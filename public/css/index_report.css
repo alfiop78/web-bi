@@ -1,0 +1,90 @@
+/*pages*/
+#pages{display: flex;transition: all 250ms;}
+.page{align-items: center;display: flex;flex-direction: column;min-width: 100%;padding: 8px;}
+
+
+.highlight{padding: 4px;border-radius: 4px;background-color: #9a9b94;color: white;}
+/*pages*/
+
+/* dialog*/
+dialog h4{font-size: .9rem;}
+.name-alias{display: grid;grid-template-columns: auto auto;}
+/* dialog*/
+
+/* dialog metric*/
+.formulaDefine section{margin: 16px;}
+/* dialog metric*/
+
+
+
+th{position: relative;}
+th i.material-icons{position: absolute;right: 8px;display: inline-table;}
+
+.colProperties{display: flex;flex-flow: row;justify-content: space-between; margin: 16px;align-items: center;}
+.colProperties .properties{display: flex;align-items: center;}
+
+
+.lists{position: relative;}
+.absList{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 6;box-shadow: 0 4px 8px 0px #b5b5b5;
+/*box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);*/}
+.absList > ul{height: 500px;overflow-y: auto;}
+i[open]{color: red;}
+
+.stepLayout{display: grid;}
+.step:first-child .stepLayout{grid-template-columns: 39% 59%; grid-column-gap: 2%; height: inherit;}
+.step:nth-child(2) .stepLayout{grid-template-columns: 1fr auto auto; grid-column-gap: 2%; height: inherit;}
+.step:nth-child(3) .stepLayout{grid-template-columns: 29% 39% 29%; grid-column-gap: 3%; height: inherit;}
+.step:last-child .stepLayout{grid-template-columns: 29% 39% 29%; grid-column-gap: 3%; height: inherit;}
+
+.stepLayout .sectionLists{height: inherit;}
+
+dialog.dialog-filters .stepLayout{grid-template-columns: 25% 1fr 1fr 30%; grid-column-gap: 2%; height: inherit;margin : 0 2em;}
+dialog.dialog-metrics .stepLayout{grid-template-columns: 20% auto 25%; grid-column-gap: 3%; height: inherit;margin: 0 2em;}
+dialog.dialog-tables .stepLayout{grid-template-columns: 25% auto 40%; grid-column-gap: 2%; height: inherit;margin : 0 2em;}
+
+.overflowList{height: 350px; overflow-y: auto; background: gainsboro;}
+#fieldList-filter{padding: 0 16px;}
+/* reportSection anteprima */
+#reportSection{display: flex;flex-flow: row;width: 100%; padding: 16px;}
+#reportSection section[table] {margin: 8px auto;width: 100%;}
+#reportSection section[table] tr > th{border: solid thin lightgray;}
+#reportSection table caption{border-top-left-radius: 4px;border-top-right-radius: 4px;}
+#reportSection table thead{color: dimgrey;}
+/* reportSection anteprima */
+
+.formula{margin: 16px;}
+
+.formulaDefine{display: grid;grid-template-columns: auto auto auto; grid-gap: 16px;}
+.listContent{align-items: left;display: flex;min-height: 200px;flex-flow: column;}
+dialog .miniList{max-height: 150px;overflow-y: auto;}
+dialog .middleList{height: 220px;overflow-y: auto;}
+.formulaContent {display: flex;}
+div.textarea {border: solid thin gainsboro;height: 120px;padding: 8px;font-size: .8rem;width: 90%;}
+div.textarea > span{padding: 4px;color: #494949;}
+div.textarea > span.formulaOperator{background: #f9c4aa;border-radius: 4px;margin: 0 8px;}
+div.textarea > span.formulaValues{border-bottom: solid thin gray;padding: 4px 16px;}
+div.textarea > span.formulaLogicalOperator{background: brown; border-radius: 4px; color: white; margin: 0 8px;}
+.logicalOperator{display: flex;justify-content: space-evenly;padding: 16px;}
+.logicalOperator > span{padding: 4px 16px;}
+.logicalOperator > span:hover{background: var(--main-secondary-color); border-radius: 4px;cursor: pointer;}
+
+.list li:hover{background: var(--main-primary-color); border-radius: 4px; color: white;cursor: pointer;}
+
+/* btn */
+.steps .btn{display: flex; flex-direction: column;align-items: center;justify-content: center;}
+.steps[data-step="1"] > .hr > .btn #stepPrevious{display: none;}
+.steps[data-step="3"] > .hr > .btn #stepNext{display: none;}
+.steps:not([data-step="3"]) > .hr > .btn #stepDone{display: none;}
+.steps[data-step="3"] > .hr > .btn #stepDone{display: initial;}
+/* btn */
+
+/* element */
+/*.element > li + i{visibility: hidden;}
+.element:hover > li + i{visibility: visible;}*/
+.element > li ~ span{visibility: hidden;}
+.element:hover > li ~ span{visibility: visible;}
+/* element */
+
+/*toast Popup*/
+small.popupToast{z-index: 9999;background: #494949;border-radius: 4px;color: white;font-size: .7rem;display: none;white-space: nowrap;
+  box-shadow: 0 2px 4px 0 black;padding: 4px 8px;position: absolute; top: var(--top); left: var(--left);}

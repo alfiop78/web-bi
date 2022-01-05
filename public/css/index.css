@@ -1,0 +1,175 @@
+.lists{position: relative;}
+.absList{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 6;box-shadow: 0 4px 8px 0px #b5b5b5;
+/*box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);*/}
+.absList > ul{height: 500px;overflow-y: auto;}
+i[open]{color: red;}
+
+div[draggable]{cursor: grab;}
+
+.highlight{padding: 4px;border-radius: 4px;background-color: #9a9b94;color: white;}
+
+h5{font-size: .9rem;padding: 8px;margin: 0;}
+
+div[tables-columns]{display: grid;grid-template-columns: max-content max-content; grid-column-gap: 16px;}
+
+/*relations*/
+section[options] i[join]{color: #99b19c;}
+section[options] i[join-left]{color: #99b19c;}
+section[options] i[join-right]{color: #99b19c;}
+section[options] i[join-remove]{color: #3b7096;}
+/*relations*/
+
+@keyframes popup {
+  0% {transform: scale(.2);}
+  75% {transform: scale(1.10);}
+  100% {transition: scale(1);}
+}
+
+/* .card-layout{display: grid;grid-template-columns: 100%;position: relative;} */
+.cardLayout > section[options]{position: absolute;display: flex;padding: 0 8px;flex-flow: column;left: calc(100% - 46px);
+  transition: left 200ms, opacity 200ms;opacity: 0;z-index: 0;}
+.cardLayout:not([mode='edit']):hover .cardTable[name] ~ section[options]{left: 100%;opacity: 1;transition: left 200ms, opacity 200ms;z-index: 5;}
+.cardLayout[mode='edit']{opacity: .5;}
+
+section[options] i{color: dimgrey;}
+section[options] > span > i[metrics]{color: #587850;}
+section[options] > span > i[columns]{color: #9a6a6a;}
+section[options] > span > i[filters]{color: #3b7096;}
+section[options] > span > i[groupby]{color: #c7b198;}
+
+section[options] > span{margin: 2px 0;position: relative;}
+
+section[options] i ~ small{visibility: hidden;}
+section[options] i:hover ~ small{visibility: visible;animation: popup 50ms ease;}
+
+section[options] > span > small{top: 32px;z-index: 5;}
+
+/* dialog */
+.dialog-buttons{display: flex;flex-flow: row;justify-content: space-between;}
+dialog h4{font-size: .9rem;}
+
+.formulaDefine{display: grid;grid-template-columns: auto auto auto;grid-gap: 16px;margin: 1em 0;align-items: center;}
+.formulaDefine .field, .formulaDefine .formula, .formulaDefine .values{display: grid;grid-template-rows: 15% auto;align-items: center;height: 100%;}
+.formulaDefine .title{align-self: flex-start;}
+
+.formulaDefine > .options{align-items: center;display: flex;}
+.formulaDefine > .alias, .formulaDefine > .alias{display: flex; flex-direction: column;justify-content: center;}
+.formulaDefine .metric-filters{max-height: 450px;overflow-y: auto;width: 100%;}
+.formulaDefine > .filtersList{padding: 16px;}
+.listContent{align-items: left;display: flex;min-height: 200px;flex-flow: column;}
+.valueContent{align-items: center;display: flex;flex-flow: row;}
+dialog .values{display: flex;flex-direction: column;padding: 8px;}
+dialog .valuesList{display: flex;flex-direction: column;padding: 8px;max-width: 300px;}
+dialog .filtersList{display: flex;flex-direction: column;}
+dialog .miniList{max-height: 150px;overflow-y: auto;}
+dialog .middleList{height: 220px;overflow-y: auto;width: 250px;}
+dialog .formula, dialog .field, dialog .values{padding: 8px;}
+
+.name-alias{display: grid;grid-template-columns: auto auto;}
+dialog h6{font-size: .85rem;font-weight: normal;padding: 4px;margin: 0;color: #52524e}
+dialog small{font-weight: lighter;padding: 4px;}
+
+dialog #between[hidden]{display: none;}
+dialog #between{display: flex;flex-direction: column;}
+dialog #between > span{padding: 16px;}
+
+/* end dialog */
+
+#formula{background-color: #be7575;padding: 16px;border-radius: 4px;margin: 16px auto;color: white;font-weight: bold;font-size: 1rem;
+  display: grid;grid-template-columns: auto auto auto;}
+#formula > span{justify-self: center;}
+
+.formulaContent {display: flex;}
+div.textarea {border: solid thin gainsboro;height: 120px;padding: 8px;font-size: .8rem;width: 90%;}
+div.textarea > span{padding: 4px;color: #494949;}
+div.textarea > span.formulaOperator{background: #f9c4aa;border-radius: 4px;margin: 0 8px;}
+div.textarea > span.formulaValues{border-bottom: solid thin gray;padding: 4px 16px;}
+div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
+
+#content.dragging{opacity: .6;box-shadow: inset 0px 0px 10px 2px grey;}
+
+/*card*/
+.card-table ul{max-height: 160px;overflow-y: auto;font-size: .7rem;}
+
+/* colonne all'interno della card/tabella*/
+.card.table ul{padding-inline-start: 0; font-size: .65rem; border-radius: 4px; min-height: auto; overflow: auto; max-height: 200px;}
+
+.card.table ul > .element li{list-style-type: none;display: block;padding: 6px;overflow: hidden;text-overflow: ellipsis;
+  white-space: nowrap;}
+
+.card.table ul > .element li[data-key="pk"] {list-style-type: none;display: block;padding: 6px;overflow: hidden;text-overflow: ellipsis;
+  white-space: nowrap;background: indianred; color: white; border-radius: 4px;}
+
+.card.table > .cardLayout > .cardTable[mode] ul > .element li:hover{cursor: pointer;}
+
+.card.table > .cardLayout > .cardTable[mode='columns'] ul > .element li:hover{background-color: #9a6a6a;border-radius: 4px;color: white;}
+.card.table > .cardLayout > .cardTable[mode='relations'] ul > .element li:hover{background-color: #99b19c;border-radius: 4px;color: white;}
+.card.table > .cardLayout > .cardTable[mode='metrics'] ul > .element li:hover{background-color: #587850;border-radius: 4px;color: white;}
+.card.table ul > .element li ~ i{color: grey;visibility: hidden;}
+.card.table ul > .element li[relations] ~ #hierarchy-icon{visibility: visible;}
+.card.table ul > .element li[columns] ~ #columns-icon{color: #9a6a6a;visibility: visible;}
+.card.table ul > .element li[metrics] ~ #metrics-icon{color: #587850;visibility: visible;}
+
+.card.table ul > .element li[data-relation-id='true'] ~ #hierarchy-icon{color: #99b19c;}
+/* colonne all'interno della card/tabella*/
+
+.card.table{width: 300px;background: white;position: absolute;font-size: .8rem; border-radius: 4px;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);}
+
+
+.card.table > .cardLayout{display: grid;grid-template-columns: 100%;position: relative;grid-template-rows: auto auto;}
+.card.table > .cardLayout > .cardTable{position: relative;height: fit-content;display: grid;grid-template-areas: "title" "input" "body" "footer";
+  z-index: 1;}
+.card.table > .cardLayout > .cardTable > .info{font-size: .65rem;padding: 8px;background: lemonchiffon;border-bottom-left-radius: 4px;border-bottom-right-radius: 4px;}
+.card.table > .cardLayout > .cardTable[mode='relations'] > .info{background: #99b19c;color: white;}
+.card.table > .cardLayout > .cardTable[mode='columns'] > .info{background: #9a6a6a;color: white;}
+.card.table > .cardLayout > .cardTable[filters] > .info{background: #3b7096;color: white;}
+.card.table > .cardLayout > .cardTable[mode='metrics'] > .info{background: #587850;color: white;}
+
+.card.table .cardTable > .title{grid-area: title;height: fit-content;background: tan;border-top-left-radius: 4px;
+  border-top-right-radius: 4px;display: flex;align-items: flex-start;justify-content: space-between;}
+
+.card.table .cardTable > .title > h6{padding: 8px 8px 16px 8px; margin: 0;font-size: .75rem;width: 100%;}
+.card.table .cardTable > .title > h6:hover{cursor: grab;}
+
+.card.table[fact] .title{background: var(--main-primary-color);color: white;}
+
+.card.table .cardTable > .md-field{grid-area: input;}
+.card.table .cardTable > ul{grid-area: body;}
+.card.table .cardTable > .info{grid-area: footer;}
+
+/*icona bookmark su tabelle selezionate*/
+.card.table[selected] i[data-id="selectTable"]{color: var(--main-primary-color);}
+
+.element.dimensions{flex-flow: column;background: burlywood;}
+.element.dimensions > h5:hover{cursor: pointer;color: var(--main-primary-color);}
+
+/*guide*/
+.guide{position: absolute;max-width: 300px;}
+.guide > .steps{box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);}
+.guide > .steps[active]{display: flex;width: auto;background: white;padding: 8px; margin: 4px;}
+.guide > .steps:not([active]){display: flex;width: auto;background: white;padding: 8px; margin: 4px;opacity: .4;}
+.steps > span{color: var(--main-primary-color);font-size: larger; font-weight: bold;padding: 0 8px;}
+.step{display: flex;flex-direction: column;}
+.step > small{font-size: .72rem;margin: 8px;}
+.step > span.title{font-size: larger;color: var(--main-primary-color);}
+
+/*guide*/
+
+/*hierarchies */
+#hierarchies{position: relative;float: right;display: flex;flex-direction: column;align-items: center;}
+.hier.table{width: 170px;margin: 8px;text-align: center;margin: 4px;margin-bottom: 16px;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);}
+.hier.table{background: tan;padding: 8px;font-size: .8rem;border-radius: 4px;width: 170px;overflow: hidden;text-overflow: ellipsis;}
+.dropzoneHier:last-child .hier.table{background: var(--main-primary-color);color: white;font-weight: bold;}
+.hier.table:last-child{background: var(--main-primary-color);color: white;}
+.association{background: #494949;color: white;height: auto; width: 80%;margin: 0 8px;padding: 8px;border-radius: 4px;}
+span.before, span.after{width: 80%;height: 5px;position: relative;display: flex;align-items: center;justify-content: center;}
+span.before .arrow{height: 10px; width: 10px;background: #494949;display: flex;transform: rotate(45deg);top: 0;position: absolute;}
+span.after .arrow{height: 10px; width: 10px;background: #494949;display: flex;transform: rotate(45deg);top: -5px;position: absolute;}
+.association > p{margin: 0;}
+.hier.fact{color: var(--main-primary-color);margin: 16px;}
+/*hierarchies */
+/*area*/
+.area{width: 100%;height: inherit;display: flex;justify-content: center;align-items: center;border: solid thin gainsboro;}
+/*area*/

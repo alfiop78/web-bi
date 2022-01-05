@@ -1,0 +1,85 @@
+.material-icons{padding: 6px;user-select: none;cursor: pointer;}
+
+.material-icons.noPad{padding: 0;}
+.material-icons.padding-4{padding: 4px;}
+.material-icons.md-14{font-size: 14px;}
+.material-icons.md-18{font-size: 18px;}
+.material-icons.md-24{font-size: 24px;}
+.material-icons.md-36{font-size: 36px;border-radius: 50%;border: solid thin dimgrey;}
+.material-icons.md-48{font-size: 48px;}
+.material-icons.md-light{color: gainsboro}
+.material-icons.md-important-low{color: goldenrod;}
+.material-icons.md-important-high{color: var(--main-secondary-color);}
+.material-icons.sale{border-radius: 6px;box-shadow: 0 1px 8px 1px #848484;background-color: darkgoldenrod;}
+.material-icons.md-important-medium{color: olivedrab;}
+
+.material-icons[open]{color: var(--main-secondary-color);}
+.material-icons[fact]{color: var(--main-primary-color);}
+
+.material-icons[selected] {color: brown;}
+
+/* Rules for using icons as white on a dark background. */
+.material-icons.md-light { color: rgba(255, 255, 255, 1); }
+.material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3);}
+
+.material-icons.md-dark {color: rgba(0, 0, 0, 0.54);}
+.material-icons.md-dark.md-inactive {color: rgba(0, 0, 0, 0.26);}
+.material-icons.md-dark.md-active{color: forestgreen;}
+.material-icons.md-dark.options.md-inactive { color: rgba(0, 0, 0, 0.26);padding: 0px;}
+/* color*/
+.material-icons.important {color: indianred;padding: .5em;}
+.material-icons.maintenance{color: mediumseagreen;}
+.material-icons.info{color: gray;}
+.material-icons.highlighted{color: chocolate;}
+
+.material-icons.build{color: indianred;}
+.material-icons.local_gas_station{color: dimgray;}
+.material-icons.ev_station{color: mediumseagreen;}
+.material-icons.flag{color: forestgreen;}
+
+/* range icon color*/
+.material-icons.lower, .material-icons.mediumRange, .material-icons.greater{font-weight: bold;}
+.material-icons.lower.lowRange{color: salmon;}
+.material-icons.lower.highRange{color: red;}
+.material-icons.mediumRange{color: orange;}
+.material-icons.greater.lowRange{color: darkseagreen;}
+.material-icons.greater.highRange{color: darkgreen;}
+
+.material-icons:active{color: black;}
+
+.material-icons[data-vehicle-type='1']{color: forestgreen;} /* benzina */
+.material-icons[data-vehicle-type='2']{color: dimgray;} /* diesel */
+.material-icons[data-vehicle-type='3']{color: lightblue;} /* hybrid */
+.material-icons[data-vehicle-type='4']{color: steelblue;} /* hydrogen */
+.material-icons[data-vehicle-type='5']{color: lightgreen;} /* electric */
+.material-icons[data-vehicle-type='6']{color: palegreen;} /* GPL */
+.material-icons[data-vehicle-type='7']{color: skyblue;} /* Metan */
+.material-icons[data-vehicle-type='8']{color: greenyellow;} /* hybrid PlugIn */
+
+.material-icons.build{color: var(--main-secondary-color);}
+
+/* status icons */
+.material-icons.error{color: darkred;}
+
+/* circle button */
+.material-icons.md-circle{border-radius: 50%;background: var(--main-secondary-color);box-shadow: 0 2px 4px 0px dimgrey; color: white;}
+.material-icons.md-circle-navigate{border-radius: 50%;box-shadow: 0 2px 4px 0 dimgrey; color: var(--main-secondary-color);padding: .25em;}
+.material-icons.md-circle.primary{background: var(--main-primary-color);}
+
+/* end material icons*/
+/* two-tone */
+.material-icons-two-tone.noPad{padding: 0;}
+.material-icons-two-tone.md-36{font-size: 36px;}
+
+/* outlined*/
+.material-icons-outlined.noPad{padding: 0;}
+.material-icons-outlined.md-36{font-size: 36px;}
+
+
+@media screen and (color) and (max-device-width: 360px) {
+  .material-icons{font-size: 18px;}
+  .material-icons.md-circle{padding: .7em;font-size: 18px;}
+  .material-icons.sale{padding: .35em;}
+}
+.material-icons[id]:not(.md-inactive):hover{color: black;}
+.material-icons[open]:not(.md-inactive):hover{color: var(--main-primary-color);}
