@@ -140,8 +140,6 @@ class MapDatabaseController extends Controller
             // dd($baseTable);
             // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
             $metricTable = $q->createMetricDatamarts($cube->{'filteredMetrics'});
-            // dd($metricTable);
-
             // echo 'elaborazione createDatamart';
 
             $datamartName = $q->createDatamart();
