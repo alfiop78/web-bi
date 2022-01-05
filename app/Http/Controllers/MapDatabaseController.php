@@ -136,7 +136,6 @@ class MapDatabaseController extends Controller
         $q->n_groupBy($cube->{'select'});
         /* dd($q); */
         $baseTable = $q->baseTable();
-        // dd($baseTable);
         if (!$baseTable) {
             // dd($baseTable);
             // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
