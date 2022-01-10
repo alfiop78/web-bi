@@ -18,17 +18,17 @@ use App\Http\Controllers\MapDatabaseController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
 Route::get('/users', [UserController::class, 'index']);
 
 /* map database web-bi*/
-Route::get('/mapping', [MapDatabaseController::class, 'mapping']);
+Route::get('/', [MapDatabaseController::class, 'mapping'])->name('mapping');
 Route::get('/mapping/tables', [MapDatabaseController::class, 'tables'])->name('fetchAPI_tables'); // recupero elenco tabelle dello schema
 Route::get('/mapping/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('fetchAPI_table_info'); // recupero il DESCRIBE della tabella
-Route::get('/report', [MapDatabaseController::class, 'report']);
+Route::get('/report', [MapDatabaseController::class, 'report'])->name('report');
 Route::get('/report/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('fetchAPI_table_info_report');
 Route::get('/report/{table}/distinct_values/{field}', [MapDatabaseController::class, 'distinct_values'])->name('fetchAPI_distinc_values'); // recupero i valori distinti del campo field passato come parametro
 Route::get('/ajax/cube/{jsonData}', [MapDatabaseController::class, 'cube'])->name('fetchAPI_cube'); // processo la query che crea la FX
