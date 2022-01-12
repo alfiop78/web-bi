@@ -124,6 +124,9 @@ var StorageMetric = new MetricStorage();
     let jsonData = window.localStorage.getItem(label);
     let jsonDataParsed = JSON.parse(window.localStorage.getItem(label));
     console.dir(jsonDataParsed);
+    console.dir(jsonData);
+    console.dir(JSON.stringify(jsonData));
+    debugger;
     // const url = 'ajax/cube.php';
     // const params = 'cube='+jsonData;
     // // console.dir(params);
@@ -1377,5 +1380,7 @@ var StorageMetric = new MetricStorage();
     debugger;
     location.href = '/';
   };
+
+  app.btnBackPage.onclick = () => {window.location.href = '/';};
 
 })();

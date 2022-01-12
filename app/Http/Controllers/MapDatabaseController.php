@@ -9,6 +9,10 @@ use App\Classes\Cube;
 
 class MapDatabaseController extends Controller
 {
+    public function index() {
+        return view('web_bi.index');
+    }
+
     public function mapping() {
         // recupero tutti i record
         /* $corsi = Corso::all(); */
@@ -99,11 +103,9 @@ class MapDatabaseController extends Controller
     }
 
     public function distinct_values($table, $field) {
-        /* DB::table('users')->distinct()->get(); */
-        // connessione a mysql
-        /* $values = DB::connection('mysql')->table('Azienda')->distinct()->get(); */
         // TODO: Aggiungere un limit di 1000 record
-        $values = DB::table($table)->distinct()->orderBy($field, 'asc')->limit(500)->get($field);
+        $schema = "automotive_bi_data";
+        $values = DB::connection('vertica_odbc')->table($schema.".".$table)->distinct()->orderBy($field, 'asc')->limit(500)->get($field);
         return response()->json($values);
     }
 

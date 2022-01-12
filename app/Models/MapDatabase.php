@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class MapDatabase extends Model
 {
     use HasFactory;
-    protected $connection = 'vertica_odbc';
+    // protected $connection = 'vertica_odbc';
 }

@@ -691,7 +691,31 @@ var dimension = new Dimension();
 	};
 
 	// tasto report nella sezione controls -> fabs
-	document.getElementById('mdc-report').onclick = () => {window.location.href = '/report';};
+    document.getElementById('mdc-report').onclick = () => {window.location.href = '/report';};
+
+    app.saveDIM = async (jsonDim) => {
+        console.log(jsonDim);
+        console.log(JSON.stringify(jsonDim));
+        await fetch('/fetch_api/dimension/'+JSON.stringify(jsonDim)+'/save')
+          .then((response) => {
+            if (!response.ok) { throw Error(response.statusText); }
+            return response;
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log(data);
+            if (data) {
+              console.log('data : ', data);
+              console.log('DIMENSIONE SALVATA CORRETTAMENTE');
+              // NOTE: qui ho creato la FX, a questo punto potrei scegliere di visualizzare il report, per il momento mi serve solo la FX.
+              // app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
+            } else {
+              // TODO: no data
+              console.debug('FX non è stata creata');
+            }
+          })
+          .catch((err) => console.error(err));
+    };
 
 	/* Salvataggio della dimensione, dalla dialog */
 	document.getElementById('btnDimensionSaveName').onclick = () => {
@@ -712,6 +736,8 @@ var dimension = new Dimension();
 	
 		dimension.save();
 		storage.save = dimension.dimension;
+        // TODO: salvo la dimension anche su DB
+        app.saveDIM(dimension.dimension);
 		//storage.dimension = dimension.dimension;
 		app.dialogDimensionName.close();
 	
@@ -813,7 +839,7 @@ var dimension = new Dimension();
 		app.handlerOpenTableList();
 	};
 
-	app.btnBack.onclick = () => {};
+	app.btnBack.onclick = () => {window.location.href = '/';};
 
 	/* ricerca in lista tabelle */
 	document.getElementById('tableSearch').oninput = App.searchInList;

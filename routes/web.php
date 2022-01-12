@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 // aggiungo il controller MapDatabase
 use App\Http\Controllers\MapDatabaseController;
+// aggiungo il controller BIDimensionController
+use App\Http\Controllers\BIDimensionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +27,8 @@ use App\Http\Controllers\MapDatabaseController;
 Route::get('/users', [UserController::class, 'index']);
 
 /* map database web-bi*/
-Route::get('/', [MapDatabaseController::class, 'mapping'])->name('mapping');
+Route::get('/', [MapDatabaseController::class, 'index'])->name('web_bi.index');
+Route::get('/mapping', [MapDatabaseController::class, 'mapping'])->name('web_bi.mapping');
 Route::get('/mapping/tables', [MapDatabaseController::class, 'tables'])->name('fetchAPI_tables'); // recupero elenco tabelle dello schema
 Route::get('/mapping/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('fetchAPI_table_info'); // recupero il DESCRIBE della tabella
 Route::get('/report', [MapDatabaseController::class, 'report'])->name('report');
@@ -36,5 +39,7 @@ Route::get('/ajax/cube/{jsonData}', [MapDatabaseController::class, 'cube'])->nam
 Route::get('/report/{test}/post', [MapDatabaseController::class, 'post'])->name('test_post_request');
 // test vertica
 Route::get('/mapping/test_vertica', [MapDatabaseController::class, 'test_vertica']); // connessione con il metodo usato in Zend / PHP
-Route::get('/mapping/vertica_odbc', [MapDatabaseController::class, 'vertica_odbc']); // connessione con il metodo ORM / Facade di Laravel
+Route::get('/mapping/vertica_odbc', [MapDatabaseController::class, 'vertica_odbc']); // connessione con ORM / Facade di Laravel
+// salvataggio dimensione in mysql_local "bi_dimensions"
+Route::get('/fetch_api/dimension/{json}/save', [BIDimensionController::class, 'dimension_save']);
 /* map database web-bi*/

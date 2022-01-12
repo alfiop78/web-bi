@@ -446,7 +446,7 @@
 
 				<div id="controls">
 					<div id="fabs">
-						<button id="mdcBack" class="button dense raised">da definire</button>
+						<button id="mdcBack" class="button dense raised">home</button>
 						<div class="spacer"></div>
 						<button id="mdcMapping" class="button dense raised done">mapping</button>
 					</div>

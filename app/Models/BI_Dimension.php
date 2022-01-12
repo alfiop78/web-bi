@@ -8,5 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class BI_Dimension extends Model
 {
     use HasFactory;
-    protected $connection = 'pgsql';
+    // protected $connection = 'mysql_local';
+    // protected $table = 'bi_dimensions';
 }

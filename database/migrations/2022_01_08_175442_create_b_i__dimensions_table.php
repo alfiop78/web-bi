@@ -6,8 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateBIDimensionsTable extends Migration
 {
-    // pgsql non è il database di default quindi imposto qui la variabile connection (l'ho impostata anche nel Model)
-    protected $connection = 'pgsql';
     /**
      * Run the migrations.
      *
@@ -15,7 +13,7 @@ class CreateBIDimensionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('bi_dimensions', function (Blueprint $table) {
+        Schema::connection('mysql_local')->create('bi_dimensions', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->json('json_value');
@@ -30,6 +28,6 @@ class CreateBIDimensionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('b_i__dimensions');
+        Schema::connection('mysql_local')->dropIfExists('bi_dimensions');
     }
 }
