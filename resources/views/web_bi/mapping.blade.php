@@ -126,6 +126,8 @@
 
                 <nav>
                     <!-- TODO: qui inserisco l'elenco dei database/schema da selezionare prima di elencare le tabelle -->
+                    <p>schema 1</p>
+                    <p>schema 2</p>
                 </nav>
             </div>
 

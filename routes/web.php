@@ -29,6 +29,7 @@ Route::get('/users', [UserController::class, 'index']);
 /* map database web-bi*/
 Route::get('/', [MapDatabaseController::class, 'index'])->name('web_bi.index');
 Route::get('/mapping', [MapDatabaseController::class, 'mapping'])->name('web_bi.mapping');
+Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']);
 Route::get('/mapping/tables', [MapDatabaseController::class, 'tables'])->name('fetchAPI_tables'); // recupero elenco tabelle dello schema
 Route::get('/mapping/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('fetchAPI_table_info'); // recupero il DESCRIBE della tabella
 Route::get('/report', [MapDatabaseController::class, 'report'])->name('report');

@@ -31,6 +31,12 @@ class MapDatabaseController extends Controller
         /* return response()->json($tables); */
     }
 
+    public function schemata() {
+
+        $schemaList = DB::connection('vertica_odbc')->select("SELECT SCHEMA_NAME FROM V_CATALOG.SCHEMATA S WHERE IS_SYSTEM_SCHEMA = FALSE ORDER BY SCHEMA_NAME;");
+        dd($schemaList);
+    }
+
     public function test_vertica() {
         
         # A simple function to trap errors from queries

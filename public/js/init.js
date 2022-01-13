@@ -913,6 +913,28 @@ var dimension = new Dimension();
 		
 	};
 
+    app.getSchemata = async () => {
+		const url = '/fetch_api/schema';
+		await fetch(url)
+			.then( (response) => {
+                console.log(response);
+			if (!response.ok) {throw Error(response.statusText);}
+			return response;
+			})
+			.then( (response) => response.json())
+			.then( (data) => {
+		        console.log(data);
+		        if (data) {
+		        } else {
+		          // TODO: no data
+		          console.warning('Non è stato possibile recuperare la lista delle tabelle');
+		        }
+		    })
+	    .catch( (err) => console.error(err));
+    };
+
+    app.getSchemata();
+
 	app.getDatabaseTable();
 
 	app.getDimensions();
