@@ -135,7 +135,7 @@ var StorageMetric = new MetricStorage();
     // const req = new Request(url, init);
     App.handlerConsole('Process in corso', 'info');
 
-    await fetch('/ajax/cube/' + jsonData)
+    await fetch('/fetch_api/cube/' + jsonData + '/process')
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -1377,8 +1377,7 @@ var StorageMetric = new MetricStorage();
   };
 
   app.btnMapping.onclick = () => {
-    debugger;
-    location.href = '/';
+    location.href = '/mapping';
   };
 
   app.btnBackPage.onclick = () => {window.location.href = '/';};

@@ -130,7 +130,7 @@ class MapDatabaseController extends Controller
         dd($test);
     }
 
-    public function cube($cube) {
+    public function process($cube) {
         $cube = json_decode($cube); // object
         /* dd($cube); */
         $q = new Cube();
@@ -152,6 +152,8 @@ class MapDatabaseController extends Controller
             // echo 'elaborazione createDatamart';
 
             $datamartName = $q->createDatamart();
+            // TODO: devo eliminare le tabelle temporanee 'decisyon_cache.W_AP_base_*' e 'decisyon_cache.W_AP_metric_*'
+            // TODO: se $datamartName è valorizzato elimino le tabelle temporanee
             // dd($result);
             $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM $datamartName;");
             return response()->json($datamartResult);

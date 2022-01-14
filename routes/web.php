@@ -34,8 +34,7 @@ Route::get('/fetch_api/schema/{schema}/tables', [MapDatabaseController::class, '
 Route::get('/fetch_api/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('web_bi.fetch_api.table_info'); // recupero il DESCRIBE della tabella
 Route::get('/report', [MapDatabaseController::class, 'report'])->name('web_bi.report'); // page report
 Route::get('/fetch_api/table/{table}/field/{field}/distinct_values', [MapDatabaseController::class, 'distinct_values'])->name('web_bi.fetch_api.distinct_values'); // recupero i valori distinti del campo field passato come parametro
-// TODO: da rinominare in fetch_api/cube/{jsonData}/process
-Route::get('/ajax/cube/{jsonData}', [MapDatabaseController::class, 'cube'])->name('fetchAPI_cube'); // processo la query che crea la FX
+Route::get('/fetch_api/cube/{jsonData}/process', [MapDatabaseController::class, 'process'])->name('web_bi.fetch_api.process'); // processo la query che crea la FX
 // salvataggio dimensione in mysql_local "bi_dimensions"
 Route::get('/fetch_api/dimension/{json}/save', [BIDimensionController::class, 'dimension_save']);
 
