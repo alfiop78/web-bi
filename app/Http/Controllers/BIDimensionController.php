@@ -12,11 +12,15 @@ class BIDimensionController extends Controller
         // dd(json_decode($json));
         $dimension = json_decode($json);
         $key = $dimension->{'name'};
-        $result = DB::connection("mysql_local")->table('bi_dimensions')->insert([
+        // $result = DB::connection("mysql_local")->table('bi_dimensions')->insert([
+        //     'name' => $key,
+        //     'json_value' => $json
+        // ]);
+        // dd($result); // true se il record è stato inserito
+        $result = DB::table('bi_dimensions')->insert([
             'name' => $key,
             'json_value' => $json
         ]);
-        // dd($result); // true se il record è stato inserito
         return $result;
 
     }

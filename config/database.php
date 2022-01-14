@@ -57,7 +57,8 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'strict' => true,
-            'engine' => null,
+            // 'engine' => null, default, l'ho modificato perchè su mysql 5.6 (lynx) ci sono errori nel'elaborazione del migrate
+            'engine' => 'innodb row_format=dynamic',
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],

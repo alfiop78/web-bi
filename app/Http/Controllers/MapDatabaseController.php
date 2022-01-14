@@ -109,9 +109,7 @@ class MapDatabaseController extends Controller
         return response()->json($info);
     }
 
-    public function distinct_values($table, $field) {
-        // TODO: Aggiungere lo schema nella Route
-        $schema = "automotive_bi_data";
+    public function distinct_values($schema, $table, $field) {
         $values = DB::connection('vertica_odbc')->table($schema.".".$table)->distinct()->orderBy($field, 'asc')->limit(500)->get($field);
         return response()->json($values);
     }
