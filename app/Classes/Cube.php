@@ -62,25 +62,25 @@ class Cube {
 	}
 
 	public function joinFact($joins) {
+        // definisco la join tra l'ultima tabella della gerarchia e la FACT.
+        // se è presente una sola tabella nella dimensione, la prop 'where' sarà vuota, per cui, qui, invece della AND dovrò usare la WHERE iniziale e le successive join con la AND
 		$this->_ands = array();
-		$this->_and = " AND ";
+        $this->_and = (!$this->_where) ? " WHERE " : " AND " ;
+		// $this->_and = " AND ";
 		foreach ($joins as $dim) {
 			// var_dump($dim);
 			foreach ($dim as $cube) {
 				// var_dump($cube);
-				foreach ($cube as $join)
-				$this->_ands[] = implode(" = ", $join);
+				foreach ($cube as $join) $this->_ands[] = implode(" = ", $join);
 			}
 		}
-		// foreach ($joins as $join) {
-		// 	$this->_ands[] = implode(" = ", $join);
-		// }
+		
 		$this->_and .= implode(" AND ", $this->_ands);
 		// var_dump($this->_and);
 	}
 
 	public function filters($tables) {
-		/* definisco i filtri del report*/
+		// definisco i filtri del report
 		$and = " AND ";
 		foreach ($tables as $table) {
 			// var_dump($table);

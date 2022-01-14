@@ -415,6 +415,7 @@ var StorageMetric = new MetricStorage();
     }
   };
 
+  // selezione di una tabella nella dialog-filter
   app.handlerTableSelectedDialogFilter = (e) => {
     const dimension = e.currentTarget.getAttribute('data-dimension-name');
     Query.table = e.currentTarget.getAttribute('label');
@@ -498,14 +499,17 @@ var StorageMetric = new MetricStorage();
     app.dialogFilter.showModal();
   };
 
-  // selezione del field nella dialogFilter
+  // selezione del field nella dialogFilter, questo metodo farà partire la query per ottenere i campi distinti (in getDistinctValues())
   app.handlerFilterFieldSelected = (e) => {
     // rimuovo eventuali altre selezioni precedenti
+    debugger;
     const fieldList = app.dialogFilter.querySelector('#fieldList-filter');
     fieldList.querySelectorAll('ul li[selected]').forEach(element => element.toggleAttribute('selected'));
     e.currentTarget.toggleAttribute('selected');
     Query.field = e.target.getAttribute('label');
     Query.fieldType = e.target.getAttribute('data-type');
+    Query.schema = e.currentTarget.getAttribute('data-schema');
+    debugger;
     // inserisco il field selezionato nella textarea
     if (e.currentTarget.hasAttribute('selected')) {
       const listRef = app.dialogFilter.querySelector('#filter-valueList');
@@ -552,6 +556,7 @@ var StorageMetric = new MetricStorage();
             section.setAttribute('data-label-search', value.COLUMN_NAME);
             section.setAttribute('data-table-name', Query.table);
             li.innerText = value.COLUMN_NAME;
+            li.setAttribute('data-schema', Query.schema);
             // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
             let pos = value.DATA_TYPE.indexOf('('); // datatype
             let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
@@ -812,7 +817,7 @@ var StorageMetric = new MetricStorage();
     // const init = {headers: {'Content-Type': 'application/x-www-form-urlencoded'}, method: 'POST', body: params};
     // const req = new Request(url, init);
     // TODO: aggiungere anche lo schema recuperandolo da Query.schema
-    await fetch('fetch_api/table/' + Query.table + '/field/' + Query.field + '/distinct_values')
+    await fetch('fetch_api/schema/' + Query.schema + '/table/' + Query.table + '/field/' + Query.field + '/distinct_values')
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -951,6 +956,7 @@ var StorageMetric = new MetricStorage();
     }
   };
 
+  // popolamento della lista delle tabelle nella dialog-filter
   app.getTablesInHierarchiesDialogFilter = () => {
     const content = app.tmplUlList.content.cloneNode(true);
     const ul = content.querySelector("ul[data-id='fields-tables']");
@@ -1285,9 +1291,10 @@ var StorageMetric = new MetricStorage();
     const processId = Date.now();
     const name = document.getElementById('reportName').value;
 
-    // il datamart sarà creato come FXprocessId
+    // il datamart sarà creato come FX_processId
     debugger;
     Query.save(processId, name);
+    // TODO: salvataggio nel database tabella : bi_processes
     // aggiungo il report da processare nella list 'reportProcessList'
     const ulReportsProcess = document.getElementById('reportsProcess');
     let tmplContent = app.tmplList.content.cloneNode(true);
