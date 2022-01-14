@@ -677,6 +677,31 @@ var StorageMetric = new MetricStorage();
     }
     app.dialogTables.close();
   };
+    
+    // salvataggio della metrica nel db
+    app.saveMetricDB = async (json) => {
+        console.log(json);
+        console.log(JSON.stringify(json));
+        await fetch('/fetch_api/json/'+JSON.stringify(json)+'/table/bi_metrics/save')
+          .then((response) => {
+            if (!response.ok) { throw Error(response.statusText); }
+            return response;
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log(data);
+            if (data) {
+              console.log('data : ', data);
+              console.log('METRICA SALVATA CORRETTAMENTE');
+              // NOTE: qui ho creato la FX, a questo punto potrei scegliere di visualizzare il report, per il momento mi serve solo la FX.
+              // app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
+            } else {
+              // TODO: no data
+              console.debug('ERRORE NEL SALVATAGGIO DELLA METRICA SU DB');
+            }
+          })
+          .catch((err) => console.error(err));
+    };
 
   // tasto 'fatto' nella dialogMetric, salvo la metrica impostata
   app.btnMetricDone.onclick = (e) => {
@@ -734,11 +759,38 @@ var StorageMetric = new MetricStorage();
     // salvo la nuova metrica nello storage
     console.log(metricObj)
     StorageMetric.save = metricObj
+    // salvo nel DB
+    app.saveMetricDB(metricObj);
 
     // storage.save = metricObj;
 
     app.dialogMetric.close();
   };
+
+    // salvo il filtro nel DB, table : bi_filters
+    app.saveFilterDB = async (json) => {
+        console.log(json);
+        console.log(JSON.stringify(json));
+        await fetch('/fetch_api/json/'+JSON.stringify(json)+'/table/bi_filters/save')
+          .then((response) => {
+            if (!response.ok) { throw Error(response.statusText); }
+            return response;
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log(data);
+            if (data) {
+              console.log('data : ', data);
+              console.log('FILTRO SALVATO CORRETTAMENTE');
+              // NOTE: qui ho creato la FX, a questo punto potrei scegliere di visualizzare il report, per il momento mi serve solo la FX.
+              // app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
+            } else {
+              // TODO: no data
+              console.debug('ERRORE NEL SALVATAGGIO DEL FILTRO SU DB');
+            }
+          })
+          .catch((err) => console.error(err));
+    };
 
   // salvataggio del filtro impostato nella dialog
   app.btnFilterSave.onclick = (e) => {
@@ -754,6 +806,8 @@ var StorageMetric = new MetricStorage();
     const formula = `${Query.table}.${textarea.value}`;
     console.log(formula);
     StorageFilter.save = { 'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula };
+    // salvataggio di un filtro nel DB
+    app.saveFilterDB({ 'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula });
     const existFilterRef = app.dialogFilter.querySelector('#existFilters');
     const ul = existFilterRef.querySelector("ul[data-id='fields-filter']");
     // const parent = document.getElementById('existFilters'); // dove verrà inserita la <ul>
@@ -816,7 +870,6 @@ var StorageMetric = new MetricStorage();
 
     // const init = {headers: {'Content-Type': 'application/x-www-form-urlencoded'}, method: 'POST', body: params};
     // const req = new Request(url, init);
-    // TODO: aggiungere anche lo schema recuperandolo da Query.schema
     await fetch('fetch_api/schema/' + Query.schema + '/table/' + Query.table + '/field/' + Query.field + '/distinct_values')
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
@@ -1279,9 +1332,33 @@ var StorageMetric = new MetricStorage();
     app.dialogSaveReport.setAttribute('mode', 'process');
   };
 
+    // salvo il process nel DB
+    app.saveProcess = async () => {
+        console.log(JSON.stringify(Query.reportProcessStringify));
+        await fetch('/fetch_api/json/'+JSON.stringify(Query.reportProcessStringify)+'/table/bi_processes/save')
+          .then((response) => {
+            if (!response.ok) { throw Error(response.statusText); }
+            return response;
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log(data);
+            if (data) {
+              console.log('data : ', data);
+              console.log('PROCESS SALVATO CORRETTAMENTE');
+              // NOTE: qui ho creato la FX, a questo punto potrei scegliere di visualizzare il report, per il momento mi serve solo la FX.
+              // app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
+            } else {
+              // TODO: no data
+              console.debug('PROCESS non salvato nel DB');
+            }
+          })
+          .catch((err) => console.error(err));
+    };
+
   // salvo il report da processare
   app.btnSaveReportDone.onclick = () => {
-    console.dir(Query);
+    // console.dir(Query);
     // debugger;
     // aggiungo, nella from, il cubo selezionato nel primo step
     // salvo temporaneamente la query da processare nello storage
@@ -1292,8 +1369,8 @@ var StorageMetric = new MetricStorage();
     const name = document.getElementById('reportName').value;
 
     // il datamart sarà creato come FX_processId
-    debugger;
     Query.save(processId, name);
+    app.saveProcess();
     // TODO: salvataggio nel database tabella : bi_processes
     // aggiungo il report da processare nella list 'reportProcessList'
     const ulReportsProcess = document.getElementById('reportsProcess');

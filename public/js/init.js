@@ -650,6 +650,29 @@ var dimension = new Dimension();
 	};
 
 	/*events */
+    app.saveCube = async (json) => {
+        console.log(json);
+        console.log(JSON.stringify(json));
+        await fetch('/fetch_api/json/'+JSON.stringify(json)+'/table/bi_cubes/save')
+          .then((response) => {
+            if (!response.ok) { throw Error(response.statusText); }
+            return response;
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log(data);
+            if (data) {
+              console.log('data : ', data);
+              console.log('CUBO SALVATO CORRETTAMENTE');
+              // NOTE: qui ho creato la FX, a questo punto potrei scegliere di visualizzare il report, per il momento mi serve solo la FX.
+              // app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
+            } else {
+              // TODO: no data
+              console.debug('ERRORE NEL SALVATAGGIO DEL CUBO SU BD');
+            }
+          })
+          .catch((err) => console.error(err));
+    };
 
 	// salvataggio di un cubo già esistente
 	app.btnSaveOpenedCube.onclick = () => {
@@ -686,6 +709,9 @@ var dimension = new Dimension();
 
 		// salvo il cubo in localStorage
 		StorageCube.save = cube.cube;
+        debugger;
+        // TODO: DA TESTARE
+        app.saveCube(cube.cube);
 
 		app.dialogCubeName.close();
 	};
@@ -696,7 +722,7 @@ var dimension = new Dimension();
     app.saveDIM = async (jsonDim) => {
         console.log(jsonDim);
         console.log(JSON.stringify(jsonDim));
-        await fetch('/fetch_api/dimension/'+JSON.stringify(jsonDim)+'/save')
+        await fetch('/fetch_api/json/'+JSON.stringify(jsonDim)+'/table/bi_dimensions/save')
           .then((response) => {
             if (!response.ok) { throw Error(response.statusText); }
             return response;
@@ -823,6 +849,7 @@ var dimension = new Dimension();
 
 		// salvo il cubo in localStorage
 		StorageCube.save = cube.cube;
+        app.saveCube(cube.cube);
 
 		app.dialogCubeName.close();
 	};

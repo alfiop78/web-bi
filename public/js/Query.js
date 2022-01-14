@@ -228,8 +228,11 @@ class Queries {
 		this._reportProcess['type'] = 'PROCESS';
 
 		window.localStorage.setItem('process_' + name, JSON.stringify(this._reportProcess));
+        console.log(name+' salvato nello storage');
 
 	}
+
+    get reportProcessStringify() {return this._reportProcess;}
 
 	getJSONProcess(value) {
 		return JSON.parse(window.localStorage.getItem('process_' + value));

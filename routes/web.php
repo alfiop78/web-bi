@@ -4,10 +4,10 @@ use Illuminate\Support\Facades\Route;
 
 // aggiungo il controller UserController
 use App\Http\Controllers\UserController;
-// aggiungo il controller MapDatabase
+// aggiungo il controller MapDatabase, collegato a vertica
 use App\Http\Controllers\MapDatabaseController;
-// aggiungo il controller BIDimensionController
-use App\Http\Controllers\BIDimensionController;
+// aggiungo il controller MetadataController, collegato al 192.168.2.7 web_bi_md per il metadato
+use App\Http\Controllers\MetadataController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,8 +35,9 @@ Route::get('/fetch_api/{schema}/schema/{table}/table_info', [MapDatabaseControll
 Route::get('/report', [MapDatabaseController::class, 'report'])->name('web_bi.report'); // page report
 Route::get('/fetch_api/schema/{schema}/table/{table}/field/{field}/distinct_values', [MapDatabaseController::class, 'distinct_values'])->name('web_bi.fetch_api.distinct_values'); // recupero i valori distinti del campo field passato come parametro
 Route::get('/fetch_api/cube/{jsonData}/process', [MapDatabaseController::class, 'process'])->name('web_bi.fetch_api.process'); // processo la query che crea la FX
-// salvataggio dimensione in mysql_local "bi_dimensions"
-Route::get('/fetch_api/dimension/{json}/save', [BIDimensionController::class, 'dimension_save']);
+// Utilizzo un unico metodo per salvare il Metadato, questo perchè i campi da salvare sono sempre 2 (key, json_value)
+// Come parametri passo il json da salvare (al cui interno c'è la proprietà 'name') e il nome della tabella in cui salvare i dati (es.: bi_dimensions, bi_filters, ecc...)
+Route::get('/fetch_api/json/{json}/table/{table}/save', [MetadataController::class, 'save']);
 
 // test POST request
 Route::get('/report/{test}/post', [MapDatabaseController::class, 'post'])->name('test_post_request');
