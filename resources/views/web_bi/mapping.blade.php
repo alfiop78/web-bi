@@ -124,10 +124,8 @@
 
                 <section class="account"><h5>user</h5><i class="material-icons md-light">person</i></section>
 
-                <nav>
+                <nav id="nav-schema">
                     <!-- TODO: qui inserisco l'elenco dei database/schema da selezionare prima di elencare le tabelle -->
-                    <p>schema 1</p>
-                    <p>schema 2</p>
                 </nav>
             </div>
 

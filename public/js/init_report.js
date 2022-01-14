@@ -526,7 +526,7 @@ var StorageMetric = new MetricStorage();
     // const req = new Request(url, init);
     // debugger;
 
-    await fetch('/report/' + Query.schema + '/schema/' + Query.table + '/table_info')
+    await fetch('/fetch_api/' + Query.schema + '/schema/' + Query.table + '/table_info')
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -812,7 +812,7 @@ var StorageMetric = new MetricStorage();
     // const init = {headers: {'Content-Type': 'application/x-www-form-urlencoded'}, method: 'POST', body: params};
     // const req = new Request(url, init);
     // TODO: aggiungere anche lo schema recuperandolo da Query.schema
-    await fetch('report/' + Query.table + '/distinct_values/' + Query.field)
+    await fetch('fetch_api/table/' + Query.table + '/field/' + Query.field + '/distinct_values')
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;

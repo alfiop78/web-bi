@@ -27,20 +27,21 @@ use App\Http\Controllers\BIDimensionController;
 Route::get('/users', [UserController::class, 'index']);
 
 /* map database web-bi*/
-Route::get('/', [MapDatabaseController::class, 'index'])->name('web_bi.index');
-Route::get('/mapping', [MapDatabaseController::class, 'mapping'])->name('web_bi.mapping');
-Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']);
-Route::get('/mapping/tables', [MapDatabaseController::class, 'tables'])->name('fetchAPI_tables'); // recupero elenco tabelle dello schema
-Route::get('/mapping/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('fetchAPI_table_info'); // recupero il DESCRIBE della tabella
-Route::get('/report', [MapDatabaseController::class, 'report'])->name('report');
-Route::get('/report/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('fetchAPI_table_info_report');
-Route::get('/report/{table}/distinct_values/{field}', [MapDatabaseController::class, 'distinct_values'])->name('fetchAPI_distinc_values'); // recupero i valori distinti del campo field passato come parametro
+Route::get('/', [MapDatabaseController::class, 'index'])->name('web_bi.index'); // home page
+Route::get('/mapping', [MapDatabaseController::class, 'mapping'])->name('web_bi.mapping'); // page mapping
+Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']); // recupero l'elenco dei database presenti (schema)
+Route::get('/fetch_api/schema/{schema}/tables', [MapDatabaseController::class, 'tables'])->name('web_bi.fetch_api.tables'); // recupero elenco tabelle dello schema selezionato
+Route::get('/fetch_api/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('web_bi.fetch_api.table_info'); // recupero il DESCRIBE della tabella
+Route::get('/report', [MapDatabaseController::class, 'report'])->name('web_bi.report'); // page report
+Route::get('/fetch_api/table/{table}/field/{field}/distinct_values', [MapDatabaseController::class, 'distinct_values'])->name('web_bi.fetch_api.distinct_values'); // recupero i valori distinti del campo field passato come parametro
+// TODO: da rinominare in fetch_api/cube/{jsonData}/process
 Route::get('/ajax/cube/{jsonData}', [MapDatabaseController::class, 'cube'])->name('fetchAPI_cube'); // processo la query che crea la FX
+// salvataggio dimensione in mysql_local "bi_dimensions"
+Route::get('/fetch_api/dimension/{json}/save', [BIDimensionController::class, 'dimension_save']);
+
 // test POST request
 Route::get('/report/{test}/post', [MapDatabaseController::class, 'post'])->name('test_post_request');
 // test vertica
 Route::get('/mapping/test_vertica', [MapDatabaseController::class, 'test_vertica']); // connessione con il metodo usato in Zend / PHP
 Route::get('/mapping/vertica_odbc', [MapDatabaseController::class, 'vertica_odbc']); // connessione con ORM / Facade di Laravel
-// salvataggio dimensione in mysql_local "bi_dimensions"
-Route::get('/fetch_api/dimension/{json}/save', [BIDimensionController::class, 'dimension_save']);
 /* map database web-bi*/

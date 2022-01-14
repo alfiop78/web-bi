@@ -34,6 +34,7 @@ class MapDatabaseController extends Controller
     public function schemata() {
 
         $schemaList = DB::connection('vertica_odbc')->select("SELECT SCHEMA_NAME FROM V_CATALOG.SCHEMATA S WHERE IS_SYSTEM_SCHEMA = FALSE ORDER BY SCHEMA_NAME;");
+        return response()->json($schemaList);
         dd($schemaList);
     }
 
@@ -109,17 +110,17 @@ class MapDatabaseController extends Controller
     }
 
     public function distinct_values($table, $field) {
-        // TODO: Aggiungere un limit di 1000 record
+        // TODO: Aggiungere lo schema nella Route
         $schema = "automotive_bi_data";
         $values = DB::connection('vertica_odbc')->table($schema.".".$table)->distinct()->orderBy($field, 'asc')->limit(500)->get($field);
         return response()->json($values);
     }
 
-    public function tables() {
+    public function tables($schema) {
         /* $tables = DB::connection('mysql_local')->select("SHOW TABLES"); */
         /* $tables = DB::connection('mysql')->select("SHOW TABLES"); */
         // connessione a vertica per recuperare l'elenco delle tabelle
-        $tables = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='automotive_bi_data';");
+        $tables = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='$schema';");
         /* $tables = DB::connection('vertica')->select("SELECT * FROM automotive_bi_data.Azienda"); */
         return response()->json($tables);
     }

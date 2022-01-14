@@ -560,8 +560,8 @@ var dimension = new Dimension();
 	};
 
 	// get tabelle del database
-	app.getDatabaseTable = async () => {
-		const url = '/mapping/tables';
+	app.getDatabaseTable = async (schema) => {
+		const url = '/fetch_api/schema/'+schema+'/tables';
 		await fetch(url)
 			.then( (response) => {
                 console.log(response);
@@ -609,7 +609,7 @@ var dimension = new Dimension();
 		// elemento dove inserire le colonne della tabella
 		let ulContainer = cube.card.ref.querySelector('#columns');
 
-	    await fetch('/mapping/'+schema+'/schema/'+table+'/table_info')
+	    await fetch('/fetch_api/'+schema+'/schema/'+table+'/table_info')
 			.then( (response) => {
 			if (!response.ok) {throw Error(response.statusText);}
 			return response;
@@ -913,6 +913,13 @@ var dimension = new Dimension();
 		
 	};
 
+    app.schemaSelected = (e) => {
+        e.preventDefault();
+        console.log(e.target);
+        app.getDatabaseTable(e.target.getAttribute('data-schema'));
+    };
+
+    // recupero gli schemi database presenti
     app.getSchemata = async () => {
 		const url = '/fetch_api/schema';
 		await fetch(url)
@@ -925,6 +932,17 @@ var dimension = new Dimension();
 			.then( (data) => {
 		        console.log(data);
 		        if (data) {
+                    const nav = document.getElementById('nav-schema');
+                    for (const [key, value] of Object.entries(data)) {
+                        const a = document.createElement('a');
+                        a.innerHTML = value.SCHEMA_NAME;
+                        a.href = '#';
+                        a.setAttribute('data-schema', value.SCHEMA_NAME);
+                        a.id = key;
+                        nav.appendChild(a);
+                        a.addEventListener('click', app.schemaSelected);
+                    }
+                    
 		        } else {
 		          // TODO: no data
 		          console.warning('Non è stato possibile recuperare la lista delle tabelle');
@@ -935,7 +953,7 @@ var dimension = new Dimension();
 
     app.getSchemata();
 
-	app.getDatabaseTable();
+	// app.getDatabaseTable();
 
 	app.getDimensions();
 
