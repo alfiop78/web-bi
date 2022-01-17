@@ -132,16 +132,34 @@ class Cube {
 		if (!is_null($this->_groupBy)) {$this->_sql .= $this->_groupBy;}
         // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
 		$sql = "CREATE TEMPORARY TABLE decisyon_cache.W_AP_base_".$this->reportId." ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ".$this->_sql.";";
-		// $sql = "CREATE TABLE decisyon_cache.W_AP_base_".$this->reportId." INCLUDE SCHEMA PRIVILEGES AS ".$this->_sql.";"; // funziona
 		// $result = DB::connection('vertica_odbc')->raw($sql);
-		// $result = DB::connection('vertica_odbc')->statement($sql); // creata vuota
-		$result = DB::connection('vertica_odbc')->statement($sql);
-		// $test = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.W_AP_base_".$this->reportId);
-		// $result = DB::connection('vertica_odbc')->statement(DB::connection('vertica_odbc')->raw($sql)); creata vuota
+
+        // TODO: devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
+        // $tableExist = DB::connection('vertica_odbc')->table("decisyon_cache.W_AP_base_".$this->reportId);
+        // $values = DB::connection('vertica_odbc')->table('decisyon_cache.FX_1641245491605')->get();
+        $tableTemp = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='W_AP_base_".$this->reportId."' AND SCHEMA_NAME='decisyon_cache';");
+        // dd($tables);
+        if ($tableTemp) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.W_AP_base_$this->reportId;");
+
+        $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_".$this->reportId."' AND SCHEMA_NAME='decisyon_cache';");
+        // dd($tables);
+        if ($FX) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.FX_$this->reportId;");
+        
+        $result = DB::connection('vertica_odbc')->statement($sql);
+        return $result;
+        
+
+        /* il metodo getSchemaBuilder() funziona con mysql, non con vertica, da rivedere perche ho usato il repository presente nel metodo vertica_odbc nel Controller */
+        // if (DB::connection('pgsql')->getSchemaBuilder()->hasTable('decisyon_cache.W_AP_base_'.$this->reportId)) {
+        //     dd('la tabella già esiste');
+        // } else {
+        //     dd('la tabella non esiste');
+        // }
+
+		// $result = DB::connection('vertica_odbc')->statement($sql);
         // $result = $sql;
 
-		// return $this->reportId;
-		return $result;
+		// return $result;
 	}
 
 	public function createMetricDatamarts($filteredMetrics) {

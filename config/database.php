@@ -95,7 +95,7 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-            'schema' => 'md_decisyon_v6_ve',
+            'schema' => 'md_decisyon_v6',
             'sslmode' => 'prefer',
         ],
 
@@ -127,7 +127,7 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'schema' => 'public',
-            /* 'schema' => 'automotive_bi_data', */
+            // 'schema' => 'automotive_bi_data',
             'sslmode' => 'prefer',
         ],
         'sqlsrv' => [

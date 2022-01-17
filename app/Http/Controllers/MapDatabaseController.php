@@ -78,11 +78,9 @@ class MapDatabaseController extends Controller
         // Facade
         // utilizzo di odbc dopo l'installazione del repository laravel-odbc
         // https://github.com/andreossido/laravel-odbc
-        // la connessione viene fatta nel Model MapDatabase ed in questo modo riesco ad accedere direttamente allo schema impostato nel .env
         /* $books = DB::table('Azienda')->where('id', '473')->get(); */
         /* $tablesList = DB::table('all_tables')->where('schema_name', 'automotive_bi_data')->get('table_name'); errore perchè all_tables non è presente nello schema automotive_bi_data, probabilmente qui potrei creare un'altra connessione in config/database.php per accedere a schemi diversi, dovrò comunque farlo per lo schema decisyon_cache */
         $tablesList = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='automotive_bi_data';");
-        // se la connessione non viene fatta nel Model MapDatabase posso farla qui ma devo specificare lo schema
         /* $books = DB::connection('vertica_odbc')->table('automotive_bi_data.Azienda')->where('id', '473')->get(); */
         dd($tablesList);
 
