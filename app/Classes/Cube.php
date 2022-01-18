@@ -134,23 +134,21 @@ class Cube {
 		$sql = "CREATE TEMPORARY TABLE decisyon_cache.W_AP_base_".$this->reportId." ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ".$this->_sql.";";
 		// $result = DB::connection('vertica_odbc')->raw($sql);
 
-        // TODO: devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
+        // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
         // $tableExist = DB::connection('vertica_odbc')->table("decisyon_cache.W_AP_base_".$this->reportId);
         // $values = DB::connection('vertica_odbc')->table('decisyon_cache.FX_1641245491605')->get();
         $tableTemp = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='W_AP_base_".$this->reportId."' AND SCHEMA_NAME='decisyon_cache';");
-        // dd($tables);
+        // dd($tableTemp);
         if ($tableTemp) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.W_AP_base_$this->reportId;");
-
-        $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_".$this->reportId."' AND SCHEMA_NAME='decisyon_cache';");
-        // dd($tables);
-        if ($FX) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.FX_$this->reportId;");
+        // dd($tableTemp);
         
         $result = DB::connection('vertica_odbc')->statement($sql);
+        // dd($result);
         return $result;
         
 
         /* il metodo getSchemaBuilder() funziona con mysql, non con vertica, da rivedere perche ho usato il repository presente nel metodo vertica_odbc nel Controller */
-        // if (DB::connection('pgsql')->getSchemaBuilder()->hasTable('decisyon_cache.W_AP_base_'.$this->reportId)) {
+        // if (DB::connection('test_vertica')->getSchemaBuilder()->hasTable('decisyon_cache.W_AP_base_'.$this->reportId)) {
         //     dd('la tabella già esiste');
         // } else {
         //     dd('la tabella non esiste');
@@ -196,6 +194,10 @@ class Cube {
 
 		$sql = "CREATE TEMPORARY TABLE decisyon_cache.".$tableName." ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ".$this->_sql.";";
 		// return $sql;
+        // TODO: da testare
+        $table = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='$tableName' AND SCHEMA_NAME='decisyon_cache';");
+        // dd($tables);
+        if ($table) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
 		return DB::connection('vertica_odbc')->statement($sql);
 	}
 
@@ -243,9 +245,13 @@ class Cube {
 			$sql .= $leftJoin.");";
 
 		} else {
-			$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS (SELECT * FROM decisyon_cache.$baseTableName);";
+			$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS (SELECT * FROM decisyon_cache.".$baseTableName.");";
 		}
 		// var_dump($sql);
+        $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_$this->reportId' AND SCHEMA_NAME='decisyon_cache';");
+        // dd($FX);
+        if ($FX) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.FX_$this->reportId;");
+
 		$res = DB::connection('vertica_odbc')->statement($sql);
 		if (!$res) return $datamartName;
 	}
