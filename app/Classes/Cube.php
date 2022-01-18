@@ -135,29 +135,22 @@ class Cube {
 		// $result = DB::connection('vertica_odbc')->raw($sql);
 
         // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
-        // $tableExist = DB::connection('vertica_odbc')->table("decisyon_cache.W_AP_base_".$this->reportId);
-        // $values = DB::connection('vertica_odbc')->table('decisyon_cache.FX_1641245491605')->get();
-        $tableTemp = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='W_AP_base_".$this->reportId."' AND SCHEMA_NAME='decisyon_cache';");
-        // dd($tableTemp);
-        if ($tableTemp) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.W_AP_base_$this->reportId;");
-        // dd($tableTemp);
-        
-        $result = DB::connection('vertica_odbc')->statement($sql);
-        // dd($result);
-        return $result;
-        
 
-        /* il metodo getSchemaBuilder() funziona con mysql, non con vertica, da rivedere perche ho usato il repository presente nel metodo vertica_odbc nel Controller */
-        // if (DB::connection('test_vertica')->getSchemaBuilder()->hasTable('decisyon_cache.W_AP_base_'.$this->reportId)) {
-        //     dd('la tabella già esiste');
-        // } else {
-        //     dd('la tabella non esiste');
-        // }
+        /* il metodo getSchemaBuilder() funziona con mysql, non con vertica. Ho creato MyVerticaGrammar.php dove c'è la sintassi corretta per vertica (solo alcuni Metodi ho modificato) */
 
-		// $result = DB::connection('vertica_odbc')->statement($sql);
-        // $result = $sql;
+        if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable('W_AP_base_'.$this->reportId)) {
+            // dd('la tabella già esiste, la elimino');
+            $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.W_AP_base_$this->reportId;");
+            if (!$drop) {
+            	// null : tabella eliminata, ricreo la tabella temporanea
+				$result = DB::connection('vertica_odbc')->statement($sql);            	
+            }
+        } else {
+        	$result = DB::connection('vertica_odbc')->statement($sql);
+            // dd('la tabella non esiste');
+        }
 
-		// return $result;
+		return $result;
 	}
 
 	public function createMetricDatamarts($filteredMetrics) {
@@ -194,22 +187,35 @@ class Cube {
 
 		$sql = "CREATE TEMPORARY TABLE decisyon_cache.".$tableName." ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ".$this->_sql.";";
 		// return $sql;
-        // TODO: da testare
+        if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
+            // dd('la tabella già esiste, la elimino');
+            $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
+            if (!$drop) {
+            	// null : tabella eliminata, ricreo la tabella temporanea
+				$result = DB::connection('vertica_odbc')->statement($sql);
+            }
+        } else {
+        	$result = DB::connection('vertica_odbc')->statement($sql);
+            // dd('la tabella non esiste');
+        }
+        /* vecchio metodo, senza MyVerticaGrammar.php
         $table = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='$tableName' AND SCHEMA_NAME='decisyon_cache';");
         // dd($tables);
         if ($table) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
-		return DB::connection('vertica_odbc')->statement($sql);
+        */
+		return $result;
 	}
 
 	public function createDatamart() {
 		// TODO: https://dev.mysql.com/doc/refman/8.0/en/create-table-select.html Il create table può essere migliorato impostando il datatype per ogni colonna e un id univoco
 		$baseTableName = "W_AP_base_".$this->reportId;
 		$datamartName = "decisyon_cache.FX_".$this->reportId;
+		$table = "FX_$this->reportId";
 		// se _metricTable ha qualche metrica (sono metriche filtrate) allora procedo con la creazione FX con LEFT JOIN, altrimenti creo una singola FX
 
 		$sql = "CREATE TABLE $datamartName AS ";
 		$sql .= "(SELECT $baseTableName.*, ";
-
+		// TODO: da testare con metriche filtrate - 18.01.2022
 		if (isset($this->_metricTable) && count($this->_metricTable) > 0) {
 			$table_and_metric = array();
 			$leftJoin = null;
@@ -247,13 +253,30 @@ class Cube {
 		} else {
 			$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS (SELECT * FROM decisyon_cache.".$baseTableName.");";
 		}
-		// var_dump($sql);
+		/* vecchio metodo, prima di MyVerticaGrammar.php
         $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_$this->reportId' AND SCHEMA_NAME='decisyon_cache';");
         // dd($FX);
-        if ($FX) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.FX_$this->reportId;");
+        if ($FX) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.FX_$this->reportId;");*/
+        if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($table)) {
+            // dd('la tabella già esiste, la elimino');
+            $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$table;");
+            if (!$drop) {
+            	// null : tabella eliminata, ricreo la tabella temporanea
+				$result = DB::connection('vertica_odbc')->statement($sql);
+            } else {
+            	dd("Errore : tabella non eliminata");
+            }
+        } else {
+        	$result = DB::connection('vertica_odbc')->statement($sql);
+            // dd('la tabella non esiste');
+        }
 
-		$res = DB::connection('vertica_odbc')->statement($sql);
-		if (!$res) return $datamartName;
+		if (!$result) {
+			$dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$baseTableName;");
+			// TODO: elimino le tabelle temporanee delle metriche filtrate
+			// ritorno il nome della FX
+			return $datamartName;
+		}
 	}
 
 } // End Class

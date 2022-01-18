@@ -129,7 +129,15 @@ return [
             'schema' => 'public',
             // 'schema' => 'automotive_bi_data',
             'sslmode' => 'prefer',
+            'options' => [
+                // 'processor' => Illuminate\Database\Query\Processors\Processor::class,   //default
+                'grammar' => [
+                    'query' => Illuminate\Database\Query\Grammars\Grammar::class,       //default
+                    'schema' => Illuminate\Database\Schema\Grammars\MyVerticaGrammar::class      // Ho creato MyVerticaGrammar.php
+                ]
+            ]
         ],
+
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DATABASE_URL'),
