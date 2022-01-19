@@ -12,6 +12,8 @@ class MetadataController extends Controller
         // recupero l'elenco delle dimensioni create da bi_dimensions
         // NOTE: il support alle query su colonne JSON è per mysql 5.7+ https://laravel.com/docs/8.x/queries#json-where-clauses
         $dimensions = DB::table('bi_dimensions')->get('json_value');
+        // dd(json_encode($dimensions));
+        // dd($dimensions);
         // dd($dimensions);
         // dd($dimensions[0]->json_value);
         // dd(response()->json($dimensions));
@@ -20,7 +22,7 @@ class MetadataController extends Controller
         // return response()->json($schemaList);
         // dd($query);
         // return view('web_bi.mapping')->with(['dimensions' => json_encode($dimensions), 'schemes' => $schemaList]); TEST
-        return view('web_bi.mapping')->with(['dimensions' => $dimensions, 'schemes' => $schemaList]);
+        return view('web_bi.mapping')->with(['dimensions' => json_encode($dimensions), 'schemes' => $schemaList]);
     }
 
     public function save($json, $table) {

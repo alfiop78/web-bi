@@ -112,6 +112,8 @@ class MapDatabaseController extends Controller
 
     // processo la FX
     public function process($cube) {
+        echo gettype($cube);
+        dd(json_decode($cube));
         $cube = json_decode($cube); // object
         /* dd($cube); */
         $q = new Cube();

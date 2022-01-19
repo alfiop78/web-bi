@@ -144,7 +144,7 @@
             </header>
             <div id="container" data-page="1">
 
-                <div id="content"> <!--class="dropzone"-->
+                <div id="content">
 
                     <div id="body">
                         
@@ -187,6 +187,24 @@
                                     <template id="miniCard"><div class="miniCard"><h6></h6></div></template>
                                 </div>
                             </template>
+                            @php
+                                // dd(json_decode($dimensions, true));
+                                // $arrayDim = json_decode($dimensions, true); // array, ogni elementi dell'array è una dimensione
+                                // $t = json_decode($dimensions, false); // object
+                                // var_dump($t);
+                                // echo gettype($t);
+                                // ciclo le dimensioni
+                                /*foreach($arrayDim as $key => $value) {
+                                    $jsonDimension = json_decode($value['json_value']); // ogni elemento dell'array $t ha un array associativo {json_value => 'stringa json'}
+                                    echo $jsonDimension->{'name'};
+                                }*/
+                            @endphp
+                            {{-- @foreach($arrayDim as $key => $value) --}}
+                                @php
+                                    //$jsonDimension = json_decode($value['json_value']); //ogni elemento dell'array $t ha un array associativo {json_value => 'stringa json'}--}}
+                                    //echo $jsonDimension->{'name'};
+                                @endphp
+                            {{-- @endforeach --}}
 
                             <div class="absList" id="dimensionList" hidden>
                                 <div class="md-field">
@@ -194,17 +212,16 @@
                                     <label for="dimensionSearch" class="">Ricerca</label>
                                 </div>
                                 <ul id="dimensions">
-                                    @foreach($dimensions as $dim)
-                                    {{-- {{ dd($dim->json_value) }} --}}
+                                    @php 
+                                        $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione --}}
+                                    @endphp
+                                    @foreach($arrayDim as $key => $dimension)
+                                        @php
+                                            $jsonDimension = json_decode($dimension['json_value']);
+                                        @endphp
                                         <div class="element dimensions" data-source-db>
-                                            <?php 
-                                                //var_dump($dim);
-                                                //$test = json_encode($dim);
-                                                //echo $test->{'name'};
-                                            ?>
-                                            {{-- <?php $test = json_decode($dim); ?> --}}
-                                            {{-- <h5 label="{{ dd($test) }}"></h5> --}}
-                                            {{-- <div id="miniCard-db" class="miniCard"><h6>{{ $dim->name }}</h6></div> --}}
+                                            <h5 label="{{ $jsonDimension->{'name'} }}">{{ $jsonDimension->{'name'} }}</h5>
+                                            <div id="miniCard-db" class="miniCard"><h6>{{ $jsonDimension->{'lastTableInHierarchy'} }}</h6></div>
                                         </div>
                                     @endforeach
                                 </ul>
@@ -248,10 +265,6 @@
 
                             </section>
                         </div>
-
-                        {{-- <div class="center">
-                            <h5>Trascina qui le tabelle da aggiungere</h5>
-                        </div> --}}
 
                         <div id="drop-zone">
                             
