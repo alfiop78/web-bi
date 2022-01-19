@@ -43,9 +43,9 @@ header h1{font-size: 1.4rem;font-weight: 400;margin: 0 8px;flex-grow: 1;flex-shr
 .center{justify-self: center;margin: 8px 0;text-align: center;}
 
 h2{font-size: 1.25rem; font-weight: 400;margin: 4px;text-align: center;}
-h3{font-size: 1rem;margin: 4px;font-weight: lighter;text-align: center;}
-h5{font-size: .9rem;margin: 16px;font-weight: lighter;text-align: center;}
-h6{font-size: .7rem; margin: 8px;font-weight: normal;}
+h3{font-size: 1.1rem;margin: 4px;font-weight: lighter;text-align: center;}
+h5{font-size: 1rem;margin: 16px;font-weight: lighter;text-align: center;}
+h6{font-size: .9rem; margin: 8px;font-weight: normal;}
 
 h4{padding: 16px 0; font-weight: 400;margin: 0 auto;color: var(--main-color-outisde-card);}
 
@@ -182,7 +182,7 @@ tr.tr-right{display: flex;justify-content: flex-end;}
 /*tfoot*/
 
 /*actions*/
-.actions{display: flex; flex-flow: row;margin: 8px 16px;}
+.actions{display: flex; flex-flow: row;margin: 8px 0px; padding: .5rem; box-shadow: 0px 1px 3px -1px grey; border-radius: 4px; background-color: white;}
 /* .actions > span{display: flex;justify-content: center;position: relative;} */
 span.popupContent:hover small{visibility: visible; animation: popup 50ms ease;top: 42px;}
 /*actions*/

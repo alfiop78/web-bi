@@ -126,6 +126,10 @@
 
                 <nav id="nav-schema">
                     <!-- TODO: qui inserisco l'elenco dei database/schema da selezionare prima di elencare le tabelle -->
+                    {{-- {{dd($schemes)}} --}}
+                    @foreach($schemes as $schema)
+                        <a href="#" data-schema="{{ $schema['SCHEMA_NAME'] }}">{{ $schema['SCHEMA_NAME'] }}</a>
+                    @endforeach
                 </nav>
             </div>
 
@@ -143,16 +147,15 @@
                 <div id="content"> <!--class="dropzone"-->
 
                     <div id="body">
-                        <h5>Trascina qui le tabelle da aggiungere</h5>
-
+                        
                         <div class="actions">
-                            <span class="popupContent"><i id="openTableList" class="material-icons md-24">view_list</i><small class="popup">Lista tabelle</small></span>
-                            <span class="popupContent"><i id="openDimensionList" class="material-icons md-24">view_list</i><small class="popup">Lista Dimensioni</small></span>
-                            <span class="popupContent"><i class="material-icons md-24">playlist_add</i><small class="popup">Nuova dimensione</small></span>
+                            <span class="popupContent"><i id="openTableList" class="material-icons md-24 md-inactive">storage</i><small class="popup">Lista tabelle</small></span>
+                            <span class="popupContent"><i id="openDimensionList" class="material-icons md-24">mediation</i><small class="popup">Lista Dimensioni</small></span>
+                            <span class="popupContent"><i class="material-icons md-24">dashboard_customize</i><small class="popup">Nuova dimensione</small></span>
                             <span class="popupContent"><i id="saveCube" class="material-icons md-24">save</i><small class="popup">Salva Cubo</small></span>
                             <span class="popupContent" hide><i id="saveOpenedCube" class="material-icons md-24">save</i><small class="popup">Salva Cubo esistente</small></span>
                             <span class="popupContent"><i id="processCube" class="material-icons md-24">folder_open</i><small class="popup">Lista Cubi</small></span>
-                            <span class="popupContent"><i id="defineCube" class="material-icons md-24">space_dashboard</i><small class="popup">Definisci Cubo</small></span>
+                            <span class="popupContent"><i id="defineCube" class="material-icons md-24 md-inactive">space_dashboard</i><small class="popup">Definisci Cubo</small></span>
                         </div>
 
                         <div class="lists">
@@ -180,7 +183,7 @@
                         <div class="lists">
                             <template id="dimension">
                                 <div class="element dimensions">
-                                    <h5>dim title</h5>
+                                    <h5></h5> {{-- titolo della dimensione --}}
                                     <template id="miniCard"><div class="miniCard"><h6></h6></div></template>
                                 </div>
                             </template>
@@ -190,12 +193,43 @@
                                     <input type="search" id="dimensionSearch" value=""/>
                                     <label for="dimensionSearch" class="">Ricerca</label>
                                 </div>
-                                <ul id="dimensions"></ul>
+                                <ul id="dimensions">
+                                    @foreach($dimensions as $dim)
+                                    {{-- {{ dd($dim->json_value) }} --}}
+                                        <div class="element dimensions" data-source-db>
+                                            <?php 
+                                                //var_dump($dim);
+                                                //$test = json_encode($dim);
+                                                //echo $test->{'name'};
+                                            ?>
+                                            {{-- <?php $test = json_decode($dim); ?> --}}
+                                            {{-- <h5 label="{{ dd($test) }}"></h5> --}}
+                                            {{-- <div id="miniCard-db" class="miniCard"><h6>{{ $dim->name }}</h6></div> --}}
+                                        </div>
+                                    @endforeach
+                                </ul>
                             </div>
                         </div>
 
+                        {{-- <div class="lists">
+                            <div class="absList" id="dimensionList-db">
+                                <div class="md-field">
+                                    <input type="search" id="dimensionSearch-db" value=""/>
+                                    <label for="dimensionSearch-db" class="">Ricerca</label>
+                                </div>
+                                <ul id="dimensions-db">
+                                    <div class="element dimensions">
+                                        @foreach($dimensions as $dim)
+                                            <h5 label="{{ $dim->name }}">{{ $dim->name }}</h5>
+                                            <div id="miniCard-db" class="miniCard"><h6>{{ $dim->name }}</h6></div>
+                                        @endforeach
+                                    </div>
+                                </ul>
+                            </div>
+                        </div> --}}
+
                         <div id="hierarchiesContainer">
-                            <section id="hierarchies">
+                            <section id="hierarchies" class="section-content">
                                 <h5>Struttura gerarchica</h5><h6>Gerarchia 1</h6>
                                 <div id="hierTables"></div>
                                 <span class="before"><span class="arrow"></span></span>
@@ -213,6 +247,14 @@
                                 </div>
 
                             </section>
+                        </div>
+
+                        {{-- <div class="center">
+                            <h5>Trascina qui le tabelle da aggiungere</h5>
+                        </div> --}}
+
+                        <div id="drop-zone">
+                            
                         </div>
 
                     </div>

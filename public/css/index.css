@@ -1,6 +1,6 @@
 .lists{position: relative;}
-.absList{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 6;box-shadow: 0 4px 8px 0px #b5b5b5;
-/*box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);*/}
+.absList{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 6;box-shadow: 0 4px 8px 0px #b5b5b5;}
+.absList[fact]{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 6;box-shadow: 0 4px 8px 0px #b5b5b5;background-color: saddlebrown;color: white;}
 .absList > ul{height: 500px;overflow-y: auto;}
 i[open]{color: red;}
 
@@ -8,7 +8,7 @@ div[draggable]{cursor: grab;}
 
 .highlight{padding: 4px;border-radius: 4px;background-color: #9a9b94;color: white;}
 
-h5{font-size: .9rem;padding: 8px;margin: 0;}
+h5{font-size: 1rem;padding: 8px;margin: 0;}
 
 div[tables-columns]{display: grid;grid-template-columns: max-content max-content; grid-column-gap: 16px;}
 
@@ -113,8 +113,15 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 .card.table ul > .element li[data-relation-id='true'] ~ #hierarchy-icon{color: #99b19c;}
 /* colonne all'interno della card/tabella*/
 
-.card.table{width: 300px;background: white;position: absolute;font-size: .8rem; border-radius: 4px;
-  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);}
+/*.card.table{
+	width: 300px;background: white;position: absolute;font-size: .8rem; border-radius: 4px;
+	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+}*/
+
+.card.table{
+	width: 300px;background: white;position: relative;font-size: .8rem; border-radius: 4px;
+	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+}
 
 
 .card.table > .cardLayout{display: grid;grid-template-columns: 100%;position: relative;grid-template-rows: auto auto;}
@@ -142,6 +149,7 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 .card.table[selected] i[data-id="selectTable"]{color: var(--main-primary-color);}
 
 .element.dimensions{flex-flow: column;background: burlywood;}
+.element.dimensions[data-source-db]{flex-flow: column;background: saddlebrown;color: white;}
 .element.dimensions > h5:hover{cursor: pointer;color: var(--main-primary-color);}
 
 /*guide*/
@@ -157,7 +165,12 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 /*guide*/
 
 /*hierarchies */
-#hierarchies{position: relative;float: right;display: flex;flex-direction: column;align-items: center;}
+#hierarchies{position: relative;float: right;display: flex;flex-direction: column;align-items: center;margin: 0em 0em 1em 1em;padding: 1em;}
+.section-content{
+	box-shadow: 0px 1px 3px -1px grey;
+    border-radius: 4px;
+    background-color: white;
+}
 .hier.table{width: 170px;margin: 8px;text-align: center;margin: 4px;margin-bottom: 16px;
   box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);}
 .hier.table{background: tan;padding: 8px;font-size: .8rem;border-radius: 4px;width: 170px;overflow: hidden;text-overflow: ellipsis;}
@@ -173,3 +186,8 @@ span.after .arrow{height: 10px; width: 10px;background: #494949;display: flex;tr
 /*area*/
 .area{width: 100%;height: inherit;display: flex;justify-content: center;align-items: center;border: solid thin gainsboro;}
 /*area*/
+
+/*drop-zone*/
+#drop-zone{display: flex; align-items: center; justify-content: center; height: inherit;border: dotted thin darkgrey; overflow: hidden;z-index: 1000;}
+#drop-zone::after{content: "Trascina qui le tabelle da mappare"; color: darkgrey; font-size: 1.5rem;}
+/*drop-zone*/

@@ -9,35 +9,14 @@ use App\Classes\Cube;
 
 class MapDatabaseController extends Controller
 {
-    public function index() {
-        return view('web_bi.index');
-    }
-
-    public function mapping() {
-        // recupero tutti i record
-        /* $corsi = Corso::all(); */
-        /* $tables = DB::connection('mysql_local')->select("SHOW TABLES"); */
-        /* $tables = DB::connection('mysql')->select("SHOW TABLES"); */
-        /* dd($tables); */
-        // get recupera uno specifico campo
-        //$corsi = corso::get('name');
-        // find recupero un record specifico
-        // $corso = corso::find(1); // 1 : id record
-        // dd($corso); // utilizzo di Die Dump, interrompe l'esecuzione e mostra il dump.
-        // restituisco i dati recuperati dal db alla view
-        /* return view('web_bi.mapping')->with('tableList', $tables);  */
-        return view('web_bi.mapping'); 
-        /* return response(json_encode($tables))->header('Content-Type', 'application/json'); */
-        /* return response()->json($tables); */
-    }
-
-    public function schemata() {
-
+    // TODO: questo verrà eliminato perchè gli schemi li recupero nel metodo mapping
+    /*public function schemata() {
         $schemaList = DB::connection('vertica_odbc')->select("SELECT SCHEMA_NAME FROM V_CATALOG.SCHEMATA S WHERE IS_SYSTEM_SCHEMA = FALSE ORDER BY SCHEMA_NAME;");
+        // dd($schemaList);
         return response()->json($schemaList);
-        dd($schemaList);
-    }
+    }*/
 
+    // test connessione vertica (senza utilizzo di Eloquen/ORM)
     public function test_vertica() {
         
         # A simple function to trap errors from queries
@@ -74,6 +53,7 @@ class MapDatabaseController extends Controller
         dd($row);
     }
 
+    // test utilizzando Eloquent
     public function vertica_odbc() {
         // Facade
         // utilizzo di odbc dopo l'installazione del repository laravel-odbc
@@ -88,14 +68,15 @@ class MapDatabaseController extends Controller
         /* $books = Book::where('Author', 'Abram Andrea')->get(); */
     }
 
+    // Pagina Report
     public function report() {
         // pagina report
         return view('web_bi.report'); 
     }
 
+    // Invocata sia da Mapping (ottengo la lista dei campi della tabella) che da report (dialog-filter)
     public function table_info($schema, $table) {
         /* dd($table); */
-        // questa viene richiamata sia dalla pagina Mapping che dalla pagina Report
         /* $tables = DB::connection('mysql')->select("DESCRIBE Azienda"); */
         $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME
                 FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
@@ -107,11 +88,13 @@ class MapDatabaseController extends Controller
         return response()->json($info);
     }
 
+    // ottengo valori distinti per il field selezionato (dialog-filter)
     public function distinct_values($schema, $table, $field) {
         $values = DB::connection('vertica_odbc')->table($schema.".".$table)->distinct()->orderBy($field, 'asc')->limit(500)->get($field);
         return response()->json($values);
     }
 
+    // Elenco delle tabelle dello schema selezionato
     public function tables($schema) {
         /* $tables = DB::connection('mysql_local')->select("SHOW TABLES"); */
         /* $tables = DB::connection('mysql')->select("SHOW TABLES"); */
@@ -121,11 +104,13 @@ class MapDatabaseController extends Controller
         return response()->json($tables);
     }
 
+    // test
     public function post($test) {
         /* dd(request()->all()); */
         dd($test);
     }
 
+    // processo la FX
     public function process($cube) {
         $cube = json_decode($cube); // object
         /* dd($cube); */
@@ -140,17 +125,17 @@ class MapDatabaseController extends Controller
         $q->filters($cube->{'filters'});
         $q->n_groupBy($cube->{'select'});
         /* dd($q); */
+        // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
         $baseTable = $q->baseTable();
         if (!$baseTable) {
-            // dd($baseTable);
             // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
+            // creo una tabella temporanea per ogni metrica filtrata
             $metricTable = $q->createMetricDatamarts($cube->{'filteredMetrics'});
             // echo 'elaborazione createDatamart';
-
+            // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
             $datamartName = $q->createDatamart();
-            // TODO: devo eliminare le tabelle temporanee 'decisyon_cache.W_AP_base_*' e 'decisyon_cache.W_AP_metric_*'
-            // TODO: se $datamartName è valorizzato elimino le tabelle temporanee
             // dd($result);
+            // restituisco un json con i dati del datamart appena creato
             $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM $datamartName;");
             return response()->json($datamartResult);
         }

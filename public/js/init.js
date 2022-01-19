@@ -191,10 +191,13 @@ var dimension = new Dimension();
 		// imposto il titolo in h6
 		cardLayout.querySelector('h6').innerHTML = card.getAttribute('label');
 		card.appendChild(cardLayout);
+		const dropZone = document.getElementById('drop-zone');
 
-		app.body.appendChild(card);
+		dropZone.appendChild(card);
+		// app.body.appendChild(card);
+
 		// tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
-		if (app.btnTableList.hasAttribute('fact')) {
+		if (document.getElementById('tableList').hasAttribute('fact')) {
 		  card.setAttribute('fact', true);
 		  card.querySelector('.cardTable').setAttribute('fact', true);
 		  // visualizzo l'icona metrics
@@ -573,6 +576,9 @@ var dimension = new Dimension();
 		        console.log(data);
 		        if (data) {
 		        	let ul = document.getElementById('tables');
+		        	// TODO: attivo il tasto "openTableList" dopo aver caricato l'elenco delle tabelle
+		        	app.btnTableList.classList.remove('md-inactive');
+		        	app.btnNewFact.classList.remove('md-inactive');
 		        	for (const [key, value] of Object.entries(data)) {
 		        		// debugger;
 		        		let tmpl = document.getElementById('el');
@@ -771,7 +777,10 @@ var dimension = new Dimension();
 		app.closeCards();
 		// visualizzo le dimensioni create
 		// imposto, sulla icona openTableList, il colore della fact
+		console.debug('REVISIONARE');
 		app.btnTableList.setAttribute('fact', true);
+		debugger;
+
 		app.getDimensions(); // TODO: qui andrò ad aggiornare solo la dimensione appena salvata/modificata
 
 		delete dimension.dimension;
@@ -854,16 +863,21 @@ var dimension = new Dimension();
 		app.dialogCubeName.close();
 	};
 
-	app.handlerOpenTableList = () => {
-		const tableList = document.getElementById('tableList');
-		app.btnTableList.toggleAttribute('open');
-		tableList.toggleAttribute('hidden');
+	app.handlerOpenTableList = (e) => {
+		// console.log(e.target);
+		if (e.target.classList.contains('md-inactive')) return;
+		document.getElementById('tableList').removeAttribute('fact');
+		e.target.toggleAttribute('open');
+		document.getElementById('tableList').toggleAttribute('hidden');
 		document.getElementById('tableSearch').focus();
 	};
 
-	app.btnNewFact.onclick = () => {
-		app.btnTableList.setAttribute('fact', true);
-		app.handlerOpenTableList();
+	app.btnNewFact.onclick = (e) => {
+		if (e.target.classList.contains('md-inactive')) return;
+		document.getElementById('tableList').setAttribute('fact', true);
+		e.target.toggleAttribute('open');
+		document.getElementById('tableList').toggleAttribute('hidden');
+		document.getElementById('tableSearch').focus();
 	};
 
 	app.btnBack.onclick = () => {window.location.href = '/';};
@@ -946,8 +960,11 @@ var dimension = new Dimension();
         app.getDatabaseTable(e.target.getAttribute('data-schema'));
     };
 
+    // associo l'evento click dello schema
+	document.querySelectorAll('#nav-schema > a').forEach( (a) => {a.addEventListener('click', app.schemaSelected)});
+
     // recupero gli schemi database presenti
-    app.getSchemata = async () => {
+    /*app.getSchemata = async () => {
 		const url = '/fetch_api/schema';
 		await fetch(url)
 			.then( (response) => {
@@ -976,9 +993,9 @@ var dimension = new Dimension();
 		        }
 		    })
 	    .catch( (err) => console.error(err));
-    };
+    };*/
 
-    app.getSchemata();
+    // app.getSchemata(); // l'elenco degli schemi li recupero sulla Route mapping
 
 	// app.getDatabaseTable();
 

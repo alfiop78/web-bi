@@ -264,7 +264,7 @@
 					<div id="body" hidden>
 
 						<div class="actions">
-							<span class="popupContent"><i id="btnProcessReport" class="material-icons md-24">folder_open</i><small class="popup">Crea FX</small></span>
+							<span class="popupContent"><i id="btnProcessReport" class="material-icons md-24">table_rows</i><small class="popup">Crea FX</small></span>
 						</div>
 						
 

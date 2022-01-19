@@ -82,4 +82,6 @@
   .material-icons.sale{padding: .35em;}
 }
 .material-icons[id]:not(.md-inactive):hover{color: black;}
+.material-icons.md-inactive{color: lightgrey;cursor: not-allowed;}
+.material-icons:not(.md-inactive):hover{color: black;}
 .material-icons[open]:not(.md-inactive):hover{color: var(--main-primary-color);}
