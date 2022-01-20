@@ -266,8 +266,8 @@
                             </section>
                         </div>
 
-                        <div id="drop-zone">
-                            
+                        <div id="drop">
+                            <div id="drop-zone" class="dropzone">Trascina qui le tabelle da mappare</div>
                         </div>
 
                     </div>

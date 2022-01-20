@@ -1,5 +1,5 @@
 .lists{position: relative;}
-.absList{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 6;box-shadow: 0 4px 8px 0px #b5b5b5;}
+.absList{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;}
 .absList[fact]{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 6;box-shadow: 0 4px 8px 0px #b5b5b5;background-color: saddlebrown;color: white;}
 .absList > ul{height: 500px;overflow-y: auto;}
 i[open]{color: red;}
@@ -119,7 +119,7 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 }*/
 
 .card.table{
-	width: 300px;background: white;position: relative;font-size: .8rem; border-radius: 4px;
+	width: 300px;background: white;position: absolute;font-size: .8rem; border-radius: 4px;
 	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
 }
 
@@ -188,6 +188,10 @@ span.after .arrow{height: 10px; width: 10px;background: #494949;display: flex;tr
 /*area*/
 
 /*drop-zone*/
-#drop-zone{display: flex; align-items: center; justify-content: center; height: inherit;border: dotted thin darkgrey; overflow: hidden;z-index: 1000;}
-#drop-zone::after{content: "Trascina qui le tabelle da mappare"; color: darkgrey; font-size: 1.5rem;}
+#drop{display: flex;position: relative;height: inherit;overflow: hidden;z-index: 1000;}
+#drop-zone{position: absolute; width: 100%; height: 100%; display: flex;align-items: center; justify-content: center; border: dotted thin darkgrey;font-size: 1.5rem;color: darkgrey;}
+/* sto muovendo l'oggetto draggato in un area di drop, elimino il display: flex...center altrimenti esegue il drop dal centro, e non da x: 0 e y: 0 del div*/
+#drop-zone.dropping{display: block; align-items: unset; justify-content: unset; border: dotted thin indianred;background-color: white;}
+/* terminato il drop reimposto il border lasciando inalterato il display */
+#drop-zone.dropped{display: block; align-items: unset; justify-content: unset; border: dotted thin darkgrey; color: black;}
 /*drop-zone*/

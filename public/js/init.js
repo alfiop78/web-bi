@@ -37,6 +37,7 @@ var dimension = new Dimension();
 		cardTitle : null,
 		content : document.getElementById('content'),
 		body : document.getElementById('body'),
+		dropZone : document.getElementById('drop-zone'),
 		// dropzone : document.getElementsByClassName('dropzone')[0],
 		currentX : 0,
 		currentY : 0,
@@ -51,6 +52,7 @@ var dimension = new Dimension();
 
 	App.init();
 
+	// utilizzato per lo spostamento all'interno del drop-zone (card già droppata)
 	app.dragStart = (e) => {
         console.log('dragStart : ', e.target);
 		// mousedown da utilizzare per lo spostamento dell'elemento
@@ -60,6 +62,8 @@ var dimension = new Dimension();
 			// recupero la posizione attuale della card tramite l'attributo x-y impostato su .cardTable
 			app.xOffset = e.path[4].getAttribute('x');
 			app.yOffset = e.path[4].getAttribute('y');
+			console.log('xOffset : ', app.xOffset);
+			console.log('yOffset : ', app.yOffset);
 		}
 		// cardTitle = document.querySelector('.card.table .title > h6');
 		if (e.type === 'touchstart') {
@@ -72,6 +76,7 @@ var dimension = new Dimension();
 		if (e.target === app.cardTitle) {app.active = true;}
 	};
 
+	// spostamento della card già droppata
     app.dragEnd = () => {
         console.log('dragEnd');
 		// console.log(e.target);
@@ -81,14 +86,14 @@ var dimension = new Dimension();
 		app.active = false;
 	};
 
+	// evento attivato quando sposto la card già droppata all'interno della drop-zone
     app.drag = (e) => {
-        // console.log('drag');
-		// mousemove elemento si sta spostato
-		// console.log(e.target);
-		// console.log(e);
+        console.log('drag');
+        // console.log('e.target drag : ', e.target);
+		// mousemove elemento si sta spostando
 		if (app.active) {
 			e.preventDefault();
-
+			// debugger;
 			if (e.type === 'touchmove') {
 				app.currentX = e.touches[0].clientX - app.initialX;
 				app.currentY = e.touches[0].clientY - app.initialY;
@@ -108,9 +113,9 @@ var dimension = new Dimension();
 		}
 	};
 
-	app.body.onmousedown = app.dragStart;
-	app.body.onmouseup = app.dragEnd;
-	app.body.onmousemove = app.drag;
+	app.dropZone.onmousedown = app.dragStart;
+	app.dropZone.onmouseup = app.dragEnd;
+	app.dropZone.onmousemove = app.drag;
 
 	// TODO: aggiungere anhce eventi touch...
 
@@ -120,26 +125,41 @@ var dimension = new Dimension();
 		// console.log(e.target.id);
 		// return;
 		e.dataTransfer.setData('text/plain', e.target.id);
+		e.dataTransfer.effectAllowed = "copy";
         // console.log(e.dataTransfer);
-		app.dragElement = document.getElementById(e.target.id);
+		// app.dragElement = document.getElementById(e.target.id);
 		// console.log(e.path);
-		app.elementMenu = e.path[1]; // elemento da eliminare al termine drl drag&drop
+		// app.elementMenu = e.path[1]; // elemento da eliminare al termine drl drag&drop
 		// console.log(e.dataTransfer);
 	};
 
 	app.handlerDragOver = (e) => {
 		console.log('handlerDragOver');
 		e.preventDefault();
+		console.log('dragOver:', e.target);
+		if (e.target.classList.contains('dropzone')) {
+			e.dataTransfer.dropEffect = "copy";
+		} else {
+			e.dataTransfer.dropEffect = "none";
+		}
 	};
 
 	app.handlerDragEnter = (e) => {
 		console.log('handlerDragEnter');
 		e.preventDefault();
 		console.log(e.target);
+		// if (e.target.id === "help-drop") e.target.remove();
 
 		if (e.target.className === 'dropzone') {
-		  console.info('DROPZONE');
-		  // TODO: css effect
+			console.info('DROPZONE');
+			// e.dataTransfer.dropEffect = "copy";
+			// coloro il border differente per la dropzone
+			e.target.classList.add('dropping');
+			// elimino il testo all'interno di #drop-zone
+			e.target.innerText = '';
+		} else {
+			// TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
+			// e.dataTransfer.dropEffect = "none";
 		}
 	};
 
@@ -156,19 +176,19 @@ var dimension = new Dimension();
 		// console.log(e.target);
 		// debugger;
 		// faccio il DESCRIBE della tabella
-		app.getTable(e.target.getAttribute('data-schema'), cube.card.tableName);
+		// app.getTable(e.target.getAttribute('data-schema'), cube.card.tableName);
 	};
 
 	app.handlerDrop = (e) => {
         console.log('handlerDrop');
 		e.preventDefault();
+		e.target.classList.remove('dropping');
+		e.target.classList.add('dropped');
+		if (e.target.id !== 'drop-zone') return; // anullo il drop (da vedere drop abort oppure dropcancel)
 		// console.log('drop');
 		// console.log(e.target);
 		let data = e.dataTransfer.getData('text/plain');
 		let card = document.getElementById(data);
-		// debugger;
-		// console.log(e.dataTransfer);
-		// console.log(e.target);
 		// nuova tabella droppata
 		// console.log(card);
 		// console.log(app.dragElement);
@@ -192,19 +212,18 @@ var dimension = new Dimension();
 		cardLayout.querySelector('h6').innerHTML = card.getAttribute('label');
 		card.appendChild(cardLayout);
 		const dropZone = document.getElementById('drop-zone');
-
 		dropZone.appendChild(card);
-		// app.body.appendChild(card);
 
 		// tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
 		if (document.getElementById('tableList').hasAttribute('fact')) {
-		  card.setAttribute('fact', true);
-		  card.querySelector('.cardTable').setAttribute('fact', true);
-		  // visualizzo l'icona metrics
-		  card.querySelector('section[options] > .popupContent[hide]').removeAttribute('hide');
+			card.setAttribute('fact', true);
+			card.querySelector('.cardTable').setAttribute('fact', true);
+			// visualizzo l'icona metrics
+			card.querySelector('section[options] > .popupContent[hide]').removeAttribute('hide');
 		}
 
 		// imposto la card draggata nella posizione dove si trova il mouse
+		console.log('e.target : ', e.target);
 		card.style.transform = 'translate3d(' + e.offsetX + 'px, ' + e.offsetY + 'px, 0)';
 		card.setAttribute('x', e.offsetX);
 		card.setAttribute('y', e.offsetY);
