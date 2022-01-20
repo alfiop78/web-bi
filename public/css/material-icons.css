@@ -85,3 +85,8 @@
 .material-icons.md-inactive{color: lightgrey;cursor: not-allowed;}
 .material-icons:not(.md-inactive):hover{color: black;}
 .material-icons[open]:not(.md-inactive):hover{color: var(--main-primary-color);}
+
+/* material-icons con colori */
+/* TODO: utilizzare questa funzionalità con gli attributi sull'elemento nel DOM e con le variabili qui in css --color*/
+.material-icons.md-indianred{color: indianred;}
+.material-icons.md-darkgray{color: darkgray;}

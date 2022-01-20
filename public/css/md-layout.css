@@ -182,14 +182,17 @@ tr.tr-right{display: flex;justify-content: flex-end;}
 /*tfoot*/
 
 /*actions*/
-.actions{display: flex; flex-flow: row;margin: 8px 0px; padding: .5rem; box-shadow: 0px 1px 3px -1px grey; border-radius: 4px; background-color: white;}
+.actions{display: flex; flex-flow: row; justify-content: space-between; margin: 8px 0px; padding: .5rem; box-shadow: 0px 1px 3px -1px grey; border-radius: 4px; background-color: white;}
+.actions > .buttons{display: flex;flex-flow: row;}
+.actions > .help-console{background: saddlebrown; color: white; border-radius: 4px; display: flex;flex-flow: row;padding: 6px;}
+.help-console > #guide{padding: 6px;}
 /* .actions > span{display: flex;justify-content: center;position: relative;} */
 span.popupContent:hover small{visibility: visible; animation: popup 50ms ease;top: 42px;}
 /*actions*/
 /* lo span che contiene l'icona e lo small della popup*/
 span.popupContent[hide]{display: none;}
 span.popupContent{display: flex;justify-content: center;align-items: center;position: relative;}
-span.popupContent small{z-index: 5;}
+span.popupContent small{z-index: 1600;}
 small.popup{background: #494949;border-radius: 4px;color: white;font-size: .7rem;visibility: hidden;white-space: nowrap;
   box-shadow: 0 2px 4px 0 black;padding: 4px 8px;position: absolute;}
 /*lo span che contiene l'icona e lo small della popup*/
@@ -200,3 +203,17 @@ small.popup{background: #494949;border-radius: 4px;color: white;font-size: .7rem
 }
 
 .dialog-buttons{display: flex;flex-flow: row;justify-content: space-between;}
+
+/*versioning dialog*/
+.versioning-status{display: grid; grid-template-columns: 50% 20% 20% 10%;}
+.versioning-status > div:not(:first-child){text-align: center;}
+.versioning-status .vers-title{margin: .5em; padding: .5em;}
+.versioning-status-header{display: grid; grid-template-columns: 50% 20% 20% 10%;}
+.versioning-status-header > div{text-align: center;}
+#versioning fieldset{
+	border-color: rgb(0 0 0 / 15%);
+	border-width: 1px;
+	border-radius: 4px;
+	padding: 2em;
+}
+fieldset legend{font-size: .9rem; padding: 1em;}

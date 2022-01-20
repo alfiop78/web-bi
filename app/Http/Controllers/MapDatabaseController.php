@@ -99,7 +99,7 @@ class MapDatabaseController extends Controller
         /* $tables = DB::connection('mysql_local')->select("SHOW TABLES"); */
         /* $tables = DB::connection('mysql')->select("SHOW TABLES"); */
         // connessione a vertica per recuperare l'elenco delle tabelle
-        $tables = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='$schema';");
+        $tables = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='$schema' ORDER BY TABLE_NAME ASC;");
         /* $tables = DB::connection('vertica')->select("SELECT * FROM automotive_bi_data.Azienda"); */
         return response()->json($tables);
     }

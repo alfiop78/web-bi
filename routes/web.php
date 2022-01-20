@@ -39,6 +39,8 @@ Route::get('/fetch_api/cube/{jsonData}/process', [MapDatabaseController::class, 
 // Utilizzo un unico metodo per salvare il Metadato, questo perchè i campi da salvare sono sempre 2 (key, json_value)
 // Come parametri passo il json da salvare (al cui interno c'è la proprietà 'name') e il nome della tabella in cui salvare i dati (es.: bi_dimensions, bi_filters, ecc...)
 Route::get('/fetch_api/json/{json}/table/{table}/save', [MetadataController::class, 'save']);
+// sincronizzazione dal DB per il metadato
+Route::get('/fetch_api/syncDB', [MetadataController::class, 'getMetadata'])->name('web_bi.fetch_api.getMetadata');
 
 // test POST request
 Route::get('/report/{test}/post', [MapDatabaseController::class, 'post'])->name('test_post_request');

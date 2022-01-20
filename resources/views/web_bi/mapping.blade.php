@@ -32,6 +32,54 @@
         </style>
     </head>
     <body class="antialiased">
+
+        <dialog id="versioning">
+            <section>
+                <h4>Sincronizzazione elementi</h4>
+                <fieldset>
+                    <legend>Lista elementi da versionare</legend>
+                    <section dimensions-local></section>
+                    <section cube-local></section>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Lista elementi sincronizzati dal DB</legend>
+                    <section dimensions>
+                        <h5>Dimensioni</h5>
+                        @php 
+                            $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione --}}
+                        @endphp
+                        <div class="versioning-status-header">
+                            <div>title</div>
+                            <div>status</div>
+                            <div>text</div>
+                            <div>text</div>
+                        </div>
+                        {{-- <div class="versioning-status">
+                            da creare dinamicamente
+                        </div> --}}
+                        {{-- @foreach($arrayDim as $key => $dimension)
+                            @php
+                                $jsonDimension = json_decode($dimension['json_value']);
+                            @endphp
+                            <div class="versioning-status">
+                                <div class="vers-title">{{ $jsonDimension->{'name'} }}<span>({{ $jsonDimension->{'lastTableInHierarchy'} }})</span></div>
+                                <div class="vers-status"><i class="material-icons">done</i></div>
+                            </div>
+                        @endforeach --}}
+                    </section>
+                    <section cubes>
+                        <h5>CUBI</h5>
+                        
+                    </section>
+                </fieldset>
+                <div class="dialog-buttons">
+                    <button type="button" name="cancel" class="md-button">annulla</button>
+                    {{-- <button id="btnCubeSaveName" type="button" name="done" class="md-button">Salva</button> --}}
+                </div>
+            </section>
+        </dialog>
+
         <dialog id="cube-name">
             <div class="dialog-save-name">
 
@@ -140,7 +188,7 @@
 
                 </div>
 
-                <h1 class="title">Mapping database</h1>
+                <h1 class="title">Map database</h1>
             </header>
             <div id="container" data-page="1">
 
@@ -149,13 +197,18 @@
                     <div id="body">
                         
                         <div class="actions">
-                            <span class="popupContent"><i id="openTableList" class="material-icons md-24 md-inactive">storage</i><small class="popup">Lista tabelle</small></span>
-                            <span class="popupContent"><i id="openDimensionList" class="material-icons md-24">mediation</i><small class="popup">Lista Dimensioni</small></span>
-                            <span class="popupContent"><i class="material-icons md-24">dashboard_customize</i><small class="popup">Nuova dimensione</small></span>
-                            <span class="popupContent"><i id="saveCube" class="material-icons md-24">save</i><small class="popup">Salva Cubo</small></span>
-                            <span class="popupContent" hide><i id="saveOpenedCube" class="material-icons md-24">save</i><small class="popup">Salva Cubo esistente</small></span>
-                            <span class="popupContent"><i id="processCube" class="material-icons md-24">folder_open</i><small class="popup">Lista Cubi</small></span>
-                            <span class="popupContent"><i id="defineCube" class="material-icons md-24 md-inactive">space_dashboard</i><small class="popup">Definisci Cubo</small></span>
+                            <div class="buttons">
+                                <span class="popupContent"><i id="openTableList" class="material-icons md-24 md-inactive">storage</i><small class="popup">Lista tabelle</small></span>
+                                <span class="popupContent"><i id="openDimensionList" class="material-icons md-24">mediation</i><small class="popup">Lista Dimensioni</small></span>
+                                <span class="popupContent"><i class="material-icons md-24">dashboard_customize</i><small class="popup">Nuova dimensione</small></span>
+                                <span class="popupContent"><i id="saveCube" class="material-icons md-24">save</i><small class="popup">Salva Cubo</small></span>
+                                <span class="popupContent" hide><i id="saveOpenedCube" class="material-icons md-24">save</i><small class="popup">Salva Cubo esistente</small></span>
+                                <span class="popupContent"><i id="processCube" class="material-icons md-24">folder_open</i><small class="popup">Lista Cubi definiti</small></span>
+                                <span class="popupContent"><i id="defineCube" class="material-icons md-24 md-inactive">space_dashboard</i><small class="popup">Definisci Cubo</small></span>
+                            </div>
+                            <div class="help-console">
+                                <span id="guide"></span>
+                            </div>
                         </div>
 
                         <div class="lists">
@@ -187,25 +240,7 @@
                                     <template id="miniCard"><div class="miniCard"><h6></h6></div></template>
                                 </div>
                             </template>
-                            @php
-                                // dd(json_decode($dimensions, true));
-                                // $arrayDim = json_decode($dimensions, true); // array, ogni elementi dell'array è una dimensione
-                                // $t = json_decode($dimensions, false); // object
-                                // var_dump($t);
-                                // echo gettype($t);
-                                // ciclo le dimensioni
-                                /*foreach($arrayDim as $key => $value) {
-                                    $jsonDimension = json_decode($value['json_value']); // ogni elemento dell'array $t ha un array associativo {json_value => 'stringa json'}
-                                    echo $jsonDimension->{'name'};
-                                }*/
-                            @endphp
-                            {{-- @foreach($arrayDim as $key => $value) --}}
-                                @php
-                                    //$jsonDimension = json_decode($value['json_value']); //ogni elemento dell'array $t ha un array associativo {json_value => 'stringa json'}--}}
-                                    //echo $jsonDimension->{'name'};
-                                @endphp
-                            {{-- @endforeach --}}
-
+                            
                             <div class="absList" id="dimensionList" hidden>
                                 <div class="md-field">
                                     <input type="search" id="dimensionSearch" value=""/>

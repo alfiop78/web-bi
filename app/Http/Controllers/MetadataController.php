@@ -25,6 +25,12 @@ class MetadataController extends Controller
         return view('web_bi.mapping')->with(['dimensions' => json_encode($dimensions), 'schemes' => $schemaList]);
     }
 
+    public function getMetadata() {
+        $dimensions = DB::table('bi_dimensions')->get('json_value');
+        $cubes = DB::table('bi_cubes')->get('json_value');
+        return response()->json(['dimensions' => $dimensions, 'cubes' => $cubes]);
+    }
+
     public function save($json, $table) {
         $jsonContent = json_decode($json);
         $key = $jsonContent->{'name'};
