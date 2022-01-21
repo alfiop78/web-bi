@@ -1,8 +1,3 @@
-// TODO: Da valutare se la property 'from', all'interno della dimensione mi serve ancora visto che le tabelle sono elencate, in ordine gerarchico, anche nella property 'hierarchies'
-// TODO: visto che, nella property lastTableInHierarchy ho l'ultima tabella della gerarchia, potrei togliere questa tabella dalla property 'hierarchies'. In questo modo, 'hierarchies' e 'join' hanno lo stesso indice, da valutare
-// window.addEventListener('load', test);
-// function test(e) {console.log(e);}
-
 var App = new Application();
 var cube = new Cube();
 var StorageCube = new CubeStorage();
@@ -12,6 +7,9 @@ var dimension = new Dimension();
 		dialogCubeName : document.getElementById('cube-name'),
 		dialogDimensionName : document.getElementById('dimension-name'),
 		dialogHierarchyName : document.getElementById('hierarchy-name'),
+
+		/* template */
+		tmplVersioningDB : document.getElementById('versioning-db'),
 
 		hierarchyContainer : document.getElementById('hierarchiesContainer'), // struttura gerarchica sulla destra
 
@@ -1044,11 +1042,11 @@ var dimension = new Dimension();
 		}		
 	};
 
-	app.getSyncDimensions = async () => {
+	/*app.getSyncDimensions = async () => {
 		await fetch('/fetch_api/syncDB')
 			.then( (response) => {
-			if (!response.ok) {throw Error(response.statusText);}
-			return response;
+				if (!response.ok) {throw Error(response.statusText);}
+				return response;
 			})
 			.then( (response) => response.json())
 			.then( (data) => {
@@ -1072,28 +1070,34 @@ var dimension = new Dimension();
 		        			versioningStatus.className = 'versioning-status';
 		        			let i = document.createElement('i');
 		        			i.className = 'material-icons';
-		        			let versText_1 = document.createElement('div');
-		        			// TODO: verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore
-		        			if ( jsonParsed.name === JSON.parse(window.localStorage.getItem(jsonParsed.name)).name ) {
-		        				// se l'elemento è già presente in locale verifico anche se il suo contenuto è uguale a quello del DB
-		        				console.log('elemento già presente in locale', jsonParsed.name);
-		        				if (el.json_value === window.localStorage.getItem(jsonParsed.name)) {
-		        					console.info('UGUALE CONTENTUO JSON, ELEMENTO NON AGGIORNATO');
-		        					i.innerText = 'remove';
-		        					i.classList.add('md-darkgray');
-		        					versText_1.innerText = 'Sincronizzato con DB';
-		        				} else {
-		        					// elemento presente ma contenuto diverso dal DB, da aggiornare manualmente
-		        					i.innerText = 'clear';
-		        					i.classList.add('md-indianred');
-		        					versText_1.innerText = 'Non sincronizzato';
-		        				}
+		        			let versStatusDescr = document.createElement('div');
+		        			versStatusDescr.className = 'vers-status-descr';
+		        			let versActions = document.createElement('div');
+		        			versActions.className = 'vers-actions';
+		        			// verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore
+		        			if (JSON.parse(window.localStorage.getItem(jsonParsed.name))) {
+		        				if ( jsonParsed.name === JSON.parse(window.localStorage.getItem(jsonParsed.name)).name ) {
+			        				// se l'elemento è già presente in locale verifico anche se il suo contenuto è uguale a quello del DB
+			        				console.log('elemento già presente in locale', jsonParsed.name);
+			        				if (el.json_value === window.localStorage.getItem(jsonParsed.name)) {
+			        					console.info('UGUALE CONTENTUO JSON, ELEMENTO NON AGGIORNATO');
+			        					i.innerText = 'remove';
+			        					i.classList.add('md-darkgray');
+			        					versStatusDescr.innerText = 'Sincronizzato con DB';
+			        				} else {
+			        					// elemento presente ma contenuto diverso dal DB, da aggiornare manualmente
+			        					i.innerText = 'clear';
+			        					i.classList.add('md-indianred');
+			        					versStatusDescr.innerText = 'Non sincronizzato';
+			        					versActions.innerHTML = "Sovrascrivi copia locale";
+			        				}
+			        			}
 		        			} else {
-		        				window.localStorage.setItem(jsonParsed.name, el.json_value);
-		        				i.innerText = 'done';
-		        				i.classList.add('md-green');
-		        				versText_1.innerText = 'Aggiornato';
-		        			}
+								window.localStorage.setItem(jsonParsed.name, el.json_value);
+								i.innerText = 'done';
+								i.classList.add('md-mediumseagreen');
+								versStatusDescr.innerText = 'Aggiornato';
+							}
 		        			
 		        			let versTitle = document.createElement('div');
 		        			let versStatus = document.createElement('div');
@@ -1104,8 +1108,75 @@ var dimension = new Dimension();
 		        			versTitle.innerText = jsonParsed.name;
 		        			versioningStatus.appendChild(versTitle);
 		        			versioningStatus.appendChild(versStatus);
-		        			versioningStatus.appendChild(versText_1);
+		        			versioningStatus.appendChild(versStatusDescr);
+		        			versioningStatus.appendChild(versActions);
 		        			versStatus.appendChild(i);
+		        		});
+		        	}
+		    
+		        } else {
+		          // TODO: no data, handlerConsoleMessage
+		          
+		        }
+		    })
+	    .catch( (err) => console.error(err));
+	};*/
+	// stessa funzione di sopra ma con l'utilizzo di un template html
+	app.getSyncDimensions = async () => {
+		await fetch('/fetch_api/syncDB')
+			.then( (response) => {
+				if (!response.ok) {throw Error(response.statusText);}
+				return response;
+			})
+			.then( (response) => response.json())
+			.then( (data) => {
+                console.log(data);
+		        if (data) {
+		        	// ciclo le dimensioni per inserirle nella dialog #versioning ed anche nello storage in locale
+		        	for (element in data) {
+		        		console.log('element : ', element);
+		        		// console.log(data[element]);
+		        		let parent = document.querySelector("dialog section["+element+"]");
+		        		data[element].forEach( (el) => {
+		        			// template
+		        			const tmplContent = app.tmplVersioningDB.content.cloneNode(true);
+		        			let versioningStatus = tmplContent.querySelector('.versioning-status');
+		        			let iconStatus = versioningStatus.querySelector('i');
+		        			let descrStatus = versioningStatus.querySelector('.vers-status-descr');
+		        			let action = versioningStatus.querySelector('.vers-actions');
+		        			const parent = document.querySelector("dialog section["+element+"]"); // element in ciclo vale "dimensions" e "cubes"
+
+		        			const jsonParsed = JSON.parse(el.json_value);
+		        			// se l'elemento recuperato dal DB è già presente in localStorage, ed è diverso, non lo aggiorno, si potrà scegliere di aggiornarlo/sovrascriverlo da un altro tasto
+		        			// console.log(jsonParsed.name);
+		        			// console.log(JSON.parse(window.localStorage.getItem(jsonParsed.name)).name);
+		        			
+		        			// verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore a causa della prop 'name'
+		        			if (JSON.parse(window.localStorage.getItem(jsonParsed.name))) {
+		        				if ( jsonParsed.name === JSON.parse(window.localStorage.getItem(jsonParsed.name)).name ) {
+			        				// se l'elemento è già presente in locale verifico anche se il suo contenuto è uguale a quello del DB
+			        				console.log('elemento già presente in locale', jsonParsed.name);
+			        				if (el.json_value === window.localStorage.getItem(jsonParsed.name)) {
+			        					console.info('UGUALE CONTENTUO JSON, ELEMENTO NON AGGIORNATO');
+			        					iconStatus.innerText = 'remove';
+			        					iconStatus.classList.add('md-darkgray');
+			        					descrStatus.innerText = 'Sincronizzato con DB';
+			        				} else {
+			        					// elemento presente ma contenuto diverso dal DB, da aggiornare manualmente
+			        					iconStatus.innerText = 'clear';
+			        					iconStatus.classList.add('md-indianred');
+			        					descrStatus.innerText = 'Non sincronizzato';
+			        					action.innerHTML = "Sovrascrivi copia locale";
+			        				}
+			        			}
+		        			} else {
+								window.localStorage.setItem(jsonParsed.name, el.json_value);
+								iconStatus.innerText = 'done';
+								iconStatus.classList.add('md-mediumseagreen');
+								descrStatus.innerText = 'Aggiornato';
+							}
+							versioningStatus.querySelector('.vers-title').innerText = jsonParsed.name;
+		        			parent.appendChild(versioningStatus);
 		        		});
 		        	}
 		    

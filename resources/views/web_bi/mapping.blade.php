@@ -34,6 +34,15 @@
     <body class="antialiased">
 
         <dialog id="versioning">
+            {{-- template utilizzato per popolare sia le dimensioni che i cubi --}}
+            <template id="versioning-db">
+                <div class="versioning-status">
+                    <div class="vers-title"></div>
+                    <div class="vers-status"><i class="material-icons"></i></div>
+                    <div class="vers-status-descr"></div>
+                    <div class="vers-actions"></div>
+                </div>
+            </template>
             <section>
                 <h4>Sincronizzazione elementi</h4>
                 <fieldset>
@@ -45,18 +54,19 @@
                 <fieldset>
                     <legend>Lista elementi sincronizzati dal DB</legend>
                     <section dimensions>
-                        <h5>Dimensioni</h5>
-                        @php 
-                            $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione --}}
-                        @endphp
+                        <h5 class="upper">dimensioni</h5>
+                        {{-- @php  --}}
+                            {{-- $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione --}}
+                        {{-- @endphp --}}
                         <div class="versioning-status-header">
-                            <div>title</div>
-                            <div>status</div>
-                            <div>text</div>
-                            <div>text</div>
+                            <div>Title</div>
+                            <div>Status</div>
+                            <div>Descr. Status</div>
+                            <div>Action</div>
                         </div>
+                        {{-- qui viene popolato tramite template --}}
                         {{-- <div class="versioning-status">
-                            da creare dinamicamente
+                            creato dinamicamente in app.getSyncDimensions
                         </div> --}}
                         {{-- @foreach($arrayDim as $key => $dimension)
                             @php
@@ -69,8 +79,14 @@
                         @endforeach --}}
                     </section>
                     <section cubes>
-                        <h5>CUBI</h5>
-                        
+                        <h5 class="upper">cubi</h5>
+                        <div class="versioning-status-header">
+                            <div>Title</div>
+                            <div>Status</div>
+                            <div>Descr. Status</div>
+                            <div>Action</div>
+                        </div>
+                        {{-- qui viene popolato tramite template --}}
                     </section>
                 </fieldset>
                 <div class="dialog-buttons">
@@ -173,7 +189,6 @@
                 <section class="account"><h5>user</h5><i class="material-icons md-light">person</i></section>
 
                 <nav id="nav-schema">
-                    <!-- TODO: qui inserisco l'elenco dei database/schema da selezionare prima di elencare le tabelle -->
                     {{-- {{dd($schemes)}} --}}
                     @foreach($schemes as $schema)
                         <a href="#" data-schema="{{ $schema['SCHEMA_NAME'] }}">{{ $schema['SCHEMA_NAME'] }}</a>

@@ -205,10 +205,12 @@ small.popup{background: #494949;border-radius: 4px;color: white;font-size: .7rem
 .dialog-buttons{display: flex;flex-flow: row;justify-content: space-between;}
 
 /*versioning dialog*/
-.versioning-status{display: grid; grid-template-columns: 50% 20% 20% 10%;}
+.versioning-status{display: grid; grid-template-columns: 40% 10% 25% 25%;}
 .versioning-status > div:not(:first-child){text-align: center;}
 .versioning-status .vers-title{margin: .5em; padding: .5em;}
-.versioning-status-header{display: grid; grid-template-columns: 50% 20% 20% 10%;}
+.versioning-status .vers-status-descr{margin: .5em; padding: .5em;}
+.versioning-status .vers-actions{margin: .5em; padding: .5em;}
+.versioning-status-header{display: grid; grid-template-columns: 40% 10% 25% 25%;}
 .versioning-status-header > div{text-align: center;}
 #versioning fieldset{
 	border-color: rgb(0 0 0 / 15%);
@@ -217,3 +219,4 @@ small.popup{background: #494949;border-radius: 4px;color: white;font-size: .7rem
 	padding: 2em;
 }
 fieldset legend{font-size: .9rem; padding: 1em;}
+.upper{text-transform: uppercase;}
