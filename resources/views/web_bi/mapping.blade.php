@@ -47,13 +47,22 @@
                 <h4>Sincronizzazione elementi</h4>
                 <fieldset>
                     <legend>Lista elementi da versionare</legend>
-                    <section dimensions-local></section>
-                    <section cube-local></section>
+                    <section data-dimensions-local class="dialog-overflow">
+                        <div class="versioning-status-header">
+                            <div>Title</div>
+                            <div>Status</div>
+                            <div>Descr. Status</div>
+                            <div>Action</div>
+                        </div>
+                        <div data-id="versioning-content" class="versioning-content overflow-y">
+                        </div>
+                    </section>
+                    <section data-cubes-local class="dialog-overflow"></section>
                 </fieldset>
 
                 <fieldset>
                     <legend>Lista elementi sincronizzati dal DB</legend>
-                    <section dimensions>
+                    <section data-dimensions class="dialog-overflow">
                         <h5 class="upper">dimensioni</h5>
                         {{-- @php  --}}
                             {{-- $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione --}}
@@ -64,21 +73,23 @@
                             <div>Descr. Status</div>
                             <div>Action</div>
                         </div>
-                        {{-- qui viene popolato tramite template --}}
-                        {{-- <div class="versioning-status">
-                            creato dinamicamente in app.getSyncDimensions
-                        </div> --}}
-                        {{-- @foreach($arrayDim as $key => $dimension)
-                            @php
-                                $jsonDimension = json_decode($dimension['json_value']);
-                            @endphp
-                            <div class="versioning-status">
-                                <div class="vers-title">{{ $jsonDimension->{'name'} }}<span>({{ $jsonDimension->{'lastTableInHierarchy'} }})</span></div>
-                                <div class="vers-status"><i class="material-icons">done</i></div>
-                            </div>
-                        @endforeach --}}
+                        <div data-id="versioning-content" class="versioning-content overflow-y">
+                            {{-- qui viene popolato tramite template --}}
+                            {{-- <div class="versioning-status">
+                                creato dinamicamente in app.getSyncDimensions
+                            </div> --}}
+                            {{-- @foreach($arrayDim as $key => $dimension)
+                                @php
+                                    $jsonDimension = json_decode($dimension['json_value']);
+                                @endphp
+                                <div class="versioning-status">
+                                    <div class="vers-title">{{ $jsonDimension->{'name'} }}<span>({{ $jsonDimension->{'lastTableInHierarchy'} }})</span></div>
+                                    <div class="vers-status"><i class="material-icons">done</i></div>
+                                </div>
+                            @endforeach --}}
+                        </div>
                     </section>
-                    <section cubes>
+                    <section data-cubes>
                         <h5 class="upper">cubi</h5>
                         <div class="versioning-status-header">
                             <div>Title</div>
@@ -86,7 +97,7 @@
                             <div>Descr. Status</div>
                             <div>Action</div>
                         </div>
-                        {{-- qui viene popolato tramite template --}}
+                        <div data-id="versioning-content" class="versioning-content overflow-y"></div>
                     </section>
                 </fieldset>
                 <div class="dialog-buttons">

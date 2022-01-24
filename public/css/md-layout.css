@@ -210,7 +210,7 @@ small.popup{background: #494949;border-radius: 4px;color: white;font-size: .7rem
 .versioning-status .vers-title{margin: .5em; padding: .5em;}
 .versioning-status .vers-status-descr{margin: .5em; padding: .5em;}
 .versioning-status .vers-actions{margin: .5em; padding: .5em;}
-.versioning-status-header{display: grid; grid-template-columns: 40% 10% 25% 25%;}
+.versioning-status-header{display: grid; grid-template-columns: 40% 10% 25% 25%; font-weight: bold;}
 .versioning-status-header > div{text-align: center;}
 #versioning fieldset{
 	border-color: rgb(0 0 0 / 15%);
@@ -220,3 +220,5 @@ small.popup{background: #494949;border-radius: 4px;color: white;font-size: .7rem
 }
 fieldset legend{font-size: .9rem; padding: 1em;}
 .upper{text-transform: uppercase;}
+
+dialog .versioning-content.overflow-y{max-height: 150px; overflow-y: scroll;margin-top: 1.5em;margin-bottom: 1.5em;}

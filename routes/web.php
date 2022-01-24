@@ -8,6 +8,11 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MapDatabaseController;
 // aggiungo il controller MetadataController, collegato al 192.168.2.7 web_bi_md per il metadato
 use App\Http\Controllers\MetadataController;
+use App\Http\Controllers\BIdimensionController;
+use App\Http\Controllers\BIcubeController;
+use App\Http\Controllers\BImetricController;
+use App\Http\Controllers\BIfilterController;
+use App\Http\Controllers\BIprocessController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,12 +38,17 @@ Route::get('/mapping', [MetadataController::class, 'mapping'])->name('web_bi.map
 Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']); // recupero l'elenco dei database presenti (schema)
 Route::get('/fetch_api/schema/{schema}/tables', [MapDatabaseController::class, 'tables'])->name('web_bi.fetch_api.tables'); // recupero elenco tabelle dello schema selezionato
 Route::get('/fetch_api/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('web_bi.fetch_api.table_info'); // recupero il DESCRIBE della tabella
-Route::get('/report', [MapDatabaseController::class, 'report'])->name('web_bi.report'); // page report
+Route::get('/report', function() {return view('web_bi.report');})->name('web_bi.report'); // page report
 Route::get('/fetch_api/schema/{schema}/table/{table}/field/{field}/distinct_values', [MapDatabaseController::class, 'distinct_values'])->name('web_bi.fetch_api.distinct_values'); // recupero i valori distinti del campo field passato come parametro
 Route::get('/fetch_api/cube/{jsonData}/process', [MapDatabaseController::class, 'process'])->name('web_bi.fetch_api.process'); // processo la query che crea la FX
 // Utilizzo un unico metodo per salvare il Metadato, questo perchè i campi da salvare sono sempre 2 (key, json_value)
 // Come parametri passo il json da salvare (al cui interno c'è la proprietà 'name') e il nome della tabella in cui salvare i dati (es.: bi_dimensions, bi_filters, ecc...)
-Route::get('/fetch_api/json/{json}/table/{table}/save', [MetadataController::class, 'save']);
+// Route::get('/fetch_api/json/{json}/table/{table}/save', [MetadataController::class, 'save']);
+Route::get('/fetch_api/json/{json}/dimension_store', [BIdimensionController::class, 'store']);
+Route::get('/fetch_api/json/{json}/cube_store', [BIcubeController::class, 'store']);
+Route::get('/fetch_api/json/{json}/metric_store', [BImetricController::class, 'store']);
+Route::get('/fetch_api/json/{json}/filter_store', [BIfilterController::class, 'store']);
+Route::get('/fetch_api/json/{json}/process_store', [BIprocessController::class, 'store']);
 // sincronizzazione dal DB per il metadato
 Route::get('/fetch_api/syncDB', [MetadataController::class, 'getMetadata'])->name('web_bi.fetch_api.getMetadata');
 

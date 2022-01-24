@@ -1,4 +1,5 @@
 <?php
+// TODO: QUEESTO CONTROLLER È DA ELIMINARE PERCHÈ L'HO SOSTITUITO CON QUELLI DEDICATI ALLE TABELLE (BIdimension, BIcubes, ecc...)
 
 namespace App\Http\Controllers;
 
@@ -13,8 +14,6 @@ class MetadataController extends Controller
         // NOTE: il support alle query su colonne JSON è per mysql 5.7+ https://laravel.com/docs/8.x/queries#json-where-clauses
         $dimensions = DB::table('bi_dimensions')->get('json_value');
         // dd(json_encode($dimensions));
-        // dd($dimensions);
-        // dd($dimensions);
         // dd($dimensions[0]->json_value);
         // dd(response()->json($dimensions));
         $schemaList = DB::connection('vertica_odbc')->select("SELECT SCHEMA_NAME FROM V_CATALOG.SCHEMATA WHERE IS_SYSTEM_SCHEMA = FALSE ORDER BY SCHEMA_NAME;");
@@ -29,21 +28,6 @@ class MetadataController extends Controller
         $dimensions = DB::table('bi_dimensions')->get('json_value');
         $cubes = DB::table('bi_cubes')->get('json_value');
         return response()->json(['dimensions' => $dimensions, 'cubes' => $cubes]);
-    }
-
-    public function save($json, $table) {
-        $jsonContent = json_decode($json);
-        $key = $jsonContent->{'name'};
-        // $result = DB::connection("mysql_local")->table('bi_dimensions')->insert([
-        //     'name' => $key,
-        //     'json_value' => $json
-        // ]);
-        // dd($result); // true se il record è stato inserito
-        $result = DB::table($table)->insert([
-            'name' => $key,
-            'json_value' => $json
-        ]);
-        return $result;
     }
 
 }

@@ -68,12 +68,6 @@ class MapDatabaseController extends Controller
         /* $books = Book::where('Author', 'Abram Andrea')->get(); */
     }
 
-    // Pagina Report
-    public function report() {
-        // pagina report
-        return view('web_bi.report'); 
-    }
-
     // Invocata sia da Mapping (ottengo la lista dei campi della tabella) che da report (dialog-filter)
     public function table_info($schema, $table) {
         /* dd($table); */

@@ -682,7 +682,8 @@ var StorageMetric = new MetricStorage();
     app.saveMetricDB = async (json) => {
         console.log(json);
         console.log(JSON.stringify(json));
-        await fetch('/fetch_api/json/'+JSON.stringify(json)+'/table/bi_metrics/save')
+        // await fetch('/fetch_api/json/'+JSON.stringify(json)+'/table/bi_metrics/save')
+        await fetch('/fetch_api/json/'+JSON.stringify(json)+'/metric_store')
           .then((response) => {
             if (!response.ok) { throw Error(response.statusText); }
             return response;
@@ -771,7 +772,8 @@ var StorageMetric = new MetricStorage();
     app.saveFilterDB = async (json) => {
         console.log(json);
         console.log(JSON.stringify(json));
-        await fetch('/fetch_api/json/'+JSON.stringify(json)+'/table/bi_filters/save')
+        // await fetch('/fetch_api/json/'+JSON.stringify(json)+'/table/bi_filters/save')
+        await fetch('/fetch_api/json/'+JSON.stringify(json)+'/filter_store')
           .then((response) => {
             if (!response.ok) { throw Error(response.statusText); }
             return response;
@@ -1335,7 +1337,8 @@ var StorageMetric = new MetricStorage();
     // salvo il process nel DB
     app.saveProcess = async () => {
         console.log(JSON.stringify(Query.reportProcessStringify));
-        await fetch('/fetch_api/json/'+JSON.stringify(Query.reportProcessStringify)+'/table/bi_processes/save')
+        // await fetch('/fetch_api/json/'+JSON.stringify(Query.reportProcessStringify)+'/table/bi_processes/save')
+        await fetch('/fetch_api/json/'+JSON.stringify(Query.reportProcessStringify)+'/process_store')
           .then((response) => {
             if (!response.ok) { throw Error(response.statusText); }
             return response;

@@ -216,8 +216,8 @@ var dimension = new Dimension();
 		// imposto il titolo in h6
 		cardLayout.querySelector('h6').innerHTML = card.getAttribute('label');
 		card.appendChild(cardLayout);
-		const dropZone = document.getElementById('drop-zone');
-		dropZone.appendChild(card);
+		// const dropZone = document.getElementById('drop-zone');
+		app.dropZone.appendChild(card);
 
 		// tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
 		if (document.getElementById('tableList').hasAttribute('fact')) {
@@ -683,7 +683,8 @@ var dimension = new Dimension();
     app.saveCube = async (json) => {
         console.log(json);
         console.log(JSON.stringify(json));
-        await fetch('/fetch_api/json/'+JSON.stringify(json)+'/table/bi_cubes/save')
+        // await fetch('/fetch_api/json/'+JSON.stringify(json)+'/table/bi_cubes/save')
+        await fetch('/fetch_api/json/'+JSON.stringify(json)+'/cube_store')
           .then((response) => {
             if (!response.ok) { throw Error(response.statusText); }
             return response;
@@ -752,7 +753,8 @@ var dimension = new Dimension();
     app.saveDIM = async (jsonDim) => {
         console.log(jsonDim);
         console.log(JSON.stringify(jsonDim));
-        await fetch('/fetch_api/json/'+JSON.stringify(jsonDim)+'/table/bi_dimensions/save')
+        // await fetch('/fetch_api/json/'+JSON.stringify(jsonDim)+'/table/bi_dimensions/save')
+        await fetch('/fetch_api/json/'+JSON.stringify(jsonDim)+'/dimension_store')
           .then((response) => {
             if (!response.ok) { throw Error(response.statusText); }
             return response;
@@ -950,7 +952,7 @@ var dimension = new Dimension();
 		cardLayout.querySelector('h6').innerHTML = label.split('.')[1];
 		card.appendChild(cardLayout);
 		console.log(card);
-		app.body.appendChild(card);
+		app.dropZone.appendChild(card);
 
 		// evento sul tasto close della card
 		card.querySelector('i[data-id="closeTable"]').onclick = app.handlerCloseCard;
@@ -1042,7 +1044,8 @@ var dimension = new Dimension();
 		}		
 	};
 
-	/*app.getSyncDimensions = async () => {
+	// recupero lo stato delle dimensioni per il versionamento
+	app.getSyncVersioning = async () => {
 		await fetch('/fetch_api/syncDB')
 			.then( (response) => {
 				if (!response.ok) {throw Error(response.statusText);}
@@ -1056,87 +1059,6 @@ var dimension = new Dimension();
 		        	for (element in data) {
 		        		console.log('element : ', element);
 		        		// console.log(data[element]);
-		        		let parent = document.querySelector("dialog section["+element+"]");
-		        		data[element].forEach( (el) => {
-		        			// console.log('dimension : ', dimension);
-		        			// console.log(dimension.json_value);
-		        			// console.log(JSON.parse(dimension.json_value));
-		        			// console.log(JSON.stringify(dimension.json_value));
-		        			const jsonParsed = JSON.parse(el.json_value);
-		        			// se l'elemento recuperato dal DB è già presente in localStorage, ed è diverso, non lo aggiorno, si potrà scegliere di aggiornarlo/sovrascriverlo da un altro tasto
-		        			// console.log(jsonParsed.name);
-		        			// console.log(JSON.parse(window.localStorage.getItem(jsonParsed.name)).name);
-		        			let versioningStatus = document.createElement('div');
-		        			versioningStatus.className = 'versioning-status';
-		        			let i = document.createElement('i');
-		        			i.className = 'material-icons';
-		        			let versStatusDescr = document.createElement('div');
-		        			versStatusDescr.className = 'vers-status-descr';
-		        			let versActions = document.createElement('div');
-		        			versActions.className = 'vers-actions';
-		        			// verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore
-		        			if (JSON.parse(window.localStorage.getItem(jsonParsed.name))) {
-		        				if ( jsonParsed.name === JSON.parse(window.localStorage.getItem(jsonParsed.name)).name ) {
-			        				// se l'elemento è già presente in locale verifico anche se il suo contenuto è uguale a quello del DB
-			        				console.log('elemento già presente in locale', jsonParsed.name);
-			        				if (el.json_value === window.localStorage.getItem(jsonParsed.name)) {
-			        					console.info('UGUALE CONTENTUO JSON, ELEMENTO NON AGGIORNATO');
-			        					i.innerText = 'remove';
-			        					i.classList.add('md-darkgray');
-			        					versStatusDescr.innerText = 'Sincronizzato con DB';
-			        				} else {
-			        					// elemento presente ma contenuto diverso dal DB, da aggiornare manualmente
-			        					i.innerText = 'clear';
-			        					i.classList.add('md-indianred');
-			        					versStatusDescr.innerText = 'Non sincronizzato';
-			        					versActions.innerHTML = "Sovrascrivi copia locale";
-			        				}
-			        			}
-		        			} else {
-								window.localStorage.setItem(jsonParsed.name, el.json_value);
-								i.innerText = 'done';
-								i.classList.add('md-mediumseagreen');
-								versStatusDescr.innerText = 'Aggiornato';
-							}
-		        			
-		        			let versTitle = document.createElement('div');
-		        			let versStatus = document.createElement('div');
-		        			versStatus.className = 'vers-status';
-		        			
-		        			parent.appendChild(versioningStatus);
-		        			versTitle.className = 'vers-title';
-		        			versTitle.innerText = jsonParsed.name;
-		        			versioningStatus.appendChild(versTitle);
-		        			versioningStatus.appendChild(versStatus);
-		        			versioningStatus.appendChild(versStatusDescr);
-		        			versioningStatus.appendChild(versActions);
-		        			versStatus.appendChild(i);
-		        		});
-		        	}
-		    
-		        } else {
-		          // TODO: no data, handlerConsoleMessage
-		          
-		        }
-		    })
-	    .catch( (err) => console.error(err));
-	};*/
-	// stessa funzione di sopra ma con l'utilizzo di un template html
-	app.getSyncDimensions = async () => {
-		await fetch('/fetch_api/syncDB')
-			.then( (response) => {
-				if (!response.ok) {throw Error(response.statusText);}
-				return response;
-			})
-			.then( (response) => response.json())
-			.then( (data) => {
-                console.log(data);
-		        if (data) {
-		        	// ciclo le dimensioni per inserirle nella dialog #versioning ed anche nello storage in locale
-		        	for (element in data) {
-		        		console.log('element : ', element);
-		        		// console.log(data[element]);
-		        		let parent = document.querySelector("dialog section["+element+"]");
 		        		data[element].forEach( (el) => {
 		        			// template
 		        			const tmplContent = app.tmplVersioningDB.content.cloneNode(true);
@@ -1144,7 +1066,7 @@ var dimension = new Dimension();
 		        			let iconStatus = versioningStatus.querySelector('i');
 		        			let descrStatus = versioningStatus.querySelector('.vers-status-descr');
 		        			let action = versioningStatus.querySelector('.vers-actions');
-		        			const parent = document.querySelector("dialog section["+element+"]"); // element in ciclo vale "dimensions" e "cubes"
+		        			const parent = document.querySelector("dialog section[data-"+element+"] div[data-id='versioning-content']"); // element in ciclo vale "dimensions" e "cubes"
 
 		        			const jsonParsed = JSON.parse(el.json_value);
 		        			// se l'elemento recuperato dal DB è già presente in localStorage, ed è diverso, non lo aggiorno, si potrà scegliere di aggiornarlo/sovrascriverlo da un altro tasto
@@ -1170,6 +1092,7 @@ var dimension = new Dimension();
 			        				}
 			        			}
 		        			} else {
+		        				// elemento non presente in locale, lo salvo
 								window.localStorage.setItem(jsonParsed.name, el.json_value);
 								iconStatus.innerText = 'done';
 								iconStatus.classList.add('md-mediumseagreen');
@@ -1188,12 +1111,18 @@ var dimension = new Dimension();
 	    .catch( (err) => console.error(err));
 	};
 
+	app.getSyncLocal = () => {
+
+	};
+
 	app.getDimensions();
 
     app.getCubes();
 
     // recupero dimensioni dal DB e le aggiungo al localStorage
-    app.getSyncDimensions();
+    app.getSyncVersioning();
+
+    app.getSyncLocal();
 
     app.handlerGuide();
 
