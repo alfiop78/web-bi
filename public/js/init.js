@@ -952,7 +952,9 @@ var dimension = new Dimension();
 		cardLayout.querySelector('h6').innerHTML = label.split('.')[1];
 		card.appendChild(cardLayout);
 		console.log(card);
+        app.dropZone.innerText = '';
 		app.dropZone.appendChild(card);
+        app.dropZone.classList.add('dropped');
 
 		// evento sul tasto close della card
 		card.querySelector('i[data-id="closeTable"]').onclick = app.handlerCloseCard;

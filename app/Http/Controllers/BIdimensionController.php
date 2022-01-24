@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BIdimension;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+// use Illuminate\Support\Facades\DB;
 
 class BIdimensionController extends Controller
 {
@@ -16,6 +16,10 @@ class BIdimensionController extends Controller
     public function index()
     {
         // dd('index BIdimension Controller');
+        // utilizzo del Model
+        $dimensions = BIdimension::all();
+        // dd($t);
+        return response()->json($dimensions);
     }
 
     /**
@@ -41,7 +45,6 @@ class BIdimensionController extends Controller
         // l'inserimento con Eloquent ha inserito anche i campi created_at/updated_at
         $dim = new BIdimension();
         // il nome della tabella è impostato nel Model
-        $key = $jsonContent->{'name'};
         $dim->name = $jsonContent->{'name'};
         $dim->json_value = $json;
         return $dim->save();

@@ -41,15 +41,14 @@ Route::get('/fetch_api/{schema}/schema/{table}/table_info', [MapDatabaseControll
 Route::get('/report', function() {return view('web_bi.report');})->name('web_bi.report'); // page report
 Route::get('/fetch_api/schema/{schema}/table/{table}/field/{field}/distinct_values', [MapDatabaseController::class, 'distinct_values'])->name('web_bi.fetch_api.distinct_values'); // recupero i valori distinti del campo field passato come parametro
 Route::get('/fetch_api/cube/{jsonData}/process', [MapDatabaseController::class, 'process'])->name('web_bi.fetch_api.process'); // processo la query che crea la FX
-// Utilizzo un unico metodo per salvare il Metadato, questo perchè i campi da salvare sono sempre 2 (key, json_value)
-// Come parametri passo il json da salvare (al cui interno c'è la proprietà 'name') e il nome della tabella in cui salvare i dati (es.: bi_dimensions, bi_filters, ecc...)
-// Route::get('/fetch_api/json/{json}/table/{table}/save', [MetadataController::class, 'save']);
+// salvataggio oggetti sul metadato, dimensioni, cubi, metriche, filtri e processi
 Route::get('/fetch_api/json/{json}/dimension_store', [BIdimensionController::class, 'store']);
 Route::get('/fetch_api/json/{json}/cube_store', [BIcubeController::class, 'store']);
 Route::get('/fetch_api/json/{json}/metric_store', [BImetricController::class, 'store']);
 Route::get('/fetch_api/json/{json}/filter_store', [BIfilterController::class, 'store']);
 Route::get('/fetch_api/json/{json}/process_store', [BIprocessController::class, 'store']);
 // sincronizzazione dal DB per il metadato
+Route::get('/versioning', [BIdimensionController::class, 'index']);
 Route::get('/fetch_api/syncDB', [MetadataController::class, 'getMetadata'])->name('web_bi.fetch_api.getMetadata');
 
 // test POST request

@@ -1,6 +1,6 @@
 .lists{position: relative;}
 .absList{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;}
-.absList[fact]{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 6;box-shadow: 0 4px 8px 0px #b5b5b5;background-color: saddlebrown;color: white;}
+.absList[fact]{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;background-color: saddlebrown;color: white;}
 .absList > ul{height: 500px;overflow-y: auto;}
 i[open]{color: red;}
 
