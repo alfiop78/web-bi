@@ -9,7 +9,7 @@ var dimension = new Dimension();
 		dialogHierarchyName : document.getElementById('hierarchy-name'),
 
 		/* template */
-		tmplVersioningDB : document.getElementById('versioning-db'),
+		tmplVersioningDB : document.getElementById('versioning-db'), // TODO: da eliminare
 
 		hierarchyContainer : document.getElementById('hierarchiesContainer'), // struttura gerarchica sulla destra
 
@@ -21,6 +21,7 @@ var dimension = new Dimension();
 		btnSaveCube : document.getElementById('saveCube'),
 		btnSaveCubeName : document.getElementById('btnCubeSaveName'),
 		btnSaveOpenedCube : document.getElementById('saveOpenedCube'),
+		btnVersioningStatus : document.getElementById('versioning-status'),
 
 		// tasto openTableList
 		btnTableList : document.getElementById('openTableList'),
@@ -193,12 +194,12 @@ var dimension = new Dimension();
 		// console.log('drop');
 		// console.log(e.target);
 		let data = e.dataTransfer.getData('text/plain');
-		let card = document.getElementById(data);
+        let card = document.getElementById(data).cloneNode(true);
 		// nuova tabella droppata
 		// console.log(card);
 		// console.log(app.dragElement);
 		// TODO: dopo il drop elimino l'elemento <li> e imposto il template #cardLayout
-		// TODO: la .card .draggable diventa .card .table
+		// la .card .draggable diventa .card .table
 		card.className = 'card table';
 		card.removeAttribute('draggable');
 		card.removeAttribute('name');
@@ -907,6 +908,8 @@ var dimension = new Dimension();
 	};
 
 	app.btnBack.onclick = () => {window.location.href = '/';};
+	
+	app.btnVersioningStatus.onclick = () => window.location.href = '/versioning';
 
 	/* ricerca in lista tabelle */
 	document.getElementById('tableSearch').oninput = App.searchInList;
@@ -1128,6 +1131,6 @@ var dimension = new Dimension();
 
     app.handlerGuide();
 
-    document.querySelector('#versioning').showModal();
+    // document.querySelector('#versioning').showModal();
     
 })();

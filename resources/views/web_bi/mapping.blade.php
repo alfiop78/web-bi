@@ -231,6 +231,7 @@
                                 <span class="popupContent" hide><i id="saveOpenedCube" class="material-icons md-24">save</i><small class="popup">Salva Cubo esistente</small></span>
                                 <span class="popupContent"><i id="processCube" class="material-icons md-24">folder_open</i><small class="popup">Lista Cubi definiti</small></span>
                                 <span class="popupContent"><i id="defineCube" class="material-icons md-24 md-inactive">space_dashboard</i><small class="popup">Definisci Cubo</small></span>
+                                <span class="popupContent"><i id="versioning-status" class="material-icons md-24">cached</i><small class="popup">Versionamento</small></span>
                             </div>
                             <div class="help-console">
                                 <span id="guide"></span>

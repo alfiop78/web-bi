@@ -18,8 +18,8 @@ class BIdimensionController extends Controller
         // dd('index BIdimension Controller');
         // utilizzo del Model
         $dimensions = BIdimension::all();
-        // dd($t);
-        return response()->json($dimensions);
+        // dd($dimensions);
+        return response()->json(['dimensions' => $dimensions]);
     }
 
     /**

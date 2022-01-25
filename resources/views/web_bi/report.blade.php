@@ -245,7 +245,7 @@
 		</dialog>
 
 		<main>
-			<div id="drawer">
+			<div id="drawer" close>
 				<section class="account"><h5>user</h5><i class="material-icons md-light">person</i></section>
 				<nav>
 				</nav>
