@@ -14,7 +14,9 @@ class BImetricController extends Controller
      */
     public function index()
     {
-        //
+        $metrics = BImetric::all();
+        // dd($dimensions);
+        return response()->json($metrics);
     }
 
     /**

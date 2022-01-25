@@ -1,19 +1,25 @@
 window.onload = function() {
-  console.log('onload');
+	var App = new Application();
+	console.log('onload');
 
-  // se le input non hanno contenuto non evidenzio le label come :invalid, aggiungendo una class=has-content sulle label
-  var inputs = document.querySelectorAll("input:not([type='checkbox']):not([type='radio'])");
-  inputs.forEach((input) => {
-    input.addEventListener('input', (e) => {
-      (e.target.value.length > 0) ?
-        e.target.parentElement.querySelector('label').classList.add('has-content') :
-        e.target.parentElement.querySelector('label').classList.remove('has-content');
-    }, true);
+	// se le input non hanno contenuto non evidenzio le label come :invalid, aggiungendo una class=has-content sulle label
+	var inputs = document.querySelectorAll("input:not([type='checkbox']):not([type='radio'])");
+	inputs.forEach((input) => {
+		// se la input ha l'attributo "search" e l'attr "data-generic-search" gli associo l'evento input per la ricerca genericSearch
+		// la genericSearch è utilizzata per la schemata del versionamento, poi si può estendere ad altri casi
+		if (input.hasAttribute('type') && input.getAttribute('type') === 'search') input.oninput = App.genericSearch;
 
-    input.onfocus = function(e) {this.select();}});
+		input.addEventListener('input', (e) => {
+			(e.target.value.length > 0) ?
+				e.target.parentElement.querySelector('label').classList.add('has-content') :
+				e.target.parentElement.querySelector('label').classList.remove('has-content');
+		}, true);
 
-  /* tasto cancel nelle dialog*/
-  document.querySelectorAll("button[name='cancel']").forEach((btn) => {
-    btn.onclick = function() {document.querySelector('dialog[open]').close();}
-  });
+		input.onfocus = function(e) {this.select();}
+	});
+
+	/* tasto cancel nelle dialog*/
+	document.querySelectorAll("button[name='cancel']").forEach((btn) => {
+		btn.onclick = function() {document.querySelector('dialog[open]').close();}
+	});
 };

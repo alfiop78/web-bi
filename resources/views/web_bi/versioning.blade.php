@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
 		<link rel="icon" href="/favicon.png" type="image/png" />
         <title>Versionamento</title>
-        {{-- <link rel="stylesheet" href="{{asset('css/index.css')}}"> --}}
+        <link rel="stylesheet" href="{{ asset('css/index_versioning.css') }}">
         <link rel="stylesheet" type="text/css" href="/css/md-layout.css" />
 		<link rel="stylesheet" type="text/css" href="/css/material-icons.css" />
 		<link rel="stylesheet" type="text/css" href="/css/md-loader.css" />
@@ -33,88 +33,19 @@
     </head>
     <body class="antialiased">
 
-        {{-- <dialog id="versioning">
-            {{ template utilizzato per popolare sia le dimensioni che i cubi --}}{{--
-            <template id="versioning-db">
+        {{-- template utilizzato per popolare sia le dimensioni che i cubi --}}
+        <template id="versioning-db">
+            <section data-searchable="true">
                 <div class="versioning-status">
                     <div class="vers-title"></div>
                     <div class="vers-status"><i class="material-icons"></i></div>
                     <div class="vers-status-descr"></div>
-                    <div class="vers-actions"></div>
-                </div>
-            </template>
-            <section>
-                <h4>Sincronizzazione elementi</h4>
-                <fieldset>
-                    <legend>Lista elementi da versionare</legend>
-                    <section data-dimensions-local class="dialog-overflow">
-                        <div class="versioning-status-header">
-                            <div>Title</div>
-                            <div>Status</div>
-                            <div>Descr. Status</div>
-                            <div>Action</div>
-                        </div>
-                        <div data-id="versioning-content" class="versioning-content overflow-y">
-                        </div>
-                    </section>
-                    <section data-cubes-local class="dialog-overflow"></section>
-                </fieldset>
-
-                <fieldset>
-                    <legend>Lista elementi sincronizzati dal DB</legend>
-                    <section data-dimensions class="dialog-overflow">
-                        <h5 class="upper">dimensioni</h5>
-                        {{ @php  --}}
-                            {{-- $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione --}}
-                        {{-- @endphp 
-                        <div class="versioning-status-header">
-                            <div>Title</div>
-                            <div>Status</div>
-                            <div>Descr. Status</div>
-                            <div>Action</div>
-                        </div>
-                        <div data-id="versioning-content" class="versioning-content overflow-y">
-                            {{ qui viene popolato tramite template 
-                            <div class="versioning-status">
-                                creato dinamicamente in app.getSyncDimensions
-                            </div> --}}
-                            {{-- @foreach($arrayDim as $key => $dimension)
-                                @php
-                                    $jsonDimension = json_decode($dimension['json_value']);
-                                @endphp
-                                <div class="versioning-status">
-                                    <div class="vers-title">{{ $jsonDimension->{'name'} }}<span>({{ $jsonDimension->{'lastTableInHierarchy'} }})</span></div>
-                                    <div class="vers-status"><i class="material-icons">done</i></div>
-                                </div>
-                            @endforeach 
-                        </div>
-                    </section>
-                    <section data-cubes>
-                        <h5 class="upper">cubi</h5>
-                        <div class="versioning-status-header">
-                            <div>Title</div>
-                            <div>Status</div>
-                            <div>Descr. Status</div>
-                            <div>Action</div>
-                        </div>
-                        <div data-id="versioning-content" class="versioning-content overflow-y"></div>
-                    </section>
-                </fieldset>
-                <div class="dialog-buttons">
-                    <button type="button" name="cancel" class="md-button">annulla</button>
-                   <button id="btnCubeSaveName" type="button" name="done" class="md-button">Salva</button> 
+                    <div class="vers-actions">
+                        <span class="popupContent" data-get_app hidden><i class="material-icons md-indianred">get_app</i><small class="popup">Sovrascrivi copia locale</small></span>
+                        <span class="popupContent" data-example hidden><i class="material-icons md-indianred">clear</i><small class="popup">altra azione da definire</small></span>
+                    </div>
                 </div>
             </section>
-        </dialog> --}}
-
-        {{-- template utilizzato per popolare sia le dimensioni che i cubi --}}
-        <template id="versioning-db">
-            <div class="versioning-status">
-                <div class="vers-title"></div>
-                <div class="vers-status"><i class="material-icons"></i></div>
-                <div class="vers-status-descr"></div>
-                <div class="vers-actions"></div>
-            </div>
         </template>
 
         <main>
@@ -123,11 +54,11 @@
                 <section class="account"><h5>user</h5><i class="material-icons md-light">person</i></section>
 
                 <nav id="nav-schema">
-                    <a href="#">Dimensioni</a>
-                    <a href="#">Cubi</a>
-                    <a href="#">Metriche</a>
-                    <a href="#">Filtri</a>
-                    <a href="#">Processi</a>
+                    <a href="#" id="navBtnCubes">Cubi</a>
+                    <a href="#" id="navBtnDimensions">Dimensioni</a>
+                    <a href="#" id="navBtnMetrics">Metriche</a>
+                    <a href="#" id="navBtnFilters">Filtri</a>
+                    <a href="#" id="navBtnProcesses">Processi</a>
                 </nav>
             </div>
 
@@ -146,70 +77,85 @@
 
                     <div id="body">
                         
-                        <div class="actions">
+                        {{-- <div class="actions">
                             <div class="buttons">
-                                {{-- <span class="popupContent"><i id="openTableList" class="material-icons md-24 md-inactive">storage</i><small class="popup">Lista tabelle</small></span> --}}
+                                <span class="popupContent"><i id="openTableList" class="material-icons md-24 md-inactive">storage</i><small class="popup">Lista tabelle</small></span>
                             </div>
-                        </div>
+                        </div> --}}
 
-                        {{-- sincronizzazione elementi --}}
-                        <section id="versioning">
-                            <h4>Sincronizzazione elementi</h4>
-                            <fieldset>
-                                <legend>Lista elementi da versionare</legend>
-                                <section data-dimensions-local class="dialog-overflow">
-                                    <div class="versioning-status-header">
-                                        <div>Title</div>
-                                        <div>Status</div>
-                                        <div>Descr. Status</div>
-                                        <div>Action</div>
+                        <section class="versioning-grid">
+                            <section id="versioning" class="versioning-sections">
+                                <h4>Sincronizzazione elementi</h4>
+                                
+                                <fieldset>
+                                    <legend>Lista elementi sincronizzati dal DB</legend>
+                                    <div class="md-field">
+                                        {{-- data-element-search indica gli elementi dove questa input deve effettuare la ricerca --}}
+                                        <input type="search" id="search-db" value="" data-element-search="versioning-db-search" autocomplete="off" />
+                                        <label for="search-db" class="">Ricerca</label>
                                     </div>
-                                    <div data-id="versioning-content" class="versioning-content overflow-y">
-                                    </div>
-                                </section>
-                                <section data-cubes-local class="dialog-overflow"></section>
-                            </fieldset>
+                                    <section data-versioning-elements>
+                                        <h5 class="upper"></h5>
+                                        {{-- @php  --}}
+                                            {{-- $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione --}}
+                                        {{-- @endphp --}}
+                                        <div class="versioning-status-header">
+                                            <div>Title</div>
+                                            <div>Status</div>
+                                            <div>Descr. Status</div>
+                                            <div>Action</div>
+                                        </div>
+                                        <div data-id="versioning-content" class="versioning-content overflow-y">
+                                            {{-- qui viene popolato tramite template --}}
+                                            {{-- <div class="versioning-status">
+                                                creato dinamicamente in app.getSyncDimensions
+                                            </div> --}}
+                                            {{-- @foreach($arrayDim as $key => $dimension)
+                                                @php
+                                                    $jsonDimension = json_decode($dimension['json_value']);
+                                                @endphp
+                                                <div class="versioning-status">
+                                                    <div class="vers-title">{{ $jsonDimension->{'name'} }}<span>({{ $jsonDimension->{'lastTableInHierarchy'} }})</span></div>
+                                                    <div class="vers-status"><i class="material-icons">done</i></div>
+                                                </div>
+                                            @endforeach --}}
+                                        </div>
+                                    </section>
+                                    {{-- <section data-cubes>
+                                        <h5 class="upper">cubi</h5>
+                                        <div class="versioning-status-header">
+                                            <div>Title</div>
+                                            <div>Status</div>
+                                            <div>Descr. Status</div>
+                                            <div>Action</div>
+                                        </div>
+                                        <div data-id="versioning-content" class="versioning-content overflow-y"></div>
+                                    </section> --}}
+                                </fieldset>
+                            </section>
 
-                            <fieldset>
-                                <legend>Lista elementi sincronizzati dal DB</legend>
-                                <section data-dimensions class="dialog-overflow">
-                                    <h5 class="upper">dimensioni</h5>
-                                    {{-- @php  --}}
-                                        {{-- $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione --}}
-                                    {{-- @endphp --}}
-                                    <div class="versioning-status-header">
-                                        <div>Title</div>
-                                        <div>Status</div>
-                                        <div>Descr. Status</div>
-                                        <div>Action</div>
+                            <section id="versioning-local" class="versioning-sections">
+                                <h4>Elementi locali</h4>
+                                <fieldset>
+                                    <legend>Lista elementi da versionare</legend>
+                                    <div class="md-field">
+                                        {{-- data-element-search indica gli elementi dove questa input deve effettuare la ricerca --}}
+                                        <input type="search" id="search-local" value="" data-element-search="versioning-local-search" autocomplete="off" />
+                                        <label for="search-local" class="">Ricerca</label>
                                     </div>
-                                    <div data-id="versioning-content" class="versioning-content overflow-y">
-                                        {{-- qui viene popolato tramite template --}}
-                                        {{-- <div class="versioning-status">
-                                            creato dinamicamente in app.getSyncDimensions
-                                        </div> --}}
-                                        {{-- @foreach($arrayDim as $key => $dimension)
-                                            @php
-                                                $jsonDimension = json_decode($dimension['json_value']);
-                                            @endphp
-                                            <div class="versioning-status">
-                                                <div class="vers-title">{{ $jsonDimension->{'name'} }}<span>({{ $jsonDimension->{'lastTableInHierarchy'} }})</span></div>
-                                                <div class="vers-status"><i class="material-icons">done</i></div>
-                                            </div>
-                                        @endforeach --}}
-                                    </div>
-                                </section>
-                                <section data-cubes>
-                                    <h5 class="upper">cubi</h5>
-                                    <div class="versioning-status-header">
-                                        <div>Title</div>
-                                        <div>Status</div>
-                                        <div>Descr. Status</div>
-                                        <div>Action</div>
-                                    </div>
-                                    <div data-id="versioning-content" class="versioning-content overflow-y"></div>
-                                </section>
-                            </fieldset>
+                                    <section data-dimensions-local>
+                                        <h5 class="upper"></h5>
+                                        <div class="versioning-status-header">
+                                            <div>Title</div>
+                                            <div>Status</div>
+                                            <div>Descr. Status</div>
+                                            <div>Action</div>
+                                        </div>
+                                        <div data-id="versioning-content" class="versioning-content overflow-y">
+                                        </div>
+                                    </section>
+                                </fieldset>
+                            </section>
                         </section>
 
                     </div>

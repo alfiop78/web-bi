@@ -108,6 +108,18 @@ class Application {
 		});
 	}
 
+	genericSearch(e) {
+		// la input ha un attr "data-element-search" che indica su quali elementi deve cercare, gli elementi su cui cercare avranno un attr "data-search" con lo stesso valore di questo attributo
+		// console.log(e.target.value);
+		const searchAttr = e.target.getAttribute('data-element-search');
+		let listElement = Array.from(document.querySelectorAll("section[data-search='" + searchAttr + "']"));
+		// console.log(listElement);
+		listElement.forEach( (item) => {
+			(item.getAttribute('label').indexOf(e.target.value) === -1 && item.getAttribute('label').toLowerCase().indexOf(e.target.value) === -1) ?
+			item.hidden = true : item.hidden = false;
+		});
+	}
+
 	searchInList(e) {
 		// console.log(e.path);
 		// console.log(e.target.value);

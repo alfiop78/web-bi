@@ -50,6 +50,10 @@ Route::get('/fetch_api/json/{json}/process_store', [BIprocessController::class, 
 // sincronizzazione dal DB per il metadato
 Route::get('/versioning', function() {return view('web_bi.versioning');})->name('web_bi.versioning');
 Route::get('/fetch_api/versioning/dimensions', [BIdimensionController::class, 'index']);
+Route::get('/fetch_api/versioning/cubes', [BIcubeController::class, 'index']);
+Route::get('/fetch_api/versioning/metrics', [BImetricController::class, 'index']);
+Route::get('/fetch_api/versioning/filters', [BIfilterController::class, 'index']);
+Route::get('/fetch_api/versioning/processes', [BIprocessController::class, 'index']);
 
 // Route::get('/fetch_api/syncDB', [MetadataController::class, 'getMetadata'])->name('web_bi.fetch_api.getMetadata');
 

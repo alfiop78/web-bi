@@ -19,7 +19,8 @@ class BIdimensionController extends Controller
         // utilizzo del Model
         $dimensions = BIdimension::all();
         // dd($dimensions);
-        return response()->json(['dimensions' => $dimensions]);
+        return response()->json($dimensions);
+        // return response()->json(['dimensions' => $dimensions]);
     }
 
     /**

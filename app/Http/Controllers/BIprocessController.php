@@ -14,7 +14,9 @@ class BIprocessController extends Controller
      */
     public function index()
     {
-        //
+        $processes = BIprocess::all();
+        // dd($dimensions);
+        return response()->json($processes);
     }
 
     /**

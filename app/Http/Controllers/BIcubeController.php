@@ -14,7 +14,9 @@ class BIcubeController extends Controller
      */
     public function index()
     {
-        //
+        $cubes = BIcube::all();
+        // dd($dimensions);
+        return response()->json($cubes);
     }
 
     /**
