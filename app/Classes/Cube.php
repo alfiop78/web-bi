@@ -161,7 +161,8 @@ class Cube {
 			//echo $metrics;
 
 			unset($this->_sql);
-			$metric = "{$metrics->SQLFunction}({$metrics->table}.{$metrics->field}) AS `{$metrics->alias}`";
+			$metric = "{$metrics->SQLFunction}({$metrics->table}.{$metrics->field}) AS '{$metrics->alias}'";
+			// $metric = "{$metrics->SQLFunction}({$metrics->table}.{$metrics->field}) AS '{$metrics->alias}'";
 			echo $this->createMetricTable('W_AP_metric_'.$this->reportId."_".$i, $metric, $metrics->filters);
 			// a questo punto metto in relazione (left) la query baseTable con la/e metriche contenenti filtri
 			$this->_metricTable["W_AP_metric_".$this->reportId."_".$i] = $metrics->alias; // memorizzo qui quante tabelle per metriche filtrate sono state create
@@ -213,7 +214,7 @@ class Cube {
 		$table = "FX_$this->reportId";
 		// se _metricTable ha qualche metrica (sono metriche filtrate) allora procedo con la creazione FX con LEFT JOIN, altrimenti creo una singola FX
 
-		$sql = "CREATE TABLE $datamartName AS ";
+		$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS ";
 		$sql .= "(SELECT $baseTableName.*, ";
 		// TODO: da testare con metriche filtrate - 18.01.2022
 		if (isset($this->_metricTable) && count($this->_metricTable) > 0) {
@@ -223,12 +224,12 @@ class Cube {
 			$ONConditions = NULL;
 			// var_dump($this->_columns);
 			foreach ($this->_metricTable as $metricTableName => $alias) {
-				$table_and_metric[] = "'$metricTableName'.'$alias'";
+				$table_and_metric[] = "$metricTableName.$alias";
 				$leftJoin .= "\nLEFT JOIN decisyon_cache.$metricTableName ON ";
 
 				foreach ($this->_columns as $columnAlias) {
 					// carattere backtick con ALTGR+'
-					$ONClause[] = "'".$baseTableName."'.'".$columnAlias."' = '".$metricTableName."'.'".$columnAlias."'";
+					$ONClause[] = "{$baseTableName}.{$columnAlias} = {$metricTableName}.{$columnAlias}";
 				}
 				$ONConditions = implode(" AND ", $ONClause);
 				unset($ONClause);
@@ -274,7 +275,7 @@ class Cube {
 		if (!$result) {
 			$dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$baseTableName;");
 			// TODO: elimino le tabelle temporanee delle metriche filtrate
-			// ritorno il nome della FX
+			// ritorno il nome della FX in modo da poter mostrare un anteprima dei dati
 			return $datamartName;
 		}
 	}
