@@ -114,6 +114,7 @@ class Dimension {
 	#field;
 	#table;
 	#schema;
+	#comment;
 	constructor() {
 		this._dimension = {};
 		this._join = {}; // relazioni tra le tabelle
@@ -150,6 +151,10 @@ class Dimension {
 
 	get title() {return this._title;}
 
+	set comment(value) {this.#comment = value;}
+
+	get comment() {return this.#comment;}
+
 	set from(value) {this._from = value;}
 
 	get from() {return this._from;}
@@ -174,6 +179,7 @@ class Dimension {
 		debugger;
 		this._hierarchies[object.title] = {order : object.hierarchyOrder};
 		this._hierarchies[object.title]['columns'] = this.#columns;
+		this._hierarchies[object.title]['comment'] = object.comment;
 		this._lastTableInHierarchy = object.hierarchyOrder[Object.keys(object.hierarchyOrder).length-1];
 		console.log('this._hierarchies : ', this._hierarchies);
 		console.log('this._lastTableInHierarchy : ', this._lastTableInHierarchy);
@@ -217,6 +223,7 @@ class Dimension {
 		// TODO Aggiungere dimensionId
 		// this._dimension.columns = this.#columns;
 		this._dimension.name = this._title;
+		this._dimension.comment = this.#comment;
 		this._dimension.from = this._from;
 		this._dimension.join = this._join;
 		this._dimension.cubes = {}; // object con i nomi dei cubi che hanno associazione con questa dimensione. Questa viene popolata quando si associa la dimensione al cubo

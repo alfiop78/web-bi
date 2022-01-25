@@ -5,7 +5,8 @@
         <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
 		<link rel="icon" href="/favicon.png" type="image/png" />
         <title>mapping</title>
-        <!-- <link rel="stylesheet" href="{{asset('css/index.css')}}"> -->
+        <link rel="stylesheet" href="{{ asset('css/index.css') }}">
+        <link rel="stylesheet" href="{{ asset('/css/md-dialogs.css') }}">
         <link rel="stylesheet" type="text/css" href="/css/md-layout.css" />
 		<link rel="stylesheet" type="text/css" href="/css/material-icons.css" />
 		<link rel="stylesheet" type="text/css" href="/css/md-loader.css" />
@@ -33,80 +34,6 @@
     </head>
     <body class="antialiased">
 
-        <dialog id="versioning">
-            {{-- template utilizzato per popolare sia le dimensioni che i cubi --}}
-            <template id="versioning-db">
-                <div class="versioning-status">
-                    <div class="vers-title"></div>
-                    <div class="vers-status"><i class="material-icons"></i></div>
-                    <div class="vers-status-descr"></div>
-                    <div class="vers-actions"></div>
-                </div>
-            </template>
-            <section>
-                <h4>Sincronizzazione elementi</h4>
-                <fieldset>
-                    <legend>Lista elementi da versionare</legend>
-                    <section data-dimensions-local class="dialog-overflow">
-                        <div class="versioning-status-header">
-                            <div>Title</div>
-                            <div>Status</div>
-                            <div>Descr. Status</div>
-                            <div>Action</div>
-                        </div>
-                        <div data-id="versioning-content" class="versioning-content overflow-y">
-                        </div>
-                    </section>
-                    <section data-cubes-local class="dialog-overflow"></section>
-                </fieldset>
-
-                <fieldset>
-                    <legend>Lista elementi sincronizzati dal DB</legend>
-                    <section data-dimensions class="dialog-overflow">
-                        <h5 class="upper">dimensioni</h5>
-                        {{-- @php  --}}
-                            {{-- $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione --}}
-                        {{-- @endphp --}}
-                        <div class="versioning-status-header">
-                            <div>Title</div>
-                            <div>Status</div>
-                            <div>Descr. Status</div>
-                            <div>Action</div>
-                        </div>
-                        <div data-id="versioning-content" class="versioning-content overflow-y">
-                            {{-- qui viene popolato tramite template --}}
-                            {{-- <div class="versioning-status">
-                                creato dinamicamente in app.getSyncDimensions
-                            </div> --}}
-                            {{-- @foreach($arrayDim as $key => $dimension)
-                                @php
-                                    $jsonDimension = json_decode($dimension['json_value']);
-                                @endphp
-                                <div class="versioning-status">
-                                    <div class="vers-title">{{ $jsonDimension->{'name'} }}<span>({{ $jsonDimension->{'lastTableInHierarchy'} }})</span></div>
-                                    <div class="vers-status"><i class="material-icons">done</i></div>
-                                </div>
-                            @endforeach --}}
-                        </div>
-                    </section>
-                    <section data-cubes>
-                        <h5 class="upper">cubi</h5>
-                        <div class="versioning-status-header">
-                            <div>Title</div>
-                            <div>Status</div>
-                            <div>Descr. Status</div>
-                            <div>Action</div>
-                        </div>
-                        <div data-id="versioning-content" class="versioning-content overflow-y"></div>
-                    </section>
-                </fieldset>
-                <div class="dialog-buttons">
-                    <button type="button" name="cancel" class="md-button">annulla</button>
-                    {{-- <button id="btnCubeSaveName" type="button" name="done" class="md-button">Salva</button> --}}
-                </div>
-            </section>
-        </dialog>
-
         <dialog id="cube-name">
             <div class="dialog-save-name">
 
@@ -114,6 +41,7 @@
                     <input type="text" id="cubeName" value=""/>
                     <label for="cubeName" class="">Titolo Cubo</label>
                 </div>
+                <textarea id="textarea-cube-comment" rows="7" cols="60" placeholder="Aggiungi qui le note per questo Cubo"></textarea>
 
             </div>
 
@@ -125,36 +53,45 @@
         </dialog>
 
         <dialog id="dimension-name">
-            <div class="dialog-save-name">
+            <section>
+                <h4>Nome dimensione</h4>
+                <div class="dialog-save-name">
 
-                <div class="md-field">
-                    <input type="text" id="dimensionName" value=""/>
-                    <label for="dimensionName" class="">Titolo dimensione</label>
+                    <div class="md-field">
+                        <input type="text" id="dimensionName" value=""/>
+                        <label for="dimensionName" class="">Nome dimensione</label>
+                    </div>
+                    <textarea id="textarea-dimension-comment" rows="10" placeholder="Aggiungi qui un commento per la dimensione"></textarea>
+
                 </div>
 
-            </div>
-
-            <div class="dialog-buttons">
-                <button type="button" name="cancel" class="md-button">annulla</button>
-                <button id="btnDimensionSaveName" type="button" name="done" class="md-button">Salva</button>
-            </div>
+                <div class="dialog-buttons">
+                    <button type="button" name="cancel" class="md-button">annulla</button>
+                    <button id="btnDimensionSaveName" type="button" name="done" class="md-button">Salva</button>
+                </div>
+            </section>
 
         </dialog>
 
-        <dialog id="hierarchy-name">
-            <div class="dialog-save-name">
+        <dialog id="hierarchy-name" class="dialog-small">
+            <section>
+                <h4>Nome gerarchia</h4>
+                <div class="dialog-save-name">
 
-                <div class="md-field">
-                    <input type="text" id="hierarchyName" value=""/>
-                    <label for="hierarchyName" class="">Titolo Gerarchia</label>
+                    <div class="md-field">
+                        <input type="text" id="hierarchyName" value="" autofocus/>
+                        <label for="hierarchyName" class="">Nome Gerarchia</label>
+                    </div>
+                    <textarea id="textarea-hierarchies-comment" rows="10" placeholder="Aggiungi qui un commento per questa gerarchia"></textarea>
+
                 </div>
 
-            </div>
-
-            <div class="dialog-buttons">
-                <button type="button" name="cancel" class="md-button">annulla</button>
-                <button id="btnHierarchySaveName" type="button" name="done" class="md-button">Salva</button>
-            </div>
+                <div class="dialog-buttons">
+                    <button type="button" name="cancel" class="md-button">annulla</button>
+                    <button id="btnHierarchySaveName" type="button" name="done" class="md-button">Salva</button>
+                </div>
+            </section>
+            
         </dialog>
 
         <template id="cardLayout">

@@ -1,4 +1,3 @@
---color : black; /*default*/
 .material-icons{padding: 6px;user-select: none;cursor: pointer;}
 
 .material-icons.noPad{padding: 0;}
@@ -88,6 +87,3 @@
 .material-icons[open]:not(.md-inactive):hover{color: var(--main-primary-color);}
 
 /* material-icons con colori */
-/* TODO: utilizzare questa funzionalità con gli attributi sull'elemento nel DOM e con le variabili qui in css --color*/
-
-.material-icons{color: var(--color);}

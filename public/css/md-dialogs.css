@@ -1,0 +1,6 @@
+dialog.dialog-small{min-width: 40%; max-width: 50%;}
+dialog section > h4{font-size: 1.2rem;}
+dialog .dialog-save-name{margin: 1em; padding: 1em;}
+
+.dialog-buttons{display: flex;flex-flow: row;justify-content: space-between; margin: 1.5em;}
+fieldset legend{font-size: .9rem; padding: 1em;}

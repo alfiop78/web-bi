@@ -203,6 +203,5 @@ small.popup{background: #494949;border-radius: 4px;color: white;font-size: .7rem
   100% {transition: scale(1);}
 }
 
-.dialog-buttons{display: flex;flex-flow: row;justify-content: space-between;}
-fieldset legend{font-size: .9rem; padding: 1em;}
+
 .upper{text-transform: uppercase;}

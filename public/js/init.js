@@ -785,6 +785,7 @@ var dimension = new Dimension();
 		  // creo un contenitorre per le dimensioni salvate, con dentro le tabelle che ne fanno parte.
 		*/
 		dimension.title = document.getElementById('dimensionName').value;
+		dimension.comment = document.getElementById('textarea-dimension-comment').value;
 		// cube.dimension
 		const storage = new DimensionStorage();
 		let from = [];
@@ -796,7 +797,8 @@ var dimension = new Dimension();
 		dimension.save();
 		storage.save = dimension.dimension;
         // TODO: salvo la dimension anche su DB
-        app.saveDIM(dimension.dimension);
+        // TODO: Potrei salvare la dimensione sul DB manualmente, una volta completati i testi in fase di sviluppo (in LocalStorage)
+        // app.saveDIM(dimension.dimension);
 		//storage.dimension = dimension.dimension;
 		app.dialogDimensionName.close();
 	
@@ -841,9 +843,12 @@ var dimension = new Dimension();
 		// ordine gerarchico (per stabilire quale tabella è da associare al cubo) questo dato viene preso dalla struttura di destra
 		let hierarchyOrder = {};
 		Array.from(document.querySelectorAll('#hierarchies .hier.table')).forEach((table, i) => {
+			// NOTE: utilizzo del backTick
 			hierarchyOrder[i] = `${table.getAttribute('data-schema')}.${table.getAttribute('label')}`;
 		});
-		dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder};
+		const comment = document.getElementById('textarea-hierarchies-comment').value;
+		debugger;
+		dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
 		app.dialogHierarchyName.close();
 	};
 
@@ -1049,88 +1054,10 @@ var dimension = new Dimension();
 		}		
 	};
 
-	// recupero lo stato delle dimensioni per il versionamento
-	app.getSyncVersioning = async () => {
-		await fetch('/fetch_api/syncDB')
-			.then( (response) => {
-				if (!response.ok) {throw Error(response.statusText);}
-				return response;
-			})
-			.then( (response) => response.json())
-			.then( (data) => {
-                console.log(data);
-		        if (data) {
-		        	// ciclo le dimensioni per inserirle nella dialog #versioning ed anche nello storage in locale
-		        	for (element in data) {
-		        		console.log('element : ', element);
-		        		// console.log(data[element]);
-		        		data[element].forEach( (el) => {
-		        			// template
-		        			const tmplContent = app.tmplVersioningDB.content.cloneNode(true);
-		        			let versioningStatus = tmplContent.querySelector('.versioning-status');
-		        			let iconStatus = versioningStatus.querySelector('i');
-		        			let descrStatus = versioningStatus.querySelector('.vers-status-descr');
-		        			let action = versioningStatus.querySelector('.vers-actions');
-		        			const parent = document.querySelector("dialog section[data-"+element+"] div[data-id='versioning-content']"); // element in ciclo vale "dimensions" e "cubes"
-
-		        			const jsonParsed = JSON.parse(el.json_value);
-		        			// se l'elemento recuperato dal DB è già presente in localStorage, ed è diverso, non lo aggiorno, si potrà scegliere di aggiornarlo/sovrascriverlo da un altro tasto
-		        			// console.log(jsonParsed.name);
-		        			// console.log(JSON.parse(window.localStorage.getItem(jsonParsed.name)).name);
-		        			
-		        			// verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore a causa della prop 'name'
-		        			if (JSON.parse(window.localStorage.getItem(jsonParsed.name))) {
-		        				if ( jsonParsed.name === JSON.parse(window.localStorage.getItem(jsonParsed.name)).name ) {
-			        				// se l'elemento è già presente in locale verifico anche se il suo contenuto è uguale a quello del DB
-			        				console.log('elemento già presente in locale', jsonParsed.name);
-			        				if (el.json_value === window.localStorage.getItem(jsonParsed.name)) {
-			        					console.info('UGUALE CONTENTUO JSON, ELEMENTO NON AGGIORNATO');
-			        					iconStatus.innerText = 'remove';
-			        					iconStatus.classList.add('md-darkgray');
-			        					descrStatus.innerText = 'Sincronizzato con DB';
-			        				} else {
-			        					// elemento presente ma contenuto diverso dal DB, da aggiornare manualmente
-			        					iconStatus.innerText = 'clear';
-			        					iconStatus.classList.add('md-indianred');
-			        					descrStatus.innerText = 'Non sincronizzato';
-			        					action.innerHTML = "Sovrascrivi copia locale";
-			        				}
-			        			}
-		        			} else {
-		        				// elemento non presente in locale, lo salvo
-								window.localStorage.setItem(jsonParsed.name, el.json_value);
-								iconStatus.innerText = 'done';
-								iconStatus.classList.add('md-mediumseagreen');
-								descrStatus.innerText = 'Aggiornato';
-							}
-							versioningStatus.querySelector('.vers-title').innerText = jsonParsed.name;
-		        			parent.appendChild(versioningStatus);
-		        		});
-		        	}
-		    
-		        } else {
-		          // TODO: no data, handlerConsoleMessage
-		          
-		        }
-		    })
-	    .catch( (err) => console.error(err));
-	};
-
-	app.getSyncLocal = () => {
-
-	};
-
 	app.getDimensions();
 
     app.getCubes();
 
-    // recupero dimensioni dal DB e le aggiungo al localStorage
-    app.getSyncVersioning();
-
-    app.getSyncLocal();
-
     app.handlerGuide();
-
-    // document.querySelector('#versioning').showModal();
     
 })();
