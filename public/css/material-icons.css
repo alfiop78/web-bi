@@ -86,4 +86,7 @@
 .material-icons:not(.md-inactive):hover{color: black;}
 .material-icons[open]:not(.md-inactive):hover{color: var(--main-primary-color);}
 
-/* material-icons con colori */
+/* Raggruppamenti per colori, md-danger : indianred, md-info: , md-warning: brown,md-status: darkgrey*/
+.material-icons.md-warning{color: brown;}
+.material-icons.md-status{color: darkgrey;}
+.material-icons.md-done{color: darkgreen;}

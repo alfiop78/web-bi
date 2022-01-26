@@ -33,8 +33,8 @@ Route::get('/users', [UserController::class, 'index']);
 
 /* map database web-bi*/
 Route::get('/', function() {return view('web_bi.index');})->name('web_bi.index'); // home page
-// Route::get('/mapping', [MapDatabaseController::class, 'mapping'])->name('web_bi.mapping'); // page mapping
-Route::get('/mapping', [MetadataController::class, 'mapping'])->name('web_bi.mapping'); // page mapping
+Route::get('/mapping', [MapDatabaseController::class, 'mapping'])->name('web_bi.mapping'); // page mapping
+// Route::get('/mapping', [MetadataController::class, 'mapping'])->name('web_bi.mapping'); // page mapping
 Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']); // recupero l'elenco dei database presenti (schema)
 Route::get('/fetch_api/schema/{schema}/tables', [MapDatabaseController::class, 'tables'])->name('web_bi.fetch_api.tables'); // recupero elenco tabelle dello schema selezionato
 Route::get('/fetch_api/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('web_bi.fetch_api.table_info'); // recupero il DESCRIBE della tabella

@@ -6,6 +6,7 @@ nav{font-size: .9rem;height: 100%;overflow-y: auto;}
 
 nav > a{display: flex; align-items: center;text-decoration: none;color: black;padding: 12px 8px;}
 nav > a:not([disabled]):hover{background-color: gainsboro;}
+nav > a:not([disabled])[selected]{background-color: gainsboro;font-weight: bold;}
 nav > a > span{padding: 0 8px;}
 nav > a[selected]{font-weight: bold;}
 

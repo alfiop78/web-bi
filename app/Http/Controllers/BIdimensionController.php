@@ -16,7 +16,7 @@ class BIdimensionController extends Controller
     public function index()
     {
         // dd('index BIdimension Controller');
-        // utilizzo del Model
+        // utilizzo del Model, il nome della tabella è impostata nel Model
         $dimensions = BIdimension::all();
         // dd($dimensions);
         return response()->json($dimensions);

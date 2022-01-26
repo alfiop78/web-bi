@@ -33,15 +33,102 @@
         </style>
     </head>
     <body class="antialiased">
+        {{-- template utilizzato per popolare sia le dimensioni che i cubi --}}
+        <template id="versioning-db">
+            <section data-searchable="true">
+                <div class="versioning-status">
+                    <div class="vers-title"></div>
+                    <div class="vers-status"><i class="material-icons"></i></div>
+                    <div class="vers-status-descr"></div>
+                    <div class="vers-actions">
+                        <span class="popupContent" data-get_app hidden><i class="material-icons md-warning">get_app</i><small class="popup">Sovrascrivi copia locale</small></span>
+                        <span class="popupContent" data-example hidden><i class="material-icons md-indianred">clear</i><small class="popup">altra azione da definire</small></span>
+                    </div>
+                </div>
+            </section>
+        </template>
 
-        <dialog id="cube-name">
+        <dialog id="versioning">
+
+            <section class="versioning-sections">
+                <h4>Sincronizzazione elementi</h4>                
+                <section class="versioning-grid">
+                    <fieldset>
+                        <legend>Lista Oggetti</legend>
+                        <nav id="nav-objects">
+                            <a href="#" id="navBtnCubes">Cubi</a>
+                            <a href="#" id="navBtnDimensions">Dimensioni</a>
+                            <a href="#" id="navBtnMetrics">Metriche</a>
+                            <a href="#" id="navBtnFilters">Filtri</a>
+                            <a href="#" id="navBtnProcesses">Processi</a>
+                        </nav>
+                    </fieldset>
+                    <fieldset class="auto-grid">
+                        <legend>Lista elementi sincronizzati dal DB</legend>
+                        <div class="md-field">
+                            {{-- data-element-search indica gli elementi dove questa input deve effettuare la ricerca --}}
+                            <input type="search" id="search-db" value="" data-element-search="versioning-db-search" data-search-type="generic-search" autocomplete="off" autofocus/>
+                            <label for="search-db" class="">Ricerca</label>
+                        </div>
+                        <section data-versioning-elements>
+                            {{-- @php  --}}
+                                {{-- $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione --}}
+                            {{-- @endphp --}}
+                            <div class="versioning-status-header">
+                                <div>Title</div>
+                                <div>Status</div>
+                                <div>Descr. Status</div>
+                                <div>Action</div>
+                            </div>
+                            <div data-id="versioning-content" class="versioning-content overflow-y">
+                                {{-- qui viene popolato tramite template --}}
+                                {{-- <div class="versioning-status">
+                                    creato dinamicamente in app.getSyncDimensions
+                                </div> --}}
+                                {{-- @foreach($arrayDim as $key => $dimension)
+                                    @php
+                                        $jsonDimension = json_decode($dimension['json_value']);
+                                    @endphp
+                                    <div class="versioning-status">
+                                        <div class="vers-title">{{ $jsonDimension->{'name'} }}<span>({{ $jsonDimension->{'lastTableInHierarchy'} }})</span></div>
+                                        <div class="vers-status"><i class="material-icons">done</i></div>
+                                    </div>
+                                @endforeach --}}
+                            </div>
+                        </section>
+                        {{-- <section data-cubes>
+                            <h5 class="upper">cubi</h5>
+                            <div class="versioning-status-header">
+                                <div>Title</div>
+                                <div>Status</div>
+                                <div>Descr. Status</div>
+                                <div>Action</div>
+                            </div>
+                            <div data-id="versioning-content" class="versioning-content overflow-y"></div>
+                        </section> --}}
+                    </fieldset>
+                </section>
+
+                <div class="dialog-buttons">
+                    <button type="button" name="cancel" class="md-button">chiudi</button>
+                    <!-- <button id="btnSaveColumn" type="button" name="save" class="md-button" disabled>salva</button> -->
+                    {{-- <button id="btnVersioninDone" type="button" name="done" class="md-button">fatto</button> --}}
+                </div>
+                
+            </section>
+        </dialog>
+
+        <dialog id="cube-name" class="dialog-small">
+            <section>
+                <h4>Nome Cubo</h4>
+            </section>
             <div class="dialog-save-name">
 
                 <div class="md-field">
                     <input type="text" id="cubeName" value=""/>
-                    <label for="cubeName" class="">Titolo Cubo</label>
+                    <label for="cubeName" class="">Nome</label>
                 </div>
-                <textarea id="textarea-cube-comment" rows="7" cols="60" placeholder="Aggiungi qui le note per questo Cubo"></textarea>
+                <textarea id="textarea-cube-comment" rows="10" placeholder="Aggiungi un commento per il Cubo"></textarea>
 
             </div>
 
@@ -52,14 +139,14 @@
 
         </dialog>
 
-        <dialog id="dimension-name">
+        <dialog id="dimension-name" class="dialog-small">
             <section>
                 <h4>Nome dimensione</h4>
                 <div class="dialog-save-name">
 
                     <div class="md-field">
                         <input type="text" id="dimensionName" value=""/>
-                        <label for="dimensionName" class="">Nome dimensione</label>
+                        <label for="dimensionName" class="">Nome</label>
                     </div>
                     <textarea id="textarea-dimension-comment" rows="10" placeholder="Aggiungi qui un commento per la dimensione"></textarea>
 
@@ -165,7 +252,7 @@
                                 <span class="popupContent"><i id="openDimensionList" class="material-icons md-24">mediation</i><small class="popup">Lista Dimensioni</small></span>
                                 <span class="popupContent"><i class="material-icons md-24">dashboard_customize</i><small class="popup">Nuova dimensione</small></span>
                                 <span class="popupContent"><i id="saveCube" class="material-icons md-24">save</i><small class="popup">Salva Cubo</small></span>
-                                <span class="popupContent" hide><i id="saveOpenedCube" class="material-icons md-24">save</i><small class="popup">Salva Cubo esistente</small></span>
+                                <span class="popupContent" hide><i id="saveOpenedCube" class="material-icons md-24">save</i><small class="popup">Aggiorna Cubo</small></span>
                                 <span class="popupContent"><i id="processCube" class="material-icons md-24">folder_open</i><small class="popup">Lista Cubi definiti</small></span>
                                 <span class="popupContent"><i id="defineCube" class="material-icons md-24 md-inactive">space_dashboard</i><small class="popup">Definisci Cubo</small></span>
                                 <span class="popupContent"><i id="versioning-status" class="material-icons md-24">cached</i><small class="popup">Versionamento</small></span>
@@ -178,7 +265,7 @@
                         <div class="lists">
                             <div class="absList" id="tableList" hidden>
                                 <div class="md-field">
-                                    <input type="search" id="tableSearch" autocomplete="off" />
+                                    <input type="search" id="tableSearch" data-search-type="search-list" autocomplete="off" />
                                     <label for="tableSearch" class="">Ricerca</label>
                                 </div>
                                 <ul id="tables">
@@ -190,7 +277,7 @@
                         <div class="lists">
                             <div class="absList" id="cubesList" hidden>
                                 <div class="md-field">
-                                    <input type="search" id="cubeSearch" value=""/>
+                                    <input type="search" id="cubeSearch" data-search-type="search-list" value=""/>
                                     <label for="cubeSearch" class="">Ricerca</label>
                                 </div>
                                 <ul id="cubes"></ul>
@@ -211,8 +298,8 @@
                                     <label for="dimensionSearch" class="">Ricerca</label>
                                 </div>
                                 <ul id="dimensions">
-                                    @php 
-                                        $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione --}}
+                                {{--    @php 
+                                        $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione 
                                     @endphp
                                     @foreach($arrayDim as $key => $dimension)
                                         @php
@@ -222,7 +309,7 @@
                                             <h5 label="{{ $jsonDimension->{'name'} }}">{{ $jsonDimension->{'name'} }}</h5>
                                             <div id="miniCard-db" class="miniCard"><h6>{{ $jsonDimension->{'lastTableInHierarchy'} }}</h6></div>
                                         </div>
-                                    @endforeach
+                                    @endforeach --}}
                                 </ul>
                             </div>
                         </div>

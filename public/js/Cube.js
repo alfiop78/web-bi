@@ -1,5 +1,6 @@
 class Cube {
 	#schema;
+	#comment;
 	constructor() {
 		this._cube = {};
 		this._metrics = {}; // contiene gli oggetti metriche
@@ -17,6 +18,10 @@ class Cube {
 	set title(value) {this._title = value;}
 
 	get title() {return this._title;}
+
+	set comment(value) {this.#comment = value;}
+
+	get comment() {return this.#comment;}
 
 	set relations(value) {
 		this._join['hier_'+this.relationId] = value;
@@ -75,6 +80,7 @@ class Cube {
 	save() {
 		this._cube.type = 'CUBE';
 		this._cube.name = this._title;
+		this._cube.comment = this.#comment;
 		this._cube.metrics = this._metrics;
 		// this._cube.relations = this._join; // questa deve essere salvata all'interno della dimensione, non nel cubo
 		this._cube.FACT = this._fact;

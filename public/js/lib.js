@@ -7,7 +7,20 @@ window.onload = function() {
 	inputs.forEach((input) => {
 		// se la input ha l'attributo "search" e l'attr "data-generic-search" gli associo l'evento input per la ricerca genericSearch
 		// la genericSearch è utilizzata per la schemata del versionamento, poi si può estendere ad altri casi
-		if (input.hasAttribute('type') && input.getAttribute('type') === 'search') input.oninput = App.genericSearch;
+		if (input.hasAttribute('type') && input.getAttribute('type') === 'search') {
+			const searchType = input.getAttribute('data-search-type');
+			switch (searchType) {
+				case 'generic-search':
+					input.oninput = App.genericSearch;
+					break;
+				case 'search-list':
+					input.onclick = App.searchInList;
+					break;
+				default:
+					break;
+			}
+			
+		}
 
 		input.addEventListener('input', (e) => {
 			(e.target.value.length > 0) ?

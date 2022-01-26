@@ -7,13 +7,21 @@ var dimension = new Dimension();
 		dialogCubeName : document.getElementById('cube-name'),
 		dialogDimensionName : document.getElementById('dimension-name'),
 		dialogHierarchyName : document.getElementById('hierarchy-name'),
+		dialogVersioning : document.getElementById('versioning'),
 
 		/* template */
-		tmplVersioningDB : document.getElementById('versioning-db'), // TODO: da eliminare
+		tmplVersioningDB : document.getElementById('versioning-db'),
 
 		hierarchyContainer : document.getElementById('hierarchiesContainer'), // struttura gerarchica sulla destra
 
 		btnBack : document.getElementById('mdc-back'),
+
+		// btn
+		btnCubes : document.getElementById('navBtnCubes'),
+		btnDimensions : document.getElementById('navBtnDimensions'),
+		btnMetrics : document.getElementById('navBtnMetrics'),
+		btnFilters : document.getElementById('navBtnFilters'),
+		btnProcesses : document.getElementById('navBtnProcesses'),
 
 		btnSaveDimension : document.getElementById('saveDimension'),
 		btnSaveHierarchy : document.getElementById('hierarchySave'),
@@ -568,6 +576,7 @@ var dimension = new Dimension();
 		ul.querySelectorAll('li').forEach( (li) => li.addEventListener('click', app.handlerCubeSelected) );
 	};
 
+	// selezione di un cubo già definito, da qui è possibile associare, ad esempio, una nuova dimensione ad un cubo già esistente.
 	app.handlerCubeSelected = (e) => {
 		// apro la tabella definita come Cubo
 		console.log('e.currentTarget : ', e.currentTarget);
@@ -580,7 +589,8 @@ var dimension = new Dimension();
 		StorageCube.selected.associatedDimensions.forEach( (dim) => {
 			cube.associatedDimensions = dim;
 		});
-		app.addCard(StorageCube.selected.FACT, true);
+		debugger;
+		app.addCard(`${StorageCube.selected.schema}.${StorageCube.selected.FACT}`, true);
 		// visualizzo il tasto saveOpenedCube al posto di SaveCube
 		app.btnSaveOpenedCube.parentElement.toggleAttribute('hide');
 		// nascondo btnSaveCube
@@ -706,9 +716,9 @@ var dimension = new Dimension();
           .catch((err) => console.error(err));
     };
 
-	// salvataggio di un cubo già esistente
+	// Aggiornamento di un cubo
 	app.btnSaveOpenedCube.onclick = () => {
-		console.log('cube opened save');
+		console.log('Aggiornamento Cubo');
 		console.log(StorageCube.selected);
 		cube.title = StorageCube.selected.name;
 
@@ -742,8 +752,8 @@ var dimension = new Dimension();
 		// salvo il cubo in localStorage
 		StorageCube.save = cube.cube;
         debugger;
-        // TODO: DA TESTARE
-        app.saveCube(cube.cube);
+        // TODO: aggiornamento su database, da implementare
+        // app.saveCube(cube.cube);
 
 		app.dialogCubeName.close();
 	};
@@ -857,7 +867,11 @@ var dimension = new Dimension();
 	// salvataggio di un nuovo cubo
 	app.btnSaveCubeName.onclick = () => {
 		console.log('cube save');
+		debugger;
+		// TODO: devo verificare se il nome del cubo esiste già, sia in locale che sul db.
 		cube.title = document.getElementById('cubeName').value;
+
+		cube.comment = document.getElementById('textarea-cube-comment').value;
 
 		cube.FACT = document.querySelector('.card.table[fact]').getAttribute('label');
 		cube.schema = document.querySelector('.card.table[fact]').getAttribute('data-schema');
@@ -890,7 +904,8 @@ var dimension = new Dimension();
 
 		// salvo il cubo in localStorage
 		StorageCube.save = cube.cube;
-        app.saveCube(cube.cube);
+		// salvo il cubo sul DB
+        // app.saveCube(cube.cube);
 
 		app.dialogCubeName.close();
 	};
@@ -914,7 +929,8 @@ var dimension = new Dimension();
 
 	app.btnBack.onclick = () => {window.location.href = '/';};
 	
-	app.btnVersioningStatus.onclick = () => window.location.href = '/versioning';
+	// app.btnVersioningStatus.onclick = () => window.location.href = '/versioning'; // apro una nuova pagina
+	app.btnVersioningStatus.onclick = () => app.dialogVersioning.showModal();
 
 	/* ricerca in lista tabelle */
 	document.getElementById('tableSearch').oninput = App.searchInList;
@@ -1059,5 +1075,111 @@ var dimension = new Dimension();
     app.getCubes();
 
     app.handlerGuide();
+
+    // versioning
+    // popolo gli elementi restituiti dalle chiamate fetch API nei tasti nel drawer (Dimensioni, Cubi, ecc...)
+    app.createVersioningElements = (data) => {
+    	// pulisco la lista, se presente, prima di popolarla con i nuovi elementi selezionati
+    	const versioningElements = document.querySelectorAll('section[data-versioning-elements] div[data-id="versioning-content"] .versioning-status');
+    	// console.log('versioningElements : ', versioningElements);
+    	if (versioningElements) versioningElements.forEach( element => element.remove());
+    	// ciclo le dimensioni per inserirle nella dialog #versioning ed anche nello storage in locale
+    	data.forEach( (el) => {
+    		// template
+			const tmplContent = app.tmplVersioningDB.content.cloneNode(true);
+			let sectionSearchable = tmplContent.querySelector('section[data-searchable]')
+			let versioningStatus = tmplContent.querySelector('.versioning-status');
+			let iconStatus = versioningStatus.querySelector('i');
+			let descrStatus = versioningStatus.querySelector('.vers-status-descr');
+			let actions = versioningStatus.querySelector('.vers-actions');
+			const parent = document.querySelector("section[data-versioning-elements] div[data-id='versioning-content']");
+
+			const jsonParsed = JSON.parse(el.json_value);
+			// se l'elemento recuperato dal DB è già presente in localStorage, ed è diverso, non lo aggiorno, si potrà scegliere di aggiornarlo/sovrascriverlo da un altro tasto
+			// console.log(jsonParsed.name);
+			// console.log(JSON.parse(window.localStorage.getItem(jsonParsed.name)).name);
+			
+			// verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore a causa della prop 'name'
+			if (JSON.parse(window.localStorage.getItem(jsonParsed.name))) {
+				if ( jsonParsed.name === JSON.parse(window.localStorage.getItem(jsonParsed.name)).name ) {
+    				// se l'elemento è già presente in locale verifico anche se il suo contenuto è uguale a quello del DB
+    				console.log('elemento già presente in locale', jsonParsed.name);
+    				if (el.json_value === window.localStorage.getItem(jsonParsed.name)) {
+    					console.info('UGUALE CONTENTUO JSON, ELEMENTO NON AGGIORNATO');
+    					iconStatus.innerText = 'remove';
+    					iconStatus.classList.add('md-status'); // darkgrey
+    					descrStatus.innerText = 'Sincronizzato con DB';
+    				} else {
+    					// elemento presente ma contenuto diverso dal DB, da aggiornare manualmente
+    					iconStatus.innerText = 'clear';
+    					iconStatus.classList.add('md-warning'); // brown
+    					descrStatus.innerText = 'Non sincronizzato';
+    					actions.querySelector('.popupContent[data-get_app]').removeAttribute('hidden');
+    				}
+    			}
+			} else {
+				// elemento non presente in locale, lo salvo
+				window.localStorage.setItem(jsonParsed.name, el.json_value);
+				iconStatus.innerText = 'done';
+				iconStatus.classList.add('md-done');
+				descrStatus.innerText = 'Aggiornato';
+			}
+			versioningStatus.querySelector('.vers-title').innerText = jsonParsed.name;
+			sectionSearchable.setAttribute('data-search', 'versioning-db-search');
+			sectionSearchable.setAttribute('label', jsonParsed.name);
+			parent.appendChild(sectionSearchable);
+    	});
+    };
+
+    app.fetchAPIRequestVersioning = async (url) => {
+    	await fetch(url)
+			.then( (response) => {
+				if (!response.ok) {throw Error(response.statusText);}
+				return response;
+			})
+			.then( (response) => response.json())
+			.then( (data) => {
+                console.log(data);
+		        if (data) {
+		        	app.createVersioningElements(data);
+		        } else {
+		          // TODO: no data, handlerConsoleMessage
+		          
+		        }
+		    })
+	    .catch( (err) => console.error(err));
+    };
+
+    app.btnCubes.onclick = (e) => {
+    	if (document.querySelector('#nav-objects a[selected]')) document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+
+		e.target.setAttribute('selected', true);
+    	app.fetchAPIRequestVersioning('/fetch_api/versioning/cubes');
+    }
+
+    app.btnDimensions.onclick = (e) => {
+    	// rimuovo il selected da eventuali selezioni precedenti
+    	if (document.querySelector('#nav-objects a[selected]')) document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+    	e.target.setAttribute('selected', true);
+    	app.fetchAPIRequestVersioning('/fetch_api/versioning/dimensions');
+    }
+
+    app.btnMetrics.onclick = (e) => {
+    	if (document.querySelector('#nav-objects a[selected]')) document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+    	e.target.setAttribute('selected', true);
+    	app.fetchAPIRequestVersioning('/fetch_api/versioning/metrics');
+    }
+
+    app.btnFilters.onclick = (e) => {
+    	if (document.querySelector('#nav-objects a[selected]')) document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+    	e.target.setAttribute('selected', true);
+    	app.fetchAPIRequestVersioning('/fetch_api/versioning/filters');
+    }
+
+    app.btnProcesses.onclick = (e) => {
+    	if (document.querySelector('#nav-objects a[selected]')) document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+    	e.target.setAttribute('selected', true);
+    	app.fetchAPIRequestVersioning('/fetch_api/versioning/processes');
+    }
     
 })();

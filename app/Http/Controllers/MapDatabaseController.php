@@ -4,17 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\MapDatabase;
+use App\Models\BIdimension;
 use Illuminate\Support\Facades\DB;
 use App\Classes\Cube;
 
 class MapDatabaseController extends Controller
 {
-    // TODO: questo verrà eliminato perchè gli schemi li recupero nel metodo mapping
-    /*public function schemata() {
-        $schemaList = DB::connection('vertica_odbc')->select("SELECT SCHEMA_NAME FROM V_CATALOG.SCHEMATA S WHERE IS_SYSTEM_SCHEMA = FALSE ORDER BY SCHEMA_NAME;");
-        // dd($schemaList);
-        return response()->json($schemaList);
-    }*/
+    public function mapping() {
+        // recupero l'elenco delle dimensioni create da bi_dimensions.
+        // NOTE: il support alle query su colonne JSON è per mysql 5.7+ https://laravel.com/docs/8.x/queries#json-where-clauses
+        // $dimensions = DB::table('bi_dimensions')->get('json_value'); // QueryBuilder
+        // $dimensions = BIdimension::get('json_value'); // Eloquent
+        $schemaList = DB::connection('vertica_odbc')->select("SELECT SCHEMA_NAME FROM V_CATALOG.SCHEMATA WHERE IS_SYSTEM_SCHEMA = FALSE ORDER BY SCHEMA_NAME;");
+        return view('web_bi.mapping')->with('schemes', $schemaList);
+        // return view('web_bi.mapping')->with(['dimensions' => json_encode($dimensions), 'schemes' => $schemaList]);
+    }
 
     // test connessione vertica (senza utilizzo di Eloquen/ORM)
     public function test_vertica() {
