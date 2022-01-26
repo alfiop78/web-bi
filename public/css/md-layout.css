@@ -62,7 +62,7 @@ section > h3 ~ h5{font-weight: lighter;}
   .nav-button #menu{display: none;}
   h4 {font-size: 1.7rem;}
 
-  p{font-size: .7rem;padding: 8px;}
+  p{font-size: .8rem;padding: 6px;}
 }
 
 @media screen and (max-device-width: 768px) {

@@ -19,8 +19,8 @@ class BIdimensionController extends Controller
         // utilizzo del Model, il nome della tabella è impostata nel Model
         $dimensions = BIdimension::all();
         // dd($dimensions);
-        return response()->json($dimensions);
-        // return response()->json(['dimensions' => $dimensions]);
+        // return response()->json($dimensions);
+        return response()->json(['dimensions' => $dimensions]); // la stringa 'dimensions' mi serve per identificare il div parent dove appendere l'elenco delle dimensioni nel DOM
     }
 
     /**

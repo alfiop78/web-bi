@@ -16,7 +16,7 @@ class BIprocessController extends Controller
     {
         $processes = BIprocess::all();
         // dd($dimensions);
-        return response()->json($processes);
+        return response()->json(['processes' => $processes]);
     }
 
     /**

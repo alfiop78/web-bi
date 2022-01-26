@@ -80,11 +80,9 @@
                                 <div>Descr. Status</div>
                                 <div>Action</div>
                             </div>
-                            <div data-id="versioning-content" class="versioning-content overflow-y">
+                            <div data-id="versioning-content" class="versioning-content overflow-y" data-object="dimensions" hidden> {{-- l'attributo data-object deve corrispondere al risultato della query restituita da BidimensionController, BIcubesController, ecc...--}}
                                 {{-- qui viene popolato tramite template --}}
-                                {{-- <div class="versioning-status">
-                                    creato dinamicamente in app.getSyncDimensions
-                                </div> --}}
+                                {{-- non posso utilizzare qui il confronto tra localStorage / DB. Devo farlo in javascript --}}
                                 {{-- @foreach($arrayDim as $key => $dimension)
                                     @php
                                         $jsonDimension = json_decode($dimension['json_value']);
@@ -95,6 +93,11 @@
                                     </div>
                                 @endforeach --}}
                             </div>
+
+                            <div data-id="versioning-content" class="versioning-content overflow-y" data-object="cubes" hidden></div>
+                            <div data-id="versioning-content" class="versioning-content overflow-y" data-object="metrics" hidden></div>
+                            <div data-id="versioning-content" class="versioning-content overflow-y" data-object="filters" hidden></div>
+                            <div data-id="versioning-content" class="versioning-content overflow-y" data-object="processes" hidden></div>
                         </section>
                         {{-- <section data-cubes>
                             <h5 class="upper">cubi</h5>

@@ -16,7 +16,7 @@ class BIfilterController extends Controller
     {
         $filters = BIfilter::all();
         // dd($dimensions);
-        return response()->json($filters);
+        return response()->json(['filters' => $filters]);
     }
 
     /**

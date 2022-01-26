@@ -16,7 +16,7 @@ class BIcubeController extends Controller
     {
         $cubes = BIcube::all();
         // dd($dimensions);
-        return response()->json($cubes);
+        return response()->json(['cubes' => $cubes]);
     }
 
     /**

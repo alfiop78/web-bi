@@ -23,6 +23,7 @@ var dimension = new Dimension();
 		btnFilters : document.getElementById('navBtnFilters'),
 		btnProcesses : document.getElementById('navBtnProcesses'),
 
+		// actions button
 		btnSaveDimension : document.getElementById('saveDimension'),
 		btnSaveHierarchy : document.getElementById('hierarchySave'),
 		btnHierarchySaveName : document.getElementById('btnHierarchySaveName'),
@@ -1076,110 +1077,190 @@ var dimension = new Dimension();
 
     app.handlerGuide();
 
+    app.checkVersioning = () => {
+    	// debugger;
+    	const warningElements = app.dialogVersioning.querySelectorAll('.versioning-status > .vers-status > i.md-warning');
+    	const doneElements = app.dialogVersioning.querySelectorAll('.versioning-status > .vers-status > i.md-done'); // elementi non presenti in locale e scaricati da DB
+    	const unmodifiedElements = app.dialogVersioning.querySelectorAll('.versioning-status > .vers-status > i.md-status'); // elementi non modificati perchè sincronizzati con il DB
+    	// console.log('warningElements : ', warningElements.length);
+    	let popupsMessage = '';
+    	// debugger;
+    	if (warningElements.length !== 0) {
+    		app.btnVersioningStatus.classList.add('md-warning');
+    		popupsMessage = `<p>${warningElements.length} elementi non sincronizzati</p>`;
+    	}
+    	if (doneElements.length !== 0) {
+    		popupsMessage = `<p>${doneElements.length} elementi nuovi scaricati</p>`;
+    	}
+		app.btnVersioningStatus.nextElementSibling.innerHTML = popupsMessage+`<p>${unmodifiedElements.length} elementi gi&agrave; sincronizzati</p>`;
+    };
+
     // versioning
     // popolo gli elementi restituiti dalle chiamate fetch API nei tasti nel drawer (Dimensioni, Cubi, ecc...)
     app.createVersioningElements = (data) => {
-    	// pulisco la lista, se presente, prima di popolarla con i nuovi elementi selezionati
-    	const versioningElements = document.querySelectorAll('section[data-versioning-elements] div[data-id="versioning-content"] .versioning-status');
-    	// console.log('versioningElements : ', versioningElements);
-    	if (versioningElements) versioningElements.forEach( element => element.remove());
     	// ciclo le dimensioni per inserirle nella dialog #versioning ed anche nello storage in locale
-    	data.forEach( (el) => {
-    		// template
-			const tmplContent = app.tmplVersioningDB.content.cloneNode(true);
-			let sectionSearchable = tmplContent.querySelector('section[data-searchable]')
-			let versioningStatus = tmplContent.querySelector('.versioning-status');
-			let iconStatus = versioningStatus.querySelector('i');
-			let descrStatus = versioningStatus.querySelector('.vers-status-descr');
-			let actions = versioningStatus.querySelector('.vers-actions');
-			const parent = document.querySelector("section[data-versioning-elements] div[data-id='versioning-content']");
+    	// icona 'versioning-status' nella actions, questa icona viene colorata in base agli Oggetti trovati qui, in base a questo schema:
+    	// rossa : ci sono elementi non sincronizzati DB/Local
+    	// normal : Tutti gli elementi sono aggiornati DB/Local
+    	for (element in data) {
+    		// console.log('element : ', element);
+    		data[element].forEach( (el) => {
+	    		// template
+				const tmplContent = app.tmplVersioningDB.content.cloneNode(true);
+				let sectionSearchable = tmplContent.querySelector('section[data-searchable]')
+				let versioningStatus = tmplContent.querySelector('.versioning-status');
+				let iconStatus = versioningStatus.querySelector('i');
+				let descrStatus = versioningStatus.querySelector('.vers-status-descr');
+				let actions = versioningStatus.querySelector('.vers-actions');
+				const parent = document.querySelector("section[data-versioning-elements] div[data-id='versioning-content'][data-object='" + element + "']");
+				// debugger;
 
-			const jsonParsed = JSON.parse(el.json_value);
-			// se l'elemento recuperato dal DB è già presente in localStorage, ed è diverso, non lo aggiorno, si potrà scegliere di aggiornarlo/sovrascriverlo da un altro tasto
-			// console.log(jsonParsed.name);
-			// console.log(JSON.parse(window.localStorage.getItem(jsonParsed.name)).name);
-			
-			// verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore a causa della prop 'name'
-			if (JSON.parse(window.localStorage.getItem(jsonParsed.name))) {
-				if ( jsonParsed.name === JSON.parse(window.localStorage.getItem(jsonParsed.name)).name ) {
-    				// se l'elemento è già presente in locale verifico anche se il suo contenuto è uguale a quello del DB
-    				console.log('elemento già presente in locale', jsonParsed.name);
-    				if (el.json_value === window.localStorage.getItem(jsonParsed.name)) {
-    					console.info('UGUALE CONTENTUO JSON, ELEMENTO NON AGGIORNATO');
-    					iconStatus.innerText = 'remove';
-    					iconStatus.classList.add('md-status'); // darkgrey
-    					descrStatus.innerText = 'Sincronizzato con DB';
-    				} else {
-    					// elemento presente ma contenuto diverso dal DB, da aggiornare manualmente
-    					iconStatus.innerText = 'clear';
-    					iconStatus.classList.add('md-warning'); // brown
-    					descrStatus.innerText = 'Non sincronizzato';
-    					actions.querySelector('.popupContent[data-get_app]').removeAttribute('hidden');
-    				}
-    			}
-			} else {
-				// elemento non presente in locale, lo salvo
-				window.localStorage.setItem(jsonParsed.name, el.json_value);
-				iconStatus.innerText = 'done';
-				iconStatus.classList.add('md-done');
-				descrStatus.innerText = 'Aggiornato';
-			}
-			versioningStatus.querySelector('.vers-title').innerText = jsonParsed.name;
-			sectionSearchable.setAttribute('data-search', 'versioning-db-search');
-			sectionSearchable.setAttribute('label', jsonParsed.name);
-			parent.appendChild(sectionSearchable);
-    	});
+				const jsonParsed = JSON.parse(el.json_value);
+				// se l'elemento recuperato dal DB è già presente in localStorage, ed è diverso, non lo aggiorno, si potrà scegliere di aggiornarlo/sovrascriverlo da un altro tasto
+				// console.log(jsonParsed.name);
+				// console.log(JSON.parse(window.localStorage.getItem(jsonParsed.name)).name);
+				
+				// verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore a causa della prop 'name'
+				if (JSON.parse(window.localStorage.getItem(jsonParsed.name))) {
+					if ( jsonParsed.name === JSON.parse(window.localStorage.getItem(jsonParsed.name)).name ) {
+	    				// se l'elemento è già presente in locale verifico anche se il suo contenuto è uguale a quello del DB
+	    				console.log('elemento già presente in locale', jsonParsed.name);
+	    				if (el.json_value === window.localStorage.getItem(jsonParsed.name)) {
+	    					console.info('UGUALE CONTENTUO JSON, ELEMENTO RESTA INVARIATO IN LOCALE');
+	    					iconStatus.innerText = 'remove';
+	    					iconStatus.classList.add('md-status'); // darkgrey
+	    					descrStatus.innerText = 'Sincronizzato con DB';
+	    				} else {
+	    					// elemento presente ma contenuto diverso dal DB, da aggiornare manualmente
+	    					iconStatus.innerText = 'clear';
+	    					iconStatus.classList.add('md-warning'); // brown
+	    					descrStatus.innerText = 'Non sincronizzato';
+	    					// icona per recuperare manualmente l'elemento
+	    					actions.querySelector('.popupContent[data-get_app]').removeAttribute('hidden');
+	    				}
+	    			}
+				} else {
+					// elemento non presente in locale, lo salvo
+					window.localStorage.setItem(jsonParsed.name, el.json_value);
+					iconStatus.innerText = 'done';
+					iconStatus.classList.add('md-done');
+					descrStatus.innerText = 'Aggiornato';
+				}
+				versioningStatus.querySelector('.vers-title').innerText = jsonParsed.name;
+				sectionSearchable.setAttribute('data-search', 'versioning-db-search');
+				sectionSearchable.setAttribute('label', jsonParsed.name);
+				parent.appendChild(sectionSearchable);
+	    	});
+    	}
+
+    	// dopo aver caricato tutti gli elementi nella dialog versioning, imposto il colore del tasto btnVersioningStatus in base allo status degli elementi
+    	app.checkVersioning();
     };
 
-    app.fetchAPIRequestVersioning = async (url) => {
-    	await fetch(url)
-			.then( (response) => {
+	// promise.all
+	app.fetchAPIRequestVersioningAll = async () => {
+		// viene invocata da tutti i template
+		const urls = [
+			'/fetch_api/versioning/dimensions',
+			'/fetch_api/versioning/cubes',
+			'/fetch_api/versioning/metrics',
+			'/fetch_api/versioning/filters',
+			'/fetch_api/versioning/processes'
+		];
+		// ottengo tutte le risposte in un array
+		await Promise.all(urls.map( url => fetch(url) ))
+		.then(responses => {
+			return Promise.all(responses.map(response => {
 				if (!response.ok) {throw Error(response.statusText);}
-				return response;
-			})
-			.then( (response) => response.json())
-			.then( (data) => {
-                console.log(data);
-		        if (data) {
-		        	app.createVersioningElements(data);
-		        } else {
-		          // TODO: no data, handlerConsoleMessage
-		          
-		        }
-		    })
-	    .catch( (err) => console.error(err));
-    };
+				return response.json();
+			}))
+		})
+		.then( (data) => {
+			/*
+			 data : [
+			 	0 : ['dimensions' : [risultato della query]],
+			 	1 : ['cubes' : [risultato della query]],
+			 	2 : ['metrics' : [risultato della query]],
+			 	...
+			 ]
+			*/
+			console.log(data);
+			data.forEach( (elementData) => {
+				/*
+				elementData = [
+					'dimensions' : [risultato della query]
+					'cubes' : [risultato della query],
+					...
+					]
+				*/
+				app.createVersioningElements(elementData);
+			});
+		} )
+		.catch( err => console.error(err));
+	};
+
+    app.fetchAPIRequestVersioningAll();
 
     app.btnCubes.onclick = (e) => {
-    	if (document.querySelector('#nav-objects a[selected]')) document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+    	if (document.querySelector('#nav-objects a[selected]')) {
+    		document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+    		// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
+    		// app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([data-object="cubes"])').setAttribute('hidden', true);
+    		app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
+    	}
 
 		e.target.setAttribute('selected', true);
-    	app.fetchAPIRequestVersioning('/fetch_api/versioning/cubes');
+    	// app.fetchAPIRequestVersioning('/fetch_api/versioning/cubes');
+    	document.querySelector('div[data-object="cubes"]').removeAttribute('hidden');
     }
 
     app.btnDimensions.onclick = (e) => {
     	// rimuovo il selected da eventuali selezioni precedenti
-    	if (document.querySelector('#nav-objects a[selected]')) document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
-    	e.target.setAttribute('selected', true);
-    	app.fetchAPIRequestVersioning('/fetch_api/versioning/dimensions');
-    }
+    	if (document.querySelector('#nav-objects a[selected]')) {
+    		document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+    		// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
+    		// app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([data-object="dimensions"])').setAttribute('hidden', true);
+    		app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
+    	}
 
+    	e.target.setAttribute('selected', true);
+    	// TODO: nascondo i div che hanno data-objects diverso da 'dimensions'
+    	// visualizzo il div[hidden] contenente le dimensioni
+    	document.querySelector('div[data-object="dimensions"]').removeAttribute('hidden');
+    }
+	
     app.btnMetrics.onclick = (e) => {
-    	if (document.querySelector('#nav-objects a[selected]')) document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+    	if (document.querySelector('#nav-objects a[selected]')) {
+    		document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+    		// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
+    		// app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([data-object="metrics"])').setAttribute('hidden', true);
+    		app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
+    	}
     	e.target.setAttribute('selected', true);
-    	app.fetchAPIRequestVersioning('/fetch_api/versioning/metrics');
+    	// app.fetchAPIRequestVersioning('/fetch_api/versioning/metrics');
+    	document.querySelector('div[data-object="metrics"]').removeAttribute('hidden');
     }
-
+    
     app.btnFilters.onclick = (e) => {
-    	if (document.querySelector('#nav-objects a[selected]')) document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+    	if (document.querySelector('#nav-objects a[selected]')) {
+    		document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+    		// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
+    		app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
+    	}
     	e.target.setAttribute('selected', true);
-    	app.fetchAPIRequestVersioning('/fetch_api/versioning/filters');
+    	document.querySelector('div[data-object="filters"]').removeAttribute('hidden');
+    	// app.fetchAPIRequestVersioning('/fetch_api/versioning/filters');
     }
-
+    
     app.btnProcesses.onclick = (e) => {
-    	if (document.querySelector('#nav-objects a[selected]')) document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+    	if (document.querySelector('#nav-objects a[selected]')) {
+    		document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+    		// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
+    		app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
+    	}
     	e.target.setAttribute('selected', true);
-    	app.fetchAPIRequestVersioning('/fetch_api/versioning/processes');
+    	document.querySelector('div[data-object="processes"]').removeAttribute('hidden');
+    	// app.fetchAPIRequestVersioning('/fetch_api/versioning/processes');
     }
     
 })();
