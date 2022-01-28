@@ -2,12 +2,26 @@
 La classe recupera il local storage ad ogni accesso alla pagina e contiene Metodi per recuperare ad esempio solo i CUBE o solo le DIMENSION, ecc...
 */
 class Storages {
-
+	#dimensions = [];
 	constructor() {
 		this.storage = window.localStorage;
 		this.storageKeys = Object.keys(window.localStorage);
+		// console.log('storageKeys : ', this.storageKeys);
 		// this.cubeId = this._cubeId;
 		this.JSONData = null;
+		// this.dimensions; // chiamo il metodo get dimensions() per recuperare un array di nomi di dimensioni (versioning)
+	}
+
+	get dimensions() {
+		this.storageKeys.forEach((key) => {
+			let jsonStorage = JSON.parse(this.storage.getItem(key));
+			// console.log(key);
+			if (jsonStorage.type === 'DIMENSION') {
+				// this.#dimensions.add(jsonStorage);
+				this.#dimensions.push(key);
+			}
+		});
+		return this.#dimensions;
 	}
 
 	set save(value) {
@@ -15,20 +29,7 @@ class Storages {
 		window.localStorage.setItem(value.name, JSON.stringify(value));
 	}
 
-	set reportConfig(value) {
-		window.localStorage.setItem(Object.keys(value), JSON.stringify(value[Object.keys(value)]));
-	}
 
-	// set dimension(value) {
-	//   // console.log(Object.keys(value));
-	//   // console.log(value.title);
-	//   //
-	//   window.localStorage.setItem(value.title, JSON.stringify(value));
-	//   this.dimensionName = value.title;
-	// }
-
-	// // restituisco il nome della dimensione
-	// get dimension() {return this.dimensionName;}
 
 	JSONFormat(name) {
 		// restituisco un object convertito in json, questo mi servirà per ricostruire la struttura
@@ -263,11 +264,10 @@ class DimensionStorage extends Storages {
 				// console.log('this._dimensions : ', this._dimensions);
 			}
 		});
+		// console.log('this._dimensions : ', this._dimensions);
 	}
 
-	set dimensionId(value) {
-		this.id = value;
-	}
+	set dimensionId(value) {this.id = value;}
 
 	get dimensionId() { return this.id; }
 

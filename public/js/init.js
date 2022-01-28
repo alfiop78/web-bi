@@ -2,6 +2,7 @@ var App = new Application();
 var cube = new Cube();
 var StorageCube = new CubeStorage();
 var dimension = new Dimension();
+var storage = new Storages();
 (() => {
 	var app = {
 		dialogCubeName : document.getElementById('cube-name'),
@@ -1095,6 +1096,40 @@ var dimension = new Dimension();
 		app.btnVersioningStatus.nextElementSibling.innerHTML = popupsMessage+`<p>${unmodifiedElements.length} elementi gi&agrave; sincronizzati</p>`;
     };
 
+    app.test = (data) => {
+    	// recupero elementi locali
+    	for (element in data) {
+    		console.log('element : ', element); // dimensions, cubes, ecc...
+    		if (element === 'dimensions') {
+    			const dimensions = storage.dimensions;
+    			data[element].forEach( (el) => {
+    				// se l'elemento in local è già presente sul DB lo elimino dall'array dimensions, gli elementi rimanenti da questa operazione andranno ad aggiungersi alla Dialog Versioning
+    				// ... questi sono elemeneti che si trovano SOLO in local, es.: in fase di sviluppo in locale
+    				if (dimensions.includes(el.name)) {
+    					dimensions.splice(dimensions.indexOf(el.name), 1);
+    				}
+    			});
+    			console.log('dimensions', dimensions);
+    			dimensions.forEach( (el) => {
+    				const tmplContent = app.tmplVersioningDB.content.cloneNode(true);
+					let sectionSearchable = tmplContent.querySelector('section[data-searchable]')
+					let versioningStatus = tmplContent.querySelector('.versioning-status');
+					let iconStatus = versioningStatus.querySelector('i');
+					let descrStatus = versioningStatus.querySelector('.vers-status-descr');
+					let actions = versioningStatus.querySelector('.vers-actions');
+					const parent = document.querySelector("section[data-versioning-elements] div[data-id='versioning-content'][data-object='dimensions']");
+					iconStatus.innerText = 'info';
+					iconStatus.classList.add('md-done');
+					descrStatus.innerText = 'TEST';
+					versioningStatus.querySelector('.vers-title').innerText = el;
+					sectionSearchable.setAttribute('data-search', 'versioning-db-search');
+					sectionSearchable.setAttribute('label', el);
+					parent.appendChild(sectionSearchable);
+    			});
+    		}
+    	}
+    };
+
     // versioning
     // popolo gli elementi restituiti dalle chiamate fetch API nei tasti nel drawer (Dimensioni, Cubi, ecc...)
     app.createVersioningElements = (data) => {
@@ -1113,20 +1148,19 @@ var dimension = new Dimension();
 				let descrStatus = versioningStatus.querySelector('.vers-status-descr');
 				let actions = versioningStatus.querySelector('.vers-actions');
 				const parent = document.querySelector("section[data-versioning-elements] div[data-id='versioning-content'][data-object='" + element + "']");
-				// debugger;
 
 				const jsonParsed = JSON.parse(el.json_value);
-				// se l'elemento recuperato dal DB è già presente in localStorage, ed è diverso, non lo aggiorno, si potrà scegliere di aggiornarlo/sovrascriverlo da un altro tasto
+				// se l'elemento recuperato dal DB è già presente in localStorage, ed è diverso, non lo aggiorno, si potrà scegliere di aggiornarlo/sovrascriverlo successivamente
 				// console.log(jsonParsed.name);
 				// console.log(JSON.parse(window.localStorage.getItem(jsonParsed.name)).name);
 				
-				// verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore a causa della prop 'name'
+				// verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore a causa della prop 'name', se non esiste un determinato Elemento
 				if (JSON.parse(window.localStorage.getItem(jsonParsed.name))) {
 					if ( jsonParsed.name === JSON.parse(window.localStorage.getItem(jsonParsed.name)).name ) {
 	    				// se l'elemento è già presente in locale verifico anche se il suo contenuto è uguale a quello del DB
-	    				console.log('elemento già presente in locale', jsonParsed.name);
+	    				// console.log('elemento già presente in locale', jsonParsed.name);
 	    				if (el.json_value === window.localStorage.getItem(jsonParsed.name)) {
-	    					console.info('UGUALE CONTENTUO JSON, ELEMENTO RESTA INVARIATO IN LOCALE');
+	    					// console.info('UGUALE CONTENTUO JSON, ELEMENTO RESTA INVARIATO IN LOCALE');
 	    					iconStatus.innerText = 'remove';
 	    					iconStatus.classList.add('md-status'); // darkgrey
 	    					descrStatus.innerText = 'Sincronizzato con DB';
@@ -1140,7 +1174,7 @@ var dimension = new Dimension();
 	    				}
 	    			}
 				} else {
-					// elemento non presente in locale, lo salvo
+					// elemento non presente in locale, lo salvo direttamente
 					window.localStorage.setItem(jsonParsed.name, el.json_value);
 					iconStatus.innerText = 'done';
 					iconStatus.classList.add('md-done');
@@ -1157,9 +1191,8 @@ var dimension = new Dimension();
     	app.checkVersioning();
     };
 
-	// promise.all
+	// promise.all, recupero tutti gli elementi presenti sul DB (dimensioni, cubi, filtri, ecc...)
 	app.fetchAPIRequestVersioningAll = async () => {
-		// viene invocata da tutti i template
 		const urls = [
 			'/fetch_api/versioning/dimensions',
 			'/fetch_api/versioning/cubes',
@@ -1193,7 +1226,10 @@ var dimension = new Dimension();
 					...
 					]
 				*/
+				// console.log('elementData : ', elementData);
 				app.createVersioningElements(elementData);
+				// controllo inverso, recupero gli elementi in locale che non sono presenti sul DB (es.: Dimensioni e cubi in fase di sviluppo)
+				app.test(elementData);
 			});
 		} )
 		.catch( err => console.error(err));
