@@ -2,14 +2,27 @@
 La classe recupera il local storage ad ogni accesso alla pagina e contiene Metodi per recuperare ad esempio solo i CUBE o solo le DIMENSION, ecc...
 */
 class Storages {
-	#dimensions = [];
+	#dimensions = new Set();
+	#cubes = new Set();
+	#metrics = new Set();
+	#filters = new Set();
+	#processes = new Set();
+	#all = new Set();
 	constructor() {
 		this.storage = window.localStorage;
 		this.storageKeys = Object.keys(window.localStorage);
 		// console.log('storageKeys : ', this.storageKeys);
 		// this.cubeId = this._cubeId;
 		this.JSONData = null;
-		// this.dimensions; // chiamo il metodo get dimensions() per recuperare un array di nomi di dimensioni (versioning)
+	}
+
+	get allLocalElements() {
+		this.storageKeys.forEach((key) => {
+			let jsonStorage = JSON.parse(this.storage.getItem(key));
+			// console.log(key);
+			this.#all.add(jsonStorage.name);
+		});
+		return this.#all;
 	}
 
 	get dimensions() {
@@ -17,19 +30,61 @@ class Storages {
 			let jsonStorage = JSON.parse(this.storage.getItem(key));
 			// console.log(key);
 			if (jsonStorage.type === 'DIMENSION') {
-				// this.#dimensions.add(jsonStorage);
-				this.#dimensions.push(key);
+				this.#dimensions.add(jsonStorage.name);
+				// this.#dimensions.push(key);
 			}
 		});
 		return this.#dimensions;
+	}
+
+	get cubes() {
+		this.storageKeys.forEach((key) => {
+			let jsonStorage = JSON.parse(this.storage.getItem(key));
+			// console.log(key);
+			if (jsonStorage.type === 'CUBE') {
+				this.#cubes.add(jsonStorage.name);
+			}
+		});
+		return this.#cubes;
+	}
+
+	get filters() {
+		this.storageKeys.forEach((key) => {
+			let jsonStorage = JSON.parse(this.storage.getItem(key));
+			// console.log(key);
+			if (jsonStorage.type === 'FILTER') {
+				this.#filters.add(jsonStorage.name);
+			}
+		});
+		return this.#filters;
+	}
+
+	get processes() {
+		this.storageKeys.forEach((key) => {
+			let jsonStorage = JSON.parse(this.storage.getItem(key));
+			// console.log(key);
+			if (jsonStorage.type === 'PROCESS') {
+				this.#processes.add(jsonStorage.name);
+			}
+		});
+		return this.#processes;
+	}
+
+	get metrics() {
+		this.storageKeys.forEach((key) => {
+			let jsonStorage = JSON.parse(this.storage.getItem(key));
+			// console.log(key);
+			if (jsonStorage.type === 'METRIC') {
+				this.#metrics.add(jsonStorage.name);
+			}
+		});
+		return this.#metrics;
 	}
 
 	set save(value) {
 		// salvo nello storage
 		window.localStorage.setItem(value.name, JSON.stringify(value));
 	}
-
-
 
 	JSONFormat(name) {
 		// restituisco un object convertito in json, questo mi servirà per ricostruire la struttura

@@ -10,9 +10,6 @@ var storage = new Storages();
 		dialogHierarchyName : document.getElementById('hierarchy-name'),
 		dialogVersioning : document.getElementById('versioning'),
 
-		/* template */
-		tmplVersioningDB : document.getElementById('versioning-db'),
-
 		hierarchyContainer : document.getElementById('hierarchiesContainer'), // struttura gerarchica sulla destra
 
 		btnBack : document.getElementById('mdc-back'),
@@ -31,7 +28,7 @@ var storage = new Storages();
 		btnSaveCube : document.getElementById('saveCube'),
 		btnSaveCubeName : document.getElementById('btnCubeSaveName'),
 		btnSaveOpenedCube : document.getElementById('saveOpenedCube'),
-		btnVersioningStatus : document.getElementById('versioning-status'),
+		
 
 		// tasto openTableList
 		btnTableList : document.getElementById('openTableList'),
@@ -930,9 +927,6 @@ var storage = new Storages();
 	};
 
 	app.btnBack.onclick = () => {window.location.href = '/';};
-	
-	// app.btnVersioningStatus.onclick = () => window.location.href = '/versioning'; // apro una nuova pagina
-	app.btnVersioningStatus.onclick = () => app.dialogVersioning.showModal();
 
 	/* ricerca in lista tabelle */
 	document.getElementById('tableSearch').oninput = App.searchInList;
@@ -1078,225 +1072,4 @@ var storage = new Storages();
 
     app.handlerGuide();
 
-    app.checkVersioning = () => {
-    	// debugger;
-    	const warningElements = app.dialogVersioning.querySelectorAll('.versioning-status > .vers-status > i.md-warning');
-    	const doneElements = app.dialogVersioning.querySelectorAll('.versioning-status > .vers-status > i.md-done'); // elementi non presenti in locale e scaricati da DB
-    	const unmodifiedElements = app.dialogVersioning.querySelectorAll('.versioning-status > .vers-status > i.md-status'); // elementi non modificati perchè sincronizzati con il DB
-    	// console.log('warningElements : ', warningElements.length);
-    	let popupsMessage = '';
-    	// debugger;
-    	if (warningElements.length !== 0) {
-    		app.btnVersioningStatus.classList.add('md-warning');
-    		popupsMessage = `<p>${warningElements.length} elementi non sincronizzati</p>`;
-    	}
-    	if (doneElements.length !== 0) {
-    		popupsMessage = `<p>${doneElements.length} elementi nuovi scaricati</p>`;
-    	}
-		app.btnVersioningStatus.nextElementSibling.innerHTML = popupsMessage+`<p>${unmodifiedElements.length} elementi gi&agrave; sincronizzati</p>`;
-    };
-
-    app.test = (data) => {
-    	// recupero elementi locali
-    	for (element in data) {
-    		console.log('element : ', element); // dimensions, cubes, ecc...
-    		if (element === 'dimensions') {
-    			const dimensions = storage.dimensions;
-    			data[element].forEach( (el) => {
-    				// se l'elemento in local è già presente sul DB lo elimino dall'array dimensions, gli elementi rimanenti da questa operazione andranno ad aggiungersi alla Dialog Versioning
-    				// ... questi sono elemeneti che si trovano SOLO in local, es.: in fase di sviluppo in locale
-    				if (dimensions.includes(el.name)) {
-    					dimensions.splice(dimensions.indexOf(el.name), 1);
-    				}
-    			});
-    			console.log('dimensions', dimensions);
-    			dimensions.forEach( (el) => {
-    				const tmplContent = app.tmplVersioningDB.content.cloneNode(true);
-					let sectionSearchable = tmplContent.querySelector('section[data-searchable]')
-					let versioningStatus = tmplContent.querySelector('.versioning-status');
-					let iconStatus = versioningStatus.querySelector('i');
-					let descrStatus = versioningStatus.querySelector('.vers-status-descr');
-					let actions = versioningStatus.querySelector('.vers-actions');
-					const parent = document.querySelector("section[data-versioning-elements] div[data-id='versioning-content'][data-object='dimensions']");
-					iconStatus.innerText = 'info';
-					iconStatus.classList.add('md-done');
-					descrStatus.innerText = 'TEST';
-					versioningStatus.querySelector('.vers-title').innerText = el;
-					sectionSearchable.setAttribute('data-search', 'versioning-db-search');
-					sectionSearchable.setAttribute('label', el);
-					parent.appendChild(sectionSearchable);
-    			});
-    		}
-    	}
-    };
-
-    // versioning
-    // popolo gli elementi restituiti dalle chiamate fetch API nei tasti nel drawer (Dimensioni, Cubi, ecc...)
-    app.createVersioningElements = (data) => {
-    	// ciclo le dimensioni per inserirle nella dialog #versioning ed anche nello storage in locale
-    	// icona 'versioning-status' nella actions, questa icona viene colorata in base agli Oggetti trovati qui, in base a questo schema:
-    	// rossa : ci sono elementi non sincronizzati DB/Local
-    	// normal : Tutti gli elementi sono aggiornati DB/Local
-    	for (element in data) {
-    		// console.log('element : ', element);
-    		data[element].forEach( (el) => {
-	    		// template
-				const tmplContent = app.tmplVersioningDB.content.cloneNode(true);
-				let sectionSearchable = tmplContent.querySelector('section[data-searchable]')
-				let versioningStatus = tmplContent.querySelector('.versioning-status');
-				let iconStatus = versioningStatus.querySelector('i');
-				let descrStatus = versioningStatus.querySelector('.vers-status-descr');
-				let actions = versioningStatus.querySelector('.vers-actions');
-				const parent = document.querySelector("section[data-versioning-elements] div[data-id='versioning-content'][data-object='" + element + "']");
-
-				const jsonParsed = JSON.parse(el.json_value);
-				// se l'elemento recuperato dal DB è già presente in localStorage, ed è diverso, non lo aggiorno, si potrà scegliere di aggiornarlo/sovrascriverlo successivamente
-				// console.log(jsonParsed.name);
-				// console.log(JSON.parse(window.localStorage.getItem(jsonParsed.name)).name);
-				
-				// verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore a causa della prop 'name', se non esiste un determinato Elemento
-				if (JSON.parse(window.localStorage.getItem(jsonParsed.name))) {
-					if ( jsonParsed.name === JSON.parse(window.localStorage.getItem(jsonParsed.name)).name ) {
-	    				// se l'elemento è già presente in locale verifico anche se il suo contenuto è uguale a quello del DB
-	    				// console.log('elemento già presente in locale', jsonParsed.name);
-	    				if (el.json_value === window.localStorage.getItem(jsonParsed.name)) {
-	    					// console.info('UGUALE CONTENTUO JSON, ELEMENTO RESTA INVARIATO IN LOCALE');
-	    					iconStatus.innerText = 'remove';
-	    					iconStatus.classList.add('md-status'); // darkgrey
-	    					descrStatus.innerText = 'Sincronizzato con DB';
-	    				} else {
-	    					// elemento presente ma contenuto diverso dal DB, da aggiornare manualmente
-	    					iconStatus.innerText = 'clear';
-	    					iconStatus.classList.add('md-warning'); // brown
-	    					descrStatus.innerText = 'Non sincronizzato';
-	    					// icona per recuperare manualmente l'elemento
-	    					actions.querySelector('.popupContent[data-get_app]').removeAttribute('hidden');
-	    				}
-	    			}
-				} else {
-					// elemento non presente in locale, lo salvo direttamente
-					window.localStorage.setItem(jsonParsed.name, el.json_value);
-					iconStatus.innerText = 'done';
-					iconStatus.classList.add('md-done');
-					descrStatus.innerText = 'Aggiornato';
-				}
-				versioningStatus.querySelector('.vers-title').innerText = jsonParsed.name;
-				sectionSearchable.setAttribute('data-search', 'versioning-db-search');
-				sectionSearchable.setAttribute('label', jsonParsed.name);
-				parent.appendChild(sectionSearchable);
-	    	});
-    	}
-
-    	// dopo aver caricato tutti gli elementi nella dialog versioning, imposto il colore del tasto btnVersioningStatus in base allo status degli elementi
-    	app.checkVersioning();
-    };
-
-	// promise.all, recupero tutti gli elementi presenti sul DB (dimensioni, cubi, filtri, ecc...)
-	app.fetchAPIRequestVersioningAll = async () => {
-		const urls = [
-			'/fetch_api/versioning/dimensions',
-			'/fetch_api/versioning/cubes',
-			'/fetch_api/versioning/metrics',
-			'/fetch_api/versioning/filters',
-			'/fetch_api/versioning/processes'
-		];
-		// ottengo tutte le risposte in un array
-		await Promise.all(urls.map( url => fetch(url) ))
-		.then(responses => {
-			return Promise.all(responses.map(response => {
-				if (!response.ok) {throw Error(response.statusText);}
-				return response.json();
-			}))
-		})
-		.then( (data) => {
-			/*
-			 data : [
-			 	0 : ['dimensions' : [risultato della query]],
-			 	1 : ['cubes' : [risultato della query]],
-			 	2 : ['metrics' : [risultato della query]],
-			 	...
-			 ]
-			*/
-			console.log(data);
-			data.forEach( (elementData) => {
-				/*
-				elementData = [
-					'dimensions' : [risultato della query]
-					'cubes' : [risultato della query],
-					...
-					]
-				*/
-				// console.log('elementData : ', elementData);
-				app.createVersioningElements(elementData);
-				// controllo inverso, recupero gli elementi in locale che non sono presenti sul DB (es.: Dimensioni e cubi in fase di sviluppo)
-				app.test(elementData);
-			});
-		} )
-		.catch( err => console.error(err));
-	};
-
-    app.fetchAPIRequestVersioningAll();
-
-    app.btnCubes.onclick = (e) => {
-    	if (document.querySelector('#nav-objects a[selected]')) {
-    		document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
-    		// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
-    		// app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([data-object="cubes"])').setAttribute('hidden', true);
-    		app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
-    	}
-
-		e.target.setAttribute('selected', true);
-    	// app.fetchAPIRequestVersioning('/fetch_api/versioning/cubes');
-    	document.querySelector('div[data-object="cubes"]').removeAttribute('hidden');
-    }
-
-    app.btnDimensions.onclick = (e) => {
-    	// rimuovo il selected da eventuali selezioni precedenti
-    	if (document.querySelector('#nav-objects a[selected]')) {
-    		document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
-    		// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
-    		// app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([data-object="dimensions"])').setAttribute('hidden', true);
-    		app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
-    	}
-
-    	e.target.setAttribute('selected', true);
-    	// TODO: nascondo i div che hanno data-objects diverso da 'dimensions'
-    	// visualizzo il div[hidden] contenente le dimensioni
-    	document.querySelector('div[data-object="dimensions"]').removeAttribute('hidden');
-    }
-	
-    app.btnMetrics.onclick = (e) => {
-    	if (document.querySelector('#nav-objects a[selected]')) {
-    		document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
-    		// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
-    		// app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([data-object="metrics"])').setAttribute('hidden', true);
-    		app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
-    	}
-    	e.target.setAttribute('selected', true);
-    	// app.fetchAPIRequestVersioning('/fetch_api/versioning/metrics');
-    	document.querySelector('div[data-object="metrics"]').removeAttribute('hidden');
-    }
-    
-    app.btnFilters.onclick = (e) => {
-    	if (document.querySelector('#nav-objects a[selected]')) {
-    		document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
-    		// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
-    		app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
-    	}
-    	e.target.setAttribute('selected', true);
-    	document.querySelector('div[data-object="filters"]').removeAttribute('hidden');
-    	// app.fetchAPIRequestVersioning('/fetch_api/versioning/filters');
-    }
-    
-    app.btnProcesses.onclick = (e) => {
-    	if (document.querySelector('#nav-objects a[selected]')) {
-    		document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
-    		// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
-    		app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
-    	}
-    	e.target.setAttribute('selected', true);
-    	document.querySelector('div[data-object="processes"]').removeAttribute('hidden');
-    	// app.fetchAPIRequestVersioning('/fetch_api/versioning/processes');
-    }
-    
 })();

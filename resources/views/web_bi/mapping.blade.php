@@ -41,8 +41,8 @@
                     <div class="vers-status"><i class="material-icons"></i></div>
                     <div class="vers-status-descr"></div>
                     <div class="vers-actions">
-                        <span class="popupContent" data-get_app hidden><i class="material-icons md-warning">get_app</i><small class="popup">Sovrascrivi copia locale</small></span>
-                        <span class="popupContent" data-example hidden><i class="material-icons md-indianred">clear</i><small class="popup">altra azione da definire</small></span>
+                        <span class="popupContent" data-download hidden><i class="material-icons md-warning">download</i><small class="popup">Sovrascrivi copia locale</small></span>
+                        <span class="popupContent" data-upload hidden><i data-id="btn-upload-local-object" class="material-icons md-info">upload</i><small class="popup">Salva su DB</small></span>
                     </div>
                 </div>
             </section>
@@ -65,20 +65,28 @@
                     </fieldset>
                     <fieldset class="auto-grid">
                         <legend>Lista elementi sincronizzati dal DB</legend>
-                        <div class="md-field">
-                            {{-- data-element-search indica gli elementi dove questa input deve effettuare la ricerca --}}
-                            <input type="search" id="search-db" value="" data-element-search="versioning-db-search" data-search-type="generic-search" autocomplete="off" autofocus/>
-                            <label for="search-db" class="">Ricerca</label>
+                        <div class="search-filter">
+                            <div class="md-field">
+                                {{-- data-element-search indica gli elementi dove questa input deve effettuare la ricerca --}}
+                                <input type="search" id="search-db" value="" data-element-search="versioning-db-search" data-search-type="generic-search" autocomplete="off" autofocus/>
+                                <label for="search-db" class="">Ricerca</label>
+                            </div>
+                            {{-- <input type="checkbox" value="Elementi in locale" checked> --}}
+                            <label class="pure-material-switch">
+                                <input type="checkbox" id="chk-local-db-switch" class="js-push-btn">
+                                <span>Visualizza solo elementi in locale</span>
+                            </label>
                         </div>
+                        
                         <section data-versioning-elements>
                             {{-- @php  --}}
                                 {{-- $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione --}}
                             {{-- @endphp --}}
                             <div class="versioning-status-header">
-                                <div>Title</div>
-                                <div>Status</div>
-                                <div>Descr. Status</div>
-                                <div>Action</div>
+                                <div>Nome</div>
+                                <div>Stato</div>
+                                <div>Descr. Stato</div>
+                                <div>Azione</div>
                             </div>
                             <div data-id="versioning-content" class="versioning-content overflow-y" data-object="dimensions" hidden> {{-- l'attributo data-object deve corrispondere al risultato della query restituita da BidimensionController, BIcubesController, ecc...--}}
                                 {{-- qui viene popolato tramite template --}}
@@ -386,5 +394,6 @@
             </svg>
         </div>
         <script type="text/javascript" src="/js/init.js" async></script>
+        <script type="text/javascript" src="/js/init_versioning.js" async></script>
     </body>
 </html>

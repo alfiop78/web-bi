@@ -21,10 +21,10 @@ fieldset.auto-grid{display: grid; grid-template-rows: auto 1fr auto;}
 .versioning-status > div:not(:first-child){text-align: center;}
 .versioning-status .vers-title{padding: 10px;}
 .versioning-status .vers-status-descr{padding: 10px;}
-.versioning-status .vers-actions{padding: 10px;}
 .versioning-status-header{display: grid; grid-template-columns: 40% 10% 25% 25%; font-weight: bold; font-size: .8rem;}
 .versioning-status-header > div{text-align: center;}
 .versioning-sections fieldset{border-color: rgb(0 0 0 / 15%);border-width: 1px;border-radius: 4px;padding: 2em;}
 .versioning-sections .versioning-content.overflow-y{overflow-y: scroll;margin-top: 1.5em;margin-bottom: 1.5em;font-size: .8rem;}
 section[data-versioning-elements]{display: grid; grid-template-rows: auto 400px;}
+.search-filter{display: flex;justify-content: space-between;}
 /* dialog versioning */
