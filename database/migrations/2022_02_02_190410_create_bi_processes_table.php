@@ -4,8 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-// php artisan make:migration create_bi_processes_table --create=bi_processes
-// php artisan migrate --path=/database/migrations/2022_01_14_150552_create_bi_processes_table.php
 class CreateBiProcessesTable extends Migration
 {
     /**
@@ -16,10 +14,9 @@ class CreateBiProcessesTable extends Migration
     public function up()
     {
         Schema::create('bi_processes', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
+            // $table->id();
+            $table->string('name')->primary();
             $table->longText('json_value');
-            // TODO: created_at e updated_at non vengono popolate
             $table->timestamps();
         });
     }

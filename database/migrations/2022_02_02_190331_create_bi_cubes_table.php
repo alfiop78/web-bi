@@ -14,8 +14,8 @@ class CreateBiCubesTable extends Migration
     public function up()
     {
         Schema::create('bi_cubes', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
+            // $table->id();
+            $table->string('name')->primary();
             $table->longText('json_value');
             $table->timestamps();
         });

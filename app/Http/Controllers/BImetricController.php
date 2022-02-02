@@ -15,7 +15,6 @@ class BImetricController extends Controller
     public function index()
     {
         $metrics = BImetric::all();
-        // dd($dimensions);
         return response()->json(['metrics' => $metrics]);
     }
 
@@ -41,7 +40,6 @@ class BImetricController extends Controller
         // l'inserimento con Eloquent ha inserito anche i campi created_at/updated_at
         $metric = new BImetric();
         // il nome della tabella è impostato nel Model
-        $key = $jsonContent->{'name'};
         $metric->name = $jsonContent->{'name'};
         $metric->json_value = $json;
         return $metric->save();
@@ -55,7 +53,7 @@ class BImetricController extends Controller
      */
     public function show(BImetric $bImetric)
     {
-        //
+        
     }
 
     /**
@@ -87,8 +85,9 @@ class BImetricController extends Controller
      * @param  \App\Models\BImetric  $bImetric
      * @return \Illuminate\Http\Response
      */
-    public function destroy(BImetric $bImetric)
+    public function destroy(BImetric $bImetric, $name)
     {
-        //
+        $element = $bImetric::findOrFail($name);
+        return $element->delete();
     }
 }

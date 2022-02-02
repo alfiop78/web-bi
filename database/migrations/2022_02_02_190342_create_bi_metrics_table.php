@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBiFiltersTable extends Migration
+class CreateBiMetricsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class CreateBiFiltersTable extends Migration
      */
     public function up()
     {
-        Schema::create('bi_filters', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
+        Schema::create('bi_metrics', function (Blueprint $table) {
+            // $table->id();
+            $table->string('name')->primary();
             $table->longText('json_value');
             $table->timestamps();
         });
@@ -28,6 +28,6 @@ class CreateBiFiltersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('bi_filters');
+        Schema::dropIfExists('bi_metrics');
     }
 }

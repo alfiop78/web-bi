@@ -41,7 +41,6 @@ class BIfilterController extends Controller
         // l'inserimento con Eloquent ha inserito anche i campi created_at/updated_at
         $filter = new BIfilter();
         // il nome della tabella è impostato nel Model
-        $key = $jsonContent->{'name'};
         $filter->name = $jsonContent->{'name'};
         $filter->json_value = $json;
         return $filter->save();
@@ -87,8 +86,10 @@ class BIfilterController extends Controller
      * @param  \App\Models\BIfilter  $bIfilter
      * @return \Illuminate\Http\Response
      */
-    public function destroy(BIfilter $bIfilter)
+    public function destroy(BIfilter $bIfilter, $name)
     {
-        //
+        $element = $bIfilter::findOrFail($name);
+        // dd($element);
+        return $element->delete();
     }
 }

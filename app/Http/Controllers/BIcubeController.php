@@ -15,7 +15,6 @@ class BIcubeController extends Controller
     public function index()
     {
         $cubes = BIcube::all();
-        // dd($dimensions);
         return response()->json(['cubes' => $cubes]);
     }
 
@@ -41,7 +40,6 @@ class BIcubeController extends Controller
         // l'inserimento con Eloquent ha inserito anche i campi created_at/updated_at
         $cube = new BIcube();
         // il nome della tabella è impostato nel Model
-        $key = $jsonContent->{'name'};
         $cube->name = $jsonContent->{'name'};
         $cube->json_value = $json;
         return $cube->save();
@@ -55,7 +53,7 @@ class BIcubeController extends Controller
      */
     public function show(BIcube $bIcube)
     {
-        //
+        
     }
 
     /**
@@ -87,8 +85,9 @@ class BIcubeController extends Controller
      * @param  \App\Models\BIcube  $bIcube
      * @return \Illuminate\Http\Response
      */
-    public function destroy(BIcube $bIcube)
+    public function destroy(BIcube $bIcube, $name)
     {
-        //
+        $element = $bIcube::findOrFail($name);
+        return $element->delete();
     }
 }
