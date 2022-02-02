@@ -123,7 +123,9 @@ var storage = new Storages();
 				descrStatus.innerText = 'In locale';
 				versioningStatus.querySelector('.vers-title').innerText = el;
 				sectionSearchable.setAttribute('data-search', 'versioning-db-search');
-				sectionSearchable.setAttribute('data-object-type', 'local');
+				sectionSearchable.setAttribute('data-object-storage', 'local');
+				sectionSearchable.setAttribute('data-object-type', element);
+				sectionSearchable.setAttribute('data-object-name', el);
 				sectionSearchable.setAttribute('label', el);
 				// icona per recuperare manualmente l'elemento
 				actions.querySelector('.popupContent[data-upload]').removeAttribute('hidden');
@@ -199,7 +201,9 @@ var storage = new Storages();
 					actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-type', element);
 				}
 				versioningStatus.querySelector('.vers-title').innerText = jsonParsed.name;
-				sectionSearchable.setAttribute('data-object-type', 'db');
+				sectionSearchable.setAttribute('data-object-storage', 'db');
+				sectionSearchable.setAttribute('data-object-type', element);
+				sectionSearchable.setAttribute('data-object-name', jsonParsed.name);
 				sectionSearchable.setAttribute('data-search', 'versioning-db-search');
 				sectionSearchable.setAttribute('label', jsonParsed.name);
 				parent.appendChild(sectionSearchable);
@@ -293,6 +297,16 @@ var storage = new Storages();
 				if (data) {
 					console.log('data : ', data);
 					console.log('ELEMENTO SALVATO CORRETTAMENTE');
+					// reimposto l'icona in .vers-status
+					const sectionElement = app.dialogVersioning.querySelector("section[data-object-name='" + name + "'][data-object-type='" + type + "']");
+					sectionElement.querySelector('.vers-status > i').innerText = 'sync';
+					sectionElement.querySelector('.vers-status > i').classList.replace('md-attention', 'md-status');
+					// reimposto la descr.status su 'Sincronizzato'
+					sectionElement.querySelector('.vers-status-descr').innerText = 'Sincronizzato con DB';
+					// reimposto l'icona con data-id="btn-delete" eliminando l'attributo data-object-storage (in questo modo, quando si elimina un elemento si elimina da DB/local)
+					sectionElement.querySelector('.vers-actions i[data-id="btn-delete"]').removeAttribute('data-object-storage');
+					// nascondo l'icona 
+					sectionElement.querySelector('.vers-actions span[data-upload]').hidden = true;
 				} else {
 					console.error('Elemento non salvato su DB');
 				}
@@ -337,10 +351,10 @@ var storage = new Storages();
 				if (data) {
 					console.log('data : ', data);
 					console.log('ELEMENTO ELIMINATO CON SUCCESSO!');
-					// TODO: aggiorno gli elementi del Versioning
 					// lo elimino anche dal localStorage
-					debugger;
 					window.localStorage.removeItem(name);
+					// elimino anche dal DOM l'elemento
+					app.dialogVersioning.querySelector("section[data-object-type='" + type + "'][data-object-name='" + name + "']").remove();
 				} else {
 					console.error("Problema con l'eliminazione dell'elemento");
 				}
@@ -358,7 +372,6 @@ var storage = new Storages();
 				console.log('btn upload');
 				console.log('e.target : ', e.target);
 				app.saveObjectOnDB(e.target.getAttribute('data-object-name'), e.target.getAttribute('data-object-type'));
-				// TODO: dopo aver salvato su DB, devo riaggiornare lo stato del versionamento, cambiando le icone e le altre colonne per portare l'elemento nel nuovo stato dopo il salvataggio su DB.
 				break;
 			case 'btn-delete':
 				console.log('btn delete');
@@ -446,12 +459,12 @@ var storage = new Storages();
 		if (e.target.checked) {
 			// abilitato : Visualizzo solo gli elementi in locale
 			// span.innerText = 'Locale';
-			app.dialogVersioning.querySelectorAll('.versioning-content > section[data-object-type="db"]').forEach( (el) => el.setAttribute('hidden', true));
-			app.dialogVersioning.querySelectorAll('.versioning-content > section[data-object-type="local"]').forEach( (el) => el.removeAttribute('hidden'));
+			app.dialogVersioning.querySelectorAll('.versioning-content > section[data-object-storage="db"]').forEach( (el) => el.setAttribute('hidden', true));
+			app.dialogVersioning.querySelectorAll('.versioning-content > section[data-object-storage="local"]').forEach( (el) => el.removeAttribute('hidden'));
 		} else {
 			// disabilitato : visualizzo elementi su DB (default)
 			// span.innerText = 'Database';
-			app.dialogVersioning.querySelectorAll('.versioning-content > section[data-object-type]').forEach( (el) => el.removeAttribute('hidden', true));
+			app.dialogVersioning.querySelectorAll('.versioning-content > section[data-object-storage]').forEach( (el) => el.removeAttribute('hidden', true));
 		}
 	};
 	

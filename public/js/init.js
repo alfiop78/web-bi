@@ -704,7 +704,6 @@ var dimension = new Dimension();
             if (data) {
               console.log('data : ', data);
               console.log('CUBO SALVATO CORRETTAMENTE');
-              // NOTE: qui ho creato la FX, a questo punto potrei scegliere di visualizzare il report, per il momento mi serve solo la FX.
               // app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
             } else {
               // TODO: no data
@@ -774,7 +773,6 @@ var dimension = new Dimension();
             if (data) {
               console.log('data : ', data);
               console.log('DIMENSIONE SALVATA CORRETTAMENTE');
-              // NOTE: qui ho creato la FX, a questo punto potrei scegliere di visualizzare il report, per il momento mi serve solo la FX.
               // app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
             } else {
               // TODO: no data
