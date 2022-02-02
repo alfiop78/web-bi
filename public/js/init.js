@@ -2,7 +2,6 @@ var App = new Application();
 var cube = new Cube();
 var StorageCube = new CubeStorage();
 var dimension = new Dimension();
-var storage = new Storages();
 (() => {
 	var app = {
 		dialogCubeName : document.getElementById('cube-name'),

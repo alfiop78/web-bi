@@ -43,12 +43,14 @@ Route::get('/fetch_api/schema/{schema}/table/{table}/field/{field}/distinct_valu
 Route::get('/fetch_api/cube/{jsonData}/process', [MapDatabaseController::class, 'process'])->name('web_bi.fetch_api.process'); // processo la query che crea la FX
 // salvataggio oggetti sul metadato, dimensioni, cubi, metriche, filtri e processi
 Route::get('/fetch_api/json/{json}/dimension_store', [BIdimensionController::class, 'store']);
+Route::get('/fetch_api/name/{name}/dimension_destroy', [BIdimensionController::class, 'destroy']);
+
 Route::get('/fetch_api/json/{json}/cube_store', [BIcubeController::class, 'store']);
 Route::get('/fetch_api/json/{json}/metric_store', [BImetricController::class, 'store']);
 Route::get('/fetch_api/json/{json}/filter_store', [BIfilterController::class, 'store']);
 Route::get('/fetch_api/json/{json}/process_store', [BIprocessController::class, 'store']);
 // sincronizzazione dal DB per il metadato
-Route::get('/fetch_api/versioning/dimensions', [BIdimensionController::class, 'index']);
+Route::get('/fetch_api/versioning/dimensions', [BIdimensionController::class, 'show']);
 Route::get('/fetch_api/versioning/cubes', [BIcubeController::class, 'index']);
 Route::get('/fetch_api/versioning/metrics', [BImetricController::class, 'index']);
 Route::get('/fetch_api/versioning/filters', [BIfilterController::class, 'index']);

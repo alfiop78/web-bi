@@ -219,9 +219,10 @@ class CubeStorage extends Storages {
 }
 
 class ProcessStorage extends Storages {
+	#processes = {}; // lista dei process presenti nello storage
 	constructor() {
 		super();
-		this.processes = {}; // lista dei process presenti nello storage
+		// this.processes = {}; // lista dei process presenti nello storage
 		this.id = 0; // default
 		// imposto la lista dei cubi in this.cubes
 		this.storageKeys.forEach((key) => {
@@ -230,7 +231,7 @@ class ProcessStorage extends Storages {
 			if (jsonStorage.type === 'PROCESS') {
 				let reportProperties = {'name' : key, 'processId' : jsonStorage.processId};
 				// reports.push(reportProperties);
-				this.processes[key] = reportProperties;
+				this.#processes[key] = reportProperties;
 			}
 		});
 	}
@@ -278,7 +279,7 @@ class ProcessStorage extends Storages {
 	}
 
 	list(template, ul) {
-		for (let process in this.processes) {
+		for (let process in this.#processes) {
 			// console.log(proc);
 			// console.log(toBeProcessed[proc]);
 			console.log('template : ', template);
@@ -288,7 +289,7 @@ class ProcessStorage extends Storages {
 			let li = section.querySelector('li');
 			li.innerText = process;
 			li.setAttribute('label', process);
-			li.setAttribute('data-id', this.processes[process]['processId']);
+			li.setAttribute('data-id', this.#processes[process]['processId']);
 			ul.appendChild(section);
 		}
 	}

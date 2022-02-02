@@ -41,8 +41,14 @@
                     <div class="vers-status"><i class="material-icons"></i></div>
                     <div class="vers-status-descr"></div>
                     <div class="vers-actions">
-                        <span class="popupContent" data-download hidden><i class="material-icons md-warning">download</i><small class="popup">Sovrascrivi copia locale</small></span>
-                        <span class="popupContent" data-upload hidden><i data-id="btn-upload-local-object" class="material-icons md-info">upload</i><small class="popup">Salva su DB</small></span>
+                        {{-- Elimina Sviluppo/Produzione --}}
+                        <span class="popupContent" data-delete><i data-id="btn-delete" class="material-icons md-warning">clear</i></span>
+                        {{-- Sovrascrivi copia in Sviluppo --}}
+                        <span class="popupContent" data-download hidden><i class="material-icons">download</i></span>
+                        {{-- Sovrascrivi copia in Produzione --}}
+                        <span class="popupContent" data-upgrade hidden><i data-id="btn-upgrade-production" class="material-icons md-done">upload</i></span>
+                        {{-- Salva in Produzione --}}
+                        <span class="popupContent" data-upload hidden><i data-id="btn-upload-local-object" class="material-icons md-done">upload</i></span>
                     </div>
                 </div>
             </section>
@@ -259,14 +265,14 @@
                         
                         <div class="actions">
                             <div class="buttons">
-                                <span class="popupContent"><i id="openTableList" class="material-icons md-24 md-inactive">storage</i><small class="popup">Lista tabelle</small></span>
-                                <span class="popupContent"><i id="openDimensionList" class="material-icons md-24">mediation</i><small class="popup">Lista Dimensioni</small></span>
-                                <span class="popupContent"><i class="material-icons md-24">dashboard_customize</i><small class="popup">Nuova dimensione</small></span>
-                                <span class="popupContent"><i id="saveCube" class="material-icons md-24">save</i><small class="popup">Salva Cubo</small></span>
-                                <span class="popupContent" hide><i id="saveOpenedCube" class="material-icons md-24">save</i><small class="popup">Aggiorna Cubo</small></span>
-                                <span class="popupContent"><i id="processCube" class="material-icons md-24">folder_open</i><small class="popup">Lista Cubi definiti</small></span>
-                                <span class="popupContent"><i id="defineCube" class="material-icons md-24 md-inactive">space_dashboard</i><small class="popup">Definisci Cubo</small></span>
-                                <span class="popupContent"><i id="versioning-status" class="material-icons md-24">cached</i><small class="popup">Versionamento</small></span>
+                                <span class="popupContent"><i id="openTableList" class="material-icons md-24 md-inactive">storage</i><small class="popup"><p>Lista tabelle</p></small></span>
+                                <span class="popupContent"><i id="openDimensionList" class="material-icons md-24">mediation</i><small class="popup"><p>Lista Dimensioni</p></small></span>
+                                <span class="popupContent"><i class="material-icons md-24">dashboard_customize</i><small class="popup"><p>Nuova dimensione</p></small></span>
+                                <span class="popupContent"><i id="saveCube" class="material-icons md-24">save</i><small class="popup"><p>Salva Cubo</p></small></span>
+                                <span class="popupContent" hide><i id="saveOpenedCube" class="material-icons md-24">save</i><small class="popup"><p>Aggiorna Cubo</p></small></span>
+                                <span class="popupContent"><i id="processCube" class="material-icons md-24">folder_open</i><small class="popup"><p>Lista Cubi definiti</p></small></span>
+                                <span class="popupContent"><i id="defineCube" class="material-icons md-24 md-inactive">space_dashboard</i><small class="popup"><p>Definisci Cubo</p></small></span>
+                                <span class="popupContent"><i id="versioning-status" class="material-icons md-24">cached</i><small class="popup"><!-- contenuto dinamico --></small></span>
                             </div>
                             <div class="help-console">
                                 <span id="guide"></span>

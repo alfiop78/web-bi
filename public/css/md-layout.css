@@ -179,6 +179,7 @@ tr.tr-right{display: flex;justify-content: flex-end;}
 .help-console > #guide{padding: 6px;}
 /* .actions > span{display: flex;justify-content: center;position: relative;} */
 span.popupContent:hover small{visibility: visible; animation: popup 50ms ease;top: 42px;}
+.actions .buttons span.popupContent:first-child:hover small{visibility: visible; animation: popup 50ms ease;top: 42px;left: 0px;}
 span.popupContent[hidden]{display: none;}
 /*actions*/
 /* lo span che contiene l'icona e lo small della popup*/
@@ -186,7 +187,8 @@ span.popupContent[hide]{display: none;}
 span.popupContent{display: flex;justify-content: center;align-items: center;position: relative;}
 span.popupContent small{z-index: 1600;}
 small.popup{background: #494949;border-radius: 4px;color: white;font-size: .7rem;visibility: hidden;white-space: nowrap;
-  box-shadow: 0 2px 4px 0 black;padding: 4px 8px;position: absolute;}
+  box-shadow: 0 2px 4px 0 black;padding: 4px 8px;position: absolute; max-width: 400px;}
+small.popup > p > small{display: block;color: darkgrey;white-space: normal;}
 /*lo span che contiene l'icona e lo small della popup*/
 @keyframes popup {
   0% {transform: scale(.2);}
