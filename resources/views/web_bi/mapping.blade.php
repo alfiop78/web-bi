@@ -44,7 +44,7 @@
                         {{-- Elimina Sviluppo/Produzione --}}
                         <span class="popupContent" data-delete><i data-id="btn-delete" class="material-icons md-warning">clear</i></span>
                         {{-- Sovrascrivi copia in Sviluppo --}}
-                        <span class="popupContent" data-download hidden><i class="material-icons">download</i></span>
+                        <span class="popupContent" data-download hidden><i data-id="btn-download" class="material-icons">download</i></span>
                         {{-- Sovrascrivi copia in Produzione --}}
                         <span class="popupContent" data-upgrade hidden><i data-id="btn-upgrade-production" class="material-icons md-done">upload</i></span>
                         {{-- Salva in Produzione --}}

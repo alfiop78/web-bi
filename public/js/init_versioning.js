@@ -134,7 +134,7 @@ var storage = new Storages();
 				// imposto, sull'icona delete, gli attributi per eseguire la cancellazione. Aggiungo un ulteriore attributo per differenziare gli elementi in localStorage da quelli su DB.
 				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-name', el);
 				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-type', element);
-				// se è presente l'attributo data-object-storage, l'elemento deve essere eliminato SOLO dal LocalStorage, altrimenti sia dal LocalStorage che dal DB.
+				// NOTE: se è presente l'attributo data-object-storage, l'elemento deve essere eliminato SOLO dal LocalStorage, altrimenti sia dal LocalStorage che dal DB.
 				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-storage', true);
 				parent.appendChild(sectionSearchable);
 			});
@@ -174,7 +174,7 @@ var storage = new Storages();
 							// console.info('UGUALE CONTENTUO JSON, ELEMENTO RESTA INVARIATO IN LOCALE');
 							iconStatus.innerText = 'sync';
 							iconStatus.classList.add('md-status'); // darkgrey
-							descrStatus.innerText = 'Sincronizzato con DB';
+							descrStatus.innerText = 'Sincronizzato';
 							// icona delete
 							actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-name', jsonParsed.name);
 							actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-type', element);
@@ -185,6 +185,9 @@ var storage = new Storages();
 							descrStatus.innerText = 'Non sincronizzato';
 							// icona per recuperare manualmente l'elemento
 							actions.querySelector('.popupContent[data-download]').removeAttribute('hidden');
+							actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').setAttribute('data-object-name', jsonParsed.name);
+							actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').setAttribute('data-object-type', element);
+							// icona per versionare da Sviluppo->Produzione
 							actions.querySelector('.popupContent[data-upgrade]').removeAttribute('hidden');
 							actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').setAttribute('data-object-name', jsonParsed.name);
 							actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').setAttribute('data-object-type', element);
@@ -196,14 +199,13 @@ var storage = new Storages();
 					iconStatus.innerText = 'done';
 					iconStatus.classList.add('md-done');
 					descrStatus.innerText = 'Aggiornato';
-					// icona delete
-					actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-name', jsonParsed.name);
-					actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-type', element);
 				}
 				versioningStatus.querySelector('.vers-title').innerText = jsonParsed.name;
-				sectionSearchable.setAttribute('data-object-storage', 'db');
 				sectionSearchable.setAttribute('data-object-type', element);
 				sectionSearchable.setAttribute('data-object-name', jsonParsed.name);
+				// icona delete
+				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-name', jsonParsed.name);
+				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-type', element);
 				sectionSearchable.setAttribute('data-search', 'versioning-db-search');
 				sectionSearchable.setAttribute('label', jsonParsed.name);
 				parent.appendChild(sectionSearchable);
@@ -296,13 +298,13 @@ var storage = new Storages();
 				// console.log(data);
 				if (data) {
 					console.log('data : ', data);
-					console.log('ELEMENTO SALVATO CORRETTAMENTE');
+					console.log(name,' SALVATO CORRETTAMENTE');
 					// reimposto l'icona in .vers-status
 					const sectionElement = app.dialogVersioning.querySelector("section[data-object-name='" + name + "'][data-object-type='" + type + "']");
 					sectionElement.querySelector('.vers-status > i').innerText = 'sync';
 					sectionElement.querySelector('.vers-status > i').classList.replace('md-attention', 'md-status');
 					// reimposto la descr.status su 'Sincronizzato'
-					sectionElement.querySelector('.vers-status-descr').innerText = 'Sincronizzato con DB';
+					sectionElement.querySelector('.vers-status-descr').innerText = 'Sincronizzato';
 					// reimposto l'icona con data-id="btn-delete" eliminando l'attributo data-object-storage (in questo modo, quando si elimina un elemento si elimina da DB/local)
 					sectionElement.querySelector('.vers-actions i[data-id="btn-delete"]').removeAttribute('data-object-storage');
 					// nascondo l'icona 
@@ -362,6 +364,104 @@ var storage = new Storages();
 		.catch((err) => console.error(err));
 	};
 
+	app.downloadObjectFromDB = async (name, type) => {
+		let url;
+		switch (type) {
+			case 'dimensions':
+				url = '/fetch_api/name/'+name+'/dimension_show';
+				break;
+			case 'cubes':
+				url = '/fetch_api/name/'+name+'/cube_show';
+				break;
+			case 'filters':
+				url = '/fetch_api/name/'+name+'/filter_show';
+				break;
+			case 'metrics':
+				url = '/fetch_api/name/'+name+'/metric_show';
+				break;
+			default:
+				url = '/fetch_api/name/'+name+'/process_show';
+				break;
+		}
+		await fetch(url)
+			.then((response) => {
+				if (!response.ok) { throw Error(response.statusText); }
+				return response;
+			})
+			.then((response) => response.json())
+			.then((data) => {
+				// console.log(data);
+				if (data) {
+					console.log('data : ', data);
+					console.log('ELEMENTO SCARICATO CON SUCCESSO!');
+					storage.save = JSON.parse(data.json_value);
+					const sectionElement = app.dialogVersioning.querySelector("section[data-object-name='" + name + "'][data-object-type='" + type + "']");
+					console.log('sectionElement : ', sectionElement);
+					// modifico l'icona in .vers-status impostando sync con la classe md-status al posto di md-warning
+					sectionElement.querySelector('.vers-status > i').innerText = 'sync';
+					sectionElement.querySelector('.vers-status > i').classList.replace('md-warning', 'md-status');
+					// modifico la descrizione in .vers-status-descr impostando "Sincronizzato"
+					sectionElement.querySelector('.vers-status-descr').innerText = 'Sincronizzato';
+					// nascondo l'icona btn-download e btn-upgrade-production
+					sectionElement.querySelector('.vers-actions span[data-download]').hidden = true;
+					sectionElement.querySelector('.vers-actions span[data-upgrade]').hidden = true;
+				} else {
+					// TODO: 
+				}
+			})
+		.catch((err) => console.error(err));
+	};
+
+	app.upgradeObjectOnDB = async (name, type) => {
+		let url;
+		const json = window.localStorage.getItem(name);
+		switch (type) {
+			case 'dimensions':
+				url = '/fetch_api/json/'+json+'/dimension_update';
+				break;
+			case 'cubes':
+				url = '/fetch_api/json/'+json+'/cube_update';
+				break;
+			case 'filters':
+				url = '/fetch_api/json/'+json+'/filter_update';
+				break;
+			case 'metrics':
+				url = '/fetch_api/json/'+json+'/metric_update';
+				break;
+			default:
+				url = '/fetch_api/json/'+json+'/process_update';
+				break;
+		}
+		await fetch(url)
+			.then((response) => {
+				if (!response.ok) { throw Error(response.statusText); }
+				return response;
+			})
+			.then((response) => response.json())
+			.then((data) => {
+				// console.log(data);
+				if (data) {
+					console.log('data : ', data);
+					console.log('AGGIORNAMENTO AVVENUTO CON SUCCESSO!');
+					debugger;
+					const sectionElement = app.dialogVersioning.querySelector("section[data-object-name='" + name + "'][data-object-type='" + type + "']");
+					console.log('sectionElement : ', sectionElement);
+					// modifico l'icona in .vers-status impostando sync con la classe md-status al posto di md-warning
+					sectionElement.querySelector('.vers-status > i').innerText = 'sync';
+					sectionElement.querySelector('.vers-status > i').classList.replace('md-warning', 'md-status');
+					// modifico la descrizione in .vers-status-descr impostando "Sincronizzato"
+					sectionElement.querySelector('.vers-status-descr').innerText = 'Sincronizzato';
+					// nascondo l'icona btn-download e btn-upgrade-production
+					// sectionElement.querySelector('.vers-actions span[data-upload]').hidden = true;
+					sectionElement.querySelector('.vers-actions span[data-download]').hidden = true;
+					sectionElement.querySelector('.vers-actions span[data-upgrade]').hidden = true;
+				} else {
+					// TODO: 
+				}
+			})
+		.catch((err) => console.error(err));
+	};
+
 	// events
 
 	app.dialogVersioning.addEventListener('click', (e) => {
@@ -378,16 +478,43 @@ var storage = new Storages();
 				console.log('e.target : ', e.target);
 				// elimino l'elemento sia dal localStorage che dal DB. Se è presente l'attributo data-object-storage elimino questo elemento SOLO dallo storage locale (non da DB)
 				if (e.target.hasAttribute('data-object-storage')) {
-					// app.deleteObjectOnLocal();
 					window.localStorage.removeItem(e.target.getAttribute('data-object-name'));
+					const type = e.target.getAttribute('data-object-type');
+					const name = e.target.getAttribute('data-object-name');
+					// elimino anche dal DOM l'elemento
+					app.dialogVersioning.querySelector("section[data-object-type='" + type + "'][data-object-name='" + name + "']").remove();
 				} else {
 					app.deleteObjectOnDB(e.target.getAttribute('data-object-name'), e.target.getAttribute('data-object-type'));
 				}
+				break;
+			case 'btn-download':
+				// download, scarico l'elemento in locale, sovrascrivendo l'elemento già presente
+				app.downloadObjectFromDB(e.target.getAttribute('data-object-name'), e.target.getAttribute('data-object-type'));
+				break;
+			case 'btn-upgrade-production':
+				// aggiornamento dell'elemento, sovrascrivo l'elemento presente su DB tramite quello in localStorage
+				app.upgradeObjectOnDB(e.target.getAttribute('data-object-name'), e.target.getAttribute('data-object-type'));
 				break;
 			default:
 				break;
 		}
 	});
+
+	// switch DB / localStorage
+	app.btnSwitchLocalDB.onclick = (e) => {
+		// console.log('e.target : ', e.target);
+		// const span = e.target.parentElement.querySelector('span');
+		if (e.target.checked) {
+			// abilitato : Visualizzo solo gli elementi in locale
+			// span.innerText = 'Locale';
+			app.dialogVersioning.querySelectorAll('.versioning-content > section:not([data-object-storage])').forEach( (el) => el.setAttribute('hidden', true));
+			app.dialogVersioning.querySelectorAll('.versioning-content > section[data-object-storage]').forEach( (el) => el.removeAttribute('hidden'));
+		} else {
+			// disabilitato : visualizzo elementi TUTTI gli elementi, DB e LocalStorage (default)
+			// span.innerText = 'Database';
+			app.dialogVersioning.querySelectorAll('.versioning-content > section').forEach( (el) => el.removeAttribute('hidden', true));
+		}
+	};
 
 	app.btnVersioningStatus.onclick = () => app.dialogVersioning.showModal();
 
@@ -414,7 +541,6 @@ var storage = new Storages();
 		}
 
 		e.target.setAttribute('selected', true);
-		// TODO: nascondo i div che hanno data-objects diverso da 'dimensions'
 		// visualizzo il div[hidden] contenente le dimensioni
 		document.querySelector('div[data-object="dimensions"]').removeAttribute('hidden');
 	}
@@ -452,20 +578,5 @@ var storage = new Storages();
 		document.querySelector('div[data-object="processes"]').removeAttribute('hidden');
 		// app.fetchAPIRequestVersioning('/fetch_api/versioning/processes');
 	}
-		
-	app.btnSwitchLocalDB.onclick = (e) => {
-		console.log('e.target : ', e.target);
-		// const span = e.target.parentElement.querySelector('span');
-		if (e.target.checked) {
-			// abilitato : Visualizzo solo gli elementi in locale
-			// span.innerText = 'Locale';
-			app.dialogVersioning.querySelectorAll('.versioning-content > section[data-object-storage="db"]').forEach( (el) => el.setAttribute('hidden', true));
-			app.dialogVersioning.querySelectorAll('.versioning-content > section[data-object-storage="local"]').forEach( (el) => el.removeAttribute('hidden'));
-		} else {
-			// disabilitato : visualizzo elementi su DB (default)
-			// span.innerText = 'Database';
-			app.dialogVersioning.querySelectorAll('.versioning-content > section[data-object-storage]').forEach( (el) => el.removeAttribute('hidden', true));
-		}
-	};
 	
 })();

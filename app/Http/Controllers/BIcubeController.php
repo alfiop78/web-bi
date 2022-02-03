@@ -51,9 +51,10 @@ class BIcubeController extends Controller
      * @param  \App\Models\BIcube  $bIcube
      * @return \Illuminate\Http\Response
      */
-    public function show(BIcube $bIcube)
+    public function show(BIcube $bIcube, $name)
     {
-        
+        $element = $bIcube::findOrFail($name);
+        return response()->json($element);
     }
 
     /**
@@ -74,9 +75,13 @@ class BIcubeController extends Controller
      * @param  \App\Models\BIcube  $bIcube
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, BIcube $bIcube)
+    public function update(Request $request, BIcube $bIcube, $json)
     {
-        //
+        $jsonContent = json_decode($json);
+        $cube = $bIcube::findOrFail($jsonContent->{'name'});
+        $cube->name = $jsonContent->{'name'};
+        $cube->json_value = $json;
+        return $cube->save();
     }
 
     /**

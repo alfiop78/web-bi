@@ -68,9 +68,12 @@ class BIdimensionController extends Controller
      * @param  \App\Models\BIdimension  $bIdimension
      * @return \Illuminate\Http\Response
      */
-    public function show(BIdimension $bIdimension)
+    public function show(BIdimension $bIdimension, $name)
     {
-        
+        $element = $bIdimension::findOrFail($name);
+        // dd($element);
+        // return response()->json($dimensions);
+        return response()->json($element);
     }
 
     /**
@@ -91,9 +94,15 @@ class BIdimensionController extends Controller
      * @param  \App\Models\BIdimension  $bIdimension
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, BIdimension $bIdimension)
+    public function update(Request $request, BIdimension $bIdimension, $json)
     {
-        //
+        $jsonContent = json_decode($json);
+        $dimension = $bIdimension::findOrFail($jsonContent->{'name'});
+        // dd($dimension);
+        $dimension->name = $jsonContent->{'name'};
+        $dimension->json_value = $json;
+        // dd($dim);
+        return $dimension->save();
     }
 
     /**

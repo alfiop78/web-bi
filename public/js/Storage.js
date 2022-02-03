@@ -154,7 +154,6 @@ class CubeStorage extends Storages {
 		this.cubesElement.sort(function (a, b) {
 			// console.log(a);
 			// console.log(b);
-			// TODO: cosa sono a e b ?
 			return a - b;
 		});
 		// this.pagesElement.sort((a, b) => a - b);
@@ -253,12 +252,10 @@ class ProcessStorage extends Storages {
 				this.elements.push(jsonStorage.processId);
 			}
 		});
-		// TODO: cerco il primo id "libero"
 		// ordino l'array
 		this.elements.sort(function (a, b) {
 			// console.log(a);
 			// console.log(b);
-			// TODO: cosa sono a e b ?
 			return a - b;
 		});
 
@@ -305,7 +302,6 @@ class DimensionStorage extends Storages {
 	#dimensions = new Map();
 	#name;
 	// Metodi per leggere/scrivere Dimensioni nello Storage
-	// TODO: da completare in base alla logica di PageStorage
 	constructor() {
 		super();
 		// this.#dimensions = new Set();
@@ -385,7 +381,6 @@ class DimensionStorage extends Storages {
 		this.dimensionsElement.sort(function (a, b) {
 			console.log(a);
 			console.log(b);
-			// TODO: cosa sono a e b ?
 			return a - b;
 		})
 		// this.dimensionsElement.sort((a, b) => a - b); versione compatta
@@ -469,7 +464,6 @@ class FilterStorage extends Storages {
 		this.filtersElement.sort(function (a, b) {
 			console.log(a);
 			console.log(b);
-			// TODO: cosa sono a e b ?
 			return a - b;
 		});
 

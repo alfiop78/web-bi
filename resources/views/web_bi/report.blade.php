@@ -19,7 +19,6 @@
 		<script src="/js/Application.js"></script>
 		<script src="/js/lib.js"></script>
 		<script src="/js/Storage.js"></script>
-		<script src="/js/Report.js"></script>
 		<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
 		<title>Creazione Report</title>
 	</head>

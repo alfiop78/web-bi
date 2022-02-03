@@ -15,7 +15,6 @@ class BIprocessController extends Controller
     public function index()
     {
         $processes = BIprocess::all();
-        // dd($dimensions);
         return response()->json(['processes' => $processes]);
     }
 
@@ -38,10 +37,7 @@ class BIprocessController extends Controller
     public function store(Request $request, $json)
     {
         $jsonContent = json_decode($json);
-        // l'inserimento con Eloquent ha inserito anche i campi created_at/updated_at
         $process = new BIprocess();
-        // il nome della tabella è impostato nel Model
-        $key = $jsonContent->{'name'};
         $process->name = $jsonContent->{'name'};
         $process->json_value = $json;
         return $process->save();
@@ -53,9 +49,10 @@ class BIprocessController extends Controller
      * @param  \App\Models\BIprocess  $bIprocess
      * @return \Illuminate\Http\Response
      */
-    public function show(BIprocess $bIprocess)
+    public function show(BIprocess $bIprocess, $name)
     {
-        //
+        $element = $bIprocess::findOrFail($name);
+        return response()->json($element);
     }
 
     /**
@@ -76,9 +73,13 @@ class BIprocessController extends Controller
      * @param  \App\Models\BIprocess  $bIprocess
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, BIprocess $bIprocess)
+    public function update(Request $request, BIprocess $bIprocess, $json)
     {
-        //
+        $jsonContent = json_decode($json);
+        $process = $bIprocess::findOrFail($jsonContent->{'name'});
+        $process->name = $jsonContent->{'name'};
+        $process->json_value = $json;
+        return $process->save();
     }
 
     /**
@@ -87,8 +88,9 @@ class BIprocessController extends Controller
      * @param  \App\Models\BIprocess  $bIprocess
      * @return \Illuminate\Http\Response
      */
-    public function destroy(BIprocess $bIprocess)
+    public function destroy(BIprocess $bIprocess, $name)
     {
-        //
+        $element = $bIprocess::findOrFail($name);
+        return $element->delete();
     }
 }

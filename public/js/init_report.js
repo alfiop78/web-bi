@@ -1378,7 +1378,7 @@ var StorageMetric = new MetricStorage();
 		let element = tmplContent.querySelector('.element');
 		let li = element.querySelector('li');
 		li.innerText = name;
-		li.setAttribute('label', 'process_' + name);
+		li.setAttribute('label', name);
 		li.setAttribute('data-id', processId);
 		ulReportsProcess.appendChild(element);
 		li.onclick = app.handlerReportToBeProcessed;

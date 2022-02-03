@@ -15,7 +15,6 @@ class BIfilterController extends Controller
     public function index()
     {
         $filters = BIfilter::all();
-        // dd($dimensions);
         return response()->json(['filters' => $filters]);
     }
 
@@ -52,9 +51,10 @@ class BIfilterController extends Controller
      * @param  \App\Models\BIfilter  $bIfilter
      * @return \Illuminate\Http\Response
      */
-    public function show(BIfilter $bIfilter)
+    public function show(BIfilter $bIfilter, $name)
     {
-        //
+        $element = $bIfilter::findOrFail($name);
+        return response()->json($element);
     }
 
     /**
@@ -75,9 +75,13 @@ class BIfilterController extends Controller
      * @param  \App\Models\BIfilter  $bIfilter
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, BIfilter $bIfilter)
+    public function update(Request $request, BIfilter $bIfilter, $json)
     {
-        //
+        $jsonContent = json_decode($json);
+        $filter = $bIfilter::findOrFail($jsonContent->{'name'});
+        $filter->name = $jsonContent->{'name'};
+        $filter->json_value = $json;
+        return $filter->save();
     }
 
     /**

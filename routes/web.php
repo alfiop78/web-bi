@@ -42,29 +42,46 @@ Route::get('/report', function() {return view('web_bi.report');})->name('web_bi.
 Route::get('/fetch_api/schema/{schema}/table/{table}/field/{field}/distinct_values', [MapDatabaseController::class, 'distinct_values'])->name('web_bi.fetch_api.distinct_values'); // recupero i valori distinti del campo field passato come parametro
 Route::get('/fetch_api/cube/{jsonData}/process', [MapDatabaseController::class, 'process'])->name('web_bi.fetch_api.process'); // processo la query che crea la FX
 // dimensioni
-// TODO: aggiungere il metodo group
-Route::get('/fetch_api/json/{json}/dimension_store', [BIdimensionController::class, 'store']);
-Route::get('/fetch_api/name/{name}/dimension_destroy', [BIdimensionController::class, 'destroy']);
-// cubi
-Route::get('/fetch_api/json/{json}/cube_store', [BIcubeController::class, 'store']);
-Route::get('/fetch_api/name/{name}/cube_destroy', [BIcubeController::class, 'destroy']);
-// metriche
-Route::get('/fetch_api/json/{json}/metric_store', [BImetricController::class, 'store']);
-Route::get('/fetch_api/name/{name}/metric_destroy', [BImetricController::class, 'destroy']);
-// filtri
-Route::get('/fetch_api/json/{json}/filter_store', [BIfilterController::class, 'store']);
-Route::get('/fetch_api/name/{name}/filter_destroy', [BIfilterController::class, 'destroy']);
-// processi
-Route::get('/fetch_api/json/{json}/process_store', [BIprocessController::class, 'store']);
-Route::get('/fetch_api/name/{name}/process_destroy', [BIprocessController::class, 'destroy']);
-// sincronizzazione dal DB per il metadato
-Route::get('/fetch_api/versioning/dimensions', [BIdimensionController::class, 'index']);
-Route::get('/fetch_api/versioning/cubes', [BIcubeController::class, 'index']);
-Route::get('/fetch_api/versioning/metrics', [BImetricController::class, 'index']);
-Route::get('/fetch_api/versioning/filters', [BIfilterController::class, 'index']);
-Route::get('/fetch_api/versioning/processes', [BIprocessController::class, 'index']);
-
-// Route::get('/fetch_api/syncDB', [MetadataController::class, 'getMetadata'])->name('web_bi.fetch_api.getMetadata');
+// store json
+Route::prefix('/fetch_api/json/')->group(function () {
+    Route::get('{json}/dimension_store', [BIdimensionController::class, 'store']);
+    Route::get('{json}/cube_store', [BIcubeController::class, 'store']);
+    Route::get('{json}/metric_store', [BImetricController::class, 'store']);
+    Route::get('{json}/filter_store', [BIfilterController::class, 'store']);
+    Route::get('{json}/process_store', [BIprocessController::class, 'store']);
+});
+// destroy json
+Route::prefix('/fetch_api/name/')->group(function () {
+	Route::get('{name}/dimension_destroy', [BIdimensionController::class, 'destroy']);
+	Route::get('{name}/cube_destroy', [BIcubeController::class, 'destroy']);
+	Route::get('{name}/metric_destroy', [BImetricController::class, 'destroy']);
+	Route::get('{name}/filter_destroy', [BIfilterController::class, 'destroy']);
+	Route::get('{name}/process_destroy', [BIprocessController::class, 'destroy']);
+});
+// index
+Route::prefix('/fetch_api/versioning/')->group(function () {
+	Route::get('dimensions', [BIdimensionController::class, 'index']);
+	Route::get('cubes', [BIcubeController::class, 'index']);
+	Route::get('metrics', [BImetricController::class, 'index']);
+	Route::get('filters', [BIfilterController::class, 'index']);
+	Route::get('processes', [BIprocessController::class, 'index']);
+});
+// show
+Route::prefix('/fetch_api/name/')->group(function () {
+	Route::get('{name}/dimension_show', [BIdimensionController::class, 'show']);
+	Route::get('{name}/cube_show', [BIcubeController::class, 'show']);
+	Route::get('{name}/metric_show', [BImetricController::class, 'show']);
+	Route::get('{name}/filter_show', [BIfilterController::class, 'show']);
+	Route::get('{name}/process_show', [BIprocessController::class, 'show']);
+});
+// update
+Route::prefix('/fetch_api/json/')->group(function () {
+	Route::get('{json}/dimension_update', [BIdimensionController::class, 'update']);
+	Route::get('{json}/cube_update', [BIcubeController::class, 'update']);
+	Route::get('{json}/metric_update', [BImetricController::class, 'update']);
+	Route::get('{json}/filter_update', [BIfilterController::class, 'update']);
+	Route::get('{json}/process_update', [BIprocessController::class, 'update']);
+});
 
 // test POST request
 Route::get('/report/{test}/post', [MapDatabaseController::class, 'post'])->name('test_post_request');

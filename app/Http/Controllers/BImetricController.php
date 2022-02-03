@@ -51,9 +51,10 @@ class BImetricController extends Controller
      * @param  \App\Models\BImetric  $bImetric
      * @return \Illuminate\Http\Response
      */
-    public function show(BImetric $bImetric)
+    public function show(BImetric $bImetric, $name)
     {
-        
+        $element = $bImetric::findOrFail($name);
+        return response()->json($element);   
     }
 
     /**
@@ -74,9 +75,13 @@ class BImetricController extends Controller
      * @param  \App\Models\BImetric  $bImetric
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, BImetric $bImetric)
+    public function update(Request $request, BImetric $bImetric, $json)
     {
-        //
+        $jsonContent = json_decode($json);
+        $metric = $bImetric::findOrFail($jsonContent->{'name'});
+        $metric->name = $jsonContent->{'name'};
+        $metric->json_value = $json;
+        return $metric->save();
     }
 
     /**
