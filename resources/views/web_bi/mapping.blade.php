@@ -37,7 +37,17 @@
         <template id="versioning-db">
             <section data-searchable="true">
                 <div class="versioning-status">
-                    <div class="vers-title"></div>
+                    <div class="vers-title">
+                        <div class="name" data-name></div>
+                        <div data-created-at>
+                            <span>Creazione</span>
+                            <span data-created-at></span>
+                        </div>
+                        <div data-updated-at>
+                            <span>Aggiornamento</span>
+                            <span data-updated-at></span>
+                        </div>
+                    </div>
                     <div class="vers-status"><i class="material-icons"></i></div>
                     <div class="vers-status-descr"></div>
                     <div class="vers-actions">
@@ -46,7 +56,7 @@
                         {{-- Sovrascrivi copia in Sviluppo --}}
                         <span class="popupContent" data-download hidden><i data-id="btn-download" class="material-icons">download</i></span>
                         {{-- Sovrascrivi copia in Produzione --}}
-                        <span class="popupContent" data-upgrade hidden><i data-id="btn-upgrade-production" class="material-icons md-done">upload</i></span>
+                        <span class="popupContent" data-upgrade hidden><i data-id="btn-upgrade-production" class="material-icons md-done">upgrade</i></span>
                         {{-- Salva in Produzione --}}
                         <span class="popupContent" data-upload hidden><i data-id="btn-upload-local-object" class="material-icons md-done">upload</i></span>
                     </div>

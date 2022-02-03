@@ -25,7 +25,8 @@ fieldset.auto-grid{display: grid; grid-template-rows: auto 1fr auto;}
 .versioning-status-header{display: grid; grid-template-columns: 40% 10% 25% 25%; font-weight: bold; font-size: .8rem;}
 .versioning-status-header > div{text-align: center;}
 .versioning-sections fieldset{border-color: rgb(0 0 0 / 15%);border-width: 1px;border-radius: 4px;padding: 2em;}
-.versioning-sections .versioning-content.overflow-y{overflow-y: scroll;margin-top: 1.5em;margin-bottom: 1.5em;font-size: .8rem;}
+.versioning-sections .versioning-content.overflow-y{overflow-y: scroll;margin-top: 1.5em;margin-bottom: 1.5em;font-size: .85rem;}
 section[data-versioning-elements]{display: grid; grid-template-rows: auto 400px;}
 .search-filter{display: grid; grid-template-columns: 50% 40%;grid-column-gap: 10%;}
+.vers-title > div[data-created-at], .vers-title > div[data-updated-at] {font-size: .8rem; color: dimgrey; display: flex;justify-content: space-between;}
 /* dialog versioning */

@@ -121,7 +121,7 @@ var storage = new Storages();
 				iconStatus.innerText = 'warning';
 				iconStatus.classList.add('md-attention');
 				descrStatus.innerText = 'In locale';
-				versioningStatus.querySelector('.vers-title').innerText = el;
+				versioningStatus.querySelector('.vers-title > div[data-name]').innerText = el;
 				sectionSearchable.setAttribute('data-search', 'versioning-db-search');
 				sectionSearchable.setAttribute('data-object-storage', 'local');
 				sectionSearchable.setAttribute('data-object-type', element);
@@ -200,7 +200,10 @@ var storage = new Storages();
 					iconStatus.classList.add('md-done');
 					descrStatus.innerText = 'Aggiornato';
 				}
-				versioningStatus.querySelector('.vers-title').innerText = jsonParsed.name;
+				versioningStatus.querySelector('.vers-title > div[data-name]').innerText = jsonParsed.name;
+				const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false, timeZone: 'Europe/Rome' };
+				versioningStatus.querySelector('.vers-title  span[data-created-at]').innerText = new Intl.DateTimeFormat('it-IT', options).format(new Date(el.created_at));
+				versioningStatus.querySelector('.vers-title span[data-updated-at]').innerText = new Intl.DateTimeFormat('it-IT', options).format(new Date(el.updated_at));
 				sectionSearchable.setAttribute('data-object-type', element);
 				sectionSearchable.setAttribute('data-object-name', jsonParsed.name);
 				// icona delete
