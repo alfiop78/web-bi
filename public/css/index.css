@@ -1,7 +1,7 @@
 .lists{position: relative;}
-.absList{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;}
-.absList[fact]{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;background-color: saddlebrown;color: white;}
-.absList > ul{height: 500px;overflow-y: auto;}
+.absList{width: 350px;background: white;position: absolute;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;}
+.absList[fact]{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;color: var(--primary-color);}
+.absList > ul{height: 500px;overflow-y: auto; margin-inline: 0px; padding-inline: 0px}
 i[open]{color: red;}
 
 div[draggable]{cursor: grab;}
@@ -90,7 +90,7 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 .card-table ul{max-height: 160px;overflow-y: auto;font-size: .7rem;}
 
 /* colonne all'interno della card/tabella*/
-.card.table ul{padding-inline-start: 0; font-size: .75rem; border-radius: 4px; min-height: auto; overflow: auto; max-height: 200px;}
+.card.table ul{padding-inline-start: 0; font-size: .75rem; border-radius: 4px; min-height: auto; overflow: auto; max-height: 250px;}
 
 .card.table ul > .element li{list-style-type: none;display: block;padding: 6px;overflow: hidden;text-overflow: ellipsis;
   white-space: nowrap;}
@@ -146,7 +146,7 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 /*icona bookmark su tabelle selezionate*/
 .card.table[selected] i[data-id="selectTable"]{color: var(--main-primary-color);}
 
-.element.dimensions{flex-flow: column;background: burlywood;}
+.element.dimensions{flex-flow: column;}
 .element.dimensions[data-source-db]{flex-flow: column;background: saddlebrown;color: white;}
 .element.dimensions > h5:hover{cursor: pointer;color: var(--main-primary-color);}
 
@@ -192,4 +192,5 @@ span.after .arrow{height: 10px; width: 10px;background: #494949;display: flex;tr
 #drop-zone.dropping{display: block; align-items: unset; justify-content: unset; border: dotted thin indianred;background-color: white;}
 /* terminato il drop reimposto il border lasciando inalterato il display */
 #drop-zone.dropped{display: block; align-items: unset; justify-content: unset; border: dotted thin darkgrey; color: black;}
+#drop-zone.dropped > span, #drop-zone.dropping > span{display: none;}
 /*drop-zone*/

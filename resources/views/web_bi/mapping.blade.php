@@ -13,9 +13,6 @@
 		<link rel="stylesheet" type="text/css" href="/css/md-controls.css" />
 		<link rel="stylesheet" type="text/css" href="/css/md-drawer.css" />
 		<link rel="stylesheet" type="text/css" href="/css/md-inputs.css" />
-		<link rel="stylesheet" type="text/css" href="/css/report-layout.css" />
-        <link rel="stylesheet" type="text/css" href="/css/index.css" />
-        <link rel="stylesheet" type="text/css" href="/css/layouts.css" />
         <link rel="stylesheet" type="text/css" href="/css/timeline.css" />
         <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 		<script src="/js/Application.js"></script>
@@ -54,11 +51,11 @@
                         {{-- Elimina Sviluppo/Produzione --}}
                         <span class="popupContent" data-delete><i data-id="btn-delete" class="material-icons md-warning">clear</i></span>
                         {{-- Sovrascrivi copia in Sviluppo --}}
-                        <span class="popupContent" data-download hidden><i data-id="btn-download" class="material-icons">download</i></span>
+                        <span class="popupContent" data-download hidden><i data-id="btn-download" class="material-icons md-warning">download</i></span>
                         {{-- Sovrascrivi copia in Produzione --}}
-                        <span class="popupContent" data-upgrade hidden><i data-id="btn-upgrade-production" class="material-icons md-done">upgrade</i></span>
+                        <span class="popupContent" data-upgrade hidden><i data-id="btn-upgrade-production" class="material-icons md-warning">upgrade</i></span>
                         {{-- Salva in Produzione --}}
-                        <span class="popupContent" data-upload hidden><i data-id="btn-upload-local-object" class="material-icons md-done">upload</i></span>
+                        <span class="popupContent" data-upload hidden><i data-id="btn-upload-local-object" class="material-icons md-warning">upload</i></span>
                     </div>
                 </div>
             </section>
@@ -67,7 +64,13 @@
         <dialog id="versioning">
 
             <section class="versioning-sections">
-                <h4>Sincronizzazione elementi</h4>                
+                <div class="dialog-title-info">
+                    <h4>Sincronizzazione elementi</h4>
+                    <span class="dialog-info">
+                        <span>Ultima sincronizzazione : </span>
+                        <span data-dialog-info></span>
+                    </span>                    
+                </div>
                 <section class="versioning-grid">
                     <fieldset>
                         <legend>Lista Oggetti</legend>
@@ -253,7 +256,13 @@
                 <nav id="nav-schema">
                     {{-- {{dd($schemes)}} --}}
                     @foreach($schemes as $schema)
-                        <a href="#" data-schema="{{ $schema['SCHEMA_NAME'] }}">{{ $schema['SCHEMA_NAME'] }}</a>
+                        @if ($schema['SCHEMA_NAME'] === 'automotive_bi_data')
+                            {{-- l'if è stata creata per selezionare uno schema di default, utilizzando l'attr 'selected'. Al momento non serve --}}
+                            {{-- <a href="#" data-schema="{{ $schema['SCHEMA_NAME'] }}" selected>{{ $schema['SCHEMA_NAME'] }}</a> --}}
+                            <a href="#" data-schema="{{ $schema['SCHEMA_NAME'] }}">{{ $schema['SCHEMA_NAME'] }}</a>
+                        @else
+                            <a href="#" data-schema="{{ $schema['SCHEMA_NAME'] }}">{{ $schema['SCHEMA_NAME'] }}</a>
+                        @endif
                     @endforeach
                 </nav>
             </div>
@@ -276,12 +285,14 @@
                         <div class="actions">
                             <div class="buttons">
                                 <span class="popupContent"><i id="openTableList" class="material-icons md-24 md-inactive">storage</i><small class="popup"><p>Lista tabelle</p></small></span>
-                                <span class="popupContent"><i id="openDimensionList" class="material-icons md-24">mediation</i><small class="popup"><p>Lista Dimensioni</p></small></span>
-                                <span class="popupContent"><i class="material-icons md-24">dashboard_customize</i><small class="popup"><p>Nuova dimensione</p></small></span>
-                                <span class="popupContent"><i id="saveCube" class="material-icons md-24">save</i><small class="popup"><p>Salva Cubo</p></small></span>
+                                <span class="popupContent"><i id="openDimensionList" class="material-icons md-24 md-inactive">schema</i><small class="popup"><p>Lista Dimensioni</p></small></span>
+                                <span class="popupContent"><i id="cube" class="material-icons md-24 md-inactive">space_dashboard</i><small class="popup"><p>Definisci Cubo</p></small></span>
+                                <span class="h-separator"></span>
+                                <span class="popupContent"><i class="material-icons md-24 md-inactive">dashboard_customize</i><small class="popup"><p>Nuova dimensione</p></small></span>
+                                <span class="popupContent"><i id="saveCube" class="material-icons md-24 md-inactive">save</i><small class="popup"><p>Salva Cubo</p></small></span>
                                 <span class="popupContent" hide><i id="saveOpenedCube" class="material-icons md-24">save</i><small class="popup"><p>Aggiorna Cubo</p></small></span>
-                                <span class="popupContent"><i id="processCube" class="material-icons md-24">folder_open</i><small class="popup"><p>Lista Cubi definiti</p></small></span>
-                                <span class="popupContent"><i id="defineCube" class="material-icons md-24 md-inactive">space_dashboard</i><small class="popup"><p>Definisci Cubo</p></small></span>
+                                <span class="popupContent"><i id="definedCube" class="material-icons md-24 md-inactive">folder_open</i><small class="popup"><p>Lista Cubi definiti</p></small></span>
+                                <span class="h-separator"></span>
                                 <span class="popupContent"><i id="versioning-status" class="material-icons md-24">cached</i><small class="popup"><!-- contenuto dinamico --></small></span>
                             </div>
                             <div class="help-console">
@@ -312,10 +323,18 @@
                         </div>
 
                         <div class="lists">
-                            <template id="dimension">
+                            <template id="tmpl-dimension">
                                 <div class="element dimensions">
-                                    <h5></h5> {{-- titolo della dimensione --}}
-                                    <template id="miniCard"><div class="miniCard"><h6></h6></div></template>
+                                    <div class="mini-card">
+                                        <h5></h5> {{-- titolo della dimensione --}}
+                                        <div data-dimension-tables>
+                                            {{-- elenco tabelle contenute nella dimensione --}}
+                                        </div>
+                                        <div class="mini-card-buttons">
+                                            <button data-id="dimension-use" type="button" name="dimensionUse" class="md-button">utilizza</button>
+                                            <button data-id="dimension-edit" type="button" name="dimensionEdit" class="md-button">modifica</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </template>
                             
@@ -371,8 +390,8 @@
                                     </div>
                                 </div>
                                 <div class="actions">
-                                    <span class="popupContent"><i id="saveDimension" class="material-icons md-24 md-dark md-inactive" disabled>save</i><small class="popup">Salva dimensione</small></span>
-                                    <span class="popupContent"><i id="hierarchySave" class="material-icons md-24">save</i><small class="popup">Salva gerarchia</small></span>
+                                    <span class="popupContent"><i id="saveDimension" class="material-icons md-24 md-inactive">save</i><small class="popup">Salva dimensione</small></span>
+                                    <span class="popupContent"><i id="hierarchySave" class="material-icons md-24 md-inactive">save</i><small class="popup">Salva gerarchia</small></span>
                                     <span class="popupContent"><i class="material-icons md-24">playlist_add</i><small class="popup">Nuova gerarchia</small></span>
                                 </div>
 
@@ -380,7 +399,7 @@
                         </div>
 
                         <div id="drop">
-                            <div id="drop-zone" class="dropzone">Trascina qui le tabelle da mappare</div>
+                            <div id="drop-zone" class="dropzone"><span>Trascina qui le tabelle da mappare</span></div>
                         </div>
 
                     </div>

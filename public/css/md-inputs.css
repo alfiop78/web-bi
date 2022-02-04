@@ -244,7 +244,7 @@ button.button[hidden]{visibility: hidden;display: none;}
 /* new button da completare 17.04.2019*/
 /* button{font-family: 'Roboto', Helvetica, sans-serif, Arial;} */
 button.md-button{border: none; background: none; font-size: .85rem;letter-spacing: .0892857143em;font-weight: normal;
-  text-transform: capitalize; padding: 8px;font-family: 'Open Sans', sans-serif;font-weight: 400;}
+  text-transform: capitalize; padding: 8px;font-family: 'Barlow', sans-serif;font-weight: 400;}
 .buttons button.md-button.accept:not([disabled]){color: var(--main-color-button-flat); font-weight: bolder;}
 .buttons button.md-button.reject:not([disabled]){color: dimgray;}
 button.md-button:disabled{color: darkgray;}

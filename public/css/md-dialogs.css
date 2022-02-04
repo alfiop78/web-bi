@@ -29,4 +29,7 @@ fieldset.auto-grid{display: grid; grid-template-rows: auto 1fr auto;}
 section[data-versioning-elements]{display: grid; grid-template-rows: auto 400px;}
 .search-filter{display: grid; grid-template-columns: 50% 40%;grid-column-gap: 10%;}
 .vers-title > div[data-created-at], .vers-title > div[data-updated-at] {font-size: .8rem; color: dimgrey; display: flex;justify-content: space-between;}
+.dialog-title-info{display: grid;grid-template-columns: 60% 40%;align-items: center;}
+.dialog-title-info > h4{font-size: 1.5rem;font-weight: 400;margin: 0px; color: var(--main-color-outisde-card);}
+.dialog-title-info span.dialog-info{text-align: end;}
 /* dialog versioning */

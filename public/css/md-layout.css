@@ -95,7 +95,7 @@ section > h3 ~ h5{font-weight: lighter;}
 
 /* lists */
 .lists{display: flex;}
-ul > .element:not([hide]){display: flex;justify-content: space-between;align-items: center;margin: 2px 6px;padding: 4px;}
+ul > .element:not([hide]){display: flex;margin: 2px 6px;padding: 4px;font-size: .8rem;}
 ul > section > .element:not([hidden]){display: flex;justify-content: space-between;align-items: center;width: 100%;}
 ul:not([id='columns']) > .element[draggable]:not([hide]):hover{display: flex;justify-content: space-between;align-items: center;margin: 2px 6px;padding: 4px;
   background: tan;cursor: grab;border-radius: 4px;}
@@ -196,5 +196,12 @@ small.popup > p > small{display: block;color: darkgrey;white-space: normal;}
   100% {transition: scale(1);}
 }
 
-
 .upper{text-transform: uppercase;}
+
+.h-separator{width: 1px; margin: 8px 16px; background-color: #a9a9a95e;}
+
+.mini-card{display: grid; grid-template-rows: auto auto auto;border: solid thin gainsboro;border-radius: 4px;}
+.mini-card > h5{font-size: .9rem; font-weight: normal;padding: 8px;margin: 0px; text-align: left;background-color: beige;}
+.mini-card div[data-dimension-tables]{font-weight: lighter;font-size: .85rem; padding: 16px;}
+.mini-card div[data-dimension-tables] > div:last-child{color: var(--main-primary-color); font-weight: bold;}
+.mini-card-buttons{display: flex;justify-content: space-between;}

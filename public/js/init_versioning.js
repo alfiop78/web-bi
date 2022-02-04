@@ -102,7 +102,7 @@ var storage = new Storages();
 					objectsSet = storage.processes;
 					break;
 			}
-			console.log('objectsSet : ', objectsSet);
+			// console.log('objectsSet : ', objectsSet);
 			// debugger;
 			data[element].forEach( (el) => {
 				// se l'elemento in local è già presente sul DB lo elimino dal Set dimensions, gli elementi rimanenti da questa operazione andranno ad aggiungersi alla Dialog Versioning
@@ -258,6 +258,9 @@ var storage = new Storages();
 			});
 			// dopo aver caricato tutti gli elementi nella dialog versioning, imposto il colore del tasto btnVersioningStatus in base allo status degli elementi
 			app.checkVersioning();
+			// imposto la data di ultima sincronizzazione nello span[data-dialog-info]
+			const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false, timeZone: 'Europe/Rome' };
+			app.dialogVersioning.querySelector('span[data-dialog-info]').innerText = new Intl.DateTimeFormat('it-IT', options).format(new Date());
 		} )
 		.catch( err => console.error(err));
 	};

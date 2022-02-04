@@ -13,7 +13,7 @@ var dimension = new Dimension();
 
 		btnBack : document.getElementById('mdc-back'),
 
-		// btn
+		// btn dialog versioning
 		btnCubes : document.getElementById('navBtnCubes'),
 		btnDimensions : document.getElementById('navBtnDimensions'),
 		btnMetrics : document.getElementById('navBtnMetrics'),
@@ -27,7 +27,7 @@ var dimension = new Dimension();
 		btnSaveCube : document.getElementById('saveCube'),
 		btnSaveCubeName : document.getElementById('btnCubeSaveName'),
 		btnSaveOpenedCube : document.getElementById('saveOpenedCube'),
-		
+		btnDefinedCube : document.getElementById('definedCube'),
 
 		// tasto openTableList
 		btnTableList : document.getElementById('openTableList'),
@@ -36,7 +36,7 @@ var dimension = new Dimension();
 		btnDimensionList : document.getElementById('openDimensionList'),
 		dimensionList : document.getElementById('dimensionList'),
 		// tasto definisci Cubo
-		btnNewFact : document.getElementById('defineCube'),
+		btnNewFact : document.getElementById('cube'),
 		
 		card : null,
 		cardTitle : null,
@@ -165,9 +165,8 @@ var dimension = new Dimension();
 			console.info('DROPZONE');
 			// e.dataTransfer.dropEffect = "copy";
 			// coloro il border differente per la dropzone
+			// la class dropping nasconde (display: none) automaticamente lo span che contiene "Trascina qui gli element......"
 			e.target.classList.add('dropping');
-			// elimino il testo all'interno di #drop-zone
-			e.target.innerText = '';
 		} else {
 			// TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
 			// e.dataTransfer.dropEffect = "none";
@@ -194,8 +193,7 @@ var dimension = new Dimension();
         console.log('handlerDrop');
         // TODO: ottimizzare
 		e.preventDefault();
-		e.target.classList.remove('dropping');
-		e.target.classList.add('dropped');
+		e.target.classList.replace('dropping', 'dropped');
 		if (e.target.id !== 'drop-zone') return; // anullo il drop (da vedere drop abort oppure dropcancel)
 		// console.log('drop');
 		// console.log(e.target);
@@ -537,32 +535,32 @@ var dimension = new Dimension();
 		// TODO: controllo struttura gerarchica
 	};
 
+	// recupero la lista delle dimensioni in localStorage
 	app.getDimensions = () => {
-		// recupero la lista delle dimensioni in localStorage
 		const dimension = new DimensionStorage();
 		// dimensions : è un Object che contiene un array con le tabelle incluse nella dimensione
 		const dimensions = dimension.list();
-		const tmplDimension = document.getElementById('dimension');
+		// TODO: Impostare tmplDimension nelle var globali
+		const tmplDimension = document.getElementById('tmpl-dimension');
 		for (const [key, value] of Object.entries(dimensions)) {
+			// debugger;
+			// console.log('value : ', value);
 			let tmplContent = tmplDimension.content.cloneNode(true);
 			let div = tmplContent.querySelector('.dimensions');
+			const btnDimensionUse = tmplContent.querySelector('.mini-card-buttons > button[data-id="dimension-use"]');
+			const btnDimensionEdit = tmplContent.querySelector('.mini-card-buttons > button[data-id="dimension-edit"]');
 			div.querySelector('h5').innerHTML = key;
-
+			value.forEach( (table) => {
+				const div = document.createElement('div');
+				div.innerText = table;
+				tmplContent.querySelector('div[data-dimension-tables]').appendChild(div);
+			});
+			btnDimensionUse.setAttribute('data-dimension-name', key);
+			btnDimensionEdit.setAttribute('data-dimension-name', key);
 			div.querySelector('h5').setAttribute('label', key);
 			document.querySelector('#dimensions').appendChild(div);
-			div.querySelector('h5').onclick = app.handlerDimensionSelected;
-
-			// aggiungo anche le tabelle all'interno ella dimensione
-			// console.log(obj[dimName]); // valore/i
-			const tmplMiniCard = document.getElementById('miniCard');
-
-			value.forEach( (table) => {
-				let contentMiniCard = tmplMiniCard.content.cloneNode(true);
-				let miniCard = contentMiniCard.querySelector('.miniCard');
-				miniCard.querySelector('h6').innerHTML = table;
-				// console.log(table);
-				div.appendChild(miniCard);
-			});
+			btnDimensionUse.onclick = app.handlerDimensionSelected;
+			btnDimensionEdit.onclick = app.handlerDimensionEdit;
 		}
 	};
 
@@ -595,7 +593,7 @@ var dimension = new Dimension();
 		app.btnSaveCube.parentElement.toggleAttribute('hide');
 	};
 
-	// get tabelle del database
+	// recupero le tabelle del database in base allo schema selezionato
 	app.getDatabaseTable = async (schema) => {
 		const url = '/fetch_api/schema/'+schema+'/tables';
 		await fetch(url)
@@ -609,9 +607,15 @@ var dimension = new Dimension();
 		        console.log(data);
 		        if (data) {
 		        	let ul = document.getElementById('tables');
-		        	// TODO: attivo il tasto "openTableList" dopo aver caricato l'elenco delle tabelle
+		        	// attivo tutti i tasti presenti in .actions dopo aver caricato l'elenco delle tabelle
 		        	app.btnTableList.classList.remove('md-inactive');
+		        	app.btnDimensionList.classList.remove('md-inactive');
 		        	app.btnNewFact.classList.remove('md-inactive');
+		        	app.btnSaveCube.classList.remove('md-inactive');
+		        	app.btnSaveCubeName.classList.remove('md-inactive');
+		        	app.btnDefinedCube.classList.remove('md-inactive');
+
+		        	// popolo l'elenco delle tabelle
 		        	for (const [key, value] of Object.entries(data)) {
 		        		// debugger;
 		        		let tmpl = document.getElementById('el');
@@ -688,8 +692,252 @@ var dimension = new Dimension();
 	    .catch( (err) => console.error(err));
 	};
 
-	/*events */
-    app.saveCube = async (json) => {
+    app.saveDIM = async (jsonDim) => {
+        console.log(jsonDim);
+        console.log(JSON.stringify(jsonDim));
+        // await fetch('/fetch_api/json/'+JSON.stringify(jsonDim)+'/table/bi_dimensions/save')
+        await fetch('/fetch_api/json/'+JSON.stringify(jsonDim)+'/dimension_store')
+          .then((response) => {
+            if (!response.ok) { throw Error(response.statusText); }
+            return response;
+          })
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log(data);
+            if (data) {
+              console.log('data : ', data);
+              console.log('DIMENSIONE SALVATA CORRETTAMENTE');
+              // app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
+            } else {
+              // TODO: no data
+              console.debug('FX non è stata creata');
+            }
+          })
+          .catch((err) => console.error(err));
+    };
+
+	// viene invocata da btnDimensionSaveName.onclick, quando viene salvata una dimensione, vengono chiuse tutte le card aperte attualmente
+	app.closeCards = () => {
+		document.querySelectorAll('.card.table').forEach((item) => {
+			console.log(item);
+			item.remove();
+		});
+	};
+
+	app.handlerOpenTableList = (e) => {
+		// console.log(e.target);
+		if (e.target.classList.contains('md-inactive')) return;
+		document.getElementById('tableList').removeAttribute('fact');
+		e.target.toggleAttribute('open');
+		document.getElementById('tableList').toggleAttribute('hidden');
+		document.getElementById('tableSearch').focus();
+	};
+
+	app.addCard = (label, fact) => {
+		// creo la card (label)
+		// fact : true/false
+		let card = document.createElement('div');
+		card.className = 'card table';
+		// split della stringa <schema>.<tabella>
+		card.setAttribute('data-schema', label.split('.')[0]); // schema
+		card.setAttribute('label', label.split('.')[1]); // tabella
+		if (fact) card.setAttribute('fact', true);
+		card.onmousedown = app.dragStart;
+		card.onmouseup = app.dragEnd;
+		card.onmousemove = app.drag;
+		// prendo il template cardLayout e lo inserisco nella .card.table
+		let tmpl = document.getElementById('cardLayout');
+		let content = tmpl.content.cloneNode(true);
+		let cardLayout = content.querySelector('.cardLayout');
+		// TODO: da ricontrollare, perchè imposto l'attr 'fact' senza controllare l'argomento fact?
+		cardLayout.querySelector('.cardTable').setAttribute('fact', true);
+		// imposto il titolo in h6
+
+		cardLayout.querySelector('h6').innerHTML = label.split('.')[1];
+		card.appendChild(cardLayout);
+		console.log(card);
+		app.dropZone.classList.replace('dropping', 'dropped');
+		app.dropZone.appendChild(card);
+        app.dropZone.classList.add('dropped');
+
+		// evento sul tasto close della card
+		card.querySelector('i[data-id="closeTable"]').onclick = app.handlerCloseCard;
+		// evento sulla input di ricerca nella card
+		// card.querySelector('input').oninput = App.searchInList;
+		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.getAttribute('data-schema'), 'tableName': card.getAttribute('label')};
+
+		// event sui tasti section[options]
+		card.querySelector('i[join]').onclick = app.handlerAddJoin;
+
+		app.getTable(card.getAttribute('data-schema'), card.getAttribute('label'));
+		// app.getTable(label.split('.')[0], label.split('.')[1]);
+	};
+
+	// selezione di una dimensione da inserire nel body, per legarla al cubo
+	app.handlerDimensionSelected = (e) => {
+		console.log(e.target);
+		const storage = new DimensionStorage();
+		storage.selected = e.target.getAttribute('data-dimension-name');
+		// memorizzo la dimensione selezionata per recuperarla nel salvataggio del cubo
+		cube.dimensionsSelected = e.target.getAttribute('data-dimension-name');
+		// recupero tutta la dimensione selezionata, dallo storage
+		console.log(storage.selected);
+		// aggiungo alla dropzone l'ultima tabella della gerarchia
+		app.addCard(storage.selected.lastTableInHierarchy, false);
+		// chiudo la lista delle dimensioni
+		app.dimensionList.toggleAttribute('hidden');
+		app.btnDimensionList.toggleAttribute('open');
+	};
+
+	app.addCards = (tables) => {
+		console.log('tables to add: ', tables);
+		debugger;
+	};
+
+	// selezione di una dimensione per consentirne le modifica
+	app.handlerDimensionEdit = (e) => {
+		// Recupero tutto il json della dimensione selezionata
+		const dimStorage = new DimensionStorage();
+		dimStorage.selected = e.target.getAttribute('data-dimension-name');
+		// aggiungo alla dropzone TUTTE le tabelle della gerarchia
+		// TODO: da re-implementare quando si aggiunge la funzionalità di più gerarchie nella stessa dimensione
+		const hierName =Object.keys(dimStorage.selected.hierarchies);
+		// array di tabelle
+		// TODO: Implementare questa addCards per sostituire addCard
+		app.addCards(dimStorage.selected.hierarchies[hierName].order);
+		// chiudo la lista delle dimensioni
+		app.dimensionList.toggleAttribute('hidden');
+		app.btnDimensionList.toggleAttribute('open');
+	};
+
+    app.schemaSelected = (e) => {
+    	// TODO: implementare un metodo per caricare di default lo schema 'automotive_bi_data'
+        e.preventDefault();
+        console.log(e.target);
+        // rimuovo l'attributo selected dalla precedente selezione, se ce ne sono
+        if (document.querySelector('#nav-schema a[selected]')) {
+        	document.querySelector('#nav-schema a[selected]').removeAttribute('selected');
+        	// ripulisco la #tableList perchè ci sono tabelle appartenenti allo schema selezionato in precedenza
+        	document.querySelectorAll('#tables .element.card').forEach( (element) => {element.remove();});
+        }
+        e.target.setAttribute('selected', true);
+        app.getDatabaseTable(e.target.getAttribute('data-schema'));
+        app.handlerGuide();
+    };
+
+    // recupero gli schemi database presenti
+    /*app.getSchemata = async () => {
+		const url = '/fetch_api/schema';
+		await fetch(url)
+			.then( (response) => {
+                console.log(response);
+			if (!response.ok) {throw Error(response.statusText);}
+			return response;
+			})
+			.then( (response) => response.json())
+			.then( (data) => {
+		        console.log(data);
+		        if (data) {
+                    const nav = document.getElementById('nav-schema');
+                    for (const [key, value] of Object.entries(data)) {
+                        const a = document.createElement('a');
+                        a.innerHTML = value.SCHEMA_NAME;
+                        a.href = '#';
+                        a.setAttribute('data-schema', value.SCHEMA_NAME);
+                        a.id = key;
+                        nav.appendChild(a);
+                        a.addEventListener('click', app.schemaSelected);
+                    }
+                    
+		        } else {
+		          // TODO: no data
+		          console.warning('Non è stato possibile recuperare la lista delle tabelle');
+		        }
+		    })
+	    .catch( (err) => console.error(err));
+    };*/
+
+    // app.getSchemata(); // l'elenco degli schemi li recupero sulla Route mapping
+
+	// app.getDatabaseTable();
+
+	app.handlerGuide = () => {
+		if (app.messageId === 0) {
+			app.guideStep[app.messageId];
+			document.getElementById('guide').innerHTML = app.guideStep[app.messageId];
+			app.messageId++;
+		} else {
+			document.getElementById('guide').innerHTML = app.guideStep[app.messageId];
+			app.messageId++
+		}		
+	};
+
+	app.getDimensions();
+
+    app.getCubes();
+
+    app.handlerGuide();
+
+    // NOTE: esempio di utilizzo di MutationObserver
+    // identify an element to observe
+    /*
+    const navSchema = document.querySelector("#nav-schema > a[data-schema='automotive_bi_data']");
+    console.log(navSchema);
+    // create a new instance of `MutationObserver` named `observer`,
+	// passing it a callback function
+	const observer = new MutationObserver(function() {
+	    console.log('callback that runs when observer is triggered');
+	});
+	// call `observe()` on that MutationObserver instance,
+	// passing it the element to observe, and the options object
+	observer.observe(navSchema, {subtree: true, childList: true, attributes: true});
+	navSchema.setAttribute('selected', true);*/
+
+    // ***********************events*********************
+    // lista cubi già definiti
+    app.btnDefinedCube.onclick = (e) => {
+		if (e.target.classList.contains('md-inactive')) return;
+		// visualizzo la lista dei cubi esistenti
+		const cubeList = document.getElementById('cubesList');
+		cubeList.toggleAttribute('hidden');
+		e.target.toggleAttribute('open');
+		document.getElementById('cubeSearch').focus();
+	};
+
+	// lista dimensioni già definite
+	app.btnDimensionList.onclick = (e) => {
+		if (e.target.classList.contains('md-inactive')) return;
+		// const dimensionList = document.getElementById('dimensionList');
+		app.dimensionList.toggleAttribute('hidden');
+		e.target.toggleAttribute('open');
+		document.getElementById('dimensionSearch').focus();
+	};
+
+	// open dialog salva gerarchia
+	app.btnSaveHierarchy.onclick = (e) => {
+		if (e.target.classList.contains('md-inactive')) return;
+		// salvo la gerarchia che andrà inserita in dimension
+		app.dialogHierarchyName.showModal();
+		// abilito il tasto save dimension
+		app.btnSaveDimension.classList.remove('md-inactive');
+	};
+
+	// apro la dialog Salva Cubo
+	app.btnSaveCube.onclick = (e) => {
+		if (e.target.classList.contains('md-inactive')) return;
+		app.dialogCubeName.showModal();
+	};
+
+	// definisci Cubo
+	app.btnNewFact.onclick = (e) => {
+		if (e.target.classList.contains('md-inactive')) return;
+		document.getElementById('tableList').setAttribute('fact', true);
+		e.target.toggleAttribute('open');
+		document.getElementById('tableList').toggleAttribute('hidden');
+		document.getElementById('tableSearch').focus();
+	};
+
+	app.saveCube = async (json) => {
         console.log(json);
         console.log(JSON.stringify(json));
         // await fetch('/fetch_api/json/'+JSON.stringify(json)+'/table/bi_cubes/save')
@@ -756,92 +1004,21 @@ var dimension = new Dimension();
 	};
 
 	// tasto report nella sezione controls -> fabs
-    document.getElementById('mdc-report').onclick = () => {window.location.href = '/report';};
+    document.getElementById('mdc-report').onclick = () => window.location.href = '/report';
 
-    app.saveDIM = async (jsonDim) => {
-        console.log(jsonDim);
-        console.log(JSON.stringify(jsonDim));
-        // await fetch('/fetch_api/json/'+JSON.stringify(jsonDim)+'/table/bi_dimensions/save')
-        await fetch('/fetch_api/json/'+JSON.stringify(jsonDim)+'/dimension_store')
-          .then((response) => {
-            if (!response.ok) { throw Error(response.statusText); }
-            return response;
-          })
-          .then((response) => response.json())
-          .then((data) => {
-            // console.log(data);
-            if (data) {
-              console.log('data : ', data);
-              console.log('DIMENSIONE SALVATA CORRETTAMENTE');
-              // app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
-            } else {
-              // TODO: no data
-              console.debug('FX non è stata creata');
-            }
-          })
-          .catch((err) => console.error(err));
-    };
+    // associo l'evento click dello schema
+	document.querySelectorAll('#nav-schema > a').forEach( (a) => {a.addEventListener('click', app.schemaSelected)});
 
-	/* Salvataggio della dimensione, dalla dialog */
-	document.getElementById('btnDimensionSaveName').onclick = () => {
-		/*
-		  Salvo la dimensione, senza il legame con la FACT.
-		  Salvo in localStorage la dimensione creata
-		  // Visualizzo nell'elenco di sinistra la dimensione appena creata
-		  // creo un contenitorre per le dimensioni salvate, con dentro le tabelle che ne fanno parte.
-		*/
-		dimension.title = document.getElementById('dimensionName').value;
-		dimension.comment = document.getElementById('textarea-dimension-comment').value;
-		// cube.dimension
-		const storage = new DimensionStorage();
-		let from = [];
-		document.querySelectorAll('.cardTable').forEach((card) => {
-			if (card.getAttribute('name')) {from.push(card.getAttribute('name'));}
-		});
-		dimension.from = from;
-	
-		dimension.save();
-		storage.save = dimension.dimension;
-        // TODO: salvo la dimension anche su DB
-        // TODO: Potrei salvare la dimensione sul DB manualmente, una volta completati i testi in fase di sviluppo (in LocalStorage)
-        // app.saveDIM(dimension.dimension);
-		//storage.dimension = dimension.dimension;
-		app.dialogDimensionName.close();
-	
-		// chiudo le card presenti
-		app.closeCards();
-		// visualizzo le dimensioni create
-		// imposto, sulla icona openTableList, il colore della fact
-		console.debug('REVISIONARE');
-		app.btnTableList.setAttribute('fact', true);
-		debugger;
+	app.btnBack.onclick = () => {window.location.href = '/';};
 
-		app.getDimensions(); // TODO: qui andrò ad aggiornare solo la dimensione appena salvata/modificata
+	/* ricerca in lista tabelle */
+	document.getElementById('tableSearch').oninput = App.searchInList;
 
-		delete dimension.dimension;
-	};
-
-	// viene invocata da btnDimensionSaveName.onclick, quando viene salvata una dimensione, vengono chiuse tutte le card aperte attualmente
-	app.closeCards = () => {
-		document.querySelectorAll('.card.table').forEach((item) => {
-			console.log(item);
-			item.remove();
-		});
-	};
+	app.btnTableList.onclick = app.handlerOpenTableList;
 
 	app.btnSaveDimension.onclick = (e) => {
-		if (e.target.hasAttribute('disabled')) return;
+		if (e.target.classList.contains('md-inactive')) return;
 		app.dialogDimensionName.showModal();
-	};
-
-	app.btnSaveHierarchy.onclick = (e) => {
-		if (e.target.hasAttribute('disabled')) return;
-		// TODO: salvo la gerarchia che andrà inserita in dimension
-		app.dialogHierarchyName.showModal();
-
-		// abilito il tasto save dimension
-		app.btnSaveDimension.removeAttribute('disabled');
-		app.btnSaveDimension.classList.remove('md-dark', 'md-inactive');
 	};
 
 	app.btnHierarchySaveName.onclick = () => {
@@ -857,8 +1034,6 @@ var dimension = new Dimension();
 		dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
 		app.dialogHierarchyName.close();
 	};
-
-	app.btnSaveCube.onclick = () => {app.dialogCubeName.showModal();};
 
 	// salvataggio di un nuovo cubo
 	app.btnSaveCubeName.onclick = () => {
@@ -906,167 +1081,43 @@ var dimension = new Dimension();
 		app.dialogCubeName.close();
 	};
 
-	app.handlerOpenTableList = (e) => {
-		// console.log(e.target);
-		if (e.target.classList.contains('md-inactive')) return;
-		document.getElementById('tableList').removeAttribute('fact');
-		e.target.toggleAttribute('open');
-		document.getElementById('tableList').toggleAttribute('hidden');
-		document.getElementById('tableSearch').focus();
-	};
-
-	app.btnNewFact.onclick = (e) => {
-		if (e.target.classList.contains('md-inactive')) return;
-		document.getElementById('tableList').setAttribute('fact', true);
-		e.target.toggleAttribute('open');
-		document.getElementById('tableList').toggleAttribute('hidden');
-		document.getElementById('tableSearch').focus();
-	};
-
-	app.btnBack.onclick = () => {window.location.href = '/';};
-
-	/* ricerca in lista tabelle */
-	document.getElementById('tableSearch').oninput = App.searchInList;
-
-	app.btnTableList.onclick = app.handlerOpenTableList;
-
-	document.getElementById('processCube').onclick = (e) => {
-		// visualizzo la lista dei cubi esistenti
-		const cubeList = document.getElementById('cubesList');
-		cubeList.toggleAttribute('hidden');
-		e.target.toggleAttribute('open');
-		document.getElementById('cubeSearch').focus();
-	};
-
-	app.btnDimensionList.onclick = (e) => {
-		const dimensionList = document.getElementById('dimensionList');
-		dimensionList.toggleAttribute('hidden');
-		e.target.toggleAttribute('open');
-		document.getElementById('dimensionSearch').focus();
-	};
-
-	app.addCard = (label, fact) => {
-		// creo la card (label)
-		// fact : true/false
-		debugger;
-		let card = document.createElement('div');
-		card.className = 'card table';
-		// split della stringa <schema>.<tabella>
-		card.setAttribute('data-schema', label.split('.')[0]); // schema
-		card.setAttribute('label', label.split('.')[1]); // tabella
-		if (fact) card.setAttribute('fact', true);
-		card.onmousedown = app.dragStart;
-		card.onmouseup = app.dragEnd;
-		card.onmousemove = app.drag;
-		// prendo il template cardLayout e lo inserisco nella .card.table
-		let tmpl = document.getElementById('cardLayout');
-		let content = tmpl.content.cloneNode(true);
-		let cardLayout = content.querySelector('.cardLayout');
-
-		cardLayout.querySelector('.cardTable').setAttribute('fact', true);
-		// imposto il titolo in h6
-
-		cardLayout.querySelector('h6').innerHTML = label.split('.')[1];
-		card.appendChild(cardLayout);
-		console.log(card);
-        app.dropZone.innerText = '';
-		app.dropZone.appendChild(card);
-        app.dropZone.classList.add('dropped');
-
-		// evento sul tasto close della card
-		card.querySelector('i[data-id="closeTable"]').onclick = app.handlerCloseCard;
-		// evento sulla input di ricerca nella card
-		card.querySelector('input').oninput = App.searchInList;
-		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'tableName': card.getAttribute('label')};
-
-		// event sui tasti section[options]
-		card.querySelector('i[join]').onclick = app.handlerAddJoin;
-
-		app.getTable(label.split('.')[0], label.split('.')[1]);
-	};
-
-	// selezione di una dimensione da inserire nel body, per legarla al cubo
-	app.handlerDimensionSelected = (e) => {
-		console.log(e.target);
+	/* Salvataggio della dimensione, dalla dialog */
+	document.getElementById('btnDimensionSaveName').onclick = () => {
+		/*
+		  Salvo la dimensione, senza il legame con la FACT.
+		  Salvo in localStorage la dimensione creata
+		  // Visualizzo nell'elenco di sinistra la dimensione appena creata
+		  // creo un contenitorre per le dimensioni salvate, con dentro le tabelle che ne fanno parte.
+		*/
+		dimension.title = document.getElementById('dimensionName').value;
+		dimension.comment = document.getElementById('textarea-dimension-comment').value;
+		// cube.dimension
 		const storage = new DimensionStorage();
-		storage.selected = e.target.getAttribute('label');
-		
-		// memorizzo la dimensione selezionata per recuperarla nel salvataggio del cubo
-		cube.dimensionsSelected = e.target.getAttribute('label');
-		// recupero tutta la dimensione selezionata, dallo storage
-		console.log(storage.selected);
-		app.addCard(storage.selected.lastTableInHierarchy, false);
-		
+		let from = [];
+		document.querySelectorAll('.cardTable').forEach((card) => {
+			if (card.getAttribute('name')) {from.push(card.getAttribute('name'));}
+		});
+		dimension.from = from;
+	
+		dimension.save();
+		storage.save = dimension.dimension;
+        // TODO: salvo la dimension anche su DB
+        // TODO: Potrei salvare la dimensione sul DB manualmente, una volta completati i testi in fase di sviluppo (in LocalStorage)
+        // app.saveDIM(dimension.dimension);
+		//storage.dimension = dimension.dimension;
+		app.dialogDimensionName.close();
+	
+		// chiudo le card presenti
+		app.closeCards();
+		// visualizzo le dimensioni create
+		// imposto, sulla icona openTableList, il colore della fact
+		console.debug('REVISIONARE');
+		app.btnTableList.setAttribute('fact', true);
+		debugger;
+
+		app.getDimensions(); // TODO: qui andrò ad aggiornare solo la dimensione appena salvata/modificata
+
+		delete dimension.dimension;
 	};
-
-    app.schemaSelected = (e) => {
-        e.preventDefault();
-        console.log(e.target);
-        // TODO: rimuovo l'attributo selected dalla precedente selezione, se ce ne sono
-        if (document.querySelector('#nav-schema a[selected]')) {
-        	document.querySelector('#nav-schema a[selected]').removeAttribute('selected');
-        	// ripulisco la #tableList perchè ci sono tabelle appartenenti allo schema selezionato in precedenza
-        	document.querySelectorAll('#tables .element.card').forEach( (element) => {element.remove();});
-        }
-        e.target.setAttribute('selected', true);
-        app.getDatabaseTable(e.target.getAttribute('data-schema'));
-        app.handlerGuide();
-    };
-
-    // associo l'evento click dello schema
-	document.querySelectorAll('#nav-schema > a').forEach( (a) => {a.addEventListener('click', app.schemaSelected)});
-
-    // recupero gli schemi database presenti
-    /*app.getSchemata = async () => {
-		const url = '/fetch_api/schema';
-		await fetch(url)
-			.then( (response) => {
-                console.log(response);
-			if (!response.ok) {throw Error(response.statusText);}
-			return response;
-			})
-			.then( (response) => response.json())
-			.then( (data) => {
-		        console.log(data);
-		        if (data) {
-                    const nav = document.getElementById('nav-schema');
-                    for (const [key, value] of Object.entries(data)) {
-                        const a = document.createElement('a');
-                        a.innerHTML = value.SCHEMA_NAME;
-                        a.href = '#';
-                        a.setAttribute('data-schema', value.SCHEMA_NAME);
-                        a.id = key;
-                        nav.appendChild(a);
-                        a.addEventListener('click', app.schemaSelected);
-                    }
-                    
-		        } else {
-		          // TODO: no data
-		          console.warning('Non è stato possibile recuperare la lista delle tabelle');
-		        }
-		    })
-	    .catch( (err) => console.error(err));
-    };*/
-
-    // app.getSchemata(); // l'elenco degli schemi li recupero sulla Route mapping
-
-	// app.getDatabaseTable();
-
-	app.handlerGuide = () => {
-		if (app.messageId === 0) {
-			app.guideStep[app.messageId];
-			document.getElementById('guide').innerHTML = app.guideStep[app.messageId];
-			app.messageId++;
-		} else {
-			document.getElementById('guide').innerHTML = app.guideStep[app.messageId];
-			app.messageId++
-		}		
-	};
-
-	app.getDimensions();
-
-    app.getCubes();
-
-    app.handlerGuide();
 
 })();
