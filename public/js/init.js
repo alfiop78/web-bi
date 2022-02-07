@@ -791,7 +791,31 @@ var dimension = new Dimension();
 
 	app.addCards = (tables) => {
 		console.log('tables to add: ', tables);
-		debugger;
+		for (const [key, value] of Object.entries(tables)) {
+			console.log('key : ', key);
+			console.log('value : ', value);
+			const card = document.createElement('div');
+			card.className = 'card table';
+			const schema = value.split('.')[0];
+			const table = value.split('.')[1];
+			card.setAttribute('data-schema', schema);
+			card.setAttribute('label', table);
+			// recupero il template cardLayout e lo inserisco nella .card.table
+			const tmplCardLayout = document.getElementById('cardLayout');
+			const tmplContent = tmplCardLayout.content.cloneNode(true);
+			const cardLayout = tmplContent.querySelector('.cardLayout');
+			// h6 titolo
+			cardLayout.querySelector('h6').innerHTML = table;
+			card.appendChild(cardLayout);
+			// sostituisco dropping con dropped per nascondere lo span con la stringa "Trascina qui..."
+			app.dropZone.classList.replace('dropping', 'dropped');
+			app.dropZone.appendChild(card);
+	        app.dropZone.classList.add('dropped');
+	        cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : schema, 'tableName': table};
+
+	        app.getTable(schema, table);
+		}
+			
 	};
 
 	// selezione di una dimensione per consentirne le modifica
