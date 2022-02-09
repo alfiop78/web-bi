@@ -792,14 +792,21 @@ var dimension = new Dimension();
 	app.addCards = (tables) => {
 		console.log('tables to add: ', tables);
 		for (const [key, value] of Object.entries(tables)) {
-			console.log('key : ', key);
+			let x = 40, y = 40;
+			console.log('key : ', key); // la key la posso utilizzare anche per lo z-index
 			console.log('value : ', value);
 			const card = document.createElement('div');
 			card.className = 'card table';
+			// NOTE: Impostazione di una variabile css (--zindex)
+			card.style.setProperty('--zindex', key);
 			const schema = value.split('.')[0];
 			const table = value.split('.')[1];
 			card.setAttribute('data-schema', schema);
 			card.setAttribute('label', table);
+			x *= +key; y *= +key;
+			card.style.transform = "translate3d("+x+"px, "+y+"px, 0px)";
+			card.setAttribute('x', x);
+			card.setAttribute('y', y);
 			// recupero il template cardLayout e lo inserisco nella .card.table
 			const tmplCardLayout = document.getElementById('cardLayout');
 			const tmplContent = tmplCardLayout.content.cloneNode(true);
