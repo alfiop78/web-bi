@@ -647,7 +647,7 @@ var dimension = new Dimension();
 		cube.mode('relations', 'Selezionare le colonne che saranno messe in relazione');
 	};
 
-	app.getTable = async (schema, table) => {
+	app.getTable = async (schema, table, columnsList) => {
 		let tmplList = document.getElementById('templateListColumns');
 		// elemento dove inserire le colonne della tabella
 		let ulContainer = cube.card.ref.querySelector('#columns');
@@ -663,7 +663,7 @@ var dimension = new Dimension();
 		        if (data) {
 		        	ulContainer.removeAttribute('hidden');
 		        	for ( const [key, value] of Object.entries(data)) {
-                        console.log(key, value);
+                        // console.log(key, value);
 		        		let tmplContent = tmplList.content.cloneNode(true);
 						let element = tmplContent.querySelector('.element');
 						// element.setAttribute('name', 'columnSearch');
@@ -683,6 +683,7 @@ var dimension = new Dimension();
 						ulContainer.appendChild(element);
 						// li.onclick = cube.handlerColumns.bind(cube);
 						li.onclick = app.handlerColumns;
+						if (columnsList.hasOwnProperty(value.COLUMN_NAME)) li.setAttribute('columns', true);
 		        	}
 		        } else {
 		          // TODO: no data, handlerConsoleMessage
@@ -789,7 +790,10 @@ var dimension = new Dimension();
 		app.btnDimensionList.toggleAttribute('open');
 	};
 
-	app.addCards = (tables) => {
+	app.addCards = (dimension, hierName) => {
+		// dimStorage.selected.hierarchies[hierName].order
+		const tables = dimension.hierarchies[hierName].order;
+		const columns = dimension.hierarchies[hierName].columns;
 		console.log('tables to add: ', tables);
 		for (const [key, value] of Object.entries(tables)) {
 			let x = 40, y = 40;
@@ -820,7 +824,7 @@ var dimension = new Dimension();
 	        app.dropZone.classList.add('dropped');
 	        cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : schema, 'tableName': table};
 
-	        app.getTable(schema, table);
+	        app.getTable(schema, table, dimension.hierarchies[hierName].columns[value]);
 		}
 			
 	};
@@ -835,7 +839,9 @@ var dimension = new Dimension();
 		const hierName =Object.keys(dimStorage.selected.hierarchies);
 		// array di tabelle
 		// TODO: Implementare questa addCards per sostituire addCard
-		app.addCards(dimStorage.selected.hierarchies[hierName].order);
+		app.addCards(dimStorage.selected, hierName);
+		// app.addCards(dimStorage.selected.hierarchies[hierName].order);
+		// TODO: Imposto le colonne selezionate all'interno di ogni tabella
 		// chiudo la lista delle dimensioni
 		app.dimensionList.toggleAttribute('hidden');
 		app.btnDimensionList.toggleAttribute('open');
