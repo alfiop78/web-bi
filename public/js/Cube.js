@@ -91,14 +91,20 @@ class Cube {
 
 	get cube() {return this._cube;}
 
-	mode(value, text) {
+	mode(value) {
 		// imposto la modalità della card (relations, columns, filters, groupby,metrics)
 		// console.log(this.activeCardRef);
-
 		this.card.ref.setAttribute('mode', value);
 		let info = this.card.ref.parentElement.querySelector('.info');
 		info.removeAttribute('hidden');
-		info.innerHTML = text;
+		let msg;
+		switch (value) {
+			case 'columns':
+				msg = 'Seleziona le colonne da mettere nel corpo della tabella';
+			default:
+				break;
+		}
+		info.innerHTML = msg;
 	}
 
 	set dimensionsSelected(value) {this._dimensions.push(value);}

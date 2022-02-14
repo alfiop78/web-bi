@@ -339,11 +339,11 @@ var dimension = new Dimension();
 		// selezione della colonna nella card table
 		// console.log(e.target);
 		dimension.activeCard = e.path[3];
+		debugger;
 		cube.fieldSelected = e.currentTarget.getAttribute('label');
 		// TODO: utilizzare uno dei due qui, cube.fieldSelected oppure dimension.field, da rivedere
 		dimension.field = {field : e.currentTarget.getAttribute('label'), type : e.currentTarget.getAttribute('data-key')};
-	
-		// console.log(cube.activeCard);
+		debugger;
 
 		// se è presente un altro elemento con attributo hierarchy ma NON data-relation-id, "deseleziono" quello con hierarchy per mettere ...
 		// ...[hierarchy] a quello appena selezionato. In questo modo posso selezionare solo una colonna per volta ad ogni relazione da creare
@@ -397,6 +397,7 @@ var dimension = new Dimension();
 				break;
 			default:
 				// se la card è stata imposta con l'attributo mode ...
+				debugger;
 				if (cube.card.ref.hasAttribute('mode')) {
 					console.log('columns');
 					e.currentTarget.toggleAttribute('columns');
@@ -424,7 +425,7 @@ var dimension = new Dimension();
 		// dimension.columns = primaryKey.getAttribute('label');
 		// con l'attributo columns verrà mostrata l'icona "columns associata"
 		if (primaryKey) primaryKey.toggleAttribute('columns');
-		cube.mode('columns', 'Seleziona le colonne da mettere nel corpo della tabella');
+		cube.mode('columns');
 	};
 
 	app.handlerAddMetric = (e) => {
@@ -683,7 +684,13 @@ var dimension = new Dimension();
 						ulContainer.appendChild(element);
 						// li.onclick = cube.handlerColumns.bind(cube);
 						li.onclick = app.handlerColumns;
-						if (columnsList.hasOwnProperty(value.COLUMN_NAME)) li.setAttribute('columns', true);
+						/*if (columnsList.hasOwnProperty(value.COLUMN_NAME)) {
+							debugger;
+							// dimension.activeCard = e.path[3];
+							li.toggleAttribute('columns');
+							// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
+							// dimension.columns();
+						}*/
 		        	}
 		        } else {
 		          // TODO: no data, handlerConsoleMessage
@@ -823,6 +830,9 @@ var dimension = new Dimension();
 			app.dropZone.appendChild(card);
 	        app.dropZone.classList.add('dropped');
 	        cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : schema, 'tableName': table};
+	        // event sui tasti section[options]
+	        card.querySelector('i[join]').onclick = app.handlerAddJoin;
+	        card.querySelector('i[columns]').onclick = app.handlerAddColumns;
 
 	        app.getTable(schema, table, dimension.hierarchies[hierName].columns[value]);
 		}
