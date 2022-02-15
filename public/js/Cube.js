@@ -131,9 +131,10 @@ class Dimension {
 	#table;
 	#schema;
 	#comment;
+	#join = {};
 	constructor() {
 		this._dimension = {};
-		this._join = {}; // relazioni tra le tabelle
+		// this._join = {}; // relazioni tra le tabelle
 		this._hierarchies = {}; // ordine gerarchico
 		this._lastTableInHierarchy;
 		this.#columns = {}; // Object di colonne selezionate, queste potranno essere inserite nella creazione del report {'nometabella' : [array di colonne]}
@@ -176,19 +177,22 @@ class Dimension {
 	get from() {return this._from;}
 
 	set hierarchies(value) {
-		if (!this._join.hasOwnProperty(this.#table)) {
+		// debugger;
+		if (!this.#join.hasOwnProperty(this.#table)) {
+			// questa tabella non ha ancora nessuna relazione, azzero il relationId
 			this.relationId = 0;
-			this._join[this.#table] = {[this.relationId] : value};
-			// this._join[this.#table] = value;
-			this.relationId++;
+			this.#join[this.#table] = {[this.relationId] : value};
 		} else {
-			this._join[this.#table][this.relationId] = value;
+			debugger;
+			// non incremento più relationId ma lo ricavo dal length in base alle relazioni già presenti per ogni tabella
+			this.relationId = Object.keys(this.#join[this.#table]).length;
+			this.#join[this.#table][this.relationId] = value;
+			// this.#join[this.#table][this.relationId] = value;
 		}
-		console.log('this._join : ', this._join);
-		
+		console.log('this.#join : ', this.#join);		
 	}
 
-	get hierarchies() {return this._join;}
+	get hierarchies() {return this.#join;}
 
 	set hierarchyOrder(object) {
 		console.log('object : ', object);
@@ -212,6 +216,7 @@ class Dimension {
 			// la relazione è stata creata, posso eliminare [selected]
 			el.removeAttribute('selected');
 		});
+		// this.relationId++;
 	}
 
 	columns() {
@@ -241,7 +246,7 @@ class Dimension {
 		this._dimension.name = this._title;
 		this._dimension.comment = this.#comment;
 		this._dimension.from = this._from;
-		this._dimension.join = this._join;
+		this._dimension.join = this.#join;
 		this._dimension.cubes = {}; // object con i nomi dei cubi che hanno associazione con questa dimensione. Questa viene popolata quando si associa la dimensione al cubo
 		this._dimension.lastTableInHierarchy = this._lastTableInHierarchy;
 		this._dimension.hierarchies = this._hierarchies;

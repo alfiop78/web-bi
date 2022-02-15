@@ -108,7 +108,8 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 .card.table ul > .element li[columns] ~ #columns-icon{color: #9a6a6a;visibility: visible;}
 .card.table ul > .element li[metrics] ~ #metrics-icon{color: #587850;visibility: visible;}
 
-.card.table ul > .element li[data-relation-id='true'] ~ #hierarchy-icon{color: #99b19c;}
+/*.card.table ul > .element li[data-relation-id='true'] ~ #hierarchy-icon{color: #99b19c;}*/
+.card.table ul > .element li[data-relation-id] ~ #hierarchy-icon{color: #99b19c;}
 /* colonne all'interno della card/tabella*/
 
 /*.card.table{

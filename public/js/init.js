@@ -377,7 +377,6 @@ var dimension = new Dimension();
 					e.currentTarget.toggleAttribute('relations');
 					e.currentTarget.toggleAttribute('selected');
 					// se ho selezionato una colonna diversa da quella già selezionata, rimuovo la selezione corrente e imposto quella nuova
-					// se è stata selezionata una colonna già selezionata la deseleziono
 					if (liRelationSelected && (liRelationSelected.id !== e.currentTarget.id)) {
 						liRelationSelected.toggleAttribute('relations');
 						liRelationSelected.toggleAttribute('selected');
@@ -429,13 +428,11 @@ var dimension = new Dimension();
 	app.createHierarchy = (e) => {
 		console.log('create Relations');
 		let hier = [];
-		// let hierObj = {};
 		let colSelected = [];
 		console.log( document.querySelectorAll('.cardTable[mode="relations"] li[relations][selected]').length);
 		// quando i campi selezionati sono 1 recupero il nome della tabella perchè questa gerarchia avrà il nome della prima tabella selezionata da mettere in relazione
 		if (document.querySelectorAll('.cardTable[mode="relations"] li[relations][selected]').length === 1) {
 			dimension.table = document.querySelector('.cardTable[mode="relations"] li[relations][selected]').getAttribute('data-table-name');
-			// let li = document.querySelector('.cardTable[mode="relations"] li[relations][selected]');
 		}
 		console.log('dimension.table : ', dimension.table);
 		debugger;
@@ -450,8 +447,8 @@ var dimension = new Dimension();
 			console.log(hier);
 			// per creare correttamente la relazione è necessario avere due elementi selezionati
 			if (hier.length === 2) {
-				// se, in questa relazione è presente anche la tabella FACT rinomino hier_n in fact_n in modo da poter separare le gerarchie
-				// e capire quali sono quelle con la fact (quindi legate al Cubo) e quali no (posso salvare la Dimensione, senza il legame con il Cubo)
+				// se, in questa relazione, è presente anche la tabella FACT rinomino hier_n in fact_n in modo da poter separare le gerarchie
+				// e capire quali sono quelle con la fact e quali no (posso salvare la Dimensione, senza il legame con il Cubo)
 				if (card.hasAttribute('fact')) {
 					console.log('FACT TABLE Relation');
 					cube.relations['cubeJoin_'+cube.relationId] = hier;
@@ -461,8 +458,8 @@ var dimension = new Dimension();
 				} else {
 					debugger;
 					dimension.hierarchies = hier;
-					// dimension.relationId++;
 					// visualizzo l'icona per capire che c'è una relazione tra le due colonne
+					debugger;
 					dimension.saveRelation(colSelected);
 					console.log(dimension.hierarchies);
 					// esiste una relazione, visualizzo il div hierarchiesContainer
@@ -639,7 +636,7 @@ var dimension = new Dimension();
 		cube.mode('relations');
 	};
 
-	app.getTable = async (schema, table, columnsList, join) => {
+	app.getTable = async (schema, table) => {
 		let tmplList = document.getElementById('templateListColumns');
 		// elemento dove inserire le colonne della tabella
 		let ulContainer = cube.card.ref.querySelector('#columns');
@@ -651,9 +648,8 @@ var dimension = new Dimension();
 			})
 			.then( (response) => response.json())
 			.then( (data) => {
-                console.log(data);
-                // imposto la cardActive per poter eseguire il dimension.columns()
-                dimension.activeCard = document.querySelector(".cardTable[name='"+table+"']");
+				console.log('response getTable');
+                // console.log(data);
 		        if (data) {
 		        	ulContainer.removeAttribute('hidden');
 		        	for ( const [key, value] of Object.entries(data)) {
@@ -677,15 +673,6 @@ var dimension = new Dimension();
 						// fn da associare all'evento in 'mutation observe'
 						li.setAttribute('data-fn', 'handlerColumns');
 						ulContainer.appendChild(element);
-						// imposto l'attr columns per selezionare i campi automaticamente (Modifica di una dimensione)
-						if (columnsList) {
-							if (columnsList.hasOwnProperty(value.COLUMN_NAME)) {
-								li.toggleAttribute('columns');
-								dimension.field = {field : li.getAttribute('label'), type : li.getAttribute('data-key')};
-								// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
-								dimension.columns();
-							}
-						}
 		        	}
 		        } else {
 		          // TODO: no data, handlerConsoleMessage
@@ -792,7 +779,7 @@ var dimension = new Dimension();
 		app.btnDimensionList.toggleAttribute('open');
 	};
 
-	app.addCards = (dim, hierName) => {
+	app.addCards = async (dim, hierName) => {
 		// dimStorage.selected.hierarchies[hierName].order
 		const tables = dim.hierarchies[hierName].order;
 		const columns = dim.hierarchies[hierName].columns;
@@ -829,8 +816,50 @@ var dimension = new Dimension();
 	        // event sui tasti section[options]
 	        card.querySelector('i[join]').onclick = app.handlerAddJoin;
 	        card.querySelector('i[columns]').onclick = app.handlerAddColumns;
-
-	        app.getTable(schema, table, dim.hierarchies[hierName].columns[value], dim.join);
+	        // await : aspetto che getTable popoli tutta la card con i relativi campi
+	        await app.getTable(schema, table);
+	        console.log('after await');
+	        // imposto la card attiva
+	        dimension.activeCard = card.querySelector('.cardTable');
+	        // seleziono i campi impostati nella dimensione, nelle proprietà 'hierarchies[hiername]columns[value]'
+	        for (const [field, type] of Object.entries(dim.hierarchies[hierName].columns[value])) {
+	        	// console.log(field);
+	        	// console.log(type);
+	        	// debugger;
+	        	dimension.activeCard.querySelector("li[label='"+field+"']").toggleAttribute('columns');
+	        	dimension.field = {field, type};
+				// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
+				dimension.columns();
+	        }
+		}
+		// dopo aver caricato tutte le tabelle appartenenti alla dimensione, imposto le gerarchie definite recuperandole dalla proprietà 'join'
+		// , dim.join
+		// TODO: a questo punto posso recuperare dim.join per inserire nelle tabelle le relative join
+		console.clear();
+		for (let table in dim.join) {
+			dimension.table = table;
+			// console.log(table);
+			// console.log(dim.join[table]);
+			// per ogni tabella
+			for (const [joinId, joins] of Object.entries(dim.join[table]) ) {
+				// joinId : 0,1,2,ecc... ogni relazione
+				console.log('joinId : ', joinId);
+				// console.log('joins : ', joins); // array delle relazioni
+				// debugger;
+				joins.forEach( (table_field) => {
+					// debugger;
+					const tableName = table_field.split('.')[0];
+					const fieldName = table_field.split('.')[1];
+					// console.log('tableName : ', tableName);
+					// console.log('fieldName : ', fieldName);
+					// imposto, sulla table/field l'attributo hier
+					app.dropZone.querySelector(".cardTable[name='" + tableName + "'] li[label='" + fieldName + "']").toggleAttribute('relations');
+					app.dropZone.querySelector(".cardTable[name='" + tableName + "'] li[label='" + fieldName + "']").setAttribute('data-rel-'+joinId, joinId);
+					app.dropZone.querySelector(".cardTable[name='" + tableName + "'] li[label='" + fieldName + "']").setAttribute('data-relation-id', true);
+				});
+				
+				dimension.hierarchies = joins;
+			}
 		}
 			
 	};
