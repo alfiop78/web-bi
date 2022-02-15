@@ -101,6 +101,10 @@ class Cube {
 		switch (value) {
 			case 'columns':
 				msg = 'Seleziona le colonne da mettere nel corpo della tabella';
+				break;
+			case 'relations':
+				msg = 'Selezionare le colonne che saranno messe in relazione';
+				break;
 			default:
 				break;
 		}

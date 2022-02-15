@@ -390,8 +390,8 @@
                                     </div>
                                 </div>
                                 <div class="actions">
-                                    <span class="popupContent"><i id="saveDimension" class="material-icons md-24 md-inactive">save</i><small class="popup">Salva dimensione</small></span>
-                                    <span class="popupContent"><i id="hierarchySave" class="material-icons md-24 md-inactive">save</i><small class="popup">Salva gerarchia</small></span>
+                                    <span class="popupContent"><i id="saveDimension" class="material-icons md-24">save</i><small class="popup">Salva dimensione</small></span>
+                                    <span class="popupContent"><i id="hierarchySave" class="material-icons md-24">save</i><small class="popup">Salva gerarchia</small></span>
                                     <span class="popupContent"><i class="material-icons md-24">playlist_add</i><small class="popup">Nuova gerarchia</small></span>
                                 </div>
 

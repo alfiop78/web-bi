@@ -65,7 +65,7 @@ var dimension = new Dimension();
 
 	// utilizzato per lo spostamento all'interno del drop-zone (card già droppata)
 	app.dragStart = (e) => {
-        console.log('dragStart : ', e.target);
+        // console.log('dragStart : ', e.target);
 		// mousedown da utilizzare per lo spostamento dell'elemento
 		if (e.target.localName === 'h6') {
 			app.cardTitle = e.target;
@@ -73,8 +73,8 @@ var dimension = new Dimension();
 			// recupero la posizione attuale della card tramite l'attributo x-y impostato su .cardTable
 			app.xOffset = e.path[4].getAttribute('x');
 			app.yOffset = e.path[4].getAttribute('y');
-			console.log('xOffset : ', app.xOffset);
-			console.log('yOffset : ', app.yOffset);
+			// console.log('xOffset : ', app.xOffset);
+			// console.log('yOffset : ', app.yOffset);
 		}
 		// cardTitle = document.querySelector('.card.table .title > h6');
 		if (e.type === 'touchstart') {
@@ -339,11 +339,11 @@ var dimension = new Dimension();
 		// selezione della colonna nella card table
 		// console.log(e.target);
 		dimension.activeCard = e.path[3];
-		debugger;
+		// debugger;
 		cube.fieldSelected = e.currentTarget.getAttribute('label');
 		// TODO: utilizzare uno dei due qui, cube.fieldSelected oppure dimension.field, da rivedere
 		dimension.field = {field : e.currentTarget.getAttribute('label'), type : e.currentTarget.getAttribute('data-key')};
-		debugger;
+		// debugger;
 
 		// se è presente un altro elemento con attributo hierarchy ma NON data-relation-id, "deseleziono" quello con hierarchy per mettere ...
 		// ...[hierarchy] a quello appena selezionato. In questo modo posso selezionare solo una colonna per volta ad ogni relazione da creare
@@ -397,7 +397,7 @@ var dimension = new Dimension();
 				break;
 			default:
 				// se la card è stata imposta con l'attributo mode ...
-				debugger;
+				// debugger;
 				if (cube.card.ref.hasAttribute('mode')) {
 					console.log('columns');
 					e.currentTarget.toggleAttribute('columns');
@@ -410,21 +410,12 @@ var dimension = new Dimension();
 	// click sull'icona di destra "columns" per l'associazione delle colonne
 	app.handlerAddColumns = (e) => {
 		// console.log(e.target);
-		// console.log(e.path);
-		console.log('add columns');
-
+		// console.log('add columns');
 		const cardTable = e.path[3].querySelector('.cardTable');
-		console.log('cardTable : ', cardTable);
+		// console.log('cardTable : ', cardTable);
 		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.getAttribute('data-schema'), 'tableName': cardTable.getAttribute('name')};
 		// quando aggiungo la tabella imposto da subito la colonna id in "columns"
 		dimension.activeCard = cardTable; // card attiva
-		const primaryKey = dimension.activeCard.querySelector('ul li[data-key="pk"]');
-        if (primaryKey) dimension.field = {field : primaryKey.getAttribute('label'), type : primaryKey.getAttribute('data-key')};
-		// dimension.columns = {field : primaryKey.getAttribute('label'), type : primaryKey.getAttribute('data-key')};
-		dimension.columns();
-		// dimension.columns = primaryKey.getAttribute('label');
-		// con l'attributo columns verrà mostrata l'icona "columns associata"
-		if (primaryKey) primaryKey.toggleAttribute('columns');
 		cube.mode('columns');
 	};
 
@@ -642,13 +633,13 @@ var dimension = new Dimension();
 	};
 
 	app.handlerAddJoin = (e) => {
-		debugger;
+		// debugger;
 		const cardTable = e.path[3].querySelector('.cardTable');
 		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.getAttribute('data-schema'), 'tableName': cardTable.getAttribute('name')};
-		cube.mode('relations', 'Selezionare le colonne che saranno messe in relazione');
+		cube.mode('relations');
 	};
 
-	app.getTable = async (schema, table, columnsList) => {
+	app.getTable = async (schema, table, columnsList, join) => {
 		let tmplList = document.getElementById('templateListColumns');
 		// elemento dove inserire le colonne della tabella
 		let ulContainer = cube.card.ref.querySelector('#columns');
@@ -661,6 +652,8 @@ var dimension = new Dimension();
 			.then( (response) => response.json())
 			.then( (data) => {
                 console.log(data);
+                // imposto la cardActive per poter eseguire il dimension.columns()
+                dimension.activeCard = document.querySelector(".cardTable[name='"+table+"']");
 		        if (data) {
 		        	ulContainer.removeAttribute('hidden');
 		        	for ( const [key, value] of Object.entries(data)) {
@@ -681,16 +674,18 @@ var dimension = new Dimension();
 						li.setAttribute('data-key', value.CONSTRAINT_NAME); // pk : chiave primaria
 						//li.setAttribute('data-table',cube.table);
 						li.id = key;
+						// fn da associare all'evento in 'mutation observe'
+						li.setAttribute('data-fn', 'handlerColumns');
 						ulContainer.appendChild(element);
-						// li.onclick = cube.handlerColumns.bind(cube);
-						li.onclick = app.handlerColumns;
-						/*if (columnsList.hasOwnProperty(value.COLUMN_NAME)) {
-							debugger;
-							// dimension.activeCard = e.path[3];
-							li.toggleAttribute('columns');
-							// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
-							// dimension.columns();
-						}*/
+						// imposto l'attr columns per selezionare i campi automaticamente (Modifica di una dimensione)
+						if (columnsList) {
+							if (columnsList.hasOwnProperty(value.COLUMN_NAME)) {
+								li.toggleAttribute('columns');
+								dimension.field = {field : li.getAttribute('label'), type : li.getAttribute('data-key')};
+								// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
+								dimension.columns();
+							}
+						}
 		        	}
 		        } else {
 		          // TODO: no data, handlerConsoleMessage
@@ -797,10 +792,10 @@ var dimension = new Dimension();
 		app.btnDimensionList.toggleAttribute('open');
 	};
 
-	app.addCards = (dimension, hierName) => {
+	app.addCards = (dim, hierName) => {
 		// dimStorage.selected.hierarchies[hierName].order
-		const tables = dimension.hierarchies[hierName].order;
-		const columns = dimension.hierarchies[hierName].columns;
+		const tables = dim.hierarchies[hierName].order;
+		const columns = dim.hierarchies[hierName].columns;
 		console.log('tables to add: ', tables);
 		for (const [key, value] of Object.entries(tables)) {
 			let x = 40, y = 40;
@@ -830,11 +825,12 @@ var dimension = new Dimension();
 			app.dropZone.appendChild(card);
 	        app.dropZone.classList.add('dropped');
 	        cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : schema, 'tableName': table};
+	        // debugger;
 	        // event sui tasti section[options]
 	        card.querySelector('i[join]').onclick = app.handlerAddJoin;
 	        card.querySelector('i[columns]').onclick = app.handlerAddColumns;
 
-	        app.getTable(schema, table, dimension.hierarchies[hierName].columns[value]);
+	        app.getTable(schema, table, dim.hierarchies[hierName].columns[value], dim.join);
 		}
 			
 	};
@@ -1167,4 +1163,17 @@ var dimension = new Dimension();
 		delete dimension.dimension;
 	};
 
+	const body = document.getElementById('body');
+    // console.log(body);
+    // create a new instance of `MutationObserver` named `observer`,
+	// passing it a callback function
+	const observer = new MutationObserver(function() {
+	    // console.log('callback that runs when observer is triggered');
+	    document.querySelectorAll('li[data-fn]').forEach( (li) => {
+	    	li.onclick = app[li.getAttribute('data-fn')];
+	    });
+	});
+	// call `observe()` on that MutationObserver instance,
+	// passing it the element to observe, and the options object
+	observer.observe(body, {subtree: true, childList: true, attributes: true});
 })();
