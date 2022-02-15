@@ -847,15 +847,16 @@ var dimension = new Dimension();
 				// console.log('joins : ', joins); // array delle relazioni
 				// debugger;
 				joins.forEach( (table_field) => {
-					// debugger;
+					debugger;
 					const tableName = table_field.split('.')[0];
 					const fieldName = table_field.split('.')[1];
+					const li = app.dropZone.querySelector(".cardTable[name='" + tableName + "'] li[label='" + fieldName + "']");
 					// console.log('tableName : ', tableName);
 					// console.log('fieldName : ', fieldName);
-					// imposto, sulla table/field l'attributo hier
-					app.dropZone.querySelector(".cardTable[name='" + tableName + "'] li[label='" + fieldName + "']").toggleAttribute('relations');
-					app.dropZone.querySelector(".cardTable[name='" + tableName + "'] li[label='" + fieldName + "']").setAttribute('data-rel-'+joinId, joinId);
-					app.dropZone.querySelector(".cardTable[name='" + tableName + "'] li[label='" + fieldName + "']").setAttribute('data-relation-id', true);
+					// se questo campo ha già una relazione impostata (ad esempio con un altra tabella), non faccio il toggle dell'attr 'relations' altrimenti viene eliminata la relazione
+					if (!li.hasAttribute('relations')) li.toggleAttribute('relations');
+					li.setAttribute('data-rel-'+joinId, joinId);
+					li.setAttribute('data-relation-id', true);
 				});
 				
 				dimension.hierarchies = joins;
