@@ -122,11 +122,11 @@ var storage = new Storages();
 				iconStatus.classList.add('md-attention');
 				descrStatus.innerText = 'In locale';
 				versioningStatus.querySelector('.vers-title > div[data-name]').innerText = el;
-				sectionSearchable.setAttribute('data-search', 'versioning-db-search');
+				sectionSearchable.setAttribute('data-element-search', 'versioning-db-search');
 				sectionSearchable.setAttribute('data-object-storage', 'local');
 				sectionSearchable.setAttribute('data-object-type', element);
 				sectionSearchable.setAttribute('data-object-name', el);
-				sectionSearchable.setAttribute('label', el);
+				sectionSearchable.setAttribute('data-label', el);
 				// icona per recuperare manualmente l'elemento
 				actions.querySelector('.popupContent[data-upload]').removeAttribute('hidden');
 				actions.querySelector('.popupContent[data-upload] i[data-id="btn-upload-local-object"]').setAttribute('data-object-name', el);
@@ -209,8 +209,8 @@ var storage = new Storages();
 				// icona delete
 				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-name', jsonParsed.name);
 				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-type', element);
-				sectionSearchable.setAttribute('data-search', 'versioning-db-search');
-				sectionSearchable.setAttribute('label', jsonParsed.name);
+				sectionSearchable.setAttribute('data-element-search', 'versioning-db-search');
+				sectionSearchable.setAttribute('data-label', jsonParsed.name);
 				parent.appendChild(sectionSearchable);
 			});
 		}

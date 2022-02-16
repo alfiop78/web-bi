@@ -109,46 +109,19 @@ class Application {
 	}
 
 	genericSearch(e) {
+		(e.target.value.length > 0) ?
+			e.target.parentElement.querySelector('label').classList.add('has-content') :
+			e.target.parentElement.querySelector('label').classList.remove('has-content');
+		// verifico che la input ha l'attr type='search', non eseguo la ricerca se il campo non ha l'attr type='search'
+		if ( !(e.target.hasAttribute('type') && e.target.getAttribute('type') === 'search') ) return;
 		// la input ha un attr "data-element-search" che indica su quali elementi deve cercare, gli elementi su cui cercare avranno un attr "data-search" con lo stesso valore di questo attributo
 		// console.log(e.target.value);
 		const searchAttr = e.target.getAttribute('data-element-search');
-		let listElement = Array.from(document.querySelectorAll("section[data-search='" + searchAttr + "']"));
+		const listElement = Array.from(document.querySelectorAll("section[data-element-search='" + searchAttr + "']"));
 		// console.log(listElement);
 		listElement.forEach( (item) => {
-			(item.getAttribute('label').indexOf(e.target.value) === -1 && item.getAttribute('label').toLowerCase().indexOf(e.target.value) === -1) ?
+			(item.getAttribute('data-label').indexOf(e.target.value) === -1 && item.getAttribute('data-label').toLowerCase().indexOf(e.target.value) === -1) ?
 			item.hidden = true : item.hidden = false;
-		});
-	}
-
-	searchInList(e) {
-		// console.log(e.path);
-		// console.log(e.target.value);
-
-		// Ricerca in una lista
-		(this.value.length > 0) ?
-		  this.parentElement.querySelector('label').classList.add('has-content') :
-		  this.parentElement.querySelector('label').classList.remove('has-content');
-
-		// let listElement = Array.from(e.path[2].querySelectorAll('.element[name="'+name+'"] > .elementSearch'));
-		let listElement = Array.from(e.path[2].querySelectorAll('.elementSearch'));
-		// console.log(listElement);
-		// TODO: foreach
-		listElement.forEach((item) => {
-			(item.getAttribute('label').indexOf(e.target.value) === -1 && item.getAttribute('label').toLowerCase().indexOf(e.target.value) === -1) ?
-			item.parentElement.setAttribute('hide', true) : item.parentElement.removeAttribute('hide');
-		});
-	}
-
-	// Ricerca in una lista, il tag section ha l'attributo data-label-search
-	searchInSectionList(e) {
-		console.clear();
-		// console.log(e.path);
-		// console.log(e.target.value);
-		const ul = e.path[2].querySelector('ul');
-		const elements = ul.querySelectorAll("section[data-searchable]");
-		elements.forEach( (item) => {
-		  	(item.getAttribute('data-label-search').indexOf(e.target.value) === -1 && item.getAttribute('data-label-search').toLowerCase().indexOf(e.target.value) === -1) ?
-		  	item.hidden = true : item.hidden = false;
 		});
 	}
 

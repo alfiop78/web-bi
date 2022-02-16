@@ -219,7 +219,7 @@
                         <span data-id="popupCloseTable" class="popupContent"><i data-id="closeTable" class="material-icons md-18">close</i><small class="popup">Chiudi</small></span>
                     </div>
                     <div class="md-field">
-                        <input type="search" value=""/>
+                        <input type="search" value="" data-element-search/>
                         <label for="searchColumns" class="">Ricerca</label>
                     </div>
                     <ul id="columns" hidden></ul>
@@ -237,16 +237,20 @@
         </template>
 
         <template id="el">
-            <div class="element card" id="" draggable="true" label=""></div>
+            <section data-element-search="tables" data-label>
+                <div class="element card" id="" draggable="true" label=""></div>                
+            </section>
         </template>
 
         <template id="templateListColumns">
-            <div class="element" name="">
-                <li></li>
-                <i id="columns-icon" class="material-icons md-18">view_list</i>
-                <i id="hierarchy-icon" class="material-icons md-18">insert_link</i>
-                <i id="metrics-icon" class="material-icons md-18">show_chart</i>
-            </div>
+            <section data-element-search="" data-label="">
+                <div class="element">
+                    <li></li>
+                    <i id="columns-icon" class="material-icons md-18">view_list</i>
+                    <i id="hierarchy-icon" class="material-icons md-18">insert_link</i>
+                    <i id="metrics-icon" class="material-icons md-18">show_chart</i>
+                </div>
+            </section>
         </template>
         <main>
             <div id="drawer">
@@ -303,7 +307,7 @@
                         <div class="lists">
                             <div class="absList" id="tableList" hidden>
                                 <div class="md-field">
-                                    <input type="search" id="tableSearch" data-search-type="search-list" autocomplete="off" />
+                                    <input type="search" id="tableSearch" data-element-search="tables" autocomplete="off" />
                                     <label for="tableSearch" class="">Ricerca</label>
                                 </div>
                                 <ul id="tables">

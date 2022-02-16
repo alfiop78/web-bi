@@ -244,7 +244,9 @@ var dimension = new Dimension();
 		// evento sul tasto close della card
 		card.querySelector('i[data-id="closeTable"]').onclick = app.handlerCloseCard;
 		// evento sulla input di ricerca nella card
-		card.querySelector('input').oninput = App.searchInList;
+
+		// card.querySelector('input').oninput = App.searchInList;
+		card.querySelector('input').setAttribute('data-element-search', card.getAttribute('label'));
 	
 		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.getAttribute('data-schema'), 'tableName': card.getAttribute('label')};
 		// inserisco il nome della tabella selezionata nella card [active]
@@ -609,12 +611,15 @@ var dimension = new Dimension();
 		        		// debugger;
 		        		let tmpl = document.getElementById('el');
 						let tmplContent = tmpl.content.cloneNode(true);
+						const section = tmplContent.querySelector('section');
+						section.setAttribute('data-label', value.TABLE_NAME);
+
 						let element = tmplContent.querySelector('.element.card');
 						element.ondragstart = app.handlerDragStart;
 						element.id = 'table-' + key;
 						element.setAttribute('data-schema', schema);
 						element.setAttribute('label', value.TABLE_NAME);
-						ul.appendChild(element);
+						ul.appendChild(section);
 						let span = document.createElement('span');
 						span.classList = 'elementSearch';
 						span.setAttribute('label', value.TABLE_NAME);
@@ -655,11 +660,11 @@ var dimension = new Dimension();
 		        	for ( const [key, value] of Object.entries(data)) {
                         // console.log(key, value);
 		        		let tmplContent = tmplList.content.cloneNode(true);
-						let element = tmplContent.querySelector('.element');
-						// element.setAttribute('name', 'columnSearch');
-						let li = element.querySelector('li');
+		        		const section = tmplContent.querySelector('section');
+		        		section.setAttribute('data-label', value.COLUMN_NAME);
+		        		section.setAttribute('data-element-search', table);
+						let li = section.querySelector('li');
 						li.className = 'elementSearch';
-						// let iElement = element.querySelector('i');
 						li.innerText = value.COLUMN_NAME;
 						li.setAttribute('label', value.COLUMN_NAME);
 						li.setAttribute('data-table-name', table);
@@ -672,7 +677,7 @@ var dimension = new Dimension();
 						li.id = key;
 						// fn da associare all'evento in 'mutation observe'
 						li.setAttribute('data-fn', 'handlerColumns');
-						ulContainer.appendChild(element);
+						ulContainer.appendChild(section);
 		        	}
 		        } else {
 		          // TODO: no data, handlerConsoleMessage
@@ -816,6 +821,8 @@ var dimension = new Dimension();
 	        // event sui tasti section[options]
 	        card.querySelector('i[join]').onclick = app.handlerAddJoin;
 	        card.querySelector('i[columns]').onclick = app.handlerAddColumns;
+	        // input di ricerca, imposto l'attr data-element-search
+	        card.querySelector('input[type="search"]').setAttribute('data-element-search', table);
 	        // await : aspetto che getTable popoli tutta la card con i relativi campi
 	        await app.getTable(schema, table);
 	        console.log('after await');
@@ -847,7 +854,7 @@ var dimension = new Dimension();
 				// console.log('joins : ', joins); // array delle relazioni
 				// debugger;
 				joins.forEach( (table_field) => {
-					debugger;
+					// debugger;
 					const tableName = table_field.split('.')[0];
 					const fieldName = table_field.split('.')[1];
 					const li = app.dropZone.querySelector(".cardTable[name='" + tableName + "'] li[label='" + fieldName + "']");

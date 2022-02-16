@@ -96,6 +96,7 @@ section > h3 ~ h5{font-weight: lighter;}
 /* lists */
 .lists{display: flex;}
 ul > .element:not([hide]){display: flex;margin: 2px 6px;padding: 4px;font-size: .8rem;}
+ul > section{margin: 2px 6px;padding: 4px;font-size: .8rem;}
 ul > section > .element:not([hidden]){display: flex;justify-content: space-between;align-items: center;width: 100%;}
 ul:not([id='columns']) > .element[draggable]:not([hide]):hover{display: flex;justify-content: space-between;align-items: center;margin: 2px 6px;padding: 4px;
   background: tan;cursor: grab;border-radius: 4px;}

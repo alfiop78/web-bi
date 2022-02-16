@@ -96,20 +96,20 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
   white-space: nowrap;}
 
 .card.table ul > .element li[data-key="pk"] {list-style-type: none;display: block;padding: 6px;overflow: hidden;text-overflow: ellipsis;
-  white-space: nowrap;background: indianred; color: white; border-radius: 4px;}
+  white-space: nowrap;background: gainsboro; color: black; border-radius: 4px;}
 
-.card.table > .cardLayout > .cardTable[mode] ul > .element li:hover{cursor: pointer;}
+.card.table > .cardLayout > .cardTable[mode] ul > section > .element li:hover{cursor: pointer;}
 
-.card.table > .cardLayout > .cardTable[mode='columns'] ul > .element li:hover{background-color: #9a6a6a;border-radius: 4px;color: white;}
-.card.table > .cardLayout > .cardTable[mode='relations'] ul > .element li:hover{background-color: #99b19c;border-radius: 4px;color: white;}
-.card.table > .cardLayout > .cardTable[mode='metrics'] ul > .element li:hover{background-color: #587850;border-radius: 4px;color: white;}
-.card.table ul > .element li ~ i{color: grey;visibility: hidden;}
-.card.table ul > .element li[relations] ~ #hierarchy-icon{visibility: visible;}
-.card.table ul > .element li[columns] ~ #columns-icon{color: #9a6a6a;visibility: visible;}
-.card.table ul > .element li[metrics] ~ #metrics-icon{color: #587850;visibility: visible;}
+.card.table > .cardLayout > .cardTable[mode='columns'] ul > section > .element li:hover{background-color: #9a6a6a;border-radius: 4px;color: white;}
+.card.table > .cardLayout > .cardTable[mode='relations'] ul > section > .element li:hover{background-color: #99b19c;border-radius: 4px;color: white;}
+.card.table > .cardLayout > .cardTable[mode='metrics'] ul > section > .element li:hover{background-color: #587850;border-radius: 4px;color: white;}
+.card.table ul > section > .element li ~ i{color: grey;visibility: hidden;}
+.card.table ul > section > .element li[relations] ~ #hierarchy-icon{visibility: visible;}
+.card.table ul > section > .element li[columns] ~ #columns-icon{color: #9a6a6a;visibility: visible;}
+.card.table ul > section > .element li[metrics] ~ #metrics-icon{color: #587850;visibility: visible;}
 
 /*.card.table ul > .element li[data-relation-id='true'] ~ #hierarchy-icon{color: #99b19c;}*/
-.card.table ul > .element li[data-relation-id] ~ #hierarchy-icon{color: #99b19c;}
+.card.table ul > section > .element li[data-relation-id] ~ #hierarchy-icon{color: #99b19c;}
 /* colonne all'interno della card/tabella*/
 
 /*.card.table{
