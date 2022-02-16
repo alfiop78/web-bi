@@ -174,7 +174,7 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
   box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);}
 .hier.table{background: tan;padding: 8px;font-size: .8rem;border-radius: 4px;width: 170px;overflow: hidden;text-overflow: ellipsis;}
 .dropzoneHier:last-child .hier.table{background: var(--main-primary-color);color: white;font-weight: bold;}
-.hier.table:last-child{background: var(--main-primary-color);color: white;}
+/*.hier.table:last-child{background: var(--main-primary-color);color: white;}*/
 .association{background: #494949;color: white;height: auto; width: 80%;margin: 0 8px;padding: 8px;border-radius: 4px;}
 span.before, span.after{width: 80%;height: 5px;position: relative;display: flex;align-items: center;justify-content: center;}
 span.before .arrow{height: 10px; width: 10px;background: #494949;display: flex;transform: rotate(45deg);top: 0;position: absolute;}

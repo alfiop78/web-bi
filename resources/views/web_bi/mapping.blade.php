@@ -79,6 +79,10 @@
             </section>
         </template>
 
+        <template id="hierarchy-struct">
+            <div class="hier table dropzoneHier" data-schema draggable="true" label></div>
+        </template>
+
         <template id="tmpl-cube-list">
             <section data-element-search="cubes" data-label>
                 <div class="element">
@@ -201,7 +205,7 @@
                 <div class="dialog-save-name">
 
                     <div class="md-field">
-                        <input type="text" id="dimensionName" value=""/>
+                        <input type="text" id="dimensionName" value="" autofocus autocomplete="off" />
                         <label for="dimensionName" class="">Nome</label>
                     </div>
                     <textarea id="textarea-dimension-comment" rows="10" placeholder="Aggiungi qui un commento per la dimensione"></textarea>
@@ -222,7 +226,7 @@
                 <div class="dialog-save-name">
 
                     <div class="md-field">
-                        <input type="text" id="hierarchyName" value="" autofocus/>
+                        <input type="text" id="hierarchyName" value="" autofocus autocomplete="off" />
                         <label for="hierarchyName" class="">Nome Gerarchia</label>
                     </div>
                     <textarea id="textarea-hierarchies-comment" rows="10" placeholder="Aggiungi qui un commento per questa gerarchia"></textarea>
@@ -386,16 +390,16 @@
                             <div class="grid-cols">
                                 <div id="hierarchiesContainer">
                                     <section id="hierarchies" class="section-content">
-                                        <h5>Struttura gerarchica</h5><h6>Gerarchia 1</h6>
+                                        <h6>Struttura gerarchica</h6>
                                         <div id="hierTables"></div>
-                                        <span class="before"><span class="arrow"></span></span>
+                                        {{-- <span class="before"><span class="arrow"></span></span>
                                         <div class="association"><p>Associazione con la Fact Table</p></div>
                                         <span class="after"><span class="arrow"></span></span>
                                         <div id="hierFact">
                                             <div>
                                                 <div class="hier fact">FACT TABLE</div>
                                             </div>
-                                        </div>
+                                        </div> --}}
                                         <div class="actions">
                                             <span class="popupContent"><i id="saveDimension" class="material-icons md-24">save</i><small class="popup">Salva dimensione</small></span>
                                             <span class="popupContent"><i id="hierarchySave" class="material-icons md-24">save</i><small class="popup">Salva gerarchia</small></span>

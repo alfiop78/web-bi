@@ -200,6 +200,7 @@ class Dimension {
 		this._hierarchies[object.title] = {order : object.hierarchyOrder};
 		this._hierarchies[object.title]['columns'] = this.#columns;
 		this._hierarchies[object.title]['comment'] = object.comment;
+		// TODO: qui effettuo il controllo per vedere se, quando ci sono più gerarchie, viene condivisa l'ultima tabella, che deve essere la stessa per ciascuna delle gerarchie.
 		this._lastTableInHierarchy = object.hierarchyOrder[Object.keys(object.hierarchyOrder).length-1];
 		console.log('this._hierarchies : ', this._hierarchies);
 		console.log('this._lastTableInHierarchy : ', this._lastTableInHierarchy);

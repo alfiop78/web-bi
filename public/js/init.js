@@ -148,9 +148,9 @@ var dimension = new Dimension();
 	};
 
 	app.handlerDragOver = (e) => {
-		console.log('handlerDragOver');
+		// console.log('handlerDragOver');
 		e.preventDefault();
-		console.log('dragOver:', e.target);
+		// console.log('dragOver:', e.target);
 		if (e.target.classList.contains('dropzone')) {
 			e.dataTransfer.dropEffect = "copy";
 		} else {
@@ -204,8 +204,6 @@ var dimension = new Dimension();
         let card = document.getElementById(data).cloneNode(true);
 		// nuova tabella droppata
 		// console.log(card);
-		// console.log(app.dragElement);
-		// TODO: dopo il drop elimino l'elemento <li> e imposto il template #cardLayout
 		// la .card .draggable diventa .card .table
 		card.className = 'card table';
 		card.removeAttribute('draggable');
@@ -213,6 +211,7 @@ var dimension = new Dimension();
 		// elimino lo span all'interno della card
 		card.querySelector('span[label]').remove();
 		// associo gli eventi mouse
+		// TODO: da eliminare per impostarli nel document.addEventListener
 		card.onmousedown = app.dragStart;
 		card.onmouseup = app.dragEnd;
 		card.onmousemove = app.drag;
@@ -224,7 +223,6 @@ var dimension = new Dimension();
 		// imposto il titolo in h6
 		cardLayout.querySelector('h6').innerHTML = card.getAttribute('label');
 		card.appendChild(cardLayout);
-		// const dropZone = document.getElementById('drop-zone');
 		app.dropZone.appendChild(card);
 
 		// tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
@@ -236,52 +234,49 @@ var dimension = new Dimension();
 		}
 
 		// imposto la card draggata nella posizione dove si trova il mouse
-		console.log('e.target : ', e.target);
+		// console.log('e.target : ', e.target);
 		card.style.transform = 'translate3d(' + e.offsetX + 'px, ' + e.offsetY + 'px, 0)';
 		card.setAttribute('x', e.offsetX);
 		card.setAttribute('y', e.offsetY);
 		// chiudo la list openTableList
+		// TODO: definire in Application.js la chiusura/apertura di tutte le liste
 		app.btnTableList.removeAttribute('open');
 		app.tableList.toggleAttribute('hidden');
 
 		// evento sul tasto close della card
+		// TODO: da associare al document.addEventListener
 		card.querySelector('i[data-id="closeTable"]').onclick = app.handlerCloseCard;
-		// evento sulla input di ricerca nella card
-
+		// imposto la input search, con questo attributo, l'evento input viene gestito in Application.js
 		card.querySelector('input').setAttribute('data-element-search', card.getAttribute('label'));
 	
 		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.getAttribute('data-schema'), 'tableName': card.getAttribute('label')};
-		// inserisco il nome della tabella selezionata nella card [active]
-		// cube.table = card.getAttribute('label');
+		app.createHierarchyStruct(card);
 
+		// event sui tasti section[options]
+		// TODO: da gestire con document.addEventListener
+		card.querySelector('i[join]').onclick = app.handlerAddJoin;
+		card.querySelector('i[metrics]').onclick = app.handlerAddMetric;
+		card.querySelector('i[columns]').onclick = app.handlerAddColumns;
+	};
+
+	app.createHierarchyStruct = (card) => {
 		// inserisco il nome della tabella nella struttura gerarchica sulla destra
 		const hierarchiesTables = document.getElementById('hierTables');
-		let id = hierarchiesTables.childElementCount;
-		// let dropzone = document.createElement('div');
-	
-		// dropzone.classList = 'dropzoneHier';
-		// hierarchiesTables.appendChild(dropzone);
-		let div = document.createElement('div');
-		div.className = 'hier table dropzoneHier';
-		div.id = 'relation_' + id;
+		const tmplHierarchyStruct = document.getElementById('hierarchy-struct');
+		const tmplContent = tmplHierarchyStruct.content.cloneNode(true);
+		const div = tmplContent.querySelector('div');
+		div.innerHTML = cube.card.tableName;
 		div.setAttribute('data-schema', card.getAttribute('data-schema'));
-		div.setAttribute('draggable', true);
 		div.setAttribute('label', cube.card.tableName);
-		div.innerText = cube.card.tableName;
-
 		hierarchiesTables.appendChild(div);
 		// imposto sul div l'evento drag&drop per gli elementi della gerarchia sulla destra
+		// TODO: gestire con document.addEventListener
 		div.ondragstart = app.hierDragStart;
 		div.ondragover = app.hierDragOver;
 		div.ondragenter = app.hierDragEnter;
 		div.ondragleave = app.hierDragLeave;
 		div.ondragend = app.hierDragEnd;
 		div.ondrop = app.hierDrop;
-
-		// event sui tasti section[options]
-		card.querySelector('i[join]').onclick = app.handlerAddJoin;
-		card.querySelector('i[metrics]').onclick = app.handlerAddMetric;
-		card.querySelector('i[columns]').onclick = app.handlerAddColumns;
 	};
 
 	app.hierDragStart = (e) => {
@@ -1122,6 +1117,13 @@ var dimension = new Dimension();
 		debugger;
 		dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
 		app.dialogHierarchyName.close();
+		// TODO: ripulisco la drop-zone per avere la possibilità di inserire altre gerarchie
+		// recupero tutte le .card.table presenti nella drop-zone
+		app.dropZone.querySelectorAll('.card.table').forEach( card => card.remove());
+		// se la dropzone ha un solo elemento, cioè lo span, allora rimuovo la class dropped per ripristinare lo stato iniziale
+		if (app.dropZone.childElementCount === 1) app.dropZone.classList.remove('dropped');
+		// ripulisco anche il div con la struttura gerarchica 'hierTables'
+		document.querySelectorAll('#hierTables > div').forEach( table => table.remove());
 	};
 
 	// salvataggio di un nuovo cubo
