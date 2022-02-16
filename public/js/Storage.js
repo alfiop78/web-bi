@@ -107,6 +107,7 @@ class CubeStorage extends Storages {
 				// this._cubes[key] = {'id' : jsonStorage['id'], 'FACT' : jsonStorage['FACT'], 'key' : key};
 			}
 		});
+		console.log('cubes : ', this._cubes);
 	}
 
 	get cubes() {return this._cubes;}
@@ -173,7 +174,6 @@ class CubeStorage extends Storages {
 		return this.id;
 	}
 
-	// da rivedere quando viene utilizzata
 	list(ul) {
 		for (const [key, value] of Object.entries(this._cubes)) {
 			let element = document.createElement('div');

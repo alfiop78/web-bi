@@ -61,6 +61,32 @@
             </section>
         </template>
 
+        {{-- template tmpl-dimension --}}
+        <template id="tmpl-dimension-list">
+            <section data-element-search="dimensions">
+                <div class="element dimensions">
+                    <div class="mini-card">
+                        <h5></h5> {{-- titolo della dimensione --}}
+                        <div data-dimension-tables>
+                            {{-- elenco tabelle contenute nella dimensione --}}
+                        </div>
+                        <div class="mini-card-buttons">
+                            <button data-id="dimension-use" type="button" name="dimensionUse" class="md-button">utilizza</button>
+                            <button data-id="dimension-edit" type="button" name="dimensionEdit" class="md-button">modifica</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </template>
+
+        <template id="tmpl-cube-list">
+            <section data-element-search="cubes" data-label>
+                <div class="element">
+                    <li id="" label=""></li>
+                </div>                
+            </section>
+        </template>
+
         <dialog id="versioning">
 
             <section class="versioning-sections">
@@ -319,7 +345,7 @@
                         <div class="lists">
                             <div class="absList" id="cubesList" hidden>
                                 <div class="md-field">
-                                    <input type="search" id="cubeSearch" data-search-type="search-list" value=""/>
+                                    <input type="search" id="cubeSearch" data-element-search="cubes" autocomplete="off"/>
                                     <label for="cubeSearch" class="">Ricerca</label>
                                 </div>
                                 <ul id="cubes"></ul>
@@ -327,24 +353,10 @@
                         </div>
 
                         <div class="lists">
-                            <template id="tmpl-dimension">
-                                <div class="element dimensions">
-                                    <div class="mini-card">
-                                        <h5></h5> {{-- titolo della dimensione --}}
-                                        <div data-dimension-tables>
-                                            {{-- elenco tabelle contenute nella dimensione --}}
-                                        </div>
-                                        <div class="mini-card-buttons">
-                                            <button data-id="dimension-use" type="button" name="dimensionUse" class="md-button">utilizza</button>
-                                            <button data-id="dimension-edit" type="button" name="dimensionEdit" class="md-button">modifica</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
                             
                             <div class="absList" id="dimensionList" hidden>
                                 <div class="md-field">
-                                    <input type="search" id="dimensionSearch" value=""/>
+                                    <input type="search" id="dimensionSearch" data-element-search="dimensions" autocomplete="off"/>
                                     <label for="dimensionSearch" class="">Ricerca</label>
                                 </div>
                                 <ul id="dimensions">
@@ -363,23 +375,6 @@
                                 </ul>
                             </div>
                         </div>
-
-                        {{-- <div class="lists">
-                            <div class="absList" id="dimensionList-db">
-                                <div class="md-field">
-                                    <input type="search" id="dimensionSearch-db" value=""/>
-                                    <label for="dimensionSearch-db" class="">Ricerca</label>
-                                </div>
-                                <ul id="dimensions-db">
-                                    <div class="element dimensions">
-                                        @foreach($dimensions as $dim)
-                                            <h5 label="{{ $dim->name }}">{{ $dim->name }}</h5>
-                                            <div id="miniCard-db" class="miniCard"><h6>{{ $dim->name }}</h6></div>
-                                        @endforeach
-                                    </div>
-                                </ul>
-                            </div>
-                        </div> --}}
 
                         <div id="hierarchiesContainer">
                             <section id="hierarchies" class="section-content">

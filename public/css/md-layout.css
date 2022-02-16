@@ -201,7 +201,7 @@ small.popup > p > small{display: block;color: darkgrey;white-space: normal;}
 
 .h-separator{width: 1px; margin: 8px 16px; background-color: #a9a9a95e;}
 
-.mini-card{display: grid; grid-template-rows: auto auto auto;border: solid thin gainsboro;border-radius: 4px;}
+.mini-card{display: grid; grid-template-rows: auto auto auto;border: solid thin gainsboro;border-radius: 4px; width: inherit;}
 .mini-card > h5{font-size: .9rem; font-weight: normal;padding: 8px;margin: 0px; text-align: left;background-color: beige;}
 .mini-card div[data-dimension-tables]{font-weight: lighter;font-size: .85rem; padding: 16px;}
 .mini-card div[data-dimension-tables] > div:last-child{color: var(--main-primary-color); font-weight: bold;}

@@ -8,6 +8,9 @@ var dimension = new Dimension();
 		dialogDimensionName : document.getElementById('dimension-name'),
 		dialogHierarchyName : document.getElementById('hierarchy-name'),
 		dialogVersioning : document.getElementById('versioning'),
+		// templates
+		tmplDimension : document.getElementById('tmpl-dimension-list'),
+		tmplCube : document.getElementById('tmpl-cube-list'),
 
 		hierarchyContainer : document.getElementById('hierarchiesContainer'), // struttura gerarchica sulla destra
 
@@ -245,7 +248,6 @@ var dimension = new Dimension();
 		card.querySelector('i[data-id="closeTable"]').onclick = app.handlerCloseCard;
 		// evento sulla input di ricerca nella card
 
-		// card.querySelector('input').oninput = App.searchInList;
 		card.querySelector('input').setAttribute('data-element-search', card.getAttribute('label'));
 	
 		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.getAttribute('data-schema'), 'tableName': card.getAttribute('label')};
@@ -526,30 +528,31 @@ var dimension = new Dimension();
 		// TODO: controllo struttura gerarchica
 	};
 
-	// recupero la lista delle dimensioni in localStorage
+	// recupero la lista delle dimensioni
 	app.getDimensions = () => {
 		const dimension = new DimensionStorage();
 		// dimensions : è un Object che contiene un array con le tabelle incluse nella dimensione
 		const dimensions = dimension.list();
-		// TODO: Impostare tmplDimension nelle var globali
-		const tmplDimension = document.getElementById('tmpl-dimension');
 		for (const [key, value] of Object.entries(dimensions)) {
 			// debugger;
 			// console.log('value : ', value);
-			let tmplContent = tmplDimension.content.cloneNode(true);
-			let div = tmplContent.querySelector('.dimensions');
+			let tmplContent = app.tmplDimension.content.cloneNode(true);
+			const section = tmplContent.querySelector('section');
+			section.setAttribute('data-element-search', 'dimensions');
+			section.setAttribute('data-label', key);
+			const div = tmplContent.querySelector('.dimensions');
 			const btnDimensionUse = tmplContent.querySelector('.mini-card-buttons > button[data-id="dimension-use"]');
 			const btnDimensionEdit = tmplContent.querySelector('.mini-card-buttons > button[data-id="dimension-edit"]');
 			div.querySelector('h5').innerHTML = key;
 			value.forEach( (table) => {
-				const div = document.createElement('div');
+				let div = document.createElement('div');
 				div.innerText = table;
 				tmplContent.querySelector('div[data-dimension-tables]').appendChild(div);
 			});
 			btnDimensionUse.setAttribute('data-dimension-name', key);
 			btnDimensionEdit.setAttribute('data-dimension-name', key);
 			div.querySelector('h5').setAttribute('label', key);
-			document.querySelector('#dimensions').appendChild(div);
+			document.querySelector('#dimensions').appendChild(section);
 			btnDimensionUse.onclick = app.handlerDimensionSelected;
 			btnDimensionEdit.onclick = app.handlerDimensionEdit;
 		}
@@ -558,9 +561,25 @@ var dimension = new Dimension();
 	// recupero la lista dei Cubi in localStorage
 	app.getCubes = () => {
 		const ul = document.getElementById('cubes');
-		StorageCube.list(ul);
+		console.log(StorageCube.cubes);
+		// StorageCube.list(ul);
+		for (const [key, value] of Object.entries(StorageCube.cubes)) {
+			let tmplContent = app.tmplCube.content.cloneNode(true);
+			const section = tmplContent.querySelector('section');
+			const element = tmplContent.querySelector('.element');
+			const li = tmplContent.querySelector('li');
+			section.setAttribute('data-label', key);
+			li.setAttribute('label', key);
+			li.innerText = key;
+			/* TODO: questi erano precedentemente impostati, da valutare se servono ancora
+			li.id = 'cube-id-' + value['id'];
+			li.setAttribute('data-cube-id', value['id']);*/
+
+			li.setAttribute('data-fn', 'handlerCubeSelected');
+			ul.appendChild(section);
+		}
 		// associo la Fn che gestisce il click sulle <li>
-		ul.querySelectorAll('li').forEach( (li) => li.addEventListener('click', app.handlerCubeSelected) );
+		// ul.querySelectorAll('li').forEach( (li) => li.addEventListener('click', app.handlerCubeSelected) );
 	};
 
 	// selezione di un cubo già definito, da qui è possibile associare, ad esempio, una nuova dimensione ad un cubo già esistente.
@@ -571,6 +590,7 @@ var dimension = new Dimension();
 		StorageCube.selected = e.currentTarget.getAttribute('label');
 		console.log('cube selected : ', StorageCube.selected);
 		// ridefinisco le proprietà del cubo, leggendo da quello selezionato, nello storage, per consentirne la modifica o l'aggiunto di dimensioni al cubo
+		// TODO: la prop privata _metric la devo definire tramite un Metodo
 		cube._metrics = StorageCube.selected.metrics;
 		debugger;
 		StorageCube.selected.associatedDimensions.forEach( (dim) => {
@@ -758,14 +778,14 @@ var dimension = new Dimension();
 		// evento sul tasto close della card
 		card.querySelector('i[data-id="closeTable"]').onclick = app.handlerCloseCard;
 		// evento sulla input di ricerca nella card
-		// card.querySelector('input').oninput = App.searchInList;
+		// input di ricerca, imposto l'attr data-element-search
+		card.querySelector('input[type="search"]').setAttribute('data-element-search', card.getAttribute('label'));
 		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.getAttribute('data-schema'), 'tableName': card.getAttribute('label')};
 
 		// event sui tasti section[options]
 		card.querySelector('i[join]').onclick = app.handlerAddJoin;
 
 		app.getTable(card.getAttribute('data-schema'), card.getAttribute('label'));
-		// app.getTable(label.split('.')[0], label.split('.')[1]);
 	};
 
 	// selezione di una dimensione da inserire nel body, per legarla al cubo
