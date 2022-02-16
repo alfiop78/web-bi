@@ -239,6 +239,8 @@ class Dimension {
 		console.log('this.#columns : ', this.#columns);
 	}
 
+	resetColumns() {this.#columns = {};}
+
 	save() {
 		debugger;
 		this._dimension.type = 'DIMENSION';

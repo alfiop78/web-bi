@@ -235,6 +235,7 @@
 
                 <div class="dialog-buttons">
                     <button type="button" name="cancel" class="md-button">annulla</button>
+                    <button id="btnHierarchySaveNameAndNew" type="button" name="done" class="md-button">Salva e crea nuova Gerarchia</button>
                     <button id="btnHierarchySaveName" type="button" name="done" class="md-button">Salva</button>
                 </div>
             </section>
@@ -401,9 +402,8 @@
                                             </div>
                                         </div> --}}
                                         <div class="actions">
-                                            <span class="popupContent"><i id="saveDimension" class="material-icons md-24">save</i><small class="popup">Salva dimensione</small></span>
+                                            <span class="popupContent"><i id="saveDimension" class="material-icons md-24 md-inactive">save</i><small class="popup">Salva dimensione</small></span>
                                             <span class="popupContent"><i id="hierarchySave" class="material-icons md-24">save</i><small class="popup">Salva gerarchia</small></span>
-                                            <span class="popupContent"><i class="material-icons md-24">playlist_add</i><small class="popup">Nuova gerarchia</small></span>
                                         </div>
 
                                     </section>

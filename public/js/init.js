@@ -27,6 +27,7 @@ var dimension = new Dimension();
 		btnSaveDimension : document.getElementById('saveDimension'),
 		btnSaveHierarchy : document.getElementById('hierarchySave'),
 		btnHierarchySaveName : document.getElementById('btnHierarchySaveName'),
+		btnHierarchySaveNameAndNew : document.getElementById('btnHierarchySaveNameAndNew'),
 		btnSaveCube : document.getElementById('saveCube'),
 		btnSaveCubeName : document.getElementById('btnCubeSaveName'),
 		btnSaveOpenedCube : document.getElementById('saveOpenedCube'),
@@ -337,7 +338,8 @@ var dimension = new Dimension();
 	app.handlerColumns = (e) => {
 		// selezione della colonna nella card table
 		// console.log(e.target);
-		dimension.activeCard = e.path[3];
+		// passo a activeCard il riferimento nel DOM della card attiva
+		dimension.activeCard = app.dropZone.querySelector(".cardTable[name='" + e.currentTarget.getAttribute('data-table-name') + "']");
 		// debugger;
 		cube.fieldSelected = e.currentTarget.getAttribute('label');
 		// TODO: utilizzare uno dei due qui, cube.fieldSelected oppure dimension.field, da rivedere
@@ -1117,6 +1119,21 @@ var dimension = new Dimension();
 		debugger;
 		dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
 		app.dialogHierarchyName.close();
+	};
+
+	// salvo e pulisco la dropzone per creare una nuova gerarchia
+	app.btnHierarchySaveNameAndNew.onclick = () => {
+		const hierTitle = document.getElementById('hierarchyName').value;
+		// ordine gerarchico (per stabilire quale tabella è da associare al cubo) questo dato viene preso dalla struttura di destra
+		let hierarchyOrder = {};
+		Array.from(document.querySelectorAll('#hierarchies .hier.table')).forEach((table, i) => {
+			// NOTE: utilizzo del backTick
+			hierarchyOrder[i] = `${table.getAttribute('data-schema')}.${table.getAttribute('label')}`;
+		});
+		const comment = document.getElementById('textarea-hierarchies-comment').value;
+		debugger;
+		dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
+		app.dialogHierarchyName.close();
 		// TODO: ripulisco la drop-zone per avere la possibilità di inserire altre gerarchie
 		// recupero tutte le .card.table presenti nella drop-zone
 		app.dropZone.querySelectorAll('.card.table').forEach( card => card.remove());
@@ -1124,6 +1141,7 @@ var dimension = new Dimension();
 		if (app.dropZone.childElementCount === 1) app.dropZone.classList.remove('dropped');
 		// ripulisco anche il div con la struttura gerarchica 'hierTables'
 		document.querySelectorAll('#hierTables > div').forEach( table => table.remove());
+		dimension.resetColumns();
 	};
 
 	// salvataggio di un nuovo cubo
