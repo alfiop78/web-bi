@@ -164,7 +164,7 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 /*guide*/
 
 /*hierarchies */
-#hierarchies{position: relative;float: right;display: flex;flex-direction: column;align-items: center;margin: 0em 0em 1em 1em;padding: 1em;}
+#hierarchies{position: relative;display: flex;flex-direction: column;align-items: center; padding: 1em;}
 .section-content{
 	box-shadow: 0px 1px 3px -1px grey;
     border-radius: 4px;
@@ -186,12 +186,18 @@ span.after .arrow{height: 10px; width: 10px;background: #494949;display: flex;tr
 .area{width: 100%;height: inherit;display: flex;justify-content: center;align-items: center;border: solid thin gainsboro;}
 /*area*/
 
+/*wrapper*/
+.wrapper {display: grid; grid-template-columns: 80% calc(20% - 16px); grid-column-gap: 16px; height: inherit;}
+/*wrapper*/
+
+
 /*drop-zone*/
-#drop{display: flex;position: relative;height: inherit;overflow: hidden;z-index: 1000;box-shadow: 0px 1px 7px -5px black}
+#drop{display: flex;position: relative;overflow: hidden;z-index: 1000;box-shadow: 0px 1px 7px -5px black}
 #drop-zone{position: absolute; width: 100%; height: 100%; display: flex;align-items: center; justify-content: center; border: dotted thin darkgrey;font-size: 1.5rem;color: darkgrey;}
 /* sto muovendo l'oggetto draggato in un area di drop, elimino il display: flex...center altrimenti esegue il drop dal centro, e non da x: 0 e y: 0 del div*/
 #drop-zone.dropping{display: block; align-items: unset; justify-content: unset; border: dotted thin indianred;background-color: white;}
 /* terminato il drop reimposto il border lasciando inalterato il display */
 #drop-zone.dropped{display: block; align-items: unset; justify-content: unset; border: dotted thin darkgrey; color: black;}
 #drop-zone.dropped > span, #drop-zone.dropping > span{display: none;}
+#drop-zone.dropped[edit] > span {position: absolute;top: 0px;width: inherit;display: flex;background: #494949;color: white;justify-content: center;font-size: .88rem;padding: 8px;}
 /*drop-zone*/

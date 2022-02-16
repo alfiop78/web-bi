@@ -903,7 +903,9 @@ var dimension = new Dimension();
 		// array di tabelle
 		// TODO: Implementare questa addCards per sostituire addCard
 		app.addCards(dimStorage.selected, hierName);
-		// app.addCards(dimStorage.selected.hierarchies[hierName].order);
+		// imposto lo span all'interno del dropzone con la descrizione della dimensione auutalmente in modifica
+		app.dropZone.querySelector('span').innerHTML = "Dimensione in modifica : " + e.target.getAttribute('data-dimension-name');
+		app.dropZone.setAttribute('edit', e.target.getAttribute('data-dimension-name'));
 		// TODO: Imposto le colonne selezionate all'interno di ogni tabella
 		// chiudo la lista delle dimensioni
 		app.dimensionList.toggleAttribute('hidden');
@@ -977,21 +979,6 @@ var dimension = new Dimension();
     app.getCubes();
 
     app.handlerGuide();
-
-    // NOTE: esempio di utilizzo di MutationObserver
-    // identify an element to observe
-    /*
-    const navSchema = document.querySelector("#nav-schema > a[data-schema='automotive_bi_data']");
-    console.log(navSchema);
-    // create a new instance of `MutationObserver` named `observer`,
-	// passing it a callback function
-	const observer = new MutationObserver(function() {
-	    console.log('callback that runs when observer is triggered');
-	});
-	// call `observe()` on that MutationObserver instance,
-	// passing it the element to observe, and the options object
-	observer.observe(navSchema, {subtree: true, childList: true, attributes: true});
-	navSchema.setAttribute('selected', true);*/
 
     // ***********************events*********************
     // lista cubi già definiti
@@ -1118,6 +1105,8 @@ var dimension = new Dimension();
 
 	app.btnSaveDimension.onclick = (e) => {
 		if (e.target.classList.contains('md-inactive')) return;
+		// se drop-zone ha l'attr edit con il nome della dimensione in modifica, lo inserisco direttamente nella input dimensionName
+		if (app.dropZone.hasAttribute('edit')) app.dialogDimensionName.querySelector('#dimensionName').value = app.dropZone.getAttribute('edit');
 		app.dialogDimensionName.showModal();
 	};
 
@@ -1220,8 +1209,8 @@ var dimension = new Dimension();
 		delete dimension.dimension;
 	};
 
+	// NOTE: esempio di utilizzo di MutationObserver
 	const body = document.getElementById('body');
-    // console.log(body);
     // create a new instance of `MutationObserver` named `observer`,
 	// passing it a callback function
 	const observer = new MutationObserver(function() {

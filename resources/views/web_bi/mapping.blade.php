@@ -376,30 +376,36 @@
                             </div>
                         </div>
 
-                        <div id="hierarchiesContainer">
-                            <section id="hierarchies" class="section-content">
-                                <h5>Struttura gerarchica</h5><h6>Gerarchia 1</h6>
-                                <div id="hierTables"></div>
-                                <span class="before"><span class="arrow"></span></span>
-                                <div class="association"><p>Associazione con la Fact Table</p></div>
-                                <span class="after"><span class="arrow"></span></span>
-                                <div id="hierFact">
-                                    <div>
-                                        <div class="hier fact">FACT TABLE</div>
-                                    </div>
-                                </div>
-                                <div class="actions">
-                                    <span class="popupContent"><i id="saveDimension" class="material-icons md-24">save</i><small class="popup">Salva dimensione</small></span>
-                                    <span class="popupContent"><i id="hierarchySave" class="material-icons md-24">save</i><small class="popup">Salva gerarchia</small></span>
-                                    <span class="popupContent"><i class="material-icons md-24">playlist_add</i><small class="popup">Nuova gerarchia</small></span>
-                                </div>
+                        <section class="wrapper">
+                            {{-- div 1 --}}
+                            <div id="drop">
+                                <div id="drop-zone" class="dropzone"><span>Trascina qui le tabelle da mappare</span></div>
+                            </div>
+                            
+                            {{-- div 2 --}}
+                            <div class="grid-cols">
+                                <div id="hierarchiesContainer">
+                                    <section id="hierarchies" class="section-content">
+                                        <h5>Struttura gerarchica</h5><h6>Gerarchia 1</h6>
+                                        <div id="hierTables"></div>
+                                        <span class="before"><span class="arrow"></span></span>
+                                        <div class="association"><p>Associazione con la Fact Table</p></div>
+                                        <span class="after"><span class="arrow"></span></span>
+                                        <div id="hierFact">
+                                            <div>
+                                                <div class="hier fact">FACT TABLE</div>
+                                            </div>
+                                        </div>
+                                        <div class="actions">
+                                            <span class="popupContent"><i id="saveDimension" class="material-icons md-24">save</i><small class="popup">Salva dimensione</small></span>
+                                            <span class="popupContent"><i id="hierarchySave" class="material-icons md-24">save</i><small class="popup">Salva gerarchia</small></span>
+                                            <span class="popupContent"><i class="material-icons md-24">playlist_add</i><small class="popup">Nuova gerarchia</small></span>
+                                        </div>
 
-                            </section>
-                        </div>
-
-                        <div id="drop">
-                            <div id="drop-zone" class="dropzone"><span>Trascina qui le tabelle da mappare</span></div>
-                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </section>
 
                     </div>
 
