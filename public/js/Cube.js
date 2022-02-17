@@ -234,10 +234,14 @@ class Dimension {
 			} else {
 				// field già esiste per questa tabella, lo elimino
 				delete this.#columns[`${this.#schema}.${this._tableName}`][this.#field.field];
+				// elimino anche l'attr "schema.table" se, al suo interno, non sono presenti altri field
+				if (Object.keys(this.#columns[`${this.#schema}.${this._tableName}`]).length === 0) delete this.#columns[`${this.#schema}.${this._tableName}`];
 			}
 		}
 		console.log('this.#columns : ', this.#columns);
 	}
+
+	getColumns() {return this.#columns;}
 
 	resetColumns() {this.#columns = {};}
 

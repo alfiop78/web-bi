@@ -79,10 +79,6 @@
             </section>
         </template>
 
-        <template id="hierarchy-struct">
-            <div class="hier table dropzoneHier" data-schema draggable="true" label></div>
-        </template>
-
         <template id="tmpl-cube-list">
             <section data-element-search="cubes" data-label>
                 <div class="element">
@@ -235,7 +231,6 @@
 
                 <div class="dialog-buttons">
                     <button type="button" name="cancel" class="md-button">annulla</button>
-                    <button id="btnHierarchySaveNameAndNew" type="button" name="done" class="md-button">Salva e crea nuova Gerarchia</button>
                     <button id="btnHierarchySaveName" type="button" name="done" class="md-button">Salva</button>
                 </div>
             </section>
@@ -380,33 +375,32 @@
                                 </ul>
                             </div>
                         </div>
+                        <template id="tmpl-hier-table">
+                            <div class="hier table dropzoneHier" data-schema draggable="true" label></div>
+                        </template>
 
                         <section class="wrapper">
                             {{-- div 1 --}}
                             <div id="drop">
                                 <div id="drop-zone" class="dropzone"><span>Trascina qui le tabelle da mappare</span></div>
                             </div>
+                            <template id="tmpl-hierarchies">
+                                <section id="hierarchies" data-hier-id="0" class="section-content" data-active>
+                                    <h6></h6>
+                                    <div data-hier-id>{{-- qui verranno aggiunte le tabelle della gerarchia --}}</div>
+                                </section>
+                            </template>
                             
                             {{-- div 2 --}}
-                            <div class="grid-cols">
+                            <div id="box-hierarchy">
                                 <div id="hierarchiesContainer">
-                                    <section id="hierarchies" class="section-content">
-                                        <h6>Struttura gerarchica</h6>
-                                        <div id="hierTables"></div>
-                                        {{-- <span class="before"><span class="arrow"></span></span>
-                                        <div class="association"><p>Associazione con la Fact Table</p></div>
-                                        <span class="after"><span class="arrow"></span></span>
-                                        <div id="hierFact">
-                                            <div>
-                                                <div class="hier fact">FACT TABLE</div>
-                                            </div>
-                                        </div> --}}
-                                        <div class="actions">
-                                            <span class="popupContent"><i id="saveDimension" class="material-icons md-24 md-inactive">save</i><small class="popup">Salva dimensione</small></span>
-                                            <span class="popupContent"><i id="hierarchySave" class="material-icons md-24">save</i><small class="popup">Salva gerarchia</small></span>
-                                        </div>
-
-                                    </section>
+                                    
+                                </div>
+                                <button id="hierarchyDelete" type="button" name="" class="md-button" disabled>elimina</button>
+                                <button id="hierarchySave" type="button" name="" class="md-button" disabled>salva</button>
+                                <button id="hierarchyNew" type="button" name="" class="md-button" disabled>nuova</button>
+                                <div class="bottom-position">
+                                    <button id="saveDimension" type="button" name="" class="md-button" disabled>salva dimensione</button>
                                 </div>
                             </div>
                         </section>
