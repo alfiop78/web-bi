@@ -385,6 +385,7 @@
                                 <div id="drop-zone" class="dropzone"><span>Trascina qui le tabelle da mappare</span></div>
                             </div>
                             <template id="tmpl-hierarchies">
+                                {{-- TODO: da rinominare l'attr in data-hier-active --}}
                                 <section id="hierarchies" data-hier-id="0" class="section-content" data-active>
                                     <h6></h6>
                                     <div data-hier-id>{{-- qui verranno aggiunte le tabelle della gerarchia --}}</div>

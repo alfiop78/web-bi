@@ -93,7 +93,7 @@ var dimension = new Dimension();
 
 	// spostamento della card già droppata
     app.dragEnd = () => {
-        console.log('dragEnd');
+        // console.log('dragEnd');
 		// console.log(e.target);
 		// mouseup, elemento rilasciato dopo lo spostamento
 		app.initialX = app.currentX;
@@ -135,7 +135,7 @@ var dimension = new Dimension();
 	// TODO: aggiungere anhce eventi touch...
 
 	app.handlerDragStart = (e) => {
-		console.log('handlerDragStart');
+		// console.log('handlerDragStart');
 		// dragStart
 		// console.log(e.target.id);
 		// return;
@@ -160,9 +160,9 @@ var dimension = new Dimension();
 	};
 
 	app.handlerDragEnter = (e) => {
-		console.log('handlerDragEnter');
+		// console.log('handlerDragEnter');
 		e.preventDefault();
-		console.log(e.target);
+		// console.log(e.target);
 		// if (e.target.id === "help-drop") e.target.remove();
 
 		if (e.target.className === 'dropzone') {
@@ -178,13 +178,13 @@ var dimension = new Dimension();
 	};
 
 	app.handlerDragLeave = (e) => {
-        console.log('handlerDragLeave');
+        // console.log('handlerDragLeave');
 		e.preventDefault();
 		// console.log('dragLeave');
 	};
 
 	app.handlerDragEnd = (e) => {
-        console.log('handlerDragEnd');
+        // console.log('handlerDragEnd');
 		e.preventDefault();
 		// console.log('dragEnd');
 		// console.log(e.target);
@@ -194,7 +194,7 @@ var dimension = new Dimension();
 	};
 
 	app.handlerDrop = (e) => {
-        console.log('handlerDrop');
+        // console.log('handlerDrop');
         // TODO: ottimizzare
 		e.preventDefault();
 		e.target.classList.replace('dropping', 'dropped');
@@ -505,7 +505,7 @@ var dimension = new Dimension();
 			dimension.table = document.querySelector('.cardTable[mode="relations"] li[relations][selected]').getAttribute('data-table-name');
 		}
 		console.log('dimension.table : ', dimension.table);
-		debugger;
+		// debugger;
 		document.querySelectorAll('.cardTable[mode="relations"]').forEach((card) => {
 			let tableName = card.getAttribute('name');
 			let liRef = card.querySelector('li[relations][selected]');
@@ -739,7 +739,7 @@ var dimension = new Dimension();
 			})
 			.then( (response) => response.json())
 			.then( (data) => {
-				console.log('response getTable');
+				// console.log('response getTable');
                 // console.log(data);
 		        if (data) {
 		        	ulContainer.removeAttribute('hidden');
@@ -1181,11 +1181,12 @@ var dimension = new Dimension();
 		const hierTitle = document.getElementById('hierarchyName').value;
 		// ordine gerarchico (per stabilire quale tabella è da associare al cubo) questo dato viene preso dalla struttura di destra
 		let hierarchyOrder = {};
-		Array.from(document.querySelectorAll('#hierarchies .hier.table')).forEach((table, i) => {
+		Array.from(document.querySelectorAll('section[data-hier-id][data-active] .hier.table')).forEach((table, i) => {
 			// NOTE: utilizzo del backTick
 			hierarchyOrder[i] = `${table.getAttribute('data-schema')}.${table.getAttribute('label')}`;
 		});
 		const comment = document.getElementById('textarea-hierarchies-comment').value;
+		debugger;
 		dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
 		app.dialogHierarchyName.close();
 		// abilito il tasto btnHierarchyNew
