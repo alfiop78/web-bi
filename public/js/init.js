@@ -2,6 +2,7 @@ var App = new Application();
 var cube = new Cube();
 var StorageCube = new CubeStorage();
 var dimension = new Dimension();
+var hier = new Hierarchy();
 (() => {
 	var app = {
 		dialogCubeName : document.getElementById('cube-name'),
@@ -405,11 +406,11 @@ var dimension = new Dimension();
 		// selezione della colonna nella card table
 		// console.log(e.target);
 		// passo a activeCard il riferimento nel DOM della card attiva
-		dimension.activeCard = app.dropZone.querySelector(".cardTable[name='" + e.currentTarget.getAttribute('data-table-name') + "']");
+		hier.activeCard = app.dropZone.querySelector(".cardTable[name='" + e.currentTarget.getAttribute('data-table-name') + "']");
 		// debugger;
 		cube.fieldSelected = e.currentTarget.getAttribute('label');
-		// TODO: utilizzare uno dei due qui, cube.fieldSelected oppure dimension.field, da rivedere
-		dimension.field = {field : e.currentTarget.getAttribute('label'), type : e.currentTarget.getAttribute('data-key')};
+		// TODO: utilizzare uno dei due qui, cube.fieldSelected oppure hier.field, da rivedere
+		hier.field = {field : e.currentTarget.getAttribute('label'), type : e.currentTarget.getAttribute('data-key')};
 		// debugger;
 
 		// se è presente un altro elemento con attributo hierarchy ma NON data-relation-id, "deseleziono" quello con hierarchy per mettere ...
@@ -439,7 +440,7 @@ var dimension = new Dimension();
 						}
 					}
 				} else {
-					let liRelationSelected = dimension.card.querySelector('li[relations]:not([data-relation-id])');
+					let liRelationSelected = hier.card.querySelector('li[relations]:not([data-relation-id])');
 					// console.log(liRelationSelected);
 					e.currentTarget.toggleAttribute('relations');
 					e.currentTarget.toggleAttribute('selected');
@@ -468,10 +469,10 @@ var dimension = new Dimension();
 					console.log('columns');
 					e.currentTarget.toggleAttribute('columns');
 					// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
-					dimension.columns();
+					hier.columns();
 					// se è stata impostata almento una colonna posso abilitare il tasto 'hierarchySave'
-					console.log(dimension.getColumns());
-					(Object.keys(dimension.getColumns()).length !== 0) ? app.btnSaveHierarchy.disabled = false : app.btnSaveHierarchy.disabled = true;
+					console.log(hier.getColumns());
+					(Object.keys(hier.getColumns()).length !== 0) ? app.btnSaveHierarchy.disabled = false : app.btnSaveHierarchy.disabled = true;
 				}
 		}
 	};
@@ -484,7 +485,7 @@ var dimension = new Dimension();
 		// console.log('cardTable : ', cardTable);
 		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.getAttribute('data-schema'), 'tableName': cardTable.getAttribute('name')};
 		// quando aggiungo la tabella imposto da subito la colonna id in "columns"
-		dimension.activeCard = cardTable; // card attiva
+		hier.activeCard = cardTable; // card attiva
 		cube.mode('columns');
 	};
 
@@ -913,14 +914,14 @@ var dimension = new Dimension();
 	        await app.getTable(schema, table);
 	        console.log('after await');
 	        // imposto la card attiva
-	        dimension.activeCard = card.querySelector('.cardTable');
+	        hier.activeCard = card.querySelector('.cardTable');
 	        // seleziono i campi impostati nella dimensione, nelle proprietà 'hierarchies[hiername]columns[value]'
 	        for (const [field, type] of Object.entries(dim.hierarchies[hierName].columns[value])) {
 	        	// console.log(field);
 	        	// console.log(type);
 	        	// debugger;
-	        	dimension.activeCard.querySelector("li[label='"+field+"']").toggleAttribute('columns');
-	        	dimension.field = {field, type};
+	        	hier.activeCard.querySelector("li[label='"+field+"']").toggleAttribute('columns');
+	        	hier.field = {field, type};
 				// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
 				dimension.columns();
 	        }
@@ -1187,7 +1188,8 @@ var dimension = new Dimension();
 		});
 		const comment = document.getElementById('textarea-hierarchies-comment').value;
 		debugger;
-		dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
+		hier.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
+		// dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
 		app.dialogHierarchyName.close();
 		// abilito il tasto btnHierarchyNew
 		app.btnHierarchyNew.disabled = false;
@@ -1205,7 +1207,9 @@ var dimension = new Dimension();
 		document.querySelector('section[data-active]').removeAttribute('data-active');
 		// document.querySelectorAll('#hierTables > div').forEach( table => table.remove());
 		// reset delle prop #columns e #join
-		dimension.newHierarchy();
+		// dimension.newHierarchy();
+		// nuovo oggetto Hierarchy
+		hier = new Hierarchy();
 	};
 
 	// salvataggio di un nuovo cubo
@@ -1263,7 +1267,7 @@ var dimension = new Dimension();
 		  // creo un contenitorre per le dimensioni salvate, con dentro le tabelle che ne fanno parte.
 		*/
 		dimension.title = document.getElementById('dimensionName').value;
-		dimension.comment = document.getElementById('textarea-dimension-comment').value;
+		hier.comment = document.getElementById('textarea-dimension-comment').value;
 		// cube.dimension
 		const storage = new DimensionStorage();
 		let from = [];
@@ -1271,8 +1275,8 @@ var dimension = new Dimension();
 			if (card.getAttribute('name')) {from.push(card.getAttribute('name'));}
 		});
 		dimension.from = from;
-	
-		dimension.save();
+		debugger;
+		hier.save();
 		storage.save = dimension.dimension;
         // TODO: salvo la dimension anche su DB
         // TODO: Potrei salvare la dimensione sul DB manualmente, una volta completati i testi in fase di sviluppo (in LocalStorage)
