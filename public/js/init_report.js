@@ -582,10 +582,10 @@ var StorageMetric = new MetricStorage();
 			// recupero la property 'join' (nella dimensione) dove la key è maggiore della tableId al momento selezionata (Quindi recupero tutte le hier inferiori)
 			if (+k >= +Query.tables.tableId) {
 				Query.from = table;
-				if (Dim.selected.join[table.split('.')[1]]) {
+				if (Dim.selected.hierarchies[hier].joins[table.split('.')[1]]) {
 					Query.joinId = +k;
 					debugger;
-					Query.where = Dim.selected.join[table.split('.')[1]];
+					Query.where = Dim.selected.hierarchies[hier].joins[table.split('.')[1]];
 				}
 			}
 		}

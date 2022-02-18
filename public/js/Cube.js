@@ -254,7 +254,7 @@ class Dimension {
 		this._dimension.name = this._title;
 		this._dimension.comment = this.#comment;
 		this._dimension.from = this._from;
-		this._dimension.join = this.#join;
+		// this._dimension.join = this.#join;
 		this._dimension.cubes = {}; // object con i nomi dei cubi che hanno associazione con questa dimensione. Questa viene popolata quando si associa la dimensione al cubo
 		this._dimension.lastTableInHierarchy = this._lastTableInHierarchy;
 		this._dimension.hierarchies = this._hierarchies;
