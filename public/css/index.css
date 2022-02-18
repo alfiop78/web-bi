@@ -193,6 +193,7 @@ span.after .arrow{height: 10px; width: 10px;background: #494949;display: flex;tr
 .wrapper #box-hierarchy section:not([data-active]) > div{visibility: hidden;}
 #box-hierarchy{display: grid;grid-template-rows: auto 48px; position: relative;}
 #box-hierarchy > .bottom-position{position: absolute; bottom: 0px;justify-self: center;}
+#hierarchiesContainer{display: grid; grid-template-rows: auto; grid-row-gap: 16px;}
 /*wrapper*/
 
 
