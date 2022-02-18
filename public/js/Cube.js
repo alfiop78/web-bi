@@ -244,7 +244,10 @@ class Dimension {
 
 	getColumns() {return this.#columns;}
 
-	resetColumns() {this.#columns = {};}
+	newHierarchy() {
+		this.#columns = {};
+		this.#join = {};
+	}
 
 	save() {
 		debugger;

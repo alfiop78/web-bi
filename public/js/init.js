@@ -1204,8 +1204,8 @@ var dimension = new Dimension();
 		// riduco il section[data-active] relativo alla struttura gerarchica attualmente attiva
 		document.querySelector('section[data-active]').removeAttribute('data-active');
 		// document.querySelectorAll('#hierTables > div').forEach( table => table.remove());
-		// reset della #columns precedentemente salvate nella prima gerarchia
-		dimension.resetColumns();		
+		// reset delle prop #columns e #join
+		dimension.newHierarchy();
 	};
 
 	// salvataggio di un nuovo cubo
