@@ -128,43 +128,32 @@ class Cube {
 class Dimension {
 	// #columns = {}; // Object di colonne selezionate, queste potranno essere inserite nella creazione del report {'nometabella' : [array di colonne]}
 	// #field;
-	#table;
+	// #table;
 	// #schema;
 	#comment;
+	#lastTableHierarchy;
+	#hier = {};
 	// #join = {};
 	// #hierarchies = {};
 	constructor() {
 		this.schema;
 		this._dimension = {};
-		// this._join = {}; // relazioni tra le tabelle
-		// this.#hierarchies = {}; // ordine gerarchico
-		this._lastTableInHierarchy;
-		// this.#columns = {};
-		// this.field = {};
-		// this.relationId = 0;
 	}
 
-	set table(value) {this.#table = value;}
+	set hier(value) {
+		this.#hier[Object.keys(value)] = value[Object.keys(value)];
+		console.log('Dim #hier : ', this.#hier);
+	}
 
-	get table() {return this.#table;}
+	get hier() {return this.#hier;}
+
+	set lastTableHierarchy(value) {this.#lastTableHierarchy = value;}
+
+	get lastTableHierarchy() {return this.#lastTableHierarchy;}
 
 	set id(value) {this._id = value;}
 
 	get id() {return this._id;}
-
-	/*set field(object) {this.#field = object;}
-
-	get field() {return this.#field;}*/
-
-	/*set activeCard(cardRef) {
-		// la card su cui si sta operando
-		this.card = cardRef;
-		console.log(this.card);
-		this._tableName = this.card.getAttribute('name');
-		this.schema = this.card.getAttribute('data-schema');
-	}
-
-	get activeCard() {return this.card;}*/
 
 	set title(value) {this._title = value;}
 
@@ -174,117 +163,48 @@ class Dimension {
 
 	get comment() {return this.#comment;}
 
-	set from(value) {this._from = value;}
-
-	get from() {return this._from;}
-
-	/*set hierarchies(value) {
-		// debugger;
-		if (!this.#join.hasOwnProperty(this.#table)) {
-			// questa tabella non ha ancora nessuna relazione, azzero il relationId
-			this.relationId = 0;
-			this.#join[this.#table] = {[this.relationId] : value};
-		} else {
-			debugger;
-			// non incremento più relationId ma lo ricavo dal length in base alle relazioni già presenti per ogni tabella
-			this.relationId = Object.keys(this.#join[this.#table]).length;
-			this.#join[this.#table][this.relationId] = value;
-			// this.#join[this.#table][this.relationId] = value;
-		}
-		console.log('this.#join : ', this.#join);		
-	}
-
-	get hierarchies() {return this.#join;}*/
-
-	/*set hierarchyOrder(object) {
-		console.log('object : ', object);
-		debugger;
-		this.#hierarchies[object.title] = {order : object.hierarchyOrder};
-		this.#hierarchies[object.title]['columns'] = this.#columns;
-		this.#hierarchies[object.title]['joins'] = this.#join;
-		this.#hierarchies[object.title]['comment'] = object.comment;
-		// TODO: qui effettuo il controllo per vedere se, quando ci sono più gerarchie, viene condivisa l'ultima tabella, che deve essere la stessa per ciascuna delle gerarchie.
-		this._lastTableInHierarchy = object.hierarchyOrder[Object.keys(object.hierarchyOrder).length-1];
-		console.log('this.#hierarchies : ', this.#hierarchies);
-		console.log('this._lastTableInHierarchy : ', this._lastTableInHierarchy);
-	}
-
-	get hierarchyOrder() {return this.#hierarchies;}*/
-
-	saveRelation(value) {
-		// value : colSelected
-		value.forEach((el) => {
-			el.setAttribute('data-rel-'+this.relationId, this.relationId);
-			// el.setAttribute('data-relation-id', 'rel_'+this.relationId);
-			el.setAttribute('data-relation-id', true);
-			// la relazione è stata creata, posso eliminare [selected]
-			el.removeAttribute('selected');
-		});
-		// this.relationId++;
-	}
-
-	/*columns() {
-		this._obj = {};
-		if (!this.#columns.hasOwnProperty(`${this.#schema}.${this._tableName}`)) {
-			// #columns non ha l'attributo _tableName, lo aggiungo
-			this._obj[this.#field.field] = this.#field.type;
-			this.#columns[`${this.#schema}.${this._tableName}`] = this._obj;
-		} else {
-			// tabella già presente, verifico se il campo è già presente, se non lo è lo aggiungo altrimenti lo elimino
-			if (!this.#columns[`${this.#schema}.${this._tableName}`].hasOwnProperty(this.#field.field)) {
-				// field non esistente per questa tabella, lo aggiungo
-				this.#columns[`${this.#schema}.${this._tableName}`][this.#field.field] = this.#field.type;
-			} else {
-				// field già esiste per questa tabella, lo elimino
-				delete this.#columns[`${this.#schema}.${this._tableName}`][this.#field.field];
-				// elimino anche l'attr "schema.table" se, al suo interno, non sono presenti altri field
-				if (Object.keys(this.#columns[`${this.#schema}.${this._tableName}`]).length === 0) delete this.#columns[`${this.#schema}.${this._tableName}`];
-			}
-		}
-		console.log('this.#columns : ', this.#columns);
-	}
-
-	getColumns() {return this.#columns;}*/
-
-	/*newHierarchy() {
-		this.#columns = {};
-		this.#join = {};
-	}*/
-
 	save() {
 		debugger;
 		this._dimension.type = 'DIMENSION';
-		// TODO Aggiungere dimensionId
-		// this._dimension.columns = this.#columns;
 		this._dimension.name = this._title;
 		this._dimension.comment = this.#comment;
-		this._dimension.from = this._from;
-		// this._dimension.join = this.#join;
 		this._dimension.cubes = {}; // object con i nomi dei cubi che hanno associazione con questa dimensione. Questa viene popolata quando si associa la dimensione al cubo
-		this._dimension.lastTableInHierarchy = this._lastTableInHierarchy;
-		this._dimension.hierarchies = this._hierarchies;
+		this._dimension.lastTableInHierarchy = this.#lastTableHierarchy;
+		this._dimension.hierarchies = this.#hier;
 		console.log(this._dimension);
+		debugger;
 	}
 
 	get dimension() {return this._dimension;}
 
 }
 
-class Hierarchy extends Dimension {
+class Hierarchy {
 	#schema;
 	#tableName;
-	#table;
-	// #hierarchies = {};
+	#col = {};
 	#columns = {};
 	#join = {};
 	#relationId = 0;
 	#field;
 	#comment;
+	#hier = {};
+	#from;
+	#table;
+	#hierarchies;
+	#lastTableHierarchy;
+	constructor() {}
 
-	constructor() {
-		super();
-		this._hierarchies = {};
+	set table(value) {
+		// debugger;
+		this.#table = value;
 	}
+	
+	get table() {return this.#table;}
+
+	set from(value) {this.#from = value;}
+
+	get from() {return this.#from;}
 
 	set activeCard(cardRef) {
 		// la card su cui si sta operando
@@ -300,67 +220,94 @@ class Hierarchy extends Dimension {
 
 	get field() {return this.#field;}
 
-	set hierarchies(value) {
-		// debugger;
-		if (!this.#join.hasOwnProperty(this.#table)) {
+	set join(value) {
+		debugger;
+		if (!this.#join.hasOwnProperty(this.table)) {
 			// questa tabella non ha ancora nessuna relazione, azzero il relationId
 			this.#relationId = 0;
-			this.#join[this.#table] = {[this.#relationId] : value};
+			this.#join[this.table] = {[this.#relationId] : value};
 		} else {
 			debugger;
 			// non incremento più relationId ma lo ricavo dal length in base alle relazioni già presenti per ogni tabella
-			this.#relationId = Object.keys(this.#join[this.#table]).length;
-			this.#join[this.#table][this.#relationId] = value;
-			// this.#join[this.#table][this.relationId] = value;
+			this.#relationId = Object.keys(this.#join[this.table]).length;
+			this.#join[this.table][this.#relationId] = value;
+			// this.#join[this.table][this.relationId] = value;
 		}
 		console.log('this.#join : ', this.#join);		
 	}
 
+	get join() {return this.#join;}
+	
 	set comment(value) {this.#comment = value;}
 
 	get comment() {return this.#comment;}
 
-	get hierarchies() {return this.#join;}
+	set hierarchies(hier) {this.#hierarchies = hier;}
 
-	set hierarchyOrder(object) {
+	get hierarchies() {return this.#hierarchies;}
+
+	set hier(object) {
 		console.log('object : ', object);
 		debugger;
-		this._hierarchies[object.title] = {order : object.hierarchyOrder};
-		this._hierarchies[object.title]['columns'] = this.#columns;
-		this._hierarchies[object.title]['joins'] = this.#join;
-		this._hierarchies[object.title]['comment'] = object.comment;
+		this.#hier[object.title] = {order : object.hierarchyOrder};
+		this.#hier[object.title]['columns'] = this.#columns;
+		this.#hier[object.title]['joins'] = this.#join;
+		this.#hier[object.title]['from'] = object.from;
+		this.#hier[object.title]['comment'] = object.comment;
 		// TODO: qui effettuo il controllo per vedere se, quando ci sono più gerarchie, viene condivisa l'ultima tabella, che deve essere la stessa per ciascuna delle gerarchie.
-		this._lastTableInHierarchy = object.hierarchyOrder[Object.keys(object.hierarchyOrder).length-1];
-		console.log('this._hierarchies : ', this._hierarchies);
-		debugger;
-		console.log('this._lastTableInHierarchy : ', this._lastTableInHierarchy);
+		this.lastTableHierarchy = object.hierarchyOrder[Object.keys(object.hierarchyOrder).length-1];
+		console.log('this._hierarchies : ', this.#hier);
+		this.hierarchies = this.#hier;
+		console.log(this.hierarchies);
 	}
 
-	get hierarchyOrder() {return this._hierarchies;}
+	get hier() {return this.#hier;}
+
+	set lastTableHierarchy(value) {this.#lastTableHierarchy = value;}
+
+	get lastTableHierarchy() {return this.#lastTableHierarchy;}
+
+	set columns_(value) {
+		this.#columns = value;
+		console.log('#columns : ', this.#columns);
+	}
+
+	get columns_() {return this.#columns;}
 
 	columns() {
 		this._obj = {};
-		console.log(this.schema);
-		console.log(super.schema);
 		debugger;
-		if (!this.#columns.hasOwnProperty(`${this.#schema}.${this.#tableName}`)) {
+		if (!this.#col.hasOwnProperty(`${this.#schema}.${this.#tableName}`)) {
 			// #columns non ha l'attributo #tableName, lo aggiungo
 			this._obj[this.#field.field] = this.#field.type;
-			this.#columns[`${this.#schema}.${this.#tableName}`] = this._obj;
+			this.#col[`${this.#schema}.${this.#tableName}`] = this._obj;
 		} else {
 			// tabella già presente, verifico se il campo è già presente, se non lo è lo aggiungo altrimenti lo elimino
-			if (!this.#columns[`${this.#schema}.${this.#tableName}`].hasOwnProperty(this.#field.field)) {
+			if (!this.#col[`${this.#schema}.${this.#tableName}`].hasOwnProperty(this.#field.field)) {
 				// field non esistente per questa tabella, lo aggiungo
-				this.#columns[`${this.#schema}.${this.#tableName}`][this.#field.field] = this.#field.type;
+				this.#col[`${this.#schema}.${this.#tableName}`][this.#field.field] = this.#field.type;
 			} else {
 				// field già esiste per questa tabella, lo elimino
-				delete this.#columns[`${this.#schema}.${this.#tableName}`][this.#field.field];
+				delete this.#col[`${this.#schema}.${this.#tableName}`][this.#field.field];
 				// elimino anche l'attr "schema.table" se, al suo interno, non sono presenti altri field
-				if (Object.keys(this.#columns[`${this.#schema}.${this.#tableName}`]).length === 0) delete this.#columns[`${this.#schema}.${this.#tableName}`];
+				if (Object.keys(this.#col[`${this.#schema}.${this.#tableName}`]).length === 0) delete this.#col[`${this.#schema}.${this.#tableName}`];
 			}
 		}
-		console.log('this.#columns : ', this.#columns);
+		console.log('this.#columns : ', this.#col);
+		this.columns_ = this.#col;
 	}
 
-	getColumns() {return this.#columns;}
+	// getColumns() {return this.#columns;}
+
+	saveRelation(value) {
+		// value : colSelected
+		value.forEach((el) => {
+			el.setAttribute('data-rel-'+this.relationId, this.relationId);
+			// el.setAttribute('data-relation-id', 'rel_'+this.relationId);
+			el.setAttribute('data-relation-id', true);
+			// la relazione è stata creata, posso eliminare [selected]
+			el.removeAttribute('selected');
+		});
+		// this.relationId++;
+	}
 }

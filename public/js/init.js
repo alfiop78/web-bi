@@ -1,8 +1,8 @@
 var App = new Application();
 var cube = new Cube();
 var StorageCube = new CubeStorage();
-var dimension = new Dimension();
-var hier = new Hierarchy();
+var Dim = new Dimension();
+var Hier = new Hierarchy();
 (() => {
 	var app = {
 		dialogCubeName : document.getElementById('cube-name'),
@@ -406,11 +406,11 @@ var hier = new Hierarchy();
 		// selezione della colonna nella card table
 		// console.log(e.target);
 		// passo a activeCard il riferimento nel DOM della card attiva
-		hier.activeCard = app.dropZone.querySelector(".cardTable[name='" + e.currentTarget.getAttribute('data-table-name') + "']");
+		Hier.activeCard = app.dropZone.querySelector(".cardTable[name='" + e.currentTarget.getAttribute('data-table-name') + "']");
 		// debugger;
 		cube.fieldSelected = e.currentTarget.getAttribute('label');
 		// TODO: utilizzare uno dei due qui, cube.fieldSelected oppure hier.field, da rivedere
-		hier.field = {field : e.currentTarget.getAttribute('label'), type : e.currentTarget.getAttribute('data-key')};
+		Hier.field = {field : e.currentTarget.getAttribute('label'), type : e.currentTarget.getAttribute('data-key')};
 		// debugger;
 
 		// se è presente un altro elemento con attributo hierarchy ma NON data-relation-id, "deseleziono" quello con hierarchy per mettere ...
@@ -440,7 +440,7 @@ var hier = new Hierarchy();
 						}
 					}
 				} else {
-					let liRelationSelected = hier.card.querySelector('li[relations]:not([data-relation-id])');
+					let liRelationSelected = Hier.card.querySelector('li[relations]:not([data-relation-id])');
 					// console.log(liRelationSelected);
 					e.currentTarget.toggleAttribute('relations');
 					e.currentTarget.toggleAttribute('selected');
@@ -469,10 +469,11 @@ var hier = new Hierarchy();
 					console.log('columns');
 					e.currentTarget.toggleAttribute('columns');
 					// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
-					hier.columns();
+					Hier.columns();
 					// se è stata impostata almento una colonna posso abilitare il tasto 'hierarchySave'
-					console.log(hier.getColumns());
-					(Object.keys(hier.getColumns()).length !== 0) ? app.btnSaveHierarchy.disabled = false : app.btnSaveHierarchy.disabled = true;
+					console.log(Hier.columns_);
+					// debugger;
+					(Object.keys(Hier.columns_).length !== 0) ? app.btnSaveHierarchy.disabled = false : app.btnSaveHierarchy.disabled = true;
 				}
 		}
 	};
@@ -485,7 +486,7 @@ var hier = new Hierarchy();
 		// console.log('cardTable : ', cardTable);
 		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.getAttribute('data-schema'), 'tableName': cardTable.getAttribute('name')};
 		// quando aggiungo la tabella imposto da subito la colonna id in "columns"
-		hier.activeCard = cardTable; // card attiva
+		Hier.activeCard = cardTable; // card attiva
 		cube.mode('columns');
 	};
 
@@ -503,9 +504,9 @@ var hier = new Hierarchy();
 		console.log( document.querySelectorAll('.cardTable[mode="relations"] li[relations][selected]').length);
 		// quando i campi selezionati sono 1 recupero il nome della tabella perchè questa gerarchia avrà il nome della prima tabella selezionata da mettere in relazione
 		if (document.querySelectorAll('.cardTable[mode="relations"] li[relations][selected]').length === 1) {
-			dimension.table = document.querySelector('.cardTable[mode="relations"] li[relations][selected]').getAttribute('data-table-name');
+			Hier.table = document.querySelector('.cardTable[mode="relations"] li[relations][selected]').getAttribute('data-table-name');
 		}
-		console.log('dimension.table : ', dimension.table);
+		console.log('dimension.table : ', Hier.table);
 		// debugger;
 		document.querySelectorAll('.cardTable[mode="relations"]').forEach((card) => {
 			let tableName = card.getAttribute('name');
@@ -528,11 +529,10 @@ var hier = new Hierarchy();
 					cube.saveRelation(colSelected);
 				} else {
 					debugger;
-					dimension.hierarchies = hier;
+					Hier.join = hier;
 					// visualizzo l'icona per capire che c'è una relazione tra le due colonne
-					debugger;
-					dimension.saveRelation(colSelected);
-					console.log(dimension.hierarchies);
+					Hier.saveRelation(colSelected);
+					console.log(Hier.join);
 					// esiste una relazione, visualizzo il div hierarchiesContainer
 					app.hierarchyContainer.removeAttribute('hidden');
 				}
@@ -600,6 +600,7 @@ var hier = new Hierarchy();
 		const dimension = new DimensionStorage();
 		// dimensions : è un Object che contiene un array con le tabelle incluse nella dimensione
 		const dimensions = dimension.list();
+		debugger;
 		for (const [key, value] of Object.entries(dimensions)) {
 			// debugger;
 			// console.log('value : ', value);
@@ -611,11 +612,12 @@ var hier = new Hierarchy();
 			const btnDimensionUse = tmplContent.querySelector('.mini-card-buttons > button[data-id="dimension-use"]');
 			const btnDimensionEdit = tmplContent.querySelector('.mini-card-buttons > button[data-id="dimension-edit"]');
 			div.querySelector('h5').innerHTML = key;
-			value.forEach( (table) => {
+			// TODO: temporaneamnete commentato dopo aver eliminato la prop 'from' dalle dimensioni. La prop 'from' è stata spostata all'interno delle singole gerarchie
+			/*value.forEach( (table) => {
 				let div = document.createElement('div');
 				div.innerText = table;
 				tmplContent.querySelector('div[data-dimension-tables]').appendChild(div);
-			});
+			});*/
 			btnDimensionUse.setAttribute('data-dimension-name', key);
 			btnDimensionEdit.setAttribute('data-dimension-name', key);
 			div.querySelector('h5').setAttribute('label', key);
@@ -801,7 +803,7 @@ var hier = new Hierarchy();
 	// viene invocata da btnDimensionSaveName.onclick, quando viene salvata una dimensione, vengono chiuse tutte le card aperte attualmente
 	app.closeCards = () => {
 		document.querySelectorAll('.card.table').forEach((item) => {
-			console.log(item);
+			// console.log(item);
 			item.remove();
 		});
 	};
@@ -914,14 +916,14 @@ var hier = new Hierarchy();
 	        await app.getTable(schema, table);
 	        console.log('after await');
 	        // imposto la card attiva
-	        hier.activeCard = card.querySelector('.cardTable');
+	        Hier.activeCard = card.querySelector('.cardTable');
 	        // seleziono i campi impostati nella dimensione, nelle proprietà 'hierarchies[hiername]columns[value]'
 	        for (const [field, type] of Object.entries(dim.hierarchies[hierName].columns[value])) {
 	        	// console.log(field);
 	        	// console.log(type);
 	        	// debugger;
-	        	hier.activeCard.querySelector("li[label='"+field+"']").toggleAttribute('columns');
-	        	hier.field = {field, type};
+	        	Hier.activeCard.querySelector("li[label='"+field+"']").toggleAttribute('columns');
+	        	Hier.field = {field, type};
 				// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
 				dimension.columns();
 	        }
@@ -931,7 +933,7 @@ var hier = new Hierarchy();
 		// TODO: a questo punto posso recuperare dim.join per inserire nelle tabelle le relative join
 		console.clear();
 		for (let table in dim.join) {
-			dimension.table = table;
+			Hier.table = table;
 			// console.log(table);
 			// console.log(dim.join[table]);
 			// per ogni tabella
@@ -1187,8 +1189,17 @@ var hier = new Hierarchy();
 			hierarchyOrder[i] = `${table.getAttribute('data-schema')}.${table.getAttribute('label')}`;
 		});
 		const comment = document.getElementById('textarea-hierarchies-comment').value;
-		debugger;
-		hier.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
+		// debugger;
+		let from = [];
+		document.querySelectorAll('.cardTable').forEach((card) => {
+			if (card.getAttribute('name')) {from.push(card.getAttribute('name'));}
+		});
+		// Hier.from = from;
+		Hier.hier = {title : hierTitle, hierarchyOrder, comment, from};
+		// la gerarchia creata la salvo nell'oggetto Dim, della classe Dimension, dove andrò a salvare, alla fine, tutta la dimensione
+		Dim.hier = Hier.hierarchies;
+		Dim.lastTableHierarchy = Hier.lastTableHierarchy;
+		console.log('Dim.#hier : ', Dim.hier);
 		// dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
 		app.dialogHierarchyName.close();
 		// abilito il tasto btnHierarchyNew
@@ -1206,10 +1217,7 @@ var hier = new Hierarchy();
 		// riduco il section[data-active] relativo alla struttura gerarchica attualmente attiva
 		document.querySelector('section[data-active]').removeAttribute('data-active');
 		// document.querySelectorAll('#hierTables > div').forEach( table => table.remove());
-		// reset delle prop #columns e #join
-		// dimension.newHierarchy();
-		// nuovo oggetto Hierarchy
-		hier = new Hierarchy();
+		Hier = new Hierarchy();
 	};
 
 	// salvataggio di un nuovo cubo
@@ -1266,22 +1274,13 @@ var hier = new Hierarchy();
 		  // Visualizzo nell'elenco di sinistra la dimensione appena creata
 		  // creo un contenitorre per le dimensioni salvate, con dentro le tabelle che ne fanno parte.
 		*/
-		dimension.title = document.getElementById('dimensionName').value;
-		hier.comment = document.getElementById('textarea-dimension-comment').value;
+		Dim.title = document.getElementById('dimensionName').value;
+		Dim.comment = document.getElementById('textarea-dimension-comment').value;
 		// cube.dimension
 		const storage = new DimensionStorage();
-		let from = [];
-		document.querySelectorAll('.cardTable').forEach((card) => {
-			if (card.getAttribute('name')) {from.push(card.getAttribute('name'));}
-		});
-		dimension.from = from;
-		debugger;
-		hier.save();
-		storage.save = dimension.dimension;
-        // TODO: salvo la dimension anche su DB
-        // TODO: Potrei salvare la dimensione sul DB manualmente, una volta completati i testi in fase di sviluppo (in LocalStorage)
-        // app.saveDIM(dimension.dimension);
-		//storage.dimension = dimension.dimension;
+		
+		Dim.save();
+		storage.save = Dim.dimension;
 		app.dialogDimensionName.close();
 	
 		// chiudo le card presenti
@@ -1294,7 +1293,7 @@ var hier = new Hierarchy();
 
 		app.getDimensions(); // TODO: qui andrò ad aggiornare solo la dimensione appena salvata/modificata
 
-		delete dimension.dimension;
+		delete Dim.dimension;
 	};
 
 	// NOTE: esempio di utilizzo di MutationObserver
