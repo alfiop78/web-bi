@@ -356,7 +356,7 @@ class DimensionStorage extends Storages {
 			// console.log(jsonStorage.type);
 			if (jsonStorage.type === 'DIMENSION') {
 				// console.log(key);
-				dimObj[key] = jsonStorage.from;
+				dimObj[key] = jsonStorage;
 			}
 		});
 		// return dimensions;

@@ -600,10 +600,10 @@ var Hier = new Hierarchy();
 		const dimension = new DimensionStorage();
 		// dimensions : è un Object che contiene un array con le tabelle incluse nella dimensione
 		const dimensions = dimension.list();
-		debugger;
+		// debugger;
 		for (const [key, value] of Object.entries(dimensions)) {
-			// debugger;
-			// console.log('value : ', value);
+			// key : nome
+			console.log('value : ', value);
 			let tmplContent = app.tmplDimension.content.cloneNode(true);
 			const section = tmplContent.querySelector('section');
 			section.setAttribute('data-element-search', 'dimensions');
@@ -612,6 +612,17 @@ var Hier = new Hierarchy();
 			const btnDimensionUse = tmplContent.querySelector('.mini-card-buttons > button[data-id="dimension-use"]');
 			const btnDimensionEdit = tmplContent.querySelector('.mini-card-buttons > button[data-id="dimension-edit"]');
 			div.querySelector('h5').innerHTML = key;
+			// TODO: per ogni gerarchia recupero la pro 'from'
+			for (const [hierName, hierValue] of Object.entries(value.hierarchies)) {
+				console.log(hierName);
+				console.log(hierValue);
+				hierValue.from.forEach( (table) => {
+					let div = document.createElement('div');
+					div.innerText = table;
+					tmplContent.querySelector('div[data-dimension-tables]').appendChild(div);	
+				});
+				debugger;
+			}
 			// TODO: temporaneamnete commentato dopo aver eliminato la prop 'from' dalle dimensioni. La prop 'from' è stata spostata all'interno delle singole gerarchie
 			/*value.forEach( (table) => {
 				let div = document.createElement('div');
@@ -1197,7 +1208,8 @@ var Hier = new Hierarchy();
 		// Hier.from = from;
 		Hier.hier = {title : hierTitle, hierarchyOrder, comment, from};
 		// la gerarchia creata la salvo nell'oggetto Dim, della classe Dimension, dove andrò a salvare, alla fine, tutta la dimensione
-		Dim.hier = Hier.hierarchies;
+		Dim.hier = Hier.hier;
+		// Dim.hier = Hier.hierarchies;
 		Dim.lastTableHierarchy = Hier.lastTableHierarchy;
 		console.log('Dim.#hier : ', Dim.hier);
 		// dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};

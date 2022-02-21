@@ -126,15 +126,9 @@ class Cube {
 }
 
 class Dimension {
-	// #columns = {}; // Object di colonne selezionate, queste potranno essere inserite nella creazione del report {'nometabella' : [array di colonne]}
-	// #field;
-	// #table;
-	// #schema;
 	#comment;
 	#lastTableHierarchy;
 	#hier = {};
-	// #join = {};
-	// #hierarchies = {};
 	constructor() {
 		this.schema;
 		this._dimension = {};
@@ -227,7 +221,6 @@ class Hierarchy {
 			this.#relationId = 0;
 			this.#join[this.table] = {[this.#relationId] : value};
 		} else {
-			debugger;
 			// non incremento più relationId ma lo ricavo dal length in base alle relazioni già presenti per ogni tabella
 			this.#relationId = Object.keys(this.#join[this.table]).length;
 			this.#join[this.table][this.#relationId] = value;
@@ -242,9 +235,9 @@ class Hierarchy {
 
 	get comment() {return this.#comment;}
 
-	set hierarchies(hier) {this.#hierarchies = hier;}
+	// set hierarchies(hier) {this.#hierarchies = hier;}
 
-	get hierarchies() {return this.#hierarchies;}
+	// get hierarchies() {return this.#hierarchies;}
 
 	set hier(object) {
 		console.log('object : ', object);
@@ -257,8 +250,8 @@ class Hierarchy {
 		// TODO: qui effettuo il controllo per vedere se, quando ci sono più gerarchie, viene condivisa l'ultima tabella, che deve essere la stessa per ciascuna delle gerarchie.
 		this.lastTableHierarchy = object.hierarchyOrder[Object.keys(object.hierarchyOrder).length-1];
 		console.log('this._hierarchies : ', this.#hier);
-		this.hierarchies = this.#hier;
-		console.log(this.hierarchies);
+		// this.hierarchies = this.#hier;
+		// console.log(this.hierarchies);
 	}
 
 	get hier() {return this.#hier;}
