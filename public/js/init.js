@@ -612,29 +612,31 @@ var Hier = new Hierarchy();
 			const btnDimensionUse = tmplContent.querySelector('.mini-card-buttons > button[data-id="dimension-use"]');
 			const btnDimensionEdit = tmplContent.querySelector('.mini-card-buttons > button[data-id="dimension-edit"]');
 			div.querySelector('h5').innerHTML = key;
-			// TODO: per ogni gerarchia recupero la pro 'from'
+			// TODO: per ogni gerarchia recupero la prop 'from'
 			for (const [hierName, hierValue] of Object.entries(value.hierarchies)) {
 				console.log(hierName);
 				console.log(hierValue);
+				const tmplHierarchyList = document.getElementById('tmpl-hierarchy-list');
+				const tmplHierarchyContent = tmplHierarchyList.content.cloneNode(true);
+				const divHier = tmplHierarchyContent.querySelector('.hierarchies');
+				const h6 = tmplHierarchyContent.querySelector('h6');
+				const divTables = tmplHierarchyContent.querySelector('.tables');
+				const btnUse = tmplHierarchyContent.querySelector("button[data-id='dimension-use']");
+				const btnEdit = tmplHierarchyContent.querySelector("button[data-id='dimension-edit']");
+				btnUse.setAttribute('data-dimension-name', key);
+				btnEdit.setAttribute('data-dimension-name', key);
+				h6.innerText = hierName;
+				tmplContent.querySelector('div[data-dimension-tables]').appendChild(divHier);
 				hierValue.from.forEach( (table) => {
 					let div = document.createElement('div');
 					div.innerText = table;
-					tmplContent.querySelector('div[data-dimension-tables]').appendChild(div);	
+					divTables.appendChild(div);
 				});
-				debugger;
+				btnUse.onclick = app.handlerDimensionSelected;
+				btnEdit.onclick = app.handlerDimensionEdit;
 			}
-			// TODO: temporaneamnete commentato dopo aver eliminato la prop 'from' dalle dimensioni. La prop 'from' è stata spostata all'interno delle singole gerarchie
-			/*value.forEach( (table) => {
-				let div = document.createElement('div');
-				div.innerText = table;
-				tmplContent.querySelector('div[data-dimension-tables]').appendChild(div);
-			});*/
-			btnDimensionUse.setAttribute('data-dimension-name', key);
-			btnDimensionEdit.setAttribute('data-dimension-name', key);
 			div.querySelector('h5').setAttribute('label', key);
 			document.querySelector('#dimensions').appendChild(section);
-			btnDimensionUse.onclick = app.handlerDimensionSelected;
-			btnDimensionEdit.onclick = app.handlerDimensionEdit;
 		}
 	};
 

@@ -61,6 +61,17 @@
             </section>
         </template>
 
+        <template id="tmpl-hierarchy-list">
+            <div class="hierarchies">
+                <h6></h6>
+                <div class="tables"></div>
+                <div class="mini-card-buttons">
+                    <button data-id="dimension-use" type="button" name="dimensionUse" class="md-button">utilizza</button>
+                    <button data-id="dimension-edit" type="button" name="dimensionEdit" class="md-button">modifica</button>
+                </div>
+            </div>
+        </template>
+
         {{-- template tmpl-dimension --}}
         <template id="tmpl-dimension-list">
             <section data-element-search="dimensions">
@@ -69,11 +80,12 @@
                         <h5></h5> {{-- titolo della dimensione --}}
                         <div data-dimension-tables>
                             {{-- elenco tabelle contenute nella dimensione --}}
+                            
                         </div>
-                        <div class="mini-card-buttons">
+                        {{-- <div class="mini-card-buttons">
                             <button data-id="dimension-use" type="button" name="dimensionUse" class="md-button">utilizza</button>
                             <button data-id="dimension-edit" type="button" name="dimensionEdit" class="md-button">modifica</button>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </section>
