@@ -6,6 +6,7 @@ class Queries {
 	#column;
 	#firstTable; // la prima tabella della gerarchia, da qui posso ottenere la from e la join
 	#joinId;
+	#where = {};
 	constructor() {
 		this.#select = {};
 		this.#obj = {}; // object generico
@@ -56,7 +57,6 @@ class Queries {
 	}
 
 	get tables() {return this.#firstTable;}
-
 
 	deleteFrom(tableName) {
 		this._fromSet.delete(tableName);
@@ -109,16 +109,31 @@ class Queries {
 
 	set where(join) {
 		console.log('join : ', join);
-		this._where[this.#joinId] = join;
-		console.log('where : ', this._where);
+		debugger;
+		if (Object.keys(join).length > 1) {
+			for (const [key, value] of Object.entries(join)) {
+				this.#where[key] = value;	
+			}
+		} else {
+			console.log('key : ', Object.keys(join));
+			// let test = Object.keys(this._where).length;
+			// this._where[test] = join;
+			this.#where[Object.keys(join)] = join[Object.keys(join)];
+			// this.#where.set(Object.keys(join), join);
+			// this.#whereSet.add(join);
+			// this._where[this.#joinId] = join;
+			// console.log('where : ', this._where);
+		}
+		console.log('#where : ', this.#where);
 	}
 
 	deleteWhere() {
+		debugger;
 		delete this._where[this.#joinId];
 		console.log('where : ', this._where);	
 	}
 
-	get where() {return this._where;}
+	get where() {return this.#where;}
 
 	set factRelation(dimension) {
 		// console.log('dimName : ', dimension.name);
@@ -217,7 +232,7 @@ class Queries {
 		this._reportProcess = {};
 		this._reportProcess['select'] = this.#select;
 		this._reportProcess['from'] = Array.from(this._fromSet); // converto il set in un array
-		this._reportProcess['where'] = this._where;
+		this._reportProcess['where'] = this.#where;
 		this._reportProcess['factJoin'] = this._factRelation;
 		this._reportProcess['filters'] = this._filter;
 		this._reportProcess['metrics'] = this._metrics;

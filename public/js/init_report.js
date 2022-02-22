@@ -545,7 +545,7 @@ var StorageMetric = new MetricStorage();
 				const parent = document.getElementById('fieldList-filter'); // dove verrà inserita la <ul>
 				// ul.querySelectorAll('section').forEach((el) => {el.remove();});
 				for (const [key, value] of Object.entries(data)) {
-					console.log(key, value);
+					// console.log(key, value);
 					const contentElement = app.tmplList.content.cloneNode(true);
 					const section = contentElement.querySelector('section[data-no-icon]');
 					const element = section.querySelector('.element');
@@ -576,7 +576,7 @@ var StorageMetric = new MetricStorage();
 	app.checkRelations = (hier) => {
 		// recupero la prima tabella selezionata della gerarchia
 		console.log(+Query.tables.tableId);
-		debugger;
+		// debugger;
 
 		for (const [k, table] of Object.entries(Dim.selected.hierarchies[hier].order)) {
 			// recupero la property 'join' (nella dimensione) dove la key è maggiore della tableId al momento selezionata (Quindi recupero tutte le hier inferiori)
@@ -584,7 +584,7 @@ var StorageMetric = new MetricStorage();
 				Query.from = table;
 				if (Dim.selected.hierarchies[hier].joins[table.split('.')[1]]) {
 					Query.joinId = +k;
-					debugger;
+					// debugger;
 					Query.where = Dim.selected.hierarchies[hier].joins[table.split('.')[1]];
 				}
 			}
@@ -949,11 +949,11 @@ var StorageMetric = new MetricStorage();
 		const ul = content.querySelector("ul[data-id='fields-dimensions']");
 		const parent = document.getElementById('dimensionList'); // dove verrà inserita la <ul>
 		// creo un unica <ul> con dentro tutte le dimensioni, queste verranno filtrate quando si selezionano uno o più cubi
-		console.log('lista cubi : ', StorageCube.cubes); // tutta la lista dei cubi
+		// console.log('lista cubi : ', StorageCube.cubes); // tutta la lista dei cubi
 		for (const [cubeName, cubeValue] of (Object.entries(StorageCube.cubes))) {
-			console.log('key : ', cubeName);
-			console.log('value : ', cubeValue); // tutto il contenuto del cubo
-			console.log('dimensioni associate : ', cubeValue.associatedDimensions);
+			// console.log('key : ', cubeName);
+			// console.log('value : ', cubeValue); // tutto il contenuto del cubo
+			// console.log('dimensioni associate : ', cubeValue.associatedDimensions);
 			// per ogni dimensione presente in associatedDimensions inserisco un element (preso dal template app.tmplListField)
 			cubeValue.associatedDimensions.forEach((dimension, index) => {
 				const contentElement = app.tmplList.content.cloneNode(true);
@@ -982,7 +982,7 @@ var StorageMetric = new MetricStorage();
 		const parent = document.getElementById('tableList-hierarchies'); // dove verrà inserita la <ul>
 
 		// ottengo l'elenco delle gerarchie per ogni dimensione presente in storage, successivamente, quando la dimensione viene selezionata, visualizzo/nascondo solo quella selezionata
-		console.log('lista dimensioni :', Dim.dimensions);
+		// console.log('lista dimensioni :', Dim.dimensions);
 		// per ogni dimensione presente aggiungo gli elementi nella ul con le gerarchie
 		for (const [dimName, dimValue] of (Object.entries(Dim.dimensions))) {
 			// per ogni dimensione presente in associatedDimensions inserisco un element (preso dal template app.tmplListField)
@@ -1019,11 +1019,11 @@ var StorageMetric = new MetricStorage();
 		// per ogni dimensione, vado a leggere le hierarchies presenti, le ciclo per creare una <ul>, in sectionFields-tables, con le tabelle presenti nella gerarchia in ciclo
 		for (const [dimName, dimValue] of (Object.entries(Dim.dimensions))) {
 			Dim.selected = dimName;
-			console.log('hierarchies : ', Dim.selected.hierarchies);
+			// console.log('hierarchies : ', Dim.selected.hierarchies);
 			for (const hier in Dim.selected.hierarchies) {
 				for (const [key, value] of Object.entries(Dim.selected.hierarchies[hier]['order'])) {
 					// ciclo le tabelle presenti nella gerarchia
-					console.log(key, value);
+					// console.log(key, value);
 					const contentElement = app.tmplList.content.cloneNode(true);
 					const section = contentElement.querySelector('section[data-no-icon]');
 					const element = section.querySelector('.element');
@@ -1053,11 +1053,11 @@ var StorageMetric = new MetricStorage();
 		// per ogni dimensione, vado a leggere le hierarchies presenti, le ciclo per creare una <ul>, in sectionFields-tables, con le tabelle presenti nella gerarchia in ciclo
 		for (const [dimName, dimValue] of (Object.entries(Dim.dimensions))) {
 			Dim.selected = dimName;
-			console.log('hierarchies : ', Dim.selected.hierarchies);
+			// console.log('hierarchies : ', Dim.selected.hierarchies);
 			for (const hier in Dim.selected.hierarchies) {
 				for (const [key, value] of Object.entries(Dim.selected.hierarchies[hier]['order'])) {
 					// ciclo le tabelle presenti nella gerarchia
-					console.log(key, value);
+					// console.log(key, value);
 					const contentElement = app.tmplList.content.cloneNode(true);
 					const section = contentElement.querySelector('section[data-no-icon]');
 					const element = section.querySelector('.element');
@@ -1084,22 +1084,22 @@ var StorageMetric = new MetricStorage();
 		const ul = content.querySelector("ul[data-id='fields-column']");
 		const parent = document.getElementById('table-fieldList'); // dove verrà inserita la <ul>
 		// per ogni dimensione, recupero la property 'columns'
-		console.log('Dim.dimension : ', Dim.dimensions);
+		// console.log('Dim.dimension : ', Dim.dimensions);
 		for (const [key, value] of (Object.entries(Dim.dimensions))) {
 			// key : nome della dimensione
 			// value : tutte le property della dimensione
-			console.log('key : ', key);
+			// console.log('key : ', key);
 			// console.log('value : ', value.columns);
 			// le columns sono all'interno della prop hierarchies.nomeGerarchia.columns per cui vado a ciclare questa prop
 			// per ogni gerarchia vado ad aggiungere le columns
 			for (const [hier, hierValue] of Object.entries(value.hierarchies)) {
-				console.log('hier : ', hier, hierValue.columns);
+				// console.log('hier : ', hier, hierValue.columns);
 				for (const [table, fields] of Object.entries(hierValue.columns)) {
-					console.log('table : ', table);
-					console.log('fields : ', fields);
+					// console.log('table : ', table);
+					// console.log('fields : ', fields);
 					for (let field in fields) {
-						console.log('field : ', field);
-						console.log('fields[field] : ', fields[field]);
+						// console.log('field : ', field);
+						// console.log('fields[field] : ', fields[field]);
 						const contentElement = app.tmplList.content.cloneNode(true);
 						const section = contentElement.querySelector('section[data-no-icon');
 						const element = section.querySelector('.element');
@@ -1126,17 +1126,17 @@ var StorageMetric = new MetricStorage();
 		const content = app.tmplUlList.content.cloneNode(true);
 		const ul = content.querySelector("ul[data-id='fields-filter']");
 		const parent = document.getElementById('existFilters'); // dove verrà inserita la <ul>
-		console.log('Dim.dimension : ', Dim.dimensions);
+		// console.log('Dim.dimension : ', Dim.dimensions);
 		// TODO: per avere il data-hier-name nel tag section (degli elementi da cercare) devo recuperare la table dalla property hierarchies.nomegerarchia.order, in questo modo posso aggiungere
 		// section.setAttribute('data-hier-name', nomegerarchia);
 		// L'unione di data-dimension-name+data-hier-name consentirà di evitare bug quando ci sono tabelle uguali in gerarchie diverse o in dimensioni diverse
 		for (const [key, value] of (Object.entries(Dim.dimensions))) {
 			// key : nome della dimensione
 			// value : tutte le property della dimensione
-			console.log('key : ', key);
+			// console.log('key : ', key);
 			// console.log('value : ', value.from);
 			for (const [hier, hierValue] of Object.entries(value.hierarchies)) {
-				console.log('hier : ', hier, hierValue.order);
+				// console.log('hier : ', hier, hierValue.order);
 				for (const [tableKey, table] of Object.entries(hierValue.order)) {
 					const filters = StorageFilter.tableFilters(table.split('.')[1]);
 					// debugger;

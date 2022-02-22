@@ -530,8 +530,8 @@ var Hier = new Hierarchy();
 				} else {
 					debugger;
 					Hier.join = hier;
-					// visualizzo l'icona per capire che c'è una relazione tra le due colonne
-					Hier.saveRelation(colSelected);
+					// visualizzo le icone di "join" nelle due colonne
+					Hier.showRelationIcons(colSelected);
 					console.log(Hier.join);
 					// esiste una relazione, visualizzo il div hierarchiesContainer
 					app.hierarchyContainer.removeAttribute('hidden');
@@ -612,7 +612,7 @@ var Hier = new Hierarchy();
 			const btnDimensionUse = tmplContent.querySelector('.mini-card-buttons > button[data-id="dimension-use"]');
 			const btnDimensionEdit = tmplContent.querySelector('.mini-card-buttons > button[data-id="dimension-edit"]');
 			div.querySelector('h5').innerHTML = key;
-			// TODO: per ogni gerarchia recupero la prop 'from'
+			// per ogni gerarchia recupero la prop 'from'
 			for (const [hierName, hierValue] of Object.entries(value.hierarchies)) {
 				console.log(hierName);
 				console.log(hierValue);
@@ -624,7 +624,9 @@ var Hier = new Hierarchy();
 				const btnUse = tmplHierarchyContent.querySelector("button[data-id='dimension-use']");
 				const btnEdit = tmplHierarchyContent.querySelector("button[data-id='dimension-edit']");
 				btnUse.setAttribute('data-dimension-name', key);
+				btnUse.setAttribute('data-hierarchy-name', hierName);
 				btnEdit.setAttribute('data-dimension-name', key);
+				btnEdit.setAttribute('data-hierarchy-name', hierName);
 				h6.innerText = hierName;
 				tmplContent.querySelector('div[data-dimension-tables]').appendChild(divHier);
 				hierValue.from.forEach( (table) => {
@@ -931,14 +933,17 @@ var Hier = new Hierarchy();
 	        // imposto la card attiva
 	        Hier.activeCard = card.querySelector('.cardTable');
 	        // seleziono i campi impostati nella dimensione, nelle proprietà 'hierarchies[hiername]columns[value]'
-	        for (const [field, type] of Object.entries(dim.hierarchies[hierName].columns[value])) {
-	        	// console.log(field);
-	        	// console.log(type);
-	        	// debugger;
-	        	Hier.activeCard.querySelector("li[label='"+field+"']").toggleAttribute('columns');
-	        	Hier.field = {field, type};
-				// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
-				dimension.columns();
+	        // debugger;
+	        // se la tabella, appartenente alla gerarchia selezionata, ha field selezionati li imposto come 'selezionati'
+	        if (dim.hierarchies[hierName].columns.hasOwnProperty(value)) {
+	        	for (const [field, type] of Object.entries(dim.hierarchies[hierName].columns[value])) {
+		        	// console.log(field);
+		        	// console.log(type);
+		        	Hier.activeCard.querySelector("li[label='"+field+"']").toggleAttribute('columns');
+		        	Hier.field = {field, type};
+					// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
+					Hier.columns();
+		        }
 	        }
 		}
 		// dopo aver caricato tutte le tabelle appartenenti alla dimensione, imposto le gerarchie definite recuperandole dalla proprietà 'join'
@@ -979,16 +984,12 @@ var Hier = new Hierarchy();
 		// Recupero tutto il json della dimensione selezionata
 		const dimStorage = new DimensionStorage();
 		dimStorage.selected = e.target.getAttribute('data-dimension-name');
-		// aggiungo alla dropzone TUTTE le tabelle della gerarchia
-		// TODO: da re-implementare quando si aggiunge la funzionalità di più gerarchie nella stessa dimensione
-		const hierName =Object.keys(dimStorage.selected.hierarchies);
-		// array di tabelle
-		// TODO: Implementare questa addCards per sostituire addCard
+		const hierName = e.target.getAttribute('data-hierarchy-name');
+		// TODO: Implementare addCards in modo da svolgere anche le istruzioni di addCard
 		app.addCards(dimStorage.selected, hierName);
 		// imposto lo span all'interno del dropzone con la descrizione della dimensione auutalmente in modifica
 		app.dropZone.querySelector('span').innerHTML = "Dimensione in modifica : " + e.target.getAttribute('data-dimension-name');
 		app.dropZone.setAttribute('edit', e.target.getAttribute('data-dimension-name'));
-		// TODO: Imposto le colonne selezionate all'interno di ogni tabella
 		// chiudo la lista delle dimensioni
 		app.dimensionList.toggleAttribute('hidden');
 		app.btnDimensionList.toggleAttribute('open');

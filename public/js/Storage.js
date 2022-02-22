@@ -107,7 +107,7 @@ class CubeStorage extends Storages {
 				// this._cubes[key] = {'id' : jsonStorage['id'], 'FACT' : jsonStorage['FACT'], 'key' : key};
 			}
 		});
-		console.log('cubes : ', this._cubes);
+		// console.log('cubes : ', this._cubes);
 	}
 
 	get cubes() {return this._cubes;}
@@ -279,7 +279,7 @@ class ProcessStorage extends Storages {
 		for (let process in this.#processes) {
 			// console.log(proc);
 			// console.log(toBeProcessed[proc]);
-			console.log('template : ', template);
+			// console.log('template : ', template);
 			const content = template.content.cloneNode(true);
 			let section = content.querySelector('section[data-no-icon]');
 			section.hidden = false;
@@ -326,7 +326,7 @@ class DimensionStorage extends Storages {
 	set selected(value) {
 		// imposto la dimensione selezionata
 		this.#name = value;
-		console.log('#name : ', this.#name);
+		// console.log('#name : ', this.#name);
 	}
 
 	get selected() {

@@ -51,12 +51,11 @@ class Cube {
 
 	public function n_where($joins) {
 		$i = 0;
-		foreach ($joins as $joinId) {
-			foreach ($joinId as $join) {
-				$relation = implode(" = ", $join);
-				($i === 0) ? $this->_where .= " WHERE ".$relation : $this->_where .= " AND " . $relation;
-				$i++;
-			}
+		// joins = "token_join" : ['table.field', 'table.field']
+		foreach ($joins as $join) {
+			$relation = implode(" = ", $join);
+			$this->_where .= ($i === 0) ? " WHERE $relation " : " AND $relation ";
+			$i++;
 		}
 		// var_dump($this->_where);
 	}

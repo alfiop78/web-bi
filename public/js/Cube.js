@@ -216,15 +216,22 @@ class Hierarchy {
 
 	set join(value) {
 		debugger;
+		// genero un token per questa relazione
+		const rand = () => Math.random(0).toString(36).substr(2);
+		// const token = (length) => (rand()+rand()+rand()+rand()).substr(0,length);
+		const token = rand().substr(0, 7);
+		// console.log(token(7));
+		// console.log('token : ', token);
 		if (!this.#join.hasOwnProperty(this.table)) {
 			// questa tabella non ha ancora nessuna relazione, azzero il relationId
-			this.#relationId = 0;
-			this.#join[this.table] = {[this.#relationId] : value};
+			// this.#relationId = 0;
+			this.#join[this.table] = { [token] : value };
+			// this.#join[this.table] = {[this.#relationId] : value};
 		} else {
 			// non incremento più relationId ma lo ricavo dal length in base alle relazioni già presenti per ogni tabella
-			this.#relationId = Object.keys(this.#join[this.table]).length;
-			this.#join[this.table][this.#relationId] = value;
-			// this.#join[this.table][this.relationId] = value;
+			// this.#relationId = Object.keys(this.#join[this.table]).length;
+			this.#join[this.table][token] = value;
+			// this.#join[this.table][this.#relationId] = value;
 		}
 		console.log('this.#join : ', this.#join);		
 	}
@@ -292,7 +299,7 @@ class Hierarchy {
 
 	// getColumns() {return this.#columns;}
 
-	saveRelation(value) {
+	showRelationIcons(value) {
 		// value : colSelected
 		value.forEach((el) => {
 			el.setAttribute('data-rel-'+this.relationId, this.relationId);
