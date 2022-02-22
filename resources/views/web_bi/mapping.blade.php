@@ -398,9 +398,13 @@
                             </div>
                             <template id="tmpl-hierarchies">
                                 {{-- TODO: da rinominare l'attr in data-hier-active --}}
-                                <section id="hierarchies" data-hier-id="0" class="section-content" data-active>
+                                <section data-id="hierarchies" data-hier-id="0" class="section-content" data-active>
                                     <h6></h6>
-                                    <div data-hier-id>{{-- qui verranno aggiunte le tabelle della gerarchia --}}</div>
+                                    <div data-hier-id></div>
+                                    <section class="hierButtons">
+                                        <button data-id="hierarchyDelete" type="button" name="" class="md-button" disabled>elimina</button>
+                                        <button data-id="hierarchySave" type="button" name="" class="md-button" disabled>salva</button>
+                                    </section>
                                 </section>
                             </template>
                             
@@ -409,10 +413,10 @@
                                 <div id="hierarchiesContainer">
                                     
                                 </div>
-                                <button id="hierarchyDelete" type="button" name="" class="md-button" disabled>elimina</button>
-                                <button id="hierarchySave" type="button" name="" class="md-button" disabled>salva</button>
-                                <button id="hierarchyNew" type="button" name="" class="md-button" disabled>nuova</button>
+                                {{-- <button id="hierarchyDelete" type="button" name="" class="md-button" disabled>elimina</button>
+                                <button id="hierarchySave" type="button" name="" class="md-button" disabled>salva</button> --}}
                                 <div class="bottom-position">
+                                    <button id="hierarchyNew" type="button" name="" class="md-button" disabled>nuova</button>
                                     <button id="saveDimension" type="button" name="" class="md-button" disabled>salva dimensione</button>
                                 </div>
                             </div>

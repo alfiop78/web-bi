@@ -26,7 +26,6 @@ var Hier = new Hierarchy();
 
 		// actions button
 		btnSaveDimension : document.getElementById('saveDimension'),
-		btnSaveHierarchy : document.getElementById('hierarchySave'),
 		btnHierarchySaveName : document.getElementById('btnHierarchySaveName'),
 		btnHierarchyNew : document.getElementById('hierarchyNew'),
 		btnSaveCube : document.getElementById('saveCube'),
@@ -252,9 +251,8 @@ var Hier = new Hierarchy();
 		card.querySelector('input').setAttribute('data-element-search', card.getAttribute('label'));
 	
 		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.getAttribute('data-schema'), 'tableName': card.getAttribute('label')};
-		// TODO: se questa è la prima gerarchia utilizzo la Fn addTablesToHierStruct, altrimenti utilizzo createHierStruct()
-		// (Object.keys(dimension.hierarchyOrder).length === 0) ? app.addTablesToDefaultStruct(card) : app.createHierStruct(card);
-		app.testHierStruct(card);
+		// creazione della struttura gerarchica sulla destra
+		app.hierStruct(card);
 
 		// event sui tasti section[options]
 		// TODO: da gestire con document.addEventListener
@@ -263,7 +261,7 @@ var Hier = new Hierarchy();
 		card.querySelector('i[columns]').onclick = app.handlerAddColumns;
 	};
 
-	app.testHierStruct = (card) => {
+	app.hierStruct = (card) => {
 		if (!document.querySelector('section[data-active]')) {
 			// creo la struttura per la gerarchia
 			const parent = document.getElementById('hierarchiesContainer');
@@ -271,6 +269,7 @@ var Hier = new Hierarchy();
 			const content = tmpl.content.cloneNode(true);
 			const sectionDataHier = content.querySelector('section[data-hier-id]');
 			const h6 = content.querySelector('h6');
+			const btnSaveHierarchy = content.querySelector("button[data-id='hierarchySave']");
 			h6.innerHTML = cube.card.tableName;
 			parent.appendChild(sectionDataHier);
 			const divHier = sectionDataHier.querySelector('div');
@@ -282,6 +281,7 @@ var Hier = new Hierarchy();
 			divTable.setAttribute('data-schema', card.getAttribute('data-schema'));
 			divTable.setAttribute('label', cube.card.tableName);
 			divHier.appendChild(divTable);
+			btnSaveHierarchy.addEventListener('click', app.btnSaveHierarchy);
 		} else {
 			// debugger;
 			const parent = document.querySelector('section[data-active] > div');
@@ -295,57 +295,6 @@ var Hier = new Hierarchy();
 
 		}
 	};
-
-	// aggiunta delle tabelle alla struttura delle gerarchie
-	app.addTablesToDefaultStruct = (card) => {
-		const tmplHierTables = document.getElementById('tmpl-hier-tables');
-		const parent = document.querySelector('#hierTables div[data-hier-id]');
-		const content = tmplHierTables.content.cloneNode(true);
-		const div = content.querySelector('div');
-		div.innerHTML = cube.card.tableName;
-		div.setAttribute('data-schema', card.getAttribute('data-schema'));
-		div.setAttribute('label', cube.card.tableName);
-		parent.appendChild(div);
-		/*const tmplHierarchies = document.getElementById('tmpl-hierarchies');
-		const content = tmplHierarchies.content.cloneNode(true);*/
-	};
-
-	app.createHierStruct = (card) => {
-		debugger;
-		const tmplHierStruct = document.getElementById('tmpl-hier-struct');
-		const tmplHierTables = document.getElementById('tmpl-hier-tables');
-		// in parent verrà aggiunto il div[data-hier-id], la nuova gerarchia
-		const parent = document.querySelector('#hierTables div[data-hierarchies]');
-		const hierStructContent = tmplHierStruct.content.cloneNode(true); // template div[data-hier-id]
-		const hierTablesContent = tmplHierTables.content.cloneNode(true); // template div[draggable] il div contenente la tabella
-		const divHier = hierStructContent.querySelector('div[data-hier-id]');
-		parent.appendChild(divHier);
-		const div = hierTablesContent.querySelector('div');
-		div.innerHTML = cube.card.tableName;
-		div.setAttribute('data-schema', card.getAttribute('data-schema'));
-		div.setAttribute('label', cube.card.tableName);
-		divHier.appendChild(div);
-	};
-
-	/*app.createHierarchyStruct = (card) => {
-		// inserisco il nome della tabella nella struttura gerarchica sulla destra
-		const hierarchiesTables = document.getElementById('hierTables');
-		const tmplHierarchyStruct = document.getElementById('hierarchy-struct');
-		const tmplContent = tmplHierarchyStruct.content.cloneNode(true);
-		const div = tmplContent.querySelector('div');
-		div.innerHTML = cube.card.tableName;
-		div.setAttribute('data-schema', card.getAttribute('data-schema'));
-		div.setAttribute('label', cube.card.tableName);
-		hierarchiesTables.appendChild(div);
-		// imposto sul div l'evento drag&drop per gli elementi della gerarchia sulla destra
-		// TODO: gestire con document.addEventListener
-		div.ondragstart = app.hierDragStart;
-		div.ondragover = app.hierDragOver;
-		div.ondragenter = app.hierDragEnter;
-		div.ondragleave = app.hierDragLeave;
-		div.ondragend = app.hierDragEnd;
-		div.ondrop = app.hierDrop;
-	};*/
 
 	app.hierDragStart = (e) => {
 		console.log('hier drag start');
@@ -473,7 +422,10 @@ var Hier = new Hierarchy();
 					// se è stata impostata almento una colonna posso abilitare il tasto 'hierarchySave'
 					console.log(Hier.columns_);
 					// debugger;
-					(Object.keys(Hier.columns_).length !== 0) ? app.btnSaveHierarchy.disabled = false : app.btnSaveHierarchy.disabled = true;
+					// recuper o il tasto Save della gerarchia attiva
+					debugger;
+					const btnSaveHierarchy = document.querySelector("#box-hierarchy section[data-id='hierarchies'][data-active] button[data-id='hierarchySave']");
+					(Object.keys(Hier.columns_).length !== 0) ? btnSaveHierarchy.disabled = false : btnSaveHierarchy.disabled = true;
 				}
 		}
 	};
@@ -1084,7 +1036,8 @@ var Hier = new Hierarchy();
 	};
 
 	// open dialog salva gerarchia
-	app.btnSaveHierarchy.onclick = (e) => {
+	app.btnSaveHierarchy = (e) => {
+		debugger;
 		if (e.target.classList.contains('md-inactive')) return;
 		// salvo la gerarchia che andrà inserita in dimension
 		app.dialogHierarchyName.showModal();
