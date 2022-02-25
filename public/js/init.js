@@ -58,10 +58,10 @@ var Hier = new Hierarchy();
 		popup: document.getElementById('popup-help'),
 		dragElement : null,
 		elementMenu : null,
-		guideStep : [
+		/*guideStep : [
 			'Seleziona uno Schema sulla sinistra per iniziare',
 			'Aggiungi le tabelle da mappare trascinandole da "Lista Tabelle"'
-		],
+		],*/
 		messageId : 0
 	};
 
@@ -959,7 +959,7 @@ var Hier = new Hierarchy();
         }
         e.target.setAttribute('selected', true);
         app.getDatabaseTable(e.target.getAttribute('data-schema'));
-        app.handlerGuide();
+        // app.handlerGuide();
     };
 
     // recupero gli schemi database presenti
@@ -998,7 +998,7 @@ var Hier = new Hierarchy();
 
 	// app.getDatabaseTable();
 
-	app.handlerGuide = () => {
+	/*app.handlerGuide = () => {
 		if (app.messageId === 0) {
 			app.guideStep[app.messageId];
 			document.getElementById('guide').innerHTML = app.guideStep[app.messageId];
@@ -1007,13 +1007,13 @@ var Hier = new Hierarchy();
 			document.getElementById('guide').innerHTML = app.guideStep[app.messageId];
 			app.messageId++
 		}		
-	};
+	};*/
 
 	app.getDimensions();
 
     app.getCubes();
 
-    app.handlerGuide();
+    // app.handlerGuide();
 
     // ***********************events*********************
     // lista cubi già definiti

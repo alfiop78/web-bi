@@ -337,9 +337,9 @@
                                 <span class="h-separator"></span>
                                 <span class="popupContent"><i id="versioning-status" class="material-icons md-24">cached</i><small class="popup"><!-- contenuto dinamico --></small></span>
                             </div>
-                            <div class="help-console">
+                            {{-- <div class="help-console">
                                 <span id="guide"></span>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div class="lists">
