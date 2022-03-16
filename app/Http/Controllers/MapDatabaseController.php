@@ -127,6 +127,7 @@ class MapDatabaseController extends Controller
         /* dd($q); */
         // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
         $baseTable = $q->baseTable();
+        // dd($baseTable);
         if (!$baseTable) {
             // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
             // creo una tabella temporanea per ogni metrica filtrata
@@ -134,9 +135,9 @@ class MapDatabaseController extends Controller
             // echo 'elaborazione createDatamart';
             // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
             $datamartName = $q->createDatamart();
-            // dd($result);
-            // restituisco un json con i dati del datamart appena creato
-            $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM $datamartName;");
+            // dd($datamartName);
+            // restituisco un ANTEPRIMA del json con i dati del datamart appena creato
+            $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM $datamartName LIMIT 5000;");
             return response()->json($datamartResult);
         }
     }
