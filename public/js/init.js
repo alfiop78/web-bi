@@ -225,7 +225,7 @@ var Hier = new Hierarchy();
 
 		// imposto il titolo in h6
 		cardLayout.querySelector('h6').innerHTML = card.getAttribute('label');
-		// TODO: imposto un alias per questa tabella
+		// imposto un alias per questa tabella
 		const time = Date.now().toString();
 		cardLayout.querySelector('small').innerHTML = `AS ${card.getAttribute('label')}_${time.substring(time.length - 3)}`;
 		card.appendChild(cardLayout);
