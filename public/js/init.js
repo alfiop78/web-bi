@@ -63,22 +63,20 @@ var Hier = new Hierarchy();
 			'Aggiungi le tabelle da mappare trascinandole da "Lista Tabelle"'
 		],*/
 		messageId : 0
-	}
+	};
 
 	App.init();
 
 	// utilizzato per lo spostamento all'interno del drop-zone (card già droppata)
 	app.dragStart = (e) => {
-        console.log('dragStart : ', e.target);
-        console.log('dragStart : ', e.target.localName);
+        // console.log('dragStart : ', e.target);
 		// mousedown da utilizzare per lo spostamento dell'elemento
-		// debugger;
 		if (e.target.localName === 'h6') {
 			app.cardTitle = e.target;
-			app.card = e.path[5];
+			app.card = e.path[4];
 			// recupero la posizione attuale della card tramite l'attributo x-y impostato su .cardTable
-			app.xOffset = e.path[5].getAttribute('x');
-			app.yOffset = e.path[5].getAttribute('y');
+			app.xOffset = e.path[4].getAttribute('x');
+			app.yOffset = e.path[4].getAttribute('y');
 			// console.log('xOffset : ', app.xOffset);
 			// console.log('yOffset : ', app.yOffset);
 		}
@@ -91,7 +89,7 @@ var Hier = new Hierarchy();
 			app.initialY = e.clientY - app.yOffset;
 		}
 		if (e.target === app.cardTitle) {app.active = true;}
-	}
+	};
 
 	// spostamento della card già droppata
     app.dragEnd = () => {
@@ -101,7 +99,7 @@ var Hier = new Hierarchy();
 		app.initialX = app.currentX;
 		app.initialY = app.currentY;
 		app.active = false;
-	}
+	};
 
 	// evento attivato quando sposto la card già droppata all'interno della drop-zone
     app.drag = (e) => {
@@ -128,7 +126,7 @@ var Hier = new Hierarchy();
 
 			app.card.style.transform = 'translate3d(' + app.currentX + 'px, ' + app.currentY + 'px, 0)';
 		}
-	}
+	};
 
 	app.dropZone.onmousedown = app.dragStart;
 	app.dropZone.onmouseup = app.dragEnd;
@@ -148,7 +146,7 @@ var Hier = new Hierarchy();
 		// console.log(e.path);
 		// app.elementMenu = e.path[1]; // elemento da eliminare al termine drl drag&drop
 		// console.log(e.dataTransfer);
-	}
+	};
 
 	app.handlerDragOver = (e) => {
 		// console.log('handlerDragOver');
@@ -159,7 +157,7 @@ var Hier = new Hierarchy();
 		} else {
 			e.dataTransfer.dropEffect = "none";
 		}
-	}
+	};
 
 	app.handlerDragEnter = (e) => {
 		// console.log('handlerDragEnter');
@@ -177,13 +175,13 @@ var Hier = new Hierarchy();
 			// TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
 			// e.dataTransfer.dropEffect = "none";
 		}
-	}
+	};
 
 	app.handlerDragLeave = (e) => {
         // console.log('handlerDragLeave');
 		e.preventDefault();
 		// console.log('dragLeave');
-	}
+	};
 
 	app.handlerDragEnd = (e) => {
         // console.log('handlerDragEnd');
@@ -193,7 +191,7 @@ var Hier = new Hierarchy();
 		// debugger;
 		// faccio il DESCRIBE della tabella
 		app.getTable(e.target.getAttribute('data-schema'), cube.card.tableName);
-	}
+	};
 
 	app.handlerDrop = (e) => {
         // console.log('handlerDrop');
@@ -225,9 +223,6 @@ var Hier = new Hierarchy();
 
 		// imposto il titolo in h6
 		cardLayout.querySelector('h6').innerHTML = card.getAttribute('label');
-		// TODO: imposto un alias per questa tabella
-		const time = Date.now().toString();
-		cardLayout.querySelector('small').innerHTML = `AS ${card.getAttribute('label')}_${time.substring(time.length - 3)}`;
 		card.appendChild(cardLayout);
 		app.dropZone.appendChild(card);
 
@@ -264,7 +259,7 @@ var Hier = new Hierarchy();
 		card.querySelector('i[join]').onclick = app.handlerAddJoin;
 		card.querySelector('i[metrics]').onclick = app.handlerAddMetric;
 		card.querySelector('i[columns]').onclick = app.handlerAddColumns;
-	}
+	};
 
 	app.hierStruct = (card) => {
 		if (!document.querySelector('section[data-active]')) {
@@ -346,7 +341,7 @@ var Hier = new Hierarchy();
 
 		// let parent = document.getElementById('hierTables');
 		// parent.replaceChild(document.getElementById(data), e.target);
-	}
+	};
 
 	app.content.ondragover = app.handlerDragOver;
 	app.content.ondragenter = app.handlerDragEnter;
