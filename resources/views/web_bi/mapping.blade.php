@@ -253,7 +253,8 @@
             <div class="cardLayout">
                 <section class="cardTable" name="" data-schema="">
                     <div class="title">
-                        <h6></h6>
+                        {{-- <h6></h6> --}}
+                        <div class="title-alias"><h6></h6><small></small></div>
                         <span data-id="popupCloseTable" class="popupContent"><i data-id="closeTable" class="material-icons md-18">close</i><small class="popup">Chiudi</small></span>
                     </div>
                     <div class="md-field">
