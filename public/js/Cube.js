@@ -187,6 +187,7 @@ class Hierarchy {
 	#table;
 	#hierarchies;
 	#lastTableHierarchy;
+	#alias; // alias per la tabella
 	constructor() {}
 
 	set table(value) {
@@ -214,23 +215,27 @@ class Hierarchy {
 
 	get field() {return this.#field;}
 
+	set alias(value) {this.#alias = value;}
+
+	get alias() {return this.#alias;}
+
 	set join(value) {
-		debugger;
 		// genero un token per questa relazione
+		const alias = value[0].split('.')[0];
 		const rand = () => Math.random(0).toString(36).substr(2);
 		// const token = (length) => (rand()+rand()+rand()+rand()).substr(0,length);
 		const token = rand().substr(0, 7);
 		// console.log(token(7));
 		// console.log('token : ', token);
-		if (!this.#join.hasOwnProperty(this.table)) {
+		if (!this.#join.hasOwnProperty(alias)) {
 			// questa tabella non ha ancora nessuna relazione, azzero il relationId
 			// this.#relationId = 0;
-			this.#join[this.table] = { [token] : value };
+			this.#join[alias] = { [token] : value };
 			// this.#join[this.table] = {[this.#relationId] : value};
 		} else {
 			// non incremento più relationId ma lo ricavo dal length in base alle relazioni già presenti per ogni tabella
 			// this.#relationId = Object.keys(this.#join[this.table]).length;
-			this.#join[this.table][token] = value;
+			this.#join[alias][token] = value;
 			// this.#join[this.table][this.#relationId] = value;
 		}
 		console.log('this.#join : ', this.#join);		
@@ -253,9 +258,10 @@ class Hierarchy {
 		this.#hier[object.title]['columns'] = this.#columns;
 		this.#hier[object.title]['joins'] = this.#join;
 		this.#hier[object.title]['from'] = object.from;
+		this.#hier[object.title]['tablesFrom'] = object.tablesForm;
 		this.#hier[object.title]['comment'] = object.comment;
 		// TODO: qui effettuo il controllo per vedere se, quando ci sono più gerarchie, viene condivisa l'ultima tabella, che deve essere la stessa per ciascuna delle gerarchie.
-		this.lastTableHierarchy = object.hierarchyOrder[Object.keys(object.hierarchyOrder).length-1];
+		// this.lastTableHierarchy = object.lastTables;
 		console.log('this._hierarchies : ', this.#hier);
 		// this.hierarchies = this.#hier;
 		// console.log(this.hierarchies);
@@ -263,9 +269,9 @@ class Hierarchy {
 
 	get hier() {return this.#hier;}
 
-	set lastTableHierarchy(value) {this.#lastTableHierarchy = value;}
+	/*set lastTableHierarchy(value) {this.#lastTableHierarchy = value;}
 
-	get lastTableHierarchy() {return this.#lastTableHierarchy;}
+	get lastTableHierarchy() {return this.#lastTableHierarchy;}*/
 
 	set columns_(value) {
 		this.#columns = value;
@@ -277,20 +283,20 @@ class Hierarchy {
 	columns() {
 		this._obj = {};
 		debugger;
-		if (!this.#col.hasOwnProperty(`${this.#schema}.${this.#tableName}`)) {
+		if (!this.#col.hasOwnProperty(this.#alias)) {
 			// #columns non ha l'attributo #tableName, lo aggiungo
 			this._obj[this.#field.field] = this.#field.type;
-			this.#col[`${this.#schema}.${this.#tableName}`] = this._obj;
+			this.#col[this.#alias] = this._obj;
 		} else {
 			// tabella già presente, verifico se il campo è già presente, se non lo è lo aggiungo altrimenti lo elimino
-			if (!this.#col[`${this.#schema}.${this.#tableName}`].hasOwnProperty(this.#field.field)) {
+			if (!this.#col[this.#alias].hasOwnProperty(this.#field.field)) {
 				// field non esistente per questa tabella, lo aggiungo
-				this.#col[`${this.#schema}.${this.#tableName}`][this.#field.field] = this.#field.type;
+				this.#col[this.#alias][this.#field.field] = this.#field.type;
 			} else {
 				// field già esiste per questa tabella, lo elimino
-				delete this.#col[`${this.#schema}.${this.#tableName}`][this.#field.field];
+				delete this.#col[this.#alias][this.#field.field];
 				// elimino anche l'attr "schema.table" se, al suo interno, non sono presenti altri field
-				if (Object.keys(this.#col[`${this.#schema}.${this.#tableName}`]).length === 0) delete this.#col[`${this.#schema}.${this.#tableName}`];
+				if (Object.keys(this.#col[this.#alias]).length === 0) delete this.#col[this.#alias];
 			}
 		}
 		console.log('this.#columns : ', this.#col);

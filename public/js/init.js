@@ -228,6 +228,7 @@ var Hier = new Hierarchy();
 		// imposto un alias per questa tabella
 		const time = Date.now().toString();
 		cardLayout.querySelector('small').innerHTML = `AS ${card.getAttribute('label')}_${time.substring(time.length - 3)}`;
+		content.querySelector('.cardTable').setAttribute('data-alias', `${card.getAttribute('label')}_${time.substring(time.length - 3)}`);
 		card.appendChild(cardLayout);
 		app.dropZone.appendChild(card);
 
@@ -284,6 +285,7 @@ var Hier = new Hierarchy();
 			const divTable = tmplContentTable.querySelector('div');
 			divTable.innerHTML = cube.card.tableName;
 			divTable.setAttribute('data-schema', card.getAttribute('data-schema'));
+			divTable.setAttribute('data-alias', cube.card.ref.getAttribute('data-alias'));
 			divTable.setAttribute('label', cube.card.tableName);
 			divHier.appendChild(divTable);
 			btnSaveHierarchy.addEventListener('click', app.btnSaveHierarchy);
@@ -295,11 +297,12 @@ var Hier = new Hierarchy();
 			const divTable = tmplContentTable.querySelector('div');
 			divTable.innerHTML = cube.card.tableName;
 			divTable.setAttribute('data-schema', card.getAttribute('data-schema'));
+			divTable.setAttribute('data-alias', cube.card.ref.getAttribute('data-alias'));
 			divTable.setAttribute('label', cube.card.tableName);
 			parent.appendChild(divTable);
 
 		}
-	};
+	}
 
 	app.hierDragStart = (e) => {
 		console.log('hier drag start');
@@ -307,13 +310,13 @@ var Hier = new Hierarchy();
 		// disattivo temporaneamente gli eventi drop e dragend su app.content
 		app.content.removeEventListener('dragend', app.handlerDragEnd, true);
 		app.content.removeEventListener('drop', app.handlerDrop, true);
-	};
+	}
 
 	app.hierDragOver = (e) => {
 		console.log('dragover');
 		e.preventDefault();
 		// console.log(e.target);
-	};
+	}
 
 	app.hierDragEnter = (e) => {
 		e.preventDefault();
@@ -323,16 +326,16 @@ var Hier = new Hierarchy();
 			console.info('DROPZONE');
 			// TODO: css effect
 		}
-	};
+	}
 
-	app.hierDragLeave = (e) => {e.preventDefault();};
+	app.hierDragLeave = (e) => {e.preventDefault();}
 
 	app.hierDragEnd = (e) => {
 		e.preventDefault();
 		// reimposto gli eventi drop e dragend su app.content
 		app.content.addEventListener('dragend', app.handlerDragEnd, true);
 		app.content.addEventListener('drop', app.handlerDrop, true);
-	};
+	}
 
 	app.hierDrop = (e) => {
 		e.preventDefault();
@@ -365,7 +368,8 @@ var Hier = new Hierarchy();
 		cube.fieldSelected = e.currentTarget.getAttribute('label');
 		// TODO: utilizzare uno dei due qui, cube.fieldSelected oppure hier.field, da rivedere
 		Hier.field = {field : e.currentTarget.getAttribute('label'), type : e.currentTarget.getAttribute('data-key')};
-		// debugger;
+		// imposto l'alias per la tabella
+		Hier.alias = cube.card.ref.getAttribute('data-alias');
 
 		// se è presente un altro elemento con attributo hierarchy ma NON data-relation-id, "deseleziono" quello con hierarchy per mettere ...
 		// ...[hierarchy] a quello appena selezionato. In questo modo posso selezionare solo una colonna per volta ad ogni relazione da creare
@@ -433,7 +437,7 @@ var Hier = new Hierarchy();
 					(Object.keys(Hier.columns_).length !== 0) ? btnSaveHierarchy.disabled = false : btnSaveHierarchy.disabled = true;
 				}
 		}
-	};
+	}
 
 	// click sull'icona di destra "columns" per l'associazione delle colonne
 	app.handlerAddColumns = (e) => {
@@ -445,14 +449,14 @@ var Hier = new Hierarchy();
 		// quando aggiungo la tabella imposto da subito la colonna id in "columns"
 		Hier.activeCard = cardTable; // card attiva
 		cube.mode('columns');
-	};
+	}
 
 	app.handlerAddMetric = (e) => {
 		// imposto il metrics mode
 		const cardTable = e.path[3].querySelector('.cardTable');
 		cube.activeCard = {'ref': cardTable, 'tableName': cardTable.getAttribute('name')};
 		cube.mode('metrics', 'Seleziona le colonne da impostare come Metriche');
-	};
+	}
 
 	app.createHierarchy = (e) => {
 		console.log('create Relations');
@@ -466,12 +470,13 @@ var Hier = new Hierarchy();
 		console.log('dimension.table : ', Hier.table);
 		// debugger;
 		document.querySelectorAll('.cardTable[mode="relations"]').forEach((card) => {
-			let tableName = card.getAttribute('name');
+			// const tableName = card.getAttribute('name');
 			let liRef = card.querySelector('li[relations][selected]');
 			if (liRef) {
 				// metto in un array gli elementi selezionati per la creazione della gerarchia
 				colSelected.push(liRef);
-				hier.push(tableName+'.'+liRef.innerText); // questa istruzione crea "Azienda.id"
+				hier.push(card.getAttribute('data-alias')+'.'+liRef.innerText); // questa istruzione crea "Azienda_xxx.id" (alias.field)
+				// hier.push(tableName+'.'+liRef.innerText); // questa istruzione crea "Azienda.id"
 			}
 			console.log(hier);
 			// per creare correttamente la relazione è necessario avere due elementi selezionati
@@ -495,7 +500,7 @@ var Hier = new Hierarchy();
 				}
 			}
 		});
-	};
+	}
 
 	app.removeHierarchy = (relationId, value) => {
 		console.log(relationId);
@@ -539,7 +544,7 @@ var Hier = new Hierarchy();
 			delete cube.hierarchyTable['dimensionJoin_'+value];
 			console.log(cube.hierarchyTable);
 		}
-	};
+	}
 
 	app.handlerCloseCard = (e) => {
 		// elimino la card e la rivisualizzo nel drawer (spostata durante il drag&drop)
@@ -550,7 +555,7 @@ var Hier = new Hierarchy();
 		// TODO: eliminare anche dal flusso delle gerarchie sulla destra
 
 		// TODO: controllo struttura gerarchica
-	};
+	}
 
 	// recupero la lista delle dimensioni
 	app.getDimensions = () => {
@@ -597,7 +602,7 @@ var Hier = new Hierarchy();
 			div.querySelector('h5').setAttribute('label', key);
 			document.querySelector('#dimensions').appendChild(section);
 		}
-	};
+	}
 
 	// recupero la lista dei Cubi in localStorage
 	app.getCubes = () => {
@@ -621,7 +626,7 @@ var Hier = new Hierarchy();
 		}
 		// associo la Fn che gestisce il click sulle <li>
 		// ul.querySelectorAll('li').forEach( (li) => li.addEventListener('click', app.handlerCubeSelected) );
-	};
+	}
 
 	// selezione di un cubo già definito, da qui è possibile associare, ad esempio, una nuova dimensione ad un cubo già esistente.
 	app.handlerCubeSelected = (e) => {
@@ -643,7 +648,7 @@ var Hier = new Hierarchy();
 		app.btnSaveOpenedCube.parentElement.toggleAttribute('hide');
 		// nascondo btnSaveCube
 		app.btnSaveCube.parentElement.toggleAttribute('hide');
-	};
+	}
 
 	// recupero le tabelle del database in base allo schema selezionato
 	app.getDatabaseTable = async (schema) => {
@@ -693,14 +698,14 @@ var Hier = new Hierarchy();
 		        }
 		    })
 	    .catch( (err) => console.error(err));
-	};
+	}
 
 	app.handlerAddJoin = (e) => {
 		// debugger;
 		const cardTable = e.path[3].querySelector('.cardTable');
 		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.getAttribute('data-schema'), 'tableName': cardTable.getAttribute('name')};
 		cube.mode('relations');
-	};
+	}
 
 	app.getTable = async (schema, table) => {
 		let tmplList = document.getElementById('templateListColumns');
@@ -746,7 +751,7 @@ var Hier = new Hierarchy();
 		        }
 		    })
 	    .catch( (err) => console.error(err));
-	};
+	}
 
     app.saveDIM = async (jsonDim) => {
         console.log(jsonDim);
@@ -770,7 +775,7 @@ var Hier = new Hierarchy();
             }
           })
           .catch((err) => console.error(err));
-    };
+    }
 
 	// viene invocata da btnDimensionSaveName.onclick, quando viene salvata una dimensione, vengono chiuse tutte le card aperte attualmente
 	app.closeCards = () => {
@@ -778,7 +783,7 @@ var Hier = new Hierarchy();
 			// console.log(item);
 			item.remove();
 		});
-	};
+	}
 
 	app.handlerOpenTableList = (e) => {
 		// console.log(e.target);
@@ -787,16 +792,17 @@ var Hier = new Hierarchy();
 		e.target.toggleAttribute('open');
 		document.getElementById('tableList').toggleAttribute('hidden');
 		document.getElementById('tableSearch').focus();
-	};
+	}
 
-	app.addCard = (label, fact) => {
+	app.addCard = (lastTableObject, fact) => {
 		// creo la card (label)
 		// fact : true/false
+		debugger;
 		let card = document.createElement('div');
 		card.className = 'card table';
 		// split della stringa <schema>.<tabella>
-		card.setAttribute('data-schema', label.split('.')[0]); // schema
-		card.setAttribute('label', label.split('.')[1]); // tabella
+		card.setAttribute('data-schema', lastTableObject.schema); // schema
+		card.setAttribute('label', lastTableObject.table); // tabella
 		if (fact) card.setAttribute('fact', true);
 		card.onmousedown = app.dragStart;
 		card.onmouseup = app.dragEnd;
@@ -808,8 +814,10 @@ var Hier = new Hierarchy();
 		// TODO: da ricontrollare, perchè imposto l'attr 'fact' senza controllare l'argomento fact?
 		cardLayout.querySelector('.cardTable').setAttribute('fact', true);
 		// imposto il titolo in h6
-
-		cardLayout.querySelector('h6').innerHTML = label.split('.')[1];
+		// TODO: imposto l'alias della tabella
+		cardLayout.querySelector('small').innerHTML = `AS ${lastTableObject.alias}`;
+		cardLayout.querySelector('.cardTable').setAttribute('data-alias', lastTableObject.alias);
+		cardLayout.querySelector('h6').innerHTML = lastTableObject.table;
 		card.appendChild(cardLayout);
 		console.log(card);
 		app.dropZone.classList.replace('dropping', 'dropped');
@@ -827,7 +835,7 @@ var Hier = new Hierarchy();
 		card.querySelector('i[join]').onclick = app.handlerAddJoin;
 
 		app.getTable(card.getAttribute('data-schema'), card.getAttribute('label'));
-	};
+	}
 
 	// selezione di una dimensione da inserire nel body, per legarla al cubo
 	app.handlerDimensionSelected = (e) => {
@@ -839,11 +847,12 @@ var Hier = new Hierarchy();
 		// recupero tutta la dimensione selezionata, dallo storage
 		console.log(storage.selected);
 		// aggiungo alla dropzone l'ultima tabella della gerarchia
+		debugger;
 		app.addCard(storage.selected.lastTableInHierarchy, false);
 		// chiudo la lista delle dimensioni
 		app.dimensionList.toggleAttribute('hidden');
 		app.btnDimensionList.toggleAttribute('open');
-	};
+	}
 
 	app.addCards = async (dim, hierName) => {
 		// dimStorage.selected.hierarchies[hierName].order
@@ -934,7 +943,7 @@ var Hier = new Hierarchy();
 			}
 		}
 			
-	};
+	}
 
 	// selezione di una dimensione per consentirne le modifica
 	app.handlerDimensionEdit = (e) => {
@@ -950,7 +959,7 @@ var Hier = new Hierarchy();
 		// chiudo la lista delle dimensioni
 		app.dimensionList.toggleAttribute('hidden');
 		app.btnDimensionList.toggleAttribute('open');
-	};
+	}
 
     app.schemaSelected = (e) => {
     	// TODO: implementare un metodo per caricare di default lo schema 'automotive_bi_data'
@@ -965,54 +974,7 @@ var Hier = new Hierarchy();
         e.target.setAttribute('selected', true);
         app.getDatabaseTable(e.target.getAttribute('data-schema'));
         // app.handlerGuide();
-    };
-
-    // recupero gli schemi database presenti
-    /*app.getSchemata = async () => {
-		const url = '/fetch_api/schema';
-		await fetch(url)
-			.then( (response) => {
-                console.log(response);
-			if (!response.ok) {throw Error(response.statusText);}
-			return response;
-			})
-			.then( (response) => response.json())
-			.then( (data) => {
-		        console.log(data);
-		        if (data) {
-                    const nav = document.getElementById('nav-schema');
-                    for (const [key, value] of Object.entries(data)) {
-                        const a = document.createElement('a');
-                        a.innerHTML = value.SCHEMA_NAME;
-                        a.href = '#';
-                        a.setAttribute('data-schema', value.SCHEMA_NAME);
-                        a.id = key;
-                        nav.appendChild(a);
-                        a.addEventListener('click', app.schemaSelected);
-                    }
-                    
-		        } else {
-		          // TODO: no data
-		          console.warning('Non è stato possibile recuperare la lista delle tabelle');
-		        }
-		    })
-	    .catch( (err) => console.error(err));
-    };*/
-
-    // app.getSchemata(); // l'elenco degli schemi li recupero sulla Route mapping
-
-	// app.getDatabaseTable();
-
-	/*app.handlerGuide = () => {
-		if (app.messageId === 0) {
-			app.guideStep[app.messageId];
-			document.getElementById('guide').innerHTML = app.guideStep[app.messageId];
-			app.messageId++;
-		} else {
-			document.getElementById('guide').innerHTML = app.guideStep[app.messageId];
-			app.messageId++
-		}		
-	};*/
+    }
 
 	app.getDimensions();
 
@@ -1029,7 +991,7 @@ var Hier = new Hierarchy();
 		cubeList.toggleAttribute('hidden');
 		e.target.toggleAttribute('open');
 		document.getElementById('cubeSearch').focus();
-	};
+	}
 
 	// lista dimensioni già definite
 	app.btnDimensionList.onclick = (e) => {
@@ -1038,7 +1000,7 @@ var Hier = new Hierarchy();
 		app.dimensionList.toggleAttribute('hidden');
 		e.target.toggleAttribute('open');
 		document.getElementById('dimensionSearch').focus();
-	};
+	}
 
 	// open dialog salva gerarchia
 	app.btnSaveHierarchy = (e) => {
@@ -1049,13 +1011,13 @@ var Hier = new Hierarchy();
 		// abilito il tasto save dimension
 		// TODO: da correggere perchè non è più una <i> ma un <button>
 		app.btnSaveDimension.classList.remove('md-inactive');
-	};
+	}
 
 	// apro la dialog Salva Cubo
 	app.btnSaveCube.onclick = (e) => {
 		if (e.target.classList.contains('md-inactive')) return;
 		app.dialogCubeName.showModal();
-	};
+	}
 
 	// definisci Cubo
 	app.btnNewFact.onclick = (e) => {
@@ -1064,7 +1026,7 @@ var Hier = new Hierarchy();
 		e.target.toggleAttribute('open');
 		document.getElementById('tableList').toggleAttribute('hidden');
 		document.getElementById('tableSearch').focus();
-	};
+	}
 
 	app.saveCube = async (json) => {
         console.log(json);
@@ -1088,7 +1050,7 @@ var Hier = new Hierarchy();
             }
           })
           .catch((err) => console.error(err));
-    };
+    }
 
 	// Aggiornamento di un cubo
 	app.btnSaveOpenedCube.onclick = () => {
@@ -1130,7 +1092,7 @@ var Hier = new Hierarchy();
         // app.saveCube(cube.cube);
 
 		app.dialogCubeName.close();
-	};
+	}
 
 	// tasto report nella sezione controls -> fabs
     document.getElementById('mdc-report').onclick = () => window.location.href = '/report';
@@ -1138,7 +1100,7 @@ var Hier = new Hierarchy();
     // associo l'evento click dello schema
 	document.querySelectorAll('#nav-schema > a').forEach( (a) => {a.addEventListener('click', app.schemaSelected)});
 
-	app.btnBack.onclick = () => {window.location.href = '/';};
+	app.btnBack.onclick = () => {window.location.href = '/';}
 
 	/* ricerca in lista tabelle */
 	document.getElementById('tableSearch').oninput = App.searchInList;
@@ -1150,36 +1112,44 @@ var Hier = new Hierarchy();
 		// se drop-zone ha l'attr edit con il nome della dimensione in modifica, lo inserisco direttamente nella input dimensionName
 		if (app.dropZone.hasAttribute('edit')) app.dialogDimensionName.querySelector('#dimensionName').value = app.dropZone.getAttribute('edit');
 		app.dialogDimensionName.showModal();
-	};
+	}
 
 	app.btnHierarchySaveName.onclick = () => {
 		const hierTitle = document.getElementById('hierarchyName').value;
 		// ordine gerarchico (per stabilire quale tabella è da associare al cubo) questo dato viene preso dalla struttura di destra
-		let hierarchyOrder = {};
+		let hierarchyOrder = {}, hierarchyOrderTables = {};
 		Array.from(document.querySelectorAll('section[data-hier-id][data-active] .hier.table')).forEach((table, i) => {
-			// NOTE: utilizzo del backTick
-			hierarchyOrder[i] = `${table.getAttribute('data-schema')}.${table.getAttribute('label')}`;
+			hierarchyOrder[i] = {table : table.getAttribute('label'), alias : table.getAttribute('data-alias')};
+			// hierarchyOrder[i] = `${table.getAttribute('data-schema')}.${table.getAttribute('label')}`;
 		});
 		const comment = document.getElementById('textarea-hierarchies-comment').value;
 		// debugger;
-		let from = [];
+		let from = [], tablesFrom = [];
+		let lastTables = {};
 		document.querySelectorAll('.cardTable').forEach((card) => {
-			if (card.getAttribute('name')) {from.push(card.getAttribute('name'));}
+			if (card.getAttribute('name')) {
+				from.push(`${card.getAttribute('data-schema')}.${card.getAttribute('name')} AS ${card.getAttribute('data-alias')}`);
+				tablesFrom.push(card.getAttribute('name'));
+				lastTables = {
+					alias : card.getAttribute('data-alias'),
+					schema : card.getAttribute('data-schema'),
+					table : card.getAttribute('name')
+				};
+			}
 		});
-		// Hier.from = from;
-		Hier.hier = {title : hierTitle, hierarchyOrder, comment, from};
+		Hier.hier = {title : hierTitle, hierarchyOrder, comment, from, tablesFrom};
 		// la gerarchia creata la salvo nell'oggetto Dim, della classe Dimension, dove andrò a salvare, alla fine, tutta la dimensione
 		Dim.hier = Hier.hier;
 		// Dim.hier = Hier.hierarchies;
-		Dim.lastTableHierarchy = Hier.lastTableHierarchy;
-		console.log('Dim.#hier : ', Dim.hier);
+		debugger;
+		Dim.lastTableHierarchy = lastTables;
 		// dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
 		app.dialogHierarchyName.close();
 		// abilito il tasto btnHierarchyNew
 		app.btnHierarchyNew.disabled = false;
 		// abilito il tasto 'saveDimension'
 		app.btnSaveDimension.disabled = false;
-	};
+	}
 
 	app.btnHierarchyNew.onclick = (e) => {
 		// ripulisco la drop-zone per avere la possibilità di inserire altre gerarchie
@@ -1191,7 +1161,7 @@ var Hier = new Hierarchy();
 		document.querySelector('section[data-active]').removeAttribute('data-active');
 		// document.querySelectorAll('#hierTables > div').forEach( table => table.remove());
 		Hier = new Hierarchy();
-	};
+	}
 
 	// salvataggio di un nuovo cubo
 	app.btnSaveCubeName.onclick = () => {
@@ -1237,7 +1207,7 @@ var Hier = new Hierarchy();
         // app.saveCube(cube.cube);
 
 		app.dialogCubeName.close();
-	};
+	}
 
 	/* Salvataggio della dimensione, dalla dialog */
 	document.getElementById('btnDimensionSaveName').onclick = () => {
@@ -1267,7 +1237,7 @@ var Hier = new Hierarchy();
 		app.getDimensions(); // TODO: qui andrò ad aggiornare solo la dimensione appena salvata/modificata
 
 		delete Dim.dimension;
-	};
+	}
 
 	// NOTE: esempio di utilizzo di MutationObserver
 	const body = document.getElementById('body');

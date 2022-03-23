@@ -48,7 +48,7 @@ var StorageMetric = new MetricStorage();
 		ulDimensions: document.getElementById('dimensions'),
 		aggregationFunction: document.getElementById('sql-aggregation-list'),
 		btnMapping: document.getElementById('mdcMapping')
-	};
+	}
 
 	app.showPopupDialog = (e) => {
 		// console.log('e : ', e);
@@ -108,9 +108,9 @@ var StorageMetric = new MetricStorage();
 		// console.log(e.target.getBoundingClientRect().bottom);
 		// console.log(e.target.getBoundingClientRect().left);
 		// console.log(' : ', rect);
-	};
+	}
 
-	app.hidePopup = (e) => {app.popup.style.display = 'none';};
+	app.hidePopup = (e) => {app.popup.style.display = 'none';}
 
 	// 2021-10-19 click sul report da processare/elaborare. tasto "Process Report"
  	app.handlerReportToBeProcessed = async (e) => {
@@ -152,7 +152,7 @@ var StorageMetric = new MetricStorage();
 			}
 		})
 		.catch((err) => console.error(err));
-	};
+	}
 
 	// creo la lista degli elementi da processare
 	app.datamartToBeProcessed = () => {
@@ -160,7 +160,7 @@ var StorageMetric = new MetricStorage();
 		const toProcess = StorageProcess.list(app.tmplList, ul);
 		// associo la Fn che gestisce il click sulle <li>
 		ul.querySelectorAll('li').forEach((li) => li.addEventListener('click', app.handlerReportToBeProcessed));
-	};
+	}
 
 	app.handlerCubeSelected = (e) => {
 		// const cubeId = e.currentTarget.getAttribute('data-cube-id');
@@ -197,7 +197,7 @@ var StorageMetric = new MetricStorage();
 			});
 			StorageCube.deleteCube();
 		}
-	};
+	}
 
 	// selezione delle dimensioni
 	app.handlerDimensionSelected = (e) => {
@@ -222,7 +222,7 @@ var StorageMetric = new MetricStorage();
 			Query.deleteFactRelation(Dim.selected.name);
 			Dim.delete();
 		}
-	};
+	}
 
 	// selezione della gerarchia
 	app.handlerHierSelected = (e) => {
@@ -244,7 +244,7 @@ var StorageMetric = new MetricStorage();
 				table.toggleAttribute('data-searchable');
 			});
 		}
-	};
+	}
 
 	// selezione di un filtro già esistente, lo salvo nell'oggetto Query, come quando si salva un nuovo filtro dalla dialog
 	app.handlerFilterSelected = (e) => {
@@ -265,7 +265,7 @@ var StorageMetric = new MetricStorage();
 			// delete filter
 			Query.deleteFilter();
 		}
-	};
+	}
 
 	// selezione di una metrica già esistente, lo salvo nell'oggetto Query, come quando si salva un nuovo filtro dalla dialog
 	app.handlerMetricSelected = (e) => {
@@ -288,7 +288,7 @@ var StorageMetric = new MetricStorage();
 		} else {
 			// elimino la metrica
 		}
-	};
+	}
 
 	// selezione della metrica, apro la dialog per impostare la metrica
 	app.handlerSelectedMetricToSet = (e) => {
@@ -352,7 +352,7 @@ var StorageMetric = new MetricStorage();
 		}
 		app.dialogPopup = app.dialogMetric.querySelector('#dialog-popup');
 		app.dialogMetric.showModal();
-	};
+	}
 
 	// selezione della tabella nella sezione Column
 	app.openDialogTables = (e) => {
@@ -369,7 +369,7 @@ var StorageMetric = new MetricStorage();
 			table.toggleAttribute('data-searchable');
 		});
 		app.dialogTables.showModal();
-	};
+	}
 
 	app.selectColumn = (e) => {
 		console.log('e.currentTarget : ', e.currentTarget);
@@ -385,7 +385,7 @@ var StorageMetric = new MetricStorage();
 			document.getElementById('columnName').focus();
 			document.getElementById('columnAlias').value = "";
 		}
-	};
+	}
 
 	app.handlerTableSelected = (e) => {
 		const dimension = e.currentTarget.getAttribute('data-dimension-name');
@@ -411,7 +411,7 @@ var StorageMetric = new MetricStorage();
 				field.toggleAttribute('data-searchable');
 			});
 		}
-	};
+	}
 
 	// selezione di una tabella nella dialog-filter
 	app.handlerTableSelectedDialogFilter = (e) => {
@@ -441,7 +441,7 @@ var StorageMetric = new MetricStorage();
 		});
 		app.getFields();
 		e.currentTarget.toggleAttribute('selected');
-	};
+	}
 
 	// selezione della FACT nella sezione metric
 	app.handlerTableSelectedMetrics = (e) => {
@@ -462,7 +462,7 @@ var StorageMetric = new MetricStorage();
 				metric.toggleAttribute('data-searchable');
 			});
 		}
-	};
+	}
 
 	// selezione della tabella nello step Filter, visualizzo i filtri creati su questa tabella, recuperandoli dallo storage
 	app.openDialogFilters = (e) => {
@@ -496,7 +496,7 @@ var StorageMetric = new MetricStorage();
 		// });
 		app.dialogPopup = app.dialogFilter.querySelector('#dialog-popup');
 		app.dialogFilter.showModal();
-	};
+	}
 
 	// selezione del field nella dialogFilter, questo metodo farà partire la query per ottenere i campi distinti (in getDistinctValues())
 	app.handlerFilterFieldSelected = (e) => {
@@ -518,7 +518,7 @@ var StorageMetric = new MetricStorage();
 			textarea.value = Query.field;
 			textarea.focus();
 		}
-	};
+	}
 
   // carico elenco colonne dal DB da visualizzare nella dialogFilter
 	app.getFields = async () => {
@@ -571,21 +571,21 @@ var StorageMetric = new MetricStorage();
 			}
 		})
 		  .catch((err) => console.error(err));
-	};
+	}
 
 	app.checkRelations = (hier) => {
 		// recupero la prima tabella selezionata della gerarchia
 		console.log(+Query.tables.tableId);
 		// debugger;
 
-		for (const [k, table] of Object.entries(Dim.selected.hierarchies[hier].order)) {
+		for (const [k, order] of Object.entries(Dim.selected.hierarchies[hier].order)) {
 			// recupero la property 'join' (nella dimensione) dove la key è maggiore della tableId al momento selezionata (Quindi recupero tutte le hier inferiori)
 			if (+k >= +Query.tables.tableId) {
-				Query.from = table;
-				if (Dim.selected.hierarchies[hier].joins[table.split('.')[1]]) {
+				Query.from = order.table;
+				if (Dim.selected.hierarchies[hier].joins[order.table]) {
 					Query.joinId = +k;
 					// debugger;
-					Query.where = Dim.selected.hierarchies[hier].joins[table.split('.')[1]];
+					Query.where = Dim.selected.hierarchies[hier].joins[order.table];
 				}
 			}
 		}
@@ -675,7 +675,7 @@ var StorageMetric = new MetricStorage();
 			}*/
 		}
 		app.dialogTables.close();
-	};
+	}
 	
 	// salvataggio della metrica nel db
 	app.saveMetricDB = async (json) => {
@@ -701,7 +701,7 @@ var StorageMetric = new MetricStorage();
 			}
 		  })
 		  .catch((err) => console.error(err));
-	};
+	}
 
 	// tasto 'fatto' nella dialogMetric, salvo la metrica impostata
 	app.btnMetricDone.onclick = (e) => {
@@ -765,7 +765,7 @@ var StorageMetric = new MetricStorage();
 		// storage.save = metricObj;
 
 		app.dialogMetric.close();
-	};
+	}
 
 	// salvo il filtro nel DB, table : bi_filters
 	app.saveFilterDB = async (json) => {
@@ -791,7 +791,7 @@ var StorageMetric = new MetricStorage();
 			}
 		  })
 		  .catch((err) => console.error(err));
-	};
+	}
 
 	// salvataggio del filtro impostato nella dialog
 	app.btnFilterSave.onclick = (e) => {
@@ -834,7 +834,7 @@ var StorageMetric = new MetricStorage();
 		filterName.focus();
 		// pulisco la textarea
 		textarea.value = "";
-	};
+	}
 
 	app.btnFilterDone.onclick = () => {
 		// console.log(Query.filters);
@@ -862,7 +862,7 @@ var StorageMetric = new MetricStorage();
 		// verifico quali relazioni inserire in where e quindi anche in from
 		app.checkRelations(hier);
 		app.dialogFilter.close();
-	};
+	}
 
 	// recupero valori distinti per inserimento nella dialogFilter
 	app.getDistinctValues = async () => {
@@ -909,7 +909,7 @@ var StorageMetric = new MetricStorage();
 				}
 			})
 		.catch((err) => console.error(err));
-	};
+	}
 
 	// selezione di uno o più valori dalla lista dei valori della colonna in dialogFilter
 	app.handlerValueFilterSelected = (e) => {
@@ -917,7 +917,7 @@ var StorageMetric = new MetricStorage();
 		// aggiungo alla textarea il valore selezionato
 		textarea.value += e.currentTarget.getAttribute('label');
 		app.checkFilterForm();
-	};
+	}
 
 	// carico elenco Cubi su cui creare il report
 	app.getCubes = () => {
@@ -941,7 +941,7 @@ var StorageMetric = new MetricStorage();
 			li.onclick = app.handlerCubeSelected;
 		}
 		parent.appendChild(ul);
-	};
+	}
 
 	app.getDimensions = () => {
 		// elenco di tutte le dimensioni
@@ -973,7 +973,7 @@ var StorageMetric = new MetricStorage();
 			}); // forse index si deve sostituire con un dimensionId (che attualmente non viene creato quando si crea una dimensione)
 			parent.appendChild(ul);
 		}
-	};
+	}
 
 	app.getHierarchies = () => {
 		// lista di tutte le gerarchie, imposto un data-dimension-id/name sugli .element della lista gerarchie, in questo modo posso filtrarle quando seleziono le dimensioni nello step precedente
@@ -1009,7 +1009,7 @@ var StorageMetric = new MetricStorage();
 			}
 		  parent.appendChild(ul);
 		}
-	};
+	}
 
 	// popolamento della lista delle tabelle nella dialog-filter
 	app.getTablesInHierarchiesDialogFilter = () => {
@@ -1023,11 +1023,12 @@ var StorageMetric = new MetricStorage();
 			for (const hier in Dim.selected.hierarchies) {
 				for (const [key, value] of Object.entries(Dim.selected.hierarchies[hier]['order'])) {
 					// ciclo le tabelle presenti nella gerarchia
-					// console.log(key, value);
+					console.log(key, value);
 					const contentElement = app.tmplList.content.cloneNode(true);
 					const section = contentElement.querySelector('section[data-no-icon]');
 					const element = section.querySelector('.element');
 					const li = element.querySelector('li');
+					debugger;
 					section.setAttribute('data-label-search', value.split('.')[1]); // utilizzabile per la ricerca dalla input sopra
 					section.setAttribute('data-dimension-name', dimName); // utilizzabile dalla dimensione + gerarchia selezionata
 					section.setAttribute('data-hier-name', hier);
@@ -1043,7 +1044,7 @@ var StorageMetric = new MetricStorage();
 				parent.appendChild(ul);
 			}
 		}
-	};
+	}
 
 	app.getTablesInHierarchies = () => {
 		// lista di tutte le tabelle, incluse nelle dimensioni e di conseguenza, nelle gerarchie
@@ -1076,7 +1077,7 @@ var StorageMetric = new MetricStorage();
 				parent.appendChild(ul);
 			}
 		}
-	};
+	}
 
 	app.getColumnsInTable = () => {
 		// lista di tutte le colonne, incluse nelle dimensioni, property 'columns'
@@ -1119,7 +1120,7 @@ var StorageMetric = new MetricStorage();
 				}
 			}
 		}
-	};
+	}
 
 	// recupero elenco di tutti i filtri presenti nello storage, per ogni dimensione
 	app.getFiltersInFrom = () => {
@@ -1160,7 +1161,7 @@ var StorageMetric = new MetricStorage();
 				}
 			}
 		}
-	};
+	}
 
 	app.getTables = () => {
 		const content = app.tmplUlList.content.cloneNode(true);
@@ -1190,7 +1191,7 @@ var StorageMetric = new MetricStorage();
 			li.onclick = app.handlerTableSelectedMetrics;
 			parent.appendChild(ul);
 		}
-	};
+	}
 
 	// elenco di tutte le metriche impostate all'interno del cubo, queste sono le metriche che si possono impostare, quindi mettere la funzione (SUM, AVG, ecc...), il distinct e l'alias
 	app.getMetricsInCubes = () => {
@@ -1217,7 +1218,7 @@ var StorageMetric = new MetricStorage();
 				parent.appendChild(ul);
 			});
 		}
-	};
+	}
 
 	// recupero tutte le metriche esistenti dallo storage, per tutti i cubi. Queste sono le metriche che sono state già impostate e quindi si possono già utilizzare nel report che si sta creando
 	app.getMetrics = () => {
@@ -1242,7 +1243,7 @@ var StorageMetric = new MetricStorage();
 				parent.appendChild(ul);
 			}
 		}
-	};
+	}
 
 	app.getCubes();
 
@@ -1271,7 +1272,7 @@ var StorageMetric = new MetricStorage();
 		const filterName = document.getElementById('inputFilterName');
 		const filterFormula = document.getElementById('filterSQLFormula');
 		((filterName.value.length !== 0) && (filterFormula.value.length !== 0)) ? app.btnFilterSave.disabled = false : app.btnFilterSave.disabled = true;
-	};
+	}
 
 	// selezione di un operatore logica da inserire nella formula (AND, OR, NOT, ecc...)
 	app.handlerLogicalOperatorSelected = (e) => {
@@ -1283,7 +1284,7 @@ var StorageMetric = new MetricStorage();
 		span.className = 'formulaLogicalOperator';
 		span.innerText = e.target.getAttribute('label');
 		textarea.appendChild(span);
-	};
+	}
 	/* events */
 
 	app.checkSelection = () => {
@@ -1314,7 +1315,7 @@ var StorageMetric = new MetricStorage();
 		  // step 3
 		}
 		return true;
-	};
+	}
 
 	app.btnPreviousStep.onclick = () => Step.previous();
 
@@ -1322,14 +1323,14 @@ var StorageMetric = new MetricStorage();
 		// verifica selezioni cubo e dimensioni
 		// console.log('return check : ', app.checkSelection());
 		if (app.checkSelection()) Step.next();
-	};
+	}
 
 	// tasto completato nello step 4, // dialog per il salvataggio del nome del report
 	app.btnStepDone.onclick = (e) => {
 		app.dialogSaveReport.showModal();
 		// sulla dialog imposto la modalità di salvataggio tra process/report, se impostato su process salvo, dal tasto OK, il process del report, altrimenti salvo il report con tutte le sue opzioni
 		app.dialogSaveReport.setAttribute('mode', 'process');
-	};
+	}
 
 	// salvo il process nel DB
 	app.saveProcess = async () => {
@@ -1354,7 +1355,7 @@ var StorageMetric = new MetricStorage();
 			}
 		  })
 		  .catch((err) => console.error(err));
-	};
+	}
 
 	// salvo il report da processare
 	app.btnSaveReportDone.onclick = () => {
@@ -1383,13 +1384,13 @@ var StorageMetric = new MetricStorage();
 		ulReportsProcess.appendChild(element);
 		li.onclick = app.handlerReportToBeProcessed;
 		app.dialogSaveReport.close();
-	};
+	}
 
 	// visualizzo la lista dei report da processare
 	app.btnProcessReport.onclick = () => {
 		const listReportProcess = document.getElementById('reportProcessList');
 		listReportProcess.toggleAttribute('hidden');
-	};
+	}
 
 	document.addEventListener('input', (e) => {
 		// console.log('currentTarget : ', e.target);
@@ -1422,13 +1423,13 @@ var StorageMetric = new MetricStorage();
 
 	document.getElementById('columnName').oninput = (e) => {
 		(e.target.value.length === 0) ? app.btnSaveColumn.disabled = true : app.btnSaveColumn.disabled = false;
-	};
+	}
 
 	app.checkDialogMetric = () => {
 		const metricName = document.getElementById('metric-name').value;
 		const aliasMetric = document.getElementById('alias-metric').value;
 		(metricName.length !== 0 && aliasMetric.length !== 0) ? app.btnMetricDone.disabled = false : app.btnMetricDone.disabled = true;
-	};
+	}
 
 	document.getElementById('alias-metric').oninput = () => app.checkDialogMetric();
 
@@ -1444,7 +1445,7 @@ var StorageMetric = new MetricStorage();
 		e.path[1].querySelector('li[selected]').toggleAttribute('selected');
 		// console.log('e.target : ', e.target.toggleAttribute('selected'))
 		e.target.toggleAttribute('selected');
-	};
+	}
 
 	// 'Salva' nella dialogTables
 	app.btnSaveColumn.onclick = (e) => {
@@ -1457,7 +1458,7 @@ var StorageMetric = new MetricStorage();
 		// aggiungo la colonna selezionata a Query.groupBy
 		// Query.groupBy = {table : Query.table, field: Query.field, SQL: textarea};
 		document.getElementById('columnAlias').value = '';
-	};
+	}
 
 	app.btnMapping.onclick = () => location.href = '/mapping';
 

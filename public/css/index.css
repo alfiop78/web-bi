@@ -135,7 +135,7 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 .card.table .cardTable > .title{grid-area: title;height: fit-content;background: tan;border-top-left-radius: 4px;
   border-top-right-radius: 4px;display: flex;align-items: flex-start;justify-content: space-between;}
 
-.card.table .cardTable > .title h6{padding: 8px 8px 16px 8px; margin: 0;font-size: .75rem;width: 100%;}
+.card.table .cardTable > .title h6{padding: 8px 8px 16px 8px; margin: 0;font-size: .85rem; width: 100%;}
 .card.table .cardTable > .title h6:hover{cursor: grab;}
 .card.table .cardTable > .title > .title-alias{width: 100%;padding: 0px 8px;}
 
