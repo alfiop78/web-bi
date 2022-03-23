@@ -1119,7 +1119,7 @@ var Hier = new Hierarchy();
 		// ordine gerarchico (per stabilire quale tabella è da associare al cubo) questo dato viene preso dalla struttura di destra
 		let hierarchyOrder = {}, hierarchyOrderTables = {};
 		Array.from(document.querySelectorAll('section[data-hier-id][data-active] .hier.table')).forEach((table, i) => {
-			hierarchyOrder[i] = {table : table.getAttribute('label'), alias : table.getAttribute('data-alias')};
+			hierarchyOrder[i] = {schema : table.getAttribute('data-schema'), table : table.getAttribute('label'), alias : table.getAttribute('data-alias')};
 			// hierarchyOrder[i] = `${table.getAttribute('data-schema')}.${table.getAttribute('label')}`;
 		});
 		const comment = document.getElementById('textarea-hierarchies-comment').value;

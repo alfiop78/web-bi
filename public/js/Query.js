@@ -2,6 +2,7 @@ class Queries {
 	#select;
 	#obj;
 	#table;
+	#tableAlias;
 	#schema;
 	#column;
 	#firstTable; // la prima tabella della gerarchia, da qui posso ottenere la from e la join
@@ -22,6 +23,10 @@ class Queries {
 	set table(value) {this.#table = value;}
 
 	get table() {return this.#table;}
+
+	set tableAlias(value) {this.#tableAlias = value;}
+
+	get tableAlias() {return this.#tableAlias;}
 
 	set schema(value) {this.#schema = value;}
 
