@@ -1028,6 +1028,7 @@ var Hier = new Hierarchy();
 		document.getElementById('tableSearch').focus();
 	}
 
+	// salvataggio del cubo
 	app.saveCube = async (json) => {
         console.log(json);
         console.log(JSON.stringify(json));
@@ -1173,8 +1174,10 @@ var Hier = new Hierarchy();
 		cube.comment = document.getElementById('textarea-cube-comment').value;
 
 		cube.FACT = document.querySelector('.card.table[fact]').getAttribute('label');
-		cube.schema = document.querySelector('.card.table[fact]').getAttribute('data-schema');
+		// TODO: recupero l'alias della FACT
+		cube.alias = document.querySelector('.card.table[fact] .cardTable').getAttribute('data-alias');
 		debugger;
+		cube.schema = document.querySelector('.card.table[fact]').getAttribute('data-schema');
 		// Creo il cubeId basandomi sui cubi già creati in Storage, il cubeId lo associo al cubo che sto per andare a salvare.
 		cube.id = StorageCube.getIdAvailable();
 		console.log(cube.id);

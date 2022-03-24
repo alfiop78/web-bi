@@ -5,6 +5,7 @@ var StorageCube = new CubeStorage();
 var StorageProcess = new ProcessStorage();
 var StorageFilter = new FilterStorage();
 var StorageMetric = new MetricStorage();
+// TODO: 24.03.2022 impostare gli alias di tabella nelle dialog 'columns/filter' altrimenti una tabella in più gerarchie non posso distinguerla
 
 (() => {
 	App.init();
@@ -246,21 +247,20 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
-	// selezione di un filtro già esistente, lo salvo nell'oggetto Query, come quando si salva un nuovo filtro dalla dialog
+	// selezione di un filtro già presente, lo salvo nell'oggetto Query
 	app.handlerFilterSelected = (e) => {
 		StorageFilter.filter = e.currentTarget.getAttribute('label');
-
 		e.currentTarget.toggleAttribute('selected');
 		Query.filterName = StorageFilter.filter.name;
 		if (e.currentTarget.hasAttribute('selected')) {
 			// recupero dallo storage il filtro selezionato
 			console.log(StorageFilter.filter);
-			console.log('Query.table : ', Query.table);
-			console.log('Query.tableId : ', Query.tableId);
-			Query.addTables();
+			// console.log('Query.table : ', Query.table);
+			// console.log('Query.tableId : ', Query.tableId);
+			Query.addTables(); // imposto la firstTable
 			console.log(StorageFilter.filter.formula);
-			debugger;
-			Query.filters = StorageFilter.filter.formula;
+			// nel salvare il filtro nel report attuale devo impostarne anche l'alias della tabella selezionata nella dialog
+			Query.filters = `${Query.tableAlias}.${StorageFilter.filter.formula}`;
 		} else {
 			// delete filter
 			Query.deleteFilter();
@@ -274,10 +274,10 @@ var StorageMetric = new MetricStorage();
 		if (e.currentTarget.hasAttribute('selected')) {
 			// aggiungo la metrica
 			// recupero dallo StorageMetric la metrica selezionata
-			debugger;
 			console.log(StorageMetric.metric);
 			console.log(StorageMetric.metric.name);
 			console.log(StorageMetric.metric.formula);
+			debugger;
 			Query.metricName = StorageMetric.metric.name;
 			// se la metrica contiene un filtro bisogna aggiungerla a Query.filteredMetrics altrimenti a Query.metrics
 			if (StorageMetric.metric.formula[StorageMetric.metric.name].hasOwnProperty('filters')) {
@@ -295,6 +295,7 @@ var StorageMetric = new MetricStorage();
 		Query.field = e.currentTarget.getAttribute('label');
 		app.dialogMetric.querySelector('h4 > span').innerHTML = Query.field;
 		app.dialogMetric.querySelector('section').setAttribute('data-table-selected', e.currentTarget.getAttribute('data-table-name'));
+		app.dialogMetric.querySelector('section').setAttribute('data-table-selected-alias', e.currentTarget.getAttribute('data-table-alias'));
 
 		// ul.querySelectorAll('.element').forEach((el) => {el.remove();});
 		// carico elenco filtri presenti su tutte le tabelle che fanno parte di tutte le dimensioni selezionate
@@ -310,8 +311,8 @@ var StorageMetric = new MetricStorage();
 				Dim.selected = dim;
 				for (const [hier, hierValue] of Object.entries(Dim.selected.hierarchies)) {
 					console.log('hier : ', hier, hierValue.order);
-					for (const [tableKey, table] of Object.entries(hierValue.order)) {
-						const filters = StorageFilter.tableFilters(table.split('.')[1]); // split per il nome dello schema, qui prendo il nome della tabella
+					for (const [tableKey, order] of Object.entries(hierValue.order)) {
+						const filters = StorageFilter.tableFilters(order.table); // split per il nome dello schema, qui prendo il nome della tabella
 						filters.forEach((filter) => {
 							const contentElement = app.tmplList.content.cloneNode(true);
 							const section = contentElement.querySelector('section[data-no-icon]');
@@ -319,7 +320,7 @@ var StorageMetric = new MetricStorage();
 							const li = element.querySelector('li');
 							section.hidden = false;
 							section.setAttribute('data-label-search', filter.name);
-							section.setAttribute('data-table-name', table);
+							section.setAttribute('data-table-name', order.table);
 							section.setAttribute('data-dimension-name', dim);
 							section.setAttribute('data-hier-name', hier);
 							section.setAttribute('data-searchable', true);
@@ -450,7 +451,8 @@ var StorageMetric = new MetricStorage();
 	app.handlerTableSelectedMetrics = (e) => {
 		const fact = e.currentTarget.getAttribute('data-fact');
 		const schema = e.currentTarget.getAttribute('data-schema');
-		Query.from = `${schema}.${fact}`;
+		Query.tableAlias = e.currentTarget.getAttribute('data-table-alias');
+		Query.from = `${schema}.${fact} AS ${Query.tableAlias}`;
 		debugger;
 		e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('selected')) {
@@ -584,15 +586,15 @@ var StorageMetric = new MetricStorage();
 		for (const [k, order] of Object.entries(Dim.selected.hierarchies[hier].order)) {
 			// recupero la property 'join' (nella dimensione) dove la key è maggiore della tableId al momento selezionata (Quindi recupero tutte le hier inferiori)
 			if (+k >= +Query.tables.tableId) {
-				Query.from = order.table;
-				if (Dim.selected.hierarchies[hier].joins[order.table]) {
+				Query.from = `${order.schema}.${order.table} AS ${order.alias}`;
+				if (Dim.selected.hierarchies[hier].joins[order.alias]) {
 					Query.joinId = +k;
 					// debugger;
-					Query.where = Dim.selected.hierarchies[hier].joins[order.table];
+					Query.where = Dim.selected.hierarchies[hier].joins[order.alias];
 				}
 			}
 		}
-	};
+	}
 
 	// "Fatto" nella dialog Tables
 	app.btnColumnDone.onclick = () => {
@@ -617,66 +619,6 @@ var StorageMetric = new MetricStorage();
 
 		// verifico quali relazioni inserire in where e quindi anche in from
 		app.checkRelations(hier);
-		app.dialogTables.close();
-		return;
-
-		// verifico se l'object _select ha elementi selezionati (per una determinata tabella). _select avrà sempre almeno 1 elemento selezionato, si tratta della primaryKey
-		// ... quindi, oltre a verificare se ci sono colonne selezionate, devo verificare anche se ce n'è una sola, quella è la primaryKey
-
-		if (Query.select[Query.table]) {
-			debugger;
-			// TODO: L'aggiunta della primaryKey NON deve essere impostata per ogni tabella...10.10.2021 in corso di valutazione. Probabilmente deve essere impostato solo sulla prima tabella della gerarchia
-			// Ci sono colonne selezionate per questa tabella, quindi aggiungo anche la primaryKey (contrassegnata dall'attr data-key)
-			/*const fieldList = document.getElementById('table-fieldList'); // contiene la ul con i nomi dei field
-			// cerco la <li> che ha data-key='PRI'
-			Query.field = fieldList.querySelector('section[data-table-name="'+Query.table+'"] li[data-key="PRI"]').getAttribute('label');
-			Query.select = {SQLFormat: null, alias : "pri_"+Query.table+"_"+Query.field};
-			Query.groupBy = {SQLFormat: null};*/
-			for (const [k, table] of Object.entries(Dim.selected.hierarchies[hier].order)) {
-				// recupero la property 'join' (nella dimensione) dove la key è maggiore della tableId al momento selezionata (Quindi recupero tutte le hier inferiori)
-				if (+k >= Query.tableId) {
-					Query.from = table;
-					if (Dim.selected.join[table]) {
-						Query.joinId = +k;
-						Query.where = Dim.selected.join[table];
-					}
-				}
-			}
-			// liTable.setAttribute('data-columns', true);
-			list.querySelector('section[data-label-search="' + Query.table + '"][data-hier-name="' + hier + '"] #columns-icon-' + hier + "-" + Query.table).setAttribute('selected', true);
-		} else {
-			debugger;
-			// non ci sono colonne impostati/selezionati per questa tabella, oppure c'è solo l'id impostato (in automatico) per questa tabella. 
-			// La elimino da Query.from e dalla Query.join, deseleziono con l'attr 'selected' in 'fieldList-tables'
-			// se l'elemento <li> con il nome della tabella NON contiene l'attr data-filters (quindi su questa tabella non è stato impostata un filtro) la posso eliminare dalla _from e dalla _join
-			/*list.querySelector('section[data-label-search="'+Query.table+'"][data-hier-name="'+hier+'"] #columns-icon-'+hier+"-"+Query.table).removeAttribute('selected');
-
-			// se l'icona filter-icon NON ha l'attributo 'selected' non è stato impostato alcun filtro su questa tabella, quindi posso rimuoverla dalla _from/_join
-			// controllo tutte le tabelle di gerarchia inferiore
-			for ( const [k, table] of Object.entries(Dim.selected.hierarchies[hier].order)) {
-			// elimino tutte le tabelle appartenenti a gerarchie superiori alla tabella selezionata
-			if (+k <= Query.tableId) {
-			  Query.deleteFrom(table);
-			  if (Dim.selected.join[table]) {
-				Query.joinId = +k;
-				Query.deleteWhere();
-			  }
-			}
-			// vado a controllare tutte le tabelle di gerarchia inferiore a quella selezionata, controllo se sono impostati filtri o colonne
-			const filterIcon = list.querySelector('section[data-label-search="'+table+'"][data-hier-name="'+hier+'"] #filter-icon-'+hier+"-"+table);
-			// console.log('filterIcon : ', filterIcon);
-			const columnIcon = list.querySelector('section[data-label-search="'+table+'"][data-hier-name="'+hier+'"] #columns-icon-'+hier+"-"+table);
-			// console.log('filterIcon : ', columnIcon);
-			if (!filterIcon.hasAttribute('selected') && !columnIcon.hasAttribute('selected')) {
-			  // non ha nè filtri impostati nè colonne impostate, quindi la elimino dalla _from/_join
-			  Query.deleteFrom(table);
-			  if (Dim.selected.join[table]) {
-				Query.joinId = +k;
-				Query.deleteWhere();
-			  }
-			}
-			}*/
-		}
 		app.dialogTables.close();
 	}
 	
@@ -713,11 +655,11 @@ var StorageMetric = new MetricStorage();
 		const SQLFunction = document.querySelector('#sql-aggregation-list > li[selected]').getAttribute('label');
 		const distinctOption = document.getElementById('checkbox-distinct').checked;
 		Query.table = app.dialogMetric.querySelector('section').getAttribute('data-table-selected');
+		// Query.tableAlias = app.dialogMetric.querySelector('section').getAttribute('data-table-selected-alias');
 		Query.metricName = name;
 		console.log(Query.metricName);
 		//console.log(Query.table);
 		// verifico se ci sono filtri da associare a questa metrica
-		debugger;
 		let associatedFilters = {};
 		app.dialogMetric.querySelectorAll('#existsFilter_Metric > ul > section li[selected]').forEach((filterSelected) => {
 			// set il nome del filtro
@@ -728,31 +670,21 @@ var StorageMetric = new MetricStorage();
 			// associatedFilters[filterSelected.getAttribute('label')] = StorageFilter.filter;
 			associatedFilters[StorageFilter.filter.name] = StorageFilter.filter;
 		});
-		// ****************************
-		/*const ul = app.dialogMetric.querySelector('#existsFilter_Metric > ul');
-		console.log('ul con filtri all\'interno della metrica : ', ul);
-		let associatedFilters = {};
-		// const filterStorage = new FilterStorage()
-		ul.querySelectorAll('section li[selected]').forEach((filter) => {
-		  // associatedFilters.push(filter.getAttribute('label'));
-		  // set il nome del filtro
-		  StorageFilter.filter = filter.getAttribute('label');
-		  // recupero dallo storage il contenuto del filtro per inserirlo in un object (quest'ultimo verrà inserito nella metrica)
-		  associatedFilters[filter.getAttribute('label')] = StorageFilter.filter;
-		});*/
-		// ******************************
 
 		let metricObj = {};
 		// se associatedFilters > 0 sarà una metrica filtrata, altrimenti una metrica a livello di report (senza nessun filtro all'interno della metrica)
 		if (Object.keys(associatedFilters).length > 0) {
 			// metrica filtrata
-			console.log('metrica filtrata');
+			console.info('metrica filtrata');
+			debugger;
 			Query.filteredMetrics = { SQLFunction, 'table': Query.table, 'field': Query.field, name, 'distinct': distinctOption, alias, 'filters': associatedFilters };
 
 			console.log(Query.filteredMetrics);
 			metricObj = { 'type': 'METRIC', name, 'formula': Query.filteredMetrics };
 		} else {
 			// metrica
+			console.info('metrica non filtrata');
+			debugger;
 			Query.metrics = { SQLFunction, 'table': Query.table, 'field': Query.field, name, 'distinct': distinctOption, alias };
 			// all'interno di 'formula' devo vedere se ci posso mettere l'object appena salvato in Query.metrics
 			metricObj = { 'type': 'METRIC', name, 'formula': Query.metrics };
@@ -799,7 +731,6 @@ var StorageMetric = new MetricStorage();
 	// salvataggio del filtro impostato nella dialog
 	app.btnFilterSave.onclick = (e) => {
 		console.log(Query.table);
-		console.log(Query.tableAlias);
 		debugger;
 		const hier = app.dialogFilter.querySelector('section').getAttribute('data-hier-name');
 		const dimension = app.dialogFilter.querySelector('section').getAttribute('data-dimension-name');
@@ -810,11 +741,11 @@ var StorageMetric = new MetricStorage();
 		Query.filterName = filterName.value;
 
 		// const formula = `${Query.table}.${textarea.value}`;
-		const formula = `${Query.tableAlias}.${textarea.value}`;
-		console.log(formula);
-		StorageFilter.save = { 'type': 'FILTER', 'name': filterName.value, /*'schema' : Query.schema,*/ 'table': Query.table, formula };
+		// const formula = textarea.value;
+		// console.log(formula);
+		StorageFilter.save = { 'type': 'FILTER', 'name': filterName.value, /*'schema' : Query.schema,*/ 'table': Query.table, formula : textarea.value };
 		// salvataggio di un filtro nel DB
-		app.saveFilterDB({ 'type': 'FILTER', 'name': filterName.value, /*'schema' : Query.schema,*/ 'table': Query.table, formula });
+		app.saveFilterDB({ 'type': 'FILTER', 'name': filterName.value, /*'schema' : Query.schema,*/ 'table': Query.table, formula : textarea.value });
 		debugger;
 		const existFilterRef = app.dialogFilter.querySelector('#existFilters');
 		const ul = existFilterRef.querySelector("ul[data-id='fields-filter']");
@@ -1067,6 +998,7 @@ var StorageMetric = new MetricStorage();
 			for (const hier in Dim.selected.hierarchies) {
 				for (const [key, order] of Object.entries(Dim.selected.hierarchies[hier]['order'])) {
 					// ciclo le tabelle presenti nella gerarchia
+					// debugger;
 					// console.log(key, order);
 					const contentElement = app.tmplList.content.cloneNode(true);
 					const section = contentElement.querySelector('section[data-no-icon]');
@@ -1079,6 +1011,7 @@ var StorageMetric = new MetricStorage();
 					li.setAttribute('data-table-id', key);
 					li.setAttribute('label', order.table);
 					li.setAttribute('data-table-alias', order.alias);
+					li.setAttribute('data-schema', order.schema);
 					li.setAttribute('data-dimension-name', dimName);
 					li.setAttribute('data-hier-name', hier);
 					li.onclick = app.handlerTableSelected;
@@ -1175,6 +1108,7 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
+	// popolamento della/e tabella FACT nello step 3 (metrics)
 	app.getTables = () => {
 		const content = app.tmplUlList.content.cloneNode(true);
 		const ul = content.querySelector("ul[data-id='fields-tables']");
@@ -1198,6 +1132,7 @@ var StorageMetric = new MetricStorage();
 			li.innerText = cubeValue.FACT;
 			li.setAttribute('data-fact', cubeValue.FACT);
 			li.setAttribute('data-schema', cubeValue.schema);
+			li.setAttribute('data-table-alias', cubeValue.alias);
 			li.setAttribute('label', cubeValue.FACT);
 			ul.appendChild(section);
 			li.onclick = app.handlerTableSelectedMetrics;
@@ -1225,6 +1160,7 @@ var StorageMetric = new MetricStorage();
 				li.innerText = metric;
 				li.setAttribute('label', metric);
 				li.setAttribute('data-table-name', cubeValue.FACT);
+				li.setAttribute('data-table-alias', cubeValue.alias);
 				ul.appendChild(section);
 				li.onclick = app.handlerSelectedMetricToSet; // metrica da impostare
 				parent.appendChild(ul);
@@ -1248,6 +1184,7 @@ var StorageMetric = new MetricStorage();
 				const li = element.querySelector('li');
 				section.setAttribute('data-label-search', metricName); // questo attr consente la ricerca dalla input sopra
 				section.setAttribute('data-fact', cubeValue.FACT); // questo attr consente la ricerca dalla selezione del cubo
+				section.setAttribute('data-table-alias', cubeValue.alias);
 				li.innerText = metricName;
 				li.setAttribute('label', metricName);
 				ul.appendChild(section);

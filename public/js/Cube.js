@@ -1,6 +1,7 @@
 class Cube {
 	#schema;
 	#comment;
+	#alias;
 	constructor() {
 		this._cube = {};
 		this._metrics = {}; // contiene gli oggetti metriche
@@ -58,6 +59,7 @@ class Cube {
 	get fieldSelected() {return this._field;}
 
 	set metrics(field) {
+		debugger;
 		// TODO: da rivedere, utilizzare la stessa logica utilizzata in dimension.columns() per aggiungere/rimuovere la field selezionata
 		if (!this._metrics.hasOwnProperty(this._tableName)) {this._arrMetrics = [];}
 
@@ -73,6 +75,10 @@ class Cube {
 
 	get FACT() {return this._fact;}
 
+	set alias(value) {this.#alias = value;}
+
+	get alias() {return this.#alias;}
+
 	set schema(value) {this.#schema = value;}
 
 	get schema() {return this.#schema;}
@@ -85,6 +91,7 @@ class Cube {
 		// this._cube.relations = this._join; // questa deve essere salvata all'interno della dimensione, non nel cubo
 		this._cube.FACT = this._fact;
 		this._cube.schema = this.#schema;
+		this._cube.alias = this.#alias;
 		this._cube.id = this._id;
 		this._cube.associatedDimensions = this._associatedDimension;
 	}

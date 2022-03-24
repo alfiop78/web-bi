@@ -29,15 +29,9 @@ class Cube {
 			/* var_dump($key); // il nome dato alla colonna */
 			/* print_r($object); // contiene l'object {table : tabella, field: campo, alias : alias, SQL : formulSQL} */
 			/* var_dump($object->table); */
-			$fieldList[] = "{$object->table}.{$object->field} AS '{$object->alias}'";
-			/* $fieldList[] = "{$object->table}.{$object->field} AS `{$object->alias}`"; mysql */
+			$fieldList[] = "{$object->tableAlias}.{$object->field} AS '{$object->alias}'";
+			// $fieldList[] = "{$object->table}.{$object->field} AS '{$object->alias}'";
 			$this->_columns[] = $object->alias; // questo viene utilizzato nella clausola ON della LEFT JOIN
-			/*foreach ($object as $key => $value) {
-				// var_dump($key);
-				// var_dump($value);
-				$fieldList[] = $param->table.".".$field." AS '".$param->alias."'";
-				$this->_columns[] = $param->alias;
-			}*/
 		}
 		$this->_select .= implode(", ", $fieldList);
 		/* var_dump($this->_select); */
@@ -96,9 +90,8 @@ class Cube {
 		//var_dump($metrics);
 		foreach ($metrics as $metric) {
 			// var_dump($metric);
-			//$metricsList[] = $metric->SQLFunction."(".$metric->table.".".$metric->field.") AS '".$metric->alias."'";
-			$metricsList[] = "{$metric->SQLFunction}({$metric->table}.{$metric->field}) AS '{$metric->alias}'";
-			/* $metricsList[] = "{$metric->SQLFunction}({$metric->table}.{$metric->field}) AS `{$metric->alias}`"; mysql*/
+			$metricsList[] = "{$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}) AS '{$metric->alias}'";
+			// $metricsList[] = "{$metric->SQLFunction}({$metric->table}.{$metric->field}) AS '{$metric->alias}'";
 		}
 		$this->_metrics = implode(", ", $metricsList);
 		// var_dump($this->_metrics);
@@ -112,7 +105,8 @@ class Cube {
 			/* var_dump($key); // il nome dato alla colonna */
 			/* print_r($object); // contiene l'object {table : tabella, field: campo, alias : alias, SQL : formulSQL} */
 			/* var_dump($object->table); */
-			$fieldList[] = "{$object->table}.{$object->field}";
+			// $fieldList[] = "{$object->table}.{$object->field}";
+			$fieldList[] = "{$object->tableAlias}.{$object->field}";
 		}
 		$this->_groupBy .= implode(", ", $fieldList);
 		/* var_dump($this->_groupBy); */

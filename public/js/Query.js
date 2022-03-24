@@ -184,18 +184,11 @@ class Queries {
 	get metricName() {return this._metricName;}
 
 	set metrics(object) {
-		debugger;
 		// object = {sqlFunction: "SUM", field: "NettoRiga", metricName: "netto riga", distinct: false, alias: "Venduto"}
+		object.tableAlias = this.tableAlias;
 		this._metrics[this._metricName] = object;
 		console.log('metrics : ', this._metrics);
-		// NOTE: object metric da salvare in storage
-		    /*matricName: 
-				type: "METRIC"
-				name: "n"
-				formula: {
-					SQLFunction: "SUM", table: "DocVenditaDettaglio", field: "NettoRiga", distinct: false, alias: "netto"
-					}
-		    */
+		debugger;
 	}
 
 	get metrics() {return this._metrics;}
@@ -246,6 +239,8 @@ class Queries {
 		//  al posto del processId voglio utilizzare il nome del report legato alla FX_
 		this._reportProcess['name'] = name;
 		this._reportProcess['type'] = 'PROCESS';
+		console.info(this._reportProcess);
+		debugger;
 
 		window.localStorage.setItem(name, JSON.stringify(this._reportProcess));
         console.log(name+' salvato nello storage');
