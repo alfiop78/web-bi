@@ -112,6 +112,9 @@ class Cube {
 			case 'relations':
 				msg = 'Selezionare le colonne che saranno messe in relazione';
 				break;
+			case 'hier-order':
+				msg = 'Selezionare le tabelle nell\'ordine gerarchico';
+				break;
 			default:
 				break;
 		}

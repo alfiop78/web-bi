@@ -69,8 +69,8 @@ var Hier = new Hierarchy();
 
 	// utilizzato per lo spostamento all'interno del drop-zone (card già droppata)
 	app.dragStart = (e) => {
-        console.log('dragStart : ', e.target);
-        console.log('dragStart : ', e.target.localName);
+        // console.log('dragStart : ', e.target);
+        // console.log('dragStart : ', e.target.localName);
 		// mousedown da utilizzare per lo spostamento dell'elemento
 		// debugger;
 		if (e.target.localName === 'h6') {
@@ -230,6 +230,12 @@ var Hier = new Hierarchy();
 		cardLayout.querySelector('small').innerHTML = `AS ${card.getAttribute('label')}_${time.substring(time.length - 3)}`;
 		content.querySelector('.cardTable').setAttribute('data-alias', `${card.getAttribute('label')}_${time.substring(time.length - 3)}`);
 		card.appendChild(cardLayout);
+		// imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone
+		const hierNumber = app.dropZone.querySelectorAll('.card.table').length + 1;
+		card.querySelector('.hierarchy-order').innerText = hierNumber;
+		card.querySelector('.hierarchy-order').setAttribute('data-value', hierNumber);
+		card.querySelector('i[hier-order-plus]').setAttribute('data-value', hierNumber);
+		card.querySelector('i[hier-order-minus]').setAttribute('data-value', hierNumber);
 		app.dropZone.appendChild(card);
 
 		// tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
@@ -265,6 +271,8 @@ var Hier = new Hierarchy();
 		card.querySelector('i[join]').onclick = app.handlerAddJoin;
 		card.querySelector('i[metrics]').onclick = app.handlerAddMetric;
 		card.querySelector('i[columns]').onclick = app.handlerAddColumns;
+		card.querySelector('i[hier-order-plus]').onclick = app.handlerHierarchyOrder;
+		card.querySelector('i[hier-order-minus]').onclick = app.handlerHierarchyOrder;
 	}
 
 	app.hierStruct = (card) => {
@@ -278,7 +286,8 @@ var Hier = new Hierarchy();
 			const btnSaveHierarchy = content.querySelector("button[data-id='hierarchySave']");
 			h6.innerHTML = cube.card.tableName;
 			parent.appendChild(sectionDataHier);
-			const divHier = sectionDataHier.querySelector('div');
+			const divHier = sectionDataHier.querySelector('div[data-hier-id]');
+			// const divHierLastTable = sectionDataHier.querySelector('div[data-hier-last-table]');
 			// aggiungo la tabella al div all'interno di sectionDataHier
 			const tmplTable = document.getElementById('tmpl-hier-table');
 			const tmplContentTable = tmplTable.content.cloneNode(true);
@@ -287,6 +296,7 @@ var Hier = new Hierarchy();
 			divTable.setAttribute('data-schema', card.getAttribute('data-schema'));
 			divTable.setAttribute('data-alias', cube.card.ref.getAttribute('data-alias'));
 			divTable.setAttribute('label', cube.card.tableName);
+			// divHierLastTable.appendChild(divTable);
 			divHier.appendChild(divTable);
 			btnSaveHierarchy.addEventListener('click', app.btnSaveHierarchy);
 		} else {
@@ -300,7 +310,6 @@ var Hier = new Hierarchy();
 			divTable.setAttribute('data-alias', cube.card.ref.getAttribute('data-alias'));
 			divTable.setAttribute('label', cube.card.tableName);
 			parent.appendChild(divTable);
-
 		}
 	}
 
@@ -976,6 +985,23 @@ var Hier = new Hierarchy();
         // app.handlerGuide();
     }
 
+    // ordine gerarchico, livello superiore
+    app.handlerHierarchyOrder = (e) => {
+    	console.log(e.target);
+    	console.log(cube.activeCard.ref);
+    	debugger;
+    	let value = +e.target.getAttribute('data-value');
+    	if (e.target.hasAttribute('hier-order-plus')) {
+    		value++;
+    		cube.activeCard.ref.querySelector(':root + i[hier-order-minus]').setAttribute('data-value', value);
+    	} else {
+    		value--;
+    		cube.activeCard.ref.querySelector('+ i[hier-order-plus]').setAttribute('data-value', value);
+    	}
+    	e.target.setAttribute('data-value', value);
+    	cube.activeCard.ref.querySelector('.hierarchy-order').innerText = value;
+    }
+
 	app.getDimensions();
 
     app.getCubes();
@@ -1004,7 +1030,6 @@ var Hier = new Hierarchy();
 
 	// open dialog salva gerarchia
 	app.btnSaveHierarchy = (e) => {
-		debugger;
 		if (e.target.classList.contains('md-inactive')) return;
 		// salvo la gerarchia che andrà inserita in dimension
 		app.dialogHierarchyName.showModal();
@@ -1125,12 +1150,13 @@ var Hier = new Hierarchy();
 		});
 		const comment = document.getElementById('textarea-hierarchies-comment').value;
 		// debugger;
-		let from = [], tablesFrom = [];
+		let from = [];
+		// let tablesFrom = [];
 		let lastTables = {};
 		document.querySelectorAll('.cardTable').forEach((card) => {
 			if (card.getAttribute('name')) {
 				from.push(`${card.getAttribute('data-schema')}.${card.getAttribute('name')} AS ${card.getAttribute('data-alias')}`);
-				tablesFrom.push(card.getAttribute('name'));
+				// tablesFrom.push(card.getAttribute('name'));
 				lastTables = {
 					alias : card.getAttribute('data-alias'),
 					schema : card.getAttribute('data-schema'),
@@ -1138,11 +1164,9 @@ var Hier = new Hierarchy();
 				};
 			}
 		});
-		Hier.hier = {title : hierTitle, hierarchyOrder, comment, from, tablesFrom};
+		Hier.hier = {title : hierTitle, hierarchyOrder, comment, from};
 		// la gerarchia creata la salvo nell'oggetto Dim, della classe Dimension, dove andrò a salvare, alla fine, tutta la dimensione
 		Dim.hier = Hier.hier;
-		// Dim.hier = Hier.hierarchies;
-		debugger;
 		Dim.lastTableHierarchy = lastTables;
 		// dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
 		app.dialogHierarchyName.close();
@@ -1153,14 +1177,35 @@ var Hier = new Hierarchy();
 	}
 
 	app.btnHierarchyNew.onclick = (e) => {
-		// ripulisco la drop-zone per avere la possibilità di inserire altre gerarchie
-		// recupero tutte le .card.table presenti nella drop-zone per eliminarle
-		app.dropZone.querySelectorAll('.card.table').forEach( card => card.remove());
-		// se la dropzone ha un solo elemento, cioè lo span, allora rimuovo la class dropped per ripristinare lo stato iniziale
-		if (app.dropZone.childElementCount === 1) app.dropZone.classList.remove('dropped');
-		// riduco il section[data-active] relativo alla struttura gerarchica attualmente attiva
-		document.querySelector('section[data-active]').removeAttribute('data-active');
-		// document.querySelectorAll('#hierTables > div').forEach( table => table.remove());
+		/* se è presente più di una tabella, nella gerarchia, l'ultima non la elimino.
+		* Questo perchè, l'ultima tabella, sarà messa in relazione anche con le altre gerarchie che verranno create
+		*/
+		console.log('numero tabelle presenti nella gerarchia : ', app.dropZone.querySelectorAll('.card.table').length);
+		// numero tabelle presenti nella gerarchia corrente
+		if (app.dropZone.querySelectorAll('.card.table').length > 1) {
+			// sono presenti più tabelle, l'ultima non la elimino
+			app.dropZone.querySelectorAll('.card.table:not(:last-child)').forEach( card => card.remove());
+		} else {
+			// ripulisco la drop-zone per avere la possibilità di inserire altre gerarchie
+			// recupero tutte le .card.table presenti nella drop-zone per eliminarle
+			app.dropZone.querySelectorAll('.card.table').forEach( card => card.remove());
+			// se la dropzone ha un solo elemento, cioè lo span, allora rimuovo la class dropped per ripristinare lo stato iniziale
+			if (app.dropZone.childElementCount === 1) app.dropZone.classList.remove('dropped');
+			// riduco il section[data-active] relativo alla struttura gerarchica attualmente attiva (sulla destra)
+			document.querySelector('section[data-active]').removeAttribute('data-active');
+			// document.querySelectorAll('#hierTables > div').forEach( table => table.remove());
+		}
+		// TODO: prima di creare la nuova struttura sulla destra, rimuovo l'attr [data-active] dalla gerarchia attuale
+		document.querySelector("section[data-id='hierarchies'][data-active]").removeAttribute('data-active');
+		// TODO: creo una nuova struttura dove andranno inserite le tabelle della nuova gerarchia
+		const parent = document.getElementById('hierarchiesContainer');
+		const tmpl = document.getElementById('tmpl-hierarchies');
+		const content = tmpl.content.cloneNode(true);
+		const sectionDataHier = content.querySelector('section[data-hier-id]');
+		const h6 = content.querySelector('h6');
+		const btnSaveHierarchy = content.querySelector("button[data-id='hierarchySave']");
+		parent.appendChild(sectionDataHier);
+		btnSaveHierarchy.addEventListener('click', app.btnSaveHierarchy);
 		Hier = new Hierarchy();
 	}
 
@@ -1241,6 +1286,7 @@ var Hier = new Hierarchy();
 
 		delete Dim.dimension;
 	}
+
 
 	// NOTE: esempio di utilizzo di MutationObserver
 	const body = document.getElementById('body');
