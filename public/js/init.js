@@ -236,6 +236,7 @@ var Hier = new Hierarchy();
 		card.querySelector('.hierarchy-order').setAttribute('data-value', hierNumber);
 		card.querySelector('i[hier-order-plus]').setAttribute('data-value', hierNumber);
 		card.querySelector('i[hier-order-minus]').setAttribute('data-value', hierNumber);
+		card.querySelector('.cardTable').setAttribute('data-value', hierNumber);
 		app.dropZone.appendChild(card);
 
 		// tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
@@ -987,19 +988,26 @@ var Hier = new Hierarchy();
 
     // ordine gerarchico, livello superiore
     app.handlerHierarchyOrder = (e) => {
-    	console.log(e.target);
-    	console.log(cube.activeCard.ref);
-    	debugger;
+    	// console.log(e.target);
+    	// imposto la attuale card come card attiva
+    	const cardTable = e.path[3]; // .cardTable
+		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.getAttribute('data-schema'), 'tableName': cardTable.getAttribute('name')};
+    	console.log(cube.activeCard.ref); // card attiva
     	let value = +e.target.getAttribute('data-value');
     	if (e.target.hasAttribute('hier-order-plus')) {
     		value++;
-    		cube.activeCard.ref.querySelector(':root + i[hier-order-minus]').setAttribute('data-value', value);
+    		// incremento il tasto minus
+    		cube.activeCard.ref.querySelector('i[hier-order-minus]').setAttribute('data-value', value);
     	} else {
-    		value--;
-    		cube.activeCard.ref.querySelector('+ i[hier-order-plus]').setAttribute('data-value', value);
+    		if (value !== 1) value--;
+    		// decremento il tasto plus
+    		cube.activeCard.ref.querySelector('i[hier-order-plus]').setAttribute('data-value', value);
     	}
     	e.target.setAttribute('data-value', value);
     	cube.activeCard.ref.querySelector('.hierarchy-order').innerText = value;
+    	cube.activeCard.ref.querySelector('.hierarchy-order').setAttribute('data-value', value);
+    	// imposto il data-value anche sulla .cardTable
+    	cube.activeCard.ref.setAttribute('data-value', value);
     }
 
 	app.getDimensions();
@@ -1133,6 +1141,7 @@ var Hier = new Hierarchy();
 
 	app.btnTableList.onclick = app.handlerOpenTableList;
 
+	// dialog apertura 'salva dimensione'
 	app.btnSaveDimension.onclick = (e) => {
 		if (e.target.classList.contains('md-inactive')) return;
 		// se drop-zone ha l'attr edit con il nome della dimensione in modifica, lo inserisco direttamente nella input dimensionName
@@ -1140,30 +1149,30 @@ var Hier = new Hierarchy();
 		app.dialogDimensionName.showModal();
 	}
 
+	// salvataggio di una gerarchia
 	app.btnHierarchySaveName.onclick = () => {
 		const hierTitle = document.getElementById('hierarchyName').value;
-		// ordine gerarchico (per stabilire quale tabella è da associare al cubo) questo dato viene preso dalla struttura di destra
+		// ordine gerarchico (per stabilire quale tabella è da associare al cubo) questo dato viene preso dal valore presente in .hierarchy-order
 		let hierarchyOrder = {}, hierarchyOrderTables = {};
-		Array.from(document.querySelectorAll('section[data-hier-id][data-active] .hier.table')).forEach((table, i) => {
-			hierarchyOrder[i] = {schema : table.getAttribute('data-schema'), table : table.getAttribute('label'), alias : table.getAttribute('data-alias')};
-			// hierarchyOrder[i] = `${table.getAttribute('data-schema')}.${table.getAttribute('label')}`;
-		});
-		const comment = document.getElementById('textarea-hierarchies-comment').value;
-		// debugger;
+		// contare quante tabelle sono presenti nella gerarchia corrente
+		// eseguire un ciclo che inizia da 1 (per la prima tabella della gerarchia)
+		// recuperare le tabelle in ordine per aggiungerle all'object hierarchyOrder
+		const tables = document.querySelectorAll('.cardTable');
+		const tableCount = tables.length;
 		let from = [];
-		// let tablesFrom = [];
 		let lastTables = {};
-		document.querySelectorAll('.cardTable').forEach((card) => {
-			if (card.getAttribute('name')) {
-				from.push(`${card.getAttribute('data-schema')}.${card.getAttribute('name')} AS ${card.getAttribute('data-alias')}`);
-				// tablesFrom.push(card.getAttribute('name'));
-				lastTables = {
-					alias : card.getAttribute('data-alias'),
-					schema : card.getAttribute('data-schema'),
-					table : card.getAttribute('name')
-				};
-			}
-		});
+		for (let i = 1, index = 0; i <= tableCount; i++, index++) {
+			const table = document.querySelector(".cardTable[data-value='"+i+"']");
+			hierarchyOrder[index] = {schema : table.getAttribute('data-schema'), table : table.getAttribute('name'), alias : table.getAttribute('data-alias')};
+			from.push(`${table.getAttribute('data-schema')}.${table.getAttribute('name')} AS ${table.getAttribute('data-alias')}`);
+			lastTables = {
+				alias : table.getAttribute('data-alias'),
+				schema : table.getAttribute('data-schema'),
+				table : table.getAttribute('name')
+			};
+		}
+		const comment = document.getElementById('textarea-hierarchies-comment').value;
+		
 		Hier.hier = {title : hierTitle, hierarchyOrder, comment, from};
 		// la gerarchia creata la salvo nell'oggetto Dim, della classe Dimension, dove andrò a salvare, alla fine, tutta la dimensione
 		Dim.hier = Hier.hier;
@@ -1181,10 +1190,12 @@ var Hier = new Hierarchy();
 		* Questo perchè, l'ultima tabella, sarà messa in relazione anche con le altre gerarchie che verranno create
 		*/
 		console.log('numero tabelle presenti nella gerarchia : ', app.dropZone.querySelectorAll('.card.table').length);
+		const tableCount = app.dropZone.querySelectorAll('.cardTable').length;
 		// numero tabelle presenti nella gerarchia corrente
-		if (app.dropZone.querySelectorAll('.card.table').length > 1) {
+		if (app.dropZone.querySelectorAll('.cardTable').length > 1) {
 			// sono presenti più tabelle, l'ultima non la elimino
-			app.dropZone.querySelectorAll('.card.table:not(:last-child)').forEach( card => card.remove());
+			app.dropZone.querySelectorAll(".cardTable:not([data-value='"+tableCount+"'])").forEach( card => card.remove());
+			debugger;
 		} else {
 			// ripulisco la drop-zone per avere la possibilità di inserire altre gerarchie
 			// recupero tutte le .card.table presenti nella drop-zone per eliminarle

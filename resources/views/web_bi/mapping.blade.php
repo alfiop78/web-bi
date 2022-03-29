@@ -251,8 +251,14 @@
 
         <template id="cardLayout">
             <div class="cardLayout">
-                <section class="cardTable" name="" data-schema="">
-                    <span class="hierarchy-order"></span>
+                <section class="cardTable" name data-schema data-alias data-value>
+                    <section options-hier>
+                        <div>
+                            <i class="material-icons md-18" hier-order-plus data-value>keyboard_arrow_up</i>
+                            <span class="hierarchy-order" data-value></span>
+                            <i class="material-icons md-18" hier-order-minus data-value>keyboard_arrow_down</i>
+                        </div>
+                    </section>
                     <div class="title">
                         {{-- <h6></h6> --}}
                         <div class="title-alias"><h6></h6><small></small></div>
@@ -272,8 +278,8 @@
                     <span class="popupContent"><i class="material-icons md-18" join-left>flip</i><small class="popup">Left Join</small></span>
                     <span class="popupContent"><i class="material-icons md-18" join-right>flip</i><small class="popup">Right Join</small></span>
                     <span class="popupContent"><i class="material-icons md-18" join-remove>link_off</i><small class="popup">Rimuovi relazione</small></span>
-                    <span class="popupContent"><i class="material-icons md-18" hier-order-plus data-value>add</i><small class="popup">Ordine gerarchico superiore</small></span>
-                    <span class="popupContent"><i class="material-icons md-18" hier-order-minus data-value>remove</i><small class="popup">Ordine gerarchico inferiore</small></span>
+                    {{-- <span class="popupContent"><i class="material-icons md-18" hier-order-plus data-value>add</i><small class="popup">Ordine gerarchico superiore</small></span>
+                    <span class="popupContent"><i class="material-icons md-18" hier-order-minus data-value>remove</i><small class="popup">Ordine gerarchico inferiore</small></span> --}}
                 </section>
             </div>
         </template>

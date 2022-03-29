@@ -46,6 +46,15 @@ section[options] i:hover ~ small{visibility: visible;animation: popup 50ms ease;
 
 section[options] > span > small{top: 32px;z-index: 5;}
 
+/* section options-hier*/
+.cardTable section[options-hier]{position: absolute;display: flex;flex-flow: column; right: calc(100% - 46px); padding: 0 8px; transition: right 200ms, opacity 200ms;opacity: 0;z-index: 0;}
+.cardLayout:hover .cardTable > section[options-hier]{right: 100%;opacity: 1; transition: right 200ms, opacity 200ms; padding: 0 8px; z-index: 5;border-radius: 5px;}
+section[options-hier] > div{background-color: #494949; color: white; border-radius: 5px;}
+section[options-hier] i{color: gainsboro;}
+section[options-hier] i:hover{color: white!important;}
+section[options-hier] .hierarchy-order{display: flex;justify-content: center;align-items: center;}
+
+
 /* dialog TODO:  da spostare in md-dialog.css*/
 
 .formulaDefine{display: grid;grid-template-columns: auto auto auto;grid-gap: 16px;margin: 1em 0;align-items: center;}
@@ -126,9 +135,6 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 
 
 .card.table > .cardLayout{display: grid;grid-template-columns: 100%;position: relative;grid-template-rows: auto auto;}
-/* numero che rappresenta l'ordine gerarchico della tabella */
-.cardTable > .hierarchy-order{position: absolute;width: 2rem;height: 2rem;background: #494949;color: white;z-index: 10;display: flex;
-	justify-content: center;align-items: center;border-radius: 50%;top: -1rem;left: -1rem; cursor: pointer;}
 .card.table > .cardLayout > .cardTable{position: relative;height: fit-content;display: grid;grid-template-areas: "title" "input" "body" "footer";
   z-index: 1;}
 .card.table > .cardLayout > .cardTable > .info{font-size: .65rem;padding: 8px;background: lemonchiffon;border-bottom-left-radius: 4px;border-bottom-right-radius: 4px;}
