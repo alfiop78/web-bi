@@ -990,16 +990,28 @@ var Hier = new Hierarchy();
     app.handlerHierarchyOrder = (e) => {
     	// console.log(e.target);
     	// imposto la attuale card come card attiva
+    	const card = e.path[5];
+    	// debugger;
     	const cardTable = e.path[3]; // .cardTable
+    	const cardCount = document.querySelectorAll('.card.table').length;
 		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.getAttribute('data-schema'), 'tableName': cardTable.getAttribute('name')};
     	console.log(cube.activeCard.ref); // card attiva
     	let value = +e.target.getAttribute('data-value');
+
+		// TODO: spostare, nel DOM, le card in base al livello gerarchico. Livello gerarchico inferiore le card vanno messe prima nel DOM.
+    	// questo consentirà di creare correttamente le gerarchie con il nome della tabella di gerarchia inferiore salvata nella prop 'hierarchies'
     	if (e.target.hasAttribute('hier-order-plus')) {
     		value++;
+    		if (value > cardCount) return;
+    		// console.log('nextElement : ', card.nextElementSibling);
+    		if (card.nextElementSibling) card.nextElementSibling.after(card);
     		// incremento il tasto minus
     		cube.activeCard.ref.querySelector('i[hier-order-minus]').setAttribute('data-value', value);
     	} else {
-    		if (value !== 1) value--;
+    		if (value !== 1) {
+    			value--;
+    			card.previousElementSibling.before(card);
+    		}
     		// decremento il tasto plus
     		cube.activeCard.ref.querySelector('i[hier-order-plus]').setAttribute('data-value', value);
     	}
@@ -1157,8 +1169,7 @@ var Hier = new Hierarchy();
 		// contare quante tabelle sono presenti nella gerarchia corrente
 		// eseguire un ciclo che inizia da 1 (per la prima tabella della gerarchia)
 		// recuperare le tabelle in ordine per aggiungerle all'object hierarchyOrder
-		const tables = document.querySelectorAll('.cardTable');
-		const tableCount = tables.length;
+		const tableCount = document.querySelectorAll('.cardTable').length;
 		let from = [];
 		let lastTables = {};
 		for (let i = 1, index = 0; i <= tableCount; i++, index++) {
@@ -1189,14 +1200,24 @@ var Hier = new Hierarchy();
 		/* se è presente più di una tabella, nella gerarchia, l'ultima non la elimino.
 		* Questo perchè, l'ultima tabella, sarà messa in relazione anche con le altre gerarchie che verranno create
 		*/
-		console.log('numero tabelle presenti nella gerarchia : ', app.dropZone.querySelectorAll('.card.table').length);
-		const tableCount = app.dropZone.querySelectorAll('.cardTable').length;
+		console.log('numero tabelle presenti nella gerarchia : ', app.dropZone.querySelectorAll('.cardTable').length);
+		const cards = app.dropZone.querySelectorAll('.card.table');
+		const tableCount = cards.length;
 		// numero tabelle presenti nella gerarchia corrente
-		if (app.dropZone.querySelectorAll('.cardTable').length > 1) {
-			// sono presenti più tabelle, l'ultima non la elimino
-			app.dropZone.querySelectorAll(".cardTable:not([data-value='"+tableCount+"'])").forEach( card => card.remove());
-			debugger;
+		if (tableCount > 1) {
+			// sono presenti più tabelle, l'ultima della gerarchia non la elimino
+			cards.forEach( (card) => {
+				if (+card.querySelector('.cardTable').getAttribute('data-value') !== tableCount) {
+					card.remove();
+				} else {
+					// ultima tabella
+					// resetto il 'mode' allo stato iniziale
+					card.removeAttribute('mode');
+					card.querySelector('.info').hidden = true;
+				}
+			})
 		} else {
+			debugger;
 			// ripulisco la drop-zone per avere la possibilità di inserire altre gerarchie
 			// recupero tutte le .card.table presenti nella drop-zone per eliminarle
 			app.dropZone.querySelectorAll('.card.table').forEach( card => card.remove());
@@ -1217,6 +1238,7 @@ var Hier = new Hierarchy();
 		const btnSaveHierarchy = content.querySelector("button[data-id='hierarchySave']");
 		parent.appendChild(sectionDataHier);
 		btnSaveHierarchy.addEventListener('click', app.btnSaveHierarchy);
+
 		Hier = new Hierarchy();
 	}
 

@@ -103,7 +103,7 @@ class Cube {
 		// console.log(this.activeCardRef);
 		this.card.ref.setAttribute('mode', value);
 		let info = this.card.ref.parentElement.querySelector('.info');
-		info.removeAttribute('hidden');
+		info.toggleAttribute('hidden');
 		let msg;
 		switch (value) {
 			case 'columns':
