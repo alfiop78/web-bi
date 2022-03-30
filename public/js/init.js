@@ -233,9 +233,6 @@ var Hier = new Hierarchy();
 		// imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone
 		const hierNumber = app.dropZone.querySelectorAll('.card.table').length + 1;
 		card.querySelector('.hierarchy-order').innerText = hierNumber;
-		card.querySelector('.hierarchy-order').setAttribute('data-value', hierNumber);
-		card.querySelector('i[hier-order-plus]').setAttribute('data-value', hierNumber);
-		card.querySelector('i[hier-order-minus]').setAttribute('data-value', hierNumber);
 		card.querySelector('.cardTable').setAttribute('data-value', hierNumber);
 		app.dropZone.appendChild(card);
 
@@ -990,36 +987,34 @@ var Hier = new Hierarchy();
     app.handlerHierarchyOrder = (e) => {
     	// console.log(e.target);
     	// imposto la attuale card come card attiva
-    	const card = e.path[5];
-    	// debugger;
-    	const cardTable = e.path[3]; // .cardTable
+    	const card = e.path[5]; // .card .table
+    	const cardTable = e.path[3]; // .cardTable, qui è presente il data-value
     	const cardCount = document.querySelectorAll('.card.table').length;
 		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.getAttribute('data-schema'), 'tableName': cardTable.getAttribute('name')};
-    	console.log(cube.activeCard.ref); // card attiva
-    	let value = +e.target.getAttribute('data-value');
-
-		// TODO: spostare, nel DOM, le card in base al livello gerarchico. Livello gerarchico inferiore le card vanno messe prima nel DOM.
+    	// console.log(cube.activeCard.ref); // card attiva
+    	// console.log(+cardTable.getAttribute('data-value'));
+    	let value = +cardTable.getAttribute('data-value');
+		// spostare, nel DOM, le card in base al livello gerarchico. Livello gerarchico inferiore le card vanno messe prima nel DOM.
     	// questo consentirà di creare correttamente le gerarchie con il nome della tabella di gerarchia inferiore salvata nella prop 'hierarchies'
     	if (e.target.hasAttribute('hier-order-plus')) {
     		value++;
+    		// non posso spostare card se supero il numero delle card presenti nella pagina
     		if (value > cardCount) return;
-    		// console.log('nextElement : ', card.nextElementSibling);
+    		// TODO: sostituisco il valore della card successiva con quello della card che sto modificando
+    		card.nextElementSibling.querySelector('.cardTable').setAttribute('data-value', cardTable.getAttribute('data-value'));
+    		card.nextElementSibling.querySelector('.hierarchy-order').innerText = cardTable.getAttribute('data-value');
+    		// identifico la card successiva a quella che sto modificando e la posiziono DOPO
     		if (card.nextElementSibling) card.nextElementSibling.after(card);
-    		// incremento il tasto minus
-    		cube.activeCard.ref.querySelector('i[hier-order-minus]').setAttribute('data-value', value);
     	} else {
-    		if (value !== 1) {
-    			value--;
-    			card.previousElementSibling.before(card);
-    		}
-    		// decremento il tasto plus
-    		cube.activeCard.ref.querySelector('i[hier-order-plus]').setAttribute('data-value', value);
+    		if (value === 1) return;
+			value--;
+			// console.log(card.previousElementSibling);
+			card.previousElementSibling.querySelector('.cardTable').setAttribute('data-value', cardTable.getAttribute('data-value'));
+    		card.previousElementSibling.querySelector('.hierarchy-order').innerText = cardTable.getAttribute('data-value');
+			card.previousElementSibling.before(card);
     	}
-    	e.target.setAttribute('data-value', value);
-    	cube.activeCard.ref.querySelector('.hierarchy-order').innerText = value;
-    	cube.activeCard.ref.querySelector('.hierarchy-order').setAttribute('data-value', value);
-    	// imposto il data-value anche sulla .cardTable
-    	cube.activeCard.ref.setAttribute('data-value', value);
+    	cardTable.querySelector('.hierarchy-order').innerText = value;
+    	cardTable.setAttribute('data-value', value);
     }
 
 	app.getDimensions();

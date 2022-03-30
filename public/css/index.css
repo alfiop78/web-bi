@@ -47,8 +47,9 @@ section[options] i:hover ~ small{visibility: visible;animation: popup 50ms ease;
 section[options] > span > small{top: 32px;z-index: 5;}
 
 /* section options-hier*/
-.cardTable section[options-hier]{position: absolute;display: flex;flex-flow: column; right: calc(100% - 46px); padding: 0 8px; transition: right 200ms, opacity 200ms;opacity: 0;z-index: 0;}
-.cardLayout:hover .cardTable > section[options-hier]{right: 100%;opacity: 1; transition: right 200ms, opacity 200ms; padding: 0 8px; z-index: 5;border-radius: 5px;}
+/*.cardTable section[options-hier]{position: absolute;display: flex;flex-flow: column; right: calc(100% - 46px); padding: 0 8px; transition: right 200ms, opacity 200ms;opacity: 0;z-index: 0;}*/
+/*.cardLayout:hover .cardTable > section[options-hier]{right: 100%;opacity: 1; transition: right 200ms, opacity 200ms; padding: 0 8px; z-index: 5;border-radius: 5px;}*/
+section[options-hier]{position: absolute;display: flex;flex-flow: column;right: 100%;opacity: 1; padding: 0 8px; z-index: 5;border-radius: 5px;}
 section[options-hier] > div{background-color: #494949; color: white; border-radius: 5px;}
 section[options-hier] i{color: gainsboro;}
 section[options-hier] i:hover{color: white!important;}

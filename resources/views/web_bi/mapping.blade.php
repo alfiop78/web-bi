@@ -254,9 +254,9 @@
                 <section class="cardTable" name data-schema data-alias data-value>
                     <section options-hier>
                         <div>
-                            <i class="material-icons md-18" hier-order-plus data-value>keyboard_arrow_up</i>
-                            <span class="hierarchy-order" data-value></span>
-                            <i class="material-icons md-18" hier-order-minus data-value>keyboard_arrow_down</i>
+                            <i class="material-icons md-18" hier-order-plus>keyboard_arrow_up</i>
+                            <span class="hierarchy-order"></span>
+                            <i class="material-icons md-18" hier-order-minus>keyboard_arrow_down</i>
                         </div>
                     </section>
                     <div class="title">
