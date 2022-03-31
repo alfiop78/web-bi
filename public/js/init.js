@@ -501,7 +501,7 @@ var Hier = new Hierarchy();
 					Hier.join = hier;
 					// visualizzo le icone di "join" nelle due colonne
 					Hier.showRelationIcons(colSelected);
-					console.log(Hier.join);
+					// console.log(Hier.join);
 					// esiste una relazione, visualizzo il div hierarchiesContainer
 					app.hierarchyContainer.removeAttribute('hidden');
 				}
@@ -639,7 +639,7 @@ var Hier = new Hierarchy();
 	app.handlerCubeSelected = (e) => {
 		// apro la tabella definita come Cubo
 		console.log('e.currentTarget : ', e.currentTarget);
-		debugger;
+		// debugger;
 		StorageCube.selected = e.currentTarget.getAttribute('label');
 		console.log('cube selected : ', StorageCube.selected);
 		// ridefinisco le proprietà del cubo, leggendo da quello selezionato, nello storage, per consentirne la modifica o l'aggiunto di dimensioni al cubo
@@ -649,8 +649,14 @@ var Hier = new Hierarchy();
 		StorageCube.selected.associatedDimensions.forEach( (dim) => {
 			cube.associatedDimensions = dim;
 		});
-		debugger;
-		app.addCard(`${StorageCube.selected.schema}.${StorageCube.selected.FACT}`, true);
+		const factTable = {
+			schema : StorageCube.selected.schema,
+			table : StorageCube.selected.FACT,
+			alias : StorageCube.selected.alias
+		};
+		// debugger;
+		app.addCard(factTable, true);
+		// app.addCard(`${StorageCube.selected.schema}.${StorageCube.selected.FACT}`, true);
 		// visualizzo il tasto saveOpenedCube al posto di SaveCube
 		app.btnSaveOpenedCube.parentElement.toggleAttribute('hide');
 		// nascondo btnSaveCube
@@ -1093,12 +1099,12 @@ var Hier = new Hierarchy();
           .catch((err) => console.error(err));
     }
 
-	// Aggiornamento di un cubo
+	// Aggiorna cubo già esistente
 	app.btnSaveOpenedCube.onclick = () => {
 		console.log('Aggiornamento Cubo');
 		console.log(StorageCube.selected);
 		cube.title = StorageCube.selected.name;
-
+		cube.alias = StorageCube.selected.alias;
 		cube.FACT = StorageCube.selected.FACT;
 		// Creo il cubeId basandomi sui cubi già creati in Storage, il cubeId lo associo al cubo che sto per andare a salvare.
 		cube.id = StorageCube.selected.id;
