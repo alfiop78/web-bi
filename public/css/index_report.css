@@ -87,3 +87,6 @@ div.textarea > span.formulaLogicalOperator{background: brown; border-radius: 4px
 /*toast Popup*/
 small.popupToast{z-index: 9999;background: #494949;border-radius: 4px;color: white;font-size: .7rem;display: none;white-space: nowrap;
   box-shadow: 0 2px 4px 0 black;padding: 4px 8px;position: absolute; top: var(--top); left: var(--left);}
+
+/*ul*/
+ul > section.fact{font-weight: bold;}

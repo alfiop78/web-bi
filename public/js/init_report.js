@@ -163,6 +163,24 @@ var StorageMetric = new MetricStorage();
 		ul.querySelectorAll('li').forEach((li) => li.addEventListener('click', app.handlerReportToBeProcessed));
 	}
 
+	// recupero la FACT associata al cubo
+	app.addFACTToHierList = (parent) => {
+		const contentElement = app.tmplList.content.cloneNode(true);
+		const section = contentElement.querySelector('section[data-icon-column][data-icon-filter');
+		section.removeAttribute('hidden');
+		section.className = 'fact';
+		const element = section.querySelector('.element');
+		const li = element.querySelector('li');
+		const iColumns = element.querySelector("i[data-id='columns-icon']");
+		const iFilter = element.querySelector("i[data-id='filter-icon']");
+		li.innerText = StorageCube.selected.FACT;
+		li.label = StorageCube.selected.FACT;
+		li.setAttribute('data-table-alias', StorageCube.selected.alias);
+		li.setAttribute('data-schema', StorageCube.selected.schema);
+		parent.appendChild(section);
+	}
+
+	// selezione di un cubo (step-1)
 	app.handlerCubeSelected = (e) => {
 		// const cubeId = e.currentTarget.getAttribute('data-cube-id');
 		// const fieldType = e.currentTarget.getAttribute('data-list-type');
@@ -185,6 +203,8 @@ var StorageMetric = new MetricStorage();
 				table.hidden = false;
 				table.toggleAttribute('data-searchable');
 			});
+			// aggiungo alla <ul> fields-hierarchies la FACT-alias-schema selezionata
+			app.addFACTToHierList(document.querySelector('#tableList-hierarchies > ul'));
 		} else {
 			// deselect cube
 			document.querySelectorAll("ul[data-id='fields-dimensions'] > section[data-cube-name='" + StorageCube.selected.name + "']").forEach((table) => {
@@ -357,10 +377,21 @@ var StorageMetric = new MetricStorage();
 
 	// selezione della tabella nella sezione Column
 	app.openDialogTables = (e) => {
+		// visualizzo solo le tabelle associate alla gerarchia selezionata
 		const hier = e.currentTarget.getAttribute('data-hier-name');
 		const dimension = e.currentTarget.getAttribute('data-dimension-name');
 		app.dialogTables.querySelector('section').setAttribute('data-hier-name', hier);
 		app.dialogTables.querySelector('section').setAttribute('data-dimension-name', dimension);
+		// rimetto in hidden le tabelle NON appartenenti alla gerarchia selezionata
+		app.dialogTables.querySelectorAll("ul[data-id='fields-tables'] > section:not([data-hier-name='" + hier + "'])").forEach( (table) => {
+			table.hidden = true;
+			table.toggleAttribute('data-searchable');
+		});
+		// all'apertura della dialog imposto a hidden tutta la <ul> contenente i nomi dei field 'table-fieldList'
+		app.dialogTables.querySelectorAll("ul[data-id='fields-column'] > section").forEach( (table) => {
+			table.hidden = true;
+			table.toggleAttribute('data-searchable');
+		});
 		// visualizzo le tabelle appartenenti alla hier selezionata
 		app.dialogTables.querySelectorAll("ul[data-id='fields-tables'] > section[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']").forEach((table) => {
 			// console.log('tabelle appartententi alla gerarchia selezionata : ', table);
@@ -418,6 +449,8 @@ var StorageMetric = new MetricStorage();
 
 	// selezione di una tabella nella dialog-filter
 	app.handlerTableSelectedDialogFilter = (e) => {
+		// query per visualizzare tutti i field della tabella
+		// Visualizzazione dei filtri già creati appartenenti alla tabella selezionata
 		const dimension = e.currentTarget.getAttribute('data-dimension-name');
 		Query.table = e.currentTarget.getAttribute('label');
 		Query.tableAlias = e.currentTarget.getAttribute('data-table-alias');
@@ -430,7 +463,7 @@ var StorageMetric = new MetricStorage();
 			const li = app.dialogFilter.querySelector('#filter-fieldList-tables ul li[selected]');
 			li.toggleAttribute('selected');
 			debugger;
-			app.dialogFilter.querySelector('#fieldList-filter ul').remove();
+			if (app.dialogFilter.querySelector('#fieldList-filter ul')) app.dialogFilter.querySelector('#fieldList-filter ul').remove();
 			// nascondo tutti filtri che fanno parte della tabella precedentemente selezionata
 			app.dialogFilter.querySelectorAll("ul[data-id='fields-filter'] > section[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "'][data-table-name='" + li.getAttribute('label') + "']").forEach((filter) => {
 				filter.hidden = true;
@@ -475,6 +508,8 @@ var StorageMetric = new MetricStorage();
 		const dimension = e.currentTarget.getAttribute('data-dimension-name');
 		app.dialogFilter.querySelector('section').setAttribute('data-hier-name', hier);
 		app.dialogFilter.querySelector('section').setAttribute('data-dimension-name', dimension);
+		// nascondo le tabelle NON appartenenti alla hier selezionata
+		app.dialogFilter.querySelectorAll("ul[data-id='fields-tables'] > section:not([data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "'])").forEach( table => table.hidden = true);
 		// visualizzo le tabelle appartenenti alla hier selezionata
 		app.dialogFilter.querySelectorAll("ul[data-id='fields-tables'] > section[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']").forEach((table) => {
 			// console.log('tabelle appartententi alla gerarchia selezionata : ', table);
@@ -912,7 +947,9 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
+	// popolo la lista delle gerarchie
 	app.getHierarchies = () => {
+		// in questa lista visualizzo anche la FACT per dare la possibilità di aggiungere columns/filter anche sulla FACT
 		// lista di tutte le gerarchie, imposto un data-dimension-id/name sugli .element della lista gerarchie, in questo modo posso filtrarle quando seleziono le dimensioni nello step precedente
 		const content = app.tmplUlList.content.cloneNode(true);
 		const ul = content.querySelector("ul[data-id='fields-hierarchies']");
@@ -962,7 +999,7 @@ var StorageMetric = new MetricStorage();
 			for (const hier in Dim.selected.hierarchies) {
 				for (const [key, order] of Object.entries(Dim.selected.hierarchies[hier]['order'])) {
 					// ciclo le tabelle presenti nella gerarchia
-					console.log(key, order);
+					// console.log(key, order);
 					const contentElement = app.tmplList.content.cloneNode(true);
 					const section = contentElement.querySelector('section[data-no-icon]');
 					const element = section.querySelector('.element');
@@ -986,6 +1023,7 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
+	// lista tabelle nella dialog columns
 	app.getTablesInHierarchies = () => {
 		// lista di tutte le tabelle, incluse nelle dimensioni e di conseguenza, nelle gerarchie
 		const content = app.tmplUlList.content.cloneNode(true);
