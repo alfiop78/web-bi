@@ -173,6 +173,8 @@ var StorageMetric = new MetricStorage();
 		const li = element.querySelector('li');
 		const iColumns = element.querySelector("i[data-id='columns-icon']");
 		const iFilter = element.querySelector("i[data-id='filter-icon']");
+		iColumns.onclick = app.openDialogTables; // apre la dialog dialogTables per impostare gli alias e SQL per le colonne
+		iFilter.onclick = app.openDialogFilters; // apre la dialog dialogFilter per impostare i filtri
 		li.innerText = StorageCube.selected.FACT;
 		li.label = StorageCube.selected.FACT;
 		li.setAttribute('data-table-alias', StorageCube.selected.alias);
@@ -217,6 +219,7 @@ var StorageMetric = new MetricStorage();
 				table.toggleAttribute('data-searchable');
 			});
 			StorageCube.deleteCube();
+			// TODO: elimino la FACT dall'elenco #tableList-hierarchies > ul
 		}
 	}
 
@@ -949,12 +952,10 @@ var StorageMetric = new MetricStorage();
 
 	// popolo la lista delle gerarchie
 	app.getHierarchies = () => {
-		// in questa lista visualizzo anche la FACT per dare la possibilità di aggiungere columns/filter anche sulla FACT
-		// lista di tutte le gerarchie, imposto un data-dimension-id/name sugli .element della lista gerarchie, in questo modo posso filtrarle quando seleziono le dimensioni nello step precedente
+		// imposto un data-dimension-id/name sugli .element della lista gerarchie, in questo modo posso filtrarle quando seleziono le dimensioni nello step precedente
 		const content = app.tmplUlList.content.cloneNode(true);
 		const ul = content.querySelector("ul[data-id='fields-hierarchies']");
 		const parent = document.getElementById('tableList-hierarchies'); // dove verrà inserita la <ul>
-
 		// ottengo l'elenco delle gerarchie per ogni dimensione presente in storage, successivamente, quando la dimensione viene selezionata, visualizzo/nascondo solo quella selezionata
 		// console.log('lista dimensioni :', Dim.dimensions);
 		// per ogni dimensione presente aggiungo gli elementi nella ul con le gerarchie
