@@ -2,9 +2,11 @@ class Cube {
 	#schema;
 	#comment;
 	#alias;
+	#columns;
+	#metrics = {};
 	constructor() {
 		this._cube = {};
-		this._metrics = {}; // contiene gli oggetti metriche
+		// this._metrics = {}; // contiene gli oggetti metriche
 		this.arrMetrics = []; // accessibile dall'esterno
 		this.relationId = 0;
 		this._join = {};
@@ -23,6 +25,14 @@ class Cube {
 	set comment(value) {this.#comment = value;}
 
 	get comment() {return this.#comment;}
+
+	set columnsDefined(value) {this.#columns = value;}
+
+	get columnsDefined() {return this.#columns;}
+
+	set metricDefined(value) {this.#metrics = value;}
+
+	get metricDefined() {return this.#metrics;}
 
 	set relations(value) {
 		this._join['hier_'+this.relationId] = value;
@@ -61,15 +71,15 @@ class Cube {
 	set metrics(field) {
 		debugger;
 		// TODO: da rivedere, utilizzare la stessa logica utilizzata in dimension.columns() per aggiungere/rimuovere la field selezionata
-		if (!this._metrics.hasOwnProperty(this._tableName)) {this._arrMetrics = [];}
+		if (!this.#metrics.hasOwnProperty(this._tableName)) {this._arrMetrics = [];}
 
 		this._arrMetrics.push(field);
 
-		this._metrics[this._tableName] = this._arrMetrics;
-		console.log(this._metrics);
+		this.#metrics[this._tableName] = this._arrMetrics;
+		console.log(this.#metrics);
 	}
 
-	get metrics() {return this._metrics;}
+	get metrics() {return this.#metrics;}
 
 	set FACT(value) {this._fact = value;}
 
@@ -84,10 +94,12 @@ class Cube {
 	get schema() {return this.#schema;}
 
 	save() {
+		debugger;
 		this._cube.type = 'CUBE';
 		this._cube.name = this._title;
 		this._cube.comment = this.#comment;
-		this._cube.metrics = this._metrics;
+		this._cube.metrics = this.#metrics;
+		this._cube.columns = this.#columns;
 		// this._cube.relations = this._join; // questa deve essere salvata all'interno della dimensione, non nel cubo
 		this._cube.FACT = this._fact;
 		this._cube.schema = this.#schema;

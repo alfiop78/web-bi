@@ -644,7 +644,8 @@ var Hier = new Hierarchy();
 		console.log('cube selected : ', StorageCube.selected);
 		// ridefinisco le proprietà del cubo, leggendo da quello selezionato, nello storage, per consentirne la modifica o l'aggiunto di dimensioni al cubo
 		// TODO: la prop privata _metric la devo definire tramite un Metodo
-		cube._metrics = StorageCube.selected.metrics;
+		cube.metricDefined = StorageCube.selected.metrics;
+		cube.columnsDefined = StorageCube.selected.columns;
 		debugger;
 		StorageCube.selected.associatedDimensions.forEach( (dim) => {
 			cube.associatedDimensions = dim;
@@ -1246,9 +1247,10 @@ var Hier = new Hierarchy();
 	// salvataggio di un nuovo cubo
 	app.btnSaveCubeName.onclick = () => {
 		console.log('cube save');
-		debugger;
 		// TODO: devo verificare se il nome del cubo esiste già, sia in locale che sul db.
 		cube.title = document.getElementById('cubeName').value;
+		debugger;
+		cube.columnsDefined = Hier.columns_;
 
 		cube.comment = document.getElementById('textarea-cube-comment').value;
 

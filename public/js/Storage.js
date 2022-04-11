@@ -95,6 +95,7 @@ class Storages {
 class CubeStorage extends Storages {
 	#cubeSelected = new Set();
 	#name;
+	#lists = {};
 	constructor() {
 		super();
 		this._cubes = {}; // lista dei cubi presenti nello storage
@@ -108,6 +109,20 @@ class CubeStorage extends Storages {
 			}
 		});
 		// console.log('cubes : ', this._cubes);
+	}
+
+	setLists() {
+		this.storageKeys.forEach((key) => {
+			let jsonStorage = JSON.parse(this.storage.getItem(key));
+			if (jsonStorage.type === 'CUBE') {
+				this.#lists[key] = jsonStorage;
+			}
+		});
+	}
+
+	getLists() {
+		this.setLists();
+		return this.#lists;
 	}
 
 	get cubes() {return this._cubes;}
