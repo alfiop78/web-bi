@@ -14,6 +14,7 @@
 		<link rel="stylesheet" type="text/css" href="/css/report-layout.css" />
 		<link rel="stylesheet" type="text/css" href="/css/index_report.css" />
 		<link rel="stylesheet" type="text/css" href="/css/steps.css" />
+		<link rel="stylesheet" type="text/css" href="/css/md-dialogs.css" />
 		<script src="/js/Step.js"></script>
 		<script src="/js/Query.js"></script>
 		<script src="/js/Application.js"></script>

@@ -1,3 +1,4 @@
+dialog{min-width: 70%;}
 dialog > section{padding: 16px;}
 dialog{border: none;box-shadow: 0 2px 5px 1px rgba(10,10,10,.35);border-radius: 4px;font-size: .8rem; min-width: 70%;}
 dialog#versioning{height: 80%;max-height: 90%;}
