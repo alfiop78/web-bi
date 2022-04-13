@@ -117,11 +117,10 @@ class Application {
 		// la input ha un attr "data-element-search" che indica su quali elementi deve cercare, gli elementi su cui cercare avranno un attr "data-search" con lo stesso valore di questo attributo
 		// console.log(e.target.value);
 		const searchAttr = e.target.getAttribute('data-element-search');
-		const listElement = Array.from(document.querySelectorAll("section[data-element-search='" + searchAttr + "']"));
+		const listElement = Array.from(document.querySelectorAll("section[data-element-search='" + searchAttr + "'][data-searchable='true']"));
 		// console.log(listElement);
 		listElement.forEach( (item) => {
-			(item.getAttribute('data-label').indexOf(e.target.value) === -1 && item.getAttribute('data-label').toLowerCase().indexOf(e.target.value) === -1) ?
-			item.hidden = true : item.hidden = false;
+			item.hidden = (item.getAttribute('data-label').indexOf(e.target.value) === -1 && item.getAttribute('data-label').toLowerCase().indexOf(e.target.value) === -1) ? true : false;
 		});
 	}
 

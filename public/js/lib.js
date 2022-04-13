@@ -1,6 +1,7 @@
 window.onload = function() {
 	var App = new Application();
 	console.log('onload');
+	// TODO: input search, non tutte le input
 	document.addEventListener('input', App.genericSearch);
 
 	// se le input non hanno contenuto non evidenzio le label come :invalid, aggiungendo una class=has-content sulle label

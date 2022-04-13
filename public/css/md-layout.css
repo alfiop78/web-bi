@@ -102,8 +102,6 @@ ul:not([id='columns']) > .element[draggable]:not([hide]):hover{display: flex;jus
   background: tan;cursor: grab;border-radius: 4px;}
 ul > .element[hide] {display: none;}
 
-ul.overflowList > section{width: 100%; margin-top: 2px 6px; padding: 4px;}
-
 ul:not(.filters) li{list-style: none;padding: 6px;margin: 2px 8px;}
 ul > section > .element > li{list-style: none;padding: 6px;margin: 2px 8px; width: inherit;}
 /* ul:not(.filters) li:hover, ul li[selected]{list-style: none;padding: 6px;background-color: var(--main-primary-color);border-radius: 4px;

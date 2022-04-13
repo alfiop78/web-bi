@@ -36,7 +36,7 @@
 					<section class="sectionLists">
 						<h5>Tabelle</h5><h6>subtitle</h6>
 						<div class="md-field">
-							<input type="search" id="searchTables" value="" autocomplete="off" />
+							<input type="search" data-element-search="columns-table-list" id="searchTables" value="" autocomplete="off" />
 							<label for="searchTables" class="">Ricerca</label>
 						</div>
 						<div id="fieldList-tables"><!-- qui viene inserito il template tmpl_ulList--></div>
@@ -45,7 +45,7 @@
 					<section class="sectionLists">
 						<h5>Colonne</h5><h6>Seleziona le colonne da includere</h6>
 						<div class="md-field" value>
-							<input type="search" id="fieldSearch" value="" autocomplete="off" />
+							<input type="search" data-element-search="columns-field-list" id="fieldSearch" value autocomplete="off" />
 							<label for="fieldSearch" class="">Ricerca</label>
 						</div>
 						<div id="table-fieldList"></div>
@@ -103,7 +103,7 @@
 					<section class="sectionLists">
 						<h5>Tabelle</h5><h6>subtitle</h6>
 						<div class="md-field">
-							<input type="search" id="filter-searchTables" value="" autocomplete="off" />
+							<input type="search" data-element-search="filters-table-list" id="filter-searchTables" value autocomplete="off" />
 							<label for="filter-searchTables" class="">Ricerca</label>
 						</div>
 						<div id="filter-fieldList-tables"><!-- qui viene inserito il template tmpl_ulList--></div>
@@ -112,7 +112,7 @@
 					<section class="sectionLists">
 						<h5>Crea filtro</h5><h6>subtitle</h6>
 						<div class="md-field">
-							<input type="search" id="fieldSearch" value="" autocomplete="off" />
+							<input type="search" id="fieldSearch" data-element-search="search-field-db" value autocomplete="off" />
 							<label for="fieldSearch" class="">Ricerca</label>
 						</div>
 						<div id="fieldList-filter"><!-- template ul--></div>
@@ -137,9 +137,9 @@
 					</section>
 
 					<section class="sectionLists">
-						<h5>Filtri esistenti</h5><h6>subtitle</h6>
+						<h5>Filtri esistenti</h5><h6>Seleziona i filtri da aggiungere al report</h6>
 						<div class="md-field">
-							<input type="search" id="searchExistsFilter" value="" autocomplete="off" />
+							<input type="search" id="searchExistsFilter" data-element-search="search-exist-filters" value autocomplete="off" />
 							<label for="searchExistsFilter" class="">Ricerca</label>
 						</div>
 						<div id="existFilters"><!-- template ul--></div>
@@ -280,7 +280,7 @@
 						<!-- template con icone 'column' e 'filter' -->
 						<template id="templateList">
 
-							<section hidden data-label-search data-icon-column data-icon-filter>
+							<section hidden data-label data-element-search data-icon-column data-icon-filter>
 								<div class="element" name="">
 									<li class="elementSearch" label=""></li>
 									<i data-id="columns-icon" class="material-icons md-18">view_list</i>
@@ -302,7 +302,7 @@
 								</div>	
 							</section>
 
-							<section hidden data-label-search data-no-icon>
+							<section hidden data-element-search data-label data-no-icon>
 								<div class="element" name="">
 									<li class="elementSearch" label=""></li>
 								</div>	
@@ -348,7 +348,7 @@
 													<section class="sectionLists">
 														<h5>Dimensioni</h5>
 														<div class="md-field">
-															<input type="search" id="searchDimension" value="" autocomplete="off" />
+															<input type="search" data-element-search="dimension-list" id="searchDimension" value autocomplete="off" />
 															<label for="searchDimension" class="">Ricerca</label>
 														</div>
 														<div id="dimensionList">
@@ -368,7 +368,7 @@
 													<section class="sectionLists">
 														<h5>Gerarchie</h5>
 														<div class="md-field">
-															<input type="search" id="searchTables-hierarchies" value="" autocomplete="off" />
+															<input type="search" id="searchTables-hierarchies" data-element-search="hierarchy-list" value autocomplete="off" />
 															<label for="searchTables-hierarchies" class="">Ricerca</label>
 														</div>
 														<div id="tableList-hierarchies">
@@ -377,20 +377,20 @@
 													</section>
 
 													<section class="sectionLists">
-														<h5>Colonne impostate</h5>
+														<h5>Colonne del report</h5>
 														<div class="md-field">
-															<input type="search" id="" value="" autocomplete="off" />
+															<input type="search" data-element-search="search-fields-set" id value autocomplete="off" />
 															<label for="" class="">Ricerca</label>
 														</div>
-														<div><ul id="columnsSet"></ul></div>
+														<div><ul id="fields-set" class="overflowList"></ul></div>
 													</section>
 													<section class="sectionLists">
-														<h5>Filtri impostati</h5>
+														<h5>Filtri del report</h5>
 														<div class="md-field">
-															<input type="search" id="" value="" autocomplete="off" />
+															<input type="search" data-element-search="search-filters-set" id value autocomplete="off" />
 															<label for="" class="">Ricerca</label>
 														</div>
-														<div><ul id="filtersSet"></ul></div>
+														<div><ul id="filters-set" class="overflowList"></ul></div>
 													</section>
 												</div>
 											</section>
