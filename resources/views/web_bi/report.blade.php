@@ -303,13 +303,22 @@
 								</div>	
 							</section>
 
-							<section hidden data-element-search data-label data-no-icon>
+							<section data-element-search data-label data-no-icon hidden>
 								<div class="element" name>
 									<li class="elementSearch" label></li>
 								</div>	
 							</section>
 
+							<section data-element-search data-label data-sublist hidden>
+								<div class="element" name>
+									<span class="sublist">
+										<li class="elementSearch" label></li>
+									</span>
+								</div>	
+							</section>
+
 						</template>
+						<template id="sublist-item"><span class="sublist-item">table 1</span></template>
 
 						<template id="template_ulList">
 							<ul data-id="list-cubes" class="overflowList"></ul>
@@ -328,11 +337,51 @@
 								<div class="overflow">
 									<div id="stepTranslate" data-translate-x="0">
 										<section class="step" data-step="1" selected>
-											<div class="pageContent">pagina 1</div>
+											<div class="pageContent">
+												<div class="h-grid">
+													{{-- cube-list --}}
+													<div id="parent-list-cubes">
+														<h5>Cubi</h5>
+														<div class="md-field">
+															<input type="search" data-element-search="search-cube" id="search-cube" value autocomplete="off" />
+															<label for="search-cube" class="">Ricerca</label>
+														</div>
+														<ul id="list-cubes" class="overflowList"></ul>
+													</div>
+													{{-- dimension-list --}}
+													<div id="parent-list-dimensions">
+														<h5>Dimensioni</h5>
+														<div class="md-field">
+															<input type="search" data-element-search="search-dimension" id="search-dimension" value autocomplete="off" />
+															<label for="search-dimension" class="">Ricerca</label>
+														</div>
+														<ul id="list-dimensions" class="overflowList"></ul>
+													</div>
+												</div>
+											</div>
 										</section>
 									  
 										<section class="step" data-step="2">
-											<div class="pageContent">pagina 2</div>
+											<div class="pageContent">
+												<div class="h-grid">
+													<div id="parent-list-hierarchies">
+														<h5>gerarchie</h5>
+														<div class="md-field">
+															<input type="search" data-element-search="search-hierarchy" id="search-hierarchy" value autocomplete="off" />
+															<label for="search-hierarchy" class="">Ricerca</label>
+														</div>
+														<ul id="list-hierarchies" class="full-overflow-list"></ul>
+													</div>
+													<div id="parent-list-columns">
+														<h5>colonne</h5>
+														<div class="md-field">
+															<input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" />
+															<label for="search-columns" class="">Ricerca</label>
+														</div>
+														<ul id="list-columns" class="full-overflow-list"></ul>
+													</div>
+												</div>
+											</div>
 										</section>
 
 										<section class="step" data-step="3">
@@ -340,11 +389,10 @@
 										</section>
 									</div>
 
-									<div class="buttons">
-										<button id="prev">prev</button>
-										<button id="next">next</button>
-									</div>
-
+								</div>
+								<div class="buttons">
+									<button id="prev" class="md-button">Precedente</button>
+									<button id="next" class="md-button">Successivo</button>
 								</div>
 							</div>
 						</div>

@@ -94,3 +94,9 @@ ul > section.fact{font-weight: bold;}
 
 /*new page report*/
 .wrapper{height: inherit;}
+.h-grid {display: grid; grid-gap: 16px; height: inherit;}
+.step[data-step="1"] > .pageContent{width: 60%!important;}
+.step[data-step="1"] .h-grid{grid-template-columns : 40% calc(60% - 16px);}
+.step[data-step="2"] .h-grid{grid-template-columns : 25% 25% calc(50% - 16px);}
+.overflowList{height: 350px; overflow-y: auto; background: gainsboro;}
+.full-overflow-list{height: 70%; overflow-y: auto; max-height: 450px;}
