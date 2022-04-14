@@ -289,14 +289,14 @@
 								</div>	
 							</section>
 
-							<section hidden data-label-search data-icon-edit>
+							<section hidden data-label data-element-search data-icon-edit>
 								<div class="element" name="">
 									<li class="elementSearch" label=""></li>
 									<i id="edit-icon" class="material-icons md-18">edit</i>
 								</div>	
 							</section>
 
-							<section data-label-search data-icon-delete>
+							<section data-label data-icon-delete>
 								<div class="element" name="">
 									<li class="elementSearch" label=""></li>
 									<i id="delete-icon" class="material-icons md-18">delete</i>
@@ -304,25 +304,50 @@
 							</section>
 
 							<section hidden data-element-search data-label data-no-icon>
-								<div class="element" name="">
-									<li class="elementSearch" label=""></li>
+								<div class="element" name>
+									<li class="elementSearch" label></li>
 								</div>	
 							</section>
 
 						</template>
 
 						<template id="template_ulList">
-							<ul data-id="fields-cubes" class="overflowList"></ul>
-							<ul data-id="fields-filter" class="overflowList"></ul>
-							<ul data-id="fields-dimensions" class="overflowList"></ul>
-							<ul data-id="fields-hierarchies" class="overflowList"></ul>
-							<ul data-id="fields-column" class="overflowList"></ul>
-							<ul data-id="fields-field" class="overflowList"></ul>
-							<ul data-id="fields-values" class="list middleList"></ul>
-							<ul data-id="fields-tables" class="overflowList"></ul>
-							<ul data-id="fields-metric" class="overflowList"></ul>
+							<ul data-id="list-cubes" class="overflowList"></ul>
+							<ul data-id="list-filter" class="overflowList"></ul>
+							<ul data-id="list-dimensions" class="overflowList"></ul>
+							<ul data-id="list-hierarchies" class="overflowList"></ul>
+							<ul data-id="list-columns" class="overflowList"></ul>
+							<ul data-id="list-fields" class="overflowList"></ul>
+							<ul data-id="list-values" class="list middleList"></ul>
+							<ul data-id="list-tables" class="overflowList"></ul>
+							<ul data-id="list-metrics" class="overflowList"></ul>
 						</template>
 
+						<div class="wrapper">
+							<div class="steps" data-step="1">
+								<div class="overflow">
+									<div id="stepTranslate" data-translate-x="0">
+										<section class="step" data-step="1" selected>
+											<div class="pageContent">pagina 1</div>
+										</section>
+									  
+										<section class="step" data-step="2">
+											<div class="pageContent">pagina 2</div>
+										</section>
+
+										<section class="step" data-step="3">
+											<div class="pageContent">pagina 3</div>
+										</section>
+									</div>
+
+									<div class="buttons">
+										<button id="prev">prev</button>
+										<button id="next">next</button>
+									</div>
+
+								</div>
+							</div>
+						</div>
 						
 					</div>
 				</div>

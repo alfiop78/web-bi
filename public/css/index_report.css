@@ -90,3 +90,7 @@ small.popupToast{z-index: 9999;background: #494949;border-radius: 4px;color: whi
 
 /*ul*/
 ul > section.fact{font-weight: bold;}
+
+
+/*new page report*/
+.wrapper{height: inherit;}

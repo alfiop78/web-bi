@@ -3,72 +3,75 @@ timelineId = elemento id della class='timelineContent'
 */
 
 class Steps {
+	#pageWidth;
+	#move;
+	#translateX = 0;
+	#stepActive = 1;
+	constructor(stepTranslate) {
+		// definisco il div che deve effettuare la translate
+		this._translateRef = document.getElementById(stepTranslate);
+		this._step = document.querySelector('.steps[data-step]'); // elemento con [data-step]
+		this.btnNext = this._step.querySelector('#next');
+		this.btnPrevious = this._step.querySelector('#prev');
+		// numero degli step presenti, con questo posso controllare il enabled/disabled dei tasti prev-next
+		this.stepCount = this._translateRef.childElementCount;
+		this.page = document.querySelector('.step[selected]');
+	}
 
-  constructor(stepTranslate) {
-    // definisco il div che deve effettuare la translate
-    // console.log(stepTranslate);
-    this._translateRef = document.getElementById(stepTranslate);
-    this._translateX = 0;
-    this.page = document.querySelector('.step[selected]');
-    this._step = document.getElementById('step'); // elemento con [data-step]
-    this._stepActive = 1;
-    // console.log(this._page);
-    // console.log(this._page.offsetWidth);
-    this._pageWidth = this._page.offsetWidth; // width della pagina da translare
-    //this._pageWidth = this._page.offsetWidth + 32; // width della pagina da translare
-    console.log(this._pageWidth);
+	set page(value) {
+		// imposto la pagina corrente
+		this._page = value;
+		this.btnPrevious.disabled = (this.#stepActive === 1) ? true :  false;
+		this.btnNext.disabled = (this.#stepActive === this.stepCount) ? true :  false;
+	}
 
-  }
+	get page() {return this._page;}
 
-  set page(pageRef) {
-    // imposto la pagina corrente
-    this._page = pageRef;
-  }
+	set translate(value) {
+		this._translateRef.setAttribute('translate-x', value);
+		this.#translateX = value;
+	}
 
-  get page() {return this._page;}
+	get translate() {return this.#translateX;}
 
-  set translate(value) {
-    this._translateRef.setAttribute('translate-x', value);
-    this._translateX = value;
-  }
+	previous() {
+		this.#pageWidth = this._page.offsetWidth; // width della pagina da translare
+		this.#move = this.#pageWidth + (this.#translateX);
+		if (this._page.previousElementSibling) {
+			this._translateRef.style.transform = "translateX("+this.#move+"px)";
+			this.translate = this.#move;
+			this._step.setAttribute('data-step', --this.#stepActive);
+			// rimuovo [selected] dalla pagina corrente
+			this._page.removeAttribute('selected');
+			// imposto [selected] sul nuovo step
+			this._page.previousElementSibling.setAttribute('selected', true);
+			// imposto la nuova pagina corrente
+			this.page = this._page.previousElementSibling;
+			// se la pagina precedente non esiste disabilito il tasto previous
+			this.btnPrevious.disabled = (!this.page.previousElementSibling) ? true : false;
+		}
+	}
 
-  get translate() {return this._translateX;}
+	next() {
+		this.#pageWidth = this._page.offsetWidth; // width della pagina da translare
+		this.#move = this.#pageWidth - (this.#translateX);
+		if (this._page.nextElementSibling) {
+			this._translateRef.style.transform = "translateX(-"+this.#move+"px)";
+			this.translate = -this.#move;
+			this._step.setAttribute('data-step', ++this.#stepActive);
+			// rimuovo [selected] dalla pagina corrente
+			this._page.removeAttribute('selected');
+			// imposto [selected] sul nuovo step
+			this._page.nextElementSibling.setAttribute('selected', true);
+			// imposto la nuova pagina corrente
+			this.page = this._page.nextElementSibling;
+			// se la pagina successiva non esiste disabilito il tasto next
+			this.btnNext.disabled = (!this.page.nextElementSibling) ? true : false;
+		}
+	}
 
-  previous() {
-    // this._pageWidth = this._page.offsetWidth + 32;
-    //this._translateRef.style.transform = "translateX("+(this._pageWidth-this._pageWidth)+"px)";
+	goStep(e) {
 
-    this._move = this._pageWidth + (this._translateX);
-    // this._pageWidth = this._page.offsetWidth + 32;
-    //this._translateRef.style.transform = "translateX(-"+this._pageWidth+"px)";
-    this._translateRef.style.transform = "translateX("+this._move+"px)";
-    this.translate = this._move;
-    this._step.setAttribute('data-step', --this._stepActive);
-    // rimuovo [selected] dalla pagina corrente
-    this._page.removeAttribute('selected');
-    // imposto [selected] sul nuovo step
-    this._page.previousElementSibling.setAttribute('selected', true);
-    // imposto la nuova pagina corrente
-    this.page = this._page.previousElementSibling;
-  }
-
-  next() {
-    this._move = this._pageWidth - (this._translateX);
-    // this._pageWidth = this._page.offsetWidth + 32;
-    //this._translateRef.style.transform = "translateX(-"+this._pageWidth+"px)";
-    this._translateRef.style.transform = "translateX(-"+this._move+"px)";
-    this.translate = -this._move;
-    this._step.setAttribute('data-step', ++this._stepActive);
-    // rimuovo [selected] dalla pagina corrente
-    this._page.removeAttribute('selected');
-    // imposto [selected] sul nuovo step
-    this._page.nextElementSibling.setAttribute('selected', true);
-    // imposto la nuova pagina corrente
-    this.page = this._page.nextElementSibling;
-  }
-
-  goStep(e) {
-    
-  }
+	}
 
 }

@@ -24,8 +24,8 @@ var StorageMetric = new MetricStorage();
 		dialogPopup: null,
 
 		// btn		
-		btnPreviousStep: document.getElementById('stepPrevious'),
-		btnNextStep: document.getElementById('stepNext'),
+		btnPreviousStep : document.getElementById('prev'),
+		btnNextStep : document.getElementById('next'),
 		btnStepDone: document.getElementById('stepDone'),
 		btnSaveAndProcess: document.getElementById('saveAndProcess'),
 		btnSaveColumn: document.getElementById('btnSaveColumn'), // salvataggio di un alias/sql di colonna nella dialog dialogTables
@@ -49,6 +49,31 @@ var StorageMetric = new MetricStorage();
 		ulDimensions: document.getElementById('dimensions'),
 		aggregationFunction: document.getElementById('sql-aggregation-list'),
 		btnMapping: document.getElementById('mdcMapping')
+	}
+
+	// carico elenco Cubi su cui creare il report
+	app.getCubes = () => {
+		// const content = app.tmplUlList.content.cloneNode(true);
+		// const ul = content.querySelector("ul[data-id='list-cubes']");
+		const ul = document.getElementById('list-cubes');
+		const parent = document.getElementById('parent-list-cubes');
+		for (const [key, value] of Object.entries(StorageCube.cubes)) {
+			const contentElement = app.tmplList.content.cloneNode(true);
+			const section = contentElement.querySelector('section[data-no-icon]');
+			const element = section.querySelector('.element');
+			const li = element.querySelector('li');
+			section.setAttribute('data-label-search', key);
+			section.removeAttribute('hidden');
+			// element.setAttribute('data-cube-id', value.id);
+			// element.setAttribute('data-cube-name', key);
+			li.innerText = key;
+			li.setAttribute('label', key);
+			li.setAttribute('data-cube-id', value.id);
+			li.setAttribute('data-cube-name', key);
+			ul.appendChild(section);
+			li.onclick = app.handlerCubeSelected;
+		}
+		parent.appendChild(ul);
 	}
 
 	app.showPopupDialog = (e) => {
@@ -1069,30 +1094,6 @@ var StorageMetric = new MetricStorage();
 		app.checkFilterForm();
 	}
 
-	// carico elenco Cubi su cui creare il report
-	app.getCubes = () => {
-		const content = app.tmplUlList.content.cloneNode(true);
-		const ul = content.querySelector("ul[data-id='fields-cubes']");
-		const parent = document.getElementById('fieldList-cubes'); // dove verrà inserita la <ul>
-		for (const [key, value] of Object.entries(StorageCube.cubes)) {
-			const contentElement = app.tmplList.content.cloneNode(true);
-			const section = contentElement.querySelector('section[data-no-icon]');
-			const element = section.querySelector('.element');
-			const li = element.querySelector('li');
-			section.setAttribute('data-label-search', key);
-			section.removeAttribute('hidden');
-			// element.setAttribute('data-cube-id', value.id);
-			// element.setAttribute('data-cube-name', key);
-			li.innerText = key;
-			li.setAttribute('label', key);
-			li.setAttribute('data-cube-id', value.id);
-			li.setAttribute('data-cube-name', key);
-			ul.appendChild(section);
-			li.onclick = app.handlerCubeSelected;
-		}
-		parent.appendChild(ul);
-	}
-
 	app.getDimensions = () => {
 		// elenco di tutte le dimensioni
 		const content = app.tmplUlList.content.cloneNode(true);
@@ -1436,9 +1437,9 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
-	app.getCubes();
+	// app.getCubes();
 
-	app.getDimensions();
+	/*app.getDimensions();
 
 	app.getHierarchies();
 
@@ -1454,7 +1455,7 @@ var StorageMetric = new MetricStorage();
 
 	app.getMetricsInCubes();
 
-	app.getMetrics();
+	app.getMetrics();*/
 
 	app.datamartToBeProcessed();
 
@@ -1513,15 +1514,16 @@ var StorageMetric = new MetricStorage();
 	app.btnNextStep.onclick = () => {
 		// verifica selezioni cubo e dimensioni
 		// console.log('return check : ', app.checkSelection());
-		if (app.checkSelection()) Step.next();
+		Step.next();
+		// if (app.checkSelection()) Step.next();
 	}
 
 	// tasto completato nello step 4, // dialog per il salvataggio del nome del report
-	app.btnStepDone.onclick = (e) => {
+	/*app.btnStepDone.onclick = (e) => {
 		app.dialogSaveReport.showModal();
 		// sulla dialog imposto la modalità di salvataggio tra process/report, se impostato su process salvo, dal tasto OK, il process del report, altrimenti salvo il report con tutte le sue opzioni
 		app.dialogSaveReport.setAttribute('mode', 'process');
-	}
+	}*/
 
 	// salvo il process nel DB
 	app.saveProcess = async () => {
