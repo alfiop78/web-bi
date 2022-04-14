@@ -30,26 +30,20 @@
 		<dialog id="dialogTables" class="dialog-tables">
 			<small id="dialog-popup" class="popupToast"></small>
 			<section data-hier-name data-dimension-name>
-				<h4>Seleziona le colonne da includere per la tabella <span></span></h4>
+				<h4>Seleziona le colonne da includere nel report</h4>
 
 				<div class="stepLayout">
 
 					<section class="sectionLists">
-						<h5>Tabelle</h5><h6>subtitle</h6>
-						<div class="md-field">
-							<input type="search" data-element-search="columns-table-list" id="searchTables" value="" autocomplete="off" />
-							<label for="searchTables" class="">Ricerca</label>
+						{{-- <h5>tabelle</h5><h6>subtitle</h6> --}}
+						<div id="parent-list-columns">
+							<h5>colonne</h5>
+							<div class="md-field">
+								<input type="search" data-element-search="search-columns" id="dialog-columns-search-column" value autocomplete="off" />
+								<label for="dialog-columns-search-column" class="">Ricerca</label>
+							</div>
+							<ul id="list-columns" class="overflowList"></ul>
 						</div>
-						<div id="fieldList-tables"><!-- qui viene inserito il template tmpl_ulList--></div>
-					</section>
-
-					<section class="sectionLists">
-						<h5>Colonne</h5><h6>Seleziona le colonne da includere</h6>
-						<div class="md-field" value>
-							<input type="search" data-element-search="columns-field-list" id="fieldSearch" value autocomplete="off" />
-							<label for="fieldSearch" class="">Ricerca</label>
-						</div>
-						<div id="table-fieldList"></div>
 					</section>
 
 					<section class="sectionLists">
@@ -318,7 +312,15 @@
 							</section>
 
 						</template>
-						<template id="sublist-item"><span class="sublist-item">table 1</span></template>
+						<template id="sublist-item">
+							<span class="sublist-element">
+								<span class="sublist-item"></span>
+								<span class="icons">
+									<i data-id="column-icon" class="material-icons md-18">view_list</i>
+									<i data-id="filter-icon" class="material-icons md-18">filter_alt</i>									
+								</span>
+							</span>
+						</template>
 
 						<template id="template_ulList">
 							<ul data-id="list-cubes" class="overflowList"></ul>
@@ -371,14 +373,6 @@
 															<label for="search-hierarchy" class="">Ricerca</label>
 														</div>
 														<ul id="list-hierarchies" class="full-overflow-list"></ul>
-													</div>
-													<div id="parent-list-columns">
-														<h5>colonne</h5>
-														<div class="md-field">
-															<input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" />
-															<label for="search-columns" class="">Ricerca</label>
-														</div>
-														<ul id="list-columns" class="full-overflow-list"></ul>
 													</div>
 												</div>
 											</div>
