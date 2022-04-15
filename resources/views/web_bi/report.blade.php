@@ -374,6 +374,23 @@
 														</div>
 														<ul id="list-hierarchies" class="full-overflow-list"></ul>
 													</div>
+													<div>
+														<h5>Report</h5>
+														<div class="addElementsReport">
+															<div id="btn-add-filters">
+																<span>colonne</span>
+																<i class="material-icons md-36">add</i>
+															</div>
+															<div id="btn-add-filters">
+																<span>filtri</span>
+																<i class="material-icons md-36">add</i>
+															</div>
+															<div id="btn-add-metrics">
+																<span>metriche</span>
+																<i class="material-icons md-36">add</i>
+															</div>
+														</div>
+													</div>
 												</div>
 											</div>
 										</section>

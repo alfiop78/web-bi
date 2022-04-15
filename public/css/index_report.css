@@ -92,11 +92,15 @@ small.popupToast{z-index: 9999;background: #494949;border-radius: 4px;color: whi
 ul > section.fact{font-weight: bold;}
 
 
-/*new page report*/
+/* NOTE:  new page report*/
 .wrapper{height: inherit;}
 .h-grid {display: grid; grid-gap: 16px; height: inherit;}
 .step[data-step="1"] > .pageContent{width: 60%!important;}
 .step[data-step="1"] .h-grid{grid-template-columns : 40% calc(60% - 16px);}
-.step[data-step="2"] .h-grid{grid-template-columns : 25% 25% calc(50% - 16px);}
+.step[data-step="2"] .h-grid{grid-template-columns : 25% calc(75% - 16px);}
 .overflowList{height: 350px; overflow-y: auto; background: gainsboro;}
 .full-overflow-list{height: 70%; overflow-y: auto; max-height: 450px;}
+
+.addElementsReport{background: #dcdcdc61;display: grid;grid-template-columns: auto auto; color: dimgrey;}
+.addElementsReport > div{display: grid;grid-template-rows: auto 50px;justify-content: center;align-items: center;justify-items: center;padding: 2em;}
+.addElementsReport > div > span{padding: 1em;}
