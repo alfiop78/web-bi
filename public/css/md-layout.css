@@ -96,7 +96,7 @@ section > h3 ~ h5{font-weight: lighter;}
 /* lists */
 .lists{display: flex;}
 ul > .element:not([hide]){display: flex;margin: 2px 6px;padding: 4px;font-size: .8rem;}
-ul > section{margin: 2px 6px; padding: 4px; font-size: .8rem; border: solid thin gainsboro}
+ul > section{margin: 2px 6px; padding: 4px; font-size: .8rem; border: solid thin gainsboro;}
 ul > section > .element:not([hidden]){display: flex;justify-content: space-between;align-items: center;width: 100%;}
 ul > section > .element > .sublist{display: flex;flex-direction: column; width: 100%;}
 ul > section > .element > .sublist > .sublist-element{padding: .1em .5em .1em 2em; width: 100%; display: flex; justify-content: space-between; align-items: center;}
@@ -117,7 +117,7 @@ ul > .element li{width: 100%;list-style-type: none;display: flex;align-items: ce
 
 /* .sectionLists*/
 ul .element > li:hover{background: var(--main-secondary-color); border-radius: 4px;cursor: pointer;}
-ul .sublist .sublist-item:hover{background: var(--main-secondary-color); border-radius: 4px;cursor: pointer;}
+/*ul .sublist .sublist-item:hover{background: var(--main-secondary-color); border-radius: 4px;cursor: pointer;}*/
 ul li[selected]{background: var(--main-secondary-color); border-radius: 4px;cursor: pointer;}
 /* .sectionLists*/
 

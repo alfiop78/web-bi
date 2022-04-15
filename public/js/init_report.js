@@ -19,12 +19,14 @@ var StorageMetric = new MetricStorage();
 		tmplUlList: document.getElementById('template_ulList'), // contiene le <ul>
 		tmplList: document.getElementById('templateList'), // contiene i section
 		tmplSubList : document.getElementById('sublist-item'),
+		tmplSubListTable : document.getElementById('data-sublist-table-columns'),
 
 		// popup
 		popup: document.getElementById('popup'),
 		dialogPopup: null,
 
-		// btn		
+		// btn
+		btnAddColumns : document.getElementById('btn-add-columns'),
 		btnPreviousStep : document.getElementById('prev'),
 		btnNextStep : document.getElementById('next'),
 		btnStepDone: document.getElementById('stepDone'),
@@ -112,6 +114,24 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
+	app.handlerSelectHierarchy = (e) => {
+		e.currentTarget.toggleAttribute('selected');
+		const hier = e.currentTarget.getAttribute('data-hier-name');
+		if (e.currentTarget.hasAttribute('selected')) {
+			// visualizzo, in ul list-columns, solo le tabelle delle gerarchie selezionate
+			document.querySelectorAll("#list-columns section[data-hier-name='" + hier + "']").forEach( (hier) => {
+				hier.hidden = false;
+				hier.setAttribute('data-searchable', true);
+			});
+		} else {
+			// deselezione della gerarchia, nascondo le tabelle della gerarchia selezionata
+			document.querySelectorAll("#list-columns section[data-hier-name='" + hier + "']").forEach( (hier) => {
+				hier.hidden = true;
+				hier.removeAttribute('data-searchable');
+			});
+		}
+	}
+
 	// lista gerarchie
 	app.getHierarchies = () => {
 		// imposto un data-dimension-id/name sugli .element della lista gerarchie, in questo modo posso filtrarle quando seleziono le dimensioni nello step precedente
@@ -134,6 +154,7 @@ var StorageMetric = new MetricStorage();
 				section.setAttribute('data-element-search','search-hierarchy'); // ricerca dalla input sopra
 				section.setAttribute('data-dimension-name', dimValue.name);
 				section.setAttribute('data-hier-name', hierName);
+				section.addEventListener('click', app.handlerSelectHierarchy);
 				li.innerText = hierName;
 				li.setAttribute('data-hier-name', hierName);
 				li.setAttribute('data-dimension-name', dimName);
@@ -156,6 +177,7 @@ var StorageMetric = new MetricStorage();
 					columnIcon.onclick = app.openDialogColumns;
 					filterIcon.onclick = app.openDialogFilters
 					sublistItem.innerText = table.table;
+					sublistItem.setAttribute('data-table-id', tableId);
 					sublist.appendChild(sublistElement);
 				}
 			}
@@ -172,37 +194,62 @@ var StorageMetric = new MetricStorage();
 		for (const [key, value] of (Object.entries(Dim.dimensions))) {
 			// key : nome della dimensione
 			// value : tutte le property della dimensione
-			// console.log('key : ', key);
-			// console.log('value : ', value.columns);
-			// le columns sono all'interno della prop hierarchies.nomeGerarchia.columns per cui vado a ciclare questa prop
-			// per ogni gerarchia vado ad aggiungere le columns
 			for (const [hier, hierValue] of Object.entries(value.hierarchies)) {
-				// console.log('hier : ', hier, hierValue.columns);
-				for (const [table, fields] of Object.entries(hierValue.columns)) {
-					// console.log('table : ', table);
-					// console.log('fields : ', fields);
-					// debugger;
-					for (let field in fields) {
+
+				for (const [tableId, orderTable] of Object.entries(hierValue.order)) {
+					console.log('tableId : ', tableId);
+					console.log('orderTable : ', orderTable);
+					// console.log('fields : ', orderTable.alias);
+					// console.log('hierValue.columns : ', hierValue.columns[orderTable.alias]);
+					for (const field in hierValue.columns[orderTable.alias]) {
 						// console.log('field : ', field);
-						// console.log('fields[field] : ', fields[field]);
-						const contentElement = app.tmplList.content.cloneNode(true);
-						const section = contentElement.querySelector('section[data-no-icon');
-						const element = section.querySelector('.element');
-						const li = element.querySelector('li');
+						const content = app.tmplList.content.cloneNode(true);
+						const section = content.querySelector('section[data-sublist-hier-table-columns]');
+						const subList = section.querySelector('.sublist');
+						const spanHier = subList.querySelector('span[hier]');
+						const spanTable = subList.querySelector('span[table]');
+						const spanColumn = subList.querySelector('span[column]');
 						section.setAttribute('data-label', field);
 						section.setAttribute('data-element-search', 'search-columns');
-						section.setAttribute('data-table-name', table.split('_')[0]);
-						section.setAttribute('data-dimension-name', key);
 						section.setAttribute('data-hier-name', hier);
-						li.innerText = field;
-						li.setAttribute('label', field);
-						li.setAttribute('data-key', fields[field]);
-						li.setAttribute('data-table-name', table.split('_')[0]);
-						li.setAttribute('data-table-alias', table);
+						spanHier.innerText = hier;
+						spanTable.innerText = orderTable.table;
+						spanColumn.innerText = field;
+						spanColumn.setAttribute('data-label', field);
+						// spanColumn.setAttribute('data-table-name', table.split('_')[0]);
+						spanColumn.setAttribute('data-alias-name', orderTable.table);
+						spanColumn.setAttribute('data-table-id', tableId);
+						spanColumn.setAttribute('data-dimension-name', key);
+						spanColumn.setAttribute('data-hier-name', hier);
+						// spanColumn.setAttribute('data-table-id')
+						spanColumn.onclick = app.selectColumn;
 						ul.appendChild(section);
-						li.onclick = app.selectColumn;
 					}
-					parent.appendChild(ul);
+				// for (const [table, fields] of Object.entries(hierValue.columns)) {
+					// for (let field in fields) {
+						// console.log('field : ', field);
+						// console.log('fields[field] : ', fields[field]);
+						/*const content = app.tmplList.content.cloneNode(true);
+						const section = content.querySelector('section[data-sublist-hier-table-columns]');
+						const subList = section.querySelector('.sublist');
+						const spanHier = subList.querySelector('span[hier]');
+						const spanTable = subList.querySelector('span[table]');
+						const spanColumn = subList.querySelector('span[column]');
+						section.setAttribute('data-label', field);
+						section.setAttribute('data-element-search', 'search-columns');
+						section.setAttribute('data-hier-name', hier);
+						spanHier.innerText = hier;
+						spanTable.innerText = table;
+						spanColumn.innerText = field;
+						spanColumn.setAttribute('data-label', field);
+						spanColumn.setAttribute('data-table-name', table.split('_')[0]);
+						spanColumn.setAttribute('data-alias-name', table);
+						spanColumn.setAttribute('data-dimension-name', key);
+						spanColumn.setAttribute('data-hier-name', hier);
+						// spanColumn.setAttribute('data-table-id')
+						spanColumn.onclick = app.selectColumn;
+						ul.appendChild(section);*/
+					// }
 				}
 			}
 		}
@@ -432,9 +479,9 @@ var StorageMetric = new MetricStorage();
 		console.log('Dimensione selezionata : ', Dim.selected);
 		e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('selected')) {
-			document.querySelectorAll("#list-hierarchies > section[data-dimension-name='" + Dim.selected.name + "']").forEach((hier) => {
-			hier.hidden = false;
-			hier.setAttribute('data-searchable', true);
+			document.querySelectorAll("#list-hierarchies > section[data-dimension-name='" + Dim.selected.name + "']").forEach( (hier) => {
+				hier.hidden = false;
+				hier.setAttribute('data-searchable', true);
 			});
 			Query.factRelation = Dim.selected;
 			// imposto, in un object le dimensioni selezionate, questo mi servirà nella dialog-metrics per visualizzare/nascondere solo i filtri appartenenti alle dimensioni selezionate
@@ -561,18 +608,18 @@ var StorageMetric = new MetricStorage();
 
 	// selezione delle colonne nella dialogTables
 	app.selectColumn = (e) => {
-		console.log('e.currentTarget : ', e.currentTarget);
 		e.currentTarget.toggleAttribute('selected');
-		Query.field = e.currentTarget.getAttribute('label');
+		Query.table = e.currentTarget.getAttribute('data-table-name');
+		Query.tableAlias = e.currentTarget.getAttribute('data-alias-name');
+		// Query.tableId = e.currentTarget.getAttribute('data-table-id');
+		Query.field = e.currentTarget.getAttribute('data-label');
 		if (!e.currentTarget.hasAttribute('selected')) {
-			// deselezionato
+			// TODO: colonna deselezionata, implementare la logica in Query.deleteSelect
 			Query.deleteSelect();
-			// Query.deleteGroupBy();
 		} else {
-			// selezionato
-			document.getElementById('columnName').value = "";
+			document.getElementById('columnName').value = '';
+			document.getElementById('columnAlias').value = '';
 			document.getElementById('columnName').focus();
-			document.getElementById('columnAlias').value = "";
 		}
 	}
 
@@ -1446,6 +1493,26 @@ var StorageMetric = new MetricStorage();
 		// console.log('return check : ', app.checkSelection());
 		Step.next();
 		// if (app.checkSelection()) Step.next();
+	}
+
+	// aggiungi colonne (step-2)
+	app.btnAddColumns.onclick = (e) => {
+		console.log('addColumns');
+		// verifico che almeno una gerarchia è stata selezionata
+		const hierSelectedCount = document.querySelectorAll('#list-hierarchies section[selected]').length;
+		if (hierSelectedCount === 0) {
+			App.handlerConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
+			return;
+		} else {
+			// TODO: recupero le gerarchie selezionate
+			const hierSelected = document.querySelectorAll('#list-hierarchies section[selected]');
+			// TODO: per ogni gerarchia selezionata aggiungo le tabelle e le colonne in una lista
+			app.dialogTables.showModal();
+
+
+		}
+
+		// TODO: apro la dialog, oppure un form, per completare l'aggiunta di nuove colonne
 	}
 
 	// tasto completato nello step 4, // dialog per il salvataggio del nome del report

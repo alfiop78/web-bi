@@ -3,6 +3,7 @@ window.onload = function() {
 	console.log('onload');
 	// TODO: input search, non tutte le input
 	document.addEventListener('input', App.genericSearch);
+	// TODO: utilizzare mutationObserver sulle input in modo da attivare l'evento quando viene inserito un testo nella input NON tramite tastiera
 
 	// se le input non hanno contenuto non evidenzio le label come :invalid, aggiungendo una class=has-content sulle label
 	// var inputs = document.querySelectorAll("input:not([type='checkbox']):not([type='radio'])");

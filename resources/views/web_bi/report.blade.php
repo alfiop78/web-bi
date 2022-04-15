@@ -42,7 +42,7 @@
 								<input type="search" data-element-search="search-columns" id="dialog-columns-search-column" value autocomplete="off" />
 								<label for="dialog-columns-search-column" class="">Ricerca</label>
 							</div>
-							<ul id="list-columns" class="overflowList"></ul>
+							<ul id="list-columns" class="full-overflow-list-columns"></ul>
 						</div>
 					</section>
 
@@ -308,10 +308,21 @@
 									<span class="sublist">
 										<li class="elementSearch" label></li>
 									</span>
-								</div>	
+								</div>
+							</section>
+
+							<section data-element-search data-label data-sublist-hier-table-columns hidden>
+								<div class="element" name>
+									<span class="sublist">
+										<span hier></span>
+										<span table></span>
+										<span column></span>
+									</span>
+								</div>
 							</section>
 
 						</template>
+
 						<template id="sublist-item">
 							<span class="sublist-element">
 								<span class="sublist-item"></span>
@@ -377,15 +388,15 @@
 													<div>
 														<h5>Report</h5>
 														<div class="addElementsReport">
-															<div id="btn-add-filters">
+															<div class="btn-add">
 																<span>colonne</span>
-																<i class="material-icons md-36">add</i>
+																<i id="btn-add-columns" class="material-icons md-36">add</i>
 															</div>
-															<div id="btn-add-filters">
+															<div class="btn-add">
 																<span>filtri</span>
 																<i class="material-icons md-36">add</i>
 															</div>
-															<div id="btn-add-metrics">
+															<div class="btn-add">
 																<span>metriche</span>
 																<i class="material-icons md-36">add</i>
 															</div>
