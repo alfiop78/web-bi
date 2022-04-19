@@ -217,7 +217,8 @@ var StorageMetric = new MetricStorage();
 						spanColumn.innerText = field;
 						spanColumn.setAttribute('data-label', field);
 						// spanColumn.setAttribute('data-table-name', table.split('_')[0]);
-						spanColumn.setAttribute('data-alias-name', orderTable.table);
+						spanColumn.setAttribute('data-table-name', orderTable.table);
+						spanColumn.setAttribute('data-alias-name', orderTable.alias);
 						spanColumn.setAttribute('data-table-id', tableId);
 						spanColumn.setAttribute('data-dimension-name', key);
 						spanColumn.setAttribute('data-hier-name', hier);
@@ -611,7 +612,7 @@ var StorageMetric = new MetricStorage();
 		e.currentTarget.toggleAttribute('selected');
 		Query.table = e.currentTarget.getAttribute('data-table-name');
 		Query.tableAlias = e.currentTarget.getAttribute('data-alias-name');
-		// Query.tableId = e.currentTarget.getAttribute('data-table-id');
+		Query.tableId = e.currentTarget.getAttribute('data-table-id');
 		Query.field = e.currentTarget.getAttribute('data-label');
 		if (!e.currentTarget.hasAttribute('selected')) {
 			// TODO: colonna deselezionata, implementare la logica in Query.deleteSelect
@@ -620,6 +621,10 @@ var StorageMetric = new MetricStorage();
 			document.getElementById('columnName').value = '';
 			document.getElementById('columnAlias').value = '';
 			document.getElementById('columnName').focus();
+			debugger;
+			// imposto, nella section della dialog, l'attributo data-hier-name e data-dimension-name selezionata
+			app.dialogTables.querySelector('section').setAttribute('data-hier-name', e.currentTarget.getAttribute('data-hier-name'));
+			app.dialogTables.querySelector('section').setAttribute('data-dimension-name', e.currentTarget.getAttribute('data-dimension-name'));
 		}
 	}
 
@@ -924,20 +929,23 @@ var StorageMetric = new MetricStorage();
 				}
 			}
 		}
+		// azzero #firstTable dopo aver creato la 'from' e 'where' per la hier selezionata
+
 	}
 
 	// tasto Fatto nella dialog Tables
 	app.btnColumnDone.onclick = () => {
+		// TODO: L'oggetto Query.select ora è popolato con le colonne scelte, da aggiungere al report. Popolo un div dove sono presenti le colonne scelte prima di chiudere la dialog.
 		// console.log('Query.table : ', Query.table);
 		// console.log('Query.tableId : ', Query.tableId);
 		if (!app.dialogTables.querySelector('section').hasAttribute('data-fact-name')) {
-			const hier = app.dialogTables.querySelector('section').getAttribute('data-hier-name');
+			/*const hier = app.dialogTables.querySelector('section').getAttribute('data-hier-name');
 			const list = document.getElementById('fieldList-tables');
-			Dim.selected = app.dialogTables.querySelector('section').getAttribute('data-dimension-name');
+			Dim.selected = app.dialogTables.querySelector('section').getAttribute('data-dimension-name');*/
 			// recupero la property #select della classe Query per visualizzare nella <ul> #fields-set
-			const ul = document.getElementById('fields-set');
-			console.log('Query.select : ', Query.select);
 			debugger;
+			const ul = document.getElementById('report-columns');
+			console.log('Query.select : ', Query.select);
 			for (const [key, value] of Object.entries(Query.select)) {
 				const contentElement = app.tmplList.content.cloneNode(true);
 				const section = contentElement.querySelector('section[data-no-icon]');
@@ -1637,14 +1645,20 @@ var StorageMetric = new MetricStorage();
 		e.target.toggleAttribute('selected');
 	}
 
-	// 'Salva' nella dialogTables
+	// Salva nella dialogTables
 	app.btnSaveColumn.onclick = (e) => {
+		const hier = app.dialogTables.querySelector('section').getAttribute('data-hier-name');
+		Dim.selected = app.dialogTables.querySelector('section').getAttribute('data-dimension-name');
+		
 		Query.columnName = document.getElementById('columnName').value;
 		const alias = document.getElementById('columnAlias').value;
 		const textarea = (document.getElementById('columnSQL').value.length === 0) ? null : document.getElementById('columnSQL').value;
 		Query.select = { table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQL: textarea, alias };
 		debugger;
-		Query.addTables();
+		Query.addTables(hier);
+
+		// verifico quali relazioni inserire in where e quindi anche in from
+		app.checkRelations(hier);
 		// aggiungo la colonna selezionata a Query.groupBy
 		// Query.groupBy = {table : Query.table, field: Query.field, SQL: textarea};
 		document.getElementById('columnAlias').value = '';

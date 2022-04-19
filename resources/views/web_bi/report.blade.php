@@ -388,10 +388,16 @@
 													<div>
 														<h5>Report</h5>
 														<div class="addElementsReport">
-															<div class="btn-add">
-																<span>colonne</span>
-																<i id="btn-add-columns" class="material-icons md-36">add</i>
+															<div>
+																<div class="btn-add">
+																	<span>colonne</span>
+																	<i id="btn-add-columns" class="material-icons md-36">add</i>
+																</div>
+																<div>
+																	<ul id="report-columns"></ul>
+																</div>
 															</div>
+															
 															<div class="btn-add">
 																<span>filtri</span>
 																<i class="material-icons md-36">add</i>
@@ -400,6 +406,12 @@
 																<span>metriche</span>
 																<i class="material-icons md-36">add</i>
 															</div>
+														</div>
+														{{-- elementi del report --}}
+														<div class="elementsReport">
+															
+															<ul id="report-filters"></ul>
+															<ul id="report-metrics"></ul>
 														</div>
 													</div>
 												</div>
