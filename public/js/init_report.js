@@ -197,8 +197,8 @@ var StorageMetric = new MetricStorage();
 			for (const [hier, hierValue] of Object.entries(value.hierarchies)) {
 
 				for (const [tableId, orderTable] of Object.entries(hierValue.order)) {
-					console.log('tableId : ', tableId);
-					console.log('orderTable : ', orderTable);
+					// console.log('tableId : ', tableId);
+					// console.log('orderTable : ', orderTable);
 					// console.log('fields : ', orderTable.alias);
 					// console.log('hierValue.columns : ', hierValue.columns[orderTable.alias]);
 					for (const field in hierValue.columns[orderTable.alias]) {
@@ -618,10 +618,10 @@ var StorageMetric = new MetricStorage();
 			// TODO: colonna deselezionata, implementare la logica in Query.deleteSelect
 			Query.deleteSelect();
 		} else {
-			document.getElementById('columnName').value = '';
+			// document.getElementById('columnName').value = e.currentTarget.getAttribute('data-label');
+			document.getElementById('columnName').setAttribute('value', e.currentTarget.getAttribute('data-label'));
 			document.getElementById('columnAlias').value = '';
 			document.getElementById('columnName').focus();
-			debugger;
 			// imposto, nella section della dialog, l'attributo data-hier-name e data-dimension-name selezionata
 			app.dialogTables.querySelector('section').setAttribute('data-hier-name', e.currentTarget.getAttribute('data-hier-name'));
 			app.dialogTables.querySelector('section').setAttribute('data-dimension-name', e.currentTarget.getAttribute('data-dimension-name'));
@@ -1659,13 +1659,25 @@ var StorageMetric = new MetricStorage();
 
 		// verifico quali relazioni inserire in where e quindi anche in from
 		app.checkRelations(hier);
-		// aggiungo la colonna selezionata a Query.groupBy
-		// Query.groupBy = {table : Query.table, field: Query.field, SQL: textarea};
 		document.getElementById('columnAlias').value = '';
 	}
 
 	app.btnMapping.onclick = () => location.href = '/mapping';
 
 	app.btnBackPage.onclick = () => window.location.href = '/';
+
+	// NOTE: esempio di utilizzo di MutationObserver
+	const columnName = document.getElementById('columnName');
+    // create a new instance of `MutationObserver` named `observer`,
+	// passing it a callback function
+	const observer = new MutationObserver(function() {
+	    console.log('callback that runs when observer is triggered');
+	    // debugger;
+	    // console.log(fields);
+	    (columnName.value.length > 0) ? columnName.parentElement.querySelector('label').classList.add('has-content') : columnName.parentElement.querySelector('label').classList.remove('has-content');
+	});
+	// call `observe()` on that MutationObserver instance,
+	// passing it the element to observe, and the options object
+	observer.observe(columnName, {subtree: true, childList: true, attributes: true})
 
 })();

@@ -114,6 +114,6 @@ ul > section[data-sublist][selected]{border-left: solid thick indianred;}
 
 span[hier] {color: dimgray; padding: .5em .2em;font-size: .75rem;}
 span[table] {color: dimgray; padding: .5em .7em;font-size: .75rem;}
-span[column] {padding: .5em 1.5em; font-size: .8rem;}
-span[column]:hover{border-left: solid 10px indianred; cursor: pointer;}
-span[column][selected]{border-left: solid 10px indianred;}
+span[column] {padding: .5em 1.5em; font-size: .8rem; border-left-width: 0px; border-left-style: solid; border-left-color: indianred; transition: border-left-width 150ms;}
+span[column]:hover{border-left-width: 10px; border-left-style: solid; border-left-color: indianred; cursor: pointer; transition: border-left-width 150ms;}
+span[column][selected]{border-left-width: 10px; border-left-style: solid; border-left-color: indianred;}
