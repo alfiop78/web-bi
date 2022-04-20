@@ -89,62 +89,64 @@
 
 		</dialog>
 
+		<dialog id="dialog-value" class="mini-dialog">
+			<section>
+				<h4>Ricerca valori per la colonna</h4>
+				<div class="md-field">
+					<input type="search" id="dialog-value-search" data-element-search="dialog-value-search" value autocomplete="off" />
+					<label for="dialog-value-search" class="">Ricerca valori</label>
+				</div>
+				<ul id="dialog-filter-values" class="full-overflow-list-columns"></ul>
+			</section>
+
+			<div class="dialog-buttons">
+				<button type="button" name="cancel" class="md-button">annulla</button>
+				<button id="btnValueDone" type="button" name="value-done" class="md-button">ok</button>
+			</div>
+		</dialog>
+
 		<dialog id="dialogFilter" class="dialog-filters">
 			<small id="dialog-popup" class="popupToast"></small>
 			<section data-table-selected>
-				<h4>Selezione filtri per la tabella <span></span></h4>
+				<h4>Creazione nuovo filtro</h4>
 				<div class="stepLayout">
 
 					<section class="sectionLists">
-						<h5>Tabelle</h5><h6>subtitle</h6>
+						<h5>Tabelle</h5><h6>Seleziona la tabella</h6>
 						<div class="md-field">
-							<input type="search" data-element-search="filters-table-list" id="filter-searchTables" value autocomplete="off" />
-							<label for="filter-searchTables" class="">Ricerca</label>
+							<input type="search" data-element-search="search-tables" id="dialog-columns-search-table" value autocomplete="off" />
+							<label for="dialog-columns-search-table" class="">Ricerca</label>
 						</div>
-						<div id="filter-fieldList-tables"><!-- qui viene inserito il template tmpl_ulList--></div>
+						<ul id="list-tables" class="full-overflow-list-columns"></ul>
 					</section>
 					
 					<section class="sectionLists">
-						<h5>Crea filtro</h5><h6>subtitle</h6>
+						<h5>Colonna/e</h5><h6>Seleziona la colonna</h6>
 						<div class="md-field">
-							<input type="search" id="fieldSearch" data-element-search="search-field-db" value autocomplete="off" />
-							<label for="fieldSearch" class="">Ricerca</label>
+							<input type="search" id="dialog-filter-search-field" data-element-search="dialog-filter-search-field" value autocomplete="off" />
+							<label for="dialog-filter-search-field" class="">Ricerca</label>
 						</div>
-						<div id="fieldList-filter"><!-- template ul--></div>
-						
+						<ul id="dialog-filter-fields" class="full-overflow-list-columns"></ul>						
 					</section>
 
 					<section class="sectionLists">
-						<h5>Modifica</h5><h6>subtitle</h6>
+						<h5>SQL</h5><h6>Inserisci una formula SQL</h6>
 						<div class="md-field">
 							<input type="text" id="inputFilterName" name="filterName" autocomplete="off" />
-							<label for="inputFilterName" class="">Filter name</label>
+							<label for="inputFilterName" class="">name</label>
 						</div>
 						<div class="md-field">
-							<textarea id="filterSQLFormula" name="filterSQL" rows="5" cols="33" placeholder="SQL"></textarea>
+							<textarea id="filterSQLFormula" name="filterSQL" rows="10" cols="33" placeholder="SQL"></textarea>
 						</div>
-						<div class="md-field">
-							<input type="search" id="searchValues" value="" autocomplete="off" />
-							<label for="searchValues" class="">Ricerca valori</label>
-						</div>
-						<div id="filter-valueList"><!-- template ul--></div>
-						
+						<i class="material-icons" id="search-field-values" data-field-name>search</i>
+						<button id="btnFilterSave" type="button" name="save" class="md-button" disabled="true">salva</button>
 					</section>
 
-					<section class="sectionLists">
-						<h5>Filtri esistenti</h5><h6>Seleziona i filtri da aggiungere al report</h6>
-						<div class="md-field">
-							<input type="search" id="searchExistsFilter" data-element-search="search-exist-filters" value autocomplete="off" />
-							<label for="searchExistsFilter" class="">Ricerca</label>
-						</div>
-						<div id="existFilters"><!-- template ul--></div>
-					</section>
 				</div>
 
 				<div class="dialog-buttons">
 					<button type="button" name="cancel" class="md-button">annulla</button>
-					<button id="btnFilterSave" type="button" name="save" class="md-button" disabled="true">salva</button>
-					<button id="btnFilterDone" type="button" name="done" class="md-button">fine</button>
+					<button id="btnFilterDone" type="button" name="done" class="md-button">chiudi</button>
 				</div>
 			</section>
 		</dialog>
@@ -330,6 +332,21 @@
 								</div>
 							</section>
 
+							<section data-element-search data-label data-sublist-table hidden>
+								<div class="element" name>
+									<span class="sublist">
+										<span hier></span>
+										<span table></span>
+									</span>
+								</div>
+							</section>
+
+							<section data-element-search data-label data-sublist-generic hidden>
+								<span class="sublist">
+									<span generic class="selectable"></span>
+								</span>
+							</section>
+
 						</template>
 
 						<template id="sublist-item">
@@ -368,7 +385,7 @@
 															<input type="search" data-element-search="search-cube" id="search-cube" value autocomplete="off" />
 															<label for="search-cube" class="">Ricerca</label>
 														</div>
-														<ul id="list-cubes" class="overflowList"></ul>
+														<ul id="list-cubes" class="full-overflow-list-columns"></ul>
 													</div>
 													{{-- dimension-list --}}
 													<div id="parent-list-dimensions">
@@ -377,7 +394,7 @@
 															<input type="search" data-element-search="search-dimension" id="search-dimension" value autocomplete="off" />
 															<label for="search-dimension" class="">Ricerca</label>
 														</div>
-														<ul id="list-dimensions" class="overflowList"></ul>
+														<ul id="list-dimensions" class="full-overflow-list-columns"></ul>
 													</div>
 												</div>
 											</div>
@@ -402,7 +419,7 @@
 																<i id="btn-add-columns" class="material-icons md-36">add</i>
 															</div>															
 															<div class="btn-add">
-																<span>filtri</span>
+																<span>nuovo filtro</span>
 																<i id="btn-add-filters" class="material-icons md-36">add</i>
 															</div>
 															<div class="btn-add">

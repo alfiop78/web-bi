@@ -37,7 +37,7 @@ i[open]{color: red;}
 
 .stepLayout .sectionLists{height: inherit;}
 
-dialog.dialog-filters .stepLayout{grid-template-columns: 25% 1fr 1fr 30%; grid-column-gap: 2%; height: inherit;margin : 0 2em;}
+dialog.dialog-filters .stepLayout{grid-template-columns: 20% 20% auto; grid-column-gap: 2%; height: inherit;margin : 0 2em;}
 dialog.dialog-metrics .stepLayout{grid-template-columns: 20% auto 25%; grid-column-gap: 3%; height: inherit;margin: 0 2em;}
 dialog.dialog-tables .stepLayout{grid-template-columns: 30% calc(70% - 2%); grid-column-gap: 2%; height: inherit;margin : 0 2em;}
 
@@ -106,15 +106,26 @@ ul > section.fact{font-weight: bold;}
 .addElementsReport > div{display: grid;grid-template-rows: auto 50px;justify-content: center;align-items: center;justify-items: center;padding: 2em; background-color: gainsboro;}
 .addElementsReport > div > span{padding: 1em;}
 .btn-add{display: flex; flex-direction: column;}
+#list-hierarchies > section li[data-hier-name]{font-weight: bold;}
 
 .elementsReport{display: grid; grid-template-columns: repeat(3, 30%); grid-column-gap: 5%;}
 
-ul > section[data-sublist]{border-left: solid 0px indianred; transition: border-left 150ms;}
+ul > section[data-sublist]{border-left: solid thin gainsboro; transition: border-left 150ms;}
 ul > section[data-sublist]:hover{cursor: pointer; border-left: solid thick indianred; transition: border-left 150ms;}
 ul > section[data-sublist][selected]{border-left: solid thick indianred;}
 
+.sublist{display: flex;}
+
 span[hier] {color: dimgray; padding: .5em .2em;font-size: .75rem;}
-span[table] {color: dimgray; padding: .5em .7em;font-size: .75rem;}
-span[column] {padding: .5em 1.5em; font-size: .8rem; border-left-width: 0px; border-left-style: solid; border-left-color: indianred; transition: border-left-width 150ms;}
-span[column]:hover{border-left-width: 5px; border-left-style: solid; border-left-color: indianred; cursor: pointer; transition: border-left-width 150ms;}
-span[column][selected]{border-left-width: 5px; border-left-style: solid; border-left-color: indianred;}
+section[data-sublist-hier-table-columns] span[table] {color: dimgray; padding: .5em .7em;font-size: .75rem;}
+section[data-sublist-table] span[table] {padding: .5em 1.5em; font-size: .8rem; border-left-width: 0px; border-left-style: solid; border-left-color: indianred; transition: border-left-width 150ms;}
+
+span[column], span[filter], section[data-sublist-table] span[table] {padding: .5em 1.5em; font-size: .8rem; border-left-width: 0px; border-left-style: solid; border-left-color: indianred; transition: border-left-width 150ms;}
+span[column]:hover, span[filter]:hover, section[data-sublist-table] span[table]:hover{border-left-width: 5px; border-left-style: solid; border-left-color: indianred; cursor: pointer; transition: border-left-width 150ms;}
+span[column][selected], span[filter][selected], section[data-sublist-table] span[table][selected]{border-left-width: 5px; border-left-style: solid; border-left-color: indianred;}
+
+span.selectable{font-size: .8rem; border-left-width: 0px; border-left-style: solid; border-left-color: indianred; transition: border-left-width 150ms; width: 100%;}
+span[generic].selectable{padding: .5em;}
+span.selectable:hover{border-left-width: 5px; border-left-style: solid; border-left-color: indianred; cursor: pointer; transition: border-left-width 150ms;}
+span.selectable[selected]{border-left-width: 5px; border-left-style: solid; border-left-color: indianred; cursor: pointer; transition: border-left-width 150ms;}
+

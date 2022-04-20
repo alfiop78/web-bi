@@ -1,6 +1,7 @@
 dialog{min-width: 70%;}
+dialog.mini-dialog{min-width: 30%;min-height: 60%;}
 dialog > section{padding: 16px;}
-dialog{border: none;box-shadow: 0 2px 5px 1px rgba(10,10,10,.35);border-radius: 4px;font-size: .8rem; min-width: 70%;}
+dialog{border: none;box-shadow: 0 2px 5px 1px rgba(10,10,10,.35);border-radius: 4px;font-size: .8rem; min-width: 80%; min-height: 70%}
 dialog#versioning{height: 80%;max-height: 90%;}
 dialog .dialogContent{padding: 16px;}
 dialog .dialogTitle{background: brown; color: white;border-top-left-radius: 4px; border-top-right-radius: 4px;padding: 12px; font-size: .85rem;}
