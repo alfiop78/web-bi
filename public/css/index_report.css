@@ -102,18 +102,19 @@ ul > section.fact{font-weight: bold;}
 .full-overflow-list{height: 70%; overflow-y: auto; max-height: 450px;}
 .full-overflow-list-columns{height: 350px; max-height: 350px; overflow-y: auto; max-height: 450px;}
 
-.addElementsReport{background: #dcdcdc61;display: grid;grid-template-columns: auto auto auto; color: dimgrey;}
-.addElementsReport > div{display: grid;grid-template-rows: auto 50px;justify-content: center;align-items: center;justify-items: center;padding: 2em;}
+.addElementsReport{background: #dcdcdc61;display: grid;grid-template-columns: repeat(3, 30%); grid-column-gap: 5%; color: dimgrey;}
+.addElementsReport > div{display: grid;grid-template-rows: auto 50px;justify-content: center;align-items: center;justify-items: center;padding: 2em; background-color: gainsboro;}
 .addElementsReport > div > span{padding: 1em;}
 .btn-add{display: flex; flex-direction: column;}
 
-.elementsReport{display: grid; grid-template-columns: auto auto auto;}
+.elementsReport{display: grid; grid-template-columns: repeat(3, 30%); grid-column-gap: 5%;}
 
-ul > section[data-sublist]:hover{cursor: pointer; border: solid thin grey;}
+ul > section[data-sublist]{border-left: solid 0px indianred; transition: border-left 150ms;}
+ul > section[data-sublist]:hover{cursor: pointer; border-left: solid thick indianred; transition: border-left 150ms;}
 ul > section[data-sublist][selected]{border-left: solid thick indianred;}
 
 span[hier] {color: dimgray; padding: .5em .2em;font-size: .75rem;}
 span[table] {color: dimgray; padding: .5em .7em;font-size: .75rem;}
 span[column] {padding: .5em 1.5em; font-size: .8rem; border-left-width: 0px; border-left-style: solid; border-left-color: indianred; transition: border-left-width 150ms;}
-span[column]:hover{border-left-width: 10px; border-left-style: solid; border-left-color: indianred; cursor: pointer; transition: border-left-width 150ms;}
-span[column][selected]{border-left-width: 10px; border-left-style: solid; border-left-color: indianred;}
+span[column]:hover{border-left-width: 5px; border-left-style: solid; border-left-color: indianred; cursor: pointer; transition: border-left-width 150ms;}
+span[column][selected]{border-left-width: 5px; border-left-style: solid; border-left-color: indianred;}

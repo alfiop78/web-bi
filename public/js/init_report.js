@@ -27,6 +27,7 @@ var StorageMetric = new MetricStorage();
 
 		// btn
 		btnAddColumns : document.getElementById('btn-add-columns'),
+		btnAddFilters : document.getElementById('btn-add-filters'),
 		btnPreviousStep : document.getElementById('prev'),
 		btnNextStep : document.getElementById('next'),
 		btnStepDone: document.getElementById('stepDone'),
@@ -123,6 +124,21 @@ var StorageMetric = new MetricStorage();
 				hier.hidden = false;
 				hier.setAttribute('data-searchable', true);
 			});
+			// visualizzo, in exist-filters, solo i filtri relativi alle tabelle presenti nella gerarchia selezionata
+			document.querySelectorAll("#list-hierarchies > section[selected]").forEach( (hierarchy) => {
+				// per ogni gerarchia selezionata ne recupero le tabelle al suo interno
+				// per ogni tabella all'interno della gerarchia vado a recuperare i filtri appartenenti a quella tabella
+				hierarchy.querySelectorAll('.sublist-element').forEach( (table) => {
+					let tableName = table.getAttribute('data-label');
+					// recupero i filtri appartenenti alla tabella in ciclo
+					const filters = StorageFilter.tableFilters(tableName);
+					// visualizzo i filtri per questa tabella
+					filters.forEach( (filter) => {
+						document.querySelector("#exist-filters > section[data-label='" + filter.name + "']").removeAttribute('hidden');
+					});
+				});
+			});
+
 		} else {
 			// deselezione della gerarchia, nascondo le tabelle della gerarchia selezionata
 			document.querySelectorAll("#list-columns section[data-hier-name='" + hier + "']").forEach( (hier) => {
@@ -168,6 +184,7 @@ var StorageMetric = new MetricStorage();
 					const sublistItem = sublistElement.querySelector('.sublist-item');
 					const columnIcon = sublistElement.querySelector('i[data-id="column-icon"]');
 					const filterIcon = sublistElement.querySelector('i[data-id="filter-icon"]');
+					sublistElement.setAttribute('data-label', table.table);
 					columnIcon.setAttribute('data-dimension-name', dimName);
 					columnIcon.setAttribute('data-hier-name', hierName);
 					columnIcon.setAttribute('data-table-name', table.table);
@@ -226,33 +243,35 @@ var StorageMetric = new MetricStorage();
 						spanColumn.onclick = app.selectColumn;
 						ul.appendChild(section);
 					}
-				// for (const [table, fields] of Object.entries(hierValue.columns)) {
-					// for (let field in fields) {
-						// console.log('field : ', field);
-						// console.log('fields[field] : ', fields[field]);
-						/*const content = app.tmplList.content.cloneNode(true);
-						const section = content.querySelector('section[data-sublist-hier-table-columns]');
-						const subList = section.querySelector('.sublist');
-						const spanHier = subList.querySelector('span[hier]');
-						const spanTable = subList.querySelector('span[table]');
-						const spanColumn = subList.querySelector('span[column]');
-						section.setAttribute('data-label', field);
-						section.setAttribute('data-element-search', 'search-columns');
-						section.setAttribute('data-hier-name', hier);
-						spanHier.innerText = hier;
-						spanTable.innerText = table;
-						spanColumn.innerText = field;
-						spanColumn.setAttribute('data-label', field);
-						spanColumn.setAttribute('data-table-name', table.split('_')[0]);
-						spanColumn.setAttribute('data-alias-name', table);
-						spanColumn.setAttribute('data-dimension-name', key);
-						spanColumn.setAttribute('data-hier-name', hier);
-						// spanColumn.setAttribute('data-table-id')
-						spanColumn.onclick = app.selectColumn;
-						ul.appendChild(section);*/
-					// }
 				}
 			}
+		}
+	}
+
+	// popolo la lista dei filtri esistenti
+	app.getFilters = () => {
+		const ul = document.getElementById('exist-filters');
+		console.log('filters : ', StorageFilter.filters);
+		for (const [key, value] of Object.entries(StorageFilter.filters)) {
+			const content = app.tmplList.content.cloneNode(true);
+			const section = content.querySelector('section[data-sublist-table-filters]');
+			const subList = section.querySelector('.sublist');
+			const table = subList.querySelector('span[table]');
+			const filter = subList.querySelector('span[filter]');
+			// debugger;
+			section.setAttribute('data-label', key);
+			section.setAttribute('data-element-search', 'search-exist-filters');
+			// table.innerText = orderTable.table;
+			filter.innerText = key;
+			filter.setAttribute('data-label', key);
+			// spanColumn.setAttribute('data-table-name', orderTable.table);
+			// spanColumn.setAttribute('data-alias-name', orderTable.alias);
+			// spanColumn.setAttribute('data-table-id', tableId);
+			// spanColumn.setAttribute('data-dimension-name', key);
+			// spanColumn.setAttribute('data-hier-name', hier);
+			// spanColumn.setAttribute('data-table-id')
+			// spanColumn.onclick = app.selectColumn;
+			ul.appendChild(section);
 		}
 	}
 
@@ -621,7 +640,7 @@ var StorageMetric = new MetricStorage();
 			// document.getElementById('columnName').value = e.currentTarget.getAttribute('data-label');
 			document.getElementById('columnName').setAttribute('value', e.currentTarget.getAttribute('data-label'));
 			document.getElementById('columnAlias').value = '';
-			document.getElementById('columnName').focus();
+			document.getElementById('columnAlias').focus();
 			// imposto, nella section della dialog, l'attributo data-hier-name e data-dimension-name selezionata
 			app.dialogTables.querySelector('section').setAttribute('data-hier-name', e.currentTarget.getAttribute('data-hier-name'));
 			app.dialogTables.querySelector('section').setAttribute('data-dimension-name', e.currentTarget.getAttribute('data-dimension-name'));
@@ -935,16 +954,17 @@ var StorageMetric = new MetricStorage();
 
 	// tasto Fatto nella dialog Tables
 	app.btnColumnDone.onclick = () => {
-		// TODO: L'oggetto Query.select ora è popolato con le colonne scelte, da aggiungere al report. Popolo un div dove sono presenti le colonne scelte prima di chiudere la dialog.
+		// L'oggetto Query.select ora è popolato con le colonne scelte, da aggiungere al report. Popolo una <ul> dove sono presenti le colonne scelte prima di chiudere la dialog.
 		// console.log('Query.table : ', Query.table);
 		// console.log('Query.tableId : ', Query.tableId);
 		if (!app.dialogTables.querySelector('section').hasAttribute('data-fact-name')) {
-			/*const hier = app.dialogTables.querySelector('section').getAttribute('data-hier-name');
-			const list = document.getElementById('fieldList-tables');
+			const hier = app.dialogTables.querySelector('section').getAttribute('data-hier-name');
+			/*const list = document.getElementById('fieldList-tables');
 			Dim.selected = app.dialogTables.querySelector('section').getAttribute('data-dimension-name');*/
 			// recupero la property #select della classe Query per visualizzare nella <ul> #fields-set
-			debugger;
 			const ul = document.getElementById('report-columns');
+			// ripulisco la <ul> in caso di una precedente aggiunta delle colonne
+			ul.querySelectorAll('section').forEach( section => section.remove());
 			console.log('Query.select : ', Query.select);
 			for (const [key, value] of Object.entries(Query.select)) {
 				const contentElement = app.tmplList.content.cloneNode(true);
@@ -958,8 +978,6 @@ var StorageMetric = new MetricStorage();
 				li.innerText = key;
 				ul.appendChild(section);
 			}
-			// verifico quali relazioni inserire in where e quindi anche in from
-			app.checkRelations(hier);
 		} else {
 			// FACT
 			const ul = document.getElementById('fields-set');
@@ -978,6 +996,50 @@ var StorageMetric = new MetricStorage();
 			}
 		}		
 		app.dialogTables.close();
+	}
+
+	app.btnFilterDone.onclick = () => {
+		// console.log(Query.filters);
+		if (!app.dialogTables.querySelector('section').hasAttribute('data-fact-name')) {
+			console.log('Query.table : ', Query.table);
+			console.log('Query.tableId : ', Query.tableId);
+			const hier = app.dialogFilter.querySelector('section').getAttribute('data-hier-name');
+			const list = document.getElementById('fieldList-tables');
+			Dim.selected = app.dialogFilter.querySelector('section').getAttribute('data-dimension-name');
+			console.log(Query.filters);
+			console.log(Query.filters[Query.table]);
+			const ul = document.getElementById('filters-set');
+			for (const [table, value] of Object.entries(Query.filters)) {
+				for (let filter in Query.filters[table]) {
+					const contentElement = app.tmplList.content.cloneNode(true);
+					const section = contentElement.querySelector('section[data-no-icon]');
+					const element = section.querySelector('.element');
+					const li = element.querySelector('li');
+					section.hidden = false;
+					section.setAttribute('data-label', filter);
+					section.setAttribute('data-element-search', 'search-filters-set');
+					section.setAttribute('data-searchable', true);
+					li.innerText = filter;
+					ul.appendChild(section);
+				}
+			}
+		} else {
+			// FACT
+			const ul = document.getElementById('filters-set');
+			for (const [table, value] of Object.entries(Query.filters)) {
+				for (let filter in Query.filters[table]) {
+					const contentElement = app.tmplList.content.cloneNode(true);
+					const section = contentElement.querySelector('section[data-no-icon]');
+					const element = section.querySelector('.element');
+					const li = element.querySelector('li');
+					section.hidden = false;
+					section.setAttribute('data-label-search', filter);
+					li.innerText = filter;
+					ul.appendChild(section);
+				}
+			}
+		}
+		app.dialogFilter.close();
 	}
 	
 	// salvataggio della metrica nel db
@@ -1016,7 +1078,7 @@ var StorageMetric = new MetricStorage();
 		// Query.tableAlias = app.dialogMetric.querySelector('section').getAttribute('data-table-selected-alias');
 		Query.metricName = name;
 		console.log(Query.metricName);
-		//console.log(Query.table);
+		// console.log(Query.table);
 		// verifico se ci sono filtri da associare a questa metrica
 		let associatedFilters = {};
 		app.dialogMetric.querySelectorAll('#existsFilter_Metric > ul > section li[selected]').forEach((filterSelected) => {
@@ -1129,53 +1191,6 @@ var StorageMetric = new MetricStorage();
 		filterName.focus();
 		// pulisco la textarea
 		textarea.value = "";
-	}
-
-	app.btnFilterDone.onclick = () => {
-		// console.log(Query.filters);
-		if (!app.dialogTables.querySelector('section').hasAttribute('data-fact-name')) {
-			console.log('Query.table : ', Query.table);
-			console.log('Query.tableId : ', Query.tableId);
-			const hier = app.dialogFilter.querySelector('section').getAttribute('data-hier-name');
-			const list = document.getElementById('fieldList-tables');
-			Dim.selected = app.dialogFilter.querySelector('section').getAttribute('data-dimension-name');
-			console.log(Query.filters);
-			console.log(Query.filters[Query.table]);
-			const ul = document.getElementById('filters-set');
-			for (const [table, value] of Object.entries(Query.filters)) {
-				for (let filter in Query.filters[table]) {
-					const contentElement = app.tmplList.content.cloneNode(true);
-					const section = contentElement.querySelector('section[data-no-icon]');
-					const element = section.querySelector('.element');
-					const li = element.querySelector('li');
-					section.hidden = false;
-					section.setAttribute('data-label', filter);
-					section.setAttribute('data-element-search', 'search-filters-set');
-					section.setAttribute('data-searchable', true);
-					li.innerText = filter;
-					ul.appendChild(section);
-				}
-			}
-
-			// verifico quali relazioni inserire in where e quindi anche in from
-			app.checkRelations(hier);
-		} else {
-			// FACT
-			const ul = document.getElementById('filters-set');
-			for (const [table, value] of Object.entries(Query.filters)) {
-				for (let filter in Query.filters[table]) {
-					const contentElement = app.tmplList.content.cloneNode(true);
-					const section = contentElement.querySelector('section[data-no-icon]');
-					const element = section.querySelector('.element');
-					const li = element.querySelector('li');
-					section.hidden = false;
-					section.setAttribute('data-label-search', filter);
-					li.innerText = filter;
-					ul.appendChild(section);
-				}
-			}
-		}
-		app.dialogFilter.close();
 	}
 
 	// recupero valori distinti per inserimento nella dialogFilter
@@ -1430,6 +1445,8 @@ var StorageMetric = new MetricStorage();
 
 	app.getColumns();
 
+	app.getFilters();
+
 	/*app.getTablesInHierarchiesDialogFilter();
 
 	app.getColumnsInTable();
@@ -1512,15 +1529,17 @@ var StorageMetric = new MetricStorage();
 			App.handlerConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
 			return;
 		} else {
-			// TODO: recupero le gerarchie selezionate
-			const hierSelected = document.querySelectorAll('#list-hierarchies section[selected]');
-			// TODO: per ogni gerarchia selezionata aggiungo le tabelle e le colonne in una lista
+			// recupero le gerarchie selezionate
+			// const hierSelected = document.querySelectorAll('#list-hierarchies section[selected]');
+			// per ogni gerarchia selezionata aggiungo le tabelle e le colonne in una lista
 			app.dialogTables.showModal();
-
-
 		}
+	}
 
-		// TODO: apro la dialog, oppure un form, per completare l'aggiunta di nuove colonne
+	// aggiungi filtri (step-2)
+	app.btnAddFilters.onclick = (e) => {
+		console.log('addFilters');
+		app.dialogFilters.showModal();
 	}
 
 	// tasto completato nello step 4, // dialog per il salvataggio del nome del report

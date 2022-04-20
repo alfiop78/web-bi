@@ -426,17 +426,20 @@ class DimensionStorage extends Storages {
 }
 
 class FilterStorage extends Storages {
+	#filters = {};
 	constructor() {
 		super();
-		this._filters = {};
+		// this._filters = {};
 		this.storageKeys.forEach((key) => {
 			let jsonStorage = JSON.parse(this.storage.getItem(key));
 			// console.log(key);
 			if (jsonStorage.type === 'FILTER') {
-				this._filters[key] = jsonStorage;
+				// this._filters[key] = jsonStorage;
+				this.#filters[key] = jsonStorage;
 			}
 		});
 		this.id = 0; // default
+		// console.log('#filters', this.#filters);
 	}
 
 	set filterId(value) {
@@ -452,19 +455,6 @@ class FilterStorage extends Storages {
 	get filter() {
 		return JSON.parse(this.storage.getItem(this._name));
 	}
-
-	//  list(table) {
-		// // ottengo la lista dei filtri create
-		// this.filters = {};
-		// this.storageKeys.forEach((key) => {
-		//   let jsonStorage = JSON.parse(this.storage.getItem(key));
-		//   // console.log(key);
-		//   if (jsonStorage.type === "FILTER" && jsonStorage.table === table) {
-		// 	this.filters[key] = jsonStorage.formula;
-		//   }
-		// });
-		// return this.filters;
-	//  }
 
 	getIdAvailable() {
 		// ottengo il primo Id disponibile
@@ -498,14 +488,14 @@ class FilterStorage extends Storages {
 		return this.id;
 	}
 
-	get filters() {return this._filters;} // tutti i filtri
+	get filters() {return this.#filters;} // tutti i filtri
 
 	tableFilters(table) {
 		// console.clear();
 		// recupero tutti i filtri appartenenti alla table e restituisco un array
 		// console.log(table);
 		this._tableFilters = [];
-		for ( const [key, value] of Object.entries(this._filters)) {
+		for ( const [key, value] of Object.entries(this.#filters)) {
 			if (value.table === table) {
 				this._tableFilters.push(value);
 			}

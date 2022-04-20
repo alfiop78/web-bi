@@ -321,6 +321,15 @@
 								</div>
 							</section>
 
+							<section data-element-search data-label data-sublist-table-filters hidden>
+								<div class="element" name>
+									<span class="sublist">
+										<span table></span>
+										<span filter></span>
+									</span>
+								</div>
+							</section>
+
 						</template>
 
 						<template id="sublist-item">
@@ -388,19 +397,13 @@
 													<div>
 														<h5>Report</h5>
 														<div class="addElementsReport">
-															<div>
-																<div class="btn-add">
-																	<span>colonne</span>
-																	<i id="btn-add-columns" class="material-icons md-36">add</i>
-																</div>
-																<div>
-																	<ul id="report-columns"></ul>
-																</div>
-															</div>
-															
+															<div class="btn-add">
+																<span>colonne</span>
+																<i id="btn-add-columns" class="material-icons md-36">add</i>
+															</div>															
 															<div class="btn-add">
 																<span>filtri</span>
-																<i class="material-icons md-36">add</i>
+																<i id="btn-add-filters" class="material-icons md-36">add</i>
 															</div>
 															<div class="btn-add">
 																<span>metriche</span>
@@ -409,8 +412,14 @@
 														</div>
 														{{-- elementi del report --}}
 														<div class="elementsReport">
-															
-															<ul id="report-filters"></ul>
+															<ul id="report-columns"></ul>
+															<div>
+																<div class="md-field">
+																	<input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
+																	<label for="search-exist-filters" class="">Ricerca</label>
+																</div>
+																<ul id="exist-filters"></ul>																
+															</div>
 															<ul id="report-metrics"></ul>
 														</div>
 													</div>
