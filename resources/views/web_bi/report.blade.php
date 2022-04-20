@@ -107,7 +107,7 @@
 
 		<dialog id="dialogFilter" class="dialog-filters">
 			<small id="dialog-popup" class="popupToast"></small>
-			<section data-table-selected>
+			<section data-table-name data-hier-name data-dimension-name>
 				<h4>Creazione nuovo filtro</h4>
 				<div class="stepLayout">
 
@@ -135,10 +135,10 @@
 							<input type="text" id="inputFilterName" name="filterName" autocomplete="off" />
 							<label for="inputFilterName" class="">name</label>
 						</div>
+						<i class="material-icons" id="search-field-values" data-field-name>search</i>
 						<div class="md-field">
 							<textarea id="filterSQLFormula" name="filterSQL" rows="10" cols="33" placeholder="SQL"></textarea>
 						</div>
-						<i class="material-icons" id="search-field-values" data-field-name>search</i>
 						<button id="btnFilterSave" type="button" name="save" class="md-button" disabled="true">salva</button>
 					</section>
 
@@ -146,7 +146,7 @@
 
 				<div class="dialog-buttons">
 					<button type="button" name="cancel" class="md-button">annulla</button>
-					<button id="btnFilterDone" type="button" name="done" class="md-button">chiudi</button>
+					<button id="btnFilterDone" type="button" name="done" class="md-button">fatto</button>
 				</div>
 			</section>
 		</dialog>

@@ -109,11 +109,12 @@ class Application {
 	}
 
 	genericSearch(e) {
+		// verifico che la input ha l'attr type='search', non eseguo la ricerca se il campo non ha l'attr type='search'
+		if ( !(e.target.hasAttribute('type') && e.target.getAttribute('type') === 'search') ) return;
+		
 		(e.target.value.length > 0) ?
 			e.target.parentElement.querySelector('label').classList.add('has-content') :
 			e.target.parentElement.querySelector('label').classList.remove('has-content');
-		// verifico che la input ha l'attr type='search', non eseguo la ricerca se il campo non ha l'attr type='search'
-		if ( !(e.target.hasAttribute('type') && e.target.getAttribute('type') === 'search') ) return;
 		// la input ha un attr "data-element-search" che indica su quali elementi deve cercare, gli elementi su cui cercare avranno un attr "data-search" con lo stesso valore di questo attributo
 		// console.log(e.target.value);
 		const searchAttr = e.target.getAttribute('data-element-search');
