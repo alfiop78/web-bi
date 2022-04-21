@@ -29,7 +29,7 @@
 
 		<dialog id="dialogTables" class="dialog-tables">
 			<small id="dialog-popup" class="popupToast"></small>
-			<section data-hier-name data-dimension-name>
+			<section>
 				<h4>Seleziona le colonne da includere nel report</h4>
 
 				<div class="stepLayout">
@@ -42,6 +42,7 @@
 								<input type="search" data-element-search="search-columns" id="dialog-columns-search-column" value autocomplete="off" />
 								<label for="dialog-columns-search-column" class="">Ricerca</label>
 							</div>
+							<ul id="list-columns-fact" class="fact-table"></ul>
 							<ul id="list-columns" class="full-overflow-list-columns"></ul>
 						</div>
 					</section>
@@ -324,12 +325,10 @@
 							</section>
 
 							<section data-element-search data-label data-sublist-table-filters hidden>
-								<div class="element" name>
-									<span class="sublist">
-										<span table></span>
-										<span filter></span>
-									</span>
-								</div>
+								<span class="sublist">
+									<span table></span>
+									<span filter></span>
+								</span>
 							</section>
 
 							<section data-element-search data-label data-sublist-table hidden>
@@ -347,6 +346,13 @@
 								</span>
 							</section>
 
+							<section data-element-search data-label data-sublist-cube-columns hidden>
+								<span class="sublist">
+									<span cube></span>
+									<span column></span>
+								</span>
+							</section>
+
 						</template>
 
 						<template id="sublist-item">
@@ -360,15 +366,14 @@
 						</template>
 
 						<template id="template_ulList">
-							<ul data-id="list-cubes" class="overflowList"></ul>
+							{{-- <ul data-id="list-cubes" class="overflowList"></ul>
 							<ul data-id="list-filter" class="overflowList"></ul>
 							<ul data-id="list-dimensions" class="overflowList"></ul>
-							<ul data-id="list-hierarchies" class="overflowList"></ul>
 							<ul data-id="list-columns" class="overflowList"></ul>
 							<ul data-id="list-fields" class="overflowList"></ul>
 							<ul data-id="list-values" class="list middleList"></ul>
 							<ul data-id="list-tables" class="overflowList"></ul>
-							<ul data-id="list-metrics" class="overflowList"></ul>
+							<ul data-id="list-metrics" class="overflowList"></ul> --}}
 						</template>
 
 						<div class="wrapper">
@@ -409,7 +414,10 @@
 															<input type="search" data-element-search="search-hierarchy" id="search-hierarchy" value autocomplete="off" />
 															<label for="search-hierarchy" class="">Ricerca</label>
 														</div>
-														<ul id="list-hierarchies" class="full-overflow-list"></ul>
+														<ul id="list-fact-tables" class="fact-table"></ul>
+														<div class="c">
+															<ul id="list-hierarchies" class="full-overflow-list"></ul>
+														</div>														
 													</div>
 													<div>
 														<h5>Report</h5>
@@ -435,7 +443,7 @@
 																	<input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
 																	<label for="search-exist-filters" class="">Ricerca</label>
 																</div>
-																<ul id="exist-filters"></ul>																
+																<ul id="exist-filters" class="full-overflow-list"></ul>																
 															</div>
 															<ul id="report-metrics"></ul>
 														</div>

@@ -68,16 +68,12 @@ var StorageMetric = new MetricStorage();
 			section.setAttribute('data-element-search', 'search-cube');
 			section.setAttribute('data-label', key);
 			section.setAttribute('data-searchable', true);
-			section.removeAttribute('hidden');
-			// element.setAttribute('data-cube-id', value.id);
-			// element.setAttribute('data-cube-name', key);
+			section.setAttribute('data-cube-id', value.id);
+			section.setAttribute('data-cube-name', key);
+			section.hidden = false;
 			span.innerText = key;
-			span.setAttribute('label', key);
-			span.setAttribute('data-cube-id', value.id);
-			span.setAttribute('data-cube-name', key);
 			ul.appendChild(section);
-			// TODO: valutare se meglio impostare gli eventi (e tutti gli attributi utili) sul <section> anzichè sulle <li> oppure <span>
-			span.onclick = app.handlerCubeSelected;
+			section.onclick = app.handlerCubeSelected;
 		}
 	}
 
@@ -96,24 +92,21 @@ var StorageMetric = new MetricStorage();
 				section.setAttribute('data-element-search', 'search-dimension');
 				section.setAttribute('data-label', dimension); // questo attr consente la ricerca dalla input sopra
 				section.setAttribute('data-cube-name', cubeName); // questo attr consente la ricerca dalla selezione del cubo
-				// element.setAttribute('data-dimension-id', dimName);
-				// element.setAttribute('data-hier-id', hier);
+				section.setAttribute('data-dimension-name', dimension);
+				section.setAttribute('data-cube-name', cubeName);
 				span.innerText = dimension;
-				span.setAttribute('data-dimension-name', dimension);
-				span.setAttribute('label', dimension);
-				span.setAttribute('data-cube-name', cubeName);
 				ul.appendChild(section);
-				span.onclick = app.handlerDimensionSelected;
+				section.onclick = app.handlerDimensionSelected;
 			});
 		}
 	}
 
+	// selezione di una gerarchia (step-2)
 	app.handlerSelectHierarchy = (e) => {
 		e.currentTarget.toggleAttribute('selected');
 		const hier = e.currentTarget.getAttribute('data-hier-name');
+		const hierRef = e.currentTarget; // questo mi serve per ciclare le tabella al suo interno, il ciclo sulle tabelle va a visualizzare quali filtri appartengono alle tabelle di questa gerarchia
 		const dimension = e.currentTarget.getAttribute('data-dimension-name');
-		debugger;
-		// TODO: aggiungere anche dimension
 		if (e.currentTarget.hasAttribute('selected')) {
 			// visualizzo, in ul list-columns (dialogTable), solo le tabelle delle gerarchie selezionate
 			document.querySelectorAll("#list-columns section[data-hier-name='" + hier + "']").forEach( (hier) => {
@@ -121,17 +114,22 @@ var StorageMetric = new MetricStorage();
 				hier.setAttribute('data-searchable', true);
 			});
 			// visualizzo, in exist-filters, solo i filtri relativi alla dimensione-hier-table presenti nella gerarchia selezionata
-			document.querySelectorAll("#list-hierarchies > section[selected]").forEach( (hierarchy) => {
-				// per ogni gerarchia selezionata ne recupero le tabelle al suo interno
-				// per ogni tabella all'interno della gerarchia vado a recuperare i filtri appartenenti a quella tabella
-				hierarchy.querySelectorAll('.sublist-element').forEach( (table) => {
-					// recupero i filtri appartenenti alla tabella in ciclo
-					const filters = StorageFilter.tableFilters(table.getAttribute('data-label'));
-					// visualizzo i filtri per questa tabella
-					filters.forEach( (filter) => {
-						document.querySelector("#exist-filters > section[data-label='" + filter.name + "'][data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']").removeAttribute('hidden');
-						document.querySelector("#exist-filters > section[data-label='" + filter.name + "'][data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']").setAttribute('data-searchable', true);
-					});
+			// recupero le tabelle della gerarchia selezionata
+			// per ogni tabella all'interno della gerarchia vado a recuperare i filtri appartenenti a quella tabella
+			hierRef.querySelectorAll('.sublist-element').forEach( (table) => {
+				// recupero i filtri appartenenti alla tabella in ciclo
+				const filters = StorageFilter.tableFilters(table.getAttribute('data-label'));
+				const alias = table.getAttribute('data-alias-name');
+				const tableId = table.querySelector('.sublist-item').getAttribute('data-table-id');
+				// visualizzo i filtri per questa tabella in #exist-filters
+				filters.forEach( (filter) => {
+					const filterRef = document.querySelector("#exist-filters > section[data-label='" + filter.name + "'][data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']");
+					if (filterRef) {
+						filterRef.removeAttribute('hidden');
+						filterRef.setAttribute('data-searchable', true);
+						filterRef.querySelector('span[filter]').setAttribute('data-alias-name', alias);
+						filterRef.querySelector('span[filter]').setAttribute('data-table-id', tableId);
+					}
 				});
 			});
 			// visualizzo, in list-tables (dialogFilter) solo le tabelle della gerarchia selezionata
@@ -153,7 +151,6 @@ var StorageMetric = new MetricStorage();
 		// imposto un data-dimension-id/name sugli .element della lista gerarchie, in questo modo posso filtrarle quando seleziono le dimensioni nello step precedente
 		// const content = app.tmplUlList.content.cloneNode(true);
 		const ul = document.getElementById('list-hierarchies');
-		const parent = document.getElementById('parent-list-hierarchies'); // dove verrà inserita la <ul>
 		// ottengo l'elenco delle gerarchie per ogni dimensione presente in storage, successivamente, quando la dimensione viene selezionata, visualizzo/nascondo solo quella selezionata
 		// console.log('lista dimensioni :', Dim.dimensions);
 		// per ogni dimensione presente aggiungo gli elementi nella ul con le gerarchie
@@ -175,7 +172,6 @@ var StorageMetric = new MetricStorage();
 				li.setAttribute('data-hier-name', hierName);
 				li.setAttribute('data-dimension-name', dimName);
 				ul.appendChild(section);
-				li.onclick = app.handlerHierSelected;
 				// lista tabelle presenti per ogni gerarchia
 				for (const [tableId, table] of Object.entries(hier.order)) {
 					// console.log(table.table);
@@ -185,6 +181,7 @@ var StorageMetric = new MetricStorage();
 					const columnIcon = sublistElement.querySelector('i[data-id="column-icon"]');
 					const filterIcon = sublistElement.querySelector('i[data-id="filter-icon"]');
 					sublistElement.setAttribute('data-label', table.table);
+					sublistElement.setAttribute('data-alias-name', table.alias);
 					columnIcon.setAttribute('data-dimension-name', dimName);
 					columnIcon.setAttribute('data-hier-name', hierName);
 					columnIcon.setAttribute('data-table-name', table.table);
@@ -198,7 +195,6 @@ var StorageMetric = new MetricStorage();
 					sublist.appendChild(sublistElement);
 				}
 			}
-		  parent.appendChild(ul);
 		}
 	}
 
@@ -240,10 +236,36 @@ var StorageMetric = new MetricStorage();
 						spanColumn.setAttribute('data-dimension-name', key);
 						spanColumn.setAttribute('data-hier-name', hier);
 						// spanColumn.setAttribute('data-table-id')
-						spanColumn.onclick = app.selectColumn;
+						spanColumn.onclick = app.handlerSelectColumn;
 						ul.appendChild(section);
 					}
 				}
+			}
+		}
+	}
+
+	// recupero le colonne agganciate alla fact, proprietà columns nel json
+	app.getColumnsFact = () => {
+		const ul = document.getElementById('list-columns-fact');
+		for (const [key, value] of Object.entries(StorageCube.cubes)) {
+			console.log(key, value.columns);
+			for (const field in value.columns[value.alias]) {
+				console.log('field : ', field);
+				const content = app.tmplList.content.cloneNode(true);
+				const section = content.querySelector('section[data-sublist-cube-columns]');
+				const subList = section.querySelector('.sublist');
+				const spanCube = subList.querySelector('span[cube]');
+				const spanColumn = subList.querySelector('span[column]');
+				section.setAttribute('data-label', field);
+				section.setAttribute('data-cube-name', key);
+				section.setAttribute('data-element-search', 'search-columns');
+				spanCube.innerText = key;
+				spanColumn.innerText = field;
+				spanColumn.setAttribute('data-label', field);
+				spanColumn.setAttribute('data-table-name', value.FACT);
+				spanColumn.setAttribute('data-alias-name', value.alias);
+				spanColumn.onclick = app.handlerSelectColumn;
+				ul.appendChild(section);
 			}
 		}
 	}
@@ -261,15 +283,21 @@ var StorageMetric = new MetricStorage();
 			// debugger;
 			section.setAttribute('data-label', key);
 			section.setAttribute('data-table-name', value.table);
-			section.setAttribute('data-dimension-name', value.dimension);
-			section.setAttribute('data-hier-name', value.hier);
+			if (value.dimension) {
+				section.setAttribute('data-dimension-name', value.dimension);
+				section.setAttribute('data-hier-name', value.hier);
+			}			
 			section.setAttribute('data-element-search', 'search-exist-filters');
 			table.innerText = value.table;
 			filter.innerText = key;
 			filter.setAttribute('data-label', key);
-			filter.setAttribute('data-dimension-name', value.dimension);
-			filter.setAttribute('data-hier-name', value.hier);
-			// TODO: spanColumn.onclick = app.selectColumn;
+			if (value.dimension) {
+				filter.setAttribute('data-dimension-name', value.dimension);
+				filter.setAttribute('data-hier-name', value.hier);
+				filter.setAttribute('data-table-name', value.table);
+				// TODO: recuperare l'alias della tabella
+			}
+			filter.onclick = app.handlerFilterSelected;
 			ul.appendChild(section);
 		}
 	}
@@ -302,10 +330,46 @@ var StorageMetric = new MetricStorage();
 					tableName.setAttribute('data-table-name', order.table);
 					tableName.setAttribute('data-table-alias', order.alias);
 					tableName.setAttribute('data-schema', order.schema);
-					tableName.onclick = app.selectTable;
+					tableName.onclick = app.handlerSelectTable;
 					ul.appendChild(section);
 				}
 			}
+		}
+	}
+
+	// lista tabelle Fact
+	app.getFactTable = () => {
+		const ul = document.getElementById('list-fact-tables');
+		for (const [key, value] of Object.entries(StorageCube.cubes)) {
+			const content = app.tmplList.content.cloneNode(true);
+			const section = content.querySelector('section[data-sublist-generic]');
+			const subList = section.querySelector('.sublist');
+			const span = subList.querySelector('span[generic]');
+			section.setAttribute('data-label', value.FACT);
+			section.setAttribute('data-cube-name', key);
+			section.setAttribute('data-alias-name', value.alias);
+			section.setAttribute('data-schema-name', value.schema);
+			section.onclick = app.selectFact;
+			span.innerText = value.FACT;
+			ul.appendChild(section);
+		}
+	}
+
+	// selezione della fact nello step-2
+	app.selectFact = (e) => {
+		e.currentTarget.toggleAttribute('selected');
+		const cube = e.currentTarget.getAttribute('data-cube-name');
+		const table = e.currentTarget.getAttribute('data-label');
+		if (e.currentTarget.hasAttribute('selected')) {
+			// visualizzo, in ul list-columns (dialogTable), le colonne appartenenti alla Fact
+			const fact = document.querySelector("#list-columns-fact section[data-cube-name='" + cube + "']");
+			fact.hidden = false;
+			fact.setAttribute('data-searchable', true);
+			// visualizzo, in exist-filters, i filtri appartenenti alla Fact
+			document.querySelectorAll("#exist-filters section[data-table-name='" + table + "']:not([data-hier-name])").forEach( (filter) => {
+				filter.hidden = false;
+				filter.setAttribute('data-searchable', true);
+			});
 		}
 	}
 
@@ -421,72 +485,11 @@ var StorageMetric = new MetricStorage();
 		ul.querySelectorAll('li').forEach((li) => li.addEventListener('click', app.handlerReportToBeProcessed));
 	}
 
-	// recupero la FACT associata al cubo
-	app.addFACTToHierList = (parent) => {
-		const contentElement = app.tmplList.content.cloneNode(true);
-		const section = contentElement.querySelector('section[data-icon-column][data-icon-filter');
-		section.removeAttribute('hidden');
-		section.className = 'fact';
-		const element = section.querySelector('.element');
-		const li = element.querySelector('li');
-		const iColumns = element.querySelector("i[data-id='columns-icon']");
-		const iFilter = element.querySelector("i[data-id='filter-icon']");
-		iColumns.setAttribute('data-fact-name', StorageCube.selected.FACT);
-		iColumns.setAttribute('data-fact-alias', StorageCube.selected.alias);
-		iColumns.setAttribute('data-fact-schema', StorageCube.selected.schema);
-		iFilter.setAttribute('data-fact-name', StorageCube.selected.FACT);
-		iFilter.setAttribute('data-fact-alias', StorageCube.selected.alias);
-		iFilter.setAttribute('data-fact-schema', StorageCube.selected.schema);
-		iColumns.onclick = app.openDialogTables; // apre la dialog dialogTables per impostare gli alias e SQL per le colonne
-		iFilter.onclick = app.openDialogFilters; // apre la dialog dialogFilter per impostare i filtri
-		li.innerText = StorageCube.selected.FACT;
-		li.label = StorageCube.selected.FACT;
-		li.setAttribute('data-table-alias', StorageCube.selected.alias);
-		li.setAttribute('data-schema', StorageCube.selected.schema);
-		parent.appendChild(section);
-	}
-
-	// aggiungo la fact selezionata all'elenco delle tabelle nella dialogColumns
-	app.addFACTToDialogColumns = (parent) => {
-		// aggiungo la tabella FACT all'elenco 'fieldList-tables' > ul[data-id=fields-tables] 
-		const contentElement = app.tmplList.content.cloneNode(true);
-		const section = contentElement.querySelector('section[data-no-icon]');
-		const element = section.querySelector('.element');
-		const li = element.querySelector('li');
-		section.setAttribute('data-label-search', StorageCube.selected.FACT);
-		section.setAttribute('data-fact-name', StorageCube.selected.FACT);
-		li.innerText = StorageCube.selected.FACT;
-		li.setAttribute('label', StorageCube.selected.FACT);
-		li.setAttribute('data-fact-alias', StorageCube.selected.alias);
-		li.setAttribute('data-fact-schema', StorageCube.selected.schema);
-		li.setAttribute('data-cube-name', StorageCube.selected.name);
-		li.onclick = app.handlerFactSelectedDialogColumns;
-		parent.appendChild(section);
-	}
-
-	// aggiungo la fact selezionata all'elenco delle tabelle nella dialogFilter
-	app.addFACTToDialogFilters = (parent) => {
-		// aggiungo la tabella FACT all'elenco 'filter-fieldList-tables' > ul[data-id=fields-tables]
-		const contentElement = app.tmplList.content.cloneNode(true);
-		const section = contentElement.querySelector('section[data-no-icon]');
-		const element = section.querySelector('.element');
-		const li = element.querySelector('li');
-		section.setAttribute('data-label-search', StorageCube.selected.FACT);
-		section.setAttribute('data-fact-name', StorageCube.selected.FACT);
-		li.innerText = StorageCube.selected.FACT;
-		li.setAttribute('label', StorageCube.selected.FACT);
-		li.setAttribute('data-fact-alias', StorageCube.selected.alias);
-		li.setAttribute('data-fact-schema', StorageCube.selected.schema);
-		li.setAttribute('data-cube-name', StorageCube.selected.name);
-		li.onclick = app.handlerTableSelectedDialogFilter;
-		parent.appendChild(section);
-	}
-
 	// selezione di un cubo (step-1)
 	app.handlerCubeSelected = (e) => {
 		// const cubeId = e.currentTarget.getAttribute('data-cube-id');
 		// const fieldType = e.currentTarget.getAttribute('data-list-type');
-		StorageCube.selected = e.currentTarget.getAttribute('label');
+		StorageCube.selected = e.currentTarget.getAttribute('data-label');
 
 		console.log('cube selected : ', StorageCube.selected.name);
 		e.currentTarget.toggleAttribute('selected');
@@ -498,6 +501,8 @@ var StorageMetric = new MetricStorage();
 				dimension.hidden = false;
 				dimension.setAttribute('data-searchable', true);
 			});
+			// visualizzo la/e tabelle fact nello step-2
+			document.querySelector("#list-fact-tables > section[data-cube-name='" + StorageCube.selected.name + "']").hidden = false;
 			/*
 			// aggiungo la FACT al cubeSelected, questa mi serve per recuperare i filtri nella dialog-metrics che appartengono alla FACT
 			StorageCube.addCube();
@@ -554,15 +559,20 @@ var StorageMetric = new MetricStorage();
 
 	// selezione di un filtro già presente, lo salvo nell'oggetto Query
 	app.handlerFilterSelected = (e) => {
-		StorageFilter.filter = e.currentTarget.getAttribute('label');
+		StorageFilter.filter = e.currentTarget.getAttribute('data-label');
+		if (e.currentTarget.hasAttribute('data-hier-name')) {
+			hier = e.currentTarget.getAttribute('data-hier-name');
+			Dim.selected = e.currentTarget.getAttribute('data-dimension-name');
+			Query.tableId = e.currentTarget.getAttribute('data-table-id');
+		}
+		Query.table = e.currentTarget.getAttribute('data-table-name');
+		Query.tableAlias = e.currentTarget.getAttribute('data-alias-name');
 		e.currentTarget.toggleAttribute('selected');
 		Query.filterName = StorageFilter.filter.name;
 		if (e.currentTarget.hasAttribute('selected')) {
 			// recupero dallo storage il filtro selezionato
 			console.log(StorageFilter.filter);
-			// console.log('Query.table : ', Query.table);
-			// console.log('Query.tableId : ', Query.tableId);
-			Query.addTables(); // imposto la firstTable
+			if (StorageFilter.filter.hier) Query.addTables(StorageFilter.filter.hier); // imposto la firstTable se il filtro appartiene a una dimensione e non a un cubo
 			console.log(StorageFilter.filter.formula);
 			// nel salvare il filtro nel report attuale devo impostarne anche l'alias della tabella selezionata nella dialog
 			Query.filters = `${Query.tableAlias}.${StorageFilter.filter.formula}`;
@@ -661,11 +671,13 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// selezione delle colonne nella dialogTables
-	app.selectColumn = (e) => {
+	app.handlerSelectColumn = (e) => {
 		e.currentTarget.toggleAttribute('selected');
 		Query.table = e.currentTarget.getAttribute('data-table-name');
 		Query.tableAlias = e.currentTarget.getAttribute('data-alias-name');
-		Query.tableId = e.currentTarget.getAttribute('data-table-id');
+		debugger;
+		// la FACT table non ha un data-table-id
+		if (e.currentTarget.hasAttribute('data-table-id')) Query.tableId = e.currentTarget.getAttribute('data-table-id');
 		Query.field = e.currentTarget.getAttribute('data-label');
 		if (!e.currentTarget.hasAttribute('selected')) {
 			// TODO: colonna deselezionata, implementare la logica in Query.deleteSelect
@@ -676,38 +688,13 @@ var StorageMetric = new MetricStorage();
 			document.getElementById('columnAlias').value = '';
 			document.getElementById('columnAlias').focus();
 			// imposto, nella section della dialog, l'attributo data-hier-name e data-dimension-name selezionata
-			app.dialogTables.querySelector('section').setAttribute('data-hier-name', e.currentTarget.getAttribute('data-hier-name'));
-			app.dialogTables.querySelector('section').setAttribute('data-dimension-name', e.currentTarget.getAttribute('data-dimension-name'));
-		}
-	}
-
-	// selezione, dalla dialogColumns, della fact table. Visualizzo la prop 'columns' appartenente alla fact
-	app.handlerFactSelectedDialogColumns = (e) => {
-		Query.table = e.currentTarget.getAttribute('label');
-		Query.tableAlias = e.currentTarget.getAttribute('data-fact-alias');
-		StorageCube.selected = e.target.getAttribute('data-cube-name');
-		// const FACT = StorageCube.selected.FACT;
-		// const alias = StorageCube.selected.alias;
-		// visualizzo le colonne mappate nel cubo selezionato
-		const ul = app.dialogTables.querySelector('#table-fieldList > ul');
-		for (const [table, fields] of Object.entries(StorageCube.selected.columns)) {
-			for (let field in fields) {
-				console.log('field : ', field);
-				console.log('fields[field] : ', fields[field]);
-				const contentElement = app.tmplList.content.cloneNode(true);
-				const section = contentElement.querySelector('section[data-no-icon');
-				const element = section.querySelector('.element');
-				const li = element.querySelector('li');
-				section.removeAttribute('hidden');
-				section.setAttribute('data-label-search', field);
-				section.setAttribute('data-table-name', Query.table);
-				li.innerText = field;
-				li.setAttribute('label', field);
-				li.setAttribute('data-key', fields[field]);
-				li.setAttribute('data-table-name', Query.table);
-				li.setAttribute('data-table-alias', Query.tableAlias);
-				ul.appendChild(section);
-				li.onclick = app.selectColumn;
+			// TODO: da gestire in modo diverso con le colonne di una FACT table. Se è presente data-hier-name è una colonna di una dimensione e non della FACT
+			if (e.currentTarget.hasAttribute('data-hier-name')) {
+				app.dialogTables.querySelector('section').setAttribute('data-hier-name', e.currentTarget.getAttribute('data-hier-name'));
+				app.dialogTables.querySelector('section').setAttribute('data-dimension-name', e.currentTarget.getAttribute('data-dimension-name'));				
+			} else {
+				// selezione di una colonna della Fact, elimino l'attributo data-hier-name perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
+				app.dialogTables.querySelector('section').removeAttribute('data-hier-name');
 			}
 		}
 	}
@@ -741,7 +728,7 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// selezione di una tabella nella dialog-filter
-	app.selectTable = (e) => {
+	app.handlerSelectTable = (e) => {
 		e.currentTarget.toggleAttribute('selected');
 		if (e.target.hasAttribute('data-hier-name')) {
 			if (e.currentTarget.hasAttribute('selected')) {
@@ -882,7 +869,7 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// selezione del field nella dialogFilter, questo metodo farà partire la query per ottenere i campi distinti (in getDistinctValues())
-	app.selectField = (e) => {
+	app.handlerSelectField = (e) => {
 		e.currentTarget.toggleAttribute('selected');
 		// debugger;
 		if (e.currentTarget.hasAttribute('selected')) {
@@ -938,7 +925,7 @@ var StorageMetric = new MetricStorage();
 						li.setAttribute('data-type', type);
 						li.setAttribute('label', value.COLUMN_NAME); // nome campo
 						ul.appendChild(section);
-						li.onclick = app.selectField;
+						li.onclick = app.handlerSelectField;
 					}
 				} else {
 					// TODO: no data
@@ -1138,6 +1125,7 @@ var StorageMetric = new MetricStorage();
 	// salvataggio del filtro impostato nella dialog-filter
 	app.btnFilterSave.onclick = (e) => {
 		console.log(Query.table);
+		// TODO: per i filtri creati sulla Fact, hier e dimension devono essere = null
 		const hier = app.dialogFilter.querySelector('section').getAttribute('data-hier-name');
 		const dimension = app.dialogFilter.querySelector('section').getAttribute('data-dimension-name');
 		const table = app.dialogFilter.querySelector('section').getAttribute('data-table-name');
@@ -1229,7 +1217,7 @@ var StorageMetric = new MetricStorage();
 						// li.setAttribute('label', value[Query.field]);
 						li.innerHTML = value[Query.field];
 						ul.appendChild(section);
-						li.onclick = app.selectValue;
+						li.onclick = app.handlerSelectValue;
 					}
 				} else {
 					// TODO: no data
@@ -1240,7 +1228,7 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// selezione di uno o più valori dalla lista dei valori della colonna in dialogFilter
-	app.selectValue = e => e.currentTarget.toggleAttribute('selected');
+	app.handlerSelectValue = e => e.currentTarget.toggleAttribute('selected');
 
 	// popolamento della lista delle tabelle nella dialog-filter
 	app.getTablesInHierarchiesDialogFilter = () => {
@@ -1439,9 +1427,13 @@ var StorageMetric = new MetricStorage();
 
 	app.getColumns();
 
+	app.getColumnsFact();
+
 	app.getFilters(); // <ul> exist-filters
 
 	app.getTables(); //  elenco tabelle nella dialogFilter
+
+	app.getFactTable(); // lista delle FACT da visualizzare nello step-2
 
 	/*app.getTablesInHierarchiesDialogFilter();
 
@@ -1619,13 +1611,6 @@ var StorageMetric = new MetricStorage();
 		app.dialogValue.showModal();
 	}
 
-	/*document.addEventListener('input', (e) => {
-		// console.log('currentTarget : ', e.target);
-		if (e.target.hasAttribute('type') && e.target.getAttribute('type') === 'search') {
-		  e.target.oninput = App.searchInSectionList;
-		}
-	});*/
-
 	// document.getElementById('columnSQL').oninput = () => {
 	// 	if (Array.from(document.querySelectorAll('#fieldList-tables ul li[selected]')).length === 0) {
 	// 		// non ci sono tabelle selezionate
@@ -1676,18 +1661,21 @@ var StorageMetric = new MetricStorage();
 
 	// Salva nella dialogTables
 	app.btnSaveColumn.onclick = (e) => {
-		const hier = app.dialogTables.querySelector('section').getAttribute('data-hier-name');
-		Dim.selected = app.dialogTables.querySelector('section').getAttribute('data-dimension-name');
-		
+		let hier;
+		// le colonne di una Fact non hanno data-hier-name
+		if (app.dialogTables.querySelector('section').hasAttribute('data-hier-name')) {
+			hier = app.dialogTables.querySelector('section').getAttribute('data-hier-name');
+			Dim.selected = app.dialogTables.querySelector('section').getAttribute('data-dimension-name');
+		}
 		Query.columnName = document.getElementById('columnName').value;
 		const alias = document.getElementById('columnAlias').value;
 		const textarea = (document.getElementById('columnSQL').value.length === 0) ? null : document.getElementById('columnSQL').value;
 		Query.select = { table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQL: textarea, alias };
-		debugger;
-		Query.addTables(hier);
-
-		// verifico quali relazioni inserire in where e quindi anche in from
-		app.checkRelations(hier);
+		if (app.dialogTables.querySelector('section').hasAttribute('data-hier-name')) {
+			Query.addTables(hier);
+			// verifico quali relazioni inserire in where e quindi anche in from
+			app.checkRelations(hier);	
+		}		
 		document.getElementById('columnAlias').value = '';
 	}
 
