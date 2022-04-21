@@ -27,7 +27,7 @@
 
 		<small id="popup" class="popupToast"></small>
 
-		<dialog id="dialogTables" class="dialog-tables">
+		<dialog id="dialog-column">
 			<small id="dialog-popup" class="popupToast"></small>
 			<section>
 				<h4>Seleziona le colonne da includere nel report</h4>
@@ -106,9 +106,9 @@
 			</div>
 		</dialog>
 
-		<dialog id="dialogFilter" class="dialog-filters">
+		<dialog id="dialog-filter">
 			<small id="dialog-popup" class="popupToast"></small>
-			<section data-table-name data-hier-name data-dimension-name>
+			<section data-table-name> {{--  data-hier-name data-dimension-name --}}
 				<h4>Creazione nuovo filtro</h4>
 				<div class="stepLayout">
 
@@ -118,6 +118,7 @@
 							<input type="search" data-element-search="search-tables" id="dialog-columns-search-table" value autocomplete="off" />
 							<label for="dialog-columns-search-table" class="">Ricerca</label>
 						</div>
+						<ul id="list-filters-fact" class="fact-table"></ul>
 						<ul id="list-tables" class="full-overflow-list-columns"></ul>
 					</section>
 					
@@ -152,7 +153,7 @@
 			</section>
 		</dialog>
 
-		<dialog id="dialogMetric" class="dialog-metrics">
+		<dialog id="dialog-metric">
 			<small id="dialog-popup" class="popupToast"></small>
 			<section data-table-selected>
 				<h4>Inserisci qui la funzione per la metrica&nbsp;<span></span></h4>
