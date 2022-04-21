@@ -101,7 +101,7 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// selezione di una gerarchia (step-2)
-	app.handlerSelectHierarchy = (e) => {
+	app.handlerHierarchySelected = (e) => {
 		e.currentTarget.toggleAttribute('selected');
 		const hier = e.currentTarget.getAttribute('data-hier-name');
 		const hierRef = e.currentTarget; // questo mi serve per ciclare le tabella al suo interno, il ciclo sulle tabelle va a visualizzare quali filtri appartengono alle tabelle di questa gerarchia
@@ -166,7 +166,7 @@ var StorageMetric = new MetricStorage();
 				section.setAttribute('data-element-search','search-hierarchy'); // ricerca dalla input sopra
 				section.setAttribute('data-dimension-name', dimValue.name);
 				section.setAttribute('data-hier-name', hierName);
-				section.addEventListener('click', app.handlerSelectHierarchy);
+				section.addEventListener('click', app.handlerHierarchySelected);
 				li.innerText = hierName;
 				li.setAttribute('data-hier-name', hierName);
 				li.setAttribute('data-dimension-name', dimName);
@@ -364,14 +364,53 @@ var StorageMetric = new MetricStorage();
 			section.setAttribute('data-cube-name', key);
 			section.setAttribute('data-table-alias', value.alias);
 			section.setAttribute('data-schema-name', value.schema);
-			section.onclick = app.selectFact;
+			section.onclick = app.handlerFactSelected;
 			span.innerText = value.FACT;
 			ul.appendChild(section);
 		}
 	}
 
+	app.getMetrics = () => {
+		const ul = document.getElementById('exist-metrics');
+		console.log('metrics : ', StorageMetric.metrics);
+		for (const [key, value] of Object.entries(StorageMetric.metrics)) {
+			debugger;
+			const content = app.tmplList.content.cloneNode(true);
+			const section = content.querySelector('section[data-sublist-table-metrics]');
+			const subList = section.querySelector('.sublist');
+			const spanTable = subList.querySelector('span[table]');
+			const spanMetric = subList.querySelector('span[metric]');
+
+			section.setAttribute('data-label', metric);
+			section.setAttribute('data-cube-name', key);
+			section.setAttribute('data-element-search', 'search-exist-metrics');
+			spanTable.innerText = value.FACT;
+			spanMetric.innerText = metric;
+			spanMetric.setAttribute('data-table-alias', value.alias);
+			spanMetric.setAttribute('data-table-name', value.FACT);
+			spanMetric.setAttribute('data-schema-name', value.schema);
+			spanMetric.setAttribute('data-label', metric);
+			spanMetric.onclick = app.handlerMetricSelected;
+			ul.appendChild(section);
+		}
+		// StorageMetric
+		// TODO: NON devo prendere le metriche dal cubo ma dallo storage, come fatto per i filtri
+
+
+
+		// NOTE: questo codicee mi può servire per creare una nuova metrica
+		/*for (const [key, value] of Object.entries(StorageCube.cubes)) {
+			console.log(key, value);
+			// per ogni metrica
+			console.log(value.metrics[value.FACT]);
+			value.metrics[value.FACT].forEach( (metric) => {
+				
+			});
+		}*/
+	}
+
 	// selezione della fact nello step-2
-	app.selectFact = (e) => {
+	app.handlerFactSelected = (e) => {
 		e.currentTarget.toggleAttribute('selected');
 		const cube = e.currentTarget.getAttribute('data-cube-name');
 		const table = e.currentTarget.getAttribute('data-label');
@@ -386,6 +425,12 @@ var StorageMetric = new MetricStorage();
 				filter.hidden = false;
 				filter.setAttribute('data-searchable', true);
 				filter.querySelector('span[filter]').setAttribute('data-table-alias', alias);
+			});
+			// visualizzo, in exist-metrics, le metriche appartenenti al cubo selezionato
+			document.querySelectorAll("#exist-metrics section[data-cube-name='" + cube + "']").forEach( (metric) => {
+				metric.hidden = false;
+				metric.setAttribute('data-searchable', true);
+				// metric.querySelector('span[filter]').setAttribute('data-table-alias', alias);
 			});
 		}
 	}
@@ -601,7 +646,8 @@ var StorageMetric = new MetricStorage();
 
 	// selezione di una metrica già esistente, lo salvo nell'oggetto Query, come quando si salva un nuovo filtro dalla dialog
 	app.handlerMetricSelected = (e) => {
-		StorageMetric.metric = e.currentTarget.getAttribute('label');
+		debugger;
+		StorageMetric.metric = e.currentTarget.getAttribute('data-label');
 		e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('selected')) {
 			// aggiungo la metrica
@@ -1406,32 +1452,6 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
-	// recupero tutte le metriche esistenti dallo storage, per tutti i cubi. Queste sono le metriche che sono state già impostate e quindi si possono già utilizzare nel report che si sta creando
-	app.getMetrics = () => {
-		const content = app.tmplUlList.content.cloneNode(true);
-		const ul = content.querySelector("ul[data-id='fields-metric']");
-		const parent = document.getElementById('existMetrics'); // dove verrà inserita la <ul>
-		// creo un unica <ul> con dentro tutte le dimensioni, queste verranno filtrate quando si selezionano uno o più cubi
-		// console.log('lista cubi : ', StorageCube.cubes); // tutta la lista dei cubi
-		for (const [cubeName, cubeValue] of (Object.entries(StorageCube.cubes))) {
-			// console.log('StorageMetric : ', StorageMetric.metrics);
-			for (const [metricName, metric] of Object.entries(StorageMetric.metrics)) {
-				const contentElement = app.tmplList.content.cloneNode(true);
-				const section = contentElement.querySelector('section[data-no-icon]');
-				const element = section.querySelector('.element');
-				const li = element.querySelector('li');
-				section.setAttribute('data-label-search', metricName); // questo attr consente la ricerca dalla input sopra
-				section.setAttribute('data-fact', cubeValue.FACT); // questo attr consente la ricerca dalla selezione del cubo
-				section.setAttribute('data-table-alias', cubeValue.alias);
-				li.innerText = metricName;
-				li.setAttribute('label', metricName);
-				ul.appendChild(section);
-				li.onclick = app.handlerMetricSelected;
-				parent.appendChild(ul);
-			}
-		}
-	}
-
 	app.getCubes();
 
 	app.getDimensions();
@@ -1447,6 +1467,8 @@ var StorageMetric = new MetricStorage();
 	app.getTables(); //  elenco tabelle nella dialogFilter
 
 	app.getFactTable(); // lista delle FACT da visualizzare nello step-2
+
+	app.getMetrics();
 
 	/*app.getTablesInHierarchiesDialogFilter();
 

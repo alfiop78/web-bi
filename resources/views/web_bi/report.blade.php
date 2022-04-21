@@ -354,6 +354,13 @@
 								</span>
 							</section>
 
+							<section data-element-search data-label data-sublist-table-metrics hidden>
+								<span class="sublist">
+									<span table></span>
+									<span metric></span>
+								</span>
+							</section>
+
 						</template>
 
 						<template id="sublist-item">
@@ -364,17 +371,6 @@
 									<i data-id="filter-icon" class="material-icons md-18">filter_alt</i>									
 								</span>
 							</span>
-						</template>
-
-						<template id="template_ulList">
-							{{-- <ul data-id="list-cubes" class="overflowList"></ul>
-							<ul data-id="list-filter" class="overflowList"></ul>
-							<ul data-id="list-dimensions" class="overflowList"></ul>
-							<ul data-id="list-columns" class="overflowList"></ul>
-							<ul data-id="list-fields" class="overflowList"></ul>
-							<ul data-id="list-values" class="list middleList"></ul>
-							<ul data-id="list-tables" class="overflowList"></ul>
-							<ul data-id="list-metrics" class="overflowList"></ul> --}}
 						</template>
 
 						<div class="wrapper">
@@ -438,7 +434,15 @@
 														</div>
 														{{-- elementi del report --}}
 														<div class="elementsReport">
-															<ul id="report-columns"></ul>
+															{{-- colonne --}}
+															<div>
+																<div class="md-field">
+																	<input type="search" data-element-search="search-columns-selected" id="search-columns-selected" value autocomplete="off" />
+																	<label for="search-columns-selected" class="">Ricerca</label>
+																</div>
+																<ul id="report-columns"></ul>
+															</div>
+															{{-- filtri --}}
 															<div>
 																<div class="md-field">
 																	<input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
@@ -446,7 +450,14 @@
 																</div>
 																<ul id="exist-filters" class="full-overflow-list"></ul>																
 															</div>
-															<ul id="report-metrics"></ul>
+															{{-- metriche --}}
+															<div>
+																<div class="md-field">
+																	<input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
+																	<label for="search-exist-metrics" class="">Ricerca</label>
+																</div>
+																<ul id="exist-metrics"></ul>
+															</div>
 														</div>
 													</div>
 												</div>

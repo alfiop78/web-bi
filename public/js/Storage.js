@@ -505,14 +505,14 @@ class FilterStorage extends Storages {
 }
 
 class MetricStorage extends Storages {
+	#metrics = {};
 	constructor() {
 		super();
-		this._metrics = {};
 		this.storageKeys.forEach((key) => {
 			let jsonStorage = JSON.parse(this.storage.getItem(key));
 			// console.log(key);
 			if (jsonStorage.type === 'METRIC') {
-				this._metrics[key] = jsonStorage;
+				this.#metrics[key] = jsonStorage;
 			}
 		});
 		// console.log('_metrics : ', this._metrics);
@@ -528,39 +528,17 @@ class MetricStorage extends Storages {
 
 	get metric() {return JSON.parse(this.storage.getItem(this._metric));}
 
-	get metrics() {return this._metrics;}
+	// TODO: impostare anche un metodo Set, invece di metterlo nel costructor, verificare anche le altre subClass
+	get metrics() {return this.#metrics;} // tutte le metriche
 
 	tableMetrics(table) {
 		this._tableMetrics = {};
-		for ( const [key, value] of Object.entries(this._metrics)) {
+		for ( const [key, value] of Object.entries(this.#metrics)) {
 			if (value.table === table) {
 				this._tableMetrics.push(value);
 			}
 		}
 		return this._tableMetrics;
 	}
-
-	/*list(table) {
-		// ottengo la lista delle pagine create
-		this.metrics = {};
-		this.storageKeys.forEach((key) => {
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			// console.log(key);
-
-			// if (jsonStorage.type === "METRIC" && jsonStorage.formula.table === table) {
-
-			//   this.metrics[key] = jsonStorage.formula;
-			// }
-
-			if (jsonStorage.type === "METRIC") {
-				console.log(jsonStorage.formula[key].table);
-				if (jsonStorage.formula[key].table === table) {
-					this.metrics[key] = jsonStorage.formula[key];
-				}
-			}
-		});
-		debugger;
-		return this.metrics;
-	}*/
 
 }
