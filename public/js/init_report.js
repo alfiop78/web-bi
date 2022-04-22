@@ -450,13 +450,10 @@ var StorageMetric = new MetricStorage();
 
 				section.setAttribute('data-label', metric);
 				section.setAttribute('data-cube-name', key);
-				// section.setAttribute('data-table-name', value.formula[key].table);
+				section.setAttribute('data-table-alias', value.alias);
+				section.setAttribute('data-table-name', value.FACT);
 				section.setAttribute('data-element-search', 'search-available-metrics');
-				// spanTable.innerText = value.formula[key].table;
 				span.innerText = metric;
-				// spanMetric.setAttribute('data-table-alias', value.alias);
-				// span.setAttribute('data-table-name', value.formula[key].table);
-				// spanMetric.setAttribute('data-schema-name', value.schema);
 				section.onclick = app.handlerMetricAvailable;
 				ul.appendChild(section);
 			});
@@ -480,18 +477,11 @@ var StorageMetric = new MetricStorage();
 				filter.setAttribute('data-searchable', true);
 				filter.querySelector('span[filter]').setAttribute('data-table-alias', alias);
 			});
-			// visualizzo, in exist-metrics, le metriche appartenenti al cubo selezionato
-			/* // TODO: probabilmente nella creazione di una nuova metrica sarà meglio aggiungere anche il cubo a cui appartiene, in questo caso andrò a visualizzarla tramite l'attr data-cube-name
-			document.querySelectorAll("#exist-metrics section[data-cube-name='" + cube + "']").forEach( (metric) => {
-				metric.hidden = false;
-				metric.setAttribute('data-searchable', true);
-				// metric.querySelector('span[filter]').setAttribute('data-table-alias', alias);
-			});*/
-			// BUG: Al momento visualizzo le metriche in base a data-table-name
 			document.querySelectorAll("#exist-metrics section[data-table-name='" + table + "']").forEach( (metric) => {
+				// imposto data-table-alias nella <ul> delle metriche già esistenti
 				metric.hidden = false;
 				metric.setAttribute('data-searchable', true);
-				// metric.querySelector('span[filter]').setAttribute('data-table-alias', alias);
+				metric.querySelector('span[metric]').setAttribute('data-table-alias', alias);
 			});
 			// imposto, nella dialog-metric il nome della tabella selezionata
 			app.dialogMetric.querySelector('section[data-table-name]').setAttribute('data-table-name', table);
@@ -618,11 +608,11 @@ var StorageMetric = new MetricStorage();
 
 	// selezione di un cubo (step-1)
 	app.handlerCubeSelected = (e) => {
-		// const cubeId = e.currentTarget.getAttribute('data-cube-id');
-		// const fieldType = e.currentTarget.getAttribute('data-list-type');
 		StorageCube.selected = e.currentTarget.getAttribute('data-label');
+		Query.tableAlias = StorageCube.selected.alias;
+		Query.from = `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${Query.tableAlias}`;
 
-		console.log('cube selected : ', StorageCube.selected.name);
+		// console.log('cube selected : ', StorageCube.selected.name);
 		e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('selected')) {
 			// Query.addFromCubes(StorageCube.selected.FACT);
@@ -703,7 +693,12 @@ var StorageMetric = new MetricStorage();
 		if (e.currentTarget.hasAttribute('selected')) {
 			// recupero dallo storage il filtro selezionato
 			console.log(StorageFilter.filter);
-			if (StorageFilter.filter.hier) Query.addTables(StorageFilter.filter.hier); // imposto la firstTable se il filtro appartiene a una dimensione e non a un cubo
+			debugger;
+			if (StorageFilter.filter.hier) {
+				// imposto la firstTable se il filtro appartiene a una dimensione e non a un cubo
+				Query.addTables(StorageFilter.filter.hier);
+				app.checkRelations(hier);
+			}
 			console.log(StorageFilter.filter.formula);
 			// nel salvare il filtro nel report attuale devo impostarne anche l'alias della tabella selezionata nella dialog
 			Query.filters = `${Query.tableAlias}.${StorageFilter.filter.formula}`;
@@ -717,7 +712,6 @@ var StorageMetric = new MetricStorage();
 
 	// selezione di una metrica già esistente, lo salvo nell'oggetto Query, come quando si salva un nuovo filtro dalla dialog
 	app.handlerMetricSelected = (e) => {
-		debugger;
 		StorageMetric.metric = e.currentTarget.getAttribute('data-label');
 		e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('selected')) {
@@ -726,7 +720,7 @@ var StorageMetric = new MetricStorage();
 			console.log(StorageMetric.metric);
 			console.log(StorageMetric.metric.name);
 			console.log(StorageMetric.metric.formula);
-			debugger;
+			Query.tableAlias = e.currentTarget.getAttribute('data-table-alias');
 			Query.metricName = StorageMetric.metric.name;
 			// se la metrica contiene un filtro bisogna aggiungerla a Query.filteredMetrics altrimenti a Query.metrics
 			if (StorageMetric.metric.formula[StorageMetric.metric.name].hasOwnProperty('filters')) {
@@ -817,55 +811,8 @@ var StorageMetric = new MetricStorage();
 			app.dialogFilter.querySelectorAll('#dialog-filter-fields > section').forEach( section => section.remove());
 			app.dialogFilter.querySelector('section').setAttribute('data-table-name', e.currentTarget.getAttribute('data-table-name'));
 		}
-		/*if (e.target.hasAttribute('data-hier-name')) {
-			
-		} else {
-			// FACT
-			StorageCube.selected = e.target.getAttribute('data-cube-name');
-			Query.table = e.currentTarget.getAttribute('label');
-			Query.tableAlias = e.currentTarget.getAttribute('data-fact-alias');
-			Query.schema = e.currentTarget.getAttribute('data-fact-schema');
-			// nascondo i filtri che NON fanno parte della tabella selezionata
-			if (app.dialogFilter.querySelector('#filter-fieldList-tables ul li[selected]')) {
-				const li = app.dialogFilter.querySelector('#filter-fieldList-tables ul li[selected]');
-				li.toggleAttribute('selected');
-				if (app.dialogFilter.querySelector('#fieldList-filter ul')) app.dialogFilter.querySelector('#fieldList-filter ul').remove();
-				app.dialogFilter.querySelectorAll("ul[data-id='fields-filter'] > section:not([data-fact-name])").forEach((filter) => {
-					filter.hidden = true;
-					filter.removeAttribute('data-searchable');
-				});
-			}
-			// visualizzo i filtri esistenti appartenenti alla tabella selezionata
-			// debugger;
-			app.dialogFilter.querySelectorAll("ul[data-id='fields-filter'] > section[data-fact-name='" + Query.table + "']").forEach( (filter) => {
-				filter.hidden = false;
-				filter.setAttribute('data-searchable', true);
-			});
-		}		*/
 		app.getFields();
 		e.currentTarget.toggleAttribute('selected');
-	}
-
-	// selezione della FACT nella sezione metric
-	app.handlerTableSelectedMetrics = (e) => {
-		const fact = e.currentTarget.getAttribute('data-fact');
-		const schema = e.currentTarget.getAttribute('data-schema');
-		Query.tableAlias = e.currentTarget.getAttribute('data-table-alias');
-		Query.from = `${schema}.${fact} AS ${Query.tableAlias}`;
-		debugger;
-		e.currentTarget.toggleAttribute('selected');
-		if (e.currentTarget.hasAttribute('selected')) {
-			document.querySelectorAll("ul[data-id='fields-metric'] > section[data-fact='" + fact + "']").forEach((metric) => {
-				metric.hidden = false;
-				metric.toggleAttribute('data-searchable');
-			});
-		} else {
-			// deselezione
-			document.querySelectorAll("ul[data-id='fields-metric'] > section[data-fact='" + fact + "']").forEach((metric) => {
-				metric.hidden = true;
-				metric.toggleAttribute('data-searchable');
-			});
-		}
 	}
 
 	// selezione di una metrica mappata, disponibile per la creazione
@@ -873,6 +820,8 @@ var StorageMetric = new MetricStorage();
 		e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('selected')) {
 			Query.field = e.currentTarget.getAttribute('data-label');
+			Query.table = e.currentTarget.getAttribute('data-table-name');
+			Query.tableAlias = e.currentTarget.getAttribute('data-table-alias');
 		} else {
 			// TODO: 
 		}
@@ -1122,8 +1071,8 @@ var StorageMetric = new MetricStorage();
 		const alias = document.getElementById('alias-metric').value;
 		const SQLFunction = document.querySelector('#ul-aggregation-functions > section[selected]').getAttribute('data-label');
 		const distinctOption = document.getElementById('checkbox-distinct').checked;
-		Query.table = app.dialogMetric.querySelector('section[data-table-name]').getAttribute('data-table-name');
-		// Query.tableAlias = app.dialogMetric.querySelector('section').getAttribute('data-table-selected-alias');
+		Query.table = document.querySelector('#ul-available-metrics > section[selected]').getAttribute('data-table-name');
+		Query.tableAlias = document.querySelector('#ul-available-metrics > section[selected]').getAttribute('data-table-alias');
 		Query.metricName = name;
 		console.log(Query.metricName);
 		// console.log(Query.table);
@@ -1180,6 +1129,7 @@ var StorageMetric = new MetricStorage();
 		spanMetric.innerText = Query.metricName;
 		spanMetric.setAttribute('data-label', Query.metricName);			
 		spanMetric.setAttribute('data-table-name', Query.table);
+		spanMetric.setAttribute('data-table-alias', Query.tableAlias);
 		spanMetric.onclick = app.handlerMetricSelected;
 		ul.appendChild(section);
 

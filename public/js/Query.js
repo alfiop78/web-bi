@@ -199,10 +199,10 @@ class Queries {
 
 	set metrics(object) {
 		// object = {sqlFunction: "SUM", field: "NettoRiga", metricName: "netto riga", distinct: false, alias: "Venduto"}
+		debugger;
 		object.tableAlias = this.tableAlias;
 		this._metrics[this._metricName] = object;
 		console.log('metrics : ', this._metrics);
-		debugger;
 	}
 
 	get metrics() {return this._metrics;}
