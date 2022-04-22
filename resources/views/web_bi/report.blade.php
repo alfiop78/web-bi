@@ -155,8 +155,9 @@
 
 		<dialog id="dialog-metric">
 			<small id="dialog-popup" class="popupToast"></small>
-			<section data-table-selected>
-				<h4>Inserisci qui la funzione per la metrica&nbsp;<span></span></h4>
+			<section data-table-name>
+				<h4>Creazione di una nuova metrica per il cubo <span data-cube-selected></span></h4>
+				
 				<div class="name-alias">
 					<div class="md-field">
 						<input type="text" id="metric-name" value="" autocomplete="off" />
@@ -170,15 +171,50 @@
 				</div>
 
 				<div class="stepLayout">
+					{{-- metriche mappate --}}
 					<section class="sectionLists">
-						<h5>Funzione di aggregazione</h5>
+						<h5>Metriche disponibili</h5>
+						<div class="md-field">
+							<input type="search" data-element-search="search-available-metrics" id="search-available-metrics" value autocomplete="off" />
+							<label for="search-available-metrics" class="">Ricerca</label>
+						</div>
+						<ul id="ul-available-metrics"></ul>
+					</section>
+					{{-- funzioni di aggregazione --}}
+					<section class="sectionLists">
+						<h5>Aggregazione</h5>{{-- <h6>Seleziona la funzione di aggregazione</h6> --}}
 						<div id="sql-aggregation">
-							<ul id="sql-aggregation-list" class="list middleList">
-								<li label="SUM" selected>SUM</li>
+							<ul id="ul-aggregation-functions" class="dialog-overflow-list">
+								<section data-element-search="search-aggregate-functions" data-label="SUM" data-sublist-generic data-searchable="true" selected>
+									<span class="sublist">
+										<span generic class="selectable">SUM</span>
+									</span>
+								</section>
+								<section data-element-search="search-aggregate-functions" data-label="COUNT" data-sublist-generic data-searchable="true">
+									<span class="sublist">
+										<span generic class="selectable">COUNT</span>
+									</span>
+								</section>
+								<section data-element-search="search-aggregate-functions" data-label="AVG" data-sublist-generic data-searchable="true">
+									<span class="sublist">
+										<span generic class="selectable">AVG</span>
+									</span>
+								</section>
+								<section data-element-search="search-aggregate-functions" data-label="MAX" data-sublist-generic data-searchable="true">
+									<span class="sublist">
+										<span generic class="selectable">MAX</span>
+									</span>
+								</section>
+								<section data-element-search="search-aggregate-functions" data-label="MIN" data-sublist-generic data-searchable="true">
+									<span class="sublist">
+										<span generic class="selectable">MIN</span>
+									</span>
+								</section>
+								{{-- <li label="SUM" selected>SUM</li>
 								<li label="COUNT">COUNT</li>
 								<li label="AVG">AVG</li>
 								<li label="MAX">MAX</li>
-								<li label="MIN">MIN</li>
+								<li label="MIN">MIN</li> --}}
 							</ul>
 						</div>
 						<label class="mdc-checkbox">
@@ -188,51 +224,22 @@
 					</section>
 
 					<section class="sectionLists">
-						<h5>Modifica</h5>
+						<h5>SQL</h5>
 						<div class="md-field">
 							<textarea id="metricSQLFormula" name="metricSQL" rows="8" cols="25" placeholder="SQL"></textarea>
 						</div>
+						<button id="btnMetricSave" type="button" name="save" class="md-button" disabled>salva</button>
 					</section>
 
-					<section class="sectionLists">
+					{{-- <section class="sectionLists">
 						<h5>Filtri disponibili</h5>
 						<div class="md-field">
-							<input type="search" id="searchExistsFilter_Metric" value="" autocomplete="off" />
+							<input type="search" id="searchExistsFilter_Metric" data-element-search="exist-filter-metric" value autocomplete="off" />
 							<label for="searchExistsFilter_Metric" class="">Ricerca</label>
 						</div>
-						<div id="existsFilter_Metric"><!-- <ul> --></div>
-					</section>
+						<ul id="exist-filter-metric"></ul>
+					</section> --}}
 				</div>
-
-				<!-- <div class="formulaDefine"> -->
-					<!-- <section class="formula">
-						<h6>SQL Function</h6><small>Scorri la lista delle funzioni di aggregazione</small>
-						<div class="listContent">
-					  		<ul id="function-list" class="miniList">
-								<li id="SUM" label="SUM" selected>SUM</li>
-								<li id="COUNT" label="COUNT">COUNT</li>
-								<li id="AVG" label="AVG">AVG</li>
-								<li id="MAX" label="MAX">MAX</li>
-								<li id="MIN" label="MIN">MIN</li>
-							</ul>
-						</div>
-						<label class="mdc-checkbox">
-							<input id="checkbox-distinct" type="checkbox" name="distinct-checkbox"/>
-							<span>DISTINCT</span>
-						</label>
-					</section> -->
-
-					<!-- <section class="filters">
-						<h6>Filtri disponibili</h6><small>Filtri disponibili da associare alla metrica</small>
-						<div class="md-field">
-							<input type="search" id="searchExistsFilter_Metric" value="" autocomplete="off" />
-							<label for="searchExistsFilter_Metric" class="">Ricerca</label>
-						</div>
-						<div id="existsFilter_Metric">
-							
-						</div>
-					</section> -->
-				<!-- </div> -->
 
 				<div class="dialog-buttons">
 					<button type="button" name="cancel" class="md-button">annulla</button>
@@ -429,7 +436,7 @@
 															</div>
 															<div class="btn-add">
 																<span>metriche</span>
-																<i class="material-icons md-36">add</i>
+																<i id="btn-add-metrics" class="material-icons md-36">add</i>
 															</div>
 														</div>
 														{{-- elementi del report --}}

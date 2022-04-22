@@ -38,7 +38,7 @@ i[open]{color: red;}
 .stepLayout .sectionLists{height: inherit;}
 
 #dialog-filter .stepLayout{grid-template-columns: 20% 20% auto; grid-column-gap: 2%; height: inherit;margin : 0 2em;}
-#dialog-metric .stepLayout{grid-template-columns: 20% auto 25%; grid-column-gap: 3%; height: inherit;margin: 0 2em;}
+#dialog-metric .stepLayout{grid-template-columns: 20% 20% auto; grid-column-gap: 3%; height: inherit;margin: 0 2em;}
 #dialog-column .stepLayout{grid-template-columns: 30% calc(70% - 2%); grid-column-gap: 2%; height: inherit;margin : 0 2em;}
 
 .overflowList{height: 350px; overflow-y: auto; background: gainsboro;}
@@ -100,7 +100,8 @@ ul > section.fact{font-weight: bold;}
 .step[data-step="2"] .h-grid{grid-template-columns : 25% calc(75% - 16px);}
 .overflowList{height: 350px; overflow-y: auto; background: gainsboro;}
 .full-overflow-list{height: 70%; overflow-y: auto; max-height: 450px;}
-.full-overflow-list-columns{height: 350px; max-height: 350px; overflow-y: auto; max-height: 450px;}
+.full-overflow-list-columns{height: 350px; max-height: 350px; overflow-y: auto;}
+.dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}
 
 .addElementsReport{background: #dcdcdc61;display: grid;grid-template-columns: repeat(3, 30%); grid-column-gap: 5%; color: dimgrey;}
 .addElementsReport > div{display: grid;grid-template-rows: auto auto;justify-content: center;align-items: center;justify-items: center;padding: 1em; background-color: gainsboro;}
