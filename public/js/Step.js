@@ -12,6 +12,7 @@ class Steps {
 		this._translateRef = document.getElementById(stepTranslate);
 		this._step = document.querySelector('.steps[data-step]'); // elemento con [data-step]
 		this.btnNext = this._step.querySelector('#next');
+		this.btnSave = this._step.querySelector('#save');
 		this.btnPrevious = this._step.querySelector('#prev');
 		// numero degli step presenti, con questo posso controllare il enabled/disabled dei tasti prev-next
 		this.stepCount = this._translateRef.childElementCount;
@@ -21,8 +22,9 @@ class Steps {
 	set page(value) {
 		// imposto la pagina corrente
 		this._page = value;
-		this.btnPrevious.disabled = (this.#stepActive === 1) ? true :  false;
-		this.btnNext.disabled = (this.#stepActive === this.stepCount) ? true :  false;
+		this.btnPrevious.hidden = (this.#stepActive === 1) ? true :  false;
+		this.btnNext.hidden = (this.#stepActive === this.stepCount) ? true :  false;
+		this.btnSave.hidden = (this.#stepActive !== this.stepCount) ? true :  false;
 	}
 
 	get page() {return this._page;}
@@ -47,8 +49,6 @@ class Steps {
 			this._page.previousElementSibling.setAttribute('selected', true);
 			// imposto la nuova pagina corrente
 			this.page = this._page.previousElementSibling;
-			// se la pagina precedente non esiste disabilito il tasto previous
-			this.btnPrevious.disabled = (!this.page.previousElementSibling) ? true : false;
 		}
 	}
 
@@ -65,8 +65,6 @@ class Steps {
 			this._page.nextElementSibling.setAttribute('selected', true);
 			// imposto la nuova pagina corrente
 			this.page = this._page.nextElementSibling;
-			// se la pagina successiva non esiste disabilito il tasto next
-			this.btnNext.disabled = (!this.page.nextElementSibling) ? true : false;
 		}
 	}
 

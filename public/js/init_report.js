@@ -31,7 +31,6 @@ var StorageMetric = new MetricStorage();
 		btnAddMetrics : document.getElementById('btn-add-metrics'),
 		btnPreviousStep : document.getElementById('prev'),
 		btnNextStep : document.getElementById('next'),
-		btnStepDone: document.getElementById('stepDone'),
 		btnSaveAndProcess: document.getElementById('saveAndProcess'),
 		btnSaveColumn: document.getElementById('btnSaveColumn'), // salvataggio di un alias/sql di colonna nella dialog dialogColumns
 		btnSearchValue : document.getElementById('search-field-values'),
@@ -39,8 +38,9 @@ var StorageMetric = new MetricStorage();
 		btnProcessReport: document.getElementById('btnProcessReport'), // apre la lista dei report da processare "Crea FX"
 
 		// dialog
-		dialogSaveReport: document.getElementById('dialogSaveReport'),
+		dialogSaveReport: document.getElementById('dialog-save-report'),
 		dialogFilter: document.getElementById('dialog-filter'),
+		dialogMetricFilter : document.getElementById('dialog-metric-filter'),
 		dialogColumns: document.getElementById('dialog-column'),
 		dialogValue : document.getElementById('dialog-value'),
 		dialogMetric: document.getElementById('dialog-metric'),
@@ -49,8 +49,10 @@ var StorageMetric = new MetricStorage();
 		btnColumnDone: document.getElementById('btnColumnDone'), // tasto ok nella dialogColumns
 		btnMetricSave: document.getElementById('btnMetricSave'), // tasto salva nella dialogMetric
 		btnMetricDone: document.getElementById('btnMetricDone'), // tasto Salva nella dialogMetric
+		btnMetricFilterDone: document.getElementById('btnMetricFilterDone'), // tasto ok nella dialog-metric-filter
+		btnSetMetricFilter : document.getElementById('metric-filtered'), // apre la dialog-metric-filter
 		btnValueDone : document.getElementById('btnValueDone'), // tasto done nella dialogValue
-		btnSaveReport: document.getElementById('saveReport'),
+		btnSaveReport: document.getElementById('save'), // apre la dialogSaveReport
 		btnSaveReportDone: document.getElementById('btnReportSaveName'),
 
 		btnBackPage: document.getElementById('mdcBack'), // da definire
@@ -125,11 +127,18 @@ var StorageMetric = new MetricStorage();
 				// visualizzo i filtri per questa tabella in #exist-filters
 				filters.forEach( (filter) => {
 					const filterRef = document.querySelector("#exist-filters > section[data-label='" + filter.name + "'][data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']");
+					const filterRefMetricFilter = document.querySelector("#ul-metric-filter > section[data-label='" + filter.name + "'][data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']");
 					if (filterRef) {
 						filterRef.removeAttribute('hidden');
 						filterRef.setAttribute('data-searchable', true);
 						filterRef.querySelector('span[filter]').setAttribute('data-table-alias', alias);
 						filterRef.querySelector('span[filter]').setAttribute('data-table-id', tableId);
+					}
+					if (filterRefMetricFilter) {
+						filterRefMetricFilter.removeAttribute('hidden');
+						filterRefMetricFilter.setAttribute('data-searchable', true);
+						filterRefMetricFilter.querySelector('span[filter]').setAttribute('data-table-alias', alias);
+						filterRefMetricFilter.querySelector('span[filter]').setAttribute('data-table-id', tableId);
 					}
 				});
 			});
@@ -318,6 +327,36 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
+	// popolo la lista dei filtri esistenti nella dialog metric-filter (metriche filtrate)
+	app.getMetricFilters = () => {
+		const ul = document.getElementById('ul-metric-filter');
+		console.log('filters : ', StorageFilter.filters);
+		for (const [key, value] of Object.entries(StorageFilter.filters)) {
+			const content = app.tmplList.content.cloneNode(true);
+			const section = content.querySelector('section[data-sublist-table-filters]');
+			const subList = section.querySelector('.sublist');
+			const table = subList.querySelector('span[table]');
+			const filter = subList.querySelector('span[filter]');
+			section.setAttribute('data-label', key);
+			section.setAttribute('data-table-name', value.table);
+			if (value.hasOwnProperty('dimension')) {
+				section.setAttribute('data-dimension-name', value.dimension);
+				section.setAttribute('data-hier-name', value.hier);
+			}			
+			section.setAttribute('data-element-search', 'search-exist-filters');
+			table.innerText = value.table;
+			filter.innerText = key;
+			filter.setAttribute('data-label', key);
+			if (value.hasOwnProperty('dimension')) {
+				filter.setAttribute('data-dimension-name', value.dimension);
+				filter.setAttribute('data-hier-name', value.hier);
+			}
+			filter.setAttribute('data-table-name', value.table);
+			filter.onclick = app.handlerMetricFilterSelected;
+			ul.appendChild(section);
+		}
+	}
+
 	// popolamento delle tabelle nella dialogFilter
 	app.getTables = () => {
 		const ul = document.getElementById('list-tables');
@@ -436,7 +475,7 @@ var StorageMetric = new MetricStorage();
 			fact.hidden = false;
 			fact.setAttribute('data-searchable', true);
 			// visualizzo, in exist-filters, i filtri appartenenti alla Fact
-			document.querySelectorAll("#exist-filters section[data-table-name='" + table + "']:not([data-hier-name])").forEach( (filter) => {
+			document.querySelectorAll("#exist-filters section[data-table-name='" + table + "']:not([data-hier-name]), #ul-metric-filter section[data-table-name='" + table + "']:not([data-hier-name])").forEach( (filter) => {
 				filter.hidden = false;
 				filter.setAttribute('data-searchable', true);
 				filter.querySelector('span[filter]').setAttribute('data-table-alias', alias);
@@ -673,6 +712,8 @@ var StorageMetric = new MetricStorage();
 			Query.deleteFilter();
 		}
 	}
+
+	app.handlerMetricFilterSelected = e => e.currentTarget.toggleAttribute('selected');
 
 	// selezione di una metrica già esistente, lo salvo nell'oggetto Query, come quando si salva un nuovo filtro dalla dialog
 	app.handlerMetricSelected = (e) => {
@@ -1072,6 +1113,9 @@ var StorageMetric = new MetricStorage();
 
 	app.btnMetricDone.onclick = () => app.dialogMetric.close();
 
+	// dialog-metric-filter, recupero i filtri selezionati per inserirli nella metrica filtrata
+	app.btnMetricFilterDone.onclick = e => app.dialogMetricFilter.close();
+
 	// tasto 'fatto' nella dialogMetric, salvo la metrica impostata
 	app.btnMetricSave.onclick = (e) => {
 		const name = document.getElementById('metric-name').value;
@@ -1085,9 +1129,10 @@ var StorageMetric = new MetricStorage();
 		// console.log(Query.table);
 		// verifico se ci sono filtri da associare a questa metrica
 		let associatedFilters = {};
-		app.dialogMetric.querySelectorAll('#existsFilter_Metric > ul > section li[selected]').forEach((filterSelected) => {
+		document.querySelectorAll('#ul-metric-filter > section span[filter][selected]').forEach((filterSelected) => {
 			// set il nome del filtro
-			StorageFilter.filter = filterSelected.getAttribute('label');
+			debugger;
+			StorageFilter.filter = filterSelected.getAttribute('data-label');
 			// recupero dallo storage il contenuto del filtro per inserirlo in un object (quest'ultimo verrà inserito nella metrica)
 			console.log(StorageFilter.filter.name);
 			// debugger;
@@ -1293,6 +1338,8 @@ var StorageMetric = new MetricStorage();
 
 	app.getFilters(); // <ul> exist-filters
 
+	app.getMetricFilters(); // dialog-metric-filter per le metriche filtrate
+
 	app.getTables(); //  elenco tabelle nella dialogFilter
 
 	app.getFactTable(); // lista delle FACT da visualizzare nello step-2
@@ -1430,10 +1477,12 @@ var StorageMetric = new MetricStorage();
 		  .catch((err) => console.error(err));
 	}
 
+	app.btnSaveReport.onclick = (e) => app.dialogSaveReport.showModal();
+
 	// salvo il report da processare
 	app.btnSaveReportDone.onclick = () => {
 		// console.dir(Query);
-		// debugger;
+		debugger;
 		// aggiungo, nella from, il cubo selezionato nel primo step
 		// salvo temporaneamente la query da processare nello storage
 
@@ -1458,6 +1507,9 @@ var StorageMetric = new MetricStorage();
 		li.onclick = app.handlerReportToBeProcessed;
 		app.dialogSaveReport.close();
 	}
+
+	// apro la dialog-metric-filter
+	app.btnSetMetricFilter.onclick = () => app.dialogMetricFilter.showModal();
 
 	// visualizzo la lista dei report da processare
 	app.btnProcessReport.onclick = () => {

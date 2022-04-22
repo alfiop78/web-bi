@@ -74,7 +74,7 @@
 			</section>
 		</dialog>
 
-		<dialog id="dialogSaveReport">
+		<dialog id="dialog-save-report" class="dialog-save">
 			<div class="dialog-save-name">
 
 				<div class="md-field">
@@ -153,23 +153,28 @@
 			</section>
 		</dialog>
 
+		<dialog id="dialog-metric-filter" class="mini-dialog">
+			<small id="dialog-popup" class="popupToast"></small>
+			<section>
+				<h4>Ricerca filtri da impostare per la metrica</h4>
+				<div class="md-field">
+					<input type="search" id="dialog-metric-filter-search" data-element-search="search-exist-filters" value autocomplete="off" />
+					<label for="dialog-metric-filter-search" class="">Ricerca</label>
+				</div>
+				<ul id="ul-metric-filter" class="full-overflow-list-columns"></ul>
+			</section>
+
+			<div class="dialog-buttons">
+				<button type="button" name="cancel" class="md-button">annulla</button>
+				<button id="btnMetricFilterDone" type="button" name="metric-filter-done" class="md-button">ok</button>
+			</div>
+		</dialog>
+
 		<dialog id="dialog-metric">
 			<small id="dialog-popup" class="popupToast"></small>
 			<section data-table-name>
 				<h4>Creazione di una nuova metrica per il cubo <span data-cube-selected></span></h4>
 				
-				<div class="name-alias">
-					<div class="md-field">
-						<input type="text" id="metric-name" value="" autocomplete="off" />
-						<label for="metric-name" class="">Nome</label>
-					</div>
-
-					<div class="md-field">
-						<input type="text" id="alias-metric" value="" autocomplete="off" />
-						<label for="alias-metrics" class="">Alias</label>
-					</div>
-				</div>
-
 				<div class="stepLayout">
 					{{-- metriche mappate --}}
 					<section class="sectionLists">
@@ -183,40 +188,42 @@
 					{{-- funzioni di aggregazione --}}
 					<section class="sectionLists">
 						<h5>Aggregazione</h5>{{-- <h6>Seleziona la funzione di aggregazione</h6> --}}
-						<div id="sql-aggregation">
-							<ul id="ul-aggregation-functions" class="dialog-overflow-list">
-								<section data-element-search="search-aggregate-functions" data-label="SUM" data-sublist-generic data-searchable="true" selected>
-									<span class="sublist">
-										<span generic class="selectable">SUM</span>
-									</span>
-								</section>
-								<section data-element-search="search-aggregate-functions" data-label="COUNT" data-sublist-generic data-searchable="true">
-									<span class="sublist">
-										<span generic class="selectable">COUNT</span>
-									</span>
-								</section>
-								<section data-element-search="search-aggregate-functions" data-label="AVG" data-sublist-generic data-searchable="true">
-									<span class="sublist">
-										<span generic class="selectable">AVG</span>
-									</span>
-								</section>
-								<section data-element-search="search-aggregate-functions" data-label="MAX" data-sublist-generic data-searchable="true">
-									<span class="sublist">
-										<span generic class="selectable">MAX</span>
-									</span>
-								</section>
-								<section data-element-search="search-aggregate-functions" data-label="MIN" data-sublist-generic data-searchable="true">
-									<span class="sublist">
-										<span generic class="selectable">MIN</span>
-									</span>
-								</section>
-								{{-- <li label="SUM" selected>SUM</li>
-								<li label="COUNT">COUNT</li>
-								<li label="AVG">AVG</li>
-								<li label="MAX">MAX</li>
-								<li label="MIN">MIN</li> --}}
-							</ul>
+						<div class="md-field">
+							<input type="search" id="search-aggregate-functions" data-element-search="search-aggregate-functions" value="" autocomplete="off" />
+							<label for="metric-name" class="">Ricerca</label>
 						</div>
+						<ul id="ul-aggregation-functions" class="dialog-overflow-list">
+							<section data-element-search="search-aggregate-functions" data-label="SUM" data-sublist-generic data-searchable="true" selected>
+								<span class="sublist">
+									<span generic class="selectable">SUM</span>
+								</span>
+							</section>
+							<section data-element-search="search-aggregate-functions" data-label="COUNT" data-sublist-generic data-searchable="true">
+								<span class="sublist">
+									<span generic class="selectable">COUNT</span>
+								</span>
+							</section>
+							<section data-element-search="search-aggregate-functions" data-label="AVG" data-sublist-generic data-searchable="true">
+								<span class="sublist">
+									<span generic class="selectable">AVG</span>
+								</span>
+							</section>
+							<section data-element-search="search-aggregate-functions" data-label="MAX" data-sublist-generic data-searchable="true">
+								<span class="sublist">
+									<span generic class="selectable">MAX</span>
+								</span>
+							</section>
+							<section data-element-search="search-aggregate-functions" data-label="MIN" data-sublist-generic data-searchable="true">
+								<span class="sublist">
+									<span generic class="selectable">MIN</span>
+								</span>
+							</section>
+							{{-- <li label="SUM" selected>SUM</li>
+							<li label="COUNT">COUNT</li>
+							<li label="AVG">AVG</li>
+							<li label="MAX">MAX</li>
+							<li label="MIN">MIN</li> --}}
+						</ul>
 						<label class="mdc-checkbox">
 							<input id="checkbox-distinct" type="checkbox" name="distinct-checkbox"/>
 							<span>DISTINCT</span>
@@ -225,9 +232,21 @@
 
 					<section class="sectionLists">
 						<h5>SQL</h5>
+						<div class="name-alias">
+							<div class="md-field">
+								<input type="text" id="metric-name" value="" autocomplete="off" />
+								<label for="metric-name" class="">Nome</label>
+							</div>
+
+							<div class="md-field">
+								<input type="text" id="alias-metric" value="" autocomplete="off" />
+								<label for="alias-metrics" class="">Alias</label>
+							</div>
+						</div>
 						<div class="md-field">
 							<textarea id="metricSQLFormula" name="metricSQL" rows="8" cols="25" placeholder="SQL"></textarea>
 						</div>
+						<button id="metric-filtered" type="button" name="metric-filtered" class="md-button">Imposta filtri</button>
 						<button id="btnMetricSave" type="button" name="save" class="md-button" disabled>salva</button>
 					</section>
 
@@ -478,8 +497,13 @@
 
 								</div>
 								<div class="buttons">
-									<button id="prev" class="md-button">Precedente</button>
-									<button id="next" class="md-button">Successivo</button>
+									<div class="left-buttons">
+										<button id="prev" class="md-button">Precedente</button>										
+									</div>
+									<div class="right-buttons">
+										<button id="next" class="md-button">Successivo</button>
+										<button id="save" class="md-button">Salva</button>										
+									</div>
 								</div>
 							</div>
 						</div>

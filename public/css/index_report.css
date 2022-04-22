@@ -103,8 +103,10 @@ ul > section.fact{font-weight: bold;}
 .full-overflow-list-columns{height: 350px; max-height: 350px; overflow-y: auto;}
 .dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}
 
-.addElementsReport{background: #dcdcdc61;display: grid;grid-template-columns: repeat(3, 30%); grid-column-gap: 5%; color: dimgrey;}
-.addElementsReport > div{display: grid;grid-template-rows: auto auto;justify-content: center;align-items: center;justify-items: center;padding: 1em; background-color: gainsboro;}
+.addElementsReport{display: grid;grid-template-columns: repeat(3, 30%); grid-column-gap: 5%; color: dimgrey;}
+.addElementsReport > div{display: grid;grid-template-rows: auto auto;justify-content: center; opacity: .5;align-items: center;justify-items: center;padding: 1em; background-color: #dcdcdc61;
+  border-radius: 0px;box-shadow: 0px 0px 0px 0px; transition: box-shadow 200ms, opacity 250ms, border-radius 150ms;}
+.addElementsReport > div:hover{opacity: 1;border-radius: 4px;box-shadow: 0px 1px 8px -2px darkgrey;}
 .addElementsReport > div > span{padding: .5em 1em;}
 .btn-add{display: flex; flex-direction: column;}
 #list-hierarchies > section li[data-hier-name]{font-weight: bold;}

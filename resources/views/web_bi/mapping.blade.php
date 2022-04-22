@@ -186,7 +186,7 @@
             </section>
         </dialog>
 
-        <dialog id="cube-name" class="dialog-small">
+        <dialog id="cube-name" class="dialog-save">
             <section>
                 <h4>Nome Cubo</h4>
             </section>
@@ -207,7 +207,7 @@
 
         </dialog>
 
-        <dialog id="dimension-name" class="dialog-small">
+        <dialog id="dimension-name" class="dialog-save">
             <section>
                 <h4>Nome dimensione</h4>
                 <div class="dialog-save-name">
@@ -228,7 +228,7 @@
 
         </dialog>
 
-        <dialog id="hierarchy-name" class="dialog-small">
+        <dialog id="hierarchy-name" class="dialog-save">
             <section>
                 <h4>Nome gerarchia</h4>
                 <div class="dialog-save-name">

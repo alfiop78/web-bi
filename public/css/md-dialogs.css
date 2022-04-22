@@ -8,7 +8,7 @@ dialog .dialogTitle{background: brown; color: white;border-top-left-radius: 4px;
 dialog .lists{min-width: 300px;}
 dialog .list ul{margin: 8px;max-height: 400px;overflow-y: auto;}
 
-dialog.dialog-small{min-width: 40%; max-width: 50%;}
+dialog.dialog-save{min-width: 40%; max-width: 50%; min-height: 50%; max-height: 60%;}
 dialog section > h4{font-size: 1.2rem;}
 dialog .dialog-save-name{margin: 1em; padding: 1em;}
 

@@ -12,9 +12,11 @@
 
 .buttons{
 	width: 90%;
-    background: tomato;
+    background: gainsboro;
     display: flex;
     justify-content: space-around;
     padding: 0.5em;
     border-radius: 4px;
 }
+.buttons > .left-buttons{width: 50%; display: flex;justify-content: space-evenly;}
+.buttons > .right-buttons{width: 50%; display: flex;justify-content: space-evenly;}
