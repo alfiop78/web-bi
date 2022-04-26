@@ -167,13 +167,15 @@ var Hier = new Hierarchy();
 		// console.log(e.target);
 		// if (e.target.id === "help-drop") e.target.remove();
 
-		if (e.target.className === 'dropzone') {
+		// if (e.target.className === 'dropzone') {
+		if (e.target.classList.contains('dropzone')) {
 			console.info('DROPZONE');
 			// e.dataTransfer.dropEffect = "copy";
 			// coloro il border differente per la dropzone
 			// la class dropping nasconde (display: none) automaticamente lo span che contiene "Trascina qui gli element......"
 			e.target.classList.add('dropping');
 		} else {
+			console.log('non in dropzone');
 			// TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
 			// e.dataTransfer.dropEffect = "none";
 		}
@@ -186,13 +188,10 @@ var Hier = new Hierarchy();
 	}
 
 	app.handlerDragEnd = (e) => {
-        // console.log('handlerDragEnd');
-		e.preventDefault();
-		// console.log('dragEnd');
-		// console.log(e.target);
-		// debugger;
+        e.preventDefault();
 		// faccio il DESCRIBE della tabella
-		app.getTable(e.target.getAttribute('data-schema'), cube.card.tableName);
+		// controllo lo stato di dropEffect per verificare se il drop è stato completato correttamente, come descritto qui:https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#drag_end
+		if (e.dataTransfer.dropEffect === 'copy') app.getTable(e.target.getAttribute('data-schema'), cube.card.tableName);
 	}
 
 	app.handlerDrop = (e) => {

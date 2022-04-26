@@ -330,12 +330,11 @@ class Hierarchy {
 	showRelationIcons(value) {
 		// value : colSelected
 		value.forEach((el) => {
-			el.setAttribute('data-rel-'+this.relationId, this.relationId);
-			// el.setAttribute('data-relation-id', 'rel_'+this.relationId);
+			el.setAttribute('data-rel-'+this.#relationId, this.#relationId);
 			el.setAttribute('data-relation-id', true);
 			// la relazione è stata creata, posso eliminare [selected]
 			el.removeAttribute('selected');
 		});
-		// this.relationId++;
+		// this.#relationId++;
 	}
 }

@@ -291,7 +291,7 @@
         </template>
 
         <template id="templateListColumns">
-            <section data-element-search="" data-label="">
+            <section data-element-search data-label data-searchable="true">
                 <div class="element">
                     <li></li>
                     <i id="columns-icon" class="material-icons md-18">view_list</i>
