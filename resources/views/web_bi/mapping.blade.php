@@ -61,27 +61,35 @@
             </section>
         </template>
 
-        <template id="tmpl-hierarchy-list">
-            <div class="hierarchies">
-                <h6></h6>
-                <div class="tables"></div>
-                <div class="mini-card-buttons">
-                    <button data-id="dimension-use" type="button" name="dimensionUse" class="md-button">utilizza</button>
-                    <button data-id="dimension-edit" type="button" name="dimensionEdit" class="md-button">modifica</button>
-                </div>
+        <template id="tmpl-hierarchy-tables">
+            <div class="schema-table">
+                <span schema></span>
+                <span table></span>
             </div>
         </template>
 
-        {{-- template tmpl-dimension --}}
+        <template id="tmpl-hierarchy-list">
+            <div class="hierarchies">
+                <h6></h6>
+                <div class="hierarchy">
+                    <div class="tables"></div>
+                    <button data-id="dimension-edit" type="button" name="dimensionEdit" class="md-button">modifica</button>
+                </div>
+                {{-- <div class="mini-card-buttons">
+                    
+                </div> --}}
+            </div>
+        </template>
+
         <template id="tmpl-dimension-list">
-            <section data-element-search="dimensions">
+            <section data-element-search="dimensions" data-searchable="true" data-sublist-dimensions>
                 <div class="element dimensions">
                     <div class="mini-card">
                         <h5></h5> {{-- titolo della dimensione --}}
                         <div data-dimension-tables>
-                            {{-- elenco tabelle contenute nella dimensione --}}
-                            
+                            {{-- elenco tabelle contenute nella dimensione --}}                            
                         </div>
+                        <button data-id="dimension-use" type="button" name="dimensionUse" class="md-button">utilizza</button>
                         {{-- <div class="mini-card-buttons">
                             <button data-id="dimension-use" type="button" name="dimensionUse" class="md-button">utilizza</button>
                             <button data-id="dimension-edit" type="button" name="dimensionEdit" class="md-button">modifica</button>
@@ -291,6 +299,7 @@
         </template>
 
         <template id="templateList">
+
             <section data-element-search data-label data-sublist-table-card data-searchable="true">
                 <span class="sublist">
                     <span generic class="selectable"></span>
@@ -308,7 +317,15 @@
                     </div>
                 </span>
             </section>
+
+            <section data-element-search data-label data-sublist-generic data-searchable="true">
+                <span class="sublist">
+                    <span generic></span>
+                </span>
+            </section>
+
         </template>
+
         <main>
             <div id="drawer">
 
@@ -342,6 +359,7 @@
                 <div id="content">
 
                     <div id="body">
+                        {{-- <canvas id="canvas"></canvas> --}}
                         
                         <div class="actions">
                             <div class="buttons">
@@ -381,8 +399,7 @@
                             </div>
                         </div>
 
-                        <div class="lists">
-                            
+                        <div class="lists">                            
                             <div class="absList" id="dimensionList" hidden>
                                 <div class="md-field">
                                     <input type="search" id="dimensionSearch" data-element-search="dimensions" autocomplete="off"/>
@@ -404,6 +421,7 @@
                                 </ul>
                             </div>
                         </div>
+                        {{-- TODO: appartiene alla struttura gerarchica sulla destra, da rivedere ed eliminare --}}
                         <template id="tmpl-hier-table">
                             <div class="hier table dropzoneHier" data-schema draggable="true" label></div>
                         </template>

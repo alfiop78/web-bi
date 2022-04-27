@@ -1,6 +1,6 @@
 .lists{position: relative;}
 .absList{background: white;position: absolute;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;}
-#tableList.absList{width: 260px;}
+#tableList.absList, #cubesList.absList{width: 260px;}
 #dimensionList.absList{width: 350px;}
 .absList[fact]{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;color: var(--primary-color);}
 .absList > ul{height: 500px;overflow-y: auto; margin-inline: 0px; padding-inline: 0px}
@@ -219,11 +219,25 @@ span.after .arrow{height: 10px; width: 10px;background: #494949;display: flex;tr
 #drop-zone.dropped > span, #drop-zone.dropping > span{display: none;}
 #drop-zone.dropped[edit] > span {position: absolute;top: 0px;width: inherit;display: flex;background: #494949;color: white;justify-content: center;font-size: .88rem;padding: 8px;}
 /*drop-zone*/
-/*minicard*/
 
+/*lista dimensioni*/
+.schema-table{display: flex;flex-direction: column;margin: 6px 0px;padding: 4px 16px;}
+.schema-table > span[schema] {color: dimgray;font-size: .8rem;}
+.schema-table > span[table] {font-size: .85rem;}
+/*lista dimensioni*/
+
+/*lista cubi definiti*/
+ul > section[data-sublist-generic]{border: none;}
+ul > section[data-sublist-generic]{border-left: solid 0px gainsboro; transition: border-left 150ms;}
+ul > section[data-sublist-generic]:hover{cursor: pointer; border-left: solid thick indianred; transition: border-left 150ms;}
+/*lista cubi definiti*/
+
+/*minicard*/
 .mini-card{display: grid; grid-template-rows: auto auto auto;border: solid thin gainsboro;border-radius: 4px; width: inherit;}
 .mini-card > h5{font-size: .9rem; font-weight: normal;padding: 8px;margin: 0px; text-align: left;background-color: beige;}
 .mini-card div[data-dimension-tables] .hierarchies{font-weight: lighter;font-size: .85rem; padding: 16px;}
-.mini-card div[data-dimension-tables] .hierarchies > .tables > div:last-child{color: var(--main-primary-color); font-weight: bold;}
+.mini-card div[data-dimension-tables] .hierarchies > .hierarchy > .tables > .schema-table:last-child{color: var(--main-primary-color); font-weight: bold;}
 .mini-card-buttons{display: flex;justify-content: space-between;}
+.hierarchy{display: grid; grid-template-rows: auto auto;}
+ul > section[data-sublist-dimensions]{border: none;}
 /*minicard*/

@@ -113,7 +113,7 @@ ul > section.fact{font-weight: bold;}
 
 .elementsReport{display: grid; grid-template-columns: repeat(3, 30%); grid-column-gap: 5%;}
 
-ul > section[data-sublist], ul > section[data-sublist-generic]{border-left: solid thin gainsboro; transition: border-left 150ms;}
+ul > section[data-sublist], ul > section[data-sublist-generic]{border-left: solid 0px gainsboro; transition: border-left 150ms;}
 ul > section[data-sublist]:hover, ul > section[data-sublist-generic]:hover{cursor: pointer; border-left: solid thick indianred; transition: border-left 150ms;}
 ul > section[data-sublist][selected], ul > section[data-sublist-generic][selected]{border-left: solid thick indianred;}
 

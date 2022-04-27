@@ -12,7 +12,8 @@ var Hier = new Hierarchy();
 		// templates
 		tmplDimension : document.getElementById('tmpl-dimension-list'),
 		tmplCube : document.getElementById('tmpl-cube-list'),
-		tmplLists : document.getElementById('templateList'), // include tutte le liste da utilizzare
+		tmplLists : document.getElementById('templateList'), // include tutte le liste da utilizzare,
+		tmplTables : document.getElementById('tmpl-hierarchy-tables'),
 
 		hierarchyContainer : document.getElementById('hierarchiesContainer'), // struttura gerarchica sulla destra
 
@@ -570,8 +571,9 @@ var Hier = new Hierarchy();
 			section.setAttribute('data-element-search', 'dimensions');
 			section.setAttribute('data-label', key);
 			const div = tmplContent.querySelector('.dimensions');
-			const btnDimensionUse = tmplContent.querySelector('.mini-card-buttons > button[data-id="dimension-use"]');
-			const btnDimensionEdit = tmplContent.querySelector('.mini-card-buttons > button[data-id="dimension-edit"]');
+			const btnDimensionUse = tmplContent.querySelector('button[data-id="dimension-use"]');
+			btnDimensionUse.setAttribute('data-dimension-name', key);
+
 			div.querySelector('h5').innerHTML = key;
 			// per ogni gerarchia recupero la prop 'from'
 			for (const [hierName, hierValue] of Object.entries(value.hierarchies)) {
@@ -582,22 +584,23 @@ var Hier = new Hierarchy();
 				const divHier = tmplHierarchyContent.querySelector('.hierarchies');
 				const h6 = tmplHierarchyContent.querySelector('h6');
 				const divTables = tmplHierarchyContent.querySelector('.tables');
-				const btnUse = tmplHierarchyContent.querySelector("button[data-id='dimension-use']");
 				const btnEdit = tmplHierarchyContent.querySelector("button[data-id='dimension-edit']");
-				btnUse.setAttribute('data-dimension-name', key);
-				btnUse.setAttribute('data-hierarchy-name', hierName);
 				btnEdit.setAttribute('data-dimension-name', key);
 				btnEdit.setAttribute('data-hierarchy-name', hierName);
 				h6.innerText = hierName;
 				tmplContent.querySelector('div[data-dimension-tables]').appendChild(divHier);
-				hierValue.from.forEach( (table) => {
-					let div = document.createElement('div');
-					div.innerText = table;
+				for (const [orderKey, orderValue] of Object.entries(hierValue.order)) {
+					const tableContent = app.tmplTables.content.cloneNode(true);
+					const div = tableContent.querySelector('div');
+					const spanSchema = tableContent.querySelector('span[schema]');
+					const spanTable = tableContent.querySelector('span[table]');
+					spanSchema.innerText = orderValue.schema;
+					spanTable.innerText = orderValue.table;
 					divTables.appendChild(div);
-				});
-				btnUse.onclick = app.handlerDimensionSelected;
+				}
 				btnEdit.onclick = app.handlerDimensionEdit;
 			}
+			btnDimensionUse.onclick = app.handlerDimensionSelected;
 			div.querySelector('h5').setAttribute('label', key);
 			document.querySelector('#dimensions').appendChild(section);
 		}
@@ -607,8 +610,8 @@ var Hier = new Hierarchy();
 	app.getCubes = () => {
 		const ul = document.getElementById('cubes');
 		console.log(StorageCube.cubes);
-		// StorageCube.list(ul);
 		for (const [key, value] of Object.entries(StorageCube.cubes)) {
+			/* ------------------------
 			let tmplContent = app.tmplCube.content.cloneNode(true);
 			const section = tmplContent.querySelector('section');
 			const element = tmplContent.querySelector('.element');
@@ -618,14 +621,37 @@ var Hier = new Hierarchy();
 			li.innerText = key;
 			/* TODO: questi erano precedentemente impostati, da valutare se servono ancora
 			li.id = 'cube-id-' + value['id'];
-			li.setAttribute('data-cube-id', value['id']);*/
+			li.setAttribute('data-cube-id', value['id']);*//*
 
 			li.setAttribute('data-fn', 'handlerCubeSelected');
+			---------------------*/
+			const content = app.tmplLists.content.cloneNode(true);
+			const section = content.querySelector('section[data-sublist-generic]');
+			const span = section.querySelector('span[generic]');
+			section.setAttribute('data-label', key);
+			section.setAttribute('data-element-search', 'cubes');
+			span.setAttribute('label', key);
+			span.innerText = key;
+			span.setAttribute('data-fn', 'handlerCubeSelected');
 			ul.appendChild(section);
 		}
 		// associo la Fn che gestisce il click sulle <li>
 		// ul.querySelectorAll('li').forEach( (li) => li.addEventListener('click', app.handlerCubeSelected) );
 	}
+
+	/*var canvas = document.getElementById('canvas');
+	if (canvas.getContext) {
+		var ctx = canvas.getContext('2d');
+		// Stroked triangle
+		ctx.beginPath();
+		ctx.moveTo(10, 10);
+		ctx.lineTo(10, 145);
+		ctx.moveTo(20, 30);
+		ctx.lineTo(130, 30);
+		ctx.closePath();
+		ctx.stroke();
+	}*/
+
 
 	// selezione di un cubo già definito, da qui è possibile associare, ad esempio, una nuova dimensione ad un cubo già esistente.
 	app.handlerCubeSelected = (e) => {
@@ -682,7 +708,6 @@ var Hier = new Hierarchy();
 		        	for (const [key, value] of Object.entries(data)) {
 		        		// debugger;
 		        		const content = app.tmplLists.content.cloneNode(true);
-						// let tmplContent = tmpl.content.cloneNode(true);
 						const section = content.querySelector('section[data-sublist-draggable]');
 						const element = content.querySelector('div[draggable]');
 						const span = section.querySelector('span[table]');
@@ -734,7 +759,7 @@ var Hier = new Hierarchy();
 		        		section.setAttribute('data-label', value.COLUMN_NAME);
 		        		section.setAttribute('data-element-search', table);
 						let span = section.querySelector('span[generic]');
-						span.className = 'elementSearch';
+						// span.className = 'elementSearch';
 						span.innerText = value.COLUMN_NAME;
 						span.setAttribute('label', value.COLUMN_NAME);
 						span.setAttribute('data-table-name', table);
