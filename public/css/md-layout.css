@@ -209,7 +209,10 @@ small.popup > p > small{display: block;color: darkgrey;white-space: normal;}
 
 /*new list features/lists */
 ul > section[data-sublist-table-card]{border: none;}
-ul > section[data-sublist-table-card]{border-left: solid 0px indianred; transition: border-left 150ms;}
-ul > section[data-sublist-table-card]:hover{cursor: pointer; border-left: solid thick indianred; transition: border-left 150ms;}
+ul > section[data-sublist-table-card]{border-left: solid 0px grey; transition: border-left 150ms;}
 ul > section[data-sublist-table-card] > .sublist{display: flex; flex-direction: row; width: 100%; align-items: center;}
 ul > section[data-sublist-table-card] > .sublist > span{width: 100%;}
+
+ul > section[data-sublist-draggable]{border: none;padding: 6px 4px;}
+ul > section[data-sublist-draggable]{border-left: solid 0px gainsboro; transition: border-left 150ms;}
+ul > section[data-sublist-draggable]:hover{cursor: grab; border-left: solid thick indianred; transition: border-left 150ms;font-weight: bold;}

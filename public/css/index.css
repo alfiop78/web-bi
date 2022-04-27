@@ -1,5 +1,7 @@
 .lists{position: relative;}
-.absList{width: 350px;background: white;position: absolute;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;}
+.absList{background: white;position: absolute;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;}
+#tableList.absList{width: 260px;}
+#dimensionList.absList{width: 350px;}
 .absList[fact]{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;color: var(--primary-color);}
 .absList > ul{height: 500px;overflow-y: auto; margin-inline: 0px; padding-inline: 0px}
 i[open]{color: red;}
@@ -117,8 +119,8 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 
 .card.table ul > section[data-sublist-table-card] > .sublist span ~ i{color: grey;visibility: hidden;}
 .card.table ul > section[data-sublist-table-card] > .sublist span[relations] ~ i[data-id="hierarchy-icon"]{visibility: visible;}
-.card.table ul > section[data-sublist-table-card] > .sublist span[columns] ~ i[data-id="columns-icon"]{color: #9a6a6a;visibility: visible;}
-.card.table ul > section[data-sublist-table-card] > .sublist span[metrics] ~ i[data-id="metrics-icon"]{color: #587850;visibility: visible;}
+.card.table ul > section[data-sublist-table-card] > .sublist span[columns] ~ i[data-id="column-icon"]{color: #9a6a6a;visibility: visible;}
+.card.table ul > section[data-sublist-table-card] > .sublist span[metrics] ~ i[data-id="metric-icon"]{color: #587850;visibility: visible;}
 /*join completata, colore verde per icona hierarchy*/
 .card.table ul > section[data-sublist-table-card] > .sublist span[data-relation-id] ~ i[data-id="hierarchy-icon"]{color: #99b19c;}
 
@@ -131,7 +133,7 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 .card.table > .cardLayout{display: grid;grid-template-columns: 100%;position: relative;grid-template-rows: auto auto;}
 .card.table > .cardLayout > .cardTable{position: relative;height: fit-content;display: grid;grid-template-areas: "title" "input" "body" "footer";
   z-index: 1;}
-.card.table > .cardLayout > .cardTable > .info{font-size: .65rem;padding: 8px;background: lemonchiffon;border-bottom-left-radius: 4px;border-bottom-right-radius: 4px;}
+.card.table > .cardLayout > .cardTable > .info{font-size: .7rem;padding: 8px;background: lemonchiffon;border-bottom-left-radius: 4px;border-bottom-right-radius: 4px;}
 .card.table > .cardLayout > .cardTable[mode='relations'] > .info{background: #99b19c;color: white;}
 .card.table > .cardLayout > .cardTable[mode='columns'] > .info{background: #9a6a6a;color: white;}
 .card.table > .cardLayout > .cardTable[filters] > .info{background: #3b7096;color: white;}
@@ -140,8 +142,9 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 .card.table .cardTable > .title{grid-area: title;height: fit-content;background: tan;border-top-left-radius: 4px;
   border-top-right-radius: 4px;display: flex;align-items: flex-start;justify-content: space-between;}
 
-.card.table .cardTable > .title h6{padding: 8px 8px 16px 8px; margin: 0;font-size: .85rem; width: 100%;}
+.card.table .cardTable > .title h6{padding: 8px 8px 16px 8px; margin: 0;font-size: .9rem; width: 100%;}
 .card.table .cardTable > .title h6:hover{cursor: grab;}
+.card.table .cardTable > .title > .title-alias > .subtitle{padding: 2px 2px 8px 16px;color: #494949; font-size: .8rem;}
 .card.table .cardTable > .title > .title-alias{width: 100%;padding: 0px 8px;}
 
 .card.table[fact] .title{background: var(--main-primary-color);color: white;}

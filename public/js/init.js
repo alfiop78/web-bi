@@ -138,17 +138,9 @@ var Hier = new Hierarchy();
 	// TODO: aggiungere anhce eventi touch...
 
 	app.handlerDragStart = (e) => {
-		// console.log('handlerDragStart');
-		// dragStart
-		// console.log(e.target.id);
-		// return;
+		console.log('e.target : ', e.target.id);
 		e.dataTransfer.setData('text/plain', e.target.id);
 		e.dataTransfer.effectAllowed = "copy";
-        // console.log(e.dataTransfer);
-		// app.dragElement = document.getElementById(e.target.id);
-		// console.log(e.path);
-		// app.elementMenu = e.path[1]; // elemento da eliminare al termine drl drag&drop
-		// console.log(e.dataTransfer);
 	}
 
 	app.handlerDragOver = (e) => {
@@ -200,7 +192,7 @@ var Hier = new Hierarchy();
         // TODO: ottimizzare
 		e.preventDefault();
 		e.target.classList.replace('dropping', 'dropped');
-		if (e.target.id !== 'drop-zone') return; // anullo il drop (da vedere drop abort oppure dropcancel)
+		if (e.target.id !== 'drop-zone') return;
 		// console.log('drop');
 		// console.log(e.target);
 		let data = e.dataTransfer.getData('text/plain');
@@ -212,7 +204,7 @@ var Hier = new Hierarchy();
 		card.removeAttribute('draggable');
 		card.removeAttribute('name');
 		// elimino lo span all'interno della card
-		card.querySelector('span[label]').remove();
+		card.querySelector('span[table]').remove();
 		// associo gli eventi mouse
 		// TODO: da eliminare per impostarli nel document.addEventListener
 		card.onmousedown = app.dragStart;
@@ -227,7 +219,7 @@ var Hier = new Hierarchy();
 		cardLayout.querySelector('h6').innerHTML = card.getAttribute('label');
 		// imposto un alias per questa tabella
 		const time = Date.now().toString();
-		cardLayout.querySelector('small').innerHTML = `AS ${card.getAttribute('label')}_${time.substring(time.length - 3)}`;
+		cardLayout.querySelector('.subtitle').innerHTML = `AS ${card.getAttribute('label')}_${time.substring(time.length - 3)}`;
 		content.querySelector('.cardTable').setAttribute('data-alias', `${card.getAttribute('label')}_${time.substring(time.length - 3)}`);
 		card.appendChild(cardLayout);
 		// imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone
@@ -405,7 +397,7 @@ var Hier = new Hierarchy();
 						}
 					}
 				} else {
-					let liRelationSelected = Hier.card.querySelector('li[relations]:not([data-relation-id])');
+					let liRelationSelected = Hier.card.querySelector('span[relations]:not([data-relation-id])');
 					// console.log(liRelationSelected);
 					e.currentTarget.toggleAttribute('relations');
 					e.currentTarget.toggleAttribute('selected');
@@ -469,21 +461,21 @@ var Hier = new Hierarchy();
 		console.log('create Relations');
 		let hier = [];
 		let colSelected = [];
-		console.log( document.querySelectorAll('.cardTable[mode="relations"] li[relations][selected]').length);
+		console.log( document.querySelectorAll('.cardTable[mode="relations"] span[relations][selected]').length);
 		// quando i campi selezionati sono 1 recupero il nome della tabella perchè questa gerarchia avrà il nome della prima tabella selezionata da mettere in relazione
-		if (document.querySelectorAll('.cardTable[mode="relations"] li[relations][selected]').length === 1) {
-			Hier.table = document.querySelector('.cardTable[mode="relations"] li[relations][selected]').getAttribute('data-table-name');
+		if (document.querySelectorAll('.cardTable[mode="relations"] span[relations][selected]').length === 1) {
+			Hier.table = document.querySelector('.cardTable[mode="relations"] span[relations][selected]').getAttribute('data-table-name');
 		}
 		console.log('dimension.table : ', Hier.table);
 		// debugger;
 		document.querySelectorAll('.cardTable[mode="relations"]').forEach((card) => {
 			// const tableName = card.getAttribute('name');
-			let liRef = card.querySelector('li[relations][selected]');
-			if (liRef) {
+			let spanRef = card.querySelector('span[relations][selected]');
+			if (spanRef) {
 				// metto in un array gli elementi selezionati per la creazione della gerarchia
-				colSelected.push(liRef);
-				hier.push(card.getAttribute('data-alias')+'.'+liRef.innerText); // questa istruzione crea "Azienda_xxx.id" (alias.field)
-				// hier.push(tableName+'.'+liRef.innerText); // questa istruzione crea "Azienda.id"
+				colSelected.push(spanRef);
+				hier.push(card.getAttribute('data-alias')+'.'+spanRef.innerText); // questa istruzione crea "Azienda_xxx.id" (alias.field)
+				// hier.push(tableName+'.'+spanRef.innerText); // questa istruzione crea "Azienda.id"
 			}
 			console.log(hier);
 			// per creare correttamente la relazione è necessario avere due elementi selezionati
@@ -689,22 +681,21 @@ var Hier = new Hierarchy();
 		        	// popolo l'elenco delle tabelle
 		        	for (const [key, value] of Object.entries(data)) {
 		        		// debugger;
-		        		let tmpl = document.getElementById('el');
-						let tmplContent = tmpl.content.cloneNode(true);
-						const section = tmplContent.querySelector('section');
-						section.setAttribute('data-label', value.TABLE_NAME);
+		        		const content = app.tmplLists.content.cloneNode(true);
+						// let tmplContent = tmpl.content.cloneNode(true);
+						const section = content.querySelector('section[data-sublist-draggable]');
+						const element = content.querySelector('div[draggable]');
+						const span = section.querySelector('span[table]');
 
-						let element = tmplContent.querySelector('.element.card');
+						section.setAttribute('data-label', value.TABLE_NAME);
+						section.setAttribute('data-element-search', 'tables');
 						element.ondragstart = app.handlerDragStart;
 						element.id = 'table-' + key;
 						element.setAttribute('data-schema', schema);
 						element.setAttribute('label', value.TABLE_NAME);
-						ul.appendChild(section);
-						let span = document.createElement('span');
-						span.classList = 'elementSearch';
+						span.innerText = value.TABLE_NAME;
 						span.setAttribute('label', value.TABLE_NAME);
-						span.innerHTML = value.TABLE_NAME;
-						element.appendChild(span);
+						ul.appendChild(section);
 		        	}
 		        } else {
 		          // TODO: no data
@@ -723,7 +714,7 @@ var Hier = new Hierarchy();
 
 	app.getTable = async (schema, table) => {
 		// elemento dove inserire le colonne della tabella
-		const ul = cube.card.ref.querySelector('#columns');
+		const ul = cube.card.ref.querySelector("ul[data-id='columns']");
 
 	    await fetch('/fetch_api/'+schema+'/schema/'+table+'/table_info')
 			.then( (response) => {
@@ -828,7 +819,7 @@ var Hier = new Hierarchy();
 		cardLayout.querySelector('.cardTable').setAttribute('fact', true);
 		// imposto il titolo in h6
 		// TODO: imposto l'alias della tabella
-		cardLayout.querySelector('small').innerHTML = `AS ${lastTableObject.alias}`;
+		cardLayout.querySelector('.subtitle').innerHTML = `AS ${lastTableObject.alias}`;
 		cardLayout.querySelector('.cardTable').setAttribute('data-alias', lastTableObject.alias);
 		cardLayout.querySelector('h6').innerHTML = lastTableObject.table;
 		card.appendChild(cardLayout);

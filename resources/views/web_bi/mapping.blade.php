@@ -261,14 +261,14 @@
                     </section>
                     <div class="title">
                         {{-- <h6></h6> --}}
-                        <div class="title-alias"><h6></h6><small></small></div>
+                        <div class="title-alias"><h6></h6><div class="subtitle"></div></div>
                         <span data-id="popupCloseTable" class="popupContent"><i data-id="closeTable" class="material-icons md-18">close</i><small class="popup">Chiudi</small></span>
                     </div>
                     <div class="md-field">
                         <input type="search" value="" data-element-search/>
                         <label for="searchColumns" class="">Ricerca</label>
                     </div>
-                    <ul id="columns" hidden></ul>
+                    <ul data-id="columns" hidden></ul>
                     <div class="info" hidden></div>
                 </section>
                 <section options>
@@ -285,19 +285,8 @@
         </template>
 
         <template id="el">
-            <section data-element-search="tables" data-label>
-                <div class="element card" id="" draggable="true" label=""></div>                
-            </section>
-        </template>
-
-        <template id="templateListColumns">
-            <section data-element-search data-label data-searchable="true">
-                <div class="element">
-                    <li></li>
-                    <i id="columns-icon" class="material-icons md-18">view_list</i>
-                    <i id="hierarchy-icon" class="material-icons md-18">insert_link</i>
-                    <i id="metrics-icon" class="material-icons md-18">show_chart</i>
-                </div>
+            <section data-element-search="tables" data-label data-searchable="true">
+                <div class="element card" id="" draggable="true" label=""></div>
             </section>
         </template>
 
@@ -305,10 +294,18 @@
             <section data-element-search data-label data-sublist-table-card data-searchable="true">
                 <span class="sublist">
                     <span generic class="selectable"></span>
-                    {{-- TODO: sostituire id con data-id --}}
-                    <i id="columns-icon" class="material-icons md-18">view_list</i>
-                    <i id="hierarchy-icon" class="material-icons md-18">insert_link</i>
-                    <i id="metrics-icon" class="material-icons md-18">show_chart</i>
+                    <i data-id="column-icon" class="material-icons md-18">view_list</i>
+                    <i data-id="hierarchy-icon" class="material-icons md-18">insert_link</i>
+                    <i data-id="metric-icon" class="material-icons md-18">show_chart</i>
+                </span>
+            </section>
+
+            <section data-element-search data-label data-sublist-draggable data-searchable="true">
+                <span class="sublist">
+                    {{-- <span generic class="selectable"></span> --}}
+                    <div generic id draggable="true" label>
+                        <span table></span>
+                    </div>
                 </span>
             </section>
         </template>
@@ -370,9 +367,7 @@
                                     <input type="search" id="tableSearch" data-element-search="tables" autocomplete="off" />
                                     <label for="tableSearch" class="">Ricerca</label>
                                 </div>
-                                <ul id="tables">
-                                    
-                                </ul>
+                                <ul id="tables"></ul>
                             </div>
                         </div>
 
