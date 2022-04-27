@@ -104,30 +104,23 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 /* colonne all'interno della card/tabella*/
 .card.table ul{padding-inline-start: 0; font-size: .75rem; border-radius: 4px; min-height: auto; overflow: auto; max-height: 250px;}
 
-.card.table ul > .element li{list-style-type: none;display: block;padding: 6px;overflow: hidden;text-overflow: ellipsis;
-  white-space: nowrap;}
+.card.table ul > .sublist span{list-style-type: none;display: block;padding: 6px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
 
-.card.table ul > .element li[data-key="pk"] {list-style-type: none;display: block;padding: 6px;overflow: hidden;text-overflow: ellipsis;
+.card.table ul > .sublist span[data-key="pk"] {list-style-type: none;display: block;padding: 6px;overflow: hidden;text-overflow: ellipsis;
   white-space: nowrap;background: gainsboro; color: black; border-radius: 4px;}
 
-.card.table > .cardLayout > .cardTable[mode] ul > section > .element li:hover{cursor: pointer;}
+/*colore del border diverso in base al 'mode' impostato */
+.cardTable[mode='columns'] ul > section[data-sublist-table-card]:hover{cursor: pointer; border-left: solid thick #9a6a6a; transition: border-left 150ms;}
+.cardTable[mode='relations'] ul > section[data-sublist-table-card]:hover{cursor: pointer; border-left: solid thick #99b19c; transition: border-left 150ms;}
+.cardTable[mode='metrics'] ul > section[data-sublist-table-card]:hover{cursor: pointer; border-left: solid thick #587850; transition: border-left 150ms;}
+/*colore del border diverso in base al 'mode' impostato */
 
-.card.table > .cardLayout > .cardTable[mode='columns'] ul > section > .element li:hover{background-color: #9a6a6a;border-radius: 4px;color: white;}
-.card.table > .cardLayout > .cardTable[mode='relations'] ul > section > .element li:hover{background-color: #99b19c;border-radius: 4px;color: white;}
-.card.table > .cardLayout > .cardTable[mode='metrics'] ul > section > .element li:hover{background-color: #587850;border-radius: 4px;color: white;}
-.card.table ul > section > .element li ~ i{color: grey;visibility: hidden;}
-.card.table ul > section > .element li[relations] ~ #hierarchy-icon{visibility: visible;}
-.card.table ul > section > .element li[columns] ~ #columns-icon{color: #9a6a6a;visibility: visible;}
-.card.table ul > section > .element li[metrics] ~ #metrics-icon{color: #587850;visibility: visible;}
-
-/*.card.table ul > .element li[data-relation-id='true'] ~ #hierarchy-icon{color: #99b19c;}*/
-.card.table ul > section > .element li[data-relation-id] ~ #hierarchy-icon{color: #99b19c;}
-/* colonne all'interno della card/tabella*/
-
-/*.card.table{
-	width: 300px;background: white;position: absolute;font-size: .8rem; border-radius: 4px;
-	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
-}*/
+.card.table ul > section[data-sublist-table-card] > .sublist span ~ i{color: grey;visibility: hidden;}
+.card.table ul > section[data-sublist-table-card] > .sublist span[relations] ~ i[data-id="hierarchy-icon"]{visibility: visible;}
+.card.table ul > section[data-sublist-table-card] > .sublist span[columns] ~ i[data-id="columns-icon"]{color: #9a6a6a;visibility: visible;}
+.card.table ul > section[data-sublist-table-card] > .sublist span[metrics] ~ i[data-id="metrics-icon"]{color: #587850;visibility: visible;}
+/*join completata, colore verde per icona hierarchy*/
+.card.table ul > section[data-sublist-table-card] > .sublist span[data-relation-id] ~ i[data-id="hierarchy-icon"]{color: #99b19c;}
 
 .card.table{
 	width: 300px;background: white;position: absolute;font-size: .8rem; border-radius: 4px; z-index: var(--zindex);

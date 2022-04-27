@@ -12,6 +12,7 @@ var Hier = new Hierarchy();
 		// templates
 		tmplDimension : document.getElementById('tmpl-dimension-list'),
 		tmplCube : document.getElementById('tmpl-cube-list'),
+		tmplLists : document.getElementById('templateList'), // include tutte le liste da utilizzare
 
 		hierarchyContainer : document.getElementById('hierarchiesContainer'), // struttura gerarchica sulla destra
 
@@ -721,9 +722,8 @@ var Hier = new Hierarchy();
 	}
 
 	app.getTable = async (schema, table) => {
-		let tmplList = document.getElementById('templateListColumns');
 		// elemento dove inserire le colonne della tabella
-		let ulContainer = cube.card.ref.querySelector('#columns');
+		const ul = cube.card.ref.querySelector('#columns');
 
 	    await fetch('/fetch_api/'+schema+'/schema/'+table+'/table_info')
 			.then( (response) => {
@@ -735,28 +735,28 @@ var Hier = new Hierarchy();
 				// console.log('response getTable');
                 // console.log(data);
 		        if (data) {
-		        	ulContainer.removeAttribute('hidden');
+		        	ul.removeAttribute('hidden');
 		        	for ( const [key, value] of Object.entries(data)) {
                         // console.log(key, value);
-		        		let tmplContent = tmplList.content.cloneNode(true);
-		        		const section = tmplContent.querySelector('section');
+		        		const content = app.tmplLists.content.cloneNode(true);
+		        		const section = content.querySelector('section[data-sublist-table-card]'); // questa lista include le 3 icone per columns, hierarchy, metric
 		        		section.setAttribute('data-label', value.COLUMN_NAME);
 		        		section.setAttribute('data-element-search', table);
-						let li = section.querySelector('li');
-						li.className = 'elementSearch';
-						li.innerText = value.COLUMN_NAME;
-						li.setAttribute('label', value.COLUMN_NAME);
-						li.setAttribute('data-table-name', table);
+						let span = section.querySelector('span[generic]');
+						span.className = 'elementSearch';
+						span.innerText = value.COLUMN_NAME;
+						span.setAttribute('label', value.COLUMN_NAME);
+						span.setAttribute('data-table-name', table);
 						// scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
 						let pos = value.DATA_TYPE.indexOf('(');
 						let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-						li.setAttribute('data-type', type);
-						li.setAttribute('data-key', value.CONSTRAINT_NAME); // pk : chiave primaria
+						span.setAttribute('data-type', type);
+						span.setAttribute('data-key', value.CONSTRAINT_NAME); // pk : chiave primaria
 						//li.setAttribute('data-table',cube.table);
-						li.id = key;
+						span.id = key;
 						// fn da associare all'evento in 'mutation observe'
-						li.setAttribute('data-fn', 'handlerColumns');
-						ulContainer.appendChild(section);
+						span.setAttribute('data-fn', 'handlerColumns');
+						ul.appendChild(section);
 		        	}
 		        } else {
 		          // TODO: no data, handlerConsoleMessage
@@ -1329,8 +1329,8 @@ var Hier = new Hierarchy();
 	// passing it a callback function
 	const observer = new MutationObserver(function() {
 	    // console.log('callback that runs when observer is triggered');
-	    document.querySelectorAll('li[data-fn]').forEach( (li) => {
-	    	li.onclick = app[li.getAttribute('data-fn')];
+	    document.querySelectorAll('span[data-fn]').forEach( (span) => {
+	    	span.onclick = app[span.getAttribute('data-fn')];
 	    });
 	});
 	// call `observe()` on that MutationObserver instance,

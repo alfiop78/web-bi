@@ -300,6 +300,18 @@
                 </div>
             </section>
         </template>
+
+        <template id="templateList">
+            <section data-element-search data-label data-sublist-table-card data-searchable="true">
+                <span class="sublist">
+                    <span generic class="selectable"></span>
+                    {{-- TODO: sostituire id con data-id --}}
+                    <i id="columns-icon" class="material-icons md-18">view_list</i>
+                    <i id="hierarchy-icon" class="material-icons md-18">insert_link</i>
+                    <i id="metrics-icon" class="material-icons md-18">show_chart</i>
+                </span>
+            </section>
+        </template>
         <main>
             <div id="drawer">
 
