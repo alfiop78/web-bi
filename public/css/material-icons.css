@@ -1,5 +1,7 @@
 .material-icons{padding: 6px;user-select: none;cursor: pointer;}
 
+.material-icons[hidden]{display: none;}
+
 .material-icons.noPad{padding: 0;}
 .material-icons.padding-4{padding: 4px;}
 .material-icons.md-14{font-size: 14px;}

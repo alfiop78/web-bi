@@ -1338,6 +1338,21 @@ var Hier = new Hierarchy();
 		delete Dim.dimension;
 	}
 
+	document.querySelectorAll('*[data-tooltip]').forEach( (element) => {
+		element.onmouseenter = (e) => {
+			// impostando la class (oppure un attributo) tooltipShow posso far comparire l'animation del tooltip dopo x ms
+			setTimeout(() => e.target.toggleAttribute('data-tooltip-show'), 500);
+			// setTimeout(() => e.target.classList.add('tooltipShow'), 500);
+		}
+
+		element.onmouseleave = (e) => {
+			e.target.toggleAttribute('data-tooltip-show');
+			// e.target.classList.remove('tooltipShow');
+		}
+	});
+
+	document.addEventListener('mouseenter', (e) => {console.log(e.target)});
+
 
 	// NOTE: esempio di utilizzo di MutationObserver
 	const body = document.getElementById('body');

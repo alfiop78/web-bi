@@ -280,7 +280,8 @@
                     <div class="info" hidden></div>
                 </section>
                 <section options>
-                    <span class="popupContent"><i class="material-icons md-18" columns>view_list</i><small class="popup">Colonna</small></span>
+                    {{-- <span class="popupContent"><i class="material-icons md-18" columns>view_list</i><small class="popup">Colonna</small></span> --}}
+                    <i class="material-icons md-18" columns data-tooltip="Colonna" data-tooltip-position="right">view_list</i>
                     <span class="popupContent" hide><i class="material-icons md-18" metrics>show_chart</i><small class="popup">Metrica</small></span>
                     <span class="popupContent"><i class="material-icons md-18" join>insert_link</i><small class="popup">Crea Relazione</small></span>
                     <span class="popupContent"><i class="material-icons md-18" join-left>flip</i><small class="popup">Left Join</small></span>
@@ -363,20 +364,18 @@
                         
                         <div class="actions">
                             <div class="buttons">
-                                <span class="popupContent"><i id="openTableList" class="material-icons md-24 md-inactive">storage</i><small class="popup"><p>Lista tabelle</p></small></span>
-                                <span class="popupContent"><i id="openDimensionList" class="material-icons md-24 md-inactive">schema</i><small class="popup"><p>Lista Dimensioni</p></small></span>
-                                <span class="popupContent"><i id="cube" class="material-icons md-24 md-inactive">space_dashboard</i><small class="popup"><p>Definisci Cubo</p></small></span>
+                                <i id="openTableList" class="material-icons md-24 md-inactive" data-tooltip="Lista tabelle" data-tooltip-position="right">storage</i>
+                                <i id="openDimensionList" class="material-icons md-24 md-inactive" data-tooltip="Lista Dimensioni" data-tooltip-position="bottom">schema</i>
+                                <i id="cube" class="material-icons md-24 md-inactive" data-tooltip="Definisci cubo" data-tooltip-position="bottom">space_dashboard</i>
                                 <span class="h-separator"></span>
-                                <span class="popupContent"><i class="material-icons md-24 md-inactive">dashboard_customize</i><small class="popup"><p>Nuova dimensione</p></small></span>
-                                <span class="popupContent"><i id="saveCube" class="material-icons md-24 md-inactive">save</i><small class="popup"><p>Salva Cubo</p></small></span>
-                                <span class="popupContent" hide><i id="saveOpenedCube" class="material-icons md-24">save</i><small class="popup"><p>Aggiorna Cubo</p></small></span>
-                                <span class="popupContent"><i id="definedCube" class="material-icons md-24 md-inactive">folder_open</i><small class="popup"><p>Lista Cubi definiti</p></small></span>
+                                <i class="material-icons md-24 md-inactive" data-tooltip="Nuova dimensione" data-tooltip-position="bottom">dashboard_customize</i>
+                                <i id="saveCube" class="material-icons md-24 md-inactive" data-tooltip="Salva cubo" data-tooltip-position="bottom">save</i>
+                                <i id="saveOpenedCube" class="material-icons md-24" data-tooltip="Aggiorna cubo" data-tooltip-position="bottom" hidden>save</i>
+                                <i id="definedCube" class="material-icons md-24 md-inactive" data-tooltip="Lista Cubi definiti" data-tooltip-position="bottom">folder_open</i>
                                 <span class="h-separator"></span>
-                                <span class="popupContent"><i id="versioning-status" class="material-icons md-24">cached</i><small class="popup"><!-- contenuto dinamico --></small></span>
+                                {{-- <i id="versioning-status" class="material-icons md-24" data-tooltip="Versionamento" data-tooltip-position="bottom">cached</i> --}}
+                                <span class="popupContent"><i id="versioning-status" class="material-icons md-24">cached</i><small class="popup"></small></span>
                             </div>
-                            {{-- <div class="help-console">
-                                <span id="guide"></span>
-                            </div> --}}
                         </div>
 
                         <div class="lists">
