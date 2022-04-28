@@ -242,8 +242,11 @@ ul > section[data-sublist-draggable]:hover{cursor: grab; border-left: solid thic
     border-radius: 4px;
     background-color: #fff;
     z-index: 1500;
-    top: 200px;
-    left: 350px;
+    max-width: 400px;
+    max-height: 500px;
+    /*top: 200px;
+    left: 350px;*/
+    top: var(--top); left: var(--left);
     padding: 1.5em;
 }
 .abs-window > div{margin: 1.5em .5em;}

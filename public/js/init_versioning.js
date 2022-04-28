@@ -16,9 +16,7 @@ var storage = new Storages();
 		// template per lo status degli oggetti da versionare
 		tmplVersioningDB : document.getElementById('versioning-db'),
 		btnVersioningStatus : document.getElementById('versioning-status')
-	};
-
-	// App.init();
+	}
 
 	app.checkVersioning = () => {
 		// elementi in locale diversi dalla copia su DB, occorre azione manuale
@@ -42,7 +40,6 @@ var storage = new Storages();
 			if (p.hasAttribute('data-text-plural') ) p.querySelector('strong').innerHTML = warningElements.length;
 		}
 		if (attentionElements.length !== 0) {
-			debugger;
 			document.querySelector('#attention-elements').hidden = false;
 			const p = (attentionElements.length === 1) ? document.querySelector('#attention-elements > p[data-text-singular]') : document.querySelector('#attention-elements > p[data-text-plural]');
 			p.hidden = false;
@@ -60,7 +57,7 @@ var storage = new Storages();
 			p.hidden = false;
 			if (p.hasAttribute('data-text-plural') ) p.querySelector('strong').innerHTML = unmodifiedElements.length;
 		}
-	};
+	}
 
 	app.getLocalElements = (data) => {
 		// recupero elementi locali
@@ -121,7 +118,7 @@ var storage = new Storages();
 				parent.appendChild(sectionSearchable);
 			});
 		}
-	};
+	}
 
 	// versioning
 	// popolo gli elementi restituiti dalle chiamate fetch API nei tasti nel drawer (Dimensioni, Cubi, ecc...)
@@ -196,7 +193,7 @@ var storage = new Storages();
 				parent.appendChild(sectionSearchable);
 			});
 		}
-	};
+	}
 
 	// promise.all, recupero tutti gli elementi presenti sul DB (dimensioni, cubi, filtri, ecc...)
 	app.fetchAPIRequestVersioningAll = async () => {
@@ -245,7 +242,7 @@ var storage = new Storages();
 			app.dialogVersioning.querySelector('span[data-dialog-info]').innerText = new Intl.DateTimeFormat('it-IT', options).format(new Date());
 		} )
 		.catch( err => console.error(err));
-	};
+	}
 
 	app.fetchAPIRequestVersioningAll();
 
@@ -302,7 +299,7 @@ var storage = new Storages();
 				}
 			})
 		.catch((err) => console.error(err));
-	};
+	}
 
 	app.deleteObjectOnDB = async (name, type) => {
 		let url;
@@ -350,7 +347,7 @@ var storage = new Storages();
 				}
 			})
 		.catch((err) => console.error(err));
-	};
+	}
 
 	app.downloadObjectFromDB = async (name, type) => {
 		let url;
@@ -398,7 +395,7 @@ var storage = new Storages();
 				}
 			})
 		.catch((err) => console.error(err));
-	};
+	}
 
 	app.upgradeObjectOnDB = async (name, type) => {
 		let url;
@@ -448,7 +445,7 @@ var storage = new Storages();
 				}
 			})
 		.catch((err) => console.error(err));
-	};
+	}
 
 	// events
 
@@ -502,7 +499,7 @@ var storage = new Storages();
 			// span.innerText = 'Database';
 			app.dialogVersioning.querySelectorAll('.versioning-content > section').forEach( (el) => el.removeAttribute('hidden', true));
 		}
-	};
+	}
 
 	app.btnVersioningStatus.onclick = () => app.dialogVersioning.showModal();
 

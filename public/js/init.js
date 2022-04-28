@@ -66,7 +66,8 @@ var Hier = new Hierarchy();
 		],*/
 		messageId : 0,
 		tooltip : document.getElementById('tooltip'),
-		tooltipTimeoutId : null
+		tooltipTimeoutId : null,
+		absWindow : document.querySelector('.abs-window')
 	}
 
 	App.init();
@@ -1339,6 +1340,9 @@ var Hier = new Hierarchy();
 	}
 
 	app.showTooltip = (e) => {
+		// TODO: da spostare in Application.js
+		if (e.target.classList.contains('md-inactive')) return;
+		// console.log(e.target.getAttribute('data-tooltip').length);
 		// console.log('enter');
 		// const toast = document.getElementById('toast');
 		// console.log('pageX : ', e.pageX);
@@ -1352,23 +1356,57 @@ var Hier = new Hierarchy();
 		// console.log(e.target.getBoundingClientRect().right);
 		// console.log(e.target.getBoundingClientRect().bottom);
 		// console.log('left : ',e.target.getBoundingClientRect().left);
-		const yPosition = e.target.getBoundingClientRect().bottom + 5;
-		const left = e.target.getBoundingClientRect().left;
-		const right = e.target.getBoundingClientRect().right;
-		// console.log('left : ', left);
-		// console.log('right : ', right);
-		// ottengo il centro dell'icona
-		let centerElement = left + ((right - left) / 2);
-		app.tooltip.innerHTML = e.currentTarget.getAttribute('data-tooltip');
-		// ottengo la metà del popup, la sua width varia a seconda di cosa c'è scritto dentro, quindi qui devo prima visualizzarlo (display: block) e dopo posso vedere la width
-		const elementWidth = app.tooltip.offsetWidth / 2;
-		// il popup verrà posizionato al centro dell'icona
-		const xPosition = centerElement - elementWidth;
-
-		app.tooltip.style.setProperty('--left', xPosition + "px");
-		app.tooltip.style.setProperty('--top', yPosition + "px");
+		const pos = () => {
+			let x,y;
+			const left = e.target.getBoundingClientRect().left;
+			const right = e.target.getBoundingClientRect().right;
+			const top = e.target.getBoundingClientRect().top;
+			const bottom = e.target.getBoundingClientRect().bottom;
+			let centerElementW = left + ((right - left) / 2);
+			let centerElementH = top + ((bottom - top) / 2);
+			app.tooltip.innerHTML = e.currentTarget.getAttribute('data-tooltip');
+			const elementWidth = app.tooltip.offsetWidth / 2;
+			const elementHeight = app.tooltip.offsetHeight / 2;
+			const width = app.tooltip.offsetWidth;
+			const height = app.tooltip.offsetHeight;
+			switch (e.target.getAttribute('data-tooltip-position')) {
+				case 'top':
+					y = top - height;
+					x = centerElementW - elementWidth;
+					break;
+				case 'right':
+					// y = e.target.getBoundingClientRect().top;
+					y = centerElementH - elementHeight;
+					x = right + 5;
+					break;
+				case 'left':
+					y = centerElementH - elementHeight;
+					x = left - width;
+					break;
+				default:
+					// bottom
+					y = bottom + 5;
+					x = centerElementW - elementWidth;
+					break;
+			}
+			return {x,y};
+		}
+		
+		app.tooltip.style.setProperty('--left', pos().x + "px");
+		// app.tooltip.style.setProperty('--left', xPosition + "px");
+		app.tooltip.style.setProperty('--top', pos().y + "px");
+		// app.tooltip.style.setProperty('--top', yPosition + "px");
+		if (e.target.hasAttribute('data-open-abs-window')) {
+			// tasto versionamento, mostro la abs-window
+			app.absWindow.style.setProperty('--left', pos().x + 'px');
+			app.absWindow.style.setProperty('--top', pos().y + 'px');
+			app.absWindow.hidden = false;
+		}
 		// app.popup.classList.add('show');
-		app.tooltipTimeoutId = setTimeout(() => {app.tooltip.classList.add('show')}, 600);
+		app.tooltipTimeoutId = setTimeout(() => {
+			// se il tooltip non contiene un testo non deve essere mostrato
+			if (e.target.getAttribute('data-tooltip').length !== 0) app.tooltip.classList.add('show');
+		}, 600);
 		/*app.popup.animate([
 		  {transform: 'scale(.2)'},
 		  {transform: 'scale(1.2)'},
@@ -1382,11 +1420,16 @@ var Hier = new Hierarchy();
 
 	app.hideTooltip = (e) => {
 		// console.log('leave');
+		if (e.target.classList.contains('md-inactive')) return;
 		app.tooltip.classList.remove('show');
 		clearTimeout(app.tooltipTimeoutId);
+		if (e.target.hasAttribute('data-open-abs-window')) {
+			// tasto versionamento, mostro la abs-window
+			app.absWindow.hidden = true;
+		}
 	}
 
-	// eventi mouseEnter/Leave su tutte le icon con l'attributo data-popup-label
+	// eventi mouseEnter/Leave su tutte le icon con l'attributo data-tooltip
 	document.querySelectorAll('*[data-tooltip]').forEach((icon) => {
 		icon.onmouseenter = app.showTooltip;
 		icon.onmouseleave = app.hideTooltip;
@@ -1403,18 +1446,8 @@ var Hier = new Hierarchy();
 	    });
 
 	    document.querySelectorAll('*[data-tooltip]').forEach( (element) => {
-			element.onmouseenter = (e) => {
-				e.target.onmouseenter = app.showTooltip;
-				// impostando la class (oppure un attributo) tooltipShow posso far comparire l'animation del tooltip dopo x ms
-				// setTimeout(() => e.target.toggleAttribute('data-tooltip-show'), 500);
-				// setTimeout(() => e.target.classList.add('tooltipShow'), 500);
-			}
-
-			element.onmouseleave = (e) => {
-				e.target.onmouseleave = app.hideTooltip;
-				// e.target.toggleAttribute('data-tooltip-show');
-				// e.target.classList.remove('tooltipShow');
-			}
+			element.onmouseenter = app.showTooltip;
+			element.onmouseleave = app.hideTooltip;
 		});
 	});
 	// call `observe()` on that MutationObserver instance,

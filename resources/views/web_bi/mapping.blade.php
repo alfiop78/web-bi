@@ -385,14 +385,11 @@
             <div id="container" data-page="1">
                 <div id="content">
                     <div id="body">
-                        
-                        <i class="material-icons" data-tooltip="testo popup">view_list</i>
-                        <i class="material-icons" data-tooltip="testo">view_list</i>
                         {{-- <canvas id="canvas"></canvas> --}}
                         
                         <div class="actions">
                             <div class="buttons">
-                                <i id="openTableList" class="material-icons md-24 md-inactive" data-tooltip="Lista tabelle" data-tooltip-position="bottom-right">storage</i>
+                                <i id="openTableList" class="material-icons md-24 md-inactive" data-tooltip="Lista tabelle" data-tooltip-position="bottom">storage</i>
                                 <i id="openDimensionList" class="material-icons md-24 md-inactive" data-tooltip="Lista Dimensioni" data-tooltip-position="bottom">schema</i>
                                 <i id="cube" class="material-icons md-24 md-inactive" data-tooltip="Definisci cubo" data-tooltip-position="bottom">space_dashboard</i>
                                 <span class="h-separator"></span>
@@ -402,7 +399,7 @@
                                 <i id="definedCube" class="material-icons md-24 md-inactive" data-tooltip="Lista Cubi definiti" data-tooltip-position="bottom">folder_open</i>
                                 <span class="h-separator"></span>
                                 {{-- <span class="popupContent"><i id="versioning-status" class="material-icons md-24">cached</i><small class="popup"></small></span> --}}
-                                <i id="versioning-status" class="material-icons md-24" data-tooltip="Stato versionamento" data-tooltip-position="bottom">cached</i>
+                                <i id="versioning-status" class="material-icons md-24" data-tooltip="" data-open-abs-window data-tooltip-position="bottom">cached</i>
                             </div>
                         </div>
 
