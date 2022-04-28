@@ -30,6 +30,31 @@
         </style>
     </head>
     <body class="antialiased">
+        <small id="tooltip" class="tooltip"></small>
+
+        <div class="abs-window" hidden>
+            <div id="warning-elements" hidden>
+                <small>Elementi presenti in ambiente di Produzione / Sviluppo.<br>La copia in Sviluppo è diversa da quella in Produzione</small>
+                <p data-text-singular hidden>&Eacute; presente <strong>1</strong> elemento in conflitto</p>
+                <p data-text-plural hidden>Sono presenti <strong></strong> elementi in conflitto</p>
+            </div>
+            <div id="attention-elements" hidden>
+                <small>Elementi presenti in ambiente di Sviluppo.<br>Questi elementi, una volta terminata la fase di Sviluppo, potranno essere "versionati" in Produzione.</small>
+                <p data-text-singular hidden>&Eacute; presente <strong>1</strong> nuovo elemento in locale, (non sincronizzato)</p>
+                <p data-text-plural hidden>Sono presenti <strong></strong> nuovi elementi in locale (non sincronizzato)</p>
+            </div>
+            <div id="done-elements" hidden>
+                <small>Elementi non presenti in ambiente di Sviluppo.<br>Questi elementi vengono sincronizzati automaticamente dal DB</small>
+                <p data-text-singular hidden>&Eacute; stato scaricato <strong>1</strong> nuovo elemento in locale</p>
+                <p data-text-plural hidden>Sono stati scaricati <strong></strong> nuovi elementi in locale</p>
+            </div>
+            <div id="sync-elements" hidden>
+                <small>Elementi già sincronizzati</small>
+                <p data-text-singular hidden>&Eacute; presente <strong>1</strong> elemento già sincronizzato</p>
+                <p data-text-plural hidden>Sono presenti <strong></strong> elementi già sincronizzati</p>
+            </div>
+        </div>
+
         {{-- template utilizzato per popolare sia le dimensioni che i cubi --}}
         <template id="versioning-db">
             <section data-searchable="true">
@@ -268,9 +293,8 @@
                         </div>
                     </section>
                     <div class="title">
-                        {{-- <h6></h6> --}}
                         <div class="title-alias"><h6></h6><div class="subtitle"></div></div>
-                        <span data-id="popupCloseTable" class="popupContent"><i data-id="closeTable" class="material-icons md-18">close</i><small class="popup">Chiudi</small></span>
+                        <i data-id="closeTable" class="material-icons md-18" data-tooltip="Chiudi" data-tooltip-position="bottom">close</i>
                     </div>
                     <div class="md-field">
                         <input type="search" value="" data-element-search/>
@@ -281,23 +305,26 @@
                 </section>
                 <section options>
                     {{-- <span class="popupContent"><i class="material-icons md-18" columns>view_list</i><small class="popup">Colonna</small></span> --}}
-                    <i class="material-icons md-18" columns data-tooltip="Colonna" data-tooltip-position="right">view_list</i>
-                    <span class="popupContent" hide><i class="material-icons md-18" metrics>show_chart</i><small class="popup">Metrica</small></span>
-                    <span class="popupContent"><i class="material-icons md-18" join>insert_link</i><small class="popup">Crea Relazione</small></span>
-                    <span class="popupContent"><i class="material-icons md-18" join-left>flip</i><small class="popup">Left Join</small></span>
-                    <span class="popupContent"><i class="material-icons md-18" join-right>flip</i><small class="popup">Right Join</small></span>
-                    <span class="popupContent"><i class="material-icons md-18" join-remove>link_off</i><small class="popup">Rimuovi relazione</small></span>
-                    {{-- <span class="popupContent"><i class="material-icons md-18" hier-order-plus data-value>add</i><small class="popup">Ordine gerarchico superiore</small></span>
-                    <span class="popupContent"><i class="material-icons md-18" hier-order-minus data-value>remove</i><small class="popup">Ordine gerarchico inferiore</small></span> --}}
+                    <i class="material-icons md-18" columns data-tooltip="Colonne" data-tooltip-position="right">view_list</i>
+                    <i class="material-icons md-18" metrics data-tooltip="Metriche" data-tooltip-position="right" hidden>show_chart</i>
+                    {{-- <span class="popupContent" hide><small class="popup">Metrica</small></span> --}}
+                    <i class="material-icons md-18" join data-tooltip="Crea relazione" data-tooltip-position="right">insert_link</i>
+                    {{-- <span class="popupContent"><small class="popup">Crea Relazione</small></span> --}}
+                    {{-- <span class="popupContent"><small class="popup">Left Join</small></span> --}}
+                    <i class="material-icons md-18" join-left data-tooltip="Left join" data-tooltip-position="right">flip</i>
+                    <i class="material-icons md-18" join-right data-tooltip="Right join" data-tooltip-position="right">flip</i>
+                    {{-- <span class="popupContent"><i class="material-icons md-18" join-right>flip</i><small class="popup">Right Join</small></span> --}}
+                    <i class="material-icons md-18" join-remove data-tooltip="Rimuovi relazione" data-tooltip-position="right">link_off</i>
+                    {{-- <span class="popupContent"><small class="popup">Rimuovi relazione</small></span> --}}
                 </section>
             </div>
         </template>
 
-        <template id="el">
+        {{-- <template id="el">
             <section data-element-search="tables" data-label data-searchable="true">
                 <div class="element card" id="" draggable="true" label=""></div>
             </section>
-        </template>
+        </template> --}}
 
         <template id="templateList">
 
@@ -356,15 +383,16 @@
                 <h1 class="title">Map database</h1>
             </header>
             <div id="container" data-page="1">
-
                 <div id="content">
-
                     <div id="body">
+                        
+                        <i class="material-icons" data-tooltip="testo popup">view_list</i>
+                        <i class="material-icons" data-tooltip="testo">view_list</i>
                         {{-- <canvas id="canvas"></canvas> --}}
                         
                         <div class="actions">
                             <div class="buttons">
-                                <i id="openTableList" class="material-icons md-24 md-inactive" data-tooltip="Lista tabelle" data-tooltip-position="right">storage</i>
+                                <i id="openTableList" class="material-icons md-24 md-inactive" data-tooltip="Lista tabelle" data-tooltip-position="bottom-right">storage</i>
                                 <i id="openDimensionList" class="material-icons md-24 md-inactive" data-tooltip="Lista Dimensioni" data-tooltip-position="bottom">schema</i>
                                 <i id="cube" class="material-icons md-24 md-inactive" data-tooltip="Definisci cubo" data-tooltip-position="bottom">space_dashboard</i>
                                 <span class="h-separator"></span>
@@ -373,8 +401,8 @@
                                 <i id="saveOpenedCube" class="material-icons md-24" data-tooltip="Aggiorna cubo" data-tooltip-position="bottom" hidden>save</i>
                                 <i id="definedCube" class="material-icons md-24 md-inactive" data-tooltip="Lista Cubi definiti" data-tooltip-position="bottom">folder_open</i>
                                 <span class="h-separator"></span>
-                                {{-- <i id="versioning-status" class="material-icons md-24" data-tooltip="Versionamento" data-tooltip-position="bottom">cached</i> --}}
-                                <span class="popupContent"><i id="versioning-status" class="material-icons md-24">cached</i><small class="popup"></small></span>
+                                {{-- <span class="popupContent"><i id="versioning-status" class="material-icons md-24">cached</i><small class="popup"></small></span> --}}
+                                <i id="versioning-status" class="material-icons md-24" data-tooltip="Stato versionamento" data-tooltip-position="bottom">cached</i>
                             </div>
                         </div>
 

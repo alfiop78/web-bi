@@ -18,7 +18,7 @@ var storage = new Storages();
 		btnVersioningStatus : document.getElementById('versioning-status')
 	};
 
-	App.init();
+	// App.init();
 
 	app.checkVersioning = () => {
 		// elementi in locale diversi dalla copia su DB, occorre azione manuale
@@ -35,48 +35,30 @@ var storage = new Storages();
 		// console.log('unmodifiedElements : ', unmodifiedElements.length);
 		// se sono presenti elementi coloro l'icona per notificare questi elementi
 		if (warningElements.length !== 0 || attentionElements.length !== 0 || doneElements.length !== 0) app.btnVersioningStatus.classList.add('md-warning');
-		const parent = app.btnVersioningStatus.nextElementSibling;
 		if (warningElements.length !== 0) {
-			let p = document.createElement('p');
-			p.innerHTML = (warningElements.length === 1) ? `&Eacute; presente ${warningElements.length} elemento in conflitto` : `Sono presenti ${warningElements.length} elementi in conflitto`;
-			parent.appendChild(p);
-			let small = document.createElement('small');
-			small.innerHTML = 'Elementi presenti in ambiente di Produzione / Sviluppo.<br>La copia in Sviluppo è diversa da quella in Produzione.'
-			p.appendChild(small);
+			document.querySelector('#warning-elements').hidden = false;
+			const p = (warningElements.length === 1) ? document.querySelector('#warning-elements > p[data-text-singular]') : document.querySelector('#warning-elements > p[data-text-plural]');
+			p.hidden = false;
+			if (p.hasAttribute('data-text-plural') ) p.querySelector('strong').innerHTML = warningElements.length;
 		}
 		if (attentionElements.length !== 0) {
-			let p = document.createElement('p');
-			p.innerHTML = (attentionElements.length === 1) ? `&Eacute; presente ${attentionElements.length} nuovo elemento in locale, (non sincronizzato)` :
-				`Sono presenti ${attentionElements.length} nuovi elementi in locale (non sincronizzato)`;
-			parent.appendChild(p);
-			let small = document.createElement('small');
-			small.innerHTML = 'Elementi presenti in ambiente di Sviluppo.<br>Questi elementi, una volta terminata la fase di Sviluppo, potranno essere "versionati" in Produzione.'
-			p.appendChild(small);
+			debugger;
+			document.querySelector('#attention-elements').hidden = false;
+			const p = (attentionElements.length === 1) ? document.querySelector('#attention-elements > p[data-text-singular]') : document.querySelector('#attention-elements > p[data-text-plural]');
+			p.hidden = false;
+			if (p.hasAttribute('data-text-plural') ) p.querySelector('strong').innerHTML = attentionElements.length;
 		}
 		if (doneElements.length !== 0) {
-			let p = document.createElement('p');
-			p.innerHTML = (doneElements.length === 1) ? `&Eacute; stato scaricato ${doneElements.length} nuovo elemento in locale` :
-				`Sono stati scaricati ${doneElements.length} nuovi elementi in locale`;
-			parent.appendChild(p);
-			let small = document.createElement('small');
-			small.innerHTML = 'Elementi non presenti in ambiente di Sviluppo.<br>Questi elementi vengono sincronizzati automaticamente.'
-			p.appendChild(small);
-		} else {
-			let p = document.createElement('p');
-			p.innerHTML = 'Nessun nuovo elemento scaricato';
-			parent.appendChild(p);
-			let small = document.createElement('small');
-			small.innerHTML = 'Elementi non presenti in ambiente di Sviluppo.<br>Questi elementi vengono sincronizzati automaticamente.'
-			p.appendChild(small);
-		}
+			document.querySelector('#done-elements').hidden = false;
+			const p = (doneElements.length === 1) ? document.querySelector('#done-elements > p[data-text-singular]') : document.querySelector('#done-elements > p[data-text-plural]');
+			p.hidden = false;
+			if (p.hasAttribute('data-text-plural') ) p.querySelector('strong').innerHTML = doneElements.length;
+		} 
 		if (unmodifiedElements.length !== 0) {
-			let p = document.createElement('p');
-			p.innerHTML = (unmodifiedElements.length === 1) ? `&Eacute; presente ${unmodifiedElements.length} elemento già sincronizzato` :
-				`Sono presenti ${unmodifiedElements.length} elementi già sincronizzati`;
-			parent.appendChild(p);
-			let small = document.createElement('small');
-			small.innerHTML = 'Elementi già sincronizzati'
-			p.appendChild(small);
+			document.querySelector('#sync-elements').hidden = false;
+			const p = (unmodifiedElements.length === 1) ? document.querySelector('#sync-elements > p[data-text-singular]') : document.querySelector('#sync-elements > p[data-text-plural]');
+			p.hidden = false;
+			if (p.hasAttribute('data-text-plural') ) p.querySelector('strong').innerHTML = unmodifiedElements.length;
 		}
 	};
 

@@ -64,7 +64,9 @@ var Hier = new Hierarchy();
 			'Seleziona uno Schema sulla sinistra per iniziare',
 			'Aggiungi le tabelle da mappare trascinandole da "Lista Tabelle"'
 		],*/
-		messageId : 0
+		messageId : 0,
+		tooltip : document.getElementById('tooltip'),
+		tooltipTimeoutId : null
 	}
 
 	App.init();
@@ -1043,8 +1045,6 @@ var Hier = new Hierarchy();
 
     app.getCubes();
 
-    // app.handlerGuide();
-
     // ***********************events*********************
     // lista cubi già definiti
     app.btnDefinedCube.onclick = (e) => {
@@ -1338,21 +1338,59 @@ var Hier = new Hierarchy();
 		delete Dim.dimension;
 	}
 
-	document.querySelectorAll('*[data-tooltip]').forEach( (element) => {
-		element.onmouseenter = (e) => {
-			// impostando la class (oppure un attributo) tooltipShow posso far comparire l'animation del tooltip dopo x ms
-			setTimeout(() => e.target.toggleAttribute('data-tooltip-show'), 500);
-			// setTimeout(() => e.target.classList.add('tooltipShow'), 500);
-		}
+	app.showTooltip = (e) => {
+		// console.log('enter');
+		// const toast = document.getElementById('toast');
+		// console.log('pageX : ', e.pageX);
+		// console.log('pageY : ', e.pageY);
+		// console.log('screen-x : ', e.screenX);
+		// console.log('offset-x : ', e.offsetX);
+		// console.log('offset-y : ', e.offsetY);
+		// console.log('client-x : ', e.clientX);
+		// console.log('client-y : ', e.clientY);
+		// console.log(e.target.getBoundingClientRect().top);
+		// console.log(e.target.getBoundingClientRect().right);
+		// console.log(e.target.getBoundingClientRect().bottom);
+		// console.log('left : ',e.target.getBoundingClientRect().left);
+		const yPosition = e.target.getBoundingClientRect().bottom + 5;
+		const left = e.target.getBoundingClientRect().left;
+		const right = e.target.getBoundingClientRect().right;
+		// console.log('left : ', left);
+		// console.log('right : ', right);
+		// ottengo il centro dell'icona
+		let centerElement = left + ((right - left) / 2);
+		app.tooltip.innerHTML = e.currentTarget.getAttribute('data-tooltip');
+		// ottengo la metà del popup, la sua width varia a seconda di cosa c'è scritto dentro, quindi qui devo prima visualizzarlo (display: block) e dopo posso vedere la width
+		const elementWidth = app.tooltip.offsetWidth / 2;
+		// il popup verrà posizionato al centro dell'icona
+		const xPosition = centerElement - elementWidth;
 
-		element.onmouseleave = (e) => {
-			e.target.toggleAttribute('data-tooltip-show');
-			// e.target.classList.remove('tooltipShow');
-		}
+		app.tooltip.style.setProperty('--left', xPosition + "px");
+		app.tooltip.style.setProperty('--top', yPosition + "px");
+		// app.popup.classList.add('show');
+		app.tooltipTimeoutId = setTimeout(() => {app.tooltip.classList.add('show')}, 600);
+		/*app.popup.animate([
+		  {transform: 'scale(.2)'},
+		  {transform: 'scale(1.2)'},
+		  {transform: 'scale(1)'}
+		], { duration: 50, easing: 'ease-in-out', delay: 1000 });*/
+
+		// console.log(e.target.getBoundingClientRect().bottom);
+		// console.log(e.target.getBoundingClientRect().left);
+		// console.log(' : ', rect);
+	}
+
+	app.hideTooltip = (e) => {
+		// console.log('leave');
+		app.tooltip.classList.remove('show');
+		clearTimeout(app.tooltipTimeoutId);
+	}
+
+	// eventi mouseEnter/Leave su tutte le icon con l'attributo data-popup-label
+	document.querySelectorAll('*[data-tooltip]').forEach((icon) => {
+		icon.onmouseenter = app.showTooltip;
+		icon.onmouseleave = app.hideTooltip;
 	});
-
-	document.addEventListener('mouseenter', (e) => {console.log(e.target)});
-
 
 	// NOTE: esempio di utilizzo di MutationObserver
 	const body = document.getElementById('body');
@@ -1363,6 +1401,21 @@ var Hier = new Hierarchy();
 	    document.querySelectorAll('span[data-fn]').forEach( (span) => {
 	    	span.onclick = app[span.getAttribute('data-fn')];
 	    });
+
+	    document.querySelectorAll('*[data-tooltip]').forEach( (element) => {
+			element.onmouseenter = (e) => {
+				e.target.onmouseenter = app.showTooltip;
+				// impostando la class (oppure un attributo) tooltipShow posso far comparire l'animation del tooltip dopo x ms
+				// setTimeout(() => e.target.toggleAttribute('data-tooltip-show'), 500);
+				// setTimeout(() => e.target.classList.add('tooltipShow'), 500);
+			}
+
+			element.onmouseleave = (e) => {
+				e.target.onmouseleave = app.hideTooltip;
+				// e.target.toggleAttribute('data-tooltip-show');
+				// e.target.classList.remove('tooltipShow');
+			}
+		});
 	});
 	// call `observe()` on that MutationObserver instance,
 	// passing it the element to observe, and the options object

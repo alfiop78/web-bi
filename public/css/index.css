@@ -36,10 +36,10 @@ section[options] i[hier-order-minus]{color: #3b7096;}
 .cardLayout[mode='edit']{opacity: .5;}
 
 section[options] i{color: dimgrey;}
-section[options] > span > i[metrics]{color: #587850;}
-section[options] > span > i[columns]{color: #9a6a6a;}
-section[options] > span > i[filters]{color: #3b7096;}
-section[options] > span > i[groupby]{color: #c7b198;}
+section[options] > i[metrics]{color: #587850;}
+section[options] > i[columns]{color: #9a6a6a;}
+/*section[options] > i[filters]{color: #3b7096;}
+section[options] > i[groupby]{color: #c7b198;}*/
 
 section[options] > span{margin: 2px 0;position: relative;}
 
@@ -144,8 +144,8 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 
 .card.table .cardTable > .title h6{padding: 8px 8px 16px 8px; margin: 0;font-size: .9rem; width: 100%;}
 .card.table .cardTable > .title h6:hover{cursor: grab;}
-.card.table .cardTable > .title > .title-alias > .subtitle{padding: 2px 2px 8px 16px;color: #494949; font-size: .8rem;}
-.card.table .cardTable > .title > .title-alias{width: 100%;padding: 0px 8px;}
+.card.table .cardTable > .title > .title-alias > .subtitle{padding: 2px 2px 8px 8px;color: #494949; font-size: .8rem;}
+.card.table .cardTable > .title > .title-alias{width: 100%;}
 
 .card.table[fact] .title{background: var(--main-primary-color);color: white;}
 
@@ -241,3 +241,4 @@ ul > section[data-sublist-generic]:hover{cursor: pointer; border-left: solid thi
 .hierarchy{display: grid; grid-template-rows: auto auto;}
 ul > section[data-sublist-dimensions]{border: none;}
 /*minicard*/
+
