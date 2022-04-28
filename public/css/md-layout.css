@@ -96,13 +96,14 @@ section > h3 ~ h5{font-weight: lighter;}
 /* lists */
 .lists{display: flex;}
 ul > .element:not([hide]){display: flex;margin: 2px 6px;padding: 4px;font-size: .8rem;}
-ul > section{margin: 2px 6px; padding: 4px; font-size: .8rem; border: none;}
+ul > section{margin: 2px 6px; font-size: .8rem; border: none;}
 ul > section > .element:not([hidden]){display: flex;justify-content: space-between;align-items: center;width: 100%;}
 ul > section > .element > .sublist{display: flex;flex-direction: column; width: 100%;}
 ul > section > .sublist{display: flex;flex-direction: column; width: 100%;}
 ul > section > .element > .sublist > .sublist-element{padding: .1em .5em .1em 2em; width: 100%; display: flex; justify-content: space-between; align-items: center;}
 .sublist-element > .icons{display: flex;}
 .sublist-item {text-overflow: ellipsis;width: 100%;overflow-x: clip;}
+.sublist *[generic]{padding: 6px;}
 
 ul:not([id='columns']) > .element[draggable]:not([hide]):hover{display: flex;justify-content: space-between;align-items: center;margin: 2px 6px;padding: 4px;
   background: tan;cursor: grab;border-radius: 4px;}
@@ -227,9 +228,9 @@ small.tooltip.show{visibility: visible; animation: popup 50ms ease;}
 ul > section[data-sublist-table-card]{border: none;}
 ul > section[data-sublist-table-card]{border-left: solid 0px grey; transition: border-left 150ms;}
 ul > section[data-sublist-table-card] > .sublist{display: flex; flex-direction: row; width: 100%; align-items: center;}
-ul > section[data-sublist-table-card] > .sublist > span{width: 100%; padding: 8px 0px;}
+ul > section[data-sublist-table-card] > .sublist > span{width: 100%; padding: 8px 6px;}
 
-ul > section[data-sublist-draggable]{border: none;padding: 6px 4px;}
+ul > section[data-sublist-draggable]{border: none;}
 ul > section[data-sublist-draggable]{border-left: solid 0px gainsboro; transition: border-left 150ms;}
 ul > section[data-sublist-draggable]:hover{cursor: grab; border-left: solid thick indianred; transition: border-left 150ms;font-weight: bold;}
 

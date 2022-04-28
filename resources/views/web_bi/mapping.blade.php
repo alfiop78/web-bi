@@ -304,18 +304,12 @@
                     <div class="info" hidden></div>
                 </section>
                 <section options>
-                    {{-- <span class="popupContent"><i class="material-icons md-18" columns>view_list</i><small class="popup">Colonna</small></span> --}}
                     <i class="material-icons md-18" columns data-tooltip="Colonne" data-tooltip-position="right">view_list</i>
                     <i class="material-icons md-18" metrics data-tooltip="Metriche" data-tooltip-position="right" hidden>show_chart</i>
-                    {{-- <span class="popupContent" hide><small class="popup">Metrica</small></span> --}}
                     <i class="material-icons md-18" join data-tooltip="Crea relazione" data-tooltip-position="right">insert_link</i>
-                    {{-- <span class="popupContent"><small class="popup">Crea Relazione</small></span> --}}
-                    {{-- <span class="popupContent"><small class="popup">Left Join</small></span> --}}
                     <i class="material-icons md-18" join-left data-tooltip="Left join" data-tooltip-position="right">flip</i>
                     <i class="material-icons md-18" join-right data-tooltip="Right join" data-tooltip-position="right">flip</i>
-                    {{-- <span class="popupContent"><i class="material-icons md-18" join-right>flip</i><small class="popup">Right Join</small></span> --}}
                     <i class="material-icons md-18" join-remove data-tooltip="Rimuovi relazione" data-tooltip-position="right">link_off</i>
-                    {{-- <span class="popupContent"><small class="popup">Rimuovi relazione</small></span> --}}
                 </section>
             </div>
         </template>

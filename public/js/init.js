@@ -80,6 +80,10 @@ var Hier = new Hierarchy();
 		// debugger;
 		if (e.target.localName === 'h6') {
 			app.cardTitle = e.target;
+			/* BUG: e.path deprecato
+			'Event.path' is deprecated and will be removed in M109, around January 2023.
+			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
+			*/
 			app.card = e.path[5];
 			// recupero la posizione attuale della card tramite l'attributo x-y impostato su .cardTable
 			app.xOffset = e.path[5].getAttribute('x');
@@ -237,7 +241,7 @@ var Hier = new Hierarchy();
 			card.setAttribute('fact', true);
 			card.querySelector('.cardTable').setAttribute('fact', true);
 			// visualizzo l'icona metrics
-			card.querySelector('section[options] > .popupContent[hide]').removeAttribute('hide');
+			card.querySelector('section[options] > i[metrics]').hidden = false;
 		}
 
 		// imposto la card draggata nella posizione dove si trova il mouse
@@ -446,6 +450,10 @@ var Hier = new Hierarchy();
 	app.handlerAddColumns = (e) => {
 		// console.log(e.target);
 		// console.log('add columns');
+		/* BUG: e.path deprecato
+			'Event.path' is deprecated and will be removed in M109, around January 2023.
+			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
+		*/
 		const cardTable = e.path[3].querySelector('.cardTable');
 		// console.log('cardTable : ', cardTable);
 		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.getAttribute('data-schema'), 'tableName': cardTable.getAttribute('name')};
@@ -456,6 +464,10 @@ var Hier = new Hierarchy();
 
 	app.handlerAddMetric = (e) => {
 		// imposto il metrics mode
+		/* BUG: e.path deprecato
+			'Event.path' is deprecated and will be removed in M109, around January 2023.
+			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
+		*/
 		const cardTable = e.path[3].querySelector('.cardTable');
 		cube.activeCard = {'ref': cardTable, 'tableName': cardTable.getAttribute('name')};
 		cube.mode('metrics', 'Seleziona le colonne da impostare come Metriche');
@@ -554,6 +566,10 @@ var Hier = new Hierarchy();
 		console.log(e.target);
 		console.log(e.path);
 		// TODO: rimettere la card chiusa al suo posto originario, nel drawer
+		/* BUG: e.path deprecato
+			'Event.path' is deprecated and will be removed in M109, around January 2023.
+			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
+		*/
 		e.path[5].remove();
 		// TODO: eliminare anche dal flusso delle gerarchie sulla destra
 
@@ -735,6 +751,10 @@ var Hier = new Hierarchy();
 
 	app.handlerAddJoin = (e) => {
 		// debugger;
+		/* BUG: e.path deprecato
+			'Event.path' is deprecated and will be removed in M109, around January 2023.
+			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
+		*/
 		const cardTable = e.path[3].querySelector('.cardTable');
 		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.getAttribute('data-schema'), 'tableName': cardTable.getAttribute('name')};
 		cube.mode('relations');
@@ -1012,6 +1032,10 @@ var Hier = new Hierarchy();
     app.handlerHierarchyOrder = (e) => {
     	// console.log(e.target);
     	// imposto la attuale card come card attiva
+    	/* BUG: e.path deprecato
+			'Event.path' is deprecated and will be removed in M109, around January 2023.
+			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
+		*/
     	const card = e.path[5]; // .card .table
     	const cardTable = e.path[3]; // .cardTable, qui è presente il data-value
     	const cardCount = document.querySelectorAll('.card.table').length;
