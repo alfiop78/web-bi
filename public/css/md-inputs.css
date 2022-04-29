@@ -2,7 +2,12 @@ input{font-family: 'Open Sans', sans-serif;border-top-left-radius: 5px;
       border-top-right-radius: 5px; width: inherit;min-width: 85px;
       display:block;border:none;border-bottom: 1px solid rgba(0,0,0,0.10);transition: border .2s;}
 
+/*textarea*/
 textarea{font-family: 'Barlow', sans-serif; font-size: .8rem;width: 100%;margin: 2em 0px;padding: 1em;border: solid thin gainsboro; border-radius: 4px;}
+
+textarea:focus{box-shadow: 0px 0px 10px -2px grey; outline: none;}
+textarea:active{outline: none;}
+/*textarea*/
 input[type='number'], input[type='time']{text-align: right;}
 /* 75757526 disabled input color*/
 input:disabled{background-color: #75757526;}

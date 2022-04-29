@@ -202,7 +202,9 @@ class Hierarchy {
 	#columns = {};
 	#join = {};
 	#relationId = 0;
-	#field;
+	#field; // TODO: da modificare in fieldDs
+	#fieldId;
+	#fieldRef; // riferimento, nel DOM, della colonna selezionata
 	#comment;
 	#hier = {};
 	#from;
@@ -233,9 +235,17 @@ class Hierarchy {
 
 	get activeCard() {return this.card;}
 
+	set fieldId(object) {this.#fieldId = object;}
+
+	get fieldId() {return this.#fieldId;}
+
 	set field(object) {this.#field = object;}
 
 	get field() {return this.#field;}
+
+	set fieldRef(value) {this.#fieldRef = value;}
+
+	get fieldRef() {return this.#fieldRef;}
 
 	set alias(value) {this.#alias = value;}
 
@@ -302,21 +312,28 @@ class Hierarchy {
 
 	get columns_() {return this.#columns;}
 
-	columns() {
-		this._obj = {};
+	columns(token) {
+		this.obj = {};
+		this.tokenObj = {};
 		debugger;
 		if (!this.#col.hasOwnProperty(this.#alias)) {
-			// #columns non ha l'attributo #tableName, lo aggiungo
-			this._obj[this.#field.field] = this.#field.type;
-			this.#col[this.#alias] = this._obj;
+			// alias di tabella ancora non mappata come columns
+			this.tokenObj = {id : this.#fieldId, ds : this.#field};
+			this.obj[token] = this.tokenObj;
+			this.#col[this.#alias] = this.obj;
+			// this._obj[this.#field.field] = this.#field.type;
+			// this._obj[this.#fieldId.field] = this.#fieldId.type;
+			// this.#col[this.#alias] = this._obj;
 		} else {
 			// tabella già presente, verifico se il campo è già presente, se non lo è lo aggiungo altrimenti lo elimino
 			if (!this.#col[this.#alias].hasOwnProperty(this.#field.field)) {
 				// field non esistente per questa tabella, lo aggiungo
 				this.#col[this.#alias][this.#field.field] = this.#field.type;
+				this.#col[this.#alias][this.#fieldId.field] = this.#fieldId.type;
 			} else {
 				// field già esiste per questa tabella, lo elimino
 				delete this.#col[this.#alias][this.#field.field];
+				delete this.#col[this.#alias][this.#fieldId.field];
 				// elimino anche l'attr "schema.table" se, al suo interno, non sono presenti altri field
 				if (Object.keys(this.#col[this.#alias]).length === 0) delete this.#col[this.#alias];
 			}

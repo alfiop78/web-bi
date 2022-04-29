@@ -5,10 +5,12 @@ var Dim = new Dimension();
 var Hier = new Hierarchy();
 (() => {
 	var app = {
+		absPopup : document.getElementById('abs-popup-dialog'),
 		dialogCubeName : document.getElementById('cube-name'),
 		dialogDimensionName : document.getElementById('dimension-name'),
 		dialogHierarchyName : document.getElementById('hierarchy-name'),
 		dialogVersioning : document.getElementById('versioning'),
+		dialogColumnMap : document.getElementById('dialog-column-map'),
 		// templates
 		tmplDimension : document.getElementById('tmpl-dimension-list'),
 		tmplCube : document.getElementById('tmpl-cube-list'),
@@ -34,6 +36,15 @@ var Hier = new Hierarchy();
 		btnSaveCubeName : document.getElementById('btnCubeSaveName'),
 		btnSaveOpenedCube : document.getElementById('saveOpenedCube'),
 		btnDefinedCube : document.getElementById('definedCube'),
+
+		// button dialog-columns-map
+		btnEditSqlId : document.getElementById('edit-sql-formula-column-id'),
+		btnEditSqlDs : document.getElementById('edit-sql-formula-column-ds'),
+		btnColumnMap : document.getElementById('btnColumnsMap'),
+
+		// inputs / textarea
+		txtareaColumnId : document.getElementById('textarea-column-id-formula'),
+		txtareaColumnDs : document.getElementById('textarea-column-ds-formula'),
 
 		// tasto openTableList
 		btnTableList : document.getElementById('openTableList'),
@@ -376,6 +387,8 @@ var Hier = new Hierarchy();
 		cube.fieldSelected = e.currentTarget.getAttribute('label');
 		// TODO: utilizzare uno dei due qui, cube.fieldSelected oppure hier.field, da rivedere
 		Hier.field = {field : e.currentTarget.getAttribute('label'), type : e.currentTarget.getAttribute('data-key')};
+		Hier.fieldRef = e.currentTarget;
+		debugger;
 		// imposto l'alias per la tabella
 		Hier.alias = cube.card.ref.getAttribute('data-alias');
 
@@ -432,10 +445,15 @@ var Hier = new Hierarchy();
 				if (cube.card.ref.hasAttribute('mode')) {
 					console.log('columns');
 					e.currentTarget.toggleAttribute('columns');
-					// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
+					// imposto la colonna selezionata nelle textarea ID - DS
+					app.txtareaColumnId.innerText = cube.fieldSelected;
+					app.txtareaColumnDs.innerText = cube.fieldSelected;
+					app.dialogColumnMap.showModal();
+					return;
+					/*// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
 					Hier.columns();
 					// se è stata impostata almento una colonna posso abilitare il tasto 'hierarchySave'
-					console.log(Hier.columns_);
+					console.log(Hier.columns_);*/
 					// debugger;
 					// recuper o il tasto Save della gerarchia attiva
 					debugger;
@@ -1179,6 +1197,57 @@ var Hier = new Hierarchy();
         // app.saveCube(cube.cube);
 
 		app.dialogCubeName.close();
+	}
+
+	app.btnEditSqlId.onclick = (e) => {
+		app.txtareaColumnId.removeAttribute('readonly');
+		app.txtareaColumnId.setAttribute('readwrite', true);
+		app.txtareaColumnId.focus();
+		app.txtareaColumnId.select();
+	}
+
+	app.btnEditSqlDs.onclick = (e) => {
+		app.txtareaColumnDs.removeAttribute('readonly');
+		app.txtareaColumnDs.setAttribute('readwrite', true);
+		app.txtareaColumnDs.focus();
+		app.txtareaColumnDs.select();
+	}
+
+	/*app.txtareaColumnId.oninput = (e) => {
+		// visualizzo il div absolute-popup
+		app.absPopup.hidden = false;
+		// left position della textarea
+		const left = e.target.offsetLeft + 'px';
+		const caretXPos = app.txtareaColumnId.textLength+'ch';
+		const x = `calc(${left} + ${caretXPos})`;
+		const top = e.target.offsetTop + 'px';
+		const caretYPos = '4em';
+		const y = `calc(${top} + ${caretYPos})`;
+		// app.absPopup.style.setProperty('--left', left + 'px');
+		app.absPopup.style.setProperty('--left', x);
+		app.absPopup.style.setProperty('--top', y);
+		// console.log(app.txtareaColumnId.textLength);
+		// app.txtareaColumnId.selectionStart = app.txtareaColumnId.textLength;
+		// console.log(app.txtareaColumnId.selectionStart);
+	}*/
+
+	app.btnColumnMap.onclick = () => {
+		console.log(app.txtareaColumnId.value);
+		console.log(app.txtareaColumnDs.value);
+		// debugger;
+		Hier.fieldId = {field : app.txtareaColumnId.value, type : 'da_completare', SQL : null};
+		Hier.field = {field : app.txtareaColumnDs.value, type : 'da_completare', SQL : null};
+		// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
+		const rand = () => Math.random(0).toString(36).substr(2);
+		const token = rand().substr(0, 7);
+		Hier.columns(token);
+		// TODO: imposto il token sulla colonna selezionata
+
+		console.log(Hier.activeCard);
+		console.log(Hier.fieldRef);
+		debugger;
+		Hier.fieldRef.setAttribute('data-token-column', token);
+		app.dialogColumnMap.close();
 	}
 
 	// tasto report nella sezione controls -> fabs

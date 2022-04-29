@@ -215,6 +215,48 @@
             </section>
         </dialog>
 
+        <dialog id="dialog-column-map" class="medium-dialog">
+            <div id="abs-popup-dialog" class="absolute-popup" hidden></div>
+            <section>
+                <h4>Imposta ID - Descrizione colonna</h4>
+            </section>
+            <div class="columns-map">
+                <div class="id-ds">
+                    <div>
+                        <span id="column-id">ID</span>
+                        {{-- <div id="textarea-column-id-formula" contenteditable="true">
+                            <strong><span contenteditable="true"></span></strong>
+                        </div> --}}
+                        <textarea id="textarea-column-id-formula" rows="10" placeholder="ID Formula" autocomplete="off" autofocus required minlength="1" readonly></textarea>
+                        <div class="buttons-sql-formula">
+                            <i id="edit-sql-formula-column-id" class="material-icons md-18" data-tooltip="Modifica" data-tooltip-position="bottom">edit</i>
+                        </div>
+                    </div>
+                    <div>
+                        <span id="column-ds">DESCRIZIONE</span>
+                        <textarea id="textarea-column-ds-formula" rows="10" placeholder="Description Formula" autocomplete="off" required minlength="1" readonly></textarea>
+                        <div class="buttons-sql-formula">
+                            <i id="edit-sql-formula-column-ds" class="material-icons md-18" data-tooltip="Modifica" data-tooltip-position="bottom">edit</i>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="md-field">
+                        <input type="search" id="search" data-element-search="search" autocomplete="off" />
+                        <label for="tableSearch" class="">Ricerca</label>
+                    </div>
+                    <ul id="ul-column-map" hidden></ul>
+                </div>                
+
+            </div>
+
+            <div class="dialog-buttons">
+                <button type="button" name="cancel" class="md-button">annulla</button>
+                <button id="btnColumnsMap" type="button" name="done" class="md-button">ok</button>
+            </div>
+        </dialog>
+
         <dialog id="cube-name" class="dialog-save">
             <section>
                 <h4>Nome Cubo</h4>
