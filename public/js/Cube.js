@@ -315,30 +315,24 @@ class Hierarchy {
 	columns(token) {
 		this.obj = {};
 		this.tokenObj = {};
-		debugger;
 		if (!this.#col.hasOwnProperty(this.#alias)) {
+			debugger;
 			// alias di tabella ancora non mappata come columns
 			this.tokenObj = {id : this.#fieldId, ds : this.#field};
 			this.obj[token] = this.tokenObj;
 			this.#col[this.#alias] = this.obj;
-			// this._obj[this.#field.field] = this.#field.type;
-			// this._obj[this.#fieldId.field] = this.#fieldId.type;
-			// this.#col[this.#alias] = this._obj;
-		} else {
-			// tabella già presente, verifico se il campo è già presente, se non lo è lo aggiungo altrimenti lo elimino
-			if (!this.#col[this.#alias].hasOwnProperty(this.#field.field)) {
+		} else {			
+			// tabella già presente, verifico se il token è già presente, se non lo è lo aggiungo altrimenti lo elimino
+			if (!this.#col[this.#alias].hasOwnProperty(token)) {
 				// field non esistente per questa tabella, lo aggiungo
-				this.#col[this.#alias][this.#field.field] = this.#field.type;
-				this.#col[this.#alias][this.#fieldId.field] = this.#fieldId.type;
+				this.#col[this.#alias][token] = {id : this.#fieldId, ds : this.#field};
 			} else {
 				// field già esiste per questa tabella, lo elimino
-				delete this.#col[this.#alias][this.#field.field];
-				delete this.#col[this.#alias][this.#fieldId.field];
+				delete this.#col[this.#alias][token];
 				// elimino anche l'attr "schema.table" se, al suo interno, non sono presenti altri field
 				if (Object.keys(this.#col[this.#alias]).length === 0) delete this.#col[this.#alias];
 			}
 		}
-		console.log('this.#columns : ', this.#col);
 		this.columns_ = this.#col;
 	}
 

@@ -449,16 +449,6 @@ var Hier = new Hierarchy();
 					app.txtareaColumnId.innerText = cube.fieldSelected;
 					app.txtareaColumnDs.innerText = cube.fieldSelected;
 					app.dialogColumnMap.showModal();
-					return;
-					/*// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
-					Hier.columns();
-					// se è stata impostata almento una colonna posso abilitare il tasto 'hierarchySave'
-					console.log(Hier.columns_);*/
-					// debugger;
-					// recuper o il tasto Save della gerarchia attiva
-					debugger;
-					const btnSaveHierarchy = document.querySelector("#box-hierarchy section[data-id='hierarchies'][data-active] button[data-id='hierarchySave']");
-					(Object.keys(Hier.columns_).length !== 0) ? btnSaveHierarchy.disabled = false : btnSaveHierarchy.disabled = true;
 				}
 		}
 	}
@@ -1232,22 +1222,17 @@ var Hier = new Hierarchy();
 	}*/
 
 	app.btnColumnMap.onclick = () => {
-		console.log(app.txtareaColumnId.value);
-		console.log(app.txtareaColumnDs.value);
-		// debugger;
 		Hier.fieldId = {field : app.txtareaColumnId.value, type : 'da_completare', SQL : null};
 		Hier.field = {field : app.txtareaColumnDs.value, type : 'da_completare', SQL : null};
 		// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
 		const rand = () => Math.random(0).toString(36).substr(2);
 		const token = rand().substr(0, 7);
 		Hier.columns(token);
-		// TODO: imposto il token sulla colonna selezionata
-
-		console.log(Hier.activeCard);
-		console.log(Hier.fieldRef);
-		debugger;
+		// imposto il token sulla colonna selezionata, mi servirà in fase di deselezione della colonna
 		Hier.fieldRef.setAttribute('data-token-column', token);
 		app.dialogColumnMap.close();
+		const btnSaveHierarchy = document.querySelector("#box-hierarchy section[data-id='hierarchies'][data-active] button[data-id='hierarchySave']");
+		btnSaveHierarchy.disabled = (Object.keys(Hier.columns_).length !== 0) ? false : true;
 	}
 
 	// tasto report nella sezione controls -> fabs
