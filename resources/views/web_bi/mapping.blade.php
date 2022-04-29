@@ -115,10 +115,6 @@
                             {{-- elenco tabelle contenute nella dimensione --}}                            
                         </div>
                         <button data-id="dimension-use" type="button" name="dimensionUse" class="md-button">utilizza</button>
-                        {{-- <div class="mini-card-buttons">
-                            <button data-id="dimension-use" type="button" name="dimensionUse" class="md-button">utilizza</button>
-                            <button data-id="dimension-edit" type="button" name="dimensionEdit" class="md-button">modifica</button>
-                        </div> --}}
                     </div>
                 </div>
             </section>
@@ -287,9 +283,9 @@
                 <section class="cardTable" name data-schema data-alias data-value>
                     <section options-hier>
                         <div>
-                            <i class="material-icons md-18" hier-order-plus>keyboard_arrow_up</i>
+                            <i class="material-icons md-18" data-tooltip="Incrementa ordine gerarchico" data-tooltip-position="left" hier-order-plus>keyboard_arrow_up</i>
                             <span class="hierarchy-order"></span>
-                            <i class="material-icons md-18" hier-order-minus>keyboard_arrow_down</i>
+                            <i class="material-icons md-18" hier-order-minus data-tooltip="Decrementa ordine gerarchico" data-tooltip-position="left">keyboard_arrow_down</i>
                         </div>
                     </section>
                     <div class="title">
@@ -392,8 +388,7 @@
                                 <i id="saveOpenedCube" class="material-icons md-24" data-tooltip="Aggiorna cubo" data-tooltip-position="bottom" hidden>save</i>
                                 <i id="definedCube" class="material-icons md-24 md-inactive" data-tooltip="Lista Cubi definiti" data-tooltip-position="bottom">folder_open</i>
                                 <span class="h-separator"></span>
-                                {{-- <span class="popupContent"><i id="versioning-status" class="material-icons md-24">cached</i><small class="popup"></small></span> --}}
-                                <i id="versioning-status" class="material-icons md-24" data-tooltip="" data-open-abs-window data-tooltip-position="bottom">cached</i>
+                                <i id="versioning-status" class="material-icons md-24 md-inactive" data-tooltip="" data-open-abs-window data-tooltip-position="bottom">cached</i>
                             </div>
                         </div>
 

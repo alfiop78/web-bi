@@ -372,21 +372,21 @@ var Hier = new Hierarchy();
 		// passo a activeCard il riferimento nel DOM della card attiva
 		Hier.activeCard = app.dropZone.querySelector(".cardTable[name='" + e.currentTarget.getAttribute('data-table-name') + "']");
 		// debugger;
+		// colonna selezionata
 		cube.fieldSelected = e.currentTarget.getAttribute('label');
 		// TODO: utilizzare uno dei due qui, cube.fieldSelected oppure hier.field, da rivedere
 		Hier.field = {field : e.currentTarget.getAttribute('label'), type : e.currentTarget.getAttribute('data-key')};
 		// imposto l'alias per la tabella
 		Hier.alias = cube.card.ref.getAttribute('data-alias');
 
-		// se è presente un altro elemento con attributo hierarchy ma NON data-relation-id, "deseleziono" quello con hierarchy per mettere ...
-		// ...[hierarchy] a quello appena selezionato. In questo modo posso selezionare solo una colonna per volta ad ogni relazione da creare
-		// se però, viene cliccato una colonna con già una relazione impostata (quindi ha [data-relationn-id]) elimino la relazione da
-		// ...entrambe le tabelle tramite un identificatifo di relazione
-
 		let attrs = cube.card.ref.getAttribute('mode');
 
 		switch (attrs) {
 			case 'relations':
+				// se è presente un altro elemento con attributo hierarchy ma NON data-relation-id, "deseleziono" quello con hierarchy per mettere ...
+				// ...[hierarchy] a quello appena selezionato. In questo modo posso selezionare solo una colonna per volta ad ogni relazione da creare
+				// se però, viene cliccato una colonna con già una relazione impostata (quindi ha [data-relationn-id]) elimino la relazione da
+				// ...entrambe le tabelle tramite un identificatifo di relazione
 				if (e.currentTarget.hasAttribute('data-relation-id')) {
 					// debugger;
 					/* oltre a fare il toggle dell'attributo, se questa colonna era stata già messa in
@@ -428,8 +428,7 @@ var Hier = new Hierarchy();
 				}
 				break;
 			default:
-				// se la card è stata imposta con l'attributo mode ...
-				// debugger;
+				// columns
 				if (cube.card.ref.hasAttribute('mode')) {
 					console.log('columns');
 					e.currentTarget.toggleAttribute('columns');

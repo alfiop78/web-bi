@@ -57,6 +57,7 @@ var storage = new Storages();
 			p.hidden = false;
 			if (p.hasAttribute('data-text-plural') ) p.querySelector('strong').innerHTML = unmodifiedElements.length;
 		}
+		app.btnVersioningStatus.classList.remove('md-inactive');
 	}
 
 	app.getLocalElements = (data) => {
