@@ -2,6 +2,7 @@ class Queries {
 	#select;
 	#obj;
 	#table;
+	#columnToken;
 	#tableAlias;
 	#schema;
 	#column;
@@ -39,6 +40,10 @@ class Queries {
 	set field(value) {this._field = value;}
 
 	get field() {return this._field;}
+
+	set columnToken(value) {this.#columnToken = value;}
+
+	get columnToken() {return this.#columnToken;}
 
 	set fieldType(value) {this._fieldType = value;}
 
@@ -93,15 +98,16 @@ class Queries {
 	set select(object) {
 		// es.: this.#select[nometabella] = {field: nomecolonna, SQLFormat: (es.: date_format), 'alias': "Cod.Sede"}
 		this.#obj = {};
-		if (this.#select.hasOwnProperty(this.#column)) {
+		debugger;
+		if (this.#select.hasOwnProperty(this.#columnToken)) {
 			// tabella già presente nell'object #select
-			if (!this.#select[this.#column].hasOwnProperty(this._field)) {
+			if (!this.#select[this.#columnToken].hasOwnProperty(this._field)) {
 				// field NON presente in #select[#table], lo aggiungo
-				this.#select[this.#column][this._field] = object;
+				this.#select[this.#columnToken][this._field] = object;
 			}
 		} else {
 			// this.#obj[this._field] = object;
-			this.#select[this.#column] = object;
+			this.#select[this.#columnToken] = object;
 		}
 		console.log('select : ', this.#select);
 	}
@@ -111,7 +117,7 @@ class Queries {
 	deleteSelect() {
 		debugger;
 		// TODO: da completare dopo la modifica della select
-		delete this.#select[this.#column];
+		delete this.#select[this.#columnToken];
 		// if (Object.keys(this.#select).length === 0) delete this.#select;
 		// if (Object.keys(this.#select).length === 0) unset this.#select;
 
@@ -128,7 +134,7 @@ class Queries {
 
 	set where(join) {
 		console.log('join : ', join);
-		debugger;
+		// debugger;
 		if (Object.keys(join).length > 1) {
 			for (const [key, value] of Object.entries(join)) {
 				this.#where[key] = value;	

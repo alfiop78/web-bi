@@ -29,12 +29,15 @@ class Cube {
 			/* var_dump($key); // il nome dato alla colonna */
 			/* print_r($object); // contiene l'object {table : tabella, field: campo, alias : alias, SQL : formulSQL} */
 			/* var_dump($object->table); */
-			$fieldList[] = "{$object->tableAlias}.{$object->field} AS '{$object->alias}'";
-			// $fieldList[] = "{$object->table}.{$object->field} AS '{$object->alias}'";
-			$this->_columns[] = $object->alias; // questo viene utilizzato nella clausola ON della LEFT JOIN
+			foreach ($object->field as $token => $field) {
+				$fieldList[] = "{$object->tableAlias}.{$field->id->field} AS '{$object->alias}_id'";
+				$fieldList[] = "{$object->tableAlias}.{$field->ds->field} AS '{$object->alias}_ds'";
+				// $fieldList[] = "{$object->table}.{$object->field} AS '{$object->alias}'";
+				$this->_columns[] = `{$object->alias}_id`; // questo viene utilizzato nella clausola ON della LEFT JOIN
+			}
 		}
 		$this->_select .= implode(", ", $fieldList);
-		/* var_dump($this->_select); */
+		// var_dump($this->_select);
 	}
 
 	public function n_from($from) {
@@ -106,7 +109,10 @@ class Cube {
 			/* print_r($object); // contiene l'object {table : tabella, field: campo, alias : alias, SQL : formulSQL} */
 			/* var_dump($object->table); */
 			// $fieldList[] = "{$object->table}.{$object->field}";
-			$fieldList[] = "{$object->tableAlias}.{$object->field}";
+			foreach ($object->field as $token => $field) {
+				$fieldList[] = "{$object->tableAlias}.{$field->id->field}";	
+				$fieldList[] = "{$object->tableAlias}.{$field->ds->field}";	
+			}			
 		}
 		$this->_groupBy .= implode(", ", $fieldList);
 		/* var_dump($this->_groupBy); */
@@ -123,6 +129,7 @@ class Cube {
 		if (isset($this->_reportFilters)) {$this->_sql .= $this->_reportFilters."\n";}
 
 		if (!is_null($this->_groupBy)) {$this->_sql .= $this->_groupBy;}
+		// dd($this->_sql);
         // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
 		$sql = "CREATE TEMPORARY TABLE decisyon_cache.W_AP_base_".$this->reportId." ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ".$this->_sql.";";
 		// $result = DB::connection('vertica_odbc')->raw($sql);
@@ -222,6 +229,7 @@ class Cube {
 
 				foreach ($this->_columns as $columnAlias) {
 					// carattere backtick con ALTGR+'
+					// TODO: da testare dopo la modifica id_ds
 					$ONClause[] = "{$baseTableName}.{$columnAlias} = {$metricTableName}.{$columnAlias}";
 				}
 				$ONConditions = implode(" AND ", $ONClause);

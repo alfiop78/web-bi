@@ -678,7 +678,6 @@ var Hier = new Hierarchy();
 		ctx.stroke();
 	}*/
 
-
 	// selezione di un cubo già definito, da qui è possibile associare, ad esempio, una nuova dimensione ad un cubo già esistente.
 	app.handlerCubeSelected = (e) => {
 		// apro la tabella definita come Cubo
@@ -703,9 +702,9 @@ var Hier = new Hierarchy();
 		app.addCard(factTable, true);
 		// app.addCard(`${StorageCube.selected.schema}.${StorageCube.selected.FACT}`, true);
 		// visualizzo il tasto saveOpenedCube al posto di SaveCube
-		app.btnSaveOpenedCube.parentElement.toggleAttribute('hide');
+		app.btnSaveOpenedCube.hidden = false;
 		// nascondo btnSaveCube
-		app.btnSaveCube.parentElement.toggleAttribute('hide');
+		app.btnSaveCube.hidden = true;
 	}
 
 	// recupero le tabelle del database in base allo schema selezionato

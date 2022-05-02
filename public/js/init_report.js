@@ -208,8 +208,8 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
+	// lista di tutte le colonne, incluse nelle dimensioni, property 'columns'
 	app.getColumns = () => {
-		// lista di tutte le colonne, incluse nelle dimensioni, property 'columns'
 		const ul = document.getElementById('list-columns');
 		const parent = document.getElementById('parent-list-columns');
 		// per ogni dimensione, recupero la property 'columns'
@@ -224,30 +224,34 @@ var StorageMetric = new MetricStorage();
 					// console.log('orderTable : ', orderTable);
 					// console.log('fields : ', orderTable.alias);
 					// console.log('hierValue.columns : ', hierValue.columns[orderTable.alias]);
-					for (const field in hierValue.columns[orderTable.alias]) {
-						// console.log('field : ', field);
-						const content = app.tmplList.content.cloneNode(true);
-						const section = content.querySelector('section[data-sublist-hier-table-columns]');
-						const subList = section.querySelector('.sublist');
-						const spanHier = subList.querySelector('span[hier]');
-						const spanTable = subList.querySelector('span[table]');
-						const spanColumn = subList.querySelector('span[column]');
-						section.setAttribute('data-label', field);
-						section.setAttribute('data-element-search', 'search-columns');
-						section.setAttribute('data-hier-name', hier);
-						spanHier.innerText = hier;
-						spanTable.innerText = orderTable.table;
-						spanColumn.innerText = field;
-						spanColumn.setAttribute('data-label', field);
-						// spanColumn.setAttribute('data-table-name', table.split('_')[0]);
-						spanColumn.setAttribute('data-table-name', orderTable.table);
-						spanColumn.setAttribute('data-table-alias', orderTable.alias);
-						spanColumn.setAttribute('data-table-id', tableId);
-						spanColumn.setAttribute('data-dimension-name', key);
-						spanColumn.setAttribute('data-hier-name', hier);
-						// spanColumn.setAttribute('data-table-id')
-						spanColumn.onclick = app.handlerSelectColumn;
-						ul.appendChild(section);
+					// verifico se la tabella in ciclo ha delle colonne mappate
+					if (hierValue.columns.hasOwnProperty(orderTable.alias)) {
+						for (const [token, field] of Object.entries(hierValue.columns[orderTable.alias])) {
+							// console.log('field : ', field);
+							const content = app.tmplList.content.cloneNode(true);
+							const section = content.querySelector('section[data-sublist-hier-table-columns]');
+							const subList = section.querySelector('.sublist');
+							const spanHier = subList.querySelector('span[hier]');
+							const spanTable = subList.querySelector('span[table]');
+							const spanColumn = subList.querySelector('span[column]');
+							section.setAttribute('data-label', field.ds.field);
+							section.setAttribute('data-element-search', 'search-columns');
+							section.setAttribute('data-hier-name', hier);
+							spanHier.innerText = hier;
+							spanTable.innerText = orderTable.table;
+							spanColumn.innerText = field.ds.field;
+							spanColumn.setAttribute('data-label', field.ds.field);
+							// spanColumn.setAttribute('data-table-name', table.split('_')[0]);
+							spanColumn.setAttribute('data-table-name', orderTable.table);
+							spanColumn.setAttribute('data-table-alias', orderTable.alias);
+							spanColumn.setAttribute('data-table-id', tableId);
+							spanColumn.setAttribute('data-dimension-name', key);
+							spanColumn.setAttribute('data-hier-name', hier);
+							spanColumn.setAttribute('data-token-column', token);
+							// spanColumn.setAttribute('data-table-id')
+							spanColumn.onclick = app.handlerSelectColumn;
+							ul.appendChild(section);
+						}
 					}
 				}
 			}
@@ -275,23 +279,27 @@ var StorageMetric = new MetricStorage();
 			spanColumnDialogFilter.setAttribute('data-schema', value.schema);
 			spanColumnDialogFilter.onclick = app.handlerSelectTable;
 			ulDialogFilter.appendChild(sectionDialogFilter);
-			for (const field in value.columns[value.alias]) {
-				console.log('field : ', field);
-				const content = app.tmplList.content.cloneNode(true);
-				const section = content.querySelector('section[data-sublist-cube-columns]');
-				const subList = section.querySelector('.sublist');
-				const spanCube = subList.querySelector('span[cube]');
-				const spanColumn = subList.querySelector('span[column]');
-				section.setAttribute('data-label', field);
-				section.setAttribute('data-cube-name', key);
-				section.setAttribute('data-element-search', 'search-columns');
-				spanCube.innerText = key;
-				spanColumn.innerText = field;
-				spanColumn.setAttribute('data-label', field);
-				spanColumn.setAttribute('data-table-name', value.FACT);
-				spanColumn.setAttribute('data-table-alias', value.alias);
-				spanColumn.onclick = app.handlerSelectColumn;
-				ul.appendChild(section);
+			if (value.columns.hasOwnProperty(value.alias)) {
+				for (const [token, field] of Object.entries(value.columns[value.alias])) {
+					console.log('field : ', field);
+					const content = app.tmplList.content.cloneNode(true);
+					const section = content.querySelector('section[data-sublist-cube-columns]');
+					const subList = section.querySelector('.sublist');
+					const spanCube = subList.querySelector('span[cube]');
+					const spanColumn = subList.querySelector('span[column]');
+					section.setAttribute('data-label', field.ds.field);
+					section.setAttribute('data-cube-name', key);
+					section.setAttribute('data-element-search', 'search-columns');
+					spanCube.innerText = key;
+					spanColumn.innerText = field.ds.field;
+					spanColumn.setAttribute('data-label', field.ds.field);
+					spanColumn.setAttribute('data-table-name', value.FACT);
+					spanColumn.setAttribute('data-table-alias', value.alias);
+					spanColumn.setAttribute('data-token-column', token);
+					spanColumn.setAttribute('data-cube-name', key);
+					spanColumn.onclick = app.handlerSelectColumn;
+					ul.appendChild(section);
+				}
 			}
 		}
 	}
@@ -468,9 +476,12 @@ var StorageMetric = new MetricStorage();
 		const alias = e.currentTarget.getAttribute('data-table-alias');
 		if (e.currentTarget.hasAttribute('selected')) {
 			// visualizzo, in ul list-columns (dialogTable), le colonne appartenenti alla Fact
-			const fact = document.querySelector("#list-columns-fact section[data-cube-name='" + cube + "']");
-			fact.hidden = false;
-			fact.setAttribute('data-searchable', true);
+			// verifico se sono presenti colonne associate alla FACT
+			if (document.querySelector("#list-columns-fact section[data-cube-name='" + cube + "']")) {
+				const fact = document.querySelector("#list-columns-fact section[data-cube-name='" + cube + "']");
+				fact.hidden = false;
+				fact.setAttribute('data-searchable', true);
+			}
 			// visualizzo, in exist-filters, i filtri appartenenti alla Fact
 			document.querySelectorAll("#exist-filters section[data-table-name='" + table + "']:not([data-hier-name]), #ul-metric-filter section[data-table-name='" + table + "']:not([data-hier-name])").forEach( (filter) => {
 				filter.hidden = false;
@@ -736,11 +747,22 @@ var StorageMetric = new MetricStorage();
 	// selezione delle colonne nella dialogColumns
 	app.handlerSelectColumn = (e) => {
 		e.currentTarget.toggleAttribute('selected');
+		let hier = e.currentTarget.getAttribute('data-hier-name');
 		Query.table = e.currentTarget.getAttribute('data-table-name');
 		Query.tableAlias = e.currentTarget.getAttribute('data-table-alias');
+		Query.columnToken = e.currentTarget.getAttribute('data-token-column');
 		// la FACT table non ha un data-table-id
-		if (e.currentTarget.hasAttribute('data-table-id')) Query.tableId = e.currentTarget.getAttribute('data-table-id');
-		Query.field = e.currentTarget.getAttribute('data-label');
+		if (e.currentTarget.hasAttribute('data-table-id')) {
+			Dim.selected = e.currentTarget.getAttribute('data-dimension-name');
+			Query.tableId = e.currentTarget.getAttribute('data-table-id');
+			Query.field = {[Query.columnToken] : Dim.selected.hierarchies[hier].columns[Query.tableAlias][Query.columnToken]};
+		} else {
+			// TODO: 
+			StorageCube.selected = e.currentTarget.getAttribute('data-cube-name');
+			Query.field = {[Query.columnToken] : StorageCube.selected.columns[Query.tableAlias][Query.columnToken]};
+		}
+		debugger;
+		// Query.field = e.currentTarget.getAttribute('data-label');
 		if (!e.currentTarget.hasAttribute('selected')) {
 			// TODO: colonna deselezionata, implementare la logica in Query.deleteSelect
 			Query.deleteSelect();
@@ -969,22 +991,20 @@ var StorageMetric = new MetricStorage();
 	app.checkRelations = (hier) => {
 		// recupero la prima tabella selezionata della gerarchia
 		console.log(+Query.tables.tableId);
-		debugger;
-
+		// debugger;
 		for (const [k, order] of Object.entries(Dim.selected.hierarchies[hier].order)) {
 			// recupero la property 'join' (nella dimensione) dove la key è maggiore della tableId al momento selezionata (Quindi recupero tutte le hier inferiori)
 			if (+k >= +Query.tables.tableId) {
 				Query.from = `${order.schema}.${order.table} AS ${order.alias}`;
 				if (Dim.selected.hierarchies[hier].joins[order.alias]) {
 					Query.joinId = +k;
-					// debugger;
 					Query.where = Dim.selected.hierarchies[hier].joins[order.alias];
 				}
 			}
 		}
 	}
 
-	// tasto Fatto nella dialog Tables
+	// tasto Fatto nella dialog Column
 	app.btnColumnDone.onclick = () => {
 		// L'oggetto Query.select ora è popolato con le colonne scelte, da aggiungere al report. Popolo una <ul> dove sono presenti le colonne scelte prima di chiudere la dialog.
 		// console.log('Query.table : ', Query.table);
@@ -1005,10 +1025,10 @@ var StorageMetric = new MetricStorage();
 				const element = section.querySelector('.element');
 				const li = element.querySelector('li');
 				section.hidden = false;
-				section.setAttribute('data-label', key);
-				section.setAttribute('data-element-search', 'search-fields-set');
+				section.setAttribute('data-label', value.alias);
+				section.setAttribute('data-element-search', 'search-columns-selected');
 				section.setAttribute('data-searchable', true);
-				li.innerText = key;
+				li.innerText = value.alias;
 				ul.appendChild(section);
 			}
 		} else {
@@ -1022,9 +1042,9 @@ var StorageMetric = new MetricStorage();
 				const li = element.querySelector('li');
 				section.hidden = false;
 				section.setAttribute('data-element-search', 'search-fields-set')
-				section.setAttribute('data-label', key);
+				section.setAttribute('data-label', value.alias);
 				section.setAttribute('data-searchable', true);
-				li.innerText = key;
+				li.innerText = value.alias;
 				ul.appendChild(section);
 			}
 		}		
@@ -1519,7 +1539,7 @@ var StorageMetric = new MetricStorage();
 
 	// Salva nella dialogColumns
 	app.btnSaveColumn.onclick = (e) => {
-		let hier;
+		let hier, field;
 		// le colonne di una Fact non hanno data-hier-name
 		if (app.dialogColumns.querySelector('section').hasAttribute('data-hier-name')) {
 			hier = app.dialogColumns.querySelector('section').getAttribute('data-hier-name');
