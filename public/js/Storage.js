@@ -296,12 +296,12 @@ class ProcessStorage extends Storages {
 			// console.log(toBeProcessed[proc]);
 			// console.log('template : ', template);
 			const content = template.content.cloneNode(true);
-			let section = content.querySelector('section[data-no-icon]');
+			let section = content.querySelector('section[data-sublist-generic]');
 			section.hidden = false;
-			let li = section.querySelector('li');
-			li.innerText = process;
-			li.setAttribute('label', process);
-			li.setAttribute('data-id', this.#processes[process]['processId']);
+			let span = section.querySelector('span[generic]');
+			span.innerText = process;
+			span.setAttribute('label', process);
+			span.setAttribute('data-id', this.#processes[process]['processId']);
 			ul.appendChild(section);
 		}
 	}

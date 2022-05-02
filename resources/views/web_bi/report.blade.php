@@ -50,10 +50,6 @@
 					<section class="sectionLists">
 						<h5>SQL</h5><h6>Aggiungere un alias per la colonna</h6>
 						<div class="md-field">
-							<input type="text" id="columnName" name="columnName" autocomplete="off" />
-							<label for="columnName" class="">Nome per la colonna</label>
-						</div>
-						<div class="md-field">
 							<input type="text" id="columnAlias" name="columnAlias" autocomplete="off" />
 							<label for="columnAlias" class="">Alias</label>
 						</div>
@@ -290,7 +286,6 @@
 						<div class="actions">
 							<span class="popupContent"><i id="btnProcessReport" class="material-icons md-24">table_rows</i><small class="popup">Crea FX</small></span>
 						</div>
-						
 
 						<div class="lists">
 							<div class="absList" id="reportProcessList" hidden>
@@ -302,44 +297,7 @@
 							</div>
 						</div>
 	  
-						<!-- template con icone 'column' e 'filter' -->
 						<template id="templateList">
-
-							<section hidden data-label data-element-search data-icon-column data-icon-filter>
-								<div class="element" name="">
-									<li class="elementSearch" label=""></li>
-									<i data-id="columns-icon" class="material-icons md-18">view_list</i>
-									<i data-id="filter-icon" class="material-icons md-18">filter_alt</i>
-								</div>	
-							</section>
-
-							<section hidden data-label data-element-search data-icon-edit>
-								<div class="element" name="">
-									<li class="elementSearch" label=""></li>
-									<i id="edit-icon" class="material-icons md-18">edit</i>
-								</div>	
-							</section>
-
-							<section data-label data-icon-delete>
-								<div class="element" name="">
-									<li class="elementSearch" label=""></li>
-									<i id="delete-icon" class="material-icons md-18">delete</i>
-								</div>	
-							</section>
-
-							<section data-element-search data-label data-no-icon hidden>
-								<div class="element" name>
-									<li class="elementSearch" label></li>
-								</div>	
-							</section>
-
-							<section data-element-search data-label data-sublist hidden>
-								<div class="element" name>
-									<span class="sublist">
-										<li class="elementSearch" label></li>
-									</span>
-								</div>
-							</section>
 
 							<section data-element-search data-label data-sublist-hier-table-columns hidden>
 								<div class="element" name>
@@ -387,16 +345,6 @@
 								</span>
 							</section>
 
-						</template>
-
-						<template id="sublist-item">
-							<span class="sublist-element">
-								<span class="sublist-item"></span>
-								<span class="icons">
-									<i data-id="column-icon" class="material-icons md-18">view_list</i>
-									<i data-id="filter-icon" class="material-icons md-18">filter_alt</i>									
-								</span>
-							</span>
 						</template>
 
 						<div class="wrapper">

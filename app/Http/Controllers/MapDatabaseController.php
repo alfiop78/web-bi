@@ -118,6 +118,7 @@ class MapDatabaseController extends Controller
         $q->reportId = $cube->{'processId'};
         $q->reportName = $cube->{'name'}; // il nome del report non deve avere caratteri non consentiti per la creazione di tabelle (per ora non c'è un controllo sul nome inserito, da javascript)
         $q->n_select($cube->{'select'});
+        // exit;
         $q->metrics($cube->{'metrics'});
         $q->n_from($cube->{'from'});
         $q->n_where($cube->{'where'});

@@ -33,11 +33,12 @@ class Cube {
 				$fieldList[] = "{$object->tableAlias}.{$field->id->field} AS '{$object->alias}_id'";
 				$fieldList[] = "{$object->tableAlias}.{$field->ds->field} AS '{$object->alias}_ds'";
 				// $fieldList[] = "{$object->table}.{$object->field} AS '{$object->alias}'";
-				$this->_columns[] = `{$object->alias}_id`; // questo viene utilizzato nella clausola ON della LEFT JOIN
+				$this->_columns[] = "{$object->alias}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
 			}
 		}
 		$this->_select .= implode(", ", $fieldList);
 		// var_dump($this->_select);
+		// var_dump($this->_columns);
 	}
 
 	public function n_from($from) {
@@ -161,7 +162,7 @@ class Cube {
 			//echo $metrics;
 
 			unset($this->_sql);
-			$metric = "{$metrics->SQLFunction}({$metrics->table}.{$metrics->field}) AS '{$metrics->alias}'";
+			$metric = "{$metrics->SQLFunction}({$metrics->tableAlias}.{$metrics->field}) AS '{$metrics->alias}'";
 			// $metric = "{$metrics->SQLFunction}({$metrics->table}.{$metrics->field}) AS '{$metrics->alias}'";
 			echo $this->createMetricTable('W_AP_metric_'.$this->reportId."_".$i, $metric, $metrics->filters);
 			// a questo punto metto in relazione (left) la query baseTable con la/e metriche contenenti filtri
@@ -172,6 +173,7 @@ class Cube {
 
 	private function createMetricTable($tableName, $metric, $filters) {
 		// var_dump($filters);
+		// dd($filters);
 
 		$this->_sql = $this->_select.", ".$metric."\n";
 		$this->_sql .= $this->_from."\n";
@@ -180,14 +182,16 @@ class Cube {
 		$this->_sql .= $this->_reportFilters."\n";
 
 		foreach ($filters as $filter) {
-			$this->_metricFilters .= " AND {$filter->formula}";
+			$this->_metricFilters .= " AND {$filter->alias}.{$filter->formula}";
 		}
+		// dd($this._metricFilters);
 
 		$this->_sql .= $this->_metricFilters."\n";
 		if (!is_null($this->_groupBy)) {$this->_sql .= $this->_groupBy;}
 
 		$sql = "CREATE TEMPORARY TABLE decisyon_cache.".$tableName." ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ".$this->_sql.";";
 		// return $sql;
+		// dd($sql);
         if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
             // dd('la tabella già esiste, la elimino');
             $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
@@ -222,23 +226,18 @@ class Cube {
 			$leftJoin = null;
 			$ONClause = array();
 			$ONConditions = NULL;
-			// var_dump($this->_columns);
 			foreach ($this->_metricTable as $metricTableName => $alias) {
 				$table_and_metric[] = "$metricTableName.$alias";
 				$leftJoin .= "\nLEFT JOIN decisyon_cache.$metricTableName ON ";
-
 				foreach ($this->_columns as $columnAlias) {
 					// carattere backtick con ALTGR+'
-					// TODO: da testare dopo la modifica id_ds
+					// TODO: da testare dopo la modifica id_ds, la join, al momento viene fatta solo con i campi _id, ulteriori verifiche da fare
 					$ONClause[] = "{$baseTableName}.{$columnAlias} = {$metricTableName}.{$columnAlias}";
 				}
 				$ONConditions = implode(" AND ", $ONClause);
 				unset($ONClause);
-				// var_dump($ONConditions);
 				$leftJoin .= "$ONConditions";
 			}
-			// echo $leftJoin;
-
 			/*
 			DATAMART DA GENERARE
 			select W_AP_base_3.*, `W_AP_metric_3_1`.`Listino`, `W_AP_metric_3_2`.`sconto` FROM W_AP_base_3
@@ -251,6 +250,7 @@ class Cube {
 			$sql .= $tables;
 			$sql .= "\nFROM decisyon_cache.$baseTableName";
 			$sql .= $leftJoin.");";
+			// dd($sql);
 
 		} else {
 			$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS (SELECT * FROM decisyon_cache.".$baseTableName.");";

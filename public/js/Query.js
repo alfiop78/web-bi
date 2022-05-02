@@ -221,21 +221,10 @@ class Queries {
 
 	set filteredMetrics(object) {
 		console.log(object);
+		debugger;
+		object.tableAlias = this.tableAlias;
 		this._filteredMetrics[this._metricName] = object;
 		console.log(this._filteredMetrics);
-		/*matricName: 
-				type: "METRIC"
-				name: "n"
-				formula: {
-					SQLFunction: "SUM", table: "DocVenditaDettaglio", field: "NettoRiga", distinct: false, alias: "netto", 
-					filters: {
-						glm:
-							type: "FILTER"
-							name: "glm"
-							table: "Azienda"
-							formula: "Azienda.id = 43"}
-					}
-		    */
 	}
 
 	get filteredMetrics() {return this._filteredMetrics;}
