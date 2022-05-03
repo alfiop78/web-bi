@@ -308,7 +308,9 @@ var StorageMetric = new MetricStorage();
 			if (value.hasOwnProperty('dimension')) {
 				section.setAttribute('data-dimension-name', value.dimension);
 				section.setAttribute('data-hier-name', value.hier);
-			}			
+			} else {
+				section.setAttribute('data-cube-name', value.cube);
+			}
 			section.setAttribute('data-element-search', 'search-exist-filters');
 			table.innerText = value.table;
 			filter.innerText = key;
@@ -316,6 +318,8 @@ var StorageMetric = new MetricStorage();
 			if (value.hasOwnProperty('dimension')) {
 				filter.setAttribute('data-dimension-name', value.dimension);
 				filter.setAttribute('data-hier-name', value.hier);
+			} else {
+				filter.setAttribute('data-cube-name', value.cube);
 			}
 			filter.setAttribute('data-table-name', value.table);
 			filter.onclick = app.handlerFilterSelected;
@@ -338,7 +342,9 @@ var StorageMetric = new MetricStorage();
 			if (value.hasOwnProperty('dimension')) {
 				section.setAttribute('data-dimension-name', value.dimension);
 				section.setAttribute('data-hier-name', value.hier);
-			}			
+			} else {
+				section.setAttribute('data-cube-name', value.cube);
+			}
 			section.setAttribute('data-element-search', 'search-exist-filters');
 			table.innerText = value.table;
 			filter.innerText = key;
@@ -346,6 +352,8 @@ var StorageMetric = new MetricStorage();
 			if (value.hasOwnProperty('dimension')) {
 				filter.setAttribute('data-dimension-name', value.dimension);
 				filter.setAttribute('data-hier-name', value.hier);
+			} else {
+				filter.setAttribute('data-cube-name', value.cube);
 			}
 			filter.setAttribute('data-table-name', value.table);
 			filter.onclick = app.handlerMetricFilterSelected;
@@ -474,7 +482,7 @@ var StorageMetric = new MetricStorage();
 				fact.setAttribute('data-searchable', true);
 			}
 			// visualizzo, in exist-filters, i filtri appartenenti alla Fact
-			document.querySelectorAll("#exist-filters section[data-table-name='" + table + "']:not([data-hier-name]), #ul-metric-filter section[data-table-name='" + table + "']:not([data-hier-name])").forEach( (filter) => {
+			document.querySelectorAll("#exist-filters section[data-cube-name='" + cube + "'], #ul-metric-filter section[data-cube-name='" + cube + "']").forEach( (filter) => {
 				filter.hidden = false;
 				filter.setAttribute('data-searchable', true);
 				filter.querySelector('span[filter]').setAttribute('data-table-alias', alias);
