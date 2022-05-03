@@ -479,7 +479,7 @@ var StorageMetric = new MetricStorage();
 				filter.setAttribute('data-searchable', true);
 				filter.querySelector('span[filter]').setAttribute('data-table-alias', alias);
 			});
-			document.querySelectorAll("#exist-metrics section[data-table-name='" + table + "']").forEach( (metric) => {
+			document.querySelectorAll("#exist-metrics section[data-cube-name='" + cube + "']").forEach( (metric) => {
 				// imposto data-table-alias nella <ul> delle metriche già esistenti
 				metric.hidden = false;
 				metric.setAttribute('data-searchable', true);
