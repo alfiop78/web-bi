@@ -264,6 +264,7 @@ var StorageMetric = new MetricStorage();
 			spanColumnDialogFilter.setAttribute('data-table-name', value.FACT);
 			spanColumnDialogFilter.setAttribute('data-table-alias', value.alias);
 			spanColumnDialogFilter.setAttribute('data-schema', value.schema);
+			spanColumnDialogFilter.setAttribute('data-cube-name', key);
 			spanColumnDialogFilter.onclick = app.handlerSelectTable;
 			ulDialogFilter.appendChild(sectionDialogFilter);
 			if (value.columns.hasOwnProperty(value.alias)) {
@@ -803,12 +804,14 @@ var StorageMetric = new MetricStorage();
 			Query.schema = e.currentTarget.getAttribute('data-schema');
 			if (e.currentTarget.hasAttribute('data-hier-name')) {
 				Query.tableId = e.currentTarget.getAttribute('data-table-id');
+				// TODO: invece di impostare questi due attributi nel <section> della dialog potrei impostarli nella Classe Storage, con il metodo selected()
 				app.dialogFilter.querySelector('section').setAttribute('data-hier-name', e.currentTarget.getAttribute('data-hier-name'));
 				app.dialogFilter.querySelector('section').setAttribute('data-dimension-name', e.currentTarget.getAttribute('data-dimension-name'));
 			} else {
 				// selezione di una tabella della Fact, elimino l'attributo data-hier-name perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
 				app.dialogFilter.querySelector('section').removeAttribute('data-hier-name');
 				app.dialogFilter.querySelector('section').removeAttribute('data-dimension-name');
+				StorageCube.selected = e.currentTarget.getAttribute('data-cube-name');
 			}
 			// pulisco la <ul> dialog-filter-fields contenente la lista dei campi recuperata dal db, della selezione precedente
 			app.dialogFilter.querySelectorAll('#dialog-filter-fields > section').forEach( section => section.remove());
@@ -1167,20 +1170,26 @@ var StorageMetric = new MetricStorage();
 	// salvataggio del filtro impostato nella dialog-filter
 	app.btnFilterSave.onclick = (e) => {
 		console.log(Query.table);
-		// per i filtri creati sulla Fact, hier e dimension devono essere = null
+		// per i filtri creati sulla Fact, hier e dimension devono essere = null ma và salvato, nel filtro, il nome del cubo a cui accede
 		let hier, dimension;
+		const textarea = document.getElementById('filterSQLFormula');
+		let filterName = document.getElementById('inputFilterName');
+		let filterObject = {};
+		// TODO: controllo se il nome del filtro, per la stessa dimensione-hier, già esiste
+		Query.filterName = filterName.value;
+		// la creazione di un filtro su un livello dimensionale salva il filtro con, all'interno, le proprietà dimension e hier.
+		// Un filtro impostato la FACT avrà al suo interno il nome del cubo a cui è associato
 		if (app.dialogFilter.querySelector('section').hasAttribute('data-hier-name')) {
 			hier = app.dialogFilter.querySelector('section').getAttribute('data-hier-name');	
 			dimension = app.dialogFilter.querySelector('section').getAttribute('data-dimension-name');
+			filterObject = {'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, dimension, hier};
+		} else {
+			filterObject = {'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, cube : StorageCube.selected.name};
 		}
-		const table = app.dialogFilter.querySelector('section').getAttribute('data-table-name');
-		const textarea = document.getElementById('filterSQLFormula');
-		let filterName = document.getElementById('inputFilterName');
-		Query.filterName = filterName.value;
-		// TODO: controllo se il nome del filtro, per la stessa dimensione-hier, già esiste
-		StorageFilter.save = {'type': 'FILTER', 'name': filterName.value, /*'schema' : Query.schema,*/ 'table': Query.table, formula : textarea.value, dimension, hier};
-		// salvataggio di un filtro nel DB
-		app.saveFilterDB({'type': 'FILTER', 'name': filterName.value, /*'schema' : Query.schema,*/ 'table': Query.table, formula : textarea.value, dimension, hier});
+		StorageFilter.save = filterObject;
+		debugger;
+		// salvataggio nel DB
+		app.saveFilterDB(filterObject);
 		// reset del form
 		filterName.value = "";
 		filterName.focus();
