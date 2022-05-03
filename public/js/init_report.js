@@ -407,6 +407,7 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
+	// lista metriche esistenti
 	app.getMetrics = () => {
 		const ul = document.getElementById('exist-metrics');
 		console.log('metrics : ', StorageMetric.metrics);
@@ -419,10 +420,12 @@ var StorageMetric = new MetricStorage();
 
 			section.setAttribute('data-label', key);
 			section.setAttribute('data-table-name', value.formula[key].table);
+			section.setAttribute('data-cube-name', value.formula[key].cube);
 			section.setAttribute('data-element-search', 'search-exist-metrics');
 			spanTable.innerText = value.formula[key].table;
 			spanMetric.innerText = key;
 			// spanMetric.setAttribute('data-table-alias', value.alias);
+			spanMetric.setAttribute('data-cube-name', value.formula[key].cube);
 			spanMetric.setAttribute('data-table-name', value.formula[key].table);
 			// spanMetric.setAttribute('data-schema-name', value.schema);
 			spanMetric.setAttribute('data-label', key);
@@ -488,7 +491,6 @@ var StorageMetric = new MetricStorage();
 			document.querySelectorAll("#ul-available-metrics section[data-cube-name='" + cube + "']").forEach( (metric) => {
 				metric.hidden = false;
 				metric.setAttribute('data-searchable', true);
-				// metric.querySelector('span[filter]').setAttribute('data-table-alias', alias);
 			});
 		}
 	}
@@ -716,10 +718,6 @@ var StorageMetric = new MetricStorage();
 		if (e.currentTarget.hasAttribute('selected')) {
 			// aggiungo la metrica
 			// recupero dallo StorageMetric la metrica selezionata
-			console.log(StorageMetric.metric);
-			console.log(StorageMetric.metric.name);
-			console.log(StorageMetric.metric.formula);
-			Query.tableAlias = e.currentTarget.getAttribute('data-table-alias');
 			Query.metricName = StorageMetric.metric.name;
 			// se la metrica contiene un filtro bisogna aggiungerla a Query.filteredMetrics altrimenti a Query.metrics
 			if (StorageMetric.metric.formula[StorageMetric.metric.name].hasOwnProperty('filters')) {
@@ -728,7 +726,7 @@ var StorageMetric = new MetricStorage();
 				Query.metrics = StorageMetric.metric.formula[StorageMetric.metric.name];
 			}
 		} else {
-			// elimino la metrica
+			// TODO: elimino la metrica
 		}
 	}
 
@@ -828,6 +826,7 @@ var StorageMetric = new MetricStorage();
 			Query.field = e.currentTarget.getAttribute('data-label');
 			Query.table = e.currentTarget.getAttribute('data-table-name');
 			Query.tableAlias = e.currentTarget.getAttribute('data-table-alias');
+			StorageCube.selected = e.currentTarget.getAttribute('data-cube-name');
 		} else {
 			// TODO: 
 		}
@@ -1066,30 +1065,23 @@ var StorageMetric = new MetricStorage();
 	// dialog-metric-filter, recupero i filtri selezionati per inserirli nella metrica filtrata
 	app.btnMetricFilterDone.onclick = e => app.dialogMetricFilter.close();
 
-	// tasto 'fatto' nella dialogMetric, salvo la metrica impostata
+	// tasto salva nella dialogMetric, salvo la metrica impostata
 	app.btnMetricSave.onclick = (e) => {
 		const name = document.getElementById('metric-name').value;
 		const alias = document.getElementById('alias-metric').value;
 		const SQLFunction = document.querySelector('#ul-aggregation-functions > section[selected]').getAttribute('data-label');
 		const distinctOption = document.getElementById('checkbox-distinct').checked;
-		Query.table = document.querySelector('#ul-available-metrics > section[selected]').getAttribute('data-table-name');
-		Query.tableAlias = document.querySelector('#ul-available-metrics > section[selected]').getAttribute('data-table-alias');
+		console.log('Query.table : ', Query.table);
+		console.log('Query.tableAlias : ', Query.tableAlias);
+		console.log('cube selected : ', StorageCube.selected.name);
 		Query.metricName = name;
 		console.log(Query.metricName);
-		// console.log(Query.table);
 		// verifico se ci sono filtri da associare a questa metrica
 		let associatedFilters = {};
 		document.querySelectorAll('#ul-metric-filter > section span[filter][selected]').forEach((filterSelected) => {
-			// set il nome del filtro
 			StorageFilter.filter = filterSelected.getAttribute('data-label');
 			// recupero dallo storage il contenuto del filtro per inserirlo in un object (quest'ultimo verrà inserito nella metrica)
-			console.log(StorageFilter.filter.name);
-			let newFilter = StorageFilter.filter;
-			debugger;
-			newFilter['alias'] = Query.tableAlias;
-			associatedFilters[StorageFilter.filter.name] = newFilter;
-			debugger;
-			// associatedFilters[StorageFilter.filter.name] = StorageFilter.filter;
+			associatedFilters[StorageFilter.filter.name] = StorageFilter.filter;
 		});
 
 		let metricObj = {};
@@ -1097,19 +1089,15 @@ var StorageMetric = new MetricStorage();
 		if (Object.keys(associatedFilters).length > 0) {
 			// metrica filtrata
 			console.info('metrica filtrata');
-			debugger;
-			Query.filteredMetrics = { SQLFunction, 'table': Query.table, 'field': Query.field, name, 'distinct': distinctOption, alias, 'filters': associatedFilters };
+			Query.filteredMetrics = { SQLFunction, 'table': Query.table, 'tableAlias' : Query.tableAlias, 'field': Query.field, name, 'distinct': distinctOption, alias, cube : StorageCube.selected.name, 'filters': associatedFilters };
 
 			console.log(Query.filteredMetrics);
 			metricObj = { 'type': 'METRIC', name, 'formula': Query.filteredMetrics };
 		} else {
 			// metrica
 			console.info('metrica non filtrata');
-			debugger;
-			Query.metrics = { SQLFunction, 'table': Query.table, 'field': Query.field, name, 'distinct': distinctOption, alias };
-			// all'interno di 'formula' devo vedere se ci posso mettere l'object appena salvato in Query.metrics
+			Query.metrics = { SQLFunction, 'table': Query.table, 'tableAlias' : Query.tableAlias, 'field': Query.field, name, 'distinct': distinctOption, alias, cube : StorageCube.selected.name };
 			metricObj = { 'type': 'METRIC', name, 'formula': Query.metrics };
-			//console.log(metricObj);
 		}
 
 		// salvo la nuova metrica nello storage
@@ -1127,12 +1115,14 @@ var StorageMetric = new MetricStorage();
 		section.removeAttribute('hidden');
 		section.setAttribute('data-label', Query.metricName);
 		section.setAttribute('data-table-name', Query.table);
+		section.setAttribute('data-cube-name', StorageCube.selected.name);
 		section.setAttribute('data-element-search', 'search-exist-metrics');
 		spanTable.innerText = Query.table;
 		spanMetric.innerText = Query.metricName;
 		spanMetric.setAttribute('data-label', Query.metricName);			
 		spanMetric.setAttribute('data-table-name', Query.table);
 		spanMetric.setAttribute('data-table-alias', Query.tableAlias);
+		spanMetric.setAttribute('data-cube-name', StorageCube.selected.name);
 		spanMetric.onclick = app.handlerMetricSelected;
 		ul.appendChild(section);
 
@@ -1178,13 +1168,13 @@ var StorageMetric = new MetricStorage();
 		// TODO: controllo se il nome del filtro, per la stessa dimensione-hier, già esiste
 		Query.filterName = filterName.value;
 		// la creazione di un filtro su un livello dimensionale salva il filtro con, all'interno, le proprietà dimension e hier.
-		// Un filtro impostato la FACT avrà al suo interno il nome del cubo a cui è associato
+		// Un filtro impostato la FACT avrà al suo interno il nome del cubo a cui è associato e l'alias della FACT
 		if (app.dialogFilter.querySelector('section').hasAttribute('data-hier-name')) {
 			hier = app.dialogFilter.querySelector('section').getAttribute('data-hier-name');	
 			dimension = app.dialogFilter.querySelector('section').getAttribute('data-dimension-name');
 			filterObject = {'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, dimension, hier};
 		} else {
-			filterObject = {'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, cube : StorageCube.selected.name};
+			filterObject = {'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, cube : StorageCube.selected.name, alias : StorageCube.selected.alias};
 		}
 		StorageFilter.save = filterObject;
 		debugger;
