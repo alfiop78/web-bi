@@ -141,22 +141,30 @@ class Application {
 			let sectionElement = Array.from(document.querySelectorAll("section[data-element-search='" + searchAttr + "'][data-searchable='true']"));
 
 			sectionElement.forEach( (sectionItem) => {
+				// livello 2
 				let spanElement = Array.from(sectionItem.querySelectorAll("span[data-element-search='" + searchAttr + "'][data-searchable='true']"));
 				// ogni section contiene una sola gerarchia
+				// livello 1
 				let spanHierarchyElement = sectionItem.querySelector('span[data-hier-name]');
+				// cerco prima nel livello più basso (2)
 				spanElement.forEach( (item) => {
 					if ( item.getAttribute('data-label').toLowerCase().indexOf(e.target.value.toLowerCase()) > -1 ) {
+						// elemento trovato (livello 2), gli applico il <mark>
 						this.markSearch(item, 'data-label', e.target.value);
-
+						// verifico se, con lo stesso searchText, trovo anche qualcosa nel livello 1
 						if ( spanHierarchyElement.getAttribute('data-hier-name').toLowerCase().indexOf(e.target.value.toLowerCase()) > -1 ) {
+							// trovato, applico il <mark>
 							this.markSearch(spanHierarchyElement, 'data-hier-name', e.target.value);
 						} else {
+							// non trovato, elimino il <mark> per reinserire il testo originale. Il <mark> và eliminato altrimenti childNodes[0] restituisce solo il primo node, il tag <mark>, se presente sarà il secondo node...
 							// rimuovo la selezione con il mark perchè, in questo else, non viene trovato nessun elemento tra i nomi delle gerarchie
 							spanHierarchyElement.innerText = spanHierarchyElement.getAttribute('data-hier-name');
 						}
 					} else {
 						// rimuovo la selezione con il mark perchè, in questo else, non viene trovato nessun elemento
+						// non trovato, elimino il <mark> per reinserire il testo originale. Il <mark> và eliminato altrimenti childNodes[0] restituisce solo il primo node, il tag <mark>, se presente sarà il secondo node...
 						item.innerText = item.getAttribute('data-label');
+						// verifico se, con lo stesso searchText, trovo anche qualcosa nel livello 1
 						if ( spanHierarchyElement.getAttribute('data-hier-name').toLowerCase().indexOf(e.target.value.toLowerCase()) > -1 ) {
 							this.markSearch(spanHierarchyElement, 'data-hier-name', e.target.value);
 						} else {
@@ -164,27 +172,25 @@ class Application {
 							spanHierarchyElement.innerText = spanHierarchyElement.getAttribute('data-hier-name');
 						}
 					}
+					// nascondo/visualizzo l'elemento trovato
 					item.hidden = (item.getAttribute('data-label').toLowerCase().indexOf(e.target.value.toLowerCase()) === -1) ? true : false;
 				});
 				// console.log('section : ', sectionItem);
 				// quanti elementi sono stati trovati in questa section
 				const foundedElement = sectionItem.querySelectorAll("span[data-element-search='" + searchAttr + "'][data-searchable='true']:not([hidden])").length;
-				// prima di nascondere la section (in caso nessun elemento è stato trovato) verifico se il testo da cercare viene trovato nell'elemento radice della lista nidificata
+				// prima di nascondere la section, livello 0, (in caso nessun elemento è stato trovato) verifico se il searchText viene trovato nell'elemento radice della lista nidificata
 				if (sectionItem.getAttribute('data-label').toLowerCase().indexOf(e.target.value.toLowerCase()) === -1) {
-					// non trovato, nascondo la section
+					// non trovato, nascondo tutta la section
 					// se nessun elemento trovato nascondo il livello radice della lista nidificata
 					sectionItem.hidden = (foundedElement === 0) ? true : false;
 				} else {
 					sectionItem.hidden = false;
-					// ho trovato nel livello root, a questo punto devo mostrare il suo contenuto
+					// ho trovato nel livello 0, a questo punto devo mostrare TUTTO il suo contenuto
 					sectionItem.querySelectorAll("span[hidden]").forEach( span => span.hidden = false);
 				}
 			});
 		} else {
 			// ricerca classica
-			/*(e.target.value.length > 0) ?
-				e.target.parentElement.querySelector('label').classList.add('has-content') :
-				e.target.parentElement.querySelector('label').classList.remove('has-content');*/
 			// la input ha un attr "data-element-search" che indica su quali elementi deve cercare, gli elementi su cui cercare avranno un attr "data-search" con lo stesso valore di questo attributo
 			// console.log(e.target.value);
 			// const searchAttr = e.target.getAttribute('data-element-search');
