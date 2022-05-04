@@ -184,9 +184,11 @@ var StorageMetric = new MetricStorage();
 					// console.log(table.table);
 					const contentSub = app.tmplList.content.cloneNode(true);
 					const spanSub = contentSub.querySelector('span[generic]');
+					spanSub.setAttribute('data-searchable', true);
 					spanSub.setAttribute('data-label', table.table);
 					spanSub.setAttribute('data-table-alias', table.alias);
 					spanSub.setAttribute('data-table-id', tableId);
+					spanSub.setAttribute('data-element-search','search-hierarchy');
 					spanSub.innerText = table.table;
 					sublist.appendChild(spanSub);
 				}

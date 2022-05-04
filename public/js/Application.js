@@ -108,21 +108,78 @@ class Application {
 		});
 	}
 
-	genericSearch(e) {
-		// verifico che la input ha l'attr type='search', non eseguo la ricerca se il campo non ha l'attr type='search'
-		if ( !(e.target.hasAttribute('type') && e.target.getAttribute('type') === 'search') ) return;
-		
+	initInput(e) {
 		(e.target.value.length > 0) ?
 			e.target.parentElement.querySelector('label').classList.add('has-content') :
 			e.target.parentElement.querySelector('label').classList.remove('has-content');
-		// la input ha un attr "data-element-search" che indica su quali elementi deve cercare, gli elementi su cui cercare avranno un attr "data-search" con lo stesso valore di questo attributo
-		// console.log(e.target.value);
+	}
+
+	genericSearch(e) {
+		// verifico che la input ha l'attr type='search', non eseguo la ricerca se il campo non ha l'attr type='search'
+		if ( !(e.target.hasAttribute('type') && e.target.getAttribute('type') === 'search') ) return;
 		const searchAttr = e.target.getAttribute('data-element-search');
-		const listElement = Array.from(document.querySelectorAll("section[data-element-search='" + searchAttr + "'][data-searchable='true']"));
-		// console.log(listElement);
-		listElement.forEach( (item) => {
-			item.hidden = (item.getAttribute('data-label').indexOf(e.target.value) === -1 && item.getAttribute('data-label').toLowerCase().indexOf(e.target.value) === -1) ? true : false;
-		});
+		if (e.target.hasAttribute('data-type-search')) {
+			// ricerca su elementi nidificati
+			let sectionElement = Array.from(document.querySelectorAll("section[data-element-search='" + searchAttr + "'][data-searchable='true']"));
+			// console.log(sectionElement);
+			// sectionElement.forEach( (item) => {
+			// 	console.log(item);
+			// 	console.log(e.target.value);
+			// 	item.hidden = (item.getAttribute('data-label').indexOf(e.target.value) === -1 && item.getAttribute('data-label').toLowerCase().indexOf(e.target.value) === -1) ? true : false;
+			// });
+			// console.log(e.target.value);
+
+			sectionElement.forEach( (sectionItem) => {
+				let spanElement = Array.from(sectionItem.querySelectorAll("span[data-element-search='" + searchAttr + "'][data-searchable='true']"));
+				spanElement.forEach( (item) => {
+					if ( item.getAttribute('data-label').toLowerCase().indexOf(e.target.value.toLowerCase()) > -1 ) {
+						console.log(item.getAttribute('data-label'));
+						let textNode = item.childNodes[0];
+						// console.log('textNode ', textNode);
+						// console.log('textNode.length ', textNode.length);
+						// debugger;
+						let startOffset = item.getAttribute('data-label').toLowerCase().indexOf(e.target.value.toLowerCase());
+						let endOffset = startOffset+e.target.value.length;
+						const range = document.createRange();
+						console.log('start : ', startOffset);
+						console.log('end : ', endOffset);
+						range.setStart(textNode, startOffset);
+						range.setEnd(textNode, endOffset);
+						const mark = document.createElement('mark');
+						range.surroundContents(mark);
+						// range.deleteContents();
+					}
+					item.hidden = (item.getAttribute('data-label').toLowerCase().indexOf(e.target.value.toLowerCase()) === -1) ? true : false;
+					// item.hidden = (item.getAttribute('data-label').indexOf(e.target.value) === -1 && item.getAttribute('data-label').toLowerCase().indexOf(e.target.value) === -1) ? true : false;
+				});
+				// console.log('section : ', sectionItem);
+				// quanti elementi sono stati trovati in questa section
+				const foundedElement = sectionItem.querySelectorAll("span[data-element-search='" + searchAttr + "'][data-searchable='true']:not([hidden])").length;
+				// prima di nascondere la section (in caso nessun elemento è stato trovato) verifico se il testo da cercare viene trovato nell'elemento radice della lista nidificata
+				if (sectionItem.getAttribute('data-label').indexOf(e.target.value) === -1 && sectionItem.getAttribute('data-label').toLowerCase().indexOf(e.target.value) === -1) {
+					// non trovato, nascondo la section
+					// se nessun elemento trovato nascondo il livello radice della lista nidificata
+					sectionItem.hidden = (foundedElement === 0) ? true : false;
+				} else {
+					sectionItem.hidden = false;
+					// ho trovato nel livello root, a questo punto devo mostrare il suo contenuto
+					sectionItem.querySelectorAll("span[hidden]").forEach( span => span.hidden = false);
+				}
+			});
+		} else {
+			// ricerca classica
+			/*(e.target.value.length > 0) ?
+				e.target.parentElement.querySelector('label').classList.add('has-content') :
+				e.target.parentElement.querySelector('label').classList.remove('has-content');*/
+			// la input ha un attr "data-element-search" che indica su quali elementi deve cercare, gli elementi su cui cercare avranno un attr "data-search" con lo stesso valore di questo attributo
+			// console.log(e.target.value);
+			// const searchAttr = e.target.getAttribute('data-element-search');
+			let listElement = Array.from(document.querySelectorAll("section[data-element-search='" + searchAttr + "'][data-searchable='true']"));
+			// console.log(listElement);
+			listElement.forEach( (item) => {
+				item.hidden = (item.getAttribute('data-label').indexOf(e.target.value) === -1 && item.getAttribute('data-label').toLowerCase().indexOf(e.target.value) === -1) ? true : false;
+			});
+		}
 	}
 
 	// handlerConsole() {

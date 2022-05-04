@@ -100,7 +100,8 @@ ul > section{margin: 2px 6px; font-size: .8rem; border: none;}
 ul > section > .element:not([hidden]){display: flex;justify-content: space-between;align-items: center;width: 100%;}
 ul > section > .element > .sublist{display: flex;flex-direction: column; width: 100%;}
 ul > section > .sublist{display: flex;flex-direction: column; width: 100%;}
-ul > section > .sublist > span[data-table-id] {padding: 6px 4px 6px 16px; width: 100%; display: flex; justify-content: space-between; align-items: center;}
+/*ul > section > .sublist > span[data-table-id] {padding: 6px 4px 6px 16px; width: 100%; display: flex; justify-content: space-between; align-items: center;}*/
+ul > section > .sublist > span[data-table-id] {padding: 6px 4px 6px 16px; width: 100%;}
 .sublist-element > .icons{display: flex;}
 .sublist-item {text-overflow: ellipsis;width: 100%;overflow-x: clip;}
 .sublist *[generic]{padding: 6px;}
@@ -254,3 +255,5 @@ ul > section[data-sublist-draggable]:hover{cursor: grab; border-left: solid thic
 .abs-window > div > p{font-size: .95rem; padding: 8px; margin: 0px}
 .abs-window > div > small{font-size: .8rem;}
 /*absolute-window*/
+
+mark{background-color: indianred; color: white}

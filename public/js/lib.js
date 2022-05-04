@@ -3,6 +3,8 @@ window.onload = function() {
 	console.log('onload');
 	// TODO: input search, non tutte le input
 	document.addEventListener('input', App.genericSearch);
+	// document.addEventListener('input', App.handlerSearch);
+	document.addEventListener('input', App.initInput); // gestione della label con class="has-content"
 
 	// se le input non hanno contenuto non evidenzio le label come :invalid, aggiungendo una class=has-content sulle label
 	// var inputs = document.querySelectorAll("input:not([type='checkbox']):not([type='radio'])");

@@ -382,7 +382,7 @@
 													<div id="parent-list-hierarchies">
 														<h5>gerarchie</h5>
 														<div class="md-field">
-															<input type="search" data-element-search="search-hierarchy" id="search-hierarchy" value autocomplete="off" />
+															<input type="search" data-element-search="search-hierarchy" id="search-hierarchy" value autocomplete="off" data-type-search="nested"/>
 															<label for="search-hierarchy" class="">Ricerca</label>
 														</div>
 														<ul id="list-fact-tables" class="fact-table"></ul>
