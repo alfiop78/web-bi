@@ -115,18 +115,24 @@ class Application {
 	}
 
 	markSearch(item, attr, searchText) {
-		if (item.querySelector('mark')) item.innerText = item.getAttribute(attr);
+		if (item.querySelector('mark')) {
+			item.querySelector('mark').remove();
+			item.innerText = item.getAttribute(attr);
+		}
 		let textNode = item.childNodes[0];
 		let startOffset = item.getAttribute(attr).toLowerCase().indexOf(searchText.toLowerCase());
 		let endOffset = startOffset+searchText.length;
 		const range = document.createRange();
 		range.setStart(textNode, startOffset);
 		range.setEnd(textNode, endOffset);
-		const mark = document.createElement('mark');
-		range.surroundContents(mark);
+		if (startOffset !== 0 && endOffset !== 0) {
+			const mark = document.createElement('mark');
+			range.surroundContents(mark);
+		}
 	}
 
 	genericSearch(e) {
+		console.clear();
 		// verifico che la input ha l'attr type='search', non eseguo la ricerca se il campo non ha l'attr type='search'
 		if ( !(e.target.hasAttribute('type') && e.target.getAttribute('type') === 'search') ) return;
 		const searchAttr = e.target.getAttribute('data-element-search');
@@ -140,38 +146,19 @@ class Application {
 				let spanHierarchyElement = sectionItem.querySelector('span[data-hier-name]');
 				spanElement.forEach( (item) => {
 					if ( item.getAttribute('data-label').toLowerCase().indexOf(e.target.value.toLowerCase()) > -1 ) {
-						console.log('this : ', this);
 						this.markSearch(item, 'data-label', e.target.value);
 
 						if ( spanHierarchyElement.getAttribute('data-hier-name').toLowerCase().indexOf(e.target.value.toLowerCase()) > -1 ) {
 							this.markSearch(spanHierarchyElement, 'data-hier-name', e.target.value);
-							/*if (spanHierarchyElement.querySelector('mark')) spanHierarchyElement.innerText = spanHierarchyElement.getAttribute('data-hier-name');
-							let textNodeHier = spanHierarchyElement.childNodes[0];
-							let startOffsetHier = spanHierarchyElement.getAttribute('data-hier-name').toLowerCase().indexOf(e.target.value.toLowerCase());
-							let endOffsetHier = startOffsetHier+e.target.value.length;
-							const rangeHier = document.createRange();
-							rangeHier.setStart(textNodeHier, startOffsetHier);
-							rangeHier.setEnd(textNodeHier, endOffsetHier);
-							const markHier = document.createElement('mark');
-							rangeHier.surroundContents(markHier);*/
 						} else {
-							// rimuovo la selezione, con il mark perchè, in questo else, non viene trovato nessun elemento
+							// rimuovo la selezione con il mark perchè, in questo else, non viene trovato nessun elemento tra i nomi delle gerarchie
 							spanHierarchyElement.innerText = spanHierarchyElement.getAttribute('data-hier-name');
 						}
 					} else {
-						// rimuovo la selezione, con il mark perchè, in questo else, non viene trovato nessun elemento
+						// rimuovo la selezione con il mark perchè, in questo else, non viene trovato nessun elemento
 						item.innerText = item.getAttribute('data-label');
 						if ( spanHierarchyElement.getAttribute('data-hier-name').toLowerCase().indexOf(e.target.value.toLowerCase()) > -1 ) {
 							this.markSearch(spanHierarchyElement, 'data-hier-name', e.target.value);
-							/*if (spanHierarchyElement.querySelector('mark')) spanHierarchyElement.innerText = spanHierarchyElement.getAttribute('data-hier-name');
-							let textNodeHier = spanHierarchyElement.childNodes[0];
-							let startOffsetHier = spanHierarchyElement.getAttribute('data-hier-name').toLowerCase().indexOf(e.target.value.toLowerCase());
-							let endOffsetHier = startOffsetHier+e.target.value.length;
-							const rangeHier = document.createRange();
-							rangeHier.setStart(textNodeHier, startOffsetHier);
-							rangeHier.setEnd(textNodeHier, endOffsetHier);
-							const markHier = document.createElement('mark');
-							rangeHier.surroundContents(markHier);*/
 						} else {
 							// rimuovo la selezione, con il mark perchè, in questo else, non viene trovato nessun elemento
 							spanHierarchyElement.innerText = spanHierarchyElement.getAttribute('data-hier-name');

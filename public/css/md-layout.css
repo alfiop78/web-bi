@@ -256,4 +256,4 @@ ul > section[data-sublist-draggable]:hover{cursor: grab; border-left: solid thic
 .abs-window > div > small{font-size: .8rem;}
 /*absolute-window*/
 
-mark{background-color: indianred; color: white}
+mark{background-color: sienna; color: white; border-radius: 2px; padding: 2px;}
