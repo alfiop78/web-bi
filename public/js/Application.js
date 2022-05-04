@@ -116,6 +116,8 @@ class Application {
 
 	markSearch(item, attr, searchText) {
 		if (item.querySelector('mark')) {
+			// se è presente un <mark> lo rimuovo altrimenti il childNodes[0] restituisce solo il primo nodo.
+			// es. : Azienda verrà così suddiviso sulla ricerca "z". Node 1 : "A", Node 2 : <mark>z</mark>, Node 3 "ienda"
 			item.querySelector('mark').remove();
 			item.innerText = item.getAttribute(attr);
 		}
@@ -125,6 +127,7 @@ class Application {
 		const range = document.createRange();
 		range.setStart(textNode, startOffset);
 		range.setEnd(textNode, endOffset);
+		// se trovo qualcosa applico il <mark>
 		if (startOffset !== 0 && endOffset !== 0) {
 			const mark = document.createElement('mark');
 			range.surroundContents(mark);
