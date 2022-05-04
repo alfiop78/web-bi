@@ -2,7 +2,7 @@ window.onload = function() {
 	var App = new Application();
 	console.log('onload');
 	// TODO: input search, non tutte le input
-	document.addEventListener('input', App.genericSearch);
+	document.addEventListener('input', App.genericSearch.bind(this.App));
 	// document.addEventListener('input', App.handlerSearch);
 	document.addEventListener('input', App.initInput); // gestione della label con class="has-content"
 

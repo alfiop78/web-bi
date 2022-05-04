@@ -114,6 +114,18 @@ class Application {
 			e.target.parentElement.querySelector('label').classList.remove('has-content');
 	}
 
+	markSearch(item, attr, searchText) {
+		if (item.querySelector('mark')) item.innerText = item.getAttribute(attr);
+		let textNode = item.childNodes[0];
+		let startOffset = item.getAttribute(attr).toLowerCase().indexOf(searchText.toLowerCase());
+		let endOffset = startOffset+searchText.length;
+		const range = document.createRange();
+		range.setStart(textNode, startOffset);
+		range.setEnd(textNode, endOffset);
+		const mark = document.createElement('mark');
+		range.surroundContents(mark);
+	}
+
 	genericSearch(e) {
 		// verifico che la input ha l'attr type='search', non eseguo la ricerca se il campo non ha l'attr type='search'
 		if ( !(e.target.hasAttribute('type') && e.target.getAttribute('type') === 'search') ) return;
@@ -121,42 +133,57 @@ class Application {
 		if (e.target.hasAttribute('data-type-search')) {
 			// ricerca su elementi nidificati
 			let sectionElement = Array.from(document.querySelectorAll("section[data-element-search='" + searchAttr + "'][data-searchable='true']"));
-			// console.log(sectionElement);
-			// sectionElement.forEach( (item) => {
-			// 	console.log(item);
-			// 	console.log(e.target.value);
-			// 	item.hidden = (item.getAttribute('data-label').indexOf(e.target.value) === -1 && item.getAttribute('data-label').toLowerCase().indexOf(e.target.value) === -1) ? true : false;
-			// });
-			// console.log(e.target.value);
 
 			sectionElement.forEach( (sectionItem) => {
 				let spanElement = Array.from(sectionItem.querySelectorAll("span[data-element-search='" + searchAttr + "'][data-searchable='true']"));
+				// ogni section contiene una sola gerarchia
+				let spanHierarchyElement = sectionItem.querySelector('span[data-hier-name]');
 				spanElement.forEach( (item) => {
 					if ( item.getAttribute('data-label').toLowerCase().indexOf(e.target.value.toLowerCase()) > -1 ) {
-						console.log(item.getAttribute('data-label'));
-						let textNode = item.childNodes[0];
-						// console.log('textNode ', textNode);
-						// console.log('textNode.length ', textNode.length);
-						// debugger;
-						let startOffset = item.getAttribute('data-label').toLowerCase().indexOf(e.target.value.toLowerCase());
-						let endOffset = startOffset+e.target.value.length;
-						const range = document.createRange();
-						console.log('start : ', startOffset);
-						console.log('end : ', endOffset);
-						range.setStart(textNode, startOffset);
-						range.setEnd(textNode, endOffset);
-						const mark = document.createElement('mark');
-						range.surroundContents(mark);
-						// range.deleteContents();
+						console.log('this : ', this);
+						this.markSearch(item, 'data-label', e.target.value);
+
+						if ( spanHierarchyElement.getAttribute('data-hier-name').toLowerCase().indexOf(e.target.value.toLowerCase()) > -1 ) {
+							this.markSearch(spanHierarchyElement, 'data-hier-name', e.target.value);
+							/*if (spanHierarchyElement.querySelector('mark')) spanHierarchyElement.innerText = spanHierarchyElement.getAttribute('data-hier-name');
+							let textNodeHier = spanHierarchyElement.childNodes[0];
+							let startOffsetHier = spanHierarchyElement.getAttribute('data-hier-name').toLowerCase().indexOf(e.target.value.toLowerCase());
+							let endOffsetHier = startOffsetHier+e.target.value.length;
+							const rangeHier = document.createRange();
+							rangeHier.setStart(textNodeHier, startOffsetHier);
+							rangeHier.setEnd(textNodeHier, endOffsetHier);
+							const markHier = document.createElement('mark');
+							rangeHier.surroundContents(markHier);*/
+						} else {
+							// rimuovo la selezione, con il mark perchè, in questo else, non viene trovato nessun elemento
+							spanHierarchyElement.innerText = spanHierarchyElement.getAttribute('data-hier-name');
+						}
+					} else {
+						// rimuovo la selezione, con il mark perchè, in questo else, non viene trovato nessun elemento
+						item.innerText = item.getAttribute('data-label');
+						if ( spanHierarchyElement.getAttribute('data-hier-name').toLowerCase().indexOf(e.target.value.toLowerCase()) > -1 ) {
+							this.markSearch(spanHierarchyElement, 'data-hier-name', e.target.value);
+							/*if (spanHierarchyElement.querySelector('mark')) spanHierarchyElement.innerText = spanHierarchyElement.getAttribute('data-hier-name');
+							let textNodeHier = spanHierarchyElement.childNodes[0];
+							let startOffsetHier = spanHierarchyElement.getAttribute('data-hier-name').toLowerCase().indexOf(e.target.value.toLowerCase());
+							let endOffsetHier = startOffsetHier+e.target.value.length;
+							const rangeHier = document.createRange();
+							rangeHier.setStart(textNodeHier, startOffsetHier);
+							rangeHier.setEnd(textNodeHier, endOffsetHier);
+							const markHier = document.createElement('mark');
+							rangeHier.surroundContents(markHier);*/
+						} else {
+							// rimuovo la selezione, con il mark perchè, in questo else, non viene trovato nessun elemento
+							spanHierarchyElement.innerText = spanHierarchyElement.getAttribute('data-hier-name');
+						}
 					}
 					item.hidden = (item.getAttribute('data-label').toLowerCase().indexOf(e.target.value.toLowerCase()) === -1) ? true : false;
-					// item.hidden = (item.getAttribute('data-label').indexOf(e.target.value) === -1 && item.getAttribute('data-label').toLowerCase().indexOf(e.target.value) === -1) ? true : false;
 				});
 				// console.log('section : ', sectionItem);
 				// quanti elementi sono stati trovati in questa section
 				const foundedElement = sectionItem.querySelectorAll("span[data-element-search='" + searchAttr + "'][data-searchable='true']:not([hidden])").length;
 				// prima di nascondere la section (in caso nessun elemento è stato trovato) verifico se il testo da cercare viene trovato nell'elemento radice della lista nidificata
-				if (sectionItem.getAttribute('data-label').indexOf(e.target.value) === -1 && sectionItem.getAttribute('data-label').toLowerCase().indexOf(e.target.value) === -1) {
+				if (sectionItem.getAttribute('data-label').toLowerCase().indexOf(e.target.value.toLowerCase()) === -1) {
 					// non trovato, nascondo la section
 					// se nessun elemento trovato nascondo il livello radice della lista nidificata
 					sectionItem.hidden = (foundedElement === 0) ? true : false;
