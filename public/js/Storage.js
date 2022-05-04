@@ -490,7 +490,7 @@ class FilterStorage extends Storages {
 
 	get filters() {return this.#filters;} // tutti i filtri
 
-	tableFilters(table) {
+	getFiltersByTable(table) {
 		// console.clear();
 		// recupero tutti i filtri appartenenti alla table e restituisco un array
 		// console.log(table);
@@ -501,6 +501,16 @@ class FilterStorage extends Storages {
 			}
 		}
 		return this._tableFilters;
+	}
+
+	getFiltersByDimension(dim, hier, table) {
+		this._tableFilters = [];
+		for ( const [key, value] of Object.entries(this.#filters)) {
+			if (value.dimension === dim && value.hier === hier && value.table === table) {
+				this._tableFilters.push(value);
+			}
+		}
+		return this._tableFilters;	
 	}
 }
 
