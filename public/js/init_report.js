@@ -108,7 +108,6 @@ var StorageMetric = new MetricStorage();
 		console.log(e.currentTarget);
 		e.currentTarget.toggleAttribute('selected');
 		const hier = e.currentTarget.getAttribute('data-hier-name');
-		const hierRef = e.currentTarget; // questo mi serve per ciclare le tabella al suo interno, il ciclo sulle tabelle va a visualizzare quali filtri appartengono alle tabelle di questa gerarchia
 		const dimension = e.currentTarget.getAttribute('data-dimension-name');
 		if (e.currentTarget.hasAttribute('selected')) {
 			// visualizzo, in ul list-columns (dialogTable), solo le tabelle delle gerarchie selezionate
@@ -116,31 +115,25 @@ var StorageMetric = new MetricStorage();
 				hier.hidden = false;
 				hier.setAttribute('data-searchable', true);
 			});
-			// visualizzo, in exist-filters, solo i filtri relativi alla dimensione-hier-table presenti nella gerarchia selezionata
-			// recupero le tabelle della gerarchia selezionata
-			// per ogni tabella all'interno della gerarchia vado a recuperare i filtri appartenenti a quella tabella
-			hierRef.querySelectorAll('span[generic][data-table-id]').forEach( (table) => {
-				// recupero i filtri appartenenti alla tabella in ciclo
-				const filters = StorageFilter.getFiltersByTable(table.getAttribute('data-label'));
-				const alias = table.getAttribute('data-table-alias');
-				const tableId = table.getAttribute('data-table-id');
-				// visualizzo i filtri per questa tabella in #exist-filters
-				filters.forEach( (filter) => {
-					const filterRef = document.querySelector("#exist-filters > section[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']");
-					const filterRefMetricFilter = document.querySelector("#ul-metric-filter > section[data-label='" + filter.name + "'][data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']");
-					if (filterRef) {
-						filterRef.removeAttribute('hidden');
-						filterRef.setAttribute('data-searchable', true);
-						// filterRef.querySelector('span[table]').setAttribute('data-table-alias', alias);
-						// filterRef.querySelector('span[table]').setAttribute('data-table-id', tableId);
-					}
-					if (filterRefMetricFilter) {
-						filterRefMetricFilter.removeAttribute('hidden');
-						filterRefMetricFilter.setAttribute('data-searchable', true);
-						// filterRefMetricFilter.querySelector('span[generic]').setAttribute('data-table-alias', alias);
-						// filterRefMetricFilter.querySelector('span[generic]').setAttribute('data-table-id', tableId);
-					}
-				});
+			// visualizzo, in exist-filters, solo i filtri relativi alla dimensione-hier selezionata
+			const filters = StorageFilter.getFiltersByHierarchy(dimension, hier);
+			// const alias = table.getAttribute('data-table-alias');
+			// const tableId = table.getAttribute('data-table-id');
+			filters.forEach( (filter) => {
+				const filterRef = document.querySelector("#exist-filters > section[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']");
+				if (filterRef) {
+					filterRef.removeAttribute('hidden');
+					filterRef.setAttribute('data-searchable', true);
+					// filterRef.querySelector('span[table]').setAttribute('data-table-alias', alias);
+					// filterRef.querySelector('span[table]').setAttribute('data-table-id', tableId);
+				}
+				// TODO: da completare anche per i filtri nella dialog metric filter
+				/*if (filterRefMetricFilter) {
+					filterRefMetricFilter.removeAttribute('hidden');
+					filterRefMetricFilter.setAttribute('data-searchable', true);
+					// filterRefMetricFilter.querySelector('span[generic]').setAttribute('data-table-alias', alias);
+					// filterRefMetricFilter.querySelector('span[generic]').setAttribute('data-table-id', tableId);
+				}*/
 			});
 			// visualizzo, in list-tables (dialogFilter) solo le tabelle della gerarchia selezionata
 			document.querySelectorAll("#list-tables section[data-hier-name='" + hier + "']").forEach( (hier) => {
@@ -149,6 +142,7 @@ var StorageMetric = new MetricStorage();
 			});
 		} else {
 			// deselezione della gerarchia, nascondo le tabelle della gerarchia selezionata
+			// TODO: da completare
 			document.querySelectorAll("#list-columns section[data-hier-name='" + hier + "']").forEach( (hier) => {
 				hier.hidden = true;
 				hier.removeAttribute('data-searchable');
@@ -298,11 +292,10 @@ var StorageMetric = new MetricStorage();
 	// popolo la lista dei filtri esistenti
 	app.getFilters = () => {
 		const ul = document.getElementById('exist-filters');
-		console.log('filters : ', StorageFilter.filters);
+		// console.log('filters : ', StorageFilter.filters);
 		for (const [dimName, dimValue] of (Object.entries(StorageDimension.dimensions))) {
 			// per ogni dimensione recupero i filtri a questa appartenenti
-			for (const [hierName, hier] of (Object.entries(dimValue.hierarchies)) ) {
-				
+			for (const [hierName, hier] of (Object.entries(dimValue.hierarchies)) ) {				
 				// lista tabelle presenti per ogni gerarchia
 				for (const [tableId, table] of Object.entries(hier.order)) {
 					const filters = StorageFilter.getFiltersByDimension(dimName, hierName, table.table);
@@ -337,35 +330,34 @@ var StorageMetric = new MetricStorage();
 				}
 			}
 		}
-		/*for (const [key, value] of Object.entries(StorageFilter.filters)) {
-			const content = app.tmplList.content.cloneNode(true);
-			const section = content.querySelector('section[data-sublist-table-filters]');
-			const subList = section.querySelector('.sublist');
-			const table = subList.querySelector('span[table]');
-			const filter = subList.querySelector('span[filter]');
-			// debugger;
-			section.setAttribute('data-label', key);
-			section.setAttribute('data-table-name', value.table);
-			if (value.hasOwnProperty('dimension')) {
-				section.setAttribute('data-dimension-name', value.dimension);
-				section.setAttribute('data-hier-name', value.hier);
-			} else {
-				section.setAttribute('data-cube-name', value.cube);
-			}
+	}
+
+	app.getFiltersFact = () => {
+		const ul = document.getElementById('exist-filters');
+		for (const [cubeName, cubeValue] of Object.entries(StorageCube.cubes) ) {
+			const contentElement = app.tmplList.content.cloneNode(true);
+			const section = contentElement.querySelector('section[data-sublist-table-filters]');
+			const sublist = section.querySelector('.sublist');
+			const span = sublist.querySelector('span[table]');
 			section.setAttribute('data-element-search', 'search-exist-filters');
-			table.innerText = value.table;
-			filter.innerText = key;
-			filter.setAttribute('data-label', key);
-			if (value.hasOwnProperty('dimension')) {
-				filter.setAttribute('data-dimension-name', value.dimension);
-				filter.setAttribute('data-hier-name', value.hier);
-			} else {
-				filter.setAttribute('data-cube-name', value.cube);
-			}
-			filter.setAttribute('data-table-name', value.table);
-			filter.onclick = app.handlerFilterSelected;
+			section.setAttribute('data-table-name', cubeValue.FACT);
+			span.innerText = cubeValue.FACT;
+			StorageFilter.getFiltersByCube(cubeName).forEach( (filter) => {
+				console.log('filter : ', filter);
+				section.setAttribute('data-label', cubeValue.FACT);
+				section.setAttribute('data-cube-name', cubeName);
+				const contentSub = app.tmplSublists.content.cloneNode(true);
+				const spanSub = contentSub.querySelector('span[filter]');
+				spanSub.setAttribute('data-label', filter.name);
+				spanSub.setAttribute('data-element-search','search-exist-filters');
+				spanSub.setAttribute('data-table-name', cubeValue.FACT);
+				spanSub.setAttribute('data-table-alias', cubeValue.alias);
+				spanSub.innerText = filter.name;
+				spanSub.onclick = app.handlerFilterSelected;
+				sublist.appendChild(spanSub);				
+			});
 			ul.appendChild(section);
-		}*/
+		}
 	}
 
 	// popolo la lista dei filtri esistenti nella dialog metric-filter (metriche filtrate)
@@ -1335,6 +1327,8 @@ var StorageMetric = new MetricStorage();
 	app.getColumnsFact();
 
 	app.getFilters(); // <ul> exist-filters
+
+	app.getFiltersFact(); // exist-filters : filtri collegati alla Fact
 
 	// app.getMetricFilters(); // dialog-metric-filter per le metriche filtrate
 
