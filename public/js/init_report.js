@@ -301,7 +301,7 @@ var StorageMetric = new MetricStorage();
 					const filters = StorageFilter.getFiltersByDimension(dimName, hierName, table.table);
 					if (filters.length > 0) {
 						const contentElement = app.tmplList.content.cloneNode(true);
-						const section = contentElement.querySelector('section[data-sublist-table-filters]');
+						const section = contentElement.querySelector('section[data-sublist-nested-level-2]');
 						const sublist = section.querySelector('.sublist');
 						const span = sublist.querySelector('span[table]');
 						section.setAttribute('data-element-search', 'search-exist-filters');
@@ -336,7 +336,7 @@ var StorageMetric = new MetricStorage();
 		const ul = document.getElementById('exist-filters');
 		for (const [cubeName, cubeValue] of Object.entries(StorageCube.cubes) ) {
 			const contentElement = app.tmplList.content.cloneNode(true);
-			const section = contentElement.querySelector('section[data-sublist-table-filters]');
+			const section = contentElement.querySelector('section[data-sublist-nested-level-2]');
 			const sublist = section.querySelector('.sublist');
 			const span = sublist.querySelector('span[table]');
 			section.setAttribute('data-element-search', 'search-exist-filters');
@@ -354,7 +354,7 @@ var StorageMetric = new MetricStorage();
 				spanSub.setAttribute('data-table-alias', cubeValue.alias);
 				spanSub.innerText = filter.name;
 				spanSub.onclick = app.handlerFilterSelected;
-				sublist.appendChild(spanSub);				
+				sublist.appendChild(spanSub);
 			});
 			ul.appendChild(section);
 		}
@@ -366,7 +366,7 @@ var StorageMetric = new MetricStorage();
 		console.log('filters : ', StorageFilter.filters);
 		for (const [key, value] of Object.entries(StorageFilter.filters)) {
 			const content = app.tmplList.content.cloneNode(true);
-			const section = content.querySelector('section[data-sublist-table-filters]');
+			const section = content.querySelector('section[data-sublist-nested-level-2]');
 			const subList = section.querySelector('.sublist');
 			const table = subList.querySelector('span[table]');
 			const filter = subList.querySelector('span[filter]');
@@ -451,26 +451,28 @@ var StorageMetric = new MetricStorage();
 	// lista metriche esistenti
 	app.getMetrics = () => {
 		const ul = document.getElementById('exist-metrics');
-		console.log('metrics : ', StorageMetric.metrics);
-		for (const [key, value] of Object.entries(StorageMetric.metrics)) {
-			const content = app.tmplList.content.cloneNode(true);
-			const section = content.querySelector('section[data-sublist-table-metrics]');
-			const subList = section.querySelector('.sublist');
-			const spanTable = subList.querySelector('span[table]');
-			const spanMetric = subList.querySelector('span[metric]');
-
-			section.setAttribute('data-label', key);
-			section.setAttribute('data-table-name', value.formula[key].table);
-			section.setAttribute('data-cube-name', value.formula[key].cube);
+		for (const [cubeName, cubeValue] of Object.entries(StorageCube.cubes)) {
+			const contentElement = app.tmplList.content.cloneNode(true);
+			const section = contentElement.querySelector('section[data-sublist-nested-level-2]');
+			const sublist = section.querySelector('.sublist');
+			const span = sublist.querySelector('span[table]');
 			section.setAttribute('data-element-search', 'search-exist-metrics');
-			spanTable.innerText = value.formula[key].table;
-			spanMetric.innerText = key;
-			// spanMetric.setAttribute('data-table-alias', value.alias);
-			spanMetric.setAttribute('data-cube-name', value.formula[key].cube);
-			spanMetric.setAttribute('data-table-name', value.formula[key].table);
-			// spanMetric.setAttribute('data-schema-name', value.schema);
-			spanMetric.setAttribute('data-label', key);
-			spanMetric.onclick = app.handlerMetricSelected;
+			section.setAttribute('data-table-name', cubeValue.FACT);
+			section.setAttribute('data-cube-name', cubeName);
+			span.innerText = cubeValue.FACT;
+			for (const [key, value] of Object.entries(StorageMetric.metrics)) {
+				section.setAttribute('data-label', key);
+				const contentSub = app.tmplSublists.content.cloneNode(true);
+				const spanSub = contentSub.querySelector('span[metric]');
+				spanSub.setAttribute('data-cube-name', cubeName);
+				spanSub.setAttribute('data-label', key);
+				spanSub.setAttribute('data-element-search','search-exist-metrics');
+				spanSub.setAttribute('data-table-name', cubeValue.FACT);
+				spanSub.setAttribute('data-table-alias', cubeValue.alias);
+				spanSub.innerText = key;
+				spanSub.onclick = app.handlerMetricSelected;
+				sublist.appendChild(spanSub);
+			}
 			ul.appendChild(section);
 		}
 	}
@@ -1228,7 +1230,7 @@ var StorageMetric = new MetricStorage();
 		// aggiorno la lista dei filtri esistenti, aggiungendo il filtro appena creato
 		const ul = document.getElementById('exist-filters');
 		const content = app.tmplList.content.cloneNode(true);
-		const section = content.querySelector('section[data-sublist-table-filters]');
+		const section = content.querySelector('section[data-sublist-nested-level-2]');
 		const subList = section.querySelector('.sublist');
 		const spanTable = subList.querySelector('span[table]');
 		const filter = subList.querySelector('span[filter]');

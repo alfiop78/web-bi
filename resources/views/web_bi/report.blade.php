@@ -325,12 +325,12 @@
 							</section>
 
 							{{-- template per table-filter --}}
-							<section data-element-search data-label data-sublist-table-filters hidden>
+							<section data-element-search data-label data-sublist-nested-level-2 hidden>
 								<span class="sublist">
 									<span table></span>
 								</span>
 							</section>
-
+							
 							<section data-element-search data-label data-sublist-cube-columns hidden>
 								<span class="sublist">
 									<span cube></span>
@@ -338,17 +338,11 @@
 								</span>
 							</section>
 
-							<section data-element-search data-label data-sublist-table-metrics hidden>
-								<span class="sublist">
-									<span table></span>
-									<span metric></span>
-								</span>
-							</section>
-
 						</template>
 
 						<template id="tmpl-sublists">
 							<span filter data-element-search></span>
+							<span metric data-element-search></span>
 						</template>
 
 						<div class="wrapper">
