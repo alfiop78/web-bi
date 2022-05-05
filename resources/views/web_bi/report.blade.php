@@ -12,9 +12,9 @@
 		<link rel="stylesheet" type="text/css" href="/css/md-drawer.css" />
 		<link rel="stylesheet" type="text/css" href="/css/md-inputs.css" />
 		<link rel="stylesheet" type="text/css" href="/css/report-layout.css" />
-		<link rel="stylesheet" type="text/css" href="/css/index_report.css" />
 		<link rel="stylesheet" type="text/css" href="/css/steps.css" />
 		<link rel="stylesheet" type="text/css" href="/css/md-dialogs.css" />
+		<link rel="stylesheet" type="text/css" href="/css/index_report.css" />
 		<script src="/js/Step.js"></script>
 		<script src="/js/Query.js"></script>
 		<script src="/js/Application.js"></script>
@@ -308,14 +308,7 @@
 									</span>
 								</div>
 							</section>
-
-							<section data-element-search data-label data-sublist-table-filters hidden>
-								<span class="sublist">
-									<span table></span>
-									<span filter></span>
-								</span>
-							</section>
-
+							
 							<section data-element-search data-label data-sublist-table hidden>
 								<div class="element" name>
 									<span class="sublist">
@@ -328,6 +321,13 @@
 							<section data-element-search data-label data-sublist-generic hidden>
 								<span class="sublist">
 									<span generic class="selectable"></span>
+								</span>
+							</section>
+
+							{{-- template per table-filter --}}
+							<section data-element-search data-label data-sublist-table-filters hidden>
+								<span class="sublist">
+									<span table></span>
 								</span>
 							</section>
 
@@ -345,6 +345,10 @@
 								</span>
 							</section>
 
+						</template>
+
+						<template id="tmpl-sublists">
+							<span filter data-element-search></span>
 						</template>
 
 						<div class="wrapper">

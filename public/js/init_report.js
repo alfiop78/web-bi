@@ -16,6 +16,7 @@ var StorageMetric = new MetricStorage();
 		// templates
 		tmplUlList: document.getElementById('template_ulList'), // contiene le <ul>
 		tmplList: document.getElementById('templateList'), // contiene i section
+		tmplSublists : document.getElementById('tmpl-sublists'),
 		tmplSubListTable : document.getElementById('data-sublist-table-columns'),
 
 		// popup
@@ -125,13 +126,13 @@ var StorageMetric = new MetricStorage();
 				const tableId = table.getAttribute('data-table-id');
 				// visualizzo i filtri per questa tabella in #exist-filters
 				filters.forEach( (filter) => {
-					const filterRef = document.querySelector("#exist-filters > section[data-label='" + filter.name + "'][data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']");
+					const filterRef = document.querySelector("#exist-filters > section[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']");
 					const filterRefMetricFilter = document.querySelector("#ul-metric-filter > section[data-label='" + filter.name + "'][data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']");
 					if (filterRef) {
 						filterRef.removeAttribute('hidden');
 						filterRef.setAttribute('data-searchable', true);
-						filterRef.querySelector('span[generic]').setAttribute('data-table-alias', alias);
-						filterRef.querySelector('span[generic]').setAttribute('data-table-id', tableId);
+						// filterRef.querySelector('span[table]').setAttribute('data-table-alias', alias);
+						// filterRef.querySelector('span[table]').setAttribute('data-table-id', tableId);
 					}
 					if (filterRefMetricFilter) {
 						filterRefMetricFilter.removeAttribute('hidden');
@@ -307,23 +308,26 @@ var StorageMetric = new MetricStorage();
 					const filters = StorageFilter.getFiltersByDimension(dimName, hierName, table.table);
 					if (filters.length > 0) {
 						const contentElement = app.tmplList.content.cloneNode(true);
-						const section = contentElement.querySelector('section[data-sublist-generic]');
+						const section = contentElement.querySelector('section[data-sublist-table-filters]');
 						const sublist = section.querySelector('.sublist');
-						const span = section.querySelector('span[generic]');
+						const span = sublist.querySelector('span[table]');
 						section.setAttribute('data-element-search', 'search-exist-filters');
 						section.setAttribute('data-table-name', table.table);
 						span.innerText = table.table;
 						filters.forEach( (filter) => {
-							section.setAttribute('data-label', filter.name);
+							section.setAttribute('data-label', table.table);
 							section.setAttribute('data-dimension-name', filter.dimension);
 							section.setAttribute('data-hier-name', filter.hier);
 
-							const contentSub = app.tmplList.content.cloneNode(true);
-							const spanSub = contentSub.querySelector('span[generic]');
+							const contentSub = app.tmplSublists.content.cloneNode(true);
+							const spanSub = contentSub.querySelector('span[filter]');
 							spanSub.setAttribute('data-label', filter.name);
+							spanSub.setAttribute('data-element-search','search-exist-filters');
 							spanSub.setAttribute('data-dimension-name', filter.dimension);
 							spanSub.setAttribute('data-hier-name', filter.hier);
 							spanSub.setAttribute('data-table-name', filter.table);
+							spanSub.setAttribute('data-table-alias', table.alias);
+							spanSub.setAttribute('data-table-id', tableId);
 							spanSub.innerText = filter.name;
 							spanSub.onclick = app.handlerFilterSelected;
 							sublist.appendChild(spanSub);
@@ -365,7 +369,7 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// popolo la lista dei filtri esistenti nella dialog metric-filter (metriche filtrate)
-	app.getMetricFilters = () => {
+	/*app.getMetricFilters = () => {
 		const ul = document.getElementById('ul-metric-filter');
 		console.log('filters : ', StorageFilter.filters);
 		for (const [key, value] of Object.entries(StorageFilter.filters)) {
@@ -396,7 +400,7 @@ var StorageMetric = new MetricStorage();
 			filter.onclick = app.handlerMetricFilterSelected;
 			ul.appendChild(section);
 		}
-	}
+	}*/
 
 	// popolamento delle tabelle nella dialogFilter
 	app.getTables = () => {
@@ -1332,7 +1336,7 @@ var StorageMetric = new MetricStorage();
 
 	app.getFilters(); // <ul> exist-filters
 
-	app.getMetricFilters(); // dialog-metric-filter per le metriche filtrate
+	// app.getMetricFilters(); // dialog-metric-filter per le metriche filtrate
 
 	app.getTables(); //  elenco tabelle nella dialogFilter
 
