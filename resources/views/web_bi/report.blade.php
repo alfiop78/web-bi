@@ -6,6 +6,7 @@
 		<meta name="theme-color" content="#70b1bb">
 		<meta name="author" content="Pietrantuono Alfio">
 		<link rel="stylesheet" type="text/css" href="/css/md-layout.css" />
+		<link rel="stylesheet" type="text/css" href="/css/md-lists.css" />
 		<link rel="stylesheet" type="text/css" href="/css/material-icons.css" />
 		<link rel="stylesheet" type="text/css" href="/css/md-loader.css" />
 		<link rel="stylesheet" type="text/css" href="/css/md-controls.css" />
@@ -296,26 +297,24 @@
 								<ul id="reportsProcess"></ul>
 							</div>
 						</div>
+
+						<template id="template-hier"><span hier class="nested"></span></template>
+						<template id="template-table"><span table class="nested"></span></template>
+						<template id="template-column"><span column class="nested"></span></template>
+						<template id="template-filter">
+							<div>
+								<div class="span-h-content">
+									<span filter class="nested hightlight"></span>&nbsp;(<small table></small>)
+								</div>
+							</div>
+						</template>
 	  
 						<template id="templateList">
 
-							<section data-element-search data-label data-sublist-nested hidden>
-								<span class="sublist">
-									<template id="template-hier"><span hier class="nested"></span></template>
-									<template id="template-table"><span table class="nested"></span></template>
-									<template id="template-column"><span column class="nested"></span></template>
-								</span>
+							<section data-element-search data-label data-sublist-nested>
+								<span class="sublist"></span>
 							</section>
 							
-							{{-- <section data-element-search data-label data-sublist-table hidden>
-								<div class="element" name>
-									<span class="sublist">
-										<span hier></span>
-										<span table></span>
-									</span>
-								</div>
-							</section> --}}
-
 							<section data-element-search data-label data-sublist-generic hidden>
 								<span class="sublist">
 									<span generic class="selectable"></span>

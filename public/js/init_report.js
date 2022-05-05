@@ -211,10 +211,10 @@ var StorageMetric = new MetricStorage();
 				spanHier.innerText = hier;
 				sublist.appendChild(spanHier);
 				for (const [tableId, table] of Object.entries(hierValue.order)) {
-					// verifico se la tabella in ciclo ha delle colonne mappate
 					const tmplTable = section.querySelector('#template-table');
 					const contentTable = tmplTable.content.cloneNode(true);
 					const spanTable = contentTable.querySelector('span[table]');
+					// verifico se la tabella in ciclo ha delle colonne mappate
 					
 					if (hierValue.columns.hasOwnProperty(table.alias)) {
 						spanTable.innerText = table.table;
@@ -300,39 +300,51 @@ var StorageMetric = new MetricStorage();
 		// console.log('filters : ', StorageFilter.filters);
 		for (const [dimName, dimValue] of (Object.entries(StorageDimension.dimensions))) {
 			// per ogni dimensione recupero i filtri a questa appartenenti
-			for (const [hierName, hier] of (Object.entries(dimValue.hierarchies)) ) {				
-				// lista tabelle presenti per ogni gerarchia
+			for (const [hierName, hier] of (Object.entries(dimValue.hierarchies)) ) {
+				// per ogni gerarchia...
+				const contentElement = app.tmplList.content.cloneNode(true);
+				const section = contentElement.querySelector('section[data-sublist-nested]');
+				const sublist = section.querySelector('.sublist');
+				
 				for (const [tableId, table] of Object.entries(hier.order)) {
+					// per ogni tabella...
 					const filters = StorageFilter.getFiltersByDimension(dimName, hierName, table.table);
 					if (filters.length > 0) {
-						const contentElement = app.tmplList.content.cloneNode(true);
-						const section = contentElement.querySelector('section[data-sublist-nested-level-2]');
-						const sublist = section.querySelector('.sublist');
-						const span = sublist.querySelector('span[table]');
-						section.setAttribute('data-element-search', 'search-exist-filters');
-						section.setAttribute('data-table-name', table.table);
-						span.innerText = table.table;
+						// se sono presenti filtri per questa tabella
+						const tmplHier = document.getElementById('template-hier');
+						const contentHier = tmplHier.content.cloneNode(true);
+						const spanHier = contentHier.querySelector('span[hier]');
+						spanHier.innerText = hierName;
+						sublist.appendChild(spanHier);		
 						filters.forEach( (filter) => {
+							const tmplFilter = document.getElementById('template-filter');
+							const contentFilter = tmplFilter.content.cloneNode(true);
+							const div = contentFilter.querySelector('div');
+							const spanHContent = contentFilter.querySelector('.span-h-content');
+							const span = contentFilter.querySelector('span[filter]');
+							const small = contentFilter.querySelector('small[table]');
+							section.setAttribute('data-element-search', 'search-exist-filters');
+							section.setAttribute('data-table-name', table.table);
+							small.innerText = table.table;
+
 							section.setAttribute('data-label', table.table);
 							section.setAttribute('data-dimension-name', filter.dimension);
 							section.setAttribute('data-hier-name', filter.hier);
 
-							const contentSub = app.tmplSublists.content.cloneNode(true);
-							const spanSub = contentSub.querySelector('span[filter]');
-							spanSub.setAttribute('data-label', filter.name);
-							spanSub.setAttribute('data-element-search','search-exist-filters');
-							spanSub.setAttribute('data-dimension-name', filter.dimension);
-							spanSub.setAttribute('data-hier-name', filter.hier);
-							spanSub.setAttribute('data-table-name', filter.table);
-							spanSub.setAttribute('data-table-alias', table.alias);
-							spanSub.setAttribute('data-table-id', tableId);
-							spanSub.innerText = filter.name;
-							spanSub.onclick = app.handlerFilterSelected;
-							sublist.appendChild(spanSub);
+							span.setAttribute('data-label', filter.name);
+							span.setAttribute('data-element-search','search-exist-filters');
+							span.setAttribute('data-dimension-name', filter.dimension);
+							span.setAttribute('data-hier-name', filter.hier);
+							span.setAttribute('data-table-name', filter.table);
+							span.setAttribute('data-table-alias', table.alias);
+							span.setAttribute('data-table-id', tableId);
+							span.innerText = filter.name;
+							span.onclick = app.handlerFilterSelected;
+							sublist.appendChild(div);
 						});
-						ul.appendChild(section);
 					}
 				}
+				ul.appendChild(section);
 			}
 		}
 	}
@@ -1372,9 +1384,9 @@ var StorageMetric = new MetricStorage();
 
 	app.getHierarchies();
 
-	app.getColumns();
+	// app.getColumns();
 
-	app.getColumnsFact();
+	// app.getColumnsFact();
 
 	app.getFilters(); // <ul> exist-filters
 
@@ -1384,7 +1396,7 @@ var StorageMetric = new MetricStorage();
 	
 	app.getMetricFiltersFact(); // dialog-metric-filter filtri appartenenti ai cubi per le metriche filtrate
 
-	app.getTables(); //  elenco tabelle nella dialogFilter
+	// app.getTables(); //  elenco tabelle nella dialogFilter
 
 	app.getFactTable(); // lista delle FACT da visualizzare nello step-2
 
