@@ -299,24 +299,22 @@
 	  
 						<template id="templateList">
 
-							<section data-element-search data-label data-sublist-hier-table-columns hidden>
-								<div class="element" name>
-									<span class="sublist">
-										<span hier></span>
-										<span table></span>
-										<span column></span>
-									</span>
-								</div>
+							<section data-element-search data-label data-sublist-nested hidden>
+								<span class="sublist">
+									<template id="template-hier"><span hier class="nested"></span></template>
+									<template id="template-table"><span table class="nested"></span></template>
+									<template id="template-column"><span column class="nested"></span></template>
+								</span>
 							</section>
 							
-							<section data-element-search data-label data-sublist-table hidden>
+							{{-- <section data-element-search data-label data-sublist-table hidden>
 								<div class="element" name>
 									<span class="sublist">
 										<span hier></span>
 										<span table></span>
 									</span>
 								</div>
-							</section>
+							</section> --}}
 
 							<section data-element-search data-label data-sublist-generic hidden>
 								<span class="sublist">
@@ -324,13 +322,13 @@
 								</span>
 							</section>
 
-							{{-- template per table-filter --}}
+							{{-- template con un sottolivello nidificato --}}
 							<section data-element-search data-label data-sublist-nested-level-2 hidden>
 								<span class="sublist">
 									<span table></span>
 								</span>
 							</section>
-							
+
 							<section data-element-search data-label data-sublist-cube-columns hidden>
 								<span class="sublist">
 									<span cube></span>
