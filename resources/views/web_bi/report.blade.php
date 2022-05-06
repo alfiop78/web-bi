@@ -352,7 +352,7 @@
 									<div class="h-content">
 										<div class="v-content">
 											<span table class="hightlight"></span>
-											<small hier></small>
+											<small></small>
 										</div>
 									</div>
 								</div>

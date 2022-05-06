@@ -414,7 +414,7 @@ var StorageMetric = new MetricStorage();
 					const div = section.querySelector('div.selectable');
 					const spanHContent = div.querySelector('.h-content');
 					const span = spanHContent.querySelector('span[table]');
-					const smallHier = spanHContent.querySelector('small[hier]');
+					const smallHier = spanHContent.querySelector('small');
 
 					section.setAttribute('data-hier-name', hier);
 					section.setAttribute('data-label', table.table);
@@ -432,6 +432,27 @@ var StorageMetric = new MetricStorage();
 					ul.appendChild(section);
 				}
 			}
+		}
+	}
+
+	app.getTablesInDialogFilter = () => {
+		const ul = document.getElementById('list-filters-fact');
+		for (const [key, value] of Object.entries(StorageCube.cubes)) {
+			const content = app.tmplList.content.cloneNode(true);
+			const section = content.querySelector('section[data-sublist-tables]');
+			const div = section.querySelector('div.selectable');
+			const spanHContent = div.querySelector('.h-content');
+			const span = spanHContent.querySelector('span[table]');
+			const small = spanHContent.querySelector('small');
+			section.setAttribute('data-label', value.FACT);
+			section.setAttribute('data-cube-name', key);
+			section.setAttribute('data-table-alias', value.alias);
+			section.setAttribute('data-schema-name', value.schema);
+			div.setAttribute('data-label', value.FACT);
+			div.onclick = app.handlerFactSelected;
+			span.innerText = value.FACT;
+			small.innerText = key;
+			ul.appendChild(section);
 		}
 	}
 
@@ -516,8 +537,13 @@ var StorageMetric = new MetricStorage();
 			if (document.querySelector("#list-columns-fact section[data-cube-name='" + cube + "']")) {
 				const fact = document.querySelector("#list-columns-fact section[data-cube-name='" + cube + "']");
 				fact.hidden = false;
-				fact.setAttribute('data-searchable', true);
+				fact.toggleAttribute('data-searchable');
 			}
+			document.querySelectorAll("#list-filters-fact section[data-cube-name='" + cube + "']").forEach( (cube) => {
+				cube.hidden = false;
+				cube.toggleAttribute('data-searchable');
+			});
+
 			// visualizzo, in exist-filters, i filtri appartenenti alla Fact
 			document.querySelectorAll("#exist-filters section[data-cube-name='" + cube + "'], #ul-metric-filter section[data-cube-name='" + cube + "']").forEach( (filter) => {
 				filter.hidden = false;
@@ -526,7 +552,7 @@ var StorageMetric = new MetricStorage();
 			document.querySelectorAll("#exist-metrics section[data-cube-name='" + cube + "']").forEach( (metric) => {
 				// imposto data-table-alias nella <ul> delle metriche già esistenti
 				metric.hidden = false;
-				metric.setAttribute('data-searchable', true);
+				metric.toggleAttribute('data-searchable');
 				// metric.querySelector('span[metric]').setAttribute('data-table-alias', alias);
 			});
 			// imposto, nella dialog-metric il nome della tabella selezionata
@@ -1339,6 +1365,8 @@ var StorageMetric = new MetricStorage();
 	app.getMetricFiltersFact(); // dialog-metric-filter filtri appartenenti ai cubi per le metriche filtrate
 
 	app.getTables(); //  elenco tabelle nella dialogFilter
+
+	app.getTablesInDialogFilter();
 
 	app.getFactTable(); // lista delle FACT da visualizzare nello step-2
 
