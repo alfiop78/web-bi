@@ -297,26 +297,24 @@
 								<ul id="reportsProcess"></ul>
 							</div>
 						</div>
-
-						<template id="template-hier"><span hier class="no-highlight"></span></template>
-						<template id="template-table"><span table class=""></span></template>
-						<template id="template-column"><span column class=""></span></template>
-						<template id="template-filter">
-							<div class="selectable" data-label>
-								<div class="h-content">
-									<div class="v-content">
-										<span filter class="hightlight"></span>
-										<small table></small>
-									</div>
-									<i class="material-icons md-18">edit</i>
-								</div>
-							</div>
-						</template>
 	  
 						<template id="templateList">
 
 							<section data-element-search data-label data-sublist-nested>
 								<span class="sublist"></span>
+							</section>
+
+							{{-- lista column esistenti --}}
+							<section data-element-search data-label data-sublist-columns hidden>
+								<div class="selectable" data-label>
+									<div class="h-content">
+										<div class="v-content">
+											<span column class="hightlight"></span>
+											<small table></small>
+											<small hier></small>
+										</div>
+									</div>
+								</div>
 							</section>
 
 							{{-- lista filtri esistenti --}}
@@ -344,6 +342,18 @@
 											{{-- TODO: qui, sulle metriche filtrate potrei visualizzare un popup con l'elenco dei filtri, oppure, per le metriche composte, visualizzarne, nel popup, la propria formula --}}
 										</div>
 										<i class="material-icons md-18">edit</i>
+									</div>
+								</div>
+							</section>
+
+							{{-- lista tabelle --}}
+							<section data-element-search data-label data-sublist-tables hidden>
+								<div class="selectable" data-label>
+									<div class="h-content">
+										<div class="v-content">
+											<span table class="hightlight"></span>
+											<small hier></small>
+										</div>
 									</div>
 								</div>
 							</section>

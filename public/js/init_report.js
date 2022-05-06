@@ -113,7 +113,7 @@ var StorageMetric = new MetricStorage();
 			// visualizzo, in ul list-columns (dialogTable), solo le tabelle delle gerarchie selezionate
 			document.querySelectorAll("#list-columns section[data-hier-name='" + hier + "']").forEach( (hier) => {
 				hier.hidden = false;
-				hier.setAttribute('data-searchable', true);
+				hier.toggleAttribute('data-searchable');
 			});
 			document.querySelectorAll("#exist-filters > section[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']").forEach( (filter) => {
 				filter.hidden = false;
@@ -122,7 +122,7 @@ var StorageMetric = new MetricStorage();
 			// visualizzo, in list-tables (dialogFilter) solo le tabelle della gerarchia selezionata
 			document.querySelectorAll("#list-tables section[data-hier-name='" + hier + "']").forEach( (hier) => {
 				hier.hidden = false;
-				hier.setAttribute('data-searchable', true);
+				hier.toggleAttribute('data-searchable');
 			});
 		} else {
 			// deselezione della gerarchia, nascondo le tabelle della gerarchia selezionata
@@ -185,45 +185,36 @@ var StorageMetric = new MetricStorage();
 			// key : nome della dimensione
 			// value : tutte le property della dimensione
 			for (const [hier, hierValue] of Object.entries(value.hierarchies)) {
-				const content = app.tmplList.content.cloneNode(true);
-				const section = content.querySelector('section[data-sublist-nested]');
-				const sublist = section.querySelector('.sublist');
-				ul.appendChild(section);
-				const tmplHier = section.querySelector('#template-hier');
-				const contentHier = tmplHier.content.cloneNode(true);
-				const spanHier = contentHier.querySelector('span[hier]');
-				spanHier.innerText = hier;
-				sublist.appendChild(spanHier);
+				// per ogni gerarchia...
 				for (const [tableId, table] of Object.entries(hierValue.order)) {
-					const tmplTable = section.querySelector('#template-table');
-					const contentTable = tmplTable.content.cloneNode(true);
-					const spanTable = contentTable.querySelector('span[table]');
-					// verifico se la tabella in ciclo ha delle colonne mappate
-					
+					// verifico se la tabella in ciclo ha delle colonne mappate					
 					if (hierValue.columns.hasOwnProperty(table.alias)) {
-						spanTable.innerText = table.table;
-						sublist.appendChild(spanTable);
 						for (const [token, field] of Object.entries(hierValue.columns[table.alias])) {
 							// console.log('field : ', field);
-							const tmplColumn = section.querySelector('#template-column');
-							const contentColumn = tmplColumn.content.cloneNode(true);
-							const spanColumn = contentColumn.querySelector('span[column]');
-							spanColumn.classList.add('final');
+							const content = app.tmplList.content.cloneNode(true);
+							const section = content.querySelector('section[data-sublist-columns]');
+							const div = section.querySelector('div.selectable');
+							const spanHContent = div.querySelector('.h-content');
+							const span = spanHContent.querySelector('span[column]');
+							const smallTable = spanHContent.querySelector('small[table]');
+							const smallHier = spanHContent.querySelector('small:last-child');
+
 							section.setAttribute('data-label', field.ds.field);
 							section.setAttribute('data-element-search', 'search-columns');
 							section.setAttribute('data-hier-name', hier);
-							spanHier.innerText = hier;
-							spanTable.innerText = table.table;
-							spanColumn.innerText = field.ds.field;
-							spanColumn.setAttribute('data-label', field.ds.field);
-							spanColumn.setAttribute('data-table-name', table.table);
-							spanColumn.setAttribute('data-table-alias', table.alias);
-							spanColumn.setAttribute('data-table-id', tableId);
-							spanColumn.setAttribute('data-dimension-name', key);
-							spanColumn.setAttribute('data-hier-name', hier);
-							spanColumn.setAttribute('data-token-column', token);
-							spanColumn.onclick = app.handlerSelectColumn;
-							sublist.appendChild(spanColumn);
+							div.setAttribute('data-label', field.ds.field);
+							div.setAttribute('data-table-name', table.table);
+							div.setAttribute('data-table-alias', table.alias);
+							div.setAttribute('data-table-id', tableId);
+							div.setAttribute('data-dimension-name', key);
+							div.setAttribute('data-hier-name', hier);
+							div.setAttribute('data-token-column', token);
+							div.onclick = app.handlerSelectColumn;
+
+							span.innerText = field.ds.field;
+							smallTable.innerText = table.table;
+							smallHier.innerText = hier;
+							ul.appendChild(section);
 						}
 					}
 				}
@@ -231,47 +222,34 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
-	// recupero le colonne agganciate alla fact, proprietà columns nel json, per aggiungerle nelle dialog-column/filter
+	// recupero le colonne agganciate alla fact, proprietà columns nel json, per aggiungerle nelle dialog-column
 	app.getColumnsFact = () => {
 		const ul = document.getElementById('list-columns-fact');
-		const ulDialogFilter = document.getElementById('list-filters-fact');
 		for (const [key, value] of Object.entries(StorageCube.cubes)) {
-			// ul.dialogFilter.appendChild();
-			const contentDialogFilter = app.tmplList.content.cloneNode(true);
-			const sectionDialogFilter = contentDialogFilter.querySelector('section[data-sublist-cube-columns]');
-			const subListDialogFilter = sectionDialogFilter.querySelector('.sublist');
-			const spanCubeDialogFilter = subListDialogFilter.querySelector('span[cube]');
-			const spanColumnDialogFilter = subListDialogFilter.querySelector('span[column]');
-			sectionDialogFilter.hidden = false;
-			sectionDialogFilter.setAttribute('data-cube-name', key);
-			// sectionDialogFilter.setAttribute('data-element-search', 'search-columns');
-			spanCubeDialogFilter.innerText = key;
-			spanColumnDialogFilter.innerText = value.FACT;
-			spanColumnDialogFilter.setAttribute('data-table-name', value.FACT);
-			spanColumnDialogFilter.setAttribute('data-table-alias', value.alias);
-			spanColumnDialogFilter.setAttribute('data-schema', value.schema);
-			spanColumnDialogFilter.setAttribute('data-cube-name', key);
-			spanColumnDialogFilter.onclick = app.handlerSelectTable;
-			ulDialogFilter.appendChild(sectionDialogFilter);
 			if (value.columns.hasOwnProperty(value.alias)) {
 				for (const [token, field] of Object.entries(value.columns[value.alias])) {
 					console.log('field : ', field);
 					const content = app.tmplList.content.cloneNode(true);
-					const section = content.querySelector('section[data-sublist-cube-columns]');
-					const subList = section.querySelector('.sublist');
-					const spanCube = subList.querySelector('span[cube]');
-					const spanColumn = subList.querySelector('span[column]');
+					const section = content.querySelector('section[data-sublist-columns]');
+					const div = section.querySelector('div.selectable');
+					const spanHContent = div.querySelector('.h-content');
+					const span = spanHContent.querySelector('span[column]');
+					const smallTable = spanHContent.querySelector('small[table]');
+					const smallCube = spanHContent.querySelector('small:last-child');
+
 					section.setAttribute('data-label', field.ds.field);
-					section.setAttribute('data-cube-name', key);
 					section.setAttribute('data-element-search', 'search-columns');
-					spanCube.innerText = key;
-					spanColumn.innerText = field.ds.field;
-					spanColumn.setAttribute('data-label', field.ds.field);
-					spanColumn.setAttribute('data-table-name', value.FACT);
-					spanColumn.setAttribute('data-table-alias', value.alias);
-					spanColumn.setAttribute('data-token-column', token);
-					spanColumn.setAttribute('data-cube-name', key);
-					spanColumn.onclick = app.handlerSelectColumn;
+					section.setAttribute('data-cube-name', key);
+					div.setAttribute('data-label', field.ds.field);
+					div.setAttribute('data-table-name', value.FACT);
+					div.setAttribute('data-table-alias', value.alias);
+					div.setAttribute('data-token-column', token);
+					div.setAttribute('data-cube-name', key);
+					div.onclick = app.handlerSelectColumn;
+
+					span.innerText = field.ds.field;
+					smallTable.innerText = value.FACT;
+					smallCube.innerText = key;
 					ul.appendChild(section);
 				}
 			}
@@ -428,37 +406,30 @@ var StorageMetric = new MetricStorage();
 			// key : nome della dimensione
 			// value : tutte le property della dimensione
 			for (const [hier, hierValue] of Object.entries(value.hierarchies)) {
-				const content = app.tmplList.content.cloneNode(true);
-				const section = content.querySelector('section[data-sublist-nested]');
-				const sublist = section.querySelector('.sublist');
-				ul.appendChild(section);
-				const tmplHier = section.querySelector('#template-hier');
-				const contentHier = tmplHier.content.cloneNode(true);
-				const spanHier = contentHier.querySelector('span[hier]');
-				spanHier.innerText = hier;
-				sublist.appendChild(spanHier);
-
 				for (const [tableId, table] of Object.entries(hierValue.order)) {
 					// console.log('tableId : ', tableId);
 					// console.log('table : ', table);
-					const tmplTable = section.querySelector('#template-table');
-					const contentTable = tmplTable.content.cloneNode(true);
-					const spanTable = contentTable.querySelector('span[table]');
-					spanTable.classList.add('final');
+					const content = app.tmplList.content.cloneNode(true);
+					const section = content.querySelector('section[data-sublist-tables]');
+					const div = section.querySelector('div.selectable');
+					const spanHContent = div.querySelector('.h-content');
+					const span = spanHContent.querySelector('span[table]');
+					const smallHier = spanHContent.querySelector('small[hier]');
 
 					section.setAttribute('data-hier-name', hier);
 					section.setAttribute('data-label', table.table);
 					section.setAttribute('data-table-name', table.table);
 					section.setAttribute('data-element-search', 'search-tables');
-					spanTable.innerText = table.table;
-					spanTable.setAttribute('data-dimension-name', key);
-					spanTable.setAttribute('data-hier-name', hier);
-					spanTable.setAttribute('data-table-name', table.table);
-					spanTable.setAttribute('data-table-alias', table.alias);
-					spanTable.setAttribute('data-schema', table.schema);
-					spanTable.setAttribute('data-table-id', tableId);
-					spanTable.onclick = app.handlerSelectTable;
-					sublist.appendChild(spanTable);
+					div.setAttribute('data-dimension-name', key);
+					div.setAttribute('data-hier-name', hier);
+					div.setAttribute('data-table-name', table.table);
+					div.setAttribute('data-table-alias', table.alias);
+					div.setAttribute('data-schema', table.schema);
+					div.setAttribute('data-table-id', tableId);
+					div.onclick = app.handlerSelectTable;
+					span.innerText = table.table;
+					smallHier.innerText = hier;
+					ul.appendChild(section);
 				}
 			}
 		}
@@ -1357,7 +1328,7 @@ var StorageMetric = new MetricStorage();
 
 	app.getColumns();
 
-	// app.getColumnsFact();
+	app.getColumnsFact();
 
 	app.getFilters(); // <ul> exist-filters
 
@@ -1367,7 +1338,7 @@ var StorageMetric = new MetricStorage();
 	
 	app.getMetricFiltersFact(); // dialog-metric-filter filtri appartenenti ai cubi per le metriche filtrate
 
-	// app.getTables(); //  elenco tabelle nella dialogFilter
+	app.getTables(); //  elenco tabelle nella dialogFilter
 
 	app.getFactTable(); // lista delle FACT da visualizzare nello step-2
 

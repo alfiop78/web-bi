@@ -121,5 +121,5 @@ ul > section[data-sublist][selected], ul > section[data-sublist-generic][selecte
 
 span[cube] {color: dimgray; padding: .5em .2em;font-size: .75rem;font-weight: normal;}
 
-.fact-table > section {background-color: beige;font-weight: bold;}
+.fact-table > section {background-color: beige;}
 
