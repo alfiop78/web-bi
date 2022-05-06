@@ -190,36 +190,56 @@
 							<label for="metric-name" class="">Ricerca</label>
 						</div>
 						<ul id="ul-aggregation-functions" class="dialog-overflow-list">
-							<section data-element-search="search-aggregate-functions" data-label="SUM" data-sublist-generic data-searchable="true" selected>
-								<span class="sublist">
-									<span generic class="selectable">SUM</span>
-								</span>
+							<section data-element-search="search-aggregate-functions" data-label="SUM" data-sublist-gen data-searchable>
+								<div class="selectable" data-label="SUM" selected>
+									<div class="h-content">
+										<div class="v-content">
+											<span item>SUM</span>
+										</div>
+									</div>
+								</div>
 							</section>
-							<section data-element-search="search-aggregate-functions" data-label="COUNT" data-sublist-generic data-searchable="true">
-								<span class="sublist">
-									<span generic class="selectable">COUNT</span>
-								</span>
+
+							<section data-element-search="search-aggregate-functions" data-label="COUNT" data-sublist-gen data-searchable>
+								<div class="selectable" data-label="COUNT">
+									<div class="h-content">
+										<div class="v-content">
+											<span item>COUNT</span>
+										</div>
+									</div>
+								</div>
 							</section>
-							<section data-element-search="search-aggregate-functions" data-label="AVG" data-sublist-generic data-searchable="true">
-								<span class="sublist">
-									<span generic class="selectable">AVG</span>
-								</span>
+
+							<section data-element-search="search-aggregate-functions" data-label="AVG" data-sublist-gen data-searchable>
+								<div class="selectable" data-label="AVG">
+									<div class="h-content">
+										<div class="v-content">
+											<span item>AVG</span>
+										</div>
+									</div>
+								</div>
 							</section>
-							<section data-element-search="search-aggregate-functions" data-label="MAX" data-sublist-generic data-searchable="true">
-								<span class="sublist">
-									<span generic class="selectable">MAX</span>
-								</span>
+
+							<section data-element-search="search-aggregate-functions" data-label="MAX" data-sublist-gen data-searchable>
+								<div class="selectable" data-label="MAX">
+									<div class="h-content">
+										<div class="v-content">
+											<span item>MAX</span>
+										</div>
+									</div>
+								</div>
 							</section>
-							<section data-element-search="search-aggregate-functions" data-label="MIN" data-sublist-generic data-searchable="true">
-								<span class="sublist">
-									<span generic class="selectable">MIN</span>
-								</span>
+
+							<section data-element-search="search-aggregate-functions" data-label="MIN" data-sublist-gen data-searchable>
+								<div class="selectable" data-label="MIN">
+									<div class="h-content">
+										<div class="v-content">
+											<span item>MIN</span>
+										</div>
+									</div>
+								</div>
 							</section>
-							{{-- <li label="SUM" selected>SUM</li>
-							<li label="COUNT">COUNT</li>
-							<li label="AVG">AVG</li>
-							<li label="MAX">MAX</li>
-							<li label="MIN">MIN</li> --}}
+
 						</ul>
 						<label class="mdc-checkbox">
 							<input id="checkbox-distinct" type="checkbox" name="distinct-checkbox"/>
@@ -259,7 +279,7 @@
 
 				<div class="dialog-buttons">
 					<button type="button" name="cancel" class="md-button">annulla</button>
-					<button id="btnMetricDone" type="button" name="done" class="md-button" disabled>fatto</button>
+					<button id="btnMetricDone" type="button" name="done" class="md-button">fatto</button>
 				</div>
 			</section>
 			</div>
@@ -300,12 +320,8 @@
 	  
 						<template id="templateList">
 
-							<section data-element-search data-label data-sublist-nested>
-								<span class="sublist"></span>
-							</section>
-
 							{{-- lista column esistenti --}}
-							<section data-element-search data-label data-sublist-columns hidden>
+							<section class="data-item" data-element-search data-label data-sublist-columns hidden>
 								<div class="selectable" data-label>
 									<div class="h-content">
 										<div class="v-content">
@@ -317,8 +333,22 @@
 								</div>
 							</section>
 
+							{{-- lista colonne impostate nel report --}}
+							<section data-element-search data-label data-sublist-columns-selected>
+								<div data-label>
+									<div class="h-content">
+										<div class="v-content">
+											<span column class="hightlight"></span>
+											<small table></small>
+											{{-- <small hier></small> --}}
+										</div>
+										<i class="material-icons md-18">remove</i>
+									</div>
+								</div>
+							</section>
+
 							{{-- lista filtri esistenti --}}
-							<section data-element-search data-label data-sublist-filters hidden>
+							<section class="data-item" data-element-search data-label data-sublist-filters hidden>
 								<div class="selectable" data-label>
 									<div class="h-content">
 										<div class="v-content">
@@ -332,7 +362,7 @@
 							</section>
 
 							{{-- lista metriche esistenti --}}
-							<section data-element-search data-label data-sublist-metrics hidden>
+							<section class="data-item" data-element-search data-label data-sublist-metrics hidden>
 								<div class="selectable" data-label>
 									<div class="h-content">
 										<div class="v-content">
@@ -346,8 +376,19 @@
 								</div>
 							</section>
 
+							<section class="data-item" data-element-search data-label data-sublist-available-metrics hidden>
+								<div class="selectable" data-label>
+									<div class="h-content">
+										<div class="v-content">
+											<span metric class="hightlight"></span>
+											<small table></small>
+										</div>
+									</div>
+								</div>
+							</section>
+
 							{{-- lista tabelle --}}
-							<section data-element-search data-label data-sublist-tables hidden>
+							<section class="data-item" data-element-search data-label data-sublist-tables hidden>
 								<div class="selectable" data-label>
 									<div class="h-content">
 										<div class="v-content">
@@ -358,16 +399,20 @@
 								</div>
 							</section>
 
+							{{-- lista generica --}}
+							<section class="data-item list" data-element-search data-label data-sublist-gen>
+								<div class="selectable" data-label>
+									<div class="h-content">
+										<div class="v-content">
+											<span item></span>
+										</div>
+									</div>
+								</div>
+							</section>
+
 							<section data-element-search data-label data-sublist-generic hidden>
 								<span class="sublist">
 									<span generic></span>
-								</span>
-							</section>
-
-							{{-- template con un sottolivello nidificato --}}
-							<section data-element-search data-label data-sublist-nested-level-2 hidden>
-								<span class="sublist">
-									<span table></span>
 								</span>
 							</section>
 

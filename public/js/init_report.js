@@ -64,16 +64,18 @@ var StorageMetric = new MetricStorage();
 		const ul = document.getElementById('list-cubes');
 		for (const [key, value] of Object.entries(StorageCube.cubes)) {
 			const content = app.tmplList.content.cloneNode(true);
-			const section = content.querySelector('section[data-sublist-generic]');
-			const span = section.querySelector('span[generic]');
+			const section = content.querySelector('section[data-sublist-gen]');
+			const div = section.querySelector('div.selectable');
+			const span = section.querySelector('span');
+			section.hidden = false;
 			section.setAttribute('data-element-search', 'search-cube');
 			section.setAttribute('data-label', key);
-			section.setAttribute('data-searchable', true);
+			section.toggleAttribute('data-searchable');
 			section.setAttribute('data-cube-id', value.id);
 			section.setAttribute('data-cube-name', key);
-			section.hidden = false;
+			div.setAttribute('data-label', key);
 			span.innerText = key;
-			section.onclick = app.handlerCubeSelected;
+			div.onclick = app.handlerCubeSelected;
 			ul.appendChild(section);
 		}
 	}
@@ -88,16 +90,19 @@ var StorageMetric = new MetricStorage();
 			// per ogni dimensione presente in associatedDimensions inserisco un element (preso dal template app.tmplListField)
 			cubeValue.associatedDimensions.forEach((dimension, index) => {
 				const content = app.tmplList.content.cloneNode(true);
-				const section = content.querySelector('section[data-sublist-generic]');
-				const span = section.querySelector('span[generic]');
+				const section = content.querySelector('section[data-sublist-gen]');
+				const div = section.querySelector('div.selectable');
+				const span = section.querySelector('span');
+				section.hidden = true;
 				section.setAttribute('data-element-search', 'search-dimension');
-				section.setAttribute('data-label', dimension); // questo attr consente la ricerca dalla input sopra
-				section.setAttribute('data-cube-name', cubeName); // questo attr consente la ricerca dalla selezione del cubo
-				section.setAttribute('data-dimension-name', dimension);
+				section.setAttribute('data-label', dimension);
 				section.setAttribute('data-cube-name', cubeName);
+				section.setAttribute('data-dimension-name', dimension);
+
+				div.setAttribute('data-dimension-name', dimension);
 				span.innerText = dimension;
+				div.onclick = app.handlerDimensionSelected;
 				ul.appendChild(section);
-				section.onclick = app.handlerDimensionSelected;
 			});
 		}
 	}
@@ -110,26 +115,16 @@ var StorageMetric = new MetricStorage();
 		const hier = e.currentTarget.getAttribute('data-hier-name');
 		const dimension = e.currentTarget.getAttribute('data-dimension-name');
 		if (e.currentTarget.hasAttribute('selected')) {
-			// visualizzo, in ul list-columns (dialogTable), solo le tabelle delle gerarchie selezionate
-			document.querySelectorAll("#list-columns section[data-hier-name='" + hier + "']").forEach( (hier) => {
-				hier.hidden = false;
-				hier.toggleAttribute('data-searchable');
-			});
-			document.querySelectorAll("#exist-filters > section[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']").forEach( (filter) => {
-				filter.hidden = false;
-				filter.toggleAttribute('data-searchable');
-			});
-			// visualizzo, in list-tables (dialogFilter) solo le tabelle della gerarchia selezionata
-			document.querySelectorAll("#list-tables section[data-hier-name='" + hier + "']").forEach( (hier) => {
-				hier.hidden = false;
-				hier.toggleAttribute('data-searchable');
+			// visualizzo, in tutte le <ul>, gli elementi appartenenti alla dimensione->gerarchia selezionata
+			document.querySelectorAll("ul > section.data-item[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']").forEach( (item) => {
+				item.hidden = false;
+				item.toggleAttribute('data-searchable');
 			});
 		} else {
 			// deselezione della gerarchia, nascondo le tabelle della gerarchia selezionata
-			// TODO: da completare
-			document.querySelectorAll("#list-columns section[data-hier-name='" + hier + "']").forEach( (hier) => {
-				hier.hidden = true;
-				hier.removeAttribute('data-searchable');
+			document.querySelectorAll("ul section.data-item[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']").forEach( (item) => {
+				item.hidden = true;
+				item.toggleAttribute('data-searchable');
 			});
 		}
 	}
@@ -201,6 +196,7 @@ var StorageMetric = new MetricStorage();
 
 							section.setAttribute('data-label', field.ds.field);
 							section.setAttribute('data-element-search', 'search-columns');
+							section.setAttribute('data-dimension-name', key);
 							section.setAttribute('data-hier-name', hier);
 							div.setAttribute('data-label', field.ds.field);
 							div.setAttribute('data-table-name', table.table);
@@ -320,6 +316,7 @@ var StorageMetric = new MetricStorage();
 				div.setAttribute('data-table-name', cubeValue.FACT);
 				div.setAttribute('data-table-alias', cubeValue.alias);
 				div.setAttribute('data-cube-name', cubeName);
+				div.setAttribute('data-label', filter.name);
 				div.onclick = app.handlerFilterSelected;
 				span.innerText = filter.name;
 				smallTable.innerText = cubeValue.FACT;
@@ -332,39 +329,43 @@ var StorageMetric = new MetricStorage();
 	// popolo la lista dei filtri esistenti nella dialog metric-filter (metriche filtrate)
 	app.getMetricFilters = () => {
 		const ul = document.getElementById('ul-metric-filter');
+		// console.log('filters : ', StorageFilter.filters);
 		for (const [dimName, dimValue] of (Object.entries(StorageDimension.dimensions))) {
 			// per ogni dimensione recupero i filtri a questa appartenenti
-			for (const [hierName, hier] of (Object.entries(dimValue.hierarchies)) ) {				
-				// lista tabelle presenti per ogni gerarchia
+			for (const [hierName, hier] of (Object.entries(dimValue.hierarchies)) ) {
+				// per ogni gerarchia...
 				for (const [tableId, table] of Object.entries(hier.order)) {
+					// per ogni tabella...
 					const filters = StorageFilter.getFiltersByDimension(dimName, hierName, table.table);
 					if (filters.length > 0) {
-						const contentElement = app.tmplList.content.cloneNode(true);
-						const section = contentElement.querySelector('section[data-sublist-nested-level-2]');
-						const sublist = section.querySelector('.sublist');
-						const span = sublist.querySelector('span[table]');
-						section.setAttribute('data-element-search', 'search-exist-filters');
-						section.setAttribute('data-table-name', table.table);
-						span.innerText = table.table;
+						// se sono presenti filtri per questa tabella
 						filters.forEach( (filter) => {
-							section.setAttribute('data-label', table.table);
+							const contentElement = app.tmplList.content.cloneNode(true);
+							const section = contentElement.querySelector('section[data-sublist-filters]');
+							const div = section.querySelector('div.selectable');
+							const spanHContent = div.querySelector('.h-content');
+							const span = spanHContent.querySelector('span[filter]');
+							const smallTable = spanHContent.querySelector('small[table]');
+							const smallHier = spanHContent.querySelector('small:last-child');
+							section.setAttribute('data-element-search', 'search-exist-filters');
+							section.setAttribute('data-label', filter.name);
 							section.setAttribute('data-dimension-name', filter.dimension);
 							section.setAttribute('data-hier-name', filter.hier);
+							div.setAttribute('data-label', filter.name);
+							div.setAttribute('data-element-search','search-exist-filters');
+							div.setAttribute('data-dimension-name', filter.dimension);
+							div.setAttribute('data-hier-name', filter.hier);
+							div.setAttribute('data-table-name', filter.table);
+							div.setAttribute('data-table-alias', table.alias);
+							div.setAttribute('data-table-id', tableId);
+							div.onclick = app.handlerMetricFilterSelected;
 
-							const contentSub = app.tmplSublists.content.cloneNode(true);
-							const spanSub = contentSub.querySelector('span[filter]');
-							spanSub.setAttribute('data-label', filter.name);
-							spanSub.setAttribute('data-element-search','search-exist-filters');
-							spanSub.setAttribute('data-dimension-name', filter.dimension);
-							spanSub.setAttribute('data-hier-name', filter.hier);
-							spanSub.setAttribute('data-table-name', filter.table);
-							spanSub.setAttribute('data-table-alias', table.alias);
-							spanSub.setAttribute('data-table-id', tableId);
-							spanSub.innerText = filter.name;
-							spanSub.onclick = app.handlerMetricFilterSelected;
-							sublist.appendChild(spanSub);
+							span.innerText = filter.name;
+							smallTable.innerText = table.table;
+							smallHier.setAttribute('hier', true);
+							smallHier.innerText = hierName;
+							ul.appendChild(section);
 						});
-						ul.appendChild(section);
 					}
 				}
 			}
@@ -374,28 +375,27 @@ var StorageMetric = new MetricStorage();
 	app.getMetricFiltersFact = () => {
 		const ul = document.getElementById('ul-metric-filter');
 		for (const [cubeName, cubeValue] of Object.entries(StorageCube.cubes) ) {
-			const contentElement = app.tmplList.content.cloneNode(true);
-			const section = contentElement.querySelector('section[data-sublist-nested-level-2]');
-			const sublist = section.querySelector('.sublist');
-			const span = sublist.querySelector('span[table]');
-			section.setAttribute('data-element-search', 'search-exist-filters');
-			section.setAttribute('data-table-name', cubeValue.FACT);
-			span.innerText = cubeValue.FACT;
 			StorageFilter.getFiltersByCube(cubeName).forEach( (filter) => {
 				console.log('filter : ', filter);
-				section.setAttribute('data-label', cubeValue.FACT);
+				const content = app.tmplList.content.cloneNode(true);
+				const section = content.querySelector('section[data-sublist-filters]');
+				const div = section.querySelector('div.selectable');
+				const spanHContent = div.querySelector('.h-content');
+				const span = spanHContent.querySelector('span[filter]');
+				const smallTable = spanHContent.querySelector('small[table]');
+				const smallCube = spanHContent.querySelector('small:last-child');
+				section.setAttribute('data-element-search', 'search-exist-filters');
+				section.setAttribute('data-label', filter.name);
 				section.setAttribute('data-cube-name', cubeName);
-				const contentSub = app.tmplSublists.content.cloneNode(true);
-				const spanSub = contentSub.querySelector('span[filter]');
-				spanSub.setAttribute('data-label', filter.name);
-				spanSub.setAttribute('data-element-search','search-exist-filters');
-				spanSub.setAttribute('data-table-name', cubeValue.FACT);
-				spanSub.setAttribute('data-table-alias', cubeValue.alias);
-				spanSub.innerText = filter.name;
-				spanSub.onclick = app.handlerMetricFilterSelected;
-				sublist.appendChild(spanSub);
+				div.setAttribute('data-table-name', cubeValue.FACT);
+				div.setAttribute('data-table-alias', cubeValue.alias);
+				div.setAttribute('data-cube-name', cubeName);
+				div.onclick = app.handlerMetricFilterSelected;
+				span.innerText = filter.name;
+				smallTable.innerText = cubeValue.FACT;
+				smallCube.innerText = cubeName;
+				ul.appendChild(section);
 			});
-			ul.appendChild(section);
 		}
 	}
 
@@ -416,6 +416,7 @@ var StorageMetric = new MetricStorage();
 					const span = spanHContent.querySelector('span[table]');
 					const smallHier = spanHContent.querySelector('small');
 
+					section.setAttribute('data-dimension-name', key);
 					section.setAttribute('data-hier-name', hier);
 					section.setAttribute('data-label', table.table);
 					section.setAttribute('data-table-name', table.table);
@@ -449,27 +450,36 @@ var StorageMetric = new MetricStorage();
 			section.setAttribute('data-table-alias', value.alias);
 			section.setAttribute('data-schema-name', value.schema);
 			div.setAttribute('data-label', value.FACT);
-			div.onclick = app.handlerFactSelected;
+			div.setAttribute('data-table-name', value.FACT);
+			div.setAttribute('data-table-alias', value.alias);
+			div.setAttribute('data-schema', value.schema);
+			div.setAttribute('data-cube-name', key);
+			div.onclick = app.handlerSelectTable;
 			span.innerText = value.FACT;
 			small.innerText = key;
 			ul.appendChild(section);
 		}
 	}
 
-	// lista tabelle Fact
+	// lista tabelle Fact (step 1)
 	app.getFactTable = () => {
 		const ul = document.getElementById('list-fact-tables');
 		for (const [key, value] of Object.entries(StorageCube.cubes)) {
 			const content = app.tmplList.content.cloneNode(true);
-			const section = content.querySelector('section[data-sublist-generic]');
-			const subList = section.querySelector('.sublist');
-			const span = subList.querySelector('span[generic]');
+			const section = content.querySelector('section[data-sublist-gen]');
+			const div = section.querySelector('div.selectable');
+			const span = div.querySelector('span');
+			section.classList.remove('data-item');
 			section.setAttribute('data-label', value.FACT);
 			section.setAttribute('data-cube-name', key);
 			section.setAttribute('data-table-alias', value.alias);
 			section.setAttribute('data-schema-name', value.schema);
-			section.onclick = app.handlerFactSelected;
+			div.setAttribute('data-cube-name', key);
+			div.setAttribute('data-label', value.FACT);
+			div.setAttribute('data-table-alias', value.alias);
+
 			span.innerText = value.FACT;
+			div.onclick = app.handlerFactSelected;
 			ul.appendChild(section);
 		}
 	}
@@ -509,17 +519,24 @@ var StorageMetric = new MetricStorage();
 			console.log(value.metrics[value.FACT]);
 			value.metrics[value.FACT].forEach( (metric) => {
 				const content = app.tmplList.content.cloneNode(true);
-				const section = content.querySelector('section[data-sublist-generic]');
-				const subList = section.querySelector('.sublist');
-				const span = subList.querySelector('span[generic]');
+				const section = content.querySelector('section[data-sublist-available-metrics]');
+				const div = section.querySelector('div.selectable');
+				const spanHContent = div.querySelector('.h-content');
+				const span = div.querySelector('span[metric]');
+				const small = div.querySelector('small');
 
 				section.setAttribute('data-label', metric);
 				section.setAttribute('data-cube-name', key);
 				section.setAttribute('data-table-alias', value.alias);
 				section.setAttribute('data-table-name', value.FACT);
 				section.setAttribute('data-element-search', 'search-available-metrics');
+				div.setAttribute('data-table-alias', value.alias);
+				div.setAttribute('data-table-name', value.FACT);
+				div.setAttribute('data-label', metric);
+				div.setAttribute('data-cube-name', key);
+				div.onclick = app.handlerMetricAvailable;
 				span.innerText = metric;
-				section.onclick = app.handlerMetricAvailable;
+				small.innerText = value.FACT;
 				ul.appendChild(section);
 			});
 		}
@@ -532,35 +549,15 @@ var StorageMetric = new MetricStorage();
 		const table = e.currentTarget.getAttribute('data-label');
 		const alias = e.currentTarget.getAttribute('data-table-alias');
 		if (e.currentTarget.hasAttribute('selected')) {
-			// visualizzo, in ul list-columns (dialogTable), le colonne appartenenti alla Fact
-			// verifico se sono presenti colonne associate alla FACT
-			if (document.querySelector("#list-columns-fact section[data-cube-name='" + cube + "']")) {
-				const fact = document.querySelector("#list-columns-fact section[data-cube-name='" + cube + "']");
-				fact.hidden = false;
-				fact.toggleAttribute('data-searchable');
-			}
-			document.querySelectorAll("#list-filters-fact section[data-cube-name='" + cube + "']").forEach( (cube) => {
-				cube.hidden = false;
-				cube.toggleAttribute('data-searchable');
+			// visualizzo, in tutte le ul section.data-item[data-cube-name] gli elementi appartenenti al cubo selezionato
+			document.querySelectorAll("ul > section.data-item[data-cube-name='" + cube + "']").forEach( item => {
+				item.hidden = false;
+				item.toggleAttribute('data-searchable');
 			});
-
-			// visualizzo, in exist-filters, i filtri appartenenti alla Fact
-			document.querySelectorAll("#exist-filters section[data-cube-name='" + cube + "'], #ul-metric-filter section[data-cube-name='" + cube + "']").forEach( (filter) => {
-				filter.hidden = false;
-				filter.toggleAttribute('data-searchable');
-			});
-			document.querySelectorAll("#exist-metrics section[data-cube-name='" + cube + "']").forEach( (metric) => {
-				// imposto data-table-alias nella <ul> delle metriche già esistenti
-				metric.hidden = false;
-				metric.toggleAttribute('data-searchable');
-				// metric.querySelector('span[metric]').setAttribute('data-table-alias', alias);
-			});
-			// imposto, nella dialog-metric il nome della tabella selezionata
-			app.dialogMetric.querySelector('section[data-table-name]').setAttribute('data-table-name', table);
-			// visualizzo le metriche disponbili, mappate, per questo cubo, serve per la creazione di una nuova metrica
-			document.querySelectorAll("#ul-available-metrics section[data-cube-name='" + cube + "']").forEach( (metric) => {
-				metric.hidden = false;
-				metric.setAttribute('data-searchable', true);
+		} else {
+			document.querySelectorAll("ul > section.data-item[data-cube-name='" + cube + "']").forEach( item => {
+				item.hidden = true;
+				item.toggleAttribute('data-searchable');
 			});
 		}
 	}
@@ -643,7 +640,6 @@ var StorageMetric = new MetricStorage();
 		// const url = 'ajax/cube.php';
 		// const params = 'cube='+jsonData;
 		// // console.dir(params);
-		// debugger;
 		// const init = {headers: {'Content-Type': 'application/x-www-form-urlencoded'}, method: 'POST', body: params};
 		// const req = new Request(url, init);
 		App.handlerConsole('Process in corso', 'info');
@@ -695,27 +691,9 @@ var StorageMetric = new MetricStorage();
 			});
 			// visualizzo la/e tabelle fact nello step-2
 			document.querySelector("#list-fact-tables > section[data-cube-name='" + StorageCube.selected.name + "']").hidden = false;
-			/*
-			// aggiungo la FACT al cubeSelected, questa mi serve per recuperare i filtri nella dialog-metrics che appartengono alla FACT
-			StorageCube.addCube();
-			// visualizzo la FACT nello step 3 Metrics
-			document.querySelectorAll("ul[data-id='fields-tables'] > section[data-cube-name='" + StorageCube.selected.name + "']").forEach((table) => {
-				table.hidden = false;
-				table.toggleAttribute('data-searchable');
-			});
-			// aggiungo alla <ul> fields-hierarchies la FACT-alias-schema selezionata
-			app.addFACTToHierList(document.querySelector('#tableList-hierarchies > ul'));
-			app.addFACTToDialogColumns(document.querySelector('#fieldList-tables > ul'));
-			app.addFACTToDialogFilters(document.querySelector('#filter-fieldList-tables > ul'));
-			*/
 		} else {
 			// deselect cube
 			document.querySelectorAll("ul[data-id='fields-dimensions'] > section[data-cube-name='" + StorageCube.selected.name + "']").forEach((table) => {
-				table.hidden = true;
-				table.toggleAttribute('data-searchable');
-			});
-			// nascondo la FACT nello step 3
-			document.querySelectorAll("ul[data-id='fields-tables'] > section[data-cube-name='" + StorageCube.selected.name + "']").forEach((table) => {
 				table.hidden = true;
 				table.toggleAttribute('data-searchable');
 			});
@@ -737,9 +715,10 @@ var StorageMetric = new MetricStorage();
 			Query.factRelation = StorageDimension.selected;
 			// imposto, in un object le dimensioni selezionate, questo mi servirà nella dialog-metrics per visualizzare/nascondere solo i filtri appartenenti alle dimensioni selezionate
 			// ... probabilmente mi servirà anche nella dialog-filter per lo stesso utilizzo
+			// TODO: da rivedere se viene utilizzato
 			StorageDimension.add();
 		} else {
-			document.querySelectorAll("ul[data-id='fields-hierarchies'] > section[data-dimension-name='" + StorageDimension.selected.name + "']").forEach((hier) => {
+			document.querySelectorAll("#list-hierarchies > section[data-dimension-name='" + StorageDimension.selected.name + "']").forEach((hier) => {
 				hier.hidden = true;
 				hier.removeAttribute('data-searchable');
 			});
@@ -751,7 +730,6 @@ var StorageMetric = new MetricStorage();
 
 	// selezione di un filtro già presente, lo salvo nell'oggetto Query
 	app.handlerFilterSelected = (e) => {
-		debugger;
 		StorageFilter.filter = e.currentTarget.getAttribute('data-label');
 		if (e.currentTarget.hasAttribute('data-hier-name')) {
 			hier = e.currentTarget.getAttribute('data-hier-name');
@@ -765,7 +743,6 @@ var StorageMetric = new MetricStorage();
 		if (e.currentTarget.hasAttribute('selected')) {
 			// recupero dallo storage il filtro selezionato
 			console.log(StorageFilter.filter);
-			// debugger;
 			if (StorageFilter.filter.hier) {
 				// imposto la firstTable se il filtro appartiene a una dimensione e non a un cubo
 				Query.addTables(StorageFilter.filter.hier);
@@ -979,12 +956,11 @@ var StorageMetric = new MetricStorage();
 	// selezione del field nella dialogFilter, questo metodo farà partire la query per ottenere i campi distinti (in getDistinctValues())
 	app.handlerSelectField = (e) => {
 		e.currentTarget.toggleAttribute('selected');
-		// debugger;
 		if (e.currentTarget.hasAttribute('selected')) {
 			// field selezionato
-			Query.field = e.target.getAttribute('label');
-			Query.fieldType = e.target.getAttribute('data-type');
-			Query.schema = e.target.getAttribute('data-schema');
+			Query.field = e.currentTarget.getAttribute('label');
+			Query.fieldType = e.currentTarget.getAttribute('data-type');
+			Query.schema = e.currentTarget.getAttribute('data-schema');
 			const valueList = app.dialogValue.querySelector('#dialog-filter-values');
 			valueList.querySelectorAll('section').forEach( section => section.remove());
 			const textarea = document.getElementById('filterSQLFormula');
@@ -1000,7 +976,6 @@ var StorageMetric = new MetricStorage();
 		// console.log('params : ', params);
 		// const init = {headers: {'Content-Type': 'application/x-www-form-urlencoded'}, method: 'POST', body: params};
 		// const req = new Request(url, init);
-		// debugger;
 
 		await fetch('/fetch_api/' + Query.schema + '/schema/' + Query.table + '/table_info')
 			.then((response) => {
@@ -1016,21 +991,23 @@ var StorageMetric = new MetricStorage();
 					for (const [key, value] of Object.entries(data)) {
 						// console.log(key, value);
 						const content = app.tmplList.content.cloneNode(true);
-						const section = content.querySelector('section[data-sublist-generic]');
-						const span = section.querySelector('span[generic]');
-						section.hidden = false;
+						const section = content.querySelector('section[data-sublist-gen]');
+						const div = section.querySelector('div.selectable');
+						const span = div.querySelector('span');
+						// section.hidden = false;
 						section.setAttribute('data-searchable', true);
 						section.setAttribute('data-label', value.COLUMN_NAME);
 						section.setAttribute('data-element-search', 'dialog-filter-search-field');
 						section.setAttribute('data-table-name', Query.table);
-						span.innerText = value.COLUMN_NAME;
-						span.setAttribute('data-schema', Query.schema);
+						div.setAttribute('data-schema', Query.schema);
 						// scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
 						let pos = value.DATA_TYPE.indexOf('('); // datatype
 						let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-						span.setAttribute('data-type', type);
-						span.setAttribute('label', value.COLUMN_NAME); // nome campo
-						span.onclick = app.handlerSelectField;
+						div.setAttribute('data-type', type);
+						div.setAttribute('label', value.COLUMN_NAME); // nome campo
+						div.onclick = app.handlerSelectField;
+						span.innerText = value.COLUMN_NAME;
+						
 						ul.appendChild(section);
 					}
 				} else {
@@ -1044,7 +1021,6 @@ var StorageMetric = new MetricStorage();
 	app.checkRelations = (hier) => {
 		// recupero la prima tabella selezionata della gerarchia
 		console.log(+Query.tables.tableId);
-		// debugger;
 		for (const [k, order] of Object.entries(StorageDimension.selected.hierarchies[hier].order)) {
 			// recupero la property 'join' (nella dimensione) dove la key è maggiore della tableId al momento selezionata (Quindi recupero tutte le hier inferiori)
 			if (+k >= +Query.tables.tableId) {
@@ -1059,46 +1035,28 @@ var StorageMetric = new MetricStorage();
 
 	// tasto Fatto nella dialog Column
 	app.btnColumnDone.onclick = () => {
-		// L'oggetto Query.select ora è popolato con le colonne scelte, da aggiungere al report. Popolo una <ul> dove sono presenti le colonne scelte prima di chiudere la dialog.
-		// console.log('Query.table : ', Query.table);
-		// console.log('Query.tableId : ', Query.tableId);
-		if (!app.dialogColumns.querySelector('section').hasAttribute('data-fact-name')) {
-			const hier = app.dialogColumns.querySelector('section').getAttribute('data-hier-name');
-			/*const list = document.getElementById('fieldList-tables');
-			StorageDimension.selected = app.dialogColumns.querySelector('section').getAttribute('data-dimension-name');*/
-			// recupero la property #select della classe Query per visualizzare nella <ul> #fields-set
-			const ul = document.getElementById('report-columns');
-			// ripulisco la <ul> in caso di una precedente aggiunta delle colonne
-			ul.querySelectorAll('section').forEach( section => section.remove());
-			console.log('Query.select : ', Query.select);
-			// aggiungo, alla <ul> report-columns le colonne selezionate nella dialog
-			for (const [key, value] of Object.entries(Query.select)) {
-				const contentElement = app.tmplList.content.cloneNode(true);
-				const section = contentElement.querySelector('section[data-sublist-generic]');
-				const span = section.querySelector('span[generic]');
-				section.hidden = false;
-				section.setAttribute('data-label', value.alias);
-				section.setAttribute('data-element-search', 'search-columns-selected');
-				section.setAttribute('data-searchable', true);
-				span.innerText = value.alias;
-				ul.appendChild(section);
-			}
-		} else {
-			// FACT
-			const ul = document.getElementById('fields-set');
-			console.log('Query.select : ', Query.select);
-			for (const [key, value] of Object.entries(Query.select)) {
-				const contentElement = app.tmplList.content.cloneNode(true);
-				const section = contentElement.querySelector('section[data-sublist-generic]');
-				const span = section.querySelector('span[generic');
-				section.hidden = false;
-				section.setAttribute('data-element-search', 'search-columns-selected')
-				section.setAttribute('data-label', value.alias);
-				section.setAttribute('data-searchable', true);
-				span.innerText = value.alias;
-				ul.appendChild(section);
-			}
-		}		
+		// L'oggetto Query.select ora è popolato con le colonne scelte, da aggiungere al report.
+		// Popolo una <ul> dove sono presenti le colonne scelte prima di chiudere la dialog.
+		const ul = document.getElementById('report-columns');
+		// ripulisco la <ul> in caso di una precedente aggiunta delle colonne
+		ul.querySelectorAll('section').forEach( section => section.remove());
+		// console.log('Query.select : ', Query.select);
+		// aggiungo, alla <ul> report-columns le colonne selezionate nella dialog
+		for (const [key, value] of Object.entries(Query.select)) {
+			const contentElement = app.tmplList.content.cloneNode(true);
+			const section = contentElement.querySelector('section[data-sublist-columns-selected]');
+			const div = section.querySelector('div');
+			const spanHContent = div.querySelector('.h-content');
+			const column = spanHContent.querySelector('span[column]');
+			const smallTable = spanHContent.querySelector('small');
+			section.hidden = false;
+			section.setAttribute('data-label', value.alias);
+			section.setAttribute('data-element-search', 'search-columns-selected');
+			section.setAttribute('data-searchable', true);
+			column.innerText = value.alias;
+			smallTable.innerText = value.table;
+			ul.appendChild(section);
+		}
 		app.dialogColumns.close();
 	}
 
@@ -1140,7 +1098,7 @@ var StorageMetric = new MetricStorage();
 	app.btnMetricSave.onclick = (e) => {
 		const name = document.getElementById('metric-name').value;
 		const alias = document.getElementById('alias-metric').value;
-		const SQLFunction = document.querySelector('#ul-aggregation-functions > section[selected]').getAttribute('data-label');
+		const SQLFunction = document.querySelector('#ul-aggregation-functions .selectable[selected]').getAttribute('data-label');
 		const distinctOption = document.getElementById('checkbox-distinct').checked;
 		console.log('Query.table : ', Query.table);
 		console.log('Query.tableAlias : ', Query.tableAlias);
@@ -1179,27 +1137,25 @@ var StorageMetric = new MetricStorage();
 		// TODO: spostare in una funzione il codice per aggiungere la nuova metrica all'elenco di quelle esistenti (da fare anche per i filtri creati/esistenti)
 		const ul = document.getElementById('exist-metrics');
 		const content = app.tmplList.content.cloneNode(true);
-		const section = content.querySelector('section[data-sublist-table-metrics]');
-		const subList = section.querySelector('.sublist');
-		const spanTable = subList.querySelector('span[table]');
-		const spanMetric = subList.querySelector('span[metric]');
+		const section = content.querySelector('section[data-sublist-metrics]');
+		const div = section.querySelector('div.selectable');
+		const spanMetric = div.querySelector('span[metric]');
+		const small = div.querySelector('small');
 		section.removeAttribute('hidden');
-		section.setAttribute('data-label', Query.metricName);
-		section.setAttribute('data-table-name', Query.table);
-		section.setAttribute('data-cube-name', StorageCube.selected.name);
 		section.setAttribute('data-element-search', 'search-exist-metrics');
-		spanTable.innerText = Query.table;
+		section.setAttribute('data-label', Query.metricName);
+		section.setAttribute('data-cube-name', StorageCube.selected.name);
+		section.toggleAttribute('data-searchable');
+
+		div.setAttribute('data-label', Query.metricName);
+		div.setAttribute('data-table-name', Query.table);
+		div.setAttribute('data-table-alias', Query.tableAlias);
+		div.setAttribute('data-cube-name', StorageCube.selected.name);
+		
 		spanMetric.innerText = Query.metricName;
-		spanMetric.setAttribute('data-label', Query.metricName);			
-		spanMetric.setAttribute('data-table-name', Query.table);
-		spanMetric.setAttribute('data-table-alias', Query.tableAlias);
-		spanMetric.setAttribute('data-cube-name', StorageCube.selected.name);
-		spanMetric.onclick = app.handlerMetricSelected;
+		small.innerText = Query.table;
+		div.onclick = app.handlerMetricSelected;
 		ul.appendChild(section);
-
-		// storage.save = metricObj;
-
-		app.dialogMetric.close();
 	}
 
 	// salvo il filtro nel DB, table : bi_filters
@@ -1258,32 +1214,43 @@ var StorageMetric = new MetricStorage();
 		// aggiorno la lista dei filtri esistenti, aggiungendo il filtro appena creato
 		const ul = document.getElementById('exist-filters');
 		const content = app.tmplList.content.cloneNode(true);
-		const section = content.querySelector('section[data-sublist-nested-level-2]');
-		const subList = section.querySelector('.sublist');
-		const spanTable = subList.querySelector('span[table]');
-		const filter = subList.querySelector('span[filter]');
+		const section = content.querySelector('section[data-sublist-filters]');
+		const div = section.querySelector('div.selectable');
+		const spanHContent = div.querySelector('.h-content');
+		const span = spanHContent.querySelector('span[filter]');
+		const smallTable = spanHContent.querySelector('small[table]');
+		const smallHier = spanHContent.querySelector('small:last-child');
 		section.removeAttribute('hidden');
 		section.setAttribute('data-label', Query.filterName);
-		section.setAttribute('data-table-name', Query.table);
 		section.setAttribute('data-element-search', 'search-exist-filters');
-		spanTable.innerText = Query.table;
-		filter.innerText = Query.filterName;
-		filter.setAttribute('data-label', Query.filterName);
+		section.setAttribute('data-dimension-name', dimension);
+		section.setAttribute('data-hier-name', hier);
+		div.setAttribute('data-label', Query.filterName);
+		div.setAttribute('data-table-name', Query.table);
+		div.setAttribute('data-table-alias', Query.tableAlias);
+
+		span.innerText = Query.filterName;
+		smallTable.innerText = Query.table;
+		smallHier.setAttribute('hier', true);
+		smallHier.innerText = hier;
+		
 		if (dimension !== undefined) {
-			filter.setAttribute('data-dimension-name', dimension);
-			filter.setAttribute('data-hier-name', hier);
-			filter.setAttribute('data-table-id', Query.tableId);
-		}		
-		filter.setAttribute('data-table-name', Query.table);
-		filter.setAttribute('data-table-alias', Query.tableAlias);
-		filter.onclick = app.handlerFilterSelected;
+			div.setAttribute('data-dimension-name', dimension);
+			div.setAttribute('data-hier-name', hier);
+			div.setAttribute('data-table-id', Query.tableId);
+		} else {
+			section.setAttribute('data-cube-name', StorageCube.selected.name);
+			div.setAttribute('data-cube-name', StorageCube.selected.name);
+		}
+
+		div.onclick = app.handlerFilterSelected;
 		ul.appendChild(section);
 	}
 
 	// tasto OK nella dialogValue
 	app.btnValueDone.onclick = () => {
 		// recupero tutti i valori selezionati.
-		const valueSelected = app.dialogValue.querySelectorAll('#dialog-filter-values > section[selected]');
+		const valueSelected = app.dialogValue.querySelectorAll('#dialog-filter-values .selectable[selected]');
 		// TODO: Elaborare un sistema per effettuare la IN(), la BETWEEN, AND, OR, ecc...in base alla selezione dei valori
 		const textarea = document.getElementById('filterSQLFormula');
 		let arrayValues = [];
@@ -1314,25 +1281,21 @@ var StorageMetric = new MetricStorage();
 			})
 			.then((response) => response.json())
 			.then((data) => {
-				// debugger;
 				console.log(data);
 				if (data) {
 					const ul = document.getElementById('dialog-filter-values');
 					for (const [key, value] of Object.entries(data)) {
 						const content = app.tmplList.content.cloneNode(true);
-						const section = content.querySelector('section[data-sublist-generic');
-						const span = section.querySelector('span[generic]');
-						section.hidden = false;
+						const section = content.querySelector('section[data-sublist-gen');
+						const div = section.querySelector('div.selectable');
+						const span = div.querySelector('span');
 						section.setAttribute('data-label', value[Query.field]);
 						section.setAttribute('data-element-search', 'dialog-value-search');
 						section.setAttribute('data-searchable', true);
-						// section.setAttribute('data-table-name', Query.table);
+						div.setAttribute('data-label', value[Query.field]);
 						span.innerText = value[Query.field];
-						// span.setAttribute('label', value[Query.field]);
 						span.id = key;
-						// li.setAttribute('label', value[Query.field]);
-						span.innerHTML = value[Query.field];
-						section.onclick = app.handlerSelectValue;
+						div.onclick = app.handlerSelectValue;
 						ul.appendChild(section);
 					}
 				} else {
@@ -1469,7 +1432,7 @@ var StorageMetric = new MetricStorage();
 	// aggiungi metriche (step-2)
 	app.btnAddMetrics.onclick = (e) => {
 		// verifico se è stato selezionato almeno un cubo
-		const cubeSelectedCount = document.querySelectorAll('#list-fact-tables > section[selected]').length;
+		const cubeSelectedCount = document.querySelectorAll('#list-fact-tables .selectable[selected]').length;
 		if (cubeSelectedCount === 0) {
 			App.handlerConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
 			return;
@@ -1584,10 +1547,10 @@ var StorageMetric = new MetricStorage();
 	document.getElementById('filterSQLFormula').oninput = () => app.checkFilterForm();
 
 	// selezione di una funzione di aggregazione (dialog-metric)
-	app.aggregationFunction.querySelectorAll('section').forEach( (fn) => {
+	app.aggregationFunction.querySelectorAll('section > .selectable').forEach( (fn) => {
 		fn.onclick = (e) => {
 			// deseleziono altre funzioni di aggregazione precedentemente selezionate e seleziono quella e.target
-			app.dialogMetric.querySelector('#ul-aggregation-functions > section[selected]').toggleAttribute('selected');
+			document.querySelector('#ul-aggregation-functions .selectable[selected]').toggleAttribute('selected');
 			// console.log('e.currentTarget : ', e.currentTarget);
 			e.currentTarget.toggleAttribute('selected');
 		}

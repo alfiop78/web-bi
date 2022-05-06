@@ -109,9 +109,12 @@ class Application {
 	}
 
 	initInput(e) {
-		(e.target.value.length > 0) ?
-			e.target.parentElement.querySelector('label').classList.add('has-content') :
-			e.target.parentElement.querySelector('label').classList.remove('has-content');
+		// non valido per le textarea
+		if (e.target.hasAttribute('type')) {
+			(e.target.value.length > 0) ?
+				e.target.parentElement.querySelector('label').classList.add('has-content') :
+				e.target.parentElement.querySelector('label').classList.remove('has-content');
+		}
 	}
 
 	markSearch(item, attr, searchText) {
