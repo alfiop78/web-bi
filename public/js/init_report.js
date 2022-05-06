@@ -486,28 +486,25 @@ var StorageMetric = new MetricStorage();
 	app.getMetrics = () => {
 		const ul = document.getElementById('exist-metrics');
 		for (const [cubeName, cubeValue] of Object.entries(StorageCube.cubes)) {
-			const contentElement = app.tmplList.content.cloneNode(true);
-			const section = contentElement.querySelector('section[data-sublist-nested-level-2]');
-			const sublist = section.querySelector('.sublist');
-			const span = sublist.querySelector('span[table]');
-			section.setAttribute('data-element-search', 'search-exist-metrics');
-			section.setAttribute('data-table-name', cubeValue.FACT);
-			section.setAttribute('data-cube-name', cubeName);
-			span.innerText = cubeValue.FACT;
 			for (const [key, value] of Object.entries(StorageMetric.metrics)) {
+				const contentElement = app.tmplList.content.cloneNode(true);
+				const section = contentElement.querySelector('section[data-sublist-metrics]');
+				const div = section.querySelector('div.selectable');
+				const spanHContent = div.querySelector('.h-content');
+				const span = spanHContent.querySelector('span[metric]');
+				const smallTable = spanHContent.querySelector('small[table]');
+				section.setAttribute('data-element-search', 'search-exist-metrics');
 				section.setAttribute('data-label', key);
-				const contentSub = app.tmplSublists.content.cloneNode(true);
-				const spanSub = contentSub.querySelector('span[metric]');
-				spanSub.setAttribute('data-cube-name', cubeName);
-				spanSub.setAttribute('data-label', key);
-				spanSub.setAttribute('data-element-search','search-exist-metrics');
-				spanSub.setAttribute('data-table-name', cubeValue.FACT);
-				spanSub.setAttribute('data-table-alias', cubeValue.alias);
-				spanSub.innerText = key;
-				spanSub.onclick = app.handlerMetricSelected;
-				sublist.appendChild(spanSub);
+				section.setAttribute('data-cube-name', cubeName);
+				div.setAttribute('data-table-name', cubeValue.FACT);
+				div.setAttribute('data-table-alias', cubeValue.alias);
+				div.setAttribute('data-cube-name', cubeName);
+				div.setAttribute('data-label', key);
+				div.onclick = app.handlerMetricSelected;
+				span.innerText = key;
+				smallTable.innerText = cubeValue.FACT;
+				ul.appendChild(section);
 			}
-			ul.appendChild(section);
 		}
 	}
 
@@ -1358,7 +1355,7 @@ var StorageMetric = new MetricStorage();
 
 	app.getHierarchies();
 
-	// app.getColumns();
+	app.getColumns();
 
 	// app.getColumnsFact();
 

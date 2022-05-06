@@ -319,6 +319,7 @@
 								<span class="sublist"></span>
 							</section>
 
+							{{-- lista filtri esistenti --}}
 							<section data-element-search data-label data-sublist-filters hidden>
 								<div class="selectable" data-label>
 									<div class="h-content">
@@ -331,7 +332,22 @@
 									</div>
 								</div>
 							</section>
-							
+
+							{{-- lista metriche esistenti --}}
+							<section data-element-search data-label data-sublist-metrics hidden>
+								<div class="selectable" data-label>
+									<div class="h-content">
+										<div class="v-content">
+											{{-- TODO: metriche composte potrei colorarle in modo diverso, cos' come le metriche filtrate --}}
+											<span metric class="hightlight"></span>
+											<small table></small>
+											{{-- TODO: qui, sulle metriche filtrate potrei visualizzare un popup con l'elenco dei filtri, oppure, per le metriche composte, visualizzarne, nel popup, la propria formula --}}
+										</div>
+										<i class="material-icons md-18">edit</i>
+									</div>
+								</div>
+							</section>
+
 							<section data-element-search data-label data-sublist-generic hidden>
 								<span class="sublist">
 									<span generic></span>
