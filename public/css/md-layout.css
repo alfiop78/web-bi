@@ -103,22 +103,6 @@ ul > section > .sublist{display: flex;flex-direction: column; width: 100%;}
 /*ul > section > .sublist > span[data-table-id] {padding: 6px 4px 6px 16px; width: 100%; display: flex; justify-content: space-between; align-items: center;}*/
 ul > section > .sublist > span[data-table-id] {padding: 6px 4px 6px 16px; width: 100%;}
 #list-hierarchies > section span[data-table-id]{color: grey;}
-/*nuovo metodo per le liste*/
-section[data-sublist-nested-level-2] > .sublist > span[table]{padding: .5em; color: grey;}
-section[data-sublist-nested-level-2] > .sublist > span[filter]{padding: .5em 1.5em; border-left: solid 0px gainsboro; transition: border-left 150ms;}
-section[data-sublist-nested-level-2] > .sublist > span[filter]:hover{cursor: pointer; border-left: solid thick indianred; transition: border-left 150ms;}
-section[data-sublist-nested-level-2] > .sublist > span[filter][selected]{border-left-width: 5px; border-left-style: solid; border-left-color: indianred;}
-
-section[data-sublist-nested-level-2] > .sublist > span[metric]{padding: .5em 1.5em; border-left: solid 0px gainsboro; transition: border-left 150ms;}
-section[data-sublist-nested-level-2] > .sublist > span[metric]:hover{cursor: pointer; border-left: solid thick indianred; transition: border-left 150ms;}
-section[data-sublist-nested-level-2] > .sublist > span[metric][selected]{border-left-width: 5px; border-left-style: solid; border-left-color: indianred;}
-
-span.nested.hightlight{padding: .5em; color: sienna;}
-span.nested{padding: .5em .75em; color: grey;}
-span.nested.final{padding: .5em 1em; border-left: solid 0px gainsboro; transition: border-left 150ms;}
-span.nested.final:hover{cursor: pointer; border-left: solid thick indianred; transition: border-left 150ms;}
-span.nested.final[selected]{cursor: pointer; border-left: solid thick indianred; transition: border-left 150ms;}
-/*nuovo metodo per le liste*/
 
 .sublist-element > .icons{display: flex;}
 .sublist-item {text-overflow: ellipsis;width: 100%;overflow-x: clip;}

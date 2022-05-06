@@ -298,13 +298,17 @@
 							</div>
 						</div>
 
-						<template id="template-hier"><span hier class="nested"></span></template>
-						<template id="template-table"><span table class="nested"></span></template>
-						<template id="template-column"><span column class="nested"></span></template>
+						<template id="template-hier"><span hier class="no-highlight"></span></template>
+						<template id="template-table"><span table class=""></span></template>
+						<template id="template-column"><span column class=""></span></template>
 						<template id="template-filter">
-							<div>
-								<div class="span-h-content">
-									<span filter class="nested hightlight"></span>&nbsp;(<small table></small>)
+							<div class="selectable" data-label>
+								<div class="h-content">
+									<div class="v-content">
+										<span filter class="hightlight"></span>
+										<small table></small>
+									</div>
+									<i class="material-icons md-18">edit</i>
 								</div>
 							</div>
 						</template>
@@ -314,10 +318,23 @@
 							<section data-element-search data-label data-sublist-nested>
 								<span class="sublist"></span>
 							</section>
+
+							<section data-element-search data-label data-sublist-filters hidden>
+								<div class="selectable" data-label>
+									<div class="h-content">
+										<div class="v-content">
+											<span filter class="hightlight"></span>
+											<small table></small>
+											<small></small>
+										</div>
+										<i class="material-icons md-18">edit</i>
+									</div>
+								</div>
+							</section>
 							
 							<section data-element-search data-label data-sublist-generic hidden>
 								<span class="sublist">
-									<span generic class="selectable"></span>
+									<span generic></span>
 								</span>
 							</section>
 

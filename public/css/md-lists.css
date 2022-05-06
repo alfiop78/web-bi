@@ -1,1 +1,7 @@
-.span-h-content{display: flex; align-items: center; padding: 1em;}
+.h-content{display: flex; align-items: center;}
+.v-content{display: flex;flex-flow: column;width: 100%;}
+span.hightlight{color: sienna;}
+span.no-highlight{color: dimgray; 4px 2px;}
+.selectable{border-left: solid 0px indianred; transition: border-left 100ms; margin: 4px; padding: 2px 4px;}
+.selectable:hover{cursor: pointer; border-left: solid thick indianred; transition: border-left 100ms;}
+.selectable[selected]{cursor: pointer; border-left: solid thick sienna; transition: border-left 100ms;}

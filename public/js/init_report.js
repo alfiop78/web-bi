@@ -115,25 +115,9 @@ var StorageMetric = new MetricStorage();
 				hier.hidden = false;
 				hier.setAttribute('data-searchable', true);
 			});
-			// visualizzo, in exist-filters, solo i filtri relativi alla dimensione-hier selezionata
-			const filters = StorageFilter.getFiltersByHierarchy(dimension, hier);
-			// const alias = table.getAttribute('data-table-alias');
-			// const tableId = table.getAttribute('data-table-id');
-			filters.forEach( (filter) => {
-				const filterRef = document.querySelector("#exist-filters > section[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']");
-				const filterRefMetricFilter = document.querySelector("#ul-metric-filter > section[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']");
-				if (filterRef) {
-					filterRef.removeAttribute('hidden');
-					filterRef.setAttribute('data-searchable', true);
-					// filterRef.querySelector('span[table]').setAttribute('data-table-alias', alias);
-					// filterRef.querySelector('span[table]').setAttribute('data-table-id', tableId);
-				}
-				if (filterRefMetricFilter) {
-					filterRefMetricFilter.removeAttribute('hidden');
-					filterRefMetricFilter.setAttribute('data-searchable', true);
-					// filterRefMetricFilter.querySelector('span[generic]').setAttribute('data-table-alias', alias);
-					// filterRefMetricFilter.querySelector('span[generic]').setAttribute('data-table-id', tableId);
-				}
+			document.querySelectorAll("#exist-filters > section[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']").forEach( (filter) => {
+				filter.hidden = false;
+				filter.toggleAttribute('data-searchable');
 			});
 			// visualizzo, in list-tables (dialogFilter) solo le tabelle della gerarchia selezionata
 			document.querySelectorAll("#list-tables section[data-hier-name='" + hier + "']").forEach( (hier) => {
@@ -302,49 +286,40 @@ var StorageMetric = new MetricStorage();
 			// per ogni dimensione recupero i filtri a questa appartenenti
 			for (const [hierName, hier] of (Object.entries(dimValue.hierarchies)) ) {
 				// per ogni gerarchia...
-				const contentElement = app.tmplList.content.cloneNode(true);
-				const section = contentElement.querySelector('section[data-sublist-nested]');
-				const sublist = section.querySelector('.sublist');
-				
 				for (const [tableId, table] of Object.entries(hier.order)) {
 					// per ogni tabella...
 					const filters = StorageFilter.getFiltersByDimension(dimName, hierName, table.table);
 					if (filters.length > 0) {
 						// se sono presenti filtri per questa tabella
-						const tmplHier = document.getElementById('template-hier');
-						const contentHier = tmplHier.content.cloneNode(true);
-						const spanHier = contentHier.querySelector('span[hier]');
-						spanHier.innerText = hierName;
-						sublist.appendChild(spanHier);		
 						filters.forEach( (filter) => {
-							const tmplFilter = document.getElementById('template-filter');
-							const contentFilter = tmplFilter.content.cloneNode(true);
-							const div = contentFilter.querySelector('div');
-							const spanHContent = contentFilter.querySelector('.span-h-content');
-							const span = contentFilter.querySelector('span[filter]');
-							const small = contentFilter.querySelector('small[table]');
+							const contentElement = app.tmplList.content.cloneNode(true);
+							const section = contentElement.querySelector('section[data-sublist-filters]');
+							const div = section.querySelector('div.selectable');
+							const spanHContent = div.querySelector('.h-content');
+							const span = spanHContent.querySelector('span[filter]');
+							const smallTable = spanHContent.querySelector('small[table]');
+							const smallHier = spanHContent.querySelector('small:last-child');
 							section.setAttribute('data-element-search', 'search-exist-filters');
-							section.setAttribute('data-table-name', table.table);
-							small.innerText = table.table;
-
-							section.setAttribute('data-label', table.table);
+							section.setAttribute('data-label', filter.name);
 							section.setAttribute('data-dimension-name', filter.dimension);
 							section.setAttribute('data-hier-name', filter.hier);
+							div.setAttribute('data-label', filter.name);
+							div.setAttribute('data-element-search','search-exist-filters');
+							div.setAttribute('data-dimension-name', filter.dimension);
+							div.setAttribute('data-hier-name', filter.hier);
+							div.setAttribute('data-table-name', filter.table);
+							div.setAttribute('data-table-alias', table.alias);
+							div.setAttribute('data-table-id', tableId);
+							div.onclick = app.handlerFilterSelected;
 
-							span.setAttribute('data-label', filter.name);
-							span.setAttribute('data-element-search','search-exist-filters');
-							span.setAttribute('data-dimension-name', filter.dimension);
-							span.setAttribute('data-hier-name', filter.hier);
-							span.setAttribute('data-table-name', filter.table);
-							span.setAttribute('data-table-alias', table.alias);
-							span.setAttribute('data-table-id', tableId);
 							span.innerText = filter.name;
-							span.onclick = app.handlerFilterSelected;
-							sublist.appendChild(div);
+							smallTable.innerText = table.table;
+							smallHier.setAttribute('hier', true);
+							smallHier.innerText = hierName;
+							ul.appendChild(section);
 						});
 					}
 				}
-				ul.appendChild(section);
 			}
 		}
 	}
@@ -352,28 +327,27 @@ var StorageMetric = new MetricStorage();
 	app.getFiltersFact = () => {
 		const ul = document.getElementById('exist-filters');
 		for (const [cubeName, cubeValue] of Object.entries(StorageCube.cubes) ) {
-			const contentElement = app.tmplList.content.cloneNode(true);
-			const section = contentElement.querySelector('section[data-sublist-nested-level-2]');
-			const sublist = section.querySelector('.sublist');
-			const span = sublist.querySelector('span[table]');
-			section.setAttribute('data-element-search', 'search-exist-filters');
-			section.setAttribute('data-table-name', cubeValue.FACT);
-			span.innerText = cubeValue.FACT;
 			StorageFilter.getFiltersByCube(cubeName).forEach( (filter) => {
 				console.log('filter : ', filter);
-				section.setAttribute('data-label', cubeValue.FACT);
+				const content = app.tmplList.content.cloneNode(true);
+				const section = content.querySelector('section[data-sublist-filters]');
+				const div = section.querySelector('div.selectable');
+				const spanHContent = div.querySelector('.h-content');
+				const span = spanHContent.querySelector('span[filter]');
+				const smallTable = spanHContent.querySelector('small[table]');
+				const smallCube = spanHContent.querySelector('small:last-child');
+				section.setAttribute('data-element-search', 'search-exist-filters');
+				section.setAttribute('data-label', filter.name);
 				section.setAttribute('data-cube-name', cubeName);
-				const contentSub = app.tmplSublists.content.cloneNode(true);
-				const spanSub = contentSub.querySelector('span[filter]');
-				spanSub.setAttribute('data-label', filter.name);
-				spanSub.setAttribute('data-element-search','search-exist-filters');
-				spanSub.setAttribute('data-table-name', cubeValue.FACT);
-				spanSub.setAttribute('data-table-alias', cubeValue.alias);
-				spanSub.innerText = filter.name;
-				spanSub.onclick = app.handlerFilterSelected;
-				sublist.appendChild(spanSub);
+				div.setAttribute('data-table-name', cubeValue.FACT);
+				div.setAttribute('data-table-alias', cubeValue.alias);
+				div.setAttribute('data-cube-name', cubeName);
+				div.onclick = app.handlerFilterSelected;
+				span.innerText = filter.name;
+				smallTable.innerText = cubeValue.FACT;
+				smallCube.innerText = cubeName;
+				ul.appendChild(section);
 			});
-			ul.appendChild(section);
 		}
 	}
 
@@ -579,8 +553,7 @@ var StorageMetric = new MetricStorage();
 			// visualizzo, in exist-filters, i filtri appartenenti alla Fact
 			document.querySelectorAll("#exist-filters section[data-cube-name='" + cube + "'], #ul-metric-filter section[data-cube-name='" + cube + "']").forEach( (filter) => {
 				filter.hidden = false;
-				filter.setAttribute('data-searchable', true);
-				// filter.querySelector('span[filter]').setAttribute('data-table-alias', alias);
+				filter.toggleAttribute('data-searchable');
 			});
 			document.querySelectorAll("#exist-metrics section[data-cube-name='" + cube + "']").forEach( (metric) => {
 				// imposto data-table-alias nella <ul> delle metriche già esistenti
@@ -784,6 +757,7 @@ var StorageMetric = new MetricStorage();
 
 	// selezione di un filtro già presente, lo salvo nell'oggetto Query
 	app.handlerFilterSelected = (e) => {
+		debugger;
 		StorageFilter.filter = e.currentTarget.getAttribute('data-label');
 		if (e.currentTarget.hasAttribute('data-hier-name')) {
 			hier = e.currentTarget.getAttribute('data-hier-name');
