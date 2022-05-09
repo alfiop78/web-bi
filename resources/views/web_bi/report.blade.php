@@ -311,11 +311,11 @@
 
 							<div class="md-field">
 								<input type="text" id="composite-alias-metric" value="" autocomplete="off" />
-								<label for="composite-alias-metrics" class="">Alias</label>
+								<label for="composite-alias-metric" class="">Alias</label>
 							</div>
 						</div>
 						<div class="md-field">
-							<textarea id="composite-metricSQLFormula" name="composite-metricSQL" rows="8" cols="25" placeholder="SQL"></textarea>
+							<textarea id="composite-metricSQLFormula" name="composite-metricSQL" rows="15" cols="25" placeholder="Aggiungi le metriche qui"></textarea>
 						</div>
 						<button id="btnCompositeMetricSave" type="button" name="save" class="md-button" disabled>salva</button>
 					</section>

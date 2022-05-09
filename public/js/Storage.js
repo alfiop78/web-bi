@@ -565,14 +565,14 @@ class MetricStorage extends Storages {
 	// TODO: impostare anche un metodo Set, invece di metterlo nel costructor, verificare anche le altre subClass
 	get metrics() {return this.#metrics;} // tutte le metriche
 
-	tableMetrics(table) {
-		this._tableMetrics = {};
+	getCubeMetrics(cube) {
+		this._metrics = [];
 		for ( const [key, value] of Object.entries(this.#metrics)) {
-			if (value.table === table) {
-				this._tableMetrics.push(value);
+			if (value.formula[key].cube === cube) {
+				this._metrics.push(value);
 			}
 		}
-		return this._tableMetrics;
+		return this._metrics;
 	}
 
 }

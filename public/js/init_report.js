@@ -48,6 +48,7 @@ var StorageMetric = new MetricStorage();
 		btnFilterDone: document.getElementById('btnFilterDone'), //tasto fatto nella dialog filter
 		btnColumnDone: document.getElementById('btnColumnDone'), // tasto ok nella dialogColumns
 		btnMetricSave: document.getElementById('btnMetricSave'), // tasto salva nella dialogMetric
+		btnCompositeMetricSave: document.getElementById('btnCompositeMetricSave'), // tasto salva nella dialog-composite-metric
 		btnMetricDone: document.getElementById('btnMetricDone'), // tasto Salva nella dialogMetric
 		btnMetricFilterDone: document.getElementById('btnMetricFilterDone'), // tasto ok nella dialog-metric-filter
 		btnSetMetricFilter : document.getElementById('metric-filtered'), // apre la dialog-metric-filter
@@ -782,6 +783,14 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
+	// selezione di una metrica per la creazione di una metrica composta
+	app.handlerMetricSelectedComposite= (e) => {
+		// TODO: aggiungo la metrica alla textarea
+		const textArea = document.getElementById('composite-metricSQLFormula');
+		// textArea.innerText += e.currentTarget.getAttribute('data-label');
+		textArea.value += e.currentTarget.getAttribute('data-label');
+	}
+
 	// selezione delle colonne nella dialogColumns
 	app.handlerSelectColumn = (e) => {
 		e.currentTarget.toggleAttribute('selected');
@@ -1164,6 +1173,54 @@ var StorageMetric = new MetricStorage();
 		ul.appendChild(section);
 	}
 
+	app.btnCompositeMetricSave.onclick = (e) => {
+		const name = document.getElementById('composite-metric-name').value;
+		const alias = document.getElementById('composite-alias-metric').value;
+		const metricContent = document.getElementById('composite-metricSQLFormula').value;
+		debugger;
+		console.log('Query.table : ', Query.table);
+		console.log('Query.tableAlias : ', Query.tableAlias);
+		console.log('cube selected : ', StorageCube.selected.name);
+		Query.metricName = name;
+		console.log(Query.metricName);
+		return;
+
+		let metricObj = {};
+
+		console.info('metrica non filtrata');
+		Query.metrics = { metricContent, 'table': Query.table, 'tableAlias' : Query.tableAlias, 'field': Query.field, name, alias, cube : StorageCube.selected.name };
+		metricObj = { 'type': 'METRIC', name, 'formula': Query.metrics };
+
+		console.log(metricObj)
+		StorageMetric.save = metricObj
+		// salvo nel DB
+		app.saveMetricDB(metricObj);
+		// TODO: spostare in una funzione il codice per aggiungere la nuova metrica all'elenco di quelle esistenti (da fare anche per i filtri creati/esistenti)
+		const ul = document.getElementById('exist-metrics');
+		const content = app.tmplList.content.cloneNode(true);
+		const section = content.querySelector('section[data-sublist-metrics]');
+		const div = section.querySelector('div.selectable');
+		const spanMetric = div.querySelector('span[metric]');
+		const smallTable = div.querySelector('small[table]');
+		const smallCube = div.querySelector('small[cube]');
+		section.removeAttribute('hidden');
+		section.setAttribute('data-element-search', 'search-exist-metrics');
+		section.setAttribute('data-label', Query.metricName);
+		section.setAttribute('data-cube-name', StorageCube.selected.name);
+		section.toggleAttribute('data-searchable');
+
+		div.setAttribute('data-label', Query.metricName);
+		div.setAttribute('data-table-name', Query.table);
+		div.setAttribute('data-table-alias', Query.tableAlias);
+		div.setAttribute('data-cube-name', StorageCube.selected.name);
+		
+		spanMetric.innerText = Query.metricName;
+		smallTable.innerText = Query.table;
+		smallCube.innerText = StorageCube.selected.name;
+		div.onclick = app.handlerMetricSelected;
+		ul.appendChild(section);
+	}
+
 	// salvo il filtro nel DB, table : bi_filters
 	app.saveFilterDB = async (json) => {
 		console.log(json);
@@ -1455,6 +1512,40 @@ var StorageMetric = new MetricStorage();
 			App.handlerConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
 			return;
 		} else {
+			// TODO: popola la #ul-metrics
+			// recupero i cubi selezionati
+			const selectedCubes = document.querySelectorAll('#list-fact-tables .selectable[selected]');
+			// per ogni cubo selezionato ne recupero le metriche ad esso appartenenti
+			const ul = document.getElementById('ul-metrics');
+			selectedCubes.forEach( cube => {
+				const cubeName = cube.getAttribute('data-cube-name');
+				// for (const [key, value] of Object.entries(StorageMetric.getCubeMetrics(cubeName)) ) {
+				// ripulisco la lista, prima di popolarla
+				document.querySelectorAll('#ul-metrics > section').forEach( item => item.remove());
+				StorageMetric.getCubeMetrics(cubeName).forEach( metric => {
+					const contentElement = app.tmplList.content.cloneNode(true);
+					const section = contentElement.querySelector('section[data-sublist-metrics]');
+					const div = section.querySelector('div.selectable');
+					const spanHContent = div.querySelector('.h-content');
+					const span = spanHContent.querySelector('span[metric]');
+					const smallTable = spanHContent.querySelector('small[table]');
+					const smallCube = spanHContent.querySelector('small[cube]');
+					section.hidden = false;
+					section.setAttribute('data-element-search', 'search-exist-metrics');
+					// nome metrica
+					section.setAttribute('data-label', metric.name);
+					section.setAttribute('data-cube-name', cubeName);
+					div.setAttribute('data-table-name', metric.formula[metric.name].table);
+					div.setAttribute('data-table-alias', metric.formula[metric.name].tableAlias);
+					div.setAttribute('data-cube-name', cubeName);
+					div.setAttribute('data-label', metric.name);
+					div.onclick = app.handlerMetricSelectedComposite;
+					span.innerText = metric.name;
+					smallTable.innerText = metric.formula[metric.name].table;
+					smallCube.innerText = cubeName;
+					ul.appendChild(section);
+				});
+			});
 			app.dialogCompositeMetric.showModal();
 		}
 	}
@@ -1556,9 +1647,19 @@ var StorageMetric = new MetricStorage();
 		(metricName.length !== 0 && aliasMetric.length !== 0) ? app.btnMetricSave.disabled = false : app.btnMetricSave.disabled = true;
 	}
 
+	app.checkDialogCompositeMetric = () => {
+		const name = document.getElementById('composite-metric-name').value;
+		const alias = document.getElementById('composite-alias-metric').value;
+		(name.length !== 0 && alias.length !== 0) ? app.btnCompositeMetricSave.disabled = false : app.btnCompositeMetricSave.disabled = true;
+	}
+
 	document.getElementById('alias-metric').oninput = () => app.checkDialogMetric();
 
 	document.getElementById('metric-name').oninput = () => app.checkDialogMetric();
+
+	document.getElementById('composite-metric-name').oninput = () => app.checkDialogCompositeMetric();
+	
+	document.getElementById('composite-alias-metric').oninput = () => app.checkDialogCompositeMetric();
 
 	document.getElementById('inputFilterName').oninput = () => app.checkFilterForm();
 
