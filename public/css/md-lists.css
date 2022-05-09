@@ -11,3 +11,6 @@ span.no-highlight{color: dimgray; 4px 2px;}
 
 section[data-sublist-filters] i{visibility: hidden;}
 section[data-sublist-filters]:hover i{visibility: visible;}
+
+section[data-sublist-metrics] i{visibility: hidden;}
+section[data-sublist-metrics]:hover i{visibility: visible;}

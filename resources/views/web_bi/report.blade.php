@@ -369,6 +369,7 @@
 											{{-- TODO: metriche composte potrei colorarle in modo diverso, cos' come le metriche filtrate --}}
 											<span metric class="hightlight"></span>
 											<small table></small>
+											<small cube></small>
 											{{-- TODO: qui, sulle metriche filtrate potrei visualizzare un popup con l'elenco dei filtri, oppure, per le metriche composte, visualizzarne, nel popup, la propria formula --}}
 										</div>
 										<i class="material-icons md-18">edit</i>
@@ -513,7 +514,7 @@
 																	<input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
 																	<label for="search-exist-metrics" class="">Ricerca</label>
 																</div>
-																<ul id="exist-metrics"></ul>
+																<ul id="exist-metrics" class="full-overflow-list"></ul>
 															</div>
 														</div>
 													</div>

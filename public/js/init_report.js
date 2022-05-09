@@ -495,6 +495,7 @@ var StorageMetric = new MetricStorage();
 				const spanHContent = div.querySelector('.h-content');
 				const span = spanHContent.querySelector('span[metric]');
 				const smallTable = spanHContent.querySelector('small[table]');
+				const smallCube = spanHContent.querySelector('small[cube]');
 				section.setAttribute('data-element-search', 'search-exist-metrics');
 				section.setAttribute('data-label', key);
 				section.setAttribute('data-cube-name', cubeName);
@@ -505,6 +506,7 @@ var StorageMetric = new MetricStorage();
 				div.onclick = app.handlerMetricSelected;
 				span.innerText = key;
 				smallTable.innerText = cubeValue.FACT;
+				smallCube.innerText = cubeName;
 				ul.appendChild(section);
 			}
 		}
@@ -1140,7 +1142,8 @@ var StorageMetric = new MetricStorage();
 		const section = content.querySelector('section[data-sublist-metrics]');
 		const div = section.querySelector('div.selectable');
 		const spanMetric = div.querySelector('span[metric]');
-		const small = div.querySelector('small');
+		const smallTable = div.querySelector('small[table]');
+		const smallCube = div.querySelector('small[cube]');
 		section.removeAttribute('hidden');
 		section.setAttribute('data-element-search', 'search-exist-metrics');
 		section.setAttribute('data-label', Query.metricName);
@@ -1153,7 +1156,8 @@ var StorageMetric = new MetricStorage();
 		div.setAttribute('data-cube-name', StorageCube.selected.name);
 		
 		spanMetric.innerText = Query.metricName;
-		small.innerText = Query.table;
+		smallTable.innerText = Query.table;
+		smallCube.innerText = StorageCube.selected.name;
 		div.onclick = app.handlerMetricSelected;
 		ul.appendChild(section);
 	}
@@ -1231,16 +1235,17 @@ var StorageMetric = new MetricStorage();
 
 		span.innerText = Query.filterName;
 		smallTable.innerText = Query.table;
-		smallHier.setAttribute('hier', true);
-		smallHier.innerText = hier;
 		
 		if (dimension !== undefined) {
 			div.setAttribute('data-dimension-name', dimension);
 			div.setAttribute('data-hier-name', hier);
 			div.setAttribute('data-table-id', Query.tableId);
+			smallHier.setAttribute('hier', true);
+			smallHier.innerText = hier;
 		} else {
 			section.setAttribute('data-cube-name', StorageCube.selected.name);
 			div.setAttribute('data-cube-name', StorageCube.selected.name);
+			smallHier.innerText = StorageCube.selected.name;
 		}
 
 		div.onclick = app.handlerFilterSelected;
