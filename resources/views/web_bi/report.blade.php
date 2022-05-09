@@ -285,6 +285,51 @@
 			</div>
 		</dialog>
 
+		<dialog id="dialog-composite-metric">
+			<small id="dialog-popup" class="popupToast"></small>
+			<section data-table-name>
+				<h4>Creazione di una nuova metrica composta per il cubo <span data-cube-selected></span></h4>
+				
+				<div class="stepLayout">
+					{{-- metriche mappate --}}
+					<section class="sectionLists">
+						<h5>Metriche disponibili</h5>
+						<div class="md-field">
+							<input type="search" data-element-search="search-metrics" id="search-metrics" value autocomplete="off" />
+							<label for="search-metrics" class="">Ricerca</label>
+						</div>
+						<ul id="ul-metrics"></ul>
+					</section>
+
+					<section class="sectionLists">
+						<h5>SQL</h5>
+						<div class="name-alias">
+							<div class="md-field">
+								<input type="text" id="composite-metric-name" value="" autocomplete="off" />
+								<label for="composite-metric-name" class="">Nome</label>
+							</div>
+
+							<div class="md-field">
+								<input type="text" id="composite-alias-metric" value="" autocomplete="off" />
+								<label for="composite-alias-metrics" class="">Alias</label>
+							</div>
+						</div>
+						<div class="md-field">
+							<textarea id="composite-metricSQLFormula" name="composite-metricSQL" rows="8" cols="25" placeholder="SQL"></textarea>
+						</div>
+						<button id="btnCompositeMetricSave" type="button" name="save" class="md-button" disabled>salva</button>
+					</section>
+
+				</div>
+
+				<div class="dialog-buttons">
+					<button type="button" name="cancel" class="md-button">annulla</button>
+					<button id="btnMetricDone" type="button" name="done" class="md-button">fatto</button>
+				</div>
+			</section>
+			</div>
+		</dialog>
+
 		<main>
 			<div id="drawer" close>
 				<section class="account"><h5>user</h5><i class="material-icons md-light">person</i></section>
@@ -401,7 +446,7 @@
 							</section>
 
 							{{-- lista generica --}}
-							<section class="data-item list" data-element-search data-label data-sublist-gen>
+							<section class="data-item list" data-element-search data-label data-sublist-gen hidden>
 								<div class="selectable" data-label>
 									<div class="h-content">
 										<div class="v-content">
@@ -456,13 +501,7 @@
 														</div>
 														<ul id="list-dimensions" class="full-overflow-list-columns"></ul>
 													</div>
-												</div>
-											</div>
-										</section>
-									  
-										<section class="step" data-step="2">
-											<div class="pageContent">
-												<div class="h-grid">
+													{{-- gerarchie --}}
 													<div id="parent-list-hierarchies">
 														<h5>gerarchie</h5>
 														<div class="md-field">
@@ -474,48 +513,65 @@
 															<ul id="list-hierarchies" class="full-overflow-list"></ul>
 														</div>														
 													</div>
-													<div>
-														<h5>Report</h5>
-														<div class="addElementsReport">
-															<div class="btn-add">
-																<span>colonne</span>
-																<i id="btn-add-columns" class="material-icons md-36">add</i>
-															</div>															
-															<div class="btn-add">
-																<span>nuovo filtro</span>
-																<i id="btn-add-filters" class="material-icons md-36">add</i>
-															</div>
-															<div class="btn-add">
-																<span>metriche</span>
-																<i id="btn-add-metrics" class="material-icons md-36">add</i>
-															</div>
+												</div>
+											</div>
+										</section>
+									  
+										<section class="step" data-step="2">
+											<div class="pageContent">
+												<h5>Report</h5>
+												<div class="v-grid">
+													<div class="addElementsReport">
+														<div class="btn-add">
+															<span>colonne</span>
+															<i id="btn-add-columns" class="material-icons md-36">add</i>
+														</div>															
+														<div class="btn-add">
+															<span>nuovo filtro</span>
+															<i id="btn-add-filters" class="material-icons md-36">add</i>
 														</div>
-														{{-- elementi del report --}}
-														<div class="elementsReport">
-															{{-- colonne --}}
-															<div>
-																<div class="md-field">
-																	<input type="search" data-element-search="search-columns-selected" id="search-columns-selected" value autocomplete="off" />
-																	<label for="search-columns-selected" class="">Ricerca</label>
-																</div>
-																<ul id="report-columns"></ul>
+														<div class="btn-add">
+															<span>metriche</span>
+															<i id="btn-add-metrics" class="material-icons md-36">add</i>
+														</div>
+														<div class="btn-add">
+															<span>metriche composte</span>
+															<i id="btn-add-composite-metrics" class="material-icons md-36">add</i>
+														</div>
+													</div>
+													{{-- elementi del report --}}
+													<div class="elementsReport">
+														{{-- colonne --}}
+														<div>
+															<div class="md-field">
+																<input type="search" data-element-search="search-columns-selected" id="search-columns-selected" value autocomplete="off" />
+																<label for="search-columns-selected" class="">Ricerca</label>
 															</div>
-															{{-- filtri --}}
-															<div>
-																<div class="md-field">
-																	<input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
-																	<label for="search-exist-filters" class="">Ricerca</label>
-																</div>
-																<ul id="exist-filters" class="full-overflow-list"></ul>																
+															<ul id="report-columns"></ul>
+														</div>
+														{{-- filtri --}}
+														<div>
+															<div class="md-field">
+																<input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
+																<label for="search-exist-filters" class="">Ricerca</label>
 															</div>
-															{{-- metriche --}}
-															<div>
-																<div class="md-field">
-																	<input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
-																	<label for="search-exist-metrics" class="">Ricerca</label>
-																</div>
-																<ul id="exist-metrics" class="full-overflow-list"></ul>
+															<ul id="exist-filters" class="full-overflow-list"></ul>																
+														</div>
+														{{-- metriche --}}
+														<div>
+															<div class="md-field">
+																<input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
+																<label for="search-exist-metrics" class="">Ricerca</label>
 															</div>
+															<ul id="exist-metrics" class="full-overflow-list"></ul>
+														</div>
+														{{-- metriche composte --}}
+														<div>
+															<div class="md-field">
+																<input type="search" data-element-search="search-exist-composite-metrics" id="search-exist-composite-metrics" value autocomplete="off" />
+																<label for="search-exist-composite-metrics" class="">Ricerca</label>
+															</div>
+															<ul id="exist-composite-metrics" class="full-overflow-list"></ul>
 														</div>
 													</div>
 												</div>

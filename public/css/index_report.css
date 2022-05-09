@@ -95,15 +95,15 @@ ul > section.fact{font-weight: bold;}
 /* NOTE:  new page report*/
 .wrapper{height: inherit;}
 .h-grid {display: grid; grid-gap: 16px; min-height: 100%; max-height: 100%;}
-.step[data-step="1"] > .pageContent{width: 60%!important;}
-.step[data-step="1"] .h-grid{grid-template-columns : 40% calc(60% - 16px);}
-.step[data-step="2"] .h-grid{grid-template-columns : 25% calc(75% - 16px);}
+/*.step[data-step="1"] > .pageContent{width: 60%!important;}*/
+.step[data-step="1"] .h-grid{grid-template-columns : 30% calc(40% - 16px) calc(30% - 16px);}
+.step[data-step="2"] .v-grid{grid-template-rows : 10% calc(90% - 16px);}
 .overflowList{height: 350px; overflow-y: auto; background: gainsboro;}
 .full-overflow-list{height: 70%; overflow-y: auto; max-height: 450px;}
 .full-overflow-list-columns{height: 350px; max-height: 350px; overflow-y: auto;}
 .dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}
 
-.addElementsReport{display: grid;grid-template-columns: repeat(3, 30%); grid-column-gap: 5%; color: dimgrey;}
+.addElementsReport{display: grid;grid-template-columns: 25% repeat(3, calc(25% - 16px)); grid-column-gap: 16px; color: dimgrey;}
 .addElementsReport > div{display: grid;grid-template-rows: auto auto;justify-content: center; opacity: .5;align-items: center;justify-items: center;padding: 1em; background-color: #dcdcdc61;
   border-radius: 0px;box-shadow: 0px 0px 0px 0px; transition: box-shadow 200ms, opacity 250ms, border-radius 150ms;}
 .addElementsReport > div:hover{opacity: 1;border-radius: 4px;box-shadow: 0px 1px 8px -2px darkgrey;}
@@ -111,7 +111,7 @@ ul > section.fact{font-weight: bold;}
 .btn-add{display: flex; flex-direction: column;}
 #list-hierarchies > section li[data-hier-name]{font-weight: bold;}
 
-.elementsReport{display: grid; grid-template-columns: repeat(3, 30%); grid-column-gap: 5%;}
+.elementsReport{display: grid; grid-template-columns: 25% repeat(3, calc(25% - 16px)); grid-column-gap: 16px;}
 
 ul > section[data-sublist], ul > section[data-sublist-generic]{border-left: solid 0px gainsboro; transition: border-left 150ms;}
 ul > section[data-sublist]:hover, ul > section[data-sublist-generic]:hover{cursor: pointer; border-left: solid thick indianred; transition: border-left 150ms;}

@@ -27,6 +27,7 @@ var StorageMetric = new MetricStorage();
 		btnAddColumns : document.getElementById('btn-add-columns'),
 		btnAddFilters : document.getElementById('btn-add-filters'),
 		btnAddMetrics : document.getElementById('btn-add-metrics'),
+		btnAddCompositeMetrics : document.getElementById('btn-add-composite-metrics'),
 		btnPreviousStep : document.getElementById('prev'),
 		btnNextStep : document.getElementById('next'),
 		btnSaveAndProcess: document.getElementById('saveAndProcess'),
@@ -42,6 +43,7 @@ var StorageMetric = new MetricStorage();
 		dialogColumns: document.getElementById('dialog-column'),
 		dialogValue : document.getElementById('dialog-value'),
 		dialogMetric: document.getElementById('dialog-metric'),
+		dialogCompositeMetric : document.getElementById('dialog-composite-metric'),
 		btnFilterSave: document.getElementById('btnFilterSave'), //tasto salva nella dialog filter
 		btnFilterDone: document.getElementById('btnFilterDone'), //tasto fatto nella dialog filter
 		btnColumnDone: document.getElementById('btnColumnDone'), // tasto ok nella dialogColumns
@@ -1443,6 +1445,17 @@ var StorageMetric = new MetricStorage();
 			return;
 		} else {
 			app.dialogMetric.showModal();
+		}
+	}
+
+	// aggiungi metrica composta
+	app.btnAddCompositeMetrics.onclick = (e) => {
+		const cubeSelectedCount = document.querySelectorAll('#list-fact-tables .selectable[selected]').length;
+		if (cubeSelectedCount === 0) {
+			App.handlerConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
+			return;
+		} else {
+			app.dialogCompositeMetric.showModal();
 		}
 	}
 
