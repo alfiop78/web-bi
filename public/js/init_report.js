@@ -786,9 +786,11 @@ var StorageMetric = new MetricStorage();
 	// selezione di una metrica per la creazione di una metrica composta
 	app.handlerMetricSelectedComposite= (e) => {
 		// TODO: aggiungo la metrica alla textarea
-		const textArea = document.getElementById('composite-metricSQLFormula');
-		// textArea.innerText += e.currentTarget.getAttribute('data-label');
-		textArea.value += e.currentTarget.getAttribute('data-label');
+		const textArea = document.getElementById('composite-metric-formula');
+		// creo uno span con dentro la metrica
+		const mark = document.createElement('mark');
+		mark.innerText = e.currentTarget.getAttribute('data-label');
+		textArea.appendChild(mark);
 	}
 
 	// selezione delle colonne nella dialogColumns
@@ -1176,7 +1178,7 @@ var StorageMetric = new MetricStorage();
 	app.btnCompositeMetricSave.onclick = (e) => {
 		const name = document.getElementById('composite-metric-name').value;
 		const alias = document.getElementById('composite-alias-metric').value;
-		const metricContent = document.getElementById('composite-metricSQLFormula').value;
+		const metricContent = document.getElementById('composite-metric-formula').value;
 		debugger;
 		console.log('Query.table : ', Query.table);
 		console.log('Query.tableAlias : ', Query.tableAlias);
