@@ -243,9 +243,9 @@ class ProcessStorage extends Storages {
 			let jsonStorage = JSON.parse(this.storage.getItem(key));
 			// console.log(key);
 			if (jsonStorage.type === 'PROCESS') {
-				let reportProperties = {'name' : key, 'processId' : jsonStorage.processId};
-				// reports.push(reportProperties);
-				this.#processes[key] = reportProperties;
+				// let reportProperties = {'name' : key, 'processId' : jsonStorage.processId};
+				// this.#processes[key] = reportProperties;
+				this.#processes[key] = jsonStorage;
 			}
 		});
 	}
@@ -290,26 +290,20 @@ class ProcessStorage extends Storages {
 		return this.id;
 	}
 
-	list(template, ul) {
-		for (let process in this.#processes) {
-			// console.log(proc);
-			// console.log(toBeProcessed[proc]);
-			// console.log('template : ', template);
-			const content = template.content.cloneNode(true);
-			let section = content.querySelector('section[data-sublist-generic]');
-			section.hidden = false;
-			let span = section.querySelector('span[generic]');
-			span.innerText = process;
-			span.setAttribute('label', process);
-			span.setAttribute('data-id', this.#processes[process]['processId']);
-			ul.appendChild(section);
-		}
-	}
-
 	getJSONProcess(value) {
 		let processReports = {};
 		let report = JSON.parse(this.storage.getItem(value));
 		return report.process;
+	}
+
+	get processes() {
+		this.storageKeys.forEach((key) => {
+			let jsonStorage = JSON.parse(this.storage.getItem(key));
+			if (jsonStorage.type === 'PROCESS') {
+				this.#processes[key] = jsonStorage;
+			}
+		});
+		return this.#processes;
 	}
 }
 

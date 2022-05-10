@@ -62,6 +62,27 @@ var StorageMetric = new MetricStorage();
 		btnMapping: document.getElementById('mdcMapping')
 	}
 
+	// creo la lista degli elementi da processare
+	app.getProcesses = () => {
+		const ul = document.getElementById('ul-processes');
+		for (const [key, value] of Object.entries(StorageProcess.processes)) {
+			const content = app.tmplList.content.cloneNode(true);
+			const section = content.querySelector('section[data-sublist-gen]');
+			const div = section.querySelector('div.selectable');
+			const span = section.querySelector('span');
+			section.hidden = false;
+			section.dataset.elementSearch = 'search-process';
+			section.dataset.label = key;
+			section.toggleAttribute('data-searchable');
+			// section.dataset.processId = value.id;
+			div.dataset.label = key;
+			div.dataset.processId = value.processId;
+			span.innerText = key;
+			div.onclick = app.handlerReportToBeProcessed;
+			ul.appendChild(section);
+		}
+	}
+
 	// carico elenco Cubi su cui creare il report
 	app.getCubes = () => {
 		const ul = document.getElementById('list-cubes');
@@ -636,21 +657,19 @@ var StorageMetric = new MetricStorage();
 	// 2021-10-19 click sul report da processare/elaborare. tasto "Process Report"
  	app.handlerReportToBeProcessed = async (e) => {
 		console.clear();
-		const label = e.target.getAttribute('label');
+		const label = e.currentTarget.dataset.label;
+		debugger;
 		console.log(label);
-		const reportId = +e.target.getAttribute('data-id');
+		const reportId = +e.currentTarget.dataset.processId;
+		// const reportId = +e.target.getAttribute('data-id');
 		console.log('reportId : ', reportId);
+		debugger;
 		let jsonData = window.localStorage.getItem(label);
 		let jsonDataParsed = JSON.parse(window.localStorage.getItem(label));
 		console.dir(jsonDataParsed);
 		console.dir(jsonData);
 		console.dir(JSON.stringify(jsonData));
 		debugger;
-		// const url = 'ajax/cube.php';
-		// const params = 'cube='+jsonData;
-		// // console.dir(params);
-		// const init = {headers: {'Content-Type': 'application/x-www-form-urlencoded'}, method: 'POST', body: params};
-		// const req = new Request(url, init);
 		App.handlerConsole('Process in corso', 'info');
 
 		await fetch('/fetch_api/cube/' + jsonData + '/process')
@@ -672,14 +691,6 @@ var StorageMetric = new MetricStorage();
 			}
 		})
 		.catch((err) => console.error(err));
-	}
-
-	// creo la lista degli elementi da processare
-	app.datamartToBeProcessed = () => {
-		const ul = document.getElementById('reportsProcess');
-		const toProcess = StorageProcess.list(app.tmplList, ul);
-		// associo la Fn che gestisce il click sulle <li>
-		ul.querySelectorAll('span[generic]').forEach( span => span.addEventListener('click', app.handlerReportToBeProcessed));
 	}
 
 	// selezione di un cubo (step-1)
@@ -776,11 +787,16 @@ var StorageMetric = new MetricStorage();
 			// aggiungo la metrica
 			// recupero dallo StorageMetric la metrica selezionata
 			Query.metricName = StorageMetric.metric.name;
-			// se la metrica contiene un filtro bisogna aggiungerla a Query.filteredMetrics altrimenti a Query.metrics
-			if (StorageMetric.metric.formula[StorageMetric.metric.name].hasOwnProperty('filters')) {
-				Query.filteredMetrics = StorageMetric.metric.formula[StorageMetric.metric.name];
+			if (StorageMetric.metric.composite) {
+				// metrica composta
+				Query.compositeMetrics = StorageMetric.metric.formula[StorageMetric.metric.name];
 			} else {
-				Query.metrics = StorageMetric.metric.formula[StorageMetric.metric.name];
+				// se la metrica contiene un filtro bisogna aggiungerla a Query.filteredMetrics altrimenti a Query.metrics
+				if (StorageMetric.metric.formula[StorageMetric.metric.name].hasOwnProperty('filters')) {
+					Query.filteredMetrics = StorageMetric.metric.formula[StorageMetric.metric.name];
+				} else {
+					Query.metrics = StorageMetric.metric.formula[StorageMetric.metric.name];
+				}
 			}
 		} else {
 			// TODO: elimino la metrica
@@ -1221,7 +1237,7 @@ var StorageMetric = new MetricStorage();
 
 		let metricObj = {};
 		Query.metrics = { formula_text, formula_sql, 'table': Query.table, 'tableAlias' : Query.tableAlias, alias, cube : StorageCube.selected.name };
-		metricObj = { 'type': 'METRIC', name, 'formula': Query.metrics };
+		metricObj = { 'type': 'METRIC', name, composite : true, 'formula': Query.metrics };
 
 		console.log(metricObj)
 		StorageMetric.save = metricObj
@@ -1433,7 +1449,7 @@ var StorageMetric = new MetricStorage();
 
 	app.getAvailableMetrics();
 
-	// app.datamartToBeProcessed();
+	app.getProcesses();
 
 	// abilito il tasto btnFilterSave se il form per la creazione del filtro è corretto
 	app.checkFilterForm = () => {
@@ -1500,7 +1516,7 @@ var StorageMetric = new MetricStorage();
 	app.btnAddColumns.onclick = (e) => {
 		console.log('addColumns');
 		// verifico che almeno una gerarchia è stata selezionata
-		const hierSelectedCount = document.querySelectorAll('#list-hierarchies section[selected]').length;
+		const hierSelectedCount = document.querySelectorAll('#list-hierarchies .selectable[selected]').length;
 		if (hierSelectedCount === 0) {
 			App.handlerConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
 			return;
@@ -1516,7 +1532,7 @@ var StorageMetric = new MetricStorage();
 	app.btnAddFilters.onclick = (e) => {
 		// stessa logica di btnAddColumns
 		console.log('addFilters');
-		const hierSelectedCount = document.querySelectorAll('#list-hierarchies section[selected]').length;
+		const hierSelectedCount = document.querySelectorAll('#list-hierarchies .selectable[selected]').length;
 		if (hierSelectedCount === 0) {
 			App.handlerConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
 			return;

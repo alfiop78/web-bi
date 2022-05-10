@@ -120,7 +120,7 @@ class Cube {
 	}
 
 	public function baseTable() {
-		// TODO: creo una VIEW/TABLE senza metriche su cui, dopo, andrò a fare una left join con le VIEW/TABLE che contengono le metriche
+		// creo una VIEW/TABLE senza metriche su cui, dopo, andrò a fare una left join con le VIEW/TABLE che contengono le metriche
 		$this->_sql = $this->_select; //.", ".$this->_metrics."\n";
 		// se ci sono metriche a livello di report le aggiungo
 		if ($this->_metrics) {$this->_sql .= ", $this->_metrics\n";}
@@ -171,6 +171,7 @@ class Cube {
 		}
 	}
 
+	// creo la tabella contenente le metriche filtrate
 	private function createMetricTable($tableName, $metric, $filters) {
 		// var_dump($filters);
 		// dd($filters);
@@ -211,6 +212,7 @@ class Cube {
 		return $result;
 	}
 
+	// creo il datamart finale, mettendo insieme, base table con metric table (LEFT JOIN)
 	public function createDatamart() {
 		// TODO: https://dev.mysql.com/doc/refman/8.0/en/create-table-select.html Il create table può essere migliorato impostando il datatype per ogni colonna e un id univoco
 		$baseTableName = "W_AP_base_".$this->reportId;

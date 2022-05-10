@@ -9,6 +9,7 @@ class Queries {
 	#firstTable = {}; // la prima tabella della gerarchia, da qui posso ottenere la from e la join
 	#joinId;
 	#where = {};
+	#compositeMetrics = {};
 	constructor() {
 		this.#select = {};
 		this.#obj = {}; // object generico
@@ -224,6 +225,13 @@ class Queries {
 
 	get filteredMetrics() {return this._filteredMetrics;}
 
+	set compositeMetrics(object) {
+		this.#compositeMetrics[this._metricName] = object;
+		console.log('this.#compositeMetrics : ', this.#compositeMetrics);
+	}
+
+	get compositeMetrics() {return this.#compositeMetrics;}
+
 	deleteFilteredMetric() {
 		debugger;
 		delete this._filteredMetrics[this._metricName];
@@ -239,6 +247,7 @@ class Queries {
 		this._reportProcess['filters'] = this._filter;
 		this._reportProcess['metrics'] = this._metrics;
 		this._reportProcess['filteredMetrics'] = this._filteredMetrics;
+		this._reportProcess['compositeMetrics'] = this.#compositeMetrics;
 		this._reportProcess['processId'] = processId; // questo creerà il datamart FX[processId]
 		//  al posto del processId voglio utilizzare il nome del report legato alla FX_
 		this._reportProcess['name'] = name;

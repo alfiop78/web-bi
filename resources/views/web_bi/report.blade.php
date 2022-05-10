@@ -363,7 +363,7 @@
 									<input type="search" id="searchReportProcess" value="" autocomplete="off" />
 									<label for="searchReportProcess" class="">Ricerca</label>
 								</div>
-								<ul id="reportsProcess"></ul>
+								<ul id="ul-processes"></ul>
 							</div>
 						</div>
 	  
