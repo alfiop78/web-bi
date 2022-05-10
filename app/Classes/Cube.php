@@ -95,7 +95,6 @@ class Cube {
 		foreach ($metrics as $metric) {
 			// var_dump($metric);
 			$metricsList[] = "{$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}) AS '{$metric->alias}'";
-			// $metricsList[] = "{$metric->SQLFunction}({$metric->table}.{$metric->field}) AS '{$metric->alias}'";
 		}
 		$this->_metrics = implode(", ", $metricsList);
 		// var_dump($this->_metrics);
@@ -120,10 +119,11 @@ class Cube {
 	}
 
 	public function baseTable() {
-		// creo una VIEW/TABLE senza metriche su cui, dopo, andrò a fare una left join con le VIEW/TABLE che contengono le metriche
-		$this->_sql = $this->_select; //.", ".$this->_metrics."\n";
+		// creo una TEMP_TABLE su cui, successivamente andrò a fare una LEFT JOIN con le TEMP_TABLE contenenti le metriche
+		$this->_sql = $this->_select;
 		// se ci sono metriche a livello di report le aggiungo
 		if ($this->_metrics) {$this->_sql .= ", $this->_metrics\n";}
+		// TODO: logica per metriche composte in versione "ReportDatamart" (risultato della metrica composta) oppure "reportBody" (contenuto della metrica composta)
 		$this->_sql .= $this->_from."\n";
 		$this->_sql .= $this->_where."\n";
 		$this->_sql .= $this->_and."\n";
@@ -134,9 +134,7 @@ class Cube {
         // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
 		$sql = "CREATE TEMPORARY TABLE decisyon_cache.W_AP_base_".$this->reportId." ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ".$this->_sql.";";
 		// $result = DB::connection('vertica_odbc')->raw($sql);
-
         // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
-
         /* il metodo getSchemaBuilder() funziona con mysql, non con vertica. Ho creato MyVerticaGrammar.php dove c'è la sintassi corretta per vertica (solo alcuni Metodi ho modificato) */
 
         if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable('W_AP_base_'.$this->reportId)) {
@@ -160,12 +158,9 @@ class Cube {
 		// var_dump($filteredMetrics);
 		foreach ($filteredMetrics as $metrics) {
 			//echo $metrics;
-
 			unset($this->_sql);
 			$metric = "{$metrics->SQLFunction}({$metrics->tableAlias}.{$metrics->field}) AS '{$metrics->alias}'";
-			// $metric = "{$metrics->SQLFunction}({$metrics->table}.{$metrics->field}) AS '{$metrics->alias}'";
 			echo $this->createMetricTable('W_AP_metric_'.$this->reportId."_".$i, $metric, $metrics->filters);
-			// a questo punto metto in relazione (left) la query baseTable con la/e metriche contenenti filtri
 			$this->_metricTable["W_AP_metric_".$this->reportId."_".$i] = $metrics->alias; // memorizzo qui quante tabelle per metriche filtrate sono state create
 			$i++;
 		}
@@ -219,10 +214,9 @@ class Cube {
 		$datamartName = "decisyon_cache.FX_".$this->reportId;
 		$table = "FX_$this->reportId";
 		// se _metricTable ha qualche metrica (sono metriche filtrate) allora procedo con la creazione FX con LEFT JOIN, altrimenti creo una singola FX
-
+		// TODO: le 2 righe successive sono da spostare all'interno della if, fanno parte della logica per la creazione di un datamart con metriche filtrate
 		$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS ";
 		$sql .= "(SELECT $baseTableName.*, ";
-		// TODO: da testare con metriche filtrate - 18.01.2022
 		if (isset($this->_metricTable) && count($this->_metricTable) > 0) {
 			$table_and_metric = array();
 			$leftJoin = null;
