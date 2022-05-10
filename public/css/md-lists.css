@@ -3,7 +3,7 @@
 section[data-sublist-gen] .v-content{margin: 4px 2px;}
 .v-content{display: flex;flex-flow: column;width: 100%;}
 span.highlight{color: sienna;}
-.no-highlight{color: dimgray;}
+.no-highlight{color: dimgray}
 .selectable{border-left: solid 0px sienna; transition: border-left 100ms; margin: 4px; padding: 2px 4px;}
 .selectable:hover{cursor: pointer; border-left: solid thick sienna; transition: border-left 100ms;}
 .selectable[selected]{cursor: pointer; border-left: solid thick sienna; transition: border-left 100ms;}

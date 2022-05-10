@@ -5,6 +5,7 @@ var StorageCube = new CubeStorage();
 var StorageProcess = new ProcessStorage();
 var StorageFilter = new FilterStorage();
 var StorageMetric = new MetricStorage();
+// TODO: impostare i dataset come fatto in getHierarchy()
 (() => {
 	App.init();
 	// console.info('Date.now() : ', Date.now());
@@ -787,13 +788,31 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// selezione di una metrica per la creazione di una metrica composta
-	app.handlerMetricSelectedComposite= (e) => {
+	app.handlerMetricSelectedComposite = (e) => {
 		// TODO: aggiungo la metrica alla textarea
+		Query.table = e.currentTarget.dataset.tableName;
 		const textArea = document.getElementById('composite-metric-formula');
 		// creo uno span con dentro la metrica
 		const mark = document.createElement('mark');
 		mark.innerText = e.currentTarget.getAttribute('data-label');
 		textArea.appendChild(mark);
+		// aggiungo anche uno span per il proseguimento della scrittura della formula
+		let span = document.createElement('span');
+		span.setAttribute('contenteditable', true);
+		textArea.appendChild(span);
+		span.focus();
+	}
+
+	document.getElementById('composite-metric-formula').onclick = (e) => {
+		console.log('e : ', e);
+		console.log('e.target : ', e.target);
+		console.log('e.currentTarget : ', e.currentTarget);
+		if (e.target.localName === 'div') {
+			const span = document.createElement('span');
+			span.setAttribute('contenteditable', true);
+			e.target.appendChild(span);
+			span.focus();
+		}
 	}
 
 	// selezione delle colonne nella dialogColumns
@@ -1181,19 +1200,27 @@ var StorageMetric = new MetricStorage();
 	app.btnCompositeMetricSave.onclick = (e) => {
 		const name = document.getElementById('composite-metric-name').value;
 		const alias = document.getElementById('composite-alias-metric').value;
-		const metricContent = document.getElementById('composite-metric-formula').value;
-		debugger;
-		console.log('Query.table : ', Query.table);
-		console.log('Query.tableAlias : ', Query.tableAlias);
-		console.log('cube selected : ', StorageCube.selected.name);
+		let arr_text = [], arr_sql = [];
+		document.querySelectorAll('#composite-metric-formula *').forEach( element => {
+			// console.log('element : ', element);
+			// console.log('element : ', element.nodeName);
+			// se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
+			if (element.nodeName === 'MARK') {
+				StorageMetric.metric = element.innerText;
+				// es. SUM(NettoRiga)
+				// TODO: verificare se è presente il distinct : true in ogni metrica
+				arr_sql.push(`${StorageMetric.metric.formula[element.innerText].SQLFunction}(${StorageMetric.metric.formula[element.innerText].field})`);
+			} else {
+				arr_sql.push(element.innerText.trim());	
+			}
+			arr_text.push(element.innerText.trim());
+		});
+		const formula_text = arr_text.join(' ');
+		const formula_sql = arr_sql.join(' ');
 		Query.metricName = name;
-		console.log(Query.metricName);
-		return;
 
 		let metricObj = {};
-
-		console.info('metrica non filtrata');
-		Query.metrics = { metricContent, 'table': Query.table, 'tableAlias' : Query.tableAlias, 'field': Query.field, name, alias, cube : StorageCube.selected.name };
+		Query.metrics = { formula_text, formula_sql, 'table': Query.table, 'tableAlias' : Query.tableAlias, alias, cube : StorageCube.selected.name };
 		metricObj = { 'type': 'METRIC', name, 'formula': Query.metrics };
 
 		console.log(metricObj)

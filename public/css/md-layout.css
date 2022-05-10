@@ -259,3 +259,5 @@ ul > section[data-sublist-draggable]:hover{cursor: grab; border-left: solid thic
 /*absolute-window*/
 
 mark{background-color: sienna; color: white; border-radius: 2px; padding: 2px;}
+
+span[contenteditable]{margin: 4px; padding: 8px; background-color: tan;}

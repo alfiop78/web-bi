@@ -318,7 +318,7 @@
 							{{-- <textarea id="composite-metricSQLFormula" name="composite-metricSQL" rows="15" cols="25" placeholder="Aggiungi le metriche qui"></textarea> --}}
 
 						</div>
-						<div id="composite-metric-formula" contenteditable="true">
+						<div id="composite-metric-formula" contenteditable="false">
 							
 						</div>
 						<button id="btnCompositeMetricSave" type="button" name="save" class="md-button" disabled>salva</button>
