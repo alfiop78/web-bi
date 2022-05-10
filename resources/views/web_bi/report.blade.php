@@ -374,7 +374,7 @@
 								<div class="selectable" data-label>
 									<div class="h-content">
 										<div class="v-content">
-											<span column class="hightlight"></span>
+											<span column class="highlight"></span>
 											<small table></small>
 											<small hier></small>
 										</div>
@@ -387,7 +387,7 @@
 								<div data-label>
 									<div class="h-content">
 										<div class="v-content">
-											<span column class="hightlight"></span>
+											<span column class="highlight"></span>
 											<small table></small>
 											{{-- <small hier></small> --}}
 										</div>
@@ -401,7 +401,7 @@
 								<div class="selectable" data-label>
 									<div class="h-content">
 										<div class="v-content">
-											<span filter class="hightlight"></span>
+											<span filter class="highlight"></span>
 											<small table></small>
 											<small></small>
 										</div>
@@ -416,7 +416,7 @@
 									<div class="h-content">
 										<div class="v-content">
 											{{-- TODO: metriche composte potrei colorarle in modo diverso, cos' come le metriche filtrate --}}
-											<span metric class="hightlight"></span>
+											<span metric class="highlight"></span>
 											<small table></small>
 											<small cube></small>
 											{{-- TODO: qui, sulle metriche filtrate potrei visualizzare un popup con l'elenco dei filtri, oppure, per le metriche composte, visualizzarne, nel popup, la propria formula --}}
@@ -430,7 +430,7 @@
 								<div class="selectable" data-label>
 									<div class="h-content">
 										<div class="v-content">
-											<span metric class="hightlight"></span>
+											<span metric class="highlight"></span>
 											<small table></small>
 										</div>
 									</div>
@@ -442,7 +442,7 @@
 								<div class="selectable" data-label>
 									<div class="h-content">
 										<div class="v-content">
-											<span table class="hightlight"></span>
+											<span table class="highlight"></span>
 											<small></small>
 										</div>
 									</div>
@@ -460,24 +460,12 @@
 								</div>
 							</section>
 
-							<section data-element-search data-label data-sublist-generic hidden>
-								<span class="sublist">
-									<span generic></span>
-								</span>
-							</section>
-
-							<section data-element-search data-label data-sublist-cube-columns hidden>
-								<span class="sublist">
-									<span cube></span>
-									<span column></span>
-								</span>
-							</section>
-
 						</template>
 
-						<template id="tmpl-sublists">
-							<span filter data-element-search></span>
-							<span metric data-element-search></span>
+						<template id="template-sublists">
+							{{-- utilizzato quando ho un numero di elementi indefiniti, ad Esempio elenco gerarchie con le relative tabelle --}}
+							<span></span>
+							<small class="no-highlight"></small>
 						</template>
 
 						<div class="wrapper">

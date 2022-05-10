@@ -16,8 +16,7 @@ var StorageMetric = new MetricStorage();
 		// templates
 		tmplUlList: document.getElementById('template_ulList'), // contiene le <ul>
 		tmplList: document.getElementById('templateList'), // contiene i section
-		tmplSublists : document.getElementById('tmpl-sublists'),
-		tmplSubListTable : document.getElementById('data-sublist-table-columns'),
+		tmplSublists : document.getElementById('template-sublists'),
 
 		// popup
 		popup: document.getElementById('popup'),
@@ -144,30 +143,34 @@ var StorageMetric = new MetricStorage();
 			// per ogni dimensione presente in associatedDimensions inserisco un element (preso dal template app.tmplListField)
 			for (const [hierName, hier] of (Object.entries(dimValue.hierarchies)) ) {
 				const contentElement = app.tmplList.content.cloneNode(true);
-				const section = contentElement.querySelector('section[data-sublist-generic]');
-				const sublist = section.querySelector('.sublist');
-				const span = section.querySelector('span[generic]');
-				section.setAttribute('data-label', hierName); // ricerca dalla input sopra
-				section.setAttribute('data-element-search','search-hierarchy'); // ricerca dalla input sopra
-				section.setAttribute('data-dimension-name', dimValue.name);
-				section.setAttribute('data-hier-name', hierName);
-				section.addEventListener('click', app.handlerHierarchySelected);
+				const section = contentElement.querySelector('section[data-sublist-gen]');
+				const div = section.querySelector('div.selectable');
+				const vContent = div.querySelector('.v-content');
+				const span = vContent.querySelector('span[item]');
+				section.dataset.label = hierName;
+				section.dataset.elementSearch = 'search-hierarchy';
+				section.dataset.dimensionName = dimValue.name;
+				div.dataset.label = hierName;
+				div.dataset.dimensionName = dimValue.name;
+				div.dataset.hierName = hierName;
+				div.addEventListener('click', app.handlerHierarchySelected);
 				span.innerText = hierName;
-				span.setAttribute('data-hier-name', hierName);
-				span.setAttribute('data-dimension-name', dimName);
+				span.dataset.hierName = hierName;
+				span.dataset.dimensionName = dimName;
+				span.classList.add('highlight');
 				
 				// lista tabelle presenti per ogni gerarchia
 				for (const [tableId, table] of Object.entries(hier.order)) {
 					// console.log(table.table);
-					const contentSub = app.tmplList.content.cloneNode(true);
-					const spanSub = contentSub.querySelector('span[generic]');
-					spanSub.setAttribute('data-searchable', true);
-					spanSub.setAttribute('data-label', table.table);
-					spanSub.setAttribute('data-table-alias', table.alias);
-					spanSub.setAttribute('data-table-id', tableId);
-					spanSub.setAttribute('data-element-search','search-hierarchy');
-					spanSub.innerText = table.table;
-					sublist.appendChild(spanSub);
+					const contentSub = app.tmplSublists.content.cloneNode(true);
+					const small = contentSub.querySelector('small');
+					small.dataset.searchable = true;
+					small.dataset.label = table.table;
+					small.dataset.tableAlias = table.alias;
+					small.dataset.tableId = tableId;
+					small.dataset.elementSearch = 'search-hierarchy';
+					small.innerText = table.table;
+					vContent.appendChild(small);
 				}
 				ul.appendChild(section);
 			}
@@ -1403,7 +1406,7 @@ var StorageMetric = new MetricStorage();
 
 	app.getAvailableMetrics();
 
-	app.datamartToBeProcessed();
+	// app.datamartToBeProcessed();
 
 	// abilito il tasto btnFilterSave se il form per la creazione del filtro è corretto
 	app.checkFilterForm = () => {
@@ -1638,10 +1641,6 @@ var StorageMetric = new MetricStorage();
 	document.getElementById('columnAlias').oninput = (e) => {
 		(e.target.value.length === 0) ? app.btnSaveColumn.disabled = true : app.btnSaveColumn.disabled = false;
 	}
-/*
-	document.getElementById('columnName').oninput = (e) => {
-		(e.target.value.length === 0) ? app.btnSaveColumn.disabled = true : app.btnSaveColumn.disabled = false;
-	}*/
 
 	app.checkDialogMetric = () => {
 		const metricName = document.getElementById('metric-name').value;
