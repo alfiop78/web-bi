@@ -103,9 +103,15 @@ class Cube {
 	// metriche composte
 	public function compositeMetrics($metrics) {
 		$metricsList = array();
-		//var_dump($metrics);
+		// TODO: qui devo verificare se la metrica composta contiene metriche filtrate
 		foreach ($metrics as $metric) {
-			// var_dump($metric);
+			// dd($metrics, $metric);
+			/*if ($metric->filtered === true){
+				dd('metrica comopsta con filtri');
+
+			} else {
+				dd('metrica comopsta senza filtri');
+			}*/
 			$metricsList[] = "\n{$metric->formula_sql} AS '{$metric->alias}'";
 		}
 		$this->_compositeMetrics = implode(", ", $metricsList);
@@ -134,7 +140,7 @@ class Cube {
 		$this->_sql = $this->_select;
 		// se ci sono metriche a livello di report le aggiungo
 		if ($this->_metrics) {$this->_sql .= ", $this->_metrics";}
-		if ($this->_compositeMetrics) {$this->_sql .= ", $this->_compositeMetrics";}
+		// if ($this->_compositeMetrics) {$this->_sql .= ", $this->_compositeMetrics";}
 		$this->_sql .= "\n$this->_from";
 		$this->_sql .= "\n$this->_where";
 		$this->_sql .= "\n$this->_and";
@@ -181,23 +187,24 @@ class Cube {
 	// creo la tabella contenente le metriche filtrate
 	private function createMetricTable($tableName, $metric, $filters) {
 		// dd($filters);
-		$this->_sql = $this->_select.", ".$metric."\n";
-		$this->_sql .= $this->_from."\n";
-		$this->_sql .= $this->_where."\n";
-		$this->_sql .= $this->_and."\n";
-		$this->_sql .= $this->_reportFilters."\n";
+		$this->_sql = $this->_select.",\n$metric";
+		if ($this->_compositeMetrics) {$this->_sql .= ", $this->_compositeMetrics";}
+		$this->_sql .= "\n$this->_from";
+		$this->_sql .= "\n$this->_where";
+		$this->_sql .= "\n$this->_and";
+		$this->_sql .= $this->_reportFilters;
 
 		foreach ($filters as $filter) {
-			$this->_metricFilters .= " AND {$filter->alias}.{$filter->formula}";
+			$this->_metricFilters .= "AND {$filter->alias}.{$filter->formula}";
 		}
 		// dd($this._metricFilters);
 
-		$this->_sql .= $this->_metricFilters."\n";
-		if (!is_null($this->_groupBy)) {$this->_sql .= $this->_groupBy;}
+		$this->_sql .= "\n$this->_metricFilters";
+		if (!is_null($this->_groupBy)) {$this->_sql .= "\n$this->_groupBy";}
 
-		$sql = "CREATE TEMPORARY TABLE decisyon_cache.".$tableName." ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ".$this->_sql.";";
-		// return $sql;
+		$sql = "CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
 		// dd($sql);
+		// TODO: eliminare la tabella temporanea come fatto per baseTable
         if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
             // dd('la tabella già esiste, la elimino');
             $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
@@ -224,24 +231,24 @@ class Cube {
 		$datamartName = "decisyon_cache.FX_".$this->reportId;
 		$table = "FX_$this->reportId";
 		// se _metricTable ha qualche metrica (sono metriche filtrate) allora procedo con la creazione FX con LEFT JOIN, altrimenti creo una singola FX
-		// TODO: le 2 righe successive sono da spostare all'interno della if, fanno parte della logica per la creazione di un datamart con metriche filtrate
-		$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS ";
-		$sql .= "(SELECT $baseTableName.*, ";
 		if (isset($this->_metricTable) && count($this->_metricTable) > 0) {
+			$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS ";
+			$sql .= "\n(SELECT\n$baseTableName.*,\n";
 			// sono presenti metriche filtrate
 			$table_and_metric = array();
 			$leftJoin = null;
 			$ONClause = array();
 			$ONConditions = NULL;
 			foreach ($this->_metricTable as $metricTableName => $alias) {
-				$table_and_metric[] = "$metricTableName.$alias";
-				$leftJoin .= "\nLEFT JOIN decisyon_cache.$metricTableName ON ";
+				$table_and_metric[] = "$metricTableName.'$alias'";
+				
+				$leftJoin .= "\nLEFT JOIN\ndecisyon_cache.$metricTableName\nON\n";
 				foreach ($this->_columns as $columnAlias) {
 					// carattere backtick con ALTGR+'
 					// TODO: da testare dopo la modifica id_ds, la join, al momento viene fatta solo con i campi _id, ulteriori verifiche da fare
 					$ONClause[] = "{$baseTableName}.{$columnAlias} = {$metricTableName}.{$columnAlias}";
 				}
-				$ONConditions = implode(" AND ", $ONClause);
+				$ONConditions = implode("\nAND ", $ONClause);
 				unset($ONClause);
 				$leftJoin .= "$ONConditions";
 			}
@@ -255,7 +262,7 @@ class Cube {
 			$tables = implode(", ", $table_and_metric); //`W_AP_metric_3_1`.`sconto`, `W_AP_metric_3_2`.`listino`
 
 			$sql .= $tables;
-			$sql .= "\nFROM decisyon_cache.$baseTableName";
+			$sql .= "\nFROM\ndecisyon_cache.$baseTableName";
 			$sql .= $leftJoin.");";
 			dd($sql);
 		} else {

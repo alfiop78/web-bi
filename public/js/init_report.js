@@ -421,6 +421,7 @@ var StorageMetric = new MetricStorage();
 				div.setAttribute('data-table-name', cubeValue.FACT);
 				div.setAttribute('data-table-alias', cubeValue.alias);
 				div.setAttribute('data-cube-name', cubeName);
+				div.dataset.label = filter.name;
 				div.onclick = app.handlerMetricFilterSelected;
 				span.innerText = filter.name;
 				smallTable.innerText = cubeValue.FACT;
@@ -690,12 +691,12 @@ var StorageMetric = new MetricStorage();
  	app.handlerReportToBeProcessed = async (e) => {
 		console.clear();
 		const label = e.currentTarget.dataset.label;
-		debugger;
+		// debugger;
 		console.log(label);
 		const reportId = +e.currentTarget.dataset.processId;
 		// const reportId = +e.target.getAttribute('data-id');
 		console.log('reportId : ', reportId);
-		debugger;
+		// debugger;
 		let jsonData = window.localStorage.getItem(label);
 		let jsonDataParsed = JSON.parse(window.localStorage.getItem(label));
 		console.dir(jsonDataParsed);
@@ -822,11 +823,9 @@ var StorageMetric = new MetricStorage();
 			if (StorageMetric.metric.composite) {
 				// metrica composta
 				Query.compositeMetrics = StorageMetric.metric.formula;
-				// Query.compositeMetrics = StorageMetric.metric.formula[StorageMetric.metric.name];
 			} else {
 				// se la metrica contiene un filtro bisogna aggiungerla a Query.filteredMetrics altrimenti a Query.metrics
 				if (StorageMetric.metric.formula.filtered) {
-					debugger;
 					// metrica filtrata
 					Query.filteredMetrics = StorageMetric.metric.formula;
 				} else {
@@ -943,6 +942,7 @@ var StorageMetric = new MetricStorage();
 				app.dialogFilter.querySelector('section').setAttribute('data-dimension-name', e.currentTarget.getAttribute('data-dimension-name'));
 			} else {
 				// selezione di una tabella della Fact, elimino l'attributo data-hier-name perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
+				// TODO: da ricontrollare se questi due attributi vengono utilizzati quando si seleziona una tabella appartenente a una dimensione->hier
 				app.dialogFilter.querySelector('section').removeAttribute('data-hier-name');
 				app.dialogFilter.querySelector('section').removeAttribute('data-dimension-name');
 				StorageCube.selected = e.currentTarget.getAttribute('data-cube-name');
@@ -1082,7 +1082,7 @@ var StorageMetric = new MetricStorage();
 						const section = content.querySelector('section[data-sublist-gen]');
 						const div = section.querySelector('div.selectable');
 						const span = div.querySelector('span');
-						// section.hidden = false;
+						section.hidden = false;
 						section.setAttribute('data-searchable', true);
 						section.setAttribute('data-label', value.COLUMN_NAME);
 						section.setAttribute('data-element-search', 'dialog-filter-search-field');
@@ -1197,7 +1197,7 @@ var StorageMetric = new MetricStorage();
 		console.log(Query.metricName);
 		// verifico se ci sono filtri da associare a questa metrica
 		let associatedFilters = {};
-		document.querySelectorAll('#ul-metric-filter > section .selectable[selected]').forEach((filterSelected) => {
+		document.querySelectorAll('#ul-metric-filter .selectable[selected]').forEach((filterSelected) => {
 			StorageFilter.filter = filterSelected.getAttribute('data-label');
 			// recupero dallo storage il contenuto del filtro per inserirlo in un object (quest'ultimo verrà inserito nella metrica)
 			associatedFilters[StorageFilter.filter.name] = StorageFilter.filter;
@@ -1254,14 +1254,14 @@ var StorageMetric = new MetricStorage();
 		const name = document.getElementById('composite-metric-name').value;
 		const alias = document.getElementById('composite-alias-metric').value;
 		let arr_text = [], arr_sql = [];
-		let filteredExist = false;
+		// let filteredExist = false;
 		document.querySelectorAll('#composite-metric-formula *').forEach( element => {
 			// console.log('element : ', element);
 			// console.log('element : ', element.nodeName);
 			// se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
 			if (element.nodeName === 'MARK') {
 				StorageMetric.metric = element.innerText;
-				if (StorageMetric.metric.formula.filtered) filteredExist = true;
+				// if (StorageMetric.metric.formula.filtered) filteredExist = true;
 				// es. SUM(NettoRiga)
 				// TODO: verificare se è presente il distinct : true in ogni metrica
 				arr_sql.push(`${StorageMetric.metric.formula.SQLFunction}(${StorageMetric.metric.formula.tableAlias}.${StorageMetric.metric.formula.field})`);
@@ -1276,9 +1276,9 @@ var StorageMetric = new MetricStorage();
 		Query.metricName = name;
 
 		let metricObj = {};
-		Query.compositeMetrics = { formula_sql, alias };
+		Query.compositeMetrics = { formula_sql, alias, filtered : StorageMetric.metric.formula.filtered };
 		// Query.compositeMetrics = { formula_sql, table: Query.table, tableAlias : Query.tableAlias, alias };
-		metricObj = { type: 'METRIC', name, composite : true, formula: Query.compositeMetrics[name], cube : StorageCube.selected.name, filtered : filteredExist };
+		metricObj = { type: 'METRIC', name, composite : true, formula: Query.compositeMetrics[name], cube : StorageCube.selected.name, filtered : StorageMetric.metric.formula.filtered };
 
 		console.log(metricObj)
 		debugger;
@@ -1443,6 +1443,7 @@ var StorageMetric = new MetricStorage();
 						const section = content.querySelector('section[data-sublist-gen');
 						const div = section.querySelector('div.selectable');
 						const span = div.querySelector('span');
+						section.hidden = false;
 						section.setAttribute('data-label', value[Query.field]);
 						section.setAttribute('data-element-search', 'dialog-value-search');
 						section.setAttribute('data-searchable', true);

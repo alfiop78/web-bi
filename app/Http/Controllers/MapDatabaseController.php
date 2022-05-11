@@ -120,6 +120,7 @@ class MapDatabaseController extends Controller
         $q->n_select($cube->{'select'});
         // exit;
         $q->metrics($cube->{'metrics'});
+        // dd(get_object_vars($cube->{'compositeMetrics'}));
         $q->compositeMetrics($cube->{'compositeMetrics'});
         $q->n_from($cube->{'from'});
         $q->n_where($cube->{'where'});
