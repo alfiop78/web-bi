@@ -23,28 +23,28 @@ class Cube {
 
 	public function n_select($columns) {
 		$fieldList = array();
-		$this->_select = "SELECT ";
+		$this->_select = "SELECT";
 
 		foreach ($columns as $key => $object) {
 			/* var_dump($key); // il nome dato alla colonna */
 			/* print_r($object); // contiene l'object {table : tabella, field: campo, alias : alias, SQL : formulSQL} */
 			/* var_dump($object->table); */
 			foreach ($object->field as $token => $field) {
-				$fieldList[] = "{$object->tableAlias}.{$field->id->field} AS '{$object->alias}_id'";
+				$fieldList[] = "\n{$object->tableAlias}.{$field->id->field} AS '{$object->alias}_id'";
 				$fieldList[] = "{$object->tableAlias}.{$field->ds->field} AS '{$object->alias}_ds'";
 				// $fieldList[] = "{$object->table}.{$object->field} AS '{$object->alias}'";
 				$this->_columns[] = "{$object->alias}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
 			}
 		}
 		$this->_select .= implode(", ", $fieldList);
-		// var_dump($this->_select);
+		// dd($this->_select);
 		// var_dump($this->_columns);
 	}
 
 	public function n_from($from) {
 		// per ogni dimensione esistente vado a aggiungere, in this->_from, i FROM che si trovano al suo interno
-		$this->_from = " FROM " . implode(", ", $from);
-		// var_dump($this->_from);
+		$this->_from = "FROM\n" . implode(",\n", $from);
+		// dd($this->_from);
 	}
 
 	public function n_where($joins) {
@@ -52,17 +52,17 @@ class Cube {
 		// joins = "token_join" : ['table.field', 'table.field']
 		foreach ($joins as $join) {
 			$relation = implode(" = ", $join);
-			$this->_where .= ($i === 0) ? " WHERE $relation " : " AND $relation ";
+			$this->_where .= ($i === 0) ? "WHERE\n$relation " : "\nAND $relation ";
 			$i++;
 		}
-		// var_dump($this->_where);
+		// dd($this->_where);
 	}
 
 	public function joinFact($joins) {
         // definisco la join tra l'ultima tabella della gerarchia e la FACT.
         // se è presente una sola tabella nella dimensione, la prop 'where' sarà vuota, per cui, qui, invece della AND dovrò usare la WHERE iniziale e le successive join con la AND
 		$this->_ands = array();
-        $this->_and = (!$this->_where) ? " WHERE " : " AND " ;
+        $this->_and = (!$this->_where) ? "WHERE\n " : "AND " ;
 		// $this->_and = " AND ";
 		foreach ($joins as $dim) {
 			// var_dump($dim);
@@ -72,13 +72,13 @@ class Cube {
 			}
 		}
 		
-		$this->_and .= implode(" AND ", $this->_ands);
-		// var_dump($this->_and);
+		$this->_and .= implode("\nAND ", $this->_ands);
+		// dd($this->_and);
 	}
 
 	public function filters($tables) {
 		// definisco i filtri del report
-		$and = " AND ";
+		$and = "\nAND ";
 		foreach ($tables as $table) {
 			// var_dump($table);
 			foreach ($table as $filter) {
@@ -94,7 +94,7 @@ class Cube {
 		//var_dump($metrics);
 		foreach ($metrics as $metric) {
 			// var_dump($metric);
-			$metricsList[] = "{$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}) AS '{$metric->alias}'";
+			$metricsList[] = "\n{$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}) AS '{$metric->alias}'";
 		}
 		$this->_metrics = implode(", ", $metricsList);
 		// dd($this->_metrics);
@@ -106,7 +106,7 @@ class Cube {
 		//var_dump($metrics);
 		foreach ($metrics as $metric) {
 			// var_dump($metric);
-			$metricsList[] = "{$metric->formula_sql} AS '{$metric->alias}'";
+			$metricsList[] = "\n{$metric->formula_sql} AS '{$metric->alias}'";
 		}
 		$this->_compositeMetrics = implode(", ", $metricsList);
 		// dd($this->_compositeMetrics);
@@ -114,20 +114,19 @@ class Cube {
 
 	public function n_groupBy($groups) {
 		$fieldList = array();
-		$this->_groupBy = " GROUP BY ";
-
+		$this->_groupBy = "GROUP BY";
 		foreach ($groups as $key => $object) {
 			/* var_dump($key); // il nome dato alla colonna */
 			/* print_r($object); // contiene l'object {table : tabella, field: campo, alias : alias, SQL : formulSQL} */
 			/* var_dump($object->table); */
 			// $fieldList[] = "{$object->table}.{$object->field}";
 			foreach ($object->field as $token => $field) {
-				$fieldList[] = "{$object->tableAlias}.{$field->id->field}";	
-				$fieldList[] = "{$object->tableAlias}.{$field->ds->field}";	
+				$fieldList[] = "\n{$object->tableAlias}.{$field->id->field}";
+				$fieldList[] = "{$object->tableAlias}.{$field->ds->field}";
 			}			
 		}
 		$this->_groupBy .= implode(", ", $fieldList);
-		/* var_dump($this->_groupBy); */
+		// dd($this->_groupBy);
 	}
 
 	public function baseTable() {
@@ -135,13 +134,13 @@ class Cube {
 		$this->_sql = $this->_select;
 		// se ci sono metriche a livello di report le aggiungo
 		if ($this->_metrics) {$this->_sql .= ", $this->_metrics";}
-		if ($this->_compositeMetrics) {$this->_sql .= ", $this->_compositeMetrics\n";}
-		$this->_sql .= $this->_from."\n";
-		$this->_sql .= $this->_where."\n";
-		$this->_sql .= $this->_and."\n";
-		if (isset($this->_reportFilters)) {$this->_sql .= $this->_reportFilters."\n";}
+		if ($this->_compositeMetrics) {$this->_sql .= ", $this->_compositeMetrics";}
+		$this->_sql .= "\n$this->_from";
+		$this->_sql .= "\n$this->_where";
+		$this->_sql .= "\n$this->_and";
+		if (isset($this->_reportFilters)) {$this->_sql .= "$this->_reportFilters";}
 
-		if (!is_null($this->_groupBy)) {$this->_sql .= $this->_groupBy;}
+		if (!is_null($this->_groupBy)) {$this->_sql .= "\n$this->_groupBy";}
 		// dd($this->_sql);
         // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
 		$sql = "CREATE TEMPORARY TABLE decisyon_cache.W_AP_base_$this->reportId ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
