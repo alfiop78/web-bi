@@ -1,4 +1,4 @@
-#controls{position: absolute;bottom: 32px;left: 0;right: 0;display: flex;justify-content: center;
+#controls{position: absolute;bottom: 16px;left: 0;right: 0;display: flex;justify-content: center;
   padding: 0 32px;flex-direction: column;z-index: 1001;}
 
 #fabs{display: flex;flex-grow: 1;max-width: 1025px;width: 100%;margin: 0 auto;}

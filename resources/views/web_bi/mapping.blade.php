@@ -5,7 +5,6 @@
         <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
 		<link rel="icon" href="/favicon.png" type="image/png" />
         <title>mapping</title>
-        <link rel="stylesheet" href="{{ asset('css/index.css') }}">
         <link rel="stylesheet" href="{{ asset('/css/md-dialogs.css') }}">
         <link rel="stylesheet" type="text/css" href="/css/md-layout.css" />
 		<link rel="stylesheet" type="text/css" href="/css/material-icons.css" />
@@ -14,6 +13,7 @@
 		<link rel="stylesheet" type="text/css" href="/css/md-drawer.css" />
 		<link rel="stylesheet" type="text/css" href="/css/md-inputs.css" />
         <link rel="stylesheet" type="text/css" href="/css/timeline.css" />
+        <link rel="stylesheet" href="{{ asset('css/index.css') }}">
         <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 		<script src="/js/Application.js"></script>
 		<script src="/js/lib.js"></script>
@@ -21,8 +21,6 @@
 		<script src="/js/Cube.js"></script>
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@200;400;500;600&display=swap" rel="stylesheet">
-        <!-- Styles -->
-
         <style>
             body {
                 font-family: 'Barlow', sans-serif;

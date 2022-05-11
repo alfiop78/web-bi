@@ -218,6 +218,7 @@ class Cube {
 		$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS ";
 		$sql .= "(SELECT $baseTableName.*, ";
 		if (isset($this->_metricTable) && count($this->_metricTable) > 0) {
+			// sono presenti metriche filtrate
 			$table_and_metric = array();
 			$leftJoin = null;
 			$ONClause = array();
@@ -235,7 +236,7 @@ class Cube {
 				$leftJoin .= "$ONConditions";
 			}
 			/*
-			DATAMART DA GENERARE
+			QUERY CHE GENERA IL DATAMART
 			select W_AP_base_3.*, `W_AP_metric_3_1`.`Listino`, `W_AP_metric_3_2`.`sconto` FROM W_AP_base_3
 							  LEFT JOIN W_AP_metric_3_1 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_1`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_1`.`Sede`
 							  LEFT JOIN W_AP_metric_3_2 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_2`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_2`.`Sede`
@@ -246,10 +247,9 @@ class Cube {
 			$sql .= $tables;
 			$sql .= "\nFROM decisyon_cache.$baseTableName";
 			$sql .= $leftJoin.");";
-			// dd($sql);
-
+			dd($sql);
 		} else {
-			$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS (SELECT * FROM decisyon_cache.".$baseTableName.");";
+			$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS (SELECT * FROM decisyon_cache.$baseTableName);";
 		}
 		/* vecchio metodo, prima di MyVerticaGrammar.php
         $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_$this->reportId' AND SCHEMA_NAME='decisyon_cache';");

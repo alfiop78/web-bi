@@ -26,7 +26,7 @@
 	</head>
 	<body>
 
-		<small id="popup" class="popupToast"></small>
+		<small id="tooltip" class="tooltip"></small>
 
 		<dialog id="dialog-column">
 			<small id="dialog-popup" class="popupToast"></small>
@@ -354,7 +354,8 @@
 					<div id="body" hidden>
 
 						<div class="actions">
-							<span class="popupContent"><i id="btnProcessReport" class="material-icons md-24">table_rows</i><small class="popup">Crea FX</small></span>
+							{{-- <span class="popupContent"><i id="btnProcessReport" class="material-icons md-18">table_rows</i><small class="popup">Crea FX</small></span> --}}
+							<i id="btnProcessReport" class="material-icons md-18" data-tooltip="Crea datamart" data-tooltip-position="bottom">table_rows</i>
 						</div>
 
 						<div class="lists">

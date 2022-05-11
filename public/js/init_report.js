@@ -59,7 +59,9 @@ var StorageMetric = new MetricStorage();
 		btnBackPage: document.getElementById('mdcBack'), // da definire
 		ulDimensions: document.getElementById('dimensions'),
 		aggregationFunction: document.getElementById('ul-aggregation-functions'),
-		btnMapping: document.getElementById('mdcMapping')
+		btnMapping: document.getElementById('mdcMapping'),
+		tooltip : document.getElementById('tooltip'),
+		tooltipTimeoutId : null
 	}
 
 	// creo la lista degli elementi da processare
@@ -252,7 +254,7 @@ var StorageMetric = new MetricStorage();
 		for (const [key, value] of Object.entries(StorageCube.cubes)) {
 			if (value.columns.hasOwnProperty(value.alias)) {
 				for (const [token, field] of Object.entries(value.columns[value.alias])) {
-					console.log('field : ', field);
+					// console.log('field : ', field);
 					const content = app.tmplList.content.cloneNode(true);
 					const section = content.querySelector('section[data-sublist-columns]');
 					const div = section.querySelector('div.selectable');
@@ -330,7 +332,7 @@ var StorageMetric = new MetricStorage();
 		const ul = document.getElementById('exist-filters');
 		for (const [cubeName, cubeValue] of Object.entries(StorageCube.cubes) ) {
 			StorageFilter.getFiltersByCube(cubeName).forEach( (filter) => {
-				console.log('filter : ', filter);
+				// console.log('filter : ', filter);
 				const content = app.tmplList.content.cloneNode(true);
 				const section = content.querySelector('section[data-sublist-filters]');
 				const div = section.querySelector('div.selectable');
@@ -404,7 +406,7 @@ var StorageMetric = new MetricStorage();
 		const ul = document.getElementById('ul-metric-filter');
 		for (const [cubeName, cubeValue] of Object.entries(StorageCube.cubes) ) {
 			StorageFilter.getFiltersByCube(cubeName).forEach( (filter) => {
-				console.log('filter : ', filter);
+				// console.log('filter : ', filter);
 				const content = app.tmplList.content.cloneNode(true);
 				const section = content.querySelector('section[data-sublist-filters]');
 				const div = section.querySelector('div.selectable');
@@ -544,9 +546,9 @@ var StorageMetric = new MetricStorage();
 	app.getAvailableMetrics = () => {
 		const ul = document.getElementById('ul-available-metrics');
 		for (const [key, value] of Object.entries(StorageCube.cubes)) {
-			console.log(key, value);
+			// console.log(key, value);
 			// per ogni metrica
-			console.log(value.metrics[value.FACT]);
+			// console.log(value.metrics[value.FACT]);
 			value.metrics[value.FACT].forEach( (metric) => {
 				const content = app.tmplList.content.cloneNode(true);
 				const section = content.querySelector('section[data-sublist-available-metrics]');
@@ -1742,6 +1744,103 @@ var StorageMetric = new MetricStorage();
 	app.btnMapping.onclick = () => location.href = '/mapping';
 
 	app.btnBackPage.onclick = () => window.location.href = '/';
+
+	// TODO: queste 3 funzioni che riguardano i tooltip vanno posizionate in Application.js, rendendole disponibili per tutte le pagine
+	app.showTooltip = (e) => {
+		// TODO: da spostare in Application.js
+		if (e.target.classList.contains('md-inactive')) return;
+		// console.log(e.target.getAttribute('data-tooltip').length);
+		// console.log('enter');
+		// const toast = document.getElementById('toast');
+		// console.log('pageX : ', e.pageX);
+		// console.log('pageY : ', e.pageY);
+		// console.log('screen-x : ', e.screenX);
+		// console.log('offset-x : ', e.offsetX);
+		// console.log('offset-y : ', e.offsetY);
+		// console.log('client-x : ', e.clientX);
+		// console.log('client-y : ', e.clientY);
+		// console.log(e.target.getBoundingClientRect().top);
+		// console.log(e.target.getBoundingClientRect().right);
+		// console.log(e.target.getBoundingClientRect().bottom);
+		// console.log('left : ',e.target.getBoundingClientRect().left);
+		const pos = () => {
+			let x,y;
+			const left = e.target.getBoundingClientRect().left;
+			const right = e.target.getBoundingClientRect().right;
+			const top = e.target.getBoundingClientRect().top;
+			const bottom = e.target.getBoundingClientRect().bottom;
+			let centerElementW = left + ((right - left) / 2);
+			let centerElementH = top + ((bottom - top) / 2);
+			app.tooltip.innerHTML = e.currentTarget.getAttribute('data-tooltip');
+			const elementWidth = app.tooltip.offsetWidth / 2;
+			const elementHeight = app.tooltip.offsetHeight / 2;
+			const width = app.tooltip.offsetWidth;
+			const height = app.tooltip.offsetHeight;
+			switch (e.target.getAttribute('data-tooltip-position')) {
+				case 'top':
+					y = top - height;
+					x = centerElementW - elementWidth;
+					break;
+				case 'right':
+					// y = e.target.getBoundingClientRect().top;
+					y = centerElementH - elementHeight;
+					x = right + 5;
+					break;
+				case 'left':
+					y = centerElementH - elementHeight;
+					x = left - width;
+					break;
+				default:
+					// bottom
+					y = bottom + 5;
+					x = centerElementW - elementWidth;
+					break;
+			}
+			return {x,y};
+		}
+		
+		app.tooltip.style.setProperty('--left', pos().x + "px");
+		// app.tooltip.style.setProperty('--left', xPosition + "px");
+		app.tooltip.style.setProperty('--top', pos().y + "px");
+		// app.tooltip.style.setProperty('--top', yPosition + "px");
+		if (e.target.hasAttribute('data-open-abs-window')) {
+			// tasto versionamento, mostro la abs-window
+			app.absWindow.style.setProperty('--left', pos().x + 'px');
+			app.absWindow.style.setProperty('--top', pos().y + 'px');
+			app.absWindow.hidden = false;
+		}
+		// app.popup.classList.add('show');
+		app.tooltipTimeoutId = setTimeout(() => {
+			// se il tooltip non contiene un testo non deve essere mostrato
+			if (e.target.getAttribute('data-tooltip').length !== 0) app.tooltip.classList.add('show');
+		}, 600);
+		/*app.popup.animate([
+		  {transform: 'scale(.2)'},
+		  {transform: 'scale(1.2)'},
+		  {transform: 'scale(1)'}
+		], { duration: 50, easing: 'ease-in-out', delay: 1000 });*/
+
+		// console.log(e.target.getBoundingClientRect().bottom);
+		// console.log(e.target.getBoundingClientRect().left);
+		// console.log(' : ', rect);
+	}
+
+	app.hideTooltip = (e) => {
+		// console.log('leave');
+		if (e.target.classList.contains('md-inactive')) return;
+		app.tooltip.classList.remove('show');
+		clearTimeout(app.tooltipTimeoutId);
+		if (e.target.hasAttribute('data-open-abs-window')) {
+			// tasto versionamento, mostro la abs-window
+			app.absWindow.hidden = true;
+		}
+	}
+
+	// eventi mouseEnter/Leave su tutte le icon con l'attributo data-tooltip
+	document.querySelectorAll('*[data-tooltip]').forEach((icon) => {
+		icon.onmouseenter = app.showTooltip;
+		icon.onmouseleave = app.hideTooltip;
+	});
 
 	// NOTE: esempio di utilizzo di MutationObserver
 	/*

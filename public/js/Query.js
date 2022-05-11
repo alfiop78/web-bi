@@ -225,18 +225,18 @@ class Queries {
 
 	get filteredMetrics() {return this._filteredMetrics;}
 
+	deleteFilteredMetric() {
+		debugger;
+		delete this._filteredMetrics[this._metricName];
+		console.log('_filteredMetrics : ', this._filteredMetrics);
+	}
+
 	set compositeMetrics(object) {
 		this.#compositeMetrics[this._metricName] = object;
 		console.log('this.#compositeMetrics : ', this.#compositeMetrics);
 	}
 
 	get compositeMetrics() {return this.#compositeMetrics;}
-
-	deleteFilteredMetric() {
-		debugger;
-		delete this._filteredMetrics[this._metricName];
-		console.log('_filteredMetrics : ', this._filteredMetrics);
-	}
 
 	save(processId, name) {
 		this._reportProcess = {};
