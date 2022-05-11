@@ -49,6 +49,7 @@ var StorageMetric = new MetricStorage();
 		btnColumnDone: document.getElementById('btnColumnDone'), // tasto ok nella dialogColumns
 		btnMetricSave: document.getElementById('btnMetricSave'), // tasto salva nella dialogMetric
 		btnCompositeMetricSave: document.getElementById('btnCompositeMetricSave'), // tasto salva nella dialog-composite-metric
+		btnCompositeMetricDone : document.getElementById('btnCompositeMetricDone'),
 		btnMetricDone: document.getElementById('btnMetricDone'), // tasto Salva nella dialogMetric
 		btnMetricFilterDone: document.getElementById('btnMetricFilterDone'), // tasto ok nella dialog-metric-filter
 		btnSetMetricFilter : document.getElementById('metric-filtered'), // apre la dialog-metric-filter
@@ -542,6 +543,35 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
+	// lista metriche composte
+	// lista metriche esistenti
+	app.getCompositeMetrics = () => {
+		const ul = document.getElementById('exist-composite-metrics');
+		for (const [cubeName, cubeValue] of Object.entries(StorageCube.cubes)) {
+			for (const [key] of StorageMetric.getCubeCompositeMetrics(cubeName).entries()) {
+				const contentElement = app.tmplList.content.cloneNode(true);
+				const section = contentElement.querySelector('section[data-sublist-metrics]');
+				const div = section.querySelector('div.selectable');
+				const spanHContent = div.querySelector('.h-content');
+				const span = spanHContent.querySelector('span[metric]');
+				const smallTable = spanHContent.querySelector('small[table]');
+				const smallCube = spanHContent.querySelector('small[cube]');
+				section.setAttribute('data-element-search', 'search-exist-metrics');
+				section.setAttribute('data-label', key.name);
+				section.setAttribute('data-cube-name', cubeName);
+				div.setAttribute('data-table-name', cubeValue.FACT);
+				div.setAttribute('data-table-alias', cubeValue.alias);
+				div.setAttribute('data-cube-name', cubeName);
+				div.setAttribute('data-label', key.name);
+				div.onclick = app.handlerMetricSelected;
+				span.innerText = key.name;
+				smallTable.innerText = cubeValue.FACT;
+				smallCube.innerText = cubeName;
+				ul.appendChild(section);
+			}
+		}
+	}
+
 	// lista delle metriche disponibili nei cubi
 	app.getAvailableMetrics = () => {
 		const ul = document.getElementById('ul-available-metrics');
@@ -791,13 +821,16 @@ var StorageMetric = new MetricStorage();
 			Query.metricName = StorageMetric.metric.name;
 			if (StorageMetric.metric.composite) {
 				// metrica composta
-				Query.compositeMetrics = StorageMetric.metric.formula[StorageMetric.metric.name];
+				Query.compositeMetrics = StorageMetric.metric.formula;
+				// Query.compositeMetrics = StorageMetric.metric.formula[StorageMetric.metric.name];
 			} else {
 				// se la metrica contiene un filtro bisogna aggiungerla a Query.filteredMetrics altrimenti a Query.metrics
-				if (StorageMetric.metric.formula[StorageMetric.metric.name].hasOwnProperty('filters')) {
-					Query.filteredMetrics = StorageMetric.metric.formula[StorageMetric.metric.name];
+				if (StorageMetric.metric.formula.filtered) {
+					debugger;
+					// metrica filtrata
+					Query.filteredMetrics = StorageMetric.metric.formula;
 				} else {
-					Query.metrics = StorageMetric.metric.formula[StorageMetric.metric.name];
+					Query.metrics = StorageMetric.metric.formula;
 				}
 			}
 		} else {
@@ -1146,10 +1179,12 @@ var StorageMetric = new MetricStorage();
 
 	app.btnMetricDone.onclick = () => app.dialogMetric.close();
 
+	app.btnCompositeMetricDone.onclick = () => app.dialogCompositeMetric.close();
+
 	// dialog-metric-filter, recupero i filtri selezionati per inserirli nella metrica filtrata
 	app.btnMetricFilterDone.onclick = e => app.dialogMetricFilter.close();
 
-	// tasto salva nella dialogMetric, salvo la metrica impostata
+	// metric save
 	app.btnMetricSave.onclick = (e) => {
 		const name = document.getElementById('metric-name').value;
 		const alias = document.getElementById('alias-metric').value;
@@ -1162,7 +1197,7 @@ var StorageMetric = new MetricStorage();
 		console.log(Query.metricName);
 		// verifico se ci sono filtri da associare a questa metrica
 		let associatedFilters = {};
-		document.querySelectorAll('#ul-metric-filter > section span[filter][selected]').forEach((filterSelected) => {
+		document.querySelectorAll('#ul-metric-filter > section .selectable[selected]').forEach((filterSelected) => {
 			StorageFilter.filter = filterSelected.getAttribute('data-label');
 			// recupero dallo storage il contenuto del filtro per inserirlo in un object (quest'ultimo verrà inserito nella metrica)
 			associatedFilters[StorageFilter.filter.name] = StorageFilter.filter;
@@ -1173,15 +1208,15 @@ var StorageMetric = new MetricStorage();
 		if (Object.keys(associatedFilters).length > 0) {
 			// metrica filtrata
 			console.info('metrica filtrata');
-			Query.filteredMetrics = { SQLFunction, 'table': Query.table, 'tableAlias' : Query.tableAlias, 'field': Query.field, name, 'distinct': distinctOption, alias, cube : StorageCube.selected.name, 'filters': associatedFilters };
+			Query.filteredMetrics = { SQLFunction, field: Query.field, distinct: distinctOption, alias, table: Query.table, tableAlias : Query.tableAlias, filtered : true, filters: associatedFilters };
 
 			console.log(Query.filteredMetrics);
-			metricObj = { 'type': 'METRIC', name, 'formula': Query.filteredMetrics };
+			metricObj = { type: 'METRIC', name, formula: Query.filteredMetrics[name], cube : StorageCube.selected.name };
 		} else {
 			// metrica
 			console.info('metrica non filtrata');
-			Query.metrics = { SQLFunction, 'table': Query.table, 'tableAlias' : Query.tableAlias, 'field': Query.field, name, 'distinct': distinctOption, alias, cube : StorageCube.selected.name };
-			metricObj = { 'type': 'METRIC', name, 'formula': Query.metrics };
+			Query.metrics = { SQLFunction, field: Query.field, distinct: distinctOption, alias, table: Query.table, tableAlias : Query.tableAlias, filtered : false };
+			metricObj = { type: 'METRIC', name, formula: Query.metrics[name], cube : StorageCube.selected.name };
 		}
 
 		// salvo la nuova metrica nello storage
@@ -1219,34 +1254,39 @@ var StorageMetric = new MetricStorage();
 		const name = document.getElementById('composite-metric-name').value;
 		const alias = document.getElementById('composite-alias-metric').value;
 		let arr_text = [], arr_sql = [];
+		let filteredExist = false;
 		document.querySelectorAll('#composite-metric-formula *').forEach( element => {
 			// console.log('element : ', element);
 			// console.log('element : ', element.nodeName);
 			// se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
 			if (element.nodeName === 'MARK') {
 				StorageMetric.metric = element.innerText;
+				if (StorageMetric.metric.formula.filtered) filteredExist = true;
 				// es. SUM(NettoRiga)
 				// TODO: verificare se è presente il distinct : true in ogni metrica
-				arr_sql.push(`${StorageMetric.metric.formula[element.innerText].SQLFunction}(${StorageMetric.metric.formula[element.innerText].field})`);
+				arr_sql.push(`${StorageMetric.metric.formula.SQLFunction}(${StorageMetric.metric.formula.tableAlias}.${StorageMetric.metric.formula.field})`);
 			} else {
 				arr_sql.push(element.innerText.trim());	
 			}
 			arr_text.push(element.innerText.trim());
 		});
-		const formula_text = arr_text.join(' ');
+		// const formula_text = arr_text.join(' ');
 		const formula_sql = arr_sql.join(' ');
+		// const formula_sql = arr_sql.join(' ')+` AS '${alias}'`;
 		Query.metricName = name;
 
 		let metricObj = {};
-		Query.metrics = { formula_text, formula_sql, 'table': Query.table, 'tableAlias' : Query.tableAlias, alias, cube : StorageCube.selected.name };
-		metricObj = { 'type': 'METRIC', name, composite : true, 'formula': Query.metrics };
+		Query.compositeMetrics = { formula_sql, alias };
+		// Query.compositeMetrics = { formula_sql, table: Query.table, tableAlias : Query.tableAlias, alias };
+		metricObj = { type: 'METRIC', name, composite : true, formula: Query.compositeMetrics[name], cube : StorageCube.selected.name, filtered : filteredExist };
 
 		console.log(metricObj)
+		debugger;
 		StorageMetric.save = metricObj
 		// salvo nel DB
 		app.saveMetricDB(metricObj);
 		// TODO: spostare in una funzione il codice per aggiungere la nuova metrica all'elenco di quelle esistenti (da fare anche per i filtri creati/esistenti)
-		const ul = document.getElementById('exist-metrics');
+		const ul = document.getElementById('exist-composite-metrics');
 		const content = app.tmplList.content.cloneNode(true);
 		const section = content.querySelector('section[data-sublist-metrics]');
 		const div = section.querySelector('div.selectable');
@@ -1438,6 +1478,8 @@ var StorageMetric = new MetricStorage();
 	app.getFiltersFact(); // exist-filters : filtri collegati alla Fact
 
 	app.getMetricFilters(); // dialog-metric-filter per le metriche filtrate
+
+	app.getCompositeMetrics(); // metriche composite
 	
 	app.getMetricFiltersFact(); // dialog-metric-filter filtri appartenenti ai cubi per le metriche filtrate
 
@@ -1585,18 +1627,19 @@ var StorageMetric = new MetricStorage();
 					// nome metrica
 					section.setAttribute('data-label', metric.name);
 					section.setAttribute('data-cube-name', cubeName);
-					div.setAttribute('data-table-name', metric.formula[metric.name].table);
-					div.setAttribute('data-table-alias', metric.formula[metric.name].tableAlias);
+					div.setAttribute('data-table-name', metric.formula.table);
+					div.setAttribute('data-table-alias', metric.formula.tableAlias);
 					div.setAttribute('data-cube-name', cubeName);
 					div.setAttribute('data-label', metric.name);
 					div.onclick = app.handlerMetricSelectedComposite;
 					span.innerText = metric.name;
-					smallTable.innerText = metric.formula[metric.name].table;
+					smallTable.innerText = metric.formula.table;
 					smallCube.innerText = cubeName;
 					ul.appendChild(section);
 				});
 			});
 			app.dialogCompositeMetric.showModal();
+			document.getElementById('composite-metric-name').focus();
 		}
 	}
 

@@ -3,7 +3,7 @@ namespace App\Classes;
 use Illuminate\Support\Facades\DB;
 
 class Cube {
-	private $_select, $_columns = array(), $_from, $_and, $_where, $_reportFilters, $_metricFilters, $_reportMetrics, $_metrics, $_groupBy, $_sql, $_metricTable;
+	private $_select, $_columns = array(), $_from, $_and, $_where, $_reportFilters, $_metricFilters, $_reportMetrics, $_metrics, $_compositeMetrics, $_groupBy, $_sql, $_metricTable;
 	private $reportName;
 	private $reportId;
 
@@ -97,7 +97,19 @@ class Cube {
 			$metricsList[] = "{$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}) AS '{$metric->alias}'";
 		}
 		$this->_metrics = implode(", ", $metricsList);
-		// var_dump($this->_metrics);
+		// dd($this->_metrics);
+	}
+
+	// metriche composte
+	public function compositeMetrics($metrics) {
+		$metricsList = array();
+		//var_dump($metrics);
+		foreach ($metrics as $metric) {
+			// var_dump($metric);
+			$metricsList[] = "{$metric->formula_sql} AS '{$metric->alias}'";
+		}
+		$this->_compositeMetrics = implode(", ", $metricsList);
+		// dd($this->_compositeMetrics);
 	}
 
 	public function n_groupBy($groups) {
@@ -122,8 +134,8 @@ class Cube {
 		// creo una TEMP_TABLE su cui, successivamente andrò a fare una LEFT JOIN con le TEMP_TABLE contenenti le metriche
 		$this->_sql = $this->_select;
 		// se ci sono metriche a livello di report le aggiungo
-		if ($this->_metrics) {$this->_sql .= ", $this->_metrics\n";}
-		// TODO: logica per metriche composte in versione "ReportDatamart" (risultato della metrica composta) oppure "reportBody" (contenuto della metrica composta)
+		if ($this->_metrics) {$this->_sql .= ", $this->_metrics";}
+		if ($this->_compositeMetrics) {$this->_sql .= ", $this->_compositeMetrics\n";}
 		$this->_sql .= $this->_from."\n";
 		$this->_sql .= $this->_where."\n";
 		$this->_sql .= $this->_and."\n";
@@ -132,7 +144,7 @@ class Cube {
 		if (!is_null($this->_groupBy)) {$this->_sql .= $this->_groupBy;}
 		// dd($this->_sql);
         // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
-		$sql = "CREATE TEMPORARY TABLE decisyon_cache.W_AP_base_".$this->reportId." ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ".$this->_sql.";";
+		$sql = "CREATE TEMPORARY TABLE decisyon_cache.W_AP_base_$this->reportId ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
 		// $result = DB::connection('vertica_odbc')->raw($sql);
         // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
         /* il metodo getSchemaBuilder() funziona con mysql, non con vertica. Ho creato MyVerticaGrammar.php dove c'è la sintassi corretta per vertica (solo alcuni Metodi ho modificato) */
@@ -160,7 +172,8 @@ class Cube {
 			//echo $metrics;
 			unset($this->_sql);
 			$metric = "{$metrics->SQLFunction}({$metrics->tableAlias}.{$metrics->field}) AS '{$metrics->alias}'";
-			echo $this->createMetricTable('W_AP_metric_'.$this->reportId."_".$i, $metric, $metrics->filters);
+			$this->createMetricTable('W_AP_metric_'.$this->reportId."_".$i, $metric, $metrics->filters);
+			// echo $this->createMetricTable('W_AP_metric_'.$this->reportId."_".$i, $metric, $metrics->filters);
 			$this->_metricTable["W_AP_metric_".$this->reportId."_".$i] = $metrics->alias; // memorizzo qui quante tabelle per metriche filtrate sono state create
 			$i++;
 		}
@@ -168,9 +181,7 @@ class Cube {
 
 	// creo la tabella contenente le metriche filtrate
 	private function createMetricTable($tableName, $metric, $filters) {
-		// var_dump($filters);
 		// dd($filters);
-
 		$this->_sql = $this->_select.", ".$metric."\n";
 		$this->_sql .= $this->_from."\n";
 		$this->_sql .= $this->_where."\n";

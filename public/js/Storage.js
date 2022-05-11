@@ -562,8 +562,19 @@ class MetricStorage extends Storages {
 	getCubeMetrics(cube) {
 		this._metrics = [];
 		for ( const [key, value] of Object.entries(this.#metrics)) {
-			if (value.formula[key].cube === cube) {
+			if (value.cube === cube) {
 				this._metrics.push(value);
+			}
+		}
+		return this._metrics;
+	}
+
+	getCubeCompositeMetrics(cube) {
+		this._metrics = new Set();
+		for ( const [key, value] of Object.entries(this.#metrics)) {
+			// debugger;
+			if (value.cube === cube && value.composite) {
+				this._metrics.add(value);
 			}
 		}
 		return this._metrics;
