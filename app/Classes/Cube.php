@@ -234,30 +234,27 @@ class Cube {
 		// converto la formula  delle metriche composte da : ( alias_metric * alias_metric) a (W_AP_base_*.alias_metric * W_AP_base_*.alias_metric)
 		// verifico se, tra le metriche che compongono la composta, ci sono metriche di base o avanzate (filtrate)
 		// print_r($compositeMetrics);
+		// TODO: calcolare le metriche composte in un funzione private separata
 		foreach ($compositeMetrics as $name => $metric) {
-			// per ogni metrica che compone la composta vado a sostituire la formula
+			// per ogni metrica che compone la composta vado a sostituire la formula prendendola dalla metrica originale
 			// echo $name;
 			// print_r($metric->metrics_alias);
 			foreach ($metric->metrics_alias as $metricName => $metricAlias) {
 				// print_r($this->baseMetrics);
+				// metriche base
 				if (property_exists($this->baseMetrics, $metricName)) {
 					foreach ($metric->formula_sql as $key => $sqlItem) {
-						// echo $key;
-						// if ($sqlItem === $metricName) {$metric->formula_sql[$key] = "$baseTableName.'$metricAlias'";}
-						// dd($this->baseMetrics->$metricName->SQLFunction);
 						$aggregate = $this->baseMetrics->$metricName->SQLFunction;
 						if ($sqlItem === $metricName) {$metric->formula_sql[$key] = "$aggregate($baseTableName.'$metricAlias')";}
-						// print_r($sqlItem);
 					}
 				}
 			}
 			$metric->formula_sql[] = "AS '$metric->alias'\n";
 			$this->_composite_sql_formula = implode(" ", $metric->formula_sql);
-			// dd($this->_composite_sql_formula);
 		}
-		$select = array();
+		$columns = array();
 		foreach ($this->_datamartColumns as $column) {
-			$select[] = "$baseTableName.$column";
+			$columns[] = "$baseTableName.$column";
 		}
 		$fields = implode(", ", $select);
 
@@ -271,8 +268,7 @@ class Cube {
 			$ONClause = array();
 			$ONConditions = NULL;
 			foreach ($this->_metricTable as $metricTableName => $alias) {
-				$table_and_metric[] = "$metricTableName.'$alias'";
-				
+				$table_and_metric[] = "$metricTableName.'$alias'";				
 				$leftJoin .= "\nLEFT JOIN\ndecisyon_cache.$metricTableName\nON\n";
 				foreach ($this->_columns as $columnAlias) {
 					// carattere backtick con ALTGR+'
@@ -302,6 +298,12 @@ class Cube {
 			$sql .= "$leftJoin);";
 			dd($sql);
 		} else {
+			/*
+				creazione metrica composta nella tabella baseTable (metriche non filtrate) 2022-05-12
+				SELECT W_AP_base_1652367363055.'sid_id', W_AP_base_1652367363055.'sid_ds', W_AP_base_1652367363055.'sede_id', W_AP_base_1652367363055.'sede_ds', ( SUM(W_AP_base_1652367363055.'comp-przmedio-alias') * SUM(W_AP_base_1652367363055.'comp-qta') ) AS 'composite-costo'
+				FROM decisyon_cache.W_AP_base_1652367363055
+				GROUP BY W_AP_base_1652367363055.'sid_id', W_AP_base_1652367363055.'sid_ds', W_AP_base_1652367363055.'sede_id', W_AP_base_1652367363055.'sede_ds');
+			*/
 			$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS\n(SELECT $fields, $this->_composite_sql_formula FROM decisyon_cache.$baseTableName GROUP BY $fields);";
 		}
 		// dd($sql);
