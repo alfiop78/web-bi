@@ -3,9 +3,11 @@ namespace App\Classes;
 use Illuminate\Support\Facades\DB;
 
 class Cube {
-	private $_select, $_columns = array(), $_from, $_and, $_where, $_reportFilters, $_metricFilters, $_reportMetrics, $_metrics, $_compositeMetrics, $_groupBy, $_sql, $_metricTable;
+	private $_select, $_columns = array(), $_from, $_and, $_where, $_reportFilters, $_metricFilters, $_reportMetrics, $_metrics, $_compositeMetrics, $_compositeTables, $_groupBy, $_sql, $_metricTable;
 	private $reportName;
 	private $reportId;
+	private $_composite_sql_formula;
+	private $_datamartColumns = array();
 
 	// function __construct($fact_table) {
 	//   $this->fact = $fact_table;
@@ -21,10 +23,23 @@ class Cube {
 		$this->$prop = $value;
 	}
 
+	public function setColumns() {
+		// dd($this->baseColumns);
+		$fieldList = array();
+		foreach ($this->baseColumns as $key => $object) {
+			foreach ($object->field as $token => $field) {
+				$fieldList[] = "'{$object->alias}_id'";
+				$fieldList[] = "'{$object->alias}_ds'";
+			}
+		}
+		// $this->_datamartColumns .= implode(", ", $fieldList);
+		$this->_datamartColumns = $fieldList;
+		// dd($this->_datamartColumns);
+	}
+
 	public function n_select($columns) {
 		$fieldList = array();
 		$this->_select = "SELECT";
-
 		foreach ($columns as $key => $object) {
 			/* var_dump($key); // il nome dato alla colonna */
 			/* print_r($object); // contiene l'object {table : tabella, field: campo, alias : alias, SQL : formulSQL} */
@@ -91,31 +106,21 @@ class Cube {
 	public function metrics($metrics) {
 		// metriche non filtrate
 		$metricsList = array();
-		//var_dump($metrics);
+		// var_dump($metrics);
 		foreach ($metrics as $metric) {
-			// var_dump($metric);
+			// print_r($metric->name);
 			$metricsList[] = "\n{$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}) AS '{$metric->alias}'";
+			// se, tra le metriche composte, ce n'è qualcuna che appartiene a baseTable (quindi all'interno di $metrics), la salvo in un array per utilizzarla in createDatamart()
+			/*foreach ($compositeMetrics as $key => $value) {
+				if (property_exists($value->metrics_alias, $metric->name)) {
+					// questa metrica è presente anche all'interno di una metrica composta
+					$this->_compositeMetrics = [$value->metrics_alias];
+				}
+			}*/
 		}
+		// dd($this->_compositeMetrics);
 		$this->_metrics = implode(", ", $metricsList);
 		// dd($this->_metrics);
-	}
-
-	// metriche composte
-	public function compositeMetrics($metrics) {
-		$metricsList = array();
-		// TODO: qui devo verificare se la metrica composta contiene metriche filtrate
-		foreach ($metrics as $metric) {
-			// dd($metrics, $metric);
-			/*if ($metric->filtered === true){
-				dd('metrica comopsta con filtri');
-
-			} else {
-				dd('metrica comopsta senza filtri');
-			}*/
-			$metricsList[] = "\n{$metric->formula_sql} AS '{$metric->alias}'";
-		}
-		$this->_compositeMetrics = implode(", ", $metricsList);
-		// dd($this->_compositeMetrics);
 	}
 
 	public function n_groupBy($groups) {
@@ -140,12 +145,10 @@ class Cube {
 		$this->_sql = $this->_select;
 		// se ci sono metriche a livello di report le aggiungo
 		if ($this->_metrics) {$this->_sql .= ", $this->_metrics";}
-		// if ($this->_compositeMetrics) {$this->_sql .= ", $this->_compositeMetrics";}
 		$this->_sql .= "\n$this->_from";
 		$this->_sql .= "\n$this->_where";
 		$this->_sql .= "\n$this->_and";
 		if (isset($this->_reportFilters)) {$this->_sql .= "$this->_reportFilters";}
-
 		if (!is_null($this->_groupBy)) {$this->_sql .= "\n$this->_groupBy";}
 		// dd($this->_sql);
         // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
@@ -165,7 +168,6 @@ class Cube {
         	$result = DB::connection('vertica_odbc')->statement($sql);
             // dd('la tabella non esiste');
         }
-
 		return $result;
 	}
 
@@ -184,11 +186,11 @@ class Cube {
 		}
 	}
 
-	// creo la tabella contenente le metriche filtrate
+	// creo la tabella temporanea che contiene metriche filtrate
 	private function createMetricTable($tableName, $metric, $filters) {
 		// dd($filters);
 		$this->_sql = $this->_select.",\n$metric";
-		if ($this->_compositeMetrics) {$this->_sql .= ", $this->_compositeMetrics";}
+		// if ($this->_compositeMetrics) {$this->_sql .= ", $this->_compositeMetrics";}
 		$this->_sql .= "\n$this->_from";
 		$this->_sql .= "\n$this->_where";
 		$this->_sql .= "\n$this->_and";
@@ -198,12 +200,11 @@ class Cube {
 			$this->_metricFilters .= "AND {$filter->alias}.{$filter->formula}";
 		}
 		// dd($this._metricFilters);
-
 		$this->_sql .= "\n$this->_metricFilters";
 		if (!is_null($this->_groupBy)) {$this->_sql .= "\n$this->_groupBy";}
 
 		$sql = "CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
-		// dd($sql);
+		dd($sql);
 		// TODO: eliminare la tabella temporanea come fatto per baseTable
         if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
             // dd('la tabella già esiste, la elimino');
@@ -225,11 +226,41 @@ class Cube {
 	}
 
 	// creo il datamart finale, mettendo insieme, base table con metric table (LEFT JOIN)
-	public function createDatamart() {
+	public function createDatamart($compositeMetrics) {
 		// TODO: https://dev.mysql.com/doc/refman/8.0/en/create-table-select.html Il create table può essere migliorato impostando il datatype per ogni colonna e un id univoco
 		$baseTableName = "W_AP_base_".$this->reportId;
 		$datamartName = "decisyon_cache.FX_".$this->reportId;
 		$table = "FX_$this->reportId";
+		// converto la formula  delle metriche composte da : ( alias_metric * alias_metric) a (W_AP_base_*.alias_metric * W_AP_base_*.alias_metric)
+		// verifico se, tra le metriche che compongono la composta, ci sono metriche di base o avanzate (filtrate)
+		// print_r($compositeMetrics);
+		foreach ($compositeMetrics as $name => $metric) {
+			// per ogni metrica che compone la composta vado a sostituire la formula
+			// echo $name;
+			// print_r($metric->metrics_alias);
+			foreach ($metric->metrics_alias as $metricName => $metricAlias) {
+				// print_r($this->baseMetrics);
+				if (property_exists($this->baseMetrics, $metricName)) {
+					foreach ($metric->formula_sql as $key => $sqlItem) {
+						// echo $key;
+						// if ($sqlItem === $metricName) {$metric->formula_sql[$key] = "$baseTableName.'$metricAlias'";}
+						// dd($this->baseMetrics->$metricName->SQLFunction);
+						$aggregate = $this->baseMetrics->$metricName->SQLFunction;
+						if ($sqlItem === $metricName) {$metric->formula_sql[$key] = "$aggregate($baseTableName.'$metricAlias')";}
+						// print_r($sqlItem);
+					}
+				}
+			}
+			$metric->formula_sql[] = "AS '$metric->alias'\n";
+			$this->_composite_sql_formula = implode(" ", $metric->formula_sql);
+			// dd($this->_composite_sql_formula);
+		}
+		$select = array();
+		foreach ($this->_datamartColumns as $column) {
+			$select[] = "$baseTableName.$column";
+		}
+		$fields = implode(", ", $select);
+
 		// se _metricTable ha qualche metrica (sono metriche filtrate) allora procedo con la creazione FX con LEFT JOIN, altrimenti creo una singola FX
 		if (isset($this->_metricTable) && count($this->_metricTable) > 0) {
 			$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS ";
@@ -246,28 +277,34 @@ class Cube {
 				foreach ($this->_columns as $columnAlias) {
 					// carattere backtick con ALTGR+'
 					// TODO: da testare dopo la modifica id_ds, la join, al momento viene fatta solo con i campi _id, ulteriori verifiche da fare
+					// creo : ON W_AP_base_3.sede = W_AP_metric_3_1.sede
 					$ONClause[] = "{$baseTableName}.{$columnAlias} = {$metricTableName}.{$columnAlias}";
 				}
 				$ONConditions = implode("\nAND ", $ONClause);
 				unset($ONClause);
-				$leftJoin .= "$ONConditions";
+				$leftJoin .= $ONConditions;
 			}
 			/*
 			QUERY CHE GENERA IL DATAMART
 			select W_AP_base_3.*, `W_AP_metric_3_1`.`Listino`, `W_AP_metric_3_2`.`sconto` FROM W_AP_base_3
 							  LEFT JOIN W_AP_metric_3_1 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_1`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_1`.`Sede`
 							  LEFT JOIN W_AP_metric_3_2 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_2`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_2`.`Sede`
+			con metriche composte
+			select W_AP_base_3.*, `W_AP_metric_3_1`.`Listino`, `W_AP_metric_3_2`.`sconto`, (W_AP_base_3.aliasMetric + W_AP_base_3.aliasMetric) AS 'alias' FROM W_AP_base_3
+							  LEFT JOIN W_AP_metric_3_1 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_1`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_1`.`Sede`
+							  LEFT JOIN W_AP_metric_3_2 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_2`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_2`.`Sede`
 			*/
 
-			$tables = implode(", ", $table_and_metric); //`W_AP_metric_3_1`.`sconto`, `W_AP_metric_3_2`.`listino`
+			$tables = implode(", ", $table_and_metric); //W_AP_metric_3_1.sconto, W_AP_metric_3_2.listino
 
 			$sql .= $tables;
 			$sql .= "\nFROM\ndecisyon_cache.$baseTableName";
-			$sql .= $leftJoin.");";
+			$sql .= "$leftJoin);";
 			dd($sql);
 		} else {
-			$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS (SELECT * FROM decisyon_cache.$baseTableName);";
+			$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS\n(SELECT $fields, $this->_composite_sql_formula FROM decisyon_cache.$baseTableName GROUP BY $fields);";
 		}
+		// dd($sql);
 		/* vecchio metodo, prima di MyVerticaGrammar.php
         $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_$this->reportId' AND SCHEMA_NAME='decisyon_cache';");
         // dd($FX);

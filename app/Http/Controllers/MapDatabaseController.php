@@ -117,11 +117,13 @@ class MapDatabaseController extends Controller
         $q = new Cube();
         $q->reportId = $cube->{'processId'};
         $q->reportName = $cube->{'name'}; // il nome del report non deve avere caratteri non consentiti per la creazione di tabelle (per ora non c'è un controllo sul nome inserito, da javascript)
+        $q->baseColumns = $cube->{'select'};
+        $q->baseMetrics = $cube->{'metrics'};
+        $q->filteredMetrics = $cube->{'filteredMetrics'};
+        // dd($q->baseMetrics, $q->filteredMetrics);
+        $q->setColumns();
         $q->n_select($cube->{'select'});
-        // exit;
         $q->metrics($cube->{'metrics'});
-        // dd(get_object_vars($cube->{'compositeMetrics'}));
-        $q->compositeMetrics($cube->{'compositeMetrics'});
         $q->n_from($cube->{'from'});
         $q->n_where($cube->{'where'});
         $q->joinFact($cube->{'factJoin'});
@@ -137,7 +139,7 @@ class MapDatabaseController extends Controller
             $metricTable = $q->createMetricDatamarts($cube->{'filteredMetrics'});
             // echo 'elaborazione createDatamart';
             // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-            $datamartName = $q->createDatamart();
+            $datamartName = $q->createDatamart($cube->{'compositeMetrics'});
             // dd($datamartName);
             // restituisco un ANTEPRIMA del json con i dati del datamart appena creato
             $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM $datamartName LIMIT 5000;");
