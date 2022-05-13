@@ -1305,6 +1305,7 @@ var StorageMetric = new MetricStorage();
 				arr_sql.push(element.innerText.trim());	
 			}
 		});
+		arr_sql.push(`AS '${alias}'`);
 		Query.metricName = name;
 		Query.compositeMetrics = { formula_sql : arr_sql, alias, metrics_alias : metricsAlias };
 		const metricObj = { type: 'METRIC', name, composite : true, formula: Query.compositeMetrics[name], cube : StorageCube.selected.name };
