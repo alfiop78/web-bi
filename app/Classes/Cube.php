@@ -23,8 +23,18 @@ class Cube {
 		$this->$prop = $value;
 	}
 
-	public function setColumns() {
+	// creo elenco delle colonne da aggiungere alle tabelle temporanee (base e metric)
+	public function fields() {
 		// dd($this->baseColumns);
+		// verrà creato un array con l'elenco delle colonne da inserire nella creazione del datamart, sia nella clausola SELECT che in quella GROUP BY
+		/*
+			array:4 [
+				0 => "'sid_id'"
+				1 => "'sid_ds'"
+				2 => "'sede_id'"
+				3 => "'sede_ds'"
+			]
+		*/
 		$fieldList = array();
 		foreach ($this->baseColumns as $key => $object) {
 			foreach ($object->field as $token => $field) {
@@ -37,7 +47,7 @@ class Cube {
 		// dd($this->_datamartColumns);
 	}
 
-	public function n_select($columns) {
+	public function select($columns) {
 		$fieldList = array();
 		$this->_select = "SELECT";
 		foreach ($columns as $key => $object) {
@@ -56,13 +66,13 @@ class Cube {
 		// var_dump($this->_columns);
 	}
 
-	public function n_from($from) {
+	public function from($from) {
 		// per ogni dimensione esistente vado a aggiungere, in this->_from, i FROM che si trovano al suo interno
 		$this->_from = "FROM\n" . implode(",\n", $from);
 		// dd($this->_from);
 	}
 
-	public function n_where($joins) {
+	public function where($joins) {
 		$i = 0;
 		// joins = "token_join" : ['table.field', 'table.field']
 		foreach ($joins as $join) {
@@ -123,7 +133,7 @@ class Cube {
 		// dd($this->_metrics);
 	}
 
-	public function n_groupBy($groups) {
+	public function groupBy($groups) {
 		$fieldList = array();
 		$this->_groupBy = "GROUP BY";
 		foreach ($groups as $key => $object) {
@@ -138,6 +148,29 @@ class Cube {
 		}
 		$this->_groupBy .= implode(", ", $fieldList);
 		// dd($this->_groupBy);
+	}
+
+	// calcolo metriche composte
+	private function compositeMetrics() {
+		// converto la formula delle metriche composte da : ( alias_metric * alias_metric) -> (W_AP_base_*.alias_metric * W_AP_base_*.alias_metric)
+		// verifico se, tra le metriche che compongono la composta, ci sono metriche di base o avanzate (filtrate)
+		foreach ($this->compositeMetrics as $name => $metric) {
+			// per ogni metrica che compone la composta vado a sostituire la formula prendendola dalla metrica originale
+			// echo $name;
+			// print_r($metric->metrics_alias);
+			foreach ($metric->metrics_alias as $metricName => $metricAlias) {
+				// print_r($this->baseMetrics);
+				// metriche base
+				if (property_exists($this->baseMetrics, $metricName)) {
+					foreach ($metric->formula_sql as $key => $sqlItem) {
+						$aggregate = $this->baseMetrics->$metricName->SQLFunction;
+						if ($sqlItem === $metricName) {$metric->formula_sql[$key] = "$aggregate($this->baseTable.'$metricAlias')";}
+					}
+				}
+			}
+			$metric->formula_sql[] = "AS '$metric->alias'\n";
+			$this->_composite_sql_formula = implode(" ", $metric->formula_sql);
+		}
 	}
 
 	public function baseTable() {
@@ -226,42 +259,21 @@ class Cube {
 	}
 
 	// creo il datamart finale, mettendo insieme, base table con metric table (LEFT JOIN)
-	public function createDatamart($compositeMetrics) {
-		// TODO: https://dev.mysql.com/doc/refman/8.0/en/create-table-select.html Il create table può essere migliorato impostando il datatype per ogni colonna e un id univoco
-		$baseTableName = "W_AP_base_".$this->reportId;
-		$datamartName = "decisyon_cache.FX_".$this->reportId;
+	public function createDatamart() {
 		$table = "FX_$this->reportId";
-		// converto la formula  delle metriche composte da : ( alias_metric * alias_metric) a (W_AP_base_*.alias_metric * W_AP_base_*.alias_metric)
-		// verifico se, tra le metriche che compongono la composta, ci sono metriche di base o avanzate (filtrate)
-		// print_r($compositeMetrics);
-		// TODO: calcolare le metriche composte in un funzione private separata
-		foreach ($compositeMetrics as $name => $metric) {
-			// per ogni metrica che compone la composta vado a sostituire la formula prendendola dalla metrica originale
-			// echo $name;
-			// print_r($metric->metrics_alias);
-			foreach ($metric->metrics_alias as $metricName => $metricAlias) {
-				// print_r($this->baseMetrics);
-				// metriche base
-				if (property_exists($this->baseMetrics, $metricName)) {
-					foreach ($metric->formula_sql as $key => $sqlItem) {
-						$aggregate = $this->baseMetrics->$metricName->SQLFunction;
-						if ($sqlItem === $metricName) {$metric->formula_sql[$key] = "$aggregate($baseTableName.'$metricAlias')";}
-					}
-				}
-			}
-			$metric->formula_sql[] = "AS '$metric->alias'\n";
-			$this->_composite_sql_formula = implode(" ", $metric->formula_sql);
-		}
+		
+		$this->compositeMetrics();
+
 		$columns = array();
 		foreach ($this->_datamartColumns as $column) {
-			$columns[] = "$baseTableName.$column";
+			$columns[] = "$this->baseTable.$column";
 		}
-		$fields = implode(", ", $select);
+		$fields = implode(", ", $columns);
 
 		// se _metricTable ha qualche metrica (sono metriche filtrate) allora procedo con la creazione FX con LEFT JOIN, altrimenti creo una singola FX
 		if (isset($this->_metricTable) && count($this->_metricTable) > 0) {
-			$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS ";
-			$sql .= "\n(SELECT\n$baseTableName.*,\n";
+			$sql = "CREATE TABLE $this->datamartName INCLUDE SCHEMA PRIVILEGES AS ";
+			$sql .= "\n(SELECT\n$this->baseTable.*,\n";
 			// sono presenti metriche filtrate
 			$table_and_metric = array();
 			$leftJoin = null;
@@ -274,7 +286,7 @@ class Cube {
 					// carattere backtick con ALTGR+'
 					// TODO: da testare dopo la modifica id_ds, la join, al momento viene fatta solo con i campi _id, ulteriori verifiche da fare
 					// creo : ON W_AP_base_3.sede = W_AP_metric_3_1.sede
-					$ONClause[] = "{$baseTableName}.{$columnAlias} = {$metricTableName}.{$columnAlias}";
+					$ONClause[] = "{$this->baseTable}.{$columnAlias} = {$metricTableName}.{$columnAlias}";
 				}
 				$ONConditions = implode("\nAND ", $ONClause);
 				unset($ONClause);
@@ -294,7 +306,7 @@ class Cube {
 			$tables = implode(", ", $table_and_metric); //W_AP_metric_3_1.sconto, W_AP_metric_3_2.listino
 
 			$sql .= $tables;
-			$sql .= "\nFROM\ndecisyon_cache.$baseTableName";
+			$sql .= "\nFROM\ndecisyon_cache.$this->baseTable";
 			$sql .= "$leftJoin);";
 			dd($sql);
 		} else {
@@ -304,7 +316,7 @@ class Cube {
 				FROM decisyon_cache.W_AP_base_1652367363055
 				GROUP BY W_AP_base_1652367363055.'sid_id', W_AP_base_1652367363055.'sid_ds', W_AP_base_1652367363055.'sede_id', W_AP_base_1652367363055.'sede_ds');
 			*/
-			$sql = "CREATE TABLE $datamartName INCLUDE SCHEMA PRIVILEGES AS\n(SELECT $fields, $this->_composite_sql_formula FROM decisyon_cache.$baseTableName GROUP BY $fields);";
+			$sql = "CREATE TABLE $this->datamartName INCLUDE SCHEMA PRIVILEGES AS\n(SELECT $fields, $this->_composite_sql_formula FROM decisyon_cache.$this->baseTable GROUP BY $fields);";
 		}
 		// dd($sql);
 		/* vecchio metodo, prima di MyVerticaGrammar.php
@@ -326,10 +338,10 @@ class Cube {
         }
 
 		if (!$result) {
-			$dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$baseTableName;");
+			$dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTable;");
 			// TODO: elimino le tabelle temporanee delle metriche filtrate
 			// ritorno il nome della FX in modo da poter mostrare un anteprima dei dati
-			return $datamartName;
+			return $this->datamartName;
 		}
 	}
 

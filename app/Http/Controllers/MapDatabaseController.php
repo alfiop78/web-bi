@@ -115,20 +115,25 @@ class MapDatabaseController extends Controller
         $cube = json_decode($cube); // object
         /* dd($cube); */
         $q = new Cube();
+        // imposto le proprietà con i magic methods
         $q->reportId = $cube->{'processId'};
+        $q->baseTable = "W_AP_base_$q->reportId";
+        $q->datamartName = "decisyon_cache.FX_$q->reportId";
         $q->reportName = $cube->{'name'}; // il nome del report non deve avere caratteri non consentiti per la creazione di tabelle (per ora non c'è un controllo sul nome inserito, da javascript)
         $q->baseColumns = $cube->{'select'};
         $q->baseMetrics = $cube->{'metrics'};
         $q->filteredMetrics = $cube->{'filteredMetrics'};
-        // dd($q->baseMetrics, $q->filteredMetrics);
-        $q->setColumns();
-        $q->n_select($cube->{'select'});
+        $q->compositeMetrics = $cube->{'compositeMetrics'};
+        // imposto le colonne da includere nel datamart finale
+        $q->fields();
+        // creo le clausole per SQL
+        $q->select($cube->{'select'});
         $q->metrics($cube->{'metrics'});
-        $q->n_from($cube->{'from'});
-        $q->n_where($cube->{'where'});
+        $q->from($cube->{'from'});
+        $q->where($cube->{'where'});
         $q->joinFact($cube->{'factJoin'});
         $q->filters($cube->{'filters'});
-        $q->n_groupBy($cube->{'select'});
+        $q->groupBy($cube->{'select'});
         /* dd($q); */
         // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
         $baseTable = $q->baseTable();
@@ -139,7 +144,7 @@ class MapDatabaseController extends Controller
             $metricTable = $q->createMetricDatamarts($cube->{'filteredMetrics'});
             // echo 'elaborazione createDatamart';
             // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-            $datamartName = $q->createDatamart($cube->{'compositeMetrics'});
+            $datamartName = $q->createDatamart();
             // dd($datamartName);
             // restituisco un ANTEPRIMA del json con i dati del datamart appena creato
             $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM $datamartName LIMIT 5000;");
