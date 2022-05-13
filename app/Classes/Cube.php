@@ -3,7 +3,7 @@ namespace App\Classes;
 use Illuminate\Support\Facades\DB;
 
 class Cube {
-	private $_select, $_columns = array(), $_from, $_and, $_where, $_reportFilters, $_metricFilters, $_reportMetrics, $_metrics, $_compositeMetrics, $_compositeTables, $_groupBy, $_sql, $_metricTable;
+	private $_select, $_fields = array(), $_fieldsSQL, $_columns = array(), $_from, $_and, $_where, $_reportFilters, $_metricFilters, $_reportMetrics, $_metrics, $_compositeMetrics, $_compositeTables, $_groupBy, $_sql, $_metricTable;
 	private $reportName;
 	private $reportId;
 	private $_composite_sql_formula;
@@ -25,7 +25,6 @@ class Cube {
 
 	// creo elenco delle colonne da aggiungere alle tabelle temporanee (base e metric)
 	public function fields() {
-		// dd($this->baseColumns);
 		// verrà creato un array con l'elenco delle colonne da inserire nella creazione del datamart, sia nella clausola SELECT che in quella GROUP BY
 		/*
 			array:4 [
@@ -34,17 +33,19 @@ class Cube {
 				2 => "'sede_id'"
 				3 => "'sede_ds'"
 			]
-		*/
-		$fieldList = array();
+		*/		
 		foreach ($this->baseColumns as $key => $object) {
 			foreach ($object->field as $token => $field) {
-				$fieldList[] = "'{$object->alias}_id'";
-				$fieldList[] = "'{$object->alias}_ds'";
+				$this->_fields[] = "'{$object->alias}_id'";
+				$this->_fields[] = "'{$object->alias}_ds'";
 			}
 		}
-		// $this->_datamartColumns .= implode(", ", $fieldList);
-		$this->_datamartColumns = $fieldList;
-		// dd($this->_datamartColumns);
+		// foreach ($fieldList as $column) {
+		// 	$columns[] = "$this->baseTable.$column";
+		// }
+		// $this->fields = implode(", ", $fieldList);
+		// print_r($fieldList);
+		// dd($this->_fields);
 	}
 
 	public function select($columns) {
@@ -260,15 +261,8 @@ class Cube {
 
 	// creo il datamart finale, mettendo insieme, base table con metric table (LEFT JOIN)
 	public function createDatamart() {
-		$table = "FX_$this->reportId";
-		
+		$table = "FX_$this->reportId";		
 		$this->compositeMetrics();
-
-		$columns = array();
-		foreach ($this->_datamartColumns as $column) {
-			$columns[] = "$this->baseTable.$column";
-		}
-		$fields = implode(", ", $columns);
 
 		// se _metricTable ha qualche metrica (sono metriche filtrate) allora procedo con la creazione FX con LEFT JOIN, altrimenti creo una singola FX
 		if (isset($this->_metricTable) && count($this->_metricTable) > 0) {
@@ -310,13 +304,19 @@ class Cube {
 			$sql .= "$leftJoin);";
 			dd($sql);
 		} else {
+			// aggiungo, ai nomi dei campi, il nome della tabella baseTable creata
+			$table_fields = array();
+			foreach ($this->_fields as $field) {
+				$table_fields[] = "$this->baseTable.$field";
+			}
+			$this->_fieldsSQL = implode(", ", $table_fields);
 			/*
 				creazione metrica composta nella tabella baseTable (metriche non filtrate) 2022-05-12
 				SELECT W_AP_base_1652367363055.'sid_id', W_AP_base_1652367363055.'sid_ds', W_AP_base_1652367363055.'sede_id', W_AP_base_1652367363055.'sede_ds', ( SUM(W_AP_base_1652367363055.'comp-przmedio-alias') * SUM(W_AP_base_1652367363055.'comp-qta') ) AS 'composite-costo'
 				FROM decisyon_cache.W_AP_base_1652367363055
 				GROUP BY W_AP_base_1652367363055.'sid_id', W_AP_base_1652367363055.'sid_ds', W_AP_base_1652367363055.'sede_id', W_AP_base_1652367363055.'sede_ds');
 			*/
-			$sql = "CREATE TABLE $this->datamartName INCLUDE SCHEMA PRIVILEGES AS\n(SELECT $fields, $this->_composite_sql_formula FROM decisyon_cache.$this->baseTable GROUP BY $fields);";
+			$sql = "CREATE TABLE $this->datamartName INCLUDE SCHEMA PRIVILEGES AS\n(SELECT $this->_fieldsSQL, $this->_composite_sql_formula FROM decisyon_cache.$this->baseTable GROUP BY $this->_fieldsSQL);";
 		}
 		// dd($sql);
 		/* vecchio metodo, prima di MyVerticaGrammar.php
@@ -340,6 +340,9 @@ class Cube {
 		if (!$result) {
 			$dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTable;");
 			// TODO: elimino le tabelle temporanee delle metriche filtrate
+			// se sono state create anche tabelle con metriche filtrate le elimino
+			echo "tabelle temporanee da eliminare";
+			dd($this->_metricTable);
 			// ritorno il nome della FX in modo da poter mostrare un anteprima dei dati
 			return $this->datamartName;
 		}
