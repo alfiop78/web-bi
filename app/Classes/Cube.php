@@ -380,8 +380,14 @@ class Cube {
 			$dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTable;");
 			// TODO: elimino le tabelle temporanee delle metriche filtrate
 			// se sono state create anche tabelle con metriche filtrate le elimino
-			echo "tabelle temporanee da eliminare";
-			dd($this->_metricTable);
+			// echo "tabelle temporanee da eliminare";
+			if ($this->_metricTable) {
+				foreach ($this->_metricTable as $tempTable => $metric) {
+					// dd($tempTable);
+					$dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tempTable;");
+				}
+			}
+			// dd($this->_metricTable);
 			// ritorno il nome della FX in modo da poter mostrare un anteprima dei dati
 			return $this->datamartName;
 		}
