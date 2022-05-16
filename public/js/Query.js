@@ -245,9 +245,11 @@ class Queries {
 		this._reportProcess['where'] = this.#where;
 		this._reportProcess['factJoin'] = this._factRelation;
 		this._reportProcess['filters'] = this._filter;
-		this._reportProcess['metrics'] = this._metrics;
-		this._reportProcess['filteredMetrics'] = this._filteredMetrics;
-		this._reportProcess['compositeMetrics'] = this.#compositeMetrics;
+		if (Object.keys(this._metrics).length > 0) this._reportProcess['metrics'] = this._metrics;
+		if (Object.keys(this._filteredMetrics).length > 0) this._reportProcess['filteredMetrics'] = this._filteredMetrics;
+		if (Object.keys(this.#compositeMetrics).length > 0) this._reportProcess['compositeMetrics'] = this.#compositeMetrics;
+		// this._reportProcess['filteredMetrics'] = this._filteredMetrics;
+		// this._reportProcess['compositeMetrics'] = this.#compositeMetrics;
 		this._reportProcess['processId'] = processId; // questo creerà il datamart FX[processId]
 		//  al posto del processId voglio utilizzare il nome del report legato alla FX_
 		this._reportProcess['name'] = name;

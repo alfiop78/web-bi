@@ -812,33 +812,45 @@ var StorageMetric = new MetricStorage();
 
 	app.handlerMetricFilterSelected = e => e.currentTarget.toggleAttribute('selected');
 
-	// selezione di una metrica già esistente, lo salvo nell'oggetto Query, come quando si salva un nuovo filtro dalla dialog
+	// selezione di una metrica già esistente, lo salvo nella Classe Query.metrics (oppure Query.filteredMetrics)
 	app.handlerMetricSelected = (e) => {
-		// TODO: posso aggiungere un attributo se questa è una metrica composta-filtrata-base. Ottimizzazione da fare
 		StorageMetric.metric = e.currentTarget.getAttribute('data-label');
 		e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('selected')) {
 			// aggiungo la metrica
-			if (StorageMetric.metric.composite) {
-				// metrica composta
-				// Siccome le metriche composte contengono le metriche "base"/"filtrate" vanno aggiunte anche queste all'elaborazione di baseTable() (metriche base) oppure metricTable() (metriche filtrate)
-				// ottengo le metriche inserite nella composta
-				for (const name in StorageMetric.metric.formula.metrics_alias) {
-					// recupero le metriche che compongono la composta
-					StorageMetric.metric = name;
-					// imposto, in Query.metricName la metrica selezionata
-					Query.metricName = name;
-					// recupero la prop 'filtered' per capire se inserire Query.metrics/filteredMetrics
-					(StorageMetric.metric.formula.filtered) ? Query.filteredMetrics = StorageMetric.metric.formula : Query.metrics = StorageMetric.metric.formula;
-				}
-				// reimposto la metrica selezionata
-				StorageMetric.metric = e.currentTarget.getAttribute('data-label');
-				// ne definisco il nome per poi salvare l'oggetto formula in Query.compositeMetrics
-				Query.metricName = StorageMetric.metric.name;
-				Query.compositeMetrics = StorageMetric.metric.formula;
-			} else {
-				// se la metrica contiene un filtro bisogna aggiungerla a Query.filteredMetrics altrimenti a Query.metrics
-				(StorageMetric.name.formula.filtered) ? Query.filteredMetrics = StorageMetric.metric.formula : Query.metrics = StorageMetric.metric.formula;
+			debugger;
+			switch (StorageMetric.metric.metric_type) {
+				case 1:
+					// filtrata
+					Query.metricName = StorageMetric.metric.name;
+					Query.filteredMetrics = StorageMetric.metric.formula;
+					break;
+				case 2:
+					// composta
+					debugger;
+					// Siccome le metriche composte contengono le metriche "base"/"filtrate" vanno aggiunte anche queste all'elaborazione di baseTable() (metriche base) oppure metricTable() (metriche filtrate)
+					// ottengo le metriche inserite nella composta
+					for (const name in StorageMetric.metric.formula.metrics_alias) {
+						// recupero le metriche che compongono la composta
+						StorageMetric.metric = name;
+						// imposto, in Query.metricName la metrica selezionata
+						Query.metricName = name;
+						// recupero la prop 'filtered' per capire se inserire Query.metrics/filteredMetrics
+						// BUG: nella metrica composta potrebbe esserci anche un'altra metrica composta
+						(StorageMetric.metric.metric_type === 1) ? Query.filteredMetrics = StorageMetric.metric.formula : Query.metrics = StorageMetric.metric.formula;
+					}
+					// reimposto la metrica selezionata
+					StorageMetric.metric = e.currentTarget.getAttribute('data-label');
+					// ne definisco il nome per poi salvare l'oggetto formula in Query.compositeMetrics
+					Query.metricName = StorageMetric.metric.name;
+					Query.compositeMetrics = StorageMetric.metric.formula;
+					break;
+				default:
+					// base
+					Query.metricName = StorageMetric.metric.name;
+					Query.metrics = StorageMetric.metric.formula;
+					break;
+
 			}
 		} else {
 			// TODO: elimino la metrica
@@ -1216,24 +1228,30 @@ var StorageMetric = new MetricStorage();
 		if (Object.keys(associatedFilters).length > 0) {
 			// metrica filtrata
 			console.info('metrica filtrata');
-			Query.filteredMetrics = { SQLFunction, field: Query.field, distinct: distinctOption, name, alias, table: Query.table, tableAlias : Query.tableAlias, filtered : true, filters: associatedFilters };
+			Query.filteredMetrics = { SQLFunction, field: Query.field, distinct: distinctOption, name, alias, table: Query.table, tableAlias : Query.tableAlias, filters: associatedFilters };
 
 			console.log(Query.filteredMetrics);
-			metricObj = { type: 'METRIC', name, formula: Query.filteredMetrics[name], cube : StorageCube.selected.name };
+			metricObj = { type: 'METRIC', metric_type : 1, name, formula: Query.filteredMetrics[name], cube : StorageCube.selected.name };
 		} else {
 			// metrica
 			console.info('metrica non filtrata');
-			Query.metrics = { SQLFunction, field: Query.field, distinct: distinctOption, name, alias, table: Query.table, tableAlias : Query.tableAlias, filtered : false };
-			metricObj = { type: 'METRIC', name, formula: Query.metrics[name], cube : StorageCube.selected.name };
+			Query.metrics = { SQLFunction, field: Query.field, distinct: distinctOption, name, alias, table: Query.table, tableAlias : Query.tableAlias };
+			metricObj = { type: 'METRIC', metric_type : 0, name, formula: Query.metrics[name], cube : StorageCube.selected.name };
 		}
 
 		// salvo la nuova metrica nello storage
-		console.log(metricObj)
+		console.log(metricObj);
+		debugger;
 		StorageMetric.save = metricObj
 		// salvo nel DB
 		app.saveMetricDB(metricObj);
 		// TODO: spostare in una funzione il codice per aggiungere la nuova metrica all'elenco di quelle esistenti (da fare anche per i filtri creati/esistenti)
-		const ul = document.getElementById('exist-metrics');
+		app.appendMetric('exist-metrics');
+	}
+
+	// aggiungo la metrica appena creata alla <ul> (metriche base e filtrate)
+	app.appendMetric = (ulId) => {
+		const ul = document.getElementById(ulId);
 		const content = app.tmplList.content.cloneNode(true);
 		const section = content.querySelector('section[data-sublist-metrics]');
 		const div = section.querySelector('div.selectable');
@@ -1258,8 +1276,8 @@ var StorageMetric = new MetricStorage();
 		ul.appendChild(section);
 	}
 
-	// aggiungo la metrica appena creata alla <ul>
-	app.appendMetric = (ulId) => {
+	// aggiungo la metrica appena creata alla <ul> (metrica composta)
+	app.appendCompositeMetric = (ulId) => {
 		const ul = document.getElementById(ulId);
 		const content = app.tmplList.content.cloneNode(true);
 		const section = content.querySelector('section[data-sublist-metrics]');
@@ -1308,7 +1326,7 @@ var StorageMetric = new MetricStorage();
 		arr_sql.push(`AS '${alias}'`);
 		Query.metricName = name;
 		Query.compositeMetrics = { formula_sql : arr_sql, alias, metrics_alias : metricsAlias };
-		const metricObj = { type: 'METRIC', name, composite : true, formula: Query.compositeMetrics[name], cube : StorageCube.selected.name };
+		const metricObj = { type: 'METRIC', name, metric_type : 2, formula: Query.compositeMetrics[name], cube : StorageCube.selected.name };
 
 		console.log(metricObj)
 		debugger;
@@ -1316,7 +1334,7 @@ var StorageMetric = new MetricStorage();
 		// salvo nel DB
 		app.saveMetricDB(metricObj);
 		// aggiungo la metrica alla <ul>
-		app.appendMetric('exist-composite-metrics');
+		app.appendCompositeMetric('exist-composite-metrics');
 	}
 
 	// salvo il filtro nel DB, table : bi_filters

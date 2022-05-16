@@ -121,18 +121,22 @@ class MapDatabaseController extends Controller
         $q->datamartName = "decisyon_cache.FX_$q->reportId";
         $q->reportName = $cube->{'name'}; // il nome del report non deve avere caratteri non consentiti per la creazione di tabelle (per ora non c'è un controllo sul nome inserito, da javascript)
         $q->baseColumns = $cube->{'select'};
-        $q->baseMetrics = $cube->{'metrics'};
-        $q->filteredMetrics = $cube->{'filteredMetrics'};
-        $q->compositeMetrics = $cube->{'compositeMetrics'};
         // imposto le colonne da includere nel datamart finale
         $q->fields();
+        if (property_exists($cube, 'compositeMetrics')) $q->compositeMetrics = $cube->{'compositeMetrics'};
+        // verifico se sono presenti metriche di base
+        if (property_exists($cube, 'metrics')) {
+            $q->baseMetrics = $cube->{'metrics'};
+            $q->metrics();
+        }
+        
         // creo le clausole per SQL
         $q->select($cube->{'select'});
-        $q->metrics($cube->{'metrics'});
         $q->from($cube->{'from'});
         $q->where($cube->{'where'});
         $q->joinFact($cube->{'factJoin'});
         $q->filters($cube->{'filters'});
+        // TODO: siccome il group by viene creato uguale alla clausola SELECT potrei unirli e non fare qui 2 chiamate
         $q->groupBy($cube->{'select'});
         /* dd($q); */
         // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
@@ -141,7 +145,11 @@ class MapDatabaseController extends Controller
         if (!$baseTable) {
             // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
             // creo una tabella temporanea per ogni metrica filtrata
-            $metricTable = $q->createMetricDatamarts($cube->{'filteredMetrics'});
+            // TODO: 2022-05-06 qui occorre una verifica più approfondita sui filtri contenuti nella metrica, allo stato attuale faccio una query per ogni metrica filtrata, anche se i filtri all'interno della metrica sono uguali. Includere più metriche che contengono gli stessi filtri in un unica query
+            if (property_exists($cube, 'filteredMetrics')) {
+                $q->filteredMetrics = $cube->{'filteredMetrics'};
+                $metricTable = $q->createMetricDatamarts();
+            }
             // echo 'elaborazione createDatamart';
             // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
             $datamartName = $q->createDatamart();
