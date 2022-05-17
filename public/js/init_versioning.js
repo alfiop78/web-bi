@@ -83,7 +83,6 @@ var storage = new Storages();
 					break;
 			}
 			// console.log('objectsSet : ', objectsSet);
-			// debugger;
 			data[element].forEach( (el) => {
 				// se l'elemento in local è già presente sul DB lo elimino dal Set dimensions, gli elementi rimanenti da questa operazione andranno ad aggiungersi alla Dialog Versioning
 				// ... questi sono elemeneti che si trovano SOLO in local, es.: in fase di sviluppo in locale

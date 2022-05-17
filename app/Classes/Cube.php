@@ -327,29 +327,26 @@ class Cube {
 			$sql .= "\nFROM\ndecisyon_cache.$this->baseTable";
 			$sql .= "$leftJoin\nGROUP BY $this->_fieldsSQL);";
 		} else {
-			dd("exit");
 			/*
 				creazione metrica composta nella tabella baseTable (metriche non filtrate) 2022-05-12
 				SELECT W_AP_base_1652367363055.'sid_id', W_AP_base_1652367363055.'sid_ds', W_AP_base_1652367363055.'sede_id', W_AP_base_1652367363055.'sede_ds', ( SUM(W_AP_base_1652367363055.'comp-przmedio-alias') * SUM(W_AP_base_1652367363055.'comp-qta') ) AS 'composite-costo'
 				FROM decisyon_cache.W_AP_base_1652367363055
 				GROUP BY W_AP_base_1652367363055.'sid_id', W_AP_base_1652367363055.'sid_ds', W_AP_base_1652367363055.'sede_id', W_AP_base_1652367363055.'sede_ds');
 			*/
-			// dd(property_exists($this, 'compositeMetrics'));
+			$s = "SELECT $this->_fieldsSQL";
+			if (property_exists($this, 'baseMetrics')) $s .= ", $this->_metrics_base_datamart";
 			if (property_exists($this, 'compositeMetrics')) {
 				// sono presenti metriche composte
-				// $this->rebuildCompositeMetrics();
-				// unisco tutto l'array della formula ottenendo ( SUM(table.alias) * SUM(table.alias) )
-				dd($this->_composite_sql_formula);
-				$this->_composite_metrics[] = implode(" ", $this->_composite_sql_formula);
-				// separo con la virgole tutte le metriche composte trovate
-				$composite_metrics = "\n".implode(", ", $this->_composite_metrics);
-				// dd($this->_composite_sql_formula);
-				// $select_sql = "$this->_fieldsSQL, $this->_composite_sql_formula";
-				// TODO: qui posso decidere se includere, nel datamart, le metriche che compongono la composta oppure creare nel datamart solo la metrica composta
-				$sql = "CREATE TABLE $this->datamartName INCLUDE SCHEMA PRIVILEGES AS\n(SELECT $this->_fieldsSQL, $composite_metrics\nFROM decisyon_cache.$this->baseTable\nGROUP BY $this->_fieldsSQL);";
-			} else {
-				$sql = "CREATE TABLE $this->datamartName INCLUDE SCHEMA PRIVILEGES AS\n(SELECT $this->_fieldsSQL, $this->_metrics_base_datamart\nFROM decisyon_cache.$this->baseTable\nGROUP BY $this->_fieldsSQL);";
+				foreach ($this->_composite_sql_formula as $metric_name => $formula) {
+					$this->_composite_metrics[] = implode(" ", $formula);
+				}
+				$s .= ",\n";
+				$s .= implode(", ", $this->_composite_metrics);	
 			}
+			$s .= "\nFROM decisyon_cache.$this->baseTable";
+			$s .= "\nGROUP BY $this->_fieldsSQL";
+			// dd($s);
+			$sql = "CREATE TABLE $this->datamartName INCLUDE SCHEMA PRIVILEGES AS\n($s);";
 		}
 		// dd($sql);
 		/* vecchio metodo, prima di MyVerticaGrammar.php

@@ -520,7 +520,8 @@ var StorageMetric = new MetricStorage();
 	app.getMetrics = () => {
 		const ul = document.getElementById('exist-metrics');
 		for (const [cubeName, cubeValue] of Object.entries(StorageCube.cubes)) {
-			for (const [key, value] of Object.entries(StorageMetric.metrics)) {
+			StorageMetric.cubeMetrics = cubeName;
+			for ( const [key, metric] of Object.entries(StorageMetric.baseAdvancedMetrics) ) {
 				const contentElement = app.tmplList.content.cloneNode(true);
 				const section = contentElement.querySelector('section[data-sublist-metrics]');
 				const div = section.querySelector('div.selectable');
@@ -529,14 +530,14 @@ var StorageMetric = new MetricStorage();
 				const smallTable = spanHContent.querySelector('small[table]');
 				const smallCube = spanHContent.querySelector('small[cube]');
 				section.setAttribute('data-element-search', 'search-exist-metrics');
-				section.setAttribute('data-label', key);
+				section.setAttribute('data-label', metric.name);
 				section.setAttribute('data-cube-name', cubeName);
 				div.setAttribute('data-table-name', cubeValue.FACT);
 				div.setAttribute('data-table-alias', cubeValue.alias);
 				div.setAttribute('data-cube-name', cubeName);
-				div.setAttribute('data-label', key);
+				div.setAttribute('data-label', metric.name);
 				div.onclick = app.handlerMetricSelected;
-				span.innerText = key;
+				span.innerText = metric.name;
 				smallTable.innerText = cubeValue.FACT;
 				smallCube.innerText = cubeName;
 				ul.appendChild(section);
@@ -549,25 +550,26 @@ var StorageMetric = new MetricStorage();
 	app.getCompositeMetrics = () => {
 		const ul = document.getElementById('exist-composite-metrics');
 		for (const [cubeName, cubeValue] of Object.entries(StorageCube.cubes)) {
-			for (const [key] of StorageMetric.getCubeCompositeMetrics(cubeName).entries()) {
+			StorageMetric.cubeMetrics = cubeName;
+			for ( const [key, metric] of Object.entries(StorageMetric.compositeMetrics) ) {
 				const contentElement = app.tmplList.content.cloneNode(true);
 				const section = contentElement.querySelector('section[data-sublist-metrics]');
 				const div = section.querySelector('div.selectable');
 				const spanHContent = div.querySelector('.h-content');
 				const span = spanHContent.querySelector('span[metric]');
-				const smallTable = spanHContent.querySelector('small[table]');
-				const smallCube = spanHContent.querySelector('small[cube]');
+				// const smallTable = spanHContent.querySelector('small[table]');
+				// const smallCube = spanHContent.querySelector('small[cube]');
 				section.setAttribute('data-element-search', 'search-exist-metrics');
-				section.setAttribute('data-label', key.name);
+				section.setAttribute('data-label', metric.name);
 				section.setAttribute('data-cube-name', cubeName);
 				div.setAttribute('data-table-name', cubeValue.FACT);
 				div.setAttribute('data-table-alias', cubeValue.alias);
 				div.setAttribute('data-cube-name', cubeName);
-				div.setAttribute('data-label', key.name);
+				div.setAttribute('data-label', metric.name);
 				div.onclick = app.handlerMetricSelected;
-				span.innerText = key.name;
-				smallTable.innerText = cubeValue.FACT;
-				smallCube.innerText = cubeName;
+				span.innerText = metric.name;
+				// smallTable.innerText = cubeValue.FACT;
+				// smallCube.innerText = cubeName;
 				ul.appendChild(section);
 			}
 		}
@@ -1638,10 +1640,12 @@ var StorageMetric = new MetricStorage();
 			const ul = document.getElementById('ul-metrics');
 			selectedCubes.forEach( cube => {
 				const cubeName = cube.getAttribute('data-cube-name');
-				// for (const [key, value] of Object.entries(StorageMetric.getCubeMetrics(cubeName)) ) {
 				// ripulisco la lista, prima di popolarla
 				document.querySelectorAll('#ul-metrics > section').forEach( item => item.remove());
-				StorageMetric.getCubeMetrics(cubeName).forEach( metric => {
+				// recupero lista aggiornata delle metriche
+				StorageMetric.cubeMetrics = cubeName;
+				debugger;
+				for ( const [key, metric] of Object.entries(StorageMetric.cubeMetrics) ) {
 					const contentElement = app.tmplList.content.cloneNode(true);
 					const section = contentElement.querySelector('section[data-sublist-metrics]');
 					const div = section.querySelector('div.selectable');
@@ -1652,18 +1656,20 @@ var StorageMetric = new MetricStorage();
 					section.hidden = false;
 					section.setAttribute('data-element-search', 'search-exist-metrics');
 					// nome metrica
-					section.setAttribute('data-label', metric.name);
+					section.setAttribute('data-label', key);
 					section.setAttribute('data-cube-name', cubeName);
 					div.setAttribute('data-table-name', metric.formula.table);
 					div.setAttribute('data-table-alias', metric.formula.tableAlias);
 					div.setAttribute('data-cube-name', cubeName);
-					div.setAttribute('data-label', metric.name);
+					div.setAttribute('data-label', key);
 					div.onclick = app.handlerMetricSelectedComposite;
-					span.innerText = metric.name;
-					smallTable.innerText = metric.formula.table;
-					smallCube.innerText = cubeName;
+					span.innerText = key;
+					if (metric.metric_type !== 2) {
+						smallTable.innerText = metric.formula.table;
+						smallCube.innerText = cubeName;
+					}
 					ul.appendChild(section);
-				});
+				}
 			});
 			app.dialogCompositeMetric.showModal();
 			document.getElementById('composite-metric-name').focus();

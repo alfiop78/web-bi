@@ -4,17 +4,30 @@ La classe recupera il local storage ad ogni accesso alla pagina e contiene Metod
 class Storages {
 	#dimensions = new Set();
 	#cubes = new Set();
+	// #storage = {};
 	#metrics = new Set();
 	#filters = new Set();
 	#processes = new Set();
 	#all = new Set();
 	constructor() {
+		this.st = {}; // TODO: da rinominare in this.storage
 		this.storage = window.localStorage;
 		this.storageKeys = Object.keys(window.localStorage);
 		// console.log('storageKeys : ', this.storageKeys);
 		// this.cubeId = this._cubeId;
 		this.JSONData = null;
 	}
+
+	set storageK(value) {
+		// value : METRIC, FILTER, DIMENSION, ecc...
+		Object.keys(window.localStorage).forEach( key => {
+			if (JSON.parse(window.localStorage.getItem(key)).type === value) {
+				this.st[key] = JSON.parse(window.localStorage.getItem(key));
+			}
+		});
+	}
+
+	get storageK() {return this.st;}
 
 	get allLocalElements() {
 		this.storageKeys.forEach((key) => {
@@ -70,6 +83,7 @@ class Storages {
 		return this.#processes;
 	}
 
+	// viene invocata da init_versioning.js
 	get metrics() {
 		this.storageKeys.forEach((key) => {
 			let jsonStorage = JSON.parse(this.storage.getItem(key));
@@ -533,51 +547,41 @@ class FilterStorage extends Storages {
 }
 
 class MetricStorage extends Storages {
-	#metrics = {};
+	#metricsObject = {};
 	constructor() {
 		super();
-		this.storageKeys.forEach((key) => {
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			// console.log(key);
-			if (jsonStorage.type === 'METRIC') {
-				this.#metrics[key] = jsonStorage;
-			}
-		});
-		// console.log('_metrics : ', this._metrics);
-		// debugger;
-		this.id = 0; // default
 	}
 
-	set metricId(value) {this.id = value;}
+	// restituisco la lista delle metriche prendendole direttamente dallo stato attuale dello storage
+	set cubeMetrics(cube) {
+		// recupero gli oggetti METRIC dallo storage
+		this.#metricsObject = {};
+		super.storageK = 'METRIC';
+		for ( const [key, value] of Object.entries(this.st)) {
+			if (value.cube === cube) this.#metricsObject[key] = value;
+		}
+	}
 
-	get metricId() { return this.id; }
+	get cubeMetrics() {return this.#metricsObject;}
+
+	get baseAdvancedMetrics() {
+		this.localMetrics = {};
+		for (const [key, value] of Object.entries(this.#metricsObject) ) {
+			if (value.metric_type !== 2) this.localMetrics[key] = value;
+		}
+		return this.localMetrics;
+	}
+
+	get compositeMetrics() {
+		this.localMetrics = {};
+		for (const [key, value] of Object.entries(this.#metricsObject) ) {
+			if (value.metric_type === 2) this.localMetrics[key] = value;
+		}
+		return this.localMetrics;
+	}
 
 	set metric(value) {this._metric = value;}
 
 	get metric() {return JSON.parse(this.storage.getItem(this._metric));}
-
-	// TODO: impostare anche un metodo Set, invece di metterlo nel costructor, verificare anche le altre subClass
-	get metrics() {return this.#metrics;} // tutte le metriche
-
-	getCubeMetrics(cube) {
-		this._metrics = [];
-		for ( const [key, value] of Object.entries(this.#metrics)) {
-			if (value.cube === cube) {
-				this._metrics.push(value);
-			}
-		}
-		return this._metrics;
-	}
-
-	getCubeCompositeMetrics(cube) {
-		this._metrics = new Set();
-		for ( const [key, value] of Object.entries(this.#metrics)) {
-			// debugger;
-			if (value.cube === cube && value.composite) {
-				this._metrics.add(value);
-			}
-		}
-		return this._metrics;
-	}
 
 }
