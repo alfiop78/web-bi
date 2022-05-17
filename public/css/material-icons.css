@@ -49,17 +49,6 @@
 
 .material-icons:active{color: black;}
 
-.material-icons[data-vehicle-type='1']{color: forestgreen;} /* benzina */
-.material-icons[data-vehicle-type='2']{color: dimgray;} /* diesel */
-.material-icons[data-vehicle-type='3']{color: lightblue;} /* hybrid */
-.material-icons[data-vehicle-type='4']{color: steelblue;} /* hydrogen */
-.material-icons[data-vehicle-type='5']{color: lightgreen;} /* electric */
-.material-icons[data-vehicle-type='6']{color: palegreen;} /* GPL */
-.material-icons[data-vehicle-type='7']{color: skyblue;} /* Metan */
-.material-icons[data-vehicle-type='8']{color: greenyellow;} /* hybrid PlugIn */
-
-.material-icons.build{color: var(--main-secondary-color);}
-
 /* status icons */
 .material-icons.error{color: darkred;}
 
@@ -93,3 +82,6 @@
 .material-icons.md-status{color: darkgrey;}
 .material-icons.md-attention{color: darkorange;}
 .material-icons.md-done{color: darkgreen;}
+
+/*colori*/
+.material-icons.md-orange{color: orange;}

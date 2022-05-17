@@ -38,6 +38,7 @@ section[options] i[hier-order-minus]{color: #3b7096;}
 section[options] i{color: dimgrey;}
 section[options] > i[metrics]{color: #587850;}
 section[options] > i[columns]{color: #9a6a6a;}
+section[options] > i[composite-metrics]{color: #9a6a6a;}
 /*section[options] > i[filters]{color: #3b7096;}
 section[options] > i[groupby]{color: #c7b198;}*/
 

@@ -13,6 +13,7 @@
 		<link rel="stylesheet" type="text/css" href="/css/md-drawer.css" />
 		<link rel="stylesheet" type="text/css" href="/css/md-inputs.css" />
         <link rel="stylesheet" type="text/css" href="/css/timeline.css" />
+        <link rel="stylesheet" type="text/css" href="/css/md-lists.css" />
         <link rel="stylesheet" href="{{ asset('css/index.css') }}">
         <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 		<script src="/js/Application.js"></script>
@@ -318,6 +319,55 @@
             
         </dialog>
 
+        <dialog id="dialog-composite-metric">
+            <small id="dialog-popup" class="popupToast"></small>
+            <section data-table-name>
+                <h4>Creazione di una nuova metrica composta per il cubo <span data-cube-selected></span></h4>
+                
+                <div class="stepLayout">
+                    {{-- metriche mappate --}}
+                    <section class="sectionLists">
+                        <h5>Metriche disponibili</h5>
+                        <div class="md-field">
+                            <input type="search" data-element-search="search-metrics" id="search-metrics" value autocomplete="off" />
+                            <label for="search-metrics" class="">Ricerca</label>
+                        </div>
+                        <ul id="ul-fields" class="dialog-overflow-list"></ul>
+                    </section>
+
+                    <section class="sectionLists">
+                        <h5>SQL</h5>
+                        <div class="name-alias">
+                            <div class="md-field">
+                                <input type="text" id="composite-metric-name" value="" autocomplete="off" />
+                                <label for="composite-metric-name" class="">Nome</label>
+                            </div>
+
+                            <div class="md-field">
+                                <input type="text" id="composite-alias-metric" value="" autocomplete="off" />
+                                <label for="composite-alias-metric" class="">Alias</label>
+                            </div>
+                        </div>
+                        <div class="md-field">
+                            {{-- <textarea id="composite-metricSQLFormula" name="composite-metricSQL" rows="15" cols="25" placeholder="Aggiungi le metriche qui"></textarea> --}}
+
+                        </div>
+                        <div id="composite-metric-formula" contenteditable="false">
+                            
+                        </div>
+                        <button id="btnCompositeMetricSave" type="button" name="save" class="md-button" disabled>salva</button>
+                    </section>
+
+                </div>
+
+                <div class="dialog-buttons">
+                    <button type="button" name="cancel" class="md-button">annulla</button>
+                    <button id="btnCompositeMetricDone" type="button" name="done" class="md-button">fatto</button>
+                </div>
+            </section>
+            </div>
+        </dialog>
+
         <template id="cardLayout">
             <div class="cardLayout">
                 <section class="cardTable" name data-schema data-alias data-value>
@@ -342,6 +392,7 @@
                 <section options>
                     <i class="material-icons md-18" columns data-tooltip="Colonne" data-tooltip-position="right">view_list</i>
                     <i class="material-icons md-18" metrics data-tooltip="Metriche" data-tooltip-position="right" hidden>show_chart</i>
+                    <i class="material-icons md-18" composite-metrics data-tooltip="Crea metrica composta" data-tooltip-position="right" hidden>addchart</i>
                     <i class="material-icons md-18" join data-tooltip="Crea relazione" data-tooltip-position="right">insert_link</i>
                     <i class="material-icons md-18" join-left data-tooltip="Left join" data-tooltip-position="right">flip</i>
                     <i class="material-icons md-18" join-right data-tooltip="Right join" data-tooltip-position="right">flip</i>
@@ -370,7 +421,7 @@
             <section data-element-search data-label data-sublist-draggable data-searchable="true">
                 <span class="sublist">
                     {{-- <span generic class="selectable"></span> --}}
-                    <div generic id draggable="true" label>
+                    <div generic id draggable="true">
                         <span table></span>
                     </div>
                 </span>

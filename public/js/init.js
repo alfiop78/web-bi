@@ -11,6 +11,7 @@ var Hier = new Hierarchy();
 		dialogHierarchyName : document.getElementById('hierarchy-name'),
 		dialogVersioning : document.getElementById('versioning'),
 		dialogColumnMap : document.getElementById('dialog-column-map'),
+		dialogCompositeMetrics : document.getElementById('dialog-composite-metric'),
 		// templates
 		tmplDimension : document.getElementById('tmpl-dimension-list'),
 		tmplCube : document.getElementById('tmpl-cube-list'),
@@ -203,7 +204,7 @@ var Hier = new Hierarchy();
         e.preventDefault();
 		// faccio il DESCRIBE della tabella
 		// controllo lo stato di dropEffect per verificare se il drop è stato completato correttamente, come descritto qui:https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#drag_end
-		if (e.dataTransfer.dropEffect === 'copy') app.getTable(e.target.getAttribute('data-schema'), cube.card.tableName);
+		if (e.dataTransfer.dropEffect === 'copy') app.getTable(e.target.dataset.schema, cube.card.tableName);
 	}
 
 	app.handlerDrop = (e) => {
@@ -235,16 +236,16 @@ var Hier = new Hierarchy();
 		let cardLayout = content.querySelector('.cardLayout');
 
 		// imposto il titolo in h6
-		cardLayout.querySelector('h6').innerHTML = card.getAttribute('label');
+		cardLayout.querySelector('h6').innerHTML = card.dataset.label;
 		// imposto un alias per questa tabella
 		const time = Date.now().toString();
-		cardLayout.querySelector('.subtitle').innerHTML = `AS ${card.getAttribute('label')}_${time.substring(time.length - 3)}`;
-		content.querySelector('.cardTable').setAttribute('data-alias', `${card.getAttribute('label')}_${time.substring(time.length - 3)}`);
+		cardLayout.querySelector('.subtitle').innerHTML = `AS ${card.dataset.label}_${time.substring(time.length - 3)}`;
+		content.querySelector('.cardTable').dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`;
 		card.appendChild(cardLayout);
 		// imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone
 		const hierNumber = app.dropZone.querySelectorAll('.card.table').length + 1;
 		card.querySelector('.hierarchy-order').innerText = hierNumber;
-		card.querySelector('.cardTable').setAttribute('data-value', hierNumber);
+		card.querySelector('.cardTable').dataset.value = hierNumber;
 		app.dropZone.appendChild(card);
 
 		// tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
@@ -252,7 +253,10 @@ var Hier = new Hierarchy();
 			card.setAttribute('fact', true);
 			card.querySelector('.cardTable').setAttribute('fact', true);
 			// visualizzo l'icona metrics
+			card.querySelector('section[options] > i[composite-metrics]').dataset.schema = e.target.querySelector('div').dataset.schema;
+			card.querySelector('section[options] > i[composite-metrics]').dataset.label = e.target.querySelector('div').dataset.label;
 			card.querySelector('section[options] > i[metrics]').hidden = false;
+			card.querySelector('section[options] > i[composite-metrics]').hidden = false;
 		}
 
 		// imposto la card draggata nella posizione dove si trova il mouse
@@ -269,9 +273,8 @@ var Hier = new Hierarchy();
 		// TODO: da associare al document.addEventListener
 		card.querySelector('i[data-id="closeTable"]').onclick = app.handlerCloseCard;
 		// imposto la input search, con questo attributo, l'evento input viene gestito in Application.js
-		card.querySelector('input').setAttribute('data-element-search', card.getAttribute('label'));
-	
-		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.getAttribute('data-schema'), 'tableName': card.getAttribute('label')};
+		card.querySelector('input').dataset.elementSearch = card.dataset.label;	
+		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.dataset.schema, 'tableName': card.dataset.label};
 		// creazione della struttura gerarchica sulla destra
 		app.hierStruct(card);
 
@@ -279,6 +282,7 @@ var Hier = new Hierarchy();
 		// TODO: da gestire con document.addEventListener
 		card.querySelector('i[join]').onclick = app.handlerAddJoin;
 		card.querySelector('i[metrics]').onclick = app.handlerAddMetric;
+		card.querySelector('i[composite-metrics]').onclick = app.handlerAddCompositeMetric;
 		card.querySelector('i[columns]').onclick = app.handlerAddColumns;
 		card.querySelector('i[hier-order-plus]').onclick = app.handlerHierarchyOrder;
 		card.querySelector('i[hier-order-minus]').onclick = app.handlerHierarchyOrder;
@@ -478,6 +482,17 @@ var Hier = new Hierarchy();
 		const cardTable = e.path[3].querySelector('.cardTable');
 		cube.activeCard = {'ref': cardTable, 'tableName': cardTable.getAttribute('name')};
 		cube.mode('metrics', 'Seleziona le colonne da impostare come Metriche');
+	}
+
+	// aggiunta metrica composta
+	app.handlerAddCompositeMetric = async (e) => {
+		// TODO: recupero dal DB le colonne della tabella
+		const cardTable = app.dropZone.querySelector(".cardTable[name='" + e.target.dataset.label + "']");
+		cube.activeCard = {'ref': cardTable, schema : e.target.dataset.schema, 'tableName': e.target.dataset.label};
+		const data = await app._getTable();
+		debugger;
+		// TODO: popolo la lista #ul-fields	
+		app.dialogCompositeMetrics.showModal();
 	}
 
 	app.createHierarchy = (e) => {
@@ -737,14 +752,14 @@ var Hier = new Hierarchy();
 						const element = content.querySelector('div[draggable]');
 						const span = section.querySelector('span[table]');
 
-						section.setAttribute('data-label', value.TABLE_NAME);
-						section.setAttribute('data-element-search', 'tables');
+						section.dataset.label = value.TABLE_NAME;
+						section.dataset.elementSearch = 'tables';
 						element.ondragstart = app.handlerDragStart;
 						element.id = 'table-' + key;
-						element.setAttribute('data-schema', schema);
-						element.setAttribute('label', value.TABLE_NAME);
+						element.dataset.schema = schema;
+						element.dataset.label = value.TABLE_NAME;
 						span.innerText = value.TABLE_NAME;
-						span.setAttribute('label', value.TABLE_NAME);
+						span.dataset.label =  value.TABLE_NAME;
 						ul.appendChild(section);
 		        	}
 		        } else {
@@ -764,6 +779,20 @@ var Hier = new Hierarchy();
 		const cardTable = e.path[3].querySelector('.cardTable');
 		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.getAttribute('data-schema'), 'tableName': cardTable.getAttribute('name')};
 		cube.mode('relations');
+	}
+
+	// NOTE: questa function andrà a sostituire getTable()
+	app._getTable = async () => {
+		// elemento dove inserire le colonne della tabella
+		// const ul = cube.card.ref.querySelector("ul[data-id='columns']");
+	    return await fetch('/fetch_api/'+cube.activeCard.schema+'/schema/'+cube.activeCard.tableName+'/table_info')
+			.then( (response) => {
+				if (!response.ok) {throw Error(response.statusText);}
+				return response;
+			})
+			.then( (response) => response.json())
+			.then( response => response)
+	    .catch( (err) => console.error(err));
 	}
 
 	app.getTable = async (schema, table) => {
@@ -952,6 +981,7 @@ var Hier = new Hierarchy();
 	        // input di ricerca, imposto l'attr data-element-search
 	        card.querySelector('input[type="search"]').setAttribute('data-element-search', table);
 	        // await : aspetto che getTable popoli tutta la card con i relativi campi
+	        // NOTE: utilizzo di await
 	        await app.getTable(schema, table);
 	        console.log('after await');
 	        // imposto la card attiva
