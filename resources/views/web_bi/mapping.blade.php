@@ -401,12 +401,6 @@
             </div>
         </template>
 
-        {{-- <template id="el">
-            <section data-element-search="tables" data-label data-searchable="true">
-                <div class="element card" id="" draggable="true" label=""></div>
-            </section>
-        </template> --}}
-
         <template id="templateList">
 
             <section data-element-search data-label data-sublist-table-card data-searchable="true">
@@ -431,6 +425,17 @@
                 <span class="sublist">
                     <span generic></span>
                 </span>
+            </section>
+
+            {{-- lista generica --}}
+            <section class="data-item list" data-element-search data-label data-sublist-gen hidden>
+                <div class="selectable" data-label>
+                    <div class="h-content">
+                        <div class="v-content">
+                            <span data-item></span>
+                        </div>
+                    </div>
+                </div>
             </section>
 
         </template>

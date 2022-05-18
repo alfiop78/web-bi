@@ -118,5 +118,3 @@ ul > section[data-sublist][selected], ul > section[data-sublist-generic][selecte
 span[cube] {color: dimgray; padding: .5em .2em;font-size: .75rem;font-weight: normal;}
 
 .fact-table > section {color: var(--main-primary-color);font-weight: bold;}
-
-#composite-metric-formula{background: #e2e2e2; width: 100%; height: 100%; padding: 1em;}

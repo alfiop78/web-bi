@@ -1,3 +1,4 @@
+ul{margin-inline: 0px;padding-inline: 0px;}
 .list{color: #494949;}
 .h-content{display: flex; align-items: center;}
 section[data-sublist-gen] .v-content{margin: 4px 2px;}

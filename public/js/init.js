@@ -11,7 +11,7 @@ var Hier = new Hierarchy();
 		dialogHierarchyName : document.getElementById('hierarchy-name'),
 		dialogVersioning : document.getElementById('versioning'),
 		dialogColumnMap : document.getElementById('dialog-column-map'),
-		dialogCompositeMetrics : document.getElementById('dialog-composite-metric'),
+		dialogCompositeMetric : document.getElementById('dialog-composite-metric'),
 		// templates
 		tmplDimension : document.getElementById('tmpl-dimension-list'),
 		tmplCube : document.getElementById('tmpl-cube-list'),
@@ -37,6 +37,8 @@ var Hier = new Hierarchy();
 		btnSaveCubeName : document.getElementById('btnCubeSaveName'),
 		btnSaveOpenedCube : document.getElementById('saveOpenedCube'),
 		btnDefinedCube : document.getElementById('definedCube'),
+		btnCompositeMetricSave : document.getElementById('btnCompositeMetricSave'), // tasto salva nella dialog-composite-metric
+		btnCompositeMetricDone : document.getElementById('btnCompositeMetricDone'),
 
 		// button dialog-columns-map
 		btnEditSqlId : document.getElementById('edit-sql-formula-column-id'),
@@ -441,7 +443,9 @@ var Hier = new Hierarchy();
 				if (!e.currentTarget.hasAttribute('metrics')) {
 					// TODO: delete cube.metrics[tableName][fieldName];
 				} else {
-					cube.metrics = cube.fieldSelected;
+					// TODO: nel salvataggio di una metrica di base dovrò aprire una dialog dove impostare l'alias. Quindi andrò a salvare in cube.metrics così come viene salvata la metrica composta
+					cube.metrics = { name : cube.fieldSelected, metric_type : 0, formula : null, alias : cube.fieldSelected };
+					// cube.metrics = cube.fieldSelected;
 				}
 				break;
 			default:
@@ -486,13 +490,47 @@ var Hier = new Hierarchy();
 
 	// aggiunta metrica composta
 	app.handlerAddCompositeMetric = async (e) => {
-		// TODO: recupero dal DB le colonne della tabella
+		// recupero dal DB le colonne della tabella
 		const cardTable = app.dropZone.querySelector(".cardTable[name='" + e.target.dataset.label + "']");
 		cube.activeCard = {'ref': cardTable, schema : e.target.dataset.schema, 'tableName': e.target.dataset.label};
 		const data = await app._getTable();
-		debugger;
-		// TODO: popolo la lista #ul-fields	
-		app.dialogCompositeMetrics.showModal();
+		// popolo la lista #ul-fields	
+		const ul = document.getElementById('ul-fields');
+		data.forEach( field => {
+			const content = app.tmplLists.content.cloneNode(true);
+			const section = content.querySelector('section[data-sublist-gen]');
+			const div = section.querySelector('div.selectable');
+			const span = section.querySelector('span[data-item]');
+			section.removeAttribute('hidden');
+			div.dataset.label = field.COLUMN_NAME;
+			span.innerText = field.COLUMN_NAME;
+			div.onclick = app.handlerMetricSelectedComposite;
+			ul.appendChild(section);
+		});
+		app.dialogCompositeMetric.showModal();
+	}
+
+	app.btnCompositeMetricSave.onclick = (e) => {
+		const name = document.getElementById('composite-metric-name').value;
+		const alias = document.getElementById('composite-alias-metric').value;
+		let arr_sql = [];
+		// let metricsAlias = {}; // contiene un'elenco di object con nome_metrica : alias che compongono la metrica composta
+		document.querySelectorAll('#composite-metric-formula *').forEach( element => {
+			// console.log('element : ', element);
+			// console.log('element : ', element.nodeName);
+			// se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
+			if (element.nodeName === 'MARK') {
+				// StorageMetric.metric = element.innerText;
+				// metrics[element.innerText] = StorageMetric.metric.formula.alias;
+				// metricsAlias[element.innerText] = StorageMetric.metric.formula.alias;
+				// TODO: verificare se è presente il distinct : true in ogni metrica
+				arr_sql.push(element.innerText);
+			} else {
+				arr_sql.push(element.innerText.trim());	
+			}
+		});
+		console.log('arr_sql : ', arr_sql);
+		cube.metrics = { name, metric_type : 0, formula: arr_sql, alias };
 	}
 
 	app.createHierarchy = (e) => {
@@ -1540,6 +1578,48 @@ var Hier = new Hierarchy();
 		icon.onmouseenter = app.showTooltip;
 		icon.onmouseleave = app.hideTooltip;
 	});
+
+	app.btnCompositeMetricDone.onclick = () => app.dialogCompositeMetric.close();
+
+	// textarea per creare una metrica composta
+	document.getElementById('composite-metric-formula').onclick = (e) => {
+		console.log('e : ', e);
+		console.log('e.target : ', e.target);
+		console.log('e.currentTarget : ', e.currentTarget);
+		if (e.target.localName === 'div') {
+			const span = document.createElement('span');
+			span.setAttribute('contenteditable', true);
+			e.target.appendChild(span);
+			span.focus();
+		}
+	}
+
+	// selezione di una metrica per la creazione di una metrica composta
+	app.handlerMetricSelectedComposite = (e) => {
+		// TODO: aggiungo la metrica alla textarea
+		console.log(cube.activeCard.tableName);
+		// debugger;
+		const textArea = document.getElementById('composite-metric-formula');
+		// creo uno span con dentro la metrica
+		const mark = document.createElement('mark');
+		mark.innerText = e.currentTarget.getAttribute('data-label');
+		textArea.appendChild(mark);
+		// aggiungo anche uno span per il proseguimento della scrittura della formula
+		let span = document.createElement('span');
+		span.setAttribute('contenteditable', true);
+		textArea.appendChild(span);
+		span.focus();
+	}
+
+	app.checkDialogCompositeMetric = () => {
+		const name = document.getElementById('composite-metric-name').value;
+		const alias = document.getElementById('composite-alias-metric').value;
+		(name.length !== 0 && alias.length !== 0) ? app.btnCompositeMetricSave.disabled = false : app.btnCompositeMetricSave.disabled = true;
+	}
+
+	document.getElementById('composite-metric-name').oninput = () => app.checkDialogCompositeMetric();
+	
+	document.getElementById('composite-alias-metric').oninput = () => app.checkDialogCompositeMetric();
 
 	// NOTE: esempio di utilizzo di MutationObserver
 	const body = document.getElementById('body');

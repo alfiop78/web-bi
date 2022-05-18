@@ -4,6 +4,7 @@ class Cube {
 	#alias;
 	#columns;
 	#metrics = {};
+	#metricsMap = new Map();
 	constructor() {
 		this._cube = {};
 		// this._metrics = {}; // contiene gli oggetti metriche
@@ -68,7 +69,7 @@ class Cube {
 
 	get fieldSelected() {return this._field;}
 
-	set metrics(field) {
+	/*set metrics(field) {
 		debugger;
 		// TODO: da rivedere, utilizzare la stessa logica utilizzata in dimension.columns() per aggiungere/rimuovere la field selezionata
 		if (!this.#metrics.hasOwnProperty(this._tableName)) {this._arrMetrics = [];}
@@ -79,7 +80,17 @@ class Cube {
 		console.log(this.#metrics);
 	}
 
-	get metrics() {return this.#metrics;}
+	get metrics() {return this.#metrics;}*/
+
+	// TODO: sostituirà metrics
+	set metrics(value) {
+		// value : { name, metric_type : 0, formula: arr_sql, alias }
+		// se value è un object (metrica composta) lo salvo come object altrimenti come stringa nel Map()
+		this.#metricsMap.set(value.name, {alias : value.alias, formula : value.formula, metric_type : value.metric_type})		
+		console.log(this.#metricsMap);
+	}
+
+	get metrics() {return this.#metricsMap;}
 
 	set FACT(value) {this._fact = value;}
 
@@ -98,9 +109,11 @@ class Cube {
 		this._cube.type = 'CUBE';
 		this._cube.name = this._title;
 		this._cube.comment = this.#comment;
-		this._cube.metrics = this.#metrics;
+		// this._cube.metrics = this.#metrics;
+		// console.log(Object.fromEntries(this.#metricsMap));
+		this._cube.metrics = Object.fromEntries(this.metrics);
+		debugger;
 		this._cube.columns = this.#columns;
-		// this._cube.relations = this._join; // questa deve essere salvata all'interno della dimensione, non nel cubo
 		this._cube.FACT = this._fact;
 		this._cube.schema = this.#schema;
 		this._cube.alias = this.#alias;
