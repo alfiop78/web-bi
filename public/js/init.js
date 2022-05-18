@@ -840,7 +840,6 @@ var Hier = new Hierarchy();
 	app.getTable = async (schema, table) => {
 		// elemento dove inserire le colonne della tabella
 		const ul = cube.card.ref.querySelector("ul[data-id='columns']");
-
 	    await fetch('/fetch_api/'+schema+'/schema/'+table+'/table_info')
 			.then( (response) => {
 			if (!response.ok) {throw Error(response.statusText);}
@@ -855,23 +854,24 @@ var Hier = new Hierarchy();
 		        	for ( const [key, value] of Object.entries(data)) {
                         // console.log(key, value);
 		        		const content = app.tmplLists.content.cloneNode(true);
-		        		const section = content.querySelector('section[data-sublist-table-card]'); // questa lista include le 3 icone per columns, hierarchy, metric
-		        		section.setAttribute('data-label', value.COLUMN_NAME);
-		        		section.setAttribute('data-element-search', table);
-						let span = section.querySelector('span[generic]');
+		        		const section = content.querySelector('section[data-sublist-fields]'); // questa lista include le 3 icone per columns, hierarchy, metric
+		        		const div = section.querySelector('div.selectable');
+		        		const span = div.querySelector('span[data-item]');
+		        		section.dataset.label = value.COLUMN_NAME;
+		        		section.dataset.elementSearch = table;
+						// let span = section.querySelector('span[generic]');
 						// span.className = 'elementSearch';
 						span.innerText = value.COLUMN_NAME;
 						span.setAttribute('label', value.COLUMN_NAME);
-						span.setAttribute('data-table-name', table);
+						span.dataset.tableName = table;
 						// scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
 						let pos = value.DATA_TYPE.indexOf('(');
 						let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-						span.setAttribute('data-type', type);
-						span.setAttribute('data-key', value.CONSTRAINT_NAME); // pk : chiave primaria
-						//li.setAttribute('data-table',cube.table);
+						span.dataset.type = type;
+						span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
 						span.id = key;
 						// fn da associare all'evento in 'mutation observe'
-						span.setAttribute('data-fn', 'handlerColumns');
+						span.dataset.fn = 'handlerColumns';
 						ul.appendChild(section);
 		        	}
 		        } else {

@@ -438,6 +438,20 @@
                 </div>
             </section>
 
+            {{-- lista fields --}}
+            <section class="data-item list" data-element-search data-label data-sublist-fields>
+                <div class="selectable" data-label>
+                    <div class="h-content">
+                        <div class="v-content">
+                            <span data-item></span>
+                        </div>
+                        <i data-id="column-icon" class="material-icons md-18">view_list</i>
+                        <i data-id="hierarchy-icon" class="material-icons md-18">insert_link</i>
+                        <i data-id="metric-icon" class="material-icons md-18">show_chart</i>
+                    </div>
+                </div>
+            </section>
+
         </template>
 
         <main>
