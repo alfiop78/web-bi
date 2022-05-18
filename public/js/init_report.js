@@ -979,12 +979,35 @@ var StorageMetric = new MetricStorage();
 
 	// selezione di una metrica mappata, disponibile per la creazione
 	app.handlerMetricAvailable = (e) => {
+		// elimino tutte le selezioni precedenti
+		const ul = document.getElementById('ul-available-metrics');
+		if (ul.querySelector('.selectable[selected]')) ul.querySelector('.selectable[selected]').toggleAttribute('selected');
 		e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('selected')) {
-			Query.field = e.currentTarget.getAttribute('data-label');
-			Query.table = e.currentTarget.getAttribute('data-table-name');
-			Query.tableAlias = e.currentTarget.getAttribute('data-table-alias');
-			StorageCube.selected = e.currentTarget.getAttribute('data-cube-name');
+			StorageCube.selected = e.currentTarget.dataset.cubeName;
+			// se la metrica selezionata ha la prop fields (metrica sul cubo) si tratta di una metrica composta (es.: prezzo * quantità)
+			if (StorageCube.selected.metrics[e.currentTarget.dataset.label].hasOwnProperty('fields')) {
+				// in Query.field devo impostare (alias_tabella.prezzo * alias_tabella.quantita)
+				// l'array fields, nella metrica legata al cubo, la utilizzo come "controllo" per verificare quali metriche sono state messe nella formula e modificarle di conseguenza
+				const fields = StorageCube.selected.metrics[e.currentTarget.dataset.label].fields;
+				// baseFormula contiene la mappatura fatta su DB (es. : [prezzo, *, quantita])
+				let baseFormula = StorageCube.selected.metrics[e.currentTarget.dataset.label].formula;
+				// per ogni metrica presente nella baseFormula ...
+				const newFormula = baseFormula.map(formulaElement => {
+					// ...vado a modificare l'elemento dell'array che è contenuto nella formula, generando l'array newFormula : [DocVenditaDettaglio_444.prezzo, *, DocVenditaDettaglio_444.quantita]
+					return (fields.includes(formulaElement)) ? `${e.currentTarget.dataset.tableAlias}.${formulaElement}` : formulaElement;
+					// ...che successivamente lego con join creando DocVenditaDettaglio_444.prezzo * DocVenditaDettaglio_444.quantita.
+					// ...in PHP, questo Query.field, verrà convertito in SUM(DocVenditaDettaglio_444.prezzo * DocVenditaDettaglio_444.quantita) AS 'alias_metric'
+				}).join(' ');
+				Query.flagCompositeBase = true;
+				Query.field = newFormula;
+			} else {
+				Query.flagCompositeBase = false;
+				Query.field = e.currentTarget.dataset.label;
+				// per le metriche composte di primo livello non è necessario impostare le 2 prop tableAlias e table, sono già impostate con il map() qui sopra
+				Query.table = e.currentTarget.dataset.tableName;
+				Query.tableAlias = e.currentTarget.dataset.tableAlias;
+			}
 		} else {
 			// TODO: 
 		}
@@ -1210,11 +1233,13 @@ var StorageMetric = new MetricStorage();
 	app.btnMetricSave.onclick = (e) => {
 		const name = document.getElementById('metric-name').value;
 		const alias = document.getElementById('alias-metric').value;
-		const SQLFunction = document.querySelector('#ul-aggregation-functions .selectable[selected]').getAttribute('data-label');
+		const SQLFunction = document.querySelector('#ul-aggregation-functions .selectable[selected]').dataset.label;
 		const distinctOption = document.getElementById('checkbox-distinct').checked;
 		console.log('Query.table : ', Query.table);
 		console.log('Query.tableAlias : ', Query.tableAlias);
+		console.log('Query.field : ', Query.field);
 		console.log('cube selected : ', StorageCube.selected.name);
+		// debugger;
 		Query.metricName = name;
 		console.log(Query.metricName);
 		// verifico se ci sono filtri da associare a questa metrica
@@ -1236,8 +1261,15 @@ var StorageMetric = new MetricStorage();
 			metricObj = { type: 'METRIC', metric_type : 1, name, formula: Query.filteredMetrics[name], cube : StorageCube.selected.name };
 		} else {
 			// metrica
-			console.info('metrica non filtrata');
-			Query.metrics = { SQLFunction, field: Query.field, distinct: distinctOption, name, alias, table: Query.table, tableAlias : Query.tableAlias };
+			debugger;
+			console.info('metrica di base');
+			if (Query.flagCompositeBase) {
+				// si tratta di una metrica di base però composta (es.: prezzo*quantita) definita sul cubo
+				// in questo caso NON aggiungo le proprietà table e tableAlias perchè sono già definite all'interno della formula
+				Query.metrics = { SQLFunction, field: Query.field, distinct: distinctOption, name, alias };
+			} else {
+				Query.metrics = { SQLFunction, field: Query.field, distinct: distinctOption, name, alias, table: Query.table, tableAlias : Query.tableAlias };
+			}
 			metricObj = { type: 'METRIC', metric_type : 0, name, formula: Query.metrics[name], cube : StorageCube.selected.name };
 		}
 

@@ -43,12 +43,6 @@ class Cube {
 				$this->_fields[] = "'{$object->alias}_ds'";
 			}
 		}
-		// foreach ($fieldList as $column) {
-		// 	$columns[] = "$this->baseTable.$column";
-		// }
-		// $this->fields = implode(", ", $fieldList);
-		// print_r($fieldList);
-		// dd($this->_fields);
 	}
 
 	public function select($columns) {
@@ -123,10 +117,17 @@ class Cube {
 		$metrics_base_datamart = array();
 		foreach ($this->baseMetrics as $metric) {
 			// print_r($metric->name);
-			// $metrics_base è utilizzato in baseTable()
-			$metrics_base[] = "\n{$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}) AS '{$metric->alias}'";
-			// $metrics_base_datamart è utilizzato in createDatamart()
+			// TODO: devo eliminare le proprietà tableAlias e table per le metriche composte legate al cubo (metriche di primo livello definite sul cubo es.: (table.field-2 * table.field-2))
+			if ( (!property_exists($metric, 'table')) && (!property_exists($metric, 'tableAlias')) ) {
+				// è una metrica composta a livello di cubo
+				$metrics_base[] = "\n{$metric->SQLFunction}({$metric->field}) AS '{$metric->alias}'";
+			} else {
+				// $metrics_base è utilizzato in baseTable()
+				$metrics_base[] = "\n{$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}) AS '{$metric->alias}'";
+			}
+			// $metrics_base_datamart è utilizzato in createDatamart(), conterrà la tabella temporanea invece della tabella di origine
 			$metrics_base_datamart[] = "\n{$metric->SQLFunction}({$this->baseTable}.'{$metric->alias}') AS '{$metric->alias}'";
+			// verifico se la metrica in ciclo è presente in una metrica composta
 			if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics("W_AP_base_$this->reportId", $metric);
 		}
 		$this->_metrics_base = implode(", ", $metrics_base);
@@ -142,7 +143,6 @@ class Cube {
 			/* var_dump($key); // il nome dato alla colonna */
 			/* print_r($object); // contiene l'object {table : tabella, field: campo, alias : alias, SQL : formulSQL} */
 			/* var_dump($object->table); */
-			// $fieldList[] = "{$object->table}.{$object->field}";
 			foreach ($object->field as $token => $field) {
 				$fieldList[] = "\n{$object->tableAlias}.{$field->id->field}";
 				$fieldList[] = "{$object->tableAlias}.{$field->ds->field}";

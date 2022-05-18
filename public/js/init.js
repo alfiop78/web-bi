@@ -510,10 +510,12 @@ var Hier = new Hierarchy();
 		app.dialogCompositeMetric.showModal();
 	}
 
+	// salvataggio metrica composta di base
 	app.btnCompositeMetricSave.onclick = (e) => {
 		const name = document.getElementById('composite-metric-name').value;
 		const alias = document.getElementById('composite-alias-metric').value;
 		let arr_sql = [];
+		let fields = [];
 		// let metricsAlias = {}; // contiene un'elenco di object con nome_metrica : alias che compongono la metrica composta
 		document.querySelectorAll('#composite-metric-formula *').forEach( element => {
 			// console.log('element : ', element);
@@ -525,12 +527,13 @@ var Hier = new Hierarchy();
 				// metricsAlias[element.innerText] = StorageMetric.metric.formula.alias;
 				// TODO: verificare se è presente il distinct : true in ogni metrica
 				arr_sql.push(element.innerText);
+				fields.push(element.innerText);
 			} else {
 				arr_sql.push(element.innerText.trim());	
 			}
 		});
 		console.log('arr_sql : ', arr_sql);
-		cube.metrics = { name, metric_type : 0, formula: arr_sql, alias };
+		cube.metrics = { name, metric_type : 0, formula: arr_sql, alias, fields };
 	}
 
 	app.createHierarchy = (e) => {

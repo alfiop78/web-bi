@@ -32,7 +32,7 @@ class Cube {
 	get columnsDefined() {return this.#columns;}
 
 	set metricDefined(value) {
-		// converto un oggetto Object in Map()
+		// NOTE: converto un oggetto Object in Map()
 		this.#metricsMap = new Map(Object.entries(value));
 	}
 
@@ -75,7 +75,7 @@ class Cube {
 	set metrics(value) {
 		// value : { name, metric_type : 0, formula: arr_sql, alias }
 		// se value è un object (metrica composta) lo salvo come object altrimenti come stringa nel Map()
-		this.#metricsMap.set(value.name, {alias : value.alias, formula : value.formula, metric_type : value.metric_type})		
+		this.#metricsMap.set(value.name, {alias : value.alias, formula : value.formula, metric_type : value.metric_type, fields : value.fields});
 		console.log(this.#metricsMap);
 	}
 
@@ -100,6 +100,7 @@ class Cube {
 		this._cube.comment = this.#comment;
 		// this._cube.metrics = this.#metrics;
 		// console.log(Object.fromEntries(this.#metricsMap));
+		// NOTE: conversione di un oggetto Map in Object
 		this._cube.metrics = Object.fromEntries(this.metrics);
 		this._cube.columns = this.#columns;
 		this._cube.FACT = this._fact;

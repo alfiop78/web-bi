@@ -10,6 +10,7 @@ class Queries {
 	#joinId;
 	#where = {};
 	#compositeMetrics = {};
+	#compositeBaseMetric;
 	constructor() {
 		this.#select = {};
 		this.#obj = {}; // object generico
@@ -57,6 +58,10 @@ class Queries {
 	}
 
 	get from() {return this._fromSet;}
+
+	set flagCompositeBase(value) {this.#compositeBaseMetric = value;};
+
+	get flagCompositeBase() {return this.#compositeBaseMetric;}
 
 	addTables(hier) {
 		// è necessario creare la proprietà firstTable per poterla utilizzare in checkRelations e stabilire quali tabelle e join devono essere considerate nella query finale
