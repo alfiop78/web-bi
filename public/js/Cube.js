@@ -31,9 +31,12 @@ class Cube {
 
 	get columnsDefined() {return this.#columns;}
 
-	set metricDefined(value) {this.#metrics = value;}
+	set metricDefined(value) {
+		// converto un oggetto Object in Map()
+		this.#metricsMap = new Map(Object.entries(value));
+	}
 
-	get metricDefined() {return this.#metrics;}
+	get metricDefined() {return this.#metricsMap;}
 
 	set relations(value) {
 		this._join['hier_'+this.relationId] = value;
@@ -69,20 +72,6 @@ class Cube {
 
 	get fieldSelected() {return this._field;}
 
-	/*set metrics(field) {
-		debugger;
-		// TODO: da rivedere, utilizzare la stessa logica utilizzata in dimension.columns() per aggiungere/rimuovere la field selezionata
-		if (!this.#metrics.hasOwnProperty(this._tableName)) {this._arrMetrics = [];}
-
-		this._arrMetrics.push(field);
-
-		this.#metrics[this._tableName] = this._arrMetrics;
-		console.log(this.#metrics);
-	}
-
-	get metrics() {return this.#metrics;}*/
-
-	// TODO: sostituirà metrics
 	set metrics(value) {
 		// value : { name, metric_type : 0, formula: arr_sql, alias }
 		// se value è un object (metrica composta) lo salvo come object altrimenti come stringa nel Map()
@@ -112,7 +101,6 @@ class Cube {
 		// this._cube.metrics = this.#metrics;
 		// console.log(Object.fromEntries(this.#metricsMap));
 		this._cube.metrics = Object.fromEntries(this.metrics);
-		debugger;
 		this._cube.columns = this.#columns;
 		this._cube.FACT = this._fact;
 		this._cube.schema = this.#schema;

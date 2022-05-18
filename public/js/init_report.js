@@ -582,28 +582,28 @@ var StorageMetric = new MetricStorage();
 			// console.log(key, value);
 			// per ogni metrica
 			// console.log(value.metrics[value.FACT]);
-			value.metrics[value.FACT].forEach( (metric) => {
+			for ( const [name, metric] of Object.entries(value.metrics) ) {
+			// value.metrics[value.FACT].forEach( (metric) => {
 				const content = app.tmplList.content.cloneNode(true);
 				const section = content.querySelector('section[data-sublist-available-metrics]');
 				const div = section.querySelector('div.selectable');
 				const spanHContent = div.querySelector('.h-content');
 				const span = div.querySelector('span[metric]');
 				const small = div.querySelector('small');
-
-				section.setAttribute('data-label', metric);
-				section.setAttribute('data-cube-name', key);
-				section.setAttribute('data-table-alias', value.alias);
-				section.setAttribute('data-table-name', value.FACT);
-				section.setAttribute('data-element-search', 'search-available-metrics');
-				div.setAttribute('data-table-alias', value.alias);
-				div.setAttribute('data-table-name', value.FACT);
-				div.setAttribute('data-label', metric);
-				div.setAttribute('data-cube-name', key);
+				section.dataset.label = name;
+				section.dataset.cubeName = key;
+				section.dataset.tableAlias = value.alias;
+				section.dataset.tableName = value.FACT;
+				section.dataset.elementSearch = 'search-available-metrics';
+				div.dataset.tableAlias = value.alias;
+				div.dataset.tableName = value.FACT;
+				div.dataset.label = name;
+				div.dataset.cubeName = key;
 				div.onclick = app.handlerMetricAvailable;
-				span.innerText = metric;
+				span.innerText = name;
 				small.innerText = value.FACT;
 				ul.appendChild(section);
-			});
+			};
 		}
 	}
 

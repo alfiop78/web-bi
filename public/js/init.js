@@ -736,6 +736,7 @@ var Hier = new Hierarchy();
 		// apro la tabella definita come Cubo
 		console.log('e.currentTarget : ', e.currentTarget);
 		// debugger;
+		// TODO: modificare con dataset.label
 		StorageCube.selected = e.currentTarget.getAttribute('label');
 		console.log('cube selected : ', StorageCube.selected);
 		// ridefinisco le proprietà del cubo, leggendo da quello selezionato, nello storage, per consentirne la modifica o l'aggiunto di dimensioni al cubo
@@ -1414,11 +1415,10 @@ var Hier = new Hierarchy();
 
 		cube.comment = document.getElementById('textarea-cube-comment').value;
 
-		cube.FACT = document.querySelector('.card.table[fact]').getAttribute('label');
+		cube.FACT = document.querySelector('.card.table[fact]').dataset.label;
 		// TODO: recupero l'alias della FACT
-		cube.alias = document.querySelector('.card.table[fact] .cardTable').getAttribute('data-alias');
-		debugger;
-		cube.schema = document.querySelector('.card.table[fact]').getAttribute('data-schema');
+		cube.alias = document.querySelector('.card.table[fact] .cardTable').dataset.alias;
+		cube.schema = document.querySelector('.card.table[fact]').dataset.schema;
 		// Creo il cubeId basandomi sui cubi già creati in Storage, il cubeId lo associo al cubo che sto per andare a salvare.
 		cube.id = StorageCube.getIdAvailable();
 		console.log(cube.id);
