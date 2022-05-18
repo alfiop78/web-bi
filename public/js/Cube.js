@@ -49,9 +49,9 @@ class Cube {
 		value.forEach((el) => {
 			el.setAttribute('data-rel-'+this.relationId, this.relationId);
 			// el.setAttribute('data-relation-id', 'rel_'+this.relationId);
-			el.setAttribute('data-relation-id', true);
+			el.dataset.relationId = true;
 			// la relazione è stata creata, posso eliminare [selected]
-			el.removeAttribute('selected');
+			el.removeAttribute('data-selected');
 		});
 	}
 
@@ -318,7 +318,7 @@ class Hierarchy {
 		this.obj = {};
 		this.tokenObj = {};
 		if (!this.#col.hasOwnProperty(this.#alias)) {
-			debugger;
+			// debugger;
 			// alias di tabella ancora non mappata come columns
 			this.tokenObj = {id : this.#fieldId, ds : this.#field};
 			this.obj[token] = this.tokenObj;
@@ -344,9 +344,9 @@ class Hierarchy {
 		// value : colSelected
 		value.forEach((el) => {
 			el.setAttribute('data-rel-'+this.#relationId, this.#relationId);
-			el.setAttribute('data-relation-id', true);
+			el.dataset.relationId = true;
 			// la relazione è stata creata, posso eliminare [selected]
-			el.removeAttribute('selected');
+			el.removeAttribute('data-selected');
 		});
 		// this.#relationId++;
 	}

@@ -387,16 +387,14 @@ var Hier = new Hierarchy();
 		// selezione della colonna nella card table
 		// console.log(e.target);
 		// passo a activeCard il riferimento nel DOM della card attiva
-		Hier.activeCard = app.dropZone.querySelector(".cardTable[name='" + e.currentTarget.getAttribute('data-table-name') + "']");
-		// debugger;
+		Hier.activeCard = app.dropZone.querySelector(".cardTable[name='" + e.currentTarget.dataset.tableName + "']");
 		// colonna selezionata
-		cube.fieldSelected = e.currentTarget.getAttribute('label');
+		cube.fieldSelected = e.currentTarget.dataset.label;
 		// TODO: utilizzare uno dei due qui, cube.fieldSelected oppure hier.field, da rivedere
-		Hier.field = {field : e.currentTarget.getAttribute('label'), type : e.currentTarget.getAttribute('data-key')};
+		Hier.field = {field : e.currentTarget.dataset.label, type : e.currentTarget.dataset.key};
 		Hier.fieldRef = e.currentTarget;
-		debugger;
 		// imposto l'alias per la tabella
-		Hier.alias = cube.card.ref.getAttribute('data-alias');
+		Hier.alias = cube.card.ref.dataset.alias;
 
 		let attrs = cube.card.ref.getAttribute('mode');
 
@@ -412,8 +410,9 @@ var Hier = new Hierarchy();
 					relazione con un altra tabella (quindi attributo [data-relation-id] presente) elimino anche la relazione tra i due campi.
 					Bisogna eliminarla sia dal DOM, eliminando [data-relation-id] che dall'array this.hierarchy
 					*/
-					e.currentTarget.toggleAttribute('selected');
+					e.currentTarget.toggleAttribute('data-selected');
 					// recupero tutti gli attributi di e.currentTarget e vado a ciclare this.removeHierarchy(relationId) per verificare uno alla volta quale posso eliminare
+					// NOTE: utilizzo di getAttributeNames()
 					for (let name of e.currentTarget.getAttributeNames()) {
 						// console.log(name);
 						let relationId, value;
@@ -424,12 +423,12 @@ var Hier = new Hierarchy();
 						}
 					}
 				} else {
-					let liRelationSelected = Hier.card.querySelector('span[relations]:not([data-relation-id])');
+					let liRelationSelected = Hier.card.querySelector('.selectable[relations]:not([data-relation-id])');
 					// console.log(liRelationSelected);
 					e.currentTarget.toggleAttribute('relations');
-					e.currentTarget.toggleAttribute('selected');
+					e.currentTarget.toggleAttribute('data-selected');
 					// se ho selezionato una colonna diversa da quella già selezionata, rimuovo la selezione corrente e imposto quella nuova
-					if (liRelationSelected && (liRelationSelected.id !== e.currentTarget.id)) {
+					if (liRelationSelected && (liRelationSelected.dataset.id !== e.currentTarget.dataset.id)) {
 						liRelationSelected.toggleAttribute('relations');
 						liRelationSelected.toggleAttribute('selected');
 					}
@@ -443,15 +442,16 @@ var Hier = new Hierarchy();
 				if (!e.currentTarget.hasAttribute('metrics')) {
 					// TODO: delete cube.metrics[tableName][fieldName];
 				} else {
-					// TODO: nel salvataggio di una metrica di base dovrò aprire una dialog dove impostare l'alias. Quindi andrò a salvare in cube.metrics così come viene salvata la metrica composta
+					// TODO: nel salvataggio di una metrica di base dovrò aprire una dialog dove impostare l'alias.
+					// ...quindi andrò a salvare in cube.metrics così come viene salvata la metrica composta di base, cioè quella legata al cubo
 					cube.metrics = { name : cube.fieldSelected, metric_type : 0, formula : null, alias : cube.fieldSelected };
-					// cube.metrics = cube.fieldSelected;
 				}
 				break;
 			default:
 				// columns
 				if (cube.card.ref.hasAttribute('mode')) {
 					console.log('columns');
+					// TODO: rivedere se utilizzare il metodo con l'oggetto Map(), come fatto in Query.metrics
 					e.currentTarget.toggleAttribute('columns');
 					// imposto la colonna selezionata nelle textarea ID - DS
 					app.txtareaColumnId.innerText = cube.fieldSelected;
@@ -540,23 +540,19 @@ var Hier = new Hierarchy();
 		console.log('create Relations');
 		let hier = [];
 		let colSelected = [];
-		console.log( document.querySelectorAll('.cardTable[mode="relations"] span[relations][selected]').length);
+		// console.log( document.querySelectorAll('.cardTable[mode="relations"] .selectable[relations][data-selected]').length);
 		// quando i campi selezionati sono 1 recupero il nome della tabella perchè questa gerarchia avrà il nome della prima tabella selezionata da mettere in relazione
-		if (document.querySelectorAll('.cardTable[mode="relations"] span[relations][selected]').length === 1) {
-			Hier.table = document.querySelector('.cardTable[mode="relations"] span[relations][selected]').getAttribute('data-table-name');
+		if (document.querySelectorAll('.cardTable[mode="relations"] .selectable[relations][data-selected]').length === 1) {
+			Hier.table = document.querySelector('.cardTable[mode="relations"] .selectable[relations][data-selected]').dataset.tableName;
 		}
-		console.log('dimension.table : ', Hier.table);
-		// debugger;
-		document.querySelectorAll('.cardTable[mode="relations"]').forEach((card) => {
-			// const tableName = card.getAttribute('name');
-			let spanRef = card.querySelector('span[relations][selected]');
+		// console.log('dimension.table : ', Hier.table);
+		document.querySelectorAll('.cardTable[mode="relations"]').forEach( card => {
+			let spanRef = card.querySelector('.selectable[relations][data-selected]');
 			if (spanRef) {
 				// metto in un array gli elementi selezionati per la creazione della gerarchia
 				colSelected.push(spanRef);
-				hier.push(card.getAttribute('data-alias')+'.'+spanRef.innerText); // questa istruzione crea "Azienda_xxx.id" (alias.field)
-				// hier.push(tableName+'.'+spanRef.innerText); // questa istruzione crea "Azienda.id"
+				hier.push(card.dataset.alias+'.'+spanRef.dataset.label); // questa istruzione crea "Azienda_xxx.id" (alias.field)
 			}
-			console.log(hier);
 			// per creare correttamente la relazione è necessario avere due elementi selezionati
 			if (hier.length === 2) {
 				// se, in questa relazione, è presente anche la tabella FACT rinomino hier_n in fact_n in modo da poter separare le gerarchie
@@ -565,14 +561,12 @@ var Hier = new Hierarchy();
 					console.log('FACT TABLE Relation');
 					cube.relations['cubeJoin_'+cube.relationId] = hier;
 					cube.relationId++;
-					console.log(cube.relations);
+					// console.log(cube.relations);
 					cube.saveRelation(colSelected);
 				} else {
-					debugger;
 					Hier.join = hier;
 					// visualizzo le icone di "join" nelle due colonne
 					Hier.showRelationIcons(colSelected);
-					// console.log(Hier.join);
 					// esiste una relazione, visualizzo il div hierarchiesContainer
 					app.hierarchyContainer.removeAttribute('hidden');
 				}
@@ -859,19 +853,23 @@ var Hier = new Hierarchy();
 		        		const span = div.querySelector('span[data-item]');
 		        		section.dataset.label = value.COLUMN_NAME;
 		        		section.dataset.elementSearch = table;
+		        		div.dataset.tableName = table;
+		        		div.dataset.label = value.COLUMN_NAME;
+		        		div.dataset.key = value.CONSTRAINT_NAME;
 						// let span = section.querySelector('span[generic]');
 						// span.className = 'elementSearch';
 						span.innerText = value.COLUMN_NAME;
-						span.setAttribute('label', value.COLUMN_NAME);
-						span.dataset.tableName = table;
+						// span.setAttribute('label', value.COLUMN_NAME);
+						// span.dataset.tableName = table;
 						// scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
 						let pos = value.DATA_TYPE.indexOf('(');
 						let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
 						span.dataset.type = type;
-						span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
-						span.id = key;
+						// span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
+		        		div.dataset.id = key;
+						// span.id = key;
 						// fn da associare all'evento in 'mutation observe'
-						span.dataset.fn = 'handlerColumns';
+						div.dataset.fn = 'handlerColumns';
 						ul.appendChild(section);
 		        	}
 		        } else {
@@ -970,13 +968,13 @@ var Hier = new Hierarchy();
 	app.handlerDimensionSelected = (e) => {
 		console.log(e.target);
 		const storage = new DimensionStorage();
-		storage.selected = e.target.getAttribute('data-dimension-name');
+		storage.selected = e.target.dataset.dimensionName;
 		// memorizzo la dimensione selezionata per recuperarla nel salvataggio del cubo
-		cube.dimensionsSelected = e.target.getAttribute('data-dimension-name');
+		cube.dimensionsSelected = e.target.dataset.dimensionName;
 		// recupero tutta la dimensione selezionata, dallo storage
 		console.log(storage.selected);
 		// aggiungo alla dropzone l'ultima tabella della gerarchia
-		debugger;
+		// debugger;
 		app.addCard(storage.selected.lastTableInHierarchy, false);
 		// chiudo la lista delle dimensioni
 		app.dimensionList.toggleAttribute('hidden');
@@ -1300,7 +1298,7 @@ var Hier = new Hierarchy();
 		const token = rand().substr(0, 7);
 		Hier.columns(token);
 		// imposto il token sulla colonna selezionata, mi servirà in fase di deselezione della colonna
-		Hier.fieldRef.setAttribute('data-token-column', token);
+		Hier.fieldRef.dataset.tokenColumn = token;
 		app.dialogColumnMap.close();
 		const btnSaveHierarchy = document.querySelector("#box-hierarchy section[data-id='hierarchies'][data-active] button[data-id='hierarchySave']");
 		btnSaveHierarchy.disabled = (Object.keys(Hier.columns_).length !== 0) ? false : true;
@@ -1630,8 +1628,8 @@ var Hier = new Hierarchy();
 	// passing it a callback function
 	const observer = new MutationObserver(function() {
 	    // console.log('callback that runs when observer is triggered');
-	    document.querySelectorAll('span[data-fn]').forEach( (span) => {
-	    	span.onclick = app[span.getAttribute('data-fn')];
+	    document.querySelectorAll('*[data-fn]').forEach( (span) => {
+	    	span.onclick = app[span.dataset.fn];
 	    });
 
 	    document.querySelectorAll('*[data-tooltip]').forEach( (element) => {
