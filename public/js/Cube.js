@@ -237,10 +237,6 @@ class Hierarchy {
 
 	get activeCard() {return this.card;}
 
-	set fieldId(object) {this.#fieldId = object;}
-
-	get fieldId() {return this.#fieldId;}
-
 	set field(object) {this.#field = object;}
 
 	get field() {return this.#field;}
@@ -318,16 +314,15 @@ class Hierarchy {
 		this.obj = {};
 		this.tokenObj = {};
 		if (!this.#col.hasOwnProperty(this.#alias)) {
-			// debugger;
 			// alias di tabella ancora non mappata come columns
-			this.tokenObj = {id : this.#fieldId, ds : this.#field};
+			this.tokenObj = { id : this.field.id, ds : this.field.ds};
 			this.obj[token] = this.tokenObj;
 			this.#col[this.#alias] = this.obj;
 		} else {			
 			// tabella già presente, verifico se il token è già presente, se non lo è lo aggiungo altrimenti lo elimino
 			if (!this.#col[this.#alias].hasOwnProperty(token)) {
 				// field non esistente per questa tabella, lo aggiungo
-				this.#col[this.#alias][token] = {id : this.#fieldId, ds : this.#field};
+				this.#col[this.#alias][token] = {id : this.field.id, ds : this.field.ds};
 			} else {
 				// field già esiste per questa tabella, lo elimino
 				delete this.#col[this.#alias][token];

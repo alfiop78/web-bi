@@ -202,11 +202,15 @@ var Hier = new Hierarchy();
 		// console.log('dragLeave');
 	}
 
-	app.handlerDragEnd = (e) => {
+	app.handlerDragEnd = async (e) => {
         e.preventDefault();
 		// faccio il DESCRIBE della tabella
 		// controllo lo stato di dropEffect per verificare se il drop è stato completato correttamente, come descritto qui:https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#drag_end
-		if (e.dataTransfer.dropEffect === 'copy') app.getTable(e.target.dataset.schema, cube.card.tableName);
+		// in app.getTable() vengono utilizzate le property della classe Cube (cube.card.schema, cube.card.tableName);
+		if (e.dataTransfer.dropEffect === 'copy') {
+			const data = await app.getTable();
+			app.addFields(cube.card.ref.querySelector("ul[data-id='columns']"), data);
+		}
 	}
 
 	app.handlerDrop = (e) => {
@@ -494,7 +498,7 @@ var Hier = new Hierarchy();
 		const cardTable = app.dropZone.querySelector(".cardTable[name='" + e.target.dataset.label + "']");
 		cube.activeCard = {'ref': cardTable, schema : e.target.dataset.schema, 'tableName': e.target.dataset.label};
 		// NOTE: utilizzo await per aspettare la risposta dal DB
-		const data = await app._getTable();
+		const data = await app.getTable();
 		// popolo la lista #ul-fields	
 		const ul = document.getElementById('ul-fields');
 		data.forEach( field => {
@@ -566,6 +570,7 @@ var Hier = new Hierarchy();
 					// console.log(cube.relations);
 					cube.saveRelation(colSelected);
 				} else {
+					debugger;
 					Hier.join = hier;
 					// visualizzo le icone di "join" nelle due colonne
 					Hier.showRelationIcons(colSelected);
@@ -806,10 +811,11 @@ var Hier = new Hierarchy();
 		cube.mode('relations');
 	}
 
-	// NOTE: questa function andrà a sostituire getTable()
-	app._getTable = async () => {
+	// recupero i field della tabella
+	app.getTable = async () => {
 		// elemento dove inserire le colonne della tabella
 		// const ul = cube.card.ref.querySelector("ul[data-id='columns']");
+		console.log(cube.card.schema, cube.card.tableName);
 	    return await fetch('/fetch_api/'+cube.activeCard.schema+'/schema/'+cube.activeCard.tableName+'/table_info')
 			.then( (response) => {
 				if (!response.ok) {throw Error(response.statusText);}
@@ -817,55 +823,6 @@ var Hier = new Hierarchy();
 			})
 			.then( (response) => response.json())
 			.then( response => response)
-	    .catch( (err) => console.error(err));
-	}
-
-	app.getTable = async (schema, table) => {
-		// elemento dove inserire le colonne della tabella
-		const ul = cube.card.ref.querySelector("ul[data-id='columns']");
-	    await fetch('/fetch_api/'+schema+'/schema/'+table+'/table_info')
-			.then( (response) => {
-			if (!response.ok) {throw Error(response.statusText);}
-			return response;
-			})
-			.then( (response) => response.json())
-			.then( (data) => {
-				// console.log('response getTable');
-                // console.log(data);
-		        if (data) {
-		        	ul.removeAttribute('hidden');
-		        	for ( const [key, value] of Object.entries(data)) {
-                        // console.log(key, value);
-		        		const content = app.tmplLists.content.cloneNode(true);
-		        		const section = content.querySelector('section[data-sublist-fields]'); // questa lista include le 3 icone per columns, hierarchy, metric
-		        		const div = section.querySelector('div.selectable');
-		        		const span = div.querySelector('span[data-item]');
-		        		section.dataset.label = value.COLUMN_NAME;
-		        		section.dataset.elementSearch = table;
-		        		div.dataset.tableName = table;
-		        		div.dataset.label = value.COLUMN_NAME;
-		        		div.dataset.key = value.CONSTRAINT_NAME;
-						// let span = section.querySelector('span[generic]');
-						// span.className = 'elementSearch';
-						span.innerText = value.COLUMN_NAME;
-						// span.setAttribute('label', value.COLUMN_NAME);
-						// span.dataset.tableName = table;
-						// scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
-						let pos = value.DATA_TYPE.indexOf('(');
-						let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-						span.dataset.type = type;
-						// span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
-		        		div.dataset.id = key;
-						// span.id = key;
-						// fn da associare all'evento in 'mutation observe'
-						div.dataset.fn = 'handlerColumns';
-						ul.appendChild(section);
-		        	}
-		        } else {
-		          // TODO: no data, handlerConsoleMessage
-		          console.error('Non è stato possibile recuperare le colonne della tabella : ', table);
-		        }
-		    })
 	    .catch( (err) => console.error(err));
 	}
 
@@ -910,7 +867,34 @@ var Hier = new Hierarchy();
 		document.getElementById('tableSearch').focus();
 	}
 
-	app.addCard = (lastTableObject, fact) => {
+	app.addFields = (ul, response) => {
+		ul.hidden = false;
+		for ( const [key, value] of Object.entries(response)) {
+            // console.log(key, value);
+    		const content = app.tmplLists.content.cloneNode(true);
+    		const section = content.querySelector('section[data-sublist-fields]'); // questa lista include le 3 icone per columns, hierarchy, metric
+    		const div = section.querySelector('div.selectable');
+    		const span = div.querySelector('span[data-item]');
+    		section.dataset.label = value.COLUMN_NAME;
+    		section.dataset.elementSearch = cube.activeCard.tableName;
+    		div.dataset.tableName = cube.activeCard.tableName;
+    		div.dataset.label = value.COLUMN_NAME;
+    		div.dataset.key = value.CONSTRAINT_NAME;
+			span.innerText = value.COLUMN_NAME;
+			// scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
+			let pos = value.DATA_TYPE.indexOf('(');
+			let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
+			span.dataset.type = type;
+			// span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
+    		div.dataset.id = key;
+			// span.id = key;
+			// fn da associare all'evento in 'mutation observe'
+			div.dataset.fn = 'handlerColumns';
+			ul.appendChild(section);
+    	}
+	}
+
+	app.addCard = async (lastTableObject, fact) => {
 		// creo la card (label)
 		// fact : true/false
 		debugger;
@@ -950,10 +934,15 @@ var Hier = new Hierarchy();
 		// event sui tasti section[options]
 		card.querySelector('i[join]').onclick = app.handlerAddJoin;
 
-		app.getTable(card.dataset.schema, card.getAttribute('label')); // OPTIMIZE: dataset data-label
+		// console.log(cube.activeCard.schema, cube.activeCard.tableName);
+		// ottengo l'elenco dei field della tabella
+		const data = await app.getTable();
+		// popolo la ul[data-id="columns"] della card corrente recuperata dalla Classe Cube cube.card.ref
+		// debugger;
+		app.addFields(cube.card.ref.querySelector("ul[data-id='columns']"), data);
 	}
 
-	// selezione di una dimensione da inserire nel body, per legarla al cubo
+	// button "utilizza" nell'elenco delle dimensioni
 	app.handlerDimensionSelected = (e) => {
 		console.log(e.target);
 		const storage = new DimensionStorage();
@@ -975,19 +964,20 @@ var Hier = new Hierarchy();
 		// dimStorage.selected.hierarchies[hierName].order
 		const tables = dim.hierarchies[hierName].order;
 		const columns = dim.hierarchies[hierName].columns;
+		const joins = dim.hierarchies[hierName].joins;
 		console.log('tables to add: ', tables);
 		for (const [key, value] of Object.entries(tables)) {
 			let x = 40, y = 40;
-			console.log('key : ', key); // la key la posso utilizzare anche per lo z-index
-			console.log('value : ', value);
+			// console.log('key : ', key); // la key la posso utilizzare anche per lo z-index
+			// console.log('value : ', value);
 			const card = document.createElement('div');
 			card.className = 'card table';
 			// NOTE: Impostazione di una variabile css (--zindex)
 			card.style.setProperty('--zindex', key);
-			const schema = value.split('.')[0];
-			const table = value.split('.')[1];
-			card.dataset.schema = schema;
-			card.setAttribute('label', table); // OPTIMIZE: dataset data-label
+			// const schema = value.schema;
+			// const table = value.table;
+			card.dataset.schema = value.schema;
+			card.setAttribute('label', value.table); // OPTIMIZE: dataset data-label
 			x *= +key; y *= +key;
 			card.style.transform = "translate3d("+x+"px, "+y+"px, 0px)";
 			card.setAttribute('x', x);
@@ -997,67 +987,61 @@ var Hier = new Hierarchy();
 			const tmplContent = tmplCardLayout.content.cloneNode(true);
 			const cardLayout = tmplContent.querySelector('.cardLayout');
 			// h6 titolo
-			cardLayout.querySelector('h6').innerHTML = table;
+			cardLayout.querySelector('h6').innerHTML = value.table;
 			card.appendChild(cardLayout);
 			// sostituisco dropping con dropped per nascondere lo span con la stringa "Trascina qui..."
 			app.dropZone.classList.replace('dropping', 'dropped');
 			app.dropZone.appendChild(card);
 	        app.dropZone.classList.add('dropped');
-	        cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : schema, 'tableName': table};
+	        card.querySelector('.cardTable').dataset.alias = value.alias;
+	        cube.activeCard = {ref: card.querySelector('.cardTable'), schema : value.schema, tableName : value.table};
 	        // debugger;
 	        // event sui tasti section[options]
 	        card.querySelector('i[join]').onclick = app.handlerAddJoin;
 	        card.querySelector('i[columns]').onclick = app.handlerAddColumns;
 	        // input di ricerca, imposto l'attr data-element-search
-	        card.querySelector('input[type="search"]').dataset.elementSearch = table;
+	        card.querySelector('input[type="search"]').dataset.elementSearch = value.table;
 	        // await : aspetto che getTable popoli tutta la card con i relativi campi
 	        // NOTE: utilizzo di await
-	        await app.getTable(schema, table);
-	        console.log('after await');
+	        const data = await app.getTable();
+	        app.addFields(cube.card.ref.querySelector("ul[data-id='columns']"), data);
 	        // imposto la card attiva
 	        Hier.activeCard = card.querySelector('.cardTable');
 	        // seleziono i campi impostati nella dimensione, nelle proprietà 'hierarchies[hiername]columns[value]'
-	        // debugger;
-	        // se la tabella, appartenente alla gerarchia selezionata, ha field selezionati li imposto come 'selezionati'
-	        if (dim.hierarchies[hierName].columns.hasOwnProperty(value)) {
-	        	for (const [field, type] of Object.entries(dim.hierarchies[hierName].columns[value])) {
-		        	// console.log(field);
-		        	// console.log(type);
-		        	Hier.activeCard.querySelector("li[label='"+field+"']").toggleAttribute('columns');
-		        	Hier.field = {field, type};
+	        // per ogni colonna in questa tabella...
+	        // ...reimposto le selezioni di origine della gerarchia selezionata
+	        if (columns.hasOwnProperty(value.alias)) {
+	        	for (const [token, field] of Object.entries(dim.hierarchies[hierName].columns[value.alias])) {
+		        	console.log(token, field.id.origin_field);
+		        	Hier.activeCard.querySelector(".selectable[data-label='"+field.id.origin_field+"']").toggleAttribute('columns');
+		        	Hier.field = field;
 					// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
-					Hier.columns();
+					Hier.columns(token);
 		        }
 	        }
+	        // TODO: fare la stessa cosa qui con le join per ogni tabella in ciclo (il codice sotto va spostato qui)
 		}
 		// dopo aver caricato tutte le tabelle appartenenti alla dimensione, imposto le gerarchie definite recuperandole dalla proprietà 'join'
-		// , dim.join
 		// TODO: a questo punto posso recuperare dim.join per inserire nelle tabelle le relative join
-		console.clear();
-		for (let table in dim.join) {
-			Hier.table = table;
-			// console.log(table);
-			// console.log(dim.join[table]);
+		for ( const [tableAlias, tokenJoin] of Object.entries(joins) ) {
+			// Hier.table = table;
 			// per ogni tabella
-			for (const [joinId, joins] of Object.entries(dim.join[table]) ) {
+			for (const [token, joins] of Object.entries(tokenJoin) ) {
 				// joinId : 0,1,2,ecc... ogni relazione
-				console.log('joinId : ', joinId);
+				// console.log('joinId : ', joinId);
 				// console.log('joins : ', joins); // array delle relazioni
 				// debugger;
 				joins.forEach( (table_field) => {
-					// debugger;
 					const tableName = table_field.split('.')[0];
 					const fieldName = table_field.split('.')[1];
-					const li = app.dropZone.querySelector(".cardTable[name='" + tableName + "'] li[label='" + fieldName + "']");
-					// console.log('tableName : ', tableName);
-					// console.log('fieldName : ', fieldName);
+					const fieldSelected = app.dropZone.querySelector(".cardTable[data-alias='" + tableName + "'] .selectable[data-label='" + fieldName + "']");
 					// se questo campo ha già una relazione impostata (ad esempio con un altra tabella), non faccio il toggle dell'attr 'relations' altrimenti viene eliminata la relazione
-					if (!li.hasAttribute('relations')) li.toggleAttribute('relations');
-					li.setAttribute('data-rel-'+joinId, joinId);
-					li.dataset.relationId = true;
+					if (!fieldSelected.hasAttribute('relations')) fieldSelected.toggleAttribute('relations');
+					// TODO: probabilmente qui dovrò usare il token, anche in fase di creazione/mappatura delle join
+					// fieldSelected.setAttribute('data-rel-'+joinId, joinId);
+					fieldSelected.dataset.relationId = true;
 				});
-				
-				dimension.hierarchies = joins;
+				Hier.join = joins;
 			}
 		}
 			
@@ -1281,8 +1265,10 @@ var Hier = new Hierarchy();
 	}*/
 
 	app.btnColumnMap.onclick = () => {
-		Hier.fieldId = {field : app.txtareaColumnId.value, type : 'da_completare', SQL : null};
-		Hier.field = {field : app.txtareaColumnDs.value, type : 'da_completare', SQL : null};
+		Hier.field = {
+			id : {field : app.txtareaColumnId.value, type : 'da_completare', SQL : null, origin_field : Hier.field.field},
+			ds : {field : app.txtareaColumnDs.value, type : 'da_completare', SQL : null, origin_field : Hier.field.field}
+		};
 		// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
 		const rand = () => Math.random(0).toString(36).substr(2);
 		const token = rand().substr(0, 7);
