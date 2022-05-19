@@ -253,7 +253,7 @@ var Hier = new Hierarchy();
 		// tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
 		if (document.getElementById('tableList').hasAttribute('fact')) {
 			card.setAttribute('fact', true);
-			card.querySelector('.cardTable').setAttribute('fact', true);
+			card.querySelector('.cardTable').setAttribute('fact', true); // OPTIMIZE: dataset data-fact
 			// visualizzo l'icona metrics
 			card.querySelector('section[options] > i[composite-metrics]').dataset.schema = e.target.querySelector('div').dataset.schema;
 			card.querySelector('section[options] > i[composite-metrics]').dataset.label = e.target.querySelector('div').dataset.label;
@@ -308,9 +308,9 @@ var Hier = new Hierarchy();
 			const tmplContentTable = tmplTable.content.cloneNode(true);
 			const divTable = tmplContentTable.querySelector('div');
 			divTable.innerHTML = cube.card.tableName;
-			divTable.setAttribute('data-schema', card.getAttribute('data-schema'));
-			divTable.setAttribute('data-alias', cube.card.ref.getAttribute('data-alias'));
-			divTable.setAttribute('label', cube.card.tableName);
+			divTable.dataset.schema = card.dataset.schema;
+			divTable.dataset.alias = cube.card.ref.dataset.alias;
+			divTable.setAttribute('label', cube.card.tableName); // OPTIMIZE: dataset data-label
 			// divHierLastTable.appendChild(divTable);
 			divHier.appendChild(divTable);
 			btnSaveHierarchy.addEventListener('click', app.btnSaveHierarchy);
@@ -321,9 +321,9 @@ var Hier = new Hierarchy();
 			const tmplContentTable = tmplTable.content.cloneNode(true);
 			const divTable = tmplContentTable.querySelector('div');
 			divTable.innerHTML = cube.card.tableName;
-			divTable.setAttribute('data-schema', card.getAttribute('data-schema'));
-			divTable.setAttribute('data-alias', cube.card.ref.getAttribute('data-alias'));
-			divTable.setAttribute('label', cube.card.tableName);
+			divTable.dataset.schema = card.dataset.schema;
+			divTable.dataset.alias = cube.card.ref.dataset.alias;
+			divTable.setAttribute('label', cube.card.tableName); // OPTIMIZE: dataset data-label
 			parent.appendChild(divTable);
 		}
 	}
@@ -396,7 +396,7 @@ var Hier = new Hierarchy();
 		// imposto l'alias per la tabella
 		Hier.alias = cube.card.ref.dataset.alias;
 
-		let attrs = cube.card.ref.getAttribute('mode');
+		let attrs = cube.card.ref.getAttribute('mode'); // OPTIMIZE: dataset data-mode
 
 		switch (attrs) {
 			case 'relations':
@@ -471,7 +471,7 @@ var Hier = new Hierarchy();
 		*/
 		const cardTable = e.path[3].querySelector('.cardTable');
 		// console.log('cardTable : ', cardTable);
-		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.getAttribute('data-schema'), 'tableName': cardTable.getAttribute('name')};
+		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.getAttribute('name')}; // OPTIMIZE: dataset data-name
 		// quando aggiungo la tabella imposto da subito la colonna id in "columns"
 		Hier.activeCard = cardTable; // card attiva
 		cube.mode('columns');
@@ -484,7 +484,7 @@ var Hier = new Hierarchy();
 			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
 		*/
 		const cardTable = e.path[3].querySelector('.cardTable');
-		cube.activeCard = {'ref': cardTable, 'tableName': cardTable.getAttribute('name')};
+		cube.activeCard = {'ref': cardTable, 'tableName': cardTable.getAttribute('name')}; // OPTIMIZE: dataset data-name
 		cube.mode('metrics', 'Seleziona le colonne da impostare come Metriche');
 	}
 
@@ -493,6 +493,7 @@ var Hier = new Hierarchy();
 		// recupero dal DB le colonne della tabella
 		const cardTable = app.dropZone.querySelector(".cardTable[name='" + e.target.dataset.label + "']");
 		cube.activeCard = {'ref': cardTable, schema : e.target.dataset.schema, 'tableName': e.target.dataset.label};
+		// NOTE: utilizzo await per aspettare la risposta dal DB
 		const data = await app._getTable();
 		// popolo la lista #ul-fields	
 		const ul = document.getElementById('ul-fields');
@@ -538,6 +539,7 @@ var Hier = new Hierarchy();
 
 	app.createHierarchy = (e) => {
 		console.log('create Relations');
+		// OPTIMIZE: ottimizzare la logica della funzione
 		let hier = [];
 		let colSelected = [];
 		// console.log( document.querySelectorAll('.cardTable[mode="relations"] .selectable[relations][data-selected]').length);
@@ -575,6 +577,7 @@ var Hier = new Hierarchy();
 	}
 
 	app.removeHierarchy = (relationId, value) => {
+		// OPTIMIZE: 2022-05-19 la funzione non è testata
 		console.log(relationId);
 		console.log(value);
 		debugger;
@@ -648,7 +651,7 @@ var Hier = new Hierarchy();
 			section.setAttribute('data-label', key);
 			const div = tmplContent.querySelector('.dimensions');
 			const btnDimensionUse = tmplContent.querySelector('button[data-id="dimension-use"]');
-			btnDimensionUse.setAttribute('data-dimension-name', key);
+			btnDimensionUse.dataset.dimensionName = key;
 
 			div.querySelector('h5').innerHTML = key;
 			// per ogni gerarchia recupero la prop 'from'
@@ -661,8 +664,8 @@ var Hier = new Hierarchy();
 				const h6 = tmplHierarchyContent.querySelector('h6');
 				const divTables = tmplHierarchyContent.querySelector('.tables');
 				const btnEdit = tmplHierarchyContent.querySelector("button[data-id='dimension-edit']");
-				btnEdit.setAttribute('data-dimension-name', key);
-				btnEdit.setAttribute('data-hierarchy-name', hierName);
+				btnEdit.dataset.dimensionName = key;
+				btnEdit.dataset.hierarchyName = hierName;
 				h6.innerText = hierName;
 				tmplContent.querySelector('div[data-dimension-tables]').appendChild(divHier);
 				for (const [orderKey, orderValue] of Object.entries(hierValue.order)) {
@@ -677,7 +680,7 @@ var Hier = new Hierarchy();
 				btnEdit.onclick = app.handlerDimensionEdit;
 			}
 			btnDimensionUse.onclick = app.handlerDimensionSelected;
-			div.querySelector('h5').setAttribute('label', key);
+			div.querySelector('h5').setAttribute('label', key); // OPTIMIZE: dataset data-label
 			document.querySelector('#dimensions').appendChild(section);
 		}
 	}
@@ -687,28 +690,14 @@ var Hier = new Hierarchy();
 		const ul = document.getElementById('cubes');
 		console.log(StorageCube.cubes);
 		for (const [key, value] of Object.entries(StorageCube.cubes)) {
-			/* ------------------------
-			let tmplContent = app.tmplCube.content.cloneNode(true);
-			const section = tmplContent.querySelector('section');
-			const element = tmplContent.querySelector('.element');
-			const li = tmplContent.querySelector('li');
-			section.setAttribute('data-label', key);
-			li.setAttribute('label', key);
-			li.innerText = key;
-			/* TODO: questi erano precedentemente impostati, da valutare se servono ancora
-			li.id = 'cube-id-' + value['id'];
-			li.setAttribute('data-cube-id', value['id']);*//*
-
-			li.setAttribute('data-fn', 'handlerCubeSelected');
-			---------------------*/
 			const content = app.tmplLists.content.cloneNode(true);
 			const section = content.querySelector('section[data-sublist-generic]');
 			const span = section.querySelector('span[generic]');
-			section.setAttribute('data-label', key);
-			section.setAttribute('data-element-search', 'cubes');
-			span.setAttribute('label', key);
+			section.dataset.label = key;
+			section.dataset.elementSearch = 'cubes';
+			span.setAttribute('label', key); // OPTIMIZE: dataset data-label
 			span.innerText = key;
-			span.setAttribute('data-fn', 'handlerCubeSelected');
+			span.dataset.fn = 'handlerCubeSelected';
 			ul.appendChild(section);
 		}
 		// associo la Fn che gestisce il click sulle <li>
@@ -734,7 +723,7 @@ var Hier = new Hierarchy();
 		console.log('e.currentTarget : ', e.currentTarget);
 		// debugger;
 		// TODO: modificare con dataset.label
-		StorageCube.selected = e.currentTarget.getAttribute('label');
+		StorageCube.selected = e.currentTarget.getAttribute('label'); // OPTIMIZE: dataset data-label
 		console.log('cube selected : ', StorageCube.selected);
 		// ridefinisco le proprietà del cubo, leggendo da quello selezionato, nello storage, per consentirne la modifica o l'aggiunto di dimensioni al cubo
 		// TODO: la prop privata _metric la devo definire tramite un Metodo
@@ -813,7 +802,7 @@ var Hier = new Hierarchy();
 			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
 		*/
 		const cardTable = e.path[3].querySelector('.cardTable');
-		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.getAttribute('data-schema'), 'tableName': cardTable.getAttribute('name')};
+		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.getAttribute('name')}; // OPTIMIZE: dataset data-name
 		cube.mode('relations');
 	}
 
@@ -898,7 +887,7 @@ var Hier = new Hierarchy();
               // app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
             } else {
               // TODO: no data
-              console.debug('FX non è stata creata');
+              console.debug('dimensione non è stata salvata');
             }
           })
           .catch((err) => console.error(err));
@@ -928,9 +917,9 @@ var Hier = new Hierarchy();
 		let card = document.createElement('div');
 		card.className = 'card table';
 		// split della stringa <schema>.<tabella>
-		card.setAttribute('data-schema', lastTableObject.schema); // schema
-		card.setAttribute('label', lastTableObject.table); // tabella
-		if (fact) card.setAttribute('fact', true);
+		card.dataset.schema = lastTableObject.schema; // schema
+		card.setAttribute('label', lastTableObject.table); // tabella // OPTIMIZE: dataset data-label
+		if (fact) card.setAttribute('fact', true); // OPTIMIZE: dataset data-fact
 		card.onmousedown = app.dragStart;
 		card.onmouseup = app.dragEnd;
 		card.onmousemove = app.drag;
@@ -939,11 +928,11 @@ var Hier = new Hierarchy();
 		let content = tmpl.content.cloneNode(true);
 		let cardLayout = content.querySelector('.cardLayout');
 		// TODO: da ricontrollare, perchè imposto l'attr 'fact' senza controllare l'argomento fact?
-		cardLayout.querySelector('.cardTable').setAttribute('fact', true);
+		cardLayout.querySelector('.cardTable').setAttribute('fact', true); // OPTIMIZE: dataset data-fact
 		// imposto il titolo in h6
 		// TODO: imposto l'alias della tabella
 		cardLayout.querySelector('.subtitle').innerHTML = `AS ${lastTableObject.alias}`;
-		cardLayout.querySelector('.cardTable').setAttribute('data-alias', lastTableObject.alias);
+		cardLayout.querySelector('.cardTable').dataset.alias = lastTableObject.alias;
 		cardLayout.querySelector('h6').innerHTML = lastTableObject.table;
 		card.appendChild(cardLayout);
 		console.log(card);
@@ -956,12 +945,12 @@ var Hier = new Hierarchy();
 		// evento sulla input di ricerca nella card
 		// input di ricerca, imposto l'attr data-element-search
 		card.querySelector('input[type="search"]').setAttribute('data-element-search', card.getAttribute('label'));
-		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.getAttribute('data-schema'), 'tableName': card.getAttribute('label')};
+		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.dataset.schema, 'tableName': card.getAttribute('label')}; // OPTIMIZE: dataset data-label
 
 		// event sui tasti section[options]
 		card.querySelector('i[join]').onclick = app.handlerAddJoin;
 
-		app.getTable(card.getAttribute('data-schema'), card.getAttribute('label'));
+		app.getTable(card.dataset.schema, card.getAttribute('label')); // OPTIMIZE: dataset data-label
 	}
 
 	// selezione di una dimensione da inserire nel body, per legarla al cubo
@@ -982,6 +971,7 @@ var Hier = new Hierarchy();
 	}
 
 	app.addCards = async (dim, hierName) => {
+		// OPTIMIZE: logica della funzione
 		// dimStorage.selected.hierarchies[hierName].order
 		const tables = dim.hierarchies[hierName].order;
 		const columns = dim.hierarchies[hierName].columns;
@@ -996,8 +986,8 @@ var Hier = new Hierarchy();
 			card.style.setProperty('--zindex', key);
 			const schema = value.split('.')[0];
 			const table = value.split('.')[1];
-			card.setAttribute('data-schema', schema);
-			card.setAttribute('label', table);
+			card.dataset.schema = schema;
+			card.setAttribute('label', table); // OPTIMIZE: dataset data-label
 			x *= +key; y *= +key;
 			card.style.transform = "translate3d("+x+"px, "+y+"px, 0px)";
 			card.setAttribute('x', x);
@@ -1019,7 +1009,7 @@ var Hier = new Hierarchy();
 	        card.querySelector('i[join]').onclick = app.handlerAddJoin;
 	        card.querySelector('i[columns]').onclick = app.handlerAddColumns;
 	        // input di ricerca, imposto l'attr data-element-search
-	        card.querySelector('input[type="search"]').setAttribute('data-element-search', table);
+	        card.querySelector('input[type="search"]').dataset.elementSearch = table;
 	        // await : aspetto che getTable popoli tutta la card con i relativi campi
 	        // NOTE: utilizzo di await
 	        await app.getTable(schema, table);
@@ -1064,7 +1054,7 @@ var Hier = new Hierarchy();
 					// se questo campo ha già una relazione impostata (ad esempio con un altra tabella), non faccio il toggle dell'attr 'relations' altrimenti viene eliminata la relazione
 					if (!li.hasAttribute('relations')) li.toggleAttribute('relations');
 					li.setAttribute('data-rel-'+joinId, joinId);
-					li.setAttribute('data-relation-id', true);
+					li.dataset.relationId = true;
 				});
 				
 				dimension.hierarchies = joins;
@@ -1077,13 +1067,13 @@ var Hier = new Hierarchy();
 	app.handlerDimensionEdit = (e) => {
 		// Recupero tutto il json della dimensione selezionata
 		const dimStorage = new DimensionStorage();
-		dimStorage.selected = e.target.getAttribute('data-dimension-name');
-		const hierName = e.target.getAttribute('data-hierarchy-name');
+		dimStorage.selected = e.target.dataset.dimensionName;
+		const hierName = e.target.dataset.hierarchyName;
 		// TODO: Implementare addCards in modo da svolgere anche le istruzioni di addCard
 		app.addCards(dimStorage.selected, hierName);
 		// imposto lo span all'interno del dropzone con la descrizione della dimensione auutalmente in modifica
-		app.dropZone.querySelector('span').innerHTML = "Dimensione in modifica : " + e.target.getAttribute('data-dimension-name');
-		app.dropZone.setAttribute('edit', e.target.getAttribute('data-dimension-name'));
+		app.dropZone.querySelector('span').innerHTML = "Dimensione in modifica : " + e.target.dataset.dimensionName;
+		app.dropZone.setAttribute('edit', e.target.dataset.dimensionName); // OPTIMIZE: dataset data-edit
 		// chiudo la lista delle dimensioni
 		app.dimensionList.toggleAttribute('hidden');
 		app.btnDimensionList.toggleAttribute('open');
@@ -1099,8 +1089,8 @@ var Hier = new Hierarchy();
         	// ripulisco la #tableList perchè ci sono tabelle appartenenti allo schema selezionato in precedenza
         	document.querySelectorAll('#tables .element.card').forEach( (element) => {element.remove();});
         }
-        e.target.setAttribute('selected', true);
-        app.getDatabaseTable(e.target.getAttribute('data-schema'));
+        e.target.setAttribute('selected', true); // OPTIMIZE: dataset data-selected
+        app.getDatabaseTable(e.target.dataset.schema);
         // app.handlerGuide();
     }
 
@@ -1115,10 +1105,10 @@ var Hier = new Hierarchy();
     	const card = e.path[5]; // .card .table
     	const cardTable = e.path[3]; // .cardTable, qui è presente il data-value
     	const cardCount = document.querySelectorAll('.card.table').length;
-		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.getAttribute('data-schema'), 'tableName': cardTable.getAttribute('name')};
+		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.getAttribute('name')}; // OPTIMIZE: dataset data-name
     	// console.log(cube.activeCard.ref); // card attiva
     	// console.log(+cardTable.getAttribute('data-value'));
-    	let value = +cardTable.getAttribute('data-value');
+    	let value = +cardTable.dataset.value;
 		// spostare, nel DOM, le card in base al livello gerarchico. Livello gerarchico inferiore le card vanno messe prima nel DOM.
     	// questo consentirà di creare correttamente le gerarchie con il nome della tabella di gerarchia inferiore salvata nella prop 'hierarchies'
     	if (e.target.hasAttribute('hier-order-plus')) {
@@ -1126,20 +1116,20 @@ var Hier = new Hierarchy();
     		// non posso spostare card se supero il numero delle card presenti nella pagina
     		if (value > cardCount) return;
     		// TODO: sostituisco il valore della card successiva con quello della card che sto modificando
-    		card.nextElementSibling.querySelector('.cardTable').setAttribute('data-value', cardTable.getAttribute('data-value'));
-    		card.nextElementSibling.querySelector('.hierarchy-order').innerText = cardTable.getAttribute('data-value');
+    		card.nextElementSibling.querySelector('.cardTable').dataset.value = cardTable.dataset.value;
+    		card.nextElementSibling.querySelector('.hierarchy-order').innerText = cardTable.dataset.value;
     		// identifico la card successiva a quella che sto modificando e la posiziono DOPO
     		if (card.nextElementSibling) card.nextElementSibling.after(card);
     	} else {
     		if (value === 1) return;
 			value--;
 			// console.log(card.previousElementSibling);
-			card.previousElementSibling.querySelector('.cardTable').setAttribute('data-value', cardTable.getAttribute('data-value'));
-    		card.previousElementSibling.querySelector('.hierarchy-order').innerText = cardTable.getAttribute('data-value');
+			card.previousElementSibling.querySelector('.cardTable').dataset.value = cardTable.dataset.value;
+    		card.previousElementSibling.querySelector('.hierarchy-order').innerText = cardTable.dataset.value;
 			card.previousElementSibling.before(card);
     	}
     	cardTable.querySelector('.hierarchy-order').innerText = value;
-    	cardTable.setAttribute('data-value', value);
+    	cardTable.dataset.value = value;
     }
 
 	app.getDimensions();
@@ -1185,7 +1175,7 @@ var Hier = new Hierarchy();
 	// definisci Cubo
 	app.btnNewFact.onclick = (e) => {
 		if (e.target.classList.contains('md-inactive')) return;
-		document.getElementById('tableList').setAttribute('fact', true);
+		document.getElementById('tableList').setAttribute('fact', true); // OPTIMIZE: dataset data-fact
 		e.target.toggleAttribute('open');
 		document.getElementById('tableList').toggleAttribute('hidden');
 		document.getElementById('tableSearch').focus();
@@ -1321,7 +1311,7 @@ var Hier = new Hierarchy();
 	app.btnSaveDimension.onclick = (e) => {
 		if (e.target.classList.contains('md-inactive')) return;
 		// se drop-zone ha l'attr edit con il nome della dimensione in modifica, lo inserisco direttamente nella input dimensionName
-		if (app.dropZone.hasAttribute('edit')) app.dialogDimensionName.querySelector('#dimensionName').value = app.dropZone.getAttribute('edit');
+		if (app.dropZone.hasAttribute('edit')) app.dialogDimensionName.querySelector('#dimensionName').value = app.dropZone.getAttribute('edit'); // OPTIMIZE: dataset data-edit
 		app.dialogDimensionName.showModal();
 	}
 
@@ -1338,12 +1328,12 @@ var Hier = new Hierarchy();
 		let lastTables = {};
 		for (let i = 1, index = 0; i <= tableCount; i++, index++) {
 			const table = document.querySelector(".cardTable[data-value='"+i+"']");
-			hierarchyOrder[index] = {schema : table.getAttribute('data-schema'), table : table.getAttribute('name'), alias : table.getAttribute('data-alias')};
-			from.push(`${table.getAttribute('data-schema')}.${table.getAttribute('name')} AS ${table.getAttribute('data-alias')}`);
+			hierarchyOrder[index] = {schema : table.dataset.schema, table : table.getAttribute('name'), alias : table.dataset.alias}; // OPTIMIZE: dataset data-name
+			from.push(`${table.dataset.schema}.${table.getAttribute('name')} AS ${table.dataset.alias}`); // OPTIMIZE: dataset data-name
 			lastTables = {
-				alias : table.getAttribute('data-alias'),
-				schema : table.getAttribute('data-schema'),
-				table : table.getAttribute('name')
+				alias : table.dataset.alias,
+				schema : table.dataset.schema),
+				table : table.getAttribute('name') // OPTIMIZE: dataset data-name
 			};
 		}
 		const comment = document.getElementById('textarea-hierarchies-comment').value;
@@ -1371,7 +1361,7 @@ var Hier = new Hierarchy();
 		if (tableCount > 1) {
 			// sono presenti più tabelle, l'ultima della gerarchia non la elimino
 			cards.forEach( (card) => {
-				if (+card.querySelector('.cardTable').getAttribute('data-value') !== tableCount) {
+				if (+card.querySelector('.cardTable').dataset.value !== tableCount) {
 					card.remove();
 				} else {
 					// ultima tabella
@@ -1454,7 +1444,7 @@ var Hier = new Hierarchy();
 		app.dialogCubeName.close();
 	}
 
-	/* Salvataggio della dimensione, dalla dialog */
+	// save dimension
 	document.getElementById('btnDimensionSaveName').onclick = () => {
 		/*
 		  Salvo la dimensione, senza il legame con la FACT.
@@ -1476,7 +1466,7 @@ var Hier = new Hierarchy();
 		// visualizzo le dimensioni create
 		// imposto, sulla icona openTableList, il colore della fact
 		console.debug('REVISIONARE');
-		app.btnTableList.setAttribute('fact', true);
+		app.btnTableList.setAttribute('fact', true); // OPTIMIZE: dataset data-fact
 		debugger;
 
 		app.getDimensions(); // TODO: qui andrò ad aggiornare solo la dimensione appena salvata/modificata
@@ -1485,7 +1475,7 @@ var Hier = new Hierarchy();
 	}
 
 	app.showTooltip = (e) => {
-		// TODO: da spostare in Application.js
+		// OPTIMIZE: da spostare in Application.js
 		if (e.target.classList.contains('md-inactive')) return;
 		// console.log(e.target.getAttribute('data-tooltip').length);
 		// console.log('enter');
@@ -1509,12 +1499,12 @@ var Hier = new Hierarchy();
 			const bottom = e.target.getBoundingClientRect().bottom;
 			let centerElementW = left + ((right - left) / 2);
 			let centerElementH = top + ((bottom - top) / 2);
-			app.tooltip.innerHTML = e.currentTarget.getAttribute('data-tooltip');
+			app.tooltip.innerHTML = e.currentTarget.dataset.tooltip;
 			const elementWidth = app.tooltip.offsetWidth / 2;
 			const elementHeight = app.tooltip.offsetHeight / 2;
 			const width = app.tooltip.offsetWidth;
 			const height = app.tooltip.offsetHeight;
-			switch (e.target.getAttribute('data-tooltip-position')) {
+			switch (e.target.dataset.tooltipPosition) {
 				case 'top':
 					y = top - height;
 					x = centerElementW - elementWidth;
@@ -1550,7 +1540,7 @@ var Hier = new Hierarchy();
 		// app.popup.classList.add('show');
 		app.tooltipTimeoutId = setTimeout(() => {
 			// se il tooltip non contiene un testo non deve essere mostrato
-			if (e.target.getAttribute('data-tooltip').length !== 0) app.tooltip.classList.add('show');
+			if (e.target.dataset.tooltip.length !== 0) app.tooltip.classList.add('show');
 		}, 600);
 		/*app.popup.animate([
 		  {transform: 'scale(.2)'},
@@ -1564,7 +1554,7 @@ var Hier = new Hierarchy();
 	}
 
 	app.hideTooltip = (e) => {
-		// console.log('leave');
+		// OPTIMIZE: da spostare in Application.js
 		if (e.target.classList.contains('md-inactive')) return;
 		app.tooltip.classList.remove('show');
 		clearTimeout(app.tooltipTimeoutId);
@@ -1576,6 +1566,7 @@ var Hier = new Hierarchy();
 
 	// eventi mouseEnter/Leave su tutte le icon con l'attributo data-tooltip
 	document.querySelectorAll('*[data-tooltip]').forEach((icon) => {
+		// OPTIMIZE: da spostare in Application.js
 		icon.onmouseenter = app.showTooltip;
 		icon.onmouseleave = app.hideTooltip;
 	});
@@ -1603,7 +1594,7 @@ var Hier = new Hierarchy();
 		const textArea = document.getElementById('composite-metric-formula');
 		// creo uno span con dentro la metrica
 		const mark = document.createElement('mark');
-		mark.innerText = e.currentTarget.getAttribute('data-label');
+		mark.innerText = e.currentTarget.dataset.label;
 		textArea.appendChild(mark);
 		// aggiungo anche uno span per il proseguimento della scrittura della formula
 		let span = document.createElement('span');
