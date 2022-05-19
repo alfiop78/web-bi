@@ -644,7 +644,7 @@ var Hier = new Hierarchy();
 		// debugger;
 		for (const [key, value] of Object.entries(dimensions)) {
 			// key : nome
-			console.log('value : ', value);
+			// console.log('value : ', value);
 			let tmplContent = app.tmplDimension.content.cloneNode(true);
 			const section = tmplContent.querySelector('section');
 			section.setAttribute('data-element-search', 'dimensions');
@@ -656,8 +656,8 @@ var Hier = new Hierarchy();
 			div.querySelector('h5').innerHTML = key;
 			// per ogni gerarchia recupero la prop 'from'
 			for (const [hierName, hierValue] of Object.entries(value.hierarchies)) {
-				console.log(hierName);
-				console.log(hierValue);
+				// console.log(hierName);
+				// console.log(hierValue);
 				const tmplHierarchyList = document.getElementById('tmpl-hierarchy-list');
 				const tmplHierarchyContent = tmplHierarchyList.content.cloneNode(true);
 				const divHier = tmplHierarchyContent.querySelector('.hierarchies');
@@ -688,7 +688,7 @@ var Hier = new Hierarchy();
 	// recupero la lista dei Cubi in localStorage
 	app.getCubes = () => {
 		const ul = document.getElementById('cubes');
-		console.log(StorageCube.cubes);
+		// console.log(StorageCube.cubes);
 		for (const [key, value] of Object.entries(StorageCube.cubes)) {
 			const content = app.tmplLists.content.cloneNode(true);
 			const section = content.querySelector('section[data-sublist-generic]');
@@ -1332,7 +1332,7 @@ var Hier = new Hierarchy();
 			from.push(`${table.dataset.schema}.${table.getAttribute('name')} AS ${table.dataset.alias}`); // OPTIMIZE: dataset data-name
 			lastTables = {
 				alias : table.dataset.alias,
-				schema : table.dataset.schema),
+				schema : table.dataset.schema,
 				table : table.getAttribute('name') // OPTIMIZE: dataset data-name
 			};
 		}
