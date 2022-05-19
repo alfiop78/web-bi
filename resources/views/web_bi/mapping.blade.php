@@ -439,7 +439,7 @@
             </section>
 
             {{-- lista fields --}}
-            <section class="data-item list" data-element-search data-label data-sublist-fields>
+            <section class="data-item list" data-element-search data-label data-sublist-fields data-searchable>
                 <div class="selectable" data-label>
                     <div class="h-content">
                         <div class="v-content">

@@ -870,7 +870,6 @@ var Hier = new Hierarchy();
 	app.addFields = (ul, response) => {
 		ul.hidden = false;
 		for ( const [key, value] of Object.entries(response)) {
-            // console.log(key, value);
     		const content = app.tmplLists.content.cloneNode(true);
     		const section = content.querySelector('section[data-sublist-fields]'); // questa lista include le 3 icone per columns, hierarchy, metric
     		const div = section.querySelector('div.selectable');
