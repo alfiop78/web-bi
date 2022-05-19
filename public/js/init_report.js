@@ -70,18 +70,22 @@ var StorageMetric = new MetricStorage();
 		const ul = document.getElementById('ul-processes');
 		for (const [key, value] of Object.entries(StorageProcess.processes)) {
 			const content = app.tmplList.content.cloneNode(true);
-			const section = content.querySelector('section[data-sublist-gen]');
-			const div = section.querySelector('div.selectable');
-			const span = section.querySelector('span');
-			section.hidden = false;
+			const section = content.querySelector('section[data-sublist-processes]');
+			// const div = section.querySelector('div.selectable');
+			const span = section.querySelector('span[data-process]');
+			const iEdit = section.querySelector('i[data-edit]');
+			const iSchedule = section.querySelector('i[data-schedule]');
 			section.dataset.elementSearch = 'search-process';
-			section.dataset.label = key;
-			section.toggleAttribute('data-searchable');
-			// section.dataset.processId = value.id;
-			div.dataset.label = key;
-			div.dataset.processId = value.processId;
+			section.dataset.label = key; // per la ricerca
+			// div.dataset.label = key;
+			// div.dataset.processId = value.processId;
 			span.innerText = key;
-			div.onclick = app.handlerReportToBeProcessed;
+			iEdit.dataset.id = value.processId;
+			iEdit.dataset.label = key;
+			iSchedule.dataset.id = value.processId;
+			iSchedule.dataset.label = key;
+			iEdit.onclick = app.handlerReportEdit;
+			iSchedule.onclick = app.handlerReportToBeProcessed;
 			ul.appendChild(section);
 		}
 	}
@@ -689,11 +693,7 @@ var StorageMetric = new MetricStorage();
  	app.handlerReportToBeProcessed = async (e) => {
 		console.clear();
 		const label = e.currentTarget.dataset.label;
-		// debugger;
-		// console.log(label);
 		const reportId = +e.currentTarget.dataset.processId;
-		// const reportId = +e.target.getAttribute('data-id');
-		// console.log('reportId : ', reportId);
 		let jsonData = window.localStorage.getItem(label);
 		let jsonDataParsed = JSON.parse(window.localStorage.getItem(label));
 		console.dir(jsonDataParsed);
@@ -721,6 +721,17 @@ var StorageMetric = new MetricStorage();
 			}
 		})
 		.catch((err) => console.error(err));
+	}
+
+	app.handlerReportEdit = (e) => {
+		debugger;
+		// TODO: seleziono il cubo/i utilizzati nel report (prop factJoin -> dimensioni utilizzate -> cubi utilizzati)
+		// TODO: seleziono le dimensioni utilizzate nel report
+		// TODO: seleziono le gerarchie utilizzate nel report (nella prop where ci sono i token delle join utilizzate)
+		// TODO: seleziono le colonne utilizzate nel report
+		//  (questo lo posso fare dopo la modifica della lista colonne che consente di selezionare le colonne dalla <ul> #report-columns anzichè dalla dialog)
+		// nella prop select ci sono i token delle colonne utilizzate nel report
+		// TODO: seleziono i filtri/metriche utilizzati nel report (prop filters e metrics, filteredMetrics e compositeMEtrics)
 	}
 
 	// selezione di un cubo (step-1)

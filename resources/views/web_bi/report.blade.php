@@ -361,7 +361,7 @@
 						<div class="lists">
 							<div class="absList" id="reportProcessList" hidden>
 								<div class="md-field">
-									<input type="search" id="searchReportProcess" value="" autocomplete="off" />
+									<input type="search" id="searchReportProcess" data-element-search="search-process" value="" autocomplete="off" />
 									<label for="searchReportProcess" class="">Ricerca</label>
 								</div>
 								<ul id="ul-processes"></ul>
@@ -423,6 +423,19 @@
 											{{-- TODO: qui, sulle metriche filtrate potrei visualizzare un popup con l'elenco dei filtri, oppure, per le metriche composte, visualizzarne, nel popup, la propria formula --}}
 										</div>
 										<i class="material-icons md-18">edit</i>
+									</div>
+								</div>
+							</section>
+
+							{{-- lista reports/processes --}}
+							<section class="data-item" data-element-search="search-process" data-label data-sublist-processes data-searchable>
+								<div class="unselectable">
+									<div class="h-content">
+										<div class="v-content">
+											<span data-process></span>
+										</div>
+										<i data-edit class="material-icons md-18" data-tooltip="Modifica Report" data-tooltip-position="bottom">edit</i>
+										<i data-schedule class="material-icons md-18 md-highlight" data-tooltip="Esegui Report" data-tooltip-position="bottom">schedule_send</i>
 									</div>
 								</div>
 							</section>

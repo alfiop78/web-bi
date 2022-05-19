@@ -1,3 +1,7 @@
+:root{
+  --main-highlight-icons-color: sienna;
+}
+
 .material-icons{padding: 6px;user-select: none;cursor: pointer;}
 
 .material-icons[hidden]{display: none;}
@@ -85,3 +89,5 @@
 
 /*colori*/
 .material-icons.md-orange{color: orange;}
+
+.material-icons.md-highlight{color: var(--main-highlight-icons-color);}
