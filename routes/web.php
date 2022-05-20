@@ -71,7 +71,7 @@ Route::prefix('/fetch_api/name/')->group(function () {
 	Route::get('{name}/dimension_show', [BIdimensionController::class, 'show']);
 	Route::get('{name}/cube_show', [BIcubeController::class, 'show']);
 	Route::get('{name}/metric_show', [BImetricController::class, 'show']);
-	Route::get('{name}/filter_show', [BIfilterController::class, 'show']);
+	Route::get('{token}/filter_show', [BIfilterController::class, 'show']);
 	Route::get('{name}/process_show', [BIprocessController::class, 'show']);
 });
 // update

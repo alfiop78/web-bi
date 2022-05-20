@@ -99,16 +99,15 @@ class Cube {
 		// dd($this->_and);
 	}
 
-	public function filters($tables) {
+	public function filters($filters) {
 		// definisco i filtri del report
+		// dd($filters);
 		$and = "\nAND ";
-		foreach ($tables as $table) {
-			// var_dump($table);
-			foreach ($table as $filter) {
-				$this->_reportFilters .= $and.$filter;
-			}
+		foreach ($filters as $filter) {
+			// dd($filter); // filter_name => alias_table.field = value
+			$this->_reportFilters .= $and.$filter;
 		}
-		// var_dump($this->_reportFilters);
+		// dd($this->_reportFilters);
 	}
 
 	public function metrics() {
