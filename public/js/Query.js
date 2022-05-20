@@ -14,6 +14,7 @@ class Queries {
 	#elementReport = new Map();
 	#elementCube = new Map();
 	#elementDimension = new Set();
+	#elementHierarchies = new Set();
 	constructor() {
 		this.#select = {};
 		this.#obj = {}; // object generico
@@ -264,9 +265,17 @@ class Queries {
 
 	get elementDimension() {return this.#elementDimension;}
 
+	set elementHierarchy(value) {
+		(this.#elementHierarchies.has(value.name)) ? this.#elementHierarchies.delete(value.name) : this.#elementHierarchies.add(value.name);
+		console.log('this.#elementHierarchies : ', this.#elementHierarchies);
+	}
+
+	get elementHierarchy() {return this.#elementHierarchies;}
+
 	get elementReport() {
 		this.#elementReport.set('cubes', Object.fromEntries(this.elementCube));
 		this.#elementReport.set('dimensions', [...this.#elementDimension]);
+		this.#elementReport.set('hierarchies', [...this.#elementHierarchies]);
 		return this.#elementReport;
 	}
 

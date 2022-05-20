@@ -137,28 +137,6 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
-	// selezione di una gerarchia (step-2)
-	app.handlerHierarchySelected = (e) => {
-		console.clear();
-		console.log(e.currentTarget);
-		e.currentTarget.toggleAttribute('selected');
-		const hier = e.currentTarget.dataset.hierName;
-		const dimension = e.currentTarget.dataset.dimensionName;
-		if (e.currentTarget.hasAttribute('selected')) {
-			// visualizzo, in tutte le <ul>, gli elementi appartenenti alla dimensione->gerarchia selezionata
-			document.querySelectorAll("ul > section.data-item[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']").forEach( (item) => {
-				item.hidden = false;
-				item.toggleAttribute('data-searchable');
-			});
-		} else {
-			// deselezione della gerarchia, nascondo le tabelle della gerarchia selezionata
-			document.querySelectorAll("ul section.data-item[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']").forEach( (item) => {
-				item.hidden = true;
-				item.toggleAttribute('data-searchable');
-			});
-		}
-	}
-
 	// lista gerarchie
 	app.getHierarchies = () => {
 		// imposto un data-dimension-id/name sugli .element della lista gerarchie, in questo modo posso filtrarle quando seleziono le dimensioni nello step precedente
@@ -370,6 +348,38 @@ var StorageMetric = new MetricStorage();
 		document.querySelectorAll("#list-dimensions > section[data-cube-name='" + StorageCube.selected.name + "']").forEach((table) => {
 			table.hidden = true;
 			table.toggleAttribute('data-searchable');
+		});
+	}
+
+	app.showHierarchies = () => {
+		document.querySelectorAll("#list-hierarchies > section[data-dimension-name='" + StorageDimension.selected.name + "']").forEach( (hier) => {
+			hier.hidden = false;
+			hier.dataset.searchable = true;
+		});
+	}
+
+	app.hideHierarchies = () => {
+		document.querySelectorAll("#list-hierarchies > section[data-dimension-name='" + StorageDimension.selected.name + "']").forEach((hier) => {
+			hier.hidden = true;
+			hier.removeAttribute('data-searchable');
+		});
+	}
+
+	app.showAllElements = () => {
+		Query.elementHierarchy.forEach( hier => {
+			document.querySelectorAll("ul > section.data-item[data-dimension-name='" + StorageDimension.selected.name + "'][data-hier-name='" + hier + "']").forEach( (item) => {
+				item.hidden = false;
+				item.toggleAttribute('data-searchable');
+			});
+		});
+	}
+
+	app.hideAllElements = () => {
+		Query.elementHierarchy.forEach( hier => {
+			document.querySelectorAll("ul section.data-item[data-dimension-name='" + StorageDimension.selected.name + "'][data-hier-name='" + hier + "']").forEach( (item) => {
+				item.hidden = true;
+				item.toggleAttribute('data-searchable');
+			});
 		});
 	}
 
@@ -744,6 +754,7 @@ var StorageMetric = new MetricStorage();
 		console.log(StorageProcess.process.elements.cubes);
 		// converto in oggetto Map
 		const cubes = new Map(Object.entries(StorageProcess.process.elements.cubes));
+		// seleziono il cubo/i utilizzati nel report (prop factJoin -> dimensioni utilizzate -> cubi utilizzati)
 		for (const [key, value] of cubes) {
 			console.log(key + ' = ' + value.tableAlias);
 			// #list-cubes visualizzo e seleziono il cubo presente nella lista
@@ -757,10 +768,23 @@ var StorageMetric = new MetricStorage();
 			document.querySelector("#list-fact-tables > section[data-cube-name='" + StorageCube.selected.name + "']").hidden = false;
 		}
 
-		// debugger;
-		// seleziono il cubo/i utilizzati nel report (prop factJoin -> dimensioni utilizzate -> cubi utilizzati)
-		// TODO: seleziono le dimensioni utilizzate nel report
-		// TODO: seleziono le gerarchie utilizzate nel report (nella prop where ci sono i token delle join utilizzate)
+		// array dimensioni
+		// seleziono le dimensioni utilizzate nel report
+		StorageProcess.process.elements.dimensions.forEach( dimension => {
+			StorageDimension.selected = dimension;
+			Query.factRelation = StorageDimension.selected;
+			Query.elementDimension = {name : dimension};
+			document.querySelector("#list-dimensions > section[data-label='" + dimension + "'] .selectable").setAttribute('selected', true);
+			app.showHierarchies();
+		});
+
+		// seleziono le gerarchie utilizzate nel report
+		StorageProcess.process.elements.hierarchies.forEach( hierarchy => {
+			Query.elementHierarchy = {name : hierarchy};
+			document.querySelector("#list-hierarchies > section[data-label='" + hierarchy + "'] .selectable").setAttribute('selected', true);
+			app.showAllElements();
+		});
+		
 		// TODO: seleziono le colonne utilizzate nel report
 		//  (questo lo posso fare dopo la modifica della lista colonne che consente di selezionare le colonne dalla <ul> #report-columns anzichè dalla dialog)
 		// nella prop select ci sono i token delle colonne utilizzate nel report
@@ -795,28 +819,38 @@ var StorageMetric = new MetricStorage();
 		console.log('Dimensione selezionata : ', StorageDimension.selected);
 		e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('selected')) {
-			// TODO: showHierarchies
-			document.querySelectorAll("#list-hierarchies > section[data-dimension-name='" + StorageDimension.selected.name + "']").forEach( (hier) => {
-				hier.hidden = false;
-				hier.dataset.searchable = true;
-			});
+			app.showHierarchies();
 			// imposto la relazione tra dimensione -> cubo
 			Query.factRelation = StorageDimension.selected;
 			Query.elementDimension = {name : e.currentTarget.dataset.dimensionName};
-			debugger;
 			// imposto, in un object le dimensioni selezionate, questo mi servirà nella dialog-metrics per visualizzare/nascondere solo i filtri appartenenti alle dimensioni selezionate
 			// ... probabilmente mi servirà anche nella dialog-filter per lo stesso utilizzo
 			// TODO: da rivedere se viene utilizzato, 2022-05-22 al momento sembra che non serve più
 			// StorageDimension.add();
 		} else {
-			// TODO: hideHierarchies
-			document.querySelectorAll("#list-hierarchies > section[data-dimension-name='" + StorageDimension.selected.name + "']").forEach((hier) => {
-				hier.hidden = true;
-				hier.removeAttribute('data-searchable');
-			});
+			app.hideHierarchies();
 			// TODO: delete factRelation
 			Query.deleteFactRelation(StorageDimension.selected.name);
 			StorageDimension.delete();
+		}
+	}
+
+
+	// selezione di una gerarchia (step-2)
+	app.handlerHierarchySelected = (e) => {
+		e.currentTarget.toggleAttribute('selected');
+		StorageDimension.selected = e.currentTarget.dataset.dimensionName;
+		if (e.currentTarget.hasAttribute('selected')) {
+			// memorizzo le gerarchie selezionate
+			Query.elementHierarchy = {name : e.currentTarget.dataset.hierName};
+			// visualizzo tutti gli elementi (columns, filters) relativi alla gerarchia selezionata
+			app.showAllElements();
+		} else {
+			// TODO: hideAllElements
+			// deselezione della gerarchia, nascondo le tabelle della gerarchia selezionata
+			app.hideAllElements();
+			// dopo aver nascosto gli elementi della gerarchia DESELEZIONATA, rimuovo la gerarchia anche dal element_reports
+			Query.elementHierarchy = {name : e.currentTarget.dataset.hierName};
 		}
 	}
 

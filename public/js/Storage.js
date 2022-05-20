@@ -362,6 +362,7 @@ class DimensionStorage extends Storages {
 	}
 
 	add() {
+		// TODO: 2022-05-20 molto probabilmente non utilizzato
 		// creo un object con le dimensioni che sono state selezionate
 		this.#dimensions.set(this.#name, this.selected.from);
 		console.log('#dimensions : ', this.#dimensions);
