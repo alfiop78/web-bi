@@ -287,7 +287,7 @@ var StorageMetric = new MetricStorage();
 							section.dataset.label = filter.name;
 							section.dataset.dimensionName = filter.dimension;
 							section.dataset.hierName = filter.hier;
-							div.dataset.label = filter.name;
+							div.dataset.label = filter.token;
 							div.dataset.elementSearch = 'search-exist-filters';
 							div.dataset.dimensionName = filter.dimension;
 							div.dataset.hierName = filter.hier;
@@ -784,6 +784,21 @@ var StorageMetric = new MetricStorage();
 			document.querySelector("#list-hierarchies > section[data-label='" + hierarchy + "'] .selectable").setAttribute('selected', true);
 			app.showAllElements();
 		});
+
+		// seleziono i filtri utilizzati nel report
+		const filters = new Map(Object.entries(StorageProcess.process.elements.filters));
+		for (const [token, value] of filters) {
+			document.querySelector("#exist-filters .selectable[data-label='"+token+"']").setAttribute('selected', true);
+			// lo re-imposto come se venisse selezionato
+			debugger;
+			if (value.hasOwnProperty('hier')) {
+				// imposto la firstTable se il filtro appartiene a una dimensione e non a un cubo
+				Query.addTables(value.hier);
+				app.checkRelations(value.hier);
+			}
+			debugger;
+			Query.filters = { token, SQL : `${value.tableAlias}.${value.formula}` };
+		}
 		
 		// TODO: seleziono le colonne utilizzate nel report
 		//  (questo lo posso fare dopo la modifica della lista colonne che consente di selezionare le colonne dalla <ul> #report-columns anzichè dalla dialog)
@@ -857,6 +872,8 @@ var StorageMetric = new MetricStorage();
 	// selezione di un filtro già presente, lo salvo nell'oggetto Query
 	app.handlerFilterSelected = (e) => {
 		StorageFilter.filter = e.currentTarget.dataset.label;
+		let hier;
+		// i filtri impostati su un livello dimensionale hanno l'attr data-hier-name
 		if (e.currentTarget.hasAttribute('data-hier-name')) {
 			hier = e.currentTarget.dataset.hierName;
 			StorageDimension.selected = e.currentTarget.dataset.dimensionName;
@@ -865,21 +882,25 @@ var StorageMetric = new MetricStorage();
 		Query.table = e.currentTarget.dataset.tableName;
 		Query.tableAlias = e.currentTarget.dataset.tableAlias;
 		e.currentTarget.toggleAttribute('selected');
-		Query.filterName = StorageFilter.filter.name;
 		if (e.currentTarget.hasAttribute('selected')) {
 			// recupero dallo storage il filtro selezionato
-			console.log(StorageFilter.filter);
+			// console.log(StorageFilter.filter);
 			if (StorageFilter.filter.hier) {
 				// imposto la firstTable se il filtro appartiene a una dimensione e non a un cubo
 				Query.addTables(StorageFilter.filter.hier);
 				app.checkRelations(hier);
+				Query.elementFilter = {token : e.currentTarget.dataset.label, hier, tableAlias : Query.tableAlias, formula : StorageFilter.filter.formula};
+			} else {
+				// filtro sul cubo, non ha hier
+				Query.elementFilter = {token : e.currentTarget.dataset.label, tableAlias : Query.tableAlias, formula : StorageFilter.filter.formula};
 			}
-			console.log(StorageFilter.filter.formula);
+			// console.log(StorageFilter.filter.formula);
 			// nel salvare il filtro nel report attuale devo impostarne anche l'alias della tabella selezionata nella dialog
-			Query.filters = `${Query.tableAlias}.${StorageFilter.filter.formula}`;
+			Query.filters = { token : e.currentTarget.dataset.label, SQL : `${Query.tableAlias}.${StorageFilter.filter.formula}` };
 		} else {
 			// delete filter
-			Query.deleteFilter();
+			Query.filters = { token : e.currentTarget.dataset.label, SQL : `${Query.tableAlias}.${StorageFilter.filter.formula}` };
+			// BUG: dopo aver eliminato il filtro dal report si deve ricontrollare il checkRelations() ed eliminare le join che riguardano il filtro deselezionato
 		}
 	}
 
@@ -961,7 +982,6 @@ var StorageMetric = new MetricStorage();
 	// selezione delle colonne nella dialogColumns
 	app.handlerSelectColumn = (e) => {
 		e.currentTarget.toggleAttribute('selected');
-		let hier = e.currentTarget.dataset.hierName;
 		Query.table = e.currentTarget.dataset.tableName;
 		Query.tableAlias = e.currentTarget.dataset.tableAlias;
 		Query.columnToken = e.currentTarget.dataset.tokenColumn;
@@ -969,7 +989,7 @@ var StorageMetric = new MetricStorage();
 		if (e.currentTarget.hasAttribute('data-table-id')) {
 			StorageDimension.selected = e.currentTarget.dataset.dimensionName;
 			Query.tableId = e.currentTarget.dataset.tableId;
-			Query.field = {[Query.columnToken] : StorageDimension.selected.hierarchies[hier].columns[Query.tableAlias][Query.columnToken]};
+			Query.field = {[Query.columnToken] : StorageDimension.selected.hierarchies[e.currentTarget.dataset.hierName].columns[Query.tableAlias][Query.columnToken]};
 		} else {
 			StorageCube.selected = e.currentTarget.dataset.cubeName;
 			Query.field = {[Query.columnToken] : StorageCube.selected.columns[Query.tableAlias][Query.columnToken]};
@@ -1461,20 +1481,25 @@ var StorageMetric = new MetricStorage();
 		let hier, dimension;
 		const textarea = document.getElementById('filterSQLFormula');
 		let filterName = document.getElementById('inputFilterName');
+		const rand = () => Math.random(0).toString(36).substr(2);
+		const token = rand().substr(0, 21);
 		let filterObject = {};
-		// TODO: controllo se il nome del filtro, per la stessa dimensione-hier, già esiste
-		Query.filterName = filterName.value;
+		// Query.filterName = filterName.value;
 		// la creazione di un filtro su un livello dimensionale salva il filtro con, all'interno, le proprietà dimension e hier.
 		// Un filtro impostato la FACT avrà al suo interno il nome del cubo a cui è associato e l'alias della FACT
 		if (app.dialogFilter.querySelector('section').hasAttribute('data-hier-name')) {
 			hier = app.dialogFilter.querySelector('section').dataset.hierName;	
 			dimension = app.dialogFilter.querySelector('section').dataset.dimensionName;
-			filterObject = {'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, dimension, hier};
+			// NOTE: inizializzazione di un Map con un Object
+			/*filterObject = new Map([
+				[token, {token, 'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, dimension, hier}]
+			]);*/
+			filterObject = {token, 'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, dimension, hier};
 		} else {
-			filterObject = {'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, cube : StorageCube.selected.name, alias : StorageCube.selected.alias};
+			filterObject = {token, 'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, cube : StorageCube.selected.name, alias : StorageCube.selected.alias};
 		}
-		StorageFilter.save = filterObject;
-		debugger;
+		// console.log('filterObject : ', filterObject);
+		StorageFilter.saveTemp = filterObject;
 		// salvataggio nel DB
 		app.saveFilterDB(filterObject);
 		// reset del form
@@ -1888,24 +1913,21 @@ var StorageMetric = new MetricStorage();
 		}
 	});
 
-	// Salva nella dialogColumns
+	// btnSaveColumn : salvataggio di una colonna del report
 	app.btnSaveColumn.onclick = (e) => {
-		let hier, field;
+		const alias = document.getElementById('columnAlias');
+		const textarea = (document.getElementById('columnSQL').value.length === 0) ? null : document.getElementById('columnSQL').value;
 		// le colonne di una Fact non hanno data-hier-name
 		if (app.dialogColumns.querySelector('section').hasAttribute('data-hier-name')) {
-			hier = app.dialogColumns.querySelector('section').dataset.hierName;
+			const hier = app.dialogColumns.querySelector('section').dataset.hierName;
 			StorageDimension.selected = app.dialogColumns.querySelector('section').dataset.dimensionName;
-		}
-		const alias = document.getElementById('columnAlias').value;
-		const textarea = (document.getElementById('columnSQL').value.length === 0) ? null : document.getElementById('columnSQL').value;
-		// NOTE: in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
-		Query.select = { table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias };
-		if (app.dialogColumns.querySelector('section').hasAttribute('data-hier-name')) {
 			Query.addTables(hier);
 			// verifico quali relazioni inserire in where e quindi anche in from
-			app.checkRelations(hier);	
+			app.checkRelations(hier);
 		}		
-		document.getElementById('columnAlias').value = '';
+		// in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
+		Query.select = { table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value };
+		alias.value = '';
 	}
 
 	app.btnMapping.onclick = () => location.href = '/mapping';

@@ -610,6 +610,6 @@
             </svg>
         </div>
         <script type="text/javascript" src="/js/init.js" async></script>
-        <script type="text/javascript" src="/js/init_versioning.js" async></script>
+        {{-- <script type="text/javascript" src="/js/init_versioning.js" async></script> --}}
     </body>
 </html>

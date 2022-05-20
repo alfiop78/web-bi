@@ -100,6 +100,12 @@ class Storages {
 		window.localStorage.setItem(value.name, JSON.stringify(value));
 	}
 
+	set saveTemp(value) {
+		console.log(value);
+		debugger;
+		window.localStorage.setItem(value.token, JSON.stringify(value));	
+	}
+
 	JSONFormat(name) {
 		// restituisco un object convertito in json, questo mi servirà per ricostruire la struttura
 		return JSON.parse(window.localStorage.getItem(name));
@@ -502,6 +508,7 @@ class FilterStorage extends Storages {
 		return this.id;
 	}
 
+	// TODO: utilizzare la stessa logica utilizzata cubeMetrics
 	get filters() {return this.#filters;} // tutti i filtri
 
 	// filtri appartenenti a un determinato cubo

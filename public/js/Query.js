@@ -11,17 +11,18 @@ class Queries {
 	#where = {};
 	#compositeMetrics = {};
 	#compositeBaseMetric;
+	#filters = new Map();
 	#elementReport = new Map();
 	#elementCube = new Map();
 	#elementDimension = new Set();
 	#elementHierarchies = new Set();
+	#elementFilters = new Map();
 	constructor() {
 		this.#select = {};
 		this.#obj = {}; // object generico
 		this._fromSet = new Set();
 		this._where = {};
 		this._factRelation = {};
-		this._filter = {}
 		this._metrics = {};
 		this._filteredMetrics = {};
 		// this.#firstTable = {};
@@ -143,14 +144,14 @@ class Queries {
 	get joinId() {return this.#joinId;}
 
 	set where(join) {
-		console.log('join : ', join);
+		// console.log('join : ', join);
 		// debugger;
 		if (Object.keys(join).length > 1) {
 			for (const [key, value] of Object.entries(join)) {
 				this.#where[key] = value;	
 			}
 		} else {
-			console.log('key : ', Object.keys(join));
+			// console.log('key : ', Object.keys(join));
 			// let test = Object.keys(this._where).length;
 			// this._where[test] = join;
 			this.#where[Object.keys(join)] = join[Object.keys(join)];
@@ -186,30 +187,20 @@ class Queries {
 		console.log('_factRelation : ', this._factRelation);
 	}
 
-	set filters(object) {
-		this.#obj = {};
-		if (this._filter.hasOwnProperty(this.#table)) {
-			// tabella già presente nell'object #select
-			if (!this._filter[this.#table].hasOwnProperty(this._filterName)) {
-				this._filter[this.#table][this._filterName] = object;
-			}
+	set filters(value) {
+		// this.#obj = {};
+		if (this.#filters.has(value.token)) {
+			if (value.SQL === this.#filters.get(value.token)) {
+				// se anche il contenuto del filtro è uguale a quello già presente allora è stato deselzionato e quindi posso eliminarlo dal Map
+				this.#filters.delete(value.token);
+			}			
 		} else {
-			this.#obj[this._filterName] = object;
-			this._filter[this.#table] = this.#obj;
+			this.#filters.set(value.token, value.SQL);
 		}
-		// *********************
-		// this._filter[this._filterName] = {table : object.table, formula : object.formula};
-		console.log('filter : ', this._filter);
+		console.log('this.#filters : ', this.#filters);
 	}
 
-	get filters() {return this._filter};
-
-	deleteFilter() {
-		delete this._filter[this.#table][this.filterName];
-		// se, per questa tabella non ci sono altri filtri, elimino anche la property this.#table
-		if (Object.keys(this._filter[this.#table]).length === 0) delete this._filter[this.#table];
-		console.log('filter : ', this._filter);
-	}
+	get filters() {return this.#filters};
 
 	set metricName(value) {this._metricName = value;}
 
@@ -272,20 +263,36 @@ class Queries {
 
 	get elementHierarchy() {return this.#elementHierarchies;}
 
+	set elementColumn(value) {
+
+	}
+
+	get elementColumn() {}
+
+	set elementFilter(value) {
+		(this.#elementFilters.has(value.token)) ?
+			this.#elementFilters.delete(value.token) : this.#elementFilters.set(value.token, {hier : value.hier, tableAlias : value.tableAlias, formula : value.formula});
+		console.log('this.#elementFilters : ', this.#elementFilters);
+	}
+
+	get elementFilter() {return this.#elementFilters;}
+
 	get elementReport() {
 		this.#elementReport.set('cubes', Object.fromEntries(this.elementCube));
 		this.#elementReport.set('dimensions', [...this.#elementDimension]);
 		this.#elementReport.set('hierarchies', [...this.#elementHierarchies]);
+		this.#elementReport.set('filters', Object.fromEntries(this.elementFilter));
 		return this.#elementReport;
 	}
 
 	save(processId, name) {
 		this._reportProcess = {};
+		// TODO: chiamare il metodo this.select
 		this._reportProcess['select'] = this.#select;
 		this._reportProcess['from'] = Array.from(this._fromSet); // converto il set in un array
 		this._reportProcess['where'] = this.#where;
 		this._reportProcess['factJoin'] = this._factRelation;
-		this._reportProcess['filters'] = this._filter;
+		this._reportProcess['filters'] = Object.fromEntries(this.filters);
 		if (Object.keys(this._metrics).length > 0) this._reportProcess['metrics'] = this._metrics;
 		if (Object.keys(this._filteredMetrics).length > 0) this._reportProcess['filteredMetrics'] = this._filteredMetrics;
 		if (Object.keys(this.#compositeMetrics).length > 0) this._reportProcess['compositeMetrics'] = this.#compositeMetrics;

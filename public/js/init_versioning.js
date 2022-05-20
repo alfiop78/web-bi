@@ -145,11 +145,11 @@ var storage = new Storages();
 				// console.log(JSON.parse(window.localStorage.getItem(jsonParsed.name)).name);
 			
 				// verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore a causa della prop 'name', se non esiste un determinato Elemento
-				if (JSON.parse(window.localStorage.getItem(jsonParsed.name))) {
-					if ( jsonParsed.name === JSON.parse(window.localStorage.getItem(jsonParsed.name)).name ) {
+				if (JSON.parse(window.localStorage.getItem(jsonParsed.name)) || JSON.parse(window.localStorage.getItem(jsonParsed.token)) ) {
+					if ( jsonParsed.name === JSON.parse(window.localStorage.getItem(jsonParsed.name)).name || jsonParsed.token === JSON.parse(window.localStorage.getItem(jsonParsed.token)).token ) {
 						// se l'elemento è già presente in locale verifico anche se il suo contenuto è uguale a quello del DB
 						// console.log('elemento già presente in locale', jsonParsed.name);
-						if (el.json_value === window.localStorage.getItem(jsonParsed.name)) {
+						if (el.json_value === window.localStorage.getItem(jsonParsed.name) || el.json_value === window.localStorage.getItem(jsonParsed.token)) {
 							// console.info('UGUALE CONTENTUO JSON, ELEMENTO RESTA INVARIATO IN LOCALE');
 							iconStatus.innerText = 'sync';
 							iconStatus.classList.add('md-status'); // darkgrey
