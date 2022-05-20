@@ -248,6 +248,7 @@ class CubeStorage extends Storages {
 
 class ProcessStorage extends Storages {
 	#processes = {}; // lista dei process presenti nello storage
+	#process;
 	constructor() {
 		super();
 		// this.processes = {}; // lista dei process presenti nello storage
@@ -303,6 +304,10 @@ class ProcessStorage extends Storages {
 		}
 		return this.id;
 	}
+
+	set process(value) {this.#process = value;}
+
+	get process() {return JSON.parse(window.localStorage.getItem(this.#process));}
 
 	getJSONProcess(value) {
 		let processReports = {};

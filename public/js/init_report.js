@@ -357,6 +357,22 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
+	app.showDimensions = () => {
+		// visualizzo la <ul> contentente le dimensioni appartenenti al cubo selezionato
+		document.querySelectorAll("#list-dimensions > section[data-cube-name='" + StorageCube.selected.name + "']").forEach((dimension) => {
+			// console.log('Dimensioni del cubo selezionato : ', dimension);
+			dimension.hidden = false;
+			dimension.dataset.searchable = true;
+		});
+	}
+
+	app.hideDimensions = () => {
+		document.querySelectorAll("#list-dimensions > section[data-cube-name='" + StorageCube.selected.name + "']").forEach((table) => {
+			table.hidden = true;
+			table.toggleAttribute('data-searchable');
+		});
+	}
+
 	// popolo la lista dei filtri esistenti nella dialog metric-filter (metriche filtrate)
 	app.getMetricFilters = () => {
 		const ul = document.getElementById('ul-metric-filter');
@@ -724,8 +740,25 @@ var StorageMetric = new MetricStorage();
 	}
 
 	app.handlerReportEdit = (e) => {
-		debugger;
-		// TODO: seleziono il cubo/i utilizzati nel report (prop factJoin -> dimensioni utilizzate -> cubi utilizzati)
+		StorageProcess.process = e.currentTarget.dataset.label;
+		console.log(StorageProcess.process.elements.cubes);
+		// converto in oggetto Map
+		const cubes = new Map(Object.entries(StorageProcess.process.elements.cubes));
+		for (const [key, value] of cubes) {
+			console.log(key + ' = ' + value.tableAlias);
+			// #list-cubes visualizzo e seleziono il cubo presente nella lista
+			document.querySelector("#list-cubes > section[data-label='" + key + "'] .selectable").setAttribute('selected', true);
+			// reimposto tutto come se avessi fatto clic per selezionare il cubo, in app.handlerCubeSelected()
+			StorageCube.selected = key;
+			Query.tableAlias = StorageCube.selected.alias;
+			Query.from = `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${Query.tableAlias}`;
+			app.showDimensions();
+			// visualizzo la/e tabelle fact nello step-2
+			document.querySelector("#list-fact-tables > section[data-cube-name='" + StorageCube.selected.name + "']").hidden = false;
+		}
+
+		// debugger;
+		// seleziono il cubo/i utilizzati nel report (prop factJoin -> dimensioni utilizzate -> cubi utilizzati)
 		// TODO: seleziono le dimensioni utilizzate nel report
 		// TODO: seleziono le gerarchie utilizzate nel report (nella prop where ci sono i token delle join utilizzate)
 		// TODO: seleziono le colonne utilizzate nel report
@@ -739,27 +772,20 @@ var StorageMetric = new MetricStorage();
 		StorageCube.selected = e.currentTarget.dataset.label;
 		Query.tableAlias = StorageCube.selected.alias;
 		Query.from = `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${Query.tableAlias}`;
-
+		// al momento non serve l'object con tableAlias e from, lo recupero direttamente dal nome del cubo in handlerEditReport, se così potrei anche utilizzare un oggetto Set anziche Map in Query.js
+		Query.elementCube = {name : e.currentTarget.dataset.label, tableAlias : StorageCube.selected.alias, from : Query.from};
+		// debugger;
 		// console.log('cube selected : ', StorageCube.selected.name);
 		e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('selected')) {
 			// Query.addFromCubes(StorageCube.selected.FACT);
-			// visualizzo la <ul> contentente le dimensioni appartenenti al cubo selezionato
-			document.querySelectorAll("#list-dimensions > section[data-cube-name='" + StorageCube.selected.name + "']").forEach((dimension) => {
-				// console.log('Dimensioni del cubo selezionato : ', dimension);
-				dimension.hidden = false;
-				dimension.dataset.searchable = true;
-			});
-			// visualizzo la/e tabelle fact nello step-2
+			app.showDimensions();
+			// visualizzo la/e tabelle fact
 			document.querySelector("#list-fact-tables > section[data-cube-name='" + StorageCube.selected.name + "']").hidden = false;
 		} else {
-			// deselect cube
-			document.querySelectorAll("ul[data-id='fields-dimensions'] > section[data-cube-name='" + StorageCube.selected.name + "']").forEach((table) => {
-				table.hidden = true;
-				table.toggleAttribute('data-searchable');
-			});
+			// TODO: completare
+			app.hideDimensions();
 			StorageCube.deleteCube();
-			// TODO: elimino la FACT dall'elenco #tableList-hierarchies > ul
 		}
 	}
 
@@ -769,16 +795,21 @@ var StorageMetric = new MetricStorage();
 		console.log('Dimensione selezionata : ', StorageDimension.selected);
 		e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('selected')) {
+			// TODO: showHierarchies
 			document.querySelectorAll("#list-hierarchies > section[data-dimension-name='" + StorageDimension.selected.name + "']").forEach( (hier) => {
 				hier.hidden = false;
 				hier.dataset.searchable = true;
 			});
+			// imposto la relazione tra dimensione -> cubo
 			Query.factRelation = StorageDimension.selected;
+			Query.elementDimension = {name : e.currentTarget.dataset.dimensionName};
+			debugger;
 			// imposto, in un object le dimensioni selezionate, questo mi servirà nella dialog-metrics per visualizzare/nascondere solo i filtri appartenenti alle dimensioni selezionate
 			// ... probabilmente mi servirà anche nella dialog-filter per lo stesso utilizzo
-			// TODO: da rivedere se viene utilizzato
-			StorageDimension.add();
+			// TODO: da rivedere se viene utilizzato, 2022-05-22 al momento sembra che non serve più
+			// StorageDimension.add();
 		} else {
+			// TODO: hideHierarchies
 			document.querySelectorAll("#list-hierarchies > section[data-dimension-name='" + StorageDimension.selected.name + "']").forEach((hier) => {
 				hier.hidden = true;
 				hier.removeAttribute('data-searchable');
@@ -1744,7 +1775,7 @@ var StorageMetric = new MetricStorage();
 		app.saveProcess();
 		// TODO: salvataggio nel database tabella : bi_processes
 		// aggiungo il report da processare nella list 'reportProcessList'
-		const ulReportsProcess = document.getElementById('reportsProcess');
+		/*const ulReportsProcess = document.getElementById('reportsProcess');
 		let tmplContent = app.tmplList.content.cloneNode(true);
 		let element = tmplContent.querySelector('.element');
 		let li = element.querySelector('li');
@@ -1752,7 +1783,7 @@ var StorageMetric = new MetricStorage();
 		li.setAttribute('label', name); // TODO: dataset data-label
 		li.dataset.id = processId;
 		ulReportsProcess.appendChild(element);
-		li.onclick = app.handlerReportToBeProcessed;
+		li.onclick = app.handlerReportToBeProcessed;*/
 		app.dialogSaveReport.close();
 	}
 

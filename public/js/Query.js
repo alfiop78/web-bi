@@ -11,6 +11,9 @@ class Queries {
 	#where = {};
 	#compositeMetrics = {};
 	#compositeBaseMetric;
+	#elementReport = new Map();
+	#elementCube = new Map();
+	#elementDimension = new Set();
 	constructor() {
 		this.#select = {};
 		this.#obj = {}; // object generico
@@ -168,7 +171,9 @@ class Queries {
 
 	set factRelation(dimension) {
 		// console.log('dimName : ', dimension.name);
+		// TODO: utilizzare oggetto Map()
 		this._factRelation[dimension.name] = dimension.cubes;
+		// this._fatcRelation viene salvato nel processo in save()
 		console.log('_factRelation : ', this._factRelation);
 	}
 
@@ -243,6 +248,28 @@ class Queries {
 
 	get compositeMetrics() {return this.#compositeMetrics;}
 
+	set elementCube(value) {
+		// se l'elemento esiste lo elimino altrimenti lo aggiungo al Map
+		(this.#elementCube.has(value.name)) ? this.#elementCube.delete(value.name) : this.#elementCube.set(value.name, {tableAlias : value.tableAlias, from : [...value.from]});
+		console.log('this.#elementCube : ', this.#elementCube);
+	}
+
+	get elementCube() {return this.#elementCube;}
+
+	set elementDimension(value) {
+		(this.#elementDimension.has(value.name)) ? this.#elementDimension.delete(value.name) : this.#elementDimension.add(value.name);
+		// (this.#elementDimension.has(value.name)) ? this.#elementDimension.delete(value.name) : this.#elementDimension.set(value.name);
+		console.log('this.#elementDimension : ', this.#elementDimension);
+	}
+
+	get elementDimension() {return this.#elementDimension;}
+
+	get elementReport() {
+		this.#elementReport.set('cubes', Object.fromEntries(this.elementCube));
+		this.#elementReport.set('dimensions', [...this.#elementDimension]);
+		return this.#elementReport;
+	}
+
 	save(processId, name) {
 		this._reportProcess = {};
 		this._reportProcess['select'] = this.#select;
@@ -253,18 +280,16 @@ class Queries {
 		if (Object.keys(this._metrics).length > 0) this._reportProcess['metrics'] = this._metrics;
 		if (Object.keys(this._filteredMetrics).length > 0) this._reportProcess['filteredMetrics'] = this._filteredMetrics;
 		if (Object.keys(this.#compositeMetrics).length > 0) this._reportProcess['compositeMetrics'] = this.#compositeMetrics;
-		// this._reportProcess['filteredMetrics'] = this._filteredMetrics;
-		// this._reportProcess['compositeMetrics'] = this.#compositeMetrics;
 		this._reportProcess['processId'] = processId; // questo creerà il datamart FX[processId]
 		//  al posto del processId voglio utilizzare il nome del report legato alla FX_
 		this._reportProcess['name'] = name;
 		this._reportProcess['type'] = 'PROCESS';
+		this._reportProcess['elements'] = Object.fromEntries(this.elementReport);
 		console.info(this._reportProcess);
 		debugger;
 
 		window.localStorage.setItem(name, JSON.stringify(this._reportProcess));
         console.log(name+' salvato nello storage');
-
 	}
 
     get reportProcessStringify() {return this._reportProcess;}
