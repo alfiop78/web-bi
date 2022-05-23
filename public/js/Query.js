@@ -13,6 +13,7 @@ class Queries {
 	#compositeBaseMetric;
 	#filters = new Map();
 	#metrics = new Map();
+	#columns = new Map();
 	#elementReport = new Map();
 	#elementCube = new Map();
 	#elementDimension = new Set();
@@ -20,7 +21,6 @@ class Queries {
 	#elementFilters = new Map();
 	#elementMetrics = new Map();
 	constructor() {
-		this.#select = {};
 		this.#obj = {}; // object generico
 		this._fromSet = new Set();
 		this._where = {};
@@ -40,7 +40,7 @@ class Queries {
 
 	get schema() {return this.#schema;}
 
-	set tableId(value) {this._tableId = value;}
+	set tableId(value) {this._tableId = +value;}
 
 	get tableId() {return this._tableId;}
 
@@ -98,34 +98,16 @@ class Queries {
 
 	get columnName() {return this.#column;}
 
-	set select(object) {
-		// es.: this.#select[nometabella] = {field: nomecolonna, SQLFormat: (es.: date_format), 'alias': "Cod.Sede"}
-		this.#obj = {};
-		debugger;
-		if (this.#select.hasOwnProperty(this.#columnToken)) {
-			// tabella già presente nell'object #select
-			if (!this.#select[this.#columnToken].hasOwnProperty(this._field)) {
-				// field NON presente in #select[#table], lo aggiungo
-				this.#select[this.#columnToken][this._field] = object;
-			}
+	set select(value) {
+		if (this.#columns.has(value.token)) {
+			this.#columns.delete(value.token);
 		} else {
-			// this.#obj[this._field] = object;
-			this.#select[this.#columnToken] = object;
+			this.#columns.set(value.token, value);
 		}
-		console.log('select : ', this.#select);
+		console.log('select : ', this.#columns);
 	}
 
-	get select() {return this.#select;}
-
-	deleteSelect() {
-		debugger;
-		// TODO: da completare dopo la modifica della select
-		delete this.#select[this.#columnToken];
-		// if (Object.keys(this.#select).length === 0) delete this.#select;
-		// if (Object.keys(this.#select).length === 0) unset this.#select;
-
-		console.log('select : ', this.#select);
-	}
+	get select() {return this.#columns;}
 
 	getAliasColumn() {
 		return this.#select[this.#table][this._field]['alias'];
@@ -182,11 +164,13 @@ class Queries {
 	set filters(value) {
 		// this.#obj = {};
 		if (this.#filters.has(value.token)) {
+			debugger;
 			if (value.SQL === this.#filters.get(value.token)) {
 				// se anche il contenuto del filtro è uguale a quello già presente allora è stato deselzionato e quindi posso eliminarlo dal Map
 				this.#filters.delete(value.token);
 			}			
 		} else {
+			debugger;
 			this.#filters.set(value.token, value.SQL);
 		}
 		console.log('this.#filters : ', this.#filters);
@@ -283,11 +267,12 @@ class Queries {
 	save(processId, name) {
 		this._reportProcess = {};
 		// TODO: chiamare il metodo this.select
-		this._reportProcess['select'] = this.#select;
+		this._reportProcess['select'] = Object.fromEntries(this.select);
+		this.#elementReport.set('columns', Object.fromEntries(this.select));
 		this._reportProcess['from'] = Array.from(this._fromSet); // converto il set in un array
 		this._reportProcess['where'] = this.#where;
 		this._reportProcess['factJoin'] = this._factRelation;
-		this._reportProcess['filters'] = Object.fromEntries(this.filters);
+		if (this.filters.size > 0) this._reportProcess['filters'] = Object.fromEntries(this.filters);
 		if (this.metrics.size > 0) {
 			this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
 			this._reportProcess['metrics'] = Object.fromEntries(this.#metrics);

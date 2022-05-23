@@ -39,12 +39,12 @@
 						{{-- <h5>tabelle</h5><h6>subtitle</h6> --}}
 						<div id="parent-list-columns">
 							<h5>colonne</h5>
-							<div class="md-field">
+							{{-- <div class="md-field">
 								<input type="search" data-element-search="search-columns" id="dialog-columns-search-column" value autocomplete="off" />
 								<label for="dialog-columns-search-column" class="">Ricerca</label>
-							</div>
-							<ul id="list-columns-fact" class="fact-table"></ul>
-							<ul id="list-columns" class="full-overflow-list-columns"></ul>
+							</div> --}}
+							{{-- <ul id="list-columns-fact" class="fact-table"></ul>
+							<ul id="list-columns" class="full-overflow-list-columns"></ul> --}}
 						</div>
 					</section>
 
@@ -379,23 +379,24 @@
 											<small table></small>
 											<small hier></small>
 										</div>
+										<i class="material-icons md-18">edit</i>
+										<i class="material-icons md-18">remove</i>
 									</div>
 								</div>
 							</section>
 
 							{{-- lista colonne impostate nel report --}}
-							<section data-element-search data-label data-sublist-columns-selected>
+							{{-- <section data-element-search data-label data-sublist-columns-selected>
 								<div data-label>
 									<div class="h-content">
 										<div class="v-content">
 											<span column class="highlight"></span>
 											<small table></small>
-											{{-- <small hier></small> --}}
 										</div>
 										<i class="material-icons md-18">remove</i>
 									</div>
 								</div>
-							</section>
+							</section> --}}
 
 							{{-- lista filtri esistenti --}}
 							<section class="data-item" data-element-search data-label data-sublist-filters hidden>
@@ -550,10 +551,11 @@
 														{{-- colonne --}}
 														<div>
 															<div class="md-field">
-																<input type="search" data-element-search="search-columns-selected" id="search-columns-selected" value autocomplete="off" />
-																<label for="search-columns-selected" class="">Ricerca</label>
+																<input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" />
+																<label for="search-columns" class="">Ricerca</label>
 															</div>
-															<ul id="report-columns"></ul>
+															<ul id="ul-columns-fact"></ul>
+															<ul id="ul-columns"></ul>
 														</div>
 														{{-- filtri --}}
 														<div>

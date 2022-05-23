@@ -24,7 +24,7 @@ var StorageMetric = new MetricStorage();
 		dialogPopup: null,
 
 		// btn
-		btnAddColumns : document.getElementById('btn-add-columns'),
+		// btnAddColumns : document.getElementById('btn-add-columns'),
 		btnAddFilters : document.getElementById('btn-add-filters'),
 		btnAddMetrics : document.getElementById('btn-add-metrics'),
 		btnAddCompositeMetrics : document.getElementById('btn-add-composite-metrics'),
@@ -187,7 +187,7 @@ var StorageMetric = new MetricStorage();
 
 	// lista di tutte le colonne, incluse nelle dimensioni, property 'columns'
 	app.getColumns = () => {
-		const ul = document.getElementById('list-columns');
+		const ul = document.getElementById('ul-columns');
 		// per ogni dimensione, recupero la property 'columns'
 		// console.log('StorageDimension.dimension : ', StorageDimension.dimensions);
 		for (const [key, value] of (Object.entries(StorageDimension.dimensions))) {
@@ -233,7 +233,7 @@ var StorageMetric = new MetricStorage();
 
 	// recupero le colonne agganciate alla fact, proprietà columns nel json, per aggiungerle nelle dialog-column
 	app.getColumnsFact = () => {
-		const ul = document.getElementById('list-columns-fact');
+		const ul = document.getElementById('ul-columns-fact');
 		for (const [key, value] of Object.entries(StorageCube.cubes)) {
 			if (value.columns.hasOwnProperty(value.alias)) {
 				for (const [token, field] of Object.entries(value.columns[value.alias])) {
@@ -761,6 +761,7 @@ var StorageMetric = new MetricStorage();
 			StorageCube.selected = key;
 			Query.tableAlias = StorageCube.selected.alias;
 			Query.from = `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${Query.tableAlias}`;
+			Query.elementCube = {name : key, tableAlias : value.tableAlias, from : Query.from};
 			app.showDimensions();
 			// visualizzo la/e tabelle fact nello step-2
 			document.querySelector("#list-fact-tables > section[data-cube-name='" + StorageCube.selected.name + "']").hidden = false;
@@ -797,6 +798,9 @@ var StorageMetric = new MetricStorage();
 				Query.table = value.table;
 				Query.addTables(value.hier);
 				app.checkRelations(value.hier);
+				Query.elementFilter = {token, hier: value.hier, tableAlias : value.tableAlias, formula : value.formula, tableId : value.tableId};
+			} else {
+				Query.elementFilter = {token, tableAlias : value.tableAlias, formula : value.formula};
 			}
 			Query.filters = { token, SQL : `${value.tableAlias}.${value.formula}` };
 		}
@@ -806,6 +810,7 @@ var StorageMetric = new MetricStorage();
 			// seleziono le metriche impostate sul report
 			document.querySelector("#exist-metrics .selectable[data-label='"+token+"']").setAttribute('selected', true); // TODO: dataset data-selected
 			// se la metrica NON ha la prop table è una metrica composta, di base, quindi legata al cubo
+			// TODO: da rivedere dopo aver aggiunto metric_type non serve più flagCompositeBase
 			Query.flagCompositeBase = (!value.hasOwnProperty('table')) ? true : false;
 			// le imposto nel Metodo Query.metrics come quando vengono selezionate per creare un report
 			Query.metrics = {
@@ -815,6 +820,14 @@ var StorageMetric = new MetricStorage();
 				distinct : value.distinct,
 				alias : value.alias
 			};
+		}
+
+		const columns =new Map(Object.entries(StorageProcess.process.elements.columns));
+		for (const [token, value] of columns) {
+			// seleziono le colonne impostate sul report
+			document.querySelector("#ul-columns .selectable[data-token-column='"+token+"']").setAttribute('selected', true); // TODO: dataset data-selected
+			// le imposto come se fossero state selezionate
+			Query.select = { token, table: value.table, tableAlias : value.tableAlias, field: value.field, SQLReport : value.SQLReport, alias : value.alias };
 		}
 		
 		// TODO: seleziono le colonne utilizzate nel report
@@ -947,7 +960,7 @@ var StorageMetric = new MetricStorage();
 						field : StorageMetric.metric.formula.field,
 						distinct : StorageMetric.metric.formula.distinct,
 						alias : StorageMetric.metric.formula.alias
-					};					
+					};
 					break;
 				case 2:
 					// metrica filtrata
@@ -1033,34 +1046,44 @@ var StorageMetric = new MetricStorage();
 
 	// selezione delle colonne nella dialogColumns
 	app.handlerSelectColumn = (e) => {
-		e.currentTarget.toggleAttribute('selected');
-		Query.table = e.currentTarget.dataset.tableName;
-		Query.tableAlias = e.currentTarget.dataset.tableAlias;
-		Query.columnToken = e.currentTarget.dataset.tokenColumn;
-		// la FACT table non ha un data-table-id
-		if (e.currentTarget.hasAttribute('data-table-id')) {
-			StorageDimension.selected = e.currentTarget.dataset.dimensionName;
-			Query.tableId = e.currentTarget.dataset.tableId;
-			Query.field = {[Query.columnToken] : StorageDimension.selected.hierarchies[e.currentTarget.dataset.hierName].columns[Query.tableAlias][Query.columnToken]};
+		console.log('addColumns');
+		// verifico che almeno una gerarchia sia stata selezionata
+		const hierSelectedCount = document.querySelectorAll('#ul-hierarchies .selectable[selected]').length;
+		if (hierSelectedCount === 0) {
+			App.handlerConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
+			return;
 		} else {
-			StorageCube.selected = e.currentTarget.dataset.cubeName;
-			Query.field = {[Query.columnToken] : StorageCube.selected.columns[Query.tableAlias][Query.columnToken]};
-		}
-		if (!e.currentTarget.hasAttribute('selected')) {
-			// TODO: colonna deselezionata, implementare la logica in Query.deleteSelect
-			Query.deleteSelect();
-		} else {
-			document.getElementById('columnAlias').value = '';
-			document.getElementById('columnAlias').focus();
-			// imposto, nella section della dialog, l'attributo data-hier-name e data-dimension-name selezionata
-			if (e.currentTarget.hasAttribute('data-hier-name')) {
-				app.dialogColumns.querySelector('section').dataset.hierName = e.currentTarget.getAttribute('data-hier-name');
-				app.dialogColumns.querySelector('section').dataset.dimensionName = e.currentTarget.dataset.dimensionName;
+			e.currentTarget.toggleAttribute('selected');
+			Query.table = e.currentTarget.dataset.tableName;
+			Query.tableAlias = e.currentTarget.dataset.tableAlias;
+			Query.columnToken = e.currentTarget.dataset.tokenColumn;
+			// la FACT table non ha un data-table-id
+			if (e.currentTarget.hasAttribute('data-table-id')) {
+				StorageDimension.selected = e.currentTarget.dataset.dimensionName;
+				Query.tableId = e.currentTarget.dataset.tableId;
+				Query.field = {[Query.columnToken] : StorageDimension.selected.hierarchies[e.currentTarget.dataset.hierName].columns[Query.tableAlias][Query.columnToken]};
 			} else {
-				// selezione di una colonna della Fact, elimino l'attributo data-hier-name perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
-				app.dialogColumns.querySelector('section').removeAttribute('data-hier-name');
+				StorageCube.selected = e.currentTarget.dataset.cubeName;
+				Query.field = {[Query.columnToken] : StorageCube.selected.columns[Query.tableAlias][Query.columnToken]};
 			}
-		}
+			if (e.currentTarget.hasAttribute('selected')) {
+				document.getElementById('columnAlias').value = '';
+				document.getElementById('columnAlias').focus();
+				// imposto, nella section della dialog, l'attributo data-hier-name e data-dimension-name selezionata
+				if (e.currentTarget.hasAttribute('data-hier-name')) {
+					app.dialogColumns.querySelector('section').dataset.hierName = e.currentTarget.dataset.hierName;
+					app.dialogColumns.querySelector('section').dataset.dimensionName = e.currentTarget.dataset.dimensionName;
+				} else {
+					// selezione di una colonna della Fact, elimino l'attributo data-hier-name perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
+					app.dialogColumns.querySelector('section').removeAttribute('data-hier-name');
+				}
+				app.dialogColumns.showModal();
+			} else {
+				// TODO: colonna deselezionata, implementare la logica in Query.deleteSelect
+				Query.deleteSelect();
+			}
+			
+		}		
 	}
 
 	// selezione della tabella nella dialog-tables (columns)
@@ -1295,33 +1318,6 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
-	// tasto Fatto nella dialog Column
-	app.btnColumnDone.onclick = () => {
-		// L'oggetto Query.select ora è popolato con le colonne scelte, da aggiungere al report.
-		// Popolo una <ul> dove sono presenti le colonne scelte prima di chiudere la dialog.
-		const ul = document.getElementById('report-columns');
-		// ripulisco la <ul> in caso di una precedente aggiunta delle colonne
-		ul.querySelectorAll('section').forEach( section => section.remove());
-		// console.log('Query.select : ', Query.select);
-		// aggiungo, alla <ul> report-columns le colonne selezionate nella dialog
-		for (const [key, value] of Object.entries(Query.select)) {
-			const contentElement = app.tmplList.content.cloneNode(true);
-			const section = contentElement.querySelector('section[data-sublist-columns-selected]');
-			const div = section.querySelector('div');
-			const spanHContent = div.querySelector('.h-content');
-			const column = spanHContent.querySelector('span[column]');
-			const smallTable = spanHContent.querySelector('small');
-			section.hidden = false;
-			section.dataset.label = value.alias;
-			section.dataset.elementSearch = 'search-columns-selected';
-			section.dataset.searchable = true;
-			column.innerText = value.alias;
-			smallTable.innerText = value.table;
-			ul.appendChild(section);
-		}
-		app.dialogColumns.close();
-	}
-
 	// tasto 'Fatto' nella dialogFilter
 	app.btnFilterDone.onclick = e => app.dialogFilter.close();
 	
@@ -1539,9 +1535,9 @@ var StorageMetric = new MetricStorage();
 			/*filterObject = new Map([
 				[token, {token, 'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, dimension, hier}]
 			]);*/
-			filterObject = {token, 'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, dimension, hier};
+			filterObject = {token, type: 'FILTER', name: filterName.value, table: Query.table, formula : textarea.value, dimension, hier};
 		} else {
-			filterObject = {token, 'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, cube : StorageCube.selected.name, alias : StorageCube.selected.alias};
+			filterObject = {token, type: 'FILTER', name: filterName.value, table: Query.table, formula : textarea.value, cube : StorageCube.selected.name, alias : StorageCube.selected.alias};
 		}
 		// console.log('filterObject : ', filterObject);
 		StorageFilter.saveTemp = filterObject;
@@ -1742,22 +1738,6 @@ var StorageMetric = new MetricStorage();
 		// console.log('return check : ', app.checkSelection());
 		Step.next();
 		// if (app.checkSelection()) Step.next();
-	}
-
-	// aggiungi colonne (step-2)
-	app.btnAddColumns.onclick = (e) => {
-		console.log('addColumns');
-		// verifico che almeno una gerarchia è stata selezionata
-		const hierSelectedCount = document.querySelectorAll('#ul-hierarchies .selectable[selected]').length;
-		if (hierSelectedCount === 0) {
-			App.handlerConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
-			return;
-		} else {
-			// recupero le gerarchie selezionate
-			// const hierSelected = document.querySelectorAll('#ul-hierarchies section[selected]');
-			// per ogni gerarchia selezionata aggiungo le tabelle e le colonne in una lista
-			app.dialogColumns.showModal();
-		}
 	}
 
 	// aggiungi filtri (step-2)
@@ -1969,10 +1949,12 @@ var StorageMetric = new MetricStorage();
 			Query.addTables(hier);
 			// verifico quali relazioni inserire in where e quindi anche in from
 			app.checkRelations(hier);
-		}		
+		}
+		console.log('columnToken : ', Query.columnToken);
 		// in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
-		Query.select = { table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value };
-		alias.value = '';
+		Query.select = { token : Query.columnToken, table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value };
+		document.querySelector("#ul-columns section .selectable[data-token-column='"+Query.columnToken+"'] span[column]").innerText += ` (${alias.value})`;
+		app.dialogColumns.close();
 	}
 
 	app.btnMapping.onclick = () => location.href = '/mapping';
