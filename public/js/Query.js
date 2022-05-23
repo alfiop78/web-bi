@@ -20,6 +20,7 @@ class Queries {
 	#elementHierarchies = new Set();
 	#elementFilters = new Map();
 	#elementMetrics = new Map();
+	#reportProcess = {};
 	constructor() {
 		this.#obj = {}; // object generico
 		this._fromSet = new Set();
@@ -264,34 +265,35 @@ class Queries {
 		return this.#elementReport;
 	}
 
-	save(processId, name) {
-		this._reportProcess = {};
+	save(token, processId, name) {
+		// this._reportProcess = {};
 		// TODO: chiamare il metodo this.select
-		this._reportProcess['select'] = Object.fromEntries(this.select);
+		this.#reportProcess['token'] = token;
+		this.#reportProcess['select'] = Object.fromEntries(this.select);
 		this.#elementReport.set('columns', Object.fromEntries(this.select));
-		this._reportProcess['from'] = Array.from(this._fromSet); // converto il set in un array
-		this._reportProcess['where'] = this.#where;
-		this._reportProcess['factJoin'] = this._factRelation;
-		if (this.filters.size > 0) this._reportProcess['filters'] = Object.fromEntries(this.filters);
+		this.#reportProcess['from'] = Array.from(this._fromSet); // converto il set in un array
+		this.#reportProcess['where'] = this.#where;
+		this.#reportProcess['factJoin'] = this._factRelation;
+		if (this.filters.size > 0) this.#reportProcess['filters'] = Object.fromEntries(this.filters);
 		if (this.metrics.size > 0) {
 			this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
-			this._reportProcess['metrics'] = Object.fromEntries(this.#metrics);
+			this.#reportProcess['metrics'] = Object.fromEntries(this.#metrics);
 		}
-		if (Object.keys(this._filteredMetrics).length > 0) this._reportProcess['filteredMetrics'] = this._filteredMetrics;
-		if (Object.keys(this.#compositeMetrics).length > 0) this._reportProcess['compositeMetrics'] = this.#compositeMetrics;
-		this._reportProcess['processId'] = processId; // questo creerà il datamart FX[processId]
+		if (Object.keys(this._filteredMetrics).length > 0) this.#reportProcess['filteredMetrics'] = this._filteredMetrics;
+		if (Object.keys(this.#compositeMetrics).length > 0) this.#reportProcess['compositeMetrics'] = this.#compositeMetrics;
+		this.#reportProcess['processId'] = processId; // questo creerà il datamart FX[processId]
 		//  al posto del processId voglio utilizzare il nome del report legato alla FX_
-		this._reportProcess['name'] = name;
-		this._reportProcess['type'] = 'PROCESS';
-		this._reportProcess['elements'] = Object.fromEntries(this.elementReport);
-		console.info(this._reportProcess);
-		debugger;
+		this.#reportProcess['name'] = name;
+		this.#reportProcess['type'] = 'PROCESS';
+		this.#reportProcess['elements'] = Object.fromEntries(this.elementReport);
+		console.info(this.#reportProcess);
 
-		window.localStorage.setItem(name, JSON.stringify(this._reportProcess));
-        console.log(name+' salvato nello storage');
+		window.localStorage.setItem(token, JSON.stringify(this.#reportProcess));
+        console.log(`${name} salvato nello storage con token : ${token}`);
+		debugger;
 	}
 
-    get reportProcessStringify() {return this._reportProcess;}
+    get reportProcessStringify() {return this.#reportProcess;}
 
 	getJSONProcess(value) {
 		return JSON.parse(window.localStorage.getItem(value));

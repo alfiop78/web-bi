@@ -68,7 +68,7 @@ var StorageMetric = new MetricStorage();
 	// creo la lista degli elementi da processare
 	app.getProcesses = () => {
 		const ul = document.getElementById('ul-processes');
-		for (const [key, value] of Object.entries(StorageProcess.processes)) {
+		for (const [token, value] of Object.entries(StorageProcess.processes)) {
 			const content = app.tmplList.content.cloneNode(true);
 			const section = content.querySelector('section[data-sublist-processes]');
 			// const div = section.querySelector('div.selectable');
@@ -76,14 +76,14 @@ var StorageMetric = new MetricStorage();
 			const iEdit = section.querySelector('i[data-edit]');
 			const iSchedule = section.querySelector('i[data-schedule]');
 			section.dataset.elementSearch = 'search-process';
-			section.dataset.label = key; // per la ricerca
+			section.dataset.label = value.name; // per la ricerca
 			// div.dataset.label = key;
 			// div.dataset.processId = value.processId;
-			span.innerText = key;
+			span.innerText = value.name;
 			iEdit.dataset.id = value.processId;
-			iEdit.dataset.label = key;
+			iEdit.dataset.label = token;
 			iSchedule.dataset.id = value.processId;
-			iSchedule.dataset.label = key;
+			iSchedule.dataset.label = token;
 			iEdit.onclick = app.handlerReportEdit;
 			iSchedule.onclick = app.handlerReportToBeProcessed;
 			ul.appendChild(section);
@@ -1853,9 +1853,10 @@ var StorageMetric = new MetricStorage();
 		// const processId = StorageProcess.getIdAvailable();
 		const processId = Date.now();
 		const name = document.getElementById('reportName').value;
-
+		const rand = () => Math.random(0).toString(36).substr(2);
+		const token = rand().substr(0, 21);
 		// il datamart sarà creato come FX_processId
-		Query.save(processId, name);
+		Query.save(token, processId, name);
 		app.saveProcess();
 		// TODO: salvataggio nel database tabella : bi_processes
 		// aggiungo il report da processare nella list 'reportProcessList'

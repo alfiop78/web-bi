@@ -15,7 +15,8 @@ class CreateBiProcessesTable extends Migration
     {
         Schema::create('bi_processes', function (Blueprint $table) {
             // $table->id();
-            $table->string('name')->primary();
+            $table->string('token')->primary();
+            $table->string('name');
             $table->longText('json_value');
             $table->timestamps();
         });

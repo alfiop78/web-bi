@@ -38,6 +38,7 @@ class BIprocessController extends Controller
     {
         $jsonContent = json_decode($json);
         $process = new BIprocess();
+        $process->token = $jsonContent->{'token'};
         $process->name = $jsonContent->{'name'};
         $process->json_value = $json;
         return $process->save();
@@ -49,9 +50,9 @@ class BIprocessController extends Controller
      * @param  \App\Models\BIprocess  $bIprocess
      * @return \Illuminate\Http\Response
      */
-    public function show(BIprocess $bIprocess, $name)
+    public function show(BIprocess $bIprocess, $token)
     {
-        $element = $bIprocess::findOrFail($name);
+        $element = $bIprocess::findOrFail($token);
         return response()->json($element);
     }
 
@@ -76,7 +77,8 @@ class BIprocessController extends Controller
     public function update(Request $request, BIprocess $bIprocess, $json)
     {
         $jsonContent = json_decode($json);
-        $process = $bIprocess::findOrFail($jsonContent->{'name'});
+        $process = $bIprocess::findOrFail($jsonContent->{'token'});
+        $process->token = $jsonContent->{'token'};
         $process->name = $jsonContent->{'name'};
         $process->json_value = $json;
         return $process->save();
@@ -88,9 +90,9 @@ class BIprocessController extends Controller
      * @param  \App\Models\BIprocess  $bIprocess
      * @return \Illuminate\Http\Response
      */
-    public function destroy(BIprocess $bIprocess, $name)
+    public function destroy(BIprocess $bIprocess, $token)
     {
-        $element = $bIprocess::findOrFail($name);
+        $element = $bIprocess::findOrFail($token);
         return $element->delete();
     }
 }
