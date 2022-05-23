@@ -100,6 +100,7 @@ class Storages {
 		window.localStorage.setItem(value.name, JSON.stringify(value));
 	}
 
+	// TODO: sostituirà save()
 	set saveTemp(value) {
 		console.log(value);
 		debugger;

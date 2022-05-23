@@ -12,20 +12,20 @@ class Queries {
 	#compositeMetrics = {};
 	#compositeBaseMetric;
 	#filters = new Map();
+	#metrics = new Map();
 	#elementReport = new Map();
 	#elementCube = new Map();
 	#elementDimension = new Set();
 	#elementHierarchies = new Set();
 	#elementFilters = new Map();
+	#elementMetrics = new Map();
 	constructor() {
 		this.#select = {};
 		this.#obj = {}; // object generico
 		this._fromSet = new Set();
 		this._where = {};
 		this._factRelation = {};
-		this._metrics = {};
 		this._filteredMetrics = {};
-		// this.#firstTable = {};
 	}
 
 	set table(value) {this.#table = value;}
@@ -64,10 +64,6 @@ class Queries {
 
 	get from() {return this._fromSet;}
 
-	set flagCompositeBase(value) {this.#compositeBaseMetric = value;};
-
-	get flagCompositeBase() {return this.#compositeBaseMetric;}
-
 	addTables(hier) {
 		// è necessario creare la proprietà firstTable per poterla utilizzare in checkRelations e stabilire quali tabelle e join devono essere considerate nella query finale
 		/*
@@ -97,10 +93,6 @@ class Queries {
 		this._fromSet.delete(tableName);
 		console.log('_from : ', this._fromSet);
 	}
-
-	set filterName(value) {this._filterName = value};
-
-	get filterName() {return this._filterName;}
 
 	set columnName(value) {this.#column = value;}
 
@@ -202,23 +194,25 @@ class Queries {
 
 	get filters() {return this.#filters};
 
-	set metricName(value) {this._metricName = value;}
-
-	get metricName() {return this._metricName;}
-
-	set metrics(object) {
-		// object = {sqlFunction: "SUM", field: "NettoRiga", metricName: "netto riga", distinct: false, alias: "Venduto"}
-		this._metrics[this._metricName] = object;
-		console.log('metrics : ', this._metrics);
+	set metrics(value) {
+		// value = {sqlFunction: "SUM", field: "NettoRiga", metricName: "netto riga", distinct: false, alias: "Venduto"}
+		// this.#metrics[this._metricName] = object;
+		if (this.#metrics.has(value.token)) {
+			this.#metrics.delete(value.token);
+		} else {
+			this.#metrics.set(value.token, value);
+			/*
+			if (this.flagCompositeBase) {
+				// metrica composta sul cubo, non includo table e tableAlias
+				this.#metrics.set(value.token, value);
+			}*/ /*else {
+				this.#metrics.set(value.token, {SQLFunction : value.SQLFunction, alias : value.alias, distinct : value.distinct, field : value.field, table : this.table, tableAlias : this.tableAlias});
+			}*/
+		}
+		console.log('metrics : ', this.#metrics);
 	}
 
-	get metrics() {return this._metrics;}
-
-	deleteMetric() {
-		debugger;
-		delete this._metrics[this._metricName];
-		console.log('_metrics : ', this._metrics);
-	}
+	get metrics() {return this.#metrics;}
 
 	set filteredMetrics(object) {
 		this._filteredMetrics[this._metricName] = object;
@@ -282,6 +276,7 @@ class Queries {
 		this.#elementReport.set('dimensions', [...this.#elementDimension]);
 		this.#elementReport.set('hierarchies', [...this.#elementHierarchies]);
 		this.#elementReport.set('filters', Object.fromEntries(this.elementFilter));
+		
 		return this.#elementReport;
 	}
 
@@ -293,7 +288,10 @@ class Queries {
 		this._reportProcess['where'] = this.#where;
 		this._reportProcess['factJoin'] = this._factRelation;
 		this._reportProcess['filters'] = Object.fromEntries(this.filters);
-		if (Object.keys(this._metrics).length > 0) this._reportProcess['metrics'] = this._metrics;
+		if (this.metrics.size > 0) {
+			this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
+			this._reportProcess['metrics'] = Object.fromEntries(this.#metrics);
+		}
 		if (Object.keys(this._filteredMetrics).length > 0) this._reportProcess['filteredMetrics'] = this._filteredMetrics;
 		if (Object.keys(this.#compositeMetrics).length > 0) this._reportProcess['compositeMetrics'] = this.#compositeMetrics;
 		this._reportProcess['processId'] = processId; // questo creerà il datamart FX[processId]

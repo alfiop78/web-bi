@@ -75,7 +75,12 @@ class Cube {
 	set metrics(value) {
 		// value : { name, metric_type : 0, formula: arr_sql, alias }
 		// se value è un object (metrica composta) lo salvo come object altrimenti come stringa nel Map()
-		this.#metricsMap.set(value.name, {alias : value.alias, formula : value.formula, metric_type : value.metric_type, fields : value.fields});
+		if (value.metric_type === 0) {
+			this.#metricsMap.set(value.name, {alias : value.alias, metric_type : value.metric_type});
+		} else {
+			// metrica di base composta (es.: przmedio * quantita) impostata sul cubo
+			this.#metricsMap.set(value.name, {alias : value.alias, formula : value.formula, metric_type : value.metric_type, fields : value.fields});
+		}
 		console.log(this.#metricsMap);
 	}
 

@@ -9,7 +9,7 @@ class BImetric extends Model
 {
     use HasFactory;
     protected $table = 'bi_metrics';
-    protected $primaryKey = 'name';
+    protected $primaryKey = 'token';
     protected $keyType = 'string';
     // con l'utilizzo di incrementing la primaryKey non viene convertita in Int
     public $incrementing = false;

@@ -40,6 +40,7 @@ class BImetricController extends Controller
         // l'inserimento con Eloquent ha inserito anche i campi created_at/updated_at
         $metric = new BImetric();
         // il nome della tabella è impostato nel Model
+        $metric->token = $jsonContent->{'token'};
         $metric->name = $jsonContent->{'name'};
         $metric->json_value = $json;
         return $metric->save();
@@ -51,9 +52,9 @@ class BImetricController extends Controller
      * @param  \App\Models\BImetric  $bImetric
      * @return \Illuminate\Http\Response
      */
-    public function show(BImetric $bImetric, $name)
+    public function show(BImetric $bImetric, $token)
     {
-        $element = $bImetric::findOrFail($name);
+        $element = $bImetric::findOrFail($token);
         return response()->json($element);   
     }
 
@@ -78,7 +79,8 @@ class BImetricController extends Controller
     public function update(Request $request, BImetric $bImetric, $json)
     {
         $jsonContent = json_decode($json);
-        $metric = $bImetric::findOrFail($jsonContent->{'name'});
+        $metric = $bImetric::findOrFail($jsonContent->{'token'});
+        $metric->token = $jsonContent->{'token'};
         $metric->name = $jsonContent->{'name'};
         $metric->json_value = $json;
         return $metric->save();
@@ -90,9 +92,9 @@ class BImetricController extends Controller
      * @param  \App\Models\BImetric  $bImetric
      * @return \Illuminate\Http\Response
      */
-    public function destroy(BImetric $bImetric, $name)
+    public function destroy(BImetric $bImetric, $token)
     {
-        $element = $bImetric::findOrFail($name);
+        $element = $bImetric::findOrFail($token);
         return $element->delete();
     }
 }

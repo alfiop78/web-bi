@@ -444,11 +444,12 @@ var Hier = new Hierarchy();
 				e.currentTarget.toggleAttribute('metrics');
 
 				if (!e.currentTarget.hasAttribute('metrics')) {
+					// TODO: utilizzare l'oggetto Map come fatto nella classe Query
 					// TODO: delete cube.metrics[tableName][fieldName];
 				} else {
 					// TODO: nel salvataggio di una metrica di base dovrò aprire una dialog dove impostare l'alias.
 					// ...quindi andrò a salvare in cube.metrics così come viene salvata la metrica composta di base, cioè quella legata al cubo
-					cube.metrics = { name : cube.fieldSelected, metric_type : 0, formula : null, alias : cube.fieldSelected };
+					cube.metrics = { name : cube.fieldSelected, metric_type : 0, alias : cube.fieldSelected };
 				}
 				break;
 			default:
@@ -538,7 +539,7 @@ var Hier = new Hierarchy();
 			}
 		});
 		console.log('arr_sql : ', arr_sql);
-		cube.metrics = { name, metric_type : 0, formula: arr_sql, alias, fields };
+		cube.metrics = { name, metric_type : 1, formula: arr_sql, alias, fields };
 	}
 
 	app.createHierarchy = (e) => {
