@@ -496,7 +496,7 @@
 															<input type="search" data-element-search="search-cube" id="search-cube" value autocomplete="off" />
 															<label for="search-cube" class="">Ricerca</label>
 														</div>
-														<ul id="list-cubes" class="full-overflow-list-columns"></ul>
+														<ul id="ul-cubes" class="full-overflow-list-columns"></ul>
 													</div>
 													{{-- dimension-list --}}
 													<div id="parent-list-dimensions">
@@ -505,7 +505,7 @@
 															<input type="search" data-element-search="search-dimension" id="search-dimension" value autocomplete="off" />
 															<label for="search-dimension" class="">Ricerca</label>
 														</div>
-														<ul id="list-dimensions" class="full-overflow-list-columns"></ul>
+														<ul id="ul-dimensions" class="full-overflow-list-columns"></ul>
 													</div>
 													{{-- gerarchie --}}
 													<div id="parent-list-hierarchies">
@@ -516,7 +516,7 @@
 														</div>
 														<ul id="list-fact-tables" class="fact-table"></ul>
 														<div class="c">
-															<ul id="list-hierarchies" class="full-overflow-list"></ul>
+															<ul id="ul-hierarchies" class="full-overflow-list"></ul>
 														</div>														
 													</div>
 												</div>

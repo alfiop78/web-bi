@@ -92,7 +92,7 @@ var StorageMetric = new MetricStorage();
 
 	// carico elenco Cubi su cui creare il report
 	app.getCubes = () => {
-		const ul = document.getElementById('list-cubes');
+		const ul = document.getElementById('ul-cubes');
 		for (const [key, value] of Object.entries(StorageCube.cubes)) {
 			const content = app.tmplList.content.cloneNode(true);
 			const section = content.querySelector('section[data-sublist-gen]');
@@ -105,6 +105,8 @@ var StorageMetric = new MetricStorage();
 			section.dataset.cubeId = value.id;
 			section.dataset.cubeName = key;
 			div.dataset.label = key;
+			div.dataset.tableAlias = value.alias;
+			div.dataset.tableName = value.FACT;
 			span.innerText = key;
 			div.onclick = app.handlerCubeSelected;
 			ul.appendChild(section);
@@ -113,7 +115,7 @@ var StorageMetric = new MetricStorage();
 
 	// lista dimensioni
 	app.getDimensions = () => {
-		const ul = document.getElementById('list-dimensions');
+		const ul = document.getElementById('ul-dimensions');
 		for (const [cubeName, cubeValue] of (Object.entries(StorageCube.cubes))) {
 			// console.log('key : ', cubeName);
 			// console.log('value : ', cubeValue); // tutto il contenuto del cubo
@@ -141,7 +143,7 @@ var StorageMetric = new MetricStorage();
 	app.getHierarchies = () => {
 		// imposto un data-dimension-id/name sugli .element della lista gerarchie, in questo modo posso filtrarle quando seleziono le dimensioni nello step precedente
 		// const content = app.tmplUlList.content.cloneNode(true);
-		const ul = document.getElementById('list-hierarchies');
+		const ul = document.getElementById('ul-hierarchies');
 		// ottengo l'elenco delle gerarchie per ogni dimensione presente in storage, successivamente, quando la dimensione viene selezionata, visualizzo/nascondo solo quella selezionata
 		// console.log('lista dimensioni :', StorageDimension.dimensions);
 		// per ogni dimensione presente aggiungo gli elementi nella ul con le gerarchie
@@ -325,7 +327,7 @@ var StorageMetric = new MetricStorage();
 				div.dataset.tableName = cubeValue.FACT;
 				div.dataset.tableAlias = cubeValue.alias;
 				div.dataset.cubeName = cubeName;
-				div.dataset.label = filter.name;
+				div.dataset.label = filter.token;
 				div.onclick = app.handlerFilterSelected;
 				span.innerText = filter.name;
 				smallTable.innerText = cubeValue.FACT;
@@ -335,9 +337,24 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
+	// visualizzo metriche / filtri appartenenti al cubo
+	app.showCubeObjects = () => {
+		document.querySelectorAll("ul > section.data-item[data-cube-name='" + StorageCube.selected.name + "']").forEach( item => {
+			item.hidden = false;
+			item.toggleAttribute('data-searchable');
+		});
+	}
+
+	app.hideCubeObjects = () => {
+		document.querySelectorAll("ul > section.data-item[data-cube-name='" + StorageCube.selected.name + "']").forEach( item => {
+			item.hidden = true;
+			item.toggleAttribute('data-searchable');
+		});
+	}
+
 	app.showDimensions = () => {
 		// visualizzo la <ul> contentente le dimensioni appartenenti al cubo selezionato
-		document.querySelectorAll("#list-dimensions > section[data-cube-name='" + StorageCube.selected.name + "']").forEach((dimension) => {
+		document.querySelectorAll("#ul-dimensions > section[data-cube-name='" + StorageCube.selected.name + "']").forEach((dimension) => {
 			// console.log('Dimensioni del cubo selezionato : ', dimension);
 			dimension.hidden = false;
 			dimension.dataset.searchable = true;
@@ -345,21 +362,21 @@ var StorageMetric = new MetricStorage();
 	}
 
 	app.hideDimensions = () => {
-		document.querySelectorAll("#list-dimensions > section[data-cube-name='" + StorageCube.selected.name + "']").forEach((table) => {
+		document.querySelectorAll("#ul-dimensions > section[data-cube-name='" + StorageCube.selected.name + "']").forEach((table) => {
 			table.hidden = true;
 			table.toggleAttribute('data-searchable');
 		});
 	}
 
 	app.showHierarchies = () => {
-		document.querySelectorAll("#list-hierarchies > section[data-dimension-name='" + StorageDimension.selected.name + "']").forEach( (hier) => {
+		document.querySelectorAll("#ul-hierarchies > section[data-dimension-name='" + StorageDimension.selected.name + "']").forEach( (hier) => {
 			hier.hidden = false;
 			hier.dataset.searchable = true;
 		});
 	}
 
 	app.hideHierarchies = () => {
-		document.querySelectorAll("#list-hierarchies > section[data-dimension-name='" + StorageDimension.selected.name + "']").forEach((hier) => {
+		document.querySelectorAll("#ul-hierarchies > section[data-dimension-name='" + StorageDimension.selected.name + "']").forEach((hier) => {
 			hier.hidden = true;
 			hier.removeAttribute('data-searchable');
 		});
@@ -527,15 +544,16 @@ var StorageMetric = new MetricStorage();
 			const div = section.querySelector('div.selectable');
 			const span = div.querySelector('span');
 			section.classList.remove('data-item');
-			section.dataset.label = value.FACT;
+			div.classList.remove('selectable');
+			// section.dataset.label = value.FACT;
 			section.dataset.cubeName = key;
-			section.dataset.tableAlias = value.alias;
-			section.dataset.schemaName = value.schema; // WARN: data-schema o schema-name ?
-			div.dataset.cubeName = key;
-			div.dataset.label = value.FACT;
-			div.dataset.tableAlias = value.alias;
+			// section.dataset.tableAlias = value.alias;
+			// section.dataset.schemaName = value.schema; // WARN: data-schema o schema-name ?
+			// div.dataset.cubeName = key;
+			// div.dataset.label = value.FACT;
+			// div.dataset.tableAlias = value.alias;
 			span.innerText = value.FACT;
-			div.onclick = app.handlerFactSelected;
+			// div.onclick = app.handlerFactSelected;
 			ul.appendChild(section);
 		}
 	}
@@ -570,7 +588,6 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// lista metriche composte
-	// lista metriche esistenti
 	app.getCompositeMetrics = () => {
 		const ul = document.getElementById('exist-composite-metrics');
 		for (const [cubeName, cubeValue] of Object.entries(StorageCube.cubes)) {
@@ -632,7 +649,7 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// selezione della fact nello step-2
-	app.handlerFactSelected = (e) => {
+	/*app.handlerFactSelected = (e) => {
 		e.currentTarget.toggleAttribute('selected');
 		const cube = e.currentTarget.dataset.cubeName;
 		const table = e.currentTarget.dataset.label;
@@ -649,7 +666,7 @@ var StorageMetric = new MetricStorage();
 				item.toggleAttribute('data-searchable');
 			});
 		}
-	}
+	}*/
 
 	app.showPopupDialog = (e) => {
 		// OPTIMIZE: spostare in Application.js
@@ -757,8 +774,8 @@ var StorageMetric = new MetricStorage();
 		// seleziono il cubo/i utilizzati nel report (prop factJoin -> dimensioni utilizzate -> cubi utilizzati)
 		for (const [key, value] of cubes) {
 			console.log(key + ' = ' + value.tableAlias);
-			// #list-cubes visualizzo e seleziono il cubo presente nella lista
-			document.querySelector("#list-cubes > section[data-label='" + key + "'] .selectable").setAttribute('selected', true);
+			// #ul-cubes visualizzo e seleziono il cubo presente nella lista
+			document.querySelector("#ul-cubes > section[data-label='" + key + "'] .selectable").setAttribute('selected', true);
 			// reimposto tutto come se avessi fatto clic per selezionare il cubo, in app.handlerCubeSelected()
 			StorageCube.selected = key;
 			Query.tableAlias = StorageCube.selected.alias;
@@ -766,6 +783,8 @@ var StorageMetric = new MetricStorage();
 			app.showDimensions();
 			// visualizzo la/e tabelle fact nello step-2
 			document.querySelector("#list-fact-tables > section[data-cube-name='" + StorageCube.selected.name + "']").hidden = false;
+			// visualizzo e seleziono metriche e filtri appartenenti al cubo
+			app.showCubeObjects();
 		}
 
 		// array dimensioni
@@ -774,14 +793,14 @@ var StorageMetric = new MetricStorage();
 			StorageDimension.selected = dimension;
 			Query.factRelation = StorageDimension.selected;
 			Query.elementDimension = {name : dimension};
-			document.querySelector("#list-dimensions > section[data-label='" + dimension + "'] .selectable").setAttribute('selected', true);
+			document.querySelector("#ul-dimensions > section[data-label='" + dimension + "'] .selectable").setAttribute('selected', true);
 			app.showHierarchies();
 		});
 
 		// seleziono le gerarchie utilizzate nel report
 		StorageProcess.process.elements.hierarchies.forEach( hierarchy => {
 			Query.elementHierarchy = {name : hierarchy};
-			document.querySelector("#list-hierarchies > section[data-label='" + hierarchy + "'] .selectable").setAttribute('selected', true);
+			document.querySelector("#ul-hierarchies > section[data-label='" + hierarchy + "'] .selectable").setAttribute('selected', true);
 			app.showAllElements();
 		});
 
@@ -790,20 +809,20 @@ var StorageMetric = new MetricStorage();
 		for (const [token, value] of filters) {
 			document.querySelector("#exist-filters .selectable[data-label='"+token+"']").setAttribute('selected', true);
 			// lo re-imposto come se venisse selezionato
-			debugger;
 			if (value.hasOwnProperty('hier')) {
 				// imposto la firstTable se il filtro appartiene a una dimensione e non a un cubo
+				Query.tableId = value.tableId;
+				Query.table = value.table;
 				Query.addTables(value.hier);
 				app.checkRelations(value.hier);
 			}
-			debugger;
 			Query.filters = { token, SQL : `${value.tableAlias}.${value.formula}` };
 		}
 		
 		// TODO: seleziono le colonne utilizzate nel report
 		//  (questo lo posso fare dopo la modifica della lista colonne che consente di selezionare le colonne dalla <ul> #report-columns anzichè dalla dialog)
 		// nella prop select ci sono i token delle colonne utilizzate nel report
-		// TODO: seleziono i filtri/metriche utilizzati nel report (prop filters e metrics, filteredMetrics e compositeMEtrics)
+		// TODO: seleziono i filtri/metriche utilizzati nel report
 	}
 
 	// selezione di un cubo (step-1)
@@ -819,11 +838,19 @@ var StorageMetric = new MetricStorage();
 		if (e.currentTarget.hasAttribute('selected')) {
 			// Query.addFromCubes(StorageCube.selected.FACT);
 			app.showDimensions();
-			// visualizzo la/e tabelle fact
+			app.showCubeObjects();
+			/*// visualizzo, in tutte le ul section.data-item[data-cube-name] gli elementi appartenenti al cubo selezionato
+			document.querySelectorAll("ul > section.data-item[data-cube-name='" + StorageCube.selected.name + "']").forEach( item => {
+				item.hidden = false;
+				item.toggleAttribute('data-searchable');
+			});*/
+			// visualizzo la tabelle fact del cubo selezionato
 			document.querySelector("#list-fact-tables > section[data-cube-name='" + StorageCube.selected.name + "']").hidden = false;
 		} else {
 			// TODO: completare
 			app.hideDimensions();
+			// nascondo tutti gli elementi relativi al cubo deselezionato
+			app.hideCubeObjects();
 			StorageCube.deleteCube();
 		}
 	}
@@ -885,11 +912,12 @@ var StorageMetric = new MetricStorage();
 		if (e.currentTarget.hasAttribute('selected')) {
 			// recupero dallo storage il filtro selezionato
 			// console.log(StorageFilter.filter);
-			if (StorageFilter.filter.hier) {
+			debugger;
+			if (StorageFilter.filter.hasOwnProperty(hier)) {
 				// imposto la firstTable se il filtro appartiene a una dimensione e non a un cubo
 				Query.addTables(StorageFilter.filter.hier);
 				app.checkRelations(hier);
-				Query.elementFilter = {token : e.currentTarget.dataset.label, hier, tableAlias : Query.tableAlias, formula : StorageFilter.filter.formula};
+				Query.elementFilter = {token : e.currentTarget.dataset.label, hier, tableAlias : Query.tableAlias, formula : StorageFilter.filter.formula, tableId : Query.tableId};
 			} else {
 				// filtro sul cubo, non ha hier
 				Query.elementFilter = {token : e.currentTarget.dataset.label, tableAlias : Query.tableAlias, formula : StorageFilter.filter.formula};
@@ -1703,13 +1731,13 @@ var StorageMetric = new MetricStorage();
 	app.btnAddColumns.onclick = (e) => {
 		console.log('addColumns');
 		// verifico che almeno una gerarchia è stata selezionata
-		const hierSelectedCount = document.querySelectorAll('#list-hierarchies .selectable[selected]').length;
+		const hierSelectedCount = document.querySelectorAll('#ul-hierarchies .selectable[selected]').length;
 		if (hierSelectedCount === 0) {
 			App.handlerConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
 			return;
 		} else {
 			// recupero le gerarchie selezionate
-			// const hierSelected = document.querySelectorAll('#list-hierarchies section[selected]');
+			// const hierSelected = document.querySelectorAll('#ul-hierarchies section[selected]');
 			// per ogni gerarchia selezionata aggiungo le tabelle e le colonne in una lista
 			app.dialogColumns.showModal();
 		}
@@ -1719,7 +1747,7 @@ var StorageMetric = new MetricStorage();
 	app.btnAddFilters.onclick = (e) => {
 		// stessa logica di btnAddColumns
 		console.log('addFilters');
-		const hierSelectedCount = document.querySelectorAll('#list-hierarchies .selectable[selected]').length;
+		const hierSelectedCount = document.querySelectorAll('#ul-hierarchies .selectable[selected]').length;
 		if (hierSelectedCount === 0) {
 			App.handlerConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
 			return;
@@ -1731,7 +1759,7 @@ var StorageMetric = new MetricStorage();
 	// aggiungi metriche (step-2)
 	app.btnAddMetrics.onclick = (e) => {
 		// verifico se è stato selezionato almeno un cubo
-		const cubeSelectedCount = document.querySelectorAll('#list-fact-tables .selectable[selected]').length;
+		const cubeSelectedCount = document.querySelectorAll('#ul-cubes .selectable[selected]').length;
 		if (cubeSelectedCount === 0) {
 			App.handlerConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
 			return;
@@ -1742,18 +1770,18 @@ var StorageMetric = new MetricStorage();
 
 	// aggiungi metrica composta
 	app.btnAddCompositeMetrics.onclick = (e) => {
-		const cubeSelectedCount = document.querySelectorAll('#list-fact-tables .selectable[selected]').length;
+		const cubeSelectedCount = document.querySelectorAll('#ul-cubes .selectable[selected]').length;
 		if (cubeSelectedCount === 0) {
 			App.handlerConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
 			return;
 		} else {
 			// TODO: popola la #ul-metrics
 			// recupero i cubi selezionati
-			const selectedCubes = document.querySelectorAll('#list-fact-tables .selectable[selected]');
+			const selectedCubes = document.querySelectorAll('#ul-cubes .selectable[selected]');
 			// per ogni cubo selezionato ne recupero le metriche ad esso appartenenti
 			const ul = document.getElementById('ul-metrics');
 			selectedCubes.forEach( cube => {
-				const cubeName = cube.dataset.cubeName;
+				const cubeName = cube.dataset.label;
 				// ripulisco la lista, prima di popolarla
 				document.querySelectorAll('#ul-metrics > section').forEach( item => item.remove());
 				// recupero lista aggiornata delle metriche

@@ -271,7 +271,7 @@ class Queries {
 
 	set elementFilter(value) {
 		(this.#elementFilters.has(value.token)) ?
-			this.#elementFilters.delete(value.token) : this.#elementFilters.set(value.token, {hier : value.hier, tableAlias : value.tableAlias, formula : value.formula});
+			this.#elementFilters.delete(value.token) : this.#elementFilters.set(value.token, {hier : value.hier, tableAlias : value.tableAlias, formula : value.formula, tableId : value.tableId, table : this.table});
 		console.log('this.#elementFilters : ', this.#elementFilters);
 	}
 
