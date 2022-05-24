@@ -64,32 +64,35 @@ var storage = new Storages();
 		// recupero elementi locali
 		for (element in data) {
 			// console.log('element : ', element); // dimensions, cubes, ecc...
-			let objectsSet;
+			// let objectsSet = new Map();
+			console.log('element : ', element);
+			let objectsMap;
+			// let objectsMap = new Map();
 			switch (element) {
 				case 'dimensions':
-					objectsSet = storage.dimensions;
+					objectsMap = storage.dimensions;
 					break;
 				case 'cubes':
-					objectsSet = storage.cubes;
+					objectsMap = storage.cubes;
 					break;
 				case 'filters':
-					objectsSet = storage.filters;
+					objectsMap = storage.filters;
 					break;
 				case 'metrics':
-					objectsSet = storage.metrics;
+					objectsMap = storage.metrics;
 					break;
 				default:
-					objectsSet = storage.processes;
+					objectsMap = storage.processes;
 					break;
 			}
 			// console.log('objectsSet : ', objectsSet);
 			data[element].forEach( (el) => {
-				// se l'elemento in local è già presente sul DB lo elimino dal Set dimensions, gli elementi rimanenti da questa operazione andranno ad aggiungersi alla Dialog Versioning
-				// ... questi sono elemeneti che si trovano SOLO in local, es.: in fase di sviluppo in locale
-				 if (objectsSet.has(el.name)) objectsSet.delete(el.name);
+				// se l'elemento in local è già presente sul DB lo elimino dal Map dimensions, gli elementi rimanenti da questa operazione andranno ad aggiungersi alla Dialog Versioning
+				// ... questi sono elementi che si trovano SOLO in local, es.: in fase di sviluppo in locale
+				if (objectsMap.has(el.token)) objectsMap.delete(el.token);
 			});
-			// console.log('objectsSet', objectsSet);
-			objectsSet.forEach( (el) => {
+			for ( const [token, value] of objectsMap) {
+				console.log('token : ', token);
 				const tmplContent = app.tmplVersioningDB.content.cloneNode(true);
 				let sectionSearchable = tmplContent.querySelector('section[data-searchable]')
 				let versioningStatus = tmplContent.querySelector('.versioning-status');
@@ -100,23 +103,26 @@ var storage = new Storages();
 				iconStatus.innerText = 'warning';
 				iconStatus.classList.add('md-attention');
 				descrStatus.innerText = 'In locale';
-				versioningStatus.querySelector('.vers-title > div[data-name]').innerText = el;
-				sectionSearchable.setAttribute('data-element-search', 'versioning-db-search');
-				sectionSearchable.setAttribute('data-object-storage', 'local');
-				sectionSearchable.setAttribute('data-object-type', element);
-				sectionSearchable.setAttribute('data-object-name', el);
-				sectionSearchable.setAttribute('data-label', el);
+				versioningStatus.querySelector('.vers-title > div[data-name]').innerText = value.name;
+				sectionSearchable.dataset.elementSearch = 'versioning-db-search';
+				sectionSearchable.dataset.objectStorage = 'local';
+				sectionSearchable.dataset.objectType = element;
+				sectionSearchable.dataset.objectName = value.name;
+				sectionSearchable.dataset.token = token;
+				// sectionSearchable.dataset.token = token;
 				// icona per recuperare manualmente l'elemento
 				actions.querySelector('.popupContent[data-upload]').removeAttribute('hidden');
-				actions.querySelector('.popupContent[data-upload] i[data-id="btn-upload-local-object"]').setAttribute('data-object-name', el);
-				actions.querySelector('.popupContent[data-upload] i[data-id="btn-upload-local-object"]').setAttribute('data-object-type', element);
+				actions.querySelector('.popupContent[data-upload] i[data-id="btn-upload-local-object"]').dataset.objectName = value.name;
+				actions.querySelector('.popupContent[data-upload] i[data-id="btn-upload-local-object"]').dataset.token = token;
+				actions.querySelector('.popupContent[data-upload] i[data-id="btn-upload-local-object"]').dataset.objectType = element;
 				// imposto, sull'icona delete, gli attributi per eseguire la cancellazione. Aggiungo un ulteriore attributo per differenziare gli elementi in localStorage da quelli su DB.
-				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-name', el);
-				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-type', element);
+				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectName = value.name;
+				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.token = token;
+				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectType = element;
 				// NOTE: se è presente l'attributo data-object-storage, l'elemento deve essere eliminato SOLO dal LocalStorage, altrimenti sia dal LocalStorage che dal DB.
-				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-storage', true);
+				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectStorage = true;
 				parent.appendChild(sectionSearchable);
-			});
+			}
 		}
 	}
 
@@ -145,18 +151,19 @@ var storage = new Storages();
 				// console.log(JSON.parse(window.localStorage.getItem(jsonParsed.name)).name);
 			
 				// verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore a causa della prop 'name', se non esiste un determinato Elemento
-				if (JSON.parse(window.localStorage.getItem(jsonParsed.name)) || JSON.parse(window.localStorage.getItem(jsonParsed.token)) ) {
-					if ( jsonParsed.name === JSON.parse(window.localStorage.getItem(jsonParsed.name)).name || jsonParsed.token === JSON.parse(window.localStorage.getItem(jsonParsed.token)).token ) {
+				if (JSON.parse(window.localStorage.getItem(jsonParsed.token)) ) {
+					if ( jsonParsed.token === JSON.parse(window.localStorage.getItem(jsonParsed.token)).token ) {
 						// se l'elemento è già presente in locale verifico anche se il suo contenuto è uguale a quello del DB
 						// console.log('elemento già presente in locale', jsonParsed.name);
-						if (el.json_value === window.localStorage.getItem(jsonParsed.name) || el.json_value === window.localStorage.getItem(jsonParsed.token)) {
+						if ( el.json_value === window.localStorage.getItem(jsonParsed.token) ) {
 							// console.info('UGUALE CONTENTUO JSON, ELEMENTO RESTA INVARIATO IN LOCALE');
 							iconStatus.innerText = 'sync';
 							iconStatus.classList.add('md-status'); // darkgrey
 							descrStatus.innerText = 'Sincronizzato';
 							// icona delete
-							actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-name', jsonParsed.name);
-							actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-type', element);
+							actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectName = jsonParsed.name;
+							actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectType = element;
+							actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.token = jsonParsed.token;
 						} else {
 							// elemento presente ma contenuto diverso dal DB, da aggiornare manualmente
 							iconStatus.innerText = 'sync_problem';
@@ -164,17 +171,19 @@ var storage = new Storages();
 							descrStatus.innerText = 'Non sincronizzato';
 							// icona per recuperare manualmente l'elemento
 							actions.querySelector('.popupContent[data-download]').removeAttribute('hidden');
-							actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').setAttribute('data-object-name', jsonParsed.name);
-							actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').setAttribute('data-object-type', element);
+							actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').dataset.objectName = jsonParsed.name;
+							actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').dataset.objectType = element;
+							actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').dataset.token = jsonParsed.token;
 							// icona per versionare da Sviluppo->Produzione
 							actions.querySelector('.popupContent[data-upgrade]').removeAttribute('hidden');
-							actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').setAttribute('data-object-name', jsonParsed.name);
-							actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').setAttribute('data-object-type', element);
+							actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').dataset.objectName = jsonParsed.name;
+							actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').dataset.objectType = element;
+							actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').dataset.token = jsonParsed.token;
 						}
 					}
 				} else {
 					// elemento non presente in locale, lo salvo direttamente
-					window.localStorage.setItem(jsonParsed.name, el.json_value);
+					window.localStorage.setItem(jsonParsed.token, el.json_value);
 					iconStatus.innerText = 'done';
 					iconStatus.classList.add('md-done');
 					descrStatus.innerText = 'Aggiornato';
@@ -183,13 +192,14 @@ var storage = new Storages();
 				const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false, timeZone: 'Europe/Rome' };
 				versioningStatus.querySelector('.vers-title  span[data-created-at]').innerText = new Intl.DateTimeFormat('it-IT', options).format(new Date(el.created_at));
 				versioningStatus.querySelector('.vers-title span[data-updated-at]').innerText = new Intl.DateTimeFormat('it-IT', options).format(new Date(el.updated_at));
-				sectionSearchable.setAttribute('data-object-type', element);
-				sectionSearchable.setAttribute('data-object-name', jsonParsed.name);
+				sectionSearchable.dataset.objectType = element;
+				sectionSearchable.dataset.objectName = jsonParsed.name;
 				// icona delete
-				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-name', jsonParsed.name);
-				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').setAttribute('data-object-type', element);
-				sectionSearchable.setAttribute('data-element-search', 'versioning-db-search');
-				sectionSearchable.setAttribute('data-label', jsonParsed.name);
+				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectName = jsonParsed.name;
+				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectType = element;
+				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.token = jsonParsed.token;
+				sectionSearchable.dataset.elementSearch = 'versioning-db-search';
+				sectionSearchable.dataset.label = jsonParsed.name;
 				parent.appendChild(sectionSearchable);
 			});
 		}
@@ -230,7 +240,7 @@ var storage = new Storages();
 					...
 					]
 				*/
-				// console.log('elementData : ', elementData);
+				console.log('elementData : ', elementData);
 				app.createVersioningElements(elementData);
 				// controllo inverso, recupero gli elementi in locale che non sono presenti sul DB (es.: Dimensioni e cubi in fase di sviluppo)
 				app.getLocalElements(elementData);
@@ -246,11 +256,12 @@ var storage = new Storages();
 
 	app.fetchAPIRequestVersioningAll();
 
-	app.saveObjectOnDB = async (name, type) => {
+	app.saveObjectOnDB = async (token, type) => {
 		// console.log(window.localStorage.getItem(name));
+		// debugger;
 		let url;
 		// const json = JSON.stringify(window.localStorage.getItem(name));
-		const json = window.localStorage.getItem(name);
+		const json = window.localStorage.getItem(token);
 		// console.log('json', json);
 		// console.log('json', window.localStorage.getItem(name));
 		// console.log('json', JSON.stringify(window.localStorage.getItem(name)));
@@ -283,9 +294,9 @@ var storage = new Storages();
 				// console.log(data);
 				if (data) {
 					console.log('data : ', data);
-					console.log(name,' SALVATO CORRETTAMENTE');
+					console.log(token,' SALVATO CORRETTAMENTE');
 					// reimposto l'icona in .vers-status
-					const sectionElement = app.dialogVersioning.querySelector("section[data-object-name='" + name + "'][data-object-type='" + type + "']");
+					const sectionElement = app.dialogVersioning.querySelector("section[data-token='" + token + "'][data-object-type='" + type + "']");
 					sectionElement.querySelector('.vers-status > i').innerText = 'sync';
 					sectionElement.querySelector('.vers-status > i').classList.replace('md-attention', 'md-status');
 					// reimposto la descr.status su 'Sincronizzato'
@@ -451,34 +462,34 @@ var storage = new Storages();
 
 	app.dialogVersioning.addEventListener('click', (e) => {
 		// console.log('e.target : ', e.target);
-		switch (e.target.getAttribute('data-id')) {
+		switch (e.target.dataset.id) {
 			case 'btn-upload-local-object':
 				// tasto upload
 				console.log('btn upload');
 				console.log('e.target : ', e.target);
-				app.saveObjectOnDB(e.target.getAttribute('data-object-name'), e.target.getAttribute('data-object-type'));
+				app.saveObjectOnDB(e.target.dataset.token, e.target.dataset.objectType);
 				break;
 			case 'btn-delete':
 				console.log('btn delete');
 				console.log('e.target : ', e.target);
 				// elimino l'elemento sia dal localStorage che dal DB. Se è presente l'attributo data-object-storage elimino questo elemento SOLO dallo storage locale (non da DB)
 				if (e.target.hasAttribute('data-object-storage')) {
-					window.localStorage.removeItem(e.target.getAttribute('data-object-name'));
-					const type = e.target.getAttribute('data-object-type');
-					const name = e.target.getAttribute('data-object-name');
+					window.localStorage.removeItem(e.target.dataset.token);
+					const type = e.target.dataset.objectType;
+					const name = e.target.dataset.objectName;
 					// elimino anche dal DOM l'elemento
 					app.dialogVersioning.querySelector("section[data-object-type='" + type + "'][data-object-name='" + name + "']").remove();
 				} else {
-					app.deleteObjectOnDB(e.target.getAttribute('data-object-name'), e.target.getAttribute('data-object-type'));
+					app.deleteObjectOnDB(e.target.dataset.token, e.target.dataset.objectType);
 				}
 				break;
 			case 'btn-download':
 				// download, scarico l'elemento in locale, sovrascrivendo l'elemento già presente
-				app.downloadObjectFromDB(e.target.getAttribute('data-object-name'), e.target.getAttribute('data-object-type'));
+				app.downloadObjectFromDB(e.target.dataset.token, e.target.dataset.objectType);
 				break;
 			case 'btn-upgrade-production':
 				// aggiornamento dell'elemento, sovrascrivo l'elemento presente su DB tramite quello in localStorage
-				app.upgradeObjectOnDB(e.target.getAttribute('data-object-name'), e.target.getAttribute('data-object-type'));
+				app.upgradeObjectOnDB(e.target.dataset.token, e.target.dataset.objectType);
 				break;
 			default:
 				break;

@@ -2,7 +2,12 @@
 La classe recupera il local storage ad ogni accesso alla pagina e contiene Metodi per recuperare ad esempio solo i CUBE o solo le DIMENSION, ecc...
 */
 class Storages {
-	#dimensions = new Set();
+	// #dimensions = new Set();
+	#dimensionsMap = new Map();
+	#cubesMap = new Map();
+	#filtersMap = new Map();
+	#metricsMap = new Map();
+	#processesMap = new Map();
 	#cubes = new Set();
 	// #storage = {};
 	#metrics = new Set();
@@ -10,7 +15,6 @@ class Storages {
 	#processes = new Set();
 	#all = new Set();
 	constructor() {
-		this.st = {}; // TODO: da rinominare in this.storage
 		this.storage = window.localStorage;
 		this.storageKeys = Object.keys(window.localStorage);
 		// console.log('storageKeys : ', this.storageKeys);
@@ -20,6 +24,7 @@ class Storages {
 
 	set storageK(value) {
 		// value : METRIC, FILTER, DIMENSION, ecc...
+		this.st = {}; // TODO: da rinominare in this.storage
 		Object.keys(window.localStorage).forEach( key => {
 			if (JSON.parse(window.localStorage.getItem(key)).type === value) {
 				this.st[key] = JSON.parse(window.localStorage.getItem(key));
@@ -39,60 +44,45 @@ class Storages {
 	}
 
 	get dimensions() {
-		this.storageKeys.forEach((key) => {
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			// console.log(key);
-			if (jsonStorage.type === 'DIMENSION') {
-				this.#dimensions.add(jsonStorage.name);
-				// this.#dimensions.push(key);
-			}
-		});
-		return this.#dimensions;
+		// recupero gli oggetti DIMENSION dallo storage
+		this.storageK = 'DIMENSION';
+		for ( const [key, value] of Object.entries(this.st)) {
+			this.#dimensionsMap.set(key, value);
+		}
+		return this.#dimensionsMap;
 	}
 
 	get cubes() {
-		this.storageKeys.forEach((key) => {
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			// console.log(key);
-			if (jsonStorage.type === 'CUBE') {
-				this.#cubes.add(jsonStorage.name);
-			}
-		});
-		return this.#cubes;
+		this.storageK = 'CUBE';
+		for ( const [key, value] of Object.entries(this.st)) {
+			this.#cubesMap.set(key, value);
+		}
+		return this.#cubesMap;
 	}
 
 	get filters() {
-		this.storageKeys.forEach((key) => {
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			// console.log(key);
-			if (jsonStorage.type === 'FILTER') {
-				this.#filters.add(jsonStorage.name);
-			}
-		});
-		return this.#filters;
+		this.storageK = 'FILTER';
+		for ( const [key, value] of Object.entries(this.st)) {
+			this.#filtersMap.set(key, value);
+		}
+		return this.#filtersMap;
 	}
 
 	get processes() {
-		this.storageKeys.forEach((key) => {
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			// console.log(key);
-			if (jsonStorage.type === 'PROCESS') {
-				this.#processes.add(jsonStorage.name);
-			}
-		});
-		return this.#processes;
+		this.storageK = 'PROCESS';
+		for ( const [key, value] of Object.entries(this.st)) {
+			this.#processesMap.set(key, value);
+		}
+		return this.#processesMap;
 	}
 
 	// viene invocata da init_versioning.js
 	get metrics() {
-		this.storageKeys.forEach((key) => {
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			// console.log(key);
-			if (jsonStorage.type === 'METRIC') {
-				this.#metrics.add(jsonStorage.name);
-			}
-		});
-		return this.#metrics;
+		this.storageK = 'METRIC';
+		for ( const [key, value] of Object.entries(this.st)) {
+			this.#metricsMap.set(key, value);
+		}
+		return this.#metricsMap;
 	}
 
 	set save(value) {
@@ -101,7 +91,7 @@ class Storages {
 	}
 
 	// TODO: sostituirà save()
-	set saveTemp(value) {
+	saveTemp(value) {
 		console.log(value);
 		debugger;
 		window.localStorage.setItem(value.token, JSON.stringify(value));	
@@ -115,7 +105,7 @@ class Storages {
 
 class CubeStorage extends Storages {
 	#cubeSelected = new Set();
-	#name;
+	#token;
 	#lists = {};
 	constructor() {
 		super();
@@ -146,19 +136,13 @@ class CubeStorage extends Storages {
 		return this.#lists;
 	}
 
-	get cubes() {return this._cubes;}
-
-	set cubeId(value) {this.id = value;}
-
-	get cubeId() {return this.id;}
-
 	set selected(value) {
 		// imposto il cubo selezionato
-		this.#name = value;
+		this.#token = value;
 	}
 
 	get selected() {
-		return JSON.parse(this.storage.getItem(this.#name));
+		return JSON.parse(this.storage.getItem(this.#token));
 	}
 
 	addCube() {
@@ -335,28 +319,16 @@ class ProcessStorage extends Storages {
 
 class DimensionStorage extends Storages {
 	#dimensions = new Map();
+	// #dimsMap = new Map();
 	#name;
 	// Metodi per leggere/scrivere Dimensioni nello Storage
 	constructor() {
 		super();
-		// this.#dimensions = new Set();
-		this._dimensions = {}; // lista dimensioni presenti nello storage
-		this.id = 0; // default
-		// this.#name;
-		this.storageKeys.forEach((key) => {
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			// console.log(key);
-			if (jsonStorage.type === 'DIMENSION') {
-				this._dimensions[key] = jsonStorage;
-				// console.log('this._dimensions : ', this._dimensions);
-			}
-		});
-		// console.log('this._dimensions : ', this._dimensions);
 	}
 
-	set dimensionId(value) {this.id = value;}
+	// set dimensionId(value) {this.id = value;}
 
-	get dimensionId() { return this.id; }
+	// get dimensionId() { return this.id; }
 
 	set selected(value) {
 		// imposto la dimensione selezionata
@@ -381,23 +353,6 @@ class DimensionStorage extends Storages {
 	}
 
 	get selectedDimensions() {return this.#dimensions;}
-
-	list() {
-		// let dimensions = [];
-		let dimObj = {};
-		this.storageKeys.forEach((key) => {
-			// console.log(key);
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			// console.log(jsonStorage);
-			// console.log(jsonStorage.type);
-			if (jsonStorage.type === 'DIMENSION') {
-				// console.log(key);
-				dimObj[key] = jsonStorage;
-			}
-		});
-		// return dimensions;
-		return dimObj;
-	}
 
 	getIdAvailable() {
 		// ottengo il primo Id disponibile
@@ -441,9 +396,6 @@ class DimensionStorage extends Storages {
 		return this.tables;
 	}
 
-	get dimensions() {return this._dimensions;}
-
-
 }
 
 class FilterStorage extends Storages {
@@ -477,7 +429,7 @@ class FilterStorage extends Storages {
 		return JSON.parse(this.storage.getItem(this._name));
 	}
 
-	getIdAvailable() {
+	/*getIdAvailable() {
 		// ottengo il primo Id disponibile
 		console.log(this.storageKeys);
 		this.filtersElement = [];
@@ -507,7 +459,7 @@ class FilterStorage extends Storages {
 			}
 		}
 		return this.id;
-	}
+	}*/
 
 	// TODO: utilizzare la stessa logica utilizzata cubeMetrics
 	get filters() {return this.#filters;} // tutti i filtri
@@ -524,11 +476,11 @@ class FilterStorage extends Storages {
 	}
 
 	// filtri appartenenti a una determinata dimensione-gerarchia-tabella
-	getFiltersByDimension(dim, hier, table) {
-		this._tableFilters = [];
-		for ( const [key, value] of Object.entries(this.#filters)) {
-			if (value.dimension === dim && value.hier === hier && value.table === table) {
-				this._tableFilters.push(value);
+	getFiltersByDimension(dimensionToken, hier, table) {
+		this._tableFilters = new Set();
+		for ( const [key, filter] of Object.entries(this.#filters)) {
+			if (filter.dimensionToken === dimensionToken && filter.hier === hier && filter.table === table) {
+				this._tableFilters.add(filter);
 			}
 		}
 		return this._tableFilters;

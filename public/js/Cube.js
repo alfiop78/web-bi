@@ -98,8 +98,9 @@ class Cube {
 
 	get schema() {return this.#schema;}
 
-	save() {
-		debugger;
+	save(token) {
+		debugger;		
+		this._cube.token = token;
 		this._cube.type = 'CUBE';
 		this._cube.name = this._title;
 		this._cube.comment = this.#comment;
@@ -188,6 +189,9 @@ class Dimension {
 
 	save() {
 		debugger;
+		const rand = () => Math.random(0).toString(36).substr(2);
+		const token = rand().substr(0, 21);
+		this._dimension.token = token;
 		this._dimension.type = 'DIMENSION';
 		this._dimension.name = this._title;
 		this._dimension.comment = this.#comment;

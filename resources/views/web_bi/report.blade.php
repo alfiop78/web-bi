@@ -116,7 +116,7 @@
 							<label for="dialog-columns-search-table" class="">Ricerca</label>
 						</div>
 						<ul id="list-filters-fact" class="fact-table"></ul>
-						<ul id="list-tables" class="full-overflow-list-columns"></ul>
+						<ul id="ul-tables" class="full-overflow-list-columns"></ul>
 					</section>
 					
 					<section class="sectionLists">
@@ -267,14 +267,6 @@
 						<button id="btnMetricSave" type="button" name="save" class="md-button" disabled>salva</button>
 					</section>
 
-					{{-- <section class="sectionLists">
-						<h5>Filtri disponibili</h5>
-						<div class="md-field">
-							<input type="search" id="searchExistsFilter_Metric" data-element-search="exist-filter-metric" value autocomplete="off" />
-							<label for="searchExistsFilter_Metric" class="">Ricerca</label>
-						</div>
-						<ul id="exist-filter-metric"></ul>
-					</section> --}}
 				</div>
 
 				<div class="dialog-buttons">
@@ -380,27 +372,13 @@
 											<small hier></small>
 										</div>
 										<i class="material-icons md-18">edit</i>
-										<i class="material-icons md-18">remove</i>
 									</div>
 								</div>
 							</section>
 
-							{{-- lista colonne impostate nel report --}}
-							{{-- <section data-element-search data-label data-sublist-columns-selected>
-								<div data-label>
-									<div class="h-content">
-										<div class="v-content">
-											<span column class="highlight"></span>
-											<small table></small>
-										</div>
-										<i class="material-icons md-18">remove</i>
-									</div>
-								</div>
-							</section> --}}
-
 							{{-- lista filtri esistenti --}}
 							<section class="data-item" data-element-search data-label data-sublist-filters hidden>
-								<div class="selectable" data-label>
+								<div class="selectable">
 									<div class="h-content">
 										<div class="v-content">
 											<span filter class="highlight"></span>
@@ -563,7 +541,7 @@
 																<input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
 																<label for="search-exist-filters" class="">Ricerca</label>
 															</div>
-															<ul id="exist-filters" class="full-overflow-list"></ul>																
+															<ul id="ul-exist-filters" class="full-overflow-list"></ul>																
 														</div>
 														{{-- metriche --}}
 														<div>

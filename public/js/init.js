@@ -644,22 +644,21 @@ var Hier = new Hierarchy();
 
 	// recupero la lista delle dimensioni
 	app.getDimensions = () => {
-		const dimension = new DimensionStorage();
+		// TODO: utilizzare lo storage inizializzato all'inizio del file
+		const storage = new DimensionStorage();
 		// dimensions : è un Object che contiene un array con le tabelle incluse nella dimensione
-		const dimensions = dimension.list();
-		// debugger;
-		for (const [key, value] of Object.entries(dimensions)) {
+		for (const [token, value] of storage.dimensions) {
 			// key : nome
 			// console.log('value : ', value);
 			let tmplContent = app.tmplDimension.content.cloneNode(true);
 			const section = tmplContent.querySelector('section');
 			section.setAttribute('data-element-search', 'dimensions');
-			section.setAttribute('data-label', key);
+			section.setAttribute('data-label', token);
 			const div = tmplContent.querySelector('.dimensions');
 			const btnDimensionUse = tmplContent.querySelector('button[data-id="dimension-use"]');
-			btnDimensionUse.dataset.dimensionName = key;
+			btnDimensionUse.dataset.token = token;
 
-			div.querySelector('h5').innerHTML = key;
+			div.querySelector('h5').innerHTML = value.name;
 			// per ogni gerarchia recupero la prop 'from'
 			for (const [hierName, hierValue] of Object.entries(value.hierarchies)) {
 				// console.log(hierName);
@@ -670,7 +669,7 @@ var Hier = new Hierarchy();
 				const h6 = tmplHierarchyContent.querySelector('h6');
 				const divTables = tmplHierarchyContent.querySelector('.tables');
 				const btnEdit = tmplHierarchyContent.querySelector("button[data-id='dimension-edit']");
-				btnEdit.dataset.dimensionName = key;
+				btnEdit.dataset.dimensionName = value.name;
 				btnEdit.dataset.hierarchyName = hierName;
 				h6.innerText = hierName;
 				tmplContent.querySelector('div[data-dimension-tables]').appendChild(divHier);
@@ -686,7 +685,7 @@ var Hier = new Hierarchy();
 				btnEdit.onclick = app.handlerDimensionEdit;
 			}
 			btnDimensionUse.onclick = app.handlerDimensionSelected;
-			div.querySelector('h5').setAttribute('label', key); // OPTIMIZE: dataset data-label
+			div.querySelector('h5').setAttribute('label', value.name); // OPTIMIZE: dataset data-label
 			document.querySelector('#dimensions').appendChild(section);
 		}
 	}
@@ -946,9 +945,9 @@ var Hier = new Hierarchy();
 	app.handlerDimensionSelected = (e) => {
 		console.log(e.target);
 		const storage = new DimensionStorage();
-		storage.selected = e.target.dataset.dimensionName;
+		storage.selected = e.target.dataset.token;
 		// memorizzo la dimensione selezionata per recuperarla nel salvataggio del cubo
-		cube.dimensionsSelected = e.target.dataset.dimensionName;
+		cube.dimensionsSelected = e.target.dataset.token;
 		// recupero tutta la dimensione selezionata, dallo storage
 		console.log(storage.selected);
 		// aggiungo alla dropzone l'ultima tabella della gerarchia
@@ -1382,48 +1381,48 @@ var Hier = new Hierarchy();
 		Hier = new Hierarchy();
 	}
 
-	// salvataggio di un nuovo cubo
+	// save cube
 	app.btnSaveCubeName.onclick = () => {
 		console.log('cube save');
 		// TODO: devo verificare se il nome del cubo esiste già, sia in locale che sul db.
 		cube.title = document.getElementById('cubeName').value;
 		debugger;
 		cube.columnsDefined = Hier.columns_;
-
 		cube.comment = document.getElementById('textarea-cube-comment').value;
-
 		cube.FACT = document.querySelector('.card.table[fact]').dataset.label;
 		// TODO: recupero l'alias della FACT
 		cube.alias = document.querySelector('.card.table[fact] .cardTable').dataset.alias;
 		cube.schema = document.querySelector('.card.table[fact]').dataset.schema;
 		// Creo il cubeId basandomi sui cubi già creati in Storage, il cubeId lo associo al cubo che sto per andare a salvare.
-		cube.id = StorageCube.getIdAvailable();
-		console.log(cube.id);
+		// TODO: con l'aggiunta del token non servirà più il cubeId, da eliminare 2022-05-24
+		// cube.id = StorageCube.getIdAvailable();
+		// console.log(cube.id);
+
+		const rand = () => Math.random(0).toString(36).substr(2);
+		const token = rand().substr(0, 21);
 
 		const dimensionStorage = new DimensionStorage();
 		
 		cube.dimensionsSelected.forEach((dimensionName) => {
 			let dimensionObject = {};
-			console.log(dimensionName);
+			// console.log(dimensionName);
 			dimensionStorage.selected = dimensionName;
-			console.log(dimensionStorage.selected);
 			// il metodo selected restituisce la dimensione che sto ciclando, la salvo in dimensionObject per modificarla (aggiunta cubi)
 			dimensionObject[dimensionName] = dimensionStorage.selected;
 			// salvo il cubo all'interno della dimensione, comprese la sua join con questa dimensione
 			// dimensionObject[dimensionName].cubes.push({[cube._title] : cube.relations});
-			dimensionObject[dimensionName].cubes[cube._title] = cube.relations;
-
+			dimensionObject[dimensionName].cubes[token] = cube.relations;
 			console.log(dimensionObject[dimensionName]);
 			// salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
 			cube.associatedDimensions = dimensionName;
 			// salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
-			dimensionStorage.save = dimensionObject[dimensionName];
+			dimensionStorage.saveTemp(dimensionObject[dimensionName]);
 		});
 
-		cube.save();
+		cube.save(token);
 
 		// salvo il cubo in localStorage
-		StorageCube.save = cube.cube;
+		StorageCube.saveTemp(cube.cube);
 		// salvo il cubo sul DB
         // app.saveCube(cube.cube);
 
@@ -1441,12 +1440,10 @@ var Hier = new Hierarchy();
 		Dim.title = document.getElementById('dimensionName').value;
 		Dim.comment = document.getElementById('textarea-dimension-comment').value;
 		// cube.dimension
-		const storage = new DimensionStorage();
-		
+		const storage = new DimensionStorage();		
 		Dim.save();
-		storage.save = Dim.dimension;
-		app.dialogDimensionName.close();
-	
+		storage.saveTemp(Dim.dimension);
+		app.dialogDimensionName.close();	
 		// chiudo le card presenti
 		app.closeCards();
 		// visualizzo le dimensioni create

@@ -221,14 +221,14 @@ class Queries {
 
 	set elementCube(value) {
 		// se l'elemento esiste lo elimino altrimenti lo aggiungo al Map
-		(this.#elementCube.has(value.name)) ? this.#elementCube.delete(value.name) : this.#elementCube.set(value.name, {tableAlias : value.tableAlias, from : [...value.from]});
+		(this.#elementCube.has(value.token)) ? this.#elementCube.delete(value.token) : this.#elementCube.set(value.token, {tableAlias : value.tableAlias, from : [...value.from]});
 		console.log('this.#elementCube : ', this.#elementCube);
 	}
 
 	get elementCube() {return this.#elementCube;}
 
 	set elementDimension(value) {
-		(this.#elementDimension.has(value.name)) ? this.#elementDimension.delete(value.name) : this.#elementDimension.add(value.name);
+		(this.#elementDimension.has(value.token)) ? this.#elementDimension.delete(value.token) : this.#elementDimension.add(value.token);
 		// (this.#elementDimension.has(value.name)) ? this.#elementDimension.delete(value.name) : this.#elementDimension.set(value.name);
 		console.log('this.#elementDimension : ', this.#elementDimension);
 	}
