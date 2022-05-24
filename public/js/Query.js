@@ -15,7 +15,7 @@ class Queries {
 	#columns = new Map();
 	#elementReport = new Map();
 	#elementCube = new Map();
-	#elementDimension = new Set();
+	#elementDimension = new Map();
 	#elementHierarchies = new Set();
 	#elementFilters = new Map();
 	#elementMetrics = new Map();
@@ -36,9 +36,10 @@ class Queries {
 	get processId() {return this.#processId;}
 
 	set token(value) {
-		const rand = () => Math.random(0).toString(36).substr(2);
-		const token = rand().substr(0, 21);
+		this.#token = value;
 	}
+
+	get token() {return this.#token;}
 
 	set table(value) {this.#table = value;}
 
@@ -229,20 +230,23 @@ class Queries {
 
 	get elementCube() {return this.#elementCube;}
 
-	set elementDimension(value) {
+	/*set elementDimension(value) {
 		(this.#elementDimension.has(value.token)) ? this.#elementDimension.delete(value.token) : this.#elementDimension.add(value.token);
-		// (this.#elementDimension.has(value.name)) ? this.#elementDimension.delete(value.name) : this.#elementDimension.set(value.name);
 		console.log('this.#elementDimension : ', this.#elementDimension);
 	}
 
-	get elementDimension() {return this.#elementDimension;}
+	get elementDimension() {return this.#elementDimension;}*/
 
 	set elementHierarchy(value) {
-		(this.#elementHierarchies.has(value.name)) ? this.#elementHierarchies.delete(value.name) : this.#elementHierarchies.add(value.name);
-		console.log('this.#elementHierarchies : ', this.#elementHierarchies);
+		(this.#elementHierarchies.has(value.hier)) ? this.#elementHierarchies.delete(value.hier) : this.#elementHierarchies.add(value.hier);
+		this.#elementDimension.set(value.token, this.#elementHierarchies);
+		// (this.#elementHierarchies.has(value.name)) ? this.#elementHierarchies.delete(value.name) : this.#elementHierarchies.add(value.name);
+		console.log('this.#elementDimension : ', this.#elementDimension);
+		debugger;
+		// console.log('this.#elementHierarchies : ', this.#elementHierarchies);
 	}
 
-	get elementHierarchy() {return this.#elementHierarchies;}
+	get elementHierarchy() {return this.#elementDimension;}
 
 	set elementColumn(value) {
 
@@ -260,7 +264,9 @@ class Queries {
 
 	get elementReport() {
 		this.#elementReport.set('cubes', Object.fromEntries(this.elementCube));
-		this.#elementReport.set('dimensions', [...this.#elementDimension]);
+		this.#elementReport.set('dimensions', Object.fromEntries(this.#elementDimension));
+		// this.#elementReport.set('dimensions', [...this.#elementDimension]);
+
 		this.#elementReport.set('hierarchies', [...this.#elementHierarchies]);
 		this.#elementReport.set('filters', Object.fromEntries(this.elementFilter));
 		
@@ -269,15 +275,14 @@ class Queries {
 
 	save(name) {
 		const rand = () => Math.random(0).toString(36).substr(2);
+		debugger;
 		// se il token non è definito sto salvando un nuovo report e quindi lo definisco qui, altrimenti sto editando un report che ha già un proprio token e processId
 		if (this.#token === 0) {
 			this.#token = rand().substr(0, 21);
-			this.#processId
+			this.#processId = Date.now();
 		}
-
 		debugger;
-
-		this.processId = Date.now();
+		// this.processId = Date.now();
 		this.#reportProcess['token'] = this.#token;
 		this.#reportProcess['select'] = Object.fromEntries(this.select);
 		this.#elementReport.set('columns', Object.fromEntries(this.select));
@@ -298,8 +303,8 @@ class Queries {
 		this.#reportProcess['type'] = 'PROCESS';
 		this.#reportProcess['edit'] = Object.fromEntries(this.elementReport);
 		console.info(this.#reportProcess);
-		window.localStorage.setItem(token, JSON.stringify(this.#reportProcess));
-        console.info(`${name} salvato nello storage con token : ${token}`);
+		window.localStorage.setItem(this.#token, JSON.stringify(this.#reportProcess));
+        console.info(`${name} salvato nello storage con token : ${this.token}`);
 	}
 
     get reportProcessStringify() {return this.#reportProcess;}

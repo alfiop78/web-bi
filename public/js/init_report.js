@@ -261,7 +261,7 @@ var StorageMetric = new MetricStorage();
 					div.onclick = app.handlerSelectColumn;
 					span.innerText = field.ds.field;
 					smallTable.innerText = value.FACT;
-					smallCube.innerText = key;
+					smallCube.innerText = value.name;
 					ul.appendChild(section);
 				}
 			}
@@ -389,12 +389,13 @@ var StorageMetric = new MetricStorage();
 	}
 
 	app.showAllElements = () => {
-		Query.elementHierarchy.forEach( hier => {
+		// Query.elementHierarchy
+		/*Query.elementHierarchy.forEach( hier => {
 			document.querySelectorAll("ul > section.data-item[data-dimension-token='" + StorageDimension.dimension.token + "'][data-hier-name='" + hier + "']").forEach( (item) => {
 				item.hidden = false;
 				item.toggleAttribute('data-searchable');
 			});
-		});
+		});*/
 	}
 
 	app.hideAllElements = () => {
@@ -755,6 +756,7 @@ var StorageMetric = new MetricStorage();
 		StorageProcess.process = e.currentTarget.dataset.processToken;
 		// imposto il processToken e il processId in modo da andare a sovrascrivere il report esistente quando si salva
 		Query.processId = StorageProcess.process.processId;
+		Query.token = StorageProcess.process.token;
 		// converto in oggetto Map
 		const cubes = new Map(Object.entries(StorageProcess.process.edit.cubes));
 		// seleziono il cubo/i utilizzati nel report (prop factJoin -> dimensioni utilizzate -> cubi utilizzati)
@@ -766,7 +768,7 @@ var StorageMetric = new MetricStorage();
 			StorageCube.cube = token;
 			Query.tableAlias = StorageCube.cube.alias;
 			Query.from = `${StorageCube.cube.schema}.${StorageCube.cube.FACT} AS ${Query.tableAlias}`;
-			Query.elementCube = {name : token, tableAlias : cube.tableAlias, from : Query.from};
+			Query.elementCube = {token : token, tableAlias : cube.tableAlias, from : Query.from};
 			app.showDimensions();
 			// visualizzo la/e tabelle fact
 			document.querySelector("#ul-fact-tables > section[data-cube-token='" + token + "']").hidden = false;
@@ -866,7 +868,7 @@ var StorageMetric = new MetricStorage();
 			app.showHierarchies();
 			// imposto la relazione tra dimensione -> cubo
 			Query.factRelation = StorageDimension.dimension;
-			Query.elementDimension = {token : e.currentTarget.dataset.dimensionToken};
+			// Query.elementDimension = {token : e.currentTarget.dataset.dimensionToken};
 			// imposto, in un object le dimensioni selezionate, questo mi servirà nella dialog-metrics per visualizzare/nascondere solo i filtri appartenenti alle dimensioni selezionate
 			// ... probabilmente mi servirà anche nella dialog-filter per lo stesso utilizzo
 			// TODO: da rivedere se viene utilizzato, 2022-05-22 al momento sembra che non serve più
@@ -879,22 +881,22 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
-
 	// selezione di una gerarchia (step-2)
 	app.handlerHierarchySelected = (e) => {
 		e.currentTarget.toggleAttribute('selected');
 		StorageDimension.dimension = e.currentTarget.dataset.dimensionToken;
 		if (e.currentTarget.hasAttribute('selected')) {
-			// memorizzo le gerarchie selezionate
-			Query.elementHierarchy = {name : e.currentTarget.dataset.hierName};
+			// memorizzo le gerarchie selezionate all'interno
+			Query.elementHierarchy = {token : e.currentTarget.dataset.dimensionToken, hier : e.currentTarget.dataset.hierName};
+			// Query.elementHierarchy = {name : e.currentTarget.dataset.hierName};
 			// visualizzo tutti gli elementi (columns, filters) relativi alla gerarchia selezionata
 			app.showAllElements();
 		} else {
-			// TODO: hideAllElements
 			// deselezione della gerarchia, nascondo le tabelle della gerarchia selezionata
 			app.hideAllElements();
 			// dopo aver nascosto gli elementi della gerarchia DESELEZIONATA, rimuovo la gerarchia anche dal element_reports
-			Query.elementHierarchy = {name : e.currentTarget.dataset.hierName};
+			Query.elementHierarchy = {token : e.currentTarget.dataset.dimensionToken, hier : e.currentTarget.dataset.hierName};			
+			// Query.elementHierarchy = {name : e.currentTarget.dataset.hierName};
 		}
 	}
 
