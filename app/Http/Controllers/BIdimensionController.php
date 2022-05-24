@@ -45,6 +45,7 @@ class BIdimensionController extends Controller
         // l'inserimento con Eloquent ha inserito anche i campi created_at/updated_at
         $dim = new BIdimension();
         // il nome della tabella è impostato nel Model
+        $dim->token = $jsonContent->{'token'};
         $dim->name = $jsonContent->{'name'};
         $dim->json_value = $json;
         // dd($dim);
@@ -68,9 +69,9 @@ class BIdimensionController extends Controller
      * @param  \App\Models\BIdimension  $bIdimension
      * @return \Illuminate\Http\Response
      */
-    public function show(BIdimension $bIdimension, $name)
+    public function show(BIdimension $bIdimension, $token)
     {
-        $element = $bIdimension::findOrFail($name);
+        $element = $bIdimension::findOrFail($token);
         // dd($element);
         // return response()->json($dimensions);
         return response()->json($element);
@@ -97,8 +98,9 @@ class BIdimensionController extends Controller
     public function update(Request $request, BIdimension $bIdimension, $json)
     {
         $jsonContent = json_decode($json);
-        $dimension = $bIdimension::findOrFail($jsonContent->{'name'});
+        $dimension = $bIdimension::findOrFail($jsonContent->{'token'});
         // dd($dimension);
+        $dimension->token = $jsonContent->{'token'};
         $dimension->name = $jsonContent->{'name'};
         $dimension->json_value = $json;
         // dd($dim);
@@ -112,11 +114,11 @@ class BIdimensionController extends Controller
      * @param  $name : il nome dell'elemento da eliminare
      * @return \Illuminate\Http\Response
      */
-    public function destroy(BIdimension $bIdimension, $name)
+    public function destroy(BIdimension $bIdimension, $token)
     {
         // cerco l'elemento da eliminare
         // impostando $primaryKey = 'name' nel Model posso utilizzare findOrFail() invece di 'where(nome_campo, '=', valore)'
-        $element = $bIdimension::findOrFail($name);
+        $element = $bIdimension::findOrFail($token);
         // dd($element);
         return $element->delete();
     }

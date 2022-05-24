@@ -52,8 +52,8 @@ Route::prefix('/fetch_api/json/')->group(function () {
 });
 // destroy json
 Route::prefix('/fetch_api/name/')->group(function () {
-	Route::get('{name}/dimension_destroy', [BIdimensionController::class, 'destroy']);
-	Route::get('{name}/cube_destroy', [BIcubeController::class, 'destroy']);
+	Route::get('{token}/dimension_destroy', [BIdimensionController::class, 'destroy']);
+	Route::get('{token}/cube_destroy', [BIcubeController::class, 'destroy']);
 	Route::get('{token}/metric_destroy', [BImetricController::class, 'destroy']);
 	Route::get('{token}/filter_destroy', [BIfilterController::class, 'destroy']);
 	Route::get('{token}/process_destroy', [BIprocessController::class, 'destroy']);
@@ -68,8 +68,8 @@ Route::prefix('/fetch_api/versioning/')->group(function () {
 });
 // show
 Route::prefix('/fetch_api/name/')->group(function () {
-	Route::get('{name}/dimension_show', [BIdimensionController::class, 'show']);
-	Route::get('{name}/cube_show', [BIcubeController::class, 'show']);
+	Route::get('{token}/dimension_show', [BIdimensionController::class, 'show']);
+	Route::get('{token}/cube_show', [BIcubeController::class, 'show']);
 	Route::get('{token}/metric_show', [BImetricController::class, 'show']);
 	Route::get('{token}/filter_show', [BIfilterController::class, 'show']);
 	Route::get('{token}/process_show', [BIprocessController::class, 'show']);

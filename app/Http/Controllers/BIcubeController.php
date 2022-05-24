@@ -40,6 +40,7 @@ class BIcubeController extends Controller
         // l'inserimento con Eloquent ha inserito anche i campi created_at/updated_at
         $cube = new BIcube();
         // il nome della tabella è impostato nel Model
+        $cube->token = $jsonContent->{'token'};
         $cube->name = $jsonContent->{'name'};
         $cube->json_value = $json;
         return $cube->save();
@@ -51,9 +52,9 @@ class BIcubeController extends Controller
      * @param  \App\Models\BIcube  $bIcube
      * @return \Illuminate\Http\Response
      */
-    public function show(BIcube $bIcube, $name)
+    public function show(BIcube $bIcube, $token)
     {
-        $element = $bIcube::findOrFail($name);
+        $element = $bIcube::findOrFail($token);
         return response()->json($element);
     }
 
@@ -78,7 +79,8 @@ class BIcubeController extends Controller
     public function update(Request $request, BIcube $bIcube, $json)
     {
         $jsonContent = json_decode($json);
-        $cube = $bIcube::findOrFail($jsonContent->{'name'});
+        $cube = $bIcube::findOrFail($jsonContent->{'token'});
+        $cube->token = $jsonContent->{'token'};
         $cube->name = $jsonContent->{'name'};
         $cube->json_value = $json;
         return $cube->save();
@@ -90,9 +92,9 @@ class BIcubeController extends Controller
      * @param  \App\Models\BIcube  $bIcube
      * @return \Illuminate\Http\Response
      */
-    public function destroy(BIcube $bIcube, $name)
+    public function destroy(BIcube $bIcube, $token)
     {
-        $element = $bIcube::findOrFail($name);
+        $element = $bIcube::findOrFail($token);
         return $element->delete();
     }
 }
