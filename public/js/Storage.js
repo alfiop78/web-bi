@@ -92,8 +92,7 @@ class Storages {
 
 	// TODO: sostituirà save()
 	saveTemp(value) {
-		console.log(value);
-		debugger;
+		console.info('SAVE : ', value);
 		window.localStorage.setItem(value.token, JSON.stringify(value));	
 	}
 
@@ -105,7 +104,7 @@ class Storages {
 
 class CubeStorage extends Storages {
 	#cubeSelected = new Set();
-	#token;
+	#cube;
 	#lists = {};
 	constructor() {
 		super();
@@ -136,15 +135,16 @@ class CubeStorage extends Storages {
 		return this.#lists;
 	}
 
-	set selected(value) {
+	set cube(value) {
 		// imposto il cubo selezionato
-		this.#token = value;
+		this.#cube = value;
 	}
 
-	get selected() {
-		return JSON.parse(this.storage.getItem(this.#token));
+	get cube() {
+		return JSON.parse(this.storage.getItem(this.#cube));
 	}
 
+	// TODO: quando viene utilizzata ?
 	addCube() {
 		this.#cubeSelected.add(this.selected.FACT);
 		console.log('#cubeSelected : ', this.#cubeSelected);
@@ -157,7 +157,7 @@ class CubeStorage extends Storages {
 
 	get cubeSelected() {return this.#cubeSelected;}
 
-	getIdAvailable() {
+	/*getIdAvailable() {
 		// ottengo il primo Id disponibile
 		console.log(this.storageKeys);
 		this.cubesElement = [];
@@ -192,7 +192,7 @@ class CubeStorage extends Storages {
 			}
 		}
 		return this.id;
-	}
+	}*/
 
 	list(ul) {
 		for (const [key, value] of Object.entries(this._cubes)) {
@@ -222,7 +222,6 @@ class CubeStorage extends Storages {
 		// un object del cube convertito in json, questo mi servirà per ricostruire la struttura
 		return JSON.parse(window.localStorage.getItem(cubeName));
 	}*/
-
 	getMetrics(cubeName) {
 		this._cube = JSON.parse(window.localStorage.getItem(cubeName));
 		return this._cube.metrics;
@@ -320,6 +319,7 @@ class ProcessStorage extends Storages {
 class DimensionStorage extends Storages {
 	#dimensions = new Map();
 	// #dimsMap = new Map();
+	#dimension;
 	#name;
 	// Metodi per leggere/scrivere Dimensioni nello Storage
 	constructor() {
@@ -330,14 +330,14 @@ class DimensionStorage extends Storages {
 
 	// get dimensionId() { return this.id; }
 
-	set selected(value) {
+	set dimension(value) {
 		// imposto la dimensione selezionata
-		this.#name = value;
+		this.#dimension = value;
 		// console.log('#name : ', this.#name);
 	}
 
-	get selected() {
-		return JSON.parse(this.storage.getItem(this.#name));
+	get dimension() {
+		return JSON.parse(this.storage.getItem(this.#dimension));
 	}
 
 	add() {
@@ -465,11 +465,11 @@ class FilterStorage extends Storages {
 	get filters() {return this.#filters;} // tutti i filtri
 
 	// filtri appartenenti a un determinato cubo
-	getFiltersByCube(cube) {
-		this._tableFilters = [];
+	getFiltersByCube(cubeToken) {
+		this._tableFilters = new Set();
 		for ( const [key, value] of Object.entries(this.#filters)) {
-			if (value.cube === cube) {
-				this._tableFilters.push(value);
+			if (value.cubeToken === cubeToken) {
+				this._tableFilters.add(value);
 			}
 		}
 		return this._tableFilters;
@@ -514,26 +514,27 @@ class FilterStorage extends Storages {
 
 class MetricStorage extends Storages {
 	#metricsObject = {};
+	#metric;
 	constructor() {
 		super();
 	}
 
 	// restituisco la lista delle metriche prendendole direttamente dallo stato attuale dello storage
-	set cubeMetrics(cube) {
+	set cubeMetrics(cubeToken) {
 		// recupero gli oggetti METRIC dallo storage
 		this.#metricsObject = {};
 		super.storageK = 'METRIC';
 		for ( const [key, value] of Object.entries(this.st)) {
-			if (value.cube === cube) this.#metricsObject[key] = value;
+			if (value.cubeToken === cubeToken) this.#metricsObject[key] = value;
 		}
 	}
 
 	get cubeMetrics() {return this.#metricsObject;}
 
 	get baseAdvancedMetrics() {
-		this.localMetrics = {};
+		this.localMetrics = new Set();
 		for (const [key, value] of Object.entries(this.#metricsObject) ) {
-			if (value.metric_type !== 2) this.localMetrics[key] = value;
+			if (value.metric_type !== 2) this.localMetrics.add(value);
 		}
 		return this.localMetrics;
 	}
@@ -546,8 +547,8 @@ class MetricStorage extends Storages {
 		return this.localMetrics;
 	}
 
-	set metric(value) {this._metric = value;}
+	set metric(value) {this.#metric = value;}
 
-	get metric() {return JSON.parse(this.storage.getItem(this._metric));}
+	get metric() {return JSON.parse(this.storage.getItem(this.#metric));}
 
 }

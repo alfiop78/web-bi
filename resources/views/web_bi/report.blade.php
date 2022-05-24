@@ -115,7 +115,7 @@
 							<input type="search" data-element-search="search-tables" id="dialog-columns-search-table" value autocomplete="off" />
 							<label for="dialog-columns-search-table" class="">Ricerca</label>
 						</div>
-						<ul id="list-filters-fact" class="fact-table"></ul>
+						<ul id="ul-fact" class="fact-table"></ul>
 						<ul id="ul-tables" class="full-overflow-list-columns"></ul>
 					</section>
 					
@@ -392,7 +392,7 @@
 
 							{{-- lista metriche esistenti --}}
 							<section class="data-item" data-element-search data-label data-sublist-metrics hidden>
-								<div class="selectable" data-label>
+								<div class="selectable">
 									<div class="h-content">
 										<div class="v-content">
 											{{-- TODO: metriche composte potrei colorarle in modo diverso, cos' come le metriche filtrate --}}
@@ -493,7 +493,7 @@
 															<input type="search" data-element-search="search-hierarchy" id="search-hierarchy" value autocomplete="off" data-type-search="nested"/>
 															<label for="search-hierarchy" class="">Ricerca</label>
 														</div>
-														<ul id="list-fact-tables" class="fact-table"></ul>
+														<ul id="ul-fact-tables" class="fact-table"></ul>
 														<div class="c">
 															<ul id="ul-hierarchies" class="full-overflow-list"></ul>
 														</div>														
@@ -549,7 +549,7 @@
 																<input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
 																<label for="search-exist-metrics" class="">Ricerca</label>
 															</div>
-															<ul id="exist-metrics" class="full-overflow-list"></ul>
+															<ul id="ul-exist-metrics" class="full-overflow-list"></ul>
 														</div>
 														{{-- metriche composte --}}
 														<div>

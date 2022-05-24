@@ -1,6 +1,5 @@
 class Queries {
 	#select;
-	#obj;
 	#table;
 	#columnToken;
 	#tableAlias;
@@ -21,12 +20,24 @@ class Queries {
 	#elementFilters = new Map();
 	#elementMetrics = new Map();
 	#reportProcess = {};
+	#processId = 0;
+	#token = 0;
 	constructor() {
-		this.#obj = {}; // object generico
 		this._fromSet = new Set();
 		this._where = {};
 		this._factRelation = {};
 		this._filteredMetrics = {};
+	}
+
+	set processId(value) {
+		this.#processId = value;
+	}
+
+	get processId() {return this.#processId;}
+
+	set token(value) {
+		const rand = () => Math.random(0).toString(36).substr(2);
+		const token = rand().substr(0, 21);
 	}
 
 	set table(value) {this.#table = value;}
@@ -163,15 +174,14 @@ class Queries {
 	}
 
 	set filters(value) {
-		// this.#obj = {};
 		if (this.#filters.has(value.token)) {
-			debugger;
+			// debugger;
 			if (value.SQL === this.#filters.get(value.token)) {
 				// se anche il contenuto del filtro è uguale a quello già presente allora è stato deselzionato e quindi posso eliminarlo dal Map
 				this.#filters.delete(value.token);
 			}			
 		} else {
-			debugger;
+			// debugger;
 			this.#filters.set(value.token, value.SQL);
 		}
 		console.log('this.#filters : ', this.#filters);
@@ -181,18 +191,10 @@ class Queries {
 
 	set metrics(value) {
 		// value = {sqlFunction: "SUM", field: "NettoRiga", metricName: "netto riga", distinct: false, alias: "Venduto"}
-		// this.#metrics[this._metricName] = object;
 		if (this.#metrics.has(value.token)) {
 			this.#metrics.delete(value.token);
 		} else {
 			this.#metrics.set(value.token, value);
-			/*
-			if (this.flagCompositeBase) {
-				// metrica composta sul cubo, non includo table e tableAlias
-				this.#metrics.set(value.token, value);
-			}*/ /*else {
-				this.#metrics.set(value.token, {SQLFunction : value.SQLFunction, alias : value.alias, distinct : value.distinct, field : value.field, table : this.table, tableAlias : this.tableAlias});
-			}*/
 		}
 		console.log('metrics : ', this.#metrics);
 	}
@@ -265,10 +267,18 @@ class Queries {
 		return this.#elementReport;
 	}
 
-	save(token, processId, name) {
-		// this._reportProcess = {};
-		// TODO: chiamare il metodo this.select
-		this.#reportProcess['token'] = token;
+	save(name) {
+		const rand = () => Math.random(0).toString(36).substr(2);
+		// se il token non è definito sto salvando un nuovo report e quindi lo definisco qui, altrimenti sto editando un report che ha già un proprio token e processId
+		if (this.#token === 0) {
+			this.#token = rand().substr(0, 21);
+			this.#processId
+		}
+
+		debugger;
+
+		this.processId = Date.now();
+		this.#reportProcess['token'] = this.#token;
 		this.#reportProcess['select'] = Object.fromEntries(this.select);
 		this.#elementReport.set('columns', Object.fromEntries(this.select));
 		this.#reportProcess['from'] = Array.from(this._fromSet); // converto il set in un array
@@ -281,16 +291,15 @@ class Queries {
 		}
 		if (Object.keys(this._filteredMetrics).length > 0) this.#reportProcess['filteredMetrics'] = this._filteredMetrics;
 		if (Object.keys(this.#compositeMetrics).length > 0) this.#reportProcess['compositeMetrics'] = this.#compositeMetrics;
-		this.#reportProcess['processId'] = processId; // questo creerà il datamart FX[processId]
+		debugger;
+		this.#reportProcess['processId'] = this.#processId; // questo creerà il datamart FX[processId]
 		//  al posto del processId voglio utilizzare il nome del report legato alla FX_
 		this.#reportProcess['name'] = name;
 		this.#reportProcess['type'] = 'PROCESS';
-		this.#reportProcess['elements'] = Object.fromEntries(this.elementReport);
+		this.#reportProcess['edit'] = Object.fromEntries(this.elementReport);
 		console.info(this.#reportProcess);
-
 		window.localStorage.setItem(token, JSON.stringify(this.#reportProcess));
-        console.log(`${name} salvato nello storage con token : ${token}`);
-		debugger;
+        console.info(`${name} salvato nello storage con token : ${token}`);
 	}
 
     get reportProcessStringify() {return this.#reportProcess;}
