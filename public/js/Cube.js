@@ -5,6 +5,7 @@ class Cube {
 	#columns;
 	#metrics = {};
 	#metricsMap = new Map();
+	#token;
 	constructor() {
 		this._cube = {};
 		// this._metrics = {}; // contiene gli oggetti metriche
@@ -18,6 +19,12 @@ class Cube {
 	set id(value) {this._id = value;}
 
 	get id() {return this._id;}
+
+	set token(value) {
+		this.#token = value;
+	}
+
+	get token() {return this.#token;}
 
 	set title(value) {this._title = value;}
 
@@ -98,9 +105,8 @@ class Cube {
 
 	get schema() {return this.#schema;}
 
-	save(token) {
-		debugger;		
-		this._cube.token = token;
+	save() {
+		this._cube.token = this.token;
 		this._cube.type = 'CUBE';
 		this._cube.name = this._title;
 		this._cube.comment = this.#comment;
@@ -113,7 +119,9 @@ class Cube {
 		this._cube.schema = this.#schema;
 		this._cube.alias = this.#alias;
 		this._cube.id = this._id;
-		this._cube.associatedDimensions = this._associatedDimension;
+		console.log(this.associatedDimensions);
+		debugger;
+		this._cube.associatedDimensions = this.associatedDimensions;
 	}
 
 	get cube() {return this._cube;}
@@ -145,9 +153,10 @@ class Cube {
 
 	get dimensionsSelected() {return this._dimensions;}
 
-	set associatedDimensions(dimensionName) {
+	set associatedDimensions(token) {
 		debugger;
-		this._associatedDimension.push(dimensionName);
+		// TODO: valutare oggetto Map()
+		this._associatedDimension.push(token);
 		// this._associatedDimension = obj;
 	}
 

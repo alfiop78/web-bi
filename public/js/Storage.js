@@ -14,6 +14,7 @@ class Storages {
 	#filters = new Set();
 	#processes = new Set();
 	#all = new Set();
+	#selected;
 	constructor() {
 		this.storage = window.localStorage;
 		this.storageKeys = Object.keys(window.localStorage);
@@ -93,12 +94,21 @@ class Storages {
 	// TODO: sostituirà save()
 	saveTemp(value) {
 		console.info('SAVE : ', value);
+		debugger;
 		window.localStorage.setItem(value.token, JSON.stringify(value));	
 	}
 
 	JSONFormat(name) {
 		// restituisco un object convertito in json, questo mi servirà per ricostruire la struttura
 		return JSON.parse(window.localStorage.getItem(name));
+	}
+
+	set selected(token) {
+		this.#selected = token;
+	}
+
+	get selected() {
+		return JSON.parse(this.storage.getItem(this.#selected));
 	}
 }
 
@@ -133,15 +143,6 @@ class CubeStorage extends Storages {
 	getLists() {
 		this.setLists();
 		return this.#lists;
-	}
-
-	set cube(value) {
-		// imposto il cubo selezionato
-		this.#cube = value;
-	}
-
-	get cube() {
-		return JSON.parse(this.storage.getItem(this.#cube));
 	}
 
 	// TODO: quando viene utilizzata ?
@@ -295,10 +296,6 @@ class ProcessStorage extends Storages {
 		return this.id;
 	}
 
-	set process(value) {this.#process = value;}
-
-	get process() {return JSON.parse(window.localStorage.getItem(this.#process));}
-
 	getJSONProcess(value) {
 		let processReports = {};
 		let report = JSON.parse(this.storage.getItem(value));
@@ -324,20 +321,6 @@ class DimensionStorage extends Storages {
 	// Metodi per leggere/scrivere Dimensioni nello Storage
 	constructor() {
 		super();
-	}
-
-	// set dimensionId(value) {this.id = value;}
-
-	// get dimensionId() { return this.id; }
-
-	set dimension(value) {
-		// imposto la dimensione selezionata
-		this.#dimension = value;
-		// console.log('#name : ', this.#name);
-	}
-
-	get dimension() {
-		return JSON.parse(this.storage.getItem(this.#dimension));
 	}
 
 	add() {
@@ -414,52 +397,6 @@ class FilterStorage extends Storages {
 		this.id = 0; // default
 		// console.log('#filters', this.#filters);
 	}
-
-	set filterId(value) {
-		this.id = value;
-	}
-
-	get filterId() { return this.id; }
-
-	set filter(value) {
-		this._name = value;
-	}
-
-	get filter() {
-		return JSON.parse(this.storage.getItem(this._name));
-	}
-
-	/*getIdAvailable() {
-		// ottengo il primo Id disponibile
-		console.log(this.storageKeys);
-		this.filtersElement = [];
-		this.storageKeys.forEach((key, index) => {
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			if (jsonStorage.type === "FILTERS") {this.filtersElement.push(jsonStorage.id);}
-		});
-
-		// ordino l'array
-		this.filtersElement.sort(function (a, b) {
-			console.log(a);
-			console.log(b);
-			return a - b;
-		});
-
-		// this.pagesElement.sort((a, b) => a - b);
-		for (let i = 0; i < this.filtersElement.length; i++) {
-			// indice 0
-			// se 0 è presente in pagesElement aggiungo una unità
-			// console.log(this.pagesElement.includes(i));
-
-			if (this.filtersElement.includes(i)) {
-				this.id++;
-				// console.log(this.id);
-			} else {
-				this.id = i;
-			}
-		}
-		return this.id;
-	}*/
 
 	// TODO: utilizzare la stessa logica utilizzata cubeMetrics
 	get filters() {return this.#filters;} // tutti i filtri
@@ -546,9 +483,5 @@ class MetricStorage extends Storages {
 		}
 		return this.localMetrics;
 	}
-
-	set metric(value) {this.#metric = value;}
-
-	get metric() {return JSON.parse(this.storage.getItem(this.#metric));}
 
 }

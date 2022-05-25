@@ -693,16 +693,14 @@ var Hier = new Hierarchy();
 	// recupero la lista dei Cubi in localStorage
 	app.getCubes = () => {
 		const ul = document.getElementById('cubes');
-		// console.log(StorageCube.cubes);
-		// TODO: da modificare dopo aver aggiunto il token
-		for (const [key, value] of Object.entries(StorageCube.cubes)) {
+		for (const [token, value] of StorageCube.cubes) {
 			const content = app.tmplLists.content.cloneNode(true);
 			const section = content.querySelector('section[data-sublist-generic]');
 			const span = section.querySelector('span[generic]');
-			section.dataset.label = key;
+			section.dataset.label = token;
 			section.dataset.elementSearch = 'cubes';
-			span.setAttribute('label', key); // OPTIMIZE: dataset data-label
-			span.innerText = key;
+			span.dataset.cubeToken = token;
+			span.innerText = value.name;
 			span.dataset.fn = 'handlerCubeSelected';
 			ul.appendChild(section);
 		}
@@ -728,21 +726,20 @@ var Hier = new Hierarchy();
 		// apro la tabella definita come Cubo
 		console.log('e.currentTarget : ', e.currentTarget);
 		// debugger;
-		// TODO: modificare con dataset.label
-		StorageCube.cube = e.currentTarget.getAttribute('label'); // OPTIMIZE: dataset data-label
-		console.log('cube selected : ', StorageCube.cube);
+		StorageCube.selected = e.currentTarget.dataset.cubeToken;
+		console.log('cube selected : ', StorageCube.selected);
 		// ridefinisco le proprietà del cubo, leggendo da quello selezionato, nello storage, per consentirne la modifica o l'aggiunto di dimensioni al cubo
 		// TODO: la prop privata _metric la devo definire tramite un Metodo
-		cube.metricDefined = StorageCube.cube.metrics;
-		cube.columnsDefined = StorageCube.cube.columns;
+		cube.metricDefined = StorageCube.selected.metrics;
+		cube.columnsDefined = StorageCube.selected.columns;
 		debugger;
-		StorageCube.cube.associatedDimensions.forEach( (dim) => {
+		StorageCube.selected.associatedDimensions.forEach( dim => {
 			cube.associatedDimensions = dim;
 		});
 		const factTable = {
-			schema : StorageCube.cube.schema,
-			table : StorageCube.cube.FACT,
-			alias : StorageCube.cube.alias
+			schema : StorageCube.selected.schema,
+			table : StorageCube.selected.FACT,
+			alias : StorageCube.selected.alias
 		};
 		// debugger;
 		app.addCard(factTable, true);
@@ -946,14 +943,14 @@ var Hier = new Hierarchy();
 	app.handlerDimensionSelected = (e) => {
 		console.log(e.target);
 		const storage = new DimensionStorage();
-		storage.dimension = e.target.dataset.token;
+		storage.selected = e.target.dataset.token;
 		// memorizzo la dimensione selezionata per recuperarla nel salvataggio del cubo
 		cube.dimensionsSelected = e.target.dataset.token;
 		// recupero tutta la dimensione selezionata, dallo storage
-		console.log(storage.dimension);
+		console.log(storage.selected);
 		// aggiungo alla dropzone l'ultima tabella della gerarchia
 		// debugger;
-		app.addCard(storage.dimension.lastTableInHierarchy, false);
+		app.addCard(storage.selected.lastTableInHierarchy, false);
 		// chiudo la lista delle dimensioni
 		app.dimensionList.toggleAttribute('hidden');
 		app.btnDimensionList.toggleAttribute('open');
@@ -1050,11 +1047,11 @@ var Hier = new Hierarchy();
 	// selezione di una dimensione per consentirne le modifica
 	app.handlerDimensionEdit = (e) => {
 		// Recupero tutto il json della dimensione selezionata
-		const dimStorage = new DimensionStorage();
-		dimStorage.dimension = e.target.dataset.dimensionName;
+		const storage = new DimensionStorage();
+		storage.selected = e.target.dataset.dimensionName;
 		const hierName = e.target.dataset.hierarchyName;
 		// TODO: Implementare addCards in modo da svolgere anche le istruzioni di addCard
-		app.addCards(dimStorage.dimension, hierName);
+		app.addCards(storage.selected, hierName);
 		// imposto lo span all'interno del dropzone con la descrizione della dimensione auutalmente in modifica
 		app.dropZone.querySelector('span').innerHTML = "Dimensione in modifica : " + e.target.dataset.dimensionName;
 		app.dropZone.setAttribute('edit', e.target.dataset.dimensionName); // OPTIMIZE: dataset data-edit
@@ -1193,38 +1190,37 @@ var Hier = new Hierarchy();
 	// Aggiorna cubo già esistente
 	app.btnSaveOpenedCube.onclick = () => {
 		console.log('Aggiornamento Cubo');
-		console.log(StorageCube.cube);
-		cube.title = StorageCube.cube.name;
-		cube.alias = StorageCube.cube.alias;
-		cube.FACT = StorageCube.cube.FACT;
+		console.log(StorageCube.selected);
+		cube.title = StorageCube.selected.name;
+		cube.alias = StorageCube.selected.alias;
+		cube.FACT = StorageCube.selected.FACT;
 		// Creo il cubeId basandomi sui cubi già creati in Storage, il cubeId lo associo al cubo che sto per andare a salvare.
-		cube.id = StorageCube.cube.id;
+		cube.id = StorageCube.selected.id;
+		cube.token = StorageCube.selected.token;
 		debugger;
 
-		const dimensionStorage = new DimensionStorage();
-		
-		cube.dimensionsSelected.forEach((dimensionName) => {
+		cube.dimensionsSelected.forEach( dimensionToken => {
+			const storage = new DimensionStorage();
 			let dimensionObject = {};
-			console.log(dimensionName);
-			dimensionStorage.dimension = dimensionName;
-			console.log(dimensionStorage.dimension);
+			console.log(dimensionToken);
+			storage.selected = dimensionToken;
+			console.log(storage.selected);
 			// il metodo selected restituisce la dimensione che sto ciclando, la salvo in dimensionObject per modificarla (aggiunta cubi)
-			dimensionObject[dimensionName] = dimensionStorage.dimension;
+			dimensionObject[dimensionToken] = storage.selected;
 			// salvo il cubo all'interno della dimensione, comprese la sua join con questa dimensione
 			// dimensionObject[dimensionName].cubes.push({[cube._title] : cube.relations});
 			// TODO: impostare cubes come un object e non come un array, in questo modo è più semplice recuperarlo da report/init.js "app.handlerDimensionSelected()"
-			dimensionObject[dimensionName].cubes[cube._title] = cube.relations;
-			console.log(dimensionObject[dimensionName]);
+			dimensionObject[dimensionToken].cubes[cube.token] = cube.relations;
+			console.log(dimensionObject[dimensionToken]);
 			// salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
-			cube.associatedDimensions = dimensionName;
+			cube.associatedDimensions = dimensionToken;
 			// salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
-			dimensionStorage.save = dimensionObject[dimensionName];
+			storage.saveTemp(dimensionObject[dimensionToken]);
 		});
 
 		cube.save();
-
 		// salvo il cubo in localStorage
-		StorageCube.save = cube.cube;
+		StorageCube.saveTemp(cube.cube);
         debugger;
         // TODO: aggiornamento su database, da implementare
         // app.saveCube(cube.cube);
@@ -1400,33 +1396,34 @@ var Hier = new Hierarchy();
 		// console.log(cube.id);
 
 		const rand = () => Math.random(0).toString(36).substr(2);
-		const token = rand().substr(0, 21);
+		// const token = rand().substr(0, 21);
+		cube.token = rand().substr(0, 21);
 
-		const dimensionStorage = new DimensionStorage();
+		const storage = new DimensionStorage();
 		
-		cube.dimensionsSelected.forEach((dimensionName) => {
+		cube.dimensionsSelected.forEach( dimensionToken => {
 			let dimensionObject = {};
 			// console.log(dimensionName);
-			dimensionStorage.dimension = dimensionName;
+			storage.selected = dimensionToken;
 			// il metodo selected restituisce la dimensione che sto ciclando, la salvo in dimensionObject per modificarla (aggiunta cubi)
-			dimensionObject[dimensionName] = dimensionStorage.dimension;
+			dimensionObject[dimensionToken] = storage.selected;
 			// salvo il cubo all'interno della dimensione, comprese la sua join con questa dimensione
 			// dimensionObject[dimensionName].cubes.push({[cube._title] : cube.relations});
-			dimensionObject[dimensionName].cubes[token] = cube.relations;
-			console.log(dimensionObject[dimensionName]);
+			dimensionObject[dimensionToken].cubes[cube.token] = cube.relations;
+			console.log(dimensionObject[dimensionToken]);
 			// salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
-			cube.associatedDimensions = dimensionName;
+			cube.associatedDimensions = dimensionToken;
 			// salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
-			dimensionStorage.saveTemp(dimensionObject[dimensionName]);
+			storage.saveTemp(dimensionObject[dimensionToken]);
 		});
 
-		cube.save(token);
+		cube.save();
 
 		// salvo il cubo in localStorage
+		debugger;
 		StorageCube.saveTemp(cube.cube);
 		// salvo il cubo sul DB
         // app.saveCube(cube.cube);
-
 		app.dialogCubeName.close();
 	}
 

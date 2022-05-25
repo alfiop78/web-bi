@@ -242,7 +242,6 @@ class Queries {
 		this.#elementDimension.set(value.token, this.#elementHierarchies);
 		// (this.#elementHierarchies.has(value.name)) ? this.#elementHierarchies.delete(value.name) : this.#elementHierarchies.add(value.name);
 		console.log('this.#elementDimension : ', this.#elementDimension);
-		debugger;
 		// console.log('this.#elementHierarchies : ', this.#elementHierarchies);
 	}
 
