@@ -161,7 +161,7 @@ class Queries {
 	set factRelation(dimension) {
 		// console.log('dimName : ', dimension.name);
 		// TODO: utilizzare oggetto Map()
-		this._factRelation[dimension.name] = dimension.cubes;
+		this._factRelation[dimension.token] = dimension.cubes;
 		// this._fatcRelation viene salvato nel processo in save()
 		console.log('_factRelation : ', this._factRelation);
 	}
@@ -230,16 +230,9 @@ class Queries {
 
 	get elementCube() {return this.#elementCube;}
 
-	/*set elementDimension(value) {
-		(this.#elementDimension.has(value.token)) ? this.#elementDimension.delete(value.token) : this.#elementDimension.add(value.token);
-		console.log('this.#elementDimension : ', this.#elementDimension);
-	}
-
-	get elementDimension() {return this.#elementDimension;}*/
-
 	set elementHierarchy(value) {
 		(this.#elementHierarchies.has(value.hier)) ? this.#elementHierarchies.delete(value.hier) : this.#elementHierarchies.add(value.hier);
-		this.#elementDimension.set(value.token, this.#elementHierarchies);
+		this.#elementDimension.set(value.token, [...this.#elementHierarchies]);
 		// (this.#elementHierarchies.has(value.name)) ? this.#elementHierarchies.delete(value.name) : this.#elementHierarchies.add(value.name);
 		console.log('this.#elementDimension : ', this.#elementDimension);
 		// console.log('this.#elementHierarchies : ', this.#elementHierarchies);
@@ -263,25 +256,19 @@ class Queries {
 
 	get elementReport() {
 		this.#elementReport.set('cubes', Object.fromEntries(this.elementCube));
-		this.#elementReport.set('dimensions', Object.fromEntries(this.#elementDimension));
-		// this.#elementReport.set('dimensions', [...this.#elementDimension]);
-
-		this.#elementReport.set('hierarchies', [...this.#elementHierarchies]);
+		this.#elementReport.set('dimensions', Object.fromEntries(this.elementHierarchy));
 		this.#elementReport.set('filters', Object.fromEntries(this.elementFilter));
-		
+		debugger;
 		return this.#elementReport;
 	}
 
 	save(name) {
 		const rand = () => Math.random(0).toString(36).substr(2);
-		debugger;
 		// se il token non è definito sto salvando un nuovo report e quindi lo definisco qui, altrimenti sto editando un report che ha già un proprio token e processId
 		if (this.#token === 0) {
 			this.#token = rand().substr(0, 21);
 			this.#processId = Date.now();
 		}
-		debugger;
-		// this.processId = Date.now();
 		this.#reportProcess['token'] = this.#token;
 		this.#reportProcess['select'] = Object.fromEntries(this.select);
 		this.#elementReport.set('columns', Object.fromEntries(this.select));
@@ -293,11 +280,11 @@ class Queries {
 			this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
 			this.#reportProcess['metrics'] = Object.fromEntries(this.#metrics);
 		}
+		debugger;
 		if (Object.keys(this._filteredMetrics).length > 0) this.#reportProcess['filteredMetrics'] = this._filteredMetrics;
 		if (Object.keys(this.#compositeMetrics).length > 0) this.#reportProcess['compositeMetrics'] = this.#compositeMetrics;
-		debugger;
+
 		this.#reportProcess['processId'] = this.#processId; // questo creerà il datamart FX[processId]
-		//  al posto del processId voglio utilizzare il nome del report legato alla FX_
 		this.#reportProcess['name'] = name;
 		this.#reportProcess['type'] = 'PROCESS';
 		this.#reportProcess['edit'] = Object.fromEntries(this.elementReport);

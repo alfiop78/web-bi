@@ -776,28 +776,37 @@ var StorageMetric = new MetricStorage();
 			Query.tableAlias = StorageCube.selected.alias;
 			Query.from = `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${Query.tableAlias}`;
 			Query.elementCube = {token : token, tableAlias : cube.tableAlias, from : Query.from};
+
+			// TODO: implementare una funzione, come showAll.... che visualizza/nasconde tutti gli elementi
 			app.showDimensions();
 			// visualizzo la/e tabelle fact
 			document.querySelector("#ul-fact-tables > section[data-cube-token='" + token + "']").hidden = false;
 			// visualizzo e seleziono metriche e filtri appartenenti al cubo
 			app.showCubeObjects();
 		}
-		// array dimensioni
+		
 		// seleziono le dimensioni utilizzate nel report
-		StorageProcess.selected.edit.dimensions.forEach( dimensionToken => {
-			StorageDimension.selected = dimensionToken;
+		const dimensions = new Map(Object.entries(StorageProcess.selected.edit.dimensions));
+		for ( const [token, hierarchies] of dimensions ) {
+			// StorageProcess.selected.edit.dimensions.forEach( dimensionToken => {
+			StorageDimension.selected = token;
 			Query.factRelation = StorageDimension.selected;
-			Query.elementDimension = {token : dimensionToken};
-			document.querySelector("#ul-dimensions > section[data-dimension-token='" + StorageDimension.selected.token + "'] .selectable").setAttribute('selected', true);
+			// seleziono la dimensione in ciclo
+			document.querySelector("#ul-dimensions > section[data-dimension-token='" + token + "'] .selectable").setAttribute('selected', true);
+			// visualizzo le hier relative alla dimensione
 			app.showHierarchies();
-		});
-		// seleziono le gerarchie utilizzate nel report
-		StorageProcess.selected.edit.hierarchies.forEach( hierarchy => {
-			Query.elementHierarchy = {name : hierarchy};
-			// TODO: aggiungere anche data-dimension-token
-			document.querySelector("#ul-hierarchies > section[data-label='" + hierarchy + "'] .selectable").setAttribute('selected', true);
-			app.showAllElements();
-		});
+			// all'interno delle dimensioni ci sono le gerarchie
+			// console.log('hierarchies : ', hierarchies);
+			// reimposto elementHierarchy
+			// Query.elementHierarchy = {token, hier : new Set(hierarchies)};
+			hierarchies.forEach ( hier => {
+				Query.elementHierarchy = {token, hier};
+				// seleziono le gerarchie
+				document.querySelector("#ul-hierarchies > section[data-label='" + hier + "'] .selectable").setAttribute('selected', true);
+				// visualizzo tutti gli oggetti relativi alla gerarchia
+				app.showAllElements();
+			});
+		}
 
 		// seleziono i filtri utilizzati nel report
 		const filters = new Map(Object.entries(StorageProcess.selected.edit.filters));
@@ -874,6 +883,7 @@ var StorageMetric = new MetricStorage();
 		if (e.currentTarget.hasAttribute('selected')) {
 			app.showHierarchies();
 			// imposto la relazione tra dimensione -> cubo
+			// TODO: utilizzare oggetto Map()
 			Query.factRelation = StorageDimension.selected;
 			// Query.elementDimension = {token : e.currentTarget.dataset.dimensionToken};
 			// imposto, in un object le dimensioni selezionate, questo mi servirà nella dialog-metrics per visualizzare/nascondere solo i filtri appartenenti alle dimensioni selezionate
@@ -1855,6 +1865,30 @@ var StorageMetric = new MetricStorage();
 		  .catch((err) => console.error(err));
 	}
 
+	app.updateProcess = async () => {
+		console.log(JSON.stringify(Query.reportProcessStringify));
+		// await fetch('/fetch_api/json/'+JSON.stringify(Query.reportProcessStringify)+'/table/bi_processes/save')
+		await fetch('/fetch_api/json/'+JSON.stringify(Query.reportProcessStringify)+'/process_update')
+		  .then((response) => {
+			if (!response.ok) { throw Error(response.statusText); }
+			return response;
+		  })
+		  .then((response) => response.json())
+		  .then((data) => {
+			// console.log(data);
+			if (data) {
+			  console.log('data : ', data);
+			  console.log('PROCESS AGGIORNATO CORRETTAMENTE');
+			  // NOTE: qui ho creato la FX, a questo punto potrei scegliere di visualizzare il report, per il momento mi serve solo la FX.
+			  // app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
+			} else {
+			  // TODO: no data
+			  console.debug('PROCESS non salvato nel DB');
+			}
+		  })
+		  .catch((err) => console.error(err));
+	}
+
 	app.btnSaveReport.onclick = (e) => app.dialogSaveReport.showModal();
 
 	// save report
@@ -1863,9 +1897,18 @@ var StorageMetric = new MetricStorage();
 		// const processId = Date.now();
 		const name = document.getElementById('reportName').value;
 		// il datamart sarà creato come FX_processId
-		Query.save(name);
-		// salvataggio nel database tabella : bi_processes
-		app.saveProcess();
+		// se il token è !== 0 significa che sto editando un report
+		if (Query.token !== 0) {
+			// edit del report
+			// TODO: visualizzare un alert che avvisa della sovrascrittura del report
+			Query.save(name);
+			// salvataggio nel database tabella : bi_processes
+			app.updateProcess();
+		} else {
+			// nuovo report
+			Query.save(name);
+			app.saveProcess();
+		}		
 		// TODO: aggiungo alla lista #ul-processes
 		app.dialogSaveReport.close();
 	}
