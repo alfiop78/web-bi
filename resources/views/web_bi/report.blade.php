@@ -533,7 +533,7 @@
 																<label for="search-columns" class="">Ricerca</label>
 															</div>
 															<ul id="ul-columns-fact"></ul>
-															<ul id="ul-columns"></ul>
+															<ul id="ul-columns" class="full-overflow-list"></ul>
 														</div>
 														{{-- filtri --}}
 														<div>

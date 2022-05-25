@@ -94,7 +94,7 @@ class Queries {
 			La prima colonna aggiunta a Query è sede.codice, la tabella sede ha un id:1, successivamente viene aggiunta una colonna appartenente alla tabella Azienda (id: 0).
 			A questo punto il valore di firstTable deve cambiare da sede a azienda, includendo, nella query finale, anche la tabella azienda e le sue relative join
 		*/
-		if ( +this.#firstTable.tableId > +this._tableId) {
+		if ( this.#firstTable.tableId > this._tableId) {
 			this.#firstTable = {tableId : this._tableId, table : this.table, hier};
 		}
 		console.log('#firstTable : ', this.#firstTable);
@@ -147,7 +147,7 @@ class Queries {
 			// this._where[this.#joinId] = join;
 			// console.log('where : ', this._where);
 		}
-		console.log('#where : ', this.#where);
+		// console.log('#where : ', this.#where);
 	}
 
 	deleteWhere() {
@@ -163,7 +163,7 @@ class Queries {
 		// TODO: utilizzare oggetto Map()
 		this._factRelation[dimension.token] = dimension.cubes;
 		// this._fatcRelation viene salvato nel processo in save()
-		console.log('_factRelation : ', this._factRelation);
+		// console.log('_factRelation : ', this._factRelation);
 	}
 
 	get factRelation() {this._factRelation;}
@@ -197,7 +197,7 @@ class Queries {
 		} else {
 			this.#metrics.set(value.token, value);
 		}
-		console.log('metrics : ', this.#metrics);
+		// console.log('metrics : ', this.#metrics);
 	}
 
 	get metrics() {return this.#metrics;}
@@ -225,7 +225,7 @@ class Queries {
 	set elementCube(value) {
 		// se l'elemento esiste lo elimino altrimenti lo aggiungo al Map
 		(this.#elementCube.has(value.token)) ? this.#elementCube.delete(value.token) : this.#elementCube.set(value.token, {tableAlias : value.tableAlias, from : [...value.from]});
-		console.log('this.#elementCube : ', this.#elementCube);
+		// console.log('this.#elementCube : ', this.#elementCube);
 	}
 
 	get elementCube() {return this.#elementCube;}
@@ -234,7 +234,7 @@ class Queries {
 		(this.#elementHierarchies.has(value.hier)) ? this.#elementHierarchies.delete(value.hier) : this.#elementHierarchies.add(value.hier);
 		this.#elementDimension.set(value.token, [...this.#elementHierarchies]);
 		// (this.#elementHierarchies.has(value.name)) ? this.#elementHierarchies.delete(value.name) : this.#elementHierarchies.add(value.name);
-		console.log('this.#elementDimension : ', this.#elementDimension);
+		// console.log('this.#elementDimension : ', this.#elementDimension);
 		// console.log('this.#elementHierarchies : ', this.#elementHierarchies);
 	}
 
@@ -248,8 +248,8 @@ class Queries {
 
 	set elementFilter(value) {
 		(this.#elementFilters.has(value.token)) ?
-			this.#elementFilters.delete(value.token) : this.#elementFilters.set(value.token, {hier : value.hier, tableAlias : value.tableAlias, formula : value.formula, tableId : value.tableId, table : this.table});
-		console.log('this.#elementFilters : ', this.#elementFilters);
+			this.#elementFilters.delete(value.token) : this.#elementFilters.set(value.token, value);
+		// console.log('this.#elementFilters : ', this.#elementFilters);
 	}
 
 	get elementFilter() {return this.#elementFilters;}
@@ -258,37 +258,43 @@ class Queries {
 		this.#elementReport.set('cubes', Object.fromEntries(this.elementCube));
 		this.#elementReport.set('dimensions', Object.fromEntries(this.elementHierarchy));
 		this.#elementReport.set('filters', Object.fromEntries(this.elementFilter));
-		debugger;
+		console.log('this.#elementReport : ', this.#elementReport);
 		return this.#elementReport;
 	}
 
 	save(name) {
+		this.reportElements = {};
+		this.editElements = {};
 		const rand = () => Math.random(0).toString(36).substr(2);
 		// se il token non è definito sto salvando un nuovo report e quindi lo definisco qui, altrimenti sto editando un report che ha già un proprio token e processId
 		if (this.#token === 0) {
 			this.#token = rand().substr(0, 21);
 			this.#processId = Date.now();
 		}
-		this.#reportProcess['token'] = this.#token;
-		this.#reportProcess['select'] = Object.fromEntries(this.select);
+		this.#reportProcess.token = this.#token;
+		this.reportElements.processId = this.#processId; // questo creerà il datamart FX[processId]
+		this.#reportProcess.name = name;
+
+		this.reportElements.select = Object.fromEntries(this.select);
 		this.#elementReport.set('columns', Object.fromEntries(this.select));
-		this.#reportProcess['from'] = Array.from(this._fromSet); // converto il set in un array
-		this.#reportProcess['where'] = this.#where;
-		this.#reportProcess['factJoin'] = this._factRelation;
-		if (this.filters.size > 0) this.#reportProcess['filters'] = Object.fromEntries(this.filters);
+		this.reportElements.from = Array.from(this._fromSet); // converto il set in un array
+		this.reportElements.where = this.#where;
+		this.reportElements.factJoin = this._factRelation;
+		if (this.filters.size > 0) this.reportElements.filters = Object.fromEntries(this.filters);
 		if (this.metrics.size > 0) {
 			this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
-			this.#reportProcess['metrics'] = Object.fromEntries(this.#metrics);
+			this.reportElements.metrics = Object.fromEntries(this.#metrics);
 		}
-		debugger;
-		if (Object.keys(this._filteredMetrics).length > 0) this.#reportProcess['filteredMetrics'] = this._filteredMetrics;
-		if (Object.keys(this.#compositeMetrics).length > 0) this.#reportProcess['compositeMetrics'] = this.#compositeMetrics;
-
-		this.#reportProcess['processId'] = this.#processId; // questo creerà il datamart FX[processId]
-		this.#reportProcess['name'] = name;
-		this.#reportProcess['type'] = 'PROCESS';
-		this.#reportProcess['edit'] = Object.fromEntries(this.elementReport);
+		if (Object.keys(this._filteredMetrics).length > 0) this.reportElements.filteredMetrics = this._filteredMetrics;
+		if (Object.keys(this.#compositeMetrics).length > 0) this.reportElements.compositeMetrics = this.#compositeMetrics;
+		
+		// this.#reportProcess['name'] = name;
+		this.#reportProcess.type = 'PROCESS';
+		this.editElements = Object.fromEntries(this.elementReport);
+		this.#reportProcess.report = this.reportElements;
+		this.#reportProcess.edit = this.editElements;
 		console.info(this.#reportProcess);
+		debugger;
 		window.localStorage.setItem(this.#token, JSON.stringify(this.#reportProcess));
         console.info(`${name} salvato nello storage con token : ${this.token}`);
 	}

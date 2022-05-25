@@ -95,7 +95,7 @@ ul > section.fact{font-weight: bold;}
 .step[data-step="1"] .h-grid{grid-template-columns : 25% calc(35% - 16px) calc(40% - 16px);}
 .step[data-step="2"] .v-grid{grid-template-rows : 10% calc(90% - 16px);}
 .overflowList{height: 350px; overflow-y: auto; background: gainsboro;}
-.full-overflow-list{height: 70%; overflow-y: auto; max-height: 450px;}
+.full-overflow-list{height: 70%; overflow-y: auto; max-height: 300px;}
 .full-overflow-list-columns{height: 350px; max-height: 350px; overflow-y: auto;}
 /*.dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}*/
 

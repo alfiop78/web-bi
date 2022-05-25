@@ -37,6 +37,7 @@ class BIprocessController extends Controller
     public function store(Request $request, $json)
     {
         $jsonContent = json_decode($json);
+        // dd($jsonContent);
         $process = new BIprocess();
         $process->token = $jsonContent->{'token'};
         $process->name = $jsonContent->{'name'};

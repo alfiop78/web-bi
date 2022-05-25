@@ -48,7 +48,8 @@ Route::prefix('/fetch_api/json/')->group(function () {
     Route::get('{json}/cube_store', [BIcubeController::class, 'store']);
     Route::get('{json}/metric_store', [BImetricController::class, 'store']);
     Route::get('{json}/filter_store', [BIfilterController::class, 'store']);
-    Route::get('{json}/process_store', [BIprocessController::class, 'store']);
+    Route::post('{json}/process_store', [BIprocessController::class, 'store']);
+    // Route::get('{json}/process_store', [BIprocessController::class, 'store']);
 });
 // destroy json
 Route::prefix('/fetch_api/name/')->group(function () {
@@ -80,7 +81,8 @@ Route::prefix('/fetch_api/json/')->group(function () {
 	Route::get('{json}/cube_update', [BIcubeController::class, 'update']);
 	Route::get('{json}/metric_update', [BImetricController::class, 'update']);
 	Route::get('{json}/filter_update', [BIfilterController::class, 'update']);
-	Route::get('{json}/process_update', [BIprocessController::class, 'update']);
+	Route::post('/process_update', [BIprocessController::class, 'update']);
+	// Route::get('{json}/process_update', [BIprocessController::class, 'update']);
 });
 
 // test POST request

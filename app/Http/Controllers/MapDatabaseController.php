@@ -119,7 +119,7 @@ class MapDatabaseController extends Controller
         $q->reportId = $cube->{'processId'};
         $q->baseTable = "W_AP_base_$q->reportId";
         $q->datamartName = "decisyon_cache.FX_$q->reportId";
-        $q->reportName = $cube->{'name'}; // il nome del report non deve avere caratteri non consentiti per la creazione di tabelle (per ora non c'è un controllo sul nome inserito, da javascript)
+        // $q->reportName = $cube->{'name'}; // il nome del report non deve avere caratteri non consentiti per la creazione di tabelle (per ora non c'è un controllo sul nome inserito, da javascript)
         $q->baseColumns = $cube->{'select'};
         // imposto le colonne da includere nel datamart finale
         $q->fields();
