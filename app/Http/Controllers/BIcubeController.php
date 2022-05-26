@@ -34,15 +34,16 @@ class BIcubeController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    // TODO: request post come fatto per BIprocessController
-    public function store(Request $request, $json)
+    public function store(Request $request)
     {
-        $jsonContent = json_decode($json);
-        // l'inserimento con Eloquent ha inserito anche i campi created_at/updated_at
+        $token = $request->collect()->get('token');
+        $name = $request->collect()->get('name');
+        // codifico tutta la $request in json per poterla inserire nel DB
+        $json = json_encode($request->all());
         $cube = new BIcube();
-        // il nome della tabella è impostato nel Model
-        $cube->token = $jsonContent->{'token'};
-        $cube->name = $jsonContent->{'name'};
+        // salvo su DB
+        $cube->token = $token;
+        $cube->name = $name;
         $cube->json_value = $json;
         return $cube->save();
     }
@@ -78,12 +79,16 @@ class BIcubeController extends Controller
      * @return \Illuminate\Http\Response
      */
     // TODO: request post come fatto per BIprocessController
-    public function update(Request $request, BIcube $bIcube, $json)
+    public function update(Request $request, BIcube $bIcube)
     {
-        $jsonContent = json_decode($json);
-        $cube = $bIcube::findOrFail($jsonContent->{'token'});
-        $cube->token = $jsonContent->{'token'};
-        $cube->name = $jsonContent->{'name'};
+        $token = $request->collect()->get('token');
+        $name = $request->collect()->get('name');
+        // codifico tutta la $request in json per poterla inserire nel DB 
+        $json = json_encode($request->all());
+        // cerco nel DB il token del PROCESS da aggiornare
+        $cube = $bIcube::findOrFail($token);
+        $cube->token = $token;
+        $cube->name = $name;
         $cube->json_value = $json;
         return $cube->save();
     }

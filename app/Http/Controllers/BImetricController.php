@@ -34,16 +34,28 @@ class BImetricController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    // TODO: request post come fatto per BIprocessController
-    public function store(Request $request, $json)
+    public function store(Request $request)
     {
-        $jsonContent = json_decode($json);
+        $token = $request->collect()->get('token');
+        $name = $request->collect()->get('name');
+        // codifico tutta la $request in json per poterla inserire nel DB
+        $json = json_encode($request->all());
+        // l'inserimento con Eloquent ha inserito anche i campi created_at/updated_at
+        $metric = new BImetric();
+        // salvo su DB
+        $metric->token = $token;
+        $metric->name = $name;
+        $metric->json_value = $json;
+
+        // **************************** vecchia gestione con una route ::get ***************
+        /*$jsonContent = json_decode($json);
         // l'inserimento con Eloquent ha inserito anche i campi created_at/updated_at
         $metric = new BImetric();
         // il nome della tabella è impostato nel Model
         $metric->token = $jsonContent->{'token'};
         $metric->name = $jsonContent->{'name'};
         $metric->json_value = $json;
+        ***************************/
         return $metric->save();
     }
 
@@ -77,14 +89,23 @@ class BImetricController extends Controller
      * @param  \App\Models\BImetric  $bImetric
      * @return \Illuminate\Http\Response
      */
-    // TODO: request post come fatto per BIprocessController
-    public function update(Request $request, BImetric $bImetric, $json)
+    public function update(Request $request, BImetric $bImetric)
     {
+        $token = $request->collect()->get('token');
+        $name = $request->collect()->get('name');
+        // codifico tutta la $request in json per poterla inserire nel DB 
+        $json = json_encode($request->all());
+        // cerco nel DB il token del PROCESS da aggiornare
+        $metric = $bImetric::findOrFail($token);
+        $metric->token = $token;
+        $metric->name = $name;
+        $metric->json_value = $json;
+        /* ************************* route ::get ***************************
         $jsonContent = json_decode($json);
         $metric = $bImetric::findOrFail($jsonContent->{'token'});
         $metric->token = $jsonContent->{'token'};
         $metric->name = $jsonContent->{'name'};
-        $metric->json_value = $json;
+        $metric->json_value = $json;*/
         return $metric->save();
     }
 

@@ -257,34 +257,31 @@ var storage = new Storages();
 	app.fetchAPIRequestVersioningAll();
 
 	app.saveObjectOnDB = async (token, type) => {
-		// console.log(window.localStorage.getItem(name));
-		// debugger;
 		let url;
-		// const json = JSON.stringify(window.localStorage.getItem(name));
-		const json = window.localStorage.getItem(token);
-		// console.log('json', json);
-		// console.log('json', window.localStorage.getItem(name));
-		// console.log('json', JSON.stringify(window.localStorage.getItem(name)));
+		const json = JSON.parse(window.localStorage.getItem(token));
+		const params = JSON.stringify(json);
+		const init = {headers: {'Content-Type': 'application/json'}, method: 'POST', body: params};
 		switch (type) {
 			case 'dimensions':
-				url = '/fetch_api/json/'+json+'/dimension_store';
+				url = '/fetch_api/json/dimension_store';
 				break;
 			case 'cubes':
-				url = '/fetch_api/json/'+json+'/cube_store';
+				url = '/fetch_api/json/cube_store';
 				break;
 			case 'filters':
-				url = '/fetch_api/json/'+json+'/filter_store';
+				url = '/fetch_api/json/filter_store';
 				break;
 			case 'metrics':
-				url = '/fetch_api/json/'+json+'/metric_store';
+				url = '/fetch_api/json/metric_store';
 				break;
 			default:
-				url = '/fetch_api/json/'+json+'/process_store';
+				url = '/fetch_api/json/process_store';
 				break;
 		}
 		// recupero l'elemento da salvare su db, presente nello storage
 		// console.log(JSON.stringify(json));
-		await fetch(url)
+		const req = new Request(url, init);
+		await fetch(req)
 			.then((response) => {
 				if (!response.ok) { throw Error(response.statusText); }
 				return response;
@@ -312,7 +309,7 @@ var storage = new Storages();
 		.catch((err) => console.error(err));
 	}
 
-	app.deleteObjectOnDB = async (name, type) => {
+	app.deleteObjectOnDB = async (token, type) => {
 		let url;
 		// const json = JSON.stringify(window.localStorage.getItem(name));
 		// const json = window.localStorage.getItem(name);
@@ -321,19 +318,19 @@ var storage = new Storages();
 		// console.log('json', JSON.stringify(window.localStorage.getItem(name)));
 		switch (type) {
 			case 'dimensions':
-				url = '/fetch_api/name/'+name+'/dimension_destroy';
+				url = '/fetch_api/name/'+token+'/dimension_destroy';
 				break;
 			case 'cubes':
-				url = '/fetch_api/name/'+name+'/cube_destroy';
+				url = '/fetch_api/name/'+token+'/cube_destroy';
 				break;
 			case 'filters':
-				url = '/fetch_api/name/'+name+'/filter_destroy';
+				url = '/fetch_api/name/'+token+'/filter_destroy';
 				break;
 			case 'metrics':
-				url = '/fetch_api/name/'+name+'/metric_destroy';
+				url = '/fetch_api/name/'+token+'/metric_destroy';
 				break;
 			default:
-				url = '/fetch_api/name/'+name+'/process_destroy';
+				url = '/fetch_api/name/'+token+'/process_destroy';
 				break;
 		}
 		// recupero l'elemento da salvare su db, presente nello storage
@@ -408,27 +405,30 @@ var storage = new Storages();
 		.catch((err) => console.error(err));
 	}
 
-	app.upgradeObjectOnDB = async (name, type) => {
+	app.upgradeObjectOnDB = async (token, type) => {
+		const json = JSON.parse(window.localStorage.getItem(token));
+		const params = JSON.stringify(json);
+		const init = {headers: {'Content-Type': 'application/json'}, method: 'POST', body: params};
 		let url;
-		const json = window.localStorage.getItem(name);
 		switch (type) {
 			case 'dimensions':
-				url = '/fetch_api/json/'+json+'/dimension_update';
+				url = '/fetch_api/json/dimension_update';
 				break;
 			case 'cubes':
-				url = '/fetch_api/json/'+json+'/cube_update';
+				url = '/fetch_api/json/cube_update';
 				break;
 			case 'filters':
-				url = '/fetch_api/json/'+json+'/filter_update';
+				url = '/fetch_api/json/filter_update';
 				break;
 			case 'metrics':
-				url = '/fetch_api/json/'+json+'/metric_update';
+				url = '/fetch_api/json/metric_update';
 				break;
 			default:
-				url = '/fetch_api/json/'+json+'/process_update';
+				url = '/fetch_api/json/process_update';
 				break;
 		}
-		await fetch(url)
+		const req = new Request(url, init);
+		await fetch(req)
 			.then((response) => {
 				if (!response.ok) { throw Error(response.statusText); }
 				return response;

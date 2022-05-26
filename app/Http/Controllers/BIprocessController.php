@@ -37,13 +37,13 @@ class BIprocessController extends Controller
     public function store(Request $request)
     {
         // dd($request->collect()->get('token'));
-        $tokenProcess = $request->collect()->get('token');
+        $token = $request->collect()->get('token');
         $name = $request->collect()->get('name');
         // codifico tutta la $request in json per poterla inserire nel DB
         $json = json_encode($request->all());
         $process = new BIprocess();
         // salvo su DB
-        $process->token = $tokenProcess;
+        $process->token = $token;
         $process->name = $name;
         $process->json_value = $json;
 
@@ -90,13 +90,13 @@ class BIprocessController extends Controller
     public function update(Request $request, BIprocess $bIprocess)
     {
         // token del PROCESS
-        $tokenProcess = $request->collect()->get('token');
+        $token = $request->collect()->get('token');
         $name = $request->collect()->get('name');
         // codifico tutta la $request in json per poterla inserire nel DB 
         $json = json_encode($request->all());
         // cerco nel DB il token del PROCESS da aggiornare
-        $process = $bIprocess::findOrFail($tokenProcess);
-        $process->token = $tokenProcess;
+        $process = $bIprocess::findOrFail($token);
+        $process->token = $token;
         $process->name = $name;
         $process->json_value = $json;
         return $process->save();

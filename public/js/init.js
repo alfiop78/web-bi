@@ -824,11 +824,13 @@ var Hier = new Hierarchy();
 	    .catch( (err) => console.error(err));
 	}
 
-    app.saveDIM = async (jsonDim) => {
-        console.log(jsonDim);
-        console.log(JSON.stringify(jsonDim));
-        // await fetch('/fetch_api/json/'+JSON.stringify(jsonDim)+'/table/bi_dimensions/save')
-        await fetch('/fetch_api/json/'+JSON.stringify(jsonDim)+'/dimension_store')
+	// WARNING: al momento non utilizzata, il salvataggio di una dimensione viene effettuato nel Versioning
+    app.saveDIM = async (json) => {
+        const params = JSON.stringify(json);
+		const url = "/fetch_api/json/dimension_store";
+		const init = {headers: {'Content-Type': 'application/json'}, method: 'POST', body: params};
+		const req = new Request(url, init);
+        await fetch(req)
           .then((response) => {
             if (!response.ok) { throw Error(response.statusText); }
             return response;
@@ -1163,11 +1165,13 @@ var Hier = new Hierarchy();
 	}
 
 	// salvataggio del cubo
+	// WARNING: al momento non viene utilizzata perchè il salvataggio del cubo viene effettuato dal Versioning
 	app.saveCube = async (json) => {
-        console.log(json);
-        console.log(JSON.stringify(json));
-        // await fetch('/fetch_api/json/'+JSON.stringify(json)+'/table/bi_cubes/save')
-        await fetch('/fetch_api/json/'+JSON.stringify(json)+'/cube_store')
+        const params = JSON.stringify(json);
+		const url = "/fetch_api/json/cube_store";
+		const init = {headers: {'Content-Type': 'application/json'}, method: 'POST', body: params};
+		const req = new Request(url, init);
+        await fetch(req)
           .then((response) => {
             if (!response.ok) { throw Error(response.statusText); }
             return response;

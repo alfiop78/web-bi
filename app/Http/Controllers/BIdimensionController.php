@@ -38,19 +38,18 @@ class BIdimensionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    // TODO: request post come fatto per BIprocessController
-    public function store(Request $request, $json)
+    public function store(Request $request)
     {
-        // dd($json);
-        $jsonContent = json_decode($json);
-        // l'inserimento con Eloquent ha inserito anche i campi created_at/updated_at
-        $dim = new BIdimension();
-        // il nome della tabella è impostato nel Model
-        $dim->token = $jsonContent->{'token'};
-        $dim->name = $jsonContent->{'name'};
-        $dim->json_value = $json;
-        // dd($dim);
-        return $dim->save();
+        $token = $request->collect()->get('token');
+        $name = $request->collect()->get('name');
+        // codifico tutta la $request in json per poterla inserire nel DB
+        $json = json_encode($request->all());
+        $dimension = new BIdimension();
+        // salvo su DB
+        $dimension->token = $token;
+        $dimension->name = $name;
+        $dimension->json_value = $json;
+        return $dimension->save();
         // dd($key);
         // insert con il query builder
         // $result = DB::connection("mysql_local")->table('bi_dimensions')->insert([
@@ -96,16 +95,17 @@ class BIdimensionController extends Controller
      * @param  \App\Models\BIdimension  $bIdimension
      * @return \Illuminate\Http\Response
      */
-    // TODO: request post come fatto per BIprocessController
-    public function update(Request $request, BIdimension $bIdimension, $json)
+    public function update(Request $request, BIdimension $bIdimension)
     {
-        $jsonContent = json_decode($json);
-        $dimension = $bIdimension::findOrFail($jsonContent->{'token'});
-        // dd($dimension);
-        $dimension->token = $jsonContent->{'token'};
-        $dimension->name = $jsonContent->{'name'};
+        $token = $request->collect()->get('token');
+        $name = $request->collect()->get('name');
+        // codifico tutta la $request in json per poterla inserire nel DB 
+        $json = json_encode($request->all());
+        // cerco nel DB il token del PROCESS da aggiornare
+        $dimension = $bIdimension::findOrFail($token);
+        $dimension->token = $token;
+        $dimension->name = $name;
         $dimension->json_value = $json;
-        // dd($dim);
         return $dimension->save();
     }
 

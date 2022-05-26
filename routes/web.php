@@ -44,10 +44,10 @@ Route::post('/fetch_api/cube/process', [MapDatabaseController::class, 'process']
 
 // store json
 Route::prefix('/fetch_api/json/')->group(function () {
-    Route::get('{json}/dimension_store', [BIdimensionController::class, 'store']);
-    Route::get('{json}/cube_store', [BIcubeController::class, 'store']);
-    Route::get('{json}/metric_store', [BImetricController::class, 'store']);
-    Route::get('{json}/filter_store', [BIfilterController::class, 'store']);
+    Route::post('/dimension_store', [BIdimensionController::class, 'store']);
+    Route::post('/cube_store', [BIcubeController::class, 'store']);
+    Route::post('/metric_store', [BImetricController::class, 'store']);
+    Route::post('/filter_store', [BIfilterController::class, 'store']);
     Route::post('/process_store', [BIprocessController::class, 'store']);
 });
 // destroy json
@@ -76,10 +76,10 @@ Route::prefix('/fetch_api/name/')->group(function () {
 });
 // update
 Route::prefix('/fetch_api/json/')->group(function () {
-	Route::get('{json}/dimension_update', [BIdimensionController::class, 'update']);
-	Route::get('{json}/cube_update', [BIcubeController::class, 'update']);
-	Route::get('{json}/metric_update', [BImetricController::class, 'update']);
-	Route::get('{json}/filter_update', [BIfilterController::class, 'update']);
+	Route::post('/dimension_update', [BIdimensionController::class, 'update']);
+	Route::post('/cube_update', [BIcubeController::class, 'update']);
+	Route::post('/metric_update', [BImetricController::class, 'update']);
+	Route::post('/filter_update', [BIfilterController::class, 'update']);
 	Route::post('/process_update', [BIprocessController::class, 'update']);
 });
 

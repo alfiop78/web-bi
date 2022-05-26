@@ -747,7 +747,6 @@ var StorageMetric = new MetricStorage();
 		const init = {headers: {'Content-Type': 'application/json'}, method: 'POST', body: params};
 		const req = new Request(url, init);
 		await fetch(req)
-		// await fetch('/fetch_api/cube/' + jsonReport + '/process')
 		.then((response) => {
 			if (!response.ok) { throw Error(response.statusText); }
 			return response;
@@ -1337,12 +1336,6 @@ var StorageMetric = new MetricStorage();
 
 	// carico elenco colonne dal DB da visualizzare nella dialogFilter
 	app.getFields = async () => {
-		// const url = '/report/table_info';
-		// const params = 'tableName='+Query.table;
-		// console.log('params : ', params);
-		// const init = {headers: {'Content-Type': 'application/x-www-form-urlencoded'}, method: 'POST', body: params};
-		// const req = new Request(url, init);
-
 		await fetch('/fetch_api/' + Query.schema + '/schema/' + Query.table + '/table_info')
 			.then((response) => {
 				if (!response.ok) { throw Error(response.statusText); }
@@ -1403,9 +1396,14 @@ var StorageMetric = new MetricStorage();
 	
 	// salvataggio della metrica nel db
 	app.saveMetricDB = async (json) => {
-		console.log(json);
-		console.log(JSON.stringify(json));
-		await fetch('/fetch_api/json/'+JSON.stringify(json)+'/metric_store')
+		// console.log(json);
+		// console.log(JSON.stringify(json));
+		const params = JSON.stringify(json);
+		const url = "/fetch_api/json/metric_store";
+		const init = {headers: {'Content-Type': 'application/json'}, method: 'POST', body: params};
+		const req = new Request(url, init);
+
+		await fetch(req)
 		  .then((response) => {
 			if (!response.ok) { throw Error(response.statusText); }
 			return response;
@@ -1626,10 +1624,11 @@ var StorageMetric = new MetricStorage();
 
 	// salvo il filtro nel DB, table : bi_filters
 	app.saveFilterDB = async (json) => {
-		console.log(json);
-		console.log(JSON.stringify(json));
-		// await fetch('/fetch_api/json/'+JSON.stringify(json)+'/table/bi_filters/save')
-		await fetch('/fetch_api/json/'+JSON.stringify(json)+'/filter_store')
+		const params = JSON.stringify(json);
+		const url = "/fetch_api/json/filter_store";
+		const init = {headers: {'Content-Type': 'application/json'}, method: 'POST', body: params};
+		const req = new Request(url, init);
+		await fetch(req)
 		  .then((response) => {
 			if (!response.ok) { throw Error(response.statusText); }
 			return response;
@@ -1708,11 +1707,6 @@ var StorageMetric = new MetricStorage();
 
 	// recupero valori distinti per inserimento nella dialogFilter
 	app.getDistinctValues = async () => {
-		// const url = 'report/distinct_values';
-		// const params = 'table='+Query.table+'&field='+Query.field;
-		// console.log('params : ', params);
-		// const init = {headers: {'Content-Type': 'application/x-www-form-urlencoded'}, method: 'POST', body: params};
-		// const req = new Request(url, init);
 		await fetch('fetch_api/schema/' + Query.schema + '/table/' + Query.table + '/field/' + Query.field + '/distinct_values')
 			.then((response) => {
 			if (!response.ok) { throw Error(response.statusText); }
@@ -1924,9 +1918,7 @@ var StorageMetric = new MetricStorage();
 		const url = "/fetch_api/json/process_store";
 		const init = {headers: {'Content-Type': 'application/json'}, method: 'POST', body: params};
 		const req = new Request(url, init);
-
 		await fetch(req)
-			// await fetch('/fetch_api/json/'+JSON.stringify(Query.reportProcessStringify)+'/process_store')
 		  .then((response) => {
 			if (!response.ok) { throw Error(response.statusText); }
 			return response;
@@ -1954,7 +1946,6 @@ var StorageMetric = new MetricStorage();
 		const init = {headers: {'Content-Type': 'application/json'}, method: 'POST', body: params};
 		const req = new Request(url, init);
 		await fetch(req)
-		// await fetch('/fetch_api/json/'+JSON.stringify(Query.reportProcessStringify)+'/process_update')
 		  .then((response) => {
 			if (!response.ok) { throw Error(response.statusText); }
 			return response;

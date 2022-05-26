@@ -34,15 +34,16 @@ class BIfilterController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    // TODO: request post come fatto per BIprocessController
-    public function store(Request $request, $json)
+    public function store(Request $request)
     {
-        $jsonContent = json_decode($json);
-        // l'inserimento con Eloquent ha inserito anche i campi created_at/updated_at
+        $token = $request->collect()->get('token');
+        $name = $request->collect()->get('name');
+        // codifico tutta la $request in json per poterla inserire nel DB
+        $json = json_encode($request->all());
         $filter = new BIfilter();
-        // il nome della tabella è impostato nel Model
-        $filter->token = $jsonContent->{'token'};
-        $filter->name = $jsonContent->{'name'};
+        // salvo su DB
+        $filter->token = $token;
+        $filter->name = $name;
         $filter->json_value = $json;
         return $filter->save();
     }
@@ -77,13 +78,16 @@ class BIfilterController extends Controller
      * @param  \App\Models\BIfilter  $bIfilter
      * @return \Illuminate\Http\Response
      */
-    // TODO: request post come fatto per BIprocessController
-    public function update(Request $request, BIfilter $bIfilter, $json)
+    public function update(Request $request, BIfilter $bIfilter)
     {
-        $jsonContent = json_decode($json);
-        $filter = $bIfilter::findOrFail($jsonContent->{'token'});
-        $filter->token = $jsonContent->{'token'};
-        $filter->name = $jsonContent->{'name'};
+        $token = $request->collect()->get('token');
+        $name = $request->collect()->get('name');
+        // codifico tutta la $request in json per poterla inserire nel DB 
+        $json = json_encode($request->all());
+        // cerco nel DB il token del PROCESS da aggiornare
+        $filter = $bIfilter::findOrFail($token);
+        $filter->token = $token;
+        $filter->name = $name;
         $filter->json_value = $json;
         return $filter->save();
     }
