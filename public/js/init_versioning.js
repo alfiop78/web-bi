@@ -145,25 +145,31 @@ var storage = new Storages();
 				let actions = versioningStatus.querySelector('.vers-actions');
 				const parent = document.querySelector("section[data-versioning-elements] div[data-id='versioning-content'][data-object='" + element + "']");
 
-				const jsonParsed = JSON.parse(el.json_value);
+				const jsonParsedDB = JSON.parse(el.json_value);
+				const jsonParsedLocal = JSON.parse(window.localStorage.getItem(jsonParsedDB.token));
 				// se l'elemento recuperato dal DB è già presente in localStorage, ed è diverso, non lo aggiorno, si potrà scegliere di aggiornarlo/sovrascriverlo successivamente
 				// console.log(jsonParsed.name);
 				// console.log(JSON.parse(window.localStorage.getItem(jsonParsed.name)).name);
 			
-				// verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore a causa della prop 'name', se non esiste un determinato Elemento
-				if (JSON.parse(window.localStorage.getItem(jsonParsed.token)) ) {
-					if ( jsonParsed.token === JSON.parse(window.localStorage.getItem(jsonParsed.token)).token ) {
-						// se l'elemento è già presente in locale verifico anche se il suo contenuto è uguale a quello del DB
+				// verifico prima se è presente l'elemento nello storage altrimenti nella if ho un errore a causa della prop 'token', se non esiste un determinato Elemento
+				if ( jsonParsedLocal ) {
+					// se l'elemento è già presente in locale verifico anche se il suo contenuto è uguale a quello del DB
+					console.log(jsonParsedDB, jsonParsedLocal);
+					// debugger;
+					if ( jsonParsedDB.token === jsonParsedLocal.token ) {
+						console.log('elemento presente in locale : ', jsonParsedLocal);
+						// debugger;
 						// console.log('elemento già presente in locale', jsonParsed.name);
-						if ( el.json_value === window.localStorage.getItem(jsonParsed.token) ) {
+						if ( jsonParsedDB.updated_at === jsonParsedLocal.updated_at ) {
+							console.info('elementi sono identici');
 							// console.info('UGUALE CONTENTUO JSON, ELEMENTO RESTA INVARIATO IN LOCALE');
 							iconStatus.innerText = 'sync';
 							iconStatus.classList.add('md-status'); // darkgrey
 							descrStatus.innerText = 'Sincronizzato';
 							// icona delete
-							actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectName = jsonParsed.name;
+							// actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectName = jsonParsedDB.name;
 							actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectType = element;
-							actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.token = jsonParsed.token;
+							actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.token = jsonParsedDB.token;
 						} else {
 							// elemento presente ma contenuto diverso dal DB, da aggiornare manualmente
 							iconStatus.innerText = 'sync_problem';
@@ -171,35 +177,36 @@ var storage = new Storages();
 							descrStatus.innerText = 'Non sincronizzato';
 							// icona per recuperare manualmente l'elemento
 							actions.querySelector('.popupContent[data-download]').removeAttribute('hidden');
-							actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').dataset.objectName = jsonParsed.name;
+							// actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').dataset.objectName = jsonParsedDB.name;
 							actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').dataset.objectType = element;
-							actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').dataset.token = jsonParsed.token;
+							actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').dataset.token = jsonParsedDB.token;
 							// icona per versionare da Sviluppo->Produzione
 							actions.querySelector('.popupContent[data-upgrade]').removeAttribute('hidden');
-							actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').dataset.objectName = jsonParsed.name;
+							// actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').dataset.objectName = jsonParsedDB.name;
 							actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').dataset.objectType = element;
-							actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').dataset.token = jsonParsed.token;
+							actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').dataset.token = jsonParsedDB.token;
 						}
 					}
 				} else {
 					// elemento non presente in locale, lo salvo direttamente
-					window.localStorage.setItem(jsonParsed.token, el.json_value);
+					console.info('elemento non presente in locale');
+					debugger;
+					window.localStorage.setItem(jsonParsedDB.token, el.json_value);
 					iconStatus.innerText = 'done';
 					iconStatus.classList.add('md-done');
 					descrStatus.innerText = 'Aggiornato';
 				}
-				versioningStatus.querySelector('.vers-title > div[data-name]').innerText = jsonParsed.name;
+				versioningStatus.querySelector('.vers-title > div[data-name]').innerText = jsonParsedDB.name;
 				const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false, timeZone: 'Europe/Rome' };
 				versioningStatus.querySelector('.vers-title  span[data-created-at]').innerText = new Intl.DateTimeFormat('it-IT', options).format(new Date(el.created_at));
 				versioningStatus.querySelector('.vers-title span[data-updated-at]').innerText = new Intl.DateTimeFormat('it-IT', options).format(new Date(el.updated_at));
 				sectionSearchable.dataset.objectType = element;
-				sectionSearchable.dataset.objectName = jsonParsed.name;
+				sectionSearchable.dataset.token = jsonParsedDB.token;
 				// icona delete
-				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectName = jsonParsed.name;
+				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.token = jsonParsedDB.token;
 				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectType = element;
-				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.token = jsonParsed.token;
 				sectionSearchable.dataset.elementSearch = 'versioning-db-search';
-				sectionSearchable.dataset.label = jsonParsed.name;
+				sectionSearchable.dataset.label = jsonParsedDB.name;
 				parent.appendChild(sectionSearchable);
 			});
 		}
@@ -439,9 +446,9 @@ var storage = new Storages();
 				if (data) {
 					console.log('data : ', data);
 					console.log('AGGIORNAMENTO AVVENUTO CON SUCCESSO!');
-					debugger;
-					const sectionElement = app.dialogVersioning.querySelector("section[data-object-name='" + name + "'][data-object-type='" + type + "']");
+					const sectionElement = app.dialogVersioning.querySelector("section[data-token='" + token + "'][data-object-type='" + type + "']");
 					console.log('sectionElement : ', sectionElement);
+					debugger;
 					// modifico l'icona in .vers-status impostando sync con la classe md-status al posto di md-warning
 					sectionElement.querySelector('.vers-status > i').innerText = 'sync';
 					sectionElement.querySelector('.vers-status > i').classList.replace('md-warning', 'md-status');
@@ -461,7 +468,7 @@ var storage = new Storages();
 	// events
 
 	app.dialogVersioning.addEventListener('click', (e) => {
-		// console.log('e.target : ', e.target);
+		console.log('e.target : ', e.target);
 		switch (e.target.dataset.id) {
 			case 'btn-upload-local-object':
 				// tasto upload

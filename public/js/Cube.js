@@ -107,7 +107,13 @@ class Cube {
 
 	save() {
 		this._cube.token = this.token;
+		// imposto la data last_created e last_edit
+		const date = new Date();
+		// const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+		const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
 		this._cube.type = 'CUBE';
+		this._cube.created_at = date.toLocaleDateString('it-IT', options);
+		this._cube.updated_at = date.toLocaleDateString('it-IT', options);
 		this._cube.name = this._title;
 		this._cube.comment = this.#comment;
 		// this._cube.metrics = this.#metrics;
@@ -200,7 +206,15 @@ class Dimension {
 		debugger;
 		const rand = () => Math.random(0).toString(36).substr(2);
 		const token = rand().substr(0, 21);
+		// imposto la data last_created e last_edit
+		const date = new Date();
+		// const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+		const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+		// console.log(date.toLocaleDateString('it-IT', options));
 		this._dimension.token = token;
+		// TODO: quando sarà implementata la modifica di una dimensione dovrò utilizzare solo updated_at
+		this._dimension.created_at = date.toLocaleDateString('it-IT', options);
+		this._dimension.updated_at = date.toLocaleDateString('it-IT', options);
 		this._dimension.type = 'DIMENSION';
 		this._dimension.name = this._title;
 		this._dimension.comment = this.#comment;

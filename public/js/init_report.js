@@ -1445,6 +1445,9 @@ var StorageMetric = new MetricStorage();
 		console.log('cube selected token : ', StorageCube.selected.token);
 		const rand = () => Math.random(0).toString(36).substr(2);
 		const token = rand().substr(0, 21);
+		const date = new Date();
+		// const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+		const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
 		// verifico se ci sono filtri da associare a questa metrica
 		let associatedFilters = {};
 		document.querySelectorAll('#ul-metric-filter .selectable[selected]').forEach((filterSelected) => {
@@ -1454,7 +1457,7 @@ var StorageMetric = new MetricStorage();
 			// recupero dallo storage il contenuto del filtro per inserirlo in un object (quest'ultimo verrà inserito nella metrica)
 			associatedFilters[StorageFilter.selected.token] = StorageFilter.selected;
 		});
-		let metricObj = {};
+		let metricObj = { created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options) };
 		// se associatedFilters > 0 sarà una metrica filtrata, altrimenti una metrica a livello di report (senza nessun filtro all'interno della metrica)
 		// la metrica che si sta per creare non deve essere "selezionata" (con Query.metrics oppure Query.filteredMetrics) per il report in costruzione
 		// TODO: metric_type = 2
@@ -1658,8 +1661,10 @@ var StorageMetric = new MetricStorage();
 		let filterName = document.getElementById('inputFilterName');
 		const rand = () => Math.random(0).toString(36).substr(2);
 		const token = rand().substr(0, 21);
-		let filterObject = {};
-		// Query.filterName = filterName.value;
+		const date = new Date();
+		// const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+		const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+		let filterObject = {created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options)};
 		// la creazione di un filtro su un livello dimensionale salva il filtro con, all'interno, le proprietà dimension e hier.
 		// Un filtro impostato la FACT avrà al suo interno il nome del cubo a cui è associato e l'alias della FACT
 		if (app.dialogFilter.querySelector('section').hasAttribute('data-hier-name')) {
@@ -1968,7 +1973,7 @@ var StorageMetric = new MetricStorage();
 
 	app.btnSaveReport.onclick = (e) => app.dialogSaveReport.showModal();
 
-	// save report
+	// save process
 	app.btnSaveReportDone.onclick = () => {
 		// ottengo un processId per passarlo a costruttore
 		// const processId = Date.now();

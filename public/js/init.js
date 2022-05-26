@@ -1191,7 +1191,7 @@ var Hier = new Hierarchy();
           .catch((err) => console.error(err));
     }
 
-	// Aggiorna cubo già esistente
+	// update cube
 	app.btnSaveOpenedCube.onclick = () => {
 		console.log('Aggiornamento Cubo');
 		console.log(StorageCube.selected);
@@ -1221,7 +1221,7 @@ var Hier = new Hierarchy();
 			// salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
 			storage.saveTemp(dimensionObject[dimensionToken]);
 		});
-
+		// TODO: l'aggiornamento del cubo non deve aggiornare anche la prop created_at ma solo updated_at
 		cube.save();
 		// salvo il cubo in localStorage
 		StorageCube.saveTemp(cube.cube);

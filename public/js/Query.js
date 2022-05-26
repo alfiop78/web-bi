@@ -274,6 +274,12 @@ class Queries {
 		this.#reportProcess.token = this.#token;
 		this.reportElements.processId = this.#processId; // questo creerà il datamart FX[processId]
 		this.#reportProcess.name = name;
+		const date = new Date();
+		// const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+		const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+		// TODO: l'update del report non deve aggiornare updated_at
+		this.#reportProcess.created_at = date.toLocaleDateString('it-IT', options);
+		this.#reportProcess.updated_at = date.toLocaleDateString('it-IT', options);
 
 		this.reportElements.select = Object.fromEntries(this.select);
 		this.#elementReport.set('columns', Object.fromEntries(this.select));
