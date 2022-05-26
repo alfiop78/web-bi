@@ -109,11 +109,11 @@ class MapDatabaseController extends Controller
     }
 
     // processo la FX
-    public function process($cube) {
+    public function process(Request $request) {
         // echo gettype($cube);
-        // dd(json_decode($cube));
-        $cube = json_decode($cube); // object
-        /* dd($cube); */
+        // dd($request);
+        // per accedere al contenuto della $request lo converto in json codificando la $request e decodificandolo in json
+        $cube = json_decode(json_encode($request->all())); // object
         $q = new Cube();
         // imposto le proprietà con i magic methods
         $q->reportId = $cube->{'processId'};

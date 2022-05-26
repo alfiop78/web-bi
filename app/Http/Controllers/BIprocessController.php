@@ -34,14 +34,26 @@ class BIprocessController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, $json)
+    public function store(Request $request)
     {
+        // dd($request->collect()->get('token'));
+        $tokenProcess = $request->collect()->get('token');
+        $name = $request->collect()->get('name');
+        // codifico tutta la $request in json per poterla inserire nel DB
+        $json = json_encode($request->all());
+        $process = new BIprocess();
+        // salvo su DB
+        $process->token = $tokenProcess;
+        $process->name = $name;
+        $process->json_value = $json;
+
+        /* codice valido prima della modifica della route da get a post, negli argomenti della function era presente anche il $json, passato dalla route ::get
         $jsonContent = json_decode($json);
         // dd($jsonContent);
         $process = new BIprocess();
         $process->token = $jsonContent->{'token'};
         $process->name = $jsonContent->{'name'};
-        $process->json_value = $json;
+        $process->json_value = $json;*/
         return $process->save();
     }
 
@@ -75,12 +87,17 @@ class BIprocessController extends Controller
      * @param  \App\Models\BIprocess  $bIprocess
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, BIprocess $bIprocess, $json)
+    public function update(Request $request, BIprocess $bIprocess)
     {
-        $jsonContent = json_decode($json);
-        $process = $bIprocess::findOrFail($jsonContent->{'token'});
-        $process->token = $jsonContent->{'token'};
-        $process->name = $jsonContent->{'name'};
+        // token del PROCESS
+        $tokenProcess = $request->collect()->get('token');
+        $name = $request->collect()->get('name');
+        // codifico tutta la $request in json per poterla inserire nel DB 
+        $json = json_encode($request->all());
+        // cerco nel DB il token del PROCESS da aggiornare
+        $process = $bIprocess::findOrFail($tokenProcess);
+        $process->token = $tokenProcess;
+        $process->name = $name;
         $process->json_value = $json;
         return $process->save();
     }

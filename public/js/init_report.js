@@ -734,19 +734,20 @@ var StorageMetric = new MetricStorage();
 		console.clear();
 		const processToken = e.currentTarget.dataset.processToken;
 		const reportId = +e.currentTarget.dataset.id;
-		let jsonData = window.localStorage.getItem(processToken);
-		console.dir(jsonData); // dati da inviare alla fetch API
-		debugger;
-		return;
 		let jsonDataParsed = JSON.parse(window.localStorage.getItem(processToken));
-		// console.dir(jsonDataParsed);
-		// console.dir(JSON.stringify(jsonData));
 		console.dir(jsonDataParsed.report);
 		// invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
-		const jsonReport = JSON.stringify(jsonDataParsed.report);
+		const params = JSON.stringify(jsonDataParsed.report);
 		App.handlerConsole('Process in corso', 'info'); // TODO: da far visualizzare fino a quando non termina il processo
-
-		await fetch('/fetch_api/cube/' + jsonReport + '/process')
+		// chiudo la lista dei report da eseguire
+		const listReportProcess = document.getElementById('reportProcessList');
+		listReportProcess.toggleAttribute('hidden');
+		// lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveProcess()
+		const url = "/fetch_api/cube/process";
+		const init = {headers: {'Content-Type': 'application/json'}, method: 'POST', body: params};
+		const req = new Request(url, init);
+		await fetch(req)
+		// await fetch('/fetch_api/cube/' + jsonReport + '/process')
 		.then((response) => {
 			if (!response.ok) { throw Error(response.statusText); }
 			return response;
@@ -1021,12 +1022,13 @@ var StorageMetric = new MetricStorage();
 	app.handlerMetricSelected = (e) => {
 		StorageMetric.selected = e.currentTarget.dataset.metricToken;
 		e.currentTarget.toggleAttribute('selected');
+		debugger;
 		if (e.currentTarget.hasAttribute('selected')) {
 			// aggiungo la metrica
-			debugger;
 			switch (StorageMetric.selected.metric_type) {
 				case 1:
 					// metrica di base composta
+					debugger;
 					Query.metrics = {
 						token : e.currentTarget.dataset.metricToken,
 						SQLFunction : StorageMetric.selected.formula.SQLFunction,
@@ -1074,7 +1076,6 @@ var StorageMetric = new MetricStorage();
 					break;
 				default:
 					// base
-					debugger;
 					Query.table = e.currentTarget.dataset.tableName;
 					Query.tableAlias = e.currentTarget.dataset.tableAlias;
 					Query.metrics = {
@@ -1088,7 +1089,6 @@ var StorageMetric = new MetricStorage();
 					};
 					break;
 			}
-			Query.elementMetric = Query.metrics;
 		} else {
 			// TODO: elimino la metrica
 		}
@@ -1458,20 +1458,31 @@ var StorageMetric = new MetricStorage();
 		});
 		let metricObj = {};
 		// se associatedFilters > 0 sarà una metrica filtrata, altrimenti una metrica a livello di report (senza nessun filtro all'interno della metrica)
+		// la metrica che si sta per creare non deve essere "selezionata" (con Query.metrics oppure Query.filteredMetrics) per il report in costruzione
+		// TODO: metric_type = 2
 		if (Object.keys(associatedFilters).length > 0) {
 			// metrica filtrata
 			console.info('metrica filtrata');
-			Query.filteredMetrics = { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, table: Query.table, tableAlias : Query.tableAlias, filters: associatedFilters };
-
-			console.log(Query.filteredMetrics);
-			metricObj = { type: 'METRIC', token, metric_type : 2, name, formula: Query.filteredMetrics.get(token), cubeToken : StorageCube.selected.token };
+			metricObj = {
+				type: 'METRIC',
+				token,
+				metric_type : 2,
+				name,
+				formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, table: Query.table, tableAlias : Query.tableAlias, filters: associatedFilters },
+				cubeToken : StorageCube.selected.token
+			};
+			// metricObj = { type: 'METRIC', token, metric_type : 2, name, formula: Query.filteredMetrics.get(token), cubeToken : StorageCube.selected.token };
 		} else {
 			// metrica
 			console.info('metrica di base');
-			debugger;
-			// in Query.metrics effettuo il controllo se si tratta di una metrica di base semplice o composta (legata al cubo). In quelle composte non aggiungo le prop table e tableAlias
-			Query.metrics = { token, SQLFunction, field: Query.field, distinct: distinctOption, alias };
-			metricObj = { type: 'METRIC', token, metric_type, name, formula: Query.metrics.get(token), cubeToken : StorageCube.selected.token };
+			metricObj = {
+				type: 'METRIC',
+				token,
+				metric_type,
+				name,
+				formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias },
+				cubeToken : StorageCube.selected.token
+			};
 		}
 
 		// salvo la nuova metrica nello storage
@@ -1505,7 +1516,6 @@ var StorageMetric = new MetricStorage();
 			div.dataset.tableAlias = Query.tableAlias;
 		}		
 		div.dataset.metricToken = StorageMetric.selected.token;
-		div.dataset.cubeToken = StorageMetric.selected.cubeToken;
 		
 		spanMetric.innerText = StorageMetric.selected.name;
 		if (StorageMetric.selected.metric_type === 0) smallTable.innerText = Query.table;
@@ -1911,13 +1921,12 @@ var StorageMetric = new MetricStorage();
 	app.saveProcess = async () => {
 		console.log(JSON.stringify(Query.reportProcessStringify));
 		const params = JSON.stringify(Query.reportProcessStringify);
-		const url = "/fetch_api/json/"+params+"/process_store";
-		const init = {headers: {'Content-Type': 'application/x-www-form-urlencoded'}, method: 'POST', body: params};
+		const url = "/fetch_api/json/process_store";
+		const init = {headers: {'Content-Type': 'application/json'}, method: 'POST', body: params};
 		const req = new Request(url, init);
-		debugger;
 
 		await fetch(req)
-		// await fetch('/fetch_api/json/'+JSON.stringify(Query.reportProcessStringify)+'/process_store')
+			// await fetch('/fetch_api/json/'+JSON.stringify(Query.reportProcessStringify)+'/process_store')
 		  .then((response) => {
 			if (!response.ok) { throw Error(response.statusText); }
 			return response;
@@ -1942,10 +1951,9 @@ var StorageMetric = new MetricStorage();
 		console.log(JSON.stringify(Query.reportProcessStringify));
 		const params = JSON.stringify(Query.reportProcessStringify);
 		const url = "/fetch_api/json/process_update";
-		const init = {headers: {'Content-Type': 'application/x-www-form-urlencoded'}, method: 'POST', body: params};
+		const init = {headers: {'Content-Type': 'application/json'}, method: 'POST', body: params};
 		const req = new Request(url, init);
-		debugger;
-		await fetch(url, init)
+		await fetch(req)
 		// await fetch('/fetch_api/json/'+JSON.stringify(Query.reportProcessStringify)+'/process_update')
 		  .then((response) => {
 			if (!response.ok) { throw Error(response.statusText); }

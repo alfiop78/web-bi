@@ -197,7 +197,7 @@ class Queries {
 		} else {
 			this.#metrics.set(value.token, value);
 		}
-		// console.log('metrics : ', this.#metrics);
+		console.log('metrics : ', this.#metrics);
 	}
 
 	get metrics() {return this.#metrics;}

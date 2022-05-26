@@ -11,7 +11,11 @@ class VerifyCsrfToken extends Middleware
      *
      * @var array<int, string>
      */
+    // escludo alcune route dal controllo del csrf token. Queste Route sono state modificate da get a post perchè nel get alcuni oggetti json (process) erano troppo lunghi, superavano circa 16.000 crt.
+    // l'altro metodo che si può utilizzare, per consentire il csrf è metterlo nel tag meta della pagina come spiegato qui: https://laravel.com/docs/9.x/csrf#csrf-x-csrf-token
     protected $except = [
-        //
+        '/fetch_api/json/process_update',
+        '/fetch_api/json/process_store',
+        '/fetch_api/cube/process'
     ];
 }

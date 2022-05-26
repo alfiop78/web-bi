@@ -40,16 +40,15 @@ Route::get('/fetch_api/schema/{schema}/tables', [MapDatabaseController::class, '
 Route::get('/fetch_api/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('web_bi.fetch_api.table_info'); // recupero il DESCRIBE della tabella
 Route::get('/report', function() {return view('web_bi.report');})->name('web_bi.report'); // page report
 Route::get('/fetch_api/schema/{schema}/table/{table}/field/{field}/distinct_values', [MapDatabaseController::class, 'distinct_values'])->name('web_bi.fetch_api.distinct_values'); // recupero i valori distinti del campo field passato come parametro
-Route::get('/fetch_api/cube/{jsonData}/process', [MapDatabaseController::class, 'process'])->name('web_bi.fetch_api.process'); // processo la query che crea la FX
-// dimensioni
+Route::post('/fetch_api/cube/process', [MapDatabaseController::class, 'process'])->name('web_bi.fetch_api.process'); // processo la query che crea la FX
+
 // store json
 Route::prefix('/fetch_api/json/')->group(function () {
     Route::get('{json}/dimension_store', [BIdimensionController::class, 'store']);
     Route::get('{json}/cube_store', [BIcubeController::class, 'store']);
     Route::get('{json}/metric_store', [BImetricController::class, 'store']);
     Route::get('{json}/filter_store', [BIfilterController::class, 'store']);
-    Route::post('{json}/process_store', [BIprocessController::class, 'store']);
-    // Route::get('{json}/process_store', [BIprocessController::class, 'store']);
+    Route::post('/process_store', [BIprocessController::class, 'store']);
 });
 // destroy json
 Route::prefix('/fetch_api/name/')->group(function () {
@@ -82,7 +81,6 @@ Route::prefix('/fetch_api/json/')->group(function () {
 	Route::get('{json}/metric_update', [BImetricController::class, 'update']);
 	Route::get('{json}/filter_update', [BIfilterController::class, 'update']);
 	Route::post('/process_update', [BIprocessController::class, 'update']);
-	// Route::get('{json}/process_update', [BIprocessController::class, 'update']);
 });
 
 // test POST request

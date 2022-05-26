@@ -38,6 +38,7 @@ class BIdimensionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    // TODO: request post come fatto per BIprocessController
     public function store(Request $request, $json)
     {
         // dd($json);
@@ -95,6 +96,7 @@ class BIdimensionController extends Controller
      * @param  \App\Models\BIdimension  $bIdimension
      * @return \Illuminate\Http\Response
      */
+    // TODO: request post come fatto per BIprocessController
     public function update(Request $request, BIdimension $bIdimension, $json)
     {
         $jsonContent = json_decode($json);

@@ -34,6 +34,7 @@ class BIfilterController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    // TODO: request post come fatto per BIprocessController
     public function store(Request $request, $json)
     {
         $jsonContent = json_decode($json);
@@ -76,6 +77,7 @@ class BIfilterController extends Controller
      * @param  \App\Models\BIfilter  $bIfilter
      * @return \Illuminate\Http\Response
      */
+    // TODO: request post come fatto per BIprocessController
     public function update(Request $request, BIfilter $bIfilter, $json)
     {
         $jsonContent = json_decode($json);
