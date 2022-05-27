@@ -378,9 +378,9 @@
 
 							{{-- lista filtri esistenti --}}
 							<section class="data-item" data-element-search data-label data-sublist-filters hidden>
-								<div class="selectable">
+								<div>
 									<div class="h-content">
-										<div class="v-content">
+										<div class="selectable v-content">
 											<span filter class="highlight"></span>
 											<small table></small>
 											<small></small>
@@ -392,9 +392,9 @@
 
 							{{-- lista metriche esistenti --}}
 							<section class="data-item" data-element-search data-label data-sublist-metrics hidden>
-								<div class="selectable">
+								<div>
 									<div class="h-content">
-										<div class="v-content">
+										<div class="selectable v-content">
 											{{-- TODO: metriche composte potrei colorarle in modo diverso, cos' come le metriche filtrate --}}
 											<span metric class="highlight"></span>
 											<small table></small>
@@ -507,58 +507,57 @@
 												<h5>Report</h5>
 												<div class="v-grid">
 													<div class="addElementsReport">
-														<div class="btn-add">
-															<span>colonne</span>
-															<i id="btn-add-columns" class="material-icons md-36">add</i>
-														</div>															
-														<div class="btn-add">
-															<span>nuovo filtro</span>
-															<i id="btn-add-filters" class="material-icons md-36">add</i>
-														</div>
-														<div class="btn-add">
-															<span>metriche</span>
-															<i id="btn-add-metrics" class="material-icons md-36">add</i>
-														</div>
-														<div class="btn-add">
-															<span>metriche composte</span>
-															<i id="btn-add-composite-metrics" class="material-icons md-36">add</i>
-														</div>
-													</div>
-													{{-- elementi del report --}}
-													<div class="elementsReport">
-														{{-- colonne --}}
-														<div>
-															<div class="md-field">
-																<input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" />
-																<label for="search-columns" class="">Ricerca</label>
+														<section class="columns">
+															<div>
+																<div class="md-field">
+																	<input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" />
+																	<label for="search-columns" class="">Ricerca</label>
+																</div>
+																<ul id="ul-columns-fact"></ul>
+																<ul id="ul-columns" class="full-overflow-list"></ul>
 															</div>
-															<ul id="ul-columns-fact"></ul>
-															<ul id="ul-columns" class="full-overflow-list"></ul>
-														</div>
-														{{-- filtri --}}
-														<div>
-															<div class="md-field">
-																<input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
-																<label for="search-exist-filters" class="">Ricerca</label>
+														</section>
+														<section class="filters">
+															<div class="btn-add">
+																<span>nuovo filtro</span>
+																<i id="btn-add-filters" class="material-icons md-36">add</i>
 															</div>
-															<ul id="ul-exist-filters" class="full-overflow-list"></ul>																
-														</div>
-														{{-- metriche --}}
-														<div>
-															<div class="md-field">
-																<input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
-																<label for="search-exist-metrics" class="">Ricerca</label>
+															<div>
+																<div class="md-field">
+																	<input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
+																	<label for="search-exist-filters" class="">Ricerca</label>
+																</div>
+																<ul id="ul-exist-filters" class="full-overflow-list"></ul>																
 															</div>
-															<ul id="ul-exist-metrics" class="full-overflow-list"></ul>
-														</div>
-														{{-- metriche composte --}}
-														<div>
-															<div class="md-field">
-																<input type="search" data-element-search="search-exist-composite-metrics" id="search-exist-composite-metrics" value autocomplete="off" />
-																<label for="search-exist-composite-metrics" class="">Ricerca</label>
+														</section>
+														{{-- metrics --}}
+														<section class="metrics">
+															<div class="btn-add">
+																<span>metriche</span>
+																<i id="btn-add-metrics" class="material-icons md-36">add</i>
 															</div>
-															<ul id="exist-composite-metrics" class="full-overflow-list"></ul>
-														</div>
+															<div>
+																<div class="md-field">
+																	<input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
+																	<label for="search-exist-metrics" class="">Ricerca</label>
+																</div>
+																<ul id="ul-exist-metrics" class="full-overflow-list"></ul>
+															</div>
+														</section>
+														{{-- composite --}}
+														<section class="composite-metrics">
+															<div class="btn-add">
+																<span>metriche composte</span>
+																<i id="btn-add-composite-metrics" class="material-icons md-36">add</i>
+															</div>
+															<div>
+																<div class="md-field">
+																	<input type="search" data-element-search="search-exist-composite-metrics" id="search-exist-composite-metrics" value autocomplete="off" />
+																	<label for="search-exist-composite-metrics" class="">Ricerca</label>
+																</div>
+																<ul id="exist-composite-metrics" class="full-overflow-list"></ul>
+															</div>															
+														</section>
 													</div>
 												</div>
 											</div>
