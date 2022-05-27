@@ -111,16 +111,16 @@ var storage = new Storages();
 				sectionSearchable.dataset.token = token;
 				// sectionSearchable.dataset.token = token;
 				// icona per recuperare manualmente l'elemento
-				actions.querySelector('.popupContent[data-upload]').removeAttribute('hidden');
-				actions.querySelector('.popupContent[data-upload] i[data-id="btn-upload-local-object"]').dataset.objectName = value.name;
-				actions.querySelector('.popupContent[data-upload] i[data-id="btn-upload-local-object"]').dataset.token = token;
-				actions.querySelector('.popupContent[data-upload] i[data-id="btn-upload-local-object"]').dataset.objectType = element;
+				actions.querySelector('i[data-id="btn-upload-local-object"]').removeAttribute('hidden');
+				actions.querySelector('i[data-id="btn-upload-local-object"]').dataset.objectName = value.name;
+				actions.querySelector('i[data-id="btn-upload-local-object"]').dataset.token = token;
+				actions.querySelector('i[data-id="btn-upload-local-object"]').dataset.objectType = element;
 				// imposto, sull'icona delete, gli attributi per eseguire la cancellazione. Aggiungo un ulteriore attributo per differenziare gli elementi in localStorage da quelli su DB.
-				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectName = value.name;
-				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.token = token;
-				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectType = element;
+				actions.querySelector('i[data-id="btn-delete"]').dataset.objectName = value.name;
+				actions.querySelector('i[data-id="btn-delete"]').dataset.token = token;
+				actions.querySelector('i[data-id="btn-delete"]').dataset.objectType = element;
 				// NOTE: se è presente l'attributo data-object-storage, l'elemento deve essere eliminato SOLO dal LocalStorage, altrimenti sia dal LocalStorage che dal DB.
-				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectStorage = true;
+				actions.querySelector('i[data-id="btn-delete"]').dataset.objectStorage = true;
 				parent.appendChild(sectionSearchable);
 			}
 		}
@@ -167,24 +167,21 @@ var storage = new Storages();
 							iconStatus.classList.add('md-status'); // darkgrey
 							descrStatus.innerText = 'Sincronizzato';
 							// icona delete
-							// actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectName = jsonParsedDB.name;
-							actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectType = element;
-							actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.token = jsonParsedDB.token;
+							actions.querySelector('i[data-id="btn-delete"]').dataset.objectType = element;
+							actions.querySelector('i[data-id="btn-delete"]').dataset.token = jsonParsedDB.token;
 						} else {
 							// elemento presente ma contenuto diverso dal DB, da aggiornare manualmente
 							iconStatus.innerText = 'sync_problem';
 							iconStatus.classList.add('md-warning'); // brown
 							descrStatus.innerText = 'Non sincronizzato';
 							// icona per recuperare manualmente l'elemento
-							actions.querySelector('.popupContent[data-download]').removeAttribute('hidden');
-							// actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').dataset.objectName = jsonParsedDB.name;
-							actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').dataset.objectType = element;
-							actions.querySelector('.popupContent[data-download] i[data-id="btn-download"]').dataset.token = jsonParsedDB.token;
+							actions.querySelector('i[data-id="btn-download"]').removeAttribute('hidden');
+							actions.querySelector('i[data-id="btn-download"]').dataset.objectType = element;
+							actions.querySelector('i[data-id="btn-download"]').dataset.token = jsonParsedDB.token;
 							// icona per versionare da Sviluppo->Produzione
-							actions.querySelector('.popupContent[data-upgrade]').removeAttribute('hidden');
-							// actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').dataset.objectName = jsonParsedDB.name;
-							actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').dataset.objectType = element;
-							actions.querySelector('.popupContent[data-upgrade] i[data-id="btn-upgrade-production"]').dataset.token = jsonParsedDB.token;
+							actions.querySelector('i[data-id="btn-upgrade-production"]').removeAttribute('hidden');
+							actions.querySelector('i[data-id="btn-upgrade-production"]').dataset.objectType = element;
+							actions.querySelector('i[data-id="btn-upgrade-production"]').dataset.token = jsonParsedDB.token;
 						}
 					}
 				} else {
@@ -203,8 +200,8 @@ var storage = new Storages();
 				sectionSearchable.dataset.objectType = element;
 				sectionSearchable.dataset.token = jsonParsedDB.token;
 				// icona delete
-				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.token = jsonParsedDB.token;
-				actions.querySelector('.popupContent[data-delete] i[data-id="btn-delete"]').dataset.objectType = element;
+				actions.querySelector('i[data-id="btn-delete"]').dataset.token = jsonParsedDB.token;
+				actions.querySelector('i[data-id="btn-delete"]').dataset.objectType = element;
 				sectionSearchable.dataset.elementSearch = 'versioning-db-search';
 				sectionSearchable.dataset.label = jsonParsedDB.name;
 				parent.appendChild(sectionSearchable);
@@ -448,7 +445,7 @@ var storage = new Storages();
 					console.log('AGGIORNAMENTO AVVENUTO CON SUCCESSO!');
 					const sectionElement = app.dialogVersioning.querySelector("section[data-token='" + token + "'][data-object-type='" + type + "']");
 					console.log('sectionElement : ', sectionElement);
-					debugger;
+					// debugger;
 					// modifico l'icona in .vers-status impostando sync con la classe md-status al posto di md-warning
 					sectionElement.querySelector('.vers-status > i').innerText = 'sync';
 					sectionElement.querySelector('.vers-status > i').classList.replace('md-warning', 'md-status');

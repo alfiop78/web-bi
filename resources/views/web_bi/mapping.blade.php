@@ -73,13 +73,16 @@
                     <div class="vers-status-descr"></div>
                     <div class="vers-actions">
                         {{-- Elimina Sviluppo/Produzione --}}
-                        <span class="popupContent" data-delete><i data-id="btn-delete" class="material-icons md-warning">clear</i></span>
+                        <i data-id="btn-delete" data-tooltip="Elimina" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning">clear</i>
                         {{-- Sovrascrivi copia in Sviluppo --}}
-                        <span class="popupContent" data-download hidden><i data-id="btn-download" class="material-icons md-warning">download</i></span>
+                        <i data-id="btn-download" data-tooltip="Download" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning">download</i>
+                        {{-- <span class="popupContent" data-download hidden><i data-id="btn-download" class="material-icons md-warning">download</i></span> --}}
                         {{-- Sovrascrivi copia in Produzione --}}
-                        <span class="popupContent" data-upgrade hidden><i data-id="btn-upgrade-production" class="material-icons md-warning">upgrade</i></span>
+                        <i data-id="btn-upgrade-production" data-tooltip="Aggiorna" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning">upgrade</i>
+                        {{-- <span class="popupContent" data-upgrade hidden><i data-id="btn-upgrade-production" class="material-icons md-warning">upgrade</i></span> --}}
                         {{-- Salva in Produzione --}}
-                        <span class="popupContent" data-upload hidden><i data-id="btn-upload-local-object" class="material-icons md-warning">upload</i></span>
+                        <i data-id="btn-upload-local-object" data-tooltip="Upload" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning">upload</i>
+                        {{-- <span class="popupContent" data-upload hidden><i data-id="btn-upload-local-object" class="material-icons md-warning">upload</i></span> --}}
                     </div>
                 </div>
             </section>
@@ -128,7 +131,7 @@
         </template>
 
         <dialog id="versioning">
-
+            <small class="tooltip-dialog"></small>
             <section class="versioning-sections">
                 <div class="dialog-title-info">
                     <h4>Sincronizzazione elementi</h4>

@@ -79,7 +79,8 @@ var Hier = new Hierarchy();
 			'Aggiungi le tabelle da mappare trascinandole da "Lista Tabelle"'
 		],*/
 		messageId : 0,
-		tooltip : document.getElementById('tooltip'),
+		// tooltip : document.getElementById('tooltip'),
+		tooltip : null,
 		tooltipTimeoutId : null,
 		absWindow : document.querySelector('.abs-window')
 	}
@@ -1462,9 +1463,6 @@ var Hier = new Hierarchy();
 	app.showTooltip = (e) => {
 		// OPTIMIZE: da spostare in Application.js
 		if (e.target.classList.contains('md-inactive')) return;
-		// console.log(e.target.getAttribute('data-tooltip').length);
-		// console.log('enter');
-		// const toast = document.getElementById('toast');
 		// console.log('pageX : ', e.pageX);
 		// console.log('pageY : ', e.pageY);
 		// console.log('screen-x : ', e.screenX);
@@ -1476,14 +1474,31 @@ var Hier = new Hierarchy();
 		// console.log(e.target.getBoundingClientRect().right);
 		// console.log(e.target.getBoundingClientRect().bottom);
 		// console.log('left : ',e.target.getBoundingClientRect().left);
-		const pos = () => {
+		const pos = (tooltipType) => {
+			// tooltipType : 0 (tooltip page) 1 (tooltip all'interno di una dialog)
 			let x,y;
-			const left = e.target.getBoundingClientRect().left;
-			const right = e.target.getBoundingClientRect().right;
-			const top = e.target.getBoundingClientRect().top;
-			const bottom = e.target.getBoundingClientRect().bottom;
+			let left, right, top, bottom;
+			if (tooltipType === 0) {
+				// getBoundingClientRect è relativo al viewport
+				left = e.target.getBoundingClientRect().left;
+				right = e.target.getBoundingClientRect().right;
+				top = e.target.getBoundingClientRect().top;
+				bottom = e.target.getBoundingClientRect().bottom;
+			} else {
+				left = e.target.offsetLeft;
+				right = left + e.target.offsetWidth;
+				top = e.target.offsetTop;
+				bottom = top + e.target.offsetHeight;
+			}
+			console.log('left : ', e.target.offsetLeft);
+			console.log('top : ', e.target.offsetTop);
+			// console.log('left : ', left);
+			// console.log(left - document.querySelector('#versioning').getBoundingClientRect().left);
+			// debugger;
+			
 			let centerElementW = left + ((right - left) / 2);
 			let centerElementH = top + ((bottom - top) / 2);
+			// il testo del tooltip
 			app.tooltip.innerHTML = e.currentTarget.dataset.tooltip;
 			const elementWidth = app.tooltip.offsetWidth / 2;
 			const elementHeight = app.tooltip.offsetHeight / 2;
@@ -1511,15 +1526,27 @@ var Hier = new Hierarchy();
 			}
 			return {x,y};
 		}
+		console.log('e.target : ', e.target);
+		if (e.target.hasAttribute('data-tooltip-dialog')) {
+			// recupero il tooltip all'interno della dialog definita nell'attributo data-tooltip-dialog
+			app.tooltip = document.querySelector('#'+e.target.dataset.tooltipDialog+' > .tooltip-dialog');
+			console.log('app.tooltip : ', app.tooltip);
+			app.tooltip.style.setProperty('--left', pos(1).x + "px");
+			// app.tooltip.style.setProperty('--left', xPosition + "px");
+			app.tooltip.style.setProperty('--top', pos(1).y + "px");
+		} else {
+			app.tooltip = document.getElementById('tooltip');
+			console.log('app.tooltip : ', app.tooltip);
+			app.tooltip.style.setProperty('--left', pos(0).x + "px");
+			// app.tooltip.style.setProperty('--left', xPosition + "px");
+			app.tooltip.style.setProperty('--top', pos(0).y + "px");
+		}
 		
-		app.tooltip.style.setProperty('--left', pos().x + "px");
-		// app.tooltip.style.setProperty('--left', xPosition + "px");
-		app.tooltip.style.setProperty('--top', pos().y + "px");
 		// app.tooltip.style.setProperty('--top', yPosition + "px");
 		if (e.target.hasAttribute('data-open-abs-window')) {
 			// tasto versionamento, mostro la abs-window
-			app.absWindow.style.setProperty('--left', pos().x + 'px');
-			app.absWindow.style.setProperty('--top', pos().y + 'px');
+			app.absWindow.style.setProperty('--left', pos(0).x + 'px');
+			app.absWindow.style.setProperty('--top', pos(0).y + 'px');
 			app.absWindow.hidden = false;
 		}
 		// app.popup.classList.add('show');
@@ -1550,7 +1577,7 @@ var Hier = new Hierarchy();
 	}
 
 	// eventi mouseEnter/Leave su tutte le icon con l'attributo data-tooltip
-	document.querySelectorAll('*[data-tooltip]').forEach((icon) => {
+	document.querySelectorAll('*[data-tooltip]').forEach( icon => {
 		// OPTIMIZE: da spostare in Application.js
 		icon.onmouseenter = app.showTooltip;
 		icon.onmouseleave = app.hideTooltip;

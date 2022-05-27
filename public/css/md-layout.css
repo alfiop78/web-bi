@@ -191,36 +191,15 @@ small.tooltip{font-family: 'Barlow'; z-index: 9999; background: #494949; color: 
 	font-size: .8rem; visibility: hidden; height: fit-content; box-shadow: 0 2px 4px 0 black;padding: 1em;position: absolute; top: var(--top); left: var(--left);}
 small.tooltip.show{visibility: visible; animation: popup 50ms ease;}
 
+small.tooltip-dialog{font-family: 'Barlow'; z-index: 9999; background: #494949; color: white; white-space: nowrap; width: fit-content; border-radius: 5px;
+  font-size: .8rem; visibility: hidden; height: fit-content; box-shadow: 0 2px 4px 0 black;padding: 1em;position: absolute; top: var(--top); left: var(--left);}
+small.tooltip-dialog.show{visibility: visible; animation: popup 50ms ease;}
+
 @keyframes popup {
   0% {transform: scale(.2);}
   75% {transform: scale(1.10);}
   100% {transform: scale(1);}
 }
-
-/*popup con data-popup*/
-/* NOTE: uso dell'asterisco per indicare tutti gli elementi che hanno l'attributo [data-tooltip] */
-/**[data-tooltip]:not(.md-inactive):hover{color: #494949!important; position: relative;}*/
-/*NOTE:  utilizzo di attr() con ::after */
-/**[data-tooltip][data-tooltip-position][data-tooltip-show]:not(.md-inactive):hover::after{
-	content: attr(data-tooltip) " ";
-	animation: popup 50ms ease;
-	color: white;
-	width: fit-content;
-	height: fit-content;
-	background-color: #494949;
-	position: absolute;
-	padding: 1em;
-	border-radius: 5px;
-	font-size: .8rem;
-	white-space: nowrap;
-	box-shadow: 0 2px 4px 0 black;
-	font-family: 'Barlow';
-	z-index: 1010;
-}
-*[data-tooltip][data-tooltip-position="bottom"][data-tooltip-show]:hover::after{left: -150%; top: 130%;}
-*[data-tooltip][data-tooltip-position="bottom-right"][data-tooltip-show]:hover::after{left: 0px; top: 130%;}
-*[data-tooltip][data-tooltip-position="right"][data-tooltip-show]:hover::after{left: 130%; top: calc(-50% + 6px);}*/
-/*popup con data-popup*/
 
 .upper{text-transform: uppercase;}
 
