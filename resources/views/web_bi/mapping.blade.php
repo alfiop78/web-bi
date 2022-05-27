@@ -501,6 +501,7 @@
                                 <i id="saveOpenedCube" class="material-icons md-24" data-tooltip="Aggiorna cubo" data-tooltip-position="bottom" hidden>save</i>
                                 <i id="definedCube" class="material-icons md-24 md-inactive" data-tooltip="Lista Cubi definiti" data-tooltip-position="bottom">folder_open</i>
                                 <span class="h-separator"></span>
+                                <i id="btnVersioningProcess" class="material-icons md-24" data-tooltip="Esegui sincronizzazione" data-tooltip-position="bottom">cached</i>
                                 <i id="versioning-status" class="material-icons md-24 md-inactive" data-tooltip="" data-open-abs-window data-tooltip-position="bottom">cached</i>
                             </div>
                         </div>

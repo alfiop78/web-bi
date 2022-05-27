@@ -15,7 +15,8 @@ var storage = new Storages();
 
 		// template per lo status degli oggetti da versionare
 		tmplVersioningDB : document.getElementById('versioning-db'),
-		btnVersioningStatus : document.getElementById('versioning-status')
+		btnVersioningStatus : document.getElementById('versioning-status'),
+		btnVersioningProcess : document.getElementById('btnVersioningProcess')
 	}
 
 	app.checkVersioning = () => {
@@ -208,57 +209,6 @@ var storage = new Storages();
 			});
 		}
 	}
-
-	// promise.all, recupero tutti gli elementi presenti sul DB (dimensioni, cubi, filtri, ecc...)
-	app.fetchAPIRequestVersioningAll = async () => {
-		const urls = [
-			'/fetch_api/versioning/dimensions',
-			'/fetch_api/versioning/cubes',
-			'/fetch_api/versioning/metrics',
-			'/fetch_api/versioning/filters',
-			'/fetch_api/versioning/processes'
-		];
-		// ottengo tutte le risposte in un array
-		await Promise.all(urls.map( url => fetch(url) ))
-		.then(responses => {
-			return Promise.all(responses.map(response => {
-				if (!response.ok) {throw Error(response.statusText);}
-				return response.json();
-			}))
-		})
-		.then( (data) => {
-			/*
-			 data : [
-				0 : ['dimensions' : [risultato della query]],
-				1 : ['cubes' : [risultato della query]],
-				2 : ['metrics' : [risultato della query]],
-				...
-			 ]
-			*/
-			console.log(data);
-			data.forEach( (elementData) => {
-				/*
-				elementData = [
-					'dimensions' : [risultato della query]
-					'cubes' : [risultato della query],
-					...
-					]
-				*/
-				console.log('elementData : ', elementData);
-				app.createVersioningElements(elementData);
-				// controllo inverso, recupero gli elementi in locale che non sono presenti sul DB (es.: Dimensioni e cubi in fase di sviluppo)
-				app.getLocalElements(elementData);
-			});
-			// dopo aver caricato tutti gli elementi nella dialog versioning, imposto il colore del tasto btnVersioningStatus in base allo status degli elementi
-			app.checkVersioning();
-			// imposto la data di ultima sincronizzazione nello span[data-dialog-info]
-			const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false, timeZone: 'Europe/Rome' };
-			app.dialogVersioning.querySelector('span[data-dialog-info]').innerText = new Intl.DateTimeFormat('it-IT', options).format(new Date());
-		} )
-		.catch( err => console.error(err));
-	}
-
-	app.fetchAPIRequestVersioningAll();
 
 	app.saveObjectOnDB = async (token, type) => {
 		let url;
@@ -463,6 +413,56 @@ var storage = new Storages();
 	}
 
 	// events
+
+	// process sync
+	app.btnVersioningProcess.onclick = async () => {
+		// promise.all, recupero tutti gli elementi presenti sul DB (dimensioni, cubi, filtri, ecc...)
+		const urls = [
+			'/fetch_api/versioning/dimensions',
+			'/fetch_api/versioning/cubes',
+			'/fetch_api/versioning/metrics',
+			'/fetch_api/versioning/filters',
+			'/fetch_api/versioning/processes'
+		];
+		// ottengo tutte le risposte in un array
+		await Promise.all(urls.map( url => fetch(url) ))
+			.then(responses => {
+				return Promise.all(responses.map(response => {
+					if (!response.ok) {throw Error(response.statusText);}
+					return response.json();
+				}))
+			})
+		.then( (data) => {
+			/*
+			 data : [
+				0 : ['dimensions' : [risultato della query]],
+				1 : ['cubes' : [risultato della query]],
+				2 : ['metrics' : [risultato della query]],
+				...
+			 ]
+			*/
+			console.log(data);
+			data.forEach( (elementData) => {
+				/*
+				elementData = [
+					'dimensions' : [risultato della query]
+					'cubes' : [risultato della query],
+					...
+					]
+				*/
+				console.log('elementData : ', elementData);
+				app.createVersioningElements(elementData);
+				// controllo inverso, recupero gli elementi in locale che non sono presenti sul DB (es.: Dimensioni e cubi in fase di sviluppo)
+				app.getLocalElements(elementData);
+			});
+			// dopo aver caricato tutti gli elementi nella dialog versioning, imposto il colore del tasto btnVersioningStatus in base allo status degli elementi
+			app.checkVersioning();
+			// imposto la data di ultima sincronizzazione nello span[data-dialog-info]
+			const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false, timeZone: 'Europe/Rome' };
+			app.dialogVersioning.querySelector('span[data-dialog-info]').innerText = new Intl.DateTimeFormat('it-IT', options).format(new Date());
+		} )
+		.catch( err => console.error(err));
+	}
 
 	app.dialogVersioning.addEventListener('click', (e) => {
 		console.log('e.target : ', e.target);
