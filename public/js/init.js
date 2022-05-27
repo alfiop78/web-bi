@@ -1463,17 +1463,6 @@ var Hier = new Hierarchy();
 	app.showTooltip = (e) => {
 		// OPTIMIZE: da spostare in Application.js
 		if (e.target.classList.contains('md-inactive')) return;
-		// console.log('pageX : ', e.pageX);
-		// console.log('pageY : ', e.pageY);
-		// console.log('screen-x : ', e.screenX);
-		// console.log('offset-x : ', e.offsetX);
-		// console.log('offset-y : ', e.offsetY);
-		// console.log('client-x : ', e.clientX);
-		// console.log('client-y : ', e.clientY);
-		// console.log(e.target.getBoundingClientRect().top);
-		// console.log(e.target.getBoundingClientRect().right);
-		// console.log(e.target.getBoundingClientRect().bottom);
-		// console.log('left : ',e.target.getBoundingClientRect().left);
 		const pos = (tooltipType) => {
 			// tooltipType : 0 (tooltip page) 1 (tooltip all'interno di una dialog)
 			let x,y;
@@ -1489,13 +1478,7 @@ var Hier = new Hierarchy();
 				right = left + e.target.offsetWidth;
 				top = e.target.offsetTop;
 				bottom = top + e.target.offsetHeight;
-			}
-			console.log('left : ', e.target.offsetLeft);
-			console.log('top : ', e.target.offsetTop);
-			// console.log('left : ', left);
-			// console.log(left - document.querySelector('#versioning').getBoundingClientRect().left);
-			// debugger;
-			
+			}			
 			let centerElementW = left + ((right - left) / 2);
 			let centerElementH = top + ((bottom - top) / 2);
 			// il testo del tooltip
@@ -1526,17 +1509,16 @@ var Hier = new Hierarchy();
 			}
 			return {x,y};
 		}
-		console.log('e.target : ', e.target);
 		if (e.target.hasAttribute('data-tooltip-dialog')) {
 			// recupero il tooltip all'interno della dialog definita nell'attributo data-tooltip-dialog
 			app.tooltip = document.querySelector('#'+e.target.dataset.tooltipDialog+' > .tooltip-dialog');
-			console.log('app.tooltip : ', app.tooltip);
+			// console.log('app.tooltip : ', app.tooltip);
 			app.tooltip.style.setProperty('--left', pos(1).x + "px");
 			// app.tooltip.style.setProperty('--left', xPosition + "px");
 			app.tooltip.style.setProperty('--top', pos(1).y + "px");
 		} else {
 			app.tooltip = document.getElementById('tooltip');
-			console.log('app.tooltip : ', app.tooltip);
+			// console.log('app.tooltip : ', app.tooltip);
 			app.tooltip.style.setProperty('--left', pos(0).x + "px");
 			// app.tooltip.style.setProperty('--left', xPosition + "px");
 			app.tooltip.style.setProperty('--top', pos(0).y + "px");

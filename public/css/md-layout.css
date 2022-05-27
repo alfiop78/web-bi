@@ -187,13 +187,9 @@ tr.tr-right{display: flex;justify-content: flex-end;}
 .actions > .buttons{display: flex;flex-flow: row;}
 
 /*toast Popup*/
-small.tooltip{font-family: 'Barlow'; z-index: 9999; background: #494949; color: white; white-space: nowrap; width: fit-content; border-radius: 5px;
+small.tooltip, small.tooltip-dialog{font-family: 'Barlow'; font-weight: normal; z-index: 9999; background: #494949; color: white; white-space: nowrap; width: fit-content; border-radius: 5px;
 	font-size: .8rem; visibility: hidden; height: fit-content; box-shadow: 0 2px 4px 0 black;padding: 1em;position: absolute; top: var(--top); left: var(--left);}
-small.tooltip.show{visibility: visible; animation: popup 50ms ease;}
-
-small.tooltip-dialog{font-family: 'Barlow'; z-index: 9999; background: #494949; color: white; white-space: nowrap; width: fit-content; border-radius: 5px;
-  font-size: .8rem; visibility: hidden; height: fit-content; box-shadow: 0 2px 4px 0 black;padding: 1em;position: absolute; top: var(--top); left: var(--left);}
-small.tooltip-dialog.show{visibility: visible; animation: popup 50ms ease;}
+small.tooltip.show, small.tooltip-dialog.show{visibility: visible; animation: popup 50ms ease;}
 
 @keyframes popup {
   0% {transform: scale(.2);}

@@ -75,13 +75,13 @@
                         {{-- Elimina Sviluppo/Produzione --}}
                         <i data-id="btn-delete" data-tooltip="Elimina" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning">clear</i>
                         {{-- Sovrascrivi copia in Sviluppo --}}
-                        <i data-id="btn-download" data-tooltip="Download" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning">download</i>
+                        <i data-id="btn-download" data-tooltip="Download" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning" hidden>download</i>
                         {{-- <span class="popupContent" data-download hidden><i data-id="btn-download" class="material-icons md-warning">download</i></span> --}}
                         {{-- Sovrascrivi copia in Produzione --}}
-                        <i data-id="btn-upgrade-production" data-tooltip="Aggiorna" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning">upgrade</i>
+                        <i data-id="btn-upgrade-production" data-tooltip="Aggiorna" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning" hidden>upgrade</i>
                         {{-- <span class="popupContent" data-upgrade hidden><i data-id="btn-upgrade-production" class="material-icons md-warning">upgrade</i></span> --}}
                         {{-- Salva in Produzione --}}
-                        <i data-id="btn-upload-local-object" data-tooltip="Upload" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning">upload</i>
+                        <i data-id="btn-upload-local-object" data-tooltip="Upload" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning" hidden>upload</i>
                         {{-- <span class="popupContent" data-upload hidden><i data-id="btn-upload-local-object" class="material-icons md-warning">upload</i></span> --}}
                     </div>
                 </div>
