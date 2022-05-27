@@ -455,6 +455,15 @@ class MetricStorage extends Storages {
 		super();
 	}
 
+	get metrics() {
+		this.#metricsObject = {};
+		super.storageK = 'METRIC';
+		for ( const [key, value] of Object.entries(this.st)) {
+			this.#metricsObject[key] = value;
+		}
+		return this.#metricsObject;
+	}
+
 	// restituisco la lista delle metriche prendendole direttamente dallo stato attuale dello storage
 	set cubeMetrics(cubeToken) {
 		// recupero gli oggetti METRIC dallo storage
@@ -476,9 +485,9 @@ class MetricStorage extends Storages {
 	}
 
 	get compositeMetrics() {
-		this.localMetrics = {};
-		for (const [key, value] of Object.entries(this.#metricsObject) ) {
-			if (value.metric_type === 2) this.localMetrics[key] = value;
+		this.localMetrics = new Set();
+		for (const [key, value] of Object.entries(this.metrics) ) {
+			if (value.metric_type === 3) this.localMetrics.add(value);
 		}
 		return this.localMetrics;
 	}

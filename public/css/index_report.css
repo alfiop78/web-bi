@@ -93,16 +93,20 @@ ul > section.fact{font-weight: bold;}
 .h-grid {display: grid; grid-gap: 16px; min-height: 100%; max-height: 100%;}
 /*.step[data-step="1"] > .pageContent{width: 60%!important;}*/
 .step[data-step="1"] .h-grid{grid-template-columns : 25% calc(35% - 16px) calc(40% - 16px);}
-.step[data-step="2"] .v-grid{grid-template-rows : 10% calc(90% - 16px);}
+.step[data-step="2"] .v-grid{grid-template-rows : 10% calc(90% - 16px); height: inherit; padding: 1em 8px 4px;}
 .overflowList{height: 350px; overflow-y: auto; background: gainsboro;}
 .full-overflow-list{height: 70%; overflow-y: auto; max-height: 300px;}
 .full-overflow-list-columns{height: 350px; max-height: 350px; overflow-y: auto;}
 /*.dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}*/
 
-.addElementsReport{display: grid;grid-template-columns: 25% repeat(3, calc(25% - 16px)); grid-column-gap: 16px; color: dimgrey;}
-.addElementsReport > div{display: grid;grid-template-rows: auto auto;justify-content: center; opacity: .5;align-items: center;justify-items: center;padding: 1em; background-color: #dcdcdc61;
+.addElementsReport{display: grid;grid-template-columns: 25% repeat(3, calc(25% - 16px)); grid-column-gap: 16px; color: dimgrey; height: inherit;}
+.addElementsReport > .filters .btn-add{color: olive;}
+.addElementsReport > .metrics .btn-add{color: darkgoldenrod;}
+.addElementsReport > .filters .btn-add, .addElementsReport > .metrics .btn-add, .addElementsReport > .composite-metrics .btn-add{
+  display: grid;grid-template-rows: auto auto;justify-content: center; opacity: .5;align-items: center;justify-items: center;padding: 8px 1em; background-color: #dcdcdc61;
   border-radius: 0px;box-shadow: 0px 0px 0px 0px; transition: box-shadow 200ms, opacity 250ms, border-radius 150ms;}
-.addElementsReport > div:hover{opacity: 1;border-radius: 4px;box-shadow: 0px 1px 8px -2px darkgrey;}
+
+.addElementsReport > section > .btn-add:hover{opacity: 1;border-radius: 4px;box-shadow: 0px 1px 8px -2px darkgrey;}
 .addElementsReport > div > span{padding: .5em 1em;}
 .btn-add{display: flex; flex-direction: column;}
 #list-hierarchies > section li[data-hier-name]{font-weight: bold;}

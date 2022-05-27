@@ -11,7 +11,8 @@
 .material-icons.md-14{font-size: 14px;}
 .material-icons.md-18{font-size: 18px;}
 .material-icons.md-24{font-size: 24px;}
-.material-icons.md-36{font-size: 36px;border-radius: 50%;border: solid thin dimgrey;}
+.material-icons.md-32{font-size: 32px;}
+.material-icons.md-36{font-size: 36px;}
 .material-icons.md-48{font-size: 48px;}
 .material-icons.md-light{color: gainsboro}
 .material-icons.md-important-low{color: goldenrod;}
@@ -34,14 +35,8 @@
 .material-icons.md-dark.options.md-inactive { color: rgba(0, 0, 0, 0.26);padding: 0px;}
 /* color*/
 .material-icons.important {color: indianred;padding: .5em;}
-.material-icons.maintenance{color: mediumseagreen;}
 .material-icons.info{color: gray;}
 .material-icons.highlighted{color: chocolate;}
-
-.material-icons.build{color: indianred;}
-.material-icons.local_gas_station{color: dimgray;}
-.material-icons.ev_station{color: mediumseagreen;}
-.material-icons.flag{color: forestgreen;}
 
 /* range icon color*/
 .material-icons.lower, .material-icons.mediumRange, .material-icons.greater{font-weight: bold;}
@@ -61,7 +56,6 @@
 .material-icons.md-circle-navigate{border-radius: 50%;box-shadow: 0 2px 4px 0 dimgrey; color: var(--main-secondary-color);padding: .25em;}
 .material-icons.md-circle.primary{background: var(--main-primary-color);}
 
-/* end material icons*/
 /* two-tone */
 .material-icons-two-tone.noPad{padding: 0;}
 .material-icons-two-tone.md-36{font-size: 36px;}
@@ -76,6 +70,7 @@
   .material-icons.md-circle{padding: .7em;font-size: 18px;}
   .material-icons.sale{padding: .35em;}
 }
+
 .material-icons[id]:not(.md-inactive):hover{color: black;}
 .material-icons.md-inactive{color: lightgrey;cursor: not-allowed;}
 .material-icons:not(.md-inactive):hover{color: black;}

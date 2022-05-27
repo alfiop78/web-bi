@@ -114,9 +114,8 @@ class Cube {
 		// metriche di base
 		$metrics_base = array();
 		$metrics_base_datamart = array();
-		foreach ($this->baseMetrics as $metric) {
-			// print_r($metric->name);
-			// TODO: devo eliminare le proprietà tableAlias e table per le metriche composte legate al cubo (metriche di primo livello definite sul cubo es.: (table.field-2 * table.field-2))
+		foreach ($this->baseMetrics as $metricName => $metric) {
+			dd($metric);
 			if ( (!property_exists($metric, 'table')) && (!property_exists($metric, 'tableAlias')) ) {
 				// è una metrica composta a livello di cubo
 				$metrics_base[] = "\n{$metric->SQLFunction}({$metric->field}) AS '{$metric->alias}'";
@@ -152,6 +151,7 @@ class Cube {
 	}
 
 	private function buildCompositeMetrics($tableName, $metricObject) {
+		dd($metricObject);
 		// converto la formula delle metriche composte da : ( metric_name * metric_name) -> (W_AP_base_*.metric_alias * W_AP_base_*.metric_alias)
 		// verifico se, tra le metriche che compongono la composta, ci sono metriche di base o avanzate (filtrate)
 		foreach ($this->compositeMetrics as $name => $metric) {
@@ -160,7 +160,7 @@ class Cube {
 			// echo $name;
 			// print_r($metric->metrics_alias);
 			foreach ($metric->metrics_alias as $metricName => $metricAlias) {
-				// la prop 'metrics_alias' : {metric_name : metric_alias}
+				// la prop 'metrics_alias' : {metric_name : {token : ...., alias : metric_alias}
 				// print_r($this->baseMetrics);
 				if ($metricObject->name === $metricName) {
 					foreach ($metric->formula_sql as $key => $sqlItem) {

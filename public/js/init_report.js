@@ -205,24 +205,26 @@ var StorageMetric = new MetricStorage();
 							// console.log('field : ', field);
 							const content = app.tmplList.content.cloneNode(true);
 							const section = content.querySelector('section[data-sublist-columns]');
-							const div = section.querySelector('div.selectable');
-							const spanHContent = div.querySelector('.h-content');
-							const span = spanHContent.querySelector('span[column]');
-							const smallTable = spanHContent.querySelector('small[table]');
-							const smallHier = spanHContent.querySelector('small:last-child');
+							const spanHContent = section.querySelector('.h-content');
+							const selectable = spanHContent.querySelector('.selectable');
+							const span = selectable.querySelector('span[column]');
+							const smallTable = selectable.querySelector('small[table]');
+							const smallHier = selectable.querySelector('small:last-child');
+							const i = spanHContent.querySelector('i');
 
 							section.dataset.label = field.ds.field;
 							section.dataset.elementSearch = 'search-columns';
 							section.dataset.dimensionToken = dimToken;
 							section.dataset.hierName = hier;
-							div.dataset.label = field.ds.field;
-							div.dataset.tableName = table.table;
-							div.dataset.tableAlias = table.alias;
-							div.dataset.tableId = tableId;
-							div.dataset.dimensionToken = dimToken;
-							div.dataset.hierName = hier;
-							div.dataset.tokenColumn = token;
-							div.onclick = app.handlerSelectColumn;
+							selectable.dataset.label = field.ds.field;
+							selectable.dataset.tableName = table.table;
+							selectable.dataset.tableAlias = table.alias;
+							selectable.dataset.tableId = tableId;
+							selectable.dataset.dimensionToken = dimToken;
+							selectable.dataset.hierName = hier;
+							selectable.dataset.tokenColumn = token;
+							selectable.onclick = app.handlerSelectColumn;
+							i.onclick = app.handlerColumnEdit;
 							span.innerText = field.ds.field;
 							smallTable.innerText = table.table;
 							smallHier.innerText = hier;
@@ -243,21 +245,23 @@ var StorageMetric = new MetricStorage();
 					// console.log('field : ', field);
 					const content = app.tmplList.content.cloneNode(true);
 					const section = content.querySelector('section[data-sublist-columns]');
-					const div = section.querySelector('div.selectable');
-					const spanHContent = div.querySelector('.h-content');
-					const span = spanHContent.querySelector('span[column]');
-					const smallTable = spanHContent.querySelector('small[table]');
-					const smallCube = spanHContent.querySelector('small:last-child');
+					const spanHContent = section.querySelector('.h-content');
+					const selectable = spanHContent.querySelector('.selectable');
+					const span = selectable.querySelector('span[column]');
+					const smallTable = selectable.querySelector('small[table]');
+					const smallCube = selectable.querySelector('small:last-child');
+					const i = spanHContent.querySelector('i');
 
 					section.dataset.label = field.ds.field;
 					section.dataset.elementSearch = 'search-columns';
 					section.dataset.cubeToken = cubeToken;
-					div.dataset.label = field.ds.field;
-					div.dataset.tableName = value.FACT;
-					div.dataset.tableAlias = value.alias;
-					div.dataset.tokenColumn = token;
-					div.dataset.cubeToken = cubeToken;
-					div.onclick = app.handlerSelectColumn;
+					selectable.dataset.label = field.ds.field;
+					selectable.dataset.tableName = value.FACT;
+					selectable.dataset.tableAlias = value.alias;
+					selectable.dataset.tokenColumn = token;
+					selectable.dataset.cubeToken = cubeToken;
+					selectable.onclick = app.handlerSelectColumn;
+					i.onclick = app.handlerColumnEdit;
 					span.innerText = field.ds.field;
 					smallTable.innerText = value.FACT;
 					smallCube.innerText = value.name;
@@ -606,32 +610,29 @@ var StorageMetric = new MetricStorage();
 
 	// lista metriche composte
 	app.getCompositeMetrics = () => {
-		const ul = document.getElementById('exist-composite-metrics');
-		for (const [token, value] of StorageCube.cubes) {
-			// TODO: compositeMetrics dovrebbe essere un oggetto Map, togliere Object.entries
-			StorageMetric.cubeMetrics = token;
-			for ( const [key, metric] of Object.entries(StorageMetric.compositeMetrics) ) {
-				const contentElement = app.tmplList.content.cloneNode(true);
-				const section = contentElement.querySelector('section[data-sublist-metrics]');
-				const spanHContent = section.querySelector('.h-content');
-				const selectable = spanHContent.querySelector('.selectable');
-				const span = spanHContent.querySelector('span[metric]');
-				// const smallTable = spanHContent.querySelector('small[table]');
-				// const smallCube = spanHContent.querySelector('small[cube]');
-				section.dataset.elementSearch = 'search-exist-metrics';
-				section.dataset.label = metric.name;
-				section.dataset.cubeToken = token;
-				selectable.dataset.tableName = value.FACT;
-				selectable.dataset.tableAlias = value.alias;
-				selectable.dataset.cubeToken = token;
-				selectable.dataset.label = metric.name;
-				selectable.onclick = app.handlerMetricSelected;
-				span.innerText = metric.name;
-				// smallTable.innerText = cubeValue.FACT;
-				// smallCube.innerText = cubeName;
-				ul.appendChild(section);
-			}
-		}
+		const ul = document.getElementById('ul-exist-composite-metrics');
+		// TODO: 2022-05-27 in futuro ci sarà da valutare metriche composte appartenenti a più cubi
+		StorageMetric.compositeMetrics.forEach( metric => {
+			const contentElement = app.tmplList.content.cloneNode(true);
+			const section = contentElement.querySelector('section[data-sublist-metrics]');
+			const spanHContent = section.querySelector('.h-content');
+			const selectable = spanHContent.querySelector('.selectable');
+			const span = spanHContent.querySelector('span[metric]');
+			// non esiste nessun cubo legato a una metrica composta, quindi la rendo subito visibile
+			section.hidden = false;
+			// const smallTable = spanHContent.querySelector('small[table]');
+			// const smallCube = spanHContent.querySelector('small[cube]');
+			section.dataset.elementSearch = 'search-exist-metrics';
+			section.dataset.label = metric.name; // ricerca
+			// section.dataset.cubeToken = cubeToken;
+			selectable.dataset.metricToken = metric.token;
+			// selectable.dataset.tableName = value.FACT;
+			// selectable.dataset.tableAlias = value.alias;
+			// selectable.dataset.cubeToken = cubeToken;
+			selectable.onclick = app.handlerMetricSelected;
+			span.innerText = metric.name;
+			ul.appendChild(section);
+		});
 	}
 
 	// lista delle metriche disponibili nei cubi
@@ -666,70 +667,6 @@ var StorageMetric = new MetricStorage();
 			};
 		}
 	}
-
-	app.showPopupDialog = (e) => {
-		// OPTIMIZE: spostare in Application.js
-		// console.log('e : ', e);
-		const yPosition = e.target.offsetTop + e.target.clientHeight + 10; // offsetTop : altezza dall'elemento dialog + clienteHeight : altezza dell'icona
-		const left = e.target.offsetLeft;
-		const right = e.target.offsetLeft + e.target.clientWidth;
-		// console.log('left : ', left);
-		// console.log('right : ', right);
-		// ottengo il centro dell'icona
-		let centerElement = left + ((right - left) / 2);
-		app.dialogPopup.innerHTML = e.currentTarget.dataset.popupLabel;
-		app.dialogPopup.style.display = 'block';
-		// ottengo la metà del dialogPopup, la sua width varia a seconda di cosa c'è scritto dentro, quindi qui devo prima visualizzarlo (display: block) e dopo posso vedere la width
-		const elementWidth = app.dialogPopup.offsetWidth / 2;
-		// il dialogPopup verrà posizionato al centro dell'icona
-		const xPosition = centerElement - elementWidth;
-
-		app.dialogPopup.style.setProperty('--left', xPosition + "px");
-		app.dialogPopup.style.setProperty('--top', yPosition + "px");
-		app.dialogPopup.animate([
-		  { transform: 'scale(.2)' },
-		  { transform: 'scale(1.2)' },
-		  { transform: 'scale(1)' }
-		], { duration: 50, easing: 'ease-in-out' });
-	}
-
-	app.hidePopupDialog = () => app.dialogPopup.style.display = 'none';
-
-	app.showPopup = (e) => {
-		// OPTIMIZE: spostare in Application.js
-		// const toast = document.getElementById('toast');
-		// console.log('pageX : ', e.pageX);
-		// console.log('pageY : ', e.pageY);
-		// console.log('offset : ', e.offsetX);
-		// console.log('screen : ', e.screenX);
-		const yPosition = e.target.getBoundingClientRect().bottom + 10;
-		const left = e.target.getBoundingClientRect().left;
-		const right = e.target.getBoundingClientRect().right;
-		// console.log('left : ', left);
-		// console.log('right : ', right);
-		// ottengo il centro dell'icona
-		let centerElement = left + ((right - left) / 2);
-		app.popup.innerHTML = e.currentTarget.dataset.popupLabel;
-		app.popup.style.display = 'block';
-		// ottengo la metà del popup, la sua width varia a seconda di cosa c'è scritto dentro, quindi qui devo prima visualizzarlo (display: block) e dopo posso vedere la width
-		const elementWidth = app.popup.offsetWidth / 2;
-		// il popup verrà posizionato al centro dell'icona
-		const xPosition = centerElement - elementWidth;
-
-		app.popup.style.setProperty('--left', xPosition + "px");
-		app.popup.style.setProperty('--top', yPosition + "px");
-		app.popup.animate([
-		  { transform: 'scale(.2)' },
-		  { transform: 'scale(1.2)' },
-		  { transform: 'scale(1)' }
-		], { duration: 50, easing: 'ease-in-out' });
-
-		// console.log(e.target.getBoundingClientRect().bottom);
-		// console.log(e.target.getBoundingClientRect().left);
-		// console.log(' : ', rect);
-	}
-
-	app.hidePopup = (e) => {app.popup.style.display = 'none';}
 
 	// process report
  	app.handlerSelectedReport = async (e) => {
@@ -918,6 +855,10 @@ var StorageMetric = new MetricStorage();
 		debugger;
 	}
 
+	app.handlerColumnEdit = (e) => {
+		debugger;
+	}
+
 	// selezione di un cubo (step-1)
 	app.handlerCubeSelected = (e) => {
 		StorageCube.selected = e.currentTarget.dataset.cubeToken;
@@ -1032,7 +973,6 @@ var StorageMetric = new MetricStorage();
 	app.handlerMetricSelected = (e) => {
 		StorageMetric.selected = e.currentTarget.dataset.metricToken;
 		e.currentTarget.toggleAttribute('selected');
-		debugger;
 		if (e.currentTarget.hasAttribute('selected')) {
 			// aggiungo la metrica
 			switch (StorageMetric.selected.metric_type) {
@@ -1057,21 +997,18 @@ var StorageMetric = new MetricStorage();
 					break;
 				case 3:
 					// metrica composta
-					// TODO: da testare
 					// Siccome le metriche composte contengono le metriche "base"/"filtrate" vanno aggiunte anche queste all'elaborazione di baseTable() (metriche base) oppure metricTable() (metriche filtrate)
 					// ottengo le metriche inserite nella composta
-					for (const name in StorageMetric.selected.formula.metrics_alias) {
+					for (const [name, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
 						// TODO: tutto da rivedere dopo la modifica del token
 						// recupero le metriche che compongono la composta
-						StorageMetric.selected = name;
-						// imposto, in Query.metricName la metrica selezionata
-						// Query.metricName = name;
-						// recupero la prop 'filtered' per capire se inserire Query.metrics/filteredMetrics
+						StorageMetric.selected = metric.token;
+						// se c'è una metrica filtrata memorizzo in Query.filteredMetrics altrimenti in Query.metrics
 						// BUG: nella metrica composta potrebbe esserci anche un'altra metrica composta
 						(StorageMetric.selected.metric_type === 2) ? 
 							Query.filteredMetrics = StorageMetric.selected.formula : 
 							Query.metrics = {
-								token : e.currentTarget.dataset.metricToken,
+								token : metric.token,
 								SQLFunction : StorageMetric.selected.formula.SQLFunction,
 								field : StorageMetric.selected.formula.field,
 								distinct : StorageMetric.selected.formula.distinct,
@@ -1082,6 +1019,8 @@ var StorageMetric = new MetricStorage();
 						}
 					// reimposto la metrica selezionata
 					StorageMetric.selected = e.currentTarget.dataset.metricToken;
+					// aggiungo alle metriche selezionate per il report
+					debugger;
 					Query.compositeMetrics = StorageMetric.selected.formula;
 					break;
 				default:
@@ -1111,6 +1050,7 @@ var StorageMetric = new MetricStorage();
 		const textArea = document.getElementById('composite-metric-formula');
 		// creo uno span con dentro la metrica
 		const mark = document.createElement('mark');
+		mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
 		mark.innerText = e.currentTarget.dataset.label;
 		textArea.appendChild(mark);
 		// aggiungo anche uno span per il proseguimento della scrittura della formula
@@ -1471,30 +1411,47 @@ var StorageMetric = new MetricStorage();
 		let metricObj = { created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options) };
 		// se associatedFilters > 0 sarà una metrica filtrata, altrimenti una metrica a livello di report (senza nessun filtro all'interno della metrica)
 		// la metrica che si sta per creare non deve essere "selezionata" (con Query.metrics oppure Query.filteredMetrics) per il report in costruzione
-		// TODO: metric_type = 2
-		if (Object.keys(associatedFilters).length > 0) {
-			// metrica filtrata
-			console.info('metrica filtrata');
-			metricObj = {
-				type: 'METRIC',
-				token,
-				metric_type : 2,
-				name,
-				formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, table: Query.table, tableAlias : Query.tableAlias, filters: associatedFilters },
-				cubeToken : StorageCube.selected.token
-			};
-			// metricObj = { type: 'METRIC', token, metric_type : 2, name, formula: Query.filteredMetrics.get(token), cubeToken : StorageCube.selected.token };
-		} else {
-			// metrica
-			console.info('metrica di base');
-			metricObj = {
-				type: 'METRIC',
-				token,
-				metric_type,
-				name,
-				formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias },
-				cubeToken : StorageCube.selected.token
-			};
+		
+		switch (metric_type) {
+			case 0:
+				// base
+				console.info('metrica di base');
+				metricObj = {
+					type: 'METRIC',
+					token,
+					metric_type,
+					name,
+					formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, table : Query.table, tableAlias : Query.tableAlias },
+					cubeToken : StorageCube.selected.token
+				};
+				break;
+			case 1:
+				// base composta (legata al cubo)
+				metricObj = {
+					type: 'METRIC',
+					token,
+					metric_type,
+					name,
+					formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias },
+					cubeToken : StorageCube.selected.token
+				};
+				break;
+			case 2:
+				// filtrata
+				console.info('metrica filtrata');
+				metricObj = {
+					type: 'METRIC',
+					token,
+					metric_type,
+					name,
+					formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, table: Query.table, tableAlias : Query.tableAlias, filters: associatedFilters },
+					cubeToken : StorageCube.selected.token
+				};
+				break;
+			default:
+				// composta
+				// TODO: implementare
+				break;
 		}
 
 		// salvo la nuova metrica nello storage
@@ -1540,42 +1497,44 @@ var StorageMetric = new MetricStorage();
 		const ul = document.getElementById(ulId);
 		const content = app.tmplList.content.cloneNode(true);
 		const section = content.querySelector('section[data-sublist-filters]');
-		const div = section.querySelector('div.selectable');
 		const spanHContent = div.querySelector('.h-content');
-		const span = spanHContent.querySelector('span[filter]');
-		const smallTable = spanHContent.querySelector('small[table]');
-		const smallHier = spanHContent.querySelector('small:last-child');
+		const selectable = spanHContent.querySelector('.selectable');
+		const span = selectable.querySelector('span[filter]');
+		const smallTable = selectable.querySelector('small[table]');
+		const smallHier = selectable.querySelector('small:last-child');
+		const iEdit = spanHContent.querySelector('i');
 		section.removeAttribute('hidden');
 		section.dataset.label = StorageFilter.selected.name;
 		section.dataset.elementSearch = 'search-exist-filters';
-		div.dataset.filterToken = StorageFilter.selected.token;
-		div.dataset.tableName = Query.table;
-		div.dataset.tableAlias = Query.tableAlias;
+		selectable.dataset.filterToken = StorageFilter.selected.token;
+		selectable.dataset.tableName = Query.table;
+		selectable.dataset.tableAlias = Query.tableAlias;
 		
 		if (StorageFilter.selected.hasOwnProperty('dimensionToken')) {
 			// è un filtro su un livello dimensionale
 			section.dataset.dimensionToken = StorageFilter.selected.dimensionToken;
 			section.dataset.hierName = StorageFilter.selected.hier;
-			div.dataset.dimensionToken = StorageFilter.selected.dimensionToken;
-			div.dataset.hierName = StorageFilter.selected.hier;
-			div.dataset.tableId = Query.tableId;
+			selectable.dataset.dimensionToken = StorageFilter.selected.dimensionToken;
+			selectable.dataset.hierName = StorageFilter.selected.hier;
+			selectable.dataset.tableId = Query.tableId;
 			smallHier.setAttribute('hier', true); // TODO: dataset data-hier
 			smallHier.innerText = StorageFilter.selected.hier;
 		} else {
 			// è un filtro su una tabella FACT
 			section.dataset.cubeToken = StorageCube.selected.token;
-			div.dataset.cubeToken = StorageCube.selected.token;
+			selectable.dataset.cubeToken = StorageCube.selected.token;
 			smallHier.innerText = StorageCube.selected.name;
 		}
 		span.innerText = StorageFilter.selected.name;
 		smallTable.innerText = Query.table;
 
-		div.onclick = app.handlerFilterSelected;
+		selectable.onclick = app.handlerFilterSelected;
+		iEdit.onclick = app.handlerFilterEdit; // TODO: da implementare
 		ul.appendChild(section);
 	}
 
 	// aggiungo la metrica appena creata alla <ul> (metrica composta)
-	app.appendCompositeMetric = (ulId) => {
+	app.addCompositeMetric = (ulId) => {
 		const ul = document.getElementById(ulId);
 		const content = app.tmplList.content.cloneNode(true);
 		const section = content.querySelector('section[data-sublist-metrics]');
@@ -1584,19 +1543,18 @@ var StorageMetric = new MetricStorage();
 		const smallTable = selectable.querySelector('small[table]');
 		const smallCube = selectable.querySelector('small[cube]');
 		section.removeAttribute('hidden');
-		section.dataset.elementSearch = 'search-exist-metrics';
-		section.dataset.label = Query.metricName;
-		section.dataset.cubeName = StorageCube.selected.name;
 		section.toggleAttribute('data-searchable');
+		section.dataset.elementSearch = 'search-exist-metrics';
+		section.dataset.label = StorageMetric.selected.name; // utile per la ricerca
 
-		selectable.dataset.label = Query.metricName;
-		selectable.dataset.tableName = Query.table;
-		selectable.dataset.tableAlias = Query.tableAlias;
-		selectable.dataset.cubeName = StorageCube.selected.name;
+		selectable.dataset.metricToken = StorageMetric.selected.token;
+		// selectable.dataset.tableName = Query.table;
+		// selectable.dataset.tableAlias = Query.tableAlias;
+		// selectable.dataset.cubeName = StorageCube.selected.name;
 		
-		spanMetric.innerText = Query.metricName;
-		smallTable.innerText = Query.table;
-		smallCube.innerText = StorageCube.selected.name;
+		spanMetric.innerText = StorageMetric.selected.name;
+		// smallTable.innerText = Query.table;
+		// smallCube.innerText = StorageCube.selected.name;
 		selectable.onclick = app.handlerMetricSelected;
 		ul.appendChild(section);
 	}
@@ -1606,34 +1564,34 @@ var StorageMetric = new MetricStorage();
 		const name = document.getElementById('composite-metric-name').value;
 		const alias = document.getElementById('composite-alias-metric').value;
 		let arr_sql = [];
+		const rand = () => Math.random(0).toString(36).substr(2);
+		const token = rand().substr(0, 21);
 		let metricsAlias = {}; // contiene un'elenco di object con nome_metrica : alias che compongono la metrica composta
 		document.querySelectorAll('#composite-metric-formula *').forEach( element => {
-			// console.log('element : ', element);
+			console.log('element : ', element);
 			// console.log('element : ', element.nodeName);
 			// se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
 			if (element.nodeName === 'MARK') {
-				StorageMetric.selected = element.innerText;
+				StorageMetric.selected = element.dataset.metricToken;
 				// metrics[element.innerText] = StorageMetric.selected.formula.alias;
 				// TODO: probabilmente qui meglio inserire tutto il contenuto della metrica e non solo l'alias
-				metricsAlias[element.innerText] = StorageMetric.selected.formula.alias;
+				metricsAlias[element.innerText] = {token : element.dataset.metricToken, alias : StorageMetric.selected.formula.alias};
 				// TODO: verificare se è presente il distinct : true in ogni metrica
-				arr_sql.push(StorageMetric.selected.formula.name);
+				arr_sql.push(StorageMetric.selected.name);
 			} else {
 				arr_sql.push(element.innerText.trim());	
 			}
 		});
 		arr_sql.push(`AS '${alias}'`);
-		Query.metricName = name;
-		Query.compositeMetrics = { formula_sql : arr_sql, alias, metrics_alias : metricsAlias };
-		const metricObj = { type: 'METRIC', name, metric_type : 3, formula: Query.compositeMetrics[name], cube : StorageCube.selected.name };
-
-		console.log(metricObj)
-		debugger;
-		StorageMetric.save = metricObj
+		const metricObj = { type: 'METRIC', token, name, metric_type : 3, formula: { token, formula_sql : arr_sql, alias, metrics_alias : metricsAlias } };
+		console.log(metricObj);
+		StorageMetric.saveTemp(metricObj);
 		// salvo nel DB
 		app.saveMetricDB(metricObj);
 		// aggiungo la metrica alla <ul>
-		app.appendCompositeMetric('exist-composite-metrics');
+		// reimposto, come metrica selezionata, la metrica appena creata e da aggiungere a #ul-exist-composite-metrics
+		StorageMetric.selected = token;
+		app.addCompositeMetric('ul-exist-composite-metrics');
 	}
 
 	// salvo il filtro nel DB, table : bi_filters
@@ -1890,13 +1848,11 @@ var StorageMetric = new MetricStorage();
 			// per ogni cubo selezionato ne recupero le metriche ad esso appartenenti
 			const ul = document.getElementById('ul-metrics');
 			selectedCubes.forEach( cube => {
-				const cubeName = cube.dataset.label;
 				// ripulisco la lista, prima di popolarla
 				document.querySelectorAll('#ul-metrics > section').forEach( item => item.remove());
 				// recupero lista aggiornata delle metriche
-				StorageMetric.cubeMetrics = cubeName;
-				debugger;
-				for ( const [key, metric] of Object.entries(StorageMetric.cubeMetrics) ) {
+				StorageMetric.cubeMetrics = cube.dataset.cubeToken;
+				for ( const [token, metric] of Object.entries(StorageMetric.cubeMetrics) ) {
 					const contentElement = app.tmplList.content.cloneNode(true);
 					const section = contentElement.querySelector('section[data-sublist-metrics]');
 					const spanHContent = section.querySelector('.h-content');
@@ -1906,19 +1862,20 @@ var StorageMetric = new MetricStorage();
 					const smallCube = spanHContent.querySelector('small[cube]');
 					section.hidden = false;
 					section.dataset.elementSearch = 'search-exist-metrics';
-					// nome metrica
-					section.dataset.label = key;
-					section.dataset.cubeName = cubeName;
-					selectable.dataset.tableName = metric.formula.table;
-					selectable.dataset.tableAlias = metric.formula.tableAlias;
-					selectable.dataset.cubeName = cubeName;
-					selectable.dataset.label = key;
-					selectable.onclick = app.handlerMetricSelectedComposite;
-					span.innerText = key;
-					if (metric.metric_type !== 2) {
+					section.dataset.label = metric.name;
+					section.dataset.cubeToken = metric.cubeToken;
+					// metriche composte di base e composte non hanno le prop table, tableAlias
+					if (metric.metric_type !== 1 && metric.metric_type !== 3) {
+						selectable.dataset.tableName = metric.formula.table;
+						selectable.dataset.tableAlias = metric.formula.tableAlias;
 						smallTable.innerText = metric.formula.table;
-						smallCube.innerText = cubeName;
 					}
+					selectable.dataset.label = metric.name;
+					selectable.dataset.cubeToken = metric.cubeToken;
+					selectable.dataset.metricToken = token;
+					selectable.onclick = app.handlerMetricSelectedComposite;
+					span.innerText = metric.name;
+					smallCube.innerText = cube.dataset.label;
 					ul.appendChild(section);
 				}
 			});

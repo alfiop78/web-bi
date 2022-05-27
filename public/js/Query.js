@@ -8,7 +8,7 @@ class Queries {
 	#firstTable = {}; // la prima tabella della gerarchia, da qui posso ottenere la from e la join
 	#joinId;
 	#where = {};
-	#compositeMetrics = {};
+	#compositeMetrics = new Map();
 	#compositeBaseMetric;
 	#filters = new Map();
 	#metrics = new Map();
@@ -215,8 +215,13 @@ class Queries {
 		console.log('_filteredMetrics : ', this._filteredMetrics);
 	}
 
-	set compositeMetrics(object) {
-		this.#compositeMetrics[this._metricName] = object;
+	set compositeMetrics(value) {
+		// this.#compositeMetrics[this._metricName] = object;
+		if (this.#compositeMetrics.has(value.token)) {
+			this.#compositeMetrics.delete(value.token);
+		} else {
+			this.#compositeMetrics.set(value.token, value);
+		}
 		console.log('this.#compositeMetrics : ', this.#compositeMetrics);
 	}
 
@@ -291,8 +296,12 @@ class Queries {
 			this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
 			this.reportElements.metrics = Object.fromEntries(this.#metrics);
 		}
-		if (Object.keys(this._filteredMetrics).length > 0) this.reportElements.filteredMetrics = this._filteredMetrics;
-		if (Object.keys(this.#compositeMetrics).length > 0) this.reportElements.compositeMetrics = this.#compositeMetrics;
+		if (this.compositeMetrics.size > 0) {
+			this.#elementReport.set('compositeMetrics', Object.fromEntries(this.compositeMetrics));
+			this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
+		}
+		// if (Object.keys(this._filteredMetrics).length > 0) this.reportElements.filteredMetrics = this._filteredMetrics;
+		// if (Object.keys(this.#compositeMetrics).length > 0) this.reportElements.compositeMetrics = this.#compositeMetrics;
 		
 		// this.#reportProcess['name'] = name;
 		this.#reportProcess.type = 'PROCESS';

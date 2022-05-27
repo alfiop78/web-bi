@@ -123,6 +123,7 @@ class MapDatabaseController extends Controller
         $q->baseColumns = $cube->{'select'};
         // imposto le colonne da includere nel datamart finale
         $q->fields();
+        // imposto il magic method con le metriche composte
         if (property_exists($cube, 'compositeMetrics')) $q->compositeMetrics = $cube->{'compositeMetrics'};
         // verifico se sono presenti metriche di base
         if (property_exists($cube, 'metrics')) {

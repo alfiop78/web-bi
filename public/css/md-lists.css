@@ -4,6 +4,8 @@ ul{margin-inline: 0px;padding-inline: 0px;}
 section[data-sublist-gen] .v-content{margin: 4px 2px;}
 .v-content{display: flex;flex-flow: column;width: 100%;}
 span.highlight{color: sienna;}
+span.highlight.filters-color{color: olive;}
+span.highlight.metrics-color{color: darkgoldenrod;}
 .no-highlight{color: dimgray}
 .selectable{border-left: solid 0px sienna; transition: border-left 100ms; margin: 4px; padding: 2px 4px;}
 .unselectable{margin: 4px; padding: 2px 4px;}
@@ -21,6 +23,9 @@ section[data-sublist-fields] > .selectable[relations] i[data-id="hierarchy-icon"
 section[data-sublist-fields] > .selectable[relations][data-relation-id="true"] i[data-id="hierarchy-icon"]{color: #99b19c; visibility: visible;}
 section[data-sublist-fields] > .selectable[metrics] i[data-id="metric-icon"]{color: #587850; visibility: visible;}
 
+/*visualizzo icona su hover section*/
+section[data-sublist-columns] i{visibility: hidden;}
+section[data-sublist-columns]:hover i{visibility: visible;}
 
 section[data-sublist-filters] i{visibility: hidden;}
 section[data-sublist-filters]:hover i{visibility: visible;}

@@ -364,9 +364,9 @@
 
 							{{-- lista column esistenti --}}
 							<section class="data-item" data-element-search data-label data-sublist-columns hidden>
-								<div class="selectable" data-label>
+								<div>
 									<div class="h-content">
-										<div class="v-content">
+										<div class="v-content selectable">
 											<span column class="highlight"></span>
 											<small table></small>
 											<small hier></small>
@@ -381,7 +381,7 @@
 								<div>
 									<div class="h-content">
 										<div class="selectable v-content">
-											<span filter class="highlight"></span>
+											<span filter class="highlight filters-color"></span>
 											<small table></small>
 											<small></small>
 										</div>
@@ -396,7 +396,7 @@
 									<div class="h-content">
 										<div class="selectable v-content">
 											{{-- TODO: metriche composte potrei colorarle in modo diverso, cos' come le metriche filtrate --}}
-											<span metric class="highlight"></span>
+											<span metric class="highlight metrics-color"></span>
 											<small table></small>
 											<small cube></small>
 											{{-- TODO: qui, sulle metriche filtrate potrei visualizzare un popup con l'elenco dei filtri, oppure, per le metriche composte, visualizzarne, nel popup, la propria formula --}}
@@ -504,7 +504,7 @@
 									  
 										<section class="step" data-step="2">
 											<div class="pageContent">
-												<h5>Report</h5>
+												<h5>Seleziona gli elementi per comporre il Report</h5>
 												<div class="v-grid">
 													<div class="addElementsReport">
 														<section class="columns">
@@ -519,8 +519,8 @@
 														</section>
 														<section class="filters">
 															<div class="btn-add">
-																<span>nuovo filtro</span>
-																<i id="btn-add-filters" class="material-icons md-36">add</i>
+																<span>Crea filtro</span>
+																<i id="btn-add-filters" class="material-icons md-32">add</i>
 															</div>
 															<div>
 																<div class="md-field">
@@ -533,8 +533,8 @@
 														{{-- metrics --}}
 														<section class="metrics">
 															<div class="btn-add">
-																<span>metriche</span>
-																<i id="btn-add-metrics" class="material-icons md-36">add</i>
+																<span>Crea metrica</span>
+																<i id="btn-add-metrics" class="material-icons md-32">add</i>
 															</div>
 															<div>
 																<div class="md-field">
@@ -547,15 +547,15 @@
 														{{-- composite --}}
 														<section class="composite-metrics">
 															<div class="btn-add">
-																<span>metriche composte</span>
-																<i id="btn-add-composite-metrics" class="material-icons md-36">add</i>
+																<span>Crea metrica composta</span>
+																<i id="btn-add-composite-metrics" class="material-icons md-32">add</i>
 															</div>
 															<div>
 																<div class="md-field">
 																	<input type="search" data-element-search="search-exist-composite-metrics" id="search-exist-composite-metrics" value autocomplete="off" />
 																	<label for="search-exist-composite-metrics" class="">Ricerca</label>
 																</div>
-																<ul id="exist-composite-metrics" class="full-overflow-list"></ul>
+																<ul id="ul-exist-composite-metrics" class="full-overflow-list"></ul>
 															</div>															
 														</section>
 													</div>
