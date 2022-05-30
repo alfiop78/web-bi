@@ -221,7 +221,6 @@ class Cube {
 		$i = 1;
 		// dd($this->filteredMetrics);
 		foreach ($this->filteredMetrics as $metrics) {
-			// dd($metrics);
 			unset($this->_sql);
 			$metric = "\n{$metrics->SQLFunction}({$metrics->tableAlias}.{$metrics->field}) AS '{$metrics->alias}'";
 			$this->_metrics_advanced_datamart[] = "\n{$metrics->SQLFunction}(W_AP_metric_{$this->reportId}_{$i}.'{$metrics->alias}') AS '{$metrics->alias}'";
@@ -245,9 +244,8 @@ class Cube {
 		$this->_sql .= $this->_reportFilters;
 		// aggiungo i filtri della metrica
 		foreach ($filters as $filter) {
-			$this->_metricFilters .= "AND {$filter->alias}.{$filter->formula}";
+			$this->_metricFilters .= "AND $filter->SQL";
 		}
-		// dd($this._metricFilters);
 		$this->_sql .= "\n$this->_metricFilters";
 		if (!is_null($this->_groupBy)) {$this->_sql .= "\n$this->_groupBy";}
 

@@ -15,9 +15,9 @@ class Queries {
 	#filteredMetrics = new Map();
 	#columns = new Map();
 	#elementReport = new Map();
-	#elementCube = new Map();
-	#elementDimension = new Map();
-	#elementHierarchies = new Set();
+	#elementCubes = new Map();
+	#elementDimensions = new Map();
+	#elementHierarchies = new Map();
 	#elementFilters = new Map();
 	#elementMetrics = new Map();
 	#reportProcess = {};
@@ -168,9 +168,9 @@ class Queries {
 
 	get factRelation() {this._factRelation;}
 
-	deleteFactRelation(dimName) {
-		debugger;
-		delete this._factRelation[dimName];
+	deleteFactRelation(token) {
+		// debugger;
+		delete this._factRelation[token];
 		console.log('_factRelation : ', this._factRelation);
 	}
 
@@ -205,7 +205,7 @@ class Queries {
 
 	set addFilteredMetric(value) {
 		if (!this.#filteredMetrics.has(value.token)) this.#filteredMetrics.set(value.token, value);
-		console.log(this.#filteredMetrics);
+		console.log('this.#filteredMetrics : ', this.#filteredMetrics);
 	}
 
 	get filteredMetrics() {return this.#filteredMetrics;}
@@ -234,21 +234,29 @@ class Queries {
 
 	set elementCube(value) {
 		// se l'elemento esiste lo elimino altrimenti lo aggiungo al Map
-		(this.#elementCube.has(value.token)) ? this.#elementCube.delete(value.token) : this.#elementCube.set(value.token, {tableAlias : value.tableAlias, from : [...value.from]});
-		// console.log('this.#elementCube : ', this.#elementCube);
+		(this.#elementCubes.has(value.token)) ? this.#elementCubes.delete(value.token) : this.#elementCubes.set(value.token, value);
+		console.log('this.#elementCube : ', this.#elementCubes);
 	}
 
-	get elementCube() {return this.#elementCube;}
+	get elementCube() {return this.#elementCubes;}
+
+	set elementDimension(value) {
+		// se l'elemento esiste lo elimino altrimenti lo aggiungo al Map
+		(this.#elementDimensions.has(value.token)) ? this.#elementDimensions.delete(value.token) : this.#elementDimensions.set(value.token, value);
+		console.log('this.#elementDimension : ', this.#elementDimensions);
+	}
+
+	get elementDimension() {return this.#elementDimensions;}
 
 	set elementHierarchy(value) {
-		(this.#elementHierarchies.has(value.hier)) ? this.#elementHierarchies.delete(value.hier) : this.#elementHierarchies.add(value.hier);
-		this.#elementDimension.set(value.token, [...this.#elementHierarchies]);
+		(this.#elementHierarchies.has(value.token)) ? this.#elementHierarchies.delete(value.token) : this.#elementHierarchies.set(value.token, value);
+		// this.#elementDimension.set(value.token, [...this.#elementHierarchies]);
 		// (this.#elementHierarchies.has(value.name)) ? this.#elementHierarchies.delete(value.name) : this.#elementHierarchies.add(value.name);
-		// console.log('this.#elementDimension : ', this.#elementDimension);
+		console.log('this.#elementDimension : ', this.#elementHierarchies);
 		// console.log('this.#elementHierarchies : ', this.#elementHierarchies);
 	}
 
-	get elementHierarchy() {return this.#elementDimension;}
+	get elementHierarchy() {return this.#elementHierarchies;}
 
 	set elementColumn(value) {
 
@@ -266,7 +274,8 @@ class Queries {
 
 	get elementReport() {
 		this.#elementReport.set('cubes', Object.fromEntries(this.elementCube));
-		this.#elementReport.set('dimensions', Object.fromEntries(this.elementHierarchy));
+		this.#elementReport.set('dimensions', Object.fromEntries(this.elementDimension));
+		this.#elementReport.set('hierarchies', Object.fromEntries(this.elementHierarchy));
 		this.#elementReport.set('filters', Object.fromEntries(this.elementFilter));
 		console.log('this.#elementReport : ', this.#elementReport);
 		return this.#elementReport;

@@ -113,23 +113,8 @@ class Storages {
 }
 
 class CubeStorage extends Storages {
-	#selectedCubes = new Set();
 	#cube;
 	constructor() {super();}
-
-	addCube(value) {
-		if (!this.#selectedCubes.has(value)) {
-			this.#selectedCubes.add(value);
-		}
-		console.log('this.#selectedCubes : ', this.#selectedCubes);
-	}
-
-	removeCube(value) {
-		if (this.#selectedCubes.has(value)) this.#selectedCubes.delete(value);
-		console.log('this.#selectedCubes : ', this.#selectedCubes);
-	}
-
-	get selectedCubes() {return this.#selectedCubes;}
 
 	/*getIdAvailable() {
 		// ottengo il primo Id disponibile
@@ -276,20 +261,6 @@ class DimensionStorage extends Storages {
 		super();
 	}
 
-	addDimension(value) {
-		if (!this.#selectedDimensions.has(value)) {
-			this.#selectedDimensions.add(value);
-		}
-		console.log('this.#selectedDimensions : ', this.#selectedDimensions);
-	}
-
-	removeDimension(value) {
-		if (this.#selectedDimensions.has(value)) this.#selectedDimensions.delete(value);
-		console.log('this.#selectedDimensions : ', this.#selectedDimensions);
-	}
-
-	get selectedDimensions() {return this.#selectedDimensions;}
-
 	/*getIdAvailable() {
 		// ottengo il primo Id disponibile
 		console.log(this.storageKeys);
@@ -370,30 +341,6 @@ class FilterStorage extends Storages {
 		return this._tableFilters;
 	}
 
-	// filtri appartenenti a una determinata dimensione-gerarchia
-	/*getFiltersByHierarchy(dim, hier) {
-		this._tableFilters = [];
-		for ( const [key, value] of Object.entries(this.filters)) {
-			if (value.dimension === dim && value.hier === hier) {
-				this._tableFilters.push(value);
-			}
-		}
-		return this._tableFilters;
-	}*/
-
-	// filtri appartenenti a una determinata tabella
-	/*getFiltersByTable(table) {
-		// console.clear();
-		// recupero tutti i filtri appartenenti alla table e restituisco un array
-		// console.log(table);
-		this._tableFilters = [];
-		for ( const [key, value] of Object.entries(this.filters)) {
-			if (value.table === table) {
-				this._tableFilters.push(value);
-			}
-		}
-		return this._tableFilters;
-	}*/
 }
 
 class MetricStorage extends Storages {
@@ -427,7 +374,7 @@ class MetricStorage extends Storages {
 	get baseAdvancedMetrics() {
 		this.localMetrics = new Set();
 		for (const [key, value] of Object.entries(this.#metricsObject) ) {
-			if (value.metric_type !== 2) this.localMetrics.add(value);
+			if (value.metric_type !== 4) this.localMetrics.add(value);
 		}
 		return this.localMetrics;
 	}

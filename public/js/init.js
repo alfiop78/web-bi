@@ -1302,7 +1302,7 @@ var Hier = new Hierarchy();
 		app.dialogDimensionName.showModal();
 	}
 
-	// salvataggio di una gerarchia
+	// save hierarchy
 	app.btnHierarchySaveName.onclick = () => {
 		const hierTitle = document.getElementById('hierarchyName').value;
 		// ordine gerarchico (per stabilire quale tabella è da associare al cubo) questo dato viene preso dal valore presente in .hierarchy-order
@@ -1324,8 +1324,10 @@ var Hier = new Hierarchy();
 			};
 		}
 		const comment = document.getElementById('textarea-hierarchies-comment').value;
+		const rand = () => Math.random(0).toString(36).substr(2);
+		const token = rand().substr(0, 7);
 		
-		Hier.hier = {title : hierTitle, hierarchyOrder, comment, from};
+		Hier.hier = {token, name : hierTitle, hierarchyOrder, comment, from};
 		// la gerarchia creata la salvo nell'oggetto Dim, della classe Dimension, dove andrò a salvare, alla fine, tutta la dimensione
 		Dim.hier = Hier.hier;
 		Dim.lastTableHierarchy = lastTables;

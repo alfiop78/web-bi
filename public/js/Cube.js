@@ -316,12 +316,13 @@ class Hierarchy {
 	set hier(object) {
 		console.log('object : ', object);
 		debugger;
-		this.#hier[object.title] = {order : object.hierarchyOrder};
-		this.#hier[object.title]['columns'] = this.#columns;
-		this.#hier[object.title]['joins'] = this.#join;
-		this.#hier[object.title]['from'] = object.from;
-		this.#hier[object.title]['tablesFrom'] = object.tablesForm;
-		this.#hier[object.title]['comment'] = object.comment;
+		this.#hier[object.token] = {order : object.hierarchyOrder};
+		this.#hier[object.token]['name'] = object.name;
+		this.#hier[object.token]['columns'] = this.#columns;
+		this.#hier[object.token]['joins'] = this.#join;
+		this.#hier[object.token]['from'] = object.from;
+		this.#hier[object.token]['tablesFrom'] = object.tablesForm;
+		this.#hier[object.token]['comment'] = object.comment;
 		// TODO: qui effettuo il controllo per vedere se, quando ci sono più gerarchie, viene condivisa l'ultima tabella, che deve essere la stessa per ciascuna delle gerarchie.
 		// this.lastTableHierarchy = object.lastTables;
 		console.log('this._hierarchies : ', this.#hier);
