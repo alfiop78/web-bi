@@ -115,9 +115,9 @@ class Cube {
 		$metrics_base = array();
 		$metrics_base_datamart = array();
 		foreach ($this->baseMetrics as $metricName => $metric) {
-			dd($metric);
+			// dd($metric);
 			if ( (!property_exists($metric, 'table')) && (!property_exists($metric, 'tableAlias')) ) {
-				// è una metrica composta a livello di cubo
+				// nella metrica in ciclo non ci sono le prop table e tableAlias quindi è una metrica composta a livello di cubo
 				$metrics_base[] = "\n{$metric->SQLFunction}({$metric->field}) AS '{$metric->alias}'";
 			} else {
 				// $metrics_base è utilizzato in baseTable()
@@ -151,29 +151,37 @@ class Cube {
 	}
 
 	private function buildCompositeMetrics($tableName, $metricObject) {
-		dd($metricObject);
+		// dd($metricObject);
 		// converto la formula delle metriche composte da : ( metric_name * metric_name) -> (W_AP_base_*.metric_alias * W_AP_base_*.metric_alias)
 		// verifico se, tra le metriche che compongono la composta, ci sono metriche di base o avanzate (filtrate)
 		foreach ($this->compositeMetrics as $name => $metric) {
+			// dd($metric->formula->metrics_alias);
 			// per ogni metrica che compone la composta vado a sostituire la formula prendendola dalla metrica originale.
-			// il nome della metrica contenuto nella formula si verrà sostituito da nome_tabella.metric_alias
+			// il nome della metrica contenuto nella formula verrà sostituito da nome_tabella.metric_alias
 			// echo $name;
 			// print_r($metric->metrics_alias);
-			foreach ($metric->metrics_alias as $metricName => $metricAlias) {
+			foreach ($metric->formula->metrics_alias as $metricName => $metricAlias) {
 				// la prop 'metrics_alias' : {metric_name : {token : ...., alias : metric_alias}
 				// print_r($this->baseMetrics);
 				if ($metricObject->name === $metricName) {
-					foreach ($metric->formula_sql as $key => $sqlItem) {
+					// la metrica passata come argomento è inclusa nella formula della metrica composta
+					foreach ($metric->formula->formula_sql as $key => $sqlItem) {
+						// la formula composta come array è ad es.: [ "(", "przmedio(nome_metrica)", "*", "quantita(nome_metrica)", ")"]
+						// ciclo ogni elemento per sostituire il nome della metrica con la formula contenuta in SQLFunction
 						$aggregate = $metricObject->SQLFunction;
-						if ($sqlItem === $metricName) {$metric->formula_sql[$key] = "$aggregate($tableName.'$metricAlias')";}
+						if ($sqlItem === $metricName) {
+							// se l'elemento in ciclo è il nome di una metrica lo sostituisco con : SUM(table_name.alias) lasciando invariati gli elementi parentesi, operatori, ecc...
+							$metric->formula->formula_sql[$key] = "$aggregate($tableName.'$metricAlias->alias')";
+						}
 					}
 				}
 			}
 			// aggiungo l'alias della metrica composta
-			$this->_composite_sql_formula[$name] = $metric->formula_sql;
+			$this->_composite_sql_formula[$name] = $metric->formula->formula_sql;
 			// var_dump($this->_composite_sql_formula);
 			// $this->_composite_sql_formula = implode(" ", $metric->formula_sql);
 		}
+		// dd($this->_composite_sql_formula);
 	}
 
 	public function baseTable() {

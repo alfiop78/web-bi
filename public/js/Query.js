@@ -12,6 +12,7 @@ class Queries {
 	#compositeBaseMetric;
 	#filters = new Map();
 	#metrics = new Map();
+	#filteredMetrics = new Map();
 	#columns = new Map();
 	#elementReport = new Map();
 	#elementCube = new Map();
@@ -26,7 +27,6 @@ class Queries {
 		this._fromSet = new Set();
 		this._where = {};
 		this._factRelation = {};
-		this._filteredMetrics = {};
 	}
 
 	set processId(value) {
@@ -190,24 +190,29 @@ class Queries {
 
 	get filters() {return this.#filters};
 
-	set metrics(value) {
+	set addMetric(value) {
 		// value = {sqlFunction: "SUM", field: "NettoRiga", metricName: "netto riga", distinct: false, alias: "Venduto"}
-		if (this.#metrics.has(value.token)) {
-			this.#metrics.delete(value.token);
-		} else {
-			this.#metrics.set(value.token, value);
-		}
+		if (!this.#metrics.has(value.token)) this.#metrics.set(value.token, value);
 		console.log('metrics : ', this.#metrics);
 	}
 
 	get metrics() {return this.#metrics;}
 
-	set filteredMetrics(object) {
-		this._filteredMetrics[this._metricName] = object;
-		console.log(this._filteredMetrics);
+	set removeMetric(token) {
+		if (this.#metrics.has(token)) this.#metrics.delete(token);
+		console.log('metrics : ', this.#metrics);
 	}
 
-	get filteredMetrics() {return this._filteredMetrics;}
+	set addFilteredMetric(value) {
+		if (!this.#filteredMetrics.has(value.token)) this.#filteredMetrics.set(value.token, value);
+		console.log(this.#filteredMetrics);
+	}
+
+	get filteredMetrics() {return this.#filteredMetrics;}
+
+	set removeFilteredMetric(token) {
+		if (this.#filteredMetrics.has(token)) this.#filteredMetrics.delete(token);
+	}
 
 	deleteFilteredMetric() {
 		debugger;
@@ -215,13 +220,13 @@ class Queries {
 		console.log('_filteredMetrics : ', this._filteredMetrics);
 	}
 
-	set compositeMetrics(value) {
-		// this.#compositeMetrics[this._metricName] = object;
-		if (this.#compositeMetrics.has(value.token)) {
-			this.#compositeMetrics.delete(value.token);
-		} else {
-			this.#compositeMetrics.set(value.token, value);
-		}
+	set addCompositeMetric(value) {
+		if (!this.#compositeMetrics.has(value.token)) this.#compositeMetrics.set(value.token, value);
+		console.log('this.#compositeMetrics : ', this.#compositeMetrics);
+	}
+
+	set removeCompositeMetric(token) {
+		if (this.#compositeMetrics.has(token)) this.#compositeMetrics.delete(token);
 		console.log('this.#compositeMetrics : ', this.#compositeMetrics);
 	}
 

@@ -790,7 +790,7 @@ var StorageMetric = new MetricStorage();
 			// seleziono le metriche impostate sul report
 			document.querySelector("#ul-exist-metrics .selectable[data-metric-token='"+token+"']").setAttribute('selected', true); // TODO: dataset data-selected
 			// se la metrica NON ha la prop table è una metrica composta, di base, quindi legata al cubo
-			Query.metrics = {
+			Query.addMetric = {
 				token,
 				SQLFunction : metric.SQLFunction,
 				field : metric.field,
@@ -969,7 +969,7 @@ var StorageMetric = new MetricStorage();
 
 	app.handlerMetricFilterSelected = e => e.currentTarget.toggleAttribute('selected');
 
-	// selezione di una metrica già esistente, lo salvo nella Classe Query.metrics (oppure Query.filteredMetrics)
+	// selezione di una metrica già esistente, lo salvo nella Classe Query.addMetric (oppure Query.addFilteredMetric)
 	app.handlerMetricSelected = (e) => {
 		StorageMetric.selected = e.currentTarget.dataset.metricToken;
 		e.currentTarget.toggleAttribute('selected');
@@ -977,10 +977,11 @@ var StorageMetric = new MetricStorage();
 			// aggiungo la metrica
 			switch (StorageMetric.selected.metric_type) {
 				case 1:
-					// metrica di base composta
+					// metrica di base composta, non ha le proprietà table e tableAlias
 					debugger;
-					Query.metrics = {
+					Query.addMetric = {
 						token : e.currentTarget.dataset.metricToken,
+						name : StorageMetric.selected.name,
 						SQLFunction : StorageMetric.selected.formula.SQLFunction,
 						field : StorageMetric.selected.formula.field, // contiene la formula (es.: prezzo * quantita)
 						distinct : StorageMetric.selected.formula.distinct,
@@ -992,8 +993,12 @@ var StorageMetric = new MetricStorage();
 					Query.tableAlias = e.currentTarget.dataset.tableAlias;
 					// metrica filtrata
 					// TODO: da testare
-					Query.filteredMetrics = StorageMetric.selected.formula;
 					debugger;
+					Query.addFilteredMetric = {
+						token : e.currentTarget.dataset.metricToken,
+						name : StorageMetric.selected.name,
+						formula : StorageMetric.selected.formula
+					};
 					break;
 				case 3:
 					// metrica composta
@@ -1003,12 +1008,22 @@ var StorageMetric = new MetricStorage();
 						// TODO: tutto da rivedere dopo la modifica del token
 						// recupero le metriche che compongono la composta
 						StorageMetric.selected = metric.token;
-						// se c'è una metrica filtrata memorizzo in Query.filteredMetrics altrimenti in Query.metrics
+						// se c'è una metrica filtrata memorizzo in Query.addFilteredMetric altrimenti in Query.addMetric
 						// BUG: nella metrica composta potrebbe esserci anche un'altra metrica composta
 						(StorageMetric.selected.metric_type === 2) ? 
-							Query.filteredMetrics = StorageMetric.selected.formula : 
-							Query.metrics = {
+							Query.addFilteredMetric = {
 								token : metric.token,
+								name : StorageMetric.selected.name,
+								formula : StorageMetric.selected.formula,
+								field : StorageMetric.selected.formula.field,
+								distinct : StorageMetric.selected.formula.distinct,
+								alias : StorageMetric.selected.formula.alias,
+								table : Query.table,
+								tableAlias : Query.tableAlias
+							} : 
+							Query.addMetric = {
+								token : metric.token,
+								name : StorageMetric.selected.name,
 								SQLFunction : StorageMetric.selected.formula.SQLFunction,
 								field : StorageMetric.selected.formula.field,
 								distinct : StorageMetric.selected.formula.distinct,
@@ -1021,14 +1036,19 @@ var StorageMetric = new MetricStorage();
 					StorageMetric.selected = e.currentTarget.dataset.metricToken;
 					// aggiungo alle metriche selezionate per il report
 					debugger;
-					Query.compositeMetrics = StorageMetric.selected.formula;
+					Query.addCompositeMetric = {
+						token : e.currentTarget.dataset.metricToken,
+						name : StorageMetric.selected.name,
+						formula : StorageMetric.selected.formula
+					};
 					break;
 				default:
 					// base
 					Query.table = e.currentTarget.dataset.tableName;
 					Query.tableAlias = e.currentTarget.dataset.tableAlias;
-					Query.metrics = {
+					Query.addMetric = {
 						token : e.currentTarget.dataset.metricToken,
+						name : StorageMetric.selected.name,
 						SQLFunction : StorageMetric.selected.formula.SQLFunction,
 						field : StorageMetric.selected.formula.field,
 						distinct : StorageMetric.selected.formula.distinct,
@@ -1039,7 +1059,21 @@ var StorageMetric = new MetricStorage();
 					break;
 			}
 		} else {
-			// TODO: elimino la metrica
+			// deselezione di una metrica
+			switch (StorageMetric.selected.metric_type) {
+				case 2:
+					// metrica avanzata
+					Query.removeFilteredMetric = e.currentTarget.data.metricToken;
+					break;
+				case 3:
+					// metrica composta
+					Query.removeCompositeMetric = e.currentTarget.dataset.metricToken;
+					break;
+				default:
+					// metrica composta di base oppure metrica di base
+					Query.removeMetric = e.currentTarget.dataset.metricToken;
+					break;
+			}
 		}
 	}
 
@@ -1410,7 +1444,7 @@ var StorageMetric = new MetricStorage();
 		});
 		let metricObj = { created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options) };
 		// se associatedFilters > 0 sarà una metrica filtrata, altrimenti una metrica a livello di report (senza nessun filtro all'interno della metrica)
-		// la metrica che si sta per creare non deve essere "selezionata" (con Query.metrics oppure Query.filteredMetrics) per il report in costruzione
+		// la metrica che si sta per creare non deve essere "selezionata" (con Query.addMetric oppure Query.addFilteredMetric) per il report in costruzione
 		
 		switch (metric_type) {
 			case 0:
