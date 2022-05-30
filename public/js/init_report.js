@@ -790,14 +790,30 @@ var StorageMetric = new MetricStorage();
 			// seleziono le metriche impostate sul report
 			document.querySelector("#ul-exist-metrics .selectable[data-metric-token='"+token+"']").setAttribute('selected', true); // TODO: dataset data-selected
 			// se la metrica NON ha la prop table è una metrica composta, di base, quindi legata al cubo
+			debugger;
 			Query.addMetric = {
 				token,
+				name : metric.name,
 				SQLFunction : metric.SQLFunction,
 				field : metric.field,
 				distinct : metric.distinct,
 				alias : metric.alias
 			};
 		}
+
+		// metriche composte
+		const compositeMetrics = new Map(Object.entries(StorageProcess.selected.edit.compositeMetrics));
+		for (const [token, metric] of compositeMetrics) {
+			// seleziono le metriche impostate sul report
+			document.querySelector("#ul-exist-composite-metrics .selectable[data-metric-token='"+token+"']").setAttribute('selected', true); // TODO: dataset data-selected
+			Query.addCompositeMetric = {
+				token,
+				name : metric.name,
+				formula : metric.formula
+			};
+		}
+
+		// TODO: metriche filtrate
 
 		const columns =new Map(Object.entries(StorageProcess.selected.edit.columns));
 		for (const [token, value] of columns) {
@@ -1046,6 +1062,7 @@ var StorageMetric = new MetricStorage();
 					// base
 					Query.table = e.currentTarget.dataset.tableName;
 					Query.tableAlias = e.currentTarget.dataset.tableAlias;
+					debugger;
 					Query.addMetric = {
 						token : e.currentTarget.dataset.metricToken,
 						name : StorageMetric.selected.name,
