@@ -482,6 +482,7 @@ var StorageMetric = new MetricStorage();
 					section.dataset.elementSearch = 'search-tables';
 					div.dataset.dimensionToken = token;
 					div.dataset.hierToken = hierToken;
+					div.dataset.hierName = hierValue.name;
 					div.dataset.tableName = table.table;
 					div.dataset.tableAlias = table.alias;
 					div.dataset.schema = table.schema;
@@ -702,25 +703,24 @@ var StorageMetric = new MetricStorage();
 		
 		// seleziono le dimensioni utilizzate nel report
 		const dimensions = new Map(Object.entries(StorageProcess.selected.edit.dimensions));
-		for ( const [token, hierarchies] of dimensions ) {
-			// StorageProcess.selected.edit.dimensions.forEach( dimensionToken => {
+		for ( const [token, value] of dimensions ) {
 			StorageDimension.selected = token;
 			Query.factRelation = StorageDimension.selected;
+			Query.elementDimension = { token, cubes : StorageDimension.selected.cubes};
 			// seleziono la dimensione in ciclo
 			document.querySelector("#ul-dimensions > section[data-dimension-token='" + token + "'] .selectable").setAttribute('selected', true);
 			// visualizzo le hier relative alla dimensione
 			app.showHierarchies();
-			// all'interno delle dimensioni ci sono le gerarchie
-			// console.log('hierarchies : ', hierarchies);
-			// reimposto elementHierarchy
-			// Query.elementHierarchy = {token, hier : new Set(hierarchies)};
-			hierarchies.forEach ( hier => {
-				Query.elementHierarchy = {token, hier};
-				// seleziono le gerarchie
-				document.querySelector("#ul-hierarchies > section[data-label='" + hier + "'] .selectable").setAttribute('selected', true);
-				// visualizzo tutti gli oggetti relativi alla gerarchia
-				app.showAllElements();
-			});
+		}
+
+		// gerarchie
+		const hierarchies = new Map(Object.entries(StorageProcess.selected.edit.hierarchies));
+		for ( const [token, value] of hierarchies ) {
+			Query.elementHierarchy = {dimensionToken : value.dimensionToken, token};
+			// seleziono le gerarchie
+			document.querySelector("#ul-hierarchies .selectable[data-hier-token='" + token + "']").setAttribute('selected', true);
+			// visualizzo tutti gli oggetti relativi alla gerarchia
+			app.showAllElements();
 		}
 
 		// seleziono i filtri utilizzati nel report
@@ -948,21 +948,20 @@ var StorageMetric = new MetricStorage();
 	app.handlerFilterSelected = (e) => {
 		StorageFilter.selected = e.currentTarget.dataset.filterToken;
 		let hier;
-		// i filtri impostati su un livello dimensionale hanno l'attr data-hier-name
-		if (e.currentTarget.hasAttribute('data-hier-name')) {
-			hier = e.currentTarget.dataset.hierName;
+		// i filtri impostati su un livello dimensionale hanno l'attr data-hier-token
+		if (e.currentTarget.hasAttribute('data-hier-token')) {
+			hier = e.currentTarget.dataset.hierToken;
 			StorageDimension.selected = e.currentTarget.dataset.dimensionToken;
 			Query.tableId = e.currentTarget.dataset.tableId;
 		}
 		Query.table = e.currentTarget.dataset.tableName;
-		debugger;
 		Query.tableAlias = e.currentTarget.dataset.tableAlias;
 		e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('selected')) {
 			// recupero dallo storage il filtro selezionato
 			if (StorageFilter.selected.hier) {
 				// imposto la firstTable se il filtro appartiene a una dimensione e non a un cubo
-				Query.addTables(StorageFilter.selected.hier);
+				Query.addTables(StorageFilter.selected.hier.token);
 				app.checkRelations(hier);
 				Query.elementFilter = {
 					token : e.currentTarget.dataset.filterToken,
@@ -1162,7 +1161,7 @@ var StorageMetric = new MetricStorage();
 			if (e.currentTarget.hasAttribute('data-table-id')) {
 				StorageDimension.selected = e.currentTarget.dataset.dimensionToken;
 				Query.tableId = e.currentTarget.dataset.tableId;
-				Query.field = {[Query.columnToken] : StorageDimension.selected.hierarchies[e.currentTarget.dataset.hierName].columns[Query.tableAlias][Query.columnToken]};
+				Query.field = {[Query.columnToken] : StorageDimension.selected.hierarchies[e.currentTarget.dataset.hierToken].columns[Query.tableAlias][Query.columnToken]};
 			} else {
 				StorageCube.selected = e.currentTarget.dataset.cubeToken;
 				Query.field = {[Query.columnToken] : StorageCube.selected.columns[Query.tableAlias][Query.columnToken]};
@@ -1170,13 +1169,13 @@ var StorageMetric = new MetricStorage();
 			if (e.currentTarget.hasAttribute('selected')) {
 				document.getElementById('columnAlias').value = '';
 				document.getElementById('columnAlias').focus();
-				// imposto, nella section della dialog, l'attributo data-hier-name e data-dimension-name selezionata
-				if (e.currentTarget.hasAttribute('data-hier-name')) {
-					app.dialogColumns.querySelector('section').dataset.hierName = e.currentTarget.dataset.hierName;
+				// imposto, nella section della dialog, l'attributo data-hier-token e data-dimension-name selezionata
+				if (e.currentTarget.hasAttribute('data-hier-token')) {
+					app.dialogColumns.querySelector('section').dataset.hierToken = e.currentTarget.dataset.hierToken;
 					app.dialogColumns.querySelector('section').dataset.dimensionToken = e.currentTarget.dataset.dimensionToken;
 				} else {
-					// selezione di una colonna della Fact, elimino l'attributo data-hier-name perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
-					app.dialogColumns.querySelector('section').removeAttribute('data-hier-name');
+					// selezione di una colonna della Fact, elimino l'attributo data-hier-token perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
+					app.dialogColumns.querySelector('section').removeAttribute('data-hier-token');
 				}
 				app.dialogColumns.showModal();
 			} else {
@@ -1194,14 +1193,14 @@ var StorageMetric = new MetricStorage();
 		Query.table = e.currentTarget.getAttribute('label'); // TODO: impostare data-label
 		Query.tableAlias = e.currentTarget.dataset.tableAlias;
 		Query.tableId = e.currentTarget.dataset.tableId;
-		const hier = e.currentTarget.dataset.hierName;
+		const hier = e.currentTarget.dataset.hierToken;
 		// deseleziono le precedenti tabelle selezionate
 		// let activeDialog = document.querySelector('dialog[open]');
 		if (app.dialogColumns.querySelector('#fieldList-tables ul li[selected]')) {
 			const li = app.dialogColumns.querySelector('#fieldList-tables ul li[selected]');
 			li.toggleAttribute('selected');
 			// nascondo tutte le colonne che fanno parte della tabella precedentemente selezionata
-			app.dialogColumns.querySelectorAll("ul[data-id='fields-column'] > section[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "'][data-table-name='" + li.getAttribute('label') + "']").forEach((field) => {
+			app.dialogColumns.querySelectorAll("ul[data-id='fields-column'] > section[data-dimension-name='" + dimension + "'][data-hier-token='" + hier + "'][data-table-name='" + li.getAttribute('label') + "']").forEach((field) => {
 				field.hidden = true;
 				field.removeAttribute('data-searchable');
 			});
@@ -1209,7 +1208,7 @@ var StorageMetric = new MetricStorage();
 		e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('selected')) {
 			// visualizzo le colonne appartenenti alla tabella selezionata
-			app.dialogColumns.querySelectorAll("ul[data-id='fields-column'] > section[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "'][data-table-name='" + Query.table + "']").forEach((field) => {
+			app.dialogColumns.querySelectorAll("ul[data-id='fields-column'] > section[data-dimension-name='" + dimension + "'][data-hier-token='" + hier + "'][data-table-name='" + Query.table + "']").forEach((field) => {
 				field.hidden = false;
 				field.dataset.searchable = true;
 			});
@@ -1229,9 +1228,10 @@ var StorageMetric = new MetricStorage();
 				Query.tableId = e.currentTarget.dataset.tableId;
 				// TODO: invece di impostare questi due attributi nel <section> della dialog potrei impostarli nella Classe Storage, con il metodo selected()
 				app.dialogFilter.querySelector('section').dataset.hierToken = e.currentTarget.dataset.hierToken;
+				app.dialogFilter.querySelector('section').dataset.hierName = e.currentTarget.dataset.hierName;
 				app.dialogFilter.querySelector('section').dataset.dimensionToken = e.currentTarget.dataset.dimensionToken;
 			} else {
-				// selezione di una tabella della Fact, elimino l'attributo data-hier-name perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
+				// selezione di una tabella della Fact, elimino l'attributo data-hier-token perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
 				// TODO: da ricontrollare se questi due attributi vengono utilizzati quando si seleziona una tabella appartenente a una dimensione->hier
 				app.dialogFilter.querySelector('section').removeAttribute('data-hier-token');
 				app.dialogFilter.querySelector('section').removeAttribute('data-dimension-token');
@@ -1284,10 +1284,10 @@ var StorageMetric = new MetricStorage();
 
 	// apertura dialog per impostare le colonne nel report
 	app.openDialogColumns = (e) => {
-		const hier = e.currentTarget.dataset.hierName;
+		const hier = e.currentTarget.dataset.hierToken;
 		const table = e.currentTarget.dataset.tableName;
 		const dimension = e.currentTarget.dataset.dimensionToken;
-		app.dialogColumns.querySelector('section').dataset.hierName = hier;
+		app.dialogColumns.querySelector('section').dataset.hierToken = hier;
 		app.dialogColumns.querySelector('section').dataset.dimensionToken = dimension;
 		// nascondo le tabelle NON appartenenti alla gerarchia selezionata
 		app.dialogColumns.querySelectorAll("#list-columns > section:not([data-table-name='" + table + "'])").forEach( (column) => {
@@ -1308,14 +1308,14 @@ var StorageMetric = new MetricStorage();
 	// selezione della tabella nello step Filter, visualizzo i filtri creati su questa tabella, recuperandoli dallo storage
 	app.openDialogFilters = (e) => {
 		if (!e.target.hasAttribute('data-fact-name')) {
-			const hier = e.currentTarget.dataset.hierName;
+			const hier = e.currentTarget.dataset.hierToken;
 			const dimension = e.currentTarget.dataset.dimensionToken;
-			app.dialogFilter.querySelector('section').dataset.hierName = hier;
+			app.dialogFilter.querySelector('section').dataset.hierToken = hier;
 			app.dialogFilter.querySelector('section').dataset.dimensionToken = dimension;
 			// nascondo le tabelle NON appartenenti alla hier selezionata
-			app.dialogFilter.querySelectorAll("ul[data-id='fields-tables'] > section:not([data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "'])").forEach( table => table.hidden = true);
+			app.dialogFilter.querySelectorAll("ul[data-id='fields-tables'] > section:not([data-dimension-name='" + dimension + "'][data-hier-token='" + hier + "'])").forEach( table => table.hidden = true);
 			// visualizzo le tabelle appartenenti alla hier selezionata
-			app.dialogFilter.querySelectorAll("ul[data-id='fields-tables'] > section[data-dimension-name='" + dimension + "'][data-hier-name='" + hier + "']").forEach((table) => {
+			app.dialogFilter.querySelectorAll("ul[data-id='fields-tables'] > section[data-dimension-name='" + dimension + "'][data-hier-token='" + hier + "']").forEach((table) => {
 				// console.log('tabelle appartententi alla gerarchia selezionata : ', table);
 				table.hidden = false;
 				// imposto l'elemento con l'attr 'searchable' in modo che il metodo SearchInSectionList cerca solo tra gli elementi che hanno questo attributo
@@ -1601,13 +1601,12 @@ var StorageMetric = new MetricStorage();
 		selectable.dataset.filterToken = StorageFilter.selected.token;
 		selectable.dataset.tableName = Query.table;
 		selectable.dataset.tableAlias = Query.tableAlias;
-		
 		if (StorageFilter.selected.hasOwnProperty('dimensionToken')) {
 			// è un filtro su un livello dimensionale
 			section.dataset.dimensionToken = StorageFilter.selected.dimensionToken;
-			section.dataset.hierToken = StorageFilter.selected.hier;
+			section.dataset.hierToken = StorageFilter.selected.hier.token;
 			selectable.dataset.dimensionToken = StorageFilter.selected.dimensionToken;
-			selectable.dataset.hierToken = StorageFilter.selected.hier;
+			selectable.dataset.hierToken = StorageFilter.selected.hier.token;
 			selectable.dataset.tableId = Query.tableId;
 			smallHier.setAttribute('hier', true); // TODO: dataset data-hier
 			smallHier.innerText = StorageFilter.selected.hier.name;
@@ -1717,7 +1716,7 @@ var StorageMetric = new MetricStorage();
 	app.btnFilterSave.onclick = (e) => {
 		console.log(Query.table);
 		// per i filtri creati sulla Fact, hier e dimension devono essere = null ma và salvato, nel filtro, il nome del cubo a cui accede
-		let hier, dimension;
+		let hierToken, hierName, dimension;
 		const textarea = document.getElementById('filterSQLFormula');
 		let filterName = document.getElementById('inputFilterName');
 		const rand = () => Math.random(0).toString(36).substr(2);
@@ -1729,14 +1728,14 @@ var StorageMetric = new MetricStorage();
 		// la creazione di un filtro su un livello dimensionale salva il filtro con, all'interno, le proprietà dimension e hier.
 		// Un filtro impostato la FACT avrà al suo interno il nome del cubo a cui è associato e l'alias della FACT
 		if (app.dialogFilter.querySelector('section').hasAttribute('data-hier-token')) {
-			debugger;
-			hier = app.dialogFilter.querySelector('section').dataset.hierToken;
+			hierToken = app.dialogFilter.querySelector('section').dataset.hierToken;
+			hierName = app.dialogFilter.querySelector('section').dataset.hierName;
 			dimensionToken = app.dialogFilter.querySelector('section').dataset.dimensionToken;
 			// NOTE: inizializzazione di un Map con un Object
 			/*filterObject = new Map([
 				[token, {token, 'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, dimension, hier}]
 			]);*/
-			filterObject = {token, type: 'FILTER', name: filterName.value, table: Query.table, formula : textarea.value, dimensionToken, hier};
+			filterObject = { token, type: 'FILTER', name: filterName.value, table: Query.table, formula : textarea.value, dimensionToken, hier : {token : hierToken, name: hierName} };
 		} else {
 			filterObject = {token, type: 'FILTER', name: filterName.value, table: Query.table, formula : textarea.value, cubeToken : StorageCube.selected.token, alias : StorageCube.selected.alias};
 		}
@@ -1744,7 +1743,7 @@ var StorageMetric = new MetricStorage();
 		StorageFilter.saveTemp(filterObject);
 		StorageFilter.selected = token;
 		// salvataggio nel DB
-		app.saveFilterDB(filterObject);
+		// app.saveFilterDB(filterObject);
 		// reset del form
 		filterName.value = "";
 		filterName.focus();
@@ -2064,7 +2063,7 @@ var StorageMetric = new MetricStorage();
 		console.log('cubi selezionati : ', Query.elementCube);
 		for ( const [token, cube] of Query.elementCube) {
 			console.log('cube : ', cube);
-			debugger;
+			// debugger;
 			StorageFilter.getFiltersByCube(token).forEach( filter => {
 				// console.log('filter : ', filter);
 				const content = app.tmplList.content.cloneNode(true);
@@ -2089,81 +2088,43 @@ var StorageMetric = new MetricStorage();
 				ul.appendChild(section);
 			});	
 		}
-		// visualizzo i filtri appartenenti alle dimensioni selezionate
-		for ( const [token, dimension] of Query.elementHierarchy) {
-			StorageDimension.selected = token;
-			for (const [hierName, hier] of (Object.entries(StorageDimension.selected.hierarchies)) ) {
-				// per ogni tabella nella gerarchia
-				for (const [tableId, table] of Object.entries(hier.order)) {
-					const filters = StorageFilter.getFiltersByDimension(token, hierName, table.table);
-					if (filters.size > 0) {
-						filters.forEach( filter => {
-							const contentElement = app.tmplList.content.cloneNode(true);
-							const section = contentElement.querySelector('section[data-sublist-filters]');
-							const spanHContent = section.querySelector('.h-content');
-							const selectable = spanHContent.querySelector('.selectable');
-							const span = selectable.querySelector('span[filter]');
-							const smallTable = selectable.querySelector('small[table]');
-							const smallHier = selectable.querySelector('small:last-child');
-							section.hidden = false;
-							section.dataset.elementSearch = 'search-exist-filters';
-							section.dataset.label = filter.name;
-							section.dataset.dimensionToken = filter.dimensionToken;
-							section.dataset.hierName = filter.hier;
-							selectable.dataset.filterToken = filter.token;
-							selectable.dataset.dimensionToken = filter.dimensionToken;
-							selectable.dataset.hierName = filter.hier;
-							selectable.dataset.tableName = filter.table;
-							selectable.dataset.tableAlias = table.alias;
-							selectable.dataset.tableId = tableId;
-							selectable.onclick = app.handlerMetricFilterSelected;
-							span.innerText = filter.name;
-							smallTable.innerText = table.table;
-							smallHier.setAttribute('hier', true); // TODO: dataset
-							smallHier.innerText = hierName;
-							ul.appendChild(section);
-						});
-					}
+		// visualizzo i filtri appartenenti alle gerarchie selezionate
+		for ( const [token, value] of Query.elementHierarchy) {
+			StorageDimension.selected = value.dimensionToken;
+			// per ogni tabella nella gerarchia
+			for (const [tableId, table] of Object.entries(StorageDimension.selected.hierarchies[token].order)) {
+				const filters = StorageFilter.getFiltersByDimension(value.dimensionToken, token, table.table);
+				if (filters.size > 0) {
+					// debugger;
+					filters.forEach( filter => {
+						const contentElement = app.tmplList.content.cloneNode(true);
+						const section = contentElement.querySelector('section[data-sublist-filters]');
+						const spanHContent = section.querySelector('.h-content');
+						const selectable = spanHContent.querySelector('.selectable');
+						const span = selectable.querySelector('span[filter]');
+						const smallTable = selectable.querySelector('small[table]');
+						const smallHier = selectable.querySelector('small:last-child');
+						section.hidden = false;
+						section.dataset.elementSearch = 'search-exist-filters';
+						section.dataset.label = filter.name;
+						section.dataset.dimensionToken = filter.dimensionToken;
+						section.dataset.hierToken = filter.hier.token;
+						selectable.dataset.filterToken = filter.token;
+						selectable.dataset.dimensionToken = filter.dimensionToken;
+						selectable.dataset.hierToken = filter.hier.token;
+						selectable.dataset.tableName = filter.table;
+						selectable.dataset.tableAlias = table.alias;
+						selectable.dataset.tableId = tableId;
+						selectable.onclick = app.handlerMetricFilterSelected;
+						span.innerText = filter.name;
+						smallTable.innerText = table.table;
+						smallHier.setAttribute('hier', true); // TODO: dataset
+						smallHier.innerText = filter.hier.name;
+						ul.appendChild(section);
+					});
 				}
 			}
 		}
-		/*StorageDimension.selectedDimensions.forEach( token => {
-			StorageDimension.selected = token;
-			for (const [hierName, hier] of (Object.entries(StorageDimension.selected.hierarchies)) ) {
-				// per ogni tabella nella gerarchia
-				for (const [tableId, table] of Object.entries(hier.order)) {
-					const filters = StorageFilter.getFiltersByDimension(token, hierName, table.table);
-					if (filters.size > 0) {
-						filters.forEach( filter => {
-							const contentElement = app.tmplList.content.cloneNode(true);
-							const section = contentElement.querySelector('section[data-sublist-filters]');
-							const spanHContent = section.querySelector('.h-content');
-							const selectable = spanHContent.querySelector('.selectable');
-							const span = selectable.querySelector('span[filter]');
-							const smallTable = selectable.querySelector('small[table]');
-							const smallHier = selectable.querySelector('small:last-child');
-							section.hidden = false;
-							section.dataset.elementSearch = 'search-exist-filters';
-							section.dataset.label = filter.name;
-							section.dataset.dimensionToken = filter.dimensionToken;
-							section.dataset.hierName = filter.hier;
-							selectable.dataset.filterToken = filter.token;
-							selectable.dataset.dimensionToken = filter.dimensionToken;
-							selectable.dataset.hierName = filter.hier;
-							selectable.dataset.tableName = filter.table;
-							selectable.dataset.tableAlias = table.alias;
-							selectable.dataset.tableId = tableId;
-							selectable.onclick = app.handlerMetricFilterSelected;
-							span.innerText = filter.name;
-							smallTable.innerText = table.table;
-							smallHier.setAttribute('hier', true); // TODO: dataset
-							smallHier.innerText = hierName;
-							ul.appendChild(section);
-						});
-					}
-				}
-			}
-		});*/
 		app.dialogMetricFilter.showModal();
 	}
 
@@ -2222,9 +2183,9 @@ var StorageMetric = new MetricStorage();
 	app.btnSaveColumn.onclick = (e) => {
 		const alias = document.getElementById('columnAlias');
 		const textarea = (document.getElementById('columnSQL').value.length === 0) ? null : document.getElementById('columnSQL').value;
-		// le colonne di una Fact non hanno data-hier-name
-		if (app.dialogColumns.querySelector('section').hasAttribute('data-hier-name')) {
-			const hier = app.dialogColumns.querySelector('section').dataset.hierName;
+		// le colonne di una Fact non hanno data-hier-token
+		if (app.dialogColumns.querySelector('section').hasAttribute('data-hier-token')) {
+			const hier = app.dialogColumns.querySelector('section').dataset.hierToken;
 			StorageDimension.selected = app.dialogColumns.querySelector('section').dataset.dimensionToken;
 			// il tableId è definito in app.handlerSelectColumn()
 			Query.addTables(hier);

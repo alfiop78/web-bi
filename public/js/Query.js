@@ -267,7 +267,7 @@ class Queries {
 	set elementFilter(value) {
 		(this.#elementFilters.has(value.token)) ?
 			this.#elementFilters.delete(value.token) : this.#elementFilters.set(value.token, value);
-		// console.log('this.#elementFilters : ', this.#elementFilters);
+		console.log('this.#elementFilters : ', this.#elementFilters);
 	}
 
 	get elementFilter() {return this.#elementFilters;}

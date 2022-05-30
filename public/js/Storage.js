@@ -334,7 +334,7 @@ class FilterStorage extends Storages {
 	getFiltersByDimension(dimensionToken, hier, table) {
 		this._tableFilters = new Set();
 		for ( const [key, filter] of Object.entries(this.filters)) {
-			if (filter.dimensionToken === dimensionToken && filter.hier === hier && filter.table === table) {
+			if (filter.dimensionToken === dimensionToken && filter.hier.token === hier && filter.table === table) {
 				this._tableFilters.add(filter);
 			}
 		}
