@@ -14,7 +14,7 @@ class Storages {
 	#filters = new Set();
 	#processes = new Set();
 	#all = new Set();
-	#selected;
+	#selected; // l'elemento selezionato in un determinato momento
 	constructor() {
 		this.storage = window.localStorage;
 		this.storageKeys = Object.keys(window.localStorage);
@@ -109,53 +109,27 @@ class Storages {
 	get selected() {
 		return JSON.parse(this.storage.getItem(this.#selected));
 	}
+
 }
 
 class CubeStorage extends Storages {
-	#cubeSelected = new Set();
+	#selectedCubes = new Set();
 	#cube;
-	#lists = {};
-	constructor() {
-		super();
-		this._cubes = {}; // lista dei cubi presenti nello storage
-		this.id = 0; // default
-		// imposto la lista dei cubi in this.cubes
-		this.storageKeys.forEach((key) => {
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			if (jsonStorage.type === 'CUBE') {
-				this._cubes[key] = jsonStorage;
-				// this._cubes[key] = {'id' : jsonStorage['id'], 'FACT' : jsonStorage['FACT'], 'key' : key};
-			}
-		});
-		// console.log('cubes : ', this._cubes);
+	constructor() {super();}
+
+	addCube(value) {
+		if (!this.#selectedCubes.has(value)) {
+			this.#selectedCubes.add(value);
+		}
+		console.log('this.#selectedCubes : ', this.#selectedCubes);
 	}
 
-	setLists() {
-		this.storageKeys.forEach((key) => {
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			if (jsonStorage.type === 'CUBE') {
-				this.#lists[key] = jsonStorage;
-			}
-		});
+	removeCube(value) {
+		if (this.#selectedCubes.has(value)) this.#selectedCubes.delete(value);
+		console.log('this.#selectedCubes : ', this.#selectedCubes);
 	}
 
-	getLists() {
-		this.setLists();
-		return this.#lists;
-	}
-
-	// TODO: quando viene utilizzata ?
-	addCube() {
-		this.#cubeSelected.add(this.selected.FACT);
-		console.log('#cubeSelected : ', this.#cubeSelected);
-	}
-
-	deleteCube() {
-		this.#cubeSelected.delete(this.selected.FACT);
-		console.log('#cubeSelected : ', this.#cubeSelected);
-	}
-
-	get cubeSelected() {return this.#cubeSelected;}
+	get selectedCubes() {return this.#selectedCubes;}
 
 	/*getIdAvailable() {
 		// ottengo il primo Id disponibile
@@ -194,22 +168,6 @@ class CubeStorage extends Storages {
 		return this.id;
 	}*/
 
-	list(ul) {
-		for (const [key, value] of Object.entries(this._cubes)) {
-			let element = document.createElement('div');
-			element.className = 'element';
-			element.setAttribute('label', key);
-			let li = document.createElement('li');
-			li.innerText = key;
-			li.setAttribute('label', key);
-			// li.setAttribute('data-list-type', 'dimensions'); // questo influenza la <ul> delle dimensioni
-			li.id = 'cube-id-' + value['id'];
-			li.setAttribute('data-cube-id', value['id']);
-			ul.appendChild(element);
-			element.appendChild(li);
-		}
-	}
-
 	set stringify(value) {this._stringify = value;}
 
 	get stringify() {return this._stringify;}
@@ -218,10 +176,6 @@ class CubeStorage extends Storages {
 
 	get stringifyObject() {return this._stringify;}
 
-	/*json(cubeName) {
-		// un object del cube convertito in json, questo mi servirà per ricostruire la struttura
-		return JSON.parse(window.localStorage.getItem(cubeName));
-	}*/
 	getMetrics(cubeName) {
 		this._cube = JSON.parse(window.localStorage.getItem(cubeName));
 		return this._cube.metrics;
@@ -313,30 +267,30 @@ class ProcessStorage extends Storages {
 }
 
 class DimensionStorage extends Storages {
-	#dimensions = new Map();
-	// #dimsMap = new Map();
-	#dimension;
-	#name;
+	// #dimensions = new Map();
+	#selectedDimensions = new Set();
+	// #dimension;
+	// #name;
 	// Metodi per leggere/scrivere Dimensioni nello Storage
 	constructor() {
 		super();
 	}
 
-	add() {
-		// TODO: 2022-05-20 molto probabilmente non utilizzato
-		// creo un object con le dimensioni che sono state selezionate
-		this.#dimensions.set(this.#name, this.selected.from);
-		console.log('#dimensions : ', this.#dimensions);
+	addDimension(value) {
+		if (!this.#selectedDimensions.has(value)) {
+			this.#selectedDimensions.add(value);
+		}
+		console.log('this.#selectedDimensions : ', this.#selectedDimensions);
 	}
 
-	delete() {
-		this.#dimensions.delete(this.#name);
-		console.log('#dimensions : ', this.#dimensions);
+	removeDimension(value) {
+		if (this.#selectedDimensions.has(value)) this.#selectedDimensions.delete(value);
+		console.log('this.#selectedDimensions : ', this.#selectedDimensions);
 	}
 
-	get selectedDimensions() {return this.#dimensions;}
+	get selectedDimensions() {return this.#selectedDimensions;}
 
-	getIdAvailable() {
+	/*getIdAvailable() {
 		// ottengo il primo Id disponibile
 		console.log(this.storageKeys);
 		this.dimensionsElement = [];
@@ -366,9 +320,9 @@ class DimensionStorage extends Storages {
 			}
 		}
 		return this.id;
-	}
+	}*/
 
-	getFields(table) {
+	/*getFields(table) {
 		// resituisco un array con il nome delle tabelle incluse in .columns
 		this.item = JSON.parse(this.storage.getItem(this._name));
 		this.tables = [];
@@ -376,34 +330,28 @@ class DimensionStorage extends Storages {
 			this.tables.push(table);
 		}
 		return this.tables;
-	}
+	}*/
 
 }
 
 class FilterStorage extends Storages {
-	#filters = {};
 	constructor() {
 		super();
-		// this._filters = {};
-		this.storageKeys.forEach((key) => {
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			// console.log(key);
-			if (jsonStorage.type === 'FILTER') {
-				// this._filters[key] = jsonStorage;
-				this.#filters[key] = jsonStorage;
-			}
-		});
-		this.id = 0; // default
-		// console.log('#filters', this.#filters);
 	}
 
-	// TODO: utilizzare la stessa logica utilizzata cubeMetrics
-	get filters() {return this.#filters;} // tutti i filtri
+	get filters() {
+		this.filtersObject = {};
+		super.storageK = 'FILTER';
+		for ( const [key, value] of Object.entries(this.st)) {
+			this.filtersObject[key] = value;
+		}
+		return this.filtersObject;
+	}
 
 	// filtri appartenenti a un determinato cubo
 	getFiltersByCube(cubeToken) {
 		this._tableFilters = new Set();
-		for ( const [key, value] of Object.entries(this.#filters)) {
+		for ( const [key, value] of Object.entries(this.filters)) {
 			if (value.cubeToken === cubeToken) {
 				this._tableFilters.add(value);
 			}
@@ -414,7 +362,7 @@ class FilterStorage extends Storages {
 	// filtri appartenenti a una determinata dimensione-gerarchia-tabella
 	getFiltersByDimension(dimensionToken, hier, table) {
 		this._tableFilters = new Set();
-		for ( const [key, filter] of Object.entries(this.#filters)) {
+		for ( const [key, filter] of Object.entries(this.filters)) {
 			if (filter.dimensionToken === dimensionToken && filter.hier === hier && filter.table === table) {
 				this._tableFilters.add(filter);
 			}
@@ -423,29 +371,29 @@ class FilterStorage extends Storages {
 	}
 
 	// filtri appartenenti a una determinata dimensione-gerarchia
-	getFiltersByHierarchy(dim, hier) {
+	/*getFiltersByHierarchy(dim, hier) {
 		this._tableFilters = [];
-		for ( const [key, value] of Object.entries(this.#filters)) {
+		for ( const [key, value] of Object.entries(this.filters)) {
 			if (value.dimension === dim && value.hier === hier) {
 				this._tableFilters.push(value);
 			}
 		}
 		return this._tableFilters;
-	}
+	}*/
 
 	// filtri appartenenti a una determinata tabella
-	getFiltersByTable(table) {
+	/*getFiltersByTable(table) {
 		// console.clear();
 		// recupero tutti i filtri appartenenti alla table e restituisco un array
 		// console.log(table);
 		this._tableFilters = [];
-		for ( const [key, value] of Object.entries(this.#filters)) {
+		for ( const [key, value] of Object.entries(this.filters)) {
 			if (value.table === table) {
 				this._tableFilters.push(value);
 			}
 		}
 		return this._tableFilters;
-	}
+	}*/
 }
 
 class MetricStorage extends Storages {

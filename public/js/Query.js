@@ -305,8 +305,10 @@ class Queries {
 			this.#elementReport.set('compositeMetrics', Object.fromEntries(this.compositeMetrics));
 			this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
 		}
-		// if (Object.keys(this._filteredMetrics).length > 0) this.reportElements.filteredMetrics = this._filteredMetrics;
-		// if (Object.keys(this.#compositeMetrics).length > 0) this.reportElements.compositeMetrics = this.#compositeMetrics;
+		if (this.filteredMetrics.size > 0) {
+			this.#elementReport.set('filteredMetrics', Object.fromEntries(this.filteredMetrics));
+			this.reportElements.filteredMetrics = Object.fromEntries(this.filteredMetrics);
+		}
 		
 		// this.#reportProcess['name'] = name;
 		this.#reportProcess.type = 'PROCESS';
