@@ -138,9 +138,9 @@ class Application {
 	}
 
 	genericSearch(e) {
-		console.clear();
 		// verifico che la input ha l'attr type='search', non eseguo la ricerca se il campo non ha l'attr type='search'
 		if ( !(e.target.hasAttribute('type') && e.target.getAttribute('type') === 'search') ) return;
+		console.clear();
 		const searchAttr = e.target.getAttribute('data-element-search');
 		if (e.target.hasAttribute('data-type-search')) {
 			// ricerca su elementi nidificati

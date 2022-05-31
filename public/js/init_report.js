@@ -2219,8 +2219,7 @@ var StorageMetric = new MetricStorage();
 		}
 	});
 
-	// save column : salvataggio di una colonna del report
-	app.btnSaveColumn.onclick = (e) => {
+	app.saveColumn = () => {
 		const alias = document.getElementById('columnAlias');
 		const textarea = (document.getElementById('columnSQL').value.length === 0) ? null : document.getElementById('columnSQL').value;
 		// le colonne di una Fact non hanno data-hier-token
@@ -2242,6 +2241,9 @@ var StorageMetric = new MetricStorage();
 		// in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
 		app.dialogColumns.close();
 	}
+
+	// save column : salvataggio di una colonna del report
+	app.btnSaveColumn.onclick = () => app.saveColumn();
 
 	app.btnMapping.onclick = () => location.href = '/mapping';
 
@@ -2343,6 +2345,17 @@ var StorageMetric = new MetricStorage();
 		icon.onmouseenter = app.showTooltip;
 		icon.onmouseleave = app.hideTooltip;
 	});
+
+	document.getElementById('columnAlias').onkeydown = (e) => {
+		if (e.defaultPrevented) {
+			console.log('è stato premuto 2 volte');
+			return; // Do nothing if the event was already processed
+		}
+		// console.log(e);
+		// console.log(e.key);
+		if (e.key === 'Enter') app.saveColumn();
+		// e.preventDefault();
+	}
 
 	// NOTE: esempio di utilizzo di MutationObserver
 	/*
