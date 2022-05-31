@@ -346,12 +346,14 @@
 					<div id="body" hidden>
 
 						<div class="actions">
-							{{-- <span class="popupContent"><i id="btnProcessReport" class="material-icons md-18">table_rows</i><small class="popup">Crea FX</small></span> --}}
-							<i id="btnProcessReport" class="material-icons md-18" data-tooltip="Crea datamart" data-tooltip-position="bottom">table_rows</i>
+							<div class="buttons">
+								<i id="btnProcessReport" class="material-icons md-18" data-tooltip="Crea datamart" data-tooltip-position="bottom">table_rows</i>
+								{{-- <i id="btnDuplicateReport" class="material-icons md-18" data-tooltip="Duplica report" data-tooltip-position="bottom">content_copy</i> --}}
+							</div>
 						</div>
 
 						<div class="lists">
-							<div class="absList" id="reportProcessList" hidden>
+							<div class="absList large" id="reportProcessList" hidden>
 								<div class="md-field">
 									<input type="search" id="searchReportProcess" data-element-search="search-process" value="" autocomplete="off" />
 									<label for="searchReportProcess" class="">Ricerca</label>
@@ -414,6 +416,8 @@
 											<span data-process></span>
 										</div>
 										<i data-edit class="material-icons md-18" data-tooltip="Modifica Report" data-tooltip-position="bottom">edit</i>
+										<i data-copy class="material-icons md-18" data-tooltip="Duplica report" data-tooltip-position="bottom">content_copy</i>
+										<span class="h-separator"></span>
 										<i data-schedule class="material-icons md-18 md-highlight" data-tooltip="Esegui Report" data-tooltip-position="bottom">schedule_send</i>
 									</div>
 								</div>

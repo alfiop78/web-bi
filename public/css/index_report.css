@@ -22,9 +22,8 @@ th i.material-icons{position: absolute;right: 8px;display: inline-table;}
 
 
 .lists{position: relative;}
-.absList{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 6;box-shadow: 0 4px 8px 0px #b5b5b5;
-/*box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);*/}
-.absList > ul{height: 500px;overflow-y: auto;}
+/*.absList{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 6;box-shadow: 0 4px 8px 0px #b5b5b5;}
+.absList > ul{height: 500px;overflow-y: auto;}*/
 i[open]{color: red;}
 
 .step:first-child .stepLayout{grid-template-columns: 39% 59%; grid-column-gap: 2%; height: inherit;}

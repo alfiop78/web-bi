@@ -63,29 +63,33 @@ var StorageMetric = new MetricStorage();
 		tooltipTimeoutId : null
 	}
 
+	app.addProcess = (token, value) => {
+		const ul = document.getElementById('ul-processes');
+		const content = app.tmplList.content.cloneNode(true);
+		const section = content.querySelector('section[data-sublist-processes]');
+		const span = section.querySelector('span[data-process]');
+		const iEdit = section.querySelector('i[data-edit]');
+		const iCopy = section.querySelector('i[data-copy]');
+		const iSchedule = section.querySelector('i[data-schedule]');
+		section.dataset.elementSearch = 'search-process';
+		section.dataset.label = value.name; // per la ricerca
+		span.innerText = value.name;
+		iEdit.dataset.id = value.report.processId;
+		iEdit.dataset.processToken = token;
+		iCopy.dataset.id = value.report.processId;
+		iCopy.dataset.processToken = token;
+		iSchedule.dataset.id = value.report.processId;
+		iSchedule.dataset.processToken = token;
+		iEdit.onclick = app.handlerReportEdit;
+		iCopy.onclick = app.handlerReportCopy;
+		iSchedule.onclick = app.handlerSelectedReport;
+		ul.appendChild(section);
+	}
+
 	// creo la lista degli elementi da processare
 	app.getProcesses = () => {
-		const ul = document.getElementById('ul-processes');
-		// TODO: se è un oggetto Map devo togliere Object.entries
-		for (const [token, value] of Object.entries(StorageProcess.processes)) {
-			const content = app.tmplList.content.cloneNode(true);
-			const section = content.querySelector('section[data-sublist-processes]');
-			// const div = section.querySelector('div.selectable');
-			const span = section.querySelector('span[data-process]');
-			const iEdit = section.querySelector('i[data-edit]');
-			const iSchedule = section.querySelector('i[data-schedule]');
-			section.dataset.elementSearch = 'search-process';
-			section.dataset.label = value.name; // per la ricerca
-			// div.dataset.label = key;
-			// div.dataset.processId = value.processId;
-			span.innerText = value.name;
-			iEdit.dataset.id = value.report.processId;
-			iEdit.dataset.processToken = token;
-			iSchedule.dataset.id = value.report.processId;
-			iSchedule.dataset.processToken = token;
-			iEdit.onclick = app.handlerReportEdit;
-			iSchedule.onclick = app.handlerSelectedReport;
-			ul.appendChild(section);
+		for (const [token, value] of StorageProcess.processes) {
+			app.addProcess(token, value);
 		}
 	}
 
@@ -866,6 +870,30 @@ var StorageMetric = new MetricStorage();
 		}
 		const listReportProcess = document.getElementById('reportProcessList');
 		listReportProcess.toggleAttribute('hidden');
+	}
+
+	app.handlerReportCopy = (e) => {
+		console.clear();
+		StorageProcess.selected = e.target.dataset.processToken;
+		const process = StorageProcess.selected;
+		console.log('process selected : ', process);
+		const rand = () => Math.random(0).toString(36).substr(2);
+		const newToken = rand().substr(0, 21);
+		// modifico il token e il processId
+		process.token = newToken;
+		process.report.processId = Date.now();
+		// salvo il process duplicato con lo stesso nome aggiungendo un prefix _copy_of_
+		process.name = '_copy_of_'+process.name;
+		// modifico la data creazione e updated
+		const date = new Date();
+		// const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+		const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+		process.created_at = date.toLocaleDateString('it-IT', options);
+		process.updated_at = date.toLocaleDateString('it-IT', options);
+		// salvo il process duplicato
+		StorageProcess.saveTemp(process);
+		// lo aggiungo alla #ul-processes
+		app.addProcess(process.token, process);
 	}
 
 	// edit filter
@@ -2053,8 +2081,10 @@ var StorageMetric = new MetricStorage();
 			// nuovo report
 			Query.save(name);
 			// app.saveProcess();
-		}		
-		// TODO: aggiungo alla lista #ul-processes
+		}
+		// recupero da Query la proprietà this.#reportProcess appena creata e la aggiungo a #ul-processes	
+		// aggiungo alla lista #ul-processes
+		app.addProcess(Query.process.token, Query.process);
 		app.dialogSaveReport.close();
 	}
 

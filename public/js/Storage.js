@@ -91,7 +91,7 @@ class Storages {
 		window.localStorage.setItem(value.name, JSON.stringify(value));
 	}
 
-	// TODO: sostituirà save()
+	// TODO: sostituirà save() qui sopra
 	saveTemp(value) {
 		// console.info('SAVE : ', value);
 		window.localStorage.setItem(value.token, JSON.stringify(value));	
@@ -194,10 +194,11 @@ class ProcessStorage extends Storages {
 		});
 	}
 
-	set processId(value) {this.id = value;}
+	set processId(value) {this.id = value;} // TODO: probabilmente non viene mai utilizzato, da ricontrollare
 
-	get processId() {return this.id;}
+	get processId() {return this.id;} // TODO: probabilmente non viene mai utilizzato, da ricontrollare
 
+	// TODO: probabilmente non viene mai utilizzato, da ricontrollare
 	getIdAvailable() {
 		// ottengo il primo Id disponibile
 		// console.log(this.storageKeys);
@@ -234,23 +235,16 @@ class ProcessStorage extends Storages {
 		return this.id;
 	}
 
+	// TODO: probabilmente non viene mai utilizzato, da ricontrollare
 	getJSONProcess(value) {
 		let processReports = {};
 		let report = JSON.parse(this.storage.getItem(value));
 		return report.process;
 	}
 
-	get processes() {
-		this.storageKeys.forEach((key) => {
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			if (jsonStorage.type === 'PROCESS') {
-				this.#processes[key] = jsonStorage;
-			}
-		});
-		return this.#processes;
-	}
 }
 
+// TODO: da rivedere e probabilmente  da eliminare perche non vengono mai utilizzati i suoi metodi
 class DimensionStorage extends Storages {
 	// #dimensions = new Map();
 	#selectedDimensions = new Set();
@@ -260,48 +254,6 @@ class DimensionStorage extends Storages {
 	constructor() {
 		super();
 	}
-
-	/*getIdAvailable() {
-		// ottengo il primo Id disponibile
-		console.log(this.storageKeys);
-		this.dimensionsElement = [];
-		this.storageKeys.forEach((key, index) => {
-			let jsonStorage = JSON.parse(this.storage.getItem(key));
-			// console.log(jsonStorage);
-
-			if (jsonStorage.type === 'DIMENSION') {
-				// ottengo il numero di elementi PAGE nello storage
-				this.dimensionsElement.push(jsonStorage.id);
-			}
-		});
-
-		// ordino l'array
-		this.dimensionsElement.sort(function (a, b) {
-			console.log(a);
-			console.log(b);
-			return a - b;
-		})
-		// this.dimensionsElement.sort((a, b) => a - b); versione compatta
-
-		for (let i = 0; i < this.dimensionsElement.length; i++) {
-			if (this.dimensionsElement.includes(i)) {
-				this.id++;
-			} else {
-				this.id = i;
-			}
-		}
-		return this.id;
-	}*/
-
-	/*getFields(table) {
-		// resituisco un array con il nome delle tabelle incluse in .columns
-		this.item = JSON.parse(this.storage.getItem(this._name));
-		this.tables = [];
-		for (let table in this.item.from) {
-			this.tables.push(table);
-		}
-		return this.tables;
-	}*/
 
 }
 

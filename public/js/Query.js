@@ -324,10 +324,11 @@ class Queries {
 		this.#reportProcess.report = this.reportElements;
 		this.#reportProcess.edit = this.editElements;
 		console.info(this.#reportProcess);
-		debugger;
 		window.localStorage.setItem(this.#token, JSON.stringify(this.#reportProcess));
         console.info(`${name} salvato nello storage con token : ${this.token}`);
 	}
+
+	get process() {return this.#reportProcess;}
 
     get reportProcessStringify() {return this.#reportProcess;}
 
