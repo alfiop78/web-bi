@@ -117,7 +117,8 @@ class Cube {
 		foreach ($this->baseMetrics as $metricName => $metric) {
 			// dd($metric);
 			if ( (!property_exists($metric, 'table')) && (!property_exists($metric, 'tableAlias')) ) {
-				// nella metrica in ciclo non ci sono le prop table e tableAlias quindi è una metrica composta a livello di cubo
+				// TODO: invece di fare questo controllo potrei farlo direttamente sul metric_type
+				// nella metrica in ciclo non ci sono le prop table e tableAlias quindi è una metrica composta a livello di cubo (metric_type : 1)
 				$metrics_base[] = "\n{$metric->SQLFunction}({$metric->field}) AS '{$metric->alias}'";
 			} else {
 				// $metrics_base è utilizzato in baseTable()
@@ -220,16 +221,24 @@ class Cube {
 		/* creo i datamart necessari per le metriche filtrate */
 		$i = 1;
 		// dd($this->filteredMetrics);
+		$metrics_advanced = array();
 		foreach ($this->filteredMetrics as $metrics) {
+			// dd($metrics);
 			unset($this->_sql);
-			$metric = "\n{$metrics->SQLFunction}({$metrics->tableAlias}.{$metrics->field}) AS '{$metrics->alias}'";
-			$this->_metrics_advanced_datamart[] = "\n{$metrics->SQLFunction}(W_AP_metric_{$this->reportId}_{$i}.'{$metrics->alias}') AS '{$metrics->alias}'";
-			// verifico se sono presenti metriche composte e sostituisco questa metrica all'interno delle metriche composte
-			// echo "verifico compositeMetrics";
-			// dd(property_exists($this, 'compositeMetrics'));
-			if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics("W_AP_metric_{$this->reportId}_{$i}", $metrics);
-			$this->createMetricTable('W_AP_metric_'.$this->reportId."_".$i, $metric, $metrics->filters);
-			$this->_metricTable["W_AP_metric_".$this->reportId."_".$i] = $metrics->alias; // memorizzo qui quante tabelle per metriche filtrate sono state create
+			if ($metric->metric_type === 3) {
+				// metrica composta a livello cubo filtrata
+				$metrics_advanced[] = "\n{$metric->SQLFunction}({$metric->field}) AS '{$metric->alias}'";
+			} else {
+				// metrica filtrata
+				$metric = "\n{$metrics->SQLFunction}({$metrics->tableAlias}.{$metrics->field}) AS '{$metrics->alias}'";
+				$this->_metrics_advanced_datamart[] = "\n{$metrics->SQLFunction}(W_AP_metric_{$this->reportId}_{$i}.'{$metrics->alias}') AS '{$metrics->alias}'";
+				// verifico se sono presenti metriche composte e sostituisco questa metrica all'interno delle metriche composte
+				// echo "verifico compositeMetrics";
+				// dd(property_exists($this, 'compositeMetrics'));
+				if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics("W_AP_metric_{$this->reportId}_{$i}", $metrics);
+				$this->createMetricTable('W_AP_metric_'.$this->reportId."_".$i, $metric, $metrics->filters);
+				$this->_metricTable["W_AP_metric_".$this->reportId."_".$i] = $metrics->alias; // memorizzo qui quante tabelle per metriche filtrate sono state create
+			}			
 			$i++;
 		}
 	}
