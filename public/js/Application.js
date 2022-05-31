@@ -214,17 +214,22 @@ class Application {
 
 	handlerConsole(message, icon, time) {
 	    // console.log(message+icon);
-	    if (!time) time = 2000; // se time non è impostato lo imposto su 2secondi
+	    // if (!time) time = 2000; // se time non è impostato il message viene visualizzato alla chiamata di closeConsole()
 	    // type = info, warning, error, done
 	    document.querySelector('#console p').innerText = message;
 	    document.querySelector('#console i').setAttribute('data-icon', icon);
 	    document.querySelector('#console i').innerText = icon;
 	    document.getElementById("console").toggleAttribute('open');
+	    if (time) {
+	    	setTimeout(function() {
+		    	// chiudo la console dopo "time" secondi
+		    	document.getElementById("console").toggleAttribute('open');
+		    }, time);
+	    }
+  }
 
-	    setTimeout(function() {
-	    	// chiudo la console dopo "time" secondi
-	    	document.getElementById("console").toggleAttribute('open');
-	    }, time);
+  closeConsole() {
+  	document.getElementById('console').toggleAttribute('open');
   }
 
 } // end Class

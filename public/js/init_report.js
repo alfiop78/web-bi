@@ -650,7 +650,7 @@ var StorageMetric = new MetricStorage();
 		console.dir(jsonDataParsed.report);
 		// invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
 		const params = JSON.stringify(jsonDataParsed.report);
-		App.handlerConsole('Process in corso', 'info'); // TODO: da far visualizzare fino a quando non termina il processo
+		App.handlerConsole('Process in corso...', 'info');
 		// chiudo la lista dei report da eseguire
 		const listReportProcess = document.getElementById('reportProcessList');
 		listReportProcess.toggleAttribute('hidden');
@@ -667,13 +667,16 @@ var StorageMetric = new MetricStorage();
 		.then((data) => {
 			// console.log(data);
 			if (data) {
-				console.info('FX creata con successo !');
+				// console.info('FX creata con successo !');
+				App.closeConsole();
+				App.handlerConsole('Datamart creato con successo!', 'done', 5000);
 				console.log('data : ', data);
 				// NOTE: qui ho creato la FX, a questo punto potrei scegliere di visualizzare il report, per il momento mi serve solo la FX.
 				// app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
 			} else {
 				// TODO: no data
 				console.debug('FX non è stata creata');
+				App.handlerConsole('Errori nella creazione del datamart', 'error', 5000);
 			}
 		})
 		.catch((err) => console.error(err));
@@ -1984,7 +1987,8 @@ var StorageMetric = new MetricStorage();
 					const smallTable = spanHContent.querySelector('small[table]');
 					const smallCube = spanHContent.querySelector('small[cube]');
 					section.hidden = false;
-					section.dataset.elementSearch = 'search-exist-metrics';
+					section.dataset.elementSearch = 'search-metrics';
+					section.dataset.searchable = true;
 					section.dataset.label = metric.name;
 					section.dataset.cubeToken = metric.cubeToken;
 					// metriche composte di base e composte non hanno le prop table, tableAlias
