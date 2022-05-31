@@ -344,6 +344,13 @@ class FilterStorage extends Storages {
 }
 
 class MetricStorage extends Storages {
+	/* NOTE: metric_type
+		0 : metriche di base legate al cubo
+		1 : metrica composta legata al cubo (es.: prezzo * quantita)
+		2 : metrica filtrata
+		3 : metrica composta legata al cubo filtrata
+		4 : metrica composta
+	*/
 	#metricsObject = {};
 	#metric;
 	constructor() {
@@ -382,7 +389,7 @@ class MetricStorage extends Storages {
 	get compositeMetrics() {
 		this.localMetrics = new Set();
 		for (const [key, value] of Object.entries(this.metrics) ) {
-			if (value.metric_type === 3) this.localMetrics.add(value);
+			if (value.metric_type === 4) this.localMetrics.add(value);
 		}
 		return this.localMetrics;
 	}

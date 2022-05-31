@@ -290,6 +290,7 @@ class Queries {
 			this.#token = rand().substr(0, 21);
 			this.#processId = Date.now();
 		}
+		this.#reportProcess.type = 'PROCESS';
 		this.#reportProcess.token = this.#token;
 		this.reportElements.processId = this.#processId; // questo creerà il datamart FX[processId]
 		this.#reportProcess.name = name;
@@ -319,8 +320,6 @@ class Queries {
 			this.reportElements.filteredMetrics = Object.fromEntries(this.filteredMetrics);
 		}
 		
-		// this.#reportProcess['name'] = name;
-		this.#reportProcess.type = 'PROCESS';
 		this.editElements = Object.fromEntries(this.elementReport);
 		this.#reportProcess.report = this.reportElements;
 		this.#reportProcess.edit = this.editElements;

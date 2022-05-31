@@ -1248,10 +1248,15 @@ var StorageMetric = new MetricStorage();
 	// selezione di una metrica mappata, disponibile per la creazione
 	app.handlerMetricAvailable = (e) => {
 		const ul = document.getElementById('ul-available-metrics');
+		const inputMetricName = document.getElementById('metric-name');
+		const inputMetricAlias = document.getElementById('alias-metric');
 		// elimino tutte le selezioni precedenti
 		if (ul.querySelector('.selectable[selected]')) ul.querySelector('.selectable[selected]').toggleAttribute('selected');
 		e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('selected')) {
+			inputMetricName.value = '';
+			inputMetricAlias.value = '';
+			inputMetricName.focus();
 			StorageCube.selected = e.currentTarget.dataset.cubeToken;
 			// se la metrica selezionata è metric_type: 1 si tratta di una metrica composta, legata al cubo (es.: prezzo * quantità)
 			if (StorageCube.selected.metrics[e.currentTarget.dataset.label].metric_type === 1) {
@@ -1549,7 +1554,7 @@ var StorageMetric = new MetricStorage();
 		// salvo la nuova metrica nello storage
 		StorageMetric.saveTemp(metricObj);
 		// salvo nel DB
-		app.saveMetricDB(metricObj);
+		// app.saveMetricDB(metricObj);
 		// Imposto la metrica appena create come "selezionata" in modo da andare a creare il nuovo elemento nella #ul-exist-metrics
 		StorageMetric.selected = token;
 		// TODO: spostare in una funzione il codice per aggiungere la nuova metrica all'elenco di quelle esistenti (da fare anche per i filtri creati/esistenti)
@@ -1678,7 +1683,7 @@ var StorageMetric = new MetricStorage();
 		console.log(metricObj);
 		StorageMetric.saveTemp(metricObj);
 		// salvo nel DB
-		app.saveMetricDB(metricObj);
+		// app.saveMetricDB(metricObj);
 		// aggiungo la metrica alla <ul>
 		// reimposto, come metrica selezionata, la metrica appena creata e da aggiungere a #ul-exist-composite-metrics
 		StorageMetric.selected = token;
@@ -2043,11 +2048,11 @@ var StorageMetric = new MetricStorage();
 			// TODO: visualizzare un alert che avvisa della sovrascrittura del report
 			Query.save(name);
 			// salvataggio nel database tabella : bi_processes
-			app.updateProcess();
+			// app.updateProcess();
 		} else {
 			// nuovo report
 			Query.save(name);
-			app.saveProcess();
+			// app.saveProcess();
 		}		
 		// TODO: aggiungo alla lista #ul-processes
 		app.dialogSaveReport.close();
@@ -2063,7 +2068,8 @@ var StorageMetric = new MetricStorage();
 		console.log('cubi selezionati : ', Query.elementCube);
 		for ( const [token, cube] of Query.elementCube) {
 			console.log('cube : ', cube);
-			// debugger;
+			// imposto il cubo in ciclo in modo da poter recuperare le sue proprietà ed inserirle nella <ul> dei filtri
+			StorageCube.selected = token;
 			StorageFilter.getFiltersByCube(token).forEach( filter => {
 				// console.log('filter : ', filter);
 				const content = app.tmplList.content.cloneNode(true);
@@ -2077,14 +2083,14 @@ var StorageMetric = new MetricStorage();
 				section.dataset.elementSearch = 'search-exist-filters';
 				section.dataset.label = filter.name;
 				section.dataset.cubeToken = token;
-				selectable.dataset.tableName = cube.FACT;
-				selectable.dataset.tableAlias = cube.tableAlias;
+				selectable.dataset.tableName = StorageCube.selected.FACT;
+				selectable.dataset.tableAlias = StorageCube.selected.tableAlias;
 				selectable.dataset.cubeToken = token;
 				selectable.dataset.filterToken = filter.token;
 				selectable.onclick = app.handlerMetricFilterSelected;
 				span.innerText = filter.name;
-				smallTable.innerText = cube.FACT;
-				smallCube.innerText = cube.name;
+				smallTable.innerText = StorageCube.selected.FACT;
+				smallCube.innerText = StorageCube.selected.name;
 				ul.appendChild(section);
 			});	
 		}
