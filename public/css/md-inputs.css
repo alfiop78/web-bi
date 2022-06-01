@@ -312,17 +312,22 @@ grid-template-rows: auto;grid-row-gap: 4px; align-items: center;/*justify-conten
 
 .datalist{overflow-y: scroll;margin-top: 8px;}
 
-.helper{margin: 0;height: 16px;/*padding: 0 8px;*/position: absolute;left: 16px;font-size: .7rem;
-  text-overflow: ellipsis;white-space: nowrap;width: inherit;overflow: auto;text-align: left;color: grey;}
+.helper{height: 16px;position: relative; margin: 4px 0px; padding: 0px 16px; font-size: .75rem;text-overflow: ellipsis; white-space: nowrap; width: 90%; max-width: 90%;overflow: hidden;text-align: left;}
 
-.helper.alert{animation: alertText 300ms ease-in-out;}
+.helper.error{animation: errorText 50ms ease-in-out; color: brown;}
+.helper.warning{animation: warningText 50ms ease-in-out;color: darkorange;}
 
 input:invalid ~ label.has-content ~ span{visibility: visible;}
 
-@keyframes alertText {
-  0% {font-size: .75rem;color: grey;}
-  50% {font-size: .85rem; color: brown; font-weight: normal;}
-  100% {font-size: .75rem;color: brown;}
+@keyframes errorText {
+  0% {font-size: .7rem;color: black;}
+  50% {font-size: .8rem; color: brown;}
+  100% {font-size: .7rem;}
+}
+@keyframes warningText {
+  0% {font-size: .7rem;color: black;}
+  50% {font-size: .8rem; color: darkorange;}
+  100% {font-size: .7rem;}
 }
 
 .selectList{max-height: 35vh;overflow-y: scroll;}

@@ -2,14 +2,12 @@
 La classe recupera il local storage ad ogni accesso alla pagina e contiene Metodi per recuperare ad esempio solo i CUBE o solo le DIMENSION, ecc...
 */
 class Storages {
-	// #dimensions = new Set();
 	#dimensionsMap = new Map();
 	#cubesMap = new Map();
 	#filtersMap = new Map();
 	#metricsMap = new Map();
 	#processesMap = new Map();
 	#cubes = new Set();
-	// #storage = {};
 	#metrics = new Set();
 	#filters = new Set();
 	#processes = new Set();
@@ -86,13 +84,7 @@ class Storages {
 		return this.#metricsMap;
 	}
 
-	set save(value) {
-		// salvo nello storage
-		window.localStorage.setItem(value.name, JSON.stringify(value));
-	}
-
-	// TODO: sostituirà save() qui sopra
-	saveTemp(value) {
+	save(value) {
 		// console.info('SAVE : ', value);
 		window.localStorage.setItem(value.token, JSON.stringify(value));	
 	}
@@ -153,6 +145,13 @@ class CubeStorage extends Storages {
 		return this.id;
 	}*/
 
+	// verifico se il nome inserito è presente nello storage
+	checkNames(name) {
+		for (const values of super.cubes.values()) {
+			if (values.name.toLowerCase() === name.toLowerCase()) return true;
+		}
+	}
+
 	set stringify(value) {this._stringify = value;}
 
 	get stringify() {return this._stringify;}
@@ -197,6 +196,13 @@ class ProcessStorage extends Storages {
 	set processId(value) {this.id = value;} // TODO: probabilmente non viene mai utilizzato, da ricontrollare
 
 	get processId() {return this.id;} // TODO: probabilmente non viene mai utilizzato, da ricontrollare
+
+	// verifico se il nome inserito è presente nello storage
+	checkNames(name) {
+		for (const values of super.processes.values()) {
+			if (values.name.toLowerCase() === name.toLowerCase()) return true;
+		}
+	}
 
 	// TODO: probabilmente non viene mai utilizzato, da ricontrollare
 	getIdAvailable() {
@@ -255,11 +261,25 @@ class DimensionStorage extends Storages {
 		super();
 	}
 
+	// verifico se il nome inserito è presente nello storage
+	checkNames(name) {
+		for (const values of super.dimensions.values()) {
+			if (values.name.toLowerCase() === name.toLowerCase()) return true;
+		}
+	}
+
 }
 
 class FilterStorage extends Storages {
 	constructor() {
 		super();
+	}
+
+	// verifico se il nome inserito è presente nello storage
+	checkNames(name) {
+		for (const values of super.filters.values()) {
+			if (values.name.toLowerCase() === name.toLowerCase()) return true;
+		}
 	}
 
 	get filters() {
@@ -316,6 +336,13 @@ class MetricStorage extends Storages {
 			this.#metricsObject[key] = value;
 		}
 		return this.#metricsObject;
+	}
+
+	// verifico se il nome inserito è presente nello storage
+	checkNames(name) {
+		for (const values of super.metrics.values()) {
+			if (values.name.toLowerCase() === name.toLowerCase()) return true;
+		}
 	}
 
 	// restituisco la lista delle metriche prendendole direttamente dallo stato attuale dello storage

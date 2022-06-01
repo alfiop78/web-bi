@@ -53,20 +53,19 @@
 						<div class="md-field">
 							<input type="text" id="columnAlias" name="columnAlias" autocomplete="off" />
 							<label for="columnAlias" class="">Alias</label>
+							<p class="helper"></p>
 						</div>
 
 						<div class="md-field">
 							<textarea id="columnSQL" name="columnSQL" rows="10" cols="50" placeholder="es.: CONCAT(tabella.campo,'-',tabella.campo)"></textarea>
 						</div>
-						<button id="btnSaveColumn" type="button" name="save" class="md-button" disabled>salva</button>
 					</section>
 
 				</div>
 
 				<div class="dialog-buttons">
 					<button type="button" name="cancel" class="md-button">annulla</button>
-					<!-- <button id="btnSaveColumn" type="button" name="save" class="md-button" disabled>salva</button> -->
-					<button id="btnColumnDone" type="button" name="done" class="md-button">fatto</button>
+					<button id="btnColumnDone" type="button" name="done" class="md-button" disabled>fatto</button>
 				</div>
 			</section>
 		</dialog>
@@ -75,8 +74,9 @@
 			<div class="dialog-save-name">
 
 				<div class="md-field">
-					<input type="text" id="reportName" value=""/>
+					<input type="text" id="reportName" value="" autocomplete="off"/>
 					<label for="reportName" class="">Titolo Report</label>
+					<p class="helper"></p>
 				</div>
 			</div>
 
@@ -131,8 +131,9 @@
 					<section class="sectionLists">
 						<h5>SQL</h5><h6>Inserisci una formula SQL</h6>
 						<div class="md-field">
-							<input type="text" id="inputFilterName" name="filterName" autocomplete="off" />
-							<label for="inputFilterName" class="">name</label>
+							<input type="text" id="filterName" name="filterName" autocomplete="off" />
+							<label for="filterName" class="">name</label>
+							<p class="helper"></p>
 						</div>
 						<i class="material-icons" id="search-field-values" data-field-name>search</i>
 						<div class="md-field">
@@ -187,7 +188,7 @@
 						<h5>Aggregazione</h5>{{-- <h6>Seleziona la funzione di aggregazione</h6> --}}
 						<div class="md-field">
 							<input type="search" id="search-aggregate-functions" data-element-search="search-aggregate-functions" value="" autocomplete="off" />
-							<label for="metric-name" class="">Ricerca</label>
+							<label for="search-aggregate-functions" class="">Ricerca</label>
 						</div>
 						<ul id="ul-aggregation-functions" class="dialog-overflow-list">
 							<section data-element-search="search-aggregate-functions" data-label="SUM" data-sublist-gen data-searchable>
@@ -258,6 +259,7 @@
 							<div class="md-field">
 								<input type="text" id="alias-metric" value="" autocomplete="off" />
 								<label for="alias-metrics" class="">Alias</label>
+								<p class="helper"></p>
 							</div>
 						</div>
 						<div class="md-field">
@@ -417,7 +419,7 @@
 										</div>
 										<i data-edit class="material-icons md-18" data-tooltip="Modifica Report" data-tooltip-position="bottom">edit</i>
 										<i data-copy class="material-icons md-18" data-tooltip="Duplica report" data-tooltip-position="bottom">content_copy</i>
-										<span class="h-separator"></span>
+										{{-- <span class="h-separator"></span> --}}
 										<i data-schedule class="material-icons md-18 md-highlight" data-tooltip="Esegui Report" data-tooltip-position="bottom">schedule_send</i>
 									</div>
 								</div>

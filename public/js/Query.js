@@ -214,12 +214,6 @@ class Queries {
 		if (this.#filteredMetrics.has(token)) this.#filteredMetrics.delete(token);
 	}
 
-	deleteFilteredMetric() {
-		debugger;
-		delete this._filteredMetrics[this._metricName];
-		console.log('_filteredMetrics : ', this._filteredMetrics);
-	}
-
 	set addCompositeMetric(value) {
 		if (!this.#compositeMetrics.has(value.token)) this.#compositeMetrics.set(value.token, value);
 		console.log('this.#compositeMetrics : ', this.#compositeMetrics);
@@ -279,6 +273,19 @@ class Queries {
 		this.#elementReport.set('filters', Object.fromEntries(this.elementFilter));
 		console.log('this.#elementReport : ', this.#elementReport);
 		return this.#elementReport;
+	}
+
+	checkColumnAlias(alias) {
+		for ( const values of this.select.values() ) {
+			return (values.alias.toLowerCase() === alias.toLowerCase()) ? true : false;
+		}
+	}
+
+	checkMetricAlias(alias) {
+		for ( const values of this.metrics.values() ) {
+			debugger;
+			return (values.alias.toLowerCase() === alias.toLowerCase()) ? true : false;
+		}
 	}
 
 	save(name) {

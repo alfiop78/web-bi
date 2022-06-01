@@ -1233,12 +1233,12 @@ var Hier = new Hierarchy();
 			// salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
 			cube.associatedDimensions = dimensionToken;
 			// salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
-			storage.saveTemp(dimensionObject[dimensionToken]);
+			storage.save(dimensionObject[dimensionToken]);
 		});
 		// TODO: l'aggiornamento del cubo non deve aggiornare anche la prop created_at ma solo updated_at
 		cube.save();
 		// salvo il cubo in localStorage
-		StorageCube.saveTemp(cube.cube);
+		StorageCube.save(cube.cube);
         debugger;
         // TODO: aggiornamento su database, da implementare
         // app.saveCube(cube.cube);
@@ -1434,14 +1434,14 @@ var Hier = new Hierarchy();
 			// salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
 			cube.associatedDimensions = dimensionToken;
 			// salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
-			storage.saveTemp(dimensionObject[dimensionToken]);
+			storage.save(dimensionObject[dimensionToken]);
 		});
 
 		cube.save();
 
 		// salvo il cubo in localStorage
 		debugger;
-		StorageCube.saveTemp(cube.cube);
+		StorageCube.save(cube.cube);
 		// salvo il cubo sul DB
         // app.saveCube(cube.cube);
 		app.dialogCubeName.close();
@@ -1460,7 +1460,7 @@ var Hier = new Hierarchy();
 		// cube.dimension
 		const storage = new DimensionStorage();		
 		Dim.save();
-		storage.saveTemp(Dim.dimension);
+		storage.save(Dim.dimension);
 		app.dialogDimensionName.close();	
 		// chiudo le card presenti
 		app.closeCards();
