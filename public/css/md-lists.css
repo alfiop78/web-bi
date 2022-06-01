@@ -52,3 +52,16 @@ section[data-sublist-composite-metrics]:hover i{visibility: visible;}
 	.absList > ul{height: 500px;overflow-y: auto;}
 	/*absolute list*/
 }
+
+/*test*/
+.data-item{position: relative;}
+.data-item:hover::before{
+	content: '';
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    border-radius: 50%;
+    background-color: indianred;
+    top: calc(50% - 8px);
+    left: -5px;
+}
