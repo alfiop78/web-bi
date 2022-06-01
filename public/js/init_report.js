@@ -466,9 +466,7 @@ var StorageMetric = new MetricStorage();
 				}
 			}
 		}
-	}
-
-	
+	}	
 
 	// popolamento delle tabelle nella dialogFilter
 	app.getTables = () => {
@@ -591,28 +589,11 @@ var StorageMetric = new MetricStorage();
 
 	// lista metriche composte
 	app.getCompositeMetrics = () => {
-		const ul = document.getElementById('ul-exist-composite-metrics');
 		// TODO: 2022-05-27 in futuro ci sarà da valutare metriche composte appartenenti a più cubi
 		StorageMetric.compositeMetrics.forEach( metric => {
-			const contentElement = app.tmplList.content.cloneNode(true);
-			const section = contentElement.querySelector('section[data-sublist-metrics]');
-			const spanHContent = section.querySelector('.h-content');
-			const selectable = spanHContent.querySelector('.selectable');
-			const span = spanHContent.querySelector('span[metric]');
-			// non esiste nessun cubo legato a una metrica composta, quindi la rendo subito visibile
-			section.hidden = false;
-			// const smallTable = spanHContent.querySelector('small[table]');
-			// const smallCube = spanHContent.querySelector('small[cube]');
-			section.dataset.elementSearch = 'search-exist-metrics';
-			section.dataset.label = metric.name; // ricerca
-			// section.dataset.cubeToken = cubeToken;
-			selectable.dataset.metricToken = metric.token;
-			// selectable.dataset.tableName = value.FACT;
-			// selectable.dataset.tableAlias = value.alias;
-			// selectable.dataset.cubeToken = cubeToken;
-			selectable.onclick = app.handlerMetricSelected;
-			span.innerText = metric.name;
-			ul.appendChild(section);
+			StorageMetric.selected = metric.token;
+			// aggiungo la metrica alla #ul-exist-composite-metrics
+			app.addCompositeMetric(); // questa function viene usata anche quando si crea una nuova metrica composta
 		});
 	}
 
@@ -1683,28 +1664,40 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// aggiungo la metrica appena creata alla <ul> (metrica composta)
-	app.addCompositeMetric = (ulId) => {
-		const ul = document.getElementById(ulId);
-		const content = app.tmplList.content.cloneNode(true);
-		const section = content.querySelector('section[data-sublist-metrics]');
-		const selectable = section.querySelector('.selectable');
-		const spanMetric = selectable.querySelector('span[metric]');
-		const smallTable = selectable.querySelector('small[table]');
-		const smallCube = selectable.querySelector('small[cube]');
-		section.removeAttribute('hidden');
-		section.toggleAttribute('data-searchable');
+	app.addCompositeMetric = () => {
+		const ul = document.getElementById('ul-exist-composite-metrics');
+		const contentElement = app.tmplList.content.cloneNode(true);
+		const section = contentElement.querySelector('section[data-sublist-composite-metrics]');
+		const spanHContent = section.querySelector('.h-content');
+		const selectable = spanHContent.querySelector('.selectable');
+		const spanMetric = spanHContent.querySelector('span[metric]');
+		// non esiste nessun cubo legato a una metrica composta, quindi la rendo subito visibile
+		section.hidden = false;
+		// const smallTable = spanHContent.querySelector('small[table]');
+		// const smallCube = spanHContent.querySelector('small[cube]');
 		section.dataset.elementSearch = 'search-exist-metrics';
-		section.dataset.label = StorageMetric.selected.name; // utile per la ricerca
-
+		section.dataset.label = StorageMetric.selected.name; // ricerca
+		// section.dataset.cubeToken = cubeToken;
 		selectable.dataset.metricToken = StorageMetric.selected.token;
-		// selectable.dataset.tableName = Query.table;
-		// selectable.dataset.tableAlias = Query.tableAlias;
-		// selectable.dataset.cubeName = StorageCube.selected.name;
-		
-		spanMetric.innerText = StorageMetric.selected.name;
-		// smallTable.innerText = Query.table;
-		// smallCube.innerText = StorageCube.selected.name;
+		// selectable.dataset.tableName = value.FACT;
+		// selectable.dataset.tableAlias = value.alias;
+		// selectable.dataset.cubeToken = cubeToken;
 		selectable.onclick = app.handlerMetricSelected;
+		spanMetric.innerText = StorageMetric.selected.name;
+		// per ogni cubo in StorageMetric.selected.metric_cubes
+		for ( const [cubeToken, cube] of Object.entries(StorageMetric.selected.metric_cubes)) {
+			// debugger;
+			const contentSub = app.tmplSublists.content.cloneNode(true);
+			const small = contentSub.querySelector('small');
+			small.dataset.cubeToken = cubeToken;
+			// small.dataset.metricToken = StorageMetric.selected.token;
+			// small.dataset.searchable = true;
+			// small.dataset.tableAlias = table.alias;
+			// small.dataset.tableId = tableId;
+			// small.dataset.elementSearch = 'search-hierarchy';
+			small.innerText = cube;
+			selectable.appendChild(small);
+		}
 		ul.appendChild(section);
 	}
 
@@ -1716,12 +1709,16 @@ var StorageMetric = new MetricStorage();
 		const rand = () => Math.random(0).toString(36).substr(2);
 		const token = rand().substr(0, 21);
 		let metricsAlias = {}; // contiene un'elenco di object con nome_metrica : alias che compongono la metrica composta
+		let metricCubes = new Map(); // contiene i cubi relativi alle metriche all'interno della metrica composta
 		document.querySelectorAll('#composite-metric-formula *').forEach( element => {
 			console.log('element : ', element);
 			// console.log('element : ', element.nodeName);
 			// se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
 			if (element.nodeName === 'MARK') {
 				StorageMetric.selected = element.dataset.metricToken;
+				// recupero il nome del cubo a cui appartiene la metrica. Questo lo visualizzerò nell'elenco delle metriche composte
+				StorageCube.selected = StorageMetric.selected.cubeToken;
+				metricCubes.set(StorageCube.selected.token, StorageCube.selected.name);
 				// metrics[element.innerText] = StorageMetric.selected.formula.alias;
 				// TODO: probabilmente qui meglio inserire tutto il contenuto della metrica e non solo l'alias
 				metricsAlias[element.innerText] = {token : element.dataset.metricToken, alias : StorageMetric.selected.formula.alias};
@@ -1732,7 +1729,7 @@ var StorageMetric = new MetricStorage();
 			}
 		});
 		arr_sql.push(`AS '${alias}'`);
-		const metricObj = { type: 'METRIC', token, name, metric_type : 4, formula: { token, formula_sql : arr_sql, alias, metrics_alias : metricsAlias } };
+		const metricObj = { type: 'METRIC', token, name, metric_type : 4, formula: { token, formula_sql : arr_sql, alias, metrics_alias : metricsAlias }, metric_cubes : Object.fromEntries(metricCubes) };
 		console.log(metricObj);
 		StorageMetric.save(metricObj);
 		// salvo nel DB
@@ -1740,7 +1737,7 @@ var StorageMetric = new MetricStorage();
 		// aggiungo la metrica alla <ul>
 		// reimposto, come metrica selezionata, la metrica appena creata e da aggiungere a #ul-exist-composite-metrics
 		StorageMetric.selected = token;
-		app.addCompositeMetric('ul-exist-composite-metrics');
+		app.addCompositeMetric();
 	}
 
 	// salvo il filtro nel DB, table : bi_filters
@@ -1995,21 +1992,20 @@ var StorageMetric = new MetricStorage();
 
 	// aggiungi metrica composta
 	app.btnAddCompositeMetrics.onclick = (e) => {
+		// console.log(Query.elementCube);
+		// TODO: questo controllo lo farò sul tasto next degli step
 		const cubeSelectedCount = document.querySelectorAll('#ul-cubes .selectable[data-selected]').length;
-		if (cubeSelectedCount === 0) {
+		if (Query.elementCube.size === 0) {
 			App.showConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
 			return;
 		} else {
-			// TODO: popola la #ul-metrics
-			// recupero i cubi selezionati
-			const selectedCubes = document.querySelectorAll('#ul-cubes .selectable[selected]');
 			// per ogni cubo selezionato ne recupero le metriche ad esso appartenenti
 			const ul = document.getElementById('ul-metrics');
-			selectedCubes.forEach( cube => {
+			Query.elementCube.forEach( cube => {
 				// ripulisco la lista, prima di popolarla
 				document.querySelectorAll('#ul-metrics > section').forEach( item => item.remove());
 				// recupero lista aggiornata delle metriche
-				StorageMetric.cubeMetrics = cube.dataset.cubeToken;
+				StorageMetric.cubeMetrics = cube.token;
 				for ( const [token, metric] of Object.entries(StorageMetric.cubeMetrics) ) {
 					const contentElement = app.tmplList.content.cloneNode(true);
 					const section = contentElement.querySelector('section[data-sublist-metrics]');
@@ -2034,9 +2030,10 @@ var StorageMetric = new MetricStorage();
 					selectable.dataset.metricToken = token;
 					selectable.onclick = app.handlerMetricSelectedComposite;
 					span.innerText = metric.name;
-					smallCube.innerText = cube.dataset.label;
+					smallCube.innerText = cube.name;
 					ul.appendChild(section);
 				}
+				// 2022-06-01 TODO: in questo elenco dovranno esserci anche le metriche composte da poter selezionare
 			});
 			app.dialogCompositeMetric.showModal();
 			document.getElementById('composite-metric-name').focus();
@@ -2254,10 +2251,10 @@ var StorageMetric = new MetricStorage();
 		(metricName.length !== 0 && aliasMetric.length !== 0) ? app.btnMetricSave.disabled = false : app.btnMetricSave.disabled = true;
 	}
 
-	app.checkDialogCompositeMetric = () => {
+	app.checkDialogCompositeMetric = (check) => {
 		const name = document.getElementById('composite-metric-name').value;
 		const alias = document.getElementById('composite-alias-metric').value;
-		(name.length !== 0 && alias.length !== 0) ? app.btnCompositeMetricSave.disabled = false : app.btnCompositeMetricSave.disabled = true;
+		app.btnCompositeMetricSave.disabled = ((name.length !== 0) && (alias.length !== 0) || !check) ? false : true;
 	}
 
 	document.getElementById('alias-metric').oninput = (e) => {
@@ -2278,7 +2275,19 @@ var StorageMetric = new MetricStorage();
 		app.checkDialogMetric();
 	}
 
-	document.getElementById('composite-metric-name').oninput = () => app.checkDialogCompositeMetric();
+	document.getElementById('composite-metric-name').oninput = (e) => {
+		const check = StorageMetric.checkNames(e.target.value);
+		if (check) {
+			// nome già presente nello storage
+			// console.log(e.target.querySelector(':scope'));
+			e.target.parentElement.querySelector('.helper').classList.add('error');
+			e.target.parentElement.querySelector('.helper').innerText = "Il nome inserito è già presente";
+		} else {
+			e.target.parentElement.querySelector('.helper').classList.remove('error');
+			e.target.parentElement.querySelector('.helper').innerText = "";
+		}
+		app.checkDialogCompositeMetric(check);
+	}
 	
 	document.getElementById('composite-alias-metric').oninput = () => app.checkDialogCompositeMetric();
 

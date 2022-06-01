@@ -301,6 +301,7 @@
 							<div class="md-field">
 								<input type="text" id="composite-metric-name" value="" autocomplete="off" />
 								<label for="composite-metric-name" class="">Nome</label>
+								<p class="helper"></p>
 							</div>
 
 							<div class="md-field">
@@ -399,11 +400,23 @@
 								<div>
 									<div class="h-content">
 										<div class="selectable v-content">
-											{{-- TODO: metriche composte potrei colorarle in modo diverso, cos' come le metriche filtrate --}}
 											<span metric class="highlight metrics-color"></span>
 											<small table></small>
 											<small cube></small>
-											{{-- TODO: qui, sulle metriche filtrate potrei visualizzare un popup con l'elenco dei filtri, oppure, per le metriche composte, visualizzarne, nel popup, la propria formula --}}
+											{{-- TODO: qui, sulle metriche filtrate potrei visualizzare un popup con l'elenco dei filtri. --}}
+										</div>
+										<i class="material-icons md-18">edit</i>
+									</div>
+								</div>
+							</section>
+
+							{{-- metriche composite --}}
+							<section class="data-item" data-element-search data-label data-sublist-composite-metrics hidden>
+								<div>
+									<div class="h-content">
+										<div class="selectable v-content">
+											<span metric class="highlight metrics-color"></span>
+											{{-- TODO: per le metriche composte, visualizzarne, nel popup, l'elenco dei cubi utilizzati dalle metriche all'interno della formula --}}
 										</div>
 										<i class="material-icons md-18">edit</i>
 									</div>

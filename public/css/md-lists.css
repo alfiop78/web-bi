@@ -33,6 +33,9 @@ section[data-sublist-filters]:hover i{visibility: visible;}
 section[data-sublist-metrics] i{visibility: hidden;}
 section[data-sublist-metrics]:hover i{visibility: visible;}
 
+section[data-sublist-composite-metrics] i{visibility: hidden;}
+section[data-sublist-composite-metrics]:hover i{visibility: visible;}
+
 /*dialog lists*/
 .dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}
 
