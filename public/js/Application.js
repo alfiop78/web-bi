@@ -4,6 +4,8 @@
 
 class Application {
 	#console = document.getElementById('console');
+	#messageConsole = document.querySelector('#console p');
+	#iconConsole = document.querySelector('#console i');
 	constructor() {}
 
 	init() {
@@ -208,28 +210,22 @@ class Application {
 		}
 	}
 
-	// handlerConsole() {
-	// 	this.#console.toggleAttribute('open');
-	// }
-
-	handlerConsole(message, icon, time) {
+	showConsole(message, icon, time) {
 	    // console.log(message+icon);
 	    // if (!time) time = 2000; // se time non è impostato il message viene visualizzato alla chiamata di closeConsole()
 	    // type = info, warning, error, done
-	    document.querySelector('#console p').innerText = message;
-	    document.querySelector('#console i').setAttribute('data-icon', icon);
-	    document.querySelector('#console i').innerText = icon;
-	    document.getElementById("console").toggleAttribute('open');
+	    this.#messageConsole.innerText = message;
+	    this.#iconConsole.setAttribute('data-icon', icon);
+	    this.#iconConsole.innerText = icon;
+	    if (!this.#console.hasAttribute('open')) this.#console.toggleAttribute('open');
 	    if (time) {
-	    	setTimeout(function() {
+	    	setTimeout(() => {
 		    	// chiudo la console dopo "time" secondi
-		    	document.getElementById("console").toggleAttribute('open');
+		    	this.#console.toggleAttribute('open');
 		    }, time);
 	    }
-  }
+	}
 
-  closeConsole() {
-  	document.getElementById('console').toggleAttribute('open');
-  }
+  closeConsole() {this.#console.toggleAttribute('open');}
 
 } // end Class

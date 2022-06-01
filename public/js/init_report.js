@@ -63,7 +63,7 @@ var StorageMetric = new MetricStorage();
 		tooltipTimeoutId : null
 	}
 
-	app.addProcess = (token, value) => {
+	app.addReport = (token, value) => {
 		const ul = document.getElementById('ul-processes');
 		const content = app.tmplList.content.cloneNode(true);
 		const section = content.querySelector('section[data-sublist-processes]');
@@ -82,14 +82,15 @@ var StorageMetric = new MetricStorage();
 		iSchedule.dataset.processToken = token;
 		iEdit.onclick = app.handlerReportEdit;
 		iCopy.onclick = app.handlerReportCopy;
-		iSchedule.onclick = app.handlerSelectedReport;
+		iSchedule.onclick = app.handlerReportSelected;
 		ul.appendChild(section);
 	}
 
 	// creo la lista degli elementi da processare
-	app.getProcesses = () => {
+	app.getReports = () => {
 		for (const [token, value] of StorageProcess.processes) {
-			app.addProcess(token, value);
+			// utilizzo addReport() perchè questa funzione viene chiamata anche quando si duplica il report o si crea un nuovo report e viene aggiunto all'elenco
+			app.addReport(token, value);
 		}
 	}
 
@@ -641,8 +642,8 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
-	// process report
- 	app.handlerSelectedReport = async (e) => {
+	// execute report
+ 	app.handlerReportSelected = async (e) => {
 		console.clear();
 		const processToken = e.currentTarget.dataset.processToken;
 		const reportId = +e.currentTarget.dataset.id;
@@ -650,36 +651,40 @@ var StorageMetric = new MetricStorage();
 		console.dir(jsonDataParsed.report);
 		// invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
 		const params = JSON.stringify(jsonDataParsed.report);
-		App.handlerConsole('Process in corso...', 'info');
+		App.showConsole('Process in corso...', 'info');
 		// chiudo la lista dei report da eseguire
 		const listReportProcess = document.getElementById('reportProcessList');
 		listReportProcess.toggleAttribute('hidden');
-		// lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveProcess()
+		// lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
 		const url = "/fetch_api/cube/process";
 		const init = {headers: {'Content-Type': 'application/json'}, method: 'POST', body: params};
 		const req = new Request(url, init);
 		await fetch(req)
-		.then((response) => {
-			if (!response.ok) { throw Error(response.statusText); }
-			return response;
-		})
-		.then((response) => response.json())
-		.then((data) => {
-			// console.log(data);
-			if (data) {
-				// console.info('FX creata con successo !');
-				App.closeConsole();
-				App.handlerConsole('Datamart creato con successo!', 'done', 5000);
-				console.log('data : ', data);
-				// NOTE: qui ho creato la FX, a questo punto potrei scegliere di visualizzare il report, per il momento mi serve solo la FX.
-				// app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
-			} else {
-				// TODO: no data
-				console.debug('FX non è stata creata');
-				App.handlerConsole('Errori nella creazione del datamart', 'error', 5000);
-			}
-		})
-		.catch((err) => console.error(err));
+			.then((response) => {
+				if (!response.ok) {
+					// console.log('response : ', response);
+					throw Error(response.statusText);
+				}
+				return response;
+			})
+			.then((response) => response.json())
+			.then((response) => {
+				if (response) {
+					App.closeConsole();
+					App.showConsole('Datamart creato con successo!', 'done', 5000);
+					console.log('data : ', response);
+					// NOTE: qui ho creato la FX, a questo punto potrei scegliere di visualizzare il report, per il momento mi serve solo la FX.
+					// app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
+				} else {
+					// TODO: no response
+					console.debug('FX non è stata creata');
+					App.showConsole('Errori nella creazione del datamart', 'error', 5000);
+				}
+			})
+			.catch((err) => {
+				App.showConsole(err, 'error');
+				console.error(err);
+			});
 	}
 
 	app.handlerReportEdit = (e) => {
@@ -896,7 +901,7 @@ var StorageMetric = new MetricStorage();
 		// salvo il process duplicato
 		StorageProcess.saveTemp(process);
 		// lo aggiungo alla #ul-processes
-		app.addProcess(process.token, process);
+		app.addReport(process.token, process);
 	}
 
 	// edit filter
@@ -1181,7 +1186,7 @@ var StorageMetric = new MetricStorage();
 		// verifico che almeno una gerarchia sia stata selezionata
 		const hierSelectedCount = document.querySelectorAll('#ul-hierarchies .selectable[selected]').length;
 		if (hierSelectedCount === 0) {
-			App.handlerConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
+			App.showConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
 			return;
 		} else {
 			e.currentTarget.toggleAttribute('selected');
@@ -1873,7 +1878,7 @@ var StorageMetric = new MetricStorage();
 
 	app.getAvailableMetrics();
 
-	app.getProcesses();
+	app.getReports();
 
 	// abilito il tasto btnFilterSave se il form per la creazione del filtro è corretto
 	app.checkFilterForm = () => {
@@ -1905,11 +1910,11 @@ var StorageMetric = new MetricStorage();
 			case 1:
 				// cubi e dimensioni
 				if (StorageCube.cubeSelected.size === 0) {
-					App.handlerConsole('Cubo non selezionato', 'warning');
+					App.showConsole('Cubo non selezionato', 'warning');
 					return false;
 				}
 				if (StorageDimension.dimensionDimensions.size === 0) {
-					App.handlerConsole('Dimensione non selezionata', 'warning');
+					App.showConsole('Dimensione non selezionata', 'warning');
 					return false;
 				}
 				break;
@@ -1917,7 +1922,7 @@ var StorageMetric = new MetricStorage();
 				// colonne/filtri
 				// deve essere selezionata almeno una colonna per proseguire
 				if (Object.keys(Query.select).length === 0) {
-					App.handlerConsole('Selezionare almeno un livello dimensionale', 'warning')
+					App.showConsole('Selezionare almeno un livello dimensionale', 'warning')
 					return false;
 				}
 				break;
@@ -1942,7 +1947,7 @@ var StorageMetric = new MetricStorage();
 		console.log('addFilters');
 		const hierSelectedCount = document.querySelectorAll('#ul-hierarchies .selectable[selected]').length;
 		if (hierSelectedCount === 0) {
-			App.handlerConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
+			App.showConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
 			return;
 		} else {
 			app.dialogFilter.showModal();
@@ -1954,7 +1959,7 @@ var StorageMetric = new MetricStorage();
 		// verifico se è stato selezionato almeno un cubo
 		const cubeSelectedCount = document.querySelectorAll('#ul-cubes .selectable[selected]').length;
 		if (cubeSelectedCount === 0) {
-			App.handlerConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
+			App.showConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
 			return;
 		} else {
 			app.dialogMetric.showModal();
@@ -1965,7 +1970,7 @@ var StorageMetric = new MetricStorage();
 	app.btnAddCompositeMetrics.onclick = (e) => {
 		const cubeSelectedCount = document.querySelectorAll('#ul-cubes .selectable[selected]').length;
 		if (cubeSelectedCount === 0) {
-			App.handlerConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
+			App.showConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
 			return;
 		} else {
 			// TODO: popola la #ul-metrics
@@ -2012,7 +2017,7 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// salvo il process nel DB
-	app.saveProcess = async () => {
+	app.saveReport = async () => {
 		console.log(JSON.stringify(Query.reportProcessStringify));
 		const params = JSON.stringify(Query.reportProcessStringify);
 		const url = "/fetch_api/json/process_store";
@@ -2039,7 +2044,7 @@ var StorageMetric = new MetricStorage();
 		  .catch((err) => console.error(err));
 	}
 
-	app.updateProcess = async () => {
+	app.updateReport = async () => {
 		console.log(JSON.stringify(Query.reportProcessStringify));
 		const params = JSON.stringify(Query.reportProcessStringify);
 		const url = "/fetch_api/json/process_update";
@@ -2068,7 +2073,7 @@ var StorageMetric = new MetricStorage();
 
 	app.btnSaveReport.onclick = (e) => app.dialogSaveReport.showModal();
 
-	// save process
+	// save report
 	app.btnSaveReportDone.onclick = () => {
 		// ottengo un processId per passarlo a costruttore
 		// const processId = Date.now();
@@ -2080,15 +2085,15 @@ var StorageMetric = new MetricStorage();
 			// TODO: visualizzare un alert che avvisa della sovrascrittura del report
 			Query.save(name);
 			// salvataggio nel database tabella : bi_processes
-			// app.updateProcess();
+			// app.updateReport();
 		} else {
 			// nuovo report
 			Query.save(name);
-			// app.saveProcess();
+			// app.saveReport();
 		}
 		// recupero da Query la proprietà this.#reportProcess appena creata e la aggiungo a #ul-processes	
 		// aggiungo alla lista #ul-processes
-		app.addProcess(Query.process.token, Query.process);
+		app.addReport(Query.process.token, Query.process);
 		app.dialogSaveReport.close();
 	}
 
