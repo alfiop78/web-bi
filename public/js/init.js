@@ -793,10 +793,14 @@ var Hier = new Hierarchy();
 		        	}
 		        } else {
 		          // TODO: no data
+		          debugger;
 		          console.warning('Non è stato possibile recuperare la lista delle tabelle');
 		        }
 		    })
-	    .catch( (err) => console.error(err));
+	    .catch( err => {
+	    	App.showConsole(err, 'error');
+	    	console.error(err);
+	    });
 	}
 
 	app.handlerAddJoin = (e) => {
@@ -822,7 +826,10 @@ var Hier = new Hierarchy();
 			})
 			.then( (response) => response.json())
 			.then( response => response)
-	    .catch( (err) => console.error(err));
+	    .catch( err => {
+	    	App.showConsole(err, 'error');
+	    	console.error(err);
+	    });
 	}
 
 	// WARNING: al momento non utilizzata, il salvataggio di una dimensione viene effettuato nel Versioning
@@ -848,7 +855,10 @@ var Hier = new Hierarchy();
               console.debug('dimensione non è stata salvata');
             }
           })
-          .catch((err) => console.error(err));
+          .catch(err => {
+	    	App.showConsole(err, 'error');
+	    	console.error(err);
+	    });
     }
 
 	// viene invocata da btnDimensionSaveName.onclick, quando viene salvata una dimensione, vengono chiuse tutte le card aperte attualmente
@@ -1189,7 +1199,10 @@ var Hier = new Hierarchy();
               console.debug('ERRORE NEL SALVATAGGIO DEL CUBO SU BD');
             }
           })
-          .catch((err) => console.error(err));
+          .catch(err => {
+	    	App.showConsole(err, 'error');
+	    	console.error(err);
+	    });
     }
 
 	// update cube

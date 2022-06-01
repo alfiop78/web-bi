@@ -661,10 +661,8 @@ var StorageMetric = new MetricStorage();
 		const req = new Request(url, init);
 		await fetch(req)
 			.then((response) => {
-				if (!response.ok) {
-					// console.log('response : ', response);
-					throw Error(response.statusText);
-				}
+				// TODO: Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
+				if (!response.ok) {throw Error(response.statusText);}
 				return response;
 			})
 			.then((response) => response.json())
@@ -672,16 +670,17 @@ var StorageMetric = new MetricStorage();
 				if (response) {
 					App.closeConsole();
 					App.showConsole('Datamart creato con successo!', 'done', 5000);
-					console.log('data : ', response);
+					// console.log('data : ', response);
 					// NOTE: qui ho creato la FX, a questo punto potrei scegliere di visualizzare il report, per il momento mi serve solo la FX.
 					// app.getDatamart(reportId, jsonDataParsed); // recupero i dati dalla FX appena creata
 				} else {
-					// TODO: no response
+					// TODO: Da testare se il codice arriva qui o viene gestito sempre dal catch()
 					console.debug('FX non è stata creata');
+					debugger;
 					App.showConsole('Errori nella creazione del datamart', 'error', 5000);
 				}
 			})
-			.catch((err) => {
+			.catch( err => {
 				App.showConsole(err, 'error');
 				console.error(err);
 			});
@@ -1435,10 +1434,14 @@ var StorageMetric = new MetricStorage();
 					}
 				} else {
 					// TODO: no data
+					debugger;
 					console.debug('Dati non recuperati');
 				}
 			})
-			.catch((err) => console.error(err));
+			.catch( err => {
+				App.showConsole(err, 'error');
+				console.error(err);
+			});
 	}
 
 	app.checkRelations = (hier) => {
@@ -1486,7 +1489,10 @@ var StorageMetric = new MetricStorage();
 			  console.debug('ERRORE NEL SALVATAGGIO DELLA METRICA SU DB');
 			}
 		  })
-		  .catch((err) => console.error(err));
+		  .catch( err => {
+		  	App.showConsole(err, 'error');
+		  	console.error(err);
+		  });
 	}
 
 	app.btnMetricDone.onclick = () => app.dialogMetric.close();
@@ -1750,7 +1756,10 @@ var StorageMetric = new MetricStorage();
 			  console.debug('ERRORE NEL SALVATAGGIO DEL FILTRO SU DB');
 			}
 		  })
-		  .catch((err) => console.error(err));
+		  .catch( err => {
+		  	App.showConsole(err, 'error');
+		  	console.error(err);
+		  });
 	}
 
 	// save filter
@@ -1844,7 +1853,10 @@ var StorageMetric = new MetricStorage();
 					console.warning('Dati non recuperati');
 				}
 			})
-		.catch((err) => console.error(err));
+		.catch( err => {
+			App.showConsole(err, 'error');
+			console.error(err);
+		});
 	}
 
 	// selezione di uno o più valori dalla lista dei valori della colonna in dialogFilter
@@ -2041,7 +2053,10 @@ var StorageMetric = new MetricStorage();
 			  console.debug('PROCESS non salvato nel DB');
 			}
 		  })
-		  .catch((err) => console.error(err));
+		  .catch( err => {
+		  	App.showConsole(err, 'error');
+		  	console.error(err);
+		  });
 	}
 
 	app.updateReport = async () => {
@@ -2068,7 +2083,10 @@ var StorageMetric = new MetricStorage();
 			  console.debug('PROCESS non salvato nel DB');
 			}
 		  })
-		  .catch((err) => console.error(err));
+		  .catch( err => {
+		  	App.showConsole(err, 'error');
+		  	console.error(err);
+		  });
 	}
 
 	app.btnSaveReport.onclick = (e) => app.dialogSaveReport.showModal();
