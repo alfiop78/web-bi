@@ -417,6 +417,9 @@
 										<div class="selectable v-content">
 											<span metric class="highlight metrics-color"></span>
 											{{-- TODO: per le metriche composte, visualizzarne, nel popup, l'elenco dei cubi utilizzati dalle metriche all'interno della formula --}}
+											<div class="smalls">
+												
+											</div>
 										</div>
 										<i class="material-icons md-18">edit</i>
 									</div>

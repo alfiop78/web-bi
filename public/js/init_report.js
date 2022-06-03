@@ -1670,6 +1670,7 @@ var StorageMetric = new MetricStorage();
 		const section = contentElement.querySelector('section[data-sublist-composite-metrics]');
 		const spanHContent = section.querySelector('.h-content');
 		const selectable = spanHContent.querySelector('.selectable');
+		const smalls = selectable.querySelector('.smalls');
 		const spanMetric = spanHContent.querySelector('span[metric]');
 		// non esiste nessun cubo legato a una metrica composta, quindi la rendo subito visibile
 		section.hidden = false;
@@ -1696,7 +1697,8 @@ var StorageMetric = new MetricStorage();
 			// small.dataset.tableId = tableId;
 			// small.dataset.elementSearch = 'search-hierarchy';
 			small.innerText = cube;
-			selectable.appendChild(small);
+			small.dataset.attr = cube+'test';
+			smalls.appendChild(small);
 		}
 		ul.appendChild(section);
 	}
