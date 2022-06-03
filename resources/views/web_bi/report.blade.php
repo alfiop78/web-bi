@@ -385,7 +385,7 @@
 							<section class="data-item" data-element-search data-label data-sublist-filters hidden>
 								<div>
 									<div class="h-content">
-										<div class="selectable v-content">
+										<div class="selectable v-content filters-color">
 											<span filter class="highlight filters-color"></span>
 											<small table></small>
 											<small></small>
@@ -399,7 +399,7 @@
 							<section class="data-item" data-element-search data-label data-sublist-metrics hidden>
 								<div>
 									<div class="h-content">
-										<div class="selectable v-content">
+										<div class="selectable v-content metrics-color">
 											<span metric class="highlight metrics-color"></span>
 											<small table></small>
 											<small cube></small>

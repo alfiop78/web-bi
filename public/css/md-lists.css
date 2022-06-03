@@ -1,16 +1,19 @@
+:root{
+  --main-filters-color: olive;
+  --main-metrics-color: darkgoldenrod;
+}
+
 ul{margin-inline: 0px;padding-inline: 0px;}
 .list{color: #494949;}
 .h-content{display: flex; align-items: center;}
 section[data-sublist-gen] .v-content{margin: 4px 2px;}
 .v-content{display: flex;flex-flow: column;width: 100%;}
 span.highlight{color: sienna;}
-span.highlight.filters-color{color: olive;}
-span.highlight.metrics-color{color: darkgoldenrod;}
+.filters-color span.highlight{color: var(--main-filters-color);}
+.metrics-color span.highlight{color: var(--main-metrics-color);}
 .no-highlight{color: dimgray}
-.selectable{border-left: solid 0px sienna; transition: border-left 100ms; margin: 4px; padding: 2px 4px;}
+.selectable{margin: 4px; padding: 2px 4px;}
 .unselectable{margin: 4px; padding: 2px 4px;}
-.selectable:hover{cursor: pointer; border-left: solid 4px darkorange; transition: border-left 100ms;}
-.selectable[data-selected]{cursor: pointer; border-left: solid thick sienna; transition: border-left 100ms;}
 
 /* modifico il colore del bordo degli elementi selezionati quando sono impostate le 'mode' sulla card */
 .cardTable[mode='columns'] ul > section[data-sublist-fields] > .selectable:hover{border-left: solid 4px #9a6a6a;}
@@ -53,15 +56,18 @@ section[data-sublist-composite-metrics]:hover i{visibility: visible;}
 	/*absolute list*/
 }
 
-/*test*/
+/*hover selected elements*/
 .data-item{position: relative;}
-.data-item:hover::before{
-	content: '';
-    width: 16px;
-    height: 16px;
-    position: absolute;
-    border-radius: 50%;
-    background-color: indianred;
-    top: calc(50% - 8px);
-    left: -5px;
+.selectable{transition: padding-left 150ms; padding-left: 4px;}
+.selectable:hover{cursor: pointer;transition: padding-left 200ms; padding-left: 8px;}
+.selectable::before{background-color : sienna;}
+.selectable:hover::before{content: '';width: 8px;height: 20px;position: absolute;border-radius: 3px;opacity: .7;top: calc(50% - 8px);left: -4px;animation: hoverSelected 200ms ease;}
+.selectable[data-selected]::before{content: '';width: 8px;height: 20px;position: absolute;border-radius: 3px;opacity: 1;top: calc(50% - 8px);left: -4px;animation: hoverSelected 200ms ease;}
+.selectable.filters-color::before{background-color : var(--main-filters-color);}
+.selectable.metrics-color::before{background-color : var(--main-metrics-color);}
+
+@keyframes hoverSelected {
+  0% {transform: scale(.2);}
+  75% {transform: scale(1.10);}
+  100% {transform: scale(1);}
 }
