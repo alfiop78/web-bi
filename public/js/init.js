@@ -32,7 +32,7 @@ var Hier = new Hierarchy();
 		// actions button
 		btnSaveDimension : document.getElementById('saveDimension'),
 		btnHierarchySaveName : document.getElementById('btnHierarchySaveName'),
-		btnHierarchyNew : document.getElementById('hierarchyNew'),
+		btnNewHierarchy : document.getElementById('btnNewHierarchy'),
 		btnSaveCube : document.getElementById('saveCube'),
 		btnSaveCubeName : document.getElementById('btnCubeSaveName'),
 		btnSaveOpenedCube : document.getElementById('saveOpenedCube'),
@@ -48,6 +48,8 @@ var Hier = new Hierarchy();
 		// inputs / textarea
 		txtareaColumnId : document.getElementById('textarea-column-id-formula'),
 		txtareaColumnDs : document.getElementById('textarea-column-ds-formula'),
+
+		btnSaveHierarchy : document.getElementById('btnSaveHierarchy'),
 
 		// tasto openTableList
 		btnTableList : document.getElementById('openTableList'),
@@ -282,8 +284,7 @@ var Hier = new Hierarchy();
 		// imposto la input search, con questo attributo, l'evento input viene gestito in Application.js
 		card.querySelector('input').dataset.elementSearch = card.dataset.label;	
 		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.dataset.schema, 'tableName': card.dataset.label};
-		// creazione della struttura gerarchica sulla destra
-		app.hierStruct(card);
+		// app.hierStruct(card);
 
 		// event sui tasti section[options]
 		// TODO: da gestire con document.addEventListener
@@ -577,7 +578,7 @@ var Hier = new Hierarchy();
 					// visualizzo le icone di "join" nelle due colonne
 					Hier.showRelationIcons(colSelected);
 					// esiste una relazione, visualizzo il div hierarchiesContainer
-					app.hierarchyContainer.removeAttribute('hidden');
+					// app.hierarchyContainer.removeAttribute('hidden');
 				}
 			}
 		});
@@ -1151,7 +1152,7 @@ var Hier = new Hierarchy();
 	}
 
 	// open dialog salva gerarchia
-	app.btnSaveHierarchy = (e) => {
+	app.btnSaveHierarchy.onclick = (e) => {
 		if (e.target.classList.contains('md-inactive')) return;
 		// salvo la gerarchia che andrà inserita in dimension
 		app.dialogHierarchyName.showModal();
@@ -1290,8 +1291,8 @@ var Hier = new Hierarchy();
 		// imposto il token sulla colonna selezionata, mi servirà in fase di deselezione della colonna
 		Hier.fieldRef.dataset.tokenColumn = token;
 		app.dialogColumnMap.close();
-		const btnSaveHierarchy = document.querySelector("#box-hierarchy section[data-id='hierarchies'][data-active] button[data-id='hierarchySave']");
-		btnSaveHierarchy.disabled = (Object.keys(Hier.columns_).length !== 0) ? false : true;
+		// const btnSaveHierarchy = document.querySelector("#box-hierarchy section[data-id='hierarchies'][data-active] button[data-id='hierarchySave']");
+		(Object.keys(Hier.columns_).length !== 0) ? app.btnSaveHierarchy.classList.remove('md-inactive') : app.btnSaveHierarchy.classList.add('md-inactive');
 	}
 
 	// tasto report nella sezione controls -> fabs
@@ -1317,6 +1318,7 @@ var Hier = new Hierarchy();
 
 	// save hierarchy
 	app.btnHierarchySaveName.onclick = () => {
+		debugger;
 		const hierTitle = document.getElementById('hierarchyName').value;
 		// ordine gerarchico (per stabilire quale tabella è da associare al cubo) questo dato viene preso dal valore presente in .hierarchy-order
 		let hierarchyOrder = {}, hierarchyOrderTables = {};
@@ -1338,24 +1340,32 @@ var Hier = new Hierarchy();
 		}
 		const comment = document.getElementById('textarea-hierarchies-comment').value;
 		const rand = () => Math.random(0).toString(36).substr(2);
-		const token = rand().substr(0, 7);
-		
+		const token = rand().substr(0, 7);		
 		Hier.hier = {token, name : hierTitle, hierarchyOrder, comment, from};
 		// la gerarchia creata la salvo nell'oggetto Dim, della classe Dimension, dove andrò a salvare, alla fine, tutta la dimensione
 		Dim.hier = Hier.hier;
 		Dim.lastTableHierarchy = lastTables;
 		// dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
 		app.dialogHierarchyName.close();
-		// abilito il tasto btnHierarchyNew
-		app.btnHierarchyNew.disabled = false;
+		// abilito il tasto btnNewHierarchy
+		app.btnNewHierarchy.classList.remove('md-inactive');
+		// TODO: imposto, nel div #hierarchies la gerarchia appena creata
+		const divHierarchies = document.querySelector('#hierarchies > .hierarchies');
+		const tmpl = document.getElementById('tmpl-hierarchies');
+		const content = tmpl.content.cloneNode(true);
+		const section = content.querySelector('section');
+		const h6 = section.querySelector('h6');
+		h6.innerText = hierTitle;
+		divHierarchies.appendChild(section);
 		// abilito il tasto 'saveDimension'
 		app.btnSaveDimension.disabled = false;
 	}
 
-	app.btnHierarchyNew.onclick = (e) => {
+	app.btnNewHierarchy.onclick = (e) => {
 		/* se è presente più di una tabella, nella gerarchia, l'ultima non la elimino.
 		* Questo perchè, l'ultima tabella, sarà messa in relazione anche con le altre gerarchie che verranno create
 		*/
+		debugger;
 		console.log('numero tabelle presenti nella gerarchia : ', app.dropZone.querySelectorAll('.cardTable').length);
 		const cards = app.dropZone.querySelectorAll('.card.table');
 		const tableCount = cards.length;

@@ -557,34 +557,31 @@
                             {{-- div 1 --}}
                             <div id="drop">
                                 <div id="drop-zone" class="dropzone"><span>Trascina qui le tabelle da mappare</span></div>
+                                <div id="hierarchies">
+                                    <section class="hierarchies"></section>
+                                    <button id="saveDimension" type="button" name="" class="md-button" disabled>salva dimensione</button>
+                                </div>
+                                <div id="drop-zone-buttons">
+                                    <i id="btnNewHierarchy" class="material-icons md-inactive" data-tooltip="Nuova gerarchia" data-tooltip-position="right">add</i>
+                                    <i id="btnSaveHierarchy" class="material-icons md-inactive" data-tooltip="Salva gerarchia" data-tooltip-position="right">save</i>
+                                </div>
                             </div>
                             <template id="tmpl-hierarchies">
-                                {{-- TODO: da rinominare l'attr in data-hier-active --}}
-                                <section data-id="hierarchies" data-hier-id="0" class="section-content" data-active>
+                                <section data-id="hierarchies" data-hier-token="0" class="section-content">
                                     <h6></h6>
-
-                                    <div data-hier-id></div>
-                                    <div data-hier-last-table></div>
-
-                                    <section class="hierButtons">
-                                        <button data-id="hierarchyDelete" type="button" name="" class="md-button" disabled>elimina</button>
-                                        <button data-id="hierarchySave" type="button" name="" class="md-button" disabled>salva</button>
-                                    </section>
                                 </section>
                             </template>
                             
                             {{-- div 2 --}}
-                            <div id="box-hierarchy">
+                            {{-- <div id="box-hierarchy">
                                 <div id="hierarchiesContainer">
                                     
                                 </div>
-                                {{-- <button id="hierarchyDelete" type="button" name="" class="md-button" disabled>elimina</button>
-                                <button id="hierarchySave" type="button" name="" class="md-button" disabled>salva</button> --}}
                                 <div class="bottom-position">
                                     <button id="hierarchyNew" type="button" name="" class="md-button" disabled>nuova</button>
                                     <button id="saveDimension" type="button" name="" class="md-button" disabled>salva dimensione</button>
                                 </div>
-                            </div>
+                            </div> --}}
                         </section>
 
                     </div>
