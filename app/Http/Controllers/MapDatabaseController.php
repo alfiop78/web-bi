@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\MapDatabase;
 use App\Models\BIdimension;
+use App\Models\BIprocess;
 use Illuminate\Support\Facades\DB;
 use App\Classes\Cube;
 
@@ -102,12 +103,6 @@ class MapDatabaseController extends Controller
         return response()->json($tables);
     }
 
-    // test
-    public function post($test) {
-        /* dd(request()->all()); */
-        dd($test);
-    }
-
     // processo la FX
     public function process(Request $request) {
         // echo gettype($cube);
@@ -119,7 +114,6 @@ class MapDatabaseController extends Controller
         $q->reportId = $cube->{'processId'};
         $q->baseTable = "W_AP_base_$q->reportId";
         $q->datamartName = "decisyon_cache.FX_$q->reportId";
-        // $q->reportName = $cube->{'name'}; // il nome del report non deve avere caratteri non consentiti per la creazione di tabelle (per ora non c'è un controllo sul nome inserito, da javascript)
         $q->baseColumns = $cube->{'select'};
         // imposto le colonne da includere nel datamart finale
         $q->fields();
@@ -158,6 +152,57 @@ class MapDatabaseController extends Controller
             // restituisco un ANTEPRIMA del json con i dati del datamart appena creato
             $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM $datamartName LIMIT 5000;");
             return response()->json($datamartResult);
+        }
+    }
+
+    // curl
+    public function curlprocess($json) {
+        $json_decoded = json_decode($json); // object
+        $json_value = json_decode($json_decoded->{'json_value'});
+        $cube = $json_value->{'report'};
+        $reportName = $json_value->{'name'};
+
+        $q = new Cube();
+        // imposto le proprietà con i magic methods
+        $q->reportId = $cube->{'processId'};
+        $q->baseTable = "W_AP_base_$q->reportId";
+        $q->datamartName = "decisyon_cache.FX_$q->reportId";
+        $q->baseColumns = $cube->{'select'};
+        // imposto le colonne da includere nel datamart finale
+        $q->fields();
+        // imposto il magic method con le metriche composte
+        if (property_exists($cube, 'compositeMetrics')) $q->compositeMetrics = $cube->{'compositeMetrics'};
+        // verifico se sono presenti metriche di base
+        if (property_exists($cube, 'metrics')) {
+            $q->baseMetrics = $cube->{'metrics'};
+            $q->metrics();
+        }
+        
+        // creo le clausole per SQL
+        $q->select($cube->{'select'});
+        $q->from($cube->{'from'});
+        $q->where($cube->{'where'});
+        $q->joinFact($cube->{'factJoin'});
+        $q->filters($cube->{'filters'});
+        // TODO: siccome il group by viene creato uguale alla clausola SELECT potrei unirli e non fare qui 2 chiamate
+        $q->groupBy($cube->{'select'});
+        /* dd($q); */
+        // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
+        $baseTable = $q->baseTable();
+        // dd($baseTable);
+        if (!$baseTable) {
+            // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
+            // creo una tabella temporanea per ogni metrica filtrata
+            // TODO: 2022-05-06 qui occorre una verifica più approfondita sui filtri contenuti nella metrica, allo stato attuale faccio una query per ogni metrica filtrata, anche se i filtri all'interno della metrica sono uguali. Includere più metriche che contengono gli stessi filtri in un unica query
+            if (property_exists($cube, 'filteredMetrics')) {
+                $q->filteredMetrics = $cube->{'filteredMetrics'};
+                $metricTable = $q->createMetricDatamarts();
+            }
+            // echo 'elaborazione createDatamart';
+            // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
+            $datamartName = $q->createDatamart();
+            // var_dump($datamartName);
+            if ($datamartName) return "Datamart ({$datamartName}) per il report {$reportName} creato con successo!\n";
         }
     }
 

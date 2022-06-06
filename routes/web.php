@@ -13,7 +13,8 @@ use App\Http\Controllers\BIcubeController;
 use App\Http\Controllers\BImetricController;
 use App\Http\Controllers\BIfilterController;
 use App\Http\Controllers\BIprocessController;
-
+// uso il Model BIprocess che viene utilizzato nella route curlprocess (web_bi.schedule_report)
+use App\Models\BIprocess;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -34,13 +35,20 @@ Route::get('/users', [UserController::class, 'index']);
 /* map database web-bi*/
 Route::get('/', function() {return view('web_bi.index');})->name('web_bi.index'); // home page
 Route::get('/mapping', [MapDatabaseController::class, 'mapping'])->name('web_bi.mapping'); // page mapping
-// Route::get('/mapping', [MetadataController::class, 'mapping'])->name('web_bi.mapping'); // page mapping
 Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']); // recupero l'elenco dei database presenti (schema)
 Route::get('/fetch_api/schema/{schema}/tables', [MapDatabaseController::class, 'tables'])->name('web_bi.fetch_api.tables'); // recupero elenco tabelle dello schema selezionato
 Route::get('/fetch_api/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('web_bi.fetch_api.table_info'); // recupero il DESCRIBE della tabella
 Route::get('/report', function() {return view('web_bi.report');})->name('web_bi.report'); // page report
 Route::get('/fetch_api/schema/{schema}/table/{table}/field/{field}/distinct_values', [MapDatabaseController::class, 'distinct_values'])->name('web_bi.fetch_api.distinct_values'); // recupero i valori distinti del campo field passato come parametro
 Route::post('/fetch_api/cube/process', [MapDatabaseController::class, 'process'])->name('web_bi.fetch_api.process'); // processo la query che crea la FX
+
+// curl http://127.0.0.1:8000/curl/process/t1cm3v1nnso/schedule
+Route::get('/curl/process/{token}/schedule', function(BIprocess $biProcess, $token) {
+	$map = new MapDatabaseController();
+	// interrogo la tabella bi_processes per recuperare il json_value relativo al report indicato nel token
+	$json_value = BIprocess::where("token", "=", $token)->first('json_value');
+	return $map->curlprocess($json_value);
+} )->name('web_bi.schedule_report');
 
 // store json
 Route::prefix('/fetch_api/json/')->group(function () {
@@ -83,8 +91,6 @@ Route::prefix('/fetch_api/json/')->group(function () {
 	Route::post('/process_update', [BIprocessController::class, 'update']);
 });
 
-// test POST request
-Route::get('/report/{test}/post', [MapDatabaseController::class, 'post'])->name('test_post_request');
 // test vertica
 Route::get('/mapping/test_vertica', [MapDatabaseController::class, 'test_vertica']); // connessione con il metodo usato in Zend / PHP
 Route::get('/mapping/vertica_odbc', [MapDatabaseController::class, 'vertica_odbc']); // connessione con ORM / Facade di Laravel

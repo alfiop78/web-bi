@@ -188,7 +188,6 @@ var storage = new Storages();
 				} else {
 					// elemento non presente in locale, lo salvo direttamente
 					console.info('elemento non presente in locale');
-					debugger;
 					window.localStorage.setItem(jsonParsedDB.token, el.json_value);
 					iconStatus.innerText = 'done';
 					iconStatus.classList.add('md-done');
@@ -303,7 +302,7 @@ var storage = new Storages();
 					// lo elimino anche dal localStorage
 					window.localStorage.removeItem(name);
 					// elimino anche dal DOM l'elemento
-					app.dialogVersioning.querySelector("section[data-object-type='" + type + "'][data-object-name='" + name + "']").remove();
+					app.dialogVersioning.querySelector("section[data-object-type='" + type + "'][data-object-token='" + token + "']").remove();
 				} else {
 					console.error("Problema con l'eliminazione dell'elemento");
 				}
