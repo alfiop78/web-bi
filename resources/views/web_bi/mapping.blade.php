@@ -559,29 +559,32 @@
                                 <div id="drop-zone" class="dropzone"><span>Trascina qui le tabelle da mappare</span></div>
                                 <div id="hierarchies">
                                     <section class="hierarchies"></section>
+                                    <div id="btn-arrow-open-close">
+                                        <i id="toggle-hierarchy-struct" class="material-icons md-24">arrow_circle_left</i>
+                                    </div>
                                     <button id="saveDimension" type="button" name="" class="md-button" disabled>salva dimensione</button>
                                 </div>
                                 <div id="drop-zone-buttons">
-                                    <i id="btnNewHierarchy" class="material-icons md-inactive" data-tooltip="Nuova gerarchia" data-tooltip-position="right">add</i>
-                                    <i id="btnSaveHierarchy" class="material-icons md-inactive" data-tooltip="Salva gerarchia" data-tooltip-position="right">save</i>
+                                    <div class="drop-zone-buttons">
+                                        <button id="btnNewHierarchy" class="button-icon">
+                                            <i class="material-icons md-18 md-dark" data-tooltip="Nuova gerarchia" data-tooltip-position="right">add</i>
+                                        </button>
+                                        <button id="btnSaveHierarchy" class="button-icon" type="button" disabled>
+                                            <i class="material-icons md-18 md-dark" data-tooltip="Salva gerarchia" data-tooltip-position="right">save</i>
+                                        </button>
+                                        <button id="saveDimension" class="button-icon" type="button" disabled>
+                                            <i class="material-icons md-18 md-dark" data-tooltip="Salva dimensione" data-tooltip-position="right">save</i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <template id="tmpl-hierarchies">
                                 <section data-id="hierarchies" data-hier-token="0" class="section-content">
                                     <h6></h6>
+                                    <div class="hierarchy-details"></div>
                                 </section>
                             </template>
                             
-                            {{-- div 2 --}}
-                            {{-- <div id="box-hierarchy">
-                                <div id="hierarchiesContainer">
-                                    
-                                </div>
-                                <div class="bottom-position">
-                                    <button id="hierarchyNew" type="button" name="" class="md-button" disabled>nuova</button>
-                                    <button id="saveDimension" type="button" name="" class="md-button" disabled>salva dimensione</button>
-                                </div>
-                            </div> --}}
                         </section>
 
                     </div>

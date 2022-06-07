@@ -21,6 +21,7 @@ var Hier = new Hierarchy();
 		hierarchyContainer : document.getElementById('hierarchiesContainer'), // struttura gerarchica sulla destra
 
 		btnBack : document.getElementById('mdc-back'),
+		btnToggleHierarchyStruct : document.getElementById('toggle-hierarchy-struct'),
 
 		// btn dialog versioning
 		btnCubes : document.getElementById('navBtnCubes'),
@@ -1359,6 +1360,13 @@ var Hier = new Hierarchy();
 		divHierarchies.appendChild(section);
 		// abilito il tasto 'saveDimension'
 		app.btnSaveDimension.disabled = false;
+	}
+
+	app.btnToggleHierarchyStruct.onclick = (e) => {
+		console.log(e.target);
+		const hierarchyStruct = document.getElementById('hierarchies');
+		hierarchyStruct.toggleAttribute('data-open');
+		e.target.innerText = (hierarchyStruct.hasAttribute('data-open')) ? 'arrow_circle_right' : 'arrow_circle_left';
 	}
 
 	app.btnNewHierarchy.onclick = (e) => {

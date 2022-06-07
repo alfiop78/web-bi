@@ -29,8 +29,8 @@
 .material-icons.md-light { color: rgba(255, 255, 255, 1); }
 .material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3);}
 
-.material-icons.md-dark {color: rgba(0, 0, 0, 0.54);}
-.material-icons.md-dark.md-inactive {color: rgba(0, 0, 0, 0.26);}
+.material-icons.md-dark {color: whitesmoke;}
+.material-icons.md-dark.md-inactive {color: #757575;}
 .material-icons.md-dark.md-active{color: forestgreen;}
 .material-icons.md-dark.options.md-inactive { color: rgba(0, 0, 0, 0.26);padding: 0px;}
 /* color*/
@@ -72,8 +72,9 @@
 }
 
 .material-icons[id]:not(.md-inactive):hover{color: black;}
+.material-icons[id].md-dark:not(.md-inactive):hover{color: white;}
 .material-icons.md-inactive{color: lightgrey;cursor: not-allowed;}
-.material-icons:not(.md-inactive):hover{color: black;}
+/*.material-icons:not(.md-inactive):hover{color: black;}*/
 .material-icons[open]:not(.md-inactive):hover{color: var(--main-primary-color);}
 
 /* Raggruppamenti per colori, md-danger : indianred, md-info: , md-warning: brown,md-status: darkgrey*/
@@ -86,3 +87,9 @@
 .material-icons.md-orange{color: orange;}
 
 .material-icons.md-highlight{color: var(--main-highlight-icons-color);}
+
+/*icons all'interno di buttons*/
+button[disabled] i.md-dark{color: #757575;} /*disabled dark*/
+button[disabled]:hover i.md-dark{cursor: not-allowed;} /*disabled dark*/
+button:not([disabled]):hover i.md-dark{color: white;} /*disabled dark*/
+button i.md-dark{color: gainsboro;} /*disabled dark*/
