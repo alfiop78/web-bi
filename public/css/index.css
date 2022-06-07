@@ -105,7 +105,7 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 .card-table ul{max-height: 160px;overflow-y: auto;font-size: .7rem;}
 
 /* colonne all'interno della card/tabella*/
-.card.table ul{padding-inline-start: 0; font-size: .75rem; border-radius: 4px; min-height: auto; overflow: auto; max-height: 250px;}
+.card.table ul{padding-inline-start: 0; margin-block-start: 4px; font-size: .75rem; border-radius: 4px; min-height: auto; overflow: auto; max-height: 250px;}
 
 .card.table ul > .sublist span{list-style-type: none;display: block;padding: 6px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
 
@@ -113,7 +113,7 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
   white-space: nowrap;background: gainsboro; color: black; border-radius: 4px;}
 
 .card.table{
-	width: 300px;background: white;position: absolute;font-size: .8rem; border-radius: 4px; z-index: var(--zindex);
+	width: 270px;background: white;position: absolute;font-size: .8rem; border-radius: 4px; z-index: var(--zindex);
 	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
 }
 
@@ -130,9 +130,9 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 .card.table .cardTable > .title{grid-area: title;height: fit-content;background: tan;border-top-left-radius: 4px;
   border-top-right-radius: 4px;display: flex;align-items: flex-start;justify-content: space-between;}
 
-.card.table .cardTable > .title h6{padding: 8px 8px 16px 8px; margin: 0;font-size: .9rem; width: 100%;}
+.card.table .cardTable > .title h6{padding: 8px; margin: 0;font-size: .85rem; width: 100%;}
 .card.table .cardTable > .title h6:hover{cursor: grab;}
-.card.table .cardTable > .title > .title-alias > .subtitle{padding: 2px 2px 8px 8px;color: #494949; font-size: .8rem;}
+.card.table .cardTable > .title > .title-alias > .subtitle{padding: 0px 0px 4px 12px;color: #494949; font-size: .8rem;}
 .card.table .cardTable > .title > .title-alias{width: 100%;}
 
 .card.table[fact] .title{background: var(--main-primary-color);color: white;}

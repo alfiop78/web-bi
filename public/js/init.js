@@ -1553,6 +1553,7 @@ var Hier = new Hierarchy();
 	app.hideTooltip = (e) => {
 		// OPTIMIZE: da spostare in Application.js
 		if (e.target.hasAttribute('disabled')) return;
+		console.debug(e.target);
 		app.tooltip.classList.remove('show');
 		clearTimeout(app.tooltipTimeoutId);
 		if (e.target.hasAttribute('data-open-abs-window')) {

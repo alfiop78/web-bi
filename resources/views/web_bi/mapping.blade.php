@@ -142,7 +142,7 @@
                 </div>
                 <section class="versioning-grid">
                     <fieldset>
-                        <legend>Lista Oggetti</legend>
+                        <legend>Elementi</legend>
                         <nav id="nav-objects">
                             <a href="#" id="navBtnCubes">Cubi</a>
                             <a href="#" id="navBtnDimensions">Dimensioni</a>

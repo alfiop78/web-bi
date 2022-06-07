@@ -85,6 +85,9 @@
 
 .material-icons.md-highlight{color: var(--main-highlight-icons-color);}
 
+/*icone all'interno della card, lista field*/
+.card.table ul > section i{padding: 4px;}
+
 /*icons all'interno di buttons*/
 button:disabled.md-dark{color: #757575;} /*disabled dark*/
 button:disabled{color: lightgrey;} /*disabled*/

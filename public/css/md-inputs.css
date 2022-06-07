@@ -448,7 +448,7 @@ input:invalid ~ label.has-content ~ span{visibility: visible;}
     color: rgba(var(--pure-material-onsurface-rgb, 0, 0, 0), 0.87);
     /*font-family: var(--pure-material-font, "Roboto", "Segoe UI", BlinkMacSystemFont, system-ui, -apple-system);*/
     font-size: .85rem;
-    line-height: 1.5; margin: 1em;
+    line-height: 1.5; margin: auto;
 }
 
 /* Input */

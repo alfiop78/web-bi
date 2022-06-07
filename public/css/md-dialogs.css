@@ -1,9 +1,12 @@
 dialog{min-width: 70%;}
+dialog h4{padding: 0px;font-size: 1.5rem;font-weight: 400;margin: 0px; color: var(--main-color-outisde-card);}
 dialog.mini-dialog{min-width: 30%;min-height: 50%;}
 dialog.medium-dialog{min-width: 50%;min-height: 60%;}
-dialog > section{padding: 16px;}
+/*dialog > section{padding: 16px;}*/
+dialog{padding: 1em;}
+dialog h4{padding: 0px;}
 dialog{border: none;box-shadow: 0 2px 5px 1px rgba(10,10,10,.35);border-radius: 4px;font-size: .8rem; min-width: 80%; min-height: 70%}
-dialog#versioning{height: 80%;max-height: 90%;}
+dialog#versioning{height: 90%;max-height: 90%;}
 dialog .dialogContent{padding: 16px;}
 dialog .dialogTitle{background: brown; color: white;border-top-left-radius: 4px; border-top-right-radius: 4px;padding: 12px; font-size: .85rem;}
 dialog .lists{min-width: 300px;}
@@ -13,27 +16,27 @@ dialog.dialog-save{min-width: 40%; max-width: 50%; min-height: 50%; max-height: 
 dialog section > h4{font-size: 1.2rem;}
 dialog .dialog-save-name{margin: 1em; padding: 1em;}
 
+dialog nav{height: 100%;max-height: 100%;overflow-y: hidden;}
+
 .dialog-buttons{display: flex;flex-flow: row;justify-content: space-between; margin: 1.5em;}
-fieldset legend{font-size: .9rem; padding: 1em;}
+fieldset legend{font-size: .9rem; padding: 8px;}
 fieldset.auto-grid{display: grid; grid-template-rows: auto 1fr auto;}
 
 /* dialog versioning */
-.versioning-grid{display: grid;grid-template-columns: calc(20% - 8px) calc(80% - 8px); grid-gap: 16px; overflow: hidden; height: inherit;} /* 8px è il grid-gap */
-.versioning-sections{background-color: white;border-radius: 4px;height: 100%;max-height: 100%;display: grid; grid-template-rows: 8% 82% 10%;}
-.versioning-status{display: grid; grid-template-columns: 40% 10% 25% 25%; align-items: center;}
+.versioning-grid{display: grid;grid-template-columns: calc(20% - 8px) calc(80% - 8px); grid-gap: 16px; overflow: hidden; height: 100%;} /* 8px è il grid-gap */
+.versioning-sections{background-color: white;height: 100%;max-height: 100%;display: grid; grid-template-rows: 8% 82% 10%;}
+.versioning-status{display: grid; grid-template-columns: 1fr 5% 20% 25%; align-items: center; grid-column-gap: 8px;}
 .versioning-status > div:not(:first-child){text-align: center;}
-.versioning-status .vers-title{padding: 10px;}
-.versioning-status .vers-status-descr{padding: 10px;}
+/*.versioning-status .vers-title{padding: 4px;}*/
 .versioning-status .vers-actions{display: flex; justify-content: space-between;}
-.versioning-status-header{display: grid; grid-template-columns: 40% 10% 25% 25%; font-weight: bold; font-size: .8rem;}
+.versioning-status-header{display: grid; grid-template-columns: 50% 5% 20% 25%; font-weight: bold; font-size: .8rem; align-items: center;}
 .versioning-status-header > div{text-align: center;}
-.versioning-sections fieldset{border-color: rgb(0 0 0 / 15%);border-width: 1px;border-radius: 4px;padding: 2em;}
-.versioning-sections .versioning-content.overflow-y{overflow-y: scroll;margin-top: 1.5em;margin-bottom: 1.5em;font-size: .85rem;}
-section[data-versioning-elements]{display: grid; grid-template-rows: auto 400px;}
+.versioning-sections fieldset{border-color: rgb(0 0 0 / 15%);border-width: 1px;border-radius: 4px;padding: 1em;height: 100%; max-height: 100%;}
+.versioning-sections .versioning-content.overflow-y{overflow-y: scroll;margin-top: .5em;margin-bottom: .5em;font-size: .85rem; height: 210px;}
+section[data-versioning-elements]{display: grid; grid-template-rows: 10% 90%;}
 .search-filter{display: grid; grid-template-columns: 50% 40%;grid-column-gap: 10%;}
 .vers-title > div[data-created-at], .vers-title > div[data-updated-at] {font-size: .8rem; color: dimgrey; display: flex;justify-content: space-between;}
 .dialog-title-info{display: grid;grid-template-columns: 60% 40%;align-items: center;}
-.dialog-title-info > h4{font-size: 1.5rem;font-weight: 400;margin: 0px; color: var(--main-color-outisde-card);}
 .dialog-title-info span.dialog-info{text-align: end;}
 /* dialog versioning */
 
