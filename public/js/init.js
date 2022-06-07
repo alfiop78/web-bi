@@ -16,6 +16,7 @@ var Hier = new Hierarchy();
 		tmplDimension : document.getElementById('tmpl-dimension-list'),
 		tmplCube : document.getElementById('tmpl-cube-list'),
 		tmplLists : document.getElementById('templateList'), // include tutte le liste da utilizzare,
+		tmplSpan : document.getElementById('tmpl-span'),
 		tmplTables : document.getElementById('tmpl-hierarchy-tables'),
 
 		hierarchyContainer : document.getElementById('hierarchiesContainer'), // struttura gerarchica sulla destra
@@ -31,13 +32,13 @@ var Hier = new Hierarchy();
 		btnProcesses : document.getElementById('navBtnProcesses'),
 
 		// actions button
-		btnSaveDimension : document.getElementById('saveDimension'),
+		btnSaveDimension : document.getElementById('btn-save-dimension'),
 		btnHierarchySaveName : document.getElementById('btnHierarchySaveName'),
 		btnNewHierarchy : document.getElementById('btnNewHierarchy'),
-		btnSaveCube : document.getElementById('save-cube'),
+		btnSaveCube : document.getElementById('btn-save-cube'),
 		btnSaveCubeName : document.getElementById('btnCubeSaveName'),
-		btnSaveOpenedCube : document.getElementById('save-opened-cube'),
-		btnDefinedCube : document.getElementById('defined-cube'),
+		btnSaveOpenedCube : document.getElementById('btn-save-opened-cube'),
+		btnDefinedCube : document.getElementById('btn-defined-cube'),
 		btnCompositeMetricSave : document.getElementById('btnCompositeMetricSave'), // tasto salva nella dialog-composite-metric
 		btnCompositeMetricDone : document.getElementById('btnCompositeMetricDone'),
 
@@ -53,13 +54,13 @@ var Hier = new Hierarchy();
 		btnSaveHierarchy : document.getElementById('btnSaveHierarchy'),
 
 		// tasto openTableList
-		btnTableList : document.getElementById('openTableList'),
+		btnTableList : document.getElementById('btn-open-table-list'),
 		tableList : document.getElementById('tableList'),
 		// tasto openDimensionList per l'apertura dell'elenco delle dimensioni
-		btnDimensionList : document.getElementById('openDimensionList'),
+		btnDimensionList : document.getElementById('btn-open-dimension-list'),
 		dimensionList : document.getElementById('dimensionList'),
 		// tasto definisci Cubo
-		btnNewFact : document.getElementById('new-cube'),
+		btnNewFact : document.getElementById('btn-new-cube'),
 		
 		card : null,
 		cardTitle : null,
@@ -259,14 +260,15 @@ var Hier = new Hierarchy();
 		app.dropZone.appendChild(card);
 
 		// tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
-		if (document.getElementById('tableList').hasAttribute('fact')) {
+		if (app.tableList.hasAttribute('fact')) {
 			card.setAttribute('fact', true);
 			card.querySelector('.cardTable').setAttribute('fact', true); // OPTIMIZE: dataset data-fact
 			// visualizzo l'icona metrics
-			card.querySelector('section[options] > i[composite-metrics]').dataset.schema = e.target.querySelector('div').dataset.schema;
-			card.querySelector('section[options] > i[composite-metrics]').dataset.label = e.target.querySelector('div').dataset.label;
-			card.querySelector('section[options] > i[metrics]').hidden = false;
-			card.querySelector('section[options] > i[composite-metrics]').hidden = false;
+			card.querySelector('section[options] > button[composite-metrics]').dataset.schema = card.dataset.schema;
+			// console.log(card.dataset.label);
+			card.querySelector('section[options] > button[composite-metrics]').dataset.label = card.dataset.label;
+			card.querySelector('section[options] > button[metrics]').hidden = false;
+			card.querySelector('section[options] > button[composite-metrics]').hidden = false;
 		}
 
 		// imposto la card draggata nella posizione dove si trova il mouse
@@ -281,58 +283,19 @@ var Hier = new Hierarchy();
 
 		// evento sul tasto close della card
 		// TODO: da associare al document.addEventListener
-		card.querySelector('i[data-id="closeTable"]').onclick = app.handlerCloseCard;
+		card.querySelector('button[data-id="closeTable"]').onclick = app.handlerCloseCard;
 		// imposto la input search, con questo attributo, l'evento input viene gestito in Application.js
 		card.querySelector('input').dataset.elementSearch = card.dataset.label;	
 		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.dataset.schema, 'tableName': card.dataset.label};
-		// app.hierStruct(card);
 
 		// event sui tasti section[options]
 		// TODO: da gestire con document.addEventListener
-		card.querySelector('i[join]').onclick = app.handlerAddJoin;
-		card.querySelector('i[metrics]').onclick = app.handlerAddMetric;
-		card.querySelector('i[composite-metrics]').onclick = app.handlerAddCompositeMetric;
-		card.querySelector('i[columns]').onclick = app.handlerAddColumns;
-		card.querySelector('i[hier-order-plus]').onclick = app.handlerHierarchyOrder;
-		card.querySelector('i[hier-order-minus]').onclick = app.handlerHierarchyOrder;
-	}
-
-	app.hierStruct = (card) => {
-		if (!document.querySelector('section[data-active]')) {
-			// creo la struttura per la gerarchia
-			const parent = document.getElementById('hierarchiesContainer');
-			const tmpl = document.getElementById('tmpl-hierarchies');
-			const content = tmpl.content.cloneNode(true);
-			const sectionDataHier = content.querySelector('section[data-hier-id]');
-			const h6 = content.querySelector('h6');
-			const btnSaveHierarchy = content.querySelector("button[data-id='hierarchySave']");
-			h6.innerHTML = cube.card.tableName;
-			parent.appendChild(sectionDataHier);
-			const divHier = sectionDataHier.querySelector('div[data-hier-id]');
-			// const divHierLastTable = sectionDataHier.querySelector('div[data-hier-last-table]');
-			// aggiungo la tabella al div all'interno di sectionDataHier
-			const tmplTable = document.getElementById('tmpl-hier-table');
-			const tmplContentTable = tmplTable.content.cloneNode(true);
-			const divTable = tmplContentTable.querySelector('div');
-			divTable.innerHTML = cube.card.tableName;
-			divTable.dataset.schema = card.dataset.schema;
-			divTable.dataset.alias = cube.card.ref.dataset.alias;
-			divTable.setAttribute('label', cube.card.tableName); // OPTIMIZE: dataset data-label
-			// divHierLastTable.appendChild(divTable);
-			divHier.appendChild(divTable);
-			btnSaveHierarchy.addEventListener('click', app.btnSaveHierarchy);
-		} else {
-			// debugger;
-			const parent = document.querySelector('section[data-active] > div');
-			const tmplTable = document.getElementById('tmpl-hier-table');
-			const tmplContentTable = tmplTable.content.cloneNode(true);
-			const divTable = tmplContentTable.querySelector('div');
-			divTable.innerHTML = cube.card.tableName;
-			divTable.dataset.schema = card.dataset.schema;
-			divTable.dataset.alias = cube.card.ref.dataset.alias;
-			divTable.setAttribute('label', cube.card.tableName); // OPTIMIZE: dataset data-label
-			parent.appendChild(divTable);
-		}
+		card.querySelector('button[join]').onclick = app.handlerAddJoin;
+		card.querySelector('button[metrics]').onclick = app.handlerAddMetric;
+		card.querySelector('button[composite-metrics]').onclick = app.handlerAddCompositeMetric;
+		card.querySelector('button[columns]').onclick = app.handlerAddColumns;
+		card.querySelector('button[hier-order-plus]').onclick = app.handlerHierarchyOrder;
+		card.querySelector('button[hier-order-minus]').onclick = app.handlerHierarchyOrder;
 	}
 
 	app.hierDragStart = (e) => {
@@ -749,6 +712,7 @@ var Hier = new Hierarchy();
 		// app.addCard(`${StorageCube.selected.schema}.${StorageCube.selected.FACT}`, true);
 		// visualizzo il tasto saveOpenedCube al posto di SaveCube
 		app.btnSaveOpenedCube.hidden = false;
+		app.btnSaveOpenedCube.disabled = false;
 		// nascondo btnSaveCube
 		app.btnSaveCube.hidden = true;
 	}
@@ -873,7 +837,7 @@ var Hier = new Hierarchy();
 
 	app.handlerOpenTableList = (e) => {
 		// console.log(e.target);
-		if (e.target.parentElement.hasAttribute('disabled')) return;
+		if (e.target.hasAttribute('disabled')) return;
 		document.getElementById('tableList').removeAttribute('fact');
 		e.target.toggleAttribute('open');
 		document.getElementById('tableList').toggleAttribute('hidden');
@@ -937,14 +901,14 @@ var Hier = new Hierarchy();
         app.dropZone.classList.add('dropped');
 
 		// evento sul tasto close della card
-		card.querySelector('i[data-id="closeTable"]').onclick = app.handlerCloseCard;
+		card.querySelector('button[data-id="closeTable"]').onclick = app.handlerCloseCard;
 		// evento sulla input di ricerca nella card
 		// input di ricerca, imposto l'attr data-element-search
 		card.querySelector('input[type="search"]').setAttribute('data-element-search', card.getAttribute('label'));
 		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.dataset.schema, 'tableName': card.getAttribute('label')}; // OPTIMIZE: dataset data-label
 
 		// event sui tasti section[options]
-		card.querySelector('i[join]').onclick = app.handlerAddJoin;
+		card.querySelector('button[join]').onclick = app.handlerAddJoin;
 
 		// console.log(cube.activeCard.schema, cube.activeCard.tableName);
 		// ottengo l'elenco dei field della tabella
@@ -1135,7 +1099,7 @@ var Hier = new Hierarchy();
     // ***********************events*********************
     // lista cubi già definiti
     app.btnDefinedCube.onclick = (e) => {
-		if (e.target.parentElement.hasAttribute('disabled')) return;
+		if (e.target.hasAttribute('disabled')) return;
 		// visualizzo la lista dei cubi esistenti
 		const cubeList = document.getElementById('cubesList');
 		cubeList.toggleAttribute('hidden');
@@ -1145,7 +1109,7 @@ var Hier = new Hierarchy();
 
 	// lista dimensioni già definite
 	app.btnDimensionList.onclick = (e) => {
-		if (e.target.parentElement.hasAttribute('disabled')) return;
+		if (e.target.hasAttribute('disabled')) return;
 		// const dimensionList = document.getElementById('dimensionList');
 		app.dimensionList.toggleAttribute('hidden');
 		e.target.toggleAttribute('open');
@@ -1154,26 +1118,23 @@ var Hier = new Hierarchy();
 
 	// open dialog salva gerarchia
 	app.btnSaveHierarchy.onclick = (e) => {
-		if (e.target.classList.contains('md-inactive')) return;
-		// salvo la gerarchia che andrà inserita in dimension
 		app.dialogHierarchyName.showModal();
 		// abilito il tasto save dimension
-		// TODO: da correggere perchè non è più una <i> ma un <button>
-		app.btnSaveDimension.classList.remove('md-inactive');
+		app.btnSaveDimension.disabled = false;
 	}
 
 	// apro la dialog Salva Cubo
 	app.btnSaveCube.onclick = (e) => {
-		if (e.target.parentElement.hasAttribute('disabled')) return;
+		if (e.target.hasAttribute('disabled')) return;
 		app.dialogCubeName.showModal();
 	}
 
 	// definisci Cubo
 	app.btnNewFact.onclick = (e) => {
-		if (e.target.parentElement.hasAttribute('disabled')) return;
-		document.getElementById('tableList').setAttribute('fact', true); // OPTIMIZE: dataset data-fact
+		if (e.target.hasAttribute('disabled')) return;
+		app.tableList.setAttribute('fact', true); // OPTIMIZE: dataset data-fact
 		e.target.toggleAttribute('open');
-		document.getElementById('tableList').toggleAttribute('hidden');
+		app.tableList.toggleAttribute('hidden');
 		document.getElementById('tableSearch').focus();
 	}
 
@@ -1293,7 +1254,7 @@ var Hier = new Hierarchy();
 		Hier.fieldRef.dataset.tokenColumn = token;
 		app.dialogColumnMap.close();
 		// const btnSaveHierarchy = document.querySelector("#box-hierarchy section[data-id='hierarchies'][data-active] button[data-id='hierarchySave']");
-		(Object.keys(Hier.columns_).length !== 0) ? app.btnSaveHierarchy.classList.remove('md-inactive') : app.btnSaveHierarchy.classList.add('md-inactive');
+		app.btnSaveHierarchy.disabled = (Object.keys(Hier.columns_).length !== 0) ? false : true;
 	}
 
 	// tasto report nella sezione controls -> fabs
@@ -1311,15 +1272,38 @@ var Hier = new Hierarchy();
 
 	// dialog apertura 'salva dimensione'
 	app.btnSaveDimension.onclick = (e) => {
-		if (e.target.classList.contains('md-inactive')) return;
 		// se drop-zone ha l'attr edit con il nome della dimensione in modifica, lo inserisco direttamente nella input dimensionName
 		if (app.dropZone.hasAttribute('edit')) app.dialogDimensionName.querySelector('#dimensionName').value = app.dropZone.getAttribute('edit'); // OPTIMIZE: dataset data-edit
 		app.dialogDimensionName.showModal();
 	}
 
+	app.addHierarchy = (name, order) => {
+		console.log('name : ', name);
+		console.log('order : ', order);
+		const divHierarchies = document.querySelector('#hierarchies > .hierarchies');
+		const tmpl = document.getElementById('tmpl-hierarchies');
+		const content = tmpl.content.cloneNode(true);
+		const section = content.querySelector('section');
+		const h6 = section.querySelector('h6');
+		h6.innerText = name;
+		// TODO: per ogni tabella nell'object 'order' creo uno span all'interno di .hierarchy-details
+		const hierarchyDetail = section.querySelector('.hierarchy-detail');
+		for ( const [key, object] of Object.entries(order) ) {
+			const tmplSpan = app.tmplSpan.content.cloneNode(true);
+			const div = tmplSpan.querySelector('div');
+			const spanId = div.querySelector('span[data-id]');
+			const spanTable = div.querySelector('span[data-table]');
+			spanId.innerText = key;
+			spanId.dataset.id = key;
+			spanTable.innerText = object.table;
+			spanTable.dataset.table = object.table;
+			hierarchyDetail.appendChild(div);
+		}
+		divHierarchies.appendChild(section);
+	}
+
 	// save hierarchy
 	app.btnHierarchySaveName.onclick = () => {
-		debugger;
 		const hierTitle = document.getElementById('hierarchyName').value;
 		// ordine gerarchico (per stabilire quale tabella è da associare al cubo) questo dato viene preso dal valore presente in .hierarchy-order
 		let hierarchyOrder = {}, hierarchyOrderTables = {};
@@ -1349,21 +1333,17 @@ var Hier = new Hierarchy();
 		// dimension.hierarchyOrder = {title : hierTitle, hierarchyOrder, comment};
 		app.dialogHierarchyName.close();
 		// abilito il tasto btnNewHierarchy
-		app.btnNewHierarchy.classList.remove('md-inactive');
-		// TODO: imposto, nel div #hierarchies la gerarchia appena creata
-		const divHierarchies = document.querySelector('#hierarchies > .hierarchies');
-		const tmpl = document.getElementById('tmpl-hierarchies');
-		const content = tmpl.content.cloneNode(true);
-		const section = content.querySelector('section');
-		const h6 = section.querySelector('h6');
-		h6.innerText = hierTitle;
-		divHierarchies.appendChild(section);
-		// abilito il tasto 'saveDimension'
+		app.btnNewHierarchy.disabled = false;
+		// creo, nel div #hierarchies, la gerarchia appena creata
+		app.addHierarchy(hierTitle, hierarchyOrder);
+		
+		// abilito il tasto 'saveDimension' e disabilito btnSaveHierarchy
 		app.btnSaveDimension.disabled = false;
+		app.btnSaveHierarchy.disabled = true;
 	}
 
 	app.btnToggleHierarchyStruct.onclick = (e) => {
-		console.log(e.target);
+		// console.log(e.target);
 		const hierarchyStruct = document.getElementById('hierarchies');
 		hierarchyStruct.toggleAttribute('data-open');
 		e.target.innerText = (hierarchyStruct.hasAttribute('data-open')) ? 'arrow_circle_right' : 'arrow_circle_left';
@@ -1401,17 +1381,6 @@ var Hier = new Hierarchy();
 			document.querySelector('section[data-active]').removeAttribute('data-active');
 			// document.querySelectorAll('#hierTables > div').forEach( table => table.remove());
 		}
-		// TODO: prima di creare la nuova struttura sulla destra, rimuovo l'attr [data-active] dalla gerarchia attuale
-		document.querySelector("section[data-id='hierarchies'][data-active]").removeAttribute('data-active');
-		// TODO: creo una nuova struttura dove andranno inserite le tabelle della nuova gerarchia
-		const parent = document.getElementById('hierarchiesContainer');
-		const tmpl = document.getElementById('tmpl-hierarchies');
-		const content = tmpl.content.cloneNode(true);
-		const sectionDataHier = content.querySelector('section[data-hier-id]');
-		const h6 = content.querySelector('h6');
-		const btnSaveHierarchy = content.querySelector("button[data-id='hierarchySave']");
-		parent.appendChild(sectionDataHier);
-		btnSaveHierarchy.addEventListener('click', app.btnSaveHierarchy);
 
 		Hier = new Hierarchy();
 	}
@@ -1496,7 +1465,7 @@ var Hier = new Hierarchy();
 	app.showTooltip = (e) => {
 		// console.log('e.target : ', e.target);
 		// OPTIMIZE: da spostare in Application.js
-		if (e.target.parentElement.hasAttribute('disabled')) return;
+		if (e.target.hasAttribute('disabled')) return;
 		const pos = (tooltipType) => {
 			// tooltipType : 0 (tooltip page) 1 (tooltip all'interno di una dialog)
 			let x,y;
@@ -1583,7 +1552,7 @@ var Hier = new Hierarchy();
 
 	app.hideTooltip = (e) => {
 		// OPTIMIZE: da spostare in Application.js
-		if (e.target.parentElement.hasAttribute('disabled')) return;
+		if (e.target.hasAttribute('disabled')) return;
 		app.tooltip.classList.remove('show');
 		clearTimeout(app.tooltipTimeoutId);
 		if (e.target.hasAttribute('data-open-abs-window')) {

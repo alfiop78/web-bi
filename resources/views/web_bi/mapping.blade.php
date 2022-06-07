@@ -376,14 +376,14 @@
                 <section class="cardTable" name data-schema data-alias data-value>
                     <section options-hier>
                         <div>
-                            <i class="material-icons md-18" data-tooltip="Incrementa ordine gerarchico" data-tooltip-position="left" hier-order-plus>keyboard_arrow_up</i>
+                            <button type="button" class="button-icon material-icons md-18 md-dark" data-tooltip="Incrementa ordine gerarchico" data-tooltip-position="left" hier-order-plus>keyboard_arrow_up</button>
                             <span class="hierarchy-order"></span>
-                            <i class="material-icons md-18" hier-order-minus data-tooltip="Decrementa ordine gerarchico" data-tooltip-position="left">keyboard_arrow_down</i>
+                            <button type="button" class="button-icon material-icons md-18 md-dark" hier-order-minus data-tooltip="Decrementa ordine gerarchico" data-tooltip-position="left">keyboard_arrow_down</button>
                         </div>
                     </section>
                     <div class="title">
                         <div class="title-alias"><h6></h6><div class="subtitle"></div></div>
-                        <i data-id="closeTable" class="material-icons md-18" data-tooltip="Chiudi" data-tooltip-position="bottom">close</i>
+                        <button type="button" data-id="closeTable" class="button-icon material-icons md-18" data-tooltip="Chiudi" data-tooltip-position="bottom">close</button>
                     </div>
                     <div class="md-field">
                         <input type="search" value="" data-element-search/>
@@ -393,13 +393,13 @@
                     <div class="info" hidden></div>
                 </section>
                 <section options>
-                    <i class="material-icons md-18" columns data-tooltip="Colonne" data-tooltip-position="right">view_list</i>
-                    <i class="material-icons md-18" metrics data-tooltip="Metriche" data-tooltip-position="right" hidden>show_chart</i>
-                    <i class="material-icons md-18" composite-metrics data-tooltip="Crea metrica composta" data-tooltip-position="right" hidden>addchart</i>
-                    <i class="material-icons md-18" join data-tooltip="Crea relazione" data-tooltip-position="right">insert_link</i>
-                    <i class="material-icons md-18" join-left data-tooltip="Left join" data-tooltip-position="right">flip</i>
-                    <i class="material-icons md-18" join-right data-tooltip="Right join" data-tooltip-position="right">flip</i>
-                    <i class="material-icons md-18" join-remove data-tooltip="Rimuovi relazione" data-tooltip-position="right">link_off</i>
+                    <button type="button" class="button-icon material-icons md-18" columns data-tooltip="Colonne" data-tooltip-position="right">view_list</button>
+                    <button type="button" class="button-icon material-icons md-18" metrics data-tooltip="Metriche" data-tooltip-position="right" hidden>show_chart</button>
+                    <button type="button" class="button-icon material-icons md-18" composite-metrics data-tooltip="Crea metrica composta" data-tooltip-position="right" hidden>addchart</button>
+                    <button type="button" class="button-icon material-icons md-18" join data-tooltip="Crea relazione" data-tooltip-position="right">insert_link</button>
+                    <button type="button" class="button-icon material-icons md-18" join-left data-tooltip="Left join" data-tooltip-position="right">join_left</button>
+                    <button type="button" class="button-icon material-icons md-18" join-right data-tooltip="Right join" data-tooltip-position="right">join_right</button>
+                    <button type="button" class="button-icon material-icons md-18" join-remove data-tooltip="Rimuovi relazione" data-tooltip-position="right">link_off</button>
                 </section>
             </div>
         </template>
@@ -457,6 +457,13 @@
 
         </template>
 
+        <template id="tmpl-span">
+            <div>
+                <span data-id></span>
+                <span data-table></span>
+            </div>
+        </template>
+
         <main>
             <div id="drawer">
 
@@ -493,17 +500,17 @@
                         <div class="actions">
                             <div class="buttons">
                                 {{-- <i id="openTableList" class="material-icons md-24 md-inactive" data-tooltip="Lista tabelle" data-tooltip-position="bottom">storage</i> --}}
-                                <button id="openTableList" class="button-icon" type="button" disabled><i class="material-icons md-18" data-tooltip="Lista tabelle" data-tooltip-position="bottom">storage</i></button>
-                                <button id="openDimensionList" type="button" class="button-icon" disabled><i class="material-icons md-18" data-tooltip="Lista Dimensioni" data-tooltip-position="bottom">schema</i></button>
-                                <button id="new-cube" type="button" class="button-icon" disabled><i class="material-icons md-18" data-tooltip="Definisci cubo" data-tooltip-position="bottom">space_dashboard</i></button>
+                                <button id="btn-open-table-list" class="button-icon material-icons md-18" type="button" data-tooltip="Lista tabelle" data-tooltip-position="bottom" disabled>storage</button>
+                                <button id="btn-open-dimension-list" type="button" class="button-icon material-icons md-18" data-tooltip="Lista Dimensioni" data-tooltip-position="bottom" disabled>schema</button>
+                                <button id="btn-new-cube" type="button" class="button-icon material-icons md-18" data-tooltip="Definisci cubo" data-tooltip-position="bottom" disabled>space_dashboard</button>
                                 <span class="h-separator"></span>
                                 {{-- <i class="material-icons md-24 md-inactive" data-tooltip="Nuova dimensione" data-tooltip-position="bottom">dashboard_customize</i> --}}
-                                <button id="save-cube" type="button" class="button-icon" disabled><i class="material-icons md-18" data-tooltip="Salva cubo" data-tooltip-position="bottom">save</i></button>
-                                <button id="save-opened-cube" type="button" class="button-icon" disabled hidden><i id="saveOpenedCube" class="material-icons md-18" data-tooltip="Aggiorna cubo" data-tooltip-position="bottom">save</i></button>
-                                <button id="defined-cube" type="button" class="button-icon" disabled><i class="material-icons md-18" data-tooltip="Lista Cubi definiti" data-tooltip-position="bottom">folder_open</i></button>
+                                <button id="btn-save-cube" type="button" class="button-icon material-icons md-18" data-tooltip="Salva cubo" data-tooltip-position="bottom" disabled>save</button>
+                                <button id="btn-save-opened-cube" type="button" class="button-icon material-icons md-18" data-tooltip="Aggiorna cubo" data-tooltip-position="bottom" disabled hidden>save</button>
+                                <button id="btn-defined-cube" type="button" class="button-icon material-icons md-18" data-tooltip="Lista Cubi definiti" data-tooltip-position="bottom" disabled>folder_open</button>
                                 <span class="h-separator"></span>
-                                <button id="btn-versioning" type="button" class="button-icon"><i id="btnVersioningProcess" class="material-icons md-18" data-tooltip="Esegui sincronizzazione" data-tooltip-position="bottom">cached</i></button>
-                                <button id="btn-versioning-status" type="button" class="button-icon" disabled><i class="material-icons md-18" data-tooltip="" data-open-abs-window data-tooltip-position="bottom">cached</i></button>
+                                <button id="btn-versioning" type="button" class="button-icon material-icons md-18" data-tooltip="Esegui sincronizzazione" data-tooltip-position="bottom">cached</button>
+                                <button id="btn-versioning-status" type="button" class="button-icon material-icons md-18" data-tooltip="" data-open-abs-window data-tooltip-position="bottom" disabled>cached</button>
                             </div>
                         </div>
 
@@ -549,10 +556,6 @@
                                 </ul>
                             </div>
                         </div>
-                        {{-- TODO: appartiene alla struttura gerarchica sulla destra, da rivedere ed eliminare --}}
-                        <template id="tmpl-hier-table">
-                            <div class="hier table dropzoneHier" data-schema draggable="true" label></div>
-                        </template>
 
                         <section class="wrapper">
                             {{-- div 1 --}}
@@ -561,28 +564,21 @@
                                 <div id="hierarchies">
                                     <section class="hierarchies"></section>
                                     <div id="btn-arrow-open-close">
-                                        <i id="toggle-hierarchy-struct" class="material-icons md-24">arrow_circle_left</i>
+                                        <button type="button" id="toggle-hierarchy-struct" class="button-icon material-icons md-24">arrow_circle_left</button>
                                     </div>
-                                    <button id="saveDimension" type="button" name="" class="md-button" disabled>salva dimensione</button>
                                 </div>
                                 <div id="drop-zone-buttons">
                                     <div class="drop-zone-buttons">
-                                        <button id="btnNewHierarchy" class="button-icon">
-                                            <i class="material-icons md-18 md-dark" data-tooltip="Nuova gerarchia" data-tooltip-position="right">add</i>
-                                        </button>
-                                        <button id="btnSaveHierarchy" class="button-icon" type="button" disabled>
-                                            <i class="material-icons md-18 md-dark" data-tooltip="Salva gerarchia" data-tooltip-position="right">save</i>
-                                        </button>
-                                        <button id="saveDimension" class="button-icon" type="button" disabled>
-                                            <i class="material-icons md-18 md-dark" data-tooltip="Salva dimensione" data-tooltip-position="right">save</i>
-                                        </button>
+                                        <button id="btnNewHierarchy" type="button" class="button-icon material-icons md-18 md-dark" data-tooltip="Nuova gerarchia" data-tooltip-position="right">add</button>
+                                        <button id="btnSaveHierarchy" class="button-icon material-icons md-18 md-dark md-sienna" type="button" data-tooltip="Salva gerarchia" data-tooltip-position="right" disabled>ballot</button>
+                                        <button id="btn-save-dimension" class="button-icon material-icons md-18 md-dark" type="button" data-tooltip="Salva dimensione" data-tooltip-position="right" disabled>save</button>
                                     </div>
                                 </div>
                             </div>
                             <template id="tmpl-hierarchies">
                                 <section data-id="hierarchies" data-hier-token="0" class="section-content">
                                     <h6></h6>
-                                    <div class="hierarchy-details"></div>
+                                    <div class="hierarchy-detail"></div>
                                 </section>
                             </template>
                             

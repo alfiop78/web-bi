@@ -81,13 +81,14 @@
 
 /*colori*/
 .material-icons.md-orange{color: orange;}
+.material-icons.md-sienna{color: sienna;}
 
 .material-icons.md-highlight{color: var(--main-highlight-icons-color);}
 
 /*icons all'interno di buttons*/
-button[disabled] i.md-dark{color: #757575;} /*disabled dark*/
-button[disabled] i{color: lightgrey;} /*disabled*/
-button[disabled]:hover i.md-dark{cursor: not-allowed;} /*disabled dark*/
-button[disabled]:hover i{cursor: not-allowed;} /*disabled dark*/
-button:not([disabled]):hover i.md-dark{color: white;} /*disabled dark*/
-button i.md-dark{color: gainsboro;} /*disabled dark*/
+button:disabled.md-dark{color: #757575;} /*disabled dark*/
+button:disabled{color: lightgrey;} /*disabled*/
+button:disabled:hover.md-dark{cursor: not-allowed;} /*disabled dark*/
+button:disabled:hover{cursor: not-allowed;} /*disabled dark*/
+button:enabled:hover.md-dark{color: white;} /*disabled dark*/
+button.md-dark{color: gainsboro;} /*disabled dark*/
