@@ -254,7 +254,7 @@ var storage = new Storages();
 					// reimposto l'icona con data-id="btn-delete" eliminando l'attributo data-object-storage (in questo modo, quando si elimina un elemento si elimina da DB/local)
 					sectionElement.querySelector('.vers-actions i[data-id="btn-delete"]').removeAttribute('data-object-storage');
 					// nascondo l'icona 
-					sectionElement.querySelector('.vers-actions span[data-upload]').hidden = true;
+					sectionElement.querySelector('.vers-actions i[data-id="btn-upload-local-object"]').hidden = true;
 				} else {
 					console.error('Elemento non salvato su DB');
 				}
@@ -302,7 +302,7 @@ var storage = new Storages();
 					// lo elimino anche dal localStorage
 					window.localStorage.removeItem(name);
 					// elimino anche dal DOM l'elemento
-					app.dialogVersioning.querySelector("section[data-object-type='" + type + "'][data-object-token='" + token + "']").remove();
+					app.dialogVersioning.querySelector("section[data-object-type='" + type + "'][data-token='" + token + "']").remove();
 				} else {
 					console.error("Problema con l'eliminazione dell'elemento");
 				}
@@ -473,15 +473,13 @@ var storage = new Storages();
 				app.saveObjectOnDB(e.target.dataset.token, e.target.dataset.objectType);
 				break;
 			case 'btn-delete':
-				console.log('btn delete');
-				console.log('e.target : ', e.target);
 				// elimino l'elemento sia dal localStorage che dal DB. Se è presente l'attributo data-object-storage elimino questo elemento SOLO dallo storage locale (non da DB)
 				if (e.target.hasAttribute('data-object-storage')) {
 					window.localStorage.removeItem(e.target.dataset.token);
 					const type = e.target.dataset.objectType;
-					const name = e.target.dataset.objectName;
+					const token = e.target.dataset.token;
 					// elimino anche dal DOM l'elemento
-					app.dialogVersioning.querySelector("section[data-object-type='" + type + "'][data-object-name='" + name + "']").remove();
+					app.dialogVersioning.querySelector("section[data-object-type='" + type + "'][data-token='" + token + "']").remove();
 				} else {
 					app.deleteObjectOnDB(e.target.dataset.token, e.target.dataset.objectType);
 				}
