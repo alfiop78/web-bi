@@ -492,17 +492,18 @@
                         
                         <div class="actions">
                             <div class="buttons">
-                                <i id="openTableList" class="material-icons md-24 md-inactive" data-tooltip="Lista tabelle" data-tooltip-position="bottom">storage</i>
-                                <i id="openDimensionList" class="material-icons md-24 md-inactive" data-tooltip="Lista Dimensioni" data-tooltip-position="bottom">schema</i>
-                                <i id="cube" class="material-icons md-24 md-inactive" data-tooltip="Definisci cubo" data-tooltip-position="bottom">space_dashboard</i>
+                                {{-- <i id="openTableList" class="material-icons md-24 md-inactive" data-tooltip="Lista tabelle" data-tooltip-position="bottom">storage</i> --}}
+                                <button id="openTableList" class="button-icon" type="button" disabled><i class="material-icons md-18" data-tooltip="Lista tabelle" data-tooltip-position="bottom">storage</i></button>
+                                <button id="openDimensionList" type="button" class="button-icon" disabled><i class="material-icons md-18" data-tooltip="Lista Dimensioni" data-tooltip-position="bottom">schema</i></button>
+                                <button id="new-cube" type="button" class="button-icon" disabled><i class="material-icons md-18" data-tooltip="Definisci cubo" data-tooltip-position="bottom">space_dashboard</i></button>
                                 <span class="h-separator"></span>
-                                <i class="material-icons md-24 md-inactive" data-tooltip="Nuova dimensione" data-tooltip-position="bottom">dashboard_customize</i>
-                                <i id="saveCube" class="material-icons md-24 md-inactive" data-tooltip="Salva cubo" data-tooltip-position="bottom">save</i>
-                                <i id="saveOpenedCube" class="material-icons md-24" data-tooltip="Aggiorna cubo" data-tooltip-position="bottom" hidden>save</i>
-                                <i id="definedCube" class="material-icons md-24 md-inactive" data-tooltip="Lista Cubi definiti" data-tooltip-position="bottom">folder_open</i>
+                                {{-- <i class="material-icons md-24 md-inactive" data-tooltip="Nuova dimensione" data-tooltip-position="bottom">dashboard_customize</i> --}}
+                                <button id="save-cube" type="button" class="button-icon" disabled><i class="material-icons md-18" data-tooltip="Salva cubo" data-tooltip-position="bottom">save</i></button>
+                                <button id="save-opened-cube" type="button" class="button-icon" disabled hidden><i id="saveOpenedCube" class="material-icons md-18" data-tooltip="Aggiorna cubo" data-tooltip-position="bottom">save</i></button>
+                                <button id="defined-cube" type="button" class="button-icon" disabled><i class="material-icons md-18" data-tooltip="Lista Cubi definiti" data-tooltip-position="bottom">folder_open</i></button>
                                 <span class="h-separator"></span>
-                                <i id="btnVersioningProcess" class="material-icons md-24" data-tooltip="Esegui sincronizzazione" data-tooltip-position="bottom">cached</i>
-                                <i id="versioning-status" class="material-icons md-24 md-inactive" data-tooltip="" data-open-abs-window data-tooltip-position="bottom">cached</i>
+                                <button id="btn-versioning" type="button" class="button-icon"><i id="btnVersioningProcess" class="material-icons md-18" data-tooltip="Esegui sincronizzazione" data-tooltip-position="bottom">cached</i></button>
+                                <button id="btn-versioning-status" type="button" class="button-icon" disabled><i class="material-icons md-18" data-tooltip="" data-open-abs-window data-tooltip-position="bottom">cached</i></button>
                             </div>
                         </div>
 

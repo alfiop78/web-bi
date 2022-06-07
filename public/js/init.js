@@ -34,10 +34,10 @@ var Hier = new Hierarchy();
 		btnSaveDimension : document.getElementById('saveDimension'),
 		btnHierarchySaveName : document.getElementById('btnHierarchySaveName'),
 		btnNewHierarchy : document.getElementById('btnNewHierarchy'),
-		btnSaveCube : document.getElementById('saveCube'),
+		btnSaveCube : document.getElementById('save-cube'),
 		btnSaveCubeName : document.getElementById('btnCubeSaveName'),
-		btnSaveOpenedCube : document.getElementById('saveOpenedCube'),
-		btnDefinedCube : document.getElementById('definedCube'),
+		btnSaveOpenedCube : document.getElementById('save-opened-cube'),
+		btnDefinedCube : document.getElementById('defined-cube'),
 		btnCompositeMetricSave : document.getElementById('btnCompositeMetricSave'), // tasto salva nella dialog-composite-metric
 		btnCompositeMetricDone : document.getElementById('btnCompositeMetricDone'),
 
@@ -59,7 +59,7 @@ var Hier = new Hierarchy();
 		btnDimensionList : document.getElementById('openDimensionList'),
 		dimensionList : document.getElementById('dimensionList'),
 		// tasto definisci Cubo
-		btnNewFact : document.getElementById('cube'),
+		btnNewFact : document.getElementById('new-cube'),
 		
 		card : null,
 		cardTitle : null,
@@ -768,12 +768,12 @@ var Hier = new Hierarchy();
 		        if (data) {
 		        	let ul = document.getElementById('tables');
 		        	// attivo tutti i tasti presenti in .actions dopo aver caricato l'elenco delle tabelle
-		        	app.btnTableList.classList.remove('md-inactive');
-		        	app.btnDimensionList.classList.remove('md-inactive');
-		        	app.btnNewFact.classList.remove('md-inactive');
-		        	app.btnSaveCube.classList.remove('md-inactive');
-		        	app.btnSaveCubeName.classList.remove('md-inactive');
-		        	app.btnDefinedCube.classList.remove('md-inactive');
+		        	app.btnTableList.disabled = false;
+		        	app.btnDimensionList.disabled = false;
+		        	app.btnNewFact.disabled = false;
+		        	app.btnSaveCube.disabled = false;
+		        	app.btnSaveCubeName.disabled = false;
+		        	app.btnDefinedCube.disabled = false;
 
 		        	// popolo l'elenco delle tabelle
 		        	for (const [key, value] of Object.entries(data)) {
@@ -873,7 +873,7 @@ var Hier = new Hierarchy();
 
 	app.handlerOpenTableList = (e) => {
 		// console.log(e.target);
-		if (e.target.classList.contains('md-inactive')) return;
+		if (e.target.parentElement.hasAttribute('disabled')) return;
 		document.getElementById('tableList').removeAttribute('fact');
 		e.target.toggleAttribute('open');
 		document.getElementById('tableList').toggleAttribute('hidden');
@@ -1135,7 +1135,7 @@ var Hier = new Hierarchy();
     // ***********************events*********************
     // lista cubi già definiti
     app.btnDefinedCube.onclick = (e) => {
-		if (e.target.classList.contains('md-inactive')) return;
+		if (e.target.parentElement.hasAttribute('disabled')) return;
 		// visualizzo la lista dei cubi esistenti
 		const cubeList = document.getElementById('cubesList');
 		cubeList.toggleAttribute('hidden');
@@ -1145,7 +1145,7 @@ var Hier = new Hierarchy();
 
 	// lista dimensioni già definite
 	app.btnDimensionList.onclick = (e) => {
-		if (e.target.classList.contains('md-inactive')) return;
+		if (e.target.parentElement.hasAttribute('disabled')) return;
 		// const dimensionList = document.getElementById('dimensionList');
 		app.dimensionList.toggleAttribute('hidden');
 		e.target.toggleAttribute('open');
@@ -1164,13 +1164,13 @@ var Hier = new Hierarchy();
 
 	// apro la dialog Salva Cubo
 	app.btnSaveCube.onclick = (e) => {
-		if (e.target.classList.contains('md-inactive')) return;
+		if (e.target.parentElement.hasAttribute('disabled')) return;
 		app.dialogCubeName.showModal();
 	}
 
 	// definisci Cubo
 	app.btnNewFact.onclick = (e) => {
-		if (e.target.classList.contains('md-inactive')) return;
+		if (e.target.parentElement.hasAttribute('disabled')) return;
 		document.getElementById('tableList').setAttribute('fact', true); // OPTIMIZE: dataset data-fact
 		e.target.toggleAttribute('open');
 		document.getElementById('tableList').toggleAttribute('hidden');
@@ -1494,8 +1494,9 @@ var Hier = new Hierarchy();
 	}
 
 	app.showTooltip = (e) => {
+		// console.log('e.target : ', e.target);
 		// OPTIMIZE: da spostare in Application.js
-		if (e.target.classList.contains('md-inactive')) return;
+		if (e.target.parentElement.hasAttribute('disabled')) return;
 		const pos = (tooltipType) => {
 			// tooltipType : 0 (tooltip page) 1 (tooltip all'interno di una dialog)
 			let x,y;
@@ -1582,7 +1583,7 @@ var Hier = new Hierarchy();
 
 	app.hideTooltip = (e) => {
 		// OPTIMIZE: da spostare in Application.js
-		if (e.target.classList.contains('md-inactive')) return;
+		if (e.target.parentElement.hasAttribute('disabled')) return;
 		app.tooltip.classList.remove('show');
 		clearTimeout(app.tooltipTimeoutId);
 		if (e.target.hasAttribute('data-open-abs-window')) {

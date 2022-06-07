@@ -71,10 +71,6 @@
   .material-icons.sale{padding: .35em;}
 }
 
-.material-icons[id]:not(.md-inactive):hover{color: black;}
-.material-icons[id].md-dark:not(.md-inactive):hover{color: white;}
-.material-icons.md-inactive{color: lightgrey;cursor: not-allowed;}
-/*.material-icons:not(.md-inactive):hover{color: black;}*/
 .material-icons[open]:not(.md-inactive):hover{color: var(--main-primary-color);}
 
 /* Raggruppamenti per colori, md-danger : indianred, md-info: , md-warning: brown,md-status: darkgrey*/
@@ -90,6 +86,8 @@
 
 /*icons all'interno di buttons*/
 button[disabled] i.md-dark{color: #757575;} /*disabled dark*/
+button[disabled] i{color: lightgrey;} /*disabled*/
 button[disabled]:hover i.md-dark{cursor: not-allowed;} /*disabled dark*/
+button[disabled]:hover i{cursor: not-allowed;} /*disabled dark*/
 button:not([disabled]):hover i.md-dark{color: white;} /*disabled dark*/
 button i.md-dark{color: gainsboro;} /*disabled dark*/
