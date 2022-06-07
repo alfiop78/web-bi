@@ -687,7 +687,7 @@ var StorageMetric = new MetricStorage();
 		for (const [token, cube] of cubes) {
 			// console.log(token + ' = ' + cube.tableAlias);
 			// #ul-cubes visualizzo e seleziono il cubo presente nella lista
-			document.querySelector("#ul-cubes > section[data-cube-token='" + token + "'] .selectable").setAttribute('selected', true);
+			document.querySelector("#ul-cubes > section[data-cube-token='" + token + "'] .selectable").dataset.selected = true;
 			// reimposto tutto come se avessi fatto clic per selezionare il cubo, in app.handlerCubeSelected()
 			StorageCube.selected = token;
 			Query.tableAlias = StorageCube.selected.alias;
@@ -709,7 +709,7 @@ var StorageMetric = new MetricStorage();
 			Query.factRelation = StorageDimension.selected;
 			Query.elementDimension = { token, cubes : StorageDimension.selected.cubes};
 			// seleziono la dimensione in ciclo
-			document.querySelector("#ul-dimensions > section[data-dimension-token='" + token + "'] .selectable").setAttribute('selected', true);
+			document.querySelector("#ul-dimensions > section[data-dimension-token='" + token + "'] .selectable").dataset.selected = true;
 			// visualizzo le hier relative alla dimensione
 			app.showHierarchies();
 		}
@@ -719,7 +719,7 @@ var StorageMetric = new MetricStorage();
 		for ( const [token, value] of hierarchies ) {
 			Query.elementHierarchy = {dimensionToken : value.dimensionToken, token};
 			// seleziono le gerarchie
-			document.querySelector("#ul-hierarchies .selectable[data-hier-token='" + token + "']").setAttribute('selected', true);
+			document.querySelector("#ul-hierarchies .selectable[data-hier-token='" + token + "']").dataset.selected = true;
 			// visualizzo tutti gli oggetti relativi alla gerarchia
 			app.showAllElements();
 		}
@@ -728,7 +728,7 @@ var StorageMetric = new MetricStorage();
 		const filters = new Map(Object.entries(StorageProcess.selected.edit.filters));
 		for (const [token, filter] of filters) {
 			// seleziono i filtri impostati sul report
-			document.querySelector("#ul-exist-filters .selectable[data-filter-token='"+token+"']").setAttribute('selected', true); // TODO: dataset data-selected
+			document.querySelector("#ul-exist-filters .selectable[data-filter-token='"+token+"']").dataset.selected = true;
 			// lo re-imposto come se venisse selezionato
 			if (filter.hier) {
 				// imposto la firstTable se il filtro appartiene a una dimensione e non a un cubo
@@ -757,7 +757,7 @@ var StorageMetric = new MetricStorage();
 		const metrics = new Map(Object.entries(StorageProcess.selected.edit.metrics));
 		for (const [token, metric] of metrics) {
 			// seleziono le metriche impostate sul report
-			document.querySelector("#ul-exist-metrics .selectable[data-metric-token='"+token+"']").setAttribute('selected', true); // TODO: dataset data-selected
+			document.querySelector("#ul-exist-metrics .selectable[data-metric-token='"+token+"']").dataset.selected = true;
 			// se la metrica NON ha la prop table è una metrica composta, di base, quindi legata al cubo
 			Query.addMetric = {
 				token,
@@ -774,7 +774,7 @@ var StorageMetric = new MetricStorage();
 			const metrics = new Map(Object.entries(StorageProcess.selected.edit.filteredMetrics));
 			for (const [token, metric] of metrics) {
 				// seleziono le metriche impostate sul report
-				document.querySelector("#ul-exist-metrics .selectable[data-metric-token='"+token+"']").setAttribute('selected', true); // TODO: dataset data-selected
+				document.querySelector("#ul-exist-metrics .selectable[data-metric-token='"+token+"']").dataset.selected = true;
 				// se la metrica NON ha la prop table è una metrica composta, di base, quindi legata al cubo
 				if (metric.metric_type === 2) {
 					// metrica filtrata
@@ -811,7 +811,7 @@ var StorageMetric = new MetricStorage();
 			const compositeMetrics = new Map(Object.entries(StorageProcess.selected.edit.compositeMetrics));
 			for (const [token, metric] of compositeMetrics) {
 				// seleziono le metriche impostate sul report
-				document.querySelector("#ul-exist-composite-metrics .selectable[data-metric-token='"+token+"']").setAttribute('selected', true); // TODO: dataset data-selected
+				document.querySelector("#ul-exist-composite-metrics .selectable[data-metric-token='"+token+"']").dataset.selected = true;
 				Query.addCompositeMetric = {
 					token,
 					name : metric.name,
@@ -863,7 +863,7 @@ var StorageMetric = new MetricStorage();
 				};
 			}
 			// debugger;
-			document.querySelector("#ul-columns .selectable[data-token-column='"+token+"'], #ul-columns-fact .selectable[data-token-column='"+token+"']").setAttribute('selected', true);
+			document.querySelector("#ul-columns .selectable[data-token-column='"+token+"'], #ul-columns-fact .selectable[data-token-column='"+token+"']").dataset.selected = true;
 		}
 		const listReportProcess = document.getElementById('reportProcessList');
 		listReportProcess.toggleAttribute('hidden');
@@ -2340,8 +2340,8 @@ var StorageMetric = new MetricStorage();
 			Query.select = { token : Query.columnToken, table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value };
 		}
 		console.log('columnToken : ', Query.columnToken);
-		// evidenzio come 'selezionata' la colonna che ha aperto la dialog dopo averla salvata qui
-		document.querySelector("#ul-columns .selectable[data-token-column='" + Query.columnToken + "']").toggleAttribute('data-selected');
+		// evidenzio come 'selezionata' la colonna che ha aperto la dialog dopo averla salvata qui. Vado a verificare sia le colonne della fact che quelle delle dimensioni
+		document.querySelector("#ul-columns .selectable[data-token-column='" + Query.columnToken + "'], #ul-columns-fact .selectable[data-token-column='" + Query.columnToken + "']").toggleAttribute('data-selected');
 		// in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
 		app.dialogColumns.close();
 	}

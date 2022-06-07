@@ -15,8 +15,8 @@ var storage = new Storages();
 
 		// template per lo status degli oggetti da versionare
 		tmplVersioningDB : document.getElementById('versioning-db'),
-		btnVersioningStatus : document.getElementById('versioning-status'),
-		btnVersioningProcess : document.getElementById('btnVersioningProcess')
+		btnVersioningStatus : document.getElementById('btn-versioning-status'),
+		btnVersioningProcess : document.getElementById('btn-versioning')
 	}
 
 	app.checkVersioning = () => {
@@ -58,7 +58,7 @@ var storage = new Storages();
 			p.hidden = false;
 			if (p.hasAttribute('data-text-plural') ) p.querySelector('strong').innerHTML = unmodifiedElements.length;
 		}
-		app.btnVersioningStatus.classList.remove('md-inactive');
+		app.btnVersioningStatus.disabled = false;
 	}
 
 	app.getLocalElements = (data) => {

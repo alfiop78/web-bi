@@ -29,8 +29,8 @@
 .material-icons.md-light { color: rgba(255, 255, 255, 1); }
 .material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3);}
 
-.material-icons.md-dark {color: rgba(0, 0, 0, 0.54);}
-.material-icons.md-dark.md-inactive {color: rgba(0, 0, 0, 0.26);}
+.material-icons.md-dark {color: whitesmoke;}
+.material-icons.md-dark.md-inactive {color: #757575;}
 .material-icons.md-dark.md-active{color: forestgreen;}
 .material-icons.md-dark.options.md-inactive { color: rgba(0, 0, 0, 0.26);padding: 0px;}
 /* color*/
@@ -71,9 +71,6 @@
   .material-icons.sale{padding: .35em;}
 }
 
-.material-icons[id]:not(.md-inactive):hover{color: black;}
-.material-icons.md-inactive{color: lightgrey;cursor: not-allowed;}
-.material-icons:not(.md-inactive):hover{color: black;}
 .material-icons[open]:not(.md-inactive):hover{color: var(--main-primary-color);}
 
 /* Raggruppamenti per colori, md-danger : indianred, md-info: , md-warning: brown,md-status: darkgrey*/
@@ -84,5 +81,14 @@
 
 /*colori*/
 .material-icons.md-orange{color: orange;}
+.material-icons.md-sienna{color: sienna;}
 
 .material-icons.md-highlight{color: var(--main-highlight-icons-color);}
+
+/*icons all'interno di buttons*/
+button:disabled.md-dark{color: #757575;} /*disabled dark*/
+button:disabled{color: lightgrey;} /*disabled*/
+button:disabled:hover.md-dark{cursor: not-allowed;} /*disabled dark*/
+button:disabled:hover{cursor: not-allowed;} /*disabled dark*/
+button:enabled:hover.md-dark{color: white;} /*disabled dark*/
+button.md-dark{color: gainsboro;} /*disabled dark*/

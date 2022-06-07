@@ -239,3 +239,5 @@ mark{background-color: sienna; color: white; border-radius: 2px; padding: 2px;}
 span[contenteditable]{margin: 4px; padding: 8px; background-color: tan;}
 
 #composite-metric-formula{background: #e2e2e2; width: 100%; height: 100%; padding: 1em;}
+
+.button-icon{padding: 2px; background: transparent; border: none;}
