@@ -491,34 +491,40 @@
 											<div class="pageContent">
 												<div class="h-grid">
 													{{-- cube-list --}}
-													<div id="parent-list-cubes">
+													<div class="parent-ul">
 														<h5>Cubi</h5>
 														<div class="md-field">
 															<input type="search" data-element-search="search-cube" id="search-cube" value autocomplete="off" />
 															<label for="search-cube" class="">Ricerca</label>
 														</div>
-														<ul id="ul-cubes" class="full-overflow-list-columns"></ul>
+														<div class="relative-ul">
+															<ul id="ul-cubes" class="absolute"></ul>
+														</div>
 													</div>
 													{{-- dimension-list --}}
-													<div id="parent-list-dimensions">
+													<div class="parent-ul">
 														<h5>Dimensioni</h5>
 														<div class="md-field">
 															<input type="search" data-element-search="search-dimension" id="search-dimension" value autocomplete="off" />
 															<label for="search-dimension" class="">Ricerca</label>
 														</div>
-														<ul id="ul-dimensions" class="full-overflow-list-columns"></ul>
+														<div class="relative-ul">
+															<ul id="ul-dimensions" class="absolute"></ul>
+														</div>
 													</div>
 													{{-- gerarchie --}}
-													<div id="parent-list-hierarchies">
+													<div class="parent-ul-hierarchies">
 														<h5>gerarchie</h5>
 														<div class="md-field">
 															<input type="search" data-element-search="search-hierarchy" id="search-hierarchy" value autocomplete="off" data-type-search="nested"/>
 															<label for="search-hierarchy" class="">Ricerca</label>
 														</div>
-														<ul id="ul-fact-tables" class="fact-table"></ul>
-														<div class="c">
-															<ul id="ul-hierarchies" class="full-overflow-list"></ul>
-														</div>														
+														<div class="relative-ul">
+															<ul id="ul-fact-tables" class="absolute"></ul>
+														</div>
+														<div class="relative-ul">
+															<ul id="ul-hierarchies" class="absolute"></ul>
+														</div>
 													</div>
 												</div>
 											</div>
@@ -539,17 +545,19 @@
 																<ul id="ul-columns" class="full-overflow-list"></ul>
 															</div>
 														</section>
-														<section class="filters">
+														<section class="parent-ul-filters">
 															<div class="btn-add">
 																<span>Crea filtro</span>
 																<button type="button" id="btn-add-filters" class="button-icon material-icons md-32">add</button>
 															</div>
-															<div>
+															<div class="parent-ul-filters">
 																<div class="md-field">
 																	<input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
 																	<label for="search-exist-filters" class="">Ricerca</label>
 																</div>
-																<ul id="ul-exist-filters" class="full-overflow-list"></ul>
+																<div class="relative-ul">
+																	<ul id="ul-exist-filters" class="absolute"></ul>
+																</div>
 															</div>
 														</section>
 														{{-- metrics --}}
