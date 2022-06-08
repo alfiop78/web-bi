@@ -69,19 +69,19 @@
                             <span data-updated-at></span>
                         </div>
                     </div>
-                    <div class="vers-status"><i class="material-icons"></i></div>
+                    <div class="vers-status"><button data-status type="button" class="button-icon material-icons"></i></div>
                     <div class="vers-status-descr"></div>
                     <div class="vers-actions">
                         {{-- Elimina Sviluppo/Produzione --}}
-                        <i data-id="btn-delete" data-tooltip="Elimina" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning">clear</i>
+                        <button type="button" data-id="btn-delete" data-tooltip="Elimina" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-warning">clear</button>
                         {{-- Sovrascrivi copia in Sviluppo --}}
-                        <i data-id="btn-download" data-tooltip="Download" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning" hidden>download</i>
+                        <button type="button" data-id="btn-download" data-tooltip="Download" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-warning" hidden>download</button>
                         {{-- <span class="popupContent" data-download hidden><i data-id="btn-download" class="material-icons md-warning">download</i></span> --}}
                         {{-- Sovrascrivi copia in Produzione --}}
-                        <i data-id="btn-upgrade-production" data-tooltip="Aggiorna" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning" hidden>upgrade</i>
+                        <button type="button" data-id="btn-upgrade-production" data-tooltip="Aggiorna" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-warning" hidden>upgrade</button>
                         {{-- <span class="popupContent" data-upgrade hidden><i data-id="btn-upgrade-production" class="material-icons md-warning">upgrade</i></span> --}}
                         {{-- Salva in Produzione --}}
-                        <i data-id="btn-upload-local-object" data-tooltip="Upload" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="material-icons md-warning" hidden>upload</i>
+                        <button type="button" data-id="btn-upload-local-object" data-tooltip="Upload" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-warning" hidden>upload</button>
                         {{-- <span class="popupContent" data-upload hidden><i data-id="btn-upload-local-object" class="material-icons md-warning">upload</i></span> --}}
                     </div>
                 </div>
@@ -159,7 +159,6 @@
                                 <input type="search" id="search-db" value="" data-element-search="versioning-db-search" data-search-type="generic-search" autocomplete="off" autofocus/>
                                 <label for="search-db" class="">Ricerca</label>
                             </div>
-                            {{-- <input type="checkbox" value="Elementi in locale" checked> --}}
                             <label class="pure-material-switch">
                                 <input type="checkbox" id="chk-local-db-switch" class="js-push-btn">
                                 <span>Visualizza solo elementi in locale</span>
@@ -167,51 +166,26 @@
                         </div>
                         
                         <section data-versioning-elements>
-                            {{-- @php  --}}
-                                {{-- $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione --}}
-                            {{-- @endphp --}}
-                            <div class="versioning-status-header">
+                            {{-- <div class="versioning-status-header">
                                 <div>Nome</div>
                                 <div>Stato</div>
                                 <div>Descr. Stato</div>
                                 <div>Azione</div>
+                            </div> --}}
+                            {{-- l'attributo data-object deve corrispondere al risultato della query restituita da BidimensionController, BIcubesController, ecc...--}}
+                            {{-- <div data-id="versioning-content" class="versioning-content overflow-y" data-object="dimensions" hidden>
                             </div>
-                            <div data-id="versioning-content" class="versioning-content overflow-y" data-object="dimensions" hidden> {{-- l'attributo data-object deve corrispondere al risultato della query restituita da BidimensionController, BIcubesController, ecc...--}}
-                                {{-- qui viene popolato tramite template --}}
-                                {{-- non posso utilizzare qui il confronto tra localStorage / DB. Devo farlo in javascript --}}
-                                {{-- @foreach($arrayDim as $key => $dimension)
-                                    @php
-                                        $jsonDimension = json_decode($dimension['json_value']);
-                                    @endphp
-                                    <div class="versioning-status">
-                                        <div class="vers-title">{{ $jsonDimension->{'name'} }}<span>({{ $jsonDimension->{'lastTableInHierarchy'} }})</span></div>
-                                        <div class="vers-status"><i class="material-icons">done</i></div>
-                                    </div>
-                                @endforeach --}}
-                            </div>
-
                             <div data-id="versioning-content" class="versioning-content overflow-y" data-object="cubes" hidden></div>
                             <div data-id="versioning-content" class="versioning-content overflow-y" data-object="metrics" hidden></div>
                             <div data-id="versioning-content" class="versioning-content overflow-y" data-object="filters" hidden></div>
-                            <div data-id="versioning-content" class="versioning-content overflow-y" data-object="processes" hidden></div>
+                            <div data-id="versioning-content" class="versioning-content overflow-y" data-object="processes" hidden></div> --}}
+                            <ul data-object="filters"></ul>
                         </section>
-                        {{-- <section data-cubes>
-                            <h5 class="upper">cubi</h5>
-                            <div class="versioning-status-header">
-                                <div>Title</div>
-                                <div>Status</div>
-                                <div>Descr. Status</div>
-                                <div>Action</div>
-                            </div>
-                            <div data-id="versioning-content" class="versioning-content overflow-y"></div>
-                        </section> --}}
                     </fieldset>
                 </section>
 
                 <div class="dialog-buttons">
                     <button type="button" name="cancel" class="md-button">chiudi</button>
-                    <!-- <button id="btnSaveColumn" type="button" name="save" class="md-button" disabled>salva</button> -->
-                    {{-- <button id="btnVersioninDone" type="button" name="done" class="md-button">fatto</button> --}}
                 </div>
                 
             </section>

@@ -139,12 +139,12 @@ var storage = new Storages();
 			data[element].forEach( (el) => {
 				// template
 				const tmplContent = app.tmplVersioningDB.content.cloneNode(true);
-				let sectionSearchable = tmplContent.querySelector('section[data-searchable]')
+				let sectionSearchable = tmplContent.querySelector('section[data-searchable]');
 				let versioningStatus = tmplContent.querySelector('.versioning-status');
-				let iconStatus = versioningStatus.querySelector('i');
+				let iconStatus = versioningStatus.querySelector('button[data-status]');
 				let descrStatus = versioningStatus.querySelector('.vers-status-descr');
 				let actions = versioningStatus.querySelector('.vers-actions');
-				const parent = document.querySelector("section[data-versioning-elements] div[data-id='versioning-content'][data-object='" + element + "']");
+				const parent = document.querySelector("section[data-versioning-elements] ul[data-object='" + element + "']");
 
 				const jsonParsedDB = JSON.parse(el.json_value);
 				const jsonParsedLocal = JSON.parse(window.localStorage.getItem(jsonParsedDB.token));
@@ -168,21 +168,21 @@ var storage = new Storages();
 							iconStatus.classList.add('md-status'); // darkgrey
 							descrStatus.innerText = 'Sincronizzato';
 							// icona delete
-							actions.querySelector('i[data-id="btn-delete"]').dataset.objectType = element;
-							actions.querySelector('i[data-id="btn-delete"]').dataset.token = jsonParsedDB.token;
+							actions.querySelector('button[data-id="btn-delete"]').dataset.objectType = element;
+							actions.querySelector('button[data-id="btn-delete"]').dataset.token = jsonParsedDB.token;
 						} else {
 							// elemento presente ma contenuto diverso dal DB, da aggiornare manualmente
 							iconStatus.innerText = 'sync_problem';
 							iconStatus.classList.add('md-warning'); // brown
 							descrStatus.innerText = 'Non sincronizzato';
 							// icona per recuperare manualmente l'elemento
-							actions.querySelector('i[data-id="btn-download"]').removeAttribute('hidden');
-							actions.querySelector('i[data-id="btn-download"]').dataset.objectType = element;
-							actions.querySelector('i[data-id="btn-download"]').dataset.token = jsonParsedDB.token;
+							actions.querySelector('button[data-id="btn-download"]').removeAttribute('hidden');
+							actions.querySelector('button[data-id="btn-download"]').dataset.objectType = element;
+							actions.querySelector('button[data-id="btn-download"]').dataset.token = jsonParsedDB.token;
 							// icona per versionare da Sviluppo->Produzione
-							actions.querySelector('i[data-id="btn-upgrade-production"]').removeAttribute('hidden');
-							actions.querySelector('i[data-id="btn-upgrade-production"]').dataset.objectType = element;
-							actions.querySelector('i[data-id="btn-upgrade-production"]').dataset.token = jsonParsedDB.token;
+							actions.querySelector('button[data-id="btn-upgrade-production"]').removeAttribute('hidden');
+							actions.querySelector('button[data-id="btn-upgrade-production"]').dataset.objectType = element;
+							actions.querySelector('button[data-id="btn-upgrade-production"]').dataset.token = jsonParsedDB.token;
 						}
 					}
 				} else {
@@ -200,8 +200,8 @@ var storage = new Storages();
 				sectionSearchable.dataset.objectType = element;
 				sectionSearchable.dataset.token = jsonParsedDB.token;
 				// icona delete
-				actions.querySelector('i[data-id="btn-delete"]').dataset.token = jsonParsedDB.token;
-				actions.querySelector('i[data-id="btn-delete"]').dataset.objectType = element;
+				actions.querySelector('button[data-id="btn-delete"]').dataset.token = jsonParsedDB.token;
+				actions.querySelector('button[data-id="btn-delete"]').dataset.objectType = element;
 				sectionSearchable.dataset.elementSearch = 'versioning-db-search';
 				sectionSearchable.dataset.label = jsonParsedDB.name;
 				parent.appendChild(sectionSearchable);
@@ -417,11 +417,11 @@ var storage = new Storages();
 	app.btnVersioningProcess.onclick = async () => {
 		// promise.all, recupero tutti gli elementi presenti sul DB (dimensioni, cubi, filtri, ecc...)
 		const urls = [
-			'/fetch_api/versioning/dimensions',
-			'/fetch_api/versioning/cubes',
-			'/fetch_api/versioning/metrics',
+			// '/fetch_api/versioning/dimensions',
+			// '/fetch_api/versioning/cubes',
+			// '/fetch_api/versioning/metrics',
 			'/fetch_api/versioning/filters',
-			'/fetch_api/versioning/processes'
+			// '/fetch_api/versioning/processes'
 		];
 		// ottengo tutte le risposte in un array
 		await Promise.all(urls.map( url => fetch(url) ))
