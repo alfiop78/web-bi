@@ -1486,6 +1486,7 @@ var Hier = new Hierarchy();
 			let centerElementH = top + ((bottom - top) / 2);
 			// il testo del tooltip
 			app.tooltip.innerHTML = e.currentTarget.dataset.tooltip;
+			// e.target.dataset.desc = e.currentTarget.dataset.tooltip;
 			const elementWidth = app.tooltip.offsetWidth / 2;
 			const elementHeight = app.tooltip.offsetHeight / 2;
 			const width = app.tooltip.offsetWidth;
@@ -1519,6 +1520,8 @@ var Hier = new Hierarchy();
 			app.tooltip.style.setProperty('--left', pos(1).x + "px");
 			// app.tooltip.style.setProperty('--left', xPosition + "px");
 			app.tooltip.style.setProperty('--top', pos(1).y + "px");
+			// e.target.dataset.desc = 'prova';
+			e.target.dataset.desc = e.currentTarget.dataset.tooltip;
 		} else {
 			app.tooltip = document.getElementById('tooltip');
 			// console.log('app.tooltip : ', app.tooltip);
