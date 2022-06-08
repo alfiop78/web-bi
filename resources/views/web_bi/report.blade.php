@@ -26,7 +26,7 @@
 	</head>
 	<body>
 
-		<small id="tooltip" class="tooltip"></small>
+		{{-- <small id="tooltip" class="tooltip"></small> --}}
 
 		<dialog id="dialog-column">
 			<small id="dialog-popup" class="popupToast"></small>
@@ -135,7 +135,7 @@
 							<label for="filterName" class="">name</label>
 							<p class="helper"></p>
 						</div>
-						<i class="material-icons" id="search-field-values" data-field-name>search</i>
+						<button type="button" class="button-icon material-icons" id="search-field-values" data-tooltip="Visualizza valori" data-tooltip-position="bottom" data-field-name>search</button>
 						<div class="md-field">
 							<textarea id="filterSQLFormula" name="filterSQL" rows="10" cols="33" placeholder="SQL"></textarea>
 						</div>
@@ -350,7 +350,7 @@
 
 						<div class="actions">
 							<div class="buttons">
-								<i id="btnProcessReport" class="material-icons md-18" data-tooltip="Crea datamart" data-tooltip-position="bottom">table_rows</i>
+								<button type="button" id="btnProcessReport" class="button-icon material-icons md-18" data-tooltip="Crea datamart" data-tooltip-position="bottom">table_rows</button>
 								{{-- <i id="btnDuplicateReport" class="material-icons md-18" data-tooltip="Duplica report" data-tooltip-position="bottom">content_copy</i> --}}
 							</div>
 						</div>
@@ -433,10 +433,10 @@
 										<div class="v-content">
 											<span data-process></span>
 										</div>
-										<i data-edit class="material-icons md-18" data-tooltip="Modifica Report" data-tooltip-position="bottom">edit</i>
-										<i data-copy class="material-icons md-18" data-tooltip="Duplica report" data-tooltip-position="bottom">content_copy</i>
+										<button type="button" data-edit class="button-icon material-icons md-18" data-tooltip="Modifica" data-tooltip-position="bottom">edit</button>
+										<button type="button" data-copy class="button-icon material-icons md-18" data-tooltip="Duplica" data-tooltip-position="bottom">content_copy</button>
 										{{-- <span class="h-separator"></span> --}}
-										<i data-schedule class="material-icons md-18 md-highlight" data-tooltip="Esegui Report" data-tooltip-position="bottom">schedule_send</i>
+										<button type="button" data-schedule class="button-icon material-icons md-18 md-highlight" data-tooltip="Esegui" data-tooltip-position="bottom">schedule_send</button>
 									</div>
 								</div>
 							</section>
@@ -542,21 +542,21 @@
 														<section class="filters">
 															<div class="btn-add">
 																<span>Crea filtro</span>
-																<i id="btn-add-filters" class="material-icons md-32">add</i>
+																<button type="button" id="btn-add-filters" class="button-icon material-icons md-32">add</button>
 															</div>
 															<div>
 																<div class="md-field">
 																	<input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
 																	<label for="search-exist-filters" class="">Ricerca</label>
 																</div>
-																<ul id="ul-exist-filters" class="full-overflow-list"></ul>																
+																<ul id="ul-exist-filters" class="full-overflow-list"></ul>
 															</div>
 														</section>
 														{{-- metrics --}}
 														<section class="metrics">
 															<div class="btn-add">
 																<span>Crea metrica</span>
-																<i id="btn-add-metrics" class="material-icons md-32">add</i>
+																<button type="button" id="btn-add-metrics" class="button-icon material-icons md-32">add</button>
 															</div>
 															<div>
 																<div class="md-field">
@@ -570,7 +570,7 @@
 														<section class="composite-metrics">
 															<div class="btn-add">
 																<span>Crea metrica composta</span>
-																<i id="btn-add-composite-metrics" class="material-icons md-32">add</i>
+																<button type="button" id="btn-add-composite-metrics" class="button-icon material-icons md-32">add</button>
 															</div>
 															<div>
 																<div class="md-field">

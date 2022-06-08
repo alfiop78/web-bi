@@ -67,22 +67,22 @@ var StorageMetric = new MetricStorage();
 		const content = app.tmplList.content.cloneNode(true);
 		const section = content.querySelector('section[data-sublist-processes]');
 		const span = section.querySelector('span[data-process]');
-		const iEdit = section.querySelector('i[data-edit]');
-		const iCopy = section.querySelector('i[data-copy]');
-		const iSchedule = section.querySelector('i[data-schedule]');
+		const btnEdit = section.querySelector('button[data-edit]');
+		const btnCopy = section.querySelector('button[data-copy]');
+		const btnSchedule = section.querySelector('button[data-schedule]');
 		section.dataset.elementSearch = 'search-process';
 		section.dataset.label = value.name; // per la ricerca
 		section.dataset.reportToken = token;
 		span.innerText = value.name;
-		iEdit.dataset.id = value.report.processId;
-		iEdit.dataset.processToken = token;
-		iCopy.dataset.id = value.report.processId;
-		iCopy.dataset.processToken = token;
-		iSchedule.dataset.id = value.report.processId;
-		iSchedule.dataset.processToken = token;
-		iEdit.onclick = app.handlerReportEdit;
-		iCopy.onclick = app.handlerReportCopy;
-		iSchedule.onclick = app.handlerReportSelected;
+		btnEdit.dataset.id = value.report.processId;
+		btnEdit.dataset.processToken = token;
+		btnCopy.dataset.id = value.report.processId;
+		btnCopy.dataset.processToken = token;
+		btnSchedule.dataset.id = value.report.processId;
+		btnSchedule.dataset.processToken = token;
+		btnEdit.onclick = app.handlerReportEdit;
+		btnCopy.onclick = app.handlerReportCopy;
+		btnSchedule.onclick = app.handlerReportSelected;
 		ul.appendChild(section);
 	}
 
@@ -2371,7 +2371,7 @@ var StorageMetric = new MetricStorage();
 	app.btnBackPage.onclick = () => window.location.href = '/';
 
 	// OPTIMIZE: queste 3 funzioni che riguardano i tooltip vanno posizionate in Application.js, rendendole disponibili per tutte le pagine
-	app.showTooltip = (e) => {
+	/*app.showTooltip = (e) => {
 		if (e.target.classList.contains('md-inactive')) return;
 		const pos = () => {
 			let x,y;
@@ -2424,33 +2424,18 @@ var StorageMetric = new MetricStorage();
 			// se il tooltip non contiene un testo non deve essere mostrato
 			if (e.target.dataset.tooltip.length !== 0) app.tooltip.classList.add('show');
 		}, 600);
-		/*app.popup.animate([
-		  {transform: 'scale(.2)'},
-		  {transform: 'scale(1.2)'},
-		  {transform: 'scale(1)'}
-		], { duration: 50, easing: 'ease-in-out', delay: 1000 });*/
-
+		
 		// console.log(e.target.getBoundingClientRect().bottom);
 		// console.log(e.target.getBoundingClientRect().left);
 		// console.log(' : ', rect);
-	}
-
-	app.hideTooltip = (e) => {
-		// console.log('leave');
-		if (e.target.classList.contains('md-inactive')) return;
-		app.tooltip.classList.remove('show');
-		clearTimeout(app.tooltipTimeoutId);
-		if (e.target.hasAttribute('data-open-abs-window')) {
-			// tasto versionamento, mostro la abs-window
-			app.absWindow.hidden = true;
-		}
-	}
+	}*/
+	app.showTooltip = (e) => e.target.dataset.desc = e.target.dataset.tooltip;
 
 	// eventi mouseEnter/Leave su tutte le icon con l'attributo data-tooltip
 	// OPTIMIZE: da spostare in Application.js
 	document.querySelectorAll('*[data-tooltip]').forEach((icon) => {
 		icon.onmouseenter = app.showTooltip;
-		icon.onmouseleave = app.hideTooltip;
+		// icon.onmouseleave = app.hideTooltip;
 	});
 
 	document.getElementById('columnAlias').onkeydown = (e) => {

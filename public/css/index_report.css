@@ -79,13 +79,8 @@ div.textarea > span.formulaLogicalOperator{background: brown; border-radius: 4px
 .element:hover > li ~ span{visibility: visible;}
 /* element */
 
-/*toast Popup*/
-small.popupToast{z-index: 9999;background: #494949;border-radius: 4px;color: white;font-size: .7rem;display: none;white-space: nowrap;
-  box-shadow: 0 2px 4px 0 black;padding: 4px 8px;position: absolute; top: var(--top); left: var(--left);}
-
 /*ul*/
 ul > section.fact{font-weight: bold;}
-
 
 /* NOTE:  new page report*/
 .wrapper{height: inherit;}
@@ -99,8 +94,11 @@ ul > section.fact{font-weight: bold;}
 /*.dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}*/
 
 .addElementsReport{display: grid;grid-template-columns: 25% repeat(3, calc(25% - 16px)); grid-column-gap: 16px; color: dimgrey; height: inherit;}
-.addElementsReport > .filters .btn-add{color: olive;}
-.addElementsReport > .metrics .btn-add{color: darkgoldenrod;}
+.btn-add > span{font-weight: bold;}
+.addElementsReport > .filters .btn-add{color: var(--main-filters-color);}
+.filters button.material-icons{color: var(--main-filters-color);}
+.addElementsReport > .metrics .btn-add{color: var(--main-metrics-color);}
+.metrics button.material-icons{color: var(--main-metrics-color);}
 .addElementsReport > .filters .btn-add, .addElementsReport > .metrics .btn-add, .addElementsReport > .composite-metrics .btn-add{
   display: grid;grid-template-rows: auto auto;justify-content: center; opacity: .5;align-items: center;justify-items: center;padding: 8px 1em; background-color: #dcdcdc61;
   border-radius: 0px;box-shadow: 0px 0px 0px 0px; transition: box-shadow 200ms, opacity 250ms, border-radius 150ms;}
