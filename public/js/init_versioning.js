@@ -2,12 +2,6 @@ var App = new Application();
 var storage = new Storages();
 (() => {
 	var app = {
-		// btn
-		btnCubes : document.getElementById('navBtnCubes'),
-		btnDimensions : document.getElementById('navBtnDimensions'),
-		btnMetrics : document.getElementById('navBtnMetrics'),
-		btnFilters : document.getElementById('navBtnFilters'),
-		btnProcesses : document.getElementById('navBtnProcesses'),
 		// checkbox switch Locale / DB
 		btnSwitchLocalDB : document.getElementById('chk-local-db-switch'),
 		// dialog
@@ -97,10 +91,10 @@ var storage = new Storages();
 				const tmplContent = app.tmplVersioningDB.content.cloneNode(true);
 				let sectionSearchable = tmplContent.querySelector('section[data-searchable]')
 				let versioningStatus = tmplContent.querySelector('.versioning-status');
-				let iconStatus = versioningStatus.querySelector('i');
+				let iconStatus = versioningStatus.querySelector('button[data-status]');
 				let descrStatus = versioningStatus.querySelector('.vers-status-descr');
 				let actions = versioningStatus.querySelector('.vers-actions');
-				const parent = document.querySelector("section[data-versioning-elements] div[data-id='versioning-content'][data-object='" + element + "']");
+				const parent = document.querySelector("section[data-versioning-elements] ul[data-object='" + element + "']");
 				iconStatus.innerText = 'warning';
 				iconStatus.classList.add('md-attention');
 				descrStatus.innerText = 'In locale';
@@ -108,20 +102,18 @@ var storage = new Storages();
 				sectionSearchable.dataset.elementSearch = 'versioning-db-search';
 				sectionSearchable.dataset.objectStorage = 'local';
 				sectionSearchable.dataset.objectType = element;
-				sectionSearchable.dataset.objectName = value.name;
+				sectionSearchable.dataset.label = value.name;
 				sectionSearchable.dataset.token = token;
 				// sectionSearchable.dataset.token = token;
 				// icona per recuperare manualmente l'elemento
-				actions.querySelector('i[data-id="btn-upload-local-object"]').removeAttribute('hidden');
-				actions.querySelector('i[data-id="btn-upload-local-object"]').dataset.objectName = value.name;
-				actions.querySelector('i[data-id="btn-upload-local-object"]').dataset.token = token;
-				actions.querySelector('i[data-id="btn-upload-local-object"]').dataset.objectType = element;
+				actions.querySelector('button[data-id="btn-upload-local-object"]').disabled = false;
+				actions.querySelector('button[data-id="btn-upload-local-object"]').dataset.token = token;
+				actions.querySelector('button[data-id="btn-upload-local-object"]').dataset.objectType = element;
 				// imposto, sull'icona delete, gli attributi per eseguire la cancellazione. Aggiungo un ulteriore attributo per differenziare gli elementi in localStorage da quelli su DB.
-				actions.querySelector('i[data-id="btn-delete"]').dataset.objectName = value.name;
-				actions.querySelector('i[data-id="btn-delete"]').dataset.token = token;
-				actions.querySelector('i[data-id="btn-delete"]').dataset.objectType = element;
+				actions.querySelector('button[data-id="btn-delete"]').dataset.token = token;
+				actions.querySelector('button[data-id="btn-delete"]').dataset.objectType = element;
 				// NOTE: se è presente l'attributo data-object-storage, l'elemento deve essere eliminato SOLO dal LocalStorage, altrimenti sia dal LocalStorage che dal DB.
-				actions.querySelector('i[data-id="btn-delete"]').dataset.objectStorage = true;
+				actions.querySelector('button[data-id="btn-delete"]').dataset.objectStorage = true;
 				parent.appendChild(sectionSearchable);
 			}
 		}
@@ -161,7 +153,7 @@ var storage = new Storages();
 						console.log('elemento presente in locale : ', jsonParsedLocal);
 						// debugger;
 						// console.log('elemento già presente in locale', jsonParsed.name);
-						debugger;
+						// debugger;
 						if ( jsonParsedDB.updated_at === jsonParsedLocal.updated_at ) {
 							console.info('elementi sono identici');
 							// console.info('UGUALE CONTENTUO JSON, ELEMENTO RESTA INVARIATO IN LOCALE');
@@ -177,11 +169,11 @@ var storage = new Storages();
 							iconStatus.classList.add('md-warning'); // brown
 							descrStatus.innerText = 'Non sincronizzato';
 							// icona per recuperare manualmente l'elemento
-							actions.querySelector('button[data-id="btn-download"]').removeAttribute('hidden');
+							actions.querySelector('button[data-id="btn-download"]').disabled = false;
 							actions.querySelector('button[data-id="btn-download"]').dataset.objectType = element;
 							actions.querySelector('button[data-id="btn-download"]').dataset.token = jsonParsedDB.token;
 							// icona per versionare da Sviluppo->Produzione
-							actions.querySelector('button[data-id="btn-upgrade-production"]').removeAttribute('hidden');
+							actions.querySelector('button[data-id="btn-upgrade-production"]').disabled = false;
 							actions.querySelector('button[data-id="btn-upgrade-production"]').dataset.objectType = element;
 							actions.querySelector('button[data-id="btn-upgrade-production"]').dataset.token = jsonParsedDB.token;
 						}
@@ -248,14 +240,14 @@ var storage = new Storages();
 					console.log(token,' SALVATO CORRETTAMENTE');
 					// reimposto l'icona in .vers-status
 					const sectionElement = app.dialogVersioning.querySelector("section[data-token='" + token + "'][data-object-type='" + type + "']");
-					sectionElement.querySelector('.vers-status > i').innerText = 'sync';
-					sectionElement.querySelector('.vers-status > i').classList.replace('md-attention', 'md-status');
+					sectionElement.querySelector('.vers-status > button').innerText = 'sync';
+					sectionElement.querySelector('.vers-status > button').classList.replace('md-attention', 'md-status');
 					// reimposto la descr.status su 'Sincronizzato'
 					sectionElement.querySelector('.vers-status-descr').innerText = 'Sincronizzato';
 					// reimposto l'icona con data-id="btn-delete" eliminando l'attributo data-object-storage (in questo modo, quando si elimina un elemento si elimina da DB/local)
-					sectionElement.querySelector('.vers-actions i[data-id="btn-delete"]').removeAttribute('data-object-storage');
+					sectionElement.querySelector('.vers-actions button[data-id="btn-delete"]').removeAttribute('data-object-storage');
 					// nascondo l'icona 
-					sectionElement.querySelector('.vers-actions i[data-id="btn-upload-local-object"]').hidden = true;
+					sectionElement.querySelector('.vers-actions button[data-id="btn-upload-local-object"]').disabled = true;
 				} else {
 					console.error('Elemento non salvato su DB');
 				}
@@ -345,13 +337,13 @@ var storage = new Storages();
 					const sectionElement = app.dialogVersioning.querySelector("section[data-object-name='" + name + "'][data-object-type='" + type + "']");
 					console.log('sectionElement : ', sectionElement);
 					// modifico l'icona in .vers-status impostando sync con la classe md-status al posto di md-warning
-					sectionElement.querySelector('.vers-status > i').innerText = 'sync';
-					sectionElement.querySelector('.vers-status > i').classList.replace('md-warning', 'md-status');
+					sectionElement.querySelector('.vers-status > button').innerText = 'sync';
+					sectionElement.querySelector('.vers-status > button').classList.replace('md-warning', 'md-status');
 					// modifico la descrizione in .vers-status-descr impostando "Sincronizzato"
 					sectionElement.querySelector('.vers-status-descr').innerText = 'Sincronizzato';
 					// nascondo l'icona btn-download e btn-upgrade-production
-					sectionElement.querySelector('.vers-actions span[data-download]').hidden = true;
-					sectionElement.querySelector('.vers-actions span[data-upgrade]').hidden = true;
+					sectionElement.querySelector('.vers-actions button[data-id="btn-download"]').disabled = true;
+					sectionElement.querySelector('.vers-actions button[data-id="btn-upgrade-production"]').disabled = true;
 				} else {
 					// TODO: 
 				}
@@ -397,14 +389,14 @@ var storage = new Storages();
 					console.log('sectionElement : ', sectionElement);
 					// debugger;
 					// modifico l'icona in .vers-status impostando sync con la classe md-status al posto di md-warning
-					sectionElement.querySelector('.vers-status > i').innerText = 'sync';
-					sectionElement.querySelector('.vers-status > i').classList.replace('md-warning', 'md-status');
+					sectionElement.querySelector('.vers-status > button').innerText = 'sync';
+					sectionElement.querySelector('.vers-status > button').classList.replace('md-warning', 'md-status');
 					// modifico la descrizione in .vers-status-descr impostando "Sincronizzato"
 					sectionElement.querySelector('.vers-status-descr').innerText = 'Sincronizzato';
 					// nascondo l'icona btn-download e btn-upgrade-production
 					// sectionElement.querySelector('.vers-actions span[data-upload]').hidden = true;
-					sectionElement.querySelector('.vers-actions span[data-download]').hidden = true;
-					sectionElement.querySelector('.vers-actions span[data-upgrade]').hidden = true;
+					sectionElement.querySelector('.vers-actions button[data-id="btn-download"]').disabled = true;
+					sectionElement.querySelector('.vers-actions button[data-id="btn-upgrade-production"]').disabled = true;
 				} else {
 					// TODO: 
 				}
@@ -418,11 +410,11 @@ var storage = new Storages();
 	app.btnVersioningProcess.onclick = async () => {
 		// promise.all, recupero tutti gli elementi presenti sul DB (dimensioni, cubi, filtri, ecc...)
 		const urls = [
-			// '/fetch_api/versioning/dimensions',
-			// '/fetch_api/versioning/cubes',
-			// '/fetch_api/versioning/metrics',
+			'/fetch_api/versioning/dimensions',
+			'/fetch_api/versioning/cubes',
+			'/fetch_api/versioning/metrics',
 			'/fetch_api/versioning/filters',
-			// '/fetch_api/versioning/processes'
+			'/fetch_api/versioning/processes'
 		];
 		// ottengo tutte le risposte in un array
 		await Promise.all(urls.map( url => fetch(url) ))
@@ -505,76 +497,28 @@ var storage = new Storages();
 		if (e.target.checked) {
 			// abilitato : Visualizzo solo gli elementi in locale
 			// span.innerText = 'Locale';
-			app.dialogVersioning.querySelectorAll('.versioning-content > section:not([data-object-storage])').forEach( (el) => el.setAttribute('hidden', true));
-			app.dialogVersioning.querySelectorAll('.versioning-content > section[data-object-storage]').forEach( (el) => el.removeAttribute('hidden'));
+			app.dialogVersioning.querySelectorAll('ul[data-object] > section:not([data-object-storage])').forEach( (el) => el.setAttribute('hidden', true));
+			app.dialogVersioning.querySelectorAll('ul[data-object] > section[data-object-storage]').forEach( (el) => el.removeAttribute('hidden'));
 		} else {
 			// disabilitato : visualizzo elementi TUTTI gli elementi, DB e LocalStorage (default)
 			// span.innerText = 'Database';
-			app.dialogVersioning.querySelectorAll('.versioning-content > section').forEach( (el) => el.removeAttribute('hidden', true));
+			app.dialogVersioning.querySelectorAll('ul[data-object] > section').forEach( (el) => el.removeAttribute('hidden', true));
 		}
 	}
 
 	app.btnVersioningStatus.onclick = () => app.dialogVersioning.showModal();
 
-	app.btnCubes.onclick = (e) => {
-		if (document.querySelector('#nav-objects a[selected]')) {
-			document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
+	document.querySelectorAll('nav > a[data-object-type]').forEach( a => {
+		a.onclick = (e) => {
 			// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
-			// app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([data-object="cubes"])').setAttribute('hidden', true);
-			app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
+			// console.log( document.querySelector('#nav-objects > a[data-selected]') );
+			if (document.querySelector('ul[data-object]:not([hidden])')) {
+				document.querySelector('ul[data-object]:not([hidden])').hidden = true;
+				document.querySelector('#nav-objects > a[data-selected]').removeAttribute('data-selected');
+			}
+			e.target.dataset.selected = true;
+			document.querySelector("ul[data-object='"+e.target.dataset.objectType+"']").hidden = false;
 		}
-
-		e.target.setAttribute('selected', true);
-		// app.fetchAPIRequestVersioning('/fetch_api/versioning/cubes');
-		document.querySelector('div[data-object="cubes"]').removeAttribute('hidden');
-	}
-
-	app.btnDimensions.onclick = (e) => {
-		// rimuovo il selected da eventuali selezioni precedenti
-		if (document.querySelector('#nav-objects a[selected]')) {
-			document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
-			// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
-			// app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([data-object="dimensions"])').setAttribute('hidden', true);
-			app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
-		}
-
-		e.target.setAttribute('selected', true);
-		// visualizzo il div[hidden] contenente le dimensioni
-		document.querySelector('div[data-object="dimensions"]').removeAttribute('hidden');
-	}
-	
-	app.btnMetrics.onclick = (e) => {
-		if (document.querySelector('#nav-objects a[selected]')) {
-			document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
-			// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
-			// app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([data-object="metrics"])').setAttribute('hidden', true);
-			app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
-		}
-		e.target.setAttribute('selected', true);
-		// app.fetchAPIRequestVersioning('/fetch_api/versioning/metrics');
-		document.querySelector('div[data-object="metrics"]').removeAttribute('hidden');
-	}
-		
-	app.btnFilters.onclick = (e) => {
-		if (document.querySelector('#nav-objects a[selected]')) {
-			document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
-			// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
-			app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
-		}
-		e.target.setAttribute('selected', true);
-		document.querySelector('div[data-object="filters"]').removeAttribute('hidden');
-		// app.fetchAPIRequestVersioning('/fetch_api/versioning/filters');
-	}
-	
-	app.btnProcesses.onclick = (e) => {
-		if (document.querySelector('#nav-objects a[selected]')) {
-			document.querySelector('#nav-objects a[selected]').removeAttribute('selected');
-			// nascondo il div che contiene gli elementi dell'oggetto precedentemente selezionato
-			app.dialogVersioning.querySelector('div[data-id="versioning-content"]:not([hidden])').setAttribute('hidden', true);
-		}
-		e.target.setAttribute('selected', true);
-		document.querySelector('div[data-object="processes"]').removeAttribute('hidden');
-		// app.fetchAPIRequestVersioning('/fetch_api/versioning/processes');
-	}
+	});
 	
 })();

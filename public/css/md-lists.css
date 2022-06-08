@@ -78,4 +78,4 @@ section[data-sublist-composite-metrics]:hover i{visibility: visible;}
 }
 
 /*lista nelle dialog*/
-ul[data-object]{position: absolute; overflow: auto; width: 100%; height: calc(100% - 24px); margin-block-start: 12px; margin-block-end: 12px;}
+ul[data-object]{position: absolute; overflow: auto; width: 100%; height: calc(100% - 24px); margin-block-start: 12px; margin-block-end: 12px; padding-inline-start: 1em; padding-inline-end: 1em;}

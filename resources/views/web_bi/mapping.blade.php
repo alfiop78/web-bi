@@ -69,19 +69,19 @@
                             <span data-updated-at></span>
                         </div>
                     </div>
-                    <div class="vers-status"><button data-status type="button" class="button-icon material-icons"></i></div>
+                    <div class="vers-status"><button data-status type="button" class="button-icon material-icons md-18"></i></div>
                     <div class="vers-status-descr"></div>
                     <div class="vers-actions">
                         {{-- Elimina Sviluppo/Produzione --}}
-                        <button type="button" data-id="btn-delete" data-tooltip="Elimina" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-warning">clear</button>
+                        <button type="button" data-id="btn-delete" data-tooltip="Elimina" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-18 md-warning">clear</button>
                         {{-- Sovrascrivi copia in Sviluppo --}}
-                        <button type="button" data-id="btn-download" data-tooltip="Download" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-warning" hidden>download</button>
+                        <button type="button" data-id="btn-download" data-tooltip="Download" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-18" disabled>download</button>
                         {{-- <span class="popupContent" data-download hidden><i data-id="btn-download" class="material-icons md-warning">download</i></span> --}}
                         {{-- Sovrascrivi copia in Produzione --}}
-                        <button type="button" data-id="btn-upgrade-production" data-tooltip="Aggiorna" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-warning" hidden>upgrade</button>
+                        <button type="button" data-id="btn-upgrade-production" data-tooltip="Aggiorna" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-18" disabled>upgrade</button>
                         {{-- <span class="popupContent" data-upgrade hidden><i data-id="btn-upgrade-production" class="material-icons md-warning">upgrade</i></span> --}}
                         {{-- Salva in Produzione --}}
-                        <button type="button" data-id="btn-upload-local-object" data-tooltip="Upload" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-warning" hidden>upload</button>
+                        <button type="button" data-id="btn-upload-local-object" data-tooltip="Upload" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-18" disabled>upload</button>
                         {{-- <span class="popupContent" data-upload hidden><i data-id="btn-upload-local-object" class="material-icons md-warning">upload</i></span> --}}
                     </div>
                 </div>
@@ -143,11 +143,11 @@
                     <fieldset>
                         <legend>Elementi</legend>
                         <nav id="nav-objects">
-                            <a href="#" id="navBtnCubes">Cubi</a>
-                            <a href="#" id="navBtnDimensions">Dimensioni</a>
-                            <a href="#" id="navBtnMetrics">Metriche</a>
-                            <a href="#" id="navBtnFilters">Filtri</a>
-                            <a href="#" id="navBtnProcesses">Processi</a>
+                            <a href="#" id="navBtnCubes" data-object-type="cubes" data-selected>Cubi</a>
+                            <a href="#" id="navBtnDimensions" data-object-type="dimensions">Dimensioni</a>
+                            <a href="#" id="navBtnMetrics" data-object-type="metrics">Metriche</a>
+                            <a href="#" id="navBtnFilters" data-object-type="filters">Filtri</a>
+                            <a href="#" id="navBtnProcesses" data-object-type="processes">Processi</a>
                         </nav>
                     </fieldset>
                     <fieldset class="auto-grid">
@@ -165,20 +165,12 @@
                         </div>
                         
                         <section data-versioning-elements>
-                            {{-- <div class="versioning-status-header">
-                                <div>Nome</div>
-                                <div>Stato</div>
-                                <div>Descr. Stato</div>
-                                <div>Azione</div>
-                            </div> --}}
                             {{-- l'attributo data-object deve corrispondere al risultato della query restituita da BidimensionController, BIcubesController, ecc...--}}
-                            {{-- <div data-id="versioning-content" class="versioning-content overflow-y" data-object="dimensions" hidden>
-                            </div>
-                            <div data-id="versioning-content" class="versioning-content overflow-y" data-object="cubes" hidden></div>
-                            <div data-id="versioning-content" class="versioning-content overflow-y" data-object="metrics" hidden></div>
-                            <div data-id="versioning-content" class="versioning-content overflow-y" data-object="filters" hidden></div>
-                            <div data-id="versioning-content" class="versioning-content overflow-y" data-object="processes" hidden></div> --}}
-                            <ul data-object="filters"></ul>
+                            <ul data-object="cubes"></ul>
+                            <ul data-object="dimensions" hidden></ul>
+                            <ul data-object="filters" hidden></ul>
+                            <ul data-object="metrics" hidden></ul>
+                            <ul data-object="processes" hidden></ul>
                         </section>
                     </fieldset>
                 </section>

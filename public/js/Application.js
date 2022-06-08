@@ -112,7 +112,7 @@ class Application {
 
 	initInput(e) {
 		// non valido per le textarea
-		if (e.target.hasAttribute('type')) {
+		if (e.target.hasAttribute('type') && e.target.getAttribute('type') !== 'checkbox') {
 			(e.target.value.length > 0) ?
 				e.target.parentElement.querySelector('label').classList.add('has-content') :
 				e.target.parentElement.querySelector('label').classList.remove('has-content');

@@ -3,7 +3,7 @@ dialog h4{padding: 0px;font-size: 1.5rem;font-weight: 400;margin: 0px; color: va
 dialog.mini-dialog{min-width: 30%;min-height: 50%;}
 dialog.medium-dialog{min-width: 50%;min-height: 60%;}
 /*dialog > section{padding: 16px;}*/
-dialog{padding: 1em;}
+dialog{padding: 2em;}
 dialog h4{padding: 0px;}
 dialog{border: none;box-shadow: 0 2px 5px 1px rgba(10,10,10,.35);border-radius: 4px;font-size: .8rem; min-width: 80%; min-height: 70%}
 dialog#versioning{height: 90%;max-height: 90%;}
@@ -17,6 +17,9 @@ dialog section > h4{font-size: 1.2rem;}
 dialog .dialog-save-name{margin: 1em; padding: 1em;}
 
 dialog nav{height: 100%;max-height: 100%;overflow-y: hidden;}
+
+dialog nav > a[data-selected]:hover {font-weight: bold;}
+dialog nav > a[data-selected] {font-weight: bold;}
 
 .dialog-buttons{display: flex;flex-flow: row;justify-content: space-between; margin: 1.5em;}
 fieldset legend{font-size: .9rem; padding: 8px;}
