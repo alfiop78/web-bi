@@ -131,7 +131,6 @@
         </template>
 
         <dialog id="versioning">
-            <small class="tooltip-dialog"></small>
             <section class="versioning-sections">
                 <div class="dialog-title-info">
                     <h4>Sincronizzazione elementi</h4>

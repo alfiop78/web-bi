@@ -1466,22 +1466,16 @@ var Hier = new Hierarchy();
 		// console.log('e.target : ', e.target);
 		// OPTIMIZE: da spostare in Application.js
 		if (e.target.hasAttribute('disabled')) return;
-		const pos = (tooltipType) => {
+		const pos = () => {
 			// tooltipType : 0 (tooltip page) 1 (tooltip all'interno di una dialog)
 			let x,y;
 			let left, right, top, bottom;
-			if (tooltipType === 0) {
-				// getBoundingClientRect è relativo al viewport
-				left = e.target.getBoundingClientRect().left;
-				right = e.target.getBoundingClientRect().right;
-				top = e.target.getBoundingClientRect().top;
-				bottom = e.target.getBoundingClientRect().bottom;
-			} else {
-				left = e.target.offsetLeft;
-				right = left + e.target.offsetWidth;
-				top = e.target.offsetTop;
-				bottom = top + e.target.offsetHeight;
-			}			
+			// getBoundingClientRect è relativo al viewport
+			left = e.target.getBoundingClientRect().left;
+			right = e.target.getBoundingClientRect().right;
+			top = e.target.getBoundingClientRect().top;
+			bottom = e.target.getBoundingClientRect().bottom;
+				
 			let centerElementW = left + ((right - left) / 2);
 			let centerElementH = top + ((bottom - top) / 2);
 			// il testo del tooltip
@@ -1514,34 +1508,27 @@ var Hier = new Hierarchy();
 			return {x,y};
 		}
 		if (e.target.hasAttribute('data-tooltip-dialog')) {
-			// recupero il tooltip all'interno della dialog definita nell'attributo data-tooltip-dialog
-			app.tooltip = document.querySelector('#'+e.target.dataset.tooltipDialog+' > .tooltip-dialog');
-			// console.log('app.tooltip : ', app.tooltip);
-			app.tooltip.style.setProperty('--left', pos(1).x + "px");
-			// app.tooltip.style.setProperty('--left', xPosition + "px");
-			app.tooltip.style.setProperty('--top', pos(1).y + "px");
-			// e.target.dataset.desc = 'prova';
 			e.target.dataset.desc = e.currentTarget.dataset.tooltip;
 		} else {
-			app.tooltip = document.getElementById('tooltip');
+			e.target.dataset.desc = e.currentTarget.dataset.tooltip;
+			// app.tooltip = document.getElementById('tooltip');
 			// console.log('app.tooltip : ', app.tooltip);
-			app.tooltip.style.setProperty('--left', pos(0).x + "px");
-			// app.tooltip.style.setProperty('--left', xPosition + "px");
-			app.tooltip.style.setProperty('--top', pos(0).y + "px");
+			// app.tooltip.style.setProperty('--left', pos().x + "px");
+			// app.tooltip.style.setProperty('--top', pos().y + "px");
 		}
 		
 		// app.tooltip.style.setProperty('--top', yPosition + "px");
 		if (e.target.hasAttribute('data-open-abs-window')) {
 			// tasto versionamento, mostro la abs-window
-			app.absWindow.style.setProperty('--left', pos(0).x + 'px');
-			app.absWindow.style.setProperty('--top', pos(0).y + 'px');
+			app.absWindow.style.setProperty('--left', pos().x + 'px');
+			app.absWindow.style.setProperty('--top', pos().y + 'px');
 			app.absWindow.hidden = false;
 		}
 		// app.popup.classList.add('show');
-		app.tooltipTimeoutId = setTimeout(() => {
-			// se il tooltip non contiene un testo non deve essere mostrato
-			if (e.target.dataset.tooltip.length !== 0) app.tooltip.classList.add('show');
-		}, 600);
+		// app.tooltipTimeoutId = setTimeout(() => {
+		// 	// se il tooltip non contiene un testo non deve essere mostrato
+		// 	if (e.target.dataset.tooltip.length !== 0) app.tooltip.classList.add('show');
+		// }, 600);
 		/*app.popup.animate([
 		  {transform: 'scale(.2)'},
 		  {transform: 'scale(1.2)'},
@@ -1553,23 +1540,23 @@ var Hier = new Hierarchy();
 		// console.log(' : ', rect);
 	}
 
-	app.hideTooltip = (e) => {
-		// OPTIMIZE: da spostare in Application.js
-		if (e.target.hasAttribute('disabled')) return;
-		console.debug(e.target);
-		app.tooltip.classList.remove('show');
-		clearTimeout(app.tooltipTimeoutId);
-		if (e.target.hasAttribute('data-open-abs-window')) {
-			// tasto versionamento, mostro la abs-window
-			app.absWindow.hidden = true;
-		}
-	}
+	// app.hideTooltip = (e) => {
+	// 	// OPTIMIZE: da spostare in Application.js
+	// 	if (e.target.hasAttribute('disabled')) return;
+	// 	console.debug(e.target);
+	// 	app.tooltip.classList.remove('show');
+	// 	clearTimeout(app.tooltipTimeoutId);
+	// 	if (e.target.hasAttribute('data-open-abs-window')) {
+	// 		// tasto versionamento, mostro la abs-window
+	// 		app.absWindow.hidden = true;
+	// 	}
+	// }
 
 	// eventi mouseEnter/Leave su tutte le icon con l'attributo data-tooltip
 	document.querySelectorAll('*[data-tooltip]').forEach( icon => {
 		// OPTIMIZE: da spostare in Application.js
 		icon.onmouseenter = app.showTooltip;
-		icon.onmouseleave = app.hideTooltip;
+		// icon.onmouseleave = app.hideTooltip;
 	});
 
 	app.btnCompositeMetricDone.onclick = () => app.dialogCompositeMetric.close();

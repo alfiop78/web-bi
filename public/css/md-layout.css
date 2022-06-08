@@ -192,10 +192,10 @@ small.tooltip, small.tooltip-dialog{font-family: 'Barlow'; font-weight: normal; 
 	font-size: .8rem; visibility: hidden; height: fit-content; box-shadow: 0 2px 4px 0 black;padding: 1em;position: absolute; top: var(--top); left: var(--left);}
 small.tooltip.show, small.tooltip-dialog.show{visibility: visible; animation: popup 50ms ease;}
 
-button[data-tooltip-dialog]{position: relative;}
-button[data-tooltip-dialog]:hover{display: flex;justify-content: center;}
+button[data-tooltip-dialog], button[data-tooltip]{position: relative;}
+button[data-tooltip-dialog]:hover, button[data-tooltip]:hover{display: flex;justify-content: center;}
 /*button[data-tooltip-dialog]:hover::after{content: 'test'; font-size: .9rem;font-family: 'Barlow';color: white; width: 100px; background-color: indianred; position: absolute; top: 100%; left: -30px;}*/
-button[data-tooltip-dialog]:hover::after{
+button[data-tooltip-dialog]:hover::after, button[data-tooltip]:hover::after{
   content: attr(data-desc);
   font-size: .8rem;
   font-family: 'Barlow';
@@ -203,7 +203,7 @@ button[data-tooltip-dialog]:hover::after{
   width: fit-content;
   height: fit-content;
   box-shadow: 0 2px 4px 0 black;
-  background-color: #494949;
+  background-color: indianred;
   position: absolute;
   top: 100%;
   padding: 1em;
