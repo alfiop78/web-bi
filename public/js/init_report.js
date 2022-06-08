@@ -1784,7 +1784,7 @@ var StorageMetric = new MetricStorage();
 		const date = new Date();
 		// const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
 		const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
-		let filterObject = {created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options)};
+		let filterObject = {};
 		// la creazione di un filtro su un livello dimensionale salva il filtro con, all'interno, le proprietà dimension e hier.
 		// Un filtro impostato la FACT avrà al suo interno il nome del cubo a cui è associato e l'alias della FACT
 		if (app.dialogFilter.querySelector('section').hasAttribute('data-hier-token')) {
@@ -1795,11 +1795,28 @@ var StorageMetric = new MetricStorage();
 			/*filterObject = new Map([
 				[token, {token, 'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, dimension, hier}]
 			]);*/
-			filterObject = { token, type: 'FILTER', name: filterName.value, table: Query.table, formula : textarea.value, dimensionToken, hier : {token : hierToken, name: hierName} };
+			filterObject = {
+				token,
+				type: 'FILTER',
+				name: filterName.value,
+				table: Query.table,
+				formula : textarea.value,
+				dimensionToken,
+				hier : {token : hierToken, name: hierName},
+				created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options)
+			};
 		} else {
-			filterObject = {token, type: 'FILTER', name: filterName.value, table: Query.table, formula : textarea.value, cubeToken : StorageCube.selected.token, alias : StorageCube.selected.alias};
+			filterObject = {
+				token,
+				type: 'FILTER',
+				name: filterName.value,
+				table: Query.table,
+				formula : textarea.value,
+				cubeToken : StorageCube.selected.token,
+				alias : StorageCube.selected.alias,
+				created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options)				
+			};
 		}
-		// console.log('filterObject : ', filterObject);
 		StorageFilter.save(filterObject);
 		StorageFilter.selected = token;
 		// salvataggio nel DB

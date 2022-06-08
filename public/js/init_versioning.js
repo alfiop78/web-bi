@@ -161,6 +161,7 @@ var storage = new Storages();
 						console.log('elemento presente in locale : ', jsonParsedLocal);
 						// debugger;
 						// console.log('elemento già presente in locale', jsonParsed.name);
+						debugger;
 						if ( jsonParsedDB.updated_at === jsonParsedLocal.updated_at ) {
 							console.info('elementi sono identici');
 							// console.info('UGUALE CONTENTUO JSON, ELEMENTO RESTA INVARIATO IN LOCALE');

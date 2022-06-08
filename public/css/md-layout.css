@@ -193,9 +193,9 @@ small.tooltip, small.tooltip-dialog{font-family: 'Barlow'; font-weight: normal; 
 small.tooltip.show, small.tooltip-dialog.show{visibility: visible; animation: popup 50ms ease;}
 
 button[data-tooltip-dialog], button[data-tooltip]{position: relative;}
-button[data-tooltip-dialog]:hover, button[data-tooltip]:hover{display: flex;justify-content: center;}
+button[data-tooltip-dialog]:not([disabled]):hover, button[data-tooltip]:not([disabled]):hover{display: flex; justify-content: center; align-items: center;}
 /*button[data-tooltip-dialog]:hover::after{content: 'test'; font-size: .9rem;font-family: 'Barlow';color: white; width: 100px; background-color: indianred; position: absolute; top: 100%; left: -30px;}*/
-button[data-tooltip-dialog]:hover::after, button[data-tooltip]:hover::after{
+button[data-tooltip-dialog]:not([disabled]):hover::after, button[data-tooltip]:not([disabled]):hover::after{
   content: attr(data-desc);
   font-size: .8rem;
   font-family: 'Barlow';
@@ -203,15 +203,20 @@ button[data-tooltip-dialog]:hover::after, button[data-tooltip]:hover::after{
   width: fit-content;
   height: fit-content;
   box-shadow: 0 2px 4px 0 black;
-  background-color: indianred;
+  background-color: #494949;
   position: absolute;
-  top: 100%;
+  top: calc(100% + 8px);
+  left: auto;
   padding: 1em;
   border-radius: 4px;
   z-index: 9999;
   white-space: nowrap;
   visibility: hidden;
   animation: tooltip 50ms ease 500ms forwards;
+}
+
+button[data-tooltip][data-tooltip-position="right"]:not([disabled]):hover::after{
+  top: auto; left: calc(100% + 8px);
 }
 
 @keyframes tooltip {
