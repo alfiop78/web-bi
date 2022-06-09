@@ -368,13 +368,15 @@
                 </span>
             </section>
 
-            <section data-element-search data-label data-sublist-draggable data-searchable="true">
-                <span class="sublist">
-                    {{-- <span generic class="selectable"></span> --}}
-                    <div generic id draggable="true">
-                        <span table></span>
+            <section class="data-item" data-element-search data-label data-sublist-draggable data-searchable="true">
+                <div>
+                    <div class="selectable h-content" generic id draggable="true">
+                        <div class="v-content">
+                            <span table></span>
+                        </div>
+                        <i class="material-icons md-18">star_outline</i>
                     </div>
-                </span>
+                </div>
             </section>
 
             <section data-element-search data-label data-sublist-generic data-searchable="true">

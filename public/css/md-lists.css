@@ -72,6 +72,7 @@ section[data-sublist-composite-metrics]:hover i{visibility: visible;}
 .data-item{position: relative;}
 .selectable{transition: padding-left 150ms; padding-left: 4px;}
 .selectable:hover{cursor: pointer;transition: padding-left 200ms; padding-left: 8px;}
+*[draggable].selectable:hover{cursor: grab; transition: padding-left 200ms; padding-left: 8px; font-weight: bold;}
 .selectable::before{background-color : sienna;}
 .selectable:hover::before{content: '';width: 8px;height: 20px;position: absolute;border-radius: 3px;opacity: .7;top: calc(50% - 10px);left: -4px;animation: hoverSelected 200ms ease;}
 .selectable[data-selected]::before{content: '';width: 8px;height: 20px;position: absolute;border-radius: 3px;opacity: 1;top: calc(50% - 10px);left: -4px;animation: hoverSelected 200ms ease;}

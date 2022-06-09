@@ -243,10 +243,6 @@ ul > section[data-sublist-table-card]{border-left: solid 0px grey; transition: b
 ul > section[data-sublist-table-card] > .sublist{display: flex; flex-direction: row; width: 100%; align-items: center;}
 ul > section[data-sublist-table-card] > .sublist > span{width: 100%; padding: 8px 6px;}
 
-ul > section[data-sublist-draggable]{border: none;}
-ul > section[data-sublist-draggable]{border-left: solid 0px gainsboro; transition: border-left 150ms;}
-ul > section[data-sublist-draggable]:hover{cursor: grab; border-left: solid thick indianred; transition: border-left 150ms;font-weight: bold;}
-
 /*absolute-window*/
 .abs-window{
 	position: absolute;

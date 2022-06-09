@@ -228,20 +228,20 @@ var Hier = new Hierarchy();
 		// console.log(e.target);
 		let data = e.dataTransfer.getData('text/plain');
         let card = document.getElementById(data).cloneNode(true);
-		// nuova tabella droppata
-		// console.log(card);
-		// la .card .draggable diventa .card .table
+        console.log('card : ', card); // class h-content e attributo draggable="true"
+		// la .card draggable diventa .card .table
 		card.className = 'card table';
 		card.removeAttribute('draggable');
-		card.removeAttribute('name');
-		// elimino lo span all'interno della card
-		card.querySelector('span[table]').remove();
+		// elimino il div .selectable all'interno della card
+		card.querySelector('.v-content').remove();
+		// elimino l'icon star
+		card.querySelector('i').remove();
 		// associo gli eventi mouse
 		// TODO: da eliminare per impostarli nel document.addEventListener
 		card.onmousedown = app.dragStart;
 		card.onmouseup = app.dragEnd;
 		card.onmousemove = app.drag;
-		// prendo il template cardLayout e lo inserisco nella card table
+		// recupero il template cardLayout e lo inserisco nella card table
 		let tmpl = document.getElementById('cardLayout');
 		let content = tmpl.content.cloneNode(true);
 		let cardLayout = content.querySelector('.cardLayout');
