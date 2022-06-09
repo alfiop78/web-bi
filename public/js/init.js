@@ -245,7 +245,6 @@ var Hier = new Hierarchy();
 		let tmpl = document.getElementById('cardLayout');
 		let content = tmpl.content.cloneNode(true);
 		let cardLayout = content.querySelector('.cardLayout');
-
 		// imposto il titolo in h6
 		cardLayout.querySelector('h6').innerHTML = card.dataset.label;
 		// imposto un alias per questa tabella
@@ -254,10 +253,7 @@ var Hier = new Hierarchy();
 		content.querySelector('.cardTable').dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`;
 		card.appendChild(cardLayout);
 		// imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone
-		const hierNumber = app.dropZone.querySelectorAll('.card.table').length + 1;
-		card.querySelector('.hierarchy-order').innerText = hierNumber;
-		card.querySelector('.cardTable').dataset.value = hierNumber;
-		app.dropZone.appendChild(card);
+		app.checkHierarchyNumber(card);
 
 		// tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
 		if (app.tableList.hasAttribute('fact')) {
@@ -278,8 +274,8 @@ var Hier = new Hierarchy();
 		card.setAttribute('y', e.offsetY);
 		// chiudo la list openTableList
 		// TODO: definire in Application.js la chiusura/apertura di tutte le liste
-		app.btnTableList.removeAttribute('open');
-		app.tableList.toggleAttribute('hidden');
+		// app.btnTableList.removeAttribute('open');
+		// app.tableList.toggleAttribute('hidden');
 
 		// evento sul tasto close della card
 		// TODO: da associare al document.addEventListener
@@ -296,6 +292,25 @@ var Hier = new Hierarchy();
 		card.querySelector('button[columns]').onclick = app.handlerAddColumns;
 		card.querySelector('button[hier-order-plus]').onclick = app.handlerHierarchyOrder;
 		card.querySelector('button[hier-order-minus]').onclick = app.handlerHierarchyOrder;
+	}
+
+	app.checkHierarchyNumber = (card) => {
+		// TODO: se è già presente una card con data-value="0" aggiungo la card passata come argomento PRIMA della card già presente
+		// ...successivamente gli imposto il numero dell'ordine gerarchico
+		// console.log(app.dropZone.querySelector(".card.table[data-value='0']"));
+		if (app.dropZone.querySelector(".card.table[data-value='0']")) {
+			app.dropZone.insertBefore(card, document.querySelector(".card.table[data-value='0']"));
+			card.dataset.value = 1;
+			card.querySelector('.cardTable section[options-hier] span').innerText = 1;
+			document.querySelector(".card.table[data-value='0']").dataset.value = 2;
+			// TODO: trovare una soluzione con data-attr nel css e ::after per non dover riscrivere ogni volta il valore in .card.table[data-value] e poi nello span
+			document.querySelector(".card.table[data-value='2'] section[options-hier] span").innerText = 2;
+		} else {
+			const hierNumber = app.dropZone.querySelectorAll('.card.table').length + 1;
+			card.querySelector('.hierarchy-order').innerText = hierNumber;
+			card.dataset.value = hierNumber;
+			app.dropZone.appendChild(card);
+		}
 	}
 
 	app.hierDragStart = (e) => {
@@ -357,7 +372,7 @@ var Hier = new Hierarchy();
 		// selezione della colonna nella card table
 		// console.log(e.target);
 		// passo a activeCard il riferimento nel DOM della card attiva
-		Hier.activeCard = app.dropZone.querySelector(".cardTable[name='" + e.currentTarget.dataset.tableName + "']");
+		Hier.activeCard = app.dropZone.querySelector(".cardTable[data-name='" + e.currentTarget.dataset.tableName + "']");
 		// colonna selezionata
 		cube.fieldSelected = e.currentTarget.dataset.label;
 		// TODO: utilizzare uno dei due qui, cube.fieldSelected oppure hier.field, da rivedere
@@ -442,7 +457,7 @@ var Hier = new Hierarchy();
 		*/
 		const cardTable = e.path[3].querySelector('.cardTable');
 		// console.log('cardTable : ', cardTable);
-		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.getAttribute('name')}; // OPTIMIZE: dataset data-name
+		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.dataset.name};
 		// quando aggiungo la tabella imposto da subito la colonna id in "columns"
 		Hier.activeCard = cardTable; // card attiva
 		cube.mode('columns');
@@ -455,14 +470,15 @@ var Hier = new Hierarchy();
 			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
 		*/
 		const cardTable = e.path[3].querySelector('.cardTable');
-		cube.activeCard = {'ref': cardTable, 'tableName': cardTable.getAttribute('name')}; // OPTIMIZE: dataset data-name
+		// TODO: da rivedere perchè non è presente lo schema ?
+		cube.activeCard = {'ref': cardTable, 'tableName': cardTable.dataset.name};
 		cube.mode('metrics', 'Seleziona le colonne da impostare come Metriche');
 	}
 
 	// aggiunta metrica composta
 	app.handlerAddCompositeMetric = async (e) => {
 		// recupero dal DB le colonne della tabella
-		const cardTable = app.dropZone.querySelector(".cardTable[name='" + e.target.dataset.label + "']");
+		const cardTable = app.dropZone.querySelector(".cardTable[data-name='" + e.target.dataset.label + "']");
 		cube.activeCard = {'ref': cardTable, schema : e.target.dataset.schema, 'tableName': e.target.dataset.label};
 		// NOTE: utilizzo await per aspettare la risposta dal DB
 		const data = await app.getTable();
@@ -780,7 +796,7 @@ var Hier = new Hierarchy();
 			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
 		*/
 		const cardTable = e.path[3].querySelector('.cardTable');
-		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.getAttribute('name')}; // OPTIMIZE: dataset data-name
+		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.dataset.name};
 		cube.mode('relations');
 	}
 
@@ -883,7 +899,7 @@ var Hier = new Hierarchy();
 		card.className = 'card table';
 		// split della stringa <schema>.<tabella>
 		card.dataset.schema = lastTableObject.schema; // schema
-		card.setAttribute('label', lastTableObject.table); // tabella // OPTIMIZE: dataset data-label
+		card.dataset.label = lastTableObject.table; // tabella
 		if (fact) card.setAttribute('fact', true); // OPTIMIZE: dataset data-fact
 		card.onmousedown = app.dragStart;
 		card.onmouseup = app.dragEnd;
@@ -909,8 +925,8 @@ var Hier = new Hierarchy();
 		card.querySelector('button[data-id="closeTable"]').onclick = app.handlerCloseCard;
 		// evento sulla input di ricerca nella card
 		// input di ricerca, imposto l'attr data-element-search
-		card.querySelector('input[type="search"]').setAttribute('data-element-search', card.getAttribute('label'));
-		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.dataset.schema, 'tableName': card.getAttribute('label')}; // OPTIMIZE: dataset data-label
+		card.querySelector('input[type="search"]').dataset.elementSearch = card.dataset.label;
+		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.dataset.schema, 'tableName': card.dataset.label};
 
 		// event sui tasti section[options]
 		card.querySelector('button[join]').onclick = app.handlerAddJoin;
@@ -1067,13 +1083,13 @@ var Hier = new Hierarchy();
 			'Event.path' is deprecated and will be removed in M109, around January 2023.
 			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
 		*/
-    	const card = e.path[5]; // .card .table
-    	const cardTable = e.path[3]; // .cardTable, qui è presente il data-value
+    	const card = e.path[5]; // .card .table qui è presente il data-value
+    	const cardTable = e.path[3]; // .cardTable
     	const cardCount = document.querySelectorAll('.card.table').length;
-		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.getAttribute('name')}; // OPTIMIZE: dataset data-name
+		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.dataset.name};
     	// console.log(cube.activeCard.ref); // card attiva
     	// console.log(+cardTable.getAttribute('data-value'));
-    	let value = +cardTable.dataset.value;
+    	let value = +card.dataset.value;
 		// spostare, nel DOM, le card in base al livello gerarchico. Livello gerarchico inferiore le card vanno messe prima nel DOM.
     	// questo consentirà di creare correttamente le gerarchie con il nome della tabella di gerarchia inferiore salvata nella prop 'hierarchies'
     	if (e.target.hasAttribute('hier-order-plus')) {
@@ -1081,20 +1097,21 @@ var Hier = new Hierarchy();
     		// non posso spostare card se supero il numero delle card presenti nella pagina
     		if (value > cardCount) return;
     		// TODO: sostituisco il valore della card successiva con quello della card che sto modificando
-    		card.nextElementSibling.querySelector('.cardTable').dataset.value = cardTable.dataset.value;
-    		card.nextElementSibling.querySelector('.hierarchy-order').innerText = cardTable.dataset.value;
+    		card.nextElementSibling.dataset.value = card.dataset.value;
+    		card.nextElementSibling.querySelector('.hierarchy-order').innerText = card.dataset.value;
     		// identifico la card successiva a quella che sto modificando e la posiziono DOPO
     		if (card.nextElementSibling) card.nextElementSibling.after(card);
     	} else {
     		if (value === 1) return;
 			value--;
 			// console.log(card.previousElementSibling);
-			card.previousElementSibling.querySelector('.cardTable').dataset.value = cardTable.dataset.value;
-    		card.previousElementSibling.querySelector('.hierarchy-order').innerText = cardTable.dataset.value;
+			debugger;
+			card.previousElementSibling.dataset.value = card.dataset.value;
+    		card.previousElementSibling.querySelector('.hierarchy-order').innerText = card.dataset.value;
 			card.previousElementSibling.before(card);
     	}
     	cardTable.querySelector('.hierarchy-order').innerText = value;
-    	cardTable.dataset.value = value;
+    	card.dataset.value = value;
     }
 
 	app.getDimensions();
@@ -1320,13 +1337,13 @@ var Hier = new Hierarchy();
 		let from = [];
 		let lastTables = {};
 		for (let i = 1, index = 0; i <= tableCount; i++, index++) {
-			const table = document.querySelector(".cardTable[data-value='"+i+"']");
-			hierarchyOrder[index] = {schema : table.dataset.schema, table : table.getAttribute('name'), alias : table.dataset.alias}; // OPTIMIZE: dataset data-name
-			from.push(`${table.dataset.schema}.${table.getAttribute('name')} AS ${table.dataset.alias}`); // OPTIMIZE: dataset data-name
+			const table = document.querySelector(".card.table[data-value='"+i+"'] .cardTable");
+			hierarchyOrder[index] = {schema : table.dataset.schema, table : table.dataset.name, alias : table.dataset.alias};
+			from.push(`${table.dataset.schema}.${table.dataset.name} AS ${table.dataset.alias}`);
 			lastTables = {
 				alias : table.dataset.alias,
 				schema : table.dataset.schema,
-				table : table.getAttribute('name') // OPTIMIZE: dataset data-name
+				table : table.dataset.name
 			};
 		}
 		const comment = document.getElementById('textarea-hierarchies-comment').value;
@@ -1348,6 +1365,7 @@ var Hier = new Hierarchy();
 		app.btnSaveHierarchy.disabled = true;
 	}
 
+	// hide hierarchy struct
 	app.btnToggleHierarchyStruct.onclick = (e) => {
 		// console.log(e.target);
 		const hierarchyStruct = document.getElementById('hierarchies');
@@ -1355,39 +1373,36 @@ var Hier = new Hierarchy();
 		e.target.innerText = (hierarchyStruct.hasAttribute('data-open')) ? 'arrow_circle_right' : 'arrow_circle_left';
 	}
 
+	// new hierarchy
 	app.btnNewHierarchy.onclick = (e) => {
 		/* se è presente più di una tabella, nella gerarchia, l'ultima non la elimino.
 		* Questo perchè, l'ultima tabella, sarà messa in relazione anche con le altre gerarchie che verranno create
 		*/
-		debugger;
 		console.log('numero tabelle presenti nella gerarchia : ', app.dropZone.querySelectorAll('.cardTable').length);
 		const cards = app.dropZone.querySelectorAll('.card.table');
-		const tableCount = cards.length;
 		// numero tabelle presenti nella gerarchia corrente
+		const tableCount = cards.length;
 		if (tableCount > 1) {
 			// sono presenti più tabelle, l'ultima della gerarchia non la elimino
 			cards.forEach( (card) => {
-				if (+card.querySelector('.cardTable').dataset.value !== tableCount) {
+				if (+card.dataset.value !== tableCount) {
 					card.remove();
 				} else {
-					// ultima tabella
+					// ultima e unica tabella presente
 					// resetto il 'mode' allo stato iniziale
-					card.removeAttribute('mode');
+					card.querySelector('.cardTable').removeAttribute('mode');
 					card.querySelector('.info').hidden = true;
+					// resetto il numero in .cardTable[data-value]
+					card.dataset.value = 0;
 				}
-			})
+			});
 		} else {
-			debugger;
 			// ripulisco la drop-zone per avere la possibilità di inserire altre gerarchie
 			// recupero tutte le .card.table presenti nella drop-zone per eliminarle
 			app.dropZone.querySelectorAll('.card.table').forEach( card => card.remove());
-			// se la dropzone ha un solo elemento, cioè lo span, allora rimuovo la class dropped per ripristinare lo stato iniziale
+			// se la dropzone ha un solo elemento, cioè lo span impostato all'inizio, allora rimuovo la class dropped per ripristinare lo stato iniziale
 			if (app.dropZone.childElementCount === 1) app.dropZone.classList.remove('dropped');
-			// riduco il section[data-active] relativo alla struttura gerarchica attualmente attiva (sulla destra)
-			document.querySelector('section[data-active]').removeAttribute('data-active');
-			// document.querySelectorAll('#hierTables > div').forEach( table => table.remove());
 		}
-
 		Hier = new Hierarchy();
 	}
 

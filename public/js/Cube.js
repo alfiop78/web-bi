@@ -67,8 +67,8 @@ class Cube {
 		// console.log(card);
 		// debugger;
 		this.card = card; // contiene {'ref': riferimento della card nel DOM, tableName: 'nometabella'}
-		this.card.ref.setAttribute('name', card.tableName);
-		this.card.ref.setAttribute('data-schema', card.schema);
+		this.card.ref.dataset.name = card.tableName;
+		this.card.ref.dataset.schema = card.schema;
 		this._tableName = card.tableName;
 		this.#schema = card.schema;
 	}

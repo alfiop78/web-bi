@@ -326,7 +326,7 @@
 
         <template id="cardLayout">
             <div class="cardLayout">
-                <section class="cardTable" name data-schema data-alias data-value>
+                <section class="cardTable" data-name data-schema data-alias>
                     <section options-hier>
                         <div>
                             <button type="button" class="button-icon material-icons md-18 md-dark" data-tooltip="Incrementa ordine gerarchico" data-tooltip-position="left" hier-order-plus>keyboard_arrow_up</button>
