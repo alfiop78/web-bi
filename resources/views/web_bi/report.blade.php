@@ -535,17 +535,19 @@
 												<h5>Seleziona gli elementi per comporre il Report</h5>
 												<div class="v-grid">
 													<div class="addElementsReport">
-														<section class="columns">
-															<div>
-																<div class="md-field">
-																	<input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" />
-																	<label for="search-columns" class="">Ricerca</label>
-																</div>
-																<ul id="ul-columns-fact"></ul>
-																<ul id="ul-columns" class="full-overflow-list"></ul>
+														<section class="columns parent-ul-columns">
+															<div class="md-field">
+																<input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" />
+																<label for="search-columns" class="">Ricerca</label>
+															</div>
+															<div class="relative-ul">
+																<ul id="ul-columns-fact" class="absolute"></ul>
+															</div>
+															<div class="relative-ul">
+																<ul id="ul-columns" class="absolute"></ul>
 															</div>
 														</section>
-														<section class="parent-ul-filters">
+														<section class="filters parent-ul-filters">
 															<div class="btn-add">
 																<span>Crea filtro</span>
 																<button type="button" id="btn-add-filters" class="button-icon material-icons md-32">add</button>
@@ -561,31 +563,35 @@
 															</div>
 														</section>
 														{{-- metrics --}}
-														<section class="metrics">
+														<section class="metrics parent-ul-metrics">
 															<div class="btn-add">
 																<span>Crea metrica</span>
 																<button type="button" id="btn-add-metrics" class="button-icon material-icons md-32">add</button>
 															</div>
-															<div>
+															<div class="parent-ul-metrics">
 																<div class="md-field">
 																	<input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
 																	<label for="search-exist-metrics" class="">Ricerca</label>
 																</div>
-																<ul id="ul-exist-metrics" class="full-overflow-list"></ul>
+																<div class="relative-ul">
+																	<ul id="ul-exist-metrics" class="absolute"></ul>
+																</div>
 															</div>
 														</section>
 														{{-- composite --}}
-														<section class="composite-metrics">
+														<section class="composite-metrics parent-ul-metrics">
 															<div class="btn-add">
 																<span>Crea metrica composta</span>
 																<button type="button" id="btn-add-composite-metrics" class="button-icon material-icons md-32">add</button>
 															</div>
-															<div>
+															<div class="parent-ul-metrics">
 																<div class="md-field">
 																	<input type="search" data-element-search="search-exist-composite-metrics" id="search-exist-composite-metrics" value autocomplete="off" />
 																	<label for="search-exist-composite-metrics" class="">Ricerca</label>
 																</div>
-																<ul id="ul-exist-composite-metrics" class="full-overflow-list"></ul>
+																<div class="relative-ul">
+																	<ul id="ul-exist-composite-metrics" class="absolute"></ul>
+																</div>
 															</div>															
 														</section>
 													</div>

@@ -12,7 +12,7 @@ span.highlight{color: sienna;}
 .filters-color span.highlight{color: var(--main-filters-color);}
 .metrics-color span.highlight{color: var(--main-metrics-color);}
 .no-highlight{color: dimgray}
-.selectable{margin: 4px; padding: 2px 4px;}
+.selectable{margin: 0px 4px; padding: 2px 4px;}
 .card ul > section .selectable{margin: 0px 4px; padding-top: 0px;}
 .unselectable{margin: 4px; padding: 2px 4px;}
 .selectable > .smalls{display: flex;flex-flow: column;}
@@ -82,6 +82,7 @@ ul[data-object]{position: absolute; overflow: auto; width: 100%; height: calc(10
 
 .parent-ul{display: grid; grid-template-rows: auto auto 1fr;}
 .parent-ul-hierarchies{display: grid; grid-template-rows: auto auto 1fr 4fr;}
-.parent-ul-filters{display: grid; grid-template-rows: auto 1fr;}
+.parent-ul-columns{display: grid; grid-template-rows: auto 2fr 5fr;}
+.parent-ul-filters, .parent-ul-metrics{display: grid; grid-template-rows: auto 1fr;}
 .relative-ul{position: relative; display: flex;flex-direction: column;}
 ul.absolute{position: absolute; height: calc(100% - 24px); overflow: auto; width: 100%;}
