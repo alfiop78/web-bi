@@ -213,7 +213,7 @@ button[data-tooltip-dialog]:not([disabled]):hover::after, button[data-tooltip]:n
   z-index: 9999;
   white-space: nowrap;
   visibility: hidden;
-  animation: tooltip 50ms ease 500ms forwards;
+  animation: tooltip 50ms ease 1s forwards;
 }
 
 button[data-tooltip][data-tooltip-position="right"]:not([disabled]):hover::after{

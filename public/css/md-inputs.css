@@ -1,5 +1,5 @@
 input{font-family: 'Open Sans', sans-serif;border-top-left-radius: 5px;
-      border-top-right-radius: 5px; width: inherit;min-width: 85px;
+      border-top-right-radius: 5px; width: inherit;min-width: 85px; background-color: whitesmoke;
       display:block;border:none;border-bottom: 1px solid rgba(0,0,0,0.10);transition: border .2s;}
 
 /*textarea*/

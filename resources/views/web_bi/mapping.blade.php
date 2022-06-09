@@ -379,6 +379,17 @@
                 </div>
             </section>
 
+            <section class="data-item" data-element-search data-label data-sublist-cubes data-searchable="true">
+                <div>
+                    <div class="h-content">
+                        <div class="selectable v-content">
+                            <span generic></span>
+                        </div>
+                        <i class="material-icons md-18">edit</i>
+                    </div>
+                </div>
+            </section>
+
             <section data-element-search data-label data-sublist-generic data-searchable="true">
                 <span class="sublist">
                     <span generic></span>
@@ -481,7 +492,7 @@
                                 </div>
                             </div>
                             {{-- dimensioni --}}
-                            <div class="absList" id="dimensionList" hidden>
+                            <div class="absList large-list" id="dimensionList" hidden>
                                 <div class="md-field">
                                     <input type="search" id="dimensionSearch" data-element-search="dimensions" autocomplete="off"/>
                                     <label for="dimensionSearch" class="">Ricerca</label>

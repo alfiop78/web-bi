@@ -464,7 +464,7 @@
 
 						<div class="wrapper">
 							{{-- lista processi --}}
-							<div class="absList large" id="reportProcessList" hidden>
+							<div class="absList large-list" id="reportProcessList" hidden>
 								<div class="md-field">
 									<input type="search" id="searchReportProcess" data-element-search="search-process" value="" autocomplete="off" />
 									<label for="searchReportProcess" class="">Ricerca</label>

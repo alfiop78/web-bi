@@ -664,17 +664,18 @@ var Hier = new Hierarchy();
 		const ul = document.getElementById('cubes');
 		for (const [token, value] of StorageCube.cubes) {
 			const content = app.tmplLists.content.cloneNode(true);
-			const section = content.querySelector('section[data-sublist-generic]');
+			const section = content.querySelector('section[data-sublist-cubes]');
+			const spanHContent = section.querySelector('.h-content');
+			const selectable = spanHContent.querySelector('.selectable');
 			const span = section.querySelector('span[generic]');
-			section.dataset.label = token;
+			section.dataset.label = value.name;
 			section.dataset.elementSearch = 'cubes';
+			selectable.dataset.cubeToken = token;
 			span.dataset.cubeToken = token;
 			span.innerText = value.name;
 			span.dataset.fn = 'handlerCubeSelected';
 			ul.appendChild(section);
 		}
-		// associo la Fn che gestisce il click sulle <li>
-		// ul.querySelectorAll('li').forEach( (li) => li.addEventListener('click', app.handlerCubeSelected) );
 	}
 
 	/*var canvas = document.getElementById('canvas');
@@ -1467,7 +1468,10 @@ var Hier = new Hierarchy();
 		delete Dim.dimension;
 	}
 
-	app.showTooltip = (e) => e.target.dataset.desc = e.target.dataset.tooltip;
+	app.showTooltip = (e) => {
+		e.target.dataset.desc = e.target.dataset.tooltip;
+		// TODO: dopo 5 secondi, anche se il mouse non è più posizionato sull'icona, devo nascondere il tooltip
+	}
 
 	// eventi mouseEnter/Leave su tutte le icon con l'attributo data-tooltip
 	document.querySelectorAll('*[data-tooltip]').forEach( icon => {

@@ -1,8 +1,3 @@
-.lists{position: relative;}
-#tableList.absList, #cubesList.absList{width: 260px;}
-#dimensionList.absList{width: 350px;}
-.absList[fact]{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;color: var(--primary-color);}
-.absList > ul{margin-inline: 0px; padding-inline: 0px}
 i[open]{color: red;}
 
 div[draggable]{cursor: grab;}
