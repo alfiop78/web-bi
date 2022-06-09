@@ -28,25 +28,11 @@
 
 		{{-- <small id="tooltip" class="tooltip"></small> --}}
 
-		<dialog id="dialog-column">
-			<small id="dialog-popup" class="popupToast"></small>
-			<section>
+		<dialog id="dialog-column" class="small-dialog">
+			<section class="dialog-sections">
 				<h4>Seleziona le colonne da includere nel report</h4>
 
 				<div class="stepLayout">
-
-					<section class="sectionLists">
-						{{-- <h5>tabelle</h5><h6>subtitle</h6> --}}
-						<div id="parent-list-columns">
-							<h5>colonne</h5>
-							{{-- <div class="md-field">
-								<input type="search" data-element-search="search-columns" id="dialog-columns-search-column" value autocomplete="off" />
-								<label for="dialog-columns-search-column" class="">Ricerca</label>
-							</div> --}}
-							{{-- <ul id="list-columns-fact" class="fact-table"></ul>
-							<ul id="list-columns" class="full-overflow-list-columns"></ul> --}}
-						</div>
-					</section>
 
 					<section class="sectionLists">
 						<h5>SQL</h5><h6>Aggiungere un alias per la colonna</h6>
@@ -173,80 +159,83 @@
 			</div>
 		</dialog>
 
-		<dialog id="dialog-metric">
-			<small id="dialog-popup" class="popupToast"></small>
-			<section data-table-name>
+		<dialog id="dialog-metric" class="large-dialog">
+			<section class="dialog-sections" data-table-name>
 				<h4>Creazione di una nuova metrica per il cubo <span data-cube-selected></span></h4>
 				
 				<div class="stepLayout">
 					{{-- metriche mappate --}}
-					<section class="sectionLists">
+					<section class="sectionLists parent-ul">
 						<h5>Metriche disponibili</h5>
 						<div class="md-field">
 							<input type="search" data-element-search="search-available-metrics" id="search-available-metrics" value autocomplete="off" />
 							<label for="search-available-metrics" class="">Ricerca</label>
 						</div>
-						<ul id="ul-available-metrics"></ul>
+						<div class="relative-ul">
+							<ul id="ul-available-metrics" class="absolute"></ul>
+						</div>
 					</section>
 					{{-- funzioni di aggregazione --}}
-					<section class="sectionLists">
+					<section class="sectionLists parent-ul">
 						<h5>Aggregazione</h5>{{-- <h6>Seleziona la funzione di aggregazione</h6> --}}
 						<div class="md-field">
 							<input type="search" id="search-aggregate-functions" data-element-search="search-aggregate-functions" value="" autocomplete="off" />
 							<label for="search-aggregate-functions" class="">Ricerca</label>
 						</div>
-						<ul id="ul-aggregation-functions" class="dialog-overflow-list">
-							<section data-element-search="search-aggregate-functions" data-label="SUM" data-sublist-gen data-searchable>
-								<div class="selectable" data-label="SUM" selected>
-									<div class="h-content">
-										<div class="v-content">
-											<span item>SUM</span>
+						<div class="relative-ul">
+							<ul id="ul-aggregation-functions" class="absolute">
+								<section data-element-search="search-aggregate-functions" data-label="SUM" data-sublist-gen data-searchable>
+									<div class="selectable" data-label="SUM" selected>
+										<div class="h-content">
+											<div class="v-content">
+												<span item>SUM</span>
+											</div>
 										</div>
 									</div>
-								</div>
-							</section>
+								</section>
 
-							<section data-element-search="search-aggregate-functions" data-label="COUNT" data-sublist-gen data-searchable>
-								<div class="selectable" data-label="COUNT">
-									<div class="h-content">
-										<div class="v-content">
-											<span item>COUNT</span>
+								<section data-element-search="search-aggregate-functions" data-label="COUNT" data-sublist-gen data-searchable>
+									<div class="selectable" data-label="COUNT">
+										<div class="h-content">
+											<div class="v-content">
+												<span item>COUNT</span>
+											</div>
 										</div>
 									</div>
-								</div>
-							</section>
+								</section>
 
-							<section data-element-search="search-aggregate-functions" data-label="AVG" data-sublist-gen data-searchable>
-								<div class="selectable" data-label="AVG">
-									<div class="h-content">
-										<div class="v-content">
-											<span item>AVG</span>
+								<section data-element-search="search-aggregate-functions" data-label="AVG" data-sublist-gen data-searchable>
+									<div class="selectable" data-label="AVG">
+										<div class="h-content">
+											<div class="v-content">
+												<span item>AVG</span>
+											</div>
 										</div>
 									</div>
-								</div>
-							</section>
+								</section>
 
-							<section data-element-search="search-aggregate-functions" data-label="MAX" data-sublist-gen data-searchable>
-								<div class="selectable" data-label="MAX">
-									<div class="h-content">
-										<div class="v-content">
-											<span item>MAX</span>
+								<section data-element-search="search-aggregate-functions" data-label="MAX" data-sublist-gen data-searchable>
+									<div class="selectable" data-label="MAX">
+										<div class="h-content">
+											<div class="v-content">
+												<span item>MAX</span>
+											</div>
 										</div>
 									</div>
-								</div>
-							</section>
+								</section>
 
-							<section data-element-search="search-aggregate-functions" data-label="MIN" data-sublist-gen data-searchable>
-								<div class="selectable" data-label="MIN">
-									<div class="h-content">
-										<div class="v-content">
-											<span item>MIN</span>
+								<section data-element-search="search-aggregate-functions" data-label="MIN" data-sublist-gen data-searchable>
+									<div class="selectable" data-label="MIN">
+										<div class="h-content">
+											<div class="v-content">
+												<span item>MIN</span>
+											</div>
 										</div>
 									</div>
-								</div>
-							</section>
+								</section>
 
-						</ul>
+							</ul>
+						</div>
 						<label class="mdc-checkbox">
 							<input id="checkbox-distinct" type="checkbox" name="distinct-checkbox"/>
 							<span>DISTINCT</span>
@@ -284,23 +273,24 @@
 			</div>
 		</dialog>
 
-		<dialog id="dialog-composite-metric">
-			<small id="dialog-popup" class="popupToast"></small>
-			<section data-table-name>
+		<dialog id="dialog-composite-metric" class="large-dialog">
+			<section class="dialog-sections" data-table-name>
 				<h4>Creazione di una nuova metrica composta per il cubo <span data-cube-selected></span></h4>
 				
 				<div class="stepLayout">
 					{{-- metriche mappate --}}
-					<section class="sectionLists">
+					<section class="sectionLists parent-ul">
 						<h5>Metriche disponibili</h5>
 						<div class="md-field">
 							<input type="search" data-element-search="search-metrics" id="search-metrics" value autocomplete="off" />
 							<label for="search-metrics" class="">Ricerca</label>
 						</div>
-						<ul id="ul-metrics"></ul>
+						<div class="relative-ul">
+							<ul id="ul-metrics" class="absolute"></ul>
+						</div>
 					</section>
 
-					<section class="sectionLists">
+					<section class="sectionLists parent-formula">
 						<h5>SQL</h5>
 						<div class="name-alias">
 							<div class="md-field">
@@ -314,13 +304,7 @@
 								<label for="composite-alias-metric" class="">Alias</label>
 							</div>
 						</div>
-						<div class="md-field">
-							{{-- <textarea id="composite-metricSQLFormula" name="composite-metricSQL" rows="15" cols="25" placeholder="Aggiungi le metriche qui"></textarea> --}}
-
-						</div>
-						<div id="composite-metric-formula" contenteditable="false">
-							
-						</div>
+						<div id="composite-metric-formula" contenteditable="false"></div>
 						<button id="btnCompositeMetricSave" type="button" name="save" class="md-button" disabled>salva</button>
 					</section>
 

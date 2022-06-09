@@ -31,11 +31,6 @@ i[open]{color: red;}
 .step:nth-child(3) .stepLayout{grid-template-columns: 29% 39% 29%; grid-column-gap: 3%; height: inherit;}
 .step:last-child .stepLayout{grid-template-columns: 29% 39% 29%; grid-column-gap: 3%; height: inherit;}
 
-#dialog-filter .stepLayout{grid-template-columns: 20% 20% auto; grid-column-gap: 2%; height: inherit;margin : 0 2em;}
-#dialog-metric .stepLayout{grid-template-columns: 20% 20% auto; grid-column-gap: 3%; height: inherit;margin: 0 2em;}
-#dialog-column .stepLayout{grid-template-columns: 30% calc(70% - 2%); grid-column-gap: 2%; height: inherit;margin : 0 2em;}
-/*#dialog-composite-metric .stepLayout{grid-template-columns: 25% calc(75% - 1%); grid-column-gap: 1%; height: inherit;margin: 0 2em;}*/
-
 .overflowList{height: 350px; overflow-y: auto; background: gainsboro;}
 #fieldList-filter{padding: 0 16px;}
 /* reportSection anteprima */
