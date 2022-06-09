@@ -84,5 +84,7 @@ ul[data-object]{position: absolute; overflow: auto; width: 100%; height: calc(10
 .parent-ul-hierarchies{display: grid; grid-template-rows: auto auto 1fr 4fr;}
 .parent-ul-columns{display: grid; grid-template-rows: auto 2fr 5fr;}
 .parent-ul-filters, .parent-ul-metrics{display: grid; grid-template-rows: auto 1fr;}
+.parent-ul-tables{display: grid; grid-template-rows: auto auto auto 1fr 5fr;}
+.parent-ul-fields{display: grid; grid-template-rows: auto auto auto 1fr;}
 .relative-ul{position: relative; display: flex;flex-direction: column;}
 ul.absolute{position: absolute; height: calc(100% - 24px); overflow: auto; width: 100%;}

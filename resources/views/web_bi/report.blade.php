@@ -103,29 +103,34 @@
 			</div>
 		</dialog>
 
-		<dialog id="dialog-filter">
-			<small id="dialog-popup" class="popupToast"></small>
-			<section data-table-name> {{--  data-hier-name data-dimension-name --}}
+		<dialog id="dialog-filter" class="large-dialog">
+			<section class="dialog-sections" data-table-name> {{--  data-hier-name data-dimension-name --}}
 				<h4>Creazione nuovo filtro</h4>
 				<div class="stepLayout">
 
-					<section class="sectionLists">
+					<section class="sectionLists parent-ul-tables">
 						<h5>Tabelle</h5><h6>Seleziona la tabella</h6>
 						<div class="md-field">
 							<input type="search" data-element-search="search-tables" id="dialog-columns-search-table" value autocomplete="off" />
 							<label for="dialog-columns-search-table" class="">Ricerca</label>
 						</div>
-						<ul id="ul-fact" class="fact-table"></ul>
-						<ul id="ul-tables" class="full-overflow-list-columns"></ul>
+						<div class="relative-ul">
+							<ul id="ul-fact" class="fact-table absolute"></ul>
+						</div>
+						<div class="relative-ul">
+							<ul id="ul-tables" class="absolute"></ul>
+						</div>
 					</section>
 					
-					<section class="sectionLists">
+					<section class="sectionLists parent-ul-fields">
 						<h5>Colonna/e</h5><h6>Seleziona la colonna</h6>
 						<div class="md-field">
 							<input type="search" id="dialog-filter-search-field" data-element-search="dialog-filter-search-field" value autocomplete="off" />
 							<label for="dialog-filter-search-field" class="">Ricerca</label>
 						</div>
-						<ul id="dialog-filter-fields" class="full-overflow-list-columns"></ul>						
+						<div class="relative-ul">
+							<ul id="dialog-filter-fields" class="absolute"></ul>
+						</div>
 					</section>
 
 					<section class="sectionLists">
