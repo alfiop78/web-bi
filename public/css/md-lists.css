@@ -43,15 +43,27 @@ section[data-sublist-composite-metrics]:hover i{visibility: visible;}
 .dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}
 
 @media screen and (max-height: 768px) {
-	.absList{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 6;box-shadow: 0 4px 8px 0px #b5b5b5;}
-	.absList.large{width: 30%; background: white; position: absolute; border-radius: 4px; z-index: 6; box-shadow: 0 4px 8px 0px #b5b5b5;}
+	.absList{width: 250px;background: white;position: absolute; opacity: .7;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;}
+	.absList.large{width: 30%; background: white; position: absolute; opacity: .7; border-radius: 4px; z-index: 1500; box-shadow: 0 4px 8px 0px #b5b5b5;}
 	.absList > ul{height: 300px;overflow-y: auto;}
 }
 
 @media screen and (min-height: 769px) {
 	/*absolute list*/
-	.absList{width: 250px;background: white;position: absolute;border-radius: 4px;z-index: 6;box-shadow: 0 4px 8px 0px #b5b5b5;}
-	.absList.large{width: 30%; background: white; position: absolute; border-radius: 4px; z-index: 6; box-shadow: 0 4px 8px 0px #b5b5b5;}
+	.absList:not([hidden]){
+		display: grid;
+		grid-template-rows: auto 1fr;
+		height: 100%;
+		width: 250px;
+		background: white;
+		position: absolute;
+		opacity: .7;
+		border-radius: 4px;
+		z-index: 1500;
+		box-shadow: 0 4px 8px 0px #b5b5b5;
+	}
+	.absList:hidden{ height: 100%; width: 250px;background: white;position: absolute; opacity: .7;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;}
+	.absList.large{width: 30%; background: white; position: absolute; opacity: .7; border-radius: 4px; z-index: 1500; box-shadow: 0 4px 8px 0px #b5b5b5;}
 	.absList > ul{height: 500px;overflow-y: auto;padding-inline-end: 1em;}
 	/*absolute list*/
 }
@@ -72,9 +84,9 @@ section[data-sublist-composite-metrics]:hover i{visibility: visible;}
 .cardTable[mode='metrics'] ul > section[data-sublist-fields] > .selectable::before{background-color: #587850;}
 
 @keyframes hoverSelected {
-  	0% {transform: scale(.2);}
-  	75% {transform: scale(1.10);}
-  	100% {transform: scale(1);}
+	0% {transform: scale(.2);}
+	75% {transform: scale(1.10);}
+	100% {transform: scale(1);}
 }
 
 /*lista nelle dialog*/

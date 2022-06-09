@@ -20,16 +20,8 @@
 		<script src="/js/lib.js"></script>
 		<script src="/js/Storage.js"></script>
 		<script src="/js/Cube.js"></script>
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@200;400;500;600&display=swap" rel="stylesheet">
-        <style>
-            body {
-                font-family: 'Barlow', sans-serif;
-            }
-        </style>
     </head>
     <body class="antialiased">
-        <small id="tooltip" class="tooltip"></small>
 
         <div class="abs-window" hidden>
             <div id="warning-elements" hidden>
@@ -184,44 +176,45 @@
 
         <dialog id="dialog-column-map" class="medium-dialog">
             <div id="abs-popup-dialog" class="absolute-popup" hidden></div>
-            <section>
+            <section class="dialog-sections">
                 <h4>Imposta ID - Descrizione colonna</h4>
-            </section>
-            <div class="columns-map">
-                <div class="id-ds">
-                    <div>
-                        <span id="column-id">ID</span>
-                        {{-- <div id="textarea-column-id-formula" contenteditable="true">
-                            <strong><span contenteditable="true"></span></strong>
-                        </div> --}}
-                        <textarea id="textarea-column-id-formula" rows="10" placeholder="ID Formula" autocomplete="off" autofocus required minlength="1" readonly></textarea>
-                        <div class="buttons-sql-formula">
-                            <i id="edit-sql-formula-column-id" class="material-icons md-18" data-tooltip="Modifica" data-tooltip-position="bottom">edit</i>
+                <div class="columns-map">
+                    <div class="id-ds">
+                        <div>
+                            <span id="column-id">ID</span>
+                            {{-- <div id="textarea-column-id-formula" contenteditable="true">
+                                <strong><span contenteditable="true"></span></strong>
+                            </div> --}}
+                            <textarea id="textarea-column-id-formula" rows="10" placeholder="ID Formula" autocomplete="off" autofocus required minlength="1" readonly></textarea>
+                            <div class="buttons-sql-formula">
+                                <i id="edit-sql-formula-column-id" class="material-icons md-18" data-tooltip="Modifica" data-tooltip-position="bottom">edit</i>
+                            </div>
+                        </div>
+                        <div>
+                            <span id="column-ds">DESCRIZIONE</span>
+                            <textarea id="textarea-column-ds-formula" rows="10" placeholder="Description Formula" autocomplete="off" required minlength="1" readonly></textarea>
+                            <div class="buttons-sql-formula">
+                                <i id="edit-sql-formula-column-ds" class="material-icons md-18" data-tooltip="Modifica" data-tooltip-position="bottom">edit</i>
+                            </div>
                         </div>
                     </div>
+
                     <div>
-                        <span id="column-ds">DESCRIZIONE</span>
-                        <textarea id="textarea-column-ds-formula" rows="10" placeholder="Description Formula" autocomplete="off" required minlength="1" readonly></textarea>
-                        <div class="buttons-sql-formula">
-                            <i id="edit-sql-formula-column-ds" class="material-icons md-18" data-tooltip="Modifica" data-tooltip-position="bottom">edit</i>
+                        <div class="md-field">
+                            <input type="search" id="search" data-element-search="search" autocomplete="off" />
+                            <label for="tableSearch" class="">Ricerca</label>
                         </div>
-                    </div>
+                        <ul id="ul-column-map" hidden></ul>
+                    </div>                
+
                 </div>
 
-                <div>
-                    <div class="md-field">
-                        <input type="search" id="search" data-element-search="search" autocomplete="off" />
-                        <label for="tableSearch" class="">Ricerca</label>
-                    </div>
-                    <ul id="ul-column-map" hidden></ul>
-                </div>                
-
-            </div>
-
-            <div class="dialog-buttons">
-                <button type="button" name="cancel" class="md-button">annulla</button>
-                <button id="btnColumnsMap" type="button" name="done" class="md-button">ok</button>
-            </div>
+                <div class="dialog-buttons">
+                    <button type="button" name="cancel" class="md-button">annulla</button>
+                    <button id="btnColumnsMap" type="button" name="done" class="md-button">ok</button>
+                </div>
+            </section>
+            
         </dialog>
 
         <dialog id="cube-name" class="dialog-save">
@@ -287,23 +280,24 @@
             
         </dialog>
 
-        <dialog id="dialog-composite-metric">
-            <small id="dialog-popup" class="popupToast"></small>
-            <section data-table-name>
+        <dialog id="dialog-composite-metric" class="large-dialog">
+            <section class="dialog-sections" data-table-name>
                 <h4>Creazione di una nuova metrica composta per il cubo <span data-cube-selected></span></h4>
                 
                 <div class="stepLayout">
                     {{-- metriche mappate --}}
-                    <section class="sectionLists">
+                    <section class="sectionLists parent-ul">
                         <h5>Metriche disponibili</h5>
                         <div class="md-field">
                             <input type="search" data-element-search="search-metrics" id="search-metrics" value autocomplete="off" />
                             <label for="search-metrics" class="">Ricerca</label>
                         </div>
-                        <ul id="ul-fields" class="dialog-overflow-list"></ul>
+                        <div class="relative-ul">
+                            <ul id="ul-fields" class="absolute"></ul>
+                        </div>
                     </section>
 
-                    <section class="sectionLists">
+                    <section class="sectionLists parent-formula">
                         <h5>SQL</h5>
                         <div class="name-alias">
                             <div class="md-field">
@@ -316,13 +310,7 @@
                                 <label for="composite-alias-metric" class="">Alias</label>
                             </div>
                         </div>
-                        <div class="md-field">
-                            {{-- <textarea id="composite-metricSQLFormula" name="composite-metricSQL" rows="15" cols="25" placeholder="Aggiungi le metriche qui"></textarea> --}}
-
-                        </div>
-                        <div id="composite-metric-formula" contenteditable="false">
-                            
-                        </div>
+                        <div id="composite-metric-formula" contenteditable="false"></div>
                         <button id="btnCompositeMetricSave" type="button" name="save" class="md-button" disabled>salva</button>
                     </section>
 
@@ -479,51 +467,38 @@
                             </div>
                         </div>
 
-                        <div class="lists">
+                        <section class="wrapper">
+                            {{-- div 1 --}}
                             <div class="absList" id="tableList" hidden>
                                 <div class="md-field">
                                     <input type="search" id="tableSearch" data-element-search="tables" autocomplete="off" />
                                     <label for="tableSearch" class="">Ricerca</label>
                                 </div>
-                                <ul id="tables"></ul>
-                            </div>
-                        </div>
-
-                        <div class="lists">
-                            <div class="absList" id="cubesList" hidden>
-                                <div class="md-field">
-                                    <input type="search" id="cubeSearch" data-element-search="cubes" autocomplete="off"/>
-                                    <label for="cubeSearch" class="">Ricerca</label>
+                                <div class="relative-ul">
+                                    <ul id="tables" class="absolute"></ul>
                                 </div>
-                                <ul id="cubes"></ul>
                             </div>
-                        </div>
-
-                        <div class="lists">                            
+                            {{-- dimensioni --}}
                             <div class="absList" id="dimensionList" hidden>
                                 <div class="md-field">
                                     <input type="search" id="dimensionSearch" data-element-search="dimensions" autocomplete="off"/>
                                     <label for="dimensionSearch" class="">Ricerca</label>
                                 </div>
-                                <ul id="dimensions">
-                                {{--    @php 
-                                        $arrayDim = json_decode($dimensions, true); //array, ogni elementi dell'array è una dimensione 
-                                    @endphp
-                                    @foreach($arrayDim as $key => $dimension)
-                                        @php
-                                            $jsonDimension = json_decode($dimension['json_value']);
-                                        @endphp
-                                        <div class="element dimensions" data-source-db>
-                                            <h5 label="{{ $jsonDimension->{'name'} }}">{{ $jsonDimension->{'name'} }}</h5>
-                                            <div id="miniCard-db" class="miniCard"><h6>{{ $jsonDimension->{'lastTableInHierarchy'} }}</h6></div>
-                                        </div>
-                                    @endforeach --}}
-                                </ul>
+                                <div class="relative-ul">
+                                    <ul id="dimensions" class="absolute"></ul>
+                                </div>
                             </div>
-                        </div>
 
-                        <section class="wrapper">
-                            {{-- div 1 --}}
+                            <div class="absList" id="cubesList" hidden>
+                                <div class="md-field">
+                                    <input type="search" id="cubeSearch" data-element-search="cubes" autocomplete="off"/>
+                                    <label for="cubeSearch" class="">Ricerca</label>
+                                </div>
+                                <div class="relative-ul">
+                                    <ul id="cubes" class="absolute"></ul>
+                                </div>
+                            </div>
+
                             <div id="drop">
                                 <div id="drop-zone" class="dropzone"><span>Trascina qui le tabelle da mappare</span></div>
                                 <div id="hierarchies">

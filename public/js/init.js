@@ -474,6 +474,9 @@ var Hier = new Hierarchy();
 			const div = section.querySelector('div.selectable');
 			const span = section.querySelector('span[data-item]');
 			section.removeAttribute('hidden');
+			section.dataset.label = field.COLUMN_NAME;
+			section.dataset.elementSearch = 'search-metrics';
+			section.dataset.searchable = true;
 			div.dataset.label = field.COLUMN_NAME;
 			span.innerText = field.COLUMN_NAME;
 			div.onclick = app.handlerMetricSelectedComposite;
@@ -842,6 +845,7 @@ var Hier = new Hierarchy();
 		e.target.toggleAttribute('open');
 		document.getElementById('tableList').toggleAttribute('hidden');
 		document.getElementById('tableSearch').focus();
+		document.getElementById('tableSearch').select();
 	}
 
 	app.addFields = (ul, response) => {
@@ -1136,6 +1140,7 @@ var Hier = new Hierarchy();
 		e.target.toggleAttribute('open');
 		app.tableList.toggleAttribute('hidden');
 		document.getElementById('tableSearch').focus();
+		document.getElementById('tableSearch').select();
 	}
 
 	// salvataggio del cubo

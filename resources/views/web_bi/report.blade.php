@@ -343,16 +343,6 @@
 								{{-- <i id="btnDuplicateReport" class="material-icons md-18" data-tooltip="Duplica report" data-tooltip-position="bottom">content_copy</i> --}}
 							</div>
 						</div>
-
-						<div class="lists">
-							<div class="absList large" id="reportProcessList" hidden>
-								<div class="md-field">
-									<input type="search" id="searchReportProcess" data-element-search="search-process" value="" autocomplete="off" />
-									<label for="searchReportProcess" class="">Ricerca</label>
-								</div>
-								<ul id="ul-processes"></ul>
-							</div>
-						</div>
 	  
 						<template id="templateList">
 
@@ -473,6 +463,17 @@
 						</template>
 
 						<div class="wrapper">
+							{{-- lista processi --}}
+							<div class="absList large" id="reportProcessList" hidden>
+								<div class="md-field">
+									<input type="search" id="searchReportProcess" data-element-search="search-process" value="" autocomplete="off" />
+									<label for="searchReportProcess" class="">Ricerca</label>
+								</div>
+								<div class="relative-ul">
+									<ul id="ul-processes" class="absolute"></ul>
+								</div>
+							</div>
+
 							<div class="steps" data-step="1">
 								<div class="overflow">
 									<div id="stepTranslate" data-translate-x="0">
