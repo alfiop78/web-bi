@@ -214,7 +214,7 @@ var Hier = new Hierarchy();
 		// in app.getTable() vengono utilizzate le property della classe Cube (cube.card.schema, cube.card.tableName);
 		if (e.dataTransfer.dropEffect === 'copy') {
 			const data = await app.getTable();
-			app.addFields(cube.card.ref.querySelector("ul[data-id='columns']"), data);
+			app.addFields(cube.activeCard.querySelector("ul[data-id='columns']"), data);
 		}
 	}
 
@@ -231,6 +231,7 @@ var Hier = new Hierarchy();
         console.log('card : ', card); // class h-content e attributo draggable="true"
 		// la .card draggable diventa .card .table
 		card.className = 'card table';
+		card.dataset.id = card.id;
 		card.removeAttribute('draggable');
 		// elimino il div .selectable all'interno della card
 		card.querySelector('.v-content').remove();
@@ -278,13 +279,15 @@ var Hier = new Hierarchy();
 		card.querySelector('button[data-id="closeTable"]').onclick = app.handlerCloseCard;
 		// imposto la input search, con questo attributo, l'evento input viene gestito in Application.js
 		card.querySelector('input').dataset.elementSearch = card.dataset.label;	
-		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.dataset.schema, 'tableName': card.dataset.label};
+		// cube.activeCard = {'ref': card, 'schema' : card.dataset.schema, 'tableName': card.dataset.label};
+		cube.activeCard = card.id;
 
 		// event sui tasti section[options]
 		// TODO: da gestire con document.addEventListener
 		card.querySelector('button[join]').onclick = app.handlerAddJoin;
 		card.querySelector('button[metrics]').onclick = app.handlerAddMetric;
 		card.querySelector('button[composite-metrics]').onclick = app.handlerAddCompositeMetric;
+		card.querySelector('button[columns]').dataset.id = card.id;
 		card.querySelector('button[columns]').onclick = app.handlerAddColumns;
 		card.querySelector('button[hier-order-plus]').onclick = app.handlerHierarchyOrder;
 		card.querySelector('button[hier-order-minus]').onclick = app.handlerHierarchyOrder;
@@ -456,7 +459,7 @@ var Hier = new Hierarchy();
 		*/
 		const cardTable = e.path[3].querySelector('.cardTable');
 		// console.log('cardTable : ', cardTable);
-		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.dataset.name};
+		cube.activeCard = e.target.dataset.id
 		// quando aggiungo la tabella imposto da subito la colonna id in "columns"
 		Hier.activeCard = cardTable; // card attiva
 		cube.mode('columns');
@@ -802,9 +805,7 @@ var Hier = new Hierarchy();
 	// recupero i field della tabella
 	app.getTable = async () => {
 		// elemento dove inserire le colonne della tabella
-		// const ul = cube.card.ref.querySelector("ul[data-id='columns']");
-		console.log(cube.card.schema, cube.card.tableName);
-	    return await fetch('/fetch_api/'+cube.activeCard.schema+'/schema/'+cube.activeCard.tableName+'/table_info')
+	    return await fetch('/fetch_api/'+cube.activeCard.dataset.schema+'/schema/'+cube.activeCard.dataset.label+'/table_info')
 			.then( (response) => {
 				if (!response.ok) {throw Error(response.statusText);}
 				return response;

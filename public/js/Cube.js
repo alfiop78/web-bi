@@ -62,15 +62,12 @@ class Cube {
 		});
 	}
 
-	set activeCard(card) {
+	set activeCard(id) {
 		// la card è un obj contenente il riferimento nel DOM e il nome della tabella
 		// console.log(card);
 		// debugger;
-		this.card = card; // contiene {'ref': riferimento della card nel DOM, tableName: 'nometabella'}
-		this.card.ref.dataset.name = card.tableName;
-		this.card.ref.dataset.schema = card.schema;
-		this._tableName = card.tableName;
-		this.#schema = card.schema;
+		this.card = document.querySelector(".card.table[data-id='" + id +"']"); // contiene {'ref': riferimento della card nel DOM (.card.table), schema: 'schema', tableName: 'nometabella'}
+		this.#schema = this.card.dataset.schema;
 	}
 
 	get activeCard() {return this.card;}
