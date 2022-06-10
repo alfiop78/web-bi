@@ -330,7 +330,7 @@
                     <section options-hier>
                         <div>
                             <button type="button" class="button-icon material-icons md-18 md-dark" data-tooltip="Incrementa ordine gerarchico" data-tooltip-position="left" hier-order-plus>keyboard_arrow_up</button>
-                            <span class="hierarchy-order"></span>
+                            <span data-value="" class="hierarchy-order"></span>
                             <button type="button" class="button-icon material-icons md-18 md-dark" hier-order-minus data-tooltip="Decrementa ordine gerarchico" data-tooltip-position="left">keyboard_arrow_down</button>
                         </div>
                     </section>

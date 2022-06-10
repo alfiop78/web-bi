@@ -272,10 +272,6 @@ var Hier = new Hierarchy();
 		card.style.transform = 'translate3d(' + e.offsetX + 'px, ' + e.offsetY + 'px, 0)';
 		card.setAttribute('x', e.offsetX);
 		card.setAttribute('y', e.offsetY);
-		// chiudo la list openTableList
-		// TODO: definire in Application.js la chiusura/apertura di tutte le liste
-		// app.btnTableList.removeAttribute('open');
-		// app.tableList.toggleAttribute('hidden');
 
 		// evento sul tasto close della card
 		// TODO: da associare al document.addEventListener
@@ -292,6 +288,8 @@ var Hier = new Hierarchy();
 		card.querySelector('button[columns]').onclick = app.handlerAddColumns;
 		card.querySelector('button[hier-order-plus]').onclick = app.handlerHierarchyOrder;
 		card.querySelector('button[hier-order-minus]').onclick = app.handlerHierarchyOrder;
+		document.getElementById('tableSearch').focus();
+		document.getElementById('tableSearch').select();
 	}
 
 	app.checkHierarchyNumber = (card) => {
@@ -301,13 +299,14 @@ var Hier = new Hierarchy();
 		if (app.dropZone.querySelector(".card.table[data-value='0']")) {
 			app.dropZone.insertBefore(card, document.querySelector(".card.table[data-value='0']"));
 			card.dataset.value = 1;
-			card.querySelector('.cardTable section[options-hier] span').innerText = 1;
+			// card.querySelector('.cardTable section[options-hier] span').innerText = 1;
+			card.querySelector('.cardTable section[options-hier] span').dataset.value = 1;
 			document.querySelector(".card.table[data-value='0']").dataset.value = 2;
 			// TODO: trovare una soluzione con data-attr nel css e ::after per non dover riscrivere ogni volta il valore in .card.table[data-value] e poi nello span
-			document.querySelector(".card.table[data-value='2'] section[options-hier] span").innerText = 2;
+			document.querySelector(".card.table[data-value='2'] section[options-hier] span").dataset.value = 2;
 		} else {
 			const hierNumber = app.dropZone.querySelectorAll('.card.table').length + 1;
-			card.querySelector('.hierarchy-order').innerText = hierNumber;
+			card.querySelector('.hierarchy-order').dataset.value = hierNumber;
 			card.dataset.value = hierNumber;
 			app.dropZone.appendChild(card);
 		}
@@ -1096,21 +1095,20 @@ var Hier = new Hierarchy();
     		value++;
     		// non posso spostare card se supero il numero delle card presenti nella pagina
     		if (value > cardCount) return;
-    		// TODO: sostituisco il valore della card successiva con quello della card che sto modificando
+    		// sostituisco il valore della card successiva con quello della card che sto modificando
     		card.nextElementSibling.dataset.value = card.dataset.value;
-    		card.nextElementSibling.querySelector('.hierarchy-order').innerText = card.dataset.value;
+    		card.nextElementSibling.querySelector('.hierarchy-order').dataset.value = card.dataset.value;
     		// identifico la card successiva a quella che sto modificando e la posiziono DOPO
     		if (card.nextElementSibling) card.nextElementSibling.after(card);
     	} else {
+    		// se il data-value della card = 1 non posso decrementarla
     		if (value === 1) return;
 			value--;
-			// console.log(card.previousElementSibling);
-			debugger;
 			card.previousElementSibling.dataset.value = card.dataset.value;
-    		card.previousElementSibling.querySelector('.hierarchy-order').innerText = card.dataset.value;
+    		card.previousElementSibling.querySelector('.hierarchy-order').dataset.value = card.dataset.value;
 			card.previousElementSibling.before(card);
     	}
-    	cardTable.querySelector('.hierarchy-order').innerText = value;
+    	cardTable.querySelector('.hierarchy-order').dataset.value = value;
     	card.dataset.value = value;
     }
 
@@ -1448,10 +1446,10 @@ var Hier = new Hierarchy();
 		cube.save();
 
 		// salvo il cubo in localStorage
-		debugger;
 		StorageCube.save(cube.cube);
 		// salvo il cubo sul DB
         // app.saveCube(cube.cube);
+        // TODO: pulisco la dropZone
 		app.dialogCubeName.close();
 	}
 
@@ -1472,11 +1470,9 @@ var Hier = new Hierarchy();
 		app.dialogDimensionName.close();	
 		// chiudo le card presenti
 		app.closeCards();
+		// pulisco la sezione #hierarchies
+		document.querySelectorAll('#hierarchies > .hierarchies > *').forEach( hier => hier.remove());
 		// visualizzo le dimensioni create
-		// imposto, sulla icona openTableList, il colore della fact
-		console.debug('REVISIONARE');
-		app.btnTableList.setAttribute('fact', true); // OPTIMIZE: dataset data-fact
-		debugger;
 
 		app.getDimensions(); // TODO: qui andrò ad aggiornare solo la dimensione appena salvata/modificata
 

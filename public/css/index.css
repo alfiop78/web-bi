@@ -51,6 +51,8 @@ section[options-hier] > div{background-color: #494949; color: white; border-radi
 section[options-hier] i{color: gainsboro;}
 section[options-hier] i:hover{color: white!important;}
 section[options-hier] .hierarchy-order{display: flex;justify-content: center;align-items: center;}
+/* NOTE: recupero il valore da visualizzare, dall'attributo data-value*/
+span.hierarchy-order::after{content: attr(data-value);}
 
 
 /* dialog TODO:  da spostare in md-dialog.css*/
