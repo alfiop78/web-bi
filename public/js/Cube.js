@@ -62,16 +62,6 @@ class Cube {
 		});
 	}
 
-	// set activeCard(id) {
-	// 	// la card è un obj contenente il riferimento nel DOM e il nome della tabella
-	// 	// console.log(card);
-	// 	// debugger;
-	// 	this.card = document.querySelector(".card.table[data-id='" + id +"']"); // contiene {'ref': riferimento della card nel DOM (.card.table), schema: 'schema', tableName: 'nometabella'}
-	// 	this.schema = this.card.dataset.schema;
-	// }
-
-	// get activeCard() {return this.card;}
-
 	set fieldSelected(value) {this._field = value;}
 
 	get fieldSelected() {return this._field;}
@@ -134,7 +124,7 @@ class Cube {
 	get dimensionsSelected() {return this._dimensions;}
 
 	set associatedDimensions(token) {
-		debugger;
+		// debugger;
 		// TODO: valutare oggetto Map()
 		this._associatedDimension.push(token);
 		// this._associatedDimension = obj;
@@ -236,26 +226,30 @@ class Hierarchy {
 	get activeCard() {return this.card;}
 
 	set mode(value) {
-		// imposto la modalità della card (relations, columns, filters, groupby,metrics)
-		// console.log(this.activeCardRef);
-		this.card.dataset.mode = value;
+		// imposto la modalità della card (relations, columns, filters, groupby, metrics)
 		let info = this.card.querySelector('.info');
-		info.removeAttribute('hidden');
-		let msg;
-		switch (value) {
-			case 'columns':
-				msg = 'Seleziona le colonne da mettere nel corpo della tabella';
-				break;
-			case 'relations':
-				msg = 'Selezionare le colonne che saranno messe in relazione';
-				break;
-			case 'hier-order':
-				msg = 'Selezionare le tabelle nell\'ordine gerarchico';
-				break;
-			default:
-				break;
+		if (this.card.dataset.mode === value) {
+			this.card.toggleAttribute('data-mode');
+			info.hidden = true;
+		} else {
+			this.card.dataset.mode = value;
+			info.hidden = false;
+			let msg;
+			switch (value) {
+				case 'columns':
+					msg = 'Seleziona le colonne da mettere nel corpo della tabella';
+					break;
+				case 'relations':
+					msg = 'Selezionare le colonne che saranno messe in relazione';
+					break;
+				case 'hier-order':
+					msg = 'Selezionare le tabelle nell\'ordine gerarchico';
+					break;
+				default:
+					break;
+			}
+			info.innerHTML = msg;
 		}
-		info.innerHTML = msg;
 	}
 
 	get mode() {return this.card.dataset.mode;}

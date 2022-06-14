@@ -93,9 +93,9 @@ section[data-sublist-composite-metrics]:hover i{visibility: visible;}
 .selectable.metrics-color::before{background-color : var(--main-metrics-color);}
 
 /* lista all'interno della card*/
-.cardTable[mode='columns'] ul > section[data-sublist-fields] > .selectable::before{background-color: #9a6a6a;}
-.cardTable[mode='relations'] ul > section[data-sublist-fields] > .selectable::before{background-color: #99b19c;}
-.cardTable[mode='metrics'] ul > section[data-sublist-fields] > .selectable::before{background-color: #587850;}
+.card.table[data-mode='columns'] ul > section[data-sublist-fields] > .selectable::before{background-color: #9a6a6a;}
+.card.table[data-mode='relations'] ul > section[data-sublist-fields] > .selectable::before{background-color: #99b19c;}
+.card.table[data-mode='metrics'] ul > section[data-sublist-fields] > .selectable::before{background-color: #587850;}
 
 @keyframes hoverSelected {
 	0% {transform: scale(.2);}

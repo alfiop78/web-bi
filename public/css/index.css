@@ -117,11 +117,10 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 .card.table > .cardLayout{display: grid;grid-template-columns: 100%;position: relative;grid-template-rows: auto auto;}
 .card.table > .cardLayout > .cardTable{position: relative;height: fit-content;display: grid;grid-template-areas: "title" "input" "body" "footer";
   z-index: 1;}
-.card.table > .cardLayout > .cardTable > .info{font-size: .7rem;padding: 8px;background: lemonchiffon;border-bottom-left-radius: 4px;border-bottom-right-radius: 4px;}
-.card.table > .cardLayout > .cardTable[mode='relations'] > .info{background: #99b19c;color: white;}
-.card.table > .cardLayout > .cardTable[mode='columns'] > .info{background: #9a6a6a;color: white;}
-.card.table > .cardLayout > .cardTable[filters] > .info{background: #3b7096;color: white;}
-.card.table > .cardLayout > .cardTable[mode='metrics'] > .info{background: #587850;color: white;}
+.card.table .info{font-size: .7rem;padding: 8px;background: lemonchiffon;border-bottom-left-radius: 4px;border-bottom-right-radius: 4px;}
+.card.table[data-mode='relations'] .info{background: #99b19c;color: white;}
+.card.table[data-mode='columns'] .info{background: #9a6a6a;color: white;}
+.card.table[data-mode='metrics'] .info{background: #587850;color: white;}
 
 .card.table .cardTable > .title{grid-area: title;height: fit-content;background: tan;border-top-left-radius: 4px;
   border-top-right-radius: 4px;display: flex;align-items: flex-start;justify-content: space-between;}

@@ -284,10 +284,12 @@ var Hier = new Hierarchy();
 
 		// event sui tasti section[options]
 		// TODO: da gestire con document.addEventListener
-		card.querySelector('button[join]').onclick = app.handlerAddJoin;
+		card.querySelector('button[join]').onclick = app.handlerJoin;
 		card.querySelector('button[join]').dataset.id = card.id;
-		card.querySelector('button[metrics]').onclick = app.handlerAddMetric;
+		card.querySelector('button[metrics]').onclick = app.handlerMetric;
+		card.querySelector('button[metrics]').dataset.id = card.id;
 		card.querySelector('button[composite-metrics]').onclick = app.handlerAddCompositeMetric;
+		card.querySelector('button[composite-metrics]').dataset.id = card.id;
 		card.querySelector('button[columns]').dataset.id = card.id;
 		card.querySelector('button[columns]').onclick = app.handlerAddColumns;
 		card.querySelector('button[hier-order-plus]').onclick = app.handlerHierarchyOrder;
@@ -371,12 +373,11 @@ var Hier = new Hierarchy();
 	// app.content.ondragend = app.handlerDragEnd;
 	app.content.addEventListener('dragend', app.handlerDragEnd, true);
 
+	// selezione della colonna nella card table
 	app.handlerColumns = (e) => {
-		// selezione della colonna nella card table
 		// console.log(e.target);
-		// passo a activeCard il riferimento nel DOM della card attiva
+		// imposto la card attiva
 		Hier.activeCard = e.currentTarget.dataset.tableId
-		// colonna selezionata
 		// TODO: utilizzare uno dei due qui, cube.fieldSelected oppure hier.field, da rivedere
 		cube.fieldSelected = e.currentTarget.dataset.label;
 		Hier.fieldRef = e.currentTarget;
@@ -457,29 +458,27 @@ var Hier = new Hierarchy();
 		Hier.mode = 'columns';
 	}
 
-	// add join
-	app.handlerAddJoin = (e) => {
-		Hier.activeCard = e.target.dataset.id
+	app.handlerJoin = (e) => {
+		Hier.activeCard = e.target.dataset.id;
+		// se ho già due tabelle selezionate per creare la join e la tabella attualmente selezionata non è tra queste 2 non posso creare la join
+		if (app.dropZone.querySelectorAll('.card[data-mode="relations"]').length === 2 && Hier.activeCard.dataset.mode !== 'relations') {
+			App.showConsole('Sono già presenti due tabelle da mettere in relazione', 'warning', 4000);
+			return;
+		}
 		Hier.mode = 'relations';
 	}
 
-	app.handlerAddMetric = (e) => {
+	app.handlerMetric = (e) => {
 		// imposto il metrics mode
-		/* BUG: e.path deprecato
-			'Event.path' is deprecated and will be removed in M109, around January 2023.
-			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
-		*/
-		const cardTable = e.path[3].querySelector('.cardTable');
-		// TODO: da rivedere perchè non è presente lo schema ?
-		cube.activeCard = {'ref': cardTable, 'tableName': cardTable.dataset.name};
-		cube.mode('metrics', 'Seleziona le colonne da impostare come Metriche');
+		Hier.activeCard = e.target.dataset.id;
+		Hier.mode = 'metrics';
 	}
 
 	// aggiunta metrica composta
 	app.handlerAddCompositeMetric = async (e) => {
 		// recupero dal DB le colonne della tabella
 		const cardTable = app.dropZone.querySelector(".cardTable[data-name='" + e.target.dataset.label + "']");
-		cube.activeCard = {'ref': cardTable, schema : e.target.dataset.schema, 'tableName': e.target.dataset.label};
+		// cube.activeCard = {'ref': cardTable, schema : e.target.dataset.schema, 'tableName': e.target.dataset.label};
 		// NOTE: utilizzo await per aspettare la risposta dal DB
 		const data = await app.getTable();
 		// popolo la lista #ul-fields	
@@ -551,13 +550,13 @@ var Hier = new Hierarchy();
 				// se, in questa relazione, è presente anche la tabella FACT rinomino hier_n in fact_n in modo da poter separare le gerarchie
 				// e capire quali sono quelle con la fact e quali no (posso salvare la Dimensione, senza il legame con il Cubo)
 				if (card.hasAttribute('fact')) {
+					debugger;
 					console.log('FACT TABLE Relation');
 					cube.relations['cubeJoin_'+cube.relationId] = hier;
 					cube.relationId++;
 					// console.log(cube.relations);
 					cube.saveRelation(colSelected);
 				} else {
-					debugger;
 					Hier.join = hier;
 					// visualizzo le icone di "join" nelle due colonne
 					Hier.showRelationIcons(colSelected);
@@ -688,6 +687,7 @@ var Hier = new Hierarchy();
 			section.dataset.label = value.name;
 			section.dataset.elementSearch = 'cubes';
 			selectable.dataset.cubeToken = token;
+			selectable.id = token;
 			span.dataset.cubeToken = token;
 			span.innerText = value.name;
 			span.dataset.fn = 'handlerCubeSelected';
@@ -719,7 +719,7 @@ var Hier = new Hierarchy();
 		// TODO: la prop privata _metric la devo definire tramite un Metodo
 		cube.metricDefined = StorageCube.selected.metrics;
 		cube.columnsDefined = StorageCube.selected.columns;
-		debugger;
+		// debugger;
 		StorageCube.selected.associatedDimensions.forEach( dim => {
 			cube.associatedDimensions = dim;
 		});
@@ -883,13 +883,20 @@ var Hier = new Hierarchy();
 	app.addCard = async (lastTableObject, fact) => {
 		// creo la card (label)
 		// fact : true/false
-		debugger;
 		let card = document.createElement('div');
 		card.className = 'card table';
 		// split della stringa <schema>.<tabella>
 		card.dataset.schema = lastTableObject.schema; // schema
 		card.dataset.label = lastTableObject.table; // tabella
-		if (fact) card.setAttribute('fact', true); // OPTIMIZE: dataset data-fact
+		if (fact) {
+			card.setAttribute('fact', true); // OPTIMIZE: dataset data-fact
+			card.dataset.id = "fact-0";
+			card.id ="fact-0";	
+		} else {
+			card.dataset.id = "table-0";
+			card.id ="table-0";	
+		}
+		
 		card.onmousedown = app.dragStart;
 		card.onmouseup = app.dragEnd;
 		card.onmousemove = app.drag;
@@ -902,7 +909,7 @@ var Hier = new Hierarchy();
 		// imposto il titolo in h6
 		// TODO: imposto l'alias della tabella
 		cardLayout.querySelector('.subtitle').innerHTML = `AS ${lastTableObject.alias}`;
-		cardLayout.querySelector('.cardTable').dataset.alias = lastTableObject.alias;
+		card.dataset.alias = lastTableObject.alias;
 		cardLayout.querySelector('h6').innerHTML = lastTableObject.table;
 		card.appendChild(cardLayout);
 		console.log(card);
@@ -915,17 +922,17 @@ var Hier = new Hierarchy();
 		// evento sulla input di ricerca nella card
 		// input di ricerca, imposto l'attr data-element-search
 		card.querySelector('input[type="search"]').dataset.elementSearch = card.dataset.label;
-		cube.activeCard = {'ref': card.querySelector('.cardTable'), 'schema' : card.dataset.schema, 'tableName': card.dataset.label};
+		Hier.activeCard = card.id;
 
 		// event sui tasti section[options]
-		card.querySelector('button[join]').onclick = app.handlerAddJoin;
+		card.querySelector('button[join]').onclick = app.handlerJoin;
+		card.querySelector('button[join').dataset.id = card.dataset.id;
 
-		// console.log(cube.activeCard.schema, cube.activeCard.tableName);
 		// ottengo l'elenco dei field della tabella
 		const data = await app.getTable();
 		// popolo la ul[data-id="columns"] della card corrente recuperata dalla Classe Cube cube.card.ref
 		// debugger;
-		app.addFields(cube.card.ref.querySelector("ul[data-id='columns']"), data);
+		app.addFields(Hier.activeCard.querySelector("ul[data-id='columns']"), data);
 	}
 
 	// button "utilizza" nell'elenco delle dimensioni
@@ -983,7 +990,7 @@ var Hier = new Hierarchy();
 	        cube.activeCard = {ref: card.querySelector('.cardTable'), schema : value.schema, tableName : value.table};
 	        // debugger;
 	        // event sui tasti section[options]
-	        card.querySelector('i[join]').onclick = app.handlerAddJoin;
+	        card.querySelector('i[join]').onclick = app.handlerJoin;
 	        card.querySelector('i[columns]').onclick = app.handlerAddColumns;
 	        // input di ricerca, imposto l'attr data-element-search
 	        card.querySelector('input[type="search"]').dataset.elementSearch = value.table;
@@ -1079,6 +1086,7 @@ var Hier = new Hierarchy();
     	const card = e.path[5]; // .card .table qui è presente il data-value
     	const cardTable = e.path[3]; // .cardTable
     	const cardCount = document.querySelectorAll('.card.table').length;
+    	// TODO: 
 		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.dataset.name};
     	// console.log(cube.activeCard.ref); // card attiva
     	// console.log(+cardTable.getAttribute('data-value'));
@@ -1382,8 +1390,8 @@ var Hier = new Hierarchy();
 					card.remove();
 				} else {
 					// ultima e unica tabella presente
-					// resetto il 'mode' allo stato iniziale
-					card.querySelector('.cardTable').removeAttribute('mode');
+					// resetto il 'data-mode' allo stato iniziale
+					card.removeAttribute('data-mode');
 					card.querySelector('.info').hidden = true;
 					// resetto il numero in .cardTable[data-value]
 					card.dataset.value = 0;
@@ -1404,13 +1412,14 @@ var Hier = new Hierarchy();
 		console.log('cube save');
 		// TODO: devo verificare se il nome del cubo esiste già, sia in locale che sul db.
 		cube.title = document.getElementById('cubeName').value;
+		cube.columnsDefined = Object.fromEntries(Hier.columns);
 		debugger;
-		cube.columnsDefined = Hier.columns_;
 		cube.comment = document.getElementById('textarea-cube-comment').value;
 		cube.FACT = document.querySelector('.card.table[fact]').dataset.label;
 		// TODO: recupero l'alias della FACT
-		cube.alias = document.querySelector('.card.table[fact] .cardTable').dataset.alias;
+		cube.alias = document.querySelector('.card.table[fact]').dataset.alias;
 		cube.schema = document.querySelector('.card.table[fact]').dataset.schema;
+		debugger;
 		// Creo il cubeId basandomi sui cubi già creati in Storage, il cubeId lo associo al cubo che sto per andare a salvare.
 		// TODO: con l'aggiunta del token non servirà più il cubeId, da eliminare 2022-05-24
 		// cube.id = StorageCube.getIdAvailable();
@@ -1471,7 +1480,9 @@ var Hier = new Hierarchy();
 
 		app.getDimensions(); // TODO: qui andrò ad aggiornare solo la dimensione appena salvata/modificata
 
-		delete Dim.dimension;
+		// delete Dim.dimension;
+		Dim = new Dimension();
+		Hier = new Hierarchy();
 	}
 
 	app.showTooltip = (e) => {
@@ -1504,8 +1515,6 @@ var Hier = new Hierarchy();
 	// selezione di una metrica per la creazione di una metrica composta
 	app.handlerMetricSelectedComposite = (e) => {
 		// TODO: aggiungo la metrica alla textarea
-		console.log(cube.activeCard.tableName);
-		// debugger;
 		const textArea = document.getElementById('composite-metric-formula');
 		// creo uno span con dentro la metrica
 		const mark = document.createElement('mark');
