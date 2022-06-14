@@ -214,7 +214,7 @@ var Hier = new Hierarchy();
 		// in app.getTable() vengono utilizzate le property della classe Cube (cube.card.schema, cube.card.tableName);
 		if (e.dataTransfer.dropEffect === 'copy') {
 			const data = await app.getTable();
-			app.addFields(cube.activeCard.querySelector("ul[data-id='columns']"), data);
+			app.addFields(Hier.activeCard.querySelector("ul[data-id='columns']"), data);
 		}
 	}
 
@@ -251,7 +251,7 @@ var Hier = new Hierarchy();
 		// imposto un alias per questa tabella
 		const time = Date.now().toString();
 		cardLayout.querySelector('.subtitle').innerHTML = `AS ${card.dataset.label}_${time.substring(time.length - 3)}`;
-		content.querySelector('.cardTable').dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`;
+		card.dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`;
 		card.appendChild(cardLayout);
 		// imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone
 		app.checkHierarchyNumber(card);
@@ -280,11 +280,12 @@ var Hier = new Hierarchy();
 		// imposto la input search, con questo attributo, l'evento input viene gestito in Application.js
 		card.querySelector('input').dataset.elementSearch = card.dataset.label;	
 		// cube.activeCard = {'ref': card, 'schema' : card.dataset.schema, 'tableName': card.dataset.label};
-		cube.activeCard = card.id;
+		Hier.activeCard = card.id;
 
 		// event sui tasti section[options]
 		// TODO: da gestire con document.addEventListener
 		card.querySelector('button[join]').onclick = app.handlerAddJoin;
+		card.querySelector('button[join]').dataset.id = card.id;
 		card.querySelector('button[metrics]').onclick = app.handlerAddMetric;
 		card.querySelector('button[composite-metrics]').onclick = app.handlerAddCompositeMetric;
 		card.querySelector('button[columns]').dataset.id = card.id;
@@ -374,16 +375,15 @@ var Hier = new Hierarchy();
 		// selezione della colonna nella card table
 		// console.log(e.target);
 		// passo a activeCard il riferimento nel DOM della card attiva
-		Hier.activeCard = app.dropZone.querySelector(".cardTable[data-name='" + e.currentTarget.dataset.tableName + "']");
+		Hier.activeCard = e.currentTarget.dataset.tableId
 		// colonna selezionata
-		cube.fieldSelected = e.currentTarget.dataset.label;
 		// TODO: utilizzare uno dei due qui, cube.fieldSelected oppure hier.field, da rivedere
-		Hier.field = {field : e.currentTarget.dataset.label, type : e.currentTarget.dataset.key};
+		cube.fieldSelected = e.currentTarget.dataset.label;
 		Hier.fieldRef = e.currentTarget;
 		// imposto l'alias per la tabella
-		Hier.alias = cube.card.ref.dataset.alias;
+		Hier.alias = Hier.card.dataset.alias;
 
-		let attrs = cube.card.ref.getAttribute('mode'); // OPTIMIZE: dataset data-mode
+		let attrs = Hier.card.dataset.mode;
 
 		switch (attrs) {
 			case 'relations':
@@ -437,14 +437,14 @@ var Hier = new Hierarchy();
 				break;
 			default:
 				// columns
-				if (cube.card.ref.hasAttribute('mode')) {
-					console.log('columns');
-					// TODO: rivedere se utilizzare il metodo con l'oggetto Map(), come fatto in Query.metrics
-					e.currentTarget.toggleAttribute('columns');
+				e.currentTarget.toggleAttribute('columns');
+				if (e.currentTarget.hasAttribute('columns')) {
 					// imposto la colonna selezionata nelle textarea ID - DS
 					app.txtareaColumnId.innerText = cube.fieldSelected;
 					app.txtareaColumnDs.innerText = cube.fieldSelected;
 					app.dialogColumnMap.showModal();
+				} else {
+					// TODO: deselect
 				}
 		}
 	}
@@ -453,16 +453,14 @@ var Hier = new Hierarchy();
 	app.handlerAddColumns = (e) => {
 		// console.log(e.target);
 		// console.log('add columns');
-		/* BUG: e.path deprecato
-			'Event.path' is deprecated and will be removed in M109, around January 2023.
-			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
-		*/
-		const cardTable = e.path[3].querySelector('.cardTable');
-		// console.log('cardTable : ', cardTable);
-		cube.activeCard = e.target.dataset.id
-		// quando aggiungo la tabella imposto da subito la colonna id in "columns"
-		Hier.activeCard = cardTable; // card attiva
-		cube.mode('columns');
+		Hier.activeCard = e.target.dataset.id
+		Hier.mode = 'columns';
+	}
+
+	// add join
+	app.handlerAddJoin = (e) => {
+		Hier.activeCard = e.target.dataset.id
+		Hier.mode = 'relations';
 	}
 
 	app.handlerAddMetric = (e) => {
@@ -536,11 +534,12 @@ var Hier = new Hierarchy();
 		let colSelected = [];
 		// console.log( document.querySelectorAll('.cardTable[mode="relations"] .selectable[relations][data-selected]').length);
 		// quando i campi selezionati sono 1 recupero il nome della tabella perchè questa gerarchia avrà il nome della prima tabella selezionata da mettere in relazione
-		if (document.querySelectorAll('.cardTable[mode="relations"] .selectable[relations][data-selected]').length === 1) {
-			Hier.table = document.querySelector('.cardTable[mode="relations"] .selectable[relations][data-selected]').dataset.tableName;
+		if (document.querySelectorAll('.card.table[data-mode="relations"] .selectable[relations][data-selected]').length === 1) {
+			// recupero la prima, delle due tabelle, da mettere in relazione
+			Hier.table = document.querySelector('.card.table[data-mode="relations"] .selectable[relations][data-selected]').dataset.tableName;
 		}
 		// console.log('dimension.table : ', Hier.table);
-		document.querySelectorAll('.cardTable[mode="relations"]').forEach( card => {
+		document.querySelectorAll('.card.table[data-mode="relations"]').forEach( card => {
 			let spanRef = card.querySelector('.selectable[relations][data-selected]');
 			if (spanRef) {
 				// metto in un array gli elementi selezionati per la creazione della gerarchia
@@ -791,21 +790,10 @@ var Hier = new Hierarchy();
 	    });
 	}
 
-	app.handlerAddJoin = (e) => {
-		// debugger;
-		/* BUG: e.path deprecato
-			'Event.path' is deprecated and will be removed in M109, around January 2023.
-			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
-		*/
-		const cardTable = e.path[3].querySelector('.cardTable');
-		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.dataset.name};
-		cube.mode('relations');
-	}
-
 	// recupero i field della tabella
 	app.getTable = async () => {
 		// elemento dove inserire le colonne della tabella
-	    return await fetch('/fetch_api/'+cube.activeCard.dataset.schema+'/schema/'+cube.activeCard.dataset.label+'/table_info')
+	    return await fetch('/fetch_api/'+Hier.activeCard.dataset.schema+'/schema/'+Hier.activeCard.dataset.label+'/table_info')
 			.then( (response) => {
 				if (!response.ok) {throw Error(response.statusText);}
 				return response;
@@ -873,8 +861,9 @@ var Hier = new Hierarchy();
     		const div = section.querySelector('div.selectable');
     		const span = div.querySelector('span[data-item]');
     		section.dataset.label = value.COLUMN_NAME;
-    		section.dataset.elementSearch = cube.activeCard.tableName;
-    		div.dataset.tableName = cube.activeCard.tableName;
+    		section.dataset.elementSearch = Hier.activeCard.dataset.label;
+    		div.dataset.tableId = Hier.activeCard.id;
+    		div.dataset.tableName = Hier.activeCard.dataset.label;
     		div.dataset.label = value.COLUMN_NAME;
     		div.dataset.key = value.CONSTRAINT_NAME;
 			span.innerText = value.COLUMN_NAME;
@@ -1003,6 +992,9 @@ var Hier = new Hierarchy();
 	        const data = await app.getTable();
 	        app.addFields(cube.card.ref.querySelector("ul[data-id='columns']"), data);
 	        // imposto la card attiva
+	        debugger;
+	        // console.log(card.id);
+	        // cube.activeCard = card.id;
 	        Hier.activeCard = card.querySelector('.cardTable');
 	        // seleziono i campi impostati nella dimensione, nelle proprietà 'hierarchies[hiername]columns[value]'
 	        // per ogni colonna in questa tabella...
@@ -1010,6 +1002,7 @@ var Hier = new Hierarchy();
 	        if (columns.hasOwnProperty(value.alias)) {
 	        	for (const [token, field] of Object.entries(dim.hierarchies[hierName].columns[value.alias])) {
 		        	console.log(token, field.id.origin_field);
+		        	debugger;
 		        	Hier.activeCard.querySelector(".selectable[data-label='"+field.id.origin_field+"']").toggleAttribute('columns');
 		        	Hier.field = field;
 					// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
@@ -1263,19 +1256,20 @@ var Hier = new Hierarchy();
 		// console.log(app.txtareaColumnId.selectionStart);
 	}*/
 
+	// save column
 	app.btnColumnMap.onclick = () => {
 		Hier.field = {
-			id : {field : app.txtareaColumnId.value, type : 'da_completare', SQL : null, origin_field : Hier.field.field},
-			ds : {field : app.txtareaColumnDs.value, type : 'da_completare', SQL : null, origin_field : Hier.field.field}
+			id : {field : app.txtareaColumnId.value, type : 'da_completare', SQL : null, origin_field : Hier.fieldRef.dataset.label},
+			ds : {field : app.txtareaColumnDs.value, type : 'da_completare', SQL : null, origin_field : Hier.fieldRef.dataset.label}
 		};
 		// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
 		const rand = () => Math.random(0).toString(36).substr(2);
 		const token = rand().substr(0, 7);
+		// TODO: rivedere se utilizzare il metodo con l'oggetto Map(), come fatto in Query.metrics
 		Hier.columns(token);
 		// imposto il token sulla colonna selezionata, mi servirà in fase di deselezione della colonna
 		Hier.fieldRef.dataset.tokenColumn = token;
 		app.dialogColumnMap.close();
-		// const btnSaveHierarchy = document.querySelector("#box-hierarchy section[data-id='hierarchies'][data-active] button[data-id='hierarchySave']");
 		app.btnSaveHierarchy.disabled = (Object.keys(Hier.columns_).length !== 0) ? false : true;
 	}
 

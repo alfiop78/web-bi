@@ -62,15 +62,15 @@ class Cube {
 		});
 	}
 
-	set activeCard(id) {
-		// la card è un obj contenente il riferimento nel DOM e il nome della tabella
-		// console.log(card);
-		// debugger;
-		this.card = document.querySelector(".card.table[data-id='" + id +"']"); // contiene {'ref': riferimento della card nel DOM (.card.table), schema: 'schema', tableName: 'nometabella'}
-		this.#schema = this.card.dataset.schema;
-	}
+	// set activeCard(id) {
+	// 	// la card è un obj contenente il riferimento nel DOM e il nome della tabella
+	// 	// console.log(card);
+	// 	// debugger;
+	// 	this.card = document.querySelector(".card.table[data-id='" + id +"']"); // contiene {'ref': riferimento della card nel DOM (.card.table), schema: 'schema', tableName: 'nometabella'}
+	// 	this.schema = this.card.dataset.schema;
+	// }
 
-	get activeCard() {return this.card;}
+	// get activeCard() {return this.card;}
 
 	set fieldSelected(value) {this._field = value;}
 
@@ -128,29 +128,6 @@ class Cube {
 	}
 
 	get cube() {return this._cube;}
-
-	mode(value) {
-		// imposto la modalità della card (relations, columns, filters, groupby,metrics)
-		// console.log(this.activeCardRef);
-		this.card.ref.setAttribute('mode', value);
-		let info = this.card.ref.parentElement.querySelector('.info');
-		info.removeAttribute('hidden');
-		let msg;
-		switch (value) {
-			case 'columns':
-				msg = 'Seleziona le colonne da mettere nel corpo della tabella';
-				break;
-			case 'relations':
-				msg = 'Selezionare le colonne che saranno messe in relazione';
-				break;
-			case 'hier-order':
-				msg = 'Selezionare le tabelle nell\'ordine gerarchico';
-				break;
-			default:
-				break;
-		}
-		info.innerHTML = msg;
-	}
 
 	set dimensionsSelected(value) {this._dimensions.push(value);}
 
@@ -256,15 +233,38 @@ class Hierarchy {
 
 	get from() {return this.#from;}
 
-	set activeCard(cardRef) {
+	set activeCard(id) {
 		// la card su cui si sta operando
-		this.card = cardRef;
-		console.log(this.card);
-		this.#tableName = this.card.getAttribute('name');
-		this.#schema = this.card.getAttribute('data-schema');
+		this.card = document.querySelector(".card.table[data-id='" + id +"']"); // contiene {'ref': riferimento della card nel DOM (.card.table), schema: 'schema', tableName: 'nometabella'}
+		this.schema = this.card.dataset.schema;
 	}
 
 	get activeCard() {return this.card;}
+
+	set mode(value) {
+		// imposto la modalità della card (relations, columns, filters, groupby,metrics)
+		// console.log(this.activeCardRef);
+		this.card.dataset.mode = value;
+		let info = this.card.querySelector('.info');
+		info.removeAttribute('hidden');
+		let msg;
+		switch (value) {
+			case 'columns':
+				msg = 'Seleziona le colonne da mettere nel corpo della tabella';
+				break;
+			case 'relations':
+				msg = 'Selezionare le colonne che saranno messe in relazione';
+				break;
+			case 'hier-order':
+				msg = 'Selezionare le tabelle nell\'ordine gerarchico';
+				break;
+			default:
+				break;
+		}
+		info.innerHTML = msg;
+	}
+
+	get mode() {return this.card.dataset.mode;}
 
 	set field(object) {this.#field = object;}
 
@@ -306,36 +306,25 @@ class Hierarchy {
 
 	get comment() {return this.#comment;}
 
-	// set hierarchies(hier) {this.#hierarchies = hier;}
-
-	// get hierarchies() {return this.#hierarchies;}
-
 	set hier(object) {
 		console.log('object : ', object);
 		debugger;
 		this.#hier[object.token] = {order : object.hierarchyOrder};
 		this.#hier[object.token]['name'] = object.name;
 		this.#hier[object.token]['columns'] = this.#columns;
-		this.#hier[object.token]['joins'] = this.#join;
+		this.#hier[object.token]['joins'] = this.#join; // TODO: this.join
 		this.#hier[object.token]['from'] = object.from;
 		this.#hier[object.token]['tablesFrom'] = object.tablesForm;
 		this.#hier[object.token]['comment'] = object.comment;
-		// TODO: qui effettuo il controllo per vedere se, quando ci sono più gerarchie, viene condivisa l'ultima tabella, che deve essere la stessa per ciascuna delle gerarchie.
-		// this.lastTableHierarchy = object.lastTables;
 		console.log('this._hierarchies : ', this.#hier);
-		// this.hierarchies = this.#hier;
-		// console.log(this.hierarchies);
 	}
 
 	get hier() {return this.#hier;}
 
-	/*set lastTableHierarchy(value) {this.#lastTableHierarchy = value;}
-
-	get lastTableHierarchy() {return this.#lastTableHierarchy;}*/
-
 	set columns_(value) {
 		this.#columns = value;
 		console.log('#columns : ', this.#columns);
+		debugger;
 	}
 
 	get columns_() {return this.#columns;}
