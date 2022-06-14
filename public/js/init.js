@@ -444,7 +444,7 @@ var Hier = new Hierarchy();
 					app.txtareaColumnDs.innerText = cube.fieldSelected;
 					app.dialogColumnMap.showModal();
 				} else {
-					// TODO: deselect
+					Hier.columns = e.currentTarget.dataset.tokenColumn;
 				}
 		}
 	}
@@ -544,7 +544,7 @@ var Hier = new Hierarchy();
 			if (spanRef) {
 				// metto in un array gli elementi selezionati per la creazione della gerarchia
 				colSelected.push(spanRef);
-				hier.push(card.dataset.alias+'.'+spanRef.dataset.label); // questa istruzione crea "Azienda_xxx.id" (alias.field)
+				hier.push(`${card.dataset.alias}.${spanRef.dataset.label}`); // questa istruzione crea "Azienda_xxx.id" (alias.field)
 			}
 			// per creare correttamente la relazione è necessario avere due elementi selezionati
 			if (hier.length === 2) {
@@ -1266,11 +1266,11 @@ var Hier = new Hierarchy();
 		const rand = () => Math.random(0).toString(36).substr(2);
 		const token = rand().substr(0, 7);
 		// TODO: rivedere se utilizzare il metodo con l'oggetto Map(), come fatto in Query.metrics
-		Hier.columns(token);
+		Hier.columns = token;
 		// imposto il token sulla colonna selezionata, mi servirà in fase di deselezione della colonna
 		Hier.fieldRef.dataset.tokenColumn = token;
 		app.dialogColumnMap.close();
-		app.btnSaveHierarchy.disabled = (Object.keys(Hier.columns_).length !== 0) ? false : true;
+		app.btnSaveHierarchy.disabled = (Hier.columns.size !== 0) ? false : true;
 	}
 
 	// tasto report nella sezione controls -> fabs
@@ -1326,17 +1326,17 @@ var Hier = new Hierarchy();
 		// contare quante tabelle sono presenti nella gerarchia corrente
 		// eseguire un ciclo che inizia da 1 (per la prima tabella della gerarchia)
 		// recuperare le tabelle in ordine per aggiungerle all'object hierarchyOrder
-		const tableCount = document.querySelectorAll('.cardTable').length;
+		const tableCount = document.querySelectorAll('.card.table').length;
 		let from = [];
 		let lastTables = {};
 		for (let i = 1, index = 0; i <= tableCount; i++, index++) {
-			const table = document.querySelector(".card.table[data-value='"+i+"'] .cardTable");
-			hierarchyOrder[index] = {schema : table.dataset.schema, table : table.dataset.name, alias : table.dataset.alias};
-			from.push(`${table.dataset.schema}.${table.dataset.name} AS ${table.dataset.alias}`);
+			const table = document.querySelector(".card.table[data-value='"+i+"']");
+			hierarchyOrder[index] = {schema : table.dataset.schema, table : table.dataset.label, alias : table.dataset.alias};
+			from.push(`${table.dataset.schema}.${table.dataset.label} AS ${table.dataset.alias}`);
 			lastTables = {
 				alias : table.dataset.alias,
 				schema : table.dataset.schema,
-				table : table.dataset.name
+				table : table.dataset.label
 			};
 		}
 		const comment = document.getElementById('textarea-hierarchies-comment').value;

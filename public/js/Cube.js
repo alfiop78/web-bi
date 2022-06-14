@@ -148,9 +148,10 @@ class Dimension {
 	#comment;
 	#lastTableHierarchy;
 	#hier = {};
+	#dimension = {};
 	constructor() {
 		this.schema;
-		this._dimension = {};
+		// this._dimension = {};
 	}
 
 	set hier(value) {
@@ -177,7 +178,6 @@ class Dimension {
 	get comment() {return this.#comment;}
 
 	save() {
-		debugger;
 		const rand = () => Math.random(0).toString(36).substr(2);
 		const token = rand().substr(0, 21);
 		// imposto la data last_created e last_edit
@@ -185,29 +185,27 @@ class Dimension {
 		// const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
 		const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
 		// console.log(date.toLocaleDateString('it-IT', options));
-		this._dimension.token = token;
+		this.#dimension.token = token;
 		// TODO: quando sarà implementata la modifica di una dimensione dovrò utilizzare solo updated_at
-		this._dimension.created_at = date.toLocaleDateString('it-IT', options);
-		this._dimension.updated_at = date.toLocaleDateString('it-IT', options);
-		this._dimension.type = 'DIMENSION';
-		this._dimension.name = this._title;
-		this._dimension.comment = this.#comment;
-		this._dimension.cubes = {}; // object con i nomi dei cubi che hanno associazione con questa dimensione. Questa viene popolata quando si associa la dimensione al cubo
-		this._dimension.lastTableInHierarchy = this.#lastTableHierarchy;
-		this._dimension.hierarchies = this.#hier;
-		console.log(this._dimension);
+		this.#dimension.created_at = date.toLocaleDateString('it-IT', options);
+		this.#dimension.updated_at = date.toLocaleDateString('it-IT', options);
+		this.#dimension.type = 'DIMENSION';
+		this.#dimension.name = this._title;
+		this.#dimension.comment = this.comment;
+		this.#dimension.cubes = {}; // object con i nomi dei cubi che hanno associazione con questa dimensione. Questa viene popolata quando si associa la dimensione al cubo
+		this.#dimension.lastTableInHierarchy = this.lastTableHierarchy;
+		this.#dimension.hierarchies = this.hier;
+		console.log(this.#dimension);
 		debugger;
 	}
 
-	get dimension() {return this._dimension;}
+	get dimension() {return this.#dimension;}
 
 }
 
 class Hierarchy {
 	#schema;
-	#tableName;
-	#col = {};
-	#columns = {};
+	#columns = new Map();
 	#join = {};
 	#relationId = 0;
 	#field; // TODO: da modificare in fieldDs
@@ -217,15 +215,11 @@ class Hierarchy {
 	#hier = {};
 	#from;
 	#table;
-	#hierarchies;
 	#lastTableHierarchy;
 	#alias; // alias per la tabella
 	constructor() {}
 
-	set table(value) {
-		// debugger;
-		this.#table = value;
-	}
+	set table(value) {this.#table = value;}
 	
 	get table() {return this.#table;}
 
@@ -282,20 +276,12 @@ class Hierarchy {
 		// genero un token per questa relazione
 		const alias = value[0].split('.')[0];
 		const rand = () => Math.random(0).toString(36).substr(2);
-		// const token = (length) => (rand()+rand()+rand()+rand()).substr(0,length);
 		const token = rand().substr(0, 7);
-		// console.log(token(7));
-		// console.log('token : ', token);
 		if (!this.#join.hasOwnProperty(alias)) {
-			// questa tabella non ha ancora nessuna relazione, azzero il relationId
-			// this.#relationId = 0;
+			// questa tabella non ha ancora nessuna relazione
 			this.#join[alias] = { [token] : value };
-			// this.#join[this.table] = {[this.#relationId] : value};
 		} else {
-			// non incremento più relationId ma lo ricavo dal length in base alle relazioni già presenti per ogni tabella
-			// this.#relationId = Object.keys(this.#join[this.table]).length;
 			this.#join[alias][token] = value;
-			// this.#join[this.table][this.#relationId] = value;
 		}
 		console.log('this.#join : ', this.#join);		
 	}
@@ -308,51 +294,41 @@ class Hierarchy {
 
 	set hier(object) {
 		console.log('object : ', object);
-		debugger;
 		this.#hier[object.token] = {order : object.hierarchyOrder};
 		this.#hier[object.token]['name'] = object.name;
-		this.#hier[object.token]['columns'] = this.#columns;
+		this.#hier[object.token]['columns'] = Object.fromEntries(this.columns);
 		this.#hier[object.token]['joins'] = this.#join; // TODO: this.join
 		this.#hier[object.token]['from'] = object.from;
-		this.#hier[object.token]['tablesFrom'] = object.tablesForm;
+		// this.#hier[object.token]['tablesFrom'] = object.tablesForm;
 		this.#hier[object.token]['comment'] = object.comment;
 		console.log('this._hierarchies : ', this.#hier);
 	}
 
 	get hier() {return this.#hier;}
 
-	set columns_(value) {
-		this.#columns = value;
-		console.log('#columns : ', this.#columns);
-		debugger;
-	}
-
-	get columns_() {return this.#columns;}
-
-	columns(token) {
+	// aggiungo/elimino una colonna
+	set columns(token) {
 		this.obj = {};
-		this.tokenObj = {};
-		if (!this.#col.hasOwnProperty(this.#alias)) {
+		if (!this.#columns.has(this.#alias)) {
 			// alias di tabella ancora non mappata come columns
-			this.tokenObj = { id : this.field.id, ds : this.field.ds};
-			this.obj[token] = this.tokenObj;
-			this.#col[this.#alias] = this.obj;
+			this.obj[token] = { id : this.field.id, ds : this.field.ds};
+			this.#columns.set(this.#alias, this.obj);
 		} else {			
 			// tabella già presente, verifico se il token è già presente, se non lo è lo aggiungo altrimenti lo elimino
-			if (!this.#col[this.#alias].hasOwnProperty(token)) {
+			if (!this.#columns.get(this.#alias).hasOwnProperty(token)) {
 				// field non esistente per questa tabella, lo aggiungo
-				this.#col[this.#alias][token] = {id : this.field.id, ds : this.field.ds};
+				this.#columns.get(this.#alias)[token] = {id : this.field.id, ds : this.field.ds};
 			} else {
 				// field già esiste per questa tabella, lo elimino
-				delete this.#col[this.#alias][token];
+				delete this.#columns.get(this.#alias)[token];
 				// elimino anche l'attr "schema.table" se, al suo interno, non sono presenti altri field
-				if (Object.keys(this.#col[this.#alias]).length === 0) delete this.#col[this.#alias];
+				if (this.#columns.get(this.#alias).size === 0) this.#columns.delete(this.#alias);
 			}
 		}
-		this.columns_ = this.#col;
+		console.log('this.#columns : ', this.#columns);
 	}
 
-	// getColumns() {return this.#columns;}
+	get columns() {return this.#columns;}
 
 	showRelationIcons(value) {
 		// value : colSelected
