@@ -43,9 +43,28 @@ section[data-sublist-composite-metrics]:hover i{visibility: visible;}
 .dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}
 
 @media screen and (max-height: 768px) {
-	.absList{width: 250px;background: white;position: absolute; opacity: .7;border-radius: 4px;z-index: 1500;box-shadow: 0 4px 8px 0px #b5b5b5;}
-	.absList.large{width: 30%; background: white; position: absolute; opacity: .7; border-radius: 4px; z-index: 1500; box-shadow: 0 4px 8px 0px #b5b5b5;}
-	.absList > ul{height: 300px;overflow-y: auto;}
+	.absList[hidden]{ height: 90%; left: -100%; width: 25%;background: white;position: absolute;}
+	.absList:not([hidden]){
+		display: grid;
+		grid-template-rows: auto 1fr;
+		height: 90%;
+		width: 40%;
+		align-self: center;
+		left: 2px;
+		background: white;
+		position: absolute;
+		opacity: .9;
+		border-radius: 4px;
+		z-index: 1500;
+		box-shadow: 0 4px 8px 0px #b5b5b5;
+		animation: openList 350ms ease-in-out;
+	}
+	.absList.large-list{width: 35%;}
+	/*.absList.large{width: 30%; background: white; position: absolute; opacity: .9; border-radius: 4px; z-index: 1500; box-shadow: 0 4px 8px 0px #b5b5b5;}*/
+	/*.absList > ul{ height: 500px;overflow-y: auto;padding-inline-end: 1em;}*/
+	.absList[fact]{width: 25%; background: white; position: absolute; border-radius: 4px; z-index: 1500; box-shadow: 0 4px 8px 0px #b5b5b5; color: var(--primary-color);}
+	
+	/*absolute list*/
 }
 
 @media screen and (min-height: 769px) {
@@ -70,15 +89,16 @@ section[data-sublist-composite-metrics]:hover i{visibility: visible;}
 	/*.absList.large{width: 30%; background: white; position: absolute; opacity: .9; border-radius: 4px; z-index: 1500; box-shadow: 0 4px 8px 0px #b5b5b5;}*/
 	/*.absList > ul{ height: 500px;overflow-y: auto;padding-inline-end: 1em;}*/
 	.absList[fact]{width: 25%; background: white; position: absolute; border-radius: 4px; z-index: 1500; box-shadow: 0 4px 8px 0px #b5b5b5; color: var(--primary-color);}
-	@keyframes openList {
-		0% {left: -100%;}
-		25% {left: -50%;}
-		50% {left: -25%;}
-		75% {left: 15px;}
-		100% {left: 2px;}
-	}
-
+	
 	/*absolute list*/
+}
+
+@keyframes openList {
+	0% {left: -100%;}
+	25% {left: -50%;}
+	50% {left: -25%;}
+	75% {left: 15px;}
+	100% {left: 2px;}
 }
 
 /*hover selected elements*/

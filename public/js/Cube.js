@@ -2,7 +2,7 @@ class Cube {
 	#schema;
 	#comment;
 	#alias;
-	#columns;
+	#columns = {};
 	#metrics = {};
 	#metricsMap = new Map();
 	#token;
@@ -107,11 +107,11 @@ class Cube {
 		// console.log(Object.fromEntries(this.#metricsMap));
 		// NOTE: conversione di un oggetto Map in Object
 		this._cube.metrics = Object.fromEntries(this.metrics);
-		this._cube.columns = this.columns;
+		debugger;
+		this._cube.columns = this.columnsDefined;
 		this._cube.FACT = this._fact;
 		this._cube.schema = this.schema;
 		this._cube.alias = this.alias;
-		this._cube.id = this._id;
 		console.log(this.associatedDimensions);
 		debugger;
 		this._cube.associatedDimensions = this.associatedDimensions;

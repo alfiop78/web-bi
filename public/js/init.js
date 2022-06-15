@@ -258,7 +258,6 @@ var Hier = new Hierarchy();
 		// tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
 		if (app.tableList.hasAttribute('data-fact')) {
 			card.dataset.fact = true;
-			app.dropZone.dataset.modeInsert = 'before';
 			// visualizzo l'icona metrics
 			card.querySelector('section[options] > button[composite-metrics]').dataset.schema = card.dataset.schema;
 			card.querySelector('section[options] > button[composite-metrics]').dataset.label = card.dataset.label;
@@ -320,6 +319,7 @@ var Hier = new Hierarchy();
 			card.querySelector('.hierarchy-order').dataset.value = hierNumber;
 			app.dropZone.appendChild(card);
 		}
+		if (card.hasAttribute('data-fact')) app.dropZone.dataset.modeInsert = 'before';
 	}
 
 	app.hierDragStart = (e) => {
@@ -552,6 +552,7 @@ var Hier = new Hierarchy();
 			if (hier.length === 2) {
 				// se, in questa relazione, è presente anche la tabella FACT rinomino hier_n in fact_n in modo da poter separare le gerarchie
 				// e capire quali sono quelle con la fact e quali no (posso salvare la Dimensione, senza il legame con il Cubo)
+				debugger;
 				if (card.hasAttribute('data-fact')) {
 					// TODO: utilizzare un token come fatto per le dimensioni, al posto del relation_id
 					cube.relations['cubeJoin_'+cube.relationId] = hier;
@@ -718,13 +719,14 @@ var Hier = new Hierarchy();
 		console.log('cube selected : ', StorageCube.selected);
 		// ridefinisco le proprietà del cubo, leggendo da quello selezionato, nello storage, per consentirne la modifica o l'aggiunto di dimensioni al cubo
 		cube.metricDefined = StorageCube.selected.metrics;
+		debugger;
 		cube.columnsDefined = StorageCube.selected.columns;
 		cube.schema = StorageCube.selected.schema;
 		StorageCube.selected.associatedDimensions.forEach( dim => {
 			cube.associatedDimensions = dim;
 		});
 		app.addCard(true);
-		// app.addCard(`${StorageCube.selected.schema}.${StorageCube.selected.FACT}`, true);
+		app.dropZone.dataset.modeInsert = 'before';
 		// visualizzo il tasto saveOpenedCube al posto di SaveCube
 		app.btnSaveOpenedCube.hidden = false;
 		app.btnSaveOpenedCube.disabled = false;
@@ -1193,11 +1195,10 @@ var Hier = new Hierarchy();
 		console.log(StorageCube.selected);
 		cube.title = StorageCube.selected.name;
 		cube.alias = StorageCube.selected.alias;
+		cube.schema = StorageCube.selected.schema;
 		cube.FACT = StorageCube.selected.FACT;
-		// Creo il cubeId basandomi sui cubi già creati in Storage, il cubeId lo associo al cubo che sto per andare a salvare.
 		cube.id = StorageCube.selected.id;
 		cube.token = StorageCube.selected.token;
-		debugger;
 
 		cube.dimensionsSelected.forEach( dimensionToken => {
 			const storage = new DimensionStorage();
@@ -1210,6 +1211,7 @@ var Hier = new Hierarchy();
 			// salvo il cubo all'interno della dimensione, comprese la sua join con questa dimensione
 			// dimensionObject[dimensionName].cubes.push({[cube._title] : cube.relations});
 			// TODO: impostare cubes come un object e non come un array, in questo modo è più semplice recuperarlo da report/init.js "app.handlerDimensionSelected()"
+			debugger;
 			dimensionObject[dimensionToken].cubes[cube.token] = cube.relations;
 			console.log(dimensionObject[dimensionToken]);
 			// salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
@@ -1263,6 +1265,7 @@ var Hier = new Hierarchy();
 
 	// save column
 	app.btnColumnMap.onclick = () => {
+		debugger;
 		Hier.field = {
 			id : {field : app.txtareaColumnId.value, type : 'da_completare', SQL : null, origin_field : Hier.fieldRef.dataset.label},
 			ds : {field : app.txtareaColumnDs.value, type : 'da_completare', SQL : null, origin_field : Hier.fieldRef.dataset.label}
@@ -1411,6 +1414,7 @@ var Hier = new Hierarchy();
 		console.log('cube save');
 		// TODO: devo verificare se il nome del cubo esiste già, sia in locale che sul db.
 		cube.title = document.getElementById('cubeName').value;
+		debugger;
 		cube.columnsDefined = Object.fromEntries(Hier.columns);
 		cube.comment = document.getElementById('textarea-cube-comment').value;
 		cube.FACT = document.querySelector('.card.table[data-fact]').dataset.label;
@@ -1531,43 +1535,15 @@ var Hier = new Hierarchy();
 	document.getElementById('composite-alias-metric').oninput = () => app.checkDialogCompositeMetric();
 
 	// NOTE: esempio di utilizzo di MutationObserver
-	/*const body = document.getElementById('body');
+	const body = document.getElementById('body');
     // create a new instance of `MutationObserver` named `observer`,
 	// passing it a callback function
 	const observer = new MutationObserver(function() {
-	    // console.log('callback that runs when observer is triggered');
-	    document.querySelectorAll('*[data-fn]').forEach( span => {
-	    	// debugger;
-	    	span.onclick = app[span.dataset.fn];
-	    });
+	    console.log('callback that runs when observer is triggered');
+	    body.querySelectorAll('*[data-fn]').forEach( element => element.addEventListener('click', app[element.dataset.fn]));
 	});
 	// call `observe()` on that MutationObserver instance,
 	// passing it the element to observe, and the options object
-	observer.observe(body, {subtree: true, childList: true, attributes: true});*/
+	observer.observe(body, {subtree: true, childList: true, attributes: true});
 
-	// **************************************
-	const targetNode = document.getElementById('body');
-	console.log('body : ', targetNode);
-	// Options for the observer (which mutations to observe)
-	const config = { attributes: true, childList: true, subtree: true };
-
-	// Callback function to execute when mutations are observed
-	const callback = function(mutationList, observer) {
-		debugger;
-	    // Use traditional 'for loops' for IE 11
-	    for(const mutation of mutationList) {
-	        if (mutation.type === 'childList') {
-	            console.log('A child node has been added or removed.');
-	        }
-	        else if (mutation.type === 'attributes') {
-	            console.log('The ' + mutation.attributeName + ' attribute was modified.');
-	        }
-	    }
-	};
-
-	// Create an observer instance linked to the callback function
-	const observer = new MutationObserver(callback);
-
-	// Start observing the target node for configured mutations
-	observer.observe(targetNode, config);
 })();

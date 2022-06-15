@@ -522,7 +522,7 @@ var StorageMetric = new MetricStorage();
 			div.dataset.label = value.FACT;
 			div.dataset.tableName = value.FACT;
 			div.dataset.tableAlias = value.alias;
-			debugger;
+			// debugger;
 			div.dataset.schema = value.schema;
 			div.dataset.cubeToken = token;
 			div.onclick = app.handlerSelectTable;
