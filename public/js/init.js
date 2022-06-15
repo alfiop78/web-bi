@@ -1541,6 +1541,7 @@ var Hier = new Hierarchy();
 	const observer = new MutationObserver(function() {
 	    console.log('callback that runs when observer is triggered');
 	    body.querySelectorAll('*[data-fn]').forEach( element => element.addEventListener('click', app[element.dataset.fn]));
+	    body.querySelectorAll('*[data-tooltip]').forEach( element => element.addEventListener('mouseenter', app.showTooltip));
 	});
 	// call `observe()` on that MutationObserver instance,
 	// passing it the element to observe, and the options object
