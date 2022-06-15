@@ -277,6 +277,7 @@ var Hier = new Hierarchy();
 		// evento sul tasto close della card
 		// TODO: da associare al document.addEventListener
 		card.querySelector('button[data-id="closeTable"]').onclick = app.handlerCloseCard;
+		card.querySelector('button[data-id="closeTable"]').dataset.id = card.id;
 		// imposto la input search, con questo attributo, l'evento input viene gestito in Application.js
 		card.querySelector('input').dataset.elementSearch = card.dataset.label;	
 		// cube.activeCard = {'ref': card, 'schema' : card.dataset.schema, 'tableName': card.dataset.label};
@@ -615,15 +616,8 @@ var Hier = new Hierarchy();
 	}
 
 	app.handlerCloseCard = (e) => {
-		// elimino la card e la rivisualizzo nel drawer (spostata durante il drag&drop)
-		console.log(e.target);
-		console.log(e.path);
-		// TODO: rimettere la card chiusa al suo posto originario, nel drawer
-		/* BUG: e.path deprecato
-			'Event.path' is deprecated and will be removed in M109, around January 2023.
-			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
-		*/
-		e.path[5].remove();
+		// elimino la card
+		app.dropZone.querySelector('#'+e.target.dataset.id).remove();
 		// TODO: eliminare anche dal flusso delle gerarchie sulla destra
 
 		// TODO: controllo struttura gerarchica
@@ -719,7 +713,6 @@ var Hier = new Hierarchy();
 		console.log('cube selected : ', StorageCube.selected);
 		// ridefinisco le proprietà del cubo, leggendo da quello selezionato, nello storage, per consentirne la modifica o l'aggiunto di dimensioni al cubo
 		cube.metricDefined = StorageCube.selected.metrics;
-		debugger;
 		cube.columnsDefined = StorageCube.selected.columns;
 		cube.schema = StorageCube.selected.schema;
 		StorageCube.selected.associatedDimensions.forEach( dim => {
