@@ -130,7 +130,7 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 .card.table .cardTable > .title > .title-alias > .subtitle{padding: 0px 0px 4px 12px;color: #494949; font-size: .8rem;}
 .card.table .cardTable > .title > .title-alias{width: 100%;}
 
-.card.table[fact] .title{background: var(--main-primary-color);color: white;}
+.card.table[data-fact] .title{background: var(--main-primary-color);color: white;}
 
 .card.table .cardTable > .md-field{grid-area: input;}
 .card.table .cardTable > ul{grid-area: body;}

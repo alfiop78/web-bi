@@ -522,6 +522,7 @@ var StorageMetric = new MetricStorage();
 			div.dataset.label = value.FACT;
 			div.dataset.tableName = value.FACT;
 			div.dataset.tableAlias = value.alias;
+			debugger;
 			div.dataset.schema = value.schema;
 			div.dataset.cubeToken = token;
 			div.onclick = app.handlerSelectTable;
@@ -1245,6 +1246,7 @@ var StorageMetric = new MetricStorage();
 
 	// selezione di una tabella nella dialog-filter
 	app.handlerSelectTable = (e) => {
+		debugger;
 		if (!e.currentTarget.hasAttribute('data-selected')) {
 			// de-seleziono le tabelle precedentemente selezionate se ce ne sono
 			if (document.querySelector('#ul-tables .selectable[data-selected]')) document.querySelector('#ul-tables .selectable[data-selected]').toggleAttribute('data-selected');

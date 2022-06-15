@@ -513,7 +513,7 @@
                             </div>
 
                             <div id="drop">
-                                <div id="drop-zone" class="dropzone"><span>Trascina qui le tabelle da mappare</span></div>
+                                <div id="drop-zone" class="dropzone" data-mode-insert="after"><span>Trascina qui le tabelle da mappare</span></div>
                                 <div id="hierarchies">
                                     <section class="hierarchies"></section>
                                     <div id="btn-arrow-open-close">

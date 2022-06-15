@@ -107,10 +107,10 @@ class Cube {
 		// console.log(Object.fromEntries(this.#metricsMap));
 		// NOTE: conversione di un oggetto Map in Object
 		this._cube.metrics = Object.fromEntries(this.metrics);
-		this._cube.columns = this.#columns;
+		this._cube.columns = this.columns;
 		this._cube.FACT = this._fact;
-		this._cube.schema = this.#schema;
-		this._cube.alias = this.#alias;
+		this._cube.schema = this.schema;
+		this._cube.alias = this.alias;
 		this._cube.id = this._id;
 		console.log(this.associatedDimensions);
 		debugger;
@@ -219,7 +219,7 @@ class Hierarchy {
 
 	set activeCard(id) {
 		// la card su cui si sta operando
-		this.card = document.querySelector(".card.table[data-id='" + id +"']"); // contiene {'ref': riferimento della card nel DOM (.card.table), schema: 'schema', tableName: 'nometabella'}
+		this.card = document.querySelector(".card.table[data-id='" + id +"']");
 		this.schema = this.card.dataset.schema;
 	}
 

@@ -1,6 +1,7 @@
 var App = new Application();
 var cube = new Cube();
 var StorageCube = new CubeStorage();
+var StorageDimension = new DimensionStorage();
 var Dim = new Dimension();
 var Hier = new Hierarchy();
 (() => {
@@ -253,20 +254,20 @@ var Hier = new Hierarchy();
 		cardLayout.querySelector('.subtitle').innerHTML = `AS ${card.dataset.label}_${time.substring(time.length - 3)}`;
 		card.dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`;
 		card.appendChild(cardLayout);
-		// imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone
-		app.checkHierarchyNumber(card);
-
+		
 		// tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
-		if (app.tableList.hasAttribute('fact')) {
-			card.setAttribute('fact', true);
-			card.querySelector('.cardTable').setAttribute('fact', true); // OPTIMIZE: dataset data-fact
+		if (app.tableList.hasAttribute('data-fact')) {
+			card.dataset.fact = true;
+			app.dropZone.dataset.modeInsert = 'before';
 			// visualizzo l'icona metrics
 			card.querySelector('section[options] > button[composite-metrics]').dataset.schema = card.dataset.schema;
-			// console.log(card.dataset.label);
 			card.querySelector('section[options] > button[composite-metrics]').dataset.label = card.dataset.label;
 			card.querySelector('section[options] > button[metrics]').hidden = false;
 			card.querySelector('section[options] > button[composite-metrics]').hidden = false;
 		}
+
+		// imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone
+		app.checkHierarchyNumber(card);
 
 		// imposto la card draggata nella posizione dove si trova il mouse
 		// console.log('e.target : ', e.target);
@@ -299,21 +300,24 @@ var Hier = new Hierarchy();
 	}
 
 	app.checkHierarchyNumber = (card) => {
-		// TODO: se è già presente una card con data-value="0" aggiungo la card passata come argomento PRIMA della card già presente
+		// se è già presente una card con data-value="0" (caso in cui si creano più gerarchie) aggiungo la card passata come argomento PRIMA della card già presente
 		// ...successivamente gli imposto il numero dell'ordine gerarchico
 		// console.log(app.dropZone.querySelector(".card.table[data-value='0']"));
-		if (app.dropZone.querySelector(".card.table[data-value='0']")) {
-			app.dropZone.insertBefore(card, document.querySelector(".card.table[data-value='0']"));
-			card.dataset.value = 1;
-			// card.querySelector('.cardTable section[options-hier] span').innerText = 1;
-			card.querySelector('.cardTable section[options-hier] span').dataset.value = 1;
-			document.querySelector(".card.table[data-value='0']").dataset.value = 2;
-			// TODO: trovare una soluzione con data-attr nel css e ::after per non dover riscrivere ogni volta il valore in .card.table[data-value] e poi nello span
-			document.querySelector(".card.table[data-value='2'] section[options-hier] span").dataset.value = 2;
+		// debugger;
+		// console.log('card : ', card);
+		if ( app.dropZone.dataset.modeInsert === 'before') {
+			// caso in cui vengono create più gerarchie, l'ultima tabella della gerarchia è già presente nella dropzone, la tabella aggiunta verrà messa PRIMA di quella già presente
+			const lastTable = app.dropZone.querySelector(".card:last-child");
+			const hierNumber = app.dropZone.querySelectorAll('.card.table').length;
+			app.dropZone.insertBefore(card, lastTable);
+			card.dataset.value = hierNumber;
+			card.querySelector('.hierarchy-order').dataset.value = hierNumber;
+			lastTable.dataset.value = +card.dataset.value + 1;
+			lastTable.querySelector('section[options-hier] span').dataset.value = +card.dataset.value + 1;
 		} else {
 			const hierNumber = app.dropZone.querySelectorAll('.card.table').length + 1;
-			card.querySelector('.hierarchy-order').dataset.value = hierNumber;
 			card.dataset.value = hierNumber;
+			card.querySelector('.hierarchy-order').dataset.value = hierNumber;
 			app.dropZone.appendChild(card);
 		}
 	}
@@ -393,7 +397,6 @@ var Hier = new Hierarchy();
 				// se però, viene cliccato una colonna con già una relazione impostata (quindi ha [data-relationn-id]) elimino la relazione da
 				// ...entrambe le tabelle tramite un identificatifo di relazione
 				if (e.currentTarget.hasAttribute('data-relation-id')) {
-					// debugger;
 					/* oltre a fare il toggle dell'attributo, se questa colonna era stata già messa in
 					relazione con un altra tabella (quindi attributo [data-relation-id] presente) elimino anche la relazione tra i due campi.
 					Bisogna eliminarla sia dal DOM, eliminando [data-relation-id] che dall'array this.hierarchy
@@ -549,12 +552,10 @@ var Hier = new Hierarchy();
 			if (hier.length === 2) {
 				// se, in questa relazione, è presente anche la tabella FACT rinomino hier_n in fact_n in modo da poter separare le gerarchie
 				// e capire quali sono quelle con la fact e quali no (posso salvare la Dimensione, senza il legame con il Cubo)
-				if (card.hasAttribute('fact')) {
-					debugger;
-					console.log('FACT TABLE Relation');
+				if (card.hasAttribute('data-fact')) {
+					// TODO: utilizzare un token come fatto per le dimensioni, al posto del relation_id
 					cube.relations['cubeJoin_'+cube.relationId] = hier;
 					cube.relationId++;
-					// console.log(cube.relations);
 					cube.saveRelation(colSelected);
 				} else {
 					Hier.join = hier;
@@ -687,6 +688,7 @@ var Hier = new Hierarchy();
 			section.dataset.label = value.name;
 			section.dataset.elementSearch = 'cubes';
 			selectable.dataset.cubeToken = token;
+			selectable.dataset.schema = value.schema;
 			selectable.id = token;
 			span.dataset.cubeToken = token;
 			span.innerText = value.name;
@@ -712,24 +714,16 @@ var Hier = new Hierarchy();
 	app.handlerCubeSelected = (e) => {
 		// apro la tabella definita come Cubo
 		console.log('e.currentTarget : ', e.currentTarget);
-		// debugger;
 		StorageCube.selected = e.currentTarget.dataset.cubeToken;
 		console.log('cube selected : ', StorageCube.selected);
 		// ridefinisco le proprietà del cubo, leggendo da quello selezionato, nello storage, per consentirne la modifica o l'aggiunto di dimensioni al cubo
-		// TODO: la prop privata _metric la devo definire tramite un Metodo
 		cube.metricDefined = StorageCube.selected.metrics;
 		cube.columnsDefined = StorageCube.selected.columns;
-		// debugger;
+		cube.schema = StorageCube.selected.schema;
 		StorageCube.selected.associatedDimensions.forEach( dim => {
 			cube.associatedDimensions = dim;
 		});
-		const factTable = {
-			schema : StorageCube.selected.schema,
-			table : StorageCube.selected.FACT,
-			alias : StorageCube.selected.alias
-		};
-		// debugger;
-		app.addCard(factTable, true);
+		app.addCard(true);
 		// app.addCard(`${StorageCube.selected.schema}.${StorageCube.selected.FACT}`, true);
 		// visualizzo il tasto saveOpenedCube al posto di SaveCube
 		app.btnSaveOpenedCube.hidden = false;
@@ -846,9 +840,9 @@ var Hier = new Hierarchy();
 	app.handlerOpenTableList = (e) => {
 		// console.log(e.target);
 		if (e.target.hasAttribute('disabled')) return;
-		document.getElementById('tableList').removeAttribute('fact');
+		app.tableList.removeAttribute('data-fact');
 		e.target.toggleAttribute('open');
-		document.getElementById('tableList').toggleAttribute('hidden');
+		app.tableList.toggleAttribute('hidden');
 		document.getElementById('tableSearch').focus();
 		document.getElementById('tableSearch').select();
 	}
@@ -880,23 +874,11 @@ var Hier = new Hierarchy();
     	}
 	}
 
-	app.addCard = async (lastTableObject, fact) => {
+	app.addCard = async (fact) => {
 		// creo la card (label)
 		// fact : true/false
 		let card = document.createElement('div');
-		card.className = 'card table';
-		// split della stringa <schema>.<tabella>
-		card.dataset.schema = lastTableObject.schema; // schema
-		card.dataset.label = lastTableObject.table; // tabella
-		if (fact) {
-			card.setAttribute('fact', true); // OPTIMIZE: dataset data-fact
-			card.dataset.id = "fact-0";
-			card.id ="fact-0";	
-		} else {
-			card.dataset.id = "table-0";
-			card.id ="table-0";	
-		}
-		
+		card.className = 'card table';		
 		card.onmousedown = app.dragStart;
 		card.onmouseup = app.dragEnd;
 		card.onmousemove = app.drag;
@@ -904,20 +886,35 @@ var Hier = new Hierarchy();
 		let tmpl = document.getElementById('cardLayout');
 		let content = tmpl.content.cloneNode(true);
 		let cardLayout = content.querySelector('.cardLayout');
-		// TODO: da ricontrollare, perchè imposto l'attr 'fact' senza controllare l'argomento fact?
-		cardLayout.querySelector('.cardTable').setAttribute('fact', true); // OPTIMIZE: dataset data-fact
-		// imposto il titolo in h6
-		// TODO: imposto l'alias della tabella
-		cardLayout.querySelector('.subtitle').innerHTML = `AS ${lastTableObject.alias}`;
-		card.dataset.alias = lastTableObject.alias;
-		cardLayout.querySelector('h6').innerHTML = lastTableObject.table;
 		card.appendChild(cardLayout);
-		console.log(card);
+		if (fact) {
+			card.dataset.fact = true;
+			card.dataset.schema = StorageCube.selected.schema;
+			card.dataset.label = StorageCube.selected.FACT;
+			card.dataset.alias = StorageCube.selected.alias;
+			card.querySelector('.subtitle').innerHTML = `AS ${StorageCube.selected.alias}`; // alias
+			card.querySelector('h6').innerHTML = StorageCube.selected.FACT;
+			card.dataset.id = StorageCube.selected.token;
+			card.id = StorageCube.selected.token;
+			// l'appendChild / insertBefore viene stabilito nel checkHierarchyNumber()
+			app.checkHierarchyNumber(card);
+		} else {
+			card.dataset.schema = StorageDimension.selected.lastTableInHierarchy.schema; // schema
+			card.dataset.label = StorageDimension.selected.lastTableInHierarchy.table; // tabella
+			card.querySelector('.subtitle').innerHTML = `AS ${StorageDimension.selected.lastTableInHierarchy.alias}`; // alias
+			card.dataset.alias = StorageDimension.selected.lastTableInHierarchy.alias;
+			// imposto il titolo in h6
+			card.querySelector('h6').innerHTML = StorageDimension.selected.lastTableInHierarchy.table;
+			card.dataset.id = StorageDimension.selected.token;
+			card.id = StorageDimension.selected.token;
+			// l'appendChild / insertBefore viene stabilito nel checkHierarchyNumber()
+			app.checkHierarchyNumber(card);
+		}
+		
 		app.dropZone.classList.replace('dropping', 'dropped');
-		app.dropZone.appendChild(card);
         app.dropZone.classList.add('dropped');
-
 		// evento sul tasto close della card
+		// TODO: da implementare in un mutationObserver
 		card.querySelector('button[data-id="closeTable"]').onclick = app.handlerCloseCard;
 		// evento sulla input di ricerca nella card
 		// input di ricerca, imposto l'attr data-element-search
@@ -931,22 +928,21 @@ var Hier = new Hierarchy();
 		// ottengo l'elenco dei field della tabella
 		const data = await app.getTable();
 		// popolo la ul[data-id="columns"] della card corrente recuperata dalla Classe Cube cube.card.ref
-		// debugger;
 		app.addFields(Hier.activeCard.querySelector("ul[data-id='columns']"), data);
 	}
 
 	// button "utilizza" nell'elenco delle dimensioni
 	app.handlerDimensionSelected = (e) => {
 		console.log(e.target);
-		const storage = new DimensionStorage();
-		storage.selected = e.target.dataset.token;
+		// const storage = new DimensionStorage();
+		StorageDimension.selected = e.target.dataset.token;
 		// memorizzo la dimensione selezionata per recuperarla nel salvataggio del cubo
 		cube.dimensionsSelected = e.target.dataset.token;
 		// recupero tutta la dimensione selezionata, dallo storage
-		console.log(storage.selected);
+		console.log(StorageDimension.selected);
 		// aggiungo alla dropzone l'ultima tabella della gerarchia
 		// debugger;
-		app.addCard(storage.selected.lastTableInHierarchy, false);
+		app.addCard(false);
 		// chiudo la lista delle dimensioni
 		app.dimensionList.toggleAttribute('hidden');
 		app.btnDimensionList.toggleAttribute('open');
@@ -1068,7 +1064,7 @@ var Hier = new Hierarchy();
         if (document.querySelector('#nav-schema a[selected]')) {
         	document.querySelector('#nav-schema a[selected]').removeAttribute('selected');
         	// ripulisco la #tableList perchè ci sono tabelle appartenenti allo schema selezionato in precedenza
-        	document.querySelectorAll('#tables .element.card').forEach( (element) => {element.remove();});
+        	document.querySelectorAll('#tables > section').forEach( element => element.remove() );
         }
         e.target.setAttribute('selected', true); // OPTIMIZE: dataset data-selected
         app.getDatabaseTable(e.target.dataset.schema);
@@ -1154,7 +1150,7 @@ var Hier = new Hierarchy();
 	// definisci Cubo
 	app.btnNewFact.onclick = (e) => {
 		if (e.target.hasAttribute('disabled')) return;
-		app.tableList.setAttribute('fact', true); // OPTIMIZE: dataset data-fact
+		app.tableList.dataset.fact = true;
 		e.target.toggleAttribute('open');
 		app.tableList.toggleAttribute('hidden');
 		document.getElementById('tableSearch').focus();
@@ -1222,6 +1218,7 @@ var Hier = new Hierarchy();
 			storage.save(dimensionObject[dimensionToken]);
 		});
 		// TODO: l'aggiornamento del cubo non deve aggiornare anche la prop created_at ma solo updated_at
+		debugger;
 		cube.save();
 		// salvo il cubo in localStorage
 		StorageCube.save(cube.cube);
@@ -1382,11 +1379,11 @@ var Hier = new Hierarchy();
 		console.log('numero tabelle presenti nella gerarchia : ', app.dropZone.querySelectorAll('.cardTable').length);
 		const cards = app.dropZone.querySelectorAll('.card.table');
 		// numero tabelle presenti nella gerarchia corrente
-		const tableCount = cards.length;
-		if (tableCount > 1) {
+		const cardsLength = cards.length;
+		if (cardsLength > 1) {
 			// sono presenti più tabelle, l'ultima della gerarchia non la elimino
 			cards.forEach( (card) => {
-				if (+card.dataset.value !== tableCount) {
+				if (+card.dataset.value !== cardsLength) {
 					card.remove();
 				} else {
 					// ultima e unica tabella presente
@@ -1395,12 +1392,14 @@ var Hier = new Hierarchy();
 					card.querySelector('.info').hidden = true;
 					// resetto il numero in .cardTable[data-value]
 					card.dataset.value = 0;
+					// imposto la drop-zone in modalità data-mode-insert = "before", in questo modo tutte le card aggiunte alla dropzone saranno messe PRIMA dell'ultima card
+					app.dropZone.dataset.modeInsert = "before";
 				}
 			});
 		} else {
 			// ripulisco la drop-zone per avere la possibilità di inserire altre gerarchie
 			// recupero tutte le .card.table presenti nella drop-zone per eliminarle
-			app.dropZone.querySelectorAll('.card.table').forEach( card => card.remove());
+			app.dropZone.querySelector('.card.table').remove();
 			// se la dropzone ha un solo elemento, cioè lo span impostato all'inizio, allora rimuovo la class dropped per ripristinare lo stato iniziale
 			if (app.dropZone.childElementCount === 1) app.dropZone.classList.remove('dropped');
 		}
@@ -1413,17 +1412,11 @@ var Hier = new Hierarchy();
 		// TODO: devo verificare se il nome del cubo esiste già, sia in locale che sul db.
 		cube.title = document.getElementById('cubeName').value;
 		cube.columnsDefined = Object.fromEntries(Hier.columns);
-		debugger;
 		cube.comment = document.getElementById('textarea-cube-comment').value;
-		cube.FACT = document.querySelector('.card.table[fact]').dataset.label;
-		// TODO: recupero l'alias della FACT
-		cube.alias = document.querySelector('.card.table[fact]').dataset.alias;
-		cube.schema = document.querySelector('.card.table[fact]').dataset.schema;
-		debugger;
-		// Creo il cubeId basandomi sui cubi già creati in Storage, il cubeId lo associo al cubo che sto per andare a salvare.
-		// TODO: con l'aggiunta del token non servirà più il cubeId, da eliminare 2022-05-24
-		// cube.id = StorageCube.getIdAvailable();
-		// console.log(cube.id);
+		cube.FACT = document.querySelector('.card.table[data-fact]').dataset.label;
+		// recupero l'alias della FACT
+		cube.alias = document.querySelector('.card.table[data-fact]').dataset.alias;
+		cube.schema = document.querySelector('.card.table[data-fact]').dataset.schema;
 
 		const rand = () => Math.random(0).toString(36).substr(2);
 		// const token = rand().substr(0, 21);
@@ -1538,21 +1531,43 @@ var Hier = new Hierarchy();
 	document.getElementById('composite-alias-metric').oninput = () => app.checkDialogCompositeMetric();
 
 	// NOTE: esempio di utilizzo di MutationObserver
-	const body = document.getElementById('body');
+	/*const body = document.getElementById('body');
     // create a new instance of `MutationObserver` named `observer`,
 	// passing it a callback function
 	const observer = new MutationObserver(function() {
 	    // console.log('callback that runs when observer is triggered');
-	    document.querySelectorAll('*[data-fn]').forEach( (span) => {
+	    document.querySelectorAll('*[data-fn]').forEach( span => {
+	    	// debugger;
 	    	span.onclick = app[span.dataset.fn];
 	    });
-
-	    document.querySelectorAll('*[data-tooltip]').forEach( (element) => {
-			element.onmouseenter = app.showTooltip;
-			element.onmouseleave = app.hideTooltip;
-		});
 	});
 	// call `observe()` on that MutationObserver instance,
 	// passing it the element to observe, and the options object
-	observer.observe(body, {subtree: true, childList: true, attributes: true});
+	observer.observe(body, {subtree: true, childList: true, attributes: true});*/
+
+	// **************************************
+	const targetNode = document.getElementById('body');
+	console.log('body : ', targetNode);
+	// Options for the observer (which mutations to observe)
+	const config = { attributes: true, childList: true, subtree: true };
+
+	// Callback function to execute when mutations are observed
+	const callback = function(mutationList, observer) {
+		debugger;
+	    // Use traditional 'for loops' for IE 11
+	    for(const mutation of mutationList) {
+	        if (mutation.type === 'childList') {
+	            console.log('A child node has been added or removed.');
+	        }
+	        else if (mutation.type === 'attributes') {
+	            console.log('The ' + mutation.attributeName + ' attribute was modified.');
+	        }
+	    }
+	};
+
+	// Create an observer instance linked to the callback function
+	const observer = new MutationObserver(callback);
+
+	// Start observing the target node for configured mutations
+	observer.observe(targetNode, config);
 })();
