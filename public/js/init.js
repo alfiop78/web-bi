@@ -1052,7 +1052,6 @@ var Hier = new Hierarchy();
 	}
 
     app.schemaSelected = (e) => {
-    	// TODO: implementare un metodo per caricare di default lo schema 'automotive_bi_data'
         e.preventDefault();
         console.log(e.target);
         // rimuovo l'attributo selected dalla precedente selezione, se ce ne sono
@@ -1061,9 +1060,9 @@ var Hier = new Hierarchy();
         	// ripulisco la #tableList perchè ci sono tabelle appartenenti allo schema selezionato in precedenza
         	document.querySelectorAll('#tables > section').forEach( element => element.remove() );
         }
-        e.target.setAttribute('selected', true); // OPTIMIZE: dataset data-selected
+        e.target.setAttribute('selected', true);
         app.getDatabaseTable(e.target.dataset.schema);
-        // app.handlerGuide();
+        document.getElementById('drawer').removeAttribute('open');
     }
 
     // ordine gerarchico, livello superiore
@@ -1353,6 +1352,8 @@ var Hier = new Hierarchy();
 		app.btnNewHierarchy.disabled = false;
 		// creo, nel div #hierarchies, la gerarchia appena creata
 		app.addHierarchy(hierTitle, hierarchyOrder);
+		// abilito il tasto #toggle-hierarchy-struct
+		document.getElementById('toggle-hierarchy-struct').disabled = false;
 		
 		// abilito il tasto 'saveDimension' e disabilito btnSaveHierarchy
 		app.btnSaveDimension.disabled = false;

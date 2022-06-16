@@ -59,11 +59,9 @@ footer div span{color: #3a3a3a;}
 section > h3 ~ h5{font-weight: lighter;}
 
 @media screen and (min-device-width: 769px) {
+  .nav-button #arrow-back{display: none;}
   #drawer{width: 340px;}
-  /* nascondo il tasto menu che è già aperto */
-  .nav-button #menu{display: none;}
-  h4 {font-size: 1.7rem;}
-
+  h4{font-size: 1.7rem;}
   p{font-size: .8rem;padding: 6px;}
 }
 

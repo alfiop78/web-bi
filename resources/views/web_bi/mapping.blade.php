@@ -431,7 +431,7 @@
         </template>
 
         <main>
-            <div id="drawer">
+            <div id="drawer" open>
 
                 <section class="account"><h5>user</h5><i class="material-icons md-light">person</i></section>
 
@@ -517,7 +517,7 @@
                                 <div id="hierarchies">
                                     <section class="hierarchies"></section>
                                     <div id="btn-arrow-open-close">
-                                        <button type="button" id="toggle-hierarchy-struct" class="button-icon material-icons md-24">arrow_circle_left</button>
+                                        <button type="button" id="toggle-hierarchy-struct" class="button-icon material-icons md-24" disabled>arrow_circle_left</button>
                                     </div>
                                 </div>
                                 <div id="drop-zone-buttons">
