@@ -2,7 +2,7 @@ i[open]{color: red;}
 
 div[draggable]{cursor: grab;}
 
-.highlight{padding: 4px;border-radius: 4px;background-color: #9a9b94;color: white;}
+/*.highlight{padding: 4px;border-radius: 4px;background-color: #9a9b94;color: white;}*/
 
 h5{font-size: 1rem;padding: 8px;margin: 0;}
 
@@ -236,10 +236,10 @@ ul > section[data-sublist-generic]:hover{cursor: pointer; border-left: solid thi
 /*minicard*/
 .mini-card{display: grid; grid-template-rows: auto auto auto;border: solid thin gainsboro;border-radius: 4px; width: inherit;}
 .mini-card > h5{font-size: .9rem; font-weight: normal;padding: 8px;margin: 0px; text-align: left;background-color: beige;}
-.mini-card div[data-dimension-tables] .hierarchies{font-weight: lighter;font-size: .85rem; padding: 16px;}
+.mini-card div[data-dimension-tables] .hierarchies{font-size: .8rem; padding: 4px 16px;}
 .mini-card div[data-dimension-tables] .hierarchies > .hierarchy > .tables > .schema-table:last-child{color: var(--main-primary-color); font-weight: bold;}
 .mini-card-buttons{display: flex;justify-content: space-between;}
-.hierarchy{display: grid; grid-template-rows: auto auto;}
+.hierarchy{display: grid; grid-template-columns: 80% 1fr; align-items: center;}
 ul > section[data-sublist-dimensions]{border: none;}
 /*minicard*/
 

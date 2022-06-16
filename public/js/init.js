@@ -301,53 +301,6 @@ var Hier = new Hierarchy();
 		if (card.hasAttribute('data-fact')) app.dropZone.dataset.modeInsert = 'before';
 	}
 
-	/*app.hierDragStart = (e) => {
-		console.log('hier drag start');
-		e.dataTransfer.setData('text/plain', e.target.id);
-		// disattivo temporaneamente gli eventi drop e dragend su app.content
-		app.content.removeEventListener('dragend', app.handlerDragEnd, true);
-		app.content.removeEventListener('drop', app.handlerDrop, true);
-	}
-
-	app.hierDragOver = (e) => {
-		console.log('dragover');
-		e.preventDefault();
-		// console.log(e.target);
-	}
-
-	app.hierDragEnter = (e) => {
-		e.preventDefault();
-		console.log(e.target);
-
-		if (e.target.className === 'dropzoneHier') {
-			console.info('DROPZONE');
-			// TODO: css effect
-		}
-	}
-
-	app.hierDragLeave = (e) => {e.preventDefault();}
-
-	app.hierDragEnd = (e) => {
-		e.preventDefault();
-		// reimposto gli eventi drop e dragend su app.content
-		app.content.addEventListener('dragend', app.handlerDragEnd, true);
-		app.content.addEventListener('drop', app.handlerDrop, true);
-	}
-
-	app.hierDrop = (e) => {
-		e.preventDefault();
-		let data = e.dataTransfer.getData('text/plain');
-		console.log(data);
-		const draggedCard = document.getElementById(data);
-		const nextCard = draggedCard.nextElementSibling;
-		// e.target.before(document.getElementById(data));
-		// verifico se il target è l'elemento successivo o precedente, se successivo effettuo un after() altrimenti un before()
-		(e.target === nextCard) ? e.target.after(document.getElementById(data)) : e.target.before(document.getElementById(data));
-
-		// let parent = document.getElementById('hierTables');
-		// parent.replaceChild(document.getElementById(data), e.target);
-	}*/
-
 	app.content.ondragover = app.handlerDragOver;
 	app.content.ondragenter = app.handlerDragEnter;
 	app.content.ondragleave = app.handlerDragLeave;
@@ -600,51 +553,50 @@ var Hier = new Hierarchy();
 		// TODO: controllo struttura gerarchica
 	}
 
+	app.addDimension = (token, value) => {
+		let tmplContent = app.tmplDimension.content.cloneNode(true);
+		const section = tmplContent.querySelector('section');
+		section.setAttribute('data-element-search', 'dimensions');
+		section.setAttribute('data-label', value.name);
+		const div = tmplContent.querySelector('.dimensions');
+		const btnDimensionUse = tmplContent.querySelector('button[data-id="dimension-use"]');
+		btnDimensionUse.dataset.token = token;
+		div.querySelector('h5').innerHTML = value.name;
+		// per ogni gerarchia recupero la prop 'from'
+		for (const [hierName, hierValue] of Object.entries(value.hierarchies)) {
+			// console.log(hierName);
+			// console.log(hierValue);
+			const tmplHierarchyList = document.getElementById('tmpl-hierarchy-list');
+			const tmplHierarchyContent = tmplHierarchyList.content.cloneNode(true);
+			const divHier = tmplHierarchyContent.querySelector('.hierarchies');
+			const h6 = tmplHierarchyContent.querySelector('h6');
+			const divTables = tmplHierarchyContent.querySelector('.tables');
+			const btnEdit = tmplHierarchyContent.querySelector("button[data-id='dimension-edit']");
+			btnEdit.dataset.dimensionName = value.name;
+			btnEdit.dataset.hierarchyName = hierName;
+			h6.innerText = hierValue.name;
+			tmplContent.querySelector('div[data-dimension-tables]').appendChild(divHier);
+			for (const [orderKey, orderValue] of Object.entries(hierValue.order)) {
+				const tableContent = app.tmplTables.content.cloneNode(true);
+				const div = tableContent.querySelector('div');
+				const spanSchema = tableContent.querySelector('span[schema]');
+				const spanTable = tableContent.querySelector('span[table]');
+				spanSchema.innerText = orderValue.schema;
+				spanTable.innerText = orderValue.table;
+				divTables.appendChild(div);
+			}
+			btnEdit.onclick = app.handlerDimensionEdit;
+		}
+		btnDimensionUse.onclick = app.handlerDimensionSelected;
+		div.querySelector('h5').setAttribute('label', value.name); // OPTIMIZE: dataset data-label
+		document.querySelector('#dimensions').appendChild(section);
+	}
+
 	// recupero la lista delle dimensioni
 	app.getDimensions = () => {
-		// TODO: utilizzare lo storage inizializzato all'inizio del file
-		const storage = new DimensionStorage();
 		// dimensions : è un Object che contiene un array con le tabelle incluse nella dimensione
-		for (const [token, value] of storage.dimensions) {
-			// key : nome
-			// console.log('value : ', value);
-			let tmplContent = app.tmplDimension.content.cloneNode(true);
-			const section = tmplContent.querySelector('section');
-			section.setAttribute('data-element-search', 'dimensions');
-			section.setAttribute('data-label', token);
-			const div = tmplContent.querySelector('.dimensions');
-			const btnDimensionUse = tmplContent.querySelector('button[data-id="dimension-use"]');
-			btnDimensionUse.dataset.token = token;
-
-			div.querySelector('h5').innerHTML = value.name;
-			// per ogni gerarchia recupero la prop 'from'
-			for (const [hierName, hierValue] of Object.entries(value.hierarchies)) {
-				// console.log(hierName);
-				// console.log(hierValue);
-				const tmplHierarchyList = document.getElementById('tmpl-hierarchy-list');
-				const tmplHierarchyContent = tmplHierarchyList.content.cloneNode(true);
-				const divHier = tmplHierarchyContent.querySelector('.hierarchies');
-				const h6 = tmplHierarchyContent.querySelector('h6');
-				const divTables = tmplHierarchyContent.querySelector('.tables');
-				const btnEdit = tmplHierarchyContent.querySelector("button[data-id='dimension-edit']");
-				btnEdit.dataset.dimensionName = value.name;
-				btnEdit.dataset.hierarchyName = hierName;
-				h6.innerText = hierName;
-				tmplContent.querySelector('div[data-dimension-tables]').appendChild(divHier);
-				for (const [orderKey, orderValue] of Object.entries(hierValue.order)) {
-					const tableContent = app.tmplTables.content.cloneNode(true);
-					const div = tableContent.querySelector('div');
-					const spanSchema = tableContent.querySelector('span[schema]');
-					const spanTable = tableContent.querySelector('span[table]');
-					spanSchema.innerText = orderValue.schema;
-					spanTable.innerText = orderValue.table;
-					divTables.appendChild(div);
-				}
-				btnEdit.onclick = app.handlerDimensionEdit;
-			}
-			btnDimensionUse.onclick = app.handlerDimensionSelected;
-			div.querySelector('h5').setAttribute('label', value.name); // OPTIMIZE: dataset data-label
-			document.querySelector('#dimensions').appendChild(section);
+		for (const [token, value] of StorageDimension.dimensions) {
+			app.addDimension(token, value);
 		}
 	}
 
@@ -1424,19 +1376,16 @@ var Hier = new Hierarchy();
 		Dim.title = document.getElementById('dimensionName').value;
 		Dim.comment = document.getElementById('textarea-dimension-comment').value;
 		// cube.dimension
-		const storage = new DimensionStorage();		
+		// const storage = new DimensionStorage();		
 		Dim.save();
-		storage.save(Dim.dimension);
+		StorageDimension.save(Dim.dimension);
 		app.dialogDimensionName.close();	
 		// chiudo le card presenti
 		app.closeCards();
 		// pulisco la sezione #hierarchies
 		document.querySelectorAll('#hierarchies > .hierarchies > *').forEach( hier => hier.remove());
-		// visualizzo le dimensioni create
-
-		app.getDimensions(); // TODO: qui andrò ad aggiornare solo la dimensione appena salvata/modificata
-
-		// delete Dim.dimension;
+		// aggiungo la dimensione appena creata alla #dimensions
+		app.addDimension(Dim.dimension.token, Dim.dimension);
 		Dim = new Dimension();
 		Hier = new Hierarchy();
 	}

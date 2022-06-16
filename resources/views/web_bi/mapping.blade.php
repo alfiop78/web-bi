@@ -83,7 +83,7 @@
         <template id="tmpl-hierarchy-tables">
             <div class="schema-table">
                 <span schema></span>
-                <span table></span>
+                <span class="highlight" table></span>
             </div>
         </template>
 
@@ -92,7 +92,9 @@
                 <h6></h6>
                 <div class="hierarchy">
                     <div class="tables"></div>
-                    <button data-id="dimension-edit" type="button" name="dimensionEdit" class="md-button">modifica</button>
+                    <div class="flex-center">
+                        <button data-id="dimension-edit" type="button" class="button-icon material-icons md-18" data-tooltip="Modifica gerarchia" data-tooltip-position="bottom">edit</button>
+                    </div>
                 </div>
                 {{-- <div class="mini-card-buttons">
                     

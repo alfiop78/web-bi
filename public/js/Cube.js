@@ -101,14 +101,10 @@ class Cube {
 }
 
 class Dimension {
-	#comment;
 	#lastTableHierarchy;
 	#hier = {};
 	#dimension = {};
-	constructor() {
-		this.schema;
-		// this._dimension = {};
-	}
+	constructor() {}
 
 	set hier(value) {
 		this.#hier[Object.keys(value)] = value[Object.keys(value)];
@@ -120,18 +116,6 @@ class Dimension {
 	set lastTableHierarchy(value) {this.#lastTableHierarchy = value;}
 
 	get lastTableHierarchy() {return this.#lastTableHierarchy;}
-
-	set id(value) {this._id = value;}
-
-	get id() {return this._id;}
-
-	set title(value) {this._title = value;}
-
-	get title() {return this._title;}
-
-	set comment(value) {this.#comment = value;}
-
-	get comment() {return this.#comment;}
 
 	save() {
 		const rand = () => Math.random(0).toString(36).substr(2);
@@ -146,7 +130,7 @@ class Dimension {
 		this.#dimension.created_at = date.toLocaleDateString('it-IT', options);
 		this.#dimension.updated_at = date.toLocaleDateString('it-IT', options);
 		this.#dimension.type = 'DIMENSION';
-		this.#dimension.name = this._title;
+		this.#dimension.name = this.title;
 		this.#dimension.comment = this.comment;
 		this.#dimension.cubes = {}; // object con i nomi dei cubi che hanno associazione con questa dimensione. Questa viene popolata quando si associa la dimensione al cubo
 		this.#dimension.lastTableInHierarchy = this.lastTableHierarchy;
