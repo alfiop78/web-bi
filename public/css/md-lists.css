@@ -22,8 +22,8 @@ span.highlight{color: sienna;}
 /* visualizzazione delle icone sui field impostati come : colonne, gerarchie, metriche */
 section[data-sublist-fields] > .selectable i{visibility: hidden;}
 section[data-sublist-fields] > .selectable[columns] i[data-id="column-icon"]{color: #9a6a6a; visibility: visible;}
-section[data-sublist-fields] > .selectable[relations] i[data-id="hierarchy-icon"]{color: grey; visibility: visible;}
-section[data-sublist-fields] > .selectable[relations][data-relation-id="true"] i[data-id="hierarchy-icon"]{color: #99b19c; visibility: visible;}
+section[data-sublist-fields] > .selectable[data-relation] i[data-id="hierarchy-icon"]{color: grey; visibility: visible;}
+section[data-sublist-fields] > .selectable[data-relation][data-relation-id="true"] i[data-id="hierarchy-icon"]{color: #99b19c; visibility: visible;}
 section[data-sublist-fields] > .selectable[metrics] i[data-id="metric-icon"]{color: #587850; visibility: visible;}
 
 /*visualizzo icona su hover section*/

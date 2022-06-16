@@ -346,14 +346,14 @@ var Hier = new Hierarchy();
 						}
 					}
 				} else {
-					let liRelationSelected = Hier.card.querySelector('.selectable[relations]:not([data-relation-id])');
+					let liRelationSelected = Hier.card.querySelector('.selectable[data-relation]:not([data-relation-id])');
 					// console.log(liRelationSelected);
-					e.currentTarget.toggleAttribute('relations');
+					e.currentTarget.toggleAttribute('data-relation');
 					e.currentTarget.toggleAttribute('data-selected');
 					// se ho selezionato una colonna diversa da quella già selezionata, rimuovo la selezione corrente e imposto quella nuova
 					if (liRelationSelected && (liRelationSelected.dataset.id !== e.currentTarget.dataset.id)) {
-						liRelationSelected.toggleAttribute('relations');
-						liRelationSelected.toggleAttribute('selected');
+						liRelationSelected.toggleAttribute('data-relation');
+						liRelationSelected.toggleAttribute('data-selected');
 					}
 				}
 				app.createHierarchy();
@@ -467,13 +467,13 @@ var Hier = new Hierarchy();
 		let colSelected = [];
 		// console.log( document.querySelectorAll('.cardTable[mode="relations"] .selectable[relations][data-selected]').length);
 		// quando i campi selezionati sono 1 recupero il nome della tabella perchè questa gerarchia avrà il nome della prima tabella selezionata da mettere in relazione
-		if (document.querySelectorAll('.card.table[data-mode="relations"] .selectable[relations][data-selected]').length === 1) {
+		if (document.querySelectorAll('.card.table[data-mode="relations"] .selectable[data-relation][data-selected]').length === 1) {
 			// recupero la prima, delle due tabelle, da mettere in relazione
-			Hier.table = document.querySelector('.card.table[data-mode="relations"] .selectable[relations][data-selected]').dataset.tableName;
+			Hier.table = document.querySelector('.card.table[data-mode="relations"] .selectable[data-relation][data-selected]').dataset.tableName;
 		}
 		// console.log('dimension.table : ', Hier.table);
 		document.querySelectorAll('.card.table[data-mode="relations"]').forEach( card => {
-			let spanRef = card.querySelector('.selectable[relations][data-selected]');
+			let spanRef = card.querySelector('.selectable[data-relation][data-selected]');
 			if (spanRef) {
 				// metto in un array gli elementi selezionati per la creazione della gerarchia
 				colSelected.push(spanRef);
