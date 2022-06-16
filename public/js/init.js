@@ -468,7 +468,6 @@ var Hier = new Hierarchy();
 	app.handlerAddCompositeMetric = async (e) => {
 		// recupero dal DB le colonne della tabella
 		const cardTable = app.dropZone.querySelector(".cardTable[data-name='" + e.target.dataset.label + "']");
-		// cube.activeCard = {'ref': cardTable, schema : e.target.dataset.schema, 'tableName': e.target.dataset.label};
 		// NOTE: utilizzo await per aspettare la risposta dal DB
 		const data = await app.getTable();
 		// popolo la lista #ul-fields	
@@ -978,7 +977,6 @@ var Hier = new Hierarchy();
 	        // imposto la card attiva
 	        debugger;
 	        // console.log(card.id);
-	        // cube.activeCard = card.id;
 	        Hier.activeCard = card.querySelector('.cardTable');
 	        // seleziono i campi impostati nella dimensione, nelle proprietà 'hierarchies[hiername]columns[value]'
 	        // per ogni colonna in questa tabella...
@@ -1053,21 +1051,12 @@ var Hier = new Hierarchy();
 
     // ordine gerarchico, livello superiore
     app.handlerHierarchyOrder = (e) => {
-    	// console.log(e.target);
     	// imposto la attuale card come card attiva
-    	/* BUG: e.path deprecato
-			'Event.path' is deprecated and will be removed in M109, around January 2023.
-			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
-		*/
-    	const card = e.path[5]; // .card .table qui è presente il data-value
-    	const cardTable = e.path[3]; // .cardTable
     	const cardCount = document.querySelectorAll('.card.table').length;
-    	// TODO: Magic Method ??? Da rivedere
-		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.dataset.name};
-    	debugger;
-    	// console.log(cube.activeCard.ref); // card attiva
-    	// console.log(+cardTable.getAttribute('data-value'));
-    	let value = +card.dataset.value;
+    	Hier.activeCard = e.target.dataset.id;
+    	// NOTE: Magic Method ??? Da rivedere
+		// cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.dataset.name};
+    	let value = Hier.activeCard.dataset.value;
 		// spostare, nel DOM, le card in base al livello gerarchico. Livello gerarchico inferiore le card vanno messe prima nel DOM.
     	// questo consentirà di creare correttamente le gerarchie con il nome della tabella di gerarchia inferiore salvata nella prop 'hierarchies'
     	if (e.target.hasAttribute('hier-order-plus')) {
@@ -1075,20 +1064,20 @@ var Hier = new Hierarchy();
     		// non posso spostare card se supero il numero delle card presenti nella pagina
     		if (value > cardCount) return;
     		// sostituisco il valore della card successiva con quello della card che sto modificando
-    		card.nextElementSibling.dataset.value = card.dataset.value;
-    		card.nextElementSibling.querySelector('.hierarchy-order').dataset.value = card.dataset.value;
+    		Hier.activeCard.nextElementSibling.dataset.value = Hier.activeCard.dataset.value;
+    		Hier.activeCard.nextElementSibling.querySelector('.hierarchy-order').dataset.value = Hier.activeCard.dataset.value;
     		// identifico la card successiva a quella che sto modificando e la posiziono DOPO
-    		if (card.nextElementSibling) card.nextElementSibling.after(card);
+    		if (Hier.activeCard.nextElementSibling) Hier.activeCard.nextElementSibling.after(Hier.activeCard);
     	} else {
     		// se il data-value della card = 1 non posso decrementarla
     		if (value === 1) return;
 			value--;
-			card.previousElementSibling.dataset.value = card.dataset.value;
-    		card.previousElementSibling.querySelector('.hierarchy-order').dataset.value = card.dataset.value;
-			card.previousElementSibling.before(card);
+			Hier.activeCard.previousElementSibling.dataset.value = Hier.activeCard.dataset.value;
+    		Hier.activeCard.previousElementSibling.querySelector('.hierarchy-order').dataset.value = Hier.activeCard.dataset.value;
+			Hier.activeCard.previousElementSibling.before(Hier.activeCard);
     	}
-    	cardTable.querySelector('.hierarchy-order').dataset.value = value;
-    	card.dataset.value = value;
+    	Hier.activeCard.querySelector('.hierarchy-order').dataset.value = value;
+    	Hier.activeCard.dataset.value = value;
     }
 
 	app.getDimensions();
