@@ -146,7 +146,7 @@ class Dimension {
 class Hierarchy {
 	#schema;
 	#columns = new Map();
-	#join = {};
+	#join = new Map();
 	#relationId = 0;
 	#field; // TODO: da modificare in fieldDs
 	#fieldId;
@@ -219,14 +219,27 @@ class Hierarchy {
 	set join(value) {
 		// genero un token per questa relazione
 		const alias = value[0].split('.')[0];
-		const rand = () => Math.random(0).toString(36).substr(2);
-		const token = rand().substr(0, 7);
-		if (!this.#join.hasOwnProperty(alias)) {
-			// questa tabella non ha ancora nessuna relazione
-			this.#join[alias] = { [token] : value };
+		// const rand = () => Math.random(0).toString(36).substr(2);
+		// const token = rand().substr(0, 7);
+		if ( !this.#join.has(alias) ) {
+			this.#join.set(alias, { [this.joinToken] : value} );
 		} else {
-			this.#join[alias][token] = value;
+			debugger;
+			if ( !this.#join.get(alias).hasOwnProperty(this.joinToken) ) {
+				// nella stessa tabella, questa join non è presente
+				this.#join.get(alias)[this.joinToken] = value;
+			} else {
+				delete this.#join.get(alias)[joinToken];
+				// elimino anche l'attr "schema.table" se, al suo interno, non sono presenti altri field
+				if (this.#join.get(alias).size === 0) this.#join.delete(alias);
+			}
 		}
+		// if (!this.#join.hasOwnProperty(alias)) {
+		// 	// questa tabella non ha ancora nessuna relazione
+		// 	this.#join[alias] = { [this.joinToken] : value };
+		// } else {
+		// 	this.#join[alias][this.joinToken] = value;
+		// }
 		console.log('this.#join : ', this.#join);		
 	}
 
@@ -277,7 +290,8 @@ class Hierarchy {
 	showRelationIcons(value) {
 		// value : colSelected
 		value.forEach((el) => {
-			el.setAttribute('data-rel-'+this.#relationId, this.#relationId);
+			// el.setAttribute('data-rel-'+this.#relationId, this.#relationId);
+			el.dataset.joinToken = this.joinToken;
 			el.dataset.relationId = true;
 			// la relazione è stata creata, posso eliminare [selected]
 			el.removeAttribute('data-selected');

@@ -1,7 +1,7 @@
 var App = new Application();
-var cube = new Cube();
 var StorageCube = new CubeStorage();
 var StorageDimension = new DimensionStorage();
+var cube = new Cube();
 var Dim = new Dimension();
 var Hier = new Hierarchy();
 (() => {
@@ -328,24 +328,37 @@ var Hier = new Hierarchy();
 				// ...[hierarchy] a quello appena selezionato. In questo modo posso selezionare solo una colonna per volta ad ogni relazione da creare
 				// se però, viene cliccato una colonna con già una relazione impostata (quindi ha [data-relationn-id]) elimino la relazione da
 				// ...entrambe le tabelle tramite un identificatifo di relazione
+				debugger;
 				if (e.currentTarget.hasAttribute('data-relation-id')) {
 					/* oltre a fare il toggle dell'attributo, se questa colonna era stata già messa in
 					relazione con un altra tabella (quindi attributo [data-relation-id] presente) elimino anche la relazione tra i due campi.
 					Bisogna eliminarla sia dal DOM, eliminando [data-relation-id] che dall'array this.hierarchy
 					*/
-					e.currentTarget.toggleAttribute('data-selected');
+					// e.currentTarget.toggleAttribute('data-selected');
 					// recupero tutti gli attributi di e.currentTarget e vado a ciclare this.removeHierarchy(relationId) per verificare uno alla volta quale posso eliminare
+					app.dropZone.querySelectorAll(".card.table .selectable[data-join-token='"+e.currentTarget.dataset.joinToken+"']").forEach( join => {
+						console.log('field join : ', join);
+						delete join.dataset.relation;
+						delete join.dataset.joinToken;
+						delete join.dataset.relationId;
+					});
+					debugger;
+					// TODO: da decommentare dopo aver impostato #join come un oggetto Map()
+					Hier.join = e.currentTarget.dataset.joinToken;
+
+
 					// NOTE: utilizzo di getAttributeNames()
-					for (let name of e.currentTarget.getAttributeNames()) {
-						// console.log(name);
-						let relationId, value;
-						if (name.substring(0, 9) === 'data-rel-') {
-							relationId = name;
-							value = e.currentTarget.getAttribute(name);
-							app.removeHierarchy(relationId, value);
-						}
-					}
+					// for (let name of e.currentTarget.getAttributeNames()) {
+					// 	// console.log(name);
+					// 	let relationId, value;
+					// 	if (name.substring(0, 9) === 'data-rel-') {
+					// 		relationId = name;
+					// 		value = e.currentTarget.getAttribute(name);
+					// 		app.removeHierarchy(relationId, value);
+					// 	}
+					// }
 				} else {
+					// verifico se, nella stessa tabella, sono presenti altri campi con data-relation (pronti per la join) e, se è presente, lo de-seleziono per selezionare questo del currentTarget
 					let liRelationSelected = Hier.card.querySelector('.selectable[data-relation]:not([data-relation-id])');
 					// console.log(liRelationSelected);
 					e.currentTarget.toggleAttribute('data-relation');
@@ -355,8 +368,8 @@ var Hier = new Hierarchy();
 						liRelationSelected.toggleAttribute('data-relation');
 						liRelationSelected.toggleAttribute('data-selected');
 					}
-				}
-				app.createHierarchy();
+					app.createHierarchy();
+				}				
 				break;
 			case 'metrics':
 				console.log('metrics');
@@ -461,6 +474,7 @@ var Hier = new Hierarchy();
 	}
 
 	app.createHierarchy = (e) => {
+		// debugger;
 		console.log('create Relations');
 		// OPTIMIZE: ottimizzare la logica della funzione
 		let hier = [];
@@ -484,6 +498,8 @@ var Hier = new Hierarchy();
 				// se, in questa relazione, è presente anche la tabella FACT rinomino hier_n in fact_n in modo da poter separare le gerarchie
 				// e capire quali sono quelle con la fact e quali no (posso salvare la Dimensione, senza il legame con il Cubo)
 				// debugger;
+				const rand = () => Math.random(0).toString(36).substr(2);
+				Hier.joinToken = rand().substr(0, 7);
 				if (card.hasAttribute('data-fact')) {
 					// TODO: utilizzare un token come fatto per le dimensioni, al posto del relation_id
 					cube.relations['cubeJoin_'+cube.relationId] = hier;
