@@ -238,11 +238,6 @@ var Hier = new Hierarchy();
 		card.querySelector('.v-content').remove();
 		// elimino l'icon star
 		card.querySelector('i').remove();
-		// associo gli eventi mouse
-		// TODO: da eliminare per impostarli nel document.addEventListener
-		card.onmousedown = app.dragStart;
-		card.onmouseup = app.dragEnd;
-		card.onmousemove = app.drag;
 		// recupero il template cardLayout e lo inserisco nella card table
 		let tmpl = document.getElementById('cardLayout');
 		let content = tmpl.content.cloneNode(true);
@@ -274,27 +269,18 @@ var Hier = new Hierarchy();
 		card.setAttribute('x', e.offsetX);
 		card.setAttribute('y', e.offsetY);
 
-		// evento sul tasto close della card
-		// TODO: da associare al document.addEventListener
-		card.querySelector('button[data-id="closeTable"]').onclick = app.handlerCloseCard;
-		card.querySelector('button[data-id="closeTable"]').dataset.id = card.id;
 		// imposto la input search, con questo attributo, l'evento input viene gestito in Application.js
-		card.querySelector('input').dataset.elementSearch = card.dataset.label;	
-		// cube.activeCard = {'ref': card, 'schema' : card.dataset.schema, 'tableName': card.dataset.label};
+		card.querySelector('input').dataset.elementSearch = card.dataset.label;
 		Hier.activeCard = card.id;
 
+		card.querySelector('button[data-id="closeTable"]').dataset.id = card.id;
 		// event sui tasti section[options]
-		// TODO: da gestire con document.addEventListener
-		card.querySelector('button[join]').onclick = app.handlerJoin;
 		card.querySelector('button[join]').dataset.id = card.id;
-		card.querySelector('button[metrics]').onclick = app.handlerMetric;
 		card.querySelector('button[metrics]').dataset.id = card.id;
-		card.querySelector('button[composite-metrics]').onclick = app.handlerAddCompositeMetric;
 		card.querySelector('button[composite-metrics]').dataset.id = card.id;
 		card.querySelector('button[columns]').dataset.id = card.id;
-		card.querySelector('button[columns]').onclick = app.handlerAddColumns;
-		card.querySelector('button[hier-order-plus]').onclick = app.handlerHierarchyOrder;
-		card.querySelector('button[hier-order-minus]').onclick = app.handlerHierarchyOrder;
+		card.querySelector('button[hier-order-plus]').dataset.id = card.id;
+		card.querySelector('button[hier-order-minus]').dataset.id = card.id;
 		document.getElementById('tableSearch').focus();
 		document.getElementById('tableSearch').select();
 	}
@@ -1076,8 +1062,9 @@ var Hier = new Hierarchy();
     	const card = e.path[5]; // .card .table qui è presente il data-value
     	const cardTable = e.path[3]; // .cardTable
     	const cardCount = document.querySelectorAll('.card.table').length;
-    	// TODO: 
+    	// TODO: Magic Method ??? Da rivedere
 		cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.dataset.name};
+    	debugger;
     	// console.log(cube.activeCard.ref); // card attiva
     	// console.log(+cardTable.getAttribute('data-value'));
     	let value = +card.dataset.value;
@@ -1536,6 +1523,17 @@ var Hier = new Hierarchy();
 	    console.log('callback that runs when observer is triggered');
 	    body.querySelectorAll('*[data-fn]').forEach( element => element.addEventListener('click', app[element.dataset.fn]));
 	    body.querySelectorAll('*[data-tooltip]').forEach( element => element.addEventListener('mouseenter', app.showTooltip));
+	    body.querySelectorAll('.card.table button[join]').forEach( element => element.addEventListener('click', app.handlerJoin));
+	    body.querySelectorAll('.card.table button[metrics]').forEach( element => element.addEventListener('click', app.handlerMetric));
+	    body.querySelectorAll('.card.table button[composite-metrics]').forEach( element => element.addEventListener('click', app.handlerAddCompositeMetric));
+	    body.querySelectorAll('.card.table button[columns]').forEach( element => element.addEventListener('click', app.handlerAddColumns));
+	    body.querySelectorAll('.card.table button[hier-order-plus], .card.table button[hier-order-minus]').forEach( element => element.addEventListener('click', app.handlerHierarchyOrder));
+	    body.querySelectorAll('.card.table button[data-id="closeTable"]').forEach( element => element.addEventListener('click', app.handlerCloseCard));
+	    body.querySelectorAll('.card.table').forEach( card => {
+	    	card.addEventListener('mousedown', app.dragStart);
+	    	card.addEventListener('mouseup', app.dragEnd);
+	    	card.addEventListener('mousemove', app.drag);
+	    });
 	});
 	// call `observe()` on that MutationObserver instance,
 	// passing it the element to observe, and the options object
