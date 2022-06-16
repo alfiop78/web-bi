@@ -427,7 +427,7 @@ var Hier = new Hierarchy();
 					app.txtareaColumnDs.innerText = cube.fieldSelected;
 					app.dialogColumnMap.showModal();
 				} else {
-					Hier.columns = e.currentTarget.dataset.tokenColumn;
+					Hier.column = e.currentTarget.dataset.tokenColumn;
 				}
 		}
 	}
@@ -685,14 +685,15 @@ var Hier = new Hierarchy();
 	// selezione di un cubo già definito, da qui è possibile associare, ad esempio, una nuova dimensione ad un cubo già esistente.
 	app.handlerCubeSelected = (e) => {
 		// apro la tabella definita come Cubo
-		console.log('e.currentTarget : ', e.currentTarget);
+		// console.log('e.currentTarget : ', e.currentTarget);
 		StorageCube.selected = e.currentTarget.dataset.cubeToken;
-		console.log('cube selected : ', StorageCube.selected);
+		// console.log('cube selected : ', StorageCube.selected);
 		// ridefinisco le proprietà del cubo, leggendo da quello selezionato, nello storage, per consentirne la modifica o l'aggiunto di dimensioni al cubo
+		// lo converto in un oggetto Map perchè #columns è un Map. Questo consentirà di poter fare modifiche, quindi aggiungere/eliminare colonne
+		cube.columns = new Map(Object.entries(StorageCube.selected.columns));
 		cube.metricDefined = StorageCube.selected.metrics;
-		debugger;
-		cube.columnsDefined = StorageCube.selected.columns;
 		cube.schema = StorageCube.selected.schema;
+		debugger;
 		StorageCube.selected.associatedDimensions.forEach( dim => {
 			cube.associatedDimensions = dim;
 		});
@@ -978,7 +979,7 @@ var Hier = new Hierarchy();
 		        	Hier.activeCard.querySelector(".selectable[data-label='"+field.id.origin_field+"']").toggleAttribute('columns');
 		        	Hier.field = field;
 					// nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
-					Hier.columns(token);
+					Hier.column = token;
 		        }
 	        }
 	        // TODO: fare la stessa cosa qui con le join per ogni tabella in ciclo (il codice sotto va spostato qui)
@@ -1150,28 +1151,28 @@ var Hier = new Hierarchy();
 	// update cube
 	app.btnSaveOpenedCube.onclick = () => {
 		console.log('Aggiornamento Cubo');
-		console.log(StorageCube.selected);
+		// console.log(StorageCube.selected);
 		cube.title = StorageCube.selected.name;
+		cube.comment = StorageCube.selected.comment;
 		cube.alias = StorageCube.selected.alias;
 		cube.schema = StorageCube.selected.schema;
 		cube.FACT = StorageCube.selected.FACT;
-		cube.id = StorageCube.selected.id;
 		cube.token = StorageCube.selected.token;
 
 		cube.dimensionsSelected.forEach( dimensionToken => {
 			const storage = new DimensionStorage();
 			let dimensionObject = {};
-			console.log(dimensionToken);
+			// console.log(dimensionToken);
 			storage.selected = dimensionToken;
-			console.log(storage.selected);
+			// console.log(storage.selected);
 			// il metodo selected restituisce la dimensione che sto ciclando, la salvo in dimensionObject per modificarla (aggiunta cubi)
 			dimensionObject[dimensionToken] = storage.selected;
 			// salvo il cubo all'interno della dimensione, comprese la sua join con questa dimensione
 			// dimensionObject[dimensionName].cubes.push({[cube._title] : cube.relations});
 			// TODO: impostare cubes come un object e non come un array, in questo modo è più semplice recuperarlo da report/init.js "app.handlerDimensionSelected()"
-			debugger;
+			// debugger;
 			dimensionObject[dimensionToken].cubes[cube.token] = cube.relations;
-			console.log(dimensionObject[dimensionToken]);
+			// console.log(dimensionObject[dimensionToken]);
 			// salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
 			cube.associatedDimensions = dimensionToken;
 			// salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
@@ -1232,11 +1233,11 @@ var Hier = new Hierarchy();
 		const rand = () => Math.random(0).toString(36).substr(2);
 		const token = rand().substr(0, 7);
 		// TODO: rivedere se utilizzare il metodo con l'oggetto Map(), come fatto in Query.metrics
-		Hier.columns = token;
+		Hier.column = token;
 		// imposto il token sulla colonna selezionata, mi servirà in fase di deselezione della colonna
 		Hier.fieldRef.dataset.tokenColumn = token;
 		app.dialogColumnMap.close();
-		app.btnSaveHierarchy.disabled = (Hier.columns.size !== 0) ? false : true;
+		app.btnSaveHierarchy.disabled = (Hier.column.size !== 0) ? false : true;
 	}
 
 	// tasto report nella sezione controls -> fabs
@@ -1374,13 +1375,12 @@ var Hier = new Hierarchy();
 		console.log('cube save');
 		// TODO: devo verificare se il nome del cubo esiste già, sia in locale che sul db.
 		cube.title = document.getElementById('cubeName').value;
-		cube.columns = Hier.columns;
 		cube.comment = document.getElementById('textarea-cube-comment').value;
-		cube.FACT = document.querySelector('.card.table[data-fact]').dataset.label;
-		// recupero l'alias della FACT
 		cube.alias = document.querySelector('.card.table[data-fact]').dataset.alias;
 		cube.schema = document.querySelector('.card.table[data-fact]').dataset.schema;
-		debugger;
+		cube.FACT = document.querySelector('.card.table[data-fact]').dataset.label;
+		cube.columns = Hier.column; // è un oggetto Map
+		// recupero l'alias della FACT
 
 		const rand = () => Math.random(0).toString(36).substr(2);
 		// const token = rand().substr(0, 21);

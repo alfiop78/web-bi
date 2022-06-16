@@ -1,7 +1,4 @@
 class Cube {
-	#schema;
-	#comment;
-	#alias;
 	#columns = new Map();
 	#metrics = new Map();
 	#token;
@@ -13,34 +10,23 @@ class Cube {
 		this._associatedDimension = [];
 	}
 
-	set id(value) {this._id = value;}
-
-	get id() {return this._id;}
-
 	set token(value) {
 		this.#token = value;
 	}
 
 	get token() {return this.#token;}
 
-	// set title(value) {this._title = value;}
-
-	// get title() {return this._title;}
-
-	// set comment(value) {this.#comment = value;}
-
-	// get comment() {return this.#comment;}
-
 	set columns(value) {this.#columns = value;}
 
 	get columns() {return this.#columns;}
 
-	// set metricDefined(value) {
-	// 	// NOTE: converto un oggetto Object in Map()
-	// 	this.#metricsMap = new Map(Object.entries(value));
-	// }
+	// viene utilizzata quando si seleziona un cubo e si vuole ripristinare l'oggetto Map #metrics
+	set metricDefined(value) {
+		// NOTE: converto un oggetto Object in Map()
+		this.#metrics = new Map(Object.entries(value));
+	}
 
-	// get metricDefined() {return this.#metricsMap;}
+	get metricDefined() {return this.#metrics;}
 
 	set relations(value) {
 		this._join['hier_'+this.relationId] = value;
@@ -63,6 +49,7 @@ class Cube {
 
 	get fieldSelected() {return this._field;}
 
+	// aggiungo/rimuovo una metrica
 	set metrics(value) {
 		// value : { name, metric_type : 0, formula: arr_sql, alias }
 		// se value è un object (metrica composta) lo salvo come object altrimenti come stringa nel Map()
@@ -77,18 +64,6 @@ class Cube {
 
 	get metrics() {return this.#metrics;}
 
-	// set FACT(value) {this._fact = value;}
-
-	// get FACT() {return this._fact;}
-
-	// set alias(value) {this.#alias = value;}
-
-	// get alias() {return this.#alias;}
-
-	// set schema(value) {this.#schema = value;}
-
-	// get schema() {return this.#schema;}
-
 	save() {
 		this._cube.token = this.token;
 		// imposto la data last_created e last_edit
@@ -99,18 +74,12 @@ class Cube {
 		this._cube.created_at = date.toLocaleDateString('it-IT', options);
 		this._cube.updated_at = date.toLocaleDateString('it-IT', options);
 		this._cube.name = this.title;
-		this._cube.comment = this.comment;
-		// this._cube.metrics = this.#metrics;
-		// console.log(Object.fromEntries(this.#metricsMap));
 		// NOTE: conversione di un oggetto Map in Object
 		this._cube.metrics = Object.fromEntries(this.metrics);
-		debugger;
 		this._cube.columns = Object.fromEntries(this.columns);
 		this._cube.FACT = this.FACT;
 		this._cube.schema = this.schema;
 		this._cube.alias = this.alias;
-		console.log(this.associatedDimensions);
-		debugger;
 		this._cube.associatedDimensions = this.associatedDimensions;
 	}
 
@@ -287,7 +256,7 @@ class Hierarchy {
 		console.log('object : ', object);
 		this.#hier[object.token] = {order : object.hierarchyOrder};
 		this.#hier[object.token]['name'] = object.name;
-		this.#hier[object.token]['columns'] = Object.fromEntries(this.columns);
+		this.#hier[object.token]['columns'] = Object.fromEntries(this.column);
 		this.#hier[object.token]['joins'] = this.#join; // TODO: this.join
 		this.#hier[object.token]['from'] = object.from;
 		// this.#hier[object.token]['tablesFrom'] = object.tablesForm;
@@ -298,7 +267,7 @@ class Hierarchy {
 	get hier() {return this.#hier;}
 
 	// aggiungo/elimino una colonna
-	set columns(token) {
+	set column(token) {
 		this.obj = {};
 		if (!this.#columns.has(this.#alias)) {
 			// alias di tabella ancora non mappata come columns
@@ -319,7 +288,7 @@ class Hierarchy {
 		console.log('this.#columns : ', this.#columns);
 	}
 
-	get columns() {return this.#columns;}
+	get column() {return this.#columns;}
 
 	showRelationIcons(value) {
 		// value : colSelected
