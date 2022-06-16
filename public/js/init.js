@@ -530,7 +530,7 @@ var Hier = new Hierarchy();
 			if (hier.length === 2) {
 				// se, in questa relazione, è presente anche la tabella FACT rinomino hier_n in fact_n in modo da poter separare le gerarchie
 				// e capire quali sono quelle con la fact e quali no (posso salvare la Dimensione, senza il legame con il Cubo)
-				debugger;
+				// debugger;
 				if (card.hasAttribute('data-fact')) {
 					// TODO: utilizzare un token come fatto per le dimensioni, al posto del relation_id
 					cube.relations['cubeJoin_'+cube.relationId] = hier;
@@ -1224,7 +1224,6 @@ var Hier = new Hierarchy();
 
 	// save column
 	app.btnColumnMap.onclick = () => {
-		debugger;
 		Hier.field = {
 			id : {field : app.txtareaColumnId.value, type : 'da_completare', SQL : null, origin_field : Hier.fieldRef.dataset.label},
 			ds : {field : app.txtareaColumnDs.value, type : 'da_completare', SQL : null, origin_field : Hier.fieldRef.dataset.label}
