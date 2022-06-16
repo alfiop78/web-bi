@@ -336,7 +336,7 @@
                     </section>
                     <div class="title">
                         <div class="title-alias"><h6></h6><div class="subtitle"></div></div>
-                        <button type="button" data-id="closeTable" class="button-icon material-icons md-18" data-tooltip="Chiudi" data-tooltip-position="bottom">close</button>
+                        <button type="button" data-id data-close-card class="button-icon material-icons md-18" data-tooltip="Chiudi" data-tooltip-position="bottom">close</button>
                     </div>
                     <div class="md-field">
                         <input type="search" value="" data-element-search/>

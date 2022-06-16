@@ -159,9 +159,10 @@ var Hier = new Hierarchy();
 		}
 	}
 
+	/* questi eventi sono già stati messi sulle .card.table con MutationObserve
 	app.dropZone.onmousedown = app.dragStart;
 	app.dropZone.onmouseup = app.dragEnd;
-	app.dropZone.onmousemove = app.drag;
+	app.dropZone.onmousemove = app.drag;*/
 
 	// TODO: aggiungere anhce eventi touch...
 
@@ -225,12 +226,10 @@ var Hier = new Hierarchy();
 		e.preventDefault();
 		e.target.classList.replace('dropping', 'dropped');
 		if (e.target.id !== 'drop-zone') return;
-		// console.log('drop');
-		// console.log(e.target);
 		let data = e.dataTransfer.getData('text/plain');
         let card = document.getElementById(data).cloneNode(true);
         console.log('card : ', card); // class h-content e attributo draggable="true"
-		// la .card draggable diventa .card .table
+		// la .card draggable diventa .card.table
 		card.className = 'card table';
 		card.dataset.id = card.id;
 		card.removeAttribute('draggable');
@@ -260,7 +259,7 @@ var Hier = new Hierarchy();
 			card.querySelector('section[options] > button[composite-metrics]').hidden = false;
 		}
 
-		// imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone
+		// imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone e aggiungo la card alla dropZone
 		app.checkHierarchyNumber(card);
 
 		// imposto la card draggata nella posizione dove si trova il mouse
@@ -273,7 +272,7 @@ var Hier = new Hierarchy();
 		card.querySelector('input').dataset.elementSearch = card.dataset.label;
 		Hier.activeCard = card.id;
 
-		card.querySelector('button[data-id="closeTable"]').dataset.id = card.id;
+		card.querySelector('button[data-close-card]').dataset.id = card.id;
 		// event sui tasti section[options]
 		card.querySelector('button[join]').dataset.id = card.id;
 		card.querySelector('button[metrics]').dataset.id = card.id;
@@ -309,7 +308,7 @@ var Hier = new Hierarchy();
 		if (card.hasAttribute('data-fact')) app.dropZone.dataset.modeInsert = 'before';
 	}
 
-	app.hierDragStart = (e) => {
+	/*app.hierDragStart = (e) => {
 		console.log('hier drag start');
 		e.dataTransfer.setData('text/plain', e.target.id);
 		// disattivo temporaneamente gli eventi drop e dragend su app.content
@@ -354,7 +353,7 @@ var Hier = new Hierarchy();
 
 		// let parent = document.getElementById('hierTables');
 		// parent.replaceChild(document.getElementById(data), e.target);
-	}
+	}*/
 
 	app.content.ondragover = app.handlerDragOver;
 	app.content.ondragenter = app.handlerDragEnter;
@@ -1457,13 +1456,6 @@ var Hier = new Hierarchy();
 		// TODO: dopo 5 secondi, anche se il mouse non è più posizionato sull'icona, devo nascondere il tooltip
 	}
 
-	// eventi mouseEnter/Leave su tutte le icon con l'attributo data-tooltip
-	document.querySelectorAll('*[data-tooltip]').forEach( icon => {
-		// OPTIMIZE: da spostare in Application.js
-		icon.onmouseenter = app.showTooltip;
-		// icon.onmouseleave = app.hideTooltip;
-	});
-
 	app.btnCompositeMetricDone.onclick = () => app.dialogCompositeMetric.close();
 
 	// textarea per creare una metrica composta
@@ -1517,7 +1509,7 @@ var Hier = new Hierarchy();
 	    body.querySelectorAll('.card.table button[composite-metrics]').forEach( element => element.addEventListener('click', app.handlerAddCompositeMetric));
 	    body.querySelectorAll('.card.table button[columns]').forEach( element => element.addEventListener('click', app.handlerAddColumns));
 	    body.querySelectorAll('.card.table button[hier-order-plus], .card.table button[hier-order-minus]').forEach( element => element.addEventListener('click', app.handlerHierarchyOrder));
-	    body.querySelectorAll('.card.table button[data-id="closeTable"]').forEach( element => element.addEventListener('click', app.handlerCloseCard));
+	    body.querySelectorAll('.card.table button[data-close-card]').forEach( element => element.addEventListener('click', app.handlerCloseCard));
 	    body.querySelectorAll('.card.table').forEach( card => {
 	    	card.addEventListener('mousedown', app.dragStart);
 	    	card.addEventListener('mouseup', app.dragEnd);
