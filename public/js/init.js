@@ -236,7 +236,7 @@ var Hier = new Hierarchy();
 		cardLayout.querySelector('.title-alias').dataset.id = card.id;
 		// imposto il titolo in h6
 		cardLayout.querySelector('h6').innerHTML = card.dataset.label;
-		// imposto un alias per questa tabella
+		// creo un alias per questa tabella
 		const time = Date.now().toString();
 		cardLayout.querySelector('.subtitle').innerHTML = `AS ${card.dataset.label}_${time.substring(time.length - 3)}`;
 		card.dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`;
@@ -245,7 +245,7 @@ var Hier = new Hierarchy();
 		// tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
 		if (app.tableList.hasAttribute('data-fact')) {
 			card.dataset.fact = true;
-			// visualizzo l'icona metrics
+			// visualizzo le icone per la creazione delle metriche
 			card.querySelector('section[options] > button[composite-metrics]').dataset.schema = card.dataset.schema;
 			card.querySelector('section[options] > button[composite-metrics]').dataset.label = card.dataset.label;
 			card.querySelector('section[options] > button[metrics]').hidden = false;
@@ -690,6 +690,7 @@ var Hier = new Hierarchy();
 		console.log('cube selected : ', StorageCube.selected);
 		// ridefinisco le proprietà del cubo, leggendo da quello selezionato, nello storage, per consentirne la modifica o l'aggiunto di dimensioni al cubo
 		cube.metricDefined = StorageCube.selected.metrics;
+		debugger;
 		cube.columnsDefined = StorageCube.selected.columns;
 		cube.schema = StorageCube.selected.schema;
 		StorageCube.selected.associatedDimensions.forEach( dim => {
@@ -850,10 +851,10 @@ var Hier = new Hierarchy();
 		// creo la card (label)
 		// fact : true/false
 		let card = document.createElement('div');
-		card.className = 'card table';		
-		card.onmousedown = app.dragStart;
-		card.onmouseup = app.dragEnd;
-		card.onmousemove = app.drag;
+		card.className = 'card table';
+		// card.onmousedown = app.dragStart;
+		// card.onmouseup = app.dragEnd;
+		// card.onmousemove = app.drag;
 		// prendo il template cardLayout e lo inserisco nella .card.table
 		let tmpl = document.getElementById('cardLayout');
 		let content = tmpl.content.cloneNode(true);
@@ -868,6 +869,7 @@ var Hier = new Hierarchy();
 			card.querySelector('h6').innerHTML = StorageCube.selected.FACT;
 			card.dataset.id = StorageCube.selected.token;
 			card.id = StorageCube.selected.token;
+			cardLayout.querySelector('.title-alias').dataset.id = StorageCube.selected.token;
 			// l'appendChild / insertBefore viene stabilito nel checkHierarchyNumber()
 			app.checkHierarchyNumber(card);
 		} else {
@@ -879,22 +881,18 @@ var Hier = new Hierarchy();
 			card.querySelector('h6').innerHTML = StorageDimension.selected.lastTableInHierarchy.table;
 			card.dataset.id = StorageDimension.selected.token;
 			card.id = StorageDimension.selected.token;
+			cardLayout.querySelector('.title-alias').dataset.id = StorageDimension.selected.token;
 			// l'appendChild / insertBefore viene stabilito nel checkHierarchyNumber()
 			app.checkHierarchyNumber(card);
 		}
 		
 		app.dropZone.classList.replace('dropping', 'dropped');
         app.dropZone.classList.add('dropped');
-		// evento sul tasto close della card
-		// TODO: da implementare in un mutationObserver
-		card.querySelector('button[data-id="closeTable"]').onclick = app.handlerCloseCard;
 		// evento sulla input di ricerca nella card
 		// input di ricerca, imposto l'attr data-element-search
-		card.querySelector('input[type="search"]').dataset.elementSearch = card.dataset.label;
 		Hier.activeCard = card.id;
-
-		// event sui tasti section[options]
-		card.querySelector('button[join]').onclick = app.handlerJoin;
+		card.querySelector('input[type="search"]').dataset.elementSearch = card.dataset.label;
+        card.querySelector('button[data-close-card]').dataset.id = card.id;		
 		card.querySelector('button[join').dataset.id = card.dataset.id;
 
 		// ottengo l'elenco dei field della tabella
@@ -1048,7 +1046,7 @@ var Hier = new Hierarchy();
     	Hier.activeCard = e.target.dataset.id;
     	// NOTE: Magic Method ??? Da rivedere
 		// cube.activeCard = {'ref': cardTable, 'schema' : cardTable.dataset.schema, 'tableName': cardTable.dataset.name};
-    	let value = Hier.activeCard.dataset.value;
+    	let value = +Hier.activeCard.dataset.value;
 		// spostare, nel DOM, le card in base al livello gerarchico. Livello gerarchico inferiore le card vanno messe prima nel DOM.
     	// questo consentirà di creare correttamente le gerarchie con il nome della tabella di gerarchia inferiore salvata nella prop 'hierarchies'
     	if (e.target.hasAttribute('hier-order-plus')) {
@@ -1376,13 +1374,13 @@ var Hier = new Hierarchy();
 		console.log('cube save');
 		// TODO: devo verificare se il nome del cubo esiste già, sia in locale che sul db.
 		cube.title = document.getElementById('cubeName').value;
-		debugger;
-		cube.columnsDefined = Object.fromEntries(Hier.columns);
+		cube.columns = Hier.columns;
 		cube.comment = document.getElementById('textarea-cube-comment').value;
 		cube.FACT = document.querySelector('.card.table[data-fact]').dataset.label;
 		// recupero l'alias della FACT
 		cube.alias = document.querySelector('.card.table[data-fact]').dataset.alias;
 		cube.schema = document.querySelector('.card.table[data-fact]').dataset.schema;
+		debugger;
 
 		const rand = () => Math.random(0).toString(36).substr(2);
 		// const token = rand().substr(0, 21);

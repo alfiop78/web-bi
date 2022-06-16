@@ -2,14 +2,11 @@ class Cube {
 	#schema;
 	#comment;
 	#alias;
-	#columns = {};
-	#metrics = {};
-	#metricsMap = new Map();
+	#columns = new Map();
+	#metrics = new Map();
 	#token;
 	constructor() {
 		this._cube = {};
-		// this._metrics = {}; // contiene gli oggetti metriche
-		this.arrMetrics = []; // accessibile dall'esterno
 		this.relationId = 0;
 		this._join = {};
 		this._dimensions = []; // dimensioni selezionate da associare al cube
@@ -26,24 +23,24 @@ class Cube {
 
 	get token() {return this.#token;}
 
-	set title(value) {this._title = value;}
+	// set title(value) {this._title = value;}
 
-	get title() {return this._title;}
+	// get title() {return this._title;}
 
-	set comment(value) {this.#comment = value;}
+	// set comment(value) {this.#comment = value;}
 
-	get comment() {return this.#comment;}
+	// get comment() {return this.#comment;}
 
-	set columnsDefined(value) {this.#columns = value;}
+	set columns(value) {this.#columns = value;}
 
-	get columnsDefined() {return this.#columns;}
+	get columns() {return this.#columns;}
 
-	set metricDefined(value) {
-		// NOTE: converto un oggetto Object in Map()
-		this.#metricsMap = new Map(Object.entries(value));
-	}
+	// set metricDefined(value) {
+	// 	// NOTE: converto un oggetto Object in Map()
+	// 	this.#metricsMap = new Map(Object.entries(value));
+	// }
 
-	get metricDefined() {return this.#metricsMap;}
+	// get metricDefined() {return this.#metricsMap;}
 
 	set relations(value) {
 		this._join['hier_'+this.relationId] = value;
@@ -70,27 +67,27 @@ class Cube {
 		// value : { name, metric_type : 0, formula: arr_sql, alias }
 		// se value è un object (metrica composta) lo salvo come object altrimenti come stringa nel Map()
 		if (value.metric_type === 0) {
-			this.#metricsMap.set(value.name, {alias : value.alias, metric_type : value.metric_type});
+			this.#metrics.set(value.name, {alias : value.alias, metric_type : value.metric_type});
 		} else {
 			// metrica di base composta (es.: przmedio * quantita) impostata sul cubo
-			this.#metricsMap.set(value.name, {alias : value.alias, formula : value.formula, metric_type : value.metric_type, fields : value.fields});
+			this.#metrics.set(value.name, {alias : value.alias, formula : value.formula, metric_type : value.metric_type, fields : value.fields});
 		}
-		console.log(this.#metricsMap);
+		console.log(this.#metrics);
 	}
 
-	get metrics() {return this.#metricsMap;}
+	get metrics() {return this.#metrics;}
 
-	set FACT(value) {this._fact = value;}
+	// set FACT(value) {this._fact = value;}
 
-	get FACT() {return this._fact;}
+	// get FACT() {return this._fact;}
 
-	set alias(value) {this.#alias = value;}
+	// set alias(value) {this.#alias = value;}
 
-	get alias() {return this.#alias;}
+	// get alias() {return this.#alias;}
 
-	set schema(value) {this.#schema = value;}
+	// set schema(value) {this.#schema = value;}
 
-	get schema() {return this.#schema;}
+	// get schema() {return this.#schema;}
 
 	save() {
 		this._cube.token = this.token;
@@ -101,15 +98,15 @@ class Cube {
 		this._cube.type = 'CUBE';
 		this._cube.created_at = date.toLocaleDateString('it-IT', options);
 		this._cube.updated_at = date.toLocaleDateString('it-IT', options);
-		this._cube.name = this._title;
-		this._cube.comment = this.#comment;
+		this._cube.name = this.title;
+		this._cube.comment = this.comment;
 		// this._cube.metrics = this.#metrics;
 		// console.log(Object.fromEntries(this.#metricsMap));
 		// NOTE: conversione di un oggetto Map in Object
 		this._cube.metrics = Object.fromEntries(this.metrics);
 		debugger;
-		this._cube.columns = this.columnsDefined;
-		this._cube.FACT = this._fact;
+		this._cube.columns = Object.fromEntries(this.columns);
+		this._cube.FACT = this.FACT;
 		this._cube.schema = this.schema;
 		this._cube.alias = this.alias;
 		console.log(this.associatedDimensions);
