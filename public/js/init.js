@@ -68,7 +68,6 @@ var Hier = new Hierarchy();
 		content : document.getElementById('content'),
 		body : document.getElementById('body'),
 		dropZone : document.getElementById('drop-zone'),
-		// dropzone : document.getElementsByClassName('dropzone')[0],
 		currentX : 0,
 		currentY : 0,
 		initialX : 0,
@@ -76,7 +75,6 @@ var Hier = new Hierarchy();
 		active : false,
 		xOffset : 0,
 		yOffset : 0,
-		popup: document.getElementById('popup-help'),
 		dragElement : null,
 		elementMenu : null,
 		/*guideStep : [
@@ -84,9 +82,6 @@ var Hier = new Hierarchy();
 			'Aggiungi le tabelle da mappare trascinandole da "Lista Tabelle"'
 		],*/
 		messageId : 0,
-		// tooltip : document.getElementById('tooltip'),
-		tooltip : null,
-		tooltipTimeoutId : null,
 		absWindow : document.querySelector('.abs-window')
 	}
 
@@ -94,24 +89,21 @@ var Hier = new Hierarchy();
 
 	// utilizzato per lo spostamento all'interno del drop-zone (card già droppata)
 	app.dragStart = (e) => {
-        // console.log('dragStart : ', e.target);
-        // console.log('dragStart : ', e.target.localName);
+		console.clear();
+        console.log('dragStart : ', e.target);
+        console.log('dragStart : ', e.currentTarget);
+        console.log('dragStart : ', e.target.localName);
 		// mousedown da utilizzare per lo spostamento dell'elemento
 		// debugger;
-		if (e.target.localName === 'h6') {
-			app.cardTitle = e.target;
-			/* BUG: e.path deprecato
-			'Event.path' is deprecated and will be removed in M109, around January 2023.
-			Please use 'Event.composedPath()' instead. See https://www.chromestatus.com/feature/5726124632965120 for more details.
-			*/
-			app.card = e.path[5];
+		if (e.currentTarget.classList.contains('title-alias')) {
+			app.cardTitle = e.currentTarget.querySelector('h6');
+			Hier.activeCard = e.currentTarget.dataset.id;
 			// recupero la posizione attuale della card tramite l'attributo x-y impostato su .cardTable
-			app.xOffset = e.path[5].getAttribute('x');
-			app.yOffset = e.path[5].getAttribute('y');
+			app.xOffset = Hier.activeCard.getAttribute('x');
+			app.yOffset = Hier.activeCard.getAttribute('y');
 			// console.log('xOffset : ', app.xOffset);
 			// console.log('yOffset : ', app.yOffset);
 		}
-		// cardTitle = document.querySelector('.card.table .title > h6');
 		if (e.type === 'touchstart') {
 			app.initialX = e.touches[0].clientX - app.xOffset;
 			app.initialY = e.touches[0].clientY - app.yOffset;
@@ -119,7 +111,7 @@ var Hier = new Hierarchy();
 			app.initialX = e.clientX - app.xOffset;
 			app.initialY = e.clientY - app.yOffset;
 		}
-		if (e.target === app.cardTitle) {app.active = true;}
+		app.active = true;
 	}
 
 	// spostamento della card già droppata
@@ -152,10 +144,10 @@ var Hier = new Hierarchy();
 			app.yOffset = app.currentY;
 			// imposto sulla .cardTable le posizioni dove è 'stato lasciato'  dopo il drag in modo da "riprendere" lo
 			// spostamento da dove era rimasto
-			app.card.setAttribute('x', app.xOffset);
-			app.card.setAttribute('y', app.yOffset);
+			Hier.activeCard.setAttribute('x', app.xOffset);
+			Hier.activeCard.setAttribute('y', app.yOffset);
 
-			app.card.style.transform = 'translate3d(' + app.currentX + 'px, ' + app.currentY + 'px, 0)';
+			Hier.activeCard.style.transform = 'translate3d(' + app.currentX + 'px, ' + app.currentY + 'px, 0)';
 		}
 	}
 
@@ -241,6 +233,7 @@ var Hier = new Hierarchy();
 		let tmpl = document.getElementById('cardLayout');
 		let content = tmpl.content.cloneNode(true);
 		let cardLayout = content.querySelector('.cardLayout');
+		cardLayout.querySelector('.title-alias').dataset.id = card.id;
 		// imposto il titolo in h6
 		cardLayout.querySelector('h6').innerHTML = card.dataset.label;
 		// imposto un alias per questa tabella
@@ -1511,9 +1504,9 @@ var Hier = new Hierarchy();
 	    body.querySelectorAll('.card.table button[hier-order-plus], .card.table button[hier-order-minus]').forEach( element => element.addEventListener('click', app.handlerHierarchyOrder));
 	    body.querySelectorAll('.card.table button[data-close-card]').forEach( element => element.addEventListener('click', app.handlerCloseCard));
 	    body.querySelectorAll('.card.table').forEach( card => {
-	    	card.addEventListener('mousedown', app.dragStart);
-	    	card.addEventListener('mouseup', app.dragEnd);
-	    	card.addEventListener('mousemove', app.drag);
+	    	card.querySelector('.title-alias').addEventListener('mousedown', app.dragStart);
+	    	card.querySelector('.title-alias').addEventListener('mouseup', app.dragEnd);
+	    	card.querySelector('.title-alias').addEventListener('mousemove', app.drag);
 	    });
 	});
 	// call `observe()` on that MutationObserver instance,
