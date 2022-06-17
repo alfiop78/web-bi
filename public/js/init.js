@@ -335,7 +335,9 @@ var Hier = new Hierarchy();
 					*/
 					// e.currentTarget.toggleAttribute('data-selected');
 					// recupero tutti gli attributi di e.currentTarget e vado a ciclare this.removeHierarchy(relationId) per verificare uno alla volta quale posso eliminare
+					// TODO: recupero la prima tabella della join
 					Hier.firstTableAlias = Hier.card.dataset.alias;
+					debugger;
 					Hier.join = e.currentTarget.dataset.joinToken;
 
 					// NOTE: utilizzo di getAttributeNames()
@@ -468,19 +470,8 @@ var Hier = new Hierarchy();
 		// debugger;
 		console.log('create Relations');
 		let join = [], columnsRef = [];
-		// console.log( document.querySelectorAll('.cardTable[mode="relations"] .selectable[relations][data-selected]').length);
-		// quando i campi selezionati sono 1 recupero il nome della tabella perchè questa gerarchia avrà il nome della prima tabella selezionata da mettere in relazione
-		// if (document.querySelectorAll('.card.table[data-mode="relations"] .selectable[data-relation][data-selected]').length === 1) {
-		// 	// recupero la prima, delle due tabelle, da mettere in relazione
-		// 	Hier.table = document.querySelector('.card.table[data-mode="relations"] .selectable[data-relation][data-selected]').dataset.tableName;
-		// }
-		// console.log('dimension.table : ', Hier.table);
 		document.querySelectorAll('.card.table[data-mode="relations"]').forEach( (card, i) => {
-			if (i === 0) {
-				Hier.firstTableAlias = card.dataset.alias;
-				Cube.firstTableAlias = card.dataset.alias;
-			}
-			debugger;
+			if (i === 0) Hier.firstTableAlias = card.dataset.alias;
 			let spanRef = card.querySelector('.selectable[data-relation][data-selected]');
 			if (spanRef) {
 				// metto in un array gli elementi selezionati per la creazione della gerarchia

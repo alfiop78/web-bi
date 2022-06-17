@@ -30,7 +30,6 @@ class Cubes {
 	get metricDefined() {return this.#metrics;}
 
 	set join(token) {
-		debugger;
 		if (!this.#join.has(token)) {
 			// token del cubo non presente, non ci sono join con la fact, la aggiungo
 			this.#join.set(token, this.defineJoin.join);
@@ -243,6 +242,7 @@ class Hierarchy {
 	get alias() {return this.#alias;}
 
 	set join(token) {
+		// debugger;
 		if (!this.#join.has(this.firstTableAlias)) {
 			// tabella non presente, non ci sono join su questa tabella, la aggiungo
 			this.#join.set(this.firstTableAlias, { [token] : this.defineJoin.join });
@@ -253,8 +253,11 @@ class Hierarchy {
 				// la relazione è stata creata, posso eliminare [data-selected]
 				delete col.dataset.selected;
 			});
-		} else {			
+		} else {
 			// tabella già presente, verifico se il token è già presente, se non lo è lo aggiungo altrimenti lo elimino
+			console.log(this.#join.get(this.firstTableAlias));
+			
+			debugger;
 			if (!this.#join.get(this.firstTableAlias).hasOwnProperty(token)) {
 				// join non esistente per questa tabella, lo aggiungo
 				this.#join.get(this.firstTableAlias)[token] = this.defineJoin.join;
