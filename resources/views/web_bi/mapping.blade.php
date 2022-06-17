@@ -354,7 +354,6 @@
                     <button type="button" class="button-icon material-icons md-18" join data-tooltip="Crea relazione" data-tooltip-position="right">insert_link</button>
                     <button type="button" class="button-icon material-icons md-18" join-left data-tooltip="Left join" data-tooltip-position="right">join_left</button>
                     <button type="button" class="button-icon material-icons md-18" join-right data-tooltip="Right join" data-tooltip-position="right">join_right</button>
-                    <button type="button" class="button-icon material-icons md-18" join-remove data-tooltip="Rimuovi relazione" data-tooltip-position="right">link_off</button>
                 </section>
             </div>
         </template>

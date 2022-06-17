@@ -12,7 +12,6 @@ div[tables-columns]{display: grid;grid-template-columns: max-content max-content
 section[options] button[join]{color: #99b19c;}
 section[options] button[join-left]{color: #99b19c;}
 section[options] button[join-right]{color: #99b19c;}
-section[options] button[join-remove]{color: #3b7096;}
 section[options] button[hier-order-plus]{color: #3b7096;}
 section[options] button[hier-order-minus]{color: #3b7096;}
 /*relations*/

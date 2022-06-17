@@ -1,7 +1,7 @@
 var App = new Application();
 var StorageCube = new CubeStorage();
 var StorageDimension = new DimensionStorage();
-var cube = new Cube();
+var Cube = new Cubes();
 var Dim = new Dimension();
 var Hier = new Hierarchy();
 (() => {
@@ -315,7 +315,7 @@ var Hier = new Hierarchy();
 		// imposto la card attiva
 		Hier.activeCard = e.currentTarget.dataset.tableId
 		// TODO: utilizzare uno dei due qui, cube.fieldSelected oppure hier.field, da rivedere
-		cube.fieldSelected = e.currentTarget.dataset.label;
+		Cube.fieldSelected = e.currentTarget.dataset.label;
 		Hier.fieldRef = e.currentTarget;
 		// imposto l'alias per la tabella
 		Hier.alias = Hier.card.dataset.alias;
@@ -335,16 +335,8 @@ var Hier = new Hierarchy();
 					*/
 					// e.currentTarget.toggleAttribute('data-selected');
 					// recupero tutti gli attributi di e.currentTarget e vado a ciclare this.removeHierarchy(relationId) per verificare uno alla volta quale posso eliminare
-					debugger;
+					Hier.firstTableAlias = Hier.card.dataset.alias;
 					Hier.join = e.currentTarget.dataset.joinToken;
-					debugger;
-					app.dropZone.querySelectorAll(".card.table .selectable[data-join-token='"+e.currentTarget.dataset.joinToken+"']").forEach( join => {
-						console.log('field join : ', join);
-						delete join.dataset.relation;
-						delete join.dataset.joinToken;
-						delete join.dataset.relationId;
-					});
-
 
 					// NOTE: utilizzo di getAttributeNames()
 					// for (let name of e.currentTarget.getAttributeNames()) {
@@ -380,7 +372,7 @@ var Hier = new Hierarchy();
 				} else {
 					// TODO: nel salvataggio di una metrica di base dovrò aprire una dialog dove impostare l'alias.
 					// ...quindi andrò a salvare in cube.metrics così come viene salvata la metrica composta di base, cioè quella legata al cubo
-					cube.metrics = { name : cube.fieldSelected, metric_type : 0, alias : cube.fieldSelected };
+					Cube.metrics = { name : Cube.fieldSelected, metric_type : 0, alias : Cube.fieldSelected };
 				}
 				break;
 			default:
@@ -388,8 +380,8 @@ var Hier = new Hierarchy();
 				e.currentTarget.toggleAttribute('columns');
 				if (e.currentTarget.hasAttribute('columns')) {
 					// imposto la colonna selezionata nelle textarea ID - DS
-					app.txtareaColumnId.innerText = cube.fieldSelected;
-					app.txtareaColumnDs.innerText = cube.fieldSelected;
+					app.txtareaColumnId.innerText = Cube.fieldSelected;
+					app.txtareaColumnDs.innerText = Cube.fieldSelected;
 					app.dialogColumnMap.showModal();
 				} else {
 					Hier.column = e.currentTarget.dataset.tokenColumn;
@@ -469,23 +461,26 @@ var Hier = new Hierarchy();
 			}
 		});
 		console.log('arr_sql : ', arr_sql);
-		cube.metrics = { name, metric_type : 1, formula: arr_sql, alias, fields };
+		Cube.metrics = { name, metric_type : 1, formula: arr_sql, alias, fields };
 	}
 
 	app.createHierarchy = (e) => {
 		// debugger;
 		console.log('create Relations');
-		// OPTIMIZE: ottimizzare la logica della funzione
-		// let hier = new Map();
 		let join = [], columnsRef = [];
 		// console.log( document.querySelectorAll('.cardTable[mode="relations"] .selectable[relations][data-selected]').length);
 		// quando i campi selezionati sono 1 recupero il nome della tabella perchè questa gerarchia avrà il nome della prima tabella selezionata da mettere in relazione
-		if (document.querySelectorAll('.card.table[data-mode="relations"] .selectable[data-relation][data-selected]').length === 1) {
-			// recupero la prima, delle due tabelle, da mettere in relazione
-			Hier.table = document.querySelector('.card.table[data-mode="relations"] .selectable[data-relation][data-selected]').dataset.tableName;
-		}
+		// if (document.querySelectorAll('.card.table[data-mode="relations"] .selectable[data-relation][data-selected]').length === 1) {
+		// 	// recupero la prima, delle due tabelle, da mettere in relazione
+		// 	Hier.table = document.querySelector('.card.table[data-mode="relations"] .selectable[data-relation][data-selected]').dataset.tableName;
+		// }
 		// console.log('dimension.table : ', Hier.table);
-		document.querySelectorAll('.card.table[data-mode="relations"]').forEach( card => {
+		document.querySelectorAll('.card.table[data-mode="relations"]').forEach( (card, i) => {
+			if (i === 0) {
+				Hier.firstTableAlias = card.dataset.alias;
+				Cube.firstTableAlias = card.dataset.alias;
+			}
+			debugger;
 			let spanRef = card.querySelector('.selectable[data-relation][data-selected]');
 			if (spanRef) {
 				// metto in un array gli elementi selezionati per la creazione della gerarchia
@@ -498,68 +493,16 @@ var Hier = new Hierarchy();
 				// e capire quali sono quelle con la fact e quali no (posso salvare la Dimensione, senza il legame con il Cubo)
 				// debugger;
 				const rand = () => Math.random(0).toString(36).substr(2);
-				const token = rand().substr(0, 7);
-				Hier.defineJoin = { columnsRef, join};
-				console.log('Hier.defineJoin : ', Hier.defineJoin);
+				const token = rand().substr(0, 7);				
 				if (card.hasAttribute('data-fact')) {
-					// TODO: utilizzare un token come fatto per le dimensioni, al posto del relation_id
-					cube.relations['cubeJoin_'+cube.relationId] = hier;
-					cube.relationId++;
-					cube.saveRelation(colSelected);
+					Cube.defineJoin = { columnsRef, join };
+					Cube.join = token;
 				} else {
+					Hier.defineJoin = { columnsRef, join };
 					Hier.join = token;
-					// visualizzo le icone di "join" nelle due colonne
-					// Hier.showRelationIcons(colSelected);
-					// esiste una relazione, visualizzo il div hierarchiesContainer
-					// app.hierarchyContainer.removeAttribute('hidden');
 				}
 			}
 		});
-	}
-
-	app.removeHierarchy = (relationId, value) => {
-		// OPTIMIZE: 2022-05-19 la funzione non è testata
-		console.log(relationId);
-		console.log(value);
-		debugger;
-		console.log('delete hierarchy');
-		/* prima di eliminare la gerarchia devo stabilire se le due card, in questo momento, sono in modalità hierarchies
-		// ...(questo lo vedo dall'attributo presente su card-table)
-		// elimino la gerarchia solo se la relazione tra le due tabelle riguarda le due tabelle attualmente impostate in modalità [hierarchies]
-		// se la relazione riguarda le tabelle A e B e attualmente la modalità impostata è A e B allora elimino la gerarchia
-		// altrimenti se la relazione riguarda A e B e attualmente la modalità impostata [hierarchies] riguarda B e C aggiungo la relazione e non la elimino
-		*/
-		// elementi li che hanno la relazione relationId
-		let liElementsRelated = document.querySelectorAll('.cardTable[hierarchies] li[data-relation-id]['+relationId+']').length;
-
-		if (liElementsRelated === 2) {
-			// tra le due tabelle .card-table[hiearachies] non esiste questa relazione, per cui si sta creando una nuova relazione
-			// ci sono due colonne che fanno parte di "questa relazione" (cioè delle due tabelle attualmente in modalità [hierarchies]) quindi possono essere eliminate
-			document.querySelectorAll('.cardTable[hierarchies] ul > .element > li[data-relation-id]['+relationId+']').forEach((li) => {
-				console.log('elimino li :'+li.innerText);
-				// TODO: se è presente un'altra relazione, quindi un altro attributo data-rel, NON elimino [hierarchy] e [data-relation-id]
-				//... (per non eliminare l'icona) che fa riferimento ad un'altra relazione sulla stessa colonna (doppia chiave)
-				li.removeAttribute(relationId);
-				li.removeAttribute('selected');
-				let relationFound = false; // altra relazione trovata ?
-				// console.log(li.getAttributeNames());
-				// console.log(li.getAttributeNames().indexOf('data-rel-'));
-				li.getAttributeNames().forEach((attr) => {
-					// console.log(attr.indexOf('data-rel-'));
-					if (attr.indexOf('data-rel-') !== -1) {
-						console.log('trovata altra relazione : '+attr);
-						relationFound = true;
-					}
-				});
-				if (!relationFound) {
-					li.removeAttribute('data-relation-id');
-					li.removeAttribute('hierarchy');
-				}
-			});
-			delete cube.hierarchyFact['dimensionJoin_'+value];
-			delete cube.hierarchyTable['dimensionJoin_'+value];
-			console.log(cube.hierarchyTable);
-		}
 	}
 
 	app.handlerCloseCard = (e) => {
@@ -659,12 +602,12 @@ var Hier = new Hierarchy();
 		// console.log('cube selected : ', StorageCube.selected);
 		// ridefinisco le proprietà del cubo, leggendo da quello selezionato, nello storage, per consentirne la modifica o l'aggiunto di dimensioni al cubo
 		// lo converto in un oggetto Map perchè #columns è un Map. Questo consentirà di poter fare modifiche, quindi aggiungere/eliminare colonne
-		cube.columns = new Map(Object.entries(StorageCube.selected.columns));
-		cube.metricDefined = StorageCube.selected.metrics;
-		cube.schema = StorageCube.selected.schema;
+		Cube.columns = new Map(Object.entries(StorageCube.selected.columns));
+		Cube.metricDefined = StorageCube.selected.metrics;
+		Cube.schema = StorageCube.selected.schema;
 		debugger;
 		StorageCube.selected.associatedDimensions.forEach( dim => {
-			cube.associatedDimensions = dim;
+			Cube.associatedDimensions = dim;
 		});
 		app.addCard(true);
 		app.dropZone.dataset.modeInsert = 'before';
@@ -877,7 +820,7 @@ var Hier = new Hierarchy();
 		// const storage = new DimensionStorage();
 		StorageDimension.selected = e.target.dataset.token;
 		// memorizzo la dimensione selezionata per recuperarla nel salvataggio del cubo
-		cube.dimensionsSelected = e.target.dataset.token;
+		Cube.dimensionsSelected = e.target.dataset.token;
 		// recupero tutta la dimensione selezionata, dallo storage
 		console.log(StorageDimension.selected);
 		// aggiungo alla dropzone l'ultima tabella della gerarchia
@@ -923,7 +866,7 @@ var Hier = new Hierarchy();
 			app.dropZone.appendChild(card);
 	        app.dropZone.classList.add('dropped');
 	        card.querySelector('.cardTable').dataset.alias = value.alias;
-	        cube.activeCard = {ref: card.querySelector('.cardTable'), schema : value.schema, tableName : value.table};
+	        Cube.activeCard = {ref: card.querySelector('.cardTable'), schema : value.schema, tableName : value.table};
 	        // debugger;
 	        // event sui tasti section[options]
 	        card.querySelector('i[join]').onclick = app.handlerJoin;
@@ -933,7 +876,7 @@ var Hier = new Hierarchy();
 	        // await : aspetto che getTable popoli tutta la card con i relativi campi
 	        // NOTE: utilizzo di await
 	        const data = await app.getTable();
-	        app.addFields(cube.card.ref.querySelector("ul[data-id='columns']"), data);
+	        app.addFields(Cube.card.ref.querySelector("ul[data-id='columns']"), data);
 	        // imposto la card attiva
 	        debugger;
 	        // console.log(card.id);
@@ -1121,14 +1064,14 @@ var Hier = new Hierarchy();
 	app.btnSaveOpenedCube.onclick = () => {
 		console.log('Aggiornamento Cubo');
 		// console.log(StorageCube.selected);
-		cube.title = StorageCube.selected.name;
-		cube.comment = StorageCube.selected.comment;
-		cube.alias = StorageCube.selected.alias;
-		cube.schema = StorageCube.selected.schema;
-		cube.FACT = StorageCube.selected.FACT;
-		cube.token = StorageCube.selected.token;
+		Cube.title = StorageCube.selected.name;
+		Cube.comment = StorageCube.selected.comment;
+		Cube.alias = StorageCube.selected.alias;
+		Cube.schema = StorageCube.selected.schema;
+		Cube.FACT = StorageCube.selected.FACT;
+		Cube.token = StorageCube.selected.token;
 
-		cube.dimensionsSelected.forEach( dimensionToken => {
+		Cube.dimensionsSelected.forEach( dimensionToken => {
 			const storage = new DimensionStorage();
 			let dimensionObject = {};
 			// console.log(dimensionToken);
@@ -1140,18 +1083,18 @@ var Hier = new Hierarchy();
 			// dimensionObject[dimensionName].cubes.push({[cube._title] : cube.relations});
 			// TODO: impostare cubes come un object e non come un array, in questo modo è più semplice recuperarlo da report/init.js "app.handlerDimensionSelected()"
 			// debugger;
-			dimensionObject[dimensionToken].cubes[cube.token] = cube.relations;
+			dimensionObject[dimensionToken].cubes[Cube.token] = Object.fromEntries(Cube.join);
 			// console.log(dimensionObject[dimensionToken]);
 			// salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
-			cube.associatedDimensions = dimensionToken;
+			Cube.associatedDimensions = dimensionToken;
 			// salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
 			storage.save(dimensionObject[dimensionToken]);
 		});
 		// TODO: l'aggiornamento del cubo non deve aggiornare anche la prop created_at ma solo updated_at
 		debugger;
-		cube.save();
+		Cube.save();
 		// salvo il cubo in localStorage
-		StorageCube.save(cube.cube);
+		StorageCube.save(Cube.cube);
         debugger;
         // TODO: aggiornamento su database, da implementare
         // app.saveCube(cube.cube);
@@ -1323,6 +1266,12 @@ var Hier = new Hierarchy();
 					// resetto il 'data-mode' allo stato iniziale
 					card.removeAttribute('data-mode');
 					card.querySelector('.info').hidden = true;
+					// TODO: rimuovo le precedenti relazioni (di altre gerarchie)
+					card.querySelectorAll('ul .selectable[data-relation-id]').forEach( join => {
+						delete join.dataset.relation;
+						delete join.dataset.joinToken;
+						delete join.dataset.relationId;
+					});
 					// resetto il numero in .cardTable[data-value]
 					card.dataset.value = 0;
 					// imposto la drop-zone in modalità data-mode-insert = "before", in questo modo tutte le card aggiunte alla dropzone saranno messe PRIMA dell'ultima card
@@ -1343,21 +1292,18 @@ var Hier = new Hierarchy();
 	app.btnSaveCubeName.onclick = () => {
 		console.log('cube save');
 		// TODO: devo verificare se il nome del cubo esiste già, sia in locale che sul db.
-		cube.title = document.getElementById('cubeName').value;
-		cube.comment = document.getElementById('textarea-cube-comment').value;
-		cube.alias = document.querySelector('.card.table[data-fact]').dataset.alias;
-		cube.schema = document.querySelector('.card.table[data-fact]').dataset.schema;
-		cube.FACT = document.querySelector('.card.table[data-fact]').dataset.label;
-		cube.columns = Hier.column; // è un oggetto Map
+		Cube.title = document.getElementById('cubeName').value;
+		Cube.comment = document.getElementById('textarea-cube-comment').value;
+		Cube.alias = document.querySelector('.card.table[data-fact]').dataset.alias;
+		Cube.schema = document.querySelector('.card.table[data-fact]').dataset.schema;
+		Cube.FACT = document.querySelector('.card.table[data-fact]').dataset.label;
+		Cube.columns = Hier.column; // è un oggetto Map
 		// recupero l'alias della FACT
-
 		const rand = () => Math.random(0).toString(36).substr(2);
-		// const token = rand().substr(0, 21);
-		cube.token = rand().substr(0, 21);
+		Cube.token = rand().substr(0, 21);
 
-		const storage = new DimensionStorage();
-		
-		cube.dimensionsSelected.forEach( dimensionToken => {
+		const storage = new DimensionStorage();		
+		Cube.dimensionsSelected.forEach( dimensionToken => {
 			let dimensionObject = {};
 			// console.log(dimensionName);
 			storage.selected = dimensionToken;
@@ -1365,18 +1311,18 @@ var Hier = new Hierarchy();
 			dimensionObject[dimensionToken] = storage.selected;
 			// salvo il cubo all'interno della dimensione, comprese la sua join con questa dimensione
 			// dimensionObject[dimensionName].cubes.push({[cube._title] : cube.relations});
-			dimensionObject[dimensionToken].cubes[cube.token] = cube.relations;
+			dimensionObject[dimensionToken].cubes[Cube.token] = Object.fromEntries(Cube.join);
 			console.log(dimensionObject[dimensionToken]);
 			// salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
-			cube.associatedDimensions = dimensionToken;
+			Cube.associatedDimensions = dimensionToken;
 			// salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
 			storage.save(dimensionObject[dimensionToken]);
 		});
 
-		cube.save();
+		Cube.save();
 
 		// salvo il cubo in localStorage
-		StorageCube.save(cube.cube);
+		StorageCube.save(Cube.cube);
 		// salvo il cubo sul DB
         // app.saveCube(cube.cube);
         // TODO: pulisco la dropZone

@@ -1,6 +1,7 @@
-class Cube {
+class Cubes {
 	#columns = new Map();
 	#metrics = new Map();
+	#join = new Map();
 	#token;
 	constructor() {
 		this._cube = {};
@@ -28,22 +29,47 @@ class Cube {
 
 	get metricDefined() {return this.#metrics;}
 
-	set relations(value) {
-		this._join['hier_'+this.relationId] = value;
+	set join(token) {
+		debugger;
+		if (!this.#join.has(token)) {
+			// token del cubo non presente, non ci sono join con la fact, la aggiungo
+			this.#join.set(token, this.defineJoin.join);
+			// imposto i colori delle icone sulle colonne
+			this.defineJoin.columnsRef.forEach( col => {
+				col.dataset.joinToken = token;
+				col.dataset.relationId = true;
+				// la relazione è stata creata, posso eliminare [data-selected]
+				delete col.dataset.selected;
+			});
+		} else {			
+			// token del cubo già presente, verifico se il token-join è già presente, se non lo è lo aggiungo altrimenti lo elimino
+			if (!this.#join.get(token)) {
+				// join non esistente per questo cubo, lo aggiungo
+				this.#join.set(token, this.defineJoin.join);
+				// definisco colori icone
+				this.defineJoin.columnsRef.forEach( col => {
+					col.dataset.joinToken = token;
+					col.dataset.relationId = true;
+					// la relazione è stata creata, posso eliminare [data-selected]
+					delete col.dataset.selected;
+				});
+			} else {
+				// join già esiste per questa tabella, a elimino
+				delete this.#join.get(token);
+				// rimuovo icone relative ai field della join eliminata
+				this.defineJoin.columnsRef.forEach( col => {
+					delete col.dataset.relation;
+					delete col.dataset.joinToken;
+					delete col.dataset.relationId;
+				});
+				// elimino anche la tabella se, al suo interno, non sono presenti altre join
+				if (this.#join.get(token).size === 0) this.#join.delete(token);
+			}
+		}
+		console.log('this.#join : ', this.#join);		
 	}
 
-	get relations() {return this._join;}
-
-	saveRelation(value) {
-		// value : colSelected
-		value.forEach((el) => {
-			el.setAttribute('data-rel-'+this.relationId, this.relationId);
-			// el.setAttribute('data-relation-id', 'rel_'+this.relationId);
-			el.dataset.relationId = true;
-			// la relazione è stata creata, posso eliminare [selected]
-			el.removeAttribute('data-selected');
-		});
-	}
+	get join() {return this.#join;}
 
 	set fieldSelected(value) {this._field = value;}
 
@@ -217,28 +243,41 @@ class Hierarchy {
 	get alias() {return this.#alias;}
 
 	set join(token) {
-		// { span : riferimento della colonna nel DOM, alias : alias_table, field : field_column }
-		// const alias = value[0].split('.')[0];
-		// const rand = () => Math.random(0).toString(36).substr(2);
-		// const token = rand().substr(0, 7);
-		if ( !this.#join.has(token) ) {
-			this.#join.set(token, this.defineJoin.join );
-			// imposto le icone con il dataset.relationId per visualizzare il verde, colonne messe in join
+		if (!this.#join.has(this.firstTableAlias)) {
+			// tabella non presente, non ci sono join su questa tabella, la aggiungo
+			this.#join.set(this.firstTableAlias, { [token] : this.defineJoin.join });
+			// imposto i colori delle icone sulle colonne
 			this.defineJoin.columnsRef.forEach( col => {
 				col.dataset.joinToken = token;
 				col.dataset.relationId = true;
 				// la relazione è stata creata, posso eliminare [data-selected]
 				delete col.dataset.selected;
 			});
-		} else {
-			this.#join.delete(token);
+		} else {			
+			// tabella già presente, verifico se il token è già presente, se non lo è lo aggiungo altrimenti lo elimino
+			if (!this.#join.get(this.firstTableAlias).hasOwnProperty(token)) {
+				// join non esistente per questa tabella, lo aggiungo
+				this.#join.get(this.firstTableAlias)[token] = this.defineJoin.join;
+				// definisco colori icone
+				this.defineJoin.columnsRef.forEach( col => {
+					col.dataset.joinToken = token;
+					col.dataset.relationId = true;
+					// la relazione è stata creata, posso eliminare [data-selected]
+					delete col.dataset.selected;
+				});
+			} else {
+				// join già esiste per questa tabella, a elimino
+				delete this.#join.get(this.firstTableAlias)[token];
+				// rimuovo icone relative ai field della join eliminata
+				this.defineJoin.columnsRef.forEach( col => {
+					delete col.dataset.relation;
+					delete col.dataset.joinToken;
+					delete col.dataset.relationId;
+				});
+				// elimino anche la tabella se, al suo interno, non sono presenti altre join
+				if (Object.keys(this.#join.get(this.firstTableAlias)).length === 0) this.#join.delete(this.firstTableAlias);
+			}
 		}
-		// if (!this.#join.hasOwnProperty(alias)) {
-		// 	// questa tabella non ha ancora nessuna relazione
-		// 	this.#join[alias] = { [this.joinToken] : value };
-		// } else {
-		// 	this.#join[alias][this.joinToken] = value;
-		// }
 		console.log('this.#join : ', this.#join);		
 	}
 
