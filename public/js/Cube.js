@@ -216,23 +216,22 @@ class Hierarchy {
 
 	get alias() {return this.#alias;}
 
-	set join(value) {
-		// genero un token per questa relazione
-		const alias = value[0].split('.')[0];
+	set join(token) {
+		// { span : riferimento della colonna nel DOM, alias : alias_table, field : field_column }
+		// const alias = value[0].split('.')[0];
 		// const rand = () => Math.random(0).toString(36).substr(2);
 		// const token = rand().substr(0, 7);
-		if ( !this.#join.has(alias) ) {
-			this.#join.set(alias, { [this.joinToken] : value} );
+		if ( !this.#join.has(token) ) {
+			this.#join.set(token, this.defineJoin.join );
+			// imposto le icone con il dataset.relationId per visualizzare il verde, colonne messe in join
+			this.defineJoin.columnsRef.forEach( col => {
+				col.dataset.joinToken = token;
+				col.dataset.relationId = true;
+				// la relazione è stata creata, posso eliminare [data-selected]
+				delete col.dataset.selected;
+			});
 		} else {
-			debugger;
-			if ( !this.#join.get(alias).hasOwnProperty(this.joinToken) ) {
-				// nella stessa tabella, questa join non è presente
-				this.#join.get(alias)[this.joinToken] = value;
-			} else {
-				delete this.#join.get(alias)[joinToken];
-				// elimino anche l'attr "schema.table" se, al suo interno, non sono presenti altri field
-				if (this.#join.get(alias).size === 0) this.#join.delete(alias);
-			}
+			this.#join.delete(token);
 		}
 		// if (!this.#join.hasOwnProperty(alias)) {
 		// 	// questa tabella non ha ancora nessuna relazione
@@ -254,7 +253,7 @@ class Hierarchy {
 		this.#hier[object.token] = {order : object.hierarchyOrder};
 		this.#hier[object.token]['name'] = object.name;
 		this.#hier[object.token]['columns'] = Object.fromEntries(this.column);
-		this.#hier[object.token]['joins'] = this.#join; // TODO: this.join
+		this.#hier[object.token]['joins'] = Object.fromEntries(this.join);
 		this.#hier[object.token]['from'] = object.from;
 		// this.#hier[object.token]['tablesFrom'] = object.tablesForm;
 		this.#hier[object.token]['comment'] = object.comment;
@@ -286,16 +285,4 @@ class Hierarchy {
 	}
 
 	get column() {return this.#columns;}
-
-	showRelationIcons(value) {
-		// value : colSelected
-		value.forEach((el) => {
-			// el.setAttribute('data-rel-'+this.#relationId, this.#relationId);
-			el.dataset.joinToken = this.joinToken;
-			el.dataset.relationId = true;
-			// la relazione è stata creata, posso eliminare [selected]
-			el.removeAttribute('data-selected');
-		});
-		// this.#relationId++;
-	}
 }

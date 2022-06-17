@@ -328,7 +328,6 @@ var Hier = new Hierarchy();
 				// ...[hierarchy] a quello appena selezionato. In questo modo posso selezionare solo una colonna per volta ad ogni relazione da creare
 				// se però, viene cliccato una colonna con già una relazione impostata (quindi ha [data-relationn-id]) elimino la relazione da
 				// ...entrambe le tabelle tramite un identificatifo di relazione
-				debugger;
 				if (e.currentTarget.hasAttribute('data-relation-id')) {
 					/* oltre a fare il toggle dell'attributo, se questa colonna era stata già messa in
 					relazione con un altra tabella (quindi attributo [data-relation-id] presente) elimino anche la relazione tra i due campi.
@@ -336,15 +335,15 @@ var Hier = new Hierarchy();
 					*/
 					// e.currentTarget.toggleAttribute('data-selected');
 					// recupero tutti gli attributi di e.currentTarget e vado a ciclare this.removeHierarchy(relationId) per verificare uno alla volta quale posso eliminare
+					debugger;
+					Hier.join = e.currentTarget.dataset.joinToken;
+					debugger;
 					app.dropZone.querySelectorAll(".card.table .selectable[data-join-token='"+e.currentTarget.dataset.joinToken+"']").forEach( join => {
 						console.log('field join : ', join);
 						delete join.dataset.relation;
 						delete join.dataset.joinToken;
 						delete join.dataset.relationId;
 					});
-					debugger;
-					// TODO: da decommentare dopo aver impostato #join come un oggetto Map()
-					Hier.join = e.currentTarget.dataset.joinToken;
 
 
 					// NOTE: utilizzo di getAttributeNames()
@@ -477,8 +476,8 @@ var Hier = new Hierarchy();
 		// debugger;
 		console.log('create Relations');
 		// OPTIMIZE: ottimizzare la logica della funzione
-		let hier = [];
-		let colSelected = [];
+		// let hier = new Map();
+		let join = [], columnsRef = [];
 		// console.log( document.querySelectorAll('.cardTable[mode="relations"] .selectable[relations][data-selected]').length);
 		// quando i campi selezionati sono 1 recupero il nome della tabella perchè questa gerarchia avrà il nome della prima tabella selezionata da mettere in relazione
 		if (document.querySelectorAll('.card.table[data-mode="relations"] .selectable[data-relation][data-selected]').length === 1) {
@@ -490,25 +489,27 @@ var Hier = new Hierarchy();
 			let spanRef = card.querySelector('.selectable[data-relation][data-selected]');
 			if (spanRef) {
 				// metto in un array gli elementi selezionati per la creazione della gerarchia
-				colSelected.push(spanRef);
-				hier.push(`${card.dataset.alias}.${spanRef.dataset.label}`); // questa istruzione crea "Azienda_xxx.id" (alias.field)
+				columnsRef.push(spanRef);
+				join.push(`${card.dataset.alias}.${spanRef.dataset.label}`); // questa istruzione crea "Azienda_xxx.id" (alias.field)
 			}
 			// per creare correttamente la relazione è necessario avere due elementi selezionati
-			if (hier.length === 2) {
+			if (join.length === 2) {
 				// se, in questa relazione, è presente anche la tabella FACT rinomino hier_n in fact_n in modo da poter separare le gerarchie
 				// e capire quali sono quelle con la fact e quali no (posso salvare la Dimensione, senza il legame con il Cubo)
 				// debugger;
 				const rand = () => Math.random(0).toString(36).substr(2);
-				Hier.joinToken = rand().substr(0, 7);
+				const token = rand().substr(0, 7);
+				Hier.defineJoin = { columnsRef, join};
+				console.log('Hier.defineJoin : ', Hier.defineJoin);
 				if (card.hasAttribute('data-fact')) {
 					// TODO: utilizzare un token come fatto per le dimensioni, al posto del relation_id
 					cube.relations['cubeJoin_'+cube.relationId] = hier;
 					cube.relationId++;
 					cube.saveRelation(colSelected);
 				} else {
-					Hier.join = hier;
+					Hier.join = token;
 					// visualizzo le icone di "join" nelle due colonne
-					Hier.showRelationIcons(colSelected);
+					// Hier.showRelationIcons(colSelected);
 					// esiste una relazione, visualizzo il div hierarchiesContainer
 					// app.hierarchyContainer.removeAttribute('hidden');
 				}
@@ -1275,7 +1276,8 @@ var Hier = new Hierarchy();
 		}
 		const comment = document.getElementById('textarea-hierarchies-comment').value;
 		const rand = () => Math.random(0).toString(36).substr(2);
-		const token = rand().substr(0, 7);		
+		const token = rand().substr(0, 7);
+		debugger;
 		Hier.hier = {token, name : hierTitle, hierarchyOrder, comment, from};
 		// la gerarchia creata la salvo nell'oggetto Dim, della classe Dimension, dove andrò a salvare, alla fine, tutta la dimensione
 		Dim.hier = Hier.hier;
