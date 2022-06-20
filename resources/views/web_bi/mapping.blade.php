@@ -384,7 +384,8 @@
                 <div>
                     <div class="h-content">
                         <div class="selectable v-content">
-                            <span generic></span>
+                            <span generic class="highlight"></span>
+                            <span table class="no-highlight"></span>
                         </div>
                         <i class="material-icons md-18">edit</i>
                     </div>

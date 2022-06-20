@@ -207,8 +207,10 @@ var Hier = new Hierarchy();
 		// controllo lo stato di dropEffect per verificare se il drop è stato completato correttamente, come descritto qui:https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#drag_end
 		// in app.getTable() vengono utilizzate le property della classe Cube (cube.card.schema, cube.card.tableName);
 		if (e.dataTransfer.dropEffect === 'copy') {
+			// imposto prima la <ul> altrimenti si verifica il bug riportato nella issue#50
+			const ul = Hier.activeCard.querySelector("ul[data-id='columns']");
 			const data = await app.getTable();
-			app.addFields(Hier.activeCard.querySelector("ul[data-id='columns']"), data);
+			app.addFields(ul, data);
 		}
 	}
 
@@ -555,6 +557,7 @@ var Hier = new Hierarchy();
 			const spanHContent = section.querySelector('.h-content');
 			const selectable = spanHContent.querySelector('.selectable');
 			const span = section.querySelector('span[generic]');
+			const spanTable = section.querySelector('span[table]');
 			section.dataset.label = value.name;
 			section.dataset.elementSearch = 'cubes';
 			selectable.dataset.cubeToken = token;
@@ -563,6 +566,7 @@ var Hier = new Hierarchy();
 			span.dataset.cubeToken = token;
 			span.innerText = value.name;
 			span.dataset.fn = 'handlerCubeSelected';
+			spanTable.innerText = value.FACT;
 			ul.appendChild(section);
 		}
 	}
