@@ -2,6 +2,7 @@ class Cubes {
 	#columns = new Map();
 	#metrics = new Map();
 	#join = new Map();
+	#joins = new Map();
 	#token;
 	constructor() {
 		this._cube = {};
