@@ -481,7 +481,7 @@ var Hier = new Hierarchy();
 				const rand = () => Math.random(0).toString(36).substr(2);
 				const token = rand().substr(0, 7);				
 				if (card.hasAttribute('data-fact')) {
-					Cube.defineJoin = { columnsRef, join };
+					Cube.joins = {token, table, columnsRef, join};
 					Cube.join = token;
 				} else {
 					Hier.joins = {token, table, columnsRef, join};
@@ -712,7 +712,7 @@ var Hier = new Hierarchy();
 	app.handlerOpenTableList = (e) => {
 		// console.log(e.target);
 		if (e.target.hasAttribute('disabled')) return;
-		app.tableList.removeAttribute('data-fact');
+		delete app.tableList.dataset.fact;
 		e.target.toggleAttribute('open');
 		app.tableList.toggleAttribute('hidden');
 		document.getElementById('tableSearch').focus();
@@ -1250,7 +1250,7 @@ var Hier = new Hierarchy();
 				} else {
 					// ultima e unica tabella presente
 					// resetto il 'data-mode' allo stato iniziale
-					card.removeAttribute('data-mode');
+					delete card.dataset.mode;
 					card.querySelector('.info').hidden = true;
 					// TODO: rimuovo le precedenti relazioni (di altre gerarchie)
 					card.querySelectorAll('ul .selectable[data-relation-id]').forEach( join => {

@@ -400,7 +400,7 @@ var StorageMetric = new MetricStorage();
 	app.hideHierarchies = () => {
 		document.querySelectorAll("#ul-hierarchies > section[data-dimension-token='" + StorageDimension.selected.token + "']").forEach((hier) => {
 			hier.hidden = true;
-			hier.removeAttribute('data-searchable');
+			delete hier.dataset.searchable;
 		});
 	}
 
@@ -1208,7 +1208,7 @@ var StorageMetric = new MetricStorage();
 					app.dialogColumns.querySelector('section').dataset.dimensionToken = e.currentTarget.dataset.dimensionToken;
 				} else {
 					// selezione di una colonna della Fact, elimino l'attributo data-hier-token perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
-					app.dialogColumns.querySelector('section').removeAttribute('data-hier-token');
+					delete app.dialogColumns.querySelector('section').dataset.hierToken;
 				}
 				app.dialogColumns.showModal();
 			}			
@@ -1231,7 +1231,7 @@ var StorageMetric = new MetricStorage();
 			// nascondo tutte le colonne che fanno parte della tabella precedentemente selezionata
 			app.dialogColumns.querySelectorAll("ul[data-id='fields-column'] > section[data-dimension-name='" + dimension + "'][data-hier-token='" + hier + "'][data-table-name='" + li.getAttribute('label') + "']").forEach((field) => {
 				field.hidden = true;
-				field.removeAttribute('data-searchable');
+				delete field.dataset.searchable;
 			});
 		}
 		e.currentTarget.toggleAttribute('selected');
@@ -1266,8 +1266,8 @@ var StorageMetric = new MetricStorage();
 			} else {
 				// selezione di una tabella della Fact, elimino l'attributo data-hier-token perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
 				// TODO: da ricontrollare se questi due attributi vengono utilizzati quando si seleziona una tabella appartenente a una dimensione->hier
-				app.dialogFilter.querySelector('section').removeAttribute('data-hier-token');
-				app.dialogFilter.querySelector('section').removeAttribute('data-dimension-token');
+				delete app.dialogFilter.querySelector('section').dataset.hierToken;
+				delete app.dialogFilter.querySelector('section').dataset.dimensionToken;
 				StorageCube.selected = e.currentTarget.dataset.cubeToken;
 			}
 			// pulisco la <ul> dialog-filter-fields contenente la lista dei campi recuperata dal db, della selezione precedente
@@ -1329,7 +1329,7 @@ var StorageMetric = new MetricStorage();
 		// nascondo le tabelle NON appartenenti alla gerarchia selezionata
 		app.dialogColumns.querySelectorAll("#list-columns > section:not([data-table-name='" + table + "'])").forEach( (column) => {
 			column.hidden = true;
-			column.removeAttribute('data-searchable');
+			delete column.dataset.searchable;
 		});
 		// visualizzo le tabelle appartenenti alla hier selezionata
 		document.querySelectorAll("#list-columns > section[data-table-name='" + table + "']").forEach( (column) => {
