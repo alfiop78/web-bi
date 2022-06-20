@@ -331,15 +331,9 @@ var Hier = new Hierarchy();
 				if (e.currentTarget.hasAttribute('data-relation-id')) {
 					/* oltre a fare il toggle dell'attributo, se questa colonna era stata già messa in
 					relazione con un altra tabella (quindi attributo [data-relation-id] presente) elimino anche la relazione tra i due campi.
-					Bisogna eliminarla sia dal DOM, eliminando [data-relation-id] che dall'array this.hierarchy
+					Bisogna eliminarla sia dal DOM, eliminando [data-relation-id] che da this.#join
 					*/
-					// e.currentTarget.toggleAttribute('data-selected');
-					// recupero tutti gli attributi di e.currentTarget e vado a ciclare this.removeHierarchy(relationId) per verificare uno alla volta quale posso eliminare
-					// TODO: recupero la prima tabella della join
-					Hier.firstTableAlias = Hier.card.dataset.alias;
-					debugger;
 					Hier.join = e.currentTarget.dataset.joinToken;
-
 					// NOTE: utilizzo di getAttributeNames()
 					// for (let name of e.currentTarget.getAttributeNames()) {
 					// 	// console.log(name);
@@ -470,8 +464,9 @@ var Hier = new Hierarchy();
 		// debugger;
 		console.log('create Relations');
 		let join = [], columnsRef = [];
+		let table;
 		document.querySelectorAll('.card.table[data-mode="relations"]').forEach( (card, i) => {
-			if (i === 0) Hier.firstTableAlias = card.dataset.alias;
+			if (i === 0) table = card.dataset.alias;
 			let spanRef = card.querySelector('.selectable[data-relation][data-selected]');
 			if (spanRef) {
 				// metto in un array gli elementi selezionati per la creazione della gerarchia
@@ -489,7 +484,7 @@ var Hier = new Hierarchy();
 					Cube.defineJoin = { columnsRef, join };
 					Cube.join = token;
 				} else {
-					Hier.defineJoin = { columnsRef, join };
+					Hier.joins = {token, table, columnsRef, join};
 					Hier.join = token;
 				}
 			}

@@ -172,6 +172,7 @@ class Hierarchy {
 	#schema;
 	#columns = new Map();
 	#join = new Map();
+	#joins = new Map();
 	#relationId = 0;
 	#field; // TODO: da modificare in fieldDs
 	#fieldId;
@@ -241,13 +242,23 @@ class Hierarchy {
 
 	get alias() {return this.#alias;}
 
+	set joins(value) {
+		if (!this.#joins.has(value.token)) {
+			this.#joins.set(value.token, {join: value.join, columns : value.columnsRef, table : value.table});
+		} else {
+			this.#joins.delete(value.token);
+		}
+		console.log('this.#joins : ', this.#joins);
+	}
+
+	get joins() {return this.#joins;}
+
 	set join(token) {
-		// debugger;
-		if (!this.#join.has(this.firstTableAlias)) {
+		if (!this.#join.has(this.joins.get(token).table)) {
 			// tabella non presente, non ci sono join su questa tabella, la aggiungo
-			this.#join.set(this.firstTableAlias, { [token] : this.defineJoin.join });
+			this.#join.set(this.joins.get(token).table, { [token] : this.joins.get(token).join });
 			// imposto i colori delle icone sulle colonne
-			this.defineJoin.columnsRef.forEach( col => {
+			this.joins.get(token).columns.forEach( col => {
 				col.dataset.joinToken = token;
 				col.dataset.relationId = true;
 				// la relazione è stata creata, posso eliminare [data-selected]
@@ -255,14 +266,11 @@ class Hierarchy {
 			});
 		} else {
 			// tabella già presente, verifico se il token è già presente, se non lo è lo aggiungo altrimenti lo elimino
-			console.log(this.#join.get(this.firstTableAlias));
-			
-			debugger;
-			if (!this.#join.get(this.firstTableAlias).hasOwnProperty(token)) {
+			if (!this.#join.get(this.joins.get(token).table).hasOwnProperty(token)) {
 				// join non esistente per questa tabella, lo aggiungo
-				this.#join.get(this.firstTableAlias)[token] = this.defineJoin.join;
+				this.#join.get(this.joins.get(token).table)[token] = this.joins.get(token).join;
 				// definisco colori icone
-				this.defineJoin.columnsRef.forEach( col => {
+				this.joins.get(token).columns.forEach( col => {
 					col.dataset.joinToken = token;
 					col.dataset.relationId = true;
 					// la relazione è stata creata, posso eliminare [data-selected]
@@ -270,15 +278,17 @@ class Hierarchy {
 				});
 			} else {
 				// join già esiste per questa tabella, a elimino
-				delete this.#join.get(this.firstTableAlias)[token];
+				delete this.#join.get(this.joins.get(token).table)[token];
 				// rimuovo icone relative ai field della join eliminata
-				this.defineJoin.columnsRef.forEach( col => {
+				this.joins.get(token).columns.forEach( col => {
 					delete col.dataset.relation;
 					delete col.dataset.joinToken;
 					delete col.dataset.relationId;
 				});
 				// elimino anche la tabella se, al suo interno, non sono presenti altre join
-				if (Object.keys(this.#join.get(this.firstTableAlias)).length === 0) this.#join.delete(this.firstTableAlias);
+				if (Object.keys(this.#join.get(this.joins.get(token).table)).length === 0) this.#join.delete(this.joins.get(token).table);
+				// elimino la join anche da this.#joins
+				this.joins.delete(token);
 			}
 		}
 		console.log('this.#join : ', this.#join);		
