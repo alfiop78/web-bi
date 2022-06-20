@@ -481,7 +481,7 @@ var Hier = new Hierarchy();
 				const rand = () => Math.random(0).toString(36).substr(2);
 				const token = rand().substr(0, 7);				
 				if (card.hasAttribute('data-fact')) {
-					Cube.joins = {token, table, columnsRef, join};
+					Cube.joins = {token, columnsRef, join};
 					Cube.join = token;
 				} else {
 					Hier.joins = {token, table, columnsRef, join};
