@@ -1396,7 +1396,7 @@ var Hier = new Hierarchy();
 	const observer = new MutationObserver(function() {
 	    console.log('callback that runs when observer is triggered');
 	    body.querySelectorAll('*[data-fn]').forEach( element => element.addEventListener('click', app[element.dataset.fn]));
-	    body.querySelectorAll('*[data-tooltip]').forEach( element => element.addEventListener('mouseenter', app.showTooltip));
+	    // body.querySelectorAll('*[data-tooltip]').forEach( element => element.addEventListener('mouseenter', app.showTooltip));
 	    body.querySelectorAll('.card.table button[join]').forEach( element => element.addEventListener('click', app.handlerJoin));
 	    body.querySelectorAll('.card.table button[metrics]').forEach( element => element.addEventListener('click', app.handlerMetric));
 	    body.querySelectorAll('.card.table button[composite-metrics]').forEach( element => element.addEventListener('click', app.handlerAddCompositeMetric));

@@ -6,6 +6,7 @@
 		<link rel="icon" href="/favicon.png" type="image/png" />
         <title>mapping</title>
         <link rel="stylesheet" href="{{ asset('/css/md-dialogs.css') }}">
+        <link rel="stylesheet" href="{{ asset('/css/md-tooltip.css') }}">
         <link rel="stylesheet" type="text/css" href="/css/md-layout.css" />
 		<link rel="stylesheet" type="text/css" href="/css/material-icons.css" />
 		<link rel="stylesheet" type="text/css" href="/css/md-loader.css" />
@@ -65,15 +66,15 @@
                     <div class="vers-status-descr"></div>
                     <div class="vers-actions">
                         {{-- Elimina Sviluppo/Produzione --}}
-                        <button type="button" data-id="btn-delete" data-tooltip="Elimina" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-18 md-warning">clear</button>
+                        <button type="button" data-id="btn-delete" tooltip="Elimina" flow="bottom" class="button-icon material-icons md-18 md-warning">clear</button>
                         {{-- Sovrascrivi copia in Sviluppo --}}
-                        <button type="button" data-id="btn-download" data-tooltip="Download" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-18" disabled>download</button>
+                        <button type="button" data-id="btn-download" tooltip="Download" flow="bottom" class="button-icon material-icons md-18" disabled>download</button>
                         {{-- <span class="popupContent" data-download hidden><i data-id="btn-download" class="material-icons md-warning">download</i></span> --}}
                         {{-- Sovrascrivi copia in Produzione --}}
-                        <button type="button" data-id="btn-upgrade-production" data-tooltip="Aggiorna" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-18" disabled>upgrade</button>
+                        <button type="button" data-id="btn-upgrade-production" tooltip="Aggiorna" flow="bottom" class="button-icon material-icons md-18" disabled>upgrade</button>
                         {{-- <span class="popupContent" data-upgrade hidden><i data-id="btn-upgrade-production" class="material-icons md-warning">upgrade</i></span> --}}
                         {{-- Salva in Produzione --}}
-                        <button type="button" data-id="btn-upload-local-object" data-tooltip="Upload" data-tooltip-dialog="versioning" data-tooltip-position="bottom" class="button-icon material-icons md-18" disabled>upload</button>
+                        <button type="button" data-id="btn-upload-local-object" tooltip="Upload" flow="bottom" class="button-icon material-icons md-18" disabled>upload</button>
                         {{-- <span class="popupContent" data-upload hidden><i data-id="btn-upload-local-object" class="material-icons md-warning">upload</i></span> --}}
                     </div>
                 </div>
@@ -92,8 +93,8 @@
                 <h6></h6>
                 <div class="hierarchy">
                     <div class="tables"></div>
-                    <div class="flex-center">
-                        <button data-id="dimension-edit" type="button" class="button-icon material-icons md-18" data-tooltip="Modifica gerarchia" data-tooltip-position="bottom">edit</button>
+                    <div class="self-end">
+                        <button data-id="dimension-edit" type="button" class="button-icon material-icons md-18" tooltip="Modifica" flow="left">edit</button>
                     </div>
                 </div>
                 {{-- <div class="mini-card-buttons">
@@ -189,14 +190,14 @@
                             </div> --}}
                             <textarea id="textarea-column-id-formula" rows="10" placeholder="ID Formula" autocomplete="off" autofocus required minlength="1" readonly></textarea>
                             <div class="buttons-sql-formula">
-                                <i id="edit-sql-formula-column-id" class="material-icons md-18" data-tooltip="Modifica" data-tooltip-position="bottom">edit</i>
+                                <i id="edit-sql-formula-column-id" class="material-icons md-18" tooltip="Modifica" flow="bottom">edit</i>
                             </div>
                         </div>
                         <div>
                             <span id="column-ds">DESCRIZIONE</span>
                             <textarea id="textarea-column-ds-formula" rows="10" placeholder="Description Formula" autocomplete="off" required minlength="1" readonly></textarea>
                             <div class="buttons-sql-formula">
-                                <i id="edit-sql-formula-column-ds" class="material-icons md-18" data-tooltip="Modifica" data-tooltip-position="bottom">edit</i>
+                                <i id="edit-sql-formula-column-ds" class="material-icons md-18" tooltip="Modifica" flow="bottom">edit</i>
                             </div>
                         </div>
                     </div>
@@ -331,14 +332,14 @@
                 <section class="cardTable" data-name data-schema data-alias>
                     <section options-hier>
                         <div>
-                            <button type="button" class="button-icon material-icons md-18 md-dark" data-tooltip="Incrementa ordine gerarchico" data-tooltip-position="left" hier-order-plus>keyboard_arrow_up</button>
+                            <button type="button" class="button-icon material-icons md-18 md-dark" tooltip="Incrementa ordine gerarchico" flow="left" hier-order-plus>keyboard_arrow_up</button>
                             <span data-value="" class="hierarchy-order"></span>
-                            <button type="button" class="button-icon material-icons md-18 md-dark" hier-order-minus data-tooltip="Decrementa ordine gerarchico" data-tooltip-position="left">keyboard_arrow_down</button>
+                            <button type="button" class="button-icon material-icons md-18 md-dark" hier-order-minus tooltip="Decrementa ordine gerarchico" flow="left">keyboard_arrow_down</button>
                         </div>
                     </section>
                     <div class="title">
                         <div class="title-alias" data-id><h6></h6><div class="subtitle"></div></div>
-                        <button type="button" data-id data-close-card class="button-icon material-icons md-18" data-tooltip="Chiudi" data-tooltip-position="bottom">close</button>
+                        <button type="button" data-id data-close-card class="button-icon material-icons md-18" tooltip="Chiudi" flow="bottom">close</button>
                     </div>
                     <div class="md-field">
                         <input type="search" value="" data-element-search/>
@@ -348,12 +349,12 @@
                     <div class="info" hidden></div>
                 </section>
                 <section options>
-                    <button type="button" class="button-icon material-icons md-18" columns data-tooltip="Colonne" data-tooltip-position="right">view_list</button>
-                    <button type="button" class="button-icon material-icons md-18" metrics data-tooltip="Metriche" data-tooltip-position="right" hidden>show_chart</button>
-                    <button type="button" class="button-icon material-icons md-18" composite-metrics data-tooltip="Crea metrica composta" data-tooltip-position="right" hidden>addchart</button>
-                    <button type="button" class="button-icon material-icons md-18" join data-tooltip="Crea relazione" data-tooltip-position="right">insert_link</button>
-                    <button type="button" class="button-icon material-icons md-18" join-left data-tooltip="Left join" data-tooltip-position="right">join_left</button>
-                    <button type="button" class="button-icon material-icons md-18" join-right data-tooltip="Right join" data-tooltip-position="right">join_right</button>
+                    <button type="button" class="button-icon material-icons md-18" columns tooltip="Colonne" flow="right">view_list</button>
+                    <button type="button" class="button-icon material-icons md-18" metrics tooltip="Metriche" flow="right" hidden>show_chart</button>
+                    <button type="button" class="button-icon material-icons md-18" composite-metrics tooltip="Crea metrica composta" flow="right" hidden>addchart</button>
+                    <button type="button" class="button-icon material-icons md-18" join tooltip="Crea relazione" flow="right">insert_link</button>
+                    <button type="button" class="button-icon material-icons md-18" join-left tooltip="Left join" flow="right">join_left</button>
+                    <button type="button" class="button-icon material-icons md-18" join-right tooltip="Right join" flow="right">join_right</button>
                 </section>
             </div>
         </template>
@@ -467,18 +468,16 @@
                         
                         <div class="actions">
                             <div class="buttons">
-                                {{-- <i id="openTableList" class="material-icons md-24 md-inactive" data-tooltip="Lista tabelle" data-tooltip-position="bottom">storage</i> --}}
-                                <button id="btn-open-table-list" class="button-icon material-icons md-18" type="button" data-tooltip="Lista tabelle" data-tooltip-position="bottom" disabled>storage</button>
-                                <button id="btn-open-dimension-list" type="button" class="button-icon material-icons md-18" data-tooltip="Lista Dimensioni" data-tooltip-position="bottom" disabled>schema</button>
-                                <button id="btn-new-cube" type="button" class="button-icon material-icons md-18" data-tooltip="Definisci cubo" data-tooltip-position="bottom" disabled>space_dashboard</button>
+                                <button id="btn-open-table-list" class="button-icon material-icons md-18" type="button" tooltip="Lista tabelle" flow="bottom" disabled>storage</button>
+                                <button id="btn-open-dimension-list" type="button" class="button-icon material-icons md-18" tooltip="Lista Dimensioni" flow="bottom" disabled>schema</button>
+                                <button id="btn-new-cube" type="button" class="button-icon material-icons md-18" tooltip="Definisci cubo" flow="bottom" disabled>space_dashboard</button>
                                 <span class="h-separator"></span>
-                                {{-- <i class="material-icons md-24 md-inactive" data-tooltip="Nuova dimensione" data-tooltip-position="bottom">dashboard_customize</i> --}}
-                                <button id="btn-save-cube" type="button" class="button-icon material-icons md-18" data-tooltip="Salva cubo" data-tooltip-position="bottom" disabled>save</button>
-                                <button id="btn-save-opened-cube" type="button" class="button-icon material-icons md-18" data-tooltip="Aggiorna cubo" data-tooltip-position="bottom" disabled hidden>save</button>
-                                <button id="btn-defined-cube" type="button" class="button-icon material-icons md-18" data-tooltip="Lista Cubi definiti" data-tooltip-position="bottom" disabled>folder_open</button>
+                                <button id="btn-save-cube" type="button" class="button-icon material-icons md-18" tooltip="Salva cubo" flow="bottom" disabled>save</button>
+                                <button id="btn-save-opened-cube" type="button" class="button-icon material-icons md-18" tooltip="Aggiorna cubo" flow="bottom" disabled hidden>save</button>
+                                <button id="btn-defined-cube" type="button" class="button-icon material-icons md-18" tooltip="Lista Cubi definiti" flow="bottom" disabled>folder_open</button>
                                 <span class="h-separator"></span>
-                                <button id="btn-versioning" type="button" class="button-icon material-icons md-18" data-tooltip="Esegui sincronizzazione" data-tooltip-position="bottom">cached</button>
-                                <button id="btn-versioning-status" type="button" class="button-icon material-icons md-18" data-tooltip="" data-open-abs-window data-tooltip-position="bottom" disabled>cached</button>
+                                <button id="btn-versioning" type="button" class="button-icon material-icons md-18" tooltip="Esegui sincronizzazione" flow="bottom">cached</button>
+                                <button id="btn-versioning-status" type="button" class="button-icon material-icons md-18" tooltip="" data-open-abs-window flow="bottom" disabled>cached</button>
                             </div>
                         </div>
 
@@ -524,9 +523,9 @@
                                 </div>
                                 <div id="drop-zone-buttons">
                                     <div class="drop-zone-buttons">
-                                        <button id="btnNewHierarchy" type="button" class="button-icon material-icons md-18 md-dark" data-tooltip="Nuova gerarchia" data-tooltip-position="right">add</button>
-                                        <button id="btnSaveHierarchy" class="button-icon material-icons md-18 md-dark md-sienna" type="button" data-tooltip="Salva gerarchia" data-tooltip-position="right" disabled>ballot</button>
-                                        <button id="btn-save-dimension" class="button-icon material-icons md-18 md-dark" type="button" data-tooltip="Salva dimensione" data-tooltip-position="right" disabled>save</button>
+                                        <button id="btnNewHierarchy" type="button" class="button-icon material-icons md-18 md-dark" tooltip="Nuova gerarchia" flow="right">add</button>
+                                        <button id="btnSaveHierarchy" class="button-icon material-icons md-18 md-dark md-sienna" type="button" tooltip="Salva gerarchia" flow="right" disabled>ballot</button>
+                                        <button id="btn-save-dimension" class="button-icon material-icons md-18 md-dark" type="button" tooltip="Salva dimensione" flow="right" disabled>save</button>
                                     </div>
                                 </div>
                             </div>

@@ -1,4 +1,3 @@
-/*@import url('https://fonts.googleapis.com/css?family=Barlow:wght@200;400;500;600&effect=canvas-print&display=swap');*/
 @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@100;200;400;600&display=swap');
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp&display=swap");
 * {box-sizing: border-box;}
@@ -186,50 +185,6 @@ tr.tr-right{display: flex;justify-content: flex-end;}
 .actions{display: flex; flex-flow: row; justify-content: space-between; margin: 0px 0px 8px; padding: 4px 32px 4px; box-shadow: 0px 1px 3px -1px grey; border-radius: 4px; background-color: white;}
 .actions > .buttons{display: flex;flex-flow: row;}
 
-/*toast Popup*/
-small.tooltip, small.tooltip-dialog{font-family: 'Barlow'; font-weight: normal; z-index: 9999; background: #494949; color: white; white-space: nowrap; width: fit-content; border-radius: 5px;
-	font-size: .8rem; visibility: hidden; height: fit-content; box-shadow: 0 2px 4px 0 black;padding: 1em;position: absolute; top: var(--top); left: var(--left);}
-small.tooltip.show, small.tooltip-dialog.show{visibility: visible; animation: popup 50ms ease;}
-
-button[data-tooltip-dialog], button[data-tooltip]{position: relative;}
-button[data-tooltip-dialog]:not([disabled]):hover, button[data-tooltip]:not([disabled]):hover{display: flex; justify-content: center; align-items: center;}
-/*button[data-tooltip-dialog]:hover::after{content: 'test'; font-size: .9rem;font-family: 'Barlow';color: white; width: 100px; background-color: indianred; position: absolute; top: 100%; left: -30px;}*/
-button[data-tooltip-dialog]:not([disabled]):hover::after, button[data-tooltip]:not([disabled]):hover::after{
-  content: attr(data-desc);
-  font-size: .8rem;
-  font-family: 'Barlow';
-  color: white;
-  width: fit-content;
-  height: fit-content;
-  box-shadow: 0 2px 4px 0 black;
-  background-color: #494949;
-  position: absolute;
-  top: calc(100% + 8px);
-  left: auto;
-  padding: 1em;
-  border-radius: 4px;
-  z-index: 9999;
-  white-space: nowrap;
-  visibility: hidden;
-  animation: tooltip 50ms ease 1s forwards;
-}
-
-button[data-tooltip][data-tooltip-position="right"]:not([disabled]):hover::after{
-  top: auto; left: calc(100% + 8px);
-}
-
-@keyframes tooltip {
-  0% {transform: scale(.2);visibility: visible;}
-  75% {transform: scale(1.10);visibility: visible;}
-  100% {transform: scale(1);visibility: visible;}
-}
-
-@keyframes popup {
-  0% {transform: scale(.2);}
-  75% {transform: scale(1.10);}
-  100% {transform: scale(1);}
-}
-
 .upper{text-transform: uppercase;}
 
 .h-separator{width: 1px; margin: 8px 16px; background-color: #a9a9a95e;}
@@ -269,3 +224,5 @@ span[contenteditable]{margin: 4px; padding: 8px; background-color: tan;}
 #composite-metric-formula{background: #e2e2e2; width: 100%; height: 100%; padding: 1em;}
 
 .button-icon{padding: 2px; background: transparent; border: none;}
+
+.self-end{justify-self: end;}

@@ -6,6 +6,7 @@
 		<meta name="theme-color" content="#70b1bb">
 		<meta name="author" content="Pietrantuono Alfio">
 		<link rel="stylesheet" type="text/css" href="/css/md-layout.css" />
+		<link rel="stylesheet" href="{{ asset('/css/md-tooltip.css') }}">
 		<link rel="stylesheet" type="text/css" href="/css/md-lists.css" />
 		<link rel="stylesheet" type="text/css" href="/css/material-icons.css" />
 		<link rel="stylesheet" type="text/css" href="/css/md-loader.css" />
@@ -25,8 +26,6 @@
 		<title>Creazione Report</title>
 	</head>
 	<body>
-
-		{{-- <small id="tooltip" class="tooltip"></small> --}}
 
 		<dialog id="dialog-column" class="small-dialog">
 			<section class="dialog-sections">
@@ -126,7 +125,7 @@
 							<label for="filterName" class="">name</label>
 							<p class="helper"></p>
 						</div>
-						<button type="button" class="button-icon material-icons" id="search-field-values" data-tooltip="Visualizza valori" data-tooltip-position="bottom" data-field-name>search</button>
+						<button type="button" class="button-icon material-icons" id="search-field-values" tooltip="Visualizza valori" flow="bottom" data-field-name>search</button>
 						<div class="md-field">
 							<textarea id="filterSQLFormula" name="filterSQL" rows="10" cols="33" placeholder="SQL"></textarea>
 						</div>
@@ -339,7 +338,7 @@
 
 						<div class="actions">
 							<div class="buttons">
-								<button type="button" id="btnProcessReport" class="button-icon material-icons md-18" data-tooltip="Crea datamart" data-tooltip-position="bottom">table_rows</button>
+								<button type="button" id="btnProcessReport" class="button-icon material-icons md-18" tooltip="Crea datamart" flow="bottom">table_rows</button>
 								{{-- <i id="btnDuplicateReport" class="material-icons md-18" data-tooltip="Duplica report" data-tooltip-position="bottom">content_copy</i> --}}
 							</div>
 						</div>
@@ -412,10 +411,10 @@
 										<div class="v-content">
 											<span data-process></span>
 										</div>
-										<button type="button" data-edit class="button-icon material-icons md-18" data-tooltip="Modifica" data-tooltip-position="bottom">edit</button>
-										<button type="button" data-copy class="button-icon material-icons md-18" data-tooltip="Duplica" data-tooltip-position="bottom">content_copy</button>
+										<button type="button" data-edit class="button-icon material-icons md-18" tooltip="Modifica" flow="bottom">edit</button>
+										<button type="button" data-copy class="button-icon material-icons md-18" tooltip="Duplica" flow="bottom">content_copy</button>
 										{{-- <span class="h-separator"></span> --}}
-										<button type="button" data-schedule class="button-icon material-icons md-18 md-highlight" data-tooltip="Esegui" data-tooltip-position="bottom">schedule_send</button>
+										<button type="button" data-schedule class="button-icon material-icons md-18 md-highlight" tooltip="Esegui" flow="bottom">schedule_send</button>
 									</div>
 								</div>
 							</section>
