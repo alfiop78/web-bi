@@ -250,8 +250,7 @@ var Hier = new Hierarchy();
 			// visualizzo le icone per la creazione delle metriche
 			card.querySelector('section[options] > button[composite-metrics]').dataset.schema = card.dataset.schema;
 			card.querySelector('section[options] > button[composite-metrics]').dataset.label = card.dataset.label;
-			card.querySelector('section[options] > button[metrics]').hidden = false;
-			card.querySelector('section[options] > button[composite-metrics]').hidden = false;
+			card.querySelector('section[options]').dataset.mode = 'cube';
 		}
 
 		// imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone e aggiungo la card alla dropZone
@@ -773,6 +772,7 @@ var Hier = new Hierarchy();
 			card.dataset.id = StorageCube.selected.token;
 			card.id = StorageCube.selected.token;
 			cardLayout.querySelector('.title-alias').dataset.id = StorageCube.selected.token;
+			cardLayout.querySelector('section[options]').dataset.mode = 'cube';
 			// l'appendChild / insertBefore viene stabilito nel checkHierarchyNumber()
 			app.checkHierarchyNumber(card);
 		} else {
@@ -785,6 +785,8 @@ var Hier = new Hierarchy();
 			card.dataset.id = StorageDimension.selected.token;
 			card.id = StorageDimension.selected.token;
 			cardLayout.querySelector('.title-alias').dataset.id = StorageDimension.selected.token;
+			// l'attr data-dimension-use fa in modo da nascondere, in section[options]
+			cardLayout.querySelector('section[options]').dataset.mode = 'dimension';
 			// l'appendChild / insertBefore viene stabilito nel checkHierarchyNumber()
 			app.checkHierarchyNumber(card);
 		}
@@ -1344,11 +1346,6 @@ var Hier = new Hierarchy();
 		Hier = new Hierarchy();
 	}
 
-	app.showTooltip = (e) => {
-		e.target.dataset.desc = e.target.dataset.tooltip;
-		// TODO: dopo 5 secondi, anche se il mouse non è più posizionato sull'icona, devo nascondere il tooltip
-	}
-
 	app.btnCompositeMetricDone.onclick = () => app.dialogCompositeMetric.close();
 
 	// textarea per creare una metrica composta
@@ -1396,7 +1393,6 @@ var Hier = new Hierarchy();
 	const observer = new MutationObserver(function() {
 	    console.log('callback that runs when observer is triggered');
 	    body.querySelectorAll('*[data-fn]').forEach( element => element.addEventListener('click', app[element.dataset.fn]));
-	    // body.querySelectorAll('*[data-tooltip]').forEach( element => element.addEventListener('mouseenter', app.showTooltip));
 	    body.querySelectorAll('.card.table button[join]').forEach( element => element.addEventListener('click', app.handlerJoin));
 	    body.querySelectorAll('.card.table button[metrics]').forEach( element => element.addEventListener('click', app.handlerMetric));
 	    body.querySelectorAll('.card.table button[composite-metrics]').forEach( element => element.addEventListener('click', app.handlerAddCompositeMetric));

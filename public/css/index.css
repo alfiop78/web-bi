@@ -25,6 +25,17 @@ section[options] button[hier-order-minus]{color: #3b7096;}
 /* .card-layout{display: grid;grid-template-columns: 100%;position: relative;} */
 .cardLayout > section[options]{position: absolute;display: flex;padding: 0 8px;flex-flow: column;left: calc(100% - 46px);
   transition: left 200ms, opacity 200ms;opacity: 0;z-index: 0;}
+
+section[options][data-mode="default"] > button[metrics],
+section[options][data-mode="default"] > button[composite-metrics]{
+  display: none;
+}
+section[options][data-mode="dimension"] > button[columns],
+section[options][data-mode="dimension"] > button[metrics],
+section[options][data-mode="dimension"] > button[composite-metrics]{
+  display: none;
+}
+
 .cardLayout:not([mode='edit']):hover .cardTable[data-name] ~ section[options]{left: 100%;opacity: 1;transition: left 200ms, opacity 200ms;z-index: 5;}
 .cardLayout[mode='edit']{opacity: .5;}
 

@@ -348,10 +348,10 @@
                     <ul data-id="columns" hidden></ul>
                     <div class="info" hidden></div>
                 </section>
-                <section options>
+                <section options data-mode="default">
                     <button type="button" class="button-icon material-icons md-18" columns tooltip="Colonne" flow="right">view_list</button>
-                    <button type="button" class="button-icon material-icons md-18" metrics tooltip="Metriche" flow="right" hidden>show_chart</button>
-                    <button type="button" class="button-icon material-icons md-18" composite-metrics tooltip="Crea metrica composta" flow="right" hidden>addchart</button>
+                    <button type="button" class="button-icon material-icons md-18" metrics tooltip="Metriche" flow="right">show_chart</button>
+                    <button type="button" class="button-icon material-icons md-18" composite-metrics tooltip="Crea metrica composta" flow="right">addchart</button>
                     <button type="button" class="button-icon material-icons md-18" join tooltip="Crea relazione" flow="right">insert_link</button>
                     <button type="button" class="button-icon material-icons md-18" join-left tooltip="Left join" flow="right">join_left</button>
                     <button type="button" class="button-icon material-icons md-18" join-right tooltip="Right join" flow="right">join_right</button>
