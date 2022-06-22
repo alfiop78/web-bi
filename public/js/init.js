@@ -1386,12 +1386,34 @@ var Hier = new Hierarchy();
 	
 	document.getElementById('composite-alias-metric').oninput = () => app.checkDialogCompositeMetric();
 
+	app.activeCard = (e) => {
+    	Hier.activeCard = e.currentTarget.id;
+		console.log('Hier.card : ', Hier.card);
+	}
+
+	app.handlerMinimizeCard = (e) => {
+		Hier.card.classList.add('minimize');
+		e.target.hidden = true;
+		console.log('e.target : ', e.target);
+		console.log('e.target : ', e.target.nextElementSibling);
+		e.target.nextElementSibling.hidden = false;
+	}
+
+	app.handlerExpandCard = (e) => {
+		Hier.card.classList.remove('minimize');
+		e.target.hidden = true;
+		e.target.previousElementSibling.hidden = false;
+	}
+
+	
+
 	// NOTE: esempio di utilizzo di MutationObserver
 	const body = document.getElementById('body');
     // create a new instance of `MutationObserver` named `observer`,
 	// passing it a callback function
 	const observer = new MutationObserver(function() {
 	    console.log('callback that runs when observer is triggered');
+	    body.querySelectorAll('.card.table').forEach( card => card.addEventListener('click', app.activeCard, true));
 	    body.querySelectorAll('*[data-fn]').forEach( element => element.addEventListener('click', app[element.dataset.fn]));
 	    body.querySelectorAll('.card.table button[join]').forEach( element => element.addEventListener('click', app.handlerJoin));
 	    body.querySelectorAll('.card.table button[metrics]').forEach( element => element.addEventListener('click', app.handlerMetric));
@@ -1399,6 +1421,8 @@ var Hier = new Hierarchy();
 	    body.querySelectorAll('.card.table button[columns]').forEach( element => element.addEventListener('click', app.handlerAddColumns));
 	    body.querySelectorAll('.card.table button[hier-order-plus], .card.table button[hier-order-minus]').forEach( element => element.addEventListener('click', app.handlerHierarchyOrder));
 	    body.querySelectorAll('.card.table button[data-close-card]').forEach( element => element.addEventListener('click', app.handlerCloseCard));
+	    body.querySelectorAll('.card.table button[data-minimize-card]').forEach( element => element.addEventListener('click', app.handlerMinimizeCard, false));
+	    body.querySelectorAll('.card.table button[data-expand-card]').forEach( element => element.addEventListener('click', app.handlerExpandCard, false));
 	    body.querySelectorAll('.card.table').forEach( card => {
 	    	card.querySelector('.title-alias').addEventListener('mousedown', app.dragStart);
 	    	card.querySelector('.title-alias').addEventListener('mouseup', app.dragEnd);

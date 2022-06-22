@@ -339,7 +339,11 @@
                     </section>
                     <div class="title">
                         <div class="title-alias" data-id><h6></h6><div class="subtitle"></div></div>
-                        <button type="button" data-id data-close-card class="button-icon material-icons md-18" tooltip="Chiudi" flow="bottom">close</button>
+                        <div class="buttons-card-action">
+                            <button type="button" data-id data-close-card class="button-icon material-icons md-18" tooltip="Chiudi" flow="bottom">close</button>
+                            <button type="button" data-id data-minimize-card class="button-icon material-icons md-18" tooltip="Minimizza" flow="bottom">expand_less</button>
+                            <button type="button" data-id data-expand-card class="button-icon material-icons md-18" tooltip="Espandi" flow="bottom" hidden>expand_more</button>
+                        </div>
                     </div>
                     <div class="md-field">
                         <input type="search" value="" data-element-search/>
