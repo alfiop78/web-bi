@@ -48,8 +48,8 @@
 }
 
 /* Make the tooltips respond to hover */
-[tooltip]:hover::before,
-[tooltip]:hover::after {
+[tooltip]:not([disabled]):hover::before,
+[tooltip]:not([disabled]):hover::after {
   display: block;
 }
 
