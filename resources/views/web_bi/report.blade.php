@@ -349,7 +349,7 @@
 							<section class="data-item" data-element-search data-label data-sublist-columns data-related-object hidden>
 								<div>
 									<div class="h-content">
-										<div class="v-content selectable">
+										<div class="v-content selectable" data-object-type="column">
 											<span column class="highlight"></span>
 											<small table></small>
 											<small hier></small>
@@ -363,7 +363,7 @@
 							<section class="data-item" data-element-search data-label data-related-object data-sublist-filters hidden>
 								<div>
 									<div class="h-content">
-										<div class="selectable v-content filters-color">
+										<div class="selectable v-content filters-color" data-object-type="filter">
 											<span filter class="highlight filters-color"></span>
 											<small table></small>
 											<small></small>
@@ -377,7 +377,7 @@
 							<section class="data-item" data-element-search data-label data-related-object data-type="metric" data-sublist-metrics hidden>
 								<div>
 									<div class="h-content">
-										<div class="selectable v-content metrics-color">
+										<div class="selectable v-content metrics-color" data-object-type="metric">
 											<span metric class="highlight metrics-color"></span>
 											<small table></small>
 											<small cube></small>
@@ -392,12 +392,10 @@
 							<section class="data-item" data-element-search data-label data-sublist-composite-metrics hidden>
 								<div>
 									<div class="h-content">
-										<div class="selectable v-content">
+										<div class="selectable v-content" data-object-type="composite-metric">
 											<span metric class="highlight metrics-color"></span>
 											{{-- TODO: per le metriche composte, visualizzarne, nel popup, l'elenco dei cubi utilizzati dalle metriche all'interno della formula --}}
-											<div class="smalls">
-												
-											</div>
+											<div class="smalls"></div>
 										</div>
 										<i class="material-icons md-18">edit</i>
 									</div>
@@ -444,7 +442,29 @@
 
 							{{-- lista generica --}}
 							<section class="data-item list" data-element-search data-label data-sublist-gen data-related-object hidden>
-								<div class="selectable" data-label>
+								<div class="selectable" data-label data-object-type>
+									<div class="h-content">
+										<div class="v-content">
+											<span item></span>
+										</div>
+									</div>
+								</div>
+							</section>
+
+							{{-- cube --}}
+							<section class="data-item list" data-element-search="search-cube" data-label data-sublist-cube data-searchable="true">
+								<div class="selectable" data-label data-object-type="cube">
+									<div class="h-content">
+										<div class="v-content">
+											<span item></span>
+										</div>
+									</div>
+								</div>
+							</section>
+
+							{{-- dimension --}}
+							<section class="data-item list" data-element-search="search-dimension" data-label data-related-object="cube" data-sublist-dimension hidden data-searchable="true">
+								<div class="selectable" data-label data-object-type="dimension">
 									<div class="h-content">
 										<div class="v-content">
 											<span item></span>

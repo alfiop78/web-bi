@@ -107,13 +107,10 @@ var StorageMetric = new MetricStorage();
 		const ul = document.getElementById('ul-cubes');
 		for (const [token, value] of StorageCube.cubes) {
 			const content = app.tmplList.content.cloneNode(true);
-			const section = content.querySelector('section[data-sublist-gen]');
+			const section = content.querySelector('section[data-sublist-cube]');
 			const div = section.querySelector('div.selectable');
 			const span = section.querySelector('span');
-			section.hidden = false;
-			section.dataset.elementSearch = 'search-cube';
 			section.dataset.label = value.name;
-			section.toggleAttribute('data-searchable');
 			section.dataset.cubeToken = token;
 			div.dataset.label = value.name;
 			div.dataset.cubeToken = token;
@@ -137,12 +134,9 @@ var StorageMetric = new MetricStorage();
 				// TODO: recupero le proprietà della dimensione dallo storage
 				StorageDimension.selected = tokenDimension;
 				const content = app.tmplList.content.cloneNode(true);
-				const section = content.querySelector('section[data-sublist-gen]');
+				const section = content.querySelector('section[data-sublist-dimension]');
 				const div = section.querySelector('div.selectable');
 				const span = section.querySelector('span');
-				section.dataset.relatedObject = 'cube';
-				section.hidden = true;
-				section.dataset.elementSearch = 'search-dimension';
 				section.dataset.label = StorageDimension.selected.name;
 				section.dataset.dimensionToken = tokenDimension;
 				section.dataset.cubeToken = token;
@@ -920,9 +914,6 @@ var StorageMetric = new MetricStorage();
 		Query.from = `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${Query.tableAlias}`;
 		// al momento non serve l'object con tableAlias e from, lo recupero direttamente dal nome del cubo in handlerEditReport, se così potrei anche utilizzare un oggetto Set anziche Map in Query.js
 		Query.elementCube = {token : e.currentTarget.dataset.cubeToken, tableAlias : StorageCube.selected.alias, from : Query.from, FACT : StorageCube.selected.FACT, name : StorageCube.selected.name};
-		// debugger;
-		// console.log('cube selected : ', StorageCube.selected.name);
-		// e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('data-selected')) {
 			// BUG: viene nascosto il cubo dalla lista
 			// nascondo tutti gli elementi relativi al cubo deselezionato
@@ -935,45 +926,44 @@ var StorageMetric = new MetricStorage();
 			// aggiungo l'attr data-selected
 			e.currentTarget.toggleAttribute('data-selected');
 		}
+		Query.cubes = e.currentTarget.dataset.cubeToken;
 	}
 
 	// selezione delle dimensioni
 	app.handlerDimensionSelected = (e) => {
 		StorageDimension.selected = e.currentTarget.dataset.dimensionToken;
 		console.log('Dimensione selezionata : ', StorageDimension.selected);
-		Query.elementDimension = { token : e.currentTarget.dataset.dimensionToken, cubes : StorageDimension.selected.cubes};
+		// Query.elementDimension = { token : e.currentTarget.dataset.dimensionToken, cubes : StorageDimension.selected.cubes};
 		if (e.currentTarget.hasAttribute('data-selected')) {
 			e.currentTarget.toggleAttribute('data-selected');
 			app.hideDimensionObjects();
-			// TODO: delete factRelation
-			Query.deleteFactRelation(StorageDimension.selected.token);
-			// StorageDimension.removeDimension(e.currentTarget.dataset.dimensionToken);
 		} else {
 			// imposto l'attr data-selected
 			e.currentTarget.toggleAttribute('data-selected');
 			app.showDimensionObjects();
+			
 			app.btnToggleHierarchyStruct.disabled = false;
-			// imposto la relazione tra dimensione -> cubo
-			// TODO: utilizzare oggetto Map()
-			Query.factRelation = StorageDimension.selected;
+			// Query.factJoin = StorageDimension.selected;
 		}
+		// Query.dim = e.currentTarget.dataset.dimensionToken;
+		// Query.dimensions = e.currentTarget.dataset.dimensionToken;
 	}
 
 	// selezione di una gerarchia (step-2)
-	app.handlerHierarchySelected = (e) => {
-		StorageDimension.selected = e.currentTarget.dataset.dimensionToken;
-		if (e.currentTarget.hasAttribute('data-selected')) {
-			e.currentTarget.toggleAttribute('data-selected');
-			// deselezione della gerarchia, nascondo le tabelle della gerarchia selezionata
-			app.hideAllElements();
-			Query.elementHierarchy = {dimensionToken : e.currentTarget.dataset.dimensionToken, token : e.currentTarget.dataset.hierToken};
-		} else {
-			e.currentTarget.toggleAttribute('data-selected');
-			// visualizzo tutti gli elementi (columns, filters) relativi alla gerarchia selezionata
-			Query.elementHierarchy = {dimensionToken : e.currentTarget.dataset.dimensionToken, token : e.currentTarget.dataset.hierToken};
-			app.showAllElements();
-		}
-	}
+	// app.handlerHierarchySelected = (e) => {
+	// 	StorageDimension.selected = e.currentTarget.dataset.dimensionToken;
+	// 	if (e.currentTarget.hasAttribute('data-selected')) {
+	// 		e.currentTarget.toggleAttribute('data-selected');
+	// 		// deselezione della gerarchia, nascondo le tabelle della gerarchia selezionata
+	// 		app.hideAllElements();
+	// 		Query.elementHierarchy = {dimensionToken : e.currentTarget.dataset.dimensionToken, token : e.currentTarget.dataset.hierToken};
+	// 	} else {
+	// 		e.currentTarget.toggleAttribute('data-selected');
+	// 		// visualizzo tutti gli elementi (columns, filters) relativi alla gerarchia selezionata
+	// 		Query.elementHierarchy = {dimensionToken : e.currentTarget.dataset.dimensionToken, token : e.currentTarget.dataset.hierToken};
+	// 		app.showAllElements();
+	// 	}
+	// }
 
 	// selezione di un filtro già presente, lo salvo nell'oggetto Query
 	app.handlerFilterSelected = (e) => {
@@ -1202,6 +1192,7 @@ var StorageMetric = new MetricStorage();
 			if (e.currentTarget.hasAttribute('data-selected')) {
 				e.currentTarget.toggleAttribute('data-selected');
 				debugger;
+				Query.objects = {dimensionToken : StorageDimension.selected.token, type : 'column', token : Query.columnToken};
 				// TODO: colonna deselezionata, implementare la logica in Query.deleteSelect
 				// Query.deleteSelect();				
 			} else {
@@ -2372,6 +2363,7 @@ var StorageMetric = new MetricStorage();
 			document.querySelector("#ul-columns .selectable[data-token-column='"+Query.columnToken+"'] span[column]").innerText += ` (${alias.value})`;
 			// in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
 			Query.select = { token : Query.columnToken, dimensionToken : StorageDimension.selected.token, hier, tableId : Query.tableId, table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value };
+			Query.objects = {dimensionToken : StorageDimension.selected.token, type : 'column', token : Query.columnToken};
 		} else {
 			document.querySelector("#ul-columns .selectable[data-token-column='"+Query.columnToken+"'] span[column]").innerText += ` (${alias.value})`;
 			Query.select = { token : Query.columnToken, table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value };

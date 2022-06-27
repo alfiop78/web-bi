@@ -6,7 +6,7 @@
 ul{margin-inline: 0px;padding-inline: 0px;}
 .list{color: #494949;}
 .h-content{display: flex; align-items: center; padding-right: 1em;}
-section[data-sublist-gen] .v-content{margin: 4px 2px;}
+.v-content{margin: 4px 2px;}
 .v-content{display: flex;flex-flow: column;width: 100%;}
 span.highlight{color: sienna;}
 .filters-color span.highlight{color: var(--main-filters-color);}

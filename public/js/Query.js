@@ -21,13 +21,60 @@ class Queries {
 	#elementFilters = new Map();
 	#elementMetrics = new Map();
 	#reportProcess = {};
+	#objects = new Map();
+	#objectDimension = new Map();
+	#cubes = new Set();
+	#dimensions = new Set();
+	// #dims = new Map();
+	#factJoin = {};
 	#processId = 0;
 	#token = 0;
 	constructor() {
 		this._fromSet = new Set();
 		this._where = {};
-		this._factRelation = {};
 	}
+
+	set objects(object) {
+		if (!this.#objectDimension.has(object.dimensionToken)) {
+			this.#objects = new Map();
+			( !this.#objects.has(object.token) ) ? this.#objects.set(object.token, object.type) : this.#objects.delete(object.token);
+			this.#objectDimension.set(object.dimensionToken, this.#objects);
+		} else {
+			this.#objectDimension.set(object.dimensionToken, this.#objects);	
+		}
+
+		// if (this.#objects.size === 0) this.#objectDimension.delete(object.dimensionToken);
+		this.#objectDimension.set(object.dimensionToken, this.#objects);
+		console.log('this.#objectDimension : ', this.#objectDimension);
+		// console.log('this.#objects : ', this.#objects);
+	}
+
+	get objects() {return this.#objects;}
+	
+	set cubes(token) {
+		( !this.#cubes.has(token) ) ? this.#cubes.add(token) : this.#cubes.delete(token);		
+		console.log('#cubes : ', this.#cubes);
+		// this.temp();
+	}
+
+	get cubes() {return this.#cubes;}
+
+	set dimensions(token) {
+		( !this.#dimensions.has(token) ) ? this.#dimensions.add(token) : this.#dimensions.delete(token);		
+		console.log('#dimensions : ', this.#dimensions);
+		// this.temp();
+	}
+
+	get dimensions() {return this.#dimensions;}
+
+	/*temp() {
+		this.#objects.set('cubes', [...this.cubes]);
+		this.#objects.set('dimensions', [...this.dimensions]);
+		console.log('this.#objects : ', this.#objects);
+		const rand = () => Math.random(0).toString(36).substr(2);
+		this.#token = rand().substr(0, 21);
+		window.localStorage.setItem(`_temp_${this.#token}`, JSON.stringify(Object.fromEntries(this.#objects)));
+	}*/
 
 	set processId(value) {
 		this.#processId = value;
@@ -158,20 +205,20 @@ class Queries {
 
 	get where() {return this.#where;}
 
-	set factRelation(dimension) {
+	set factJoin(dimension) {
 		// console.log('dimName : ', dimension.name);
 		// TODO: utilizzare oggetto Map()
-		this._factRelation[dimension.token] = dimension.cubes;
+		this.#factJoin[dimension.token] = dimension.cubes;
 		// this._fatcRelation viene salvato nel processo in save()
-		console.log('_factRelation : ', this._factRelation);
+		console.log('fact join : ', this.#factJoin);
 	}
 
-	get factRelation() {this._factRelation;}
+	get factJoin() {this.#factJoin;}
 
 	deleteFactRelation(token) {
 		// debugger;
-		delete this._factRelation[token];
-		console.log('_factRelation : ', this._factRelation);
+		delete this.#factJoin[token];
+		console.log('_factRelation : ', this.#factJoin);
 	}
 
 	set filters(value) {
@@ -312,7 +359,7 @@ class Queries {
 		this.#elementReport.set('columns', Object.fromEntries(this.select));
 		this.reportElements.from = Array.from(this._fromSet); // converto il set in un array
 		this.reportElements.where = this.#where;
-		this.reportElements.factJoin = this._factRelation;
+		this.reportElements.factJoin = this.factJoin;
 		if (this.filters.size > 0) this.reportElements.filters = Object.fromEntries(this.filters);
 		if (this.metrics.size > 0) {
 			this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
