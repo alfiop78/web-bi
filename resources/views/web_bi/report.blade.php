@@ -346,7 +346,7 @@
 						<template id="templateList">
 
 							{{-- lista column esistenti --}}
-							<section class="data-item" data-element-search data-label data-sublist-columns hidden>
+							<section class="data-item" data-element-search data-label data-sublist-columns data-related-object hidden>
 								<div>
 									<div class="h-content">
 										<div class="v-content selectable">
@@ -360,7 +360,7 @@
 							</section>
 
 							{{-- lista filtri esistenti --}}
-							<section class="data-item" data-element-search data-label data-sublist-filters hidden>
+							<section class="data-item" data-element-search data-label data-related-object data-sublist-filters hidden>
 								<div>
 									<div class="h-content">
 										<div class="selectable v-content filters-color">
@@ -374,7 +374,7 @@
 							</section>
 
 							{{-- lista metriche esistenti --}}
-							<section class="data-item" data-element-search data-label data-sublist-metrics hidden>
+							<section class="data-item" data-element-search data-label data-related-object data-type="metric" data-sublist-metrics hidden>
 								<div>
 									<div class="h-content">
 										<div class="selectable v-content metrics-color">
@@ -443,7 +443,7 @@
 							</section>
 
 							{{-- lista generica --}}
-							<section class="data-item list" data-element-search data-label data-sublist-gen hidden>
+							<section class="data-item list" data-element-search data-label data-sublist-gen data-related-object hidden>
 								<div class="selectable" data-label>
 									<div class="h-content">
 										<div class="v-content">
@@ -475,6 +475,23 @@
 
 							<div class="steps" data-step="1">
 								<div class="overflow">
+									<div id="hierarchies">
+										<section class="hierarchies">
+											<div class="parent-ul">
+												<h5>gerarchie</h5>
+												<div class="md-field">
+													<input type="search" data-element-search="search-hierarchy" id="search-hierarchy" value autocomplete="off" data-type-search="nested"/>
+													<label for="search-hierarchy" class="">Ricerca</label>
+												</div>
+												<div class="relative-ul">
+													<ul id="ul-hierarchies" class="absolute"></ul>
+												</div>
+											</div>
+										</section>
+	                                    <div id="btn-arrow-open-close">
+	                                        <button type="button" id="toggle-hierarchy-struct" class="button-icon material-icons md-24" disabled>arrow_circle_left</button>
+	                                    </div>
+									</div>
 									<div id="stepTranslate" data-translate-x="0">
 										<section class="step" data-step="1" selected>
 											<div class="pageContent">
@@ -490,31 +507,42 @@
 															<ul id="ul-cubes" class="absolute"></ul>
 														</div>
 													</div>
-													{{-- dimension-list --}}
-													<div class="parent-ul">
-														<h5>Dimensioni</h5>
+													{{-- metrics --}}
+													<section class="metrics parent-ul-metrics">
+														<h5>Metriche</h5>
+														{{-- <div class="btn-add">
+															<span>Crea metrica</span>
+															<button type="button" id="btn-add-metrics" class="button-icon material-icons md-32">add</button>
+														</div> --}}
 														<div class="md-field">
-															<input type="search" data-element-search="search-dimension" id="search-dimension" value autocomplete="off" />
-															<label for="search-dimension" class="">Ricerca</label>
+															<input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
+															<label for="search-exist-metrics" class="">Ricerca</label>
 														</div>
 														<div class="relative-ul">
-															<ul id="ul-dimensions" class="absolute"></ul>
+															<ul id="ul-exist-metrics" class="absolute"></ul>
 														</div>
-													</div>
-													{{-- gerarchie --}}
-													<div class="parent-ul-hierarchies">
-														<h5>gerarchie</h5>
+														<button type="button" id="btn-add-metrics" class="button-icon material-icons md-32">add</button>
+													</section>
+													{{-- composite --}}
+													<section class="composite-metrics parent-ul-metrics">
+														<h5>Metriche composte</h5>
 														<div class="md-field">
-															<input type="search" data-element-search="search-hierarchy" id="search-hierarchy" value autocomplete="off" data-type-search="nested"/>
-															<label for="search-hierarchy" class="">Ricerca</label>
+															<input type="search" data-element-search="search-exist-composite-metrics" id="search-exist-composite-metrics" value autocomplete="off" />
+															<label for="search-exist-composite-metrics" class="">Ricerca</label>
 														</div>
+														<div class="relative-ul">
+															<ul id="ul-exist-composite-metrics" class="absolute"></ul>
+														</div>
+														<button type="button" id="btn-add-composite-metrics" class="button-icon material-icons md-32">add</button>
+													</section>
+													
+													{{-- gerarchie --}}
+													{{-- <div class="parent-ul-hierarchies">
+														
 														<div class="relative-ul">
 															<ul id="ul-fact-tables" class="absolute"></ul>
 														</div>
-														<div class="relative-ul">
-															<ul id="ul-hierarchies" class="absolute"></ul>
-														</div>
-													</div>
+													</div> --}}
 												</div>
 											</div>
 										</section>
@@ -524,65 +552,43 @@
 												<h5>Seleziona gli elementi per comporre il Report</h5>
 												<div class="v-grid">
 													<div class="addElementsReport">
-														<section class="columns parent-ul-columns">
+														{{-- dimension-list --}}
+														<div class="parent-ul">
+															<h5>Dimensioni</h5>
+															<div class="md-field">
+																<input type="search" data-element-search="search-dimension" id="search-dimension" value autocomplete="off" />
+																<label for="search-dimension" class="">Ricerca</label>
+															</div>
+															<div class="relative-ul">
+																<ul id="ul-dimensions" class="absolute"></ul>
+															</div>
+														</div>
+														<section class="columns parent-ul">
+															<h5>Colonne</h5>
 															<div class="md-field">
 																<input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" />
 																<label for="search-columns" class="">Ricerca</label>
-															</div>
-															<div class="relative-ul">
-																<ul id="ul-columns-fact" class="absolute"></ul>
 															</div>
 															<div class="relative-ul">
 																<ul id="ul-columns" class="absolute"></ul>
 															</div>
 														</section>
 														<section class="filters parent-ul-filters">
-															<div class="btn-add">
+															<h5>Filtri</h5>
+															{{-- <div class="btn-add">
 																<span>Crea filtro</span>
-																<button type="button" id="btn-add-filters" class="button-icon material-icons md-32">add</button>
+																
+															</div> --}}
+															<div class="md-field">
+																<input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
+																<label for="search-exist-filters" class="">Ricerca</label>
 															</div>
-															<div class="parent-ul-filters">
-																<div class="md-field">
-																	<input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
-																	<label for="search-exist-filters" class="">Ricerca</label>
-																</div>
-																<div class="relative-ul">
-																	<ul id="ul-exist-filters" class="absolute"></ul>
-																</div>
+															<div class="relative-ul">
+																<ul id="ul-exist-filters" class="absolute"></ul>
 															</div>
+															<button type="button" id="btn-add-filters" class="button-icon material-icons md-32">add</button>
 														</section>
-														{{-- metrics --}}
-														<section class="metrics parent-ul-metrics">
-															<div class="btn-add">
-																<span>Crea metrica</span>
-																<button type="button" id="btn-add-metrics" class="button-icon material-icons md-32">add</button>
-															</div>
-															<div class="parent-ul-metrics">
-																<div class="md-field">
-																	<input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
-																	<label for="search-exist-metrics" class="">Ricerca</label>
-																</div>
-																<div class="relative-ul">
-																	<ul id="ul-exist-metrics" class="absolute"></ul>
-																</div>
-															</div>
-														</section>
-														{{-- composite --}}
-														<section class="composite-metrics parent-ul-metrics">
-															<div class="btn-add">
-																<span>Crea metrica composta</span>
-																<button type="button" id="btn-add-composite-metrics" class="button-icon material-icons md-32">add</button>
-															</div>
-															<div class="parent-ul-metrics">
-																<div class="md-field">
-																	<input type="search" data-element-search="search-exist-composite-metrics" id="search-exist-composite-metrics" value autocomplete="off" />
-																	<label for="search-exist-composite-metrics" class="">Ricerca</label>
-																</div>
-																<div class="relative-ul">
-																	<ul id="ul-exist-composite-metrics" class="absolute"></ul>
-																</div>
-															</div>															
-														</section>
+														
 													</div>
 												</div>
 											</div>

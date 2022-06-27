@@ -87,7 +87,7 @@ ul > section.fact{font-weight: bold;}
 .full-overflow-list-columns{height: 350px; max-height: 350px; overflow-y: auto;}
 /*.dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}*/
 
-.addElementsReport{display: grid;grid-template-columns: 25% repeat(3, calc(25% - 16px)); grid-column-gap: 16px; color: dimgrey; height: inherit;}
+.addElementsReport{display: grid;grid-template-columns: 34% repeat(2, calc(33% - 16px)); grid-column-gap: 16px; color: dimgrey; height: inherit;}
 .btn-add > span{font-weight: bold;}
 .addElementsReport > .filters .btn-add{color: var(--main-filters-color);}
 .filters button.material-icons{color: var(--main-filters-color);}
@@ -113,3 +113,8 @@ ul > section[data-sublist][selected], ul > section[data-sublist-generic][selecte
 span[cube] {color: dimgray; padding: .5em .2em;font-size: .75rem;font-weight: normal;}
 
 .fact-table > section {color: var(--main-primary-color);font-weight: bold;}
+
+#hierarchies{display: grid; grid-template-rows: 95% 5%; z-index: 10; position: absolute; left: -230px; padding: 32px 4px 4px;background-color: #00000024; height: 100%; opacity: .7; transition: transform 250ms;
+  transform: translateX(0px); width: 240px;}
+#hierarchies[data-open]{transform: translateX(230px); z-index: 10; opacity: .9; background: gainsboro;}
+#btn-arrow-open-close{position: absolute; right: -18px;}

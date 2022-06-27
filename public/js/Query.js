@@ -163,7 +163,7 @@ class Queries {
 		// TODO: utilizzare oggetto Map()
 		this._factRelation[dimension.token] = dimension.cubes;
 		// this._fatcRelation viene salvato nel processo in save()
-		// console.log('_factRelation : ', this._factRelation);
+		console.log('_factRelation : ', this._factRelation);
 	}
 
 	get factRelation() {this._factRelation;}

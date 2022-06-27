@@ -59,7 +59,8 @@ var StorageMetric = new MetricStorage();
 		aggregationFunction: document.getElementById('ul-aggregation-functions'),
 		btnMapping: document.getElementById('mdcMapping'),
 		tooltip : document.getElementById('tooltip'),
-		tooltipTimeoutId : null
+		tooltipTimeoutId : null,
+		btnToggleHierarchyStruct : document.getElementById('toggle-hierarchy-struct')
 	}
 
 	app.addReport = (token, value) => {
@@ -139,6 +140,7 @@ var StorageMetric = new MetricStorage();
 				const section = content.querySelector('section[data-sublist-gen]');
 				const div = section.querySelector('div.selectable');
 				const span = section.querySelector('span');
+				section.dataset.relatedObject = 'cube';
 				section.hidden = true;
 				section.dataset.elementSearch = 'search-dimension';
 				section.dataset.label = StorageDimension.selected.name;
@@ -170,6 +172,7 @@ var StorageMetric = new MetricStorage();
 				const div = section.querySelector('div.selectable');
 				const vContent = div.querySelector('.v-content');
 				const span = vContent.querySelector('span[item]');
+				section.dataset.relatedObject =  'dimension';
 				section.dataset.label = hier.name;
 				section.dataset.elementSearch = 'search-hierarchy';
 				section.dataset.dimensionToken = token;
@@ -223,7 +226,7 @@ var StorageMetric = new MetricStorage();
 							const smallTable = selectable.querySelector('small[table]');
 							const smallHier = selectable.querySelector('small:last-child');
 							const i = spanHContent.querySelector('i');
-
+							section.dataset.relatedObject = 'dimension';
 							section.dataset.label = field.ds.field;
 							section.dataset.elementSearch = 'search-columns';
 							section.dataset.dimensionToken = dimToken;
@@ -250,7 +253,7 @@ var StorageMetric = new MetricStorage();
 
 	// recupero le colonne agganciate alla fact, proprietà columns nel json, per aggiungerle nelle dialog-column
 	app.getColumnsFact = () => {
-		const ul = document.getElementById('ul-columns-fact');
+		const ul = document.getElementById('ul-columns');
 		for (const [cubeToken, value] of StorageCube.cubes) {
 			if (value.columns.hasOwnProperty(value.alias)) {
 				for (const [token, field] of Object.entries(value.columns[value.alias])) {
@@ -263,7 +266,7 @@ var StorageMetric = new MetricStorage();
 					const smallTable = selectable.querySelector('small[table]');
 					const smallCube = selectable.querySelector('small:last-child');
 					const i = spanHContent.querySelector('i');
-
+					section.dataset.relatedObject = 'cube';
 					section.dataset.label = field.ds.field;
 					section.dataset.elementSearch = 'search-columns';
 					section.dataset.cubeToken = cubeToken;
@@ -305,6 +308,7 @@ var StorageMetric = new MetricStorage();
 							const smallTable = selectable.querySelector('small[table]');
 							const smallHier = selectable.querySelector('small:last-child');
 							const iEdit = spanHContent.querySelector('i');
+							section.dataset.relatedObject = 'dimension';
 							section.dataset.elementSearch = 'search-exist-filters';
 							section.dataset.label = filter.name;
 							section.dataset.dimensionToken = filter.dimensionToken;
@@ -343,6 +347,7 @@ var StorageMetric = new MetricStorage();
 				const span = selectable.querySelector('span[filter]');
 				const smallTable = selectable.querySelector('small[table]');
 				const smallCube = selectable.querySelector('small:last-child');
+				section.dataset.relatedObject = 'cube';
 				section.dataset.elementSearch = 'search-exist-filters';
 				section.dataset.label = filter.name;
 				section.dataset.cubeToken = cubeToken;
@@ -361,14 +366,14 @@ var StorageMetric = new MetricStorage();
 
 	// visualizzo metriche / filtri appartenenti al cubo
 	app.showCubeObjects = () => {
-		document.querySelectorAll("ul > section.data-item[data-cube-token='" + StorageCube.selected.token + "']").forEach( item => {
+		document.querySelectorAll("section[data-related-object='cube'][data-cube-token='" + StorageCube.selected.token + "']").forEach( item => {
 			item.hidden = false;
 			item.toggleAttribute('data-searchable');
 		});
 	}
 
 	app.hideCubeObjects = () => {
-		document.querySelectorAll("ul > section.data-item[data-cube-token='" + StorageCube.selected.token + "']").forEach( item => {
+		document.querySelectorAll("section[data-related-object='cube'][data-cube-token='" + StorageCube.selected.token + "']").forEach( item => {
 			item.hidden = true;
 			item.toggleAttribute('data-searchable');
 		});
@@ -390,15 +395,15 @@ var StorageMetric = new MetricStorage();
 		});
 	}
 
-	app.showHierarchies = () => {
-		document.querySelectorAll("#ul-hierarchies > section[data-dimension-token='" + StorageDimension.selected.token + "']").forEach( (hier) => {
+	app.showDimensionObjects = () => {
+		document.querySelectorAll("section[data-related-object='dimension'][data-dimension-token='" + StorageDimension.selected.token + "']").forEach( hier => {
 			hier.hidden = false;
 			hier.dataset.searchable = true;
 		});
 	}
 
-	app.hideHierarchies = () => {
-		document.querySelectorAll("#ul-hierarchies > section[data-dimension-token='" + StorageDimension.selected.token + "']").forEach((hier) => {
+	app.hideDimensionObjects = () => {
+		document.querySelectorAll("section[data-related-object='dimension'][data-dimension-token='" + StorageDimension.selected.token + "']").forEach( hier => {
 			hier.hidden = true;
 			delete hier.dataset.searchable;
 		});
@@ -535,17 +540,17 @@ var StorageMetric = new MetricStorage();
 	// lista tabelle Fact (step 1)
 	app.getFactTable = () => {
 		const ul = document.getElementById('ul-fact-tables');
-		for (const [token, value] of StorageCube.cubes) {
-			const content = app.tmplList.content.cloneNode(true);
-			const section = content.querySelector('section[data-sublist-gen]');
-			const div = section.querySelector('div.selectable');
-			const span = div.querySelector('span');
-			section.classList.remove('data-item');
-			div.classList.remove('selectable');
-			section.dataset.cubeToken = token;
-			span.innerText = value.FACT;
-			ul.appendChild(section);
-		}
+		// for (const [token, value] of StorageCube.cubes) {
+		// 	const content = app.tmplList.content.cloneNode(true);
+		// 	const section = content.querySelector('section[data-sublist-gen]');
+		// 	const div = section.querySelector('div.selectable');
+		// 	const span = div.querySelector('span');
+		// 	section.classList.remove('data-item');
+		// 	div.classList.remove('selectable');
+		// 	section.dataset.cubeToken = token;
+		// 	span.innerText = value.FACT;
+		// 	ul.appendChild(section);
+		// }
 	}
 
 	// lista metriche esistenti
@@ -565,6 +570,7 @@ var StorageMetric = new MetricStorage();
 				const smallTable = spanHContent.querySelector('small[table]');
 				const smallCube = spanHContent.querySelector('small[cube]');
 				const iEdit = spanHContent.querySelector('i');
+				section.dataset.relatedObject = 'cube';
 				section.dataset.elementSearch = 'search-exist-metrics';
 				section.dataset.label = metric.name;
 				section.dataset.cubeToken = cubeToken;
@@ -864,7 +870,7 @@ var StorageMetric = new MetricStorage();
 				};
 			}
 			// debugger;
-			document.querySelector("#ul-columns .selectable[data-token-column='"+token+"'], #ul-columns-fact .selectable[data-token-column='"+token+"']").dataset.selected = true;
+			document.querySelector("#ul-columns .selectable[data-token-column='"+token+"']").dataset.selected = true;
 		}
 		const listReportProcess = document.getElementById('reportProcessList');
 		listReportProcess.toggleAttribute('hidden');
@@ -919,15 +925,13 @@ var StorageMetric = new MetricStorage();
 		// e.currentTarget.toggleAttribute('selected');
 		if (e.currentTarget.hasAttribute('data-selected')) {
 			// BUG: viene nascosto il cubo dalla lista
-			app.hideDimensions();
 			// nascondo tutti gli elementi relativi al cubo deselezionato
 			app.hideCubeObjects();
 			e.currentTarget.toggleAttribute('data-selected');
 		} else {
-			app.showDimensions();
 			app.showCubeObjects();
 			// visualizzo la tabelle fact del cubo selezionato
-			document.querySelector("#ul-fact-tables > section[data-cube-token='" + StorageCube.selected.token + "']").hidden = false;
+			// document.querySelector("#ul-fact-tables > section[data-cube-token='" + StorageCube.selected.token + "']").hidden = false;
 			// aggiungo l'attr data-selected
 			e.currentTarget.toggleAttribute('data-selected');
 		}
@@ -940,14 +944,15 @@ var StorageMetric = new MetricStorage();
 		Query.elementDimension = { token : e.currentTarget.dataset.dimensionToken, cubes : StorageDimension.selected.cubes};
 		if (e.currentTarget.hasAttribute('data-selected')) {
 			e.currentTarget.toggleAttribute('data-selected');
-			app.hideHierarchies();
+			app.hideDimensionObjects();
 			// TODO: delete factRelation
 			Query.deleteFactRelation(StorageDimension.selected.token);
 			// StorageDimension.removeDimension(e.currentTarget.dataset.dimensionToken);
 		} else {
 			// imposto l'attr data-selected
 			e.currentTarget.toggleAttribute('data-selected');
-			app.showHierarchies();
+			app.showDimensionObjects();
+			app.btnToggleHierarchyStruct.disabled = false;
 			// imposto la relazione tra dimensione -> cubo
 			// TODO: utilizzare oggetto Map()
 			Query.factRelation = StorageDimension.selected;
@@ -1177,8 +1182,8 @@ var StorageMetric = new MetricStorage();
 	app.handlerSelectColumn = (e) => {
 		console.log('addColumns');
 		// verifico che almeno una gerarchia sia stata selezionata
-		const hierSelectedCount = document.querySelectorAll('#ul-hierarchies .selectable[data-selected]').length;
-		if (hierSelectedCount === 0) {
+		const dimensionSelectedCount = document.querySelectorAll('#ul-dimensions .selectable[data-selected]').length;
+		if (dimensionSelectedCount === 0) {
 			App.showConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
 			return;
 		} else {
@@ -1448,6 +1453,10 @@ var StorageMetric = new MetricStorage();
 				if (StorageDimension.selected.hierarchies[hier].joins[order.alias]) {
 					Query.joinId = +k;
 					Query.where = StorageDimension.selected.hierarchies[hier].joins[order.alias];
+					// TODO: nel div hierarchies, evidenzio le tabelle "incluse" nella query
+					debugger;
+					const test = document.querySelector("#ul-hierarchies section[data-dimension-token='"+StorageDimension.selected.token+"'] > .selectable[data-hier-token='"+hier+"'] small[data-table-id='"+Query.joinId+"']");
+					test.dataset.s = true;
 				}
 			}
 		}
@@ -1674,6 +1683,7 @@ var StorageMetric = new MetricStorage();
 		const selectable = spanHContent.querySelector('.selectable');
 		const smalls = selectable.querySelector('.smalls');
 		const spanMetric = spanHContent.querySelector('span[metric]');
+		section.dataset.relatedObject = 'cube';
 		// non esiste nessun cubo legato a una metrica composta, quindi la rendo subito visibile
 		section.hidden = false;
 		// const smallTable = spanHContent.querySelector('small[table]');
@@ -2278,6 +2288,14 @@ var StorageMetric = new MetricStorage();
 		app.btnCompositeMetricSave.disabled = ((name.length !== 0) && (alias.length !== 0) || !check) ? false : true;
 	}
 
+	// hide hierarchy struct
+	app.btnToggleHierarchyStruct.onclick = (e) => {
+		// console.log(e.target);
+		const hierarchyStruct = document.getElementById('hierarchies');
+		hierarchyStruct.toggleAttribute('data-open');
+		e.target.innerText = (hierarchyStruct.hasAttribute('data-open')) ? 'arrow_circle_right' : 'arrow_circle_left';
+	}
+
 	document.getElementById('alias-metric').oninput = (e) => {
 		/* TODO: verifico se un nome e un alias sono già presenti nell'elenco delle metriche
 		const check = Query.checkMetricAlias(e.target.value);
@@ -2355,12 +2373,12 @@ var StorageMetric = new MetricStorage();
 			// in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
 			Query.select = { token : Query.columnToken, dimensionToken : StorageDimension.selected.token, hier, tableId : Query.tableId, table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value };
 		} else {
-			document.querySelector("#ul-columns-fact .selectable[data-token-column='"+Query.columnToken+"'] span[column]").innerText += ` (${alias.value})`;
+			document.querySelector("#ul-columns .selectable[data-token-column='"+Query.columnToken+"'] span[column]").innerText += ` (${alias.value})`;
 			Query.select = { token : Query.columnToken, table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value };
 		}
 		console.log('columnToken : ', Query.columnToken);
 		// evidenzio come 'selezionata' la colonna che ha aperto la dialog dopo averla salvata qui. Vado a verificare sia le colonne della fact che quelle delle dimensioni
-		document.querySelector("#ul-columns .selectable[data-token-column='" + Query.columnToken + "'], #ul-columns-fact .selectable[data-token-column='" + Query.columnToken + "']").toggleAttribute('data-selected');
+		document.querySelector("#ul-columns .selectable[data-token-column='" + Query.columnToken + "']").toggleAttribute('data-selected');
 		// in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
 		app.dialogColumns.close();
 	}
