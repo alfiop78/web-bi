@@ -968,10 +968,11 @@ var StorageMetric = new MetricStorage();
 	// selezione di un filtro già presente, lo salvo nell'oggetto Query
 	app.handlerFilterSelected = (e) => {
 		StorageFilter.selected = e.currentTarget.dataset.filterToken;
-		let hier;
+		let hier, hierToken;
 		// i filtri impostati su un livello dimensionale hanno l'attr data-hier-token
 		if (e.currentTarget.hasAttribute('data-hier-token')) {
-			hier = e.currentTarget.dataset.hierToken;
+			hierToken = e.currentTarget.dataset.hierToken;
+			hier = StorageDimension.selected.hierarchies[hierToken];
 			StorageDimension.selected = e.currentTarget.dataset.dimensionToken;
 			Query.tableId = e.currentTarget.dataset.tableId;
 		}
@@ -981,23 +982,25 @@ var StorageMetric = new MetricStorage();
 			e.currentTarget.toggleAttribute('data-selected');
 			// delete filter
 			Query.filters = { token : e.currentTarget.dataset.filterToken, SQL : `${Query.tableAlias}.${StorageFilter.selected.formula}` };
+			Query.objects = {token : e.currentTarget.dataset.filterToken};
 			// BUG: dopo aver eliminato il filtro dal report si deve ricontrollare il checkRelations() ed eliminare le join che riguardano il filtro deselezionato			
 		} else {
 			e.currentTarget.toggleAttribute('data-selected');
 			// recupero dallo storage il filtro selezionato
 			if (StorageFilter.selected.hier) {
 				// imposto la firstTable se il filtro appartiene a una dimensione e non a un cubo
-				Query.addTables(StorageFilter.selected.hier.token);
-				app.checkRelations(hier);
+				// Query.addTables(StorageFilter.selected.hier.token);
+				// app.checkRelations(hier);
 				Query.elementFilter = {
 					token : e.currentTarget.dataset.filterToken,
 					dimensionToken : e.currentTarget.dataset.dimensionToken,
-					hier,
+					hier : hierToken,
 					tableAlias : Query.tableAlias,
 					formula : StorageFilter.selected.formula,
 					tableId : Query.tableId,
 					table : Query.table
 				};
+				Query.objects = {token : e.currentTarget.dataset.filterToken, table : Query.tableAlias, tableId : Query.tableId, hier, dimension : StorageDimension.selected.token};
 			} else {
 				// filtro sul cubo, non ha hier
 				Query.elementFilter = {token : e.currentTarget.dataset.filterToken, tableAlias : Query.tableAlias, formula : StorageFilter.selected.formula, table : Query.table};
@@ -1191,8 +1194,13 @@ var StorageMetric = new MetricStorage();
 			}
 			if (e.currentTarget.hasAttribute('data-selected')) {
 				e.currentTarget.toggleAttribute('data-selected');
+				// Query.addTables(e.currentTarget.dataset.hierToken);
+				// verifico quali relazioni inserire in where e quindi anche in from
 				debugger;
-				Query.objects = {dimensionToken : StorageDimension.selected.token, type : 'column', token : Query.columnToken};
+				// app.removeRelations(e.currentTarget.dataset.hierToken);
+				// Query.objects = {dimensionToken : StorageDimension.selected.token, type : 'column', token : Query.columnToken};
+				Query.objects = {token : Query.columnToken};
+
 				// TODO: colonna deselezionata, implementare la logica in Query.deleteSelect
 				// Query.deleteSelect();				
 			} else {
@@ -1445,10 +1453,29 @@ var StorageMetric = new MetricStorage();
 					Query.joinId = +k;
 					Query.where = StorageDimension.selected.hierarchies[hier].joins[order.alias];
 					// TODO: nel div hierarchies, evidenzio le tabelle "incluse" nella query
-					debugger;
+					// debugger;
 					const test = document.querySelector("#ul-hierarchies section[data-dimension-token='"+StorageDimension.selected.token+"'] > .selectable[data-hier-token='"+hier+"'] small[data-table-id='"+Query.joinId+"']");
 					test.dataset.s = true;
 				}
+			}
+		}
+	}
+
+	app.removeRelations = (hier) => {
+		// recupero la prima tabella selezionata della gerarchia
+		console.log(Query.tables.tableId);
+		for (const [k, order] of Object.entries(StorageDimension.selected.hierarchies[hier].order)) {
+			// recupero la property 'join' (nella dimensione) dove la key è maggiore della tableId al momento selezionata (Quindi recupero tutte le hier inferiori)
+			if (+k <= Query.tables.tableId) {
+				console.log('delete relation : ', `${order.schema}.${order.table} AS ${order.alias}`);
+				// if (StorageDimension.selected.hierarchies[hier].joins[order.alias]) {
+				// 	Query.joinId = +k;
+				// 	Query.where = StorageDimension.selected.hierarchies[hier].joins[order.alias];
+				// 	// TODO: nel div hierarchies, evidenzio le tabelle "incluse" nella query
+				// 	// debugger;
+				// 	const test = document.querySelector("#ul-hierarchies section[data-dimension-token='"+StorageDimension.selected.token+"'] > .selectable[data-hier-token='"+hier+"'] small[data-table-id='"+Query.joinId+"']");
+				// 	test.dataset.s = true;
+				// }
 			}
 		}
 	}
@@ -2354,16 +2381,17 @@ var StorageMetric = new MetricStorage();
 		const textarea = (document.getElementById('columnSQL').value.length === 0) ? null : document.getElementById('columnSQL').value;
 		// le colonne di una Fact non hanno data-hier-token
 		if (app.dialogColumns.querySelector('section').hasAttribute('data-hier-token')) {
-			const hier = app.dialogColumns.querySelector('section').dataset.hierToken;
 			StorageDimension.selected = app.dialogColumns.querySelector('section').dataset.dimensionToken;
+			const hierToken = app.dialogColumns.querySelector('section').dataset.hierToken;
+			const hier = StorageDimension.selected.hierarchies[hierToken];
 			// il tableId è definito in app.handlerSelectColumn()
-			Query.addTables(hier);
+			// Query.addTables(hier);
 			// verifico quali relazioni inserire in where e quindi anche in from
-			app.checkRelations(hier);
+			// app.checkRelations(hier);
 			document.querySelector("#ul-columns .selectable[data-token-column='"+Query.columnToken+"'] span[column]").innerText += ` (${alias.value})`;
 			// in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
-			Query.select = { token : Query.columnToken, dimensionToken : StorageDimension.selected.token, hier, tableId : Query.tableId, table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value };
-			Query.objects = {dimensionToken : StorageDimension.selected.token, type : 'column', token : Query.columnToken};
+			Query.select = { token : Query.columnToken, dimensionToken : StorageDimension.selected.token, hier : hierToken, tableId : Query.tableId, table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value };
+			Query.objects = {token : Query.columnToken, table : Query.tableAlias, tableId : Query.tableId, hier, dimension : StorageDimension.selected.token};
 		} else {
 			document.querySelector("#ul-columns .selectable[data-token-column='"+Query.columnToken+"'] span[column]").innerText += ` (${alias.value})`;
 			Query.select = { token : Query.columnToken, table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value };
