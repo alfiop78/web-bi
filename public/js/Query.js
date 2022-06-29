@@ -30,7 +30,8 @@ class Queries {
 	#processId = 0;
 	#token = 0;
 	#FROM = new Map();
-	#hier = {};
+	#hier = new Map();
+	#hierarchiesTableId = new Map();
 	constructor() {
 		this._fromSet = new Set();
 		this._where = {};
@@ -40,21 +41,38 @@ class Queries {
 		// debugger;
 		( !this.#objects.has(object.token) ) ? this.#objects.set(object.token, object) : this.#objects.delete(object.token);
 		console.log('#objects : ', this.#objects);
+		this.mapHier = new Map();
 		if (this.#objects.has(object.token)) {
-			if (!this.#hier.hasOwnProperty(this.#objects.get(object.token).hierToken)) {
+			if (!this.#hier.has(this.#objects.get(object.token).hierToken)) {
 				// gerarchia non ancora esistente
-				this.#hier[this.#objects.get(object.token).hierToken] = {[object.token] : {tableId : this.#objects.get(object.token).tableId} };
+				// let t = new Map([
+				// 	[object.token, this.#objects.get(object.token).tableId]
+				// 	]);
+				this.mapHier.set(object.token, this.#objects.get(object.token).tableId);
+				this.#hier.set(this.#objects.get(object.token).hierToken, this.mapHier);
 			} else {
 				// gerarchia esistente
-				this.#hier[this.#objects.get(object.token).hierToken][object.token] = {tableId : this.#objects.get(object.token).tableId};
+				this.#hier.get(this.#objects.get(object.token).hierToken).set(object.token, this.#objects.get(object.token).tableId);
 			}
 		} else {
 			// l'elemento è stato deselezionato e non è più presente in #objects
-			delete this.#hier[object.hierToken][object.token];
+			this.#hier.get(object.hierToken).delete(object.token);
 			// se non ci sono più elementi, di questa gerarchia, selezionati, elimino anche la prop object.hiertoken di questa gerarchia
-			if ( Object.keys(this.#hier[object.hierToken]).length === 0) delete this.#hier[object.hierToken];
+			if ( this.#hier.get(object.hierToken).size === 0) this.#hier.delete(object.hierToken);
 		}
 		console.log('#hier : ', this.#hier);
+		// l'oggetto #hierarchiesTableId non ha nessuna gerarchia memorizzata
+		// memorizzo il valore minimo tra i tableId selezionati di questa gerarchia
+		// console.log(Math.min(...this.#hier.get(object.hierToken).values()));
+		// let minTableId = Math.min(...this.#hier.get(object.hierToken).values());
+		debugger;
+		for (const [k, v] of this.#hier) {
+			console.log(k,v);
+		}
+		// this.#hierarchiesTableId.set(object.hierToken, Math.min(...this.#hier.get(object.hierToken).values()));
+		// this.defineFrom();
+		// console.log(Math.min(...this.#hier.get(object.hierToken).values()));
+
 		// this.setFrom();
 		/*if (!this.#FROM.has(object.hierToken)) {
 			// questa gerarchia non è ancora inclusa
@@ -74,6 +92,16 @@ class Queries {
 		}
 		console.log('#FROM : ', this.#FROM);*/
 		// this.setFrom();
+	}
+
+	defineFrom() {
+		for (const [key, tableId] of this.#hierarchiesTableId) {
+			// ...per ogni gerarchia (key : token della gerarchia)
+			console.log(`${key} - ${tableId}`);
+			debugger;
+			console.log('this.#objects : ', this.#objects.get(key));
+
+		}
 	}
 
 	/*setFrom() {
