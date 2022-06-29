@@ -982,7 +982,7 @@ var StorageMetric = new MetricStorage();
 			e.currentTarget.toggleAttribute('data-selected');
 			// delete filter
 			Query.filters = { token : e.currentTarget.dataset.filterToken, SQL : `${Query.tableAlias}.${StorageFilter.selected.formula}` };
-			Query.objects = {token : e.currentTarget.dataset.filterToken};
+			Query.objects = {token : e.currentTarget.dataset.filterToken, tableId : Query.tableId, hier, hierToken};
 			// BUG: dopo aver eliminato il filtro dal report si deve ricontrollare il checkRelations() ed eliminare le join che riguardano il filtro deselezionato			
 		} else {
 			e.currentTarget.toggleAttribute('data-selected');
@@ -1000,7 +1000,7 @@ var StorageMetric = new MetricStorage();
 					tableId : Query.tableId,
 					table : Query.table
 				};
-				Query.objects = {token : e.currentTarget.dataset.filterToken, table : Query.tableAlias, tableId : Query.tableId, hier, dimension : StorageDimension.selected.token};
+				Query.objects = {token : e.currentTarget.dataset.filterToken, table : Query.tableAlias, tableId : Query.tableId, hier, hierToken};
 			} else {
 				// filtro sul cubo, non ha hier
 				Query.elementFilter = {token : e.currentTarget.dataset.filterToken, tableAlias : Query.tableAlias, formula : StorageFilter.selected.formula, table : Query.table};
@@ -1196,10 +1196,9 @@ var StorageMetric = new MetricStorage();
 				e.currentTarget.toggleAttribute('data-selected');
 				// Query.addTables(e.currentTarget.dataset.hierToken);
 				// verifico quali relazioni inserire in where e quindi anche in from
-				debugger;
 				// app.removeRelations(e.currentTarget.dataset.hierToken);
-				// Query.objects = {dimensionToken : StorageDimension.selected.token, type : 'column', token : Query.columnToken};
-				Query.objects = {token : Query.columnToken};
+				// Query.objects = {type : 'column', token : Query.columnToken};
+				Query.objects = {token : Query.columnToken, table : Query.tableAlias, tableId : Query.tableId, hier : StorageDimension.selected.hierarchies[e.currentTarget.dataset.hierToken], hierToken :  e.currentTarget.dataset.hierToken};
 
 				// TODO: colonna deselezionata, implementare la logica in Query.deleteSelect
 				// Query.deleteSelect();				
@@ -2391,7 +2390,7 @@ var StorageMetric = new MetricStorage();
 			document.querySelector("#ul-columns .selectable[data-token-column='"+Query.columnToken+"'] span[column]").innerText += ` (${alias.value})`;
 			// in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
 			Query.select = { token : Query.columnToken, dimensionToken : StorageDimension.selected.token, hier : hierToken, tableId : Query.tableId, table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value };
-			Query.objects = {token : Query.columnToken, table : Query.tableAlias, tableId : Query.tableId, hier, dimension : StorageDimension.selected.token};
+			Query.objects = {token : Query.columnToken, table : Query.tableAlias, tableId : Query.tableId, hier, hierToken};
 		} else {
 			document.querySelector("#ul-columns .selectable[data-token-column='"+Query.columnToken+"'] span[column]").innerText += ` (${alias.value})`;
 			Query.select = { token : Query.columnToken, table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value };

@@ -29,7 +29,8 @@ class Queries {
 	#factJoin = {};
 	#processId = 0;
 	#token = 0;
-	#FROM = new Set();
+	#FROM = new Map();
+	#hier = {};
 	constructor() {
 		this._fromSet = new Set();
 		this._where = {};
@@ -38,27 +39,75 @@ class Queries {
 	set objects(object) {
 		// debugger;
 		( !this.#objects.has(object.token) ) ? this.#objects.set(object.token, object) : this.#objects.delete(object.token);
-		console.log('this.#objects : ', this.#objects);
-		this.setFrom();
+		console.log('#objects : ', this.#objects);
+		if (this.#objects.has(object.token)) {
+			if (!this.#hier.hasOwnProperty(this.#objects.get(object.token).hierToken)) {
+				// gerarchia non ancora esistente
+				this.#hier[this.#objects.get(object.token).hierToken] = {[object.token] : {tableId : this.#objects.get(object.token).tableId} };
+			} else {
+				// gerarchia esistente
+				this.#hier[this.#objects.get(object.token).hierToken][object.token] = {tableId : this.#objects.get(object.token).tableId};
+			}
+		} else {
+			// l'elemento è stato deselezionato e non è più presente in #objects
+			delete this.#hier[object.hierToken][object.token];
+			// se non ci sono più elementi, di questa gerarchia, selezionati, elimino anche la prop object.hiertoken di questa gerarchia
+			if ( Object.keys(this.#hier[object.hierToken]).length === 0) delete this.#hier[object.hierToken];
+		}
+		console.log('#hier : ', this.#hier);
+		// this.setFrom();
+		/*if (!this.#FROM.has(object.hierToken)) {
+			// questa gerarchia non è ancora inclusa
+			// verifico il tableId selezionato. Se è < di quello già presente lo aggiungo altrimenti no
+			this.#FROM.set(object.hierToken, { tableId : object.tableId, token : object.token, join : object.hier.from.filter( (from, index) => index >= object.tableId) });
+		} else {
+			debugger;
+			if ( object.tableId <= this.#FROM.get(object.hierToken).tableId ) {
+				if (object.token === this.#FROM.get(object.hierToken).token) {
+					delete this.#FROM.get(object.hierToken).tableId;
+					delete this.#FROM.get(object.hierToken).token;
+					delete this.#FROM.get(object.hierToken).join;					
+				} else {
+					this.#FROM.set(object.hierToken, { tableId : object.tableId, token : object.token, join : object.hier.from.filter( (from, index) => index >= object.tableId) });
+				}
+			}
+		}
+		console.log('#FROM : ', this.#FROM);*/
+		// this.setFrom();
 	}
 
-	setFrom() {
+	/*setFrom() {
 		for ( const [key, value] of this.#objects) {
 			// console.log('key : ', key);
 			console.log('value : ', value);
-			// let tableId = value.tableId;
+			console.log('value.hierToken : ', value.hierToken);
+			console.log(this.#FROM.has(value.hierToken));
 			debugger;
-			value.hier.from.forEach( (from, index) => {
+			// let tableId = value.tableId;
+			// debugger;
+			// this.#FROM.set(value.hierToken, value.hier.from.filter( (from, index) => index >= value.tableId));
+			if (!this.#FROM.has(value.hierToken)) {
+				// questa gerarchia non è ancora inclusa
+				// verifico il tableId selezionato. Se è < di quello già presente lo aggiungo altrimenti no
+				this.#FROM.set(value.hierToken, { tableId : value.tableId, join : value.hier.from.filter( (from, index) => index >= value.tableId) });
+			} else {
+				if (value.tableId < this.#FROM.get(value.hierToken).tableId) {
+					this.#FROM.set(value.hierToken, { tableId : value.tableId, join : value.hier.from.filter( (from, index) => index >= value.tableId) });
+				}
+			}
+			*/
+
+			/*value.hier.from.forEach( (from, index) => {
 				if (index >= value.tableId) {
 					// console.log('add FROM : ', from);
 					this.#FROM.add(from);
 					if (value.hier.joins[value.table]) this.#WHERE.add(value.hier.joins[value.table]);
 				}
-			});
-		}
+			});*/
+		/*}
 		console.log('#FROM : ', this.#FROM);
-		console.log('#WHERE : ', this.#WHERE);
-	}
+		// console.log('#WHERE : ', this.#WHERE);
+	}*/
 
 	get objects() {return this.#objects;}
 	
