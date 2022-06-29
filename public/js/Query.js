@@ -48,11 +48,11 @@ class Queries {
 				// let t = new Map([
 				// 	[object.token, this.#objects.get(object.token).tableId]
 				// 	]);
-				this.mapHier.set(object.token, this.#objects.get(object.token).tableId);
+				this.mapHier.set(object.token, {tableId : this.#objects.get(object.token).tableId, hier : this.#objects.get(object.token).hier});
 				this.#hier.set(this.#objects.get(object.token).hierToken, this.mapHier);
 			} else {
 				// gerarchia esistente
-				this.#hier.get(this.#objects.get(object.token).hierToken).set(object.token, this.#objects.get(object.token).tableId);
+				this.#hier.get(this.#objects.get(object.token).hierToken).set(object.token, {tableId : this.#objects.get(object.token).tableId, hier : this.#objects.get(object.token).hier});
 			}
 		} else {
 			// l'elemento è stato deselezionato e non è più presente in #objects
@@ -61,7 +61,6 @@ class Queries {
 			if ( this.#hier.get(object.hierToken).size === 0) this.#hier.delete(object.hierToken);
 		}
 		console.log('#hier : ', this.#hier);
-		// l'oggetto #hierarchiesTableId non ha nessuna gerarchia memorizzata
 		// memorizzo il valore minimo tra i tableId selezionati di questa gerarchia
 		// console.log(Math.min(...this.#hier.get(object.hierToken).values()));
 		// let minTableId = Math.min(...this.#hier.get(object.hierToken).values());
