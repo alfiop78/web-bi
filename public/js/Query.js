@@ -29,9 +29,9 @@ class Queries {
 	#factJoin = {};
 	#processId = 0;
 	#token = 0;
-	#FROM = new Map();
-	#hier = new Map();
-	#hierarchiesTableId = new Map();
+	#FROM = new Set();
+	// #hier = new Map();
+	// #hierarchiesTableId = new Map();
 	constructor() {
 		this._fromSet = new Set();
 		this._where = {};
@@ -41,39 +41,10 @@ class Queries {
 		// debugger;
 		( !this.#objects.has(object.token) ) ? this.#objects.set(object.token, object) : this.#objects.delete(object.token);
 		console.log('#objects : ', this.#objects);
-		/*this.mapHier = new Map();
-		if (this.#objects.has(object.token)) {
-			if (!this.#hier.has(this.#objects.get(object.token).hierToken)) {
-				// gerarchia non ancora esistente
-				// let t = new Map([
-				// 	[object.token, this.#objects.get(object.token).tableId]
-				// 	]);
-				this.mapHier.set(object.token, {tableId : this.#objects.get(object.token).tableId, hier : this.#objects.get(object.token).hier});
-				this.#hier.set(this.#objects.get(object.token).hierToken, this.mapHier);
-			} else {
-				// gerarchia esistente
-				this.#hier.get(this.#objects.get(object.token).hierToken).set(object.token, {tableId : this.#objects.get(object.token).tableId, hier : this.#objects.get(object.token).hier});
-			}
-		} else {
-			// l'elemento è stato deselezionato e non è più presente in #objects
-			this.#hier.get(object.hierToken).delete(object.token);
-			// se non ci sono più elementi, di questa gerarchia, selezionati, elimino anche la prop object.hiertoken di questa gerarchia
-			if ( this.#hier.get(object.hierToken).size === 0 ) this.#hier.delete(object.hierToken);
-		}
-		console.log('#hier : ', this.#hier);*/
 		// TODO: evidenzio, nella struttura gerarchia sulla sinistra, le tabelle che verranno incluse nella from/where
 		document.querySelectorAll("#ul-hierarchies .selectable small").forEach( table => delete table.dataset.includeQuery);
-		for ( const [key, value] of this.#objects ) {
-			const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+value.hierToken+"']");
-			// console.log(Array.from(hier.querySelectorAll("small")));
-			// debugger;
-			let el = Array.from(hier.querySelectorAll("small")).filter( (small, index) => index >= value.tableId );
-			console.log('el : ', el);
-			el.forEach(small => small.dataset.includeQuery = true);
-			// hier.querySelectorAll("small[data-table-id='"+value.tableId+"']").forEach( table => {
-			// 	table.dataset.includeQuery = true;
-			// });
-		}
+
+		
 		// memorizzo il valore minimo tra i tableId selezionati di questa gerarchia
 		debugger;
 		// console.log(Math.min(...this.#hier.get(object.hierToken).values()));
@@ -104,50 +75,19 @@ class Queries {
 		// this.setFrom();
 	}
 
-	defineFrom() {
-		for (const [key, tableId] of this.#hierarchiesTableId) {
-			// ...per ogni gerarchia (key : token della gerarchia)
-			console.log(`${key} - ${tableId}`);
-			debugger;
-			console.log('this.#objects : ', this.#objects.get(key));
-
-		}
-	}
-
-	/*setFrom() {
-		for ( const [key, value] of this.#objects) {
-			// console.log('key : ', key);
-			console.log('value : ', value);
-			console.log('value.hierToken : ', value.hierToken);
-			console.log(this.#FROM.has(value.hierToken));
-			debugger;
-			// let tableId = value.tableId;
-			// debugger;
-			// this.#FROM.set(value.hierToken, value.hier.from.filter( (from, index) => index >= value.tableId));
-			if (!this.#FROM.has(value.hierToken)) {
-				// questa gerarchia non è ancora inclusa
-				// verifico il tableId selezionato. Se è < di quello già presente lo aggiungo altrimenti no
-				this.#FROM.set(value.hierToken, { tableId : value.tableId, join : value.hier.from.filter( (from, index) => index >= value.tableId) });
-			} else {
-				if (value.tableId < this.#FROM.get(value.hierToken).tableId) {
-					this.#FROM.set(value.hierToken, { tableId : value.tableId, join : value.hier.from.filter( (from, index) => index >= value.tableId) });
-				}
-			}
-			*/
-
-			/*value.hier.from.forEach( (from, index) => {
-				if (index >= value.tableId) {
-					// console.log('add FROM : ', from);
-					this.#FROM.add(from);
-					if (value.hier.joins[value.table]) this.#WHERE.add(value.hier.joins[value.table]);
-				}
-			});*/
-		/*}
-		console.log('#FROM : ', this.#FROM);
-		// console.log('#WHERE : ', this.#WHERE);
-	}*/
-
 	get objects() {return this.#objects;}
+
+	get FROM() {
+		for ( const [key, value] of this.#objects ) {
+			const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+value.hierToken+"']");
+			[...hier.querySelectorAll("small")].filter( (table, index) => index >= value.tableId).forEach( tableRef => {
+				this.#FROM.add(`${tableRef.dataset.schema}.${tableRef.dataset.label} AS  ${tableRef.dataset.tableAlias}`);
+				tableRef.dataset.includeQuery = true;
+			});
+		}
+		console.log('#FROM : ', this.#FROM);
+		return [...this.#FROM];
+	}
 	
 	set cubes(token) {
 		( !this.#cubes.has(token) ) ? this.#cubes.add(token) : this.#cubes.delete(token);		
@@ -455,6 +395,9 @@ class Queries {
 
 		this.reportElements.select = Object.fromEntries(this.select);
 		this.#elementReport.set('columns', Object.fromEntries(this.select));
+		debugger;
+		this.reportElements.from = this.FROM;
+		debugger;
 		this.reportElements.from = Array.from(this._fromSet); // converto il set in un array
 		this.reportElements.where = this.#where;
 		this.reportElements.factJoin = this.factJoin;

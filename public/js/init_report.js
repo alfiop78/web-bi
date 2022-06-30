@@ -184,6 +184,7 @@ var StorageMetric = new MetricStorage();
 					// console.log(table.table);
 					const contentSub = app.tmplSublists.content.cloneNode(true);
 					const small = contentSub.querySelector('small');
+					small.dataset.schema = table.schema;
 					small.dataset.searchable = true;
 					small.dataset.label = table.table;
 					small.dataset.tableAlias = table.alias;
