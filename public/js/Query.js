@@ -41,7 +41,7 @@ class Queries {
 		// debugger;
 		( !this.#objects.has(object.token) ) ? this.#objects.set(object.token, object) : this.#objects.delete(object.token);
 		console.log('#objects : ', this.#objects);
-		this.mapHier = new Map();
+		/*this.mapHier = new Map();
 		if (this.#objects.has(object.token)) {
 			if (!this.#hier.has(this.#objects.get(object.token).hierToken)) {
 				// gerarchia non ancora esistente
@@ -58,16 +58,27 @@ class Queries {
 			// l'elemento è stato deselezionato e non è più presente in #objects
 			this.#hier.get(object.hierToken).delete(object.token);
 			// se non ci sono più elementi, di questa gerarchia, selezionati, elimino anche la prop object.hiertoken di questa gerarchia
-			if ( this.#hier.get(object.hierToken).size === 0) this.#hier.delete(object.hierToken);
+			if ( this.#hier.get(object.hierToken).size === 0 ) this.#hier.delete(object.hierToken);
 		}
-		console.log('#hier : ', this.#hier);
+		console.log('#hier : ', this.#hier);*/
+		// TODO: evidenzio, nella struttura gerarchia sulla sinistra, le tabelle che verranno incluse nella from/where
+		document.querySelectorAll("#ul-hierarchies .selectable small").forEach( table => delete table.dataset.includeQuery);
+		for ( const [key, value] of this.#objects ) {
+			const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+value.hierToken+"']");
+			// console.log(Array.from(hier.querySelectorAll("small")));
+			// debugger;
+			let el = Array.from(hier.querySelectorAll("small")).filter( (small, index) => index >= value.tableId );
+			console.log('el : ', el);
+			el.forEach(small => small.dataset.includeQuery = true);
+			// hier.querySelectorAll("small[data-table-id='"+value.tableId+"']").forEach( table => {
+			// 	table.dataset.includeQuery = true;
+			// });
+		}
 		// memorizzo il valore minimo tra i tableId selezionati di questa gerarchia
+		debugger;
 		// console.log(Math.min(...this.#hier.get(object.hierToken).values()));
 		// let minTableId = Math.min(...this.#hier.get(object.hierToken).values());
-		debugger;
-		for (const [k, v] of this.#hier) {
-			console.log(k,v);
-		}
+		
 		// this.#hierarchiesTableId.set(object.hierToken, Math.min(...this.#hier.get(object.hierToken).values()));
 		// this.defineFrom();
 		// console.log(Math.min(...this.#hier.get(object.hierToken).values()));

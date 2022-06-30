@@ -136,4 +136,4 @@ ul[data-object]{position: absolute; overflow: auto; width: 100%; height: calc(10
 .relative-ul{position: relative; display: flex;flex-direction: column;}
 ul.absolute{position: absolute; height: calc(100% - 24px); overflow: auto; width: 100%;}
 
-small[data-s]{color: brown;}
+small[data-include-query]{color: brown;}
