@@ -226,3 +226,4 @@ span[contenteditable]{margin: 4px; padding: 8px; background-color: tan;}
 .button-icon{padding: 2px; background: transparent; border: none;}
 
 .self-end{justify-self: end;}
+.justify-self-center{justify-self: center;}

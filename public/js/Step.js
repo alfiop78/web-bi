@@ -22,9 +22,8 @@ class Steps {
 	set page(value) {
 		// imposto la pagina corrente
 		this._page = value;
-		this.btnPrevious.hidden = (this.#stepActive === 1) ? true :  false;
-		this.btnNext.hidden = (this.#stepActive === this.stepCount) ? true :  false;
-		this.btnSave.hidden = (this.#stepActive !== this.stepCount) ? true :  false;
+		this.btnPrevious.disabled = (this.#stepActive === 1) ? true :  false;
+		this.btnNext.disabled = (this.#stepActive === this.stepCount) ? true :  false;
 	}
 
 	get page() {return this._page;}

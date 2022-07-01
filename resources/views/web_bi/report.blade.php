@@ -127,14 +127,16 @@
 						</div>
 					</section>
 
-					<section class="sectionLists">
+					<section class="sectionLists parent-ul-textarea">
 						<h5>SQL</h5><h6>Inserisci una formula SQL</h6>
 						<div class="md-field">
 							<input type="text" id="filterName" name="filterName" autocomplete="off" />
 							<label for="filterName" class="">name</label>
 							<p class="helper"></p>
 						</div>
-						<button type="button" class="button-icon material-icons" id="search-field-values" tooltip="Visualizza valori" flow="bottom" data-field-name>search</button>
+						<div>
+							<button type="button" class="button-icon material-icons" id="search-field-values" tooltip="Visualizza valori" flow="bottom" data-field-name disabled>search</button>
+						</div>
 						<div class="md-field">
 							<textarea id="filterSQLFormula" name="filterSQL" rows="10" cols="33" placeholder="SQL"></textarea>
 						</div>
@@ -351,8 +353,9 @@
 
 						<div class="actions">
 							<div class="buttons">
-								<button type="button" id="btnProcessReport" class="button-icon material-icons md-18" tooltip="Crea datamart" flow="bottom">table_rows</button>
-								{{-- <i id="btnDuplicateReport" class="material-icons md-18" data-tooltip="Duplica report" data-tooltip-position="bottom">content_copy</i> --}}
+								<button type="button" id="btnProcessReport" class="button-icon material-icons-round md-24" tooltip="Crea datamart" flow="bottom">table_rows</button>
+								<button type="button" id="save" class="button-icon material-icons-round md-24" tooltip="Salva Report" flow="bottom" disabled>save</button>
+								<button type="button" id="sql_process" class="button-icon material-icons-round md-24" tooltip="Visualizza SQL" flow="bottom" disabled>info</button>
 							</div>
 						</div>
 	  
@@ -476,7 +479,7 @@
 							</section>
 
 							{{-- dimension --}}
-							<section class="data-item list" data-element-search="search-dimension" data-label data-related-object="cube" data-sublist-dimension hidden data-searchable="true">
+							<section class="data-item list" data-element-search="search-dimension" data-label data-related-object="cube" data-sublist-dimension hidden>
 								<div class="selectable" data-label data-object-type="dimension">
 									<div class="h-content">
 										<div class="v-content">
@@ -507,6 +510,7 @@
 							</div>
 
 							<div class="steps" data-step="1">
+								<button type="button" id="prev" class="button-icon material-icons-round md-48" disabled tooltip="Precedente" flow="right">skip_previous</button>
 								<div class="overflow">
 									<div id="hierarchies">
 										<section class="hierarchies">
@@ -522,7 +526,7 @@
 											</div>
 										</section>
 	                                    <div id="btn-arrow-open-close">
-	                                        <button type="button" id="toggle-hierarchy-struct" class="button-icon material-icons md-24" disabled>arrow_circle_left</button>
+	                                        <button type="button" id="toggle-hierarchy-struct" class="button-icon material-icons-round md-24 md-warning md-pad-2" tooltip="Apri struttura gerarchica" flow="right" disabled>arrow_circle_right</button>
 	                                    </div>
 									</div>
 									<div id="stepTranslate" data-translate-x="0">
@@ -579,7 +583,9 @@
 														<div class="relative-ul">
 															<ul id="ul-exist-filters" class="absolute"></ul>
 														</div>
-														<button type="button" id="btn-add-filters" class="button-icon material-icons md-32">add</button>
+														<div class="justify-self-center">
+															<button type="button" id="btn-add-filters" class="button-icon material-icons-round md-32" tooltip="Aggiungi filtro" flow="top">add_circle</button>
+														</div>
 													</section>
 													
 												</div>
@@ -603,7 +609,9 @@
 														<div class="relative-ul">
 															<ul id="ul-exist-metrics" class="absolute"></ul>
 														</div>
-														<button type="button" id="btn-add-metrics" class="button-icon material-icons md-32">add</button>
+														<div class="justify-self-center">
+															<button type="button" id="btn-add-metrics" class="button-icon material-icons-round md-32" tooltip="Aggiungi metrica" flow="top">add_circle</button>
+														</div>
 													</section>
 													{{-- composite --}}
 													<section class="composite-metrics parent-ul-metrics">
@@ -615,15 +623,19 @@
 														<div class="relative-ul">
 															<ul id="ul-exist-composite-metrics" class="absolute"></ul>
 														</div>
-														<button type="button" id="btn-add-composite-metrics" class="button-icon material-icons md-32">add</button>
+														<div class="justify-self-center"><button type="button" id="btn-add-composite-metrics" class="button-icon material-icons-round md-32" tooltip="Aggiungi metrica composta" flow="top">add_circle</button></div>
 													</section>
 												</div>
 											</div>
 										</section>
-									</div>
-
+									</div>									
 								</div>
-								<div class="buttons">
+								<button type="button" id="next" class="button-icon material-icons-round md-48" tooltip="Successivo" flow="left">skip_next</button>
+								
+								{{-- <div class="stepButtons right">
+									<button type="button" class="button-icon material-icons md-36">info</button>
+								</div> --}}
+								{{-- <div class="buttons">
 									<div class="left-buttons">
 										<button id="prev" class="md-button">Precedente</button>										
 									</div>
@@ -631,7 +643,7 @@
 										<button id="next" class="md-button">Successivo</button>
 										<button id="save" class="md-button">Salva</button>										
 									</div>
-								</div>
+								</div> --}}
 							</div>
 						</div>
 						

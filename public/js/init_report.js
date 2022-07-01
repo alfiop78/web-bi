@@ -18,10 +18,6 @@ var StorageMetric = new MetricStorage();
 		tmplList: document.getElementById('templateList'), // contiene i section
 		tmplSublists : document.getElementById('template-sublists'),
 
-		// popup
-		popup: document.getElementById('popup'),
-		dialogPopup: null,
-
 		// btn
 		btnAddFilters : document.getElementById('btn-add-filters'),
 		btnAddMetrics : document.getElementById('btn-add-metrics'),
@@ -1251,12 +1247,11 @@ var StorageMetric = new MetricStorage();
 
 	// selezione di una tabella nella dialog-filter
 	app.handlerSelectTable = (e) => {
-		debugger;
 		if (!e.currentTarget.hasAttribute('data-selected')) {
 			// de-seleziono le tabelle precedentemente selezionate se ce ne sono
 			if (document.querySelector('#ul-tables .selectable[data-selected]')) document.querySelector('#ul-tables .selectable[data-selected]').toggleAttribute('data-selected');
-			// ... anche dalla #ul-fact
-			if (document.querySelector('#ul-fact .selectable[data-selected]')) document.querySelector('#ul-fact .selectable[data-selected]').toggleAttribute('data-selected');
+			// disabilito il tasto "Ricerrca valori", viene riattivato quando si seleziona una colonna della tabella
+			app.btnSearchValue.disabled = true;
 			// query per visualizzare tutti i field della tabella
 			e.currentTarget.toggleAttribute('data-selected');
 			Query.table = e.currentTarget.dataset.tableName;
@@ -1264,7 +1259,6 @@ var StorageMetric = new MetricStorage();
 			Query.schema = e.currentTarget.dataset.schema;
 			if (e.currentTarget.hasAttribute('data-hier-token')) {
 				Query.tableId = e.currentTarget.dataset.tableId;
-				// TODO: invece di impostare questi due attributi nel <section> della dialog potrei impostarli nella Classe Storage, con il metodo selected()
 				app.dialogFilter.querySelector('section').dataset.hierToken = e.currentTarget.dataset.hierToken;
 				app.dialogFilter.querySelector('section').dataset.hierName = e.currentTarget.dataset.hierName;
 				app.dialogFilter.querySelector('section').dataset.dimensionToken = e.currentTarget.dataset.dimensionToken;
@@ -1394,6 +1388,7 @@ var StorageMetric = new MetricStorage();
 		valueList.querySelectorAll('section').forEach( section => section.remove());
 		const textarea = document.getElementById('filterSQLFormula');
 		textarea.value = (textarea.value.length === 0) ? Query.field+" = " : textarea.value + Query.field;
+		app.btnSearchValue.disabled = false;
 		textarea.focus();
 	}
 
@@ -1962,12 +1957,18 @@ var StorageMetric = new MetricStorage();
 		return true;
 	}
 
-	app.btnPreviousStep.onclick = () => Step.previous();
+	app.btnPreviousStep.onclick = (e) => {
+		Step.previous();
+		// se il tasto next è disabilitato (dalla classe Steps.js) abilito il tasto save del report
+		app.btnSaveReport.disabled = true;
+	};
 
-	app.btnNextStep.onclick = () => {
+	app.btnNextStep.onclick = (e) => {
 		// verifica selezioni cubo e dimensioni
 		// console.log('return check : ', app.checkSelection());
 		Step.next();
+		// se il tasto next è disabilitato (dalla classe Steps.js) abilito il tasto save del report
+		if (!e.target.disabled) app.btnSaveReport.disabled = false;
 		// if (app.checkSelection()) Step.next();
 	}
 
@@ -2304,7 +2305,7 @@ var StorageMetric = new MetricStorage();
 		// console.log(e.target);
 		const hierarchyStruct = document.getElementById('hierarchies');
 		hierarchyStruct.toggleAttribute('data-open');
-		e.target.innerText = (hierarchyStruct.hasAttribute('data-open')) ? 'arrow_circle_right' : 'arrow_circle_left';
+		e.target.innerText = (hierarchyStruct.hasAttribute('data-open')) ? 'arrow_circle_left' : 'arrow_circle_right';
 	}
 
 	document.getElementById('alias-metric').oninput = (e) => {

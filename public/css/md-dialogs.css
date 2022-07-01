@@ -31,7 +31,7 @@ dialog nav > a[data-selected] {font-weight: bold;}
 fieldset legend{font-size: .9rem; padding: 8px;}
 fieldset.auto-grid{display: grid; grid-template-rows: auto 1fr auto;}
 
-#dialog-filter .stepLayout{grid-template-columns: 20% 20% auto; grid-column-gap: 2%; height: inherit;margin : 0 2em;}
+#dialog-filter .stepLayout{grid-template-columns: 25% 25% auto; grid-column-gap: 2%; height: inherit;margin : 0 2em;}
 #dialog-metric-filter .stepLayout{grid-template-columns: 100%; height: inherit; margin: 0 2em;}
 #dialog-metric .stepLayout{grid-template-columns: 20% 20% auto; grid-column-gap: 2%; height: inherit;margin: 0 2em;}
 #dialog-column .stepLayout{grid-template-columns: 100%; margin : 0 2em;}

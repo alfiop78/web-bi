@@ -7,12 +7,16 @@
 .material-icons[hidden]{display: none;}
 
 .material-icons.noPad{padding: 0;}
+
 .material-icons.padding-4{padding: 4px;}
 .material-icons.md-14{font-size: 14px;}
 .material-icons.md-18{font-size: 18px;}
+.material-icons-round.md-24{font-size: 24px; padding: 0px 4px;}
 .material-icons.md-24{font-size: 24px;}
 .material-icons.md-32{font-size: 32px;}
+.material-icons-round.md-32{font-size: 32px;}
 .material-icons.md-36{font-size: 36px;}
+.material-icons-round.md-48{font-size: 48px;padding: 0px;}
 .material-icons.md-48{font-size: 48px;}
 .material-icons.md-light{color: gainsboro}
 .material-icons.md-important-low{color: goldenrod;}
@@ -22,6 +26,8 @@
 
 .material-icons[open]{color: var(--main-secondary-color);}
 .material-icons[fact]{color: var(--main-primary-color);}
+
+.material-icons-round.md-pad-2{padding: 2px;}
 
 .material-icons[selected] {color: brown;}
 
@@ -75,6 +81,8 @@
 
 /* Raggruppamenti per colori, md-danger : indianred, md-info: , md-warning: brown,md-status: darkgrey*/
 .material-icons.md-warning{color: brown;}
+.material-icons-round.md-warning:enabled{color: brown;}
+/*.material-icons-round.md-warning{color: brown;}*/
 .material-icons.md-status{color: darkgrey;}
 .material-icons.md-attention{color: darkorange;}
 .material-icons.md-done{color: darkgreen;}
@@ -94,4 +102,6 @@ button:disabled{color: lightgrey;} /*disabled*/
 button:disabled:hover.md-dark{cursor: not-allowed;} /*disabled dark*/
 button:disabled:hover{cursor: not-allowed;} /*disabled dark*/
 button:enabled:hover.md-dark{color: white;} /*disabled dark*/
+button:enabled:hover{cursor: pointer;}
+
 button.md-dark{color: gainsboro;} /*disabled dark*/
