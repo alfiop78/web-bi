@@ -116,6 +116,7 @@ var StorageMetric = new MetricStorage();
 			div.dataset.cubeToken = token;
 			div.dataset.tableAlias = value.alias;
 			div.dataset.tableName = value.FACT;
+			div.dataset.schema = value.schema;
 			span.innerText = value.name;
 			div.onclick = app.handlerCubeSelected;
 			ul.appendChild(section);
@@ -569,13 +570,14 @@ var StorageMetric = new MetricStorage();
 				section.dataset.elementSearch = 'search-exist-metrics';
 				section.dataset.label = metric.name;
 				section.dataset.cubeToken = cubeToken;
-				if (metric.metric_type !== 1) {
+				// TODO: da rivedere
+				// if (metric.metric_type !== 1) {
 					selectable.dataset.tableName = value.FACT;
 					selectable.dataset.tableAlias = value.alias;
-				} else {
+				// } else {
 					// metricha di base composta
 					selectable.dataset.cubeToken = cubeToken;
-				}
+				// }
 				// div.dataset.cubeToken = cubeToken;
 				selectable.dataset.metricToken = metric.token;
 				// div.dataset.label = metric.name;
@@ -911,13 +913,12 @@ var StorageMetric = new MetricStorage();
 	// selezione di un cubo (step-1)
 	app.handlerCubeSelected = (e) => {
 		StorageCube.selected = e.currentTarget.dataset.cubeToken;
-		Query.tableAlias = StorageCube.selected.alias;
-		Query.from = `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${Query.tableAlias}`;
+		// Query.tableAlias = StorageCube.selected.alias;
 		// al momento non serve l'object con tableAlias e from, lo recupero direttamente dal nome del cubo in handlerEditReport, se così potrei anche utilizzare un oggetto Set anziche Map in Query.js
-		Query.elementCube = {token : e.currentTarget.dataset.cubeToken, tableAlias : StorageCube.selected.alias, from : Query.from, FACT : StorageCube.selected.FACT, name : StorageCube.selected.name};
+		// Query.elementCube = {token : e.currentTarget.dataset.cubeToken, tableAlias : StorageCube.selected.alias, from : Query.from, FACT : StorageCube.selected.FACT, name : StorageCube.selected.name};
 		if (e.currentTarget.hasAttribute('data-selected')) {
-			// BUG: viene nascosto il cubo dalla lista
 			// nascondo tutti gli elementi relativi al cubo deselezionato
+			// TODO: oltre a nascondere gli elementi del cubo deselezionato, devo anche rimuoverli dalla proprietà #objects della classe Query
 			app.hideCubeObjects();
 			e.currentTarget.toggleAttribute('data-selected');
 		} else {
@@ -937,6 +938,7 @@ var StorageMetric = new MetricStorage();
 		// Query.elementDimension = { token : e.currentTarget.dataset.dimensionToken, cubes : StorageDimension.selected.cubes};
 		if (e.currentTarget.hasAttribute('data-selected')) {
 			e.currentTarget.toggleAttribute('data-selected');
+			// TODO: oltre a nascondere gli elementi della dimensione deselezionata, devo anche eliminarli dalla proprietà #objects della classe Query.
 			app.hideDimensionObjects();
 		} else {
 			// imposto l'attr data-selected
@@ -944,28 +946,9 @@ var StorageMetric = new MetricStorage();
 			app.showDimensionObjects();
 			
 			app.btnToggleHierarchyStruct.disabled = false;
-			// Query.factJoin = StorageDimension.selected;
 		}
-		// Query.dim = e.currentTarget.dataset.dimensionToken;
-		// Query.dimensions = e.currentTarget.dataset.dimensionToken;
+		Query.dimensions = e.currentTarget.dataset.dimensionToken;
 	}
-
-	// selezione di una gerarchia (step-2)
-	// app.handlerHierarchySelected = (e) => {
-	// 	StorageDimension.selected = e.currentTarget.dataset.dimensionToken;
-	// 	if (e.currentTarget.hasAttribute('data-selected')) {
-	// 		e.currentTarget.toggleAttribute('data-selected');
-	// 		// deselezione della gerarchia, nascondo le tabelle della gerarchia selezionata
-	// 		app.hideAllElements();
-	// 		Query.elementHierarchy = {dimensionToken : e.currentTarget.dataset.dimensionToken, token : e.currentTarget.dataset.hierToken};
-	// 	} else {
-	// 		e.currentTarget.toggleAttribute('data-selected');
-	// 		// visualizzo tutti gli elementi (columns, filters) relativi alla gerarchia selezionata
-	// 		Query.elementHierarchy = {dimensionToken : e.currentTarget.dataset.dimensionToken, token : e.currentTarget.dataset.hierToken};
-	// 		app.showAllElements();
-	// 	}
-	// }
-
 	// selezione di un filtro già presente, lo salvo nell'oggetto Query
 	app.handlerFilterSelected = (e) => {
 		StorageFilter.selected = e.currentTarget.dataset.filterToken;
@@ -973,26 +956,24 @@ var StorageMetric = new MetricStorage();
 		// i filtri impostati su un livello dimensionale hanno l'attr data-hier-token
 		if (e.currentTarget.hasAttribute('data-hier-token')) {
 			hierToken = e.currentTarget.dataset.hierToken;
-			hier = StorageDimension.selected.hierarchies[hierToken];
 			StorageDimension.selected = e.currentTarget.dataset.dimensionToken;
-			Query.tableId = e.currentTarget.dataset.tableId;
+			hier = StorageDimension.selected.hierarchies[hierToken];
+			// StorageDimension.selected = e.currentTarget.dataset.dimensionToken;
+			// Query.tableId = e.currentTarget.dataset.tableId;
 		}
-		Query.table = e.currentTarget.dataset.tableName;
-		Query.tableAlias = e.currentTarget.dataset.tableAlias;
+		// Query.table = e.currentTarget.dataset.tableName;
+		// Query.tableAlias = e.currentTarget.dataset.tableAlias;
 		if (e.currentTarget.hasAttribute('data-selected')) {
 			e.currentTarget.toggleAttribute('data-selected');
 			// delete filter
-			Query.filters = { token : e.currentTarget.dataset.filterToken, SQL : `${Query.tableAlias}.${StorageFilter.selected.formula}` };
-			Query.objects = {token : e.currentTarget.dataset.filterToken, tableId : Query.tableId, hier, hierToken};
-			// BUG: dopo aver eliminato il filtro dal report si deve ricontrollare il checkRelations() ed eliminare le join che riguardano il filtro deselezionato			
+			Query.filters = { token : e.currentTarget.dataset.filterToken, SQL : `${e.currentTarget.dataset.tableAlias}.${StorageFilter.selected.formula}` };
+			// TODO: probabilmente serve solo il token in fase di deselezione
+			Query.objects = {token : e.currentTarget.dataset.filterToken};			
 		} else {
 			e.currentTarget.toggleAttribute('data-selected');
 			// recupero dallo storage il filtro selezionato
 			if (StorageFilter.selected.hier) {
-				// imposto la firstTable se il filtro appartiene a una dimensione e non a un cubo
-				// Query.addTables(StorageFilter.selected.hier.token);
-				// app.checkRelations(hier);
-				Query.elementFilter = {
+				/*Query.elementFilter = {
 					token : e.currentTarget.dataset.filterToken,
 					dimensionToken : e.currentTarget.dataset.dimensionToken,
 					hier : hierToken,
@@ -1000,11 +981,17 @@ var StorageMetric = new MetricStorage();
 					formula : StorageFilter.selected.formula,
 					tableId : Query.tableId,
 					table : Query.table
-				};
-				Query.objects = {token : e.currentTarget.dataset.filterToken, table : Query.tableAlias, tableId : Query.tableId, hier, hierToken};
+				};*/
+				Query.objects = {token : e.currentTarget.dataset.filterToken, table : e.currentTarget.dataset.tableAlias, tableId : e.currentTarget.dataset.tableId, hier, hierToken};
 			} else {
 				// filtro sul cubo, non ha hier
-				Query.elementFilter = {token : e.currentTarget.dataset.filterToken, tableAlias : Query.tableAlias, formula : StorageFilter.selected.formula, table : Query.table};
+				/*Query.elementFilter = {
+					token : e.currentTarget.dataset.filterToken,
+					tableAlias : Query.tableAlias,
+					formula : StorageFilter.selected.formula,
+					table : Query.table
+				};*/
+				Query.objects = {token : e.currentTarget.dataset.filterToken, cubeToken : e.currentTarget.dataset.cubeToken};
 			}
 			// console.log(StorageFilter.selected.formula);
 			// nel salvare il filtro nel report attuale devo impostarne anche l'alias della tabella selezionata nella dialog
@@ -1038,6 +1025,7 @@ var StorageMetric = new MetricStorage();
 			}
 		} else {
 			e.currentTarget.toggleAttribute('data-selected');
+			Query.objects = {token : e.currentTarget.dataset.metricToken, cubeToken : e.currentTarget.dataset.cubeToken};
 			// aggiungo la metrica
 			switch (StorageMetric.selected.metric_type) {
 				case 1:
@@ -1125,8 +1113,8 @@ var StorageMetric = new MetricStorage();
 					break;
 				default:
 					// base
-					Query.table = e.currentTarget.dataset.tableName;
-					Query.tableAlias = e.currentTarget.dataset.tableAlias;
+					// Query.table = e.currentTarget.dataset.tableName;
+					// Query.tableAlias = e.currentTarget.dataset.tableAlias;
 					// debugger;
 					Query.addMetric = {
 						token : e.currentTarget.dataset.metricToken,
@@ -1135,8 +1123,8 @@ var StorageMetric = new MetricStorage();
 						field : StorageMetric.selected.formula.field,
 						distinct : StorageMetric.selected.formula.distinct,
 						alias : StorageMetric.selected.formula.alias,
-						table : Query.table,
-						tableAlias : Query.tableAlias
+						table : e.currentTarget.dataset.tableName,
+						tableAlias : e.currentTarget.dataset.tableAlias
 					};
 					break;
 			}
@@ -1452,10 +1440,6 @@ var StorageMetric = new MetricStorage();
 				if (StorageDimension.selected.hierarchies[hier].joins[order.alias]) {
 					Query.joinId = +k;
 					Query.where = StorageDimension.selected.hierarchies[hier].joins[order.alias];
-					// TODO: nel div hierarchies, evidenzio le tabelle "incluse" nella query
-					// debugger;
-					const test = document.querySelector("#ul-hierarchies section[data-dimension-token='"+StorageDimension.selected.token+"'] > .selectable[data-hier-token='"+hier+"'] small[data-table-id='"+Query.joinId+"']");
-					test.dataset.s = true;
 				}
 			}
 		}
@@ -2171,6 +2155,37 @@ var StorageMetric = new MetricStorage();
 	// save report
 	app.btnSaveReportDone.onclick = () => {
 		const name = document.getElementById('reportName').value;
+		// imposto la FROM e la WHERE della query
+		// debugger;
+		document.querySelectorAll("#ul-hierarchies section:not([hidden]) .selectable").forEach( hier => {
+			// per ogni gerarchia VISIBILE, aggiungo le tabelle con data-include-query alla FROM
+			// impostare il dataset.includeQuery quando si seleziona/deseleziona un oggetto e, successivamente, recuperare qui la FROM tra gli elementi contenenti includeQuery = true
+			// ...in questo modo dovrei avere le tabelle anche ordinate secondo la logica della gerarchia
+			hier.querySelectorAll("small[data-include-query]").forEach( tableRef => Query.FROM = `${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);
+		});
+		// stessa logica da usare per il cubo/i selezionati
+		// oggetto appartenente a un cubo (non ha hier)
+		// imposto un dataset.includeQuery sul cubo incluso nell'#objects in modo da prenderne la FROM concatenando `schema.FACT AS alias`
+		debugger;
+		document.querySelectorAll("#ul-cubes section:not([hidden]) .selectable[data-include-query]").forEach( cubeRef => {
+			debugger;
+			Query.FROM = `${cubeRef.dataset.schema}.${cubeRef.dataset.tableName} AS ${cubeRef.dataset.tableAlias}`;
+		});
+		// StorageCube.selected = value.cube;
+		// Query.FROM = `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${StorageCube.selected.alias}`;
+ 
+		// for ( const [key, value] of Query.objects ) {
+			// if (value.hasOwnProperty('hierToken')) {
+				// const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+value.hierToken+"']");
+				// per ogni gerarchia presente nella struttura di sinistra
+				
+			// } else {
+			// 	// oggetto appartenente a un cubo (non ha hier)
+			// 	// imposto un dataset.includeQuery sul cubo incluso nell'#objects in modo da prenderne la FROM concatenando `schema.FACT AS alias`
+			// 	StorageCube.selected = value.cube;
+			// 	Query.FROM = `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${StorageCube.selected.alias}`;
+			// }
+		// }
 		// il datamart sarà creato come FX_processId
 		// se il token è !== 0 significa che sto editando un report
 		if (Query.token !== 0) {

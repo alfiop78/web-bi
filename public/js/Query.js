@@ -41,12 +41,23 @@ class Queries {
 		// debugger;
 		( !this.#objects.has(object.token) ) ? this.#objects.set(object.token, object) : this.#objects.delete(object.token);
 		console.log('#objects : ', this.#objects);
-		// TODO: evidenzio, nella struttura gerarchia sulla sinistra, le tabelle che verranno incluse nella from/where
-		document.querySelectorAll("#ul-hierarchies .selectable small").forEach( table => delete table.dataset.includeQuery);
 
+		document.querySelectorAll("#ul-hierarchies .selectable small").forEach( tableRef => delete tableRef.dataset.includeQuery);
+		document.querySelectorAll("#ul-cubes .selectable").forEach( tableRef => delete tableRef.dataset.includeQuery);
+		for ( const [key, value] of Query.objects ) {
+			if (value.hasOwnProperty('hierToken')) {
+				const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+value.hierToken+"']");
+				// converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
+				[...hier.querySelectorAll("small")].filter( (table, index) => index >= value.tableId).forEach( tableRef => {
+					tableRef.dataset.includeQuery = true;
+				});
+			} else {
+				// elementi del cubo
+				document.querySelectorAll("#ul-cubes .selectable[data-cube-token='"+value.cubeToken+"']").forEach( tableRef => tableRef.dataset.includeQuery = true);
+			}
+		}
 		
 		// memorizzo il valore minimo tra i tableId selezionati di questa gerarchia
-		debugger;
 		// console.log(Math.min(...this.#hier.get(object.hierToken).values()));
 		// let minTableId = Math.min(...this.#hier.get(object.hierToken).values());
 		
@@ -77,17 +88,12 @@ class Queries {
 
 	get objects() {return this.#objects;}
 
-	get FROM() {
-		for ( const [key, value] of this.#objects ) {
-			const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+value.hierToken+"']");
-			[...hier.querySelectorAll("small")].filter( (table, index) => index >= value.tableId).forEach( tableRef => {
-				this.#FROM.add(`${tableRef.dataset.schema}.${tableRef.dataset.label} AS  ${tableRef.dataset.tableAlias}`);
-				tableRef.dataset.includeQuery = true;
-			});
-		}
+	set FROM(value) {
+		this.#FROM.add(value);
 		console.log('#FROM : ', this.#FROM);
-		return [...this.#FROM];
 	}
+
+	get FROM() {return [...this.#FROM];}
 	
 	set cubes(token) {
 		( !this.#cubes.has(token) ) ? this.#cubes.add(token) : this.#cubes.delete(token);		
@@ -153,37 +159,6 @@ class Queries {
 	set fieldType(value) {this._fieldType = value;}
 
 	get fieldType() {return this._fieldType;}
-
-	set from(value) {
-		// this._fromArray.push(value); // TODO: probabilmente questo non viene mai utilizzato (da verificare)
-		this._fromSet.add(value);
-		console.log('from : ', this._fromSet);
-	}
-
-	get from() {return this._fromSet;}
-
-	addTables(hier) {
-		// è necessario creare la proprietà firstTable per poterla utilizzare in checkRelations e stabilire quali tabelle e join devono essere considerate nella query finale
-		/*
-			Se firstTable non esiste la devo creare, in base, alla selezione della colonna che si sta aggiungendo.
-			Oppure, se la colonna che si sta aggiungendo è relativa ad un'altra gerarchia, reimposto firstTable per poter 'lavorare' su quella gerarchia
-			Se si ha una colonna con azienda-sede-intestazione e viene selezionata una colonna della tabella sede, la firstTable sarà id: 0, name : sede.
-			A questo punto la tabella Azienda è inutile metterla in Query perchè non c'è nessun campo (oppure filtro) che la utilizza
-		*/
-		if ( !this.#firstTable.hasOwnProperty('tableId') || this.#firstTable.hier !== hier) {
-			// non è presente nessuna firstTable per questa gerarchia, la creo
-			this.#firstTable = {tableId : this._tableId, table : this.table, hier};
-		}
-		// se la tabella presente attualmente in firstTable ha un id > di quella selezionata dovrò riscrivere il firstTable per includere anche la nuova tabella.
-		/*es.:
-			La prima colonna aggiunta a Query è sede.codice, la tabella sede ha un id:1, successivamente viene aggiunta una colonna appartenente alla tabella Azienda (id: 0).
-			A questo punto il valore di firstTable deve cambiare da sede a azienda, includendo, nella query finale, anche la tabella azienda e le sue relative join
-		*/
-		if ( this.#firstTable.tableId > this._tableId) {
-			this.#firstTable = {tableId : this._tableId, table : this.table, hier};
-		}
-		console.log('#firstTable : ', this.#firstTable);
-	}
 
 	get tables() {return this.#firstTable;}
 
@@ -395,12 +370,11 @@ class Queries {
 
 		this.reportElements.select = Object.fromEntries(this.select);
 		this.#elementReport.set('columns', Object.fromEntries(this.select));
-		debugger;
 		this.reportElements.from = this.FROM;
 		debugger;
-		this.reportElements.from = Array.from(this._fromSet); // converto il set in un array
 		this.reportElements.where = this.#where;
 		this.reportElements.factJoin = this.factJoin;
+
 		if (this.filters.size > 0) this.reportElements.filters = Object.fromEntries(this.filters);
 		if (this.metrics.size > 0) {
 			this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
