@@ -8,7 +8,6 @@ class Queries {
 	#firstTable = {}; // la prima tabella della gerarchia, da qui posso ottenere la from e la join
 	#joinId;
 	#where = {};
-	#WHERE = new Set();
 	#compositeMetrics = new Map();
 	#compositeBaseMetric;
 	#filters = new Map();
@@ -30,6 +29,7 @@ class Queries {
 	#processId = 0;
 	#token = 0;
 	#FROM = new Set();
+	#WHERE = new Map();
 	// #hier = new Map();
 	// #hierarchiesTableId = new Map();
 	constructor() {
@@ -42,10 +42,10 @@ class Queries {
 		( !this.#objects.has(object.token) ) ? this.#objects.set(object.token, object) : this.#objects.delete(object.token);
 		console.log('#objects : ', this.#objects);
 
-		document.querySelectorAll("#ul-hierarchies .selectable small").forEach( tableRef => delete tableRef.dataset.includeQuery);
-		document.querySelectorAll("#ul-cubes .selectable").forEach( tableRef => delete tableRef.dataset.includeQuery);
+		document.querySelectorAll("*[data-include-query]").forEach( tableRef => delete tableRef.dataset.includeQuery);
 		for ( const [key, value] of Query.objects ) {
 			if (value.hasOwnProperty('hierToken')) {
+				document.querySelector("#ul-dimensions .selectable[data-dimension-token='"+value.dimension+"']").dataset.includeQuery = true;
 				const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+value.hierToken+"']");
 				// converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
 				[...hier.querySelectorAll("small")].filter( (table, index) => index >= value.tableId).forEach( tableRef => {
@@ -94,6 +94,13 @@ class Queries {
 	}
 
 	get FROM() {return [...this.#FROM];}
+
+	set WHERE(object) {
+		this.#WHERE.set(object.token, object.join);
+		console.log('#WHERE : ', this.#WHERE);
+	}
+
+	get WHERE() {return Object.fromEntries(this.#WHERE);}
 	
 	set cubes(token) {
 		( !this.#cubes.has(token) ) ? this.#cubes.add(token) : this.#cubes.delete(token);		
@@ -371,9 +378,9 @@ class Queries {
 		this.reportElements.select = Object.fromEntries(this.select);
 		this.#elementReport.set('columns', Object.fromEntries(this.select));
 		this.reportElements.from = this.FROM;
-		debugger;
-		this.reportElements.where = this.#where;
-		this.reportElements.factJoin = this.factJoin;
+		this.reportElements.where = this.WHERE;
+		// this.reportElements.where = this.#where;
+		// this.reportElements.factJoin = this.factJoin;
 
 		if (this.filters.size > 0) this.reportElements.filters = Object.fromEntries(this.filters);
 		if (this.metrics.size > 0) {
@@ -389,10 +396,11 @@ class Queries {
 			this.reportElements.filteredMetrics = Object.fromEntries(this.filteredMetrics);
 		}
 		
-		this.editElements = Object.fromEntries(this.elementReport);
+		// this.editElements = Object.fromEntries(this.elementReport);
 		this.#reportProcess.report = this.reportElements;
-		this.#reportProcess.edit = this.editElements;
+		// this.#reportProcess.edit = this.editElements;
 		console.info(this.#reportProcess);
+		debugger;
 		window.localStorage.setItem(this.#token, JSON.stringify(this.#reportProcess));
         console.info(`${name} salvato nello storage con token : ${this.token}`);
 	}

@@ -73,7 +73,9 @@ class Cube {
 	public function where($joins) {
 		$i = 0;
 		// joins = "token_join" : ['table.field', 'table.field']
+		// var_dump($joins);
 		foreach ($joins as $join) {
+			// var_dump($join);
 			$relation = implode(" = ", $join);
 			$this->_where .= ($i === 0) ? "WHERE\n$relation " : "\nAND $relation ";
 			$i++;
@@ -81,7 +83,7 @@ class Cube {
 		// dd($this->_where);
 	}
 
-	public function joinFact($joins) {
+	/*public function joinFact($joins) {
         // definisco la join tra l'ultima tabella della gerarchia e la FACT.
         // se è presente una sola tabella nella dimensione, la prop 'where' sarà vuota, per cui, qui, invece della AND dovrò usare la WHERE iniziale e le successive join con la AND
 		$this->_ands = array();
@@ -97,7 +99,7 @@ class Cube {
 		
 		$this->_and .= implode("\nAND ", $this->_ands);
 		// dd($this->_and);
-	}
+	}*/
 
 	public function filters($filters) {
 		// definisco i filtri del report
@@ -193,10 +195,10 @@ class Cube {
 		if (!is_null($this->_metrics_base)) {$this->_sql .= ", $this->_metrics_base";}
 		$this->_sql .= "\n$this->_from";
 		$this->_sql .= "\n$this->_where";
-		$this->_sql .= "\n$this->_and";
+		$this->_sql .= "$this->_and";
 		if (isset($this->_reportFilters)) {$this->_sql .= "$this->_reportFilters";}
 		if (!is_null($this->_groupBy)) {$this->_sql .= "\n$this->_groupBy";}
-		// dd($this->_sql);
+		dd($this->_sql);
         // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
 		$sql = "CREATE TEMPORARY TABLE decisyon_cache.W_AP_base_$this->reportId ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
 		// $result = DB::connection('vertica_odbc')->raw($sql);

@@ -129,7 +129,7 @@ class MapDatabaseController extends Controller
         $q->select($cube->{'select'});
         $q->from($cube->{'from'});
         $q->where($cube->{'where'});
-        $q->joinFact($cube->{'factJoin'});
+        // $q->joinFact($cube->{'factJoin'});
         $q->filters($cube->{'filters'});
         // TODO: siccome il group by viene creato uguale alla clausola SELECT potrei unirli e non fare qui 2 chiamate
         $q->groupBy($cube->{'select'});
