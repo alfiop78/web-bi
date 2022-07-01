@@ -555,6 +555,13 @@ var StorageMetric = new MetricStorage();
 
 	// lista metriche esistenti
 	app.getMetrics = () => {
+		/* NOTE: logica delle metriche
+			0 : metrica di base
+			1 : metrica di base, legata al cubo, composto (es.: prezzo*quantità)
+			2 : metrica filtrata
+			3 : metrica filtrata composta
+			4 : metrica composta
+		*/
 		const ul = document.getElementById('ul-exist-metrics');
 		for (const [cubeToken, value] of StorageCube.cubes) {
 			StorageMetric.cubeMetrics = cubeToken;
@@ -957,7 +964,6 @@ var StorageMetric = new MetricStorage();
 	// selezione di un filtro già presente, lo salvo nell'oggetto Query
 	app.handlerFilterSelected = (e) => {
 		StorageFilter.selected = e.currentTarget.dataset.filterToken;
-		debugger;
 		let hier, hierToken;
 		// i filtri impostati su un livello dimensionale hanno l'attr data-hier-token
 		if (e.currentTarget.hasAttribute('data-hier-token')) {
@@ -1171,8 +1177,8 @@ var StorageMetric = new MetricStorage();
 	app.handlerSelectColumn = (e) => {
 		console.log('addColumns');
 		// verifico che almeno una gerarchia sia stata selezionata
-		const dimensionSelectedCount = document.querySelectorAll('#ul-dimensions .selectable[data-selected]').length;
-		if (dimensionSelectedCount === 0) {
+		// const dimensionSelectedCount = document.querySelectorAll('#ul-dimensions .selectable[data-selected]').length;
+		if (Query.dimensions.size === 0) {
 			App.showConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
 			return;
 		} else {
@@ -1967,9 +1973,7 @@ var StorageMetric = new MetricStorage();
 
 	// aggiungi filtri (step-2)
 	app.btnAddFilters.onclick = (e) => {
-		// stessa logica di btnAddColumns
-		const dimensionSelectedCount = document.querySelectorAll('#ul-dimensions .selectable[data-selected]').length;
-		if (dimensionSelectedCount === 0) {
+		if (Query.dimensions.size === 0) {
 			App.showConsole('Selezionare una dimensione per poter aggiungere colonne al report', 'warning');
 			return;
 		} else {
@@ -1982,8 +1986,7 @@ var StorageMetric = new MetricStorage();
 	// aggiungi metriche (step-2)
 	app.btnAddMetrics.onclick = (e) => {
 		// verifico se è stato selezionato almeno un cubo
-		const cubeSelectedCount = document.querySelectorAll('#ul-cubes .selectable[data-selected]').length;
-		if (cubeSelectedCount === 0) {
+		if (Query.cubes.size === 0) {
 			App.showConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
 			return;
 		} else {
@@ -1997,18 +2000,18 @@ var StorageMetric = new MetricStorage();
 	app.btnAddCompositeMetrics.onclick = (e) => {
 		// console.log(Query.elementCube);
 		// TODO: questo controllo lo farò sul tasto next degli step
-		const cubeSelectedCount = document.querySelectorAll('#ul-cubes .selectable[data-selected]').length;
-		if (Query.elementCube.size === 0) {
+		if (Query.cubes.size === 0) {
 			App.showConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
 			return;
 		} else {
 			// per ogni cubo selezionato ne recupero le metriche ad esso appartenenti
 			const ul = document.getElementById('ul-metrics');
-			Query.elementCube.forEach( cube => {
+			Query.cubes.forEach( cubeToken => {
+				StorageCube.selected = cubeToken;
 				// ripulisco la lista, prima di popolarla
 				document.querySelectorAll('#ul-metrics > section').forEach( item => item.remove());
 				// recupero lista aggiornata delle metriche
-				StorageMetric.cubeMetrics = cube.token;
+				StorageMetric.cubeMetrics = cubeToken;
 				for ( const [token, metric] of Object.entries(StorageMetric.cubeMetrics) ) {
 					const contentElement = app.tmplList.content.cloneNode(true);
 					const section = contentElement.querySelector('section[data-sublist-metrics]');
@@ -2033,7 +2036,7 @@ var StorageMetric = new MetricStorage();
 					selectable.dataset.metricToken = token;
 					selectable.onclick = app.handlerMetricSelectedComposite;
 					span.innerText = metric.name;
-					smallCube.innerText = cube.name;
+					smallCube.innerText = StorageCube.selected.name;
 					ul.appendChild(section);
 				}
 				// 2022-06-01 TODO: in questo elenco dovranno esserci anche le metriche composte da poter selezionare

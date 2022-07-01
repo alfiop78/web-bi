@@ -528,7 +528,7 @@
 									<div id="stepTranslate" data-translate-x="0">
 										<section class="step" data-step="1" selected>
 											<div class="pageContent">
-												<div class="h-grid">
+												<div class="h-grid col-1">
 													{{-- cube-list --}}
 													<div class="parent-ul">
 														<h5>Cubi</h5>
@@ -540,6 +540,55 @@
 															<ul id="ul-cubes" class="absolute"></ul>
 														</div>
 													</div>
+													
+												</div>
+											</div>
+										</section>
+									  
+										<section class="step" data-step="2">
+											<div class="pageContent">
+												{{-- <h5>Seleziona gli elementi per comporre il Report</h5> --}}
+												<div class="h-grid col-3">
+													{{-- dimension-list --}}
+													<section class="parent-ul">
+														<h5>Dimensioni</h5>
+														<div class="md-field">
+															<input type="search" data-element-search="search-dimension" id="search-dimension" value autocomplete="off" />
+															<label for="search-dimension" class="">Ricerca</label>
+														</div>
+														<div class="relative-ul">
+															<ul id="ul-dimensions" class="absolute"></ul>
+														</div>
+													</section>
+													<section class="columns parent-ul">
+														<h5>Colonne</h5>
+														<div class="md-field">
+															<input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" />
+															<label for="search-columns" class="">Ricerca</label>
+														</div>
+														<div class="relative-ul">
+															<ul id="ul-columns" class="absolute"></ul>
+														</div>
+													</section>
+													<section class="filters parent-ul-filters">
+														<h5>Filtri</h5>
+														<div class="md-field">
+															<input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
+															<label for="search-exist-filters" class="">Ricerca</label>
+														</div>
+														<div class="relative-ul">
+															<ul id="ul-exist-filters" class="absolute"></ul>
+														</div>
+														<button type="button" id="btn-add-filters" class="button-icon material-icons md-32">add</button>
+													</section>
+													
+												</div>
+											</div>
+										</section>
+
+										<section class="step" data-step="3">
+											<div class="pageContent">
+												<div class="h-grid col-2">
 													{{-- metrics --}}
 													<section class="metrics parent-ul-metrics">
 														<h5>Metriche</h5>
@@ -568,67 +617,8 @@
 														</div>
 														<button type="button" id="btn-add-composite-metrics" class="button-icon material-icons md-32">add</button>
 													</section>
-													
-													{{-- gerarchie --}}
-													{{-- <div class="parent-ul-hierarchies">
-														
-														<div class="relative-ul">
-															<ul id="ul-fact-tables" class="absolute"></ul>
-														</div>
-													</div> --}}
 												</div>
 											</div>
-										</section>
-									  
-										<section class="step" data-step="2">
-											<div class="pageContent">
-												<h5>Seleziona gli elementi per comporre il Report</h5>
-												<div class="v-grid">
-													<div class="addElementsReport">
-														{{-- dimension-list --}}
-														<div class="parent-ul">
-															<h5>Dimensioni</h5>
-															<div class="md-field">
-																<input type="search" data-element-search="search-dimension" id="search-dimension" value autocomplete="off" />
-																<label for="search-dimension" class="">Ricerca</label>
-															</div>
-															<div class="relative-ul">
-																<ul id="ul-dimensions" class="absolute"></ul>
-															</div>
-														</div>
-														<section class="columns parent-ul">
-															<h5>Colonne</h5>
-															<div class="md-field">
-																<input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" />
-																<label for="search-columns" class="">Ricerca</label>
-															</div>
-															<div class="relative-ul">
-																<ul id="ul-columns" class="absolute"></ul>
-															</div>
-														</section>
-														<section class="filters parent-ul-filters">
-															<h5>Filtri</h5>
-															{{-- <div class="btn-add">
-																<span>Crea filtro</span>
-																
-															</div> --}}
-															<div class="md-field">
-																<input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
-																<label for="search-exist-filters" class="">Ricerca</label>
-															</div>
-															<div class="relative-ul">
-																<ul id="ul-exist-filters" class="absolute"></ul>
-															</div>
-															<button type="button" id="btn-add-filters" class="button-icon material-icons md-32">add</button>
-														</section>
-														
-													</div>
-												</div>
-											</div>
-										</section>
-
-										<section class="step" data-step="3">
-											<div class="pageContent">pagina 3</div>
 										</section>
 									</div>
 
