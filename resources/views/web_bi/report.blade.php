@@ -72,24 +72,36 @@
 
 		</dialog>
 
-		<dialog id="dialog-value" class="mini-dialog">
-			<section>
+		<dialog id="dialog-value" class="small-dialog">
+			<section class="dialog-sections">
 				<h4>Ricerca valori per la colonna</h4>
-				<div class="md-field">
+				<div class="stepLayout">
+					<section class="sectionLists parent-ul-base">						
+						<div class="md-field">
+							<input type="search" id="dialog-value-search" data-element-search="dialog-value-search" value autocomplete="off" />
+							<label for="dialog-value-search" class="">Ricerca</label>
+						</div>
+						<div class="relative-ul">
+							<ul id="ul-filter-values" class="absolute"></ul>
+						</div>	
+					</section>
+				</div>
+				{{-- <div class="md-field">
 					<input type="search" id="dialog-value-search" data-element-search="dialog-value-search" value autocomplete="off" />
 					<label for="dialog-value-search" class="">Ricerca valori</label>
 				</div>
-				<ul id="dialog-filter-values" class="full-overflow-list-columns"></ul>
+				<ul id="dialog-filter-values" class="full-overflow-list-columns"></ul> --}}
+				<div class="dialog-buttons">
+					<button type="button" name="cancel" class="md-button">annulla</button>
+					<button id="btnValueDone" type="button" name="value-done" class="md-button">ok</button>
+				</div>
 			</section>
 
-			<div class="dialog-buttons">
-				<button type="button" name="cancel" class="md-button">annulla</button>
-				<button id="btnValueDone" type="button" name="value-done" class="md-button">ok</button>
-			</div>
+			
 		</dialog>
 
 		<dialog id="dialog-filter" class="large-dialog">
-			<section class="dialog-sections" data-table-name> {{--  data-hier-name data-dimension-name --}}
+			<section class="dialog-sections" data-table-name>
 				<h4>Creazione nuovo filtro</h4>
 				<div class="stepLayout">
 
@@ -98,9 +110,6 @@
 						<div class="md-field">
 							<input type="search" data-element-search="search-tables" id="dialog-columns-search-table" value autocomplete="off" />
 							<label for="dialog-columns-search-table" class="">Ricerca</label>
-						</div>
-						<div class="relative-ul">
-							<ul id="ul-fact" class="fact-table absolute"></ul>
 						</div>
 						<div class="relative-ul">
 							<ul id="ul-tables" class="absolute"></ul>
@@ -141,21 +150,25 @@
 			</section>
 		</dialog>
 
-		<dialog id="dialog-metric-filter" class="mini-dialog">
-			<small id="dialog-popup" class="popupToast"></small>
-			<section>
+		<dialog id="dialog-metric-filter" class="small-dialog">
+			<section class="dialog-sections">
 				<h4>Ricerca filtri da impostare per la metrica</h4>
-				<div class="md-field">
-					<input type="search" id="dialog-metric-filter-search" data-element-search="search-exist-filters" value autocomplete="off" />
-					<label for="dialog-metric-filter-search" class="">Ricerca</label>
+				<div class="stepLayout">
+					<section class="sectionLists parent-ul-base">						
+						<div class="md-field">
+							<input type="search" id="dialog-metric-filter-search" data-element-search="search-exist-filters" value autocomplete="off" />
+							<label for="dialog-metric-filter-search" class="">Ricerca</label>
+						</div>
+						<div class="relative-ul">
+							<ul id="ul-metric-filter" class="absolute"></ul>
+						</div>	
+					</section>
 				</div>
-				<ul id="ul-metric-filter" class="full-overflow-list-columns"></ul>
+				<div class="dialog-buttons">
+					<button type="button" name="cancel" class="md-button">annulla</button>
+					<button id="btnMetricFilterDone" type="button" name="metric-filter-done" class="md-button">ok</button>
+				</div>
 			</section>
-
-			<div class="dialog-buttons">
-				<button type="button" name="cancel" class="md-button">annulla</button>
-				<button id="btnMetricFilterDone" type="button" name="metric-filter-done" class="md-button">ok</button>
-			</div>
 		</dialog>
 
 		<dialog id="dialog-metric" class="large-dialog">
@@ -417,8 +430,8 @@
 								</div>
 							</section>
 
-							<section class="data-item" data-element-search data-label data-sublist-available-metrics hidden>
-								<div class="selectable" data-label>
+							<section class="data-item" data-element-search data-label data-related-object data-sublist-available-metrics hidden>
+								<div class="selectable" data-label data-object-type="metric">
 									<div class="h-content">
 										<div class="v-content">
 											<span metric class="highlight"></span>
@@ -430,7 +443,7 @@
 
 							{{-- lista tabelle --}}
 							<section class="data-item" data-element-search data-label data-sublist-tables hidden>
-								<div class="selectable" data-label>
+								<div class="selectable" data-label data-object-type="table">
 									<div class="h-content">
 										<div class="v-content">
 											<span table class="highlight"></span>
