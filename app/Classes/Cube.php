@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\DB;
 
 class Cube {
 	private $_select, $_fields = array(), $_fieldsSQL, $_columns = array(), $_from, $_and, $_where, $_reportFilters, $_metricFilters, $_reportMetrics, $_compositeMetrics, $_compositeTables, $_groupBy, $_sql, $_metricTable;
+	private $_whereFilteredMetric;
+	private $_fromFilteredMetric;
 	private $reportName;
 	private $reportId;
 	private $_metrics_base, $_metrics_base_datamart;
@@ -65,9 +67,12 @@ class Cube {
 	}
 
 	public function from($from) {
-		// per ogni dimensione esistente vado a aggiungere, in this->_from, i FROM che si trovano al suo interno
 		$this->_from = "FROM\n" . implode(",\n", $from);
 		// dd($this->_from);
+	}
+
+	private function fromFilteredMetric($from) {
+		$this->_fromFilteredMetric = implode(",\n", $from);
 	}
 
 	public function where($joins) {
@@ -81,6 +86,17 @@ class Cube {
 			$i++;
 		}
 		// dd($this->_where);
+	}
+
+	public function whereFilteredMetric($joins) {
+		// joins = "token_join" : ['table.field', 'table.field']
+		// var_dump($joins);
+		foreach ($joins as $join) {
+			// var_dump($join);
+			$relation = implode(" = ", $join);
+			$this->_whereFilteredMetric .= "\nAND $relation ";
+		}
+		// dd($this->_whereFilteredMetric);
 	}
 
 	/*public function joinFact($joins) {
@@ -247,18 +263,23 @@ class Cube {
 
 	// creo la tabella temporanea che contiene metriche filtrate
 	private function createMetricTable($tableName, $metric, $filters) {
-		// dd($filters);		
+		// dd($filters);
+		$this->fromFilteredMetric = NULL;
 		$this->_sql = "{$this->_select},{$metric}";
-		$this->_sql .= "\n$this->_from";
-		$this->_sql .= "\n$this->_where";
-		$this->_sql .= "$this->_and";
-		$this->_sql .= $this->_reportFilters;
-		// aggiungo i filtri della metrica
 		foreach ($filters as $filter) {
 			$this->_metricFilters .= "AND $filter->SQL";
+			if ($filter->FROM) $this->fromFilteredMetric($filter->FROM);
+			if ($filter->WHERE) $this->whereFilteredMetric($filter->WHERE);
 		}
+		$this->_sql .= "\n$this->_from,\n$this->_fromFilteredMetric";
+		$this->_sql .= "\n$this->_where";
+		$this->_sql .= "$this->_whereFilteredMetric";
+		$this->_sql .= "$this->_and";
+		// aggiungo i filtri del report
+		$this->_sql .= $this->_reportFilters;
 		$this->_sql .= "\n$this->_metricFilters";
 		if (!is_null($this->_groupBy)) {$this->_sql .= "\n$this->_groupBy";}
+		// dd($this->_sql);
 
 		$sql = "CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
 		// dd($sql);

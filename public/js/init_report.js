@@ -1050,8 +1050,57 @@ var StorageMetric = new MetricStorage();
 					break;
 				case 2:
 					// metrica filtrata
-					Query.table = e.currentTarget.dataset.tableName;
-					Query.tableAlias = e.currentTarget.dataset.tableAlias;
+					debugger;
+					// TODO: recupero i filtri presenti nella metrica, li ciclo
+					let object = new Map();
+					StorageMetric.selected.formula.filters.forEach( filter => {
+						let from = new Set();
+						let where = new Map();
+						
+						StorageFilter.selected = filter; // token
+						// debugger;
+						if (StorageFilter.selected.hasOwnProperty('dimensionToken')) {
+							StorageDimension.selected = StorageFilter.selected.dimensionToken;
+							const hierRef = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+StorageFilter.selected.hier.token+"']");
+							// console.log('hierRef : ', hierRef);
+							// converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
+							[...hierRef.querySelectorAll("small")].filter( (table, index) => index >= StorageFilter.selected.tableId).forEach( tableRef => {
+								// tableRef.dataset.includeQueryFilter = true;
+								// debugger;
+								from.add(`${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);				
+								// per l'ultima tabella della gerarchia non esiste la join perchè è quella che si lega al cubo e il legame è fatto nella proprietà 'cubes' della dimensione
+								if (StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias]) {
+									// console.log(Object.keys(StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias]));
+									// debugger;
+									for (const [token, join] of Object.entries(StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias])) {
+										where.set(token, join);
+									}
+								}
+							});
+							// factJoin
+							for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
+								for (const [token, join] of Object.entries(joins)) {
+									where.set(token, join);
+								}
+							}
+							object.set(StorageFilter.selected.token, {
+								SQL : `${StorageFilter.selected.tableAlias}.${StorageFilter.selected.formula}`,
+								FROM : [...from],
+								WHERE : Object.fromEntries(where)
+							});
+						} else {
+							// il filtro aggiunto alla metrica è un filtro presente sulla FACT
+							document.querySelectorAll("#ul-cubes .selectable[data-cube-token='"+StorageFilter.selected.cubeToken+"']").forEach( tableRef => {
+								from.add(`${tableRef.dataset.schema}.${tableRef.dataset.tableName} AS ${tableRef.dataset.tableAlias}`);
+							});
+							object.set(StorageFilter.selected.token, {
+								SQL : `${StorageFilter.selected.tableAlias}.${StorageFilter.selected.formula}`
+							});
+						}
+
+						
+					});
+					debugger;
 					Query.addFilteredMetric = {
 						token : e.currentTarget.dataset.metricToken,
 						name : StorageMetric.selected.name,
@@ -1060,9 +1109,9 @@ var StorageMetric = new MetricStorage();
 						alias : StorageMetric.selected.formula.alias,
 						distinct : StorageMetric.selected.formula.distinct,
 						field : StorageMetric.selected.formula.field,
-						filters : StorageMetric.selected.formula.filters,
-						table : Query.table,
-						tableAlias : Query.tableAlias
+						filters : Object.fromEntries(object),
+						table : e.currentTarget.dataset.tableName,
+						tableAlias : e.currentTarget.dataset.tableAlias
 					};
 					break;
 				case 3:
@@ -1499,23 +1548,26 @@ var StorageMetric = new MetricStorage();
 		// const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
 		const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
 		// verifico se ci sono filtri da associare a questa metrica
-		let associatedFilters = {};
+		// let associatedFilters = new Map();
+		// let from = new Set();
+		// let where = new Map();
+		let associatedFilters = new Set()
 		document.querySelectorAll('#ul-metric-filter .selectable[data-selected]').forEach( filterSelected => {
-			debugger;
-			// TODO: da testare
-			StorageFilter.selected = filterSelected.dataset.filterToken;
+			associatedFilters.add(filterSelected.dataset.filterToken);
+			// debugger;
 			// recupero dallo storage il contenuto del filtro per inserirlo in un object (quest'ultimo verrà inserito nella metrica)
-			associatedFilters[StorageFilter.selected.token] = {
-				token : StorageFilter.selected.token,
-				SQL : `${filterSelected.dataset.tableAlias}.${StorageFilter.selected.formula}`
-			};
+			// associatedFilters.set(filterSelected.dataset.filterToken, object);
+			// associatedFilters[StorageFilter.selected.token] = {
+			// 	token : StorageFilter.selected.token,
+			// 	SQL : `${filterSelected.dataset.tableAlias}.${StorageFilter.selected.formula}`
+			// };
 		});
 		let metricObj = { created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options) };
 		/* se sono presenti dei filtri per la metrica che si sta creando, il metric_type sarà :
 		* 2 : metrica di base con filtri
 		* 3 : metrica di base composta, con filtri
 		*/
-		if (Object.keys(associatedFilters).length > 0) {
+		if (associatedFilters.size > 0) {
 			metric_type = (metric_type === 0) ? 2 : 3;
 		}
 		debugger;
@@ -1540,7 +1592,7 @@ var StorageMetric = new MetricStorage();
 					token,
 					metric_type,
 					name,
-					formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, table: Query.table, tableAlias : Query.tableAlias, filters: associatedFilters },
+					formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, table: Query.table, tableAlias : Query.tableAlias, filters: [...associatedFilters] },
 					cubeToken : StorageCube.selected.token
 				};
 				break;
@@ -1551,7 +1603,7 @@ var StorageMetric = new MetricStorage();
 					token,
 					metric_type,
 					name,
-					formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, filters: associatedFilters },
+					formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, filters: [...associatedFilters] },
 					cubeToken : StorageCube.selected.token
 				};
 				break;
@@ -1785,6 +1837,8 @@ var StorageMetric = new MetricStorage();
 				type: 'FILTER',
 				name: filterName.value,
 				table: Query.table,
+				tableAlias : Query.tableAlias,
+				tableId : Query.tableId,
 				formula : textarea.value,
 				dimensionToken,
 				hier : {token : hierToken, name: hierName},
@@ -1796,6 +1850,7 @@ var StorageMetric = new MetricStorage();
 				type: 'FILTER',
 				name: filterName.value,
 				table: Query.table,
+				tableAlias : Query.tableAlias,
 				formula : textarea.value,
 				cubeToken : StorageCube.selected.token,
 				alias : StorageCube.selected.alias,
