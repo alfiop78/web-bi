@@ -28,7 +28,8 @@ class Queries {
 	#factJoin = {};
 	#processId = 0;
 	#token = 0;
-	#FROM = new Set();
+	#FROM = new Map();
+	#FROMFilteredMetric = new Map();
 	#WHERE = new Map();
 	// #hier = new Map();
 	// #hierarchiesTableId = new Map();
@@ -88,12 +89,13 @@ class Queries {
 
 	get objects() {return this.#objects;}
 
-	set FROM(value) {
-		this.#FROM.add(value);
+	set FROM(object) {
+		this.#FROM.set(object.tableAlias, object.SQL);
 		console.log('#FROM : ', this.#FROM);
 	}
 
-	get FROM() {return [...this.#FROM];}
+	get FROM() {return this.#FROM;}
+
 
 	set WHERE(object) {
 		this.#WHERE.set(object.token, object.join);
