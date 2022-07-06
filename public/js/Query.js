@@ -94,7 +94,7 @@ class Queries {
 		console.log('#FROM : ', this.#FROM);
 	}
 
-	get FROM() {return this.#FROM;}
+	get FROM() {return Object.fromEntries(this.#FROM);}
 
 
 	set WHERE(object) {

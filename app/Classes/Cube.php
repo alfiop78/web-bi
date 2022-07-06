@@ -3,9 +3,13 @@ namespace App\Classes;
 use Illuminate\Support\Facades\DB;
 
 class Cube {
-	private $_select, $_fields = array(), $_fieldsSQL, $_columns = array(), $_from, $_and, $_where, $_reportFilters, $_metricFilters, $_reportMetrics, $_compositeMetrics, $_compositeTables, $_groupBy, $_sql, $_metricTable;
+	private $SELECT, $_fields = array(), $_fieldsSQL, $_columns = array(), $_and, $_metricFilters, $_reportMetrics, $_compositeMetrics, $_compositeTables, $_sql, $_metricTable;
 	private $_whereFilteredMetric;
 	private $_fromFilteredMetric;
+	private $FROM_baseTable = array();
+	private $WHERE_baseTable;
+	private $GROUPBY_baseTable;
+	private $filters_baseTable;
 	private $reportName;
 	private $reportId;
 	private $_metrics_base, $_metrics_base_datamart;
@@ -13,12 +17,6 @@ class Cube {
 	private $_composite_sql_formula;
 	private $_composite_metrics = array();
 	private $_datamartColumns = array();
-
-	// function __construct($fact_table) {
-	//   $this->fact = $fact_table;
-	//   $this->connect = new ConnectDB('automotive_bi_data');
-	//   $this->connect->openConnection();
-	// }
 
 	public function __get($value) {
 		return $this->$value;
@@ -49,7 +47,7 @@ class Cube {
 
 	public function select($columns) {
 		$fieldList = array();
-		$this->_select = "SELECT";
+		$this->SELECT = "SELECT";
 		foreach ($columns as $key => $object) {
 			/* var_dump($key); // il nome dato alla colonna */
 			/* print_r($object); // contiene l'object {table : tabella, field: campo, alias : alias, SQL : formulSQL} */
@@ -61,18 +59,29 @@ class Cube {
 				$this->_columns[] = "{$object->alias}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
 			}
 		}
-		$this->_select .= implode(", ", $fieldList);
-		// dd($this->_select);
+		$this->SELECT .= implode(", ", $fieldList);
+		// dd($this->SELECT);
+		/*
+		es.:
+			SELECT\n
+			CodSedeDealer_765.Descrizione AS 'sede_id', CodSedeDealer_765.Descrizione AS 'sede_ds'
+		*/
 		// var_dump($this->_columns);
 	}
 
 	public function from($from) {
-		$this->_from = "FROM\n" . implode(",\n", $from);
-		// dd($this->_from);
-	}
-
-	private function fromFilteredMetric($from) {
-		$this->_fromFilteredMetric = implode(",\n", $from);
+		foreach ($from as $table) {
+			$this->FROM_baseTable[] = $table;
+		 }
+		// dd($this->FROM_baseTable);
+		/* es.:
+			array:4 [
+				0 => "automotive_bi_data.Azienda AS Azienda_997"
+				1 => "automotive_bi_data.CodSedeDealer AS CodSedeDealer_765"
+				2 => "automotive_bi_data.DocVenditaIntestazione AS DocVenditaIntestazione_055"
+				3 => "automotive_bi_data.DocVenditaDettaglio AS DocVenditaDettaglio_560"
+			]
+		*/
 	}
 
 	public function where($joins) {
@@ -82,40 +91,19 @@ class Cube {
 		foreach ($joins as $join) {
 			// var_dump($join);
 			$relation = implode(" = ", $join);
-			$this->_where .= ($i === 0) ? "WHERE\n$relation " : "\nAND $relation ";
+			$this->WHERE_baseTable .= ($i === 0) ? "WHERE\n$relation " : "\nAND $relation ";
 			$i++;
 		}
-		// dd($this->_where);
+		// dd($this->WHERE_baseTable);
+		/*
+		es.:
+			WHERE\n
+			Azienda_997.id = CodSedeDealer_765.id_Azienda \n
+			AND CodSedeDealer_765.id = DocVenditaIntestazione_055.id_CodSedeDealer \n
+			AND DocVenditaIntestazione_055.NumRifInt = DocVenditaDettaglio_560.NumRifInt \n
+			AND DocVenditaIntestazione_055.id_Azienda = DocVenditaDettaglio_560.id_Azienda 
+		*/
 	}
-
-	public function whereFilteredMetric($joins) {
-		// joins = "token_join" : ['table.field', 'table.field']
-		// var_dump($joins);
-		foreach ($joins as $join) {
-			// var_dump($join);
-			$relation = implode(" = ", $join);
-			$this->_whereFilteredMetric .= "\nAND $relation ";
-		}
-		// dd($this->_whereFilteredMetric);
-	}
-
-	/*public function joinFact($joins) {
-        // definisco la join tra l'ultima tabella della gerarchia e la FACT.
-        // se è presente una sola tabella nella dimensione, la prop 'where' sarà vuota, per cui, qui, invece della AND dovrò usare la WHERE iniziale e le successive join con la AND
-		$this->_ands = array();
-        $this->_and = (!$this->_where) ? "WHERE\n " : "AND " ;
-		// $this->_and = " AND ";
-		foreach ($joins as $dim) {
-			// var_dump($dim);
-			foreach ($dim as $cube) {
-				// var_dump($cube);
-				foreach ($cube as $join) $this->_ands[] = implode(" = ", $join);
-			}
-		}
-		
-		$this->_and .= implode("\nAND ", $this->_ands);
-		// dd($this->_and);
-	}*/
 
 	public function filters($filters) {
 		// definisco i filtri del report
@@ -123,9 +111,14 @@ class Cube {
 		$and = "\nAND ";
 		foreach ($filters as $filter) {
 			// dd($filter); // filter_name => alias_table.field = value
-			$this->_reportFilters .= $and.$filter;
+			$this->filters_baseTable .= $and.$filter;
 		}
-		// dd($this->_reportFilters);
+		// dd($this->filters_baseTable);
+		/*
+		es.:
+			AND Azienda_997.id = 473\n
+			AND DocVenditaDettaglio_560.DataDocumento >= 20220601
+		*/
 	}
 
 	public function metrics() {
@@ -155,7 +148,7 @@ class Cube {
 
 	public function groupBy($groups) {
 		$fieldList = array();
-		$this->_groupBy = "GROUP BY";
+		$this->GROUPBY_baseTable = "GROUP BY";
 		foreach ($groups as $key => $object) {
 			/* var_dump($key); // il nome dato alla colonna */
 			/* print_r($object); // contiene l'object {table : tabella, field: campo, alias : alias, SQL : formulSQL} */
@@ -165,7 +158,7 @@ class Cube {
 				$fieldList[] = "{$object->tableAlias}.{$field->ds->field}";
 			}			
 		}
-		$this->_groupBy .= implode(", ", $fieldList);
+		$this->GROUPBY_baseTable .= implode(", ", $fieldList);
 		// dd($this->_groupBy);
 	}
 
@@ -205,15 +198,14 @@ class Cube {
 
 	public function baseTable() {
 		// creo una TEMP_TABLE su cui, successivamente andrò a fare una LEFT JOIN con le TEMP_TABLE contenenti le metriche
-		$this->_sql = $this->_select;
+		$this->_sql = $this->SELECT;
 		// se ci sono metriche a livello di report le aggiungo
 		// se un report contiene solo metriche filtrate non avrà metriche di base
 		if (!is_null($this->_metrics_base)) {$this->_sql .= ", $this->_metrics_base";}
-		$this->_sql .= "\n$this->_from";
-		$this->_sql .= "\n$this->_where";
-		$this->_sql .= "$this->_and";
-		if (isset($this->_reportFilters)) {$this->_sql .= "$this->_reportFilters";}
-		if (!is_null($this->_groupBy)) {$this->_sql .= "\n$this->_groupBy";}
+		$this->_sql .= "\nFROM\n". implode(",\n", $this->FROM_baseTable);
+		$this->_sql .= "\n$this->WHERE_baseTable";
+		if (isset($this->filters_baseTable)) {$this->_sql .= "$this->filters_baseTable";}
+		$this->_sql .= "\n$this->GROUPBY_baseTable";
 		// dd($this->_sql);
         // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
 		$sql = "CREATE TEMPORARY TABLE decisyon_cache.W_AP_base_$this->reportId ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
