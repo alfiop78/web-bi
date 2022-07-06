@@ -252,7 +252,7 @@ class Queries {
 			}			
 		} else {
 			// debugger;
-			this.#filters.set(value.token, value.SQL);
+			this.#filters.set(value.token, {SQL : value.SQL});
 		}
 		console.log('this.#filters : ', this.#filters);
 	}
