@@ -143,6 +143,22 @@ class MapDatabaseController extends Controller
             // TODO: 2022-05-06 qui occorre una verifica più approfondita sui filtri contenuti nella metrica, allo stato attuale faccio una query per ogni metrica filtrata, anche se i filtri all'interno della metrica sono uguali. Includere più metriche che contengono gli stessi filtri in un unica query
             if (property_exists($cube, 'filteredMetrics')) {
                 $q->filteredMetrics = $cube->{'filteredMetrics'};
+                // $test = (array) $cube->{'filteredMetrics'};
+                // dd($test);
+                $q->groupMetricFiltered = {};
+                $token = "group_".bin2hex(random_bytes(6));
+                foreach ($q->filteredMetrics as $metric) {
+                    if (count($q->groupMetricFiltered) === 0) $q->groupMetricFiltered[$token] = [$metric];
+                    // dd($metric->filters, $q->groupMetricFiltered[$token]->filters);
+                    if ($metric->filters === $q->groupMetricFiltered[$token]->filters) {
+                        // dd("filtri uguali");
+                        $q->groupMetricFiltered[$token] = [$metric];
+                    }
+                }
+                dd($q->groupMetricFiltered);
+                // TODO: verifico quali, tra le metriche filtrate, contengono gli stessi filtri. Le metriche che contengono gli stessi filtri vanno eseguite in un unica query
+                
+                dd($q->groupMetricFiltered);
                 $metricTable = $q->createMetricDatamarts();
             }
             // echo 'elaborazione createDatamart';
