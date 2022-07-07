@@ -86,13 +86,19 @@ class Cube {
 		*/
 	}
 
+	private function setFromMetricTable($from) {
+		$this->FROM_metricTable = [];
+		foreach ($from as $table) {
+			if (!in_array($table, $this->FROM_metricTable)) $this->FROM_metricTable[] = $table;
+		 }
+	}
+
 	/*
 	* Utilizzo della stessa logica di FROM
 	* @param joins = "token_join" : ['table.field', 'table.field']
 	*/
-	public function where($joins) {
-		
-		// var_dump($joins);
+	public function where($joins) {		
+		// dd($joins);
 		foreach ($joins as $join) {
 			// var_dump($join);
 			$relation = implode(" = ", $join);
@@ -111,6 +117,15 @@ class Cube {
 		*/
 	}
 
+	private function setWhereMetricTable($joins) {
+		$this->WHERE_metricTable = [];
+		foreach ($joins as $join) {
+			$relation = implode(" = ", $join);
+			// l'aggiungo solo se non esiste già questa relazione, da testare con le metriche filtrate andando a selezionare una metrica contenente un filtro che appartiene a una join già inserita in baseTable
+			if (!in_array($join, $this->WHERE_metricTable)) $this->WHERE_metricTable[] = $relation;
+		}
+	}
+
 	public function filters($filters) {
 		// definisco i filtri del report
 		// dd($filters);
@@ -126,6 +141,17 @@ class Cube {
 			AND Azienda_997.id = 473\n
 			AND DocVenditaDettaglio_560.DataDocumento >= 20220601
 		*/
+	}
+
+	/*
+		aggiungo a $this->filters_metricTable i filtri presenti su una metrica filtrata.
+		Stessa logica del Metodo filters()
+	*/
+	private function setFiltersMetricTable($filters) {
+		$this->filters_metricTable = [];
+		foreach ($filters as $filter) {
+			if (!in_array($filter->SQL, $this->filters_metricTable)) $this->filters_metricTable[] = $filter->SQL;
+		}
 	}
 
 	public function metrics() {
@@ -237,43 +263,49 @@ class Cube {
 	/* creo i datamart necessari per le metriche filtrate */
 	public function createMetricDatamarts() {
 		$i = 1;
-		// foreach ($this->groupMetricsByFilters as $m) {
-			
-		// }
-		foreach ($this->filteredMetrics as $metrics) {
-			// dd($metrics);
-			unset($this->_sql);
-			if ($metrics->metric_type === 3) {
-				// metrica composta a livello cubo filtrata
-				$metric = "\n{$metrics->SQLFunction}({$metrics->field}) AS '{$metrics->alias}'";
-			} else {
-				// metrica filtrata
-				$metric = "\n{$metrics->SQLFunction}({$metrics->tableAlias}.{$metrics->field}) AS '{$metrics->alias}'";
+		$arrayMetrics = [];
+		foreach ($this->groupMetricsByFilters as $groupToken => $m) {
+			// var_dump($m);
+			foreach ($m as $metric) {
+				// dd($metric->token); // TODO: potrei usarlo per il nome della tabella temporanea, al posto dell'indice che non evidenzia quale metrica sto creando
+				unset($this->_sql);
+				if ($metric->metric_type === 3) {
+					// metrica composta a livello cubo filtrata
+					// $metric = "\n{$metrics->SQLFunction}({$metrics->field}) AS '{$metrics->alias}'";
+				} else {
+					// metrica filtrata
+					array_push($arrayMetrics, "{$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}) AS '{$metric->alias}'");
+				}
+				// var_dump($arrayMetrics);
+				$this->_metrics_advanced_datamart[] = "\n{$metric->SQLFunction}(W_AP_metric_{$this->reportId}_{$i}.'{$metric->alias}') AS '{$metric->alias}'";
+				// verifico se sono presenti metriche composte e sostituisco questa metrica all'interno delle metriche composte
+				// echo "verifico compositeMetrics";
+				// dd(property_exists($this, 'compositeMetrics'));
+				if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics("W_AP_metric_{$this->reportId}_{$i}", $metric);
+				// creo il datamart, passo a createMetricTable il nome della tabella temporanea, la metrica e i filtri contenuti nella metrica
+				/* TODO: Non devo AGGIUNGERE FROM, filters e WHERE alla baseTable ma devo creare altre 3 variabili che conterranno FROM, filters e WHERE 
+				* relativi alla metrica in ciclo, altrimenti, nella successiva metrica filtrata mi troverò aggiunte delle 
+				* FROM, filters e WHERE che non appartengono alla metrica in ciclo
+				*/
+				// aggiungo la FROM inclusa nella metrica filtrata alla FROM_baseTable
+				$this->setFromMetricTable($metric->FROM);
+				// dd($this->FROM_baseTable, $this->FROM_metricTable);
+				// aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
+				$this->setFiltersMetricTable($metric->filters);
+				// dd($this->filters_baseTable);
+				// aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
+				if ( property_exists($metric, 'WHERE') ) $this->setWhereMetricTable($metric->WHERE);
+				// dd($this->WHERE_baseTable);
+
+
+				// $this->createMetricTable('W_AP_metric_'.$this->reportId."_".$i, $metric);
+				// TODO: _metricTable ora dovrà riferirsi al gruppo di metriche, questa viene utilizzata nel datamart finale per stabilire la LEFT JOIN
+				$this->_metricTable["W_AP_metric_".$this->reportId."_".$i] = $metric->alias; // memorizzo qui quante tabelle per metriche filtrate sono state create			
+				$i++;
 			}
-			// dd($metric);
-			$this->_metrics_advanced_datamart[] = "\n{$metrics->SQLFunction}(W_AP_metric_{$this->reportId}_{$i}.'{$metrics->alias}') AS '{$metrics->alias}'";
-			// verifico se sono presenti metriche composte e sostituisco questa metrica all'interno delle metriche composte
-			// echo "verifico compositeMetrics";
-			// dd(property_exists($this, 'compositeMetrics'));
-			if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics("W_AP_metric_{$this->reportId}_{$i}", $metrics);
-			// creo il datamart, passo a createMetricTable il nome della tabella temporanea, la metrica e i filtri contenuti nella metrica
-			/* TODO: Non devo AGGIUNGERE FROM, filters e WHERE alla baseTable ma devo creare altre 3 variabili che conterranno FROM, filters e WHERE 
-			* relativi alla metrica in ciclo, altrimenti in questo ciclo, nella successiva metrica filtrata mi troverò aggiunte delle 
-			* FROM, filters e WHERE che non appartengono alla metrica in ciclo
-			*/
-			// aggiungo la FROM inclusa nella metrica filtrata alla FROM_baseTable
-			$this->from($metrics->FROM);
-			// aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
-			$this->filters($metrics->filters);
-			// dd($this->filters_baseTable);
-			// aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
-			if ( property_exists($metrics, 'WHERE') ) $this->where($metrics->WHERE);
-			// dd($this->WHERE_baseTable);
-
-
-			$this->createMetricTable('W_AP_metric_'.$this->reportId."_".$i, $metric);
-			$this->_metricTable["W_AP_metric_".$this->reportId."_".$i] = $metrics->alias; // memorizzo qui quante tabelle per metriche filtrate sono state create			
-			$i++;
+			// dd($arrayMetrics);
+			// TODO: probabilmente qui dovrà fare l'implode dell'array $arrayMetrics, separandole con la virgola, oopure lo faccio in createMetricTable()
+			$this->createMetricTable('W_AP_metric_'.$this->reportId."_".$i, $arrayMetrics);
 		}
 	}
 
@@ -281,18 +313,18 @@ class Cube {
 	/*
 	* @param $metric : SUM(tableAlias.field) AS 'alias'
 	*/
-	private function createMetricTable($tableName, $metric) {
+	private function createMetricTable($tableName, $metrics) {
 		// dd($filters);
 		$this->fromFilteredMetric = NULL;
-		$this->_sql = "{$this->SELECT},{$metric}";
-		$this->_sql .= "\nFROM\n". implode(",\n", $this->FROM_baseTable);
-		$this->_sql .= "\nWHERE\n". implode("\nAND ", $this->WHERE_baseTable);
+		$this->_sql = "{$this->SELECT},\n". implode(",\n", $metrics);
+		$this->_sql .= "\nFROM\n". implode(",\n", array_merge($this->FROM_baseTable, $this->FROM_metricTable));
+		$this->_sql .= "\nWHERE\n". implode("\nAND ", array_merge($this->WHERE_baseTable, $this->WHERE_metricTable));
 		// aggiungo i filtri del report e i filtri contenuti nella metrica
-		$this->_sql .= "\nAND ". implode("\nAND ", $this->filters_baseTable);
+		$this->_sql .= "\nAND ". implode("\nAND ", array_merge($this->filters_baseTable, $this->filters_metricTable));
 		$this->_sql .= "\n$this->groupBy";
-		// dd($this->_sql);
+		dd($this->_sql);
 
-		$sql = "CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
+		$sql = "--creazione tabella per metrica...\nCREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
 		// TODO: eliminare la tabella temporanea come fatto per baseTable
         if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
             // dd('la tabella già esiste, la elimino');
