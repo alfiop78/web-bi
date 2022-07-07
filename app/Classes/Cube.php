@@ -234,11 +234,12 @@ class Cube {
 		return $result;
 	}
 
+	/* creo i datamart necessari per le metriche filtrate */
 	public function createMetricDatamarts() {
-		/* creo i datamart necessari per le metriche filtrate */
 		$i = 1;
-		// dd($this->filteredMetrics);
-		// $metrics_advanced = array();
+		// foreach ($this->groupMetricsByFilters as $m) {
+			
+		// }
 		foreach ($this->filteredMetrics as $metrics) {
 			// dd($metrics);
 			unset($this->_sql);
@@ -256,6 +257,10 @@ class Cube {
 			// dd(property_exists($this, 'compositeMetrics'));
 			if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics("W_AP_metric_{$this->reportId}_{$i}", $metrics);
 			// creo il datamart, passo a createMetricTable il nome della tabella temporanea, la metrica e i filtri contenuti nella metrica
+			/* TODO: Non devo AGGIUNGERE FROM, filters e WHERE alla baseTable ma devo creare altre 3 variabili che conterranno FROM, filters e WHERE 
+			* relativi alla metrica in ciclo, altrimenti in questo ciclo, nella successiva metrica filtrata mi troverò aggiunte delle 
+			* FROM, filters e WHERE che non appartengono alla metrica in ciclo
+			*/
 			// aggiungo la FROM inclusa nella metrica filtrata alla FROM_baseTable
 			$this->from($metrics->FROM);
 			// aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
@@ -264,6 +269,8 @@ class Cube {
 			// aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
 			if ( property_exists($metrics, 'WHERE') ) $this->where($metrics->WHERE);
 			// dd($this->WHERE_baseTable);
+
+
 			$this->createMetricTable('W_AP_metric_'.$this->reportId."_".$i, $metric);
 			$this->_metricTable["W_AP_metric_".$this->reportId."_".$i] = $metrics->alias; // memorizzo qui quante tabelle per metriche filtrate sono state create			
 			$i++;

@@ -143,22 +143,30 @@ class MapDatabaseController extends Controller
             // TODO: 2022-05-06 qui occorre una verifica più approfondita sui filtri contenuti nella metrica, allo stato attuale faccio una query per ogni metrica filtrata, anche se i filtri all'interno della metrica sono uguali. Includere più metriche che contengono gli stessi filtri in un unica query
             if (property_exists($cube, 'filteredMetrics')) {
                 $q->filteredMetrics = $cube->{'filteredMetrics'};
-                // $test = (array) $cube->{'filteredMetrics'};
-                // dd($test);
-                $q->groupMetricFiltered = {};
-                $token = "group_".bin2hex(random_bytes(6));
+                // verifico quali, tra le metriche filtrate, contengono gli stessi filtri. Le metriche che contengono gli stessi filtri vanno eseguite in un unica query
+                // oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
+                $q->groupMetricsByFilters = (object)[];
+                $metrics = [];
+                $groupToken = "group_".bin2hex(random_bytes(6));
                 foreach ($q->filteredMetrics as $metric) {
-                    if (count($q->groupMetricFiltered) === 0) $q->groupMetricFiltered[$token] = [$metric];
-                    // dd($metric->filters, $q->groupMetricFiltered[$token]->filters);
-                    if ($metric->filters === $q->groupMetricFiltered[$token]->filters) {
-                        // dd("filtri uguali");
-                        $q->groupMetricFiltered[$token] = [$metric];
+                    if ( empty(get_object_vars($q->groupMetricsByFilters)) ) {
+                        array_push($metrics, $metric);                        
+                    } else {
+                        foreach ($metrics as $m) {
+                            if ( (get_object_vars($metric->filters) == get_object_vars($m->filters)) ) {
+                                array_push($metrics, $metric);
+                            } else {
+                                // è un gruppo diverso da quello già esistente, quindi creo un nuovo token (il token del gruppo)
+                                $groupToken = "group_".bin2hex(random_bytes(6));
+                                // reimposto l'array altrimenti inserisco in questo gruppo anche gli elementi che sono già stati aggiunti ad altri gruppi
+                                $metrics = [];
+                                array_push($metrics, $metric);
+                            }
+                        }
                     }
+                    $q->groupMetricsByFilters->$groupToken = $metrics;
                 }
-                dd($q->groupMetricFiltered);
-                // TODO: verifico quali, tra le metriche filtrate, contengono gli stessi filtri. Le metriche che contengono gli stessi filtri vanno eseguite in un unica query
-                
-                dd($q->groupMetricFiltered);
+                // dd($q->groupMetricsByFilters);
                 $metricTable = $q->createMetricDatamarts();
             }
             // echo 'elaborazione createDatamart';

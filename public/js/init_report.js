@@ -2172,7 +2172,10 @@ var StorageMetric = new MetricStorage();
 	}
 
 	app.setFilteredMetrics = () => {
-		debugger;
+		// debugger;
+		let map = new Map();
+		const rand = () => Math.random(0).toString(36).substr(2);
+		let groupToken = rand().substr(0, 21);
 		document.querySelectorAll("#ul-exist-metrics .selectable[data-selected][data-metric-type='2']").forEach( metricRef => {
 			StorageMetric.selected = metricRef.dataset.metricToken;
 			let object = {
@@ -2187,8 +2190,7 @@ var StorageMetric = new MetricStorage();
 			};
 			let FROM = new Map(), WHERE = new Map(), filters = new Map();
 			// debugger;
-			// controllo se è una metrica con filtri
-			// metrica filtrata, verifico se i filtri inclusi nella metrica, sono di un livello dimensionale oppure del cubo
+			// verifico se i filtri inclusi nella metrica, sono di un livello dimensionale oppure del cubo
 			StorageMetric.selected.formula.filters.forEach( filterToken => {
 				StorageFilter.selected = filterToken;
 				filters.set(filterToken, {SQL : `${StorageFilter.selected.tableAlias}.${StorageFilter.selected.formula}`});
@@ -2217,12 +2219,14 @@ var StorageMetric = new MetricStorage();
 					StorageCube.selected = StorageFilter.selected.cubeToken;
 					FROM.set(StorageCube.selected.alias, `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${StorageCube.selected.alias}`);
 				}
-
 				object.FROM = Object.fromEntries(FROM);
 				if (WHERE.size !== 0) object.WHERE = Object.fromEntries(WHERE);
 				object.filters = Object.fromEntries(filters);
 			});				
 			Query.addFilteredMetric = object;
+			// raggruppo le metriche che contengono gli stessi filtri
+				
+			// console.log('map : ', map);
 		});
 	}
 
@@ -2250,6 +2254,7 @@ var StorageMetric = new MetricStorage();
 		app.setMetrics();
 		// FROM per le metriche
 		app.setFilteredMetrics();
+		debugger;
 
 
 		// il datamart sarà creato come FX_processId
