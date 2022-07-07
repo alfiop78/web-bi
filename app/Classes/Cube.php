@@ -262,9 +262,9 @@ class Cube {
 
 	/* creo i datamart necessari per le metriche filtrate */
 	public function createMetricDatamarts() {
-		$i = 1;
-		$arrayMetrics = [];
 		foreach ($this->groupMetricsByFilters as $groupToken => $m) {
+			$arrayMetrics = [];
+			$tableName = "MX_{$this->reportId}_{$groupToken}";
 			// var_dump($m);
 			foreach ($m as $metric) {
 				// dd($metric->token); // TODO: potrei usarlo per il nome della tabella temporanea, al posto dell'indice che non evidenzia quale metrica sto creando
@@ -274,19 +274,13 @@ class Cube {
 					// $metric = "\n{$metrics->SQLFunction}({$metrics->field}) AS '{$metrics->alias}'";
 				} else {
 					// metrica filtrata
-					array_push($arrayMetrics, "{$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}) AS '{$metric->alias}'");
+					$arrayMetrics[$metric->alias] = "{$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}) AS '{$metric->alias}'";
 				}
 				// var_dump($arrayMetrics);
-				$this->_metrics_advanced_datamart[] = "\n{$metric->SQLFunction}(W_AP_metric_{$this->reportId}_{$i}.'{$metric->alias}') AS '{$metric->alias}'";
+                // _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
+				$this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\n{$metric->SQLFunction}($tableName.'{$metric->alias}') AS '{$metric->alias}'";
 				// verifico se sono presenti metriche composte e sostituisco questa metrica all'interno delle metriche composte
-				// echo "verifico compositeMetrics";
-				// dd(property_exists($this, 'compositeMetrics'));
-				if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics("W_AP_metric_{$this->reportId}_{$i}", $metric);
-				// creo il datamart, passo a createMetricTable il nome della tabella temporanea, la metrica e i filtri contenuti nella metrica
-				/* TODO: Non devo AGGIUNGERE FROM, filters e WHERE alla baseTable ma devo creare altre 3 variabili che conterranno FROM, filters e WHERE 
-				* relativi alla metrica in ciclo, altrimenti, nella successiva metrica filtrata mi troverò aggiunte delle 
-				* FROM, filters e WHERE che non appartengono alla metrica in ciclo
-				*/
+				if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($tableName, $metric);
 				// aggiungo la FROM inclusa nella metrica filtrata alla FROM_baseTable
 				$this->setFromMetricTable($metric->FROM);
 				// dd($this->FROM_baseTable, $this->FROM_metricTable);
@@ -296,16 +290,11 @@ class Cube {
 				// aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
 				if ( property_exists($metric, 'WHERE') ) $this->setWhereMetricTable($metric->WHERE);
 				// dd($this->WHERE_baseTable);
-
-
-				// $this->createMetricTable('W_AP_metric_'.$this->reportId."_".$i, $metric);
-				// TODO: _metricTable ora dovrà riferirsi al gruppo di metriche, questa viene utilizzata nel datamart finale per stabilire la LEFT JOIN
-				$this->_metricTable["W_AP_metric_".$this->reportId."_".$i] = $metric->alias; // memorizzo qui quante tabelle per metriche filtrate sono state create			
-				$i++;
 			}
 			// dd($arrayMetrics);
-			// TODO: probabilmente qui dovrà fare l'implode dell'array $arrayMetrics, separandole con la virgola, oopure lo faccio in createMetricTable()
-			$this->createMetricTable('W_AP_metric_'.$this->reportId."_".$i, $arrayMetrics);
+			// dd($this->_metrics_advanced_datamart);
+            // creo il datamart, passo a createMetricTable il nome della tabella temporanea e l'array di metriche che lo compongono
+			$this->createMetricTable($tableName, $arrayMetrics);
 		}
 	}
 
@@ -322,10 +311,11 @@ class Cube {
 		// aggiungo i filtri del report e i filtri contenuti nella metrica
 		$this->_sql .= "\nAND ". implode("\nAND ", array_merge($this->filters_baseTable, $this->filters_metricTable));
 		$this->_sql .= "\n$this->groupBy";
-		dd($this->_sql);
+		// dd($this->_sql);
 
-		$sql = "--creazione tabella per metrica...\nCREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
+		$sql = "/*creazione tabella per :\n".implode("\n", array_keys($metrics))."\n*/\nCREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
 		// TODO: eliminare la tabella temporanea come fatto per baseTable
+		// dd($sql);
         if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
             // dd('la tabella già esiste, la elimino');
             $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
@@ -357,29 +347,30 @@ class Cube {
 		foreach ($this->_fields as $field) {
 			$table_fields[] = "\n$this->baseTable.$field";
 		}
-		$this->_fieldsSQL = implode(", ", $table_fields);
-		if (!is_null($this->_metricTable)) {
+		$this->_fieldsSQL = implode(",", $table_fields);
+		if (!is_null($this->_metrics_advanced_datamart)) {
+			// _metrics_advanced_datamart : "\n{$metric->SQLFunction}($tableName.'{$metric->alias}') AS '{$metric->alias}'"
 			// sono presenti metriche filtrate
 			$sql = "CREATE TABLE $this->datamartName INCLUDE SCHEMA PRIVILEGES AS ";			
-			$sql .= "\n(SELECT {$this->_fieldsSQL}";
+			$sql .= "\n(SELECT{$this->_fieldsSQL}";
+			$leftJoin = null;
+
 			if (property_exists($this, 'baseMetrics')) $sql .= ", $this->_metrics_base_datamart";
 			if (property_exists($this, 'filteredMetrics')) {
-				$sql .= ",";
-				$sql .= implode(", ", $this->_metrics_advanced_datamart);
-			}
-			$leftJoin = null;
-			$ONClause = array();
-			$ONConditions = NULL;
-			foreach ($this->_metricTable as $metricTableName => $alias) {
-				$leftJoin .= "\nLEFT JOIN\ndecisyon_cache.$metricTableName\nON ";
-				foreach ($this->_columns as $columnAlias) {
-					// carattere backtick con ALTGR+'
-					// creo : ON W_AP_base_3.sede = W_AP_metric_3_1.sede
-					$ONClause[] = "{$this->baseTable}.{$columnAlias} = {$metricTableName}.{$columnAlias}";
+                $ONClause = array();
+                $ONConditions = NULL;
+				foreach ($this->_metrics_advanced_datamart as $tn => $aliasM) {
+					$sql .= ",". implode(",", $aliasM);
+					$leftJoin .= "\nLEFT JOIN\ndecisyon_cache.$tn\nON ";
+					foreach ($this->_columns as $columnAlias) {
+						// carattere backtick con ALTGR+'
+						// creo : ON W_AP_base_3.sede = W_AP_metric_3_1.sede
+						$ONClause[] = "{$this->baseTable}.{$columnAlias} = {$tn}.{$columnAlias}";
+					}
+					$ONConditions = implode("\nAND ", $ONClause);
+					unset($ONClause);
+					$leftJoin .= $ONConditions;
 				}
-				$ONConditions = implode("\nAND ", $ONClause);
-				unset($ONClause);
-				$leftJoin .= $ONConditions;
 			}
 			/*
 				QUERY CHE GENERA IL DATAMART
