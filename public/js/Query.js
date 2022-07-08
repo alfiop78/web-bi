@@ -21,6 +21,7 @@ class Queries {
 	#elementFilters = new Map();
 	#elementMetrics = new Map();
 	#reportProcess = {};
+    #SQLProcess = {};
 	#objects = new Map();
 	#cubes = new Set();
 	#dimensions = new Set();
@@ -356,6 +357,45 @@ class Queries {
 			return (values.alias.toLowerCase() === alias.toLowerCase()) ? true : false;
 		}
 	}
+
+    SQLProcess(name) {
+        this.reportElements = {};
+		const rand = () => Math.random(0).toString(36).substr(2);
+		// se il token non è definito sto salvando un nuovo report e quindi lo definisco qui, altrimenti sto editando un report che ha già un proprio token e processId
+		if (this.#token === 0) {
+			this.#token = rand().substr(0, 21);
+			this.#processId = Date.now();
+		}
+		this.#SQLProcess.type = 'PROCESS';
+		this.#SQLProcess.token = this.#token;
+		this.reportElements.processId = this.#processId; // questo creerà il datamart FX[processId]
+		this.#SQLProcess.name = name;
+        this.reportElements.select = Object.fromEntries(this.select);
+		this.#elementReport.set('columns', Object.fromEntries(this.select));
+		this.reportElements.from = this.FROM;
+		this.reportElements.where = this.WHERE;
+
+		if (this.filters.size > 0) this.reportElements.filters = Object.fromEntries(this.filters);
+		if (this.metrics.size > 0) {
+			this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
+			this.reportElements.metrics = Object.fromEntries(this.#metrics);
+		}
+		if (this.compositeMetrics.size > 0) {
+			this.#elementReport.set('compositeMetrics', Object.fromEntries(this.compositeMetrics));
+			this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
+		}
+		if (this.filteredMetrics.size > 0) {
+			this.#elementReport.set('filteredMetrics', Object.fromEntries(this.filteredMetrics));
+			this.reportElements.filteredMetrics = Object.fromEntries(this.filteredMetrics);
+		}
+
+		// this.editElements = Object.fromEntries(this.elementReport);
+		this.#SQLProcess.report = this.reportElements;
+		// this.#reportProcess.edit = this.editElements;
+		console.info(this.#SQLProcess);
+    }
+
+    getSQLProcess() {return this.#SQLProcess;}
 
 	save(name) {
 		this.reportElements = {};

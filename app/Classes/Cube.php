@@ -229,7 +229,7 @@ class Cube {
 		// dd($this->_composite_sql_formula);
 	}
 
-	public function baseTable() {
+	public function baseTable($mode) {
 		// creo una TEMP_TABLE su cui, successivamente andrò a fare una LEFT JOIN con le TEMP_TABLE contenenti le metriche
 		$this->_sql = $this->SELECT;
 		// se ci sono metriche a livello di report le aggiungo
@@ -237,34 +237,37 @@ class Cube {
 		if (!is_null($this->_metrics_base)) {$this->_sql .= ", $this->_metrics_base";}
 		$this->_sql .= "\nFROM\n". implode(",\n", $this->FROM_baseTable);
 		$this->_sql .= "\nWHERE\n". implode("\nAND ", $this->WHERE_baseTable);
-		if (isset($this->filters_baseTable)) $this->_sql .= "\nAND ". implode("\nAND ", $this->filters_baseTable);
+		if (count($this->filters_baseTable) ) $this->_sql .= "\nAND ". implode("\nAND ", $this->filters_baseTable);
 		$this->_sql .= "\n$this->groupBy";
 		// dd($this->_sql);
         // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
-		$sql = "CREATE TEMPORARY TABLE decisyon_cache.W_AP_base_$this->reportId ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
+		$sql = "CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTable} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
 		// $result = DB::connection('vertica_odbc')->raw($sql);
         // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
         /* il metodo getSchemaBuilder() funziona con mysql, non con vertica. Ho creato MyVerticaGrammar.php dove c'è la sintassi corretta per vertica (solo alcuni Metodi ho modificato) */
-
-        if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable('W_AP_base_'.$this->reportId)) {
-            // dd('la tabella già esiste, la elimino');
-            $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.W_AP_base_$this->reportId;");
-            if (!$drop) {
-            	// null : tabella eliminata, ricreo la tabella temporanea
-				$result = DB::connection('vertica_odbc')->statement($sql);            	
-            }
+        if ($mode === 'sql') {
+        	$result = $sql;
         } else {
-        	$result = DB::connection('vertica_odbc')->statement($sql);
-            // dd('la tabella non esiste');
+        	if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($this->baseTable)) {
+	            // dd('la tabella già esiste, la elimino');
+	            $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.{$this->baseTable};");
+	            if (!$drop) {
+	            	// null : tabella eliminata, ricreo la tabella temporanea
+					$result = DB::connection('vertica_odbc')->statement($sql);            	
+	            }
+	        } else {
+	        	$result = DB::connection('vertica_odbc')->statement($sql);
+	            // dd('la tabella non esiste');
+	        }
         }
 		return $result;
 	}
 
 	/* creo i datamart necessari per le metriche filtrate */
-	public function createMetricDatamarts() {
+	public function createMetricDatamarts($mode) {
 		foreach ($this->groupMetricsByFilters as $groupToken => $m) {
 			$arrayMetrics = [];
-			$tableName = "MX_{$this->reportId}_{$groupToken}";
+			$tableName = "WEB_BI_TEMP_METRIC_{$this->reportId}_{$groupToken}";
 			// var_dump($m);
 			foreach ($m as $metric) {
 				// dd($metric->token); // TODO: potrei usarlo per il nome della tabella temporanea, al posto dell'indice che non evidenzia quale metrica sto creando
@@ -294,7 +297,11 @@ class Cube {
 			// dd($arrayMetrics);
 			// dd($this->_metrics_advanced_datamart);
             // creo il datamart, passo a createMetricTable il nome della tabella temporanea e l'array di metriche che lo compongono
-			$this->createMetricTable($tableName, $arrayMetrics);
+			if ($mode === 'sql') {
+				return $this->createMetricTable($tableName, $arrayMetrics, $mode);
+			} else {
+				$this->createMetricTable($tableName, $arrayMetrics, null);
+			}
 		}
 	}
 
@@ -302,7 +309,7 @@ class Cube {
 	/*
 	* @param $metric : SUM(tableAlias.field) AS 'alias'
 	*/
-	private function createMetricTable($tableName, $metrics) {
+	private function createMetricTable($tableName, $metrics, $mode) {
 		// dd($filters);
 		$this->fromFilteredMetric = NULL;
 		$this->_sql = "{$this->SELECT},\n". implode(",\n", $metrics);
@@ -316,17 +323,21 @@ class Cube {
 		$sql = "/*creazione tabella per :\n".implode("\n", array_keys($metrics))."\n*/\nCREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
 		// TODO: eliminare la tabella temporanea come fatto per baseTable
 		// dd($sql);
-        if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
-            // dd('la tabella già esiste, la elimino');
-            $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
-            if (!$drop) {
-            	// null : tabella eliminata, ricreo la tabella temporanea
-				$result = DB::connection('vertica_odbc')->statement($sql);
-            }
-        } else {
-        	$result = DB::connection('vertica_odbc')->statement($sql);
-            // dd('la tabella non esiste');
-        }
+		if ($mode === 'sql') {
+			$result = $sql;
+		} else {
+			if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
+	            // dd('la tabella già esiste, la elimino');
+	            $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
+	            if (!$drop) {
+	            	// null : tabella eliminata, ricreo la tabella temporanea
+					$result = DB::connection('vertica_odbc')->statement($sql);
+	            }
+	        } else {
+	        	$result = DB::connection('vertica_odbc')->statement($sql);
+	            // dd('la tabella non esiste');
+	        }
+		}
         /* vecchio metodo, senza MyVerticaGrammar.php
         $table = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='$tableName' AND SCHEMA_NAME='decisyon_cache';");
         // dd($tables);
@@ -336,7 +347,7 @@ class Cube {
 	}
 
 	// creo il datamart finale, mettendo insieme, base table con metric table (LEFT JOIN)
-	public function createDatamart() {
+	public function createDatamart($mode) {
 		$table = "FX_$this->reportId";
 		//verifico se esistono metriche composte
 		// dd($this->compositeMetrics);
@@ -351,7 +362,7 @@ class Cube {
 		if (!is_null($this->_metrics_advanced_datamart)) {
 			// _metrics_advanced_datamart : "\n{$metric->SQLFunction}($tableName.'{$metric->alias}') AS '{$metric->alias}'"
 			// sono presenti metriche filtrate
-			$sql = "CREATE TABLE $this->datamartName INCLUDE SCHEMA PRIVILEGES AS ";			
+			$sql = "/*Creazione DATAMART finale :\n{$this->datamartName}\n*/\nCREATE TABLE $this->datamartName INCLUDE SCHEMA PRIVILEGES AS ";			
 			$sql .= "\n(SELECT{$this->_fieldsSQL}";
 			$leftJoin = null;
 
@@ -416,42 +427,46 @@ class Cube {
 			$s .= "\nFROM decisyon_cache.$this->baseTable";
 			$s .= "\nGROUP BY $this->_fieldsSQL";
 			// dd($s);
-			$sql = "CREATE TABLE $this->datamartName INCLUDE SCHEMA PRIVILEGES AS\n($s);";
+			$sql = "/*Creazione DATAMART finale :\n{$this->datamartName}\n*/\nCREATE TABLE $this->datamartName INCLUDE SCHEMA PRIVILEGES AS\n($s);";
 		}
 		// dd($sql);
 		/* vecchio metodo, prima di MyVerticaGrammar.php
         $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_$this->reportId' AND SCHEMA_NAME='decisyon_cache';");
         // dd($FX);
         if ($FX) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.FX_$this->reportId;");*/
-        if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($table)) {
-            // dd('la tabella già esiste, la elimino');
-            $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$table;");
-            if (!$drop) {
-            	// null : tabella eliminata, ricreo la tabella temporanea
-				$result = DB::connection('vertica_odbc')->statement($sql);
-            } else {
-            	dd("Errore : tabella non eliminata");
-            }
+        if ($mode === 'sql') {
+        	return $sql;
         } else {
-        	$result = DB::connection('vertica_odbc')->statement($sql);
-            // dd('la tabella non esiste');
-        }
+        	if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($table)) {
+	            // dd('la tabella già esiste, la elimino');
+	            $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$table;");
+	            if (!$drop) {
+	            	// null : tabella eliminata, ricreo la tabella temporanea
+					$result = DB::connection('vertica_odbc')->statement($sql);
+	            } else {
+	            	dd("Errore : tabella non eliminata");
+	            }
+	        } else {
+	        	$result = DB::connection('vertica_odbc')->statement($sql);
+	            // dd('la tabella non esiste');
+	        }
 
-		if (!$result) {
-			$dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTable;");
-			// TODO: elimino le tabelle temporanee delle metriche filtrate
-			// se sono state create anche tabelle con metriche filtrate le elimino
-			// echo "tabelle temporanee da eliminare";
-			if ($this->_metricTable) {
-				foreach ($this->_metricTable as $tempTable => $metric) {
-					// dd($tempTable);
-					$dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tempTable;");
+			if (!$result) {
+				$dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTable;");
+				// TODO: elimino le tabelle temporanee delle metriche filtrate
+				// se sono state create anche tabelle con metriche filtrate le elimino
+				// echo "tabelle temporanee da eliminare";
+				if ($this->_metricTable) {
+					foreach ($this->_metricTable as $tempTable => $metric) {
+						// dd($tempTable);
+						$dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tempTable;");
+					}
 				}
+				// dd($this->_metricTable);
+				// ritorno il nome della FX in modo da poter mostrare un anteprima dei dati
+				return $this->datamartName;
 			}
-			// dd($this->_metricTable);
-			// ritorno il nome della FX in modo da poter mostrare un anteprima dei dati
-			return $this->datamartName;
-		}
+        }
 	}
 
 } // End Class

@@ -24,6 +24,7 @@ class VerifyCsrfToken extends Middleware
         '/fetch_api/json/metric_store',
         '/fetch_api/json/dimension_store',
         '/fetch_api/json/filter_store',
-        '/fetch_api/cube/process'
+        '/fetch_api/cube/process',
+        '/fetch_api/cube/sqlInfo'
     ];
 }

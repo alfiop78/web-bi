@@ -27,6 +27,20 @@
 	</head>
 	<body>
 
+        <dialog id="dialog-sqlInfo" class="large-dialog">
+            <section class="dialog-sections">
+				<h4>INFO SQL</h4>
+
+				<div class="stepLayout overflow-y">
+                    <section id="SQL"></section>
+				</div>
+
+				<div class="dialog-buttons">
+					<button type="button" name="cancel" class="md-button">chiudi</button>
+				</div>
+			</section>
+        </dialog>
+
 		<dialog id="dialog-column" class="small-dialog">
 			<section class="dialog-sections">
 				<h4>Seleziona le colonne da includere nel report</h4>

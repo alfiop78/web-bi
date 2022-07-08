@@ -25,12 +25,14 @@ var StorageMetric = new MetricStorage();
 		btnPreviousStep : document.getElementById('prev'),
 		btnNextStep : document.getElementById('next'),
 		btnSaveAndProcess: document.getElementById('saveAndProcess'),
+        btnSQLProcess : document.getElementById('sql_process'),
 		btnSearchValue : document.getElementById('search-field-values'),
 
 		btnProcessReport: document.getElementById('btnProcessReport'), // apre la lista dei report da processare "Crea FX"
 
 		// dialog
 		dialogSaveReport: document.getElementById('dialog-save-report'),
+		dialogSQLInfo : document.getElementById('dialog-sqlInfo'),
 		dialogFilter: document.getElementById('dialog-filter'),
 		dialogMetricFilter : document.getElementById('dialog-metric-filter'),
 		dialogColumns: document.getElementById('dialog-column'),
@@ -354,6 +356,15 @@ var StorageMetric = new MetricStorage();
 				smallCube.innerText = value.name;
 				ul.appendChild(section);
 			});
+		}
+	}
+
+	// verifico se ci sono object selezionati per poter attivare/disattivare alcuni tasti
+	app.checkObjectSelected = () => {
+		if (Query.objects.size > 0) {
+			app.btnSQLProcess.disabled = false;
+		} else {
+			app.btnSQLProcess.disabled = true;
 		}
 	}
 
@@ -975,7 +986,7 @@ var StorageMetric = new MetricStorage();
 			// delete filter
 			Query.filters = { token : e.currentTarget.dataset.filterToken, SQL : `${e.currentTarget.dataset.tableAlias}.${StorageFilter.selected.formula}` };
 			// TODO: probabilmente serve solo il token in fase di deselezione
-			Query.objects = {token : e.currentTarget.dataset.filterToken};			
+			Query.objects = {token : e.currentTarget.dataset.filterToken};
 		} else {
 			e.currentTarget.toggleAttribute('data-selected');
 			// recupero dallo storage il filtro selezionato
@@ -1003,6 +1014,7 @@ var StorageMetric = new MetricStorage();
 			// console.log(StorageFilter.selected.formula);
 			// nel salvare il filtro nel report attuale devo impostarne anche l'alias della tabella selezionata nella dialog
 			Query.filters = { token : e.currentTarget.dataset.filterToken, SQL : `${e.currentTarget.dataset.tableAlias}.${StorageFilter.selected.formula}` };
+			app.checkObjectSelected();
 		}
 	}
 
@@ -1136,6 +1148,7 @@ var StorageMetric = new MetricStorage();
 					break;
 			}
 		}
+		app.checkObjectSelected();
 	}
 
 	// selezione di una metrica per la creazione di una metrica composta
@@ -2271,6 +2284,58 @@ var StorageMetric = new MetricStorage();
 		app.dialogSaveReport.close();
 	}
 
+    // visualizzo in una dialog l'SQL della baseTable e delle metricTable
+    app.btnSQLProcess.onclick = async () => {
+        const name = document.getElementById('reportName').value;
+        app.setFrom();
+
+		// imposto la factJoin che è presente solo sulla dimensione
+		document.querySelectorAll('#ul-dimensions .selectable[data-include-query]').forEach( dimension => {
+			StorageDimension.selected = dimension.dataset.dimensionToken;
+			// per ogni dimensione con includeQuery recupero le join con il cubo
+			for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
+				// debugger;
+				for (const [token, join] of Object.entries(joins)) {
+					Query.WHERE = {token, join};
+				}
+			}
+		});
+		// imposto la FROM per gli elementi del cubo/i selezionati
+		document.querySelectorAll("#ul-cubes section:not([hidden]) .selectable[data-include-query]").forEach( cubeRef => {
+			Query.FROM = {tableAlias : cubeRef.dataset.tableAlias, SQL : `${cubeRef.dataset.schema}.${cubeRef.dataset.tableName} AS ${cubeRef.dataset.tableAlias}`};
+		});
+
+		app.setMetrics();
+		// FROM per le metriche
+		app.setFilteredMetrics();
+        Query.SQLProcess(name);
+		const params = JSON.stringify(Query.getSQLProcess().report);
+        const url = "/fetch_api/cube/sqlInfo";
+		const init = {headers: {'Content-Type': 'application/json'}, method: 'POST', body: params};
+		const req = new Request(url, init);
+		await fetch(req)
+			.then((response) => {
+				// TODO: Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
+				if (!response.ok) {throw Error(response.statusText);}
+				return response;
+			})
+			.then((response) => response.text())
+			.then((response) => {
+				if (response) {
+					// console.log(response);
+					app.dialogSQLInfo.showModal();
+					document.getElementById('SQL').innerHTML = response;
+					App.showConsole('SQL generato!', 'done', 5000);
+				} else {
+					App.showConsole('Errori nella creazione del datamart', 'error', 5000);
+				}
+			})
+			.catch( err => {
+				App.showConsole(err, 'error');
+				console.error(err);
+			});
+    }
+
 	// apro la dialog-metric-filter
 	app.btnSetMetricFilter.onclick = () => {
 		// popolo la <ul>
@@ -2479,6 +2544,7 @@ var StorageMetric = new MetricStorage();
 		document.querySelector("#ul-columns .selectable[data-token-column='" + Query.columnToken + "']").toggleAttribute('data-selected');
 		// in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
 		app.dialogColumns.close();
+		app.checkObjectSelected();
 	}
 
 	// save column : salvataggio di una colonna del report

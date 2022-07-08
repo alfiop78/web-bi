@@ -69,6 +69,7 @@ section[data-versioning-elements]{display: flex; flex-direction: column; positio
 /*abs-popup-dialog*/
 
 .stepLayout{display: grid;}
+.stepLayout.overflow-y{overflow-y: auto;}
 #dialog-composite-metric .stepLayout{grid-template-columns: 25% calc(75% - 1%); grid-column-gap: 1%; height: inherit;margin: 0 2em;}
 
 .stepLayout .sectionLists{height: inherit;}
