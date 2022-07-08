@@ -367,8 +367,10 @@
 
 						<div class="actions">
 							<div class="buttons">
+								<button type="button" id="btnNewReport" class="button-icon material-icons-round md-24" tooltip="Nuovo Report" flow="bottom">add</button>
 								<button type="button" id="btnProcessReport" class="button-icon material-icons-round md-24" tooltip="Crea datamart" flow="bottom">table_rows</button>
 								<button type="button" id="save" class="button-icon material-icons-round md-24" tooltip="Salva Report" flow="bottom" disabled>save</button>
+								<button type="button" id="btnTempReport" class="button-icon material-icons-round md-24" tooltip="Report temporanei" flow="bottom">snippet_folder</button>
 								<button type="button" id="sql_process" class="button-icon material-icons-round md-24" tooltip="Visualizza SQL" flow="bottom" disabled>info</button>
 							</div>
 						</div>
@@ -520,6 +522,16 @@
 								</div>
 								<div class="relative-ul">
 									<ul id="ul-processes" class="absolute"></ul>
+								</div>
+							</div>
+
+                            <div class="absList large-list" id="reportTempProcessList" hidden>
+                                <div class="md-field">
+									<input type="search" id="searchTempReport" data-element-search="search-temp-report" value="" autocomplete="off" />
+									<label for="searchTempReport" class="">Ricerca</label>
+								</div>
+								<div class="relative-ul">
+									<ul id="ul-temp-processes" class="absolute"></ul>
 								</div>
 							</div>
 

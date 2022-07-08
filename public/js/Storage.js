@@ -7,6 +7,7 @@ class Storages {
 	#filtersMap = new Map();
 	#metricsMap = new Map();
 	#processesMap = new Map();
+	#processesTempMap = new Map();
 	#cubes = new Set();
 	#metrics = new Set();
 	#filters = new Set();
@@ -73,6 +74,14 @@ class Storages {
 			this.#processesMap.set(key, value);
 		}
 		return this.#processesMap;
+	}
+
+    get tempProcesses() {
+		this.storageK = '_temp_';
+		for ( const [key, value] of Object.entries(this.st)) {
+			this.#processesTempMap.set(key, value);
+		}
+		return this.#processesTempMap;
 	}
 
 	// viene invocata da init_versioning.js

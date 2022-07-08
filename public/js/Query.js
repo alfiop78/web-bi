@@ -6,8 +6,6 @@ class Queries {
 	#schema;
 	#column;
 	#firstTable = {}; // la prima tabella della gerarchia, da qui posso ottenere la from e la join
-	#joinId;
-	#where = {};
 	#compositeMetrics = new Map();
 	#compositeBaseMetric;
 	#filters = new Map();
@@ -26,17 +24,14 @@ class Queries {
 	#cubes = new Set();
 	#dimensions = new Set();
 	// #dims = new Map();
-	#factJoin = {};
 	#processId = 0;
 	#token = 0;
 	#FROM = new Map();
-	#FROMFilteredMetric = new Map();
 	#WHERE = new Map();
-	// #hier = new Map();
-	// #hierarchiesTableId = new Map();
+    #editObjects = {};
 	constructor() {
-		this._fromSet = new Set();
-		this._where = {};
+        const rand = () => Math.random(0).toString(36).substr(2);
+        this.token = rand().substr(0, 21);
 	}
 
 	set objects(object) {
@@ -47,48 +42,31 @@ class Queries {
 		document.querySelectorAll("*[data-include-query]").forEach( tableRef => delete tableRef.dataset.includeQuery);
 		for ( const [key, value] of Query.objects ) {
 			if (value.hasOwnProperty('hierToken')) {
-				document.querySelector("#ul-dimensions .selectable[data-dimension-token='"+value.dimension+"']").dataset.includeQuery = true;
+				document.querySelector("#ul-dimensions .selectable[data-dimension-token='"+value.dimension+"']").dataset.includeQuery = 'true';
 				const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+value.hierToken+"']");
 				// converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
 				[...hier.querySelectorAll("small")].filter( (table, index) => index >= value.tableId).forEach( tableRef => {
-					tableRef.dataset.includeQuery = true;
+					tableRef.dataset.includeQuery = 'true';
 				});
 			} else {
 				// elementi del cubo
 				document.querySelectorAll("#ul-cubes .selectable[data-cube-token='"+value.cubeToken+"']").forEach( tableRef => tableRef.dataset.includeQuery = true);
 			}
 		}
-		
-		// memorizzo il valore minimo tra i tableId selezionati di questa gerarchia
-		// console.log(Math.min(...this.#hier.get(object.hierToken).values()));
-		// let minTableId = Math.min(...this.#hier.get(object.hierToken).values());
-		
-		// this.#hierarchiesTableId.set(object.hierToken, Math.min(...this.#hier.get(object.hierToken).values()));
-		// this.defineFrom();
-		// console.log(Math.min(...this.#hier.get(object.hierToken).values()));
-
-		// this.setFrom();
-		/*if (!this.#FROM.has(object.hierToken)) {
-			// questa gerarchia non è ancora inclusa
-			// verifico il tableId selezionato. Se è < di quello già presente lo aggiungo altrimenti no
-			this.#FROM.set(object.hierToken, { tableId : object.tableId, token : object.token, join : object.hier.from.filter( (from, index) => index >= object.tableId) });
-		} else {
-			debugger;
-			if ( object.tableId <= this.#FROM.get(object.hierToken).tableId ) {
-				if (object.token === this.#FROM.get(object.hierToken).token) {
-					delete this.#FROM.get(object.hierToken).tableId;
-					delete this.#FROM.get(object.hierToken).token;
-					delete this.#FROM.get(object.hierToken).join;					
-				} else {
-					this.#FROM.set(object.hierToken, { tableId : object.tableId, token : object.token, join : object.hier.from.filter( (from, index) => index >= object.tableId) });
-				}
-			}
-		}
-		console.log('#FROM : ', this.#FROM);*/
-		// this.setFrom();
 	}
 
 	get objects() {return this.#objects;}
+
+    save_temp() {
+        this.#editObjects.cubes = [...this.cubes];
+        this.#editObjects.dimensions = [...this.dimensions];
+        this.#editObjects.columns = Object.fromEntries(this.select);
+        this.#editObjects.filters = Object.fromEntries(this.filters);
+        this.#editObjects.token = this.token;
+        this.#editObjects.type = '_temp_';
+        console.log(this.#editObjects);
+        window.localStorage.setItem(`_temp_${this.token}`, JSON.stringify(this.#editObjects));
+    }
 
 	set FROM(object) {
 		this.#FROM.set(object.tableAlias, object.SQL);
@@ -96,7 +74,6 @@ class Queries {
 	}
 
 	get FROM() {return Object.fromEntries(this.#FROM);}
-
 
 	set WHERE(object) {
 		this.#WHERE.set(object.token, object.join);
@@ -121,15 +98,6 @@ class Queries {
 
 	get dimensions() {return this.#dimensions;}
 
-	/*temp() {
-		this.#objects.set('cubes', [...this.cubes]);
-		this.#objects.set('dimensions', [...this.dimensions]);
-		console.log('this.#objects : ', this.#objects);
-		const rand = () => Math.random(0).toString(36).substr(2);
-		this.#token = rand().substr(0, 21);
-		window.localStorage.setItem(`_temp_${this.#token}`, JSON.stringify(Object.fromEntries(this.#objects)));
-	}*/
-
 	set processId(value) {
 		this.#processId = value;
 	}
@@ -138,6 +106,7 @@ class Queries {
 
 	set token(value) {
 		this.#token = value;
+        console.log(this.#token);
 	}
 
 	get token() {return this.#token;}
@@ -172,89 +141,17 @@ class Queries {
 
 	get tables() {return this.#firstTable;}
 
-	deleteFrom(tableName) {
-		this._fromSet.delete(tableName);
-		console.log('_from : ', this._fromSet);
-	}
-
-	set columnName(value) {this.#column = value;}
-
-	get columnName() {return this.#column;}
-
 	set select(value) {
-		if (this.#columns.has(value.token)) {
-			this.#columns.delete(value.token);
-		} else {
-			this.#columns.set(value.token, value);
-		}
+		(this.#columns.has(value.token)) ? this.#columns.delete(value.token) : this.#columns.set(value.token, value);
+        this.save_temp();
 		console.log('select : ', this.#columns);
 	}
 
 	get select() {return this.#columns;}
 
-	getAliasColumn() {
-		return this.#select[this.#table][this._field]['alias'];
-	}
-
-	set joinId(value) {this.#joinId = value;}
-
-	get joinId() {return this.#joinId;}
-
-	set where(join) {
-		// console.log('join : ', join);
-		// debugger;
-		if (Object.keys(join).length > 1) {
-			for (const [key, value] of Object.entries(join)) {
-				this.#where[key] = value;	
-			}
-		} else {
-			// console.log('key : ', Object.keys(join));
-			// let test = Object.keys(this._where).length;
-			// this._where[test] = join;
-			this.#where[Object.keys(join)] = join[Object.keys(join)];
-			// this.#where.set(Object.keys(join), join);
-			// this.#whereSet.add(join);
-			// this._where[this.#joinId] = join;
-			// console.log('where : ', this._where);
-		}
-		// console.log('#where : ', this.#where);
-	}
-
-	deleteWhere() {
-		debugger;
-		delete this._where[this.#joinId];
-		console.log('where : ', this._where);	
-	}
-
-	get where() {return this.#where;}
-
-	set factJoin(dimension) {
-		// console.log('dimName : ', dimension.name);
-		// TODO: utilizzare oggetto Map()
-		this.#factJoin[dimension.token] = dimension.cubes;
-		// this._fatcRelation viene salvato nel processo in save()
-		console.log('fact join : ', this.#factJoin);
-	}
-
-	get factJoin() {this.#factJoin;}
-
-	deleteFactRelation(token) {
-		// debugger;
-		delete this.#factJoin[token];
-		console.log('_factRelation : ', this.#factJoin);
-	}
-
 	set filters(value) {
-		if (this.#filters.has(value.token)) {
-			// debugger;
-			if (value.SQL === this.#filters.get(value.token)) {
-				// se anche il contenuto del filtro è uguale a quello già presente allora è stato deselzionato e quindi posso eliminarlo dal Map
-				this.#filters.delete(value.token);
-			}			
-		} else {
-			// debugger;
-			this.#filters.set(value.token, {SQL : value.SQL});
-		}
+        (!this.#filters.has(value.token)) ? this.#filters.set(value.token, {SQL : `${value.tableAlias}.${value.formula}`}) : this.#filters.delete(value.token);
+        this.save_temp();
 		console.log('this.#filters : ', this.#filters);
 	}
 
@@ -400,14 +297,14 @@ class Queries {
 	save(name) {
 		this.reportElements = {};
 		this.editElements = {};
-		const rand = () => Math.random(0).toString(36).substr(2);
+		// const rand = () => Math.random(0).toString(36).substr(2);
 		// se il token non è definito sto salvando un nuovo report e quindi lo definisco qui, altrimenti sto editando un report che ha già un proprio token e processId
-		if (this.#token === 0) {
+		/*if (this.#token === 0) {
 			this.#token = rand().substr(0, 21);
 			this.#processId = Date.now();
-		}
+		}*/
 		this.#reportProcess.type = 'PROCESS';
-		this.#reportProcess.token = this.#token;
+		this.#reportProcess.token = this.token;
 		this.reportElements.processId = this.#processId; // questo creerà il datamart FX[processId]
 		this.#reportProcess.name = name;
 		const date = new Date();
@@ -421,8 +318,6 @@ class Queries {
 		this.#elementReport.set('columns', Object.fromEntries(this.select));
 		this.reportElements.from = this.FROM;
 		this.reportElements.where = this.WHERE;
-		// this.reportElements.where = this.#where;
-		// this.reportElements.factJoin = this.factJoin;
 
 		if (this.filters.size > 0) this.reportElements.filters = Object.fromEntries(this.filters);
 		if (this.metrics.size > 0) {
@@ -444,7 +339,7 @@ class Queries {
 		console.info(this.#reportProcess);
 		debugger;
 		window.localStorage.setItem(this.#token, JSON.stringify(this.#reportProcess));
-        console.info(`${name} salvato nello storage con token : ${this.token}`);
+        console.info(`${name} salvato nello storage con token : ${this.#token}`);
 	}
 
 	get process() {return this.#reportProcess;}
