@@ -733,7 +733,15 @@ var StorageMetric = new MetricStorage();
             app.showDimensionObjects();
         });
         // colonne
-        StorageProcess.selected.colu
+        for (const [token, column] of Object.entries(StorageProcess.selected.columns)) {
+//            Query.select = { field: Query.field, SQLReport: textarea, alias : alias.value };
+            document.querySelector("#ul-columns .selectable[data-token-column='"+token+"']").dataset.selected= 'true';
+            Query.field = column.field;
+            // reimposto la colonna come quando viene selezionata
+            Query.select = column;
+        }
+        // filtri
+
 
         const listReportProcess = document.getElementById('reportTempProcessList');
 		listReportProcess.toggleAttribute('hidden');
