@@ -621,7 +621,6 @@ var StorageMetric = new MetricStorage();
 				const content = app.tmplList.content.cloneNode(true);
 				const section = content.querySelector('section[data-sublist-available-metrics]');
 				const div = section.querySelector('div.selectable');
-				const spanHContent = div.querySelector('.h-content');
 				const span = div.querySelector('span[metric]');
 				const small = div.querySelector('small');
 				section.dataset.relatedObject = 'cube';
@@ -639,7 +638,7 @@ var StorageMetric = new MetricStorage();
 				span.innerText = name;
 				small.innerText = value.FACT;
 				ul.appendChild(section);
-			};
+			}
 		}
 	}
 
@@ -647,7 +646,6 @@ var StorageMetric = new MetricStorage();
  	app.handlerReportSelected = async (e) => {
 		console.clear();
 		const processToken = e.currentTarget.dataset.processToken;
-		const reportId = +e.currentTarget.dataset.id;
 		let jsonDataParsed = JSON.parse(window.localStorage.getItem(processToken));
 		console.dir(jsonDataParsed.report);
 		// invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
@@ -961,7 +959,7 @@ var StorageMetric = new MetricStorage();
 	// selezione di un filtro già presente, lo salvo nell'oggetto Query
 	app.handlerFilterSelected = (e) => {
 		StorageFilter.selected = e.currentTarget.dataset.filterToken;
-		let hier, hierToken;
+		let hierToken;
 		// i filtri impostati su un livello dimensionale hanno l'attr data-hier-token
 		if (e.currentTarget.hasAttribute('data-hier-token')) {
 			hierToken = e.currentTarget.dataset.hierToken;
@@ -1299,6 +1297,7 @@ var StorageMetric = new MetricStorage();
 				// baseFormula contiene la mappatura fatta su DB (es. : [prezzo, *, quantita])
 				let baseFormula = StorageCube.selected.metrics[e.currentTarget.dataset.label].formula;
 				// per ogni metrica presente nella baseFormula ...
+                // NOTE: utilizzo di map()
 				const newFormula = baseFormula.map(formulaElement => {
 					// ...vado a modificare l'elemento dell'array che è contenuto nella formula, generando l'array newFormula : [DocVenditaDettaglio_444.prezzo, *, DocVenditaDettaglio_444.quantita]
 					return (fields.includes(formulaElement)) ? `${e.currentTarget.dataset.tableAlias}.${formulaElement}` : formulaElement;
@@ -2173,9 +2172,7 @@ var StorageMetric = new MetricStorage();
 
 	app.setFilteredMetrics = () => {
 		// debugger;
-		let map = new Map();
 		const rand = () => Math.random(0).toString(36).substr(2);
-		let groupToken = rand().substr(0, 21);
 		document.querySelectorAll("#ul-exist-metrics .selectable[data-selected][data-metric-type='2']").forEach( metricRef => {
 			StorageMetric.selected = metricRef.dataset.metricToken;
 			let object = {
@@ -2224,9 +2221,6 @@ var StorageMetric = new MetricStorage();
 				object.filters = Object.fromEntries(filters);
 			});				
 			Query.addFilteredMetric = object;
-			// raggruppo le metriche che contengono gli stessi filtri
-				
-			// console.log('map : ', map);
 		});
 	}
 
@@ -2392,7 +2386,7 @@ var StorageMetric = new MetricStorage();
 	app.checkDialogCompositeMetric = (check) => {
 		const name = document.getElementById('composite-metric-name').value;
 		const alias = document.getElementById('composite-alias-metric').value;
-		app.btnCompositeMetricSave.disabled = ((name.length !== 0) && (alias.length !== 0) || !check) ? false : true;
+		app.btnCompositeMetricSave.disabled = (!((name.length !== 0) && (alias.length !== 0) || !check));
 	}
 
 	// hide hierarchy struct
