@@ -1,35 +1,21 @@
 class Queries {
-	#select;
 	#table;
 	#columnToken;
 	#tableAlias;
 	#schema;
-	#column;
-	#firstTable = {}; // la prima tabella della gerarchia, da qui posso ottenere la from e la join
 	#compositeMetrics = new Map();
-	#compositeBaseMetric;
 	#filters = new Map();
 	#metrics = new Map();
 	#filteredMetrics = new Map();
 	#columns = new Map();
-	#elementReport = new Map();
-	#elementCubes = new Map();
-	#elementDimensions = new Map();
-	#elementHierarchies = new Map();
-	#elementFilters = new Map();
-	#elementMetrics = new Map();
 	#reportProcess = {};
     #SQLProcess = {};
 	#objects = new Map();
 	#cubes = new Set();
 	#dimensions = new Set();
-	// #processId = 0;
-	#token = 0;
 	#FROM = new Map();
 	#WHERE = new Map();
-	constructor() {
-
-	}
+	constructor() {}
 
 	set objects(object) {
 		// debugger;
@@ -61,8 +47,6 @@ class Queries {
         this.object.columns = Object.fromEntries(this.select);
         this.object.filters = [...this.filters.keys()];
         this.object.metrics = [...this.metrics.keys()];
-//        this.object.filters = Object.fromEntries(this.filters);
-        console.log(this.object);
         return this.object;
     }
 
@@ -83,7 +67,6 @@ class Queries {
 	set cubes(token) {
 		( !this.#cubes.has(token) ) ? this.#cubes.add(token) : this.#cubes.delete(token);		
 		console.log('#cubes : ', this.#cubes);
-		// this.temp();
 	}
 
 	get cubes() {return this.#cubes;}
@@ -91,17 +74,9 @@ class Queries {
 	set dimensions(token) {
 		( !this.#dimensions.has(token) ) ? this.#dimensions.add(token) : this.#dimensions.delete(token);		
 		console.log('#dimensions : ', this.#dimensions);
-		// this.temp();
 	}
 
 	get dimensions() {return this.#dimensions;}
-
-	/*set token(value) {
-		this.#token = value;
-        console.log(this.#token);
-	}
-
-	get token() {return this.#token;}*/
 
 	set table(value) {this.#table = value;}
 
@@ -131,8 +106,6 @@ class Queries {
 
 	get fieldType() {return this._fieldType;}
 
-	get tables() {return this.#firstTable;}
-
 	set select(value) {
 		(this.#columns.has(value.token)) ? this.#columns.delete(value.token) : this.#columns.set(value.token, value);
 		console.log('select : ', this.#columns);
@@ -147,40 +120,25 @@ class Queries {
 
 	get filters() {return this.#filters};
 
-	set addMetric(value) {
+	set metric(value) {
 		// value = {sqlFunction: "SUM", field: "NettoRiga", metricName: "netto riga", distinct: false, alias: "Venduto"}
-		if (!this.#metrics.has(value.token)) this.#metrics.set(value.token, value);
+        (!this.#metrics.has(value.token)) ? this.#metrics.set(value.token, value) : this.#metrics.delete(value.token);
 		console.log('metrics : ', this.#metrics);
 	}
 
 	get metrics() {return this.#metrics;}
 
-	set removeMetric(token) {
-		if (this.#metrics.has(token)) this.#metrics.delete(token);
-		console.log('metrics : ', this.#metrics);
-	}
-
-	set addFilteredMetric(value) {
-		if (!this.#filteredMetrics.has(value.token)) this.#filteredMetrics.set(value.token, value);
+	set filteredMetric(value) {
+		(!this.#filteredMetrics.has(value.token)) ? this.#filteredMetrics.set(value.token, value) : this.#filteredMetrics.delete(value.token);
 		console.log('this.#filteredMetrics : ', this.#filteredMetrics);
 	}
 
 	get filteredMetrics() {return this.#filteredMetrics;}
 
-	set removeFilteredMetric(token) {
-		if (this.#filteredMetrics.has(token)) this.#filteredMetrics.delete(token);
-	}
-
-	set addCompositeMetric(value) {
-		if (!this.#compositeMetrics.has(value.token)) this.#compositeMetrics.set(value.token, value);
+	set compositeMetric(value) {
+        (!this.#compositeMetrics.has(value.token)) ? this.#compositeMetrics.set(value.token, value) : this.#compositeMetrics.delete(value.token);
 		console.log('this.#compositeMetrics : ', this.#compositeMetrics);
 	}
-
-	set removeCompositeMetric(token) {
-		if (this.#compositeMetrics.has(token)) this.#compositeMetrics.delete(token);
-		console.log('this.#compositeMetrics : ', this.#compositeMetrics);
-	}
-
 	get compositeMetrics() {return this.#compositeMetrics;}
 
 	checkColumnAlias(alias) {
@@ -203,25 +161,12 @@ class Queries {
 		this.reportElements.processId = this.processId; // questo creerà il datamart FX[processId]
 		this.#SQLProcess.name = name;
         this.reportElements.select = Object.fromEntries(this.select);
-		//this.#elementReport.set('columns', Object.fromEntries(this.select));
 		this.reportElements.from = this.FROM;
 		this.reportElements.where = this.WHERE;
-
 		if (this.filters.size > 0) this.reportElements.filters = Object.fromEntries(this.filters);
-		if (this.metrics.size > 0) {
-			//this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
-			this.reportElements.metrics = Object.fromEntries(this.#metrics);
-		}
-		if (this.compositeMetrics.size > 0) {
-			//this.#elementReport.set('compositeMetrics', Object.fromEntries(this.compositeMetrics));
-			this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
-		}
-		if (this.filteredMetrics.size > 0) {
-			//this.#elementReport.set('filteredMetrics', Object.fromEntries(this.filteredMetrics));
-			this.reportElements.filteredMetrics = Object.fromEntries(this.filteredMetrics);
-		}
-
-		// this.editElements = Object.fromEntries(this.elementReport);
+		if (this.metrics.size > 0) this.reportElements.metrics = Object.fromEntries(this.#metrics);
+		if (this.compositeMetrics.size > 0) this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
+		if (this.filteredMetrics.size > 0) this.reportElements.filteredMetrics = Object.fromEntries(this.filteredMetrics);
 		this.#SQLProcess.report = this.reportElements;
 		console.info(this.#SQLProcess);
     }
@@ -247,18 +192,9 @@ class Queries {
 		this.reportElements.where = this.WHERE;
 
 		if (this.filters.size > 0) this.reportElements.filters = Object.fromEntries(this.filters);
-		if (this.metrics.size > 0) {
-			//this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
-			this.reportElements.metrics = Object.fromEntries(this.#metrics);
-		}
-		if (this.compositeMetrics.size > 0) {
-			//this.#elementReport.set('compositeMetrics', Object.fromEntries(this.compositeMetrics));
-			this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
-		}
-		if (this.filteredMetrics.size > 0) {
-			//this.#elementReport.set('filteredMetrics', Object.fromEntries(this.filteredMetrics));
-			this.reportElements.filteredMetrics = Object.fromEntries(this.filteredMetrics);
-		}
+		if (this.metrics.size > 0) this.reportElements.metrics = Object.fromEntries(this.#metrics);
+		if (this.compositeMetrics.size > 0) this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
+		if (this.filteredMetrics.size > 0) this.reportElements.filteredMetrics = Object.fromEntries(this.filteredMetrics);
 		
 		// this.editElements = Object.fromEntries(this.elementReport);
 		this.#reportProcess.report = this.reportElements;
