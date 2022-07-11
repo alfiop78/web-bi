@@ -1418,6 +1418,7 @@ var StorageMetric = new MetricStorage();
 		section.dataset.label = StorageMetric.selected.name; // ricerca
 		// section.dataset.cubeToken = cubeToken;
 		selectable.dataset.metricToken = StorageMetric.selected.token;
+        selectable.dataset.metricType = StorageMetric.selected.metric_type;
 		// selectable.dataset.tableName = value.FACT;
 		// selectable.dataset.tableAlias = value.alias;
 		// selectable.dataset.cubeToken = cubeToken;
@@ -2012,7 +2013,7 @@ var StorageMetric = new MetricStorage();
     app.setCompositeMetrics = () => {
         // Siccome le metriche composte contengono le metriche "base"/"filtrate" vanno aggiunte anche queste all'elaborazione di baseTable() (metriche base) oppure metricTable() (metriche filtrate)
         // metriche composte selezionate
-        document.querySelectorAll("#ul-exist-metrics .selectable[data-selected][data-metric-type='4']").forEach( metricRef => {
+        document.querySelectorAll("#ul-exist-composite-metrics .selectable[data-selected][data-metric-type='4']").forEach( metricRef => {
             StorageMetric.selected = metricRef.dataset.metricToken;
             // ottengo le metriche inserite nella composta
             for (const [name, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
@@ -2029,8 +2030,8 @@ var StorageMetric = new MetricStorage();
                         field : StorageMetric.selected.formula.field,
                         distinct : StorageMetric.selected.formula.distinct,
                         alias : StorageMetric.selected.formula.alias,
-                        table : Query.table,
-                        tableAlias : Query.tableAlias
+                        table : StorageMetric.selected.table,
+                        tableAlias : StorageMetric.selected.tableAlias
                     } :
                     Query.metric = {
                         token : metric.token,
@@ -2039,16 +2040,16 @@ var StorageMetric = new MetricStorage();
                         field : StorageMetric.selected.formula.field,
                         distinct : StorageMetric.selected.formula.distinct,
                         alias : StorageMetric.selected.formula.alias,
-                        table : Query.table,
-                        tableAlias : Query.tableAlias
+                        table : StorageMetric.selected.table,
+                        tableAlias : StorageMetric.selected.tableAlias
                     };
             }
             // reimposto la metrica selezionata
-            StorageMetric.selected = e.currentTarget.dataset.metricToken;
+            StorageMetric.selected = metricRef.dataset.metricToken;
             // aggiungo alle metriche selezionate per il report
             debugger;
             Query.compositeMetric = {
-                token : e.currentTarget.dataset.metricToken,
+                token : metricRef.dataset.metricToken,
                 name : StorageMetric.selected.name,
                 formula : StorageMetric.selected.formula
             };
