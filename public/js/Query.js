@@ -23,15 +23,12 @@ class Queries {
 	#objects = new Map();
 	#cubes = new Set();
 	#dimensions = new Set();
-	// #dims = new Map();
-	#processId = 0;
+	// #processId = 0;
 	#token = 0;
 	#FROM = new Map();
 	#WHERE = new Map();
-    #editObjects = {};
 	constructor() {
-        const rand = () => Math.random(0).toString(36).substr(2);
-        this.token = rand().substr(0, 21);
+
 	}
 
 	set objects(object) {
@@ -57,15 +54,16 @@ class Queries {
 
 	get objects() {return this.#objects;}
 
-    save_temp() {
-        this.#editObjects.cubes = [...this.cubes];
-        this.#editObjects.dimensions = [...this.dimensions];
-        this.#editObjects.columns = Object.fromEntries(this.select);
-        this.#editObjects.filters = Object.fromEntries(this.filters);
-        this.#editObjects.token = this.token;
-        this.#editObjects.type = '_temp_';
-        console.log(this.#editObjects);
-        window.localStorage.setItem(`_temp_${this.token}`, JSON.stringify(this.#editObjects));
+    editObjects() {
+        this.object = {};
+        this.object.cubes = [...this.cubes];
+        this.object.dimensions = [...this.dimensions];
+        this.object.columns = Object.fromEntries(this.select);
+        this.object.filters = [...this.filters.keys()];
+        this.object.metrics = [...this.metrics.keys()];
+//        this.object.filters = Object.fromEntries(this.filters);
+        console.log(this.object);
+        return this.object;
     }
 
 	set FROM(object) {
@@ -98,18 +96,12 @@ class Queries {
 
 	get dimensions() {return this.#dimensions;}
 
-	set processId(value) {
-		this.#processId = value;
-	}
-
-	get processId() {return this.#processId;}
-
-	set token(value) {
+	/*set token(value) {
 		this.#token = value;
         console.log(this.#token);
 	}
 
-	get token() {return this.#token;}
+	get token() {return this.#token;}*/
 
 	set table(value) {this.#table = value;}
 
@@ -143,7 +135,6 @@ class Queries {
 
 	set select(value) {
 		(this.#columns.has(value.token)) ? this.#columns.delete(value.token) : this.#columns.set(value.token, value);
-        this.save_temp();
 		console.log('select : ', this.#columns);
 	}
 
@@ -151,7 +142,6 @@ class Queries {
 
 	set filters(value) {
         (!this.#filters.has(value.token)) ? this.#filters.set(value.token, {SQL : `${value.tableAlias}.${value.formula}`}) : this.#filters.delete(value.token);
-        this.save_temp();
 		console.log('this.#filters : ', this.#filters);
 	}
 
@@ -193,55 +183,6 @@ class Queries {
 
 	get compositeMetrics() {return this.#compositeMetrics;}
 
-	set elementCube(value) {
-		// se l'elemento esiste lo elimino altrimenti lo aggiungo al Map
-		(this.#elementCubes.has(value.token)) ? this.#elementCubes.delete(value.token) : this.#elementCubes.set(value.token, value);
-		console.log('this.#elementCube : ', this.#elementCubes);
-	}
-
-	get elementCube() {return this.#elementCubes;}
-
-	set elementDimension(value) {
-		// se l'elemento esiste lo elimino altrimenti lo aggiungo al Map
-		(this.#elementDimensions.has(value.token)) ? this.#elementDimensions.delete(value.token) : this.#elementDimensions.set(value.token, value);
-		console.log('this.#elementDimension : ', this.#elementDimensions);
-	}
-
-	get elementDimension() {return this.#elementDimensions;}
-
-	set elementHierarchy(value) {
-		(this.#elementHierarchies.has(value.token)) ? this.#elementHierarchies.delete(value.token) : this.#elementHierarchies.set(value.token, value);
-		// this.#elementDimension.set(value.token, [...this.#elementHierarchies]);
-		// (this.#elementHierarchies.has(value.name)) ? this.#elementHierarchies.delete(value.name) : this.#elementHierarchies.add(value.name);
-		console.log('this.#elementDimension : ', this.#elementHierarchies);
-		// console.log('this.#elementHierarchies : ', this.#elementHierarchies);
-	}
-
-	get elementHierarchy() {return this.#elementHierarchies;}
-
-	set elementColumn(value) {
-
-	}
-
-	get elementColumn() {}
-
-	set elementFilter(value) {
-		(this.#elementFilters.has(value.token)) ?
-			this.#elementFilters.delete(value.token) : this.#elementFilters.set(value.token, value);
-		console.log('this.#elementFilters : ', this.#elementFilters);
-	}
-
-	get elementFilter() {return this.#elementFilters;}
-
-	get elementReport() {
-		this.#elementReport.set('cubes', Object.fromEntries(this.elementCube));
-		this.#elementReport.set('dimensions', Object.fromEntries(this.elementDimension));
-		this.#elementReport.set('hierarchies', Object.fromEntries(this.elementHierarchy));
-		this.#elementReport.set('filters', Object.fromEntries(this.elementFilter));
-		console.log('this.#elementReport : ', this.#elementReport);
-		return this.#elementReport;
-	}
-
 	checkColumnAlias(alias) {
 		for ( const values of this.select.values() ) {
 			return (values.alias.toLowerCase() === alias.toLowerCase()) ? true : false;
@@ -257,38 +198,31 @@ class Queries {
 
     SQLProcess(name) {
         this.reportElements = {};
-		const rand = () => Math.random(0).toString(36).substr(2);
-		// se il token non è definito sto salvando un nuovo report e quindi lo definisco qui, altrimenti sto editando un report che ha già un proprio token e processId
-		if (this.#token === 0) {
-			this.#token = rand().substr(0, 21);
-			this.#processId = Date.now();
-		}
 		this.#SQLProcess.type = 'PROCESS';
-		this.#SQLProcess.token = this.#token;
-		this.reportElements.processId = this.#processId; // questo creerà il datamart FX[processId]
+		this.#SQLProcess.token = this.token;
+		this.reportElements.processId = this.processId; // questo creerà il datamart FX[processId]
 		this.#SQLProcess.name = name;
         this.reportElements.select = Object.fromEntries(this.select);
-		this.#elementReport.set('columns', Object.fromEntries(this.select));
+		//this.#elementReport.set('columns', Object.fromEntries(this.select));
 		this.reportElements.from = this.FROM;
 		this.reportElements.where = this.WHERE;
 
 		if (this.filters.size > 0) this.reportElements.filters = Object.fromEntries(this.filters);
 		if (this.metrics.size > 0) {
-			this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
+			//this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
 			this.reportElements.metrics = Object.fromEntries(this.#metrics);
 		}
 		if (this.compositeMetrics.size > 0) {
-			this.#elementReport.set('compositeMetrics', Object.fromEntries(this.compositeMetrics));
+			//this.#elementReport.set('compositeMetrics', Object.fromEntries(this.compositeMetrics));
 			this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
 		}
 		if (this.filteredMetrics.size > 0) {
-			this.#elementReport.set('filteredMetrics', Object.fromEntries(this.filteredMetrics));
+			//this.#elementReport.set('filteredMetrics', Object.fromEntries(this.filteredMetrics));
 			this.reportElements.filteredMetrics = Object.fromEntries(this.filteredMetrics);
 		}
 
 		// this.editElements = Object.fromEntries(this.elementReport);
 		this.#SQLProcess.report = this.reportElements;
-		// this.#reportProcess.edit = this.editElements;
 		console.info(this.#SQLProcess);
     }
 
@@ -296,16 +230,9 @@ class Queries {
 
 	save(name) {
 		this.reportElements = {};
-		this.editElements = {};
-		// const rand = () => Math.random(0).toString(36).substr(2);
-		// se il token non è definito sto salvando un nuovo report e quindi lo definisco qui, altrimenti sto editando un report che ha già un proprio token e processId
-		/*if (this.#token === 0) {
-			this.#token = rand().substr(0, 21);
-			this.#processId = Date.now();
-		}*/
 		this.#reportProcess.type = 'PROCESS';
 		this.#reportProcess.token = this.token;
-		this.reportElements.processId = this.#processId; // questo creerà il datamart FX[processId]
+		this.reportElements.processId = this.processId; // questo creerà il datamart FX[processId]
 		this.#reportProcess.name = name;
 		const date = new Date();
 		// const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
@@ -315,31 +242,31 @@ class Queries {
 		this.#reportProcess.updated_at = date.toLocaleDateString('it-IT', options);
 
 		this.reportElements.select = Object.fromEntries(this.select);
-		this.#elementReport.set('columns', Object.fromEntries(this.select));
+		//this.#elementReport.set('columns', Object.fromEntries(this.select));
 		this.reportElements.from = this.FROM;
 		this.reportElements.where = this.WHERE;
 
 		if (this.filters.size > 0) this.reportElements.filters = Object.fromEntries(this.filters);
 		if (this.metrics.size > 0) {
-			this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
+			//this.#elementReport.set('metrics', Object.fromEntries(this.metrics));
 			this.reportElements.metrics = Object.fromEntries(this.#metrics);
 		}
 		if (this.compositeMetrics.size > 0) {
-			this.#elementReport.set('compositeMetrics', Object.fromEntries(this.compositeMetrics));
+			//this.#elementReport.set('compositeMetrics', Object.fromEntries(this.compositeMetrics));
 			this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
 		}
 		if (this.filteredMetrics.size > 0) {
-			this.#elementReport.set('filteredMetrics', Object.fromEntries(this.filteredMetrics));
+			//this.#elementReport.set('filteredMetrics', Object.fromEntries(this.filteredMetrics));
 			this.reportElements.filteredMetrics = Object.fromEntries(this.filteredMetrics);
 		}
 		
 		// this.editElements = Object.fromEntries(this.elementReport);
 		this.#reportProcess.report = this.reportElements;
-		// this.#reportProcess.edit = this.editElements;
+		this.#reportProcess.edit = this.editObjects();
 		console.info(this.#reportProcess);
 		debugger;
-		window.localStorage.setItem(this.#token, JSON.stringify(this.#reportProcess));
-        console.info(`${name} salvato nello storage con token : ${this.#token}`);
+		window.localStorage.setItem(this.token, JSON.stringify(this.#reportProcess));
+        console.info(`${name} salvato nello storage con token : ${this.token}`);
 	}
 
 	get process() {return this.#reportProcess;}
