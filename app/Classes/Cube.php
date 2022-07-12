@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\DB;
 class Cube {
 	private $SELECT, $_fields = array(), $_fieldsSQL, $_columns = array(), $_compositeMetrics, $_compositeTables, $_sql, $_metricTable;
 	private $FROM_baseTable = array();
+    private $FROM_metricTable = array();
+    private $WHERE_metricTable = array();
 	private $WHERE_baseTable = array();
 	private $groupBy;
 	private $filters_baseTable = array();
@@ -87,10 +89,11 @@ class Cube {
 	}
 
 	private function setFromMetricTable($from) {
-		$this->FROM_metricTable = [];
+        $this->FROM_metricTable = array();
 		foreach ($from as $table) {
-			if (!in_array($table, $this->FROM_metricTable)) $this->FROM_metricTable[] = $table;
+            if ( (!in_array($table, $this->FROM_metricTable)) && (!in_array($table, $this->FROM_baseTable)) ) $this->FROM_metricTable[] = $table;
 		 }
+        //dd($this->FROM_baseTable, $this->FROM_metricTable);
 	}
 
 	/*
@@ -118,7 +121,7 @@ class Cube {
 	}
 
 	private function setWhereMetricTable($joins) {
-		$this->WHERE_metricTable = [];
+        $this->WHERE_metricTable = array();
 		foreach ($joins as $join) {
 			$relation = implode(" = ", $join);
 			// l'aggiungo solo se non esiste già questa relazione, da testare con le metriche filtrate andando a selezionare una metrica contenente un filtro che appartiene a una join già inserita in baseTable
@@ -273,7 +276,7 @@ class Cube {
 				// dd($metric->token); // TODO: potrei usarlo per il nome della tabella temporanea, al posto dell'indice che non evidenzia quale metrica sto creando
 				unset($this->_sql);
 				if ($metric->metric_type === 3) {
-					// metrica composta a livello cubo filtrata
+					// TODO: metrica composta a livello cubo filtrata
 					// $metric = "\n{$metrics->SQLFunction}({$metrics->field}) AS '{$metrics->alias}'";
 				} else {
 					// metrica filtrata
@@ -314,13 +317,18 @@ class Cube {
 		$this->fromFilteredMetric = NULL;
 		$this->_sql = "{$this->SELECT},\n". implode(",\n", $metrics);
 		$this->_sql .= "\nFROM\n". implode(",\n", array_merge($this->FROM_baseTable, $this->FROM_metricTable));
-		$this->_sql .= "\nWHERE\n". implode("\nAND ", array_merge($this->WHERE_baseTable, $this->WHERE_metricTable));
+        // in alcuni casi, come ad esempio le metriche filtrate che hanno dei filtri sulla FACT, non è presente la prop 'WHERE'
+        if (count($this->WHERE_metricTable) !== 0) {
+            $this->_sql .= "\nWHERE\n". implode("\nAND ", array_merge($this->WHERE_baseTable, $this->WHERE_metricTable));
+        } else {
+            $this->_sql .= "\nWHERE\n". implode("\nAND ", $this->WHERE_baseTable);
+        }
 		// aggiungo i filtri del report e i filtri contenuti nella metrica
 		$this->_sql .= "\nAND ". implode("\nAND ", array_merge($this->filters_baseTable, $this->filters_metricTable));
 		$this->_sql .= "\n$this->groupBy";
 		// dd($this->_sql);
 
-		$sql = "/*creazione tabella per :\n".implode("\n", array_keys($metrics))."\n*/\nCREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
+		$sql = "/*\nCreazione tabella per :\n".implode("\n", array_keys($metrics))."\n*/\nCREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
 		// TODO: eliminare la tabella temporanea come fatto per baseTable
 		// dd($sql);
 		if ($mode === 'sql') {

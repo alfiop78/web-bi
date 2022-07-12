@@ -748,16 +748,13 @@ var StorageMetric = new MetricStorage();
                     dimension : StorageFilter.selected.dimensionToken
                 };
             } else {
-                Query.objects = {
-                    token,
-                    cubeToken : StorageFilter.selected.cubeToken
-                };
+                Query.objects = {token, cubeToken : StorageFilter.selected.cubeToken};
             }
         });
         // metriche
         StorageProcess.selected.edit.metrics.forEach( token => {
             StorageMetric.selected = token;
-            // seleziono i filtri impostati nel report
+            // seleziono le metriche (0, 1, 2, 3) impostate nel report
             document.querySelector("#ul-exist-metrics .selectable[data-metric-token='"+token+"']").dataset.selected = 'true';
             Query.objects = {token, cubeToken : StorageMetric.selected.cubeToken};
         });

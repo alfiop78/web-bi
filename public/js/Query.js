@@ -46,7 +46,8 @@ class Queries {
         this.object.dimensions = [...this.dimensions];
         this.object.columns = Object.fromEntries(this.select);
         this.object.filters = [...this.filters.keys()];
-        this.object.metrics = [...this.metrics.keys()];
+        debugger;
+        this.object.metrics = [...this.metrics.keys()].concat([...this.filteredMetrics.keys()]);
         return this.object;
     }
 
