@@ -221,7 +221,7 @@ class Cube {
 			// echo $name;
 			// print_r($metric->metrics_alias);
 			foreach ($metric->formula->metrics_alias as $metricName => $metricAlias) {
-				// la prop 'metrics_alias' : {metric_name : {token : ...., alias : metric_alias}
+                // la prop 'metrics_alias' : {metric_name : {token : ...., alias : metric_alias}
 				if ($metricObject->name === $metricName) {
 					// la metrica passata come argomento è inclusa nella formula della metrica composta
 					foreach ($metric->formula->formula_sql as $key => $sqlItem) {
@@ -297,8 +297,9 @@ class Cube {
 				// var_dump($arrayMetrics);
                 // _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
 				$this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\n{$metric->SQLFunction}($tableName.'{$metric->alias}') AS '{$metric->alias}'";
-				// verifico se sono presenti metriche composte e sostituisco questa metrica all'interno delle metriche composte
-				//if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($tableName, $metric);
+				// verifico se sono presenti metriche composte che contengono metriche filtrate, stessa logica utilizzata per le metriche di base
+				if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($tableName, $metric);
+
 				// aggiungo la FROM inclusa nella metrica filtrata alla FROM_baseTable
 				$this->setFromMetricTable($metric->FROM);
 				// dd($this->FROM_baseTable, $this->FROM_metricTable);

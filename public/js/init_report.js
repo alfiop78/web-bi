@@ -1953,14 +1953,15 @@ var StorageMetric = new MetricStorage();
 		document.querySelectorAll("#ul-exist-metrics .selectable[data-selected][data-metric-type='2']").forEach( metricRef => {
 			StorageMetric.selected = metricRef.dataset.metricToken;
 			let object = {
-				token : metricRef.dataset.metricToken,
-				metric_type : StorageMetric.selected.metric_type,
-				SQLFunction : StorageMetric.selected.formula.SQLFunction,
-				alias : StorageMetric.selected.formula.alias,
-				distinct : StorageMetric.selected.formula.distinct,
-				field : StorageMetric.selected.formula.field,
-				table : StorageMetric.selected.formula.table,
-				tableAlias : StorageMetric.selected.formula.tableAlias
+                token : metricRef.dataset.metricToken,
+                name : StorageMetric.selected.name,
+                metric_type : StorageMetric.selected.metric_type,
+                SQLFunction : StorageMetric.selected.formula.SQLFunction,
+                alias : StorageMetric.selected.formula.alias,
+                distinct : StorageMetric.selected.formula.distinct,
+                field : StorageMetric.selected.formula.field,
+                table : StorageMetric.selected.formula.table,
+                tableAlias : StorageMetric.selected.formula.tableAlias
 			};
 			let FROM = new Map(), WHERE = new Map(), filters = new Map();
 			// debugger;
