@@ -46,8 +46,9 @@ class Queries {
         this.object.dimensions = [...this.dimensions];
         this.object.columns = Object.fromEntries(this.select);
         this.object.filters = [...this.filters.keys()];
-        debugger;
         this.object.metrics = [...this.metrics.keys()].concat([...this.filteredMetrics.keys()]);
+        this.object.compositeMetrics = [...this.compositeMetrics.keys()];
+        debugger;
         return this.object;
     }
 
@@ -129,7 +130,7 @@ class Queries {
 
 	get metrics() {return this.#metrics;}
 
-	set filteredMetric(value) {
+	set filteredMetrics(value) {
 		(!this.#filteredMetrics.has(value.token)) ? this.#filteredMetrics.set(value.token, value) : this.#filteredMetrics.delete(value.token);
 		console.log('this.#filteredMetrics : ', this.#filteredMetrics);
 	}

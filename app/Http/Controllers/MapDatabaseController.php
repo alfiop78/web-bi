@@ -112,7 +112,7 @@ class MapDatabaseController extends Controller
         $q = new Cube();
         // imposto le proprietà con i magic methods
         $q->reportId = $cube->{'processId'};
-        $q->baseTable = "W_AP_base_$q->reportId";
+        $q->baseTableName = "WEB_BI_TEMP_BASE_$q->reportId";
         $q->datamartName = "decisyon_cache.FX_$q->reportId";
         $q->baseColumns = $cube->{'select'};
         // imposto le colonne da includere nel datamart finale
