@@ -162,11 +162,13 @@ class Cube {
 		$metrics_base = array();
 		$metrics_base_datamart = array();
 		foreach ($this->baseMetrics as $metricName => $metric) {
-			//dd($metric);
-			if ( (!property_exists($metric, 'table')) && (!property_exists($metric, 'tableAlias')) ) {
-				// TODO: invece di fare questo controllo potrei farlo direttamente sul metric_type
-				// nella metrica in ciclo non ci sono le prop table e tableAlias quindi è una metrica composta a livello di cubo (metric_type : 1)
-				$metrics_base[] = "\n{$metric->SQLFunction}({$metric->field}) AS '{$metric->alias}'";
+			//dd($this->baseMetrics);
+			//var_dump($metric);
+			if ( $metric->metric_type === 1 || $metric->metric_type === 3) {
+                // metrica composta di base oppure metrica composta di base con filtri
+                // per queste metriche la prop 'field' contiene la formula es.: DocVenditaDettaglio_560.PrzMedioPond * DocVenditaDettaglio_560.Quantita
+                $metrics_base[] = "\n{$metric->SQLFunction}({$metric->field}) AS '{$metric->alias}'";
+                // SUM(DocVenditaDettaglio_560.PrzMedioPond * DocVenditaDettaglio_560.Quantita) AS 'alias'
 			} else {
 				// $metrics_base è utilizzato in baseTable()
 				$metrics_base[] = "\n{$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}) AS '{$metric->alias}'";
@@ -283,42 +285,43 @@ class Cube {
 		foreach ($this->groupMetricsByFilters as $groupToken => $m) {
 			$arrayMetrics = [];
 			$tableName = "WEB_BI_TEMP_METRIC_{$this->reportId}_{$groupToken}";
-			// var_dump($m);
 			foreach ($m as $metric) {
-				// dd($metric->token); // TODO: potrei usarlo per il nome della tabella temporanea, al posto dell'indice che non evidenzia quale metrica sto creando
-				unset($this->_sql);
-				if ($metric->metric_type === 3) {
-					// TODO: metrica composta a livello cubo filtrata
-					// $metric = "\n{$metrics->SQLFunction}({$metrics->field}) AS '{$metrics->alias}'";
-				} else {
-					// metrica filtrata
-					$arrayMetrics[$metric->alias] = "{$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}) AS '{$metric->alias}'";
-				}
-				// var_dump($arrayMetrics);
+                unset($this->_sql);
+                if ($metric->metric_type === 3) {
+                    // metrica composta a livello cubo filtrata (es. : prezzo * quantita impostato sul cubo con filtro)
+                    $arrayMetrics[$metric->alias] = "{$metric->SQLFunction}({$metric->field}) AS '{$metric->alias}'";
+                } else {
+                    // metrica filtrata
+                    $arrayMetrics[$metric->alias] = "{$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}) AS '{$metric->alias}'";
+                }
+                // var_dump($arrayMetrics);
                 // _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
-				$this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\n{$metric->SQLFunction}($tableName.'{$metric->alias}') AS '{$metric->alias}'";
-				// verifico se sono presenti metriche composte che contengono metriche filtrate, stessa logica utilizzata per le metriche di base
-				if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($tableName, $metric);
+                // TODO: aggiungere documentazione per _metrics_advanced_datamart
+                $this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\n{$metric->SQLFunction}($tableName.'{$metric->alias}') AS '{$metric->alias}'";
+                // verifico se sono presenti metriche composte che contengono la metrica in ciclo, stessa logica utilizzata per le metriche di base
+                if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($tableName, $metric);
 
-				// aggiungo la FROM inclusa nella metrica filtrata alla FROM_baseTable
-				$this->setFromMetricTable($metric->FROM);
-				// dd($this->FROM_baseTable, $this->FROM_metricTable);
-				// aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
-				$this->setFiltersMetricTable($metric->filters);
-				// dd($this->filters_baseTable);
-				// aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
-				if ( property_exists($metric, 'WHERE') ) $this->setWhereMetricTable($metric->WHERE);
-				// dd($this->WHERE_baseTable);
+                // aggiungo la FROM inclusa nella metrica filtrata alla FROM_baseTable
+                $this->setFromMetricTable($metric->FROM);
+                // dd($this->FROM_baseTable, $this->FROM_metricTable);
+                // aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
+                $this->setFiltersMetricTable($metric->filters);
+                // dd($this->filters_baseTable);
+                // aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
+                // se, nella metrica in ciclo, non è presente la WHERE devo ripulire WHERE_metricTable altrimenti verranno aggiunte WHERE della precedente metrica filtrata
+                ( property_exists($metric, 'WHERE') ) ? $this->setWhereMetricTable($metric->WHERE) : $this->WHERE_metricTable = array();
+                // dd($this->WHERE_baseTable);
 			}
 			// dd($arrayMetrics);
 			// dd($this->_metrics_advanced_datamart);
             // creo il datamart, passo a createMetricTable il nome della tabella temporanea e l'array di metriche che lo compongono
 			if ($mode === 'sql') {
-				return $this->createMetricTable($tableName, $arrayMetrics, $mode);
+                $sqlFilteredMetrics[] = $this->createMetricTable($tableName, $arrayMetrics, $mode);
 			} else {
-				$this->createMetricTable($tableName, $arrayMetrics, null);
+                $this->createMetricTable($tableName, $arrayMetrics, null);
 			}
 		}
+        if ($mode === 'sql') return $sqlFilteredMetrics;
 	}
 
 	// creo la tabella temporanea che contiene metriche filtrate

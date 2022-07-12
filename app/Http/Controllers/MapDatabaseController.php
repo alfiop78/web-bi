@@ -187,7 +187,7 @@ class MapDatabaseController extends Controller
         $q = new Cube();
         // imposto le proprietà con i magic methods
         $q->reportId = $cube->{'processId'};
-        $q->baseTable = "WEB_BI_TEMP_BASE_$q->reportId";
+        $q->baseTableName = "WEB_BI_TEMP_BASE_$q->reportId";
         $q->datamartName = "decisyon_cache.FX_$q->reportId";
         $q->baseColumns = $cube->{'select'};
         // imposto le colonne da includere nel datamart finale
@@ -243,8 +243,8 @@ class MapDatabaseController extends Controller
             }
             // dd($q->groupMetricsByFilters);
             
-            $resultSQL[] = $q->createMetricDatamarts('sql');
-            // dd($q->createMetricDatamarts('sql'));
+            $resultSQL[] = implode("\n\n\n", $q->createMetricDatamarts('sql'));
+            //dd($resultSQL);
         }
         // return nl2br(implode("\n\n----------------------\n\n", $resultSQL));
         // echo 'elaborazione createDatamart';

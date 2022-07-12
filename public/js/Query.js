@@ -46,9 +46,9 @@ class Queries {
         this.object.dimensions = [...this.dimensions];
         this.object.columns = Object.fromEntries(this.select);
         this.object.filters = [...this.filters.keys()];
+        debugger;
         this.object.metrics = [...this.metrics.keys()].concat([...this.filteredMetrics.keys()]);
         this.object.compositeMetrics = [...this.compositeMetrics.keys()];
-        debugger;
         return this.object;
     }
 
@@ -122,7 +122,7 @@ class Queries {
 
 	get filters() {return this.#filters};
 
-	set metric(value) {
+	set metrics(value) {
 		// value = {sqlFunction: "SUM", field: "NettoRiga", metricName: "netto riga", distinct: false, alias: "Venduto"}
         (!this.#metrics.has(value.token)) ? this.#metrics.set(value.token, value) : this.#metrics.delete(value.token);
 		console.log('metrics : ', this.#metrics);
@@ -166,7 +166,7 @@ class Queries {
 		this.reportElements.from = this.FROM;
 		this.reportElements.where = this.WHERE;
 		if (this.filters.size > 0) this.reportElements.filters = Object.fromEntries(this.filters);
-		if (this.metrics.size > 0) this.reportElements.metrics = Object.fromEntries(this.#metrics);
+		if (this.metrics.size > 0) this.reportElements.metrics = Object.fromEntries(this.metrics);
 		if (this.compositeMetrics.size > 0) this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
 		if (this.filteredMetrics.size > 0) this.reportElements.filteredMetrics = Object.fromEntries(this.filteredMetrics);
 		this.#SQLProcess.report = this.reportElements;
@@ -194,7 +194,7 @@ class Queries {
 		this.reportElements.where = this.WHERE;
 
 		if (this.filters.size > 0) this.reportElements.filters = Object.fromEntries(this.filters);
-		if (this.metrics.size > 0) this.reportElements.metrics = Object.fromEntries(this.#metrics);
+		if (this.metrics.size > 0) this.reportElements.metrics = Object.fromEntries(this.metrics);
 		if (this.compositeMetrics.size > 0) this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
 		if (this.filteredMetrics.size > 0) this.reportElements.filteredMetrics = Object.fromEntries(this.filteredMetrics);
 		
