@@ -891,6 +891,13 @@ var StorageMetric = new MetricStorage();
             // TODO: per le metriche composte (metric_type: 4) c'è da definire se inserire nel JSON, i cubi a cui appartengono le metriche che compongono la composta
             if (+e.currentTarget.dataset.metricType === 4) {
                 Query.objects = {token : e.currentTarget.dataset.metricToken, cubes : StorageMetric.selected.cubes};
+                // TODO: quando viene selezionata una metrica composta, le metriche al suo interno verranno incluse nel datamart finale, potrei selezionarle sulla pagina con un colore diverso per
+                // ... evidenziare il fatto che sono già incluse nel report
+                // la prop formula->metrics_alias contiene {nome_metrica : metricToken, metricAlias}. Tramite il metricToken posso selezionare le metriche incluse nella formula della composta.
+                for (const [metricName, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
+                    debugger;
+                    document.querySelector("#ul-exist-metrics .selectable[data-metric-token='"+metric.token+"']").dataset.selected = 'true';
+                }
             } else {
                 Query.objects = {token : e.currentTarget.dataset.metricToken, cubeToken : e.currentTarget.dataset.cubeToken};
             }
