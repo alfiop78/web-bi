@@ -767,8 +767,7 @@ var StorageMetric = new MetricStorage();
         });
 
         app.processList.toggleAttribute('hidden');
-        app.btnSaveReport.disabled = false;
-        app.btnSQLProcess.disabled = false;
+        app.checkObjectSelected();
 	}
 
 	app.handlerReportCopy = (e) => {
@@ -776,10 +775,8 @@ var StorageMetric = new MetricStorage();
 		StorageProcess.selected = e.target.dataset.processToken;
 		const process = StorageProcess.selected;
 		console.log('process selected : ', process);
-		// const rand = () => Math.random(0).toString(36).substr(2);
-		const newToken = rand().substr(0, 21);
 		// modifico il token e il processId
-		process.token = newToken;
+		process.token = rand().substr(0, 21);;
 		process.report.processId = Date.now();
 		// salvo il process duplicato con lo stesso nome aggiungendo un prefix _copy_of_
 		process.name = '_copy_of_'+process.name;
@@ -891,13 +888,13 @@ var StorageMetric = new MetricStorage();
             // TODO: per le metriche composte (metric_type: 4) c'è da definire se inserire nel JSON, i cubi a cui appartengono le metriche che compongono la composta
             if (+e.currentTarget.dataset.metricType === 4) {
                 Query.objects = {token : e.currentTarget.dataset.metricToken, cubes : StorageMetric.selected.cubes};
-                // TODO: quando viene selezionata una metrica composta, le metriche al suo interno verranno incluse nel datamart finale, potrei selezionarle sulla pagina con un colore diverso per
+                // quando viene selezionata una metrica composta, le metriche al suo interno verranno incluse nel datamart finale, potrei selezionarle sulla pagina con un colore diverso per
                 // ... evidenziare il fatto che sono già incluse nel report
                 // la prop formula->metrics_alias contiene {nome_metrica : metricToken, metricAlias}. Tramite il metricToken posso selezionare le metriche incluse nella formula della composta.
                 for (const [metricName, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
-                    debugger;
                     document.querySelector("#ul-exist-metrics .selectable[data-metric-token='"+metric.token+"']").dataset.selected = 'true';
                 }
+                
             } else {
                 Query.objects = {token : e.currentTarget.dataset.metricToken, cubeToken : e.currentTarget.dataset.cubeToken};
             }
@@ -1724,23 +1721,14 @@ var StorageMetric = new MetricStorage();
 		return true;
 	}
 
-	app.btnPreviousStep.onclick = (e) => {
-		Step.previous();
-		// se il tasto next è disabilitato (dalla classe Steps.js) abilito il tasto save del report
-		app.btnSaveReport.disabled = true;
-	};
+	app.btnPreviousStep.onclick = () => Step.previous();
 
-	app.btnNextStep.onclick = (e) => {
-		// verifica selezioni cubo e dimensioni
-		// console.log('return check : ', app.checkSelection());
-		Step.next();
-	}
+	app.btnNextStep.onclick = () => Step.next();
 
 	// aggiungi filtri (step-2)
-	app.btnAddFilters.onclick = (e) => {
+	app.btnAddFilters.onclick = () => {
 		if (Query.dimensions.size === 0) {
 			App.showConsole('Selezionare una dimensione per poter aggiungere colonne al report', 'warning');
-			return;
 		} else {
 			app.dialogFilter.showModal();
 			document.getElementById('filterName').value = '';
@@ -1749,11 +1737,10 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// aggiungi metriche (step-2)
-	app.btnAddMetrics.onclick = (e) => {
+	app.btnAddMetrics.onclick = () => {
 		// verifico se è stato selezionato almeno un cubo
 		if (Query.cubes.size === 0) {
 			App.showConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
-			return;
 		} else {
 			app.dialogMetric.showModal();
 			document.getElementById('metric-name').value = '';
@@ -1762,12 +1749,11 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// aggiungi metrica composta
-	app.btnAddCompositeMetrics.onclick = (e) => {
+	app.btnAddCompositeMetrics.onclick = () => {
 		// console.log(Query.elementCube);
 		// TODO: questo controllo lo farò sul tasto next degli step
 		if (Query.cubes.size === 0) {
 			App.showConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
-			return;
 		} else {
 			// per ogni cubo selezionato ne recupero le metriche ad esso appartenenti
 			const ul = document.getElementById('ul-metrics');

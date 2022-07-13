@@ -414,7 +414,8 @@
 											<small cube></small>
 											{{-- TODO: qui, sulle metriche filtrate potrei visualizzare un popup con l'elenco dei filtri. --}}
 										</div>
-										<i class="material-icons md-18">edit</i>
+										<i class="material-icons-round md-18">info</i>
+										<i class="material-icons-round md-18">edit</i>
 									</div>
 								</div>
 							</section>
