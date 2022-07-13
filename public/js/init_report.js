@@ -1022,35 +1022,36 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// selezione di una tabella nella dialog-filter
-	app.handlerSelectTable = (e) => {
-		if (!e.currentTarget.hasAttribute('data-selected')) {
-			// de-seleziono le tabelle precedentemente selezionate se ce ne sono
-			if (document.querySelector('#ul-tables .selectable[data-selected]')) document.querySelector('#ul-tables .selectable[data-selected]').toggleAttribute('data-selected');
-			// disabilito il tasto "Ricerrca valori", viene riattivato quando si seleziona una colonna della tabella
-			app.btnSearchValue.disabled = true;
-			// query per visualizzare tutti i field della tabella
-			e.currentTarget.toggleAttribute('data-selected');
-			Query.table = e.currentTarget.dataset.tableName;
-			Query.tableAlias = e.currentTarget.dataset.tableAlias;
-			Query.schema = e.currentTarget.dataset.schema;
-			if (e.currentTarget.hasAttribute('data-hier-token')) {
-				Query.tableId = e.currentTarget.dataset.tableId;
-				app.dialogFilter.querySelector('section').dataset.hierToken = e.currentTarget.dataset.hierToken;
-				app.dialogFilter.querySelector('section').dataset.hierName = e.currentTarget.dataset.hierName;
-				app.dialogFilter.querySelector('section').dataset.dimensionToken = e.currentTarget.dataset.dimensionToken;
-			} else {
-				// selezione di una tabella della Fact, elimino l'attributo data-hier-token perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
-				// TODO: da ricontrollare se questi due attributi vengono utilizzati quando si seleziona una tabella appartenente a una dimensione->hier
-				delete app.dialogFilter.querySelector('section').dataset.hierToken;
-				delete app.dialogFilter.querySelector('section').dataset.dimensionToken;
-				StorageCube.selected = e.currentTarget.dataset.cubeToken;
-			}
-			// pulisco la <ul> dialog-filter-fields contenente la lista dei campi recuperata dal db, della selezione precedente
-			app.dialogFilter.querySelectorAll('#dialog-filter-fields > section').forEach( section => section.remove());
-			app.dialogFilter.querySelector('section').dataset.tableName = e.currentTarget.dataset.tableName;
-			app.getFields();	
-		}
-	}
+    app.handlerSelectTable = (e) => {
+        if (!e.currentTarget.hasAttribute('data-selected')) {
+            // de-seleziono le tabelle precedentemente selezionate se ce ne sono
+            if (document.querySelector('#ul-tables .selectable[data-selected]')) document.querySelector('#ul-tables .selectable[data-selected]').toggleAttribute('data-selected');
+            // disabilito il tasto "Ricerca valori", viene riattivato quando si seleziona una colonna della tabella
+            app.btnSearchValue.disabled = true;
+            // query per visualizzare tutti i field della tabella
+            e.currentTarget.toggleAttribute('data-selected');
+            Query.table = e.currentTarget.dataset.tableName;
+            Query.tableAlias = e.currentTarget.dataset.tableAlias;
+            Query.schema = e.currentTarget.dataset.schema;
+            if (e.currentTarget.hasAttribute('data-hier-token')) {
+                Query.tableId = e.currentTarget.dataset.tableId;
+                app.dialogFilter.querySelector('section').dataset.hierToken = e.currentTarget.dataset.hierToken;
+                app.dialogFilter.querySelector('section').dataset.hierName = e.currentTarget.dataset.hierName;
+                app.dialogFilter.querySelector('section').dataset.dimensionToken = e.currentTarget.dataset.dimensionToken;
+            } else {
+                // selezione di una tabella della Fact, elimino l'attributo data-hier-token perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
+                // TODO: da ricontrollare se questi due attributi vengono utilizzati quando si seleziona una tabella appartenente a una dimensione->hier
+                delete app.dialogFilter.querySelector('section').dataset.hierToken;
+                delete app.dialogFilter.querySelector('section').dataset.dimensionToken;
+                StorageCube.selected = e.currentTarget.dataset.cubeToken;
+            }
+            // pulisco la <ul> dialog-filter-fields contenente la lista dei campi recuperata dal db, della selezione precedente
+            app.dialogFilter.querySelectorAll('#dialog-filter-fields > section').forEach( section => section.remove());
+            app.dialogFilter.querySelector('section').dataset.tableName = e.currentTarget.dataset.tableName;
+            // TODO: qui utilizzare il await come fatto per getTable nel Mapping
+            app.getFields();
+        }
+    }
 
 	// selezione di una metrica mappata, disponibile per la creazione
 	app.handlerMetricAvailable = (e) => {
