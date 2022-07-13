@@ -1352,10 +1352,11 @@ var StorageMetric = new MetricStorage();
         const ul = document.getElementById(ulId);
         const content = app.tmplList.content.cloneNode(true);
         const section = content.querySelector('section[data-sublist-metrics]');
-        const selectable = section.querySelector('.selectable');
-        const spanMetric = selectable.querySelector('span[metric]');
-        const smallTable = selectable.querySelector('small[table]');
-        const smallCube = selectable.querySelector('small[cube]');
+        const spanHContent = section.querySelector('.h-content');
+        const selectable = spanHContent.querySelector('.selectable');
+        const span = spanHContent.querySelector('span[metric]');
+        const smallTable = spanHContent.querySelector('small[table]');
+        const smallCube = spanHContent.querySelector('small[cube]');
         const btnInfo = spanHContent.querySelector('button[data-info-object-token]');
         const btnEdit = spanHContent.querySelector('button[data-object-token]');
         section.removeAttribute('hidden');
@@ -1372,8 +1373,8 @@ var StorageMetric = new MetricStorage();
 		// }		
 		selectable.dataset.metricToken = StorageMetric.selected.token;
 		selectable.dataset.metricType = StorageMetric.selected.metric_type;		
-		spanMetric.innerText = StorageMetric.selected.name;
-        (metric.metric_type === 2) ? btnInfo.dataset.infoObjectToken = StorageMetric.selected.token : btnInfo.hidden = 'true';
+		span.innerText = StorageMetric.selected.name;
+        (StorageMetric.selected.metric_type === 2) ? btnInfo.dataset.infoObjectToken = StorageMetric.selected.token : btnInfo.hidden = 'true';
         btnEdit.dataset.objectToken = StorageMetric.selected.token;
         btnEdit.onclick = app.handlerMetricEdit; // TODO: implementare
 		if (StorageMetric.selected.metric_type === 0 || StorageMetric.selected.metric_type === 2) smallTable.innerText = Query.table;
