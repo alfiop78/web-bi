@@ -342,8 +342,9 @@ class Cube {
 		$this->_sql .= "\nAND ". implode("\nAND ", array_merge($this->filters_baseTable, $this->filters_metricTable));
 		$this->_sql .= "\n$this->groupBy";
 		// dd($this->_sql);
+        $comment = "/*\nCreazione tabella METRIC :\n".implode("\n", array_keys($metrics))."\n*/\n";
 
-		$sql = "/*\nCreazione tabella per :\n".implode("\n", array_keys($metrics))."\n*/\nCREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
+		$sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
 		// TODO: eliminare la tabella temporanea come fatto per baseTable
 		// dd($sql);
 		if ($mode === 'sql') {
@@ -381,7 +382,8 @@ class Cube {
         if (!is_null($this->_metrics_advanced_datamart)) {
             // _metrics_advanced_datamart : "\n{$metric->SQLFunction}($tableName.'{$metric->alias}') AS '{$metric->alias}'"
             // sono presenti metriche filtrate
-            $sql = "/*Creazione DATAMART finale :\n{$this->datamartName}\n*/\nCREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS ";
+            $comment = "/*Creazione DATAMART :\ndecisyon_cache.{$this->datamartName}\n*/\n";
+            $sql = "{$comment}CREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS ";
             $sql .= "\n(SELECT{$this->_fieldsSQL}";
             $leftJoin = null;
 
