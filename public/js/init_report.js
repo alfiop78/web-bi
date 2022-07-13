@@ -803,9 +803,14 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// edit filter
-	app.handlerFilterEdit = (e) => {
-		debugger;
-	}
+    app.handlerFilterEdit = (e) => {
+        // TODO: Implementazione
+        // recupero il filtro selezionato
+        // apro la #dialog-filter
+        // carico l'elenco delle colonne della tabella (da valutare per i filtri su più tabelle)
+        // inserisco i dati del filtro nella dialog (formula, name, table)
+        debugger;
+    }
 
 	app.handlerMetricEdit = (e) => {
 		debugger;
@@ -1406,7 +1411,7 @@ var StorageMetric = new MetricStorage();
 			selectable.dataset.dimensionToken = StorageFilter.selected.dimensionToken;
 			selectable.dataset.hierToken = StorageFilter.selected.hier.token;
 			selectable.dataset.tableId = Query.tableId;
-			smallHier.setAttribute('hier', true); // TODO: dataset data-hier
+			smallHier.setAttribute('hier', 'true'); // TODO: dataset data-hier
 			smallHier.innerText = StorageFilter.selected.hier.name;
 		} else {
 			// è un filtro su una tabella FACT
@@ -2113,6 +2118,7 @@ var StorageMetric = new MetricStorage();
     // visualizzo in una dialog l'SQL della baseTable e delle metricTable
     app.btnSQLProcess.onclick = async () => {
         const name = document.getElementById('reportName').value;
+
         app.setFrom();
 
 		// imposto la factJoin che è presente solo sulla dimensione
@@ -2138,6 +2144,7 @@ var StorageMetric = new MetricStorage();
 		app.setFilteredMetrics();
         // metriche composte
         app.setCompositeMetrics();
+        if (!Query.processId) Query.processId = '_process_id_';
 
         Query.SQLProcess(name);
 		const params = JSON.stringify(Query.getSQLProcess().report);

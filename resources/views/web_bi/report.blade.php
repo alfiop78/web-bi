@@ -1,31 +1,31 @@
 <!DOCTYPE html>
 <html lang="it" dir="ltr">
-	<head>
-		<meta charset="utf-8">
-		<link rel="icon" href="/favicon.png" type="image/png" />
-		<meta name="theme-color" content="#70b1bb">
-		<meta name="author" content="Pietrantuono Alfio">
-		<link rel="stylesheet" type="text/css" href="/css/md-layout.css" />
-		<link rel="stylesheet" href="{{ asset('/css/md-tooltip.css') }}">
-		<link rel="stylesheet" type="text/css" href="/css/md-lists.css" />
-		<link rel="stylesheet" type="text/css" href="/css/material-icons.css" />
-		<link rel="stylesheet" type="text/css" href="/css/md-loader.css" />
-		<link rel="stylesheet" type="text/css" href="/css/md-controls.css" />
-		<link rel="stylesheet" type="text/css" href="/css/md-drawer.css" />
-		<link rel="stylesheet" type="text/css" href="/css/md-inputs.css" />
-		<link rel="stylesheet" type="text/css" href="/css/report-layout.css" />
-		<link rel="stylesheet" type="text/css" href="/css/steps.css" />
-		<link rel="stylesheet" type="text/css" href="/css/md-dialogs.css" />
-		<link rel="stylesheet" type="text/css" href="/css/index_report.css" />
-		<script src="/js/Step.js"></script>
-		<script src="/js/Query.js"></script>
-		<script src="/js/Application.js"></script>
-		<script src="/js/lib.js"></script>
-		<script src="/js/Storage.js"></script>
-		<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
-		<title>Creazione Report</title>
-	</head>
-	<body>
+    <head>
+        <meta charset="utf-8">
+        <link rel="icon" href="/favicon.png" type="image/png" />
+        <meta name="theme-color" content="#70b1bb">
+        <meta name="author" content="Pietrantuono Alfio">
+        <link rel="stylesheet" type="text/css" href="/css/md-layout.css" />
+        <link rel="stylesheet" href="{{ asset('/css/md-tooltip.css') }}">
+        <link rel="stylesheet" type="text/css" href="/css/md-lists.css" />
+        <link rel="stylesheet" type="text/css" href="/css/material-icons.css" />
+        <link rel="stylesheet" type="text/css" href="/css/md-loader.css" />
+        <link rel="stylesheet" type="text/css" href="/css/md-controls.css" />
+        <link rel="stylesheet" type="text/css" href="/css/md-drawer.css" />
+        <link rel="stylesheet" type="text/css" href="/css/md-inputs.css" />
+        <link rel="stylesheet" type="text/css" href="/css/report-layout.css" />
+        <link rel="stylesheet" type="text/css" href="/css/steps.css" />
+        <link rel="stylesheet" type="text/css" href="/css/md-dialogs.css" />
+        <link rel="stylesheet" type="text/css" href="/css/index_report.css" />
+        <script src="/js/Step.js"></script>
+        <script src="/js/Query.js"></script>
+        <script src="/js/Application.js"></script>
+        <script src="/js/lib.js"></script>
+        <script src="/js/Storage.js"></script>
+        <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+        <title>Creazione Report</title>
+    </head>
+    <body>
 
         <div id="absolute-window" class="absolute-window">
             <section class="window-title">
