@@ -105,6 +105,7 @@ class MapDatabaseController extends Controller
 
     // processo la FX
     public function process(Request $request) {
+        // TODO: Ottimizzazione. Molti di questi Metodi e Proprietà vengono utilizzati anche in curlprocess() e sqlInfo() per cui potrei evitare codice duplicato
         // echo gettype($cube);
         // dd($request);
         // per accedere al contenuto della $request lo converto in json codificando la $request e decodificandolo in json
@@ -112,8 +113,9 @@ class MapDatabaseController extends Controller
         $q = new Cube();
         // imposto le proprietà con i magic methods
         $q->reportId = $cube->{'processId'};
-        $q->baseTableName = "WEB_BI_TEMP_BASE_$q->reportId";
-        $q->datamartName = "decisyon_cache.FX_$q->reportId";
+        $q->baseTableName = "WEB_BI_TMP_BASE_$q->reportId";
+        $q->datamartName = "WEB_BI_$q->reportId";
+        // TODO: baseColumns potrei utilizzarlo anche nella chiamata a $q->select e $q->groupBy
         $q->baseColumns = $cube->{'select'};
         // imposto le colonne da includere nel datamart finale
         $q->fields();
@@ -129,7 +131,7 @@ class MapDatabaseController extends Controller
         $q->select($cube->{'select'});
         $q->from($cube->{'from'});
         $q->where($cube->{'where'});
-        // $q->joinFact($cube->{'factJoin'});
+        // TODO: da valutare if (property_exists($cube, 'filters')) $q->filters($cube->{'filters'});
         $q->filters($cube->{'filters'});
         // TODO: siccome il group by viene creato uguale alla clausola SELECT potrei unirli e non fare qui 2 chiamate
         $q->groupBy($cube->{'select'});
@@ -176,6 +178,8 @@ class MapDatabaseController extends Controller
             // restituisco un ANTEPRIMA del json con i dati del datamart appena creato
             $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM $datamartName LIMIT 5000;");
             return response()->json($datamartResult);
+        } else {
+            return 'BaseTable non create';
         }
     }
 
@@ -187,8 +191,9 @@ class MapDatabaseController extends Controller
         $q = new Cube();
         // imposto le proprietà con i magic methods
         $q->reportId = $cube->{'processId'};
-        $q->baseTableName = "WEB_BI_TEMP_BASE_$q->reportId";
-        $q->datamartName = "decisyon_cache.FX_$q->reportId";
+        $q->baseTableName = "WEB_BI_TMP_BASE_$q->reportId";
+        $q->datamartName = "WEB_BI_$q->reportId";
+        // TODO: baseColumns potrei utilizzarlo anche nella chiamata a $q->select e $q->groupBy
         $q->baseColumns = $cube->{'select'};
         // imposto le colonne da includere nel datamart finale
         $q->fields();
@@ -241,13 +246,9 @@ class MapDatabaseController extends Controller
                 }
                 $q->groupMetricsByFilters->$groupToken = $metrics;
             }
-            // dd($q->groupMetricsByFilters);
-            
             $resultSQL[] = implode("\n\n\n", $q->createMetricDatamarts('sql'));
             //dd($resultSQL);
         }
-        // return nl2br(implode("\n\n----------------------\n\n", $resultSQL));
-        // echo 'elaborazione createDatamart';
         // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
         $resultSQL[] = $q->createDatamart('sql');
         return nl2br(implode("\n\n\n", $resultSQL));
@@ -255,6 +256,8 @@ class MapDatabaseController extends Controller
 
     // curl
     public function curlprocess($json) {
+        // curl http://127.0.0.1:8000/curl/process/210wu29ifoh/schedule
+        // http://gaia.automotive-cloud.com/curl/process/210wu29ifoh/schedule
         $json_decoded = json_decode($json); // object
         $json_value = json_decode($json_decoded->{'json_value'});
         $cube = $json_value->{'report'};
@@ -263,8 +266,8 @@ class MapDatabaseController extends Controller
         $q = new Cube();
         // imposto le proprietà con i magic methods
         $q->reportId = $cube->{'processId'};
-        $q->baseTable = "W_AP_base_$q->reportId";
-        $q->datamartName = "decisyon_cache.FX_$q->reportId";
+        $q->baseTableName = "WEB_BI_TMP_BASE_$q->reportId";
+        $q->datamartName = "WEB_BI_$q->reportId";
         $q->baseColumns = $cube->{'select'};
         // imposto le colonne da includere nel datamart finale
         $q->fields();
@@ -280,13 +283,12 @@ class MapDatabaseController extends Controller
         $q->select($cube->{'select'});
         $q->from($cube->{'from'});
         $q->where($cube->{'where'});
-        // $q->joinFact($cube->{'factJoin'});
-        $q->filters($cube->{'filters'});
+        if (property_exists($cube, 'filters')) $q->filters($cube->{'filters'});
         // TODO: siccome il group by viene creato uguale alla clausola SELECT potrei unirli e non fare qui 2 chiamate
         $q->groupBy($cube->{'select'});
         /* dd($q); */
         // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
-        $baseTable = $q->baseTable();
+        $baseTable = $q->baseTable(null);
         // dd($baseTable);
         if (!$baseTable) {
             // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
@@ -294,11 +296,33 @@ class MapDatabaseController extends Controller
             // TODO: 2022-05-06 qui occorre una verifica più approfondita sui filtri contenuti nella metrica, allo stato attuale faccio una query per ogni metrica filtrata, anche se i filtri all'interno della metrica sono uguali. Includere più metriche che contengono gli stessi filtri in un unica query
             if (property_exists($cube, 'filteredMetrics')) {
                 $q->filteredMetrics = $cube->{'filteredMetrics'};
-                $metricTable = $q->createMetricDatamarts();
+                $q->groupMetricsByFilters = (object)[];
+                $metrics = [];
+                $groupToken = "group_".bin2hex(random_bytes(6));
+                foreach ($q->filteredMetrics as $metric) {
+                    if ( empty(get_object_vars($q->groupMetricsByFilters)) ) {
+                        array_push($metrics, $metric);
+                    } else {
+                        foreach ($metrics as $m) {
+                            if ( (get_object_vars($metric->filters) == get_object_vars($m->filters)) ) {
+                                array_push($metrics, $metric);
+                            } else {
+                                // è un gruppo diverso da quello già esistente, quindi creo un nuovo token (il token del gruppo)
+                                $groupToken = "group_".bin2hex(random_bytes(6));
+                                // reimposto l'array altrimenti inserisco in questo gruppo anche gli elementi che sono già stati aggiunti ad altri gruppi
+                                $metrics = [];
+                                array_push($metrics, $metric);
+                            }
+                        }
+                    }
+                    $q->groupMetricsByFilters->$groupToken = $metrics;
+                }
+                // dd($q->groupMetricsByFilters);
+                $metricTable = $q->createMetricDatamarts(null);
             }
             // echo 'elaborazione createDatamart';
             // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-            $datamartName = $q->createDatamart();
+            $datamartName = $q->createDatamart(null);
             // var_dump($datamartName);
             if ($datamartName) return "Datamart ({$datamartName}) per il report {$reportName} creato con successo!\n";
         }

@@ -2018,7 +2018,7 @@ var StorageMetric = new MetricStorage();
                 // BUG: nella metrica composta potrebbero esserci anche altre metriche composte
                 if (StorageMetric.selected.metric_type === 2 || StorageMetric.selected.metric_type === 3)  {
                     // se, in Query.filteredMetrics e Query.metrics sono già presenti le metriche in ciclo (che compongono la composta) non devono essere aggiunte
-                    debugger;
+                    //debugger;
                     if (!Query.filteredMetrics.has(metric.token))
                         Query.filteredMetrics = {
                             token : metric.token,
@@ -2107,7 +2107,6 @@ var StorageMetric = new MetricStorage();
     // visualizzo in una dialog l'SQL della baseTable e delle metricTable
     app.btnSQLProcess.onclick = async () => {
         const name = document.getElementById('reportName').value;
-        Query.processId = Date.now();
         app.setFrom();
 
 		// imposto la factJoin che è presente solo sulla dimensione
@@ -2126,9 +2125,14 @@ var StorageMetric = new MetricStorage();
 			Query.FROM = {tableAlias : cubeRef.dataset.tableAlias, SQL : `${cubeRef.dataset.schema}.${cubeRef.dataset.tableName} AS ${cubeRef.dataset.tableAlias}`};
 		});
 
-		app.setMetrics();
-		// FROM per le metriche
+        app.setMetrics();
+        // metrica di base composta
+        app.setCompositeBaseMetrics();
+		// metriche filtrate
 		app.setFilteredMetrics();
+        // metriche composte
+        app.setCompositeMetrics();
+
         Query.SQLProcess(name);
 		const params = JSON.stringify(Query.getSQLProcess().report);
         const url = "/fetch_api/cube/sqlInfo";
