@@ -257,7 +257,8 @@ class MapDatabaseController extends Controller
     // curl
     public function curlprocess($json) {
         // curl http://127.0.0.1:8000/curl/process/210wu29ifoh/schedule
-        // http://gaia.automotive-cloud.com/curl/process/210wu29ifoh/schedule
+        // con il login : curl http://user:psw@gaia.automotive-cloud.com/curl/process/{processToken}/schedule
+        // ...oppure : curl -u 'user:psw' http://gaia.automotive-cloud.com/curl/process/{processToken}/schedule
         $json_decoded = json_decode($json); // object
         $json_value = json_decode($json_decoded->{'json_value'});
         $cube = $json_value->{'report'};
