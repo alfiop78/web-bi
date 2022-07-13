@@ -176,7 +176,7 @@ class MapDatabaseController extends Controller
             $datamartName = $q->createDatamart(null);
             // dd($datamartName);
             // restituisco un ANTEPRIMA del json con i dati del datamart appena creato
-            $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM $datamartName LIMIT 5000;");
+            $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.$q->datamartName LIMIT 5000;");
             return response()->json($datamartResult);
         } else {
             return 'BaseTable non create';

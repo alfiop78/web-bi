@@ -1349,18 +1349,20 @@ var StorageMetric = new MetricStorage();
 
 	// aggiungo la metrica appena creata alla <ul> (metriche base e filtrate)
 	app.addMetric = (ulId) => {
-		const ul = document.getElementById(ulId);
-		const content = app.tmplList.content.cloneNode(true);
-		const section = content.querySelector('section[data-sublist-metrics]');
-		const selectable = section.querySelector('.selectable');
-		const spanMetric = selectable.querySelector('span[metric]');
-		const smallTable = selectable.querySelector('small[table]');
-		const smallCube = selectable.querySelector('small[cube]');
-		section.removeAttribute('hidden');
-		section.dataset.elementSearch = 'search-exist-metrics';
-		section.dataset.label = StorageMetric.selected.name;
-		section.dataset.cubeToken = StorageMetric.selected.cubeToken;
-		section.toggleAttribute('data-searchable');
+        const ul = document.getElementById(ulId);
+        const content = app.tmplList.content.cloneNode(true);
+        const section = content.querySelector('section[data-sublist-metrics]');
+        const selectable = section.querySelector('.selectable');
+        const spanMetric = selectable.querySelector('span[metric]');
+        const smallTable = selectable.querySelector('small[table]');
+        const smallCube = selectable.querySelector('small[cube]');
+        const btnInfo = spanHContent.querySelector('button[data-info-object-token]');
+        const btnEdit = spanHContent.querySelector('button[data-object-token]');
+        section.removeAttribute('hidden');
+        section.dataset.elementSearch = 'search-exist-metrics';
+        section.dataset.label = StorageMetric.selected.name;
+        section.dataset.cubeToken = StorageMetric.selected.cubeToken;
+        section.toggleAttribute('data-searchable');
 
 		// div.dataset.label = StorageMetric.selected.name;
 		// if (StorageMetric.selected.metric_type === 0 || StorageMetric.selected.metric_type === 2) {
@@ -1371,6 +1373,9 @@ var StorageMetric = new MetricStorage();
 		selectable.dataset.metricToken = StorageMetric.selected.token;
 		selectable.dataset.metricType = StorageMetric.selected.metric_type;		
 		spanMetric.innerText = StorageMetric.selected.name;
+        (metric.metric_type === 2) ? btnInfo.dataset.infoObjectToken = StorageMetric.selected.token : btnInfo.hidden = 'true';
+        btnEdit.dataset.objectToken = StorageMetric.selected.token;
+        btnEdit.onclick = app.handlerMetricEdit; // TODO: implementare
 		if (StorageMetric.selected.metric_type === 0 || StorageMetric.selected.metric_type === 2) smallTable.innerText = Query.table;
 		smallCube.innerText = StorageCube.selected.name;
 		selectable.onclick = app.handlerMetricSelected;
@@ -1386,7 +1391,7 @@ var StorageMetric = new MetricStorage();
 		const span = selectable.querySelector('span[filter]');
 		const smallTable = selectable.querySelector('small[table]');
 		const smallHier = selectable.querySelector('small:last-child');
-		const iEdit = spanHContent.querySelector('i');
+		const btnEdit = spanHContent.querySelector('button');
 		section.removeAttribute('hidden');
 		section.dataset.label = StorageFilter.selected.name;
 		section.dataset.elementSearch = 'search-exist-filters';
@@ -1412,7 +1417,7 @@ var StorageMetric = new MetricStorage();
 		smallTable.innerText = Query.table;
 
 		selectable.onclick = app.handlerFilterSelected;
-		iEdit.onclick = app.handlerFilterEdit; // TODO: da implementare
+		btnEdit.onclick = app.handlerFilterEdit; // TODO: da implementare
 		ul.appendChild(section);
 	}
 
@@ -1784,7 +1789,7 @@ var StorageMetric = new MetricStorage();
 					const smallCube = spanHContent.querySelector('small[cube]');
 					section.hidden = false;
 					section.dataset.elementSearch = 'search-metrics';
-					section.dataset.searchable = true;
+					section.dataset.searchable = 'true';
 					section.dataset.label = metric.name;
 					section.dataset.cubeToken = metric.cubeToken;
 					// metriche composte di base e composte non hanno le prop table, tableAlias
