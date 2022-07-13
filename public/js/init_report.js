@@ -18,6 +18,7 @@ var StorageMetric = new MetricStorage();
 		tmplUlList: document.getElementById('template_ulList'), // contiene le <ul>
 		tmplList: document.getElementById('templateList'), // contiene i section
 		tmplSublists : document.getElementById('template-sublists'),
+        absoluteWindow : document.getElementById('absolute-window'),
 
         processList : document.getElementById('reportProcessList'),
 
@@ -210,42 +211,43 @@ var StorageMetric = new MetricStorage();
 		for (const [dimToken, value] of StorageDimension.dimensions) {
 			// key : nome della dimensione
 			// value : tutte le property della dimensione
-			for (const [hierToken, hierValue] of Object.entries(value.hierarchies)) {
+            for (const [hierToken, hierValue] of Object.entries(value.hierarchies)) {
 				// per ogni gerarchia...
-				for (const [tableId, table] of Object.entries(hierValue.order)) {
-					// verifico se la tabella in ciclo ha delle colonne mappate					
-					if (hierValue.columns.hasOwnProperty(table.alias)) {
-						for (const [token, field] of Object.entries(hierValue.columns[table.alias])) {
-							// console.log('field : ', field);
-							const content = app.tmplList.content.cloneNode(true);
-							const section = content.querySelector('section[data-sublist-columns]');
-							const spanHContent = section.querySelector('.h-content');
-							const selectable = spanHContent.querySelector('.selectable');
-							const span = selectable.querySelector('span[column]');
-							const smallTable = selectable.querySelector('small[table]');
-							const smallHier = selectable.querySelector('small:last-child');
-							const i = spanHContent.querySelector('i');
-							section.dataset.relatedObject = 'dimension';
-							section.dataset.label = field.ds.field;
-							section.dataset.elementSearch = 'search-columns';
-							section.dataset.dimensionToken = dimToken;
-							section.dataset.hierToken = hierToken;
-							selectable.dataset.label = field.ds.field;
-							selectable.dataset.tableName = table.table;
-							selectable.dataset.tableAlias = table.alias;
-							selectable.dataset.tableId = tableId;
-							selectable.dataset.dimensionToken = dimToken;
-							selectable.dataset.hierToken = hierToken;
-							selectable.dataset.tokenColumn = token;
-							selectable.onclick = app.handlerSelectColumn;
-							i.onclick = app.handlerColumnEdit;
-							span.innerText = field.ds.field;
-							smallTable.innerText = table.table;
-							smallHier.innerText = hierValue.name;
-							ul.appendChild(section);
-						}
-					}
-				}
+                for (const [tableId, table] of Object.entries(hierValue.order)) {
+                    // verifico se la tabella in ciclo ha delle colonne mappate
+                    if (hierValue.columns.hasOwnProperty(table.alias)) {
+                        for (const [token, field] of Object.entries(hierValue.columns[table.alias])) {
+                            // console.log('field : ', field);
+                            const content = app.tmplList.content.cloneNode(true);
+                            const section = content.querySelector('section[data-sublist-columns]');
+                            const spanHContent = section.querySelector('.h-content');
+                            const selectable = spanHContent.querySelector('.selectable');
+                            const span = selectable.querySelector('span[column]');
+                            const smallTable = selectable.querySelector('small[table]');
+                            const smallHier = selectable.querySelector('small:last-child');
+                            const btnEdit = spanHContent.querySelector('button');
+                            section.dataset.relatedObject = 'dimension';
+                            section.dataset.label = field.ds.field;
+                            section.dataset.elementSearch = 'search-columns';
+                            section.dataset.dimensionToken = dimToken;
+                            section.dataset.hierToken = hierToken;
+                            selectable.dataset.label = field.ds.field;
+                            selectable.dataset.tableName = table.table;
+                            selectable.dataset.tableAlias = table.alias;
+                            selectable.dataset.tableId = tableId;
+                            selectable.dataset.dimensionToken = dimToken;
+                            selectable.dataset.hierToken = hierToken;
+                            selectable.dataset.tokenColumn = token;
+                            selectable.onclick = app.handlerSelectColumn;
+                            btnEdit.dataset.objectToken = token;
+                            btnEdit.onclick = app.handlerColumnEdit; // TODO: da implementare
+                            span.innerText = field.ds.field;
+                            smallTable.innerText = table.table;
+                            smallHier.innerText = hierValue.name;
+                            ul.appendChild(section);
+                        }
+                    }
+                }
 			}
 		}
 	}
@@ -255,32 +257,33 @@ var StorageMetric = new MetricStorage();
 		const ul = document.getElementById('ul-columns');
 		for (const [cubeToken, value] of StorageCube.cubes) {
 			if (value.columns.hasOwnProperty(value.alias)) {
-				for (const [token, field] of Object.entries(value.columns[value.alias])) {
-					// console.log('field : ', field);
-					const content = app.tmplList.content.cloneNode(true);
-					const section = content.querySelector('section[data-sublist-columns]');
-					const spanHContent = section.querySelector('.h-content');
-					const selectable = spanHContent.querySelector('.selectable');
-					const span = selectable.querySelector('span[column]');
-					const smallTable = selectable.querySelector('small[table]');
-					const smallCube = selectable.querySelector('small:last-child');
-					const i = spanHContent.querySelector('i');
-					section.dataset.relatedObject = 'cube';
-					section.dataset.label = field.ds.field;
-					section.dataset.elementSearch = 'search-columns';
-					section.dataset.cubeToken = cubeToken;
-					selectable.dataset.label = field.ds.field;
-					selectable.dataset.tableName = value.FACT;
-					selectable.dataset.tableAlias = value.alias;
-					selectable.dataset.tokenColumn = token;
-					selectable.dataset.cubeToken = cubeToken;
-					selectable.onclick = app.handlerSelectColumn;
-					i.onclick = app.handlerColumnEdit;
-					span.innerText = field.ds.field;
-					smallTable.innerText = value.FACT;
-					smallCube.innerText = value.name;
-					ul.appendChild(section);
-				}
+                for (const [token, field] of Object.entries(value.columns[value.alias])) {
+                    // console.log('field : ', field);
+                    const content = app.tmplList.content.cloneNode(true);
+                    const section = content.querySelector('section[data-sublist-columns]');
+                    const spanHContent = section.querySelector('.h-content');
+                    const selectable = spanHContent.querySelector('.selectable');
+                    const span = selectable.querySelector('span[column]');
+                    const smallTable = selectable.querySelector('small[table]');
+                    const smallCube = selectable.querySelector('small:last-child');
+                    const btnEdit = spanHContent.querySelector('button');
+                    section.dataset.relatedObject = 'cube';
+                    section.dataset.label = field.ds.field;
+                    section.dataset.elementSearch = 'search-columns';
+                    section.dataset.cubeToken = cubeToken;
+                    selectable.dataset.label = field.ds.field;
+                    selectable.dataset.tableName = value.FACT;
+                    selectable.dataset.tableAlias = value.alias;
+                    selectable.dataset.tokenColumn = token;
+                    selectable.dataset.cubeToken = cubeToken;
+                    selectable.onclick = app.handlerSelectColumn;
+                    btnEdit.dataset.objectToken = token;
+                    btnEdit.onclick = app.handlerColumnEdit;
+                    span.innerText = field.ds.field;
+                    smallTable.innerText = value.FACT;
+                    smallCube.innerText = value.name;
+                    ul.appendChild(section);
+                }
 			}
 		}
 	}
@@ -292,66 +295,70 @@ var StorageMetric = new MetricStorage();
 		for (const [dimToken, dimValue] of StorageDimension.dimensions) {
 			// per ogni dimensione recupero i filtri appartenenti ad essa
 			for (const [hierToken, hier] of (Object.entries(dimValue.hierarchies)) ) {
-				// per ogni gerarchia...
-				for (const [tableId, table] of Object.entries(hier.order)) {
-					// per ogni tabella...
-					const filters = StorageFilter.getFiltersByDimension(dimToken, hierToken, table.table);
-					if (filters.size > 0) {
-						// se sono presenti filtri per questa tabella
-						filters.forEach( (filter) => {
-							const contentElement = app.tmplList.content.cloneNode(true);
-							const section = contentElement.querySelector('section[data-sublist-filters]');
-							const spanHContent = section.querySelector('.h-content');
-							const selectable = spanHContent.querySelector('.selectable');
-							const span = selectable.querySelector('span[filter]');
-							const smallTable = selectable.querySelector('small[table]');
-							const smallHier = selectable.querySelector('small:last-child');
-							const iEdit = spanHContent.querySelector('i');
-							section.dataset.relatedObject = 'dimension';
-							section.dataset.elementSearch = 'search-exist-filters';
-							section.dataset.label = filter.name;
-							section.dataset.dimensionToken = filter.dimensionToken;
-							section.dataset.hierToken = hierToken;
-							selectable.dataset.filterToken = filter.token;
-							selectable.onclick = app.handlerFilterSelected;
-							span.innerText = filter.name;
-							smallTable.innerText = table.table;
-							smallHier.setAttribute('hier', true); // TODO: dataset
-							iEdit.onclick = app.handlerFilterEdit; // TODO: da implementare
-							smallHier.innerText = hier.name;
-							ul.appendChild(section);
-						});
-					}
-				}
-			}
-		}
+                // per ogni gerarchia...
+                for (const [tableId, table] of Object.entries(hier.order)) {
+                    // per ogni tabella...
+                    const filters = StorageFilter.getFiltersByDimension(dimToken, hierToken, table.table);
+                    if (filters.size > 0) {
+                        // se sono presenti filtri per questa tabella
+                        filters.forEach( (filter) => {
+                            const contentElement = app.tmplList.content.cloneNode(true);
+                            const section = contentElement.querySelector('section[data-sublist-filters]');
+                            const spanHContent = section.querySelector('.h-content');
+                            const selectable = spanHContent.querySelector('.selectable');
+                            const span = selectable.querySelector('span[filter]');
+                            const smallTable = selectable.querySelector('small[table]');
+                            const smallHier = selectable.querySelector('small:last-child');
+                            const btnEdit = spanHContent.querySelector('button');
+                            section.dataset.relatedObject = 'dimension';
+                            section.dataset.elementSearch = 'search-exist-filters';
+                            section.dataset.label = filter.name;
+                            section.dataset.dimensionToken = filter.dimensionToken;
+                            section.dataset.hierToken = hierToken;
+                            selectable.dataset.filterToken = filter.token;
+                            selectable.onclick = app.handlerFilterSelected;
+                            span.innerText = filter.name;
+                            smallTable.innerText = table.table;
+                            smallHier.setAttribute('hier', 'true'); // TODO: dataset
+                            btnEdit.dataset.objectToken = filter.token;
+                            btnEdit.onclick = app.handlerFilterEdit; // TODO: da implementare
+                            smallHier.innerText = hier.name;
+                            ul.appendChild(section);
+                        });
+                    }
+                }
+            }
+        }
 	}
 
 	app.getFiltersFact = () => {
-		// TODO: 2022-05-24 da rivedere - branch editReport
-		const ul = document.getElementById('ul-exist-filters');
-		for (const [cubeToken, value] of StorageCube.cubes) {
-			StorageFilter.getFiltersByCube(cubeToken).forEach( (filter) => {
-				// console.log('filter : ', filter);
-				const content = app.tmplList.content.cloneNode(true);
-				const section = content.querySelector('section[data-sublist-filters]');
-				const spanHContent = section.querySelector('.h-content');
-				const selectable = spanHContent.querySelector('.selectable');
-				const span = selectable.querySelector('span[filter]');
-				const smallTable = selectable.querySelector('small[table]');
-				const smallCube = selectable.querySelector('small:last-child');
-				section.dataset.relatedObject = 'cube';
-				section.dataset.elementSearch = 'search-exist-filters';
-				section.dataset.label = filter.name;
-				section.dataset.cubeToken = cubeToken;
-				selectable.dataset.filterToken = filter.token;
-				selectable.onclick = app.handlerFilterSelected;
-				span.innerText = filter.name;
-				smallTable.innerText = value.FACT;
-				smallCube.innerText = value.name;
-				ul.appendChild(section);
-			});
-		}
+        // TODO: 2022-05-24 da rivedere - branch editReport
+        const ul = document.getElementById('ul-exist-filters');
+        for (const [cubeToken, value] of StorageCube.cubes) {
+            StorageFilter.getFiltersByCube(cubeToken).forEach( (filter) => {
+                // console.log('filter : ', filter);
+                const content = app.tmplList.content.cloneNode(true);
+                const section = content.querySelector('section[data-sublist-filters]');
+                const spanHContent = section.querySelector('.h-content');
+                const selectable = spanHContent.querySelector('.selectable');
+                const span = selectable.querySelector('span[filter]');
+                const smallTable = selectable.querySelector('small[table]');
+                const smallCube = selectable.querySelector('small:last-child');
+                const btnEdit = spanHContent.querySelector('button[data-object-token]');
+                section.dataset.relatedObject = 'cube';
+                section.dataset.elementSearch = 'search-exist-filters';
+                section.dataset.label = filter.name;
+                section.dataset.cubeToken = cubeToken;
+                selectable.dataset.filterToken = filter.token;
+                selectable.onclick = app.handlerFilterSelected;
+                btnEdit.dataset.objectToken = filter.token;
+                btnEdit.onclick = app.handlerFilterEdit;
+                span.innerText = filter.name;
+                smallTable.innerText = value.FACT;
+                smallCube.innerText = value.name;
+                ul.appendChild(section);
+            });
+        }
 	}
 
 	// verifico se ci sono object selezionati per poter attivare/disattivare alcuni tasti
@@ -559,53 +566,56 @@ var StorageMetric = new MetricStorage();
 
 	// lista metriche esistenti
 	app.getMetrics = () => {
-		/* NOTE: logica delle metriche
-			0 : metrica di base
-			1 : metrica di base, legata al cubo, composto (es.: prezzo*quantità)
-			2 : metrica filtrata
-			3 : metrica filtrata composta
-			4 : metrica composta
-		*/
-		const ul = document.getElementById('ul-exist-metrics');
+        /* NOTE: logica delle metriche
+        0 : metrica di base
+        1 : metrica di base, legata al cubo, composto (es.: prezzo*quantità)
+        2 : metrica filtrata
+        3 : metrica filtrata composta
+        4 : metrica composta
+        */
+        const ul = document.getElementById('ul-exist-metrics');
 		for (const [cubeToken, value] of StorageCube.cubes) {
-			StorageMetric.cubeMetrics = cubeToken;
-			// recupero le metriche di base 0, base composte 1, avanzate 2
-			// console.log(StorageMetric.baseAdvancedMetrics.size);
-			StorageMetric.baseAdvancedMetrics.forEach( metric => {
-				// console.log('metric : ', metric);
-				const contentElement = app.tmplList.content.cloneNode(true);
-				const section = contentElement.querySelector('section[data-sublist-metrics]');
-				const spanHContent = section.querySelector('.h-content');
-				const selectable = spanHContent.querySelector('.selectable');
-				const span = spanHContent.querySelector('span[metric]');
-				const smallTable = spanHContent.querySelector('small[table]');
-				const smallCube = spanHContent.querySelector('small[cube]');
-				const iEdit = spanHContent.querySelector('i');
-				section.dataset.relatedObject = 'cube';
-				section.dataset.elementSearch = 'search-exist-metrics';
-				section.dataset.label = metric.name;
-				section.dataset.cubeToken = cubeToken;
-				// TODO: da rivedere
-				// if (metric.metric_type !== 1) {
-					selectable.dataset.tableName = value.FACT;
-					selectable.dataset.tableAlias = value.alias;
-				// } else {
-					// metricha di base composta
-					selectable.dataset.cubeToken = cubeToken;
-				// }
-				// div.dataset.cubeToken = cubeToken;
-				selectable.dataset.metricToken = metric.token;
-				selectable.dataset.metricType = metric.metric_type;
-				// div.dataset.label = metric.name;
-				selectable.onclick = app.handlerMetricSelected;
-				iEdit.onclick = app.handlerMetricEdit; // TODO: implementare
-				span.innerText = metric.name;
-				smallTable.innerText = value.FACT;
-				smallCube.innerText = value.name;
-				ul.appendChild(section);
-			});
-		}
-	}
+            StorageMetric.cubeMetrics = cubeToken;
+            // recupero le metriche di base 0, base composte 1, avanzate 2
+            // console.log(StorageMetric.baseAdvancedMetrics.size);
+            StorageMetric.baseAdvancedMetrics.forEach( metric => {
+                // console.log('metric : ', metric);
+                const contentElement = app.tmplList.content.cloneNode(true);
+                const section = contentElement.querySelector('section[data-sublist-metrics]');
+                const spanHContent = section.querySelector('.h-content');
+                const selectable = spanHContent.querySelector('.selectable');
+                const span = spanHContent.querySelector('span[metric]');
+                const smallTable = spanHContent.querySelector('small[table]');
+                const smallCube = spanHContent.querySelector('small[cube]');
+                const btnInfo = spanHContent.querySelector('button[data-info-object-token]');
+                const btnEdit = spanHContent.querySelector('button[data-object-token]');
+                section.dataset.relatedObject = 'cube';
+                section.dataset.elementSearch = 'search-exist-metrics';
+                section.dataset.label = metric.name;
+                section.dataset.cubeToken = cubeToken;
+                // TODO: da rivedere
+                // if (metric.metric_type !== 1) {
+                selectable.dataset.tableName = value.FACT;
+                selectable.dataset.tableAlias = value.alias;
+                // } else {
+                // metricha di base composta
+                selectable.dataset.cubeToken = cubeToken;
+                // }
+                // div.dataset.cubeToken = cubeToken;
+                selectable.dataset.metricToken = metric.token;
+                selectable.dataset.metricType = metric.metric_type;
+                // div.dataset.label = metric.name;
+                selectable.onclick = app.handlerMetricSelected;
+                (metric.metric_type === 2) ? btnInfo.dataset.infoObjectToken = metric.token : btnInfo.hidden = 'true';
+                btnEdit.dataset.objectToken = metric.token;
+                btnEdit.onclick = app.handlerMetricEdit; // TODO: implementare
+                span.innerText = metric.name;
+                smallTable.innerText = value.FACT;
+                smallCube.innerText = value.name;
+                ul.appendChild(section);
+            });
+        }
+    }
 
 	// lista metriche composte
 	app.getCompositeMetrics = () => {
@@ -938,7 +948,6 @@ var StorageMetric = new MetricStorage();
 		// const dimensionSelectedCount = document.querySelectorAll('#ul-dimensions .selectable[data-selected]').length;
 		if (Query.dimensions.size === 0) {
 			App.showConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
-			return;
 		} else {
 			Query.table = e.currentTarget.dataset.tableName;
 			Query.tableAlias = e.currentTarget.dataset.tableAlias;
@@ -1409,45 +1418,47 @@ var StorageMetric = new MetricStorage();
 
 	// aggiungo la metrica appena creata alla <ul> (metrica composta)
 	app.addCompositeMetric = () => {
-		const ul = document.getElementById('ul-exist-composite-metrics');
-		const contentElement = app.tmplList.content.cloneNode(true);
-		const section = contentElement.querySelector('section[data-sublist-composite-metrics]');
-		const spanHContent = section.querySelector('.h-content');
-		const selectable = spanHContent.querySelector('.selectable');
-		const smalls = selectable.querySelector('.smalls');
-		const spanMetric = spanHContent.querySelector('span[metric]');
-		section.dataset.relatedObject = 'cube';
-		// non esiste nessun cubo legato a una metrica composta, quindi la rendo subito visibile
-		section.hidden = false;
-		// const smallTable = spanHContent.querySelector('small[table]');
-		// const smallCube = spanHContent.querySelector('small[cube]');
-		section.dataset.elementSearch = 'search-exist-metrics';
-		section.dataset.label = StorageMetric.selected.name; // ricerca
-		// section.dataset.cubeToken = cubeToken;
-		selectable.dataset.metricToken = StorageMetric.selected.token;
+        const ul = document.getElementById('ul-exist-composite-metrics');
+        const contentElement = app.tmplList.content.cloneNode(true);
+        const section = contentElement.querySelector('section[data-sublist-composite-metrics]');
+        const spanHContent = section.querySelector('.h-content');
+        const selectable = spanHContent.querySelector('.selectable');
+        const smalls = selectable.querySelector('.smalls');
+        const spanMetric = spanHContent.querySelector('span[metric]');
+        const btnInfo = spanHContent.querySelector('button[data-info-object-token]')
+        const btnEdit = spanHContent.querySelector('button[data-object-token]')
+        section.dataset.relatedObject = 'cube';
+        // non esiste nessun cubo legato a una metrica composta, quindi la rendo subito visibile
+        section.hidden = false;
+        // const smallTable = spanHContent.querySelector('small[table]');
+        // const smallCube = spanHContent.querySelector('small[cube]');
+        section.dataset.elementSearch = 'search-exist-metrics';
+        section.dataset.label = StorageMetric.selected.name; // ricerca
+        // section.dataset.cubeToken = cubeToken;
+        selectable.dataset.metricToken = StorageMetric.selected.token;
         selectable.dataset.metricType = StorageMetric.selected.metric_type;
-		// selectable.dataset.tableName = value.FACT;
-		// selectable.dataset.tableAlias = value.alias;
-		// selectable.dataset.cubeToken = cubeToken;
-		selectable.onclick = app.handlerMetricSelected;
-		spanMetric.innerText = StorageMetric.selected.name;
-		// per ogni cubo in StorageMetric.selected.metric_cubes
-		for ( const [cubeToken, cube] of Object.entries(StorageMetric.selected.cubes)) {
-			// debugger;
-			const contentSub = app.tmplSublists.content.cloneNode(true);
-			const small = contentSub.querySelector('small');
-			small.dataset.cubeToken = cubeToken;
-			// small.dataset.metricToken = StorageMetric.selected.token;
-			// small.dataset.searchable = true;
-			// small.dataset.tableAlias = table.alias;
-			// small.dataset.tableId = tableId;
-			// small.dataset.elementSearch = 'search-hierarchy';
-			small.innerText = cube;
-			small.dataset.attr = cube+'test';
-			smalls.appendChild(small);
-		}
-		ul.appendChild(section);
-	}
+        // selectable.dataset.tableName = value.FACT;
+        // selectable.dataset.tableAlias = value.alias;
+        // selectable.dataset.cubeToken = cubeToken;
+        selectable.onclick = app.handlerMetricSelected;
+        spanMetric.innerText = StorageMetric.selected.name;
+        // per ogni cubo in StorageMetric.selected.metric_cubes
+        for ( const [cubeToken, cube] of Object.entries(StorageMetric.selected.cubes)) {
+            // debugger;
+            const contentSub = app.tmplSublists.content.cloneNode(true);
+            const small = contentSub.querySelector('small');
+            small.dataset.cubeToken = cubeToken;
+            // small.dataset.metricToken = StorageMetric.selected.token;
+            // small.dataset.searchable = true;
+            // small.dataset.tableAlias = table.alias;
+            // small.dataset.tableId = tableId;
+            // small.dataset.elementSearch = 'search-hierarchy';
+            small.innerText = cube;
+            small.dataset.attr = cube+'test';
+            smalls.appendChild(small);
+        }
+        ul.appendChild(section);
+    }
 
 	// save compositeMetric
 	app.btnCompositeMetricSave.onclick = (e) => {
@@ -2375,20 +2386,66 @@ var StorageMetric = new MetricStorage();
 		// e.preventDefault();
 	}
 
-	// NOTE: esempio di utilizzo di MutationObserver
-	/*
-	const columnName = document.getElementById('columnName');
+    app.showAbsoluteWindow = (e) => {
+        const pos = () => {
+            let x,y;
+            const left = e.target.getBoundingClientRect().left;
+            const right = e.target.getBoundingClientRect().right;
+            const top = e.target.getBoundingClientRect().top;
+            const bottom = e.target.getBoundingClientRect().bottom;
+            let centerElementW = left + ((right - left) / 2);
+            const elementWidth = app.absoluteWindow.offsetWidth / 2;
+
+            y = bottom + 5;
+            x = centerElementW - elementWidth;
+            return {x,y};
+        }
+
+        app.absoluteWindow.style.setProperty('--left', pos().x + "px");
+        // app.tooltip.style.setProperty('--left', xPosition + "px");
+        app.absoluteWindow.style.setProperty('--top', pos().y + "px");
+        // app.tooltip.style.setProperty('--top', yPosition + "px");
+        /*app.popup.animate([
+        {transform: 'scale(.2)'},
+        {transform: 'scale(1.2)'},
+        {transform: 'scale(1)'}
+        ], { duration: 50, easing: 'ease-in-out', delay: 1000 });*/
+
+        // console.log(e.target.getBoundingClientRect().bottom);
+        // console.log(e.target.getBoundingClientRect().left);
+        // console.log(' : ', rect);
+	}
+
+    app.showInfoObject = (e) => {
+        console.log(e.target);
+        const storage = new Storages();
+        storage.selected = e.target.dataset.infoObjectToken;
+        app.absoluteWindow.dataset.open = 'true';
+        app.absoluteWindow.querySelector('*[data-object-name]').innerText = storage.selected.name;
+        //debugger;
+        switch (storage.selected.type) {
+            case 'METRIC':
+                app.absoluteWindow.querySelector('*[data-object-alias]').innerText = storage.selected.formula.alias;
+                storage.selected.formula.filters.forEach(token => {
+                    StorageFilter.selected = token;
+                    app.absoluteWindow.querySelector('span[data-filter]').innerText = StorageFilter.selected.formula;
+                });
+                break;
+            default:
+                break;
+        }
+        app.showAbsoluteWindow(e);
+    }
+
+	const body = document.getElementById('body');
     // create a new instance of `MutationObserver` named `observer`,
 	// passing it a callback function
 	const observer = new MutationObserver(function() {
 	    console.log('callback that runs when observer is triggered');
-	    // debugger;
-	    // console.log(fields);
-	    (columnName.value.length > 0) ? columnName.parentElement.querySelector('label').classList.add('has-content') : columnName.parentElement.querySelector('label').classList.remove('has-content');
+	    body.querySelectorAll('*[data-info-object-token]').forEach( element => element.addEventListener('click', app.showInfoObject));
 	});
 	// call `observe()` on that MutationObserver instance,
 	// passing it the element to observe, and the options object
-	observer.observe(columnName, {subtree: true, childList: true, attributes: true});
-	*/
+	observer.observe(body, {subtree: true, childList: true, attributes: true});
 
 })();

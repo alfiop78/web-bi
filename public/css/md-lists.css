@@ -27,17 +27,17 @@ section[data-sublist-fields] > .selectable[data-relation][data-relation-id="true
 section[data-sublist-fields] > .selectable[metrics] i[data-id="metric-icon"]{color: #587850; visibility: visible;}
 
 /*visualizzo icona su hover section*/
-section[data-sublist-columns] i{visibility: hidden;}
-section[data-sublist-columns]:hover i{visibility: visible;}
+section[data-sublist-columns] button{visibility: hidden;}
+section[data-sublist-columns]:hover button{visibility: visible;}
 
-section[data-sublist-filters] i{visibility: hidden;}
-section[data-sublist-filters]:hover i{visibility: visible;}
+section[data-sublist-filters] button{visibility: hidden;}
+section[data-sublist-filters]:hover button{visibility: visible;}
 
-section[data-sublist-metrics] i{visibility: hidden;}
-section[data-sublist-metrics]:hover i{visibility: visible;}
+section[data-sublist-metrics] button{visibility: hidden;}
+section[data-sublist-metrics]:hover button{visibility: visible;}
 
-section[data-sublist-composite-metrics] i{visibility: hidden;}
-section[data-sublist-composite-metrics]:hover i{visibility: visible;}
+section[data-sublist-composite-metrics] button{visibility: hidden;}
+section[data-sublist-composite-metrics]:hover button{visibility: visible;}
 
 /*dialog lists*/
 .dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}

@@ -36,7 +36,11 @@ window.onload = function() {
 	});*/
 
 	/* tasto cancel nelle dialog*/
-	document.querySelectorAll("button[name='cancel']").forEach((btn) => {
-		btn.onclick = function() {document.querySelector('dialog[open]').close();}
+	document.querySelectorAll("button[name='cancel']").forEach( btn => {
+		btn.onclick = () => document.querySelector('dialog[open]').close();
+	});
+
+    document.querySelectorAll("button[name='cancelAbsoluteWindow']").forEach( btn => {
+		btn.onclick = () => delete document.querySelector('#absolute-window').dataset.open;
 	});
 };

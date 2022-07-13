@@ -27,6 +27,22 @@
 	</head>
 	<body>
 
+        <div id="absolute-window" class="absolute-window">
+            <section class="window-title">
+                <h5 data-object-name></h5>
+                <h6 data-object-alias></h6>
+            </section>
+            <div class="content-window">
+                <div>
+                    <span>Filtri</span>
+                    <span data-filter></span>
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button type="button" name="cancelAbsoluteWindow" class="md-button">chiudi</button>
+            </div>
+        </div>
+
         <dialog id="dialog-sqlInfo" class="large-dialog">
             <section class="dialog-sections">
 				<h4>INFO SQL</h4>
@@ -385,7 +401,7 @@
 											<small table></small>
 											<small hier></small>
 										</div>
-										<i class="material-icons md-18">edit</i>
+                                        <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom" disabled>edit</button>
 									</div>
 								</div>
 							</section>
@@ -399,7 +415,7 @@
 											<small table></small>
 											<small></small>
 										</div>
-										<i class="material-icons md-18">edit</i>
+										<button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom" disabled>edit</button>
 									</div>
 								</div>
 							</section>
@@ -412,10 +428,9 @@
 											<span metric class="highlight metrics-color"></span>
 											<small table></small>
 											<small cube></small>
-											{{-- TODO: qui, sulle metriche filtrate potrei visualizzare un popup con l'elenco dei filtri. --}}
 										</div>
-										<i class="material-icons-round md-18">info</i>
-										<i class="material-icons-round md-18">edit</i>
+										<button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Dettaglio" flow="bottom">info</button>
+										<button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom" disabled>edit</button>
 									</div>
 								</div>
 							</section>
@@ -429,7 +444,8 @@
 											{{-- TODO: per le metriche composte, visualizzarne, nel popup, l'elenco dei cubi utilizzati dalle metriche all'interno della formula --}}
 											<div class="smalls"></div>
 										</div>
-										<i class="material-icons md-18">edit</i>
+										<button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Dettaglio" flow="bottom" disabled>info</button>
+										<button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom" disabled>edit</button>
 									</div>
 								</div>
 							</section>
