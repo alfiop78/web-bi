@@ -24,8 +24,7 @@ class Queries {
 
 		document.querySelectorAll("*[data-include-query]").forEach( tableRef => delete tableRef.dataset.includeQuery);
 		for ( const [key, value] of Query.objects ) {
-			// debugger;
-			if (!value.hasOwnProperty('cube')) {
+			if (!value.cubeToken) {
 				// ha la prop hierarchies : {hierToken: tableId}
 				// per ogni dimensione presente nell'oggetto (es.: filtri multipli)
 				value.dimensions.forEach( token => {

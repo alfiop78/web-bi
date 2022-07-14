@@ -864,23 +864,12 @@ var StorageMetric = new MetricStorage();
 		} else {
 			e.currentTarget.toggleAttribute('data-selected');
 			// verifico le gerarchie incluse nel filtro selezionato (modifica filtro multiplo)
-			if (!StorageFilter.selected.hasOwnProperty('cube')) {
-				// filtro su un livello dimensionale
-				Query.objects = {
-                    token : e.currentTarget.dataset.filterToken,
-                    // tableId : StorageFilter.selected.tableId,
-                    // hierToken : StorageFilter.selected.hier.token,
-                    hierarchies : StorageFilter.selected.hierarchies,
-                    // dimension : StorageFilter.selected.dimensionToken
-                    dimensions : StorageFilter.selected.dimensions
-                };
-			} else {
-				// filtro sul cubo
-				Query.objects = {
-					token : e.currentTarget.dataset.filterToken,
-					cubeToken : StorageFilter.selected.cube
-				};
-			}
+			Query.objects = {
+                token : e.currentTarget.dataset.filterToken,
+                cubeToken : StorageFilter.selected.cubeToken,
+                hierarchies : StorageFilter.selected.hierarchies,
+                dimensions : StorageFilter.selected.dimensions
+            };
 			// console.log(StorageFilter.selected.formula);
 			// nel salvare il filtro nel report attuale devo impostarne anche l'alias della tabella selezionata nella dialog
             Query.filters = StorageFilter.selected;
@@ -975,7 +964,7 @@ var StorageMetric = new MetricStorage();
 			// la FACT table non ha un data-table-id
 			if (e.currentTarget.hasAttribute('data-table-id')) {
 				StorageDimension.selected = e.currentTarget.dataset.dimensionToken;
-				Query.tableId = e.currentTarget.dataset.tableId;
+				Query.tableId = +e.currentTarget.dataset.tableId;
 				Query.field = {[Query.columnToken] : StorageDimension.selected.hierarchies[e.currentTarget.dataset.hierToken].columns[Query.tableAlias][Query.columnToken]};
 			} else {
 				StorageCube.selected = e.currentTarget.dataset.cubeToken;
@@ -1013,7 +1002,7 @@ var StorageMetric = new MetricStorage();
 		const dimension = e.currentTarget.dataset.dimensionToken;
 		Query.table = e.currentTarget.getAttribute('label'); // TODO: impostare data-label
 		Query.tableAlias = e.currentTarget.dataset.tableAlias;
-		Query.tableId = e.currentTarget.dataset.tableId;
+		Query.tableId = +e.currentTarget.dataset.tableId;
 		const hier = e.currentTarget.dataset.hierToken;
 		// deseleziono le precedenti tabelle selezionate
 		// let activeDialog = document.querySelector('dialog[open]');
@@ -1050,18 +1039,12 @@ var StorageMetric = new MetricStorage();
             Query.tableAlias = e.currentTarget.dataset.tableAlias;
             Query.schema = e.currentTarget.dataset.schema;
             if (e.currentTarget.hasAttribute('data-hier-token')) {
-                Query.tableId = e.currentTarget.dataset.tableId;
+                Query.tableId = +e.currentTarget.dataset.tableId;
                 Query.hierToken = e.currentTarget.dataset.hierToken;
-                // Query.hierName = e.currentTarget.dataset.hierName;
                 Query.dimensionToken = e.currentTarget.dataset.dimensionToken;
-                //app.dialogFilter.querySelector('section').dataset.hierToken = e.currentTarget.dataset.hierToken;
-                //app.dialogFilter.querySelector('section').dataset.hierName = e.currentTarget.dataset.hierName;
-                //app.dialogFilter.querySelector('section').dataset.dimensionToken = e.currentTarget.dataset.dimensionToken;
             } else {
                 // selezione di una tabella della Fact, elimino l'attributo data-hier-token perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
                 // TODO: da ricontrollare se questi due attributi vengono utilizzati quando si seleziona una tabella appartenente a una dimensione->hier
-                //delete app.dialogFilter.querySelector('section').dataset.hierToken;
-                //delete app.dialogFilter.querySelector('section').dataset.dimensionToken;
                 Query.tableId = null;
                 // StorageCube.selected = e.currentTarget.dataset.cubeToken;
                 Query.cubeToken = e.currentTarget.dataset.cubeToken;
@@ -2070,24 +2053,26 @@ var StorageMetric = new MetricStorage();
                 debugger;
                 if (Object.keys(StorageFilter.selected.hierarchies).length !== 0) {
                     // filtro appartenente a un livello dimensionale. Ciclare tutte le gerarchie presenti nel filtro multiplo creato
-                    
-                    const hier = document.querySelector("#ul-hierarchies .selectable[data-dimension-token='"+StorageFilter.selected.dimensionToken+"'][data-hier-token='"+StorageFilter.selected.hier.token+"']");
-                    hier.querySelectorAll("small").forEach( tableRef => {
-                        FROM.set(tableRef.dataset.tableAlias, `${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);
-                        StorageDimension.selected = tableRef.dataset.dimensionToken;
-                        // per ogni dimensione contenuta all'interno del filtro recupero le join con il cubo
-                        for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
-                            for (const [token, join] of Object.entries(joins)) {
-                                WHERE.set(token, join);
-                            }
-                        }
-                        // per l'ultima tabella della gerarchia non esiste la join perchè è quella che si lega al cubo e il legame è fatto nella proprietà 'cubes' della dimensione
-                        if (StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias]) {
-                            for (const [token, join] of Object.entries(StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias])) {
-                                WHERE.set(token, join);
-                            }
-                        }
-                    });
+                    for (const [token, tableId] of Object.entries(StorageFilter.selected.hierarchies)) {
+                    	const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+token+"']");
+                    	hier.querySelectorAll("small").forEach( tableRef => {
+	                        FROM.set(tableRef.dataset.tableAlias, `${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);
+	                        StorageDimension.selected = tableRef.dataset.dimensionToken;
+	                        // TODO: utilizzando la dimensione presente sul ref nel DOM della gerarchia, forse posso eliminarlo dall'oggetto filter che salvo e lasciare solo le gerarchie
+	                        // per ogni dimensione contenuta all'interno del filtro recupero le join con il cubo
+	                        for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
+	                            for (const [token, join] of Object.entries(joins)) {
+	                                WHERE.set(token, join);
+	                            }
+	                        }
+	                        // per l'ultima tabella della gerarchia non esiste la join perchè è quella che si lega al cubo e il legame è fatto nella proprietà 'cubes' della dimensione
+	                        if (StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias]) {
+	                            for (const [token, join] of Object.entries(StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias])) {
+	                                WHERE.set(token, join);
+	                            }
+	                        }
+	                    });
+                    }
                 } else {
                     // il filtro contenuto nella metrica è un filtro della FACT
                     // document.querySelector("#ul-cubes .selectable[data-cube-token='"++"'][data-selected]")
