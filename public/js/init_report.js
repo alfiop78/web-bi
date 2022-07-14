@@ -917,22 +917,22 @@ var StorageMetric = new MetricStorage();
 		app.checkObjectSelected();
 	}
 
-	// selezione di una metrica per la creazione di una metrica composta
-	app.handlerMetricSelectedComposite = (e) => {
-		// aggiungo la metrica alla textarea
-		Query.table = e.currentTarget.dataset.tableName;
-		const textArea = document.getElementById('composite-metric-formula');
-		// creo uno span con dentro la metrica
-		const mark = document.createElement('mark');
-		mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
-		mark.innerText = e.currentTarget.dataset.label;
-		textArea.appendChild(mark);
-		// aggiungo anche uno span per il proseguimento della scrittura della formula
-		let span = document.createElement('span');
-		span.setAttribute('contenteditable', true);
-		textArea.appendChild(span);
-		span.focus();
-	}
+    // selezione di una metrica per la creazione di una metrica composta
+    app.handlerMetricSelectedComposite = (e) => {
+        // aggiungo la metrica alla textarea
+        Query.table = e.currentTarget.dataset.tableName;
+        const textArea = document.getElementById('composite-metric-formula');
+        // creo uno span con dentro la metrica
+        const mark = document.createElement('mark');
+        mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
+        mark.innerText = e.currentTarget.dataset.label;
+        textArea.appendChild(mark);
+        // aggiungo anche uno span per il proseguimento della scrittura della formula
+        let span = document.createElement('span');
+        span.setAttribute('contenteditable', 'true');
+        textArea.appendChild(span);
+        span.focus();
+    }
 
     // div contenteditable della formula per la metrica composta
     document.getElementById('composite-metric-formula').onclick = (e) => {
@@ -1046,14 +1046,14 @@ var StorageMetric = new MetricStorage();
             app.btnSearchValue.disabled = true;
             // query per visualizzare tutti i field della tabella
             e.currentTarget.toggleAttribute('data-selected');
-            // probabilmente non serve più qui memorizzare Query.table, tableAlias e schema, posso metterli nello span[conteneditable] all'interno della formula.
-            // ...in questo modo, quando si salva il filtro riesco lo stesso a creare le prop table, tableAlias e schema
 
             Query.table = e.currentTarget.dataset.tableName;
             Query.tableAlias = e.currentTarget.dataset.tableAlias;
             Query.schema = e.currentTarget.dataset.schema;
             if (e.currentTarget.hasAttribute('data-hier-token')) {
                 Query.tableId = e.currentTarget.dataset.tableId;
+                Query.hierToken = e.currentTarget.dataset.hierToken;
+                Query.dimensionToken = e.currentTarget.dataset.dimensionToken;
                 //app.dialogFilter.querySelector('section').dataset.hierToken = e.currentTarget.dataset.hierToken;
                 //app.dialogFilter.querySelector('section').dataset.hierName = e.currentTarget.dataset.hierName;
                 //app.dialogFilter.querySelector('section').dataset.dimensionToken = e.currentTarget.dataset.dimensionToken;
@@ -1062,7 +1062,9 @@ var StorageMetric = new MetricStorage();
                 // TODO: da ricontrollare se questi due attributi vengono utilizzati quando si seleziona una tabella appartenente a una dimensione->hier
                 //delete app.dialogFilter.querySelector('section').dataset.hierToken;
                 //delete app.dialogFilter.querySelector('section').dataset.dimensionToken;
+                Query.tableId = null;
                 StorageCube.selected = e.currentTarget.dataset.cubeToken;
+                Query.cubeToken = e.currentTarget.dataset.cubeToken;
             }
             // pulisco la <ul> dialog-filter-fields contenente la lista dei campi recuperata dal db, della selezione precedente
             app.dialogFilter.querySelectorAll('#dialog-filter-fields > section').forEach( section => section.remove());
@@ -1178,18 +1180,36 @@ var StorageMetric = new MetricStorage();
     app.handlerSelectField = (e) => {
         // field selezionato
         Query.field = e.currentTarget.dataset.label;
-        debugger;
         Query.fieldType = e.currentTarget.dataset.type;
-        Query.schema = e.currentTarget.dataset.schema;
         // ul con i valori contenuti nella colonna
         const valueList = app.dialogValue.querySelector('#ul-filter-values');
         valueList.querySelectorAll('section').forEach( section => section.remove());
 
-
-        const textarea = document.getElementById('filterSQLFormula');
-        textarea.value = (textarea.value.length === 0) ? Query.field+" = " : textarea.value + Query.field;
+        const textarea = document.getElementById('composite-filter-formula');
+        const mark = document.createElement('mark');
+        // aggiungo il tableAlias come attributo. In questo modo visualizzo Azienda.id ma quando andrò a salvare
+        // ... il filtro salverò Azienda_333.id...
+        mark.dataset.tableAlias = Query.tableAlias;
+        // differenziare per livello dimensionale / livello associato al cubo
+        //debugger;
+        if (Query.tableId === null) {
+            // tabella selezionata è la FACT
+            mark.dataset.cubeToken = Query.cubeToken;
+        } else {
+            mark.dataset.tableId = Query.tableId;
+            mark.dataset.hierToken = Query.hierToken;
+            mark.dataset.dimensionToken = Query.dimensionToken;
+            mark.dataset.field = Query.field;
+        }
+        mark.innerText = `${Query.table}.${Query.field}`;
+        textarea.appendChild(mark);
+        const span = document.createElement('span');
+        span.setAttribute('contenteditable', 'true');
+        textarea.appendChild(span);
+        span.focus();
+        // TODO: checkFormulaValid()
         app.btnSearchValue.disabled = false;
-        textarea.focus();
+        app.btnFilterSave.disabled = false;
     }
 
     app.addFields = (response) => {
@@ -1491,7 +1511,7 @@ var StorageMetric = new MetricStorage();
     }
 
 	// save compositeMetric
-	app.btnCompositeMetricSave.onclick = (e) => {
+	app.btnCompositeMetricSave.onclick = () => {
 		const name = document.getElementById('composite-metric-name').value;
 		const alias = document.getElementById('composite-alias-metric').value;
 		let arr_sql = [];
@@ -1560,65 +1580,108 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// save filter
-	app.btnFilterSave.onclick = (e) => {
-		console.log(Query.table);
-		// per i filtri creati sulla Fact, hier e dimension devono essere = null ma và salvato, nel filtro, il nome del cubo a cui accede
-		let hierToken, hierName, dimension;
-		const textarea = document.getElementById('filterSQLFormula');
-		let filterName = document.getElementById('filterName');
-		//const rand = () => Math.random(0).toString(36).substr(2);
-		const token = rand().substr(0, 21);
-		const date = new Date();
-		// const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
-		const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
-		let filterObject = {};
-		// la creazione di un filtro su un livello dimensionale salva il filtro con, all'interno, le proprietà dimension e hier.
-		// Un filtro impostato la FACT avrà al suo interno il nome del cubo a cui è associato e l'alias della FACT
-		if (app.dialogFilter.querySelector('section').hasAttribute('data-hier-token')) {
-			hierToken = app.dialogFilter.querySelector('section').dataset.hierToken;
-			hierName = app.dialogFilter.querySelector('section').dataset.hierName;
-			dimensionToken = app.dialogFilter.querySelector('section').dataset.dimensionToken;
-			// NOTE: inizializzazione di un Map con un Object
-			/*filterObject = new Map([
-				[token, {token, 'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, dimension, hier}]
-			]);*/
-			filterObject = {
-				token,
-				type: 'FILTER',
-				name: filterName.value,
-				table: Query.table,
-				tableAlias : Query.tableAlias,
-				tableId : Query.tableId,
-				formula : textarea.value,
-				dimensionToken,
-				hier : {token : hierToken, name: hierName},
-				created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options)
-			};
-		} else {
-			filterObject = {
-				token,
-				type: 'FILTER',
-				name: filterName.value,
-				table: Query.table,
-				tableAlias : Query.tableAlias,
-				formula : textarea.value,
-				cubeToken : StorageCube.selected.token,
-				alias : StorageCube.selected.alias,
-				created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options)				
-			};
-		}
-		StorageFilter.save(filterObject);
-		StorageFilter.selected = token;
-		// salvataggio nel DB
-		// app.saveFilterDB(filterObject);
-		// reset del form
-		filterName.value = "";
-		filterName.focus();
-		textarea.value = "";
-		// aggiorno la lista dei filtri esistenti, aggiungendo il filtro appena creato		
-		// TODO: utilizzare la stessa logica di addReport
-		app.addFilter('ul-exist-filters');
-	}
+    app.btnFilterSave.onclick = () => {
+        console.log(Query.table);
+        // per i filtri creati sulla Fact, hier e dimension devono essere = null ma và salvato, nel filtro, il nome del cubo a cui accede
+        let hierToken, hierName, dimensionToken;
+        const textarea = document.getElementById('composite-filter-formula');
+        let filterName = document.getElementById('filterName');
+        //const rand = () => Math.random(0).toString(36).substr(2);
+        const token = rand().substr(0, 21);
+        const date = new Date();
+        // const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+        let filterObject = {};
+        let sql_formula = [];
+        let hierarchies = new Map(); // tabelle (e quindi gerarchie) utilizzate nel filtro
+        //let dimensions = [];
+        // la creazione di un filtro su un livello dimensionale salva il filtro con, all'interno, le proprietà dimension e hier.
+        // Un filtro impostato la FACT avrà al suo interno il nome del cubo a cui è associato e l'alias della FACT
+        document.querySelectorAll('#composite-filter-formula *').forEach( element => {
+            console.log(element);
+            debugger
+            // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
+            // ... altrimenti devo recuperare il cubeToken. Ci sono anche filtri che possono essere fatti su un livello dimensionale e su una FACT
+            if (element.nodeName === 'MARK') {
+                if (element.dataset.tableId) {
+                    // tabella appartenente a un livello dimensionale
+                    sql_formula.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
+                    //sql_formula.push(element.innerText.trim());
+                    //debugger;
+                    if (hierarchies.has(element.dataset.hierToken)) {
+                        if (+element.dataset.tableId < hierarchies.get(element.dataset.hierToken)) {
+                            hierarchies.set(element.dataset.hierToken, +element.dataset.tableId);
+                        }
+                    } else {
+                        hierarchies.set(element.dataset.hierToken, +element.dataset.tableId);
+                    }
+                } else {
+                    // tabella appartenente alla FACT
+                }
+            } else {
+                sql_formula.push(element.innerText.trim());
+            }
+        });
+        console.log(sql_formula);
+        console.log(hierarchies);
+        filterObject = {
+            token,
+            type: 'FILTER',
+            name: filterName.value,
+            formula : sql_formula.join(' '), // Azienda_444.id = 43
+            //dimensionToken,
+            hierarchies : Object.fromEntries(hierarchies),
+            created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options)
+        };
+        debugger;
+        //--------------------------------------------
+
+        if (app.dialogFilter.querySelector('section').hasAttribute('data-hier-token')) {
+            debugger;
+            //hierToken = app.dialogFilter.querySelector('section').dataset.hierToken;
+            //hierName = app.dialogFilter.querySelector('section').dataset.hierName;
+            //dimensionToken = app.dialogFilter.querySelector('section').dataset.dimensionToken;
+            // NOTE: inizializzazione di un Map con un Object
+            /*filterObject = new Map([
+            [token, {token, 'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, dimension, hier}]
+            ]);*/
+            filterObject = {
+                token,
+                type: 'FILTER',
+                name: filterName.value,
+                table: Query.table,
+                tableAlias : Query.tableAlias,
+                tableId : Query.tableId,
+                formula : textarea.value,
+                dimensionToken,
+                hier : {token : hierToken, name: hierName},
+                created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options)
+            };
+        } else {
+            filterObject = {
+                token,
+                type: 'FILTER',
+                name: filterName.value,
+                table: Query.table,
+                tableAlias : Query.tableAlias,
+                formula : textarea.value,
+                cubeToken : StorageCube.selected.token,
+                alias : StorageCube.selected.alias,
+                created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options)
+            };
+        }
+        StorageFilter.save(filterObject);
+        StorageFilter.selected = token;
+        // salvataggio nel DB
+        // app.saveFilterDB(filterObject);
+        // reset del form
+        filterName.value = "";
+        filterName.focus();
+        textarea.value = "";
+        // aggiorno la lista dei filtri esistenti, aggiungendo il filtro appena creato
+        // TODO: utilizzare la stessa logica di addReport
+        app.addFilter('ul-exist-filters');
+    }
 
 	// tasto OK nella dialogValue
 	app.btnValueDone.onclick = () => {
@@ -1712,9 +1775,10 @@ var StorageMetric = new MetricStorage();
 
 	// abilito il tasto btnFilterSave se il form per la creazione del filtro è corretto
 	app.checkFilterForm = (check) => {
+        // TODO: Implementazione
 		const filterName = document.getElementById('filterName').value;
-		const filterFormula = document.getElementById('filterSQLFormula').value;
-		((filterName.length !== 0) && (filterFormula.length !== 0) || !check) ? app.btnFilterSave.disabled = false : app.btnFilterSave.disabled = true;
+		//const filterFormula = document.getElementById('filterSQLFormula').value;
+		//((filterName.length !== 0) && (filterFormula.length !== 0) || !check) ? app.btnFilterSave.disabled = false : app.btnFilterSave.disabled = true;
 	}
 
 	// selezione di un operatore logica da inserire nella formula (AND, OR, NOT, ecc...)
@@ -1915,7 +1979,7 @@ var StorageMetric = new MetricStorage();
 		}
 	}
 
-	app.btnSaveReport.onclick = (e) => {
+	app.btnSaveReport.onclick = () => {
         // edit report inserisco il titolo nella input
         (!Query.token) ?
             document.getElementById('reportName').value = '' :
