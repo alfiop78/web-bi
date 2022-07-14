@@ -3,7 +3,7 @@ namespace App\Classes;
 use Illuminate\Support\Facades\DB;
 
 class Cube {
-	private $SELECT, $_fields = array(), $_fieldsSQL, $_columns = array(), $_sql, $_metricTable;
+	private $SELECT, $_fields = array(), $_columns = array(), $_sql;
 	private $FROM_baseTable = array();
     private $FROM_metricTable = array();
     private $WHERE_metricTable = array();

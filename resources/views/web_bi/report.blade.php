@@ -130,78 +130,80 @@
 			
 		</dialog>
 
-		<dialog id="dialog-filter" class="large-dialog">
-			<section class="dialog-sections" data-table-name>
-				<h4>Creazione nuovo filtro</h4>
-				<div class="stepLayout">
+        <dialog id="dialog-filter" class="large-dialog">
+            <section class="dialog-sections" data-table-name>
+                <h4>Creazione nuovo filtro</h4>
+                <div class="stepLayout">
 
-					<section class="sectionLists parent-ul-tables">
-						<h5>Tabelle</h5><h6>Seleziona la tabella</h6>
-						<div class="md-field">
-							<input type="search" data-element-search="search-tables" id="dialog-columns-search-table" value autocomplete="off" />
-							<label for="dialog-columns-search-table" class="">Ricerca</label>
-						</div>
-						<div class="relative-ul">
-							<ul id="ul-tables" class="absolute"></ul>
-						</div>
-					</section>
-					
-					<section class="sectionLists parent-ul-fields">
-						<h5>Colonna/e</h5><h6>Seleziona la colonna</h6>
-						<div class="md-field">
-							<input type="search" id="dialog-filter-search-field" data-element-search="dialog-filter-search-field" value autocomplete="off" />
-							<label for="dialog-filter-search-field" class="">Ricerca</label>
-						</div>
-						<div class="relative-ul">
-							<ul id="dialog-filter-fields" class="absolute"></ul>
-						</div>
-					</section>
+                    <section class="sectionLists parent-ul-tables">
+                        <h5>Tabelle</h5><h6>Seleziona la tabella</h6>
+                        <div class="md-field">
+                            <input type="search" data-element-search="search-tables" id="dialog-columns-search-table" value autocomplete="off" />
+                            <label for="dialog-columns-search-table" class="">Ricerca</label>
+                        </div>
+                        <div class="relative-ul">
+                            <ul id="ul-tables" class="absolute"></ul>
+                        </div>
+                    </section>
 
-					<section class="sectionLists parent-ul-textarea">
-						<h5>SQL</h5><h6>Inserisci una formula SQL</h6>
-						<div class="md-field">
-							<input type="text" id="filterName" name="filterName" autocomplete="off" />
-							<label for="filterName" class="">name</label>
-							<p class="helper"></p>
-						</div>
-						<div>
-							<button type="button" class="button-icon material-icons" id="search-field-values" tooltip="Visualizza valori" flow="bottom" data-field-name disabled>search</button>
-						</div>
-						<div class="md-field">
-							<textarea id="filterSQLFormula" name="filterSQL" rows="10" cols="33" placeholder="SQL"></textarea>
-						</div>
-						<button id="btnFilterSave" type="button" name="save" class="md-button" disabled="true">salva</button>
-					</section>
+                    <section class="sectionLists parent-ul-fields">
+                        <h5>Colonna/e</h5><h6>Seleziona la colonna</h6>
+                        <div class="md-field">
+                            <input type="search" id="dialog-filter-search-field" data-element-search="dialog-filter-search-field" value autocomplete="off" />
+                            <label for="dialog-filter-search-field" class="">Ricerca</label>
+                        </div>
+                        <div class="relative-ul">
+                            <ul id="dialog-filter-fields" class="absolute"></ul>
+                        </div>
+                    </section>
 
-				</div>
+                    <section class="sectionLists parent-ul-textarea">
+                        <h5>SQL</h5><h6>Inserisci una formula SQL</h6>
+                        <div class="md-field">
+                            <input type="text" id="filterName" name="filterName" autocomplete="off" />
+                            <label for="filterName" class="">name</label>
+                            <p class="helper"></p>
+                        </div>
+                        <div>
+                            <button type="button" class="button-icon material-icons" id="search-field-values" tooltip="Visualizza valori" flow="bottom" data-field-name disabled>search</button>
+                        </div>
+                        {{-- <div class="md-field">
+                            <textarea id="filterSQLFormula" name="filterSQL" rows="10" cols="33" placeholder="SQL"></textarea>
+                        </div> --}}
+                        <div id="composite-filter-formula" data-content-editable></div>
+                        {{-- <span>Inserisci qui la formula SQL del filtro</span> --}}
+                        <button id="btnFilterSave" type="button" name="save" class="md-button" disabled>salva</button>
+                    </section>
 
-				<div class="dialog-buttons">
-					<button type="button" name="cancel" class="md-button">annulla</button>
-					<button id="btnFilterDone" type="button" name="done" class="md-button">fatto</button>
-				</div>
-			</section>
-		</dialog>
+                </div>
 
-		<dialog id="dialog-metric-filter" class="small-dialog">
-			<section class="dialog-sections">
-				<h4>Ricerca filtri da impostare per la metrica</h4>
-				<div class="stepLayout">
-					<section class="sectionLists parent-ul-base">						
-						<div class="md-field">
-							<input type="search" id="dialog-metric-filter-search" data-element-search="search-exist-filters" value autocomplete="off" />
-							<label for="dialog-metric-filter-search" class="">Ricerca</label>
-						</div>
-						<div class="relative-ul">
-							<ul id="ul-metric-filter" class="absolute"></ul>
-						</div>	
-					</section>
-				</div>
-				<div class="dialog-buttons">
-					<button type="button" name="cancel" class="md-button">annulla</button>
-					<button id="btnMetricFilterDone" type="button" name="metric-filter-done" class="md-button">ok</button>
-				</div>
-			</section>
-		</dialog>
+                <div class="dialog-buttons">
+                    <button type="button" name="cancel" class="md-button">annulla</button>
+                    <button id="btnFilterDone" type="button" name="done" class="md-button">fatto</button>
+                </div>
+            </section>
+        </dialog>
+
+        <dialog id="dialog-metric-filter" class="small-dialog">
+            <section class="dialog-sections">
+                <h4>Ricerca filtri da impostare per la metrica</h4>
+                <div class="stepLayout">
+                    <section class="sectionLists parent-ul-base">
+                        <div class="md-field">
+                            <input type="search" id="dialog-metric-filter-search" data-element-search="search-exist-filters" value autocomplete="off" />
+                            <label for="dialog-metric-filter-search" class="">Ricerca</label>
+                        </div>
+                        <div class="relative-ul">
+                            <ul id="ul-metric-filter" class="absolute"></ul>
+                        </div>
+                    </section>
+                </div>
+                <div class="dialog-buttons">
+                    <button type="button" name="cancel" class="md-button">annulla</button>
+                    <button id="btnMetricFilterDone" type="button" name="metric-filter-done" class="md-button">ok</button>
+                </div>
+            </section>
+        </dialog>
 
 		<dialog id="dialog-metric" class="large-dialog">
 			<section class="dialog-sections" data-table-name>
@@ -314,7 +316,6 @@
 					<button id="btnMetricDone" type="button" name="done" class="md-button">fatto</button>
 				</div>
 			</section>
-			</div>
 		</dialog>
 
 		<dialog id="dialog-composite-metric" class="large-dialog">
@@ -359,7 +360,6 @@
 					<button id="btnCompositeMetricDone" type="button" name="done" class="md-button">fatto</button>
 				</div>
 			</section>
-			</div>
 		</dialog>
 
 		<main>

@@ -80,33 +80,33 @@ class Queries {
 
 	get dimensions() {return this.#dimensions;}
 
-	set table(value) {this.#table = value;}
+	// set table(value) {this.#table = value;}
 
-	get table() {return this.#table;}
+	// get table() {return this.#table;}
 
-	set tableAlias(value) {this.#tableAlias = value;}
+	// set tableAlias(value) {this.#tableAlias = value;}
 
-	get tableAlias() {return this.#tableAlias;}
+	// get tableAlias() {return this.#tableAlias;}
 
-	set schema(value) {this.#schema = value;}
+	// set schema(value) {this.#schema = value;}
 
-	get schema() {return this.#schema;}
+	// get schema() {return this.#schema;}
 
-	set tableId(value) {this._tableId = +value;}
+	// set tableId(value) {this._tableId = +value;}
 
-	get tableId() {return this._tableId;}
+	// get tableId() {return this._tableId;}
 
-	set field(value) {this._field = value;}
+	// set field(value) {this._field = value;}
 
-	get field() {return this._field;}
+	// get field() {return this._field;}
 
 	set columnToken(value) {this.#columnToken = value;}
 
 	get columnToken() {return this.#columnToken;}
 
-	set fieldType(value) {this._fieldType = value;}
+	// set fieldType(value) {this._fieldType = value;}
 
-	get fieldType() {return this._fieldType;}
+	// get fieldType() {return this._fieldType;}
 
 	set select(value) {
 		(this.#columns.has(value.token)) ? this.#columns.delete(value.token) : this.#columns.set(value.token, value);

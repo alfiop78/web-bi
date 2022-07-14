@@ -20,3 +20,8 @@
 @media screen and (color) and (max-device-width: 360px) {
   #controls{padding: 0 26px;}
 }
+/* elementi con all'interno altri elementi che possono essere contenteditable (es. : textarea SQL formula) */
+*[data-content-editable]{background-color: #e2e2e2; padding: 1em; border-radius: 4px; color: dimgrey;}
+*[data-content-editable] *[contenteditable="true"] {color: black; outline: none;}
+
+span[contenteditable]{margin: 4px; padding: 4px 8px; background-color: tan;}

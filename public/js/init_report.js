@@ -934,17 +934,33 @@ var StorageMetric = new MetricStorage();
 		span.focus();
 	}
 
-	document.getElementById('composite-metric-formula').onclick = (e) => {
-		console.log('e : ', e);
-		console.log('e.target : ', e.target);
-		console.log('e.currentTarget : ', e.currentTarget);
-		if (e.target.localName === 'div') {
-			const span = document.createElement('span');
-			span.setAttribute('contenteditable', true);
-			e.target.appendChild(span);
-			span.focus();
-		}
-	}
+    // div contenteditable della formula per la metrica composta
+    document.getElementById('composite-metric-formula').onclick = (e) => {
+        console.log('e : ', e);
+        console.log('e.target : ', e.target);
+        console.log('e.currentTarget : ', e.currentTarget);
+        if (e.target.localName === 'div') {
+            const span = document.createElement('span');
+            span.setAttribute('contenteditable', 'true');
+            e.target.appendChild(span);
+            span.focus();
+        }
+    }
+
+    // div contenteditable della formula per il filtro
+    document.getElementById('composite-filter-formula').onclick = (e) => {
+        console.log('e : ', e);
+        // elimino lo span che contiene il "placeholder"
+
+        console.log('e.target : ', e.target);
+        console.log('e.currentTarget : ', e.currentTarget);
+        if (e.target.localName === 'div') {
+            const span = document.createElement('span');
+            span.setAttribute('contenteditable', 'true');
+            e.target.appendChild(span);
+            span.focus();
+        }
+    }
 
 	// selezione delle colonne
 	app.handlerSelectColumn = (e) => {
@@ -1016,13 +1032,13 @@ var StorageMetric = new MetricStorage();
 			// visualizzo le colonne appartenenti alla tabella selezionata
 			app.dialogColumns.querySelectorAll("ul[data-id='fields-column'] > section[data-dimension-name='" + dimension + "'][data-hier-token='" + hier + "'][data-table-name='" + Query.table + "']").forEach((field) => {
 				field.hidden = false;
-				field.dataset.searchable = true;
+				field.dataset.searchable = 'true';
 			});
 		}
 	}
 
 	// selezione di una tabella nella dialog-filter
-    app.handlerSelectTable = (e) => {
+    app.handlerSelectTable = async (e) => {
         if (!e.currentTarget.hasAttribute('data-selected')) {
             // de-seleziono le tabelle precedentemente selezionate se ce ne sono
             if (document.querySelector('#ul-tables .selectable[data-selected]')) document.querySelector('#ul-tables .selectable[data-selected]').toggleAttribute('data-selected');
@@ -1030,26 +1046,28 @@ var StorageMetric = new MetricStorage();
             app.btnSearchValue.disabled = true;
             // query per visualizzare tutti i field della tabella
             e.currentTarget.toggleAttribute('data-selected');
+            // probabilmente non serve più qui memorizzare Query.table, tableAlias e schema, posso metterli nello span[conteneditable] all'interno della formula.
+            // ...in questo modo, quando si salva il filtro riesco lo stesso a creare le prop table, tableAlias e schema
+
             Query.table = e.currentTarget.dataset.tableName;
             Query.tableAlias = e.currentTarget.dataset.tableAlias;
             Query.schema = e.currentTarget.dataset.schema;
             if (e.currentTarget.hasAttribute('data-hier-token')) {
                 Query.tableId = e.currentTarget.dataset.tableId;
-                app.dialogFilter.querySelector('section').dataset.hierToken = e.currentTarget.dataset.hierToken;
-                app.dialogFilter.querySelector('section').dataset.hierName = e.currentTarget.dataset.hierName;
-                app.dialogFilter.querySelector('section').dataset.dimensionToken = e.currentTarget.dataset.dimensionToken;
+                //app.dialogFilter.querySelector('section').dataset.hierToken = e.currentTarget.dataset.hierToken;
+                //app.dialogFilter.querySelector('section').dataset.hierName = e.currentTarget.dataset.hierName;
+                //app.dialogFilter.querySelector('section').dataset.dimensionToken = e.currentTarget.dataset.dimensionToken;
             } else {
                 // selezione di una tabella della Fact, elimino l'attributo data-hier-token perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
                 // TODO: da ricontrollare se questi due attributi vengono utilizzati quando si seleziona una tabella appartenente a una dimensione->hier
-                delete app.dialogFilter.querySelector('section').dataset.hierToken;
-                delete app.dialogFilter.querySelector('section').dataset.dimensionToken;
+                //delete app.dialogFilter.querySelector('section').dataset.hierToken;
+                //delete app.dialogFilter.querySelector('section').dataset.dimensionToken;
                 StorageCube.selected = e.currentTarget.dataset.cubeToken;
             }
             // pulisco la <ul> dialog-filter-fields contenente la lista dei campi recuperata dal db, della selezione precedente
             app.dialogFilter.querySelectorAll('#dialog-filter-fields > section').forEach( section => section.remove());
-            app.dialogFilter.querySelector('section').dataset.tableName = e.currentTarget.dataset.tableName;
-            // TODO: qui utilizzare il await come fatto per getTable nel Mapping
-            app.getFields();
+            //app.dialogFilter.querySelector('section').dataset.tableName = e.currentTarget.dataset.tableName;
+            app.addFields(await app.getFields());
         }
     }
 
@@ -1157,67 +1175,67 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// selezione del field nella dialogFilter, questo metodo farà partire la query per ottenere i campi distinti (in getDistinctValues())
-	app.handlerSelectField = (e) => {
-		// field selezionato
-		Query.field = e.currentTarget.getAttribute('label'); // TODO: dataset data-label
-		Query.fieldType = e.currentTarget.dataset.type;
-		Query.schema = e.currentTarget.dataset.schema;
-		const valueList = app.dialogValue.querySelector('#ul-filter-values');
-		valueList.querySelectorAll('section').forEach( section => section.remove());
-		const textarea = document.getElementById('filterSQLFormula');
-		textarea.value = (textarea.value.length === 0) ? Query.field+" = " : textarea.value + Query.field;
-		app.btnSearchValue.disabled = false;
-		textarea.focus();
-	}
+    app.handlerSelectField = (e) => {
+        // field selezionato
+        Query.field = e.currentTarget.dataset.label;
+        debugger;
+        Query.fieldType = e.currentTarget.dataset.type;
+        Query.schema = e.currentTarget.dataset.schema;
+        // ul con i valori contenuti nella colonna
+        const valueList = app.dialogValue.querySelector('#ul-filter-values');
+        valueList.querySelectorAll('section').forEach( section => section.remove());
+
+
+        const textarea = document.getElementById('filterSQLFormula');
+        textarea.value = (textarea.value.length === 0) ? Query.field+" = " : textarea.value + Query.field;
+        app.btnSearchValue.disabled = false;
+        textarea.focus();
+    }
+
+    app.addFields = (response) => {
+        const ul = document.getElementById('dialog-filter-fields'); // dove verrà inserita la <ul>
+        // ul.querySelectorAll('section').forEach((el) => {el.remove();});
+        for (const [key, value] of Object.entries(response)) {
+            // console.log(key, value);
+            const content = app.tmplList.content.cloneNode(true);
+            const section = content.querySelector('section[data-sublist-gen]');
+            const selectable = section.querySelector('.selectable');
+            const span = selectable.querySelector('span');
+            section.hidden = false;
+            section.dataset.searchable = true;
+            section.dataset.label = value.COLUMN_NAME;
+            section.dataset.elementSearch = 'dialog-filter-search-field';
+            //section.dataset.tableName = Query.table;
+            selectable.dataset.schema = Query.schema;
+            // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
+            let pos = value.DATA_TYPE.indexOf('('); // datatype
+            const type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
+            selectable.dataset.type = type;
+            selectable.dataset.label = value.COLUMN_NAME;
+            selectable.dataset.tableName = Query.table;
+            selectable.onclick = app.handlerSelectField;
+            span.innerText = value.COLUMN_NAME;
+            ul.appendChild(section);
+        }
+    }
 
 	// carico elenco colonne dal DB da visualizzare nella dialogFilter
-	app.getFields = async () => {
-		await fetch('/fetch_api/' + Query.schema + '/schema/' + Query.table + '/table_info')
-			.then((response) => {
-				if (!response.ok) { throw Error(response.statusText); }
-				return response;
-			})
-			.then((response) => response.json())
-			.then((data) => {
-			  	console.log(data);
-				if (data) {
-					const ul = document.getElementById('dialog-filter-fields'); // dove verrà inserita la <ul>
-					// ul.querySelectorAll('section').forEach((el) => {el.remove();});
-					for (const [key, value] of Object.entries(data)) {
-						// console.log(key, value);
-						const content = app.tmplList.content.cloneNode(true);
-						const section = content.querySelector('section[data-sublist-gen]');
-						const div = section.querySelector('div.selectable');
-						const span = div.querySelector('span');
-						section.hidden = false;
-						section.dataset.searchable = true;
-						section.dataset.label = value.COLUMN_NAME;
-						section.dataset.elementSearch = 'dialog-filter-search-field';
-						section.dataset.tableName = Query.table;
-						div.dataset.schema = Query.schema;
-						// scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
-						let pos = value.DATA_TYPE.indexOf('('); // datatype
-						let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-						div.dataset.type = type;
-						div.setAttribute('label', value.COLUMN_NAME); // // TODO: dataset data-label
-						div.onclick = app.handlerSelectField;
-						span.innerText = value.COLUMN_NAME;						
-						ul.appendChild(section);
-					}
-				} else {
-					// TODO: no data
-					debugger;
-					console.debug('Dati non recuperati');
-				}
-			})
-			.catch( err => {
-				App.showConsole(err, 'error');
-				console.error(err);
-			});
-	}
+    app.getFields = async () => {
+        return await fetch('/fetch_api/' + Query.schema + '/schema/' + Query.table + '/table_info')
+            .then((response) => {
+                if (!response.ok) { throw Error(response.statusText); }
+                    return response;
+                })
+            .then((response) => response.json())
+            .then(response => response)
+            .catch( err => {
+                App.showConsole(err, 'error');
+                console.error(err);
+            });
+    }
 
 	// tasto 'Fatto' nella dialogFilter
-	app.btnFilterDone.onclick = e => app.dialogFilter.close();
+    app.btnFilterDone.onclick = () => app.dialogFilter.close();
 	
 	// salvataggio della metrica nel db
 	app.saveMetricDB = async (json) => {
@@ -2349,8 +2367,6 @@ var StorageMetric = new MetricStorage();
 		}
 		app.checkFilterForm(check);
 	}
-
-	document.getElementById('filterSQLFormula').oninput = () => app.checkFilterForm(false);
 
 	// selezione di una funzione di aggregazione (dialog-metric)
 	app.aggregationFunction.querySelectorAll('section > .selectable').forEach( (fn) => {
