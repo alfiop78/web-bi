@@ -24,13 +24,21 @@ class Queries {
 
 		document.querySelectorAll("*[data-include-query]").forEach( tableRef => delete tableRef.dataset.includeQuery);
 		for ( const [key, value] of Query.objects ) {
-			if (value.hasOwnProperty('hierToken')) {
-				document.querySelector("#ul-dimensions .selectable[data-dimension-token='"+value.dimension+"']").dataset.includeQuery = 'true';
-				const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+value.hierToken+"']");
-				// converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
-				[...hier.querySelectorAll("small")].filter( (table, index) => index >= value.tableId).forEach( tableRef => {
-					tableRef.dataset.includeQuery = 'true';
+			// debugger;
+			if (!value.hasOwnProperty('cube')) {
+				// ha la prop hierarchies : {hierToken: tableId}
+				// per ogni dimensione presente nell'oggetto (es.: filtri multipli)
+				value.dimensions.forEach( token => {
+					document.querySelector("#ul-dimensions .selectable[data-dimension-token='"+token+"']").dataset.includeQuery = 'true';
 				});
+				for (const [token, tableId] of Object.entries(value.hierarchies)) {
+					// debugger;
+					const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+token+"']");
+					// converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
+					[...hier.querySelectorAll("small")].filter( (table, index) => index >= tableId).forEach( tableRef => {
+						tableRef.dataset.includeQuery = 'true';
+					});					
+				}
 			} else {
 				// elementi del cubo
 				document.querySelectorAll("#ul-cubes .selectable[data-cube-token='"+value.cubeToken+"']").forEach( tableRef => tableRef.dataset.includeQuery = true);
@@ -116,7 +124,7 @@ class Queries {
 	get select() {return this.#columns;}
 
 	set filters(value) {
-        (!this.#filters.has(value.token)) ? this.#filters.set(value.token, {SQL : `${value.tableAlias}.${value.formula}`}) : this.#filters.delete(value.token);
+        (!this.#filters.has(value.token)) ? this.#filters.set(value.token, {SQL : value.formula}) : this.#filters.delete(value.token);
 		console.log('this.#filters : ', this.#filters);
 	}
 

@@ -291,14 +291,14 @@ class FilterStorage extends Storages {
 		}
 	}
 
-	get filters() {
+	/*get filters() {
 		this.filtersObject = {};
 		super.storageK = 'FILTER';
 		for ( const [key, value] of Object.entries(this.st)) {
 			this.filtersObject[key] = value;
 		}
 		return this.filtersObject;
-	}
+	}*/
 
 	// filtri appartenenti a un determinato cubo
 	getFiltersByCube(cubeToken) {
