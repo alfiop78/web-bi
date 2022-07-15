@@ -49,9 +49,9 @@ class Queries {
         this.object.dimensions = [...this.dimensions];
         this.object.columns = Object.fromEntries(this.select);
         this.object.filters = [...this.filters.keys()];
-        debugger;
         this.object.metrics = [...this.metrics.keys()].concat([...this.filteredMetrics.keys()]);
         this.object.compositeMetrics = [...this.compositeMetrics.keys()];
+        debugger;
         return this.object;
     }
 
@@ -82,26 +82,6 @@ class Queries {
 	}
 
 	get dimensions() {return this.#dimensions;}
-
-	// set table(value) {this.#table = value;}
-
-	// get table() {return this.#table;}
-
-	// set tableAlias(value) {this.#tableAlias = value;}
-
-	// get tableAlias() {return this.#tableAlias;}
-
-	// set schema(value) {this.#schema = value;}
-
-	// get schema() {return this.#schema;}
-
-	// set tableId(value) {this._tableId = +value;}
-
-	// get tableId() {return this._tableId;}
-
-	// set field(value) {this._field = value;}
-
-	// get field() {return this._field;}
 
 	set columnToken(value) {this.#columnToken = value;}
 

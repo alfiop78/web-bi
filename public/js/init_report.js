@@ -642,7 +642,6 @@ var StorageMetric = new MetricStorage();
             Query.objects = {
                 token,
                 cubeToken : StorageFilter.selected.cubeToken,
-                tableId : StorageFilter.selected.tableId,
                 hierarchies : StorageFilter.selected.hierarchies,
                 dimensions : StorageFilter.selected.dimensions
             };
@@ -1874,7 +1873,6 @@ var StorageMetric = new MetricStorage();
     }
 
 	app.setFrom = () => {
-        debugger;
 		// imposto la FROM per le gerarchie
 		document.querySelectorAll("#ul-hierarchies section:not([hidden]) .selectable").forEach( hier => {
 			// per ogni gerarchia VISIBILE, aggiungo le tabelle con data-include-query alla FROM
@@ -1898,7 +1896,9 @@ var StorageMetric = new MetricStorage();
 	app.setMetrics = () => {
         document.querySelectorAll("#ul-exist-metrics .selectable[data-selected][data-metric-type='0']").forEach( metricRef => {
             StorageMetric.selected = metricRef.dataset.metricToken;
-            // se questa metrica è stata precedentemente aggiunta non devo invocare il metodo metrics() altrimenti viene eliminata
+            /* La metrica potrebbe già essere stata inclusa in Query.metrics se, ad esempio si è attivato il SQLinfo più volte (il Metodo Query.metrics è un Map che aggiunge/elimina)
+            * oppure si clicca prima SQLInfo e poi Salva report. Per questo motivo faccio qui il controllo se la metrica già esiste nella classe Query non la aggiungo
+            */
             if (!Query.metrics.has(metricRef.dataset.metricToken))
                 Query.metrics = {
                     token : metricRef.dataset.metricToken,
@@ -1932,11 +1932,11 @@ var StorageMetric = new MetricStorage();
 		});
 	}
 
-	app.setFilteredMetrics = () => {
-		document.querySelectorAll("#ul-exist-metrics .selectable[data-selected][data-metric-type='2'], #ul-exist-metrics .selectable[data-selected][data-metric-type='3']").forEach( metricRef => {
-			StorageMetric.selected = metricRef.dataset.metricToken;
+    app.setFilteredMetrics = () => {
+        document.querySelectorAll("#ul-exist-metrics .selectable[data-selected][data-metric-type='2'], #ul-exist-metrics .selectable[data-selected][data-metric-type='3']").forEach( metricRef => {
+            StorageMetric.selected = metricRef.dataset.metricToken;
             //debugger;
-			let object = {
+            let object = {
                 token : metricRef.dataset.metricToken,
                 name : StorageMetric.selected.name,
                 metric_type : StorageMetric.selected.metric_type,
@@ -1946,50 +1946,47 @@ var StorageMetric = new MetricStorage();
                 field : StorageMetric.selected.formula.field,
                 table : StorageMetric.selected.formula.table,
                 tableAlias : StorageMetric.selected.formula.tableAlias
-			};
-			let FROM = new Map(), WHERE = new Map(), filters = new Map();
-			// debugger;
-			// verifico se i filtri inclusi nella metrica, sono di un livello dimensionale oppure del cubo
-			StorageMetric.selected.formula.filters.forEach( filterToken => {
+            };
+            let FROM = new Map(), WHERE = new Map(), filters = new Map();
+            // associo la FROM e WHERE in base ai filtri contenuti nella metrica
+            StorageMetric.selected.formula.filters.forEach( filterToken => {
                 StorageFilter.selected = filterToken;
                 filters.set(filterToken, {SQL : StorageFilter.selected.formula});
-                debugger;
-                if (Object.keys(StorageFilter.selected.hierarchies).length !== 0) {
-                    // filtro appartenente a un livello dimensionale. Ciclare tutte le gerarchie presenti nel filtro multiplo creato
-                    for (const [token, tableId] of Object.entries(StorageFilter.selected.hierarchies)) {
-                    	const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+token+"']");
-                    	hier.querySelectorAll("small").forEach( tableRef => {
-	                        FROM.set(tableRef.dataset.tableAlias, `${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);
-	                        StorageDimension.selected = tableRef.dataset.dimensionToken;
-	                        // TODO: utilizzando la dimensione presente sul ref nel DOM della gerarchia, forse posso eliminarlo dall'oggetto filter che salvo e lasciare solo le gerarchie
-	                        // per ogni dimensione contenuta all'interno del filtro recupero le join con il cubo
-	                        for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
-	                            for (const [token, join] of Object.entries(joins)) {
-	                                WHERE.set(token, join);
-	                            }
-	                        }
-	                        // per l'ultima tabella della gerarchia non esiste la join perchè è quella che si lega al cubo e il legame è fatto nella proprietà 'cubes' della dimensione
-	                        if (StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias]) {
-	                            for (const [token, join] of Object.entries(StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias])) {
-	                                WHERE.set(token, join);
-	                            }
-	                        }
-	                    });
-                    }
-                } else {
-                    // il filtro contenuto nella metrica è un filtro della FACT
-                    // document.querySelector("#ul-cubes .selectable[data-cube-token='"++"'][data-selected]")
-                    // TODO: da rivedere dopo la modifica dei filtri multipli
-                    //StorageCube.selected = StorageFilter.selected.cubeToken;
-                    //FROM.set(StorageCube.selected.alias, `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${StorageCube.selected.alias}`);
+
+                for (const [token, tableId] of Object.entries(StorageFilter.selected.hierarchies)) {
+                    const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+token+"']");
+                    hier.querySelectorAll("small").forEach( tableRef => {
+                        FROM.set(tableRef.dataset.tableAlias, `${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);
+                        StorageDimension.selected = tableRef.dataset.dimensionToken;
+                        // per ogni dimensione contenuta all'interno del filtro recupero le join con il cubo
+                        for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
+                            for (const [token, join] of Object.entries(joins)) {
+                                WHERE.set(token, join);
+                            }
+                        }
+                        // per l'ultima tabella della gerarchia non esiste la join perchè è quella che si lega al cubo e il legame è fatto nella proprietà 'cubes' della dimensione
+                        if (StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias]) {
+                            for (const [token, join] of Object.entries(StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias])) {
+                                WHERE.set(token, join);
+                            }
+                        }
+                    });
+                }
+                /*
+                * un filtro può contenere anche una tabella di un livello dimensionale e una FACT. Es.: Azienda.id =43 AND tiporiga = 'M'
+                * in questo caso, dopo aver verificato le prop hierarchies e dimensions del filtro vado a verificare anche se è presente il cubeToken
+                */
+                if (StorageFilter.selected.hasOwnProperty('cubeToken')) {
+                    StorageCube.selected = StorageFilter.selected.cubeToken;
+                    FROM.set(StorageCube.selected.alias, `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${StorageCube.selected.alias}`);
                 }
                 object.FROM = Object.fromEntries(FROM);
                 if (WHERE.size !== 0) object.WHERE = Object.fromEntries(WHERE);
                 object.filters = Object.fromEntries(filters);
-			});				
-			Query.filteredMetrics = object;
-		});
-	}
+            });
+            if (!Query.filteredMetrics.has(metricRef.dataset.metricToken)) Query.filteredMetrics = object;
+        });
+    }
 
     // metriche composte selezionate
     app.setCompositeMetrics = () => {
@@ -2035,7 +2032,7 @@ var StorageMetric = new MetricStorage();
             // reimposto la metrica composta selezionata
             StorageMetric.selected = metricRef.dataset.metricToken;
             // aggiungo alle metriche selezionate per il report
-            Query.compositeMetric = { token : metricRef.dataset.metricToken, name : StorageMetric.selected.name, formula : StorageMetric.selected.formula };
+            if (!Query.compositeMetric.has(metricRef.dataset.metricToken)) Query.compositeMetric = { token : metricRef.dataset.metricToken, name : StorageMetric.selected.name, formula : StorageMetric.selected.formula };
         });
     }
 
