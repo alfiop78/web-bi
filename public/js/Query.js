@@ -1,8 +1,5 @@
 class Queries {
-	#table;
 	#columnToken;
-	#tableAlias;
-	#schema;
 	#compositeMetrics = new Map();
 	#filters = new Map();
 	#metrics = new Map();

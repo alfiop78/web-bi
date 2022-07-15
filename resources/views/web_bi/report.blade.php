@@ -194,7 +194,7 @@
                             <label for="dialog-metric-filter-search" class="">Ricerca</label>
                         </div>
                         <div class="relative-ul">
-                            <ul id="ul-metric-filter" class="absolute"></ul>
+                            <ul id="ul-metric-filters" class="absolute"></ul>
                         </div>
                     </section>
                 </div>

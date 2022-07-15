@@ -291,37 +291,6 @@ class FilterStorage extends Storages {
 		}
 	}
 
-	/*get filters() {
-		this.filtersObject = {};
-		super.storageK = 'FILTER';
-		for ( const [key, value] of Object.entries(this.st)) {
-			this.filtersObject[key] = value;
-		}
-		return this.filtersObject;
-	}*/
-
-	// filtri appartenenti a un determinato cubo
-	getFiltersByCube(cubeToken) {
-		this._tableFilters = new Set();
-		for ( const [key, value] of Object.entries(this.filters)) {
-			if (value.cubeToken === cubeToken) {
-				this._tableFilters.add(value);
-			}
-		}
-		return this._tableFilters;
-	}
-
-	// filtri appartenenti a una determinata dimensione-gerarchia-tabella
-	getFiltersByDimension(dimensionToken, hier, table) {
-		this._tableFilters = new Set();
-		for ( const [key, filter] of Object.entries(this.filters)) {
-			if (filter.dimensionToken === dimensionToken && filter.hier.token === hier && filter.table === table) {
-				this._tableFilters.add(filter);
-			}
-		}
-		return this._tableFilters;
-	}
-
 }
 
 class MetricStorage extends Storages {

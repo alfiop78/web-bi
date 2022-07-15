@@ -289,70 +289,12 @@ var StorageMetric = new MetricStorage();
 	}
 
 	// popolo la lista dei filtri esistenti
-	app.getFilters = () => {
-		const ul = document.getElementById('ul-exist-filters');
+	app.getFilters = (ul_id, hiddenStatus, fn) => {
 		for (const [token, filter] of StorageFilter.filters) {
-			// StorageFilter.selected = token;
-			// const ul = document.getElementById(ulId);
-			const contentElement = app.tmplList.content.cloneNode(true);
-	        const section = contentElement.querySelector('section[data-sublist-filters]');
-	        const spanHContent = section.querySelector('.h-content');
-	        const selectable = spanHContent.querySelector('.selectable');
-	        const span = selectable.querySelector('span[filter]');
-	        const smallTable = selectable.querySelector('small[table]');
-	        const smallHier = selectable.querySelector('small:last-child');
-	        const btnEdit = spanHContent.querySelector('button');
-	        // il filtro può contenere tabelle dei livelli dimensionali insieme alla FACT
-	        section.dataset.relatedObject = 'dimension cube';
-	        section.dataset.elementSearch = 'search-exist-filters';
-	        section.dataset.label = filter.name;
-	        if (filter.dimensions.length !== 0) {
-	        	section.dataset.dimensionToken = filter.dimensions.join(' ');	
-	        	// elenco token hier separate da spazi
-	        	section.dataset.hierToken = Object.keys(filter.hierarchies).join(' ');
-	        } else {
-	        	section.dataset.cubeToken = filter.cubeToken;
-	        }                       
-	        selectable.dataset.filterToken = filter.token;
-	        selectable.onclick = app.handlerFilterSelected;
-	        span.innerText = filter.name;
-	        // smallTable.innerText = table.table;
-	        smallHier.setAttribute('hier', 'true'); // TODO: dataset
-	        btnEdit.dataset.objectToken = filter.token;
-	        btnEdit.onclick = app.handlerFilterEdit;
-	        // smallHier.innerText = hier.name;
-	        ul.appendChild(section);
+			StorageFilter.selected = token;
+            app.addFilter(ul_id, hiddenStatus, fn);
 		}
 	}
-
-	/*app.getFiltersFact = () => {
-        const ul = document.getElementById('ul-exist-filters');
-        for (const [cubeToken, value] of StorageCube.cubes) {
-            StorageFilter.getFiltersByCube(cubeToken).forEach( (filter) => {
-                // console.log('filter : ', filter);
-                const content = app.tmplList.content.cloneNode(true);
-                const section = content.querySelector('section[data-sublist-filters]');
-                const spanHContent = section.querySelector('.h-content');
-                const selectable = spanHContent.querySelector('.selectable');
-                const span = selectable.querySelector('span[filter]');
-                const smallTable = selectable.querySelector('small[table]');
-                const smallCube = selectable.querySelector('small:last-child');
-                const btnEdit = spanHContent.querySelector('button[data-object-token]');
-                section.dataset.relatedObject = 'cube';
-                section.dataset.elementSearch = 'search-exist-filters';
-                section.dataset.label = filter.name;
-                section.dataset.cubeToken = cubeToken;
-                selectable.dataset.filterToken = filter.token;
-                selectable.onclick = app.handlerFilterSelected;
-                btnEdit.dataset.objectToken = filter.token;
-                btnEdit.onclick = app.handlerFilterEdit;
-                span.innerText = filter.name;
-                smallTable.innerText = value.FACT;
-                smallCube.innerText = value.name;
-                ul.appendChild(section);
-            });
-        }
-	}*/
 
 	// verifico se ci sono object selezionati per poter attivare/disattivare alcuni tasti
 	app.checkObjectSelected = () => {
@@ -428,52 +370,6 @@ var StorageMetric = new MetricStorage();
 			});
 		}
 	}
-
-	// popolo la lista dei filtri esistenti nella dialog metric-filter (metriche filtrate)
-	/*app.getMetricFilters = () => {
-		const ul = document.getElementById('ul-metric-filter');
-		// console.log('filters : ', StorageFilter.filters);
-		for (const [token, dimValue] of StorageDimension.dimensions ) {
-			// per ogni dimensione recupero i filtri a questa appartenenti
-			for (const [hierName, hier] of (Object.entries(dimValue.hierarchies)) ) {
-				// per ogni gerarchia...
-				for (const [tableId, table] of Object.entries(hier.order)) {
-					// per ogni tabella...
-					const filters = StorageFilter.getFiltersByDimension(token, hierName, table.table);
-					if (filters.length > 0) {
-						// se sono presenti filtri per questa tabella
-						filters.forEach( (filter) => {
-							const contentElement = app.tmplList.content.cloneNode(true);
-							const section = contentElement.querySelector('section[data-sublist-filters]');
-							const div = section.querySelector('div.selectable');
-							const spanHContent = div.querySelector('.h-content');
-							const span = spanHContent.querySelector('span[filter]');
-							const smallTable = spanHContent.querySelector('small[table]');
-							const smallHier = spanHContent.querySelector('small:last-child');
-							section.dataset.relatedObject = 'dimension';
-							section.dataset.elementSearch = 'search-exist-filters';
-							section.dataset.label = filter.name;
-							section.dataset.dimensionName = filter.dimension;
-							section.dataset.hierName = filter.hier;
-							div.dataset.label = filter.name;
-							div.dataset.elementSearch = 'search-exist-filters';
-							div.dataset.dimensionName = filter.dimension;
-							div.dataset.hierName = filter.hier;
-							div.dataset.tableName = filter.table;
-							div.dataset.tableAlias = table.alias;
-							div.dataset.tableId = tableId;
-							div.onclick = app.handlerMetricFilterSelected;
-							span.innerText = filter.name;
-							smallTable.innerText = table.table;
-							smallHier.setAttribute('hier', true); // TODO: dataset
-							smallHier.innerText = hierName;
-							ul.appendChild(section);
-						});
-					}
-				}
-			}
-		}
-	}	*/
 
 	// popolamento delle tabelle nella dialogFilter
 	app.getTables = () => {
@@ -1171,6 +1067,8 @@ var StorageMetric = new MetricStorage();
         valueList.querySelectorAll('section').forEach( section => section.remove());
         const textarea = document.getElementById('composite-filter-formula');
         const mark = document.createElement('mark');
+        // TODO: creare un template per il mark
+        //const small = document.createElement('small');
         // aggiungo il tableAlias e table come attributo.
         // ...in questo modo visualizzo solo il nome della colonna ma quando andrò a salvare la formula del filtro salverò table.field
         mark.dataset.tableAlias = Query.tableAlias;
@@ -1189,7 +1087,9 @@ var StorageMetric = new MetricStorage();
         // TODO: visualizzare, nell'SQL formula solo il nome della colonna, potrei impostare un attr dove inserire il nome della tabella e mostrarlo, con css::before, all'evento del mouseOver
         // mark.innerText = `${Query.table}.${Query.field}`;
         mark.innerText = Query.field;
+        //small.innerText = Query.table;
         textarea.appendChild(mark);
+        //mark.appendChild(small);
         const span = document.createElement('span');
         span.setAttribute('contenteditable', 'true');
         textarea.appendChild(span);
@@ -1306,7 +1206,7 @@ var StorageMetric = new MetricStorage();
 		// let from = new Set();
 		// let where = new Map();
 		let associatedFilters = new Set();
-		document.querySelectorAll('#ul-metric-filter .selectable[data-selected]').forEach( filterSelected => {
+		document.querySelectorAll('#ul-metric-filters .selectable[data-selected]').forEach( filterSelected => {
 			associatedFilters.add(filterSelected.dataset.filterToken);
 		});
 		let metricObj = { created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options) };
@@ -1414,17 +1314,23 @@ var StorageMetric = new MetricStorage();
 		ul.appendChild(section);
 	}
 
-	app.addFilter = (ulId) => {
-		const ul = document.getElementById(ulId);
+	app.addFilter = (ul_id, hiddenStatus, fn) => {
+        /*
+        * hidden (boolean) : indica che il section deve essere visibile/nascosto (boolean)
+        * La funzione, invocata da getFilters() avrà hidden true (elementi nascosti)
+        * mentre, se invocata dalla creazione di un nuovo filtro avrà hidden: false
+        * fn : il nome della function da associare a .selectable.onclick
+        */
+		const ul = document.getElementById(ul_id);
 		const contentElement = app.tmplList.content.cloneNode(true);
         const section = contentElement.querySelector('section[data-sublist-filters]');
         const spanHContent = section.querySelector('.h-content');
         const selectable = spanHContent.querySelector('.selectable');
         const span = selectable.querySelector('span[filter]');
-        const smallTable = selectable.querySelector('small[table]');
+        //const smallTable = selectable.querySelector('small[table]');
         const smallHier = selectable.querySelector('small:last-child');
         const btnEdit = spanHContent.querySelector('button');
-        section.hidden = false;
+        section.hidden = hiddenStatus;
         // il filtro può contenere tabelle dei livelli dimensionali insieme alla FACT
         section.dataset.relatedObject = 'dimension cube';
         section.dataset.elementSearch = 'search-exist-filters';
@@ -1437,12 +1343,12 @@ var StorageMetric = new MetricStorage();
         	section.dataset.cubeToken = StorageFilter.selected.cubeToken;
         }                       
         selectable.dataset.filterToken = StorageFilter.selected.token;
-        selectable.onclick = app.handlerFilterSelected;
+        selectable.onclick = app[fn];
         span.innerText = StorageFilter.selected.name;
         // smallTable.innerText = table.table;
         smallHier.setAttribute('hier', 'true'); // TODO: dataset
         btnEdit.dataset.objectToken = StorageFilter.selected.token;
-        btnEdit.onclick = app.handlerFilterEdit;
+        //btnEdit.onclick = app.handlerFilterEdit;
         // smallHier.innerText = hier.name;
         ul.appendChild(section);
 	}
@@ -1664,7 +1570,8 @@ var StorageMetric = new MetricStorage();
         filterName.focus();
         textarea.value = "";
         // aggiorno la lista dei filtri esistenti, aggiungendo il filtro appena creato
-        app.addFilter('ul-exist-filters');
+        app.addFilter('ul-exist-filters', false, 'handlerFilterSelected');
+        app.addFilter('ul-metric-filters', false, 'handlerMetricFilterSelected');
     }
 
 	// tasto OK nella dialogValue
@@ -1737,11 +1644,9 @@ var StorageMetric = new MetricStorage();
 
 	app.getColumnsFact();
 
-	app.getFilters(); // <ul> exist-filters
+	app.getFilters('ul-exist-filters', true, 'handlerFilterSelected'); // <ul> exist-filters
 
-	// app.getFiltersFact(); // exist-filters : filtri collegati alla Fact
-
-	// app.getMetricFilters(); // dialog-metric-filter per le metriche filtrate
+	app.getFilters('ul-metric-filters', true, 'handlerMetricFilterSelected'); // <ul> metric-filters
 
 	app.getCompositeMetrics(); // metriche composite
 
@@ -1972,6 +1877,7 @@ var StorageMetric = new MetricStorage();
     }
 
 	app.setFrom = () => {
+        debugger;
 		// imposto la FROM per le gerarchie
 		document.querySelectorAll("#ul-hierarchies section:not([hidden]) .selectable").forEach( hier => {
 			// per ogni gerarchia VISIBILE, aggiungo le tabelle con data-include-query alla FROM
@@ -2246,84 +2152,8 @@ var StorageMetric = new MetricStorage();
 			});
     }
 
-	// apro la dialog-metric-filter
-	app.btnSetMetricFilter.onclick = () => {
-		// popolo la <ul>
-		// elenco filtri da associare alla metrica (creazione metrica filtrata)
-		const ul = document.getElementById('ul-metric-filter');
-		ul.querySelectorAll('section').forEach( item => item.remove());
-		// recupero i cubi selezionati
-		console.log('cubi selezionati : ', Query.cubes);
-		Query.cubes.forEach( token => {
-			StorageCube.selected = token;
-			StorageFilter.getFiltersByCube(token).forEach( filter => {
-				// console.log('filter : ', filter);
-				const content = app.tmplList.content.cloneNode(true);
-				const section = content.querySelector('section[data-sublist-filters]');
-				const spanHContent = section.querySelector('.h-content');
-				const selectable = spanHContent.querySelector('.selectable');
-				const span = selectable.querySelector('span[filter]');
-				const smallTable = selectable.querySelector('small[table]');
-				const smallCube = selectable.querySelector('small:last-child');
-				section.hidden = false;
-				section.dataset.elementSearch = 'search-exist-filters';
-				section.dataset.label = filter.name;
-				section.dataset.cubeToken = token;
-				section.dataset.relatedObject = 'cube';
-				selectable.dataset.tableName = StorageCube.selected.FACT;
-				selectable.dataset.tableAlias = StorageCube.selected.tableAlias;
-				selectable.dataset.cubeToken = token;
-				selectable.dataset.filterToken = filter.token;
-				selectable.onclick = app.handlerMetricFilterSelected;
-				span.innerText = filter.name;
-				smallTable.innerText = StorageCube.selected.FACT;
-				smallCube.innerText = StorageCube.selected.name;
-				ul.appendChild(section);
-			});
-		});
-		// visualizzo i filtri appartenenti alle gerarchie selezionate
-		Query.dimensions.forEach( token => {
-			StorageDimension.selected = token;
-			// per ogni gerarchia
-			for (const [hierToken, hier] of Object.entries(StorageDimension.selected.hierarchies)) {
-				// per ogni tabella nella gerarchia
-				for (const [tableId, table] of Object.entries(StorageDimension.selected.hierarchies[hierToken].order)) {
-					const filters = StorageFilter.getFiltersByDimension(token, hierToken, table.table);
-					if (filters.size > 0) {
-						// debugger;
-						filters.forEach( filter => {
-							const contentElement = app.tmplList.content.cloneNode(true);
-							const section = contentElement.querySelector('section[data-sublist-filters]');
-							const spanHContent = section.querySelector('.h-content');
-							const selectable = spanHContent.querySelector('.selectable');
-							const span = selectable.querySelector('span[filter]');
-							const smallTable = selectable.querySelector('small[table]');
-							const smallHier = selectable.querySelector('small:last-child');
-							section.hidden = false;
-							section.dataset.relatedObject = 'dimension';
-							section.dataset.elementSearch = 'search-exist-filters';
-							section.dataset.label = filter.name;
-							section.dataset.dimensionToken = filter.dimensionToken;
-							section.dataset.hierToken = filter.hier.token;
-							selectable.dataset.filterToken = filter.token;
-							selectable.dataset.dimensionToken = filter.dimensionToken;
-							selectable.dataset.hierToken = filter.hier.token;
-							selectable.dataset.tableName = filter.table;
-							selectable.dataset.tableAlias = table.alias;
-							selectable.dataset.tableId = tableId;
-							selectable.onclick = app.handlerMetricFilterSelected;
-							span.innerText = filter.name;
-							smallTable.innerText = table.table;
-							smallHier.setAttribute('hier', true); // TODO: dataset
-							smallHier.innerText = filter.hier.name;
-							ul.appendChild(section);
-						});
-					}
-				}
-			}
-		});
-		app.dialogMetricFilter.showModal();
-	}
+    // apro la dialog-metric-filter
+    app.btnSetMetricFilter.onclick = () => app.dialogMetricFilter.showModal();
 
 	// visualizzo la lista dei report da processare
 	app.btnProcessReport.onclick = () => {
