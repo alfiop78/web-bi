@@ -18,6 +18,7 @@ var StorageMetric = new MetricStorage();
 		tmplUlList: document.getElementById('template_ulList'), // contiene le <ul>
 		tmplList: document.getElementById('templateList'), // contiene i section
 		tmplSublists : document.getElementById('template-sublists'),
+        tmplFilterFormula : document.getElementById('tmpl-filter-formula'),
         absoluteWindow : document.getElementById('absolute-window'),
 
         processList : document.getElementById('reportProcessList'),
@@ -827,18 +828,46 @@ var StorageMetric = new MetricStorage();
         }
     }
 
+//    app.handlerSpanContentEditable = (e) => {
+//        //debugger;
+//        if (e.defaultPrevented) {
+//            console.log('prevent default tab');
+//            return; // Do nothing if the event was already processed
+//        }
+//        if (e.key === 'Tab') {
+//            console.log('tab key');
+//            app.addSpan();
+//            e.preventDefault();
+//        }
+//    }
+
+    app.addSpan = (target) => {
+        const span = document.createElement('span');
+        span.setAttribute('contenteditable', 'true');
+        span.onkeydown = (e) => {
+            if (e.defaultPrevented) {
+                console.log('prevent default tab');
+                return; // Do nothing if the event was already processed
+            }
+            if (e.key === 'Tab') {
+                console.log('tab key');
+                app.addSpan(target);
+                e.preventDefault();
+            }
+
+        }
+        target.appendChild(span);
+        span.focus();
+    }
+
     // div contenteditable della formula per il filtro
     document.getElementById('composite-filter-formula').onclick = (e) => {
         console.log('e : ', e);
         // elimino lo span che contiene il "placeholder"
-
         console.log('e.target : ', e.target);
         console.log('e.currentTarget : ', e.currentTarget);
         if (e.target.localName === 'div') {
-            const span = document.createElement('span');
-            span.setAttribute('contenteditable', 'true');
-            e.target.appendChild(span);
-            span.focus();
+            app.addSpan(e.target);
         }
     }
 
@@ -1062,13 +1091,16 @@ var StorageMetric = new MetricStorage();
         const valueList = app.dialogValue.querySelector('#ul-filter-values');
         valueList.querySelectorAll('section').forEach( section => section.remove());
         const textarea = document.getElementById('composite-filter-formula');
-        const mark = document.createElement('mark');
-        // TODO: creare un template per il mark
-        //const small = document.createElement('small');
+        const templateContent = app.tmplFilterFormula.content.cloneNode(true);
+        const span = templateContent.querySelector('span');
+        const mark = templateContent.querySelector('mark');
+        const small = templateContent.querySelector('small');
+
         // aggiungo il tableAlias e table come attributo.
         // ...in questo modo visualizzo solo il nome della colonna ma quando andrò a salvare la formula del filtro salverò table.field
         mark.dataset.tableAlias = Query.tableAlias;
         mark.dataset.table = Query.table;
+        //mark.dataset.attr = Query.table;
         //debugger;
         if (Query.tableId === null) {
             // tabella selezionata è la FACT
@@ -1076,20 +1108,14 @@ var StorageMetric = new MetricStorage();
         } else {
             mark.dataset.tableId = Query.tableId;
             mark.dataset.hierToken = Query.hierToken;
-            // mark.dataset.hierName = Query.hierName;
             mark.dataset.dimensionToken = Query.dimensionToken;
         }
         mark.dataset.field = Query.field;
-        // TODO: visualizzare, nell'SQL formula solo il nome della colonna, potrei impostare un attr dove inserire il nome della tabella e mostrarlo, con css::before, all'evento del mouseOver
-        // mark.innerText = `${Query.table}.${Query.field}`;
         mark.innerText = Query.field;
-        //small.innerText = Query.table;
-        textarea.appendChild(mark);
-        //mark.appendChild(small);
-        const span = document.createElement('span');
-        span.setAttribute('contenteditable', 'true');
+        small.innerText = Query.table;
         textarea.appendChild(span);
-        span.focus();
+
+        app.addSpan(textarea);
         // TODO: checkFormulaValid()
         app.btnSearchValue.disabled = false;
         app.btnFilterSave.disabled = false;
@@ -1484,7 +1510,10 @@ var StorageMetric = new MetricStorage();
             // console.log(element);
             // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
             // ... altrimenti devo recuperare il cubeToken. Ci sono anche filtri che possono essere fatti su un livello dimensionale e su una FACT
+            if (element.classList.contains('markContent') || element.nodeName === 'SMALL') return;
+            //element.nodeName === 'MARK'
             if (element.nodeName === 'MARK') {
+                //const mark = element.querySelector('mark');
                 if (element.dataset.tableId) {
                     // tabella appartenente a un livello dimensionale
                     // debugger;
@@ -1521,42 +1550,6 @@ var StorageMetric = new MetricStorage();
             hierarchies : Object.fromEntries(hierarchies),
             created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options)
         };
-        debugger;
-
-        // if (app.dialogFilter.querySelector('section').hasAttribute('data-hier-token')) {
-            // debugger;
-            //hierToken = app.dialogFilter.querySelector('section').dataset.hierToken;
-            //hierName = app.dialogFilter.querySelector('section').dataset.hierName;
-            //dimensionToken = app.dialogFilter.querySelector('section').dataset.dimensionToken;
-            // NOTE: inizializzazione di un Map con un Object
-            /*filterObject = new Map([
-            [token, {token, 'type': 'FILTER', 'name': filterName.value, 'table': Query.table, formula : textarea.value, dimension, hier}]
-            ]);*/
-            /*filterObject = {
-                token,
-                type: 'FILTER',
-                name: filterName.value,
-                table: Query.table,
-                tableAlias : Query.tableAlias,
-                tableId : Query.tableId,
-                formula : textarea.value,
-                dimensionToken,
-                hier : {token : hierToken, name: hierName},
-                created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options)
-            };*/
-        // } else {
-            /*filterObject = {
-                token,
-                type: 'FILTER',
-                name: filterName.value,
-                table: Query.table,
-                tableAlias : Query.tableAlias,
-                formula : textarea.value,
-                cubeToken : StorageCube.selected.token,
-                alias : StorageCube.selected.alias,
-                created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options)
-            };*/
-        // }
         StorageFilter.save(filterObject);
         StorageFilter.selected = token;
         // salvataggio nel DB
@@ -2355,14 +2348,19 @@ var StorageMetric = new MetricStorage();
     }
 
 	const body = document.getElementById('body');
+    //const compositeFilterFormula = document.getElementById('composite-filter-formula');
     // create a new instance of `MutationObserver` named `observer`,
 	// passing it a callback function
 	const observer = new MutationObserver(function() {
 	    console.log('callback that runs when observer is triggered');
 	    body.querySelectorAll('*[data-info-object-token]').forEach( element => element.addEventListener('click', app.showInfoObject));
+        /*compositeFilterFormula.querySelectorAll('span[contenteditable]').forEach(element => {
+            element.addEventListener('keydown', app.handlerSpanContentEditable);
+        });*/
 	});
 	// call `observe()` on that MutationObserver instance,
 	// passing it the element to observe, and the options object
 	observer.observe(body, {subtree: true, childList: true, attributes: true});
+	//observer.observe(compositeFilterFormula, {subtree: true, childList: true, attributes: true});
 
 })();

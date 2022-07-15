@@ -24,4 +24,10 @@
 *[data-content-editable]{background-color: #e2e2e2; padding: 1em; border-radius: 4px; color: dimgrey;}
 *[data-content-editable] *[contenteditable="true"] {color: black; outline: none;}
 
-span[contenteditable]{margin: 4px; padding: 4px 8px; background-color: tan;}
+span[contenteditable]{
+    margin: 2px 4px;
+    padding: 2px 8px;
+    background-color: tan;
+    border-radius: 4px;
+    display: inline-block;
+}

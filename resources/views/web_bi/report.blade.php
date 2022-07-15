@@ -27,6 +27,13 @@
     </head>
     <body>
 
+        <template id="tmpl-filter-formula">
+            <span class="markContent">
+                <mark></mark>
+                <small></small>
+            </span>
+        </template>
+
         <div id="absolute-window" class="absolute-window">
             <section class="window-title">
                 <h5 data-object-name></h5>

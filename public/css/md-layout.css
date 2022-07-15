@@ -217,9 +217,23 @@ ul > section[data-sublist-table-card] > .sublist > span{width: 100%; padding: 8p
 .abs-window > div > small{font-size: .8rem;}
 /*absolute-window*/
 
-mark{background-color: sienna; color: white; border-radius: 2px; padding: 2px;}
+mark{
+    background-color: sienna;
+    color: white;
+    border-radius: 4px;
+    padding: 2px;
+    display: inline-flex;
+    width: 100%;
+    justify-content: center;
+}
 
 .button-icon{padding: 2px; background: transparent; border: none;}
 
 .self-end{justify-self: end;}
 .justify-self-center{justify-self: center;}
+
+span.markContent {
+    position: relative; color: dimgrey; margin-bottom: 8px;
+    display: inline-grid; justify-items: center;
+}
+/*mark.markContent::before {content: attr(data-attr); position: absolute; top: 100%; color: dimgray;}*/*/
