@@ -591,7 +591,7 @@ var StorageMetric = new MetricStorage();
 			});
 	}
 
-	app.handlerReportEdit = (e) => {
+    app.handlerReportEdit = (e) => {
         StorageProcess.selected = e.target.dataset.processToken;
         Query.token = e.target.dataset.processToken;
         Query.processId = +e.target.dataset.id;
@@ -618,12 +618,12 @@ var StorageMetric = new MetricStorage();
             Query.field = column.field;
             // reimposto la colonna come quando viene selezionata
             Query.select = column;
-            if (column.hasOwnProperty('tableId')) {
+            if (!column.hasOwnProperty('cubeToken')) {
+                const hierarchiesObject = new Map([[column.hier, column.tableId]]);
                 Query.objects = {
                     token,
-                    tableId : column.tableId,
-                    hierToken : column.hier,
-                    dimension : column.dimensionToken
+                    hierarchies : Object.fromEntries(hierarchiesObject),
+                    dimensions : [column.dimensionToken]
                 };
             } else {
                 Query.objects = {
@@ -639,16 +639,13 @@ var StorageMetric = new MetricStorage();
             document.querySelector("#ul-exist-filters .selectable[data-filter-token='"+token+"']").dataset.selected = 'true';
             // reimposto il filtro come se fosse stato selezionato
             Query.filters = StorageFilter.selected;
-            if (StorageFilter.selected.hier) {
-                Query.objects = {
-                    token,
-                    tableId : StorageFilter.selected.tableId,
-                    hierToken : StorageFilter.selected.hier.token,
-                    dimension : StorageFilter.selected.dimensionToken
-                };
-            } else {
-                Query.objects = {token, cubeToken : StorageFilter.selected.cubeToken};
-            }
+            Query.objects = {
+                token,
+                cubeToken : StorageFilter.selected.cubeToken,
+                tableId : StorageFilter.selected.tableId,
+                hierarchies : StorageFilter.selected.hierarchies,
+                dimensions : StorageFilter.selected.dimensions
+            };
         });
         // metriche
         StorageProcess.selected.edit.metrics.forEach( token => {
@@ -667,7 +664,7 @@ var StorageMetric = new MetricStorage();
 
         app.processList.toggleAttribute('hidden');
         app.checkObjectSelected();
-	}
+    }
 
 	app.handlerReportCopy = (e) => {
 		console.clear();

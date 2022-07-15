@@ -14,33 +14,32 @@ class Queries {
 	#WHERE = new Map();
 	constructor() {}
 
-	set objects(object) {
-		// debugger;
-		( !this.#objects.has(object.token) ) ? this.#objects.set(object.token, object) : this.#objects.delete(object.token);
-		console.log('#objects : ', this.#objects);
+    set objects(object) {
+        ( !this.#objects.has(object.token) ) ? this.#objects.set(object.token, object) : this.#objects.delete(object.token);
+        console.log('#objects : ', this.#objects);
 
-		document.querySelectorAll("*[data-include-query]").forEach( tableRef => delete tableRef.dataset.includeQuery);
-		for ( const [key, value] of Query.objects ) {
-			if (!value.cubeToken) {
-				// ha la prop hierarchies : {hierToken: tableId}
-				// per ogni dimensione presente nell'oggetto (es.: filtri multipli)
-				value.dimensions.forEach( token => {
-					document.querySelector("#ul-dimensions .selectable[data-dimension-token='"+token+"']").dataset.includeQuery = 'true';
-				});
-				for (const [token, tableId] of Object.entries(value.hierarchies)) {
-					// debugger;
-					const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+token+"']");
-					// converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
-					[...hier.querySelectorAll("small")].filter( (table, index) => index >= tableId).forEach( tableRef => {
-						tableRef.dataset.includeQuery = 'true';
-					});					
-				}
-			} else {
-				// elementi del cubo
-				document.querySelectorAll("#ul-cubes .selectable[data-cube-token='"+value.cubeToken+"']").forEach( tableRef => tableRef.dataset.includeQuery = true);
-			}
-		}
-	}
+        document.querySelectorAll("*[data-include-query]").forEach( tableRef => delete tableRef.dataset.includeQuery);
+        for ( const [key, value] of Query.objects ) {
+            if (!value.cubeToken) {
+                // ha la prop hierarchies : {hierToken: tableId}
+                // per ogni dimensione presente nell'oggetto (es.: filtri multipli)
+                value.dimensions.forEach( token => {
+                    document.querySelector("#ul-dimensions .selectable[data-dimension-token='"+token+"']").dataset.includeQuery = 'true';
+                });
+                for (const [token, tableId] of Object.entries(value.hierarchies)) {
+                    // debugger;
+                    const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+token+"']");
+                    // converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
+                    [...hier.querySelectorAll("small")].filter( (table, index) => index >= tableId).forEach( tableRef => {
+                        tableRef.dataset.includeQuery = 'true';
+                    });
+                }
+            } else {
+                // elementi del cubo
+                document.querySelectorAll("#ul-cubes .selectable[data-cube-token='"+value.cubeToken+"']").forEach( tableRef => tableRef.dataset.includeQuery = true);
+            }
+        }
+    }
 
 	get objects() {return this.#objects;}
 
