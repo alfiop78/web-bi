@@ -20,7 +20,8 @@ class Queries {
 
         document.querySelectorAll("*[data-include-query]").forEach( tableRef => delete tableRef.dataset.includeQuery);
         for ( const [key, value] of Query.objects ) {
-            if (!value.cubeToken) {
+        	// debugger;
+            if (!value.cubeToken && !value.cubes) {
                 // ha la prop hierarchies : {hierToken: tableId}
                 // per ogni dimensione presente nell'oggetto (es.: filtri multipli)
                 value.dimensions.forEach( token => {
@@ -35,6 +36,7 @@ class Queries {
                     });
                 }
             } else {
+            	// debugger;
                 // elementi del cubo
                 document.querySelectorAll("#ul-cubes .selectable[data-cube-token='"+value.cubeToken+"']").forEach( tableRef => tableRef.dataset.includeQuery = true);
             }
@@ -120,7 +122,7 @@ class Queries {
 
 	get filteredMetrics() {return this.#filteredMetrics;}
 
-	set compositeMetric(value) {
+	set compositeMetrics(value) {
         (!this.#compositeMetrics.has(value.token)) ? this.#compositeMetrics.set(value.token, value) : this.#compositeMetrics.delete(value.token);
 		console.log('this.#compositeMetrics : ', this.#compositeMetrics);
 	}

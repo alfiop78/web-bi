@@ -356,7 +356,7 @@
 								<label for="composite-alias-metric" class="">Alias</label>
 							</div>
 						</div>
-						<div id="composite-metric-formula" contenteditable="false"></div>
+						<div id="composite-metric-formula" data-content-editable></div>
 						<button id="btnCompositeMetricSave" type="button" name="save" class="md-button" disabled>salva</button>
 					</section>
 

@@ -619,6 +619,7 @@ var StorageMetric = new MetricStorage();
             Query.field = column.field;
             // reimposto la colonna come quando viene selezionata
             Query.select = column;
+            console.log(column);
             if (!column.hasOwnProperty('cubeToken')) {
                 const hierarchiesObject = new Map([[column.hier, column.tableId]]);
                 Query.objects = {
@@ -783,6 +784,7 @@ var StorageMetric = new MetricStorage();
 			e.currentTarget.toggleAttribute('data-selected');
             // TODO: per le metriche composte (metric_type: 4) c'è da definire se inserire nel JSON, i cubi a cui appartengono le metriche che compongono la composta
             if (+e.currentTarget.dataset.metricType === 4) {
+                // TODO: in futuro è da rivedere, per la creazione di metriche composte su più cubi
                 Query.objects = {token : e.currentTarget.dataset.metricToken, cubes : StorageMetric.selected.cubes};
                 // quando viene selezionata una metrica composta, le metriche al suo interno verranno incluse nel datamart finale, potrei selezionarle sulla pagina con un colore diverso per
                 // ... evidenziare il fatto che sono già incluse nel report
@@ -802,17 +804,17 @@ var StorageMetric = new MetricStorage();
     app.handlerMetricSelectedComposite = (e) => {
         // aggiungo la metrica alla textarea
         Query.table = e.currentTarget.dataset.tableName;
-        const textArea = document.getElementById('composite-metric-formula');
-        // creo uno span con dentro la metrica
-        const mark = document.createElement('mark');
+        const textarea = document.getElementById('composite-metric-formula');
+        const templateContent = app.tmplFilterFormula.content.cloneNode(true);
+        const span = templateContent.querySelector('span');
+        const mark = templateContent.querySelector('mark');
+        const small = templateContent.querySelector('small');
+
         mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
         mark.innerText = e.currentTarget.dataset.label;
-        textArea.appendChild(mark);
+        textarea.appendChild(span);
         // aggiungo anche uno span per il proseguimento della scrittura della formula
-        let span = document.createElement('span');
-        span.setAttribute('contenteditable', 'true');
-        textArea.appendChild(span);
-        span.focus();
+        app.addSpan(textarea);
     }
 
     // div contenteditable della formula per la metrica composta
@@ -821,25 +823,9 @@ var StorageMetric = new MetricStorage();
         console.log('e.target : ', e.target);
         console.log('e.currentTarget : ', e.currentTarget);
         if (e.target.localName === 'div') {
-            const span = document.createElement('span');
-            span.setAttribute('contenteditable', 'true');
-            e.target.appendChild(span);
-            span.focus();
+            app.addSpan(e.target);
         }
     }
-
-//    app.handlerSpanContentEditable = (e) => {
-//        //debugger;
-//        if (e.defaultPrevented) {
-//            console.log('prevent default tab');
-//            return; // Do nothing if the event was already processed
-//        }
-//        if (e.key === 'Tab') {
-//            console.log('tab key');
-//            app.addSpan();
-//            e.preventDefault();
-//        }
-//    }
 
     app.addSpan = (target) => {
         const span = document.createElement('span');
@@ -1431,6 +1417,7 @@ var StorageMetric = new MetricStorage();
 		document.querySelectorAll('#composite-metric-formula *').forEach( element => {
 			console.log('element : ', element);
 			// console.log('element : ', element.nodeName);
+            if (element.classList.contains('markContent') || element.nodeName === 'SMALL') return;
 			// se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
 			if (element.nodeName === 'MARK') {
 				StorageMetric.selected = element.dataset.metricToken;
@@ -2025,7 +2012,7 @@ var StorageMetric = new MetricStorage();
             // reimposto la metrica composta selezionata
             StorageMetric.selected = metricRef.dataset.metricToken;
             // aggiungo alle metriche selezionate per il report
-            if (!Query.compositeMetric.has(metricRef.dataset.metricToken)) Query.compositeMetric = { token : metricRef.dataset.metricToken, name : StorageMetric.selected.name, formula : StorageMetric.selected.formula };
+            if (!Query.compositeMetrics.has(metricRef.dataset.metricToken)) Query.compositeMetrics = { token : metricRef.dataset.metricToken, name : StorageMetric.selected.name, formula : StorageMetric.selected.formula };
         });
     }
 
@@ -2267,7 +2254,7 @@ var StorageMetric = new MetricStorage();
 			};
 		} else {
             document.querySelector("#ul-columns .selectable[data-token-column='"+Query.columnToken+"'] span[column]").innerText += ` (${alias.value})`;
-            Query.select = { token : Query.columnToken, table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value };
+            Query.select = { token : Query.columnToken, table: Query.table, tableAlias : Query.tableAlias, field: Query.field, SQLReport: textarea, alias : alias.value, cubeToken : StorageCube.selected.token };
             Query.objects = {token : Query.columnToken, cubeToken : StorageCube.selected.token};
 		}
 		console.log('columnToken : ', Query.columnToken);
