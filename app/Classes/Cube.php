@@ -254,7 +254,7 @@ class Cube {
 		if (count($this->filters_baseTable) ) $this->_sql .= "\nAND ". implode("\nAND ", $this->filters_baseTable);
 		$this->_sql .= "\n$this->groupBy";
         $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
-		// dd($this->_sql);
+		//dd($this->_sql);
         // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
 		$sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
         //dd($sql);
@@ -341,7 +341,7 @@ class Cube {
 		// aggiungo i filtri del report e i filtri contenuti nella metrica
 		$this->_sql .= "\nAND ". implode("\nAND ", array_merge($this->filters_baseTable, $this->filters_metricTable));
 		$this->_sql .= "\n$this->groupBy";
-		// dd($this->_sql);
+		//dd($this->_sql);
         $comment = "/*\nCreazione tabella METRIC :\n".implode("\n", array_keys($metrics))."\n*/\n";
 
 		$sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";

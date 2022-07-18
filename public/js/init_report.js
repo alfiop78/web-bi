@@ -599,6 +599,7 @@ var StorageMetric = new MetricStorage();
         Query.processId = +e.target.dataset.id;
         // cubi
         StorageProcess.selected.edit.cubes.forEach( token => {
+            debugger;
             console.log(token);
             StorageCube.selected = token;
             // selezione del cubo nella #ul-cubes
@@ -608,6 +609,7 @@ var StorageMetric = new MetricStorage();
         });
         // dimensioni
         StorageProcess.selected.edit.dimensions.forEach( token => {
+            debugger;
             StorageDimension.selected = token;
             document.querySelector("#ul-dimensions section[data-dimension-token='"+token+"'] .selectable").dataset.selected = 'true';
             Query.dimensions = token;
@@ -642,19 +644,20 @@ var StorageMetric = new MetricStorage();
             document.querySelector("#ul-exist-filters .selectable[data-filter-token='"+token+"']").dataset.selected = 'true';
             // reimposto il filtro come se fosse stato selezionato
             Query.filters = StorageFilter.selected;
-            Query.objects = {
-                token,
-                cubeToken : StorageFilter.selected.cubeToken,
-                hierarchies : StorageFilter.selected.hierarchies,
-                dimensions : StorageFilter.selected.dimensions
-            };
+            let object = {};
+            object.token = e.currentTarget.dataset.filterToken;
+            if (StorageFilter.selected.hasOwnProperty('cubes')) object.cubes = StorageFilter.selected.cubes;
+            if (StorageFilter.selected.hasOwnProperty('dimensions')) object.dimensions = StorageFilter.selected.dimensions;
+            if (StorageFilter.selected.hasOwnProperty('hierarchies')) object.hierarchies = StorageFilter.selected.hierarchies;
+
+            Query.objects = object;
         });
         // metriche
         StorageProcess.selected.edit.metrics.forEach( token => {
             StorageMetric.selected = token;
             // seleziono le metriche (0, 1, 2, 3) impostate nel report
             document.querySelector("#ul-exist-metrics .selectable[data-metric-token='"+token+"']").dataset.selected = 'true';
-            Query.objects = {token, cubeToken : StorageMetric.selected.cubeToken};
+            Query.objects = {token, cubes : StorageMetric.selected.cubes};
         });
         // metriche composte
         StorageProcess.selected.edit.compositeMetrics.forEach( token => {
@@ -786,17 +789,14 @@ var StorageMetric = new MetricStorage();
 			e.currentTarget.toggleAttribute('data-selected');
             // TODO: per le metriche composte (metric_type: 4) c'è da definire se inserire nel JSON, i cubi a cui appartengono le metriche che compongono la composta
             if (+e.currentTarget.dataset.metricType === 4) {
-                Query.objects = {token : e.currentTarget.dataset.metricToken, cubes : StorageMetric.selected.cubes};
                 // quando viene selezionata una metrica composta, le metriche al suo interno verranno incluse nel datamart finale, potrei selezionarle sulla pagina con un colore diverso per
                 // ... evidenziare il fatto che sono già incluse nel report
                 // la prop formula->metrics_alias contiene {nome_metrica : metricToken, metricAlias}. Tramite il metricToken posso selezionare le metriche incluse nella formula della composta.
                 for (const [metricName, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
                     document.querySelector("#ul-exist-metrics .selectable[data-metric-token='"+metric.token+"']").dataset.selected = 'true';
                 }
-                
-            } else {
-                Query.objects = {token : e.currentTarget.dataset.metricToken, cubeToken : e.currentTarget.dataset.cubeToken};
             }
+            Query.objects = {token : e.currentTarget.dataset.metricToken, cubes : StorageMetric.selected.cubes};
 		}
 		app.checkObjectSelected();
 	}
@@ -1952,9 +1952,12 @@ var StorageMetric = new MetricStorage();
                         FROM.set(tableRef.dataset.tableAlias, `${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);
                         StorageDimension.selected = tableRef.dataset.dimensionToken;
                         // per ogni dimensione contenuta all'interno del filtro recupero le join con il cubo
+                        //debugger;
                         for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
-                            for (const [token, join] of Object.entries(joins)) {
-                                WHERE.set(token, join);
+                            if (StorageFilter.selected.cubes.includes(cubeToken)) {
+                                for (const [token, join] of Object.entries(joins)) {
+                                    WHERE.set(token, join);
+                                }
                             }
                         }
                         // per l'ultima tabella della gerarchia non esiste la join perchè è quella che si lega al cubo e il legame è fatto nella proprietà 'cubes' della dimensione
@@ -1969,9 +1972,11 @@ var StorageMetric = new MetricStorage();
                 * un filtro può contenere anche una tabella di un livello dimensionale e una FACT. Es.: Azienda.id =43 AND tiporiga = 'M'
                 * in questo caso, dopo aver verificato le prop hierarchies e dimensions del filtro vado a verificare anche se è presente il cubeToken
                 */
-                if (StorageFilter.selected.hasOwnProperty('cubeToken')) {
-                    StorageCube.selected = StorageFilter.selected.cubeToken;
-                    FROM.set(StorageCube.selected.alias, `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${StorageCube.selected.alias}`);
+                if (StorageFilter.selected.hasOwnProperty('cubes')) {
+                    StorageFilter.selected.cubes.forEach( cubeToken => {
+                        StorageCube.selected = cubeToken;
+                        FROM.set(StorageCube.selected.alias, `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${StorageCube.selected.alias}`);
+                    });
                 }
                 object.FROM = Object.fromEntries(FROM);
                 if (WHERE.size !== 0) object.WHERE = Object.fromEntries(WHERE);
