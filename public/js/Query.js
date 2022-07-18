@@ -18,6 +18,16 @@ class Queries {
         ( !this.#objects.has(object.token) ) ? this.#objects.set(object.token, object) : this.#objects.delete(object.token);
         console.log('#objects : ', this.#objects);
 
+        this.setReportProperties();
+    }
+
+	get objects() {return this.#objects;}
+
+    /*
+    * Imposto gli elementi del report.
+    * Imposto quali cubi, FROM e JOIN che devono essere incluse nel report
+    */
+    setReportProperties() {
         document.querySelectorAll("*[data-include-query]").forEach( tableRef => delete tableRef.dataset.includeQuery);
         for ( const [key, value] of Query.objects ) {
         	// debugger;
@@ -36,14 +46,12 @@ class Queries {
                     });
                 }
             } else {
-            	// debugger;
+                debugger;
                 // elementi del cubo
                 document.querySelectorAll("#ul-cubes .selectable[data-cube-token='"+value.cubeToken+"']").forEach( tableRef => tableRef.dataset.includeQuery = true);
             }
         }
     }
-
-	get objects() {return this.#objects;}
 
     editObjects() {
         this.object = {};

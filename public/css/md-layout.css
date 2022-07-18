@@ -213,7 +213,7 @@ ul > section[data-sublist-table-card] > .sublist > span{width: 100%; padding: 8p
     padding: 1.5em;
 }
 .abs-window > div{margin: 1.5em .5em;}
-.abs-window > div > p{font-size: .95rem; padding: 8px; margin: 0px}
+.abs-window > div > p{font-size: .95rem; padding: 8px; margin: 0px;}
 .abs-window > div > small{font-size: .8rem;}
 /*absolute-window*/
 
@@ -236,4 +236,7 @@ span.markContent {
     position: relative; color: dimgrey; margin-bottom: 8px;
     display: inline-grid; justify-items: center;
 }
-/*mark.markContent::before {content: attr(data-attr); position: absolute; top: 100%; color: dimgray;}*/*/
+/*mark.markContent::before {content: attr(data-attr); position: absolute; top: 100%; color: dimgray;}*/
+.markContent > i {position: absolute; left: -7px; top: -7px; color: black; visibility: hidden;}
+.markContent:hover > i {position: absolute; left: -7px; top: -7px; color: black; visibility: visible;}
+.markContent > i:hover {cursor: pointer;}

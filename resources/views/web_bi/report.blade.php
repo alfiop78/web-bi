@@ -29,6 +29,7 @@
 
         <template id="tmpl-filter-formula">
             <span class="markContent">
+                <i class="material-icons-round md-14">cancel</i>
                 <mark></mark>
                 <small></small>
             </span>

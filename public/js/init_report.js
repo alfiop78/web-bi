@@ -1066,6 +1066,12 @@ var StorageMetric = new MetricStorage();
 		app.dialogFilter.showModal();
 	}
 
+    // cancellazione di un oggetto inserito nelle textarea formula SQL
+    app.cancelFormulaObject = (e) => {
+        console.log(e.currentTarget);
+        e.currentTarget.parentElement.remove();
+    }
+
 	// selezione del field nella dialogFilter, questo metodo farà partire la query per ottenere i campi distinti (in getDistinctValues())
     app.handlerSelectField = (e) => {
         // field selezionato
@@ -1078,6 +1084,8 @@ var StorageMetric = new MetricStorage();
         valueList.querySelectorAll('section').forEach( section => section.remove());
         const textarea = document.getElementById('composite-filter-formula');
         const templateContent = app.tmplFilterFormula.content.cloneNode(true);
+        const i = templateContent.querySelector('i');
+        i.addEventListener('click', app.cancelFormulaObject);
         const span = templateContent.querySelector('span');
         const mark = templateContent.querySelector('mark');
         const small = templateContent.querySelector('small');
@@ -1405,45 +1413,45 @@ var StorageMetric = new MetricStorage();
         ul.appendChild(section);
     }
 
-	// save compositeMetric
-	app.btnCompositeMetricSave.onclick = () => {
-		const name = document.getElementById('composite-metric-name').value;
-		const alias = document.getElementById('composite-alias-metric').value;
-		let arr_sql = [];
-		//const rand = () => Math.random(0).toString(36).substr(2);
-		const token = rand().substr(0, 21);
-		let metricsAlias = {}; // contiene un'elenco di object con nome_metrica : alias che compongono la metrica composta
-		let metricCubes = new Map(); // contiene i cubi relativi alle metriche all'interno della metrica composta
-		document.querySelectorAll('#composite-metric-formula *').forEach( element => {
-			console.log('element : ', element);
-			// console.log('element : ', element.nodeName);
-            if (element.classList.contains('markContent') || element.nodeName === 'SMALL') return;
-			// se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
-			if (element.nodeName === 'MARK') {
-				StorageMetric.selected = element.dataset.metricToken;
-				// recupero il nome del cubo a cui appartiene la metrica. Questo lo visualizzerò nell'elenco delle metriche composte
-				StorageCube.selected = StorageMetric.selected.cubeToken;
-				metricCubes.set(StorageCube.selected.token, StorageCube.selected.name);
-				// metrics[element.innerText] = StorageMetric.selected.formula.alias;
-				// TODO: probabilmente qui meglio inserire tutto il contenuto della metrica e non solo l'alias
-				metricsAlias[element.innerText] = {token : element.dataset.metricToken, alias : StorageMetric.selected.formula.alias};
-				// TODO: verificare se è presente il distinct : true in ogni metrica
-				arr_sql.push(StorageMetric.selected.name);
-			} else {
-				arr_sql.push(element.innerText.trim());	
-			}
-		});
-		arr_sql.push(`AS '${alias}'`);
-		const metricObj = { type: 'METRIC', token, name, metric_type : 4, formula: { token, formula_sql : arr_sql, alias, metrics_alias : metricsAlias }, cubes : Object.fromEntries(metricCubes) };
-		console.log(metricObj);
-		StorageMetric.save(metricObj);
-		// salvo nel DB
-		// app.saveMetricDB(metricObj);
-		// aggiungo la metrica alla <ul>
-		// reimposto, come metrica selezionata, la metrica appena creata e da aggiungere a #ul-exist-composite-metrics
-		StorageMetric.selected = token;
-		app.addCompositeMetric();
-	}
+    // save compositeMetric
+    app.btnCompositeMetricSave.onclick = () => {
+        const name = document.getElementById('composite-metric-name').value;
+        const alias = document.getElementById('composite-alias-metric').value;
+        let arr_sql = [];
+        //const rand = () => Math.random(0).toString(36).substr(2);
+        const token = rand().substr(0, 21);
+        let metricsAlias = {}; // contiene un'elenco di object con nome_metrica : alias che compongono la metrica composta
+        let metricCubes = new Map(); // contiene i cubi relativi alle metriche all'interno della metrica composta
+        document.querySelectorAll('#composite-metric-formula *').forEach( element => {
+            console.log('element : ', element);
+            // console.log('element : ', element.nodeName);
+            if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
+            // se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
+            if (element.nodeName === 'MARK') {
+                StorageMetric.selected = element.dataset.metricToken;
+                // recupero il nome del cubo a cui appartiene la metrica. Questo lo visualizzerò nell'elenco delle metriche composte
+                StorageCube.selected = StorageMetric.selected.cubeToken;
+                metricCubes.set(StorageCube.selected.token, StorageCube.selected.name);
+                // metrics[element.innerText] = StorageMetric.selected.formula.alias;
+                // TODO: probabilmente qui meglio inserire tutto il contenuto della metrica e non solo l'alias
+                metricsAlias[element.innerText] = {token : element.dataset.metricToken, alias : StorageMetric.selected.formula.alias};
+                // TODO: verificare se è presente il distinct : true in ogni metrica
+                arr_sql.push(StorageMetric.selected.name);
+            } else {
+                arr_sql.push(element.innerText.trim());
+            }
+        });
+        arr_sql.push(`AS '${alias}'`);
+        const metricObj = { type: 'METRIC', token, name, metric_type : 4, formula: { token, formula_sql : arr_sql, alias, metrics_alias : metricsAlias }, cubes : Object.fromEntries(metricCubes) };
+        console.log(metricObj);
+        StorageMetric.save(metricObj);
+        // salvo nel DB
+        // app.saveMetricDB(metricObj);
+        // aggiungo la metrica alla <ul>
+        // reimposto, come metrica selezionata, la metrica appena creata e da aggiungere a #ul-exist-composite-metrics
+        StorageMetric.selected = token;
+        app.addCompositeMetric();
+    }
 
 	// salvo il filtro nel DB, table : bi_filters
 	app.saveFilterDB = async (json) => {
@@ -1497,7 +1505,7 @@ var StorageMetric = new MetricStorage();
             // console.log(element);
             // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
             // ... altrimenti devo recuperare il cubeToken. Ci sono anche filtri che possono essere fatti su un livello dimensionale e su una FACT
-            if (element.classList.contains('markContent') || element.nodeName === 'SMALL') return;
+            if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
             //element.nodeName === 'MARK'
             if (element.nodeName === 'MARK') {
                 //const mark = element.querySelector('mark');
