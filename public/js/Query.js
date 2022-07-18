@@ -29,14 +29,17 @@ class Queries {
     */
     setReportProperties() {
         document.querySelectorAll("*[data-include-query]").forEach( tableRef => delete tableRef.dataset.includeQuery);
+        //debugger;
         for ( const [key, value] of Query.objects ) {
-        	// debugger;
-            if (!value.cubeToken && !value.cubes) {
+            console.log(value);
+            //debugger;
+            if (value.hasOwnProperty('dimensions')) {
                 // ha la prop hierarchies : {hierToken: tableId}
                 // per ogni dimensione presente nell'oggetto (es.: filtri multipli)
                 value.dimensions.forEach( token => {
                     document.querySelector("#ul-dimensions .selectable[data-dimension-token='"+token+"']").dataset.includeQuery = 'true';
                 });
+                // gerarchie
                 for (const [token, tableId] of Object.entries(value.hierarchies)) {
                     // debugger;
                     const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+token+"']");
@@ -45,10 +48,12 @@ class Queries {
                         tableRef.dataset.includeQuery = 'true';
                     });
                 }
-            } else {
-                debugger;
-                // elementi del cubo
-                document.querySelectorAll("#ul-cubes .selectable[data-cube-token='"+value.cubeToken+"']").forEach( tableRef => tableRef.dataset.includeQuery = true);
+            }
+            // cubi
+            if (value.hasOwnProperty('cubes')) {
+                value.cubes.forEach( token => {
+                    document.querySelector("#ul-cubes .selectable[data-cube-token='"+token+"']").dataset.includeQuery = 'true';
+                });
             }
         }
     }

@@ -329,7 +329,7 @@ class MetricStorage extends Storages {
 		this.#metricsObject = {};
 		super.storageK = 'METRIC';
 		for ( const [key, value] of Object.entries(this.st)) {
-			if (value.cubeToken === cubeToken) this.#metricsObject[key] = value;
+			if (value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;
 		}
 	}
 

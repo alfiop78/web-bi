@@ -464,6 +464,7 @@ var StorageMetric = new MetricStorage();
         4 : metrica composta
         */
         const ul = document.getElementById('ul-exist-metrics');
+        // per ogni cubo attualmente selezionato
 		for (const [cubeToken, value] of StorageCube.cubes) {
             StorageMetric.cubeMetrics = cubeToken;
             // recupero le metriche di base 0, base composte 1, avanzate 2
@@ -747,30 +748,31 @@ var StorageMetric = new MetricStorage();
 		Query.dimensions = e.currentTarget.dataset.dimensionToken;
 	}
 	// selezione di un filtro già presente, lo salvo nell'oggetto Query
-	app.handlerFilterSelected = (e) => {
-		StorageFilter.selected = e.currentTarget.dataset.filterToken;
-		if (e.currentTarget.hasAttribute('data-selected')) {
-			e.currentTarget.toggleAttribute('data-selected');
-			// delete filter
-            // TODO: da rivedere se occorre aggiungere qui anche la prop SQL
-			Query.filters = { token : e.currentTarget.dataset.filterToken, SQL : `${StorageFilter.selected.tableAlias}.${StorageFilter.selected.formula}` };
-			Query.objects = { token : e.currentTarget.dataset.filterToken };
-		} else {
-			e.currentTarget.toggleAttribute('data-selected');
-			// verifico le gerarchie incluse nel filtro selezionato (modifica filtro multiplo)
-			Query.objects = {
-                token : e.currentTarget.dataset.filterToken,
-                cubeToken : StorageFilter.selected.cubeToken,
-                hierarchies : StorageFilter.selected.hierarchies,
-                dimensions : StorageFilter.selected.dimensions
-            };
-			// console.log(StorageFilter.selected.formula);
-			// nel salvare il filtro nel report attuale devo impostarne anche l'alias della tabella selezionata nella dialog
+    app.handlerFilterSelected = (e) => {
+        StorageFilter.selected = e.currentTarget.dataset.filterToken;
+        let object = {};
+        if (e.currentTarget.hasAttribute('data-selected')) {
+            e.currentTarget.toggleAttribute('data-selected');
+            // delete filter
+            Query.filters = { token : e.currentTarget.dataset.filterToken };
+            //Query.filters = { token : e.currentTarget.dataset.filterToken, SQL : `${StorageFilter.selected.tableAlias}.${StorageFilter.selected.formula}` };
+            Query.objects = { token : e.currentTarget.dataset.filterToken };
+        } else {
+            e.currentTarget.toggleAttribute('data-selected');
+            // creo l'oggetto da passare a Query.objects
+            object.token = e.currentTarget.dataset.filterToken;
+            if (StorageFilter.selected.hasOwnProperty('cubes')) object.cubes = StorageFilter.selected.cubes;
+            if (StorageFilter.selected.hasOwnProperty('dimensions')) object.dimensions = StorageFilter.selected.dimensions;
+            if (StorageFilter.selected.hasOwnProperty('hierarchies')) object.hierarchies = StorageFilter.selected.hierarchies;
+
+            Query.objects = object;
+            // console.log(StorageFilter.selected.formula);
+            // nel salvare il filtro nel report attuale devo impostarne anche l'alias della tabella selezionata nella dialog
             Query.filters = StorageFilter.selected;
-			// Query.filters = { token : e.currentTarget.dataset.filterToken, SQL : `${StorageFilter.selected.tableAlias}.${StorageFilter.selected.formula}` };
-			app.checkObjectSelected();
-		}
-	}
+            // Query.filters = { token : e.currentTarget.dataset.filterToken, SQL : `${StorageFilter.selected.tableAlias}.${StorageFilter.selected.formula}` };
+            app.checkObjectSelected();
+        }
+    }
 
 	app.handlerMetricFilterSelected = e => e.currentTarget.toggleAttribute('data-selected');
 
@@ -784,7 +786,6 @@ var StorageMetric = new MetricStorage();
 			e.currentTarget.toggleAttribute('data-selected');
             // TODO: per le metriche composte (metric_type: 4) c'è da definire se inserire nel JSON, i cubi a cui appartengono le metriche che compongono la composta
             if (+e.currentTarget.dataset.metricType === 4) {
-                // TODO: in futuro è da rivedere, per la creazione di metriche composte su più cubi
                 Query.objects = {token : e.currentTarget.dataset.metricToken, cubes : StorageMetric.selected.cubes};
                 // quando viene selezionata una metrica composta, le metriche al suo interno verranno incluse nel datamart finale, potrei selezionarle sulla pagina con un colore diverso per
                 // ... evidenziare il fatto che sono già incluse nel report
@@ -1217,15 +1218,16 @@ var StorageMetric = new MetricStorage();
 		const date = new Date();
 		// const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
 		const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+        const dateString = date.toLocaleDateString('it-IT', options);
 		// verifico se ci sono filtri da associare a questa metrica
-		// let associatedFilters = new Map();
-		// let from = new Set();
-		// let where = new Map();
 		let associatedFilters = new Set();
 		document.querySelectorAll('#ul-metric-filters .selectable[data-selected]').forEach( filterSelected => {
 			associatedFilters.add(filterSelected.dataset.filterToken);
 		});
-		let metricObj = { created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options) };
+		let metricObj = {
+            created_at : dateString,
+            updated_at : dateString
+        };
 		/* se sono presenti dei filtri per la metrica che si sta creando, il metric_type sarà :
 		* 2 : metrica di base con filtri
 		* 3 : metrica di base composta, con filtri
@@ -1244,7 +1246,7 @@ var StorageMetric = new MetricStorage();
 					metric_type,
 					name,
 					formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias },
-					cubeToken : StorageCube.selected.token
+					cubes : [StorageCube.selected.token]
 				};
 				break;
 			case 2:
@@ -1256,7 +1258,7 @@ var StorageMetric = new MetricStorage();
 					metric_type,
 					name,
 					formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, table: Query.table, tableAlias : Query.tableAlias, filters: [...associatedFilters] },
-					cubeToken : StorageCube.selected.token
+					cubes : [StorageCube.selected.token]
 				};
 				break;
 			case 3:
@@ -1267,7 +1269,7 @@ var StorageMetric = new MetricStorage();
 					metric_type,
 					name,
 					formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, filters: [...associatedFilters] },
-					cubeToken : StorageCube.selected.token
+					cubes : [StorageCube.selected.token]
 				};
 				break;
 			default:
@@ -1279,7 +1281,7 @@ var StorageMetric = new MetricStorage();
 					metric_type,
 					name,
 					formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, table : Query.table, tableAlias : Query.tableAlias },
-					cubeToken : StorageCube.selected.token
+					cubes : [StorageCube.selected.token]
 				};
 				break;
 		}
@@ -1351,12 +1353,12 @@ var StorageMetric = new MetricStorage();
         section.dataset.relatedObject = 'dimension cube';
         section.dataset.elementSearch = 'search-exist-filters';
         section.dataset.label = StorageFilter.selected.name;
-        if (StorageFilter.selected.dimensions.length !== 0) {
+        if (StorageFilter.selected.hasOwnProperty('dimensions')) {
         	section.dataset.dimensionToken = StorageFilter.selected.dimensions.join(' ');	
         	// elenco token hier separate da spazi
         	section.dataset.hierToken = Object.keys(StorageFilter.selected.hierarchies).join(' ');
         } else {
-        	section.dataset.cubeToken = StorageFilter.selected.cubeToken;
+        	section.dataset.cubeToken = StorageFilter.selected.cubes;
         }                       
         selectable.dataset.filterToken = StorageFilter.selected.token;
         selectable.onclick = app[fn];
@@ -1421,7 +1423,7 @@ var StorageMetric = new MetricStorage();
         //const rand = () => Math.random(0).toString(36).substr(2);
         const token = rand().substr(0, 21);
         let metricsAlias = {}; // contiene un'elenco di object con nome_metrica : alias che compongono la metrica composta
-        let metricCubes = new Map(); // contiene i cubi relativi alle metriche all'interno della metrica composta
+        let cubes = new Set(); // contiene i cubi relativi alle metriche all'interno della metrica composta
         document.querySelectorAll('#composite-metric-formula *').forEach( element => {
             console.log('element : ', element);
             // console.log('element : ', element.nodeName);
@@ -1431,7 +1433,7 @@ var StorageMetric = new MetricStorage();
                 StorageMetric.selected = element.dataset.metricToken;
                 // recupero il nome del cubo a cui appartiene la metrica. Questo lo visualizzerò nell'elenco delle metriche composte
                 StorageCube.selected = StorageMetric.selected.cubeToken;
-                metricCubes.set(StorageCube.selected.token, StorageCube.selected.name);
+                cubes.add(StorageCube.selected.token);
                 // metrics[element.innerText] = StorageMetric.selected.formula.alias;
                 // TODO: probabilmente qui meglio inserire tutto il contenuto della metrica e non solo l'alias
                 metricsAlias[element.innerText] = {token : element.dataset.metricToken, alias : StorageMetric.selected.formula.alias};
@@ -1442,7 +1444,7 @@ var StorageMetric = new MetricStorage();
             }
         });
         arr_sql.push(`AS '${alias}'`);
-        const metricObj = { type: 'METRIC', token, name, metric_type : 4, formula: { token, formula_sql : arr_sql, alias, metrics_alias : metricsAlias }, cubes : Object.fromEntries(metricCubes) };
+        const metricObj = { type: 'METRIC', token, name, metric_type : 4, formula: { token, formula_sql : arr_sql, alias, metrics_alias : metricsAlias }, cubes : [...cubes] };
         console.log(metricObj);
         StorageMetric.save(metricObj);
         // salvo nel DB
@@ -1495,9 +1497,9 @@ var StorageMetric = new MetricStorage();
         const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
         let filterObject = {};
         let sql_formula = [];
-        let hierarchies = new Map(); // tabelle (e quindi gerarchie) utilizzate nel filtro
+        let hierarchiesMap = new Map(); // tabelle (e quindi gerarchie) utilizzate nel filtro
         let dimensions = new Set();
-        let cubeToken;
+        let cubes = new Set();
         //let dimensions = [];
         // la creazione di un filtro su un livello dimensionale salva il filtro con, all'interno, le proprietà dimension e hier.
         // Un filtro impostato la FACT avrà al suo interno il nome del cubo a cui è associato e l'alias della FACT
@@ -1506,7 +1508,6 @@ var StorageMetric = new MetricStorage();
             // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
             // ... altrimenti devo recuperare il cubeToken. Ci sono anche filtri che possono essere fatti su un livello dimensionale e su una FACT
             if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
-            //element.nodeName === 'MARK'
             if (element.nodeName === 'MARK') {
                 //const mark = element.querySelector('mark');
                 if (element.dataset.tableId) {
@@ -1516,16 +1517,16 @@ var StorageMetric = new MetricStorage();
                     sql_formula.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
                     //sql_formula.push(element.innerText.trim());
                     //debugger;
-                    if (hierarchies.has(element.dataset.hierToken)) {
-                        if (+element.dataset.tableId < hierarchies.get(element.dataset.hierToken)) {
-                            hierarchies.set(element.dataset.hierToken, +element.dataset.tableId);
+                    if (hierarchiesMap.has(element.dataset.hierToken)) {
+                        if (+element.dataset.tableId < hierarchiesMap.get(element.dataset.hierToken)) {
+                            hierarchiesMap.set(element.dataset.hierToken, +element.dataset.tableId);
                         }
                     } else {
-                        hierarchies.set(element.dataset.hierToken, +element.dataset.tableId);
+                        hierarchiesMap.set(element.dataset.hierToken, +element.dataset.tableId);
                     }
                 } else {
                     // tabella appartenente alla FACT.
-                    cubeToken = element.dataset.cubeToken;
+                    cubes.add(element.dataset.cubeToken);
                     // ...non dovrebbe servire il cubeToken su un filtro associato alla FACT, perchè in ogni caso, la FACT viene aggiunta in base alle metriche (che devono essere obbligatorie)
                     sql_formula.push(`${element.dataset.tableAlias}.${element.dataset.field}`);
                 }
@@ -1534,17 +1535,20 @@ var StorageMetric = new MetricStorage();
             }
         });
         console.log(sql_formula);
-        console.log(hierarchies);
+        // console.log(hierarchiesMap);
         filterObject = {
             token,
             type: 'FILTER',
             name: filterName.value,
-            dimensions : [...dimensions],
-            cubeToken,
             formula : sql_formula.join(' '), // Azienda_444.id = 43
-            hierarchies : Object.fromEntries(hierarchies),
             created_at : date.toLocaleDateString('it-IT', options), updated_at : date.toLocaleDateString('it-IT', options)
         };
+        if (hierarchiesMap.size !== 0) {
+            filterObject.hierarchies = Object.fromEntries(hierarchiesMap);
+            filterObject.dimensions = [...dimensions];
+        }
+        // non sono presenti, tra gli elementi che compongono il filtro, che fanno riferimento a qualche livello dimensionale
+        if (cubes.size !== 0) filterObject.cubes = [...cubes];
         StorageFilter.save(filterObject);
         StorageFilter.selected = token;
         // salvataggio nel DB
@@ -1552,7 +1556,8 @@ var StorageMetric = new MetricStorage();
         // reset del form
         filterName.value = "";
         filterName.focus();
-        textarea.value = "";
+        // pulisco la textarea
+        document.querySelectorAll('#composite-filter-formula *').forEach( element => element.remove());
         // aggiorno la lista dei filtri esistenti, aggiungendo il filtro appena creato
         app.addFilter('ul-exist-filters', false, 'handlerFilterSelected');
         app.addFilter('ul-metric-filters', false, 'handlerMetricFilterSelected');
