@@ -1945,28 +1945,30 @@ var StorageMetric = new MetricStorage();
             StorageMetric.selected.formula.filters.forEach( filterToken => {
                 StorageFilter.selected = filterToken;
                 filters.set(filterToken, {SQL : StorageFilter.selected.formula});
-
-                for (const [token, tableId] of Object.entries(StorageFilter.selected.hierarchies)) {
-                    const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+token+"']");
-                    hier.querySelectorAll("small").forEach( tableRef => {
-                        FROM.set(tableRef.dataset.tableAlias, `${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);
-                        StorageDimension.selected = tableRef.dataset.dimensionToken;
-                        // per ogni dimensione contenuta all'interno del filtro recupero le join con il cubo
-                        debugger;
-                        for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
-                            if (StorageFilter.selected.cubes.includes(cubeToken)) {
-                                for (const [token, join] of Object.entries(joins)) {
+                // se su quseto filtro sono presneti gerarchie...
+                if (StorageFilter.selected.hasOwnProperty('hierarchies')) {
+                    for (const [token, tableId] of Object.entries(StorageFilter.selected.hierarchies)) {
+                        const hier = document.querySelector("#ul-hierarchies .selectable[data-hier-token='"+token+"']");
+                        hier.querySelectorAll("small").forEach( tableRef => {
+                            FROM.set(tableRef.dataset.tableAlias, `${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);
+                            StorageDimension.selected = tableRef.dataset.dimensionToken;
+                            // per ogni dimensione contenuta all'interno del filtro recupero le join con il cubo
+                            //debugger;
+                            for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
+                                if (StorageFilter.selected.cubes.includes(cubeToken)) {
+                                    for (const [token, join] of Object.entries(joins)) {
+                                        WHERE.set(token, join);
+                                    }
+                                }
+                            }
+                            // per l'ultima tabella della gerarchia non esiste la join perchè è quella che si lega al cubo e il legame è fatto nella proprietà 'cubes' della dimensione
+                            if (StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias]) {
+                                for (const [token, join] of Object.entries(StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias])) {
                                     WHERE.set(token, join);
                                 }
                             }
-                        }
-                        // per l'ultima tabella della gerarchia non esiste la join perchè è quella che si lega al cubo e il legame è fatto nella proprietà 'cubes' della dimensione
-                        if (StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias]) {
-                            for (const [token, join] of Object.entries(StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias])) {
-                                WHERE.set(token, join);
-                            }
-                        }
-                    });
+                        });
+                    }
                 }
                 /*
                 * un filtro può contenere anche una tabella di un livello dimensionale e una FACT. Es.: Azienda.id =43 AND tiporiga = 'M'
