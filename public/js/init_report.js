@@ -1426,13 +1426,15 @@ var StorageMetric = new MetricStorage();
         let cubes = new Set(); // contiene i cubi relativi alle metriche all'interno della metrica composta
         document.querySelectorAll('#composite-metric-formula *').forEach( element => {
             console.log('element : ', element);
+            debugger;
             // console.log('element : ', element.nodeName);
             if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
             // se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
             if (element.nodeName === 'MARK') {
                 StorageMetric.selected = element.dataset.metricToken;
                 // recupero il nome del cubo a cui appartiene la metrica. Questo lo visualizzerò nell'elenco delle metriche composte
-                StorageCube.selected = StorageMetric.selected.cubeToken;
+                // TODO: qui dovranno essere ciclati i cubi per le metriche create su più cubi
+                StorageCube.selected = StorageMetric.selected.cubes;
                 cubes.add(StorageCube.selected.token);
                 // metrics[element.innerText] = StorageMetric.selected.formula.alias;
                 // TODO: probabilmente qui meglio inserire tutto il contenuto della metrica e non solo l'alias
