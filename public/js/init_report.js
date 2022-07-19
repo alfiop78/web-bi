@@ -599,7 +599,7 @@ var StorageMetric = new MetricStorage();
         Query.processId = +e.target.dataset.id;
         // cubi
         StorageProcess.selected.edit.cubes.forEach( token => {
-            debugger;
+            //debugger;
             console.log(token);
             StorageCube.selected = token;
             // selezione del cubo nella #ul-cubes
@@ -609,7 +609,7 @@ var StorageMetric = new MetricStorage();
         });
         // dimensioni
         StorageProcess.selected.edit.dimensions.forEach( token => {
-            debugger;
+            //debugger;
             StorageDimension.selected = token;
             document.querySelector("#ul-dimensions section[data-dimension-token='"+token+"'] .selectable").dataset.selected = 'true';
             Query.dimensions = token;
@@ -645,7 +645,7 @@ var StorageMetric = new MetricStorage();
             // reimposto il filtro come se fosse stato selezionato
             Query.filters = StorageFilter.selected;
             let object = {};
-            object.token = e.currentTarget.dataset.filterToken;
+            object.token = token;
             if (StorageFilter.selected.hasOwnProperty('cubes')) object.cubes = StorageFilter.selected.cubes;
             if (StorageFilter.selected.hasOwnProperty('dimensions')) object.dimensions = StorageFilter.selected.dimensions;
             if (StorageFilter.selected.hasOwnProperty('hierarchies')) object.hierarchies = StorageFilter.selected.hierarchies;
@@ -1952,7 +1952,7 @@ var StorageMetric = new MetricStorage();
                         FROM.set(tableRef.dataset.tableAlias, `${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);
                         StorageDimension.selected = tableRef.dataset.dimensionToken;
                         // per ogni dimensione contenuta all'interno del filtro recupero le join con il cubo
-                        //debugger;
+                        debugger;
                         for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
                             if (StorageFilter.selected.cubes.includes(cubeToken)) {
                                 for (const [token, join] of Object.entries(joins)) {

@@ -4,12 +4,12 @@ class Cubes {
 	#join = new Map();
 	#joins = new Map();
 	#token;
+    #associatedDimension = new Set();
 	constructor() {
 		this._cube = {};
 		this.relationId = 0;
 		this._join = {};
 		this._dimensions = []; // dimensioni selezionate da associare al cube
-		this._associatedDimension = [];
 	}
 
 	set token(value) {
@@ -115,12 +115,11 @@ class Cubes {
 
 	set associatedDimensions(token) {
 		// debugger;
-		// TODO: valutare oggetto Map()
-		this._associatedDimension.push(token);
-		// this._associatedDimension = obj;
+		// TODO: deve essere un oggetto Set(), quando si aggiunge una dimensione ad un cubo ma la dimensione già esiste, non deve essere aggiunta
+		this.#associatedDimension.add(token);
 	}
 
-	get associatedDimensions() {return this._associatedDimension;}
+	get associatedDimensions() {return [...this.#associatedDimension];}
 
 }
 

@@ -397,7 +397,7 @@ class Cube {
                     foreach ($this->_columns as $columnAlias) {
                         // carattere backtick con ALTGR+'
                         // creo : ON W_AP_base_3.sede = W_AP_metric_3_1.sede
-                        $ONClause[] = "{$this->baseTableName}.{$columnAlias} = {$tableName}.{$columnAlias}";
+                        $ONClause[] = "{$this->baseTableName}.'{$columnAlias}' = {$tableName}.'{$columnAlias}'";
                     }
                     $ONConditions = implode("\nAND ", $ONClause);
                     unset($ONClause);

@@ -1080,6 +1080,7 @@ var Hier = new Hierarchy();
 			// salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
 			Cube.associatedDimensions = dimensionToken;
 			// salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
+            // TODO: devo aggiornare le prop 'created_at' e 'updated_at' altrimenti questa dimensione non verrà considerata aggiornata dal versioning
 			storage.save(dimensionObject[dimensionToken]);
 		});
 		// TODO: l'aggiornamento del cubo non deve aggiornare anche la prop created_at ma solo updated_at
