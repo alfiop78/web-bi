@@ -127,22 +127,22 @@ class Cube {
 		}
 	}
 
-	public function filters($filters) {
-		// definisco i filtri del report
-		// dd($filters);
-		// $and = "\nAND ";
-		foreach ($filters as $filter) {
-			// dd($filter); // filter_name => alias_table.field = value
-			// $this->filters_baseTable .= $and.$filter->SQL;
-			if (!in_array($filter->SQL, $this->filters_baseTable)) $this->filters_baseTable[] = $filter->SQL;
-		}
-		// dd($this->filters_baseTable);
-		/*
-		es.:
-			AND Azienda_997.id = 473\n
-			AND DocVenditaDettaglio_560.DataDocumento >= 20220601
-		*/
-	}
+    public function filters($filters) {
+        // definisco i filtri del report
+        // dd($filters);
+        // $and = "\nAND ";
+        foreach ($filters as $filter) {
+            // dd($filter); // filter_name => alias_table.field = value
+            // $this->filters_baseTable .= $and.$filter->SQL;
+            if (!in_array($filter->SQL, $this->filters_baseTable)) $this->filters_baseTable[] = $filter->SQL;
+        }
+        //dd($this->filters_baseTable);
+        /*
+        es.:
+        AND Azienda_997.id = 473\n
+        AND DocVenditaDettaglio_560.DataDocumento >= 20220601
+        */
+    }
 
 	/*
 		aggiungo a $this->filters_metricTable i filtri presenti su una metrica filtrata.
