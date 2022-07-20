@@ -173,6 +173,7 @@ class Cube
     // metriche di base
     $metrics_base = array();
     $metrics_base_datamart = array();
+    dd($this->baseMetrics);
     foreach ($this->baseMetrics as $metricName => $metric) {
       //dd($this->baseMetrics);
       //var_dump($metric);
@@ -192,7 +193,7 @@ class Cube
     }
     $this->_metrics_base = implode(", ", $metrics_base);
     $this->_metrics_base_datamart = implode(", ", $metrics_base_datamart);
-    // dd($this->_metrics_base);
+    dd($this->_metrics_base);
     // dd($this->_metrics_base_datamart);
   }
 

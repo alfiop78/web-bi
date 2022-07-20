@@ -792,8 +792,9 @@ var StorageMetric = new MetricStorage();
         // quando viene selezionata una metrica composta, le metriche al suo interno verranno incluse nel datamart finale, potrei selezionarle sulla pagina con un colore diverso per
         // ... evidenziare il fatto che sono già incluse nel report
         // la prop formula->metrics_alias contiene {nome_metrica : metricToken, metricAlias}. Tramite il metricToken posso selezionare le metriche incluse nella formula della composta.
+        // all'interno delle metriche composte possono trovarsi anche altre metriche composte, quindi vado a cercare anche in #ul-exist-composite-metrics
         for (const [metricName, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
-          document.querySelector("#ul-exist-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
+          document.querySelector("#ul-exist-metrics .selectable[data-metric-token='" + metric.token + "'], #ul-exist-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
         }
       }
       Query.objects = { token: e.currentTarget.dataset.metricToken, cubes: StorageMetric.selected.cubes };
