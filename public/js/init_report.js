@@ -810,7 +810,6 @@ var StorageMetric = new MetricStorage();
     const templateContent = app.tmplFilterFormula.content.cloneNode(true);
     const span = templateContent.querySelector('span');
     const mark = templateContent.querySelector('mark');
-    const small = templateContent.querySelector('small');
 
     mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
     mark.innerText = e.currentTarget.dataset.label;
@@ -2001,38 +2000,47 @@ var StorageMetric = new MetricStorage();
       StorageMetric.selected = metricRef.dataset.metricToken;
       // ottengo le metriche inserite nella composta
       for (const [name, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
-        // recupero le metriche che compongono la composta
         StorageMetric.selected = metric.token;
         // se c'è una metrica filtrata memorizzo in Query.filteredMetrics altrimenti in Query.metrics
         // BUG: nella metrica composta potrebbero esserci anche altre metriche composte
-        if (StorageMetric.selected.metric_type === 2 || StorageMetric.selected.metric_type === 3) {
-          // se, in Query.filteredMetrics e Query.metrics sono già presenti le metriche in ciclo (che compongono la composta) non devono essere aggiunte
-          //debugger;
-          if (!Query.filteredMetrics.has(metric.token))
-            Query.filteredMetrics = {
-              token: metric.token,
-              name,
-              metric_type: StorageMetric.selected.metric_type,
-              formula: StorageMetric.selected.formula,
-              field: StorageMetric.selected.formula.field,
-              distinct: StorageMetric.selected.formula.distinct,
-              alias: StorageMetric.selected.formula.alias,
-              table: StorageMetric.selected.table,
-              tableAlias: StorageMetric.selected.tableAlias
-            };
-        } else {
-          if (!Query.metrics.has(metric.token))
-            Query.metrics = {
-              token: metric.token,
-              name,
-              metric_type: StorageMetric.selected.metric_type,
-              SQLFunction: StorageMetric.selected.formula.SQLFunction,
-              field: StorageMetric.selected.formula.field,
-              distinct: StorageMetric.selected.formula.distinct,
-              alias: StorageMetric.selected.formula.alias,
-              table: StorageMetric.selected.table,
-              tableAlias: StorageMetric.selected.tableAlias
-            };
+        switch (StorageMetric.selected.metric_type) {
+          case 0:
+          case 1:
+            if (!Query.metrics.has(metric.token))
+              Query.metrics = {
+                token: metric.token,
+                name,
+                metric_type: StorageMetric.selected.metric_type,
+                SQLFunction: StorageMetric.selected.formula.SQLFunction,
+                field: StorageMetric.selected.formula.field,
+                distinct: StorageMetric.selected.formula.distinct,
+                alias: StorageMetric.selected.formula.alias,
+                table: StorageMetric.selected.table,
+                tableAlias: StorageMetric.selected.tableAlias
+              };
+            break;
+          case 2:
+          case 3:
+            // metrica filtrata (es.: nettoriga manodopera) e metrica di base composta filtrata (prezzo*quantita manodopera)
+            if (!Query.filteredMetrics.has(metric.token))
+              Query.filteredMetrics = {
+                token: metric.token,
+                name,
+                metric_type: StorageMetric.selected.metric_type,
+                formula: StorageMetric.selected.formula,
+                field: StorageMetric.selected.formula.field,
+                distinct: StorageMetric.selected.formula.distinct,
+                alias: StorageMetric.selected.formula.alias,
+                table: StorageMetric.selected.table,
+                tableAlias: StorageMetric.selected.tableAlias
+              };
+            break;
+          default:
+            // metrica composta (è contenuto dentro un'altra metrica composta)
+            if (!Query.compositeMetrics.has(metric.token)) {
+              Query.compositeMetrics = { token: metric.token, name, formula: StorageMetric.selected.formula };
+            }
+            break;
         }
       }
       // reimposto la metrica composta selezionata

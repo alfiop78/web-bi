@@ -173,10 +173,9 @@ class Cube
     // metriche di base
     $metrics_base = array();
     $metrics_base_datamart = array();
-    dd($this->baseMetrics);
+    // dd($this->baseMetrics);
     foreach ($this->baseMetrics as $metricName => $metric) {
-      //dd($this->baseMetrics);
-      //var_dump($metric);
+      var_dump($metric);
       if ($metric->metric_type === 1 || $metric->metric_type === 3) {
         // metrica composta di base oppure metrica composta di base con filtri
         // per queste metriche la prop 'field' contiene la formula es.: DocVenditaDettaglio_560.PrzMedioPond * DocVenditaDettaglio_560.Quantita
@@ -193,7 +192,7 @@ class Cube
     }
     $this->_metrics_base = implode(", ", $metrics_base);
     $this->_metrics_base_datamart = implode(", ", $metrics_base_datamart);
-    dd($this->_metrics_base);
+    // dd($this->_metrics_base);
     // dd($this->_metrics_base_datamart);
   }
 
@@ -216,11 +215,11 @@ class Cube
 
   private function buildCompositeMetrics($tableName, $metricObject)
   {
-    //dd($tableName, $metricObject);
     // converto la formula delle metriche composte da : ( metric_name * metric_name) -> (W_AP_base_*.metric_alias * W_AP_base_*.metric_alias)
     // verifico se, tra le metriche che compongono la composta, ci sono metriche di base o avanzate (filtrate)
     foreach ($this->compositeMetrics as $name => $metric) {
       //dd($metric->formula->metrics_alias);
+      // if ($metric->token === 'ixzormyn9gl') dd($metric);
       /* formula->metrics_alias
                 {
                     +"venduto": {
@@ -257,7 +256,7 @@ class Cube
       // var_dump($this->_composite_sql_formula);
       // $this->_composite_sql_formula = implode(" ", $metric->formula_sql);
     }
-    //dd($this->_composite_sql_formula);
+    // dd($this->_composite_sql_formula);
   }
 
   public function baseTable($mode)
@@ -418,7 +417,6 @@ class Cube
           $sql .= "," . implode(",", $aliasM);
           $leftJoin .= "\nLEFT JOIN\ndecisyon_cache.$tableName\nON ";
           foreach ($this->_columns as $columnAlias) {
-            // carattere backtick con ALTGR+'
             // creo : ON W_AP_base_3.sede = W_AP_metric_3_1.sede
             $ONClause[] = "{$this->baseTableName}.'{$columnAlias}' = {$tableName}.'{$columnAlias}'";
           }
