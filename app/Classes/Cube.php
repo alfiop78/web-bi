@@ -215,10 +215,11 @@ class Cube
 
   private function buildCompositeMetrics($tableName, $metricObject)
   {
-    // converto la formula delle metriche composte da : ( metric_name * metric_name) -> (W_AP_base_*.metric_alias * W_AP_base_*.metric_alias)
+    // $nestedComposite = array();
+    // converto la formula delle metriche composte da : ( metric_name * metric_name) -> (WEB_BI_TMP_BASE_*.metric_alias * WEB_BI_TMP_BASE_*.metric_alias)
     // verifico se, tra le metriche che compongono la composta, ci sono metriche di base o avanzate (filtrate)
-    foreach ($this->compositeMetrics as $name => $metric) {
-      //dd($metric->formula->metrics_alias);
+    foreach ($this->compositeMetrics as $token => $metric) {
+      // dd($token);
       // if ($metric->token === 'ixzormyn9gl') dd($metric);
       /* formula->metrics_alias
                 {
@@ -251,12 +252,43 @@ class Cube
           }
         }
       }
-      // aggiungo l'alias della metrica composta
-      $this->_composite_sql_formula[$name] = $metric->formula->formula_sql;
-      // var_dump($this->_composite_sql_formula);
+      // aggiungo la formula della metrica composta
+      $this->_composite_sql_formula[$metric->name] = $metric->formula->formula_sql;
+      // $this->_composite_sql_formula[$token] = $metric->formula->formula_sql;
+      // print_r($this->_composite_sql_formula);
+      // echo "\n\n\n$metricObject->name\n\n\n";
+      // echo "\n\n\n$metric->name\n\n\n";
       // $this->_composite_sql_formula = implode(" ", $metric->formula_sql);
+
+      // // verifico se, questa metrica composta, in ciclo, è presente in altre metriche composte.
+      // foreach ($this->compositeMetrics as $cMetric) {
+      //   // echo ("metrica composta : $token ($cMetric->name) ");
+      //   // print_r($cMetric->formula->metrics_alias);
+      //   // print_r($cMetric->formula->formula_sql);
+      //   if (property_exists($cMetric->formula->metrics_alias, $metric->name)) {
+      //     echo ("metrica composta nidificata\n$metric->name\n");
+      //     // dd($this->_composite_sql_formula[$metric->token]);
+      //     $nestedComposite[$metric->name] = $this->_composite_sql_formula[$metric->name];
+      //   }
+      // }
     }
-    // dd($this->_composite_sql_formula);
+    // print_r($this->_composite_sql_formula);
+  }
+
+  private function createCompositeMetrics()
+  {
+    $nestedComposite = array();
+    // verifico se, questa metrica composta, in ciclo, è presente in altre metriche composte.
+    foreach ($this->compositeMetrics as $cMetric) {
+      // echo ("metrica composta : $token ($cMetric->name) ");
+      // print_r($cMetric->formula->metrics_alias);
+      // print_r($cMetric->formula->formula_sql);
+      if (property_exists($cMetric->formula->metrics_alias, $this->_composite_sql_formula)) {
+        // dd($this->_composite_sql_formula[$metric->token]);
+        $nestedComposite[$cMetric->formula->metrics_alias] = $this->_composite_sql_formula[$cMetric->formula->metricAlias];
+      }
+    }
+    dd($nestedComposite);
   }
 
   public function baseTable($mode)
@@ -458,6 +490,7 @@ class Cube
             */
       $s = "SELECT $this->_fieldsSQL";
       if (property_exists($this, 'baseMetrics')) $s .= ", $this->_metrics_base_datamart";
+      $this->createCompositeMetrics();
       if (property_exists($this, 'compositeMetrics')) {
         // sono presenti metriche composte
         foreach ($this->_composite_sql_formula as $metric_name => $formula) {
