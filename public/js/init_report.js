@@ -2061,8 +2061,10 @@ var StorageMetric = new MetricStorage();
       // per ogni dimensione con includeQuery recupero le join con il cubo
       for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
         // debugger;
-        for (const [token, join] of Object.entries(joins)) {
-          Query.WHERE = { token, join };
+        if (document.querySelector("#ul-cubes section[data-cube-token='" + cubeToken + "'] .selectable").hasAttribute('data-include-query')) {
+          for (const [token, join] of Object.entries(joins)) {
+            Query.WHERE = { token, join };
+          }
         }
       }
     });
@@ -2113,8 +2115,10 @@ var StorageMetric = new MetricStorage();
       // per ogni dimensione con includeQuery recupero le join con il cubo
       for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
         // debugger;
-        for (const [token, join] of Object.entries(joins)) {
-          Query.WHERE = { token, join };
+        if (document.querySelector("#ul-cubes section[data-cube-token='" + cubeToken + "'] .selectable").hasAttribute('data-include-query')) {
+          for (const [token, join] of Object.entries(joins)) {
+            Query.WHERE = { token, join };
+          }
         }
       }
     });
