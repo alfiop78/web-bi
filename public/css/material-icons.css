@@ -31,6 +31,7 @@
 .material-icons[fact]{color: var(--main-primary-color);}
 
 .material-icons-round.md-pad-2{padding: 2px;}
+.material-icons-round.md-pad-4{padding: 4px;}
 
 .material-icons[selected] {color: brown;}
 
@@ -95,9 +96,6 @@
 .material-icons.md-sienna{color: sienna;}
 
 .material-icons.md-highlight{color: var(--main-highlight-icons-color);}
-
-/*icone all'interno della card, lista field*/
-.card.table ul > section i{padding: 4px;}
 
 /*icons all'interno di buttons*/
 button:disabled.md-dark{color: #757575;} /*disabled dark*/
