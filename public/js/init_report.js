@@ -700,7 +700,48 @@ var StorageMetric = new MetricStorage();
     // apro la #dialog-filter
     // carico l'elenco delle colonne della tabella (da valutare per i filtri su più tabelle)
     // inserisco i dati del filtro nella dialog (formula, name, table)
+    const filterName = document.getElementById('filterName');
+    // imposto un attributo data-edit = true sul tasto app.btnFilterSave che verrà verificato in fase di salvataggio del filtro
+    app.btnFilterSave.dataset.token = e.currentTarget.dataset.objectToken;
+    const textarea = document.getElementById('composite-filter-formula');
+    console.log(StorageFilter.selected);
+    console.log(e.currentTarget);
+    StorageFilter.selected = e.currentTarget.dataset.objectToken;
+    // imposto il nome del filtro nella input
+    filterName.value = StorageFilter.selected.name;
+    filterName.focus();
+    // recupero la formula inserita nel div contenteditable e la re-inserisco 
+    // template utilizzato per il mark
+    const templateContent = app.tmplFilterFormula.content.cloneNode(true);
+    const i = templateContent.querySelector('i');
+    i.addEventListener('click', app.cancelFormulaObject);
+    const span = templateContent.querySelector('span');
+    const mark = templateContent.querySelector('mark');
+    const small = templateContent.querySelector('small');
+
+    app.dialogFilter.showModal();
     debugger;
+    StorageFilter.selected.editFormula.forEach(item => {
+      if (item.hasOwnProperty('table')) {
+        // l'item contiene il nome dell'alias della tabella, il field selezionato per creare il filtro e il nome della tabella.
+        // riprendo il template che ho utilizzato per creare il filtro.
+        mark.dataset.tableAlias = item.alias;
+        mark.dataset.table = item.table;
+        mark.dataset.field = item.field;
+        if (item.tableId) {
+          mark.dataset.tableId = item.tableId;
+          // da valutare come devono essere inseriti nell'oggetto Filter da salvare
+          mark.dataset.hierToken = item.hierToken;
+          mark.dataset.dimensionToken = item.dimensionToken;
+        }
+        mark.innerText = item.field;
+        small.innerText = item.table;
+        textarea.appendChild(span);
+      } else {
+        // l'item contiene gli operatori e il valore/i della formula
+        app.addSpan(textarea, item);
+      }
+    });
   }
 
   app.handlerMetricEdit = (e) => {
@@ -815,7 +856,7 @@ var StorageMetric = new MetricStorage();
     mark.innerText = e.currentTarget.dataset.label;
     textarea.appendChild(span);
     // aggiungo anche uno span per il proseguimento della scrittura della formula
-    app.addSpan(textarea);
+    app.addSpan(textarea, null);
   }
 
   // div contenteditable della formula per la metrica composta
@@ -824,11 +865,11 @@ var StorageMetric = new MetricStorage();
     console.log('e.target : ', e.target);
     console.log('e.currentTarget : ', e.currentTarget);
     if (e.target.localName === 'div') {
-      app.addSpan(e.target);
+      app.addSpan(e.target, null);
     }
   }
 
-  app.addSpan = (target) => {
+  app.addSpan = (target, value) => {
     const span = document.createElement('span');
     span.setAttribute('contenteditable', 'true');
     span.onkeydown = (e) => {
@@ -838,11 +879,12 @@ var StorageMetric = new MetricStorage();
       }
       if (e.key === 'Tab') {
         console.log('tab key');
-        app.addSpan(target);
+        app.addSpan(target, null);
         e.preventDefault();
       }
 
     }
+    if (value) span.innerText = value;
     target.appendChild(span);
     span.focus();
   }
@@ -854,7 +896,7 @@ var StorageMetric = new MetricStorage();
     console.log('e.target : ', e.target);
     console.log('e.currentTarget : ', e.currentTarget);
     if (e.target.localName === 'div') {
-      app.addSpan(e.target);
+      app.addSpan(e.target, null);
     }
   }
 
@@ -1110,7 +1152,7 @@ var StorageMetric = new MetricStorage();
     small.innerText = Query.table;
     textarea.appendChild(span);
 
-    app.addSpan(textarea);
+    app.addSpan(textarea, null);
     // TODO: checkFormulaValid()
     app.btnSearchValue.disabled = false;
     app.btnFilterSave.disabled = false;
@@ -1347,7 +1389,7 @@ var StorageMetric = new MetricStorage();
     const span = selectable.querySelector('span[filter]');
     //const smallTable = selectable.querySelector('small[table]');
     const smallHier = selectable.querySelector('small:last-child');
-    const btnEdit = spanHContent.querySelector('button');
+    const btnEdit = spanHContent.querySelector('button[data-edit]');
     section.hidden = hiddenStatus;
     // il filtro può contenere tabelle dei livelli dimensionali insieme alla FACT
     section.dataset.relatedObject = 'dimension cube';
@@ -1366,7 +1408,7 @@ var StorageMetric = new MetricStorage();
     // smallTable.innerText = table.table;
     smallHier.setAttribute('hier', 'true'); // TODO: dataset
     btnEdit.dataset.objectToken = StorageFilter.selected.token;
-    //btnEdit.onclick = app.handlerFilterEdit;
+    btnEdit.onclick = app.handlerFilterEdit;
     // smallHier.innerText = hier.name;
     ul.appendChild(section);
   }
@@ -1491,9 +1533,11 @@ var StorageMetric = new MetricStorage();
   app.btnFilterSave.onclick = () => {
     console.log(Query.table);
     // per i filtri creati sulla Fact, hier e dimension devono essere = null ma và salvato, nel filtro, il nome del cubo a cui accede
-    const textarea = document.getElementById('composite-filter-formula');
     const filterName = document.getElementById('filterName');
-    const token = rand().substr(0, 21);
+    // edit o salvataggio di un filtro
+    debugger;
+    // se è presente l'attributo data-token, sul tasto, allora sono in modifica di un filtro, altrimenti sto inserendo un nuovo filtro.
+    const token = (!app.btnFilterSave.dataset.token) ? rand().substr(0, 21) : app.btnFilterSave.dataset.token;
     const date = new Date();
     // const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
     const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
@@ -1502,23 +1546,32 @@ var StorageMetric = new MetricStorage();
     let hierarchiesMap = new Map(); // tabelle (e quindi gerarchie) utilizzate nel filtro
     let dimensions = new Set();
     let cubes = new Set();
-    //let dimensions = [];
-    // la creazione di un filtro su un livello dimensionale salva il filtro con, all'interno, le proprietà dimension e hier.
+    // questa proprietà, salvata all'interno del filtro, mi servirà per visualizzare la formula SQL del filtro in fase di Edit
+    let editFormula = [];
     // Un filtro impostato la FACT avrà al suo interno il nome del cubo a cui è associato e l'alias della FACT
     document.querySelectorAll('#composite-filter-formula *').forEach(element => {
       // console.log(element);
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
       // ... altrimenti devo recuperare il cubeToken. Ci sono anche filtri che possono essere fatti su un livello dimensionale e su una FACT
+      // console.log(element);
+      // debugger;
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         //const mark = element.querySelector('mark');
         if (element.dataset.tableId) {
           // tabella appartenente a un livello dimensionale
-          // debugger;
+          editFormula.push(
+            {
+              table: element.dataset.table,
+              alias: element.dataset.tableAlias,
+              field: element.dataset.field,
+              tableId: element.dataset.tableId,
+              hierToken: element.dataset.hierToken,
+              dimensionToken: element.dataset.dimensionToken
+            }
+          );
           dimensions.add(element.dataset.dimensionToken);
           sql_formula.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
-          //sql_formula.push(element.innerText.trim());
-          //debugger;
           if (hierarchiesMap.has(element.dataset.hierToken)) {
             if (+element.dataset.tableId < hierarchiesMap.get(element.dataset.hierToken)) {
               hierarchiesMap.set(element.dataset.hierToken, +element.dataset.tableId);
@@ -1534,12 +1587,16 @@ var StorageMetric = new MetricStorage();
         }
       } else {
         sql_formula.push(element.innerText.trim());
+        editFormula.push(element.innerText.trim());
       }
     });
     console.log(sql_formula);
+    console.log(editFormula);
+    // debugger;
     // console.log(hierarchiesMap);
     filterObject = {
       token,
+      editFormula,
       type: 'FILTER',
       name: filterName.value,
       formula: sql_formula.join(' '), // Azienda_444.id = 43
@@ -1657,8 +1714,9 @@ var StorageMetric = new MetricStorage();
   app.checkFilterForm = (check) => {
     // TODO: Implementazione
     const filterName = document.getElementById('filterName').value;
-    //const filterFormula = document.getElementById('filterSQLFormula').value;
-    //((filterName.length !== 0) && (filterFormula.length !== 0) || !check) ? app.btnFilterSave.disabled = false : app.btnFilterSave.disabled = true;
+    const filterFormula = document.getElementById('composite-filter-formula');
+    debugger;
+    app.btnFilterSave.disabled = ((filterName.length !== 0) && (filterFormula.childElementCount !== 0) || !check) ? false : true;
   }
 
   // selezione di un operatore logica da inserire nella formula (AND, OR, NOT, ecc...)
@@ -1716,6 +1774,7 @@ var StorageMetric = new MetricStorage();
       App.showConsole('Selezionare una dimensione per poter aggiungere colonne al report', 'warning');
     } else {
       app.dialogFilter.showModal();
+      delete app.btnFilterSave.dataset.token;
       document.getElementById('filterName').value = '';
       document.getElementById('filterName').focus();
     }
