@@ -731,6 +731,8 @@ var StorageMetric = new MetricStorage();
           // da valutare come devono essere inseriti nell'oggetto Filter da salvare
           mark.dataset.hierToken = item.hierToken;
           mark.dataset.dimensionToken = item.dimensionToken;
+        } else {
+          mark.dataset.cubeToken = item.cubeToken;
         }
         mark.innerText = item.field;
         small.innerText = item.table;
@@ -868,23 +870,57 @@ var StorageMetric = new MetricStorage();
   }
 
   app.addSpan = (target, value) => {
+    /*
+    * target : il div che contiene la formula
+    */
     const span = document.createElement('span');
     span.setAttribute('contenteditable', 'true');
+    span.setAttribute('tabindex', 0);
+    // let evt = new KeyboardEvent("keydown", {
+    //   shiftKey: true,
+    //   key: "Tab"
+    // });
     span.addEventListener('input', app.checkSpanFormula);
     span.onkeydown = (e) => {
       if (e.defaultPrevented) {
-        console.log('prevent default tab');
         return; // Do nothing if the event was already processed
       }
+      /* verifico prima se questo span è l'ultimo elemento della formula.
+      * In caso che lo span è l'ultimo elemento della formula ne aggiungo un'altro, altrimenti il Tab avrà il comportamento di default
+      */
+      const lastSpan = (e.target === target.querySelector('span[contenteditable]:last-child'));
+      console.log(e.key);
       switch (e.key) {
         case 'Tab':
-          console.log('tab key');
-          app.addSpan(target, null);
-          e.preventDefault();
+          // console.log(e.ctrlKey);
+          // se il tasto shift non è premuto e mi trovo sull'ultimo span, aggiungo un altro span. In caso contrario, la combinazione shift+tab oppure tab su un qualsiasi altro
+          // ...span che non sia l'ultimo, avrà il comportamento di default
+          if (!e.shiftKey && lastSpan) {
+            app.addSpan(target, null);
+            e.preventDefault();
+          }
           break;
         case 'Backspace':
-          // se lo span è vuoto devo eliminarlo, altrimenti ha il comportamento di default
-          if (span.textContent.length === 0) span.remove();
+          // se lo span è vuoto devo eliminarlo, in caso contrario ha il comportamento di default
+          if (span.textContent.length === 0) {
+            // posiziono il focus sul primo span disponibile andando indietro nel DOM
+            /* const event = new Event('build');
+
+            // Listen for the event.
+             span.addEventListener('build', function(e) { console.log(e) }, false);
+
+            // Dispatch the event.
+            span.dispatchEvent(event);
+            */
+            // span.dispatchEvent(evt);
+
+            // verifico il primo span[contenteditable] presente andando all'indietro (backspace keydown event)
+            let previousContentEditable = (span) => {
+              return (span.previousElementSibling.hasAttribute('contenteditable')) ? span.previousElementSibling : previousContentEditable(span.previousElementSibling);
+            }
+            previousContentEditable(span).focus();
+            span.remove();
+          }
           break;
 
         default:
@@ -1595,6 +1631,14 @@ var StorageMetric = new MetricStorage();
             hierarchiesMap.set(element.dataset.hierToken, +element.dataset.tableId);
           }
         } else {
+          editFormula.push(
+            {
+              table: element.dataset.table,
+              alias: element.dataset.tableAlias,
+              field: element.dataset.field,
+              cubeToken: element.dataset.cubeToken
+            }
+          );
           // tabella appartenente alla FACT.
           cubes.add(element.dataset.cubeToken);
           // ...non dovrebbe servire il cubeToken su un filtro associato alla FACT, perchè in ogni caso, la FACT viene aggiunta in base alle metriche (che devono essere obbligatorie)
