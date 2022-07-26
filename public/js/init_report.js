@@ -340,14 +340,14 @@ var StorageMetric = new MetricStorage();
   }
 
   app.showDimensionObjects = () => {
-    document.querySelectorAll("section[data-related-object*='dimension'][data-dimension-token='" + StorageDimension.selected.token + "']").forEach(hier => {
+    document.querySelectorAll("section[data-related-object*='dimension'][data-dimension-token*='" + StorageDimension.selected.token + "']").forEach(hier => {
       hier.hidden = false;
       hier.dataset.searchable = true;
     });
   }
 
   app.hideDimensionObjects = () => {
-    document.querySelectorAll("section[data-related-object*='dimension'][data-dimension-token='" + StorageDimension.selected.token + "']").forEach(hier => {
+    document.querySelectorAll("section[data-related-object*='dimension'][data-dimension-token*='" + StorageDimension.selected.token + "']").forEach(hier => {
       hier.hidden = true;
       delete hier.dataset.searchable;
     });
@@ -695,7 +695,7 @@ var StorageMetric = new MetricStorage();
 
   // edit filter
   app.handlerFilterEdit = (e) => {
-    // TODO: Implementazione
+    // Implementazione
     // recupero il filtro selezionato
     // apro la #dialog-filter
     // carico l'elenco delle colonne della tabella (da valutare per i filtri su più tabelle)
@@ -704,25 +704,23 @@ var StorageMetric = new MetricStorage();
     // imposto un attributo data-edit = true sul tasto app.btnFilterSave che verrà verificato in fase di salvataggio del filtro
     app.btnFilterSave.dataset.token = e.currentTarget.dataset.objectToken;
     const textarea = document.getElementById('composite-filter-formula');
-    console.log(StorageFilter.selected);
-    console.log(e.currentTarget);
     StorageFilter.selected = e.currentTarget.dataset.objectToken;
-    // imposto il nome del filtro nella input
+    // imposto il nome del filtro nella input. Lo imposto in due modi perchè con setAttribute viene riconosciuto dal MutationObserve e gli viene applicata la classe 'has-content' sulla label
+    filterName.setAttribute('value', StorageFilter.selected.name);
     filterName.value = StorageFilter.selected.name;
     filterName.focus();
-    // recupero la formula inserita nel div contenteditable e la re-inserisco 
-    // template utilizzato per il mark
-    const templateContent = app.tmplFilterFormula.content.cloneNode(true);
-    const i = templateContent.querySelector('i');
-    i.addEventListener('click', app.cancelFormulaObject);
-    const span = templateContent.querySelector('span');
-    const mark = templateContent.querySelector('mark');
-    const small = templateContent.querySelector('small');
 
     app.dialogFilter.showModal();
-    debugger;
     StorageFilter.selected.editFormula.forEach(item => {
       if (item.hasOwnProperty('table')) {
+        // recupero la formula inserita nel div contenteditable e la re-inserisco 
+        // template utilizzato per il mark
+        const templateContent = app.tmplFilterFormula.content.cloneNode(true);
+        const i = templateContent.querySelector('i');
+        i.addEventListener('click', app.cancelFormulaObject);
+        const span = templateContent.querySelector('span');
+        const mark = templateContent.querySelector('mark');
+        const small = templateContent.querySelector('small');
         // l'item contiene il nome dell'alias della tabella, il field selezionato per creare il filtro e il nome della tabella.
         // riprendo il template che ho utilizzato per creare il filtro.
         mark.dataset.tableAlias = item.alias;
@@ -872,21 +870,36 @@ var StorageMetric = new MetricStorage();
   app.addSpan = (target, value) => {
     const span = document.createElement('span');
     span.setAttribute('contenteditable', 'true');
+    span.addEventListener('input', app.checkSpanFormula);
     span.onkeydown = (e) => {
       if (e.defaultPrevented) {
         console.log('prevent default tab');
         return; // Do nothing if the event was already processed
       }
-      if (e.key === 'Tab') {
-        console.log('tab key');
-        app.addSpan(target, null);
-        e.preventDefault();
+      switch (e.key) {
+        case 'Tab':
+          console.log('tab key');
+          app.addSpan(target, null);
+          e.preventDefault();
+          break;
+        case 'Backspace':
+          // se lo span è vuoto devo eliminarlo, altrimenti ha il comportamento di default
+          if (span.textContent.length === 0) span.remove();
+          break;
+
+        default:
+          break;
       }
 
     }
     if (value) span.innerText = value;
     target.appendChild(span);
     span.focus();
+  }
+
+  app.checkSpanFormula = (e) => {
+    // TODO: qui potrei fare dei controlli sulla sintassi inserita, per il momentom sull'evento input abilito solo il tasto btnSaveFilter.
+    app.btnFilterSave.disabled = false;
   }
 
   // div contenteditable della formula per il filtro
@@ -1395,6 +1408,7 @@ var StorageMetric = new MetricStorage();
     section.dataset.relatedObject = 'dimension cube';
     section.dataset.elementSearch = 'search-exist-filters';
     section.dataset.label = StorageFilter.selected.name;
+    section.dataset.filterToken = StorageFilter.selected.token;
     if (StorageFilter.selected.hasOwnProperty('dimensions')) {
       section.dataset.dimensionToken = StorageFilter.selected.dimensions.join(' ');
       // elenco token hier separate da spazi
@@ -1535,9 +1549,10 @@ var StorageMetric = new MetricStorage();
     // per i filtri creati sulla Fact, hier e dimension devono essere = null ma và salvato, nel filtro, il nome del cubo a cui accede
     const filterName = document.getElementById('filterName');
     // edit o salvataggio di un filtro
-    debugger;
     // se è presente l'attributo data-token, sul tasto, allora sono in modifica di un filtro, altrimenti sto inserendo un nuovo filtro.
     const token = (!app.btnFilterSave.dataset.token) ? rand().substr(0, 21) : app.btnFilterSave.dataset.token;
+    // se il filtro è in fase di aggiornamento lo recupero dallo storage perchè la prop created_at deve restare invariata
+    if (app.btnFilterSave.dataset.token) StorageFilter.selected = token;
     const date = new Date();
     // const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
     const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
@@ -1590,8 +1605,8 @@ var StorageMetric = new MetricStorage();
         editFormula.push(element.innerText.trim());
       }
     });
-    console.log(sql_formula);
-    console.log(editFormula);
+    // console.log(sql_formula);
+    // console.log(editFormula);
     // debugger;
     // console.log(hierarchiesMap);
     filterObject = {
@@ -1600,8 +1615,10 @@ var StorageMetric = new MetricStorage();
       type: 'FILTER',
       name: filterName.value,
       formula: sql_formula.join(' '), // Azienda_444.id = 43
-      created_at: date.toLocaleDateString('it-IT', options), updated_at: date.toLocaleDateString('it-IT', options)
+      updated_at: date.toLocaleDateString('it-IT', options)
     };
+    // aggiornamento oppure nuovo filtri, per l'aggiornamento del filtro andrò a modificare solo la data updated_at
+    filterObject.created_at = (app.btnFilterSave.dataset.token) ? StorageFilter.selected.created_at : date.toLocaleDateString('it-IT', options);
     if (hierarchiesMap.size !== 0) {
       filterObject.hierarchies = Object.fromEntries(hierarchiesMap);
       filterObject.dimensions = [...dimensions];
@@ -1612,14 +1629,23 @@ var StorageMetric = new MetricStorage();
     StorageFilter.selected = token;
     // salvataggio nel DB
     // app.saveFilterDB(filterObject);
+    // aggiorno la lista dei filtri esistenti
+    if (app.btnFilterSave.dataset.token) {
+      // aggiornamento del filtro
+      document.querySelector("#ul-exist-filters section[data-filter-token='" + token + "']").dataset.label = filterName.value;
+      document.querySelector("#ul-metric-filters section[data-filter-token='" + token + "']").dataset.label = filterName.value;
+      document.querySelector("#ul-exist-filters .selectable[data-filter-token='" + token + "'] span[filter]").innerText = filterName.value;
+      document.querySelector("#ul-metric-filters .selectable[data-filter-token='" + token + "'] span[filter]").innerText = filterName.value;
+    } else {
+      // nuovo filtro, lo aggiungo alle #ul
+      app.addFilter('ul-exist-filters', false, 'handlerFilterSelected');
+      app.addFilter('ul-metric-filters', false, 'handlerMetricFilterSelected');
+    }
+    // pulisco la textarea
+    document.querySelectorAll('#composite-filter-formula *').forEach(element => element.remove());
     // reset del form
     filterName.value = "";
     filterName.focus();
-    // pulisco la textarea
-    document.querySelectorAll('#composite-filter-formula *').forEach(element => element.remove());
-    // aggiorno la lista dei filtri esistenti, aggiungendo il filtro appena creato
-    app.addFilter('ul-exist-filters', false, 'handlerFilterSelected');
-    app.addFilter('ul-metric-filters', false, 'handlerMetricFilterSelected');
   }
 
   // tasto OK nella dialogValue
@@ -1715,7 +1741,6 @@ var StorageMetric = new MetricStorage();
     // TODO: Implementazione
     const filterName = document.getElementById('filterName').value;
     const filterFormula = document.getElementById('composite-filter-formula');
-    debugger;
     app.btnFilterSave.disabled = ((filterName.length !== 0) && (filterFormula.childElementCount !== 0) || !check) ? false : true;
   }
 
@@ -2432,7 +2457,7 @@ var StorageMetric = new MetricStorage();
   }
 
   const body = document.getElementById('body');
-  //const compositeFilterFormula = document.getElementById('composite-filter-formula');
+  const inputs = document.querySelectorAll("input[type='text']");
   // create a new instance of `MutationObserver` named `observer`,
   // passing it a callback function
   const observer = new MutationObserver(function() {
@@ -2441,10 +2466,27 @@ var StorageMetric = new MetricStorage();
     /*compositeFilterFormula.querySelectorAll('span[contenteditable]').forEach(element => {
         element.addEventListener('keydown', app.handlerSpanContentEditable);
     });*/
+    inputs.forEach(input => {
+      // console.log(input);
+      // l'elemento successivo alla input è la label
+      (input.value.length !== 0) ? input.nextElementSibling.classList.add('has-content') : input.nextElementSibling.classList.remove('has-content');
+    });
   });
   // call `observe()` on that MutationObserver instance,
   // passing it the element to observe, and the options object
   observer.observe(body, { subtree: true, childList: true, attributes: true });
   //observer.observe(compositeFilterFormula, {subtree: true, childList: true, attributes: true});
+  // call `observe()` on that MutationObserver instance,
+  // passing it the element to observe, and the options object
+  inputs.forEach(input => {
+    observer.observe(input, { subtree: true, childList: true, attributes: true });
+  });
 
+  // dialog event close
+
+  app.dialogFilter.addEventListener('close', () => {
+    // ripulisco la input filterName e tutti gli oggetti presenti nella textarea
+    document.getElementById('filterName').value = '';
+    document.querySelectorAll('#composite-filter-formula *').forEach(element => element.remove());
+  });
 })();
