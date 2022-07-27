@@ -463,7 +463,7 @@
                     <div class="smalls"></div>
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Dettaglio" flow="bottom" disabled>info</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom" disabled>edit</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom">edit</button>
                 </div>
               </div>
             </section>

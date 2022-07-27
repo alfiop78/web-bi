@@ -179,14 +179,14 @@ class Cube
       if ($metric->metric_type === 1 || $metric->metric_type === 3) {
         // metrica composta di base oppure metrica composta di base con filtri
         // per queste metriche la prop 'field' contiene la formula es.: DocVenditaDettaglio_560.PrzMedioPond * DocVenditaDettaglio_560.Quantita
-        $metrics_base[] = "\nNVL({$metric->SQLFunction}({$metric->field}), 0) AS '{$metric->alias}'";
+        $metrics_base[] = "\nNVL({$metric->aggregateFn}({$metric->field}), 0) AS '{$metric->alias}'";
         // SUM(DocVenditaDettaglio_560.PrzMedioPond * DocVenditaDettaglio_560.Quantita) AS 'alias'
       } else {
         // $metrics_base è utilizzato in baseTable()
-        $metrics_base[] = "\nNVL({$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}), 0) AS '{$metric->alias}'";
+        $metrics_base[] = "\nNVL({$metric->aggregateFn}({$metric->tableAlias}.{$metric->field}), 0) AS '{$metric->alias}'";
       }
       // $metrics_base_datamart è utilizzato in createDatamart(), conterrà la tabella temporanea invece della tabella di origine
-      $metrics_base_datamart[] = "\nNVL({$metric->SQLFunction}({$this->baseTableName}.'{$metric->alias}'), 0) AS '{$metric->alias}'";
+      $metrics_base_datamart[] = "\nNVL({$metric->aggregateFn}({$this->baseTableName}.'{$metric->alias}'), 0) AS '{$metric->alias}'";
       // verifico se la metrica in ciclo è presente in una metrica composta
       if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($this->baseTableName, $metric);
     }
@@ -243,8 +243,8 @@ class Cube
           // la metrica passata come argomento è inclusa nella formula della metrica composta
           foreach ($metric->formula->formula_sql as $key => $sqlItem) {
             // la formula composta come array è ad es.: [ "(", "przmedio(nome_metrica)", "*", "quantita(nome_metrica)", ")"]
-            // ciclo ogni elemento per sostituire il nome della metrica con la formula contenuta in SQLFunction
-            $aggregate = $metricObject->SQLFunction;
+            // ciclo ogni elemento per sostituire il nome della metrica con la formula contenuta in aggregateFn
+            $aggregate = $metricObject->aggregateFn;
             if ($sqlItem === $metricName) {
               // se l'elemento in ciclo è il nome di una metrica lo sostituisco con : SUM(table_name.alias) lasciando invariati gli elementi parentesi, operatori, ecc...
               $metric->formula->formula_sql[$key] = "NVL($aggregate($tableName.'$metricAlias->alias'), 0)";
@@ -332,15 +332,15 @@ class Cube
         unset($this->_sql);
         if ($metric->metric_type === 3) {
           // metrica composta a livello cubo filtrata (es. : prezzo * quantita impostato sul cubo con filtro)
-          $arrayMetrics[$metric->alias] = "NVL({$metric->SQLFunction}({$metric->field}), 0) AS '{$metric->alias}'";
+          $arrayMetrics[$metric->alias] = "NVL({$metric->aggregateFn}({$metric->field}), 0) AS '{$metric->alias}'";
         } else {
           // metrica filtrata
-          $arrayMetrics[$metric->alias] = "NVL({$metric->SQLFunction}({$metric->tableAlias}.{$metric->field}), 0) AS '{$metric->alias}'";
+          $arrayMetrics[$metric->alias] = "NVL({$metric->aggregateFn}({$metric->tableAlias}.{$metric->field}), 0) AS '{$metric->alias}'";
         }
         // var_dump($arrayMetrics);
         // _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
         // TODO: aggiungere documentazione per _metrics_advanced_datamart
-        $this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\nNVL({$metric->SQLFunction}($tableName.'{$metric->alias}'), 0) AS '{$metric->alias}'";
+        $this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\nNVL({$metric->aggregateFn}($tableName.'{$metric->alias}'), 0) AS '{$metric->alias}'";
         // verifico se sono presenti metriche composte che contengono la metrica in ciclo, stessa logica utilizzata per le metriche di base
         if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($tableName, $metric);
 
@@ -426,7 +426,7 @@ class Cube
     }
     $this->_fieldsSQL = implode(",", $table_fields);
     if (!is_null($this->_metrics_advanced_datamart)) {
-      // _metrics_advanced_datamart : "\n{$metric->SQLFunction}($tableName.'{$metric->alias}') AS '{$metric->alias}'"
+      // _metrics_advanced_datamart : "\n{$metric->aggregateFn}($tableName.'{$metric->alias}') AS '{$metric->alias}'"
       // sono presenti metriche filtrate
       $comment = "/*Creazione DATAMART :\ndecisyon_cache.{$this->datamartName}\n*/\n";
       $sql = "{$comment}CREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS ";
