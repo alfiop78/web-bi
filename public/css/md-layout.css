@@ -221,7 +221,7 @@ mark{
     background-color: sienna;
     color: white;
     border-radius: 4px;
-    padding: 2px;
+    padding: 2px 12px;
     display: inline-flex;
     width: 100%;
     justify-content: center;

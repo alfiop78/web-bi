@@ -916,7 +916,11 @@ var StorageMetric = new MetricStorage();
 
             // verifico il primo span[contenteditable] presente andando all'indietro (backspace keydown event)
             let previousContentEditable = (span) => {
-              return (span.previousElementSibling.hasAttribute('contenteditable')) ? span.previousElementSibling : previousContentEditable(span.previousElementSibling);
+              // se viene trovate uno <span> precedente a quello passato come argomento, lo restituisco, altrimenti restituisco quello passato come argomento
+              if (span.previousElementSibling) {
+                span = (span.previousElementSibling.hasAttribute('contenteditable')) ? span.previousElementSibling : previousContentEditable(span.previousElementSibling);
+              }
+              return span;
             }
             previousContentEditable(span).focus();
             span.remove();
@@ -1697,16 +1701,13 @@ var StorageMetric = new MetricStorage();
     // recupero tutti i valori selezionati.
     const valueSelected = app.dialogValue.querySelectorAll('#ul-filter-values .selectable[data-selected]');
     // TODO: Elaborare un sistema per effettuare la IN(), la BETWEEN, AND, OR, ecc...in base alla selezione dei valori
-    const textarea = document.getElementById('filterSQLFormula');
+    const textarea = document.getElementById('composite-filter-formula');
     let arrayValues = [];
-    valueSelected.forEach((element) => {
-      arrayValues.push(element.dataset.label);
-    });
-    debugger;
-    textarea.value += arrayValues.join(',');
-    // textarea.value += e.currentTarget.getAttribute('label');
+    valueSelected.forEach(element => arrayValues.push(element.dataset.label));
+    // aggiungo i valori selezionati alla textarea
+    app.addSpan(textarea, arrayValues.join(', '));
 
-    // TODO: posizionare nella creazione di un nuovo filtro app.checkFilterForm();
+    // TODO: impostare app.checkFilterForm(); nella creazione di un nuovo filtro
 
     app.dialogValue.close();
   }
