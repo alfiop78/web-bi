@@ -695,7 +695,6 @@ var StorageMetric = new MetricStorage();
 
   // edit filter
   app.handlerFilterEdit = (e) => {
-    // Implementazione
     // recupero il filtro selezionato
     // apro la #dialog-filter
     // carico l'elenco delle colonne della tabella (da valutare per i filtri su più tabelle)
@@ -745,6 +744,9 @@ var StorageMetric = new MetricStorage();
   }
 
   app.handlerMetricEdit = (e) => {
+    // recupero la metrica selezionata
+    // apro la #dialog-metrics
+    // inserisco i dati della metrica nella dialog
     debugger;
   }
 
@@ -1065,9 +1067,9 @@ var StorageMetric = new MetricStorage();
     const inputMetricName = document.getElementById('metric-name');
     const inputMetricAlias = document.getElementById('alias-metric');
     // elimino tutte le selezioni precedenti
-    if (ul.querySelector('.selectable[selected]')) ul.querySelector('.selectable[selected]').toggleAttribute('selected');
-    e.currentTarget.toggleAttribute('selected');
-    if (e.currentTarget.hasAttribute('selected')) {
+    if (ul.querySelector('.selectable[data-selected]')) ul.querySelector('.selectable[data-selected]').toggleAttribute('data-selected');
+    e.currentTarget.toggleAttribute('data-selected');
+    if (e.currentTarget.hasAttribute('data-selected')) {
       inputMetricName.value = '';
       inputMetricAlias.value = '';
       inputMetricName.focus();
@@ -1091,7 +1093,6 @@ var StorageMetric = new MetricStorage();
         }).join(' ');
         Query.field = newFormula;
       } else {
-        debugger;
         Query.field = e.currentTarget.dataset.label;
         // per le metriche composte di primo livello non è necessario impostare le 2 prop tableAlias e table, sono già impostate con il map() qui sopra
         Query.table = e.currentTarget.dataset.tableName;
@@ -1300,84 +1301,68 @@ var StorageMetric = new MetricStorage();
   app.btnMetricSave.onclick = (e) => {
     const name = document.getElementById('metric-name').value;
     const alias = document.getElementById('alias-metric').value;
-    const SQLFunction = document.querySelector('#ul-aggregation-functions .selectable[selected]').dataset.label;
-    let metric_type = +document.querySelector('#ul-available-metrics .selectable[selected]').dataset.metricType;
+    const sql = document.querySelector('#ul-aggregation-functions .selectable[data-selected]').dataset.label;
+    const metric_type = +document.querySelector('#ul-available-metrics .selectable[data-selected]').dataset.metricType;
     const distinctOption = document.getElementById('checkbox-distinct').checked;
+    const date = new Date();
     console.log('Query.table : ', Query.table);
     console.log('Query.tableAlias : ', Query.tableAlias);
     console.log('Query.field : ', Query.field);
     console.log('cube selected : ', StorageCube.selected.name);
     console.log('cube selected token : ', StorageCube.selected.token);
-    //const rand = () => Math.random(0).toString(36).substr(2);
-    const token = rand().substr(0, 21);
-    const date = new Date();
+    debugger;
+    // edit o salvataggio di una metrica
+    const token = (!e.target.dataset.token) ? rand().substr(0, 21) : e.target.dataset.token;
+    // se la metrica è in fase di 'edit' la recupero dallo storage
+    if (e.target.dataset.token) StorageMetric.selected = token;
     // const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
     const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
-    const dateString = date.toLocaleDateString('it-IT', options);
+    // const date = date.toLocaleDateString('it-IT', options);
     // verifico se ci sono filtri da associare a questa metrica
     let associatedFilters = new Set();
     document.querySelectorAll('#ul-metric-filters .selectable[data-selected]').forEach(filterSelected => {
       associatedFilters.add(filterSelected.dataset.filterToken);
     });
     let metricObj = {
-      created_at: dateString,
-      updated_at: dateString
+      updated_at: date.toLocaleDateString('it-IT', options),
+      type: 'METRIC',
+      token,
+      name,
+      cubes: [StorageCube.selected.token]
     };
+    metricObj.created_at = (e.target.dataset.token) ? StorageMetric.selected.created_at : date.toLocaleDateString('it-IT', options);
     /* se sono presenti dei filtri per la metrica che si sta creando, il metric_type sarà :
     * 2 : metrica di base con filtri
     * 3 : metrica di base composta, con filtri
     */
-    if (associatedFilters.size > 0) {
-      metric_type = (metric_type === 0) ? 2 : 3;
-    }
-    debugger;
+    if (associatedFilters.size > 0) metric_type = (metric_type === 0) ? 2 : 3;
+    metricObj.metric_type = metric_type;
+
+    let formulaObj = { token, sql, field: Query.field, distinct: distinctOption, alias };
 
     switch (metric_type) {
       case 1:
         // base composta (legata al cubo) senza filtri es.: prezzo*quantita
-        metricObj = {
-          type: 'METRIC',
-          token,
-          metric_type,
-          name,
-          formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias },
-          cubes: [StorageCube.selected.token]
-        };
+        metricObj.formula = formulaObj;
         break;
       case 2:
         // base filtrata (es.: venduto con filtro manodopera)
-        debugger;
-        metricObj = {
-          type: 'METRIC',
-          token,
-          metric_type,
-          name,
-          formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, table: Query.table, tableAlias: Query.tableAlias, filters: [...associatedFilters] },
-          cubes: [StorageCube.selected.token]
-        };
+        formulaObj.table = Query.table;
+        formulaObj.tableAlias = Query.tableAlias
+        formulaObj.filters = [...associatedFilters];
+        metricObj.formula = formulaObj;
         break;
       case 3:
         // base composta filtrata (es.: prezzo * qta impostate sul cubo e con filtro)
-        metricObj = {
-          type: 'METRIC',
-          token,
-          metric_type,
-          name,
-          formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, filters: [...associatedFilters] },
-          cubes: [StorageCube.selected.token]
-        };
+        formulaObj.filters = [...associatedFilters];
+        metricObj.formula = formulaObj;
         break;
       default:
         // base
         console.info('metrica di base');
-        metricObj = {
-          type: 'METRIC',
-          token,
-          metric_type,
-          name,
-          formula: { token, SQLFunction, field: Query.field, distinct: distinctOption, alias, table: Query.table, tableAlias: Query.tableAlias },
-          cubes: [StorageCube.selected.token]
-        };
+        formulaObj.table = Query.table;
+        formulaObj.tableAlias = Query.tableAlias;
+        metricObj.formula = formulaObj;
         break;
     }
 
@@ -1857,6 +1842,8 @@ var StorageMetric = new MetricStorage();
       App.showConsole('Selezionare un Cubo per poter aggiungere metriche al report', 'warning');
     } else {
       app.dialogMetric.showModal();
+      // nuova metrica, rimuovo il data-token dal tasto btnMetricSave
+      delete app.btnMetricSave.dataset.token;
       document.getElementById('metric-name').value = '';
       document.getElementById('metric-name').focus();
     }

@@ -245,9 +245,9 @@
           <div class="relative-ul">
             <ul id="ul-aggregation-functions" class="absolute">
               <section data-element-search="search-aggregate-functions" data-label="SUM" data-sublist-gen data-searchable>
-                <div class="selectable" data-label="SUM" selected>
+                <div>
                   <div class="h-content">
-                    <div class="v-content">
+                    <div class="selectable v-content" data-label="SUM" data-selected>
                       <span item>SUM</span>
                     </div>
                   </div>
@@ -255,9 +255,9 @@
               </section>
 
               <section data-element-search="search-aggregate-functions" data-label="COUNT" data-sublist-gen data-searchable>
-                <div class="selectable" data-label="COUNT">
+                <div>
                   <div class="h-content">
-                    <div class="v-content">
+                    <div class="selectable v-content" data-label="COUNT">
                       <span item>COUNT</span>
                     </div>
                   </div>
@@ -265,9 +265,9 @@
               </section>
 
               <section data-element-search="search-aggregate-functions" data-label="AVG" data-sublist-gen data-searchable>
-                <div class="selectable" data-label="AVG">
+                <div>
                   <div class="h-content">
-                    <div class="v-content">
+                    <div class="selectable v-content" data-label="AVG">
                       <span item>AVG</span>
                     </div>
                   </div>
@@ -275,9 +275,9 @@
               </section>
 
               <section data-element-search="search-aggregate-functions" data-label="MAX" data-sublist-gen data-searchable>
-                <div class="selectable" data-label="MAX">
+                <div>
                   <div class="h-content">
-                    <div class="v-content">
+                    <div class="selectable v-content" data-label="MAX">
                       <span item>MAX</span>
                     </div>
                   </div>
@@ -285,9 +285,9 @@
               </section>
 
               <section data-element-search="search-aggregate-functions" data-label="MIN" data-sublist-gen data-searchable>
-                <div class="selectable" data-label="MIN">
+                <div>
                   <div class="h-content">
-                    <div class="v-content">
+                    <div class="selectable v-content" data-label="MIN">
                       <span item>MIN</span>
                     </div>
                   </div>
@@ -317,7 +317,7 @@
             </div>
           </div>
           <div class="md-field">
-            <textarea id="metricSQLFormula" name="metricSQL" rows="8" cols="25" placeholder="SQL"></textarea>
+            <textarea id="metricSQLFormula" name="metricSQL" rows="8" cols="25" placeholder="SQL" disabled></textarea>
           </div>
           <button id="metric-filtered" type="button" name="metric-filtered" class="md-button">Imposta filtri</button>
           <button id="btnMetricSave" type="button" name="save" class="md-button" disabled>salva</button>
@@ -448,7 +448,7 @@
                     <small cube></small>
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Dettaglio" flow="bottom">info</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom" disabled>edit</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom">edit</button>
                 </div>
               </div>
             </section>

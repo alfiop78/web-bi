@@ -103,6 +103,7 @@ section[data-sublist-composite-metrics]:hover button{visibility: visible;}
 
 /*hover selected elements*/
 .data-item{position: relative;}
+section[data-sublist-gen] {position: relative;}
 .selectable{transition: padding-left 150ms; padding-left: 4px;}
 .selectable:hover{cursor: pointer;transition: padding-left 200ms; padding-left: 8px;}
 *[draggable].selectable:hover{cursor: grab; transition: padding-left 200ms; padding-left: 8px; font-weight: bold;}

@@ -96,7 +96,7 @@ ul > section.fact{font-weight: bold;}
 .filters .btn-add{color: var(--main-filters-color);}
 .filters button.material-icons-round:not([data-object-token]){color: var(--main-filters-color);}
 .metrics .btn-add{color: var(--main-metrics-color);}
-.metrics button.material-icons-round{color: var(--main-metrics-color);}
+.metrics button.material-icons-round:not([data-object-token]){color: var(--main-metrics-color);}
 .filters .btn-add, .metrics .btn-add, .composite-metrics .btn-add{
   display: grid;grid-template-rows: auto auto;justify-content: center; opacity: .5;align-items: center;justify-items: center;padding: 8px 1em; background-color: #dcdcdc61;
   border-radius: 0px;box-shadow: 0px 0px 0px 0px; transition: box-shadow 200ms, opacity 250ms, border-radius 150ms;}
