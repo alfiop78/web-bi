@@ -253,27 +253,28 @@ class Cube
         }
       }
       // aggiungo la formula della metrica composta
-      $this->_composite_sql_formula[$metric->name] = $metric->formula->formula_sql;
+      // var_dump($metric->formula->alias);
+      $this->_composite_sql_formula[$metric->name] = ['alias' => $metric->formula->alias, 'formula' => $metric->formula->formula_sql];
+      // dd($this->_composite_sql_formula);
     }
   }
 
   private function createCompositeMetrics()
   {
     // verifico se le metrica composta, in ciclo, è presente in altre metriche composte.
+    // dd($this->compositeMetrics);
     foreach ($this->compositeMetrics as $cMetric) {
       // in _composite_sql_formula sono già state aggiunte metriche composte provenienti dall'elaborazione delle metriche di base/avanzate
-      foreach ($this->_composite_sql_formula as $metricName => $formula) {
+      foreach ($this->_composite_sql_formula as $metricName => $alias_formula) {
+        // $alias_formula contiene 2 array, uno ha l'alias della metrica composta già definita in buildCompositeMetrics, l'altro array contiene la formula, già definita allo stesso modo
         // se, nelle metriche composte già definite (in _composite_sql_formula), ne è presente qualcuna che si trova anche in un'altra metrica allora ne recupero la formula
         if (property_exists($cMetric->formula->metrics_alias, $metricName)) {
           // la metrica composta è presente anche in un'altra metrica composta
-          // elimino, dalla metrica composta già definita in _composite_sql_formula, l'ultimo elemento dell'array, questo è l'alias della metrica...
-          // ... che non va inserito nella formula della metrica composta (cMetric) in ciclo
-          array_pop($formula);
           foreach ($cMetric->formula->formula_sql as $key => $sql_item) {
             // sostituisco il nome della metrica con la sua formula prendendola data _composite_sql_formula.
             if ($sql_item === $metricName) {
-              $cMetric->formula->formula_sql[$key] = implode(" ", $formula);
-              $this->_composite_sql_formula[$cMetric->name] = $cMetric->formula->formula_sql;
+              $cMetric->formula->formula_sql[$key] = implode(" ", $alias_formula['formula']);
+              $this->_composite_sql_formula[$cMetric->name] = ['alias' => $cMetric->formula->alias, 'formula' => $cMetric->formula->formula_sql];
             }
           }
         }
@@ -464,8 +465,8 @@ class Cube
       // dd(property_exists($this, 'compositeMetrics'));
       if (property_exists($this, 'compositeMetrics')) {
         $this->createCompositeMetrics();
-        foreach ($this->_composite_sql_formula as $formula) {
-          $this->_composite_metrics[] = implode(" ", $formula);
+        foreach ($this->_composite_sql_formula as $alias_formula) {
+          $this->_composite_metrics[] = implode(" ", $alias_formula['formula']) . " AS '{$alias_formula["alias"]}'";
         }
         $sql .= ",\n";
         $sql .= implode(",\n", $this->_composite_metrics);
@@ -485,8 +486,8 @@ class Cube
       if (property_exists($this, 'compositeMetrics')) {
         $this->createCompositeMetrics();
         // sono presenti metriche composte
-        foreach ($this->_composite_sql_formula as $formula) {
-          $this->_composite_metrics[] = implode(" ", $formula);
+        foreach ($this->_composite_sql_formula as $alias_formula) {
+          $this->_composite_metrics[] = implode(" ", $alias_formula['formula']) . " AS '{$alias_formula["alias"]}'";
         }
         $s .= ",\n";
         $s .= implode(", ", $this->_composite_metrics);

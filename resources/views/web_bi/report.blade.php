@@ -432,7 +432,7 @@
                     <small table></small>
                     <small></small>
                   </div>
-                  <button class="button-icon material-icons-round md-18" data-object-token tooltip="Info" flow="bottom" disabled>info</button>
+                  <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Info" flow="bottom" disabled>info</button>
                   <button class="button-icon material-icons-round md-18" data-object-token data-edit tooltip="Modifica" flow="bottom">edit</button>
                 </div>
               </div>
@@ -457,8 +457,8 @@
             <section class="data-item" data-element-search data-label data-sublist-composite-metrics hidden>
               <div>
                 <div class="h-content">
-                  <div class="selectable v-content" data-object-type="composite-metric">
-                    <span metric class="highlight metrics-color"></span>
+                  <div class="selectable v-content composite-metrics-color" data-object-type="composite-metric">
+                    <span metric class="highlight"></span>
                     {{-- TODO: per le metriche composte, visualizzarne, nel popup, l'elenco dei cubi utilizzati dalle metriche all'interno della formula --}}
                     <div class="smalls"></div>
                   </div>

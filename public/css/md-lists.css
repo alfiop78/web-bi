@@ -1,6 +1,7 @@
 :root{
   --main-filters-color: darkolivegreen;
   --main-metrics-color: darkgoldenrod;
+  --main-composite-metrics-color: sienna;
 }
 
 ul{margin-inline: 0px;padding-inline: 0px;}
@@ -11,6 +12,7 @@ ul{margin-inline: 0px;padding-inline: 0px;}
 span.highlight{color: sienna;}
 .filters-color span.highlight{color: var(--main-filters-color);}
 .metrics-color span.highlight{color: var(--main-metrics-color);}
+.composite-metrics-color span.highlight{color: var(--main-composite-metrics-color);}
 .no-highlight{color: dimgray}
 .selectable{margin: 0px 4px; padding: 2px 4px;}
 .card ul > section .selectable{margin: 0px 4px; padding-top: 0px;}
@@ -27,18 +29,8 @@ section[data-sublist-fields] > .selectable[data-relation][data-relation-id="true
 section[data-sublist-fields] > .selectable[metrics] i[data-id="metric-icon"]{color: #587850; visibility: visible;}
 
 /*visualizzo icona su hover section*/
-section[data-sublist-columns] button{visibility: hidden;}
-section[data-sublist-columns]:hover button{visibility: visible;}
-
-section[data-sublist-filters] button{visibility: hidden;}
-section[data-sublist-filters]:hover button{visibility: visible;}
-
-section[data-sublist-metrics] button{visibility: hidden;}
-section[data-sublist-metrics]:hover button{visibility: visible;}
-
-section[data-sublist-composite-metrics] button{visibility: hidden;}
-section[data-sublist-composite-metrics]:hover button{visibility: visible;}
-
+section.data-item button {visibility: hidden;}
+section.data-item:hover button {visibility: visible;}
 /*dialog lists*/
 .dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}
 
@@ -112,6 +104,7 @@ section[data-sublist-gen] {position: relative;}
 .selectable[data-selected]::before{content: '';width: 8px;height: 20px;position: absolute;border-radius: 3px;opacity: 1;top: calc(50% - 10px);left: -4px;animation: hoverSelected 200ms ease;}
 .selectable.filters-color::before{background-color : var(--main-filters-color);}
 .selectable.metrics-color::before{background-color : var(--main-metrics-color);}
+.selectable.composite-metrics-color::before{background-color : var(--main-composite-metrics-color);}
 
 /* lista all'interno della card*/
 .card.table[data-mode='columns'] ul > section[data-sublist-fields] > .selectable::before{background-color: #9a6a6a;}

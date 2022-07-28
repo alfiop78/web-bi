@@ -94,9 +94,10 @@ ul > section.fact{font-weight: bold;}
 /*.addElementsReport{display: grid;grid-template-columns: 34% repeat(2, calc(33% - 16px)); grid-column-gap: 16px; color: dimgrey; height: inherit;}*/
 .btn-add > span{font-weight: bold;}
 .filters .btn-add{color: var(--main-filters-color);}
-.filters button.material-icons-round:not([data-object-token]){color: var(--main-filters-color);}
-.metrics .btn-add{color: var(--main-metrics-color);}
-.metrics button.material-icons-round:not([data-object-token]){color: var(--main-metrics-color);}
+.filters button.material-icons-round:not([data-object-token],[data-info-object-token]) {color: var(--main-filters-color);}
+.metrics .btn-add {color: var(--main-metrics-color);}
+.metrics button.material-icons-round:not([data-object-token],[data-info-object-token]) {color: var(--main-metrics-color);}
+.composite-metrics button.material-icons-round:not([data-object-token],[data-info-object-token]) {color: var(--main-composite-metrics-color);}
 .filters .btn-add, .metrics .btn-add, .composite-metrics .btn-add{
   display: grid;grid-template-rows: auto auto;justify-content: center; opacity: .5;align-items: center;justify-items: center;padding: 8px 1em; background-color: #dcdcdc61;
   border-radius: 0px;box-shadow: 0px 0px 0px 0px; transition: box-shadow 200ms, opacity 250ms, border-radius 150ms;}
