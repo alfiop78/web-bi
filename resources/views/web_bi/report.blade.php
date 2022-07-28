@@ -306,12 +306,12 @@
           <h5>SQL</h5>
           <div class="name-alias">
             <div class="md-field">
-              <input type="text" id="metric-name" value="" autocomplete="off" />
+              <input type="text" id="metric-name" value="" autocomplete="off" disabled />
               <label for="metric-name" class="">Nome</label>
             </div>
 
             <div class="md-field">
-              <input type="text" id="alias-metric" value="" autocomplete="off" />
+              <input type="text" id="alias-metric" value="" autocomplete="off" disabled />
               <label for="alias-metrics" class="">Alias</label>
               <p class="helper"></p>
             </div>
