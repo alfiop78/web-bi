@@ -762,6 +762,8 @@ var StorageMetric = new MetricStorage();
       // TODO: qui, se viene impostato il nome UNIVOCO della metrica legata al cubo, non serve aggiungere query.table/tableAlias ma basta Query.field
       document.querySelector("#ul-available-metrics .selectable[data-label='" + Query.field + "'][data-table-name='" + Query.table + "'][data-table-alias='" + Query.tableAlias + "']").dataset.selected = 'true';
     }
+    // prima di selezionare la Fn di aggregazione che riguarda la metrica da editare, rimuovo la selezione dal valore di default SUM
+    delete document.querySelector("#ul-aggregation-functions .selectable[data-selected]").dataset.selected;
     // seleziono la aggregateFn selezionata per la metrica
     document.querySelector("#ul-aggregation-functions .selectable[data-label='" + StorageMetric.selected.formula.aggregateFn + "']").dataset.selected = 'true';
     // nome e alias della metrica
@@ -777,6 +779,9 @@ var StorageMetric = new MetricStorage();
       });
     }
     app.dialogMetric.showModal();
+    // abilito le input
+    document.getElementById('metric-name').disabled = false;
+    document.getElementById('alias-metric').disabled = false;
   }
 
   // edit di una metrica composta
@@ -1140,42 +1145,42 @@ var StorageMetric = new MetricStorage();
 
   // selezione di una metrica mappata, disponibile per la creazione
   app.handlerMetricAvailable = (e) => {
+    if (e.currentTarget.hasAttribute('data-selected')) return;
     const ul = document.getElementById('ul-available-metrics');
     const inputMetricName = document.getElementById('metric-name');
     const inputMetricAlias = document.getElementById('alias-metric');
-    // elimino tutte le selezioni precedenti
-    if (ul.querySelector('.selectable[data-selected]')) ul.querySelector('.selectable[data-selected]').toggleAttribute('data-selected');
-    e.currentTarget.toggleAttribute('data-selected');
-    if (e.currentTarget.hasAttribute('data-selected')) {
-      inputMetricName.value = '';
-      inputMetricName.disabled = false;
-      inputMetricAlias.value = '';
-      inputMetricAlias.disabled = false;
-      inputMetricName.focus();
-      StorageCube.selected = e.currentTarget.dataset.cubeToken;
-      // se la metrica selezionata è metric_type: 1 si tratta di una metrica composta, legata al cubo (es.: prezzo * quantità)
-      if (StorageCube.selected.metrics[e.currentTarget.dataset.label].metric_type === 1) {
-        // in Query.field devo impostare (alias_tabella.prezzo * alias_tabella.quantita)
-        // l'array fields, nella metrica legata al cubo, la utilizzo come "controllo" per verificare quali metriche sono state messe nella formula e modificarle di conseguenza
-        const fields = StorageCube.selected.metrics[e.currentTarget.dataset.label].fields;
-        // baseFormula contiene la mappatura fatta su DB (es. : [prezzo, *, quantita])
-        let baseFormula = StorageCube.selected.metrics[e.currentTarget.dataset.label].formula;
-        // per ogni metrica presente nella baseFormula ...
-        // NOTE: utilizzo di map()
-        const newFormula = baseFormula.map(formulaElement => {
-          // ...vado a modificare l'elemento dell'array che è contenuto nella formula, generando l'array newFormula : [DocVenditaDettaglio_444.prezzo, *, DocVenditaDettaglio_444.quantita]
-          return (fields.includes(formulaElement)) ? `${e.currentTarget.dataset.tableAlias}.${formulaElement}` : formulaElement;
-          // ...che successivamente lego con join creando DocVenditaDettaglio_444.prezzo * DocVenditaDettaglio_444.quantita.
-          // ...in PHP, questo Query.field, verrà convertito in SUM(DocVenditaDettaglio_444.prezzo * DocVenditaDettaglio_444.quantita) AS 'alias_metric'
-        }).join(' ');
-        Query.field = newFormula;
-        Query.fieldName = e.currentTarget.dataset.label;
-      } else {
-        Query.field = e.currentTarget.dataset.label;
-        // per le metriche composte di primo livello non è necessario impostare le 2 prop tableAlias e table, sono già impostate con il map() qui sopra
-        Query.table = e.currentTarget.dataset.tableName;
-        Query.tableAlias = e.currentTarget.dataset.tableAlias;
-      }
+    // elimino la precedente selezione
+    if (ul.querySelector('.selectable[data-selected]')) delete ul.querySelector('.selectable[data-selected]').dataset.selected;
+    debugger;
+    e.currentTarget.dataset.selected = true;
+    inputMetricName.value = '';
+    inputMetricName.disabled = false;
+    inputMetricAlias.value = '';
+    inputMetricAlias.disabled = false;
+    inputMetricName.focus();
+    StorageCube.selected = e.currentTarget.dataset.cubeToken;
+    // se la metrica selezionata è metric_type: 1 si tratta di una metrica composta, legata al cubo (es.: prezzo * quantità)
+    if (StorageCube.selected.metrics[e.currentTarget.dataset.label].metric_type === 1) {
+      // in Query.field devo impostare (alias_tabella.prezzo * alias_tabella.quantita)
+      // l'array fields, nella metrica legata al cubo, la utilizzo come "controllo" per verificare quali metriche sono state messe nella formula e modificarle di conseguenza
+      const fields = StorageCube.selected.metrics[e.currentTarget.dataset.label].fields;
+      // baseFormula contiene la mappatura fatta su DB (es. : [prezzo, *, quantita])
+      let baseFormula = StorageCube.selected.metrics[e.currentTarget.dataset.label].formula;
+      // per ogni metrica presente nella baseFormula ...
+      // NOTE: utilizzo di map()
+      const newFormula = baseFormula.map(formulaElement => {
+        // ...vado a modificare l'elemento dell'array che è contenuto nella formula, generando l'array newFormula : [DocVenditaDettaglio_444.prezzo, *, DocVenditaDettaglio_444.quantita]
+        return (fields.includes(formulaElement)) ? `${e.currentTarget.dataset.tableAlias}.${formulaElement}` : formulaElement;
+        // ...che successivamente lego con join creando DocVenditaDettaglio_444.prezzo * DocVenditaDettaglio_444.quantita.
+        // ...in PHP, questo Query.field, verrà convertito in SUM(DocVenditaDettaglio_444.prezzo * DocVenditaDettaglio_444.quantita) AS 'alias_metric'
+      }).join(' ');
+      Query.field = newFormula;
+      Query.fieldName = e.currentTarget.dataset.label;
+    } else {
+      Query.field = e.currentTarget.dataset.label;
+      // per le metriche composte di primo livello non è necessario impostare le 2 prop tableAlias e table, sono già impostate con il map() qui sopra
+      Query.table = e.currentTarget.dataset.tableName;
+      Query.tableAlias = e.currentTarget.dataset.tableAlias;
     }
   }
 
@@ -1455,6 +1460,7 @@ var StorageMetric = new MetricStorage();
     StorageMetric.selected = token;
     // aggiungo la nuova metrica alla #ul-exist-metrics
     app.addMetric('ul-exist-metrics');
+    app.btnMetricSave.disabled = true;
   }
 
   // aggiungo la metrica appena creata alla <ul> (metriche base e filtrate)
@@ -1937,8 +1943,8 @@ var StorageMetric = new MetricStorage();
       app.dialogMetric.showModal();
       // nuova metrica, rimuovo il data-token dal tasto btnMetricSave
       delete app.btnMetricSave.dataset.token;
-      document.getElementById('metric-name').value = '';
-      document.getElementById('metric-name').focus();
+      document.getElementById('metric-name').disabled = true;
+      document.getElementById('alias-metric').disabled = true;
     }
   }
 
