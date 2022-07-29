@@ -308,29 +308,31 @@ class MapDatabaseController extends Controller
       // TODO: 2022-05-06 qui occorre una verifica più approfondita sui filtri contenuti nella metrica, allo stato attuale faccio una query per ogni metrica filtrata, anche se i filtri all'interno della metrica sono uguali. Includere più metriche che contengono gli stessi filtri in un unica query
       if (property_exists($cube, 'filteredMetrics')) {
         $q->filteredMetrics = $cube->{'filteredMetrics'};
+        // verifico quali, tra le metriche filtrate, contengono gli stessi filtri. Le metriche che contengono gli stessi filtri vanno eseguite in un unica query
+        // oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
         $q->groupMetricsByFilters = (object)[];
-        $metrics = [];
-        $groupToken = "group_" . bin2hex(random_bytes(6));
+        // raggruppare per tipologia dei filtri
+        $groupFilters = array();
+        // creo un gruppo di filtri
         foreach ($q->filteredMetrics as $metric) {
-          if (empty(get_object_vars($q->groupMetricsByFilters))) {
-            array_push($metrics, $metric);
-          } else {
-            foreach ($metrics as $m) {
-              if ((get_object_vars($metric->filters) == get_object_vars($m->filters))) {
-                array_push($metrics, $metric);
-              } else {
-                // è un gruppo diverso da quello già esistente, quindi creo un nuovo token (il token del gruppo)
-                $groupToken = "group_" . bin2hex(random_bytes(6));
-                // reimposto l'array altrimenti inserisco in questo gruppo anche gli elementi che sono già stati aggiunti ad altri gruppi
-                $metrics = [];
-                array_push($metrics, $metric);
-              }
+          // ogni gruppo di filtri ha un tokenGrouup diverso come key dekk'array
+          $tokenGroup = "group_" . bin2hex(random_bytes(4));
+          if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
+        }
+        // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
+        foreach ($groupFilters as $token => $group) {
+          $metrics = array();
+          foreach ($q->filteredMetrics as $metric) {
+            if (get_object_vars($metric->filters) == get_object_vars($group)) {
+              // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
+              array_push($metrics, $metric);
             }
           }
-          $q->groupMetricsByFilters->$groupToken = $metrics;
+          // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
+          $q->groupMetricsByFilters->$token = $metrics;
         }
         // dd($q->groupMetricsByFilters);
-        $metricTable = $q->createMetricDatamarts(null);
+        $resultSQL[] = implode("\n\n\n", $q->createMetricDatamarts('sql'));
       }
       // echo 'elaborazione createDatamart';
       // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
