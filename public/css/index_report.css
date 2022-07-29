@@ -118,11 +118,13 @@ span[cube] {color: dimgray; padding: .5em .2em;font-size: .75rem;font-weight: no
 
 .fact-table > section {color: var(--main-primary-color);font-weight: bold;}
 
-#hierarchies{display: grid; grid-template-rows: 95% 5%; z-index: 10; position: absolute; left: -260px; background: gainsboro; padding: 32px 4px 4px;height: 100%; opacity: .7; transition: transform 250ms;
+#drawer-hierarchies, #drawer-cubes{display: grid; grid-template-rows: 95% 5%; z-index: 10; position: absolute; left: -260px; background: gainsboro; padding: 32px 4px 4px;height: 100%; opacity: .7; transition: transform 250ms;
   transform: translateX(0px); width: 260px;}
-#hierarchies[data-open]{transform: translateX(260px); z-index: 10; opacity: .9; background: gainsboro; border-top-right-radius: 4px;border-bottom-right-radius: 4px;}
-#hierarchies:not([data-open]) #btn-arrow-open-close{background: transparent;}
-#btn-arrow-open-close{position: absolute; right: -28px; top: 8px; background-color: gainsboro; border-top-right-radius: 6px; border-bottom-right-radius: 6px;}
+#drawer-hierarchies[data-open], #drawer-cubes[data-open]{transform: translateX(260px); z-index: 10; opacity: .9; background: gainsboro; border-top-right-radius: 4px;border-bottom-right-radius: 4px;}
+#drawer-hierarchies:not([data-open]) #btn-hierarchies-open-close{background: transparent;}
+#drawer-cubes:not([data-open]) #btn-cubes-open-close{background: transparent;}
+#btn-hierarchies-open-close{position: absolute; right: -28px; top: 8px; background-color: gainsboro; border-top-right-radius: 6px; border-bottom-right-radius: 6px;}
+#btn-cubes-open-close{position: absolute; right: -28px; top: 100px; background-color: gainsboro; border-top-right-radius: 6px; border-bottom-right-radius: 6px;}
 
 button[data-object-token],
 button[data-info-object-token]:hover {cursor: pointer;}

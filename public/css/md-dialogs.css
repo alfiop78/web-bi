@@ -2,12 +2,17 @@ dialog{min-width: 70%;}
 dialog h4{padding: 0px;font-size: 1.5rem;font-weight: 400;margin: 0px; color: var(--main-color-outisde-card);}
 dialog h5{font-weight: normal;}
 dialog h6{font-weight: lighter;}
-dialog.medium-dialog{max-height: 90%; height: 60%; min-width: 70%; max-width: 90%;}
 
 dialog.small-dialog{max-height: 90%; height: 60%; min-width: 60%; max-width: 90%;}
-dialog.large-dialog{max-height: 90%; height: 70%; max-width: 80%;}
+dialog.medium-dialog{max-height: 90%; height: 70%; min-width: 75%; max-width: 90%;}
+dialog.large-dialog{max-height: 90%; height: 75%; max-width: 80%;}
+
+
+/*dialog con struttura gerarchica*/
+dialog.hierarchy-struct {display: grid; grid-template-columns: 25% 1fr; grid-column-gap: 2%;padding: 0px;}
 
 .dialog-sections{display: grid; grid-template-rows: auto 1fr auto; height: 100%;}
+dialog.hierarchy-struct .dialog-sections{display: grid; grid-template-rows: auto 1fr auto; height: 100%; padding: 2em .5em;}
 /*dialog > section{padding: 16px;}*/
 dialog{padding: 2em;}
 dialog h4{padding: 0px 0px 1em;}
@@ -34,7 +39,7 @@ fieldset.auto-grid{display: grid; grid-template-rows: auto 1fr auto;}
 #dialog-filter .stepLayout{grid-template-columns: 25% 25% auto; grid-column-gap: 2%; height: inherit;margin : 0 2em;}
 #dialog-metric-filter .stepLayout{grid-template-columns: 100%; height: inherit; margin: 0 2em;}
 #dialog-metric .stepLayout{grid-template-columns: 20% 20% auto; grid-column-gap: 2%; height: inherit;margin: 0 2em;}
-#dialog-column .stepLayout{grid-template-columns: 100%; margin : 0 2em;}
+dialog.hierarchy-struct .stepLayout{grid-template-columns: 35% 1fr; grid-column-gap: 1%; margin: 0 1em;}
 
 /* dialog versioning */
 .versioning-grid{display: grid;grid-template-columns: calc(20% - 8px) calc(80% - 8px); grid-gap: 16px; overflow: hidden; height: 100%;} /* 8px è il grid-gap */
@@ -75,3 +80,5 @@ section[data-versioning-elements]{display: flex; flex-direction: column; positio
 .stepLayout .sectionLists{height: inherit;}
 
 .parent-formula{display: grid; grid-template-rows: auto auto 1fr auto;}
+.parent-formula-column{display: grid; grid-template-rows: auto auto auto 1fr auto;}
+.hierarchies-struct{background-color: gainsboro; height: 100%; position: relative; padding-top: 1em;}

@@ -67,15 +67,35 @@
     </section>
   </dialog>
 
-  <dialog id="dialog-column" class="small-dialog">
+  <dialog id="dialog-column" class="medium-dialog hierarchy-struct">
+    <section class="hierarchies-struct">
+      <div class="parent-ul">
+        <h5>Struttura gerarchie</h5>
+        <div class="relative-ul">
+          <ul id="ul-hierarchies-struct" class="absolute"></ul>
+        </div>
+      </div>
+    </section>
     <section class="dialog-sections">
       <h4>Seleziona le colonne da includere nel report</h4>
 
       <div class="stepLayout">
 
-        <section class="sectionLists">
+        <section class="sectionLists parent-ul-columns">
+          <h5>Colonne</h5>
+          <h6>subtitle</h6>
+          <div class="md-field">
+            <input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" />
+            <label for="search-columns" class="">Ricerca</label>
+          </div>
+          <div class="relative-ul">
+            <ul id="ul-columns" class="absolute"></ul>
+          </div>
+        </section>
+
+        <section class="sectionLists parent-formula-column">
           <h5>SQL</h5>
-          <h6>Aggiungere un alias per la colonna</h6>
+          <h6>Alias per la colonna</h6>
           <div class="md-field">
             <input type="text" id="columnAlias" name="columnAlias" autocomplete="off" />
             <label for="columnAlias" class="">Alias</label>
@@ -83,8 +103,9 @@
           </div>
 
           <div class="md-field">
-            <textarea id="columnSQL" name="columnSQL" rows="10" cols="50" placeholder="es.: CONCAT(tabella.campo,'-',tabella.campo)"></textarea>
+            <textarea id="columnSQL" name="columnSQL" rows="10" cols="50" placeholder="es.: CONCAT(tabella.campo,'-',tabella.campo)" disabled></textarea>
           </div>
+          <button id="btnColumnSave" type="button" name="save" class="md-button" disabled>salva</button>
         </section>
 
       </div>
@@ -181,11 +202,7 @@
           <div>
             <button type="button" class="button-icon material-icons" id="search-field-values" tooltip="Visualizza valori" flow="bottom" data-field-name disabled>search</button>
           </div>
-          {{-- <div class="md-field">
-                            <textarea id="filterSQLFormula" name="filterSQL" rows="10" cols="33" placeholder="SQL"></textarea>
-                        </div> --}}
           <div id="composite-filter-formula" data-content-editable></div>
-          {{-- <span>Inserisci qui la formula SQL del filtro</span> --}}
           <button id="btnFilterSave" type="button" name="save" class="md-button" disabled>salva</button>
         </section>
 
@@ -400,9 +417,9 @@
 
           <div class="actions">
             <div class="buttons">
-              <button type="button" id="btnProcessReport" class="button-icon material-icons-round md-24" tooltip="Crea datamart" flow="bottom">folder</button>
-              <button type="button" id="btnNewReport" class="button-icon material-icons-round md-24" tooltip="Nuovo Report" flow="bottom">add</button>
-              <button type="button" id="save" class="button-icon material-icons-round md-24" tooltip="Salva Report" flow="bottom" disabled>save</button>
+              <button type="button" id="btnNewReport" class="button-icon material-icons-round md-color-highlight md-24" tooltip="Nuovo" flow="bottom">text_snippet</button>
+              <button type="button" id="btnProcessReport" class="button-icon material-icons-round md-24" tooltip="Apri" flow="bottom">folder</button>
+              <button type="button" id="save" class="button-icon material-icons-round md-24" tooltip="Salva" flow="bottom" disabled>save</button>
               <button type="button" id="sql_process" class="button-icon material-icons-round md-24" tooltip="Visualizza SQL" flow="bottom" disabled>info</button>
             </div>
           </div>
@@ -517,12 +534,25 @@
               </div>
             </section>
 
+            <!-- lista gerarchie -->
+            <section class="data-item list" data-element-search data-label data-sublist-hierarchies data-related-object hidden>
+              <div class="unselectable" data-label data-object-type>
+                <div class="h-content">
+                  <div class="v-content">
+                    <span data-dimension></span>
+                    <span item class="highlight"></span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
             {{-- cube --}}
             <section class="data-item list" data-element-search="search-cube" data-label data-sublist-cube data-searchable="true">
               <div class="selectable" data-label data-object-type="cube">
                 <div class="h-content">
                   <div class="v-content">
                     <span item></span>
+                    <small data-table></small>
                   </div>
                 </div>
               </div>
@@ -572,8 +602,26 @@
             <div class="steps" data-step="1">
               <button type="button" id="prev" class="button-icon material-icons-round md-48" disabled tooltip="Precedente" flow="right">skip_previous</button>
               <div class="overflow">
-                <div id="hierarchies">
-                  <section class="hierarchies">
+                <div id="drawer-cubes">
+                  <section class="drawers">
+                    <div class="parent-ul">
+                      <h5>title</h5>
+                      <div class="md-field">
+                        <input type="search" data-element-search="search-cubes" id="search-cubes" value autocomplete="off" data-type-search="nested" />
+                        <label for="search-cubes" class="">Ricerca cubi</label>
+                      </div>
+                      <div class="relative-ul">
+                        <ul id="ul-cubes" class="absolute"></ul>
+                      </div>
+                    </div>
+                  </section>
+                  <div id="btn-cubes-open-close">
+                    <button type="button" id="toggle-cubes-drawer" class="button-icon material-icons-round md-24 md-warning md-pad-2" tooltip="Lista cubi" flow="right">arrow_circle_right</button>
+                  </div>
+                </div>
+
+                <div id="drawer-hierarchies">
+                  <section class="drawers">
                     <div class="parent-ul">
                       <h5>gerarchie</h5>
                       <div class="md-field">
@@ -585,31 +633,31 @@
                       </div>
                     </div>
                   </section>
-                  <div id="btn-arrow-open-close">
-                    <button type="button" id="toggle-hierarchy-struct" class="button-icon material-icons-round md-24 md-warning md-pad-2" tooltip="Apri struttura gerarchica" flow="right" disabled>arrow_circle_right</button>
+                  <div id="btn-hierarchies-open-close">
+                    <button type="button" id="toggle-hierarchy-drawer" class="button-icon material-icons-round md-24 md-warning md-pad-2" tooltip="Apri struttura gerarchica" flow="right" disabled>arrow_circle_right</button>
                   </div>
                 </div>
                 <div id="stepTranslate" data-translate-x="0">
+                  <!-- <section class="step" data-step="1" selected> -->
+                  <!--   <div class="pageContent"> -->
+                  <!--     <div class="h-grid col-1"> -->
+                  <!--       {{-- cube-list --}} -->
+                  <!--       <div class="parent-ul"> -->
+                  <!--         <h5>Cubi</h5> -->
+                  <!--         <div class="md-field"> -->
+                  <!--           <input type="search" data-element-search="search-cube" id="search-cube" value autocomplete="off" /> -->
+                  <!--           <label for="search-cube" class="">Ricerca</label> -->
+                  <!--         </div> -->
+                  <!--         <div class="relative-ul"> -->
+                  <!--           <ul id="ul-cubes" class="absolute"></ul> -->
+                  <!--         </div> -->
+                  <!--       </div> -->
+
+                  <!--     </div> -->
+                  <!--   </div> -->
+                  <!-- </section> -->
+
                   <section class="step" data-step="1" selected>
-                    <div class="pageContent">
-                      <div class="h-grid col-1">
-                        {{-- cube-list --}}
-                        <div class="parent-ul">
-                          <h5>Cubi</h5>
-                          <div class="md-field">
-                            <input type="search" data-element-search="search-cube" id="search-cube" value autocomplete="off" />
-                            <label for="search-cube" class="">Ricerca</label>
-                          </div>
-                          <div class="relative-ul">
-                            <ul id="ul-cubes" class="absolute"></ul>
-                          </div>
-                        </div>
-
-                      </div>
-                    </div>
-                  </section>
-
-                  <section class="step" data-step="2">
                     <div class="pageContent">
                       {{-- <h5>Seleziona gli elementi per comporre il Report</h5> --}}
                       <div class="h-grid col-3">
@@ -632,6 +680,9 @@
                           </div>
                           <div class="relative-ul">
                             <ul id="ul-columns" class="absolute"></ul>
+                          </div>
+                          <div class="justify-self-center">
+                            <button type="button" id="btn-add-columns" class="button-icon material-icons-round md-32" tooltip="Aggiungi colonna" flow="top">add_circle</button>
                           </div>
                         </section>
                         <section class="filters parent-ul-filters">

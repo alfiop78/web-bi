@@ -106,3 +106,4 @@ button:enabled:hover.md-dark{color: white;} /*disabled dark*/
 button:enabled:hover{cursor: pointer;}
 
 button.md-dark{color: gainsboro;} /*disabled dark*/
+.material-icons-round.md-color-highlight {color: sienna;}
