@@ -731,7 +731,6 @@ var StorageMetric = new MetricStorage();
         mark.dataset.field = item.field;
         if (item.tableId) {
           mark.dataset.tableId = item.tableId;
-          // da valutare come devono essere inseriti nell'oggetto Filter da salvare
           mark.dataset.hierToken = item.hierToken;
           mark.dataset.dimensionToken = item.dimensionToken;
         } else {
@@ -742,7 +741,7 @@ var StorageMetric = new MetricStorage();
         textarea.appendChild(span);
       } else {
         // l'item contiene gli operatori e il valore/i della formula
-        app.addSpan(textarea, item);
+        app.addSpan(textarea, item, 'filter');
       }
     });
   }
@@ -794,6 +793,7 @@ var StorageMetric = new MetricStorage();
     // inserisco la formula, il nome e l'alias della metrica selezionata
     // apro la dialogCompositeMetric
     const inputName = document.getElementById('composite-metric-name');
+    const helper = document.querySelector('#composite-metric-name ~ .helper');
     const inputAlias = document.getElementById('composite-alias-metric');
     console.log(e.currentTarget.dataset.objectToken);
     StorageMetric.selected = e.currentTarget.dataset.objectToken;
@@ -803,6 +803,8 @@ var StorageMetric = new MetricStorage();
     // imposto il nome e alias della metrica nella dialog
     inputName.value = StorageMetric.selected.name;
     inputName.setAttribute('value', StorageMetric.selected.name);
+    helper.classList.remove('error');
+    helper.innerText = "";
     inputAlias.value = StorageMetric.selected.formula.alias;
     inputAlias.setAttribute('value', StorageMetric.selected.formula.alias);
     // re-inserisco la formula nella textarea
@@ -822,7 +824,7 @@ var StorageMetric = new MetricStorage();
         mark.innerText = item;
         textarea.appendChild(span);
       } else {
-        app.addSpan(textarea, item);
+        app.addSpan(textarea, item, 'metric');
       }
     });
     // aggiungo, nella ul-metrics, le metriche già create
@@ -941,7 +943,7 @@ var StorageMetric = new MetricStorage();
     mark.innerText = e.currentTarget.dataset.label;
     textarea.appendChild(span);
     // aggiungo anche uno span per il proseguimento della scrittura della formula
-    app.addSpan(textarea, null);
+    app.addSpan(textarea, null, 'metric');
   }
 
   // div contenteditable della formula per la metrica composta
@@ -950,15 +952,17 @@ var StorageMetric = new MetricStorage();
     console.log('e.target : ', e.target);
     console.log('e.currentTarget : ', e.currentTarget);
     if (e.target.localName === 'div') {
-      app.addSpan(e.target, null);
+      app.addSpan(e.target, null, 'metric');
     }
   }
 
-  app.addSpan = (target, value) => {
+  app.addSpan = (target, value, check) => {
     /*
     * target : il div che contiene la formula
+    * check : filter, metric (filter se sto creando una formula per il filtro, metric per le metriche composte)
     */
     const span = document.createElement('span');
+    span.dataset.check = check;
     span.setAttribute('contenteditable', 'true');
     span.setAttribute('tabindex', 0);
     // let evt = new KeyboardEvent("keydown", {
@@ -981,7 +985,7 @@ var StorageMetric = new MetricStorage();
           // se il tasto shift non è premuto e mi trovo sull'ultimo span, aggiungo un altro span. In caso contrario, la combinazione shift+tab oppure tab su un qualsiasi altro
           // ...span che non sia l'ultimo, avrà il comportamento di default
           if (!e.shiftKey && lastSpan) {
-            app.addSpan(target, null);
+            app.addSpan(target, null, check);
             e.preventDefault();
           }
           break;
@@ -1023,8 +1027,18 @@ var StorageMetric = new MetricStorage();
   }
 
   app.checkSpanFormula = (e) => {
-    // TODO: qui potrei fare dei controlli sulla sintassi inserita, per il momentom sull'evento input abilito solo il tasto btnSaveFilter.
-    app.btnFilterSave.disabled = false;
+    // TODO: qui potrei fare dei controlli sulla sintassi inserita, per il momento sull'evento input abilito solo il tasto btnSaveFilter.
+    // e.target.dataset.check contiene il nome della formula da verificare, data-check='filter' la dialog che consente di creare/aggiornare i filtri , data-check='metric' per la dialog delle metriche composte
+    switch (e.target.dataset.check) {
+      case 'filter':
+        app.checkFormulaFilter();
+        break;
+      case 'metric':
+        app.checkFormulaMetric();
+        break;
+      default:
+        break;
+    }
   }
 
   // div contenteditable della formula per il filtro
@@ -1034,7 +1048,7 @@ var StorageMetric = new MetricStorage();
     console.log('e.target : ', e.target);
     console.log('e.currentTarget : ', e.currentTarget);
     if (e.target.localName === 'div') {
-      app.addSpan(e.target, null);
+      app.addSpan(e.target, null, 'filter');
     }
   }
 
@@ -1287,7 +1301,7 @@ var StorageMetric = new MetricStorage();
     small.innerText = Query.table;
     textarea.appendChild(span);
 
-    app.addSpan(textarea, null);
+    app.addSpan(textarea, null, 'filter');
     // TODO: checkFormulaValid()
     app.btnSearchValue.disabled = false;
     app.btnFilterSave.disabled = false;
@@ -1461,13 +1475,21 @@ var StorageMetric = new MetricStorage();
     } else {
       app.addMetric('ul-exist-metrics');
     }
-    // resetto le input, i filtri aggiunti alla metrica (#ul-metric-filters) e la metrica selezionata da #ul-available-metrics
-    inputName.value = "";
-    inputAlias.value = "";
-    document.querySelectorAll('#ul-metric-filters .selectable[data-selected]').forEach(filter => delete filter.dataset.selected);
-    document.querySelectorAll('#ul-available-metrics .selectable[data-selected]').forEach(metric => delete metric.dataset.selected);
+    app.resetDialogMetric();
 
     app.btnMetricSave.disabled = true;
+  }
+
+  app.resetDialogMetric = () => {
+    // resetto le input, i filtri aggiunti alla metrica (#ul-metric-filters) e la metrica selezionata da #ul-available-metrics
+    const inputName = document.getElementById('metric-name');
+    const inputAlias = document.getElementById('alias-metric');
+    inputName.value = "";
+    inputAlias.value = "";
+    inputName.disabled = true;
+    inputAliasdisabled = true;
+    document.querySelectorAll('#ul-metric-filters .selectable[data-selected]').forEach(filter => delete filter.dataset.selected);
+    document.querySelectorAll('#ul-available-metrics .selectable[data-selected]').forEach(metric => delete metric.dataset.selected);
   }
 
   // aggiungo la metrica appena creata alla <ul> (metriche base e filtrate)
@@ -1655,6 +1677,7 @@ var StorageMetric = new MetricStorage();
     inputName.value = "";
     inputAlias.value = "";
     document.querySelectorAll('#composite-metric-formula *').forEach(item => item.remove());
+    app.btnCompositeMetricSave.disabled = true;
   }
 
   // salvo il filtro nel DB, table : bi_filters
@@ -1808,9 +1831,9 @@ var StorageMetric = new MetricStorage();
     let arrayValues = [];
     valueSelected.forEach(element => arrayValues.push(element.dataset.label));
     // aggiungo i valori selezionati alla textarea
-    app.addSpan(textarea, arrayValues.join(', '));
+    app.addSpan(textarea, arrayValues.join(', '), 'filter');
 
-    // TODO: impostare app.checkFilterForm(); nella creazione di un nuovo filtro
+    // TODO: impostare app.checkFormulaFilter(); nella creazione di un nuovo filtro
 
     app.dialogValue.close();
   }
@@ -1885,7 +1908,7 @@ var StorageMetric = new MetricStorage();
   app.getReports();
 
   // abilito il tasto btnFilterSave se il form per la creazione del filtro è corretto
-  app.checkFilterForm = (check) => {
+  app.checkFormulaFilter = (check) => {
     // TODO: Implementazione
     const filterName = document.getElementById('filterName').value;
     const filterFormula = document.getElementById('composite-filter-formula');
@@ -2442,12 +2465,31 @@ var StorageMetric = new MetricStorage();
     (metricName.length !== 0 && aliasMetric.length !== 0 && metricSelected !== 0) ? app.btnMetricSave.disabled = false : app.btnMetricSave.disabled = true;
   }
 
-  app.checkDialogCompositeMetric = (check) => {
-    const name = document.getElementById('composite-metric-name').value;
+  app.checkFormulaMetric = () => {
+    const inputName = document.getElementById('composite-metric-name');
+    const helper = document.querySelector('#composite-metric-name ~ .helper');
     const alias = document.getElementById('composite-alias-metric').value;
-    // controllo anche che la formula abbia dei contenuti
-    const formula = document.querySelectorAll('#composite-metric-formula *').length;
-    app.btnCompositeMetricSave.disabled = (!((name.length !== 0) && (alias.length !== 0) && (formula.length !== 0) || !check));
+    const formula = document.getElementById('composite-metric-formula');
+    if (!app.btnCompositeMetricSave.dataset.token) {
+      const check = StorageMetric.checkNames(inputName.value);
+      if (check) {
+        // nome già presente nello storage
+        helper.classList.add('error');
+        helper.innerText = "Il nome inserito è già presente";
+        app.btnCompositeMetricSave.disabled = true;
+      } else {
+        helper.classList.remove('error');
+        helper.innerText = "";
+      }
+      // controllo anche che la formula abbia dei contenuti
+      app.btnCompositeMetricSave.disabled = (inputName.value.length !== 0 && alias.length !== 0 && !check && formula.childElementCount !== 0) ? false : true;
+    } else {
+      // edit della metrica
+      // rimuovo eventuali avvisi sull'helper di metriche precedenti
+      helper.classList.remove('error');
+      helper.innerText = "";
+      app.btnCompositeMetricSave.disabled = (inputName.value.length !== 0 && alias.length !== 0 && formula.childElementCount !== 0) ? false : true;
+    }
   }
 
   // hide hierarchy struct
@@ -2459,16 +2501,7 @@ var StorageMetric = new MetricStorage();
   }
 
   document.getElementById('alias-metric').oninput = (e) => {
-    /* TODO: verifico se un nome e un alias sono già presenti nell'elenco delle metriche
-    const check = Query.checkMetricAlias(e.target.value);
-    if (check) {
-      e.target.parentElement.querySelector('.helper').classList.add('warning');
-      e.target.parentElement.querySelector('.helper').innerText = "Il nome inserito è già presente";
-    } else {
-      e.target.parentElement.querySelector('.helper').classList.remove('warning');
-      e.target.parentElement.querySelector('.helper').innerText = "";
-    }
-    (e.target.value.length === 0 || check) ? app.btnMetricSave.disabled = true : app.btnMetricSave.disabled = false;*/
+    // TODO: verifico se un nome e un alias sono già presenti nell'elenco delle metriche
     app.checkDialogMetric();
   }
 
@@ -2477,20 +2510,10 @@ var StorageMetric = new MetricStorage();
   }
 
   document.getElementById('composite-metric-name').oninput = (e) => {
-    const check = StorageMetric.checkNames(e.target.value);
-    if (check) {
-      // nome già presente nello storage
-      // console.log(e.target.querySelector(':scope'));
-      e.target.parentElement.querySelector('.helper').classList.add('error');
-      e.target.parentElement.querySelector('.helper').innerText = "Il nome inserito è già presente";
-    } else {
-      e.target.parentElement.querySelector('.helper').classList.remove('error');
-      e.target.parentElement.querySelector('.helper').innerText = "";
-    }
-    app.checkDialogCompositeMetric(check);
+    app.checkFormulaMetric(e.target);
   }
 
-  document.getElementById('composite-alias-metric').oninput = () => app.checkDialogCompositeMetric();
+  document.getElementById('composite-alias-metric').oninput = () => app.checkFormulaMetric();
 
   document.getElementById('filterName').oninput = (e) => {
     // verifico se il nome inserito è presente nello storage
@@ -2505,7 +2528,7 @@ var StorageMetric = new MetricStorage();
       e.target.parentElement.querySelector('.helper').classList.remove('warning');
       e.target.parentElement.querySelector('.helper').innerText = "";
     }
-    app.checkFilterForm(check);
+    app.checkFormulaFilter(check);
   }
 
   // selezione di una funzione di aggregazione (dialog-metric)
@@ -2670,4 +2693,7 @@ var StorageMetric = new MetricStorage();
     document.querySelectorAll('#composite-metric-formula *').forEach(item => item.remove());
   });
 
+  app.dialogMetricFilter.addEventListener('open', () => {
+    document.getElementById('dialog-metric-filter-search').value = "";
+  });
 })();
