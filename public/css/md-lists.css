@@ -1,4 +1,5 @@
 :root{
+  --main-columns-color: brown;
   --main-filters-color: darkolivegreen;
   --main-metrics-color: darkgoldenrod;
   --main-composite-metrics-color: sienna;

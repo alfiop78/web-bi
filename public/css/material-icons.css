@@ -107,3 +107,4 @@ button:enabled:hover{cursor: pointer;}
 
 button.md-dark{color: gainsboro;} /*disabled dark*/
 .material-icons-round.md-color-highlight {color: sienna;}
+button.material-icons-round.align-self-center{width: min-content; align-self: center;}

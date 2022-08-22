@@ -71,7 +71,8 @@ var StorageMetric = new MetricStorage();
     tooltip: document.getElementById('tooltip'),
     tooltipTimeoutId: null,
     btnToggleHierarchyDrawer: document.getElementById('toggle-hierarchy-drawer'),
-    btnToggleCubesDrawer: document.getElementById('toggle-cubes-drawer')
+    btnToggleCubesDrawer: document.getElementById('toggle-cubes-drawer'),
+    btnToggleDimensionsDrawer: document.getElementById('toggle-dimensions-drawer')
   }
 
   app.addReport = (token, value) => {
@@ -860,6 +861,8 @@ var StorageMetric = new MetricStorage();
       app.hideCubeObjects();
       e.currentTarget.toggleAttribute('data-selected');
     } else {
+      // abilito il tasto #toggle-dimensions-drawer che consente di aprire il drawer con l'elenco delle dimensioni
+      app.btnToggleDimensionsDrawer.disabled = false;
       app.showCubeObjects();
       // visualizzo la tabelle fact del cubo selezionato
       // document.querySelector("#ul-fact-tables > section[data-cube-token='" + StorageCube.selected.token + "']").hidden = false;
@@ -2513,6 +2516,12 @@ var StorageMetric = new MetricStorage();
     e.target.innerText = (drawer.hasAttribute('data-open')) ? 'arrow_circle_left' : 'arrow_circle_right';
   }
 
+  app.btnToggleDimensionsDrawer.onclick = (e) => {
+    // console.log(e.target);
+    const drawer = document.getElementById('drawer-dimensions');
+    drawer.toggleAttribute('data-open');
+    e.target.innerText = (drawer.hasAttribute('data-open')) ? 'arrow_circle_left' : 'arrow_circle_right';
+  }
   document.getElementById('alias-metric').oninput = (e) => {
     // TODO: verifico se un nome e un alias sono già presenti nell'elenco delle metriche
     app.checkDialogMetric();

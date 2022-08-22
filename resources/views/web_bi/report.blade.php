@@ -605,7 +605,7 @@
                 <div id="drawer-cubes">
                   <section class="drawers">
                     <div class="parent-ul">
-                      <h5>title</h5>
+                      <h5>Cubi</h5>
                       <div class="md-field">
                         <input type="search" data-element-search="search-cubes" id="search-cubes" value autocomplete="off" data-type-search="nested" />
                         <label for="search-cubes" class="">Ricerca cubi</label>
@@ -617,6 +617,24 @@
                   </section>
                   <div id="btn-cubes-open-close">
                     <button type="button" id="toggle-cubes-drawer" class="button-icon material-icons-round md-24 md-warning md-pad-2" tooltip="Lista cubi" flow="right">arrow_circle_right</button>
+                  </div>
+                </div>
+
+                <div id="drawer-dimensions">
+                  <section class="drawers">
+                    <div class="parent-ul">
+                      <h5>Dimensioni</h5>
+                      <div class="md-field">
+                        <input type="search" data-element-search="search-dimension" id="search-dimension" value autocomplete="off" data-type-search="nested" />
+                        <label for="search-dimension" class="">Ricerca dimensioni</label>
+                      </div>
+                      <div class="relative-ul">
+                        <ul id="ul-dimensions" class="absolute"></ul>
+                      </div>
+                    </div>
+                  </section>
+                  <div id="btn-dimensions-open-close">
+                    <button type="button" id="toggle-dimensions-drawer" class="button-icon material-icons-round md-24 md-warning md-pad-2" tooltip="Lista dimensioni" flow="right" disabled>arrow_circle_right</button>
                   </div>
                 </div>
 
@@ -638,42 +656,16 @@
                   </div>
                 </div>
                 <div id="stepTranslate" data-translate-x="0">
-                  <!-- <section class="step" data-step="1" selected> -->
-                  <!--   <div class="pageContent"> -->
-                  <!--     <div class="h-grid col-1"> -->
-                  <!--       {{-- cube-list --}} -->
-                  <!--       <div class="parent-ul"> -->
-                  <!--         <h5>Cubi</h5> -->
-                  <!--         <div class="md-field"> -->
-                  <!--           <input type="search" data-element-search="search-cube" id="search-cube" value autocomplete="off" /> -->
-                  <!--           <label for="search-cube" class="">Ricerca</label> -->
-                  <!--         </div> -->
-                  <!--         <div class="relative-ul"> -->
-                  <!--           <ul id="ul-cubes" class="absolute"></ul> -->
-                  <!--         </div> -->
-                  <!--       </div> -->
-
-                  <!--     </div> -->
-                  <!--   </div> -->
-                  <!-- </section> -->
 
                   <section class="step" data-step="1" selected>
                     <div class="pageContent">
-                      {{-- <h5>Seleziona gli elementi per comporre il Report</h5> --}}
-                      <div class="h-grid col-3">
-                        {{-- dimension-list --}}
-                        <section class="parent-ul">
-                          <h5>Dimensioni</h5>
-                          <div class="md-field">
-                            <input type="search" data-element-search="search-dimension" id="search-dimension" value autocomplete="off" />
-                            <label for="search-dimension" class="">Ricerca</label>
-                          </div>
-                          <div class="relative-ul">
-                            <ul id="ul-dimensions" class="absolute"></ul>
-                          </div>
-                        </section>
+                      <div class="h-grid col-4">
+
                         <section class="columns parent-ul">
-                          <h5>Colonne</h5>
+                          <div class="add-button columns">
+                            <h5>Colonne</h5>
+                            <button type="button" id="btn-add-columns" class="button-icon material-icons-round md-48 align-self-center" tooltip="Aggiungi colonna" flow="top">add</button>
+                          </div>
                           <div class="md-field">
                             <input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" />
                             <label for="search-columns" class="">Ricerca</label>
@@ -681,12 +673,13 @@
                           <div class="relative-ul">
                             <ul id="ul-columns" class="absolute"></ul>
                           </div>
-                          <div class="justify-self-center">
-                            <button type="button" id="btn-add-columns" class="button-icon material-icons-round md-32" tooltip="Aggiungi colonna" flow="top">add_circle</button>
-                          </div>
                         </section>
+
                         <section class="filters parent-ul-filters">
-                          <h5>Filtri</h5>
+                          <div class="add-button filters">
+                            <h5>Filtri</h5>
+                            <button type="button" id="btn-add-filters" class="button-icon material-icons-round md-48 align-self-center" tooltip="Aggiungi filtro" flow="top">add</button>
+                          </div>
                           <div class="md-field">
                             <input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
                             <label for="search-exist-filters" class="">Ricerca</label>
@@ -694,25 +687,14 @@
                           <div class="relative-ul">
                             <ul id="ul-exist-filters" class="absolute"></ul>
                           </div>
-                          <div class="justify-self-center">
-                            <button type="button" id="btn-add-filters" class="button-icon material-icons-round md-32" tooltip="Aggiungi filtro" flow="top">add_circle</button>
-                          </div>
                         </section>
 
-                      </div>
-                    </div>
-                  </section>
-
-                  <section class="step" data-step="3">
-                    <div class="pageContent">
-                      <div class="h-grid col-2">
-                        {{-- metrics --}}
                         <section class="metrics parent-ul-metrics">
-                          <h5>Metriche</h5>
-                          {{-- <div class="btn-add">
-															<span>Crea metrica</span>
-															<button type="button" id="btn-add-metrics" class="button-icon material-icons md-32">add</button>
-														</div> --}}
+                          <div class="add-button metrics">
+                            <h5>Metriche</h5>
+                            <button type="button" id="btn-add-metrics" class="button-icon material-icons-round md-48 align-self-center" tooltip="Aggiungi metrica" flow="top">add</button>
+                          </div>
+
                           <div class="md-field">
                             <input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
                             <label for="search-exist-metrics" class="">Ricerca</label>
@@ -720,11 +702,8 @@
                           <div class="relative-ul">
                             <ul id="ul-exist-metrics" class="absolute"></ul>
                           </div>
-                          <div class="justify-self-center">
-                            <button type="button" id="btn-add-metrics" class="button-icon material-icons-round md-32" tooltip="Aggiungi metrica" flow="top">add_circle</button>
-                          </div>
                         </section>
-                        {{-- composite --}}
+
                         <section class="composite-metrics parent-ul-metrics">
                           <h5>Metriche composte</h5>
                           <div class="md-field">
@@ -736,6 +715,15 @@
                           </div>
                           <div class="justify-self-center"><button type="button" id="btn-add-composite-metrics" class="button-icon material-icons-round md-32" tooltip="Aggiungi metrica composta" flow="top">add_circle</button></div>
                         </section>
+
+                      </div>
+                    </div>
+                  </section>
+
+                  <section class="step" data-step="3">
+                    <div class="pageContent">
+                      <div class="h-grid col-2">
+                        <h5>Anteprima</h5>
                       </div>
                     </div>
                   </section>
