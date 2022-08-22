@@ -142,9 +142,11 @@ class Queries {
   get compositeMetrics() { return this.#compositeMetrics; }
 
   checkColumnAlias(alias) {
+    let result = false;
     for (const values of this.select.values()) {
-      return (values.alias.toLowerCase() === alias.toLowerCase()) ? true : false;
+      if (values.alias.toLowerCase() === alias.toLowerCase()) result = true;
     }
+    return result;
   }
 
   checkMetricAlias(alias) {

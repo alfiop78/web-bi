@@ -148,11 +148,6 @@
           </div>
         </section>
       </div>
-      {{-- <div class="md-field">
-					<input type="search" id="dialog-value-search" data-element-search="dialog-value-search" value autocomplete="off" />
-					<label for="dialog-value-search" class="">Ricerca valori</label>
-				</div>
-				<ul id="dialog-filter-values" class="full-overflow-list-columns"></ul> --}}
       <div class="dialog-buttons">
         <button type="button" name="cancel" class="md-button">annulla</button>
         <button id="btnValueDone" type="button" name="value-done" class="md-button">ok</button>
@@ -162,7 +157,20 @@
 
   </dialog>
 
-  <dialog id="dialog-filter" class="large-dialog">
+  <dialog id="dialog-filter" class="large-dialog struct">
+    <section class="exist-struct">
+      <div class="parent-ul">
+        <h5>Filtri presenti</h5>
+        <div class="md-field">
+          <input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
+          <label for="search-exist-filters" class="">Ricerca</label>
+        </div>
+        <div class="relative-ul">
+          <ul id="ul-filters" class="absolute"></ul>
+        </div>
+      </div>
+    </section>
+
     <section class="dialog-sections" data-table-name>
       <h4>Creazione nuovo filtro</h4>
       <div class="stepLayout">
@@ -236,7 +244,20 @@
     </section>
   </dialog>
 
-  <dialog id="dialog-metric" class="large-dialog">
+  <dialog id="dialog-metric" class="large-dialog struct">
+    <section class="exist-struct">
+      <div class="parent-ul">
+        <h5>Metriche presenti</h5>
+        <div class="md-field">
+          <input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
+          <label for="search-exist-metrics" class="">Ricerca</label>
+        </div>
+        <div class="relative-ul">
+          <ul id="ul-metrics" class="absolute"></ul>
+        </div>
+      </div>
+    </section>
+
     <section class="dialog-sections" data-table-name>
       <h4>Creazione di una nuova metrica per il cubo <span data-cube-selected></span></h4>
 
@@ -440,6 +461,22 @@
               </div>
             </section>
 
+            {{-- lista column definite --}}
+            <section class="data-item-defined" data-element-search data-label data-sublist-columns-defined data-related-object>
+              {{-- TODO: implementare il drag&drop per l'ordinamento delle colonne nel datamart finale --}}
+              <div>
+                <div class="h-content">
+                  <div class="defined v-content" data-object-type="column">
+                    <small field></small>
+                    <span column class="highlight"></span>
+                    <small table></small>
+                    <small hier></small>
+                  </div>
+                  <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom">edit</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token tooltip="Rimuovi" flow="bottom">close</button>
+                </div>
+              </div>
+            </section>
             {{-- lista filtri esistenti --}}
             <section class="data-item" data-element-search data-label data-related-object data-sublist-filters hidden>
               <div>
@@ -451,6 +488,19 @@
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Info" flow="bottom" disabled>info</button>
                   <button class="button-icon material-icons-round md-18" data-object-token data-edit tooltip="Modifica" flow="bottom">edit</button>
+                </div>
+              </div>
+            </section>
+
+            {{-- lista filtri definiti nel report --}}
+            <section class="data-item-defined" data-element-search data-label data-related-object data-sublist-filters-defined>
+              <div>
+                <div class="h-content">
+                  <div class="defined v-content filters-color" data-object-type="filter">
+                    <span filter class="highlight filters-color"></span>
+                  </div>
+                  <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Info" flow="bottom" disabled>info</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token data-remove tooltip="Rimuovi" flow="bottom">close</button>
                 </div>
               </div>
             </section>
@@ -662,58 +712,60 @@
                       <div class="h-grid col-4">
 
                         <section class="columns parent-ul">
-                          <div class="add-button columns">
+                          <div id="btn-add-columns" class="add-button columns" tooltip="Aggiungi colonna" flow="bottom">
                             <h5>Colonne</h5>
-                            <button type="button" id="btn-add-columns" class="button-icon material-icons-round md-48 align-self-center" tooltip="Aggiungi colonna" flow="top">add</button>
+                            <i class="material-icons-round md-48 align-self-center">add</i>
                           </div>
-                          <div class="md-field">
-                            <input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" />
-                            <label for="search-columns" class="">Ricerca</label>
-                          </div>
+                          <!-- <div class="md-field"> -->
+                          <!--   <input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" /> -->
+                          <!--   <label for="search-columns" class="">Ricerca</label> -->
+                          <!-- </div> -->
                           <div class="relative-ul">
-                            <ul id="ul-columns" class="absolute"></ul>
+                            <ul id="ul-defined-columns" class="absolute"></ul>
                           </div>
                         </section>
 
                         <section class="filters parent-ul-filters">
-                          <div class="add-button filters">
+                          <div id="btn-add-filters" class="add-button filters" tooltip="Aggiungi filtro" flow="bottom">
                             <h5>Filtri</h5>
-                            <button type="button" id="btn-add-filters" class="button-icon material-icons-round md-48 align-self-center" tooltip="Aggiungi filtro" flow="top">add</button>
+                            <i class="material-icons-round md-48 align-self-center">add</i>
                           </div>
-                          <div class="md-field">
-                            <input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
-                            <label for="search-exist-filters" class="">Ricerca</label>
-                          </div>
+                          <!-- <div class="md-field"> -->
+                          <!--   <input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" /> -->
+                          <!--   <label for="search-exist-filters" class="">Ricerca</label> -->
+                          <!-- </div> -->
                           <div class="relative-ul">
-                            <ul id="ul-exist-filters" class="absolute"></ul>
+                            <ul id="ul-defined-filters" class="absolute"></ul>
                           </div>
                         </section>
 
                         <section class="metrics parent-ul-metrics">
-                          <div class="add-button metrics">
+                          <div id="btn-add-metrics" class="add-button metrics" tooltip="Aggiungi metrica" flow="bottom">
                             <h5>Metriche</h5>
-                            <button type="button" id="btn-add-metrics" class="button-icon material-icons-round md-48 align-self-center" tooltip="Aggiungi metrica" flow="top">add</button>
+                            <i class="material-icons-round md-48 align-self-center">add</i>
                           </div>
 
-                          <div class="md-field">
-                            <input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
-                            <label for="search-exist-metrics" class="">Ricerca</label>
-                          </div>
+                          <!-- <div class="md-field"> -->
+                          <!--   <input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" /> -->
+                          <!--   <label for="search-exist-metrics" class="">Ricerca</label> -->
+                          <!-- </div> -->
                           <div class="relative-ul">
-                            <ul id="ul-exist-metrics" class="absolute"></ul>
+                            <ul id="ul-defined-metrics" class="absolute"></ul>
                           </div>
                         </section>
 
                         <section class="composite-metrics parent-ul-metrics">
-                          <h5>Metriche composte</h5>
-                          <div class="md-field">
-                            <input type="search" data-element-search="search-exist-composite-metrics" id="search-exist-composite-metrics" value autocomplete="off" />
-                            <label for="search-exist-composite-metrics" class="">Ricerca</label>
+                          <div id="btn-add-composite-metrics" class="add-button composite-metrics" tooltip="Aggiungi metrica composta" flow="bottom">
+                            <h5>Metriche composte</h5>
+                            <i class="material-icons-round md-48 align-self-center">add</i>
                           </div>
+                          <!-- <div class="md-field"> -->
+                          <!--   <input type="search" data-element-search="search-exist-composite-metrics" id="search-exist-composite-metrics" value autocomplete="off" /> -->
+                          <!--   <label for="search-exist-composite-metrics" class="">Ricerca</label> -->
+                          <!-- </div> -->
                           <div class="relative-ul">
-                            <ul id="ul-exist-composite-metrics" class="absolute"></ul>
+                            <ul id="ul-composite-metrics-defined" class="absolute"></ul>
                           </div>
-                          <div class="justify-self-center"><button type="button" id="btn-add-composite-metrics" class="button-icon material-icons-round md-32" tooltip="Aggiungi metrica composta" flow="top">add_circle</button></div>
                         </section>
 
                       </div>

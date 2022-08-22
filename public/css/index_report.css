@@ -95,12 +95,12 @@ ul > section.fact{font-weight: bold;}
 /*.addElementsReport{display: grid;grid-template-columns: 34% repeat(2, calc(33% - 16px)); grid-column-gap: 16px; color: dimgrey; height: inherit;}*/
 .btn-add > span{font-weight: bold;}
 .columns .btn-add{color: var(--main-columns-color);}
-.columns button.material-icons-round:not([data-object-token],[data-info-object-token]) {color: var(--main-columns-color);}
+.columns .material-icons-round:not([data-object-token],[data-info-object-token]) {color: var(--main-columns-color);}
 .filters .btn-add{color: var(--main-filters-color);}
-.filters button.material-icons-round:not([data-object-token],[data-info-object-token]) {color: var(--main-filters-color);}
+.filters .material-icons-round:not([data-object-token],[data-info-object-token]) {color: var(--main-filters-color);}
 .metrics .btn-add {color: var(--main-metrics-color);}
-.metrics button.material-icons-round:not([data-object-token],[data-info-object-token]) {color: var(--main-metrics-color);}
-.composite-metrics button.material-icons-round:not([data-object-token],[data-info-object-token]) {color: var(--main-composite-metrics-color);}
+.metrics .material-icons-round:not([data-object-token],[data-info-object-token]) {color: var(--main-metrics-color);}
+.composite-metrics .material-icons-round:not([data-object-token],[data-info-object-token]) {color: var(--main-composite-metrics-color);}
 .filters .btn-add, .metrics .btn-add, .composite-metrics .btn-add{
   display: grid;grid-template-rows: auto auto;justify-content: center; opacity: .5;align-items: center;justify-items: center;padding: 8px 1em; background-color: #dcdcdc61;
   border-radius: 0px;box-shadow: 0px 0px 0px 0px; transition: box-shadow 200ms, opacity 250ms, border-radius 150ms;}
@@ -127,9 +127,9 @@ span[cube] {color: dimgray; padding: .5em .2em;font-size: .75rem;font-weight: no
 #drawer-hierarchies:not([data-open]) #btn-hierarchies-open-close{background: transparent;}
 #drawer-cubes:not([data-open]) #btn-cubes-open-close{background: transparent;}
 #drawer-dimensions:not([data-open]) #btn-dimensions-open-close{background: transparent;}
-#btn-cubes-open-close{position: absolute; right: -28px; top: 100px; background-color: gainsboro; border-top-right-radius: 6px; border-bottom-right-radius: 6px;}
-#btn-dimensions-open-close{position: absolute; right: -28px; top: 150px; background-color: gainsboro; border-top-right-radius: 6px; border-bottom-right-radius: 6px;}
-#btn-hierarchies-open-close{position: absolute; right: -28px; top: 200px; background-color: gainsboro; border-top-right-radius: 6px; border-bottom-right-radius: 6px;}
+#btn-cubes-open-close{position: absolute; right: -28px; top: 160px; background-color: gainsboro; border-top-right-radius: 6px; border-bottom-right-radius: 6px;}
+#btn-dimensions-open-close{position: absolute; right: -28px; top: 210px; background-color: gainsboro; border-top-right-radius: 6px; border-bottom-right-radius: 6px;}
+#btn-hierarchies-open-close{position: absolute; right: -28px; top: 260px; background-color: gainsboro; border-top-right-radius: 6px; border-bottom-right-radius: 6px;}
 
 button[data-object-token],
 button[data-info-object-token]:hover {cursor: pointer;}
@@ -141,8 +141,9 @@ button[data-info-object-token]:hover {cursor: pointer;}
     position: absolute; background-color: indianred; width: 250px; height: 300px;
     z-index: 200; left: var(--left); top: var(--top); visibility: visible;
 }
-.add-button{display: flex; flex-direction:column; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; padding: 1em; background: #ededed; opacity: .7;transition: opacity 150ms;}
-.add-button:hover{opacity: 1;}
+.add-button{display: flex; flex-direction:column; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; padding: 1em; background: #ededed; opacity: .7;transition: opacity 150ms; box-shadow: 0px 2px 5px -4px black;}
+.add-button:hover{opacity: 1; cursor: pointer;}
 .add-button.columns{border-top: solid thick var(--main-columns-color);}
 .add-button.filters{border-top: solid thick var(--main-filters-color);}
 .add-button.metrics{border-top: solid thick var(--main-metrics-color);}
+.add-button.composite-metrics{border-top: solid thick var(--main-composite-metrics-color);}

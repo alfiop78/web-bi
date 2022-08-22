@@ -5,14 +5,16 @@ dialog h6{font-weight: lighter;}
 
 dialog.small-dialog{max-height: 90%; height: 60%; min-width: 60%; max-width: 90%;}
 dialog.medium-dialog{max-height: 90%; height: 70%; min-width: 75%; max-width: 90%;}
-dialog.large-dialog{max-height: 90%; height: 75%; max-width: 80%;}
+dialog.large-dialog{max-height: 90%; height: 75%; max-width: 90%; min-width: 80%;}
 
 
 /*dialog con struttura gerarchica*/
 dialog.hierarchy-struct {display: grid; grid-template-columns: 25% 1fr; grid-column-gap: 2%;padding: 0px;}
+dialog.struct {display: grid; grid-template-columns: 25% 1fr; grid-column-gap: 2%;padding: 0px;}
 
 .dialog-sections{display: grid; grid-template-rows: auto 1fr auto; height: 100%;}
 dialog.hierarchy-struct .dialog-sections{display: grid; grid-template-rows: auto 1fr auto; height: 100%; padding: 2em .5em;}
+dialog.struct .dialog-sections{display: grid; grid-template-rows: auto 1fr auto; height: 100%; padding: 2em .5em;}
 /*dialog > section{padding: 16px;}*/
 dialog{padding: 2em;}
 dialog h4{padding: 0px 0px 1em;}
@@ -82,3 +84,4 @@ section[data-versioning-elements]{display: flex; flex-direction: column; positio
 .parent-formula{display: grid; grid-template-rows: auto auto 1fr auto;}
 .parent-formula-column{display: grid; grid-template-rows: auto auto auto 1fr auto;}
 .hierarchies-struct{background-color: gainsboro; height: 100%; position: relative; padding-top: 1em;}
+.exist-struct{background-color: gainsboro; height: 100%; position: relative; padding-top: 1em;}

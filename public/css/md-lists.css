@@ -30,8 +30,8 @@ section[data-sublist-fields] > .selectable[data-relation][data-relation-id="true
 section[data-sublist-fields] > .selectable[metrics] i[data-id="metric-icon"]{color: #587850; visibility: visible;}
 
 /*visualizzo icona su hover section*/
-section.data-item button {visibility: hidden;}
-section.data-item:hover button {visibility: visible;}
+section.data-item button, section.data-item-defined button {visibility: hidden;}
+section.data-item:hover button, section.data-item-defined:hover button {visibility: visible;}
 /*dialog lists*/
 .dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}
 
@@ -95,7 +95,7 @@ section.data-item:hover button {visibility: visible;}
 }
 
 /*hover selected elements*/
-.data-item{position: relative;}
+.data-item, .data-item-defined{position: relative;}
 section[data-sublist-gen] {position: relative;}
 .selectable{transition: padding-left 150ms; padding-left: 4px;}
 .selectable:hover{cursor: pointer;transition: padding-left 200ms; padding-left: 8px;}
@@ -127,7 +127,7 @@ ul[data-object]{position: absolute; overflow: auto; width: 100%; height: calc(10
 .parent-ul-hierarchies{display: grid; grid-template-rows: 1fr;}
 .parent-ul-hierarchies-fact{display: grid; grid-template-rows: 1fr;}
 .parent-ul-columns{display: grid; grid-template-rows: auto auto auto 1fr;}
-.parent-ul-filters, .parent-ul-metrics{display: grid; grid-template-rows: auto auto 1fr auto;}
+.parent-ul-filters, .parent-ul-metrics{display: grid; grid-template-rows: auto 1fr;}
 .parent-ul-tables{display: grid; grid-template-rows: auto auto auto 1fr;}
 .parent-ul-fields{display: grid; grid-template-rows: auto auto auto 1fr;}
 .parent-ul-textarea{display: grid; grid-template-rows: auto auto auto auto 1fr auto;}
