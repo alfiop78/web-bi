@@ -25,8 +25,14 @@ var StorageMetric = new MetricStorage();
 
     processList: document.getElementById('reportProcessList'),
     // ul
-    ulExistMetrics: document.getElementById('ul-metrics'), // TODO: da completare in tutto il codice
-    ulExistCompositeMetrics: document.getElementById('ul-exist-composite-metrics'), // TODO: da completare in tutto il codice
+    ulMetrics: document.getElementById('ul-metrics'),
+    ulDefinedMetrics: document.getElementById('ul-defined-metrics'),
+    ulCompositeMetrics: document.getElementById('ul-composite-metrics'),
+    ulDefinedCompositeMetrics: document.getElementById('ul-defined-composite-metrics'),
+    ulColumns: document.getElementById('ul-columns'),
+    ulDefinedColumns: document.getElementById('ul-defined-columns'),
+    ulFilters: document.getElementById('ul-filters'),
+    ulDefinedFilters: document.getElementById('ul-defined-filters'),
 
     // btn
     btnAddFilters: document.getElementById('btn-add-filters'),
@@ -224,7 +230,6 @@ var StorageMetric = new MetricStorage();
 
   // lista di tutte le colonne, incluse nelle dimensioni, property 'columns'
   app.getColumns = () => {
-    const ul = document.getElementById('ul-columns');
     // per ogni dimensione, recupero la property 'columns'
     // console.log('StorageDimension.selected : ', StorageDimension.dimensions);
     for (const [dimToken, value] of StorageDimension.dimensions) {
@@ -263,7 +268,7 @@ var StorageMetric = new MetricStorage();
               span.innerText = field.ds.field;
               smallTable.innerText = table.table;
               smallHier.innerText = hierValue.name;
-              ul.appendChild(section);
+              app.ulColumns.appendChild(section);
             }
           }
         }
@@ -273,7 +278,6 @@ var StorageMetric = new MetricStorage();
 
   // recupero le colonne agganciate alla fact, proprietà columns nel json, per aggiungerle nelle dialog-column
   app.getColumnsFact = () => {
-    const ul = document.getElementById('ul-columns');
     for (const [cubeToken, value] of StorageCube.cubes) {
       if (value.columns.hasOwnProperty(value.alias)) {
         for (const [token, field] of Object.entries(value.columns[value.alias])) {
@@ -301,7 +305,7 @@ var StorageMetric = new MetricStorage();
           span.innerText = field.ds.field;
           smallTable.innerText = value.FACT;
           smallCube.innerText = value.name;
-          ul.appendChild(section);
+          app.ulColumns.appendChild(section);
         }
       }
     }
@@ -481,7 +485,6 @@ var StorageMetric = new MetricStorage();
     3 : metrica filtrata composta
     4 : metrica composta
     */
-    const ul = document.getElementById('ul-metrics');
     // ...per ogni cubo 
     for (const [cubeToken, value] of StorageCube.cubes) {
       StorageMetric.cubeMetrics = cubeToken;
@@ -522,7 +525,7 @@ var StorageMetric = new MetricStorage();
         span.innerText = metric.name;
         smallTable.innerText = value.FACT;
         smallCube.innerText = value.name;
-        ul.appendChild(section);
+        app.ulMetrics.appendChild(section);
       });
     }
   }
@@ -532,7 +535,7 @@ var StorageMetric = new MetricStorage();
     // TODO: 2022-05-27 in futuro ci sarà da valutare metriche composte appartenenti a più cubi
     StorageMetric.compositeMetrics.forEach(metric => {
       StorageMetric.selected = metric.token;
-      // aggiungo la metrica alla #ul-exist-composite-metrics
+      // aggiungo la metrica alla #ul-composite-metrics
       app.addCompositeMetric(); // questa function viene usata anche quando si crea una nuova metrica composta
     });
   }
@@ -625,6 +628,7 @@ var StorageMetric = new MetricStorage();
       document.querySelector("#ul-cubes section[data-cube-token='" + token + "'] .selectable").dataset.selected = 'true';
       Query.cubes = token;
       app.showCubeObjects();
+      app.btnToggleDimensionsDrawer.disabled = false;
     });
     // dimensioni
     StorageProcess.selected.edit.dimensions.forEach(token => {
@@ -637,7 +641,7 @@ var StorageMetric = new MetricStorage();
     // colonne
     for (const [token, column] of Object.entries(StorageProcess.selected.edit.columns)) {
       // Query.select = { field: Query.field, SQLReport: textarea, alias : alias.value };
-      document.querySelector("#ul-columns .selectable[data-token-column='" + token + "']").dataset.selected = 'true';
+      app.ulColumns.querySelector(".selectable[data-token-column='" + token + "']").dataset.selected = 'true';
       Query.field = column.field;
       // reimposto la colonna come quando viene selezionata
       Query.select = column;
@@ -655,6 +659,8 @@ var StorageMetric = new MetricStorage();
           cubeToken: column.cubeToken
         };
       }
+      // aggiungo alla #ul-defined-columns
+      app.addDefinedColumn(column.alias, token);
     }
     // filtri
     StorageProcess.selected.edit.filters.forEach(token => {
@@ -670,6 +676,8 @@ var StorageMetric = new MetricStorage();
       if (StorageFilter.selected.hasOwnProperty('hierarchies')) object.hierarchies = StorageFilter.selected.hierarchies;
 
       Query.objects = object;
+      // aggiungo alla lista #ul-defined-filters
+      app.addDefinedFilter();
     });
     // metriche
     StorageProcess.selected.edit.metrics.forEach(token => {
@@ -677,12 +685,14 @@ var StorageMetric = new MetricStorage();
       // seleziono le metriche (0, 1, 2, 3) impostate nel report
       document.querySelector("#ul-metrics .selectable[data-metric-token='" + token + "']").dataset.selected = 'true';
       Query.objects = { token, cubes: StorageMetric.selected.cubes };
+      // aggiungo alla lista #ul-defined-metrics
+      app.addDefinedMetric();
     });
     // metriche composte
     StorageProcess.selected.edit.compositeMetrics.forEach(token => {
       StorageMetric.selected = token;
       // seleziono le metriche (0, 1, 2, 3) impostate nel report
-      document.querySelector("#ul-exist-composite-metrics .selectable[data-metric-token='" + token + "']").dataset.selected = 'true';
+      app.ulCompositeMetrics.querySelector(".selectable[data-metric-token='" + token + "']").dataset.selected = 'true';
       Query.objects = { token, cubes: StorageMetric.selected.cubes };
     });
 
@@ -897,20 +907,13 @@ var StorageMetric = new MetricStorage();
   app.handlerFilterSelected = (e) => {
     StorageFilter.selected = e.currentTarget.dataset.filterToken;
     let object = {};
-    if (e.currentTarget.hasAttribute('data-selected')) {
-      e.currentTarget.toggleAttribute('data-selected');
-      // delete filter
-      Query.filters = { token: e.currentTarget.dataset.filterToken };
-      //Query.filters = { token : e.currentTarget.dataset.filterToken, SQL : `${StorageFilter.selected.tableAlias}.${StorageFilter.selected.formula}` };
-      Query.objects = { token: e.currentTarget.dataset.filterToken };
-    } else {
+    if (!e.currentTarget.hasAttribute('data-selected')) {
       e.currentTarget.toggleAttribute('data-selected');
       // creo l'oggetto da passare a Query.objects
       object.token = e.currentTarget.dataset.filterToken;
       if (StorageFilter.selected.hasOwnProperty('cubes')) object.cubes = StorageFilter.selected.cubes;
       if (StorageFilter.selected.hasOwnProperty('dimensions')) object.dimensions = StorageFilter.selected.dimensions;
       if (StorageFilter.selected.hasOwnProperty('hierarchies')) object.hierarchies = StorageFilter.selected.hierarchies;
-
       Query.objects = object;
       // console.log(StorageFilter.selected.formula);
       // nel salvare il filtro nel report attuale devo impostarne anche l'alias della tabella selezionata nella dialog
@@ -926,27 +929,24 @@ var StorageMetric = new MetricStorage();
   // selezione di una metrica già esistente
   app.handlerMetricSelected = (e) => {
     StorageMetric.selected = e.currentTarget.dataset.metricToken;
-    if (e.currentTarget.hasAttribute('data-selected')) {
-      e.currentTarget.toggleAttribute('data-selected');
-      Query.objects = { token: e.currentTarget.dataset.metricToken };
-    } else {
+    if (!e.currentTarget.hasAttribute('data-selected')) {
       e.currentTarget.toggleAttribute('data-selected');
       // TODO: per le metriche composte (metric_type: 4) c'è da definire se inserire nel JSON, i cubi a cui appartengono le metriche che compongono la composta
       if (+e.currentTarget.dataset.metricType === 4) {
         // quando viene selezionata una metrica composta, le metriche al suo interno verranno incluse nel datamart finale, potrei selezionarle sulla pagina con un colore diverso per
         // ... evidenziare il fatto che sono già incluse nel report
         // la prop formula->metrics_alias contiene {nome_metrica : metricToken, metricAlias}. Tramite il metricToken posso selezionare le metriche incluse nella formula della composta.
-        // all'interno delle metriche composte possono trovarsi anche altre metriche composte, quindi vado a cercare anche in #ul-exist-composite-metrics
+        // all'interno delle metriche composte possono trovarsi anche altre metriche composte, quindi vado a cercare anche in #ul-composite-metrics
         for (const [metricName, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
-          document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "'], #ul-exist-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
+          document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "'], #ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
         }
         app.addDefinedCompositeMetric();
       } else {
         app.addDefinedMetric();
       }
       Query.objects = { token: e.currentTarget.dataset.metricToken, cubes: StorageMetric.selected.cubes };
+      app.checkObjectSelected();
     }
-    app.checkObjectSelected();
   }
 
   // selezione di una metrica per la creazione di una metrica composta
@@ -1092,12 +1092,7 @@ var StorageMetric = new MetricStorage();
       }
 
       if (e.currentTarget.hasAttribute('data-selected')) {
-        // Query.addTables(e.currentTarget.dataset.hierToken);
-        // verifico quali relazioni inserire in where e quindi anche in from
-        // app.removeRelations(e.currentTarget.dataset.hierToken);
-        // Query.objects = {type : 'column', token : Query.columnToken};
         Query.objects = { token: Query.columnToken };
-
         // TODO: colonna deselezionata, implementare la logica in Query.deleteSelect
         // Query.deleteSelect();				
       } else {
@@ -1489,8 +1484,8 @@ var StorageMetric = new MetricStorage();
     // aggiungo oppure aggiorno la metrica in #ul-metrics
     if (e.target.dataset.token) {
       // edit metrica
-      app.ulExistMetrics.querySelector("section[data-metric-token='" + token + "']").dataset.label = inputName.value;
-      app.ulExistMetrics.querySelector(".selectable[data-metric-token='" + token + "'] span[metric]").innerText = inputName.value;
+      app.ulMetrics.querySelector("section[data-metric-token='" + token + "']").dataset.label = inputName.value;
+      app.ulMetrics.querySelector(".selectable[data-metric-token='" + token + "'] span[metric]").innerText = inputName.value;
     } else {
       app.addMetric('ul-metrics');
     }
@@ -1587,7 +1582,7 @@ var StorageMetric = new MetricStorage();
     ul.appendChild(section);
   }
 
-  app.addDefinedColumn = (alias) => {
+  app.addDefinedColumn = (alias, token) => {
     const ul = document.getElementById('ul-defined-columns');
     const contentElement = app.tmplList.content.cloneNode(true);
     const section = contentElement.querySelector('section[data-sublist-columns-defined]');
@@ -1599,7 +1594,10 @@ var StorageMetric = new MetricStorage();
     section.dataset.relatedObject = 'dimension cube';
     section.dataset.elementSearch = 'search-defined-columns';
     section.dataset.label = alias;
+    section.dataset.tokenColumn = token;
     span.innerText = alias;
+    btnRemove.addEventListener('click', app.handlerColumnRemove);
+    btnRemove.dataset.objectToken = token;
     ul.appendChild(section);
   }
 
@@ -1639,7 +1637,6 @@ var StorageMetric = new MetricStorage();
     const defined = spanHContent.querySelector('.defined');
     const span = defined.querySelector('span[metric]');
     const btnRemove = spanHContent.querySelector('button[data-remove]');
-    // il filtro può contenere tabelle dei livelli dimensionali insieme alla FACT
     section.dataset.relatedObject = 'dimension cube';
     section.dataset.elementSearch = 'search-defined-metrics';
     section.dataset.label = StorageMetric.selected.name;
@@ -1648,7 +1645,6 @@ var StorageMetric = new MetricStorage();
     span.innerText = StorageMetric.selected.name;
     btnRemove.dataset.objectToken = StorageMetric.selected.token;
     btnRemove.onclick = app.handlerMetricRemove;
-    // smallHier.innerText = hier.name;
     ul.appendChild(section);
   }
 
@@ -1660,7 +1656,6 @@ var StorageMetric = new MetricStorage();
     const defined = spanHContent.querySelector('.defined');
     const span = defined.querySelector('span[metric]');
     const btnRemove = spanHContent.querySelector('button[data-remove]');
-    // il filtro può contenere tabelle dei livelli dimensionali insieme alla FACT
     section.dataset.relatedObject = 'dimension cube';
     section.dataset.elementSearch = 'search-defined-metrics';
     section.dataset.label = StorageMetric.selected.name;
@@ -1668,15 +1663,13 @@ var StorageMetric = new MetricStorage();
     defined.dataset.metricToken = StorageMetric.selected.token;
     span.innerText = StorageMetric.selected.name;
     btnRemove.dataset.objectToken = StorageMetric.selected.token;
-    btnRemove.onclick = app.handlerMetricRemove;
-    // smallHier.innerText = hier.name;
+    btnRemove.onclick = app.handlerCompositeMetricRemove;
     ul.appendChild(section);
   }
 
 
   // aggiungo la metrica appena creata alla <ul> (metrica composta)
   app.addCompositeMetric = () => {
-    const ul = document.getElementById('ul-exist-composite-metrics');
     const contentElement = app.tmplList.content.cloneNode(true);
     const section = contentElement.querySelector('section[data-sublist-composite-metrics]');
     const spanHContent = section.querySelector('.h-content');
@@ -1718,7 +1711,38 @@ var StorageMetric = new MetricStorage();
       small.dataset.attr = cube + 'test';
       smalls.appendChild(small);
     }
-    ul.appendChild(section);
+    app.ulCompositeMetrics.appendChild(section);
+  }
+
+  // remove filter from report
+  app.handlerFilterRemove = (e) => {
+    Query.filters = { token: e.currentTarget.dataset.objectToken };
+    Query.objects = { token: e.currentTarget.dataset.objectToken };
+    app.ulDefinedFilters.querySelector("section[data-filter-token='" + e.currentTarget.dataset.objectToken + "']").remove();
+    delete app.ulFilters.querySelector("section[data-filter-token='" + e.currentTarget.dataset.objectToken + "'] .selectable").dataset.selected;
+  }
+
+  // remove metrics from report
+  app.handlerMetricRemove = (e) => {
+    Query.objects = { token: e.currentTarget.dataset.objectToken };
+    app.ulDefinedMetrics.querySelector("section[data-metric-token='" + e.currentTarget.dataset.objectToken + "']").remove();
+    delete app.ulMetrics.querySelector("section[data-metric-token='" + e.currentTarget.dataset.objectToken + "'] .selectable").dataset.selected;
+  }
+
+  // remove composite metrics from report
+  app.handlerCompositeMetricRemove = (e) => {
+    Query.objects = { token: e.currentTarget.dataset.objectToken };
+    app.ulDefinedCompositeMetrics.querySelector("section[data-metric-token='" + e.currentTarget.dataset.objectToken + "']").remove();
+    delete app.ulCompositeMetrics.querySelector("section[data-metric-token='" + e.currentTarget.dataset.objectToken + "'] .selectable").dataset.selected;
+  }
+
+  // remove column from report
+  app.handlerColumnRemove = (e) => {
+    Query.objects = { token: e.currentTarget.dataset.objectToken };
+    // TODO: colonna deselezionata, implementare la logica in Query.deleteSelect
+    // Query.deleteSelect();				
+    app.ulDefinedColumns.querySelector("section[data-token-column='" + e.currentTarget.dataset.objectToken + "']").remove();
+    delete app.ulColumns.querySelector(".selectable[data-token-column='" + e.currentTarget.dataset.objectToken + "']").dataset.selected;
   }
 
   // save compositeMetric
@@ -1768,13 +1792,13 @@ var StorageMetric = new MetricStorage();
     StorageMetric.save(metricObj);
     // salvo nel DB
     // app.saveMetricDB(metricObj);
-    // reimposto, come metrica selezionata, la metrica appena creata che è da aggiungere a #ul-exist-composite-metrics
+    // reimposto, come metrica selezionata, la metrica appena creata che è da aggiungere a #ul-composite-metrics
     StorageMetric.selected = token;
     // aggiungo la metrica alla <ul>
     if (e.target.dataset.token) {
       // aggiornamento metrica
-      app.ulExistCompositeMetrics.querySelector("section[data-metric-token='" + token + "']").dataset.label = inputName.value;
-      app.ulExistCompositeMetrics.querySelector(".selectable[data-metric-token='" + token + "'] span[metric]").innerText = inputName.value;
+      app.ulCompositeMetrics.querySelector("section[data-metric-token='" + token + "']").dataset.label = inputName.value;
+      app.ulCompositeMetrics.querySelector(".selectable[data-metric-token='" + token + "'] span[metric]").innerText = inputName.value;
     } else {
       // salvataggio nuova metrica, la aggiungo alla ul
       app.addCompositeMetric();
@@ -1995,9 +2019,9 @@ var StorageMetric = new MetricStorage();
 
   app.getColumnsFact();
 
-  app.getFilters('ul-filters', true, 'handlerFilterSelected'); // <ul> exist-filters
+  app.getFilters('ul-filters', true, 'handlerFilterSelected');
 
-  app.getFilters('ul-metric-filters', true, 'handlerMetricFilterSelected'); // <ul> metric-filters
+  app.getFilters('ul-metric-filters', true, 'handlerMetricFilterSelected');
 
   app.getCompositeMetrics(); // metriche composite
 
@@ -2089,7 +2113,7 @@ var StorageMetric = new MetricStorage();
     } else {
       // ripulisco la dialog
       app.columnAlias.value = '';
-      document.querySelectorAll('#ul-columns .selectable').forEach(item => delete item.dataset.selected);
+      // document.querySelectorAll('#ul-columns .selectable').forEach(item => delete item.dataset.selected);
       app.btnColumnDone.disabled = true;
       app.dialogColumns.showModal();
     }
@@ -2379,7 +2403,7 @@ var StorageMetric = new MetricStorage();
   // metriche composte selezionate
   app.setCompositeMetrics = () => {
     // Siccome le metriche composte contengono le metriche "base"/"filtrate" vanno aggiunte anche queste all'elaborazione di baseTable() (metriche base) oppure metricTable() (metriche filtrate)
-    document.querySelectorAll("#ul-exist-composite-metrics .selectable[data-selected][data-metric-type='4']").forEach(metricRef => {
+    app.ulCompositeMetrics.querySelectorAll(".selectable[data-selected][data-metric-type='4']").forEach(metricRef => {
       StorageMetric.selected = metricRef.dataset.metricToken;
       // ottengo le metriche inserite nella composta
       for (const [name, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
@@ -2701,12 +2725,12 @@ var StorageMetric = new MetricStorage();
     // document.querySelector("#ul-columns .selectable[data-token-column='" + Query.columnToken + "']").toggleAttribute('data-selected');
     // in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
     // aggiungo la colonna inserita nella ul-defined-columns
-    app.addDefinedColumn(alias.value);
+    app.addDefinedColumn(alias.value, Query.columnToken);
     // abilito il tasto "Fatto" della dialog
     app.btnColumnDone.disabled = false;
     app.btnColumnSave.disabled = true;
     app.columnAlias.value = '';
-    document.querySelectorAll('#ul-columns .selectable').forEach(item => delete item.dataset.selected);
+    app.ulColumns.querySelectorAll('.selectable').forEach(item => delete item.dataset.selected);
     app.checkObjectSelected();
   }
 
@@ -2723,7 +2747,7 @@ var StorageMetric = new MetricStorage();
       helper.classList.remove('error');
       helper.innerText = "";
     }
-    const column = document.querySelectorAll('#ul-columns .selectable[data-selected]').length;
+    const column = app.ulColumns.querySelectorAll('.selectable[data-selected]').length;
     app.btnColumnSave.disabled = (!check && inputAlias.value.length !== 0 && column !== 0) ? false : true;
   }
   // save column : salvataggio di una colonna del report

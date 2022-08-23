@@ -379,7 +379,7 @@
           <label for="search-exist-composite-metrics" class="">Ricerca</label>
         </div>
         <div class="relative-ul">
-          <ul id="ul-exist-composite-metrics" class="absolute"></ul>
+          <ul id="ul-composite-metrics" class="absolute"></ul>
         </div>
       </div>
     </section>
@@ -478,7 +478,7 @@
               {{-- TODO: implementare il drag&drop per l'ordinamento delle colonne nel datamart finale --}}
               <div>
                 <div class="h-content">
-                  <button class="button-icon material-icons-round md-18" data-info-object-token>drag_handle</button>
+                  <button class="button-icon material-icons-round md-18 columns-color md-opacity" data-info-object-token>drag_indicator</button>
                   <div class="defined v-content" data-object-type="column">
                     <!-- <small field></small> -->
                     <span column class="highlight"></span>
@@ -486,7 +486,7 @@
                     <!-- <small hier></small> -->
                   </div>
                   <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom">edit</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token tooltip="Rimuovi" flow="bottom">delete</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token data-remove tooltip="Rimuovi" flow="bottom">delete</button>
                 </div>
               </div>
             </section>
@@ -537,7 +537,7 @@
             <section class="data-item-defined" data-element-search data-label data-related-object data-type="metric" data-sublist-metrics-defined>
               <div>
                 <div class="h-content">
-                  <button class="button-icon material-icons-round md-18" data-info-object-token>drag_handle</button>
+                  <button class="button-icon material-icons-round md-18 metrics-color md-opacity" data-info-object-token>drag_indicator</button>
                   <div class="defined v-content metrics-color" data-object-type="metric">
                     <span metric class="highlight metrics-color"></span>
                     <small table></small>
@@ -568,6 +568,7 @@
             <section class="data-item-defined" data-element-search data-label data-sublist-composite-metrics-defined>
               <div>
                 <div class="h-content">
+                  <button class="button-icon material-icons-round md-18 composite-metrics-color md-opacity" data-info-object-token>drag_indicator</button>
                   <div class="defined v-content composite-metrics-color" data-object-type="composite-metric">
                     <span metric class="highlight"></span>
                     {{-- TODO: per le metriche composte, visualizzarne, nel popup, l'elenco dei cubi utilizzati dalle metriche all'interno della formula --}}
@@ -578,6 +579,7 @@
                 </div>
               </div>
             </section>
+
             {{-- lista reports/processes --}}
             <section class="data-item" data-element-search="search-process" data-label data-sublist-processes data-searchable>
               <div class="unselectable">

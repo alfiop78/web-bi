@@ -8,14 +8,14 @@
 ul{margin-inline: 0px;padding-inline: 0px;}
 .list{color: #494949;}
 .h-content{display: flex; align-items: center; padding-right: 1em;}
-.v-content{margin: 4px 2px;}
 .v-content{display: flex;flex-flow: column;width: 100%;}
 span.highlight{color: sienna;}
 .filters-color span.highlight{color: var(--main-filters-color);}
 .metrics-color span.highlight{color: var(--main-metrics-color);}
+.columns-color {color: var(--main-columns-color);}
+.metrics-color {color: var(--main-metrics-color);}
 .composite-metrics-color span.highlight{color: var(--main-composite-metrics-color);}
 .no-highlight{color: dimgray}
-.selectable{margin: 0px 4px; padding: 2px 4px;}
 .card ul > section .selectable{margin: 0px 4px; padding-top: 0px;}
 .unselectable{margin: 4px; padding: 2px 4px;}
 .selectable > .smalls{display: flex;flex-flow: column;}
@@ -30,7 +30,7 @@ section[data-sublist-fields] > .selectable[data-relation][data-relation-id="true
 section[data-sublist-fields] > .selectable[metrics] i[data-id="metric-icon"]{color: #587850; visibility: visible;}
 
 /*visualizzo icona su hover section*/
-section.data-item button, section.data-item-defined button {visibility: hidden;}
+section.data-item button, section.data-item-defined button:not(:first-child) {visibility: hidden;}
 section.data-item:hover button, section.data-item-defined:hover button {visibility: visible;}
 /*dialog lists*/
 .dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}
@@ -97,15 +97,25 @@ section.data-item:hover button, section.data-item-defined:hover button {visibili
 /*hover selected elements*/
 .data-item, .data-item-defined{position: relative;}
 section[data-sublist-gen] {position: relative;}
-.selectable{transition: padding-left 150ms; padding-left: 4px;}
+.selectable{transition: padding-left 150ms; margin: 0px 4px; padding: 2px 4px;}
 .selectable:hover{cursor: pointer;transition: padding-left 200ms; padding-left: 8px;}
-*[draggable].selectable:hover{cursor: grab; transition: padding-left 200ms; padding-left: 8px; font-weight: bold;}
+.selectable[data-selected]:hover{cursor: default; padding-left: 4px;}
+*[draggable].selectable:hover{cursor: grab; transition: padding-left 150ms; padding-left: 8px; font-weight: bold;}
 .selectable::before{background-color : sienna;}
-.selectable:hover::before{content: '';width: 8px;height: 20px;position: absolute;border-radius: 3px;opacity: .7;top: calc(50% - 10px);left: -4px;animation: hoverSelected 200ms ease;}
-.selectable[data-selected]::before{content: '';width: 8px;height: 20px;position: absolute;border-radius: 3px;opacity: 1;top: calc(50% - 10px);left: -4px;animation: hoverSelected 200ms ease;}
-.selectable.filters-color::before{background-color : var(--main-filters-color);}
+.selectable:not([data-selected]):hover::before{content: '';width: 6px;height: 100%;position: absolute;border-radius: 2px;opacity: .7;top: 0px;left: -4px;animation: hoverSelected 150ms ease;}
+.selectable[data-selected]::before{content: '';width: 6px;height: 50%;position: absolute;border-radius: 2px;opacity: 1;top: 25%;left: -4px;}
+.selectable[data-selected] .highlight{color: grey;}
+.selectable:not([data-selected]).filters-color::before{background-color : var(--main-filters-color);}
+
+.selectable[data-selected].filters-color::before,
+.selectable[data-selected].metrics-color::before,
+.selectable[data-selected].composite-metrics-color::before
+  {background-color : grey;}
+
 .selectable.metrics-color::before{background-color : var(--main-metrics-color);}
 .selectable.composite-metrics-color::before{background-color : var(--main-composite-metrics-color);}
+
+.data-item-defined .h-content:hover{cursor:default;padding-left:2px;font-weight:bold; transition: padding-left 150ms;}
 
 /* lista all'interno della card*/
 .card.table[data-mode='columns'] ul > section[data-sublist-fields] > .selectable::before{background-color: #9a6a6a;}
