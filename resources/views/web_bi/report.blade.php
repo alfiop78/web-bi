@@ -478,6 +478,7 @@
               {{-- TODO: implementare il drag&drop per l'ordinamento delle colonne nel datamart finale --}}
               <div>
                 <div class="h-content">
+                  <button class="button-icon material-icons-round md-18" data-info-object-token>drag_handle</button>
                   <div class="defined v-content" data-object-type="column">
                     <!-- <small field></small> -->
                     <span column class="highlight"></span>
@@ -536,7 +537,7 @@
             <section class="data-item-defined" data-element-search data-label data-related-object data-type="metric" data-sublist-metrics-defined>
               <div>
                 <div class="h-content">
-                  <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Ordina" flow="bottom">drag_handle</button>
+                  <button class="button-icon material-icons-round md-18" data-info-object-token>drag_handle</button>
                   <div class="defined v-content metrics-color" data-object-type="metric">
                     <span metric class="highlight metrics-color"></span>
                     <small table></small>
