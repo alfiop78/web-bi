@@ -64,6 +64,9 @@ var StorageMetric = new MetricStorage();
     btnSaveReport: document.getElementById('save'), // apre la dialogSaveReport
     btnSaveReportDone: document.getElementById('btnReportSaveName'),
 
+    // inputs
+    columnAlias: document.getElementById('columnAlias'), // input nella dialog-columns
+
     btnBackPage: document.getElementById('mdcBack'), // da definire
     ulDimensions: document.getElementById('dimensions'),
     aggregationFunction: document.getElementById('ul-aggregation-functions'),
@@ -937,6 +940,9 @@ var StorageMetric = new MetricStorage();
         for (const [metricName, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
           document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "'], #ul-exist-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
         }
+        app.addDefinedCompositeMetric();
+      } else {
+        app.addDefinedMetric();
       }
       Query.objects = { token: e.currentTarget.dataset.metricToken, cubes: StorageMetric.selected.cubes };
     }
@@ -1084,7 +1090,6 @@ var StorageMetric = new MetricStorage();
         StorageCube.selected = e.currentTarget.dataset.cubeToken;
         Query.field = { [Query.columnToken]: StorageCube.selected.columns[Query.tableAlias][Query.columnToken] };
       }
-      e.currentTarget.toggleAttribute('data-selected');
 
       if (e.currentTarget.hasAttribute('data-selected')) {
         // Query.addTables(e.currentTarget.dataset.hierToken);
@@ -1098,6 +1103,7 @@ var StorageMetric = new MetricStorage();
       } else {
         document.getElementById('columnAlias').value = '';
         document.getElementById('columnAlias').focus();
+        // TODO: anche le colonne possono essere "composte", nel senso che possono includere campi di diverse tabelle, quindi anche di diverse gerarchie e dimensioni
         // imposto, nella section della dialog, l'attributo data-hier-token e data-dimension-name selezionata
         if (e.currentTarget.hasAttribute('data-hier-token')) {
           app.dialogColumns.querySelector('section').dataset.hierToken = e.currentTarget.dataset.hierToken;
@@ -1107,6 +1113,7 @@ var StorageMetric = new MetricStorage();
           delete app.dialogColumns.querySelector('section').dataset.hierToken;
         }
       }
+      e.currentTarget.toggleAttribute('data-selected');
     }
   }
 
@@ -1586,15 +1593,12 @@ var StorageMetric = new MetricStorage();
     const section = contentElement.querySelector('section[data-sublist-columns-defined]');
     const spanHContent = section.querySelector('.h-content');
     const defined = spanHContent.querySelector('.defined');
-    const fieldName = defined.querySelector('small[field]');
     const span = defined.querySelector('span[column]');
     const btnEdit = spanHContent.querySelector('button[data-edit]');
     const btnRemove = spanHContent.querySelector('button[data-remove]');
-    debugger;
     section.dataset.relatedObject = 'dimension cube';
     section.dataset.elementSearch = 'search-defined-columns';
     section.dataset.label = alias;
-    fieldName.innerText = Query.field;
     span.innerText = alias;
     ul.appendChild(section);
   }
@@ -1626,6 +1630,50 @@ var StorageMetric = new MetricStorage();
     // smallHier.innerText = hier.name;
     ul.appendChild(section);
   }
+
+  app.addDefinedMetric = () => {
+    const ul = document.getElementById('ul-defined-metrics');
+    const contentElement = app.tmplList.content.cloneNode(true);
+    const section = contentElement.querySelector('section[data-sublist-metrics-defined]');
+    const spanHContent = section.querySelector('.h-content');
+    const defined = spanHContent.querySelector('.defined');
+    const span = defined.querySelector('span[metric]');
+    const btnRemove = spanHContent.querySelector('button[data-remove]');
+    // il filtro può contenere tabelle dei livelli dimensionali insieme alla FACT
+    section.dataset.relatedObject = 'dimension cube';
+    section.dataset.elementSearch = 'search-defined-metrics';
+    section.dataset.label = StorageMetric.selected.name;
+    section.dataset.metricToken = StorageMetric.selected.token;
+    defined.dataset.metricToken = StorageMetric.selected.token;
+    span.innerText = StorageMetric.selected.name;
+    btnRemove.dataset.objectToken = StorageMetric.selected.token;
+    btnRemove.onclick = app.handlerMetricRemove;
+    // smallHier.innerText = hier.name;
+    ul.appendChild(section);
+  }
+
+  app.addDefinedCompositeMetric = () => {
+    const ul = document.getElementById('ul-defined-composite-metrics');
+    const contentElement = app.tmplList.content.cloneNode(true);
+    const section = contentElement.querySelector('section[data-sublist-composite-metrics-defined]');
+    const spanHContent = section.querySelector('.h-content');
+    const defined = spanHContent.querySelector('.defined');
+    const span = defined.querySelector('span[metric]');
+    const btnRemove = spanHContent.querySelector('button[data-remove]');
+    // il filtro può contenere tabelle dei livelli dimensionali insieme alla FACT
+    section.dataset.relatedObject = 'dimension cube';
+    section.dataset.elementSearch = 'search-defined-metrics';
+    section.dataset.label = StorageMetric.selected.name;
+    section.dataset.metricToken = StorageMetric.selected.token;
+    defined.dataset.metricToken = StorageMetric.selected.token;
+    span.innerText = StorageMetric.selected.name;
+    btnRemove.dataset.objectToken = StorageMetric.selected.token;
+    btnRemove.onclick = app.handlerMetricRemove;
+    // smallHier.innerText = hier.name;
+    ul.appendChild(section);
+  }
+
+
   // aggiungo la metrica appena creata alla <ul> (metrica composta)
   app.addCompositeMetric = () => {
     const ul = document.getElementById('ul-exist-composite-metrics');
@@ -2039,6 +2087,10 @@ var StorageMetric = new MetricStorage();
     if (Query.dimensions.size === 0) {
       App.showConsole('Selezionare una dimensione per poter aggiungere colonne al report', 'warning');
     } else {
+      // ripulisco la dialog
+      app.columnAlias.value = '';
+      document.querySelectorAll('#ul-columns .selectable').forEach(item => delete item.dataset.selected);
+      app.btnColumnDone.disabled = true;
       app.dialogColumns.showModal();
     }
   }
@@ -2640,16 +2692,21 @@ var StorageMetric = new MetricStorage();
         dimensions: [StorageDimension.selected.token]
       };
     } else {
-      document.querySelector("#ul-columns .selectable[data-token-column='" + Query.columnToken + "'] span[column]").innerText += ` (${alias.value})`;
+      // document.querySelector("#ul-columns .selectable[data-token-column='" + Query.columnToken + "'] span[column]").innerText += ` (${alias.value})`;
       Query.select = { token: Query.columnToken, table: Query.table, tableAlias: Query.tableAlias, field: Query.field, SQLReport: textarea, alias: alias.value, cubeToken: StorageCube.selected.token };
       Query.objects = { token: Query.columnToken, cubeToken: StorageCube.selected.token };
     }
     console.log('columnToken : ', Query.columnToken);
     // evidenzio come 'selezionata' la colonna che ha aperto la dialog dopo averla salvata qui. Vado a verificare sia le colonne della fact che quelle delle dimensioni
-    document.querySelector("#ul-columns .selectable[data-token-column='" + Query.columnToken + "']").toggleAttribute('data-selected');
+    // document.querySelector("#ul-columns .selectable[data-token-column='" + Query.columnToken + "']").toggleAttribute('data-selected');
     // in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
-    // TODO: aggiungo la colonna inserita nella ul-defined-columns
+    // aggiungo la colonna inserita nella ul-defined-columns
     app.addDefinedColumn(alias.value);
+    // abilito il tasto "Fatto" della dialog
+    app.btnColumnDone.disabled = false;
+    app.btnColumnSave.disabled = true;
+    app.columnAlias.value = '';
+    document.querySelectorAll('#ul-columns .selectable').forEach(item => delete item.dataset.selected);
     app.checkObjectSelected();
   }
 
@@ -2685,7 +2742,7 @@ var StorageMetric = new MetricStorage();
     }
     // console.log(e);
     // console.log(e.key);
-    if (e.key === 'Enter' && !app.btnColumnDone.disabled) app.saveColumn();
+    if (e.key === 'Enter' && !app.btnColumnSave.disabled) app.saveColumn();
     // e.preventDefault();
   }
 

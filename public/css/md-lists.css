@@ -1,5 +1,5 @@
 :root{
-  --main-columns-color: brown;
+  --main-columns-color: saddlebrown;
   --main-filters-color: darkolivegreen;
   --main-metrics-color: darkgoldenrod;
   --main-composite-metrics-color: sienna;
@@ -121,7 +121,8 @@ section[data-sublist-gen] {position: relative;}
 /*lista nelle dialog*/
 ul[data-object]{position: absolute; overflow: auto; width: 100%; height: calc(100% - 24px); margin-block-start: 12px; margin-block-end: 12px; padding-inline-start: 1em; padding-inline-end: 1em;}
 
-.parent-ul{display: grid; grid-template-rows: auto auto 1fr;height: 100%;}
+.parent-ul{display: grid; grid-template-rows: auto 1fr;height: 100%;}
+.parent-ul-search{display: grid; grid-template-rows: auto auto 1fr;height: 100%;}
 .hierarchies-struct > .parent-ul{display: grid; grid-template-rows: auto 1fr;height: 100%;}
 .parent-ul-base{display: grid; grid-template-rows: auto 1fr;height: 100%;}
 .parent-ul-hierarchies{display: grid; grid-template-rows: 1fr;}

@@ -141,7 +141,7 @@ button[data-info-object-token]:hover {cursor: pointer;}
     position: absolute; background-color: indianred; width: 250px; height: 300px;
     z-index: 200; left: var(--left); top: var(--top); visibility: visible;
 }
-.add-button{display: flex; flex-direction:column; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; padding: 1em; background: #ededed; opacity: .7;transition: opacity 150ms; box-shadow: 0px 2px 5px -4px black;}
+.add-button{display: flex; flex-direction:column; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; padding: 1em; background: #ededed; opacity: .7;transition: opacity 150ms; box-shadow: 0px 1px 3px -1px black;}
 .add-button:hover{opacity: 1; cursor: pointer;}
 .add-button.columns{border-top: solid thick var(--main-columns-color);}
 .add-button.filters{border-top: solid thick var(--main-filters-color);}
