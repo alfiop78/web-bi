@@ -160,7 +160,7 @@
   <dialog id="dialog-filter" class="large-dialog struct">
     <section class="exist-struct">
       <div class="parent-ul-search">
-        <h5>Filtri presenti</h5>
+        <h5>Filtri disponibili</h5>
         <div class="md-field">
           <input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
           <label for="search-exist-filters" class="">Ricerca</label>
@@ -247,7 +247,7 @@
   <dialog id="dialog-metric" class="large-dialog struct">
     <section class="exist-struct">
       <div class="parent-ul-search">
-        <h5>Metriche presenti</h5>
+        <h5>Metriche disponibili</h5>
         <div class="md-field">
           <input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
           <label for="search-exist-metrics" class="">Ricerca</label>
@@ -263,8 +263,8 @@
 
       <div class="stepLayout">
         {{-- metriche mappate --}}
-        <section class="sectionLists parent-ul">
-          <h5>Metriche disponibili</h5>
+        <section class="sectionLists parent-ul-search">
+          <h5>Metriche</h5>
           <div class="md-field">
             <input type="search" data-element-search="search-available-metrics" id="search-available-metrics" value autocomplete="off" />
             <label for="search-available-metrics" class="">Ricerca</label>
@@ -274,7 +274,7 @@
           </div>
         </section>
         {{-- funzioni di aggregazione --}}
-        <section class="sectionLists parent-ul">
+        <section class="sectionLists parent-ul-search">
           <h5>Aggregazione</h5>{{-- <h6>Seleziona la funzione di aggregazione</h6> --}}
           <div class="md-field">
             <input type="search" id="search-aggregate-functions" data-element-search="search-aggregate-functions" value="" autocomplete="off" />
@@ -373,7 +373,7 @@
   <dialog id="dialog-composite-metric" class="large-dialog struct">
     <section class="exist-struct">
       <div class="parent-ul-search">
-        <h5>Metriche presenti</h5>
+        <h5>Metriche composte disponibili</h5>
         <div class="md-field">
           <input type="search" data-element-search="search-exist-composite-metrics" id="search-exist-composite-metrics" value autocomplete="off" />
           <label for="search-exist-composite-metrics" class="">Ricerca</label>
@@ -384,18 +384,18 @@
       </div>
     </section>
     <section class="dialog-sections" data-table-name>
-      <h4>Creazione di una nuova metrica composta per il cubo <span data-cube-selected></span></h4>
+      <h4>Creazione metrica composta</h4>
 
       <div class="stepLayout">
         {{-- metriche mappate --}}
-        <section class="sectionLists parent-ul">
+        <section class="sectionLists parent-ul-search">
           <h5>Metriche disponibili</h5>
           <div class="md-field">
             <input type="search" data-element-search="search-metrics" id="search-metrics" value autocomplete="off" />
             <label for="search-metrics" class="">Ricerca</label>
           </div>
           <div class="relative-ul">
-            <ul id="ul-metrics" class="absolute"></ul>
+            <ul id="ul-all-metrics" class="absolute"></ul>
           </div>
         </section>
 
@@ -478,7 +478,7 @@
               {{-- TODO: implementare il drag&drop per l'ordinamento delle colonne nel datamart finale --}}
               <div>
                 <div class="h-content">
-                  <button class="button-icon material-icons-round md-18 columns-color md-opacity" data-info-object-token>drag_indicator</button>
+                  <button class="button-icon material-icons-round md-18 columns-color md-opacity" data-info-object-token>drag_handle</button>
                   <div class="defined v-content" data-object-type="column">
                     <!-- <small field></small> -->
                     <span column class="highlight"></span>
@@ -537,7 +537,7 @@
             <section class="data-item-defined" data-element-search data-label data-related-object data-type="metric" data-sublist-metrics-defined>
               <div>
                 <div class="h-content">
-                  <button class="button-icon material-icons-round md-18 metrics-color md-opacity" data-info-object-token>drag_indicator</button>
+                  <button class="button-icon material-icons-round md-18 metrics-color md-opacity" data-info-object-token>drag_handle</button>
                   <div class="defined v-content metrics-color" data-object-type="metric">
                     <span metric class="highlight metrics-color"></span>
                     <small table></small>
@@ -568,7 +568,7 @@
             <section class="data-item-defined" data-element-search data-label data-sublist-composite-metrics-defined>
               <div>
                 <div class="h-content">
-                  <button class="button-icon material-icons-round md-18 composite-metrics-color md-opacity" data-info-object-token>drag_indicator</button>
+                  <button class="button-icon material-icons-round md-18 composite-metrics-color md-opacity" data-info-object-token>drag_handle</button>
                   <div class="defined v-content composite-metrics-color" data-object-type="composite-metric">
                     <span metric class="highlight"></span>
                     {{-- TODO: per le metriche composte, visualizzarne, nel popup, l'elenco dei cubi utilizzati dalle metriche all'interno della formula --}}

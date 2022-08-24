@@ -14,6 +14,7 @@ span.highlight{color: sienna;}
 .metrics-color span.highlight{color: var(--main-metrics-color);}
 .columns-color {color: var(--main-columns-color);}
 .metrics-color {color: var(--main-metrics-color);}
+.selectable > small {color: grey;}
 .composite-metrics-color span.highlight{color: var(--main-composite-metrics-color);}
 .no-highlight{color: dimgray}
 .card ul > section .selectable{margin: 0px 4px; padding-top: 0px;}
@@ -103,7 +104,7 @@ section[data-sublist-gen] {position: relative;}
 *[draggable].selectable:hover{cursor: grab; transition: padding-left 150ms; padding-left: 8px; font-weight: bold;}
 .selectable::before{background-color : sienna;}
 .selectable:not([data-selected]):hover::before{content: '';width: 6px;height: 100%;position: absolute;border-radius: 2px;opacity: .7;top: 0px;left: -4px;animation: hoverSelected 150ms ease;}
-.selectable[data-selected]::before{content: '';width: 6px;height: 50%;position: absolute;border-radius: 2px;opacity: 1;top: 25%;left: -4px;}
+.selectable[data-selected]::before{content: '';width: 6px;height: 10px;position: absolute;border-radius: 2px;opacity: 1;top: calc(50% - 5px);left: -4px; transition:height 150ms, top 150ms;}
 .selectable[data-selected] .highlight{color: grey;}
 .selectable:not([data-selected]).filters-color::before{background-color : var(--main-filters-color);}
 
