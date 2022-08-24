@@ -14,7 +14,7 @@ span.highlight{color: sienna;}
 .metrics-color span.highlight{color: var(--main-metrics-color);}
 .columns-color {color: var(--main-columns-color);}
 .metrics-color {color: var(--main-metrics-color);}
-.selectable > small {color: grey;}
+.selectable > small, .defined > small {color: grey;}
 .composite-metrics-color span.highlight{color: var(--main-composite-metrics-color);}
 .no-highlight{color: dimgray}
 .card ul > section .selectable{margin: 0px 4px; padding-top: 0px;}

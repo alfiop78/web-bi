@@ -175,7 +175,7 @@ class Cube
     $metrics_base_datamart = array();
     // dd($this->baseMetrics);
     foreach ($this->baseMetrics as $metricName => $metric) {
-      // var_dump($metric);
+      var_dump($metric);
       if ($metric->metric_type === 1 || $metric->metric_type === 3) {
         // metrica composta di base oppure metrica composta di base con filtri
         // per queste metriche la prop 'field' contiene la formula es.: DocVenditaDettaglio_560.PrzMedioPond * DocVenditaDettaglio_560.Quantita
