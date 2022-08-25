@@ -974,11 +974,11 @@ var StorageMetric = new MetricStorage();
           StorageMetric.selected = metric.token;
           if (StorageMetric.selected.metric_type !== 4) {
             // aggiungo la metrica che si trova all'interno della formula, alla ulDefinedMetrics
-            debugger;
-            if (!app.ulMetrics.querySelector(".selectable[data-metric-token='" + metric.token + "']").dataset.selected) {
+            // se la metrica che sto per aggiungere è già stata aggiunta, aggiungo solo lo small con all'interno la metrica composta qui selezionata
+            if (!app.ulMetrics.querySelector(".selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
               app.ulMetrics.querySelector(".selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
-              // con l'attr 'show-datamart' indico che la metrica non deve essere aggiunta al datamart finale
-              app.ulMetrics.querySelector(".selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
+              // includo, con show-datamart = true, anche le metriche contenute nella formula all'interno del datamart finale
+              app.ulMetrics.querySelector(".selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'true';
               app.addDefinedMetric();
             }
             // aggiungo uno <small> per indicare che la metrica è stata aggiunta perchè è inclusa in una metrica composta
@@ -986,21 +986,20 @@ var StorageMetric = new MetricStorage();
           } else {
             app.ulCompositeMetrics.querySelector(".selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
             app.ulCompositeMetrics.querySelector(".selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
-            // app.addDefinedCompositeMetric(e.currentTarget.dataset.metricToken);
           }
         }
         StorageMetric.selected = e.currentTarget.dataset.metricToken;
+        // aggiungo alla ulDefinedCompositeMetric la metrica composta appena selezionata
         app.addDefinedCompositeMetric();
       } else {
-        StorageMetric.selected = e.currentTarget.dataset.metricToken;
         app.addDefinedMetric();
       }
       Query.objects = { token: e.currentTarget.dataset.metricToken, cubes: StorageMetric.selected.cubes };
       app.checkObjectSelected();
       app.setMetrics();
       app.setCompositeBaseMetrics();
-      app.setCompositeMetrics();
       app.setFilteredMetrics();
+      app.setCompositeMetrics();
     }
   }
 
@@ -1688,8 +1687,8 @@ var StorageMetric = new MetricStorage();
     // metricToken : la metrica di base inclusa nella composta
     // token : la metrica composta
     StorageMetric.selected = token;
-    debugger;
     const section = app.ulDefinedMetrics.querySelector("section[data-metric-token='" + metricToken + "']");
+    section.querySelector('button[data-remove]').disabled = true;
     const defined = app.ulDefinedMetrics.querySelector(".defined[data-metric-token='" + metricToken + "']");
     const contentSub = app.tmplSublists.content.cloneNode(true);
     const small = contentSub.querySelector('small');
@@ -1706,7 +1705,6 @@ var StorageMetric = new MetricStorage();
     const spanHContent = section.querySelector('.h-content');
     const defined = spanHContent.querySelector('.defined');
     const span = defined.querySelector('span[metric]');
-    const small = defined.querySelector('small[info]');
     const btnRemove = spanHContent.querySelector('button[data-remove]');
     section.dataset.relatedObject = 'dimension cube';
     section.dataset.elementSearch = 'search-defined-metrics';
@@ -1716,14 +1714,6 @@ var StorageMetric = new MetricStorage();
     span.innerText = StorageMetric.selected.name;
     btnRemove.dataset.objectToken = StorageMetric.selected.token;
     btnRemove.dataset.metricType = StorageMetric.selected.metric_type;
-    // BUG: si può veririfcare un bug quando una metrica è utilizzata in più di una metrica composta
-    // if (tokenCompositeMetric) {
-    //   StorageMetric.selected = tokenCompositeMetric;
-    //   section.dataset[tokenCompositeMetric] = tokenCompositeMetric;
-    //   // (section.dataset.compositeMetrics) ? section.dataset.compositeMetrics += ` ${StorageMetric.selected.token}` : section.dataset.compositeMetrics = StorageMetric.selected.token;
-    //   small.innerText = StorageMetric.selected.name;
-    //   btnRemove.disabled = true;
-    // }
     btnRemove.onclick = app.handlerMetricRemove;
     app.ulDefinedMetrics.appendChild(section);
   }
@@ -1828,20 +1818,18 @@ var StorageMetric = new MetricStorage();
   app.handlerCompositeMetricRemove = (e) => {
     Query.objects = { token: e.currentTarget.dataset.objectToken };
     Query.compositeMetrics = { token: e.currentTarget.dataset.objectToken };
-    // debugger;
-    // rimuovo anche le metriche che compongono la metrica composta dalla ul-defined-metrics
-    // recupero il token della metrica che compone la metrica composta
-    app.ulDefinedMetrics.querySelectorAll("section[data-" + e.currentTarget.dataset.objectToken + "='" + e.currentTarget.dataset.objectToken + "']").forEach(metric => {
-      debugger;
+    // recupero tutte le metriche che sono incluse nella metrica composta selezionata qui
+    app.ulDefinedMetrics.querySelectorAll("section[data-" + e.currentTarget.dataset.objectToken + "]").forEach(metric => {
+      // metric : è la metrica base/filtrata presente nella ulDefinedMetrics
       // elimino la metrica composta associata alla metrica in ciclo
       metric.querySelector("small[data-composite-metric='" + e.currentTarget.dataset.objectToken + "']").remove();
-      // TODO: se la metrica in ciclo non ha altre metriche composte che la utilizzano allora la elimino dal report
+      // se, tra le metriche aggiunte al report, non ci sono più metriche utilizzate nella composta selezionata, allora le elimino dal report
+      // ... le elimino in base al metric_type 
       if (metric.querySelectorAll("small[data-composite-metric]").length === 0) {
         StorageMetric.selected = metric.dataset.metricToken;
         switch (StorageMetric.selected.metric_type) {
           case 0:
           case 1:
-            debugger;
             Query.metrics = { token: metric.dataset.metricToken };
             break;
           case 2:
@@ -1850,6 +1838,8 @@ var StorageMetric = new MetricStorage();
             break;
           default:
             // metrica composta
+            // in questo caso c'è una metrica composta all'interno della metrica composta selezionata
+            // TODO: in questo caso c'è da verificare, a cascata, se ci sono altre metriche da eliminare contenute in questa composta
             Query.compositeMetrics = { token: metric.dataset.metricToken };
             break;
         }
