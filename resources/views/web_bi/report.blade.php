@@ -540,8 +540,6 @@
                   <button class="button-icon material-icons-round md-18 metrics-color md-opacity" data-info-object-token>drag_handle</button>
                   <div class="defined v-content metrics-color" data-object-type="metric">
                     <span metric class="highlight metrics-color"></span>
-                    <!-- <small table></small> -->
-                    <small info></small>
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Dettaglio" flow="bottom">info</button>
                   <button class="button-icon material-icons-round md-18" data-object-token data-remove tooltip="Rimuovi" flow="bottom">delete</button>

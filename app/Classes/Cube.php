@@ -175,7 +175,7 @@ class Cube
     $metrics_base_datamart = array();
     // dd($this->baseMetrics);
     foreach ($this->baseMetrics as $metricName => $metric) {
-      var_dump($metric);
+      // var_dump($metric);
       if ($metric->metric_type === 1 || $metric->metric_type === 3) {
         // metrica composta di base oppure metrica composta di base con filtri
         // per queste metriche la prop 'field' contiene la formula es.: DocVenditaDettaglio_560.PrzMedioPond * DocVenditaDettaglio_560.Quantita
@@ -186,7 +186,7 @@ class Cube
         $metrics_base[] = "\nNVL({$metric->aggregateFn}({$metric->tableAlias}.{$metric->field}), 0) AS '{$metric->alias}'";
       }
       // $metrics_base_datamart è utilizzato in createDatamart(), conterrà la tabella temporanea invece della tabella di origine
-      $metrics_base_datamart[] = "\nNVL({$metric->aggregateFn}({$this->baseTableName}.'{$metric->alias}'), 0) AS '{$metric->alias}'";
+      if ($metric->show_datamart === 'true') $metrics_base_datamart[] = "\nNVL({$metric->aggregateFn}({$this->baseTableName}.'{$metric->alias}'), 0) AS '{$metric->alias}'";
       // verifico se la metrica in ciclo è presente in una metrica composta
       if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($this->baseTableName, $metric);
     }
@@ -434,7 +434,7 @@ class Cube
       $sql .= "\n(SELECT{$this->_fieldsSQL}";
       $leftJoin = null;
 
-      if (property_exists($this, 'baseMetrics')) $sql .= ", $this->_metrics_base_datamart";
+      if (property_exists($this, 'baseMetrics') && $this->_metrics_base_datamart) $sql .= ", $this->_metrics_base_datamart";
       if (property_exists($this, 'filteredMetrics')) {
         $ONClause = array();
         $ONConditions = NULL;
