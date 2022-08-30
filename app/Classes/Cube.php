@@ -186,7 +186,8 @@ class Cube
         $metrics_base[] = "\nNVL({$metric->aggregateFn}({$metric->tableAlias}.{$metric->field}), 0) AS '{$metric->alias}'";
       }
       // $metrics_base_datamart è utilizzato in createDatamart(), conterrà la tabella temporanea invece della tabella di origine
-      if ($metric->show_datamart === 'true') $metrics_base_datamart[] = "\nNVL({$metric->aggregateFn}({$this->baseTableName}.'{$metric->alias}'), 0) AS '{$metric->alias}'";
+      // if ($metric->show_datamart === 'true') $metrics_base_datamart[] = "\nNVL({$metric->aggregateFn}({$this->baseTableName}.'{$metric->alias}'), 0) AS '{$metric->alias}'";
+      $metrics_base_datamart[] = "\nNVL({$metric->aggregateFn}({$this->baseTableName}.'{$metric->alias}'), 0) AS '{$metric->alias}'";
       // verifico se la metrica in ciclo è presente in una metrica composta
       if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($this->baseTableName, $metric);
     }

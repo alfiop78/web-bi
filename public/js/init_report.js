@@ -2427,8 +2427,8 @@ var StorageMetric = new MetricStorage();
           distinct: StorageMetric.selected.formula.distinct,
           alias: StorageMetric.selected.formula.alias,
           table: StorageMetric.selected.formula.table,
-          tableAlias: StorageMetric.selected.formula.tableAlias,
-          show_datamart: metricRef.dataset.showDatamart
+          tableAlias: StorageMetric.selected.formula.tableAlias/*,
+          show_datamart: metricRef.dataset.showDatamart*/
         };
     });
   }
@@ -2446,8 +2446,8 @@ var StorageMetric = new MetricStorage();
           aggregateFn: StorageMetric.selected.formula.aggregateFn,
           field: StorageMetric.selected.formula.field, // contiene la formula (es.: prezzo * quantita)
           distinct: StorageMetric.selected.formula.distinct,
-          alias: StorageMetric.selected.formula.alias,
-          show_datamart: metricRef.dataset.showDatamart
+          alias: StorageMetric.selected.formula.alias/*,
+          show_datamart: metricRef.dataset.showDatamart*/
         };
     });
   }
