@@ -5,6 +5,7 @@ var StorageCube = new CubeStorage();
 var StorageProcess = new ProcessStorage();
 var StorageFilter = new FilterStorage();
 var StorageMetric = new MetricStorage();
+var List = new Lists();
 (() => {
   App.init();
   const rand = () => Math.random(0).toString(36).substr(2);
@@ -123,194 +124,6 @@ var StorageMetric = new MetricStorage();
     }
   }
 
-  // carico elenco Cubi su cui creare il report
-  app.getCubes = () => {
-    const ul = document.getElementById('ul-cubes');
-    for (const [token, value] of StorageCube.cubes) {
-      const content = app.tmplList.content.cloneNode(true);
-      const section = content.querySelector('section[data-sublist-cube]');
-      const div = section.querySelector('div.selectable');
-      const span = section.querySelector('span');
-      const small = section.querySelector('small');
-      section.dataset.label = value.name;
-      section.dataset.cubeToken = token;
-      div.dataset.label = value.name;
-      div.dataset.cubeToken = token;
-      div.dataset.tableAlias = value.alias;
-      div.dataset.tableName = value.FACT;
-      div.dataset.schema = value.schema;
-      span.innerText = value.name;
-      small.innerText = value.FACT;
-      div.onclick = app.handlerCubeSelected;
-      ul.appendChild(section);
-    }
-  }
-
-  // lista dimensioni
-  app.getDimensions = () => {
-    const ul = document.getElementById('ul-dimensions');
-    for (const [token, cubeValue] of StorageCube.cubes) {
-      // console.log('key : ', cubeName);
-      // console.log('value : ', cubeValue); // tutto il contenuto del cubo
-      // console.log('dimensioni associate : ', cubeValue.associatedDimensions);
-      // per ogni dimensione presente in associatedDimensions inserisco un element (preso dal template app.tmplListField)
-      cubeValue.associatedDimensions.forEach(tokenDimension => {
-        // TODO: recupero le proprietà della dimensione dallo storage
-        StorageDimension.selected = tokenDimension;
-        const content = app.tmplList.content.cloneNode(true);
-        const section = content.querySelector('section[data-sublist-dimension]');
-        const div = section.querySelector('div.selectable');
-        const span = section.querySelector('span');
-        section.dataset.label = StorageDimension.selected.name;
-        section.dataset.dimensionToken = tokenDimension;
-        section.dataset.cubeToken = token;
-        div.dataset.dimensionToken = tokenDimension;
-        // section.dataset.dimensionName = dimension;
-        // div.dataset.dimensionName = dimension;
-        span.innerText = StorageDimension.selected.name;
-        div.onclick = app.handlerDimensionSelected;
-        ul.appendChild(section);
-      });
-    }
-  }
-
-  app.addHierarchiesStruct = (ulId) => {
-    const ul = document.getElementById(ulId);
-    // ottengo l'elenco delle gerarchie per ogni dimensione presente in storage, successivamente, quando la dimensione viene selezionata, visualizzo/nascondo solo quella selezionata
-    // console.log('lista dimensioni :', StorageDimension.dimensions);
-    // per ogni dimensione presente aggiungo gli elementi nella ul con le gerarchie
-    for (const [token, dimValue] of StorageDimension.dimensions) {
-      // per ogni dimensione presente in associatedDimensions inserisco un element (preso dal template app.tmplListField)
-      for (const [hierToken, hier] of (Object.entries(dimValue.hierarchies))) {
-        const contentElement = app.tmplList.content.cloneNode(true);
-        const section = contentElement.querySelector('section[data-sublist-hierarchies]');
-        const div = section.querySelector('div.unselectable');
-        const vContent = div.querySelector('.v-content');
-        const spanDimension = vContent.querySelector('span[data-dimension]');
-        const span = vContent.querySelector('span[item]');
-        section.dataset.relatedObject = 'dimension';
-        section.dataset.label = hier.name;
-        section.dataset.elementSearch = 'search-hierarchy';
-        section.dataset.dimensionToken = token;
-        div.dataset.label = hier.name;
-        div.dataset.dimensionToken = token;
-        div.dataset.hierToken = hierToken;
-        div.addEventListener('click', app.handlerHierarchySelected);
-        spanDimension.innerText = dimValue.name;
-        span.innerText = hier.name;
-        span.dataset.hierName = hier.name;
-        span.dataset.dimensionName = dimValue.name;
-
-        // lista tabelle presenti per ogni gerarchia
-        for (const [tableId, table] of Object.entries(hier.order)) {
-          // console.log(table.table);
-          const contentSub = app.tmplSublists.content.cloneNode(true);
-          const small = contentSub.querySelector('small');
-          small.dataset.schema = table.schema;
-          small.dataset.dimensionToken = token;
-          small.dataset.hierToken = hierToken;
-          small.dataset.searchable = true;
-          small.dataset.label = table.table;
-          small.dataset.tableAlias = table.alias;
-          small.dataset.tableId = tableId;
-          small.dataset.elementSearch = 'search-hierarchy';
-          small.innerText = table.table;
-          vContent.appendChild(small);
-        }
-        ul.appendChild(section);
-      }
-    }
-  }
-
-  // lista gerarchie
-  app.getHierarchies = () => {
-    app.addHierarchiesStruct('ul-hierarchies');
-    app.addHierarchiesStruct('ul-hierarchies-struct');
-  }
-
-  // lista di tutte le colonne, incluse nelle dimensioni, property 'columns'
-  app.getColumns = () => {
-    // per ogni dimensione, recupero la property 'columns'
-    // console.log('StorageDimension.selected : ', StorageDimension.dimensions);
-    for (const [dimToken, value] of StorageDimension.dimensions) {
-      // key : nome della dimensione
-      // value : tutte le property della dimensione
-      for (const [hierToken, hierValue] of Object.entries(value.hierarchies)) {
-        // per ogni gerarchia...
-        for (const [tableId, table] of Object.entries(hierValue.order)) {
-          // verifico se la tabella in ciclo ha delle colonne mappate
-          if (hierValue.columns.hasOwnProperty(table.alias)) {
-            for (const [token, field] of Object.entries(hierValue.columns[table.alias])) {
-              // console.log('field : ', field);
-              const content = app.tmplList.content.cloneNode(true);
-              const section = content.querySelector('section[data-sublist-columns]');
-              const spanHContent = section.querySelector('.h-content');
-              const selectable = spanHContent.querySelector('.selectable');
-              const span = selectable.querySelector('span[column]');
-              const smallTable = selectable.querySelector('small[table]');
-              const smallHier = selectable.querySelector('small:last-child');
-              const btnEdit = spanHContent.querySelector('button');
-              section.dataset.relatedObject = 'dimension';
-              section.dataset.label = field.ds.field;
-              section.dataset.elementSearch = 'search-columns';
-              section.dataset.dimensionToken = dimToken;
-              section.dataset.hierToken = hierToken;
-              selectable.dataset.label = field.ds.field;
-              selectable.dataset.tableName = table.table;
-              selectable.dataset.tableAlias = table.alias;
-              selectable.dataset.tableId = tableId;
-              selectable.dataset.dimensionToken = dimToken;
-              selectable.dataset.hierToken = hierToken;
-              selectable.dataset.tokenColumn = token;
-              selectable.onclick = app.handlerSelectColumn;
-              btnEdit.dataset.objectToken = token;
-              btnEdit.onclick = app.handlerColumnEdit; // TODO: da implementare
-              span.innerText = field.ds.field;
-              smallTable.innerText = table.table;
-              smallHier.innerText = hierValue.name;
-              app.ulColumns.appendChild(section);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // recupero le colonne agganciate alla fact, proprietà columns nel json, per aggiungerle nelle dialog-column
-  app.getColumnsFact = () => {
-    for (const [cubeToken, value] of StorageCube.cubes) {
-      if (value.columns.hasOwnProperty(value.alias)) {
-        for (const [token, field] of Object.entries(value.columns[value.alias])) {
-          // console.log('field : ', field);
-          const content = app.tmplList.content.cloneNode(true);
-          const section = content.querySelector('section[data-sublist-columns]');
-          const spanHContent = section.querySelector('.h-content');
-          const selectable = spanHContent.querySelector('.selectable');
-          const span = selectable.querySelector('span[column]');
-          const smallTable = selectable.querySelector('small[table]');
-          const smallCube = selectable.querySelector('small:last-child');
-          const btnEdit = spanHContent.querySelector('button');
-          section.dataset.relatedObject = 'cube';
-          section.dataset.label = field.ds.field;
-          section.dataset.elementSearch = 'search-columns';
-          section.dataset.cubeToken = cubeToken;
-          selectable.dataset.label = field.ds.field;
-          selectable.dataset.tableName = value.FACT;
-          selectable.dataset.tableAlias = value.alias;
-          selectable.dataset.tokenColumn = token;
-          selectable.dataset.cubeToken = cubeToken;
-          selectable.onclick = app.handlerSelectColumn;
-          btnEdit.dataset.objectToken = token;
-          btnEdit.onclick = app.handlerColumnEdit;
-          span.innerText = field.ds.field;
-          smallTable.innerText = value.FACT;
-          smallCube.innerText = value.name;
-          app.ulColumns.appendChild(section);
-        }
-      }
-    }
-  }
-
   // popolo la lista dei filtri esistenti
   app.getFilters = (ul_id, hiddenStatus, fn) => {
     for (const [token, filter] of StorageFilter.filters) {
@@ -415,7 +228,6 @@ var StorageMetric = new MetricStorage();
           section.dataset.hierToken = hierToken;
           section.dataset.label = table.table;
           section.dataset.tableName = table.table;
-          section.dataset.elementSearch = 'search-tables';
           div.dataset.dimensionToken = token;
           div.dataset.hierToken = hierToken;
           div.dataset.hierName = hierValue.name;
@@ -2125,15 +1937,17 @@ var StorageMetric = new MetricStorage();
   // selezione di uno o più valori dalla lista dei valori della colonna in dialogFilter
   app.handlerSelectValue = e => e.currentTarget.toggleAttribute('data-selected');
 
-  app.getCubes();
+  List.getCubes();
 
-  app.getDimensions();
+  List.getDimensions();
 
-  app.getHierarchies();
+  List.getHierarchies('ul-hierarchies');
 
-  app.getColumns();
+  List.getHierarchies('ul-hierarchies-struct');
 
-  app.getColumnsFact();
+  List.getColumns();
+
+  List.getFactColumns();
 
   app.getFilters('ul-filters', true, 'handlerFilterSelected');
 
@@ -2144,8 +1958,6 @@ var StorageMetric = new MetricStorage();
   app.getTables(); //  elenco tabelle nella dialogFilter
 
   app.getTablesInDialogFilter();
-
-  // app.getFactTable(); // lista delle FACT da visualizzare nello step-2
 
   app.getMetrics();
 
@@ -2954,6 +2766,9 @@ var StorageMetric = new MetricStorage();
       // l'elemento successivo alla input è la label
       (input.value.length !== 0) ? input.nextElementSibling.classList.add('has-content') : input.nextElementSibling.classList.remove('has-content');
     });
+
+    // selectable con attributo data-fn
+    document.querySelectorAll('ul .selectable[data-fn]').forEach(item => item.addEventListener('click', app[item.dataset.fn]));
   });
   // call `observe()` on that MutationObserver instance,
   // passing it the element to observe, and the options object
@@ -2964,6 +2779,8 @@ var StorageMetric = new MetricStorage();
   inputs.forEach(input => {
     observer.observe(input, { subtree: true, childList: true, attributes: true });
   });
+
+  document.querySelectorAll('ul .selectable[data-fn]').forEach(item => observer.observe(item, { subtree: true, childList: true, attributes: true }));
 
   // dialog event close
 

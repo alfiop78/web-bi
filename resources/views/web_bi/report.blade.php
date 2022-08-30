@@ -23,6 +23,7 @@
   <script src="/js/Application.js"></script>
   <script src="/js/lib.js"></script>
   <script src="/js/Storage.js"></script>
+  <script src="/js/Lists.js"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
   <title>Creazione Report</title>
 </head>
@@ -460,7 +461,7 @@
           <template id="templateList">
 
             {{-- lista column esistenti --}}
-            <section class="data-item" data-element-search data-label data-sublist-columns data-related-object hidden>
+            <section class="data-item" data-element-search="search-columns" data-label data-sublist-columns data-related-object hidden>
               <div>
                 <div class="h-content">
                   <div class="v-content selectable" data-object-type="column">
@@ -468,7 +469,7 @@
                     <small table></small>
                     <small hier></small>
                   </div>
-                  <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom" disabled>edit</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token data-edit tooltip="Modifica" flow="bottom" disabled>edit</button>
                 </div>
               </div>
             </section>
@@ -605,7 +606,7 @@
             </section>
 
             {{-- lista tabelle --}}
-            <section class="data-item" data-element-search data-label data-sublist-tables hidden>
+            <section class="data-item" data-element-search="search-tables" data-label data-sublist-tables hidden>
               <div class="selectable" data-label data-object-type="table">
                 <div class="h-content">
                   <div class="v-content">
@@ -628,7 +629,7 @@
             </section>
 
             <!-- lista gerarchie -->
-            <section class="data-item list" data-element-search data-label data-sublist-hierarchies data-related-object hidden>
+            <section class="data-item list" data-element-search="search-hierarchy" data-label data-sublist-hierarchies data-related-object="dimension" hidden>
               <div class="unselectable" data-label data-object-type>
                 <div class="h-content">
                   <div class="v-content">
