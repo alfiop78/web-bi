@@ -230,7 +230,7 @@
       <div class="stepLayout">
         <section class="sectionLists parent-ul-base">
           <div class="md-field">
-            <input type="search" id="dialog-metric-filter-search" data-element-search="search-exist-filters" value autocomplete="off" />
+            <input type="search" id="dialog-metric-filter-search" data-element-search="search-filters-for-metric" value autocomplete="off" />
             <label for="dialog-metric-filter-search" class="">Ricerca</label>
           </div>
           <div class="relative-ul">
@@ -491,21 +491,36 @@
                 </div>
               </div>
             </section>
+
             {{-- lista filtri esistenti --}}
-            <section class="data-item" data-element-search data-label data-related-object data-sublist-filters hidden>
+            <section class="data-item" data-element-search="search-filters" data-label data-related-object="dimension cube" data-sublist-filters hidden>
               <div>
                 <div class="h-content">
-                  <div class="selectable v-content filters-color" data-object-type="filter">
+                  <div class="selectable v-content filters-color" data-object-type="filter" data-fn="handlerFilterSelected">
                     <span filter class="highlight filters-color"></span>
                     <small table></small>
                     <small></small>
                   </div>
-                  <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Info" flow="bottom" disabled>info</button>
+                  <button class="button-icon material-icons-round md-18" data-info data-info-object-token tooltip="Info" flow="bottom" disabled>info</button>
                   <button class="button-icon material-icons-round md-18" data-object-token data-edit tooltip="Modifica" flow="bottom">edit</button>
                 </div>
               </div>
             </section>
 
+            {{-- lista filtri esistenti nella dialog metric --}}
+            <section class="data-item" data-element-search="search-filters-for-metric" data-label data-related-object="dimension cube" data-sublist-filters-metric hidden>
+              <div>
+                <div class="h-content">
+                  <div class="selectable v-content filters-color" data-object-type="filter" data-fn="handlerMetricFilterSelected">
+                    <span filter class="highlight filters-color"></span>
+                    <small table></small>
+                    <small></small>
+                  </div>
+                  <button class="button-icon material-icons-round md-18" data-info data-info-object-token tooltip="Info" flow="bottom" disabled>info</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token data-edit tooltip="Modifica" flow="bottom">edit</button>
+                </div>
+              </div>
+            </section>
             {{-- lista filtri definiti nel report --}}
             <section class="data-item-defined" data-element-search data-label data-related-object data-sublist-filters-defined>
               <div>
@@ -520,7 +535,7 @@
             </section>
 
             {{-- lista metriche esistenti --}}
-            <section class="data-item" data-element-search data-label data-related-object data-type="metric" data-sublist-metrics hidden>
+            <section class="data-item" data-element-search="search-metrics" data-label data-related-object data-type="metric" data-sublist-metrics hidden>
               <div>
                 <div class="h-content">
                   <div class="selectable v-content metrics-color" data-object-type="metric">
@@ -528,8 +543,8 @@
                     <small table></small>
                     <small cube></small>
                   </div>
-                  <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Dettaglio" flow="bottom">info</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom">edit</button>
+                  <button class="button-icon material-icons-round md-18" data-info-object-token data-info tooltip="Dettaglio" flow="bottom">info</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token data-edit tooltip="Modifica" flow="bottom">edit</button>
                 </div>
               </div>
             </section>
@@ -594,7 +609,7 @@
               </div>
             </section>
 
-            <section class="data-item" data-element-search data-label data-related-object data-sublist-available-metrics hidden>
+            <section class="data-item" data-element-search="search-available-metrics" data-label data-related-object data-sublist-available-metrics hidden>
               <div class="selectable" data-label data-object-type="metric">
                 <div class="h-content">
                   <div class="v-content">
@@ -618,7 +633,7 @@
             </section>
 
             {{-- lista generica --}}
-            <section class="data-item list" data-element-search data-label data-sublist-gen data-related-object hidden>
+            <section class="data-item list" data-element-search data-label data-sublist-gen data-related-object>
               <div class="selectable" data-label data-object-type>
                 <div class="h-content">
                   <div class="v-content">
