@@ -100,6 +100,25 @@ class Lists {
 
   get columns() { return this.#sublist; }
 
+  set definedColumns(sublist) {
+    this.content = this.tmplList.content.cloneNode(true);
+    this.section = this.content.querySelector('section[' + sublist + ']');
+    this.defined = this.section.querySelector('.defined');
+    this.span = this.section.querySelector('span[column]');
+    this.btnRemove = this.section.querySelector('button[data-remove]');
+    this.btnEdit = this.section.querySelector('button[data-edit]');
+
+    this.#sublist = {
+      section: this.section,
+      defined: this.defined,
+      span: this.span,
+      btnRemove: this.btnRemove,
+      btnEdit: this.btnEdit
+    }
+  }
+
+  get definedColumns() { return this.#sublist; }
+
   set metrics(sublist) {
     this.content = this.tmplList.content.cloneNode(true);
     this.section = this.content.querySelector('section[' + sublist + ']');
@@ -123,7 +142,28 @@ class Lists {
 
   get metrics() { return this.#sublist; }
 
-  set generic(sublist) {
+  set compositeMetrics(sublist) {
+    this.content = this.tmplList.content.cloneNode(true);
+    this.section = this.content.querySelector('section[' + sublist + ']');
+    this.selectable = this.section.querySelector('.selectable');
+    this.span = this.section.querySelector('span[metric]');
+    this.smalls = this.section.querySelector('.smalls');
+    this.btnInfo = this.section.querySelector('button[data-info]');
+    this.btnEdit = this.section.querySelector('button[data-edit]');
+
+    this.#sublist = {
+      section: this.section,
+      selectable: this.selectable,
+      span: this.span,
+      smalls: this.smalls,
+      btnEdit: this.btnEdit,
+      btnInfo: this.btnInfo
+    }
+  }
+
+  get compositeMetrics() { return this.#sublist; }
+
+  set fields(sublist) {
     this.content = this.tmplList.content.cloneNode(true);
     this.section = this.content.querySelector('section[' + sublist + ']');
     this.selectable = this.section.querySelector('.selectable');
@@ -136,7 +176,7 @@ class Lists {
     }
   }
 
-  get generic() { return this.#sublist; }
+  get fields() { return this.#sublist; }
 
   set reports(sublist) {
     this.content = this.tmplList.content.cloneNode(true);
@@ -177,6 +217,23 @@ class Lists {
 
   get filters() { return this.#sublist; }
 
+  set filtersDialogMetrics(sublist) {
+    this.content = this.tmplList.content.cloneNode(true);
+    this.section = this.content.querySelector('section[' + sublist + ']');
+    this.selectable = this.section.querySelector('.selectable');
+    this.span = this.section.querySelector('span[filter]');
+    this.info = this.section.querySelector('small:last-child');
+
+    this.#sublist = {
+      section: this.section,
+      selectable: this.selectable,
+      span: this.span,
+      info: this.info
+    }
+  }
+
+  get filtersDialogMetrics() { return this.#sublist; }
+
   set availableMetrics(sublist) {
     this.content = this.tmplList.content.cloneNode(true);
     this.section = this.content.querySelector('section[' + sublist + ']');
@@ -194,7 +251,7 @@ class Lists {
 
   get availableMetrics() { return this.#sublist; }
 
-  getCubes() {
+  initCubes() {
     this.ul = 'ul-cubes';
     for (const [token, value] of StorageCube.cubes) {
       // imposto il template per questa sublist
@@ -213,7 +270,7 @@ class Lists {
     }
   }
 
-  getDimensions() {
+  initDimensions() {
     this.ul = 'ul-dimensions';
     for (const [token, cube] of StorageCube.cubes) {
       // per ogni dimensione presente in associatedDimensions inserisco un element (preso dal template app.tmplListField)
@@ -225,13 +282,12 @@ class Lists {
         this.#sublist.section.dataset.cubeToken = token;
         this.#sublist.selectable.dataset.dimensionToken = tokenDimension;
         this.#sublist.span.innerText = StorageDimension.selected.name;
-        this.#sublist.selectable.dataset.fn = 'handlerDimensionSelected';
         this.ul.appendChild(this.#sublist.section);
       });
     }
   }
 
-  getHierarchies(ul) {
+  initHierarchies(ul) {
     this.ul = ul;
     // ottengo l'elenco delle gerarchie per ogni dimensione presente in storage, successivamente, quando la dimensione viene selezionata, visualizzo/nascondo solo quella selezionata
     // console.log('lista dimensioni :', StorageDimension.dimensions);
@@ -272,7 +328,7 @@ class Lists {
     }
   }
 
-  getTables() {
+  initTables() {
     // popolamento delle tabelle nella dialogFilter
     this.ul = 'ul-tables';
     for (const [token, value] of StorageDimension.dimensions) {
@@ -280,8 +336,6 @@ class Lists {
       // value : tutte le property della dimensione
       for (const [hierToken, hierValue] of Object.entries(value.hierarchies)) {
         for (const [tableId, table] of Object.entries(hierValue.order)) {
-          // console.log('tableId : ', tableId);
-          // console.log('table : ', table);
           this.tables = 'data-sublist-tables';
           this.#sublist.section.dataset.relatedObject = 'dimension';
           this.#sublist.section.dataset.dimensionToken = token;
@@ -295,7 +349,6 @@ class Lists {
           this.#sublist.selectable.dataset.tableAlias = table.alias;
           this.#sublist.selectable.dataset.schema = table.schema;
           this.#sublist.selectable.dataset.tableId = tableId;
-          this.#sublist.selectable.dataset.fn = 'handlerSelectTable';
           this.#sublist.span.innerText = table.table;
           this.#sublist.small.innerText = hierValue.name;
           this.ul.appendChild(this.#sublist.section);
@@ -304,10 +357,11 @@ class Lists {
     }
   }
 
-  getFactTables() {
+  initFactTables() {
     // popolamento delle tabelle nella dialogFilter
     this.ul = 'ul-tables';
     for (const [token, value] of StorageCube.cubes) {
+      this.tables = 'data-sublist-tables';
       this.#sublist.section.dataset.label = value.FACT;
       this.#sublist.section.dataset.cubeToken = token;
       this.#sublist.section.dataset.relatedObject = 'cube';
@@ -316,14 +370,13 @@ class Lists {
       this.#sublist.selectable.dataset.tableAlias = value.alias;
       this.#sublist.selectable.dataset.schema = value.schema;
       this.#sublist.selectable.dataset.cubeToken = token;
-      this.#sublist.selectable.dataset.fn = 'handlerSelectTable';
       this.#sublist.span.innerText = value.FACT;
       this.#sublist.small.innerText = value.name;
       this.ul.appendChild(this.#sublist.section);
     }
   }
 
-  getColumns() {
+  initColumns() {
     this.ul = 'ul-columns';
     // per ogni dimensione, recupero la property 'columns'
     // console.log('StorageDimension.selected : ', StorageDimension.dimensions);
@@ -349,9 +402,7 @@ class Lists {
               this.#sublist.selectable.dataset.dimensionToken = dimToken;
               this.#sublist.selectable.dataset.hierToken = hierToken;
               this.#sublist.selectable.dataset.tokenColumn = token;
-              this.#sublist.selectable.dataset.fn = 'handlerSelectColumn';
               this.#sublist.btnEdit.dataset.objectToken = token;
-              this.#sublist.btnEdit.dataset.fn = 'handlerColumnEdit'; // TODO: da implementare
               this.#sublist.span.innerText = field.ds.field;
               this.#sublist.table.innerText = table.table;
               this.#sublist.info.innerText = hierValue.name;
@@ -363,7 +414,7 @@ class Lists {
     }
   }
 
-  getFactColumns() {
+  initFactColumns() {
     this.ul = 'ul-columns';
     for (const [cubeToken, value] of StorageCube.cubes) {
       if (value.columns.hasOwnProperty(value.alias)) {
@@ -377,9 +428,7 @@ class Lists {
           this.#sublist.selectable.dataset.tableAlias = value.alias;
           this.#sublist.selectable.dataset.tokenColumn = token;
           this.#sublist.selectable.dataset.cubeToken = cubeToken;
-          this.#sublist.selectable.dataset.fn = 'handlerSelectColumn';
           this.#sublist.btnEdit.dataset.objectToken = token;
-          this.#sublist.btnEdit.dataset.fn = 'handlerColumnEdit';
           this.#sublist.span.innerText = field.ds.field;
           this.#sublist.table.innerText = value.FACT;
           this.#sublist.info.innerText = value.name;
@@ -390,7 +439,7 @@ class Lists {
   }
 
   // lista metriche esistenti
-  getMetrics() {
+  initMetrics() {
     this.ul = 'ul-metrics';
     /* NOTE: logica delle metriche
     0 : metrica di base
@@ -418,10 +467,8 @@ class Lists {
         this.#sublist.selectable.dataset.metricToken = metric.token;
         this.#sublist.selectable.dataset.metricType = metric.metric_type;
         // div.dataset.label = metric.name;
-        this.#sublist.selectable.dataset.fn = 'handlerMetricSelected';
         (metric.metric_type === 2) ? this.#sublist.btnInfo.dataset.infoObjectToken = metric.token : this.#sublist.btnInfo.hidden = 'true';
         this.#sublist.btnEdit.dataset.objectToken = metric.token;
-        this.#sublist.btnEdit.dataset.fn = 'handlerMetricEdit'; // TODO: implementare
         this.#sublist.span.innerText = metric.name;
         this.#sublist.table.innerText = value.FACT;
         this.#sublist.cube.innerText = value.name;
@@ -446,30 +493,69 @@ class Lists {
     this.#sublist.span.innerText = StorageMetric.selected.name;
     (StorageMetric.selected.metric_type === 2) ? this.#sublist.btnInfo.dataset.infoObjectToken = StorageMetric.selected.token : this.#sublist.btnInfo.hidden = 'true';
     this.#sublist.btnEdit.dataset.objectToken = StorageMetric.selected.token;
-    this.#sublist.btnEdit.dataset.fn = 'handlerMetricEdit';
+    // this.#sublist.btnEdit.dataset.fn = 'handlerMetricEdit';
     if (StorageMetric.selected.metric_type === 0 || StorageMetric.selected.metric_type === 2) this.#sublist.table.innerText = Query.table;
     this.#sublist.cube.innerText = StorageCube.selected.name;
-    this.#sublist.selectable.dataset.fn = 'handlerMetricSelected';
+    // this.#sublist.selectable.dataset.fn = 'handlerMetricSelected';
     this.ul.appendChild(this.#sublist.section);
   }
 
-  addField(value) {
-    this.ul = 'dialog-filter-fields';
-    this.generic = 'data-sublist-gen';
-    this.#sublist.section.dataset.label = value.COLUMN_NAME;
-    this.#sublist.section.dataset.elementSearch = 'dialog-filter-search-field';
-    this.#sublist.selectable.dataset.schema = Query.schema;
-    let pos = value.DATA_TYPE.indexOf('('); // datatype
-    const type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-    this.#sublist.selectable.dataset.type = type;
-    this.#sublist.selectable.dataset.label = value.COLUMN_NAME;
-    this.#sublist.selectable.dataset.tableName = Query.table;
-    this.#sublist.span.innerText = value.COLUMN_NAME;
+  addCompositeMetric() {
+    this.ul = 'ul-composite-metrics';
+    this.compositeMetrics = 'data-sublist-composite-metrics';
+    this.#sublist.section.dataset.metricToken = StorageMetric.selected.token;
+    this.#sublist.section.dataset.label = StorageMetric.selected.name;
+    this.#sublist.selectable.dataset.metricToken = StorageMetric.selected.token;
+    this.#sublist.selectable.dataset.metricType = StorageMetric.selected.metric_type;
+    this.#sublist.span.innerText = StorageMetric.selected.name;
+    this.#sublist.btnEdit.dataset.objectToken = StorageMetric.selected.token;
+    // per ogni cubo in StorageMetric.selected.metric_cubes
+    for (const [cubeToken, cube] of Object.entries(StorageMetric.selected.cubes)) {
+      const contentSub = this.tmplSublists.content.cloneNode(true);
+      const small = contentSub.querySelector('small');
+      small.dataset.cubeToken = cubeToken;
+      // small.dataset.metricToken = StorageMetric.selected.token;
+      // small.dataset.searchable = true;
+      // small.dataset.tableAlias = table.alias;
+      // small.dataset.tableId = tableId;
+      // small.dataset.elementSearch = 'search-hierarchy';
+      small.innerText = cube;
+      small.dataset.attr = cube + 'test';
+      this.#sublist.smalls.appendChild(small);
+    }
     this.ul.appendChild(this.#sublist.section);
+  }
+
+  initCompositeMetrics() {
+    // TODO: 2022-05-27 in futuro ci sarà da valutare metriche composte appartenenti a più cubi
+    StorageMetric.compositeMetrics.forEach(metric => {
+      StorageMetric.selected = metric.token;
+      // aggiungo la metrica alla #ul-composite-metrics
+      this.addCompositeMetric(); // questa function viene usata anche quando si crea una nuova metrica composta
+    });
+  }
+
+  // aggiunta colonne della tabella selezionata nella dialog-filter
+  addFields(response) {
+    this.ul = 'ul-fields';
+    for (const [key, value] of Object.entries(response)) {
+      // List.addField(value);
+      // List.generic.selectable.onclick = app.handlerSelectField;
+      this.fields = 'data-sublist-fields';
+      this.#sublist.section.dataset.label = value.COLUMN_NAME;
+      this.#sublist.selectable.dataset.schema = Query.schema;
+      let pos = value.DATA_TYPE.indexOf('('); // datatype
+      const type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
+      this.#sublist.selectable.dataset.type = type;
+      this.#sublist.selectable.dataset.label = value.COLUMN_NAME;
+      this.#sublist.selectable.dataset.tableName = Query.table;
+      this.#sublist.span.innerText = value.COLUMN_NAME;
+      this.ul.appendChild(this.#sublist.section);
+    }
   }
 
   // lista delle metriche disponibili nei cubi
-  getAvailableMetrics() {
+  initAvailableMetrics() {
     this.ul = 'ul-available-metrics';
     for (const [token, value] of StorageCube.cubes) {
       // per ogni metrica
@@ -485,7 +571,7 @@ class Lists {
         this.#sublist.selectable.dataset.label = name;
         this.#sublist.selectable.dataset.cubeToken = token;
         this.#sublist.selectable.dataset.metricType = metric.metric_type;
-        this.#sublist.selectable.dataset.fn = 'handlerMetricAvailable';
+        // this.#sublist.selectable.dataset.fn = 'handlerMetricAvailable';
         this.#sublist.span.innerText = name;
         this.#sublist.small.innerText = value.FACT;
         this.ul.appendChild(this.#sublist.section);
@@ -505,9 +591,6 @@ class Lists {
     this.#sublist.btnCopy.dataset.processToken = token;
     this.#sublist.btnSchedule.dataset.id = value.report.processId;
     this.#sublist.btnSchedule.dataset.processToken = token;
-    this.#sublist.btnEdit.dataset.fn = 'handlerReportEdit';
-    this.#sublist.btnCopy.dataset.fn = 'handlerReportCopy';
-    this.#sublist.btnSchedule.dataset.fn = 'handlerReportSelected';
     this.ul.appendChild(this.#sublist.section);
   }
 
@@ -525,10 +608,7 @@ class Lists {
     }
     this.#sublist.selectable.dataset.filterToken = StorageFilter.selected.token;
     this.#sublist.span.innerText = StorageFilter.selected.name;
-    // smallTable.innerText = table.table;
     this.#sublist.info.setAttribute('hier', 'true'); // TODO: dataset
-    this.#sublist.btnEdit.dataset.objectToken = StorageFilter.selected.token;
-    this.ul.appendChild(this.#sublist.section);
   }
 
   addFilter(hidden) {
@@ -536,14 +616,63 @@ class Lists {
     this.filters = 'data-sublist-filters';
     // gli eventi sulla .selectable sono definiti nel template HTML
     this.addFilterProperty(hidden);
+    this.#sublist.btnEdit.dataset.objectToken = StorageFilter.selected.token;
+    this.ul.appendChild(this.#sublist.section);
   }
 
   // aggiunta filtri nella dialog metric (metriche avanzate)
   addMetricFilter(hidden) {
     this.ul = 'ul-metric-filters';
-    this.filters = 'data-sublist-filters-metric';
+    this.filtersDialogMetrics = 'data-sublist-filters-metric';
     // gli eventi sulla .selectable sono definiti nel template HTML
     this.addFilterProperty(hidden);
+    // questa sublist non contiene il tasto btnEdit
+    this.ul.appendChild(this.#sublist.section);
+  }
+
+  // creo la lista degli elementi da processare
+  initReports() {
+    for (const [token, value] of StorageProcess.processes) {
+      // utilizzo addReport() perchè questa funzione viene chiamata anche quando si duplica il report o si crea un nuovo report e viene aggiunto all'elenco
+      this.addReport(token, value);
+    }
+  }
+
+  // caricamento iniziale della ul-filters
+  initFilters() {
+    for (const [token, filter] of StorageFilter.filters) {
+      StorageFilter.selected = token;
+      this.addFilter(true);
+      // caricamento iniziale della ul-metric-filters
+      this.addMetricFilter(true);
+    }
+  }
+
+  // aggiungo la colonna al report
+  addDefinedColumn(alias, token) {
+    this.ul = 'ul-defined-columns';
+    this.definedColumns = 'data-sublist-columns-defined';
+    this.#sublist.section.dataset.label = alias;
+    this.#sublist.section.dataset.tokenColumn = token;
+    this.#sublist.span.innerText = alias;
+    this.#sublist.btnRemove.dataset.objectToken = token;
+    this.ul.appendChild(this.#sublist.section);
+  }
+
+  init() {
+    this.initCubes();
+    this.initDimensions();
+    this.initHierarchies('ul-hierarchies');
+    this.initHierarchies('ul-hierarchies-struct');
+    this.initTables();
+    this.initFactTables();
+    this.initColumns();
+    this.initFactColumns();
+    this.initFilters();
+    this.initMetrics();
+    this.initCompositeMetrics();
+    this.initAvailableMetrics();
+    this.initReports();
   }
 
   /* QUESTE FN LE SPOSTERO' IN UN ALTRO FILE "asyncReq*/

@@ -196,7 +196,7 @@
             <label for="dialog-filter-search-field" class="">Ricerca</label>
           </div>
           <div class="relative-ul">
-            <ul id="dialog-filter-fields" class="absolute"></ul>
+            <ul id="ul-fields" class="absolute"></ul>
           </div>
         </section>
 
@@ -464,18 +464,18 @@
             <section class="data-item" data-element-search="search-columns" data-label data-sublist-columns data-related-object hidden>
               <div>
                 <div class="h-content">
-                  <div class="v-content selectable" data-object-type="column">
+                  <div class="v-content selectable" data-object-type="column" data-fn="handlerSelectColumn">
                     <span column class="highlight"></span>
                     <small table></small>
                     <small hier></small>
                   </div>
-                  <button class="button-icon material-icons-round md-18" data-object-token data-edit tooltip="Modifica" flow="bottom" disabled>edit</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token data-edit data-fn="handlerColumnEdit" tooltip="Modifica" flow="bottom" disabled>edit</button>
                 </div>
               </div>
             </section>
 
             {{-- lista column definite --}}
-            <section class="data-item-defined" data-element-search data-label data-sublist-columns-defined data-related-object>
+            <section class="data-item-defined" data-element-search="search-defined-columns" data-label data-sublist-columns-defined data-related-object>
               {{-- TODO: implementare il drag&drop per l'ordinamento delle colonne nel datamart finale --}}
               <div>
                 <div class="h-content">
@@ -487,7 +487,7 @@
                     <!-- <small hier></small> -->
                   </div>
                   <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom">edit</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token data-remove tooltip="Rimuovi" flow="bottom">delete</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token data-remove data-fn="handlerColumnRemove" tooltip="Rimuovi" flow="bottom">delete</button>
                 </div>
               </div>
             </section>
@@ -502,7 +502,7 @@
                     <small></small>
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info data-info-object-token tooltip="Info" flow="bottom" disabled>info</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token data-edit tooltip="Modifica" flow="bottom">edit</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token data-edit data-fn="handlerFilterEdit" tooltip="Modifica" flow="bottom">edit</button>
                 </div>
               </div>
             </section>
@@ -516,8 +516,6 @@
                     <small table></small>
                     <small></small>
                   </div>
-                  <button class="button-icon material-icons-round md-18" data-info data-info-object-token tooltip="Info" flow="bottom" disabled>info</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token data-edit tooltip="Modifica" flow="bottom">edit</button>
                 </div>
               </div>
             </section>
@@ -538,13 +536,13 @@
             <section class="data-item" data-element-search="search-metrics" data-label data-related-object data-type="metric" data-sublist-metrics hidden>
               <div>
                 <div class="h-content">
-                  <div class="selectable v-content metrics-color" data-object-type="metric">
+                  <div class="selectable v-content metrics-color" data-object-type="metric" data-fn="handlerMetricSelected">
                     <span metric class="highlight metrics-color"></span>
                     <small table></small>
                     <small cube></small>
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info-object-token data-info tooltip="Dettaglio" flow="bottom">info</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token data-edit tooltip="Modifica" flow="bottom">edit</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token data-edit tooltip="Modifica" data-fn="handlerMetricEdit" flow="bottom">edit</button>
                 </div>
               </div>
             </section>
@@ -564,16 +562,15 @@
             </section>
 
             {{-- metriche composite --}}
-            <section class="data-item" data-element-search data-label data-sublist-composite-metrics hidden>
+            <section class="data-item" data-element-search="search-composite-metrics" data-related-object="cube" data-label data-sublist-composite-metrics>
               <div>
                 <div class="h-content">
-                  <div class="selectable v-content composite-metrics-color" data-object-type="composite-metric">
+                  <div class="selectable v-content composite-metrics-color" data-fn="handlerMetricSelected" data-object-type="composite-metric">
                     <span metric class="highlight"></span>
-                    {{-- TODO: per le metriche composte, visualizzarne, nel popup, l'elenco dei cubi utilizzati dalle metriche all'interno della formula --}}
                     <div class="smalls"></div>
                   </div>
-                  <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Dettaglio" flow="bottom" disabled>info</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom">edit</button>
+                  <button class="button-icon material-icons-round md-18" data-info data-info-object-token tooltip="Dettaglio" flow="bottom" disabled>info</button>
+                  <button class="button-icon material-icons-round md-18" data-edit data-object-token tooltip="Modifica" data-fn="handlerCompositeMetricEdit" flow="bottom">edit</button>
                 </div>
               </div>
             </section>
@@ -601,16 +598,15 @@
                   <div class="v-content">
                     <span data-process></span>
                   </div>
-                  <button type="button" data-edit class="button-icon material-icons md-18" tooltip="Modifica" flow="bottom">edit</button>
-                  <button type="button" data-copy class="button-icon material-icons md-18" tooltip="Duplica" flow="bottom">content_copy</button>
-                  {{-- <span class="h-separator"></span> --}}
-                  <button type="button" data-schedule class="button-icon material-icons md-18 md-highlight" tooltip="Esegui" flow="bottom">schedule_send</button>
+                  <button type="button" data-edit data-fn="handlerReportEdit" class="button-icon material-icons md-18" tooltip="Modifica" flow="bottom">edit</button>
+                  <button type="button" data-copy data-fn="handlerReportCopy" class="button-icon material-icons md-18" tooltip="Duplica" flow="bottom">content_copy</button>
+                  <button type="button" data-schedule data-fn="handlerReportSelected" class="button-icon material-icons md-18 md-highlight" tooltip="Esegui" flow="bottom">schedule_send</button>
                 </div>
               </div>
             </section>
 
             <section class="data-item" data-element-search="search-available-metrics" data-label data-related-object data-sublist-available-metrics hidden>
-              <div class="selectable" data-label data-object-type="metric">
+              <div class="selectable" data-label data-object-type="metric" data-fn="handlerMetricAvailable">
                 <div class="h-content">
                   <div class="v-content">
                     <span metric class="highlight"></span>
@@ -622,7 +618,7 @@
 
             {{-- lista tabelle --}}
             <section class="data-item" data-element-search="search-tables" data-label data-sublist-tables hidden>
-              <div class="selectable" data-label data-object-type="table">
+              <div class="selectable" data-label data-object-type="table" data-fn="handlerSelectTable">
                 <div class="h-content">
                   <div class="v-content">
                     <span table class="highlight"></span>
@@ -632,9 +628,9 @@
               </div>
             </section>
 
-            {{-- lista generica --}}
-            <section class="data-item list" data-element-search data-label data-sublist-gen data-related-object>
-              <div class="selectable" data-label data-object-type>
+            {{-- lista Fields nella dialog filter --}}
+            <section class="data-item list" data-element-search="search-fields" data-label data-sublist-fields data-related-object>
+              <div class="selectable" data-label data-object-type data-fn="handlerSelectField">
                 <div class="h-content">
                   <div class="v-content">
                     <span item></span>
@@ -657,7 +653,7 @@
 
             {{-- cube --}}
             <section class="data-item list" data-element-search="search-cube" data-label data-sublist-cube data-searchable="true">
-              <div class="selectable" data-label data-object-type="cube">
+              <div class="selectable" data-label data-object-type="cube" data-fn="handlerCubeSelected">
                 <div class="h-content">
                   <div class="v-content">
                     <span item></span>
@@ -669,7 +665,7 @@
 
             {{-- dimension --}}
             <section class="data-item list" data-element-search="search-dimension" data-label data-related-object="cube" data-sublist-dimension hidden>
-              <div class="selectable" data-label data-object-type="dimension">
+              <div class="selectable" data-label data-object-type="dimension" data-fn="handlerDimensionSelected">
                 <div class="h-content">
                   <div class="v-content">
                     <span item></span>
