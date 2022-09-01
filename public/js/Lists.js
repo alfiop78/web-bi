@@ -153,6 +153,22 @@ class Lists {
 
   get definedMetrics() { return this.#sublist; }
 
+  set definedCompositeMetrics(sublist) {
+    this.content = this.tmplList.content.cloneNode(true);
+    this.section = this.content.querySelector('section[' + sublist + ']');
+    this.defined = this.section.querySelector('.defined');
+    this.span = this.section.querySelector('span[metric]');
+    this.btnRemove = this.section.querySelector('button[data-remove]');
+
+    this.#sublist = {
+      section: this.section,
+      defined: this.defined,
+      span: this.span,
+      btnRemove: this.btnRemove
+    }
+  }
+
+  get definedCompositeMetrics() { return this.#sublist; }
 
   set metrics(sublist) {
     this.content = this.tmplList.content.cloneNode(true);
@@ -231,6 +247,22 @@ class Lists {
   }
 
   get fields() { return this.#sublist; }
+
+
+  set values(sublist) {
+    this.content = this.tmplList.content.cloneNode(true);
+    this.section = this.content.querySelector('section[' + sublist + ']');
+    this.selectable = this.section.querySelector('.selectable');
+    this.span = this.section.querySelector('span');
+
+    this.#sublist = {
+      section: this.section,
+      selectable: this.selectable,
+      span: this.span
+    }
+  }
+
+  get values() { return this.#sublist; }
 
   set reports(sublist) {
     this.content = this.tmplList.content.cloneNode(true);
@@ -763,6 +795,8 @@ class Lists {
 
   // aggiungo la metrica selezionata al report
   addDefinedMetric() {
+    // token riguarda una metrica composta, se presente, sto aggiungendo una metrica di base al report perchè
+    //.. è presente in una formula della composta
     this.ul = 'ul-defined-metrics';
     this.definedMetrics = 'data-sublist-metrics-defined';
     this.#sublist.section.dataset.label = StorageMetric.selected.name;
@@ -772,6 +806,39 @@ class Lists {
     this.#sublist.btnRemove.dataset.objectToken = StorageMetric.selected.token;
     this.#sublist.btnRemove.dataset.metricType = StorageMetric.selected.metric_type;
     this.ul.appendChild(this.#sublist.section);
+  }
+
+  addDefinedCompositeMetric(tokenCompositeMetric) {
+    this.ul = 'ul-defined-composite-metrics';
+    this.definedCompositeMetrics = 'data-sublist-composite-metrics-defined';
+    this.#sublist.section.dataset.label = StorageMetric.selected.name;
+    this.#sublist.section.dataset.metricToken = StorageMetric.selected.token;
+    this.#sublist.defined.dataset.metricToken = StorageMetric.selected.token;
+    this.#sublist.span.innerText = StorageMetric.selected.name;
+    this.#sublist.btnRemove.dataset.objectToken = StorageMetric.selected.token;
+    // TODO: da testare. Inserire una metrica composta all'interno di un'altra metrica composta
+    if (tokenCompositeMetric) {
+      StorageMetric.selected = tokenCompositeMetric;
+      this.#sublist.section.dataset.compositeMetrics = StorageMetric.selected.token;
+      small.innerText = StorageMetric.selected.name;
+      this.#sublist.btnRemove.disable = true;
+    }
+    this.ul.appendChild(this.#sublist.section);
+  }
+
+  addDistinctValues(data) {
+    this.ul = 'ul-filter-values';
+    for (const [key, value] of Object.entries(data)) {
+      this.fields = 'data-sublist-values';
+      this.#sublist.section.dataset.label = value[Query.field];
+      this.#sublist.section.dataset.elementSearch = 'dialog-value-search';
+      this.#sublist.section.dataset.searchable = true;
+      this.#sublist.selectable.dataset.label = value[Query.field];
+      this.#sublist.span.innerText = value[Query.field];
+      this.#sublist.span.id = key;
+      // this.#sublist.onclick = app.handlerSelectValue;
+      this.ul.appendChild(this.#sublist.section);
+    }
   }
 
   init() {
@@ -790,7 +857,6 @@ class Lists {
     this.initReports();
   }
 
-  /* QUESTE FN LE SPOSTERO' IN UN ALTRO FILE "asyncReq*/
   // carico elenco colonne dal DB da visualizzare nella dialogFilter
   async getFields() {
     return await fetch('/fetch_api/' + Query.schema + '/schema/' + Query.table + '/table_info')
@@ -800,6 +866,21 @@ class Lists {
       })
       .then((response) => response.json())
       .then(response => response)
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+  }
+
+  // recupero valori distinti per inserimento nella dialogFilter
+  async getDistinctValues() {
+    await fetch('fetch_api/schema/' + Query.schema + '/table/' + Query.table + '/field/' + Query.field + '/distinct_values')
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(data => (data) ? this.addDistinctValues(data) : console.warning('Dati non recuperati'))
       .catch(err => {
         App.showConsole(err, 'error');
         console.error(err);

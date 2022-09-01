@@ -456,6 +456,7 @@
               <button type="button" id="save" class="button-icon material-icons-round md-24" tooltip="Salva" flow="bottom" disabled>save</button>
               <button type="button" id="sql_process" class="button-icon material-icons-round md-24" tooltip="Visualizza SQL" flow="bottom" disabled>info</button>
             </div>
+            <div class="info"><span id="info"></span></div>
           </div>
 
           <template id="templateList">
@@ -589,7 +590,7 @@
             </section>
 
             {{-- metriche composite definite --}}
-            <section class="data-item-defined" data-element-search data-label data-sublist-composite-metrics-defined>
+            <section class="data-item-defined" data-element-search="search-defined-composite-metrics" data-label data-sublist-composite-metrics-defined>
               <div>
                 <div class="h-content">
                   <button class="button-icon material-icons-round md-18 composite-metrics-color md-opacity" data-info-object-token>drag_handle</button>
@@ -599,7 +600,7 @@
                     <div class="smalls"></div>
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Dettaglio" flow="bottom" disabled>info</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token data-remove tooltip="Rimuovi" flow="bottom">delete</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token data-remove tooltip="Rimuovi" data-fn="handlerCompositeMetricRemove" flow="bottom">delete</button>
                 </div>
               </div>
             </section>
@@ -644,6 +645,17 @@
             {{-- lista Fields nella dialog filter --}}
             <section class="data-item list" data-element-search="search-fields" data-label data-sublist-fields data-related-object>
               <div class="selectable" data-label data-object-type data-fn="handlerSelectField">
+                <div class="h-content">
+                  <div class="v-content">
+                    <span item></span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {{-- lista valori distincti nella dialog filter --}}
+            <section class="data-item list" data-element-search="search-fields" data-label data-sublist-values data-related-object>
+              <div class="selectable" data-label data-object-type data-fn="handlerSelectValue">
                 <div class="h-content">
                   <div class="v-content">
                     <span item></span>

@@ -182,8 +182,10 @@ tr.tr-right{display: flex;justify-content: flex-end;}
 /*tfoot*/
 
 /*actions*/
-.actions{display: flex; flex-flow: row; justify-content: space-between; margin: 0px 0px 8px; padding: 4px 32px 4px; box-shadow: 0px 1px 3px -1px grey; border-radius: 4px; background-color: white;}
+.actions{display: grid; grid-template-columns: 45% 55%; margin: 0px 0px 8px; padding: 4px 32px 4px; box-shadow: 0px 1px 3px -1px grey; border-radius: 4px; background-color: white;}
 .actions > .buttons{display: flex;flex-flow: row;}
+.actions > .info{display: flex; justify-content: flex-end;}
+.info > #info[data-edit]{background-color: sienna; padding: 0px 4px; color:white;border-radius: 4px;display: flex; align-items: center;}
 
 .upper{text-transform: uppercase;}
 

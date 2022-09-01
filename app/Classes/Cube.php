@@ -332,6 +332,7 @@ class Cube
       $tableName = "WEB_BI_TMP_METRIC_{$this->reportId}_{$groupToken}";
       foreach ($m as $metric) {
         unset($this->_sql);
+        var_dump($metric);
         if ($metric->metric_type === 3) {
           // metrica composta a livello cubo filtrata (es. : prezzo * quantita impostato sul cubo con filtro)
           $arrayMetrics[$metric->alias] = "NVL({$metric->aggregateFn}({$metric->field}), 0) AS '{$metric->alias}'";
