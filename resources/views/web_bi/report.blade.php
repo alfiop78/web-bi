@@ -520,14 +520,14 @@
               </div>
             </section>
             {{-- lista filtri definiti nel report --}}
-            <section class="data-item-defined" data-element-search data-label data-related-object data-sublist-filters-defined>
+            <section class="data-item-defined" data-element-search="search-defined-filters" data-label data-related-object="dimension cube" data-sublist-filters-defined>
               <div>
                 <div class="h-content">
                   <div class="defined v-content filters-color" data-object-type="filter">
                     <span filter class="highlight filters-color"></span>
                   </div>
-                  <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Info" flow="bottom" disabled>info</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token data-remove tooltip="Rimuovi" flow="bottom">delete</button>
+                  <button class="button-icon material-icons-round md-18" data-info data-info-object-token tooltip="Info" flow="bottom" disabled>info</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token data-remove data-fn="handlerFilterRemove" tooltip="Rimuovi" flow="bottom">delete</button>
                 </div>
               </div>
             </section>
@@ -547,16 +547,29 @@
               </div>
             </section>
 
-            {{-- lista metriche definite --}}
-            <section class="data-item-defined" data-element-search data-label data-related-object data-type="metric" data-sublist-metrics-defined>
+            {{-- lista metriche esistenti da visualizzare nella dialog-composite-metric --}}
+            <section class="data-item" data-element-search="search-all-metrics" data-label data-related-object data-type="metric" data-searchable="true" data-sublist-all-metrics>
               <div>
                 <div class="h-content">
-                  <button class="button-icon material-icons-round md-18 metrics-color md-opacity" data-info-object-token>drag_handle</button>
+                  <div class="selectable v-content metrics-color" data-object-type="metric" data-fn="handlerMetricSelectedComposite">
+                    <span metric class="highlight metrics-color"></span>
+                    <small table></small>
+                    <small cube></small>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {{-- lista metriche definite --}}
+            <section class="data-item-defined" data-element-search="search-defined-metrics" data-label data-related-object="dimension cube" data-type="metric" data-sublist-metrics-defined>
+              <div>
+                <div class="h-content">
+                  <button class="button-icon material-icons-round md-18 metrics-color md-opacity">drag_handle</button>
                   <div class="defined v-content metrics-color" data-object-type="metric">
                     <span metric class="highlight metrics-color"></span>
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Dettaglio" flow="bottom">info</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token data-remove tooltip="Rimuovi" flow="bottom">delete</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token data-remove data-fn="handlerMetricRemove" tooltip="Rimuovi" flow="bottom">delete</button>
                 </div>
               </div>
             </section>

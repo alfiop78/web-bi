@@ -119,6 +119,41 @@ class Lists {
 
   get definedColumns() { return this.#sublist; }
 
+  set definedFilters(sublist) {
+    this.content = this.tmplList.content.cloneNode(true);
+    this.section = this.content.querySelector('section[' + sublist + ']');
+    this.defined = this.section.querySelector('.defined');
+    this.span = this.section.querySelector('span[filter]');
+    this.btnRemove = this.section.querySelector('button[data-remove]');
+
+    this.#sublist = {
+      section: this.section,
+      defined: this.defined,
+      span: this.span,
+      btnRemove: this.btnRemove
+    }
+  }
+
+  get definedFilters() { return this.#sublist; }
+
+  set definedMetrics(sublist) {
+    this.content = this.tmplList.content.cloneNode(true);
+    this.section = this.content.querySelector('section[' + sublist + ']');
+    this.defined = this.section.querySelector('.defined');
+    this.span = this.section.querySelector('span[metric]');
+    this.btnRemove = this.section.querySelector('button[data-remove]');
+
+    this.#sublist = {
+      section: this.section,
+      defined: this.defined,
+      span: this.span,
+      btnRemove: this.btnRemove
+    }
+  }
+
+  get definedMetrics() { return this.#sublist; }
+
+
   set metrics(sublist) {
     this.content = this.tmplList.content.cloneNode(true);
     this.section = this.content.querySelector('section[' + sublist + ']');
@@ -141,6 +176,25 @@ class Lists {
   }
 
   get metrics() { return this.#sublist; }
+
+  set allMetrics(sublist) {
+    this.content = this.tmplList.content.cloneNode(true);
+    this.section = this.content.querySelector('section[' + sublist + ']');
+    this.selectable = this.section.querySelector('.selectable');
+    this.span = this.section.querySelector('span[metric]');
+    this.table = this.section.querySelector('small[table]');
+    this.cube = this.section.querySelector('small[cube]');
+
+    this.#sublist = {
+      section: this.section,
+      selectable: this.selectable,
+      span: this.span,
+      table: this.table,
+      cube: this.cube
+    }
+  }
+
+  get allMetrics() { return this.#sublist; }
 
   set compositeMetrics(sublist) {
     this.content = this.tmplList.content.cloneNode(true);
@@ -526,6 +580,36 @@ class Lists {
     this.ul.appendChild(this.#sublist.section);
   }
 
+  // apertura dialog-composite-metric, popolo elenco di tutte le metriche presenti
+  addAllMetrics() {
+    this.ul = 'ul-all-metrics';
+    // per ogni cubo selezionato ne recupero le metriche ad esso appartenenti
+    Query.cubes.forEach(cubeToken => {
+      StorageCube.selected = cubeToken;
+      // recupero lista aggiornata delle metriche
+      StorageMetric.cubeMetrics = cubeToken;
+      for (const [token, metric] of Object.entries(StorageMetric.cubeMetrics)) {
+        this.allMetrics = 'data-sublist-all-metrics';
+        // TODO: quando passo sopra una metrica da questa lista, per poterla inserire nella formula, potrei visualizzare, in un div, il dettaglio della metrica selezionata, per capire meglio come sto creando la formula
+        this.#sublist.section.dataset.label = metric.name;
+        this.#sublist.section.dataset.cubeToken = metric.cubeToken;
+        // metriche composte di base e composte non hanno le prop table, tableAlias
+        if (metric.metric_type !== 1 && metric.metric_type !== 4 && metric.metric_type !== 3) {
+          this.#sublist.selectable.dataset.tableName = metric.formula.table;
+          this.#sublist.selectable.dataset.tableAlias = metric.formula.tableAlias;
+          this.#sublist.table.innerText = metric.formula.table;
+        }
+        this.#sublist.selectable.dataset.label = metric.name;
+        this.#sublist.selectable.dataset.cubeToken = metric.cubeToken;
+        this.#sublist.selectable.dataset.metricToken = token;
+        // this.#sublist.selectable.onclick = app.handlerMetricSelectedComposite;
+        this.#sublist.span.innerText = metric.name;
+        this.#sublist.cube.innerText = StorageCube.selected.name;
+        this.ul.appendChild(this.#sublist.section);
+      }
+    });
+  }
+
   initCompositeMetrics() {
     // TODO: 2022-05-27 in futuro ci sarà da valutare metriche composte appartenenti a più cubi
     StorageMetric.compositeMetrics.forEach(metric => {
@@ -656,6 +740,37 @@ class Lists {
     this.#sublist.section.dataset.tokenColumn = token;
     this.#sublist.span.innerText = alias;
     this.#sublist.btnRemove.dataset.objectToken = token;
+    this.ul.appendChild(this.#sublist.section);
+  }
+
+  addDefinedFilter() {
+    this.ul = 'ul-defined-filters';
+    this.definedFilters = 'data-sublist-filters-defined';
+    this.#sublist.section.dataset.label = StorageFilter.selected.name;
+    this.#sublist.section.dataset.filterToken = StorageFilter.selected.token;
+    if (StorageFilter.selected.hasOwnProperty('dimensions')) {
+      this.#sublist.section.dataset.dimensionToken = StorageFilter.selected.dimensions.join(' ');
+      // elenco token hier separate da spazi
+      this.#sublist.section.dataset.hierToken = Object.keys(StorageFilter.selected.hierarchies).join(' ');
+    } else {
+      this.#sublist.section.dataset.cubeToken = StorageFilter.selected.cubes;
+    }
+    this.#sublist.defined.dataset.filterToken = StorageFilter.selected.token;
+    this.#sublist.span.innerText = StorageFilter.selected.name;
+    this.#sublist.btnRemove.dataset.objectToken = StorageFilter.selected.token;
+    this.ul.appendChild(this.#sublist.section);
+  }
+
+  // aggiungo la metrica selezionata al report
+  addDefinedMetric() {
+    this.ul = 'ul-defined-metrics';
+    this.definedMetrics = 'data-sublist-metrics-defined';
+    this.#sublist.section.dataset.label = StorageMetric.selected.name;
+    this.#sublist.section.dataset.metricToken = StorageMetric.selected.token;
+    this.#sublist.defined.dataset.metricToken = StorageMetric.selected.token;
+    this.#sublist.span.innerText = StorageMetric.selected.name;
+    this.#sublist.btnRemove.dataset.objectToken = StorageMetric.selected.token;
+    this.#sublist.btnRemove.dataset.metricType = StorageMetric.selected.metric_type;
     this.ul.appendChild(this.#sublist.section);
   }
 
