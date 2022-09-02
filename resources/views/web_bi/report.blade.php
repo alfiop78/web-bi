@@ -106,14 +106,15 @@
           <div class="md-field">
             <textarea id="columnSQL" name="columnSQL" rows="10" cols="50" placeholder="es.: CONCAT(tabella.campo,'-',tabella.campo)" disabled></textarea>
           </div>
-          <button id="btnColumnSave" type="button" name="save" class="md-button" disabled>salva</button>
+          <!-- <button id="btnColumnSave" type="button" name="save" class="md-button" disabled>salva</button> -->
         </section>
 
       </div>
 
       <div class="dialog-buttons">
-        <button type="button" name="cancel" class="md-button">annulla</button>
-        <button id="btnColumnDone" type="button" name="done" class="md-button" disabled>fatto</button>
+        <button type="button" name="cancel" class="md-button">chiudi</button>
+        <!-- <button id="btnColumnDone" type="button" name="done" class="md-button" disabled>fatto</button> -->
+        <button id="btnColumnSave" type="button" name="save" class="md-button" disabled>salva</button>
       </div>
     </section>
   </dialog>
@@ -218,7 +219,7 @@
       </div>
 
       <div class="dialog-buttons">
-        <button type="button" name="cancel" class="md-button">annulla</button>
+        <button id="btnFilterCancel" type="button" name="cancel" class="md-button">annulla</button>
         <button id="btnFilterDone" type="button" name="done" class="md-button">fatto</button>
       </div>
     </section>

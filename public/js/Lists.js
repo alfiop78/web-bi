@@ -841,6 +841,22 @@ class Lists {
     }
   }
 
+  addSmallMetric(token) {
+    // token: le metrica composta che andrà a popolare lo <small>
+    const section = document.querySelector("#ul-defined-metrics section[data-metric-token='" + StorageMetric.selected.token + "']");
+    section.querySelector('button[data-remove]').disabled = true;
+    const defined = section.querySelector(".defined[data-metric-token='" + StorageMetric.selected.token + "']");
+    const contentSub = this.tmplSublists.content.cloneNode(true);
+    const small = contentSub.querySelector('small');
+    // imposto la metrica composta passata come argomento
+    StorageMetric.selected = token;
+    // questo dataset mi servirà in fase di rimozione della metrica (rimozione della metrica composta)
+    section.dataset[token] = token;
+    small.dataset.compositeMetric = StorageMetric.selected.token;
+    small.innerText = StorageMetric.selected.name;
+    defined.appendChild(small);
+  }
+
   init() {
     this.initCubes();
     this.initDimensions();

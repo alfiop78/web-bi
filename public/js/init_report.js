@@ -51,7 +51,6 @@ var List = new Lists();
     dialogCompositeMetric: document.getElementById('dialog-composite-metric'),
     btnFilterSave: document.getElementById('btnFilterSave'), //tasto salva nella dialog filter
     btnFilterDone: document.getElementById('btnFilterDone'), //tasto fatto nella dialog filter
-    btnColumnDone: document.getElementById('btnColumnDone'), // tasto ok nella dialogColumns
     btnColumnSave: document.getElementById('btnColumnSave'), // tasto ok nella dialogColumns
     btnMetricSave: document.getElementById('btnMetricSave'), // tasto salva nella dialogMetric
     btnCompositeMetricSave: document.getElementById('btnCompositeMetricSave'), // tasto salva nella dialog-composite-metric
@@ -308,7 +307,7 @@ var List = new Lists();
         if (StorageMetric.selected.metric_type !== 4) {
           // è una metrica base inclusa nella composta
           List.addDefinedMetric();
-          app.addSmallMetric(token);
+          List.addSmallMetric(token);
         } else {
           // è una metrica composta inclusa in una formula di un'altra metrica composta
           debugger;
@@ -547,22 +546,11 @@ var List = new Lists();
   }
   // selezione di un filtro già presente, lo salvo nell'oggetto Query
   app.handlerFilterSelected = (e) => {
-    StorageFilter.selected = e.currentTarget.dataset.filterToken;
-    let object = {};
-    if (!e.currentTarget.hasAttribute('data-selected')) {
+    // se il filtro è già stato aggiunto al report non si può deselezionare da qui ma bisogna rimuoverlo dal report
+    if (!e.currentTarget.hasAttribute('data-added')) {
       e.currentTarget.toggleAttribute('data-selected');
-      // creo l'oggetto da passare a Query.objects
-      object.token = e.currentTarget.dataset.filterToken;
-      if (StorageFilter.selected.hasOwnProperty('cubes')) object.cubes = StorageFilter.selected.cubes;
-      if (StorageFilter.selected.hasOwnProperty('dimensions')) object.dimensions = StorageFilter.selected.dimensions;
-      if (StorageFilter.selected.hasOwnProperty('hierarchies')) object.hierarchies = StorageFilter.selected.hierarchies;
-      Query.objects = object;
-      // console.log(StorageFilter.selected.formula);
-      // nel salvare il filtro nel report attuale devo impostarne anche l'alias della tabella selezionata nella dialog
-      Query.filters = StorageFilter.selected;
-      // Query.filters = { token : e.currentTarget.dataset.filterToken, SQL : `${StorageFilter.selected.tableAlias}.${StorageFilter.selected.formula}` };
-      List.addDefinedFilter();
-      app.checkObjectSelected();
+      // aggiungo l'attr data-temporary perchè se viene cliccato "Annulla" nella dialog-filter, questi devono essere deselezionati e non aggiunti al report
+      e.currentTarget.toggleAttribute('data-temporary');
     }
   }
 
@@ -584,11 +572,10 @@ var List = new Lists();
           List.addDefinedMetric();
         }
         // aggiungo uno <small> per indicare che la metrica è stata aggiunta perchè è inclusa in una metrica composta
-        app.addSmallMetric(token);
+        List.addSmallMetric(token);
       } else {
         // metrica composte nidificata
-        app.nestedCompositeMetrics();
-        // TODO: qui dovrei creare una funzione ricorsiva da utilizzare per le metriche composte nidificate
+        app.nestedCompositeMetrics(metric.token);
         document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
         // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
       }
@@ -616,19 +603,18 @@ var List = new Lists();
           StorageMetric.selected = metric.token;
           if (StorageMetric.selected.metric_type !== 4) {
             // aggiungo la metrica che si trova all'interno della formula, alla ul-defined-metrics
-            // se la metrica che sto per aggiungere è già stata aggiunta, aggiungo solo lo small con all'interno la metrica composta qui selezionata
             if (!document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
               document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
               // TODO: includo, con show-datamart = true, anche le metriche contenute nella formula all'interno del datamart finale
               // document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'true';
               List.addDefinedMetric();
             }
-            // aggiungo uno <small> per indicare che la metrica è stata aggiunta perchè è inclusa in una metrica composta
-            app.addSmallMetric(e.currentTarget.dataset.metricToken);
+            // se la metrica che sto per aggiungere è già stata aggiunta, l'if precedente viene saltato e aggiungo solo lo small con all'interno la metrica composta qui selezionata
+            // la metrica appena aggiunta è inclusa in una metrica composta, aggiungo uno <small> al cui interno c'è la metrica composta
+            List.addSmallMetric(e.currentTarget.dataset.metricToken);
           } else {
             // metrica composte nidificata
             app.nestedCompositeMetrics(metric.token);
-            // TODO: qui dovrei creare una funzione ricorsiva da utilizzare per le metriche composte nidificate
             document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
             // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
           }
@@ -1022,7 +1008,27 @@ var List = new Lists();
   }
 
   // tasto 'Fatto' nella dialogFilter
-  app.btnFilterDone.onclick = () => app.dialogFilter.close();
+  app.btnFilterDone.onclick = () => {
+    // verifico i filtri che hanno l'attr data-temporary, questi verranno aggiunti alla ul-defined-filters
+    document.querySelectorAll('#ul-filters .selectable[data-temporary]').forEach(filter => {
+      StorageFilter.selected = filter.dataset.filterToken;
+      let object = {};
+      // creo l'oggetto da passare a Query.objects
+      object.token = filter.dataset.filterToken;
+      if (StorageFilter.selected.hasOwnProperty('cubes')) object.cubes = StorageFilter.selected.cubes;
+      if (StorageFilter.selected.hasOwnProperty('dimensions')) object.dimensions = StorageFilter.selected.dimensions;
+      if (StorageFilter.selected.hasOwnProperty('hierarchies')) object.hierarchies = StorageFilter.selected.hierarchies;
+      Query.objects = object;
+      // nel salvare il filtro nel report attuale devo impostarne anche l'alias della tabella selezionata nella dialog
+      Query.filters = StorageFilter.selected;
+      List.addDefinedFilter();
+      // rimuovo l'attributo data-temporary perchè li sto aggiunngendo al report
+      delete filter.dataset.temporary;
+      filter.dataset.added = 'true';
+      app.checkObjectSelected();
+    });
+    app.dialogFilter.close();
+  }
 
   // salvataggio della metrica nel db
   app.saveMetricDB = async (json) => {
@@ -1164,29 +1170,13 @@ var List = new Lists();
     document.querySelectorAll('#ul-available-metrics .selectable[data-selected]').forEach(metric => delete metric.dataset.selected);
   }
 
-  app.addSmallMetric = (token) => {
-    // token : la metrica composta
-    // in questo momento lo storagemetric.selected contiene la metrica inclusa nella composta
-    const section = document.querySelector("#ul-defined-metrics section[data-metric-token='" + StorageMetric.selected.token + "']");
-    section.querySelector('button[data-remove]').disabled = true;
-    const defined = section.querySelector(".defined[data-metric-token='" + StorageMetric.selected.token + "']");
-    const contentSub = app.tmplSublists.content.cloneNode(true);
-    const small = contentSub.querySelector('small');
-    // imposto la metrica composta passata come argomento
-    StorageMetric.selected = token;
-    // questo dataset mi servirà in fase di rimozione della metrica (rimozione della metrica composta)
-    section.dataset[token] = token;
-    small.dataset.compositeMetric = StorageMetric.selected.token;
-    small.innerText = StorageMetric.selected.name;
-    defined.appendChild(small);
-  }
-
   // remove filter from report
   app.handlerFilterRemove = (e) => {
     Query.filters = { token: e.currentTarget.dataset.objectToken };
     Query.objects = { token: e.currentTarget.dataset.objectToken };
     document.querySelector("#ul-defined-filters section[data-filter-token='" + e.currentTarget.dataset.objectToken + "']").remove();
     delete document.querySelector("#ul-filters section[data-filter-token='" + e.currentTarget.dataset.objectToken + "'] .selectable").dataset.selected;
+    delete document.querySelector("#ul-filters section[data-filter-token='" + e.currentTarget.dataset.objectToken + "'] .selectable").dataset.added;
   }
 
   // remove metrics from report
@@ -1564,7 +1554,6 @@ var List = new Lists();
       // ripulisco la dialog
       app.columnAlias.value = '';
       // document.querySelectorAll('#ul-columns .selectable').forEach(item => delete item.dataset.selected);
-      app.btnColumnDone.disabled = true;
       app.dialogColumns.showModal();
     }
   }
@@ -1733,11 +1722,7 @@ var List = new Lists();
     });
   }
 
-  // save report
-  app.btnSaveReportDone.onclick = () => {
-    const name = document.getElementById('reportName').value;
-    app.setFrom();
-
+  app.setFactJoin = () => {
     // imposto la factJoin che è presente solo sulla dimensione
     document.querySelectorAll('#ul-dimensions .selectable[data-include-query]').forEach(dimension => {
       StorageDimension.selected = dimension.dataset.dimensionToken;
@@ -1751,6 +1736,14 @@ var List = new Lists();
         }
       }
     });
+  }
+
+  // save report
+  app.btnSaveReportDone.onclick = () => {
+    const name = document.getElementById('reportName').value;
+    app.setFrom();
+    app.setFactJoin();
+
     // imposto la FROM per gli elementi del cubo/i selezionati
     document.querySelectorAll("#ul-cubes section:not([hidden]) .selectable[data-include-query]").forEach(cubeRef => {
       Query.FROM = { tableAlias: cubeRef.dataset.tableAlias, SQL: `${cubeRef.dataset.schema}.${cubeRef.dataset.tableName} AS ${cubeRef.dataset.tableAlias}` };
@@ -1789,20 +1782,8 @@ var List = new Lists();
     const name = document.getElementById('reportName').value;
 
     app.setFrom();
+    app.setFactJoin();
 
-    // imposto la factJoin che è presente solo sulla dimensione
-    document.querySelectorAll('#ul-dimensions .selectable[data-include-query]').forEach(dimension => {
-      StorageDimension.selected = dimension.dataset.dimensionToken;
-      // per ogni dimensione con includeQuery recupero le join con il cubo
-      for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
-        // debugger;
-        if (document.querySelector("#ul-cubes section[data-cube-token='" + cubeToken + "'] .selectable").hasAttribute('data-include-query')) {
-          for (const [token, join] of Object.entries(joins)) {
-            Query.WHERE = { token, join };
-          }
-        }
-      }
-    });
     // imposto la FROM per gli elementi del cubo/i selezionati
     document.querySelectorAll("#ul-cubes section:not([hidden]) .selectable[data-include-query]").forEach(cubeRef => {
       Query.FROM = { tableAlias: cubeRef.dataset.tableAlias, SQL: `${cubeRef.dataset.schema}.${cubeRef.dataset.tableName} AS ${cubeRef.dataset.tableAlias}` };
@@ -1849,7 +1830,6 @@ var List = new Lists();
   // visualizzo la lista dei report da processare
   app.btnProcessReport.onclick = () => app.processList.toggleAttribute('hidden');
 
-  // app.btnSearchValue.addEventListener('click', () => app.dialogValue.showModal());
   // apertura dialog-value per ricerca dei valori all'interno del database relativo alla colonna selezionata
   app.btnSearchValue.onclick = () => {
     List.getDistinctValues();
@@ -1989,10 +1969,8 @@ var List = new Lists();
     // evidenzio come 'selezionata' la colonna che ha aperto la dialog dopo averla salvata qui. Vado a verificare sia le colonne della fact che quelle delle dimensioni
     // document.querySelector("#ul-columns .selectable[data-token-column='" + Query.columnToken + "']").toggleAttribute('data-selected');
     // in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
-    // aggiungo la colonna inserita nella ul-defined-columns
+    // aggiungo la colonna nella ul-defined-columns
     List.addDefinedColumn(alias.value, Query.columnToken);
-    // abilito il tasto "Fatto" della dialog
-    app.btnColumnDone.disabled = false;
     app.btnColumnSave.disabled = true;
     app.columnAlias.value = '';
     document.querySelectorAll('#ul-columns .selectable').forEach(item => delete item.dataset.selected);
@@ -2015,8 +1993,6 @@ var List = new Lists();
     const column = document.querySelectorAll('#ul-columns .selectable[data-selected]').length;
     app.btnColumnSave.disabled = (!check && inputAlias.value.length !== 0 && column !== 0) ? false : true;
   }
-  // save column : salvataggio di una colonna del report
-  app.btnColumnDone.onclick = () => app.dialogColumns.close();
 
   app.btnColumnSave.onclick = () => app.saveColumn();
 
@@ -2035,6 +2011,7 @@ var List = new Lists();
     // e.preventDefault();
   }
 
+  // TODO: spostare in un file "Utils"
   app.showAbsoluteWindow = (e) => {
     const pos = () => {
       let x, y;
@@ -2109,6 +2086,13 @@ var List = new Lists();
     // ripulisco la input filterName e tutti gli oggetti presenti nella textarea
     document.getElementById('filterName').value = '';
     document.querySelectorAll('#composite-filter-formula *').forEach(element => element.remove());
+    // annullo i filtri che hanno .selectable[data-temporary], non verranno aggiunti al report
+    document.querySelectorAll('#ul-filters .selectable[data-temporary]').forEach(filter => {
+      // rimuovo la selezione di questi filtri non aggiunti
+      delete filter.dataset.selected;
+      // e rimuovo anche il data-temporary prima di chiudere la dialog
+      delete filter.dataset.temporary;
+    }); 
   });
 
   // dialog metric
@@ -2132,5 +2116,4 @@ var List = new Lists();
   app.dialogMetricFilter.addEventListener('open', () => {
     document.getElementById('dialog-metric-filter-search').value = "";
   });
-
 })();
