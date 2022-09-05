@@ -300,7 +300,7 @@ var List = new Lists();
       document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + token + "']").dataset.added = 'true';
       Query.objects = { token, cubes: StorageMetric.selected.cubes };
       // aggiungo alla Classe Query la metrica composta
-      app.setCompositeMetrics();
+      // app.setCompositeMetrics();
       List.addDefinedCompositeMetric();
 
       for (const [metricName, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
@@ -313,10 +313,11 @@ var List = new Lists();
           List.addSmallMetric(token);
         } else {
           // è una metrica composta inclusa in una formula di un'altra metrica composta
-          debugger;
           List.addDefinedCompositeMetric(token)
+          app.nestedCompositeMetrics(metric.token);
         }
       }
+      app.setCompositeMetrics();
     });
 
     // metriche
@@ -559,6 +560,7 @@ var List = new Lists();
         // se la metrica che sto per aggiungere è già stata aggiunta, aggiungo solo lo small con all'interno la metrica composta qui selezionata
         if (!document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
           document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
+          document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.added = 'true';
           // TODO: includo, con show-datamart = true, anche le metriche contenute nella formula all'interno del datamart finale
           // document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'true';
           List.addDefinedMetric();
@@ -569,10 +571,11 @@ var List = new Lists();
         // metrica composte nidificata
         app.nestedCompositeMetrics(metric.token);
         document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
+        document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.added = 'true';
         // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
+        List.addSmallCompositeMetric(token);
       }
     }
-
   }
 
   // selezione di una metrica da aggiungere al report
@@ -582,55 +585,6 @@ var List = new Lists();
       e.currentTarget.toggleAttribute('data-selected');
       e.currentTarget.toggleAttribute('data-temporary');
     }
-
-    // StorageMetric.selected = e.currentTarget.dataset.metricToken;
-    // if (!e.currentTarget.hasAttribute('data-selected')) {
-    //   e.currentTarget.toggleAttribute('data-selected');
-    //   // TODO: per le metriche composte (metric_type: 4) c'è da definire se inserire nel JSON i cubi a cui appartengono le metriche che compongono la composta
-    //   if (+e.currentTarget.dataset.metricType === 4) {
-    //     // quando viene selezionata una metrica composta, le metriche al suo interno verranno incluse nel datamart finale.
-    //     // Potrei selezionarle sulla pagina con un colore diverso per evidenziare il fatto che sono già incluse nel report, inoltre
-    //     // ... devo nascondere il tasto 'delete' perchè queste possono essere rimosse solo rimuovendo la metrica composta.
-
-    //     // la prop formula->metrics_alias contiene {nome_metrica : metricToken, metricAlias}.
-    //     // Tramite il metricToken posso selezionare le metriche incluse nella formula della composta.
-    //     // all'interno delle metriche composte possono trovarsi anche altre metriche composte, quindi vado a cercare
-    //     // ...anche in #ul-composite-metrics
-    //     for (const [metricName, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
-    //       // seleziono nello storage la metrica in ciclo contenuta all'interno della composta
-    //       StorageMetric.selected = metric.token;
-    //       if (StorageMetric.selected.metric_type !== 4) {
-    //         // aggiungo la metrica che si trova all'interno della formula, alla ul-defined-metrics
-    //         if (!document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
-    //           document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
-    //           // TODO: includo, con show-datamart = true, anche le metriche contenute nella formula all'interno del datamart finale
-    //           // document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'true';
-    //           List.addDefinedMetric();
-    //         }
-    //         // se la metrica che sto per aggiungere è già stata aggiunta, l'if precedente viene saltato e aggiungo solo lo small con all'interno la metrica composta qui selezionata
-    //         // la metrica appena aggiunta è inclusa in una metrica composta, aggiungo uno <small> al cui interno c'è la metrica composta
-    //         List.addSmallMetric(e.currentTarget.dataset.metricToken);
-    //       } else {
-    //         // metrica composte nidificata
-    //         app.nestedCompositeMetrics(metric.token);
-    //         document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
-    //         // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
-    //       }
-    //     }
-    //     // reimposto la metrica composta selezionata per poterla aggiungere alla definedList
-    //     StorageMetric.selected = e.currentTarget.dataset.metricToken;
-    //     // aggiungo alla ulDefinedCompositeMetric la metrica composta appena selezionata
-    //     List.addDefinedCompositeMetric();
-    //   } else {
-    //     // metrica di base/filtrata la aggiungo alla definedMetrics
-    //     List.addDefinedMetric();
-    //   }
-    //   Query.objects = { token: e.currentTarget.dataset.metricToken, cubes: StorageMetric.selected.cubes };
-    //   app.checkObjectSelected();
-    //   app.setMetrics();
-    //   app.setFilteredMetrics();
-    //   app.setCompositeMetrics();
-    // }
   }
 
   // selezione di una metrica per la creazione di una metrica composta
@@ -1107,14 +1061,15 @@ var List = new Lists();
         } else {
           // metrica composte nidificata
           app.nestedCompositeMetrics(metric.token);
-          document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
-          document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.added = 'true';
           // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
         }
       }
       // reimposto la metrica composta selezionata per poterla aggiungere alla definedList
       StorageMetric.selected = item.dataset.metricToken;
       // aggiungo alla ulDefinedCompositeMetric la metrica composta appena selezionata
+      item.dataset.selected = 'true';
+      item.dataset.added = 'true';
+      delete item.dataset.temporary;
       List.addDefinedCompositeMetric();
     });
     app.dialogCompositeMetric.close();
@@ -1149,11 +1104,8 @@ var List = new Lists();
       associatedFilters.add(filterSelected.dataset.filterToken);
     });
     let metricObj = {
-      type: 'METRIC',
-      name: inputName.value,
-      updated_at: date.toLocaleDateString('it-IT', options),
-      token,
-      cubes: [StorageCube.selected.token]
+      type: 'METRIC', name: inputName.value, token, cubes: [StorageCube.selected.token],
+      updated_at: date.toLocaleDateString('it-IT', options)
     };
     metricObj.created_at = (e.target.dataset.token) ? StorageMetric.selected.created_at : date.toLocaleDateString('it-IT', options);
     /* se sono presenti dei filtri per la metrica che si sta creando, il metric_type sarà :
@@ -1164,7 +1116,6 @@ var List = new Lists();
     metricObj.metric_type = metric_type;
 
     let formulaObj = { token, aggregateFn, field: Query.field, distinct: distinctOption, alias: inputAlias.value };
-    debugger;
 
     switch (metric_type) {
       case 1:
@@ -1188,7 +1139,6 @@ var List = new Lists();
         break;
       default:
         // base
-        console.info('metrica di base');
         formulaObj.table = Query.table;
         formulaObj.tableAlias = Query.tableAlias;
         metricObj.formula = formulaObj;
@@ -1210,7 +1160,6 @@ var List = new Lists();
       List.addMetric();
     }
     app.resetDialogMetric();
-
     app.btnMetricSave.disabled = true;
   }
 
@@ -1632,7 +1581,6 @@ var List = new Lists();
     } else {
       // ripulisco la lista, prima di popolarla
       document.querySelectorAll('#ul-all-metrics > section').forEach(item => item.remove());
-      // const ul = document.getElementById('ul-metrics');
       List.initAllMetrics();
       delete app.btnCompositeMetricSave.dataset.token;
       app.dialogCompositeMetric.showModal();
