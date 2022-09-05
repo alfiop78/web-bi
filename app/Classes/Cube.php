@@ -332,7 +332,7 @@ class Cube
       $tableName = "WEB_BI_TMP_METRIC_{$this->reportId}_{$groupToken}";
       foreach ($m as $metric) {
         unset($this->_sql);
-        var_dump($metric);
+        // var_dump($metric);
         if ($metric->metric_type === 3) {
           // metrica composta a livello cubo filtrata (es. : prezzo * quantita impostato sul cubo con filtro)
           $arrayMetrics[$metric->alias] = "NVL({$metric->aggregateFn}({$metric->field}), 0) AS '{$metric->alias}'";
@@ -468,9 +468,11 @@ class Cube
       if (property_exists($this, 'compositeMetrics')) {
         $this->createCompositeMetrics();
         foreach ($this->_composite_sql_formula as $alias_formula) {
-          $this->_composite_metrics[] = implode(" ", $alias_formula['formula']) . " AS '{$alias_formula["alias"]}'";
+          // dd($alias_formula['formula']);
+          $this->_composite_metrics[] = "NVL(" . implode(" ", $alias_formula['formula']) . ", 0) AS '{$alias_formula["alias"]}'";
         }
         $sql .= ",\n";
+        // dd($this->_composite_metrics);
         $sql .= implode(",\n", $this->_composite_metrics);
         // dd($this->_composite_metrics);
       }
@@ -478,11 +480,11 @@ class Cube
       $sql .= "$leftJoin\nGROUP BY $this->_fieldsSQL);";
     } else {
       /*
-            creazione metrica composta nella tabella baseTable (metriche non filtrate) 2022-05-12
-            SELECT W_AP_base_1652367363055.'sid_id', W_AP_base_1652367363055.'sid_ds', W_AP_base_1652367363055.'sede_id', W_AP_base_1652367363055.'sede_ds', ( SUM(W_AP_base_1652367363055.'comp-przmedio-alias') * SUM(W_AP_base_1652367363055.'comp-qta') ) AS 'composite-costo'
-            FROM decisyon_cache.W_AP_base_1652367363055
-            GROUP BY W_AP_base_1652367363055.'sid_id', W_AP_base_1652367363055.'sid_ds', W_AP_base_1652367363055.'sede_id', W_AP_base_1652367363055.'sede_ds');
-            */
+        creazione metrica composta nella tabella baseTable (metriche non filtrate) 2022-05-12
+        SELECT W_AP_base_1652367363055.'sid_id', W_AP_base_1652367363055.'sid_ds', W_AP_base_1652367363055.'sede_id', W_AP_base_1652367363055.'sede_ds', ( SUM(W_AP_base_1652367363055.'comp-przmedio-alias') * SUM(W_AP_base_1652367363055.'comp-qta') ) AS 'composite-costo'
+        FROM decisyon_cache.W_AP_base_1652367363055
+        GROUP BY W_AP_base_1652367363055.'sid_id', W_AP_base_1652367363055.'sid_ds', W_AP_base_1652367363055.'sede_id', W_AP_base_1652367363055.'sede_ds');
+      */
       $s = "SELECT $this->_fieldsSQL";
       if (property_exists($this, 'baseMetrics')) $s .= ", $this->_metrics_base_datamart";
       if (property_exists($this, 'compositeMetrics')) {

@@ -164,7 +164,7 @@
       <div class="parent-ul-search">
         <h5>Filtri disponibili</h5>
         <div class="md-field">
-          <input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" />
+          <input type="search" data-element-search="search-filters" id="search-exist-filters" value autocomplete="off" />
           <label for="search-exist-filters" class="">Ricerca</label>
         </div>
         <div class="relative-ul">
@@ -251,7 +251,7 @@
       <div class="parent-ul-search">
         <h5>Metriche disponibili</h5>
         <div class="md-field">
-          <input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" />
+          <input type="search" data-element-search="search-metrics" id="search-exist-metrics" value autocomplete="off" />
           <label for="search-exist-metrics" class="">Ricerca</label>
         </div>
         <div class="relative-ul">
@@ -377,7 +377,7 @@
       <div class="parent-ul-search">
         <h5>Metriche composte disponibili</h5>
         <div class="md-field">
-          <input type="search" data-element-search="search-exist-composite-metrics" id="search-exist-composite-metrics" value autocomplete="off" />
+          <input type="search" data-element-search="search-composite-metrics" id="search-exist-composite-metrics" value autocomplete="off" />
           <label for="search-exist-composite-metrics" class="">Ricerca</label>
         </div>
         <div class="relative-ul">
@@ -393,8 +393,8 @@
         <section class="sectionLists parent-ul-search">
           <h5>Metriche disponibili</h5>
           <div class="md-field">
-            <input type="search" data-element-search="search-metrics" id="search-metrics" value autocomplete="off" />
-            <label for="search-metrics" class="">Ricerca</label>
+            <input type="search" data-element-search="search-all-metrics" id="search-all-metrics" value autocomplete="off" />
+            <label for="search-all-metrics" class="">Ricerca</label>
           </div>
           <div class="relative-ul">
             <ul id="ul-all-metrics" class="absolute"></ul>
@@ -577,7 +577,7 @@
             </section>
 
             {{-- metriche composite --}}
-            <section class="data-item" data-element-search="search-composite-metrics" data-related-object="cube" data-label data-sublist-composite-metrics>
+            <section class="data-item" data-element-search="search-composite-metrics" data-related-object="cube" data-label data-sublist-composite-metrics data-searchable="true">
               <div>
                 <div class="h-content">
                   <div class="selectable v-content composite-metrics-color" data-fn="handlerMetricSelected" data-object-type="composite-metric">

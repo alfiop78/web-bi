@@ -255,7 +255,7 @@ var List = new Lists();
       Query.field = column.field;
       // reimposto la colonna come quando viene selezionata
       Query.select = column;
-      console.log(column);
+      // console.log(column);
       if (!column.hasOwnProperty('cubeToken')) {
         const hierarchiesObject = new Map([[column.hier, column.tableId]]);
         Query.objects = {
@@ -308,6 +308,7 @@ var List = new Lists();
         StorageMetric.selected = metric.token;
         if (StorageMetric.selected.metric_type !== 4) {
           // è una metrica base inclusa nella composta
+          // TODO: valutare se inserire qui il data-selected e data-added per le metriche incluse nella composta
           List.addDefinedMetric();
           List.addSmallMetric(token);
         } else {
@@ -326,19 +327,12 @@ var List = new Lists();
       document.querySelector("#ul-metrics .selectable[data-metric-token='" + token + "']").dataset.selected = 'true';
       document.querySelector("#ul-metrics .selectable[data-metric-token='" + token + "']").dataset.added = 'true';
       Query.objects = { token, cubes: StorageMetric.selected.cubes };
-      switch (StorageMetric.selected.metric_type) {
-        case 2:
-        case 3:
-          app.setFilteredMetrics();
-          break;
-        default:
-          // qui vengono impostate metric_type 0 e 1
-          app.setMetrics();
-          break;
-      }
       // aggiungo alla lista #ul-defined-metrics se questa metrica non è stata già aggiunta da qualche metrica composta
       if (!document.querySelector("#ul-defined-metrics section[data-metric-token='" + token + "']")) List.addDefinedMetric();
     });
+
+    app.setMetrics();
+    app.setFilteredMetrics();
 
     app.processList.toggleAttribute('hidden');
     app.checkObjectSelected();
