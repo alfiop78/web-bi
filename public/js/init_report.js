@@ -278,6 +278,7 @@ var List = new Lists();
       StorageFilter.selected = token;
       // seleziono i filtri impostati nel report
       document.querySelector("#ul-filters .selectable[data-filter-token='" + token + "']").dataset.selected = 'true';
+      document.querySelector("#ul-filters .selectable[data-filter-token='" + token + "']").dataset.added = 'true';
       // reimposto il filtro come se fosse stato selezionato
       Query.filters = StorageFilter.selected;
       let object = {};
@@ -322,6 +323,7 @@ var List = new Lists();
       StorageMetric.selected = token;
       // seleziono le metriche (0, 1, 2, 3) impostate nel report
       document.querySelector("#ul-metrics .selectable[data-metric-token='" + token + "']").dataset.selected = 'true';
+      document.querySelector("#ul-metrics .selectable[data-metric-token='" + token + "']").dataset.added = 'true';
       Query.objects = { token, cubes: StorageMetric.selected.cubes };
       switch (StorageMetric.selected.metric_type) {
         case 2:
@@ -513,16 +515,14 @@ var List = new Lists();
       // nascondo tutti gli elementi relativi al cubo deselezionato
       // TODO: oltre a nascondere gli elementi del cubo deselezionato, devo anche rimuoverli dalla proprietà #objects della classe Query
       app.hideCubeObjects();
-      e.currentTarget.toggleAttribute('data-selected');
     } else {
       // abilito il tasto #toggle-dimensions-drawer che consente di aprire il drawer con l'elenco delle dimensioni
       app.btnToggleDimensionsDrawer.disabled = false;
       app.showCubeObjects();
       // visualizzo la tabelle fact del cubo selezionato
       // document.querySelector("#ul-fact-tables > section[data-cube-token='" + StorageCube.selected.token + "']").hidden = false;
-      // aggiungo l'attr data-selected
-      e.currentTarget.toggleAttribute('data-selected');
     }
+    e.currentTarget.toggleAttribute('data-selected');
     Query.cubes = e.currentTarget.dataset.cubeToken;
   }
 
@@ -532,19 +532,16 @@ var List = new Lists();
     console.log('Dimensione selezionata : ', StorageDimension.selected.name);
     // Query.elementDimension = { token : e.currentTarget.dataset.dimensionToken, cubes : StorageDimension.selected.cubes};
     if (e.currentTarget.hasAttribute('data-selected')) {
-      e.currentTarget.toggleAttribute('data-selected');
       // TODO: oltre a nascondere gli elementi della dimensione deselezionata, devo anche eliminarli dalla proprietà #objects della classe Query.
       app.hideDimensionObjects();
     } else {
-      // imposto l'attr data-selected
-      e.currentTarget.toggleAttribute('data-selected');
       app.showDimensionObjects();
-
       app.btnToggleHierarchyDrawer.disabled = false;
     }
+    e.currentTarget.toggleAttribute('data-selected');
     Query.dimensions = e.currentTarget.dataset.dimensionToken;
   }
-  // selezione di un filtro già presente, lo salvo nell'oggetto Query
+  // selezione di un filtro, lo salvo nell'oggetto Query
   app.handlerFilterSelected = (e) => {
     // se il filtro è già stato aggiunto al report non si può deselezionare da qui ma bisogna rimuoverlo dal report
     if (!e.currentTarget.hasAttribute('data-added')) {
@@ -585,54 +582,60 @@ var List = new Lists();
 
   // selezione di una metrica da aggiungere al report
   app.handlerMetricSelected = (e) => {
-    StorageMetric.selected = e.currentTarget.dataset.metricToken;
-    if (!e.currentTarget.hasAttribute('data-selected')) {
+    // se la metrica è già stata aggiunta al report non posso deselezionarla qui, bisogna rimuoverla dalla ul-defined-metrics
+    if (!e.currentTarget.hasAttribute('data-added')) {
       e.currentTarget.toggleAttribute('data-selected');
-      // TODO: per le metriche composte (metric_type: 4) c'è da definire se inserire nel JSON i cubi a cui appartengono le metriche che compongono la composta
-      if (+e.currentTarget.dataset.metricType === 4) {
-        // quando viene selezionata una metrica composta, le metriche al suo interno verranno incluse nel datamart finale.
-        // Potrei selezionarle sulla pagina con un colore diverso per evidenziare il fatto che sono già incluse nel report, inoltre
-        // ... devo nascondere il tasto 'delete' perchè queste possono essere rimosse solo rimuovendo la metrica composta.
-
-        // la prop formula->metrics_alias contiene {nome_metrica : metricToken, metricAlias}.
-        // Tramite il metricToken posso selezionare le metriche incluse nella formula della composta.
-        // all'interno delle metriche composte possono trovarsi anche altre metriche composte, quindi vado a cercare
-        // ...anche in #ul-composite-metrics
-        for (const [metricName, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
-          // seleziono nello storage la metrica in ciclo contenuta all'interno della composta
-          StorageMetric.selected = metric.token;
-          if (StorageMetric.selected.metric_type !== 4) {
-            // aggiungo la metrica che si trova all'interno della formula, alla ul-defined-metrics
-            if (!document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
-              document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
-              // TODO: includo, con show-datamart = true, anche le metriche contenute nella formula all'interno del datamart finale
-              // document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'true';
-              List.addDefinedMetric();
-            }
-            // se la metrica che sto per aggiungere è già stata aggiunta, l'if precedente viene saltato e aggiungo solo lo small con all'interno la metrica composta qui selezionata
-            // la metrica appena aggiunta è inclusa in una metrica composta, aggiungo uno <small> al cui interno c'è la metrica composta
-            List.addSmallMetric(e.currentTarget.dataset.metricToken);
-          } else {
-            // metrica composte nidificata
-            app.nestedCompositeMetrics(metric.token);
-            document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
-            // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
-          }
-        }
-        // reimposto la metrica composta selezionata per poterla aggiungere alla definedList
-        StorageMetric.selected = e.currentTarget.dataset.metricToken;
-        // aggiungo alla ulDefinedCompositeMetric la metrica composta appena selezionata
-        List.addDefinedCompositeMetric();
-      } else {
-        // metrica di base/filtrata la aggiungo alla definedMetrics
-        List.addDefinedMetric();
-      }
-      Query.objects = { token: e.currentTarget.dataset.metricToken, cubes: StorageMetric.selected.cubes };
-      app.checkObjectSelected();
-      app.setMetrics();
-      app.setFilteredMetrics();
-      app.setCompositeMetrics();
+      e.currentTarget.toggleAttribute('data-temporary');
     }
+
+    // StorageMetric.selected = e.currentTarget.dataset.metricToken;
+    // if (!e.currentTarget.hasAttribute('data-selected')) {
+    //   e.currentTarget.toggleAttribute('data-selected');
+    //   // TODO: per le metriche composte (metric_type: 4) c'è da definire se inserire nel JSON i cubi a cui appartengono le metriche che compongono la composta
+    //   if (+e.currentTarget.dataset.metricType === 4) {
+    //     // quando viene selezionata una metrica composta, le metriche al suo interno verranno incluse nel datamart finale.
+    //     // Potrei selezionarle sulla pagina con un colore diverso per evidenziare il fatto che sono già incluse nel report, inoltre
+    //     // ... devo nascondere il tasto 'delete' perchè queste possono essere rimosse solo rimuovendo la metrica composta.
+
+    //     // la prop formula->metrics_alias contiene {nome_metrica : metricToken, metricAlias}.
+    //     // Tramite il metricToken posso selezionare le metriche incluse nella formula della composta.
+    //     // all'interno delle metriche composte possono trovarsi anche altre metriche composte, quindi vado a cercare
+    //     // ...anche in #ul-composite-metrics
+    //     for (const [metricName, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
+    //       // seleziono nello storage la metrica in ciclo contenuta all'interno della composta
+    //       StorageMetric.selected = metric.token;
+    //       if (StorageMetric.selected.metric_type !== 4) {
+    //         // aggiungo la metrica che si trova all'interno della formula, alla ul-defined-metrics
+    //         if (!document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
+    //           document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
+    //           // TODO: includo, con show-datamart = true, anche le metriche contenute nella formula all'interno del datamart finale
+    //           // document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'true';
+    //           List.addDefinedMetric();
+    //         }
+    //         // se la metrica che sto per aggiungere è già stata aggiunta, l'if precedente viene saltato e aggiungo solo lo small con all'interno la metrica composta qui selezionata
+    //         // la metrica appena aggiunta è inclusa in una metrica composta, aggiungo uno <small> al cui interno c'è la metrica composta
+    //         List.addSmallMetric(e.currentTarget.dataset.metricToken);
+    //       } else {
+    //         // metrica composte nidificata
+    //         app.nestedCompositeMetrics(metric.token);
+    //         document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
+    //         // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
+    //       }
+    //     }
+    //     // reimposto la metrica composta selezionata per poterla aggiungere alla definedList
+    //     StorageMetric.selected = e.currentTarget.dataset.metricToken;
+    //     // aggiungo alla ulDefinedCompositeMetric la metrica composta appena selezionata
+    //     List.addDefinedCompositeMetric();
+    //   } else {
+    //     // metrica di base/filtrata la aggiungo alla definedMetrics
+    //     List.addDefinedMetric();
+    //   }
+    //   Query.objects = { token: e.currentTarget.dataset.metricToken, cubes: StorageMetric.selected.cubes };
+    //   app.checkObjectSelected();
+    //   app.setMetrics();
+    //   app.setFilteredMetrics();
+    //   app.setCompositeMetrics();
+    // }
   }
 
   // selezione di una metrica per la creazione di una metrica composta
@@ -653,9 +656,9 @@ var List = new Lists();
 
   // div contenteditable della formula per la metrica composta
   document.getElementById('composite-metric-formula').onclick = (e) => {
-    console.log('e : ', e);
-    console.log('e.target : ', e.target);
-    console.log('e.currentTarget : ', e.currentTarget);
+    // console.log('e : ', e);
+    // console.log('e.target : ', e.target);
+    // console.log('e.currentTarget : ', e.currentTarget);
     if (e.target.localName === 'div') {
       app.addSpan(e.target, null, 'metric');
     }
@@ -748,13 +751,11 @@ var List = new Lists();
 
   // div contenteditable della formula per il filtro
   document.getElementById('composite-filter-formula').onclick = (e) => {
-    console.log('e : ', e);
+    // console.log('e : ', e);
     // elimino lo span che contiene il "placeholder"
-    console.log('e.target : ', e.target);
-    console.log('e.currentTarget : ', e.currentTarget);
-    if (e.target.localName === 'div') {
-      app.addSpan(e.target, null, 'filter');
-    }
+    // console.log('e.target : ', e.target);
+    // console.log('e.currentTarget : ', e.currentTarget);
+    if (e.target.localName === 'div') app.addSpan(e.target, null, 'filter');
   }
 
   // selezione delle colonne
@@ -1063,7 +1064,64 @@ var List = new Lists();
       });
   }
 
-  app.btnMetricDone.onclick = () => app.dialogMetric.close();
+  // tasto "Fatto" nella dialog-metrics
+  app.btnMetricDone.onclick = () => {
+    // stessa logica di utilizzo del btnFilterDone
+    // recupero l'elenco delle metriche selezionate nella dialog
+    document.querySelectorAll('#ul-metrics .selectable[data-temporary]').forEach(item => {
+      StorageMetric.selected = item.dataset.metricToken;
+      // TODO: per le metriche composte (metric_type: 4) c'è da definire se inserire nel JSON i cubi a cui appartengono le metriche che compongono la composta
+      if (+item.dataset.metricType === 4) {
+        // quando viene selezionata una metrica composta, le metriche al suo interno verranno incluse nel datamart finale.
+        // Potrei selezionarle sulla pagina con un colore diverso per evidenziare il fatto che sono già incluse nel report, inoltre
+        // ... devo nascondere il tasto 'delete' perchè queste possono essere rimosse solo rimuovendo la metrica composta.
+
+        // la prop formula->metrics_alias contiene {nome_metrica : metricToken, metricAlias}.
+        // Tramite il metricToken posso selezionare le metriche incluse nella formula della composta.
+        // all'interno delle metriche composte possono trovarsi anche altre metriche composte, quindi vado a cercare
+        // ...anche in #ul-composite-metrics
+        for (const [metricName, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
+          // seleziono nello storage la metrica in ciclo contenuta all'interno della composta
+          StorageMetric.selected = metric.token;
+          if (StorageMetric.selected.metric_type !== 4) {
+            // aggiungo la metrica che si trova all'interno della formula, alla ul-defined-metrics
+            if (!document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
+              document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
+              // TODO: includo, con show-datamart = true, anche le metriche contenute nella formula all'interno del datamart finale
+              // document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'true';
+              List.addDefinedMetric();
+            }
+            // se la metrica che sto per aggiungere è già stata aggiunta, l'if precedente viene saltato e aggiungo solo lo small con all'interno la metrica composta qui selezionata
+            // la metrica appena aggiunta è inclusa in una metrica composta, aggiungo uno <small> al cui interno c'è la metrica composta
+            List.addSmallMetric(item.dataset.metricToken);
+          } else {
+            // metrica composte nidificata
+            app.nestedCompositeMetrics(metric.token);
+            document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
+            // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
+          }
+        }
+        // reimposto la metrica composta selezionata per poterla aggiungere alla definedList
+        StorageMetric.selected = item.dataset.metricToken;
+        // aggiungo alla ulDefinedCompositeMetric la metrica composta appena selezionata
+        List.addDefinedCompositeMetric();
+      } else {
+        // metrica di base/filtrata la aggiungo alla definedMetrics
+        List.addDefinedMetric();
+      }
+      Query.objects = { token: item.dataset.metricToken, cubes: StorageMetric.selected.cubes };
+      // rovo l'attributo data-temporary perchè lo sto aggiungendo al report
+      delete item.dataset.temporary;
+      item.dataset.added = 'true';
+
+      app.checkObjectSelected();
+      app.setMetrics();
+      app.setFilteredMetrics();
+      app.setCompositeMetrics();
+    });
+
+    app.dialogMetric.close();
+  }
 
   app.btnCompositeMetricDone.onclick = () => app.dialogCompositeMetric.close();
 
@@ -1195,6 +1253,7 @@ var List = new Lists();
     }
     document.querySelector("#ul-defined-metrics section[data-metric-token='" + e.currentTarget.dataset.objectToken + "']").remove();
     delete document.querySelector("#ul-metrics section[data-metric-token='" + e.currentTarget.dataset.objectToken + "'] .selectable").dataset.selected;
+    delete document.querySelector("#ul-metrics section[data-metric-token='" + e.currentTarget.dataset.objectToken + "'] .selectable").dataset.added;
   }
 
   // remove composite metrics from report
@@ -1466,9 +1525,7 @@ var List = new Lists();
     valueSelected.forEach(element => arrayValues.push(element.dataset.label));
     // aggiungo i valori selezionati alla textarea
     app.addSpan(textarea, arrayValues.join(', '), 'filter');
-
     // TODO: impostare app.checkFormulaFilter(); nella creazione di un nuovo filtro
-
     app.dialogValue.close();
   }
 
@@ -2092,7 +2149,7 @@ var List = new Lists();
       delete filter.dataset.selected;
       // e rimuovo anche il data-temporary prima di chiudere la dialog
       delete filter.dataset.temporary;
-    }); 
+    });
   });
 
   // dialog metric
@@ -2102,6 +2159,11 @@ var List = new Lists();
     document.getElementById('alias-metric').value = "";
     document.querySelectorAll('#ul-metric-filters .selectable[data-selected]').forEach(filter => delete filter.dataset.selected);
     document.querySelectorAll('#ul-available-metrics .selectable[data-selected]').forEach(metric => delete metric.dataset.selected);
+    // annullo le metriche .selectable[data-temporary]. Non verranno aggiunte al report
+    document.querySelectorAll('#ul-metrics .selectable[data-temporary]').forEach(item => {
+      delete item.dataset.selected;
+      delete item.dataset.temporary;
+    });
   });
 
   // dialog composite-metric

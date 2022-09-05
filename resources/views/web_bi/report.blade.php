@@ -366,7 +366,7 @@
       </div>
 
       <div class="dialog-buttons">
-        <button type="button" name="cancel" class="md-button">annulla</button>
+        <button id="btnMetricCancel" type="button" name="cancel" class="md-button">annulla</button>
         <button id="btnMetricDone" type="button" name="done" class="md-button">fatto</button>
       </div>
     </section>
