@@ -612,32 +612,36 @@ class Lists {
     this.ul.appendChild(this.#sublist.section);
   }
 
-  // apertura dialog-composite-metric, popolo elenco di tutte le metriche presenti
-  addAllMetrics() {
+  addAllMetric() {
     this.ul = 'ul-all-metrics';
+    this.allMetrics = 'data-sublist-all-metrics';
+    // TODO: quando passo sopra una metrica da questa lista, per poterla inserire nella formula, potrei visualizzare, in un div, il dettaglio della metrica selezionata, per capire meglio come sto creando la formula
+    this.#sublist.section.dataset.label = StorageMetric.selected.name;
+    this.#sublist.section.dataset.cubeToken = StorageMetric.selected.cubeToken;
+    // metriche composte di base e composte non hanno le prop table, tableAlias
+    if (StorageMetric.selected.metric_type !== 1 && StorageMetric.selected.metric_type !== 4 && StorageMetric.selected.metric_type !== 3) {
+      this.#sublist.selectable.dataset.tableName = StorageMetric.selected.formula.table;
+      this.#sublist.selectable.dataset.tableAlias = StorageMetric.selected.formula.tableAlias;
+      this.#sublist.table.innerText = StorageMetric.selected.formula.table;
+    }
+    this.#sublist.selectable.dataset.label = StorageMetric.selected.name;
+    this.#sublist.selectable.dataset.cubeToken = StorageMetric.selected.cubeToken;
+    this.#sublist.selectable.dataset.metricToken = StorageMetric.selected.token;
+    this.#sublist.span.innerText = StorageMetric.selected.name;
+    this.#sublist.cube.innerText = StorageCube.selected.name;
+    this.ul.appendChild(this.#sublist.section);
+  }
+
+  // apertura dialog-composite-metric, popolo elenco di tutte le metriche presenti
+  initAllMetrics() {
     // per ogni cubo selezionato ne recupero le metriche ad esso appartenenti
     Query.cubes.forEach(cubeToken => {
       StorageCube.selected = cubeToken;
       // recupero lista aggiornata delle metriche
       StorageMetric.cubeMetrics = cubeToken;
       for (const [token, metric] of Object.entries(StorageMetric.cubeMetrics)) {
-        this.allMetrics = 'data-sublist-all-metrics';
-        // TODO: quando passo sopra una metrica da questa lista, per poterla inserire nella formula, potrei visualizzare, in un div, il dettaglio della metrica selezionata, per capire meglio come sto creando la formula
-        this.#sublist.section.dataset.label = metric.name;
-        this.#sublist.section.dataset.cubeToken = metric.cubeToken;
-        // metriche composte di base e composte non hanno le prop table, tableAlias
-        if (metric.metric_type !== 1 && metric.metric_type !== 4 && metric.metric_type !== 3) {
-          this.#sublist.selectable.dataset.tableName = metric.formula.table;
-          this.#sublist.selectable.dataset.tableAlias = metric.formula.tableAlias;
-          this.#sublist.table.innerText = metric.formula.table;
-        }
-        this.#sublist.selectable.dataset.label = metric.name;
-        this.#sublist.selectable.dataset.cubeToken = metric.cubeToken;
-        this.#sublist.selectable.dataset.metricToken = token;
-        // this.#sublist.selectable.onclick = app.handlerMetricSelectedComposite;
-        this.#sublist.span.innerText = metric.name;
-        this.#sublist.cube.innerText = StorageCube.selected.name;
-        this.ul.appendChild(this.#sublist.section);
+        StorageMetric.selected = token;
+        this.addAllMetric();
       }
     });
   }

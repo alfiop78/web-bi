@@ -491,7 +491,7 @@ var List = new Lists();
     // aggiungo, nella ul-metrics, le metriche già create
     // ripulisco la lista, prima di popolarla
     document.querySelectorAll('#ul-metrics section').forEach(item => item.remove());
-    List.addAllMetrics();
+    List.initAllMetrics();
     app.dialogCompositeMetric.showModal();
   }
 
@@ -1308,15 +1308,11 @@ var List = new Lists();
     const inputAlias = document.getElementById('composite-alias-metric');
     let arr_sql = [];
     const date = new Date();
-    //const rand = () => Math.random(0).toString(36).substr(2);
     const token = (!e.target.dataset.token) ? rand().substr(0, 21) : e.target.dataset.token;
     let metricsAlias = {}; // contiene un'elenco di object con nome_metrica : alias che compongono la metrica composta
     let cubes = new Set(); // contiene i cubi relativi alle metriche all'interno della metrica composta
     if (e.target.dataset.token) StorageMetric.selected = token;
     document.querySelectorAll('#composite-metric-formula *').forEach(element => {
-      // console.log('element : ', element);
-      // debugger;
-      // console.log('element : ', element.nodeName);
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       // se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
       if (element.nodeName === 'MARK') {
@@ -1336,10 +1332,7 @@ var List = new Lists();
     });
     // arr_sql.push(`AS '${inputAlias.value}'`);
     let metricObj = {
-      type: 'METRIC',
-      name: inputName.value,
-      token,
-      metric_type: 4,
+      type: 'METRIC', name: inputName.value, token, metric_type: 4,
       formula: { token, formula_sql: arr_sql, alias: inputAlias.value, metrics_alias: metricsAlias },
       cubes: [...cubes],
       updated_at: date.toLocaleDateString('it-IT', options),
@@ -1349,16 +1342,18 @@ var List = new Lists();
     StorageMetric.save(metricObj);
     // salvo nel DB
     // app.saveMetricDB(metricObj);
-    // reimposto, come metrica selezionata, la metrica appena creata che è da aggiungere a #ul-composite-metrics
-    StorageMetric.selected = token;
     // aggiungo la metrica alla <ul>
     if (e.target.dataset.token) {
       // aggiornamento metrica
       document.querySelector("#ul-composite-metrics section[data-metric-token='" + token + "']").dataset.label = inputName.value;
       document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + token + "'] span[metric]").innerText = inputName.value;
     } else {
+      // reimposto, come metrica selezionata, la metrica appena creata che è da aggiungere a #ul-composite-metrics
+      StorageMetric.selected = token;
       // salvataggio nuova metrica, la aggiungo alla ul
       List.addCompositeMetric();
+      // la aggiungo anche alla ul-all-metrics
+      List.addAllMetric();
     }
     // resetto le input e la formula
     inputName.value = "";
@@ -1638,7 +1633,7 @@ var List = new Lists();
       // ripulisco la lista, prima di popolarla
       document.querySelectorAll('#ul-all-metrics > section').forEach(item => item.remove());
       // const ul = document.getElementById('ul-metrics');
-      List.addAllMetrics();
+      List.initAllMetrics();
       delete app.btnCompositeMetricSave.dataset.token;
       app.dialogCompositeMetric.showModal();
       document.getElementById('composite-metric-name').focus();
