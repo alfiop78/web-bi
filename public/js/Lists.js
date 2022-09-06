@@ -595,20 +595,15 @@ class Lists {
     this.#sublist.selectable.dataset.metricType = StorageMetric.selected.metric_type;
     this.#sublist.span.innerText = StorageMetric.selected.name;
     this.#sublist.btnEdit.dataset.objectToken = StorageMetric.selected.token;
-    // per ogni cubo in StorageMetric.selected.metric_cubes
-    for (const [cubeToken, cube] of Object.entries(StorageMetric.selected.cubes)) {
+    StorageMetric.selected.cubes.forEach(token => {
       const contentSub = this.tmplSublists.content.cloneNode(true);
       const small = contentSub.querySelector('small');
-      small.dataset.cubeToken = cubeToken;
-      // small.dataset.metricToken = StorageMetric.selected.token;
-      // small.dataset.searchable = true;
-      // small.dataset.tableAlias = table.alias;
-      // small.dataset.tableId = tableId;
-      // small.dataset.elementSearch = 'search-hierarchy';
-      small.innerText = cube;
-      small.dataset.attr = cube + 'test';
+      small.dataset.cubeToken = token;
+      StorageCube.selected = token;
+      small.innerText = StorageCube.selected.name;
+      small.dataset.attr = token + '----test';
       this.#sublist.smalls.appendChild(small);
-    }
+    });
     this.ul.appendChild(this.#sublist.section);
   }
 
