@@ -812,7 +812,7 @@ class Lists {
     this.ul.appendChild(this.#sublist.section);
   }
 
-  addDefinedCompositeMetric(tokenCompositeMetric) {
+  addDefinedCompositeMetric() {
     this.ul = 'ul-defined-composite-metrics';
     this.definedCompositeMetrics = 'data-sublist-composite-metrics-defined';
     this.#sublist.section.dataset.label = StorageMetric.selected.name;
@@ -820,13 +820,6 @@ class Lists {
     this.#sublist.defined.dataset.metricToken = StorageMetric.selected.token;
     this.#sublist.span.innerText = StorageMetric.selected.name;
     this.#sublist.btnRemove.dataset.objectToken = StorageMetric.selected.token;
-    // TODO: da testare. Inserire una metrica composta all'interno di un'altra metrica composta
-    // if (tokenCompositeMetric) {
-    //   StorageMetric.selected = tokenCompositeMetric;
-    //   this.#sublist.section.dataset.compositeMetrics = StorageMetric.selected.token;
-    //   small.innerText = StorageMetric.selected.name;
-    //   this.#sublist.btnRemove.disable = true;
-    // }
     this.ul.appendChild(this.#sublist.section);
   }
 

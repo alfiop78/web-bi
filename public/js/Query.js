@@ -65,8 +65,8 @@ class Queries {
     this.object.columns = Object.fromEntries(this.select);
     this.object.filters = [...this.filters.keys()];
     this.object.metrics = [...this.metrics.keys()].concat([...this.filteredMetrics.keys()]);
-    this.object.compositeMetrics = [...this.compositeMetrics.keys()];
     debugger;
+    this.object.compositeMetrics = [...this.compositeMetrics.keys()];
     return this.object;
   }
 
@@ -182,7 +182,7 @@ class Queries {
   }
 
   setFilteredMetricReport(metric) {
-    if (!Query.filteredMetrics.has(metric.dataset.metricToken)) {
+    if (!this.filteredMetrics.has(metric.dataset.metricToken)) {
       let object = {
         token: metric.dataset.metricToken,
         name: StorageMetric.selected.name,

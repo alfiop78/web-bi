@@ -294,13 +294,11 @@ var List = new Lists();
 
     // metriche composte
     StorageProcess.selected.edit.compositeMetrics.forEach(token => {
-      // aggiungo alla Classe Query la metrica composta
-      debugger;
-      // BUG: Quando ci sono metriche nidificate 
+      // se è una metrica nidificata NON la invio a nestedCompositeMetrics
+      // solo le metriche "main" devono essere inviate a nestedCompositeMetrics la quale andrà a recuperare le metriche contenute nella formula
+      if (StorageProcess.selected.report.compositeMetrics[token].nested) return;
       app.nestedCompositeMetrics(token);
-
       StorageMetric.selected = token;
-      // seleziono le metriche (0, 1, 2, 3) impostate nel report
       document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + token + "']").dataset.selected = 'true';
       document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + token + "']").dataset.added = 'true';
       Query.objects = { token, cubes: StorageMetric.selected.cubes };
@@ -322,7 +320,6 @@ var List = new Lists();
 
     app.setMetrics();
     app.setFilteredMetrics();
-
     app.processList.toggleAttribute('hidden');
     app.checkObjectSelected();
   }
@@ -562,8 +559,9 @@ var List = new Lists();
         if (!document.querySelector("#ul-composite-metrics .selectable[data-metric-token='"+metric.token+"']").hasAttribute('data-selected')) {
           document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
           document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.added = 'true';
+          document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.nested = 'true';
           // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
-          List.addDefinedCompositeMetric(metric.token);
+          List.addDefinedCompositeMetric();
         }
         // la metrica da aggiungere nello <small> è sempre la metrica "main"
         List.addSmallCompositeMetric(token);
@@ -1680,12 +1678,14 @@ var List = new Lists();
 
   // metriche composte selezionate
   app.setCompositeMetrics = () => {
-    // Siccome le metriche composte contengono le metriche "base"/"filtrate" vanno aggiunte anche queste all'elaborazione di baseTable() (metriche base) oppure metricTable() (metriche filtrate)
-    document.querySelectorAll("#ul-composite-metrics .selectable[data-selected][data-metric-type='4']").forEach(metricRef => {
-      StorageMetric.selected = metricRef.dataset.metricToken;
+    // Siccome le metriche composte possono contenere metriche base/filtrate/composte
+    // ...vanno aggiunte anche queste all'elaborazione di baseTable() (metriche base) oppure metricTable() (metriche filtrate)
+    document.querySelectorAll("#ul-composite-metrics .selectable[data-selected][data-metric-type='4']").forEach(metric => {
+      StorageMetric.selected = metric.dataset.metricToken;
+      const nested = (metric.dataset.nested) ? true : false;
       // aggiungo alle metriche selezionate per il report, se non è già presente
-      if (!Query.compositeMetrics.has(metricRef.dataset.metricToken)) {
-        Query.compositeMetrics = { token: metricRef.dataset.metricToken, name: StorageMetric.selected.name, formula: StorageMetric.selected.formula };
+      if (!Query.compositeMetrics.has(metric.dataset.metricToken)) {
+        Query.compositeMetrics = { token: metric.dataset.metricToken, name: StorageMetric.selected.name, formula: StorageMetric.selected.formula, nested };
       }
     });
   }
