@@ -540,16 +540,15 @@ class Lists {
       // recupero le metriche di base 0, base composte 1, avanzate 2
       // console.log(StorageMetric.baseAdvancedMetrics.size);
       StorageMetric.baseAdvancedMetrics.forEach(metric => {
-        // console.log('metric : ', metric);
         this.metrics = 'data-sublist-metrics';
         this.#sublist.section.dataset.relatedObject = 'cube';
         this.#sublist.section.dataset.label = metric.name;
-        this.#sublist.section.dataset.cubeToken = cubeToken;
+        this.#sublist.section.dataset.cubeToken = metric.cube;
         this.#sublist.section.dataset.metricToken = metric.token;
         this.#sublist.selectable.dataset.tableName = value.FACT;
         this.#sublist.selectable.dataset.tableAlias = value.alias;
         // metricha di base composta
-        this.#sublist.selectable.dataset.cubeToken = cubeToken;
+        this.#sublist.selectable.dataset.cubeToken = metric.cube;
         this.#sublist.selectable.dataset.metricToken = metric.token;
         this.#sublist.selectable.dataset.metricType = metric.metric_type;
         // div.dataset.label = metric.name;
@@ -569,20 +568,18 @@ class Lists {
     this.metrics = 'data-sublist-metrics';
     this.#sublist.section.hidden = false; // rendo visibile la metrica appena creata
     this.#sublist.section.dataset.label = StorageMetric.selected.name;
-    this.#sublist.section.dataset.cubeToken = StorageMetric.selected.cubeToken;
+    this.#sublist.section.dataset.cubeToken = StorageMetric.selected.cube;
     this.#sublist.section.toggleAttribute('data-searchable');
     this.#sublist.selectable.dataset.tableName = Query.table;
     this.#sublist.selectable.dataset.tableAlias = Query.tableAlias;
-    this.#sublist.selectable.dataset.cubeToken = StorageMetric.selected.cubeToken;
+    this.#sublist.selectable.dataset.cubeToken = StorageMetric.selected.cube;
     this.#sublist.selectable.dataset.metricToken = StorageMetric.selected.token;
     this.#sublist.selectable.dataset.metricType = StorageMetric.selected.metric_type;
     this.#sublist.span.innerText = StorageMetric.selected.name;
     (StorageMetric.selected.metric_type === 2) ? this.#sublist.btnInfo.dataset.infoObjectToken = StorageMetric.selected.token : this.#sublist.btnInfo.hidden = 'true';
     this.#sublist.btnEdit.dataset.objectToken = StorageMetric.selected.token;
-    // this.#sublist.btnEdit.dataset.fn = 'handlerMetricEdit';
     if (StorageMetric.selected.metric_type === 0 || StorageMetric.selected.metric_type === 2) this.#sublist.table.innerText = Query.table;
     this.#sublist.cube.innerText = StorageCube.selected.name;
-    // this.#sublist.selectable.dataset.fn = 'handlerMetricSelected';
     this.ul.appendChild(this.#sublist.section);
   }
 
@@ -612,7 +609,16 @@ class Lists {
     this.allMetrics = 'data-sublist-all-metrics';
     // TODO: quando passo sopra una metrica da questa lista, per poterla inserire nella formula, potrei visualizzare, in un div, il dettaglio della metrica selezionata, per capire meglio come sto creando la formula
     this.#sublist.section.dataset.label = StorageMetric.selected.name;
-    this.#sublist.section.dataset.cubeToken = StorageMetric.selected.cubeToken;
+    // le metriche composte hanno la prop "cubes" contenente un array di cubi, anzichè "cube"
+    if (StorageMetric.selected.metric_type === 4) {
+      // TODO: <smalls> per i cubi legati a questa metrica
+      this.#sublist.section.dataset.cubeToken = StorageMetric.selected.cubes.join(' ');
+      this.#sublist.selectable.dataset.cubeToken = StorageMetric.selected.cubes.join(' ');
+    } else {
+      this.#sublist.section.dataset.cubeToken = StorageMetric.selected.cube;
+      this.#sublist.selectable.dataset.cubeToken = StorageMetric.selected.cube;
+      this.#sublist.cube.innerText = StorageCube.selected.name;
+    }
     // metriche composte di base e composte non hanno le prop table, tableAlias
     if (StorageMetric.selected.metric_type !== 1 && StorageMetric.selected.metric_type !== 4 && StorageMetric.selected.metric_type !== 3) {
       this.#sublist.selectable.dataset.tableName = StorageMetric.selected.formula.table;
@@ -620,10 +626,8 @@ class Lists {
       this.#sublist.table.innerText = StorageMetric.selected.formula.table;
     }
     this.#sublist.selectable.dataset.label = StorageMetric.selected.name;
-    this.#sublist.selectable.dataset.cubeToken = StorageMetric.selected.cubeToken;
     this.#sublist.selectable.dataset.metricToken = StorageMetric.selected.token;
     this.#sublist.span.innerText = StorageMetric.selected.name;
-    this.#sublist.cube.innerText = StorageCube.selected.name;
     this.ul.appendChild(this.#sublist.section);
   }
 

@@ -929,7 +929,7 @@ var List = new Lists();
       associatedFilters.add(filterSelected.dataset.filterToken);
     });
     let metricObj = {
-      type: 'METRIC', name: inputName.value, token, cubes: [StorageCube.selected.token],
+      type: 'METRIC', name: inputName.value, token, cube: StorageCube.selected.token,
       updated_at: date.toLocaleDateString('it-IT', options)
     };
     metricObj.created_at = (e.target.dataset.token) ? StorageMetric.selected.created_at : date.toLocaleDateString('it-IT', options);
