@@ -272,7 +272,7 @@ var List = new Lists();
       // seleziono le metriche (0, 1, 2, 3) impostate nel report
       document.querySelector("#ul-metrics .selectable[data-metric-token='" + token + "']").dataset.selected = 'true';
       document.querySelector("#ul-metrics .selectable[data-metric-token='" + token + "']").dataset.added = 'true';
-      Query.objects = { token, cubes: StorageMetric.selected.cubes };
+      Query.objects = { token, cube: StorageMetric.selected.cube };
       // aggiungo alla lista #ul-defined-metrics se questa metrica non è stata già aggiunta da qualche metrica composta
       if (!document.querySelector("#ul-defined-metrics section[data-metric-token='" + token + "']")) List.addDefinedMetric();
     });
@@ -500,7 +500,7 @@ var List = new Lists();
         // se è già stata aggiunta (da precedenti metriche selezionate) aggiungo solo lo small, con all'interno
         // ...la metrica "madre" passata come argomento della fn
         if (!document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
-          Query.objects = { token: metric.token, cubes: StorageMetric.selected.cubes };
+          Query.objects = { token: metric.token, cube: StorageMetric.selected.cube };
           document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
           document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.added = 'true';
           // TODO: includo, con show-datamart = true, anche le metriche contenute nella formula all'interno del datamart finale
@@ -543,7 +543,6 @@ var List = new Lists();
     const templateContent = app.tmplFilterFormula.content.cloneNode(true);
     const span = templateContent.querySelector('span');
     const mark = templateContent.querySelector('mark');
-
     mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
     mark.innerText = e.currentTarget.dataset.label;
     textarea.appendChild(span);
@@ -575,15 +574,13 @@ var List = new Lists();
     //   key: "Tab"
     // });
     span.addEventListener('input', app.checkSpanFormula);
+    // Do nothing if the event was already processed
     span.onkeydown = (e) => {
-      if (e.defaultPrevented) {
-        return; // Do nothing if the event was already processed
-      }
+      if (e.defaultPrevented) return;
       /* verifico prima se questo span è l'ultimo elemento della formula.
       * In caso che lo span è l'ultimo elemento della formula ne aggiungo un'altro, altrimenti il Tab avrà il comportamento di default
       */
       const lastSpan = (e.target === target.querySelector('span[contenteditable]:last-child'));
-      // console.log(e.key);
       switch (e.key) {
         case 'Tab':
           // console.log(e.ctrlKey);
@@ -599,15 +596,12 @@ var List = new Lists();
           if (span.textContent.length === 0) {
             // posiziono il focus sul primo span disponibile andando indietro nel DOM
             /* const event = new Event('build');
-
             // Listen for the event.
              span.addEventListener('build', function(e) { console.log(e) }, false);
-
             // Dispatch the event.
             span.dispatchEvent(event);
             */
             // span.dispatchEvent(evt);
-
             // verifico il primo span[contenteditable] presente andando all'indietro (backspace keydown event)
             let previousContentEditable = (span) => {
               // se viene trovate uno <span> precedente a quello passato come argomento, lo restituisco, altrimenti restituisco quello passato come argomento
@@ -620,11 +614,9 @@ var List = new Lists();
             span.remove();
           }
           break;
-
         default:
           break;
       }
-
     }
     if (value) span.innerText = value;
     target.appendChild(span);
@@ -872,7 +864,7 @@ var List = new Lists();
     document.querySelectorAll('#ul-metrics .selectable[data-temporary]').forEach(item => {
       StorageMetric.selected = item.dataset.metricToken;
       List.addDefinedMetric();
-      Query.objects = { token: item.dataset.metricToken, cubes: StorageMetric.selected.cubes };
+      Query.objects = { token: item.dataset.metricToken, cube: StorageMetric.selected.cube };
       // rimuovo l'attributo data-temporary perchè lo sto aggiungendo al report
       // ... per lo stesso motivo aggiungo data-added
       delete item.dataset.temporary;
@@ -1111,9 +1103,14 @@ var List = new Lists();
       if (element.nodeName === 'MARK') {
         StorageMetric.selected = element.dataset.metricToken;
         // recupero il nome del cubo a cui appartiene la metrica. Questo lo visualizzerò nell'elenco delle metriche composte
-        // TODO: qui dovranno essere ciclati i cubi per le metriche create su più cubi
-        StorageCube.selected = StorageMetric.selected.cubes;
-        cubes.add(StorageCube.selected.token);
+        // ciclo i cubi, per le metriche_type =4
+        if (StorageMetric.selected.metric_type === 4) {
+          StorageMetric.selected.cubes.forEach(cubeToken => cubes.add(cubeToken));
+        } else {
+          cubes.add(StorageMetric.selected.cube);
+        }
+        // StorageCube.selected = StorageMetric.selected.cubes;
+        // cubes.add(StorageCube.selected.token);
         // metrics[element.innerText] = StorageMetric.selected.formula.alias;
         // TODO: probabilmente qui meglio inserire tutto il contenuto della metrica e non solo l'alias
         metricsAlias[element.innerText] = { token: element.dataset.metricToken, alias: StorageMetric.selected.formula.alias };
@@ -1135,7 +1132,6 @@ var List = new Lists();
     StorageMetric.save(metricObj);
     // salvo nel DB
     // app.saveMetricDB(metricObj);
-    // aggiungo la metrica alla <ul>
     if (e.target.dataset.token) {
       // aggiornamento metrica
       document.querySelector("#ul-composite-metrics section[data-metric-token='" + token + "']").dataset.label = inputName.value;
@@ -1143,12 +1139,10 @@ var List = new Lists();
     } else {
       // reimposto, come metrica selezionata, la metrica appena creata che è da aggiungere a #ul-composite-metrics
       StorageMetric.selected = token;
-      // salvataggio nuova metrica, la aggiungo alla ul
+      // salvataggio nuova metrica, le aggiungo alle <ul>
       List.addCompositeMetric();
-      // la aggiungo anche alla ul-all-metrics
       List.addAllMetric();
     }
-    // resetto le input e la formula
     inputName.value = "";
     inputAlias.value = "";
     document.querySelectorAll('#composite-metric-formula *').forEach(item => item.remove());
