@@ -198,7 +198,6 @@ var List = new Lists();
       document.querySelector("#ul-cubes section[data-cube-token='" + token + "'] .selectable").dataset.selected = 'true';
       Query.cubes = token;
       app.toggleCubeObjects();
-      // app.showCubeObjects();
       app.btnToggleDimensionsDrawer.disabled = false;
     });
 
@@ -208,7 +207,6 @@ var List = new Lists();
       document.querySelector("#ul-dimensions section[data-dimension-token='" + token + "'] .selectable").dataset.selected = 'true';
       Query.dimensions = token;
       app.toggleDimensionObjects();
-      // app.showDimensionObjects();
     });
 
     // colonne
@@ -249,9 +247,7 @@ var List = new Lists();
       if (StorageFilter.selected.hasOwnProperty('cubes')) object.cubes = StorageFilter.selected.cubes;
       if (StorageFilter.selected.hasOwnProperty('dimensions')) object.dimensions = StorageFilter.selected.dimensions;
       if (StorageFilter.selected.hasOwnProperty('hierarchies')) object.hierarchies = StorageFilter.selected.hierarchies;
-
       Query.objects = object;
-      // aggiungo alla lista #ul-defined-filters
       List.addDefinedFilter();
     });
 
@@ -452,11 +448,8 @@ var List = new Lists();
   // selezione di un cubo (step-1)
   app.handlerCubeSelected = (e) => {
     StorageCube.selected = e.currentTarget.dataset.cubeToken;
-    // Query.tableAlias = StorageCube.selected.alias;
     // al momento non serve l'object con tableAlias e from, lo recupero direttamente dal nome del cubo in handlerEditReport, se così potrei anche utilizzare un oggetto Set anziche Map in Query.js
-    // Query.elementCube = {token : e.currentTarget.dataset.cubeToken, tableAlias : StorageCube.selected.alias, from : Query.from, FACT : StorageCube.selected.FACT, name : StorageCube.selected.name};
     if (e.currentTarget.hasAttribute('data-selected')) {
-      // nascondo tutti gli elementi relativi al cubo deselezionato
       // TODO: oltre a nascondere gli elementi del cubo deselezionato, devo anche rimuoverli dalla proprietà #objects della classe Query
     } else {
       // abilito il tasto #toggle-dimensions-drawer che consente di aprire il drawer con l'elenco delle dimensioni
@@ -473,7 +466,6 @@ var List = new Lists();
   app.handlerDimensionSelected = (e) => {
     StorageDimension.selected = e.currentTarget.dataset.dimensionToken;
     console.log('Dimensione selezionata : ', StorageDimension.selected.name);
-    // Query.elementDimension = { token : e.currentTarget.dataset.dimensionToken, cubes : StorageDimension.selected.cubes};
     if (e.currentTarget.hasAttribute('data-selected')) {
       // TODO: oltre a nascondere gli elementi della dimensione deselezionata, devo anche eliminarli dalla proprietà #objects della classe Query.
     } else {
@@ -656,16 +648,12 @@ var List = new Lists();
 
   // div contenteditable della formula per il filtro
   document.getElementById('composite-filter-formula').onclick = (e) => {
-    // console.log('e : ', e);
     // elimino lo span che contiene il "placeholder"
-    // console.log('e.target : ', e.target);
-    // console.log('e.currentTarget : ', e.currentTarget);
     if (e.target.localName === 'div') app.addSpan(e.target, null, 'filter');
   }
 
   // selezione delle colonne
   app.handlerSelectColumn = (e) => {
-    console.log('addColumns');
     // verifico che almeno una dimension sia stata selezionata
     if (Query.dimensions.size === 0) {
       App.showConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
@@ -701,35 +689,6 @@ var List = new Lists();
         }
       }
       e.currentTarget.toggleAttribute('data-selected');
-    }
-  }
-
-  // selezione della tabella nella dialog-tables (columns)
-  app.handlerTableSelected = (e) => {
-    debugger;
-    const dimension = e.currentTarget.dataset.dimensionToken;
-    Query.table = e.currentTarget.getAttribute('label'); // TODO: impostare data-label
-    Query.tableAlias = e.currentTarget.dataset.tableAlias;
-    Query.tableId = +e.currentTarget.dataset.tableId;
-    const hier = e.currentTarget.dataset.hierToken;
-    // deseleziono le precedenti tabelle selezionate
-    // let activeDialog = document.querySelector('dialog[open]');
-    if (app.dialogColumns.querySelector('#fieldList-tables ul li[selected]')) {
-      const li = app.dialogColumns.querySelector('#fieldList-tables ul li[selected]');
-      li.toggleAttribute('selected');
-      // nascondo tutte le colonne che fanno parte della tabella precedentemente selezionata
-      app.dialogColumns.querySelectorAll("ul[data-id='fields-column'] > section[data-dimension-name='" + dimension + "'][data-hier-token='" + hier + "'][data-table-name='" + li.getAttribute('label') + "']").forEach((field) => {
-        field.hidden = true;
-        delete field.dataset.searchable;
-      });
-    }
-    e.currentTarget.toggleAttribute('selected');
-    if (e.currentTarget.hasAttribute('selected')) {
-      // visualizzo le colonne appartenenti alla tabella selezionata
-      app.dialogColumns.querySelectorAll("ul[data-id='fields-column'] > section[data-dimension-name='" + dimension + "'][data-hier-token='" + hier + "'][data-table-name='" + Query.table + "']").forEach((field) => {
-        field.hidden = false;
-        field.dataset.searchable = 'true';
-      });
     }
   }
 
@@ -804,71 +763,8 @@ var List = new Lists();
     }
   }
 
-  // apertura dialog per impostare le colonne nel report
-  app.openDialogColumns = (e) => {
-    const hier = e.currentTarget.dataset.hierToken;
-    const table = e.currentTarget.dataset.tableName;
-    const dimension = e.currentTarget.dataset.dimensionToken;
-    app.dialogColumns.querySelector('section').dataset.hierToken = hier;
-    app.dialogColumns.querySelector('section').dataset.dimensionToken = dimension;
-    // nascondo le tabelle NON appartenenti alla gerarchia selezionata
-    app.dialogColumns.querySelectorAll("#list-columns > section:not([data-table-name='" + table + "'])").forEach((column) => {
-      column.hidden = true;
-      delete column.dataset.searchable;
-    });
-    // visualizzo le tabelle appartenenti alla hier selezionata
-    document.querySelectorAll("#list-columns > section[data-table-name='" + table + "']").forEach((column) => {
-      // console.log('tabelle appartententi alla gerarchia selezionata : ', table);
-      column.hidden = false;
-      // imposto l'elemento con l'attr 'searchable' in modo che il metodo SearchInSectionList cerca solo tra gli elementi che hanno questo attributo
-      // senza questo attributo, il metodo cerca tra tutti gli elementi e quindi và a nascondere/visualizzare anche quelli appartenenti ad altre dimensioni/gerarchie/tabelle ecc...
-      column.dataset.searchable = true;
-    });
-    app.dialogColumns.showModal();
-  }
-
-  // selezione della tabella nello step Filter, visualizzo i filtri creati su questa tabella, recuperandoli dallo storage
-  app.openDialogFilters = (e) => {
-    if (!e.target.hasAttribute('data-fact-name')) {
-      const hier = e.currentTarget.dataset.hierToken;
-      const dimension = e.currentTarget.dataset.dimensionToken;
-      app.dialogFilter.querySelector('section').dataset.hierToken = hier;
-      app.dialogFilter.querySelector('section').dataset.dimensionToken = dimension;
-      // nascondo le tabelle NON appartenenti alla hier selezionata
-      app.dialogFilter.querySelectorAll("ul[data-id='fields-tables'] > section:not([data-dimension-name='" + dimension + "'][data-hier-token='" + hier + "'])").forEach(table => table.hidden = true);
-      // visualizzo le tabelle appartenenti alla hier selezionata
-      app.dialogFilter.querySelectorAll("ul[data-id='fields-tables'] > section[data-dimension-name='" + dimension + "'][data-hier-token='" + hier + "']").forEach((table) => {
-        // console.log('tabelle appartententi alla gerarchia selezionata : ', table);
-        table.hidden = false;
-        // imposto l'elemento con l'attr 'searchable' in modo che il metodo SearchInSectionList cerca solo tra gli elementi che hanno questo attributo
-        // senza questo attributo, il metodo cerca tra tutti gli elementi e quindi và a nascondere/visualizzare anche quelli appartenenti ad altre dimensioni/gerarchie/tabelle ecc...
-        table.toggleAttribute('data-searchable');
-      });
-      // rimuovo, se già presente, la <ul> contenuto all'interno di #fieldList-filter per mostrare le colonne (recuperate dal DB) della tabella selezionata (esiste su selezione precedente)
-      const listRef = app.dialogFilter.querySelector('#fieldList-filter');
-      if (listRef.querySelector('ul')) listRef.querySelector('ul').remove();
-    } else {
-      // FACT
-      const fact = e.currentTarget.dataset.factName;
-      app.dialogFilter.querySelector('section').dataset.factName = fact;
-      // visualizzo le tabelle appartenenti alla FACT selezionata
-      app.dialogFilter.querySelectorAll("ul[data-id='fields-tables'] > section[data-fact-name='" + fact + "']").forEach((table) => {
-        // console.log('tabelle appartententi alla gerarchia selezionata : ', table);
-        table.hidden = false;
-        // imposto l'elemento con l'attr 'searchable' in modo che il metodo SearchInSectionList cerca solo tra gli elementi che hanno questo attributo
-        // senza questo attributo, il metodo cerca tra tutti gli elementi e quindi và a nascondere/visualizzare anche quelli appartenenti ad altre dimensioni/gerarchie/tabelle ecc...
-        table.toggleAttribute('data-searchable');
-      });
-    }
-    app.dialogPopup = app.dialogFilter.querySelector('#dialog-popup');
-    app.dialogFilter.showModal();
-  }
-
   // cancellazione di un oggetto inserito nelle textarea formula SQL
-  app.cancelFormulaObject = (e) => {
-    console.log(e.currentTarget);
-    e.currentTarget.parentElement.remove();
-  }
+  app.cancelFormulaObject = e => e.currentTarget.parentElement.remove();
 
   // selezione del field nella dialogFilter, questo metodo farà partire la query per ottenere i campi distinti (in getDistinctValues())
   app.handlerSelectField = (e) => {
@@ -1008,7 +904,7 @@ var List = new Lists();
   }
 
   // dialog-metric-filter, recupero i filtri selezionati per inserirli nella metrica filtrata
-  app.btnMetricFilterDone.onclick = e => app.dialogMetricFilter.close();
+  app.btnMetricFilterDone.onclick = () => app.dialogMetricFilter.close();
 
   // save metric
   app.btnMetricSave.onclick = (e) => {
@@ -1445,7 +1341,6 @@ var List = new Lists();
     span.innerText = e.target.getAttribute('label'); // TODO: dataset data-label
     textarea.appendChild(span);
   }
-  /* events */
 
   // TODO: da ricontrollare 22.04.2022
   app.checkSelection = () => {
