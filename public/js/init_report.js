@@ -507,7 +507,10 @@ var List = new Lists();
           // document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'true';
           List.addDefinedMetric();
         }
-        List.addSmallMetric(token);
+        // TODO: verifico se lo <small> per questa metrica è stato già inserito
+        if (!document.querySelector("#ul-defined-metrics section[data-metric-token='" + metric.token + "']").hasAttribute("data-" + token)) {
+          List.addSmallMetric(token);
+        }
       } else {
         // metrica composta
         if (!document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
