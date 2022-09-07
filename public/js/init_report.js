@@ -118,65 +118,26 @@ var List = new Lists();
     }
   }
 
-  // visualizzo metriche / filtri appartenenti al cubo
-  app.showCubeObjects = () => {
+  // visualizzo/nascondo oggetti ( metriche / filtri ) appartenenti al cubo
+  app.toggleCubeObjects = () => {
     document.querySelectorAll("section[data-related-object*='cube'][data-cube-token='" + StorageCube.selected.token + "']").forEach(item => {
-      item.hidden = false;
+      item.toggleAttribute('hidden');
       item.toggleAttribute('data-searchable');
     });
   }
 
-  app.hideCubeObjects = () => {
-    document.querySelectorAll("section[data-related-object*='cube'][data-cube-token='" + StorageCube.selected.token + "']").forEach(item => {
-      item.hidden = true;
-      item.toggleAttribute('data-searchable');
-    });
-  }
-
-  app.showDimensions = () => {
-    // visualizzo la <ul> contentente le dimensioni appartenenti al cubo selezionato
-    document.querySelectorAll("#ul-dimensions > section[data-cube-token='" + StorageCube.selected.token + "']").forEach((dimension) => {
-      // console.log('Dimensioni del cubo selezionato : ', dimension);
-      dimension.hidden = false;
-      dimension.dataset.searchable = true;
-    });
-  }
-
-  app.hideDimensions = () => {
-    document.querySelectorAll("#ul-dimensions > section[data-cube-token='" + StorageCube.selected.token + "']").forEach((table) => {
-      table.hidden = true;
-      table.toggleAttribute('data-searchable');
-    });
-  }
-
-  app.showDimensionObjects = () => {
+  app.toggleDimensionObjects = () => {
     document.querySelectorAll("section[data-related-object*='dimension'][data-dimension-token*='" + StorageDimension.selected.token + "']").forEach(hier => {
-      hier.hidden = false;
-      hier.dataset.searchable = true;
+      hier.toggleAttribute('hidden');
+      hier.toggleAttribute('data-searchable');
     });
   }
 
-  app.hideDimensionObjects = () => {
-    document.querySelectorAll("section[data-related-object*='dimension'][data-dimension-token*='" + StorageDimension.selected.token + "']").forEach(hier => {
-      hier.hidden = true;
-      delete hier.dataset.searchable;
-    });
-  }
-
-  app.showAllElements = () => {
+  app.toggleAllObjects = () => {
     // per ogni dimensione in #elementDimension...
     for (const [token, value] of Query.elementHierarchy) {
       document.querySelectorAll("ul > section.data-item[data-dimension-token='" + value.dimensionToken + "'][data-hier-token='" + token + "']").forEach((item) => {
-        item.hidden = false;
-        item.toggleAttribute('data-searchable');
-      });
-    }
-  }
-
-  app.hideAllElements = () => {
-    for (const [token, value] of Query.elementHierarchy) {
-      document.querySelectorAll("ul section.data-item[data-dimension-token='" + value.dimensionToken + "'][data-hier-token='" + token + "']").forEach((item) => {
-        item.hidden = true;
+        item.toggleAttribute('hidden');
         item.toggleAttribute('data-searchable');
       });
     }
@@ -236,7 +197,8 @@ var List = new Lists();
       // selezione del cubo nella #ul-cubes
       document.querySelector("#ul-cubes section[data-cube-token='" + token + "'] .selectable").dataset.selected = 'true';
       Query.cubes = token;
-      app.showCubeObjects();
+      app.toggleCubeObjects();
+      // app.showCubeObjects();
       app.btnToggleDimensionsDrawer.disabled = false;
     });
 
@@ -245,7 +207,8 @@ var List = new Lists();
       StorageDimension.selected = token;
       document.querySelector("#ul-dimensions section[data-dimension-token='" + token + "'] .selectable").dataset.selected = 'true';
       Query.dimensions = token;
-      app.showDimensionObjects();
+      app.toggleDimensionObjects();
+      // app.showDimensionObjects();
     });
 
     // colonne
@@ -495,14 +458,13 @@ var List = new Lists();
     if (e.currentTarget.hasAttribute('data-selected')) {
       // nascondo tutti gli elementi relativi al cubo deselezionato
       // TODO: oltre a nascondere gli elementi del cubo deselezionato, devo anche rimuoverli dalla proprietà #objects della classe Query
-      app.hideCubeObjects();
     } else {
       // abilito il tasto #toggle-dimensions-drawer che consente di aprire il drawer con l'elenco delle dimensioni
       app.btnToggleDimensionsDrawer.disabled = false;
-      app.showCubeObjects();
       // visualizzo la tabelle fact del cubo selezionato
       // document.querySelector("#ul-fact-tables > section[data-cube-token='" + StorageCube.selected.token + "']").hidden = false;
     }
+    app.toggleCubeObjects();
     e.currentTarget.toggleAttribute('data-selected');
     Query.cubes = e.currentTarget.dataset.cubeToken;
   }
@@ -514,15 +476,14 @@ var List = new Lists();
     // Query.elementDimension = { token : e.currentTarget.dataset.dimensionToken, cubes : StorageDimension.selected.cubes};
     if (e.currentTarget.hasAttribute('data-selected')) {
       // TODO: oltre a nascondere gli elementi della dimensione deselezionata, devo anche eliminarli dalla proprietà #objects della classe Query.
-      app.hideDimensionObjects();
     } else {
-      app.showDimensionObjects();
       app.btnToggleHierarchyDrawer.disabled = false;
     }
+    app.toggleDimensionObjects();
     e.currentTarget.toggleAttribute('data-selected');
     Query.dimensions = e.currentTarget.dataset.dimensionToken;
   }
-  // selezione di un filtro, lo salvo nell'oggetto Query
+  // selezione di un filtro
   app.handlerFilterSelected = (e) => {
     // se il filtro è già stato aggiunto al report non si può deselezionare da qui ma bisogna rimuoverlo dal report
     if (!e.currentTarget.hasAttribute('data-added')) {
@@ -557,7 +518,7 @@ var List = new Lists();
         List.addSmallMetric(token);
       } else {
         // metrica composta
-        if (!document.querySelector("#ul-composite-metrics .selectable[data-metric-token='"+metric.token+"']").hasAttribute('data-selected')) {
+        if (!document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
           Query.objects = { token: metric.token, cubes: StorageMetric.selected.cubes };
           document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
           document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.added = 'true';
@@ -1166,7 +1127,7 @@ var List = new Lists();
         Query.filteredMetrics = { token: StorageMetric.selected.token };
         break;
       default:
-        Query.metrics = { token : StorageMetric.selected.token};
+        Query.metrics = { token: StorageMetric.selected.token };
         break;
     }
     document.querySelector("ul section.data-item-defined[data-metric-token='" + StorageMetric.selected.token + "']").remove();
