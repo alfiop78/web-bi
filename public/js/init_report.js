@@ -18,23 +18,17 @@ var List = new Lists();
 
   var app = {
     // templates
-    tmplList: document.getElementById('templateList'), // contiene i section
-    tmplSublists: document.getElementById('template-sublists'),
     tmplFilterFormula: document.getElementById('tmpl-filter-formula'),
     absoluteWindow: document.getElementById('absolute-window'),
     info: document.getElementById('info'),
 
     processList: document.getElementById('reportProcessList'),
-    // ul
-    ulDefinedCompositeMetrics: document.getElementById('ul-defined-composite-metrics'),
 
     // btn
     btnAddFilters: document.getElementById('btn-add-filters'),
     btnAddColumns: document.getElementById('btn-add-columns'),
     btnAddMetrics: document.getElementById('btn-add-metrics'),
     btnAddCompositeMetrics: document.getElementById('btn-add-composite-metrics'),
-    btnPreviousStep: document.getElementById('prev'),
-    btnNextStep: document.getElementById('next'),
     btnSQLProcess: document.getElementById('sql_process'),
     btnSearchValue: document.getElementById('search-field-values'),
 
@@ -61,16 +55,10 @@ var List = new Lists();
     btnValueDone: document.getElementById('btnValueDone'), // tasto done nella dialogValue
     btnSaveReport: document.getElementById('save'), // apre la dialogSaveReport
     btnSaveReportDone: document.getElementById('btnReportSaveName'),
-
     // inputs
     columnAlias: document.getElementById('columnAlias'), // input nella dialog-columns
-
     btnBackPage: document.getElementById('mdcBack'), // da definire
-    ulDimensions: document.getElementById('dimensions'),
     aggregationFunction: document.getElementById('ul-aggregation-functions'),
-    btnMapping: document.getElementById('mdcMapping'),
-    tooltip: document.getElementById('tooltip'),
-    tooltipTimeoutId: null,
     btnToggleHierarchyDrawer: document.getElementById('toggle-hierarchy-drawer'),
     btnToggleCubesDrawer: document.getElementById('toggle-cubes-drawer'),
     btnToggleDimensionsDrawer: document.getElementById('toggle-dimensions-drawer')
@@ -306,7 +294,6 @@ var List = new Lists();
   // edit filter
   app.handlerFilterEdit = (e) => {
     // recupero il filtro selezionato
-    // apro la #dialog-filter
     // carico l'elenco delle colonne della tabella (da valutare per i filtri su più tabelle)
     // inserisco i dati del filtro nella dialog (formula, name, table)
     const filterName = document.getElementById('filterName');
@@ -314,12 +301,13 @@ var List = new Lists();
     app.btnFilterSave.dataset.token = e.currentTarget.dataset.objectToken;
     const textarea = document.getElementById('composite-filter-formula');
     StorageFilter.selected = e.currentTarget.dataset.objectToken;
-    // imposto il nome del filtro nella input. Lo imposto in due modi perchè con setAttribute viene riconosciuto dal MutationObserve e gli viene applicata la classe 'has-content' sulla label
+    // imposto il nome del filtro nella input.
+    // Lo imposto in due modi perchè con setAttribute viene riconosciuto dal MutationObserve e gli viene applicata
+    // ...la classe 'has-content' sulla label
     filterName.setAttribute('value', StorageFilter.selected.name);
     filterName.value = StorageFilter.selected.name;
     filterName.focus();
 
-    app.dialogFilter.showModal();
     StorageFilter.selected.editFormula.forEach(item => {
       if (item.hasOwnProperty('table')) {
         // recupero la formula inserita nel div contenteditable e la re-inserisco 
@@ -331,7 +319,7 @@ var List = new Lists();
         const mark = templateContent.querySelector('mark');
         const small = templateContent.querySelector('small');
         // l'item contiene il nome dell'alias della tabella, il field selezionato per creare il filtro e il nome della tabella.
-        // riprendo il template che ho utilizzato per creare il filtro.
+        // Riprendo il template che ho utilizzato per creare il filtro.
         mark.dataset.tableAlias = item.alias;
         mark.dataset.table = item.table;
         mark.dataset.field = item.field;
@@ -1202,11 +1190,8 @@ var List = new Lists();
     let editFormula = [];
     // Un filtro impostato la FACT avrà al suo interno il nome del cubo a cui è associato e l'alias della FACT
     document.querySelectorAll('#composite-filter-formula *').forEach(element => {
-      // console.log(element);
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
       // ... altrimenti devo recuperare il cubeToken. Ci sono anche filtri che possono essere fatti su un livello dimensionale e su una FACT
-      // console.log(element);
-      // debugger;
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         //const mark = element.querySelector('mark');
@@ -1250,10 +1235,6 @@ var List = new Lists();
         editFormula.push(element.innerText.trim());
       }
     });
-    // console.log(sql_formula);
-    // console.log(editFormula);
-    // debugger;
-    // console.log(hierarchiesMap);
     // TODO: la prop 'editFormula' va rinominata in 'edit'
     filterObject = {
       token,
@@ -1269,7 +1250,7 @@ var List = new Lists();
       filterObject.hierarchies = Object.fromEntries(hierarchiesMap);
       filterObject.dimensions = [...dimensions];
     }
-    // non sono presenti, tra gli elementi che compongono il filtro, che fanno riferimento a qualche livello dimensionale
+    // non sono presenti, tra gli elementi che compongono il filtro, elementi che fanno riferimento a qualche livello dimensionale
     if (cubes.size !== 0) filterObject.cubes = [...cubes];
     StorageFilter.save(filterObject);
     StorageFilter.selected = token;
@@ -1282,19 +1263,16 @@ var List = new Lists();
       document.querySelector("#ul-metric-filters section[data-filter-token='" + token + "']").dataset.label = filterName.value;
       document.querySelector("#ul-filters .selectable[data-filter-token='" + token + "'] span[filter]").innerText = filterName.value;
       document.querySelector("#ul-metric-filters .selectable[data-filter-token='" + token + "'] span[filter]").innerText = filterName.value;
+      delete e.target.dataset.token;
     } else {
       // nuovo filtro, lo aggiungo alle #ul
-      // app.observeUl('ul-filters');
       List.addFilter(false);
-      // app.observeUl('ul-metric-filters');
       // filtri presenti nella dialog-metrics (metriche avanzate)
       List.addMetricFilter(false);
-      // Later, you can stop observing
-      // app.observer.disconnect();
     }
     // pulisco la textarea
     document.querySelectorAll('#composite-filter-formula *').forEach(element => element.remove());
-    // reset del form
+    e.target.disabled = true;
     filterName.value = "";
     filterName.focus();
   }
@@ -1370,9 +1348,9 @@ var List = new Lists();
     return true;
   }
 
-  app.btnPreviousStep.onclick = () => Step.previous();
+  document.getElementById('prev').onclick = () => Step.previous();
 
-  app.btnNextStep.onclick = () => Step.next();
+  document.getElementById('next').onclick = () => Step.next();
 
   // aggiungi filtri
   app.btnAddFilters.onclick = () => {
@@ -1621,20 +1599,18 @@ var List = new Lists();
   // visualizzo in una dialog l'SQL della baseTable e delle metricTable
   app.btnSQLProcess.onclick = async () => {
     const name = document.getElementById('reportName').value;
-
     app.setFrom();
     app.setFactJoin();
-
     // imposto la FROM per gli elementi del cubo/i selezionati
     document.querySelectorAll("#ul-cubes section:not([hidden]) .selectable[data-include-query]").forEach(cubeRef => {
       Query.FROM = { tableAlias: cubeRef.dataset.tableAlias, SQL: `${cubeRef.dataset.schema}.${cubeRef.dataset.tableName} AS ${cubeRef.dataset.tableAlias}` };
     });
-
     app.setMetrics();
     // metriche filtrate
     app.setFilteredMetrics();
     // metriche composte
     app.setCompositeMetrics();
+
     if (!Query.processId) Query.processId = '_process_id_';
 
     Query.SQLProcess(name);
@@ -1837,7 +1813,7 @@ var List = new Lists();
 
   app.btnColumnSave.onclick = () => app.saveColumn();
 
-  app.btnMapping.onclick = () => location.href = '/mapping';
+  document.getElementById('mdcMapping').onclick = () => location.href = '/mapping';
 
   app.btnBackPage.onclick = () => window.location.href = '/';
 
