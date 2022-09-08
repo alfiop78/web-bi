@@ -342,12 +342,13 @@ var List = new Lists();
 
   app.handlerMetricEdit = (e) => {
     // recupero la metrica selezionata
-    // apro la #dialog-metrics
+    // // non consento la modifica di una metrica aggiunta al report (attr "data-added" presente su .selectable)
+    if (document.querySelector("#ul-metrics .selectable[data-metric-token='"+e.currentTarget.dataset.objectToken+"']").hasAttribute('data-added')) return;
     // inserisco i dati della metrica nella dialog
-    console.log(e.currentTarget.dataset.objectToken);
     StorageMetric.selected = e.currentTarget.dataset.objectToken;
     Query.table = StorageMetric.selected.formula.table;
     Query.tableAlias = StorageMetric.selected.formula.tableAlias;
+    // imposto il token sul tasto come fatto per l'edit di un filtro
     app.btnMetricSave.dataset.token = e.currentTarget.dataset.objectToken;
     // seleziono il field che riguarda la metrica
     if (StorageMetric.selected.metric_type === 1 || StorageMetric.selected.metric_type === 3) {
@@ -361,7 +362,7 @@ var List = new Lists();
     }
     // prima di selezionare la Fn di aggregazione che riguarda la metrica da editare, rimuovo la selezione dal valore di default SUM
     delete document.querySelector("#ul-aggregation-functions .selectable[data-selected]").dataset.selected;
-    // seleziono la aggregateFn selezionata per la metrica
+    // imposto la aggregateFn selezionata per la metrica
     document.querySelector("#ul-aggregation-functions .selectable[data-label='" + StorageMetric.selected.formula.aggregateFn + "']").dataset.selected = 'true';
     // nome e alias della metrica
     document.getElementById('metric-name').value = StorageMetric.selected.name;
@@ -375,7 +376,6 @@ var List = new Lists();
         document.querySelector("#ul-metric-filters .selectable[data-filter-token='" + filterToken + "']").dataset.selected = 'true';
       });
     }
-    app.dialogMetric.showModal();
     // abilito le input
     document.getElementById('metric-name').disabled = false;
     document.getElementById('alias-metric').disabled = false;
@@ -897,11 +897,6 @@ var List = new Lists();
     let metric_type = +document.querySelector('#ul-available-metrics .selectable[data-selected]').dataset.metricType;
     const distinctOption = document.getElementById('checkbox-distinct').checked;
     const date = new Date();
-    // console.log('Query.table : ', Query.table);
-    // console.log('Query.tableAlias : ', Query.tableAlias);
-    // console.log('Query.field : ', Query.field);
-    // console.log('cube selected : ', StorageCube.selected.name);
-    // console.log('cube selected token : ', StorageCube.selected.token);
     // edit o salvataggio di una metrica
     const token = (!e.target.dataset.token) ? rand().substr(0, 21) : e.target.dataset.token;
     // se la metrica è in fase di 'edit' la recupero dallo storage
@@ -952,10 +947,7 @@ var List = new Lists();
         metricObj.formula = formulaObj;
         break;
     }
-
-    // salvo la nuova metrica nello storage
     StorageMetric.save(metricObj);
-    // salvo nel DB
     // app.saveMetricDB(metricObj);
     // Imposto la metrica appena create come "selezionata" in modo da andare a creare il nuovo elemento nella #ul-metrics
     StorageMetric.selected = token;
@@ -964,11 +956,12 @@ var List = new Lists();
       // edit metrica
       document.querySelector("#ul-metrics section[data-metric-token='" + token + "']").dataset.label = inputName.value;
       document.querySelector("#ul-metrics .selectable[data-metric-token='" + token + "'] span[metric]").innerText = inputName.value;
+      delete e.target.dataset.token;
     } else {
       List.addMetric();
     }
     app.resetDialogMetric();
-    app.btnMetricSave.disabled = true;
+    e.target.disabled = true;
   }
 
   app.resetDialogMetric = () => {
@@ -1172,7 +1165,7 @@ var List = new Lists();
 
   // save filter
   app.btnFilterSave.onclick = (e) => {
-    console.log(Query.table);
+    // console.log(Query.table);
     // per i filtri creati sulla Fact, hier e dimension devono essere = null ma và salvato, nel filtro, il nome del cubo a cui accede
     const filterName = document.getElementById('filterName');
     // edit o salvataggio di un filtro
