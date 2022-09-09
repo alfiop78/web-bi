@@ -869,6 +869,32 @@ class Lists {
     defined.appendChild(small);
   }
 
+  // deseleziono la metrica composta specificata dal token
+  deselectCompositeMetric(token) {
+    this.ul = 'ul-composite-metrics';
+    delete this.ul.querySelector(".selectable[data-metric-token='" + token + "']").dataset.selected;
+    delete this.ul.querySelector(".selectable[data-metric-token='" + token + "']").dataset.added;
+    if (this.ul.querySelector(".selectable[data-metric-token='" + token + "']").hasAttribute('nested')) delete this.ul.querySelector(".selectable[data-metric-token='" + token + "']").dataset.nested;
+    this.ul.querySelector("button[data-edit][data-object-token='" + token + "']").removeAttribute('disabled');
+  }
+
+  deselectMetric(token) {
+    this.ul = 'ul-metrics';
+    delete this.ul.querySelector(".selectable[data-metric-token='" + token + "']").dataset.selected;
+    delete this.ul.querySelector(".selectable[data-metric-token='" + token + "']").dataset.added;
+    // riabilito il tasto edit per consentire la modifica della metrica
+    this.ul.querySelector("button[data-edit][data-object-token='" + token + "']").removeAttribute('disabled');
+  }
+
+  deselectFilter(token) {
+    this.ul = 'ul-filters';
+    delete this.ul.querySelector("section[data-filter-token='" + token + "'] .selectable").dataset.selected;
+    delete this.ul.querySelector("section[data-filter-token='" + token + "'] .selectable").dataset.added;
+    // riabilito il tasto edit per consentire la modifica del filtro
+    this.ul.querySelector("button[data-edit][data-object-token='" + token + "']").removeAttribute('disabled');
+
+  }
+
   init() {
     this.initCubes();
     this.initDimensions();

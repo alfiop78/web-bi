@@ -248,6 +248,7 @@ var List = new Lists();
       StorageMetric.selected = token;
       document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + token + "']").dataset.selected = 'true';
       document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + token + "']").dataset.added = 'true';
+      document.querySelector("#ul-composite-metrics button[data-edit][data-object-token='" + token + "']").setAttribute('disabled', 'true');
       Query.objects = { token, cubes: StorageMetric.selected.cubes };
       List.addDefinedCompositeMetric();
       app.setCompositeMetrics();
@@ -342,8 +343,6 @@ var List = new Lists();
 
   app.handlerMetricEdit = (e) => {
     // recupero la metrica selezionata
-    // // non consento la modifica di una metrica aggiunta al report (attr "data-added" presente su .selectable)
-    if (document.querySelector("#ul-metrics .selectable[data-metric-token='"+e.currentTarget.dataset.objectToken+"']").hasAttribute('data-added')) return;
     // inserisco i dati della metrica nella dialog
     StorageMetric.selected = e.currentTarget.dataset.objectToken;
     Query.table = StorageMetric.selected.formula.table;
@@ -491,6 +490,7 @@ var List = new Lists();
           Query.objects = { token: metric.token, cube: StorageMetric.selected.cube };
           document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
           document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.added = 'true';
+          document.querySelector("#ul-metrics button[data-edit][data-object-token='" + metric.token + "']").setAttribute('disabled', 'true');
           // TODO: includo, con show-datamart = true, anche le metriche contenute nella formula all'interno del datamart finale
           // document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'true';
           List.addDefinedMetric();
@@ -506,6 +506,7 @@ var List = new Lists();
           document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
           document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.added = 'true';
           document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.nested = 'true';
+          document.querySelector("#ul-composite-metrics button[data-edit][data-object-token='" + metric.token + "']").setAttribute('disabled', 'true');
           // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
           List.addDefinedCompositeMetric();
         }
@@ -795,11 +796,11 @@ var List = new Lists();
   // tasto 'Fatto' nella dialogFilter
   app.btnFilterDone.onclick = () => {
     // verifico i filtri che hanno l'attr data-temporary, questi verranno aggiunti alla ul-defined-filters
-    document.querySelectorAll('#ul-filters .selectable[data-temporary]').forEach(filter => {
-      StorageFilter.selected = filter.dataset.filterToken;
+    document.querySelectorAll('#ul-filters .selectable[data-temporary]').forEach(item => {
+      StorageFilter.selected = item.dataset.filterToken;
       let object = {};
       // creo l'oggetto da passare a Query.objects
-      object.token = filter.dataset.filterToken;
+      object.token = item.dataset.filterToken;
       if (StorageFilter.selected.hasOwnProperty('cubes')) object.cubes = StorageFilter.selected.cubes;
       if (StorageFilter.selected.hasOwnProperty('dimensions')) object.dimensions = StorageFilter.selected.dimensions;
       if (StorageFilter.selected.hasOwnProperty('hierarchies')) object.hierarchies = StorageFilter.selected.hierarchies;
@@ -808,8 +809,9 @@ var List = new Lists();
       Query.filters = StorageFilter.selected;
       List.addDefinedFilter();
       // rimuovo l'attributo data-temporary perchè li sto aggiunngendo al report
-      delete filter.dataset.temporary;
-      filter.dataset.added = 'true';
+      delete item.dataset.temporary;
+      item.dataset.added = 'true';
+      document.querySelector("#ul-filters button[data-edit][data-object-token='" + item.dataset.filterToken + "']").setAttribute('disabled', 'true');
       app.checkObjectSelected();
     });
     app.dialogFilter.close();
@@ -860,6 +862,8 @@ var List = new Lists();
       // ... per lo stesso motivo aggiungo data-added
       delete item.dataset.temporary;
       item.dataset.added = 'true';
+      // disabilito il tasto Edit. La modifica di una metrica è consentita solo quando NON utilizzata nel report attuale
+      document.querySelector("#ul-metrics button[data-edit][data-object-token='" + item.dataset.metricToken + "']").setAttribute('disabled', 'true');
       app.checkObjectSelected();
       app.setMetrics();
       app.setFilteredMetrics();
@@ -877,6 +881,7 @@ var List = new Lists();
       item.dataset.selected = 'true';
       item.dataset.added = 'true';
       delete item.dataset.temporary;
+      document.querySelector("#ul-composite-metrics button[data-edit][data-object-token='" + item.dataset.metricToken + "']").setAttribute('disabled', 'true');
       Query.objects = { token: item.dataset.metricToken, cubes: StorageMetric.selected.cubes };
       List.addDefinedCompositeMetric();
     });
@@ -981,8 +986,7 @@ var List = new Lists();
     Query.filters = { token: e.currentTarget.dataset.objectToken };
     Query.objects = { token: e.currentTarget.dataset.objectToken };
     document.querySelector("#ul-defined-filters section[data-filter-token='" + e.currentTarget.dataset.objectToken + "']").remove();
-    delete document.querySelector("#ul-filters section[data-filter-token='" + e.currentTarget.dataset.objectToken + "'] .selectable").dataset.selected;
-    delete document.querySelector("#ul-filters section[data-filter-token='" + e.currentTarget.dataset.objectToken + "'] .selectable").dataset.added;
+    List.deselectFilter(e.currentTarget.dataset.objectToken);
   }
 
   // remove metrics from report
@@ -1003,8 +1007,7 @@ var List = new Lists();
         break;
     }
     document.querySelector("ul section.data-item-defined[data-metric-token='" + StorageMetric.selected.token + "']").remove();
-    delete document.querySelector("ul .selectable[data-metric-token='" + StorageMetric.selected.token + "']").dataset.selected;
-    delete document.querySelector("ul .selectable[data-metric-token='" + StorageMetric.selected.token + "']").dataset.added;
+    List.deselectMetric(StorageMetric.selected.token);
   }
 
   app.removeCompositeMetric = (token) => {
@@ -1019,9 +1022,7 @@ var List = new Lists();
           // in questo caso c'è una metrica composta all'interno della metrica composta selezionata
           Query.compositeMetrics = { token: metric.dataset.metricToken };
           document.querySelector("ul section.data-item-defined[data-metric-token='" + token + "']").remove();
-          delete document.querySelector("ul .selectable[data-metric-token='" + token + "']").dataset.selected;
-          delete document.querySelector("ul .selectable[data-metric-token='" + token + "']").dataset.added;
-          delete document.querySelector("ul .selectable[data-metric-token='" + token + "']").dataset.nested;
+          List.deselectCompositeMetric(token);
           app.removeCompositeMetric(metric.dataset.metricToken);
         }
       }
@@ -1049,17 +1050,14 @@ var List = new Lists();
           Query.objects = { token: metric.dataset.metricToken };
           Query.compositeMetrics = { token: metric.dataset.metricToken };
           document.querySelector("ul section.data-item-defined[data-metric-token='" + metric.dataset.metricToken + "']").remove();
-          delete document.querySelector("ul .selectable[data-metric-token='" + metric.dataset.metricToken + "']").dataset.selected;
-          delete document.querySelector("ul .selectable[data-metric-token='" + metric.dataset.metricToken + "']").dataset.added;
-          delete document.querySelector("ul .selectable[data-metric-token='" + metric.dataset.metricToken + "']").dataset.nested;
+          List.deselectCompositeMetric(metric.dataset.metricToken);
           app.removeCompositeMetric(metric.dataset.metricToken);
         }
       }
     });
     // elimino anche la metrica composta selezionata per la cancellazione
     document.querySelector("#ul-defined-composite-metrics section[data-metric-token='" + e.currentTarget.dataset.objectToken + "']").remove();
-    delete document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + e.currentTarget.dataset.objectToken + "']").dataset.selected;
-    delete document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + e.currentTarget.dataset.objectToken + "']").dataset.added;
+    List.deselectCompositeMetric(e.currentTarget.dataset.objectToken);
   }
 
   // remove column from report
