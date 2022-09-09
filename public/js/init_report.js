@@ -228,6 +228,8 @@ var List = new Lists();
       // seleziono i filtri impostati nel report
       document.querySelector("#ul-filters .selectable[data-filter-token='" + token + "']").dataset.selected = 'true';
       document.querySelector("#ul-filters .selectable[data-filter-token='" + token + "']").dataset.added = 'true';
+      // non posso modificare i filtri aggiunti al report corrente
+      document.querySelector("#ul-filters button[data-edit][data-object-token='" + token + "']").setAttribute('disabled', true);
       // reimposto il filtro come se fosse stato selezionato
       Query.filters = StorageFilter.selected;
       let object = {};
@@ -261,6 +263,7 @@ var List = new Lists();
       // seleziono le metriche (0, 1, 2, 3) impostate nel report
       document.querySelector("#ul-metrics .selectable[data-metric-token='" + token + "']").dataset.selected = 'true';
       document.querySelector("#ul-metrics .selectable[data-metric-token='" + token + "']").dataset.added = 'true';
+      document.querySelector("#ul-metrics button[data-edit][data-object-token='" + token + "']").setAttribute('disabled', 'true');
       Query.objects = { token, cube: StorageMetric.selected.cube };
       // aggiungo alla lista #ul-defined-metrics se questa metrica non è stata già aggiunta da qualche metrica composta
       if (!document.querySelector("#ul-defined-metrics section[data-metric-token='" + token + "']")) List.addDefinedMetric();
@@ -481,7 +484,6 @@ var List = new Lists();
         // se è già stata aggiunta (da precedenti metriche selezionate) aggiungo solo lo small, con all'interno
         // ...la metrica "madre" passata come argomento della fn
         console.log(document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']"));
-        debugger;
         if (!document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
           Query.objects = { token: metric.token, cube: StorageMetric.selected.cube };
           document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
