@@ -388,7 +388,6 @@ var List = new Lists();
     const inputName = document.getElementById('composite-metric-name');
     const helper = document.querySelector('#composite-metric-name ~ .helper');
     const inputAlias = document.getElementById('composite-alias-metric');
-    console.log(e.currentTarget.dataset.objectToken);
     StorageMetric.selected = e.currentTarget.dataset.objectToken;
     // imposto il tasto #btnCompositeMetricSave con l'attributo 'token', in questo modo sono in modalità 'edit'
     app.btnCompositeMetricSave.dataset.token = e.currentTarget.dataset.objectToken;
@@ -420,11 +419,6 @@ var List = new Lists();
         app.addSpan(textarea, item, 'metric');
       }
     });
-    // aggiungo, nella ul-metrics, le metriche già create
-    // ripulisco la lista, prima di popolarla
-    document.querySelectorAll('#ul-metrics section').forEach(item => item.remove());
-    List.initAllMetrics();
-    app.dialogCompositeMetric.showModal();
   }
 
   // edit di una colonna
@@ -486,6 +480,8 @@ var List = new Lists();
         // la metrica all'interno della formula NON è una composta, la aggiungo alla ul-defined-metrics
         // se è già stata aggiunta (da precedenti metriche selezionate) aggiungo solo lo small, con all'interno
         // ...la metrica "madre" passata come argomento della fn
+        console.log(document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']"));
+        debugger;
         if (!document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
           Query.objects = { token: metric.token, cube: StorageMetric.selected.cube };
           document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
