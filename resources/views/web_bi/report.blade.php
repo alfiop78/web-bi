@@ -488,7 +488,7 @@
                     <!-- <small table></small> -->
                     <!-- <small hier></small> -->
                   </div>
-                  <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" flow="bottom">edit</button>
+                  <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" data-edit data-fn="handlerColumnEdit" flow="bottom">edit</button>
                   <button class="button-icon material-icons-round md-18" data-object-token data-remove data-fn="handlerColumnRemove" tooltip="Rimuovi" flow="bottom">delete</button>
                 </div>
               </div>

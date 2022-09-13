@@ -1,5 +1,4 @@
 class Queries {
-  #columnToken;
   #compositeMetrics = new Map();
   #filters = new Map();
   #metrics = new Map();
@@ -97,10 +96,6 @@ class Queries {
   }
 
   get dimensions() { return this.#dimensions; }
-
-  set columnToken(value) { this.#columnToken = value; }
-
-  get columnToken() { return this.#columnToken; }
 
   // set fieldType(value) {this._fieldType = value;}
 

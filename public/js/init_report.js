@@ -427,6 +427,7 @@ var List = new Lists();
   // edit di una colonna
   app.handlerColumnEdit = (e) => {
     debugger;
+    // TODO: implementazione
   }
 
   // selezione di un cubo (step-1)
@@ -636,41 +637,31 @@ var List = new Lists();
 
   // selezione delle colonne
   app.handlerSelectColumn = (e) => {
-    // verifico che almeno una dimension sia stata selezionata
-    if (Query.dimensions.size === 0) {
-      App.showConsole('Selezionare una gerarchia per poter aggiungere colonne al report', 'warning');
-    } else {
-      Query.table = e.currentTarget.dataset.tableName;
-      Query.tableAlias = e.currentTarget.dataset.tableAlias;
-      Query.columnToken = e.currentTarget.dataset.tokenColumn;
-      // la FACT table non ha un data-table-id
+    Query.tableAlias = e.currentTarget.dataset.tableAlias;
+    Query.table = e.currentTarget.dataset.tableName;
+    Query.columnToken = e.currentTarget.dataset.tokenColumn;
+    // la FACT table non ha un data-table-id
+
+    if (!e.currentTarget.hasAttribute('data-selected')) {
+      e.currentTarget.toggleAttribute('data-selected');
+      document.getElementById('columnAlias').value = '';
+      document.getElementById('columnAlias').focus();
       if (e.currentTarget.hasAttribute('data-table-id')) {
+        Query.hierToken = e.currentTarget.dataset.hierToken;
+        Query.dimensionToken = e.currentTarget.dataset.dimensionToken;
         StorageDimension.selected = e.currentTarget.dataset.dimensionToken;
         Query.tableId = +e.currentTarget.dataset.tableId;
         Query.field = { [Query.columnToken]: StorageDimension.selected.hierarchies[e.currentTarget.dataset.hierToken].columns[Query.tableAlias][Query.columnToken] };
+        // app.dialogColumns.querySelector('section').dataset.hierToken = e.currentTarget.dataset.hierToken;
+        // app.dialogColumns.querySelector('section').dataset.dimensionToken = e.currentTarget.dataset.dimensionToken;
       } else {
+        // selezione di una colonna della Fact, elimino l'attributo data-hier-token perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
+        // delete app.dialogColumns.querySelector('section').dataset.hierToken;
+        delete Query.hierToken;
+        delete Query.dimensionToken;
         StorageCube.selected = e.currentTarget.dataset.cubeToken;
         Query.field = { [Query.columnToken]: StorageCube.selected.columns[Query.tableAlias][Query.columnToken] };
       }
-
-      if (e.currentTarget.hasAttribute('data-selected')) {
-        Query.objects = { token: Query.columnToken };
-        // TODO: colonna deselezionata, implementare la logica in Query.deleteSelect
-        // Query.deleteSelect();				
-      } else {
-        document.getElementById('columnAlias').value = '';
-        document.getElementById('columnAlias').focus();
-        // TODO: anche le colonne possono essere "composte", nel senso che possono includere campi di diverse tabelle, quindi anche di diverse gerarchie e dimensioni
-        // imposto, nella section della dialog, l'attributo data-hier-token e data-dimension-name selezionata
-        if (e.currentTarget.hasAttribute('data-hier-token')) {
-          app.dialogColumns.querySelector('section').dataset.hierToken = e.currentTarget.dataset.hierToken;
-          app.dialogColumns.querySelector('section').dataset.dimensionToken = e.currentTarget.dataset.dimensionToken;
-        } else {
-          // selezione di una colonna della Fact, elimino l'attributo data-hier-token perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
-          delete app.dialogColumns.querySelector('section').dataset.hierToken;
-        }
-      }
-      e.currentTarget.toggleAttribute('data-selected');
     }
   }
 
@@ -1356,7 +1347,7 @@ var List = new Lists();
   // aggiungi colonne
   app.btnAddColumns.onclick = () => {
     if (Query.dimensions.size === 0) {
-      App.showConsole('Selezionare una dimensione per poter aggiungere colonne al report', 'warning');
+      App.showConsole('Selezionare una dimensione per poter aggiungere colonne al report', 'warning', 3000);
     } else {
       // ripulisco la dialog
       app.columnAlias.value = '';
