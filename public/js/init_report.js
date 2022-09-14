@@ -428,6 +428,8 @@ var List = new Lists();
   app.handlerColumnEdit = (e) => {
     debugger;
     // TODO: implementazione
+    // recupero le proprietà della colonna
+
   }
 
   // selezione di un cubo (step-1)
@@ -641,7 +643,6 @@ var List = new Lists();
     Query.table = e.currentTarget.dataset.tableName;
     Query.columnToken = e.currentTarget.dataset.tokenColumn;
     // la FACT table non ha un data-table-id
-
     if (!e.currentTarget.hasAttribute('data-selected')) {
       e.currentTarget.toggleAttribute('data-selected');
       document.getElementById('columnAlias').value = '';
@@ -1052,8 +1053,7 @@ var List = new Lists();
   // remove column from report
   app.handlerColumnRemove = (e) => {
     Query.objects = { token: e.currentTarget.dataset.objectToken };
-    // TODO: colonna deselezionata, implementare la logica in Query.deleteSelect
-    // Query.deleteSelect();				
+    Query.select = {token : e.currentTarget.dataset.objectToken};
     document.querySelector("#ul-defined-columns section[data-token-column='" + e.currentTarget.dataset.objectToken + "']").remove();
     delete document.querySelector("#ul-columns .selectable[data-token-column='" + e.currentTarget.dataset.objectToken + "']").dataset.selected;
   }
@@ -1733,39 +1733,31 @@ var List = new Lists();
   app.saveColumn = () => {
     const alias = document.getElementById('columnAlias');
     const textarea = (document.getElementById('columnSQL').value.length === 0) ? null : document.getElementById('columnSQL').value;
-    // le colonne di una Fact non hanno data-hier-token
-    if (app.dialogColumns.querySelector('section').hasAttribute('data-hier-token')) {
-      StorageDimension.selected = app.dialogColumns.querySelector('section').dataset.dimensionToken;
-      const hierToken = app.dialogColumns.querySelector('section').dataset.hierToken;
-      // document.querySelector("#ul-columns .selectable[data-token-column='" + Query.columnToken + "'] span[column]").innerText += ` (${alias.value})`;
-      // in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
-      Query.select = {
-        token: Query.columnToken,
-        dimensionToken: StorageDimension.selected.token,
-        hier: hierToken,
-        tableId: Query.tableId,
+    // tra le prop della colonna ce ne sono alcune in comune tra colonne "fact" e colonne "dimensioni"
+      let object = {
+        token : Query.columnToken,
         table: Query.table,
         tableAlias: Query.tableAlias,
         field: Query.field,
         SQLReport: textarea,
         alias: alias.value
       };
+    // le colonne di un livello dimensionale hanno Query.hierToken impostato in handlerSelectColumn
+    if (Query.hierToken) {
+      object.dimensionToken = Query.dimensionToken;
+      object.hier = Query.hierToken;
+      object.tableId = Query.tableId;
+      StorageDimension.selected = Query.dimensionToken;
+      // in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
       // NOTE: Oggetto Map
-      const hierarchiesObject = new Map([[hierToken, Query.tableId]]);
-      Query.objects = {
-        token: Query.columnToken,
-        hierarchies: Object.fromEntries(hierarchiesObject),
-        dimensions: [StorageDimension.selected.token]
-      };
+      const hierarchiesObject = new Map([[Query.hierToken, Query.tableId]]);
+      Query.objects = { token: Query.columnToken, hierarchies: Object.fromEntries(hierarchiesObject), dimensions: [Query.dimensionToken] };
     } else {
-      // document.querySelector("#ul-columns .selectable[data-token-column='" + Query.columnToken + "'] span[column]").innerText += ` (${alias.value})`;
-      Query.select = { token: Query.columnToken, table: Query.table, tableAlias: Query.tableAlias, field: Query.field, SQLReport: textarea, alias: alias.value, cubeToken: StorageCube.selected.token };
+      // la colonna fa parte di una tabella fact
+      object.cubeToken = StorageCube.selected.token;
       Query.objects = { token: Query.columnToken, cubeToken: StorageCube.selected.token };
     }
-    console.log('columnToken : ', Query.columnToken);
-    // evidenzio come 'selezionata' la colonna che ha aperto la dialog dopo averla salvata qui. Vado a verificare sia le colonne della fact che quelle delle dimensioni
-    // document.querySelector("#ul-columns .selectable[data-token-column='" + Query.columnToken + "']").toggleAttribute('data-selected');
-    // in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
+    Query.select = object;
     // aggiungo la colonna nella ul-defined-columns
     List.addDefinedColumn(alias.value, Query.columnToken);
     app.btnColumnSave.disabled = true;
