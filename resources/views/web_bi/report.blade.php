@@ -86,7 +86,7 @@
           <h5>Colonne</h5>
           <h6>subtitle</h6>
           <div class="md-field">
-            <input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" />
+            <input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" tabindex="1">
             <label for="search-columns" class="">Ricerca</label>
           </div>
           <div class="relative-ul">
@@ -98,7 +98,7 @@
           <h5>SQL</h5>
           <h6>Alias per la colonna</h6>
           <div class="md-field">
-            <input type="text" id="columnAlias" name="columnAlias" autocomplete="off" />
+            <input type="text" id="columnAlias" name="columnAlias" autocomplete="off" tabindex="2" autofocus="true"/>
             <label for="columnAlias" class="">Alias</label>
             <p class="helper"></p>
           </div>

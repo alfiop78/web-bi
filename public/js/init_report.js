@@ -205,7 +205,7 @@ var List = new Lists();
       // reimposto la colonna come quando viene selezionata
       Query.select = column;
       // console.log(column);
-      if (!column.hasOwnProperty('cubeToken')) {
+      if (column.hasOwnProperty('tableId')) {
         const hierarchiesObject = new Map([[column.hier, column.tableId]]);
         Query.objects = {
           token,
@@ -219,7 +219,7 @@ var List = new Lists();
         };
       }
       // aggiungo alla #ul-defined-columns
-      List.addDefinedColumn(column.alias, token);
+      List.addDefinedColumn(column);
     }
 
     // filtri
