@@ -661,11 +661,11 @@ var List = new Lists();
     Query.tableAlias = e.currentTarget.dataset.tableAlias;
     Query.table = e.currentTarget.dataset.tableName;
     Query.columnToken = e.currentTarget.dataset.tokenColumn;
-    // la FACT table non ha un data-table-id
     if (!e.currentTarget.hasAttribute('data-selected')) {
       e.currentTarget.toggleAttribute('data-selected');
       document.getElementById('columnAlias').value = '';
       document.getElementById('columnAlias').focus();
+      // Imposto le prop della colonna in base alla presenza o meno di tableId
       Query.hierToken = (e.currentTarget.hasAttribute('data-table-id')) ? e.currentTarget.dataset.hierToken : undefined;
       Query.dimensionToken = (e.currentTarget.hasAttribute('data-table-id')) ? e.currentTarget.dataset.dimensionToken : undefined;
       Query.tableId = (e.currentTarget.hasAttribute('data-table-id')) ? +e.currentTarget.dataset.tableId : undefined;
@@ -1747,6 +1747,11 @@ var List = new Lists();
   app.saveColumn = () => {
     const alias = document.getElementById('columnAlias');
     const textarea = (document.getElementById('columnSQL').value.length === 0) ? null : document.getElementById('columnSQL').value;
+    // elimino l'oggetto Query.objects, se presente, in questo caso sto modificando una colonna già inserita.
+    if (app.btnColumnSave.hasAttribute('data-token')) {
+      Query.objects = {token : Query.columnToken };
+      Query.select = {token : Query.columnToken};
+    }
     // tra le prop della colonna ce ne sono alcune in comune tra colonne "fact" e colonne "dimensioni"
     let object = {
       token : Query.columnToken,
@@ -1772,11 +1777,9 @@ var List = new Lists();
       object.cubeToken = StorageCube.selected.token;
       Query.objects = { token: Query.columnToken, cubeToken: StorageCube.selected.token };
     }
-    debugger;
     Query.select = object;
     if (app.btnColumnSave.hasAttribute('data-token')) {
       // edit column
-      debugger;
       List.editDefinedColumn(object);
     } else {
       // aggiungo la colonna nella ul-defined-columns
