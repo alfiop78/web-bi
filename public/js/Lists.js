@@ -86,15 +86,15 @@ class Lists {
     this.table = this.section.querySelector('small[table]');
     // info può contenere la gerarchia oppure il cubo
     this.info = this.section.querySelector('small:last-child');
-    this.btnEdit = this.section.querySelector('button[data-edit]');
+    // this.btnEdit = this.section.querySelector('button[data-edit]');
 
     this.#sublist = {
       section: this.section,
       selectable: this.selectable,
       span: this.span,
       table: this.table,
-      info: this.info,
-      btnEdit: this.btnEdit
+      info: this.info
+      // btnEdit: this.btnEdit
     }
   }
 
@@ -488,7 +488,7 @@ class Lists {
               this.#sublist.selectable.dataset.dimensionToken = dimToken;
               this.#sublist.selectable.dataset.hierToken = hierToken;
               this.#sublist.selectable.dataset.tokenColumn = token;
-              this.#sublist.btnEdit.dataset.objectToken = token;
+              // this.#sublist.btnEdit.dataset.objectToken = token;
               this.#sublist.span.innerText = field.ds.field;
               this.#sublist.table.innerText = table.table;
               this.#sublist.info.innerText = hierValue.name;
@@ -514,7 +514,7 @@ class Lists {
           this.#sublist.selectable.dataset.tableAlias = value.alias;
           this.#sublist.selectable.dataset.tokenColumn = token;
           this.#sublist.selectable.dataset.cubeToken = cubeToken;
-          this.#sublist.btnEdit.dataset.objectToken = token;
+          // this.#sublist.btnEdit.dataset.objectToken = token;
           this.#sublist.span.innerText = field.ds.field;
           this.#sublist.table.innerText = value.FACT;
           this.#sublist.info.innerText = value.name;
@@ -768,13 +768,14 @@ class Lists {
   }
 
   // aggiungo la colonna al report
-  addDefinedColumn(alias, token) {
+  addDefinedColumn(object) {
     this.ul = 'ul-defined-columns';
     this.definedColumns = 'data-sublist-columns-defined';
-    this.#sublist.section.dataset.label = alias;
-    this.#sublist.section.dataset.tokenColumn = token;
-    this.#sublist.span.innerText = alias;
-    this.#sublist.btnRemove.dataset.objectToken = token;
+    this.#sublist.section.dataset.label = object.alias;
+    this.#sublist.section.dataset.tokenColumn = object.token;
+    this.#sublist.span.innerText = object.alias;
+    this.#sublist.btnEdit.dataset.objectToken = object.token;
+    this.#sublist.btnRemove.dataset.objectToken = object.token;
     this.ul.appendChild(this.#sublist.section);
   }
 

@@ -426,10 +426,27 @@ var List = new Lists();
 
   // edit di una colonna
   app.handlerColumnEdit = (e) => {
+    // recupero le proprietà della colonna. Posso recuperarla dal metodo Query.select.
+    console.log(Query.select.get(e.currentTarget.dataset.objectToken));
+    // imposto un data-token sul tasto btnColumnSave
+    app.btnColumnSave.dataset.token = e.currentTarget.dataset.objectToken;
+    Query.columnToken = e.currentTarget.dataset.objectToken;
+    Query.tableAlias = Query.select.get(Query.columnToken).tableAlias;
+    Query.table = Query.select.get(Query.columnToken).table;
+    document.getElementById('columnAlias').setAttribute('value', Query.select.get(Query.columnToken).alias);
+    document.getElementById('columnAlias').value = Query.select.get(Query.columnToken).alias;
+    if (Query.select.get(Query.columnToken).hasOwnProperty('tableId')) {
+      // colonna di un livello dimensionale
+      Query.hierToken = Query.select.get(Query.columnToken).hier;
+      Query.dimensionToken = Query.select.get(Query.columnToken).dimensionToken;
+      Query.tableId = Query.select.get(Query.columnToken).tableId;
+    } else {
+      // colonna della fact
+      Query.cubeToken = Query.select.get(Query.columnToken).cubeToken;
+    }
+    document.querySelector("#ul-columns .selectable[data-token-column='"+e.currentTarget.dataset.objectToken+"']").dataset.selected = 'true';
     debugger;
-    // TODO: implementazione
-    // recupero le proprietà della colonna
-
+    app.dialogColumns.showModal();
   }
 
   // selezione di un cubo (step-1)
@@ -653,13 +670,11 @@ var List = new Lists();
         StorageDimension.selected = e.currentTarget.dataset.dimensionToken;
         Query.tableId = +e.currentTarget.dataset.tableId;
         Query.field = { [Query.columnToken]: StorageDimension.selected.hierarchies[e.currentTarget.dataset.hierToken].columns[Query.tableAlias][Query.columnToken] };
-        // app.dialogColumns.querySelector('section').dataset.hierToken = e.currentTarget.dataset.hierToken;
-        // app.dialogColumns.querySelector('section').dataset.dimensionToken = e.currentTarget.dataset.dimensionToken;
       } else {
         // selezione di una colonna della Fact, elimino l'attributo data-hier-token perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
-        // delete app.dialogColumns.querySelector('section').dataset.hierToken;
         delete Query.hierToken;
         delete Query.dimensionToken;
+        delete Query.tableId;
         StorageCube.selected = e.currentTarget.dataset.cubeToken;
         Query.field = { [Query.columnToken]: StorageCube.selected.columns[Query.tableAlias][Query.columnToken] };
       }
@@ -1349,9 +1364,7 @@ var List = new Lists();
     if (Query.dimensions.size === 0) {
       App.showConsole('Selezionare una dimensione per poter aggiungere colonne al report', 'warning', 3000);
     } else {
-      // ripulisco la dialog
       app.columnAlias.value = '';
-      // document.querySelectorAll('#ul-columns .selectable').forEach(item => delete item.dataset.selected);
       app.dialogColumns.showModal();
     }
   }
@@ -1754,17 +1767,21 @@ var List = new Lists();
       Query.objects = { token: Query.columnToken, hierarchies: Object.fromEntries(hierarchiesObject), dimensions: [Query.dimensionToken] };
     } else {
       // la colonna fa parte di una tabella fact
+      // StorageCube è impostato in handlerSelectColumn
       object.cubeToken = StorageCube.selected.token;
       Query.objects = { token: Query.columnToken, cubeToken: StorageCube.selected.token };
     }
     Query.select = object;
     // aggiungo la colonna nella ul-defined-columns
-    List.addDefinedColumn(alias.value, Query.columnToken);
+    List.addDefinedColumn(object);
+    // List.addDefinedColumn(alias.value, Query.columnToken);
     app.btnColumnSave.disabled = true;
     app.columnAlias.value = '';
     document.querySelectorAll('#ul-columns .selectable').forEach(item => delete item.dataset.selected);
     app.checkObjectSelected();
   }
+
+  app.btnColumnSave.onclick = () => app.saveColumn();
 
   app.checkColumnForm = () => {
     const inputAlias = document.getElementById('columnAlias');
@@ -1782,8 +1799,6 @@ var List = new Lists();
     const column = document.querySelectorAll('#ul-columns .selectable[data-selected]').length;
     app.btnColumnSave.disabled = (!check && inputAlias.value.length !== 0 && column !== 0) ? false : true;
   }
-
-  app.btnColumnSave.onclick = () => app.saveColumn();
 
   document.getElementById('mdcMapping').onclick = () => location.href = '/mapping';
 

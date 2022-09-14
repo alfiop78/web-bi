@@ -471,14 +471,13 @@
                     <small table></small>
                     <small hier></small>
                   </div>
-                  <button class="button-icon material-icons-round md-18" data-object-token data-edit data-fn="handlerColumnEdit" tooltip="Modifica" flow="bottom" disabled>edit</button>
+                  <!-- <button class="button-icon material-icons-round md-18" data-object-token data-edit data-fn="handlerColumnEdit" tooltip="Modifica" flow="bottom" disabled>edit</button> -->
                 </div>
               </div>
             </section>
 
             {{-- lista column definite --}}
             <section class="data-item-defined" data-element-search="search-defined-columns" data-label data-sublist-columns-defined data-related-object>
-              {{-- TODO: implementare il drag&drop per l'ordinamento delle colonne nel datamart finale --}}
               <div>
                 <div class="h-content">
                   <button class="button-icon material-icons-round md-18 columns-color md-opacity" data-info-object-token>drag_handle</button>
