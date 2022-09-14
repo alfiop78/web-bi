@@ -427,25 +427,27 @@ var List = new Lists();
   // edit di una colonna
   app.handlerColumnEdit = (e) => {
     // recupero le proprietà della colonna. Posso recuperarla dal metodo Query.select.
-    console.log(Query.select.get(e.currentTarget.dataset.objectToken));
     // imposto un data-token sul tasto btnColumnSave
+    // qui devo impostare le stesse prop impostate in handlerSelectColumn
     app.btnColumnSave.dataset.token = e.currentTarget.dataset.objectToken;
     Query.columnToken = e.currentTarget.dataset.objectToken;
     Query.tableAlias = Query.select.get(Query.columnToken).tableAlias;
     Query.table = Query.select.get(Query.columnToken).table;
     document.getElementById('columnAlias').setAttribute('value', Query.select.get(Query.columnToken).alias);
     document.getElementById('columnAlias').value = Query.select.get(Query.columnToken).alias;
-    if (Query.select.get(Query.columnToken).hasOwnProperty('tableId')) {
-      // colonna di un livello dimensionale
-      Query.hierToken = Query.select.get(Query.columnToken).hier;
-      Query.dimensionToken = Query.select.get(Query.columnToken).dimensionToken;
-      Query.tableId = Query.select.get(Query.columnToken).tableId;
+    // imposto gli oggetto hierToken, dimensionToken, ecc... per la colonna di un livello dimensionale e cubeToken per la colonna di una fact
+    Query.hierToken = (Query.select.get(Query.columnToken).hasOwnProperty('tableId')) ? Query.select.get(Query.columnToken).hier : undefined;
+    Query.dimensionToken = (Query.select.get(Query.columnToken).hasOwnProperty('tableId')) ? Query.select.get(Query.columnToken).dimensionToken : undefined;
+    Query.tableId = (Query.select.get(Query.columnToken).hasOwnProperty('tableId')) ? +Query.select.get(Query.columnToken).tableId : undefined;
+    Query.cubeToken = (Query.select.get(Query.columnToken).hasOwnProperty('tableId')) ? undefined : Query.select.get(Query.columnToken).cubeToken;
+    if (Query.tableId !== undefined) {
+      StorageDimension.selected = Query.dimensionToken;
+      Query.field = { [Query.columnToken]: StorageDimension.selected.hierarchies[Query.hierToken].columns[Query.tableAlias][Query.columnToken] };
     } else {
-      // colonna della fact
-      Query.cubeToken = Query.select.get(Query.columnToken).cubeToken;
-    }
+      StorageCube.selected = Query.cubeToken;
+      Query.field = { [Query.columnToken]: StorageCube.selected.columns[Query.tableAlias][Query.columnToken] };
+    } 
     document.querySelector("#ul-columns .selectable[data-token-column='"+e.currentTarget.dataset.objectToken+"']").dataset.selected = 'true';
-    debugger;
     app.dialogColumns.showModal();
   }
 
@@ -664,18 +666,15 @@ var List = new Lists();
       e.currentTarget.toggleAttribute('data-selected');
       document.getElementById('columnAlias').value = '';
       document.getElementById('columnAlias').focus();
-      if (e.currentTarget.hasAttribute('data-table-id')) {
-        Query.hierToken = e.currentTarget.dataset.hierToken;
-        Query.dimensionToken = e.currentTarget.dataset.dimensionToken;
-        StorageDimension.selected = e.currentTarget.dataset.dimensionToken;
-        Query.tableId = +e.currentTarget.dataset.tableId;
-        Query.field = { [Query.columnToken]: StorageDimension.selected.hierarchies[e.currentTarget.dataset.hierToken].columns[Query.tableAlias][Query.columnToken] };
+      Query.hierToken = (e.currentTarget.hasAttribute('data-table-id')) ? e.currentTarget.dataset.hierToken : undefined;
+      Query.dimensionToken = (e.currentTarget.hasAttribute('data-table-id')) ? e.currentTarget.dataset.dimensionToken : undefined;
+      Query.tableId = (e.currentTarget.hasAttribute('data-table-id')) ? +e.currentTarget.dataset.tableId : undefined;
+      Query.cubeToken = (e.currentTarget.hasAttribute('data-table-id')) ? undefined : e.currentTarget.dataset.cubeToken;
+      if (Query.tableId !== undefined) {
+        StorageDimension.selected = Query.dimensionToken;
+        Query.field = { [Query.columnToken]: StorageDimension.selected.hierarchies[Query.hierToken].columns[Query.tableAlias][Query.columnToken] };
       } else {
-        // selezione di una colonna della Fact, elimino l'attributo data-hier-token perchè, nel tasto Salva, è su questo attributo che controllo se si tratta di una colonna da dimensione o da Fact
-        delete Query.hierToken;
-        delete Query.dimensionToken;
-        delete Query.tableId;
-        StorageCube.selected = e.currentTarget.dataset.cubeToken;
+        StorageCube.selected = Query.cubeToken;
         Query.field = { [Query.columnToken]: StorageCube.selected.columns[Query.tableAlias][Query.columnToken] };
       }
     }
@@ -1364,6 +1363,8 @@ var List = new Lists();
     if (Query.dimensions.size === 0) {
       App.showConsole('Selezionare una dimensione per poter aggiungere colonne al report', 'warning', 3000);
     } else {
+      // reset del tasto btnColumnSave
+      delete app.btnColumnSave.dataset.token;
       app.columnAlias.value = '';
       app.dialogColumns.showModal();
     }
@@ -1747,14 +1748,14 @@ var List = new Lists();
     const alias = document.getElementById('columnAlias');
     const textarea = (document.getElementById('columnSQL').value.length === 0) ? null : document.getElementById('columnSQL').value;
     // tra le prop della colonna ce ne sono alcune in comune tra colonne "fact" e colonne "dimensioni"
-      let object = {
-        token : Query.columnToken,
-        table: Query.table,
-        tableAlias: Query.tableAlias,
-        field: Query.field,
-        SQLReport: textarea,
-        alias: alias.value
-      };
+    let object = {
+      token : Query.columnToken,
+      table: Query.table,
+      tableAlias: Query.tableAlias,
+      field: Query.field,
+      SQLReport: textarea,
+      alias: alias.value
+    };
     // le colonne di un livello dimensionale hanno Query.hierToken impostato in handlerSelectColumn
     if (Query.hierToken) {
       object.dimensionToken = Query.dimensionToken;
@@ -1771,10 +1772,16 @@ var List = new Lists();
       object.cubeToken = StorageCube.selected.token;
       Query.objects = { token: Query.columnToken, cubeToken: StorageCube.selected.token };
     }
+    debugger;
     Query.select = object;
-    // aggiungo la colonna nella ul-defined-columns
-    List.addDefinedColumn(object);
-    // List.addDefinedColumn(alias.value, Query.columnToken);
+    if (app.btnColumnSave.hasAttribute('data-token')) {
+      // edit column
+      debugger;
+      List.editDefinedColumn(object);
+    } else {
+      // aggiungo la colonna nella ul-defined-columns
+      List.addDefinedColumn(object);
+    }
     app.btnColumnSave.disabled = true;
     app.columnAlias.value = '';
     document.querySelectorAll('#ul-columns .selectable').forEach(item => delete item.dataset.selected);

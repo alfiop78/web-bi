@@ -779,6 +779,13 @@ class Lists {
     this.ul.appendChild(this.#sublist.section);
   }
 
+  // aggiorno, nella lista delle colonne già aggiunte, la colonna modificata
+  editDefinedColumn(object) {
+    this.ul = 'ul-defined-columns';
+    this.ul.querySelector("section[data-token-column='"+object.token+"']").dataset.label = object.alias;
+    this.ul.querySelector("section[data-token-column='"+object.token+"'] span[column]").innerText = object.alias;
+  }
+
   addDefinedFilter() {
     this.ul = 'ul-defined-filters';
     this.definedFilters = 'data-sublist-filters-defined';
