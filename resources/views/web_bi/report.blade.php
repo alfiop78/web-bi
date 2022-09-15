@@ -98,7 +98,7 @@
           <h5>SQL</h5>
           <h6>Alias per la colonna</h6>
           <div class="md-field">
-            <input type="text" id="columnAlias" name="columnAlias" autocomplete="off" tabindex="2" autofocus="true"/>
+            <input type="text" id="columnAlias" name="columnAlias" autocomplete="off" tabindex="2" autofocus="true" />
             <label for="columnAlias" class="">Alias</label>
             <p class="helper"></p>
           </div>
@@ -433,8 +433,6 @@
       <section class="account">
         <h5>user</h5><i class="material-icons md-light">person</i>
       </section>
-      <nav>
-      </nav>
     </div>
 
     <header>
