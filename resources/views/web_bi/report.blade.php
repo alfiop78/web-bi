@@ -469,7 +469,7 @@
                     <small table></small>
                     <small hier></small>
                   </div>
-                  <!-- <button class="button-icon material-icons-round md-18" data-object-token data-edit data-fn="handlerColumnEdit" tooltip="Modifica" flow="bottom" disabled>edit</button> -->
+                  <button class="button-icon material-icons-round md-18" data-object-token data-add data-fn="handlerColumnAdd" tooltip="Aggiungi" flow="left">add</button>
                 </div>
               </div>
             </section>

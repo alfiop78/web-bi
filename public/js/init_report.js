@@ -656,13 +656,21 @@ var List = new Lists();
     if (e.target.localName === 'div') app.addSpan(e.target, null, 'filter');
   }
 
+  app.handlerColumnAdd = (e) => {
+    debugger;
+    // TODO: aggiungo la colonna alla SQL formula
+  }
+
   // selezione delle colonne
   app.handlerSelectColumn = (e) => {
+    if (e.currentTarget.dataset.disabled) return false;
     Query.tableAlias = e.currentTarget.dataset.tableAlias;
     Query.table = e.currentTarget.dataset.tableName;
     Query.columnToken = e.currentTarget.dataset.tokenColumn;
     if (!e.currentTarget.hasAttribute('data-selected')) {
       e.currentTarget.toggleAttribute('data-selected');
+      // imposto tutti gli altri "disabled"
+      document.querySelectorAll('#ul-columns section:not([hidden]) .selectable:not([data-selected])').forEach(element => element.dataset.disabled = 'true');
       document.getElementById('columnAlias').value = '';
       document.getElementById('columnAlias').focus();
       // Imposto le prop della colonna in base alla presenza o meno di tableId
@@ -670,6 +678,7 @@ var List = new Lists();
       Query.dimensionToken = (e.currentTarget.hasAttribute('data-table-id')) ? e.currentTarget.dataset.dimensionToken : undefined;
       Query.tableId = (e.currentTarget.hasAttribute('data-table-id')) ? +e.currentTarget.dataset.tableId : undefined;
       Query.cubeToken = (e.currentTarget.hasAttribute('data-table-id')) ? undefined : e.currentTarget.dataset.cubeToken;
+
       if (Query.tableId !== undefined) {
         StorageDimension.selected = Query.dimensionToken;
         Query.field = { [Query.columnToken]: StorageDimension.selected.hierarchies[Query.hierToken].columns[Query.tableAlias][Query.columnToken] };
@@ -677,6 +686,10 @@ var List = new Lists();
         StorageCube.selected = Query.cubeToken;
         Query.field = { [Query.columnToken]: StorageCube.selected.columns[Query.tableAlias][Query.columnToken] };
       }
+    } else {
+      // deseleziono la colonna e reimposto tutti gli altri "abilitati per la selezione"
+      e.currentTarget.toggleAttribute('data-selected');
+      document.querySelectorAll('#ul-columns section:not([hidden]) .selectable[data-disabled]').forEach(element => delete element.dataset.disabled);
     }
   }
 
