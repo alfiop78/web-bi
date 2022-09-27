@@ -658,34 +658,35 @@ var List = new Lists();
   // elimino lo span che contiene il "placeholder"
   document.getElementById('composite-column-formula').onclick = (e) => { if (e.target.localName === 'div') app.addSpan(e.target, null, 'column'); }
 
-  app.handlerColumnAdd = (e) => {
-    debugger;
-    // TODO: aggiungo la colonna alla SQL formula
-  }
-
-  app.addColumn = (column, mode) => {
+  app.addColumnToSQL = (column) => {
     const textarea = document.getElementById('composite-column-formula');
+    // if (textarea.dataset.mode === 'all') { App.showConsole("Selezionare una colonna sulla sinistra", "warning", 4000); return false; }
     const templateContent = app.tmplFormula.content.cloneNode(true);
     const i = templateContent.querySelector('i');
     i.addEventListener('click', app.cancelFormulaObject);
     const span = templateContent.querySelector('span');
     const mark = templateContent.querySelector('mark');
+
     span.dataset.mode = textarea.dataset.mode;
-    mark.dataset.tableAlias = column.tableAlias;
-    mark.dataset.tableName = column.tableName;
-    mark.dataset.token = column.token;
+    mark.dataset.tableAlias = column.dataset.tableAlias;
+    mark.dataset.tableName = column.dataset.tableName;
+    mark.dataset.token = column.dataset.token;
+    mark.dataset.label = column.dataset.label;
     // livello dimensionale o FACT
-    if (column.tableId) {
-      mark.dataset.hierToken = column.hierToken;
-      mark.dataset.dimensionToken = column.dimensionToken;
-      mark.dataset.tableId = column.tableId;
+    if (column.dataset.tableId) {
+      mark.dataset.hierToken = column.dataset.hierToken;
+      mark.dataset.dimensionToken = column.dataset.dimensionToken;
+      mark.dataset.tableId = column.dataset.tableId;
     } else {
-      mark.dataset.cubeToken = column.cubeToken;
+      mark.dataset.cubeToken = column.dataset.cubeToken;
     }
-    mark.innerText = column.label;
+    mark.innerText = column.dataset.label;
     // small.innerText = Query.table;
     textarea.appendChild(span);
   }
+
+  // aggiungo la colonna alla SQL formula
+  app.handlerColumnAdd = (e) => app.addColumnToSQL(e.currentTarget);
 
   // selezione delle colonne
   app.handlerSelectColumn = (e) => {
@@ -696,20 +697,7 @@ var List = new Lists();
       document.querySelectorAll('#ul-columns section:not([hidden]) .selectable:not([data-selected])').forEach(element => element.dataset.disabled = 'true');
       document.getElementById('columnName').value = '';
       document.getElementById('columnName').focus();
-      // TODO: aggiungo la colonna selezionata alla textarea, in modalità "all"
-      /* let column = { label : e.currentTarget.dataset.label,
-        tableName : e.currentTarget.dataset.tableName,
-        tableAlias : e.currentTarget.dataset.tableAlias,
-        token : e.currentTarget.dataset.tokenColumn
-      };
-      if (e.currentTarget.dataset.tableId) {
-        column.dimensionToken = e.currentTarget.dataset.dimensionToken;
-        column.hierToken = e.currentTarget.dataset.hierToken;
-        column.tableId = e.currentTarget.dataset.tableId;
-      } else {
-        column.cubeToken = e.currentTarget.dataset.cubeToken;
-      }
-      app.addColumn(column); */
+      app.addColumnToSQL(e.currentTarget);
     } else {
       // deseleziono la colonna e reimposto tutti gli altri "abilitati per la selezione"
       e.currentTarget.toggleAttribute('data-selected');
@@ -1785,47 +1773,54 @@ var List = new Lists();
     const name = document.getElementById('columnName');
     const textarea = document.getElementById('composite-column-formula');
     const mode = textarea.dataset.mode;
-    let field = {};
+    let sql_formula = [];
+    let editFormula = [];
     // elimino l'oggetto Query.objects, se presente, in questo caso sto modificando una colonna già inserita.
     if (app.btnColumnSave.hasAttribute('data-token')) {
       Query.objects = {token : Query.columnToken };
       Query.select = {token : Query.columnToken};
     }
-    // colonna selezionata
+    // recupero la colonna selezionata
     const column = document.querySelector('#ul-columns .selectable[data-selected]');
-    // tra le prop della colonna ce ne sono alcune in comune tra colonne "fact" e colonne "dimensioni"
-    let object = {
-      token : column.dataset.tokenColumn,
-      table: column.dataset.tableName,
-      tableAlias: column.dataset.tableAlias,
-      name: name.value
-    };
-    // le colonne di un livello dimensionale hanno Query.hierToken impostato in handlerSelectColumn
-    if (column.dataset.tableId) {
-      StorageDimension.selected = column.dataset.dimensionToken;
-      object.dimensionToken = column.dataset.dimensionToken;
-      object.hier = column.dataset.hierToken;
-      object.tableId = column.dataset.tableId;
-      object.field = StorageDimension.selected.hierarchies[column.dataset.hierToken].columns[column.dataset.tableAlias][column.dataset.tokenColumn];
-      debugger;
-      // object.field = { [column.dataset.tokenColumn]: StorageDimension.selected.hierarchies[column.dataset.hierToken].columns[column.dataset.tableAlias][column.dataset.tokenColumn] };
-      // in SQLReport avrò un custom SQL utilizzabile solo nel report che si sta creando. La prop SQL, all'interno dei singoli field, determinano la customSQL impostata sulla Dimensione.
-      // NOTE: Oggetto Map
-      const hierarchiesObject = new Map([[column.dataset.hierToken, column.dataset.tableId]]);
-      Query.objects = { token: column.dataset.tokenColumn, hierarchies: Object.fromEntries(hierarchiesObject), dimensions: [column.dataset.dimensionToken] };
-    } else {
-      // la colonna fa parte di una tabella fact
-      // StorageCube è impostato in handlerSelectColumn
-      StorageCube.selected = column.dataset.cubeToken;
-      // field = { [column.dataset.tokenColumn]: StorageCube.selected.columns[column.dataset.tableAlias][column.dataset.tokenColumn] };
-      field = { [column.dataset.tokenColumn]: StorageCube.selected.columns[column.dataset.tableAlias][column.dataset.tokenColumn] };
-      object.cubeToken = column.dataset.cubeToken;
-      object.field = { [column.dataset.tokenColumn]: StorageCube.selected.columns[column.dataset.tableAlias][column.dataset.tokenColumn] };
-      Query.objects = { token: column.dataset.tokenColumn, cubeToken: column.dataset.cubeToken };
-    }
 
-    Query.select = object;
-    (app.btnColumnSave.hasAttribute('data-token')) ? List.editDefinedColumn(object) : List.addDefinedColumn(object);
+    document.querySelectorAll('#composite-column-formula *').forEach(element => {
+      if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
+      if (element.nodeName === 'MARK') {
+        // tra una colonna di un livello dimensionale e una della FACt ci sono delle prop in comune
+        let object = { token : element.dataset.token, table: element.dataset.tableName, tableAlias: element.dataset.tableAlias };
+        if (element.dataset.tableId) {
+          object.dimensionToken = element.dataset.dimensionToken;
+          object.hier = element.dataset.hierToken;
+          object.tableId = element.dataset.tableId;
+          // StorageDimension mi serve per recuperare la prop "field"
+          StorageDimension.selected = element.dataset.dimensionToken;
+          object.field = StorageDimension.selected.hierarchies[element.dataset.hierToken].columns[element.dataset.tableAlias][element.dataset.token];
+          // NOTE: Oggetto Map
+          const hierarchiesObject = new Map([[element.dataset.hierToken, element.dataset.tableId]]);
+          // TODO: ricontrollare le prop 'hierarchies' e 'dimensions', in questo caso (a differenza dei filtri) non è necessario inserire 'dimensions' come array
+          Query.objects = { token: element.dataset.token, hierarchies: Object.fromEntries(hierarchiesObject), dimensions: [element.dataset.dimensionToken] };
+          // sql_formula.push(`${element.dataset.tableAlias}.${element.dataset.field}`);
+          // tabella appartenente a un livello dimensionale
+          editFormula.push(object);
+        } else {
+          // tabella appartenente alla FACT.
+          StorageCube.selected = column.dataset.cubeToken;
+          object.cubeToken = column.dataset.cubeToken;
+          object.field = StorageCube.selected.columns[column.dataset.tableAlias][column.dataset.token];
+          Query.objects = { token: column.dataset.token, cubeToken: column.dataset.cubeToken };
+          editFormula.push(object);
+          // cubes.add(element.dataset.cubeToken);
+          // sql_formula.push(`${element.dataset.tableAlias}.${element.dataset.field}`);
+        }
+      } else {
+        sql_formula.push(element.innerText.trim());
+        editFormula.push(element.innerText.trim());
+      }
+    });
+    const columnObject = {token : column.dataset.token, edit : editFormula, name: name.value};
+    Query.select = columnObject;
+    debugger;
+    (app.btnColumnSave.hasAttribute('data-token')) ? List.editDefinedColumn(columnObject) : List.addDefinedColumn(columnObject);
     app.btnColumnSave.disabled = true;
     name.value = '';
     document.querySelectorAll('#ul-columns .selectable').forEach(item => {
@@ -1852,6 +1847,19 @@ var List = new Lists();
     }
     const column = document.querySelectorAll('#ul-columns .selectable[data-selected]').length;
     app.btnColumnSave.disabled = (!check && input.value.length !== 0 && column !== 0) ? false : true;
+  }
+
+  // tasto "key" per impostare il campo ID della colonna
+  document.getElementById('btn-sql-id').onclick = () => {
+    // attivo la sql-formula in modalità "ID"
+    document.querySelector('#composite-column-formula').dataset.mode = 'id';
+
+  }
+
+  // tasto "description" per impostare il campo DS della colonna
+  document.getElementById('btn-sql-ds').onclick = () => {
+    document.querySelector('#composite-column-formula').dataset.mode = 'ds';
+
   }
 
   document.getElementById('mdcMapping').onclick = () => location.href = '/mapping';

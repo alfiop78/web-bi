@@ -86,15 +86,15 @@ class Lists {
     this.table = this.section.querySelector('small[table]');
     // info può contenere la gerarchia oppure il cubo
     this.info = this.section.querySelector('small:last-child');
-    // this.btnEdit = this.section.querySelector('button[data-edit]');
+    this.btnAdd = this.section.querySelector('button[data-add]');
 
     this.#sublist = {
       section: this.section,
       selectable: this.selectable,
       span: this.span,
       table: this.table,
-      info: this.info
-      // btnEdit: this.btnEdit
+      info: this.info,
+      btnAdd: this.btnAdd
     }
   }
 
@@ -487,8 +487,15 @@ class Lists {
               this.#sublist.selectable.dataset.tableId = tableId;
               this.#sublist.selectable.dataset.dimensionToken = dimToken;
               this.#sublist.selectable.dataset.hierToken = hierToken;
-              this.#sublist.selectable.dataset.tokenColumn = token;
-              // this.#sublist.btnEdit.dataset.objectToken = token;
+              this.#sublist.selectable.dataset.token= token;
+              this.#sublist.btnAdd.dataset.objectToken = token;
+              this.#sublist.btnAdd.dataset.token = token;
+              this.#sublist.btnAdd.dataset.label = field.ds.field;
+              this.#sublist.btnAdd.dataset.dimensionToken = dimToken;
+              this.#sublist.btnAdd.dataset.hierToken = hierToken;
+              this.#sublist.btnAdd.dataset.tableName = table.table;
+              this.#sublist.btnAdd.dataset.tableAlias = table.alias;
+              this.#sublist.btnAdd.dataset.tableId = tableId;
               this.#sublist.span.innerText = field.ds.field;
               this.#sublist.table.innerText = table.table;
               this.#sublist.info.innerText = hierValue.name;
@@ -512,9 +519,14 @@ class Lists {
           this.#sublist.selectable.dataset.label = field.ds.field;
           this.#sublist.selectable.dataset.tableName = value.FACT;
           this.#sublist.selectable.dataset.tableAlias = value.alias;
-          this.#sublist.selectable.dataset.tokenColumn = token;
+          this.#sublist.selectable.dataset.token= token;
           this.#sublist.selectable.dataset.cubeToken = cubeToken;
-          // this.#sublist.btnEdit.dataset.objectToken = token;
+          this.#sublist.btnAdd.dataset.objectToken = token; // TODO: da valutare se è necessario
+          this.#sublist.btnAdd.dataset.token = token;
+          this.#sublist.btnAdd.dataset.label = field.ds.field;
+          this.#sublist.btnAdd.dataset.tableName = value.FACT;
+          this.#sublist.btnAdd.dataset.tableAlias = value.alias;
+          this.#sublist.btnAdd.dataset.cubeToken = cubeToken;
           this.#sublist.span.innerText = field.ds.field;
           this.#sublist.table.innerText = value.FACT;
           this.#sublist.info.innerText = value.name;
@@ -782,8 +794,8 @@ class Lists {
   // aggiorno, nella lista delle colonne già aggiunte, la colonna modificata
   editDefinedColumn(object) {
     this.ul = 'ul-defined-columns';
-    this.ul.querySelector("section[data-token-column='"+object.token+"']").dataset.label = object.alias;
-    this.ul.querySelector("section[data-token-column='"+object.token+"'] span[column]").innerText = object.alias;
+    this.ul.querySelector("section[data-token-column='"+object.token+"']").dataset.label = object.name;
+    this.ul.querySelector("section[data-token-column='"+object.token+"'] span[column]").innerText = object.name;
   }
 
   addDefinedFilter() {

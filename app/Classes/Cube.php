@@ -52,24 +52,22 @@ class Cube
   public function select($columns)
   {
     $fieldList = array();
-    $this->SELECT = "SELECT";
+    $this->SELECT = "SELECT\n";
     foreach ($columns as $key => $object) {
       // dd($object);
       foreach ($object->field as $token => $field) {
         // dd($field->field);
-        $fieldList[] = "\n{$object->tableAlias}.{$field->field} AS {$object->name}_{$token}";
-        // $fieldList[] = "{$object->tableAlias}.{$field->$token->field} AS {$object->name}_ds";
-        // $fieldList[] = "{$object->table}.{$object->field} AS '{$object->alias}'";
+        $fieldList[] = "{$object->tableAlias}.{$field->field} AS {$object->name}_{$token}";
         $this->_columns[] = "{$object->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
       }
       // dd($fieldList);
     }
-    $this->SELECT .= implode(", ", $fieldList);
+    $this->SELECT .= implode(",\n ", $fieldList);
     // dd($this->SELECT);
     /*
 		es.:
 			SELECT\n
-			CodSedeDealer_765.Descrizione AS 'sede_id', CodSedeDealer_765.Descrizione AS 'sede_ds'
+			CodSedeDealer_765.Descrizione AS sede_id, CodSedeDealer_765.Descrizione AS sede_ds
 		*/
     // var_dump($this->_columns);
   }
@@ -79,9 +77,6 @@ class Cube
     $fieldList = array();
     $this->groupBy = "GROUP BY\n";
     foreach ($groups as $key => $object) {
-      /* var_dump($key); // il nome dato alla colonna */
-      /* print_r($object); // contiene l'object {table : tabella, field: campo, alias : alias, SQL : formulSQL} */
-      /* var_dump($object->table); */
       foreach ($object->field as $field) {
         // $table_field_id = "{$object->tableAlias}.{$field->id->field}";
         // $table_field_ds = "{$object->tableAlias}.{$field->ds->field}";
@@ -91,7 +86,7 @@ class Cube
           // $fieldList[] = "{$object->tableAlias}.{$field->ds->field}";
       }
     }
-    $this->groupBy .= implode(",\n ", $fieldList);
+    $this->groupBy .= implode(",\n", $fieldList);
     // dd($this->_groupBy);
   }
 
