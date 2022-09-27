@@ -43,8 +43,8 @@ class Cube
 		*/
     foreach ($this->baseColumns as $key => $object) {
       foreach ($object->field as $token => $field) {
-        $this->_fields[] = "'{$object->alias}_id'";
-        $this->_fields[] = "'{$object->alias}_ds'";
+        $this->_fields[] = "{$object->name}_id";
+        $this->_fields[] = "{$object->name}_ds";
       }
     }
   }
@@ -54,15 +54,15 @@ class Cube
     $fieldList = array();
     $this->SELECT = "SELECT";
     foreach ($columns as $key => $object) {
-      /* var_dump($key); // il nome dato alla colonna */
-      /* print_r($object); // contiene l'object {table : tabella, field: campo, alias : alias, SQL : formulSQL} */
-      /* var_dump($object->table); */
+      // dd($object);
       foreach ($object->field as $token => $field) {
-        $fieldList[] = "\n{$object->tableAlias}.{$field->id->field} AS '{$object->alias}_id'";
-        $fieldList[] = "{$object->tableAlias}.{$field->ds->field} AS '{$object->alias}_ds'";
+        // dd($field->field);
+        $fieldList[] = "\n{$object->tableAlias}.{$field->field} AS {$object->name}_{$token}";
+        // $fieldList[] = "{$object->tableAlias}.{$field->$token->field} AS {$object->name}_ds";
         // $fieldList[] = "{$object->table}.{$object->field} AS '{$object->alias}'";
-        $this->_columns[] = "{$object->alias}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
+        $this->_columns[] = "{$object->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
       }
+      // dd($fieldList);
     }
     $this->SELECT .= implode(", ", $fieldList);
     // dd($this->SELECT);
@@ -72,6 +72,27 @@ class Cube
 			CodSedeDealer_765.Descrizione AS 'sede_id', CodSedeDealer_765.Descrizione AS 'sede_ds'
 		*/
     // var_dump($this->_columns);
+  }
+
+  public function groupBy($groups)
+  {
+    $fieldList = array();
+    $this->groupBy = "GROUP BY\n";
+    foreach ($groups as $key => $object) {
+      /* var_dump($key); // il nome dato alla colonna */
+      /* print_r($object); // contiene l'object {table : tabella, field: campo, alias : alias, SQL : formulSQL} */
+      /* var_dump($object->table); */
+      foreach ($object->field as $field) {
+        // $table_field_id = "{$object->tableAlias}.{$field->id->field}";
+        // $table_field_ds = "{$object->tableAlias}.{$field->ds->field}";
+        if (!in_array("{$object->tableAlias}.{$field->field}", $fieldList)) $fieldList[] = "{$object->tableAlias}.{$field->field}";
+        // if (!in_array("{$object->tableAlias}.{$field->ds->field}", $fieldList)) $fieldList[] = "{$object->tableAlias}.{$field->ds->field}";
+          // $fieldList[] = "\n{$object->tableAlias}.{$field->id->field}";
+          // $fieldList[] = "{$object->tableAlias}.{$field->ds->field}";
+      }
+    }
+    $this->groupBy .= implode(",\n ", $fieldList);
+    // dd($this->_groupBy);
   }
 
   /*
@@ -195,23 +216,6 @@ class Cube
     $this->_metrics_base_datamart = implode(", ", $metrics_base_datamart);
     // dd($this->_metrics_base);
     // dd($this->_metrics_base_datamart);
-  }
-
-  public function groupBy($groups)
-  {
-    $fieldList = array();
-    $this->groupBy = "GROUP BY";
-    foreach ($groups as $key => $object) {
-      /* var_dump($key); // il nome dato alla colonna */
-      /* print_r($object); // contiene l'object {table : tabella, field: campo, alias : alias, SQL : formulSQL} */
-      /* var_dump($object->table); */
-      foreach ($object->field as $token => $field) {
-        $fieldList[] = "\n{$object->tableAlias}.{$field->id->field}";
-        $fieldList[] = "{$object->tableAlias}.{$field->ds->field}";
-      }
-    }
-    $this->groupBy .= implode(", ", $fieldList);
-    // dd($this->_groupBy);
   }
 
   private function buildCompositeMetrics($tableName, $metricObject)

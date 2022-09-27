@@ -421,7 +421,7 @@ input:invalid ~ label.has-content ~ span{visibility: visible;}
 
   input:disabled ~ label.has-content{font-size: .75rem;top:8px;}
   label[for]{top: 20px;}
-  input:invalid ~ label.has-content {top: 8px;font-size: .8rem;}
+  input:invalid ~ label.has-content {top: 4px;font-size: .7rem;}
   input:read-only ~ label.has-content {top: 8px;}
   /* .md-field{min-width: 300px;} */
 

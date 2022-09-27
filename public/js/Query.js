@@ -136,10 +136,10 @@ class Queries {
   }
   get compositeMetrics() { return this.#compositeMetrics; }
 
-  checkColumnAlias(alias) {
+  checkColumnName(name) {
     let result = false;
     for (const values of this.select.values()) {
-      if (values.alias.toLowerCase() === alias.toLowerCase()) result = true;
+      if (values.name.toLowerCase() === name.toLowerCase()) result = true;
     }
     return result;
   }

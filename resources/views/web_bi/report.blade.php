@@ -30,7 +30,7 @@
 
 <body>
 
-  <template id="tmpl-filter-formula">
+  <template id="tmpl-formula">
     <span class="markContent">
       <i class="material-icons-round md-14">cancel</i>
       <mark></mark>
@@ -84,7 +84,7 @@
 
         <section class="sectionLists parent-ul-columns">
           <h5>Colonne</h5>
-          <h6>subtitle</h6>
+          <!-- <h6>subtitle</h6> -->
           <div class="md-field">
             <input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" tabindex="1">
             <label for="search-columns" class="">Ricerca</label>
@@ -96,17 +96,17 @@
 
         <section class="sectionLists parent-formula-column">
           <h5>SQL</h5>
-          <h6>Alias per la colonna</h6>
           <div class="md-field">
-            <input type="text" id="columnAlias" name="columnAlias" autocomplete="off" tabindex="2" autofocus="true" />
-            <label for="columnAlias" class="">Alias</label>
+            <input type="text" id="columnName" name="columnName" pattern="[a-zA-Z_]+" autocomplete="off" tabindex="2" autofocus="true" />
+            <label for="columnName" class="">Name</label>
             <p class="helper"></p>
           </div>
 
-          <div class="md-field">
-            <textarea id="columnSQL" name="columnSQL" rows="10" cols="50" placeholder="es.: CONCAT(tabella.campo,'-',tabella.campo)" disabled></textarea>
-          </div>
-          <!-- <button id="btnColumnSave" type="button" name="save" class="md-button" disabled>salva</button> -->
+          <section class="sql-buttons">
+            <button type="button" id="btn-sql-id" class="button-icon material-icons-round md-18 md-inactive" tooltip="SQL colonna ID" flow="bottom">key</button>
+            <button type="button" id="btn-sql-ds" class="button-icon material-icons-round md-18 md-inactive" tooltip="SQL colonna DS" flow="bottom">description</button>
+          </section>
+          <div id="composite-column-formula" data-mode="all" data-content-editable></div>
         </section>
 
       </div>
@@ -155,8 +155,6 @@
         <button id="btnValueDone" type="button" name="value-done" class="md-button">ok</button>
       </div>
     </section>
-
-
   </dialog>
 
   <dialog id="dialog-filter" class="large-dialog struct">

@@ -771,9 +771,9 @@ class Lists {
   addDefinedColumn(object) {
     this.ul = 'ul-defined-columns';
     this.definedColumns = 'data-sublist-columns-defined';
-    this.#sublist.section.dataset.label = object.alias;
+    this.#sublist.section.dataset.label = object.name;
     this.#sublist.section.dataset.tokenColumn = object.token;
-    this.#sublist.span.innerText = object.alias;
+    this.#sublist.span.innerText = object.name;
     this.#sublist.btnEdit.dataset.objectToken = object.token;
     this.#sublist.btnRemove.dataset.objectToken = object.token;
     this.ul.appendChild(this.#sublist.section);
