@@ -41,12 +41,13 @@ class Cube
 				3 => "'sede_ds'"
 			]
 		*/
+    // dd($this->baseColumns);
     foreach ($this->baseColumns as $key => $object) {
-      foreach ($object->field as $token => $field) {
-        $this->_fields[] = "{$object->name}_id";
-        $this->_fields[] = "{$object->name}_ds";
+      foreach ($object->sql as $token => $field) {
+        $this->_fields[] = "{$object->name}_{$token}";
       }
     }
+    // dd($this->_fields);
   }
 
   public function select($columns)
@@ -55,9 +56,10 @@ class Cube
     $this->SELECT = "SELECT\n";
     foreach ($columns as $key => $object) {
       // dd($object);
-      foreach ($object->field as $token => $field) {
+      foreach ($object->sql as $token => $field) {
         // dd($field->field);
-        $fieldList[] = "{$object->tableAlias}.{$field->field} AS {$object->name}_{$token}";
+        // $fieldList[] = "{$object->tableAlias}.{$field->field} AS {$object->name}_{$token}";
+        $fieldList[] = implode($field) . " AS {$object->name}_{$token}";
         $this->_columns[] = "{$object->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
       }
       // dd($fieldList);
@@ -77,17 +79,16 @@ class Cube
     $fieldList = array();
     $this->groupBy = "GROUP BY\n";
     foreach ($groups as $key => $object) {
-      foreach ($object->field as $field) {
+      foreach ($object->sql as $field) {
         // $table_field_id = "{$object->tableAlias}.{$field->id->field}";
         // $table_field_ds = "{$object->tableAlias}.{$field->ds->field}";
-        if (!in_array("{$object->tableAlias}.{$field->field}", $fieldList)) $fieldList[] = "{$object->tableAlias}.{$field->field}";
-        // if (!in_array("{$object->tableAlias}.{$field->ds->field}", $fieldList)) $fieldList[] = "{$object->tableAlias}.{$field->ds->field}";
-          // $fieldList[] = "\n{$object->tableAlias}.{$field->id->field}";
-          // $fieldList[] = "{$object->tableAlias}.{$field->ds->field}";
+        // if (!in_array("{$object->tableAlias}.{$field->field}", $fieldList)) $fieldList[] = "{$object->tableAlias}.{$field->field}";
+        $fieldImploded = implode($field);
+        if (!in_array($fieldImploded, $fieldList)) $fieldList[] = $fieldImploded;
       }
     }
     $this->groupBy .= implode(",\n", $fieldList);
-    // dd($this->_groupBy);
+    // dd($this->groupBy);
   }
 
   /*

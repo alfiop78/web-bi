@@ -31,6 +31,8 @@
 
 /* *[data-content-editable][data-mode="all"] {display: none;} */
 *[data-content-editable][data-mode="all"] {opacity: .6;}
+*[data-content-editable][data-mode="id"] *[data-mode="ds"] {display: none;}
+*[data-content-editable][data-mode="ds"] *[data-mode="id"] {display: none;}
 
 *[data-content-editable] *[contenteditable="true"] {color: black; outline: none;}
 
