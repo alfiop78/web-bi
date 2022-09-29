@@ -599,7 +599,7 @@ var List = new Lists();
           // se il tasto shift non è premuto e mi trovo sull'ultimo span, aggiungo un altro span. In caso contrario, la combinazione shift+tab oppure tab su un qualsiasi altro
           // ...span che non sia l'ultimo, avrà il comportamento di default
           if (!e.shiftKey && lastSpan) {
-            app.addSpan(target, null, check);
+            (mode) ? app.addSpan(target, null, check, mode) : app.addSpan(target, null, check);
             e.preventDefault();
           }
           break;
@@ -657,7 +657,9 @@ var List = new Lists();
   }
 
   // elimino lo span che contiene il "placeholder"
-  document.getElementById('composite-column-formula').onclick = (e) => { if (e.target.localName === 'div') app.addSpan(e.target, null, 'column', e.target.dataset.mode); }
+  document.getElementById('composite-column-formula').onclick = (e) => {
+    if (e.target.localName === 'div' && e.target.dataset.mode !== 'all') app.addSpan(e.target, null, 'column', e.target.dataset.mode);
+  }
 
   app.addColumnToSQL = (column) => {
     const textarea = document.getElementById('composite-column-formula');
@@ -704,7 +706,11 @@ var List = new Lists();
       // deseleziono la colonna e reimposto tutti gli altri "abilitati per la selezione"
       e.currentTarget.toggleAttribute('data-selected');
       document.querySelectorAll('#ul-columns section:not([hidden]) .selectable[data-disabled]').forEach(element => delete element.dataset.disabled);
+      // rimuovo dalla textarea la colonna deselezionata
+      document.querySelectorAll('#composite-column-formula *').forEach(item => item.remove());
     }
+    // ora i tasti btn-sql-id/ds possono essere abilitati/disabilitati
+    document.querySelectorAll('#btn-sql-id, #btn-sql-ds').forEach(button => button.toggleAttribute('disabled'));
   }
 
   // selezione di una tabella nella dialog-filter
@@ -1771,12 +1777,35 @@ var List = new Lists();
     }
   });
 
+  // imposto i campi id/ds delle colonne
+  app.setFormula = (obj) => {
+    switch (obj.mode) {
+      case 'id':
+        (obj.innerText) ? Query.sql_id.push(obj.innerText) : Query.sql_id.push(`${obj.tableAlias}.${obj.label}`);
+        Query.edit_id.push(obj);
+        break;
+      case 'ds':
+        (obj.innerText) ? Query.sql_ds.push(obj.innerText) : Query.sql_ds.push(`${obj.tableAlias}.${obj.label}`);
+        Query.edit_ds.push(obj);
+        break;
+      default:
+        if (obj.innerText) {
+          Query.sql_id.push(obj.innerText);
+          Query.sql_ds.push(obj.innerText);
+        } else {
+          Query.sql_id.push(`${obj.tableAlias}.${obj.label}`);
+          Query.sql_ds.push(`${obj.tableAlias}.${obj.label}`);
+        }
+        Query.edit_id.push(obj);
+        Query.edit_ds.push(obj);
+        break;
+    }
+  }
+
   app.saveColumn = () => {
     const name = document.getElementById('columnName');
     const textarea = document.getElementById('composite-column-formula');
-    const mode = textarea.dataset.mode;
-    let sql_id = [], sql_ds = [];
-    let edit_id = [], edit_ds = [];
+    Query.sql_id = [], Query.sql_ds = []; Query.edit_id = [], Query.edit_ds = [];
     // elimino l'oggetto Query.objects, se presente, in questo caso sto modificando una colonna già inserita.
     if (app.btnColumnSave.hasAttribute('data-token')) {
       Query.objects = {token : Query.columnToken };
@@ -1785,86 +1814,38 @@ var List = new Lists();
     // recupero la colonna selezionata
     const column = document.querySelector('#ul-columns .selectable[data-selected]');
     let object = { token : column.dataset.token, name : name.value };
-    // let object = { token : column.dataset.token, table : column.dataset.tableName, tableAlias : column.dataset.tableAlias, name : name.value };
-    if (column.dataset.tableId) {
-      /* object.dimensionToken = column.dataset.dimensionToken;
-      object.hierToken = column.dataset.hierToken;
-      object.tableId = column.dataset.tableId; */
-      // StorageDimension.selected = column.dataset.dimensionToken;
-      // object.field = StorageDimension.selected.hierarchies[column.dataset.hierToken].columns[column.dataset.tableAlias][column.dataset.token];
-    } else {
-      // object.cubeToken = column.dataset.cubeToken;
-      // StorageCube.selected = columnn.dataset.cubeToken;
-      // object.field = StorageCube.selected.columns[columnn.dataset.tableAlias][columnn.dataset.token];
-    }
 
     document.querySelectorAll('#composite-column-formula *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
-        // tra una colonna di un livello dimensionale e una della FACt ci sono delle prop in comune
-        // let objectColumn = { token : element.dataset.token, table: element.dataset.tableName, tableAlias: element.dataset.tableAlias };
-        let obj = { token : element.dataset.token, table : element.dataset.tableName, tableAlias : element.dataset.tableAlias };
+        let obj = { mode : element.dataset.mode, token : element.dataset.token, table : element.dataset.tableName, tableAlias : element.dataset.tableAlias, label : element.dataset.label };
         if (element.dataset.tableId) {
           // tabella appartenente a un livello dimensionale
           obj.dimensionToken = element.dataset.dimensionToken;
           obj.hierToken = element.dataset.hierToken;
           obj.tableId = element.dataset.tableId;
-          obj.field = element.dataset.label;
-          // objectColumn.field = StorageDimension.selected.hierarchies[element.dataset.hierToken].columns[element.dataset.tableAlias][element.dataset.token];
+          StorageDimension.selected = element.dataset.dimensionToken;
+          obj.field = StorageDimension.selected.hierarchies[element.dataset.hierToken].columns[element.dataset.tableAlias][element.dataset.token];
           // NOTE: Oggetto Map
           const hierarchiesObject = new Map([[element.dataset.hierToken, element.dataset.tableId]]);
           Query.objects = { token: element.dataset.token, hierarchies: Object.fromEntries(hierarchiesObject), dimensions: [element.dataset.dimensionToken] };
-          debugger;
-          if (element.dataset.mode === 'all') {
-            sql_id.push(`${element.dataset.tableAlias}.${element.dataset.label}`);
-            sql_ds.push(`${element.dataset.tableAlias}.${element.dataset.label}`);
-            edit_id.push(obj);
-            edit_ds.push(obj);
-          } else {
-            if (element.dataset.mode === 'id') {
-              sql_id.push(`${element.dataset.tableAlias}.${element.dataset.label}`);
-              edit_id.push(obj);
-            } else {
-              sql_ds.push(`${element.dataset.tableAlias}.${element.dataset.label}`);
-              edit_ds.push(obj);
-            }
-          }
+          app.setFormula(obj);
         } else {
           // tabella appartenente alla FACT.
           StorageCube.selected = element.dataset.cubeToken;
           Query.objects = { token: element.dataset.token, cubeToken: element.dataset.cubeToken };
-          editFormula.push(
-            {
-              token : element.dataset.token,
-              table : element.dataset.tableName,
-              tableAlias : element.dataset.tableAlias,
-              cubeToken : element.dataset.cubeToken,
-              field : StorageCube.selected.columns[element.dataset.tableAlias][element.dataset.token]
-            }
-          );
-          // sql_formula.push(`${element.dataset.tableAlias}.${element.dataset.label}`);
+          obj.field = StorageCube.selected.columns[element.dataset.tableAlias][element.dataset.token];
+          obj.cubeToken = element.dataset.cubeToken;
+          app.setFormula(obj);
         }
       } else {
-        if (element.dataset.mode === 'all') {
-          sql_id.push(element.innerText.trim());
-          sql_ds.push(element.innerText.trim());
-          edit_id.push(element.innerText.trim());
-          edit_ds.push(element.innerText.trim());
-        } else {
-          if (element.dataset.mode === 'id') {
-            sql_id.push(element.innerText.trim())
-            edit_id.push(element.innerText.trim());
-          } else {
-            sql_ds.push(element.innerText.trim());
-            edit_ds.push(element.innerText.trim());
-          } 
-        }
+        let obj = { mode : element.dataset.mode, innerText : element.innerText.trim() };
+        app.setFormula(obj);
       }
     });
-    object.edit = {id : edit_id, ds : edit_ds};
-    object.sql = {id : sql_id, ds: sql_ds};
+    object.edit = {id : Query.edit_id, ds : Query.edit_ds};
+    object.sql = {id : Query.sql_id, ds: Query.sql_ds};
     Query.select = object;
-    debugger;
     (app.btnColumnSave.hasAttribute('data-token')) ? List.editDefinedColumn(object) : List.addDefinedColumn(object);
     app.btnColumnSave.disabled = true;
     name.value = '';
@@ -1872,6 +1853,10 @@ var List = new Lists();
       delete item.dataset.selected;
       delete item.dataset.disabled;
     });
+    document.getElementById('btn-sql-id').toggleAttribute('disabled');
+    document.getElementById('btn-sql-ds').toggleAttribute('disabled');
+    // ripulisco la textarea
+    document.querySelectorAll('#composite-column-formula *').forEach(item => item.remove());
     app.checkObjectSelected();
   }
 
@@ -1896,15 +1881,13 @@ var List = new Lists();
 
   // tasto "key" per impostare il campo ID della colonna
   document.getElementById('btn-sql-id').onclick = () => {
-    // attivo la sql-formula in modalità "ID"
-    document.querySelector('#composite-column-formula').dataset.mode = 'id';
-
+    // se è stata selezionata una colonna attivo la sql-formula in modalità "ID"
+    if (document.querySelectorAll('#ul-columns .selectable[data-selected]').length === 1) document.querySelector('#composite-column-formula').dataset.mode = 'id';
   }
 
   // tasto "description" per impostare il campo DS della colonna
   document.getElementById('btn-sql-ds').onclick = () => {
-    document.querySelector('#composite-column-formula').dataset.mode = 'ds';
-
+    if (document.querySelectorAll('#ul-columns .selectable[data-selected]').length === 1) document.querySelector('#composite-column-formula').dataset.mode = 'ds';
   }
 
   document.getElementById('mdcMapping').onclick = () => location.href = '/mapping';

@@ -57,8 +57,6 @@ class Cube
     foreach ($columns as $key => $object) {
       // dd($object);
       foreach ($object->sql as $token => $field) {
-        // dd($field->field);
-        // $fieldList[] = "{$object->tableAlias}.{$field->field} AS {$object->name}_{$token}";
         $fieldList[] = implode($field) . " AS {$object->name}_{$token}";
         $this->_columns[] = "{$object->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
       }
@@ -80,9 +78,6 @@ class Cube
     $this->groupBy = "GROUP BY\n";
     foreach ($groups as $key => $object) {
       foreach ($object->sql as $field) {
-        // $table_field_id = "{$object->tableAlias}.{$field->id->field}";
-        // $table_field_ds = "{$object->tableAlias}.{$field->ds->field}";
-        // if (!in_array("{$object->tableAlias}.{$field->field}", $fieldList)) $fieldList[] = "{$object->tableAlias}.{$field->field}";
         $fieldImploded = implode($field);
         if (!in_array($fieldImploded, $fieldList)) $fieldList[] = $fieldImploded;
       }

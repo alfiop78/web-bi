@@ -103,8 +103,8 @@
           </div>
 
           <section class="sql-buttons">
-            <button type="button" id="btn-sql-id" class="button-icon material-icons-round md-18 md-inactive" tooltip="SQL colonna ID" flow="bottom">key</button>
-            <button type="button" id="btn-sql-ds" class="button-icon material-icons-round md-18 md-inactive" tooltip="SQL colonna DS" flow="bottom">description</button>
+            <button type="button" id="btn-sql-id" class="button-icon material-icons-round md-18 md-inactive" tooltip="SQL colonna ID" flow="bottom" disabled>key</button>
+            <button type="button" id="btn-sql-ds" class="button-icon material-icons-round md-18 md-inactive" tooltip="SQL colonna DS" flow="bottom" disabled>description</button>
           </section>
           <div id="composite-column-formula" data-mode="all" data-content-editable></div>
         </section>
