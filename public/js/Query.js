@@ -43,7 +43,7 @@ class Queries {
           // debugger;
           const hier = document.querySelector("#ul-hierarchies .unselectable[data-hier-token='" + token + "']");
           // converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
-          [...hier.querySelectorAll("small")].filter((table, index) => index >= tableId).forEach(tableRef => {
+          [...hier.querySelectorAll("small")].filter((table, index) => index >= +tableId).forEach(tableRef => {
             tableRef.dataset.includeQuery = 'true';
           });
         }
@@ -85,14 +85,14 @@ class Queries {
 
   set cubes(token) {
     (!this.#cubes.has(token)) ? this.#cubes.add(token) : this.#cubes.delete(token);
-    console.log('#cubes : ', this.#cubes);
+    // console.log('#cubes : ', this.#cubes);
   }
 
   get cubes() { return this.#cubes; }
 
   set dimensions(token) {
     (!this.#dimensions.has(token)) ? this.#dimensions.add(token) : this.#dimensions.delete(token);
-    console.log('#dimensions : ', this.#dimensions);
+    // console.log('#dimensions : ', this.#dimensions);
   }
 
   get dimensions() { return this.#dimensions; }
@@ -110,7 +110,7 @@ class Queries {
 
   set filters(value) {
     (!this.#filters.has(value.token)) ? this.#filters.set(value.token, { SQL: value.formula }) : this.#filters.delete(value.token);
-    console.log('this.#filters : ', this.#filters);
+    // console.log('this.#filters : ', this.#filters);
   }
 
   get filters() { return this.#filters };
@@ -118,7 +118,7 @@ class Queries {
   set metrics(value) {
     // value = {sqlFunction: "SUM", field: "NettoRiga", metricName: "netto riga", distinct: false, alias: "Venduto"}
     (!this.#metrics.has(value.token)) ? this.#metrics.set(value.token, value) : this.#metrics.delete(value.token);
-    console.log('metrics : ', this.#metrics);
+    // console.log('metrics : ', this.#metrics);
   }
 
   get metrics() { return this.#metrics; }
@@ -132,7 +132,7 @@ class Queries {
 
   set compositeMetrics(value) {
     (!this.#compositeMetrics.has(value.token)) ? this.#compositeMetrics.set(value.token, value) : this.#compositeMetrics.delete(value.token);
-    console.log('this.#compositeMetrics : ', this.#compositeMetrics);
+    // console.log('this.#compositeMetrics : ', this.#compositeMetrics);
   }
   get compositeMetrics() { return this.#compositeMetrics; }
 

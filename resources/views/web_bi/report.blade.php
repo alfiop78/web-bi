@@ -452,6 +452,7 @@
               <button type="button" id="btnProcessReport" class="button-icon material-icons-round md-24" tooltip="Apri" flow="bottom">folder</button>
               <button type="button" id="save" class="button-icon material-icons-round md-24" tooltip="Salva" flow="bottom" disabled>save</button>
               <button type="button" id="sql_process" class="button-icon material-icons-round md-24" tooltip="Visualizza SQL" flow="bottom" disabled>info</button>
+              <button type="button" id="btn-close-report" class="button-icon material-icons-round md-24" tooltip="Chiudi Report" flow="bottom">cancel</button>
             </div>
             <div class="info"><span id="info"></span></div>
           </div>

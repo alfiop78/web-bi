@@ -178,6 +178,7 @@ var List = new Lists();
     // app.info.innerText = StorageProcess.selected.name;
     Query.token = e.target.dataset.processToken;
     Query.processId = +e.target.dataset.id;
+    document.querySelector('#toggle-hierarchy-drawer').toggleAttribute('disabled');
     // cubi
     StorageProcess.selected.edit.cubes.forEach(token => {
       StorageCube.selected = token;
@@ -199,24 +200,31 @@ var List = new Lists();
     // colonne
     for (const [token, column] of Object.entries(StorageProcess.selected.edit.columns)) {
       // Query.select = { field: Query.field, SQLReport: textarea, alias : alias.value };
-      document.querySelector("#ul-columns .selectable[data-token-column='" + token + "']").dataset.selected = 'true';
-      Query.field = column.field;
-      // reimposto la colonna come quando viene selezionata
-      Query.select = column;
       // console.log(column);
-      if (column.hasOwnProperty('tableId')) {
-        const hierarchiesObject = new Map([[column.hier, column.tableId]]);
-        Query.objects = {
-          token,
-          hierarchies: Object.fromEntries(hierarchiesObject),
-          dimensions: [column.dimensionToken]
-        };
-      } else {
-        Query.objects = {
-          token,
-          cubeToken: column.cubeToken
-        };
+      // document.querySelector("#ul-columns .selectable[data-token-column='" + token + "']").dataset.selected = 'true';
+      // Query.field = column.field;
+      // reimposto la colonna come quando viene selezionata
+      // return;
+      // console.log(column);
+      // ciclo la proprietà 'edit' della colonna, al suo interno ci sono le specifiche della colonna da aggiungere a Objects
+      for (const [key, value] of Object.entries(column.edit)) {
+        // debugger;
+        value.forEach(item => {
+          // console.log(key, item);
+          if (item.tableId) {
+            // debugger;
+            if (!Query.objects.has(item.token)) {
+              const hierarchiesObject = new Map([[item.hierToken, item.tableId]]);
+              Query.objects = { token : item.token, hierarchies : Object.fromEntries(hierarchiesObject), dimensions : [item.dimensionToken] };
+            }
+          } else {
+            if (!Query.objects.has(item.token)) {
+              Query.objects = { token : item.token, cubeToken : item.cubeToken };
+            }
+          }
+        });
       }
+      Query.select = column;
       // aggiungo alla #ul-defined-columns
       List.addDefinedColumn(column);
     }
@@ -429,25 +437,19 @@ var List = new Lists();
     // imposto un data-token sul tasto btnColumnSave
     // qui devo impostare le stesse prop impostate in handlerSelectColumn
     app.btnColumnSave.dataset.token = e.currentTarget.dataset.objectToken;
-    Query.columnToken = e.currentTarget.dataset.objectToken;
-    Query.tableAlias = Query.select.get(Query.columnToken).tableAlias;
-    Query.table = Query.select.get(Query.columnToken).table;
-    document.getElementById('columnName').setAttribute('value', Query.select.get(Query.columnToken).alias);
-    document.getElementById('columnName').value = Query.select.get(Query.columnToken).alias;
-    // imposto gli oggetto hierToken, dimensionToken, ecc... per la colonna di un livello dimensionale e cubeToken per la colonna di una fact
-    Query.hierToken = (Query.select.get(Query.columnToken).hasOwnProperty('tableId')) ? Query.select.get(Query.columnToken).hier : undefined;
-    Query.dimensionToken = (Query.select.get(Query.columnToken).hasOwnProperty('tableId')) ? Query.select.get(Query.columnToken).dimensionToken : undefined;
-    Query.tableId = (Query.select.get(Query.columnToken).hasOwnProperty('tableId')) ? +Query.select.get(Query.columnToken).tableId : undefined;
-    Query.cubeToken = (Query.select.get(Query.columnToken).hasOwnProperty('tableId')) ? undefined : Query.select.get(Query.columnToken).cubeToken;
-    if (Query.tableId !== undefined) {
-      StorageDimension.selected = Query.dimensionToken;
-      Query.field = { [Query.columnToken]: StorageDimension.selected.hierarchies[Query.hierToken].columns[Query.tableAlias][Query.columnToken] };
-    } else {
-      StorageCube.selected = Query.cubeToken;
-      Query.field = { [Query.columnToken]: StorageCube.selected.columns[Query.tableAlias][Query.columnToken] };
-    } 
-    document.querySelector("#ul-columns .selectable[data-token-column='"+e.currentTarget.dataset.objectToken+"']").dataset.selected = 'true';
+    document.getElementById('columnName').setAttribute('value', Query.select.get(e.currentTarget.dataset.objectToken).name);
+    document.getElementById('columnName').value = Query.select.get(e.currentTarget.dataset.objectToken).name;
+    // recupero la formula dall'oggetto Query.select e la reimposto nella composite-column-formula
+    // seleziono la colonna e aggiungo la stessa al composite-column-formula
+    const column = document.querySelector("#ul-columns .selectable[data-token='"+e.currentTarget.dataset.objectToken+"']")
+    column.dataset.selected = 'true';
+    // imposto tutti gli altri "disabled"
+    document.querySelectorAll('#ul-columns section:not([hidden]) .selectable:not([data-selected])').forEach(element => element.dataset.disabled = 'true');
+    app.addColumnToSQL(column);
+    // ora i tasti btn-sql-id/ds possono essere abilitati/disabilitati
     app.dialogColumns.showModal();
+    document.getElementById('columnName').focus();
+    document.getElementById('columnName').select();
   }
 
   // selezione di un cubo (step-1)
@@ -687,6 +689,7 @@ var List = new Lists();
     mark.innerText = column.dataset.label;
     // small.innerText = Query.table;
     textarea.appendChild(span);
+    app.checkColumnForm();
   }
 
   // aggiungo la colonna alla SQL formula
@@ -1806,13 +1809,13 @@ var List = new Lists();
     const name = document.getElementById('columnName');
     const textarea = document.getElementById('composite-column-formula');
     Query.sql_id = [], Query.sql_ds = []; Query.edit_id = [], Query.edit_ds = [];
-    // elimino l'oggetto Query.objects, se presente, in questo caso sto modificando una colonna già inserita.
-    if (app.btnColumnSave.hasAttribute('data-token')) {
-      Query.objects = {token : Query.columnToken };
-      Query.select = {token : Query.columnToken};
-    }
     // recupero la colonna selezionata
     const column = document.querySelector('#ul-columns .selectable[data-selected]');
+    // elimino l'oggetto Query.objects, se presente, in questo caso sto modificando una colonna già inserita.
+    if (app.btnColumnSave.dataset.token) {
+      Query.objects = {token : column.dataset.token};
+      Query.select = {token : column.dataset.token};
+    }
     let object = { token : column.dataset.token, name : name.value };
 
     document.querySelectorAll('#composite-column-formula *').forEach(element => {
@@ -1847,16 +1850,7 @@ var List = new Lists();
     object.sql = {id : Query.sql_id, ds: Query.sql_ds};
     Query.select = object;
     (app.btnColumnSave.hasAttribute('data-token')) ? List.editDefinedColumn(object) : List.addDefinedColumn(object);
-    app.btnColumnSave.disabled = true;
-    name.value = '';
-    document.querySelectorAll('#ul-columns .selectable').forEach(item => {
-      delete item.dataset.selected;
-      delete item.dataset.disabled;
-    });
-    document.getElementById('btn-sql-id').toggleAttribute('disabled');
-    document.getElementById('btn-sql-ds').toggleAttribute('disabled');
-    // ripulisco la textarea
-    document.querySelectorAll('#composite-column-formula *').forEach(item => item.remove());
+    app.resetDialogColumn();
     app.checkObjectSelected();
   }
 
@@ -2016,6 +2010,20 @@ var List = new Lists();
       delete item.dataset.temporary;
     });
   });
+
+  app.resetDialogColumn = () => {
+    // ripulisco la textarea
+    document.querySelectorAll('#composite-column-formula *').forEach(item => item.remove());
+    app.btnColumnSave.disabled = true;
+    name.value = '';
+    document.querySelectorAll('#ul-columns .selectable').forEach(item => {
+      delete item.dataset.selected;
+      delete item.dataset.disabled;
+    });
+    document.querySelectorAll('#btn-sql-id, #btn-sql-ds').forEach(button => button.toggleAttribute('disabled'));
+  }
+
+  app.dialogColumns.addEventListener('close', () => app.resetDialogColumn());
 
   app.dialogMetricFilter.addEventListener('open', () => {
     document.getElementById('dialog-metric-filter-search').value = "";
