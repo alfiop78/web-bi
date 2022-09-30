@@ -67,7 +67,8 @@ class Cube
     /*
 		es.:
 			SELECT\n
-			CodSedeDealer_765.Descrizione AS sede_id, CodSedeDealer_765.Descrizione AS sede_ds
+      CodSedeDealer_765.Descrizione AS sede_id,
+      CodSedeDealer_765.Descrizione AS sede_ds
 		*/
     // var_dump($this->_columns);
   }

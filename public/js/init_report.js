@@ -1860,7 +1860,7 @@ var List = new Lists();
     const input = document.getElementById('columnName');
     const helper = document.querySelector('#columnName ~ .helper');
     // controllo che non sia stato già inserito il nome di questa colonna nel report
-    const check = Query.checkColumnName(input.value);
+    const check = Query.checkColumnName(app.btnColumnSave.dataset.token, input.value);
     if (check) {
       // nome già presente nello storage
       helper.classList.add('error');

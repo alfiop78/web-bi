@@ -136,10 +136,13 @@ class Queries {
   }
   get compositeMetrics() { return this.#compositeMetrics; }
 
-  checkColumnName(name) {
+  checkColumnName(token, name) {
+    // in fase di edit di una colonna, tramite l'argomento token, non devo controllare se il nome già esiste di una colonna che sto modificando
     let result = false;
     for (const values of this.select.values()) {
-      if (values.name.toLowerCase() === name.toLowerCase()) result = true;
+      if (values.token !== token) {
+        if (values.name.toLowerCase() === name.toLowerCase()) result = true;
+      }
     }
     return result;
   }
