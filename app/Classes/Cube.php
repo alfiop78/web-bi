@@ -331,15 +331,15 @@ class Cube
         // var_dump($metric);
         if ($metric->metric_type === 3) {
           // metrica composta a livello cubo filtrata (es. : prezzo * quantita impostato sul cubo con filtro)
-          $arrayMetrics[$metric->alias] = "NVL({$metric->aggregateFn}({$metric->field}), 0) AS '{$metric->alias}'";
+          $arrayMetrics[$metric->formula->alias] = "NVL({$metric->formula->aggregateFn}({$metric->formula->field}), 0) AS '{$metric->formula->alias}'";
         } else {
           // metrica filtrata
-          $arrayMetrics[$metric->alias] = "NVL({$metric->aggregateFn}({$metric->tableAlias}.{$metric->field}), 0) AS '{$metric->alias}'";
+          $arrayMetrics[$metric->formula->alias] = "NVL({$metric->formula->aggregateFn}({$metric->formula->tableAlias}.{$metric->formula->field}), 0) AS '{$metric->formula->alias}'";
         }
         // var_dump($arrayMetrics);
         // _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
         // TODO: aggiungere documentazione per _metrics_advanced_datamart
-        $this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\nNVL({$metric->aggregateFn}($tableName.'{$metric->alias}'), 0) AS '{$metric->alias}'";
+        $this->_metrics_advanced_datamart[$tableName][$metric->formula->alias] = "\nNVL({$metric->formula->aggregateFn}($tableName.'{$metric->formula->alias}'), 0) AS '{$metric->formula->alias}'";
         // verifico se sono presenti metriche composte che contengono la metrica in ciclo, stessa logica utilizzata per le metriche di base
         if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($tableName, $metric);
 

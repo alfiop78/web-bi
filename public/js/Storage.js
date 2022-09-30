@@ -14,6 +14,7 @@ class Storages {
   #processes = new Set();
   #all = new Set();
   #selected; // l'elemento selezionato in un determinato momento
+
   constructor() {
     this.storage = window.localStorage;
     this.storageKeys = Object.keys(window.localStorage);
@@ -328,6 +329,11 @@ class MetricStorage extends Storages {
     // recupero gli oggetti METRIC dallo storage
     this.#metricsObject = {};
     super.storageK = 'METRIC';
+    for (const [key, value] of Object.entries(this.st)) {
+      if (value.cube === cubeToken || value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;
+      // if (value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;
+    }
+    super.storageK = 'ADV_METRIC';
     for (const [key, value] of Object.entries(this.st)) {
       if (value.cube === cubeToken || value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;
       // if (value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;

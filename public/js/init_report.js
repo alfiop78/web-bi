@@ -96,7 +96,7 @@ var List = new Lists();
 
   // verifico se ci sono object selezionati per poter attivare/disattivare alcuni tasti
   app.checkObjectSelected = () => {
-    if (Query.OB.columns.size > 0 && Query.OB.FILTER.size > 0 && Query.OB.METRIC.size > 0) {
+    if (Query.OB['COLUMNS'].size > 0 && Query.OB['FILTER'].size > 0 && Query.OB['METRIC'].size > 0) {
       app.btnSQLProcess.disabled = false;
       app.btnSaveReport.disabled = false;
     } else {
@@ -944,7 +944,9 @@ var List = new Lists();
       associatedFilters.add(filterSelected.dataset.filterToken);
     });
     let metricObj = {
-      type: 'METRIC', name: inputName.value, token, cube: StorageCube.selected.token,
+      name: inputName.value,
+      token,
+      cube: StorageCube.selected.token,
       updated_at: date.toLocaleDateString('it-IT', options)
     };
     metricObj.created_at = (e.target.dataset.token) ? StorageMetric.selected.created_at : date.toLocaleDateString('it-IT', options);
@@ -963,6 +965,7 @@ var List = new Lists();
         // aggiungo l'oggetto fieldName
         metricObj.fieldName = Query.fieldName;
         metricObj.formula = formulaObj;
+        metricObj.type = 'METRIC';
         break;
       case 2:
         // base filtrata (es.: venduto con filtro manodopera)
@@ -970,18 +973,21 @@ var List = new Lists();
         formulaObj.tableAlias = Query.tableAlias
         formulaObj.filters = [...associatedFilters];
         metricObj.formula = formulaObj;
+        metricObj.type = 'ADV_METRIC';
         break;
       case 3:
         // base composta filtrata (es.: prezzo * qta impostate sul cubo e con filtro)
         metricObj.fieldName = Query.fieldName;
         formulaObj.filters = [...associatedFilters];
         metricObj.formula = formulaObj;
+        metricObj.type = 'ADV_METRIC';
         break;
       default:
         // base
         formulaObj.table = Query.table;
         formulaObj.tableAlias = Query.tableAlias;
         metricObj.formula = formulaObj;
+        metricObj.type = 'METRIC';
         break;
     }
     StorageMetric.save(metricObj);
@@ -1614,6 +1620,7 @@ var List = new Lists();
   // visualizzo in una dialog l'SQL della baseTable e delle metricTable
   app.btnSQLProcess.onclick = async () => {
     const name = document.getElementById('reportName').value;
+    debugger;
     app.setFrom();
     app.setFactJoin();
     // imposto la FROM per gli elementi del cubo/i selezionati
@@ -1621,6 +1628,7 @@ var List = new Lists();
       Query.FROM = { tableAlias: cubeRef.dataset.tableAlias, SQL: `${cubeRef.dataset.schema}.${cubeRef.dataset.tableName} AS ${cubeRef.dataset.tableAlias}` };
     });
     // metriche filtrate
+    Query.setAdvancedMetrics();
     // app.setFilteredMetrics();
     // metriche composte
     // app.setCompositeMetrics();
@@ -1815,7 +1823,7 @@ var List = new Lists();
           obj.field = StorageDimension.selected.hierarchies[element.dataset.hierToken].columns[element.dataset.tableAlias][element.dataset.token];
           // NOTE: Oggetto Map
           // const hierarchiesObject = new Map([[element.dataset.hierToken, element.dataset.tableId]]);
-          obj.type = 'columns';
+          obj.type = 'COLUMNS';
           obj.hierarchies = Object.fromEntries(new Map([[element.dataset.hierToken, element.dataset.tableId]]));
           obj.dimensions = [element.dataset.dimensionToken];
           Query.add(obj);
@@ -1837,7 +1845,7 @@ var List = new Lists();
     });
     object.edit = {id : Query.edit_id, ds : Query.edit_ds};
     object.sql = {id : Query.sql_id, ds: Query.sql_ds};
-    object.type = 'columns';
+    object.type = 'COLUMNS';
     object.hierarchies = Object.fromEntries(new Map([[column.dataset.hierToken, column.dataset.tableId]]));
     object.dimensions = [column.dataset.dimensionToken];
     Query.add(object);
