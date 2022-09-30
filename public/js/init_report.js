@@ -96,7 +96,7 @@ var List = new Lists();
 
   // verifico se ci sono object selezionati per poter attivare/disattivare alcuni tasti
   app.checkObjectSelected = () => {
-    if (Query.objects.size > 0) {
+    if (Query.OB.columns.size > 0 && Query.OB.FILTER.size > 0 && Query.OB.METRIC.size > 0) {
       app.btnSQLProcess.disabled = false;
       app.btnSaveReport.disabled = false;
     } else {
@@ -838,15 +838,7 @@ var List = new Lists();
     // verifico i filtri che hanno l'attr data-temporary, questi verranno aggiunti alla ul-defined-filters
     document.querySelectorAll('#ul-filters .selectable[data-temporary]').forEach(item => {
       StorageFilter.selected = item.dataset.filterToken;
-      let object = {};
-      // creo l'oggetto da passare a Query.objects
-      object.token = item.dataset.filterToken;
-      if (StorageFilter.selected.hasOwnProperty('cubes')) object.cubes = StorageFilter.selected.cubes;
-      if (StorageFilter.selected.hasOwnProperty('dimensions')) object.dimensions = StorageFilter.selected.dimensions;
-      if (StorageFilter.selected.hasOwnProperty('hierarchies')) object.hierarchies = StorageFilter.selected.hierarchies;
-      Query.objects = object;
-      // nel salvare il filtro nel report attuale devo impostarne anche l'alias della tabella selezionata nella dialog
-      Query.filters = StorageFilter.selected;
+      Query.add(StorageFilter.selected);
       List.addDefinedFilter();
       // rimuovo l'attributo data-temporary perchè li sto aggiunngendo al report
       delete item.dataset.temporary;
@@ -896,8 +888,8 @@ var List = new Lists();
     // recupero l'elenco delle metriche selezionate nella dialog
     document.querySelectorAll('#ul-metrics .selectable[data-temporary]').forEach(item => {
       StorageMetric.selected = item.dataset.metricToken;
+      Query.add(StorageMetric.selected);
       List.addDefinedMetric();
-      Query.objects = { token: item.dataset.metricToken, cube: StorageMetric.selected.cube };
       // rimuovo l'attributo data-temporary perchè lo sto aggiungendo al report
       // ... per lo stesso motivo aggiungo data-added
       delete item.dataset.temporary;
@@ -905,8 +897,8 @@ var List = new Lists();
       // disabilito il tasto Edit. La modifica di una metrica è consentita solo quando NON utilizzata nel report attuale
       document.querySelector("#ul-metrics button[data-edit][data-object-token='" + item.dataset.metricToken + "']").setAttribute('disabled', 'true');
       app.checkObjectSelected();
-      app.setMetrics();
-      app.setFilteredMetrics();
+      // app.setMetrics();
+      // app.setFilteredMetrics();
     });
     app.dialogMetric.close();
   }
@@ -1543,13 +1535,6 @@ var List = new Lists();
     });
   }
 
-  app.setMetrics = () => {
-    document.querySelectorAll("#ul-metrics .selectable[data-selected][data-metric-type='0'], #ul-metrics .selectable[data-selected][data-metric-type='1']").forEach(metricRef => {
-      StorageMetric.selected = metricRef.dataset.metricToken;
-      Query.setMetricReport(metricRef);
-    });
-  }
-
   app.setFilteredMetrics = () => {
     document.querySelectorAll("#ul-metrics .selectable[data-selected][data-metric-type='2'], #ul-metrics .selectable[data-selected][data-metric-type='3']").forEach(metricRef => {
       StorageMetric.selected = metricRef.dataset.metricToken;
@@ -1635,11 +1620,10 @@ var List = new Lists();
     document.querySelectorAll("#ul-cubes section:not([hidden]) .selectable[data-include-query]").forEach(cubeRef => {
       Query.FROM = { tableAlias: cubeRef.dataset.tableAlias, SQL: `${cubeRef.dataset.schema}.${cubeRef.dataset.tableName} AS ${cubeRef.dataset.tableAlias}` };
     });
-    app.setMetrics();
     // metriche filtrate
-    app.setFilteredMetrics();
+    // app.setFilteredMetrics();
     // metriche composte
-    app.setCompositeMetrics();
+    // app.setCompositeMetrics();
 
     if (!Query.processId) Query.processId = '_process_id_';
 
@@ -1812,10 +1796,10 @@ var List = new Lists();
     // recupero la colonna selezionata
     const column = document.querySelector('#ul-columns .selectable[data-selected]');
     // elimino l'oggetto Query.objects, se presente, in questo caso sto modificando una colonna già inserita.
-    if (app.btnColumnSave.dataset.token) {
+    /* if (app.btnColumnSave.dataset.token) {
       Query.objects = {token : column.dataset.token};
       Query.select = {token : column.dataset.token};
-    }
+    } */
     let object = { token : column.dataset.token, name : name.value };
 
     document.querySelectorAll('#composite-column-formula *').forEach(element => {
@@ -1830,8 +1814,11 @@ var List = new Lists();
           StorageDimension.selected = element.dataset.dimensionToken;
           obj.field = StorageDimension.selected.hierarchies[element.dataset.hierToken].columns[element.dataset.tableAlias][element.dataset.token];
           // NOTE: Oggetto Map
-          const hierarchiesObject = new Map([[element.dataset.hierToken, element.dataset.tableId]]);
-          Query.objects = { token: element.dataset.token, hierarchies: Object.fromEntries(hierarchiesObject), dimensions: [element.dataset.dimensionToken] };
+          // const hierarchiesObject = new Map([[element.dataset.hierToken, element.dataset.tableId]]);
+          obj.type = 'columns';
+          obj.hierarchies = Object.fromEntries(new Map([[element.dataset.hierToken, element.dataset.tableId]]));
+          obj.dimensions = [element.dataset.dimensionToken];
+          Query.add(obj);
           app.setFormula(obj);
         } else {
           // tabella appartenente alla FACT.
@@ -1839,6 +1826,8 @@ var List = new Lists();
           Query.objects = { token: element.dataset.token, cubeToken: element.dataset.cubeToken };
           obj.field = StorageCube.selected.columns[element.dataset.tableAlias][element.dataset.token];
           obj.cubeToken = element.dataset.cubeToken;
+          obj.cubes = element.dataset.cubeToken;
+          Query.add(obj);
           app.setFormula(obj);
         }
       } else {
@@ -1848,7 +1837,10 @@ var List = new Lists();
     });
     object.edit = {id : Query.edit_id, ds : Query.edit_ds};
     object.sql = {id : Query.sql_id, ds: Query.sql_ds};
-    Query.select = object;
+    object.type = 'columns';
+    object.hierarchies = Object.fromEntries(new Map([[column.dataset.hierToken, column.dataset.tableId]]));
+    object.dimensions = [column.dataset.dimensionToken];
+    Query.add(object);
     (app.btnColumnSave.hasAttribute('data-token')) ? List.editDefinedColumn(object) : List.addDefinedColumn(object);
     app.resetDialogColumn();
     app.checkObjectSelected();

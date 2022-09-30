@@ -1,7 +1,6 @@
 class Queries {
   #compositeMetrics = new Map();
   #filters = new Map();
-  #metrics = new Map();
   #filteredMetrics = new Map();
   #columns = new Map();
   #reportProcess = {};
@@ -11,48 +10,67 @@ class Queries {
   #dimensions = new Set();
   #FROM = new Map();
   #WHERE = new Map();
-  constructor() { }
-
-  set objects(object) {
-    (!this.#objects.has(object.token)) ? this.#objects.set(object.token, object) : this.#objects.delete(object.token);
-    console.log('#objects : ', this.#objects);
-
-    this.setReportProperties();
+  constructor() {
+    /* this.OB = new Map([
+      [ 'columns', null ],
+      [ 'filters', null ],
+      [ 'metrics', null ],
+      [ 'compositeMetrics', null ]
+    ]); */
+    this.OB = {
+      columns : new Map(),
+      FILTER : new Map(),
+      METRIC : new Map(),
+      compositeMetrics : new Map()
+    };
   }
 
-  get objects() { return this.#objects; }
+  add(object) {
+    this.OB[object.type].set(object.token, object);
+    console.log(this.OB);
+    this.includeElements();
+  }
+
+  remove(object) {
+    this.OB[object.type].delete(object.token);
+    console.log(this.OB);
+    this.includeElements();
+  }
 
   /*
   * Imposto gli elementi del report.
   * Imposto quali cubi, FROM e JOIN che devono essere incluse nel report
   */
-  setReportProperties() {
+  includeElements() {
     document.querySelectorAll("*[data-include-query]").forEach(tableRef => delete tableRef.dataset.includeQuery);
     //debugger;
-    for (const [key, value] of Query.objects) {
-      // console.log(value);
-      // debugger;
-      if (value.hasOwnProperty('dimensions')) {
-        // ha la prop hierarchies : {hierToken: tableId}
-        // per ogni dimensione presente nell'oggetto (es.: filtri multipli)
-        value.dimensions.forEach(token => {
-          document.querySelector("#ul-dimensions .selectable[data-dimension-token='" + token + "']").dataset.includeQuery = 'true';
-        });
-        // gerarchie
-        for (const [token, tableId] of Object.entries(value.hierarchies)) {
-          // debugger;
-          const hier = document.querySelector("#ul-hierarchies .unselectable[data-hier-token='" + token + "']");
-          // converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
-          [...hier.querySelectorAll("small")].filter((table, index) => index >= +tableId).forEach(tableRef => {
-            tableRef.dataset.includeQuery = 'true';
+    for (const [key, value] of Object.entries(this.OB)) {
+      console.log(value);
+      for (const [token, element] of value) {
+        console.log(token, element);
+        // debugger;
+        if (element.hasOwnProperty('dimensions')) {
+          // ha la prop hierarchies : {hierToken: tableId}
+          // per ogni dimensione presente nell'oggetto (es.: filtri multipli)
+          element.dimensions.forEach(tkDim => {
+            document.querySelector("#ul-dimensions .selectable[data-dimension-token='" + tkDim + "']").dataset.includeQuery = 'true';
+          });
+          // gerarchie
+          for (const [tkHier, tableId] of Object.entries(element.hierarchies)) {
+            // debugger;
+            const hier = document.querySelector("#ul-hierarchies .unselectable[data-hier-token='" + tkHier + "']");
+            // converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
+            [...hier.querySelectorAll("small")].filter((table, index) => index >= +tableId).forEach(tableRef => {
+              tableRef.dataset.includeQuery = 'true';
+            });
+          }
+        }
+        // cubi
+        if (element.hasOwnProperty('cubes')) {
+          element.cubes.forEach(tkCube => {
+            document.querySelector("#ul-cubes .selectable[data-cube-token='" + tkCube + "']").dataset.includeQuery = 'true';
           });
         }
-      }
-      // cubi
-      if (value.hasOwnProperty('cubes')) {
-        value.cubes.forEach(token => {
-          document.querySelector("#ul-cubes .selectable[data-cube-token='" + token + "']").dataset.includeQuery = 'true';
-        });
       }
     }
   }
@@ -61,11 +79,11 @@ class Queries {
     this.object = {};
     this.object.cubes = [...this.cubes];
     this.object.dimensions = [...this.dimensions];
-    this.object.columns = Object.fromEntries(this.select);
-    this.object.filters = [...this.filters.keys()];
-    this.object.metrics = [...this.metrics.keys()].concat([...this.filteredMetrics.keys()]);
+    this.object.columns = Object.fromEntries(this.OB['columns']);
+    this.object.filters = [...this.OB['FILTER'].keys()];
+    // this.object.metrics = [...this.OB['METRIC'].keys()].concat([...this.filteredMetrics.keys()]);
     debugger;
-    this.object.compositeMetrics = [...this.compositeMetrics.keys()];
+    // this.object.compositeMetrics = [...this.compositeMetrics.keys()];
     return this.object;
   }
 
@@ -97,33 +115,7 @@ class Queries {
 
   get dimensions() { return this.#dimensions; }
 
-  // set fieldType(value) {this._fieldType = value;}
-
-  // get fieldType() {return this._fieldType;}
-
-  set select(value) {
-    (this.#columns.has(value.token)) ? this.#columns.delete(value.token) : this.#columns.set(value.token, value);
-    console.log('select : ', this.#columns);
-  }
-
-  get select() { return this.#columns; }
-
-  set filters(value) {
-    (!this.#filters.has(value.token)) ? this.#filters.set(value.token, { SQL: value.formula }) : this.#filters.delete(value.token);
-    // console.log('this.#filters : ', this.#filters);
-  }
-
-  get filters() { return this.#filters };
-
-  set metrics(value) {
-    // value = {sqlFunction: "SUM", field: "NettoRiga", metricName: "netto riga", distinct: false, alias: "Venduto"}
-    (!this.#metrics.has(value.token)) ? this.#metrics.set(value.token, value) : this.#metrics.delete(value.token);
-    // console.log('metrics : ', this.#metrics);
-  }
-
-  get metrics() { return this.#metrics; }
-
-  set filteredMetrics(value) {
+  /* set filteredMetrics(value) {
     (!this.#filteredMetrics.has(value.token)) ? this.#filteredMetrics.set(value.token, value) : this.#filteredMetrics.delete(value.token);
     console.log('this.#filteredMetrics : ', this.#filteredMetrics);
   }
@@ -134,12 +126,12 @@ class Queries {
     (!this.#compositeMetrics.has(value.token)) ? this.#compositeMetrics.set(value.token, value) : this.#compositeMetrics.delete(value.token);
     // console.log('this.#compositeMetrics : ', this.#compositeMetrics);
   }
-  get compositeMetrics() { return this.#compositeMetrics; }
+  get compositeMetrics() { return this.#compositeMetrics; } */
 
   checkColumnName(token, name) {
     // in fase di edit di una colonna, tramite l'argomento token, non devo controllare se il nome già esiste di una colonna che sto modificando
     let result = false;
-    for (const values of this.select.values()) {
+    for (const values of this.OB['columns'].values()) {
       if (values.token !== token) {
         if (values.name.toLowerCase() === name.toLowerCase()) result = true;
       }
@@ -151,31 +143,6 @@ class Queries {
     for (const values of this.metrics.values()) {
       debugger;
       return (values.alias.toLowerCase() === alias.toLowerCase()) ? true : false;
-    }
-  }
-
-  setMetricReport(metric) {
-    /* La metrica potrebbe già essere stata inclusa in Query.metrics se, ad esempio si è attivato SQLinfo più volte (il Metodo Query.metrics è un Map che aggiunge/elimina)
-    * oppure si clicca prima SQLInfo e poi Salva report.
-    * Per questo motivo faccio qui il controllo se la metrica già esiste nella classe Query non la aggiungo
-    */
-    if (!this.metrics.has(metric.dataset.metricToken)) {
-      let obj = {
-        token: metric.dataset.metricToken,
-        name: StorageMetric.selected.name,
-        metric_type: StorageMetric.selected.metric_type,
-        aggregateFn: StorageMetric.selected.formula.aggregateFn,
-        field: StorageMetric.selected.formula.field,
-        distinct: StorageMetric.selected.formula.distinct,
-        alias: StorageMetric.selected.formula.alias,
-        // show_datamart: metricRef.dataset.showDatamart
-      };
-      // per le metric_type = 0 deve esserci anche table e tableAlias
-      if (StorageMetric.selected.metric_type === 0) {
-        obj.table = StorageMetric.selected.formula.table;
-        obj.tableAlias = StorageMetric.selected.formula.tableAlias;
-      }
-      this.metrics = obj;
     }
   }
 
@@ -251,13 +218,15 @@ class Queries {
     this.#SQLProcess.token = this.token;
     this.reportElements.processId = this.processId; // questo creerà il datamart FX[processId]
     this.#SQLProcess.name = name;
-    this.reportElements.select = Object.fromEntries(this.select);
+    this.reportElements.select = Object.fromEntries(this.OB['columns']);
     this.reportElements.from = this.FROM;
     this.reportElements.where = this.WHERE;
-    if (this.filters.size > 0) this.reportElements.filters = Object.fromEntries(this.filters);
-    if (this.metrics.size > 0) this.reportElements.metrics = Object.fromEntries(this.metrics);
-    if (this.compositeMetrics.size > 0) this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
-    if (this.filteredMetrics.size > 0) this.reportElements.filteredMetrics = Object.fromEntries(this.filteredMetrics);
+    this.reportElements.filters = Object.fromEntries(this.OB['FILTER']);
+    // separo le metric_type 0/1 (base) da quelle 2/3 (avanzate)
+    for (const metric of this.OB['METRIC']) {
+      (metric.metric_type < 2) ? this.reportElements.metrics = Object.fromEntries(metric) : this.reportElements.filteredMetrics = Object.fromEntries(metric);
+    }
+    // if (this.compositeMetrics.size > 0) this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
     this.#SQLProcess.report = this.reportElements;
     console.info(this.#SQLProcess);
   }
