@@ -96,7 +96,7 @@ var List = new Lists();
 
   // verifico se ci sono object selezionati per poter attivare/disattivare alcuni tasti
   app.checkObjectSelected = () => {
-    if (Query.OB['COLUMNS'].size > 0 && Query.OB['FILTER'].size > 0 && Query.OB['METRIC'].size > 0) {
+    if (Query.OB['COLUMNS'].size > 0 && Query.OB['FILTER'].size > 0) {
       app.btnSQLProcess.disabled = false;
       app.btnSaveReport.disabled = false;
     } else {
@@ -199,32 +199,15 @@ var List = new Lists();
 
     // colonne
     for (const [token, column] of Object.entries(StorageProcess.selected.edit.columns)) {
-      // Query.select = { field: Query.field, SQLReport: textarea, alias : alias.value };
-      // console.log(column);
-      // document.querySelector("#ul-columns .selectable[data-token-column='" + token + "']").dataset.selected = 'true';
-      // Query.field = column.field;
       // reimposto la colonna come quando viene selezionata
-      // return;
-      // console.log(column);
       // ciclo la proprietà 'edit' della colonna, al suo interno ci sono le specifiche della colonna da aggiungere a Objects
       for (const [key, value] of Object.entries(column.edit)) {
         // debugger;
         value.forEach(item => {
-          // console.log(key, item);
-          if (item.tableId) {
-            // debugger;
-            if (!Query.objects.has(item.token)) {
-              const hierarchiesObject = new Map([[item.hierToken, item.tableId]]);
-              Query.objects = { token : item.token, hierarchies : Object.fromEntries(hierarchiesObject), dimensions : [item.dimensionToken] };
-            }
-          } else {
-            if (!Query.objects.has(item.token)) {
-              Query.objects = { token : item.token, cubeToken : item.cubeToken };
-            }
-          }
+          Query.add(item);
         });
       }
-      Query.select = column;
+      Query.add(column);
       // aggiungo alla #ul-defined-columns
       List.addDefinedColumn(column);
     }
@@ -238,13 +221,7 @@ var List = new Lists();
       // non posso modificare i filtri aggiunti al report corrente
       document.querySelector("#ul-filters button[data-edit][data-object-token='" + token + "']").setAttribute('disabled', true);
       // reimposto il filtro come se fosse stato selezionato
-      Query.filters = StorageFilter.selected;
-      let object = {};
-      object.token = token;
-      if (StorageFilter.selected.hasOwnProperty('cubes')) object.cubes = StorageFilter.selected.cubes;
-      if (StorageFilter.selected.hasOwnProperty('dimensions')) object.dimensions = StorageFilter.selected.dimensions;
-      if (StorageFilter.selected.hasOwnProperty('hierarchies')) object.hierarchies = StorageFilter.selected.hierarchies;
-      Query.objects = object;
+      Query.add(StorageFilter.selected);
       List.addDefinedFilter();
     });
 
@@ -258,26 +235,18 @@ var List = new Lists();
       document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + token + "']").dataset.selected = 'true';
       document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + token + "']").dataset.added = 'true';
       document.querySelector("#ul-composite-metrics button[data-edit][data-object-token='" + token + "']").setAttribute('disabled', 'true');
-      Query.objects = { token, cubes: StorageMetric.selected.cubes };
+      Query.add(StorageMetric.selected);
       List.addDefinedCompositeMetric();
-      app.setCompositeMetrics();
     });
 
     // metriche
     // NOTE: il codice per le metriche composte và messo necessariamente prima di questo per aggiungere metriche già inserite nelle metriche composte
     StorageProcess.selected.edit.metrics.forEach(token => {
       StorageMetric.selected = token;
-      // seleziono le metriche (0, 1, 2, 3) impostate nel report
-      document.querySelector("#ul-metrics .selectable[data-metric-token='" + token + "']").dataset.selected = 'true';
-      document.querySelector("#ul-metrics .selectable[data-metric-token='" + token + "']").dataset.added = 'true';
-      document.querySelector("#ul-metrics button[data-edit][data-object-token='" + token + "']").setAttribute('disabled', 'true');
-      Query.objects = { token, cube: StorageMetric.selected.cube };
+      Query.add(StorageMetric.selected);
       // aggiungo alla lista #ul-defined-metrics se questa metrica non è stata già aggiunta da qualche metrica composta
       if (!document.querySelector("#ul-defined-metrics section[data-metric-token='" + token + "']")) List.addDefinedMetric();
     });
-
-    app.setMetrics();
-    app.setFilteredMetrics();
     app.processList.toggleAttribute('hidden');
     app.checkObjectSelected();
   }
@@ -508,7 +477,7 @@ var List = new Lists();
         // ...la metrica "madre" passata come argomento della fn
         console.log(document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']"));
         if (!document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
-          Query.objects = { token: metric.token, cube: StorageMetric.selected.cube };
+          Query.add(StorageMetric.selected);
           document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
           document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.added = 'true';
           document.querySelector("#ul-metrics button[data-edit][data-object-token='" + metric.token + "']").setAttribute('disabled', 'true');
@@ -523,7 +492,7 @@ var List = new Lists();
       } else {
         // metrica composta
         if (!document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
-          Query.objects = { token: metric.token, cubes: StorageMetric.selected.cubes };
+          Query.add(StorageMetric.selected);
           document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
           document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.added = 'true';
           document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.nested = 'true';
@@ -897,8 +866,6 @@ var List = new Lists();
       // disabilito il tasto Edit. La modifica di una metrica è consentita solo quando NON utilizzata nel report attuale
       document.querySelector("#ul-metrics button[data-edit][data-object-token='" + item.dataset.metricToken + "']").setAttribute('disabled', 'true');
       app.checkObjectSelected();
-      // app.setMetrics();
-      // app.setFilteredMetrics();
     });
     app.dialogMetric.close();
   }
@@ -909,18 +876,16 @@ var List = new Lists();
       app.nestedCompositeMetrics(item.dataset.metricToken);
       // imposto la metrica composta selezionata per poterla aggiungere alla definedList
       StorageMetric.selected = item.dataset.metricToken;
-      // aggiungo alla ulDefinedCompositeMetric la metrica composta appena selezionata
       item.dataset.selected = 'true';
       item.dataset.added = 'true';
       delete item.dataset.temporary;
       document.querySelector("#ul-composite-metrics button[data-edit][data-object-token='" + item.dataset.metricToken + "']").setAttribute('disabled', 'true');
-      Query.objects = { token: item.dataset.metricToken, cubes: StorageMetric.selected.cubes };
+      Query.add(StorageMetric.selected);
+      // aggiungo alla ulDefinedCompositeMetric la metrica composta appena selezionata
       List.addDefinedCompositeMetric();
     });
     app.dialogCompositeMetric.close();
-    app.setMetrics();
-    app.setFilteredMetrics();
-    app.setCompositeMetrics();
+    app.checkObjectSelected();
   }
 
   // dialog-metric-filter, recupero i filtri selezionati per inserirli nella metrica filtrata
@@ -1141,11 +1106,12 @@ var List = new Lists();
     });
     // arr_sql.push(`AS '${inputAlias.value}'`);
     let metricObj = {
-      type: 'METRIC', name: inputName.value, token, metric_type: 4,
+      type: 'COMP_METRIC', name: inputName.value, token, metric_type: 4,
       formula: { token, formula_sql: arr_sql, alias: inputAlias.value, metrics_alias: metricsAlias },
       cubes: [...cubes],
       updated_at: date.toLocaleDateString('it-IT', options),
     };
+    metricObj.nested = (metric.dataset.nested) ? true : false;
     metricObj.created_at = (e.target.dataset.token) ? StorageMetric.selected.created_at : date.toLocaleDateString('it-IT', options);
     console.log(metricObj);
     StorageMetric.save(metricObj);
@@ -1549,7 +1515,7 @@ var List = new Lists();
   }
 
   // metriche composte selezionate
-  app.setCompositeMetrics = () => {
+  /* app.setCompositeMetrics = () => {
     // Siccome le metriche composte possono contenere metriche base/filtrate/composte
     // ...vanno aggiunte anche queste all'elaborazione di baseTable() (metriche base) oppure metricTable() (metriche filtrate)
     document.querySelectorAll("#ul-composite-metrics .selectable[data-selected][data-metric-type='4']").forEach(metric => {
@@ -1560,7 +1526,7 @@ var List = new Lists();
         Query.compositeMetrics = { token: metric.dataset.metricToken, name: StorageMetric.selected.name, formula: StorageMetric.selected.formula, nested };
       }
     });
-  }
+  } */
 
   app.setFactJoin = () => {
     // imposto la factJoin che è presente solo sulla dimensione
@@ -1588,12 +1554,6 @@ var List = new Lists();
     document.querySelectorAll("#ul-cubes section:not([hidden]) .selectable[data-include-query]").forEach(cubeRef => {
       Query.FROM = { tableAlias: cubeRef.dataset.tableAlias, SQL: `${cubeRef.dataset.schema}.${cubeRef.dataset.tableName} AS ${cubeRef.dataset.tableAlias}` };
     });
-
-    app.setMetrics();
-    // metriche filtrate
-    app.setFilteredMetrics();
-    // metriche composte
-    app.setCompositeMetrics();
 
     // il datamart sarà creato come FX_processId
     // se è stato già definito un token significa che sto editando un report
@@ -1628,7 +1588,7 @@ var List = new Lists();
       Query.FROM = { tableAlias: cubeRef.dataset.tableAlias, SQL: `${cubeRef.dataset.schema}.${cubeRef.dataset.tableName} AS ${cubeRef.dataset.tableAlias}` };
     });
     // metriche filtrate
-    Query.setAdvancedMetrics();
+    // Query.setAdvancedMetrics();
     // app.setFilteredMetrics();
     // metriche composte
     // app.setCompositeMetrics();
@@ -1808,12 +1768,19 @@ var List = new Lists();
       Query.objects = {token : column.dataset.token};
       Query.select = {token : column.dataset.token};
     } */
-    let object = { token : column.dataset.token, name : name.value };
+    let object = { token : column.dataset.token, name : name.value, type: 'COLUMNS' };
+    if (column.dataset.tableId) {
+      object.hierarchies = Object.fromEntries(new Map([[column.dataset.hierToken, column.dataset.tableId]]));
+      object.dimensions = [column.dataset.dimensionToken];
+      object.tableId = column.dataset.tableId;
+    } else {
+      object.cubes = [column.dataset.cubeToken];
+    }
 
     document.querySelectorAll('#composite-column-formula *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
-        let obj = { mode : element.dataset.mode, token : element.dataset.token, table : element.dataset.tableName, tableAlias : element.dataset.tableAlias, label : element.dataset.label };
+        let obj = { mode : element.dataset.mode, type : 'COLUMNS', token : element.dataset.token, table : element.dataset.tableName, tableAlias : element.dataset.tableAlias, label : element.dataset.label };
         if (element.dataset.tableId) {
           // tabella appartenente a un livello dimensionale
           obj.dimensionToken = element.dataset.dimensionToken;
@@ -1823,7 +1790,6 @@ var List = new Lists();
           obj.field = StorageDimension.selected.hierarchies[element.dataset.hierToken].columns[element.dataset.tableAlias][element.dataset.token];
           // NOTE: Oggetto Map
           // const hierarchiesObject = new Map([[element.dataset.hierToken, element.dataset.tableId]]);
-          obj.type = 'COLUMNS';
           obj.hierarchies = Object.fromEntries(new Map([[element.dataset.hierToken, element.dataset.tableId]]));
           obj.dimensions = [element.dataset.dimensionToken];
           Query.add(obj);
@@ -1831,10 +1797,10 @@ var List = new Lists();
         } else {
           // tabella appartenente alla FACT.
           StorageCube.selected = element.dataset.cubeToken;
-          Query.objects = { token: element.dataset.token, cubeToken: element.dataset.cubeToken };
+          // Query.objects = { token: element.dataset.token, cubeToken: element.dataset.cubeToken };
           obj.field = StorageCube.selected.columns[element.dataset.tableAlias][element.dataset.token];
           obj.cubeToken = element.dataset.cubeToken;
-          obj.cubes = element.dataset.cubeToken;
+          obj.cubes = [element.dataset.cubeToken];
           Query.add(obj);
           app.setFormula(obj);
         }
@@ -1845,9 +1811,6 @@ var List = new Lists();
     });
     object.edit = {id : Query.edit_id, ds : Query.edit_ds};
     object.sql = {id : Query.sql_id, ds: Query.sql_ds};
-    object.type = 'COLUMNS';
-    object.hierarchies = Object.fromEntries(new Map([[column.dataset.hierToken, column.dataset.tableId]]));
-    object.dimensions = [column.dataset.dimensionToken];
     Query.add(object);
     (app.btnColumnSave.hasAttribute('data-token')) ? List.editDefinedColumn(object) : List.addDefinedColumn(object);
     app.resetDialogColumn();

@@ -241,7 +241,7 @@ class Cube
           foreach ($metric->formula->formula_sql as $key => $sqlItem) {
             // la formula composta come array è ad es.: [ "(", "przmedio(nome_metrica)", "*", "quantita(nome_metrica)", ")"]
             // ciclo ogni elemento per sostituire il nome della metrica con la formula contenuta in aggregateFn
-            $aggregate = $metricObject->aggregateFn;
+            $aggregate = $metricObject->formula->aggregateFn;
             if ($sqlItem === $metricName) {
               // se l'elemento in ciclo è il nome di una metrica lo sostituisco con : SUM(table_name.alias) lasciando invariati gli elementi parentesi, operatori, ecc...
               $metric->formula->formula_sql[$key] = "NVL($aggregate($tableName.'$metricAlias->alias'), 0)";

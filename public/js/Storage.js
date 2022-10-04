@@ -27,7 +27,10 @@ class Storages {
     // value : METRIC, FILTER, DIMENSION, ecc...
     this.st = {}; // TODO: da rinominare in this.storage
     Object.keys(window.localStorage).forEach(key => {
-      if (JSON.parse(window.localStorage.getItem(key)).type === value) {
+      // if (JSON.parse(window.localStorage.getItem(key)).type === value) {
+      //   this.st[key] = JSON.parse(window.localStorage.getItem(key));
+      // }
+      if (value.includes(JSON.parse(window.localStorage.getItem(key)).type)) {
         this.st[key] = JSON.parse(window.localStorage.getItem(key));
       }
     });
@@ -46,7 +49,7 @@ class Storages {
 
   get dimensions() {
     // recupero gli oggetti DIMENSION dallo storage
-    this.storageK = 'DIMENSION';
+    this.storageK = ['DIMENSION'];
     for (const [key, value] of Object.entries(this.st)) {
       this.#dimensionsMap.set(key, value);
     }
@@ -54,7 +57,7 @@ class Storages {
   }
 
   get cubes() {
-    this.storageK = 'CUBE';
+    this.storageK = ['CUBE'];
     for (const [key, value] of Object.entries(this.st)) {
       this.#cubesMap.set(key, value);
     }
@@ -62,7 +65,7 @@ class Storages {
   }
 
   get filters() {
-    this.storageK = 'FILTER';
+    this.storageK = ['FILTER'];
     for (const [key, value] of Object.entries(this.st)) {
       this.#filtersMap.set(key, value);
     }
@@ -70,7 +73,7 @@ class Storages {
   }
 
   get processes() {
-    this.storageK = 'PROCESS';
+    this.storageK = ['PROCESS'];
     for (const [key, value] of Object.entries(this.st)) {
       this.#processesMap.set(key, value);
     }
@@ -87,7 +90,7 @@ class Storages {
 
   // viene invocata da init_versioning.js
   get metrics() {
-    this.storageK = 'METRIC';
+    this.storageK = ['METRIC', 'ADV_METRIC', 'COMP_METRIC'];
     for (const [key, value] of Object.entries(this.st)) {
       this.#metricsMap.set(key, value);
     }
@@ -310,7 +313,7 @@ class MetricStorage extends Storages {
 
   get metrics() {
     this.#metricsObject = {};
-    super.storageK = 'METRIC';
+    super.storageK = ['METRIC', 'ADV_METRIC', 'COMP_METRIC'];
     for (const [key, value] of Object.entries(this.st)) {
       this.#metricsObject[key] = value;
     }
@@ -328,16 +331,16 @@ class MetricStorage extends Storages {
   set cubeMetrics(cubeToken) {
     // recupero gli oggetti METRIC dallo storage
     this.#metricsObject = {};
-    super.storageK = 'METRIC';
+    super.storageK = ['METRIC', 'ADV_METRIC'];
     for (const [key, value] of Object.entries(this.st)) {
       if (value.cube === cubeToken || value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;
       // if (value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;
     }
-    super.storageK = 'ADV_METRIC';
+    /* super.storageK = 'ADV_METRIC';
     for (const [key, value] of Object.entries(this.st)) {
       if (value.cube === cubeToken || value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;
       // if (value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;
-    }
+    } */
   }
 
   get cubeMetrics() { return this.#metricsObject; }
@@ -353,7 +356,8 @@ class MetricStorage extends Storages {
   get compositeMetrics() {
     this.localMetrics = new Set();
     for (const [key, value] of Object.entries(this.metrics)) {
-      if (value.metric_type === 4) this.localMetrics.add(value);
+      // if (value.metric_type === 4) this.localMetrics.add(value);
+      if (value.type === 'COMP_METRIC') this.localMetrics.add(value);
     }
     return this.localMetrics;
   }

@@ -34,7 +34,7 @@ class Queries {
   includeElements() {
     console.clear();
     document.querySelectorAll("*[data-include-query]").forEach(tableRef => delete tableRef.dataset.includeQuery);
-    //debugger;
+    // debugger;
     for (const [key, value] of Object.entries(this.OB)) {
       console.log(key, value);
       for (const [token, element] of value) {
@@ -69,11 +69,16 @@ class Queries {
     this.object = {};
     this.object.cubes = [...this.cubes];
     this.object.dimensions = [...this.dimensions];
-    this.object.columns = Object.fromEntries(this.OB['columns']);
+    this.object.columns = Object.fromEntries(this.OB['COLUMNS']);
     this.object.filters = [...this.OB['FILTER'].keys()];
-    // this.object.metrics = [...this.OB['METRIC'].keys()].concat([...this.filteredMetrics.keys()]);
+    // this.object.metrics = [...this.OB['METRIC'].keys()].concat([...this.advancedMetrics.keys()]);
+    this.object.metrics = [...this.OB['METRIC'].keys()].concat([...this.OB['ADV_METRIC'].keys()]);
+    // console.log([...this.OB['METRIC'].keys()].concat([...this.advancedMetrics.keys()]));
+    console.log([...this.OB['METRIC'].keys()].concat([...this.OB['ADV_METRIC'].keys()]));
+    this.object.compositeMetrics = [...this.OB['COMP_METRIC'].keys()];
+    // console.log([...this.compositeMetrics.keys()]);
+    console.log([...this.OB['COMP_METRIC'].keys()]);
     debugger;
-    // this.object.compositeMetrics = [...this.compositeMetrics.keys()];
     return this.object;
   }
 
@@ -191,6 +196,19 @@ class Queries {
     }
   }
 
+  /* app.setCompositeMetrics = () => {
+    // Siccome le metriche composte possono contenere metriche base/filtrate/composte
+    // ...vanno aggiunte anche queste all'elaborazione di baseTable() (metriche base) oppure metricTable() (metriche filtrate)
+    document.querySelectorAll("#ul-composite-metrics .selectable[data-selected][data-metric-type='4']").forEach(metric => {
+      StorageMetric.selected = metric.dataset.metricToken;
+      const nested = (metric.dataset.nested) ? true : false;
+      // aggiungo alle metriche selezionate per il report, se non è già presente
+      if (!Query.compositeMetrics.has(metric.dataset.metricToken)) {
+        Query.compositeMetrics = { token: metric.dataset.metricToken, name: StorageMetric.selected.name, formula: StorageMetric.selected.formula, nested };
+      }
+    });
+  } */
+
   SQLProcess(name) {
     this.reportElements = {};
     this.#SQLProcess.type = 'PROCESS';
@@ -201,11 +219,13 @@ class Queries {
     this.reportElements.from = this.FROM;
     this.reportElements.where = this.WHERE;
     this.reportElements.filters = Object.fromEntries(this.OB['FILTER']);
-    debugger;
     this.reportElements.metrics = Object.fromEntries(this.OB['METRIC']);
-    this.reportElements.advancedMetrics = Object.fromEntries(this.OB['ADV_METRIC']);
-    // if (this.filteredMetrics.size > 0) this.reportElements.filteredMetrics = Object.fromEntries(metric)
-    // if (this.compositeMetrics.size > 0) this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
+    if (this.OB['ADV_METRIC'].size !== 0) {
+      this.setAdvancedMetrics();
+      this.reportElements.advancedMetrics = Object.fromEntries(this.OB['ADV_METRIC']);
+    }
+    if (this.OB['COMP_METRIC'].size > 0) this.reportElements.compositeMetrics = Object.fromEntries(this.OB['COMP_METRIC']);
+    debugger;
     this.#SQLProcess.report = this.reportElements;
     console.info(this.#SQLProcess);
   }
@@ -225,17 +245,18 @@ class Queries {
     this.#reportProcess.created_at = date.toLocaleDateString('it-IT', options);
     this.#reportProcess.updated_at = date.toLocaleDateString('it-IT', options);
 
-    this.reportElements.select = Object.fromEntries(this.select);
-    //this.#elementReport.set('columns', Object.fromEntries(this.select));
+    this.reportElements.select = Object.fromEntries(this.OB['COLUMNS']);
     this.reportElements.from = this.FROM;
     this.reportElements.where = this.WHERE;
 
-    if (this.filters.size > 0) this.reportElements.filters = Object.fromEntries(this.filters);
-    if (this.metrics.size > 0) this.reportElements.metrics = Object.fromEntries(this.metrics);
-    if (this.compositeMetrics.size > 0) this.reportElements.compositeMetrics = Object.fromEntries(this.compositeMetrics);
-    if (this.filteredMetrics.size > 0) this.reportElements.filteredMetrics = Object.fromEntries(this.filteredMetrics);
+    this.reportElements.filters = Object.fromEntries(this.OB['FILTER']);
+    this.reportElements.metrics = Object.fromEntries(this.OB['METRIC']);
+    if (this.OB['ADV_METRIC'].size !== 0) {
+      this.setAdvancedMetrics();
+      this.reportElements.advancedMetrics = Object.fromEntries(this.OB['ADV_METRIC']);
+    }
+    if (this.OB['COMP_METRIC'].size > 0) this.reportElements.compositeMetrics = Object.fromEntries(this.OB['COMP_METRIC']);
 
-    // this.editElements = Object.fromEntries(this.elementReport);
     this.#reportProcess.report = this.reportElements;
     this.#reportProcess.edit = this.editObjects();
     console.info(this.#reportProcess);
