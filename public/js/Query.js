@@ -7,11 +7,11 @@ class Queries {
   #WHERE = new Map();
   constructor() {
     this.OB = {
-      COLUMNS : new Map(),
-      FILTER : new Map(),
-      METRIC : new Map(),
-      ADV_METRIC : new Map(),
-      COMP_METRIC : new Map()
+      COLUMNS: new Map(),
+      FILTER: new Map(),
+      METRIC: new Map(),
+      ADV_METRIC: new Map(),
+      COMP_METRIC: new Map()
     };
   }
 
@@ -187,7 +187,7 @@ class Queries {
             FROM.set(StorageCube.selected.alias, `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${StorageCube.selected.alias}`);
           });
         }
-        debugger;
+        // debugger;
         this.OB['ADV_METRIC'].get(token).FROM = Object.fromEntries(FROM);
         if (WHERE.size !== 0) this.OB['ADV_METRIC'].get(token).WHERE = Object.fromEntries(WHERE);
         this.OB['ADV_METRIC'].get(token).filters = Object.fromEntries(filters);
@@ -219,7 +219,7 @@ class Queries {
     this.reportElements.from = this.FROM;
     this.reportElements.where = this.WHERE;
     this.reportElements.filters = Object.fromEntries(this.OB['FILTER']);
-    this.reportElements.metrics = Object.fromEntries(this.OB['METRIC']);
+    if (this.OB['METRIC'].size !== 0) this.reportElements.metrics = Object.fromEntries(this.OB['METRIC']);
     if (this.OB['ADV_METRIC'].size !== 0) {
       this.setAdvancedMetrics();
       this.reportElements.advancedMetrics = Object.fromEntries(this.OB['ADV_METRIC']);
@@ -250,7 +250,8 @@ class Queries {
     this.reportElements.where = this.WHERE;
 
     this.reportElements.filters = Object.fromEntries(this.OB['FILTER']);
-    this.reportElements.metrics = Object.fromEntries(this.OB['METRIC']);
+    // this.reportElements.metrics = Object.fromEntries(this.OB['METRIC']);
+    if (this.OB['METRIC'].size !== 0) this.reportElements.metrics = Object.fromEntries(this.OB['METRIC']);
     if (this.OB['ADV_METRIC'].size !== 0) {
       this.setAdvancedMetrics();
       this.reportElements.advancedMetrics = Object.fromEntries(this.OB['ADV_METRIC']);

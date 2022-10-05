@@ -42,7 +42,7 @@ class Cube
 			]
 		*/
     // dd($this->baseColumns);
-    foreach ($this->baseColumns as $key => $object) {
+    foreach ($this->baseColumns as $object) {
       foreach ($object->sql as $token => $field) {
         $this->_fields[] = "{$object->name}_{$token}";
       }
@@ -54,7 +54,7 @@ class Cube
   {
     $fieldList = array();
     $this->SELECT = "SELECT\n";
-    foreach ($columns as $key => $object) {
+    foreach ($columns as $object) {
       // dd($object);
       foreach ($object->sql as $token => $field) {
         $fieldList[] = implode($field) . " AS {$object->name}_{$token}";
@@ -237,6 +237,7 @@ class Cube
       foreach ($metric->formula->metrics_alias as $metricName => $metricAlias) {
         // la prop 'metrics_alias' : {metric_name : {token : ...., alias : metric_alias}
         if ($metricObject->name === $metricName) {
+          // echo $metricName;
           // la metrica passata come argomento è inclusa nella formula della metrica composta
           foreach ($metric->formula->formula_sql as $key => $sqlItem) {
             // la formula composta come array è ad es.: [ "(", "przmedio(nome_metrica)", "*", "quantita(nome_metrica)", ")"]
@@ -250,10 +251,9 @@ class Cube
         }
       }
       // aggiungo la formula della metrica composta
-      // var_dump($metric->formula->alias);
       $this->_composite_sql_formula[$metric->name] = ['alias' => $metric->formula->alias, 'formula' => $metric->formula->formula_sql];
-      // dd($this->_composite_sql_formula);
     }
+    // dd($this->_composite_sql_formula);
   }
 
   private function createCompositeMetrics()
@@ -261,6 +261,7 @@ class Cube
     // verifico se le metrica composta, in ciclo, è presente in altre metriche composte.
     // dd($this->compositeMetrics);
     foreach ($this->compositeMetrics as $cMetric) {
+      // dd($this->_composite_sql_formula);
       // in _composite_sql_formula sono già state aggiunte metriche composte provenienti dall'elaborazione delle metriche di base/avanzate
       foreach ($this->_composite_sql_formula as $metricName => $alias_formula) {
         // $alias_formula contiene 2 array, uno ha l'alias della metrica composta già definita in buildCompositeMetrics, l'altro array contiene la formula, già definita allo stesso modo
@@ -288,6 +289,7 @@ class Cube
     // se ci sono metriche a livello di report le aggiungo
     // se un report contiene solo metriche filtrate non avrà metriche di base
     if (!is_null($this->_metrics_base)) {
+      // dd('_metrics_base ' . $this->_metrics_base);
       $this->_sql .= ", $this->_metrics_base";
     }
     $this->_sql .= "\nFROM\n" . implode(",\n", $this->FROM_baseTable);

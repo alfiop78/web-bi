@@ -331,7 +331,7 @@ class MetricStorage extends Storages {
   set cubeMetrics(cubeToken) {
     // recupero gli oggetti METRIC dallo storage
     this.#metricsObject = {};
-    super.storageK = ['METRIC', 'ADV_METRIC'];
+    super.storageK = ['METRIC', 'ADV_METRIC', 'COMP_METRIC'];
     for (const [key, value] of Object.entries(this.st)) {
       if (value.cube === cubeToken || value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;
       // if (value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;

@@ -410,7 +410,7 @@ var List = new Lists();
     document.getElementById('columnName').value = Query.select.get(e.currentTarget.dataset.objectToken).name;
     // recupero la formula dall'oggetto Query.select e la reimposto nella composite-column-formula
     // seleziono la colonna e aggiungo la stessa al composite-column-formula
-    const column = document.querySelector("#ul-columns .selectable[data-token='"+e.currentTarget.dataset.objectToken+"']")
+    const column = document.querySelector("#ul-columns .selectable[data-token='" + e.currentTarget.dataset.objectToken + "']")
     column.dataset.selected = 'true';
     // imposto tutti gli altri "disabled"
     document.querySelectorAll('#ul-columns section:not([hidden]) .selectable:not([data-selected])').forEach(element => element.dataset.disabled = 'true');
@@ -495,6 +495,7 @@ var List = new Lists();
           Query.add(StorageMetric.selected);
           document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
           document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.added = 'true';
+          // TODO: darivedere il nested
           document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.nested = 'true';
           document.querySelector("#ul-composite-metrics button[data-edit][data-object-token='" + metric.token + "']").setAttribute('disabled', 'true');
           // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
@@ -1066,7 +1067,7 @@ var List = new Lists();
   // remove column from report
   app.handlerColumnRemove = (e) => {
     Query.objects = { token: e.currentTarget.dataset.objectToken };
-    Query.select = {token : e.currentTarget.dataset.objectToken};
+    Query.select = { token: e.currentTarget.dataset.objectToken };
     document.querySelector("#ul-defined-columns section[data-token-column='" + e.currentTarget.dataset.objectToken + "']").remove();
     delete document.querySelector("#ul-columns .selectable[data-token-column='" + e.currentTarget.dataset.objectToken + "']").dataset.selected;
   }
@@ -1111,9 +1112,10 @@ var List = new Lists();
       cubes: [...cubes],
       updated_at: date.toLocaleDateString('it-IT', options),
     };
-    metricObj.nested = (metric.dataset.nested) ? true : false;
+    // metricObj.nested = (metric.dataset.nested) ? true : false;
     metricObj.created_at = (e.target.dataset.token) ? StorageMetric.selected.created_at : date.toLocaleDateString('it-IT', options);
     console.log(metricObj);
+    debugger;
     StorageMetric.save(metricObj);
     // salvo nel DB
     // app.saveMetricDB(metricObj);
@@ -1768,7 +1770,7 @@ var List = new Lists();
       Query.objects = {token : column.dataset.token};
       Query.select = {token : column.dataset.token};
     } */
-    let object = { token : column.dataset.token, name : name.value, type: 'COLUMNS' };
+    let object = { token: column.dataset.token, name: name.value, type: 'COLUMNS' };
     if (column.dataset.tableId) {
       object.hierarchies = Object.fromEntries(new Map([[column.dataset.hierToken, column.dataset.tableId]]));
       object.dimensions = [column.dataset.dimensionToken];
@@ -1780,7 +1782,7 @@ var List = new Lists();
     document.querySelectorAll('#composite-column-formula *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
-        let obj = { mode : element.dataset.mode, type : 'COLUMNS', token : element.dataset.token, table : element.dataset.tableName, tableAlias : element.dataset.tableAlias, label : element.dataset.label };
+        let obj = { mode: element.dataset.mode, type: 'COLUMNS', token: element.dataset.token, table: element.dataset.tableName, tableAlias: element.dataset.tableAlias, label: element.dataset.label };
         if (element.dataset.tableId) {
           // tabella appartenente a un livello dimensionale
           obj.dimensionToken = element.dataset.dimensionToken;
@@ -1805,12 +1807,12 @@ var List = new Lists();
           app.setFormula(obj);
         }
       } else {
-        let obj = { mode : element.dataset.mode, innerText : element.innerText.trim() };
+        let obj = { mode: element.dataset.mode, innerText: element.innerText.trim() };
         app.setFormula(obj);
       }
     });
-    object.edit = {id : Query.edit_id, ds : Query.edit_ds};
-    object.sql = {id : Query.sql_id, ds: Query.sql_ds};
+    object.edit = { id: Query.edit_id, ds: Query.edit_ds };
+    object.sql = { id: Query.sql_id, ds: Query.sql_ds };
     Query.add(object);
     (app.btnColumnSave.hasAttribute('data-token')) ? List.editDefinedColumn(object) : List.addDefinedColumn(object);
     app.resetDialogColumn();
