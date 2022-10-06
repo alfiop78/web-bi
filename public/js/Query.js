@@ -32,7 +32,7 @@ class Queries {
   * Imposto quali cubi, FROM e JOIN che devono essere incluse nel report
   */
   includeElements() {
-    console.clear();
+    // console.clear();
     document.querySelectorAll("*[data-include-query]").forEach(tableRef => delete tableRef.dataset.includeQuery);
     // debugger;
     for (const [key, value] of Object.entries(this.OB)) {
@@ -110,19 +110,6 @@ class Queries {
 
   get dimensions() { return this.#dimensions; }
 
-  /* set filteredMetrics(value) {
-    (!this.#filteredMetrics.has(value.token)) ? this.#filteredMetrics.set(value.token, value) : this.#filteredMetrics.delete(value.token);
-    console.log('this.#filteredMetrics : ', this.#filteredMetrics);
-  }
-
-  get filteredMetrics() { return this.#filteredMetrics; }
-
-  set compositeMetrics(value) {
-    (!this.#compositeMetrics.has(value.token)) ? this.#compositeMetrics.set(value.token, value) : this.#compositeMetrics.delete(value.token);
-    // console.log('this.#compositeMetrics : ', this.#compositeMetrics);
-  }
-  get compositeMetrics() { return this.#compositeMetrics; } */
-
   checkColumnName(token, name) {
     // in fase di edit di una colonna, tramite l'argomento token, non devo controllare se il nome già esiste di una colonna che sto modificando
     let result = false;
@@ -195,19 +182,6 @@ class Queries {
       // this.filteredMetrics = object;
     }
   }
-
-  /* app.setCompositeMetrics = () => {
-    // Siccome le metriche composte possono contenere metriche base/filtrate/composte
-    // ...vanno aggiunte anche queste all'elaborazione di baseTable() (metriche base) oppure metricTable() (metriche filtrate)
-    document.querySelectorAll("#ul-composite-metrics .selectable[data-selected][data-metric-type='4']").forEach(metric => {
-      StorageMetric.selected = metric.dataset.metricToken;
-      const nested = (metric.dataset.nested) ? true : false;
-      // aggiungo alle metriche selezionate per il report, se non è già presente
-      if (!Query.compositeMetrics.has(metric.dataset.metricToken)) {
-        Query.compositeMetrics = { token: metric.dataset.metricToken, name: StorageMetric.selected.name, formula: StorageMetric.selected.formula, nested };
-      }
-    });
-  } */
 
   SQLProcess(name) {
     this.reportElements = {};

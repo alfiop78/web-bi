@@ -229,13 +229,11 @@ var List = new Lists();
     StorageProcess.selected.edit.compositeMetrics.forEach(token => {
       // se è una metrica nidificata NON la invio a nestedCompositeMetrics
       // solo le metriche "main" devono essere inviate a nestedCompositeMetrics la quale andrà a recuperare le metriche contenute nella formula
-      if (StorageProcess.selected.report.compositeMetrics[token].nested) return;
+      // if (StorageProcess.selected.report.compositeMetrics[token].nested) return;
       app.nestedCompositeMetrics(token);
       StorageMetric.selected = token;
-      document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + token + "']").dataset.selected = 'true';
-      document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + token + "']").dataset.added = 'true';
-      document.querySelector("#ul-composite-metrics button[data-edit][data-object-token='" + token + "']").setAttribute('disabled', 'true');
       Query.add(StorageMetric.selected);
+      List.selectCompositeMetric(StorageMetric.selected.token);
       List.addDefinedCompositeMetric();
     });
 
@@ -244,6 +242,7 @@ var List = new Lists();
     StorageProcess.selected.edit.metrics.forEach(token => {
       StorageMetric.selected = token;
       Query.add(StorageMetric.selected);
+      List.selectMetric(StorageMetric.selected.token);
       // aggiungo alla lista #ul-defined-metrics se questa metrica non è stata già aggiunta da qualche metrica composta
       if (!document.querySelector("#ul-defined-metrics section[data-metric-token='" + token + "']")) List.addDefinedMetric();
     });
@@ -402,12 +401,13 @@ var List = new Lists();
 
   // edit di una colonna
   app.handlerColumnEdit = (e) => {
-    // recupero le proprietà della colonna. Posso recuperarla dal metodo Query.select.
+    // recupero le proprietà della colonna. Posso recuperarla dal metodo Query.OB['COLUMNS'].
     // imposto un data-token sul tasto btnColumnSave
     // qui devo impostare le stesse prop impostate in handlerSelectColumn
     app.btnColumnSave.dataset.token = e.currentTarget.dataset.objectToken;
-    document.getElementById('columnName').setAttribute('value', Query.select.get(e.currentTarget.dataset.objectToken).name);
-    document.getElementById('columnName').value = Query.select.get(e.currentTarget.dataset.objectToken).name;
+    document.getElementById('columnName').setAttribute('value', Query.OB['COLUMNS'].get(e.currentTarget.dataset.objectToken).name);
+    debugger;
+    document.getElementById('columnName').value = Query.OB['COLUMNS'].get(e.currentTarget.dataset.objectToken).name;
     // recupero la formula dall'oggetto Query.select e la reimposto nella composite-column-formula
     // seleziono la colonna e aggiungo la stessa al composite-column-formula
     const column = document.querySelector("#ul-columns .selectable[data-token='" + e.currentTarget.dataset.objectToken + "']")
@@ -478,9 +478,7 @@ var List = new Lists();
         console.log(document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']"));
         if (!document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
           Query.add(StorageMetric.selected);
-          document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
-          document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.added = 'true';
-          document.querySelector("#ul-metrics button[data-edit][data-object-token='" + metric.token + "']").setAttribute('disabled', 'true');
+          List.selectMetric(metric.token);
           // TODO: includo, con show-datamart = true, anche le metriche contenute nella formula all'interno del datamart finale
           // document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'true';
           List.addDefinedMetric();
@@ -491,11 +489,8 @@ var List = new Lists();
         // la metrica in ciclo (contenuta nella formula di una composta) è metrica composta, quindi aggiungo l'attr 'nested'
         if (!document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
           Query.add(StorageMetric.selected);
-          document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.selected = 'true';
-          document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.added = 'true';
-          debugger;
-          document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.nested = 'true';
-          document.querySelector("#ul-composite-metrics button[data-edit][data-object-token='" + metric.token + "']").setAttribute('disabled', 'true');
+          List.selectCompositeMetric(metric.token);
+          // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.nested = 'true';
           // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
           List.addDefinedCompositeMetric();
         }
@@ -985,44 +980,38 @@ var List = new Lists();
 
   // remove filter from report
   app.handlerFilterRemove = (e) => {
-    Query.filters = { token: e.currentTarget.dataset.objectToken };
-    Query.objects = { token: e.currentTarget.dataset.objectToken };
+    StorageFilter.selected = e.currentTarget.dataset.objectToken;
+    // TODO: utilizzo, per la cancellazione, lo StorageFilter, anzichè il token presente nel currentTarget.dataset, perchè, in futuro mi potrebbe servire un nuovo type : 'ADV_FILTER' (con filtri "composti"), utilizzando la stessa logica di type : 'METRIC' e 'ADV_METRIC'
+    Query.remove(StorageFilter.selected);
+    // TODO: rimuovere con animation
     document.querySelector("#ul-defined-filters section[data-filter-token='" + e.currentTarget.dataset.objectToken + "']").remove();
-    List.deselectFilter(e.currentTarget.dataset.objectToken);
+    List.deselectFilter(StorageFilter.selected.token);
   }
 
   // remove metrics from report
   app.handlerMetricRemove = (e) => {
     StorageMetric.selected = e.currentTarget.dataset.objectToken;
-    app.removeMetric();
-  }
-
-  app.removeMetric = () => {
-    Query.objects = { token: StorageMetric.selected.token };
-    switch (StorageMetric.selected.metric_type) {
-      case 2:
-      case 3:
-        Query.filteredMetrics = { token: StorageMetric.selected.token };
-        break;
-      default:
-        Query.metrics = { token: StorageMetric.selected.token };
-        break;
-    }
+    Query.remove(StorageMetric.selected);
+    // TODO: rimuovere con animation
     document.querySelector("ul section.data-item-defined[data-metric-token='" + StorageMetric.selected.token + "']").remove();
     List.deselectMetric(StorageMetric.selected.token);
   }
 
   app.removeCompositeMetric = (token) => {
+    // console.log(document.querySelectorAll("ul section[data-" + token + "]"));
     document.querySelectorAll("ul section[data-" + token + "]").forEach(metric => {
       metric.querySelector("small[data-composite-metric='" + token + "']").remove();
+      StorageMetric.selected = metric.dataset.metricToken;
       if (metric.querySelectorAll("small[data-composite-metric]").length === 0) {
-        StorageMetric.selected = metric.dataset.metricToken;
         if (StorageMetric.selected.metric_type !== 4) {
-          app.removeMetric();
+          Query.remove(StorageMetric.selected);
+          document.querySelector("ul section.data-item-defined[data-metric-token='" + StorageMetric.selected.token + "']").remove();
+          List.deselectMetric(StorageMetric.selected.token);
         } else {
+          // TODO: qui il codice dovrebbe arrivare con una metrica composta nidificata al secondo livello
           // metrica composta
+          debugger;
           // in questo caso c'è una metrica composta all'interno della metrica composta selezionata
-          Query.compositeMetrics = { token: metric.dataset.metricToken };
           document.querySelector("ul section.data-item-defined[data-metric-token='" + token + "']").remove();
           List.deselectCompositeMetric(token);
           app.removeCompositeMetric(metric.dataset.metricToken);
@@ -1033,26 +1022,27 @@ var List = new Lists();
 
   // remove composite metrics from report
   app.handlerCompositeMetricRemove = (e) => {
-    Query.objects = { token: e.currentTarget.dataset.objectToken };
-    Query.compositeMetrics = { token: e.currentTarget.dataset.objectToken };
-    // recupero tutte le metriche che sono incluse nella metrica composta selezionata qui
+    StorageMetric.selected = e.currentTarget.dataset.objectToken;
+    // elimino la metrica composta selezionata
+    Query.remove(StorageMetric.selected);
+    // recupero tutti gli <small> sotto le metriche dove è presente la metrica composta selezionata qui
     document.querySelectorAll("ul section[data-" + e.currentTarget.dataset.objectToken + "]").forEach(metric => {
-      // metric : è la metrica presente nella ulDefinedMetrics, può essere base, filtrata o composta
-      // elimino la metrica composta associata alla metrica in ciclo
+      StorageMetric.selected = metric.dataset.metricToken;
+      // metric : è la metrica presente nella ulDefinedMetrics, può essere 'METRIC', 'ADV_METRIC' e 'COMP_METRIC'
+      // elimino lo <small>, su qualsiasi metrica corrispondente alla metrica selezionata (e.currentTarget) per la cancellazione
       metric.querySelector("small[data-composite-metric='" + e.currentTarget.dataset.objectToken + "']").remove();
-      // se, tra le metriche aggiunte al report, non ci sono più metriche utilizzate nella composta selezionata, allora le elimino dal report
-      // ... le elimino in base al metric_type 
+      // dopo aver eliminato lo <small> relativo alla metrica selezionata (e.currentTarget), se, la metrica in ciclo, non ha nessun altro <small>, elimino anche la metrica in ciclo
       if (metric.querySelectorAll("small[data-composite-metric]").length === 0) {
-        StorageMetric.selected = metric.dataset.metricToken;
+        Query.remove(StorageMetric.selected);
+        // la rimuovo dalla lista delle metriche già definite
+        document.querySelector("ul section.data-item-defined[data-metric-token='" + metric.dataset.metricToken + "']").remove();
         if (StorageMetric.selected.metric_type !== 4) {
-          app.removeMetric();
+          List.deselectMetric(metric.dataset.metricToken);
+          // List.deselectMetric(StorageMetric.selected.token);
         } else {
-          // metrica composta
-          // in questo caso c'è una metrica composta all'interno della metrica composta selezionata
-          Query.objects = { token: metric.dataset.metricToken };
-          Query.compositeMetrics = { token: metric.dataset.metricToken };
-          document.querySelector("ul section.data-item-defined[data-metric-token='" + metric.dataset.metricToken + "']").remove();
+          // metrica composta nidificata all'interno di quella selezionata (e.currentTarget)
           List.deselectCompositeMetric(metric.dataset.metricToken);
+          // siccome è una metrica composta, può contenere, a sua volta, altre metriche composte, invoco una Fn ricorsiva con lo scopo di eliminare le metriche nidificate
           app.removeCompositeMetric(metric.dataset.metricToken);
         }
       }
@@ -1064,10 +1054,9 @@ var List = new Lists();
 
   // remove column from report
   app.handlerColumnRemove = (e) => {
-    Query.objects = { token: e.currentTarget.dataset.objectToken };
-    Query.select = { token: e.currentTarget.dataset.objectToken };
+    Query.remove({ token: e.currentTarget.dataset.objectToken, type: 'COLUMNS' });
+    // TODO: rimuovere con animation
     document.querySelector("#ul-defined-columns section[data-token-column='" + e.currentTarget.dataset.objectToken + "']").remove();
-    delete document.querySelector("#ul-columns .selectable[data-token-column='" + e.currentTarget.dataset.objectToken + "']").dataset.selected;
   }
 
   // save compositeMetric

@@ -487,7 +487,7 @@ class Lists {
               this.#sublist.selectable.dataset.tableId = tableId;
               this.#sublist.selectable.dataset.dimensionToken = dimToken;
               this.#sublist.selectable.dataset.hierToken = hierToken;
-              this.#sublist.selectable.dataset.token= token;
+              this.#sublist.selectable.dataset.token = token;
               this.#sublist.btnAdd.dataset.objectToken = token;
               this.#sublist.btnAdd.dataset.token = token;
               this.#sublist.btnAdd.dataset.label = field.ds.field;
@@ -519,7 +519,7 @@ class Lists {
           this.#sublist.selectable.dataset.label = field.ds.field;
           this.#sublist.selectable.dataset.tableName = value.FACT;
           this.#sublist.selectable.dataset.tableAlias = value.alias;
-          this.#sublist.selectable.dataset.token= token;
+          this.#sublist.selectable.dataset.token = token;
           this.#sublist.selectable.dataset.cubeToken = cubeToken;
           this.#sublist.btnAdd.dataset.objectToken = token; // TODO: da valutare se è necessario
           this.#sublist.btnAdd.dataset.token = token;
@@ -794,8 +794,8 @@ class Lists {
   // aggiorno, nella lista delle colonne già aggiunte, la colonna modificata
   editDefinedColumn(object) {
     this.ul = 'ul-defined-columns';
-    this.ul.querySelector("section[data-token-column='"+object.token+"']").dataset.label = object.name;
-    this.ul.querySelector("section[data-token-column='"+object.token+"'] span[column]").innerText = object.name;
+    this.ul.querySelector("section[data-token-column='" + object.token + "']").dataset.label = object.name;
+    this.ul.querySelector("section[data-token-column='" + object.token + "'] span[column]").innerText = object.name;
   }
 
   addDefinedFilter() {
@@ -889,6 +889,14 @@ class Lists {
     defined.appendChild(small);
   }
 
+  selectCompositeMetric(token) {
+    this.ul = 'ul-composite-metrics';
+    this.ul.querySelector(".selectable[data-metric-token='" + token + "']").dataset.selected = 'true';
+    this.ul.querySelector(".selectable[data-metric-token='" + token + "']").dataset.added = 'true';
+    // if (this.ul.querySelector(".selectable[data-metric-token='" + token + "']").hasAttribute('nested')) delete this.ul.querySelector(".selectable[data-metric-token='" + token + "']").dataset.nested;
+    this.ul.querySelector("button[data-edit][data-object-token='" + token + "']").setAttribute('disabled', 'true');
+  }
+
   // deseleziono la metrica composta specificata dal token
   deselectCompositeMetric(token) {
     this.ul = 'ul-composite-metrics';
@@ -896,6 +904,14 @@ class Lists {
     delete this.ul.querySelector(".selectable[data-metric-token='" + token + "']").dataset.added;
     if (this.ul.querySelector(".selectable[data-metric-token='" + token + "']").hasAttribute('nested')) delete this.ul.querySelector(".selectable[data-metric-token='" + token + "']").dataset.nested;
     this.ul.querySelector("button[data-edit][data-object-token='" + token + "']").removeAttribute('disabled');
+  }
+
+  selectMetric(token) {
+    this.ul = 'ul-metrics';
+    this.ul.querySelector(".selectable[data-metric-token='" + token + "']").dataset.selected = 'true';
+    this.ul.querySelector(".selectable[data-metric-token='" + token + "']").dataset.added = 'true';
+    // disabilito il tasto edit
+    this.ul.querySelector("button[data-edit][data-object-token='" + token + "']").setAttribute('disabled', 'true');
   }
 
   deselectMetric(token) {
