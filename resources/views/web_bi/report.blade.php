@@ -798,7 +798,7 @@
                           <!--   <label for="search-columns" class="">Ricerca</label> -->
                           <!-- </div> -->
                           <div class="relative-ul">
-                            <ul id="ul-defined-columns" class="absolute"></ul>
+                            <ul id="ul-defined-columns" class="absolute custom-scrollbar"></ul>
                           </div>
                         </section>
 
@@ -812,7 +812,7 @@
                           <!--   <label for="search-exist-filters" class="">Ricerca</label> -->
                           <!-- </div> -->
                           <div class="relative-ul">
-                            <ul id="ul-defined-filters" class="absolute"></ul>
+                            <ul id="ul-defined-filters" class="absolute custom-scrollbar"></ul>
                           </div>
                         </section>
 
@@ -827,7 +827,7 @@
                           <!--   <label for="search-exist-metrics" class="">Ricerca</label> -->
                           <!-- </div> -->
                           <div class="relative-ul">
-                            <ul id="ul-defined-metrics" class="absolute"></ul>
+                            <ul id="ul-defined-metrics" class="absolute custom-scrollbar"></ul>
                           </div>
                         </section>
 
@@ -841,7 +841,7 @@
                           <!--   <label for="search-exist-composite-metrics" class="">Ricerca</label> -->
                           <!-- </div> -->
                           <div class="relative-ul">
-                            <ul id="ul-defined-composite-metrics" class="absolute"></ul>
+                            <ul id="ul-defined-composite-metrics" class="absolute custom-scrollbar"></ul>
                           </div>
                         </section>
 
