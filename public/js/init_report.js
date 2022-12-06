@@ -66,7 +66,7 @@ var List = new Lists();
   // Callback function to execute when mutations are observed
   // const targetNode = document.querySelectorAll('ul');
   // console.log(targetNode);
-  const config = { attributes: true, childList: true, subtre: true };
+  const config = { attributes: true, childList: true, subtree: true };
 
   const callback = (mutationList, observer) => {
     // console.log(mutationList, observer);

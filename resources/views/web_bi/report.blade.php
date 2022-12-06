@@ -791,7 +791,7 @@
                         <section class="columns parent-ul">
                           <div id="btn-add-columns" class="add-button columns" tooltip="Aggiungi colonna" flow="bottom">
                             <h5>Colonne</h5>
-                            <i class="material-icons-round md-42 align-self-center">table_rows</i>
+                            <i class="material-icons-round md-28 align-self-center">table_rows</i>
                           </div>
                           <!-- <div class="md-field"> -->
                           <!--   <input type="search" data-element-search="search-columns" id="search-columns" value autocomplete="off" /> -->
@@ -805,7 +805,7 @@
                         <section class="filters parent-ul-filters">
                           <div id="btn-add-filters" class="add-button filters" tooltip="Aggiungi filtro" flow="bottom">
                             <h5>Filtri</h5>
-                            <i class="material-icons-round md-42 align-self-center">filter_alt</i>
+                            <i class="material-icons-round md-28 align-self-center">filter_alt</i>
                           </div>
                           <!-- <div class="md-field"> -->
                           <!--   <input type="search" data-element-search="search-exist-filters" id="search-exist-filters" value autocomplete="off" /> -->
@@ -819,7 +819,7 @@
                         <section class="metrics parent-ul-metrics">
                           <div id="btn-add-metrics" class="add-button metrics" tooltip="Aggiungi metrica" flow="bottom">
                             <h5>Metriche</h5>
-                            <i class="material-icons-round md-42 align-self-center">query_stats</i>
+                            <i class="material-icons-round md-28 align-self-center">query_stats</i>
                           </div>
 
                           <!-- <div class="md-field"> -->
@@ -834,7 +834,7 @@
                         <section class="composite-metrics parent-ul-metrics">
                           <div id="btn-add-composite-metrics" class="add-button composite-metrics" tooltip="Aggiungi metrica composta" flow="bottom">
                             <h5>Metriche composte</h5>
-                            <i class="material-icons-round md-42 align-self-center">addchart</i>
+                            <i class="material-icons-round md-28 align-self-center">addchart</i>
                           </div>
                           <!-- <div class="md-field"> -->
                           <!--   <input type="search" data-element-search="search-exist-composite-metrics" id="search-exist-composite-metrics" value autocomplete="off" /> -->
