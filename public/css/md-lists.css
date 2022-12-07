@@ -5,18 +5,23 @@
   --main-composite-metrics-color: sienna;
 }
 
+.metrics {color: var(--main-metrics-color);}
+.metrics .add-button {border-top : solid thick var(--main-metrics-color);}
+
+.data-item-defined.removed {color: dimgrey; opacity: .8;}
+.data-item-defined.added {color: olive; opacity: .8;}
+.data-item-defined .show-removed-status, .data-item-defined .show-added-status {display: none;}
+.data-item-defined.removed .show-removed-status {display: block;}
+.data-item-defined.removed .hide-edit-status, .data-item-defined.added .hide-edit-status  {display: none;}
+.data-item-defined.added .show-added-status {display: block;}
+
 ul{margin-inline: 0px;padding-inline: 0px;}
 .list{color: #494949;}
 .h-content{display: flex; align-items: center; padding-right: 1em;}
 .v-content{display: flex;flex-flow: column;width: 100%;}
-span.highlight{color: sienna;}
-.filters-color span.highlight{color: var(--main-filters-color);}
-.metrics-color span.highlight{color: var(--main-metrics-color);}
 .columns-color {color: var(--main-columns-color);}
 .metrics-color {color: var(--main-metrics-color);}
 .selectable > small, .defined > small {color: grey;}
-.composite-metrics-color span.highlight{color: var(--main-composite-metrics-color);}
-.no-highlight{color: dimgray}
 .card ul > section .selectable{margin: 0px 4px; padding-top: 0px;}
 .unselectable{margin: 4px; padding: 2px 4px;}
 .selectable > .smalls{display: flex;flex-flow: column;}
@@ -31,7 +36,7 @@ section[data-sublist-fields] > .selectable[data-relation][data-relation-id="true
 section[data-sublist-fields] > .selectable[metrics] i[data-id="metric-icon"]{color: #587850; visibility: visible;}
 
 /*visualizzo icona su hover section*/
-section.data-item button, section.data-item-defined button:not(:first-child) {visibility: hidden;}
+section.data-item button, section.data-item-defined button:not(:nth-child(-n+3)) {visibility: hidden;}
 section.data-item:hover button, section.data-item-defined:hover button {visibility: visible;}
 /*dialog lists*/
 .dialog-overflow-list{height: 300px; max-height: 300px; overflow-y: auto;}
@@ -96,7 +101,7 @@ section.data-item:hover button, section.data-item-defined:hover button {visibili
 }
 
 /*hover selected elements*/
-.data-item, .data-item-defined{position: relative;}
+.data-item, .data-item-defined{position: relative; transition: all 250ms;}
 section[data-sublist-gen] {position: relative;}
 .selectable{transition: padding-left 150ms; margin: 0px 4px; padding: 2px 4px;}
 .selectable:hover{cursor: pointer;transition: padding-left 200ms; padding-left: 8px;}
@@ -130,6 +135,12 @@ section[data-sublist-gen] {position: relative;}
 	75% {transform: scale(1.10);}
 	100% {transform: scale(1);}
 }
+.data-item-defined.animation-remove{animation: removeElement .5s;}
+
+@keyframes removeElement {
+	0% {transform: translateY(0%);}
+	100% {transform: translateY(100%); opacity: 0;}
+}
 
 /*lista nelle dialog*/
 ul[data-object]{position: absolute; overflow: auto; width: 100%; height: calc(100% - 24px); margin-block-start: 12px; margin-block-end: 12px; padding-inline-start: 1em; padding-inline-end: 1em;}
@@ -149,4 +160,3 @@ ul[data-object]{position: absolute; overflow: auto; width: 100%; height: calc(10
 ul.absolute{position: absolute; height: calc(100% - 24px); overflow: auto; width: 100%;}
 
 small[data-include-query]{color: brown;}
-.removed{color: dimgray; background-color:grey;}

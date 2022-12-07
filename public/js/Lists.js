@@ -142,12 +142,16 @@ class Lists {
     this.defined = this.section.querySelector('.defined');
     this.span = this.section.querySelector('span[metric]');
     this.btnRemove = this.section.querySelector('button[data-remove]');
+    this.btnUndoRemove = this.section.querySelector('button[data-undo-remove]');
+    this.btnUndoAdd = this.section.querySelector('button[data-undo-add]');
 
     this.#sublist = {
       section: this.section,
       defined: this.defined,
       span: this.span,
-      btnRemove: this.btnRemove
+      btnRemove: this.btnRemove,
+      btnUndoRemove: this.btnUndoRemove,
+      btnUndoAdd: this.btnUndoAdd
     }
   }
 
@@ -159,12 +163,16 @@ class Lists {
     this.defined = this.section.querySelector('.defined');
     this.span = this.section.querySelector('span[metric]');
     this.btnRemove = this.section.querySelector('button[data-remove]');
+    this.btnUndoRemove = this.section.querySelector('button[data-undo-remove]');
+    this.btnUndoAdd = this.section.querySelector('button[data-undo-add]');
 
     this.#sublist = {
       section: this.section,
       defined: this.defined,
       span: this.span,
-      btnRemove: this.btnRemove
+      btnRemove: this.btnRemove,
+      btnUndoRemove: this.btnUndoRemove,
+      btnUndoAdd: this.btnUndoAdd
     }
   }
 
@@ -817,28 +825,35 @@ class Lists {
   }
 
   // aggiungo la metrica selezionata al report
-  addDefinedMetric() {
+  addDefinedMetric(mode) {
     // token riguarda una metrica composta, se presente, sto aggiungendo una metrica di base al report perchè
     //.. è presente in una formula della composta
     this.ul = 'ul-defined-metrics';
     this.definedMetrics = 'data-sublist-metrics-defined';
+    if (mode === 'edit') this.#sublist.section.classList.add('added');
     this.#sublist.section.dataset.label = StorageMetric.selected.name;
     this.#sublist.section.dataset.metricToken = StorageMetric.selected.token;
     this.#sublist.defined.dataset.metricToken = StorageMetric.selected.token;
     this.#sublist.span.innerText = StorageMetric.selected.name;
     this.#sublist.btnRemove.dataset.objectToken = StorageMetric.selected.token;
+    this.#sublist.btnUndoRemove.dataset.objectToken = StorageMetric.selected.token;
+    this.#sublist.btnUndoAdd.dataset.objectToken = StorageMetric.selected.token;
     this.#sublist.btnRemove.dataset.metricType = StorageMetric.selected.metric_type;
     this.ul.appendChild(this.#sublist.section);
   }
 
-  addDefinedCompositeMetric() {
+  addDefinedCompositeMetric(mode) {
+    // debugger;
     this.ul = 'ul-defined-composite-metrics';
     this.definedCompositeMetrics = 'data-sublist-composite-metrics-defined';
+    if (mode === 'edit') this.#sublist.section.classList.add('added');
     this.#sublist.section.dataset.label = StorageMetric.selected.name;
     this.#sublist.section.dataset.metricToken = StorageMetric.selected.token;
     this.#sublist.defined.dataset.metricToken = StorageMetric.selected.token;
     this.#sublist.span.innerText = StorageMetric.selected.name;
     this.#sublist.btnRemove.dataset.objectToken = StorageMetric.selected.token;
+    this.#sublist.btnUndoRemove.dataset.objectToken = StorageMetric.selected.token;
+    this.#sublist.btnUndoAdd.dataset.objectToken = StorageMetric.selected.token;
     this.ul.appendChild(this.#sublist.section);
   }
 

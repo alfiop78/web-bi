@@ -478,6 +478,8 @@
               <div>
                 <div class="h-content">
                   <button class="button-icon material-icons-round md-18 md-opacity" data-info-object-token>drag_handle</button>
+                  <button class="button-icon material-icons-round md-18 md-opacity show-removed-status" data-info-object-token>remove</button>
+                  <button class="button-icon material-icons-round md-18 md-opacity show-added-status" data-info-object-token>add</button>
                   <div class="defined v-content" data-object-type="column">
                     <!-- <small field></small> -->
                     <span column class="highlight"></span>
@@ -486,6 +488,8 @@
                   </div>
                   <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" data-edit data-fn="handlerColumnEdit" flow="bottom">edit</button>
                   <button class="button-icon material-icons-round md-18" data-object-token data-remove data-fn="handlerColumnRemove" tooltip="Rimuovi" flow="bottom">delete</button>
+                  <button class="button-icon material-icons-round md-18 show-removed-status" data-object-token data-undo-remove tooltip="Annulla" data-fn="handlerColumnUndoRemove" flow="bottom">undo</button>
+                  <button class="button-icon material-icons-round md-18 show-added-status" data-object-token data-undo-add tooltip="Annulla" data-fn="handlerColumnUndoAdd" flow="bottom">undo</button>
                 </div>
               </div>
             </section>
@@ -521,11 +525,15 @@
             <section class="data-item-defined" data-element-search="search-defined-filters" data-label data-related-object="dimension cube" data-sublist-filters-defined>
               <div>
                 <div class="h-content">
-                  <div class="defined v-content filters-color" data-object-type="filter">
+                  <button class="button-icon material-icons-round md-18 md-opacity show-removed-status" data-info-object-token>remove</button>
+                  <button class="button-icon material-icons-round md-18 md-opacity show-added-status" data-info-object-token>add</button>
+                  <div class="defined v-content" data-object-type="filter">
                     <span filter class="highlight filters-color"></span>
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info data-info-object-token tooltip="Info" flow="bottom" disabled>info</button>
                   <button class="button-icon material-icons-round md-18" data-object-token data-remove data-fn="handlerFilterRemove" tooltip="Rimuovi" flow="bottom">delete</button>
+                  <button class="button-icon material-icons-round md-18 show-removed-status" data-object-token data-undo-remove tooltip="Annulla" data-fn="handlerFilterUndoRemove" flow="bottom">undo</button>
+                  <button class="button-icon material-icons-round md-18 show-added-status" data-object-token data-undo-add tooltip="Annulla" data-fn="handlerFilterUndoAdd" flow="bottom">undo</button>
                 </div>
               </div>
             </section>
@@ -562,12 +570,16 @@
             <section class="data-item-defined" data-element-search="search-defined-metrics" data-label data-related-object="dimension cube" data-type="metric" data-sublist-metrics-defined>
               <div>
                 <div class="h-content">
-                  <button class="button-icon material-icons-round md-18 md-opacity" data-info-object-token>drag_handle</button>
-                  <div class="defined v-content metrics-color" data-object-type="metric">
-                    <span metric class="highlight metrics-color"></span>
+                  <button class="button-icon material-icons-round md-18 md-opacity hide-edit-status" data-info-object-token>drag_handle</button>
+                  <button class="button-icon material-icons-round md-18 md-opacity show-removed-status" data-info-object-token>remove</button>
+                  <button class="button-icon material-icons-round md-18 md-opacity show-added-status" data-info-object-token>add</button>
+                  <div class="defined v-content" data-object-type="metric">
+                    <span metric></span>
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Dettaglio" flow="bottom">info</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token data-remove data-fn="handlerMetricRemove" tooltip="Rimuovi" flow="bottom">delete</button>
+                  <button class="button-icon material-icons-round md-18 hide-edit-status" data-object-token data-remove data-fn="handlerMetricRemove" tooltip="Rimuovi" flow="bottom">delete</button>
+                  <button class="button-icon material-icons-round md-18 show-removed-status" data-object-token data-undo-remove data-fn="handlerMetricUndoRemove" tooltip="Annulla" flow="bottom">undo</button>
+                  <button class="button-icon material-icons-round md-18 show-added-status" data-object-token data-undo-add data-fn="handlerMetricUndoAdd" tooltip="Annulla" flow="bottom">undo</button>
                 </div>
               </div>
             </section>
@@ -590,14 +602,18 @@
             <section class="data-item-defined" data-element-search="search-defined-composite-metrics" data-label data-sublist-composite-metrics-defined>
               <div>
                 <div class="h-content">
-                  <button class="button-icon material-icons-round md-18 md-opacity" data-info-object-token>drag_handle</button>
-                  <div class="defined v-content composite-metrics-color" data-object-type="composite-metric">
-                    <span metric class="highlight"></span>
+                  <button class="button-icon material-icons-round md-18 md-opacity hide-edit-status" data-info-object-token>drag_handle</button>
+                  <button class="button-icon material-icons-round md-18 md-opacity show-removed-status" data-info-object-token>remove</button>
+                  <button class="button-icon material-icons-round md-18 md-opacity show-added-status" data-info-object-token>add</button>
+                  <div class="defined v-content" data-object-type="composite-metric">
+                    <span metric></span>
                     {{-- TODO: per le metriche composte, visualizzarne, nel popup, l'elenco dei cubi utilizzati dalle metriche all'interno della formula --}}
                     <div class="smalls"></div>
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Dettaglio" flow="bottom" disabled>info</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token data-remove tooltip="Rimuovi" data-fn="handlerCompositeMetricRemove" flow="bottom">delete</button>
+                  <button class="button-icon material-icons-round md-18 hide-edit-status" data-object-token data-remove tooltip="Rimuovi" data-fn="handlerCompositeMetricRemove" flow="bottom">delete</button>
+                  <button class="button-icon material-icons-round md-18 show-removed-status" data-object-token data-undo-remove tooltip="Annulla" data-fn="handlerCompositeMetricUndoRemove" flow="bottom">undo</button>
+                  <button class="button-icon material-icons-round md-18 show-added-status" data-object-token data-undo-add tooltip="Annulla" data-fn="handlerCompositeMetricUndoAdd" flow="bottom">undo</button>
                 </div>
               </div>
             </section>
@@ -701,7 +717,7 @@
           <template id="template-sublists">
             {{-- utilizzato quando ho un numero di elementi indefiniti, ad Esempio elenco gerarchie con le relative tabelle --}}
             <span></span>
-            <small class="no-highlight"></small>
+            <small></small>
           </template>
 
           <div class="wrapper">
@@ -790,7 +806,7 @@
 
                         <section class="columns parent-ul">
                           <div id="btn-add-columns" class="add-button columns" tooltip="Aggiungi colonna" flow="bottom">
-                            <h5>Colonne</h5>
+                            <h6>Colonne</h6>
                             <i class="material-icons-round md-28 align-self-center">table_rows</i>
                           </div>
                           <!-- <div class="md-field"> -->
@@ -804,7 +820,7 @@
 
                         <section class="filters parent-ul-filters">
                           <div id="btn-add-filters" class="add-button filters" tooltip="Aggiungi filtro" flow="bottom">
-                            <h5>Filtri</h5>
+                            <h6>Filtri</h6>
                             <i class="material-icons-round md-28 align-self-center">filter_alt</i>
                           </div>
                           <!-- <div class="md-field"> -->
@@ -817,11 +833,10 @@
                         </section>
 
                         <section class="metrics parent-ul-metrics">
-                          <div id="btn-add-metrics" class="add-button metrics" tooltip="Aggiungi metrica" flow="bottom">
-                            <h5>Metriche</h5>
+                          <div id="btn-add-metrics" class="add-button" tooltip="Aggiungi metrica" flow="bottom">
+                            <h6>Metriche</h6>
                             <i class="material-icons-round md-28 align-self-center">query_stats</i>
                           </div>
-
                           <!-- <div class="md-field"> -->
                           <!--   <input type="search" data-element-search="search-exist-metrics" id="search-exist-metrics" value autocomplete="off" /> -->
                           <!--   <label for="search-exist-metrics" class="">Ricerca</label> -->
@@ -833,7 +848,7 @@
 
                         <section class="composite-metrics parent-ul-metrics">
                           <div id="btn-add-composite-metrics" class="add-button composite-metrics" tooltip="Aggiungi metrica composta" flow="bottom">
-                            <h5>Metriche composte</h5>
+                            <h6>Metriche composte</h6>
                             <i class="material-icons-round md-28 align-self-center">addchart</i>
                           </div>
                           <!-- <div class="md-field"> -->

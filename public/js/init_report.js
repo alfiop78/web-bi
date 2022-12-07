@@ -21,6 +21,7 @@ var List = new Lists();
     tmplFormula: document.getElementById('tmpl-formula'),
     absoluteWindow: document.getElementById('absolute-window'),
     info: document.getElementById('info'),
+    body: document.getElementById('body'),
 
     processList: document.getElementById('reportProcessList'),
 
@@ -247,6 +248,7 @@ var List = new Lists();
       if (!document.querySelector("#ul-defined-metrics section[data-metric-token='" + token + "']")) List.addDefinedMetric();
     });
     app.processList.toggleAttribute('hidden');
+    app.body.dataset.mode = 'edit';
     app.checkObjectSelected();
   }
 
@@ -475,13 +477,13 @@ var List = new Lists();
         // la metrica all'interno della formula NON è una composta, la aggiungo alla ul-defined-metrics
         // se è già stata aggiunta (da precedenti metriche selezionate) aggiungo solo lo small, con all'interno
         // ...la metrica "madre" passata come argomento della fn
-        console.log(document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']"));
+        // console.log(document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']"));
         if (!document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").hasAttribute('data-selected')) {
           Query.add(StorageMetric.selected);
           List.selectMetric(metric.token);
           // TODO: includo, con show-datamart = true, anche le metriche contenute nella formula all'interno del datamart finale
           // document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'true';
-          List.addDefinedMetric();
+          List.addDefinedMetric(app.body.dataset.mode);
         }
         // TODO: verifico se lo <small> per questa metrica è stato già inserito
         if (!document.querySelector("#ul-defined-metrics section[data-metric-token='" + metric.token + "']").hasAttribute("data-" + token)) List.addSmallMetric(token);
@@ -492,7 +494,7 @@ var List = new Lists();
           List.selectCompositeMetric(metric.token);
           // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.nested = 'true';
           // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
-          List.addDefinedCompositeMetric();
+          List.addDefinedCompositeMetric(app.body.dataset.mode);
         }
         // la metrica da aggiungere nello <small> è sempre la metrica "main"
         List.addSmallCompositeMetric(token);
@@ -867,6 +869,11 @@ var List = new Lists();
   app.btnCompositeMetricDone.onclick = () => {
     document.querySelectorAll('#ul-composite-metrics .selectable[data-temporary]').forEach(item => {
       // passo a nestedCompositeMetrics anche il token perchè lo StorageMetric.selected viene modificato dalla funzione
+      // TODO: creare qui una Fn ricorsiva come fatto in undoRecursion()
+      /* const recursiveMetricsAdd = () => {
+
+      };
+      recursiveMetricsAdd(item.dataset.metricToken); */
       app.nestedCompositeMetrics(item.dataset.metricToken);
       // imposto la metrica composta selezionata per poterla aggiungere alla definedList
       StorageMetric.selected = item.dataset.metricToken;
@@ -876,7 +883,8 @@ var List = new Lists();
       document.querySelector("#ul-composite-metrics button[data-edit][data-object-token='" + item.dataset.metricToken + "']").setAttribute('disabled', 'true');
       Query.add(StorageMetric.selected);
       // aggiungo alla ulDefinedCompositeMetric la metrica composta appena selezionata
-      List.addDefinedCompositeMetric();
+      // debugger;
+      List.addDefinedCompositeMetric(app.body.dataset.mode);
     });
     app.dialogCompositeMetric.close();
     app.checkObjectSelected();
@@ -992,8 +1000,14 @@ var List = new Lists();
   app.handlerMetricRemove = (e) => {
     StorageMetric.selected = e.currentTarget.dataset.objectToken;
     Query.remove(StorageMetric.selected);
-    // TODO: rimuovere con animation
-    document.querySelector("ul section.data-item-defined[data-metric-token='" + StorageMetric.selected.token + "']").remove();
+    const el = document.querySelector(".data-item-defined[data-metric-token='" + e.currentTarget.dataset.objectToken + "']");
+    if (el.classList.contains('removed')) {
+      el.classList.remove('removed');
+    } else {
+      el.classList.add('animation-remove');
+      el.onanimationend = e => e.target.remove();
+    }
+    // document.querySelector(".data-item-defined[data-metric-token='" + e.currentTarget.dataset.objectToken + "']").classList.add('removed');
     List.deselectMetric(StorageMetric.selected.token);
   }
 
@@ -1020,6 +1034,50 @@ var List = new Lists();
         }
       }
     });
+  }
+
+  // annullo l'aggiunta della metrica composta
+  app.handlerCompositeMetricUndoAdd = (e) => {
+    StorageMetric.selected = e.currentTarget.dataset.objectToken;
+    const el = document.querySelector(".data-item-defined[data-metric-token='" + e.currentTarget.dataset.objectToken + "']");
+    el.classList.add('animation-remove');
+    el.onanimationend = e => e.target.remove();
+    Query.remove(StorageMetric.selected);
+    const undoRecursion = () => {
+      // StorageMetric è la metrica composta qui. All'interno della Fn StorageMetric può essere anche una metrica base/adv
+      for (const [metricName, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
+        // TODO: metricName non è utilizzata, utilizzare un altro tipo ti ciclo per recuperare solo il token (for...in)
+        // imposto, come selezionata, la metrica contenuta nella formula
+        StorageMetric.selected = metric.token;
+        Query.remove(StorageMetric.selected);
+        // elimino, con animation, le metriche aggiunte (in fase di edit)
+        const el = document.querySelector(".data-item-defined[data-metric-token='" + metric.token + "']");
+        el.classList.add('animation-remove');
+        el.onanimationend = e => e.target.remove();
+        if (StorageMetric.selected.metric_type === 4) undoRecursion(metric.token);
+      }
+    };
+    undoRecursion();
+
+  }
+
+  // ripristino le metriche precedentemente rimosse in fase di edit
+  app.handlerCompositeMetricUndoRemove = (e) => {
+    StorageMetric.selected = e.currentTarget.dataset.objectToken;
+    document.querySelector(".data-item-defined.removed[data-metric-token='" + e.currentTarget.dataset.objectToken + "']").classList.remove('removed');
+    Query.add(StorageMetric.selected);
+    const undoRecursion = () => {
+      // StorageMetric è la metrica composta qui. All'interno della Fn StorageMetric può essere anche una metrica base/adv
+      for (const [metricName, metric] of Object.entries(StorageMetric.selected.formula.metrics_alias)) {
+        // TODO: metricName non è utilizzata, utilizzare un altro tipo ti ciclo per recuperare solo il token (for...in)
+        // imposto, come selezionata, la metrica contenuta nella formula
+        StorageMetric.selected = metric.token;
+        Query.add(StorageMetric.selected);
+        document.querySelector(".data-item-defined[data-metric-token='" + metric.token + "']").classList.remove('removed');
+        if (StorageMetric.selected.metric_type === 4) undoRecursion(metric.token);
+      }
+    };
+    undoRecursion();
   }
 
   // remove composite metrics from report

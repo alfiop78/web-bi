@@ -4,7 +4,6 @@
 .steps .step{align-items: center;display: flex;flex-direction: column;min-width: 100%;}
 .steps .step > .pageContent{width: 95%; display: flex;justify-content: flex-start; height: 100%; flex-flow: column; }
 .steps h4 {font-size: 1.3rem;font-weight: normal; text-align: left;margin: 0;padding: 4px;}
-.steps h6 {margin: 0;padding: 4px;font-size: .8rem;font-weight: lighter;}
 
 .steps .buttons{
 	width: 90%;
