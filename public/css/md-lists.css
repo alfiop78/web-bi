@@ -149,3 +149,4 @@ ul[data-object]{position: absolute; overflow: auto; width: 100%; height: calc(10
 ul.absolute{position: absolute; height: calc(100% - 24px); overflow: auto; width: 100%;}
 
 small[data-include-query]{color: brown;}
+.removed{color: dimgray; background-color:grey;}

@@ -477,7 +477,7 @@
             <section class="data-item-defined" data-element-search="search-defined-columns" data-label data-sublist-columns-defined data-related-object>
               <div>
                 <div class="h-content">
-                  <button class="button-icon material-icons-round md-18 columns-color md-opacity" data-info-object-token>drag_handle</button>
+                  <button class="button-icon material-icons-round md-18 md-opacity" data-info-object-token>drag_handle</button>
                   <div class="defined v-content" data-object-type="column">
                     <!-- <small field></small> -->
                     <span column class="highlight"></span>
@@ -562,7 +562,7 @@
             <section class="data-item-defined" data-element-search="search-defined-metrics" data-label data-related-object="dimension cube" data-type="metric" data-sublist-metrics-defined>
               <div>
                 <div class="h-content">
-                  <button class="button-icon material-icons-round md-18 metrics-color md-opacity">drag_handle</button>
+                  <button class="button-icon material-icons-round md-18 md-opacity" data-info-object-token>drag_handle</button>
                   <div class="defined v-content metrics-color" data-object-type="metric">
                     <span metric class="highlight metrics-color"></span>
                   </div>
@@ -590,7 +590,7 @@
             <section class="data-item-defined" data-element-search="search-defined-composite-metrics" data-label data-sublist-composite-metrics-defined>
               <div>
                 <div class="h-content">
-                  <button class="button-icon material-icons-round md-18 composite-metrics-color md-opacity" data-info-object-token>drag_handle</button>
+                  <button class="button-icon material-icons-round md-18 md-opacity" data-info-object-token>drag_handle</button>
                   <div class="defined v-content composite-metrics-color" data-object-type="composite-metric">
                     <span metric class="highlight"></span>
                     {{-- TODO: per le metriche composte, visualizzarne, nel popup, l'elenco dei cubi utilizzati dalle metriche all'interno della formula --}}

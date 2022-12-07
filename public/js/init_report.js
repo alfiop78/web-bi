@@ -1005,14 +1005,16 @@ var List = new Lists();
       if (metric.querySelectorAll("small[data-composite-metric]").length === 0) {
         if (StorageMetric.selected.metric_type !== 4) {
           Query.remove(StorageMetric.selected);
-          document.querySelector("ul section.data-item-defined[data-metric-token='" + StorageMetric.selected.token + "']").remove();
+          document.querySelector("section.data-item-defined[data-metric-token='" + StorageMetric.selected.token + "']").classList.add('removed');
+          // document.querySelector("ul section.data-item-defined[data-metric-token='" + StorageMetric.selected.token + "']").remove();
           List.deselectMetric(StorageMetric.selected.token);
         } else {
           // TODO: qui il codice dovrebbe arrivare con una metrica composta nidificata al secondo livello
           // metrica composta
           debugger;
           // in questo caso c'è una metrica composta all'interno della metrica composta selezionata
-          document.querySelector("ul section.data-item-defined[data-metric-token='" + token + "']").remove();
+          document.querySelector("section.data-item-defined[data-metric-token='" + token + "']").classList.add('removed');
+          // document.querySelector("ul section.data-item-defined[data-metric-token='" + token + "']").remove();
           List.deselectCompositeMetric(token);
           app.removeCompositeMetric(metric.dataset.metricToken);
         }
@@ -1030,15 +1032,16 @@ var List = new Lists();
       StorageMetric.selected = metric.dataset.metricToken;
       // metric : è la metrica presente nella ulDefinedMetrics, può essere 'METRIC', 'ADV_METRIC' e 'COMP_METRIC'
       // elimino lo <small>, su qualsiasi metrica corrispondente alla metrica selezionata (e.currentTarget) per la cancellazione
-      metric.querySelector("small[data-composite-metric='" + e.currentTarget.dataset.objectToken + "']").remove();
+      metric.querySelector("small[data-composite-metric='" + e.currentTarget.dataset.objectToken + "']").classList.add('removed');
+      // metric.querySelector("small[data-composite-metric='" + e.currentTarget.dataset.objectToken + "']").remove();
       // dopo aver eliminato lo <small> relativo alla metrica selezionata (e.currentTarget), se, la metrica in ciclo, non ha nessun altro <small>, elimino anche la metrica in ciclo
-      if (metric.querySelectorAll("small[data-composite-metric]").length === 0) {
+      if (metric.querySelectorAll("small[data-composite-metric]:not(.removed)").length === 0) {
         Query.remove(StorageMetric.selected);
         // la rimuovo dalla lista delle metriche già definite
-        document.querySelector("ul section.data-item-defined[data-metric-token='" + metric.dataset.metricToken + "']").remove();
+        document.querySelector("section.data-item-defined[data-metric-token='" + metric.dataset.metricToken + "']").classList.add('removed');
+        // document.querySelector("ul section.data-item-defined[data-metric-token='" + metric.dataset.metricToken + "']").remove();
         if (StorageMetric.selected.metric_type !== 4) {
           List.deselectMetric(metric.dataset.metricToken);
-          // List.deselectMetric(StorageMetric.selected.token);
         } else {
           // metrica composta nidificata all'interno di quella selezionata (e.currentTarget)
           List.deselectCompositeMetric(metric.dataset.metricToken);
@@ -1048,7 +1051,8 @@ var List = new Lists();
       }
     });
     // elimino anche la metrica composta selezionata per la cancellazione
-    document.querySelector("#ul-defined-composite-metrics section[data-metric-token='" + e.currentTarget.dataset.objectToken + "']").remove();
+    document.querySelector("section.data-item-defined[data-metric-token='" + e.currentTarget.dataset.objectToken + "']").classList.add('removed');
+    // document.querySelector("#ul-defined-composite-metrics section[data-metric-token='" + e.currentTarget.dataset.objectToken + "']").remove();
     List.deselectCompositeMetric(e.currentTarget.dataset.objectToken);
   }
 
