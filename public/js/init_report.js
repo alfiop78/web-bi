@@ -854,7 +854,7 @@ var List = new Lists();
     document.querySelectorAll('#ul-metrics .selectable[data-temporary]').forEach(item => {
       StorageMetric.selected = item.dataset.metricToken;
       Query.add(StorageMetric.selected);
-      List.addDefinedMetric();
+      List.addDefinedMetric(app.body.dataset.mode);
       // rimuovo l'attributo data-temporary perchè lo sto aggiungendo al report
       // ... per lo stesso motivo aggiungo data-added
       delete item.dataset.temporary;
@@ -870,10 +870,17 @@ var List = new Lists();
     document.querySelectorAll('#ul-composite-metrics .selectable[data-temporary]').forEach(item => {
       // passo a nestedCompositeMetrics anche il token perchè lo StorageMetric.selected viene modificato dalla funzione
       // TODO: creare qui una Fn ricorsiva come fatto in undoRecursion()
-      /* const recursiveMetricsAdd = () => {
+      /* const recursiveMetricsAdd = (token) => {
+        // token : è il token della metrica composta "main" la quale include altre metriche all'interno della sua formula
+        // imposto la metrica composta passata come argomento.
+        StorageMetric.selected = token;
 
       };
       recursiveMetricsAdd(item.dataset.metricToken); */
+
+
+
+
       app.nestedCompositeMetrics(item.dataset.metricToken);
       // imposto la metrica composta selezionata per poterla aggiungere alla definedList
       StorageMetric.selected = item.dataset.metricToken;
@@ -1001,14 +1008,29 @@ var List = new Lists();
     StorageMetric.selected = e.currentTarget.dataset.objectToken;
     Query.remove(StorageMetric.selected);
     const el = document.querySelector(".data-item-defined[data-metric-token='" + e.currentTarget.dataset.objectToken + "']");
-    if (el.classList.contains('removed')) {
-      el.classList.remove('removed');
+    if (app.body.dataset.mode === 'edit') {
+      el.classList.add('removed');
     } else {
       el.classList.add('animation-remove');
       el.onanimationend = e => e.target.remove();
+      List.deselectMetric(StorageMetric.selected.token);
     }
-    // document.querySelector(".data-item-defined[data-metric-token='" + e.currentTarget.dataset.objectToken + "']").classList.add('removed');
-    List.deselectMetric(StorageMetric.selected.token);
+  }
+
+  // metrica rimossa in fase di edit, la re-inserisco
+  app.handlerMetricUndoRemove = (e) => {
+    StorageMetric.selected = e.currentTarget.dataset.objectToken;
+    document.querySelector(".data-item-defined.removed[data-metric-token='" + e.currentTarget.dataset.objectToken + "']").classList.remove('removed');
+    Query.add(StorageMetric.selected);
+  }
+
+  // metrica aggiunta in fase di edit. Il tasto Undo la rimuove dal DOM (con animation)
+  app.handlerMetricUndoAdd = (e) => {
+    StorageMetric.selected = e.currentTarget.dataset.objectToken;
+    const el = document.querySelector(".data-item-defined.added[data-metric-token='" + e.currentTarget.dataset.objectToken + "']");
+    Query.remove(StorageMetric.selected);
+    el.classList.add('animation-remove');
+    el.onanimationend = e => e.target.remove();
   }
 
   app.removeCompositeMetric = (token) => {

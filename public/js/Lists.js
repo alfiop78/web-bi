@@ -875,7 +875,8 @@ class Lists {
   addSmallMetric(token) {
     // token: le metrica composta che andrà a popolare lo <small>
     const section = document.querySelector("#ul-defined-metrics section[data-metric-token='" + StorageMetric.selected.token + "']");
-    section.querySelector('button[data-remove]').disabled = true;
+    // questa metrica è stata aggiunta da una metrica composta, disabilito il tasto 'remove' e 'undo'
+    section.querySelectorAll('button[data-remove], button[data-undo-add], button[data-undo-remove]').forEach(el => el.disabled = true);
     const defined = section.querySelector(".defined[data-metric-token='" + StorageMetric.selected.token + "']");
     const contentSub = this.tmplSublists.content.cloneNode(true);
     const small = contentSub.querySelector('small');
@@ -891,7 +892,7 @@ class Lists {
   addSmallCompositeMetric(token) {
     // token: le metrica composta che andrà a popolare lo <small>
     const section = document.querySelector("#ul-defined-composite-metrics section[data-metric-token='" + StorageMetric.selected.token + "']");
-    section.querySelector('button[data-remove]').disabled = true;
+    section.querySelectorAll('button[data-remove], button[data-undo-add], button[data-undo-remove]').forEach(el => el.disabled = true);
     const defined = section.querySelector(".defined[data-metric-token='" + StorageMetric.selected.token + "']");
     const contentSub = this.tmplSublists.content.cloneNode(true);
     const small = contentSub.querySelector('small');

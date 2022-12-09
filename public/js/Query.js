@@ -17,7 +17,7 @@ class Queries {
 
   add(object) {
     this.OB[object.type].set(object.token, object);
-    console.log(this.OB);
+    // console.log(this.OB);
     this.includeElements();
   }
 
