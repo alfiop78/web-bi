@@ -874,12 +874,38 @@ var List = new Lists();
         // token : è il token della metrica composta "main" la quale include altre metriche all'interno della sua formula
         // imposto la metrica composta passata come argomento.
         StorageMetric.selected = token;
-
+        for (const metric in StorageMetric.selected.formula.metrics_alias) {
+          // console.log(StorageMetric.selected.formula.metrics_alias[metric]);
+          const metricToken = StorageMetric.selected.formula.metrics_alias[metric].token;
+          // imposto, come selezionata, la metrica contenuta nella formula
+          StorageMetric.selected = metricToken;
+          if (StorageMetric.selected.metric_type !== 4) {
+            if (!document.querySelector("#ul-metrics .selectable[data-metric-token='" + metricToken + "']").hasAttribute('data-selected')) {
+              Query.add(StorageMetric.selected);
+              List.selectMetric(metricToken);
+              // TODO: includo, con show-datamart = true, anche le metriche contenute nella formula all'interno del datamart finale
+              // document.querySelector("#ul-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'true';
+              List.addDefinedMetric(app.body.dataset.mode);
+            }
+            // TODO: verifico se lo <small> per questa metrica è stato già inserito
+            if (!document.querySelector("#ul-defined-metrics section[data-metric-token='" + metricToken + "']").hasAttribute("data-" + token)) List.addSmallMetric(token);
+          } else {
+            // la metrica in ciclo (contenuta nella formula di una composta) è metrica composta, quindi aggiungo l'attr 'nested'
+            if (!document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metricToken + "']").hasAttribute('data-selected')) {
+              Query.add(StorageMetric.selected);
+              List.selectCompositeMetric(metricToken);
+              // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.nested = 'true';
+              // document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + metric.token + "']").dataset.showDatamart = 'false';
+              List.addDefinedCompositeMetric(app.body.dataset.mode);
+            }
+            // la metrica da aggiungere nello <small> è sempre la metrica "main"
+            List.addSmallCompositeMetric(token);
+            // questa metrica ha, al suo interno, altre metriche
+            recursiveMetricsAdd(metricToken);
+          }
+        }
       };
       recursiveMetricsAdd(item.dataset.metricToken); */
-
-
-
 
       app.nestedCompositeMetrics(item.dataset.metricToken);
       // imposto la metrica composta selezionata per poterla aggiungere alla definedList
@@ -998,9 +1024,21 @@ var List = new Lists();
     StorageFilter.selected = e.currentTarget.dataset.objectToken;
     // TODO: utilizzo, per la cancellazione, lo StorageFilter, anzichè il token presente nel currentTarget.dataset, perchè, in futuro mi potrebbe servire un nuovo type : 'ADV_FILTER' (con filtri "composti"), utilizzando la stessa logica di type : 'METRIC' e 'ADV_METRIC'
     Query.remove(StorageFilter.selected);
-    // TODO: rimuovere con animation
-    document.querySelector("#ul-defined-filters section[data-filter-token='" + e.currentTarget.dataset.objectToken + "']").remove();
-    List.deselectFilter(StorageFilter.selected.token);
+    const el = document.querySelector("#ul-defined-filters section[data-filter-token='" + e.currentTarget.dataset.objectToken + "']");
+    if (app.body.dataset.mode === 'edit') {
+      el.classList.add('removed');
+    } else {
+      el.classList.add('animation-remove');
+      el.onanimationend = e => e.target.remove();
+      List.deselectFilter(StorageFilter.selected.token);
+    }
+  }
+
+  // filtro rimossa in fase di edit, la re-inserisco
+  app.handlerFilterUndoRemove = (e) => {
+    StorageFilter.selected = e.currentTarget.dataset.objectToken;
+    document.querySelector(".data-item-defined.removed[data-filter-token='" + e.currentTarget.dataset.objectToken + "']").classList.remove('removed');
+    Query.add(StorageFilter.selected);
   }
 
   // remove metrics from report

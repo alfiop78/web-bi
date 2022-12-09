@@ -125,12 +125,16 @@ class Lists {
     this.defined = this.section.querySelector('.defined');
     this.span = this.section.querySelector('span[filter]');
     this.btnRemove = this.section.querySelector('button[data-remove]');
+    this.btnUndoRemove = this.section.querySelector('button[data-undo-remove]');
+    this.btnUndoAdd = this.section.querySelector('button[data-undo-add]');
 
     this.#sublist = {
       section: this.section,
       defined: this.defined,
       span: this.span,
-      btnRemove: this.btnRemove
+      btnRemove: this.btnRemove,
+      btnUndoRemove: this.btnUndoRemove,
+      btnUndoAdd: this.btnUndoAdd
     }
   }
 
@@ -821,6 +825,8 @@ class Lists {
     this.#sublist.defined.dataset.filterToken = StorageFilter.selected.token;
     this.#sublist.span.innerText = StorageFilter.selected.name;
     this.#sublist.btnRemove.dataset.objectToken = StorageFilter.selected.token;
+    this.#sublist.btnUndoRemove.dataset.objectToken = StorageFilter.selected.token;
+    this.#sublist.btnUndoAdd.dataset.objectToken = StorageFilter.selected.token;
     this.ul.appendChild(this.#sublist.section);
   }
 

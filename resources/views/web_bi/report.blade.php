@@ -521,7 +521,7 @@
                 </div>
               </div>
             </section>
-            {{-- lista filtri definiti nel report --}}
+            {{-- lista filtri definiti --}}
             <section class="data-item-defined" data-element-search="search-defined-filters" data-label data-related-object="dimension cube" data-sublist-filters-defined>
               <div>
                 <div class="h-content">
@@ -531,7 +531,7 @@
                     <span filter class="highlight filters-color"></span>
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info data-info-object-token tooltip="Info" flow="bottom" disabled>info</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token data-remove data-fn="handlerFilterRemove" tooltip="Rimuovi" flow="bottom">delete</button>
+                  <button class="button-icon material-icons-round md-18 hide-edit-status" data-object-token data-remove data-fn="handlerFilterRemove" tooltip="Rimuovi" flow="bottom">delete</button>
                   <button class="button-icon material-icons-round md-18 show-removed-status" data-object-token data-undo-remove tooltip="Annulla" data-fn="handlerFilterUndoRemove" flow="bottom">undo</button>
                   <button class="button-icon material-icons-round md-18 show-added-status" data-object-token data-undo-add tooltip="Annulla" data-fn="handlerFilterUndoAdd" flow="bottom">undo</button>
                 </div>
