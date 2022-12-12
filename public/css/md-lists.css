@@ -29,6 +29,17 @@ ul{margin-inline: 0px;padding-inline: 0px;}
 .filters .h-content{grid-template-columns:80% 10% 10%;}
 .filters .removed .h-content, .filters .added .h-content{grid-template-columns: auto 70% auto auto auto;}
 *[data-sublist-processes] .h-content{display:grid; grid-template-columns: 1fr auto auto auto;}
+*[data-sublist-cube] .h-content,
+*[data-sublist-dimension] .h-content,
+*[data-sublist-hierarchies] .h-content,
+*[data-sublist-tables] .h-content
+{display:grid; grid-template-columns: 1fr;}
+*[data-sublist-columns] .h-content
+{grid-template-columns:1fr auto;}
+
+*[data-sublist-filters] .h-content, 
+*[data-sublist-metrics] .h-content,
+*[data-sublist-composite-metrics] .h-content{grid-template-columns:1fr auto auto;}
 
 .v-content{display: flex;flex-flow: column;width: 100%;}
 .columns-color {color: var(--main-columns-color);}
