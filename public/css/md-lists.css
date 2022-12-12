@@ -1,14 +1,21 @@
 :root{
-  --main-columns-color: saddlebrown;
-  --main-filters-color: darkolivegreen;
-  --main-metrics-color: darkgoldenrod;
-  --main-composite-metrics-color: sienna;
+  --main-columns-color: #875f43;
+  --main-filters-color: #5b6a3f;
+  --main-metrics-color: #89691b;
+  --main-composite-metrics-color: #6e2f10;
 }
 
+.columns {color: var(--main-columns-color);}
+.columns .add-button {border-top : solid thick var(--main-columns-color);}
+.filters {color: var(--main-filters-color);}
+.filters .add-button {border-top : solid thick var(--main-filters-color);}
 .metrics {color: var(--main-metrics-color);}
 .metrics .add-button {border-top : solid thick var(--main-metrics-color);}
+.c-metrics {color: var(--main-composite-metrics-color);}
+.c-metrics .add-button {border-top : solid thick var(--main-composite-metrics-color);}
 
-.data-item-defined.removed {color: dimgrey; opacity: .8;}
+.data-item-defined .defined {transition: all 500ms;}
+.data-item-defined.removed .defined {opacity: .6;}
 .data-item-defined.added {color: olive; opacity: .8;}
 .data-item-defined .show-removed-status, .data-item-defined .show-added-status {display: none;}
 .data-item-defined.removed .show-removed-status {display: block;}

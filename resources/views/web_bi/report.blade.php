@@ -477,7 +477,7 @@
             <section class="data-item-defined" data-element-search="search-defined-columns" data-label data-sublist-columns-defined data-related-object>
               <div>
                 <div class="h-content">
-                  <button class="button-icon material-icons-round md-18 md-opacity" data-info-object-token>drag_handle</button>
+                  <button class="button-icon material-icons-round md-18 md-opacity hide-edit-status" data-info-object-token>drag_handle</button>
                   <button class="button-icon material-icons-round md-18 md-opacity show-removed-status" data-info-object-token>remove</button>
                   <button class="button-icon material-icons-round md-18 md-opacity show-added-status" data-info-object-token>add</button>
                   <div class="defined v-content" data-object-type="column">
@@ -487,7 +487,7 @@
                     <!-- <small hier></small> -->
                   </div>
                   <button class="button-icon material-icons-round md-18" data-object-token tooltip="Modifica" data-edit data-fn="handlerColumnEdit" flow="bottom">edit</button>
-                  <button class="button-icon material-icons-round md-18" data-object-token data-remove data-fn="handlerColumnRemove" tooltip="Rimuovi" flow="bottom">delete</button>
+                  <button class="button-icon material-icons-round md-18 hide-edit-status" data-object-token data-remove data-fn="handlerColumnRemove" tooltip="Rimuovi" flow="bottom">delete</button>
                   <button class="button-icon material-icons-round md-18 show-removed-status" data-object-token data-undo-remove tooltip="Annulla" data-fn="handlerColumnUndoRemove" flow="bottom">undo</button>
                   <button class="button-icon material-icons-round md-18 show-added-status" data-object-token data-undo-add tooltip="Annulla" data-fn="handlerColumnUndoAdd" flow="bottom">undo</button>
                 </div>
@@ -528,7 +528,7 @@
                   <button class="button-icon material-icons-round md-18 md-opacity show-removed-status" data-info-object-token>remove</button>
                   <button class="button-icon material-icons-round md-18 md-opacity show-added-status" data-info-object-token>add</button>
                   <div class="defined v-content" data-object-type="filter">
-                    <span filter class="highlight filters-color"></span>
+                    <span filter></span>
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info data-info-object-token tooltip="Info" flow="bottom" disabled>info</button>
                   <button class="button-icon material-icons-round md-18 hide-edit-status" data-object-token data-remove data-fn="handlerFilterRemove" tooltip="Rimuovi" flow="bottom">delete</button>
@@ -846,7 +846,7 @@
                           </div>
                         </section>
 
-                        <section class="composite-metrics parent-ul-metrics">
+                        <section class="c-metrics parent-ul-metrics">
                           <div id="btn-add-composite-metrics" class="add-button composite-metrics" tooltip="Aggiungi metrica composta" flow="bottom">
                             <h6>Metriche composte</h6>
                             <i class="material-icons-round md-28 align-self-center">addchart</i>

@@ -154,7 +154,3 @@ button[data-info-object-token]:hover {cursor: pointer;}
   box-shadow: 0px 1px 3px -1px black;
 }
 .add-button:hover{opacity: 1; cursor: pointer;}
-.add-button.columns{border-top: solid thick var(--main-columns-color);}
-.add-button.filters{border-top: solid thick var(--main-filters-color);}
-.add-button.metrics{border-top: solid thick var(--main-metrics-color);}
-.add-button.composite-metrics{border-top: solid thick var(--main-composite-metrics-color);}

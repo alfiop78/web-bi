@@ -75,7 +75,7 @@ var List = new Lists();
       if (mutation.type === 'childList') {
         console.info('A child node has been added or removed.');
         Array.from(mutation.addedNodes).forEach(node => {
-          node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+          if (node.hasChildNodes()) node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
         });
       } else if (mutation.type === 'attributes') {
         console.log(`The ${mutation.attributeName} attribute was modified.`);
@@ -804,7 +804,7 @@ var List = new Lists();
     document.querySelectorAll('#ul-filters .selectable[data-temporary]').forEach(item => {
       StorageFilter.selected = item.dataset.filterToken;
       Query.add(StorageFilter.selected);
-      List.addDefinedFilter();
+      List.addDefinedFilter(app.body.dataset.mode);
       // rimuovo l'attributo data-temporary perchè li sto aggiunngendo al report
       delete item.dataset.temporary;
       item.dataset.added = 'true';
@@ -1071,6 +1071,19 @@ var List = new Lists();
     el.onanimationend = e => e.target.remove();
   }
 
+  // filtro aggiunto in fase di edit. Il tasto Undo la rimuove dal DOM (con animation)
+  app.handlerFilterUndoAdd = (e) => {
+    StorageFilter.selected = e.currentTarget.dataset.objectToken;
+    const el = document.querySelector(".data-item-defined.added[data-filter-token='" + e.currentTarget.dataset.objectToken + "']");
+    Query.remove(StorageFilter.selected);
+    el.classList.add('animation-remove');
+    el.onanimationend = e => e.target.remove();
+  }
+
+  app.handlerColumnUndoRemove = (e) => {
+
+  }
+
   app.removeCompositeMetric = (token) => {
     // console.log(document.querySelectorAll("ul section[data-" + token + "]"));
     document.querySelectorAll("ul section[data-" + token + "]").forEach(metric => {
@@ -1177,8 +1190,14 @@ var List = new Lists();
   // remove column from report
   app.handlerColumnRemove = (e) => {
     Query.remove({ token: e.currentTarget.dataset.objectToken, type: 'COLUMNS' });
-    // TODO: rimuovere con animation
-    document.querySelector("#ul-defined-columns section[data-token-column='" + e.currentTarget.dataset.objectToken + "']").remove();
+    const el = document.querySelector(".data-item-defined[data-token-column='" + e.currentTarget.dataset.objectToken + "']");
+    // document.querySelector("#ul-defined-columns section[data-token-column='" + e.currentTarget.dataset.objectToken + "']").remove();
+    if (app.body.dataset.mode === 'edit') {
+      el.classList.add('removed');
+    } else {
+      el.classList.add('animation-remove');
+      el.onanimationend = e => e.target.remove();
+    }
   }
 
   // save compositeMetric
@@ -2085,7 +2104,5 @@ var List = new Lists();
 
   app.dialogColumns.addEventListener('close', () => app.resetDialogColumn());
 
-  app.dialogMetricFilter.addEventListener('open', () => {
-    document.getElementById('dialog-metric-filter-search').value = "";
-  });
+  app.dialogMetricFilter.addEventListener('open', () => document.getElementById('dialog-metric-filter-search').value = "");
 })();

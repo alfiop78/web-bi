@@ -810,9 +810,10 @@ class Lists {
     this.ul.querySelector("section[data-token-column='" + object.token + "'] span[column]").innerText = object.name;
   }
 
-  addDefinedFilter() {
+  addDefinedFilter(mode) {
     this.ul = 'ul-defined-filters';
     this.definedFilters = 'data-sublist-filters-defined';
+    if (mode === 'edit') this.#sublist.section.classList.add('added');
     this.#sublist.section.dataset.label = StorageFilter.selected.name;
     this.#sublist.section.dataset.filterToken = StorageFilter.selected.token;
     if (StorageFilter.selected.hasOwnProperty('dimensions')) {
