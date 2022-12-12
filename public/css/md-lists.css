@@ -24,7 +24,12 @@
 
 ul{margin-inline: 0px;padding-inline: 0px;}
 .list{color: #494949;}
-.h-content{display: flex; align-items: center; padding-right: 1em;}
+.h-content{display: grid; align-items: center;}
+.h-content{grid-template-columns:10% 70% 10% 10%;}
+.filters .h-content{grid-template-columns:80% 10% 10%;}
+.filters .removed .h-content, .filters .added .h-content{grid-template-columns: auto 70% auto auto auto;}
+*[data-sublist-processes] .h-content{display:grid; grid-template-columns: 1fr auto auto auto;}
+
 .v-content{display: flex;flex-flow: column;width: 100%;}
 .columns-color {color: var(--main-columns-color);}
 .metrics-color {color: var(--main-metrics-color);}
@@ -34,6 +39,8 @@ ul{margin-inline: 0px;padding-inline: 0px;}
 .selectable > .smalls{display: flex;flex-flow: column;}
 /*list all'interno delle card*/
 .card ul > section{margin: 0px 6px;}
+
+.defined > span{text-overflow:ellipsis;white-space: nowrap; overflow:hidden;}
 
 /* visualizzazione delle icone sui field impostati come : colonne, gerarchie, metriche */
 section[data-sublist-fields] > .selectable i{visibility: hidden;}
