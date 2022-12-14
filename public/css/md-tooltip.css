@@ -80,12 +80,12 @@
 
 /* FLOW: DOWN */
 [tooltip][flow^="bottom"]::before {
-  top: calc(100% + 2px);
+  top: calc(100% + 7px);
   border-top-width: 0;
   border-bottom-color: #333;
 }
 [tooltip][flow^="bottom"]::after {
-  top: calc(100% + 7px);
+  top: calc(100% + 12px);
 }
 [tooltip][flow^="bottom"]::before,
 [tooltip][flow^="bottom"]::after {

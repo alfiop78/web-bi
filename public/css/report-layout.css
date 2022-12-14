@@ -17,13 +17,6 @@ h3 ~ h5{padding: 0;font-size: .9rem;margin: 8px;font-weight: 300;color: var(--ma
 .layout section[params] > div.params.column{grid-template-columns: repeat(3, auto);}
 /*layout*/
 
-/* list */
-ul{padding-inline-start: 0;font-size: .75rem;border-radius: 4px;}
-ul > li{list-style: none;padding: 6px;margin: 2px 8px;}
-/*ul > li:hover{list-style: none;padding: 6px;background-color: #d4d6c8;border-radius: 4px;cursor: pointer;}*/
-/*ul > li[selected]{list-style: none;padding: 6px;background-color: var(--main-primary-color);border-radius: 4px;color: white;cursor: pointer;}*/
-
-/* list */
 
 
 /* layout-settings */

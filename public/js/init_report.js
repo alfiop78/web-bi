@@ -1081,7 +1081,8 @@ var List = new Lists();
   }
 
   app.handlerColumnUndoRemove = (e) => {
-
+    debugger;
+    Query.add({ token: e.currentTarget.dataset.objectToken, type: 'COLUMNS' });
   }
 
   app.removeCompositeMetric = (token) => {

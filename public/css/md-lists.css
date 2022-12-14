@@ -5,6 +5,10 @@
   --main-composite-metrics-color: #6e2f10;
 }
 
+/* list */
+ul{padding-block-start:1em;  padding-inline-start: 0em; margin-block-start: 0em; padding-block-end:1em;font-size: .75rem;border-radius: 4px;}
+ul > li{list-style: none;padding: 6px;margin: 2px 8px;}
+
 .columns {color: var(--main-columns-color);}
 .columns .add-button {border-top : solid thick var(--main-columns-color);}
 .filters {color: var(--main-filters-color);}
@@ -22,36 +26,34 @@
 .data-item-defined.removed .hide-edit-status, .data-item-defined.added .hide-edit-status  {display: none;}
 .data-item-defined.added .show-added-status {display: block;}
 
-ul{margin-inline: 0px;padding-inline: 0px;}
 .list{color: #494949;}
 .h-content{display: grid; align-items: center;}
-.h-content{grid-template-columns:10% 70% 10% 10%;}
-.filters .h-content{grid-template-columns:80% 10% 10%;}
-.filters .removed .h-content, .filters .added .h-content{grid-template-columns: auto 70% auto auto auto;}
-*[data-sublist-processes] .h-content{display:grid; grid-template-columns: 1fr auto auto auto;}
-*[data-sublist-cube] .h-content,
-*[data-sublist-dimension] .h-content,
-*[data-sublist-hierarchies] .h-content,
-*[data-sublist-tables] .h-content
-{display:grid; grid-template-columns: 1fr;}
-*[data-sublist-columns] .h-content
-{grid-template-columns:1fr auto;}
+.h-content{grid-template-columns:100%;}
+.data-item-defined > *[data-item-type="column"] > .h-content{grid-template-columns: auto 70% auto auto;}
+.data-item-defined > *[data-item-type="filter"] > .h-content{grid-template-columns: 80% auto auto;}
+.data-item-defined.removed > *[data-item-type="filter"] .h-content,
+.data-item-defined.added > *[data-item-type="filter"] .h-content {grid-template-columns:auto 70% auto auto;} 
+.data-item-defined > *[data-item-type="metric"] > .h-content{grid-template-columns: auto 70% auto auto;}
+.data-item-defined > *[data-item-type="c-metric"] > .h-content{grid-template-columns: auto 70% auto auto;}
 
-*[data-sublist-filters] .h-content, 
-*[data-sublist-metrics] .h-content,
-*[data-sublist-composite-metrics] .h-content{grid-template-columns:1fr auto auto;}
+.data-item > *[data-item-type="column"] .h-content {grid-template-columns: 85% auto;}
+.data-item > *[data-item-type="filter"] .h-content,
+.data-item > *[data-item-type="metric"] .h-content,
+.data-item > *[data-item-type="c-metric"] .h-content
+{grid-template-columns: 80% auto auto;}
+
+*[data-item-type="process"] .h-content{display:grid; grid-template-columns: 78% auto auto auto;}
 
 .v-content{display: flex;flex-flow: column;width: 100%;}
 .columns-color {color: var(--main-columns-color);}
 .metrics-color {color: var(--main-metrics-color);}
 .selectable > small, .defined > small {color: grey;}
 .card ul > section .selectable{margin: 0px 4px; padding-top: 0px;}
-.unselectable{margin: 4px; padding: 2px 4px;}
 .selectable > .smalls{display: flex;flex-flow: column;}
 /*list all'interno delle card*/
 .card ul > section{margin: 0px 6px;}
 
-.defined > span{text-overflow:ellipsis;white-space: nowrap; overflow:hidden;}
+.ellipsis{text-overflow:ellipsis;white-space: nowrap; overflow:hidden;}
 
 /* visualizzazione delle icone sui field impostati come : colonne, gerarchie, metriche */
 section[data-sublist-fields] > .selectable i{visibility: hidden;}
@@ -109,7 +111,7 @@ section.data-item:hover button, section.data-item-defined:hover button {visibili
 		box-shadow: 0 4px 8px 0px #b5b5b5;
 		animation: openList 350ms ease-in-out;
 	}
-	.absList.large-list{width: 35%;}
+	.absList.large-list{width: 30%;}
 	/*.absList.large{width: 30%; background: white; position: absolute; opacity: .9; border-radius: 4px; z-index: 1500; box-shadow: 0 4px 8px 0px #b5b5b5;}*/
 	/*.absList > ul{ height: 500px;overflow-y: auto;padding-inline-end: 1em;}*/
 	.absList[fact]{width: 25%; background: white; position: absolute; border-radius: 4px; z-index: 1500; box-shadow: 0 4px 8px 0px #b5b5b5; color: var(--primary-color);}
@@ -133,8 +135,29 @@ section[data-sublist-gen] {position: relative;}
 .selectable[data-selected]:hover{cursor: default; padding-left: 4px;}
 *[draggable].selectable:hover{cursor: grab; transition: padding-left 150ms; padding-left: 8px; font-weight: bold;}
 .selectable::before{background-color : sienna;}
-.selectable:not([data-selected]):hover::before{content: '';width: 6px;height: 100%;position: absolute;border-radius: 2px;opacity: .7;top: 0px;left: -4px;animation: hoverSelected 150ms ease;}
-.selectable[data-selected]::before{content: '';width: 6px;height: 10px;position: absolute;border-radius: 2px;opacity: 1;top: calc(50% - 5px);left: -4px; transition:height 150ms, top 150ms;}
+.selectable:not([data-selected]):hover::before{
+  content: '';
+  width: 6px;
+  height: 100%;
+  position: absolute;
+  border-radius: 2px;
+  opacity: .7;
+  top: 0px;
+  left: 0px;
+  animation: hoverSelected 150ms ease;
+}
+
+.selectable[data-selected]::before{
+  content: '';
+  width: 6px;
+  height: 10px;
+  position: absolute;
+  border-radius: 2px;
+  opacity: 1;
+  top: calc(50% - 5px);
+  left: 0px;
+  transition:height 150ms, top 150ms;
+}
 .selectable[data-selected] .highlight{font-weight: bold;}
 .selectable[data-disabled] .highlight{color: grey;}
 .selectable[data-disabled]:hover {cursor: default;}
@@ -182,6 +205,7 @@ ul[data-object]{position: absolute; overflow: auto; width: 100%; height: calc(10
 .parent-ul-fields{display: grid; grid-template-rows: auto auto auto 1fr;}
 .parent-ul-textarea{display: grid; grid-template-rows: auto auto auto auto 1fr auto;}
 .relative-ul{position: relative; display: flex;flex-direction: column;}
-ul.absolute{position: absolute; height: calc(100% - 24px); overflow: auto; width: 100%;}
+ul.absolute{position: absolute; height: 100%; overflow: auto; width: 100%;}
+ul.relative{position: relative; height: 100%; overflow: auto; width: 100%;}
 
 small[data-include-query]{color: brown;}

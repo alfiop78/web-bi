@@ -829,6 +829,7 @@ class Lists {
     this.#sublist.btnUndoRemove.dataset.objectToken = StorageFilter.selected.token;
     this.#sublist.btnUndoAdd.dataset.objectToken = StorageFilter.selected.token;
     this.ul.appendChild(this.#sublist.section);
+    // this.#sublist.section.dataset.top = this.#sublist.section.offsetTop - 16;
   }
 
   // aggiungo la metrica selezionata al report
