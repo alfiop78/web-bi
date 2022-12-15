@@ -14,14 +14,7 @@ class Queries {
       COMP_METRIC: new Map()
     };
     // memorizzo qui gli oggetti che sono stati rimossi/aggiunti in fase di edit
-    this.ObjectEditAdded = {
-      COLUMNS: new Map(),
-      FILTER: new Map(),
-      METRIC: new Map(),
-      ADV_METRIC: new Map(),
-      COMP_METRIC: new Map()
-    }
-    this.ObjectEditRemoved = {
+    this.ObjectRemoved = {
       COLUMNS: new Map(),
       FILTER: new Map(),
       METRIC: new Map(),
@@ -32,17 +25,16 @@ class Queries {
 
   add(object) {
     this.OB[object.type].set(object.token, object);
-    this.ObjectEditAdded[object.type].set(object.token, object);
-    console.log(this.OB);
-    console.log(this.ObjectEdit);
+    // console.log(this.OB);
     this.includeElements();
   }
 
   remove(object) {
+    this.ObjectRemoved[object.type].set(object.token, this.OB[object.type].get(object.token));
+    // prima di eliminare l'object da this.OB, lo aggiungo all'object degli elementi rimossi, questo servirà per il ripristino in fase di edit di un report
     this.OB[object.type].delete(object.token);
-    this.ObjectEditRemoved[object.type].set(object.token);
-    console.log(this.OB);
-    console.log(this.ObjectEdit);
+    // console.log(this.OB);
+    // console.log('ObjectRemoved : ', this.ObjectRemoved);
     this.includeElements();
   }
 

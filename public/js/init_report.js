@@ -1080,9 +1080,19 @@ var List = new Lists();
     el.onanimationend = e => e.target.remove();
   }
 
+  app.handlerColumnUndoAdd = (e) => {
+    const el = document.querySelector(".data-item-defined.added[data-token-column='" + e.currentTarget.dataset.objectToken + "']");
+    Query.remove(Query.OB['COLUMNS'].get(e.currentTarget.dataset.objectToken));
+    el.classList.add('animation-remove');
+    el.onanimationend = e => e.target.remove();
+  }
+
   app.handlerColumnUndoRemove = (e) => {
-    debugger;
-    Query.add({ token: e.currentTarget.dataset.objectToken, type: 'COLUMNS' });
+    // recupero, da Query.ObjectRemoved, l'elemento rimosso in fase di edit
+    console.log(Query.ObjectRemoved['COLUMNS'].get(e.currentTarget.dataset.objectToken));
+    // lo aggiungo tramite il metodo add()
+    document.querySelector(".data-item-defined.removed[data-token-column='" + e.currentTarget.dataset.objectToken + "']").classList.remove('removed');
+    Query.add(Query.ObjectRemoved['COLUMNS'].get(e.currentTarget.dataset.objectToken));
   }
 
   app.removeCompositeMetric = (token) => {
@@ -1192,7 +1202,6 @@ var List = new Lists();
   app.handlerColumnRemove = (e) => {
     Query.remove({ token: e.currentTarget.dataset.objectToken, type: 'COLUMNS' });
     const el = document.querySelector(".data-item-defined[data-token-column='" + e.currentTarget.dataset.objectToken + "']");
-    // document.querySelector("#ul-defined-columns section[data-token-column='" + e.currentTarget.dataset.objectToken + "']").remove();
     if (app.body.dataset.mode === 'edit') {
       el.classList.add('removed');
     } else {
@@ -1876,7 +1885,6 @@ var List = new Lists();
 
   app.saveColumn = () => {
     const name = document.getElementById('columnName');
-    const textarea = document.getElementById('composite-column-formula');
     Query.sql_id = [], Query.sql_ds = []; Query.edit_id = [], Query.edit_ds = [];
     // recupero la colonna selezionata
     const column = document.querySelector('#ul-columns .selectable[data-selected]');
@@ -1897,7 +1905,7 @@ var List = new Lists();
     document.querySelectorAll('#composite-column-formula *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
-        let obj = { mode: element.dataset.mode, type: 'COLUMNS', token: element.dataset.token, table: element.dataset.tableName, tableAlias: element.dataset.tableAlias, label: element.dataset.label };
+        let obj = { token: element.dataset.token, mode: element.dataset.mode, type: 'COLUMNS', table: element.dataset.tableName, tableAlias: element.dataset.tableAlias, label: element.dataset.label };
         if (element.dataset.tableId) {
           // tabella appartenente a un livello dimensionale
           obj.dimensionToken = element.dataset.dimensionToken;
@@ -1929,7 +1937,7 @@ var List = new Lists();
     object.edit = { id: Query.edit_id, ds: Query.edit_ds };
     object.sql = { id: Query.sql_id, ds: Query.sql_ds };
     Query.add(object);
-    (app.btnColumnSave.hasAttribute('data-token')) ? List.editDefinedColumn(object) : List.addDefinedColumn(object);
+    (app.btnColumnSave.hasAttribute('data-token')) ? List.editDefinedColumn(object) : List.addDefinedColumn(object, app.body.dataset.mode);
     app.resetDialogColumn();
     app.checkObjectSelected();
   }

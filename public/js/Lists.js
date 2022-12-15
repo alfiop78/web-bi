@@ -107,13 +107,17 @@ class Lists {
     this.span = this.section.querySelector('span[column]');
     this.btnRemove = this.section.querySelector('button[data-remove]');
     this.btnEdit = this.section.querySelector('button[data-edit]');
+    this.btnUndoAdd = this.section.querySelector('button[data-undo-add]');
+    this.btnUndoRemove = this.section.querySelector('button[data-undo-remove]');
 
     this.#sublist = {
       section: this.section,
       defined: this.defined,
       span: this.span,
       btnRemove: this.btnRemove,
-      btnEdit: this.btnEdit
+      btnEdit: this.btnEdit,
+      btnUndoAdd: this.btnUndoAdd,
+      btnUndoRemove: this.btnUndoRemove
     }
   }
 
@@ -792,14 +796,17 @@ class Lists {
   }
 
   // aggiungo la colonna al report
-  addDefinedColumn(object) {
+  addDefinedColumn(object, mode) {
     this.ul = 'ul-defined-columns';
     this.definedColumns = 'data-sublist-columns-defined';
+    if (mode === 'edit') this.#sublist.section.classList.add('added');
     this.#sublist.section.dataset.label = object.name;
     this.#sublist.section.dataset.tokenColumn = object.token;
     this.#sublist.span.innerText = object.name;
     this.#sublist.btnEdit.dataset.objectToken = object.token;
     this.#sublist.btnRemove.dataset.objectToken = object.token;
+    this.#sublist.btnUndoAdd.dataset.objectToken = object.token;
+    this.#sublist.btnUndoRemove.dataset.objectToken = object.token;
     this.ul.appendChild(this.#sublist.section);
   }
 
