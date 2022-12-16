@@ -1917,8 +1917,6 @@ var List = new Lists();
           // const hierarchiesObject = new Map([[element.dataset.hierToken, element.dataset.tableId]]);
           obj.hierarchies = Object.fromEntries(new Map([[element.dataset.hierToken, element.dataset.tableId]]));
           obj.dimensions = [element.dataset.dimensionToken];
-          Query.add(obj);
-          app.setFormula(obj);
         } else {
           // tabella appartenente alla FACT.
           StorageCube.selected = element.dataset.cubeToken;
@@ -1926,9 +1924,9 @@ var List = new Lists();
           obj.field = StorageCube.selected.columns[element.dataset.tableAlias][element.dataset.token];
           obj.cubeToken = element.dataset.cubeToken;
           obj.cubes = [element.dataset.cubeToken];
-          Query.add(obj);
-          app.setFormula(obj);
         }
+        Query.add(obj);
+        app.setFormula(obj);
       } else {
         let obj = { mode: element.dataset.mode, innerText: element.innerText.trim() };
         app.setFormula(obj);
@@ -2100,6 +2098,8 @@ var List = new Lists();
   });
 
   app.resetDialogColumn = () => {
+    // reimposto data-mode="all" sulla textarea
+    document.querySelector('#composite-column-formula').dataset.mode = 'all';
     // ripulisco la textarea
     document.querySelectorAll('#composite-column-formula *').forEach(item => item.remove());
     app.btnColumnSave.disabled = true;
