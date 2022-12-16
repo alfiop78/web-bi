@@ -1886,56 +1886,55 @@ var List = new Lists();
   app.saveColumn = () => {
     const name = document.getElementById('columnName');
     Query.sql_id = [], Query.sql_ds = []; Query.edit_id = [], Query.edit_ds = [];
-    // recupero la colonna selezionata
     const column = document.querySelector('#ul-columns .selectable[data-selected]');
     // elimino l'oggetto Query.objects, se presente, in questo caso sto modificando una colonna già inserita.
     /* if (app.btnColumnSave.dataset.token) {
       Query.objects = {token : column.dataset.token};
       Query.select = {token : column.dataset.token};
     } */
-    let object = { token: column.dataset.token, name: name.value, type: 'COLUMNS' };
+    let columnObject = { token: column.dataset.token, name: name.value, type: 'COLUMNS' };
     if (column.dataset.tableId) {
-      object.hierarchies = Object.fromEntries(new Map([[column.dataset.hierToken, column.dataset.tableId]]));
-      object.dimensions = [column.dataset.dimensionToken];
-      object.tableId = column.dataset.tableId;
+      columnObject.hierarchies = Object.fromEntries(new Map([[column.dataset.hierToken, column.dataset.tableId]]));
+      columnObject.dimensions = [column.dataset.dimensionToken];
+      columnObject.tableId = column.dataset.tableId;
     } else {
-      object.cubes = [column.dataset.cubeToken];
+      columnObject.cubes = [column.dataset.cubeToken];
     }
 
     document.querySelectorAll('#composite-column-formula *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
+      let editObject = {};
       if (element.nodeName === 'MARK') {
-        let obj = { token: element.dataset.token, mode: element.dataset.mode, type: 'COLUMNS', table: element.dataset.tableName, tableAlias: element.dataset.tableAlias, label: element.dataset.label };
+        editObject = { token: element.dataset.token, mode: element.dataset.mode, type: 'COLUMNS', table: element.dataset.tableName, tableAlias: element.dataset.tableAlias, label: element.dataset.label };
+        // popolo l'oggetto 'edit'
         if (element.dataset.tableId) {
           // tabella appartenente a un livello dimensionale
-          obj.dimensionToken = element.dataset.dimensionToken;
-          obj.hierToken = element.dataset.hierToken;
-          obj.tableId = element.dataset.tableId;
+          editObject.dimensionToken = element.dataset.dimensionToken;
+          editObject.hierToken = element.dataset.hierToken;
+          editObject.tableId = element.dataset.tableId;
           StorageDimension.selected = element.dataset.dimensionToken;
-          obj.field = StorageDimension.selected.hierarchies[element.dataset.hierToken].columns[element.dataset.tableAlias][element.dataset.token];
+          editObject.field = StorageDimension.selected.hierarchies[element.dataset.hierToken].columns[element.dataset.tableAlias][element.dataset.token];
           // NOTE: Oggetto Map
           // const hierarchiesObject = new Map([[element.dataset.hierToken, element.dataset.tableId]]);
-          obj.hierarchies = Object.fromEntries(new Map([[element.dataset.hierToken, element.dataset.tableId]]));
-          obj.dimensions = [element.dataset.dimensionToken];
+          editObject.hierarchies = Object.fromEntries(new Map([[element.dataset.hierToken, element.dataset.tableId]]));
+          editObject.dimensions = [element.dataset.dimensionToken];
         } else {
           // tabella appartenente alla FACT.
           StorageCube.selected = element.dataset.cubeToken;
-          // Query.objects = { token: element.dataset.token, cubeToken: element.dataset.cubeToken };
-          obj.field = StorageCube.selected.columns[element.dataset.tableAlias][element.dataset.token];
-          obj.cubeToken = element.dataset.cubeToken;
-          obj.cubes = [element.dataset.cubeToken];
+          editObject.field = StorageCube.selected.columns[element.dataset.tableAlias][element.dataset.token];
+          editObject.cubeToken = element.dataset.cubeToken;
+          editObject.cubes = [element.dataset.cubeToken];
         }
-        Query.add(obj);
-        app.setFormula(obj);
+        Query.add(editObject);
+        app.setFormula(editObject);
       } else {
-        let obj = { mode: element.dataset.mode, innerText: element.innerText.trim() };
-        app.setFormula(obj);
+        app.setFormula({ mode: element.dataset.mode, innerText: element.innerText.trim() });
       }
     });
-    object.edit = { id: Query.edit_id, ds: Query.edit_ds };
-    object.sql = { id: Query.sql_id, ds: Query.sql_ds };
-    Query.add(object);
-    (app.btnColumnSave.hasAttribute('data-token')) ? List.editDefinedColumn(object) : List.addDefinedColumn(object, app.body.dataset.mode);
+    columnObject.edit = { id: Query.edit_id, ds: Query.edit_ds };
+    columnObject.sql = { id: Query.sql_id, ds: Query.sql_ds };
+    Query.add(columnObject);
+    (app.btnColumnSave.hasAttribute('data-token')) ? List.editDefinedColumn(columnObject) : List.addDefinedColumn(columnObject, app.body.dataset.mode);
     app.resetDialogColumn();
     app.checkObjectSelected();
   }
@@ -2098,6 +2097,7 @@ var List = new Lists();
   });
 
   app.resetDialogColumn = () => {
+    document.querySelector('#columnName').value = '';
     // reimposto data-mode="all" sulla textarea
     document.querySelector('#composite-column-formula').dataset.mode = 'all';
     // ripulisco la textarea

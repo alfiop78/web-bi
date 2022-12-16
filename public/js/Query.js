@@ -25,7 +25,7 @@ class Queries {
 
   add(object) {
     this.OB[object.type].set(object.token, object);
-    // console.log(this.OB);
+    if (object.type === 'COLUMNS') console.log(this.OB);
     this.includeElements();
   }
 
@@ -47,7 +47,7 @@ class Queries {
     document.querySelectorAll("*[data-include-query]").forEach(tableRef => delete tableRef.dataset.includeQuery);
     // debugger;
     for (const [key, value] of Object.entries(this.OB)) {
-      console.log(key, value);
+      // console.log(key, value);
       for (const [token, element] of value) {
         // debugger;
         if (element.hasOwnProperty('dimensions')) {

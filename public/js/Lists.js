@@ -497,6 +497,7 @@ class Lists {
               this.#sublist.section.dataset.label = field.ds.field;
               this.#sublist.section.dataset.dimensionToken = dimToken;
               this.#sublist.section.dataset.hierToken = hierToken;
+              this.#sublist.selectable.dataset.tokenId = 0;
               this.#sublist.selectable.dataset.label = field.ds.field;
               this.#sublist.selectable.dataset.tableName = table.table;
               this.#sublist.selectable.dataset.tableAlias = table.alias;
