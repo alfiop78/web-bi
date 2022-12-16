@@ -49,28 +49,26 @@ class Queries {
     for (const [key, value] of Object.entries(this.OB)) {
       // console.log(key, value);
       for (const [token, element] of value) {
-        // debugger;
-        if (element.hasOwnProperty('dimensions')) {
-          // ha la prop hierarchies : {hierToken: tableId}
-          // per ogni dimensione presente nell'oggetto (es.: filtri multipli)
-          element.dimensions.forEach(tkDim => {
-            document.querySelector("#ul-dimensions .selectable[data-dimension-token='" + tkDim + "']").dataset.includeQuery = 'true';
-          });
-          // gerarchie
-          for (const [tkHier, tableId] of Object.entries(element.hierarchies)) {
-            // debugger;
-            const hier = document.querySelector("#ul-hierarchies .unselectable[data-hier-token='" + tkHier + "']");
-            // converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
-            [...hier.querySelectorAll("small")].filter((table, index) => index >= +tableId).forEach(tableRef => {
-              tableRef.dataset.includeQuery = 'true';
+        if (element.hasOwnProperty('include')) {
+          if (element.include.hasOwnProperty('dimensions')) {
+            element.include.dimensions.forEach(tkDim => {
+              document.querySelector("#ul-dimensions .selectable[data-dimension-token='" + tkDim + "']").dataset.includeQuery = 'true';
+            });
+            // gerarchie
+            for (const [tkHier, tableId] of Object.entries(element.include.hierarchies)) {
+              const hier = document.querySelector("#ul-hierarchies .unselectable[data-hier-token='" + tkHier + "']");
+              // converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
+              [...hier.querySelectorAll("small")].filter((table, index) => index >= +tableId).forEach(tableRef => {
+                tableRef.dataset.includeQuery = 'true';
+              });
+            }
+          }
+          // cubi
+          if (element.include.hasOwnProperty('cubes')) {
+            element.include.cubes.forEach(tkCube => {
+              document.querySelector("#ul-cubes .selectable[data-cube-token='" + tkCube + "']").dataset.includeQuery = 'true';
             });
           }
-        }
-        // cubi
-        if (element.hasOwnProperty('cubes')) {
-          element.cubes.forEach(tkCube => {
-            document.querySelector("#ul-cubes .selectable[data-cube-token='" + tkCube + "']").dataset.includeQuery = 'true';
-          });
         }
       }
     }
@@ -149,8 +147,8 @@ class Queries {
         StorageFilter.selected = filterToken;
         filters.set(filterToken, { SQL: StorageFilter.selected.formula });
         // se su quseto filtro sono presenti gerarchie...
-        if (StorageFilter.selected.hasOwnProperty('hierarchies')) {
-          for (const [token, tableId] of Object.entries(StorageFilter.selected.hierarchies)) {
+        if (StorageFilter.selected.include.hasOwnProperty('hierarchies')) {
+          for (const [token, tableId] of Object.entries(StorageFilter.selected.include.hierarchies)) {
             const hier = document.querySelector("#ul-hierarchies .unselectable[data-hier-token='" + token + "']");
             hier.querySelectorAll("small").forEach(tableRef => {
               FROM.set(tableRef.dataset.tableAlias, `${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);
@@ -158,8 +156,8 @@ class Queries {
               // per ogni dimensione contenuta all'interno del filtro recupero le join con il cubo
               // debugger;
               for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
-                if (StorageFilter.selected.cubes) {
-                  if (StorageFilter.selected.cubes.includes(cubeToken)) {
+                if (StorageFilter.selected.include.cubes) {
+                  if (StorageFilter.selected.include.cubes.includes(cubeToken)) {
                     for (const [token, join] of Object.entries(joins)) {
                       WHERE.set(token, join);
                     }
@@ -179,8 +177,8 @@ class Queries {
         * un filtro può contenere anche una tabella di un livello dimensionale e una FACT. Es.: Azienda.id =43 AND tiporiga = 'M'
         * in questo caso, dopo aver verificato le prop hierarchies e dimensions del filtro vado a verificare anche se è presente il cubeToken
         */
-        if (StorageFilter.selected.hasOwnProperty('cubes')) {
-          StorageFilter.selected.cubes.forEach(cubeToken => {
+        if (StorageFilter.selected.include.hasOwnProperty('cubes')) {
+          StorageFilter.selected.include.cubes.forEach(cubeToken => {
             StorageCube.selected = cubeToken;
             FROM.set(StorageCube.selected.alias, `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${StorageCube.selected.alias}`);
           });

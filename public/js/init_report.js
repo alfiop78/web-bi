@@ -8,7 +8,7 @@ var StorageMetric = new MetricStorage();
 var List = new Lists();
 (() => {
   App.init();
-  const rand = () => Math.random(0).toString(36).substr(2);
+  const rand = () => Math.random(0).toString(36).substring(2);
   // const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
   const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
   // console.info('Date.now() : ', Date.now());
@@ -258,7 +258,7 @@ var List = new Lists();
     const process = StorageProcess.selected;
     console.log('process selected : ', process);
     // modifico il token e il processId
-    process.token = rand().substr(0, 21);;
+    process.token = rand().substring(0, 21);
     process.report.processId = Date.now();
     // salvo il process duplicato con lo stesso nome aggiungendo un prefix _copy_of_
     process.name = '_copy_of_' + process.name;
@@ -935,7 +935,7 @@ var List = new Lists();
     const distinctOption = document.getElementById('checkbox-distinct').checked;
     const date = new Date();
     // edit o salvataggio di una metrica
-    const token = (!e.target.dataset.token) ? rand().substr(0, 21) : e.target.dataset.token;
+    const token = (!e.target.dataset.token) ? rand().substring(0, 21) : e.target.dataset.token;
     // se la metrica è in fase di 'edit' la recupero dallo storage
     if (e.target.dataset.token) StorageMetric.selected = token;
     // verifico se ci sono filtri da associare a questa metrica
@@ -1216,7 +1216,7 @@ var List = new Lists();
     const inputAlias = document.getElementById('composite-alias-metric');
     let arr_sql = [];
     const date = new Date();
-    const token = (!e.target.dataset.token) ? rand().substr(0, 21) : e.target.dataset.token;
+    const token = (!e.target.dataset.token) ? rand().substring(0, 21) : e.target.dataset.token;
     let metricsAlias = {}; // contiene un'elenco di object con nome_metrica : alias che compongono la metrica composta
     let cubes = new Set(); // contiene i cubi relativi alle metriche all'interno della metrica composta
     if (e.target.dataset.token) StorageMetric.selected = token;
@@ -1311,7 +1311,7 @@ var List = new Lists();
     const filterName = document.getElementById('filterName');
     // edit o salvataggio di un filtro
     // se è presente l'attributo data-token, sul tasto, allora sono in modifica di un filtro, altrimenti sto inserendo un nuovo filtro.
-    const token = (!e.target.dataset.token) ? rand().substr(0, 21) : e.target.dataset.token;
+    const token = (!e.target.dataset.token) ? rand().substring(0, 21) : e.target.dataset.token;
     // se il filtro è in fase di aggiornamento lo recupero dallo storage perchè la prop created_at deve restare invariata
     if (e.target.dataset.token) StorageFilter.selected = token;
     const date = new Date();
@@ -1373,6 +1373,7 @@ var List = new Lists();
     filterObject = {
       token,
       editFormula,
+      include: {},
       type: 'FILTER',
       name: filterName.value,
       formula: sql_formula.join(' '), // Azienda_444.id = 43
@@ -1381,11 +1382,11 @@ var List = new Lists();
     // aggiornamento oppure nuovo filtri, per l'aggiornamento del filtro andrò a modificare solo la data updated_at
     filterObject.created_at = (e.target.dataset.token) ? StorageFilter.selected.created_at : date.toLocaleDateString('it-IT', options);
     if (hierarchiesMap.size !== 0) {
-      filterObject.hierarchies = Object.fromEntries(hierarchiesMap);
-      filterObject.dimensions = [...dimensions];
+      filterObject.include.hierarchies = Object.fromEntries(hierarchiesMap);
+      filterObject.include.dimensions = [...dimensions];
     }
     // non sono presenti, tra gli elementi che compongono il filtro, elementi che fanno riferimento a qualche livello dimensionale
-    if (cubes.size !== 0) filterObject.cubes = [...cubes];
+    if (cubes.size !== 0) filterObject.include.cubes = [...cubes];
     StorageFilter.save(filterObject);
     StorageFilter.selected = token;
     // salvataggio nel DB
@@ -1692,7 +1693,7 @@ var List = new Lists();
       // TODO: aggiorno il nome del report nella lista #ul-processes
     } else {
       // nuovo report
-      Query.token = rand().substr(0, 21);
+      Query.token = rand().substring(0, 21);
       Query.processId = Date.now();
       Query.save(name);
       // app.saveReport();
@@ -1884,6 +1885,7 @@ var List = new Lists();
   }
 
   app.saveColumn = () => {
+    const mainToken = rand().substring(0, 5);
     const name = document.getElementById('columnName');
     Query.sql_id = [], Query.sql_ds = []; Query.edit_id = [], Query.edit_ds = [];
     const column = document.querySelector('#ul-columns .selectable[data-selected]');
@@ -1892,7 +1894,8 @@ var List = new Lists();
       Query.objects = {token : column.dataset.token};
       Query.select = {token : column.dataset.token};
     } */
-    let columnObject = { token: column.dataset.token, name: name.value, type: 'COLUMNS' };
+    // let reference = { [token]: { reference: column.dataset.token } };
+    let columnObject = { token: mainToken, name: name.value, type: 'COLUMNS', reference: column.dataset.token };
     if (column.dataset.tableId) {
       columnObject.hierarchies = Object.fromEntries(new Map([[column.dataset.hierToken, column.dataset.tableId]]));
       columnObject.dimensions = [column.dataset.dimensionToken];
@@ -1905,12 +1908,14 @@ var List = new Lists();
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       let editObject = {};
       if (element.nodeName === 'MARK') {
-        editObject = { token: element.dataset.token, mode: element.dataset.mode, type: 'COLUMNS', table: element.dataset.tableName, tableAlias: element.dataset.tableAlias, label: element.dataset.label };
+        const token = rand().substring(0, 5);
+        editObject = { token, reference: element.dataset.token, mode: element.dataset.mode, type: 'COLUMNS', table: element.dataset.tableName, tableAlias: element.dataset.tableAlias, label: element.dataset.label };
         // popolo l'oggetto 'edit'
         if (element.dataset.tableId) {
           // tabella appartenente a un livello dimensionale
           editObject.dimensionToken = element.dataset.dimensionToken;
           editObject.hierToken = element.dataset.hierToken;
+          // FIXME: probabilmente non serve il tableId perchè già incluso nella prop 'hierarchies'
           editObject.tableId = element.dataset.tableId;
           StorageDimension.selected = element.dataset.dimensionToken;
           editObject.field = StorageDimension.selected.hierarchies[element.dataset.hierToken].columns[element.dataset.tableAlias][element.dataset.token];
@@ -1918,14 +1923,16 @@ var List = new Lists();
           // const hierarchiesObject = new Map([[element.dataset.hierToken, element.dataset.tableId]]);
           editObject.hierarchies = Object.fromEntries(new Map([[element.dataset.hierToken, element.dataset.tableId]]));
           editObject.dimensions = [element.dataset.dimensionToken];
+          columnObject.include = { dimensions: [element.dataset.dimensionToken], hierarchies: editObject.hierarchies };
         } else {
           // tabella appartenente alla FACT.
           StorageCube.selected = element.dataset.cubeToken;
           editObject.field = StorageCube.selected.columns[element.dataset.tableAlias][element.dataset.token];
           editObject.cubeToken = element.dataset.cubeToken;
           editObject.cubes = [element.dataset.cubeToken];
+          columnObject.include = { cubes: [element.dataset.cubeToken] };
         }
-        Query.add(editObject);
+        // Query.add(editObject);
         app.setFormula(editObject);
       } else {
         app.setFormula({ mode: element.dataset.mode, innerText: element.innerText.trim() });

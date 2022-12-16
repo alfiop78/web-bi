@@ -747,12 +747,12 @@ class Lists {
     // il filtro può contenere tabelle dei livelli dimensionali insieme alla FACT
     this.#sublist.section.dataset.label = StorageFilter.selected.name;
     this.#sublist.section.dataset.filterToken = StorageFilter.selected.token;
-    if (StorageFilter.selected.hasOwnProperty('dimensions')) {
-      this.#sublist.section.dataset.dimensionToken = StorageFilter.selected.dimensions.join(' ');
+    if (StorageFilter.selected.include.hasOwnProperty('dimensions')) {
+      this.#sublist.section.dataset.dimensionToken = StorageFilter.selected.include.dimensions.join(' ');
       // elenco token hier separate da spazi
-      this.#sublist.section.dataset.hierToken = Object.keys(StorageFilter.selected.hierarchies).join(' ');
+      this.#sublist.section.dataset.hierToken = Object.keys(StorageFilter.selected.include.hierarchies).join(' ');
     } else {
-      this.#sublist.section.dataset.cubeToken = StorageFilter.selected.cubes;
+      this.#sublist.section.dataset.cubeToken = StorageFilter.selected.include.cubes;
     }
     this.#sublist.selectable.dataset.filterToken = StorageFilter.selected.token;
     this.#sublist.span.innerText = StorageFilter.selected.name;
