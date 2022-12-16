@@ -43,8 +43,10 @@ class Cube
 		*/
     // dd($this->baseColumns);
     foreach ($this->baseColumns as $object) {
-      foreach ($object->sql as $token => $field) {
-        $this->_fields[] = "{$object->name}_{$token}";
+      if (property_exists($object, 'sql')) {
+        foreach ($object->sql as $token => $field) {
+          $this->_fields[] = "{$object->name}_{$token}";
+        }
       }
     }
     // dd($this->_fields);
@@ -56,9 +58,11 @@ class Cube
     $this->SELECT = "SELECT\n";
     foreach ($columns as $object) {
       // dd($object);
-      foreach ($object->sql as $token => $field) {
-        $fieldList[] = implode($field) . " AS {$object->name}_{$token}";
-        $this->_columns[] = "{$object->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
+      if (property_exists($object, 'sql')) {
+        foreach ($object->sql as $token => $field) {
+          $fieldList[] = implode($field) . " AS {$object->name}_{$token}";
+          $this->_columns[] = "{$object->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
+        }
       }
       // dd($fieldList);
     }
@@ -78,9 +82,11 @@ class Cube
     $fieldList = array();
     $this->groupBy = "GROUP BY\n";
     foreach ($groups as $key => $object) {
-      foreach ($object->sql as $field) {
-        $fieldImploded = implode($field);
-        if (!in_array($fieldImploded, $fieldList)) $fieldList[] = $fieldImploded;
+      if (property_exists($object, 'sql')) {
+        foreach ($object->sql as $field) {
+          $fieldImploded = implode($field);
+          if (!in_array($fieldImploded, $fieldList)) $fieldList[] = $fieldImploded;
+        }
       }
     }
     $this->groupBy .= implode(",\n", $fieldList);
