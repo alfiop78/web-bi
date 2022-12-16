@@ -130,12 +130,12 @@ section.data-item:hover button, section.data-item-defined:hover button {visibili
 /*hover selected elements*/
 .data-item, .data-item-defined{position: relative; transition: all 250ms;}
 section[data-sublist-gen] {position: relative;}
-.selectable{transition: padding-left 150ms; margin: 0px 4px; padding: 2px 4px;}
-.selectable:hover{cursor: pointer;transition: padding-left 200ms; padding-left: 8px;}
+.selectable{transition: padding-left 150ms, opacity 250ms; margin: 0px 4px; padding: 2px 4px;}
+.selectable:not([data-disabled]):hover{cursor: pointer;transition: padding-left 200ms; padding-left: 8px;}
 .selectable[data-selected]:hover{cursor: default; padding-left: 4px;}
 *[draggable].selectable:hover{cursor: grab; transition: padding-left 150ms; padding-left: 8px; font-weight: bold;}
 .selectable::before{background-color : sienna;}
-.selectable:not([data-selected]):hover::before{
+.selectable:not([data-selected],[data-disabled]):hover::before{
   content: '';
   width: 6px;
   height: 100%;
@@ -159,7 +159,7 @@ section[data-sublist-gen] {position: relative;}
   transition:height 150ms, top 150ms;
 }
 .selectable[data-selected] .highlight{font-weight: bold;}
-.selectable[data-disabled] .highlight{color: grey;}
+.selectable[data-disabled] {opacity: .5;}
 .selectable[data-disabled]:hover {cursor: default;}
 .selectable:not([data-selected]).filters-color::before{background-color : var(--main-filters-color);}
 
