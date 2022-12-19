@@ -943,7 +943,8 @@ var List = new Lists();
     let metricObj = {
       name: inputName.value,
       token,
-      cube: StorageCube.selected.token,
+      include: { cubes: [StorageCube.selected.token] },
+      // cube: StorageCube.selected.token,
       updated_at: date.toLocaleDateString('it-IT', options)
     };
     metricObj.created_at = (e.target.dataset.token) ? StorageMetric.selected.created_at : date.toLocaleDateString('it-IT', options);
@@ -1224,14 +1225,14 @@ var List = new Lists();
         StorageMetric.selected = element.dataset.metricToken;
         // recupero il nome del cubo a cui appartiene la metrica. Questo lo visualizzerò nell'elenco delle metriche composte
         // ciclo i cubi, per le metriche_type =4
-        if (StorageMetric.selected.metric_type === 4) {
-          StorageMetric.selected.cubes.forEach(cubeToken => cubes.add(cubeToken));
+        /* if (StorageMetric.selected.metric_type === 4) {
+          StorageMetric.selected.include.cubes.forEach(cubeToken => cubes.add(cubeToken));
         } else {
-          cubes.add(StorageMetric.selected.cube);
-        }
-        // StorageCube.selected = StorageMetric.selected.cubes;
-        // cubes.add(StorageCube.selected.token);
-        // metrics[element.innerText] = StorageMetric.selected.formula.alias;
+          cubes.add(StorageMetric.selected.include.cubes);
+        } */
+        StorageMetric.selected.include.cubes.forEach(cubeToken => cubes.add(cubeToken));
+        console.log(cubes);
+        debugger;
         // TODO: probabilmente qui meglio inserire tutto il contenuto della metrica e non solo l'alias
         metricsAlias[element.innerText] = { token: element.dataset.metricToken, alias: StorageMetric.selected.formula.alias };
         // TODO: verificare se è presente il distinct : true in ogni metrica
@@ -1244,7 +1245,7 @@ var List = new Lists();
     let metricObj = {
       type: 'COMP_METRIC', name: inputName.value, token, metric_type: 4,
       formula: { token, formula_sql: arr_sql, alias: inputAlias.value, metrics_alias: metricsAlias },
-      cubes: [...cubes],
+      include: { cubes: [...cubes] },
       updated_at: date.toLocaleDateString('it-IT', options),
     };
     // metricObj.nested = (metric.dataset.nested) ? true : false;
@@ -1651,12 +1652,15 @@ var List = new Lists();
       StorageDimension.selected = dimension.dataset.dimensionToken;
       // per ogni dimensione con includeQuery recupero le join con il cubo
       for (const [cubeToken, joins] of Object.entries(StorageDimension.selected.cubes)) {
-        // debugger;
-        if (document.querySelector("#ul-cubes section[data-cube-token='" + cubeToken + "'] .selectable").hasAttribute('data-include-query')) {
+
+        document.querySelectorAll("#ul-cubes section[data-cube-token='" + cubeToken + "'] .selectable[data-include-query]").forEach(cubeRef => {
+          // imposto la FROM per gli elementi del cubo/i selezionati
+          Query.FROM = { tableAlias: cubeRef.dataset.tableAlias, SQL: `${cubeRef.dataset.schema}.${cubeRef.dataset.tableName} AS ${cubeRef.dataset.tableAlias}` };
+          // imposto la join tra la dimensione e il cube
           for (const [token, join] of Object.entries(joins)) {
             Query.WHERE = { token, join };
           }
-        }
+        });
       }
     });
   }
@@ -1666,11 +1670,6 @@ var List = new Lists();
     const name = document.getElementById('reportName').value;
     app.setFrom();
     app.setFactJoin();
-
-    // imposto la FROM per gli elementi del cubo/i selezionati
-    document.querySelectorAll("#ul-cubes section:not([hidden]) .selectable[data-include-query]").forEach(cubeRef => {
-      Query.FROM = { tableAlias: cubeRef.dataset.tableAlias, SQL: `${cubeRef.dataset.schema}.${cubeRef.dataset.tableName} AS ${cubeRef.dataset.tableAlias}` };
-    });
 
     // il datamart sarà creato come FX_processId
     // se è stato già definito un token significa che sto editando un report
@@ -1697,13 +1696,9 @@ var List = new Lists();
   // visualizzo in una dialog l'SQL della baseTable e delle metricTable
   app.btnSQLProcess.onclick = async () => {
     const name = document.getElementById('reportName').value;
-    debugger;
     app.setFrom();
     app.setFactJoin();
-    // imposto la FROM per gli elementi del cubo/i selezionati
-    document.querySelectorAll("#ul-cubes section:not([hidden]) .selectable[data-include-query]").forEach(cubeRef => {
-      Query.FROM = { tableAlias: cubeRef.dataset.tableAlias, SQL: `${cubeRef.dataset.schema}.${cubeRef.dataset.tableName} AS ${cubeRef.dataset.tableAlias}` };
-    });
+    debugger;
 
     if (!Query.processId) Query.processId = '_process_id_';
 

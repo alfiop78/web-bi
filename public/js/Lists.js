@@ -572,12 +572,12 @@ class Lists {
         this.metrics = 'data-sublist-metrics';
         this.#sublist.section.dataset.relatedObject = 'cube';
         this.#sublist.section.dataset.label = metric.name;
-        this.#sublist.section.dataset.cubeToken = metric.cube;
+        this.#sublist.section.dataset.cubeToken = metric.include.cubes.join(' ');
         this.#sublist.section.dataset.metricToken = metric.token;
         this.#sublist.selectable.dataset.tableName = value.FACT;
         this.#sublist.selectable.dataset.tableAlias = value.alias;
         // metricha di base composta
-        this.#sublist.selectable.dataset.cubeToken = metric.cube;
+        this.#sublist.selectable.dataset.cubeToken = metric.include.cubes.join(' ');
         this.#sublist.selectable.dataset.metricToken = metric.token;
         this.#sublist.selectable.dataset.metricType = metric.metric_type;
         // div.dataset.label = metric.name;
@@ -621,7 +621,7 @@ class Lists {
     this.#sublist.selectable.dataset.metricType = StorageMetric.selected.metric_type;
     this.#sublist.span.innerText = StorageMetric.selected.name;
     this.#sublist.btnEdit.dataset.objectToken = StorageMetric.selected.token;
-    StorageMetric.selected.cubes.forEach(token => {
+    StorageMetric.selected.include.cubes.forEach(token => {
       const contentSub = this.tmplSublists.content.cloneNode(true);
       const small = contentSub.querySelector('small');
       small.dataset.cubeToken = token;
@@ -641,11 +641,11 @@ class Lists {
     // le metriche composte hanno la prop "cubes" contenente un array di cubi, anzichè "cube"
     if (StorageMetric.selected.metric_type === 4) {
       // TODO: <smalls> per i cubi legati a questa metrica
-      this.#sublist.section.dataset.cubeToken = StorageMetric.selected.cubes.join(' ');
-      this.#sublist.selectable.dataset.cubeToken = StorageMetric.selected.cubes.join(' ');
+      this.#sublist.section.dataset.cubeToken = StorageMetric.selected.include.cubes.join(' ');
+      this.#sublist.selectable.dataset.cubeToken = StorageMetric.selected.include.cubes.join(' ');
     } else {
-      this.#sublist.section.dataset.cubeToken = StorageMetric.selected.cube;
-      this.#sublist.selectable.dataset.cubeToken = StorageMetric.selected.cube;
+      this.#sublist.section.dataset.cubeToken = StorageMetric.selected.include.cubes.join(' ');
+      this.#sublist.selectable.dataset.cubeToken = StorageMetric.selected.include.cubes.join(' ');
       this.#sublist.cube.innerText = StorageCube.selected.name;
     }
     // metriche composte di base e composte non hanno le prop table, tableAlias

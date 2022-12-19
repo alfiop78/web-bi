@@ -306,7 +306,7 @@ class MetricStorage extends Storages {
     4 : metrica composta
   */
   #metricsObject = {};
-  #metric;
+
   constructor() {
     super();
   }
@@ -333,14 +333,8 @@ class MetricStorage extends Storages {
     this.#metricsObject = {};
     super.storageK = ['METRIC', 'ADV_METRIC', 'COMP_METRIC'];
     for (const [key, value] of Object.entries(this.st)) {
-      if (value.cube === cubeToken || value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;
-      // if (value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;
+      if (value.include.cubes.includes(cubeToken)) this.#metricsObject[key] = value;
     }
-    /* super.storageK = 'ADV_METRIC';
-    for (const [key, value] of Object.entries(this.st)) {
-      if (value.cube === cubeToken || value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;
-      // if (value.cubes.includes(cubeToken)) this.#metricsObject[key] = value;
-    } */
   }
 
   get cubeMetrics() { return this.#metricsObject; }
