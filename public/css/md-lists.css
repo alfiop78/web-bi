@@ -53,7 +53,7 @@ ul > li{list-style: none;padding: 6px;margin: 2px 8px;}
 /*list all'interno delle card*/
 .card ul > section{margin: 0px 6px;}
 
-.ellipsis{text-overflow:ellipsis;white-space: nowrap; overflow:hidden;}
+.ellipsis{text-overflow:ellipsis;white-space: nowrap; overflow:hidden; transition: color 250ms;}
 
 /* visualizzazione delle icone sui field impostati come : colonne, gerarchie, metriche */
 section[data-sublist-fields] > .selectable i{visibility: hidden;}
@@ -159,7 +159,7 @@ section[data-sublist-gen] {position: relative;}
   transition:height 150ms, top 150ms;
 }
 .selectable[data-selected] .highlight{font-weight: bold;}
-.selectable[data-disabled] {opacity: .5;}
+.selectable[data-disabled] > .ellipsis {color: dimgrey;}
 .selectable[data-disabled]:hover {cursor: default;}
 .selectable:not([data-selected]).filters-color::before{background-color : var(--main-filters-color);}
 

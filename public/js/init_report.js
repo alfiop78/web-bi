@@ -73,12 +73,12 @@ var List = new Lists();
     // console.log(mutationList, observer);
     for (const mutation of mutationList) {
       if (mutation.type === 'childList') {
-        console.info('A child node has been added or removed.');
+        // console.info('A child node has been added or removed.');
         Array.from(mutation.addedNodes).forEach(node => {
           if (node.hasChildNodes()) node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
         });
       } else if (mutation.type === 'attributes') {
-        console.log(`The ${mutation.attributeName} attribute was modified.`);
+        // console.log(`The ${mutation.attributeName} attribute was modified.`);
       }
     }
   };
@@ -202,12 +202,11 @@ var List = new Lists();
     for (const [token, column] of Object.entries(StorageProcess.selected.edit.columns)) {
       // reimposto la colonna come quando viene selezionata
       // ciclo la proprietà 'edit' della colonna, al suo interno ci sono le specifiche della colonna da aggiungere a Objects
-      for (const [key, value] of Object.entries(column.edit)) {
-        // debugger;
+      /* for (const [key, value] of Object.entries(column.edit)) {
         value.forEach(item => {
           Query.add(item);
         });
-      }
+      } */
       Query.add(column);
       // aggiungo alla #ul-defined-columns
       List.addDefinedColumn(column);
@@ -1889,21 +1888,14 @@ var List = new Lists();
     const name = document.getElementById('columnName');
     Query.sql_id = [], Query.sql_ds = []; Query.edit_id = [], Query.edit_ds = [];
     const column = document.querySelector('#ul-columns .selectable[data-selected]');
+    let dimensions = new Set(), cubes = new Set();
+    let hierarchiesMap = new Map();
     // elimino l'oggetto Query.objects, se presente, in questo caso sto modificando una colonna già inserita.
     /* if (app.btnColumnSave.dataset.token) {
       Query.objects = {token : column.dataset.token};
       Query.select = {token : column.dataset.token};
     } */
-    // let reference = { [token]: { reference: column.dataset.token } };
-    let columnObject = { token: mainToken, name: name.value, type: 'COLUMNS', reference: column.dataset.token };
-    if (column.dataset.tableId) {
-      columnObject.hierarchies = Object.fromEntries(new Map([[column.dataset.hierToken, column.dataset.tableId]]));
-      columnObject.dimensions = [column.dataset.dimensionToken];
-      columnObject.tableId = column.dataset.tableId;
-    } else {
-      columnObject.cubes = [column.dataset.cubeToken];
-    }
-
+    let columnObject = { token: mainToken, name: name.value, type: 'COLUMNS', reference: column.dataset.token, include: {} };
     document.querySelectorAll('#composite-column-formula *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       let editObject = {};
@@ -1913,26 +1905,23 @@ var List = new Lists();
         // popolo l'oggetto 'edit'
         if (element.dataset.tableId) {
           // tabella appartenente a un livello dimensionale
-          editObject.dimensionToken = element.dataset.dimensionToken;
-          editObject.hierToken = element.dataset.hierToken;
-          // FIXME: probabilmente non serve il tableId perchè già incluso nella prop 'hierarchies'
-          editObject.tableId = element.dataset.tableId;
           StorageDimension.selected = element.dataset.dimensionToken;
           editObject.field = StorageDimension.selected.hierarchies[element.dataset.hierToken].columns[element.dataset.tableAlias][element.dataset.token];
-          // NOTE: Oggetto Map
-          // const hierarchiesObject = new Map([[element.dataset.hierToken, element.dataset.tableId]]);
-          editObject.hierarchies = Object.fromEntries(new Map([[element.dataset.hierToken, element.dataset.tableId]]));
-          editObject.dimensions = [element.dataset.dimensionToken];
-          columnObject.include = { dimensions: [element.dataset.dimensionToken], hierarchies: editObject.hierarchies };
+          if (hierarchiesMap.has(element.dataset.hierToken)) {
+            // se l'elemento in ciclo ha un ordine gerarchico minore di quello già presente in hierarchiesMap lo aggiungo, andando a sovrascrivere quello già presente
+            if (+element.dataset.tableId < hierarchiesMap.get(element.dataset.hierToken)) hierarchiesMap.set(element.dataset.hierToken, +element.dataset.tableId);
+          } else {
+            hierarchiesMap.set(element.dataset.hierToken, +element.dataset.tableId);
+          }
+          dimensions.add(element.dataset.dimensionToken);
+          columnObject.include = { dimensions: [...dimensions], hierarchies: Object.fromEntries(hierarchiesMap) };
         } else {
           // tabella appartenente alla FACT.
           StorageCube.selected = element.dataset.cubeToken;
           editObject.field = StorageCube.selected.columns[element.dataset.tableAlias][element.dataset.token];
-          editObject.cubeToken = element.dataset.cubeToken;
-          editObject.cubes = [element.dataset.cubeToken];
-          columnObject.include = { cubes: [element.dataset.cubeToken] };
+          cubes.add(element.dataset.cubeToken);
+          columnObject.include = { cubes: [...cubes] };
         }
-        // Query.add(editObject);
         app.setFormula(editObject);
       } else {
         app.setFormula({ mode: element.dataset.mode, innerText: element.innerText.trim() });
