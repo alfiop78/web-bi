@@ -208,4 +208,9 @@ ul[data-object]{position: absolute; overflow: auto; width: 100%; height: calc(10
 ul.absolute{position: absolute; height: 100%; overflow: auto; width: 100%;}
 ul.relative{position: relative; height: 100%; overflow: auto; width: 100%;}
 
-small[data-include-query]{color: brown;}
+section[data-sublist-hierarchies] span[item] {color: sienna;}
+section[data-sublist-hierarchies] small {
+  padding:4px;
+  margin: 2px;
+}
+section[data-sublist-hierarchies] small[data-include-query]{color: #494949; background-color: #99b19c; border-radius: 2px;}

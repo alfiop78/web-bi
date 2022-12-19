@@ -25,7 +25,7 @@ class Queries {
 
   add(object) {
     this.OB[object.type].set(object.token, object);
-    if (object.type === 'COLUMNS') console.log(this.OB);
+    console.log(this.OB);
     this.includeElements();
   }
 
@@ -38,39 +38,52 @@ class Queries {
     this.includeElements();
   }
 
+  setDataInclude(element) {
+    if (element.include.hasOwnProperty('dimensions')) {
+      element.include.dimensions.forEach(tkDim => {
+        document.querySelector("#ul-dimensions .selectable[data-dimension-token='" + tkDim + "']").dataset.includeQuery = 'true';
+      });
+      // se la prop 'include' contiene 'dimensions' contiene sicuramente anche 'hierarchies'
+      for (const [tkHier, tableId] of Object.entries(element.include.hierarchies)) {
+        const hier = document.querySelector("#ul-hierarchies .unselectable[data-hier-token='" + tkHier + "']");
+        // converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
+        [...hier.querySelectorAll("small")].filter((table, index) => index >= +tableId).forEach(tableRef => {
+          tableRef.dataset.includeQuery = 'true';
+        });
+      }
+    }
+    // cubi
+    if (element.include.hasOwnProperty('cubes')) {
+      element.include.cubes.forEach(tkCube => {
+        document.querySelector("#ul-cubes .selectable[data-cube-token='" + tkCube + "']").dataset.includeQuery = 'true';
+      });
+    }
+  }
+
   /*
   * Imposto gli elementi del report.
   * Imposto quali cubi, FROM e JOIN che devono essere incluse nel report
   */
   includeElements() {
-    // console.clear();
+    console.clear();
     document.querySelectorAll("*[data-include-query]").forEach(tableRef => delete tableRef.dataset.includeQuery);
-    // debugger;
-    for (const [key, value] of Object.entries(this.OB)) {
-      // console.log(key, value);
-      for (const [token, element] of value) {
-        if (element.hasOwnProperty('include')) {
-          if (element.include.hasOwnProperty('dimensions')) {
-            element.include.dimensions.forEach(tkDim => {
-              document.querySelector("#ul-dimensions .selectable[data-dimension-token='" + tkDim + "']").dataset.includeQuery = 'true';
+    for (const [key, objectProperties] of Object.entries(this.OB)) {
+      objectProperties.forEach(element => {
+        switch (key) {
+          case 'ADV_METRIC':
+            // filtri all'interno della metrica, prop 'include' all'interno del filtro in StorageFilter
+            // ciclo l'array 'filters' all'interno della ADV_METRIC
+            element.formula.filters.forEach(token => {
+              // dallo StorageFilter ottengo la prop 'include'
+              StorageFilter.selected = token;
+              this.setDataInclude(StorageFilter.selected);
             });
-            // gerarchie
-            for (const [tkHier, tableId] of Object.entries(element.include.hierarchies)) {
-              const hier = document.querySelector("#ul-hierarchies .unselectable[data-hier-token='" + tkHier + "']");
-              // converto il nodeList in un array e, con filter(), recupero le tabelle con un id superiore a quello in ciclo
-              [...hier.querySelectorAll("small")].filter((table, index) => index >= +tableId).forEach(tableRef => {
-                tableRef.dataset.includeQuery = 'true';
-              });
-            }
-          }
-          // cubi
-          if (element.include.hasOwnProperty('cubes')) {
-            element.include.cubes.forEach(tkCube => {
-              document.querySelector("#ul-cubes .selectable[data-cube-token='" + tkCube + "']").dataset.includeQuery = 'true';
-            });
-          }
+            break;
+          default:
+            if (element.hasOwnProperty('include')) this.setDataInclude(element);
+            break;
         }
-      }
+      });
     }
   }
 

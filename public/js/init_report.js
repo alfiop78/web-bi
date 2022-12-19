@@ -939,9 +939,7 @@ var List = new Lists();
     if (e.target.dataset.token) StorageMetric.selected = token;
     // verifico se ci sono filtri da associare a questa metrica
     let associatedFilters = new Set();
-    document.querySelectorAll('#ul-metric-filters .selectable[data-selected]').forEach(filterSelected => {
-      associatedFilters.add(filterSelected.dataset.filterToken);
-    });
+    document.querySelectorAll('#ul-metric-filters .selectable[data-selected]').forEach(filterSelected => associatedFilters.add(filterSelected.dataset.filterToken));
     let metricObj = {
       name: inputName.value,
       token,
@@ -1647,13 +1645,6 @@ var List = new Lists();
     });
   }
 
-  app.setFilteredMetrics = () => {
-    document.querySelectorAll("#ul-metrics .selectable[data-selected][data-metric-type='2'], #ul-metrics .selectable[data-selected][data-metric-type='3']").forEach(metricRef => {
-      StorageMetric.selected = metricRef.dataset.metricToken;
-      Query.setFilteredMetricReport(metricRef);
-    });
-  }
-
   app.setFactJoin = () => {
     // imposto la factJoin che è presente solo sulla dimensione
     document.querySelectorAll('#ul-dimensions .selectable[data-include-query]').forEach(dimension => {
@@ -1713,11 +1704,6 @@ var List = new Lists();
     document.querySelectorAll("#ul-cubes section:not([hidden]) .selectable[data-include-query]").forEach(cubeRef => {
       Query.FROM = { tableAlias: cubeRef.dataset.tableAlias, SQL: `${cubeRef.dataset.schema}.${cubeRef.dataset.tableName} AS ${cubeRef.dataset.tableAlias}` };
     });
-    // metriche filtrate
-    // Query.setAdvancedMetrics();
-    // app.setFilteredMetrics();
-    // metriche composte
-    // app.setCompositeMetrics();
 
     if (!Query.processId) Query.processId = '_process_id_';
 
