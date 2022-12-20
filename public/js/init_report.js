@@ -1698,7 +1698,6 @@ var List = new Lists();
     const name = document.getElementById('reportName').value;
     app.setFrom();
     app.setFactJoin();
-    debugger;
 
     if (!Query.processId) Query.processId = '_process_id_';
 
