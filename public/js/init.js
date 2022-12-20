@@ -1435,4 +1435,37 @@ var Hier = new Hierarchy();
   // passing it the element to observe, and the options object
   observer.observe(body, { subtree: true, childList: true, attributes: true });
 
+  document.querySelector("#btn-time-dimension").onclick = async () => {
+    // let jsonDataParsed = JSON.parse(window.localStorage.getItem(processToken));
+    // console.dir(jsonDataParsed.report);
+    const jsonData = { start: "2022-01-01", end: "2023-01-01" };
+    const params = JSON.stringify(jsonData);
+    App.showConsole('Elaborazione in corso...', 'info');
+    // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
+    const url = "/fetch_api/dimension/time";
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    const req = new Request(url, init);
+    await fetch(req)
+      .then((response) => {
+        // TODO: Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((response) => {
+        console.log(response);
+        if (response) {
+          App.closeConsole();
+          App.showConsole('result', 'done', 5000);
+        } else {
+          // TODO: Da testare se il codice arriva qui o viene gestito sempre dal catch()
+          debugger;
+          App.showConsole('Errori....', 'error', 5000);
+        }
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+  }
 })();

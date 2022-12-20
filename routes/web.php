@@ -44,15 +44,54 @@ Route::get('/mapping', [MapDatabaseController::class, 'mapping'])->name('web_bi.
 Route::get('/report', function () {
   return view('web_bi.report');
 })->name('web_bi.report'); // page report
+
 Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']); // recupero l'elenco dei database presenti (schema)
 Route::get('/fetch_api/schema/{schema}/tables', [MapDatabaseController::class, 'tables'])->name('web_bi.fetch_api.tables'); // recupero elenco tabelle dello schema selezionato
 Route::get('/fetch_api/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('web_bi.fetch_api.table_info'); // recupero il DESCRIBE della tabella
 Route::get('/report', function () {
   return view('web_bi.report');
 })->name('web_bi.report'); // page report
+
 Route::get('/fetch_api/schema/{schema}/table/{table}/field/{field}/distinct_values', [MapDatabaseController::class, 'distinct_values'])->name('web_bi.fetch_api.distinct_values'); // recupero i valori distinti del campo field passato come parametro
 Route::post('/fetch_api/cube/process', [MapDatabaseController::class, 'process'])->name('web_bi.fetch_api.process'); // processo la query che crea la FX
 Route::post('/fetch_api/cube/sqlInfo', [MapDatabaseController::class, 'sqlInfo'])->name('web_bi.fetch_api.sqlInfo'); // restituisco SQL del process
+
+// creazione dimensione time
+// Route::post('/fetch_api/dimension/time', [MapDatabaseController::class, 'createTimeDimension'])->name('web_bi.fetch_api.time');
+Route::post('/fetch_api/dimension/time', function () {
+  $start = new DateTime('2022-01-01 00:00:00');
+  $end   = new DateTime('2023-01-01 00:00:00');
+  $interval = new DateInterval('P1D');
+  $period = new DatePeriod($start, $interval, $end);
+  $json = (object) null;
+  foreach ($period as $date) {
+    $currDate = new DateTimeImmutable($date->format('Y-m-d'));
+    // calcolo il quarter
+    $quarter = ceil($currDate->format('n') / 3);
+    $json->{$currDate->format('Y-m-d')} = (object) [
+      "date" => $currDate->format('Y-m-d'),
+      "weekday" => $currDate->format('l'),
+      "week" => $currDate->format('W'),
+      "month" => (object) [
+        "id" => $currDate->format('m'),
+        "ds" => $currDate->format('F'),
+        "short" => $currDate->format('M')
+      ],
+      "quarter" => (object) ["id" => $quarter, "ds" => "Q {$quarter}"],
+      "year" => $currDate->format('Y'),
+      "day_of_year" => $currDate->format('z'),
+      // "lastOfMonth" => $current->format('t'),
+      "previous" => (object) [
+        "day" => $currDate->sub(new DateInterval('P1D'))->format('Y-m-d'),
+        "week" => $currDate->sub(new DateInterval('P1W'))->format('Y-m-d'),
+        "month" => $currDate->sub(new DateInterval('P1M'))->format('Y-m-d'),
+        "quarter" => ceil($currDate->sub(new DateInterval('P3M'))->format('n') / 3), // quarter 3 mesi precedenti
+        "year" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d')
+      ]
+    ];
+  }
+  return $json;
+})->name('web_bi.fetch_api.time');
 
 // curl http://127.0.0.1:8000/curl/process/t1cm3v1nnso/schedule
 // http://gaia.automotive-cloud.com/curl/process/j8ykcl339r9/schedule
