@@ -90,6 +90,9 @@ Route::post('/fetch_api/dimension/time', function () {
       ]
     ];
   }
+  // $select = "SELECT ";
+  $sql = "CREATE TABLE decisyon_cache.WEB_BI_TIME ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ;";
+  $result = DB::connection('vertica_odbc')->statement($sql);
   return $json;
 })->name('web_bi.fetch_api.time');
 
