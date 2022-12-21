@@ -1,0 +1,25 @@
+{
+  "name": "venduto last year",
+  "token": "__test__",
+  "include": {
+    "cubes": [
+      "oqiu97a5m7g"
+    ]
+  },
+  "updated_at": "19\/12\/2022, 17:31:41,0",
+  "created_at": "19\/12\/2022, 17:31:41,0",
+  "metric_type": 2,
+  "formula": {
+    "token": "__test__",
+    "aggregateFn": "SUM",
+    "field": "NettoRiga",
+    "distinct": false,
+    "alias": "venduto last year",
+    "table": "DocVenditaDettaglio",
+    "tableAlias": "DocVenditaDettaglio_730",
+    "filters": [
+      "last-year"
+    ]
+  },
+  "type": "ADV_METRIC"
+}
