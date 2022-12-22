@@ -480,7 +480,7 @@
                   <button class="button-icon material-icons-round md-18 md-opacity hide-edit-status" data-info-object-token>drag_handle</button>
                   <button class="button-icon material-icons-round md-18 md-opacity show-removed-status" data-info-object-token>remove</button>
                   <button class="button-icon material-icons-round md-18 md-opacity show-added-status" data-info-object-token>add</button>
-                  <div class="defined v-content" data-object-type="column">
+                  <div class="defined v-content ellipsis" data-object-type="column">
                     <!-- <small field></small> -->
                     <span column class="ellipsis"></span>
                     <!-- <small table></small> -->
@@ -528,7 +528,7 @@
                 <div class="h-content">
                   <button class="button-icon material-icons-round md-18 md-opacity show-removed-status" data-info-object-token>remove</button>
                   <button class="button-icon material-icons-round md-18 md-opacity show-added-status" data-info-object-token>add</button>
-                  <div class="defined v-content" data-object-type="filter">
+                  <div class="defined v-content ellipsis" data-object-type="filter">
                     <span filter class="ellipsis"></span>
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info data-info-object-token tooltip="Info" flow="bottom" disabled>info</button>
@@ -574,7 +574,7 @@
                   <button class="button-icon material-icons-round md-18 md-opacity hide-edit-status" data-info-object-token>drag_handle</button>
                   <button class="button-icon material-icons-round md-18 md-opacity show-removed-status" data-info-object-token>remove</button>
                   <button class="button-icon material-icons-round md-18 md-opacity show-added-status" data-info-object-token>add</button>
-                  <div class="defined v-content" data-object-type="metric">
+                  <div class="defined v-content ellipsis" data-object-type="metric">
                     <span metric class="ellipsis"></span>
                   </div>
                   <button class="button-icon material-icons-round md-18" data-info-object-token tooltip="Dettaglio" flow="bottom">info</button>
@@ -606,7 +606,7 @@
                   <button class="button-icon material-icons-round md-18 md-opacity hide-edit-status" data-info-object-token>drag_handle</button>
                   <button class="button-icon material-icons-round md-18 md-opacity show-removed-status" data-info-object-token>remove</button>
                   <button class="button-icon material-icons-round md-18 md-opacity show-added-status" data-info-object-token>add</button>
-                  <div class="defined v-content" data-object-type="composite-metric">
+                  <div class="defined v-content ellipsis" data-object-type="composite-metric">
                     <span metric class="ellipsis"></span>
                     {{-- TODO: per le metriche composte, visualizzarne, nel popup, l'elenco dei cubi utilizzati dalle metriche all'interno della formula --}}
                     <div class="smalls"></div>

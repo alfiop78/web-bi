@@ -27,22 +27,7 @@ ul > li{list-style: none;padding: 6px;margin: 2px 8px;}
 .data-item-defined.added .show-added-status {display: block;}
 
 .list{color: #494949;}
-.h-content{display: grid; align-items: center;}
-.h-content{grid-template-columns:100%;}
-.data-item-defined > *[data-item-type="column"] > .h-content{grid-template-columns: auto 70% auto auto;}
-.data-item-defined > *[data-item-type="filter"] > .h-content{grid-template-columns: 80% auto auto;}
-.data-item-defined.removed > *[data-item-type="filter"] .h-content,
-.data-item-defined.added > *[data-item-type="filter"] .h-content {grid-template-columns:auto 70% auto auto;} 
-.data-item-defined > *[data-item-type="metric"] > .h-content{grid-template-columns: auto 70% auto auto;}
-.data-item-defined > *[data-item-type="c-metric"] > .h-content{grid-template-columns: auto 70% auto auto;}
-
-.data-item > *[data-item-type="column"] .h-content {grid-template-columns: 85% auto;}
-.data-item > *[data-item-type="filter"] .h-content,
-.data-item > *[data-item-type="metric"] .h-content,
-.data-item > *[data-item-type="c-metric"] .h-content
-{grid-template-columns: 80% auto auto;}
-
-*[data-item-type="process"] .h-content{display:grid; grid-template-columns: 78% auto auto auto;}
+.h-content{display: flex; align-items: center;}
 
 .v-content{display: flex;flex-flow: column;width: 100%;}
 .columns-color {color: var(--main-columns-color);}

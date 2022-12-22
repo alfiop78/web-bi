@@ -423,8 +423,8 @@
     <section class="data-item list" data-element-search data-label data-sublist-fields data-searchable>
       <div class="selectable" data-label>
         <div class="h-content">
-          <div class="v-content">
-            <span data-item></span>
+          <div class="v-content ellipsis">
+            <span class="ellipsis" data-item></span>
           </div>
           <i data-id="column-icon" class="material-icons-round md-pad-4 md-18">view_list</i>
           <i data-id="hierarchy-icon" class="material-icons-round md-pad-4 md-18">insert_link</i>
