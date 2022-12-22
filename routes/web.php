@@ -15,6 +15,9 @@ use App\Http\Controllers\BIfilterController;
 use App\Http\Controllers\BIprocessController;
 // uso il Model BIprocess che viene utilizzato nella route curlprocess (web_bi.schedule_report)
 use App\Models\BIprocess;
+// test 22.12.2022
+use Illuminate\Support\Facades\DB;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -60,7 +63,7 @@ Route::post('/fetch_api/cube/sqlInfo', [MapDatabaseController::class, 'sqlInfo']
 // Route::post('/fetch_api/dimension/time', [MapDatabaseController::class, 'createTimeDimension'])->name('web_bi.fetch_api.time');
 Route::post('/fetch_api/dimension/time', function () {
   $start = new DateTime('2022-01-01 00:00:00');
-  $end   = new DateTime('2023-01-01 00:00:00');
+  $end   = new DateTime('2022-02-01 00:00:00');
   $interval = new DateInterval('P1D');
   $period = new DatePeriod($start, $interval, $end);
   $json = (object) null;
@@ -90,10 +93,34 @@ Route::post('/fetch_api/dimension/time', function () {
       ]
     ];
   }
-  // $select = "SELECT ";
-  $sql = "CREATE TABLE decisyon_cache.WEB_BI_TIME ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ;";
-  $result = DB::connection('vertica_odbc')->statement($sql);
-  return $json;
+  if (!DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable('WEB_BI_TIME')) {
+    // la tabella non esiste, la creo
+    $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WEB_BI_TIME (
+    date DATE NOT NULL PRIMARY KEY,
+    json LONG VARCHAR) INCLUDE SCHEMA PRIVILEGES"; // LONG VARCHAR
+    $result = DB::connection('vertica_odbc')->statement($sql);
+    // if (!$result) echo "tabella creata";
+    // var_dump($result);
+  }
+  // var_dump($json);
+  echo "\nstart JSON :" . date('H:i:s', time());
+
+  foreach ($json as $date => $value) {
+    $str = json_encode($value);
+    // $data[] = ["date" => $date, "json" => 't'];
+    // $result_insert = DB::connection('vertica_odbc')->insert('INSERT INTO decisyon_cache.WEB_BI_TIME (date, json) VALUES(?, ?)', [$date, 'test']);
+    $result_insert = DB::connection('vertica_odbc')->table('decisyon_cache.WEB_BI_TIME')->insert([
+      'date' => "{$date}",
+      'json' => "{$str}"
+    ]);
+  }
+  // echo "\nstart INSERT :" . date('H:i:s', time());
+  // echo "\nend JSON :" . date('H:i:s', time());
+  $result_insert = DB::connection('vertica_odbc')->statement('COMMIT;');
+  // echo "\nend COMMIT :" . date('H:i:s', time());
+  // $test = DB::connection("vertica_odbc")->select("SELECT * FROM decisyon_cache.WEB_BI_TIME ORDER BY date;");
+  // dd($test);
+  return $result_insert;
 })->name('web_bi.fetch_api.time');
 
 // curl http://127.0.0.1:8000/curl/process/t1cm3v1nnso/schedule
