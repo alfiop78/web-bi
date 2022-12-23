@@ -15,6 +15,10 @@ dialog[open].struct {display: grid; grid-template-columns: 30% 1fr; grid-column-
 .dialog-sections{display: grid; grid-template-rows: auto 1fr auto; height: 100%;}
 dialog.hierarchy-struct .dialog-sections{display: grid; grid-template-rows: auto 1fr auto; height: 100%; padding: 2em .5em;}
 dialog.struct .dialog-sections{display: grid; grid-template-rows: auto 1fr auto; height: 100%; padding: 2em .5em;}
+#dialog-metric .dialog-sections{display:grid; grid-template-rows: auto auto 1fr auto; height:100%; padding: 2em .5em;}
+#dialog-metric .auto-fit{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));}
+#dialog-metric .stepLayout{display:grid; grid-template-columns: 1fr 1fr auto;}
+#dialog-metric .stepLayout > .sectionLists.buttons{display:flex;flex-direction:column; justify-content:center;padding:1em;}
 /*dialog > section{padding: 16px;}*/
 dialog{padding: 2em;}
 dialog h4{padding: 0px 0px 1em;}
@@ -40,7 +44,6 @@ fieldset.auto-grid{display: grid; grid-template-rows: auto 1fr auto;}
 
 #dialog-filter .stepLayout{grid-template-columns: 25% 25% auto; grid-column-gap: 2%; height: inherit;margin : 0 2em;}
 #dialog-metric-filter .stepLayout{grid-template-columns: 100%; height: inherit; margin: 0 2em;}
-#dialog-metric .stepLayout{grid-template-columns: 20% 20% auto; grid-column-gap: 2%; height: inherit;margin: 0 2em;}
 dialog.hierarchy-struct .stepLayout{grid-template-columns: 35% 1fr; grid-column-gap: 1%; margin: 0 1em;}
 
 /* dialog versioning */

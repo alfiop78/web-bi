@@ -246,3 +246,5 @@ span.markContent {
 .markContent > i {position: absolute; left: -7px; top: -7px; color: black; visibility: hidden;}
 .markContent:hover > i {position: absolute; left: -7px; top: -7px; color: black; visibility: visible;}
 .markContent > i:hover {cursor: pointer;}
+
+.flex-columns {display:flex; flex-direction:column;}

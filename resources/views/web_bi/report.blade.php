@@ -261,6 +261,19 @@
     <section class="dialog-sections" data-table-name>
       <h4>Creazione di una nuova metrica per il cubo <span data-cube-selected></span></h4>
 
+      <div class="name-alias auto-fit">
+        <div class="md-field">
+          <input type="text" id="metric-name" value="" autocomplete="off" disabled />
+          <label for="metric-name" class="">Nome</label>
+        </div>
+
+        <div class="md-field">
+          <input type="text" id="alias-metric" value="" autocomplete="off" disabled />
+          <label for="alias-metrics" class="">Alias</label>
+          <p class="helper"></p>
+        </div>
+      </div>
+
       <div class="stepLayout">
         {{-- metriche mappate --}}
         <section class="sectionLists parent-ul-search">
@@ -340,25 +353,10 @@
           </label>
         </section>
 
-        <section class="sectionLists">
-          <h5>SQL</h5>
-          <div class="name-alias">
-            <div class="md-field">
-              <input type="text" id="metric-name" value="" autocomplete="off" disabled />
-              <label for="metric-name" class="">Nome</label>
-            </div>
-
-            <div class="md-field">
-              <input type="text" id="alias-metric" value="" autocomplete="off" disabled />
-              <label for="alias-metrics" class="">Alias</label>
-              <p class="helper"></p>
-            </div>
-          </div>
-          <div class="md-field">
-            <textarea id="metricSQLFormula" name="metricSQL" rows="8" cols="25" placeholder="SQL" disabled></textarea>
-          </div>
-          <button id="metric-filtered" type="button" name="metric-filtered" class="md-button">Imposta filtri</button>
-          <button id="btnMetricSave" type="button" name="save" class="md-button" disabled>salva</button>
+        <section class="sectionLists buttons">
+          <button id="metric-filtered" type="button" name="metric-filtered" class="button-icon material-icons-round md-24 filters margin-vert" tooltip="Imposta filtri" flow="left">filter_alt</button>
+          <button id="btn-timing-functions" type="button" name="timing-functions" class="button-icon material-icons-round md-24 margin-vert" tooltip="Funzioni temporali" flow="left">history</button>
+          <button id="btnMetricSave" type="button" name="save" class="button-icon material-icons-round md-24 margin-vert" tooltip="Salva" flow="left" disabled>save</button>
         </section>
 
       </div>

@@ -97,7 +97,7 @@ Route::post('/fetch_api/dimension/time', function () {
     // la tabella non esiste, la creo
     $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WEB_BI_TIME (
     date DATE NOT NULL PRIMARY KEY,
-    json LONG VARCHAR) INCLUDE SCHEMA PRIVILEGES"; // LONG VARCHAR
+    json LONG VARCHAR) INCLUDE SCHEMA PRIVILEGES";
     $result = DB::connection('vertica_odbc')->statement($sql);
     // if (!$result) echo "tabella creata";
     // var_dump($result);
@@ -107,19 +107,14 @@ Route::post('/fetch_api/dimension/time', function () {
 
   foreach ($json as $date => $value) {
     $str = json_encode($value);
-    // $data[] = ["date" => $date, "json" => 't'];
-    // $result_insert = DB::connection('vertica_odbc')->insert('INSERT INTO decisyon_cache.WEB_BI_TIME (date, json) VALUES(?, ?)', [$date, 'test']);
+    // NOTE: da vertica 11 è possibile fare la INSERT INTO con più record con la seguente sintassi:
+    // INSERT INTO nometabella (field1, field2) VALUES (1, 'test'), (2, 'test'), (3, 'test')....
     $result_insert = DB::connection('vertica_odbc')->table('decisyon_cache.WEB_BI_TIME')->insert([
       'date' => "{$date}",
       'json' => "{$str}"
     ]);
   }
-  // echo "\nstart INSERT :" . date('H:i:s', time());
-  // echo "\nend JSON :" . date('H:i:s', time());
   $result_insert = DB::connection('vertica_odbc')->statement('COMMIT;');
-  // echo "\nend COMMIT :" . date('H:i:s', time());
-  // $test = DB::connection("vertica_odbc")->select("SELECT * FROM decisyon_cache.WEB_BI_TIME ORDER BY date;");
-  // dd($test);
   return $result_insert;
 })->name('web_bi.fetch_api.time');
 

@@ -4,15 +4,9 @@
 
 /*pages*/
 
-/* dialog*/
-.name-alias{display: grid;grid-template-columns: auto auto;}
-/* dialog*/
-
 /* dialog metric*/
 .formulaDefine section{margin: 16px;}
 /* dialog metric*/
-
-
 
 th{position: relative;}
 th i.material-icons{position: absolute;right: 8px;display: inline-table;}
