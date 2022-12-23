@@ -11,6 +11,7 @@ dialog.large-dialog{max-height: 90%; height: 75%; max-width: 90%; min-width: 80%
 /*dialog con struttura gerarchica*/
 dialog[open].hierarchy-struct {display: grid; grid-template-columns: 25% 1fr; grid-column-gap: 2%;padding: 0px;}
 dialog[open].struct {display: grid; grid-template-columns: 30% 1fr; grid-column-gap: 1%;padding: 0px;}
+dialog[open].struct#dialog-metric {display: grid; grid-template-columns: 30% 1fr; grid-column-gap:unset; padding: 0px;}
 
 .dialog-sections{display: grid; grid-template-rows: auto 1fr auto; height: 100%;}
 dialog.hierarchy-struct .dialog-sections{display: grid; grid-template-rows: auto 1fr auto; height: 100%; padding: 2em .5em;}
@@ -18,7 +19,7 @@ dialog.struct .dialog-sections{display: grid; grid-template-rows: auto 1fr auto;
 #dialog-metric .dialog-sections{display:grid; grid-template-rows: auto auto 1fr auto; height:100%; padding: 2em .5em;}
 #dialog-metric .auto-fit{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));}
 #dialog-metric .stepLayout{display:grid; grid-template-columns: 1fr 1fr auto;}
-#dialog-metric .stepLayout > .sectionLists.buttons{display:flex;flex-direction:column; justify-content:center;padding:1em;}
+#dialog-metric .stepLayout > .sectionLists.buttons{display:flex;flex-direction:column; justify-content:center;padding:.5em;}
 /*dialog > section{padding: 16px;}*/
 dialog{padding: 2em;}
 dialog h4{padding: 0px 0px 1em;}

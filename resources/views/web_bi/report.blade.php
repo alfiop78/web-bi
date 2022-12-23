@@ -244,6 +244,100 @@
     </section>
   </dialog>
 
+  <dialog id="dialog-timing-functions">
+    <section class="dialog-sections">
+      <h4>Funzioni temporali</h4>
+      <div class="stepLayout">
+        <section class="sectionLists parent-ul-base">
+          <div class="md-field">
+            <input type="search" id="dialog-metric-filter-search" data-element-search="search-filters-for-metric" value autocomplete="off" />
+            <label for="dialog-metric-filter-search" class="">Ricerca</label>
+          </div>
+          <div class="relative-ul">
+            <ul id="ul-metric-filters" class="absolute custom-scrollbar"></ul>
+          </div>
+        </section>
+      </div>
+      <!--<div class="stepLayout">
+        <section class="sectionLists parent-ul-base">
+          <div class="md-field">
+            <input type="search" id="dialog-metric-filter-search" data-element-search="search-filters-for-metric" value autocomplete="off" />
+            <label for="dialog-metric-filter-search" class="">Ricerca</label>
+          </div>
+          <div class="relative-ul">
+            <ul id="ul-timing-functions" class="absolute custom-scrollbar">
+              <section>
+                <p>Last Period/Day</p>
+                <span>descrizione</span>
+              </section>
+              <section>
+                <p>Last Week</p>
+                <span>descrizione</span>
+              </section>
+              <section>
+                <p>Last Month</p>
+                <span>descrizione</span>
+              </section>
+              <section>
+                <p>Last Quarter</p>
+                <span>descrizione</span>
+              </section>
+              <section>
+                <p>Last Year</p>
+                <span>descrizione</span>
+              </section>
+              <section>
+                <p>Last Year MAT</p>
+                <span>descrizione</span>
+              </section>
+              <section>
+                <p>Last Year MTD</p>
+                <span>descrizione</span>
+              </section>
+              <section>
+                <p>Last Year YTD</p>
+                <span>descrizione</span>
+              </section>
+              <section>
+                <p>Last Year YTM</p>
+                <span>descrizione</span>
+              </section>
+              <section>
+                <p>MAT</p>
+                <span>descrizione</span>
+              </section>
+              <section>
+                <p>Month To Date</p>
+                <span>descrizione</span>
+              </section>
+              <section>
+                <p>Year To Date</p>
+                <span>descrizione</span>
+              </section>
+              <section>
+                <p>Year To Month</p>
+                <span>descrizione</span>
+              </section>
+              <section>
+                <p>Last 3 Month</p>
+                <span>descrizione</span>
+              </section>
+              <section>
+                <p>Last 2 Month</p>
+                <span>descrizione</span>
+              </section>
+            </ul>
+          </div>
+        </section>-->
+      </div>
+      <div class="dialog-buttons">
+        <button type="button" name="cancel" class="md-button">annulla</button>
+        <button id="btnMetricTimingFnDone" type="button" name="metric-filter-done" class="md-button">ok</button>
+      </div>
+    </section>
+
+  </dialog>
+
   <dialog id="dialog-metric" class="large-dialog struct">
     <section class="exist-struct">
       <div class="parent-ul-search">

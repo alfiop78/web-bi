@@ -44,6 +44,8 @@ var List = new Lists();
     dialogValue: document.getElementById('dialog-value'),
     dialogMetric: document.getElementById('dialog-metric'),
     dialogCompositeMetric: document.getElementById('dialog-composite-metric'),
+    dialogTimingFn: document.getElementById('dialog-timing-functions'),
+
     btnFilterSave: document.getElementById('btnFilterSave'), //tasto salva nella dialog filter
     btnFilterDone: document.getElementById('btnFilterDone'), //tasto fatto nella dialog filter
     btnColumnSave: document.getElementById('btnColumnSave'), // tasto ok nella dialogColumns
@@ -2090,4 +2092,9 @@ var List = new Lists();
   app.dialogColumns.addEventListener('close', () => app.resetDialogColumn());
 
   app.dialogMetricFilter.addEventListener('open', () => document.getElementById('dialog-metric-filter-search').value = "");
+
+  document.querySelector("#btn-timing-functions").onclick = (e) => {
+    app.dialogTimingFn.showModal();
+  }
+
 })();
