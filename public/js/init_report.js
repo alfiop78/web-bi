@@ -943,7 +943,7 @@ var List = new Lists();
     let associatedFilters = new Set();
     document.querySelectorAll('#ul-metric-filters .selectable[data-selected]').forEach(filterSelected => associatedFilters.add(filterSelected.dataset.filterToken));
     // verifico se ci sono timing-functions selezionate per questa metrica
-    let timingFn;
+    let timingFn = null;
     if (document.querySelector("#ul-timing-functions > section[data-selected]")) {
       timingFn = document.querySelector("#ul-timing-functions > section[data-selected]").dataset.value;
     }
@@ -977,6 +977,7 @@ var List = new Lists();
         formulaObj.tableAlias = Query.tableAlias
         formulaObj.filters = [...associatedFilters];
         formulaObj.timingFn = timingFn;
+        debugger;
         metricObj.formula = formulaObj;
         metricObj.type = 'ADV_METRIC';
         break;
