@@ -45,6 +45,7 @@ fieldset.auto-grid{display: grid; grid-template-rows: auto 1fr auto;}
 
 #dialog-filter .stepLayout{grid-template-columns: 25% 25% auto; grid-column-gap: 2%; height: inherit;margin : 0 2em;}
 #dialog-metric-filter .stepLayout{grid-template-columns: 100%; height: inherit; margin: 0 2em;}
+#dialog-timing-functions .stepLayout{grid-template-columns: 100%; height: inherit; margin: 0 2em;}
 dialog.hierarchy-struct .stepLayout{grid-template-columns: 35% 1fr; grid-column-gap: 1%; margin: 0 1em;}
 
 /* dialog versioning */

@@ -161,6 +161,7 @@ class Queries {
         filters.set(filterToken, { SQL: StorageFilter.selected.formula });
         // se su quseto filtro sono presenti gerarchie...
         if (StorageFilter.selected.include.hasOwnProperty('hierarchies')) {
+          // TODO: tableId non è utilizzato
           for (const [token, tableId] of Object.entries(StorageFilter.selected.include.hierarchies)) {
             const hier = document.querySelector("#ul-hierarchies .unselectable[data-hier-token='" + token + "']");
             hier.querySelectorAll("small").forEach(tableRef => {
@@ -196,12 +197,27 @@ class Queries {
             FROM.set(StorageCube.selected.alias, `${StorageCube.selected.schema}.${StorageCube.selected.FACT} AS ${StorageCube.selected.alias}`);
           });
         }
-        // debugger;
-        this.OB['ADV_METRIC'].get(token).FROM = Object.fromEntries(FROM);
-        if (WHERE.size !== 0) this.OB['ADV_METRIC'].get(token).WHERE = Object.fromEntries(WHERE);
-        this.OB['ADV_METRIC'].get(token).filters = Object.fromEntries(filters);
       });
-      // this.filteredMetrics = object;
+      // verifico se la metrica adv ha qualche timing-functions
+      if (StorageMetric.selected.formula.hasOwnProperty('timingFn')) {
+        // recupero le gerarchie (data-include-query) appartenenti alla TIME
+        // prima tabella della gerarchia hier-time inclusa nel report (data-include-query)
+        // TODO: rinominare il token per la dimensione TIME in "hier-time" in fase di creazione della dimensione TIME
+        const hierTime = document.querySelector("#ul-hierarchies .unselectable[data-hier-token='ix5ckgq']");
+        hierTime.querySelectorAll("small").forEach(tableRef => {
+          FROM.set(tableRef.dataset.tableAlias, `${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);
+          StorageDimension.selected = tableRef.dataset.dimensionToken;
+          // per l'ultima tabella della gerarchia non esiste la join perchè è quella che si lega al cubo e il legame è fatto nella proprietà 'cubes' della dimensione
+          if (StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias]) {
+            for (const [token, join] of Object.entries(StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias])) {
+              WHERE.set(token, join);
+            }
+          }
+        });
+      }
+      this.OB['ADV_METRIC'].get(token).FROM = Object.fromEntries(FROM);
+      if (WHERE.size !== 0) this.OB['ADV_METRIC'].get(token).WHERE = Object.fromEntries(WHERE);
+      this.OB['ADV_METRIC'].get(token).filters = Object.fromEntries(filters);
     }
   }
 

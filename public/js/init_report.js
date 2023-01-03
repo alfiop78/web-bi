@@ -942,11 +942,15 @@ var List = new Lists();
     // verifico se ci sono filtri da associare a questa metrica
     let associatedFilters = new Set();
     document.querySelectorAll('#ul-metric-filters .selectable[data-selected]').forEach(filterSelected => associatedFilters.add(filterSelected.dataset.filterToken));
+    // verifico se ci sono timing-functions selezionate per questa metrica
+    let timingFn;
+    if (document.querySelector("#ul-timing-functions > section[data-selected]")) {
+      timingFn = document.querySelector("#ul-timing-functions > section[data-selected]").dataset.value;
+    }
     let metricObj = {
       name: inputName.value,
       token,
       include: { cubes: [StorageCube.selected.token] },
-      // cube: StorageCube.selected.token,
       updated_at: date.toLocaleDateString('it-IT', options)
     };
     metricObj.created_at = (e.target.dataset.token) ? StorageMetric.selected.created_at : date.toLocaleDateString('it-IT', options);
@@ -954,7 +958,7 @@ var List = new Lists();
     * 2 : metrica di base con filtri
     * 3 : metrica di base composta, con filtri
     */
-    if (associatedFilters.size > 0) metric_type = (metric_type === 0) ? 2 : 3;
+    if (associatedFilters.size > 0 || timingFn) metric_type = (metric_type === 0) ? 2 : 3;
     metricObj.metric_type = metric_type;
 
     let formulaObj = { token, aggregateFn, field: Query.field, distinct: distinctOption, alias: inputAlias.value };
@@ -972,6 +976,7 @@ var List = new Lists();
         formulaObj.table = Query.table;
         formulaObj.tableAlias = Query.tableAlias
         formulaObj.filters = [...associatedFilters];
+        formulaObj.timingFn = timingFn;
         metricObj.formula = formulaObj;
         metricObj.type = 'ADV_METRIC';
         break;
@@ -979,6 +984,7 @@ var List = new Lists();
         // base composta filtrata (es.: prezzo * qta impostate sul cubo e con filtro)
         metricObj.fieldName = Query.fieldName;
         formulaObj.filters = [...associatedFilters];
+        formulaObj.timingFn = timingFn;
         metricObj.formula = formulaObj;
         metricObj.type = 'ADV_METRIC';
         break;
@@ -2093,8 +2099,14 @@ var List = new Lists();
 
   app.dialogMetricFilter.addEventListener('open', () => document.getElementById('dialog-metric-filter-search').value = "");
 
-  document.querySelector("#btn-timing-functions").onclick = (e) => {
-    app.dialogTimingFn.showModal();
-  }
+  document.querySelector("#btn-timing-functions").onclick = () => app.dialogTimingFn.showModal();
 
+  document.querySelectorAll("#ul-timing-functions > section").forEach((fn) => {
+    fn.onclick = (e) => {
+      console.log(e.currentTarget.dataset.value);
+      e.currentTarget.dataset.selected = 'true';
+    }
+  });
+
+  document.querySelector("#btnMetricTimingFnDone").onclick = () => app.dialogTimingFn.close();
 })();

@@ -244,20 +244,9 @@
     </section>
   </dialog>
 
-  <dialog id="dialog-timing-functions">
+  <dialog id="dialog-timing-functions" class="small-dialog">
     <section class="dialog-sections">
       <h4>Funzioni temporali</h4>
-      <div class="stepLayout">
-        <section class="sectionLists parent-ul-base">
-          <div class="md-field">
-            <input type="search" id="dialog-metric-filter-search" data-element-search="search-filters-for-metric" value autocomplete="off" />
-            <label for="dialog-metric-filter-search" class="">Ricerca</label>
-          </div>
-          <div class="relative-ul">
-            <ul id="ul-metric-filters" class="absolute custom-scrollbar"></ul>
-          </div>
-        </section>
-      </div>
       <!--<div class="stepLayout">
         <section class="sectionLists parent-ul-base">
           <div class="md-field">
@@ -270,65 +259,81 @@
                 <p>Last Period/Day</p>
                 <span>descrizione</span>
               </section>
+            </ul>
+          </div>
+        </section>
+      </div>-->
+      <div class="stepLayout">
+        <section class="sectionLists parent-ul-base">
+          <div class="md-field">
+            <input type="search" id="dialog-metric-filter-search" data-element-search="search-filters-for-metric" value autocomplete="off" />
+            <label for="dialog-metric-filter-search" class="">Ricerca</label>
+          </div>
+          <div class="relative-ul">
+            <ul id="ul-timing-functions" class="absolute custom-scrollbar">
+              <section>
+                <p>Last Period/Day</p>
+                <small>Periodo temporale precedente, rispetto al livello più basso presente nel report.<br /> Ad esempio se nel report è presente il livello giorno, la funzione presenta i dati del giorno precedente, se invece è presente la settimana, presenta i dati della settimana precedente, ecc</small>
+              </section>
               <section>
                 <p>Last Week</p>
-                <span>descrizione</span>
+                <small>descrizione</small>
               </section>
               <section>
                 <p>Last Month</p>
-                <span>descrizione</span>
+                <small>descrizione</small>
               </section>
               <section>
                 <p>Last Quarter</p>
-                <span>descrizione</span>
+                <small>descrizione</small>
               </section>
-              <section>
+              <section data-value="last-year">
                 <p>Last Year</p>
-                <span>descrizione</span>
-              </section>
-              <section>
-                <p>Last Year MAT</p>
-                <span>descrizione</span>
-              </section>
-              <section>
-                <p>Last Year MTD</p>
-                <span>descrizione</span>
-              </section>
-              <section>
-                <p>Last Year YTD</p>
-                <span>descrizione</span>
-              </section>
-              <section>
-                <p>Last Year YTM</p>
-                <span>descrizione</span>
+                <small>La funzione presenta i dati relativi all’anno precedente, rispetto al livello presente nel report.<br /> Ad esempio se nel report è presente il livello mese, la funzione presenta i dati relativi allo stesso mese, ma dell’anno precedente, per il livello trimestre, presenta invece i dati dello stesso trimestre, ma dell’anno precedente</small>
               </section>
               <section>
                 <p>MAT</p>
-                <span>descrizione</span>
+                <small>La funzione aggrega i dati relativi ai 12 mesi precedenti quello corrente.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito.</small>
+              </section>
+              <section>
+                <p>Last Year MAT</p>
+                <small>Analoga alla MAT, solamente che è applicata rispetto al mese corrente dell’anno precedente.</small>
               </section>
               <section>
                 <p>Month To Date</p>
-                <span>descrizione</span>
+                <small>La funzione aggrega i dati da inizio mese fino al giorno corrente.<br /> Il livello DAY deve essere presente nel report</small>
+              </section>
+              <section>
+                <p>Last Year MTD</p>
+                <small>Analoga alla Month to date, solamente che è applicata sui dati dell’anno precedente: da inizio mese al giorno corrente dell’anno precedente.</small>
               </section>
               <section>
                 <p>Year To Date</p>
-                <span>descrizione</span>
+                <small>La funzione aggrega i dati da inizio anno fino al giorno corrente. Il livello DAY deve essere presente nel report.</small>
+              </section>
+              <section>
+                <p>Last Year YTD</p>
+                <small>Analoga alla Year to date, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al giorno corrente, sempre riferito all’anno precedente</small>
               </section>
               <section>
                 <p>Year To Month</p>
-                <span>descrizione</span>
+                <span>La funzione aggrega i dati da inizio anno fino al mese corrente. Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</span>
               </section>
               <section>
-                <p>Last 3 Month</p>
-                <span>descrizione</span>
+                <p>Last Year YTM</p>
+                <small>Analoga alla Year to month, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al mese corrente, sempre riferito all’anno precedente</small>
               </section>
               <section>
                 <p>Last 2 Month</p>
-                <span>descrizione</span>
+                <small>La funzione presenta i dati relativi ai due mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</small>
+              </section>
+              <section>
+                <p>Last 3 Month</p>
+                <small>La funzione presenta i dati relativi ai tre mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</small>
               </section>
             </ul>
           </div>
-        </section>-->
+        </section>
       </div>
       <div class="dialog-buttons">
         <button type="button" name="cancel" class="md-button">annulla</button>
