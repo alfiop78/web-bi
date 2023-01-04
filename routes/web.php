@@ -73,7 +73,9 @@ Route::post('/fetch_api/dimension/time', function () {
     $quarter = ceil($currDate->format('n') / 3);
     $json->{$currDate->format('Y-m-d')} = (object) [
       "date" => $currDate->format('Y-m-d'),
+      "trans_ly" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d'),
       "weekday" => $currDate->format('l'),
+      // "day" => (object)
       "week" => $currDate->format('W'),
       "month" => (object) [
         "id" => $currDate->format('m'),
@@ -84,7 +86,7 @@ Route::post('/fetch_api/dimension/time', function () {
       "year" => $currDate->format('Y'),
       "day_of_year" => $currDate->format('z'),
       // "lastOfMonth" => $current->format('t'),
-      "previous" => (object) [
+      "last" => (object) [
         "day" => $currDate->sub(new DateInterval('P1D'))->format('Y-m-d'),
         "week" => $currDate->sub(new DateInterval('P1W'))->format('Y-m-d'),
         "month" => $currDate->sub(new DateInterval('P1M'))->format('Y-m-d'),
@@ -97,23 +99,43 @@ Route::post('/fetch_api/dimension/time', function () {
     // la tabella non esiste, la creo
     $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WEB_BI_TIME (
     date DATE NOT NULL PRIMARY KEY,
-    json LONG VARCHAR) INCLUDE SCHEMA PRIVILEGES";
+    trans_ly DATE,
+    year INTEGER,
+    quarter VARCHAR,
+    month VARCHAR,
+    week CHAR(2),
+    day VARCHAR,
+    last VARCHAR(1000)
+    ) INCLUDE SCHEMA PRIVILEGES";
     $result = DB::connection('vertica_odbc')->statement($sql);
     // if (!$result) echo "tabella creata";
     // var_dump($result);
+    //last VARCHAR,
+    //json VARCHAR(2000)
   }
   // var_dump($json);
   echo "\nstart JSON :" . date('H:i:s', time());
 
   foreach ($json as $date => $value) {
-    $str = json_encode($value);
+    // $str = json_encode($value);
+    // dd($value->last);
+    // $quarter = json_encode($value->quarter);
+    // $month = json_encode($value->month);
     // NOTE: da vertica 11 è possibile fare la INSERT INTO con più record con la seguente sintassi:
     // INSERT INTO nometabella (field1, field2) VALUES (1, 'test'), (2, 'test'), (3, 'test')....
     $result_insert = DB::connection('vertica_odbc')->table('decisyon_cache.WEB_BI_TIME')->insert([
       'date' => "{$date}",
-      'json' => "{$str}"
+      'trans_ly' => "{$value->trans_ly}",
+      'year' => $value->year,
+      'quarter' => json_encode($value->quarter),
+      'month' => json_encode($value->month),
+      'week' => $value->week,
+      'day' => json_encode(['weekday' => $value->weekday, 'day_of_year' => $value->day_of_year]),
+      'last' => json_encode($value->last)
+      // 'json' => "{$str}"
     ]);
   }
+  echo "\nend JSON :" . date('H:i:s', time());
   $result_insert = DB::connection('vertica_odbc')->statement('COMMIT;');
   return $result_insert;
 })->name('web_bi.fetch_api.time');

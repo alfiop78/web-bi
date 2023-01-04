@@ -182,8 +182,14 @@ class Cube
   private function setFiltersMetricTable($filters)
   {
     $this->filters_metricTable = [];
-    foreach ($filters as $filter) {
-      if (!in_array($filter->SQL, $this->filters_metricTable)) $this->filters_metricTable[] = $filter->SQL;
+    foreach ($filters as $token => $filter) {
+      // dd($token, $filter);
+      $timingFunctions = ['last-year', 'altre'];
+      if (in_array($token, $timingFunctions)) {
+        // è una funzione temporale
+      } else {
+        if (!in_array($filter->SQL, $this->filters_metricTable)) $this->filters_metricTable[] = $filter->SQL;
+      }
     }
   }
 

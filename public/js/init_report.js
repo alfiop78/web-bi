@@ -975,8 +975,8 @@ var List = new Lists();
         // base filtrata (es.: venduto con filtro manodopera)
         formulaObj.table = Query.table;
         formulaObj.tableAlias = Query.tableAlias
-        formulaObj.filters = [...associatedFilters];
-        formulaObj.timingFn = timingFn;
+        formulaObj.filters = [...associatedFilters, timingFn];
+        // formulaObj.timingFn = timingFn;
         debugger;
         metricObj.formula = formulaObj;
         metricObj.type = 'ADV_METRIC';
@@ -985,7 +985,7 @@ var List = new Lists();
         // base composta filtrata (es.: prezzo * qta impostate sul cubo e con filtro)
         metricObj.fieldName = Query.fieldName;
         formulaObj.filters = [...associatedFilters];
-        formulaObj.timingFn = timingFn;
+        // formulaObj.timingFn = timingFn;
         metricObj.formula = formulaObj;
         metricObj.type = 'ADV_METRIC';
         break;
