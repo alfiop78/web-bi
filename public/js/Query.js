@@ -162,20 +162,21 @@ class Queries {
         // TODO: verifico qui se il filtro incluso nella metrica è una timing-functions
         if (['last-year', 'altre-fn-temporali'].includes(filterToken)) {
           // è un filtro temporale
-          filters.set(filterToken, { SQL: 'TRANS_LY', schema: 'automotive_bi_data', table: 'DocVenditaDettaglio_730', field: 'DataDocumento' });
           // recupero le gerarchie (data-include-query) appartenenti alla TIME
           // prima tabella della gerarchia hier-time inclusa nel report (data-include-query)
           // TODO: rinominare il token per la dimensione TIME in "hier-time" in fase di creazione della dimensione TIME
-          const hierTime = document.querySelector("#ul-hierarchies .unselectable[data-hier-token='ix5ckgq']");
+          const hierTime = document.querySelector("#ul-hierarchies .unselectable[data-hier-token='ebvwvjz']");
           hierTime.querySelectorAll("small").forEach(tableRef => {
             FROM.set(tableRef.dataset.tableAlias, `${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);
-            StorageDimension.selected = tableRef.dataset.dimensionToken;
+            // funzione temporale last-year
+            filters.set(filterToken, { table: tableRef.dataset.tableAlias, field: 'last', func: 'year', fn: filterToken });
+            // StorageDimension.selected = tableRef.dataset.dimensionToken;
             // per l'ultima tabella della gerarchia non esiste la join perchè è quella che si lega al cubo e il legame è fatto nella proprietà 'cubes' della dimensione
-            if (StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias]) {
+            /* if (StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias]) {
               for (const [token, join] of Object.entries(StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias])) {
                 WHERE.set(token, join);
               }
-            }
+            } */
           });
         } else {
           StorageFilter.selected = filterToken;

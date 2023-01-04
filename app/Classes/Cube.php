@@ -152,7 +152,8 @@ class Cube
     $this->WHERE_metricTable = array();
     foreach ($joins as $join) {
       $relation = implode(" = ", $join);
-      // l'aggiungo solo se non esiste già questa relazione, da testare con le metriche filtrate andando a selezionare una metrica contenente un filtro che appartiene a una join già inserita in baseTable
+      // l'aggiungo solo se non esiste già questa relazione.
+      // TODO:da testare con le metriche filtrate andando a selezionare una metrica contenente un filtro che appartiene a una join già inserita in baseTable
       if (!in_array($join, $this->WHERE_metricTable)) $this->WHERE_metricTable[] = $relation;
     }
   }
@@ -187,6 +188,7 @@ class Cube
       $timingFunctions = ['last-year', 'altre'];
       if (in_array($token, $timingFunctions)) {
         // è una funzione temporale
+        // dd($filter);
       } else {
         if (!in_array($filter->SQL, $this->filters_metricTable)) $this->filters_metricTable[] = $filter->SQL;
       }
