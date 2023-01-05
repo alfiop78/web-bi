@@ -9,8 +9,8 @@ class Cube
   private $SELECT, $_fields = array(), $_columns = array(), $_sql;
   private $FROM_baseTable = array();
   private $FROM_metricTable = array();
-  private $WHERE_metricTable = array();
-  private $WHERE_baseTable = array();
+  private $WHERE_metricTable = array(), $WHERE_timingFn = array();
+  private $WHERE_baseTable = array(), $WHERE_timeDimension = array();
   private $groupBy;
   private $filters_baseTable = array();
   private $reportId;
@@ -129,12 +129,17 @@ class Cube
   public function where($joins)
   {
     // dd($joins);
-    foreach ($joins as $join) {
+    foreach ($joins as $token => $join) {
       // var_dump($join);
       $relation = implode(" = ", $join);
       // var_dump($join);
       // l'aggiungo solo se non esiste già questa relazione, da testare con le metriche filtrate andando a selezionare una metrica contenente un filtro che appartiene a una join già inserita in baseTable
-      if (!in_array($join, $this->WHERE_baseTable)) $this->WHERE_baseTable[] = $relation;
+      // if (!in_array($join, $this->WHERE_baseTable)) $this->WHERE_baseTable[$token] = $relation;
+      if ($token === '6job3aa') {
+        if (!in_array($token, $this->WHERE_timeDimension)) $this->WHERE_timeDimension[$token] = $relation;
+      } else {
+        if (!in_array($token, $this->WHERE_baseTable)) $this->WHERE_baseTable[$token] = $relation;
+      }
     }
     // dd($this->WHERE_baseTable);
     /*
@@ -150,12 +155,22 @@ class Cube
   private function setWhereMetricTable($joins)
   {
     $this->WHERE_metricTable = array();
-    foreach ($joins as $join) {
+    // dd($joins);
+    foreach ($joins as $token => $join) {
       $relation = implode(" = ", $join);
-      // l'aggiungo solo se non esiste già questa relazione.
+      // var_dump($relation);
+      /* se il token è una timingFunctions devo andare a sostituire la join con token 6job3aa => [web_bi_time.date = DocVenditaDettaglio.DataDocumento]
+      * Il token di questa join è, per il momento, 6job3aa
+      */
+      $timingFunctions = ['last-year', 'altre...'];
+      // if (in_array($token, $timingFunctions)) {
+      //   $this->WHERE_metricTable[$token] = $relation;
+      // }
       // TODO:da testare con le metriche filtrate andando a selezionare una metrica contenente un filtro che appartiene a una join già inserita in baseTable
-      if (!in_array($join, $this->WHERE_metricTable)) $this->WHERE_metricTable[] = $relation;
+      // if (!in_array($join, $this->WHERE_metricTable) && !in_array($join, $this->WHERE_baseTable)) $this->WHERE_metricTable[] = $relation;
+      if (!in_array($token, $this->WHERE_metricTable) && !in_array($token, $this->WHERE_baseTable)) $this->WHERE_metricTable[$token] = $relation;
     }
+    // dd($this->WHERE_metricTable);
   }
 
   public function filters($filters)
@@ -185,12 +200,26 @@ class Cube
     $this->filters_metricTable = [];
     foreach ($filters as $token => $filter) {
       // dd($token, $filter);
-      $timingFunctions = ['last-year', 'altre'];
+      $timingFunctions = ['last-year', 'altre...'];
       if (in_array($token, $timingFunctions)) {
-        // è una funzione temporale
+        /* è una funzione temporale. Devo sostituire la join "WEB_BI_TIME.date = DocVenditaDettaglio.DataDocumento"
+         * ... con "(MapJSONExtractor(WEB_BI_TIME.last))['year']::DATE = DocVenditaDettaglio.DataDocumento"
+         * oppure (WEB_BI_TIME.trans_ly) = DocVenditaDettaglio.DataDocumento
+         * Questa join avrà un token definito (è la join che và dalla dimensione web_bi_time al cubo)
+         * Con una join a token definito posso andare a sostituirlo facilmente in  setWhereMetricTable()
+         */
+        // $join = (object)[
+        //   'last-year' => ["WEB_BI_TIME_055.trans_ly", "DocVenditaDettaglio_730.DataDocumento"]
+        // ];
+        $this->WHERE_timingFn[$token] = "WEB_BI_TIME_055.trans_ly = DocVenditaDettaglio_730.DataDocumento";
+        // dd($join);
+        // $this->setWhereMetricTable($join);
         // dd($filter);
       } else {
-        if (!in_array($filter->SQL, $this->filters_metricTable)) $this->filters_metricTable[] = $filter->SQL;
+        // dd($filter->SQL, $this->filters_metricTable, $this->filters_baseTable);
+        // se il filtro che si sta per aggiungere non è presente nè nei filtri "base_table" nè in quelli "metric_table" lo aggiungo
+        if (!in_array($filter->SQL, $this->filters_metricTable) && !in_array($filter->SQL, $this->filters_baseTable))
+          $this->filters_metricTable[] = $filter->SQL;
       }
     }
   }
@@ -307,7 +336,7 @@ class Cube
       $this->_sql .= ", $this->_metrics_base";
     }
     $this->_sql .= "\nFROM\n" . implode(",\n", $this->FROM_baseTable);
-    $this->_sql .= "\nWHERE\n" . implode("\nAND ", $this->WHERE_baseTable);
+    $this->_sql .= "\nWHERE\n" . implode("\nAND ", array_merge($this->WHERE_baseTable, $this->WHERE_timeDimension));
     if (count($this->filters_baseTable)) $this->_sql .= "\nAND " . implode("\nAND ", $this->filters_baseTable);
     $this->_sql .= "\n$this->groupBy";
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
@@ -392,12 +421,15 @@ class Cube
     $this->fromFilteredMetric = NULL;
     $this->_sql = "{$this->SELECT},\n" . implode(",\n", $metrics);
     $this->_sql .= "\nFROM\n" . implode(",\n", array_merge($this->FROM_baseTable, $this->FROM_metricTable));
-    // in alcuni casi, come ad esempio le metriche filtrate che hanno dei filtri sulla FACT, non è presente la prop 'WHERE'
-    if (count($this->WHERE_metricTable) !== 0) {
-      $this->_sql .= "\nWHERE\n" . implode("\nAND ", array_merge($this->WHERE_baseTable, $this->WHERE_metricTable));
+    // nella metrica adv, se è presente una funzione temporale NON devo aggiungere la condizione WHERE_timeDimension
+    // dd($this->WHERE_timingFn);
+    if (count($this->WHERE_timingFn) === 0) {
+      $this->_sql .= "\nWHERE\n" . implode("\nAND ", array_merge($this->WHERE_baseTable, $this->WHERE_timeDimension, $this->WHERE_metricTable));
     } else {
-      $this->_sql .= "\nWHERE\n" . implode("\nAND ", $this->WHERE_baseTable);
+      // dd($this->WHERE_timingFn);
+      $this->_sql .= "\nWHERE\n" . implode("\nAND ", array_merge($this->WHERE_baseTable, $this->WHERE_timingFn, $this->WHERE_metricTable));
     }
+    $this->WHERE_timingFn = array();
     // aggiungo i filtri del report e i filtri contenuti nella metrica
     $this->_sql .= "\nAND " . implode("\nAND ", array_merge($this->filters_baseTable, $this->filters_metricTable));
     $this->_sql .= "\n$this->groupBy";
