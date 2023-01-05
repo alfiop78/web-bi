@@ -155,11 +155,11 @@ class Queries {
   setAdvancedMetrics() {
     for (const [token, metric] of (this.OB['ADV_METRIC'])) {
       StorageMetric.selected = token;
-      console.log(StorageMetric.selected);
+      // console.log(StorageMetric.selected);
       let FROM = new Map(), WHERE = new Map(), filters = new Map();
       // associo la FROM e WHERE in base ai filtri contenuti nella metrica
       StorageMetric.selected.formula.filters.forEach(filterToken => {
-        // TODO: verifico qui se il filtro incluso nella metrica è una timing-functions
+        // verifico qui se il filtro incluso nella metrica è una timing-functions
         if (['last-year', 'altre-fn-temporali'].includes(filterToken)) {
           // è un filtro temporale
           // recupero le gerarchie (data-include-query) appartenenti alla TIME
@@ -169,14 +169,11 @@ class Queries {
           hierTime.querySelectorAll("small").forEach(tableRef => {
             FROM.set(tableRef.dataset.tableAlias, `${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);
             // funzione temporale last-year
-            filters.set(filterToken, { table: tableRef.dataset.tableAlias, field: 'last', func: 'year', fn: filterToken });
-            // StorageDimension.selected = tableRef.dataset.dimensionToken;
-            // per l'ultima tabella della gerarchia non esiste la join perchè è quella che si lega al cubo e il legame è fatto nella proprietà 'cubes' della dimensione
-            /* if (StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias]) {
-              for (const [token, join] of Object.entries(StorageDimension.selected.hierarchies[tableRef.dataset.hierToken].joins[tableRef.dataset.tableAlias])) {
-                WHERE.set(token, join);
-              }
-            } */
+            // TODO: per impostare il TO_CHAR andrà verificato in fase di creazione del cubo, se "DataDocumento" è INTEGER, andrà convertito (in base al DB) in formato DATE
+            let join = [`${tableRef.dataset.tableAlias}.trans_ly`, `TO_CHAR(${StorageMetric.selected.formula.tableAlias}.${StorageMetric.selected.formula.DateTimeField})::DATE`];
+            filters.set(filterToken, { join });
+            // da utilizzare nel caso in cui bisogna prendere timing function "last..." nel json
+            // filters.set(filterToken, { table: tableRef.dataset.tableAlias, field: 'last', func: 'year', fn: filterToken });
           });
         } else {
           StorageFilter.selected = filterToken;
@@ -243,9 +240,9 @@ class Queries {
       this.reportElements.advancedMetrics = Object.fromEntries(this.OB['ADV_METRIC']);
     }
     if (this.OB['COMP_METRIC'].size > 0) this.reportElements.compositeMetrics = Object.fromEntries(this.OB['COMP_METRIC']);
-    debugger;
     this.#SQLProcess.report = this.reportElements;
     console.info(this.#SQLProcess);
+    debugger;
   }
 
   getSQLProcess() { return this.#SQLProcess; }

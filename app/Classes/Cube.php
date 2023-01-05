@@ -202,19 +202,15 @@ class Cube
       // dd($token, $filter);
       $timingFunctions = ['last-year', 'altre...'];
       if (in_array($token, $timingFunctions)) {
-        /* è una funzione temporale. Devo sostituire la join "WEB_BI_TIME.date = DocVenditaDettaglio.DataDocumento"
-         * ... con "(MapJSONExtractor(WEB_BI_TIME.last))['year']::DATE = DocVenditaDettaglio.DataDocumento"
-         * oppure (WEB_BI_TIME.trans_ly) = DocVenditaDettaglio.DataDocumento
-         * Questa join avrà un token definito (è la join che và dalla dimensione web_bi_time al cubo)
-         * Con una join a token definito posso andare a sostituirlo facilmente in  setWhereMetricTable()
-         */
-        // $join = (object)[
-        //   'last-year' => ["WEB_BI_TIME_055.trans_ly", "DocVenditaDettaglio_730.DataDocumento"]
-        // ];
-        $this->WHERE_timingFn[$token] = "WEB_BI_TIME_055.trans_ly = DocVenditaDettaglio_730.DataDocumento";
-        // dd($join);
-        // $this->setWhereMetricTable($join);
-        // dd($filter);
+        /* è una funzione temporale. 
+          Aggiungo, alla WHERE la condizione per applicare il filtro last-year.
+          Da valutare se utilizzare (MapJSONExtractor(WEB_BI_TIME.last))['year']::DATE = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE
+          ...oppure (WEB_BI_TIME.trans_ly) = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE.
+        */
+        $this->WHERE_timingFn[$token] = implode(" = ", $filter->join);
+        // $this->WHERE_timingFn[$token] = "WEB_BI_TIME_055.trans_ly = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE";
+        // dd($this->WHERE_timingFn);
+        // dd("(MapJSONExtractor({$filter->table}.{$filter->field}))['$filter->func']::DATE");
       } else {
         // dd($filter->SQL, $this->filters_metricTable, $this->filters_baseTable);
         // se il filtro che si sta per aggiungere non è presente nè nei filtri "base_table" nè in quelli "metric_table" lo aggiungo
