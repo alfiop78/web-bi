@@ -247,9 +247,10 @@ var Hier = new Hierarchy();
     // tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
     if (app.tableList.hasAttribute('data-fact')) {
       card.dataset.fact = true;
-      // visualizzo le icone per la creazione delle metriche
+      // visualizzo le icone per la creazione delle metriche e del campo DateTime
       card.querySelector('section[options] > button[composite-metrics]').dataset.schema = card.dataset.schema;
       card.querySelector('section[options] > button[composite-metrics]').dataset.label = card.dataset.label;
+      // con il dataset.mode = 'cube' visualizzo/nascondo alcuni elementi dei button (da CSS)
       card.querySelector('section[options]').dataset.mode = 'cube';
     }
 
@@ -471,6 +472,8 @@ var Hier = new Hierarchy();
       let spanRef = card.querySelector('.selectable[data-relation][data-selected]');
       if (spanRef) {
         // metto in un array gli elementi selezionati per la creazione della gerarchia
+        debugger;
+        // TODO: non serve memorizzare tutto lo span ma solo la proprietà dataset, questa vienee utilizzata nella Classe Cube
         columnsRef.push(spanRef);
         join.push(`${card.dataset.alias}.${spanRef.dataset.label}`); // questa istruzione crea "Azienda_xxx.id" (alias.field)
       }
@@ -481,6 +484,7 @@ var Hier = new Hierarchy();
         // debugger;
         const rand = () => Math.random(0).toString(36).substr(2);
         const token = rand().substr(0, 7);
+        debugger;
         if (card.hasAttribute('data-fact')) {
           Cube.joins = { token, columnsRef, join };
           Cube.join = token;

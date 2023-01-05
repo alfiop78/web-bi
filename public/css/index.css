@@ -32,6 +32,7 @@ section[options][data-mode="default"] > button[composite-metrics]{
 }
 section[options][data-mode="dimension"] > button[columns],
 section[options][data-mode="dimension"] > button[metrics],
+section[options][data-mode="dimension"] > button[time],
 section[options][data-mode="dimension"] > button[composite-metrics]{
   display: none;
 }
