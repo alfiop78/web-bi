@@ -179,6 +179,18 @@
     </section>
   </dialog>
 
+  <dialog id="dialog-hierarchies-map">
+    <section class="dialog-sections">
+      <h4>Imposta relazione con tabella TIME</h4>
+      <div class="">
+        <textarea></textarea>
+      </div>
+      <div class="dialog-buttons">
+        <button type="button" name="cancel" class="md-button">annulla</button>
+        <button id="btnHierarchyMap" type="button" name="done" class="md-button">ok</button>
+      </div>
+  </dialog>
+
   <dialog id="dialog-column-map" class="medium-dialog">
     <div id="abs-popup-dialog" class="absolute-popup" hidden></div>
     <section class="dialog-sections">
@@ -451,15 +463,9 @@
       </section>
 
       <nav id="nav-schema">
-        {{-- {{dd($schemes)}} --}}
+        {{-- {{ dd($schemes) }} --}}
         @foreach($schemes as $schema)
-        @if ($schema['SCHEMA_NAME'] === 'automotive_bi_data')
-        {{-- l'if è stata creata per selezionare uno schema di default, utilizzando l'attr 'selected'. Al momento non serve --}}
-        {{-- <a href="#" data-schema="{{ $schema['SCHEMA_NAME'] }}" selected>{{ $schema['SCHEMA_NAME'] }}</a> --}}
         <a href="#" data-schema="{{ $schema['SCHEMA_NAME'] }}">{{ $schema['SCHEMA_NAME'] }}</a>
-        @else
-        <a href="#" data-schema="{{ $schema['SCHEMA_NAME'] }}">{{ $schema['SCHEMA_NAME'] }}</a>
-        @endif
         @endforeach
       </nav>
     </div>

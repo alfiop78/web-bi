@@ -3,12 +3,13 @@ class Cubes {
   #metrics = new Map();
   #join = new Map();
   #joins = new Map();
+  #timeJoin = new Map();
+  #timeJoins = new Map();
   #token;
   #associatedDimension = new Set();
   constructor() {
     this._cube = {};
     this.relationId = 0;
-    this._join = {};
     this._dimensions = []; // dimensioni selezionate da associare al cube
   }
 
@@ -71,6 +72,47 @@ class Cubes {
 
   get join() { return this.#join; }
 
+  set timeJoins(value) {
+    if (!this.#timeJoins.has(value.token)) {
+      this.#timeJoins.set(value.token, { join: value.join, columns: value.columnsRef });
+    } else {
+      this.#timeJoins.delete(value.token);
+    }
+    console.log('this.#timeJoins : ', this.#timeJoins);
+  }
+
+  get timeJoins() { return this.#timeJoins; }
+
+  set timeJoin(token) {
+    if (!this.#timeJoin.has(token)) {
+      // join non presente, la aggiungo
+      this.#timeJoin.set(token, this.timeJoins.get(token).join);
+      // imposto i colori delle icone sulle colonne
+      this.timeJoins.get(token).columns.forEach(col => {
+        if (col.dataset) {
+          col.dataset.joinToken = token;
+          col.dataset.relationId = true;
+          // la relazione è stata creata, posso eliminare [data-selected]
+          delete col.dataset.selected;
+        }
+      });
+    } else {
+      // join già presente, la elimino
+      delete this.#timeJoin.get(token);
+      // rimuovo icone relative ai field della join eliminata
+      this.timeJoins.get(token).columns.forEach(col => {
+        delete col.dataset.relation;
+        delete col.dataset.joinToken;
+        delete col.dataset.relationId;
+      });
+      // elimino la join anche da this.#joins
+      this.timeJoins.delete(token);
+    }
+    console.log('this.#timeJoin : ', this.#timeJoin);
+  }
+
+  get timeJoin() { return this.#timeJoin; }
+
   set fieldSelected(value) { this._field = value; }
 
   get fieldSelected() { return this._field; }
@@ -97,6 +139,7 @@ class Cubes {
     // const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
     const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
     this._cube.type = 'CUBE';
+    this._cube.dateTimeField = this.dateTimeField;
     this._cube.created_at = date.toLocaleDateString('it-IT', options);
     this._cube.updated_at = date.toLocaleDateString('it-IT', options);
     this._cube.name = this.title;

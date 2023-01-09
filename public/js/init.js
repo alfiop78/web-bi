@@ -13,6 +13,7 @@ var Hier = new Hierarchy();
     dialogVersioning: document.getElementById('versioning'),
     dialogColumnMap: document.getElementById('dialog-column-map'),
     dialogCompositeMetric: document.getElementById('dialog-composite-metric'),
+    dialogHierarchiesMap: document.getElementById('dialog-hierarchies-map'),
     // templates
     tmplDimension: document.getElementById('tmpl-dimension-list'),
     tmplCube: document.getElementById('tmpl-cube-list'),
@@ -35,6 +36,7 @@ var Hier = new Hierarchy();
     // actions button
     btnSaveDimension: document.getElementById('btn-save-dimension'),
     btnHierarchySaveName: document.getElementById('btnHierarchySaveName'),
+    btnHierarchyMap: document.getElementById('btnHierarchyMap'),
     btnNewHierarchy: document.getElementById('btnNewHierarchy'),
     btnSaveCube: document.getElementById('btn-save-cube'),
     btnSaveCubeName: document.getElementById('btnCubeSaveName'),
@@ -356,13 +358,17 @@ var Hier = new Hierarchy();
         const fact = document.querySelector('.card.table[data-fact]');
         const columnsRef = [Hier.fieldRef.dataset.label, 'date'];
         // const columnsRef = ['DataDocumento', 'date'];
+        // TODO: il campo 'date' della tabella WEB_BI_TIME_055 può variare, può essere month, year, quarter, week.
+        // al click sulla colonna comparirà una dialog dove indicare il campo (in WEB_BI_TIME_055) da mettere in relazione con la Fact
+        app.dialogHierarchiesMap.querySelector("textarea").innerHTML = `${fact.dataset.alias}.${Hier.fieldRef.dataset.label}`;
+        app.dialogHierarchiesMap.showModal();
+        return;
         const join = ['WEB_BI_TIME_055.date', `${fact.dataset.alias}.${Hier.fieldRef.dataset.label}`]; // questa istruzione crea "Azienda_xxx.id" (alias.field)
         // seleziono la dimensione TIME mkhz4os8tks
-        Cube.dimensionsSelected = 'mkhz4os8tks';
-        const rand = () => Math.random(0).toString(36).substring(2);
-        const token = rand().substring(0, 7);
-        Cube.joins = { token, columnsRef, join };
-        Cube.join = token;
+        Cube.timeDimension = 'mkhz4os8tks';
+        Cube.dateTimeField = Hier.fieldRef.dataset.label;
+        Cube.timeJoins = { token: 'time', columnsRef, join };
+        Cube.timeJoin = 'time';
         break;
       case 'relations':
         // se è presente un altro elemento con attributo hierarchy ma NON data-relation-id, "deseleziono" quello con hierarchy per mettere ...
@@ -425,6 +431,18 @@ var Hier = new Hierarchy();
           Hier.column = e.currentTarget.dataset.tokenColumn;
         }
     }
+  }
+
+  app.btnHierarchyMap.onclick = () => {
+    console.log(document.querySelector('textarea').innerHTML);
+    debugger;
+    const join = ['WEB_BI_TIME_055.date', document.querySelector('textarea').innerHTML]; // questa istruzione crea "Azienda_xxx.id" (alias.field)
+    // seleziono la dimensione TIME mkhz4os8tks
+    Cube.timeDimension = 'mkhz4os8tks';
+    Cube.dateTimeField = Hier.fieldRef.dataset.label;
+    Cube.timeJoins = { token: 'time', columnsRef, join };
+    Cube.timeJoin = 'time';
+
   }
 
   // click sull'icona di destra "columns" per l'associazione delle colonne
@@ -639,7 +657,6 @@ var Hier = new Hierarchy();
     Cube.columns = new Map(Object.entries(StorageCube.selected.columns));
     Cube.metricDefined = StorageCube.selected.metrics;
     Cube.schema = StorageCube.selected.schema;
-    debugger;
     StorageCube.selected.associatedDimensions.forEach(dim => {
       Cube.associatedDimensions = dim;
     });
@@ -1330,7 +1347,7 @@ var Hier = new Hierarchy();
 
   // save cube
   app.btnSaveCubeName.onclick = () => {
-    console.log('cube save');
+    console.log('Save Cube');
     // TODO: devo verificare se il nome del cubo esiste già, sia in locale che sul db.
     Cube.title = document.getElementById('cubeName').value;
     Cube.comment = document.getElementById('textarea-cube-comment').value;
@@ -1339,29 +1356,41 @@ var Hier = new Hierarchy();
     Cube.FACT = document.querySelector('.card.table[data-fact]').dataset.label;
     Cube.columns = Hier.column; // è un oggetto Map
     // recupero l'alias della FACT
-    const rand = () => Math.random(0).toString(36).substr(2);
-    Cube.token = rand().substr(0, 21);
+    const rand = () => Math.random(0).toString(36).substring(2);
+    Cube.token = rand().substring(0, 21);
 
-    const storage = new DimensionStorage();
-    debugger;
+    const dimension = new DimensionStorage();
     Cube.dimensionsSelected.forEach(dimensionToken => {
       let dimensionObject = {};
       // console.log(dimensionName);
-      storage.selected = dimensionToken;
+      dimension.selected = dimensionToken;
       // il metodo selected restituisce la dimensione che sto ciclando, la salvo in dimensionObject per modificarla (aggiunta cubi)
-      dimensionObject[dimensionToken] = storage.selected;
+      dimensionObject[dimensionToken] = dimension.selected;
       // salvo il cubo all'interno della dimensione, comprese la sua join con questa dimensione
       // dimensionObject[dimensionName].cubes.push({[cube._title] : cube.relations});
+      console.log(Cube.join);
       dimensionObject[dimensionToken].cubes[Cube.token] = Object.fromEntries(Cube.join);
       console.log(dimensionObject[dimensionToken]);
       // salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
       Cube.associatedDimensions = dimensionToken;
       // salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
-      storage.save(dimensionObject[dimensionToken]);
+      dimension.save(dimensionObject[dimensionToken]);
     });
+    // legame con la dimensione time
+    if (Cube.timeDimension) {
+      let dimensionObject = {};
+      dimension.selected = Cube.timeDimension;
+      dimensionObject[Cube.timeDimension] = dimension.selected;
+      console.log(Cube.timeJoin);
+      dimensionObject[Cube.timeDimension].cubes[Cube.token] = Object.fromEntries(Cube.timeJoin);
+      console.log(dimensionObject[Cube.timeDimension]);
+      // salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
+      Cube.associatedDimensions = Cube.timeDimension;
+      // salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
+      dimension.save(dimensionObject[Cube.timeDimension]);
+    }
 
     Cube.save();
-
     // salvo il cubo in localStorage
     StorageCube.save(Cube.cube);
     // salvo il cubo sul DB

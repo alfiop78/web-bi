@@ -133,15 +133,17 @@ class Cube
       // var_dump($join);
       $relation = implode(" = ", $join);
       // var_dump($join);
-      // l'aggiungo solo se non esiste già questa relazione, da testare con le metriche filtrate andando a selezionare una metrica contenente un filtro che appartiene a una join già inserita in baseTable
+      /* le join relative alla TIME le inserisco in un altro array e non in WHERE_baseTable, altrimenti verrà aggiunta 
+        la join riguardante la time anche sulle metriche filtrate
+      */
       // if (!in_array($join, $this->WHERE_baseTable)) $this->WHERE_baseTable[$token] = $relation;
-      if ($token === '6job3aa') {
+      if ($token === 'time') {
         if (!in_array($token, $this->WHERE_timeDimension)) $this->WHERE_timeDimension[$token] = $relation;
       } else {
         if (!in_array($token, $this->WHERE_baseTable)) $this->WHERE_baseTable[$token] = $relation;
       }
     }
-    // dd($this->WHERE_baseTable);
+    // dd($this->WHERE_baseTable, $this->WHERE_timeDimension);
     /*
 		es.:
 			WHERE\n
@@ -158,14 +160,6 @@ class Cube
     // dd($joins);
     foreach ($joins as $token => $join) {
       $relation = implode(" = ", $join);
-      // var_dump($relation);
-      /* se il token è una timingFunctions devo andare a sostituire la join con token 6job3aa => [web_bi_time.date = DocVenditaDettaglio.DataDocumento]
-      * Il token di questa join è, per il momento, 6job3aa
-      */
-      $timingFunctions = ['last-year', 'altre...'];
-      // if (in_array($token, $timingFunctions)) {
-      //   $this->WHERE_metricTable[$token] = $relation;
-      // }
       // TODO:da testare con le metriche filtrate andando a selezionare una metrica contenente un filtro che appartiene a una join già inserita in baseTable
       // if (!in_array($join, $this->WHERE_metricTable) && !in_array($join, $this->WHERE_baseTable)) $this->WHERE_metricTable[] = $relation;
       if (!in_array($token, $this->WHERE_metricTable) && !in_array($token, $this->WHERE_baseTable)) $this->WHERE_metricTable[$token] = $relation;

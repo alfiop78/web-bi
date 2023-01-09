@@ -977,7 +977,7 @@ var List = new Lists();
         formulaObj.tableAlias = Query.tableAlias
         formulaObj.filters = [...associatedFilters, timingFn];
         // recupero, dal cubo attuale, il campo DateTimeField
-        formulaObj.DateTimeField = StorageCube.selected.DateTimeField;
+        formulaObj.dateTimeField = StorageCube.selected.dateTimeField;
         metricObj.formula = formulaObj;
         metricObj.type = 'ADV_METRIC';
         break;
@@ -985,7 +985,7 @@ var List = new Lists();
         // base composta filtrata (es.: prezzo * qta impostate sul cubo e con filtro)
         metricObj.fieldName = Query.fieldName;
         formulaObj.filters = [...associatedFilters];
-        formulaObj.DateTimeField = StorageCube.selected.DateTimeField;
+        formulaObj.dateTimeField = StorageCube.selected.dateTimeField;
         metricObj.formula = formulaObj;
         metricObj.type = 'ADV_METRIC';
         break;
