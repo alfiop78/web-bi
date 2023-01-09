@@ -300,6 +300,7 @@ var Hier = new Hierarchy();
     card.querySelector('button[columns]').dataset.id = card.id;
     card.querySelector('button[hier-order-plus]').dataset.id = card.id;
     card.querySelector('button[hier-order-minus]').dataset.id = card.id;
+    card.querySelector('button[time]').dataset.id = card.id;
     document.getElementById('tableSearch').focus();
     document.getElementById('tableSearch').select();
   }
@@ -350,6 +351,19 @@ var Hier = new Hierarchy();
     let attrs = Hier.card.dataset.mode;
 
     switch (attrs) {
+      case 'date-time':
+        // fact
+        const fact = document.querySelector('.card.table[data-fact]');
+        const columnsRef = [Hier.fieldRef.dataset.label, 'date'];
+        // const columnsRef = ['DataDocumento', 'date'];
+        const join = ['WEB_BI_TIME_055.date', `${fact.dataset.alias}.${Hier.fieldRef.dataset.label}`]; // questa istruzione crea "Azienda_xxx.id" (alias.field)
+        // seleziono la dimensione TIME mkhz4os8tks
+        Cube.dimensionsSelected = 'mkhz4os8tks';
+        const rand = () => Math.random(0).toString(36).substring(2);
+        const token = rand().substring(0, 7);
+        Cube.joins = { token, columnsRef, join };
+        Cube.join = token;
+        break;
       case 'relations':
         // se è presente un altro elemento con attributo hierarchy ma NON data-relation-id, "deseleziono" quello con hierarchy per mettere ...
         // ...[hierarchy] a quello appena selezionato. In questo modo posso selezionare solo una colonna per volta ad ogni relazione da creare
@@ -804,6 +818,7 @@ var Hier = new Hierarchy();
       card.id = StorageCube.selected.token;
       cardLayout.querySelector('.title-alias').dataset.id = StorageCube.selected.token;
       cardLayout.querySelector('section[options]').dataset.mode = 'cube';
+      card.querySelector('button[time').dataset.id = card.dataset.id;
       // l'appendChild / insertBefore viene stabilito nel checkHierarchyNumber()
       app.checkHierarchyNumber(card);
     } else {
@@ -1501,15 +1516,8 @@ var Hier = new Hierarchy();
   }
 
   app.handlerDateTime = (e) => {
-    // fact
-    const fact = document.querySelector('.card.table[data-fact]');
-    const columnsRef = ['DataDocumento', 'date'];
-    const join = ['WEB_BI_TIME_055.date', `${fact.dataset.alias}.DataDocumento`]; // questa istruzione crea "Azienda_xxx.id" (alias.field)
-    // seleziono la dimensione TIME mkhz4os8tks
-    Cube.dimensionsSelected = 'mkhz4os8tks';
-    const rand = () => Math.random(0).toString(36).substring(2);
-    const token = rand().substring(0, 7);
-    Cube.joins = { token, columnsRef, join };
-    Cube.join = token;
+    // imposto il metrics mode
+    Hier.activeCard = e.target.dataset.id;
+    Hier.mode = 'date-time';
   }
 })();

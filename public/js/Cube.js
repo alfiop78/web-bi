@@ -222,6 +222,7 @@ class Hierarchy {
           msg = 'Selezionare le tabelle nell\'ordine gerarchico';
           break;
         default:
+          msg = 'Selezionare la colonna per le operazioni DateTime';
           break;
       }
       info.innerHTML = msg;
