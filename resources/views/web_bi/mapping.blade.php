@@ -364,7 +364,7 @@
         <button type="button" class="button-icon material-icons-round md-pad-4 md-18" join tooltip="Crea relazione" flow="right">insert_link</button>
         <button type="button" class="button-icon material-icons-round md-pad-4 md-18" join-left tooltip="Left join" flow="right">join_left</button>
         <button type="button" class="button-icon material-icons-round md-pad-4 md-18" join-right tooltip="Right join" flow="right">join_right</button>
-        <button type="button" class="button-icon material-icons-round md-pad-4 md-18" time tooltip="DateTime" flow="right">history</button>
+        <button type="button" class="button-icon material-icons-round md-pad-4 md-18" time tooltip="DateTime" data-fn="handlerDateTime" flow="right">history</button>
       </section>
     </div>
   </template>

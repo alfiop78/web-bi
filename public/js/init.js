@@ -87,6 +87,31 @@ var Hier = new Hierarchy();
 
   App.init();
 
+  // Callback function to execute when mutations are observed
+  // const targetNode = document.querySelectorAll('ul');
+  // console.log(targetNode);
+  const config = { attributes: true, childList: true, subtree: true };
+
+  const callback = (mutationList, observer) => {
+    // console.log(mutationList, observer);
+    for (const mutation of mutationList) {
+      if (mutation.type === 'childList') {
+        // console.info('A child node has been added or removed.');
+        Array.from(mutation.addedNodes).forEach(node => {
+          if (node.hasChildNodes()) node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+        });
+      } else if (mutation.type === 'attributes') {
+        // console.log(`The ${mutation.attributeName} attribute was modified.`);
+      }
+    }
+  };
+  // Create an observer instance linked to the callback function
+  const observerList = new MutationObserver(callback);
+  // Start observing the target node for configured mutations
+  // observerList.observe(targetNode, config);
+  const dropZone = document.getElementById('drop-zone');
+  observerList.observe(dropZone, config);
+
   // utilizzato per lo spostamento all'interno del drop-zone (card già droppata)
   app.dragStart = (e) => {
     console.clear();
@@ -336,16 +361,17 @@ var Hier = new Hierarchy();
           Bisogna eliminarla sia dal DOM, eliminando [data-relation-id] che da this.#join
           */
           Hier.join = e.currentTarget.dataset.joinToken;
-          // NOTE: utilizzo di getAttributeNames()
-          // for (let name of e.currentTarget.getAttributeNames()) {
-          // 	// console.log(name);
-          // 	let relationId, value;
-          // 	if (name.substring(0, 9) === 'data-rel-') {
-          // 		relationId = name;
-          // 		value = e.currentTarget.getAttribute(name);
-          // 		app.removeHierarchy(relationId, value);
-          // 	}
-          // }
+          /* NOTE: utilizzo di getAttributeNames()
+            * for (let name of e.currentTarget.getAttributeNames()) {
+            * 	// console.log(name);
+            * 	let relationId, value;
+            * 	if (name.substring(0, 9) === 'data-rel-') {
+            * 		relationId = name;
+            * 		value = e.currentTarget.getAttribute(name);
+            * 		app.removeHierarchy(relationId, value);
+            * 	}
+            * }
+          */
         } else {
           // verifico se, nella stessa tabella, sono presenti altri campi con data-relation (pronti per la join) e, se è presente, lo de-seleziono per selezionare questo del currentTarget
           let liRelationSelected = Hier.card.querySelector('.selectable[data-relation]:not([data-relation-id])');
@@ -477,13 +503,13 @@ var Hier = new Hierarchy();
         columnsRef.push(spanRef);
         join.push(`${card.dataset.alias}.${spanRef.dataset.label}`); // questa istruzione crea "Azienda_xxx.id" (alias.field)
       }
-      // per creare correttamente la relazione è necessario avere due elementi selezionati
+      // la join verrà creata quando ci sono due elementi selezionati
       if (join.length === 2) {
         // se, in questa relazione, è presente anche la tabella FACT rinomino hier_n in fact_n in modo da poter separare le gerarchie
         // e capire quali sono quelle con la fact e quali no (posso salvare la Dimensione, senza il legame con il Cubo)
         // debugger;
-        const rand = () => Math.random(0).toString(36).substr(2);
-        const token = rand().substr(0, 7);
+        const rand = () => Math.random(0).toString(36).substring(2);
+        const token = rand().substring(0, 7);
         debugger;
         if (card.hasAttribute('data-fact')) {
           Cube.joins = { token, columnsRef, join };
@@ -1057,49 +1083,6 @@ var Hier = new Hierarchy();
       });
   }
 
-  // update cube
-  app.btnSaveOpenedCube.onclick = () => {
-    console.log('Aggiornamento Cubo');
-    // console.log(StorageCube.selected);
-    Cube.title = StorageCube.selected.name;
-    Cube.comment = StorageCube.selected.comment;
-    Cube.alias = StorageCube.selected.alias;
-    Cube.schema = StorageCube.selected.schema;
-    Cube.FACT = StorageCube.selected.FACT;
-    Cube.token = StorageCube.selected.token;
-
-    Cube.dimensionsSelected.forEach(dimensionToken => {
-      const storage = new DimensionStorage();
-      let dimensionObject = {};
-      // console.log(dimensionToken);
-      storage.selected = dimensionToken;
-      // console.log(storage.selected);
-      // il metodo selected restituisce la dimensione che sto ciclando, la salvo in dimensionObject per modificarla (aggiunta cubi)
-      dimensionObject[dimensionToken] = storage.selected;
-      // salvo il cubo all'interno della dimensione, comprese la sua join con questa dimensione
-      // dimensionObject[dimensionName].cubes.push({[cube._title] : cube.relations});
-      // TODO: impostare cubes come un object e non come un array, in questo modo è più semplice recuperarlo da report/init.js "app.handlerDimensionSelected()"
-      // debugger;
-      dimensionObject[dimensionToken].cubes[Cube.token] = Object.fromEntries(Cube.join);
-      // console.log(dimensionObject[dimensionToken]);
-      // salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
-      Cube.associatedDimensions = dimensionToken;
-      // salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
-      // TODO: devo aggiornare le prop 'created_at' e 'updated_at' altrimenti questa dimensione non verrà considerata aggiornata dal versioning
-      storage.save(dimensionObject[dimensionToken]);
-    });
-    // TODO: l'aggiornamento del cubo non deve aggiornare anche la prop created_at ma solo updated_at
-    debugger;
-    Cube.save();
-    // salvo il cubo in localStorage
-    StorageCube.save(Cube.cube);
-    debugger;
-    // TODO: aggiornamento su database, da implementare
-    // app.saveCube(cube.cube);
-
-    app.dialogCubeName.close();
-  }
-
   app.btnEditSqlId.onclick = (e) => {
     app.txtareaColumnId.removeAttribute('readonly');
     app.txtareaColumnId.setAttribute('readwrite', true);
@@ -1286,6 +1269,50 @@ var Hier = new Hierarchy();
     Hier = new Hierarchy();
   }
 
+  // update cube
+  app.btnSaveOpenedCube.onclick = () => {
+    console.log('Aggiornamento Cubo');
+    // console.log(StorageCube.selected);
+    Cube.title = StorageCube.selected.name;
+    Cube.comment = StorageCube.selected.comment;
+    Cube.alias = StorageCube.selected.alias;
+    Cube.schema = StorageCube.selected.schema;
+    Cube.FACT = StorageCube.selected.FACT;
+    Cube.token = StorageCube.selected.token;
+    debugger;
+
+    Cube.dimensionsSelected.forEach(dimensionToken => {
+      const storage = new DimensionStorage();
+      let dimensionObject = {};
+      // console.log(dimensionToken);
+      storage.selected = dimensionToken;
+      // console.log(storage.selected);
+      // il metodo selected restituisce la dimensione che sto ciclando, la salvo in dimensionObject per modificarla (aggiunta cubi)
+      dimensionObject[dimensionToken] = storage.selected;
+      // salvo il cubo all'interno della dimensione, comprese la sua join con questa dimensione
+      // dimensionObject[dimensionName].cubes.push({[cube._title] : cube.relations});
+      // TODO: impostare cubes come un object e non come un array, in questo modo è più semplice recuperarlo da report/init.js "app.handlerDimensionSelected()"
+      // debugger;
+      dimensionObject[dimensionToken].cubes[Cube.token] = Object.fromEntries(Cube.join);
+      // console.log(dimensionObject[dimensionToken]);
+      // salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
+      Cube.associatedDimensions = dimensionToken;
+      // salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
+      // TODO: devo aggiornare le prop 'created_at' e 'updated_at' altrimenti questa dimensione non verrà considerata aggiornata dal versioning
+      storage.save(dimensionObject[dimensionToken]);
+    });
+    // TODO: l'aggiornamento del cubo non deve aggiornare anche la prop created_at ma solo updated_at
+    debugger;
+    Cube.save();
+    // salvo il cubo in localStorage
+    StorageCube.save(Cube.cube);
+    debugger;
+    // TODO: aggiornamento su database, da implementare
+    // app.saveCube(cube.cube);
+
+    app.dialogCubeName.close();
+  }
+
   // save cube
   app.btnSaveCubeName.onclick = () => {
     console.log('cube save');
@@ -1301,6 +1328,7 @@ var Hier = new Hierarchy();
     Cube.token = rand().substr(0, 21);
 
     const storage = new DimensionStorage();
+    debugger;
     Cube.dimensionsSelected.forEach(dimensionToken => {
       let dimensionObject = {};
       // console.log(dimensionName);
@@ -1411,9 +1439,8 @@ var Hier = new Hierarchy();
     e.target.previousElementSibling.hidden = false;
   }
 
-
-
   // NOTE: esempio di utilizzo di MutationObserver
+  // TODO: il mutationObserve l'ho inserito ad inizio pagina, i button sono da configurare con data-fn, da rivedere.
   const body = document.getElementById('body');
   // create a new instance of `MutationObserver` named `observer`,
   // passing it a callback function
@@ -1471,5 +1498,18 @@ var Hier = new Hierarchy();
         App.showConsole(err, 'error');
         console.error(err);
       });
+  }
+
+  app.handlerDateTime = (e) => {
+    // fact
+    const fact = document.querySelector('.card.table[data-fact]');
+    const columnsRef = ['DataDocumento', 'date'];
+    const join = ['WEB_BI_TIME_055.date', `${fact.dataset.alias}.DataDocumento`]; // questa istruzione crea "Azienda_xxx.id" (alias.field)
+    // seleziono la dimensione TIME mkhz4os8tks
+    Cube.dimensionsSelected = 'mkhz4os8tks';
+    const rand = () => Math.random(0).toString(36).substring(2);
+    const token = rand().substring(0, 7);
+    Cube.joins = { token, columnsRef, join };
+    Cube.join = token;
   }
 })();
