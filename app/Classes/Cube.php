@@ -12,7 +12,7 @@ class Cube
   private $WHERE_metricTable = array(), $WHERE_timingFn = array();
   private $WHERE_baseTable = array(), $WHERE_timeDimension = array();
   private $groupBy;
-  private $filters_baseTable = array();
+  private $filters_baseTable = array(), $info_baseTable = array();
   private $reportId;
   private $_metrics_base, $_metrics_base_datamart;
   private $_metrics_advanced_datamart = array();
@@ -172,11 +172,38 @@ class Cube
     // definisco i filtri del report
     // dd($filters);
     // $and = "\nAND ";
+    // test creazione json da utilizzare per sql_info
+    $js = (object)[
+      "filters" => (object)[
+        "name" => (object)[
+          "tag" => "span",
+          "class" => "nome_classe per gli elementi 'esterni' al sql",
+          "name" => "nome del filtro"
+        ],
+        "sql" => (object)[
+          "tag" => "span",
+          "class" => "classe per sql",
+          "sql" => "AND DocVenditaDettaglio.CancellatStampa = 'S'"
+        ]
+      ],
+      "where" => NULL
+    ];
     foreach ($filters as $filter) {
       // dd($filter); // filter_name => alias_table.field = value
       // $this->filters_baseTable .= $and.$filter->SQL;
       if (!in_array($filter->formula, $this->filters_baseTable)) $this->filters_baseTable[] = $filter->formula;
+      // NOTE: in un array associativo non è necessario verificare se la key esiste, il valore viene sovrascritto.
+      $this->info_baseTable[$filter->name] = $filter->formula;
     }
+    // dd($this->info_baseTable);
+    foreach ($this->info_baseTable as $name => $sql) {
+      echo "<br /><span>$name</span><br />\nAND $sql";
+      $js->filters->name->name = $name;
+      $js->filters->sql->sql = "AND $sql";
+    }
+    exit;
+    dd($js);
+    dd(key($this->info_baseTable) . "\nAND " . implode("\nAND ", $this->info_baseTable));
     //dd($this->filters_baseTable);
     /*
         es.:
