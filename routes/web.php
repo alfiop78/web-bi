@@ -77,6 +77,7 @@ Route::post('/fetch_api/dimension/time', function () {
       "weekday" => $currDate->format('l'),
       // "day" => (object)
       "week" => $currDate->format('W'),
+      "month_id" => $currDate->format('Ym'),
       "month" => (object) [
         "id" => $currDate->format('m'),
         "ds" => $currDate->format('F'),
@@ -102,6 +103,7 @@ Route::post('/fetch_api/dimension/time', function () {
     trans_ly DATE,
     year INTEGER,
     quarter VARCHAR,
+    month_id INTEGER,
     month VARCHAR,
     week CHAR(2),
     day VARCHAR,
@@ -128,6 +130,7 @@ Route::post('/fetch_api/dimension/time', function () {
       'trans_ly' => "{$value->trans_ly}",
       'year' => $value->year,
       'quarter' => json_encode($value->quarter),
+      'month_id' => $value->month_id,
       'month' => json_encode($value->month),
       'week' => $value->week,
       'day' => json_encode(['weekday' => $value->weekday, 'day_of_year' => $value->day_of_year]),
