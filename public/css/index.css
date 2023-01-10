@@ -23,8 +23,27 @@ section[options] button[hier-order-minus]{color: #3b7096;}
 }
 
 /* .card-layout{display: grid;grid-template-columns: 100%;position: relative;} */
-.cardLayout > section[options]{position: absolute;display: flex;padding: 0 8px;flex-flow: column;left: calc(100% - 46px);
-  transition: left 200ms, opacity 200ms;opacity: 0;z-index: 0;}
+.cardLayout > section[options]{
+  position: absolute;
+  display: flex;
+  padding: 0 8px;
+  flex-flow: column;
+  left: calc(100% - 46px);
+  transition: left 200ms, opacity 200ms;
+  opacity: 0;
+  z-index: 0;
+}
+
+.cardLayout > .md-field{
+  position: absolute;
+  display: flex;
+  padding: 0 8px;
+  flex-flow: column;
+  top: 0px;
+  transition: top 200ms, opacity 200ms;
+  opacity: 0;
+  z-index: 0;
+}
 
 section[options][data-mode="default"] > button[metrics],
 section[options][data-mode="default"] > button[composite-metrics]{
@@ -38,6 +57,13 @@ section[options][data-mode="dimension"] > button[composite-metrics]{
 }
 
 .card:not(.minimize) .cardLayout:not([mode='edit']):hover .cardTable[data-name] ~ section[options]{left: 100%;opacity: 1;transition: left 200ms, opacity 200ms;}
+.card:not(.minimize) .cardLayout:not([mode='edit']):hover .cardTable[data-name] ~ .md-field{
+  top: calc(-42px - .5em);
+  opacity: 1;
+  transition: top 200ms, opacity 200ms;
+  width: 100%;
+  padding-bottom: .5em;
+}
 .cardLayout[mode='edit']{opacity: .5;}
 
 section[options] button{color: dimgrey;}
@@ -140,8 +166,19 @@ div.textarea > span.formulaLogicalOperator{background: brown; color: white;}
 
 .card.table .title h6{padding: 8px; margin: 0;font-size: .85rem; width: 100%;}
 .card.table .title-alias{width: 100%;transition: opacity 150ms;opacity: .7;}
+.card.table[data-fact] .title-alias{width: 100%;transition: opacity 150ms;opacity: .7; color: white;}
 .card.table .title-alias:hover{width: 100%; cursor: grab; transition: opacity: 150ms; opacity: 1;}
-.card.table .cardTable > .title > .title-alias > .subtitle{padding: 0px 0px 4px 12px;color: #494949; font-size: .8rem;}
+.card.table .cardTable > .title > .title-alias > .subtitle{
+  padding: 0px 0px 4px 12px;
+  color: #494949;
+  font-size: .8rem;
+}
+
+.card.table[data-fact] .cardTable > .title > .title-alias > .subtitle{
+  padding: 0px 0px 4px 12px;
+  color: whitesmoke;
+  font-size: .8rem;
+}
 
 .card.table[data-fact] .title{background: var(--main-primary-color);color: white;}
 

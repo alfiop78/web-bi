@@ -161,11 +161,11 @@
 
           <section data-versioning-elements>
             {{-- l'attributo data-object deve corrispondere al risultato della query restituita da BidimensionController, BIcubesController, ecc...--}}
-            <ul data-object="cubes"></ul>
-            <ul data-object="dimensions" hidden></ul>
-            <ul data-object="filters" hidden></ul>
-            <ul data-object="metrics" hidden></ul>
-            <ul data-object="processes" hidden></ul>
+            <ul data-object="cubes" class="custom-scrollbar"></ul>
+            <ul data-object="dimensions" class="custom-scrollbar" hidden></ul>
+            <ul data-object="filters" class="custom-scrollbar" hidden></ul>
+            <ul data-object="metrics" class="custom-scrollbar" hidden></ul>
+            <ul data-object="processes" class="custom-scrollbar" hidden></ul>
           </section>
         </fieldset>
       </section>
@@ -379,11 +379,7 @@
             <button type="button" data-id data-expand-card class="button-icon material-icons-round md-pad-4 md-18" tooltip="Espandi" flow="bottom" hidden>expand_more</button>
           </div>
         </div>
-        <div class="md-field">
-          <input type="search" value="" data-element-search />
-          <label for="searchColumns" class="">Ricerca</label>
-        </div>
-        <ul data-id="columns" hidden></ul>
+        <ul data-id="columns" class="custom-scrollbar" hidden></ul>
         <div class="info" hidden></div>
       </section>
       <section options data-mode="default">
@@ -395,6 +391,10 @@
         <button type="button" class="button-icon material-icons-round md-pad-4 md-18" join-right tooltip="Right join" flow="right">join_right</button>
         <button type="button" class="button-icon material-icons-round md-pad-4 md-18" time tooltip="DateTime" data-fn="handlerDateTime" flow="right">history</button>
       </section>
+      <div class="md-field">
+        <input type="search" value="" data-element-search />
+        <label for="searchColumns" class="">Ricerca</label>
+      </div>
     </div>
   </template>
 
@@ -527,7 +527,7 @@
                 <label for="tableSearch" class="">Ricerca</label>
               </div>
               <div class="relative-ul">
-                <ul id="tables" class="absolute"></ul>
+                <ul id="tables" class="absolute custom-scrollbar"></ul>
               </div>
             </div>
             {{-- dimensioni --}}
@@ -537,7 +537,7 @@
                 <label for="dimensionSearch" class="">Ricerca</label>
               </div>
               <div class="relative-ul">
-                <ul id="dimensions" class="absolute"></ul>
+                <ul id="dimensions" class="absolute custom-scrollbar"></ul>
               </div>
             </div>
 
@@ -547,7 +547,7 @@
                 <label for="cubeSearch" class="">Ricerca</label>
               </div>
               <div class="relative-ul">
-                <ul id="cubes" class="absolute"></ul>
+                <ul id="cubes" class="absolute custom-scrollbar"></ul>
               </div>
             </div>
 
