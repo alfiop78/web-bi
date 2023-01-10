@@ -170,7 +170,8 @@ class Queries {
             FROM.set(tableRef.dataset.tableAlias, `${tableRef.dataset.schema}.${tableRef.dataset.label} AS ${tableRef.dataset.tableAlias}`);
             // funzione temporale last-year
             // TODO: per impostare il TO_CHAR andrà verificato in fase di creazione del cubo, se "DataDocumento" è INTEGER, andrà convertito (in base al DB) in formato DATE
-            let join = [`${tableRef.dataset.tableAlias}.trans_ly`, `TO_CHAR(${StorageMetric.selected.formula.tableAlias}.${StorageMetric.selected.formula.dateTimeField})::DATE`];
+            // let join = [`${tableRef.dataset.tableAlias}.trans_ly`, `TO_CHAR(${StorageMetric.selected.formula.tableAlias}.${StorageMetric.selected.formula.dateTimeField})::DATE`];
+            let join = [`${tableRef.dataset.tableAlias}.trans_ly`, StorageMetric.selected.formula.dateTimeField];
             filters.set(filterToken, { join });
             // da utilizzare nel caso in cui bisogna prendere timing function "last..." nel json
             // filters.set(filterToken, { table: tableRef.dataset.tableAlias, field: 'last', func: 'year', fn: filterToken });

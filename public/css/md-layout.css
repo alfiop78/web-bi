@@ -248,3 +248,4 @@ span.markContent {
 .markContent > i:hover {cursor: pointer;}
 
 .flex-columns {display:flex; flex-direction:column;}
+.flex-h{display:flex; flex-flow:wrap; justify-content:space-around;}

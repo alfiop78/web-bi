@@ -99,9 +99,7 @@
           <button data-id="dimension-edit" type="button" class="button-icon material-icons md-18" tooltip="Modifica" flow="left">edit</button>
         </div>
       </div>
-      {{-- <div class="mini-card-buttons">
-                    
-                </div> --}}
+      {{-- <div class="mini-card-buttons"> </div> --}}
     </div>
   </template>
 
@@ -182,8 +180,9 @@
   <dialog id="dialog-hierarchies-map">
     <section class="dialog-sections">
       <h4>Imposta relazione con tabella TIME</h4>
-      <div class="">
-        <textarea></textarea>
+      <div class="flex-h">
+        <div>elenco TIME fields</div>
+        <div id="composite-field-formula" data-content-editable contenteditable="true"></div>
       </div>
       <div class="dialog-buttons">
         <button type="button" name="cancel" class="md-button">annulla</button>

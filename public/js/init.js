@@ -356,19 +356,9 @@ var Hier = new Hierarchy();
       case 'date-time':
         // fact
         const fact = document.querySelector('.card.table[data-fact]');
-        const columnsRef = [Hier.fieldRef.dataset.label, 'date'];
-        // const columnsRef = ['DataDocumento', 'date'];
-        // TODO: il campo 'date' della tabella WEB_BI_TIME_055 può variare, può essere month, year, quarter, week.
         // al click sulla colonna comparirà una dialog dove indicare il campo (in WEB_BI_TIME_055) da mettere in relazione con la Fact
-        app.dialogHierarchiesMap.querySelector("textarea").innerHTML = `${fact.dataset.alias}.${Hier.fieldRef.dataset.label}`;
+        app.dialogHierarchiesMap.querySelector("#composite-field-formula").innerHTML = `${fact.dataset.alias}.${Hier.fieldRef.dataset.label}`;
         app.dialogHierarchiesMap.showModal();
-        return;
-        const join = ['WEB_BI_TIME_055.date', `${fact.dataset.alias}.${Hier.fieldRef.dataset.label}`]; // questa istruzione crea "Azienda_xxx.id" (alias.field)
-        // seleziono la dimensione TIME mkhz4os8tks
-        Cube.timeDimension = 'mkhz4os8tks';
-        Cube.dateTimeField = Hier.fieldRef.dataset.label;
-        Cube.timeJoins = { token: 'time', columnsRef, join };
-        Cube.timeJoin = 'time';
         break;
       case 'relations':
         // se è presente un altro elemento con attributo hierarchy ma NON data-relation-id, "deseleziono" quello con hierarchy per mettere ...
@@ -434,15 +424,16 @@ var Hier = new Hierarchy();
   }
 
   app.btnHierarchyMap.onclick = () => {
-    console.log(document.querySelector('textarea').innerHTML);
-    debugger;
-    const join = ['WEB_BI_TIME_055.date', document.querySelector('textarea').innerHTML]; // questa istruzione crea "Azienda_xxx.id" (alias.field)
-    // seleziono la dimensione TIME mkhz4os8tks
+    // TODO: il campo 'date' della tabella WEB_BI_TIME_055 può variare, può essere month, year, quarter, week.
+    const textarea = document.getElementById('composite-field-formula');
+    const columnsRef = [Hier.fieldRef.dataset.label, 'date'];
+    const join = ['WEB_BI_TIME_055.date', textarea.innerHTML];
+    // seleziono la dimensione TIME mkhz4os8tks (TODO: in futuro gli verrà assegnato un nome fisso)
     Cube.timeDimension = 'mkhz4os8tks';
-    Cube.dateTimeField = Hier.fieldRef.dataset.label;
+    Cube.dateTimeField = textarea.innerHTML;
     Cube.timeJoins = { token: 'time', columnsRef, join };
     Cube.timeJoin = 'time';
-
+    app.dialogHierarchiesMap.close();
   }
 
   // click sull'icona di destra "columns" per l'associazione delle colonne
