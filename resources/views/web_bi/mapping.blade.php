@@ -181,7 +181,25 @@
     <section class="dialog-sections">
       <h4>Imposta relazione con tabella TIME</h4>
       <div class="flex-h">
-        <div>elenco TIME fields</div>
+        <div>
+          <h6>Seleziona il campo da mettere in relazione</h6>
+          <ul id="time-fields">
+            <li data-field="date" data-fn="handlerTimeField" data-selected>DATE <small>Es.: 2023-12-31</small></li>
+            <li data-field="month_id" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
+            <li data-field="year" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
+          </ul>
+        </div>
+        <div>
+          <h6>Join</h6>
+          <div class="flex-v">
+            <span data-join-operator="=">&#61;</span>
+            <span data-join-operator=">">&gt;</span>
+            <span data-join-operator="<">&lt;</span>
+            <span data-join-operator=">=">&gt;=</span>
+            <span data-join-operator="<=">&lt;=</span>
+            <span data-join-operator="<>">&lt;&gt;</span>
+          </div>
+        </div>
         <div id="composite-field-formula" data-content-editable contenteditable="true"></div>
       </div>
       <div class="dialog-buttons">

@@ -199,3 +199,5 @@ section[data-sublist-hierarchies] small {
   margin: 2px;
 }
 section[data-sublist-hierarchies] small[data-include-query]{color: #494949; background-color: #99b19c; border-radius: 2px;}
+li[data-selected]{font-weight:bold;}
+li[data-field]:hover{cursor: pointer;}

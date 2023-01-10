@@ -256,3 +256,4 @@ ul > section[data-sublist-generic]:hover{cursor: pointer; border-left: solid thi
 ul > section[data-sublist-dimensions]{border: none;}
 /*minicard*/
 
+span[data-join-operator]{padding: 0.25em .5em; background-color: tan; font-size: 1rem; margin: .5em;}

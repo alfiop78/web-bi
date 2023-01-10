@@ -98,12 +98,13 @@ var Hier = new Hierarchy();
     // console.log(mutationList, observer);
     for (const mutation of mutationList) {
       if (mutation.type === 'childList') {
-        // console.info('A child node has been added or removed.');
+        console.info('A child node has been added or removed.');
         Array.from(mutation.addedNodes).forEach(node => {
           if (node.hasChildNodes()) node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
         });
       } else if (mutation.type === 'attributes') {
-        // console.log(`The ${mutation.attributeName} attribute was modified.`);
+        console.log(`The ${mutation.attributeName} attribute was modified.`);
+        if (mutation.target.hasChildNodes()) mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
       }
     }
   };
@@ -113,6 +114,7 @@ var Hier = new Hierarchy();
   // observerList.observe(targetNode, config);
   const dropZone = document.getElementById('drop-zone');
   observerList.observe(dropZone, config);
+  observerList.observe(app.dialogHierarchiesMap, config);
 
   // utilizzato per lo spostamento all'interno del drop-zone (card già droppata)
   app.dragStart = (e) => {
@@ -424,16 +426,26 @@ var Hier = new Hierarchy();
   }
 
   app.btnHierarchyMap.onclick = () => {
-    // TODO: il campo 'date' della tabella WEB_BI_TIME_055 può variare, può essere month, year, quarter, week.
+    // imposto la relazione tra WEB_BI_TIME e la FACT
     const textarea = document.getElementById('composite-field-formula');
-    const columnsRef = [Hier.fieldRef.dataset.label, 'date'];
-    const join = ['WEB_BI_TIME_055.date', textarea.innerHTML];
+    // recupero la <li> selezionata (date, year, month, ecc...)
+    // timeField, al momento, può essere date, month oppure year da scegliere in base al campo della FACT da mettere in join
+    const timeField = document.querySelector('li[data-field][data-selected]').dataset.field;
+    const columnsRef = [Hier.fieldRef.dataset.label, timeField];
+    const join = [`WEB_BI_TIME_055.${timeField}`, textarea.innerHTML];
     // seleziono la dimensione TIME mkhz4os8tks (TODO: in futuro gli verrà assegnato un nome fisso)
     Cube.timeDimension = 'mkhz4os8tks';
     Cube.dateTimeField = textarea.innerHTML;
     Cube.timeJoins = { token: 'time', columnsRef, join };
     Cube.timeJoin = 'time';
     app.dialogHierarchiesMap.close();
+  }
+
+  // seleziono il campo della TIME (date, month_id o year) da mettere in join
+  app.handlerTimeField = (e) => {
+    if (e.target.dataset.selected) return false;
+    delete document.querySelector('li[data-field][data-selected]').dataset.selected;
+    e.target.dataset.selected = 'true';
   }
 
   // click sull'icona di destra "columns" per l'associazione delle colonne
@@ -1501,6 +1513,7 @@ var Hier = new Hierarchy();
   // passing it the element to observe, and the options object
   observer.observe(body, { subtree: true, childList: true, attributes: true });
 
+  // popolamento tabella WEB_BI_TIME
   document.querySelector("#btn-time-dimension").onclick = async () => {
     // let jsonDataParsed = JSON.parse(window.localStorage.getItem(processToken));
     // console.dir(jsonDataParsed.report);

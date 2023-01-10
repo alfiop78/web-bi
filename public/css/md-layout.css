@@ -249,3 +249,4 @@ span.markContent {
 
 .flex-columns {display:flex; flex-direction:column;}
 .flex-h{display:flex; flex-flow:wrap; justify-content:space-around;}
+.flex-v{display: flex; flex-direction:column; align-items: center;}
