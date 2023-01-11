@@ -15,7 +15,7 @@ use App\Http\Controllers\BIfilterController;
 use App\Http\Controllers\BIprocessController;
 // uso il Model BIprocess che viene utilizzato nella route curlprocess (web_bi.schedule_report)
 use App\Models\BIprocess;
-// test 22.12.2022
+// test 22.12.2022 aggiunta per utilizzare /fetch_api/dimension/time
 use Illuminate\Support\Facades\DB;
 
 /*
@@ -38,10 +38,11 @@ Route::get('/users', [UserController::class, 'index']);
 Route::get('/index_origin', function () {
   return view('web_bi.index_origin');
 })->name('web_bi.index_origin'); // home page
-/* map database web-bi*/
-Route::get('/', function () {
+
+// pagina predisposta per il dvd (Marco Gardin) al momento non utilizzata
+/* Route::get('/', function () {
   return view('web_bi.index');
-})->name('web_bi.index'); // home page
+})->name('web_bi.index'); */
 
 Route::get('/mapping', [MapDatabaseController::class, 'mapping'])->name('web_bi.mapping'); // page mapping
 Route::get('/report', function () {

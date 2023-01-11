@@ -1980,7 +1980,7 @@ var List = new Lists();
 
   document.getElementById('mdcMapping').onclick = () => location.href = '/mapping';
 
-  app.btnBackPage.onclick = () => window.location.href = '/';
+  app.btnBackPage.onclick = () => window.location.href = '/index_origin';
 
   document.getElementById('columnName').onkeydown = (e) => {
     if (e.defaultPrevented) {

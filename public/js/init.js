@@ -1173,7 +1173,7 @@ var Hier = new Hierarchy();
   // associo l'evento click dello schema
   document.querySelectorAll('#nav-schema > a').forEach((a) => { a.addEventListener('click', app.schemaSelected) });
 
-  app.btnBack.onclick = () => { window.location.href = '/'; }
+  app.btnBack.onclick = () => { window.location.href = '/index_origin'; }
 
   /* ricerca in lista tabelle */
   document.getElementById('tableSearch').oninput = App.searchInList;
