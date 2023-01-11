@@ -250,3 +250,21 @@ span.markContent {
 .flex-columns {display:flex; flex-direction:column;}
 .flex-h{display:flex; flex-flow:wrap; justify-content:space-around;}
 .flex-v{display: flex; flex-direction:column; align-items: center;}
+
+.sql-info{display: flow-root;}
+.sql-info mark[data-info]{
+  display: unset;
+  background-color: sienna;
+  border-radius:4px;
+  padding: 2px 4px;
+  color: whitesmoke;
+  line-height: 1.5rem;
+}
+.sql-info mark[data-clause]{
+  display: unset;
+  background-color: darkblue;
+  border-radius:4px;
+  padding: 2px 4px;
+  color: whitesmoke;
+  line-height: 1.5rem;
+}

@@ -125,6 +125,17 @@ class MapDatabaseController extends Controller
     $q->datamartName = "WEB_BI_$q->reportId";
     // TODO: baseColumns potrei utilizzarlo anche nella chiamata a $q->select e $q->groupBy
     $q->baseColumns = $cube->{'select'};
+    $q->json__info = (object)[
+      "SELECT" => "SELECT",
+      "columns" => (object)[],
+      "FROM" => "FROM",
+      "from" => (object)[],
+      "WHERE" => "WHERE",
+      "where" => (object)[],
+      "filters" => (object)[],
+      "GROUP" => "GROUP BY",
+      "groupBy" => (object)[]
+    ];
     // imposto le colonne da includere nel datamart finale
     $q->fields();
     // imposto il magic method con le metriche composte
@@ -203,6 +214,17 @@ class MapDatabaseController extends Controller
     $q->datamartName = "WEB_BI_$q->reportId";
     // TODO: baseColumns potrei utilizzarlo anche nella chiamata a $q->select e $q->groupBy
     $q->baseColumns = $cube->{'select'};
+    $q->json__info = (object)[
+      "SELECT" => "SELECT",
+      "columns" => (object)[],
+      "FROM" => "FROM",
+      "from" => (object)[],
+      "WHERE" => "WHERE",
+      "where" => (object)[],
+      "filters" => (object)[],
+      "GROUP" => "GROUP BY",
+      "groupBy" => (object)[]
+    ];
     // imposto le colonne da includere nel datamart finale
     $q->fields();
     // imposto il magic method con le metriche composte
@@ -221,7 +243,7 @@ class MapDatabaseController extends Controller
     if (property_exists($cube, 'filters')) $q->filters($cube->{'filters'});
     // TODO: siccome il group by viene creato uguale alla clausola SELECT potrei unirli e non fare qui 2 chiamate
     $q->groupBy($cube->{'select'});
-    /* dd($q); */
+    // return json_encode($q->json__info);
     // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
     $resultSQL[] = $q->baseTable('sql');
     // dd($SQLBaseTable);
@@ -281,6 +303,17 @@ class MapDatabaseController extends Controller
     $q->baseTableName = "WEB_BI_TMP_BASE_$q->reportId";
     $q->datamartName = "WEB_BI_$q->reportId";
     $q->baseColumns = $cube->{'select'};
+    $q->json__info = (object)[
+      "SELECT" => "SELECT",
+      "columns" => (object)[],
+      "FROM" => "FROM",
+      "from" => (object)[],
+      "WHERE" => "WHERE",
+      "where" => (object)[],
+      "filters" => (object)[],
+      "GROUP" => "GROUP BY",
+      "groupBy" => (object)[]
+    ];
     // imposto le colonne da includere nel datamart finale
     $q->fields();
     // imposto il magic method con le metriche composte

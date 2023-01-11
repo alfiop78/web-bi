@@ -1725,8 +1725,34 @@ var List = new Lists();
       .then((response) => {
         if (response) {
           // console.log(response);
+          const sqlRef = document.getElementById('SQL');
+          if (sqlRef.hasChildNodes()) sqlRef.querySelectorAll('*').forEach(el => el.remove());
           app.dialogSQLInfo.showModal();
-          document.getElementById('SQL').innerHTML = response;
+          /* console.log(JSON.parse(response));
+          const json = JSON.parse(response);
+          for (const [clause, value] of Object.entries(json)) {
+            // console.log(clause, value, typeof value);
+            const tmpl = document.getElementById('tmpl-sql-info');
+            if (typeof value === 'object') {
+              for (const [name, props] of Object.entries(value)) {
+                const tmplContent = tmpl.content.cloneNode(true);
+                const span = tmplContent.querySelector('span');
+                const dataInfo = tmplContent.querySelector('mark[data-info]');
+                const dataSql = tmplContent.querySelector('span[data-sql]');
+                dataInfo.innerText = name;
+                dataSql.innerText = props.sql;
+                sqlRef.appendChild(span);
+              }
+            } else {
+              const tmplContent = tmpl.content.cloneNode(true);
+              const span = tmplContent.querySelector('span');
+              const dataSql = tmplContent.querySelector('span[data-sql]');
+              dataSql.innerText = value;
+              span.querySelector("mark").remove();
+              sqlRef.appendChild(span);
+            }
+          } */
+          sqlRef.innerHTML = "risposta :" + response;
           App.showConsole('SQL generato!', 'done', 5000);
         } else {
           App.showConsole('Errori nella creazione del datamart', 'error', 5000);

@@ -12,7 +12,7 @@ class Cube
   private $WHERE_metricTable = array(), $WHERE_timingFn = array();
   private $WHERE_baseTable = array(), $WHERE_timeDimension = array();
   private $groupBy;
-  private $filters_baseTable = array(), $info_baseTable = array();
+  private $filters_baseTable = array();
   private $reportId;
   private $_metrics_base, $_metrics_base_datamart;
   private $_metrics_advanced_datamart = array();
@@ -56,15 +56,19 @@ class Cube
   {
     $fieldList = array();
     $this->SELECT = "SELECT\n";
-    foreach ($columns as $object) {
-      // dd($object);
-      if (property_exists($object, 'sql')) {
-        foreach ($object->sql as $token => $field) {
-          $fieldList[] = implode($field) . " AS {$object->name}_{$token}";
-          $this->_columns[] = "{$object->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
+    foreach ($columns as $column) {
+      if (property_exists($column, 'sql')) {
+        foreach ($column->sql as $fieldType => $field) {
+          $fieldList["{$column->name}_{$fieldType}"] = implode($field) . " AS {$column->name}_{$fieldType}"; // $fieldType : id/ds
+          $this->_columns[] = "{$column->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
         }
       }
-      // dd($fieldList);
+    }
+    // dd($fieldList);
+    foreach ($fieldList as $name => $field) {
+      $this->json__info->columns->{$name} = (object)[
+        "sql" => $field
+      ];
     }
     $this->SELECT .= implode(",\n ", $fieldList);
     // dd($this->SELECT);
@@ -81,13 +85,19 @@ class Cube
   {
     $fieldList = array();
     $this->groupBy = "GROUP BY\n";
-    foreach ($groups as $key => $object) {
-      if (property_exists($object, 'sql')) {
-        foreach ($object->sql as $field) {
+    foreach ($groups as $token => $column) {
+      if (property_exists($column, 'sql')) {
+        foreach ($column->sql as $field) {
           $fieldImploded = implode($field);
-          if (!in_array($fieldImploded, $fieldList)) $fieldList[] = $fieldImploded;
+          // if (!in_array($fieldImploded, $fieldList)) $fieldList[] = $fieldImploded;
+          $fieldList["{$column->name}"] = $fieldImploded;
         }
       }
+    }
+    foreach ($fieldList as $name => $field) {
+      $this->json__info->groupBy->{$name} = (object)[
+        "sql" => $field
+      ];
     }
     $this->groupBy .= implode(",\n", $fieldList);
     // dd($this->groupBy);
@@ -99,10 +109,16 @@ class Cube
 	*/
   public function from($from)
   {
-    foreach ($from as $table) {
-      if (!in_array($table, $this->FROM_baseTable)) $this->FROM_baseTable[] = $table;
+    foreach ($from as $tableName => $sql) {
+      // if (!in_array($table, $this->FROM_baseTable)) $this->FROM_baseTable[] = $table;
+      $this->FROM_baseTable[$tableName] = $sql;
     }
     // dd($this->FROM_baseTable);
+    foreach ($this->FROM_baseTable as $tableName => $sql) {
+      $this->json__info->from->{$tableName} = (object)[
+        "sql" => $sql
+      ];
+    }
     /* es.:
 			array:4 [
 				0 => "automotive_bi_data.Azienda AS Azienda_997"
@@ -138,9 +154,21 @@ class Cube
       */
       // if (!in_array($join, $this->WHERE_baseTable)) $this->WHERE_baseTable[$token] = $relation;
       if ($token === 'time') {
-        if (!in_array($token, $this->WHERE_timeDimension)) $this->WHERE_timeDimension[$token] = $relation;
+        // if (!in_array($token, $this->WHERE_timeDimension)) $this->WHERE_timeDimension[$token] = $relation;
+        $this->WHERE_timeDimension[$token] = $relation;
+        foreach ($this->WHERE_timeDimension as $token => $value) {
+          $this->json__info->where->{$token} = (object)[
+            "sql" => $value
+          ];
+        }
       } else {
-        if (!in_array($token, $this->WHERE_baseTable)) $this->WHERE_baseTable[$token] = $relation;
+        // if (!in_array($token, $this->WHERE_baseTable)) $this->WHERE_baseTable[$token] = $relation;
+        $this->WHERE_baseTable[$token] = $relation;
+        foreach ($this->WHERE_baseTable as $token => $value) {
+          $this->json__info->where->{$token} = (object)[
+            "sql" => $value
+          ];
+        }
       }
     }
     // dd($this->WHERE_baseTable, $this->WHERE_timeDimension);
@@ -173,43 +201,25 @@ class Cube
     // dd($filters);
     // $and = "\nAND ";
     // test creazione json da utilizzare per sql_info
-    $js = (object)[
-      "filters" => (object)[
-        "name" => (object)[
-          "tag" => "span",
-          "class" => "nome_classe per gli elementi 'esterni' al sql",
-          "name" => "nome del filtro"
-        ],
-        "sql" => (object)[
-          "tag" => "span",
-          "class" => "classe per sql",
-          "sql" => "AND DocVenditaDettaglio.CancellatStampa = 'S'"
-        ]
-      ],
-      "where" => NULL
-    ];
     foreach ($filters as $filter) {
       // dd($filter); // filter_name => alias_table.field = value
       // $this->filters_baseTable .= $and.$filter->SQL;
-      if (!in_array($filter->formula, $this->filters_baseTable)) $this->filters_baseTable[] = $filter->formula;
+      // if (!in_array($filter->formula, $this->filters_baseTable)) $this->filters_baseTable[] = $filter->formula;
       // NOTE: in un array associativo non è necessario verificare se la key esiste, il valore viene sovrascritto.
-      $this->info_baseTable[$filter->name] = $filter->formula;
+      $this->filters_baseTable[$filter->name] = $filter->formula;
     }
-    // dd($this->info_baseTable);
-    foreach ($this->info_baseTable as $name => $sql) {
-      echo "<br /><span>$name</span><br />\nAND $sql";
-      $js->filters->name->name = $name;
-      $js->filters->sql->sql = "AND $sql";
+    foreach ($this->filters_baseTable as $name => $formula) {
+      // echo "<br /><span>$name</span><br />\nAND $formula";
+      $this->json__info->filters->{$name} = (object)[
+        "sql" => "AND $formula"
+      ];
     }
-    exit;
-    dd($js);
-    dd(key($this->info_baseTable) . "\nAND " . implode("\nAND ", $this->info_baseTable));
-    //dd($this->filters_baseTable);
+    // dd($this->json__info);
     /*
-        es.:
-        AND Azienda_997.id = 473\n
-        AND DocVenditaDettaglio_560.DataDocumento >= 20220601
-        */
+      es.:
+      AND Azienda_997.id = 473\n
+      AND DocVenditaDettaglio_560.DataDocumento >= 20220601
+    */
   }
 
   /*

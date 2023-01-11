@@ -523,6 +523,15 @@
     </section>
   </dialog>
 
+
+  <template id="tmpl-sql-info">
+
+    <span class="sql-info">
+      <mark data-info></mark>
+      <span data-sql></span>
+    </span>
+  </template>
+
   <main>
     <div id="drawer" close>
       <section class="account">
