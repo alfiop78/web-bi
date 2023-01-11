@@ -48,6 +48,8 @@ Route::get('/mapping', [MapDatabaseController::class, 'mapping'])->name('web_bi.
 Route::get('/report', function () {
   return view('web_bi.report');
 })->name('web_bi.report'); // page report
+// pagina Scheduler
+Route::get('/scheduler', [MapDatabaseController::class, 'scheduler'])->name('web_bi.scheduler');
 
 Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']); // recupero l'elenco dei database presenti (schema)
 Route::get('/fetch_api/schema/{schema}/tables', [MapDatabaseController::class, 'tables'])->name('web_bi.fetch_api.tables'); // recupero elenco tabelle dello schema selezionato
@@ -145,7 +147,10 @@ Route::post('/fetch_api/dimension/time', function () {
 })->name('web_bi.fetch_api.time');
 
 // curl http://127.0.0.1:8000/curl/process/t1cm3v1nnso/schedule
-// http://gaia.automotive-cloud.com/curl/process/j8ykcl339r9/schedule
+// curl http://gaia.automotive-cloud.com/curl/process/j8ykcl339r9/schedule
+// TODO: da ricontrollare se https
+// con il login : curl http://user:psw@gaia.automotive-cloud.com/curl/process/{processToken}/schedule
+// ...oppure : curl -u 'user:psw' http://gaia.automotive-cloud.com/curl/process/{processToken}/schedule
 Route::get('/curl/process/{token}/schedule', function (BIprocess $biProcess, $token) {
   $map = new MapDatabaseController();
   // interrogo la tabella bi_processes per recuperare il json_value relativo al report indicato nel token
