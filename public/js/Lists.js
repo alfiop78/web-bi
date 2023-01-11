@@ -805,6 +805,7 @@ class Lists {
     this.#sublist.section.dataset.tokenColumn = object.token;
     this.#sublist.span.innerText = object.name;
     this.#sublist.btnEdit.dataset.objectToken = object.token;
+    this.#sublist.btnEdit.dataset.objectTokenReference = object.reference;
     this.#sublist.btnRemove.dataset.objectToken = object.token;
     this.#sublist.btnUndoAdd.dataset.objectToken = object.token;
     this.#sublist.btnUndoRemove.dataset.objectToken = object.token;

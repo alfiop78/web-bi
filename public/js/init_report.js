@@ -409,11 +409,12 @@ var List = new Lists();
     // qui devo impostare le stesse prop impostate in handlerSelectColumn
     app.btnColumnSave.dataset.token = e.currentTarget.dataset.objectToken;
     document.getElementById('columnName').setAttribute('value', Query.OB['COLUMNS'].get(e.currentTarget.dataset.objectToken).name);
-    debugger;
     document.getElementById('columnName').value = Query.OB['COLUMNS'].get(e.currentTarget.dataset.objectToken).name;
     // recupero la formula dall'oggetto Query.select e la reimposto nella composite-column-formula
     // seleziono la colonna e aggiungo la stessa al composite-column-formula
-    const column = document.querySelector("#ul-columns .selectable[data-token='" + e.currentTarget.dataset.objectToken + "']")
+    debugger;
+    const column = document.querySelector("#ul-columns .selectable[data-token='" + e.currentTarget.dataset.objectTokenReference + "']")
+    // const column = document.querySelector("#ul-columns .selectable[data-token='" + e.currentTarget.dataset.objectToken + "']")
     column.dataset.selected = 'true';
     // imposto tutti gli altri "disabled"
     document.querySelectorAll('#ul-columns section:not([hidden]) .selectable:not([data-selected])').forEach(element => element.dataset.disabled = 'true');
@@ -1899,17 +1900,14 @@ var List = new Lists();
   }
 
   app.saveColumn = () => {
-    const mainToken = rand().substring(0, 5);
+    let mainToken = rand().substring(0, 5);
     const name = document.getElementById('columnName');
     Query.sql_id = [], Query.sql_ds = []; Query.edit_id = [], Query.edit_ds = [];
     const column = document.querySelector('#ul-columns .selectable[data-selected]');
     let dimensions = new Set(), cubes = new Set();
     let hierarchiesMap = new Map();
     // elimino l'oggetto Query.objects, se presente, in questo caso sto modificando una colonna già inserita.
-    /* if (app.btnColumnSave.dataset.token) {
-      Query.objects = {token : column.dataset.token};
-      Query.select = {token : column.dataset.token};
-    } */
+    if (app.btnColumnSave.dataset.token) mainToken = app.btnColumnSave.dataset.token;
     let columnObject = { token: mainToken, name: name.value, type: 'COLUMNS', reference: column.dataset.token, include: {} };
     document.querySelectorAll('#composite-column-formula *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
