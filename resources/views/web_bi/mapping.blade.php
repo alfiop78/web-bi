@@ -515,7 +515,7 @@
               <button id="btn-versioning" type="button" class="button-icon material-icons-round md-24" tooltip="Esegui sincronizzazione" flow="bottom">cached</button>
               <button id="btn-versioning-status" type="button" class="button-icon material-icons-round md-24" tooltip="" data-open-abs-window flow="bottom" disabled>cached</button>
               <span class="h-separator"></span>
-              <button id="btn-time-dimension" type="button" class="button-icon material-icons-round md-24" tooltip="Crea dimensione TIME" flow="bottom">date_range</button>
+              <button id="btn-time-dimension" type="button" class="button-icon material-icons-round md-24" tooltip="Creazione tabella TIME" flow="bottom">date_range</button>
             </div>
           </div>
 
