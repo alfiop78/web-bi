@@ -188,6 +188,7 @@ tr.tr-right{display: flex;justify-content: flex-end;}
 /*actions*/
 .actions{display: grid; grid-template-columns: 45% 55%; margin: 0px 0px 8px; padding: 4px 32px 4px; box-shadow: 0px 1px 3px -1px grey; border-radius: 4px; background-color: white;}
 .actions > .buttons{display: flex;flex-flow: row;}
+.actions button[open]{color: sienna;}
 .actions > .info{display: flex; justify-content: flex-end;}
 .info > #info[data-edit]{background-color: sienna; padding: 0px 4px; color:white;border-radius: 4px;display: flex; align-items: center;}
 
@@ -267,4 +268,35 @@ span.markContent {
   padding: 2px 4px;
   color: whitesmoke;
   line-height: 1.5rem;
+}
+
+.absolute-window{
+  position:absolute;
+  background-color: white;
+  height: 100%;
+  width: 300px;
+  z-index:0;
+  left: -300px;
+}
+
+.absolute-window[data-open="false"]{
+  z-index:0;
+  animation: closeAbsoluteWindow 150ms ease-in-out forwards;
+}
+ 
+.absolute-window[data-open="true"]{
+  z-index:900;
+  animation: openAbsoluteWindow 150ms ease-in-out forwards;
+}
+
+@keyframes openAbsoluteWindow {
+	0% {left: -300px;}
+	80% {left: 15px;}
+	100% {left: 0px;}
+}
+
+@keyframes closeAbsoluteWindow {
+	0% {left: 0px;}
+	20% {left: 15px;}
+	100% {left: -300px;}
 }

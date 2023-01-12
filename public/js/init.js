@@ -649,8 +649,17 @@ var Hier = new Hierarchy();
     ctx.stroke();
   }*/
 
+  app.closeAbsoluteWindow = (attr) => {
+    document.querySelector(".absolute-window[data-name='" + attr + "']").dataset.open = 'false';
+    document.querySelector("button[data-name='" + attr + "']").toggleAttribute('open');
+  }
+
   // selezione di un cubo già definito, da qui è possibile associare, ad esempio, una nuova dimensione ad un cubo già esistente.
   app.handlerCubeSelected = (e) => {
+    // chiudo la lista
+    app.closeAbsoluteWindow('list-defined-cubes');
+    // document.querySelector(".absolute-window[data-name='list-defined-cubes']").dataset.open = 'false';
+    // document.querySelector("button[data-name='list-defined-cubes']").toggleAttribute('open');
     // apro la tabella definita come Cubo
     // console.log('e.currentTarget : ', e.currentTarget);
     StorageCube.selected = e.currentTarget.dataset.cubeToken;
@@ -1048,12 +1057,17 @@ var Hier = new Hierarchy();
   // ***********************events*********************
   // lista cubi già definiti
   app.btnDefinedCube.onclick = (e) => {
-    if (e.target.hasAttribute('disabled')) return;
     // visualizzo la lista dei cubi esistenti
-    const cubeList = document.getElementById('cubesList');
-    cubeList.toggleAttribute('hidden');
+    // apro la absolute-window con data-name="list-defined-cubes"
+    if (e.target.hasAttribute('open')) {
+      // lista già aperta
+      // chiudo la absolute-window
+      document.querySelector(".absolute-window[data-name='" + e.target.dataset.name + "']").dataset.open = 'false';
+    } else {
+      document.querySelector(".absolute-window[data-name='" + e.target.dataset.name + "']").dataset.open = 'true';
+      document.getElementById('cubeSearch').focus();
+    }
     e.target.toggleAttribute('open');
-    document.getElementById('cubeSearch').focus();
   }
 
   // lista dimensioni già definite

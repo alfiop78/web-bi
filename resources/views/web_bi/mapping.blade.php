@@ -473,7 +473,7 @@
   </template>
 
   <main>
-    <div id="drawer" open>
+    <div id="drawer">
 
       <section class="account">
         <h5>user</h5><i class="material-icons md-light">person</i>
@@ -510,7 +510,7 @@
               <span class="h-separator"></span>
               <button id="btn-save-cube" type="button" class="button-icon material-icons-round md-24" tooltip="Salva cubo" flow="bottom" disabled>save</button>
               <button id="btn-save-opened-cube" type="button" class="button-icon material-icons-round md-24" tooltip="Aggiorna cubo" flow="bottom" disabled hidden>save</button>
-              <button id="btn-defined-cube" type="button" class="button-icon material-icons-round md-24" tooltip="Lista Cubi definiti" flow="bottom" disabled>folder_open</button>
+              <button id="btn-defined-cube" type="button" data-name="list-defined-cubes" class="button-icon material-icons-round md-24" tooltip="Lista Cubi definiti" flow="bottom" disabled>folder_open</button>
               <span class="h-separator"></span>
               <button id="btn-versioning" type="button" class="button-icon material-icons-round md-24" tooltip="Esegui sincronizzazione" flow="bottom">cached</button>
               <button id="btn-versioning-status" type="button" class="button-icon material-icons-round md-24" tooltip="" data-open-abs-window flow="bottom" disabled>cached</button>
@@ -541,17 +541,17 @@
               </div>
             </div>
 
-            <div class="absList" id="cubesList" hidden>
-              <div class="md-field">
-                <input type="search" id="cubeSearch" data-element-search="cubes" autocomplete="off" />
-                <label for="cubeSearch" class="">Ricerca</label>
-              </div>
-              <div class="relative-ul">
-                <ul id="cubes" class="absolute custom-scrollbar"></ul>
-              </div>
-            </div>
-
             <div id="drop">
+              <!--<div class="absolute-window" data-name="list-schema"></div>-->
+              <div class="absolute-window" data-name="list-defined-cubes">
+                <div class="md-field">
+                  <input type="search" id="cubeSearch" data-element-search="cubes" autocomplete="off" />
+                  <label for="cubeSearch" class="">Ricerca</label>
+                </div>
+                <div class="relative-ul">
+                  <ul id="cubes" class="custom-scrollbar"></ul>
+                </div>
+              </div>
               <div id="drop-zone" class="dropzone" data-mode-insert="after"><span>Trascina qui le tabelle da mappare</span></div>
               <div id="hierarchies">
                 <section class="hierarchies"></section>
