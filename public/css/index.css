@@ -46,9 +46,15 @@ section[options] button[hier-order-minus]{color: #3b7096;}
 }
 
 section[options][data-mode="default"] > button[metrics],
+section[options][data-mode="default"] > button[time],
 section[options][data-mode="default"] > button[composite-metrics]{
   display: none;
 }
+
+.card.table[data-mode='last-table'] section[options] > button[columns] {
+  display: none;
+}
+
 section[options][data-mode="dimension"] > button[columns],
 section[options][data-mode="dimension"] > button[metrics],
 section[options][data-mode="dimension"] > button[time],

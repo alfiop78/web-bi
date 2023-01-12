@@ -1067,6 +1067,7 @@ var Hier = new Hierarchy();
 
   // open dialog salva gerarchia
   app.btnSaveHierarchy.onclick = (e) => {
+    document.getElementById('hierarchyName').value = '';
     app.dialogHierarchyName.showModal();
     // abilito il tasto save dimension
     app.btnSaveDimension.disabled = false;
@@ -1216,7 +1217,7 @@ var Hier = new Hierarchy();
   app.btnHierarchySaveName.onclick = () => {
     const hierTitle = document.getElementById('hierarchyName').value;
     // ordine gerarchico (per stabilire quale tabella è da associare al cubo) questo dato viene preso dal valore presente in .hierarchy-order
-    let hierarchyOrder = {}, hierarchyOrderTables = {};
+    let hierarchyOrder = {};
     // contare quante tabelle sono presenti nella gerarchia corrente
     // eseguire un ciclo che inizia da 1 (per la prima tabella della gerarchia)
     // recuperare le tabelle in ordine per aggiungerle all'object hierarchyOrder
@@ -1234,9 +1235,8 @@ var Hier = new Hierarchy();
       };
     }
     const comment = document.getElementById('textarea-hierarchies-comment').value;
-    const rand = () => Math.random(0).toString(36).substr(2);
-    const token = rand().substr(0, 7);
-    debugger;
+    const rand = () => Math.random(0).toString(36).substring(2);
+    const token = rand().substring(0, 7);
     Hier.hier = { token, name: hierTitle, hierarchyOrder, comment, from };
     // la gerarchia creata la salvo nell'oggetto Dim, della classe Dimension, dove andrò a salvare, alla fine, tutta la dimensione
     Dim.hier = Hier.hier;
@@ -1264,25 +1264,23 @@ var Hier = new Hierarchy();
   }
 
   // new hierarchy
-  app.btnNewHierarchy.onclick = (e) => {
+  app.btnNewHierarchy.onclick = () => {
     /* se è presente più di una tabella, nella gerarchia, l'ultima non la elimino.
-    * Questo perchè, l'ultima tabella, sarà messa in relazione anche con le altre gerarchie che verranno create
+    * In una dimensione con più gerarchie, l'ultima tabella della gerarchia deve essere la stessa per tutte le gerarchie.
     */
-    console.log('numero tabelle presenti nella gerarchia : ', app.dropZone.querySelectorAll('.cardTable').length);
+    // lista tabelle presenti nella gerarchia
     const cards = app.dropZone.querySelectorAll('.card.table');
-    // numero tabelle presenti nella gerarchia corrente
-    const cardsLength = cards.length;
-    if (cardsLength > 1) {
+    if (cards.length > 1) {
       // sono presenti più tabelle, l'ultima della gerarchia non la elimino
       cards.forEach((card) => {
-        if (+card.dataset.value !== cardsLength) {
+        if (+card.dataset.value !== cards.length) {
           card.remove();
         } else {
           // ultima e unica tabella presente
-          // resetto il 'data-mode' allo stato iniziale
-          delete card.dataset.mode;
+          // la card ora viene impostata in mode="last-table". Questo consente di visualizzare/nascondere alcuni tasti 'options'
+          card.dataset.mode = 'last-table';
           card.querySelector('.info').hidden = true;
-          // TODO: rimuovo le precedenti relazioni (di altre gerarchie)
+          // rimuovo le precedenti relazioni (appartenenti ad altre gerarchie)
           card.querySelectorAll('ul .selectable[data-relation-id]').forEach(join => {
             delete join.dataset.relation;
             delete join.dataset.joinToken;
@@ -1290,15 +1288,16 @@ var Hier = new Hierarchy();
           });
           // resetto il numero in .cardTable[data-value]
           card.dataset.value = 0;
-          // imposto la drop-zone in modalità data-mode-insert = "before", in questo modo tutte le card aggiunte alla dropzone saranno messe PRIMA dell'ultima card
+          /* imposto la drop-zone in modalità data-mode-insert = "before".
+          * con 'before' tutte le card aggiunte alla dropzone saranno messe PRIMA dell'ultima card
+          */
           app.dropZone.dataset.modeInsert = "before";
         }
       });
     } else {
-      // ripulisco la drop-zone per avere la possibilità di inserire altre gerarchie
-      // recupero tutte le .card.table presenti nella drop-zone per eliminarle
+      // c'è solo una card, la elimino.
       app.dropZone.querySelector('.card.table').remove();
-      // se la dropzone ha un solo elemento, cioè lo span impostato all'inizio, allora rimuovo la class dropped per ripristinare lo stato iniziale
+      // se la dropzone ha un solo elemento, cioè lo <span>Trascina....</span>, rimuovo la class dropped per ripristinare lo stato iniziale
       if (app.dropZone.childElementCount === 1) app.dropZone.classList.remove('dropped');
     }
     Hier = new Hierarchy();
