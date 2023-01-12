@@ -271,9 +271,12 @@ span.markContent {
 }
 
 .absolute-window{
+  display: flex;
+  flex-flow: column;
+  align-self: center;
+  height: calc(100% - 2px);
   position:absolute;
   background-color: white;
-  height: 100%;
   width: 300px;
   z-index:0;
   left: -300px;
@@ -292,11 +295,11 @@ span.markContent {
 @keyframes openAbsoluteWindow {
 	0% {left: -300px;}
 	80% {left: 15px;}
-	100% {left: 0px;}
+	100% {left: 1px;}
 }
 
 @keyframes closeAbsoluteWindow {
-	0% {left: 0px;}
+	0% {left: 1px;}
 	20% {left: 15px;}
 	100% {left: -300px;}
 }

@@ -175,6 +175,10 @@ section[data-sublist-gen] {position: relative;}
 	100% {transform: translateY(100%); opacity: 0;}
 }
 
+section[data-sublist-generic][data-selected] {
+  border-left: solid thick indianred; transition: border-left 150ms;
+}
+
 /*lista nelle dialog*/
 ul[data-object]{position: absolute; overflow: auto; width: 100%; height: calc(100% - 24px); margin-block-start: 12px; margin-block-end: 12px; padding-inline-start: 1em; padding-inline-end: 1em;}
 

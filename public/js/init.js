@@ -115,6 +115,7 @@ var Hier = new Hierarchy();
   const dropZone = document.getElementById('drop-zone');
   observerList.observe(dropZone, config);
   observerList.observe(app.dialogHierarchiesMap, config);
+  observerList.observe(document.querySelector('#list-schema'), config);
 
   // utilizzato per lo spostamento all'interno del drop-zone (card già droppata)
   app.dragStart = (e) => {
@@ -650,16 +651,24 @@ var Hier = new Hierarchy();
   }*/
 
   app.closeAbsoluteWindow = (attr) => {
-    document.querySelector(".absolute-window[data-name='" + attr + "']").dataset.open = 'false';
-    document.querySelector("button[data-name='" + attr + "']").toggleAttribute('open');
+    document.querySelector(".absolute-window[data-window-name='" + attr + "']").dataset.open = 'false';
+    document.querySelector("button[data-window-name='" + attr + "']").toggleAttribute('open');
+  }
+
+  app.openAbsoluteWindow = (attr) => {
+    // verifico se ci sono altre absolute-window aperte
+    document.querySelectorAll(".absolute-window[data-open='true']").forEach(window => {
+      window.dataset.open = 'false';
+      document.querySelector("button[data-window-name='" + window.dataset.windowName + "']").toggleAttribute('open');
+    });
+    document.querySelector(".absolute-window[data-window-name='" + attr + "']").dataset.open = 'true';
+    document.querySelector("button[data-window-name='" + attr + "']").toggleAttribute('open');
   }
 
   // selezione di un cubo già definito, da qui è possibile associare, ad esempio, una nuova dimensione ad un cubo già esistente.
   app.handlerCubeSelected = (e) => {
     // chiudo la lista
     app.closeAbsoluteWindow('list-defined-cubes');
-    // document.querySelector(".absolute-window[data-name='list-defined-cubes']").dataset.open = 'false';
-    // document.querySelector("button[data-name='list-defined-cubes']").toggleAttribute('open');
     // apro la tabella definita come Cubo
     // console.log('e.currentTarget : ', e.currentTarget);
     StorageCube.selected = e.currentTarget.dataset.cubeToken;
@@ -1006,17 +1015,17 @@ var Hier = new Hierarchy();
   }
 
   app.schemaSelected = (e) => {
-    e.preventDefault();
-    console.log(e.target);
+    app.closeAbsoluteWindow('list-schema');
+    console.log(e.currentTarget);
     // rimuovo l'attributo selected dalla precedente selezione, se ce ne sono
-    if (document.querySelector('#nav-schema a[selected]')) {
-      document.querySelector('#nav-schema a[selected]').removeAttribute('selected');
+    if (document.querySelector('#list-schema section[data-selected]')) {
+      delete document.querySelector('#list-schema section[data-selected]').dataset.selected;
       // ripulisco la #tableList perchè ci sono tabelle appartenenti allo schema selezionato in precedenza
       document.querySelectorAll('#tables > section').forEach(element => element.remove());
     }
-    e.target.setAttribute('selected', true);
-    app.getDatabaseTable(e.target.dataset.schema);
-    document.getElementById('drawer').removeAttribute('open');
+    e.currentTarget.dataset.selected = 'true';
+    app.getDatabaseTable(e.currentTarget.dataset.schema);
+    // document.getElementById('drawer').removeAttribute('open');
   }
 
   // ordine gerarchico, livello superiore
@@ -1055,19 +1064,31 @@ var Hier = new Hierarchy();
   app.getCubes();
 
   // ***********************events*********************
-  // lista cubi già definiti
-  app.btnDefinedCube.onclick = (e) => {
-    // visualizzo la lista dei cubi esistenti
-    // apro la absolute-window con data-name="list-defined-cubes"
+  document.querySelector('#btn-schema-list').onclick = (e) => {
     if (e.target.hasAttribute('open')) {
       // lista già aperta
       // chiudo la absolute-window
-      document.querySelector(".absolute-window[data-name='" + e.target.dataset.name + "']").dataset.open = 'false';
+      // document.querySelector(".absolute-window[data-window-name='" + e.target.dataset.windowName + "']").dataset.open = 'false';
+      app.closeAbsoluteWindow(e.target.dataset.windowName);
     } else {
-      document.querySelector(".absolute-window[data-name='" + e.target.dataset.name + "']").dataset.open = 'true';
+      app.openAbsoluteWindow(e.target.dataset.windowName);
+      // document.querySelector(".absolute-window[data-window-name='" + e.target.dataset.windowName + "']").dataset.open = 'true';
+      // document.getElementById('cubeSearch').focus();
+    }
+  }
+
+  // lista cubi già definiti
+  app.btnDefinedCube.onclick = (e) => {
+    // visualizzo la lista dei cubi esistenti
+    // apro la absolute-window con data-window-name="list-defined-cubes"
+    if (e.target.hasAttribute('open')) {
+      // lista già aperta
+      // chiudo la absolute-window
+      app.closeAbsoluteWindow(e.target.dataset.windowName);
+    } else {
+      app.openAbsoluteWindow(e.target.dataset.windowName);
       document.getElementById('cubeSearch').focus();
     }
-    e.target.toggleAttribute('open');
   }
 
   // lista dimensioni già definite
@@ -1186,7 +1207,7 @@ var Hier = new Hierarchy();
   document.getElementById('mdc-report').onclick = () => window.location.href = '/report';
 
   // associo l'evento click dello schema
-  document.querySelectorAll('#nav-schema > a').forEach((a) => { a.addEventListener('click', app.schemaSelected) });
+  document.querySelectorAll(".absolute-window[data-window-name='list-schema'] > section").forEach(a => a.addEventListener('click', app.schemaSelected));
 
   app.btnBack.onclick = () => { window.location.href = '/index_origin'; }
 
@@ -1566,4 +1587,8 @@ var Hier = new Hierarchy();
     Hier.activeCard = e.target.dataset.id;
     Hier.mode = 'date-time';
   }
+
+  /* page init  (impostazioni inziali per la pagina, alcune sono necessarie per essere catturate dal mutationObserve)*/
+  document.querySelector('.absolute-window[data-window-name="list-schema"]').dataset.open = 'true';
+  /* end page init */
 })();

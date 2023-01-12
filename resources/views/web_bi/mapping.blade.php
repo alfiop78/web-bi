@@ -504,13 +504,14 @@
 
           <div class="actions">
             <div class="buttons">
+              <button id="btn-schema-list" data-window-name="list-schema" class="button-icon material-icons-round md-24" type="button" tooltip="Schemi Database" flow="bottom" open>storage</button>
               <button id="btn-open-table-list" class="button-icon material-icons-round md-24" type="button" tooltip="Lista tabelle" flow="bottom" disabled>storage</button>
               <button id="btn-open-dimension-list" type="button" class="button-icon material-icons-round md-24" tooltip="Lista Dimensioni" flow="bottom" disabled>schema</button>
               <button id="btn-new-cube" type="button" class="button-icon material-icons-round md-24" tooltip="Definisci cubo" flow="bottom" disabled>space_dashboard</button>
               <span class="h-separator"></span>
               <button id="btn-save-cube" type="button" class="button-icon material-icons-round md-24" tooltip="Salva cubo" flow="bottom" disabled>save</button>
               <button id="btn-save-opened-cube" type="button" class="button-icon material-icons-round md-24" tooltip="Aggiorna cubo" flow="bottom" disabled hidden>save</button>
-              <button id="btn-defined-cube" type="button" data-name="list-defined-cubes" class="button-icon material-icons-round md-24" tooltip="Lista Cubi definiti" flow="bottom" disabled>folder_open</button>
+              <button id="btn-defined-cube" type="button" data-window-name="list-defined-cubes" class="button-icon material-icons-round md-24" tooltip="Lista Cubi definiti" flow="bottom" disabled>folder_open</button>
               <span class="h-separator"></span>
               <button id="btn-versioning" type="button" class="button-icon material-icons-round md-24" tooltip="Esegui sincronizzazione" flow="bottom">cached</button>
               <button id="btn-versioning-status" type="button" class="button-icon material-icons-round md-24" tooltip="" data-open-abs-window flow="bottom" disabled>cached</button>
@@ -542,8 +543,21 @@
             </div>
 
             <div id="drop">
-              <!--<div class="absolute-window" data-name="list-schema"></div>-->
-              <div class="absolute-window" data-name="list-defined-cubes">
+              <div id="list-schema" class="absolute-window" data-window-name="list-schema">
+                <div class="relative-ul">
+                  <ul class="custom-scrollbar">
+                    {{-- {{ dd($schemes) }} --}}
+                    @foreach($schemes as $schema)
+                    <section data-element-search data-fn="schemaSelected" data-schema="{{ $schema['SCHEMA_NAME'] }}" data-label data-sublist-generic data-searchable="true">
+                      <span class="sublist">
+                        <span generic>{{ $schema['SCHEMA_NAME']}}</span>
+                      </span>
+                    </section>
+                    @endforeach
+                  </ul>
+                </div>
+              </div>
+              <div class="absolute-window" data-window-name="list-defined-cubes">
                 <div class="md-field">
                   <input type="search" id="cubeSearch" data-element-search="cubes" autocomplete="off" />
                   <label for="cubeSearch" class="">Ricerca</label>
