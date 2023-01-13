@@ -415,7 +415,8 @@
           <div class="v-content">
             <span table></span>
           </div>
-          <i class="material-icons md-18">star_outline</i>
+          <button class="button-icon material-icons md-18" data-fact data-fn="handlerFactTable" tooltip="Fact Table" flow="bottom">table_chart</button>
+          <button class="button-icon material-icons md-18" data-star tooltip="Aggiungi preferito" flow="bottom">star_outline</button>
         </div>
       </div>
     </section>
@@ -505,9 +506,8 @@
           <div class="actions">
             <div class="buttons">
               <button id="btn-schema-list" data-window-name="list-schema" class="button-icon material-icons-round md-24" type="button" tooltip="Schemi Database" flow="bottom" open>storage</button>
-              <button id="btn-open-table-list" class="button-icon material-icons-round md-24" type="button" tooltip="Lista tabelle" flow="bottom" disabled>storage</button>
-              <button id="btn-open-dimension-list" type="button" class="button-icon material-icons-round md-24" tooltip="Lista Dimensioni" flow="bottom" disabled>schema</button>
-              <button id="btn-new-cube" type="button" class="button-icon material-icons-round md-24" tooltip="Definisci cubo" flow="bottom" disabled>space_dashboard</button>
+              <button id="btn-open-table-list" data-window-name="list-tables" class="button-icon material-icons-round md-24" type="button" tooltip="Lista tabelle" flow="bottom" disabled>storage</button>
+              <button id="btn-open-dimension-list" data-window-name="list-dimensions" type="button" class="button-icon material-icons-round md-24" tooltip="Lista Dimensioni" flow="bottom" disabled>schema</button>
               <span class="h-separator"></span>
               <button id="btn-save-cube" type="button" class="button-icon material-icons-round md-24" tooltip="Salva cubo" flow="bottom" disabled>save</button>
               <button id="btn-save-opened-cube" type="button" class="button-icon material-icons-round md-24" tooltip="Aggiorna cubo" flow="bottom" disabled hidden>save</button>
@@ -521,27 +521,6 @@
           </div>
 
           <section class="wrapper">
-            {{-- div 1 --}}
-            <div class="absList" id="tableList" hidden>
-              <div class="md-field">
-                <input type="search" id="tableSearch" data-element-search="tables" autocomplete="off" />
-                <label for="tableSearch" class="">Ricerca</label>
-              </div>
-              <div class="relative-ul">
-                <ul id="tables" class="absolute custom-scrollbar"></ul>
-              </div>
-            </div>
-            {{-- dimensioni --}}
-            <div class="absList large-list" id="dimensionList" hidden>
-              <div class="md-field">
-                <input type="search" id="dimensionSearch" data-element-search="dimensions" autocomplete="off" />
-                <label for="dimensionSearch" class="">Ricerca</label>
-              </div>
-              <div class="relative-ul">
-                <ul id="dimensions" class="absolute custom-scrollbar"></ul>
-              </div>
-            </div>
-
             <div id="drop">
               <div id="list-schema" class="absolute-window" data-window-name="list-schema">
                 <div class="relative-ul">
@@ -563,9 +542,30 @@
                   <label for="cubeSearch" class="">Ricerca</label>
                 </div>
                 <div class="relative-ul">
-                  <ul id="cubes" class="custom-scrollbar"></ul>
+                  <ul id="ul-cubes" class="custom-scrollbar"></ul>
                 </div>
               </div>
+              <div id="list-tables" class="absolute-window" data-window-name="list-tables">
+                <!-- data-window-name può essere list-tables oppure list-tables-fact, viene impostato in javascript-->
+                <div class="md-field">
+                  <input type="search" id="tableSearch" data-element-search="tables" autocomplete="off" />
+                  <label for="tableSearch" class="">Ricerca</label>
+                </div>
+                <div class="relative-ul">
+                  <ul id="ul-tables" class="custom-scrollbar"></ul>
+                </div>
+              </div>
+              <!-- dimensioni -->
+              <div id="list-dimensions" class="absolute-window" data-window-name="list-dimensions">
+                <div class="md-field">
+                  <input type="search" id="dimensionSearch" data-element-search="dimensions" autocomplete="off" />
+                  <label for="dimensionSearch" class="">Ricerca</label>
+                </div>
+                <div class="relative-ul">
+                  <ul id="ul-dimensions" class="custom-scrollbar"></ul>
+                </div>
+              </div>
+
               <div id="drop-zone" class="dropzone" data-mode-insert="after"><span>Trascina qui le tabelle da mappare</span></div>
               <div id="hierarchies">
                 <section class="hierarchies"></section>

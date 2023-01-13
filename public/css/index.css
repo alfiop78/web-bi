@@ -300,3 +300,4 @@ ul > section[data-sublist-dimensions]{border: none;}
 /*minicard*/
 
 span[data-join-operator]{padding: 0.25em .5em; background-color: tan; font-size: 1rem; margin: .5em;}
+button[data-fact][data-selected] {color: sienna;}

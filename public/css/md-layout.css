@@ -303,3 +303,4 @@ span.markContent {
 	20% {left: 15px;}
 	100% {left: -300px;}
 }
+.no-wrap{white-space: nowrap;}

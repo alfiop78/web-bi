@@ -58,12 +58,10 @@ var Hier = new Hierarchy();
 
     // tasto openTableList
     btnTableList: document.getElementById('btn-open-table-list'),
-    tableList: document.getElementById('tableList'),
+    tableList: document.getElementById('list-tables'),
     // tasto openDimensionList per l'apertura dell'elenco delle dimensioni
     btnDimensionList: document.getElementById('btn-open-dimension-list'),
     dimensionList: document.getElementById('dimensionList'),
-    // tasto definisci Cubo
-    btnNewFact: document.getElementById('btn-new-cube'),
 
     card: null,
     cardTitle: null,
@@ -103,7 +101,7 @@ var Hier = new Hierarchy();
           if (node.hasChildNodes()) node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
         });
       } else if (mutation.type === 'attributes') {
-        console.log(`The ${mutation.attributeName} attribute was modified.`);
+        // console.log(`The ${mutation.attributeName} attribute was modified.`);
         if (mutation.target.hasChildNodes()) mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
       }
     }
@@ -116,6 +114,7 @@ var Hier = new Hierarchy();
   observerList.observe(dropZone, config);
   observerList.observe(app.dialogHierarchiesMap, config);
   observerList.observe(document.querySelector('#list-schema'), config);
+  observerList.observe(document.querySelector('#list-tables'), config);
 
   // utilizzato per lo spostamento all'interno del drop-zone (card già droppata)
   app.dragStart = (e) => {
@@ -260,7 +259,7 @@ var Hier = new Hierarchy();
     // elimino il div .selectable all'interno della card
     card.querySelector('.v-content').remove();
     // elimino l'icon star
-    card.querySelector('i').remove();
+    card.querySelector('button[data-star]').remove();
     // recupero il template cardLayout e lo inserisco nella card table
     let tmpl = document.getElementById('cardLayout');
     let content = tmpl.content.cloneNode(true);
@@ -274,15 +273,15 @@ var Hier = new Hierarchy();
     card.dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`;
     card.appendChild(cardLayout);
 
-    // tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
-    if (app.tableList.hasAttribute('data-fact')) {
+    if (card.querySelector('button[data-fact]').hasAttribute('data-selected')) {
+      // tabella fact viene colorata in modo diverso, imposto attributo fact sia sulla .card.table che sulla .cardTable
       card.dataset.fact = true;
-      // visualizzo le icone per la creazione delle metriche e del campo DateTime
-      card.querySelector('section[options] > button[composite-metrics]').dataset.schema = card.dataset.schema;
-      card.querySelector('section[options] > button[composite-metrics]').dataset.label = card.dataset.label;
       // con il dataset.mode = 'cube' visualizzo/nascondo alcuni elementi dei button (da CSS)
       card.querySelector('section[options]').dataset.mode = 'cube';
     }
+    card.querySelector('section[options] > button[composite-metrics]').dataset.schema = card.dataset.schema;
+    card.querySelector('section[options] > button[composite-metrics]').dataset.label = card.dataset.label;
+    card.querySelector('button[data-fact]').remove();
 
     // imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone e aggiungo la card alla dropZone
     app.checkHierarchyNumber(card);
@@ -297,6 +296,7 @@ var Hier = new Hierarchy();
     card.querySelector('input').dataset.elementSearch = card.dataset.label;
     Hier.activeCard = card.id;
 
+    // TODO: creare un ciclo che inserisce il dataset.id su tutti questi tasti
     card.querySelector('button[data-close-card]').dataset.id = card.id;
     // event sui tasti section[options]
     card.querySelector('button[join]').dataset.id = card.id;
@@ -602,7 +602,7 @@ var Hier = new Hierarchy();
     }
     btnDimensionUse.onclick = app.handlerDimensionSelected;
     div.querySelector('h5').setAttribute('label', value.name); // OPTIMIZE: dataset data-label
-    document.querySelector('#dimensions').appendChild(section);
+    document.querySelector('#ul-dimensions').appendChild(section);
   }
 
   // recupero la lista delle dimensioni
@@ -615,7 +615,7 @@ var Hier = new Hierarchy();
 
   // recupero la lista dei Cubi in localStorage
   app.getCubes = () => {
-    const ul = document.getElementById('cubes');
+    const ul = document.getElementById('ul-cubes');
     for (const [token, value] of StorageCube.cubes) {
       const content = app.tmplLists.content.cloneNode(true);
       const section = content.querySelector('section[data-sublist-cubes]');
@@ -651,17 +651,14 @@ var Hier = new Hierarchy();
   }*/
 
   app.closeAbsoluteWindow = (attr) => {
-    document.querySelector(".absolute-window[data-window-name='" + attr + "']").dataset.open = 'false';
+    document.querySelector(".absolute-window[data-window-name*='" + attr + "']").dataset.open = 'false';
     document.querySelector("button[data-window-name='" + attr + "']").toggleAttribute('open');
   }
 
   app.openAbsoluteWindow = (attr) => {
     // verifico se ci sono altre absolute-window aperte
-    document.querySelectorAll(".absolute-window[data-open='true']").forEach(window => {
-      window.dataset.open = 'false';
-      document.querySelector("button[data-window-name='" + window.dataset.windowName + "']").toggleAttribute('open');
-    });
-    document.querySelector(".absolute-window[data-window-name='" + attr + "']").dataset.open = 'true';
+    document.querySelectorAll(".absolute-window[data-open='true']").forEach(win => app.closeAbsoluteWindow(win.dataset.windowName));
+    document.querySelector(".absolute-window[data-window-name*='" + attr + "']").dataset.open = 'true';
     document.querySelector("button[data-window-name='" + attr + "']").toggleAttribute('open');
   }
 
@@ -703,11 +700,10 @@ var Hier = new Hierarchy();
       .then((data) => {
         console.log(data);
         if (data) {
-          let ul = document.getElementById('tables');
+          let ul = document.getElementById('ul-tables');
           // attivo tutti i tasti presenti in .actions dopo aver caricato l'elenco delle tabelle
           app.btnTableList.disabled = false;
           app.btnDimensionList.disabled = false;
-          app.btnNewFact.disabled = false;
           app.btnSaveCube.disabled = false;
           app.btnSaveCubeName.disabled = false;
           app.btnDefinedCube.disabled = false;
@@ -796,11 +792,17 @@ var Hier = new Hierarchy();
   }
 
   app.handlerOpenTableList = (e) => {
-    // console.log(e.target);
-    if (e.target.hasAttribute('disabled')) return;
     delete app.tableList.dataset.fact;
-    e.target.toggleAttribute('open');
-    app.tableList.toggleAttribute('hidden');
+    // visualizzo la lista delle tabelle
+    // apro la absolute-window con data-window-name="list-tables"
+    if (e.target.hasAttribute('open')) {
+      // lista già aperta
+      // chiudo la absolute-window
+      app.closeAbsoluteWindow(e.target.dataset.windowName);
+    } else {
+      app.openAbsoluteWindow(e.target.dataset.windowName);
+      document.getElementById('tableSearch').focus();
+    }
     document.getElementById('tableSearch').focus();
     document.getElementById('tableSearch').select();
   }
@@ -892,7 +894,9 @@ var Hier = new Hierarchy();
 
   // button "utilizza" nell'elenco delle dimensioni
   app.handlerDimensionSelected = (e) => {
-    console.log(e.target);
+    // console.log(e.target);
+    // chiudo la lista delle dimensioni
+    app.closeAbsoluteWindow('list-dimensions');
     // const storage = new DimensionStorage();
     StorageDimension.selected = e.target.dataset.token;
     // memorizzo la dimensione selezionata per recuperarla nel salvataggio del cubo
@@ -902,9 +906,6 @@ var Hier = new Hierarchy();
     // aggiungo alla dropzone l'ultima tabella della gerarchia
     // debugger;
     app.addCard(false);
-    // chiudo la lista delle dimensioni
-    app.dimensionList.toggleAttribute('hidden');
-    app.btnDimensionList.toggleAttribute('open');
   }
 
   app.addCards = async (dim, hierName) => {
@@ -1072,8 +1073,6 @@ var Hier = new Hierarchy();
       app.closeAbsoluteWindow(e.target.dataset.windowName);
     } else {
       app.openAbsoluteWindow(e.target.dataset.windowName);
-      // document.querySelector(".absolute-window[data-window-name='" + e.target.dataset.windowName + "']").dataset.open = 'true';
-      // document.getElementById('cubeSearch').focus();
     }
   }
 
@@ -1093,11 +1092,14 @@ var Hier = new Hierarchy();
 
   // lista dimensioni già definite
   app.btnDimensionList.onclick = (e) => {
-    if (e.target.hasAttribute('disabled')) return;
-    // const dimensionList = document.getElementById('dimensionList');
-    app.dimensionList.toggleAttribute('hidden');
-    e.target.toggleAttribute('open');
-    document.getElementById('dimensionSearch').focus();
+    if (e.target.hasAttribute('open')) {
+      // lista già aperta
+      // chiudo la absolute-window
+      app.closeAbsoluteWindow(e.target.dataset.windowName);
+    } else {
+      app.openAbsoluteWindow(e.target.dataset.windowName);
+      document.getElementById('dimensionSearch').focus();
+    }
   }
 
   // open dialog salva gerarchia
@@ -1112,16 +1114,6 @@ var Hier = new Hierarchy();
   app.btnSaveCube.onclick = (e) => {
     if (e.target.hasAttribute('disabled')) return;
     app.dialogCubeName.showModal();
-  }
-
-  // definisci Cubo
-  app.btnNewFact.onclick = (e) => {
-    if (e.target.hasAttribute('disabled')) return;
-    app.tableList.dataset.fact = true;
-    e.target.toggleAttribute('open');
-    app.tableList.toggleAttribute('hidden');
-    document.getElementById('tableSearch').focus();
-    document.getElementById('tableSearch').select();
   }
 
   // salvataggio del cubo
@@ -1587,6 +1579,8 @@ var Hier = new Hierarchy();
     Hier.activeCard = e.target.dataset.id;
     Hier.mode = 'date-time';
   }
+
+  app.handlerFactTable = (e) => e.target.toggleAttribute('data-selected');
 
   /* page init  (impostazioni inziali per la pagina, alcune sono necessarie per essere catturate dal mutationObserve)*/
   document.querySelector('.absolute-window[data-window-name="list-schema"]').dataset.open = 'true';
