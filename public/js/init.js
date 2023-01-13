@@ -1199,7 +1199,7 @@ var Hier = new Hierarchy();
   // associo l'evento click dello schema
   document.querySelectorAll(".absolute-window[data-window-name='list-schema'] > section").forEach(a => a.addEventListener('click', app.schemaSelected));
 
-  app.btnBack.onclick = () => { window.location.href = '/index_origin'; }
+  app.btnBack.onclick = () => { window.location.href = '/'; }
 
   /* ricerca in lista tabelle */
   document.getElementById('tableSearch').oninput = App.searchInList;

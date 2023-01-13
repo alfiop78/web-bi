@@ -35,14 +35,14 @@ use Illuminate\Support\Facades\DB;
 
 Route::get('/users', [UserController::class, 'index']);
 
-Route::get('/index_origin', function () {
-  return view('web_bi.index_origin');
-})->name('web_bi.index_origin'); // home page
+// Route::get('/index_origin', function () {
+//   return view('web_bi.index_origin');
+// })->name('web_bi.index_origin'); // home page
 
 // pagina predisposta per il dvd (Marco Gardin) al momento non utilizzata
-/* Route::get('/', function () {
+Route::get('/', function () {
   return view('web_bi.index');
-})->name('web_bi.index'); */
+})->name('web_bi.index');
 
 Route::get('/mapping', [MapDatabaseController::class, 'mapping'])->name('web_bi.mapping'); // page mapping
 Route::get('/report', function () {
