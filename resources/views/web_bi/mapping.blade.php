@@ -371,7 +371,7 @@
         <div class="title">
           <div class="title-alias" data-id>
             <h6></h6>
-            <div class="subtitle"></div>
+            <small class="subtitle"></small>
           </div>
           <div class="buttons-card-action">
             <button type="button" data-id data-close-card class="button-icon material-icons-round md-pad-4 md-18" tooltip="Chiudi" flow="bottom">close</button>
@@ -506,12 +506,12 @@
           <div class="actions">
             <div class="buttons">
               <button id="btn-schema-list" data-window-name="list-schema" class="button-icon material-icons-round md-24" type="button" tooltip="Schemi Database" flow="bottom" open>storage</button>
-              <button id="btn-open-table-list" data-window-name="list-tables" class="button-icon material-icons-round md-24" type="button" tooltip="Lista tabelle" flow="bottom" disabled>storage</button>
+              <button id="btn-open-table-list" data-window-name="list-tables" class="button-icon material-icons-round md-24" type="button" tooltip="Lista tabelle" flow="bottom" disabled>toc</button>
               <button id="btn-open-dimension-list" data-window-name="list-dimensions" type="button" class="button-icon material-icons-round md-24" tooltip="Lista Dimensioni" flow="bottom" disabled>schema</button>
               <span class="h-separator"></span>
               <button id="btn-save-cube" type="button" class="button-icon material-icons-round md-24" tooltip="Salva cubo" flow="bottom" disabled>save</button>
               <button id="btn-save-opened-cube" type="button" class="button-icon material-icons-round md-24" tooltip="Aggiorna cubo" flow="bottom" disabled hidden>save</button>
-              <button id="btn-defined-cube" type="button" data-window-name="list-defined-cubes" class="button-icon material-icons-round md-24" tooltip="Lista Cubi definiti" flow="bottom" disabled>folder_open</button>
+              <button id="btn-defined-cube" type="button" data-window-name="list-defined-cubes" class="button-icon material-icons-round md-24" tooltip="Lista Cubi definiti" flow="bottom" disabled>fact_check</button>
               <span class="h-separator"></span>
               <button id="btn-versioning" type="button" class="button-icon material-icons-round md-24" tooltip="Esegui sincronizzazione" flow="bottom">cached</button>
               <button id="btn-versioning-status" type="button" class="button-icon material-icons-round md-24" tooltip="" data-open-abs-window flow="bottom" disabled>cached</button>

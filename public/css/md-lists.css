@@ -194,6 +194,9 @@ ul[data-object]{position: absolute; overflow: auto; width: 100%; height: calc(10
 .parent-ul-fields{display: grid; grid-template-rows: auto auto auto 1fr;}
 .parent-ul-textarea{display: grid; grid-template-rows: auto auto auto auto 1fr auto;}
 .relative-ul{position: relative; display: flex;flex-direction: column;}
+.absolute-window > .relative-ul,
+.absolute-window > .relative-ul > ul
+{overflow:auto;}
 ul.absolute{position: absolute; height: 100%; overflow: auto; width: 100%;}
 ul.relative{position: relative; height: 100%; overflow: auto; width: 100%;}
 
