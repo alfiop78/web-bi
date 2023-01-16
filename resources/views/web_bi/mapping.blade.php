@@ -363,9 +363,9 @@
       <section class="cardTable" data-name data-schema data-alias>
         <section options-hier>
           <div>
-            <button type="button" class="button-icon material-icons-round md-18 md-pad-4 md-dark" tooltip="Incrementa ordine gerarchico" flow="left" hier-order-plus>keyboard_arrow_up</button>
+            <button type="button" class="button-icon material-icons-round md-18 md-pad-4 md-dark" tooltip="Incrementa ordine gerarchico" flow="left" hier-order-plus data-fn="handlerHierarchyOrder">keyboard_arrow_up</button>
             <span data-value="" class="hierarchy-order"></span>
-            <button type="button" class="button-icon material-icons-round md-18 md-pad-4 md-dark" hier-order-minus tooltip="Decrementa ordine gerarchico" flow="left">keyboard_arrow_down</button>
+            <button type="button" class="button-icon material-icons-round md-18 md-pad-4 md-dark" hier-order-minus tooltip="Decrementa ordine gerarchico" flow="left" data-fn="handlerHierarchyOrder">keyboard_arrow_down</button>
           </div>
         </section>
         <div class="title">
@@ -374,22 +374,22 @@
             <small class="subtitle"></small>
           </div>
           <div class="buttons-card-action">
-            <button type="button" data-id data-close-card class="button-icon material-icons-round md-pad-4 md-18" tooltip="Chiudi" flow="bottom">close</button>
-            <button type="button" data-id data-minimize-card class="button-icon material-icons-round md-pad-4 md-18" tooltip="Minimizza" flow="bottom">expand_less</button>
-            <button type="button" data-id data-expand-card class="button-icon material-icons-round md-pad-4 md-18" tooltip="Espandi" flow="bottom" hidden>expand_more</button>
+            <button type="button" data-id data-close-card data-fn="handlerCloseCard" class="button-icon material-icons-round md-pad-4 md-18" tooltip="Chiudi" flow="bottom">close</button>
+            <button type="button" data-id data-minimize-card data-fn="handlerMinimizeCard" class="button-icon material-icons-round md-pad-4 md-18" tooltip="Minimizza" flow="bottom">expand_less</button>
+            <button type="button" data-id data-expand-card data-fn="handlerExpandCard" class="button-icon material-icons-round md-pad-4 md-18" tooltip="Espandi" flow="bottom" hidden>expand_more</button>
           </div>
         </div>
         <ul data-id="columns" class="custom-scrollbar" hidden></ul>
         <div class="info" hidden></div>
       </section>
       <section options data-mode="default">
-        <button type="button" class="button-icon material-icons-round md-pad-4 md-18" columns tooltip="Colonne" flow="right">view_list</button>
-        <button type="button" class="button-icon material-icons-round md-pad-4 md-18" metrics tooltip="Metriche" flow="right">show_chart</button>
-        <button type="button" class="button-icon material-icons-round md-pad-4 md-18" composite-metrics tooltip="Crea metrica composta" flow="right">addchart</button>
-        <button type="button" class="button-icon material-icons-round md-pad-4 md-18" join tooltip="Crea relazione" flow="right">insert_link</button>
+        <button type="button" class="button-icon material-icons-round md-pad-4 md-18" data-fn="handlerAddColumns" columns tooltip="Colonne" flow="right">view_list</button>
+        <button type="button" class="button-icon material-icons-round md-pad-4 md-18" data-fn="handlerMetric" metrics tooltip="Metriche" flow="right">show_chart</button>
+        <button type="button" class="button-icon material-icons-round md-pad-4 md-18" data-fn="handlerAddCompositeMetric" composite-metrics tooltip="Crea metrica composta" flow="right">addchart</button>
+        <button type="button" class="button-icon material-icons-round md-pad-4 md-18" data-fn="handlerJoin" join tooltip="Crea relazione" flow="right">insert_link</button>
         <button type="button" class="button-icon material-icons-round md-pad-4 md-18" join-left tooltip="Left join" flow="right">join_left</button>
         <button type="button" class="button-icon material-icons-round md-pad-4 md-18" join-right tooltip="Right join" flow="right">join_right</button>
-        <button type="button" class="button-icon material-icons-round md-pad-4 md-18" time tooltip="DateTime" data-fn="handlerDateTime" flow="right">history</button>
+        <button type="button" class="button-icon material-icons-round md-pad-4 md-18" data-fn="handlerDateTime" time tooltip="DateTime" data-fn="handlerDateTime" flow="right">history</button>
       </section>
       <div class="md-field">
         <input type="search" value="" data-element-search />

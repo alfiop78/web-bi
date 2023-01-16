@@ -239,7 +239,7 @@ class Hierarchy {
   set activeCard(id) {
     // la card su cui si sta operando
     this.card = document.querySelector(".card.table[data-id='" + id + "']");
-    this.schema = this.card.dataset.schema;
+    if (this.card) this.schema = this.card.dataset.schema;
   }
 
   get activeCard() { return this.card; }

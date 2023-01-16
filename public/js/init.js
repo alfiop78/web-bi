@@ -115,6 +115,7 @@ var Hier = new Hierarchy();
   observerList.observe(app.dialogHierarchiesMap, config);
   observerList.observe(document.querySelector('#list-schema'), config);
   observerList.observe(document.querySelector('#list-tables'), config);
+  observerList.observe(document.getElementById('body'), config);
 
   // utilizzato per lo spostamento all'interno del drop-zone (card già droppata)
   app.dragStart = (e) => {
@@ -151,6 +152,10 @@ var Hier = new Hierarchy();
     app.initialX = app.currentX;
     app.initialY = app.currentY;
     app.active = false;
+    // imposto sulla .cardTable le posizioni dove è 'stato lasciato'  dopo il drag in modo da "riprendere" lo
+    // spostamento da dove era rimasto
+    Hier.activeCard.setAttribute('x', app.currentX);
+    Hier.activeCard.setAttribute('y', app.currentY);
   }
 
   // evento attivato quando sposto la card già droppata all'interno della drop-zone
@@ -171,12 +176,7 @@ var Hier = new Hierarchy();
 
       app.xOffset = app.currentX;
       app.yOffset = app.currentY;
-      // imposto sulla .cardTable le posizioni dove è 'stato lasciato'  dopo il drag in modo da "riprendere" lo
-      // spostamento da dove era rimasto
-      Hier.activeCard.setAttribute('x', app.xOffset);
-      Hier.activeCard.setAttribute('y', app.yOffset);
-
-      Hier.activeCard.style.transform = 'translate3d(' + app.currentX + 'px, ' + app.currentY + 'px, 0)';
+      Hier.activeCard.style.transform = 'translate(' + app.currentX + 'px, ' + app.currentY + 'px)';
     }
   }
 
@@ -207,10 +207,7 @@ var Hier = new Hierarchy();
   app.handlerDragEnter = (e) => {
     // console.log('handlerDragEnter');
     e.preventDefault();
-    // console.log(e.target);
-    // if (e.target.id === "help-drop") e.target.remove();
 
-    // if (e.target.className === 'dropzone') {
     if (e.target.classList.contains('dropzone')) {
       console.info('DROPZONE');
       // e.dataTransfer.dropEffect = "copy";
@@ -243,33 +240,32 @@ var Hier = new Hierarchy();
     }
   }
 
-  app.handlerDrop = (e) => {
-    // console.log('handlerDrop');
-    // TODO: ottimizzare
-    e.preventDefault();
-    e.target.classList.replace('dropping', 'dropped');
-    if (e.target.id !== 'drop-zone') return;
-    let data = e.dataTransfer.getData('text/plain');
-    let card = document.getElementById(data).cloneNode(true);
+  // imposto gli attributi della card prima di essere aggiunta al DOM
+  app.setCardAttributes = (card) => {
     console.log('card : ', card); // class h-content e attributo draggable="true"
     // la .card draggable diventa .card.table
     card.className = 'card table';
     card.dataset.id = card.id;
+    card.dataset.fn = "activeCard";
     card.removeAttribute('draggable');
     // elimino il div .selectable all'interno della card
     card.querySelector('.v-content').remove();
     // elimino l'icon star
     card.querySelector('button[data-star]').remove();
-    // recupero il template cardLayout e lo inserisco nella card table
     let tmpl = document.getElementById('cardLayout');
     let content = tmpl.content.cloneNode(true);
     let cardLayout = content.querySelector('.cardLayout');
-    cardLayout.querySelector('.title-alias').dataset.id = card.id;
+    const title = cardLayout.querySelector('.title-alias');
+    title.addEventListener('mousedown', app.dragStart);
+    title.addEventListener('mouseup', app.dragEnd);
+    title.addEventListener('mousemove', app.drag);
+    title.dataset.id = card.id;
+    // cardLayout.querySelector('.title-alias').dataset.id = card.id;
     // imposto il titolo in h6
-    cardLayout.querySelector('h6').innerHTML = card.dataset.label;
+    title.querySelector('h6').innerHTML = card.dataset.label;
     // creo un alias per questa tabella
     const time = Date.now().toString();
-    cardLayout.querySelector('.subtitle').innerHTML = `AS ${card.dataset.label}_${time.substring(time.length - 3)}`;
+    title.querySelector('.subtitle').innerHTML = `AS ${card.dataset.label}_${time.substring(time.length - 3)}`;
     card.dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`;
     card.appendChild(cardLayout);
 
@@ -282,13 +278,23 @@ var Hier = new Hierarchy();
     card.querySelector('section[options] > button[composite-metrics]').dataset.schema = card.dataset.schema;
     card.querySelector('section[options] > button[composite-metrics]').dataset.label = card.dataset.label;
     card.querySelector('button[data-fact]').remove();
+    card.querySelectorAll('button').forEach(button => button.dataset.id = card.id);
+  }
 
+  app.handlerDrop = (e) => {
+    // TODO: ottimizzare
+    e.preventDefault();
+    e.target.classList.replace('dropping', 'dropped');
+    if (e.target.id !== 'drop-zone') return;
+    let data = e.dataTransfer.getData('text/plain');
+    let card = document.getElementById(data).cloneNode(true);
+    console.log('card : ', card); // class h-content e attributo draggable="true"
+    app.setCardAttributes(card);
     // imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone e aggiungo la card alla dropZone
     app.checkHierarchyNumber(card);
 
     // imposto la card draggata nella posizione dove si trova il mouse
-    // console.log('e.target : ', e.target);
-    card.style.transform = 'translate3d(' + e.offsetX + 'px, ' + e.offsetY + 'px, 0)';
+    card.style.transform = 'translate(' + e.offsetX + 'px, ' + e.offsetY + 'px)';
     card.setAttribute('x', e.offsetX);
     card.setAttribute('y', e.offsetY);
 
@@ -296,16 +302,6 @@ var Hier = new Hierarchy();
     card.querySelector('input').dataset.elementSearch = card.dataset.label;
     Hier.activeCard = card.id;
 
-    // TODO: creare un ciclo che inserisce il dataset.id su tutti questi tasti
-    card.querySelector('button[data-close-card]').dataset.id = card.id;
-    // event sui tasti section[options]
-    card.querySelector('button[join]').dataset.id = card.id;
-    card.querySelector('button[metrics]').dataset.id = card.id;
-    card.querySelector('button[composite-metrics]').dataset.id = card.id;
-    card.querySelector('button[columns]').dataset.id = card.id;
-    card.querySelector('button[hier-order-plus]').dataset.id = card.id;
-    card.querySelector('button[hier-order-minus]').dataset.id = card.id;
-    card.querySelector('button[time]').dataset.id = card.id;
     document.getElementById('tableSearch').focus();
     document.getElementById('tableSearch').select();
   }
@@ -1509,33 +1505,6 @@ var Hier = new Hierarchy();
     e.target.hidden = true;
     e.target.previousElementSibling.hidden = false;
   }
-
-  // NOTE: esempio di utilizzo di MutationObserver
-  // TODO: il mutationObserve l'ho inserito ad inizio pagina, i button sono da configurare con data-fn, da rivedere.
-  const body = document.getElementById('body');
-  // create a new instance of `MutationObserver` named `observer`,
-  // passing it a callback function
-  const observer = new MutationObserver(function() {
-    console.log('callback that runs when observer is triggered');
-    body.querySelectorAll('.card.table').forEach(card => card.addEventListener('click', app.activeCard, true));
-    body.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
-    body.querySelectorAll('.card.table button[join]').forEach(element => element.addEventListener('click', app.handlerJoin));
-    body.querySelectorAll('.card.table button[metrics]').forEach(element => element.addEventListener('click', app.handlerMetric));
-    body.querySelectorAll('.card.table button[composite-metrics]').forEach(element => element.addEventListener('click', app.handlerAddCompositeMetric));
-    body.querySelectorAll('.card.table button[columns]').forEach(element => element.addEventListener('click', app.handlerAddColumns));
-    body.querySelectorAll('.card.table button[hier-order-plus], .card.table button[hier-order-minus]').forEach(element => element.addEventListener('click', app.handlerHierarchyOrder));
-    body.querySelectorAll('.card.table button[data-close-card]').forEach(element => element.addEventListener('click', app.handlerCloseCard));
-    body.querySelectorAll('.card.table button[data-minimize-card]').forEach(element => element.addEventListener('click', app.handlerMinimizeCard, false));
-    body.querySelectorAll('.card.table button[data-expand-card]').forEach(element => element.addEventListener('click', app.handlerExpandCard, false));
-    body.querySelectorAll('.card.table').forEach(card => {
-      card.querySelector('.title-alias').addEventListener('mousedown', app.dragStart);
-      card.querySelector('.title-alias').addEventListener('mouseup', app.dragEnd);
-      card.querySelector('.title-alias').addEventListener('mousemove', app.drag);
-    });
-  });
-  // call `observe()` on that MutationObserver instance,
-  // passing it the element to observe, and the options object
-  observer.observe(body, { subtree: true, childList: true, attributes: true });
 
   // popolamento tabella WEB_BI_TIME
   document.querySelector("#btn-time-dimension").onclick = async () => {
