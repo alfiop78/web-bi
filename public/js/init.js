@@ -20,6 +20,7 @@ var Hier = new Hierarchy();
     tmplLists: document.getElementById('templateList'), // include tutte le liste da utilizzare,
     tmplSpan: document.getElementById('tmpl-span'),
     tmplTables: document.getElementById('tmpl-hierarchy-tables'),
+    tmplFormula: document.getElementById('tmpl-formula'),
 
     hierarchyContainer: document.getElementById('hierarchiesContainer'), // struttura gerarchica sulla destra
 
@@ -497,13 +498,14 @@ var Hier = new Hierarchy();
   }
 
   // salvataggio metrica composta di base
-  app.btnCompositeMetricSave.onclick = (e) => {
+  app.btnCompositeMetricSave.onclick = () => {
     const name = document.getElementById('composite-metric-name').value;
     const alias = document.getElementById('composite-alias-metric').value;
     let arr_sql = [];
     let fields = [];
     // let metricsAlias = {}; // contiene un'elenco di object con nome_metrica : alias che compongono la metrica composta
     document.querySelectorAll('#composite-metric-formula *').forEach(element => {
+      if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I' || element.innerText.length === 0) return;
       // console.log('element : ', element);
       // console.log('element : ', element.nodeName);
       // se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
@@ -1452,19 +1454,83 @@ var Hier = new Hierarchy();
     }
   }
 
+  app.addSpan = (target, value, check, mode) => {
+    /*
+    * target : il div che contiene la formula
+    * check : filter, metric (filter se sto creando una formula per il filtro, metric per le metriche composte)
+    */
+    const span = document.createElement('span');
+    span.dataset.check = check;
+    if (mode) span.dataset.mode = mode;
+    span.setAttribute('contenteditable', 'true');
+    span.setAttribute('tabindex', 0);
+    // let evt = new KeyboardEvent("keydown", {
+    //   shiftKey: true,
+    //   key: "Tab"
+    // });
+    // span.addEventListener('input', app.checkSpanFormula);
+    // Do nothing if the event was already processed
+    span.onkeydown = (e) => {
+      if (e.defaultPrevented) return;
+      /* verifico prima se questo span è l'ultimo elemento della formula.
+      * In caso che lo span è l'ultimo elemento della formula ne aggiungo un'altro, altrimenti il Tab avrà il comportamento di default
+      */
+      const lastSpan = (e.target === target.querySelector('span[contenteditable]:last-child'));
+      switch (e.key) {
+        case 'Tab':
+          // console.log(e.ctrlKey);
+          // se il tasto shift non è premuto e mi trovo sull'ultimo span, aggiungo un altro span. In caso contrario, la combinazione shift+tab oppure tab su un qualsiasi altro
+          // ...span che non sia l'ultimo, avrà il comportamento di default
+          if (!e.shiftKey && lastSpan) {
+            (mode) ? app.addSpan(target, null, check, mode) : app.addSpan(target, null, check);
+            e.preventDefault();
+          }
+          break;
+        case 'Backspace':
+          // se lo span è vuoto devo eliminarlo, in caso contrario ha il comportamento di default
+          if (span.textContent.length === 0) {
+            // posiziono il focus sul primo span disponibile andando indietro nel DOM
+            /* const event = new Event('build');
+            // Listen for the event.
+             span.addEventListener('build', function(e) { console.log(e) }, false);
+            // Dispatch the event.
+            span.dispatchEvent(event);
+            */
+            // span.dispatchEvent(evt);
+            // verifico il primo span[contenteditable] presente andando all'indietro (backspace keydown event)
+            let previousContentEditable = (span) => {
+              // se viene trovate uno <span> precedente a quello passato come argomento, lo restituisco, altrimenti restituisco quello passato come argomento
+              if (span.previousElementSibling) {
+                span = (span.previousElementSibling.hasAttribute('contenteditable')) ? span.previousElementSibling : previousContentEditable(span.previousElementSibling);
+              }
+              return span;
+            }
+            previousContentEditable(span).focus();
+            span.remove();
+          }
+          break;
+        default:
+          break;
+      }
+    }
+    if (value) span.innerText = value;
+    target.appendChild(span);
+    span.focus();
+  }
+
+
   // selezione di una metrica per la creazione di una metrica composta
   app.handlerMetricSelectedComposite = (e) => {
     // TODO: aggiungo la metrica alla textarea
-    const textArea = document.getElementById('composite-metric-formula');
-    // creo uno span con dentro la metrica
-    const mark = document.createElement('mark');
+    const textarea = document.getElementById('composite-metric-formula');
+    const templateContent = app.tmplFormula.content.cloneNode(true);
+    const span = templateContent.querySelector('span');
+    const mark = templateContent.querySelector('mark');
+    // mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
     mark.innerText = e.currentTarget.dataset.label;
-    textArea.appendChild(mark);
+    textarea.appendChild(span);
     // aggiungo anche uno span per il proseguimento della scrittura della formula
-    let span = document.createElement('span');
-    span.setAttribute('contenteditable', true);
-    textArea.appendChild(span);
-    span.focus();
+    app.addSpan(textarea, null, 'metric');
   }
 
   app.checkDialogCompositeMetric = () => {

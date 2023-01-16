@@ -49,6 +49,15 @@
     </div>
   </div>
 
+  <template id="tmpl-formula">
+    <span class="markContent">
+      <i class="material-icons-round md-14">cancel</i>
+      <mark></mark>
+      <small></small>
+    </span>
+  </template>
+
+
   {{-- template utilizzato per popolare sia le dimensioni che i cubi --}}
   <template id="versioning-db">
     <section data-searchable="true">
@@ -344,7 +353,7 @@
               <label for="composite-alias-metric" class="">Alias</label>
             </div>
           </div>
-          <div id="composite-metric-formula" contenteditable="false"></div>
+          <div id="composite-metric-formula" data-content-editable></div>
           <button id="btnCompositeMetricSave" type="button" name="save" class="md-button" disabled>salva</button>
         </section>
 
