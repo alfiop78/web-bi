@@ -558,7 +558,8 @@ var Hier = new Hierarchy();
 
   app.handlerCloseCard = (e) => {
     // elimino la card
-    app.dropZone.querySelector('#' + e.target.dataset.id).remove();
+    // app.dropZone.querySelector('#' + e.target.dataset.id).remove();
+    app.dropZone.querySelector(".card[data-id='" + e.target.dataset.id + "']").remove();
     // TODO: eliminare anche dal flusso delle gerarchie sulla destra
 
     // TODO: controllo struttura gerarchica
@@ -992,10 +993,9 @@ var Hier = new Hierarchy();
     const dim = new DimensionStorage();
     dim.selected = e.target.dataset.dimensionToken;
     const hierToken = e.target.dataset.hierToken;
-    // TODO: Implementare addCards in modo da svolgere anche le istruzioni di addCard
     app.addCards(dim.selected, hierToken);
     // imposto lo span all'interno del dropzone con la descrizione della dimensione auutalmente in modifica
-    app.dropZone.querySelector('span').innerHTML = "Dimensione in modifica : " + dim.selected.name;
+    app.dropZone.querySelector('span').innerHTML = "Gerarchia in modifica : " + dim.selected.hierarchies[hierToken].name;
     app.dropZone.setAttribute('edit', dim.selected.name); // OPTIMIZE: dataset data-edit
     // chiudo la lista delle dimensioni
     app.closeAbsoluteWindow('list-dimensions');
