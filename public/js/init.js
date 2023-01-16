@@ -98,7 +98,12 @@ var Hier = new Hierarchy();
       if (mutation.type === 'childList') {
         console.info('A child node has been added or removed.');
         Array.from(mutation.addedNodes).forEach(node => {
-          if (node.hasChildNodes()) node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+          if (node.hasChildNodes()) {
+            node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+            node.querySelectorAll('*[data-fn-mousedown]').forEach(element => element.addEventListener('mousedown', app[element.dataset.fnMousedown]));
+            node.querySelectorAll('*[data-fn-mouseup]').forEach(element => element.addEventListener('mouseup', app[element.dataset.fnMouseup]));
+            node.querySelectorAll('*[data-fn-mousemove]').forEach(element => element.addEventListener('mousemove', app[element.dataset.fnMousemove]));
+          }
         });
       } else if (mutation.type === 'attributes') {
         // console.log(`The ${mutation.attributeName} attribute was modified.`);
@@ -256,9 +261,6 @@ var Hier = new Hierarchy();
     let content = tmpl.content.cloneNode(true);
     let cardLayout = content.querySelector('.cardLayout');
     const title = cardLayout.querySelector('.title-alias');
-    title.addEventListener('mousedown', app.dragStart);
-    title.addEventListener('mouseup', app.dragEnd);
-    title.addEventListener('mousemove', app.drag);
     title.dataset.id = card.id;
     // cardLayout.querySelector('.title-alias').dataset.id = card.id;
     // imposto il titolo in h6
@@ -833,9 +835,6 @@ var Hier = new Hierarchy();
     // fact : true/false
     let card = document.createElement('div');
     card.className = 'card table';
-    // card.onmousedown = app.dragStart;
-    // card.onmouseup = app.dragEnd;
-    // card.onmousemove = app.drag;
     // prendo il template cardLayout e lo inserisco nella .card.table
     let tmpl = document.getElementById('cardLayout');
     let content = tmpl.content.cloneNode(true);
@@ -852,9 +851,6 @@ var Hier = new Hierarchy();
       card.id = StorageCube.selected.token;
       cardLayout.querySelector('.title-alias').dataset.id = StorageCube.selected.token;
       cardLayout.querySelector('section[options]').dataset.mode = 'cube';
-      card.querySelector('button[time').dataset.id = card.dataset.id;
-      // l'appendChild / insertBefore viene stabilito nel checkHierarchyNumber()
-      app.checkHierarchyNumber(card);
     } else {
       card.dataset.schema = StorageDimension.selected.lastTableInHierarchy.schema; // schema
       card.dataset.label = StorageDimension.selected.lastTableInHierarchy.table; // tabella
@@ -867,18 +863,17 @@ var Hier = new Hierarchy();
       cardLayout.querySelector('.title-alias').dataset.id = StorageDimension.selected.token;
       // l'attr data-dimension-use fa in modo da nascondere, in section[options]
       cardLayout.querySelector('section[options]').dataset.mode = 'dimension';
-      // l'appendChild / insertBefore viene stabilito nel checkHierarchyNumber()
-      app.checkHierarchyNumber(card);
     }
 
+    // l'appendChild / insertBefore viene stabilito nel checkHierarchyNumber()
+    app.checkHierarchyNumber(card);
     app.dropZone.classList.replace('dropping', 'dropped');
     app.dropZone.classList.add('dropped');
     // evento sulla input di ricerca nella card
     // input di ricerca, imposto l'attr data-element-search
     Hier.activeCard = card.id;
     card.querySelector('input[type="search"]').dataset.elementSearch = card.dataset.label;
-    card.querySelector('button[data-close-card]').dataset.id = card.id;
-    card.querySelector('button[join').dataset.id = card.dataset.id;
+    card.querySelectorAll('button').forEach(button => button.dataset.id = card.id);
 
     // ottengo l'elenco dei field della tabella
     const data = await app.getTable();
@@ -903,7 +898,7 @@ var Hier = new Hierarchy();
   }
 
   app.addCards = async (dim, hierToken) => {
-    // OPTIMIZE: logica della funzione
+    // OPTIMIZE: ottimizzare in base alla app.setCardAttributes()
     // dimStorage.selected.hierarchies[hierName].order
     const tables = dim.hierarchies[hierToken].order;
     const columns = dim.hierarchies[hierToken].columns;
@@ -914,15 +909,15 @@ var Hier = new Hierarchy();
       // console.log('key : ', key); // la key la posso utilizzare anche per lo z-index
       // console.log('value : ', value);
       const card = document.createElement('div');
+      card.className = 'card table';
       card.dataset.alias = value.alias;
       card.dataset.value = +key + 1;
-      card.className = 'card table';
       // NOTE: Impostazione di una variabile css (--zindex)
       card.style.setProperty('--zindex', key);
       card.dataset.schema = value.schema;
       card.dataset.label = value.table;
       x *= +key; y *= +key;
-      card.style.transform = "translate3d(" + x + "px, " + y + "px, 0px)";
+      card.style.transform = "translate(" + x + "px, " + y + "px)";
       card.setAttribute('x', x);
       card.setAttribute('y', y);
       // recupero il template cardLayout e lo inserisco nella .card.table
@@ -931,10 +926,9 @@ var Hier = new Hierarchy();
       const cardLayout = tmplContent.querySelector('.cardLayout');
       card.appendChild(cardLayout);
       card.dataset.id = `${hierToken}-${key}`;
-      // imposto il numero di ordine gerarchico
-      card.querySelector('button[hier-order-plus]').dataset.id = card.dataset.id;
-      card.querySelector('button[hier-order-minus]').dataset.id = card.dataset.id;
       card.querySelector('section[options-hier] span').dataset.value = +card.dataset.value;
+      // imposto tutti i data-id sui button
+      card.querySelectorAll('button').forEach(button => button.dataset.id = card.dataset.id);
       // h6 titolo
       cardLayout.querySelector('h6').innerHTML = value.table;
       cardLayout.querySelector('.subtitle').innerHTML = `AS ${value.alias}`;
@@ -943,10 +937,6 @@ var Hier = new Hierarchy();
       app.dropZone.classList.replace('dropping', 'dropped');
       app.dropZone.appendChild(card);
       app.dropZone.classList.add('dropped');
-      // card.querySelector('.cardTable').dataset.alias = value.alias;
-      // TODO: event sui tasti section[options], da gestirecon data-fn e Mutation.observe
-      card.querySelector('button[join]').onclick = app.handlerJoin;
-      card.querySelector('button[columns]').onclick = app.handlerAddColumns;
       // input di ricerca, imposto l'attr data-element-search
       card.querySelector('input[type="search"]').dataset.elementSearch = value.table;
       // await : aspetto che getTable popoli tutta la card con i relativi campi
@@ -977,7 +967,7 @@ var Hier = new Hierarchy();
   app.addJoins = (joins) => {
     if (!joins) return false;
     // dopo aver caricato tutte le tabelle appartenenti alla dimensione, imposto le gerarchie definite recuperandole dalla proprietà 'join'
-    // TODO: a questo punto posso recuperare dim.join per inserire nelle tabelle le relative join
+    // a questo punto posso recuperare dim.join per inserire nelle tabelle le relative join
     for (const [tableAlias, tokenJoin] of Object.entries(joins)) {
       for (const [token, join] of Object.entries(tokenJoin)) {
         let columnsRef = [];

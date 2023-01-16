@@ -320,14 +320,14 @@
 
       <div class="stepLayout">
         {{-- metriche mappate --}}
-        <section class="sectionLists parent-ul">
+        <section class="sectionLists parent-ul-search">
           <h5>Metriche disponibili</h5>
           <div class="md-field">
             <input type="search" data-element-search="search-metrics" id="search-metrics" value autocomplete="off" />
             <label for="search-metrics" class="">Ricerca</label>
           </div>
           <div class="relative-ul">
-            <ul id="ul-fields" class="absolute"></ul>
+            <ul id="ul-fields" class="absolute custom-scrollbar"></ul>
           </div>
         </section>
 
@@ -369,7 +369,7 @@
           </div>
         </section>
         <div class="title">
-          <div class="title-alias" data-id>
+          <div class="title-alias" data-id data-fn-mousedown="dragStart" data-fn-mouseup="dragEnd" data-fn-mousemove="drag">
             <h6></h6>
             <small class="subtitle"></small>
           </div>
