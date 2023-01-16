@@ -1605,6 +1605,8 @@ var Hier = new Hierarchy();
 
   app.handlerFactTable = (e) => e.target.toggleAttribute('data-selected');
 
+  document.querySelector('#mdc-mapping-custom').onclick = () => window.location.href = '/mapdb';
+
   /* page init  (impostazioni inziali per la pagina, alcune sono necessarie per essere catturate dal mutationObserve)*/
   document.querySelector('.absolute-window[data-window-name="list-schema"]').dataset.open = 'true';
   /* end page init */
