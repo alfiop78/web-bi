@@ -608,7 +608,7 @@
           <button id="mdc-back" class="button dense raised">home</button>
           <div class="spacer"></div>
           <button id="mdc-report" class="button dense raised">report</button>
-          <button id="mdc-mapping-custom" class="button dense raised">Mapping DBB</button>
+          <button id="mdc-mapping-custom" class="button dense raised">Mapping DB</button>
         </div>
       </div>
 
