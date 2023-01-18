@@ -139,31 +139,29 @@ var App = new Application();
   /* end onclick events*/
 
   /* mouse events */
-  document.querySelector('#trans-x').onmouseover = (e) => {
-    // console.log(e);
-  }
-
-  document.querySelector('#trans-x').onmousedown = (e) => {
-    // app.x = e.target.dataset.translateX;
-    console.log(app.x);
-    app.el = e.target;
-  }
-
-  document.querySelector('#trans-x').onmousemove = (e) => {
-    if (app.el) {
-      console.log('app.x ', app.x);
-      app.x += e.movementX;
-      console.log('app.x ', app.x);
-      e.target.style.transform = "translateX(" + app.x + "px)";
-      // e.target.dataset.translateX = app.x;
+  document.querySelectorAll('.hierarchy').forEach(el => {
+    el.onmousedown = (e) => {
+      console.log(app.x);
+      app.x = +e.target.dataset.translateX;
+      app.el = e.target;
     }
-  }
 
-  document.querySelector('#trans-x').onmouseup = (e) => {
-    // console.log(e);
-    e.target.dataset.translateX = app.x;
-    delete app.el;
-  }
+    el.onmousemove = (e) => {
+      if (app.el) {
+        app.x += e.movementX;
+        // if (app.x > 30) return;
+        e.target.style.transform = "translateX(" + app.x + "px)";
+        e.target.dataset.translateX = app.x;
+      }
+    }
+
+    el.onmouseup = (e) => {
+      // console.log(e);
+      // e.target.dataset.translateX = app.x;
+      delete app.el;
+    }
+  });
+  /* end mouse events */
 
   /* fetchAPI */
 

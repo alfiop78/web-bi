@@ -99,6 +99,15 @@
     <li data-element-search data-label data-searchable="true"></li>
   </template>
 
+  <template id="tmpl-hierarchies">
+    <div class="hierarchy" data-translate-x="0">
+      <div class="card-table" data-translate-x="0">area</div>
+    </div>
+  </template>
+
+  <template id="tmpl-card-table">
+  </template>
+
   <main>
     <div id="drawer">
 
@@ -140,22 +149,18 @@
                   <input type="text" data-id="input-hierarchy-name" autocomplete="off" />
                   <label for="input-hierarchy-name" class="">Nome gerarchia</label>
                 </div>-->
-                <div class="horizontal-timeline">aggiungi gerarchia</div>
-                <button id="btn-add-tables" data-fn="handlerAddTables" type="button">Aggiungi tabelle</button>
-                <section>
-                  <h3>Lista tabelle aggiunte</h3>
-                  <div class="card table">
-                    <h4>Nome tabella</h4>
-                  </div>
-                </section>
-
               </section>
 
             </section>
             <section id="area">
-              <div id="trans-x" class="translate-el" data-translate-x="0">
-                <div class="card-table">area</div>
+              <div class="hierarchy" data-translate-x="0">
+                <div class="card-table" data-translate-x="0">table</div>
+                <div class="card-area" data-translate-x="0">area</div>
               </div>
+            </section>
+            <section>
+              <div class="horizontal-timeline">aggiungi gerarchia</div>
+              <button id="btn-add-tables" data-fn="handlerAddTables" type="button">Aggiungi tabelle</button>
             </section>
           </section>
 

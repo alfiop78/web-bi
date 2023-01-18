@@ -204,25 +204,45 @@ span.markContent {
   background-color: white;
   height: 100%;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 2fr 1fr;
 }
 
 #area{
   background-color: grey;
-  width: 90%;
-  height: 90%;
-}
-
-#area > .translate-el {
-  background-color: lightblue;
-  width: 80%;
-  height: 80%;
+  width: 100%;
+  height: auto;
+  /* max-height: 75%; */
+  padding: 1em;
   overflow: hidden;
+  display: grid;
+  grid-auto-flow: row;
+  align-items: start;
 }
 
-#trans-x > .card-table{
-  position: absolute;
-  width: 100px;
+#area .hierarchy{
+  display: grid;
+  grid-auto-flow: column;
+  grid-gap: 2em;
+  min-height: auto;
+  padding: 2em;
+  background-color: lightgreen;
+}
+
+#area div .card-table{
+  width: 400px;
   height: 100px;
   background-color: lime;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#area div .card-area{
+  width: 300px;
+  height: 100px;
+  background-color: grey;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-style: dashed thin black;
 }
