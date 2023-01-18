@@ -153,8 +153,8 @@
 
             </section>
             <section id="area">
-              <div class="translate-el">
-                <p>area</p>
+              <div id="trans-x" class="translate-el" data-translate-x="0">
+                <div class="card-table">area</div>
               </div>
             </section>
           </section>

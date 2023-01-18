@@ -15,6 +15,7 @@ var App = new Application();
     btnSelectSchema: document.getElementById('btn-select-schema'),
     // body
     body: document.getElementById('body'),
+    x: 0
 
   }
 
@@ -136,6 +137,33 @@ var App = new Application();
     document.querySelector('#' + e.currentTarget.dataset.drawerId).toggleAttribute('open');
   }
   /* end onclick events*/
+
+  /* mouse events */
+  document.querySelector('#trans-x').onmouseover = (e) => {
+    // console.log(e);
+  }
+
+  document.querySelector('#trans-x').onmousedown = (e) => {
+    // app.x = e.target.dataset.translateX;
+    console.log(app.x);
+    app.el = e.target;
+  }
+
+  document.querySelector('#trans-x').onmousemove = (e) => {
+    if (app.el) {
+      console.log('app.x ', app.x);
+      app.x += e.movementX;
+      console.log('app.x ', app.x);
+      e.target.style.transform = "translateX(" + app.x + "px)";
+      // e.target.dataset.translateX = app.x;
+    }
+  }
+
+  document.querySelector('#trans-x').onmouseup = (e) => {
+    // console.log(e);
+    e.target.dataset.translateX = app.x;
+    delete app.el;
+  }
 
   /* fetchAPI */
 
