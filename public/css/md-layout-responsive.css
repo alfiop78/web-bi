@@ -203,4 +203,19 @@ span.markContent {
 .wrapper{
   background-color: white;
   height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+#area{
+  background-color: grey;
+  width: 90%;
+  height: 90%;
+}
+
+#area > .translate-el {
+  background-color: lightblue;
+  width: 80%;
+  height: 80%;
+
 }

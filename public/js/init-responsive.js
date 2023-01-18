@@ -64,16 +64,14 @@ var App = new Application();
       let ul = document.getElementById('ul-tables');
       for (const [key, value] of Object.entries(data)) {
         const content = app.tmplList.content.cloneNode(true);
-        const section = content.querySelector('section[data-sublist-li]');
         const li = content.querySelector('li');
-        section.dataset.fn = "handlerTable";
-        section.dataset.label = value.TABLE_NAME;
-        section.dataset.elementSearch = 'tables';
+        li.dataset.fn = "handlerTable";
+        li.dataset.label = value.TABLE_NAME;
+        li.dataset.elementSearch = 'tables';
         li.id = 'table-' + key;
         li.dataset.schema = schema;
-        li.dataset.label = value.TABLE_NAME;
         li.innerText = value.TABLE_NAME;
-        ul.appendChild(section);
+        ul.appendChild(li);
       }
       drawer.toggleAttribute('open');
     }
@@ -131,6 +129,11 @@ var App = new Application();
   app.handlerAddTables = (e) => {
     console.log('addTables');
     app.dialogTables.showModal();
+  }
+
+  app.handlerToggleDrawer = (e) => {
+    console.log('toggleDrawer');
+    document.querySelector('#' + e.currentTarget.dataset.drawerId).toggleAttribute('open');
   }
   /* end onclick events*/
 

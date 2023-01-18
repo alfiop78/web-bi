@@ -74,6 +74,9 @@
           <li data-schema="{{ $schema['SCHEMA_NAME'] }}" data-fn="handlerSchema">{{ $schema['SCHEMA_NAME'] }}</li>
           @endforeach
         </ul>
+        <div class="btn-toggle" data-fn="handlerToggleDrawer" data-drawer-id="dialog-drawer">
+          <button type="button" id="toggle-cubes-drawer" class="button-icon material-icons-round md-24 md-warning md-pad-2" tooltip="Lista cubi" flow="right">arrow_circle_left</button>
+        </div>
       </section>
       <section class="dialog-list">
         <h6>Tabelle</h6>
@@ -93,9 +96,7 @@
   </dialog>
 
   <template id="tmpl-li">
-    <section class="data-item" data-element-search data-label data-sublist-li data-searchable="true">
-      <li></li>
-    </section>
+    <li data-element-search data-label data-searchable="true"></li>
   </template>
 
   <main>
@@ -150,6 +151,11 @@
 
               </section>
 
+            </section>
+            <section id="area">
+              <div class="translate-el">
+                <p>area</p>
+              </div>
             </section>
           </section>
 
