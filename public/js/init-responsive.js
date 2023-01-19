@@ -21,6 +21,19 @@ var App = new Application();
 
   App.init();
 
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.lineWidth = 0.3;
+  ctx.beginPath(); // Start a new path
+  ctx.moveTo(0, 30); // Move the pen to (30, 50)
+  ctx.lineTo(200, 30); // Draw a line to (150, 100)
+  ctx.stroke(); // Render the path
+
+  ctx.beginPath(); // Start a new path
+  ctx.moveTo(0, 50); // Move the pen to (30, 50)
+  ctx.lineTo(200, 290); // Draw a line to (150, 100)
+  ctx.stroke(); // Render the path
+
   // Callback function to execute when mutations are observed
   // const targetNode = document.querySelectorAll('ul');
   // console.log(targetNode);

@@ -155,6 +155,7 @@
             <section id="area">
               <div class="hierarchy" data-translate-x="0">
                 <div class="card-table" data-translate-x="0">table</div>
+                <canvas id="canvas" width="200" height="350"></canvas>
                 <div class="card-area" data-translate-x="0">area</div>
               </div>
             </section>
