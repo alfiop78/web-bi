@@ -106,6 +106,16 @@
   </template>
 
   <template id="tmpl-card-table">
+    <div data-id="card-struct">
+      <section class="card">
+        <div class="card-table" data-translate-x="0">table</div>
+        <div class="card-area" data-translate-x="0">table 2</div>
+      </section>
+      <canvas id="canvas" width="200" height="350"></canvas>
+      <section class="card">
+        <div class="card-area" data-translate-x="0">table</div>
+      </section>
+    </div>
   </template>
 
   <main>
@@ -153,10 +163,61 @@
 
             </section>
             <section id="area">
-              <div class="hierarchy" data-translate-x="0">
-                <div class="card-table" data-translate-x="0">table</div>
-                <canvas id="canvas" width="200" height="350"></canvas>
-                <div class="card-area" data-translate-x="0">area</div>
+              <div class="translate" data-translate-x="0">
+                <div class="hierarchy" data-translate-x="0">
+                  <div data-id="card-struct">
+                    <section class="card">
+                      <div class="card-table" data-translate-x="0">
+                        <div class="table">
+                          <span>table name</span>
+                        </div>
+                      </div>
+                      <!--<div class="card-area" data-translate-x="0">
+                      <div class="table">
+                        <span>table name</span>
+                      </div>
+                    </div>-->
+                    </section>
+                    <section class="canvas">
+                      <canvas id="canvas-1" width="200" height="108"></canvas>
+                      <!--<canvas id="canvas-2" width="200" height="108"></canvas>-->
+                    </section>
+                    <section class="card">
+                      <div class="card-area" data-translate-x="0">
+                        <div class="table">
+                          <span>table name</span>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+                <div class="hierarchy" data-translate-x="0">
+                  <div data-id="card-struct">
+                    <section class="card">
+                      <div class="card-table" data-translate-x="0">
+                        <div class="table">
+                          <span>table name</span>
+                        </div>
+                      </div>
+                      <!--<div class="card-area" data-translate-x="0">
+                      <div class="table">
+                        <span>table name</span>
+                      </div>
+                    </div>-->
+                    </section>
+                    <section class="canvas">
+                      <canvas id="canvas-2" width="200" height="108"></canvas>
+                      <!--<canvas id="canvas-2" width="200" height="108"></canvas>-->
+                    </section>
+                    <section class="card">
+                      <div class="card-area" data-translate-x="0">
+                        <div class="table">
+                          <span>table name</span>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </div>
               </div>
             </section>
             <section>

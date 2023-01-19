@@ -21,18 +21,33 @@ var App = new Application();
 
   App.init();
 
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.lineWidth = 0.3;
-  ctx.beginPath(); // Start a new path
-  ctx.moveTo(0, 30); // Move the pen to (30, 50)
-  ctx.lineTo(200, 30); // Draw a line to (150, 100)
-  ctx.stroke(); // Render the path
+  const canvas1 = document.getElementById('canvas-1');
+  const canvas2 = document.getElementById('canvas-2');
+  const ctx1 = canvas1.getContext('2d');
+  const ctx2 = canvas2.getContext('2d');
+  ctx1.lineWidth = 2.5;
+  ctx1.strokeStyle = "orangered";
+  ctx1.beginPath(); // Start a new path
+  ctx1.moveTo(0, 54); // Move the pen to (0, 50)
+  ctx1.lineTo(200, 54); // Draw a line to (200, 50)
+  ctx1.stroke(); // Render the path
 
-  ctx.beginPath(); // Start a new path
-  ctx.moveTo(0, 50); // Move the pen to (30, 50)
-  ctx.lineTo(200, 290); // Draw a line to (150, 100)
-  ctx.stroke(); // Render the path
+  ctx1.beginPath(); // Start a new path
+  ctx1.moveTo(100, 54); // Move the pen to (30, 50)
+  ctx1.lineTo(100, 200); // Draw a line to (150, 100)
+  ctx1.stroke(); // Render the path
+
+  ctx2.lineWidth = 2.5;
+  ctx2.strokeStyle = "orangered";
+  ctx2.beginPath(); // Start a new path
+  ctx2.moveTo(100, 54); // Move the pen to (30, 50)
+  ctx2.lineTo(200, 54); // Draw a line to (150, 100)
+  ctx2.stroke(); // Render the path
+
+  ctx2.beginPath(); // Start a new path
+  ctx2.moveTo(100, 54); // Move the pen to (30, 50)
+  ctx2.lineTo(100, 0); // Draw a line to (150, 100)
+  ctx2.stroke(); // Render the path
 
   // Callback function to execute when mutations are observed
   // const targetNode = document.querySelectorAll('ul');
@@ -152,19 +167,19 @@ var App = new Application();
   /* end onclick events*/
 
   /* mouse events */
-  document.querySelectorAll('.hierarchy').forEach(el => {
+  document.querySelectorAll('.translate').forEach(el => {
     el.onmousedown = (e) => {
       console.log(app.x);
-      app.x = +e.target.dataset.translateX;
-      app.el = e.target;
+      app.x = +e.currentTarget.dataset.translateX;
+      app.el = e.currentTarget;
     }
 
     el.onmousemove = (e) => {
       if (app.el) {
         app.x += e.movementX;
         // if (app.x > 30) return;
-        e.target.style.transform = "translateX(" + app.x + "px)";
-        e.target.dataset.translateX = app.x;
+        e.currentTarget.style.transform = "translateX(" + app.x + "px)";
+        e.currentTarget.dataset.translateX = app.x;
       }
     }
 

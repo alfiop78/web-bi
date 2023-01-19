@@ -208,15 +208,23 @@ span.markContent {
 }
 
 #area{
-  background-color: grey;
   width: 100%;
-  height: auto;
+  /* height: auto; */
   /* max-height: 75%; */
   padding: 1em;
   overflow: hidden;
   display: grid;
   grid-auto-flow: row;
+  /* grid-template-rows: repeat(auto-fit, 108px); */
   align-items: start;
+  border-bottom: solid thick gainsboro;
+}
+
+.translate {
+  height: 100%;
+  display: grid;
+  grid-template-rows: repeat(auto-fit, 108px);
+  grid-auto-flow: row;
 }
 
 #area .hierarchy{
@@ -224,30 +232,55 @@ span.markContent {
   grid-auto-flow: column;
   grid-gap: 1em;
   min-height: auto;
-  padding: 2em;
-  background-color: lightgreen;
+  padding: 0em 2em;
+  border-left: solid thin;
+  border-right: solid thin;
 }
 
-#area div .card-table{
-  width: 400px;
+#area .card{
+  display: grid;
+  grid-auto-flow: row;
+  grid-gap: 1em;
+  grid-template-rows: repeat(auto-fit, 108px);
+}
+
+#area .canvas{
+  display: grid;
+  grid-auto-flow: row;
+  grid-template-rows: repeat(auto-fit, 108px);
+}
+
+#area div .card-table,  #area div .card-area{
+  width: 200px;
+  max-width: 240px;
   height: 100px;
-  background-color: lime;
+  /* background-color: lime; */
+  padding: 1em;
   display: flex;
   justify-content: center;
   justify-self: center;
   align-items: center;
 }
 
-#area div .card-area{
-  width: 300px;
-  height: 100px;
-  background-color: lightblue;
-  display: flex;
-  justify-content: center;
-  justify-self: center;
-  align-items: center;
-  border: dashed thin black;
+.card-area{
+  opacity: .5;
 }
 
-canvas {
+.card-table > .table, .card-area > .table{
+  padding: 1em .5em;
+  border-radius: 4px;
+  background-color: gainsboro;
+  width: 100%;
+  box-shadow: 0px 2px 4px -2px #494949;
+}
+
+.card-area > .table{
+  border: dashed thin #494949;
+}
+
+#area div[data-id="card-struct"]{
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: repeat(3, 200px);
+  /* grid-template-columns: 2fr 1fr 2fr; */
 }
