@@ -225,6 +225,7 @@ span.markContent {
   display: grid;
   grid-template-rows: repeat(auto-fit, 108px);
   grid-auto-flow: row;
+  transition: transform 300ms;
 }
 
 #area .hierarchy{
@@ -266,21 +267,37 @@ span.markContent {
   opacity: .5;
 }
 
-.card-table > .table, .card-area > .table{
-  padding: 1em .5em;
+.card-area > .table:hover{cursor: pointer;}
+*[data-id="card-struct"]:not([data-defined]) .card-area > .table{
+  padding: 8px 4px;
+  display: flex;
+  align-items: center;
+  height: 35px;
   border-radius: 4px;
   background-color: gainsboro;
+  width: 100%;
+  border: dashed thin #494949;
+  box-shadow: 0px 2px 4px -2px #494949;
+}
+
+*[data-id="card-struct"][data-defined] .card-area > .table{
+  padding: 8px 4px;
+  display: flex;
+  align-items: center;
+  height: 35px;
+  border-radius: 4px;
+  background-color: lightblue;
   width: 100%;
   box-shadow: 0px 2px 4px -2px #494949;
 }
 
-.card-area > .table{
-  border: dashed thin #494949;
-}
+.canvas[data-set-join="false"] {visibility: hidden;}
+
+.canvas[data-set-join="true"] {visibility: visible;}
+
 
 #area div[data-id="card-struct"]{
   display: grid;
   grid-auto-flow: column;
   grid-template-columns: repeat(3, 200px);
-  /* grid-template-columns: 2fr 1fr 2fr; */
 }

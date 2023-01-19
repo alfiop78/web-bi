@@ -22,9 +22,9 @@ var App = new Application();
   App.init();
 
   const canvas1 = document.getElementById('canvas-1');
-  const canvas2 = document.getElementById('canvas-2');
+  // const canvas2 = document.getElementById('canvas-2');
   const ctx1 = canvas1.getContext('2d');
-  const ctx2 = canvas2.getContext('2d');
+  // const ctx2 = canvas2.getContext('2d');
   ctx1.lineWidth = 2.5;
   ctx1.strokeStyle = "orangered";
   ctx1.beginPath(); // Start a new path
@@ -37,7 +37,7 @@ var App = new Application();
   ctx1.lineTo(100, 200); // Draw a line to (150, 100)
   ctx1.stroke(); // Render the path
 
-  ctx2.lineWidth = 2.5;
+  /* ctx2.lineWidth = 2.5;
   ctx2.strokeStyle = "orangered";
   ctx2.beginPath(); // Start a new path
   ctx2.moveTo(100, 54); // Move the pen to (30, 50)
@@ -47,7 +47,7 @@ var App = new Application();
   ctx2.beginPath(); // Start a new path
   ctx2.moveTo(100, 54); // Move the pen to (30, 50)
   ctx2.lineTo(100, 0); // Draw a line to (150, 100)
-  ctx2.stroke(); // Render the path
+  ctx2.stroke(); // Render the path */
 
   // Callback function to execute when mutations are observed
   // const targetNode = document.querySelectorAll('ul');
@@ -60,9 +60,12 @@ var App = new Application();
       if (mutation.type === 'childList') {
         console.info('A child node has been added or removed.');
         Array.from(mutation.addedNodes).forEach(node => {
-          if (node.hasAttribute('data-fn')) node.addEventListener('click', app[node.dataset.fn]);
-          if (node.hasChildNodes()) {
-            node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+          console.log(node.nodeName);
+          if (node.nodeName !== '#text') {
+            if (node.hasAttribute('data-fn')) node.addEventListener('click', app[node.dataset.fn]);
+            if (node.hasChildNodes()) {
+              node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+            }
           }
         });
       } else if (mutation.type === 'attributes') {
@@ -147,16 +150,21 @@ var App = new Application();
 
   app.btnCreateDimension.onclick = () => {
     app.body.dataset.mode = 'create-dimension';
-
   }
 
   app.handlerTable = (e) => {
     console.log('select table');
     e.currentTarget.toggleAttribute('data-selected');
+    app.dialogTables.close();
+    const cardStruct = document.querySelector('*[data-waiting="true"]');
+    cardStruct.querySelector('span').innerHTML = e.currentTarget.dataset.label;
+    delete cardStruct.dataset.waiting;
+    cardStruct.dataset.defined = e.currentTarget.dataset.label;
   }
 
-  app.handlerAddTables = (e) => {
+  app.handlerAddTable = (e) => {
     console.log('addTables');
+    e.currentTarget.dataset.waiting = 'true';
     app.dialogTables.showModal();
   }
 
