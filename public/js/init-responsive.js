@@ -15,7 +15,7 @@ var App = new Application();
     btnSelectSchema: document.getElementById('btn-select-schema'),
     // body
     body: document.getElementById('body'),
-    x: 0
+    canvasArea: document.getElementById('canvas-area')
 
   }
 
@@ -82,9 +82,112 @@ var App = new Application();
   document.querySelectorAll('dialog').forEach(dialog => observerList.observe(dialog, config));
   observerList.observe(app.body, config);
 
-  // selezione schema/i dalla dialog "dlg-schemes"
+  /* drag events */
+
+  app.handlerDragStart = (e) => {
+    console.log('e.target : ', e.target.id);
+    e.target.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', e.target.id);
+    // e.dataTransfer.setData('application/x-moz-node', e.target.innerHTML);
+    /* const span = document.createElement('span');
+    span.innerText = e.target.dataset.label;
+    span.style.backgroundColor = '#494949';
+    span.style.color = 'white';
+    e.target.appendChild(span);
+    e.dataTransfer.setDragImage(span, 10, 10); */
+    console.log(e.dataTransfer);
+    e.dataTransfer.effectAllowed = "copy";
+  }
+
+  app.handlerDragOver = (e) => {
+    e.preventDefault();
+    // console.log('dragOver:', e.target);
+    if (e.target.classList.contains('dropzone')) {
+      e.dataTransfer.dropEffect = "copy";
+    } else {
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
+
+  app.handlerDragEnter = (e) => {
+    // console.log('handlerDragEnter');
+    e.preventDefault();
+    if (e.target.classList.contains('dropzone')) {
+      console.info('DROPZONE');
+      // e.dataTransfer.dropEffect = "copy";
+      // coloro il border differente per la dropzone
+      // la class dropping nasconde (display: none) automaticamente lo span che contiene "Trascina qui gli element......"
+      e.target.classList.add('dropping');
+    } else {
+      console.warn('non in dropzone');
+      // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
+      // e.dataTransfer.dropEffect = "none";
+    }
+  }
+
+  app.handlerDragLeave = (e) => {
+    e.preventDefault();
+    e.target.classList.remove('dropping');
+  }
+
+  app.handlerDragEnd = async (e) => {
+    e.preventDefault();
+    // faccio il DESCRIBE della tabella
+    // controllo lo stato di dropEffect per verificare se il drop è stato completato correttamente, come descritto qui:https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#drag_end
+    // in app.getTable() vengono utilizzate le property della classe Cube (cube.card.schema, cube.card.tableName);
+    if (e.dataTransfer.dropEffect === 'copy') {
+      // imposto prima la <ul> altrimenti si verifica il bug riportato nella issue#50
+      const ul = Hier.activeCard.querySelector("ul[data-id='columns']");
+      const data = await app.getTable();
+      // app.addFields(ul, data);
+    }
+  }
+
+  app.handlerDrop = (e) => {
+    // TODO: ottimizzare
+    e.preventDefault();
+    e.target.classList.replace('dropping', 'dropped');
+    if (!e.target.classList.contains('dropzone')) return;
+    const data = e.dataTransfer.getData('text/plain');
+    console.log(data);
+    const liElement = document.getElementById(data);
+    console.log(liElement);
+    liElement.classList.remove('dragging');
+    // imposto il nome della tabella draggata
+    e.target.querySelector('span').innerHTML = liElement.dataset.label;
+    e.target.dataset.label = liElement.dataset.label;
+    e.target.dataset.schema = liElement.dataset.schema;
+    return;
+    app.setCardAttributes(card);
+    // imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone e aggiungo la card alla dropZone
+    app.checkHierarchyNumber(card);
+
+    // imposto la card draggata nella posizione dove si trova il mouse
+    card.style.transform = 'translate(' + e.offsetX + 'px, ' + e.offsetY + 'px)';
+    card.setAttribute('x', e.offsetX);
+    card.setAttribute('y', e.offsetY);
+
+    // imposto la input search, con questo attributo, l'evento input viene gestito in Application.js
+    card.querySelector('input').dataset.elementSearch = card.dataset.label;
+    Hier.activeCard = card.id;
+
+    document.getElementById('tableSearch').focus();
+    document.getElementById('tableSearch').select();
+  }
+
+  // app.canvasArea.ondragover = app.handlerDragOver;
+  app.canvasArea.addEventListener('dragover', app.handlerDragOver, true);
+  // app.canvasArea.ondragenter = app.handlerDragEnter;
+  app.canvasArea.addEventListener('dragenter', app.handlerDragEnter, true);
+  // app.canvasArea.ondragleave = app.handlerDragLeave;
+  app.canvasArea.addEventListener('dragleave', app.handlerDragLeave, true);
+  // app.canvasArea.ondrop = app.handlerDrop;
+  app.canvasArea.addEventListener('drop', app.handlerDrop, true);
+  app.canvasArea.addEventListener('dragend', app.handlerDragEnd, true);
+  /* end drag events */
+
+  // selezione schema/i 
   app.handlerSchema = async (e) => {
-    const drawer = document.getElementById('dialog-drawer');
     e.currentTarget.toggleAttribute('data-selected');
     if (e.currentTarget.hasAttribute('data-selected')) {
       const schema = e.currentTarget.dataset.schema;
@@ -96,10 +199,11 @@ var App = new Application();
       let ul = document.getElementById('ul-tables');
       for (const [key, value] of Object.entries(data)) {
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li');
+        const li = content.querySelector('li[draggable]');
         li.dataset.fn = "handlerTable";
         li.dataset.label = value.TABLE_NAME;
         li.dataset.elementSearch = 'tables';
+        li.ondragstart = app.handlerDragStart;
         li.id = 'table-' + key;
         li.dataset.schema = schema;
         li.innerText = value.TABLE_NAME;
@@ -108,38 +212,6 @@ var App = new Application();
       drawer.toggleAttribute('open');
     }
   }
-
-  // selezione schema/i dalla dialog "dlg-schemes" con translate steps
-  /* app.handlerSchema = async (e) => {
-    const translate = document.getElementById('translate');
-    e.currentTarget.toggleAttribute('data-selected');
-    if (e.currentTarget.hasAttribute('data-selected')) {
-      const schema = e.currentTarget.dataset.schema;
-      // recupero le tabelle dello schema selezionato
-      const data = await app.getDatabaseTable(schema);
-      console.log(data);
-      // TODO: attivo i tasti ("Crea dimensione", "Modifica dimensione", "Crea cubo", ecc...)
-      // TODO: popolo elenco tabelle
-      let ul = document.getElementById('ul-tables');
-      for (const [key, value] of Object.entries(data)) {
-        // debugger;
-        const content = app.tmplList.content.cloneNode(true);
-        const section = content.querySelector('section[data-sublist-li]');
-        const li = content.querySelector('li');
-
-        section.dataset.fn = "handlerTable";
-        section.dataset.label = value.TABLE_NAME;
-        section.dataset.elementSearch = 'tables';
-        li.id = 'table-' + key;
-        li.dataset.schema = schema;
-        li.dataset.label = value.TABLE_NAME;
-        li.innerText = value.TABLE_NAME;
-        // span.dataset.label = value.TABLE_NAME;
-        ul.appendChild(section);
-      }
-      ++translate.dataset.step;
-    }
-  } */
 
   /* page init  (impostazioni inziali per la pagina, alcune sono necessarie per essere catturate dal mutationObserve)*/
   // TODO: da implementare
@@ -155,17 +227,10 @@ var App = new Application();
   app.handlerTable = (e) => {
     console.log('select table');
     e.currentTarget.toggleAttribute('data-selected');
-    app.dialogTables.close();
-    const cardStruct = document.querySelector('*[data-waiting="true"]');
-    cardStruct.querySelector('span').innerHTML = e.currentTarget.dataset.label;
-    delete cardStruct.dataset.waiting;
-    cardStruct.dataset.defined = e.currentTarget.dataset.label;
-  }
-
-  app.handlerAddTable = (e) => {
-    console.log('addTables');
-    e.currentTarget.dataset.waiting = 'true';
-    app.dialogTables.showModal();
+    // const cardStruct = document.querySelector('*[data-waiting="true"]');
+    // cardStruct.querySelector('span').innerHTML = e.currentTarget.dataset.label;
+    // delete cardStruct.dataset.waiting;
+    // cardStruct.dataset.defined = e.currentTarget.dataset.label;
   }
 
   app.handlerToggleDrawer = (e) => {

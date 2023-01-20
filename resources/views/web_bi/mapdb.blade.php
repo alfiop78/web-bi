@@ -21,82 +21,9 @@
 
 <body class="antialiased">
 
-  <!--<dialog id="dlg-tables" class="small grid">
-    <h5>Seleziona tabella</h5>
-    <section class="steps">
-      <section class="overflow">
-        <div id="translate" data-step="1">
-          <section class="step">
-            <h6>Schema</h6>
-            <div class="md-field">
-              <input type="search" id="schema-search" data-element-search="schemes" autocomplete="off" />
-              <label for="schema-search" class="">Ricerca</label>
-            </div>
-            <ul>
-              @foreach($schemes as $schema)
-              <li data-schema="{{ $schema['SCHEMA_NAME'] }}" data-fn="handlerSchema">{{ $schema['SCHEMA_NAME'] }}</li>
-              @endforeach
-            </ul>
-          </section>
-          <section class="step">
-            <h6>Tabelle</h6>
-            <div class="md-field">
-              <input type="search" id="table-search" data-element-search="tables" autocomplete="off" />
-              <label for="tables-search" class="">Ricerca</label>
-            </div>
-            <div class="relative-ul">
-              <ul id="ul-tables" class="custom-scrollbar"></ul>
-            </div>
-          </section>
-        </div>
-
-      </section>
-
-
-    </section>
-    <div class="buttons">
-      <button type="button" name="cancel" class="md-button">annulla</button>
-      <button id="btn-table-done" data-fn="btnTableDone" type="button" name="done" class="md-button">ok</button>
-    </div>
-  </dialog>-->
-
-  <dialog id="dlg-tables" class="small grid">
-    <h5>Seleziona tabella</h5>
-    <section class="dialog-wrapper">
-      <section id="dialog-drawer" class="dialog-drawer" open>
-        <h6>Schema</h6>
-        <div class="md-field">
-          <input type="search" id="schema-search" data-element-search="schemes" autocomplete="off" />
-          <label for="schema-search" class="">Ricerca</label>
-        </div>
-        <ul>
-          @foreach($schemes as $schema)
-          <li data-schema="{{ $schema['SCHEMA_NAME'] }}" data-fn="handlerSchema">{{ $schema['SCHEMA_NAME'] }}</li>
-          @endforeach
-        </ul>
-        <div class="btn-toggle" data-fn="handlerToggleDrawer" data-drawer-id="dialog-drawer">
-          <button type="button" id="toggle-cubes-drawer" class="button-icon material-icons-round md-24 md-warning md-pad-2" tooltip="Lista cubi" flow="right">arrow_circle_left</button>
-        </div>
-      </section>
-      <section class="dialog-list">
-        <h6>Tabelle</h6>
-        <div class="md-field">
-          <input type="search" id="table-search" data-element-search="tables" autocomplete="off" />
-          <label for="tables-search" class="">Ricerca</label>
-        </div>
-        <div class="relative-ul">
-          <ul id="ul-tables" class="custom-scrollbar"></ul>
-        </div>
-      </section>
-    </section>
-    <div class="buttons">
-      <button type="button" name="cancel" class="md-button">annulla</button>
-      <button id="btn-table-done" data-fn="btnTableDone" type="button" name="done" class="md-button">ok</button>
-    </div>
-  </dialog>
-
   <template id="tmpl-li">
     <li data-element-search data-label data-searchable="true"></li>
+    <li data-element-search data-label data-searchable="true" draggable="true"></li>
   </template>
 
   <template id="tmpl-hierarchies">
@@ -162,15 +89,15 @@
               </section>
 
             </section>
-            <section id="area">
+            <section id="canvas-area">
               <div class="translate" data-translate-x="0">
                 <div class="hierarchy">
                   <div data-id="card-struct" data-fn="handlerAddTable">
                     <section class="card" data-id="1">
                       <div class="card-area" data-translate-x="0">
-                        <div class="table">
-                          <!--<div class="table" data-fn="handlerAddTable">-->
+                        <div class="table dropzone">
                           <span>table</span>
+                          <section class="material-icons-round md-18" data-join>join_inner</section>
                         </div>
                       </div>
                     </section>
@@ -189,10 +116,35 @@
 
               </div>
             </section>
-            <section>
-              <div class="horizontal-timeline">aggiungi gerarchia</div>
-              <button id="btn-add-tables" data-fn="handlerAddTables" type="button">Aggiungi tabelle</button>
+            <section id="tables-area">
+              <section class="table-area-wrapper">
+                <nav id="schema-drawer" class="nav-drawer">
+                  <section>
+                    <div class="md-field">
+                      <input type="search" id="schema-search" data-element-search="schemes" autocomplete="off" />
+                      <label for="schema-search" class="">Ricerca</label>
+                    </div>
+                    <ul>
+                      @foreach($schemes as $schema)
+                      <li data-schema="{{ $schema['SCHEMA_NAME'] }}" data-fn="handlerSchema">{{ $schema['SCHEMA_NAME'] }}</li>
+                      @endforeach
+                    </ul>
+                  </section>
+                  <button type="button" id="btn-open-schema-drawer" data-drawer-id="schema-drawer" data-fn="handlerToggleDrawer" value="Schema">Schema</button>
+                </nav>
+                <section class="list-search">
+                  <div class="md-field">
+                    <input type="search" id="table-search" data-element-search="tables" autocomplete="off" />
+                    <label for="tables-search" class="">Ricerca</label>
+                  </div>
+                  <div class="relative-ul">
+                    <ul id="ul-tables" class="custom-scrollbar"></ul>
+                  </div>
+                </section>
+                <section>preview table</section>
+              </section>
             </section>
+          </section>
           </section>
 
         </div>
