@@ -383,7 +383,7 @@ class MapDatabaseController extends Controller
       $datamartName = $q->createDatamart(null);
       // var_dump($datamartName);
       // if ($datamartName) return "Datamart ({$datamartName}) per il report {$reportName} creato con successo!\n";
-      if ($datamartName) return "OK ({$datamartName})\n";
+      if ($datamartName) return "OK\n";
     }
   }
 }
