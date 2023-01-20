@@ -382,7 +382,8 @@ class MapDatabaseController extends Controller
       // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
       $datamartName = $q->createDatamart(null);
       // var_dump($datamartName);
-      if ($datamartName) return "Datamart ({$datamartName}) per il report {$reportName} creato con successo!\n";
+      // if ($datamartName) return "Datamart ({$datamartName}) per il report {$reportName} creato con successo!\n";
+      if ($datamartName) return "OK ({$datamartName})\n";
     }
   }
 }
