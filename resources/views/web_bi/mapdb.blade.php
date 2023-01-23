@@ -101,7 +101,7 @@
                         </div>
                       </div>
                     </section>
-                    <section class="canvas" data-set-join="false">
+                    <section class="canvas" data-set-join="true">
                       <canvas id="canvas-1" width="200" height="108"></canvas>
                     </section>
                     <!--<section class="card">

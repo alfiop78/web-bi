@@ -22,10 +22,14 @@ var App = new Application();
   App.init();
 
   const canvas1 = document.getElementById('canvas-1');
+  console.log(canvas1.offsetTop);
+  console.log(canvas1.offsetLeft);
+  var canvasOffsetTop = canvas1.offsetTop;
+  var canvasOffsetLeft = canvas1.offsetLeft;
   // const canvas2 = document.getElementById('canvas-2');
   const ctx1 = canvas1.getContext('2d');
   // const ctx2 = canvas2.getContext('2d');
-  ctx1.lineWidth = 2.5;
+  /* ctx1.lineWidth = 2.5;
   ctx1.strokeStyle = "orangered";
   ctx1.beginPath(); // Start a new path
   ctx1.moveTo(0, 54); // Move the pen to (0, 50)
@@ -35,7 +39,7 @@ var App = new Application();
   ctx1.beginPath(); // Start a new path
   ctx1.moveTo(100, 54); // Move the pen to (30, 50)
   ctx1.lineTo(100, 200); // Draw a line to (150, 100)
-  ctx1.stroke(); // Render the path
+  ctx1.stroke(); // Render the path */
 
   /* ctx2.lineWidth = 2.5;
   ctx2.strokeStyle = "orangered";
@@ -240,8 +244,41 @@ var App = new Application();
   /* end onclick events*/
 
   /* mouse events */
+  canvas1.onmousedown = (e) => {
+    console.log(e);
+    /* app.letsdraw = {
+      x: e.pageX - canvasOffsetLeft,
+      y: e.pageY - canvasOffsetTop
+    } */
+    app.letsdraw = {
+      x: 0,
+      y: 54
+    }
+    console.log(app.letsdraw);
+  }
+
+  canvas1.onmousemove = (e) => {
+    if (app.letsdraw) {
+      ctx1.clearRect(0, 0, canvas1.width, canvas1.height);
+      ctx1.strokeStyle = 'dimgrey';
+      ctx1.lineWidth = 2;
+      ctx1.beginPath();
+
+      ctx1.moveTo(app.letsdraw.x, app.letsdraw.y);
+      // ctx1.lineTo(e.pageX - canvasOffsetLeft, e.pageY - canvasOffsetTop);
+      ctx1.lineTo(e.offsetX, e.offsetY);
+      ctx1.stroke();
+    }
+  }
+
+  canvas1.onmouseup = (e) => {
+    ctx1.strokeStyle = 'orangered';
+    ctx1.stroke();
+    app.letsdraw = null;
+  }
+
   document.querySelectorAll('.translate').forEach(el => {
-    el.onmousedown = (e) => {
+    /* el.onmousedown = (e) => {
       console.log(app.x);
       app.x = +e.currentTarget.dataset.translateX;
       app.el = e.currentTarget;
@@ -260,7 +297,7 @@ var App = new Application();
       // console.log(e);
       // e.target.dataset.translateX = app.x;
       delete app.el;
-    }
+    } */
   });
   /* end mouse events */
 

@@ -245,6 +245,7 @@ span.markContent {
 
 #canvas-area .canvas{
   display: grid;
+  background-color: lightgray;
   grid-auto-flow: row;
   grid-template-rows: repeat(auto-fit, 108px);
 }
