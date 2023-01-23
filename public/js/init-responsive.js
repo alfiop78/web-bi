@@ -269,16 +269,18 @@ var App = new Application();
 
   app.svg.onmousemove = (e) => {
     if (app.letsdraw) {
-      app.line.setAttribute('x1', 150);
-      app.line.setAttribute('y1', 54);
-      app.line.setAttribute('x2', e.offsetX);
+      // app.line.setAttribute('x1', 150);
+      // app.line.setAttribute('y1', 54);
+      /* app.line.setAttribute('x2', e.offsetX);
       app.line.setAttribute('y2', e.offsetY);
-      app.line.setAttribute('stroke', 'orangered');
+      app.line.setAttribute('stroke', 'blue'); */
+      app.line.setAttribute('d', 'M 220 54 L ' + e.offsetX + ' ' + e.offsetY);
     }
   }
 
   app.svg.onmouseup = (e) => {
     app.letsdraw = null;
+    app.line.setAttribute('stroke', 'orangered');
   }
 
   /* canvas1.onmousedown = (e) => {
