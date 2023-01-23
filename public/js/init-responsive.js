@@ -112,11 +112,23 @@ var App = new Application();
       e.dataTransfer.dropEffect = "copy";
     } else {
       e.dataTransfer.dropEffect = "none";
+      if (app.line) {
+        app.line.setAttribute('stroke', 'lightblue');
+        // app.line.setAttribute('d', 'M 220 54 L ' + e.offsetX + ' ' + e.offsetY);
+        console.log(e);
+        console.log('offset ', e.offsetX, e.offsetY);
+        // console.log(e.currentTarget, e.target);
+        if (e.target.classList.contains('card-area')) {
+          app.line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + e.target.offsetLeft + ' ' + (e.target.offsetTop + (e.target.offsetHeight / 2)));
+        } else {
+          app.line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + e.offsetX + ' ' + e.offsetY);
+        }
+      }
     }
   }
 
   app.handlerDragEnter = (e) => {
-    // console.log('handlerDragEnter');
+    console.log('handlerDragEnter');
     e.preventDefault();
     if (e.target.classList.contains('dropzone')) {
       console.info('DROPZONE');
@@ -126,6 +138,19 @@ var App = new Application();
       e.target.classList.add('dropping');
     } else {
       console.warn('non in dropzone');
+      let card = document.querySelector('div.table.dropzone');
+      if (document.querySelectorAll('.card').length > 1) {
+        app.line = document.getElementById('line-1');
+        // console.log(app.line);
+        app.letsdraw = {
+          x: card.offsetLeft + card.offsetWidth,
+          y: card.offsetTop + (card.offsetHeight / 2)
+        }
+        // console.log(app.letsdraw);
+        app.line.setAttribute('stroke', 'lightblue');
+        app.line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + e.offsetX + ' ' + e.offsetY);
+        // app.line.setAttribute('d', 'M 220 54 L ' + e.offsetX + ' ' + e.offsetY);
+      }
       // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
       // e.dataTransfer.dropEffect = "none";
     }
@@ -152,6 +177,7 @@ var App = new Application();
   app.handlerDrop = (e) => {
     // TODO: ottimizzare
     e.preventDefault();
+    if (app.line) app.line.setAttribute('stroke', 'orangered');
     e.target.classList.replace('dropping', 'dropped');
     if (!e.target.classList.contains('dropzone')) return;
     const data = e.dataTransfer.getData('text/plain');
@@ -253,11 +279,9 @@ var App = new Application();
   /* end onclick events*/
 
   /* mouse events */
-  app.svg.onmousedown = (e) => {
+  /* app.svg.onmousedown = (e) => {
     console.log(e);
     let card = document.querySelector('.card');
-    // app.l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    // app.svg.appendChild(app.l);
     app.line = document.getElementById('line-1');
     console.log(app.line);
     app.letsdraw = {
@@ -269,11 +293,7 @@ var App = new Application();
 
   app.svg.onmousemove = (e) => {
     if (app.letsdraw) {
-      // app.line.setAttribute('x1', 150);
-      // app.line.setAttribute('y1', 54);
-      /* app.line.setAttribute('x2', e.offsetX);
-      app.line.setAttribute('y2', e.offsetY);
-      app.line.setAttribute('stroke', 'blue'); */
+      app.line.setAttribute('stroke', 'lightblue');
       app.line.setAttribute('d', 'M 220 54 L ' + e.offsetX + ' ' + e.offsetY);
     }
   }
@@ -281,45 +301,10 @@ var App = new Application();
   app.svg.onmouseup = (e) => {
     app.letsdraw = null;
     app.line.setAttribute('stroke', 'orangered');
-  }
-
-  /* canvas1.onmousedown = (e) => {
-    console.log(e);
-    // recupero la posizione della prima card (fact)
-    let card = document.querySelector('.card');
-    // console.log(card.offsetLeft + card.offsetWidth);
-
-    app.letsdraw = {
-      x: card.offsetLeft + card.offsetWidth,
-      y: 54
-    }
-    console.log(app.letsdraw);
-  }
-
-  canvas1.onmousemove = (e) => {
-    // console.log(e.offsetX, e.offsetY);
-    if (app.letsdraw) {
-      ctx1.clearRect(0, 0, canvas1.width, canvas1.height);
-      ctx1.strokeStyle = 'dimgrey';
-      ctx1.lineWidth = 2;
-      ctx1.beginPath();
-
-      ctx1.moveTo(app.letsdraw.x, app.letsdraw.y);
-      // ctx1.lineTo(e.pageX - canvasOffsetLeft, e.pageY - canvasOffsetTop);
-      ctx1.lineTo(e.offsetX, e.offsetY);
-      ctx1.stroke();
-    }
-  }
-
-  canvas1.onmouseup = (e) => {
-    ctx1.strokeStyle = 'orangered';
-    ctx1.stroke();
-    ctx1.save();
-    app.letsdraw = null;
   } */
 
   document.querySelectorAll('.translate').forEach(el => {
-    /* el.onmousedown = (e) => {
+    el.onmousedown = (e) => {
       console.log(app.x);
       app.x = +e.currentTarget.dataset.translateX;
       app.el = e.currentTarget;
@@ -338,7 +323,7 @@ var App = new Application();
       // console.log(e);
       // e.target.dataset.translateX = app.x;
       delete app.el;
-    } */
+    }
   });
   /* end mouse events */
 

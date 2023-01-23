@@ -92,7 +92,8 @@
             <section id="canvas-area">
               <div id="translate" class="translate" data-translate-x="0">
                 <svg id="svg">
-                  <path id="line-1" d="M 220 54" fill="transparent" stroke="black" />
+                  <!--<path id="line-1" d="M 220 54" fill="transparent" stroke="black" />-->
+                  <path id="line-1" d="" fill="transparent" stroke="black" />
                 </svg>
                 <!--<canvas id="canvas-1"></canvas>-->
                 <div class="hierarchy" id="h">
@@ -101,17 +102,21 @@
                       <div class="card-area" data-translate-x="0">
                         <div class="table dropzone">
                           <span>table</span>
-                          <section class="material-icons-round md-18" data-join>join_inner</section>
+                          <span data-path-svg-start></span>
+                          <!--<section class="material-icons-round md-18" data-join>join_inner</section>-->
                         </div>
                       </div>
                     </section>
-                    <!--<section class="card">
+                  </div>
+                  <div data-id="card-struct" data-fn="handlerAddTable">
+                    <section class="card" data-id="">
                       <div class="card-area" data-translate-x="0">
-                        <div class="table">
-                          <span>table name</span>
+                        <div class="table dropzone">
+                          <span>table</span>
+                          <!--<section class="material-icons-round md-18" data-join>join_inner</section>-->
                         </div>
                       </div>
-                    </section>-->
+                    </section>
                   </div>
                 </div>
 
