@@ -15,19 +15,21 @@ var App = new Application();
     btnSelectSchema: document.getElementById('btn-select-schema'),
     // body
     body: document.getElementById('body'),
-    canvasArea: document.getElementById('canvas-area')
+    canvasArea: document.getElementById('canvas-area'),
+    translate: document.getElementById('translate'),
+    svg: document.getElementById('svg')
 
   }
 
   App.init();
 
-  const canvas1 = document.getElementById('canvas-1');
-  console.log(canvas1.offsetTop);
-  console.log(canvas1.offsetLeft);
+  /* const canvas1 = document.getElementById('canvas-1');
+  canvas1.width = app.translate.offsetWidth;
+  canvas1.height = app.translate.offsetHeight;
   var canvasOffsetTop = canvas1.offsetTop;
   var canvasOffsetLeft = canvas1.offsetLeft;
   // const canvas2 = document.getElementById('canvas-2');
-  const ctx1 = canvas1.getContext('2d');
+  const ctx1 = canvas1.getContext('2d'); */
   // const ctx2 = canvas2.getContext('2d');
   /* ctx1.lineWidth = 2.5;
   ctx1.strokeStyle = "orangered";
@@ -241,23 +243,59 @@ var App = new Application();
     console.log('toggleDrawer');
     document.querySelector('#' + e.currentTarget.dataset.drawerId).toggleAttribute('open');
   }
+
+  app.handlerTest = () => {
+    const c = document.querySelector('div[data-id="card-struct"]');
+    let copy = c.cloneNode(true);
+    const hier = document.getElementById('h');
+    h.appendChild(copy);
+  }
   /* end onclick events*/
 
   /* mouse events */
-  canvas1.onmousedown = (e) => {
+  app.svg.onmousedown = (e) => {
     console.log(e);
-    /* app.letsdraw = {
-      x: e.pageX - canvasOffsetLeft,
-      y: e.pageY - canvasOffsetTop
-    } */
+    let card = document.querySelector('.card');
+    // app.l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    // app.svg.appendChild(app.l);
+    app.line = document.getElementById('line-1');
+    console.log(app.line);
     app.letsdraw = {
-      x: 0,
+      x: card.offsetLeft + card.offsetWidth,
+      y: 54
+    }
+    // console.log(app.letsdraw);
+  }
+
+  app.svg.onmousemove = (e) => {
+    if (app.letsdraw) {
+      app.line.setAttribute('x1', 150);
+      app.line.setAttribute('y1', 54);
+      app.line.setAttribute('x2', e.offsetX);
+      app.line.setAttribute('y2', e.offsetY);
+      app.line.setAttribute('stroke', 'orangered');
+    }
+  }
+
+  app.svg.onmouseup = (e) => {
+    app.letsdraw = null;
+  }
+
+  /* canvas1.onmousedown = (e) => {
+    console.log(e);
+    // recupero la posizione della prima card (fact)
+    let card = document.querySelector('.card');
+    // console.log(card.offsetLeft + card.offsetWidth);
+
+    app.letsdraw = {
+      x: card.offsetLeft + card.offsetWidth,
       y: 54
     }
     console.log(app.letsdraw);
   }
 
   canvas1.onmousemove = (e) => {
+    // console.log(e.offsetX, e.offsetY);
     if (app.letsdraw) {
       ctx1.clearRect(0, 0, canvas1.width, canvas1.height);
       ctx1.strokeStyle = 'dimgrey';
@@ -274,8 +312,9 @@ var App = new Application();
   canvas1.onmouseup = (e) => {
     ctx1.strokeStyle = 'orangered';
     ctx1.stroke();
+    ctx1.save();
     app.letsdraw = null;
-  }
+  } */
 
   document.querySelectorAll('.translate').forEach(el => {
     /* el.onmousedown = (e) => {
