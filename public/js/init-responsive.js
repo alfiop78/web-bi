@@ -111,17 +111,12 @@ var App = new Application();
 
   app.handlerDragOver = (e) => {
     e.preventDefault();
-    // console.log('dragOver:', e.target);
+    console.log('dragOver:', e.target);
     if (e.target.classList.contains('dropzone')) {
       e.dataTransfer.dropEffect = "copy";
-      if (app.line) {
-        app.line.setAttribute('stroke', 'red');
+      if (app.l) {
         // console.log(e.currentTarget, e.target);
-        if (e.target.classList.contains('card-area')) {
-          app.line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + e.target.offsetLeft + ' ' + (e.target.offsetTop + (e.target.offsetHeight / 2)));
-        } else {
-          app.line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + (e.offsetX - app.dragElementPosition.x - 10) + ' ' + (e.offsetY - app.dragElementPosition.y + 13.5));
-        }
+        app.l.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + (e.offsetX - app.dragElementPosition.x - 10) + ' ' + (e.offsetY - app.dragElementPosition.y + 13.5));
       }
     } else {
       e.dataTransfer.dropEffect = "none";
@@ -134,20 +129,24 @@ var App = new Application();
     if (e.target.classList.contains('dropzone')) {
       console.info('DROPZONE');
       // e.dataTransfer.dropEffect = "copy";
-      // creo la linea
-      app.l = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       // coloro il border differente per la dropzone
       e.target.classList.add('dropping');
       let card = document.querySelector('.table');
       if (app.hierarchy.childElementCount > 0) {
-        app.line = document.getElementById('line-1');
+        // creo la linea
+        app.l = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        app.l.setAttribute('fill', 'transparent');
+        app.l.setAttribute('stroke', 'red');
+        app.l.setAttribute('stroke-linecap', 'round');
+        app.l.setAttribute('stroke-width', 3);
+        app.svg.appendChild(app.l);
+        // app.line = document.getElementById('line-1');
         // console.log(app.line);
         app.letsdraw = {
           x: card.offsetLeft + card.offsetWidth,
           y: card.offsetTop + (card.offsetHeight / 2)
         }
         // console.log(app.letsdraw);
-        // app.line.setAttribute('stroke', 'black');
         // app.line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + e.offsetX + ' ' + e.offsetY);
       }
     } else {
@@ -196,9 +195,9 @@ var App = new Application();
     card.querySelector('.card-area').dataset.label = liElement.dataset.label;
     card.querySelector('.card-area').dataset.schema = liElement.dataset.schema;
     h.appendChild(card);
-    if (app.line) {
-      app.line.setAttribute('stroke', 'orange');
-      app.line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + span.offsetParent.offsetLeft + ' ' + (span.offsetParent.offsetTop + (span.offsetParent.offsetHeight / 2)));
+    if (app.l) {
+      app.l.setAttribute('stroke', 'orange');
+      app.l.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + span.offsetParent.offsetLeft + ' ' + (span.offsetParent.offsetTop + (span.offsetParent.offsetHeight / 2)));
     }
 
     return;
