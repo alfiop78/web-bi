@@ -32,15 +32,15 @@
     </div>
   </template>
 
-  <template id="tmpl-card-table">
+  <template id="tmpl-card">
     <div data-id="card-struct">
-      <section class="card">
-        <div class="card-table" data-translate-x="0">table</div>
-        <div class="card-area" data-translate-x="0">table 2</div>
-      </section>
-      <canvas id="canvas" width="200" height="350"></canvas>
-      <section class="card">
-        <div class="card-area" data-translate-x="0">table</div>
+      <section class="card" data-id="1">
+        <div class="card-area" data-translate-x="0">
+          <div class="table dropzone">
+            <span>table</span>
+            <span data-path-svg-start></span>
+          </div>
+        </div>
       </section>
     </div>
   </template>
@@ -91,33 +91,11 @@
             </section>
             <section id="canvas-area">
               <div id="translate" class="translate" data-translate-x="0">
-                <svg id="svg">
-                  <!--<path id="line-1" d="M 220 54" fill="transparent" stroke="black" />-->
-                  <path id="line-1" d="" fill="transparent" stroke="black" />
+                <svg id="svg" class="dropzone">
+                  <path id="line-1" d="" fill="transparent" stroke="black" stroke-linecap="round" stroke-width="3" />
                 </svg>
                 <!--<canvas id="canvas-1"></canvas>-->
                 <div class="hierarchy" id="h">
-                  <div data-id="card-struct" data-fn="handlerAddTable">
-                    <section class="card" data-id="1">
-                      <div class="card-area" data-translate-x="0">
-                        <div class="table dropzone">
-                          <span>table</span>
-                          <span data-path-svg-start></span>
-                          <!--<section class="material-icons-round md-18" data-join>join_inner</section>-->
-                        </div>
-                      </div>
-                    </section>
-                  </div>
-                  <div data-id="card-struct" data-fn="handlerAddTable">
-                    <section class="card" data-id="">
-                      <div class="card-area" data-translate-x="0">
-                        <div class="table dropzone">
-                          <span>table</span>
-                          <!--<section class="material-icons-round md-18" data-join>join_inner</section>-->
-                        </div>
-                      </div>
-                    </section>
-                  </div>
                 </div>
 
               </div>
