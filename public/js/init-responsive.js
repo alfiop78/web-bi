@@ -165,25 +165,32 @@ var App = new Application();
       // e.dataTransfer.dropEffect = "copy";
       // coloro il border differente per la dropzone
       e.target.classList.add('dropping');
+      if (app.hierarchy.childElementCount > 0) {
+        let table, cardStruct;
+        if (e.target.classList.contains('card')) {
+          cardStruct = e.target.parentElement;
+          table = cardStruct.querySelector('.table');
+          if (cardStruct.previousElementSibling) {
+            table = cardStruct.previousElementSibling.querySelector('.table');
+          }
+        } else {
+          cardStruct = h.querySelector('div[data-id]:last-child');
+          table = h.querySelector('div[data-id]:last-child .table');
+          if (cardStruct.previousElementSibling && e.target.classList.contains('card')) {
+            table = cardStruct.previousElementSibling.querySelector('.table');
+          }
+        }
+        app.letsdraw = {
+          x: table.offsetLeft + table.offsetWidth,
+          y: table.offsetTop + (table.offsetHeight / 2)
+        }
+        // console.log(app.letsdraw);
+        // app.line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + e.offsetX + ' ' + e.offsetY);
+      }
     } else {
       console.warn('non in dropzone');
       // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
       // e.dataTransfer.dropEffect = "none";
-    }
-    // let card = document.querySelector('.table');
-    if (app.hierarchy.childElementCount > 0) {
-      // console.log(e.target.parentElement.previousElementSibling);
-      let lastCard = h.querySelector('div[data-id]:last-child');
-      let table = h.querySelector('div[data-id]:last-child .table');
-      if (lastCard.previousElementSibling && e.target.classList.contains('card')) {
-        table = lastCard.previousElementSibling.querySelector('.table');
-      }
-      app.letsdraw = {
-        x: table.offsetLeft + table.offsetWidth,
-        y: table.offsetTop + (table.offsetHeight / 2)
-      }
-      // console.log(app.letsdraw);
-      // app.line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + e.offsetX + ' ' + e.offsetY);
     }
   }
 
