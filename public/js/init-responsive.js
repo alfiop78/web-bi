@@ -134,8 +134,9 @@ var App = new Application();
     if (e.target.classList.contains('dropzone')) {
       console.info('DROPZONE');
       // e.dataTransfer.dropEffect = "copy";
+      // creo la linea
+      app.l = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       // coloro il border differente per la dropzone
-      // la class dropping nasconde (display: none) automaticamente lo span che contiene "Trascina qui gli element......"
       e.target.classList.add('dropping');
       let card = document.querySelector('.table');
       if (app.hierarchy.childElementCount > 0) {
@@ -177,7 +178,6 @@ var App = new Application();
   app.handlerDropSVG = (e) => {
     // TODO: ottimizzare
     e.preventDefault();
-    if (app.line) app.line.setAttribute('stroke', 'orangered');
     e.target.classList.replace('dropping', 'dropped');
     if (!e.target.classList.contains('dropzone')) return;
     const data = e.dataTransfer.getData('text/plain');
@@ -191,10 +191,15 @@ var App = new Application();
     const content = app.tmplCard.content.cloneNode(true);
     const card = content.querySelector('div');
     // imposto il nome della tabella draggata
-    card.querySelector('span').innerHTML = liElement.dataset.label;
+    const span = card.querySelector('span');
+    span.innerHTML = liElement.dataset.label;
     card.querySelector('.card-area').dataset.label = liElement.dataset.label;
     card.querySelector('.card-area').dataset.schema = liElement.dataset.schema;
     h.appendChild(card);
+    if (app.line) {
+      app.line.setAttribute('stroke', 'orange');
+      app.line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + span.offsetParent.offsetLeft + ' ' + (span.offsetParent.offsetTop + (span.offsetParent.offsetHeight / 2)));
+    }
 
     return;
     app.setCardAttributes(card);

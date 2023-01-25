@@ -37,8 +37,7 @@
       <section class="card" data-id="1">
         <div class="card-area" data-translate-x="0">
           <div class="table dropzone">
-            <span>table</span>
-            <span data-path-svg-start></span>
+            <span></span>
           </div>
         </div>
       </section>
@@ -92,7 +91,7 @@
             <section id="canvas-area">
               <div id="translate" class="translate" data-translate-x="0">
                 <svg id="svg" class="dropzone">
-                  <path id="line-1" d="" fill="transparent" stroke="black" stroke-linecap="round" stroke-width="3" />
+                  <!--<path id="line-1" d="" fill="transparent" stroke="black" stroke-linecap="round" stroke-width="3" />-->
                 </svg>
                 <!--<canvas id="canvas-1"></canvas>-->
                 <div class="hierarchy" id="h">
