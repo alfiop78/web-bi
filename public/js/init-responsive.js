@@ -98,6 +98,20 @@ var App = new Application();
     app.dragElementPosition = { x: e.offsetX, y: e.offsetY };
     // console.log(app.dragElementPosition);
     e.dataTransfer.setData('text/plain', e.target.id);
+    // creo la linea
+    if (app.hierarchy.childElementCount > 0) {
+      app.l = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      app.l.dataset.id = app.svg.childElementCount;
+      app.l.setAttribute('fill', 'transparent');
+      app.l.setAttribute('stroke', 'red');
+      app.l.setAttribute('stroke-linecap', 'round');
+      app.l.setAttribute('stroke-width', 3);
+      app.svg.appendChild(app.l);
+      app.letsdraw = {
+        x: 0,
+        y: 0
+      }
+    }
     // e.dataTransfer.setData('application/x-moz-node', e.target.innerHTML);
     /* const span = document.createElement('span');
     span.innerText = e.target.dataset.label;
@@ -109,21 +123,41 @@ var App = new Application();
     e.dataTransfer.effectAllowed = "copy";
   }
 
-  app.handlerDragOver = (e) => {
+  app.handlerDragOverH = (e) => {
     e.preventDefault();
-    console.log('dragOver:', e.target);
+    // console.log('dragOver:', e.target);
     if (e.target.classList.contains('dropzone')) {
       e.dataTransfer.dropEffect = "copy";
-      if (app.l) {
-        // console.log(e.currentTarget, e.target);
-        app.l.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + (e.offsetX - app.dragElementPosition.x - 10) + ' ' + (e.offsetY - app.dragElementPosition.y + 13.5));
-      }
+      // console.log(e.currentTarget, e.target);
+      // recupero l'offsetLeft della card a sinistra del mouse
+      let lastCard = h.querySelector('div[data-id]:last-child');
+      // console.log(lastCard);
+      // console.log(e.target);
+      if (app.l) app.l.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + (e.offsetX + e.target.offsetLeft - app.dragElementPosition.x - 10) + ' ' + (e.offsetY - app.dragElementPosition.y + 13.5));
     } else {
       e.dataTransfer.dropEffect = "none";
     }
   }
 
-  app.handlerDragEnter = (e) => {
+  app.handlerDragEnterCard = (e) => {
+    // console.log('dragEnter Card');
+    // console.log(e.target, e.currentTarget);
+    /* if (app.l.dataset.id !== app.svg.childElementCount) {
+      app.l = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      app.l.dataset.id = app.svg.childElementCount;
+      app.l.setAttribute('fill', 'transparent');
+      app.l.setAttribute('stroke', 'blue');
+      app.l.setAttribute('stroke-linecap', 'round');
+      app.l.setAttribute('stroke-width', 4);
+      app.svg.appendChild(app.l);
+      app.letsdraw = {
+        x: e.target.offsetLeft + e.target.offsetWidth,
+        y: e.target.offsetTop + (e.target.offsetHeight / 2)
+      }
+    } */
+  }
+
+  app.handlerDragEnterH = (e) => {
     console.log('handlerDragEnter :', e.target);
     e.preventDefault();
     if (e.target.classList.contains('dropzone')) {
@@ -131,37 +165,39 @@ var App = new Application();
       // e.dataTransfer.dropEffect = "copy";
       // coloro il border differente per la dropzone
       e.target.classList.add('dropping');
-      let card = document.querySelector('.table');
-      if (app.hierarchy.childElementCount > 0) {
-        // creo la linea
-        app.l = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        app.l.setAttribute('fill', 'transparent');
-        app.l.setAttribute('stroke', 'red');
-        app.l.setAttribute('stroke-linecap', 'round');
-        app.l.setAttribute('stroke-width', 3);
-        app.svg.appendChild(app.l);
-        // app.line = document.getElementById('line-1');
-        // console.log(app.line);
-        app.letsdraw = {
-          x: card.offsetLeft + card.offsetWidth,
-          y: card.offsetTop + (card.offsetHeight / 2)
-        }
-        // console.log(app.letsdraw);
-        // app.line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + e.offsetX + ' ' + e.offsetY);
-      }
     } else {
       console.warn('non in dropzone');
       // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
       // e.dataTransfer.dropEffect = "none";
     }
+    // let card = document.querySelector('.table');
+    if (app.hierarchy.childElementCount > 0) {
+      // console.log(e.target.parentElement.previousElementSibling);
+      let lastCard = h.querySelector('div[data-id]:last-child');
+      let table = h.querySelector('div[data-id]:last-child .table');
+      if (lastCard.previousElementSibling && e.target.classList.contains('card')) {
+        table = lastCard.previousElementSibling.querySelector('.table');
+      }
+      app.letsdraw = {
+        x: table.offsetLeft + table.offsetWidth,
+        y: table.offsetTop + (table.offsetHeight / 2)
+      }
+      // console.log(app.letsdraw);
+      // app.line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + e.offsetX + ' ' + e.offsetY);
+    }
   }
 
-  app.handlerDragLeave = (e) => {
+  app.handlerDragLeaveH = (e) => {
     e.preventDefault();
     e.target.classList.remove('dropping');
   }
 
-  app.handlerDragEnd = async (e) => {
+  app.handlerDragLeaveCard = (e) => {
+    e.preventDefault();
+    // app.l.remove();
+  }
+
+  app.handlerDragEndH = async (e) => {
     e.preventDefault();
     // faccio il DESCRIBE della tabella
     // controllo lo stato di dropEffect per verificare se il drop è stato completato correttamente, come descritto qui:https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#drag_end
@@ -174,7 +210,7 @@ var App = new Application();
     }
   }
 
-  app.handlerDropSVG = (e) => {
+  app.handlerDropH = (e) => {
     // TODO: ottimizzare
     e.preventDefault();
     e.target.classList.replace('dropping', 'dropped');
@@ -184,45 +220,50 @@ var App = new Application();
     const liElement = document.getElementById(data);
     console.log(liElement);
     liElement.classList.remove('dragging');
-    // aggiungo la card al #h
-    const h = document.getElementById('h');
-    // const lastCardStruct = h.querySelector('div:last-child');
     const content = app.tmplCard.content.cloneNode(true);
-    const card = content.querySelector('div');
-    // imposto il nome della tabella draggata
-    const span = card.querySelector('span');
-    span.innerHTML = liElement.dataset.label;
-    card.querySelector('.card-area').dataset.label = liElement.dataset.label;
-    card.querySelector('.card-area').dataset.schema = liElement.dataset.schema;
-    h.appendChild(card);
-    if (app.l) {
-      app.l.setAttribute('stroke', 'orange');
-      app.l.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + span.offsetParent.offsetLeft + ' ' + (span.offsetParent.offsetTop + (span.offsetParent.offsetHeight / 2)));
+    let span;
+    let card;
+    if (e.target.classList.contains('card')) {
+      // sto aggiungendo la tabella alla card (non alla hierarchy)
+      card = content.querySelector('.card-area');
+      span = card.querySelector('span');
+      span.innerHTML = liElement.dataset.label;
+      card.dataset.label = liElement.dataset.label;
+      card.dataset.schema = liElement.dataset.schema;
+      e.target.appendChild(card);
+    } else {
+      card = content.querySelector("div[data-id='card-struct']");
+      // imposto il nome della tabella draggata
+      span = card.querySelector('span');
+      span.innerHTML = liElement.dataset.label;
+      card.querySelector('.card-area').dataset.label = liElement.dataset.label;
+      card.querySelector('.card-area').dataset.schema = liElement.dataset.schema;
+      app.hierarchy.appendChild(card);
+      // TODO : da ottimizzare con mutationObserve
+      card.addEventListener('dragenter', app.handlerDragEnterCard, true);
+      card.addEventListener('dragover', app.handlerDragOverCard, true);
+      card.addEventListener('dragleave', app.handlerDragLeaveCard, true);
+      card.addEventListener('drop', app.handlerDropCard, true);
+      card.addEventListener('dragend', app.handlerDragEndCard, true);
     }
-
-    return;
-    app.setCardAttributes(card);
-    // imposto il numero in .hierarchy-order, ordine gerarchico, in base alle tabelle già aggiunte alla dropzone e aggiungo la card alla dropZone
-    app.checkHierarchyNumber(card);
-
-    // imposto la card draggata nella posizione dove si trova il mouse
-    card.style.transform = 'translate(' + e.offsetX + 'px, ' + e.offsetY + 'px)';
-    card.setAttribute('x', e.offsetX);
-    card.setAttribute('y', e.offsetY);
-
-    // imposto la input search, con questo attributo, l'evento input viene gestito in Application.js
-    card.querySelector('input').dataset.elementSearch = card.dataset.label;
-    Hier.activeCard = card.id;
-
-    document.getElementById('tableSearch').focus();
-    document.getElementById('tableSearch').select();
+    span.dataset.level = app.hierarchy.childElementCount;
+    if (app.l) {
+      span.dataset.lineId = app.l.dataset.id;
+      app.l.dataset.level = app.hierarchy.childElementCount;
+      // let span = card.querySelector('span');
+      app.hierarchy.querySelectorAll("span[data-level='" + app.hierarchy.childElementCount + "']").forEach(span => {
+        const line = app.svg.querySelector("path[data-level='" + app.hierarchy.childElementCount + "'][data-id='" + span.dataset.lineId + "']");
+        line.setAttribute('stroke', 'orange');
+        line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + span.offsetParent.offsetLeft + ' ' + (span.offsetParent.offsetTop + (span.offsetParent.offsetHeight / 2)));
+      });
+    }
   }
 
-  app.svg.addEventListener('dragover', app.handlerDragOver, false);
-  app.svg.addEventListener('dragenter', app.handlerDragEnter, false);
-  app.svg.addEventListener('dragleave', app.handlerDragLeave, false);
-  app.svg.addEventListener('drop', app.handlerDropSVG, false);
-  app.svg.addEventListener('dragend', app.handlerDragEnd, false);
+  app.hierarchy.addEventListener('dragover', app.handlerDragOverH, true);
+  app.hierarchy.addEventListener('dragenter', app.handlerDragEnterH, true);
+  app.hierarchy.addEventListener('dragleave', app.handlerDragLeaveH, true);
+  app.hierarchy.addEventListener('drop', app.handlerDropH, true);
+  app.hierarchy.addEventListener('dragend', app.handlerDragEndH, true);
   /* end drag events */
 
   // selezione schema/i 

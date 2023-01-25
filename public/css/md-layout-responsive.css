@@ -235,11 +235,11 @@ span.markContent {
   display: grid;
   grid-auto-flow: column;
   grid-template-columns: repeat(auto-fit, 250px);
-  grid-gap: 1em;
+  /* grid-gap: 1em; */
+  z-index: 1;
   min-height: auto;
   padding: 0em 2em;
   position: relative;
-  z-index: 1;
 }
 
 #canvas-area .card{
@@ -264,7 +264,6 @@ svg{
   height: 100%;
   position: absolute;
   background-color: #3b629540;
-  z-index: 2;
 }
 
 span[data-path-svg-start] {
@@ -316,11 +315,11 @@ span[data-path-svg-start] {
   transition: left .5s ;
 }
 
-svg.dropzone{
+svg.dropzone, #h.dropzone{
   border: solid 2px transparent;
 }
 
-svg.dropping{
+svg.dropping, #h.dropping{
   border: solid 2px orange;
 }
 
