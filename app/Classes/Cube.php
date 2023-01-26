@@ -3,6 +3,7 @@
 namespace App\Classes;
 
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class Cube
 {
@@ -503,7 +504,7 @@ class Cube
       // _metrics_advanced_datamart : "\n{$metric->aggregateFn}($tableName.'{$metric->alias}') AS '{$metric->alias}'"
       // sono presenti metriche filtrate
       $comment = "/*Creazione DATAMART :\ndecisyon_cache.{$this->datamartName}\n*/\n";
-      $sql = "{$comment}CREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS ";
+      $sql = "{$comment}CREATE TABLE ecisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS ";
       $sql .= "\n(SELECT{$this->_fieldsSQL}";
       $leftJoin = null;
 

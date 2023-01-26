@@ -8,6 +8,7 @@ use App\Models\BIdimension;
 use App\Models\BIprocess;
 use Illuminate\Support\Facades\DB;
 use App\Classes\Cube;
+use Exception;
 
 class MapDatabaseController extends Controller
 {
@@ -380,7 +381,13 @@ class MapDatabaseController extends Controller
       }
       // echo 'elaborazione createDatamart';
       // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-      $datamartName = $q->createDatamart(null);
+      try {
+        $datamartName = $q->createDatamart(null);
+        echo $datamartName;
+        //write your codes here
+      } catch (Exception $e) {
+        return 'ERRORE ESECUZIONE : ' . $e->getMessage();
+      }
       // var_dump($datamartName);
       // if ($datamartName) return "Datamart ({$datamartName}) per il report {$reportName} creato con successo!\n";
       if ($datamartName) return "OK\n";
