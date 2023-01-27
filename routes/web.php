@@ -61,6 +61,10 @@ Route::get('/fetch_api/schema/{schema}/table/{table}/field/{field}/distinct_valu
 Route::post('/fetch_api/cube/process', [MapDatabaseController::class, 'process'])->name('web_bi.fetch_api.process'); // processo la query che crea la FX
 Route::post('/fetch_api/cube/sqlInfo', [MapDatabaseController::class, 'sqlInfo'])->name('web_bi.fetch_api.sqlInfo'); // restituisco SQL del process
 
+Route::get('/500', function () {
+  return view('errors.500');
+});
+
 // creazione dimensione time
 // Route::post('/fetch_api/dimension/time', [MapDatabaseController::class, 'createTimeDimension'])->name('web_bi.fetch_api.time');
 Route::post('/fetch_api/dimension/time', function () {
