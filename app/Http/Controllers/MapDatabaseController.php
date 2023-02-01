@@ -385,30 +385,20 @@ class MapDatabaseController extends Controller
             $q->groupMetricsByFilters->$token = $metrics;
           }
           // dd($q->groupMetricsByFilters);
-          try {
-            $q->createMetricDatamarts(null);
-          } catch (Exception $e) {
-            return "ERRORE ESECUZIONE : " . $e->getMessage() . "\n";
-          }
+          $q->createMetricDatamarts(null);
         }
         // echo 'elaborazione createDatamart';
         // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-        try {
-          $datamartName = $q->createDatamart(null);
-          // echo $datamartName;
-          // var_dump($datamartName);
-          // if ($datamartName) return "Datamart ({$datamartName}) per il report {$reportName} creato con successo!\n";
-          if ($datamartName) return "OK\n";
-        } catch (Exception $e) {
-          // return "ERRORE ESECUZIONE : " . $e->getMessage() . "\n";
-          $msg = $e->getMessage();
-          abort(500, "ERRORE ESECUZIONE QUERY : $msg");
-        }
+        $datamartName = $q->createDatamart(null);
+        // echo $datamartName;
+        // var_dump($datamartName);
+        // if ($datamartName) return "Datamart ({$datamartName}) per il report {$reportName} creato con successo!\n";
+        if ($datamartName) return "OK\n";
       }
     } catch (Exception $e) {
       $msg = $e->getMessage();
-      // return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
-      abort(500, "ERRORE ESECUZIONE QUERY : $msg");
+      return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
+      // abort(500, "ERRORE ESECUZIONE QUERY : $msg");
     }
     // dd($baseTable);
   }
