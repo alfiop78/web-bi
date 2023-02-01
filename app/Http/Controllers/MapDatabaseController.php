@@ -214,8 +214,10 @@ class MapDatabaseController extends Controller
       }
     } catch (Exception $e) {
       $msg = $e->getMessage();
-      return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
+      // return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
+      // header($_SERVER["SERVER_PROTOCOL"] . ' 500 Internal Server Error', true, 500);
       // return abort(500, "ERRORE ESECUZIONE QUERY : $msg");
+      abort(500, "ERRORE ESECUZIONE QUERY : $msg");
     }
   }
 
@@ -398,13 +400,15 @@ class MapDatabaseController extends Controller
           // if ($datamartName) return "Datamart ({$datamartName}) per il report {$reportName} creato con successo!\n";
           if ($datamartName) return "OK\n";
         } catch (Exception $e) {
-          return "ERRORE ESECUZIONE : " . $e->getMessage() . "\n";
+          // return "ERRORE ESECUZIONE : " . $e->getMessage() . "\n";
+          $msg = $e->getMessage();
+          abort(500, "ERRORE ESECUZIONE QUERY : $msg");
         }
       }
     } catch (Exception $e) {
       $msg = $e->getMessage();
-      // return abort(500, "ERRORE ESECUZIONE QUERY : $msg");
-      return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
+      // return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
+      abort(500, "ERRORE ESECUZIONE QUERY : $msg");
     }
     // dd($baseTable);
   }
