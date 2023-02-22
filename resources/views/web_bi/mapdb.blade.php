@@ -6,42 +6,28 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
   <link rel="icon" href="/favicon.png" type="image/png" />
   <title>mapping - new</title>
-  <link rel="stylesheet" href="{{ asset('/css/md-dialog-responsive.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-icons.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-input-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-mapdb.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
   <script src="{{ asset('/js/Storage.js') }}"></script>
   <script src="{{ asset('/js/Cube.js') }}"></script>
+  <script src="{{ asset('/js/DrawSVG.js') }}"></script>
 </head>
 
 <body class="antialiased">
 
   <template id="tmpl-li">
-    <li data-element-search data-label data-searchable="true"></li>
-    <li data-element-search data-label data-searchable="true" draggable="true"></li>
-  </template>
-
-  <template id="tmpl-hierarchies">
-    <div class="hierarchy" data-translate-x="0">
-      <div class="card-table" data-translate-x="0">area</div>
-    </div>
-  </template>
-
-  <template id="tmpl-card">
-    <div data-id="card-struct">
-      <section class="card dropzone" data-id="1">
-        <div class="card-area" data-translate-x="0">
-          <div class="table dropzone">
-            <span></span>
-          </div>
-        </div>
-      </section>
-    </div>
+    <li data-element-search data-label data-searchable="true" draggable="true">
+      <i class="material-icons-round md-18">drag_handle</i>
+      <span></span>
+    </li>
   </template>
 
   <main>
@@ -76,24 +62,48 @@
     <div id="container">
       <div id="content">
         <div id="body">
+          <div id="window-join" data-x="0" data-y="0" data-open="false">
+            <section class="wj-content">
+              <section class="wj-title">
+                <p class="title">Creazione relazione tra <span data-table-from="" data-schema></span>&nbsp;e&nbsp;<span data-table-to data-schema></span></p>
+                <button type="button" data-fn="closeWindowJoin" class="material-icons-round md-18">close</button>
+              </section>
+              <div class="responsive-content">
+                <section data-table-from>
+                  <input list="list-from" id="from-fields" name="from-fields-name">
+
+                  <datalist id="list-from">
+                    <option value="Chocolate" label="test">
+                    <option value="Coconut">
+                    <option value="Mint">
+                    <option value="Strawberry">
+                    <option value="Vanilla">
+                  </datalist>
+                </section>
+                <section data-table-to>
+                  <input list="list-to" id="to-fields" name="to-fields-name">
+
+                  <datalist id="list-to">
+                    <option value="Chocolate">
+                    <option value="Coconut">
+                    <option value="Mint">
+                    <option value="Strawberry">
+                    <option value="Vanilla">
+                  </datalist>
+                </section>
+              </div>
+            </section>
+          </div>
 
           <section class="wrapper">
-            <section>
-              <h3>Creazione nuova dimensione</h3>
-              <section>
-                <!--<div class="md-field">
-                  <input type="text" data-id="input-hierarchy-name" autocomplete="off" />
-                  <label for="input-hierarchy-name" class="">Nome gerarchia</label>
-                </div>-->
-              </section>
-
-            </section>
             <section id="canvas-area">
-              <div id="translate" class="translate" data-translate-x="0">
-                <!--<canvas id="canvas-1"></canvas>-->
-                <div class="hierarchy dropzone" id="h"></div>
-                <svg id="svg" class="dropzone"></svg>
-
+              <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
+                <svg id="svg" class="dropzone" data-level="0">
+                  <defs>
+                    <image id="backspace" href="{{ asset('/images/backspace.svg') }}" width="18" height="18"></image>
+                  </defs>
+                </svg>
+                <span id="coords"></span>
               </div>
             </section>
             <section id="tables-area">

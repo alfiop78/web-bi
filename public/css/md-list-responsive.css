@@ -19,10 +19,16 @@ li{
   list-style: none;
   line-height: 1.7rem;
   position: relative;
-  /* display: flex; */
-  /* align-items: center; */
+  display: flex;
+  margin: 0px 1em;
+  align-items: center;
   padding: 0px 1rem;
 }
+
+/* ul > li:hover{
+  cursor: pointer;
+  background-color: salmon;
+} */
 
 section.data-item{position: relative;}
 

@@ -1,0 +1,241 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@100;200;400;600&display=swap');
+@import url("https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp&display=swap");
+* {box-sizing: border-box; font-family: 'Barlow'; font-size: .9rem;}
+
+.material-icons-round.md-18{
+  font-size: 18px;
+}
+
+html, body{
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+main{
+  display: flex;
+  width: 100%;
+  height: 100%;
+  padding-top: 64px;
+  transition: padding 350ms;
+}
+
+main > #container{
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  position: relative;
+  background: var(--main-bg-color);
+}
+
+#content{
+  display: block;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* padding-top: 32px; */
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--main-bg-color);
+  transition: all 500ms;
+}
+
+#content > #body{
+  font-size: .9rem;
+  margin: 0 auto;
+  margin-bottom: 64px;
+  color: #3f3f40;
+  padding: 1em 1em 0em;
+  height: calc(100% - 64px);
+}
+
+.wrapper{
+  display: grid;
+  /* grid-template-rows: 2fr 0.75fr; */
+  grid-template-rows: 65% 35%;
+  background-color: white;
+  height: 100%;
+}
+
+#canvas-area{
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-auto-flow: row;
+  align-items: start;
+  border-bottom: solid thick gainsboro;
+  /* background-color: gainsboro; */
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  /* background-color: #3b629540; */
+  border: solid thin transparent;
+  z-index: 1;
+}
+
+svg.dropzone.dropping{
+  border: solid thin orangered;
+  z-index: 3
+}
+
+.translate{
+  height: 100%;
+  /* background-color: navajowhite; */
+  display: grid;
+  grid-template-rows: 100%;
+  /* grid-template-rows: repeat(auto-fit, 108px); */
+  grid-auto-flow: row;
+  transition: transform 100ms;
+  position: relative;
+}
+
+ul{
+  width: 250px;
+}
+
+/* ul > li{
+  display: flex;
+  margin: .5em;
+  font-size: 1rem;
+  list-style: none;
+} */
+
+/* ul > li:hover{
+  cursor: pointer;
+  background-color: salmon;
+} */
+
+.card-area{
+  width: 100%;
+  height: 100px;
+  /* background-color: lime; */
+  padding: 1em;
+  /* position: absolute; */
+  display: flex;
+  left: 0px;
+  top: 0px;
+  justify-content: center;
+  justify-self: center;
+  align-items: center;
+  transition: top 1s;
+}
+
+.card-area[data-transform] {
+  transform: translateY(50px);
+}
+
+path{
+  fill: transparent;
+  stroke: darkgray;
+  /* stroke-width: 3.5; */
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+path:hover{
+  cursor: pointer;
+  fill: transparent;
+  stroke: brown;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+/* g.table{
+  transition: fill 250ms;
+} */
+
+g.table:hover {
+  cursor: pointer;
+}
+
+g.table > rect{
+  fill: gainsboro;
+  stroke: #494949;
+  stroke-width: 0.2;
+  width: 170px;
+  height: 30px;
+  rx: 2;
+  transition: fill 300ms;
+}
+
+g.table text{
+  fill: #494949;
+  font: 0.85rem Barlow;
+}
+
+g.table:hover rect{
+  fill: lightslategray;
+  stroke: #e2e2e2;
+  stroke-width: 0.4;
+}
+
+g.table:hover text{
+  fill: white;
+}
+
+#coords{
+  position: absolute;
+  background-color: #494949;
+  color: white;
+  bottom: 0px;
+}
+
+
+#window-join[data-open="false"]{
+  position: absolute;
+  visibility: hidden;
+}
+
+#window-join[data-open="true"]{
+  visibility: visible;
+  background-color: gainsboro;
+  z-index: 300;
+  padding: 1em;
+  box-shadow: 0px 2px 5px 0px grey;
+  position: absolute;
+  top: 200px;
+  left: 350px;
+  width: 500px;
+  height: 400px;
+}
+
+.wj-content{
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.wj-title > p{
+  margin: 0px;
+  padding: 1em;
+}
+
+.wj-title > p.title{
+  background-color: tan;
+}
+
+.wj-title > p.title:hover{
+  background-color: sienna;
+  color: white;
+  cursor: move;
+}
+
+.wj-title > button{
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+
+
+.responsive-content{
+  display: flex;
+  flex-flow: wrap;
+  justify-content: space-evenly;
+}

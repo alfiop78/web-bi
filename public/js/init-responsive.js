@@ -1,4 +1,5 @@
 var App = new Application();
+var Draw = new DrawSVG('svg');
 // var StorageCube = new CubeStorage();
 // var StorageDimension = new DimensionStorage();
 // var Cube = new Cubes();
@@ -16,50 +17,14 @@ var App = new Application();
     btnSelectSchema: document.getElementById('btn-select-schema'),
     // body
     body: document.getElementById('body'),
-    canvasArea: document.getElementById('canvas-area'),
     translate: document.getElementById('translate'),
-    svg: document.getElementById('svg'),
-    hierarchy: document.getElementById('h')
-
+    coordsRef: document.getElementById('coords'),
+    windowJoin: document.getElementById('window-join'),
+    wjTitle: document.querySelector('#window-join .wj-title')
   }
 
   App.init();
 
-  /* const canvas1 = document.getElementById('canvas-1');
-  canvas1.width = app.translate.offsetWidth;
-  canvas1.height = app.translate.offsetHeight;
-  var canvasOffsetTop = canvas1.offsetTop;
-  var canvasOffsetLeft = canvas1.offsetLeft;
-  // const canvas2 = document.getElementById('canvas-2');
-  const ctx1 = canvas1.getContext('2d'); */
-  // const ctx2 = canvas2.getContext('2d');
-  /* ctx1.lineWidth = 2.5;
-  ctx1.strokeStyle = "orangered";
-  ctx1.beginPath(); // Start a new path
-  ctx1.moveTo(0, 54); // Move the pen to (0, 50)
-  ctx1.lineTo(200, 54); // Draw a line to (200, 50)
-  ctx1.stroke(); // Render the path
-
-  ctx1.beginPath(); // Start a new path
-  ctx1.moveTo(100, 54); // Move the pen to (30, 50)
-  ctx1.lineTo(100, 200); // Draw a line to (150, 100)
-  ctx1.stroke(); // Render the path */
-
-  /* ctx2.lineWidth = 2.5;
-  ctx2.strokeStyle = "orangered";
-  ctx2.beginPath(); // Start a new path
-  ctx2.moveTo(100, 54); // Move the pen to (30, 50)
-  ctx2.lineTo(200, 54); // Draw a line to (150, 100)
-  ctx2.stroke(); // Render the path
-
-  ctx2.beginPath(); // Start a new path
-  ctx2.moveTo(100, 54); // Move the pen to (30, 50)
-  ctx2.lineTo(100, 0); // Draw a line to (150, 100)
-  ctx2.stroke(); // Render the path */
-
-  // Callback function to execute when mutations are observed
-  // const targetNode = document.querySelectorAll('ul');
-  // console.log(targetNode);
   const config = { attributes: true, childList: true, subtree: true };
 
   const callback = (mutationList, observer) => {
@@ -73,12 +38,18 @@ var App = new Application();
             if (node.hasAttribute('data-fn')) node.addEventListener('click', app[node.dataset.fn]);
             if (node.hasChildNodes()) {
               node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+              node.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
+              node.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
             }
           }
         });
       } else if (mutation.type === 'attributes') {
         // console.log(`The ${mutation.attributeName} attribute was modified.`);
-        if (mutation.target.hasChildNodes()) mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+        if (mutation.target.hasChildNodes()) {
+          mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+          mutation.target.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
+          mutation.target.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
+        }
       }
     }
   };
@@ -86,11 +57,10 @@ var App = new Application();
   const observerList = new MutationObserver(callback);
   // Start observing the target node for configured mutations
   // observerList.observe(targetNode, config);
-  // observerList.observe(document.getElementById('body'), config);
-  document.querySelectorAll('dialog').forEach(dialog => observerList.observe(dialog, config));
-  observerList.observe(app.body, config);
+  observerList.observe(document.getElementById('body'), config);
+  // observerList.observe(Draw.svg, config);
 
-  /* drag events */
+  /* NOTE: DRAG&DROP EVENTS */
 
   app.handlerDragStart = (e) => {
     console.log('e.target : ', e.target.id);
@@ -99,179 +69,215 @@ var App = new Application();
     // console.log(app.dragElementPosition);
     e.dataTransfer.setData('text/plain', e.target.id);
     // creo la linea
-    if (app.hierarchy.childElementCount > 0) {
-      app.l = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      app.l.dataset.id = app.svg.childElementCount;
-      app.l.setAttribute('fill', 'transparent');
-      app.l.setAttribute('stroke', 'red');
-      app.l.setAttribute('stroke-linecap', 'round');
-      app.l.setAttribute('stroke-width', 3);
-      app.svg.appendChild(app.l);
-      app.letsdraw = {
-        x: 0,
-        y: 0
-      }
+    if (Draw.svg.querySelectorAll('.table').length > 0) {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      line.id = `line-${Draw.svg.querySelectorAll('g.table').length}`;
+      line.dataset.id = Draw.svg.querySelectorAll('g.table').length;
+      Draw.svg.appendChild(line);
+      Draw.currentLineRef = line.id;
     }
-    // e.dataTransfer.setData('application/x-moz-node', e.target.innerHTML);
-    /* const span = document.createElement('span');
-    span.innerText = e.target.dataset.label;
-    span.style.backgroundColor = '#494949';
-    span.style.color = 'white';
-    e.target.appendChild(span);
-    e.dataTransfer.setDragImage(span, 10, 10); */
-    console.log(e.dataTransfer);
+    // console.log(e.dataTransfer);
     e.dataTransfer.effectAllowed = "copy";
   }
 
-  app.handlerDragOverH = (e) => {
+  app.handlerDragOver = (e) => {
     e.preventDefault();
-    // console.log('dragOver:', e.target);
-    if (e.target.classList.contains('dropzone')) {
+    if (e.currentTarget.classList.contains('dropzone')) {
       e.dataTransfer.dropEffect = "copy";
-      // console.log(e.currentTarget, e.target);
-      // recupero l'offsetLeft della card a sinistra del mouse
-      let lastCard = h.querySelector('div[data-id]:last-child');
-      // console.log(lastCard);
-      // console.log(e.target);
-      if (app.l) app.l.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + (e.offsetX + e.target.offsetLeft - app.dragElementPosition.x - 10) + ' ' + (e.offsetY - app.dragElementPosition.y + 13.5));
+      app.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
+      if (Draw.svg.querySelectorAll('.table').length > 0) {
+        // TODO: da commentare
+        let nearestTable = [...Draw.svg.querySelectorAll('g.table')].reduce((prev, current) => {
+          return (Math.hypot(e.offsetX - (+current.dataset.x + 180), e.offsetY - (+current.dataset.y + 15)) < Math.hypot(e.offsetX - (+prev.dataset.x + 180), e.offsetY - (+prev.dataset.y + 15))) ? current : prev;
+        });
+        console.log(nearestTable.id);
+        const rectBounding = nearestTable.getBoundingClientRect();
+        Draw.tableJoin = {
+          table: nearestTable,
+          x: +nearestTable.dataset.x + rectBounding.width + 10,
+          y: +nearestTable.dataset.y + (rectBounding.height / 2),
+          joins: +nearestTable.dataset.joins,
+          levelId: +nearestTable.dataset.levelId
+        }
+        // console.log('joinTable :', Draw.tableJoin);
+        // console.log('tableJoin :', Draw.tableJoin.table.id);
+        if (Draw.currentLineRef && Draw.tableJoin) {
+          Draw.joinLines = {
+            id: Draw.currentLineRef.id, properties: {
+              id: Draw.currentLineRef.dataset.id,
+              key: Draw.currentLineRef.id,
+              from: Draw.tableJoin.table.id,
+              to: { x: (e.offsetX - app.dragElementPosition.x - 10), y: (e.offsetY - app.dragElementPosition.y + 17.5) } // in questo caso non c'è l'id della tabella perchè questa deve essere ancora droppata, metto le coordinate e.offsetX, e.offsetY
+            }
+          };
+          Draw.currentLine = Draw.joinLines.get(Draw.currentLineRef.id);
+        }
+        Draw.drawLine();
+      }
     } else {
       e.dataTransfer.dropEffect = "none";
     }
   }
 
-  app.handlerDragEnterCard = (e) => {
-    // console.log('dragEnter Card');
-    // console.log(e.target, e.currentTarget);
-    /* if (app.l.dataset.id !== app.svg.childElementCount) {
-      app.l = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      app.l.dataset.id = app.svg.childElementCount;
-      app.l.setAttribute('fill', 'transparent');
-      app.l.setAttribute('stroke', 'blue');
-      app.l.setAttribute('stroke-linecap', 'round');
-      app.l.setAttribute('stroke-width', 4);
-      app.svg.appendChild(app.l);
-      app.letsdraw = {
-        x: e.target.offsetLeft + e.target.offsetWidth,
-        y: e.target.offsetTop + (e.target.offsetHeight / 2)
-      }
-    } */
-  }
-
-  app.handlerDragEnterH = (e) => {
-    console.log('handlerDragEnter :', e.target);
+  app.handlerDragEnter = (e) => {
     e.preventDefault();
-    if (e.target.classList.contains('dropzone')) {
+    if (e.currentTarget.classList.contains('dropzone')) {
       console.info('DROPZONE');
+      // console.log(e.currentTarget, e.target);
+      if (e.target.nodeName === 'rect') Draw.currentLevel = +e.target.dataset.levelId;
+      // Draw.currentLevel = e.targe
       // e.dataTransfer.dropEffect = "copy";
       // coloro il border differente per la dropzone
-      e.target.classList.add('dropping');
-      if (app.hierarchy.childElementCount > 0) {
-        let table, cardStruct;
-        if (e.target.classList.contains('card')) {
-          cardStruct = e.target.parentElement;
-          table = cardStruct.querySelector('.table');
-          if (cardStruct.previousElementSibling) {
-            table = cardStruct.previousElementSibling.querySelector('.table');
-          }
-        } else {
-          cardStruct = h.querySelector('div[data-id]:last-child');
-          table = h.querySelector('div[data-id]:last-child .table');
-          if (cardStruct.previousElementSibling && e.target.classList.contains('card')) {
-            table = cardStruct.previousElementSibling.querySelector('.table');
-          }
-        }
-        app.letsdraw = {
-          x: table.offsetLeft + table.offsetWidth,
-          y: table.offsetTop + (table.offsetHeight / 2)
-        }
-        // console.log(app.letsdraw);
-        // app.line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + e.offsetX + ' ' + e.offsetY);
-      }
+      e.currentTarget.classList.add('dropping');
     } else {
       console.warn('non in dropzone');
       // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
-      // e.dataTransfer.dropEffect = "none";
+      e.dataTransfer.dropEffect = "none";
     }
   }
 
-  app.handlerDragLeaveH = (e) => {
+  app.handlerDragLeave = (e) => {
     e.preventDefault();
-    e.target.classList.remove('dropping');
+    e.currentTarget.classList.remove('dropping');
   }
 
-  app.handlerDragLeaveCard = (e) => {
+  app.handlerDragEnd = async (e) => {
     e.preventDefault();
-    // app.l.remove();
-  }
-
-  app.handlerDragEndH = async (e) => {
-    e.preventDefault();
-    // faccio il DESCRIBE della tabella
-    // controllo lo stato di dropEffect per verificare se il drop è stato completato correttamente, come descritto qui:https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#drag_end
-    // in app.getTable() vengono utilizzate le property della classe Cube (cube.card.schema, cube.card.tableName);
     if (e.dataTransfer.dropEffect === 'copy') {
-      // imposto prima la <ul> altrimenti si verifica il bug riportato nella issue#50
-      const ul = Hier.activeCard.querySelector("ul[data-id='columns']");
       const data = await app.getTable();
-      // app.addFields(ul, data);
+      app.addFields(ul, data);
     }
   }
 
-  app.handlerDropH = (e) => {
-    // TODO: ottimizzare
+  app.handlerDrop = (e) => {
     e.preventDefault();
-    e.target.classList.replace('dropping', 'dropped');
-    if (!e.target.classList.contains('dropzone')) return;
-    const data = e.dataTransfer.getData('text/plain');
-    console.log(data);
-    const liElement = document.getElementById(data);
-    console.log(liElement);
+    // console.clear();
+    e.currentTarget.classList.replace('dropping', 'dropped');
+    if (!e.currentTarget.classList.contains('dropzone')) return;
+    // const elementId = e.dataTransfer.getData('text/plain');
+    const liElement = document.getElementById(e.dataTransfer.getData('text/plain'));
     liElement.classList.remove('dragging');
-    const content = app.tmplCard.content.cloneNode(true);
-    let span;
-    let card;
-    if (e.target.classList.contains('card')) {
-      // sto aggiungendo la tabella alla card (non alla hierarchy)
-      card = content.querySelector('.card-area');
-      span = card.querySelector('span');
-      span.innerHTML = liElement.dataset.label;
-      card.dataset.label = liElement.dataset.label;
-      card.dataset.schema = liElement.dataset.schema;
-      e.target.appendChild(card);
+    const tableId = Draw.svg.querySelectorAll('g.table').length;
+    // let coords = { x: e.offsetX - app.dragElementPosition.x, y: e.offsetY - app.dragElementPosition.y }
+    let coords;
+    // se non è presente una tableJoin significa che sto aggiungendo la prima tabella
+    if (!Draw.tableJoin) {
+      coords = { x: 40, y: 60 };
+      Draw.tables = {
+        id: `svg-data-${tableId}`, properties: {
+          id: tableId,
+          key: `svg-data-${tableId}`,
+          x: coords.x,
+          y: coords.y,
+          line: {
+            from: { x: coords.x + 180, y: coords.y + 15 },
+            to: { x: coords.x - 10, y: coords.y + 15 }
+          },
+          table: liElement.dataset.label,
+          schema: liElement.dataset.schema,
+          join: null,
+          joins: 0,
+          levelId: 0
+        }
+      };
     } else {
-      card = content.querySelector("div[data-id='card-struct']");
-      // imposto il nome della tabella draggata
-      span = card.querySelector('span');
-      span.innerHTML = liElement.dataset.label;
-      card.querySelector('.card-area').dataset.label = liElement.dataset.label;
-      card.querySelector('.card-area').dataset.schema = liElement.dataset.schema;
-      app.hierarchy.appendChild(card);
-      // TODO : da ottimizzare con mutationObserve
-      card.addEventListener('dragenter', app.handlerDragEnterCard, true);
-      card.addEventListener('dragover', app.handlerDragOverCard, true);
-      card.addEventListener('dragleave', app.handlerDragLeaveCard, true);
-      card.addEventListener('drop', app.handlerDropCard, true);
-      card.addEventListener('dragend', app.handlerDragEndCard, true);
-    }
-    span.dataset.level = app.hierarchy.childElementCount;
-    if (app.l) {
-      span.dataset.lineId = app.l.dataset.id;
-      app.l.dataset.level = app.hierarchy.childElementCount;
-      // let span = card.querySelector('span');
-      app.hierarchy.querySelectorAll("span[data-level='" + app.hierarchy.childElementCount + "']").forEach(span => {
-        const line = app.svg.querySelector("path[data-level='" + app.hierarchy.childElementCount + "'][data-id='" + span.dataset.lineId + "']");
-        line.setAttribute('stroke', 'orange');
-        line.setAttribute('d', 'M ' + app.letsdraw.x + ' ' + app.letsdraw.y + ' L ' + span.offsetParent.offsetLeft + ' ' + (span.offsetParent.offsetTop + (span.offsetParent.offsetHeight / 2)));
+      // è presente una tableJoin
+      // imposto data.joins anche sull'elemento SVG
+      Draw.svg.querySelector(`g.table[id="${Draw.tableJoin.table.id}"]`).dataset.joins = ++Draw.tableJoin.joins;
+      // ... lo imposto anche nell'oggetto Map() tables
+      Draw.tables.get(Draw.tableJoin.table.id).joins = Draw.tableJoin.joins;
+      // livello che sto aggiungendo
+      const levelId = Draw.tableJoin.levelId + 1;
+      // creo un array dei livelli, ordinato in reverse per poter fare un ciclo dal penultimo livello fino al primo ed effettuare il posizionamento automatico
+      if (!Draw.arrayLevels.includes(Draw.tableJoin.levelId)) Draw.arrayLevels.splice(0, 0, Draw.tableJoin.levelId);
+      // if (!Draw.arrayLevels.includes(levelId)) Draw.arrayLevels.splice(0, 0, levelId);
+      Draw.svg.dataset.level = (Draw.svg.dataset.level < levelId) ? levelId : Draw.svg.dataset.level;
+      // quante tabelle ci sono per il livello corrente che appartengono alla stessa tableJoin
+      const tableRelated = Draw.svg.querySelectorAll(`g.table[data-level-id='${levelId}'][data-table-join='${Draw.tableJoin.table.id}']`);
+      const tableInLevel = tableRelated.length;
+      let lastTableInLevel;
+      // recupero la posizione dell'ultima tabella appartenete al livello corrente e legata alla stessa tableJoin
+      tableRelated.forEach(table => {
+        if (lastTableInLevel) {
+          if (+lastTableInLevel.dataset.y < +table.dataset.y) lastTableInLevel = table;
+        } else {
+          lastTableInLevel = table;
+        }
       });
+      let coords = { x: +Draw.tableJoin.table.dataset.x + 275, y: +Draw.tableJoin.table.dataset.y };
+      // tabella aggiunta per questo livello, la imposto nella stessa y di tableJoin
+      if (lastTableInLevel) {
+        // sono presenti altre tabelle per questo livello
+        // recupero la posizione dell'ultima tabella relativa a questa join, aggiungo la tabella corrente a +60y dopo l'ultima tabella trovata
+        // lastTableInLevel è ricavata da tableRelated (tabelle con tableJoin uguale a quella che sto droppando)
+        coords.y = +lastTableInLevel.dataset.y + 60;
+        // recupero altre tabelle presenti in questo livello > coords.y per spostarle 60 y più in basso
+        Draw.arrayLevels.forEach(levelId => {
+          // incremento il levelId perchè, in questo caso (a differenza di joinTablePositioning()) devo iniziare dall'ultimo levelId
+          levelId++;
+          // per ogni livello, partendo dall'ultimo
+          console.log(levelId);
+          // se sono presenti, in questo livello, tabelle con y > di quella che sto droppando le devo spostare y+60
+          Draw.svg.querySelectorAll(`g.table[data-level-id='${levelId}']`).forEach(table => {
+            // console.log(`Livello ${levelId}`);
+            // console.log(`tabelle ${table.id}`);
+            if (+table.dataset.y >= coords.y) {
+              Draw.tables.get(table.id).y += 60;
+              Draw.tables.get(table.id).line.from.y += 60;
+              Draw.tables.get(table.id).line.to.y += 60;
+              Draw.currentTable = Draw.tables.get(table.id);
+              Draw.autoPosition();
+            }
+          });
+        });
+      }
+      Draw.tables = {
+        id: `svg-data-${tableId}`, properties: {
+          id: tableId,
+          key: `svg-data-${tableId}`,
+          x: coords.x,
+          y: coords.y,
+          line: {
+            from: { x: coords.x + 180, y: coords.y + 15 },
+            to: { x: coords.x - 10, y: coords.y + 15 }
+          },
+          table: liElement.dataset.label,
+          schema: liElement.dataset.schema,
+          joins: 0,
+          join: Draw.tableJoin.table.id,
+          levelId
+        }
+      };
+      // linea di join da tableJoin alla tabella droppata
+      Draw.joinLines = {
+        id: Draw.currentLineRef.id, properties: {
+          id: Draw.currentLineRef.dataset.id,
+          key: Draw.currentLineRef.id,
+          from: Draw.tableJoin.table.id,
+          to: `svg-data-${tableId}`
+        }
+      };
+      console.info('create JOIN');
+      app.openJoinWindow();
     }
+    Draw.currentTable = Draw.tables.get(`svg-data-${tableId}`);
+    // creo nel DOM la tabella appena droppata
+    Draw.drawTable();
+    // posizionamento delle joinTable (tabelle che hanno data-join > 1)
+    Draw.joinTablePositioning();
   }
 
-  app.hierarchy.addEventListener('dragover', app.handlerDragOverH, true);
-  app.hierarchy.addEventListener('dragenter', app.handlerDragEnterH, true);
-  app.hierarchy.addEventListener('dragleave', app.handlerDragLeaveH, true);
-  app.hierarchy.addEventListener('drop', app.handlerDropH, true);
-  app.hierarchy.addEventListener('dragend', app.handlerDragEndH, true);
-  /* end drag events */
+  Draw.svg.addEventListener('mousemove', (e) => {
+    app.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
+  }, true);
+
+  Draw.svg.addEventListener('dragover', app.handlerDragOver, false);
+  Draw.svg.addEventListener('dragenter', app.handlerDragEnter, false);
+  Draw.svg.addEventListener('dragleave', app.handlerDragLeave, false);
+  Draw.svg.addEventListener('drop', app.handlerDrop, false);
+  // drag end event va posizionato sullo stesso elemento che ha il dragStart
+  Draw.svg.addEventListener('dragend', app.handlerDragEnd, true);
+  /* NOTE: END DRAG&DROP EVENTS */
 
   // selezione schema/i 
   app.handlerSchema = async (e) => {
@@ -287,13 +293,15 @@ var App = new Application();
       for (const [key, value] of Object.entries(data)) {
         const content = app.tmplList.content.cloneNode(true);
         const li = content.querySelector('li[draggable]');
+        const span = content.querySelector('span');
         li.dataset.fn = "handlerTable";
         li.dataset.label = value.TABLE_NAME;
+        li.dataset.schema = schema;
         li.dataset.elementSearch = 'tables';
         li.ondragstart = app.handlerDragStart;
+        li.ondragend = app.handlerDragEnd;
         li.id = 'table-' + key;
-        li.dataset.schema = schema;
-        li.innerText = value.TABLE_NAME;
+        span.innerText = value.TABLE_NAME;
         ul.appendChild(li);
       }
       drawer.toggleAttribute('open');
@@ -305,7 +313,7 @@ var App = new Application();
   // app.dialogConnection.showModal();
   /* end page init */
 
-  /*onclick events*/
+  /* NOTE: ONCLICK EVENTS*/
 
   app.btnCreateDimension.onclick = () => {
     app.body.dataset.mode = 'create-dimension';
@@ -325,52 +333,79 @@ var App = new Application();
     document.querySelector('#' + e.currentTarget.dataset.drawerId).toggleAttribute('open');
   }
 
-  app.handlerTest = () => {
-    const c = document.querySelector('div[data-id="card-struct"]');
-    let copy = c.cloneNode(true);
-    const hier = document.getElementById('h');
-    h.appendChild(copy);
+  app.tableSelected = (e) => {
+    console.log(`table selected ${e.currentTarget.dataset.table}`);
   }
-  /* end onclick events*/
 
-  /* mouse events */
-  /* app.svg.onmousedown = (e) => {
-    console.log(e);
-    let card = document.querySelector('.card');
-    app.line = document.getElementById('line-1');
-    console.log(app.line);
-    app.letsdraw = {
-      x: card.offsetLeft + card.offsetWidth,
-      y: 54
+  app.lineSelected = (e) => {
+    // console.log(`line selected ${e.currentTarget.dataset.from} -> ${e.currentTarget.dataset.to}`);
+    Draw.currentLineRef = e.target.id;
+    app.openJoinWindow();
+  }
+
+  app.openJoinWindow = () => {
+    app.windowJoin.dataset.open = 'true';
+    // console.log(Draw.currentLineRef);
+    // console.log(Draw.currentLineRef.id);
+    // console.log(Draw.joinLines.get(Draw.currentLineRef.id));
+    const from = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).from);
+    const to = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).to);
+
+    app.windowJoin.querySelector('span[data-table-from]').innerHTML = from.table;
+    app.windowJoin.querySelector('span[data-table-from]').dataset.schema = from.schema;
+    app.windowJoin.querySelector('span[data-table-to]').innerHTML = to.table;
+    app.windowJoin.querySelector('span[data-table-to]').dataset.schema = to.schema;
+    // TODO: recupero le colonne delle due tabelle da mettere in relazione
+  }
+
+  app.closeWindowJoin = () => {
+    // chiusura windowJoin
+    app.windowJoin.dataset.open = 'false';
+  }
+
+  // rimozione tabella dal draw SVG
+  app.removeTable = (e) => {
+    // tabella in join con e.currentTarget
+    const tableJoin = Draw.tables.get(e.currentTarget.dataset.id).join;
+    const tableJoinRef = Draw.svg.querySelector(`#${tableJoin}`);
+    // se è presente una tabella legata a currentTarget, in join, sto eliminando una tabella nella prop 'to' della joinLines
+    const joinLineKey = () => {
+      for (const [key, value] of Draw.joinLines) {
+        if ((value.to === e.currentTarget.dataset.id && value.from === tableJoin) || (value.from === e.currentTarget.dataset.id && value.to === tableJoin)) {
+          // console.log(`linea da eliminare ${key}`);
+          return key;
+        }
+      }
     }
-    // console.log(app.letsdraw);
-  }
-
-  app.svg.onmousemove = (e) => {
-    if (app.letsdraw) {
-      app.line.setAttribute('stroke', 'lightblue');
-      app.line.setAttribute('d', 'M 220 54 L ' + e.offsetX + ' ' + e.offsetY);
+    Draw.deleteJoinLine(joinLineKey());
+    if (tableJoin) {
+      // decremento dataset.joins della tabella legata a questa
+      tableJoinRef.dataset.joins--;
     }
+    // lo rimuovo dal DOM
+    Draw.svg.querySelector(`#${e.currentTarget.dataset.id}`).remove();
+    Draw.tables.delete(e.currentTarget.dataset.id); // svg-data-x
+    console.log(Draw.tables);
   }
 
-  app.svg.onmouseup = (e) => {
-    app.letsdraw = null;
-    app.line.setAttribute('stroke', 'orangered');
-  } */
+  /* NOTE: END ONCLICK EVENTS*/
 
+  /* NOTE: MOUSE EVENTS */
   document.querySelectorAll('.translate').forEach(el => {
     el.onmousedown = (e) => {
-      console.log(app.x);
-      app.x = +e.currentTarget.dataset.translateX;
+      // console.log(app.coords);
+      app.coords = { x: +e.currentTarget.dataset.translateX, y: +e.currentTarget.dataset.translateY };
       app.el = e.currentTarget;
     }
 
     el.onmousemove = (e) => {
       if (app.el) {
-        app.x += e.movementX;
+        app.coords.x += e.movementX;
+        app.coords.y += e.movementY;
         // if (app.x > 30) return;
-        e.currentTarget.style.transform = "translateX(" + app.x + "px)";
-        e.currentTarget.dataset.translateX = app.x;
+        e.currentTarget.style.transform = "translate(" + app.coords.x + "px, " + app.coords.y + "px)";
+        e.currentTarget.dataset.translateX = app.coords.x;
+        e.currentTarget.dataset.translateY = app.coords.y;
       }
     }
 
@@ -380,9 +415,42 @@ var App = new Application();
       delete app.el;
     }
   });
-  /* end mouse events */
 
-  /* fetchAPI */
+  app.windowJoin.onmousedown = (e) => {
+    app.coords = { x: +e.currentTarget.dataset.x, y: +e.currentTarget.dataset.y };
+    if (e.target.classList.contains('title')) app.el = e.target;
+  }
+
+  app.windowJoin.onmousemove = (e) => {
+    if (app.el) {
+      app.coords.x += e.movementX;
+      app.coords.y += e.movementY;
+      e.currentTarget.style.transform = "translate(" + app.coords.x + "px, " + app.coords.y + "px)";
+      e.currentTarget.dataset.x = app.coords.x;
+      e.currentTarget.dataset.y = app.coords.y;
+    }
+  }
+
+  app.windowJoin.onmouseup = () => delete app.el;
+
+  // visualizzo l'icona delete utilizzando <use> in svg
+  app.tableEnter = (e) => {
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    use.setAttribute('x', +e.target.dataset.x + 170 - 18);
+    use.setAttribute('y', +e.target.dataset.y);
+    use.dataset.table = e.target.dataset.table;
+    use.dataset.schema = e.target.dataset.schema;
+    use.dataset.id = e.target.id;
+    use.setAttribute('href', '#backspace');
+    use.dataset.fn = 'removeTable';
+    e.currentTarget.appendChild(use);
+  }
+
+  app.tableLeave = (e) => e.currentTarget.querySelector('use').remove();
+
+  /*  NOTE: END MOUSE EVENTS */
+
+  /* NOTE: FETCH API */
 
   // recupero le tabelle del database in base allo schema selezionato
   app.getDatabaseTable = async (schema) => {
@@ -401,6 +469,51 @@ var App = new Application();
       });
   }
 
-  /* end fetchAPI */
+  app.getTable = async () => {
+    // elemento dove inserire le colonne della tabella
+    debugger;
+    return await fetch('/fetch_api/' + Hier.activeCard.dataset.schema + '/schema/' + Hier.activeCard.dataset.label + '/table_info')
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(response => response)
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+  }
+
+  /* NOTE: END FETCH API */
+
+  /* NOTE: SUPPORT FUNCTIONS */
+  app.addFields = (ul, response) => {
+    ul.hidden = false;
+    for (const [key, value] of Object.entries(response)) {
+      const content = app.tmplLists.content.cloneNode(true);
+      const section = content.querySelector('section[data-sublist-fields]'); // questa lista include le 3 icone per columns, hierarchy, metric
+      const div = section.querySelector('div.selectable');
+      const span = div.querySelector('span[data-item]');
+      section.dataset.label = value.COLUMN_NAME;
+      section.dataset.elementSearch = Hier.activeCard.dataset.label;
+      div.dataset.tableId = Hier.activeCard.id;
+      div.dataset.tableName = Hier.activeCard.dataset.label;
+      div.dataset.label = value.COLUMN_NAME;
+      div.dataset.key = value.CONSTRAINT_NAME;
+      span.innerText = value.COLUMN_NAME;
+      // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
+      let pos = value.DATA_TYPE.indexOf('(');
+      let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
+      span.dataset.type = type;
+      // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
+      div.dataset.id = key;
+      // span.id = key;
+      // fn da associare all'evento in 'mutation observe'
+      div.dataset.fn = 'handlerColumns';
+      ul.appendChild(section);
+    }
+  }
+  /* NOTE: END SUPPORT FUNCTIONS */
 
 })();
