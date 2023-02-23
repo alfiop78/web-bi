@@ -24,7 +24,11 @@
 <body class="antialiased">
 
   <template id="tmpl-li">
-    <li data-element-search data-label data-searchable="true" draggable="true">
+    <li data-li data-element-search data-label data-searchable="true">
+      <span></span>
+    </li>
+
+    <li data-li-drag data-element-search data-label data-searchable="true" draggable="true">
       <i class="material-icons-round md-18">drag_handle</i>
       <span></span>
     </li>
@@ -65,31 +69,31 @@
           <div id="window-join" data-x="0" data-y="0" data-open="false">
             <section class="wj-content">
               <section class="wj-title">
-                <p class="title">Creazione relazione tra <span data-table-from="" data-schema></span>&nbsp;e&nbsp;<span data-table-to data-schema></span></p>
-                <button type="button" data-fn="closeWindowJoin" class="material-icons-round md-18">close</button>
+                <p class="title">Creazione relazione tra <span data-table-from=""></span>&nbsp;e&nbsp;<span data-table-to></span></p>
+                <button type="button" data-fn="closeWindowJoin" class="button-icon material-icons-round md-18">close</button>
               </section>
               <div class="responsive-content">
-                <section data-table-from>
-                  <input list="list-from" id="from-fields" name="from-fields-name">
-
-                  <datalist id="list-from">
-                    <option value="Chocolate" label="test">
-                    <option value="Coconut">
-                    <option value="Mint">
-                    <option value="Strawberry">
-                    <option value="Vanilla">
-                  </datalist>
+                <section data-table-from data-table-id>
+                  <section class="list-search">
+                    <div class="md-field">
+                      <input type="search" id="field-from-search" data-element-search="fields" autocomplete="off" />
+                      <label for="field-from-search" class="">Ricerca</label>
+                    </div>
+                    <div class="relative-ul">
+                      <ul id="ul-from-fields" class="custom-scrollbar"></ul>
+                    </div>
+                  </section>
                 </section>
-                <section data-table-to>
-                  <input list="list-to" id="to-fields" name="to-fields-name">
-
-                  <datalist id="list-to">
-                    <option value="Chocolate">
-                    <option value="Coconut">
-                    <option value="Mint">
-                    <option value="Strawberry">
-                    <option value="Vanilla">
-                  </datalist>
+                <section data-table-to data-table-id>
+                  <section class="list-search">
+                    <div class="md-field">
+                      <input type="search" id="field-to-search" data-element-search="fields" autocomplete="off" />
+                      <label for="field-to-search" class="">Ricerca</label>
+                    </div>
+                    <div class="relative-ul">
+                      <ul id="ul-to-fields" class="custom-scrollbar"></ul>
+                    </div>
+                  </section>
                 </section>
               </div>
             </section>
@@ -100,7 +104,12 @@
               <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
                 <svg id="svg" class="dropzone" data-level="0">
                   <defs>
-                    <image id="backspace" href="{{ asset('/images/backspace.svg') }}" width="18" height="18"></image>
+                    <g id="table-struct" class="struct">
+                      <rect x="0" y="0" />
+                      <text x="18" y="20" font-family="Barlow" font-size=".85rem" font-weight="normal"></text>
+                      <image id="backspace" href="{{ asset('/images/backspace.svg') }}" data-id data-fn="removeTable" x="152" y="0" width="18" height="18">
+                      </image>
+                    </g>
                   </defs>
                 </svg>
                 <span id="coords"></span>
@@ -135,7 +144,6 @@
                 <button type="button" id="test" data-fn="handlerTest">TEST</button>
               </section>
             </section>
-          </section>
           </section>
 
         </div>

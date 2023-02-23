@@ -2,14 +2,13 @@ var App = new Application();
 var Draw = new DrawSVG('svg');
 // var StorageCube = new CubeStorage();
 // var StorageDimension = new DimensionStorage();
-// var Cube = new Cubes();
-// var Dim = new Dimension();
-// var Hier = new Hierarchy();
+var Cube = new Cubes();
+var Dim = new Dimension();
+var Hier = new Hierarchy();
 (() => {
   var app = {
     // templates
     tmplList: document.getElementById('tmpl-li'),
-    tmplCard: document.getElementById('tmpl-card'),
     // dialogs
     dialogTables: document.getElementById('dlg-tables'),
     // buttons
@@ -71,8 +70,8 @@ var Draw = new DrawSVG('svg');
     // creo la linea
     if (Draw.svg.querySelectorAll('.table').length > 0) {
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      line.id = `line-${Draw.svg.querySelectorAll('g.table').length}`;
-      line.dataset.id = Draw.svg.querySelectorAll('g.table').length;
+      line.id = `line-${Draw.svg.querySelectorAll('use.table').length}`;
+      line.dataset.id = Draw.svg.querySelectorAll('use.table').length;
       Draw.svg.appendChild(line);
       Draw.currentLineRef = line.id;
     }
@@ -85,9 +84,9 @@ var Draw = new DrawSVG('svg');
     if (e.currentTarget.classList.contains('dropzone')) {
       e.dataTransfer.dropEffect = "copy";
       app.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
-      if (Draw.svg.querySelectorAll('.table').length > 0) {
+      if (Draw.svg.querySelectorAll('use.table').length > 0) {
         // TODO: da commentare
-        let nearestTable = [...Draw.svg.querySelectorAll('g.table')].reduce((prev, current) => {
+        let nearestTable = [...Draw.svg.querySelectorAll('use.table')].reduce((prev, current) => {
           return (Math.hypot(e.offsetX - (+current.dataset.x + 180), e.offsetY - (+current.dataset.y + 15)) < Math.hypot(e.offsetX - (+prev.dataset.x + 180), e.offsetY - (+prev.dataset.y + 15))) ? current : prev;
         });
         console.log(nearestTable.id);
@@ -124,7 +123,7 @@ var Draw = new DrawSVG('svg');
     if (e.currentTarget.classList.contains('dropzone')) {
       console.info('DROPZONE');
       // console.log(e.currentTarget, e.target);
-      if (e.target.nodeName === 'rect') Draw.currentLevel = +e.target.dataset.levelId;
+      if (e.target.nodeName === 'use') Draw.currentLevel = +e.target.dataset.levelId;
       // Draw.currentLevel = e.targe
       // e.dataTransfer.dropEffect = "copy";
       // coloro il border differente per la dropzone
@@ -144,8 +143,21 @@ var Draw = new DrawSVG('svg');
   app.handlerDragEnd = async (e) => {
     e.preventDefault();
     if (e.dataTransfer.dropEffect === 'copy') {
-      const data = await app.getTable();
-      app.addFields(ul, data);
+      console.log(Draw.svg.querySelectorAll('use.table').length);
+      if (Draw.countTables > 1) {
+        // tabella 'from'
+        Hier.tableJoins = {
+          from: app.windowJoin.querySelector('span[data-table-from]').dataset.tableId,
+          to: app.windowJoin.querySelector('span[data-table-to]').dataset.tableId
+        }
+        console.log(Hier.tableJoins);
+        for (const [key, value] of Object.entries(Hier.tableJoins)) {
+          Hier.activeTable = value.id;
+          const data = await app.getTable();
+          app.addFields(key, data);
+          console.log(data);
+        }
+      }
     }
   }
 
@@ -157,7 +169,7 @@ var Draw = new DrawSVG('svg');
     // const elementId = e.dataTransfer.getData('text/plain');
     const liElement = document.getElementById(e.dataTransfer.getData('text/plain'));
     liElement.classList.remove('dragging');
-    const tableId = Draw.svg.querySelectorAll('g.table').length;
+    const tableId = Draw.svg.querySelectorAll('use.table').length;
     // let coords = { x: e.offsetX - app.dragElementPosition.x, y: e.offsetY - app.dragElementPosition.y }
     let coords;
     // se non è presente una tableJoin significa che sto aggiungendo la prima tabella
@@ -183,7 +195,7 @@ var Draw = new DrawSVG('svg');
     } else {
       // è presente una tableJoin
       // imposto data.joins anche sull'elemento SVG
-      Draw.svg.querySelector(`g.table[id="${Draw.tableJoin.table.id}"]`).dataset.joins = ++Draw.tableJoin.joins;
+      Draw.svg.querySelector(`use.table[id="${Draw.tableJoin.table.id}"]`).dataset.joins = ++Draw.tableJoin.joins;
       // ... lo imposto anche nell'oggetto Map() tables
       Draw.tables.get(Draw.tableJoin.table.id).joins = Draw.tableJoin.joins;
       // livello che sto aggiungendo
@@ -193,7 +205,7 @@ var Draw = new DrawSVG('svg');
       // if (!Draw.arrayLevels.includes(levelId)) Draw.arrayLevels.splice(0, 0, levelId);
       Draw.svg.dataset.level = (Draw.svg.dataset.level < levelId) ? levelId : Draw.svg.dataset.level;
       // quante tabelle ci sono per il livello corrente che appartengono alla stessa tableJoin
-      const tableRelated = Draw.svg.querySelectorAll(`g.table[data-level-id='${levelId}'][data-table-join='${Draw.tableJoin.table.id}']`);
+      const tableRelated = Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'][data-table-join='${Draw.tableJoin.table.id}']`);
       const tableInLevel = tableRelated.length;
       let lastTableInLevel;
       // recupero la posizione dell'ultima tabella appartenete al livello corrente e legata alla stessa tableJoin
@@ -218,7 +230,7 @@ var Draw = new DrawSVG('svg');
           // per ogni livello, partendo dall'ultimo
           console.log(levelId);
           // se sono presenti, in questo livello, tabelle con y > di quella che sto droppando le devo spostare y+60
-          Draw.svg.querySelectorAll(`g.table[data-level-id='${levelId}']`).forEach(table => {
+          Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}']`).forEach(table => {
             // console.log(`Livello ${levelId}`);
             // console.log(`tabelle ${table.id}`);
             if (+table.dataset.y >= coords.y) {
@@ -292,8 +304,8 @@ var Draw = new DrawSVG('svg');
       let ul = document.getElementById('ul-tables');
       for (const [key, value] of Object.entries(data)) {
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li[draggable]');
-        const span = content.querySelector('span');
+        const li = content.querySelector('li[data-li-drag]');
+        const span = li.querySelector('span');
         li.dataset.fn = "handlerTable";
         li.dataset.label = value.TABLE_NAME;
         li.dataset.schema = schema;
@@ -307,11 +319,6 @@ var Draw = new DrawSVG('svg');
       drawer.toggleAttribute('open');
     }
   }
-
-  /* page init  (impostazioni inziali per la pagina, alcune sono necessarie per essere catturate dal mutationObserve)*/
-  // TODO: da implementare
-  // app.dialogConnection.showModal();
-  /* end page init */
 
   /* NOTE: ONCLICK EVENTS*/
 
@@ -334,6 +341,7 @@ var Draw = new DrawSVG('svg');
   }
 
   app.tableSelected = (e) => {
+    debugger;
     console.log(`table selected ${e.currentTarget.dataset.table}`);
   }
 
@@ -352,10 +360,11 @@ var Draw = new DrawSVG('svg');
     const to = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).to);
 
     app.windowJoin.querySelector('span[data-table-from]').innerHTML = from.table;
-    app.windowJoin.querySelector('span[data-table-from]').dataset.schema = from.schema;
+    app.windowJoin.querySelector('span[data-table-from]').dataset.tableFrom = from.table;
+    app.windowJoin.querySelector('span[data-table-from]').dataset.tableId = from.key;
     app.windowJoin.querySelector('span[data-table-to]').innerHTML = to.table;
-    app.windowJoin.querySelector('span[data-table-to]').dataset.schema = to.schema;
-    // TODO: recupero le colonne delle due tabelle da mettere in relazione
+    app.windowJoin.querySelector('span[data-table-to]').dataset.tableTo = to.table;
+    app.windowJoin.querySelector('span[data-table-to]').dataset.tableId = to.key;
   }
 
   app.closeWindowJoin = () => {
@@ -385,7 +394,10 @@ var Draw = new DrawSVG('svg');
     // lo rimuovo dal DOM
     Draw.svg.querySelector(`#${e.currentTarget.dataset.id}`).remove();
     Draw.tables.delete(e.currentTarget.dataset.id); // svg-data-x
+    delete Draw.tableJoin;
     console.log(Draw.tables);
+    // rimuovo anche il <g> all'interno di <defs>
+    Draw.svg.querySelector(`g#struct-${e.currentTarget.dataset.id}`).remove();
   }
 
   /* NOTE: END ONCLICK EVENTS*/
@@ -435,18 +447,17 @@ var Draw = new DrawSVG('svg');
 
   // visualizzo l'icona delete utilizzando <use> in svg
   app.tableEnter = (e) => {
-    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-    use.setAttribute('x', +e.target.dataset.x + 170 - 18);
-    use.setAttribute('y', +e.target.dataset.y);
-    use.dataset.table = e.target.dataset.table;
-    use.dataset.schema = e.target.dataset.schema;
-    use.dataset.id = e.target.id;
-    use.setAttribute('href', '#backspace');
-    use.dataset.fn = 'removeTable';
-    e.currentTarget.appendChild(use);
+    // debugger;
+    // const deleteIcon = Draw.svg.querySelector(`${e.currentTarget.href.baseVal} > image`);
+    // deleteIcon.setAttribute('y', -18);
+    // deleteIcon.dataset.fn = 'removeTable';
   }
 
-  app.tableLeave = (e) => e.currentTarget.querySelector('use').remove();
+  app.tableLeave = (e) => {
+    // debugger;
+    // e.currentTarget.remove();
+    // TODO: rimuovo anche l'elemento <g> in <defs> relativo a questa tabella
+  }
 
   /*  NOTE: END MOUSE EVENTS */
 
@@ -470,9 +481,7 @@ var Draw = new DrawSVG('svg');
   }
 
   app.getTable = async () => {
-    // elemento dove inserire le colonne della tabella
-    debugger;
-    return await fetch('/fetch_api/' + Hier.activeCard.dataset.schema + '/schema/' + Hier.activeCard.dataset.label + '/table_info')
+    return await fetch('/fetch_api/' + Hier.activeTable.dataset.schema + '/schema/' + Hier.activeTable.dataset.table + '/table_info')
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -488,30 +497,31 @@ var Draw = new DrawSVG('svg');
   /* NOTE: END FETCH API */
 
   /* NOTE: SUPPORT FUNCTIONS */
-  app.addFields = (ul, response) => {
-    ul.hidden = false;
+  app.addFields = (key, response) => {
+    // key : from, to
+    const ul = app.windowJoin.querySelector(`section[data-table-${key}] ul`);
+    // ul.hidden = false;
     for (const [key, value] of Object.entries(response)) {
-      const content = app.tmplLists.content.cloneNode(true);
-      const section = content.querySelector('section[data-sublist-fields]'); // questa lista include le 3 icone per columns, hierarchy, metric
-      const div = section.querySelector('div.selectable');
-      const span = div.querySelector('span[data-item]');
-      section.dataset.label = value.COLUMN_NAME;
-      section.dataset.elementSearch = Hier.activeCard.dataset.label;
-      div.dataset.tableId = Hier.activeCard.id;
-      div.dataset.tableName = Hier.activeCard.dataset.label;
-      div.dataset.label = value.COLUMN_NAME;
-      div.dataset.key = value.CONSTRAINT_NAME;
+      const content = app.tmplList.content.cloneNode(true);
+      const li = content.querySelector('li[data-li]');
+      const span = li.querySelector('span');
+      li.dataset.label = value.COLUMN_NAME;
+      // li.dataset.elementSearch = Hier.activeCard.dataset.label;
+      li.dataset.tableId = Hier.activeTable.id;
+      li.dataset.tableName = Hier.activeTable.dataset.table;
+      li.dataset.label = value.COLUMN_NAME;
+      li.dataset.key = value.CONSTRAINT_NAME;
       span.innerText = value.COLUMN_NAME;
       // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
       let pos = value.DATA_TYPE.indexOf('(');
       let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
       span.dataset.type = type;
       // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
-      div.dataset.id = key;
+      li.dataset.id = key;
       // span.id = key;
       // fn da associare all'evento in 'mutation observe'
-      div.dataset.fn = 'handlerColumns';
-      ul.appendChild(section);
+      li.dataset.fn = 'handlerColumns';
+      ul.appendChild(li);
     }
   }
   /* NOTE: END SUPPORT FUNCTIONS */

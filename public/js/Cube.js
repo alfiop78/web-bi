@@ -213,6 +213,7 @@ class Dimension {
 
 class Hierarchy {
   #schema;
+  #activeTable;
   #columns = new Map();
   #join = new Map();
   #joins = new Map();
@@ -226,7 +227,25 @@ class Hierarchy {
   #table;
   #lastTableHierarchy;
   #alias; // alias per la tabella
+  #tableJoins = { from: null, to: null }; // refs 
+  // #tableTo; // ref 
   constructor() { }
+
+  /* NOTE: mapdb*/
+  set tableJoins(object) {
+    this.#tableJoins.from = Draw.svg.querySelector(`#${object.from}`);
+    this.#tableJoins.to = Draw.svg.querySelector(`#${object.to}`);
+  }
+
+  get tableJoins() { return this.#tableJoins; }
+
+  set activeTable(id) {
+    this.#activeTable = Draw.svg.querySelector(`#${id}`);
+  }
+
+  get activeTable() { return this.#activeTable; }
+
+  /* NOTE: end mapdb */
 
   set table(value) { this.#table = value; }
 
