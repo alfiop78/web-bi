@@ -913,6 +913,7 @@ var Hier = new Hierarchy();
       // console.log('value : ', value);
       const card = document.createElement('div');
       card.className = 'card table';
+      card.id = `table-${key}`;
       card.dataset.alias = value.alias;
       card.dataset.value = +key + 1;
       // NOTE: Impostazione di una variabile css (--zindex)
@@ -928,7 +929,8 @@ var Hier = new Hierarchy();
       const tmplContent = tmplCardLayout.content.cloneNode(true);
       const cardLayout = tmplContent.querySelector('.cardLayout');
       card.appendChild(cardLayout);
-      card.dataset.id = `${hierToken}-${key}`;
+      card.dataset.id = `table-${key}`;
+      // card.dataset.id = `${hierToken}-${key}`;
       card.querySelector('section[options-hier] span').dataset.value = +card.dataset.value;
       // imposto tutti i data-id sui button
       card.querySelectorAll('button').forEach(button => button.dataset.id = card.dataset.id);

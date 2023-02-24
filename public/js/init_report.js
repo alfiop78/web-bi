@@ -1890,8 +1890,8 @@ var List = new Lists();
           Query.sql_id.push(obj.innerText);
           Query.sql_ds.push(obj.innerText);
         } else {
-          Query.sql_id.push(`${obj.tableAlias}.${obj.label}`);
-          Query.sql_ds.push(`${obj.tableAlias}.${obj.label}`);
+          Query.sql_id.push(`${obj.tableAlias}.${obj.field.id.field}`);
+          Query.sql_ds.push(`${obj.tableAlias}.${obj.field.ds.field}`);
         }
         Query.edit_id.push(obj);
         Query.edit_ds.push(obj);

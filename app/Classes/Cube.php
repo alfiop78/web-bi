@@ -59,12 +59,16 @@ class Cube
     foreach ($columns as $column) {
       if (property_exists($column, 'sql')) {
         foreach ($column->sql as $fieldType => $field) {
+          var_dump($column->name);
+          if ($column->name === 'month' && $fieldType === 'ds') {
+            // MapJSONExtractor
+          }
           $fieldList["{$column->name}_{$fieldType}"] = implode($field) . " AS {$column->name}_{$fieldType}"; // $fieldType : id/ds
           $this->_columns[] = "{$column->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
         }
       }
     }
-    // dd($fieldList);
+    dd($fieldList);
     foreach ($fieldList as $name => $field) {
       $this->json__info->columns->{$name} = (object)[
         "sql" => $field
@@ -85,12 +89,13 @@ class Cube
   {
     $fieldList = array();
     $this->groupBy = "GROUP BY\n";
-    foreach ($groups as $token => $column) {
+    foreach ($groups as $column) {
       if (property_exists($column, 'sql')) {
-        foreach ($column->sql as $field) {
-          $fieldImploded = implode($field);
-          // if (!in_array($fieldImploded, $fieldList)) $fieldList[] = $fieldImploded;
+        foreach ($column->sql as $fieldType => $field) {
+          /* $fieldImploded = implode($field);
           $fieldList["{$column->name}"] = $fieldImploded;
+          var_dump($fieldList); */
+          $fieldList["{$column->name}_{$fieldType}"] = implode($field); // $fieldType : id/ds
         }
       }
     }
