@@ -68,8 +68,8 @@ Route::get('/500', function () {
 // creazione dimensione time
 // Route::post('/fetch_api/dimension/time', [MapDatabaseController::class, 'createTimeDimension'])->name('web_bi.fetch_api.time');
 Route::post('/fetch_api/dimension/time', function () {
-  $start = new DateTime('2022-01-01 00:00:00');
-  $end   = new DateTime('2022-02-01 00:00:00');
+  $start = new DateTime('2021-01-01 00:00:00');
+  $end   = new DateTime('2024-01-01 00:00:00');
   $interval = new DateInterval('P1D');
   $period = new DatePeriod($start, $interval, $end);
   $json = (object) null;
