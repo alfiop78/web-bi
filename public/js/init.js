@@ -49,6 +49,8 @@ var Hier = new Hierarchy();
     // button dialog-columns-map
     btnEditSqlId: document.getElementById('edit-sql-formula-column-id'),
     btnEditSqlDs: document.getElementById('edit-sql-formula-column-ds'),
+    btnEditFieldId: document.getElementById('edit-field-id'),
+    btnEditFieldDs: document.getElementById('edit-field-ds'),
     btnColumnMap: document.getElementById('btnColumnsMap'),
 
     // inputs / textarea
@@ -266,10 +268,16 @@ var Hier = new Hierarchy();
     // cardLayout.querySelector('.title-alias').dataset.id = card.id;
     // imposto il titolo in h6
     title.querySelector('h6').innerHTML = card.dataset.label;
-    // creo un alias per questa tabella
-    const time = Date.now().toString();
-    title.querySelector('.subtitle').innerHTML = `AS ${card.dataset.label}_${time.substring(time.length - 3)}`;
-    card.dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`;
+    // per la tabella WEB_BI_TIME non creo l'alias con la funzione time, l'alias sarà WEB_BI_TIME
+    if (card.dataset.label !== 'WEB_BI_TIME') {
+      // creo un alias per questa tabella
+      const time = Date.now().toString();
+      title.querySelector('.subtitle').innerHTML = `AS ${card.dataset.label}_${time.substring(time.length - 3)}`;
+      card.dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`;
+    } else {
+      title.querySelector('.subtitle').innerHTML = `AS ${card.dataset.label}`;
+      card.dataset.alias = card.dataset.label;
+    }
     card.appendChild(cardLayout);
 
     if (card.querySelector('button[data-fact]').hasAttribute('data-selected')) {
@@ -416,8 +424,12 @@ var Hier = new Hierarchy();
         e.currentTarget.toggleAttribute('columns');
         if (e.currentTarget.hasAttribute('columns')) {
           // imposto la colonna selezionata nelle textarea ID - DS
-          app.txtareaColumnId.innerText = Cube.fieldSelected;
-          app.txtareaColumnDs.innerText = Cube.fieldSelected;
+          app.txtareaColumnId.setAttribute('readonly', 'true');
+          app.txtareaColumnId.dataset.mode = 'field';
+          app.txtareaColumnDs.setAttribute('readonly', 'true');
+          app.txtareaColumnDs.dataset.mode = 'field';
+          app.txtareaColumnId.value = Cube.fieldSelected;
+          app.txtareaColumnDs.value = Cube.fieldSelected;
           app.dialogColumnMap.showModal();
         } else {
           Hier.column = e.currentTarget.dataset.tokenColumn;
@@ -432,9 +444,11 @@ var Hier = new Hierarchy();
     // timeField, al momento, può essere date, month oppure year da scegliere in base al campo della FACT da mettere in join
     const timeField = document.querySelector('li[data-field][data-selected]').dataset.field;
     const columnsRef = [Hier.fieldRef.dataset.label, timeField];
-    const join = [`WEB_BI_TIME_055.${timeField}`, textarea.innerHTML];
+    // alias della tabella WEB_BI_TIME
+    // const alias = app.body.querySelector(".card.table[data-label='WEB_BI_TIME']").dataset.alias;
+    const join = [`WEB_BI_TIME.${timeField}`, textarea.innerHTML];
     // seleziono la dimensione TIME mkhz4os8tks (TODO: in futuro gli verrà assegnato un nome fisso)
-    Cube.timeDimension = 'mkhz4os8tks';
+    Cube.timeDimension = 'sisdu1c13f';
     Cube.dateTimeField = textarea.innerHTML;
     Cube.timeJoins = { token: 'time', columnsRef, join };
     Cube.timeJoin = 'time';
@@ -1135,6 +1149,15 @@ var Hier = new Hierarchy();
   }
 
   app.btnEditSqlId.onclick = (e) => {
+    app.txtareaColumnId.dataset.mode = 'sql';
+    app.txtareaColumnId.removeAttribute('readonly');
+    app.txtareaColumnId.setAttribute('readwrite', true);
+    app.txtareaColumnId.focus();
+    app.txtareaColumnId.select();
+  }
+
+  app.btnEditFieldId.onclick = (e) => {
+    app.txtareaColumnId.dataset.mode = 'field';
     app.txtareaColumnId.removeAttribute('readonly');
     app.txtareaColumnId.setAttribute('readwrite', true);
     app.txtareaColumnId.focus();
@@ -1142,11 +1165,21 @@ var Hier = new Hierarchy();
   }
 
   app.btnEditSqlDs.onclick = (e) => {
+    app.txtareaColumnDs.dataset.mode = 'sql';
     app.txtareaColumnDs.removeAttribute('readonly');
     app.txtareaColumnDs.setAttribute('readwrite', true);
     app.txtareaColumnDs.focus();
     app.txtareaColumnDs.select();
   }
+
+  app.btnEditFieldDs.onclick = (e) => {
+    app.txtareaColumnDs.dataset.mode = 'field';
+    app.txtareaColumnDs.removeAttribute('readonly');
+    app.txtareaColumnDs.setAttribute('readwrite', true);
+    app.txtareaColumnDs.focus();
+    app.txtareaColumnDs.select();
+  }
+
 
   /*app.txtareaColumnId.oninput = (e) => {
     // visualizzo il div absolute-popup
@@ -1168,10 +1201,15 @@ var Hier = new Hierarchy();
 
   // save column
   app.btnColumnMap.onclick = () => {
-    Hier.field = {
-      id: { field: app.txtareaColumnId.value, type: 'da_completare', SQL: null, origin_field: Hier.fieldRef.dataset.label },
-      ds: { field: app.txtareaColumnDs.value, type: 'da_completare', SQL: null, origin_field: Hier.fieldRef.dataset.label }
-    };
+    let fieldObjectDs = { field: app.txtareaColumnDs.value, type: 'da_completare', origin_field: Hier.fieldRef.dataset.label };
+    let fieldObjectId = { field: app.txtareaColumnId.value, type: 'da_completare', origin_field: Hier.fieldRef.dataset.label };
+    Hier.field = { id: fieldObjectId, ds: fieldObjectDs };
+    if (!app.txtareaColumnDs.dataset.mode === 'sql') {
+      Hier.field.ds = { field: app.txtareaColumnDs.value, type: 'da_completare', SQL: app.txtareaColumnDs.value, origin_field: Hier.fieldRef.dataset.label };
+    }
+    if (!app.txtareaColumnId.dataset.mode === 'sql') {
+      Hier.field.id = { field: app.txtareaColumnId.value, type: 'da_completare', SQL: app.txtareaColumnId.value, origin_field: Hier.fieldRef.dataset.label };
+    }
     // nel metodo columns c'è la logica per controllare se devo rimuovere/aggiungere la colonna selezionata
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
@@ -1330,8 +1368,8 @@ var Hier = new Hierarchy();
     Cube.token = StorageCube.selected.token;
     debugger;
 
+    const storage = new DimensionStorage();
     Cube.dimensionsSelected.forEach(dimensionToken => {
-      const storage = new DimensionStorage();
       let dimensionObject = {};
       // console.log(dimensionToken);
       storage.selected = dimensionToken;
@@ -1352,6 +1390,19 @@ var Hier = new Hierarchy();
     });
     // TODO: l'aggiornamento del cubo non deve aggiornare anche la prop created_at ma solo updated_at
     debugger;
+    // legame con la dimensione time
+    if (Cube.timeDimension) {
+      let dimensionObject = {};
+      storage.selected = Cube.timeDimension;
+      dimensionObject[Cube.timeDimension] = storage.selected;
+      console.log(Cube.timeJoin);
+      dimensionObject[Cube.timeDimension].cubes[Cube.token] = Object.fromEntries(Cube.timeJoin);
+      console.log(dimensionObject[Cube.timeDimension]);
+      // salvo il nome della dimensione/i associate al cubo. In questo modo, il cubo andrà a leggere la dimensione, tramite nome, se la dimensione viene modificata la modifica si riflette su tutti i cubi che hanno questa dimensione
+      Cube.associatedDimensions = Cube.timeDimension;
+      // salvo la "nuova" dimensione, la dimensione avrà la proprietà cubes valorizzata
+      storage.save(dimensionObject[Cube.timeDimension]);
+    }
     Cube.save();
     // salvo il cubo in localStorage
     StorageCube.save(Cube.cube);
@@ -1394,6 +1445,7 @@ var Hier = new Hierarchy();
       dimension.save(dimensionObject[dimensionToken]);
     });
     // legame con la dimensione time
+    debugger;
     if (Cube.timeDimension) {
       let dimensionObject = {};
       dimension.selected = Cube.timeDimension;
@@ -1519,7 +1571,6 @@ var Hier = new Hierarchy();
     target.appendChild(span);
     span.focus();
   }
-
 
   // selezione di una metrica per la creazione di una metrica composta
   app.handlerMetricSelectedComposite = (e) => {

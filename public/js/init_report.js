@@ -1890,8 +1890,9 @@ var List = new Lists();
           Query.sql_id.push(obj.innerText);
           Query.sql_ds.push(obj.innerText);
         } else {
-          Query.sql_id.push(`${obj.tableAlias}.${obj.field.id.field}`);
-          Query.sql_ds.push(`${obj.tableAlias}.${obj.field.ds.field}`);
+          debugger;
+          (obj.field.ds.hasOwnProperty('SQL')) ? Query.sql_ds.push(obj.field.ds.SQL) : Query.sql_ds.push(`${obj.tableAlias}.${obj.field.ds.field}`);
+          (obj.field.id.hasOwnProperty('SQL')) ? Query.sql_id.push(obj.field.id.SQL) : Query.sql_id.push(`${obj.tableAlias}.${obj.field.id.field}`);
         }
         Query.edit_id.push(obj);
         Query.edit_ds.push(obj);
@@ -1940,6 +1941,7 @@ var List = new Lists();
         app.setFormula({ mode: element.dataset.mode, innerText: element.innerText.trim() });
       }
     });
+    debugger;
     columnObject.edit = { id: Query.edit_id, ds: Query.edit_ds };
     columnObject.sql = { id: Query.sql_id, ds: Query.sql_ds };
     Query.add(columnObject);

@@ -228,16 +228,18 @@
             {{-- <div id="textarea-column-id-formula" contenteditable="true">
                                 <strong><span contenteditable="true"></span></strong>
                             </div> --}}
-            <textarea id="textarea-column-id-formula" rows="10" placeholder="ID Formula" autocomplete="off" autofocus required minlength="1" readonly></textarea>
+            <textarea id="textarea-column-id-formula" data-mode="field" rows="10" placeholder="ID Formula" autocomplete="off" autofocus required minlength="1" readonly></textarea>
             <div class="buttons-sql-formula">
-              <i id="edit-sql-formula-column-id" class="material-icons md-18" tooltip="Modifica" flow="bottom">edit</i>
+              <i id="edit-sql-formula-column-id" class="material-icons md-18" tooltip="SQL" flow="bottom">text_snippet</i>
+              <i id="edit-field-id" class="material-icons md-18" tooltip="Modifica" flow="bottom">edit</i>
             </div>
           </div>
           <div>
             <span id="column-ds">DESCRIZIONE</span>
-            <textarea id="textarea-column-ds-formula" rows="10" placeholder="Description Formula" autocomplete="off" required minlength="1" readonly></textarea>
+            <textarea id="textarea-column-ds-formula" data-mode="field" rows="10" placeholder="Description Formula" autocomplete="off" required minlength="1" readonly></textarea>
             <div class="buttons-sql-formula">
-              <i id="edit-sql-formula-column-ds" class="material-icons md-18" tooltip="Modifica" flow="bottom">edit</i>
+              <i id="edit-sql-formula-column-ds" class="material-icons md-18" tooltip="SQL" flow="bottom">text_snippet</i>
+              <i id="edit-field-ds" class="material-icons md-18" tooltip="Modifica" flow="bottom">edit</i>
             </div>
           </div>
         </div>

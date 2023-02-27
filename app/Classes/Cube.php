@@ -56,19 +56,16 @@ class Cube
   {
     $fieldList = array();
     $this->SELECT = "SELECT\n";
+    // dd($columns);
     foreach ($columns as $column) {
       if (property_exists($column, 'sql')) {
         foreach ($column->sql as $fieldType => $field) {
-          var_dump($column->name);
-          if ($column->name === 'month' && $fieldType === 'ds') {
-            // MapJSONExtractor
-          }
           $fieldList["{$column->name}_{$fieldType}"] = implode($field) . " AS {$column->name}_{$fieldType}"; // $fieldType : id/ds
           $this->_columns[] = "{$column->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
         }
       }
     }
-    dd($fieldList);
+    // dd($fieldList);
     foreach ($fieldList as $name => $field) {
       $this->json__info->columns->{$name} = (object)[
         "sql" => $field
