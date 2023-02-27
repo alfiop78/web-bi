@@ -63,18 +63,26 @@
       <h1 class="title">Map database</h1>
     </header>
 
+    <template id="tmpl-join-field">
+      <div class="join-field"></div>
+    </template>
+
     <div id="container">
       <div id="content">
         <div id="body">
           <div id="window-join" data-x="0" data-y="0" data-open="false">
             <section class="wj-content">
               <section class="wj-title">
-                <p class="title">Creazione relazione tra <span data-table-from=""></span>&nbsp;e&nbsp;<span data-table-to></span></p>
+                <p class="title">Creazione relazione</p>
                 <button type="button" data-fn="closeWindowJoin" class="button-icon material-icons-round md-18">close</button>
               </section>
               <div class="responsive-content">
                 <section data-table-from data-table-id>
-                  <section class="list-search">
+                  <div data-table-from>
+                    <div class="table"></div>
+                    <button id="btn-add-join" data-fn="addJoin" class="button-icon material-icons-round md-18" value="Aggiungi join">add</button>
+                  </div>
+                  <section class="list-search absolute" data-open="false">
                     <div class="md-field">
                       <input type="search" id="field-from-search" data-element-search="fields" autocomplete="off" />
                       <label for="field-from-search" class="">Ricerca</label>
@@ -85,7 +93,10 @@
                   </section>
                 </section>
                 <section data-table-to data-table-id>
-                  <section class="list-search">
+                  <div data-table-to>
+                    <div class="table"></div>
+                  </div>
+                  <section class="list-search absolute" data-open="false">
                     <div class="md-field">
                       <input type="search" id="field-to-search" data-element-search="fields" autocomplete="off" />
                       <label for="field-to-search" class="">Ricerca</label>

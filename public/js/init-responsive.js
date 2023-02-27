@@ -9,6 +9,7 @@ var Hier = new Hierarchy();
   var app = {
     // templates
     tmplList: document.getElementById('tmpl-li'),
+    tmplJoin: document.getElementById('tmpl-join-field'),
     // dialogs
     dialogTables: document.getElementById('dlg-tables'),
     // buttons
@@ -147,8 +148,8 @@ var Hier = new Hierarchy();
       if (Draw.countTables > 1) {
         // tabella 'from'
         Hier.tableJoins = {
-          from: app.windowJoin.querySelector('span[data-table-from]').dataset.tableId,
-          to: app.windowJoin.querySelector('span[data-table-to]').dataset.tableId
+          from: app.windowJoin.querySelector('.responsive-content section[data-table-from]').dataset.tableId,
+          to: app.windowJoin.querySelector('.responsive-content section[data-table-to]').dataset.tableId
         }
         console.log(Hier.tableJoins);
         for (const [key, value] of Object.entries(Hier.tableJoins)) {
@@ -351,20 +352,47 @@ var Hier = new Hierarchy();
     app.openJoinWindow();
   }
 
+  app.handlerJoinFrom = () => {
+    console.log('from');
+    app.windowJoin.querySelector('section[data-table-from] .list-search').dataset.open = 'true';
+  }
+
+  app.handlerJoinTo = () => {
+    console.log('to');
+    app.windowJoin.querySelector('section[data-table-to] .list-search').dataset.open = 'true';
+  }
+
+  app.addJoin = () => {
+    const tmplJoinFrom = app.tmplJoin.content.cloneNode(true);
+    const tmplJoinTo = app.tmplJoin.content.cloneNode(true);
+    const joinFieldFrom = tmplJoinFrom.querySelector('.join-field');
+    const joinFieldTo = tmplJoinTo.querySelector('.join-field');
+    joinFieldFrom.innerHTML = 'test from';
+    joinFieldFrom.dataset.fn = 'handlerJoinFrom';
+    joinFieldTo.dataset.fn = 'handlerJoinTo';
+    joinFieldTo.innerHTML = 'test to';
+    const ref = app.windowJoin.querySelector('#btn-add-join');
+
+    app.windowJoin.querySelector('.responsive-content div[data-table-from]').insertBefore(joinFieldFrom, ref);
+    app.windowJoin.querySelector('.responsive-content div[data-table-to]').appendChild(joinFieldTo);
+
+  }
+
   app.openJoinWindow = () => {
     app.windowJoin.dataset.open = 'true';
+    app.addJoin();
     // console.log(Draw.currentLineRef);
     // console.log(Draw.currentLineRef.id);
     // console.log(Draw.joinLines.get(Draw.currentLineRef.id));
     const from = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).from);
     const to = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).to);
 
-    app.windowJoin.querySelector('span[data-table-from]').innerHTML = from.table;
-    app.windowJoin.querySelector('span[data-table-from]').dataset.tableFrom = from.table;
-    app.windowJoin.querySelector('span[data-table-from]').dataset.tableId = from.key;
-    app.windowJoin.querySelector('span[data-table-to]').innerHTML = to.table;
-    app.windowJoin.querySelector('span[data-table-to]').dataset.tableTo = to.table;
-    app.windowJoin.querySelector('span[data-table-to]').dataset.tableId = to.key;
+    app.windowJoin.querySelector('.responsive-content section[data-table-from]').dataset.tableFrom = from.table;
+    app.windowJoin.querySelector('.responsive-content section[data-table-from]').dataset.tableId = from.key;
+    app.windowJoin.querySelector('.responsive-content div[data-table-from] .table').innerHTML = from.table;
+    app.windowJoin.querySelector('.responsive-content section[data-table-to]').dataset.tableTo = to.table;
+    app.windowJoin.querySelector('.responsive-content section[data-table-to]').dataset.tableId = to.key;
+    app.windowJoin.querySelector('.responsive-content div[data-table-to] .table').innerHTML = to.table;
   }
 
   app.closeWindowJoin = () => {
@@ -497,6 +525,12 @@ var Hier = new Hierarchy();
   /* NOTE: END FETCH API */
 
   /* NOTE: SUPPORT FUNCTIONS */
+
+  // inserisco la colonna selezionata per la creazione della join
+  app.handlerJoin = (e) => {
+    console.log(e.currentTarget);
+  }
+
   app.addFields = (key, response) => {
     // key : from, to
     const ul = app.windowJoin.querySelector(`section[data-table-${key}] ul`);
@@ -520,7 +554,7 @@ var Hier = new Hierarchy();
       li.dataset.id = key;
       // span.id = key;
       // fn da associare all'evento in 'mutation observe'
-      li.dataset.fn = 'handlerColumns';
+      li.dataset.fn = 'handlerJoin';
       ul.appendChild(li);
     }
   }
