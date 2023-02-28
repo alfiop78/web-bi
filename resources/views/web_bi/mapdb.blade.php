@@ -44,15 +44,17 @@
       </section>
 
       <nav>
-        <li id="btn-select-schema" class="icon" disabled>
-          <i class="material-icons-round md-24">schema</i>
-          <span>Seleziona schema</span>
-        </li>
         <li id="btn-create-dimension" class="icon">
           <i class="material-icons-round md-24">storage</i>
           <span>Crea dimensione</span>
         </li>
       </nav>
+
+      <nav id="nav-report">
+        <!-- TODO: -->
+
+      </nav>
+
     </div>
 
     <header>
