@@ -570,11 +570,11 @@ var Hier = new Hierarchy();
       Hier.nJoin = {
         token: fieldRef.dataset.token,
         value: {
-          table: joins[0].dataset.table,
+          // table: joins[0].dataset.table,
           alias: joins[0].dataset.alias,
           SQL: [`${joins[0].dataset.alias}.${joins[0].dataset.field}`, `${joins[1].dataset.alias}.${joins[1].dataset.field}`],
-          from: { alias: joins[0].dataset.alias, field: joins[0].dataset.field },
-          to: { alias: joins[1].dataset.alias, field: joins[1].dataset.field }
+          from: { table: joins[0].dataset.table, alias: joins[0].dataset.alias, field: joins[0].dataset.field },
+          to: { table: joins[1].dataset.table, alias: joins[1].dataset.alias, field: joins[1].dataset.field }
         }
       };
       Hier.nJoins = fieldRef.dataset.token; // nome della tabella con le proprie join (Hier.nJoin) all'interno

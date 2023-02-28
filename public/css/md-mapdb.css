@@ -123,7 +123,7 @@ ul{
 path{
   fill: transparent;
   stroke: darkgray;
-  stroke-width: 2.5;
+  stroke-width: 2;
   stroke-linecap: round;
 }
 
@@ -131,14 +131,14 @@ path:hover{
   cursor: pointer;
   fill: transparent;
   stroke: brown;
-  stroke-width: 3;
+  stroke-width: 2.5;
   stroke-linecap: round;
 }
 
 path[data-joined]{
   fill: transparent;
-  stroke: darkgreen;
-  stroke-width: 3;
+  stroke: #92afb7;
+  stroke-width: 2.5;
   stroke-linecap: round;
 }
 
