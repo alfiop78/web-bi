@@ -172,25 +172,26 @@ use.table:hover{
 
 #window-join[data-open="false"]{
   position: absolute;
-  visibility: hidden;
+  display: none;
 }
 
 #window-join[data-open="true"]{
-  visibility: visible;
+  display: grid;
   background-color: gainsboro;
   z-index: 300;
-  padding: 2em 1em;
+  /* padding: 2em 1em; */
   box-shadow: 0px 2px 5px 0px grey;
   position: absolute;
   top: 200px;
   left: 350px;
   width: 600px;
-  height: 500px;
+  height: auto;
 }
 
 .wj-content{
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto 210px;
+  grid-row-gap: 1em;
   height: 100%;
 }
 
@@ -200,13 +201,13 @@ use.table:hover{
 }
 
 .wj-title > p.title{
-  background-color: tan;
+  background-color: #AEBDCA;
 }
 
 .wj-title > p.title:hover{
-  background-color: sienna;
+  background-color: #7895B2;
   color: white;
-  cursor: move;
+  cursor: grab;
 }
 
 .wj-title > button{
@@ -216,20 +217,44 @@ use.table:hover{
 }
 
 
-.responsive-content{
+.wj-joins, .wj-fields-list{
   display: flex;
   flex-flow: wrap;
   justify-content: space-evenly;
 }
 
-.responsive-content > section{
+.wj-joins > section{
   display: grid;
-  grid-template-rows: 100%;
+  grid-template-rows: auto;
   width: 45%;
   position: relative;
 }
 
+.wj-fields-list > section{
+  display: grid;
+  grid-template-rows: 200px;
+  width: 45%;
+  position: relative;
+}
+
+.wj-fields-list .list-search{
+  background-color: white;
+}
+
 .join-field {
   background-color: white;
+  padding: .5em;
+  margin: .5em;
+}
+
+.join-field[data-active] {
+  background-color: lightslategray;
+  border: solid thin lightgray;
+  color: white;
+}
+
+.join-field:hover{cursor: pointer;}
+
+section[data-table-from] .table, section[data-table-to] .table{
   padding: .5em;
 }

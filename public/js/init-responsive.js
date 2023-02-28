@@ -148,8 +148,8 @@ var Hier = new Hierarchy();
       if (Draw.countTables > 1) {
         // tabella 'from'
         Hier.tableJoins = {
-          from: app.windowJoin.querySelector('.responsive-content section[data-table-from]').dataset.tableId,
-          to: app.windowJoin.querySelector('.responsive-content section[data-table-to]').dataset.tableId
+          from: app.windowJoin.querySelector('.wj-joins section[data-table-from]').dataset.tableId,
+          to: app.windowJoin.querySelector('.wj-joins section[data-table-to]').dataset.tableId
         }
         console.log(Hier.tableJoins);
         for (const [key, value] of Object.entries(Hier.tableJoins)) {
@@ -173,6 +173,10 @@ var Hier = new Hierarchy();
     const tableId = Draw.svg.querySelectorAll('use.table').length;
     // let coords = { x: e.offsetX - app.dragElementPosition.x, y: e.offsetY - app.dragElementPosition.y }
     let coords;
+    // TODO: alias per la tabella appena aggiunta (in sospeso)
+    /* const time = Date.now().toString();
+    card.dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`; */
+
     // se non è presente una tableJoin significa che sto aggiungendo la prima tabella
     if (!Draw.tableJoin) {
       coords = { x: 40, y: 60 };
@@ -327,106 +331,6 @@ var Hier = new Hierarchy();
     app.body.dataset.mode = 'create-dimension';
   }
 
-  app.handlerTable = (e) => {
-    console.log('select table');
-    e.currentTarget.toggleAttribute('data-selected');
-    // const cardStruct = document.querySelector('*[data-waiting="true"]');
-    // cardStruct.querySelector('span').innerHTML = e.currentTarget.dataset.label;
-    // delete cardStruct.dataset.waiting;
-    // cardStruct.dataset.defined = e.currentTarget.dataset.label;
-  }
-
-  app.handlerToggleDrawer = (e) => {
-    console.log('toggleDrawer');
-    document.querySelector('#' + e.currentTarget.dataset.drawerId).toggleAttribute('open');
-  }
-
-  app.tableSelected = (e) => {
-    debugger;
-    console.log(`table selected ${e.currentTarget.dataset.table}`);
-  }
-
-  app.lineSelected = (e) => {
-    // console.log(`line selected ${e.currentTarget.dataset.from} -> ${e.currentTarget.dataset.to}`);
-    Draw.currentLineRef = e.target.id;
-    app.openJoinWindow();
-  }
-
-  app.handlerJoinFrom = () => {
-    console.log('from');
-    app.windowJoin.querySelector('section[data-table-from] .list-search').dataset.open = 'true';
-  }
-
-  app.handlerJoinTo = () => {
-    console.log('to');
-    app.windowJoin.querySelector('section[data-table-to] .list-search').dataset.open = 'true';
-  }
-
-  app.addJoin = () => {
-    const tmplJoinFrom = app.tmplJoin.content.cloneNode(true);
-    const tmplJoinTo = app.tmplJoin.content.cloneNode(true);
-    const joinFieldFrom = tmplJoinFrom.querySelector('.join-field');
-    const joinFieldTo = tmplJoinTo.querySelector('.join-field');
-    joinFieldFrom.innerHTML = 'test from';
-    joinFieldFrom.dataset.fn = 'handlerJoinFrom';
-    joinFieldTo.dataset.fn = 'handlerJoinTo';
-    joinFieldTo.innerHTML = 'test to';
-    const ref = app.windowJoin.querySelector('#btn-add-join');
-
-    app.windowJoin.querySelector('.responsive-content div[data-table-from]').insertBefore(joinFieldFrom, ref);
-    app.windowJoin.querySelector('.responsive-content div[data-table-to]').appendChild(joinFieldTo);
-
-  }
-
-  app.openJoinWindow = () => {
-    app.windowJoin.dataset.open = 'true';
-    app.addJoin();
-    // console.log(Draw.currentLineRef);
-    // console.log(Draw.currentLineRef.id);
-    // console.log(Draw.joinLines.get(Draw.currentLineRef.id));
-    const from = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).from);
-    const to = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).to);
-
-    app.windowJoin.querySelector('.responsive-content section[data-table-from]').dataset.tableFrom = from.table;
-    app.windowJoin.querySelector('.responsive-content section[data-table-from]').dataset.tableId = from.key;
-    app.windowJoin.querySelector('.responsive-content div[data-table-from] .table').innerHTML = from.table;
-    app.windowJoin.querySelector('.responsive-content section[data-table-to]').dataset.tableTo = to.table;
-    app.windowJoin.querySelector('.responsive-content section[data-table-to]').dataset.tableId = to.key;
-    app.windowJoin.querySelector('.responsive-content div[data-table-to] .table').innerHTML = to.table;
-  }
-
-  app.closeWindowJoin = () => {
-    // chiusura windowJoin
-    app.windowJoin.dataset.open = 'false';
-  }
-
-  // rimozione tabella dal draw SVG
-  app.removeTable = (e) => {
-    // tabella in join con e.currentTarget
-    const tableJoin = Draw.tables.get(e.currentTarget.dataset.id).join;
-    const tableJoinRef = Draw.svg.querySelector(`#${tableJoin}`);
-    // se è presente una tabella legata a currentTarget, in join, sto eliminando una tabella nella prop 'to' della joinLines
-    const joinLineKey = () => {
-      for (const [key, value] of Draw.joinLines) {
-        if ((value.to === e.currentTarget.dataset.id && value.from === tableJoin) || (value.from === e.currentTarget.dataset.id && value.to === tableJoin)) {
-          // console.log(`linea da eliminare ${key}`);
-          return key;
-        }
-      }
-    }
-    Draw.deleteJoinLine(joinLineKey());
-    if (tableJoin) {
-      // decremento dataset.joins della tabella legata a questa
-      tableJoinRef.dataset.joins--;
-    }
-    // lo rimuovo dal DOM
-    Draw.svg.querySelector(`#${e.currentTarget.dataset.id}`).remove();
-    Draw.tables.delete(e.currentTarget.dataset.id); // svg-data-x
-    delete Draw.tableJoin;
-    console.log(Draw.tables);
-    // rimuovo anche il <g> all'interno di <defs>
-    Draw.svg.querySelector(`g#struct-${e.currentTarget.dataset.id}`).remove();
-  }
 
   /* NOTE: END ONCLICK EVENTS*/
 
@@ -525,16 +429,136 @@ var Hier = new Hierarchy();
   /* NOTE: END FETCH API */
 
   /* NOTE: SUPPORT FUNCTIONS */
-
-  // inserisco la colonna selezionata per la creazione della join
-  app.handlerJoin = (e) => {
-    console.log(e.currentTarget);
+  app.handlerTable = (e) => {
+    console.log('select table');
+    e.currentTarget.toggleAttribute('data-selected');
+    // const cardStruct = document.querySelector('*[data-waiting="true"]');
+    // cardStruct.querySelector('span').innerHTML = e.currentTarget.dataset.label;
+    // delete cardStruct.dataset.waiting;
+    // cardStruct.dataset.defined = e.currentTarget.dataset.label;
   }
 
-  app.addFields = (key, response) => {
-    // key : from, to
-    const ul = app.windowJoin.querySelector(`section[data-table-${key}] ul`);
-    // ul.hidden = false;
+  app.handlerToggleDrawer = (e) => {
+    console.log('toggleDrawer');
+    document.querySelector('#' + e.currentTarget.dataset.drawerId).toggleAttribute('open');
+  }
+
+  app.tableSelected = (e) => {
+    debugger;
+    console.log(`table selected ${e.currentTarget.dataset.table}`);
+  }
+
+  app.lineSelected = (e) => {
+    // console.log(`line selected ${e.currentTarget.dataset.from} -> ${e.currentTarget.dataset.to}`);
+    Draw.currentLineRef = e.target.id;
+    app.openJoinWindow();
+  }
+
+  // imposto questo field come data-active
+  app.handlerJoin = (e) => {
+    const joinId = +e.currentTarget.dataset.joinId;
+    app.windowJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => {
+      delete joinField.dataset.active;
+    });
+    // imposto il data-active sugli .join-field[data-join-id] = joinId;
+    app.windowJoin.querySelectorAll(`.join-field[data-join-id='${joinId}']`).forEach(field => {
+      field.dataset.active = 'true';
+    });
+  }
+
+  app.addJoin = () => {
+    const tmplJoinFrom = app.tmplJoin.content.cloneNode(true);
+    const tmplJoinTo = app.tmplJoin.content.cloneNode(true);
+    const joinFieldFrom = tmplJoinFrom.querySelector('.join-field');
+    const joinFieldTo = tmplJoinTo.querySelector('.join-field');
+    joinFieldFrom.innerHTML = 'Campo';
+    joinFieldFrom.dataset.fn = 'handlerJoin';
+    joinFieldTo.dataset.fn = 'handlerJoin';
+    joinFieldTo.innerHTML = 'Campo';
+    const divJoins = app.windowJoin.querySelector('section[data-table-from] > .joins').childElementCount;
+    joinFieldFrom.dataset.joinId = divJoins;
+    joinFieldTo.dataset.joinId = divJoins;
+    // rimuovo eventuali joinField che hanno l'attributo data-active prima di aggiungere quelli nuovi
+    app.windowJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
+    app.windowJoin.querySelector('.wj-joins section[data-table-from] > .joins').appendChild(joinFieldFrom);
+    app.windowJoin.querySelector('.wj-joins section[data-table-to] > .joins').appendChild(joinFieldTo);
+  }
+
+  app.openJoinWindow = () => {
+    app.windowJoin.dataset.open = 'true';
+    app.addJoin();
+    // console.log(Draw.currentLineRef);
+    // console.log(Draw.currentLineRef.id);
+    // console.log(Draw.joinLines.get(Draw.currentLineRef.id));
+    const from = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).from);
+    const to = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).to);
+
+    app.windowJoin.querySelector('.wj-joins section[data-table-from]').dataset.tableFrom = from.table;
+    app.windowJoin.querySelector('.wj-joins section[data-table-from]').dataset.tableId = from.key;
+    app.windowJoin.querySelector('.wj-joins section[data-table-from] .table').innerHTML = from.table;
+    app.windowJoin.querySelector('.wj-joins section[data-table-to]').dataset.tableTo = to.table;
+    app.windowJoin.querySelector('.wj-joins section[data-table-to]').dataset.tableId = to.key;
+    app.windowJoin.querySelector('.wj-joins section[data-table-to] .table').innerHTML = to.table;
+  }
+
+  app.closeWindowJoin = () => {
+    app.windowJoin.dataset.open = 'false';
+  }
+
+  // rimozione tabella dal draw SVG
+  app.removeTable = (e) => {
+    // tabella in join con e.currentTarget
+    const tableJoin = Draw.tables.get(e.currentTarget.dataset.id).join;
+    const tableJoinRef = Draw.svg.querySelector(`#${tableJoin}`);
+    // se è presente una tabella legata a currentTarget, in join, sto eliminando una tabella nella prop 'to' della joinLines
+    const joinLineKey = () => {
+      for (const [key, value] of Draw.joinLines) {
+        if ((value.to === e.currentTarget.dataset.id && value.from === tableJoin) || (value.from === e.currentTarget.dataset.id && value.to === tableJoin)) {
+          // console.log(`linea da eliminare ${key}`);
+          return key;
+        }
+      }
+    }
+    Draw.deleteJoinLine(joinLineKey());
+    if (tableJoin) {
+      // decremento dataset.joins della tabella legata a questa
+      tableJoinRef.dataset.joins--;
+    }
+    // lo rimuovo dal DOM
+    Draw.svg.querySelector(`#${e.currentTarget.dataset.id}`).remove();
+    Draw.tables.delete(e.currentTarget.dataset.id); // svg-data-x
+    delete Draw.tableJoin;
+    console.log(Draw.tables);
+    // rimuovo anche il <g> all'interno di <defs>
+    Draw.svg.querySelector(`g#struct-${e.currentTarget.dataset.id}`).remove();
+  }
+
+  // inserisco la colonna selezionata per la creazione della join
+  app.addFieldToJoin = (e) => {
+    const fieldRef = app.windowJoin.querySelector(`section[data-table-id='${e.currentTarget.dataset.tableId}'] .join-field[data-active]`);
+    // console.log(fieldRef);
+    fieldRef.dataset.field = e.currentTarget.dataset.label;
+    fieldRef.dataset.table = e.currentTarget.dataset.table;
+    fieldRef.innerHTML = e.currentTarget.dataset.label;
+    const joinId = +fieldRef.dataset.joinId;
+    // verifico se i due fieldRef[data-active] hanno il data-field impostato. Se vero, posso creare la join tra le due tabelle
+    // recupero, con la funzione filter, i due field da mettere in join
+    let joins = [...app.windowJoin.querySelectorAll(`.join-field[data-active][data-field][data-join-id='${joinId}']`)].filter(field => +field.dataset.joinId === joinId);
+    console.log(joins);
+    if (joins.length === 2) {
+      const rand = () => Math.random(0).toString(36).substring(2);
+      const token = rand().substring(0, 7);
+      Hier.nJoin = {
+        token,
+        from: { table: joins[0].dataset.table, field: joins[0].dataset.field },
+        to: { table: joins[1].dataset.table, field: joins[1].dataset.field }
+      };
+    }
+  }
+
+  app.addFields = (source, response) => {
+    // source : from, to
+    const ul = app.windowJoin.querySelector(`section[data-table-${source}] ul`);
     for (const [key, value] of Object.entries(response)) {
       const content = app.tmplList.content.cloneNode(true);
       const li = content.querySelector('li[data-li]');
@@ -542,7 +566,7 @@ var Hier = new Hierarchy();
       li.dataset.label = value.COLUMN_NAME;
       // li.dataset.elementSearch = Hier.activeCard.dataset.label;
       li.dataset.tableId = Hier.activeTable.id;
-      li.dataset.tableName = Hier.activeTable.dataset.table;
+      li.dataset.table = Hier.activeTable.dataset.table;
       li.dataset.label = value.COLUMN_NAME;
       li.dataset.key = value.CONSTRAINT_NAME;
       span.innerText = value.COLUMN_NAME;
@@ -554,7 +578,7 @@ var Hier = new Hierarchy();
       li.dataset.id = key;
       // span.id = key;
       // fn da associare all'evento in 'mutation observe'
-      li.dataset.fn = 'handlerJoin';
+      li.dataset.fn = 'addFieldToJoin';
       ul.appendChild(li);
     }
   }

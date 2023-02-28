@@ -66,7 +66,7 @@ section > h3 ~ h5{font-weight: lighter;}
   .nav-button #arrow-back{display: none;}
   #drawer{width: 340px;}
   h4{font-size: 1.7rem;}
-  p{font-size: .8rem;padding: 6px;}
+  p{font-size: 1rem;padding: 6px;}
 }
 
 @media screen and (max-device-width: 768px) {

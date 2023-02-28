@@ -64,7 +64,7 @@
     </header>
 
     <template id="tmpl-join-field">
-      <div class="join-field"></div>
+      <div class="join-field" data-active></div>
     </template>
 
     <div id="container">
@@ -76,13 +76,20 @@
                 <p class="title">Creazione relazione</p>
                 <button type="button" data-fn="closeWindowJoin" class="button-icon material-icons-round md-18">close</button>
               </section>
-              <div class="responsive-content">
+              <div class="wj-joins">
                 <section data-table-from data-table-id>
-                  <div data-table-from>
-                    <div class="table"></div>
-                    <button id="btn-add-join" data-fn="addJoin" class="button-icon material-icons-round md-18" value="Aggiungi join">add</button>
-                  </div>
-                  <section class="list-search absolute" data-open="false">
+                  <div class="table"></div>
+                  <div class="joins"></div>
+                </section>
+                <section data-table-to data-table-id>
+                  <div class="table"></div>
+                  <div class="joins"></div>
+                </section>
+              </div>
+              <button id="btn-add-join" data-fn="addJoin" class="button-icon material-icons-round md-18" value="Aggiungi join">add</button>
+              <div class="wj-fields-list">
+                <section data-table-from>
+                  <section class="list-search">
                     <div class="md-field">
                       <input type="search" id="field-from-search" data-element-search="fields" autocomplete="off" />
                       <label for="field-from-search" class="">Ricerca</label>
@@ -92,11 +99,8 @@
                     </div>
                   </section>
                 </section>
-                <section data-table-to data-table-id>
-                  <div data-table-to>
-                    <div class="table"></div>
-                  </div>
-                  <section class="list-search absolute" data-open="false">
+                <section data-table-to>
+                  <section class="list-search">
                     <div class="md-field">
                       <input type="search" id="field-to-search" data-element-search="fields" autocomplete="off" />
                       <label for="field-to-search" class="">Ricerca</label>

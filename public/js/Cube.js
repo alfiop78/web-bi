@@ -217,6 +217,7 @@ class Hierarchy {
   #columns = new Map();
   #join = new Map();
   #joins = new Map();
+  #nJoin = new Map();
   #relationId = 0;
   #field; // TODO: da modificare in fieldDs
   #fieldId;
@@ -244,6 +245,20 @@ class Hierarchy {
   }
 
   get activeTable() { return this.#activeTable; }
+
+  set nJoin(object) {
+    if (!this.#nJoin.has(object.token)) {
+      // join non presente, la aggiungo
+      this.#nJoin.set(object.token, { from: object.from, to: object.to });
+      console.log(this.#nJoin);
+      debugger;
+    }
+  }
+
+  get nJoin() {
+    return this.#nJoin;
+
+  }
 
   /* NOTE: end mapdb */
 
