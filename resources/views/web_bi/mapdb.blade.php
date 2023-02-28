@@ -70,96 +70,98 @@
     <div id="container">
       <div id="content">
         <div id="body">
-          <div id="window-join" data-x="0" data-y="0" data-open="false">
-            <section class="wj-content">
-              <section class="wj-title">
-                <p class="title">Creazione relazione</p>
-                <button type="button" data-fn="closeWindowJoin" class="button-icon material-icons-round md-18">close</button>
+          <div class="wrapper-steps">
+            <div id="window-join" data-x="0" data-y="0" data-open="false">
+              <section class="wj-content">
+                <section class="wj-title">
+                  <p class="title">Creazione relazione</p>
+                  <button type="button" data-fn="closeWindowJoin" class="button-icon material-icons-round md-18">close</button>
+                </section>
+                <div class="wj-joins">
+                  <section data-table-from data-table-id>
+                    <div class="table"></div>
+                    <div class="joins"></div>
+                  </section>
+                  <section data-table-to data-table-id>
+                    <div class="table"></div>
+                    <div class="joins"></div>
+                  </section>
+                </div>
+                <button id="btn-add-join" data-fn="addJoin" class="button-icon material-icons-round md-18" value="Aggiungi join">add</button>
+                <div class="wj-fields-list">
+                  <section data-table-from>
+                    <section class="list-search">
+                      <div class="md-field">
+                        <input type="search" id="field-from-search" data-element-search="from-fields" autocomplete="off" />
+                        <label for="field-from-search" class="">Ricerca</label>
+                      </div>
+                      <div class="relative-ul">
+                        <ul id="ul-from-fields" class="custom-scrollbar"></ul>
+                      </div>
+                    </section>
+                  </section>
+                  <section data-table-to>
+                    <section class="list-search">
+                      <div class="md-field">
+                        <input type="search" id="field-to-search" data-element-search="to-fields" autocomplete="off" />
+                        <label for="field-to-search" class="">Ricerca</label>
+                      </div>
+                      <div class="relative-ul">
+                        <ul id="ul-to-fields" class="custom-scrollbar"></ul>
+                      </div>
+                    </section>
+                  </section>
+                </div>
               </section>
-              <div class="wj-joins">
-                <section data-table-from data-table-id>
-                  <div class="table"></div>
-                  <div class="joins"></div>
-                </section>
-                <section data-table-to data-table-id>
-                  <div class="table"></div>
-                  <div class="joins"></div>
-                </section>
-              </div>
-              <button id="btn-add-join" data-fn="addJoin" class="button-icon material-icons-round md-18" value="Aggiungi join">add</button>
-              <div class="wj-fields-list">
-                <section data-table-from>
-                  <section class="list-search">
-                    <div class="md-field">
-                      <input type="search" id="field-from-search" data-element-search="from-fields" autocomplete="off" />
-                      <label for="field-from-search" class="">Ricerca</label>
-                    </div>
-                    <div class="relative-ul">
-                      <ul id="ul-from-fields" class="custom-scrollbar"></ul>
-                    </div>
-                  </section>
-                </section>
-                <section data-table-to>
-                  <section class="list-search">
-                    <div class="md-field">
-                      <input type="search" id="field-to-search" data-element-search="to-fields" autocomplete="off" />
-                      <label for="field-to-search" class="">Ricerca</label>
-                    </div>
-                    <div class="relative-ul">
-                      <ul id="ul-to-fields" class="custom-scrollbar"></ul>
-                    </div>
-                  </section>
-                </section>
-              </div>
-            </section>
-          </div>
+            </div>
 
-          <section class="wrapper">
-            <section id="canvas-area">
-              <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
-                <svg id="svg" class="dropzone" data-level="0">
-                  <defs>
-                    <g id="table-struct" class="struct">
-                      <rect x="0" y="0" />
-                      <text x="18" y="20" font-family="Barlow" font-size=".85rem" font-weight="normal"></text>
-                      <image id="backspace" href="{{ asset('/images/backspace.svg') }}" data-id data-fn="removeTable" x="152" y="0" width="18" height="18">
-                      </image>
-                    </g>
-                  </defs>
-                </svg>
-                <span id="coords"></span>
-              </div>
-            </section>
-            <section id="tables-area">
-              <section class="table-area-wrapper">
-                <nav id="schema-drawer" class="nav-drawer">
-                  <section>
+            <section class="wrapper">
+              <section id="canvas-area">
+                <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
+                  <svg id="svg" class="dropzone" data-level="0">
+                    <defs>
+                      <g id="table-struct" class="struct">
+                        <rect x="0" y="0" />
+                        <text x="18" y="20" font-family="Barlow" font-size=".85rem" font-weight="normal"></text>
+                        <image id="backspace" href="{{ asset('/images/backspace.svg') }}" data-id data-fn="removeTable" x="152" y="0" width="18" height="18">
+                        </image>
+                      </g>
+                    </defs>
+                  </svg>
+                  <span id="coords"></span>
+                </div>
+              </section>
+              <section id="tables-area">
+                <section class="table-area-wrapper">
+                  <nav id="schema-drawer" class="nav-drawer">
+                    <section>
+                      <div class="md-field">
+                        <input type="search" id="schema-search" data-element-search="schemes" autocomplete="off" />
+                        <label for="schema-search" class="">Ricerca</label>
+                      </div>
+                      <ul>
+                        @foreach($schemes as $schema)
+                        <li data-schema="{{ $schema['SCHEMA_NAME'] }}" data-fn="handlerSchema">{{ $schema['SCHEMA_NAME'] }}</li>
+                        @endforeach
+                      </ul>
+                    </section>
+                    <button type="button" id="btn-open-schema-drawer" data-drawer-id="schema-drawer" data-fn="handlerToggleDrawer" value="Schema">Schema</button>
+                  </nav>
+                  <section class="list-search">
                     <div class="md-field">
-                      <input type="search" id="schema-search" data-element-search="schemes" autocomplete="off" />
-                      <label for="schema-search" class="">Ricerca</label>
+                      <input type="search" id="table-search" data-element-search="tables" autocomplete="off" />
+                      <label for="tables-search" class="">Ricerca</label>
                     </div>
-                    <ul>
-                      @foreach($schemes as $schema)
-                      <li data-schema="{{ $schema['SCHEMA_NAME'] }}" data-fn="handlerSchema">{{ $schema['SCHEMA_NAME'] }}</li>
-                      @endforeach
-                    </ul>
+                    <div class="relative-ul">
+                      <ul id="ul-tables" class="custom-scrollbar"></ul>
+                    </div>
                   </section>
-                  <button type="button" id="btn-open-schema-drawer" data-drawer-id="schema-drawer" data-fn="handlerToggleDrawer" value="Schema">Schema</button>
-                </nav>
-                <section class="list-search">
-                  <div class="md-field">
-                    <input type="search" id="table-search" data-element-search="tables" autocomplete="off" />
-                    <label for="tables-search" class="">Ricerca</label>
-                  </div>
-                  <div class="relative-ul">
-                    <ul id="ul-tables" class="custom-scrollbar"></ul>
-                  </div>
+                  <section>preview table</section>
                 </section>
-                <section>preview table</section>
-                <button type="button" id="test" data-fn="handlerTest">TEST</button>
               </section>
             </section>
-          </section>
+
+          </div>
 
         </div>
 
