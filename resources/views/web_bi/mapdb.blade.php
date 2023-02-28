@@ -13,8 +13,10 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-input-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/steps.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-mapdb.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
+  <script src="{{ asset('/js/Step.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
   <script src="{{ asset('/js/Storage.js') }}"></script>
   <script src="{{ asset('/js/Cube.js') }}"></script>
@@ -70,7 +72,7 @@
     <div id="container">
       <div id="content">
         <div id="body">
-          <div class="wrapper-steps">
+          <div class="wrapper">
             <div id="window-join" data-x="0" data-y="0" data-open="false">
               <section class="wj-content">
                 <section class="wj-title">
@@ -115,50 +117,63 @@
               </section>
             </div>
 
-            <section class="wrapper">
-              <section id="canvas-area">
-                <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
-                  <svg id="svg" class="dropzone" data-level="0">
-                    <defs>
-                      <g id="table-struct" class="struct">
-                        <rect x="0" y="0" />
-                        <text x="18" y="20" font-family="Barlow" font-size=".85rem" font-weight="normal"></text>
-                        <image id="backspace" href="{{ asset('/images/backspace.svg') }}" data-id data-fn="removeTable" x="152" y="0" width="18" height="18">
-                        </image>
-                      </g>
-                    </defs>
-                  </svg>
-                  <span id="coords"></span>
-                </div>
-              </section>
-              <section id="tables-area">
-                <section class="table-area-wrapper">
-                  <nav id="schema-drawer" class="nav-drawer">
-                    <section>
-                      <div class="md-field">
-                        <input type="search" id="schema-search" data-element-search="schemes" autocomplete="off" />
-                        <label for="schema-search" class="">Ricerca</label>
-                      </div>
-                      <ul>
-                        @foreach($schemes as $schema)
-                        <li data-schema="{{ $schema['SCHEMA_NAME'] }}" data-fn="handlerSchema">{{ $schema['SCHEMA_NAME'] }}</li>
-                        @endforeach
-                      </ul>
+            <section class="steps" data-step="1">
+              <button type="button" id="prev" class="button-icon material-icons-round md-48" disabled tooltip="Precedente" flow="right">skip_previous</button>
+              <div class="overflow">
+                <div id="stepTranslate" data-translate-x="0">
+                  <section class="step" data-step="1" selected>
+                    <section class="wrapper-step">
+                      <section id="canvas-area">
+                        <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
+                          <svg id="svg" class="dropzone" data-level="0">
+                            <defs>
+                              <g id="table-struct" class="struct">
+                                <rect x="0" y="0" />
+                                <text x="18" y="20" font-family="Barlow" font-size=".85rem" font-weight="normal"></text>
+                                <image id="backspace" href="{{ asset('/images/backspace.svg') }}" data-id data-fn="removeTable" x="152" y="0" width="18" height="18">
+                                </image>
+                              </g>
+                            </defs>
+                          </svg>
+                          <span id="coords"></span>
+                        </div>
+                      </section>
+                      <section id="tables-area">
+                        <section class="table-area-wrapper">
+                          <nav id="schema-drawer" class="nav-drawer">
+                            <section>
+                              <div class="md-field">
+                                <input type="search" id="schema-search" data-element-search="schemes" autocomplete="off" />
+                                <label for="schema-search" class="">Ricerca</label>
+                              </div>
+                              <ul>
+                                @foreach($schemes as $schema)
+                                <li data-schema="{{ $schema['SCHEMA_NAME'] }}" data-fn="handlerSchema">{{ $schema['SCHEMA_NAME'] }}</li>
+                                @endforeach
+                              </ul>
+                            </section>
+                            <button type="button" id="btn-open-schema-drawer" data-drawer-id="schema-drawer" data-fn="handlerToggleDrawer" value="Schema">Schema</button>
+                          </nav>
+                          <section class="list-search">
+                            <div class="md-field">
+                              <input type="search" id="table-search" data-element-search="tables" autocomplete="off" />
+                              <label for="tables-search" class="">Ricerca</label>
+                            </div>
+                            <div class="relative-ul">
+                              <ul id="ul-tables" class="custom-scrollbar"></ul>
+                            </div>
+                          </section>
+                          <section>preview table</section>
+                        </section>
+                      </section>
                     </section>
-                    <button type="button" id="btn-open-schema-drawer" data-drawer-id="schema-drawer" data-fn="handlerToggleDrawer" value="Schema">Schema</button>
-                  </nav>
-                  <section class="list-search">
-                    <div class="md-field">
-                      <input type="search" id="table-search" data-element-search="tables" autocomplete="off" />
-                      <label for="tables-search" class="">Ricerca</label>
-                    </div>
-                    <div class="relative-ul">
-                      <ul id="ul-tables" class="custom-scrollbar"></ul>
-                    </div>
+
                   </section>
-                  <section>preview table</section>
-                </section>
-              </section>
+                  <section class="step" data-step="2">step 2</section>
+                </div>
+
+              </div>
+              <button type="button" id="next" class="button-icon material-icons-round md-48" tooltip="Anteprima report" flow="left">skip_next</button>
             </section>
 
           </div>

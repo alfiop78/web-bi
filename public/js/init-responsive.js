@@ -25,6 +25,9 @@ var Hier = new Hierarchy();
 
   App.init();
 
+  // la Classe Steps deve impostare alcune proprietà DOPO che viene visualizzato il body, non può essere posizionato prima di App.init();
+  var Step = new Steps('stepTranslate');
+
   const config = { attributes: true, childList: true, subtree: true };
 
   const callback = (mutationList, observer) => {
@@ -332,6 +335,10 @@ var Hier = new Hierarchy();
   app.btnCreateDimension.onclick = () => {
     app.body.dataset.mode = 'create-dimension';
   }
+
+  document.getElementById('prev').onclick = () => Step.previous();
+
+  document.getElementById('next').onclick = () => Step.next();
 
 
   /* NOTE: END ONCLICK EVENTS*/
