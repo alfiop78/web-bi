@@ -25,6 +25,8 @@ li{
   padding: 0px 1rem;
 }
 
+li[hidden] {display: none;}
+
 /* ul > li:hover{
   cursor: pointer;
   background-color: salmon;

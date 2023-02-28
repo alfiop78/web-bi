@@ -218,6 +218,7 @@ class Hierarchy {
   #join = new Map();
   #joins = new Map();
   #nJoin = new Map();
+  #nJoins = new Map();
   #relationId = 0;
   #field; // TODO: da modificare in fieldDs
   #fieldId;
@@ -247,18 +248,28 @@ class Hierarchy {
   get activeTable() { return this.#activeTable; }
 
   set nJoin(object) {
-    if (!this.#nJoin.has(object.token)) {
-      // join non presente, la aggiungo
-      this.#nJoin.set(object.token, { from: object.from, to: object.to });
-      console.log(this.#nJoin);
-      debugger;
+    // this.#nJoin.set(object.token, { table: object.table, alias: object.alias, from: object.from, to: object.to });
+    this.#nJoin.set(object.token, object.value);
+    console.log('#nJoin :', this.#nJoin);
+  }
+
+  get nJoin() { return this.#nJoin; }
+
+  set nJoins(token) {
+    if (!this.#nJoins.has(this.#nJoin.get(token).alias)) {
+      // alias tabella non presente nelle #nJoins, la aggiungo
+      this.#nJoins.set(this.#nJoin.get(token).alias, {
+        [token]: this.#nJoin.get(token)
+      });
+    } else {
+      // alias di tabella già presente
+      this.#nJoins.get(this.#nJoin.get(token).alias)[token] = this.#nJoin.get(token);
+
     }
+    console.log('#nJoins : ', this.#nJoins);
   }
 
-  get nJoin() {
-    return this.#nJoin;
-
-  }
+  get nJoins() { return this.#nJoins; }
 
   /* NOTE: end mapdb */
 

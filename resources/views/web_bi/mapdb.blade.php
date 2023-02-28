@@ -91,7 +91,7 @@
                 <section data-table-from>
                   <section class="list-search">
                     <div class="md-field">
-                      <input type="search" id="field-from-search" data-element-search="fields" autocomplete="off" />
+                      <input type="search" id="field-from-search" data-element-search="from-fields" autocomplete="off" />
                       <label for="field-from-search" class="">Ricerca</label>
                     </div>
                     <div class="relative-ul">
@@ -102,7 +102,7 @@
                 <section data-table-to>
                   <section class="list-search">
                     <div class="md-field">
-                      <input type="search" id="field-to-search" data-element-search="fields" autocomplete="off" />
+                      <input type="search" id="field-to-search" data-element-search="to-fields" autocomplete="off" />
                       <label for="field-to-search" class="">Ricerca</label>
                     </div>
                     <div class="relative-ul">

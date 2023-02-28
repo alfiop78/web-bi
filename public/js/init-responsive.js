@@ -174,8 +174,8 @@ var Hier = new Hierarchy();
     // let coords = { x: e.offsetX - app.dragElementPosition.x, y: e.offsetY - app.dragElementPosition.y }
     let coords;
     // TODO: alias per la tabella appena aggiunta (in sospeso)
-    /* const time = Date.now().toString();
-    card.dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`; */
+    const time = Date.now().toString();
+    // card.dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`;
 
     // se non è presente una tableJoin significa che sto aggiungendo la prima tabella
     if (!Draw.tableJoin) {
@@ -191,6 +191,7 @@ var Hier = new Hierarchy();
             to: { x: coords.x - 10, y: coords.y + 15 }
           },
           table: liElement.dataset.label,
+          alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
           schema: liElement.dataset.schema,
           join: null,
           joins: 0,
@@ -259,6 +260,7 @@ var Hier = new Hierarchy();
             to: { x: coords.x - 10, y: coords.y + 15 }
           },
           table: liElement.dataset.label,
+          alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
           schema: liElement.dataset.schema,
           joins: 0,
           join: Draw.tableJoin.table.id,
@@ -448,9 +450,20 @@ var Hier = new Hierarchy();
     console.log(`table selected ${e.currentTarget.dataset.table}`);
   }
 
-  app.lineSelected = (e) => {
-    // console.log(`line selected ${e.currentTarget.dataset.from} -> ${e.currentTarget.dataset.to}`);
+  app.lineSelected = async (e) => {
+    console.log(`line selected ${e.currentTarget.dataset.from} -> ${e.currentTarget.dataset.to}`);
     Draw.currentLineRef = e.target.id;
+    Hier.tableJoins = {
+      from: Draw.currentLineRef.dataset.from,
+      to: Draw.currentLineRef.dataset.to
+    }
+    console.log(Hier.tableJoins);
+    for (const [key, value] of Object.entries(Hier.tableJoins)) {
+      Hier.activeTable = value.id;
+      const data = await app.getTable();
+      app.addFields(key, data);
+      console.log(data);
+    }
     app.openJoinWindow();
   }
 
@@ -478,6 +491,10 @@ var Hier = new Hierarchy();
     const divJoins = app.windowJoin.querySelector('section[data-table-from] > .joins').childElementCount;
     joinFieldFrom.dataset.joinId = divJoins;
     joinFieldTo.dataset.joinId = divJoins;
+    const rand = () => Math.random(0).toString(36).substring(2);
+    const token = rand().substring(0, 7);
+    joinFieldFrom.dataset.token = token;
+    joinFieldTo.dataset.token = token;
     // rimuovo eventuali joinField che hanno l'attributo data-active prima di aggiungere quelli nuovi
     app.windowJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
     app.windowJoin.querySelector('.wj-joins section[data-table-from] > .joins').appendChild(joinFieldFrom);
@@ -485,11 +502,11 @@ var Hier = new Hierarchy();
   }
 
   app.openJoinWindow = () => {
+    // visualizzo la windowJoin
     app.windowJoin.dataset.open = 'true';
+    app.windowJoin.dataset.lineId = Draw.currentLineRef.id;
+    // aggiungo i template per join-field
     app.addJoin();
-    // console.log(Draw.currentLineRef);
-    // console.log(Draw.currentLineRef.id);
-    // console.log(Draw.joinLines.get(Draw.currentLineRef.id));
     const from = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).from);
     const to = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).to);
 
@@ -502,6 +519,9 @@ var Hier = new Hierarchy();
   }
 
   app.closeWindowJoin = () => {
+    // ripulisco la window dalla precedente join creata
+    app.windowJoin.querySelectorAll('.join-field').forEach(joinField => joinField.remove());
+    app.windowJoin.querySelectorAll('ul > li').forEach(li => li.remove());
     app.windowJoin.dataset.open = 'false';
   }
 
@@ -539,20 +559,27 @@ var Hier = new Hierarchy();
     // console.log(fieldRef);
     fieldRef.dataset.field = e.currentTarget.dataset.label;
     fieldRef.dataset.table = e.currentTarget.dataset.table;
+    fieldRef.dataset.alias = e.currentTarget.dataset.alias;
     fieldRef.innerHTML = e.currentTarget.dataset.label;
     const joinId = +fieldRef.dataset.joinId;
     // verifico se i due fieldRef[data-active] hanno il data-field impostato. Se vero, posso creare la join tra le due tabelle
     // recupero, con la funzione filter, i due field da mettere in join
     let joins = [...app.windowJoin.querySelectorAll(`.join-field[data-active][data-field][data-join-id='${joinId}']`)].filter(field => +field.dataset.joinId === joinId);
-    console.log(joins);
+    // console.log(joins);
     if (joins.length === 2) {
-      const rand = () => Math.random(0).toString(36).substring(2);
-      const token = rand().substring(0, 7);
       Hier.nJoin = {
-        token,
-        from: { table: joins[0].dataset.table, field: joins[0].dataset.field },
-        to: { table: joins[1].dataset.table, field: joins[1].dataset.field }
+        token: fieldRef.dataset.token,
+        value: {
+          table: joins[0].dataset.table,
+          alias: joins[0].dataset.alias,
+          SQL: [`${joins[0].dataset.alias}.${joins[0].dataset.field}`, `${joins[1].dataset.alias}.${joins[1].dataset.field}`],
+          from: { alias: joins[0].dataset.alias, field: joins[0].dataset.field },
+          to: { alias: joins[1].dataset.alias, field: joins[1].dataset.field }
+        }
       };
+      Hier.nJoins = fieldRef.dataset.token; // nome della tabella con le proprie join (Hier.nJoin) all'interno
+      // dopo aver completato la join coloro la linea in modo diverso
+      Draw.currentLineRef.dataset.joined = 'true';
     }
   }
 
@@ -564,9 +591,10 @@ var Hier = new Hierarchy();
       const li = content.querySelector('li[data-li]');
       const span = li.querySelector('span');
       li.dataset.label = value.COLUMN_NAME;
-      // li.dataset.elementSearch = Hier.activeCard.dataset.label;
+      li.dataset.elementSearch = `${source}-fields`;
       li.dataset.tableId = Hier.activeTable.id;
       li.dataset.table = Hier.activeTable.dataset.table;
+      li.dataset.alias = Hier.activeTable.dataset.alias;
       li.dataset.label = value.COLUMN_NAME;
       li.dataset.key = value.CONSTRAINT_NAME;
       span.innerText = value.COLUMN_NAME;

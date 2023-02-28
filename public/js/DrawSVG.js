@@ -67,6 +67,7 @@ class DrawSVG {
     use.classList.add('table');
     use.dataset.id = `data-${this.currentTable.id}`;
     use.dataset.table = this.currentTable.table;
+    use.dataset.alias = this.currentTable.alias;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;
     use.dataset.tableJoin = this.currentTable.join;
