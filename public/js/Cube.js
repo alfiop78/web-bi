@@ -219,6 +219,10 @@ class Hierarchy {
   #joins = new Map();
   #nJoin = new Map();
   #nJoins = new Map();
+  #nColumn = new Map();
+  #nColumns = new Map();
+  #nTables = new Map();
+
   #relationId = 0;
   #field; // TODO: da modificare in fieldDs
   #fieldId;
@@ -231,7 +235,9 @@ class Hierarchy {
   #alias; // alias per la tabella
   #tableJoins = { from: null, to: null }; // refs 
   // #tableTo; // ref 
-  constructor() { }
+  constructor() {
+    this.workBook = {};
+  }
 
   /* NOTE: mapdb*/
   set tableJoins(object) {
@@ -264,12 +270,46 @@ class Hierarchy {
     } else {
       // alias di tabella già presente
       this.#nJoins.get(this.#nJoin.get(token).alias)[token] = this.#nJoin.get(token);
-
     }
     console.log('#nJoins : ', this.#nJoins);
   }
 
   get nJoins() { return this.#nJoins; }
+
+  set nColumn(object) {
+    this.#nColumn.set(object.token, object.value);
+  }
+
+  get nColumn() { return this.#nColumn; }
+
+  set nColumns(token) {
+    if (!this.#nColumns.has(this.#nColumn.get(token).tableAlias)) {
+      // alias tabella non presente nelle #nJoins, la aggiungo
+      this.#nColumns.set(this.#nColumn.get(token).tableAlias, {
+        [token]: this.#nColumn.get(token)
+      });
+    } else {
+      // alias di tabella già presente
+      this.#nColumns.get(this.#nColumn.get(token).tableAlias)[token] = this.#nColumn.get(token);
+    }
+    console.log('#nColumns : ', this.#nColumns);
+  }
+
+  get nColumns() { return this.#nColumns; }
+
+  set nTables(value) {
+    this.#nTables.set(value.table, value.alias);
+    console.log(this.#nTables);
+  }
+
+  get nTables() { return this.#nTables; }
+
+  save() {
+    this.workBook.name = 'workBook 1';
+    this.workBook.columns = Object.fromEntries(this.nColumns);
+    this.workBook.joins = Object.fromEntries(this.nJoins);
+    console.log(this.workBook);
+  }
 
   /* NOTE: end mapdb */
 

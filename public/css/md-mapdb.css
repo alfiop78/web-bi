@@ -183,6 +183,12 @@ use.table:hover{
   stroke-width: 0.3;
 }
 
+use.table[data-active]{
+  fill: lightblue;
+  stroke: #494949;
+  stroke-width: 0.3;
+}
+
 #coords{
   position: absolute;
   background-color: #494949;
@@ -191,7 +197,7 @@ use.table:hover{
 }
 
 
-#window-join[data-open="false"]{
+#window-join[data-open="false"], #window-columns[data-open="false"]{
   position: absolute;
   display: none;
 }
@@ -209,6 +215,18 @@ use.table:hover{
   height: auto;
 }
 
+#window-columns[data-open="true"]{
+  display: grid;
+  background-color: gainsboro;
+  z-index: 300;
+  box-shadow: 0px 2px 5px 0px grey;
+  position: absolute;
+  top: 200px;
+  left: 350px;
+  width: 600px;
+  height: auto;
+}
+
 .wj-content{
   display: grid;
   grid-template-rows: auto 1fr auto 210px;
@@ -216,22 +234,22 @@ use.table:hover{
   height: 100%;
 }
 
-.wj-title > p{
+.w-title > p{
   margin: 0px;
   padding: 1em;
 }
 
-.wj-title > p.title{
+.w-title > p.title{
   background-color: #AEBDCA;
 }
 
-.wj-title > p.title:hover{
+.w-title > p.title:hover{
   background-color: #7895B2;
   color: white;
   cursor: grab;
 }
 
-.wj-title > button{
+.w-title > button{
   position: absolute;
   right: 0px;
   top: 0px;
@@ -276,6 +294,27 @@ use.table:hover{
 
 .join-field:hover{cursor: pointer;}
 
+.wc-content{
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-row-gap: 1em;
+  height: 100%;
+}
+
+.wc-content .define-fields{
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-column-gap: 1em;
+}
+
 section[data-table-from] .table, section[data-table-to] .table{
   padding: .5em;
+}
+
+.wrapper-sheet{
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: 280px 1fr;
+  width: 100%;
+  height: 100%;
 }

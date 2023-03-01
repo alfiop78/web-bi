@@ -14,12 +14,14 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-input-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-steps-responsive.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-preview-table.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-mapdb.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/Step.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
   <script src="{{ asset('/js/Storage.js') }}"></script>
   <script src="{{ asset('/js/Cube.js') }}"></script>
+  <script src="{{ asset('/js/Table.js') }}"></script>
   <script src="{{ asset('/js/DrawSVG.js') }}"></script>
 </head>
 
@@ -34,6 +36,10 @@
       <i class="material-icons-round md-18">drag_handle</i>
       <span></span>
     </li>
+  </template>
+
+  <template id="tmpl-table-field-list">
+    <section data-list></section>
   </template>
 
   <main>
@@ -71,9 +77,9 @@
       <div id="content">
         <div id="body">
           <div class="wrapper">
-            <div id="window-join" data-x="0" data-y="0" data-open="false">
+            <div id="window-join" class="absolute-window" data-x="0" data-y="0" data-open="false">
               <section class="wj-content">
-                <section class="wj-title">
+                <section class="w-title">
                   <p class="title">Creazione relazione</p>
                   <button type="button" data-fn="closeWindowJoin" class="button-icon material-icons-round md-18">close</button>
                 </section>
@@ -115,6 +121,27 @@
               </section>
             </div>
 
+            <div class="absolute-window" id="window-columns" data-x="0" data-y="0" data-open="false">
+              <section class="wc-content">
+                <section class="w-title">
+                  <p class="title">Definizione colonna</p>
+                </section>
+                <section class="define-fields">
+                  <div class="textarea">
+                    <textarea id="textarea-column-id-formula" data-mode="field" rows="10" placeholder="ID Formula" autocomplete="off" autofocus="" required="" minlength="1" readonly="true"></textarea>
+                  </div>
+                  <div class="textarea">
+                    <textarea id="textarea-column-ds-formula" data-mode="field" rows="10" placeholder="DS Formula" autocomplete="off" autofocus="" required="" minlength="1" readonly="true"></textarea>
+                  </div>
+                </section>
+                <div class="dialog-buttons">
+                  <button type="button" name="cancel" class="md-button">annulla</button>
+                  <button id="btn-columns-define" data-fn="saveColumn" type="button" name="done" class="md-button">SALVA</button>
+                </div>
+              </section>
+            </div>
+
+
             <section class="steps" data-step="1">
               <!--<button type="button" id="prev" class="button-icon material-icons-round md-48" disabled tooltip="Precedente" flow="right">skip_previous</button>-->
               <div class="overflow">
@@ -148,17 +175,30 @@
                             </div>
                           </section>
                           <section class="table-preview">
-                            <table>
-
-                            </table>
-
+                            <div class="table-content">
+                              <!--<table id="table-header-fixed">
+                                <thead>
+                                  <tr></tr>
+                                </thead>
+                              </table>-->
+                              <table id="preview-table">
+                                <thead>
+                                  <tr></tr>
+                                </thead>
+                                <tbody></tbody>
+                              </table>
+                            </div>
                           </section>
                         </section>
                       </section>
                     </section>
 
                   </section>
-                  <section class="step" data-step="2">step 2</section>
+                  <section class="step" data-step="2">
+                    <section class="wrapper-sheet">
+                      <div id="table-field-list" class="tables"></div>
+                    </section>
+                  </section>
                 </div>
 
               </div>

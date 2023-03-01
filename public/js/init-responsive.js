@@ -10,8 +10,11 @@ var Hier = new Hierarchy();
     // templates
     tmplList: document.getElementById('tmpl-li'),
     tmplJoin: document.getElementById('tmpl-join-field'),
+    tmplTables: document.getElementById('tmpl-table-field-list'),
     // dialogs
     dialogTables: document.getElementById('dlg-tables'),
+    windowJoin: document.getElementById('window-join'),
+    windowColumns: document.getElementById('window-columns'),
     // buttons
     btnSelectSchema: document.getElementById('btn-select-schema'),
     // drawer
@@ -20,8 +23,8 @@ var Hier = new Hierarchy();
     body: document.getElementById('body'),
     translate: document.getElementById('translate'),
     coordsRef: document.getElementById('coords'),
-    windowJoin: document.getElementById('window-join'),
-    wjTitle: document.querySelector('#window-join .wj-title')
+    wjTitle: document.querySelector('#window-join .wj-title'),
+    tablesField: document.querySelector('#table-field-list')
   }
 
   App.init();
@@ -48,8 +51,8 @@ var Hier = new Hierarchy();
           }
         });
       } else if (mutation.type === 'attributes') {
-        console.log(`The ${mutation.attributeName} attribute was modified.`);
-        console.log(mutation.target);
+        // console.log(`The ${mutation.attributeName} attribute was modified.`);
+        // console.log(mutation.target);
         if (mutation.target.hasChildNodes()) {
           mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
           mutation.target.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
@@ -338,11 +341,24 @@ var Hier = new Hierarchy();
 
   document.getElementById('prev').onclick = () => Step.previous();
 
-  document.getElementById('next').onclick = () => Step.next();
+  document.getElementById('next').onclick = () => {
+    // TODO: salvo il workbook creato
+    Hier.save();
+    app.sheet();
+    Step.next();
+  }
 
   // imposto attribute init sul <nav>, in questo modo verranno associati gli eventi data-fn sui child di <nav>
   app.drawer.querySelectorAll('nav').forEach(a => a.dataset.init = 'true');
 
+  app.handlerColumn = (e) => {
+    app.windowColumns.dataset.open = 'true';
+    app.windowColumns.dataset.field = e.currentTarget.dataset.field;
+    const id = app.windowColumns.querySelector('#textarea-column-id-formula');
+    const ds = app.windowColumns.querySelector('#textarea-column-ds-formula');
+    id.value = 'id';
+    ds.value = e.currentTarget.dataset.field;
+  }
 
   /* NOTE: END ONCLICK EVENTS*/
 
@@ -388,6 +404,23 @@ var Hier = new Hierarchy();
   }
 
   app.windowJoin.onmouseup = () => delete app.el;
+
+  app.windowColumns.onmousedown = (e) => {
+    app.coords = { x: +e.currentTarget.dataset.x, y: +e.currentTarget.dataset.y };
+    if (e.target.classList.contains('title')) app.el = e.target;
+  }
+
+  app.windowColumns.onmousemove = (e) => {
+    if (app.el) {
+      app.coords.x += e.movementX;
+      app.coords.y += e.movementY;
+      e.currentTarget.style.transform = "translate(" + app.coords.x + "px, " + app.coords.y + "px)";
+      e.currentTarget.dataset.x = app.coords.x;
+      e.currentTarget.dataset.y = app.coords.y;
+    }
+  }
+
+  app.windowColumns.onmouseup = () => delete app.el;
 
   // visualizzo l'icona delete utilizzando <use> in svg
   app.tableEnter = (e) => {
@@ -438,6 +471,20 @@ var Hier = new Hierarchy();
       });
   }
 
+  app.getPreviewTable = async () => {
+    return await fetch('/fetch_api/' + Hier.activeTable.dataset.schema + '/schema/' + Hier.activeTable.dataset.table + '/table_preview')
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(response => response)
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+  }
+
   /* NOTE: END FETCH API */
 
   /* NOTE: SUPPORT FUNCTIONS */
@@ -458,11 +505,15 @@ var Hier = new Hierarchy();
   app.tableSelected = async (e) => {
     console.log(`table selected ${e.currentTarget.dataset.table}`);
     console.log(e.currentTarget);
+    // deseleziono le altre tabelle con attributo active
+    Draw.svg.querySelectorAll("use.table[data-active='true']").forEach(use => delete use.dataset.active);
+    e.currentTarget.dataset.active = 'true';
     // recupero 50 record della tabella selezionata per visualizzare un anteprima
     Hier.activeTable = e.currentTarget.id;
-    debugger;
-    const data = await app.getTable();
-    console.log(data);
+    let DT = new Table(await app.getPreviewTable(), 'preview-table');
+    // DataTable.data = await app.getPreviewTable();
+    // console.log(DT.data);
+    DT.draw();
   }
 
   app.lineSelected = async (e) => {
@@ -477,7 +528,7 @@ var Hier = new Hierarchy();
       Hier.activeTable = value.id;
       const data = await app.getTable();
       app.addFields(key, data);
-      console.log(data);
+      // console.log(data);
     }
     app.openJoinWindow();
   }
@@ -623,6 +674,57 @@ var Hier = new Hierarchy();
       // fn da associare all'evento in 'mutation observe'
       li.dataset.fn = 'addFieldToJoin';
       ul.appendChild(li);
+    }
+  }
+
+  app.saveColumn = () => {
+    const field = app.windowColumns.dataset.field;
+    const id = app.windowColumns.querySelector('#textarea-column-id-formula');
+    const ds = app.windowColumns.querySelector('#textarea-column-ds-formula');
+    let fieldObjectId = { field: id.value, type: 'da_completare', origin_field: field };
+    let fieldObjectDs = { field: ds.value, type: 'da_completare', origin_field: field };
+    // Hier.field = { id: fieldObjectId, ds: fieldObjectDs };
+    const rand = () => Math.random(0).toString(36).substring(2);
+    const token = rand().substring(0, 7);
+    Hier.nColumn = {
+      token,
+      value: {
+        tableAlias: Hier.activeTable.dataset.alias,
+        table: Hier.activeTable.dataset.table,
+        id: fieldObjectId,
+        ds: fieldObjectDs
+      }
+    };
+    Hier.nColumns = token;
+    Hier.nTables = { table: Hier.activeTable.dataset.table, alias: Hier.activeTable.dataset.alias };
+    app.windowColumns.dataset.open = 'false';
+  }
+
+  app.openFieldList = (e) => {
+    // apertura elenco campi della tabella selezionata
+    const alias = e.currentTarget.dataset.alias;
+    console.log(alias);
+    // recupero i campi della tabella selezionata
+    console.log(Hier.nColumns.get(alias));
+    const parent = document.querySelector(`section[data-alias='${alias}']`);
+    for (const [key, value] of Object.entries(Hier.nColumns.get(alias))) {
+      const tmpl = app.tmplList.content.cloneNode(true);
+      const li = tmpl.querySelector('li');
+      const span = li.querySelector('span');
+      span.innerHTML = value.ds.field;
+      parent.appendChild(li);
+
+    }
+  }
+
+  app.sheet = () => {
+    for (const [table, alias] of Hier.nTables) {
+      const tmpl = app.tmplTables.content.cloneNode(true);
+      const section = tmpl.querySelector('section');
+      section.innerHTML = table;
+      section.dataset.alias = alias;
+      section.dataset.fn = 'openFieldList';
+      app.tablesField.appendChild(section);
     }
   }
   /* NOTE: END SUPPORT FUNCTIONS */

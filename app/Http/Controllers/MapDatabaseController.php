@@ -104,6 +104,14 @@ class MapDatabaseController extends Controller
     return response()->json($info);
   }
 
+  public function table_preview($schema, $table)
+  {
+    /* dd($table); */
+    /* $tables = DB::connection('mysql')->select("DESCRIBE Azienda"); */
+    $data = DB::connection('vertica_odbc')->select("SELECT * FROM $schema.$table LIMIT 50;");
+    return response()->json($data);
+  }
+
   // ottengo valori distinti per il field selezionato (dialog-filter)
   public function distinct_values($schema, $table, $field)
   {
