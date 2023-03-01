@@ -13,8 +13,9 @@ var Hier = new Hierarchy();
     // dialogs
     dialogTables: document.getElementById('dlg-tables'),
     // buttons
-    btnCreateDimension: document.getElementById('btn-create-dimension'),
     btnSelectSchema: document.getElementById('btn-select-schema'),
+    // drawer
+    drawer: document.getElementById('drawer'),
     // body
     body: document.getElementById('body'),
     translate: document.getElementById('translate'),
@@ -47,7 +48,8 @@ var Hier = new Hierarchy();
           }
         });
       } else if (mutation.type === 'attributes') {
-        // console.log(`The ${mutation.attributeName} attribute was modified.`);
+        console.log(`The ${mutation.attributeName} attribute was modified.`);
+        console.log(mutation.target);
         if (mutation.target.hasChildNodes()) {
           mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
           mutation.target.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
@@ -61,6 +63,7 @@ var Hier = new Hierarchy();
   // Start observing the target node for configured mutations
   // observerList.observe(targetNode, config);
   observerList.observe(document.getElementById('body'), config);
+  observerList.observe(app.drawer, config);
   // observerList.observe(Draw.svg, config);
 
   /* NOTE: DRAG&DROP EVENTS */
@@ -303,6 +306,7 @@ var Hier = new Hierarchy();
 
   // selezione schema/i 
   app.handlerSchema = async (e) => {
+    e.preventDefault();
     e.currentTarget.toggleAttribute('data-selected');
     if (e.currentTarget.hasAttribute('data-selected')) {
       const schema = e.currentTarget.dataset.schema;
@@ -332,13 +336,12 @@ var Hier = new Hierarchy();
 
   /* NOTE: ONCLICK EVENTS*/
 
-  app.btnCreateDimension.onclick = () => {
-    app.body.dataset.mode = 'create-dimension';
-  }
-
   document.getElementById('prev').onclick = () => Step.previous();
 
   document.getElementById('next').onclick = () => Step.next();
+
+  // imposto attribute init sul <nav>, in questo modo verranno associati gli eventi data-fn sui child di <nav>
+  app.drawer.querySelectorAll('nav').forEach(a => a.dataset.init = 'true');
 
 
   /* NOTE: END ONCLICK EVENTS*/
@@ -452,9 +455,14 @@ var Hier = new Hierarchy();
     document.querySelector('#' + e.currentTarget.dataset.drawerId).toggleAttribute('open');
   }
 
-  app.tableSelected = (e) => {
-    debugger;
+  app.tableSelected = async (e) => {
     console.log(`table selected ${e.currentTarget.dataset.table}`);
+    console.log(e.currentTarget);
+    // recupero 50 record della tabella selezionata per visualizzare un anteprima
+    Hier.activeTable = e.currentTarget.id;
+    debugger;
+    const data = await app.getTable();
+    console.log(data);
   }
 
   app.lineSelected = async (e) => {

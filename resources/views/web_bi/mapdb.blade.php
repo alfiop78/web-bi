@@ -13,7 +13,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-input-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/steps.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-steps-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-mapdb.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/Step.js') }}"></script>
@@ -44,15 +44,11 @@
       </section>
 
       <nav>
-        <li id="btn-create-dimension" class="icon">
-          <i class="material-icons-round md-24">storage</i>
-          <span>Crea dimensione</span>
-        </li>
-      </nav>
-
-      <nav id="nav-report">
-        <!-- TODO: -->
-
+        <a href="#" id="mdc-back">home</a>
+        {{-- {{ dd($schemes) }} --}}
+        @foreach($schemes as $schema)
+        <a href="#" data-fn="handlerSchema" data-schema="{{ $schema['SCHEMA_NAME'] }}">{{ $schema['SCHEMA_NAME'] }}</a>
+        @endforeach
       </nav>
 
     </div>
@@ -120,7 +116,7 @@
             </div>
 
             <section class="steps" data-step="1">
-              <button type="button" id="prev" class="button-icon material-icons-round md-48" disabled tooltip="Precedente" flow="right">skip_previous</button>
+              <!--<button type="button" id="prev" class="button-icon material-icons-round md-48" disabled tooltip="Precedente" flow="right">skip_previous</button>-->
               <div class="overflow">
                 <div id="stepTranslate" data-translate-x="0">
                   <section class="step" data-step="1" selected>
@@ -142,20 +138,6 @@
                       </section>
                       <section id="tables-area">
                         <section class="table-area-wrapper">
-                          <nav id="schema-drawer" class="nav-drawer">
-                            <section>
-                              <div class="md-field">
-                                <input type="search" id="schema-search" data-element-search="schemes" autocomplete="off" />
-                                <label for="schema-search" class="">Ricerca</label>
-                              </div>
-                              <ul>
-                                @foreach($schemes as $schema)
-                                <li data-schema="{{ $schema['SCHEMA_NAME'] }}" data-fn="handlerSchema">{{ $schema['SCHEMA_NAME'] }}</li>
-                                @endforeach
-                              </ul>
-                            </section>
-                            <button type="button" id="btn-open-schema-drawer" data-drawer-id="schema-drawer" data-fn="handlerToggleDrawer" value="Schema">Schema</button>
-                          </nav>
                           <section class="list-search">
                             <div class="md-field">
                               <input type="search" id="table-search" data-element-search="tables" autocomplete="off" />
@@ -165,7 +147,12 @@
                               <ul id="ul-tables" class="custom-scrollbar"></ul>
                             </div>
                           </section>
-                          <section>preview table</section>
+                          <section class="table-preview">
+                            <table>
+
+                            </table>
+
+                          </section>
                         </section>
                       </section>
                     </section>
@@ -175,7 +162,12 @@
                 </div>
 
               </div>
-              <button type="button" id="next" class="button-icon material-icons-round md-48" tooltip="Anteprima report" flow="left">skip_next</button>
+              <section class="actions">
+                <button id="prev">Workbook</button>
+                <button id="next">Sheet</button>
+              </section>
+
+              <!--<button type="button" id="next" class="button-icon material-icons-round md-48" tooltip="Anteprima report" flow="left">skip_next</button>-->
             </section>
 
           </div>
@@ -186,10 +178,10 @@
 
       <div id="controls">
         <div id="fabs">
-          <button id="mdc-back" class="button dense raised">home</button>
+          <!--<button id="mdc-back" class="button dense raised">home</button>
+          <button id="prev" class="button dense raised">WorkBook</button>
           <div class="spacer"></div>
-          <button id="mdc-report" class="button dense raised">report</button>
-          <button id="mdc-mapping" class="button dense raised">Map Database</button>
+          <button id="next" class="button dense raised">report</button>-->
         </div>
       </div>
 

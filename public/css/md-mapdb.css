@@ -61,6 +61,12 @@ main > #container{
   width: 100%;
 }
 
+.steps > .actions{
+  display: flex;
+  justify-content: space-between;
+  width: inherit;
+}
+
 .wrapper{
   display: grid;
   grid-template-columns: 100%;
