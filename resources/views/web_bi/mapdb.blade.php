@@ -38,10 +38,18 @@
     </li>
   </template>
 
-  <template id="tmpl-table-detail">
-    <details>
-      <summary>Details</summary>
-    </details>
+  <template id="tmpl-dl-element">
+    <dl data-id="dt-hierarchies">
+      <dt></dt>
+  </template>
+
+  <template id="tmpl-dd-element">
+    <dd>
+      <details data-id="dt-tables">
+        <summary></summary>
+      </details>
+    </dd>
+    </dl>
   </template>
 
   <main>
@@ -73,6 +81,14 @@
 
     <template id="tmpl-join-field">
       <div class="join-field" data-active></div>
+    </template>
+
+    <template id="tmpl-columns-defined">
+      <div class="column-defined">
+        <i class="button-icon material-icons-round md-18">view_column</i>
+        <span></span>
+        <i data-id="btn-set-metric" class="button-icon material-icons-round md-18">query_stats</i>
+      </div>
     </template>
 
     <div id="container">
@@ -198,11 +214,14 @@
                   </section>
                   <section class="step" data-step="2">
                     <section class="wrapper-sheet">
-                      <div id="table-field-list" class="tables"></div>
+                      <div id="hier-table-field" class="tables"></div>
                       <div class="report-area">
                         <section class="columns-rows">
-                          <section class="dropzone columns">columns</section>
-                          <section class="dropzone rows">rows</section>
+                          <section id="dropzone-columns" class="dropzone columns">
+                            <h5>Colonne</h5>
+                            <section class="columns-area"></section>
+                          </section>
+                          <section id="dropzone-rows" class="dropzone rows">rows</section>
                         </section>
                         <section class="report-preview">
                           <section class="">report data</section>

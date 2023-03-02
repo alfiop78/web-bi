@@ -10,7 +10,9 @@ var Hier = new Hierarchy();
     // templates
     tmplList: document.getElementById('tmpl-li'),
     tmplJoin: document.getElementById('tmpl-join-field'),
-    tmplTableDetail: document.getElementById('tmpl-table-detail'),
+    tmplDL: document.getElementById('tmpl-dl-element'),
+    tmplDD: document.getElementById('tmpl-dd-element'),
+    tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
     // dialogs
     dialogTables: document.getElementById('dlg-tables'),
     windowJoin: document.getElementById('window-join'),
@@ -24,7 +26,10 @@ var Hier = new Hierarchy();
     translate: document.getElementById('translate'),
     coordsRef: document.getElementById('coords'),
     wjTitle: document.querySelector('#window-join .wj-title'),
-    tablesField: document.querySelector('#table-field-list')
+    tablesField: document.querySelector('#hier-table-field'),
+    // columns and rows dropzone (step 2)
+    columns: document.getElementById('dropzone-columns'),
+    rows: document.getElementById('dropzone-rows')
   }
 
   App.init();
@@ -311,7 +316,78 @@ var Hier = new Hierarchy();
   // drag su campo per la creazione del report
   app.fieldDragStart = (e) => {
     console.log('field drag start');
+    console.log('e.target : ', e.target.id);
+    e.target.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', e.target.id);
+    console.log(e.dataTransfer);
+    e.dataTransfer.effectAllowed = "copy";
   }
+
+  app.fieldDragEnter = (e) => {
+    e.preventDefault();
+    console.log(e.currentTarget);
+    if (e.currentTarget.classList.contains('dropzone')) {
+      console.info('dropzone columns');
+      // console.log(e.currentTarget, e.target);
+      // e.dataTransfer.dropEffect = "copy";
+      // coloro il border differente per la dropzone
+      e.currentTarget.classList.add('dropping');
+    } else {
+      console.warn('non in dropzone');
+      // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
+
+  app.fieldDragOver = (e) => {
+    e.preventDefault();
+    // console.log(e.currentTarget);
+    if (e.currentTarget.classList.contains('dropzone')) {
+      e.dataTransfer.dropEffect = "copy";
+    } else {
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
+
+  app.handlerDragLeave = (e) => {
+    e.preventDefault();
+    console.log(e.currentTarget);
+    e.currentTarget.classList.remove('dropping');
+  }
+
+  // imposto questo field come metrica
+  app.handlerSetMetric = (e) => {
+    console.log(e.target);
+  }
+
+  app.fieldDrop = (e) => {
+    e.preventDefault();
+    console.log(e.target);
+    // console.clear();
+    e.currentTarget.classList.replace('dropping', 'dropped');
+    if (!e.currentTarget.classList.contains('dropzone')) return;
+    e.currentTarget.classList.remove('dragging');
+    const elementId = e.dataTransfer.getData('text/plain');
+    const elementRef = document.getElementById(elementId);
+    const parent = e.currentTarget.querySelector('.columns-area');
+    console.log(elementRef);
+    // creo l'elemento .field-defined dal template #tmpl-columns-defined
+    const tmpl = app.tmplColumnsDefined.content.cloneNode(true);
+    const field = tmpl.querySelector('.column-defined');
+    const span = field.querySelector('span');
+    const i = field.querySelector("i[data-id='btn-set-metric']");
+    span.innerHTML = elementRef.dataset.field;
+    field.dataset.type = 'column';
+    // i.addEventListener('click', app.handlerSetMetric);
+    i.dataset.fn = 'handlerSetMetric';
+    parent.appendChild(field);
+  }
+
+  app.columns.addEventListener('dragover', app.fieldDragOver, false);
+  app.columns.addEventListener('dragenter', app.fieldDragEnter, false);
+  app.columns.addEventListener('dragleave', app.fieldDragLeave, false);
+  app.columns.addEventListener('drop', app.fieldDrop, false);
+
   /* NOTE: END DRAG&DROP EVENTS */
 
   // selezione schema/i 
@@ -351,8 +427,9 @@ var Hier = new Hierarchy();
   document.getElementById('next').onclick = () => {
 
     // salvo il workbook creato
-    // Hier.save();
-    // Step.next();
+    Step.next();
+    app.addHierStruct();
+    Hier.save();
   }
 
   // imposto attribute init sul <nav>, in questo modo verranno associati gli eventi data-fn sui child di <nav>
@@ -519,7 +596,7 @@ var Hier = new Hierarchy();
   }
 
   app.createHierarchies = () => {
-    // TODO: salvo le gerarchie / dimensioni create nel canvas
+    // salvo le gerarchie / dimensioni create nel canvas
     // recupero gli elementi del level-id più alto, il data-level presente su <svg> identifica il livello più alto presente
     const levelId = +Draw.svg.dataset.level;
     let recursiveLevels = (levelId) => {
@@ -729,35 +806,50 @@ var Hier = new Hierarchy();
     };
     Hier.nColumns = token;
     Hier.nTables = { table: Hier.activeTable.dataset.table, alias: Hier.activeTable.dataset.alias };
-    app.addTableStruct();
     app.windowColumns.dataset.open = 'false';
   }
 
-  app.addTableStruct = () => {
-    // se la struct della tabella già esiste, aggiungo solo i campi
-    let details;
-    if (!app.tablesField.querySelector(`details[data-id='${Hier.activeTable.dataset.table}']`)) {
-      const tmpl = app.tmplTableDetail.content.cloneNode(true);
-      details = tmpl.querySelector('details');
-      const summary = details.querySelector('summary');
-      details.dataset.id = Hier.activeTable.dataset.table;
-      summary.innerHTML = Hier.activeTable.dataset.table;
-      summary.dataset.alias = Hier.activeTable.dataset.alias;
-      app.tablesField.appendChild(details);
-    } else {
-      details = app.tablesField.querySelector(`details[data-id='${Hier.activeTable.dataset.table}']`);
-    }
-    debugger;
-    for (const [key, value] of Object.entries(Hier.nColumns.get(Hier.activeTable.dataset.alias))) {
-      const tmpl = app.tmplList.content.cloneNode(true);
-      const li = tmpl.querySelector('li[data-li-drag]');
-      const span = li.querySelector('span');
-      li.setAttribute('draggable', 'true');
-      li.addEventListener('dragstart', app.fieldDragStart);
-      span.innerHTML = value.ds.field;
-      details.appendChild(li);
+  app.addHierStruct = () => {
+    // ciclo le hierarchies presenti per aggiungerle alla struttura dello step 2
+    console.log(Hier.nHier);
+    // ripulisco la struttura già presente.
+    // TODO: in futuro dovrò aggiornare la struttura già presente (e non resettare). In questo modo, gli elementi aggiunti al report non verranno resettati
+    app.tablesField.querySelectorAll('dl').forEach(dl => dl.remove());
+    for (const [hierName, tables] of Hier.nHier) {
+      const dlElement = app.tmplDL.content.cloneNode(true);
+      const dl = dlElement.querySelector("dl");
+      const dt = dl.querySelector('dt');
+      dt.innerHTML = `${hierName} (nome gerarchia)`;
+      app.tablesField.appendChild(dl);
+      tables.forEach(tableId => {
+        const ddElement = app.tmplDD.content.cloneNode(true);
+        const dd = ddElement.querySelector("dd");
+        const details = dd.querySelector("details");
+        const summary = details.querySelector('summary');
+        Hier.activeTable = tableId;
+        summary.innerHTML = Hier.activeTable.dataset.table;
+        summary.dataset.tableId = tableId;
+        dt.appendChild(dd);
+        if (Hier.nColumns.has(Hier.activeTable.dataset.alias)) {
+          for (const [token, value] of Object.entries(Hier.nColumns.get(Hier.activeTable.dataset.alias))) {
+            const tmpl = app.tmplList.content.cloneNode(true);
+            const li = tmpl.querySelector('li[data-li-drag]');
+            const i = li.querySelector('i');
+            const span = li.querySelector('span');
+            li.id = token;
+            li.dataset.table = value.table;
+            li.dataset.alias = value.tableAlias;
+            li.dataset.field = value.ds.field;
+            li.addEventListener('dragstart', app.fieldDragStart);
+            li.addEventListener('dragend', app.fieldDragEnd);
+            span.innerHTML = value.ds.field;
+            details.appendChild(li);
+          }
+        }
+      });
     }
   }
+
 
   /* NOTE: END SUPPORT FUNCTIONS */
 
