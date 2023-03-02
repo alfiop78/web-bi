@@ -340,13 +340,20 @@ section[data-table-from] .table, section[data-table-to] .table{
 
 .column-defined{
   display: flex;
-  background-color: lightcyan;
   /* color: white; */
   position: relative;
   padding: 6px;
   border-radius: 4px;
   width: 170px;
   margin: 6px 18px;
+}
+
+.column-defined[data-type="column"]{
+  background-color: lightcyan;
+}
+
+.column-defined[data-type="metric"]{
+  background-color: lightgreen;
 }
 
 i[data-id="btn-set-metric"]:hover{

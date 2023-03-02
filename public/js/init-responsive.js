@@ -2,9 +2,9 @@ var App = new Application();
 var Draw = new DrawSVG('svg');
 // var StorageCube = new CubeStorage();
 // var StorageDimension = new DimensionStorage();
-var Cube = new Cubes();
+var Cube = new newCube();
 var Dim = new Dimension();
-var Hier = new Hierarchy();
+var Hier = new newHierarchy();
 (() => {
   var app = {
     // templates
@@ -358,11 +358,21 @@ var Hier = new Hierarchy();
   // imposto questo field come metrica
   app.handlerSetMetric = (e) => {
     console.log(e.target);
+    // TODO: dialog show (anzichè showModal())
+    // const dlgMetric = document.getElementById('dlg-metric');
+    // dlgMetric.show();
+    // dlgMetric.showModal();
+    document.querySelector(`.column-defined[data-id='${e.target.dataset.token}']`).dataset.type = 'metric';
+    // imposto SUM su questa metrica
+    const aggregateFn = 'SUM';
+    const date = new Date();
+    // edit o salvataggio di una metrica
+    const token = rand().substring(0, 21);
   }
 
   app.fieldDrop = (e) => {
     e.preventDefault();
-    console.log(e.target);
+    // console.log(e.target);
     // console.clear();
     e.currentTarget.classList.replace('dropping', 'dropped');
     if (!e.currentTarget.classList.contains('dropzone')) return;
@@ -378,8 +388,10 @@ var Hier = new Hierarchy();
     const i = field.querySelector("i[data-id='btn-set-metric']");
     span.innerHTML = elementRef.dataset.field;
     field.dataset.type = 'column';
+    field.dataset.id = elementRef.id;
     // i.addEventListener('click', app.handlerSetMetric);
     i.dataset.fn = 'handlerSetMetric';
+    i.dataset.token = elementRef.id;
     parent.appendChild(field);
   }
 

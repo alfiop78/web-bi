@@ -52,6 +52,10 @@
     </dl>
   </template>
 
+  <dialog id="dlg-metric" class="medium">
+    <h5>Metrica</h5>
+  </dialog>
+
   <main>
     <div id="drawer">
 

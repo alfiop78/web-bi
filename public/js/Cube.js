@@ -11,6 +11,7 @@ class Cubes {
     this._cube = {};
     this.relationId = 0;
     this._dimensions = []; // dimensioni selezionate da associare al cube
+    this.workBook = {};
   }
 
   set token(value) {
@@ -211,33 +212,32 @@ class Dimension {
 
 }
 
-class Hierarchy {
-  #schema;
+class newCube {
+  constructor() {
+    this.workBook = {};
+
+  }
+
+  save() {
+    debugger;
+    this.workBook.name = 'workBook 1';
+    this.workBook.columns = Object.fromEntries(this.nColumns);
+    this.workBook.joins = Object.fromEntries(this.nJoins);
+    console.log(this.workBook);
+  }
+}
+
+class newHierarchy extends newCube {
   #activeTable;
-  #columns = new Map();
-  #join = new Map();
-  #joins = new Map();
   #nJoin = new Map();
   #nJoins = new Map();
   #nColumn = new Map();
   #nColumns = new Map();
   #nTables = new Map();
   #nHier = new Map();
-
-  #relationId = 0;
-  #field; // TODO: da modificare in fieldDs
-  #fieldId;
-  #fieldRef; // riferimento, nel DOM, della colonna selezionata
-  #comment;
-  #hier = {};
-  #from;
-  #table;
-  #lastTableHierarchy;
-  #alias; // alias per la tabella
   #tableJoins = { from: null, to: null }; // refs 
-  // #tableTo; // ref 
   constructor() {
-    this.workBook = {};
+    super();
   }
 
   /* NOTE: mapdb*/
@@ -312,15 +312,35 @@ class Hierarchy {
 
   get nTables() { return this.#nTables; }
 
-  save() {
-
+  /* save() {
     this.workBook.name = 'workBook 1';
     this.workBook.columns = Object.fromEntries(this.nColumns);
     this.workBook.joins = Object.fromEntries(this.nJoins);
     console.log(this.workBook);
-  }
+  } */
+}
 
-  /* NOTE: end mapdb */
+class Hierarchy {
+  #schema;
+  #activeTable;
+  #columns = new Map();
+  #join = new Map();
+  #joins = new Map();
+
+  #relationId = 0;
+  #field; // TODO: da modificare in fieldDs
+  #fieldId;
+  #fieldRef; // riferimento, nel DOM, della colonna selezionata
+  #comment;
+  #hier = {};
+  #from;
+  #table;
+  #lastTableHierarchy;
+  #alias; // alias per la tabella
+  #tableJoins = { from: null, to: null }; // refs 
+  // #tableTo; // ref 
+  constructor() {
+  }
 
   set table(value) { this.#table = value; }
 

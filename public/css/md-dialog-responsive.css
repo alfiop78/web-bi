@@ -1,7 +1,24 @@
-dialog:not([open])  {display: none;}
-dialog[open]{border: none;box-shadow: 0 2px 5px 1px rgba(10,10,10,.35);border-radius: 4px;}
+dialog:not([open]) {
+  display: none;
+}
+
+dialog[open]{
+  border: none;
+  box-shadow: 0 2px 5px 1px rgba(10,10,10,.35);
+  border-radius: 4px;
+  z-index:20;
+}
+
 dialog::backdrop {
   background: rgb(0 0 0 / 26%);
+}
+
+dialog.medium{
+  top: 30%;
+  width: 50%;
+  max-width: 60%;
+  height: 30%;
+  max-height: 50%;
 }
 
 .dialog-wrapper {
@@ -42,44 +59,6 @@ dialog::backdrop {
   display: grid;
   grid-template-rows: auto auto 1fr;
 }
-/* dialog > .grid-autofit{
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: .5em;
-} */
-
-/* dialog > .steps{
-  display: flex;
-  justify-content: center;
-}
-
-dialog > .steps > .overflow{
-  display: grid;
-  width: 80%;
-  overflow: hidden;
-  grid-template-columns: 100%;
-}
-
-dialog > .steps #translate[data-step="1"]{
-  display: flex;
-  width: 100%;
-  transition: transform 200ms;
-  transform: translateX(0%);
-}
-
-dialog > .steps #translate[data-step="2"]{
-  display: flex;
-  width: 100%;
-  transition: transform 200ms;
-  transform: translateX(-100%);
-}
-
-dialog > .steps .step{
-  display: grid;
-  grid-template-rows: auto auto 1fr;
-  min-width: calc(100% - 32px);
-  margin: 16px;
-} */
 
 .small{
   height: 60%;
