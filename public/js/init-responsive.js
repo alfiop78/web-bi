@@ -358,6 +358,8 @@ var Hier = new newHierarchy();
   // imposto questo field come metrica
   app.handlerSetMetric = (e) => {
     console.log(e.target);
+    console.log(e.target.dataset.token); // token della colonna
+    debugger;
     // TODO: dialog show (anzichè showModal())
     // const dlgMetric = document.getElementById('dlg-metric');
     // dlgMetric.show();
@@ -365,9 +367,34 @@ var Hier = new newHierarchy();
     document.querySelector(`.column-defined[data-id='${e.target.dataset.token}']`).dataset.type = 'metric';
     // imposto SUM su questa metrica
     const aggregateFn = 'SUM';
-    const date = new Date();
+    const table = document.querySelector(`details[data-id='dt-tables'] > li[id='${e.target.dataset.token}']`).dataset.table;
+    const tableAlias = document.querySelector(`details[data-id='dt-tables'] > li[id='${e.target.dataset.token}']`).dataset.alias;
+    const field = document.querySelector(`details[data-id='dt-tables'] > li[id='${e.target.dataset.token}']`).dataset.field;
+    // const date = new Date();
     // edit o salvataggio di una metrica
+    const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 21);
+
+    // metric Map Object
+    Hier.metric = {
+      token,
+      value: {
+        alias: 'metric alias',
+        type: 'base/adv/composite',
+        workBook: { table, tableAlias },
+        // workBook: { table: Hier.workBook.name, alias: 'alias tabella fact' },
+        formula: {
+          token,
+          aggregateFn,
+          field,
+          distinct: false,
+          alias: 'aliasmetric'
+        }
+      }
+    };
+    Hier.metrics = token;
+    Hier.save();
+
   }
 
   app.fieldDrop = (e) => {
@@ -770,6 +797,7 @@ var Hier = new newHierarchy();
     }
   }
 
+  // aggiungo i campi di una tabella per creare la join
   app.addFields = (source, response) => {
     // source : from, to
     const ul = app.windowJoin.querySelector(`section[data-table-${source}] ul`);

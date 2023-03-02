@@ -213,17 +213,40 @@ class Dimension {
 }
 
 class newCube {
+  #metric = new Map();
+  #metrics = new Map();
   constructor() {
     this.workBook = {};
-
   }
 
+  set metric(object) {
+    this.#metric.set(object.token, object.value);
+  }
+
+  get metric() { return this.#metric; }
+
+  set metrics(token) {
+    if (!this.#metrics.has(this.#metric.get(token).workBook.tableAlias)) {
+      this.#metrics.set(this.#metric.get(token).workBook.tableAlias, {
+        [token]: this.#metric.get(token)
+      });
+    } else {
+      // alias di tabella già presente
+      this.#metrics.get(this.#metric.get(token).workBook.tableAlias)[token] = this.#metric.get(token);
+    }
+    console.log('#metrics : ', this.#metrics);
+  }
+
+  get metrics() { return this.#metrics; }
+
   save() {
-    debugger;
+    console.clear();
     this.workBook.name = 'workBook 1';
     this.workBook.columns = Object.fromEntries(this.nColumns);
     this.workBook.joins = Object.fromEntries(this.nJoins);
-    console.log(this.workBook);
+    // TODO: le metriche non vengono impostate nella fase di mapping (almeno per ora) quindi dovrei memorizzarle in una Classe Sheet (ex Query.js)
+    this.workBook.metrics = Object.fromEntries(this.metrics);
+    console.log('WorkBook : ', this.workBook);
   }
 }
 
