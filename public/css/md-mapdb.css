@@ -318,3 +318,12 @@ section[data-table-from] .table, section[data-table-to] .table{
   width: 100%;
   height: 100%;
 }
+
+.report-area{
+  display: grid;
+  grid-template-rows: 1fr 3fr;
+}
+
+.report-area .columns-rows{
+  display: grid;
+}

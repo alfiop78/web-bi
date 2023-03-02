@@ -222,6 +222,7 @@ class Hierarchy {
   #nColumn = new Map();
   #nColumns = new Map();
   #nTables = new Map();
+  #nHier = new Map();
 
   #relationId = 0;
   #field; // TODO: da modificare in fieldDs
@@ -276,6 +277,13 @@ class Hierarchy {
 
   get nJoins() { return this.#nJoins; }
 
+  set nHier(value) {
+    this.#nHier.set(value.name, value.hierarchies);
+    console.log(this.#nHier);
+  }
+
+  get nHier() { return this.#nHier; }
+
   set nColumn(object) {
     this.#nColumn.set(object.token, object.value);
   }
@@ -305,6 +313,7 @@ class Hierarchy {
   get nTables() { return this.#nTables; }
 
   save() {
+
     this.workBook.name = 'workBook 1';
     this.workBook.columns = Object.fromEntries(this.nColumns);
     this.workBook.joins = Object.fromEntries(this.nJoins);

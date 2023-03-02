@@ -38,8 +38,10 @@
     </li>
   </template>
 
-  <template id="tmpl-table-field-list">
-    <section data-list></section>
+  <template id="tmpl-table-detail">
+    <details>
+      <summary>Details</summary>
+    </details>
   </template>
 
   <main>
@@ -197,6 +199,15 @@
                   <section class="step" data-step="2">
                     <section class="wrapper-sheet">
                       <div id="table-field-list" class="tables"></div>
+                      <div class="report-area">
+                        <section class="columns-rows">
+                          <section class="dropzone columns">columns</section>
+                          <section class="dropzone rows">rows</section>
+                        </section>
+                        <section class="report-preview">
+                          <section class="">report data</section>
+                        </section>
+                      </div>
                     </section>
                   </section>
                 </div>

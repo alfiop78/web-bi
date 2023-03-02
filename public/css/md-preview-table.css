@@ -21,6 +21,7 @@ thead th {
   top: 0;
   vertical-align: bottom;
   background-color: lightskyblue;
+  border: solid thin gainsboro;
 }
 
 thead th:hover{

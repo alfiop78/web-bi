@@ -10,7 +10,7 @@ var Hier = new Hierarchy();
     // templates
     tmplList: document.getElementById('tmpl-li'),
     tmplJoin: document.getElementById('tmpl-join-field'),
-    tmplTables: document.getElementById('tmpl-table-field-list'),
+    tmplTableDetail: document.getElementById('tmpl-table-detail'),
     // dialogs
     dialogTables: document.getElementById('dlg-tables'),
     windowJoin: document.getElementById('window-join'),
@@ -169,6 +169,8 @@ var Hier = new Hierarchy();
         }
       }
     }
+    // creo le gerarchie
+    app.createHierarchies();
   }
 
   app.handlerDrop = (e) => {
@@ -305,6 +307,11 @@ var Hier = new Hierarchy();
   Draw.svg.addEventListener('drop', app.handlerDrop, false);
   // drag end event va posizionato sullo stesso elemento che ha il dragStart
   Draw.svg.addEventListener('dragend', app.handlerDragEnd, true);
+
+  // drag su campo per la creazione del report
+  app.fieldDragStart = (e) => {
+    console.log('field drag start');
+  }
   /* NOTE: END DRAG&DROP EVENTS */
 
   // selezione schema/i 
@@ -342,10 +349,10 @@ var Hier = new Hierarchy();
   document.getElementById('prev').onclick = () => Step.previous();
 
   document.getElementById('next').onclick = () => {
-    // TODO: salvo il workbook creato
-    Hier.save();
-    app.sheet();
-    Step.next();
+
+    // salvo il workbook creato
+    // Hier.save();
+    // Step.next();
   }
 
   // imposto attribute init sul <nav>, in questo modo verranno associati gli eventi data-fn sui child di <nav>
@@ -358,6 +365,20 @@ var Hier = new Hierarchy();
     const ds = app.windowColumns.querySelector('#textarea-column-ds-formula');
     id.value = 'id';
     ds.value = e.currentTarget.dataset.field;
+  }
+
+  app.tableSelected = async (e) => {
+    console.log(`table selected ${e.currentTarget.dataset.table}`);
+    console.log(e.currentTarget);
+    // deseleziono le altre tabelle con attributo active
+    Draw.svg.querySelectorAll("use.table[data-active='true']").forEach(use => delete use.dataset.active);
+    e.currentTarget.dataset.active = 'true';
+    // recupero 50 record della tabella selezionata per visualizzare un anteprima
+    Hier.activeTable = e.currentTarget.id;
+    let DT = new Table(await app.getPreviewTable(), 'preview-table');
+    // DataTable.data = await app.getPreviewTable();
+    // console.log(DT.data);
+    DT.draw();
   }
 
   /* NOTE: END ONCLICK EVENTS*/
@@ -497,23 +518,34 @@ var Hier = new Hierarchy();
     // cardStruct.dataset.defined = e.currentTarget.dataset.label;
   }
 
+  app.createHierarchies = () => {
+    // TODO: salvo le gerarchie / dimensioni create nel canvas
+    // recupero gli elementi del level-id più alto, il data-level presente su <svg> identifica il livello più alto presente
+    const levelId = +Draw.svg.dataset.level;
+    let recursiveLevels = (levelId) => {
+      // per ogni level-id recupero le tabelle che hanno data-joins=0 (l'ultima tabella della gerarchia, che quindi non ha altre tabelle legate in join)
+      Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'][data-joins='0']`).forEach(table => {
+        let hier = { name: table.dataset.alias, hierarchies: [] };
+        // table : tabella nell'ultimo level-id
+        // procedo da questa tabella, verso la fact, per ricostruire il percorso di questa gerarchia.
+        // Per farlo ho bisogno del dataset.tableJoin perchè qui viene identificata la tabella messa in join con questa in ciclo
+        let recursive = (tableId) => {
+          hier.hierarchies.push(tableId);
+          if (Draw.tables.get(tableId).join) recursive(Draw.tables.get(tableId).join);
+        }
+        recursive(table.id);
+        // console.log(hier);
+        Hier.nHier = hier;
+      });
+      levelId--;
+      if (levelId !== 0) recursiveLevels(levelId);
+    }
+    if (levelId > 0) recursiveLevels(levelId);
+  }
+
   app.handlerToggleDrawer = (e) => {
     console.log('toggleDrawer');
     document.querySelector('#' + e.currentTarget.dataset.drawerId).toggleAttribute('open');
-  }
-
-  app.tableSelected = async (e) => {
-    console.log(`table selected ${e.currentTarget.dataset.table}`);
-    console.log(e.currentTarget);
-    // deseleziono le altre tabelle con attributo active
-    Draw.svg.querySelectorAll("use.table[data-active='true']").forEach(use => delete use.dataset.active);
-    e.currentTarget.dataset.active = 'true';
-    // recupero 50 record della tabella selezionata per visualizzare un anteprima
-    Hier.activeTable = e.currentTarget.id;
-    let DT = new Table(await app.getPreviewTable(), 'preview-table');
-    // DataTable.data = await app.getPreviewTable();
-    // console.log(DT.data);
-    DT.draw();
   }
 
   app.lineSelected = async (e) => {
@@ -697,36 +729,36 @@ var Hier = new Hierarchy();
     };
     Hier.nColumns = token;
     Hier.nTables = { table: Hier.activeTable.dataset.table, alias: Hier.activeTable.dataset.alias };
+    app.addTableStruct();
     app.windowColumns.dataset.open = 'false';
   }
 
-  app.openFieldList = (e) => {
-    // apertura elenco campi della tabella selezionata
-    const alias = e.currentTarget.dataset.alias;
-    console.log(alias);
-    // recupero i campi della tabella selezionata
-    console.log(Hier.nColumns.get(alias));
-    const parent = document.querySelector(`section[data-alias='${alias}']`);
-    for (const [key, value] of Object.entries(Hier.nColumns.get(alias))) {
+  app.addTableStruct = () => {
+    // se la struct della tabella già esiste, aggiungo solo i campi
+    let details;
+    if (!app.tablesField.querySelector(`details[data-id='${Hier.activeTable.dataset.table}']`)) {
+      const tmpl = app.tmplTableDetail.content.cloneNode(true);
+      details = tmpl.querySelector('details');
+      const summary = details.querySelector('summary');
+      details.dataset.id = Hier.activeTable.dataset.table;
+      summary.innerHTML = Hier.activeTable.dataset.table;
+      summary.dataset.alias = Hier.activeTable.dataset.alias;
+      app.tablesField.appendChild(details);
+    } else {
+      details = app.tablesField.querySelector(`details[data-id='${Hier.activeTable.dataset.table}']`);
+    }
+    debugger;
+    for (const [key, value] of Object.entries(Hier.nColumns.get(Hier.activeTable.dataset.alias))) {
       const tmpl = app.tmplList.content.cloneNode(true);
-      const li = tmpl.querySelector('li');
+      const li = tmpl.querySelector('li[data-li-drag]');
       const span = li.querySelector('span');
+      li.setAttribute('draggable', 'true');
+      li.addEventListener('dragstart', app.fieldDragStart);
       span.innerHTML = value.ds.field;
-      parent.appendChild(li);
-
+      details.appendChild(li);
     }
   }
 
-  app.sheet = () => {
-    for (const [table, alias] of Hier.nTables) {
-      const tmpl = app.tmplTables.content.cloneNode(true);
-      const section = tmpl.querySelector('section');
-      section.innerHTML = table;
-      section.dataset.alias = alias;
-      section.dataset.fn = 'openFieldList';
-      app.tablesField.appendChild(section);
-    }
-  }
   /* NOTE: END SUPPORT FUNCTIONS */
 
 })();
