@@ -98,6 +98,21 @@
     <div id="container">
       <div id="content">
         <div id="body">
+          <dialog id="dlg-filters">
+            <section class="dlg-grid">
+              <section class="dlg-title">Creazione Filtro</section>
+              <section class="dlg-content col col-2">
+                <nav>struttura delle tabelle presenti nel canvas</nav>
+                <div>textarea per la creazione del filtro</div>
+              </section>
+              <section class="dlg-buttons">
+                <button name="dlg-close" value="chiudi">Chiudi</button>
+                <button id="btn-filter-save" value="salva">Salva</button>
+              </section>
+            </section>
+
+
+          </dialog>
           <div class="wrapper">
             <div id="window-join" class="absolute-window" data-x="0" data-y="0" data-open="false">
               <section class="wj-content">
@@ -218,7 +233,15 @@
                   </section>
                   <section class="step" data-step="2">
                     <section class="wrapper-sheet">
-                      <div id="hier-table-field" class="tables"></div>
+                      <div class="properties">
+                        <section id="workbook-props"></section>
+                        <section id="sheet-props">
+                          <div>
+                            <span>Filtri</span>
+                            <button data-fn="handlerFilters" id="btn-add-filters">Filtri</button>
+                          </div>
+                        </section>
+                      </div>
                       <div class="report-area">
                         <section class="columns-rows">
                           <section id="dropzone-columns" class="dropzone columns">

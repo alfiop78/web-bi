@@ -237,6 +237,7 @@ class Sheet {
 
 }
 
+// TODO: rinominare in WorkBook
 class newCube extends Sheet {
   #metric = new Map();
   #metrics = new Map();
@@ -355,6 +356,7 @@ class newHierarchy extends newCube {
 
   get nColumns() { return this.#nColumns; }
 
+  // qui viene memorizzato solo le tabelle che hanno almeno una colonna impostata nel workbook
   set nTables(value) {
     this.#nTables.set(value.table, value.alias);
     console.log(this.#nTables);

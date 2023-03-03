@@ -364,3 +364,9 @@ i[data-id="btn-set-metric"]:hover{
   position: absolute;
   left: 100%;
 }
+
+.wrapper-sheet .properties{
+  display: grid;
+  grid-template-rows: 50% 50%;
+
+}

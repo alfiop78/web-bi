@@ -83,3 +83,13 @@ dialog > .buttons {
   display: flex;
   justify-content: space-between;
 }
+
+dialog#dlg-filters > .dlg-grid{
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+#dlg-filters > .dlg-grid > .dlg-content.col.col-2{
+  display: grid;
+  grid-template-columns: 260px 1fr;
+}

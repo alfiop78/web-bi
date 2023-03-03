@@ -15,6 +15,7 @@ var Hier = new newHierarchy();
     tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
     // dialogs
     dialogTables: document.getElementById('dlg-tables'),
+    dialogFilters: document.getElementById('dlg-filters'),
     windowJoin: document.getElementById('window-join'),
     windowColumns: document.getElementById('window-columns'),
     // buttons
@@ -26,7 +27,8 @@ var Hier = new newHierarchy();
     translate: document.getElementById('translate'),
     coordsRef: document.getElementById('coords'),
     wjTitle: document.querySelector('#window-join .wj-title'),
-    tablesField: document.querySelector('#hier-table-field'),
+    workbookProp: document.querySelector('#workbook-props'),
+    sheetProp: document.querySelector('#sheeet-props'),
     // columns and rows dropzone (step 2)
     columns: document.getElementById('dropzone-columns'),
     rows: document.getElementById('dropzone-rows')
@@ -543,6 +545,14 @@ var Hier = new newHierarchy();
       });
   }
 
+  app.handlerFilters = () => {
+    app.dialogFilters.showModal();
+    // TODO: popolo l'elenco delle tabelle presenti nel Canvas, il filtro può essere creatosu qualsiasi tabella
+    console.log(Draw.tables);
+    debugger;
+    app.addWorkBookContent();
+  }
+
   /* NOTE: END ONCLICK EVENTS*/
 
   /* NOTE: MOUSE EVENTS */
@@ -905,13 +915,13 @@ var Hier = new newHierarchy();
     console.log(Hier.nHier);
     // ripulisco la struttura già presente.
     // TODO: in futuro dovrò aggiornare la struttura già presente (e non resettare). In questo modo, gli elementi aggiunti al report non verranno resettati
-    app.tablesField.querySelectorAll('dl').forEach(dl => dl.remove());
+    app.workbookProp.querySelectorAll('dl').forEach(dl => dl.remove());
     for (const [hierName, tables] of Hier.nHier) {
       const dlElement = app.tmplDL.content.cloneNode(true);
       const dl = dlElement.querySelector("dl");
       const dt = dl.querySelector('dt');
       dt.innerHTML = `${hierName} (nome gerarchia)`;
-      app.tablesField.appendChild(dl);
+      app.workbookProp.appendChild(dl);
       tables.forEach(tableId => {
         const ddElement = app.tmplDD.content.cloneNode(true);
         const dd = ddElement.querySelector("dd");
@@ -940,6 +950,18 @@ var Hier = new newHierarchy();
         }
       });
     }
+  }
+
+  // TODO: creo la struttura delle tabelle presenti nel canvas
+  app.addWorkBookContent = () => {
+    // parent
+    const parent = app.dialogFilters.querySelector('nav');
+    for (const [key, value] of Draw.tables) {
+      console.log(key, value);
+      // TODO: creare la struttura come fatto in app.workbookProp
+
+    }
+
   }
 
 
