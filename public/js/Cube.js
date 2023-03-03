@@ -251,10 +251,10 @@ class Sheet {
 
   get filters() { return this.#filters; }
 
-  save() {
+  /* save() {
     // TODO: implementazione
 
-  }
+  } */
 
 
 }

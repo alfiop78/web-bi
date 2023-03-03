@@ -128,27 +128,7 @@ class Cube
 
         $this->WHERE_baseTable[$token] = implode(" = ", $join->SQL);
       }
-      dd($this->WHERE_baseTable);
-      /* le join relative alla TIME le inserisco in un altro array e non in WHERE_baseTable, altrimenti verrà aggiunta 
-        la join riguardante la time anche sulle metriche filtrate
-      */
-      /* if ($token === 'time') {
-        // if (!in_array($token, $this->WHERE_timeDimension)) $this->WHERE_timeDimension[$token] = $relation;
-        $this->WHERE_timeDimension[$token] = $relation;
-        foreach ($this->WHERE_timeDimension as $token => $value) {
-          $this->json__info->where->{$token} = (object)[
-            "sql" => $value
-          ];
-        }
-      } else {
-        // if (!in_array($token, $this->WHERE_baseTable)) $this->WHERE_baseTable[$token] = $relation;
-        $this->WHERE_baseTable[$token] = $relation;
-        foreach ($this->WHERE_baseTable as $token => $value) {
-          $this->json__info->where->{$token} = (object)[
-            "sql" => $value
-          ];
-        }
-      } */
+      // dd($this->WHERE_baseTable);
     }
     // dd($this->WHERE_baseTable, $this->WHERE_timeDimension);
     /*
@@ -229,11 +209,33 @@ class Cube
         }
       }
     }
+    // dd($fieldList);
     foreach ($fieldList as $name => $field) {
       $this->json__info->groupBy->{$name} = (object)[
         "sql" => $field
       ];
     }
+    $this->groupBy .= implode(",\n", $fieldList);
+    // dd($this->groupBy);
+  }
+
+  public function sheetGroupBy($groups)
+  {
+    $fieldList = array();
+    $this->groupBy = "GROUP BY\n";
+    foreach ($groups as $tableAlias => $field) {
+      foreach ($field as $prop) {
+        // dd($prop);
+        foreach ($prop->field as $key => $value) {
+          // dd($key, $value->field);
+          // $fieldList["{$value->field}_{$key}"] = "{$tableAlias}.{$prop->name}"; // $fieldType : id/ds
+          // $fieldList["{$value->field}_{$key}"] = "{$tableAlias}.{$value->field}"; // $fieldType : id/ds
+          // esempio preso da sheetSelect()
+          $fieldList["{$prop->name}_{$key}"] = "{$tableAlias}.{$value->field}"; // $fieldType : id/ds
+        }
+      }
+    }
+    // dd($fieldList);
     $this->groupBy .= implode(",\n", $fieldList);
     // dd($this->groupBy);
   }
@@ -373,30 +375,7 @@ class Cube
         }
       }
     }
-    dd($this->filters_baseTable);
-    // -------------------------
-
-    // $and = "\nAND ";
-    // test creazione json da utilizzare per sql_info
-    foreach ($filters as $filter) {
-      // dd($filter); // filter_name => alias_table.field = value
-      // $this->filters_baseTable .= $and.$filter->SQL;
-      // if (!in_array($filter->formula, $this->filters_baseTable)) $this->filters_baseTable[] = $filter->formula;
-      // NOTE: in un array associativo non è necessario verificare se la key esiste, il valore viene sovrascritto.
-      $this->filters_baseTable[$filter->name] = $filter->formula;
-    }
-    foreach ($this->filters_baseTable as $name => $formula) {
-      // echo "<br /><span>$name</span><br />\nAND $formula";
-      $this->json__info->filters->{$name} = (object)[
-        "sql" => "AND $formula"
-      ];
-    }
-    // dd($this->json__info);
-    /*
-      es.:
-      AND Azienda_997.id = 473\n
-      AND DocVenditaDettaglio_560.DataDocumento >= 20220601
-    */
+    // dd($this->filters_baseTable);
   }
 
 
@@ -529,6 +508,48 @@ class Cube
     // dd($this->compositeMetrics);
     // dd($this->_composite_sql_formula);
   }
+
+  public function sheetBaseTable($mode)
+  {
+    // creo una TEMP_TABLE su cui, successivamente andrò a fare una LEFT JOIN con le TEMP_TABLE contenenti le metriche
+    // dd($this->SELECT);
+    $this->_sql = $this->SELECT;
+    // se ci sono metriche a livello di report le aggiungo
+    // se un report contiene solo metriche filtrate non avrà metriche di base
+    if (!is_null($this->_metrics_base)) {
+      // dd('_metrics_base ' . $this->_metrics_base);
+      $this->_sql .= ", $this->_metrics_base";
+    }
+    $this->_sql .= "\nFROM\n" . implode(",\n", $this->FROM_baseTable);
+    $this->_sql .= "\nWHERE\n" . implode("\nAND ", array_merge($this->WHERE_baseTable, $this->WHERE_timeDimension));
+    if (count($this->filters_baseTable)) $this->_sql .= "\nAND " . implode("\nAND ", $this->filters_baseTable);
+    $this->_sql .= "\n$this->groupBy";
+    $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
+    //dd($this->_sql);
+    // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
+    $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
+    //dd($sql);
+    // $result = DB::connection('vertica_odbc')->raw($sql);
+    // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
+    /* il metodo getSchemaBuilder() funziona con mysql, non con vertica. Ho creato MyVerticaGrammar.php dove c'è la sintassi corretta per vertica (solo alcuni Metodi ho modificato) */
+    if ($mode === 'sql') {
+      $result = $sql;
+    } else {
+      if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($this->baseTableName)) {
+        // dd('la tabella già esiste, la elimino');
+        $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.{$this->baseTableName};");
+        if (!$drop) {
+          // null : tabella eliminata, ricreo la tabella temporanea
+          $result = DB::connection('vertica_odbc')->statement($sql);
+        }
+      } else {
+        $result = DB::connection('vertica_odbc')->statement($sql);
+        // dd('la tabella non esiste');
+      }
+    }
+    return $result;
+  }
+
 
   public function baseTable($mode)
   {

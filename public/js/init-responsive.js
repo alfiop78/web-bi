@@ -424,7 +424,16 @@ var Hier = new newHierarchy();
     i.dataset.token = elementRef.id;
     parent.appendChild(field);
     // dopo aver aggiunto la colonna allo sheet, la aggiungo anche nella prop 'from' della Classe Sheet(che è quella che si occupa di processare il report)
+    // FIX: al momento vengono aggiunte alla FROM solo le tabelle relative alle colonne inserite nel report
     Hier.from = { schema: elementRef.dataset.schema, table: elementRef.dataset.table, alias: elementRef.dataset.alias };
+    // TODO: da Hier.nHier posso recuperare tutte le tabelle gerarchicamente inferiori a questa corrent.
+    // in questo modo posso popolare la clausola FROM relativa alle columns inserite, successivamente farò lo stesso con filters
+    console.log(Hier.nHier);
+    for (const [alias, tables] of Hier.nHier) {
+      // alias : alias della tabella
+      // table : [svg-data-2,svg-data-1, ecc...]
+      // TODO: in base all'id dell'array tables vado a recuperare le tabelle da aggiungere alla FROM
+    }
   }
 
   app.columns.addEventListener('dragover', app.fieldDragOver, false);
