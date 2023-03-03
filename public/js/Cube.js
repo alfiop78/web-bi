@@ -215,6 +215,8 @@ class Dimension {
 class Sheet {
   #process = {};
   #from = new Map();
+  #filter = new Map();
+  #filters = new Map();
   constructor() { }
 
   set process(object) {
@@ -228,6 +230,26 @@ class Sheet {
   }
 
   get from() { return this.#from; }
+
+  set filter(object) {
+    this.#filter.set(object.token, object.value);
+  }
+
+  get filter() { return this.#filters; }
+
+  set filters(token) {
+    if (!this.#filters.has(this.#filter.get(token).workBook.tableAlias)) {
+      this.#filters.set(this.#filter.get(token).workBook.tableAlias, {
+        [token]: this.#filter.get(token)
+      });
+    } else {
+      // alias di tabella già presente
+      this.#filters.get(this.#filter.get(token).workBook.tableAlias)[token] = this.#filter.get(token);
+    }
+    console.log('#filters : ', this.#filters);
+  }
+
+  get filters() { return this.#filters; }
 
   save() {
     // TODO: implementazione

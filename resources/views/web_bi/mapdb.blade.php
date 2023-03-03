@@ -95,6 +95,14 @@
       </div>
     </template>
 
+    <template id="tmpl-formula">
+      <span class="markContent">
+        <i class="material-icons-round md-14">cancel</i>
+        <mark></mark>
+        <small></small>
+      </span>
+    </template>
+
     <div id="container">
       <div id="content">
         <div id="body">
@@ -102,12 +110,14 @@
             <section class="dlg-grid">
               <section class="dlg-title">Creazione Filtro</section>
               <section class="dlg-content col col-2">
-                <nav>struttura delle tabelle presenti nel canvas</nav>
-                <div>textarea per la creazione del filtro</div>
+                <nav></nav>
+                <section>
+                  <div id="textarea-filter" data-content-editable></div>
+                </section>
               </section>
               <section class="dlg-buttons">
                 <button name="dlg-close" value="chiudi">Chiudi</button>
-                <button id="btn-filter-save" value="salva">Salva</button>
+                <button data-fn="saveFilter" id="btn-filter-save" value="salva">Salva</button>
               </section>
             </section>
 

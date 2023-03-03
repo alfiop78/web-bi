@@ -141,6 +141,7 @@ class MapDatabaseController extends Controller
     $q->sheetSelect($cube->{'columns'});
     $q->sheetFrom($cube->{'from'});
     $q->sheetWhere($cube->{'joins'});
+    if (property_exists($cube, 'filters')) $q->sheetFilters($cube->{'filters'});
   }
 
   // processo la FX

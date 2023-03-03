@@ -343,6 +343,8 @@ class Cube
       // NOTE: in un array associativo non è necessario verificare se la key esiste, il valore viene sovrascritto.
       $this->filters_baseTable[$filter->name] = $filter->formula;
     }
+    // dd($this->filters_baseTable);
+
     foreach ($this->filters_baseTable as $name => $formula) {
       // echo "<br /><span>$name</span><br />\nAND $formula";
       $this->json__info->filters->{$name} = (object)[
@@ -356,6 +358,47 @@ class Cube
       AND DocVenditaDettaglio_560.DataDocumento >= 20220601
     */
   }
+
+  public function sheetFilters($filters)
+  {
+    // definisco i filtri del report
+    // dd($filters);
+    foreach ($filters as $tableAlias => $filter) {
+      foreach ($filter as $prop) {
+        // dd($prop);
+        // dd($prop->workBook->table); //in workBook sono presenti table e tableAlias
+        foreach ($prop->workBook as $key => $value) {
+          // dd($key, $value);
+          $this->filters_baseTable['iperauto'] = "{$prop->workBook->tableAlias}.{$prop->field}" . implode($prop->sql);
+        }
+      }
+    }
+    dd($this->filters_baseTable);
+    // -------------------------
+
+    // $and = "\nAND ";
+    // test creazione json da utilizzare per sql_info
+    foreach ($filters as $filter) {
+      // dd($filter); // filter_name => alias_table.field = value
+      // $this->filters_baseTable .= $and.$filter->SQL;
+      // if (!in_array($filter->formula, $this->filters_baseTable)) $this->filters_baseTable[] = $filter->formula;
+      // NOTE: in un array associativo non è necessario verificare se la key esiste, il valore viene sovrascritto.
+      $this->filters_baseTable[$filter->name] = $filter->formula;
+    }
+    foreach ($this->filters_baseTable as $name => $formula) {
+      // echo "<br /><span>$name</span><br />\nAND $formula";
+      $this->json__info->filters->{$name} = (object)[
+        "sql" => "AND $formula"
+      ];
+    }
+    // dd($this->json__info);
+    /*
+      es.:
+      AND Azienda_997.id = 473\n
+      AND DocVenditaDettaglio_560.DataDocumento >= 20220601
+    */
+  }
+
 
   /*
 		aggiungo a $this->filters_metricTable i filtri presenti su una metrica filtrata.

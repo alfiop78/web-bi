@@ -370,3 +370,8 @@ i[data-id="btn-set-metric"]:hover{
   grid-template-rows: 50% 50%;
 
 }
+
+dt dd{
+  max-height: 250px;
+  overflow: auto;
+}

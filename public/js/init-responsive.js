@@ -13,6 +13,7 @@ var Hier = new newHierarchy();
     tmplDL: document.getElementById('tmpl-dl-element'),
     tmplDD: document.getElementById('tmpl-dd-element'),
     tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
+    tmplFormula: document.getElementById('tmpl-formula'),
     // dialogs
     dialogTables: document.getElementById('dlg-tables'),
     dialogFilters: document.getElementById('dlg-filters'),
@@ -170,6 +171,7 @@ var Hier = new newHierarchy();
         console.log(Hier.tableJoins);
         for (const [key, value] of Object.entries(Hier.tableJoins)) {
           Hier.activeTable = value.id;
+          // TODO: in questo caso, in cui vengono richiamate due tabelle, fare una promiseAll
           const data = await app.getTable();
           app.addFields(key, data);
           console.log(data);
@@ -467,7 +469,6 @@ var Hier = new newHierarchy();
   document.getElementById('prev').onclick = () => Step.previous();
 
   document.getElementById('next').onclick = () => {
-
     // salvo il workbook creato
     Step.next();
     app.addHierStruct();
@@ -508,13 +509,15 @@ var Hier = new newHierarchy();
     Hier.process = Hier.workBook;
     // TODO: per il momento aggiungo a process la prop 'from' presente nella Clase Sheet
     Hier.process.from = Object.fromEntries(Hier.from);
+    // TODO: ---stesso discorso per filters
+    Hier.process.filters = Object.fromEntries(Hier.filters);
     // prova, invio al Controller per creare la query
     console.log(Hier.process);
     // console.log(JSON.stringify(Hier.process));
 
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(Hier.process);
-    console.log(params);
+    // console.log(params);
     // App.showConsole('Elaborazione in corso...', 'info');
     // chiudo la lista dei report da eseguire
     // app.processList.toggleAttribute('hidden');
@@ -545,12 +548,114 @@ var Hier = new newHierarchy();
       });
   }
 
-  app.handlerFilters = () => {
+  app.handlerFilters = async () => {
+    // popolo l'elenco delle tabelle presenti nel Canvas, il filtro può essere creatosu qualsiasi tabella
+    let urls = [];
+    for (const [hierName, tables] of Hier.nHier) {
+      tables.forEach(tableId => {
+        Hier.activeTable = tableId;
+        urls.push('/fetch_api/' + Hier.activeTable.dataset.schema + '/schema/' + Hier.activeTable.dataset.table + '/table_info');
+      });
+    }
+    // promiseAll per recuperare tutte le tabelle del canvas, successivamente vado a popolare la dialogFilters con i dati ricevuti
+    app.addWorkBookContent(await app.getTables(urls));
     app.dialogFilters.showModal();
-    // TODO: popolo l'elenco delle tabelle presenti nel Canvas, il filtro può essere creatosu qualsiasi tabella
-    console.log(Draw.tables);
+  }
+
+  // selezione della tabella dalla dialogFilters
+  app.handlerSelectField = (e) => {
+    Hier.activeTable = e.currentTarget.dataset.tableId;
+    console.log(Hier.activeTable.dataset.table);
+    const field = e.currentTarget.dataset.field;
+    const table = e.currentTarget.dataset.table;
+    const alias = e.currentTarget.dataset.alias;
+    console.log(field);
+    // textarea
+    const txtArea = app.dialogFilters.querySelector('#textarea-filter');
+    const templateContent = app.tmplFormula.content.cloneNode(true);
+    const i = templateContent.querySelector('i');
+    i.addEventListener('click', app.cancelFormulaObject);
+    const span = templateContent.querySelector('span');
+    const mark = templateContent.querySelector('mark');
+    const small = templateContent.querySelector('small');
+
+    // aggiungo il tableAlias e table come attributo.
+    // ...in questo modo visualizzo solo il nome della colonna ma quando andrò a salvare la formula del filtro salverò table.field
+    mark.dataset.tableAlias = alias;
+    mark.dataset.table = table;
+    mark.dataset.field = field;
+    mark.innerText = field;
+    small.innerText = table;
+    txtArea.appendChild(span);
+
+    app.addSpan(txtArea, null, 'filter');
+  }
+
+  app.saveFilter = (e) => {
     debugger;
-    app.addWorkBookContent();
+    // l'oggetto filter lo salvo nella Classe Sheet (ex Query.js)
+    let sql = [];
+    const rand = () => Math.random(0).toString(36).substring(2);
+    const token = rand().substring(0, 7);
+    let object = {};
+    document.querySelectorAll('#textarea-filter *').forEach(element => {
+      // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
+      // ... altrimenti devo recuperare il cubeToken. Ci sono anche filtri che possono essere fatti su un livello dimensionale e su una FACT
+      if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
+      if (element.nodeName === 'MARK') {
+        object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
+        object.field = element.dataset.field;
+
+        /* if (element.dataset.tableId) {
+          // tabella appartenente a un livello dimensionale
+          editFormula.push(
+            {
+              table: element.dataset.table,
+              alias: element.dataset.tableAlias,
+              field: element.dataset.field,
+              tableId: element.dataset.tableId,
+              hierToken: element.dataset.hierToken,
+              dimensionToken: element.dataset.dimensionToken
+            }
+          );
+          dimensions.add(element.dataset.dimensionToken);
+          sql_formula.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
+          if (hierarchiesMap.has(element.dataset.hierToken)) {
+            if (+element.dataset.tableId < hierarchiesMap.get(element.dataset.hierToken)) {
+              hierarchiesMap.set(element.dataset.hierToken, +element.dataset.tableId);
+            }
+          } else {
+            hierarchiesMap.set(element.dataset.hierToken, +element.dataset.tableId);
+          }
+        } else {
+          editFormula.push(
+            {
+              table: element.dataset.table,
+              alias: element.dataset.tableAlias,
+              field: element.dataset.field,
+              cubeToken: element.dataset.cubeToken
+            }
+          );
+          // tabella appartenente alla FACT.
+          cubes.add(element.dataset.cubeToken);
+          // ...non dovrebbe servire il cubeToken su un filtro associato alla FACT, perchè in ogni caso, la FACT viene aggiunta in base alle metriche (che devono essere obbligatorie)
+          sql_formula.push(`${element.dataset.tableAlias}.${element.dataset.field}`);
+        } */
+      } else {
+        sql.push(element.innerText.trim());
+        // editFormula.push(element.innerText.trim());
+      }
+    });
+    // TODO: la prop 'editFormula' va rinominata in 'edit'
+    object.sql = sql;
+    Hier.filter = {
+      token,
+      value: object
+      /* editFormula,
+      name: 'iperauto',
+      formula: sql_formula.join(' '), // Azienda_444.id = 43 */
+    };
+    Hier.filters = token;
   }
 
   /* NOTE: END ONCLICK EVENTS*/
@@ -664,6 +769,20 @@ var Hier = new newHierarchy();
       });
   }
 
+  app.getTables = async (urls) => {
+    return await Promise.all(urls.map(url => fetch(url)))
+      .then(responses => {
+        return Promise.all(responses.map(response => {
+          if (!response.ok) {
+            throw Error(response.statusText);
+          }
+          return response.json();
+        }))
+      })
+      .then(data => data)
+      .catch(err => console.error(err));
+  }
+
   app.getPreviewTable = async () => {
     return await fetch('/fetch_api/' + Hier.activeTable.dataset.schema + '/schema/' + Hier.activeTable.dataset.table + '/table_preview')
       .then((response) => {
@@ -730,6 +849,7 @@ var Hier = new newHierarchy();
     console.log(Hier.tableJoins);
     for (const [key, value] of Object.entries(Hier.tableJoins)) {
       Hier.activeTable = value.id;
+      // TODO: in questo caso, in cui vengono richiamate due tabelle, fare una promiseAll
       const data = await app.getTable();
       app.addFields(key, data);
       // console.log(data);
@@ -953,17 +1073,122 @@ var Hier = new newHierarchy();
   }
 
   // TODO: creo la struttura delle tabelle presenti nel canvas
-  app.addWorkBookContent = () => {
+  app.addWorkBookContent = (data) => {
+    console.log(data);
+    // FIX: Potrei ottimizzazre questa fn e popolare i field quando viene aggiunta la tabella al canvas. Insieme a questa potrei popolare anche la dialogJoin
+    // reset
+    app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
     // parent
-    const parent = app.dialogFilters.querySelector('nav');
-    for (const [key, value] of Draw.tables) {
-      console.log(key, value);
-      // TODO: creare la struttura come fatto in app.workbookProp
-
+    let parent = app.dialogFilters.querySelector('nav');
+    for (const [hierName, tables] of Hier.nHier) {
+      const dlElement = app.tmplDL.content.cloneNode(true);
+      const dl = dlElement.querySelector("dl");
+      const dt = dl.querySelector('dt');
+      dt.innerHTML = `${hierName} (nome gerarchia)`;
+      parent.appendChild(dl);
+      tables.forEach((tableId, index) => {
+        const ddElement = app.tmplDD.content.cloneNode(true);
+        const dd = ddElement.querySelector("dd");
+        const details = dd.querySelector("details");
+        const summary = details.querySelector('summary');
+        Hier.activeTable = tableId;
+        details.dataset.schema = Hier.activeTable.dataset.schema;
+        details.dataset.table = Hier.activeTable.dataset.table;
+        details.dataset.alias = Hier.activeTable.dataset.alias;
+        details.dataset.id = tableId;
+        summary.innerHTML = Hier.activeTable.dataset.table;
+        summary.dataset.tableId = tableId;
+        dt.appendChild(dd);
+        for (const [key, value] of Object.entries(data[index])) {
+          const content = app.tmplList.content.cloneNode(true);
+          const li = content.querySelector('li[data-li]');
+          const span = li.querySelector('span');
+          li.dataset.label = value.COLUMN_NAME;
+          li.dataset.fn = 'handlerSelectField';
+          // li.dataset.elementSearch = `${source}-fields`;
+          li.dataset.tableId = Hier.activeTable.id;
+          li.dataset.table = Hier.activeTable.dataset.table;
+          li.dataset.alias = Hier.activeTable.dataset.alias;
+          li.dataset.field = value.COLUMN_NAME;
+          li.dataset.key = value.CONSTRAINT_NAME;
+          span.innerText = value.COLUMN_NAME;
+          // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
+          let pos = value.DATA_TYPE.indexOf('(');
+          let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
+          span.dataset.type = type;
+          // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
+          li.dataset.id = key;
+          // span.id = key;
+          // li.dataset.fn = 'addFieldToJoin';
+          details.appendChild(li);
+        }
+      });
     }
-
   }
 
+  app.addSpan = (target, value, check, mode) => {
+    /*
+    * target : il div che contiene la formula
+    * check : filter, metric (filter se sto creando una formula per il filtro, metric per le metriche composte)
+    */
+    const span = document.createElement('span');
+    span.dataset.check = check;
+    if (mode) span.dataset.mode = mode;
+    span.setAttribute('contenteditable', 'true');
+    span.setAttribute('tabindex', 0);
+    // let evt = new KeyboardEvent("keydown", {
+    //   shiftKey: true,
+    //   key: "Tab"
+    // });
+    span.addEventListener('input', app.checkSpanFormula);
+    // Do nothing if the event was already processed
+    span.onkeydown = (e) => {
+      if (e.defaultPrevented) return;
+      /* verifico prima se questo span è l'ultimo elemento della formula.
+      * In caso che lo span è l'ultimo elemento della formula ne aggiungo un'altro, altrimenti il Tab avrà il comportamento di default
+      */
+      const lastSpan = (e.target === target.querySelector('span[contenteditable]:last-child'));
+      switch (e.key) {
+        case 'Tab':
+          // console.log(e.ctrlKey);
+          // se il tasto shift non è premuto e mi trovo sull'ultimo span, aggiungo un altro span. In caso contrario, la combinazione shift+tab oppure tab su un qualsiasi altro
+          // ...span che non sia l'ultimo, avrà il comportamento di default
+          if (!e.shiftKey && lastSpan) {
+            (mode) ? app.addSpan(target, null, check, mode) : app.addSpan(target, null, check);
+            e.preventDefault();
+          }
+          break;
+        case 'Backspace':
+          // se lo span è vuoto devo eliminarlo, in caso contrario ha il comportamento di default
+          if (span.textContent.length === 0) {
+            // posiziono il focus sul primo span disponibile andando indietro nel DOM
+            /* const event = new Event('build');
+            // Listen for the event.
+             span.addEventListener('build', function(e) { console.log(e) }, false);
+            // Dispatch the event.
+            span.dispatchEvent(event);
+            */
+            // span.dispatchEvent(evt);
+            // verifico il primo span[contenteditable] presente andando all'indietro (backspace keydown event)
+            let previousContentEditable = (span) => {
+              // se viene trovate uno <span> precedente a quello passato come argomento, lo restituisco, altrimenti restituisco quello passato come argomento
+              if (span.previousElementSibling) {
+                span = (span.previousElementSibling.hasAttribute('contenteditable')) ? span.previousElementSibling : previousContentEditable(span.previousElementSibling);
+              }
+              return span;
+            }
+            previousContentEditable(span).focus();
+            span.remove();
+          }
+          break;
+        default:
+          break;
+      }
+    }
+    if (value) span.innerText = value;
+    target.appendChild(span);
+    span.focus();
+  }
 
   /* NOTE: END SUPPORT FUNCTIONS */
 

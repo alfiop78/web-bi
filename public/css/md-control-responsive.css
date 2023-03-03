@@ -27,8 +27,8 @@
   margin: 1em 0px;
   border-radius: 4px;
   color: dimgrey;
-  min-height:100px;
-  min-width:40%;
+  min-height:300px;
+  min-width:500px;
 }
 
 /* *[data-content-editable][data-mode="all"] {display: none;} */
