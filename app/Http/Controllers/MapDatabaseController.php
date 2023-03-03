@@ -130,6 +130,19 @@ class MapDatabaseController extends Controller
     return response()->json($tables);
   }
 
+  // sheet
+  public function sheet(Request $request)
+  {
+    $cube = json_decode(json_encode($request->all())); // object
+    $q = new Cube();
+    $q->baseColumns = $cube->{'columns'};
+    // imposto le colonne da includere nel datamart finale
+    $q->sheetFields();
+    $q->sheetSelect($cube->{'columns'});
+    $q->sheetFrom($cube->{'from'});
+    $q->sheetWhere($cube->{'joins'});
+  }
+
   // processo la FX
   public function process(Request $request)
   {

@@ -228,7 +228,10 @@
                           <section id="dropzone-rows" class="dropzone rows">rows</section>
                         </section>
                         <section class="report-preview">
-                          <section class="">report data</section>
+                          <section class="">
+                            <span>report preview</span>
+                            <button id="btn-sheet-preview" data-fn="process" value="Process">Process</button>
+                          </section>
                         </section>
                       </div>
                     </section>

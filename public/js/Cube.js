@@ -212,10 +212,36 @@ class Dimension {
 
 }
 
-class newCube {
+class Sheet {
+  #process = {};
+  #from = new Map();
+  constructor() { }
+
+  set process(object) {
+    this.#process = object;
+  }
+
+  get process() { return this.#process; }
+
+  set from(object) {
+    this.#from.set(object.alias, { schema: object.schema, table: object.table });
+  }
+
+  get from() { return this.#from; }
+
+  save() {
+    // TODO: implementazione
+
+  }
+
+
+}
+
+class newCube extends Sheet {
   #metric = new Map();
   #metrics = new Map();
   constructor() {
+    super();
     this.workBook = {};
   }
 
@@ -261,6 +287,7 @@ class newHierarchy extends newCube {
   #tableJoins = { from: null, to: null }; // refs 
   constructor() {
     super();
+    this.schema;
   }
 
   /* NOTE: mapdb*/

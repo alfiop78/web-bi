@@ -394,7 +394,6 @@ var Hier = new newHierarchy();
     };
     Hier.metrics = token;
     Hier.save();
-
   }
 
   app.fieldDrop = (e) => {
@@ -420,6 +419,8 @@ var Hier = new newHierarchy();
     i.dataset.fn = 'handlerSetMetric';
     i.dataset.token = elementRef.id;
     parent.appendChild(field);
+    // dopo aver aggiunto la colonna allo sheet, la aggiungo anche nella prop 'from' della Classe Sheet(che è quella che si occupa di processare il report)
+    Hier.from = { schema: elementRef.dataset.schema, table: elementRef.dataset.table, alias: elementRef.dataset.alias };
   }
 
   app.columns.addEventListener('dragover', app.fieldDragOver, false);
@@ -491,10 +492,55 @@ var Hier = new newHierarchy();
     e.currentTarget.dataset.active = 'true';
     // recupero 50 record della tabella selezionata per visualizzare un anteprima
     Hier.activeTable = e.currentTarget.id;
+    Hier.schema = e.currentTarget.dataset.schema;
+    // debugger;
     let DT = new Table(await app.getPreviewTable(), 'preview-table');
     // DataTable.data = await app.getPreviewTable();
     // console.log(DT.data);
     DT.draw();
+  }
+
+  app.process = async () => {
+    // TODO: Valutare la possibilità di memorizzare, nella Classe newCube solo le join della mappatura (canvas)
+    // ...mentre nella Classe Sheet potrebbero essere memorizzate le columns, metrics....
+    Hier.process = Hier.workBook;
+    // TODO: per il momento aggiungo a process la prop 'from' presente nella Clase Sheet
+    Hier.process.from = Object.fromEntries(Hier.from);
+    // prova, invio al Controller per creare la query
+    console.log(Hier.process);
+    // console.log(JSON.stringify(Hier.process));
+
+    // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
+    const params = JSON.stringify(Hier.process);
+    console.log(params);
+    // App.showConsole('Elaborazione in corso...', 'info');
+    // chiudo la lista dei report da eseguire
+    // app.processList.toggleAttribute('hidden');
+    // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
+    const url = "/fetch_api/cube/sheet";
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    const req = new Request(url, init);
+    await fetch(req)
+      .then((response) => {
+        // TODO: Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((response) => {
+        if (response) {
+          console.log('data : ', response);
+        } else {
+          // TODO: Da testare se il codice arriva qui o viene gestito sempre dal catch()
+          console.debug('FX non è stata creata');
+          debugger;
+          App.showConsole('Errori nella creazione del datamart', 'error', 5000);
+        }
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
   }
 
   /* NOTE: END ONCLICK EVENTS*/
@@ -785,12 +831,13 @@ var Hier = new newHierarchy();
         token: fieldRef.dataset.token,
         value: {
           // table: joins[0].dataset.table,
-          alias: joins[0].dataset.alias,
-          SQL: [`${joins[0].dataset.alias}.${joins[0].dataset.field}`, `${joins[1].dataset.alias}.${joins[1].dataset.field}`],
-          from: { table: joins[0].dataset.table, alias: joins[0].dataset.alias, field: joins[0].dataset.field },
-          to: { table: joins[1].dataset.table, alias: joins[1].dataset.alias, field: joins[1].dataset.field }
+          alias: joins[1].dataset.alias,
+          SQL: [`${joins[1].dataset.alias}.${joins[1].dataset.field}`, `${joins[0].dataset.alias}.${joins[0].dataset.field}`],
+          from: { table: joins[1].dataset.table, alias: joins[1].dataset.alias, field: joins[1].dataset.field },
+          to: { table: joins[0].dataset.table, alias: joins[0].dataset.alias, field: joins[0].dataset.field }
         }
       };
+      debugger;
       Hier.nJoins = fieldRef.dataset.token; // nome della tabella con le proprie join (Hier.nJoin) all'interno
       // dopo aver completato la join coloro la linea in modo diverso
       Draw.currentLineRef.dataset.joined = 'true';
@@ -838,10 +885,14 @@ var Hier = new newHierarchy();
     Hier.nColumn = {
       token,
       value: {
+        schema: Hier.schema,
         tableAlias: Hier.activeTable.dataset.alias,
         table: Hier.activeTable.dataset.table,
-        id: fieldObjectId,
-        ds: fieldObjectDs
+        name: field,
+        field: {
+          id: fieldObjectId,
+          ds: fieldObjectDs
+        }
       }
     };
     Hier.nColumns = token;
@@ -877,12 +928,13 @@ var Hier = new newHierarchy();
             const i = li.querySelector('i');
             const span = li.querySelector('span');
             li.id = token;
+            li.dataset.schema = value.schema;
             li.dataset.table = value.table;
             li.dataset.alias = value.tableAlias;
-            li.dataset.field = value.ds.field;
+            li.dataset.field = value.field.ds.field;
             li.addEventListener('dragstart', app.fieldDragStart);
             li.addEventListener('dragend', app.fieldDragEnd);
-            span.innerHTML = value.ds.field;
+            span.innerHTML = value.field.ds.field;
             details.appendChild(li);
           }
         }

@@ -60,6 +60,7 @@ Route::get('/fetch_api/{schema}/schema/{table}/table_preview', [MapDatabaseContr
 
 Route::get('/fetch_api/schema/{schema}/table/{table}/field/{field}/distinct_values', [MapDatabaseController::class, 'distinct_values'])->name('web_bi.fetch_api.distinct_values'); // recupero i valori distinti del campo field passato come parametro
 Route::post('/fetch_api/cube/process', [MapDatabaseController::class, 'process'])->name('web_bi.fetch_api.process'); // processo la query che crea la FX
+Route::post('/fetch_api/cube/sheet', [MapDatabaseController::class, 'sheet'])->name('web_bi.fetch_api.sheet'); // processo la query che crea la FX
 Route::post('/fetch_api/cube/sqlInfo', [MapDatabaseController::class, 'sqlInfo'])->name('web_bi.fetch_api.sqlInfo'); // restituisco SQL del process
 
 Route::get('/500', function () {

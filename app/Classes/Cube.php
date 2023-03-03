@@ -29,6 +29,139 @@ class Cube
     $this->$prop = $value;
   }
 
+  public function sheetFields()
+  {
+    // verrà creato un array con l'elenco delle colonne da inserire nella creazione del datamart, sia nella clausola SELECT che in quella GROUP BY
+    /*
+			array:4 [
+				0 => "'sid_id'"
+				1 => "'sid_ds'"
+				2 => "'sede_id'"
+				3 => "'sede_ds'"
+			]
+		*/
+    // dd($this->baseColumns);
+    foreach ($this->baseColumns as $tableAlias => $field) {
+      // TODO: da ottimizzare
+      // all'interno delle tabelle ci sono i token che corrispondo ognuno a una colonna id-ds
+      // dd($tableAlias, $field);
+      foreach ($field as $prop) {
+        // dd($prop);
+        foreach ($prop->field as $key => $value) {
+          // dd($key, $value);
+          $this->_fields[] = "{$prop->name}_{$key}";
+        }
+      }
+    }
+    // dd($this->_fields);
+  }
+
+  public function sheetSelect($columns)
+  {
+    $fieldList = array();
+    $this->SELECT = "SELECT\n";
+    // dd($columns);
+    foreach ($columns as $tableAlias => $field) {
+      foreach ($field as $prop) {
+        foreach ($prop->field as $key => $value) {
+          // dd($key, $value->field);
+          $fieldList["{$prop->name}_{$key}"] = "{$tableAlias}.{$value->field} AS {$prop->name}_{$key}"; // $fieldType : id/ds
+        }
+        // $this->_columns[] = "{$column->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
+      }
+    }
+    // dd($fieldList);
+    /* foreach ($fieldList as $name => $field) {
+      $this->json__info->columns->{$name} = (object)[
+        "sql" => $field
+      ];
+    } */
+    $this->SELECT .= implode(",\n ", $fieldList);
+    // dd($this->SELECT);
+    /*
+		es.:
+			SELECT\n
+      CodSedeDealer_765.Descrizione AS sede_id,
+      CodSedeDealer_765.Descrizione AS sede_ds
+		*/
+    // var_dump($this->_columns);
+  }
+
+  /*
+	* il metodo from verrà invocato per creare la baseTable e, successivamente, verrà invocato per aggiungere, nella FROM, una tabella appartenente a una metrica filtrata
+	* che, al suo interno, avrà un filtro appartenente a una tabella NON inclusa nella baseTable
+	*/
+  public function sheetFrom($from)
+  {
+    // dd($from);
+    foreach ($from as $alias => $prop) {
+      $this->FROM_baseTable[$alias] = "{$prop->schema}.{$prop->table} AS {$alias}";
+    }
+    // dd($this->FROM_baseTable);
+    /* foreach ($this->FROM_baseTable as $tableName => $sql) {
+      $this->json__info->from->{$tableName} = (object)[
+        "sql" => $sql
+      ];
+    } */
+    /* es.:
+			array:4 [
+				aliasTable => "automotive_bi_data.Azienda AS Azienda_997"
+				aliasTable => "automotive_bi_data.CodSedeDealer AS CodSedeDealer_765"
+				aliasTable => "automotive_bi_data.DocVenditaIntestazione AS DocVenditaIntestazione_055"
+				aliasTable => "automotive_bi_data.DocVenditaDettaglio AS DocVenditaDettaglio_560"
+			]
+		*/
+  }
+
+  /*
+	* Utilizzo della stessa logica di FROM
+	* @param joins = "token_join" : ['table.field', 'table.field']
+	*/
+  public function sheetWhere($joins)
+  {
+    // dd($joins);
+    // TODO: metto in join le tabelle incluse nella FROM_baseTable
+    foreach ($joins as $tableAlias => $prop) {
+      foreach ($prop as $token => $join) {
+        // dd($token, $join);
+        // $relation = implode(" = ", $join->SQL);
+
+        $this->WHERE_baseTable[$token] = implode(" = ", $join->SQL);
+      }
+      dd($this->WHERE_baseTable);
+      /* le join relative alla TIME le inserisco in un altro array e non in WHERE_baseTable, altrimenti verrà aggiunta 
+        la join riguardante la time anche sulle metriche filtrate
+      */
+      /* if ($token === 'time') {
+        // if (!in_array($token, $this->WHERE_timeDimension)) $this->WHERE_timeDimension[$token] = $relation;
+        $this->WHERE_timeDimension[$token] = $relation;
+        foreach ($this->WHERE_timeDimension as $token => $value) {
+          $this->json__info->where->{$token} = (object)[
+            "sql" => $value
+          ];
+        }
+      } else {
+        // if (!in_array($token, $this->WHERE_baseTable)) $this->WHERE_baseTable[$token] = $relation;
+        $this->WHERE_baseTable[$token] = $relation;
+        foreach ($this->WHERE_baseTable as $token => $value) {
+          $this->json__info->where->{$token} = (object)[
+            "sql" => $value
+          ];
+        }
+      } */
+    }
+    // dd($this->WHERE_baseTable, $this->WHERE_timeDimension);
+    /*
+		es.:
+			WHERE\n
+			Azienda_997.id = CodSedeDealer_765.id_Azienda \n
+			AND CodSedeDealer_765.id = DocVenditaIntestazione_055.id_CodSedeDealer \n
+			AND DocVenditaIntestazione_055.NumRifInt = DocVenditaDettaglio_560.NumRifInt \n
+			AND DocVenditaIntestazione_055.id_Azienda = DocVenditaDettaglio_560.id_Azienda 
+		*/
+  }
+
+
   // creo elenco delle colonne da aggiungere alle tabelle temporanee (base e metric)
   public function fields()
   {
