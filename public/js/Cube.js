@@ -226,6 +226,7 @@ class Sheet {
   get process() { return this.#process; }
 
   set from(object) {
+    debugger;
     this.#from.set(object.alias, { schema: object.schema, table: object.table });
   }
 
@@ -308,6 +309,7 @@ class newHierarchy extends newCube {
   #nTables = new Map();
   #nHier = new Map();
   #tableJoins = { from: null, to: null }; // refs 
+  #tablesMap = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   constructor() {
     super();
     this.schema;
@@ -356,6 +358,13 @@ class newHierarchy extends newCube {
   }
 
   get nHier() { return this.#nHier; }
+
+  set tablesMap(value) {
+    this.#tablesMap.set(value.name, value.joinTables);
+    console.log(this.#tablesMap);
+  }
+
+  get tablesMap() { return this.#tablesMap; }
 
   set nColumn(object) {
     this.#nColumn.set(object.token, object.value);

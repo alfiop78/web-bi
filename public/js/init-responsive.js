@@ -180,6 +180,7 @@ var Hier = new newHierarchy();
     }
     // creo le gerarchie
     app.createHierarchies();
+    app.test();
   }
 
   app.handlerDrop = (e) => {
@@ -421,19 +422,20 @@ var Hier = new newHierarchy();
     field.dataset.id = elementRef.id;
     // i.addEventListener('click', app.handlerSetMetric);
     i.dataset.fn = 'handlerSetMetric';
-    i.dataset.token = elementRef.id;
+    i.dataset.token = elementRef.id; // svg-data-x
     parent.appendChild(field);
     // dopo aver aggiunto la colonna allo sheet, la aggiungo anche nella prop 'from' della Classe Sheet(che è quella che si occupa di processare il report)
     // FIX: al momento vengono aggiunte alla FROM solo le tabelle relative alle colonne inserite nel report
-    Hier.from = { schema: elementRef.dataset.schema, table: elementRef.dataset.table, alias: elementRef.dataset.alias };
+    // Hier.from = { schema: elementRef.dataset.schema, table: elementRef.dataset.table, alias: elementRef.dataset.alias };
+    // Hier.from = Draw.tables.get(elementRef.dataset.id); // svg-data-x
     // TODO: da Hier.nHier posso recuperare tutte le tabelle gerarchicamente inferiori a questa corrent.
     // in questo modo posso popolare la clausola FROM relativa alle columns inserite, successivamente farò lo stesso con filters
     console.log(Hier.nHier);
-    for (const [alias, tables] of Hier.nHier) {
-      // alias : alias della tabella
-      // table : [svg-data-2,svg-data-1, ecc...]
-      // TODO: in base all'id dell'array tables vado a recuperare le tabelle da aggiungere alla FROM
-    }
+    debugger;
+    Hier.nHier.get(elementRef.dataset.alias).forEach(tableId => {
+      console.log(tableId);
+      Hier.from = Draw.tables.get(tableId); // svg-data-x
+    });
   }
 
   app.columns.addEventListener('dragover', app.fieldDragOver, false);
@@ -818,10 +820,35 @@ var Hier = new newHierarchy();
     // cardStruct.dataset.defined = e.currentTarget.dataset.label;
   }
 
+  app.test = () => {
+    const levelId = +Draw.svg.dataset.level;
+    Hier.tablesMap.clear();
+    let recursiveLevels = (levelId) => {
+      // per ogni tabella creo un Map() con, al suo interno, le tabelle gerarchicamente inferiori (verso la FACT)
+      // questa mi servirà per stabilire, nello sheet, quali tabelle includere nella FROM e le relative Join nella WHERE
+      // let tables = { name: null, joinTables: [] };
+      Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}']`).forEach(table => {
+        console.log(table.dataset.alias);
+        joinTables = [table.id];
+        // della tabella corrente recupero tutte le sue discendenze fino alla FACT
+        let recursive = (tableId) => {
+          joinTables.push(tableId);
+          if (Draw.tables.get(tableId).join) recursive(Draw.tables.get(tableId).join);
+        }
+        if (Draw.tables.get(table.id).join) recursive(Draw.tables.get(table.id).join);
+        Hier.tablesMap = { name: table.dataset.alias, joinTables };
+      });
+      levelId--;
+      if (levelId !== 0) recursiveLevels(levelId);
+    }
+    if (levelId > 0) recursiveLevels(levelId);
+  }
+
   app.createHierarchies = () => {
     // salvo le gerarchie / dimensioni create nel canvas
     // recupero gli elementi del level-id più alto, il data-level presente su <svg> identifica il livello più alto presente
     const levelId = +Draw.svg.dataset.level;
+    Hier.nHier.clear();
     let recursiveLevels = (levelId) => {
       // per ogni level-id recupero le tabelle che hanno data-joins=0 (l'ultima tabella della gerarchia, che quindi non ha altre tabelle legate in join)
       Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'][data-joins='0']`).forEach(table => {
@@ -837,6 +864,7 @@ var Hier = new newHierarchy();
         // console.log(hier);
         Hier.nHier = hier;
       });
+
       levelId--;
       if (levelId !== 0) recursiveLevels(levelId);
     }
@@ -1067,6 +1095,7 @@ var Hier = new newHierarchy();
             const i = li.querySelector('i');
             const span = li.querySelector('span');
             li.id = token;
+            // li.dataset.id = tableId;
             li.dataset.schema = value.schema;
             li.dataset.table = value.table;
             li.dataset.alias = value.tableAlias;
