@@ -1,9 +1,6 @@
 var App = new Application();
 var Draw = new DrawSVG('svg');
-// var StorageCube = new CubeStorage();
-// var StorageDimension = new DimensionStorage();
-var Cube = new newCube();
-var Dim = new Dimension();
+var Storage = new Storages();
 var Hier = new newHierarchy();
 (() => {
   var app = {
@@ -21,6 +18,8 @@ var Hier = new newHierarchy();
     windowColumns: document.getElementById('window-columns'),
     // buttons
     btnSelectSchema: document.getElementById('btn-select-schema'),
+    btnDataSourceName: document.getElementById('data-source-name'),
+    btnWorkbookOpen: document.getElementById('btn-workbook-open'),
     // drawer
     drawer: document.getElementById('drawer'),
     // body
@@ -360,11 +359,47 @@ var Hier = new newHierarchy();
     e.currentTarget.classList.remove('dropping');
   }
 
+  app.setMetric = (field) => {
+    console.log(field);
+    const aggregateFn = 'SUM';
+    /* const table = document.querySelector(`details[data-id='dt-tables'] > li[id='${e.target.dataset.token}']`).dataset.table;
+    const tableAlias = document.querySelector(`details[data-id='dt-tables'] > li[id='${e.target.dataset.token}']`).dataset.alias;
+    const column = document.querySelector(`details[data-id='dt-tables'] > li[id='${e.target.dataset.token}']`).dataset.field; */
+    const table = field.dataset.table;
+    const tableAlias = field.dataset.alias;
+    const column = field.dataset.field;
+    // const date = new Date();
+    // edit o salvataggio di una metrica
+    const rand = () => Math.random(0).toString(36).substring(2);
+    const token = rand().substring(0, 21);
+
+    // metric Map Object
+    Hier.metric = {
+      token,
+      value: {
+        alias: 'metric alias',
+        type: 'base/adv/composite',
+        workBook: { table, tableAlias },
+        // workBook: { table: Hier.workBook.name, alias: 'alias tabella fact' },
+        formula: {
+          token,
+          aggregateFn,
+          field: column,
+          distinct: false,
+          alias: 'aliasmetric'
+        }
+      }
+    };
+    Hier.metrics = token;
+    // sto impostando questa colonna come metrica, per cui è necessario rimuoverla da Hier.columns
+    // Hier.removeColumn({ tableAlias, token: e.target.dataset.token });
+    // Hier.save();
+  }
+
   // imposto questo field come metrica
   app.handlerSetMetric = (e) => {
     console.log(e.target);
     console.log(e.target.dataset.token); // token della colonna
-    debugger;
     // TODO: dialog show (anzichè showModal())
     // const dlgMetric = document.getElementById('dlg-metric');
     // dlgMetric.show();
@@ -398,6 +433,8 @@ var Hier = new newHierarchy();
       }
     };
     Hier.metrics = token;
+    // sto impostando questa colonna come metrica, per cui è necessario rimuoverla da Hier.columns
+    // Hier.removeColumn({ tableAlias, token: e.target.dataset.token });
     Hier.save();
   }
 
@@ -418,13 +455,15 @@ var Hier = new newHierarchy();
     const span = field.querySelector('span');
     const i = field.querySelector("i[data-id='btn-set-metric']");
     span.innerHTML = elementRef.dataset.field;
-    field.dataset.type = 'column';
+    field.dataset.type = (elementRef.dataset.datatype === 'float') ? 'metric' : 'column';
     field.dataset.id = elementRef.id;
     // i.addEventListener('click', app.handlerSetMetric);
     i.dataset.fn = 'handlerSetMetric';
     i.dataset.token = elementRef.id; // svg-data-x
     parent.appendChild(field);
-    Hier.columns = elementRef.id;
+
+    if (field.dataset.type === 'metric') app.setMetric(elementRef);
+    if (field.dataset.type === 'column') Hier.columns = elementRef.id;
     Hier.tables = elementRef.dataset.alias;
     app.setSheet();
   }
@@ -468,13 +507,68 @@ var Hier = new newHierarchy();
 
   /* NOTE: ONCLICK EVENTS*/
 
+  app.btnWorkbookOpen.onclick = () => {
+    // TODO: recupero dallo storage il WorkBook 1
+    Storage.workBook = 'WorkBook 1';
+    console.log(Storage.workBook);
+    Draw.svg.dataset.level = Storage.workBook.svg.levelId;
+    // ciclo sulle tables presenti in svg.tables
+    for (const [key, value] of Object.entries(Storage.workBook.svg.tables)) {
+      Draw.tables = { id: key, properties: value };
+      Draw.currentTable = Draw.tables.get(key);
+      Draw.drawTable();
+    }
+    // joinLines
+    for (const [key, value] of Object.entries(Storage.workBook.svg.lines)) {
+      Draw.joinLines = { id: key, properties: value };
+      // TODO: creare una funzione (qui o in DrawSVG) che crea la linea
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      line.id = key;
+      line.dataset.id = value.id;
+      Draw.svg.appendChild(line);
+      Draw.currentLineRef = key;
+      Draw.currentLine = value;
+      Draw.drawLine();
+      Draw.autoPositionLine();
+    }
+
+    for (const [tableAlias, values] of Object.entries(Storage.workBook.columns)) {
+      // per ogni tabella
+      for (const [token, column] of Object.entries(values)) {
+        Hier.nColumn = { token, value: column };
+        Hier.nColumns = token;
+      }
+    }
+    // console.log('columns : ', Hier.nColumns);
+
+    // joins
+    for (const [tableAlias, values] of Object.entries(Storage.workBook.joins)) {
+      // per ogni tabella
+      for (const [token, join] of Object.entries(values)) {
+        Hier.nJoin = { token, value: join };
+        Hier.nJoins = token;
+      }
+    }
+    // console.log('joins : ', Hier.nJoins);
+
+    app.createHierarchies();
+    app.tablesMap();
+  }
+
+  app.btnDataSourceName.onclick = (e) => {
+    //TODO: rendo editabile per modificare il nome del datasource
+    e.target.setAttribute('contenteditable', 'true');
+    e.target.focus();
+  }
+
+
   document.getElementById('prev').onclick = () => Step.previous();
 
   document.getElementById('next').onclick = () => {
     // salvo il workbook creato
     Step.next();
     app.addHierStruct();
-    Hier.save();
+    Hier.save('WorkBook 1');
   }
 
   // imposto attribute init sul <nav>, in questo modo verranno associati gli eventi data-fn sui child di <nav>
@@ -531,7 +625,7 @@ var Hier = new newHierarchy();
         } else {
           // TODO: Da testare se il codice arriva qui o viene gestito sempre dal catch()
           console.debug('FX non è stata creata');
-          debugger;
+          // debugger;
           App.showConsole('Errori nella creazione del datamart', 'error', 5000);
         }
       })
@@ -778,6 +872,20 @@ var Hier = new newHierarchy();
       .catch(err => console.error(err));
   }
 
+  app.getColumns = async (urls) => {
+    return await Promise.all(urls.map(url => fetch(url)))
+      .then(responses => {
+        return Promise.all(responses.map(response => {
+          if (!response.ok) {
+            throw Error(response.statusText);
+          }
+          return response.json();
+        }))
+      })
+      .then(data => data)
+      .catch(err => console.error(err));
+  }
+
   app.getPreviewTable = async () => {
     return await fetch('/fetch_api/' + Hier.activeTable.dataset.schema + '/schema/' + Hier.activeTable.dataset.table + '/table_preview')
       .then((response) => {
@@ -821,6 +929,7 @@ var Hier = new newHierarchy();
 
   app.tablesMap = () => {
     // creo tablesMap : qui sono presenti tutte le tabelle del canvas, al suo interno le tabelle in join fino alla tabella dei fatti
+    // debugger;
     const levelId = +Draw.svg.dataset.level;
     Hier.tablesMap.clear();
     let recursiveLevels = (levelId) => {
@@ -1003,7 +1112,6 @@ var Hier = new newHierarchy();
           to: { table: joins[0].dataset.table, alias: joins[0].dataset.alias, field: joins[0].dataset.field }
         }
       };
-      debugger;
       Hier.nJoins = fieldRef.dataset.token; // nome della tabella con le proprie join (Hier.nJoin) all'interno
       // dopo aver completato la join coloro la linea in modo diverso
       Draw.currentLineRef.dataset.joined = 'true';
@@ -1066,7 +1174,17 @@ var Hier = new newHierarchy();
     app.windowColumns.dataset.open = 'false';
   }
 
-  app.addHierStruct = () => {
+  app.addDataTypeFields = (data) => {
+    data.forEach(table => {
+      table.forEach(field => {
+        workBookHierarchies = document.getElementById('workbook-props');
+        let fieldRef = workBookHierarchies.querySelector(`details > li[data-schema='${field.TABLE_SCHEMA}'][data-table='${field.TABLE_NAME}'][data-field='${field.COLUMN_NAME}']`);
+        fieldRef.dataset.datatype = field.DATA_TYPE;
+      });
+    });
+  }
+
+  app.addHierStruct = async () => {
     // ciclo le hierarchies presenti per aggiungerle alla struttura dello step 2
     console.log(Hier.nHier);
     // ripulisco la struttura già presente.
@@ -1078,6 +1196,7 @@ var Hier = new newHierarchy();
       const dt = dl.querySelector('dt');
       dt.innerHTML = `${hierName} (nome gerarchia)`;
       app.workbookProp.appendChild(dl);
+      let fieldUrls = [];
       tables.forEach(tableId => {
         const ddElement = app.tmplDD.content.cloneNode(true);
         const dd = ddElement.querySelector("dd");
@@ -1103,9 +1222,15 @@ var Hier = new newHierarchy();
             li.addEventListener('dragend', app.fieldDragEnd);
             span.innerHTML = value.field.ds.field;
             details.appendChild(li);
+            fieldUrls.push('/fetch_api/' + Hier.activeTable.dataset.schema + '/schema/' + Hier.activeTable.dataset.table + '/table/' + value.field.ds.field + '/column_name');
           }
         }
       });
+      // TODO: eseguuo una promiseAll per recuperare il datatype delle colonne caricate in struttura.
+      // questo mi consentirà di impostare, in automatico, le metriche, in base al datatype
+      const data = await app.getColumns(fieldUrls);
+      app.addDataTypeFields(data);
+      console.log(data);
     }
   }
 

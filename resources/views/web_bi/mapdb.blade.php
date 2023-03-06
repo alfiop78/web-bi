@@ -19,7 +19,7 @@
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/Step.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
-  <script src="{{ asset('/js/Storage.js') }}"></script>
+  <script src="{{ asset('/js/WBStorage.js') }}"></script>
   <script src="{{ asset('/js/Cube.js') }}"></script>
   <script src="{{ asset('/js/Table.js') }}"></script>
   <script src="{{ asset('/js/DrawSVG.js') }}"></script>
@@ -196,6 +196,10 @@
                   <section class="step" data-step="1" selected>
                     <section class="wrapper-step">
                       <section id="canvas-area">
+                        <div>
+                          <section id="data-source-name" class="data-source" contenteditable="false">data source name</section>
+                          <button id="btn-workbook-open" type="button" value="open WorkBook">Open</button>
+                        </div>
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
                           <svg id="svg" class="dropzone" data-level="0">
                             <defs>

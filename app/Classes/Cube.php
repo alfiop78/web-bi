@@ -370,7 +370,7 @@ class Cube
         // dd($prop->workBook->table); //in workBook sono presenti table e tableAlias
         foreach ($prop->workBook as $key => $value) {
           // dd($key, $value);
-          $this->filters_baseTable['iperauto'] = "{$prop->workBook->tableAlias}.{$prop->field}" . implode($prop->sql);
+          $this->filters_baseTable['iperauto'] = "{$prop->workBook->tableAlias}.{$prop->field} " . implode(" ", $prop->sql);
         }
       }
     }
@@ -441,23 +441,14 @@ class Cube
     // metriche di base
     $metrics_base = array();
     $metrics_base_datamart = array();
-    dd($this->sheetBaseMetrics);
-    foreach ($this->baseMetrics as $metricName => $metric) {
-      // var_dump($metric);
-      if ($metric->metric_type === 1 || $metric->metric_type === 3) {
-        // metrica composta di base oppure metrica composta di base con filtri
-        // per queste metriche la prop 'field' contiene la formula es.: DocVenditaDettaglio_560.PrzMedioPond * DocVenditaDettaglio_560.Quantita
-        $metrics_base[] = "\nNVL({$metric->formula->aggregateFn}({$metric->formula->field}), 0) AS '{$metric->formula->alias}'";
-        // SUM(DocVenditaDettaglio_560.PrzMedioPond * DocVenditaDettaglio_560.Quantita) AS 'alias'
-      } else {
-        // $metrics_base è utilizzato in baseTable()
-        $metrics_base[] = "\nNVL({$metric->formula->aggregateFn}({$metric->formula->tableAlias}.{$metric->formula->field}), 0) AS '{$metric->formula->alias}'";
+    // dd($this->sheetBaseMetrics);
+    // per ogni tabella
+    foreach ($this->sheetBaseMetrics as $tableAlias => $metric) {
+      foreach ($metric as $value) {
+        // dd($value);
+        $metrics_base[] = "\nNVL({$value->formula->aggregateFn}({$value->workBook->tableAlias}.{$value->formula->field}), 0) AS '{$value->formula->alias}'";
+        $metrics_base_datamart[] = "\nNVL({$value->formula->aggregateFn}({$this->baseTableName}.'{$value->formula->alias}'), 0) AS '{$value->formula->alias}'";
       }
-      // $metrics_base_datamart è utilizzato in createDatamart(), conterrà la tabella temporanea invece della tabella di origine
-      // if ($metric->show_datamart === 'true') $metrics_base_datamart[] = "\nNVL({$metric->aggregateFn}({$this->baseTableName}.'{$metric->alias}'), 0) AS '{$metric->alias}'";
-      $metrics_base_datamart[] = "\nNVL({$metric->formula->aggregateFn}({$this->baseTableName}.'{$metric->formula->alias}'), 0) AS '{$metric->formula->alias}'";
-      // verifico se la metrica in ciclo è presente in una metrica composta
-      if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($this->baseTableName, $metric);
     }
     $this->_metrics_base = implode(", ", $metrics_base);
     $this->_metrics_base_datamart = implode(", ", $metrics_base_datamart);
@@ -597,7 +588,7 @@ class Cube
     //dd($this->_sql);
     // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
-    //dd($sql);
+    // dd($sql);
     // $result = DB::connection('vertica_odbc')->raw($sql);
     // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
     /* il metodo getSchemaBuilder() funziona con mysql, non con vertica. Ho creato MyVerticaGrammar.php dove c'è la sintassi corretta per vertica (solo alcuni Metodi ho modificato) */
@@ -716,6 +707,125 @@ class Cube
     return $result;
   }
 
+
+  public function sheetCreateDatamart($mode)
+  {
+    // dd($this->_metricTable);
+    // TODO: commentare tutta la logica
+    $table_fields = array();
+    foreach ($this->_fields as $field) {
+      $table_fields[] = "\n$this->baseTableName.$field";
+    }
+    $this->_fieldsSQL = implode(",", $table_fields);
+    // dd(!empty($this->_metrics_advanced_datamart));
+    if (!empty($this->_metrics_advanced_datamart)) {
+      dd('metriche filtrate presenti');
+      // _metrics_advanced_datamart : "\n{$metric->aggregateFn}($tableName.'{$metric->alias}') AS '{$metric->alias}'"
+      // sono presenti metriche filtrate
+      $comment = "/*Creazione DATAMART :\ndecisyon_cache.{$this->datamartName}\n*/\n";
+      $sql = "{$comment}CREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS ";
+      $sql .= "\n(SELECT{$this->_fieldsSQL}";
+      $leftJoin = null;
+
+      if (property_exists($this, 'baseMetrics') && $this->_metrics_base_datamart) $sql .= ", $this->_metrics_base_datamart";
+      if (property_exists($this, 'filteredMetrics')) {
+        $ONClause = array();
+        $ONConditions = NULL;
+        foreach ($this->_metrics_advanced_datamart as $tableName => $aliasM) {
+          $sql .= "," . implode(",", $aliasM);
+          $leftJoin .= "\nLEFT JOIN\ndecisyon_cache.$tableName\nON ";
+          foreach ($this->_columns as $columnAlias) {
+            // creo : ON W_AP_base_3.sede = W_AP_metric_3_1.sede
+            $ONClause[] = "{$this->baseTableName}.'{$columnAlias}' = {$tableName}.'{$columnAlias}'";
+          }
+          $ONConditions = implode("\nAND ", $ONClause);
+          unset($ONClause);
+          $leftJoin .= $ONConditions;
+        }
+      }
+      /*
+            QUERY CHE GENERA IL DATAMART
+                select W_AP_base_3.*, `W_AP_metric_3_1`.`Listino`, `W_AP_metric_3_2`.`sconto` FROM W_AP_base_3
+                LEFT JOIN W_AP_metric_3_1 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_1`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_1`.`Sede`
+                LEFT JOIN W_AP_metric_3_2 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_2`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_2`.`Sede`
+                con metriche composte
+                select W_AP_base_3.*, `W_AP_metric_3_1`.`Listino`, `W_AP_metric_3_2`.`sconto`, (W_AP_base_3.aliasMetric + W_AP_base_3.aliasMetric) AS 'alias' FROM W_AP_base_3
+                LEFT JOIN W_AP_metric_3_1 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_1`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_1`.`Sede`
+                LEFT JOIN W_AP_metric_3_2 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_2`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_2`.`Sede`
+            ;
+            */
+
+      // dd(property_exists($this, 'compositeMetrics'));
+      if (property_exists($this, 'compositeMetrics')) {
+        $this->createCompositeMetrics();
+        foreach ($this->_composite_sql_formula as $alias_formula) {
+          // dd($alias_formula['formula']);
+          $this->_composite_metrics[] = "NVL(" . implode(" ", $alias_formula['formula']) . ", 0) AS '{$alias_formula["alias"]}'";
+        }
+        $sql .= ",\n";
+        // dd($this->_composite_metrics);
+        $sql .= implode(",\n", $this->_composite_metrics);
+        // dd($this->_composite_metrics);
+      }
+      $sql .= "\nFROM\ndecisyon_cache.$this->baseTableName";
+      $sql .= "$leftJoin\nGROUP BY $this->_fieldsSQL);";
+    } else {
+      $s = "SELECT $this->_fieldsSQL";
+      // dd('metrics_base_datamart : ' . $this->_metrics_base_datamart);
+      if (property_exists($this, 'sheetBaseMetrics')) $s .= ", $this->_metrics_base_datamart";
+      if (property_exists($this, 'compositeMetrics')) {
+        $this->createCompositeMetrics();
+        // sono presenti metriche composte
+        foreach ($this->_composite_sql_formula as $alias_formula) {
+          $this->_composite_metrics[] = implode(" ", $alias_formula['formula']) . " AS '{$alias_formula["alias"]}'";
+        }
+        $s .= ",\n";
+        $s .= implode(", ", $this->_composite_metrics);
+      }
+      $s .= "\nFROM decisyon_cache.$this->baseTableName";
+      $s .= "\nGROUP BY $this->_fieldsSQL";
+      // dd($s);
+      $sql = "/*Creazione DATAMART finale :\n{$this->datamartName}\n*/\nCREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS\n($s);";
+    }
+    // dd($sql);
+    /* vecchio metodo, prima di MyVerticaGrammar.php
+            $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_$this->reportId' AND SCHEMA_NAME='decisyon_cache';");
+            // dd($FX);
+            if ($FX) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.FX_$this->reportId;");
+        */
+    if ($mode === 'sql') {
+      return $sql;
+    } else {
+      if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($this->datamartName)) {
+        // dd('la tabella già esiste, la elimino');
+        $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.{$this->datamartName};");
+        if (!$drop) {
+          // null : tabella eliminata, ricreo di nuovo il datamart
+          $result = DB::connection('vertica_odbc')->statement($sql);
+        } else {
+          $result = "Errore : tabella non eliminata";
+        }
+      } else {
+        // dd('Datamart non presente, lo creo');
+        $result = DB::connection('vertica_odbc')->statement($sql);
+      }
+
+      if (!$result) {
+        // TODO: aggiungere un controllo sulla drop delle tabelle temporanee
+        $dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTableName;");
+        // elimino anche le tabelle temporanee delle metriche filtrate
+        if (count($this->_metrics_advanced_datamart) !== 0) {
+          foreach ($this->_metrics_advanced_datamart as $tableName => $aliasM) {
+            //dd($tableName);
+            $dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
+          }
+        }
+        // dd($this->_metricTable);
+        // ritorno il nome della FX in modo da poter mostrare un anteprima dei dati
+        return $this->datamartName;
+      }
+    }
+  }
   // creo il datamart finale, mettendo insieme, base table con metric table (LEFT JOIN)
   public function createDatamart($mode)
   {

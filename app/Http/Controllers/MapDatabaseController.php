@@ -104,6 +104,21 @@ class MapDatabaseController extends Controller
     return response()->json($info);
   }
 
+  public function columns_info($schema, $table, $column)
+  {
+    /* dd($table); */
+    /* $tables = DB::connection('mysql')->select("DESCRIBE Azienda"); */
+    $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME, C.TABLE_SCHEMA, C.TABLE_NAME
+                FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
+                ON C.TABLE_ID=CC.TABLE_ID 
+                AND C.COLUMN_NAME=CC.COLUMN_NAME 
+                AND CC.CONSTRAINT_TYPE='p' 
+                WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table'
+                AND C.COLUMN_NAME = '$column'
+                ORDER BY c.ordinal_position ASC;");
+    return response()->json($info);
+  }
+
   public function table_preview($schema, $table)
   {
     /* dd($table); */
@@ -186,7 +201,7 @@ class MapDatabaseController extends Controller
         }
         // echo 'elaborazione createDatamart';
         // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-        $datamartName = $q->createDatamart(null);
+        $datamartName = $q->sheetCreateDatamart(null);
         // dd($datamartName);
         // restituisco un ANTEPRIMA del json con i dati del datamart appena creato
         $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.$q->datamartName LIMIT 5000;");

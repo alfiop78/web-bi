@@ -253,6 +253,12 @@ class Sheet {
 
   get columns() { return this.#columns; }
 
+  removeColumn(object) {
+    delete this.#columns.get(object.tableAlias)[object.token];
+    // verifico se, per questa tabella, ci sono altri elementi al suo interno, altrimenti la elimino
+    if (Object.keys(this.#columns.get(object.tableAlias)).length === 0) this.#columns.delete(object.tableAlias);
+  }
+
   set filter(object) {
     this.#filter.set(object.token, object.value);
   }
@@ -294,11 +300,10 @@ class Sheet {
 
   } */
 
-
 }
 
 // TODO: rinominare in WorkBook
-class newCube extends Sheet {
+class WorkBook extends Sheet {
   #metric = new Map();
   #metrics = new Map();
   constructor() {
@@ -326,18 +331,26 @@ class newCube extends Sheet {
 
   get metrics() { return this.#metrics; }
 
-  save() {
+  save(name) {
     console.clear();
-    this.workBook.name = 'workBook 1';
+    this.workBook.name = name;
     this.workBook.columns = Object.fromEntries(this.nColumns);
     this.workBook.joins = Object.fromEntries(this.nJoins);
+    this.workBook.tablesMap = Object.fromEntries(this.tablesMap);
+    this.workBook.svg = {
+      tables: Object.fromEntries(Draw.tables),
+      lines: Object.fromEntries(Draw.joinLines),
+      levelId: +Draw.svg.dataset.level
+    }
     // TODO: le metriche non vengono impostate nella fase di mapping (almeno per ora) quindi dovrei memorizzarle in una Classe Sheet (ex Query.js)
     this.workBook.metrics = Object.fromEntries(this.metrics);
     console.log('WorkBook : ', this.workBook);
+    debugger;
+    Storage.save(this.workBook);
   }
 }
 
-class newHierarchy extends newCube {
+class newHierarchy extends WorkBook {
   #activeTable;
   #nJoin = new Map();
   #nJoins = new Map();
