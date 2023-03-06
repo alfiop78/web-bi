@@ -180,7 +180,7 @@ var Hier = new newHierarchy();
     }
     // creo le gerarchie
     app.createHierarchies();
-    app.test();
+    app.tablesMap();
   }
 
   app.handlerDrop = (e) => {
@@ -424,18 +424,9 @@ var Hier = new newHierarchy();
     i.dataset.fn = 'handlerSetMetric';
     i.dataset.token = elementRef.id; // svg-data-x
     parent.appendChild(field);
-    // dopo aver aggiunto la colonna allo sheet, la aggiungo anche nella prop 'from' della Classe Sheet(che è quella che si occupa di processare il report)
-    // FIX: al momento vengono aggiunte alla FROM solo le tabelle relative alle colonne inserite nel report
-    // Hier.from = { schema: elementRef.dataset.schema, table: elementRef.dataset.table, alias: elementRef.dataset.alias };
-    // Hier.from = Draw.tables.get(elementRef.dataset.id); // svg-data-x
-    // TODO: da Hier.nHier posso recuperare tutte le tabelle gerarchicamente inferiori a questa corrent.
-    // in questo modo posso popolare la clausola FROM relativa alle columns inserite, successivamente farò lo stesso con filters
-    console.log(Hier.nHier);
-    debugger;
-    Hier.nHier.get(elementRef.dataset.alias).forEach(tableId => {
-      console.log(tableId);
-      Hier.from = Draw.tables.get(tableId); // svg-data-x
-    });
+    Hier.columns = elementRef.id;
+    Hier.tables = elementRef.dataset.alias;
+    app.setSheet();
   }
 
   app.columns.addEventListener('dragover', app.fieldDragOver, false);
@@ -515,19 +506,10 @@ var Hier = new newHierarchy();
   }
 
   app.process = async () => {
-    // TODO: Valutare la possibilità di memorizzare, nella Classe newCube solo le join della mappatura (canvas)
-    // ...mentre nella Classe Sheet potrebbero essere memorizzate le columns, metrics....
-    Hier.process = Hier.workBook;
-    // TODO: per il momento aggiungo a process la prop 'from' presente nella Clase Sheet
-    Hier.process.from = Object.fromEntries(Hier.from);
-    // TODO: ---stesso discorso per filters
-    Hier.process.filters = Object.fromEntries(Hier.filters);
-    // prova, invio al Controller per creare la query
-    console.log(Hier.process);
-    // console.log(JSON.stringify(Hier.process));
-
+    // TODO: creo 'from' e 'where' in base agli oggetti (colonne, filtri) aggiunti al report
+    Hier.sheet = 'sheetname';
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
-    const params = JSON.stringify(Hier.process);
+    const params = JSON.stringify(Hier.sheet.get('sheetname'));
     // console.log(params);
     // App.showConsole('Elaborazione in corso...', 'info');
     // chiudo la lista dei report da eseguire
@@ -615,6 +597,7 @@ var Hier = new newHierarchy();
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
+        Hier.tables = element.dataset.tableAlias;
         object.field = element.dataset.field;
 
         /* if (element.dataset.tableId) {
@@ -667,6 +650,7 @@ var Hier = new newHierarchy();
       formula: sql_formula.join(' '), // Azienda_444.id = 43 */
     };
     Hier.filters = token;
+    app.setSheet();
   }
 
   /* NOTE: END ONCLICK EVENTS*/
@@ -811,6 +795,21 @@ var Hier = new newHierarchy();
   /* NOTE: END FETCH API */
 
   /* NOTE: SUPPORT FUNCTIONS */
+
+  app.setSheet = () => {
+    // TODO: questa logica va applicata anche quando si aggiunge un filtro
+    // per ogni elemento aggiunto al report
+    Hier.tables.forEach(alias => {
+      if (Hier.tablesMap.has(alias)) {
+        Hier.tablesMap.get(alias).forEach(tableId => {
+          // nel tableId sono presenti le tabelle gerarchicamente inferiori a 'alias'
+          Hier.from = Draw.tables.get(tableId);
+          Hier.joins = Draw.tables.get(tableId);
+        });
+      }
+    });
+  }
+
   app.handlerTable = (e) => {
     console.log('select table');
     e.currentTarget.toggleAttribute('data-selected');
@@ -820,15 +819,15 @@ var Hier = new newHierarchy();
     // cardStruct.dataset.defined = e.currentTarget.dataset.label;
   }
 
-  app.test = () => {
+  app.tablesMap = () => {
+    // creo tablesMap : qui sono presenti tutte le tabelle del canvas, al suo interno le tabelle in join fino alla tabella dei fatti
     const levelId = +Draw.svg.dataset.level;
     Hier.tablesMap.clear();
     let recursiveLevels = (levelId) => {
       // per ogni tabella creo un Map() con, al suo interno, le tabelle gerarchicamente inferiori (verso la FACT)
       // questa mi servirà per stabilire, nello sheet, quali tabelle includere nella FROM e le relative Join nella WHERE
-      // let tables = { name: null, joinTables: [] };
       Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}']`).forEach(table => {
-        console.log(table.dataset.alias);
+        // console.log(table.dataset.alias);
         joinTables = [table.id];
         // della tabella corrente recupero tutte le sue discendenze fino alla FACT
         let recursive = (tableId) => {

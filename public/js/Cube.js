@@ -212,25 +212,46 @@ class Dimension {
 
 }
 
+// TODO: rinominare (nJoins -> joinsMap), (nJoin -> joinMap), (nColumn -> columnMap) ecc...
+
 class Sheet {
-  #process = {};
   #from = new Map();
+  #joins = new Map();
   #filter = new Map();
   #filters = new Map();
+  #columns = new Map();
+  #tables = new Set(); // tutte le tabelle usate nello sheet. Mi servirà per creare la from e la where
+  #sheet = new Map();
   constructor() { }
 
-  set process(object) {
-    this.#process = object;
-  }
-
-  get process() { return this.#process; }
-
   set from(object) {
-    debugger;
     this.#from.set(object.alias, { schema: object.schema, table: object.table });
   }
 
   get from() { return this.#from; }
+
+  set tables(value) {
+    this.#tables.add(value);
+  }
+
+  get tables() { return this.#tables; }
+
+  set joins(object) {
+    // la tabella dei fatti non ha join
+    if (this.nJoins.has(object.alias)) this.#joins.set(object.alias, this.nJoins.get(object.alias));
+  }
+
+  get joins() {
+    return this.#joins;
+  }
+
+  set columns(token) {
+    this.#columns.set(this.nColumn.get(token).tableAlias, {
+      [token]: this.nColumn.get(token)
+    });
+  }
+
+  get columns() { return this.#columns; }
 
   set filter(object) {
     this.#filter.set(object.token, object.value);
@@ -251,6 +272,22 @@ class Sheet {
   }
 
   get filters() { return this.#filters; }
+
+  set sheet(sheetName) {
+    this.sheetObject = {
+      name: sheetName,
+      joins: Object.fromEntries(this.joins),
+      from: Object.fromEntries(this.from),
+      filters: Object.fromEntries(this.filters),
+      columns: Object.fromEntries(this.columns),
+      metrics: Object.fromEntries(this.metrics)
+    };
+    this.#sheet.set(this.sheetObject.name, this.sheetObject);
+    console.log(this.#sheet);
+    debugger;
+  }
+
+  get sheet() { return this.#sheet; }
 
   /* save() {
     // TODO: implementazione

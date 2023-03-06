@@ -136,17 +136,22 @@ class MapDatabaseController extends Controller
     $cube = json_decode(json_encode($request->all())); // object
     $q = new Cube();
     $q->baseTableName = "WEB_BI_TMP_BASE_test";
+    $q->datamartName = "WEB_BI_1";
     $q->baseColumns = $cube->{'columns'};
     // imposto le colonne da includere nel datamart finale
     $q->sheetFields();
     $q->sheetSelect($cube->{'columns'});
+    if (property_exists($cube, 'metrics')) {
+      $q->sheetBaseMetrics = $cube->{'metrics'};
+      $q->sheetMetrics();
+    }
     $q->sheetFrom($cube->{'from'});
     $q->sheetWhere($cube->{'joins'});
     if (property_exists($cube, 'filters')) $q->sheetFilters($cube->{'filters'});
     $q->sheetGroupBy($cube->{'columns'});
     try {
       $baseTable = $q->sheetBaseTable(null);
-      dd($baseTable);
+      // dd($baseTable);
       if (!$baseTable) {
         // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
         // creo una tabella temporanea per ogni metrica filtrata

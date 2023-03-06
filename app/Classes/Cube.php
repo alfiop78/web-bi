@@ -42,14 +42,16 @@ class Cube
 		*/
     // dd($this->baseColumns);
     foreach ($this->baseColumns as $tableAlias => $field) {
+      // ...per ogni tabella
       // TODO: da ottimizzare
-      // all'interno delle tabelle ci sono i token che corrispondo ognuno a una colonna id-ds
       // dd($tableAlias, $field);
-      foreach ($field as $prop) {
-        // dd($prop);
-        foreach ($prop->field as $key => $value) {
-          // dd($key, $value);
-          $this->_fields[] = "{$prop->name}_{$key}";
+      // field contiene un object con {token_colonna : {proprietà della colonna}}
+      foreach ($field as $column) {
+        // ... per ogni colonna
+        // all'interno delle tabelle ci sono i token che corrispondo ognuno a una colonna id-ds
+        foreach ($column->field as $key => $value) {
+          // ...ciclo id/ds
+          $this->_fields[] = "{$column->name}_{$key}";
         }
       }
     }
@@ -62,15 +64,16 @@ class Cube
     $this->SELECT = "SELECT\n";
     // dd($columns);
     foreach ($columns as $tableAlias => $field) {
-      foreach ($field as $prop) {
-        foreach ($prop->field as $key => $value) {
-          // dd($key, $value->field);
-          $fieldList["{$prop->name}_{$key}"] = "{$tableAlias}.{$value->field} AS {$prop->name}_{$key}"; // $fieldType : id/ds
+      // per ogni tabella
+      foreach ($field as $column) {
+        // ... per ogni colonna
+        foreach ($column->field as $key => $value) {
+          // ...ciclo id/ds
+          $fieldList["{$column->name}_{$key}"] = "{$tableAlias}.{$value->field} AS {$column->name}_{$key}"; // $fieldType : id/ds
         }
-        // $this->_columns[] = "{$column->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
       }
+      // $this->_columns[] = "{$column->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
     }
-    // dd($fieldList);
     /* foreach ($fieldList as $name => $field) {
       $this->json__info->columns->{$name} = (object)[
         "sql" => $field
@@ -224,14 +227,10 @@ class Cube
     $fieldList = array();
     $this->groupBy = "GROUP BY\n";
     foreach ($groups as $tableAlias => $field) {
-      foreach ($field as $prop) {
-        // dd($prop);
-        foreach ($prop->field as $key => $value) {
-          // dd($key, $value->field);
-          // $fieldList["{$value->field}_{$key}"] = "{$tableAlias}.{$prop->name}"; // $fieldType : id/ds
-          // $fieldList["{$value->field}_{$key}"] = "{$tableAlias}.{$value->field}"; // $fieldType : id/ds
-          // esempio preso da sheetSelect()
-          $fieldList["{$prop->name}_{$key}"] = "{$tableAlias}.{$value->field}"; // $fieldType : id/ds
+      // dd($prop);
+      foreach ($field as $column) {
+        foreach ($column->field as $key => $value) {
+          $fieldList["{$column->name}_{$key}"] = "{$tableAlias}.{$value->field}"; // $fieldType : id/ds
         }
       }
     }
@@ -437,6 +436,36 @@ class Cube
     // dd($this->_metrics_base_datamart);
   }
 
+  public function sheetMetrics()
+  {
+    // metriche di base
+    $metrics_base = array();
+    $metrics_base_datamart = array();
+    dd($this->sheetBaseMetrics);
+    foreach ($this->baseMetrics as $metricName => $metric) {
+      // var_dump($metric);
+      if ($metric->metric_type === 1 || $metric->metric_type === 3) {
+        // metrica composta di base oppure metrica composta di base con filtri
+        // per queste metriche la prop 'field' contiene la formula es.: DocVenditaDettaglio_560.PrzMedioPond * DocVenditaDettaglio_560.Quantita
+        $metrics_base[] = "\nNVL({$metric->formula->aggregateFn}({$metric->formula->field}), 0) AS '{$metric->formula->alias}'";
+        // SUM(DocVenditaDettaglio_560.PrzMedioPond * DocVenditaDettaglio_560.Quantita) AS 'alias'
+      } else {
+        // $metrics_base è utilizzato in baseTable()
+        $metrics_base[] = "\nNVL({$metric->formula->aggregateFn}({$metric->formula->tableAlias}.{$metric->formula->field}), 0) AS '{$metric->formula->alias}'";
+      }
+      // $metrics_base_datamart è utilizzato in createDatamart(), conterrà la tabella temporanea invece della tabella di origine
+      // if ($metric->show_datamart === 'true') $metrics_base_datamart[] = "\nNVL({$metric->aggregateFn}({$this->baseTableName}.'{$metric->alias}'), 0) AS '{$metric->alias}'";
+      $metrics_base_datamart[] = "\nNVL({$metric->formula->aggregateFn}({$this->baseTableName}.'{$metric->formula->alias}'), 0) AS '{$metric->formula->alias}'";
+      // verifico se la metrica in ciclo è presente in una metrica composta
+      if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($this->baseTableName, $metric);
+    }
+    $this->_metrics_base = implode(", ", $metrics_base);
+    $this->_metrics_base_datamart = implode(", ", $metrics_base_datamart);
+    // dd($this->_metrics_base);
+    // dd($this->_metrics_base_datamart);
+  }
+
+
   private function buildCompositeMetrics($tableName, $metricObject)
   {
     // $nestedComposite = array();
@@ -523,12 +552,11 @@ class Cube
     $this->_sql .= "\nFROM\n" . implode(",\n", $this->FROM_baseTable);
     $this->_sql .= "\nWHERE\n" . implode("\nAND ", array_merge($this->WHERE_baseTable, $this->WHERE_timeDimension));
     if (count($this->filters_baseTable)) $this->_sql .= "\nAND " . implode("\nAND ", $this->filters_baseTable);
-    $this->_sql .= "\n$this->groupBy";
+    $this->_sql .= "\n$this->groupBy LIMIT 20";
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
-    //dd($this->_sql);
     // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
-    //dd($sql);
+    // dd($sql);
     // $result = DB::connection('vertica_odbc')->raw($sql);
     // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
     /* il metodo getSchemaBuilder() funziona con mysql, non con vertica. Ho creato MyVerticaGrammar.php dove c'è la sintassi corretta per vertica (solo alcuni Metodi ho modificato) */
@@ -749,12 +777,6 @@ class Cube
       $sql .= "\nFROM\ndecisyon_cache.$this->baseTableName";
       $sql .= "$leftJoin\nGROUP BY $this->_fieldsSQL);";
     } else {
-      /*
-        creazione metrica composta nella tabella baseTable (metriche non filtrate) 2022-05-12
-        SELECT W_AP_base_1652367363055.'sid_id', W_AP_base_1652367363055.'sid_ds', W_AP_base_1652367363055.'sede_id', W_AP_base_1652367363055.'sede_ds', ( SUM(W_AP_base_1652367363055.'comp-przmedio-alias') * SUM(W_AP_base_1652367363055.'comp-qta') ) AS 'composite-costo'
-        FROM decisyon_cache.W_AP_base_1652367363055
-        GROUP BY W_AP_base_1652367363055.'sid_id', W_AP_base_1652367363055.'sid_ds', W_AP_base_1652367363055.'sede_id', W_AP_base_1652367363055.'sede_ds');
-      */
       $s = "SELECT $this->_fieldsSQL";
       if (property_exists($this, 'baseMetrics')) $s .= ", $this->_metrics_base_datamart";
       if (property_exists($this, 'compositeMetrics')) {
@@ -771,7 +793,7 @@ class Cube
       // dd($s);
       $sql = "/*Creazione DATAMART finale :\n{$this->datamartName}\n*/\nCREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS\n($s);";
     }
-    // dd($sql);
+    dd($sql);
     /* vecchio metodo, prima di MyVerticaGrammar.php
             $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_$this->reportId' AND SCHEMA_NAME='decisyon_cache';");
             // dd($FX);
