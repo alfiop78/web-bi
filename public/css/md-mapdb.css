@@ -339,7 +339,7 @@ section[data-table-from] .table, section[data-table-to] .table{
   flex-flow: wrap;
 }
 
-.column-defined{
+.column-defined, .metric-defined{
   display: flex;
   /* color: white; */
   position: relative;
@@ -357,12 +357,18 @@ section[data-table-from] .table, section[data-table-to] .table{
   background-color: lightgreen;
 }
 
-i[data-id="btn-set-metric"]:hover{
+.metric-defined{
+  background-color:teal;
+  color: white;
+}
+
+i[data-id="btn-set-metric"]:hover, i[data-id='btn-set-filter']:hover{
   cursor: pointer;
 }
 
-.column-defined > i[data-id="btn-set-metric"]{
+.column-defined > i[data-id="btn-set-metric"], .metric-defined > i[data-id="btn-set-filter"]{
   position: absolute;
+  color: #494949;
   left: 100%;
 }
 

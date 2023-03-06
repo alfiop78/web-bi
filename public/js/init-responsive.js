@@ -10,10 +10,12 @@ var Hier = new newHierarchy();
     tmplDL: document.getElementById('tmpl-dl-element'),
     tmplDD: document.getElementById('tmpl-dd-element'),
     tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
+    tmplMetricsDefined: document.getElementById('tmpl-metrics-defined'),
     tmplFormula: document.getElementById('tmpl-formula'),
     // dialogs
     dialogTables: document.getElementById('dlg-tables'),
     dialogFilters: document.getElementById('dlg-filters'),
+    dialogMetricFilters: document.getElementById('dlg-metric-filters'),
     windowJoin: document.getElementById('window-join'),
     windowColumns: document.getElementById('window-columns'),
     // buttons
@@ -368,21 +370,22 @@ var Hier = new newHierarchy();
     const table = field.dataset.table;
     const tableAlias = field.dataset.alias;
     const column = field.dataset.field;
+    // field.id è il token (TODO: da rinominare correttamente)
     // const date = new Date();
     // edit o salvataggio di una metrica
-    const rand = () => Math.random(0).toString(36).substring(2);
-    const token = rand().substring(0, 21);
+    // const rand = () => Math.random(0).toString(36).substring(2);
+    // const token = rand().substring(0, 21);
 
     // metric Map Object
     Hier.metric = {
-      token,
+      token: field.id,
       value: {
         alias: 'metric alias',
-        type: 'base/adv/composite',
+        type: 'base', // /filtered/composite
         workBook: { table, tableAlias },
         // workBook: { table: Hier.workBook.name, alias: 'alias tabella fact' },
         formula: {
-          token,
+          token: field.id,
           aggregateFn,
           field: column,
           distinct: false,
@@ -390,14 +393,11 @@ var Hier = new newHierarchy();
         }
       }
     };
-    Hier.metrics = token;
-    // sto impostando questa colonna come metrica, per cui è necessario rimuoverla da Hier.columns
-    // Hier.removeColumn({ tableAlias, token: e.target.dataset.token });
-    // Hier.save();
+    Hier.metrics = field.id;
   }
 
   // imposto questo field come metrica
-  app.handlerSetMetric = (e) => {
+  /* app.handlerSetMetric = (e) => {
     console.log(e.target);
     console.log(e.target.dataset.token); // token della colonna
     // TODO: dialog show (anzichè showModal())
@@ -436,7 +436,7 @@ var Hier = new newHierarchy();
     // sto impostando questa colonna come metrica, per cui è necessario rimuoverla da Hier.columns
     // Hier.removeColumn({ tableAlias, token: e.target.dataset.token });
     Hier.save();
-  }
+  } */
 
   app.fieldDrop = (e) => {
     e.preventDefault();
@@ -450,20 +450,29 @@ var Hier = new newHierarchy();
     const parent = e.currentTarget.querySelector('.columns-area');
     console.log(elementRef);
     // creo l'elemento .field-defined dal template #tmpl-columns-defined
-    const tmpl = app.tmplColumnsDefined.content.cloneNode(true);
-    const field = tmpl.querySelector('.column-defined');
-    const span = field.querySelector('span');
-    const i = field.querySelector("i[data-id='btn-set-metric']");
+    let tmpl, field, span, i;
+    if (elementRef.dataset.datatype === 'float') {
+      tmpl = app.tmplMetricsDefined.content.cloneNode(true);
+      field = tmpl.querySelector('.metric-defined');
+      span = field.querySelector('span');
+      i = field.querySelector("i[data-id='btn-set-filter']");
+      field.dataset.type = 'metric';
+      app.setMetric(elementRef);
+    } else {
+      tmpl = app.tmplColumnsDefined.content.cloneNode(true);
+      field = tmpl.querySelector('.column-defined');
+      span = field.querySelector('span');
+      i = field.querySelector("i[data-id='btn-set-metric']");
+      field.dataset.type = 'column';
+      Hier.columns = elementRef.id;
+    }
     span.innerHTML = elementRef.dataset.field;
-    field.dataset.type = (elementRef.dataset.datatype === 'float') ? 'metric' : 'column';
     field.dataset.id = elementRef.id;
     // i.addEventListener('click', app.handlerSetMetric);
-    i.dataset.fn = 'handlerSetMetric';
+    // i.dataset.fn = 'handlerSetMetric';
     i.dataset.token = elementRef.id; // svg-data-x
     parent.appendChild(field);
 
-    if (field.dataset.type === 'metric') app.setMetric(elementRef);
-    if (field.dataset.type === 'column') Hier.columns = elementRef.id;
     Hier.tables = elementRef.dataset.alias;
     app.setSheet();
   }
@@ -693,6 +702,7 @@ var Hier = new newHierarchy();
         object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
         Hier.tables = element.dataset.tableAlias;
         object.field = element.dataset.field;
+        object.name = 'filter test';
 
         /* if (element.dataset.tableId) {
           // tabella appartenente a un livello dimensionale
@@ -744,7 +754,52 @@ var Hier = new newHierarchy();
       formula: sql_formula.join(' '), // Azienda_444.id = 43 */
     };
     Hier.filters = token;
+    // aggiungo il filtro alla nav[data-filters-defined]
+    const parent = app.dialogFilters.querySelector('nav[data-filters-defined]');
+    const tmpl = app.tmplList.content.cloneNode(true);
+    const li = tmpl.querySelector('li[data-li]');
+    const span = li.querySelector('li[data-li] span');
+    li.dataset.name = object.name;
+    li.dataset.token = token;
+    li.dataset.fn = "handlerFilterSelected";
+    span.innerHTML = object.name;
+    parent.appendChild(li);
     app.setSheet();
+  }
+
+  app.addFiltersMetric = e => e.currentTarget.toggleAttribute('selected');
+
+  app.setMetricFilter = (e) => {
+    console.log(e.target);
+    console.log(e.target.dataset);
+    // metrica selezionata
+    const metric = Hier.metric.get(e.target.dataset.token);
+    const parent = app.dialogMetricFilters.querySelector('nav[data-filters-defined]');
+    for (const [tableAlias, filters] of Hier.filters) {
+      for (const [token, filter] of Object.entries(filters)) {
+        const tmpl = app.tmplList.content.cloneNode(true);
+        const li = tmpl.querySelector('li[data-li]');
+        const span = li.querySelector('li[data-li] span');
+        li.dataset.name = filter.name;
+        li.dataset.token = token;
+        li.dataset.fn = "addFiltersMetric";
+        span.innerHTML = filter.name;
+        parent.appendChild(li);
+      }
+    }
+    // devo aggiungere i filtri su questa metrica già presente in Hier.metric/s
+    // TODO: apertura dialog per selezionare i filtri
+    app.dialogMetricFilters.dataset.token = e.target.dataset.token;
+    app.dialogMetricFilters.show();
+  }
+
+  app.addFiltersToMetric = (e) => {
+    let filters = [];
+    app.dialogMetricFilters.querySelectorAll('li[selected]').forEach(filter => filters.push(filter.dataset.token));
+    Hier.metric.get(app.dialogMetricFilters.dataset.token).formula.filters = filters;
+    Hier.metric.get(app.dialogMetricFilters.dataset.token).type = 'filtered';
+    console.log(Hier.metric);
+    console.log(Hier.metrics);
   }
 
   /* NOTE: END ONCLICK EVENTS*/
@@ -1203,6 +1258,8 @@ var Hier = new newHierarchy();
         const details = dd.querySelector("details");
         const summary = details.querySelector('summary');
         Hier.activeTable = tableId;
+        dd.dataset.alias = Hier.activeTable.dataset.alias;
+        dd.dataset.table = Hier.activeTable.dataset.table;
         summary.innerHTML = Hier.activeTable.dataset.table;
         summary.dataset.tableId = tableId;
         dt.appendChild(dd);

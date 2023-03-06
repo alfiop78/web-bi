@@ -342,10 +342,9 @@ class WorkBook extends Sheet {
       lines: Object.fromEntries(Draw.joinLines),
       levelId: +Draw.svg.dataset.level
     }
-    // TODO: le metriche non vengono impostate nella fase di mapping (almeno per ora) quindi dovrei memorizzarle in una Classe Sheet (ex Query.js)
-    this.workBook.metrics = Object.fromEntries(this.metrics);
-    console.log('WorkBook : ', this.workBook);
-    debugger;
+    // TODO: le metriche non vengono impostate nella fase di mapping (almeno per ora) quindi le memorizzo nella Classe Sheet (ex Query.js)
+    // this.workBook.metrics = Object.fromEntries(this.metrics);
+    console.info('WorkBook : ', this.workBook);
     Storage.save(this.workBook);
   }
 }

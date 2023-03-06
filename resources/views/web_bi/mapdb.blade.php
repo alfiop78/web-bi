@@ -95,6 +95,14 @@
       </div>
     </template>
 
+    <template id="tmpl-metrics-defined">
+      <div class="metric-defined">
+        <i class="button-icon material-icons-round md-18">query_stats</i>
+        <span></span>
+        <i data-id="btn-set-filter" data-fn="setMetricFilter" class="button-icon material-icons-round md-18">filter_alt</i>
+      </div>
+    </template>
+
     <template id="tmpl-formula">
       <span class="markContent">
         <i class="material-icons-round md-14">cancel</i>
@@ -109,15 +117,29 @@
           <dialog id="dlg-filters">
             <section class="dlg-grid">
               <section class="dlg-title">Creazione Filtro</section>
-              <section class="dlg-content col col-2">
+              <section class="dlg-content col col-3">
                 <nav></nav>
                 <section>
                   <div id="textarea-filter" data-content-editable></div>
                 </section>
+                <nav data-filters-defined></nav>
               </section>
               <section class="dlg-buttons">
                 <button name="dlg-close" value="chiudi">Chiudi</button>
                 <button data-fn="saveFilter" id="btn-filter-save" value="salva">Salva</button>
+              </section>
+            </section>
+          </dialog>
+
+          <dialog id="dlg-metric-filters">
+            <section class="dlg-grid">
+              <section class="dlg-title">Creazione Filtro</section>
+              <section class="dlg-content col col-1">
+                <nav data-filters-defined></nav>
+              </section>
+              <section class="dlg-buttons">
+                <button name="dlg-close" value="chiudi">Chiudi</button>
+                <button data-fn="addFiltersToMetric" id="btn-filter-add" value="salva">Salva</button>
               </section>
             </section>
 

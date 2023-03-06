@@ -89,7 +89,7 @@ dialog#dlg-filters > .dlg-grid{
   grid-template-rows: auto 1fr auto;
 }
 
-#dlg-filters > .dlg-grid > .dlg-content.col.col-2{
+#dlg-filters > .dlg-grid > .dlg-content.col.col-3{
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 260px 1fr 230px;
 }
