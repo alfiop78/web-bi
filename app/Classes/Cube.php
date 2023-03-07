@@ -41,20 +41,20 @@ class Cube
 			]
 		*/
     // dd($this->baseColumns);
-    foreach ($this->baseColumns as $tableAlias => $field) {
-      // ...per ogni tabella
-      // TODO: da ottimizzare
-      // dd($tableAlias, $field);
-      // field contiene un object con {token_colonna : {proprietà della colonna}}
-      foreach ($field as $column) {
-        // ... per ogni colonna
-        // all'interno delle tabelle ci sono i token che corrispondo ognuno a una colonna id-ds
-        foreach ($column->field as $key => $value) {
-          // ...ciclo id/ds
-          $this->_fields[] = "{$column->name}_{$key}";
-        }
+    // foreach ($this->baseColumns as $tableAlias => $field) {
+    // ...per ogni tabella
+    // TODO: da ottimizzare
+    // dd($tableAlias, $field);
+    // field contiene un object con {token_colonna : {proprietà della colonna}}
+    foreach ($this->baseColumns as $column) {
+      // ... per ogni colonna
+      // all'interno delle tabelle ci sono i token che corrispondo ognuno a una colonna id-ds
+      foreach ($column->field as $key => $value) {
+        // ...ciclo id/ds
+        $this->_fields[] = "{$column->name}_{$key}";
       }
     }
+    // }
     // dd($this->_fields);
   }
 
@@ -63,17 +63,15 @@ class Cube
     $fieldList = array();
     $this->SELECT = "SELECT\n";
     // dd($columns);
-    foreach ($columns as $tableAlias => $field) {
-      // per ogni tabella
-      foreach ($field as $column) {
-        // ... per ogni colonna
-        foreach ($column->field as $key => $value) {
-          // ...ciclo id/ds
-          $fieldList["{$column->name}_{$key}"] = "{$tableAlias}.{$value->field} AS {$column->name}_{$key}"; // $fieldType : id/ds
-        }
+    // per ogni tabella
+    foreach ($columns as $column) {
+      // ... per ogni colonna
+      foreach ($column->field as $key => $value) {
+        // ...ciclo id/ds
+        $fieldList["{$column->name}_{$key}"] = "{$column->tableAlias}.{$value->field} AS {$column->name}_{$key}"; // $fieldType : id/ds
       }
-      // $this->_columns[] = "{$column->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
     }
+    // $this->_columns[] = "{$column->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
     /* foreach ($fieldList as $name => $field) {
       $this->json__info->columns->{$name} = (object)[
         "sql" => $field
@@ -226,17 +224,17 @@ class Cube
   {
     $fieldList = array();
     $this->groupBy = "GROUP BY\n";
-    foreach ($groups as $tableAlias => $field) {
-      // dd($prop);
-      foreach ($field as $column) {
-        foreach ($column->field as $key => $value) {
-          $fieldList["{$column->name}_{$key}"] = "{$tableAlias}.{$value->field}"; // $fieldType : id/ds
-        }
+    // foreach ($groups as $tableAlias => $field) {
+    // dd($prop);
+    foreach ($groups as $column) {
+      foreach ($column->field as $key => $value) {
+        $fieldList["{$column->name}_{$key}"] = "{$column->tableAlias}.{$value->field}"; // $fieldType : id/ds
       }
     }
+    // }
     // dd($fieldList);
     $this->groupBy .= implode(",\n", $fieldList);
-    // dd($this->groupBy);
+    dd($this->groupBy);
   }
 
   /*
@@ -442,13 +440,10 @@ class Cube
     $metrics_base = array();
     $metrics_base_datamart = array();
     // dd($this->sheetBaseMetrics);
-    // per ogni tabella
-    foreach ($this->sheetBaseMetrics as $tableAlias => $metric) {
-      foreach ($metric as $value) {
-        // dd($value);
-        $metrics_base[] = "\nNVL({$value->formula->aggregateFn}({$value->workBook->tableAlias}.{$value->formula->field}), 0) AS '{$value->formula->alias}'";
-        $metrics_base_datamart[] = "\nNVL({$value->formula->aggregateFn}({$this->baseTableName}.'{$value->formula->alias}'), 0) AS '{$value->formula->alias}'";
-      }
+    foreach ($this->sheetBaseMetrics as $value) {
+      // dd($value);
+      $metrics_base[] = "\nNVL({$value->formula->aggregateFn}({$value->workBook->tableAlias}.{$value->formula->field}), 0) AS '{$value->formula->alias}'";
+      $metrics_base_datamart[] = "\nNVL({$value->formula->aggregateFn}({$this->baseTableName}.'{$value->formula->alias}'), 0) AS '{$value->formula->alias}'";
     }
     $this->_metrics_base = implode(", ", $metrics_base);
     $this->_metrics_base_datamart = implode(", ", $metrics_base_datamart);

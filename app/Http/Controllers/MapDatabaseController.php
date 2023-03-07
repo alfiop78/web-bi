@@ -171,8 +171,8 @@ class MapDatabaseController extends Controller
         // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
         // creo una tabella temporanea per ogni metrica filtrata
         // TODO: 2022-05-06 qui occorre una verifica più approfondita sui filtri contenuti nella metrica, allo stato attuale faccio una query per ogni metrica filtrata, anche se i filtri all'interno della metrica sono uguali. Includere più metriche che contengono gli stessi filtri in un unica query
-        if (property_exists($cube, 'advancedMetrics')) {
-          $q->filteredMetrics = $cube->{'advancedMetrics'};
+        if (property_exists($cube, 'advMetrics')) {
+          $q->filteredMetrics = $cube->{'advMetrics'};
           // verifico quali, tra le metriche filtrate, contengono gli stessi filtri. Le metriche che contengono gli stessi filtri vanno eseguite in un unica query
           // oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
           $q->groupMetricsByFilters = (object)[];
@@ -180,6 +180,7 @@ class MapDatabaseController extends Controller
           $groupFilters = array();
           // creo un gruppo di filtri
           foreach ($q->filteredMetrics as $metric) {
+            dd($metric);
             // ogni gruppo di filtri ha un tokenGrouup diverso come key dekk'array
             $tokenGroup = "group_" . bin2hex(random_bytes(4));
             if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;

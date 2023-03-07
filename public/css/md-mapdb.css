@@ -387,3 +387,13 @@ details > li[data-datatype='float'] {
   background-color: teal;
   color: white;
 }
+
+details > li[data-type="metric"] {
+  background-color: teal;
+  color: white;
+}
+
+details > li[data-type="column"] {
+  background-color: lightblue;
+  color: #494949;
+}

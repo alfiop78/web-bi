@@ -125,7 +125,7 @@
                 <nav data-filters-defined></nav>
               </section>
               <section class="dlg-buttons">
-                <button name="dlg-close" value="chiudi">Chiudi</button>
+                <button name="cancel" value="chiudi">Chiudi</button>
                 <button data-fn="saveFilter" id="btn-filter-save" value="salva">Salva</button>
               </section>
             </section>
@@ -138,7 +138,7 @@
                 <nav data-filters-defined></nav>
               </section>
               <section class="dlg-buttons">
-                <button name="dlg-close" value="chiudi">Chiudi</button>
+                <button name="cancel" value="chiudi">Chiudi</button>
                 <button data-fn="addFiltersToMetric" id="btn-filter-add" value="salva">Salva</button>
               </section>
             </section>
@@ -228,7 +228,7 @@
                               <g id="table-struct" class="struct">
                                 <rect x="0" y="0" />
                                 <text x="18" y="20" font-family="Barlow" font-size=".85rem" font-weight="normal"></text>
-                                <image id="backspace" href="{{ asset('/images/backspace.svg') }}" data-id data-fn="removeTable" x="152" y="0" width="18" height="18">
+                                <image id="backspace" href="{{ asset('/images/backspace.svg') }}" data-id data-fn="contextMenu" x="152" y="0" width="18" height="18">
                                 </image>
                               </g>
                             </defs>

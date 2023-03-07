@@ -31,11 +31,30 @@ class Table {
     this.tr = this.thead.querySelector('tr');
     Object.keys(this.data[0]).forEach(column => {
       const th = document.createElement('th');
-      th.innerHTML = column;
+      const td = document.createElement('td');
+      const span = document.createElement('span');
+      const buttons = document.createElement('div');
+      const btnColumn = document.createElement('button');
+      const btnMetric = document.createElement('button');
+      // th.innerHTML = column;
       // evento click sulle intestazioni di colonna
-      th.dataset.fn = 'handlerColumn';
+      // th.dataset.fn = 'handlerColumn';
       th.dataset.field = column;
       this.tr.appendChild(th);
+      span.innerHTML = column;
+      btnColumn.dataset.fn = 'setColumn';
+      btnColumn.innerHTML = 'table_rows';
+      btnColumn.dataset.field = column;
+      btnColumn.classList.add('button-icon', 'material-icons-round', 'md-18');
+      btnMetric.dataset.fn = 'setMetric';
+      btnMetric.classList.add('button-icon', 'material-icons-round', 'md-18');
+      btnMetric.innerHTML = 'query_stats';
+      btnMetric.dataset.field = column;
+      td.appendChild(span);
+      buttons.appendChild(btnColumn);
+      buttons.appendChild(btnMetric);
+      td.appendChild(buttons);
+      th.appendChild(td);
     });
   }
 

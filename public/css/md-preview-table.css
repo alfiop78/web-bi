@@ -19,7 +19,7 @@ td{
 thead th {
   position: sticky;
   top: 0;
-  vertical-align: bottom;
+  vertical-align: middle;
   background-color: lightskyblue;
   border: solid thin gainsboro;
 }
@@ -27,6 +27,15 @@ thead th {
 thead th:hover{
   cursor: pointer;
   background-color: lightcoral;
+}
+
+thead th > td{
+  display: flex;
+  justify-content: space-between;
+}
+
+thead th > td > div{
+  display: flex;
 }
 
 .table-preview{
