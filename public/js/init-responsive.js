@@ -796,10 +796,13 @@ var Hier = new newHierarchy();
   app.addFiltersToMetric = (e) => {
     let filters = [];
     app.dialogMetricFilters.querySelectorAll('li[selected]').forEach(filter => filters.push(filter.dataset.token));
-    Hier.metric.get(app.dialogMetricFilters.dataset.token).formula.filters = filters;
-    Hier.metric.get(app.dialogMetricFilters.dataset.token).type = 'filtered';
-    console.log(Hier.metric);
-    console.log(Hier.metrics);
+    // TODO: aggiungo la metrica alla proprietà 'advancedMetrics' e la elimino da Hierr.metric/s
+    let metric = Hier.metric.get(app.dialogMetricFilters.dataset.token);
+    metric.formula.filters = filters;
+    Hier.advMetric = { token: app.dialogMetricFilters.dataset.token, value: metric };
+    Hier.advMetrics = app.dialogMetricFilters.dataset.token;
+    delete Hier.metrics.get(metric.workBook.tableAlias)[app.dialogMetricFilters.dataset.token];
+    if (Object.keys(Hier.metrics.get(metric.workBook.tableAlias)).length === 0) Hier.metrics.delete(metric.workBook.tableAlias);
   }
 
   /* NOTE: END ONCLICK EVENTS*/

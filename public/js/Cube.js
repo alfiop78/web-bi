@@ -286,7 +286,8 @@ class Sheet {
       from: Object.fromEntries(this.from),
       filters: Object.fromEntries(this.filters),
       columns: Object.fromEntries(this.columns),
-      metrics: Object.fromEntries(this.metrics)
+      metrics: Object.fromEntries(this.metrics),
+      advMetrics: Object.fromEntries(this.advMetrics)
     };
     this.#sheet.set(this.sheetObject.name, this.sheetObject);
     console.log(this.#sheet);
@@ -306,6 +307,8 @@ class Sheet {
 class WorkBook extends Sheet {
   #metric = new Map();
   #metrics = new Map();
+  #advMetric = new Map();
+  #advMetrics = new Map();
   constructor() {
     super();
     this.workBook = {};
@@ -330,6 +333,26 @@ class WorkBook extends Sheet {
   }
 
   get metrics() { return this.#metrics; }
+
+  set advMetric(object) {
+    this.#advMetric.set(object.token, object.value);
+  }
+
+  get advMetric() { return this.#advMetric; }
+
+  set advMetrics(token) {
+    if (!this.#advMetrics.has(this.#advMetric.get(token).workBook.tableAlias)) {
+      this.#advMetrics.set(this.#advMetric.get(token).workBook.tableAlias, {
+        [token]: this.#advMetric.get(token)
+      });
+    } else {
+      // alias di tabella già presente
+      this.#advMetrics.get(this.#advMetric.get(token).workBook.tableAlias)[token] = this.#advMetric.get(token);
+    }
+    console.log('#advMetrics : ', this.#advMetrics);
+  }
+
+  get advMetrics() { return this.#advMetrics; }
 
   save(name) {
     console.clear();
