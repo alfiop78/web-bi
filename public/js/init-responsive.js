@@ -15,6 +15,7 @@ var Hier = new newHierarchy();
     // dialogs
     dialogTables: document.getElementById('dlg-tables'),
     dialogFilters: document.getElementById('dlg-filters'),
+    dialogMetric: document.getElementById('dlg-metric'),
     dialogMetricFilters: document.getElementById('dlg-metric-filters'),
     windowJoin: document.getElementById('window-join'),
     windowColumns: document.getElementById('window-columns'),
@@ -33,7 +34,9 @@ var Hier = new newHierarchy();
     sheetProp: document.querySelector('#sheeet-props'),
     // columns and rows dropzone (step 2)
     columns: document.getElementById('dropzone-columns'),
-    rows: document.getElementById('dropzone-rows')
+    rows: document.getElementById('dropzone-rows'),
+
+    textAreaMetric: document.getElementById('textarea-metric')
   }
 
   App.init();
@@ -355,7 +358,7 @@ var Hier = new newHierarchy();
     }
   }
 
-  app.handlerDragLeave = (e) => {
+  app.fieldDragLeave = (e) => {
     e.preventDefault();
     console.log(e.currentTarget);
     e.currentTarget.classList.remove('dropping');
@@ -415,8 +418,8 @@ var Hier = new newHierarchy();
       tmpl = app.tmplColumnsDefined.content.cloneNode(true);
       field = tmpl.querySelector('.column-defined');
       span = field.querySelector('span');
-      i = field.querySelector("i[data-id='btn-set-metric']");
       field.dataset.type = 'column';
+      span.innerHTML = elementRef.dataset.field;
       Hier.columns = elementRef.id;
     } else {
       // metric
@@ -425,10 +428,12 @@ var Hier = new newHierarchy();
       span = field.querySelector('span');
       i = field.querySelector("i[data-id='btn-set-filter']");
       field.dataset.type = 'metric';
-      Hier.metrics = elementRef.id;
+      // recupero le proprietà della metrica per inserire la funzione di aggregazione nell'elemento appena droppato
+      span.innerHTML = elementRef.dataset.field;
+      debugger;
+      // Hier.metrics = elementRef.id;
       // app.saveMetric(elementRef);
     }
-    span.innerHTML = elementRef.dataset.field;
     field.dataset.id = elementRef.id;
     // i.addEventListener('click', app.handlerSetMetric);
     // i.dataset.fn = 'handlerSetMetric';
@@ -438,10 +443,61 @@ var Hier = new newHierarchy();
     app.setSheet();
   }
 
+  app.textareaDragEnter = (e) => {
+    e.preventDefault();
+    console.log(e.currentTarget);
+    if (e.currentTarget.classList.contains('dropzone')) {
+      console.info('dropzone columns');
+      // console.log(e.currentTarget, e.target);
+      // e.dataTransfer.dropEffect = "copy";
+      // coloro il border differente per la dropzone
+      e.currentTarget.classList.add('dropping');
+    } else {
+      console.warn('non in dropzone');
+      // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
+
+  app.textareaDragOver = (e) => {
+    e.preventDefault();
+    // console.log(e.currentTarget);
+    if (e.currentTarget.classList.contains('dropzone')) {
+      e.dataTransfer.dropEffect = "copy";
+    } else {
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
+
+  app.textareaDragLeave = (e) => {
+    e.preventDefault();
+    console.log(e.currentTarget);
+    e.currentTarget.classList.remove('dropping');
+  }
+
+  app.textareaDrop = (e) => {
+    e.preventDefault();
+    console.log(e.target);
+    // console.clear();
+    e.currentTarget.classList.replace('dropping', 'dropped');
+    if (!e.currentTarget.classList.contains('dropzone')) return;
+    e.currentTarget.classList.remove('dragging');
+    const elementId = e.dataTransfer.getData('text/plain');
+    const elementRef = document.getElementById(elementId);
+    const field = document.createTextNode(elementRef.dataset.field);
+    e.currentTarget.appendChild(field);
+    debugger;
+  }
+
   app.columns.addEventListener('dragover', app.fieldDragOver, false);
   app.columns.addEventListener('dragenter', app.fieldDragEnter, false);
   app.columns.addEventListener('dragleave', app.fieldDragLeave, false);
   app.columns.addEventListener('drop', app.fieldDrop, false);
+
+  app.textAreaMetric.addEventListener('dragover', app.textareaDragOver, false);
+  app.textAreaMetric.addEventListener('dragenter', app.textareaDragEnter, false);
+  app.textAreaMetric.addEventListener('dragleave', app.textareaDragLeave, false);
+  app.textAreaMetric.addEventListener('drop', app.textareaDrop, false);
 
   /* NOTE: END DRAG&DROP EVENTS */
 
@@ -476,6 +532,10 @@ var Hier = new newHierarchy();
   }
 
   /* NOTE: ONCLICK EVENTS*/
+
+  app.btnMetricNew = () => {
+    app.dialogMetric.show();
+  }
 
   app.btnWorkbookOpen.onclick = () => {
     // TODO: recupero dallo storage il WorkBook 1
@@ -925,6 +985,7 @@ var Hier = new newHierarchy();
 
   /* NOTE: SUPPORT FUNCTIONS */
 
+  // creazione nuova metrica dalla dialog-metric
   app.saveMetric = () => {
     /* const aggregateFn = 'SUM';
     // console.log(Hier.activeTable);

@@ -397,3 +397,11 @@ details > li[data-type="column"] {
   background-color: lightblue;
   color: #494949;
 }
+
+#textarea-metric.dropzone{
+  border: solid thin #494949;
+}
+
+#textarea-metric.dropzone.dropping{
+  border: solid thin brown;
+}

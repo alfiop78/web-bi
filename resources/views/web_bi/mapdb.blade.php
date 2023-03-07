@@ -41,6 +41,7 @@
   <template id="tmpl-dl-element">
     <dl data-id="dt-hierarchies">
       <dt></dt>
+    </dl>
   </template>
 
   <template id="tmpl-dd-element">
@@ -48,13 +49,9 @@
       <details data-id="dt-tables">
         <summary></summary>
       </details>
+      <button class="" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica</button>
     </dd>
-    </dl>
   </template>
-
-  <dialog id="dlg-metric" class="medium">
-    <h5>Metrica</h5>
-  </dialog>
 
   <main>
     <div id="drawer">
@@ -114,6 +111,22 @@
     <div id="container">
       <div id="content">
         <div id="body">
+          <dialog id="dlg-metric">
+            <section class="dlg-grid">
+              <section class="dlg-title">Creazione Metrica</section>
+              <section class="dlg-content col col-1">
+                <!--<nav></nav>-->
+                <section>
+                  <div id="textarea-metric" class="dropzone" data-content-editable></div>
+                </section>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button data-fn="saveMetric" id="btn-metric-save" value="salva">Salva</button>
+              </section>
+            </section>
+          </dialog>
+
           <dialog id="dlg-filters">
             <section class="dlg-grid">
               <section class="dlg-title">Creazione Filtro</section>

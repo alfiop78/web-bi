@@ -84,12 +84,23 @@ dialog > .buttons {
   justify-content: space-between;
 }
 
-dialog#dlg-filters > .dlg-grid{
+dialog > .dlg-grid{
   display: grid;
   grid-template-rows: auto 1fr auto;
 }
 
-#dlg-filters > .dlg-grid > .dlg-content.col.col-3{
+dialog > .dlg-grid > .dlg-content.col{
   display: grid;
+}
+
+.col-3{
   grid-template-columns: 260px 1fr 230px;
+}
+
+.col-2{
+  grid-template-columns: 260px 1fr;
+}
+
+.col-1{
+  grid-template-columns: 1fr;
 }
