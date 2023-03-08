@@ -20,7 +20,7 @@
   <script src="{{ asset('/js/Step.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
   <script src="{{ asset('/js/WBStorage.js') }}"></script>
-  <script src="{{ asset('/js/Cube.js') }}"></script>
+  <script src="{{ asset('/js/WorkBooks.js') }}"></script>
   <script src="{{ asset('/js/Table.js') }}"></script>
   <script src="{{ asset('/js/DrawSVG.js') }}"></script>
 </head>
@@ -117,7 +117,8 @@
               <section class="dlg-content col col-1">
                 <!--<nav></nav>-->
                 <section>
-                  <div id="textarea-metric" class="dropzone" data-content-editable></div>
+                  <div id="textarea-metric" class="dropzone" data-content-editable contenteditable="true"></div>
+                  <!--<textarea id="textarea-metric" cols="20" class="dropzone" rows="10">SUM(</textarea>-->
                 </section>
               </section>
               <section class="dlg-buttons">

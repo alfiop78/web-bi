@@ -214,8 +214,10 @@ class Dimension {
 
 // TODO: rinominare (nJoins -> joinsMap), (nJoin -> joinMap), (nColumn -> columnMap) ecc...
 
-class Sheet {
+class Sheets {
   #from = new Map();
+  #field = new Map();
+  #fields = new Map();
   #joins = new Map();
   #filter = new Map();
   #filters = new Map();
@@ -232,6 +234,26 @@ class Sheet {
 
   get from() { return this.#from; }
 
+  set field(object) {
+    this.#field.set(object.token, object.value);
+  }
+
+  get field() { return this.#field; }
+
+  set fields(token) {
+    if (!this.#fields.has(this.#field.get(token).tableAlias)) {
+      // alias tabella non presente nelle #nJoins, la aggiungo
+      this.#fields.set(this.#field.get(token).tableAlias, {
+        [token]: this.#field.get(token)
+      });
+    } else {
+      // alias di tabella già presente
+      this.#fields.get(this.#field.get(token).tableAlias)[token] = this.#field.get(token);
+    }
+    console.log('#fields : ', this.#fields);
+  }
+
+  get fields() { return this.#fields; }
   set tables(value) {
     this.#tables.add(value);
   }
@@ -291,7 +313,7 @@ class Sheet {
 
   get filters() { return this.#filters; }
 
-  set sheet(sheetName) {
+  /* set sheet(sheetName) {
     this.sheetObject = {
       name: sheetName,
       joins: Object.fromEntries(this.joins),
@@ -306,7 +328,7 @@ class Sheet {
     debugger;
   }
 
-  get sheet() { return this.#sheet; }
+  get sheet() { return this.#sheet; } */
 
   /* save() {
     // TODO: implementazione
@@ -316,11 +338,9 @@ class Sheet {
 }
 
 // TODO: rinominare in WorkBook
-class WorkBook extends Sheet {
+/* class WorkBook extends Sheets {
   #mapMetric = new Map();
   #mapMetrics = new Map();
-  // #mapAdvMetric = new Map();
-  // #mapAdvMetrics = new Map();
   constructor() {
     super();
     this.workBook = {};
@@ -346,28 +366,8 @@ class WorkBook extends Sheet {
 
   get mapMetrics() { return this.#mapMetrics; }
 
-  /* set mapAdvMetric(object) {
-    this.mapAdvMetric.set(object.token, object.value);
-  }
-
-  get mapAdvMetric() { return this.#mapAdvMetric; }
-
-  set mapAdvMetrics(token) {
-    if (!this.#mapAdvMetrics.has(this.#mapAdvMetric.get(token).workBook.tableAlias)) {
-      this.#mapAdvMetrics.set(this.#mapAdvMetric.get(token).workBook.tableAlias, {
-        [token]: this.#mapAdvMetric.get(token)
-      });
-    } else {
-      // alias di tabella già presente
-      this.#mapAdvMetrics.get(this.#mapAdvMetric.get(token).workBook.tableAlias)[token] = this.#mapAdvMetric.get(token);
-    }
-    console.log('#mapAdvMetrics : ', this.#mapAdvMetrics);
-  }
-
-  get mapAdvMetrics() { return this.#mapAdvMetrics; } */
-
   save(name) {
-    console.clear();
+    // console.clear();
     this.workBook.name = name;
     this.workBook.fields = Object.fromEntries(this.fields);
     this.workBook.joins = Object.fromEntries(this.nJoins);
@@ -378,18 +378,15 @@ class WorkBook extends Sheet {
       lines: Object.fromEntries(Draw.joinLines),
       levelId: +Draw.svg.dataset.level
     }
-    // TODO: le metriche non vengono impostate nella fase di mapping (almeno per ora) quindi le memorizzo nella Classe Sheet (ex Query.js)
     console.info('WorkBook : ', this.workBook);
     Storage.save(this.workBook);
   }
-}
+} */
 
-class newHierarchy extends WorkBook {
+class WorkBooks extends Sheets {
   #activeTable;
   #nJoin = new Map();
   #nJoins = new Map();
-  #field = new Map();
-  #fields = new Map();
   #nTables = new Map();
   #nHier = new Map();
   #tableJoins = { from: null, to: null }; // refs 
@@ -450,26 +447,6 @@ class newHierarchy extends WorkBook {
 
   get tablesMap() { return this.#tablesMap; }
 
-  set field(object) {
-    this.#field.set(object.token, object.value);
-  }
-
-  get field() { return this.#field; }
-
-  set fields(token) {
-    if (!this.#fields.has(this.#field.get(token).tableAlias)) {
-      // alias tabella non presente nelle #nJoins, la aggiungo
-      this.#fields.set(this.#field.get(token).tableAlias, {
-        [token]: this.#field.get(token)
-      });
-    } else {
-      // alias di tabella già presente
-      this.#fields.get(this.#field.get(token).tableAlias)[token] = this.#field.get(token);
-    }
-    console.log('#fields : ', this.#fields);
-  }
-
-  get fields() { return this.#fields; }
 
   // qui viene memorizzato solo le tabelle che hanno almeno una colonna impostata nel workbook
   set nTables(value) {

@@ -1,7 +1,7 @@
 var App = new Application();
 var Draw = new DrawSVG('svg');
 var Storage = new Storages();
-var Hier = new newHierarchy();
+var WorkBook = new WorkBooks();
 (() => {
   var app = {
     // templates
@@ -168,13 +168,13 @@ var Hier = new newHierarchy();
       console.log(Draw.svg.querySelectorAll('use.table').length);
       if (Draw.countTables > 1) {
         // tabella 'from'
-        Hier.tableJoins = {
+        WorkBook.tableJoins = {
           from: app.windowJoin.querySelector('.wj-joins section[data-table-from]').dataset.tableId,
           to: app.windowJoin.querySelector('.wj-joins section[data-table-to]').dataset.tableId
         }
-        console.log(Hier.tableJoins);
-        for (const [key, value] of Object.entries(Hier.tableJoins)) {
-          Hier.activeTable = value.id;
+        console.log(WorkBook.tableJoins);
+        for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
+          WorkBook.activeTable = value.id;
           // TODO: in questo caso, in cui vengono richiamate due tabelle, fare una promiseAll
           const data = await app.getTable();
           app.addFields(key, data);
@@ -375,20 +375,20 @@ var Hier = new newHierarchy();
 
   app.setMetric = (e) => {
     const aggregateFn = 'SUM';
-    // console.log(Hier.activeTable);
-    const table = Hier.activeTable.dataset.table;
-    const tableAlias = Hier.activeTable.dataset.alias;
+    // console.log(WorkBook.activeTable);
+    const table = WorkBook.activeTable.dataset.table;
+    const tableAlias = WorkBook.activeTable.dataset.alias;
     const field = e.target.dataset.field;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
 
     // metric Map Object
-    Hier.mapMetric = {
+    WorkBook.mapMetric = {
       token,
       value: {
         alias: 'metric alias',
         workBook: { table, tableAlias },
-        // workBook: { table: Hier.workBook.name, alias: 'alias tabella fact' },
+        // workBook: { table: WorkBook.workBook.name, alias: 'alias tabella fact' },
         formula: {
           token,
           aggregateFn,
@@ -398,7 +398,7 @@ var Hier = new newHierarchy();
         }
       }
     };
-    Hier.mapMetrics = token;
+    WorkBook.mapMetrics = token;
   }
 
   app.fieldDrop = (e) => {
@@ -420,7 +420,7 @@ var Hier = new newHierarchy();
       span = field.querySelector('span');
       field.dataset.type = 'column';
       span.innerHTML = elementRef.dataset.field;
-      Hier.columns = elementRef.id;
+      WorkBook.columns = elementRef.id;
     } else {
       // metric
       tmpl = app.tmplMetricsDefined.content.cloneNode(true);
@@ -431,7 +431,7 @@ var Hier = new newHierarchy();
       // recupero le proprietà della metrica per inserire la funzione di aggregazione nell'elemento appena droppato
       span.innerHTML = elementRef.dataset.field;
       debugger;
-      // Hier.metrics = elementRef.id;
+      // WorkBook.metrics = elementRef.id;
       // app.saveMetric(elementRef);
     }
     field.dataset.id = elementRef.id;
@@ -439,7 +439,7 @@ var Hier = new newHierarchy();
     // i.dataset.fn = 'handlerSetMetric';
     i.dataset.token = elementRef.id; // svg-data-x
     parent.appendChild(field);
-    Hier.tables = elementRef.dataset.alias;
+    WorkBook.tables = elementRef.dataset.alias;
     app.setSheet();
   }
 
@@ -485,8 +485,9 @@ var Hier = new newHierarchy();
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
     const field = document.createTextNode(elementRef.dataset.field);
+    // const span = document.createElement('span');
+    // span.innerText = elementRef.dataset.field;
     e.currentTarget.appendChild(field);
-    debugger;
   }
 
   app.columns.addEventListener('dragover', app.fieldDragOver, false);
@@ -565,26 +566,26 @@ var Hier = new newHierarchy();
     for (const [tableAlias, values] of Object.entries(Storage.workBook.fields)) {
       // per ogni tabella
       for (const [token, column] of Object.entries(values)) {
-        Hier.field = { token, value: column };
-        Hier.fields = token;
+        WorkBook.field = { token, value: column };
+        WorkBook.fields = token;
       }
     }
-    // console.log('columns : ', Hier.nColumns);
+    // console.log('columns : ', WorkBook.nColumns);
 
     // joins
     for (const [tableAlias, values] of Object.entries(Storage.workBook.joins)) {
       // per ogni tabella
       for (const [token, join] of Object.entries(values)) {
-        Hier.nJoin = { token, value: join };
-        Hier.nJoins = token;
+        WorkBook.nJoin = { token, value: join };
+        WorkBook.nJoins = token;
       }
     }
-    // console.log('joins : ', Hier.nJoins);
+    // console.log('joins : ', WorkBook.nJoins);
     for (const [tableAlias, values] of Object.entries(Storage.workBook.metrics)) {
       // per ogni tabella
       for (const [token, metric] of Object.entries(values)) {
-        Hier.mapMetric = { token, value: metric };
-        Hier.mapMetrics = token;
+        WorkBook.mapMetric = { token, value: metric };
+        WorkBook.mapMetrics = token;
       }
     }
 
@@ -603,8 +604,13 @@ var Hier = new newHierarchy();
   document.getElementById('next').onclick = () => {
     // salvo il workbook creato
     Step.next();
+    // gli elementi impostati nel workBook devono essere disponibili nello sheet.
     app.addHierStruct();
-    Hier.save('WorkBook 1');
+    WorkBook.save('WorkBook 1');
+    WorkBook.sheet = 'sheet 1';
+    // let Sheet = new Sheets('foglio 1');
+    // console.log(Sheet);
+    debugger;
   }
 
   // imposto attribute init sul <nav>, in questo modo verranno associati gli eventi data-fn sui child di <nav>
@@ -621,8 +627,8 @@ var Hier = new newHierarchy();
     Draw.svg.querySelectorAll("use.table[data-active='true']").forEach(use => delete use.dataset.active);
     e.currentTarget.dataset.active = 'true';
     // recupero 50 record della tabella selezionata per visualizzare un anteprima
-    Hier.activeTable = e.currentTarget.id;
-    Hier.schema = e.currentTarget.dataset.schema;
+    WorkBook.activeTable = e.currentTarget.id;
+    WorkBook.schema = e.currentTarget.dataset.schema;
     // debugger;
     let DT = new Table(await app.getPreviewTable(), 'preview-table');
     // DataTable.data = await app.getPreviewTable();
@@ -632,9 +638,9 @@ var Hier = new newHierarchy();
 
   app.process = async () => {
     // TODO: creo 'from' e 'where' in base agli oggetti (colonne, filtri) aggiunti al report
-    Hier.sheet = 'sheetname';
+    WorkBook.sheet = 'sheetname';
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
-    const params = JSON.stringify(Hier.sheet.get('sheetname'));
+    const params = JSON.stringify(WorkBook.sheet.get('sheetname'));
     // console.log(params);
     // App.showConsole('Elaborazione in corso...', 'info');
     // chiudo la lista dei report da eseguire
@@ -669,10 +675,10 @@ var Hier = new newHierarchy();
   app.handlerFilters = async () => {
     // popolo l'elenco delle tabelle presenti nel Canvas, il filtro può essere creatosu qualsiasi tabella
     let urls = [];
-    for (const [hierName, tables] of Hier.nHier) {
+    for (const [hierName, tables] of WorkBook.nHier) {
       tables.forEach(tableId => {
-        Hier.activeTable = tableId;
-        urls.push('/fetch_api/' + Hier.activeTable.dataset.schema + '/schema/' + Hier.activeTable.dataset.table + '/table_info');
+        WorkBook.activeTable = tableId;
+        urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info');
       });
     }
     // promiseAll per recuperare tutte le tabelle del canvas, successivamente vado a popolare la dialogFilters con i dati ricevuti
@@ -682,8 +688,8 @@ var Hier = new newHierarchy();
 
   // selezione della tabella dalla dialogFilters
   app.handlerSelectField = (e) => {
-    Hier.activeTable = e.currentTarget.dataset.tableId;
-    console.log(Hier.activeTable.dataset.table);
+    WorkBook.activeTable = e.currentTarget.dataset.tableId;
+    console.log(WorkBook.activeTable.dataset.table);
     const field = e.currentTarget.dataset.field;
     const table = e.currentTarget.dataset.table;
     const alias = e.currentTarget.dataset.alias;
@@ -722,7 +728,7 @@ var Hier = new newHierarchy();
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
-        Hier.tables = element.dataset.tableAlias;
+        WorkBook.tables = element.dataset.tableAlias;
         object.field = element.dataset.field;
         object.name = 'filter test';
 
@@ -768,14 +774,14 @@ var Hier = new newHierarchy();
     });
     // TODO: la prop 'editFormula' va rinominata in 'edit'
     object.sql = sql;
-    Hier.filter = {
+    WorkBook.filter = {
       token,
       value: object
       /* editFormula,
       name: 'iperauto',
       formula: sql_formula.join(' '), // Azienda_444.id = 43 */
     };
-    Hier.filters = token;
+    WorkBook.filters = token;
     // aggiungo il filtro alla nav[data-filters-defined]
     const parent = app.dialogFilters.querySelector('nav[data-filters-defined]');
     const tmpl = app.tmplList.content.cloneNode(true);
@@ -795,9 +801,9 @@ var Hier = new newHierarchy();
     console.log(e.target);
     console.log(e.target.dataset);
     // metrica selezionata
-    const metric = Hier.mapMetric.get(e.target.dataset.token);
+    const metric = WorkBook.mapMetric.get(e.target.dataset.token);
     const parent = app.dialogMetricFilters.querySelector('nav[data-filters-defined]');
-    for (const [tableAlias, filters] of Hier.filters) {
+    for (const [tableAlias, filters] of WorkBook.filters) {
       for (const [token, filter] of Object.entries(filters)) {
         const tmpl = app.tmplList.content.cloneNode(true);
         const li = tmpl.querySelector('li[data-li]');
@@ -809,7 +815,7 @@ var Hier = new newHierarchy();
         parent.appendChild(li);
       }
     }
-    // devo aggiungere i filtri su questa metrica già presente in Hier.metric/s
+    // devo aggiungere i filtri su questa metrica già presente in WorkBook.metric/s
     // TODO: apertura dialog per selezionare i filtri
     app.dialogMetricFilters.dataset.token = e.target.dataset.token;
     app.dialogMetricFilters.show();
@@ -818,14 +824,14 @@ var Hier = new newHierarchy();
   app.addFiltersToMetric = (e) => {
     let filters = [];
     app.dialogMetricFilters.querySelectorAll('li[selected]').forEach(filter => filters.push(filter.dataset.token));
-    // TODO: aggiungo la metrica alla proprietà 'advancedMetrics' e la elimino da Hierr.metric/s
-    let metric = Hier.metrics.get(app.dialogMetricFilters.dataset.token);
+    // TODO: aggiungo la metrica alla proprietà 'advancedMetrics' e la elimino da WorkBook..metric/s
+    let metric = WorkBook.metrics.get(app.dialogMetricFilters.dataset.token);
     metric.formula.filters = filters;
-    Hier.advMetrics = { token: app.dialogMetricFilters.dataset.token, value: metric };
-    // Hier.advMetrics = app.dialogMetricFilters.dataset.token;
-    Hier.metrics.delete(app.dialogMetricFilters.dataset.token);
+    WorkBook.advMetrics = { token: app.dialogMetricFilters.dataset.token, value: metric };
+    // WorkBook.advMetrics = app.dialogMetricFilters.dataset.token;
+    WorkBook.metrics.delete(app.dialogMetricFilters.dataset.token);
     // TODO:
-    // if (Object.keys(Hier.mapMetrics.get(metric.workBook.tableAlias)).length === 0) Hier.mapMetrics.delete(metric.workBook.tableAlias);
+    // if (Object.keys(WorkBook.mapMetrics.get(metric.workBook.tableAlias)).length === 0) WorkBook.mapMetrics.delete(metric.workBook.tableAlias);
   }
 
   /* NOTE: END ONCLICK EVENTS*/
@@ -926,7 +932,7 @@ var Hier = new newHierarchy();
   }
 
   app.getTable = async () => {
-    return await fetch('/fetch_api/' + Hier.activeTable.dataset.schema + '/schema/' + Hier.activeTable.dataset.table + '/table_info')
+    return await fetch('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info')
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -968,7 +974,7 @@ var Hier = new newHierarchy();
   }
 
   app.getPreviewTable = async () => {
-    return await fetch('/fetch_api/' + Hier.activeTable.dataset.schema + '/schema/' + Hier.activeTable.dataset.table + '/table_preview')
+    return await fetch('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_preview')
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -987,21 +993,27 @@ var Hier = new newHierarchy();
 
   // creazione nuova metrica dalla dialog-metric
   app.saveMetric = () => {
+    const text = app.textAreaMetric.textContent;
+    // cerco la metrica all'interno della textarea
+    console.log(text.indexOf('NettoRiga'));
+
+
+    debugger;
     /* const aggregateFn = 'SUM';
-    // console.log(Hier.activeTable);
-    const table = Hier.activeTable.dataset.table;
-    const tableAlias = Hier.activeTable.dataset.alias;
+    // console.log(WorkBook.activeTable);
+    const table = WorkBook.activeTable.dataset.table;
+    const tableAlias = WorkBook.activeTable.dataset.alias;
     const field = e.target.dataset.field;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
 
     // metric Map Object
-    Hier.metric = {
+    WorkBook.metric = {
       token,
       value: {
         alias: 'metric alias',
         workBook: { table, tableAlias },
-        // workBook: { table: Hier.workBook.name, alias: 'alias tabella fact' },
+        // workBook: { table: WorkBook.workBook.name, alias: 'alias tabella fact' },
         formula: {
           token,
           aggregateFn,
@@ -1011,19 +1023,19 @@ var Hier = new newHierarchy();
         }
       }
     };
-    Hier.metrics = token; */
+    WorkBook.metrics = token; */
 
   }
 
   app.setSheet = () => {
     // TODO: questa logica va applicata anche quando si aggiunge un filtro
     // per ogni elemento aggiunto al report
-    Hier.tables.forEach(alias => {
-      if (Hier.tablesMap.has(alias)) {
-        Hier.tablesMap.get(alias).forEach(tableId => {
+    WorkBook.tables.forEach(alias => {
+      if (WorkBook.tablesMap.has(alias)) {
+        WorkBook.tablesMap.get(alias).forEach(tableId => {
           // nel tableId sono presenti le tabelle gerarchicamente inferiori a 'alias'
-          Hier.from = Draw.tables.get(tableId);
-          Hier.joins = Draw.tables.get(tableId);
+          WorkBook.from = Draw.tables.get(tableId);
+          WorkBook.joins = Draw.tables.get(tableId);
         });
       }
     });
@@ -1042,7 +1054,7 @@ var Hier = new newHierarchy();
     // creo tablesMap : qui sono presenti tutte le tabelle del canvas, al suo interno le tabelle in join fino alla tabella dei fatti
     // debugger;
     const levelId = +Draw.svg.dataset.level;
-    Hier.tablesMap.clear();
+    WorkBook.tablesMap.clear();
     let recursiveLevels = (levelId) => {
       // per ogni tabella creo un Map() con, al suo interno, le tabelle gerarchicamente inferiori (verso la FACT)
       // questa mi servirà per stabilire, nello sheet, quali tabelle includere nella FROM e le relative Join nella WHERE
@@ -1055,7 +1067,7 @@ var Hier = new newHierarchy();
           if (Draw.tables.get(tableId).join) recursive(Draw.tables.get(tableId).join);
         }
         if (Draw.tables.get(table.id).join) recursive(Draw.tables.get(table.id).join);
-        Hier.tablesMap = { name: table.dataset.alias, joinTables };
+        WorkBook.tablesMap = { name: table.dataset.alias, joinTables };
       });
       levelId--;
       if (levelId !== 0) recursiveLevels(levelId);
@@ -1067,7 +1079,7 @@ var Hier = new newHierarchy();
     // salvo le gerarchie / dimensioni create nel canvas
     // recupero gli elementi del level-id più alto, il data-level presente su <svg> identifica il livello più alto presente
     const levelId = +Draw.svg.dataset.level;
-    Hier.nHier.clear();
+    WorkBook.nHier.clear();
     let recursiveLevels = (levelId) => {
       // per ogni level-id recupero le tabelle che hanno data-joins=0 (l'ultima tabella della gerarchia, che quindi non ha altre tabelle legate in join)
       Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'][data-joins='0']`).forEach(table => {
@@ -1081,7 +1093,7 @@ var Hier = new newHierarchy();
         }
         recursive(table.id);
         // console.log(hier);
-        Hier.nHier = hier;
+        WorkBook.nHier = hier;
       });
 
       levelId--;
@@ -1098,13 +1110,13 @@ var Hier = new newHierarchy();
   app.lineSelected = async (e) => {
     console.log(`line selected ${e.currentTarget.dataset.from} -> ${e.currentTarget.dataset.to}`);
     Draw.currentLineRef = e.target.id;
-    Hier.tableJoins = {
+    WorkBook.tableJoins = {
       from: Draw.currentLineRef.dataset.from,
       to: Draw.currentLineRef.dataset.to
     }
-    console.log(Hier.tableJoins);
-    for (const [key, value] of Object.entries(Hier.tableJoins)) {
-      Hier.activeTable = value.id;
+    console.log(WorkBook.tableJoins);
+    for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
+      WorkBook.activeTable = value.id;
       // TODO: in questo caso, in cui vengono richiamate due tabelle, fare una promiseAll
       const data = await app.getTable();
       app.addFields(key, data);
@@ -1224,7 +1236,7 @@ var Hier = new newHierarchy();
     let joins = [...app.windowJoin.querySelectorAll(`.join-field[data-active][data-field][data-join-id='${joinId}']`)].filter(field => +field.dataset.joinId === joinId);
     // console.log(joins);
     if (joins.length === 2) {
-      Hier.nJoin = {
+      WorkBook.nJoin = {
         token: fieldRef.dataset.token,
         value: {
           // table: joins[0].dataset.table,
@@ -1234,7 +1246,7 @@ var Hier = new newHierarchy();
           to: { table: joins[0].dataset.table, alias: joins[0].dataset.alias, field: joins[0].dataset.field }
         }
       };
-      Hier.nJoins = fieldRef.dataset.token; // nome della tabella con le proprie join (Hier.nJoin) all'interno
+      WorkBook.nJoins = fieldRef.dataset.token; // nome della tabella con le proprie join (WorkBook.nJoin) all'interno
       // dopo aver completato la join coloro la linea in modo diverso
       Draw.currentLineRef.dataset.joined = 'true';
     }
@@ -1250,9 +1262,9 @@ var Hier = new newHierarchy();
       const span = li.querySelector('span');
       li.dataset.label = value.COLUMN_NAME;
       li.dataset.elementSearch = `${source}-fields`;
-      li.dataset.tableId = Hier.activeTable.id;
-      li.dataset.table = Hier.activeTable.dataset.table;
-      li.dataset.alias = Hier.activeTable.dataset.alias;
+      li.dataset.tableId = WorkBook.activeTable.id;
+      li.dataset.table = WorkBook.activeTable.dataset.table;
+      li.dataset.alias = WorkBook.activeTable.dataset.alias;
       li.dataset.label = value.COLUMN_NAME;
       li.dataset.key = value.CONSTRAINT_NAME;
       span.innerText = value.COLUMN_NAME;
@@ -1275,17 +1287,17 @@ var Hier = new newHierarchy();
     const ds = app.windowColumns.querySelector('#textarea-column-ds-formula');
     let fieldObjectId = { field: id.value, type: 'da_completare', origin_field: field };
     let fieldObjectDs = { field: ds.value, type: 'da_completare', origin_field: field };
-    // Hier.field = { id: fieldObjectId, ds: fieldObjectDs };
+    // WorkBook.field = { id: fieldObjectId, ds: fieldObjectDs };
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
     // TODO: valutare se inserire anche qui (come sulle metriche) la prop 'workBook'
-    Hier.field = {
+    WorkBook.field = {
       token,
       value: {
         type: 'column',
-        schema: Hier.schema,
-        tableAlias: Hier.activeTable.dataset.alias,
-        table: Hier.activeTable.dataset.table,
+        schema: WorkBook.schema,
+        tableAlias: WorkBook.activeTable.dataset.alias,
+        table: WorkBook.activeTable.dataset.table,
         name: field,
         field: {
           id: fieldObjectId,
@@ -1293,18 +1305,18 @@ var Hier = new newHierarchy();
         }
       }
     };
-    Hier.fields = token;
-    // Hier.nTables = { table: Hier.activeTable.dataset.table, alias: Hier.activeTable.dataset.alias };
+    WorkBook.fields = token;
+    // WorkBook.nTables = { table: WorkBook.activeTable.dataset.table, alias: WorkBook.activeTable.dataset.alias };
     app.windowColumns.dataset.open = 'false';
   }
 
   app.addHierStruct = async () => {
     // ciclo le hierarchies presenti per aggiungerle alla struttura dello step 2
-    console.log(Hier.nHier);
+    console.log(WorkBook.nHier);
     // ripulisco la struttura già presente.
     // TODO: in futuro dovrò aggiornare la struttura già presente (e non resettare). In questo modo, gli elementi aggiunti al report non verranno resettati
     app.workbookProp.querySelectorAll('dl').forEach(dl => dl.remove());
-    for (const [hierName, tables] of Hier.nHier) {
+    for (const [hierName, tables] of WorkBook.nHier) {
       const dlElement = app.tmplDL.content.cloneNode(true);
       const dl = dlElement.querySelector("dl");
       const dt = dl.querySelector('dt');
@@ -1315,14 +1327,14 @@ var Hier = new newHierarchy();
         const dd = ddElement.querySelector("dd");
         const details = dd.querySelector("details");
         const summary = details.querySelector('summary');
-        Hier.activeTable = tableId;
-        dd.dataset.alias = Hier.activeTable.dataset.alias;
-        dd.dataset.table = Hier.activeTable.dataset.table;
-        summary.innerHTML = Hier.activeTable.dataset.table;
+        WorkBook.activeTable = tableId;
+        dd.dataset.alias = WorkBook.activeTable.dataset.alias;
+        dd.dataset.table = WorkBook.activeTable.dataset.table;
+        summary.innerHTML = WorkBook.activeTable.dataset.table;
         summary.dataset.tableId = tableId;
         dt.appendChild(dd);
-        if (Hier.fields.has(Hier.activeTable.dataset.alias)) {
-          for (const [token, value] of Object.entries(Hier.fields.get(Hier.activeTable.dataset.alias))) {
+        if (WorkBook.fields.has(WorkBook.activeTable.dataset.alias)) {
+          for (const [token, value] of Object.entries(WorkBook.fields.get(WorkBook.activeTable.dataset.alias))) {
             const tmpl = app.tmplList.content.cloneNode(true);
             const li = tmpl.querySelector('li[data-li-drag]');
             const i = li.querySelector('i');
@@ -1341,8 +1353,8 @@ var Hier = new newHierarchy();
           }
         }
         // metrics
-        if (Hier.mapMetrics.has(Hier.activeTable.dataset.alias)) {
-          for (const [token, value] of Object.entries(Hier.mapMetrics.get(Hier.activeTable.dataset.alias))) {
+        /* if (WorkBook.mapMetrics.has(WorkBook.activeTable.dataset.alias)) {
+          for (const [token, value] of Object.entries(WorkBook.mapMetrics.get(WorkBook.activeTable.dataset.alias))) {
             const tmpl = app.tmplList.content.cloneNode(true);
             const li = tmpl.querySelector('li[data-li-drag]');
             const i = li.querySelector('i');
@@ -1359,7 +1371,7 @@ var Hier = new newHierarchy();
             span.innerHTML = value.formula.field;
             details.appendChild(li);
           }
-        }
+        } */
       });
     }
   }
@@ -1372,7 +1384,7 @@ var Hier = new newHierarchy();
     app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
     // parent
     let parent = app.dialogFilters.querySelector('nav');
-    for (const [hierName, tables] of Hier.nHier) {
+    for (const [hierName, tables] of WorkBook.nHier) {
       const dlElement = app.tmplDL.content.cloneNode(true);
       const dl = dlElement.querySelector("dl");
       const dt = dl.querySelector('dt');
@@ -1383,12 +1395,12 @@ var Hier = new newHierarchy();
         const dd = ddElement.querySelector("dd");
         const details = dd.querySelector("details");
         const summary = details.querySelector('summary');
-        Hier.activeTable = tableId;
-        details.dataset.schema = Hier.activeTable.dataset.schema;
-        details.dataset.table = Hier.activeTable.dataset.table;
-        details.dataset.alias = Hier.activeTable.dataset.alias;
+        WorkBook.activeTable = tableId;
+        details.dataset.schema = WorkBook.activeTable.dataset.schema;
+        details.dataset.table = WorkBook.activeTable.dataset.table;
+        details.dataset.alias = WorkBook.activeTable.dataset.alias;
         details.dataset.id = tableId;
-        summary.innerHTML = Hier.activeTable.dataset.table;
+        summary.innerHTML = WorkBook.activeTable.dataset.table;
         summary.dataset.tableId = tableId;
         dt.appendChild(dd);
         for (const [key, value] of Object.entries(data[index])) {
@@ -1398,9 +1410,9 @@ var Hier = new newHierarchy();
           li.dataset.label = value.COLUMN_NAME;
           li.dataset.fn = 'handlerSelectField';
           // li.dataset.elementSearch = `${source}-fields`;
-          li.dataset.tableId = Hier.activeTable.id;
-          li.dataset.table = Hier.activeTable.dataset.table;
-          li.dataset.alias = Hier.activeTable.dataset.alias;
+          li.dataset.tableId = WorkBook.activeTable.id;
+          li.dataset.table = WorkBook.activeTable.dataset.table;
+          li.dataset.alias = WorkBook.activeTable.dataset.alias;
           li.dataset.field = value.COLUMN_NAME;
           li.dataset.key = value.CONSTRAINT_NAME;
           span.innerText = value.COLUMN_NAME;
