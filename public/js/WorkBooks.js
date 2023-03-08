@@ -1,7 +1,12 @@
 class Sheets {
+  constructor(name) {
+    this.workBook = { name: name };
+  }
+
+}
+
+class WorkSheets extends Sheets {
   #from = new Map();
-  #field = new Map();
-  #fields = new Map();
   #joins = new Map();
   #filter = new Map();
   #filters = new Map();
@@ -9,37 +14,24 @@ class Sheets {
   #advMetrics = new Map();
   #columns = new Map();
   #tables = new Set(); // tutte le tabelle usate nello sheet. Mi servirà per creare la from e la where
-  #sheet = new Map();
-  constructor() {
-    this.workBook = {};
+  // #workBook;
+  // #sheet = new Map();
+  constructor(name) {
+    super(name);
+    this.sheet = {};
   }
+
+  /* set workBook(workBook) {
+    this.#workBook = workBook;
+  }
+
+  get workBook() { return this.#workBook; } */
 
   set from(object) {
     this.#from.set(object.alias, { schema: object.schema, table: object.table });
   }
 
   get from() { return this.#from; }
-
-  set field(object) {
-    this.#field.set(object.token, object.value);
-  }
-
-  get field() { return this.#field; }
-
-  set fields(token) {
-    if (!this.#fields.has(this.#field.get(token).tableAlias)) {
-      // alias tabella non presente nelle #nJoins, la aggiungo
-      this.#fields.set(this.#field.get(token).tableAlias, {
-        [token]: this.#field.get(token)
-      });
-    } else {
-      // alias di tabella già presente
-      this.#fields.get(this.#field.get(token).tableAlias)[token] = this.#field.get(token);
-    }
-    console.log('#fields : ', this.#fields);
-  }
-
-  get fields() { return this.#fields; }
 
   set tables(value) {
     this.#tables.add(value);
@@ -100,80 +92,23 @@ class Sheets {
 
   get filters() { return this.#filters; }
 
-  set sheet(value) {
-    this.#sheet.name = value;
-    this.#sheet.fields = this.fields;
-    console.log(this.#sheet);
-  }
-
-  get sheet() { return this.#sheet; }
-  /* set sheet(sheetName) {
-    this.sheetObject = {
-      name: sheetName,
-      joins: Object.fromEntries(this.joins),
-      from: Object.fromEntries(this.from),
-      filters: Object.fromEntries(this.filters),
-      columns: Object.fromEntries(this.columns),
-      metrics: Object.fromEntries(this.metrics),
-      advMetrics: Object.fromEntries(this.advMetrics)
-    };
-    this.#sheet.set(this.sheetObject.name, this.sheetObject);
-    console.log(this.#sheet);
-    debugger;
-  }
-
-  get sheet() { return this.#sheet; } */
-
-  /* save() {
-    // TODO: implementazione
-
-  } */
-
 }
-
-// TODO: rinominare in WorkBook
-/* class WorkBook extends Sheets {
-  #mapMetric = new Map();
-  #mapMetrics = new Map();
-  constructor() {
-    super();
-    this.workBook = {};
-  }
-
-  set mapMetric(object) {
-    this.#mapMetric.set(object.token, object.value);
-  }
-
-  get mapMetric() { return this.#mapMetric; }
-
-  set mapMetrics(token) {
-    if (!this.#mapMetrics.has(this.#mapMetric.get(token).workBook.tableAlias)) {
-      this.#mapMetrics.set(this.#mapMetric.get(token).workBook.tableAlias, {
-        [token]: this.#mapMetric.get(token)
-      });
-    } else {
-      // alias di tabella già presente
-      this.#mapMetrics.get(this.#mapMetric.get(token).workBook.tableAlias)[token] = this.#mapMetric.get(token);
-    }
-    console.log('#mapMetrics : ', this.#mapMetrics);
-  }
-
-  get mapMetrics() { return this.#mapMetrics; }
-
-} */
 
 class WorkBooks extends Sheets {
   #activeTable;
+  #field = new Map();
+  #fields = new Map();
+  #mapMetric = new Map();
+  #mapMetrics = new Map();
   #nJoin = new Map();
   #nJoins = new Map();
   #nTables = new Map();
   #nHier = new Map();
   #tableJoins = { from: null, to: null }; // refs 
   #tablesMap = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
-  constructor() {
-    super();
+  constructor(name) {
+    super(name);
     this.schema;
-    // this.workBook = {};
   }
 
   /* NOTE: mapdb*/
@@ -189,6 +124,27 @@ class WorkBooks extends Sheets {
   }
 
   get activeTable() { return this.#activeTable; }
+
+  set field(object) {
+    this.#field.set(object.token, object.value);
+  }
+
+  get field() { return this.#field; }
+
+  set fields(token) {
+    if (!this.#fields.has(this.#field.get(token).tableAlias)) {
+      // alias tabella non presente nelle #nJoins, la aggiungo
+      this.#fields.set(this.#field.get(token).tableAlias, {
+        [token]: this.#field.get(token)
+      });
+    } else {
+      // alias di tabella già presente
+      this.#fields.get(this.#field.get(token).tableAlias)[token] = this.#field.get(token);
+    }
+    console.log('#fields : ', this.#fields);
+  }
+
+  get fields() { return this.#fields; }
 
   set nJoin(object) {
     // this.#nJoin.set(object.token, { table: object.table, alias: object.alias, from: object.from, to: object.to });
@@ -233,14 +189,33 @@ class WorkBooks extends Sheets {
     console.log(this.#nTables);
   }
 
+  set mapMetric(object) {
+    this.#mapMetric.set(object.token, object.value);
+  }
+
+  get mapMetric() { return this.#mapMetric; }
+
+  set mapMetrics(token) {
+    if (!this.#mapMetrics.has(this.#mapMetric.get(token).workBook.tableAlias)) {
+      this.#mapMetrics.set(this.#mapMetric.get(token).workBook.tableAlias, {
+        [token]: this.#mapMetric.get(token)
+      });
+    } else {
+      // alias di tabella già presente
+      this.#mapMetrics.get(this.#mapMetric.get(token).workBook.tableAlias)[token] = this.#mapMetric.get(token);
+    }
+    console.log('#mapMetrics : ', this.#mapMetrics);
+  }
+
+  get mapMetrics() { return this.#mapMetrics; }
+
   get nTables() { return this.#nTables; }
 
-  save(name) {
-    this.workBook.name = name;
-    // this.workBook.fields = Object.fromEntries(this.fields);
+  save() {
+    this.workBook.fields = Object.fromEntries(this.fields);
     this.workBook.joins = Object.fromEntries(this.nJoins);
     this.workBook.tablesMap = Object.fromEntries(this.tablesMap);
-    // this.workBook.metrics = Object.fromEntries(this.mapMetrics);
+    this.workBook.metrics = Object.fromEntries(this.mapMetrics);
     this.workBook.svg = {
       tables: Object.fromEntries(Draw.tables),
       lines: Object.fromEntries(Draw.joinLines),

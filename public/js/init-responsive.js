@@ -1,7 +1,8 @@
 var App = new Application();
 var Draw = new DrawSVG('svg');
-var Storage = new Storages();
-var WorkBook = new WorkBooks();
+var Storage = new SheetStorages();
+var WorkBook = new WorkBooks('workbook_kpi');
+var WorkSheet = new WorkSheets('ws_workbook_kpi');
 (() => {
   var app = {
     // templates
@@ -185,6 +186,7 @@ var WorkBook = new WorkBooks();
     // creo le gerarchie
     app.createHierarchies();
     app.tablesMap();
+
   }
 
   app.handlerDrop = (e) => {
@@ -539,6 +541,7 @@ var WorkBook = new WorkBooks();
   }
 
   app.btnWorkbookOpen.onclick = () => {
+    debugger;
     // TODO: recupero dallo storage il WorkBook 1
     Storage.workBook = 'WorkBook 1';
     console.log(Storage.workBook);
@@ -605,12 +608,18 @@ var WorkBook = new WorkBooks();
     // salvo il workbook creato
     Step.next();
     // gli elementi impostati nel workBook devono essere disponibili nello sheet.
-    app.addHierStruct();
-    WorkBook.save('WorkBook 1');
-    WorkBook.sheet = 'sheet 1';
+    // app.addHierStruct();
+    WorkBook.save();
+    /* WorkSheet.workBook = WorkBook.workBook;
+    console.log(WorkSheet.workBook); */
+    debugger;
+    // creo il nuovo oggetto Sheet, questo "lavorerà" sulla base del WorkBook passato nel Costruttore
+    // le colonne e le metriche aggiunte allo sheet faranno parte....
+    // Sheet = new Sheets(WorkBook.workBook);
+    // console.log(Sheet.workBook);
+    // WorkBook.sheet = 'sheet 1';
     // let Sheet = new Sheets('foglio 1');
     // console.log(Sheet);
-    debugger;
   }
 
   // imposto attribute init sul <nav>, in questo modo verranno associati gli eventi data-fn sui child di <nav>
@@ -959,7 +968,7 @@ var WorkBook = new WorkBooks();
       .catch(err => console.error(err));
   }
 
-  app.getColumns = async (urls) => {
+  /* app.getColumns = async (urls) => {
     return await Promise.all(urls.map(url => fetch(url)))
       .then(responses => {
         return Promise.all(responses.map(response => {
@@ -971,7 +980,7 @@ var WorkBook = new WorkBooks();
       })
       .then(data => data)
       .catch(err => console.error(err));
-  }
+  } */
 
   app.getPreviewTable = async () => {
     return await fetch('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_preview')
@@ -1219,7 +1228,6 @@ var WorkBook = new WorkBooks();
     console.log(table);
     console.log(tablesvg);
     // TODO: apro un context menu (con dialog.show()) con le voci : Rimuovi, Crea metrica, ecc...
-
   }
 
   // inserisco la colonna selezionata per la creazione della join
@@ -1306,6 +1314,7 @@ var WorkBook = new WorkBooks();
       }
     };
     WorkBook.fields = token;
+    // Storages.save();
     // WorkBook.nTables = { table: WorkBook.activeTable.dataset.table, alias: WorkBook.activeTable.dataset.alias };
     app.windowColumns.dataset.open = 'false';
   }
