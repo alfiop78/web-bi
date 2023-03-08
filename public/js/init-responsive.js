@@ -2,7 +2,6 @@ var App = new Application();
 var Draw = new DrawSVG('svg');
 var Storage = new SheetStorages();
 var WorkBook = new WorkBooks('workbook_kpi');
-var WorkSheet = new WorkSheets('ws_workbook_kpi');
 (() => {
   var app = {
     // templates

@@ -1,52 +1,58 @@
+// nella Class Sheets verranno aggiunti gli oggetti che consentono di creare il report.
+/*
+Es. : Quando viene aggiunta un campo alla dropzone 'rows' (questo è già presente in WorkSheets o la sua derivata) il campo
+  * verrà aggiunto alla Sheets (tramite l'istanza Sheet per ogni nuovo report da creare) e quindi diventa 'disponibile'
+  * per essere processato da MapDatabaseController -> Cube.php
+*/
 class Sheets {
-  constructor(name) {
-    this.workBook = { name: name };
+  constructor(sheetName) {
+    this.name = sheetName;
   }
 
 }
 
-class WorkSheets extends Sheets {
-  #from = new Map();
-  #joins = new Map();
+class WorkSheets {
+  /*
+  * in quesa classe andrò ad inserire tutti gli elementi (metriche filtrate, composte, colonne custom SQL, ad es. quelle concatenate) 
+  * che saranno poi disponibili per poter crear il report.
+  * Quando un filtro viene aggiunto al report (Sheets) lo recupero da questa classe e lo copio nella proprietà 'filters' della classe Sheets.
+  * Stesso discorso per le metriche e le colonne.
+  * Questa classe, e la sua derivata, sono disponibili come Modello per la creazione del report.
+  */
+  // #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
+  // #joins = new Map();
+  // #tables = new Set(); // tutte le tabelle usate nello sheet. Mi servirà per creare la from e la where
+
   #filter = new Map();
   #filters = new Map();
   #metrics = new Map();
   #advMetrics = new Map();
   #columns = new Map();
-  #tables = new Set(); // tutte le tabelle usate nello sheet. Mi servirà per creare la from e la where
-  // #workBook;
-  // #sheet = new Map();
   constructor(name) {
-    super(name);
-    this.sheet = {};
+    this.workBook = { name: name };
+    this.sheet = { name: `WorkSheet_${name}` };
   }
 
-  /* set workBook(workBook) {
-    this.#workBook = workBook;
-  }
-
-  get workBook() { return this.#workBook; } */
-
-  set from(object) {
+  /* set from(object) {
     this.#from.set(object.alias, { schema: object.schema, table: object.table });
   }
 
-  get from() { return this.#from; }
+  get from() { return this.#from; } */
 
-  set tables(value) {
+  /* set tables(value) {
     this.#tables.add(value);
   }
 
-  get tables() { return this.#tables; }
+  get tables() { return this.#tables; } */
 
-  set joins(object) {
+  /* set joins(object) {
     // la tabella dei fatti non ha join
     if (this.nJoins.has(object.alias)) this.#joins.set(object.alias, this.nJoins.get(object.alias));
   }
 
   get joins() {
     return this.#joins;
-  }
+  } */
 
   set columns(token) {
     /* this.#columns.set(this.field.get(token).tableAlias, {
@@ -94,7 +100,7 @@ class WorkSheets extends Sheets {
 
 }
 
-class WorkBooks extends Sheets {
+class WorkBooks extends WorkSheets {
   #activeTable;
   #field = new Map();
   #fields = new Map();
@@ -102,7 +108,7 @@ class WorkBooks extends Sheets {
   #mapMetrics = new Map();
   #nJoin = new Map();
   #nJoins = new Map();
-  #nTables = new Map();
+  // #nTables = new Map();
   #nHier = new Map();
   #tableJoins = { from: null, to: null }; // refs 
   #tablesMap = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
@@ -111,7 +117,6 @@ class WorkBooks extends Sheets {
     this.schema;
   }
 
-  /* NOTE: mapdb*/
   set tableJoins(object) {
     this.#tableJoins.from = Draw.svg.querySelector(`#${object.from}`);
     this.#tableJoins.to = Draw.svg.querySelector(`#${object.to}`);
@@ -184,10 +189,12 @@ class WorkBooks extends Sheets {
   get tablesMap() { return this.#tablesMap; }
 
   // qui viene memorizzato solo le tabelle che hanno almeno una colonna impostata nel workbook
-  set nTables(value) {
+  /* set nTables(value) {
     this.#nTables.set(value.table, value.alias);
     console.log(this.#nTables);
-  }
+  } 
+
+  get nTables() { return this.#nTables; }*/
 
   set mapMetric(object) {
     this.#mapMetric.set(object.token, object.value);
@@ -208,8 +215,6 @@ class WorkBooks extends Sheets {
   }
 
   get mapMetrics() { return this.#mapMetrics; }
-
-  get nTables() { return this.#nTables; }
 
   save() {
     this.workBook.fields = Object.fromEntries(this.fields);
