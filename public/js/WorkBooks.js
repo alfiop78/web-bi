@@ -5,7 +5,7 @@ Es. : Quando viene aggiunta un campo alla dropzone 'rows' (questo è già presen
   * per essere processato da MapDatabaseController -> Cube.php
 */
 class Sheets {
-  #field;
+  #fields = new Map();
   #tables = new Set(); // tutte le tabelle usate nel report. Mi servirà per creare la from e la where
   #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #joins = new Map();
@@ -19,11 +19,14 @@ class Sheets {
 
   get tables() { return this.#tables; }
 
-  set field(value) {
-    this.#field = value;
+  set fields(object) {
+    // this.#field = value;
+
+    this.#fields = value;
+    console.info('this.#fields : ', this.#fields);
   }
 
-  get field() { return this.#field; }
+  get fields() { return this.#fields; }
 
   set from(object) {
     this.#from.set(object.alias, { schema: object.schema, table: object.table });
@@ -32,17 +35,10 @@ class Sheets {
   get from() { return this.#from; }
 
   set joins(object) {
-    // la tabella dei fatti non ha join
-    console.log(object);
-    // TODO: propbabilmente qui dovrò creare gli object {token: prop, token : prop ecc...} quindi senza la tableAlias
-    // ... successivmanete si deve modificare sheetWhere
-    // this.#joins.set(object.alias, object.value);
-    // this.#joins.set(object.token, object.join);
     for (const [token, join] of Object.entries(object)) {
       this.#joins.set(token, join);
     }
-
-    debugger;
+    console.info('this.#joins : ', this.#joins);
   }
 
   get joins() { return this.#joins; }
@@ -83,6 +79,7 @@ class WorkBooks {
 
   get activeTable() { return this.#activeTable; }
 
+  // 'field/s' colonne create in fase di Mapping (quindi aggiunte al WorkBook)
   set field(object) {
     this.#field.set(object.token, object.value);
   }
@@ -203,18 +200,7 @@ class WorkSheets extends WorkBooks {
     super(name);
   }
 
-
-  /* set tables(value) {
-    this.#tables.add(value);
-  }
-
-  get tables() { return this.#tables; } */
-
-
   set columns(token) {
-    /* this.#columns.set(this.field.get(token).tableAlias, {
-      [token]: this.field.get(token)
-    }); */
     this.#columns.set(token, this.field.get(token));
     console.log('sheet columns : ', this.#columns);
   }

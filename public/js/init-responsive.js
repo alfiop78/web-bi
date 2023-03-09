@@ -35,8 +35,8 @@ var Sheet;
     workbookProp: document.querySelector('#workbook-props'),
     sheetProp: document.querySelector('#sheeet-props'),
     // columns and rows dropzone (step 2)
-    columns: document.getElementById('dropzone-columns'),
-    rows: document.getElementById('dropzone-rows'),
+    columnsDropzone: document.getElementById('dropzone-columns'),
+    rowsDropzone: document.getElementById('dropzone-rows'),
 
     textAreaMetric: document.getElementById('textarea-metric')
   }
@@ -335,7 +335,7 @@ var Sheet;
     e.dataTransfer.effectAllowed = "copy";
   }
 
-  app.fieldDragEnter = (e) => {
+  app.columnDragEnter = (e) => {
     e.preventDefault();
     console.log(e.currentTarget);
     if (e.currentTarget.classList.contains('dropzone')) {
@@ -351,7 +351,7 @@ var Sheet;
     }
   }
 
-  app.fieldDragOver = (e) => {
+  app.columnDragOver = (e) => {
     e.preventDefault();
     // console.log(e.currentTarget);
     if (e.currentTarget.classList.contains('dropzone')) {
@@ -361,10 +361,133 @@ var Sheet;
     }
   }
 
-  app.fieldDragLeave = (e) => {
+  app.columnDragLeave = (e) => {
     e.preventDefault();
     console.log(e.currentTarget);
     e.currentTarget.classList.remove('dropping');
+  }
+
+  app.columnDrop = (e) => {
+    e.preventDefault();
+    debugger;
+    e.currentTarget.classList.replace('dropping', 'dropped');
+    if (!e.currentTarget.classList.contains('dropzone')) return;
+    const elementId = e.dataTransfer.getData('text/plain');
+    const elementRef = document.getElementById(elementId);
+    console.log(elementRef);
+    // elementRef : è l'elemento nella lista di sinistra che ho draggato
+    const tmpl = app.tmplColumnsDefined.content.cloneNode(true);
+    const field = tmpl.querySelector('.column-defined');
+    const span = field.querySelector('span');
+    field.dataset.type = 'column';
+    field.dataset.id = elementRef.id;
+    span.innerHTML = elementRef.dataset.field;
+    Sheet.field = elementRef.dataset.field;
+    Sheet.tables = elementRef.dataset.alias;
+    e.currentTarget.appendChild(field);
+    // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
+    // i.addEventListener('click', app.handlerSetMetric);
+    // i.dataset.fn = 'handlerSetMetric';
+    // WARN: da verificare. tables credo che contenga le tabelle che faranno parte del report
+    Sheet.tables = elementRef.dataset.alias;
+    app.setSheet();
+    /* if (elementRef.dataset.type === 'column') {
+    } else {
+      // metric
+      tmpl = app.tmplMetricsDefined.content.cloneNode(true);
+      field = tmpl.querySelector('.metric-defined');
+      span = field.querySelector('span');
+      i = field.querySelector("i[data-id='btn-set-filter']");
+      field.dataset.type = 'metric';
+      // recupero le proprietà della metrica per inserire la funzione di aggregazione nell'elemento appena droppato
+      span.innerHTML = elementRef.dataset.field;
+      debugger;
+      // WorkSheet.metrics = elementRef.id;
+      // app.saveMetric(elementRef);
+    }
+    i.dataset.token = elementRef.id; // svg-data-x
+    e.currentTarget.appendChild(field);
+    WorkSheet.tables = elementRef.dataset.alias;
+    app.setSheet(); */
+  }
+
+  app.columnDragEnd = (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.dropEffect === 'copy') {
+
+    }
+  }
+
+  app.rowDragEnter = (e) => {
+    e.preventDefault();
+    console.log(e.currentTarget);
+    if (e.currentTarget.classList.contains('dropzone')) {
+      console.info('dropzone columns');
+      // console.log(e.currentTarget, e.target);
+      // e.dataTransfer.dropEffect = "copy";
+      // coloro il border differente per la dropzone
+      e.currentTarget.classList.add('dropping');
+    } else {
+      console.warn('non in dropzone');
+      // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
+
+  app.rowDragOver = (e) => {
+    e.preventDefault();
+    // console.log(e.currentTarget);
+    if (e.currentTarget.classList.contains('dropzone')) {
+      e.dataTransfer.dropEffect = "copy";
+    } else {
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
+
+  app.rowDragLeave = (e) => {
+    e.preventDefault();
+    console.log(e.currentTarget);
+    e.currentTarget.classList.remove('dropping');
+  }
+
+  app.rowDrop = (e) => {
+    e.preventDefault();
+    e.currentTarget.classList.replace('dropping', 'dropped');
+    if (!e.currentTarget.classList.contains('dropzone')) return;
+    const elementId = e.dataTransfer.getData('text/plain');
+    const elementRef = document.getElementById(elementId);
+    console.log(elementRef);
+    // elementRef : è l'elemento nella lista di sinistra che ho draggato
+    const tmpl = app.tmplColumnsDefined.content.cloneNode(true);
+    const field = tmpl.querySelector('.column-defined');
+    const span = field.querySelector('span');
+    field.dataset.type = 'column';
+    field.dataset.id = elementRef.id;
+    span.innerHTML = elementRef.dataset.field;
+    // aggiungo la colonna al report (Sheet)
+    console.log(WorkSheet.field.get(elementRef.id));
+    /* TODO: la recupero dal WorkSheet.
+    * se sto aggiungendo un Campo (non metrica) questa può trovarsi :
+    * - in WorkBook, nel metodo field/s (mappata come colonna fisica della tabella e non modificata nello WorkSheet)
+    * - in WorkSheet, metodo columns(). Qui sono presenti colonne modificate rispetto alla tabella fisica, quindi potrebbero esserci colonne concatenate ad esempio.
+    */
+    debugger;
+    // TODO: aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
+    Sheet.field = elementRef.dataset.field;
+    Sheet.tables = elementRef.dataset.alias;
+    e.currentTarget.appendChild(field);
+    // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
+    // i.addEventListener('click', app.handlerSetMetric);
+    // WARN: da verificare. tables credo che contenga le tabelle che faranno parte del report
+    Sheet.tables = elementRef.dataset.alias;
+    app.setSheet();
+  }
+
+  app.rowDragEnd = (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.dropEffect === 'copy') {
+
+    }
   }
 
   app.setColumn = (e) => {
@@ -403,58 +526,6 @@ var Sheet;
       }
     };
     WorkSheet.mapMetrics = token;
-  }
-
-  app.fieldDrop = (e) => {
-    e.preventDefault();
-    // console.log(e.target);
-    // console.clear();
-    e.currentTarget.classList.replace('dropping', 'dropped');
-    if (!e.currentTarget.classList.contains('dropzone')) return;
-    e.currentTarget.classList.remove('dragging');
-    const elementId = e.dataTransfer.getData('text/plain');
-    const elementRef = document.getElementById(elementId);
-    const parent = e.currentTarget.querySelector('.columns-area');
-    console.log(elementRef);
-    // elementRef : è l'elemento nella lista di sinistra
-    const tmpl = app.tmplColumnsDefined.content.cloneNode(true);
-    const field = tmpl.querySelector('.column-defined');
-    const span = field.querySelector('span');
-    field.dataset.type = 'column';
-    field.dataset.id = elementRef.id;
-    span.innerHTML = elementRef.dataset.field;
-    Sheet.field = elementRef.dataset.field;
-    Sheet.tables = elementRef.dataset.alias;
-    parent.appendChild(field);
-    debugger;
-    app.setSheet();
-    /* if (elementRef.dataset.type === 'column') {
-      tmpl = app.tmplColumnsDefined.content.cloneNode(true);
-      field = tmpl.querySelector('.column-defined');
-      span = field.querySelector('span');
-      field.dataset.type = 'column';
-      span.innerHTML = elementRef.dataset.field;
-      WorkSheet.columns = elementRef.id;
-    } else {
-      // metric
-      tmpl = app.tmplMetricsDefined.content.cloneNode(true);
-      field = tmpl.querySelector('.metric-defined');
-      span = field.querySelector('span');
-      i = field.querySelector("i[data-id='btn-set-filter']");
-      field.dataset.type = 'metric';
-      // recupero le proprietà della metrica per inserire la funzione di aggregazione nell'elemento appena droppato
-      span.innerHTML = elementRef.dataset.field;
-      debugger;
-      // WorkSheet.metrics = elementRef.id;
-      // app.saveMetric(elementRef);
-    }
-    field.dataset.id = elementRef.id;
-    // i.addEventListener('click', app.handlerSetMetric);
-    // i.dataset.fn = 'handlerSetMetric';
-    i.dataset.token = elementRef.id; // svg-data-x
-    parent.appendChild(field);
-    WorkSheet.tables = elementRef.dataset.alias;
-    app.setSheet(); */
   }
 
   app.textareaDragEnter = (e) => {
@@ -504,10 +575,18 @@ var Sheet;
     e.currentTarget.appendChild(field);
   }
 
-  app.columns.addEventListener('dragover', app.fieldDragOver, false);
-  app.columns.addEventListener('dragenter', app.fieldDragEnter, false);
-  app.columns.addEventListener('dragleave', app.fieldDragLeave, false);
-  app.columns.addEventListener('drop', app.fieldDrop, false);
+  app.columnsDropzone.addEventListener('dragenter', app.columnDragEnter, false);
+  app.columnsDropzone.addEventListener('dragover', app.columnDragOver, false);
+  app.columnsDropzone.addEventListener('dragleave', app.columnDragLeave, false);
+  app.columnsDropzone.addEventListener('drop', app.columnDrop, false);
+  app.columnsDropzone.addEventListener('drop', app.columnDragEnd, false);
+  // dropzone sheet rows
+  app.rowsDropzone.addEventListener('dragenter', app.rowDragEnter, false);
+  app.rowsDropzone.addEventListener('dragover', app.rowDragOver, false);
+  app.rowsDropzone.addEventListener('dragleave', app.rowDragLeave, false);
+  app.rowsDropzone.addEventListener('drop', app.rowDrop, false);
+  app.rowsDropzone.addEventListener('drop', app.rowDragEnd, false);
+
 
   app.textAreaMetric.addEventListener('dragover', app.textareaDragOver, false);
   app.textAreaMetric.addEventListener('dragenter', app.textareaDragEnter, false);
@@ -987,33 +1066,19 @@ var Sheet;
 
   app.setSheet = () => {
     // TODO: questa logica va applicata anche quando si aggiunge un filtro
-    // per ogni elemento aggiunto al report
+    /* 
+    * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
+    */
     Sheet.tables.forEach(alias => {
       if (WorkSheet.tablesMap.has(alias)) {
         WorkSheet.tablesMap.get(alias).forEach(tableId => {
           // nel tableId sono presenti le tabelle gerarchicamente inferiori a 'alias'
           Sheet.from = Draw.tables.get(tableId);
-          // WorkBook.joins = Draw.tables.get(tableId);
-          // questo set/get era memorizzato nella classe WorkSheet (che corrispondeva all'esecuzione del report)
-          /* set joins(object) {
-              // la tabella dei fatti non ha join
-              if (this.nJoins.has(object.alias)) this.#joins.set(object.alias, this.nJoins.get(object.alias));
-            }
-            get joins() {
-              return this.#joins;
-            } */
-          debugger;
           let tableAlias = Draw.tables.get(tableId).alias;
+          // la tabella dei fatti non ha join
           if (WorkSheet.nJoins.has(tableAlias)) {
             Sheet.joins = WorkSheet.nJoins.get(tableAlias);
           }
-
-          // if (WorkSheet.nJoins.has(alias)) Sheet.joins = { alias, value: WorkSheet.nJoins.get(alias) };
-          /* if (WorkSheet.nJoins.has(alias)) {
-            for (const [token, join] of Object.entries(WorkSheet.nJoins.get(alias))) {
-              Sheet.joins = { token, join: join.SQL };
-            }
-          } */
         });
       }
     });

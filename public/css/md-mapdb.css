@@ -330,6 +330,19 @@ section[data-table-from] .table, section[data-table-to] .table{
   grid-template-rows: 50% 50%;
 }
 
+.sheet-elements{
+  display: grid;
+  grid-template-columns: 75px 1fr;
+}
+
+.sheet-elements .dropzone{
+  border: solid thin lightgrey;
+}
+
+.sheet-elements .dropzone.dropping{
+  border: solid thin darkgreen;
+}
+
 .report-area .columns-rows > section{
   overflow: auto;
 }

@@ -88,7 +88,6 @@
       <div class="column-defined">
         <i class="button-icon material-icons-round md-18">view_column</i>
         <span></span>
-        <i data-id="btn-set-metric" class="button-icon material-icons-round md-18">query_stats</i>
       </div>
     </template>
 
@@ -294,11 +293,14 @@
                       </div>
                       <div class="report-area">
                         <section class="columns-rows">
-                          <section id="dropzone-columns" class="dropzone columns">
+                          <section class="sheet-elements">
                             <h5>Colonne</h5>
-                            <section class="columns-area"></section>
+                            <section id="dropzone-columns" class="dropzone columns"></section>
                           </section>
-                          <section id="dropzone-rows" class="dropzone rows">rows</section>
+                          <section class="sheet-elements">
+                            <h5>Righe</h5>
+                            <section id="dropzone-rows" class="dropzone rows"></section>
+                          </section>
                         </section>
                         <section class="report-preview">
                           <section class="">
