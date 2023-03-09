@@ -5,102 +5,51 @@ Es. : Quando viene aggiunta un campo alla dropzone 'rows' (questo è già presen
   * per essere processato da MapDatabaseController -> Cube.php
 */
 class Sheets {
-  constructor(sheetName) {
-    this.name = sheetName;
+  #field;
+  #tables = new Set(); // tutte le tabelle usate nel report. Mi servirà per creare la from e la where
+  #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
+  #joins = new Map();
+  constructor() {
+    // this.name = sheetName;
   }
 
-}
-
-class WorkSheets {
-  /*
-  * in quesa classe andrò ad inserire tutti gli elementi (metriche filtrate, composte, colonne custom SQL, ad es. quelle concatenate) 
-  * che saranno poi disponibili per poter crear il report.
-  * Quando un filtro viene aggiunto al report (Sheets) lo recupero da questa classe e lo copio nella proprietà 'filters' della classe Sheets.
-  * Stesso discorso per le metriche e le colonne.
-  * Questa classe, e la sua derivata, sono disponibili come Modello per la creazione del report.
-  */
-  // #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
-  // #joins = new Map();
-  // #tables = new Set(); // tutte le tabelle usate nello sheet. Mi servirà per creare la from e la where
-
-  #filter = new Map();
-  #filters = new Map();
-  #metrics = new Map();
-  #advMetrics = new Map();
-  #columns = new Map();
-  constructor(name) {
-    this.workBook = { name: name };
-    this.sheet = { name: `WorkSheet_${name}` };
-  }
-
-  /* set from(object) {
-    this.#from.set(object.alias, { schema: object.schema, table: object.table });
-  }
-
-  get from() { return this.#from; } */
-
-  /* set tables(value) {
+  set tables(value) {
     this.#tables.add(value);
   }
 
-  get tables() { return this.#tables; } */
+  get tables() { return this.#tables; }
 
-  /* set joins(object) {
+  set field(value) {
+    this.#field = value;
+  }
+
+  get field() { return this.#field; }
+
+  set from(object) {
+    this.#from.set(object.alias, { schema: object.schema, table: object.table });
+  }
+
+  get from() { return this.#from; }
+
+  set joins(object) {
     // la tabella dei fatti non ha join
-    if (this.nJoins.has(object.alias)) this.#joins.set(object.alias, this.nJoins.get(object.alias));
-  }
-
-  get joins() {
-    return this.#joins;
-  } */
-
-  set columns(token) {
-    /* this.#columns.set(this.field.get(token).tableAlias, {
-      [token]: this.field.get(token)
-    }); */
-    this.#columns.set(token, this.field.get(token));
-    console.log('sheet columns : ', this.#columns);
-  }
-
-  get columns() { return this.#columns; }
-
-  set metrics(token) {
-    this.#metrics.set(token, this.mapMetric.get(token));
-    console.log('sheet metrics : ', this.#metrics);
-  }
-
-  get metrics() { return this.#metrics; }
-
-  set advMetrics(object) {
-    this.#advMetrics.set(object.token, object.value);
-    console.log('sheet advMetrics : ', this.#advMetrics);
-  }
-
-  get advMetrics() { return this.#advMetrics; }
-
-  set filter(object) {
-    this.#filter.set(object.token, object.value);
-  }
-
-  get filter() { return this.#filters; }
-
-  set filters(token) {
-    if (!this.#filters.has(this.#filter.get(token).workBook.tableAlias)) {
-      this.#filters.set(this.#filter.get(token).workBook.tableAlias, {
-        [token]: this.#filter.get(token)
-      });
-    } else {
-      // alias di tabella già presente
-      this.#filters.get(this.#filter.get(token).workBook.tableAlias)[token] = this.#filter.get(token);
+    console.log(object);
+    // TODO: propbabilmente qui dovrò creare gli object {token: prop, token : prop ecc...} quindi senza la tableAlias
+    // ... successivmanete si deve modificare sheetWhere
+    // this.#joins.set(object.alias, object.value);
+    // this.#joins.set(object.token, object.join);
+    for (const [token, join] of Object.entries(object)) {
+      this.#joins.set(token, join);
     }
-    console.log('#filters : ', this.#filters);
+
+    debugger;
   }
 
-  get filters() { return this.#filters; }
+  get joins() { return this.#joins; }
 
 }
 
-class WorkBooks extends WorkSheets {
+class WorkBooks {
   #activeTable;
   #field = new Map();
   #fields = new Map();
@@ -113,7 +62,11 @@ class WorkBooks extends WorkSheets {
   #tableJoins = { from: null, to: null }; // refs 
   #tablesMap = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   constructor(name) {
-    super(name);
+    const rand = () => Math.random(0).toString(36).substring(2);
+    this.token = rand().substring(0, 7);
+    console.log(this.token);
+    this.workBook = { token: 'token_test', name: name };
+    this.sheet = { name: `WorkSheet_${name}` };
     this.schema;
   }
 
@@ -220,13 +173,140 @@ class WorkBooks extends WorkSheets {
     this.workBook.fields = Object.fromEntries(this.fields);
     this.workBook.joins = Object.fromEntries(this.nJoins);
     this.workBook.tablesMap = Object.fromEntries(this.tablesMap);
-    this.workBook.metrics = Object.fromEntries(this.mapMetrics);
+    this.workBook.mapMetrics = Object.fromEntries(this.mapMetrics);
     this.workBook.svg = {
       tables: Object.fromEntries(Draw.tables),
       lines: Object.fromEntries(Draw.joinLines),
       levelId: +Draw.svg.dataset.level
     }
     console.info('WorkBook : ', this.workBook);
-    Storage.save(this.workBook);
+    WorkBookStorage.save(this.workBook);
   }
+
+}
+
+class WorkSheets extends WorkBooks {
+  /*
+  * in quesa classe andrò ad inserire tutti gli elementi (metriche filtrate, composte, colonne custom SQL, ad es. quelle concatenate) 
+  * che saranno poi disponibili per poter crear il report.
+  * Quando un filtro viene aggiunto al report (Sheets) lo recupero da questa classe e lo copio nella proprietà 'filters' della classe Sheets.
+  * Stesso discorso per le metriche e le colonne.
+  * Questa classe, e la sua derivata, sono disponibili come Modello per la creazione del report.
+  */
+
+  #filter = new Map();
+  #filters = new Map();
+  #metrics = new Map();
+  #advMetrics = new Map();
+  #columns = new Map();
+  constructor(name) {
+    super(name);
+  }
+
+
+  /* set tables(value) {
+    this.#tables.add(value);
+  }
+
+  get tables() { return this.#tables; } */
+
+
+  set columns(token) {
+    /* this.#columns.set(this.field.get(token).tableAlias, {
+      [token]: this.field.get(token)
+    }); */
+    this.#columns.set(token, this.field.get(token));
+    console.log('sheet columns : ', this.#columns);
+  }
+
+  get columns() { return this.#columns; }
+
+  set metrics(object) {
+    this.#metrics.set(object.token, object.value);
+    console.log('sheet metrics : ', this.#metrics);
+  }
+
+  get metrics() { return this.#metrics; }
+
+  set advMetrics(object) {
+    this.#advMetrics.set(object.token, object.value);
+    console.log('sheet advMetrics : ', this.#advMetrics);
+  }
+
+  get advMetrics() { return this.#advMetrics; }
+
+  set filter(object) {
+    this.#filter.set(object.token, object.value);
+  }
+
+  get filter() { return this.#filters; }
+
+  set filters(token) {
+    if (!this.#filters.has(this.#filter.get(token).workBook.tableAlias)) {
+      this.#filters.set(this.#filter.get(token).workBook.tableAlias, {
+        [token]: this.#filter.get(token)
+      });
+    } else {
+      // alias di tabella già presente
+      this.#filters.get(this.#filter.get(token).workBook.tableAlias)[token] = this.#filter.get(token);
+    }
+    console.log('#filters : ', this.#filters);
+  }
+
+  get filters() { return this.#filters; }
+
+  open(token) {
+    // recupero dallo storage il workBook, tutte le sue proprietà le caricherò nella Classe 
+    WorkBookStorage.workBook = token;
+    WorkBookStorage.workBook;
+    // reimposto la Classe
+
+    Draw.svg.dataset.level = WorkBookStorage.workBook.svg.levelId;
+    // ciclo sulle tables presenti in svg.tables
+    for (const [key, value] of Object.entries(WorkBookStorage.workBook.svg.tables)) {
+      Draw.tables = { id: key, properties: value };
+      Draw.currentTable = Draw.tables.get(key);
+      Draw.drawTable();
+    }
+
+    for (const [key, value] of Object.entries(WorkBookStorage.workBook.svg.lines)) {
+      Draw.joinLines = { id: key, properties: value };
+      // TODO: creare una funzione (qui o in DrawSVG) che crea la linea
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      line.id = key;
+      line.dataset.id = value.id;
+      Draw.svg.appendChild(line);
+      Draw.currentLineRef = key;
+      Draw.currentLine = value;
+      Draw.drawLine();
+      Draw.autoPositionLine();
+    }
+
+    for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.fields)) {
+      // per ogni tabella
+      for (const [token, column] of Object.entries(values)) {
+        super.field = { token, value: column };
+        super.fields = token;
+      }
+    }
+
+    // joins
+    for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.joins)) {
+      // per ogni tabella
+      for (const [token, join] of Object.entries(values)) {
+        super.nJoin = { token, value: join };
+        super.nJoins = token;
+      }
+    }
+    // console.log('joins : ', WorkBook.nJoins);
+    for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.mapMetrics)) {
+      // per ogni tabella
+      for (const [token, metric] of Object.entries(values)) {
+        super.mapMetric = { token, value: metric };
+        super.mapMetrics = token;
+      }
+    }
+    return this;
+  }
+
 }

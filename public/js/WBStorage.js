@@ -7,9 +7,7 @@ class Storages {
 
   constructor() {
     this.storage = window.localStorage;
-    this.storageKeys = Object.keys(window.localStorage);
-    // console.log('storageKeys : ', this.storageKeys);
-    // this.cubeId = this._cubeId;
+    // this.storageKeys = Object.keys(window.localStorage);
     this.JSONData = null;
   }
 
@@ -23,9 +21,8 @@ class Storages {
     return JSON.parse(window.localStorage.getItem(this.#workbook));
   }
 
-  save(value) {
-    // console.info('SAVE : ', value);
-    window.localStorage.setItem(value.name, JSON.stringify(value));
+  save(object) {
+    window.localStorage.setItem(object.token, JSON.stringify(object));
   }
 
   set selected(token) {
@@ -39,8 +36,39 @@ class Storages {
 }
 
 class SheetStorages extends Storages {
+  // #element;
   constructor() { super(); }
 
+  /* set element(object) {
+    this.#element = { token: object.token, value: object.value };
+  }
 
+  get element() {
+    return JSON.parse(this.storage.getItem(this.#element.token));
+  } */
+
+  /* save() {
+    // console.info('SAVE : ', value);
+    debugger;
+    window.localStorage.setItem(this.element.token, JSON.stringify(this.element.value));
+  } */
+
+  save(elements) {
+    // elements : oggetto Map()
+    // ciclo tutti i field del workbook da salvare
+    for (const [token, value] of elements) {
+      // console.log(token, value);
+      window.sessionStorage.setItem(token, JSON.stringify(value));
+    }
+  }
+
+  getElement(workBook, tableAlias) {
+    let result = {};
+    for (const [token, value] of Object.entries(sessionStorage)) {
+      let json = JSON.parse(value);
+      if (json.tableAlias === tableAlias) result[token] = json;
+    }
+    return result;
+  }
 
 }
