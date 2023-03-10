@@ -48,34 +48,6 @@ class Sheets {
 
   get filters() { return this.#filters; }
 
-  // passaggio dell'oggetto {token, workshhet.field.get(...)}
-  // set fields(object) {
-  // this.#field = value;
-  // TODO: aggiungo i campi al report, questi verranno usati nella clausola SELECT e GROUP BY
-  /* columnToken : {
-      "id": [
-        "CodOperatoreOfficina_966.id"
-      ],
-      "ds": [
-        "CodOperatoreOfficina_966.Descrizione"
-      ]
-    }
-  */
-  // ciclo id/ds
-  /* this.field = {};
-  let { token, value } = object;
-  for (const [fieldType, field] of Object.entries(value.field)) {
-    this.field[fieldType] = [`${value.tableAlias}.${field.field}`];
-  }
-  debugger;
-
-  this.#fields.set(token, {
-    name: value.name,
-    SQL: this.field
-  });
-  console.info('this.#fields : ', this.#fields); */
-  // }
-
   get fields() { return this.#fields; }
 
   set from(object) {
@@ -101,6 +73,10 @@ class Sheets {
     this.sheet.fields = Object.fromEntries(this.fields);
     this.sheet.from = Object.fromEntries(this.from);
     this.sheet.joins = Object.fromEntries(this.joins);
+    /* WARN : verifica dei filtri del report.
+      * Se non sono presenti ma sono presenti in metriche filtrate elaboro comunque il report
+      * altrimenti visualizzo un AVVISO perchè l'esecuzione potrebbe essere troppo lunga
+    */
     this.sheet.filters = Object.fromEntries(this.filters);
     console.info(this.sheet);
     WorkSheetStorage.save(this.sheet);
@@ -234,6 +210,10 @@ class WorkBooks {
     this.workBook.joins = Object.fromEntries(this.nJoins);
     this.workBook.tablesMap = Object.fromEntries(this.tablesMap);
     this.workBook.mapMetrics = Object.fromEntries(this.mapMetrics);
+    debugger;
+    this.workBook.workSheet = {
+      filters: Object.fromEntries(this.filters)
+    };
     this.workBook.svg = {
       tables: Object.fromEntries(Draw.tables),
       lines: Object.fromEntries(Draw.joinLines),
@@ -254,6 +234,11 @@ class WorkSheets extends WorkBooks {
   * Questa classe, e la sua derivata, sono disponibili come Modello per la creazione del report.
   */
 
+  /* 
+  TODO: come per le colonne.
+    * Potrei avere filtri creati in fase di mapping e filtri creati nel WorkSheet (Questo è da implementare)
+    * Al momento ho filtri solo nel WorkSheet e non nel WorkBook
+  */
   #filter = new Map();
   #filters = new Map();
   #metrics = new Map();
@@ -355,6 +340,16 @@ class WorkSheets extends WorkBooks {
         super.mapMetrics = token;
       }
     }
+    // filtri aggiunti allo WorkSheet
+
+    for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.workSheet.filters)) {
+      // per ogni tabella
+      for (const [token, filter] of Object.entries(values)) {
+        this.filter = { token, value: filter };
+        this.filters = token;
+      }
+    }
+
     return this;
   }
 

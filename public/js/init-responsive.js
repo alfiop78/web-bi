@@ -652,6 +652,7 @@ var Sheet;
     Step.next();
     // gli elementi impostati nel workBook devono essere disponibili nello sheet.
     app.addHierStruct();
+    app.addFiltersStruct();
     WorkSheet.save();
     Sheet = new Sheets(WorkSheet);
   }
@@ -833,6 +834,12 @@ var Sheet;
       formula: sql_formula.join(' '), // Azienda_444.id = 43 */
     };
     WorkSheet.filters = token;
+    /* TODO: In questo caso sto modificando il WorkSheet. 
+      * Dovrei salvare il filtro aggiunto nel localStorage e, successivamente, in fase di apertura del WorkBook 
+      * dovrò caricare anche i filtri aggiunti al WorkSheet
+    */
+    // ora in localStorage ho anche il filtro aggiunto.
+    WorkSheet.save();
     // aggiungo il filtro alla nav[data-filters-defined]
     const parent = app.sheetProp.querySelector('nav[data-filters-defined]');
     const tmpl = app.tmplList.content.cloneNode(true);
@@ -1372,6 +1379,12 @@ var Sheet;
     app.windowColumns.dataset.open = 'false';
   }
 
+  app.addFiltersStruct = () => {
+    console.log(WorkSheet.filters);
+    // TODO: da Implementare
+    debugger;
+  }
+
   app.addHierStruct = async () => {
     // ciclo le hierarchies presenti per aggiungerle alla struttura dello step 2
     console.log(WorkSheet.nHier);
@@ -1395,25 +1408,6 @@ var Sheet;
         summary.innerHTML = WorkSheet.activeTable.dataset.table;
         summary.dataset.tableId = tableId;
         dt.appendChild(dd);
-        /* // TODO: recupero, dallo storage, i fields che corrispondono al workbook.token aperto
-        let fields = WorkSheetStorage.getElement(WorkSheet.token, WorkSheet.activeTable.dataset.alias);
-        for (const [token, value] of Object.entries(fields)) {
-          const tmpl = app.tmplList.content.cloneNode(true);
-          const li = tmpl.querySelector('li[data-li-drag]');
-          const i = li.querySelector('i');
-          const span = li.querySelector('span');
-          li.id = token;
-          li.dataset.type = 'column';
-          // li.dataset.id = tableId;
-          li.dataset.schema = value.schema;
-          li.dataset.table = value.table;
-          li.dataset.alias = value.tableAlias;
-          li.dataset.field = value.field.ds.field;
-          li.addEventListener('dragstart', app.fieldDragStart);
-          li.addEventListener('dragend', app.fieldDragEnd);
-          span.innerHTML = value.field.ds.field;
-          details.appendChild(li);
-        } */
         if (WorkSheet.fields.has(WorkSheet.activeTable.dataset.alias)) {
           for (const [token, value] of Object.entries(WorkSheet.fields.get(WorkSheet.activeTable.dataset.alias))) {
             const tmpl = app.tmplList.content.cloneNode(true);
@@ -1433,7 +1427,7 @@ var Sheet;
             details.appendChild(li);
           }
         }
-        // metrics
+        // metriche mappate sul cubo
         if (WorkSheet.mapMetrics.has(WorkSheet.activeTable.dataset.alias)) {
           for (const [token, value] of Object.entries(WorkSheet.mapMetrics.get(WorkSheet.activeTable.dataset.alias))) {
             const tmpl = app.tmplList.content.cloneNode(true);
