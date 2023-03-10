@@ -6,11 +6,18 @@ Es. : Quando viene aggiunta un campo alla dropzone 'rows' (questo è già presen
 */
 class Sheets {
   #fields = new Map();
-  #tables = new Set(); // tutte le tabelle usate nel report. Mi servirà per creare la from e la where
+  #tables = new Set(); // tutte le tabelle usate nel report. In base a questo Set() posso creare la from e la where
   #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #joins = new Map();
-  constructor() {
+  constructor(WorkBook) {
+    // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
+    // rendo disponibile, in questa Classe, le proprietà del WorkBook passate al Costruttore
+    this.workBook = WorkBook;
+    console.log(this.workBook);
     // this.name = sheetName;
+    // this.tablesMap = WorkBook.tablesMap;
+    // this.mapJoin = WorkBook.nJoin;
+    // this.mapJoins = WorkBook.nJoins;
   }
 
   set tables(value) {
@@ -21,8 +28,28 @@ class Sheets {
 
   set fields(object) {
     // this.#field = value;
+    // TODO: aggiungo i campi al report, questi verranno usati nella clausola SELECT e GROUP BY
+    /* columnToken : {
+        "id": [
+          "CodOperatoreOfficina_966.id"
+        ],
+        "ds": [
+          "CodOperatoreOfficina_966.Descrizione"
+        ]
+      }
+    */
+    // ciclo id/ds
+    this.field = {};
+    let { token, value } = object;
+    for (const [fieldType, field] of Object.entries(value.field)) {
+      this.field[fieldType] = [`${value.tableAlias}.${field.field}`];
+    }
+    debugger;
 
-    this.#fields = value;
+    this.#fields.set(token, {
+      name: value.name,
+      SQL: this.field
+    });
     console.info('this.#fields : ', this.#fields);
   }
 
@@ -30,15 +57,19 @@ class Sheets {
 
   set from(object) {
     this.#from.set(object.alias, { schema: object.schema, table: object.table });
+    // console.log('this.#from : ', this.#from);
   }
 
   get from() { return this.#from; }
 
+  // recupero la join dalla Proprietà nJoin della classe WorkBook (quindi da this.workBook passato al Costruttore)
   set joins(object) {
-    for (const [token, join] of Object.entries(object)) {
-      this.#joins.set(token, join);
-    }
-    console.info('this.#joins : ', this.#joins);
+    // la tabella dei fatti non ha join
+    /* TODO: Molto probabilmente non è necessario passare tutto l'oggetto presente in nJoins a this.#joins.
+    * Credo sia necessario passare solo la proprietò SQL (che contiene un array di join).
+    */
+    if (this.workBook.nJoins.has(object.alias)) this.#joins.set(object.alias, this.workBook.nJoins.get(object.alias));
+    // console.info('this.#joins : ', this.#joins);
   }
 
   get joins() { return this.#joins; }

@@ -465,21 +465,21 @@ var Sheet;
     field.dataset.id = elementRef.id;
     span.innerHTML = elementRef.dataset.field;
     // aggiungo la colonna al report (Sheet)
-    console.log(WorkSheet.field.get(elementRef.id));
+    // console.log(WorkSheet.field.get(elementRef.id));
     /* TODO: la recupero dal WorkSheet.
     * se sto aggiungendo un Campo (non metrica) questa può trovarsi :
     * - in WorkBook, nel metodo field/s (mappata come colonna fisica della tabella e non modificata nello WorkSheet)
-    * - in WorkSheet, metodo columns(). Qui sono presenti colonne modificate rispetto alla tabella fisica, quindi potrebbero esserci colonne concatenate ad esempio.
+    * - in WorkSheet, metodo columns(). Qui sono presenti colonne modificate rispetto alla tabella fisica,
+    *   quindi potrebbero esserci colonne concatenate ad esempio.
     */
     debugger;
     // TODO: aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
-    Sheet.field = elementRef.dataset.field;
+    Sheet.fields = { token: elementRef.id, value: WorkSheet.field.get(elementRef.id) };
+    // Sheet.field = elementRef.dataset.field;
     Sheet.tables = elementRef.dataset.alias;
     e.currentTarget.appendChild(field);
     // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
     // i.addEventListener('click', app.handlerSetMetric);
-    // WARN: da verificare. tables credo che contenga le tabelle che faranno parte del report
-    Sheet.tables = elementRef.dataset.alias;
     app.setSheet();
   }
 
@@ -652,7 +652,7 @@ var Sheet;
     // gli elementi impostati nel workBook devono essere disponibili nello sheet.
     app.addHierStruct();
     WorkSheet.save();
-    Sheet = new Sheets();
+    Sheet = new Sheets(WorkSheet);
   }
 
   // imposto attribute init sul <nav>, in questo modo verranno associati gli eventi data-fn sui child di <nav>
@@ -1062,6 +1062,8 @@ var Sheet;
         }
       }
     };
+    console.log(Sheet.wb);
+    debugger;
   }
 
   app.setSheet = () => {
@@ -1070,15 +1072,21 @@ var Sheet;
     * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
     */
     Sheet.tables.forEach(alias => {
+      // il tablesMap può essere ciclato sia nella Classe Sheet (perchè ho passato, nel Costruttore l'oggetto WorkSheet)
+      // ... sia nella Classe WorkSheet.
+      // ... Per il momento utilizzo quello della Classe WorkSheet
       if (WorkSheet.tablesMap.has(alias)) {
         WorkSheet.tablesMap.get(alias).forEach(tableId => {
-          // nel tableId sono presenti le tabelle gerarchicamente inferiori a 'alias'
+          // nel tableId sono presenti le tabelle gerarchicamente inferiori a 'alias', quindi tabelle da aggiungere alla 'from' e alla 'where'
           Sheet.from = Draw.tables.get(tableId);
-          let tableAlias = Draw.tables.get(tableId).alias;
-          // la tabella dei fatti non ha join
-          if (WorkSheet.nJoins.has(tableAlias)) {
-            Sheet.joins = WorkSheet.nJoins.get(tableAlias);
-          }
+          /*
+          * nel metodo joins() verifico se la tabella in ciclo ha una join 
+          * (per il momento la Fact non ha altre Join però potrei utilizzare 
+          * la funzionalitò di "entrare" nel livello fisico di una tabella per aggiungerci altre join)
+          * ad es. : potrei aggiungere, al DocVenditaDettaglio (fact), la tabella dei TipiMovimento,
+          * e quindi, in questo caso, avrei una join anche sulla Fact (e quindi nella proprietà WorkBook.nJoins)
+          */
+          Sheet.joins = Draw.tables.get(tableId);
         });
       }
     });
