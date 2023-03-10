@@ -162,9 +162,8 @@ class MapDatabaseController extends Controller
     } */
     $q->sheetFrom($cube->{'from'});
     $q->sheetWhere($cube->{'joins'});
-    // if (property_exists($cube, 'filters')) $q->sheetFilters($cube->{'filters'});
+    if (property_exists($cube, 'filters')) $q->sheetFilters($cube->{'filters'});
     $q->sheetGroupBy($cube->{'fields'});
-    exit;
     try {
       $baseTable = $q->sheetBaseTable(null);
       // dd($baseTable);

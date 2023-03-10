@@ -33,7 +33,7 @@ var Sheet;
     coordsRef: document.getElementById('coords'),
     wjTitle: document.querySelector('#window-join .wj-title'),
     workbookProp: document.querySelector('#workbook-props'),
-    sheetProp: document.querySelector('#sheeet-props'),
+    sheetProp: document.querySelector('#sheet-props'),
     // columns and rows dropzone (step 2)
     columnsDropzone: document.getElementById('dropzone-columns'),
     rowsDropzone: document.getElementById('dropzone-rows'),
@@ -472,7 +472,7 @@ var Sheet;
     * - in WorkSheet, metodo columns(). Qui sono presenti colonne modificate rispetto alla tabella fisica,
     *   quindi potrebbero esserci colonne concatenate ad esempio.
     */
-    debugger;
+    // debugger;
     // TODO: aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
     // Sheet.fields = { token: elementRef.id, value: WorkSheet.field.get(elementRef.id) };
     Sheet.fields = elementRef.id;
@@ -683,7 +683,6 @@ var Sheet;
     // TODO: creo 'from' e 'where' in base agli oggetti (colonne, filtri) aggiunti al report
     // Sheet = 'sheetname';
     Sheet.save();
-    debugger;
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(Sheet.sheet);
     // console.log(params);
@@ -758,8 +757,16 @@ var Sheet;
     app.addSpan(txtArea, null, 'filter');
   }
 
+  // aggiungo il filtro selezionato, allo Sheet
+  app.addFilter = (e) => {
+    // TODO: Implementare anche qui il drag&drop per i filtri
+    Sheet.filters = e.currentTarget.id;
+    // aggiungo la tabella a Sheet.tables
+    Sheet.tables = WorkSheet.filter.get(e.currentTarget.id).workBook.tableAlias;
+    app.setSheet();
+  }
+
   app.saveFilter = (e) => {
-    debugger;
     // l'oggetto filter lo salvo nella Classe Sheet (ex Query.js)
     let sql = [];
     const rand = () => Math.random(0).toString(36).substring(2);
@@ -771,7 +778,8 @@ var Sheet;
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
-        WorkSheet.tables = element.dataset.tableAlias;
+        // TODO: questa tabella la aggiungo a Sheet.tables solo quando viene aggiunta al report che sto creando
+        // Sheet.tables = element.dataset.tableAlias;
         object.field = element.dataset.field;
         object.name = 'filter test';
 
@@ -826,13 +834,15 @@ var Sheet;
     };
     WorkSheet.filters = token;
     // aggiungo il filtro alla nav[data-filters-defined]
-    const parent = app.dialogFilters.querySelector('nav[data-filters-defined]');
+    const parent = app.sheetProp.querySelector('nav[data-filters-defined]');
     const tmpl = app.tmplList.content.cloneNode(true);
     const li = tmpl.querySelector('li[data-li]');
     const span = li.querySelector('li[data-li] span');
     li.dataset.name = object.name;
+    // TODO: da valutare se usare id come token oppure il dataset.token
+    li.id = token;
     li.dataset.token = token;
-    li.dataset.fn = "handlerFilterSelected";
+    li.dataset.fn = "addFilter";
     span.innerHTML = object.name;
     parent.appendChild(li);
     app.setSheet();

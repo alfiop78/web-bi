@@ -8,6 +8,7 @@ class Sheets {
   #fields = new Map();
   #tables = new Set(); // tutte le tabelle usate nel report. In base a questo Set() posso creare la from e la where
   #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
+  #filters = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #joins = new Map();
   constructor(WorkBook) {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
@@ -35,13 +36,17 @@ class Sheets {
 
   // passaggio del token e recupero del field in WorkSheet tramite l'oggetto WorkBook passato al Costruttore
   set fields(token) {
-    console.log(this.workBook.field.get(token));
+    // console.log(this.workBook.field.get(token));
     this.#fields.set(token, {
       field: this.workBook.field.get(token).field,
       tableAlias: this.workBook.field.get(token).tableAlias,
       name: this.workBook.field.get(token).name
     });
   }
+
+  set filters(token) { this.#filters.set(token, this.workBook.filter.get(token)); }
+
+  get filters() { return this.#filters; }
 
   // passaggio dell'oggetto {token, workshhet.field.get(...)}
   // set fields(object) {
@@ -96,8 +101,8 @@ class Sheets {
     this.sheet.fields = Object.fromEntries(this.fields);
     this.sheet.from = Object.fromEntries(this.from);
     this.sheet.joins = Object.fromEntries(this.joins);
-    debugger;
-    console.log(this.sheet);
+    this.sheet.filters = Object.fromEntries(this.filters);
+    console.info(this.sheet);
     WorkSheetStorage.save(this.sheet);
   }
 
@@ -283,7 +288,7 @@ class WorkSheets extends WorkBooks {
     this.#filter.set(object.token, object.value);
   }
 
-  get filter() { return this.#filters; }
+  get filter() { return this.#filter; }
 
   set filters(token) {
     if (!this.#filters.has(this.#filter.get(token).workBook.tableAlias)) {

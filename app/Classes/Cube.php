@@ -365,19 +365,13 @@ class Cube
     */
   }
 
+  // definisco i filtri del report
   public function sheetFilters($filters)
   {
-    // definisco i filtri del report
     // dd($filters);
-    foreach ($filters as $tableAlias => $filter) {
-      foreach ($filter as $prop) {
-        // dd($prop);
-        // dd($prop->workBook->table); //in workBook sono presenti table e tableAlias
-        foreach ($prop->workBook as $key => $value) {
-          // dd($key, $value);
-          $this->filters_baseTable['iperauto'] = "{$prop->workBook->tableAlias}.{$prop->field} " . implode(" ", $prop->sql);
-        }
-      }
+    foreach ($filters as $filter) {
+      // dd($filter);
+      $this->filters_baseTable[$filter->name] = "{$filter->workBook->tableAlias}.{$filter->field} " . implode(" ", $filter->sql);
     }
     // dd($this->filters_baseTable);
   }
@@ -549,7 +543,7 @@ class Cube
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
     // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
-    // dd($sql);
+    // return $this->_sql;
     // $result = DB::connection('vertica_odbc')->raw($sql);
     // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
     /* il metodo getSchemaBuilder() funziona con mysql, non con vertica. Ho creato MyVerticaGrammar.php dove c'è la sintassi corretta per vertica (solo alcuni Metodi ho modificato) */
@@ -719,6 +713,7 @@ class Cube
       $table_fields[] = "\n$this->baseTableName.$field";
     }
     $this->_fieldsSQL = implode(",", $table_fields);
+    // dd($this->_fieldsSQL);
     // dd(!empty($this->_metrics_advanced_datamart));
     if (!empty($this->_metrics_advanced_datamart)) {
       dd('metriche filtrate presenti');
@@ -772,8 +767,8 @@ class Cube
       $sql .= "\nFROM\ndecisyon_cache.$this->baseTableName";
       $sql .= "$leftJoin\nGROUP BY $this->_fieldsSQL);";
     } else {
+      // non sono presenti metriche filtrate
       $s = "SELECT $this->_fieldsSQL";
-      // dd('metrics_base_datamart : ' . $this->_metrics_base_datamart);
       if (property_exists($this, 'sheetBaseMetrics')) $s .= ", $this->_metrics_base_datamart";
       if (property_exists($this, 'compositeMetrics')) {
         $this->createCompositeMetrics();
@@ -786,7 +781,7 @@ class Cube
       }
       $s .= "\nFROM decisyon_cache.$this->baseTableName";
       $s .= "\nGROUP BY $this->_fieldsSQL";
-      // dd($s);
+      // return $s;
       $sql = "/*Creazione DATAMART finale :\n{$this->datamartName}\n*/\nCREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS\n($s);";
     }
     // dd($sql);

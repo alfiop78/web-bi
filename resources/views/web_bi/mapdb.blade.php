@@ -130,12 +130,11 @@
           <dialog id="dlg-filters">
             <section class="dlg-grid">
               <section class="dlg-title">Creazione Filtro</section>
-              <section class="dlg-content col col-3">
+              <section class="dlg-content col col-2">
                 <nav></nav>
                 <section>
                   <div id="textarea-filter" data-content-editable></div>
                 </section>
-                <nav data-filters-defined></nav>
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
@@ -289,6 +288,7 @@
                             <span>Filtri</span>
                             <button data-fn="handlerFilters" id="btn-add-filters">Filtri</button>
                           </div>
+                          <nav data-filters-defined></nav>
                         </section>
                       </div>
                       <div class="report-area">
