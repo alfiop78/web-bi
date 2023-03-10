@@ -53,7 +53,7 @@ class SheetStorages extends Storages {
     window.localStorage.setItem(this.element.token, JSON.stringify(this.element.value));
   } */
 
-  save(elements) {
+  /* save(elements) {
     // elements : oggetto Map()
     // ciclo tutti i field del workbook da salvare
     for (const [token, value] of elements) {
@@ -69,6 +69,6 @@ class SheetStorages extends Storages {
       if (json.tableAlias === tableAlias) result[token] = json;
     }
     return result;
-  }
+  } */
 
 }

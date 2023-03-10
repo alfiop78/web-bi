@@ -474,7 +474,8 @@ var Sheet;
     */
     debugger;
     // TODO: aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
-    Sheet.fields = { token: elementRef.id, value: WorkSheet.field.get(elementRef.id) };
+    // Sheet.fields = { token: elementRef.id, value: WorkSheet.field.get(elementRef.id) };
+    Sheet.fields = elementRef.id;
     // Sheet.field = elementRef.dataset.field;
     Sheet.tables = elementRef.dataset.alias;
     e.currentTarget.appendChild(field);
@@ -680,13 +681,13 @@ var Sheet;
 
   app.process = async () => {
     // TODO: creo 'from' e 'where' in base agli oggetti (colonne, filtri) aggiunti al report
-    WorkSheet.sheet = 'sheetname';
+    // Sheet = 'sheetname';
+    Sheet.save();
+    debugger;
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
-    const params = JSON.stringify(WorkSheet.sheet.get('sheetname'));
+    const params = JSON.stringify(Sheet.sheet);
     // console.log(params);
     // App.showConsole('Elaborazione in corso...', 'info');
-    // chiudo la lista dei report da eseguire
-    // app.processList.toggleAttribute('hidden');
     // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
     const url = "/fetch_api/cube/sheet";
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };

@@ -14,10 +14,17 @@ class Sheets {
     // rendo disponibile, in questa Classe, le proprietà del WorkBook passate al Costruttore
     this.workBook = WorkBook;
     console.log(this.workBook);
-    // this.name = sheetName;
-    // this.tablesMap = WorkBook.tablesMap;
-    // this.mapJoin = WorkBook.nJoin;
-    // this.mapJoins = WorkBook.nJoins;
+    const rand = () => Math.random(0).toString(36).substring(2);
+    this.token = rand().substring(0, 7);
+    this.sheet = { token: this.token };
+  }
+
+  set name(value) {
+
+  }
+
+  get name() {
+
   }
 
   set tables(value) {
@@ -26,32 +33,43 @@ class Sheets {
 
   get tables() { return this.#tables; }
 
-  set fields(object) {
-    // this.#field = value;
-    // TODO: aggiungo i campi al report, questi verranno usati nella clausola SELECT e GROUP BY
-    /* columnToken : {
-        "id": [
-          "CodOperatoreOfficina_966.id"
-        ],
-        "ds": [
-          "CodOperatoreOfficina_966.Descrizione"
-        ]
-      }
-    */
-    // ciclo id/ds
-    this.field = {};
-    let { token, value } = object;
-    for (const [fieldType, field] of Object.entries(value.field)) {
-      this.field[fieldType] = [`${value.tableAlias}.${field.field}`];
-    }
-    debugger;
-
+  // passaggio del token e recupero del field in WorkSheet tramite l'oggetto WorkBook passato al Costruttore
+  set fields(token) {
+    console.log(this.workBook.field.get(token));
     this.#fields.set(token, {
-      name: value.name,
-      SQL: this.field
+      field: this.workBook.field.get(token).field,
+      tableAlias: this.workBook.field.get(token).tableAlias,
+      name: this.workBook.field.get(token).name
     });
-    console.info('this.#fields : ', this.#fields);
   }
+
+  // passaggio dell'oggetto {token, workshhet.field.get(...)}
+  // set fields(object) {
+  // this.#field = value;
+  // TODO: aggiungo i campi al report, questi verranno usati nella clausola SELECT e GROUP BY
+  /* columnToken : {
+      "id": [
+        "CodOperatoreOfficina_966.id"
+      ],
+      "ds": [
+        "CodOperatoreOfficina_966.Descrizione"
+      ]
+    }
+  */
+  // ciclo id/ds
+  /* this.field = {};
+  let { token, value } = object;
+  for (const [fieldType, field] of Object.entries(value.field)) {
+    this.field[fieldType] = [`${value.tableAlias}.${field.field}`];
+  }
+  debugger;
+
+  this.#fields.set(token, {
+    name: value.name,
+    SQL: this.field
+  });
+  console.info('this.#fields : ', this.#fields); */
+  // }
 
   get fields() { return this.#fields; }
 
@@ -73,6 +91,15 @@ class Sheets {
   }
 
   get joins() { return this.#joins; }
+
+  save() {
+    this.sheet.fields = Object.fromEntries(this.fields);
+    this.sheet.from = Object.fromEntries(this.from);
+    this.sheet.joins = Object.fromEntries(this.joins);
+    debugger;
+    console.log(this.sheet);
+    WorkSheetStorage.save(this.sheet);
+  }
 
 }
 

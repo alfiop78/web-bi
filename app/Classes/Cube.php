@@ -41,12 +41,9 @@ class Cube
 			]
 		*/
     // dd($this->baseColumns);
-    // foreach ($this->baseColumns as $tableAlias => $field) {
-    // ...per ogni tabella
-    // TODO: da ottimizzare
-    // dd($tableAlias, $field);
     // field contiene un object con {token_colonna : {proprietà della colonna}}
     foreach ($this->baseColumns as $column) {
+      // dd($column);
       // ... per ogni colonna
       // all'interno delle tabelle ci sono i token che corrispondo ognuno a una colonna id-ds
       foreach ($column->field as $key => $value) {
@@ -54,7 +51,6 @@ class Cube
         $this->_fields[] = "{$column->name}_{$key}";
       }
     }
-    // }
     // dd($this->_fields);
   }
 
@@ -71,6 +67,7 @@ class Cube
         $fieldList["{$column->name}_{$key}"] = "{$column->tableAlias}.{$value->field} AS {$column->name}_{$key}"; // $fieldType : id/ds
       }
     }
+    // dd($fieldList);
     // $this->_columns[] = "{$column->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
     /* foreach ($fieldList as $name => $field) {
       $this->json__info->columns->{$name} = (object)[
@@ -121,16 +118,29 @@ class Cube
   public function sheetWhere($joins)
   {
     // dd($joins);
-    // TODO: metto in join le tabelle incluse nella FROM_baseTable
-    foreach ($joins as $tableAlias => $prop) {
+    /* TODO: metto in join le tabelle incluse nella FROM_baseTable.
+      Valutare quale approccio può essere migliore in base ai tipi di join che si dovranno implementare in futuro
+    */
+    // NOTE : metodo 1
+    foreach ($joins as $tableAlias => $value) {
+      // il token è l'identificativo della join
+      foreach ($value as $token => $join) {
+        // dd($token, $join);
+        $this->WHERE_baseTable[$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
+      }
+    }
+    // dd($this->WHERE_baseTable);
+
+    // NOTE : metodo 2
+    /* foreach ($joins as $tableAlias => $prop) {
       foreach ($prop as $token => $join) {
         // dd($token, $join);
         // $relation = implode(" = ", $join->SQL);
 
         $this->WHERE_baseTable[$token] = implode(" = ", $join->SQL);
       }
-      // dd($this->WHERE_baseTable);
-    }
+      dd($this->WHERE_baseTable);
+    } */
     // dd($this->WHERE_baseTable, $this->WHERE_timeDimension);
     /*
 		es.:
@@ -224,17 +234,14 @@ class Cube
   {
     $fieldList = array();
     $this->groupBy = "GROUP BY\n";
-    // foreach ($groups as $tableAlias => $field) {
-    // dd($prop);
     foreach ($groups as $column) {
       foreach ($column->field as $key => $value) {
         $fieldList["{$column->name}_{$key}"] = "{$column->tableAlias}.{$value->field}"; // $fieldType : id/ds
       }
     }
-    // }
     // dd($fieldList);
     $this->groupBy .= implode(",\n", $fieldList);
-    dd($this->groupBy);
+    // dd($this->groupBy);
   }
 
   /*

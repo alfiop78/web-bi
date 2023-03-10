@@ -152,18 +152,19 @@ class MapDatabaseController extends Controller
     $q = new Cube();
     $q->baseTableName = "WEB_BI_TMP_BASE_test";
     $q->datamartName = "WEB_BI_1";
-    $q->baseColumns = $cube->{'columns'};
+    $q->baseColumns = $cube->{'fields'};
     // imposto le colonne da includere nel datamart finale
     $q->sheetFields();
-    $q->sheetSelect($cube->{'columns'});
-    if (property_exists($cube, 'metrics')) {
+    $q->sheetSelect($cube->{'fields'});
+    /* if (property_exists($cube, 'metrics')) {
       $q->sheetBaseMetrics = $cube->{'metrics'};
       $q->sheetMetrics();
-    }
+    } */
     $q->sheetFrom($cube->{'from'});
     $q->sheetWhere($cube->{'joins'});
-    if (property_exists($cube, 'filters')) $q->sheetFilters($cube->{'filters'});
-    $q->sheetGroupBy($cube->{'columns'});
+    // if (property_exists($cube, 'filters')) $q->sheetFilters($cube->{'filters'});
+    $q->sheetGroupBy($cube->{'fields'});
+    exit;
     try {
       $baseTable = $q->sheetBaseTable(null);
       // dd($baseTable);
