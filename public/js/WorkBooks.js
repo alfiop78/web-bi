@@ -9,6 +9,7 @@ class Sheets {
   #tables = new Set(); // tutte le tabelle usate nel report. In base a questo Set() posso creare la from e la where
   #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #filters = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
+  #metrics = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #joins = new Map();
   constructor(WorkBook) {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
@@ -17,9 +18,10 @@ class Sheets {
     console.log(this.workBook);
     const rand = () => Math.random(0).toString(36).substring(2);
     this.token = rand().substring(0, 7);
-    this.sheet = { token: this.token };
+    this.sheet = { token: this.token, type: 'Sheet' };
   }
 
+  // imposto il nome del report
   set name(value) {
 
   }
@@ -47,6 +49,10 @@ class Sheets {
   set filters(token) { this.#filters.set(token, this.workBook.filter.get(token)); }
 
   get filters() { return this.#filters; }
+
+  set metrics(token) { this.#metrics.set(token, this.workBook.mapMetric.get(token)); }
+
+  get metrics() { return this.#metrics; }
 
   get fields() { return this.#fields; }
 
@@ -78,6 +84,7 @@ class Sheets {
       * altrimenti visualizzo un AVVISO perchè l'esecuzione potrebbe essere troppo lunga
     */
     this.sheet.filters = Object.fromEntries(this.filters);
+    if (this.metrics.size > 0) this.sheet.metrics = Object.fromEntries(this.metrics);
     console.info(this.sheet);
     WorkSheetStorage.save(this.sheet);
   }
@@ -100,7 +107,7 @@ class WorkBooks {
     const rand = () => Math.random(0).toString(36).substring(2);
     this.token = rand().substring(0, 7);
     console.log(this.token);
-    this.workBook = { token: 'token_test', name: name };
+    this.workBook = { token: this.token, type: 'WorkBook', name: name };
     this.sheet = { name: `WorkSheet_${name}` };
     this.schema;
   }

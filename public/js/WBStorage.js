@@ -4,11 +4,13 @@ La classe recupera il local storage ad ogni accesso alla pagina e contiene Metod
 class Storages {
   #selected; // l'elemento selezionato in un determinato momento
   #workbook;
+  #workBooks = {};
 
   constructor() {
     this.storage = window.localStorage;
     // this.storageKeys = Object.keys(window.localStorage);
     this.JSONData = null;
+    // tutti gli workbook
   }
 
   set workBook(value) {
@@ -32,6 +34,16 @@ class Storages {
   get selected() {
     return JSON.parse(this.storage.getItem(this.#selected));
   }
+
+  workBooks() {
+    for (const [token, object] of Object.entries(this.storage)) {
+      if (JSON.parse(object).type === 'WorkBook') {
+        this.#workBooks[token] = JSON.parse(object);
+      }
+    }
+    return this.#workBooks;
+  }
+
 
 }
 

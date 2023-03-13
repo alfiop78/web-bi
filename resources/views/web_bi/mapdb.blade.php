@@ -110,11 +110,22 @@
     <div id="container">
       <div id="content">
         <div id="body">
+          <dialog id="dialog-workbook-open">
+            <section class="dlg-grid">
+              <section class="dlg-title">Apri WorkBook</section>
+              <section class="dlg-content col col-1">
+                <nav data-workbook-defined></nav>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+              </section>
+            </section>
+          </dialog>
+
           <dialog id="dlg-metric">
             <section class="dlg-grid">
               <section class="dlg-title">Creazione Metrica</section>
               <section class="dlg-content col col-1">
-                <!--<nav></nav>-->
                 <section>
                   <div id="textarea-metric" class="dropzone" data-content-editable contenteditable="true"></div>
                   <!--<textarea id="textarea-metric" cols="20" class="dropzone" rows="10">SUM(</textarea>-->
@@ -232,7 +243,7 @@
                       <section id="canvas-area">
                         <div>
                           <section id="data-source-name" class="data-source" contenteditable="false">data source name</section>
-                          <button id="btn-workbook-open" type="button" value="open WorkBook">Open</button>
+                          <button data-fn="workBookOpen" id="btn-workbook-open" value="open">Apri</button>
                         </div>
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
                           <svg id="svg" class="dropzone" data-level="0">
@@ -288,7 +299,7 @@
                             <span>Filtri</span>
                             <button data-fn="handlerFilters" id="btn-add-filters">Filtri</button>
                           </div>
-                          <nav data-filters-defined></nav>
+                          <nav id="worksheet-filters" data-filters-defined></nav>
                         </section>
                       </div>
                       <div class="report-area">

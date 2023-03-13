@@ -15,6 +15,7 @@ var Sheet;
     tmplMetricsDefined: document.getElementById('tmpl-metrics-defined'),
     tmplFormula: document.getElementById('tmpl-formula'),
     // dialogs
+    dialogWorkBook: document.getElementById('dialog-workbook-open'),
     dialogTables: document.getElementById('dlg-tables'),
     dialogFilters: document.getElementById('dlg-filters'),
     dialogMetric: document.getElementById('dlg-metric'),
@@ -24,7 +25,6 @@ var Sheet;
     // buttons
     btnSelectSchema: document.getElementById('btn-select-schema'),
     btnDataSourceName: document.getElementById('data-source-name'),
-    btnWorkbookOpen: document.getElementById('btn-workbook-open'),
     // drawer
     drawer: document.getElementById('drawer'),
     // body
@@ -369,46 +369,34 @@ var Sheet;
 
   app.columnDrop = (e) => {
     e.preventDefault();
-    debugger;
     e.currentTarget.classList.replace('dropping', 'dropped');
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
     console.log(elementRef);
     // elementRef : è l'elemento nella lista di sinistra che ho draggato
-    const tmpl = app.tmplColumnsDefined.content.cloneNode(true);
-    const field = tmpl.querySelector('.column-defined');
-    const span = field.querySelector('span');
-    field.dataset.type = 'column';
+    let tmpl = app.tmplColumnsDefined.content.cloneNode(true);
+    let field = tmpl.querySelector('.column-defined');
+    let span = field.querySelector('span');
+    field.dataset.type = elementRef.dataset.type;
     field.dataset.id = elementRef.id;
-    span.innerHTML = elementRef.dataset.field;
-    Sheet.field = elementRef.dataset.field;
-    Sheet.tables = elementRef.dataset.alias;
-    e.currentTarget.appendChild(field);
-    // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
-    // i.addEventListener('click', app.handlerSetMetric);
-    // i.dataset.fn = 'handlerSetMetric';
-    // WARN: da verificare. tables credo che contenga le tabelle che faranno parte del report
-    Sheet.tables = elementRef.dataset.alias;
-    app.setSheet();
-    /* if (elementRef.dataset.type === 'column') {
-    } else {
-      // metric
+    if (field.dataset.type === 'metric') {
       tmpl = app.tmplMetricsDefined.content.cloneNode(true);
       field = tmpl.querySelector('.metric-defined');
       span = field.querySelector('span');
-      i = field.querySelector("i[data-id='btn-set-filter']");
-      field.dataset.type = 'metric';
+      // i = field.querySelector("i[data-id='btn-set-filter']");
       // recupero le proprietà della metrica per inserire la funzione di aggregazione nell'elemento appena droppato
-      span.innerHTML = elementRef.dataset.field;
       debugger;
-      // WorkSheet.metrics = elementRef.id;
+      Sheet.metrics = elementRef.id;
       // app.saveMetric(elementRef);
+    } else {
+      // column
+      Sheet.fields = elementRef.id;
     }
-    i.dataset.token = elementRef.id; // svg-data-x
+    span.innerHTML = elementRef.dataset.field;
+    Sheet.tables = elementRef.dataset.alias;
     e.currentTarget.appendChild(field);
-    WorkSheet.tables = elementRef.dataset.alias;
-    app.setSheet(); */
+    app.setSheet();
   }
 
   app.columnDragEnd = (e) => {
@@ -476,7 +464,6 @@ var Sheet;
     // TODO: aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
     // Sheet.fields = { token: elementRef.id, value: WorkSheet.field.get(elementRef.id) };
     Sheet.fields = elementRef.id;
-    // Sheet.field = elementRef.dataset.field;
     Sheet.tables = elementRef.dataset.alias;
     e.currentTarget.appendChild(field);
     // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
@@ -491,6 +478,7 @@ var Sheet;
     }
   }
 
+  // apro la dialog column per definire le colonne del WorkBook
   app.setColumn = (e) => {
     app.windowColumns.dataset.open = 'true';
     app.windowColumns.dataset.field = e.currentTarget.dataset.field;
@@ -500,12 +488,14 @@ var Sheet;
     ds.value = e.currentTarget.dataset.field;
   }
 
+  // dialog-metric per definire le metriche di base del WorkBook
   app.setMetric = (e) => {
     const aggregateFn = 'SUM';
     // console.log(WorkSheet.activeTable);
     const table = WorkSheet.activeTable.dataset.table;
     const tableAlias = WorkSheet.activeTable.dataset.alias;
     const field = e.target.dataset.field;
+    const alias = e.target.dataset.field;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
 
@@ -513,7 +503,7 @@ var Sheet;
     WorkSheet.mapMetric = {
       token,
       value: {
-        alias: 'metric alias',
+        alias,
         workBook: { table, tableAlias },
         ref: WorkSheet.token,
         // workBook: { table: WorkSheet.workBook.name, alias: 'alias tabella fact' },
@@ -522,7 +512,7 @@ var Sheet;
           aggregateFn,
           field,
           distinct: false,
-          alias: 'aliasmetric'
+          alias
         }
       }
     };
@@ -632,11 +622,29 @@ var Sheet;
     app.dialogMetric.show();
   }
 
-  app.btnWorkbookOpen.onclick = () => {
+  document.querySelector('#btn-workbook-open').onclick = () => {
     // reimposto la Classe WorkSheet
-    WorkSheet = WorkSheet.open('token_test');
+    app.dialogWorkBook.showModal();
+    // carico elenco dei workBook presenti
+    const parent = document.querySelector('nav[data-workbook-defined]');
+    for (const [token, object] of Object.entries(WorkBookStorage.workBooks())) {
+      const tmpl = app.tmplList.content.cloneNode(true);
+      const li = tmpl.querySelector('li[data-li]');
+      const span = li.querySelector('li[data-li] span');
+      li.dataset.fn = 'workBookSelected';
+      li.dataset.token = token;
+      span.innerHTML = object.name;
+      parent.appendChild(li);
+
+    }
+  }
+
+  app.workBookSelected = (e) => {
+    WorkSheet = WorkSheet.open(e.currentTarget.dataset.token);
+    WorkSheet.workBook.token = e.currentTarget.dataset.token;
     app.createHierarchies();
     app.tablesMap();
+    app.dialogWorkBook.close();
   }
 
   app.btnDataSourceName.onclick = (e) => {
@@ -652,7 +660,6 @@ var Sheet;
     Step.next();
     // gli elementi impostati nel workBook devono essere disponibili nello sheet.
     app.addHierStruct();
-    app.addFiltersStruct();
     WorkSheet.save();
     Sheet = new Sheets(WorkSheet);
   }
@@ -765,6 +772,7 @@ var Sheet;
     // aggiungo la tabella a Sheet.tables
     Sheet.tables = WorkSheet.filter.get(e.currentTarget.id).workBook.tableAlias;
     app.setSheet();
+    console.log(Sheet);
   }
 
   app.saveFilter = (e) => {
@@ -841,7 +849,7 @@ var Sheet;
     // ora in localStorage ho anche il filtro aggiunto.
     WorkSheet.save();
     // aggiungo il filtro alla nav[data-filters-defined]
-    const parent = app.sheetProp.querySelector('nav[data-filters-defined]');
+    const parent = app.sheetProp.querySelector('#worksheet-filters');
     const tmpl = app.tmplList.content.cloneNode(true);
     const li = tmpl.querySelector('li[data-li]');
     const span = li.querySelector('li[data-li] span');
@@ -1080,8 +1088,8 @@ var Sheet;
         }
       }
     };
-    console.log(Sheet.wb);
     debugger;
+    console.log(Sheet.wb);
   }
 
   app.setSheet = () => {
@@ -1379,10 +1387,74 @@ var Sheet;
     app.windowColumns.dataset.open = 'false';
   }
 
-  app.addFiltersStruct = () => {
-    console.log(WorkSheet.filters);
-    // TODO: da Implementare
-    debugger;
+  app.addDefinedFields = (parent) => {
+    if (WorkSheet.fields.has(WorkSheet.activeTable.dataset.alias)) {
+      for (const [token, value] of Object.entries(WorkSheet.fields.get(WorkSheet.activeTable.dataset.alias))) {
+        const tmpl = app.tmplList.content.cloneNode(true);
+        const li = tmpl.querySelector('li[data-li-drag]');
+        const i = li.querySelector('i');
+        const span = li.querySelector('span');
+        li.id = token;
+        li.dataset.type = 'column';
+        // li.dataset.id = tableId;
+        li.dataset.schema = value.schema;
+        li.dataset.table = value.table;
+        li.dataset.alias = value.tableAlias;
+        li.dataset.field = value.field.ds.field;
+        li.addEventListener('dragstart', app.fieldDragStart);
+        li.addEventListener('dragend', app.fieldDragEnd);
+        span.innerHTML = value.field.ds.field;
+        parent.appendChild(li);
+      }
+    }
+  }
+
+  app.addDefinedMetrics = (parent) => {
+    // metriche mappate sul cubo
+    if (WorkSheet.mapMetrics.has(WorkSheet.activeTable.dataset.alias)) {
+      for (const [token, value] of Object.entries(WorkSheet.mapMetrics.get(WorkSheet.activeTable.dataset.alias))) {
+        const tmpl = app.tmplList.content.cloneNode(true);
+        const li = tmpl.querySelector('li[data-li-drag]');
+        const i = li.querySelector('i');
+        const span = li.querySelector('span');
+        li.id = token;
+        li.dataset.type = 'metric';
+        // li.dataset.id = tableId;
+        // li.dataset.schema = value.schema;
+        li.dataset.table = value.workBook.table;
+        li.dataset.alias = value.workBook.tableAlias;
+        li.dataset.field = value.formula.field;
+        li.addEventListener('dragstart', app.fieldDragStart);
+        li.addEventListener('dragend', app.fieldDragEnd);
+        span.innerHTML = value.formula.field;
+        parent.appendChild(li);
+      }
+    }
+  }
+
+  app.addDefinedFilters = () => {
+    const parent = document.getElementById('worksheet-filters');
+    // filtri mappati sul WorkBook
+    if (WorkSheet.filters.has(WorkSheet.activeTable.dataset.alias)) {
+      for (const [token, value] of Object.entries(WorkSheet.filters.get(WorkSheet.activeTable.dataset.alias))) {
+        const tmpl = app.tmplList.content.cloneNode(true);
+        const li = tmpl.querySelector('li[data-li-drag]');
+        const i = li.querySelector('i');
+        const span = li.querySelector('span');
+        li.id = token;
+        li.dataset.type = 'filter';
+        // li.dataset.id = tableId;
+        // li.dataset.schema = value.schema;
+        li.dataset.table = value.workBook.table;
+        li.dataset.alias = value.workBook.tableAlias;
+        li.dataset.field = value.field;
+        li.addEventListener('click', app.addFilter);
+        li.addEventListener('dragstart', app.fieldDragStart);
+        li.addEventListener('dragend', app.fieldDragEnd);
+        span.innerHTML = value.name;
+        parent.appendChild(li);
+      }
+    }
   }
 
   app.addHierStruct = async () => {
@@ -1408,45 +1480,9 @@ var Sheet;
         summary.innerHTML = WorkSheet.activeTable.dataset.table;
         summary.dataset.tableId = tableId;
         dt.appendChild(dd);
-        if (WorkSheet.fields.has(WorkSheet.activeTable.dataset.alias)) {
-          for (const [token, value] of Object.entries(WorkSheet.fields.get(WorkSheet.activeTable.dataset.alias))) {
-            const tmpl = app.tmplList.content.cloneNode(true);
-            const li = tmpl.querySelector('li[data-li-drag]');
-            const i = li.querySelector('i');
-            const span = li.querySelector('span');
-            li.id = token;
-            li.dataset.type = 'column';
-            // li.dataset.id = tableId;
-            li.dataset.schema = value.schema;
-            li.dataset.table = value.table;
-            li.dataset.alias = value.tableAlias;
-            li.dataset.field = value.field.ds.field;
-            li.addEventListener('dragstart', app.fieldDragStart);
-            li.addEventListener('dragend', app.fieldDragEnd);
-            span.innerHTML = value.field.ds.field;
-            details.appendChild(li);
-          }
-        }
-        // metriche mappate sul cubo
-        if (WorkSheet.mapMetrics.has(WorkSheet.activeTable.dataset.alias)) {
-          for (const [token, value] of Object.entries(WorkSheet.mapMetrics.get(WorkSheet.activeTable.dataset.alias))) {
-            const tmpl = app.tmplList.content.cloneNode(true);
-            const li = tmpl.querySelector('li[data-li-drag]');
-            const i = li.querySelector('i');
-            const span = li.querySelector('span');
-            li.id = token;
-            li.dataset.type = 'metric';
-            // li.dataset.id = tableId;
-            // li.dataset.schema = value.schema;
-            li.dataset.table = value.workBook.table;
-            li.dataset.alias = value.workBook.tableAlias;
-            li.dataset.field = value.formula.field;
-            li.addEventListener('dragstart', app.fieldDragStart);
-            li.addEventListener('dragend', app.fieldDragEnd);
-            span.innerHTML = value.formula.field;
-            details.appendChild(li);
-          }
-        }
+        app.addDefinedFields(details);
+        app.addDefinedMetrics(details);
+        app.addDefinedFilters();
       });
     }
   }

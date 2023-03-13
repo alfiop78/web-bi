@@ -330,13 +330,16 @@ section[data-table-from] .table, section[data-table-to] .table{
   grid-template-rows: 50% 50%;
 }
 
-.sheet-elements{
+/* .sheet-elements{
   display: grid;
   grid-template-columns: 75px 1fr;
-}
+} */
 
 .sheet-elements .dropzone{
   border: solid thin lightgrey;
+  overflow: auto;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .sheet-elements .dropzone.dropping{
