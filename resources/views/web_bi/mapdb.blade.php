@@ -49,7 +49,7 @@
       <details data-id="dt-tables">
         <summary></summary>
       </details>
-      <button class="" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica</button>
+      <button class="new-worksheet-object" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica</button>
     </dd>
   </template>
 
@@ -296,8 +296,7 @@
                         <section id="workbook-props"></section>
                         <section id="sheet-props">
                           <div>
-                            <span>Filtri</span>
-                            <button data-fn="handlerFilters" id="btn-add-filters">Filtri</button>
+                            <button data-fn="handlerFilters" id="btn-add-filters">Crea Filtro</button>
                           </div>
                           <nav id="worksheet-filters" data-filters-defined></nav>
                         </section>

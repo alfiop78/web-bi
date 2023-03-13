@@ -1,3 +1,34 @@
+class SHs {
+  // #test;
+  constructor() {
+    this.t;
+  }
+
+  set test(value) {
+    this.t = value;
+
+  }
+  get test() {
+    return this.t;
+  }
+
+  s(param1) {
+    console.log('a : ', param1);
+  }
+}
+
+class WSs extends SHs {
+  constructor() { super(); }
+
+}
+
+class WBs extends WSs {
+  constructor(name) {
+    super();
+    this.name = name;
+  }
+
+}
 // nella Class Sheets verranno aggiunti gli oggetti che consentono di creare il report.
 /*
 Es. : Quando viene aggiunta un campo alla dropzone 'rows' (questo è già presente in WorkSheets o la sua derivata) il campo
@@ -11,14 +42,11 @@ class Sheets {
   #filters = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #metrics = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #joins = new Map();
-  constructor(WorkBook) {
+  constructor(token, WorkBook) {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
     // rendo disponibile, in questa Classe, le proprietà del WorkBook passate al Costruttore
     this.workBook = WorkBook;
-    console.log(this.workBook);
-    const rand = () => Math.random(0).toString(36).substring(2);
-    this.token = rand().substring(0, 7);
-    this.sheet = { token: this.token, type: 'Sheet' };
+    this.sheet = { token, type: 'Sheet', workBook: WorkBook.workBook.token };
   }
 
   // imposto il nome del report
@@ -217,7 +245,6 @@ class WorkBooks {
     this.workBook.joins = Object.fromEntries(this.nJoins);
     this.workBook.tablesMap = Object.fromEntries(this.tablesMap);
     this.workBook.mapMetrics = Object.fromEntries(this.mapMetrics);
-    debugger;
     this.workBook.workSheet = {
       filters: Object.fromEntries(this.filters)
     };

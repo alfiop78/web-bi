@@ -327,19 +327,17 @@ section[data-table-from] .table, section[data-table-to] .table{
 
 .report-area .columns-rows{
   display: grid;
-  grid-template-rows: 50% 50%;
+  grid-template-rows: 50px 50px;
 }
-
-/* .sheet-elements{
-  display: grid;
-  grid-template-columns: 75px 1fr;
-} */
 
 .sheet-elements .dropzone{
   border: solid thin lightgrey;
   overflow: auto;
   display: flex;
   flex-wrap: wrap;
+  width: 100%;
+  height: 50px;
+  align-items: center;
 }
 
 .sheet-elements .dropzone.dropping{
@@ -348,6 +346,8 @@ section[data-table-from] .table, section[data-table-to] .table{
 
 .report-area .columns-rows > section{
   overflow: auto;
+  display: grid;
+  grid-template-columns: 80px 1fr;
 }
 
 .dropzone.columns .columns-area{
@@ -362,6 +362,7 @@ section[data-table-from] .table, section[data-table-to] .table{
   padding: 6px;
   border-radius: 4px;
   width: 170px;
+  height: 30px;
   margin: 6px 18px;
 }
 
@@ -397,11 +398,28 @@ i[data-id="btn-set-metric"]:hover, i[data-id='btn-set-filter']:hover{
 dt dd{
   max-height: 250px;
   overflow: auto;
+  margin-inline-start: 20px;
+}
+
+details > summary:hover{
+  cursor: pointer;
+  background-color: gainsboro;
+}
+
+details > summary{
+  font-weight: bold;
+  padding: 8px 4px;
 }
 
 details > li[data-datatype='float'] {
   background-color: teal;
   color: white;
+}
+
+details > li {
+  margin: 8px 0px;
+  height: 30px;
+  border-radius: 2px;
 }
 
 details > li[data-type="metric"] {
@@ -420,4 +438,11 @@ details > li[data-type="column"] {
 
 #textarea-metric.dropzone.dropping{
   border: solid thin brown;
+}
+
+.new-worksheet-object {
+  font-style: italic;
+  outline: none;
+  border: none;
+  color: dimgray;
 }

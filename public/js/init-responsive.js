@@ -3,6 +3,7 @@ var Draw = new DrawSVG('svg');
 var WorkSheetStorage = new SheetStorages();
 var WorkBookStorage = new Storages();
 var WorkSheet = new WorkSheets('workbook_kpi');
+var WB = new WBs('workbook_kpi');
 var Sheet;
 (() => {
   var app = {
@@ -661,7 +662,8 @@ var Sheet;
     // gli elementi impostati nel workBook devono essere disponibili nello sheet.
     app.addHierStruct();
     WorkSheet.save();
-    Sheet = new Sheets(WorkSheet);
+    const rand = () => Math.random(0).toString(36).substring(2);
+    Sheet = new Sheets(rand().substring(0, 7), WorkSheet);
   }
 
   // imposto attribute init sul <nav>, in questo modo verranno associati gli eventi data-fn sui child di <nav>
