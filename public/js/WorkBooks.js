@@ -1,34 +1,3 @@
-class SHs {
-  // #test;
-  constructor() {
-    this.t;
-  }
-
-  set test(value) {
-    this.t = value;
-
-  }
-  get test() {
-    return this.t;
-  }
-
-  s(param1) {
-    console.log('a : ', param1);
-  }
-}
-
-class WSs extends SHs {
-  constructor() { super(); }
-
-}
-
-class WBs extends WSs {
-  constructor(name) {
-    super();
-    this.name = name;
-  }
-
-}
 // nella Class Sheets verranno aggiunti gli oggetti che consentono di creare il report.
 /*
 Es. : Quando viene aggiunta un campo alla dropzone 'rows' (questo è già presente in WorkSheets o la sua derivata) il campo

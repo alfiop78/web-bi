@@ -3,7 +3,6 @@ var Draw = new DrawSVG('svg');
 var WorkSheetStorage = new SheetStorages();
 var WorkBookStorage = new Storages();
 var WorkSheet = new WorkSheets('workbook_kpi');
-var WB = new WBs('workbook_kpi');
 var Sheet;
 (() => {
   var app = {
