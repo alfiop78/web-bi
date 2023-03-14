@@ -500,12 +500,11 @@ var Sheet;
     const token = rand().substring(0, 7);
 
     // metric Map Object
-    WorkSheet.mapMetric = {
+    WorkSheet.metric = {
       token,
       value: {
         alias,
         workBook: { table, tableAlias },
-        ref: WorkSheet.token,
         // workBook: { table: WorkSheet.workBook.name, alias: 'alias tabella fact' },
         formula: {
           token,
@@ -516,7 +515,7 @@ var Sheet;
         }
       }
     };
-    WorkSheet.mapMetrics = token;
+    WorkSheet.metrics = token;
   }
 
   app.textareaDragEnter = (e) => {
@@ -578,7 +577,6 @@ var Sheet;
   app.rowsDropzone.addEventListener('drop', app.rowDrop, false);
   app.rowsDropzone.addEventListener('drop', app.rowDragEnd, false);
 
-
   app.textAreaMetric.addEventListener('dragover', app.textareaDragOver, false);
   app.textAreaMetric.addEventListener('dragenter', app.textareaDragEnter, false);
   app.textAreaMetric.addEventListener('dragleave', app.textareaDragLeave, false);
@@ -619,6 +617,8 @@ var Sheet;
   /* NOTE: ONCLICK EVENTS*/
 
   app.btnMetricNew = () => {
+    console.log(WorkSheet.activeTable.dataset.table);
+    debugger;
     app.dialogMetric.show();
   }
 
@@ -635,7 +635,6 @@ var Sheet;
       li.dataset.token = token;
       span.innerHTML = object.name;
       parent.appendChild(li);
-
     }
   }
 
@@ -726,7 +725,7 @@ var Sheet;
   app.handlerFilters = async () => {
     // popolo l'elenco delle tabelle presenti nel Canvas, il filtro può essere creatosu qualsiasi tabella
     let urls = [];
-    for (const [hierName, tables] of WorkSheet.nHier) {
+    for (const [hierName, tables] of WorkSheet.hierarchies) {
       tables.forEach(tableId => {
         WorkSheet.activeTable = tableId;
         urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/table_info');
@@ -870,7 +869,7 @@ var Sheet;
     console.log(e.target);
     console.log(e.target.dataset);
     // metrica selezionata
-    const metric = WorkSheet.mapMetric.get(e.target.dataset.token);
+    const metric = WorkSheet.metric.get(e.target.dataset.token);
     const parent = app.dialogMetricFilters.querySelector('nav[data-filters-defined]');
     for (const [tableAlias, filters] of WorkSheet.filters) {
       for (const [token, filter] of Object.entries(filters)) {
@@ -900,7 +899,7 @@ var Sheet;
     // WorkSheet.advMetrics = app.dialogMetricFilters.dataset.token;
     WorkSheet.metrics.delete(app.dialogMetricFilters.dataset.token);
     // TODO:
-    // if (Object.keys(WorkSheet.mapMetrics.get(metric.workBook.tableAlias)).length === 0) WorkSheet.mapMetrics.delete(metric.workBook.tableAlias);
+    // if (Object.keys(WorkSheet.metrics.get(metric.workBook.tableAlias)).length === 0) WorkSheet.metrics.delete(metric.workBook.tableAlias);
   }
 
   /* NOTE: END ONCLICK EVENTS*/
@@ -1067,14 +1066,15 @@ var Sheet;
     console.log(text.indexOf('NettoRiga'));
     const aggregateFn = 'AVG';
     // console.log(WorkSheet.activeTable);
-    // const table = WorkSheet.activeTable.dataset.table;
-    // const tableAlias = WorkSheet.activeTable.dataset.alias;
-    // const field = e.target.dataset.field;
+    const table = WorkSheet.activeTable.dataset.table;
+    const tableAlias = WorkSheet.activeTable.dataset.alias;
+    debugger;
+    const field = e.target.dataset.field;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
 
     // metric Map Object
-    WorkSheet.metrics = {
+    /* WorkSheet.metrics = {
       token,
       value: {
         alias: 'metric creata in worksheet',
@@ -1088,9 +1088,23 @@ var Sheet;
           alias: 'aliasmetric'
         }
       }
+    }; */
+    WorkSheet.metric = {
+      token,
+      value: {
+        alias,
+        workBook: { table, tableAlias },
+        formula: {
+          token,
+          aggregateFn,
+          field,
+          distinct: false,
+          alias
+        }
+      }
     };
-    debugger;
-    console.log(Sheet.wb);
+    WorkSheet.metrics = token;
+    // WorkSheet.save();
   }
 
   app.setSheet = () => {
@@ -1111,7 +1125,7 @@ var Sheet;
           * (per il momento la Fact non ha altre Join però potrei utilizzare 
           * la funzionalitò di "entrare" nel livello fisico di una tabella per aggiungerci altre join)
           * ad es. : potrei aggiungere, al DocVenditaDettaglio (fact), la tabella dei TipiMovimento,
-          * e quindi, in questo caso, avrei una join anche sulla Fact (e quindi nella proprietà WorkBook.nJoins)
+          * e quindi, in questo caso, avrei una join anche sulla Fact (e quindi nella proprietà WorkBook.joins)
           */
           Sheet.joins = Draw.tables.get(tableId);
         });
@@ -1157,7 +1171,7 @@ var Sheet;
     // salvo le gerarchie / dimensioni create nel canvas
     // recupero gli elementi del level-id più alto, il data-level presente su <svg> identifica il livello più alto presente
     const levelId = +Draw.svg.dataset.level;
-    WorkSheet.nHier.clear();
+    WorkSheet.hierarchies.clear();
     let recursiveLevels = (levelId) => {
       // per ogni level-id recupero le tabelle che hanno data-joins=0 (l'ultima tabella della gerarchia, che quindi non ha altre tabelle legate in join)
       Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'][data-joins='0']`).forEach(table => {
@@ -1171,7 +1185,7 @@ var Sheet;
         }
         recursive(table.id);
         // console.log(hier);
-        WorkSheet.nHier = hier;
+        WorkSheet.hierarchies = hier;
       });
 
       levelId--;
@@ -1313,7 +1327,7 @@ var Sheet;
     let joins = [...app.windowJoin.querySelectorAll(`.join-field[data-active][data-field][data-join-id='${joinId}']`)].filter(field => +field.dataset.joinId === joinId);
     // console.log(joins);
     if (joins.length === 2) {
-      WorkSheet.nJoin = {
+      WorkSheet.join = {
         token: fieldRef.dataset.token,
         value: {
           // table: joins[0].dataset.table,
@@ -1323,7 +1337,7 @@ var Sheet;
           to: { table: joins[0].dataset.table, alias: joins[0].dataset.alias, field: joins[0].dataset.field }
         }
       };
-      WorkSheet.nJoins = fieldRef.dataset.token; // nome della tabella con le proprie join (WorkSheet.nJoin) all'interno
+      WorkSheet.joins = fieldRef.dataset.token; // nome della tabella con le proprie join (WorkSheet.nJoin) all'interno
       // dopo aver completato la join coloro la linea in modo diverso
       Draw.currentLineRef.dataset.joined = 'true';
     }
@@ -1412,8 +1426,10 @@ var Sheet;
 
   app.addDefinedMetrics = (parent) => {
     // metriche mappate sul cubo
-    if (WorkSheet.mapMetrics.has(WorkSheet.activeTable.dataset.alias)) {
-      for (const [token, value] of Object.entries(WorkSheet.mapMetrics.get(WorkSheet.activeTable.dataset.alias))) {
+    const buttonNew = parent.nextElementSibling;
+    buttonNew.dataset.tableId = WorkSheet.activeTable.id;
+    if (WorkSheet.metrics.has(WorkSheet.activeTable.dataset.alias)) {
+      for (const [token, value] of Object.entries(WorkSheet.metrics.get(WorkSheet.activeTable.dataset.alias))) {
         const tmpl = app.tmplList.content.cloneNode(true);
         const li = tmpl.querySelector('li[data-li-drag]');
         const i = li.querySelector('i');
@@ -1460,11 +1476,11 @@ var Sheet;
 
   app.addHierStruct = async () => {
     // ciclo le hierarchies presenti per aggiungerle alla struttura dello step 2
-    console.log(WorkSheet.nHier);
+    console.log(WorkSheet.hierarchies);
     // ripulisco la struttura già presente.
     // TODO: in futuro dovrò aggiornare la struttura già presente (e non resettare). In questo modo, gli elementi aggiunti al report non verranno resettati
     app.workbookProp.querySelectorAll('dl').forEach(dl => dl.remove());
-    for (const [hierName, tables] of WorkSheet.nHier) {
+    for (const [hierName, tables] of WorkSheet.hierarchies) {
       const dlElement = app.tmplDL.content.cloneNode(true);
       const dl = dlElement.querySelector("dl");
       const dt = dl.querySelector('dt');
@@ -1496,7 +1512,7 @@ var Sheet;
     app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
     // parent
     let parent = app.dialogFilters.querySelector('nav');
-    for (const [hierName, tables] of WorkSheet.nHier) {
+    for (const [hierName, tables] of WorkSheet.hierarchies) {
       const dlElement = app.tmplDL.content.cloneNode(true);
       const dl = dlElement.querySelector("dl");
       const dt = dl.querySelector('dt');

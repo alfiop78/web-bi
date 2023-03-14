@@ -60,13 +60,13 @@ class Sheets {
 
   get from() { return this.#from; }
 
-  // recupero la join dalla Proprietà nJoin della classe WorkBook (quindi da this.workBook passato al Costruttore)
+  // recupero la join dalla Proprietà join della classe WorkBook (quindi da this.workBook passato al Costruttore)
   set joins(object) {
     // la tabella dei fatti non ha join
-    /* TODO: Molto probabilmente non è necessario passare tutto l'oggetto presente in nJoins a this.#joins.
+    /* TODO: Molto probabilmente non è necessario passare tutto l'oggetto presente in joins a this.#joins.
     * Credo sia necessario passare solo la proprietò SQL (che contiene un array di join).
     */
-    if (this.workBook.nJoins.has(object.alias)) this.#joins.set(object.alias, this.workBook.nJoins.get(object.alias));
+    if (this.workBook.joins.has(object.alias)) this.#joins.set(object.alias, this.workBook.joins.get(object.alias));
     // console.info('this.#joins : ', this.#joins);
   }
 
@@ -92,12 +92,12 @@ class WorkBooks {
   #activeTable;
   #field = new Map();
   #fields = new Map();
-  #mapMetric = new Map();
-  #mapMetrics = new Map();
-  #nJoin = new Map();
-  #nJoins = new Map();
+  #metric = new Map();
+  #metrics = new Map();
+  #join = new Map();
+  #joins = new Map();
   // #nTables = new Map();
-  #nHier = new Map();
+  #hierarchies = new Map();
   #tableJoins = { from: null, to: null }; // refs 
   #tablesMap = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   constructor(name) {
@@ -131,7 +131,7 @@ class WorkBooks {
 
   set fields(token) {
     if (!this.#fields.has(this.#field.get(token).tableAlias)) {
-      // alias tabella non presente nelle #nJoins, la aggiungo
+      // alias tabella non presente nelle #joins, la aggiungo
       this.#fields.set(this.#field.get(token).tableAlias, {
         [token]: this.#field.get(token)
       });
@@ -144,35 +144,35 @@ class WorkBooks {
 
   get fields() { return this.#fields; }
 
-  set nJoin(object) {
-    // this.#nJoin.set(object.token, { table: object.table, alias: object.alias, from: object.from, to: object.to });
-    this.#nJoin.set(object.token, object.value);
-    console.log('#nJoin :', this.#nJoin);
+  set join(object) {
+    // this.#join.set(object.token, { table: object.table, alias: object.alias, from: object.from, to: object.to });
+    this.#join.set(object.token, object.value);
+    console.log('#join :', this.#join);
   }
 
-  get nJoin() { return this.#nJoin; }
+  get join() { return this.#join; }
 
-  set nJoins(token) {
-    if (!this.#nJoins.has(this.#nJoin.get(token).alias)) {
-      // alias tabella non presente nelle #nJoins, la aggiungo
-      this.#nJoins.set(this.#nJoin.get(token).alias, {
-        [token]: this.#nJoin.get(token)
+  set joins(token) {
+    if (!this.#joins.has(this.#join.get(token).alias)) {
+      // alias tabella non presente nelle #joins, la aggiungo
+      this.#joins.set(this.#join.get(token).alias, {
+        [token]: this.#join.get(token)
       });
     } else {
       // alias di tabella già presente
-      this.#nJoins.get(this.#nJoin.get(token).alias)[token] = this.#nJoin.get(token);
+      this.#joins.get(this.#join.get(token).alias)[token] = this.#join.get(token);
     }
-    console.log('#nJoins : ', this.#nJoins);
+    console.log('#joins : ', this.#joins);
   }
 
-  get nJoins() { return this.#nJoins; }
+  get joins() { return this.#joins; }
 
-  set nHier(value) {
-    this.#nHier.set(value.name, value.hierarchies);
-    console.log(this.#nHier);
+  set hierarchies(value) {
+    this.#hierarchies.set(value.name, value.hierarchies);
+    console.log(this.#hierarchies);
   }
 
-  get nHier() { return this.#nHier; }
+  get hierarchies() { return this.#hierarchies; }
 
   set tablesMap(value) {
     this.#tablesMap.set(value.name, value.joinTables);
@@ -189,33 +189,36 @@ class WorkBooks {
 
   get nTables() { return this.#nTables; }*/
 
-  set mapMetric(object) {
-    this.#mapMetric.set(object.token, object.value);
+  set metric(object) {
+    this.#metric.set(object.token, object.value);
   }
 
-  get mapMetric() { return this.#mapMetric; }
+  get metric() { return this.#metric; }
 
-  set mapMetrics(token) {
-    if (!this.#mapMetrics.has(this.#mapMetric.get(token).workBook.tableAlias)) {
-      this.#mapMetrics.set(this.#mapMetric.get(token).workBook.tableAlias, {
-        [token]: this.#mapMetric.get(token)
+  set metrics(token) {
+    if (!this.#metrics.has(this.#metric.get(token).workBook.tableAlias)) {
+      this.#metrics.set(this.#metric.get(token).workBook.tableAlias, {
+        [token]: this.#metric.get(token)
       });
     } else {
       // alias di tabella già presente
-      this.#mapMetrics.get(this.#mapMetric.get(token).workBook.tableAlias)[token] = this.#mapMetric.get(token);
+      this.#metrics.get(this.#metric.get(token).workBook.tableAlias)[token] = this.#metric.get(token);
     }
-    console.log('#mapMetrics : ', this.#mapMetrics);
+    console.log('#metrics : ', this.#metrics);
   }
 
-  get mapMetrics() { return this.#mapMetrics; }
+  get metrics() { return this.#metrics; }
 
   save() {
     this.workBook.fields = Object.fromEntries(this.fields);
-    this.workBook.joins = Object.fromEntries(this.nJoins);
+    this.workBook.joins = Object.fromEntries(this.joins);
     this.workBook.tablesMap = Object.fromEntries(this.tablesMap);
-    this.workBook.mapMetrics = Object.fromEntries(this.mapMetrics);
+    this.workBook.metrics = Object.fromEntries(this.metrics);
+    // nell'oggetto WorkSheet andrò a memorizzare gli elementi aggiunti nel WorkSheet (es.: metriche/colonne custom)
     this.workBook.workSheet = {
-      filters: Object.fromEntries(this.filters)
+      filters: Object.fromEntries(this.filters),
+      // metriche avanzate sono presenti solo nello WorkSheet e non nel WorkBook
+      advMetrics: Object.fromEntries(this.advMetrics)
     };
     this.workBook.svg = {
       tables: Object.fromEntries(Draw.tables),
@@ -244,7 +247,7 @@ class WorkSheets extends WorkBooks {
   */
   #filter = new Map();
   #filters = new Map();
-  #metrics = new Map();
+  // #metrics = new Map();
   #advMetrics = new Map();
   #columns = new Map();
   constructor(name) {
@@ -258,12 +261,12 @@ class WorkSheets extends WorkBooks {
 
   get columns() { return this.#columns; }
 
-  set metrics(object) {
+  /* set metrics(object) {
     this.#metrics.set(object.token, object.value);
     console.log('sheet metrics : ', this.#metrics);
   }
 
-  get metrics() { return this.#metrics; }
+  get metrics() { return this.#metrics; } */
 
   set advMetrics(object) {
     this.#advMetrics.set(object.token, object.value);
@@ -331,26 +334,35 @@ class WorkSheets extends WorkBooks {
     for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.joins)) {
       // per ogni tabella
       for (const [token, join] of Object.entries(values)) {
-        super.nJoin = { token, value: join };
-        super.nJoins = token;
-      }
-    }
-    // console.log('joins : ', WorkBook.nJoins);
-    for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.mapMetrics)) {
-      // per ogni tabella
-      for (const [token, metric] of Object.entries(values)) {
-        super.mapMetric = { token, value: metric };
-        super.mapMetrics = token;
+        super.join = { token, value: join };
+        super.joins = token;
       }
     }
     // filtri aggiunti allo WorkSheet
-
     for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.workSheet.filters)) {
       // per ogni tabella
       for (const [token, filter] of Object.entries(values)) {
         this.filter = { token, value: filter };
         this.filters = token;
       }
+    }
+
+    // metriche aggiunte allo WorkSheet
+    for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.metrics)) {
+      // per ogni tabella
+      for (const [token, metric] of Object.entries(values)) {
+        this.metric = { token, value: metric };
+        this.metrics = token;
+      }
+    }
+
+    // metriche avanzate aggiunte allo WorkSheet
+    for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.workSheet.advMetrics)) {
+      // per ogni tabella
+      /* for (const [token, metric] of Object.entries(values)) {
+        this.metric = { token, value: metric };
+        this.metrics = token;
+      } */
     }
 
     return this;

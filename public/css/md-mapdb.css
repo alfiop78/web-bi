@@ -322,7 +322,7 @@ section[data-table-from] .table, section[data-table-to] .table{
 
 .report-area{
   display: grid;
-  grid-template-rows: 30% 70%;
+  grid-template-rows: auto 1fr;
 }
 
 .report-area .columns-rows{
