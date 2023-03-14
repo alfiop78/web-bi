@@ -383,17 +383,21 @@ var Sheet;
     if (field.dataset.type === 'metric') {
       tmpl = app.tmplMetricsDefined.content.cloneNode(true);
       field = tmpl.querySelector('.metric-defined');
-      span = field.querySelector('span');
-      // i = field.querySelector("i[data-id='btn-set-filter']");
+      formula = field.querySelector('.formula');
+      // const aggregateFn = formula.querySelector('code[data-aggregate]');
+      formula.dataset.token = elementRef.id;
+      const fieldName = formula.querySelector('code[data-field]');
+      fieldName.dataset.field = elementRef.dataset.field;
+      fieldName.innerHTML = elementRef.dataset.field;
+      fieldName.dataset.tableAlias = elementRef.dataset.alias;
       // recupero le proprietà della metrica per inserire la funzione di aggregazione nell'elemento appena droppato
-      debugger;
       Sheet.metrics = elementRef.id;
       // app.saveMetric(elementRef);
     } else {
       // column
+      span.innerHTML = elementRef.dataset.field;
       Sheet.fields = elementRef.id;
     }
-    span.innerHTML = elementRef.dataset.field;
     Sheet.tables = elementRef.dataset.alias;
     e.currentTarget.appendChild(field);
     app.setSheet();
@@ -615,6 +619,17 @@ var Sheet;
   }
 
   /* NOTE: ONCLICK EVENTS*/
+
+  app.editAggregate = (e) => {
+    const token = e.target.parentElement.dataset.token;
+    e.target.setAttribute('contenteditable', 'true');
+    e.target.focus();
+    e.target.addEventListener('blur', (e) => {
+      // TODO: modifico la metrica che sto editando
+      Sheet.metrics.get(token).formula.aggregateFn = e.target.innerHTML;
+      console.log(Sheet.metrics);
+    });
+  }
 
   app.btnMetricNew = () => {
     console.log(WorkSheet.activeTable.dataset.table);

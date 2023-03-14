@@ -47,7 +47,7 @@ class Sheets {
 
   get filters() { return this.#filters; }
 
-  set metrics(token) { this.#metrics.set(token, this.workBook.mapMetric.get(token)); }
+  set metrics(token) { this.#metrics.set(token, this.workBook.metric.get(token)); }
 
   get metrics() { return this.#metrics; }
 

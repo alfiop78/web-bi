@@ -93,8 +93,9 @@
 
     <template id="tmpl-metrics-defined">
       <div class="metric-defined">
-        <i class="button-icon material-icons-round md-18">query_stats</i>
-        <span></span>
+        <section class="formula" data-token>
+          <code data-aggregate="SUM" data-fn="editAggregate">SUM</code><span>(</span><code data-field="" data-table-alias></code><span>)</span>
+        </section>
         <i data-id="btn-set-filter" data-fn="setMetricFilter" class="button-icon material-icons-round md-18">filter_alt</i>
       </div>
     </template>
