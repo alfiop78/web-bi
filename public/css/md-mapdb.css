@@ -391,8 +391,11 @@ i[data-id="btn-set-metric"]:hover, i[data-id='btn-set-filter']:hover{
 
 .wrapper-sheet .properties{
   display: grid;
-  grid-template-rows: 50% 50%;
+  grid-template-rows: 400px 350px;
+}
 
+.wrapper-sheet .properties > section{
+  overflow-y: auto;
 }
 
 dt dd{

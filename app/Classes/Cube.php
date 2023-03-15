@@ -405,7 +405,7 @@ class Cube
     $metrics_base_datamart = array();
     // dd($this->baseMetrics);
     foreach ($this->baseMetrics as $metricName => $metric) {
-      // var_dump($metric);
+      dd($metric);
       if ($metric->metric_type === 1 || $metric->metric_type === 3) {
         // metrica composta di base oppure metrica composta di base con filtri
         // per queste metriche la prop 'field' contiene la formula es.: DocVenditaDettaglio_560.PrzMedioPond * DocVenditaDettaglio_560.Quantita
@@ -435,7 +435,9 @@ class Cube
     // dd($this->sheetBaseMetrics);
     foreach ($this->sheetBaseMetrics as $value) {
       // dd($value);
-      $metrics_base[] = "\nNVL({$value->formula->aggregateFn}({$value->workBook->tableAlias}.{$value->formula->field}), 0) AS '{$value->formula->alias}'";
+      // $metrics_base[] = "\nNVL({$value->formula->aggregateFn}({$value->workBook->tableAlias}.{$value->formula->field}), 0) AS '{$value->formula->alias}'";
+      // $metrics_base_datamart[] = "\nNVL({$value->formula->aggregateFn}({$this->baseTableName}.'{$value->formula->alias}'), 0) AS '{$value->formula->alias}'";
+      $metrics_base[] = "\nNVL({$value->formula->aggregateFn}({$value->formula->field}), 0) AS '{$value->formula->alias}'";
       $metrics_base_datamart[] = "\nNVL({$value->formula->aggregateFn}({$this->baseTableName}.'{$value->formula->alias}'), 0) AS '{$value->formula->alias}'";
     }
     $this->_metrics_base = implode(", ", $metrics_base);
@@ -533,9 +535,9 @@ class Cube
     if (count($this->filters_baseTable)) $this->_sql .= "\nAND " . implode("\nAND ", $this->filters_baseTable);
     $this->_sql .= "\n$this->groupBy LIMIT 20";
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
+    // dd($this->_sql);
     // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
-    // return $this->_sql;
     // $result = DB::connection('vertica_odbc')->raw($sql);
     // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
     /* il metodo getSchemaBuilder() funziona con mysql, non con vertica. Ho creato MyVerticaGrammar.php dove c'è la sintassi corretta per vertica (solo alcuni Metodi ho modificato) */

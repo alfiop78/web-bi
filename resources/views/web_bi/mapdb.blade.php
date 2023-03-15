@@ -139,12 +139,37 @@
             </section>
           </dialog>
 
+          <dialog id="dlg-custom-metric">
+            <section class="dlg-grid">
+              <section class="dlg-title">Creazione Metrica</section>
+              <section class="dlg-content col col-1">
+                <section>
+                  <div class="md-field">
+                    <input type="text" id="custom-metric-name" value="" autocomplete="off" />
+                    <label for="custom-metric-name" class="">Nome</label>
+                  </div>
+                  <!--<div id="textarea-metric" class="dropzone" data-content-editable contenteditable="true"></div>-->
+                  <div id="textarea-custom-metric" data-fn="addText" data-content-editable></div>
+                  <!--<textarea id="textarea-metric" cols="20" class="dropzone" rows="10">SUM(</textarea>-->
+                </section>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button data-fn="saveCustomMetric" id="btn-custom-metric-save" value="salva">Salva</button>
+              </section>
+            </section>
+          </dialog>
+
           <dialog id="dlg-filters">
             <section class="dlg-grid">
               <section class="dlg-title">Creazione Filtro</section>
               <section class="dlg-content col col-2">
                 <nav></nav>
                 <section>
+                  <div class="md-field">
+                    <input type="text" id="custom-filter-name" value="" autocomplete="off" />
+                    <label for="custom-filter-name" class="">Nome</label>
+                  </div>
                   <div id="textarea-filter" data-content-editable></div>
                 </section>
               </section>

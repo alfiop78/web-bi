@@ -24,12 +24,14 @@ class Table {
     this.header();
     this.tbody.querySelectorAll('tr').forEach(tr => tr.remove());
     this.addRows();
+    this.addCompositeColumn();
   }
 
   header() {
     // creazione intestazioni
     this.tr = this.thead.querySelector('tr');
     Object.keys(this.data[0]).forEach(column => {
+      // TODO: invece di utilizzare questa struttura potrei passare, al metodo, l'id del template HTML da utilizzare
       const th = document.createElement('th');
       const td = document.createElement('td');
       const span = document.createElement('span');
@@ -42,6 +44,8 @@ class Table {
       th.dataset.field = column;
       this.tr.appendChild(th);
       span.innerHTML = column;
+      span.dataset.field = column;
+      span.dataset.fn = 'handlerSelectColumn';
       btnColumn.dataset.fn = 'setColumn';
       btnColumn.innerHTML = 'table_rows';
       btnColumn.dataset.field = column;
@@ -56,6 +60,26 @@ class Table {
       td.appendChild(buttons);
       th.appendChild(td);
     });
+  }
+
+  addCompositeColumn() {
+    this.tr = this.thead.querySelector('tr');
+    // TODO: invece di utilizzare questa struttura potrei passare, al metodo, l'id del template HTML da utilizzare
+    const th = document.createElement('th');
+    const td = document.createElement('td');
+    const span = document.createElement('span');
+    const buttons = document.createElement('div');
+    const btnMetric = document.createElement('button');
+    th.classList.add('custom-field');
+    span.innerHTML = 'Nuovo Campo';
+    th.dataset.fn = 'setCustomField';
+    btnMetric.classList.add('button-icon', 'material-icons-round', 'md-18');
+    btnMetric.innerHTML = 'add';
+    this.tr.appendChild(th);
+    td.appendChild(span);
+    buttons.appendChild(btnMetric);
+    td.appendChild(buttons);
+    th.appendChild(td);
   }
 
   addRows() {

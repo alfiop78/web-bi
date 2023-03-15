@@ -19,6 +19,7 @@ var Sheet;
     dialogTables: document.getElementById('dlg-tables'),
     dialogFilters: document.getElementById('dlg-filters'),
     dialogMetric: document.getElementById('dlg-metric'),
+    dialogCustomMetric: document.getElementById('dlg-custom-metric'),
     dialogMetricFilters: document.getElementById('dlg-metric-filters'),
     windowJoin: document.getElementById('window-join'),
     windowColumns: document.getElementById('window-columns'),
@@ -412,7 +413,7 @@ var Sheet;
         formula: {
           token: metricProp.formula.token,
           aggregateFn: metricProp.formula.aggregateFn,
-          alias: `${metricProp.formula.alias}_${token}`,
+          alias: `${metricProp.formula.alias}_${metricProp.formula.aggregateFn}`,
           distinct: metricProp.formula.distinct,
           field: metricProp.formula.field
         },
@@ -513,13 +514,92 @@ var Sheet;
     ds.value = e.currentTarget.dataset.field;
   }
 
-  // dialog-metric per definire le metriche di base del WorkBook
+  // click all'interno di una textarea
+  app.addText = (e) => {
+    console.log('e : ', e);
+    console.log('e.target : ', e.target);
+    console.log('e.currentTarget : ', e.currentTarget);
+    if (e.target.localName === 'div') {
+      const span = document.createElement('span');
+      span.setAttribute('contenteditable', true);
+      e.target.appendChild(span);
+      span.focus();
+    }
+  }
+
+  // save metrica composta di base
+  app.saveCustomMetric = () => {
+    const name = document.getElementById('custom-metric-name').value;
+    let arr_sql = [];
+    let fields = [];
+    document.querySelectorAll('#textarea-custom-metric *').forEach(element => {
+      if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I' || element.innerText.length === 0) return;
+      // console.log('element : ', element);
+      // console.log('element : ', element.nodeName);
+      // se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
+      if (element.nodeName === 'MARK') {
+        arr_sql.push(`${element.dataset.tableAlias}.${element.innerText}`);
+        fields.push(`${element.dataset.tableAlias}.${element.innerText}`);
+      } else {
+        arr_sql.push(element.innerText.trim());
+      }
+    });
+    console.log('arr_sql : ', arr_sql);
+    const rand = () => Math.random(0).toString(36).substring(2);
+    const token = rand().substring(0, 7);
+    WorkSheet.metric = {
+      token,
+      value: {
+        alias: name,
+        workBook: {
+          table: WorkSheet.activeTable.dataset.table,
+          tableAlias: WorkSheet.activeTable.dataset.alias
+        },
+        formula: {
+          token,
+          aggregateFn: 'SUM', // default
+          field: `${arr_sql.join(' ')}`,
+          distinct: false, // default
+          alias: name, // es.:costo
+          fields, // es.:[przMedio, quantita]
+          formula_old_logic: arr_sql
+        }
+      }
+    };
+    WorkSheet.metrics = token;
+  }
+
+  /* selezione di una colonna dalla table-preview, aggiungo la colonna alla dialog-custom-metric 
+  * per la creazione di una metrica composta di base (przmedio * quantita)
+  TODO: questa funzionalità andrà sostituita con il drag&drop
+  */
+  app.handlerSelectColumn = (e) => {
+    const field = e.target.dataset.field;
+    // aggiungo la metrica alla textarea-metric
+    const textarea = app.dialogCustomMetric.querySelector('#textarea-custom-metric');
+    const templateContent = app.tmplFormula.content.cloneNode(true);
+    const span = templateContent.querySelector('span');
+    const mark = templateContent.querySelector('mark');
+    // mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
+    mark.innerText = field;
+    mark.dataset.tableAlias = WorkSheet.activeTable.dataset.alias;
+    textarea.appendChild(span);
+    // aggiungo anche uno span per il proseguimento della scrittura della formula
+    app.addSpan(textarea, null, 'metric');
+  }
+
+  // aggiunta di una nuova metrica
+  app.setCustomField = (e) => {
+    // TODO: apro la dialog 'dlg-custom-metric'
+    app.dialogCustomMetric.show();
+  }
+
+  // dialog-metric per definire le metriche di base del WorkBook (non custom metric di base, come (przmedio*quantita))
   app.setMetric = (e) => {
-    const aggregateFn = 'SUM';
     // console.log(WorkSheet.activeTable);
     const table = WorkSheet.activeTable.dataset.table;
     const tableAlias = WorkSheet.activeTable.dataset.alias;
-    const field = e.target.dataset.field;
+    const field = `${tableAlias}.${e.target.dataset.field}`;
     const alias = e.target.dataset.field;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
@@ -530,12 +610,11 @@ var Sheet;
       value: {
         alias,
         workBook: { table, tableAlias },
-        // workBook: { table: WorkSheet.workBook.name, alias: 'alias tabella fact' },
         formula: {
           token,
-          aggregateFn,
+          aggregateFn: 'SUM', // default
           field,
-          distinct: false,
+          distinct: false, // default
           alias
         }
       }
@@ -813,22 +892,22 @@ var Sheet;
     console.log(Sheet);
   }
 
+  // salvataggio di un filtro in WorkSheet
   app.saveFilter = (e) => {
     // l'oggetto filter lo salvo nella Classe Sheet (ex Query.js)
+    const name = document.getElementById('custom-filter-name').value;
     let sql = [];
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
-    let object = { token };
+    let object = { token, name };
+    const textarea = document.getElementById('textarea-filter');
     document.querySelectorAll('#textarea-filter *').forEach(element => {
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
       // ... altrimenti devo recuperare il cubeToken. Ci sono anche filtri che possono essere fatti su un livello dimensionale e su una FACT
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
-        // TODO: questa tabella la aggiungo a Sheet.tables solo quando viene aggiunta al report che sto creando
-        // Sheet.tables = element.dataset.tableAlias;
         object.field = element.dataset.field;
-        object.name = 'filter test';
 
         /* if (element.dataset.tableId) {
           // tabella appartenente a un livello dimensionale
@@ -880,6 +959,8 @@ var Sheet;
       formula: sql_formula.join(' '), // Azienda_444.id = 43 */
     };
     WorkSheet.filters = token;
+    // reset della textarea
+    textarea.querySelectorAll('*').forEach(element => element.remove());
     // salvo il nuovo filtro appena creato
     WorkSheet.save();
     // aggiungo il filtro alla nav[data-filters-defined]
@@ -894,7 +975,7 @@ var Sheet;
     li.dataset.fn = "addFilter";
     span.innerHTML = object.name;
     parent.appendChild(li);
-    app.setSheet();
+    // app.setSheet();
   }
 
   app.addFiltersMetric = e => e.currentTarget.toggleAttribute('selected');
@@ -1138,7 +1219,7 @@ var Sheet;
       }
     };
     WorkSheet.metrics = token;
-    // WorkSheet.save();
+    WorkSheet.save();
   }
 
   app.setSheet = () => {
@@ -1478,7 +1559,8 @@ var Sheet;
         li.dataset.field = value.formula.field;
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
-        span.innerHTML = value.formula.field;
+        span.innerHTML = value.formula.alias;
+        // span.innerHTML = value.formula.field;
         parent.appendChild(li);
       }
     }

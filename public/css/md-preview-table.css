@@ -22,6 +22,11 @@ thead th {
   vertical-align: middle;
   background-color: lightskyblue;
   border: solid thin gainsboro;
+  white-space: nowrap;
+}
+
+thead th.custom-field{
+  background-color: lightslategray;
 }
 
 thead th:hover{
