@@ -94,7 +94,7 @@
     <template id="tmpl-metrics-defined">
       <div class="metric-defined">
         <section class="formula" data-token>
-          <code data-aggregate="SUM" data-fn="editAggregate">SUM</code><span>(</span><code data-field="" data-table-alias></code><span>)&nbsp;</span><code data-alias="">alias</code>
+          <code data-aggregate="SUM" contenteditable="true" data-blur-fn="editAggregate">SUM</code><span>(</span><code data-field="" data-table-alias></code><span>)&nbsp;</span><code data-alias="" data-blur-fn="editMetricAlias" contenteditable="true">alias</code>
         </section>
         <i data-id="btn-set-filter" data-fn="setMetricFilter" class="button-icon material-icons-round md-18">filter_alt</i>
       </div>

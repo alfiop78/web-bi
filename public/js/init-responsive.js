@@ -61,6 +61,7 @@ var Sheet;
               node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
               node.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
               node.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
+              node.querySelectorAll('*[data-blur-fn]').forEach(element => element.addEventListener('blur', app[element.dataset.blurFn]));
             }
           }
         });
@@ -71,6 +72,7 @@ var Sheet;
           mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
           mutation.target.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
           mutation.target.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
+          mutation.target.querySelectorAll('*[data-blur-fn]').forEach(element => element.addEventListener('blur', app[element.dataset.blurFn]));
         }
       }
     }
@@ -639,14 +641,16 @@ var Sheet;
 
   /* NOTE: ONCLICK EVENTS*/
 
+  // edit di una funzione di aggregazione sulla metrica aggiunta allo Shet
   app.editAggregate = (e) => {
     const token = e.target.parentElement.dataset.token;
-    e.target.setAttribute('contenteditable', 'true');
-    e.target.focus();
-    e.target.addEventListener('blur', (e) => {
-      // TODO: modifico la metrica che sto editando
-      Sheet.metrics.get(token).formula.aggregateFn = e.target.innerHTML;
-    });
+    Sheet.metrics.get(token).formula.aggregateFn = e.target.innerHTML;
+  }
+
+  // edit di un alias della metrica dopo essere stata aggiunta allo Sheet
+  app.editMetricAlias = (e) => {
+    const token = e.target.parentElement.dataset.token;
+    Sheet.metrics.get(token).formula.alias = e.target.innerHTML;
   }
 
   app.btnMetricNew = () => {
