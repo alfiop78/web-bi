@@ -121,26 +121,18 @@ class Cube
     /* TODO: metto in join le tabelle incluse nella FROM_baseTable.
       Valutare quale approccio può essere migliore in base ai tipi di join che si dovranno implementare in futuro
     */
-    // NOTE : metodo 1
-    foreach ($joins as $tableAlias => $value) {
+    // NOTE : caso in qui viene passato tutto l'object
+    foreach ($joins as $token => $join) {
       // il token è l'identificativo della join
-      foreach ($value as $token => $join) {
-        // dd($token, $join);
-        $this->WHERE_baseTable[$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
-      }
+      // dd($token, $join);
+      $this->WHERE_baseTable[$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
     }
-    // dd($this->WHERE_baseTable);
-
-    // NOTE : metodo 2
-    /* foreach ($joins as $tableAlias => $prop) {
-      foreach ($prop as $token => $join) {
-        // dd($token, $join);
-        // $relation = implode(" = ", $join->SQL);
-
-        $this->WHERE_baseTable[$token] = implode(" = ", $join->SQL);
-      }
-      dd($this->WHERE_baseTable);
+    // NOTE: caso in qui viene passato, a joins, solo la proprietà SQL
+    /* foreach ($joins as $token => $join) {
+      // dd($token, $join);
+      $this->WHERE_baseTable[$token] = implode(" = ", $join);
     } */
+    // dd($this->WHERE_baseTable);
     // dd($this->WHERE_baseTable, $this->WHERE_timeDimension);
     /*
 		es.:

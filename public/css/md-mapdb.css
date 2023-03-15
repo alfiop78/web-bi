@@ -453,3 +453,8 @@ details > li[data-type="column"] {
   padding: 2px 4px;
   font-family: monospace;
 }
+
+code[data-alias] {
+  font-weight: bold;
+  font-style: italic;
+}

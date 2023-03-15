@@ -381,17 +381,42 @@ var Sheet;
     field.dataset.type = elementRef.dataset.type;
     field.dataset.id = elementRef.id;
     if (field.dataset.type === 'metric') {
+      const rand = () => Math.random(0).toString(36).substring(2);
+      const token = rand().substring(0, 7);
       tmpl = app.tmplMetricsDefined.content.cloneNode(true);
       field = tmpl.querySelector('.metric-defined');
       formula = field.querySelector('.formula');
       // const aggregateFn = formula.querySelector('code[data-aggregate]');
-      formula.dataset.token = elementRef.id;
+      formula.dataset.token = token;
       const fieldName = formula.querySelector('code[data-field]');
       fieldName.dataset.field = elementRef.dataset.field;
       fieldName.innerHTML = elementRef.dataset.field;
       fieldName.dataset.tableAlias = elementRef.dataset.alias;
       // recupero le proprietà della metrica per inserire la funzione di aggregazione nell'elemento appena droppato
-      Sheet.metrics = elementRef.id;
+      /* quando aggiungo la metrica allo sheet, questa deve generare un nuovo token.
+      * Questo perchè, se viene aggiunta la stessa metrica ma, una volta con SUM e una volta con AVG, queste non vengono
+      * distinte nello Sheet (perchè hanno lo stesso token) e quindi non vengono processate 2 metriche ma 1
+      */
+      const metricProp = WorkSheet.metric.get(elementRef.id);
+      /* qui creo un nuovo oggetto metric da aggiungere allo Sheet. 
+      * Questo perchè, se faccio riferimento all'oggetto presente nella classe WorkBooks, l'oggetto metric
+      * viene passato per Riferimento. Successive modifiche a Sheet.metrics (es.: la modifica del cambio aggregateFn)
+      * comporta la modifica anche dell'oggetto metric/s presente in WorkSheet, appunto perchè è stato passato per Riferimento
+      * TODO: questa logica va applicata anche alle fields
+      */
+      const metric = {
+        token,
+        alias: metricProp.alias,
+        formula: {
+          token: metricProp.formula.token,
+          aggregateFn: metricProp.formula.aggregateFn,
+          alias: `${metricProp.formula.alias}_${token}`,
+          distinct: metricProp.formula.distinct,
+          field: metricProp.formula.field
+        },
+        workBook: { table: metricProp.workBook.table, tableAlias: metricProp.workBook.tableAlias }
+      }
+      Sheet.metrics = { token, value: metric };
       // app.saveMetric(elementRef);
     } else {
       // column
@@ -458,16 +483,10 @@ var Sheet;
     span.innerHTML = elementRef.dataset.field;
     // aggiungo la colonna al report (Sheet)
     // console.log(WorkSheet.field.get(elementRef.id));
-    /* TODO: la recupero dal WorkSheet.
-    * se sto aggiungendo un Campo (non metrica) questa può trovarsi :
-    * - in WorkBook, nel metodo field/s (mappata come colonna fisica della tabella e non modificata nello WorkSheet)
-    * - in WorkSheet, metodo columns(). Qui sono presenti colonne modificate rispetto alla tabella fisica,
-    *   quindi potrebbero esserci colonne concatenate ad esempio.
-    */
-    // debugger;
     // TODO: aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
     // Sheet.fields = { token: elementRef.id, value: WorkSheet.field.get(elementRef.id) };
-    Sheet.fields = elementRef.id;
+    // passo, a Sheet.fields, la colonna creata in WorkSheet
+    Sheet.fields = WorkSheet.field.get(elementRef.id);
     Sheet.tables = elementRef.dataset.alias;
     e.currentTarget.appendChild(field);
     // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
@@ -627,7 +646,6 @@ var Sheet;
     e.target.addEventListener('blur', (e) => {
       // TODO: modifico la metrica che sto editando
       Sheet.metrics.get(token).formula.aggregateFn = e.target.innerHTML;
-      console.log(Sheet.metrics);
     });
   }
 
@@ -676,7 +694,7 @@ var Sheet;
     app.addHierStruct();
     WorkSheet.save();
     const rand = () => Math.random(0).toString(36).substring(2);
-    Sheet = new Sheets(rand().substring(0, 7), WorkSheet);
+    Sheet = new Sheets(rand().substring(0, 7), WorkSheet.workBook.token);
   }
 
   // imposto attribute init sul <nav>, in questo modo verranno associati gli eventi data-fn sui child di <nav>
@@ -783,7 +801,8 @@ var Sheet;
   // aggiungo il filtro selezionato, allo Sheet
   app.addFilter = (e) => {
     // TODO: Implementare anche qui il drag&drop per i filtri
-    Sheet.filters = e.currentTarget.id;
+    // Sheet.filters = e.currentTarget.id;
+    Sheet.filters = WorkSheet.filter.get(e.currentTarget.id);
     // aggiungo la tabella a Sheet.tables
     Sheet.tables = WorkSheet.filter.get(e.currentTarget.id).workBook.tableAlias;
     app.setSheet();
@@ -795,7 +814,7 @@ var Sheet;
     let sql = [];
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
-    let object = {};
+    let object = { token };
     document.querySelectorAll('#textarea-filter *').forEach(element => {
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
       // ... altrimenti devo recuperare il cubeToken. Ci sono anche filtri che possono essere fatti su un livello dimensionale e su una FACT
@@ -857,11 +876,7 @@ var Sheet;
       formula: sql_formula.join(' '), // Azienda_444.id = 43 */
     };
     WorkSheet.filters = token;
-    /* TODO: In questo caso sto modificando il WorkSheet. 
-      * Dovrei salvare il filtro aggiunto nel localStorage e, successivamente, in fase di apertura del WorkBook 
-      * dovrò caricare anche i filtri aggiunti al WorkSheet
-    */
-    // ora in localStorage ho anche il filtro aggiunto.
+    // salvo il nuovo filtro appena creato
     WorkSheet.save();
     // aggiungo il filtro alla nav[data-filters-defined]
     const parent = app.sheetProp.querySelector('#worksheet-filters');
@@ -1142,7 +1157,8 @@ var Sheet;
           * ad es. : potrei aggiungere, al DocVenditaDettaglio (fact), la tabella dei TipiMovimento,
           * e quindi, in questo caso, avrei una join anche sulla Fact (e quindi nella proprietà WorkBook.joins)
           */
-          Sheet.joins = Draw.tables.get(tableId);
+          // se ci sono joins per questa tableAlias la aggiungo allo Sheet
+          if (WorkSheet.joins.has(Draw.tables.get(tableId).alias)) Sheet.joins = WorkSheet.joins.get(Draw.tables.get(tableId).alias);
         });
       }
     });
@@ -1399,12 +1415,12 @@ var Sheet;
     WorkSheet.field = {
       token,
       value: {
+        token,
         type: 'column',
         schema: WorkSheet.schema,
         tableAlias: WorkSheet.activeTable.dataset.alias,
         table: WorkSheet.activeTable.dataset.table,
         name: field,
-        ref: WorkSheet.token,
         field: {
           id: fieldObjectId,
           ds: fieldObjectDs

@@ -11,11 +11,10 @@ class Sheets {
   #filters = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #metrics = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #joins = new Map();
-  constructor(token, WorkBook) {
+  constructor(token, WorkBookToken) {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
-    // rendo disponibile, in questa Classe, le proprietà del WorkBook passate al Costruttore
-    this.workBook = WorkBook;
-    this.sheet = { token, type: 'Sheet', workBook: WorkBook.workBook.token };
+    this.workBookToken = WorkBookToken;
+    this.sheet = { token, type: 'Sheet', workBook_ref: WorkBookToken };
   }
 
   // imposto il nome del report
@@ -34,20 +33,26 @@ class Sheets {
   get tables() { return this.#tables; }
 
   // passaggio del token e recupero del field in WorkSheet tramite l'oggetto WorkBook passato al Costruttore
-  set fields(token) {
-    // console.log(this.workBook.field.get(token));
-    this.#fields.set(token, {
-      field: this.workBook.field.get(token).field,
-      tableAlias: this.workBook.field.get(token).tableAlias,
-      name: this.workBook.field.get(token).name
+  set fields(object) {
+    this.#fields.set(object.token, {
+      field: object.field,
+      tableAlias: object.tableAlias,
+      name: object.name
     });
+    console.info('this.#fields : ', this.#fields);
   }
 
-  set filters(token) { this.#filters.set(token, this.workBook.filter.get(token)); }
+  set filters(object) {
+    this.#filters.set(object.token, object);
+    console.info('this.#filters : ', this.#filters);
+  }
 
   get filters() { return this.#filters; }
 
-  set metrics(token) { this.#metrics.set(token, this.workBook.metric.get(token)); }
+  set metrics(object) {
+    this.#metrics.set(object.token, object.value);
+    console.info('this.#metrics : ', this.#metrics);
+  }
 
   get metrics() { return this.#metrics; }
 
@@ -55,19 +60,24 @@ class Sheets {
 
   set from(object) {
     this.#from.set(object.alias, { schema: object.schema, table: object.table });
-    // console.log('this.#from : ', this.#from);
+    console.info('this.#from : ', this.#from);
   }
 
   get from() { return this.#from; }
 
   // recupero la join dalla Proprietà join della classe WorkBook (quindi da this.workBook passato al Costruttore)
-  set joins(object) {
-    // la tabella dei fatti non ha join
-    /* TODO: Molto probabilmente non è necessario passare tutto l'oggetto presente in joins a this.#joins.
-    * Credo sia necessario passare solo la proprietò SQL (che contiene un array di join).
-    */
-    if (this.workBook.joins.has(object.alias)) this.#joins.set(object.alias, this.workBook.joins.get(object.alias));
-    // console.info('this.#joins : ', this.#joins);
+  set joins(objects) {
+    // objects può contenere più join, quindi deve essere ciclato
+    for (const [token, join] of Object.entries(objects)) {
+      /* TODO: valutare se passare tutto l'oggetto oppure solo la proprieta SQL.
+        - Passando tutto l'oggetto posso avere più controllo su cosa costruire nella query.
+        - Passando solo l'array SQL, in php, posso utilizzare solo implode('=', join)
+        Al momento passo tutto l'oggetto
+      */
+      this.#joins.set(token, join);
+      // this.#joins.set(token, join.SQL);
+    }
+    console.info('this.#joins : ', this.#joins);
   }
 
   get joins() { return this.#joins; }
@@ -76,6 +86,7 @@ class Sheets {
     this.sheet.fields = Object.fromEntries(this.fields);
     this.sheet.from = Object.fromEntries(this.from);
     this.sheet.joins = Object.fromEntries(this.joins);
+    this.sheet.workBook_ref = this.workBook_ref;
     /* WARN : verifica dei filtri del report.
       * Se non sono presenti ma sono presenti in metriche filtrate elaboro comunque il report
       * altrimenti visualizzo un AVVISO perchè l'esecuzione potrebbe essere troppo lunga
