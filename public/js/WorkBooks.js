@@ -111,6 +111,7 @@ class WorkBooks {
   #hierarchies = new Map();
   #tableJoins = { from: null, to: null }; // refs 
   #tablesMap = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
+  #hierTables = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   constructor(name) {
     const rand = () => Math.random(0).toString(36).substring(2);
     this.token = rand().substring(0, 7);
@@ -191,6 +192,14 @@ class WorkBooks {
   }
 
   get tablesMap() { return this.#tablesMap; }
+
+  set hierTables(value) {
+    debugger;
+    this.#hierTables.set(value.id, value.table);
+    console.log('this.#hierTables : ', this.#hierTables);
+  }
+
+  get hierTables() { return this.#hierTables; }
 
   // qui viene memorizzato solo le tabelle che hanno almeno una colonna impostata nel workbook
   /* set nTables(value) {

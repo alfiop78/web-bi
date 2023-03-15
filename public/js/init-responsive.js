@@ -190,6 +190,7 @@ var Sheet;
     // creo le gerarchie
     app.createHierarchies();
     app.tablesMap();
+    app.hierTables();
 
   }
 
@@ -759,6 +760,7 @@ var Sheet;
     WorkSheet.workBook.token = e.currentTarget.dataset.token;
     app.createHierarchies();
     app.tablesMap();
+    app.hierTables();
     app.dialogWorkBook.close();
   }
 
@@ -1283,6 +1285,42 @@ var Sheet;
     if (levelId > 0) recursiveLevels(levelId);
   }
 
+  app.hierTables = () => {
+    // creo hierTables : qui sono presenti tutte le tabelle del canvas. Questa mi serve per creare la struttura nello WorkSheet
+    // debugger;
+    const levelId = +Draw.svg.dataset.level;
+    WorkSheet.hierTables.clear();
+    let tables = [];
+    let recursiveLevels = (levelId) => {
+      // per ogni tabella creo un Map() con, al suo interno, le tabelle gerarchicamente inferiori (verso la FACT)
+      // questa mi servirà per stabilire, nello sheet, quali tabelle includere nella FROM e le relative Join nella WHERE
+      Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}']`).forEach(table => {
+        // console.log(table.dataset.alias);
+        debugger;
+        // tables = [table.id];
+        // della tabella corrente recupero tutte le sue discendenze fino alla FACT
+        /* let recursive = (tableId) => {
+          joinTables.push(tableId);
+          if (Draw.tables.get(tableId).join) recursive(Draw.tables.get(tableId).join);
+        }
+        if (Draw.tables.get(table.id).join) recursive(Draw.tables.get(table.id).join); */
+        WorkSheet.hierTables = {
+          id: table.id,
+          table: {
+            name: table.dataset.table,
+            alias: table.dataset.alias
+          }
+        };
+        levelId--;
+        recursiveLevels(levelId);
+      });
+    }
+    recursiveLevels(levelId);
+    debugger;
+    console.log(WorkSheet.hierTables);
+  }
+
+
   app.createHierarchies = () => {
     // salvo le gerarchie / dimensioni create nel canvas
     // recupero gli elementi del level-id più alto, il data-level presente su <svg> identifica il livello più alto presente
@@ -1597,6 +1635,39 @@ var Sheet;
     // ripulisco la struttura già presente.
     // TODO: in futuro dovrò aggiornare la struttura già presente (e non resettare). In questo modo, gli elementi aggiunti al report non verranno resettati
     app.workbookProp.querySelectorAll('dl').forEach(dl => dl.remove());
+    for (const [tableAlias, tables] of WorkSheet.tablesMap) {
+      debugger;
+      // const dlElement = app.tmplDL.content.cloneNode(true);
+      // const dl = dlElement.querySelector("dl");
+      // const dt = dl.querySelector('dt');
+      // dt.innerHTML = `${hierName} (nome gerarchia)`;
+      // app.workbookProp.appendChild(dl);
+      // tables.forEach(tableId => {
+      const ddElement = app.tmplDD.content.cloneNode(true);
+      const dd = ddElement.querySelector("dd");
+      const details = dd.querySelector("details");
+      const summary = details.querySelector('summary');
+      dd.dataset.alias = tableAlias;
+      summary.innerHTML = tableAlias;
+      /* WorkSheet.activeTable = tableId;
+      dd.dataset.alias = WorkSheet.activeTable.dataset.alias;
+      dd.dataset.table = WorkSheet.activeTable.dataset.table;
+      summary.innerHTML = WorkSheet.activeTable.dataset.table;
+      summary.dataset.tableId = tableId; */
+      app.workbookProp.appendChild(dd);
+      // app.addDefinedFields(details);
+      // app.addDefinedMetrics(details);
+      // app.addDefinedFilters();
+      // });
+    }
+  }
+
+  /* app.addHierStruct = async () => {
+    // ciclo le hierarchies presenti per aggiungerle alla struttura dello step 2
+    console.log(WorkSheet.hierarchies);
+    // ripulisco la struttura già presente.
+    // TODO: in futuro dovrò aggiornare la struttura già presente (e non resettare). In questo modo, gli elementi aggiunti al report non verranno resettati
+    app.workbookProp.querySelectorAll('dl').forEach(dl => dl.remove());
     for (const [hierName, tables] of WorkSheet.hierarchies) {
       const dlElement = app.tmplDL.content.cloneNode(true);
       const dl = dlElement.querySelector("dl");
@@ -1619,7 +1690,7 @@ var Sheet;
         app.addDefinedFilters();
       });
     }
-  }
+  } */
 
   // TODO: creo la struttura delle tabelle presenti nel canvas
   app.addWorkBookContent = (data) => {
