@@ -53,6 +53,13 @@
     </dd>
   </template>
 
+  <template id="tmpl-details-element">
+    <details data-id="dt-tables">
+      <summary></summary>
+    </details>
+    <button class="new-worksheet-object" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica</button>
+  </template>
+
   <main>
     <div id="drawer">
 
@@ -160,12 +167,12 @@
             </section>
           </dialog>
 
-          <dialog id="dlg-filters">
+          <dialog id="dlg-filters" class="medium">
             <section class="dlg-grid">
-              <section class="dlg-title">Creazione Filtro</section>
+              <h5>Creazione Filtro</h5>
               <section class="dlg-content col col-2">
-                <nav></nav>
-                <section>
+                <nav class="custom-scrollbar"></nav>
+                <section class="textarea-formula">
                   <div class="md-field">
                     <input type="text" id="custom-filter-name" value="" autocomplete="off" />
                     <label for="custom-filter-name" class="">Nome</label>
@@ -173,7 +180,7 @@
                   <div id="textarea-filter" data-content-editable></div>
                 </section>
               </section>
-              <section class="dlg-buttons">
+              <section class="buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
                 <button data-fn="saveFilter" id="btn-filter-save" value="salva">Salva</button>
               </section>
@@ -319,7 +326,9 @@
                   <section class="step" data-step="2">
                     <section class="wrapper-sheet">
                       <div class="properties">
-                        <section id="workbook-props"></section>
+                        <section id="workbook-tables">
+                          <nav class="custom-scrollbar"></nav>
+                        </section>
                         <section id="sheet-props">
                           <div>
                             <button data-fn="handlerFilters" id="btn-add-filters">Crea Filtro</button>

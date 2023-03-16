@@ -10,7 +10,8 @@ var Sheet;
     tmplList: document.getElementById('tmpl-li'),
     tmplJoin: document.getElementById('tmpl-join-field'),
     tmplDL: document.getElementById('tmpl-dl-element'),
-    tmplDD: document.getElementById('tmpl-dd-element'),
+    // tmplDD: document.getElementById('tmpl-dd-element'),
+    tmplDetails: document.getElementById('tmpl-details-element'),
     tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
     tmplMetricsDefined: document.getElementById('tmpl-metrics-defined'),
     tmplFormula: document.getElementById('tmpl-formula'),
@@ -33,7 +34,7 @@ var Sheet;
     translate: document.getElementById('translate'),
     coordsRef: document.getElementById('coords'),
     wjTitle: document.querySelector('#window-join .wj-title'),
-    workbookProp: document.querySelector('#workbook-props'),
+    workbookTablesStruct: document.querySelector('#workbook-tables'),
     sheetProp: document.querySelector('#sheet-props'),
     // columns and rows dropzone (step 2)
     columnsDropzone: document.getElementById('dropzone-columns'),
@@ -1604,8 +1605,8 @@ var Sheet;
 
   app.addDefinedMetrics = (parent) => {
     // metriche mappate sul cubo
-    const buttonNew = parent.nextElementSibling;
-    buttonNew.dataset.tableId = WorkSheet.activeTable.id;
+    // const buttonNew = parent.nextElementSibling;
+    // buttonNew.dataset.tableId = WorkSheet.activeTable.id;
     if (WorkSheet.metrics.has(WorkSheet.activeTable.dataset.alias)) {
       for (const [token, value] of Object.entries(WorkSheet.metrics.get(WorkSheet.activeTable.dataset.alias))) {
         const tmpl = app.tmplList.content.cloneNode(true);
@@ -1656,18 +1657,18 @@ var Sheet;
   app.addTablesStruct = async () => {
     // ripulisco la struttura già presente.
     // TODO: in futuro dovrò aggiornare la struttura già presente (e non resettare). In questo modo, gli elementi aggiunti al report non verranno resettati
-    app.workbookProp.querySelectorAll('dl').forEach(dl => dl.remove());
+    app.workbookTablesStruct.querySelectorAll('details').forEach(detail => detail.remove());
+    const parent = app.workbookTablesStruct.querySelector('nav');
     for (const [tableId, value] of WorkSheet.hierTables) {
-      const ddElement = app.tmplDD.content.cloneNode(true);
-      const dd = ddElement.querySelector("dd");
-      const details = dd.querySelector("details");
+      const tmpl = app.tmplDetails.content.cloneNode(true);
+      const details = tmpl.querySelector("details");
       const summary = details.querySelector('summary');
       WorkSheet.activeTable = tableId;
-      dd.dataset.alias = value.alias;
-      dd.dataset.table = value.name;
+      details.dataset.alias = value.alias;
+      details.dataset.table = value.name;
       summary.innerHTML = value.name;
       summary.dataset.tableId = tableId;
-      app.workbookProp.appendChild(dd);
+      parent.appendChild(details);
       app.addDefinedFields(details);
       app.addDefinedMetrics(details);
       app.addDefinedFilters();
@@ -1681,9 +1682,8 @@ var Sheet;
     // parent
     let parent = app.dialogFilters.querySelector('nav');
     for (const [tableId, value] of WorkSheet.hierTables) {
-      const ddElement = app.tmplDD.content.cloneNode(true);
-      const dd = ddElement.querySelector("dd");
-      const details = dd.querySelector("details");
+      const tmpl = app.tmplDetails.content.cloneNode(true);
+      const details = tmpl.querySelector("details");
       const summary = details.querySelector('summary');
       WorkSheet.activeTable = tableId;
       // recupero le tabelle dal sessionStorage
@@ -1694,7 +1694,7 @@ var Sheet;
       details.dataset.id = tableId;
       summary.innerHTML = value.name;
       summary.dataset.tableId = tableId;
-      parent.appendChild(dd);
+      parent.appendChild(details);
       columns.forEach(column => {
         const content = app.tmplList.content.cloneNode(true);
         const li = content.querySelector('li[data-li]');

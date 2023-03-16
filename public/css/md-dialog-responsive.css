@@ -2,6 +2,11 @@ dialog:not([open]) {
   display: none;
 }
 
+dialog h5 {
+  font-weight: bold;
+  color: seagreen;
+}
+
 dialog[open]{
   border: none;
   box-shadow: 0 2px 5px 1px rgba(10,10,10,.35);
@@ -14,11 +19,10 @@ dialog::backdrop {
 }
 
 dialog.medium{
-  top: 30%;
-  width: 50%;
-  max-width: 60%;
-  height: 30%;
-  max-height: 50%;
+  width: 60%;
+  /* max-width: 60%; */
+  height: 50%;
+  /* max-height: 50%; */
 }
 
 .dialog-wrapper {
@@ -87,10 +91,32 @@ dialog > .buttons {
 dialog > .dlg-grid{
   display: grid;
   grid-template-rows: auto 1fr auto;
+  grid-row-gap: 1em;
+  height: 100%;
 }
 
 dialog > .dlg-grid > .dlg-content.col{
   display: grid;
+  overflow-y: auto;
+  grid-column-gap: 1em;
+  padding: 0px 1rem;
+}
+
+dialog nav{
+  overflow-y: auto;
+}
+
+dialog nav > details > li {
+  line-height: 2rem;
+  margin: 0px 8px;
+  height: unset;
+
+}
+
+/* textarea all'interno di una dialog */
+dialog .textarea-formula{
+  display: grid;
+  grid-template-rows: auto 1fr;
 }
 
 .col-3{
@@ -103,4 +129,8 @@ dialog > .dlg-grid > .dlg-content.col{
 
 .col-1{
   grid-template-columns: 1fr;
+}
+
+dialog .buttons{
+  padding: 1em;
 }
