@@ -246,7 +246,7 @@
               </section>
             </div>
 
-            <div class="absolute-window" id="window-columns" data-x="0" data-y="0" data-open="false">
+            <!--<div class="absolute-window" id="window-columns" data-x="0" data-y="0" data-open="false">
               <section class="wc-content">
                 <section class="w-title">
                   <p class="title">Definizione colonna</p>
@@ -264,8 +264,25 @@
                   <button id="btn-columns-define" data-fn="saveColumn" type="button" name="done" class="md-button">SALVA</button>
                 </div>
               </section>
-            </div>
+            </div>-->
 
+            <dialog id="dlg-columns" data-x="0" data-y="0" class="medium absolute">
+              <section class="dlg-grid">
+                <h5 class="title moveable">Definizione campi id/ds</h5>
+                <section class="dlg-content col columns-2">
+                  <div class="textarea">
+                    <textarea id="textarea-column-id-formula" data-mode="field" rows="6" placeholder="ID Formula" autocomplete="off" autofocus="" required="" minlength="1"></textarea>
+                  </div>
+                  <div class="textarea">
+                    <textarea id="textarea-column-ds-formula" data-mode="field" rows="6" placeholder="DS Formula" autocomplete="off" autofocus="" required="" minlength="1"></textarea>
+                  </div>
+                </section>
+                <section class="buttons">
+                  <button name="cancel" value="chiudi">Chiudi</button>
+                  <button data-fn="saveColumn" id="btn-columns-define" value="salva">Ok</button>
+                </section>
+              </section>
+            </dialog>
 
             <section class="steps" data-step="1">
               <!--<button type="button" id="prev" class="button-icon material-icons-round md-48" disabled tooltip="Precedente" flow="right">skip_previous</button>-->

@@ -23,7 +23,7 @@ var Sheet;
     dialogCustomMetric: document.getElementById('dlg-custom-metric'),
     dialogMetricFilters: document.getElementById('dlg-metric-filters'),
     windowJoin: document.getElementById('window-join'),
-    windowColumns: document.getElementById('window-columns'),
+    dialogColumns: document.getElementById('dlg-columns'),
     // buttons
     btnSelectSchema: document.getElementById('btn-select-schema'),
     btnDataSourceName: document.getElementById('data-source-name'),
@@ -509,12 +509,15 @@ var Sheet;
 
   // apro la dialog column per definire le colonne del WorkBook
   app.setColumn = (e) => {
-    app.windowColumns.dataset.open = 'true';
-    app.windowColumns.dataset.field = e.currentTarget.dataset.field;
-    const id = app.windowColumns.querySelector('#textarea-column-id-formula');
-    const ds = app.windowColumns.querySelector('#textarea-column-ds-formula');
-    id.value = 'id';
+    app.dialogColumns.show();
+    app.dialogColumns.dataset.field = e.currentTarget.dataset.field;
+    const id = app.dialogColumns.querySelector('#textarea-column-id-formula');
+    const ds = app.dialogColumns.querySelector('#textarea-column-ds-formula');
+    // id.value = 'id';
+    id.value = e.currentTarget.dataset.field;
     ds.value = e.currentTarget.dataset.field;
+    ds.focus();
+    ds.select();
   }
 
   // click all'interno di una textarea
@@ -787,8 +790,14 @@ var Sheet;
     let urls = [];
     for (const tableId of WorkSheet.hierTables.keys()) {
       WorkSheet.activeTable = tableId;
-      urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/tables_info');
+      // TODO: sela tabella è già presente in sessionStorage non rieseguo la query
+      if (!window.sessionStorage.getItem(WorkSheet.activeTable.dataset.table)) {
+        urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/tables_info');
+      }
     }
+    console.log(urls);
+    debugger;
+
     WorkBookStorage.saveSession(await app.getTables(urls));
     Step.next();
     // gli elementi impostati nel workBook devono essere disponibili nello sheet.
@@ -1079,12 +1088,12 @@ var Sheet;
 
   app.windowJoin.onmouseup = () => delete app.el;
 
-  app.windowColumns.onmousedown = (e) => {
+  app.dialogColumns.onmousedown = (e) => {
     app.coords = { x: +e.currentTarget.dataset.x, y: +e.currentTarget.dataset.y };
     if (e.target.classList.contains('title')) app.el = e.target;
   }
 
-  app.windowColumns.onmousemove = (e) => {
+  app.dialogColumns.onmousemove = (e) => {
     if (app.el) {
       app.coords.x += e.movementX;
       app.coords.y += e.movementY;
@@ -1094,7 +1103,7 @@ var Sheet;
     }
   }
 
-  app.windowColumns.onmouseup = () => delete app.el;
+  app.dialogColumns.onmouseup = () => delete app.el;
 
   // visualizzo l'icona delete utilizzando <use> in svg
   app.tableEnter = (e) => {
@@ -1146,32 +1155,35 @@ var Sheet;
   }
 
   app.getTables = async (urls) => {
-    return await Promise.all(urls.map(url => fetch(url)))
-      .then(responses => {
-        return Promise.all(responses.map(response => {
-          if (!response.ok) {
-            throw Error(response.statusText);
-          }
-          return response.json();
-        }))
-      })
-      .then(data => data)
-      .catch(err => console.error(err));
-
-    // ottengo le risposte separatamente
-    /* return await Promise.all(urls.map(url => {
-      fetch(url)
-        .then(response => {
-          if (!response.ok) { throw Error(response.statusText); }
-          return response;
+    if (urls) {
+      return await Promise.all(urls.map(url => fetch(url)))
+        .then(responses => {
+          return Promise.all(responses.map(response => {
+            if (!response.ok) {
+              throw Error(response.statusText);
+            }
+            return response.json();
+          }))
         })
-        .then(response => response.json())
         .then(data => data)
-        .catch(err => {
-          App.showConsole(err, 'error');
-          console.error(err);
-        })
-    })); */
+        .catch(err => console.error(err));
+
+      // ottengo le risposte separatamente
+      /* return await Promise.all(urls.map(url => {
+        fetch(url)
+          .then(response => {
+            if (!response.ok) { throw Error(response.statusText); }
+            return response;
+          })
+          .then(response => response.json())
+          .then(data => data)
+          .catch(err => {
+            App.showConsole(err, 'error');
+            console.error(err);
+          })
+      })); */
+
+    }
   }
 
   /* app.getColumns = async (urls) => {
@@ -1558,9 +1570,9 @@ var Sheet;
   }
 
   app.saveColumn = () => {
-    const field = app.windowColumns.dataset.field;
-    const id = app.windowColumns.querySelector('#textarea-column-id-formula');
-    const ds = app.windowColumns.querySelector('#textarea-column-ds-formula');
+    const field = app.dialogColumns.dataset.field;
+    const id = app.dialogColumns.querySelector('#textarea-column-id-formula');
+    const ds = app.dialogColumns.querySelector('#textarea-column-ds-formula');
     let fieldObjectId = { field: id.value, type: 'da_completare', origin_field: field };
     let fieldObjectDs = { field: ds.value, type: 'da_completare', origin_field: field };
     // WorkSheet.field = { id: fieldObjectId, ds: fieldObjectDs };
@@ -1581,11 +1593,9 @@ var Sheet;
         }
       }
     };
-    debugger;
     WorkSheet.fields = token;
     // Storages.save();
-    // WorkSheet.nTables = { table: WorkSheet.activeTable.dataset.table, alias: WorkSheet.activeTable.dataset.alias };
-    app.windowColumns.dataset.open = 'false';
+    app.dialogColumns.close();
   }
 
   app.addDefinedFields = (parent) => {

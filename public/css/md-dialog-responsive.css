@@ -1,10 +1,33 @@
-dialog:not([open]) {
+/* dialog:not([open]) {
   display: none;
+} */
+
+dialog{
+  background-color: #e2e2e2;
+  color: #494949;
+  width: 30%;
 }
+
+/* dialog[open] {
+  animation: 150ms ease-in forwards dialogOpen;
+} */
+
+/* @keyframes dialogOpen {
+  0% { opacity: .2; transform: scale(0.5); transform-origin: 10px; }
+  90% { transform: scale(1.10); opacity: .8; }
+  100% { transform: scale(1); opacity: 1; }
+} */
 
 dialog h5 {
   font-weight: bold;
   color: seagreen;
+}
+
+/* elemento spostabile*/
+h5.moveable:hover {
+  cursor: grab;
+  background-color: lightgoldenrodyellow;
+  color: #494949;
 }
 
 dialog[open]{
@@ -19,9 +42,9 @@ dialog::backdrop {
 }
 
 dialog.medium{
-  width: 60%;
+  width: 75%;
   /* max-width: 60%; */
-  height: 50%;
+  height: 65%;
   /* max-height: 50%; */
 }
 
@@ -110,7 +133,6 @@ dialog nav > details > li {
   line-height: 2rem;
   margin: 0px 8px;
   height: unset;
-
 }
 
 /* textarea all'interno di una dialog */
@@ -121,6 +143,10 @@ dialog .textarea-formula{
 
 .col-3{
   grid-template-columns: 260px 1fr 230px;
+}
+
+.columns-2 {
+  grid-template-columns: auto auto;
 }
 
 .col-2{
