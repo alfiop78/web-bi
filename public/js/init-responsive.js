@@ -841,18 +841,15 @@ var Sheet;
   }
 
   app.handlerFilters = async () => {
-    // popolo l'elenco delle tabelle presenti nel Canvas, il filtro può essere creatosu qualsiasi tabella
-    debugger;
-    /* let urls = [];
-    for (const [hierName, tables] of WorkSheet.hierarchies) {
-      tables.forEach(tableId => {
-        WorkSheet.activeTable = tableId;
-        urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/table_info');
-      });
+    // reo la struttura tabelle per poter creare nuovi filtri
+    let urls = [];
+    for (const [tableId, value] of WorkSheet.hierTables) {
+      WorkSheet.activeTable = tableId;
+      urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/table_info');
     }
     // promiseAll per recuperare tutte le tabelle del canvas, successivamente vado a popolare la dialogFilters con i dati ricevuti
     app.addWorkBookContent(await app.getTables(urls));
-    app.dialogFilters.showModal(); */
+    app.dialogFilters.showModal();
   }
 
   // selezione della tabella dalla dialogFilters
@@ -1655,57 +1652,52 @@ var Sheet;
   // creo la struttura tabelle nelladialog-filters
   app.addWorkBookContent = (data) => {
     console.log(data);
-    debugger;
-    // FIX: Potrei ottimizzazre questa fn e popolare i field quando viene aggiunta la tabella al canvas. Insieme a questa potrei popolare anche la dialogJoin
+    /* FIX: Potrei ottimizzazre questa fn e popolare i field quando viene aggiunta la tabella al canvas.
+    * Insieme a questa potrei popolare anche la dialogJoin
+    */
 
     // reset
-    /* app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
+    app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
     // parent
     let parent = app.dialogFilters.querySelector('nav');
-    for (const [hierName, tables] of WorkSheet.hierarchies) {
-      const dlElement = app.tmplDL.content.cloneNode(true);
-      const dl = dlElement.querySelector("dl");
-      const dt = dl.querySelector('dt');
-      dt.innerHTML = `${hierName} (nome gerarchia)`;
-      parent.appendChild(dl);
-      tables.forEach((tableId, index) => {
-        const ddElement = app.tmplDD.content.cloneNode(true);
-        const dd = ddElement.querySelector("dd");
-        const details = dd.querySelector("details");
-        const summary = details.querySelector('summary');
-        WorkSheet.activeTable = tableId;
-        details.dataset.schema = WorkSheet.activeTable.dataset.schema;
-        details.dataset.table = WorkSheet.activeTable.dataset.table;
-        details.dataset.alias = WorkSheet.activeTable.dataset.alias;
-        details.dataset.id = tableId;
-        summary.innerHTML = WorkSheet.activeTable.dataset.table;
-        summary.dataset.tableId = tableId;
-        dt.appendChild(dd);
-        for (const [key, value] of Object.entries(data[index])) {
-          const content = app.tmplList.content.cloneNode(true);
-          const li = content.querySelector('li[data-li]');
-          const span = li.querySelector('span');
-          li.dataset.label = value.COLUMN_NAME;
-          li.dataset.fn = 'handlerSelectField';
-          // li.dataset.elementSearch = `${source}-fields`;
-          li.dataset.tableId = WorkSheet.activeTable.id;
-          li.dataset.table = WorkSheet.activeTable.dataset.table;
-          li.dataset.alias = WorkSheet.activeTable.dataset.alias;
-          li.dataset.field = value.COLUMN_NAME;
-          li.dataset.key = value.CONSTRAINT_NAME;
-          span.innerText = value.COLUMN_NAME;
-          // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
-          let pos = value.DATA_TYPE.indexOf('(');
-          let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-          span.dataset.type = type;
-          // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
-          li.dataset.id = key;
-          // span.id = key;
-          // li.dataset.fn = 'addFieldToJoin';
-          details.appendChild(li);
-        }
-      });
-    } */
+    for (const [tableId, value] of WorkSheet.hierTables) {
+      const ddElement = app.tmplDD.content.cloneNode(true);
+      const dd = ddElement.querySelector("dd");
+      const details = dd.querySelector("details");
+      const summary = details.querySelector('summary');
+      WorkSheet.activeTable = tableId;
+      details.dataset.schema = WorkSheet.activeTable.dataset.schema;
+      details.dataset.table = value.name;
+      details.dataset.alias = value.alias;
+      details.dataset.id = tableId;
+      summary.innerHTML = value.name;
+      summary.dataset.tableId = tableId;
+      parent.appendChild(dd);
+      debugger;
+      /* for (const [key, value] of Object.entries(data[index])) {
+        const content = app.tmplList.content.cloneNode(true);
+        const li = content.querySelector('li[data-li]');
+        const span = li.querySelector('span');
+        li.dataset.label = value.COLUMN_NAME;
+        li.dataset.fn = 'handlerSelectField';
+        // li.dataset.elementSearch = `${source}-fields`;
+        li.dataset.tableId = WorkSheet.activeTable.id;
+        li.dataset.table = WorkSheet.activeTable.dataset.table;
+        li.dataset.alias = WorkSheet.activeTable.dataset.alias;
+        li.dataset.field = value.COLUMN_NAME;
+        li.dataset.key = value.CONSTRAINT_NAME;
+        span.innerText = value.COLUMN_NAME;
+        // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
+        let pos = value.DATA_TYPE.indexOf('(');
+        let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
+        span.dataset.type = type;
+        // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
+        li.dataset.id = key;
+        // span.id = key;
+        // li.dataset.fn = 'addFieldToJoin';
+        details.appendChild(li);
+      } */
+    }
   }
 
   app.addSpan = (target, value, check, mode) => {
