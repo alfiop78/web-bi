@@ -44,6 +44,19 @@ class Storages {
     return this.#workBooks;
   }
 
+  // salvataggio delle colonne delle tabelle
+  saveSession(data) {
+    data.forEach(tables => {
+      for (const [table, columns] of Object.entries(tables)) {
+        window.sessionStorage.setItem(table, JSON.stringify(columns));
+      }
+    });
+  }
+
+  getTable(table) {
+    return JSON.parse(window.sessionStorage.getItem(table));
+  }
+
 
 }
 

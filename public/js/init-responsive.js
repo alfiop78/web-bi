@@ -772,7 +772,17 @@ var Sheet;
 
   document.getElementById('prev').onclick = () => Step.previous();
 
-  document.getElementById('next').onclick = () => {
+  document.getElementById('next').onclick = async () => {
+    /* TODO: recupero dal DB (promise.all) tutte le tabelle mappate nel WorkBook
+    * - salvo i campi delle tabelle in sessionStorage in modo da poterci accedere più rapidamente
+    * - creo la struttura delle tabelle->fields nella dialog filter
+    */
+    let urls = [];
+    for (const tableId of WorkSheet.hierTables.keys()) {
+      WorkSheet.activeTable = tableId;
+      urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/tables_info');
+    }
+    WorkBookStorage.saveSession(await app.getTables(urls));
     Step.next();
     // gli elementi impostati nel workBook devono essere disponibili nello sheet.
     app.addTablesStruct();
@@ -841,14 +851,14 @@ var Sheet;
   }
 
   app.handlerFilters = async () => {
-    // reo la struttura tabelle per poter creare nuovi filtri
+    // creo la struttura tabelle per poter creare nuovi filtri
     let urls = [];
     for (const [tableId, value] of WorkSheet.hierTables) {
       WorkSheet.activeTable = tableId;
       urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/table_info');
     }
     // promiseAll per recuperare tutte le tabelle del canvas, successivamente vado a popolare la dialogFilters con i dati ricevuti
-    app.addWorkBookContent(await app.getTables(urls));
+    app.addWorkBookContent();
     app.dialogFilters.showModal();
   }
 
@@ -1140,6 +1150,21 @@ var Sheet;
       })
       .then(data => data)
       .catch(err => console.error(err));
+
+    // ottengo le risposte separatamente
+    /* return await Promise.all(urls.map(url => {
+      fetch(url)
+        .then(response => {
+          if (!response.ok) { throw Error(response.statusText); }
+          return response;
+        })
+        .then(response => response.json())
+        .then(data => data)
+        .catch(err => {
+          App.showConsole(err, 'error');
+          console.error(err);
+        })
+    })); */
   }
 
   /* app.getColumns = async (urls) => {
@@ -1650,12 +1675,7 @@ var Sheet;
   }
 
   // creo la struttura tabelle nelladialog-filters
-  app.addWorkBookContent = (data) => {
-    console.log(data);
-    /* FIX: Potrei ottimizzazre questa fn e popolare i field quando viene aggiunta la tabella al canvas.
-    * Insieme a questa potrei popolare anche la dialogJoin
-    */
-
+  app.addWorkBookContent = () => {
     // reset
     app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
     // parent
@@ -1666,6 +1686,8 @@ var Sheet;
       const details = dd.querySelector("details");
       const summary = details.querySelector('summary');
       WorkSheet.activeTable = tableId;
+      // recupero le tabelle dal sessionStorage
+      const columns = WorkBookStorage.getTable(value.name);
       details.dataset.schema = WorkSheet.activeTable.dataset.schema;
       details.dataset.table = value.name;
       details.dataset.alias = value.alias;
@@ -1673,30 +1695,29 @@ var Sheet;
       summary.innerHTML = value.name;
       summary.dataset.tableId = tableId;
       parent.appendChild(dd);
-      debugger;
-      /* for (const [key, value] of Object.entries(data[index])) {
+      columns.forEach(column => {
         const content = app.tmplList.content.cloneNode(true);
         const li = content.querySelector('li[data-li]');
         const span = li.querySelector('span');
-        li.dataset.label = value.COLUMN_NAME;
+        li.dataset.label = column.COLUMN_NAME;
         li.dataset.fn = 'handlerSelectField';
         // li.dataset.elementSearch = `${source}-fields`;
-        li.dataset.tableId = WorkSheet.activeTable.id;
-        li.dataset.table = WorkSheet.activeTable.dataset.table;
-        li.dataset.alias = WorkSheet.activeTable.dataset.alias;
-        li.dataset.field = value.COLUMN_NAME;
-        li.dataset.key = value.CONSTRAINT_NAME;
-        span.innerText = value.COLUMN_NAME;
+        li.dataset.tableId = tableId;
+        li.dataset.table = value.name;
+        li.dataset.alias = value.alias;
+        li.dataset.field = column.COLUMN_NAME;
+        li.dataset.key = column.CONSTRAINT_NAME;
+        span.innerText = column.COLUMN_NAME;
         // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
-        let pos = value.DATA_TYPE.indexOf('(');
-        let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
+        let pos = column.DATA_TYPE.indexOf('(');
+        let type = (pos !== -1) ? column.DATA_TYPE.substring(0, pos) : column.DATA_TYPE;
         span.dataset.type = type;
         // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
-        li.dataset.id = key;
+        // li.dataset.id = key;
         // span.id = key;
         // li.dataset.fn = 'addFieldToJoin';
         details.appendChild(li);
-      } */
+      });
     }
   }
 

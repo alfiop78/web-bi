@@ -104,6 +104,21 @@ class MapDatabaseController extends Controller
     return response()->json($info);
   }
 
+  // chiamata con promise.all
+  public function tables_info($schema, $table)
+  {
+    /* dd($table); */
+    /* $tables = DB::connection('mysql')->select("DESCRIBE Azienda"); */
+    $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME
+                FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
+                ON C.TABLE_ID=CC.TABLE_ID 
+                AND C.COLUMN_NAME=CC.COLUMN_NAME 
+                AND CC.CONSTRAINT_TYPE='p' 
+                WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table' 
+                ORDER BY c.ordinal_position ASC;");
+    return response()->json([$table => $info]);
+  }
+
   public function columns_info($schema, $table, $column)
   {
     /* dd($table); */

@@ -56,6 +56,7 @@ Route::get('/scheduler', [MapDatabaseController::class, 'scheduler'])->name('web
 Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']); // recupero l'elenco dei database presenti (schema)
 Route::get('/fetch_api/schema/{schema}/tables', [MapDatabaseController::class, 'tables'])->name('web_bi.fetch_api.tables'); // recupero elenco tabelle dello schema selezionato
 Route::get('/fetch_api/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('web_bi.fetch_api.table_info'); // recupero il DESCRIBE della tabella
+Route::get('/fetch_api/{schema}/schema/{table}/tables_info', [MapDatabaseController::class, 'tables_info'])->name('web_bi.fetch_api.tables_info'); // recupero il DESCRIBE della tabella
 Route::get('/fetch_api/{schema}/schema/{table}/table/{column}/column_name', [MapDatabaseController::class, 'columns_info'])->name('web_bi.fetch_api.columns_info'); // recupero il DESCRIBE della tabella
 Route::get('/fetch_api/{schema}/schema/{table}/table_preview', [MapDatabaseController::class, 'table_preview'])->name('web_bi.fetch_api.table_preview'); // recupero il DESCRIBE della tabella
 
