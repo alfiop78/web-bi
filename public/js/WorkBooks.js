@@ -108,7 +108,7 @@ class WorkBooks {
   #join = new Map();
   #joins = new Map();
   // #nTables = new Map();
-  #hierarchies = new Map();
+  // #hierarchies = new Map();
   #tableJoins = { from: null, to: null }; // refs 
   #tablesMap = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   #hierTables = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
@@ -143,7 +143,7 @@ class WorkBooks {
 
   set fields(token) {
     if (!this.#fields.has(this.#field.get(token).tableAlias)) {
-      // alias tabella non presente nelle #joins, la aggiungo
+      // alias tabella non presente nelle #fields, la aggiungo
       this.#fields.set(this.#field.get(token).tableAlias, {
         [token]: this.#field.get(token)
       });
@@ -179,22 +179,21 @@ class WorkBooks {
 
   get joins() { return this.#joins; }
 
-  set hierarchies(value) {
+  /* set hierarchies(value) {
     this.#hierarchies.set(value.name, value.hierarchies);
     console.log(this.#hierarchies);
   }
 
-  get hierarchies() { return this.#hierarchies; }
+  get hierarchies() { return this.#hierarchies; } */
 
   set tablesMap(value) {
     this.#tablesMap.set(value.name, value.joinTables);
-    console.log(this.#tablesMap);
+    console.log('this.#tablesMap : ', this.#tablesMap);
   }
 
   get tablesMap() { return this.#tablesMap; }
 
   set hierTables(value) {
-    debugger;
     this.#hierTables.set(value.id, value.table);
     console.log('this.#hierTables : ', this.#hierTables);
   }

@@ -188,7 +188,7 @@ var Sheet;
       }
     }
     // creo le gerarchie
-    app.createHierarchies();
+    // app.createHierarchies();
     app.tablesMap();
     app.hierTables();
 
@@ -758,7 +758,7 @@ var Sheet;
   app.workBookSelected = (e) => {
     WorkSheet = WorkSheet.open(e.currentTarget.dataset.token);
     WorkSheet.workBook.token = e.currentTarget.dataset.token;
-    app.createHierarchies();
+    // app.createHierarchies();
     app.tablesMap();
     app.hierTables();
     app.dialogWorkBook.close();
@@ -773,10 +773,10 @@ var Sheet;
   document.getElementById('prev').onclick = () => Step.previous();
 
   document.getElementById('next').onclick = () => {
-    // salvo il workbook creato
     Step.next();
     // gli elementi impostati nel workBook devono essere disponibili nello sheet.
-    app.addHierStruct();
+    app.addTablesStruct();
+    // salvo il workbook creato
     WorkSheet.save();
     const rand = () => Math.random(0).toString(36).substring(2);
     Sheet = new Sheets(rand().substring(0, 7), WorkSheet.workBook.token);
@@ -842,7 +842,8 @@ var Sheet;
 
   app.handlerFilters = async () => {
     // popolo l'elenco delle tabelle presenti nel Canvas, il filtro può essere creatosu qualsiasi tabella
-    let urls = [];
+    debugger;
+    /* let urls = [];
     for (const [hierName, tables] of WorkSheet.hierarchies) {
       tables.forEach(tableId => {
         WorkSheet.activeTable = tableId;
@@ -851,7 +852,7 @@ var Sheet;
     }
     // promiseAll per recuperare tutte le tabelle del canvas, successivamente vado a popolare la dialogFilters con i dati ricevuti
     app.addWorkBookContent(await app.getTables(urls));
-    app.dialogFilters.showModal();
+    app.dialogFilters.showModal(); */
   }
 
   // selezione della tabella dalla dialogFilters
@@ -1230,12 +1231,15 @@ var Sheet;
     * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
     */
     Sheet.tables.forEach(alias => {
-      // il tablesMap può essere ciclato sia nella Classe Sheet (perchè ho passato, nel Costruttore l'oggetto WorkSheet)
-      // ... sia nella Classe WorkSheet.
-      // ... Per il momento utilizzo quello della Classe WorkSheet
+      consolelog('tablesMap : ', WorkSheet.tablesMap);
+      /* tablesMap contiene un oggetto Map() con {tableAlias : [svg-data-2, svg-data-1, svg-data-0, ecc...]}
+      * e un'array di tabelle presenti nella gerarchia create nel canvas
+      */
       if (WorkSheet.tablesMap.has(alias)) {
         WorkSheet.tablesMap.get(alias).forEach(tableId => {
-          // nel tableId sono presenti le tabelle gerarchicamente inferiori a 'alias', quindi tabelle da aggiungere alla 'from' e alla 'where'
+          /* nel tableId sono presenti le tabelle gerarchicamente inferiori a 'alias', 
+          * quindi tabelle da aggiungere alla 'from' e alla 'where'
+          */
           Sheet.from = Draw.tables.get(tableId);
           /*
           * nel metodo joins() verifico se la tabella in ciclo ha una join 
@@ -1296,7 +1300,6 @@ var Sheet;
       // questa mi servirà per stabilire, nello sheet, quali tabelle includere nella FROM e le relative Join nella WHERE
       Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}']`).forEach(table => {
         // console.log(table.dataset.alias);
-        debugger;
         // tables = [table.id];
         // della tabella corrente recupero tutte le sue discendenze fino alla FACT
         /* let recursive = (tableId) => {
@@ -1316,12 +1319,11 @@ var Sheet;
       });
     }
     recursiveLevels(levelId);
-    debugger;
-    console.log(WorkSheet.hierTables);
+    // console.log(WorkSheet.hierTables);
   }
 
 
-  app.createHierarchies = () => {
+  /* app.createHierarchies = () => {
     // salvo le gerarchie / dimensioni create nel canvas
     // recupero gli elementi del level-id più alto, il data-level presente su <svg> identifica il livello più alto presente
     const levelId = +Draw.svg.dataset.level;
@@ -1346,7 +1348,7 @@ var Sheet;
       if (levelId !== 0) recursiveLevels(levelId);
     }
     if (levelId > 0) recursiveLevels(levelId);
-  }
+  } */
 
   app.handlerToggleDrawer = (e) => {
     console.log('toggleDrawer');
@@ -1629,75 +1631,35 @@ var Sheet;
     }
   }
 
-  app.addHierStruct = async () => {
-    // ciclo le hierarchies presenti per aggiungerle alla struttura dello step 2
-    console.log(WorkSheet.hierarchies);
+  app.addTablesStruct = async () => {
     // ripulisco la struttura già presente.
     // TODO: in futuro dovrò aggiornare la struttura già presente (e non resettare). In questo modo, gli elementi aggiunti al report non verranno resettati
     app.workbookProp.querySelectorAll('dl').forEach(dl => dl.remove());
-    for (const [tableAlias, tables] of WorkSheet.tablesMap) {
-      debugger;
-      // const dlElement = app.tmplDL.content.cloneNode(true);
-      // const dl = dlElement.querySelector("dl");
-      // const dt = dl.querySelector('dt');
-      // dt.innerHTML = `${hierName} (nome gerarchia)`;
-      // app.workbookProp.appendChild(dl);
-      // tables.forEach(tableId => {
+    for (const [tableId, value] of WorkSheet.hierTables) {
       const ddElement = app.tmplDD.content.cloneNode(true);
       const dd = ddElement.querySelector("dd");
       const details = dd.querySelector("details");
       const summary = details.querySelector('summary');
-      dd.dataset.alias = tableAlias;
-      summary.innerHTML = tableAlias;
-      /* WorkSheet.activeTable = tableId;
-      dd.dataset.alias = WorkSheet.activeTable.dataset.alias;
-      dd.dataset.table = WorkSheet.activeTable.dataset.table;
-      summary.innerHTML = WorkSheet.activeTable.dataset.table;
-      summary.dataset.tableId = tableId; */
+      WorkSheet.activeTable = tableId;
+      dd.dataset.alias = value.alias;
+      dd.dataset.table = value.name;
+      summary.innerHTML = value.name;
+      summary.dataset.tableId = tableId;
       app.workbookProp.appendChild(dd);
-      // app.addDefinedFields(details);
-      // app.addDefinedMetrics(details);
-      // app.addDefinedFilters();
-      // });
+      app.addDefinedFields(details);
+      app.addDefinedMetrics(details);
+      app.addDefinedFilters();
     }
   }
 
-  /* app.addHierStruct = async () => {
-    // ciclo le hierarchies presenti per aggiungerle alla struttura dello step 2
-    console.log(WorkSheet.hierarchies);
-    // ripulisco la struttura già presente.
-    // TODO: in futuro dovrò aggiornare la struttura già presente (e non resettare). In questo modo, gli elementi aggiunti al report non verranno resettati
-    app.workbookProp.querySelectorAll('dl').forEach(dl => dl.remove());
-    for (const [hierName, tables] of WorkSheet.hierarchies) {
-      const dlElement = app.tmplDL.content.cloneNode(true);
-      const dl = dlElement.querySelector("dl");
-      const dt = dl.querySelector('dt');
-      dt.innerHTML = `${hierName} (nome gerarchia)`;
-      app.workbookProp.appendChild(dl);
-      tables.forEach(tableId => {
-        const ddElement = app.tmplDD.content.cloneNode(true);
-        const dd = ddElement.querySelector("dd");
-        const details = dd.querySelector("details");
-        const summary = details.querySelector('summary');
-        WorkSheet.activeTable = tableId;
-        dd.dataset.alias = WorkSheet.activeTable.dataset.alias;
-        dd.dataset.table = WorkSheet.activeTable.dataset.table;
-        summary.innerHTML = WorkSheet.activeTable.dataset.table;
-        summary.dataset.tableId = tableId;
-        dt.appendChild(dd);
-        app.addDefinedFields(details);
-        app.addDefinedMetrics(details);
-        app.addDefinedFilters();
-      });
-    }
-  } */
-
-  // TODO: creo la struttura delle tabelle presenti nel canvas
+  // creo la struttura tabelle nelladialog-filters
   app.addWorkBookContent = (data) => {
     console.log(data);
+    debugger;
     // FIX: Potrei ottimizzazre questa fn e popolare i field quando viene aggiunta la tabella al canvas. Insieme a questa potrei popolare anche la dialogJoin
+
     // reset
-    app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
+    /* app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
     // parent
     let parent = app.dialogFilters.querySelector('nav');
     for (const [hierName, tables] of WorkSheet.hierarchies) {
@@ -1743,7 +1705,7 @@ var Sheet;
           details.appendChild(li);
         }
       });
-    }
+    } */
   }
 
   app.addSpan = (target, value, check, mode) => {
