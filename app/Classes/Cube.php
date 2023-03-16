@@ -405,7 +405,7 @@ class Cube
     $metrics_base_datamart = array();
     // dd($this->baseMetrics);
     foreach ($this->baseMetrics as $metricName => $metric) {
-      dd($metric);
+      // dd($metric);
       if ($metric->metric_type === 1 || $metric->metric_type === 3) {
         // metrica composta di base oppure metrica composta di base con filtri
         // per queste metriche la prop 'field' contiene la formula es.: DocVenditaDettaglio_560.PrzMedioPond * DocVenditaDettaglio_560.Quantita
@@ -533,7 +533,8 @@ class Cube
     $this->_sql .= "\nFROM\n" . implode(",\n", $this->FROM_baseTable);
     $this->_sql .= "\nWHERE\n" . implode("\nAND ", array_merge($this->WHERE_baseTable, $this->WHERE_timeDimension));
     if (count($this->filters_baseTable)) $this->_sql .= "\nAND " . implode("\nAND ", $this->filters_baseTable);
-    $this->_sql .= "\n$this->groupBy LIMIT 20";
+    $this->_sql .= "\n$this->groupBy";
+    // $this->_sql .= "\n$this->groupBy LIMIT 20";
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
     // dd($this->_sql);
     // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
@@ -894,7 +895,7 @@ class Cube
       // dd($s);
       $sql = "/*Creazione DATAMART finale :\n{$this->datamartName}\n*/\nCREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS\n($s);";
     }
-    dd($sql);
+    // dd($sql);
     /* vecchio metodo, prima di MyVerticaGrammar.php
             $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_$this->reportId' AND SCHEMA_NAME='decisyon_cache';");
             // dd($FX);

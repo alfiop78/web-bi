@@ -431,7 +431,7 @@ details > li[data-datatype='float'] {
 }
 
 details > li {
-  margin: 4px 0px;
+  margin: 2px 0px;
   margin-inline-start: 2em;
   line-height: 2rem;
   border-radius: 2px;

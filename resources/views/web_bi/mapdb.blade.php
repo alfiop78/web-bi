@@ -44,17 +44,17 @@
     </dl>
   </template>
 
-  <template id="tmpl-dd-element">
+  <!--<template id="tmpl-dd-element">
     <dd>
       <details data-id="dt-tables">
         <summary></summary>
       </details>
       <button class="new-worksheet-object" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica</button>
     </dd>
-  </template>
+  </template>-->
 
   <template id="tmpl-details-element">
-    <details data-id="dt-tables">
+    <details data-id="dt-tables" open>
       <summary></summary>
     </details>
     <button class="new-worksheet-object" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica</button>
@@ -94,7 +94,7 @@
     <template id="tmpl-columns-defined">
       <div class="column-defined">
         <i class="button-icon material-icons-round md-18">view_column</i>
-        <span></span>
+        <span contenteditable="true" data-blur-fn="editFieldAlias"></span>
       </div>
     </template>
 
@@ -253,10 +253,10 @@
                 </section>
                 <section class="define-fields">
                   <div class="textarea">
-                    <textarea id="textarea-column-id-formula" data-mode="field" rows="10" placeholder="ID Formula" autocomplete="off" autofocus="" required="" minlength="1" readonly="true"></textarea>
+                    <textarea id="textarea-column-id-formula" data-mode="field" rows="10" placeholder="ID Formula" autocomplete="off" autofocus="" required="" minlength="1"></textarea>
                   </div>
                   <div class="textarea">
-                    <textarea id="textarea-column-ds-formula" data-mode="field" rows="10" placeholder="DS Formula" autocomplete="off" autofocus="" required="" minlength="1" readonly="true"></textarea>
+                    <textarea id="textarea-column-ds-formula" data-mode="field" rows="10" placeholder="DS Formula" autocomplete="off" autofocus="" required="" minlength="1"></textarea>
                   </div>
                 </section>
                 <div class="dialog-buttons">

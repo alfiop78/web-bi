@@ -34,6 +34,11 @@ class Sheets {
 
   // passaggio del token e recupero del field in WorkSheet tramite l'oggetto WorkBook passato al Costruttore
   set fields(object) {
+    /* qui viene creato, all'interno dell'oggetto Map() un nuovo oggetto, quindi, le modifiche
+    * fatte sui fields non influiscono sui fields della Classe WorkBooks/Sheets.
+    * TODO: questa logica può essere provata (ed utilizzata) anche su Sheet.metrics, dove, attualmente 
+    * l'oggettto viene creato nel metodo rowDrop()
+    */
     this.#fields.set(object.token, {
       field: object.field,
       tableAlias: object.tableAlias,

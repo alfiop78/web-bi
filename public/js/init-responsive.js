@@ -485,9 +485,10 @@ var Sheet;
     const span = field.querySelector('span');
     field.dataset.type = 'column';
     field.dataset.id = elementRef.id;
+    // field.dataset.token = elementRef.id;
+    span.dataset.token = elementRef.id;
     span.innerHTML = elementRef.dataset.field;
     // aggiungo la colonna al report (Sheet)
-    // console.log(WorkSheet.field.get(elementRef.id));
     // TODO: aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
     // Sheet.fields = { token: elementRef.id, value: WorkSheet.field.get(elementRef.id) };
     // passo, a Sheet.fields, la colonna creata in WorkSheet
@@ -732,6 +733,11 @@ var Sheet;
   app.editMetricAlias = (e) => {
     const token = e.target.parentElement.dataset.token;
     Sheet.metrics.get(token).formula.alias = e.target.innerHTML;
+  }
+
+  app.editFieldAlias = (e) => {
+    const token = e.target.dataset.token;
+    Sheet.fields.get(token).name = e.target.innerHTML;
   }
 
   app.btnMetricNew = () => {
@@ -1254,7 +1260,7 @@ var Sheet;
     * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
     */
     Sheet.tables.forEach(alias => {
-      consolelog('tablesMap : ', WorkSheet.tablesMap);
+      console.log('tablesMap : ', WorkSheet.tablesMap);
       /* tablesMap contiene un oggetto Map() con {tableAlias : [svg-data-2, svg-data-1, svg-data-0, ecc...]}
       * e un'array di tabelle presenti nella gerarchia create nel canvas
       */
@@ -1575,6 +1581,7 @@ var Sheet;
         }
       }
     };
+    debugger;
     WorkSheet.fields = token;
     // Storages.save();
     // WorkSheet.nTables = { table: WorkSheet.activeTable.dataset.table, alias: WorkSheet.activeTable.dataset.alias };
