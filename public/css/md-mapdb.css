@@ -477,3 +477,19 @@ code[data-alias] {
 .report-area .report-preview{
   border: solid thin gainsboro;
 }
+
+.wrapper-content{
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-row-gap: 8px;
+  height: 100%;
+  width: 100%;
+}
+menu {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  margin: 0;
+  gap: 1em;
+  background-color: darkseagreen;
+}

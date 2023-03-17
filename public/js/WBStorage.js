@@ -61,39 +61,27 @@ class Storages {
 }
 
 class SheetStorages extends Storages {
-  // #element;
+  #sheets = {};
+  #sheet;
   constructor() { super(); }
 
-  /* set element(object) {
-    this.#element = { token: object.token, value: object.value };
+  set sheet(value) {
+    // current sheet
+    this.#sheet = value;
   }
 
-  get element() {
-    return JSON.parse(this.storage.getItem(this.#element.token));
-  } */
-
-  /* save() {
-    // console.info('SAVE : ', value);
-    debugger;
-    window.localStorage.setItem(this.element.token, JSON.stringify(this.element.value));
-  } */
-
-  /* save(elements) {
-    // elements : oggetto Map()
-    // ciclo tutti i field del workbook da salvare
-    for (const [token, value] of elements) {
-      // console.log(token, value);
-      window.sessionStorage.setItem(token, JSON.stringify(value));
-    }
+  get sheet() {
+    // return window.localStorage.getItem(this.#workbook);
+    return JSON.parse(window.localStorage.getItem(this.#sheet));
   }
 
-  getElement(workBook, tableAlias) {
-    let result = {};
-    for (const [token, value] of Object.entries(sessionStorage)) {
-      let json = JSON.parse(value);
-      if (json.tableAlias === tableAlias) result[token] = json;
+  sheets(workBookToken) {
+    for (const [token, object] of Object.entries(this.storage)) {
+      if (JSON.parse(object).type === 'Sheet' && JSON.parse(object).workBook_ref === workBookToken) {
+        this.#sheets[token] = JSON.parse(object);
+      }
     }
-    return result;
-  } */
+    return this.#sheets;
+  }
 
 }

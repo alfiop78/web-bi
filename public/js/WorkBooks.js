@@ -11,20 +11,18 @@ class Sheets {
   #filters = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #metrics = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #joins = new Map();
+  #name;
   constructor(token, WorkBookToken) {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
     this.workBookToken = WorkBookToken;
     this.sheet = { token, type: 'Sheet', workBook_ref: WorkBookToken };
   }
 
-  // imposto il nome del report
   set name(value) {
-
+    this.#name = value;
   }
 
-  get name() {
-
-  }
+  get name() { return this.#name; }
 
   set tables(value) {
     this.#tables.add(value);
@@ -88,10 +86,12 @@ class Sheets {
   get joins() { return this.#joins; }
 
   save() {
+    debugger;
+    this.sheet.name = this.name;
     this.sheet.fields = Object.fromEntries(this.fields);
     this.sheet.from = Object.fromEntries(this.from);
     this.sheet.joins = Object.fromEntries(this.joins);
-    this.sheet.workBook_ref = this.workBook_ref;
+    this.sheet.workBook_ref = this.workBookToken;
     /* WARN : verifica dei filtri del report.
       * Se non sono presenti ma sono presenti in metriche filtrate elaboro comunque il report
       * altrimenti visualizzo un AVVISO perchè l'esecuzione potrebbe essere troppo lunga
@@ -99,8 +99,74 @@ class Sheets {
     this.sheet.filters = Object.fromEntries(this.filters);
     if (this.metrics.size > 0) this.sheet.metrics = Object.fromEntries(this.metrics);
     console.info(this.sheet);
-    WorkSheetStorage.save(this.sheet);
+    SheetStorage.save(this.sheet);
   }
+
+  open() {
+    // il token è presente all'interno dell'oggetto sheet
+
+    // recupero dallo storage il workBook, tutte le sue proprietà le caricherò nella Classe 
+    // reimposto la Classe
+    SheetStorage.sheet = this.sheet.token;
+    this.name = SheetStorage.sheet.name;
+
+    for (const [token, object] of Object.entries(SheetStorage.sheet.fields)) {
+      this.fields = {
+        token,
+        field: object.field,
+        tableAlias: object.tableAlias,
+        name: object.name
+      };
+    }
+
+    // from
+    for (const [tableAlias, object] of Object.entries(SheetStorage.sheet.from)) {
+      this.from = {
+        alias: tableAlias,
+        schema: object.schema,
+        table: object.table
+      }
+    }
+
+    // filters
+    for (const [token, object] of Object.entries(SheetStorage.sheet.filters)) {
+      this.filters = {
+        token,
+        field: object.field,
+        name: object.name,
+        sql: object.sql,
+        workBook: {
+          table: object.workBook.table,
+          tableAlias: object.workBook.tableAlias
+        }
+      }
+    }
+
+    // joins
+    /* TODO: valutare la possibilitò di aggiungere proprietà (fields, filters, ecc...) alla Classe Sheets così come ho fatto per joins
+    * quindi con una sola riga re-imposto le joins dello Sheet
+    */
+    this.joins = SheetStorage.sheet.joins;
+
+    for (const [token, object] of Object.entries(SheetStorage.sheet.metrics)) {
+      this.metrics = {
+        token,
+        value: {
+          alias: object.alias,
+          formula: object.formula,
+          workBook: {
+            table: object.workBook.table,
+            tableAlias: object.workBook.tableAlias
+          }
+
+        }
+      }
+    }
+
+
+    return this;
+  }
+
 
 }
 

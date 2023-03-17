@@ -130,6 +130,18 @@
             </section>
           </dialog>
 
+          <dialog id="dialog-sheet-open">
+            <section class="dlg-grid">
+              <section class="dlg-title">Apertura nuovo Sheet</section>
+              <section class="dlg-content col col-1">
+                <nav data-sheet-defined></nav>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+              </section>
+            </section>
+          </dialog>
+
           <dialog id="dlg-metric">
             <section class="dlg-grid">
               <section class="dlg-title">Creazione Metrica</section>
@@ -198,8 +210,6 @@
                 <button data-fn="addFiltersToMetric" id="btn-filter-add" value="salva">Salva</button>
               </section>
             </section>
-
-
           </dialog>
           <div class="wrapper">
             <div id="window-join" class="absolute-window" data-x="0" data-y="0" data-open="false">
@@ -291,10 +301,10 @@
                   <section class="step" data-step="1" selected>
                     <section class="wrapper-step">
                       <section id="canvas-area">
-                        <div>
+                        <menu>
                           <section id="data-source-name" class="data-source" contenteditable="false">data source name</section>
                           <button data-fn="workBookOpen" id="btn-workbook-open" value="open">Apri</button>
-                        </div>
+                        </menu>
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
                           <svg id="svg" class="dropzone" data-level="0">
                             <defs>
@@ -341,36 +351,48 @@
 
                   </section>
                   <section class="step" data-step="2">
-                    <section class="wrapper-sheet">
-                      <div class="properties">
-                        <section id="workbook-tables">
-                          <nav class="custom-scrollbar"></nav>
+                    <section class="wrapper-content">
+                      <menu>
+                        <section class="buttons-menu">
+                          <button type="button">Aggiungi WorkBook (analisi multifatti)</button>
+                          <button type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri Sheet</button>
+                          <button type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
                         </section>
-                        <section id="sheet-props">
-                          <div>
-                            <button data-fn="handlerFilters" id="btn-add-filters">Crea Filtro</button>
-                          </div>
-                          <nav id="worksheet-filters" data-filters-defined></nav>
+                        <section class="sheet-title">
+                          <div id="sheet-name" contenteditable="true" data-value="Sheet 1">Sheet 1</div>
                         </section>
-                      </div>
-                      <div class="report-area">
-                        <section class="columns-rows">
-                          <section class="sheet-elements">
-                            <h5>Colonne</h5>
-                            <section id="dropzone-columns" class="dropzone columns"></section>
+                      </menu>
+                      <section class="wrapper-sheet">
+                        <div class="properties">
+                          <section id="workbook-tables">
+                            <nav class="custom-scrollbar"></nav>
                           </section>
-                          <section class="sheet-elements">
-                            <h5>Righe</h5>
-                            <section id="dropzone-rows" class="dropzone rows"></section>
+                          <section id="sheet-props">
+                            <div>
+                              <button data-fn="handlerFilters" id="btn-add-filters">Crea Filtro</button>
+                            </div>
+                            <nav id="worksheet-filters" data-filters-defined></nav>
                           </section>
-                        </section>
-                        <section class="report-preview">
-                          <section class="">
-                            <span>report preview</span>
-                            <button id="btn-sheet-preview" data-fn="process" value="Process">Process</button>
+                        </div>
+                        <div class="report-area">
+                          <section class="columns-rows">
+                            <section class="sheet-elements">
+                              <h5>Colonne</h5>
+                              <section id="dropzone-columns" class="dropzone columns"></section>
+                            </section>
+                            <section class="sheet-elements">
+                              <h5>Righe</h5>
+                              <section id="dropzone-rows" class="dropzone rows"></section>
+                            </section>
                           </section>
-                        </section>
-                      </div>
+                          <section class="report-preview">
+                            <section class="">
+                              <span>report preview</span>
+                              <button id="btn-sheet-preview" data-fn="process" value="Process">Process</button>
+                            </section>
+                          </section>
+                        </div>
+                      </section>
                     </section>
                   </section>
                 </div>

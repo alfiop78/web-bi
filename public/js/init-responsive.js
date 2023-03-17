@@ -1,6 +1,6 @@
 var App = new Application();
 var Draw = new DrawSVG('svg');
-var WorkSheetStorage = new SheetStorages();
+var SheetStorage = new SheetStorages();
 var WorkBookStorage = new Storages();
 var WorkSheet = new WorkSheets('workbook_kpi');
 var Sheet;
@@ -17,6 +17,7 @@ var Sheet;
     tmplFormula: document.getElementById('tmpl-formula'),
     // dialogs
     dialogWorkBook: document.getElementById('dialog-workbook-open'),
+    dialogSheet: document.getElementById('dialog-sheet-open'),
     dialogTables: document.getElementById('dlg-tables'),
     dialogFilters: document.getElementById('dlg-filters'),
     dialogMetric: document.getElementById('dlg-metric'),
@@ -765,6 +766,45 @@ var Sheet;
     }
   }
 
+  app.openSheetDialog = (e) => {
+    console.log('Sheet open');
+    /* popolo la dialog con gli Sheet presenti, gli Sheet hanno un workBook_ref : token, quindi 
+    * recupero solo gli Sheet appartenenti al WorkBook aperto 
+    */
+    const parent = document.querySelector('nav[data-sheet-defined]');
+    const sheets = SheetStorage.sheets(WorkSheet.workBook.token);
+    if (sheets) {
+      for (const [token, object] of Object.entries(sheets)) {
+        const tmpl = app.tmplList.content.cloneNode(true);
+        const li = tmpl.querySelector('li[data-li]');
+        const span = li.querySelector('li[data-li] span');
+        li.dataset.fn = 'sheetSelected';
+        li.dataset.token = token;
+        span.innerHTML = object.name;
+        parent.appendChild(li);
+      }
+      // gli elementi impostati nel workBook devono essere disponibili nello sheet.
+      app.addTablesStruct();
+      // salvo il workbook creato
+      WorkSheet.save();
+      const rand = () => Math.random(0).toString(36).substring(2);
+      Sheet = new Sheets(rand().substring(0, 7), WorkSheet.workBook.token);
+      app.dialogSheet.showModal();
+
+    }
+  }
+
+  // apertura nuovo Sheet, viene recuperato dal localStorage
+  app.sheetSelected = (e) => {
+    // TODO: chiamare il metodo open() dell'oggetto Sheet e seguire la stessa logica utilizzata per workBookSelected()
+    Sheet = new Sheets(e.currentTarget.dataset.token, Sheet.sheet.workBook_ref);
+    // reimposto tutte le proprietà della Classe
+    Sheet.open();
+    /* TODO: Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...) 
+    * della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
+    */
+  }
+
   app.workBookSelected = (e) => {
     WorkSheet = WorkSheet.open(e.currentTarget.dataset.token);
     WorkSheet.workBook.token = e.currentTarget.dataset.token;
@@ -772,6 +812,14 @@ var Sheet;
     app.tablesMap();
     app.hierTables();
     app.dialogWorkBook.close();
+  }
+
+  app.saveSheet = () => {
+    // imposto il nome recuperandolo dallo #sheet-name
+    debugger;
+    const name = document.getElementById('sheet-name');
+    Sheet.name = name.dataset.value;
+    Sheet.save();
   }
 
   app.btnDataSourceName.onclick = (e) => {
@@ -787,25 +835,27 @@ var Sheet;
     * - salvo i campi delle tabelle in sessionStorage in modo da poterci accedere più rapidamente
     * - creo la struttura delle tabelle->fields nella dialog filter
     */
-    let urls = [];
-    for (const tableId of WorkSheet.hierTables.keys()) {
-      WorkSheet.activeTable = tableId;
-      // TODO: sela tabella è già presente in sessionStorage non rieseguo la query
-      if (!window.sessionStorage.getItem(WorkSheet.activeTable.dataset.table)) {
-        urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/tables_info');
+    if (WorkSheet.tablesMap.size !== 0) {
+      let urls = [];
+      for (const tableId of WorkSheet.hierTables.keys()) {
+        WorkSheet.activeTable = tableId;
+        // TODO: sela tabella è già presente in sessionStorage non rieseguo la query
+        if (!window.sessionStorage.getItem(WorkSheet.activeTable.dataset.table)) {
+          urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/tables_info');
+        }
       }
-    }
-    console.log(urls);
-    debugger;
+      console.log(urls);
+      // debugger;
 
-    WorkBookStorage.saveSession(await app.getTables(urls));
-    Step.next();
-    // gli elementi impostati nel workBook devono essere disponibili nello sheet.
-    app.addTablesStruct();
-    // salvo il workbook creato
-    WorkSheet.save();
-    const rand = () => Math.random(0).toString(36).substring(2);
-    Sheet = new Sheets(rand().substring(0, 7), WorkSheet.workBook.token);
+      WorkBookStorage.saveSession(await app.getTables(urls));
+      Step.next();
+      // gli elementi impostati nel workBook devono essere disponibili nello sheet.
+      app.addTablesStruct();
+      // salvo il workbook creato
+      WorkSheet.save();
+      const rand = () => Math.random(0).toString(36).substring(2);
+      Sheet = new Sheets(rand().substring(0, 7), WorkSheet.workBook.token);
+    }
   }
 
   // imposto attribute init sul <nav>, in questo modo verranno associati gli eventi data-fn sui child di <nav>
@@ -832,9 +882,7 @@ var Sheet;
   }
 
   app.process = async () => {
-    // TODO: creo 'from' e 'where' in base agli oggetti (colonne, filtri) aggiunti al report
-    // Sheet = 'sheetname';
-    Sheet.save();
+    // Sheet.save();
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(Sheet.sheet);
     // console.log(params);
