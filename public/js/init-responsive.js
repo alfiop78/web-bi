@@ -373,6 +373,23 @@ var Sheet;
     e.currentTarget.classList.remove('dropping');
   }
 
+  // stesso funzionamento di addField()
+  app.addMetric = (target, token) => {
+    const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
+    const field = tmpl.querySelector('.metric-defined');
+    const formula = field.querySelector('.formula');
+    formula.dataset.token = token;
+    const fieldName = formula.querySelector('code[data-field]');
+    // fieldName.dataset.field = Sheet.metrics.get(token).alias;
+    fieldName.dataset.field = Sheet.metrics.get(token).formula.field;
+    // fieldName.dataset.field = elementRef.dataset.field;
+    fieldName.innerHTML = Sheet.metrics.get(token).formula.field;
+    fieldName.dataset.tableAlias = Sheet.metrics.get(token).workBook.tableAlias;
+    Sheet.tables = Sheet.metrics.get(token).workBook.tableAlias;
+    target.appendChild(field);
+    app.setSheet();
+  }
+
   app.columnDrop = (e) => {
     e.preventDefault();
     e.currentTarget.classList.replace('dropping', 'dropped');
@@ -389,27 +406,7 @@ var Sheet;
     if (field.dataset.type === 'metric') {
       const rand = () => Math.random(0).toString(36).substring(2);
       const token = rand().substring(0, 7);
-      tmpl = app.tmplMetricsDefined.content.cloneNode(true);
-      field = tmpl.querySelector('.metric-defined');
-      formula = field.querySelector('.formula');
-      // const aggregateFn = formula.querySelector('code[data-aggregate]');
-      formula.dataset.token = token;
-      const fieldName = formula.querySelector('code[data-field]');
-      fieldName.dataset.field = elementRef.dataset.field;
-      fieldName.innerHTML = elementRef.dataset.field;
-      fieldName.dataset.tableAlias = elementRef.dataset.alias;
-      // recupero le proprietà della metrica per inserire la funzione di aggregazione nell'elemento appena droppato
-      /* quando aggiungo la metrica allo sheet, questa deve generare un nuovo token.
-      * Questo perchè, se viene aggiunta la stessa metrica ma, una volta con SUM e una volta con AVG, queste non vengono
-      * distinte nello Sheet (perchè hanno lo stesso token) e quindi non vengono processate 2 metriche ma 1
-      */
       const metricProp = WorkSheet.metric.get(elementRef.id);
-      /* qui creo un nuovo oggetto metric da aggiungere allo Sheet. 
-      * Questo perchè, se faccio riferimento all'oggetto presente nella classe WorkBooks, l'oggetto metric
-      * viene passato per Riferimento. Successive modifiche a Sheet.metrics (es.: la modifica del cambio aggregateFn)
-      * comporta la modifica anche dell'oggetto metric/s presente in WorkSheet, appunto perchè è stato passato per Riferimento
-      * TODO: questa logica va applicata anche alle fields
-      */
       const metric = {
         token,
         alias: metricProp.alias,
@@ -423,15 +420,51 @@ var Sheet;
         workBook: { table: metricProp.workBook.table, tableAlias: metricProp.workBook.tableAlias }
       }
       Sheet.metrics = { token, value: metric };
+      app.addMetric(e.currentTarget, token);
+
+      /* tmpl = app.tmplMetricsDefined.content.cloneNode(true);
+      field = tmpl.querySelector('.metric-defined');
+      formula = field.querySelector('.formula');
+      // const aggregateFn = formula.querySelector('code[data-aggregate]');
+      formula.dataset.token = token;
+      const fieldName = formula.querySelector('code[data-field]');
+      fieldName.dataset.field = elementRef.dataset.field;
+      fieldName.innerHTML = elementRef.dataset.field;
+      fieldName.dataset.tableAlias = elementRef.dataset.alias; */
+      // recupero le proprietà della metrica per inserire la funzione di aggregazione nell'elemento appena droppato
+      /* quando aggiungo la metrica allo sheet, questa deve generare un nuovo token.
+      * Questo perchè, se viene aggiunta la stessa metrica ma, una volta con SUM e una volta con AVG, queste non vengono
+      * distinte nello Sheet (perchè hanno lo stesso token) e quindi non vengono processate 2 metriche ma 1
+      */
+      /* const metricProp = WorkSheet.metric.get(elementRef.id); */
+      /* qui creo un nuovo oggetto metric da aggiungere allo Sheet. 
+      * Questo perchè, se faccio riferimento all'oggetto presente nella classe WorkBooks, l'oggetto metric
+      * viene passato per Riferimento. Successive modifiche a Sheet.metrics (es.: la modifica del cambio aggregateFn)
+      * comporta la modifica anche dell'oggetto metric/s presente in WorkSheet, appunto perchè è stato passato per Riferimento
+      * TODO: questa logica va applicata anche alle fields
+      */
+      /* const metric = {
+        token,
+        alias: metricProp.alias,
+        formula: {
+          token: metricProp.formula.token,
+          aggregateFn: metricProp.formula.aggregateFn,
+          alias: `${metricProp.formula.alias}_${metricProp.formula.aggregateFn}`,
+          distinct: metricProp.formula.distinct,
+          field: metricProp.formula.field
+        },
+        workBook: { table: metricProp.workBook.table, tableAlias: metricProp.workBook.tableAlias }
+      }
+      Sheet.metrics = { token, value: metric }; */
       // app.saveMetric(elementRef);
     } else {
       // column
       span.innerHTML = elementRef.dataset.field;
       Sheet.fields = elementRef.id;
     }
-    Sheet.tables = elementRef.dataset.alias;
+    /* Sheet.tables = elementRef.dataset.alias;
     e.currentTarget.appendChild(field);
-    app.setSheet();
+    app.setSheet(); */
   }
 
   app.columnDragEnd = (e) => {
@@ -473,6 +506,31 @@ var Sheet;
     e.currentTarget.classList.remove('dropping');
   }
 
+  /* addField viene utilizzate sia quando si effettua il drag&drop sulla dropzone-rows che 
+  * quando si apre un nuovo Sheet per ripololare la dropzone-rows con gli elementi proveniente da Sheet.open()
+  */
+  app.addField = (target, token) => {
+    const tmpl = app.tmplColumnsDefined.content.cloneNode(true);
+    const field = tmpl.querySelector('.column-defined');
+    const span = field.querySelector('span');
+    field.dataset.type = 'column';
+    field.dataset.id = token;
+    // field.dataset.token = elementRef.id;
+    span.dataset.token = token;
+    span.innerHTML = Sheet.fields.get(token).name;
+    // aggiungo la colonna al report (Sheet)
+    // TODO: aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
+    // Sheet.fields = { token: elementRef.id, value: WorkSheet.field.get(elementRef.id) };
+    // passo, a Sheet.fields, la colonna creata in WorkSheet
+    // Sheet.fields = WorkSheet.field.get(elementRef.id);
+    Sheet.tables = Sheet.fields.get(token).tableAlias;
+    target.appendChild(field);
+    // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
+    // i.addEventListener('click', app.handlerSetMetric);
+    app.setSheet();
+
+  }
+
   app.rowDrop = (e) => {
     e.preventDefault();
     e.currentTarget.classList.replace('dropping', 'dropped');
@@ -481,24 +539,9 @@ var Sheet;
     const elementRef = document.getElementById(elementId);
     console.log(elementRef);
     // elementRef : è l'elemento nella lista di sinistra che ho draggato
-    const tmpl = app.tmplColumnsDefined.content.cloneNode(true);
-    const field = tmpl.querySelector('.column-defined');
-    const span = field.querySelector('span');
-    field.dataset.type = 'column';
-    field.dataset.id = elementRef.id;
-    // field.dataset.token = elementRef.id;
-    span.dataset.token = elementRef.id;
-    span.innerHTML = elementRef.dataset.field;
-    // aggiungo la colonna al report (Sheet)
-    // TODO: aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
-    // Sheet.fields = { token: elementRef.id, value: WorkSheet.field.get(elementRef.id) };
-    // passo, a Sheet.fields, la colonna creata in WorkSheet
+    // TODO: rinominare elementRef.id in elementRef.dataset.token
     Sheet.fields = WorkSheet.field.get(elementRef.id);
-    Sheet.tables = elementRef.dataset.alias;
-    e.currentTarget.appendChild(field);
-    // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
-    // i.addEventListener('click', app.handlerSetMetric);
-    app.setSheet();
+    app.addField(e.currentTarget, elementRef.id);
   }
 
   app.rowDragEnd = (e) => {
@@ -790,7 +833,6 @@ var Sheet;
       const rand = () => Math.random(0).toString(36).substring(2);
       Sheet = new Sheets(rand().substring(0, 7), WorkSheet.workBook.token);
       app.dialogSheet.showModal();
-
     }
   }
 
@@ -803,6 +845,18 @@ var Sheet;
     /* TODO: Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...) 
     * della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
     */
+    for (const [token, field] of Sheet.fields) {
+      // WARN: per il momento il target per i fields è sempre #dropzone-rows
+      const target = document.getElementById('dropzone-rows');
+      app.addField(target, token)
+    }
+
+    // imposto un data-selected sui filtri per rendere visibile il fatto che sono stati aggiunti al report
+    debugger;
+    for (const [token, metrics] of Sheet.metrics) {
+      const target = document.getElementById('dropzone-columns');
+      app.addMetric(target, token);
+    }
   }
 
   app.workBookSelected = (e) => {
