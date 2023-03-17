@@ -827,7 +827,7 @@ var Sheet;
         parent.appendChild(li);
       }
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
-      app.addTablesStruct();
+      // app.addTablesStruct();
       // salvo il workbook creato
       WorkSheet.save();
       const rand = () => Math.random(0).toString(36).substring(2);
@@ -863,6 +863,7 @@ var Sheet;
       const filterRef = document.getElementById('worksheet-filters');
       filterRef.querySelector(`li[id='${token}']`).dataset.selected = 'true';
     }
+    Sheet.save();
   }
 
   app.workBookSelected = (e) => {

@@ -303,6 +303,7 @@
                       <section id="canvas-area">
                         <menu>
                           <section id="data-source-name" class="data-source" contenteditable="false">data source name</section>
+                          <button data-fn="workBookOpen" id="btn-workbook-new" value="Nuovo" disabled>Nuovo</button>
                           <button data-fn="workBookOpen" id="btn-workbook-open" value="open">Apri</button>
                         </menu>
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
@@ -354,7 +355,8 @@
                     <section class="wrapper-content">
                       <menu>
                         <section class="buttons-menu">
-                          <button type="button">Aggiungi WorkBook (analisi multifatti)</button>
+                          <button type="button" disabled>Aggiungi WorkBook (analisi multifatti)</button>
+                          <button type="button" id="btn-sheet-new" data-fn="newSheet" disabled>Nuovo Sheet</button>
                           <button type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri Sheet</button>
                           <button type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
                         </section>
@@ -387,8 +389,8 @@
                           </section>
                           <section class="report-preview">
                             <section class="">
-                              <span>report preview</span>
-                              <button id="btn-sheet-preview" data-fn="process" value="Process">Process</button>
+                              <!--<span>report preview</span>-->
+                              <button id="btn-sheet-preview" data-fn="process" value="Elabora">Elabora</button>
                             </section>
                           </section>
                         </div>

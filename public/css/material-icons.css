@@ -102,7 +102,6 @@
 
 /*icons all'interno di buttons*/
 button:disabled.md-dark{color: #757575;} /*disabled dark*/
-button:disabled{color: lightgrey;} /*disabled*/
 button:disabled:hover.md-dark{cursor: not-allowed;} /*disabled dark*/
 button:disabled:hover{cursor: not-allowed;} /*disabled dark*/
 button:enabled:hover.md-dark{color: white;} /*disabled dark*/

@@ -86,7 +86,6 @@ class Sheets {
   get joins() { return this.#joins; }
 
   save() {
-    debugger;
     this.sheet.name = this.name;
     this.sheet.fields = Object.fromEntries(this.fields);
     this.sheet.from = Object.fromEntries(this.from);
