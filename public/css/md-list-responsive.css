@@ -112,3 +112,8 @@ ul li:hover::before{
   border: solid thin grey;
   background-color: white;
 }
+
+nav[data-filters-defined] > li[data-selected] {
+  background-color: chocolate;
+  color: white;
+}

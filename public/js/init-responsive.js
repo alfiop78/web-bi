@@ -842,6 +842,7 @@ var Sheet;
     Sheet = new Sheets(e.currentTarget.dataset.token, Sheet.sheet.workBook_ref);
     // reimposto tutte le proprietà della Classe
     Sheet.open();
+    app.dialogSheet.close();
     /* TODO: Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...) 
     * della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
     */
@@ -852,10 +853,15 @@ var Sheet;
     }
 
     // imposto un data-selected sui filtri per rendere visibile il fatto che sono stati aggiunti al report
-    debugger;
     for (const [token, metrics] of Sheet.metrics) {
       const target = document.getElementById('dropzone-columns');
       app.addMetric(target, token);
+    }
+
+    // filters
+    for (const [token, filters] of Sheet.filters) {
+      const filterRef = document.getElementById('worksheet-filters');
+      filterRef.querySelector(`li[id='${token}']`).dataset.selected = 'true';
     }
   }
 
@@ -1016,6 +1022,7 @@ var Sheet;
     Sheet.filters = WorkSheet.filter.get(e.currentTarget.id);
     // aggiungo la tabella a Sheet.tables
     Sheet.tables = WorkSheet.filter.get(e.currentTarget.id).workBook.tableAlias;
+    e.currentTarget.dataset.selected = 'true';
     app.setSheet();
     console.log(Sheet);
   }
