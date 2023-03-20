@@ -1083,6 +1083,7 @@ var Sheet;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
     let object = { token, name };
+    let from = new Map(), joins = new Map();
     const textarea = document.getElementById('textarea-filter');
     document.querySelectorAll('#textarea-filter *').forEach(element => {
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
@@ -1090,6 +1091,7 @@ var Sheet;
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
+        from.set(element.dataset.tableAlias, { schema: null, table: element.dataset.table });
         object.field = element.dataset.field;
 
         /* if (element.dataset.tableId) {
@@ -1134,6 +1136,8 @@ var Sheet;
     });
     // TODO: la prop 'editFormula' va rinominata in 'edit'
     object.sql = sql;
+    object.from = from;
+    debugger;
     WorkSheet.filter = {
       token,
       value: object
@@ -1789,7 +1793,6 @@ var Sheet;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
     let filters = {};
-    let FROM, JOINS; // TODO: da aggiungere alla metrica filtrata
     const baseMetric = WorkSheet.metric.get(e.target.dataset.token);
     // recupero tutti i filtri droppati in #filter-drop
     app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => {
@@ -1809,8 +1812,6 @@ var Sheet;
           token,
           aggregateFn: baseMetric.formula.aggregateFn,
           field: baseMetric.formula.field,
-          FROM: null,
-          JOIN: null,
           filters,
           distinct: false,
           alias

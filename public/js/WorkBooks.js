@@ -453,9 +453,12 @@ class WorkSheets extends WorkBooks {
     }
 
     // metriche avanzate aggiunte allo WorkSheet
-    for (const [token, advMetric] of Object.entries(WorkBookStorage.workBook.workSheet.advMetrics)) {
-      // per ogni tabella
-      this.advMetrics = { token, value: advMetric };
+    if (WorkBookStorage.workBook.workSheet.hasOwnProperty('advMetrics')) {
+      for (const [token, advMetric] of Object.entries(WorkBookStorage.workBook.workSheet.advMetrics)) {
+        // per ogni tabella
+        this.advMetrics = { token, value: advMetric };
+      }
+
     }
 
     return this;
