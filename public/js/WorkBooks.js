@@ -186,7 +186,7 @@ class WorkBooks {
     const rand = () => Math.random(0).toString(36).substring(2);
     this.token = rand().substring(0, 7);
     console.log(this.token);
-    this.workBook = { token: this.token, type: 'WorkBook', name: name };
+    this.workBook = { token: this.token, type: 'WorkBook', name: name, workSheet: {} };
     this.sheet = { name: `WorkSheet_${name}` };
     this.schema;
   }
@@ -304,11 +304,9 @@ class WorkBooks {
     this.workBook.tablesMap = Object.fromEntries(this.tablesMap);
     this.workBook.metrics = Object.fromEntries(this.metrics);
     // nell'oggetto WorkSheet andrò a memorizzare gli elementi aggiunti nel WorkSheet (es.: metriche/colonne custom)
-    this.workBook.workSheet = {
-      filters: Object.fromEntries(this.filters),
-      // metriche avanzate sono presenti solo nello WorkSheet e non nel WorkBook
-      advMetrics: Object.fromEntries(this.advMetrics)
-    };
+    // metriche avanzate sono presenti solo nello WorkSheet e non nel WorkBook
+    if (this.advMetrics.size !== 0) this.workBook.workSheet.advMetrics = Object.fromEntries(this.advMetrics);
+    if (this.filters.size !== 0) this.workBook.workSheet.filters = Object.fromEntries(this.filters);
     this.workBook.svg = {
       tables: Object.fromEntries(Draw.tables),
       lines: Object.fromEntries(Draw.joinLines),
@@ -359,6 +357,7 @@ class WorkSheets extends WorkBooks {
 
   set advMetrics(object) {
     this.#advMetrics.set(object.token, object.value);
+    debugger;
     console.log('sheet advMetrics : ', this.#advMetrics);
   }
 
@@ -446,13 +445,9 @@ class WorkSheets extends WorkBooks {
     }
 
     // metriche avanzate aggiunte allo WorkSheet
-    for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.workSheet.advMetrics)) {
+    /* for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.workSheet.advMetrics)) {
       // per ogni tabella
-      /* for (const [token, metric] of Object.entries(values)) {
-        this.metric = { token, value: metric };
-        this.metrics = token;
-      } */
-    }
+    } */
 
     return this;
   }

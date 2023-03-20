@@ -22,11 +22,16 @@
 }
 /* elementi con all'interno altri elementi che possono essere contenteditable (es. : textarea SQL formula) */
 *[data-content-editable] {
-  background-color: #e2e2e2;
+  background-color: white;
   padding: 1em;
   margin: 1em 0px;
   border-radius: 4px;
-  color: dimgrey;
+  color: #494949;
+}
+
+.textarea[data-content-editable] {
+  min-width: 300px;
+  min-height: 300px;
 }
 
 /* *[data-content-editable][data-mode="all"] {display: none;} */

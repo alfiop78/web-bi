@@ -409,6 +409,11 @@ i[data-id="btn-set-metric"]:hover, i[data-id='btn-set-filter']:hover{
   overflow-y: auto;
 }
 
+#workbook-tables {
+  display: grid;
+  grid-template-rows: 60% 40%;
+}
+
 dt dd{
   max-height: 250px;
   overflow: auto;
@@ -437,9 +442,11 @@ details > li {
   border-radius: 2px;
 }
 
-details > li[data-type="metric"] {
+#nav-metrics > li[data-type="metric"] {
   background-color: teal;
   color: white;
+  line-height: 2rem;
+  margin: 4px;
 }
 
 details > li[data-type="column"] {
@@ -456,10 +463,16 @@ details > li[data-type="column"] {
 }
 
 .new-worksheet-object {
-  font-style: italic;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+}
+
+.new-object {
   outline: none;
-  border: none;
   color: dimgray;
+  font-style: italic;
+  border: none;
 }
 
 *[data-aggregate][contenteditable="true"] {
@@ -492,4 +505,18 @@ menu {
   margin: 0;
   gap: 1em;
   background-color: darkseagreen;
+}
+
+section.filter-area-drop {
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+#filter-drop.dropzone{
+  border: solid thin grey;
+}
+
+#nav-metrics{
+  border-top: solid thin grey;
+  border-bottom: solid thin grey;
 }

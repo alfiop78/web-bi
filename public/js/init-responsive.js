@@ -490,6 +490,22 @@ var Sheet;
     }
   }
 
+  app.handlerDragEnterFilter = (e) => {
+    e.preventDefault();
+    console.log(e.currentTarget);
+    if (e.currentTarget.classList.contains('dropzone')) {
+      console.info('dropzone columns');
+      // console.log(e.currentTarget, e.target);
+      // e.dataTransfer.dropEffect = "copy";
+      // coloro il border differente per la dropzone
+      e.currentTarget.classList.add('dropping');
+    } else {
+      console.warn('non in dropzone');
+      // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
+
   app.rowDragOver = (e) => {
     e.preventDefault();
     // console.log(e.currentTarget);
@@ -498,6 +514,35 @@ var Sheet;
     } else {
       e.dataTransfer.dropEffect = "none";
     }
+  }
+
+  app.handlerDragOverFilter = (e) => {
+    e.preventDefault();
+    // console.log(e.currentTarget);
+    if (e.currentTarget.classList.contains('dropzone')) {
+      e.dataTransfer.dropEffect = "copy";
+    } else {
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
+
+  app.handlerDragLeaveFilter = (e) => {
+    e.preventDefault();
+    console.log(e.currentTarget);
+    e.currentTarget.classList.remove('dropping');
+  }
+
+  app.handlerDropFilter = (e) => {
+    e.preventDefault();
+    e.currentTarget.classList.replace('dropping', 'dropped');
+    if (!e.currentTarget.classList.contains('dropzone')) return;
+    const elementId = e.dataTransfer.getData('text/plain');
+    const elementRef = document.getElementById(elementId);
+    console.log(elementRef);
+    const li = document.createElement('li');
+    li.dataset.token = elementRef.id;
+    li.innerText = WorkSheet.filter.get(elementRef.id).name;
+    e.target.appendChild(li);
   }
 
   app.rowDragLeave = (e) => {
@@ -576,6 +621,7 @@ var Sheet;
       span.focus();
     }
   }
+
 
   // save metrica composta di base
   app.saveCustomMetric = () => {
@@ -789,8 +835,9 @@ var Sheet;
 
   app.btnMetricNew = () => {
     console.log(WorkSheet.activeTable.dataset.table);
-    debugger;
     app.dialogMetric.show();
+    // TODO: popolo la <nav> con i filtri
+
   }
 
   document.querySelector('#btn-workbook-open').onclick = () => {
@@ -1708,6 +1755,63 @@ var Sheet;
     app.dialogColumns.close();
   }
 
+  app.handlerMetric = (e) => {
+    // TODO: aggiungo la formula della metrica (SUM(NettoRiga)) nella textarea ma, in questo caso la textarea è disabilitata.
+    // nella metrica filtrata posso modificare solo la funzione di aggregazione
+    console.clear();
+    console.log(e.target);
+    const token = e.currentTarget.id;
+    // recupero la metrica da WorkSheet.metric
+    console.log(WorkSheet.metric.get(token));
+    const metric = WorkSheet.metric.get(token);
+    const textarea = app.dialogMetric.querySelector('#textarea-metric');
+    const span = document.createElement('span');
+    span.innerHTML = `${metric.formula.aggregateFn}(${metric.formula.field})`;
+    textarea.appendChild(span);
+    // il token presente qui lo recupero in saveAdvMetric() in modo da duplicare la metrica di base ed aggiungerci l'array di filtri
+    document.querySelector('#btn-metric-save').dataset.token = token;
+    debugger;
+    const filterDrop = document.getElementById('filter-drop');
+    filterDrop.addEventListener('dragover', app.handlerDragOverFilter, false);
+    filterDrop.addEventListener('dragenter', app.handlerDragEnterFilter, false);
+    filterDrop.addEventListener('dragleave', app.handlerDragLeaveFilter, false);
+    filterDrop.addEventListener('drop', app.handlerDropFilter, false);
+
+    app.dialogMetric.show();
+
+  }
+
+  // salvataggio metrica avanzata (filtrata)
+  app.saveAdvMetric = (e) => {
+    const alias = document.getElementById('adv-metric-name').value;
+    const rand = () => Math.random(0).toString(36).substring(2);
+    const token = rand().substring(0, 7);
+    let filters = [];
+    const baseMetric = WorkSheet.metric.get(e.target.dataset.token);
+    // recupero tutti i filtri droppati in #filter-drop
+    app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.push(filter.dataset.token));
+    console.log(filters);
+    // TODO: aggiungere opzione 'distinct'.
+    // salvo la nuova metrica nello WorkSheet
+    WorkSheet.advMetrics = {
+      token,
+      value: {
+        alias,
+        workBook: { table: baseMetric.workBook.table, tableAlias: baseMetric.workBook.tableAlias },
+        formula: {
+          token,
+          aggregateFn: baseMetric.formula.aggregateFn,
+          field: baseMetric.formula.field,
+          filters,
+          distinct: false,
+          alias
+        }
+      }
+    };
+    WorkSheet.save();
+    // TODO: aggiungo la nuova metrica nella struttura delle tabelle di sinistra
+  }
+
   app.addDefinedFields = (parent) => {
     if (WorkSheet.fields.has(WorkSheet.activeTable.dataset.alias)) {
       for (const [token, value] of Object.entries(WorkSheet.fields.get(WorkSheet.activeTable.dataset.alias))) {
@@ -1730,10 +1834,9 @@ var Sheet;
     }
   }
 
-  app.addDefinedMetrics = (parent) => {
+  app.addDefinedMetrics = (li) => {
     // metriche mappate sul cubo
-    // const buttonNew = parent.nextElementSibling;
-    // buttonNew.dataset.tableId = WorkSheet.activeTable.id;
+    const parent = app.workbookTablesStruct.querySelector('#nav-metrics');
     if (WorkSheet.metrics.has(WorkSheet.activeTable.dataset.alias)) {
       for (const [token, value] of Object.entries(WorkSheet.metrics.get(WorkSheet.activeTable.dataset.alias))) {
         const tmpl = app.tmplList.content.cloneNode(true);
@@ -1749,10 +1852,13 @@ var Sheet;
         li.dataset.field = value.formula.field;
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
+        li.addEventListener('click', app.handlerMetric);
         span.innerHTML = value.formula.alias;
         // span.innerHTML = value.formula.field;
         parent.appendChild(li);
       }
+      // aggiungo il tasto "nuova metrica"
+      parent.appendChild(li);
     }
   }
 
@@ -1785,10 +1891,11 @@ var Sheet;
     // ripulisco la struttura già presente.
     // TODO: in futuro dovrò aggiornare la struttura già presente (e non resettare). In questo modo, gli elementi aggiunti al report non verranno resettati
     app.workbookTablesStruct.querySelectorAll('details').forEach(detail => detail.remove());
-    const parent = app.workbookTablesStruct.querySelector('nav');
+    const parent = app.workbookTablesStruct.querySelector('#nav-fields');
     for (const [tableId, value] of WorkSheet.hierTables) {
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
+      const li = tmpl.querySelector("li");
       const summary = details.querySelector('summary');
       WorkSheet.activeTable = tableId;
       details.dataset.alias = value.alias;
@@ -1797,7 +1904,7 @@ var Sheet;
       summary.dataset.tableId = tableId;
       parent.appendChild(details);
       app.addDefinedFields(details);
-      app.addDefinedMetrics(details);
+      app.addDefinedMetrics(li);
       app.addDefinedFilters();
     }
   }

@@ -57,7 +57,10 @@
     <details data-id="dt-tables" open>
       <summary></summary>
     </details>
-    <button class="new-worksheet-object" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica</button>
+    <li class="new-worksheet-object">
+      <i class="material-icons-round md-18 new-object">add</i>
+      <button class="new-object" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica composta</button>
+    </li>
   </template>
 
   <main>
@@ -142,23 +145,30 @@
             </section>
           </dialog>
 
-          <dialog id="dlg-metric">
+          <dialog id="dlg-metric" class="medium">
             <section class="dlg-grid">
               <section class="dlg-title">Creazione Metrica</section>
-              <section class="dlg-content col col-1">
-                <section>
-                  <div id="textarea-metric" class="dropzone" data-content-editable contenteditable="true"></div>
-                  <!--<textarea id="textarea-metric" cols="20" class="dropzone" rows="10">SUM(</textarea>-->
+              <section class="dlg-content col col-2">
+                <section class="filter-area-drop">
+                  <small>Aggiungere qui i filtri per creare una metrica filtrata</small>
+                  <nav id="filter-drop" class="custom-scrollbar dropzone"></nav>
+                </section>
+                <section class="textarea-formula">
+                  <div class="md-field">
+                    <input type="text" id="adv-metric-name" value="" autocomplete="off" />
+                    <label for="adv-metric-name" class="">Nome</label>
+                  </div>
+                  <div id="textarea-metric" class="dropzone textarea" data-content-editable contenteditable="true"></div>
                 </section>
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
-                <button data-fn="saveMetric" id="btn-metric-save" value="salva">Salva</button>
+                <button data-fn="saveAdvMetric" id="btn-metric-save" value="salva">Salva</button>
               </section>
             </section>
           </dialog>
 
-          <dialog id="dlg-custom-metric">
+          <dialog id="dlg-custom-metric" class="small">
             <section class="dlg-grid">
               <section class="dlg-title">Creazione Metrica</section>
               <section class="dlg-content col col-1">
@@ -168,7 +178,7 @@
                     <label for="custom-metric-name" class="">Nome</label>
                   </div>
                   <!--<div id="textarea-metric" class="dropzone" data-content-editable contenteditable="true"></div>-->
-                  <div id="textarea-custom-metric" data-fn="addText" data-content-editable></div>
+                  <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea"></div>
                   <!--<textarea id="textarea-metric" cols="20" class="dropzone" rows="10">SUM(</textarea>-->
                 </section>
               </section>
@@ -367,7 +377,8 @@
                       <section class="wrapper-sheet">
                         <div class="properties">
                           <section id="workbook-tables">
-                            <nav class="custom-scrollbar"></nav>
+                            <nav id="nav-fields" class="custom-scrollbar"></nav>
+                            <nav id="nav-metrics" class="custom-scrollbar"></nav>
                           </section>
                           <section id="sheet-props">
                             <div>
