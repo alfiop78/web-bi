@@ -368,6 +368,34 @@ class Cube
     // dd($this->filters_baseTable);
   }
 
+  /*
+		aggiungo a $this->filters_metricTable i filtri presenti su una metrica filtrata.
+		Stessa logica del Metodo filters()
+	*/
+  private function setSheetFiltersMetricTable($filters)
+  {
+    $this->filters_metricTable = [];
+    foreach ($filters as $token => $filter) {
+      // dd($token, $filter);
+      $timingFunctions = ['last-year', 'altre...'];
+      if (in_array($token, $timingFunctions)) {
+        /* è una funzione temporale. 
+          Aggiungo, alla WHERE la condizione per applicare il filtro last-year.
+          Da valutare se utilizzare (MapJSONExtractor(WEB_BI_TIME.last))['year']::DATE = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE
+          ...oppure (WEB_BI_TIME.trans_ly) = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE.
+        */
+        $this->WHERE_timingFn[$token] = implode(" = ", $filter->join);
+        // $this->WHERE_timingFn[$token] = "WEB_BI_TIME_055.trans_ly = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE";
+        // dd($this->WHERE_timingFn);
+        // dd("(MapJSONExtractor({$filter->table}.{$filter->field}))['$filter->func']::DATE");
+      } else {
+        // dd($filter->SQL, $this->filters_metricTable, $this->filters_baseTable);
+        // se il filtro che si sta per aggiungere non è presente nè nei filtri "base_table" nè in quelli "metric_table" lo aggiungo
+        if (!in_array($filter->SQL, $this->filters_metricTable) && !in_array($filter->SQL, $this->filters_baseTable))
+          $this->filters_metricTable[] = $filter->SQL;
+      }
+    }
+  }
 
   /*
 		aggiungo a $this->filters_metricTable i filtri presenti su una metrica filtrata.
@@ -602,6 +630,47 @@ class Cube
   }
 
   /* creo i datamart necessari per le metriche filtrate */
+  public function sheetCreateMetricDatamarts($mode)
+  {
+    foreach ($this->groupMetricsByFilters as $groupToken => $m) {
+      $arrayMetrics = [];
+      $tableName = "WEB_BI_TMP_METRIC_{$this->reportId}_{$groupToken}";
+      // dd($m);
+      foreach ($m as $metric) {
+        unset($this->_sql);
+        // dd($metric);
+        $arrayMetrics[$metric->formula->alias] = "NVL({$metric->formula->aggregateFn}({$metric->formula->field}), 0) AS '{$metric->formula->alias}'";
+        // dd($arrayMetrics);
+        // _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
+        // TODO: aggiungere documentazione per _metrics_advanced_datamart
+        $this->_metrics_advanced_datamart[$tableName][$metric->formula->alias] = "\nNVL({$metric->formula->aggregateFn}($tableName.'{$metric->formula->alias}'), 0) AS '{$metric->formula->alias}'";
+        // verifico se sono presenti metriche composte che contengono la metrica in ciclo, stessa logica utilizzata per le metriche di base
+        // if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($tableName, $metric);
+        // aggiungo la FROM inclusa nella metrica filtrata alla FROM_baseTable
+        // $this->setSheetFromMetricTable($metric->FROM);
+        // dd($this->FROM_baseTable, $this->FROM_metricTable);
+        // aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
+        $this->setSheetFiltersMetricTable($metric->formula->filters);
+        // dd($this->filters_baseTable);
+        // aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
+        // se, nella metrica in ciclo, non è presente la WHERE devo ripulire WHERE_metricTable altrimenti verranno aggiunte WHERE della precedente metrica filtrata
+        (property_exists($metric, 'WHERE')) ? $this->setWhereMetricTable($metric->WHERE) : $this->WHERE_metricTable = array();
+        // dd($this->WHERE_baseTable);
+      }
+      // dd($arrayMetrics);
+      // dd($this->_metrics_advanced_datamart);
+      // creo il datamart, passo a createMetricTable il nome della tabella temporanea e l'array di metriche che lo compongono
+      if ($mode === 'sql') {
+        $sqlFilteredMetrics[] = $this->createMetricTable($tableName, $arrayMetrics, $mode);
+      } else {
+        $this->sheetCreateMetricTable($tableName, $arrayMetrics, null);
+      }
+    }
+    if ($mode === 'sql') return $sqlFilteredMetrics;
+  }
+
+
+  /* creo i datamart necessari per le metriche filtrate */
   public function createMetricDatamarts($mode)
   {
     foreach ($this->groupMetricsByFilters as $groupToken => $m) {
@@ -652,6 +721,53 @@ class Cube
 	* @param $metric : SUM(tableAlias.field) AS 'alias'
 	*/
   private function createMetricTable($tableName, $metrics, $mode)
+  {
+    // dd($filters);
+    $this->fromFilteredMetric = NULL;
+    $this->_sql = "{$this->SELECT},\n" . implode(",\n", $metrics);
+    $this->_sql .= "\nFROM\n" . implode(",\n", array_merge($this->FROM_baseTable, $this->FROM_metricTable));
+    // nella metrica adv, se è presente una funzione temporale NON devo aggiungere la condizione WHERE_timeDimension
+    // dd($this->WHERE_timingFn);
+    if (count($this->WHERE_timingFn) === 0) {
+      $this->_sql .= "\nWHERE\n" . implode("\nAND ", array_merge($this->WHERE_baseTable, $this->WHERE_timeDimension, $this->WHERE_metricTable));
+    } else {
+      // dd($this->WHERE_timingFn);
+      $this->_sql .= "\nWHERE\n" . implode("\nAND ", array_merge($this->WHERE_baseTable, $this->WHERE_timingFn, $this->WHERE_metricTable));
+    }
+    $this->WHERE_timingFn = array();
+    // aggiungo i filtri del report e i filtri contenuti nella metrica
+    $this->_sql .= "\nAND " . implode("\nAND ", array_merge($this->filters_baseTable, $this->filters_metricTable));
+    $this->_sql .= "\n$this->groupBy";
+    //dd($this->_sql);
+    $comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($metrics)) . "\n*/\n";
+
+    $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
+    // TODO: eliminare la tabella temporanea come fatto per baseTable
+    // dd($sql);
+    if ($mode === 'sql') {
+      $result = $sql;
+    } else {
+      if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
+        // dd('la tabella già esiste, la elimino');
+        $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
+        if (!$drop) {
+          // null : tabella eliminata, ricreo la tabella temporanea
+          $result = DB::connection('vertica_odbc')->statement($sql);
+        }
+      } else {
+        // dd('la tabella non esiste');
+        $result = DB::connection('vertica_odbc')->statement($sql);
+      }
+    }
+    /* vecchio metodo, senza MyVerticaGrammar.php
+        $table = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='$tableName' AND SCHEMA_NAME='decisyon_cache';");
+        // dd($tables);
+        if ($table) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
+        */
+    return $result;
+  }
+
+  private function sheetCreateMetricTable($tableName, $metrics, $mode)
   {
     // dd($filters);
     $this->fromFilteredMetric = NULL;

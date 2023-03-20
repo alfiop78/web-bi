@@ -10,6 +10,7 @@ class Sheets {
   #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #filters = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #metrics = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
+  #advMetrics = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #joins = new Map();
   #name;
   constructor(token, WorkBookToken) {
@@ -59,6 +60,13 @@ class Sheets {
 
   get metrics() { return this.#metrics; }
 
+  set advMetrics(object) {
+    this.#advMetrics.set(object.token, object.value);
+    console.info('this.#advMetrics : ', this.#advMetrics);
+  }
+
+  get advMetrics() { return this.#advMetrics; }
+
   get fields() { return this.#fields; }
 
   set from(object) {
@@ -97,6 +105,7 @@ class Sheets {
     */
     this.sheet.filters = Object.fromEntries(this.filters);
     if (this.metrics.size > 0) this.sheet.metrics = Object.fromEntries(this.metrics);
+    if (this.advMetrics.size > 0) this.sheet.advMetrics = Object.fromEntries(this.advMetrics);
     console.info(this.sheet);
     SheetStorage.save(this.sheet);
   }
@@ -357,7 +366,6 @@ class WorkSheets extends WorkBooks {
 
   set advMetrics(object) {
     this.#advMetrics.set(object.token, object.value);
-    debugger;
     console.log('sheet advMetrics : ', this.#advMetrics);
   }
 
@@ -445,9 +453,10 @@ class WorkSheets extends WorkBooks {
     }
 
     // metriche avanzate aggiunte allo WorkSheet
-    /* for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.workSheet.advMetrics)) {
+    for (const [token, advMetric] of Object.entries(WorkBookStorage.workBook.workSheet.advMetrics)) {
       // per ogni tabella
-    } */
+      this.advMetrics = { token, value: advMetric };
+    }
 
     return this;
   }

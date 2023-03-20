@@ -195,16 +195,16 @@ class MapDatabaseController extends Controller
           $groupFilters = array();
           // creo un gruppo di filtri
           foreach ($q->filteredMetrics as $metric) {
-            dd($metric);
+            // dd($metric->formula->filters);
             // ogni gruppo di filtri ha un tokenGrouup diverso come key dekk'array
             $tokenGroup = "group_" . bin2hex(random_bytes(4));
-            if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
+            if (!in_array($metric->formula->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->formula->filters;
           }
           // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
           foreach ($groupFilters as $token => $group) {
             $metrics = array();
             foreach ($q->filteredMetrics as $metric) {
-              if (get_object_vars($metric->filters) == get_object_vars($group)) {
+              if (get_object_vars($metric->formula->filters) == get_object_vars($group)) {
                 // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
                 array_push($metrics, $metric);
               }
@@ -213,7 +213,7 @@ class MapDatabaseController extends Controller
             $q->groupMetricsByFilters->$token = $metrics;
           }
           // dd($q->groupMetricsByFilters);
-          $metricTable = $q->createMetricDatamarts(null);
+          $metricTable = $q->sheetCreateMetricDatamarts(null);
         }
         // echo 'elaborazione createDatamart';
         // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale

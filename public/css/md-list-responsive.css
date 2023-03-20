@@ -12,7 +12,6 @@ ul{
   margin-block-start: unset;
   padding-block-end: 1em;
   margin-block-end: unset;
-  border-radius: 4px;
 }
 
 li{
@@ -22,7 +21,7 @@ li{
   display: flex;
   margin: 0px 1em;
   align-items: center;
-  padding: 0px 1rem;
+  /* padding: 0px 1rem; */
 }
 
 li[hidden] {display: none;}

@@ -377,15 +377,19 @@
                       <section class="wrapper-sheet">
                         <div class="properties">
                           <section id="workbook-tables">
-                            <nav id="nav-fields" class="custom-scrollbar"></nav>
-                            <nav id="nav-metrics" class="custom-scrollbar"></nav>
+                            <ul id="nav-fields" class="custom-scrollbar"></ul>
+                            <ul id="ul-metrics" class="custom-scrollbar"></ul>
+                            <li class="new-worksheet-object">
+                              <i class="material-icons-round md-18 new-object">add</i>
+                              <button class="new-object" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica composta</button>
+                            </li>
+                            <ul id="ul-filters" class="custom-scrollbar"></ul>
                           </section>
-                          <section id="sheet-props">
+                          <!--<section id="sheet-props">
                             <div>
                               <button data-fn="handlerFilters" id="btn-add-filters">Crea Filtro</button>
                             </div>
-                            <nav id="worksheet-filters" data-filters-defined></nav>
-                          </section>
+                          </section>-->
                         </div>
                         <div class="report-area">
                           <section class="columns-rows">
