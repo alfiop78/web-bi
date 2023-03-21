@@ -312,8 +312,8 @@ section[data-table-from] .table, section[data-table-to] .table{
 .wrapper-sheet{
   display: grid;
   grid-auto-flow: column;
-  grid-template-columns: 1fr 4fr;
-  grid-column-gap: 2em;
+  grid-template-columns: 1.5fr 4fr;
+  grid-column-gap: .5rem;
   width: 100%;
   height: 100%;
 }
@@ -395,12 +395,21 @@ i[data-id="btn-set-metric"]:hover, i[data-id='btn-set-filter']:hover{
   width: 100%;
 }
 
-#workbook-tables {
+#workbook-objects {
   position: absolute;
   height: 100%;
   width: 100%;
   display: grid;
-  grid-template-rows: 2fr auto auto 1fr;
+  /* grid-template-rows: 2fr auto auto 1fr auto; */
+  grid-template-rows: 1fr;
+  grid-row-gap: 1px;
+  background-color: gainsboro;
+}
+
+#workbook-objects > *[data-worksheet-object] {
+  background-color: white;
+  color: #494949;
+  overflow-y: auto;
 }
 
 #workbook-tables > ul {
@@ -429,7 +438,7 @@ details > summary:hover{
 
 details > summary{
   font-weight: bold;
-  line-height: 2rem;
+  line-height: 1.6rem;
 }
 
 details > li[data-datatype='float'] {
@@ -450,11 +459,17 @@ details > li {
   max-width: 200px;
   margin: 2px;
   border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-#ul-metrics > li[data-type="metric"] {
+#ul-metrics > li[data-base-metrics] > .li-content {
   background-color: #9d7165db;
   color: white;
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 
 #ul-metrics > li[data-type="advMetric"] {

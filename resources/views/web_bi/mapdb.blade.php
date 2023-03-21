@@ -36,6 +36,14 @@
       <i class="material-icons-round md-18">drag_handle</i>
       <span></span>
     </li>
+
+    <li data-li-drag data-element-search data-label data-base-metrics data-searchable="true" draggable="true">
+      <span class="li-content">
+        <i class="material-icons-round md-18">drag_handle</i>
+        <span></span>
+      </span>
+      <i data-id="filters-add" class="material-icons-round md-18">add</i>
+    </li>
   </template>
 
   <template id="tmpl-dl-element">
@@ -312,8 +320,8 @@
                     <section class="wrapper-step">
                       <section id="canvas-area">
                         <menu>
-                          <section id="data-source-name" class="data-source" contenteditable="false">data source name</section>
-                          <button data-fn="workBookOpen" id="btn-workbook-new" value="Nuovo" disabled>Nuovo</button>
+                          <section id="workbook-name" class="data-source" contenteditable="true">WorkSpace 1</section>
+                          <button data-fn="workBookNew" id="btn-workbook-new" value="Nuovo" disabled>Nuovo</button>
                           <button data-fn="workBookOpen" id="btn-workbook-open" value="open">Apri</button>
                         </menu>
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
@@ -376,18 +384,28 @@
                       </menu>
                       <section class="wrapper-sheet">
                         <div class="properties">
-                          <section id="workbook-tables">
-                            <ul id="nav-fields" class="custom-scrollbar"></ul>
-                            <ul id="ul-metrics" class="custom-scrollbar"></ul>
-                            <li class="new-worksheet-object">
-                              <i class="material-icons-round md-18 new-object">add</i>
-                              <button class="new-object" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica composta</button>
-                            </li>
-                            <ul id="ul-filters" class="custom-scrollbar"></ul>
-                            <li class="new-worksheet-object">
-                              <i class="material-icons-round md-18 new-object">add</i>
-                              <button class="new-object" data-fn="btnFilterNew" type="button" value="crea filtro">nuova filtro</button>
-                            </li>
+                          <section id="workbook-objects">
+                            <section data-worksheet-object class="custom-scrollbar">
+                              <ul id="nav-fields" class="custom-scrollbar"></ul>
+                              <li class="new-worksheet-object">
+                                <i class="material-icons-round md-18 new-object">add</i>
+                                <button class="new-object" data-fn="btnColumnNew" type="button" value="Crea Colonna">Crea colonna</button>
+                              </li>
+                            </section>
+                            <section data-worksheet-object class="custom-scrollbar">
+                              <ul id="ul-metrics" class="custom-scrollbar"></ul>
+                              <li class="new-worksheet-object">
+                                <i class="material-icons-round md-18 new-object">add</i>
+                                <button class="new-object" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica composta</button>
+                              </li>
+                            </section>
+                            <section data-worksheet-object class="custom-scrollbar">
+                              <ul id="ul-filters" class="custom-scrollbar"></ul>
+                              <li class="new-worksheet-object">
+                                <i class="material-icons-round md-18 new-object">add</i>
+                                <button class="new-object" data-fn="btnFilterNew" type="button" value="crea filtro">nuova filtro</button>
+                              </li>
+                            </section>
                           </section>
                         </div>
                         <div class="report-area">

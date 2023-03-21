@@ -2,7 +2,7 @@ var App = new Application();
 var Draw = new DrawSVG('svg');
 var SheetStorage = new SheetStorages();
 var WorkBookStorage = new Storages();
-var WorkSheet = new WorkSheets('workbook_kpi');
+var WorkSheet = new WorkSheets('WorkBook 1');
 var Sheet;
 (() => {
   var app = {
@@ -27,7 +27,7 @@ var Sheet;
     dialogColumns: document.getElementById('dlg-columns'),
     // buttons
     btnSelectSchema: document.getElementById('btn-select-schema'),
-    btnDataSourceName: document.getElementById('data-source-name'),
+    editWorkBookName: document.getElementById('workbook-name'),
     // drawer
     drawer: document.getElementById('drawer'),
     // body
@@ -35,7 +35,7 @@ var Sheet;
     translate: document.getElementById('translate'),
     coordsRef: document.getElementById('coords'),
     wjTitle: document.querySelector('#window-join .wj-title'),
-    workbookTablesStruct: document.querySelector('#workbook-tables'),
+    workbookTablesStruct: document.querySelector('#workbook-objects'),
     // columns and rows dropzone (step 2)
     columnsDropzone: document.getElementById('dropzone-columns'),
     rowsDropzone: document.getElementById('dropzone-rows'),
@@ -840,6 +840,7 @@ var Sheet;
 
   }
 
+  // apertura dialog con lista WorkBooks
   document.querySelector('#btn-workbook-open').onclick = () => {
     // carico elenco dei workBook presenti
     const parent = document.querySelector('nav[data-workbook-defined]');
@@ -851,10 +852,23 @@ var Sheet;
       const span = li.querySelector('li[data-li] span');
       li.dataset.fn = 'workBookSelected';
       li.dataset.token = token;
+      li.dataset.name = object.name;
       span.innerHTML = object.name;
       parent.appendChild(li);
     }
     app.dialogWorkBook.showModal();
+  }
+
+  // apertura del WorkBook
+  app.workBookSelected = (e) => {
+    WorkSheet = WorkSheet.open(e.currentTarget.dataset.token);
+    WorkSheet.workBook.token = e.currentTarget.dataset.token;
+    WorkSheet.name = e.currentTarget.dataset.name;
+    // modifico il nome del WorkBook in #workbook-name
+    document.getElementById('workbook-name').innerText = WorkSheet.name;
+    app.tablesMap();
+    app.hierTables();
+    app.dialogWorkBook.close();
   }
 
   app.openSheetDialog = (e) => {
@@ -915,30 +929,16 @@ var Sheet;
     Sheet.save();
   }
 
-  app.workBookSelected = (e) => {
-    WorkSheet = WorkSheet.open(e.currentTarget.dataset.token);
-    WorkSheet.workBook.token = e.currentTarget.dataset.token;
-    // app.createHierarchies();
-    app.tablesMap();
-    app.hierTables();
-    app.dialogWorkBook.close();
-  }
-
   app.saveSheet = () => {
     // imposto il nome recuperandolo dallo #sheet-name
     const name = document.getElementById('sheet-name');
     Sheet.name = name.dataset.value;
-    debugger;
     Sheet.save();
   }
 
   app.handlerEditSheetName = (e) => e.target.dataset.value = e.target.innerText;
 
-  app.btnDataSourceName.onclick = (e) => {
-    //TODO: rendo editabile per modificare il nome del datasource
-    e.target.setAttribute('contenteditable', 'true');
-    e.target.focus();
-  }
+  app.editWorkBookName.onblur = (e) => WorkSheet.name = e.target.innerText;
 
   document.getElementById('prev').onclick = () => Step.previous();
 
@@ -956,9 +956,6 @@ var Sheet;
           urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/tables_info');
         }
       }
-      console.log(urls);
-      // debugger;
-
       WorkBookStorage.saveSession(await app.getTables(urls));
       Step.next();
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
@@ -1429,23 +1426,6 @@ var Sheet;
     const field = e.target.dataset.field;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
-
-    // metric Map Object
-    /* WorkSheet.metrics = {
-      token,
-      value: {
-        alias: 'metric creata in worksheet',
-        workBook: { table: null, tableAlias: null },
-        // workBook: { table: WorkSheet.workBook.name, alias: 'alias tabella fact' },
-        formula: {
-          token,
-          aggregateFn,
-          field: 'field',
-          distinct: false,
-          alias: 'aliasmetric'
-        }
-      }
-    }; */
     WorkSheet.metric = {
       token,
       value: {
@@ -1801,7 +1781,7 @@ var Sheet;
     // nella metrica filtrata posso modificare solo la funzione di aggregazione
     console.clear();
     console.log(e.target);
-    const token = e.currentTarget.id;
+    const token = e.currentTarget.dataset.token;
     // recupero la metrica da WorkSheet.metric
     console.log(WorkSheet.metric.get(token));
     const metric = WorkSheet.metric.get(token);
@@ -1925,19 +1905,27 @@ var Sheet;
     if (WorkSheet.metrics.has(WorkSheet.activeTable.dataset.alias)) {
       for (const [token, value] of Object.entries(WorkSheet.metrics.get(WorkSheet.activeTable.dataset.alias))) {
         const tmpl = app.tmplList.content.cloneNode(true);
-        const li = tmpl.querySelector('li[data-li-drag]');
-        const i = li.querySelector('i');
-        const span = li.querySelector('span');
+        const li = tmpl.querySelector('li[data-li-drag][data-base-metrics]');
+        const content = li.querySelector('.li-content');
+        const btnDrag = content.querySelector('i');
+        const span = content.querySelector('span');
+        const btnAdd = li.querySelector('i[data-id="filters-add"]');
         li.id = token;
+        // TODO: questo potrei eliminarlo perchè questa lista avrà l'attributo data-base-metrics
         li.dataset.type = 'metric';
         // li.dataset.id = tableId;
         // li.dataset.schema = value.schema;
         li.dataset.table = value.workBook.table;
         li.dataset.alias = value.workBook.tableAlias;
         li.dataset.field = value.formula.field;
+        // TODO: gli eventi drag dovranno essere posizionati sul btnDrag, quindi anche l'attributo id
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
-        li.addEventListener('click', app.handlerMetric);
+        btnAdd.dataset.table = value.workBook.table;
+        btnAdd.dataset.alias = value.workBook.tableAlias;
+        btnAdd.dataset.field = value.formula.field;
+        btnAdd.dataset.token = token;
+        btnAdd.addEventListener('click', app.handlerMetric);
         span.innerHTML = value.formula.alias;
         // span.innerHTML = value.formula.field;
         parent.appendChild(li);

@@ -213,10 +213,16 @@ class WorkBooks {
     const rand = () => Math.random(0).toString(36).substring(2);
     this.token = rand().substring(0, 7);
     console.log(this.token);
-    this.workBook = { token: this.token, type: 'WorkBook', name: name, workSheet: {} };
-    this.sheet = { name: `WorkSheet_${name}` };
+    this.title = name;
+    this.workBook = { token: this.token, type: 'WorkBook', workSheet: {} };
     this.schema;
   }
+
+  set name(value) {
+    this.title = value;
+  }
+
+  get name() { return this.title; }
 
   set tableJoins(object) {
     this.#tableJoins.from = Draw.svg.querySelector(`#${object.from}`);
@@ -326,6 +332,7 @@ class WorkBooks {
   get metrics() { return this.#metrics; }
 
   save() {
+    this.workBook.name = this.title;
     this.workBook.fields = Object.fromEntries(this.fields);
     this.workBook.joins = Object.fromEntries(this.joins);
     this.workBook.tablesMap = Object.fromEntries(this.tablesMap);
