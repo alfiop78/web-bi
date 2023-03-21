@@ -1187,16 +1187,24 @@ var Sheet;
     // aggiungo il filtro alla nav[data-filters-defined]
     const parent = document.getElementById('ul-filters');
     const tmpl = app.tmplList.content.cloneNode(true);
-    const li = tmpl.querySelector('li[data-li]');
-    const span = li.querySelector('li[data-li] span');
-    li.dataset.name = object.name;
+    const li = tmpl.querySelector('li[data-filter]');
+    const content = li.querySelector('.li-content');
+    const btnDrag = content.querySelector('i');
+    const span = content.querySelector('span');
+    const btnEdit = li.querySelector('i[data-id="filters-edit"]');
     // TODO: da valutare se usare id come token oppure il dataset.token
     li.id = token;
+    li.dataset.type = 'filter';
+    li.dataset.name = object.name;
     li.dataset.token = token;
-    li.dataset.fn = "addFilter";
+    li.addEventListener('dragstart', app.fieldDragStart);
+    li.addEventListener('dragend', app.fieldDragEnd);
+    // li.dataset.fn = "addFilter";
+    // li.dataset.table = value.workBook.table;
+    // li.dataset.alias = value.workBook.tableAlias;
+    li.dataset.field = object.name;
     span.innerHTML = object.name;
     parent.appendChild(li);
-    // app.setSheet();
   }
 
   app.addFiltersMetric = e => e.currentTarget.toggleAttribute('selected');
@@ -1836,18 +1844,28 @@ var Sheet;
       }
     };
     WorkSheet.save();
-    // TODO: aggiungo la nuova metrica nella struttura delle tabelle di sinistra
+    // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
     const tmpl = app.tmplList.content.cloneNode(true);
-    const li = tmpl.querySelector('li[data-li-drag]');
-    const span = li.querySelector('span');
+    const li = tmpl.querySelector('li[data-li-drag][data-advanced-metrics]');
+    const content = li.querySelector('.li-content');
+    const btnDrag = content.querySelector('i');
+    const span = content.querySelector('span');
+    const btnEdit = li.querySelector('i[data-id="metric-edit"]');
     li.id = token;
     li.dataset.type = 'advMetric';
+    // li.dataset.id = tableId;
+    // li.dataset.schema = value.schema;
     li.dataset.table = baseMetric.workBook.table;
     li.dataset.alias = baseMetric.workBook.tableAlias;
     li.dataset.field = baseMetric.formula.field;
+    // TODO: da impostare sull'icona drag
     li.addEventListener('dragstart', app.fieldDragStart);
     li.addEventListener('dragend', app.fieldDragEnd);
-    li.addEventListener('click', app.handlerMetric);
+    btnEdit.dataset.table = baseMetric.workBook.table;
+    btnEdit.dataset.alias = baseMetric.workBook.tableAlias;
+    btnEdit.dataset.field = baseMetric.formula.field;
+    btnEdit.dataset.token = token;
+    btnEdit.addEventListener('click', app.editAdvancedMetric);
     span.innerHTML = baseMetric.formula.alias;
     // span.innerHTML = value.formula.field;
     parent.appendChild(li);
@@ -1880,8 +1898,11 @@ var Sheet;
     const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
     for (const [token, value] of WorkSheet.advMetrics) {
       const tmpl = app.tmplList.content.cloneNode(true);
-      const li = tmpl.querySelector('li[data-li-drag]');
-      const span = li.querySelector('span');
+      const li = tmpl.querySelector('li[data-li-drag][data-advanced-metrics]');
+      const content = li.querySelector('.li-content');
+      const btnDrag = content.querySelector('i');
+      const span = content.querySelector('span');
+      const btnEdit = li.querySelector('i[data-id="metric-edit"]');
       li.id = token;
       li.dataset.type = 'advMetric';
       // li.dataset.id = tableId;
@@ -1889,9 +1910,14 @@ var Sheet;
       li.dataset.table = value.workBook.table;
       li.dataset.alias = value.workBook.tableAlias;
       li.dataset.field = value.formula.field;
+      // TODO: da impostare sull'icona drag
       li.addEventListener('dragstart', app.fieldDragStart);
       li.addEventListener('dragend', app.fieldDragEnd);
-      li.addEventListener('click', app.handlerMetric);
+      btnEdit.dataset.table = value.workBook.table;
+      btnEdit.dataset.alias = value.workBook.tableAlias;
+      btnEdit.dataset.field = value.formula.field;
+      btnEdit.dataset.token = token;
+      btnEdit.addEventListener('click', app.editAdvancedMetric);
       span.innerHTML = value.formula.alias;
       // span.innerHTML = value.formula.field;
       parent.appendChild(li);
@@ -1939,9 +1965,11 @@ var Sheet;
     if (WorkSheet.filters.has(WorkSheet.activeTable.dataset.alias)) {
       for (const [token, value] of Object.entries(WorkSheet.filters.get(WorkSheet.activeTable.dataset.alias))) {
         const tmpl = app.tmplList.content.cloneNode(true);
-        const li = tmpl.querySelector('li[data-li-drag]');
-        const i = li.querySelector('i');
-        const span = li.querySelector('span');
+        const li = tmpl.querySelector('li[data-filter]');
+        const content = li.querySelector('.li-content');
+        const btnDrag = content.querySelector('i');
+        const span = content.querySelector('span');
+        const btnEdit = li.querySelector('i[data-id="filters-edit"]');
         li.id = token;
         li.dataset.type = 'filter';
         // li.dataset.id = tableId;
@@ -1949,7 +1977,8 @@ var Sheet;
         li.dataset.table = value.workBook.table;
         li.dataset.alias = value.workBook.tableAlias;
         li.dataset.field = value.field;
-        li.addEventListener('click', app.addFilter);
+        // li.addEventListener('click', app.addFilter);
+        // TODO: eventi drag sull'icona drag
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
         span.innerHTML = value.name;

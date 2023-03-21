@@ -37,12 +37,28 @@
       <span></span>
     </li>
 
+    <li data-li-drag data-filter data-element-search data-label data-searchable="true" draggable="true">
+      <span class="li-content">
+        <i class="material-icons-round md-18">drag_handle</i>
+        <span></span>
+      </span>
+      <i data-id="filters-edit" class="material-icons-round md-18">edit</i>
+    </li>
+
     <li data-li-drag data-element-search data-label data-base-metrics data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
       <i data-id="filters-add" class="material-icons-round md-18">add</i>
+    </li>
+
+    <li data-li-drag data-element-search data-label data-advanced-metrics data-searchable="true" draggable="true">
+      <span class="li-content">
+        <i class="material-icons-round md-18">drag_handle</i>
+        <span></span>
+      </span>
+      <i data-id="metric-edit" class="material-icons-round md-18">edit</i>
     </li>
   </template>
 
@@ -67,7 +83,7 @@
     </details>
     <li class="new-worksheet-object">
       <i class="material-icons-round md-18 new-object">add</i>
-      <button class="new-object" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica composta</button>
+      <button class="new-object" data-fn="btnMetricNew" type="button" value="crea metrica">Metrica Composta</button>
     </li>
   </template>
 
@@ -386,6 +402,7 @@
                         <div class="properties">
                           <section id="workbook-objects">
                             <section data-worksheet-object class="custom-scrollbar">
+                              <p>Campi</p>
                               <ul id="nav-fields" class="custom-scrollbar"></ul>
                               <li class="new-worksheet-object">
                                 <i class="material-icons-round md-18 new-object">add</i>
@@ -393,6 +410,7 @@
                               </li>
                             </section>
                             <section data-worksheet-object class="custom-scrollbar">
+                              <p>Metriche</p>
                               <ul id="ul-metrics" class="custom-scrollbar"></ul>
                               <li class="new-worksheet-object">
                                 <i class="material-icons-round md-18 new-object">add</i>
@@ -400,6 +418,7 @@
                               </li>
                             </section>
                             <section data-worksheet-object class="custom-scrollbar">
+                              <p>Filtri</p>
                               <ul id="ul-filters" class="custom-scrollbar"></ul>
                               <li class="new-worksheet-object">
                                 <i class="material-icons-round md-18 new-object">add</i>
