@@ -841,10 +841,10 @@ var Sheet;
   }
 
   document.querySelector('#btn-workbook-open').onclick = () => {
-    // reimposto la Classe WorkSheet
-    app.dialogWorkBook.showModal();
     // carico elenco dei workBook presenti
     const parent = document.querySelector('nav[data-workbook-defined]');
+    // reset list
+    parent.querySelectorAll('li').forEach(workbook => workbook.remove());
     for (const [token, object] of Object.entries(WorkBookStorage.workBooks())) {
       const tmpl = app.tmplList.content.cloneNode(true);
       const li = tmpl.querySelector('li[data-li]');
@@ -854,6 +854,7 @@ var Sheet;
       span.innerHTML = object.name;
       parent.appendChild(li);
     }
+    app.dialogWorkBook.showModal();
   }
 
   app.openSheetDialog = (e) => {
@@ -862,6 +863,8 @@ var Sheet;
     * recupero solo gli Sheet appartenenti al WorkBook aperto 
     */
     const parent = document.querySelector('nav[data-sheet-defined]');
+    // reset list
+    parent.querySelectorAll('li').forEach(sheet => sheet.remove());
     const sheets = SheetStorage.sheets(WorkSheet.workBook.token);
     if (sheets) {
       for (const [token, object] of Object.entries(sheets)) {
@@ -873,12 +876,6 @@ var Sheet;
         span.innerHTML = object.name;
         parent.appendChild(li);
       }
-      // gli elementi impostati nel workBook devono essere disponibili nello sheet.
-      // app.addTablesStruct();
-      // salvo il workbook creato
-      WorkSheet.save();
-      const rand = () => Math.random(0).toString(36).substring(2);
-      Sheet = new Sheets(rand().substring(0, 7), WorkSheet.workBook.token);
       app.dialogSheet.showModal();
     }
   }
@@ -929,11 +926,13 @@ var Sheet;
 
   app.saveSheet = () => {
     // imposto il nome recuperandolo dallo #sheet-name
-    debugger;
     const name = document.getElementById('sheet-name');
     Sheet.name = name.dataset.value;
+    debugger;
     Sheet.save();
   }
+
+  app.handlerEditSheetName = (e) => e.target.dataset.value = e.target.innerText;
 
   app.btnDataSourceName.onclick = (e) => {
     //TODO: rendo editabile per modificare il nome del datasource

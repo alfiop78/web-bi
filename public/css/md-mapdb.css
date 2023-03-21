@@ -444,14 +444,22 @@ details > li {
   border-radius: 2px;
 }
 
-#ul-metrics > li[data-type="metric"] {
-  background-color: #9d7165db;
-  color: white;
+#ul-metrics > li {
   line-height: 1.6rem;
   width: 200px;
   max-width: 200px;
   margin: 2px;
   border-radius: 2px;
+}
+
+#ul-metrics > li[data-type="metric"] {
+  background-color: #9d7165db;
+  color: white;
+}
+
+#ul-metrics > li[data-type="advMetric"] {
+  background-color: lightgreen;
+  color: #494949;
 }
 
 details > li[data-type="column"] {

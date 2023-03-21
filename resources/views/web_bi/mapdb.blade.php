@@ -371,7 +371,7 @@
                           <button type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
                         </section>
                         <section class="sheet-title">
-                          <div id="sheet-name" contenteditable="true" data-value="Sheet 1">Sheet 1</div>
+                          <div id="sheet-name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Sheet 1">Sheet 1</div>
                         </section>
                       </menu>
                       <section class="wrapper-sheet">
