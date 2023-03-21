@@ -670,7 +670,7 @@ class Cube
         // dd($metric->formula->filters);
         // per ogni filtro presente nella metrica
         foreach ($metric->formula->filters as $filter) {
-          $this->setSheetFromMetricTable($filter->from);
+          if (property_exists($filter, 'from')) $this->setSheetFromMetricTable($filter->from);
           // aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
           // se, nella metrica in ciclo, non è presente la WHERE devo ripulire WHERE_metricTable altrimenti verranno aggiunte WHERE della precedente metrica filtrata
           (property_exists($filter, 'joins')) ? $this->setSheetWhereMetricTable($filter->joins) : $this->WHERE_metricTable = array();
