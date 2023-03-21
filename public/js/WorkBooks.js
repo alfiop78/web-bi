@@ -156,21 +156,39 @@ class Sheets {
     */
     this.joins = SheetStorage.sheet.joins;
 
-    for (const [token, object] of Object.entries(SheetStorage.sheet.metrics)) {
-      this.metrics = {
-        token,
-        value: {
-          alias: object.alias,
-          formula: object.formula,
-          workBook: {
-            table: object.workBook.table,
-            tableAlias: object.workBook.tableAlias
-          }
+    if (SheetStorage.sheet.hasOwnProperty('metrics')) {
+      for (const [token, object] of Object.entries(SheetStorage.sheet.metrics)) {
+        this.metrics = {
+          token,
+          value: {
+            alias: object.alias,
+            formula: object.formula,
+            workBook: {
+              table: object.workBook.table,
+              tableAlias: object.workBook.tableAlias
+            }
 
+          }
         }
       }
     }
 
+    if (SheetStorage.sheet.hasOwnProperty('advMetrics')) {
+      for (const [token, object] of Object.entries(SheetStorage.sheet.advMetrics)) {
+        this.advMetrics = {
+          token,
+          value: {
+            alias: object.alias,
+            formula: object.formula,
+            workBook: {
+              table: object.workBook.table,
+              tableAlias: object.workBook.tableAlias
+            }
+
+          }
+        }
+      }
+    }
 
     return this;
   }
@@ -435,12 +453,15 @@ class WorkSheets extends WorkBooks {
       }
     }
     // filtri aggiunti allo WorkSheet
-    for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.workSheet.filters)) {
-      // per ogni tabella
-      for (const [token, filter] of Object.entries(values)) {
-        this.filter = { token, value: filter };
-        this.filters = token;
+    if (WorkBookStorage.workBook.workSheet.hasOwnProperty('filters')) {
+      for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.workSheet.filters)) {
+        // per ogni tabella
+        for (const [token, filter] of Object.entries(values)) {
+          this.filter = { token, value: filter };
+          this.filters = token;
+        }
       }
+
     }
 
     // metriche aggiunte allo WorkSheet

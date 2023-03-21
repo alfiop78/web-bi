@@ -384,12 +384,11 @@
                               <button class="new-object" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica composta</button>
                             </li>
                             <ul id="ul-filters" class="custom-scrollbar"></ul>
+                            <li class="new-worksheet-object">
+                              <i class="material-icons-round md-18 new-object">add</i>
+                              <button class="new-object" data-fn="btnFilterNew" type="button" value="crea filtro">nuova filtro</button>
+                            </li>
                           </section>
-                          <!--<section id="sheet-props">
-                            <div>
-                              <button data-fn="handlerFilters" id="btn-add-filters">Crea Filtro</button>
-                            </div>
-                          </section>-->
                         </div>
                         <div class="report-area">
                           <section class="columns-rows">

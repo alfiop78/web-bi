@@ -36,7 +36,6 @@ var Sheet;
     coordsRef: document.getElementById('coords'),
     wjTitle: document.querySelector('#window-join .wj-title'),
     workbookTablesStruct: document.querySelector('#workbook-tables'),
-    sheetProp: document.querySelector('#sheet-props'),
     // columns and rows dropzone (step 2)
     columnsDropzone: document.getElementById('dropzone-columns'),
     rowsDropzone: document.getElementById('dropzone-rows'),
@@ -442,6 +441,7 @@ var Sheet;
 
         break;
       case 'advMetric':
+        debugger;
         metricProp = WorkSheet.advMetrics.get(elementRef.id);
         metric = {
           token,
@@ -905,9 +905,14 @@ var Sheet;
       app.addMetric(target, token);
     }
 
+    for (const [token, advMetrics] of Sheet.advMetrics) {
+      const target = document.getElementById('dropzone-columns');
+      app.addAdvMetric(target, token);
+    }
+
     // filters
     for (const [token, filters] of Sheet.filters) {
-      const filterRef = document.getElementById('worksheet-filters');
+      const filterRef = document.getElementById('ul-filters');
       filterRef.querySelector(`li[id='${token}']`).dataset.selected = 'true';
     }
     Sheet.save();
@@ -1022,7 +1027,7 @@ var Sheet;
       });
   }
 
-  app.handlerFilters = async () => {
+  app.btnFilterNew = async () => {
     // creo la struttura tabelle per poter creare nuovi filtri
     let urls = [];
     for (const [tableId, value] of WorkSheet.hierTables) {
@@ -1075,6 +1080,34 @@ var Sheet;
     console.log(Sheet);
   }
 
+  app.setFROMFilter = (tableAlias) => {
+    let from = {};
+    if (WorkSheet.tablesMap.has(tableAlias)) {
+      WorkSheet.tablesMap.get(tableAlias).forEach(tableId => {
+        from[Draw.tables.get(tableId).alias] = {
+          schema: Draw.tables.get(tableId).schema,
+          table: Draw.tables.get(tableId).table
+        }
+      });
+      return from;
+    }
+  }
+
+  app.setJOINSFilter = (tableAlias) => {
+    let joins = {};
+    if (WorkSheet.tablesMap.has(tableAlias)) {
+      WorkSheet.tablesMap.get(tableAlias).forEach(tableId => {
+        if (WorkSheet.joins.has(Draw.tables.get(tableId).alias)) {
+          for (const [token, join] of Object.entries(WorkSheet.joins.get(Draw.tables.get(tableId).alias))) {
+            console.log(token, join);
+            joins[token] = join;
+          }
+        }
+      });
+      return joins;
+    }
+  }
+
   // salvataggio di un filtro in WorkSheet
   app.saveFilter = (e) => {
     // l'oggetto filter lo salvo nella Classe Sheet (ex Query.js)
@@ -1083,7 +1116,7 @@ var Sheet;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
     let object = { token, name };
-    let from = new Map(), joins = new Map();
+    let from = {}, joins = {};
     const textarea = document.getElementById('textarea-filter');
     document.querySelectorAll('#textarea-filter *').forEach(element => {
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
@@ -1091,7 +1124,11 @@ var Sheet;
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
-        from.set(element.dataset.tableAlias, { schema: null, table: element.dataset.table });
+        // from[element.dataset.tableAlias] = { schema: null, table: element.dataset.table };
+        from = app.setFROMFilter(element.dataset.tableAlias);
+        joins = app.setJOINSFilter(element.dataset.tableAlias);
+        console.log(from);
+        console.log(joins);
         object.field = element.dataset.field;
 
         /* if (element.dataset.tableId) {
@@ -1136,8 +1173,9 @@ var Sheet;
     });
     // TODO: la prop 'editFormula' va rinominata in 'edit'
     object.sql = sql;
-    object.from = from;
     debugger;
+    if (from) object.from = from;
+    if (joins) object.joins = joins;
     WorkSheet.filter = {
       token,
       value: object
@@ -1151,7 +1189,7 @@ var Sheet;
     // salvo il nuovo filtro appena creato
     WorkSheet.save();
     // aggiungo il filtro alla nav[data-filters-defined]
-    const parent = app.sheetProp.querySelector('#worksheet-filters');
+    const parent = document.getElementById('ul-filters');
     const tmpl = app.tmplList.content.cloneNode(true);
     const li = tmpl.querySelector('li[data-li]');
     const span = li.querySelector('li[data-li] span');
@@ -1824,7 +1862,7 @@ var Sheet;
     const li = tmpl.querySelector('li[data-li-drag]');
     const span = li.querySelector('span');
     li.id = token;
-    li.dataset.type = 'metric';
+    li.dataset.type = 'advMetric';
     li.dataset.table = baseMetric.workBook.table;
     li.dataset.alias = baseMetric.workBook.tableAlias;
     li.dataset.field = baseMetric.formula.field;

@@ -54,6 +54,37 @@ class Cube
     // dd($this->_fields);
   }
 
+  public function select($columns)
+  {
+    $fieldList = array();
+    $this->SELECT = "SELECT\n";
+    // dd($columns);
+    foreach ($columns as $column) {
+      if (property_exists($column, 'sql')) {
+        foreach ($column->sql as $fieldType => $field) {
+          $fieldList["{$column->name}_{$fieldType}"] = implode($field) . " AS {$column->name}_{$fieldType}"; // $fieldType : id/ds
+          $this->_columns[] = "{$column->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
+        }
+      }
+    }
+    // dd($fieldList);
+    foreach ($fieldList as $name => $field) {
+      $this->json__info->columns->{$name} = (object)[
+        "sql" => $field
+      ];
+    }
+    $this->SELECT .= implode(",\n ", $fieldList);
+    // dd($this->SELECT);
+    /*
+		es.:
+			SELECT\n
+      CodSedeDealer_765.Descrizione AS sede_id,
+      CodSedeDealer_765.Descrizione AS sede_ds
+		*/
+    // var_dump($this->_columns);
+  }
+
+
   public function sheetSelect($columns)
   {
     $fieldList = array();
@@ -65,15 +96,10 @@ class Cube
       foreach ($column->field as $key => $value) {
         // ...ciclo id/ds
         $fieldList["{$column->name}_{$key}"] = "{$column->tableAlias}.{$value->field} AS {$column->name}_{$key}"; // $fieldType : id/ds
+        $this->_columns[] = "{$column->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
       }
     }
     // dd($fieldList);
-    // $this->_columns[] = "{$column->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
-    /* foreach ($fieldList as $name => $field) {
-      $this->json__info->columns->{$name} = (object)[
-        "sql" => $field
-      ];
-    } */
     $this->SELECT .= implode(",\n ", $fieldList);
     // dd($this->SELECT);
     /*
@@ -111,39 +137,6 @@ class Cube
 		*/
   }
 
-  /*
-	* Utilizzo della stessa logica di FROM
-	* @param joins = "token_join" : ['table.field', 'table.field']
-	*/
-  public function sheetWhere($joins)
-  {
-    // dd($joins);
-    /* TODO: metto in join le tabelle incluse nella FROM_baseTable.
-      Valutare quale approccio può essere migliore in base ai tipi di join che si dovranno implementare in futuro
-    */
-    // NOTE : caso in qui viene passato tutto l'object
-    foreach ($joins as $token => $join) {
-      // il token è l'identificativo della join
-      // dd($token, $join);
-      $this->WHERE_baseTable[$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
-    }
-    // NOTE: caso in qui viene passato, a joins, solo la proprietà SQL
-    /* foreach ($joins as $token => $join) {
-      // dd($token, $join);
-      $this->WHERE_baseTable[$token] = implode(" = ", $join);
-    } */
-    // dd($this->WHERE_baseTable);
-    // dd($this->WHERE_baseTable, $this->WHERE_timeDimension);
-    /*
-		es.:
-			WHERE\n
-			Azienda_997.id = CodSedeDealer_765.id_Azienda \n
-			AND CodSedeDealer_765.id = DocVenditaIntestazione_055.id_CodSedeDealer \n
-			AND DocVenditaIntestazione_055.NumRifInt = DocVenditaDettaglio_560.NumRifInt \n
-			AND DocVenditaIntestazione_055.id_Azienda = DocVenditaDettaglio_560.id_Azienda 
-		*/
-  }
-
 
   // creo elenco delle colonne da aggiungere alle tabelle temporanee (base e metric)
   public function fields()
@@ -166,36 +159,6 @@ class Cube
       }
     }
     // dd($this->_fields);
-  }
-
-  public function select($columns)
-  {
-    $fieldList = array();
-    $this->SELECT = "SELECT\n";
-    // dd($columns);
-    foreach ($columns as $column) {
-      if (property_exists($column, 'sql')) {
-        foreach ($column->sql as $fieldType => $field) {
-          $fieldList["{$column->name}_{$fieldType}"] = implode($field) . " AS {$column->name}_{$fieldType}"; // $fieldType : id/ds
-          $this->_columns[] = "{$column->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
-        }
-      }
-    }
-    // dd($fieldList);
-    foreach ($fieldList as $name => $field) {
-      $this->json__info->columns->{$name} = (object)[
-        "sql" => $field
-      ];
-    }
-    $this->SELECT .= implode(",\n ", $fieldList);
-    // dd($this->SELECT);
-    /*
-		es.:
-			SELECT\n
-      CodSedeDealer_765.Descrizione AS sede_id,
-      CodSedeDealer_765.Descrizione AS sede_ds
-		*/
-    // var_dump($this->_columns);
   }
 
   public function groupBy($groups)
@@ -262,6 +225,20 @@ class Cube
 		*/
   }
 
+  private function setSheetFromMetricTable($from)
+  {
+    /* $this->FROM_metricTable = array();
+    // dd($from);
+    foreach ($from as $table) {
+      if ((!in_array($table, $this->FROM_metricTable)) && (!in_array($table, $this->FROM_baseTable))) $this->FROM_metricTable[] = $table;
+    } */
+    foreach ($from as $alias => $prop) {
+      $this->FROM_metricTable[$alias] = "{$prop->schema}.{$prop->table} AS {$alias}";
+    }
+    // dd($this->FROM_baseTable, $this->FROM_metricTable);
+  }
+
+
   private function setFromMetricTable($from)
   {
     $this->FROM_metricTable = array();
@@ -315,6 +292,39 @@ class Cube
 		*/
   }
 
+  /*
+	* Utilizzo della stessa logica di FROM
+	* @param joins = "token_join" : ['table.field', 'table.field']
+	*/
+  public function sheetWhere($joins)
+  {
+    // dd($joins);
+    /* TODO: metto in join le tabelle incluse nella FROM_baseTable.
+      Valutare quale approccio può essere migliore in base ai tipi di join che si dovranno implementare in futuro
+    */
+    // NOTE : caso in qui viene passato tutto l'object
+    foreach ($joins as $token => $join) {
+      // il token è l'identificativo della join
+      // dd($token, $join);
+      $this->WHERE_baseTable[$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
+    }
+    // NOTE: caso in qui viene passato, a joins, solo la proprietà SQL
+    /* foreach ($joins as $token => $join) {
+      // dd($token, $join);
+      $this->WHERE_baseTable[$token] = implode(" = ", $join);
+    } */
+    // dd($this->WHERE_baseTable);
+    // dd($this->WHERE_baseTable, $this->WHERE_timeDimension);
+    /*
+		es.:
+			WHERE\n
+			Azienda_997.id = CodSedeDealer_765.id_Azienda \n
+			AND CodSedeDealer_765.id = DocVenditaIntestazione_055.id_CodSedeDealer \n
+			AND DocVenditaIntestazione_055.NumRifInt = DocVenditaDettaglio_560.NumRifInt \n
+			AND DocVenditaIntestazione_055.id_Azienda = DocVenditaDettaglio_560.id_Azienda 
+		*/
+  }
+
   private function setWhereMetricTable($joins)
   {
     $this->WHERE_metricTable = array();
@@ -327,6 +337,17 @@ class Cube
     }
     // dd($this->WHERE_metricTable);
   }
+
+  private function setSheetWhereMetricTable($joins)
+  {
+    $this->WHERE_metricTable = array();
+    // dd($joins);
+    foreach ($joins as $token => $join) {
+      $this->WHERE_metricTable[$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
+    }
+    // dd($this->WHERE_metricTable);
+  }
+
 
   public function filters($filters)
   {
@@ -391,8 +412,9 @@ class Cube
       } else {
         // dd($filter->SQL, $this->filters_metricTable, $this->filters_baseTable);
         // se il filtro che si sta per aggiungere non è presente nè nei filtri "base_table" nè in quelli "metric_table" lo aggiungo
-        if (!in_array($filter->SQL, $this->filters_metricTable) && !in_array($filter->SQL, $this->filters_baseTable))
-          $this->filters_metricTable[] = $filter->SQL;
+        /* if (!in_array($filter->SQL, $this->filters_metricTable) && !in_array($filter->SQL, $this->filters_baseTable))
+          $this->filters_metricTable[] = $filter->SQL; */
+        $this->filters_metricTable[$filter->name] = "{$filter->workBook->tableAlias}.{$filter->field} " . implode(" ", $filter->sql);
       }
     }
   }
@@ -473,7 +495,6 @@ class Cube
     // dd($this->_metrics_base);
     // dd($this->_metrics_base_datamart);
   }
-
 
   private function buildCompositeMetrics($tableName, $metricObject)
   {
@@ -642,20 +663,21 @@ class Cube
         $arrayMetrics[$metric->formula->alias] = "NVL({$metric->formula->aggregateFn}({$metric->formula->field}), 0) AS '{$metric->formula->alias}'";
         // dd($arrayMetrics);
         // _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
-        // TODO: aggiungere documentazione per _metrics_advanced_datamart
         $this->_metrics_advanced_datamart[$tableName][$metric->formula->alias] = "\nNVL({$metric->formula->aggregateFn}($tableName.'{$metric->formula->alias}'), 0) AS '{$metric->formula->alias}'";
         // verifico se sono presenti metriche composte che contengono la metrica in ciclo, stessa logica utilizzata per le metriche di base
         // if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($tableName, $metric);
         // aggiungo la FROM inclusa nella metrica filtrata alla FROM_baseTable
-        // $this->setSheetFromMetricTable($metric->FROM);
-        // dd($this->FROM_baseTable, $this->FROM_metricTable);
+        // dd($metric->formula->filters);
+        // per ogni filtro presente nella metrica
+        foreach ($metric->formula->filters as $filter) {
+          $this->setSheetFromMetricTable($filter->from);
+          // aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
+          // se, nella metrica in ciclo, non è presente la WHERE devo ripulire WHERE_metricTable altrimenti verranno aggiunte WHERE della precedente metrica filtrata
+          (property_exists($filter, 'joins')) ? $this->setSheetWhereMetricTable($filter->joins) : $this->WHERE_metricTable = array();
+        }
         // aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
         $this->setSheetFiltersMetricTable($metric->formula->filters);
-        // dd($this->filters_baseTable);
-        // aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
-        // se, nella metrica in ciclo, non è presente la WHERE devo ripulire WHERE_metricTable altrimenti verranno aggiunte WHERE della precedente metrica filtrata
-        (property_exists($metric, 'WHERE')) ? $this->setWhereMetricTable($metric->WHERE) : $this->WHERE_metricTable = array();
-        // dd($this->WHERE_baseTable);
+        // dd($this->filters_baseTable, $this->filters_metricTable);
       }
       // dd($arrayMetrics);
       // dd($this->_metrics_advanced_datamart);
@@ -668,7 +690,6 @@ class Cube
     }
     if ($mode === 'sql') return $sqlFilteredMetrics;
   }
-
 
   /* creo i datamart necessari per le metriche filtrate */
   public function createMetricDatamarts($mode)
@@ -769,7 +790,7 @@ class Cube
 
   private function sheetCreateMetricTable($tableName, $metrics, $mode)
   {
-    // dd($filters);
+    // dd('sheetCreateMetricTable');
     $this->fromFilteredMetric = NULL;
     $this->_sql = "{$this->SELECT},\n" . implode(",\n", $metrics);
     $this->_sql .= "\nFROM\n" . implode(",\n", array_merge($this->FROM_baseTable, $this->FROM_metricTable));
@@ -785,7 +806,7 @@ class Cube
     // aggiungo i filtri del report e i filtri contenuti nella metrica
     $this->_sql .= "\nAND " . implode("\nAND ", array_merge($this->filters_baseTable, $this->filters_metricTable));
     $this->_sql .= "\n$this->groupBy";
-    //dd($this->_sql);
+    // dd($this->_sql);
     $comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($metrics)) . "\n*/\n";
 
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
@@ -827,7 +848,7 @@ class Cube
     // dd($this->_fieldsSQL);
     // dd(!empty($this->_metrics_advanced_datamart));
     if (!empty($this->_metrics_advanced_datamart)) {
-      dd('metriche filtrate presenti');
+      // dd('metriche filtrate presenti');
       // _metrics_advanced_datamart : "\n{$metric->aggregateFn}($tableName.'{$metric->alias}') AS '{$metric->alias}'"
       // sono presenti metriche filtrate
       $comment = "/*Creazione DATAMART :\ndecisyon_cache.{$this->datamartName}\n*/\n";
@@ -835,7 +856,7 @@ class Cube
       $sql .= "\n(SELECT{$this->_fieldsSQL}";
       $leftJoin = null;
 
-      if (property_exists($this, 'baseMetrics') && $this->_metrics_base_datamart) $sql .= ", $this->_metrics_base_datamart";
+      if (property_exists($this, 'sheetBaseMetrics') && $this->_metrics_base_datamart) $sql .= ", $this->_metrics_base_datamart";
       if (property_exists($this, 'filteredMetrics')) {
         $ONClause = array();
         $ONConditions = NULL;
