@@ -401,6 +401,11 @@
                       <section class="wrapper-sheet">
                         <div class="properties">
                           <section id="workbook-objects">
+                            <section data-worksheet-object>
+                              <p>WorkBook</p>
+                              <li data-workbook>workbook 1</li>
+                              <li data-workbook>workbook 2</li>
+                            </section>
                             <section data-worksheet-object class="custom-scrollbar">
                               <p>Campi</p>
                               <ul id="nav-fields" class="custom-scrollbar"></ul>

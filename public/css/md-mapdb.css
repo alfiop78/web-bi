@@ -401,7 +401,8 @@ i[data-id="btn-set-metric"]:hover, i[data-id='btn-set-filter']:hover{
   width: 100%;
   display: grid;
   /* grid-template-rows: 2fr auto auto 1fr auto; */
-  grid-template-rows: repeat(auto-fill, minmax(auto,  300px));
+  /* grid-template-rows: repeat(auto-fill, minmax(auto,  300px)); */
+  grid-template-rows: auto minmax(auto, 300px);
   grid-row-gap: 1px;
   background-color: gainsboro;
 }
