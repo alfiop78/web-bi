@@ -326,18 +326,21 @@ section[data-table-from] .table, section[data-table-to] .table{
 
 .report-area .columns-rows{
   display: grid;
-  grid-template-rows: 50px 50px;
+  grid-template-rows: auto auto;
   grid-row-gap: .5em;
 }
 
 .sheet-elements .dropzone{
   border: solid thin lightgrey;
-  overflow: auto;
+  /* overflow: auto; */
   display: flex;
+  column-gap: 1em;
+  row-gap: .5em;
   flex-wrap: wrap;
   width: 100%;
-  height: 50px;
+  transition: height 500ms;
   align-items: center;
+  padding: 8px;
 }
 
 .sheet-elements .dropzone.dropping{
@@ -345,7 +348,6 @@ section[data-table-from] .table, section[data-table-to] .table{
 }
 
 .report-area .columns-rows > section{
-  overflow: auto;
   display: grid;
   grid-template-columns: 80px 1fr;
 }
@@ -357,13 +359,12 @@ section[data-table-from] .table, section[data-table-to] .table{
 
 .column-defined, .metric-defined{
   display: flex;
-  /* color: white; */
+  align-items: center;
   position: relative;
-  padding: 6px;
+  padding: 4px;
   border-radius: 4px;
-  width: 170px;
-  height: 30px;
-  margin: 6px 18px;
+  width: 160px;
+  /* height: 25px; */
 }
 
 .column-defined[data-type="column"]{
@@ -536,7 +537,7 @@ details > li[data-type="column"] {
   border: none;
 }
 
-*[data-aggregate][contenteditable="true"] {
+code[contenteditable="true"] {
   outline: none;
   background-color: green;
   padding: 2px 4px;

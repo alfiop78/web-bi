@@ -160,3 +160,17 @@ dialog .textarea-formula{
 dialog .buttons{
   padding: 1em;
 }
+
+.context-menu {
+  position: absolute;
+  display: none;
+  width: 180px;
+  background-color: gainsboro;
+  color: #494949;
+  z-index: 0;
+}
+
+.context-menu[open] {
+  display: block;
+  z-index: 999;
+}

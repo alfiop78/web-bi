@@ -384,9 +384,10 @@ class Cube
     // dd($filters);
     foreach ($filters as $filter) {
       // dd($filter);
-      $this->filters_baseTable[$filter->name] = "{$filter->workBook->tableAlias}.{$filter->field} " . implode(" ", $filter->sql);
+      // $this->filters_baseTable[$filter->name] = "{$filter->workBook->tableAlias}.{$filter->field} " . implode(" ", $filter->sql);
+      $this->filters_baseTable[$filter->name] = implode(" ", $filter->sql);
     }
-    // dd($this->filters_baseTable);
+    dd($this->filters_baseTable);
   }
 
   /*

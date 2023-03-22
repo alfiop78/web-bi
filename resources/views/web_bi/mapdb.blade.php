@@ -120,8 +120,8 @@
 
     <template id="tmpl-columns-defined">
       <div class="column-defined">
-        <i class="button-icon material-icons-round md-18">view_column</i>
-        <span contenteditable="true" data-blur-fn="editFieldAlias"></span>
+        <i class="button-icon material-icons-round md-18">table_rows</i>
+        <code contenteditable="true" data-blur-fn="editFieldAlias"></code>
       </div>
     </template>
 
@@ -130,7 +130,6 @@
         <section class="formula" data-token>
           <code data-aggregate="SUM" contenteditable="true" data-blur-fn="editAggregate">SUM</code><span>(</span><code data-field="" data-table-alias></code><span>)&nbsp;</span><code data-alias="" data-blur-fn="editMetricAlias" contenteditable="true">alias</code>
         </section>
-        <i data-id="btn-set-filter" data-fn="setMetricFilter" class="button-icon material-icons-round md-18">filter_alt</i>
       </div>
     </template>
 
@@ -145,6 +144,14 @@
     <div id="container">
       <div id="content">
         <div id="body">
+          <div id="context-menu" class="context-menu">
+            <ul id="ul-context-menu">
+              <li>item 1</li>
+              <li>item 2</li>
+              <li>item 3</li>
+              <li>item 4</li>
+            </ul>
+          </div>
           <dialog id="dialog-workbook-open">
             <section class="dlg-grid">
               <section class="dlg-title">Apri WorkBook</section>
@@ -233,18 +240,6 @@
             </section>
           </dialog>
 
-          <dialog id="dlg-metric-filters">
-            <section class="dlg-grid">
-              <section class="dlg-title">Creazione Filtro</section>
-              <section class="dlg-content col col-1">
-                <nav data-filters-defined></nav>
-              </section>
-              <section class="dlg-buttons">
-                <button name="cancel" value="chiudi">Chiudi</button>
-                <button data-fn="addFiltersToMetric" id="btn-filter-add" value="salva">Salva</button>
-              </section>
-            </section>
-          </dialog>
           <div class="wrapper">
             <div id="window-join" class="absolute-window" data-x="0" data-y="0" data-open="false">
               <section class="wj-content">

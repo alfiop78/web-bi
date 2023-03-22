@@ -10,6 +10,7 @@ var Sheet;
     tmplList: document.getElementById('tmpl-li'),
     tmplJoin: document.getElementById('tmpl-join-field'),
     tmplDL: document.getElementById('tmpl-dl-element'),
+    contextMenuRef: document.getElementById('context-menu'),
     // tmplDD: document.getElementById('tmpl-dd-element'),
     tmplDetails: document.getElementById('tmpl-details-element'),
     tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
@@ -22,7 +23,6 @@ var Sheet;
     dialogFilters: document.getElementById('dlg-filters'),
     dialogMetric: document.getElementById('dlg-metric'),
     dialogCustomMetric: document.getElementById('dlg-custom-metric'),
-    dialogMetricFilters: document.getElementById('dlg-metric-filters'),
     windowJoin: document.getElementById('window-join'),
     dialogColumns: document.getElementById('dlg-columns'),
     // buttons
@@ -45,6 +45,9 @@ var Sheet;
 
   App.init();
 
+  app.body.addEventListener('click', (e) => {
+    if (app.contextMenuRef.hasAttribute('open')) app.contextMenuRef.toggleAttribute('open');
+  });
   // la Classe Steps deve impostare alcune proprietà DOPO che viene visualizzato il body, non può essere posizionato prima di App.init();
   var Step = new Steps('stepTranslate');
 
@@ -557,12 +560,12 @@ var Sheet;
   app.addField = (target, token) => {
     const tmpl = app.tmplColumnsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('.column-defined');
-    const span = field.querySelector('span');
+    const code = field.querySelector('code');
     field.dataset.type = 'column';
     field.dataset.id = token;
     // field.dataset.token = elementRef.id;
-    span.dataset.token = token;
-    span.innerHTML = Sheet.fields.get(token).name;
+    code.dataset.token = token;
+    code.innerHTML = Sheet.fields.get(token).name;
     // aggiungo la colonna al report (Sheet)
     // TODO: aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
     // Sheet.fields = { token: elementRef.id, value: WorkSheet.field.get(elementRef.id) };
@@ -863,6 +866,7 @@ var Sheet;
   app.workBookSelected = (e) => {
     WorkSheet = WorkSheet.open(e.currentTarget.dataset.token);
     WorkSheet.workBook.token = e.currentTarget.dataset.token;
+    WorkSheet.workSheet.token = `workSheet_${e.currentTarget.dataset.token}`;
     WorkSheet.name = e.currentTarget.dataset.name;
     // modifico il nome del WorkBook in #workbook-name
     document.getElementById('workbook-name').innerText = WorkSheet.name;
@@ -1076,7 +1080,7 @@ var Sheet;
     console.log(Sheet);
   }
 
-  app.setFROMFilter = (tableAlias) => {
+  app.setFrom = (tableAlias) => {
     let from = {};
     if (WorkSheet.tablesMap.has(tableAlias)) {
       WorkSheet.tablesMap.get(tableAlias).forEach(tableId => {
@@ -1089,7 +1093,7 @@ var Sheet;
     }
   }
 
-  app.setJOINSFilter = (tableAlias) => {
+  app.setJoins = (tableAlias) => {
     let joins = {};
     if (WorkSheet.tablesMap.has(tableAlias)) {
       WorkSheet.tablesMap.get(tableAlias).forEach(tableId => {
@@ -1108,76 +1112,52 @@ var Sheet;
   app.saveFilter = (e) => {
     // l'oggetto filter lo salvo nella Classe Sheet (ex Query.js)
     const name = document.getElementById('custom-filter-name').value;
-    let sql = [];
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
-    let object = { token, name };
-    let from = {}, joins = {};
+    let object = { token, name, tables: new Set(), sql: [], from: new Map(), joins: {} };
+    // let from = {}, joins = {};
+    let tables = new Set();
     const textarea = document.getElementById('textarea-filter');
     document.querySelectorAll('#textarea-filter *').forEach(element => {
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
       // ... altrimenti devo recuperare il cubeToken. Ci sono anche filtri che possono essere fatti su un livello dimensionale e su una FACT
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
-        object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
-        // from[element.dataset.tableAlias] = { schema: null, table: element.dataset.table };
-        from = app.setFROMFilter(element.dataset.tableAlias);
-        joins = app.setJOINSFilter(element.dataset.tableAlias);
-        console.log(from);
-        console.log(joins);
+        // object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
+        object.tables.add(element.dataset.tableAlias);
+        object.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
         object.field = element.dataset.field;
-
-        /* if (element.dataset.tableId) {
-          // tabella appartenente a un livello dimensionale
-          editFormula.push(
-            {
-              table: element.dataset.table,
-              alias: element.dataset.tableAlias,
-              field: element.dataset.field,
-              tableId: element.dataset.tableId,
-              hierToken: element.dataset.hierToken,
-              dimensionToken: element.dataset.dimensionToken
-            }
-          );
-          dimensions.add(element.dataset.dimensionToken);
-          sql_formula.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
-          if (hierarchiesMap.has(element.dataset.hierToken)) {
-            if (+element.dataset.tableId < hierarchiesMap.get(element.dataset.hierToken)) {
-              hierarchiesMap.set(element.dataset.hierToken, +element.dataset.tableId);
-            }
-          } else {
-            hierarchiesMap.set(element.dataset.hierToken, +element.dataset.tableId);
-          }
-        } else {
-          editFormula.push(
-            {
-              table: element.dataset.table,
-              alias: element.dataset.tableAlias,
-              field: element.dataset.field,
-              cubeToken: element.dataset.cubeToken
-            }
-          );
-          // tabella appartenente alla FACT.
-          cubes.add(element.dataset.cubeToken);
-          // ...non dovrebbe servire il cubeToken su un filtro associato alla FACT, perchè in ogni caso, la FACT viene aggiunta in base alle metriche (che devono essere obbligatorie)
-          sql_formula.push(`${element.dataset.tableAlias}.${element.dataset.field}`);
-        } */
       } else {
-        sql.push(element.innerText.trim());
-        // editFormula.push(element.innerText.trim());
+        object.sql.push(element.innerText.trim());
       }
     });
-    // TODO: la prop 'editFormula' va rinominata in 'edit'
-    object.sql = sql;
+    // imposto le proprietà from e joins in base a quello che si trova in object.tables
+    // object.tables contiene l'elenco delle tabelle incluse nella formula del filtro
+    object.tables.forEach(table => {
+      /* per ogni tabella di tablesMap, recupero le tabelle gerarchicamente inferiori e le aggiungo a 
+      * object.from solo se non sono già state aggiunte da precedenti tabelle
+      */
+      if (WorkSheet.tablesMap.has(table)) {
+        WorkSheet.tablesMap.get(table).forEach(tableId => {
+          if (!object.from.has(Draw.tables.get(tableId).alias)) {
+            object.from.set(Draw.tables.get(tableId).alias, {
+              schema: Draw.tables.get(tableId).schema,
+              table: Draw.tables.get(tableId).table
+            });
+          }
+          // joins
+          if (WorkSheet.joins.has(Draw.tables.get(tableId).alias)) {
+            for (const [token, join] of Object.entries(WorkSheet.joins.get(Draw.tables.get(tableId).alias))) {
+              object.joins[token] = join;
+            }
+          }
+        });
+      }
+    });
     debugger;
-    if (from) object.from = from;
-    if (joins) object.joins = joins;
     WorkSheet.filter = {
       token,
       value: object
-      /* editFormula,
-      name: 'iperauto',
-      formula: sql_formula.join(' '), // Azienda_444.id = 43 */
     };
     WorkSheet.filters = token;
     // reset della textarea
@@ -1185,6 +1165,7 @@ var Sheet;
     // salvo il nuovo filtro appena creato
     WorkSheet.save();
     // aggiungo il filtro alla nav[data-filters-defined]
+    // TODO: creare una fn "addFilter" in modo da utilizzarla sia qui che quanado apro il workbook (nel caricamento degli oggetti)
     const parent = document.getElementById('ul-filters');
     const tmpl = app.tmplList.content.cloneNode(true);
     const li = tmpl.querySelector('li[data-filter]');
@@ -1199,7 +1180,7 @@ var Sheet;
     li.dataset.token = token;
     li.addEventListener('dragstart', app.fieldDragStart);
     li.addEventListener('dragend', app.fieldDragEnd);
-    // li.dataset.fn = "addFilter";
+    li.dataset.fn = "addFilter";
     // li.dataset.table = value.workBook.table;
     // li.dataset.alias = value.workBook.tableAlias;
     li.dataset.field = object.name;
@@ -1208,43 +1189,6 @@ var Sheet;
   }
 
   app.addFiltersMetric = e => e.currentTarget.toggleAttribute('selected');
-
-  app.setMetricFilter = (e) => {
-    console.log(e.target);
-    console.log(e.target.dataset);
-    // metrica selezionata
-    const metric = WorkSheet.metric.get(e.target.dataset.token);
-    const parent = app.dialogMetricFilters.querySelector('nav[data-filters-defined]');
-    for (const [tableAlias, filters] of WorkSheet.filters) {
-      for (const [token, filter] of Object.entries(filters)) {
-        const tmpl = app.tmplList.content.cloneNode(true);
-        const li = tmpl.querySelector('li[data-li]');
-        const span = li.querySelector('li[data-li] span');
-        li.dataset.name = filter.name;
-        li.dataset.token = token;
-        li.dataset.fn = "addFiltersMetric";
-        span.innerHTML = filter.name;
-        parent.appendChild(li);
-      }
-    }
-    // devo aggiungere i filtri su questa metrica già presente in WorkSheet.metric/s
-    // TODO: apertura dialog per selezionare i filtri
-    app.dialogMetricFilters.dataset.token = e.target.dataset.token;
-    app.dialogMetricFilters.show();
-  }
-
-  app.addFiltersToMetric = (e) => {
-    let filters = [];
-    app.dialogMetricFilters.querySelectorAll('li[selected]').forEach(filter => filters.push(filter.dataset.token));
-    // TODO: aggiungo la metrica alla proprietà 'advancedMetrics' e la elimino da WorkSheet..metric/s
-    let metric = WorkSheet.metrics.get(app.dialogMetricFilters.dataset.token);
-    metric.formula.filters = filters;
-    WorkSheet.advMetrics = { token: app.dialogMetricFilters.dataset.token, value: metric };
-    // WorkSheet.advMetrics = app.dialogMetricFilters.dataset.token;
-    WorkSheet.metrics.delete(app.dialogMetricFilters.dataset.token);
-    // TODO:
-    // if (Object.keys(WorkSheet.metrics.get(metric.workBook.tableAlias)).length === 0) WorkSheet.metrics.delete(metric.workBook.tableAlias);
-  }
 
   /* NOTE: END ONCLICK EVENTS*/
 
@@ -1924,6 +1868,14 @@ var Sheet;
     }
   }
 
+  app.contextMenuMetrics = (e) => {
+    e.preventDefault();
+    console.log(e.target);
+    const { clientX: mouseX, clientY: mouseY } = e;
+    app.contextMenuRef.style.top = `${mouseY}px`;
+    app.contextMenuRef.style.left = `${mouseX}px`;
+    app.contextMenuRef.toggleAttribute('open');
+  }
 
   app.addDefinedMetrics = () => {
     // metriche mappate sul cubo
@@ -1947,6 +1899,7 @@ var Sheet;
         // TODO: gli eventi drag dovranno essere posizionati sul btnDrag, quindi anche l'attributo id
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
+        li.addEventListener('contextmenu', app.contextMenuMetrics);
         btnAdd.dataset.table = value.workBook.table;
         btnAdd.dataset.alias = value.workBook.tableAlias;
         btnAdd.dataset.field = value.formula.field;
@@ -1977,7 +1930,7 @@ var Sheet;
         li.dataset.table = value.workBook.table;
         li.dataset.alias = value.workBook.tableAlias;
         li.dataset.field = value.field;
-        // li.addEventListener('click', app.addFilter);
+        li.addEventListener('click', app.addFilter);
         // TODO: eventi drag sull'icona drag
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);

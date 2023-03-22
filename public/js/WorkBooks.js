@@ -214,7 +214,8 @@ class WorkBooks {
     this.token = rand().substring(0, 7);
     console.log(this.token);
     this.title = name;
-    this.workBook = { token: this.token, type: 'WorkBook', workSheet: {} };
+    this.workBook = { token: this.token, type: 'WorkBook' };
+    this.workSheet = { token: `workSheet_${this.token}`, type: 'WorkSheet' };
     this.schema;
   }
 
@@ -337,10 +338,6 @@ class WorkBooks {
     this.workBook.joins = Object.fromEntries(this.joins);
     this.workBook.tablesMap = Object.fromEntries(this.tablesMap);
     this.workBook.metrics = Object.fromEntries(this.metrics);
-    // nell'oggetto WorkSheet andrò a memorizzare gli elementi aggiunti nel WorkSheet (es.: metriche/colonne custom)
-    // metriche avanzate sono presenti solo nello WorkSheet e non nel WorkBook
-    if (this.advMetrics.size !== 0) this.workBook.workSheet.advMetrics = Object.fromEntries(this.advMetrics);
-    if (this.filters.size !== 0) this.workBook.workSheet.filters = Object.fromEntries(this.filters);
     this.workBook.svg = {
       tables: Object.fromEntries(Draw.tables),
       lines: Object.fromEntries(Draw.joinLines),
@@ -348,6 +345,12 @@ class WorkBooks {
     }
     console.info('WorkBook : ', this.workBook);
     WorkBookStorage.save(this.workBook);
+    // nell'oggetto WorkSheet andrò a memorizzare gli elementi aggiunti nel WorkSheet (es.: metriche/colonne custom)
+    // metriche avanzate sono presenti solo nello WorkSheet e non nel WorkBook
+    if (this.advMetrics.size !== 0) this.workSheet.advMetrics = Object.fromEntries(this.advMetrics);
+    if (this.filters.size !== 0) this.workSheet.filters = Object.fromEntries(this.filters);
+    console.info('WorkSheet : ', this.workSheet);
+    WorkBookStorage.save(this.workSheet);
   }
 
 }
@@ -417,9 +420,10 @@ class WorkSheets extends WorkBooks {
   get filters() { return this.#filters; }
 
   open(token) {
+    // TODO: ottimizzare
     // recupero dallo storage il workBook, tutte le sue proprietà le caricherò nella Classe 
     WorkBookStorage.workBook = token;
-    WorkBookStorage.workBook;
+    WorkBookStorage.workSheet = `workSheet_${token}`;
     // reimposto la Classe
 
     Draw.svg.dataset.level = WorkBookStorage.workBook.svg.levelId;
@@ -460,8 +464,8 @@ class WorkSheets extends WorkBooks {
       }
     }
     // filtri aggiunti allo WorkSheet
-    if (WorkBookStorage.workBook.workSheet.hasOwnProperty('filters')) {
-      for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.workSheet.filters)) {
+    if (WorkBookStorage.workSheet.hasOwnProperty('filters')) {
+      for (const [tableAlias, values] of Object.entries(WorkBookStorage.workSheet.filters)) {
         // per ogni tabella
         for (const [token, filter] of Object.entries(values)) {
           this.filter = { token, value: filter };
@@ -481,8 +485,8 @@ class WorkSheets extends WorkBooks {
     }
 
     // metriche avanzate aggiunte allo WorkSheet
-    if (WorkBookStorage.workBook.workSheet.hasOwnProperty('advMetrics')) {
-      for (const [token, advMetric] of Object.entries(WorkBookStorage.workBook.workSheet.advMetrics)) {
+    if (WorkBookStorage.workSheet.hasOwnProperty('advMetrics')) {
+      for (const [token, advMetric] of Object.entries(WorkBookStorage.workSheet.advMetrics)) {
         // per ogni tabella
         this.advMetrics = { token, value: advMetric };
       }
