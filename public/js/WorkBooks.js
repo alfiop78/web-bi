@@ -13,11 +13,11 @@ class Sheets {
   #advMetrics = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #joins = new Map();
   #name;
+  #id;
   constructor(token, WorkBookToken) {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
     this.workBookToken = WorkBookToken;
     this.sheet = { token, type: 'Sheet', workBook_ref: WorkBookToken };
-    this.id = Date.now();
   }
 
   set name(value) {
@@ -26,10 +26,11 @@ class Sheets {
 
   get name() { return this.#name; }
 
-  /* set id(timestamp) {
+  set id(timestamp) {
     this.#id = timestamp;
   }
-  get id() { return this.#id; } */
+
+  get id() { return this.#id; }
 
   set tables(value) {
     this.#tables.add(value);

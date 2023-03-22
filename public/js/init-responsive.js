@@ -906,6 +906,7 @@ var Sheet;
     Sheet.open();
     const name = document.getElementById('sheet-name');
     name.innerText = Sheet.name;
+    name.dataset.value = Sheet.name;
     app.dialogSheet.close();
     /* TODO: Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...) 
     * della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
@@ -997,6 +998,8 @@ var Sheet;
   }
 
   app.process = async () => {
+    // lo Sheet.id può essere già presente quando è stato aperto
+    if (!Sheet.id) Sheet.id = Date.now();
     app.saveSheet();
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(Sheet.sheet);
