@@ -192,6 +192,7 @@ class Cube
     foreach ($groups as $column) {
       foreach ($column->field as $key => $value) {
         $fieldList["{$column->name}_{$key}"] = "{$column->tableAlias}.{$value->field}"; // $fieldType : id/ds
+        // $fieldList[$column->name] = "{$column->tableAlias}.{$value->field}"; // $fieldType : id/ds
       }
     }
     // dd($fieldList);
@@ -387,7 +388,7 @@ class Cube
       // $this->filters_baseTable[$filter->name] = "{$filter->workBook->tableAlias}.{$filter->field} " . implode(" ", $filter->sql);
       $this->filters_baseTable[$filter->name] = implode(" ", $filter->sql);
     }
-    dd($this->filters_baseTable);
+    // dd($this->filters_baseTable);
   }
 
   /*
@@ -415,7 +416,7 @@ class Cube
         // se il filtro che si sta per aggiungere non è presente nè nei filtri "base_table" nè in quelli "metric_table" lo aggiungo
         /* if (!in_array($filter->SQL, $this->filters_metricTable) && !in_array($filter->SQL, $this->filters_baseTable))
           $this->filters_metricTable[] = $filter->SQL; */
-        $this->filters_metricTable[$filter->name] = "{$filter->workBook->tableAlias}.{$filter->field} " . implode(" ", $filter->sql);
+        $this->filters_metricTable[$filter->name] = implode(" ", $filter->sql);
       }
     }
   }
@@ -586,9 +587,9 @@ class Cube
     $this->_sql .= "\n$this->groupBy";
     // $this->_sql .= "\n$this->groupBy LIMIT 20";
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
-    // dd($this->_sql);
     // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
+    // dd($sql);
     // $result = DB::connection('vertica_odbc')->raw($sql);
     // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
     /* il metodo getSchemaBuilder() funziona con mysql, non con vertica. Ho creato MyVerticaGrammar.php dove c'è la sintassi corretta per vertica (solo alcuni Metodi ho modificato) */
@@ -807,12 +808,11 @@ class Cube
     // aggiungo i filtri del report e i filtri contenuti nella metrica
     $this->_sql .= "\nAND " . implode("\nAND ", array_merge($this->filters_baseTable, $this->filters_metricTable));
     $this->_sql .= "\n$this->groupBy";
-    // dd($this->_sql);
     $comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($metrics)) . "\n*/\n";
 
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
-    // TODO: eliminare la tabella temporanea come fatto per baseTable
     // dd($sql);
+    // TODO: eliminare la tabella temporanea come fatto per baseTable
     if ($mode === 'sql') {
       $result = $sql;
     } else {

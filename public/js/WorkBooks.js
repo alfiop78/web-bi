@@ -17,6 +17,7 @@ class Sheets {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
     this.workBookToken = WorkBookToken;
     this.sheet = { token, type: 'Sheet', workBook_ref: WorkBookToken };
+    this.id = Date.now();
   }
 
   set name(value) {
@@ -24,6 +25,11 @@ class Sheets {
   }
 
   get name() { return this.#name; }
+
+  /* set id(timestamp) {
+    this.#id = timestamp;
+  }
+  get id() { return this.#id; } */
 
   set tables(value) {
     this.#tables.add(value);
@@ -94,6 +100,7 @@ class Sheets {
   get joins() { return this.#joins; }
 
   save() {
+    this.sheet.id = this.id;
     this.sheet.name = this.name;
     this.sheet.fields = Object.fromEntries(this.fields);
     this.sheet.from = Object.fromEntries(this.from);
@@ -117,6 +124,7 @@ class Sheets {
     // reimposto la Classe
     SheetStorage.sheet = this.sheet.token;
     this.name = SheetStorage.sheet.name;
+    this.id = SheetStorage.sheet.id;
 
     for (const [token, object] of Object.entries(SheetStorage.sheet.fields)) {
       this.fields = {
@@ -137,17 +145,8 @@ class Sheets {
     }
 
     // filters
-    for (const [token, object] of Object.entries(SheetStorage.sheet.filters)) {
-      this.filters = {
-        token,
-        field: object.field,
-        name: object.name,
-        sql: object.sql,
-        workBook: {
-          table: object.workBook.table,
-          tableAlias: object.workBook.tableAlias
-        }
-      }
+    for (const [token, filter] of Object.entries(SheetStorage.sheet.filters)) {
+      this.filters = filter;
     }
 
     // joins
@@ -399,13 +398,13 @@ class WorkSheets extends WorkBooks {
 
   get advMetrics() { return this.#advMetrics; }
 
-  set filter(object) {
-    this.#filter.set(object.token, object.value);
+  set filters(object) {
+    this.#filters.set(object.token, object.value);
   }
 
-  get filter() { return this.#filter; }
+  get filters() { return this.#filters; }
 
-  set filters(token) {
+  /* set filters(token) {
     if (!this.#filters.has(this.#filter.get(token).workBook.tableAlias)) {
       this.#filters.set(this.#filter.get(token).workBook.tableAlias, {
         [token]: this.#filter.get(token)
@@ -417,7 +416,7 @@ class WorkSheets extends WorkBooks {
     console.log('#filters : ', this.#filters);
   }
 
-  get filters() { return this.#filters; }
+  get filters() { return this.#filters; } */
 
   open(token) {
     // TODO: ottimizzare
@@ -465,14 +464,9 @@ class WorkSheets extends WorkBooks {
     }
     // filtri aggiunti allo WorkSheet
     if (WorkBookStorage.workSheet.hasOwnProperty('filters')) {
-      for (const [tableAlias, values] of Object.entries(WorkBookStorage.workSheet.filters)) {
-        // per ogni tabella
-        for (const [token, filter] of Object.entries(values)) {
-          this.filter = { token, value: filter };
-          this.filters = token;
-        }
+      for (const [token, filter] of Object.entries(WorkBookStorage.workSheet.filters)) {
+        this.filters = { token, value: filter };
       }
-
     }
 
     // metriche aggiunte allo WorkSheet

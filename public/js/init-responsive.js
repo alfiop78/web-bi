@@ -544,7 +544,7 @@ var Sheet;
     console.log(elementRef);
     const li = document.createElement('li');
     li.dataset.token = elementRef.id;
-    li.innerText = WorkSheet.filter.get(elementRef.id).name;
+    li.innerText = WorkSheet.filters.get(elementRef.id).name;
     e.target.appendChild(li);
   }
 
@@ -904,6 +904,8 @@ var Sheet;
     Sheet = new Sheets(e.currentTarget.dataset.token, Sheet.sheet.workBook_ref);
     // reimposto tutte le proprietà della Classe
     Sheet.open();
+    const name = document.getElementById('sheet-name');
+    name.innerText = Sheet.name;
     app.dialogSheet.close();
     /* TODO: Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...) 
     * della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
@@ -995,7 +997,7 @@ var Sheet;
   }
 
   app.process = async () => {
-    // Sheet.save();
+    app.saveSheet();
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(Sheet.sheet);
     // console.log(params);
@@ -1072,15 +1074,14 @@ var Sheet;
   app.addFilter = (e) => {
     // TODO: Implementare anche qui il drag&drop per i filtri
     // Sheet.filters = e.currentTarget.id;
-    Sheet.filters = WorkSheet.filter.get(e.currentTarget.id);
-    // aggiungo la tabella a Sheet.tables
-    Sheet.tables = WorkSheet.filter.get(e.currentTarget.id).workBook.tableAlias;
+    Sheet.filters = WorkSheet.filters.get(e.currentTarget.id);
     e.currentTarget.dataset.selected = 'true';
+    // aggiungo le tabelle all'interno del filtro a Sheet.tables
+    WorkSheet.filters.get(e.currentTarget.id).tables.forEach(table => Sheet.tables = table);
     app.setSheet();
-    console.log(Sheet);
   }
 
-  app.setFrom = (tableAlias) => {
+  /* app.setFrom = (tableAlias) => {
     let from = {};
     if (WorkSheet.tablesMap.has(tableAlias)) {
       WorkSheet.tablesMap.get(tableAlias).forEach(tableId => {
@@ -1106,7 +1107,7 @@ var Sheet;
       });
       return joins;
     }
-  }
+  } */
 
   // salvataggio di un filtro in WorkSheet
   app.saveFilter = (e) => {
@@ -1115,8 +1116,6 @@ var Sheet;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
     let object = { token, name, tables: new Set(), sql: [], from: new Map(), joins: {} };
-    // let from = {}, joins = {};
-    let tables = new Set();
     const textarea = document.getElementById('textarea-filter');
     document.querySelectorAll('#textarea-filter *').forEach(element => {
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
@@ -1154,12 +1153,14 @@ var Sheet;
         });
       }
     });
+    //converto from Map() in object altrimenti non può essere salvato in localStorage e DB
+    object.from = Object.fromEntries(object.from);
+    object.tables = [...object.tables];
     debugger;
-    WorkSheet.filter = {
+    WorkSheet.filters = {
       token,
       value: object
     };
-    WorkSheet.filters = token;
     // reset della textarea
     textarea.querySelectorAll('*').forEach(element => element.remove());
     // salvo il nuovo filtro appena creato
@@ -1765,7 +1766,8 @@ var Sheet;
     const baseMetric = WorkSheet.metric.get(e.target.dataset.token);
     // recupero tutti i filtri droppati in #filter-drop
     app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => {
-      filters[filter.dataset.token] = WorkSheet.filter.get(filter.dataset.token);
+      debugger;
+      filters[filter.dataset.token] = WorkSheet.filters.get(filter.dataset.token);
       // TODO: ogni filtro aggiunto nella metrica deve controllare le tabelle da includere e le sue join (come fatto per setSheet)
     });
     console.log(filters);
@@ -1915,28 +1917,22 @@ var Sheet;
   app.addDefinedFilters = () => {
     const parent = document.getElementById('ul-filters');
     // filtri mappati sul WorkBook
-    if (WorkSheet.filters.has(WorkSheet.activeTable.dataset.alias)) {
-      for (const [token, value] of Object.entries(WorkSheet.filters.get(WorkSheet.activeTable.dataset.alias))) {
-        const tmpl = app.tmplList.content.cloneNode(true);
-        const li = tmpl.querySelector('li[data-filter]');
-        const content = li.querySelector('.li-content');
-        const btnDrag = content.querySelector('i');
-        const span = content.querySelector('span');
-        const btnEdit = li.querySelector('i[data-id="filters-edit"]');
-        li.id = token;
-        li.dataset.type = 'filter';
-        // li.dataset.id = tableId;
-        // li.dataset.schema = value.schema;
-        li.dataset.table = value.workBook.table;
-        li.dataset.alias = value.workBook.tableAlias;
-        li.dataset.field = value.field;
-        li.addEventListener('click', app.addFilter);
-        // TODO: eventi drag sull'icona drag
-        li.addEventListener('dragstart', app.fieldDragStart);
-        li.addEventListener('dragend', app.fieldDragEnd);
-        span.innerHTML = value.name;
-        parent.appendChild(li);
-      }
+    for (const [token, value] of WorkSheet.filters) {
+      const tmpl = app.tmplList.content.cloneNode(true);
+      const li = tmpl.querySelector('li[data-filter]');
+      const content = li.querySelector('.li-content');
+      const btnDrag = content.querySelector('i');
+      const span = content.querySelector('span');
+      const btnEdit = li.querySelector('i[data-id="filters-edit"]');
+      li.id = token;
+      // li.dataset.type = 'filter';
+      li.dataset.field = value.field;
+      li.addEventListener('click', app.addFilter);
+      // TODO: eventi drag sull'icona drag
+      li.addEventListener('dragstart', app.fieldDragStart);
+      li.addEventListener('dragend', app.fieldDragEnd);
+      span.innerHTML = value.name;
+      parent.appendChild(li);
     }
   }
 
@@ -1958,8 +1954,8 @@ var Sheet;
       parent.appendChild(details);
       app.addDefinedMetrics(li);
       app.addDefinedFields(details);
-      app.addDefinedFilters();
     }
+    if (WorkSheet.filters.size !== 0) app.addDefinedFilters();
     app.addDefinedAdvMetrics();
   }
 

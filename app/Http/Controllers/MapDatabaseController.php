@@ -165,8 +165,10 @@ class MapDatabaseController extends Controller
   {
     $cube = json_decode(json_encode($request->all())); // object
     $q = new Cube();
-    $q->baseTableName = "WEB_BI_TMP_BASE_test";
-    $q->datamartName = "WEB_BI_1";
+    // imposto le proprietà con i magic methods
+    $q->reportId = $cube->{'id'};
+    $q->baseTableName = "WEB_BI_TMP_BASE_$q->reportId";
+    $q->datamartName = "WEB_BI_$q->reportId";
     $q->baseColumns = $cube->{'fields'};
     // imposto le colonne da includere nel datamart finale
     $q->sheetFields();
