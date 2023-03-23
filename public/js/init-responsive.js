@@ -1827,75 +1827,13 @@ var Sheet;
 
   // salvataggio metrica composta
   // save compositeMetric
-  app.btnCompositeMetricSave.onclick = (e) => {
+  app.btnCompositeMetricSave = (e) => {
     const alias = document.getElementById('composite-metric-name').value;
     const parent = document.getElementById('ul-metrics');
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
-
-
-
-
-    // *************************************
-    let arr_sql = [];
-    const date = new Date();
-    const token = (!e.target.dataset.token) ? rand().substring(0, 21) : e.target.dataset.token;
-    let metricsAlias = {}; // contiene un'elenco di object con nome_metrica : alias che compongono la metrica composta
-    let cubes = new Set(); // contiene i cubi relativi alle metriche all'interno della metrica composta
-    if (e.target.dataset.token) StorageMetric.selected = token;
-    document.querySelectorAll('#composite-metric-formula *').forEach(element => {
-      if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
-      // se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
-      if (element.nodeName === 'MARK') {
-        StorageMetric.selected = element.dataset.metricToken;
-        // recupero il nome del cubo a cui appartiene la metrica. Questo lo visualizzerò nell'elenco delle metriche composte
-        // ciclo i cubi, per le metriche_type =4
-        /* if (StorageMetric.selected.metric_type === 4) {
-          StorageMetric.selected.include.cubes.forEach(cubeToken => cubes.add(cubeToken));
-        } else {
-          cubes.add(StorageMetric.selected.include.cubes);
-        } */
-        StorageMetric.selected.include.cubes.forEach(cubeToken => cubes.add(cubeToken));
-        console.log(cubes);
-        debugger;
-        // TODO: probabilmente qui meglio inserire tutto il contenuto della metrica e non solo l'alias
-        metricsAlias[element.innerText] = { token: element.dataset.metricToken, alias: StorageMetric.selected.formula.alias };
-        // TODO: verificare se è presente il distinct : true in ogni metrica
-        arr_sql.push(StorageMetric.selected.name);
-      } else {
-        arr_sql.push(element.innerText.trim());
-      }
-    });
-    // arr_sql.push(`AS '${inputAlias.value}'`);
-    let metricObj = {
-      type: 'COMP_METRIC', name: inputName.value, token, metric_type: 4,
-      formula: { token, formula_sql: arr_sql, alias: inputAlias.value, metrics_alias: metricsAlias },
-      include: { cubes: [...cubes] },
-      updated_at: date.toLocaleDateString('it-IT', options),
-    };
-    // metricObj.nested = (metric.dataset.nested) ? true : false;
-    metricObj.created_at = (e.target.dataset.token) ? StorageMetric.selected.created_at : date.toLocaleDateString('it-IT', options);
-    console.log(metricObj);
     debugger;
-    StorageMetric.save(metricObj);
-    // salvo nel DB
-    // app.saveMetricDB(metricObj);
-    if (e.target.dataset.token) {
-      // aggiornamento metrica
-      document.querySelector("#ul-composite-metrics section[data-metric-token='" + token + "']").dataset.label = inputName.value;
-      document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + token + "'] span[metric]").innerText = inputName.value;
-    } else {
-      // reimposto, come metrica selezionata, la metrica appena creata che è da aggiungere a #ul-composite-metrics
-      StorageMetric.selected = token;
-      // salvataggio nuova metrica, le aggiungo alle <ul>
-      List.addCompositeMetric();
-      List.addAllMetric();
-    }
-    inputName.value = "";
-    inputAlias.value = "";
-    document.querySelectorAll('#composite-metric-formula *').forEach(item => item.remove());
-    app.btnCompositeMetricSave.disabled = true;
-    // **********************************
+
   }
 
 
