@@ -61,8 +61,9 @@ class Sheets {
   get filters() { return this.#filters; }
 
   set metrics(object) {
-    this.#metrics.set(object.token, object.value);
+    this.#metrics.set(object.field, object);
     console.info('this.#metrics : ', this.#metrics);
+    debugger;
   }
 
   get metrics() { return this.#metrics; }
@@ -200,7 +201,6 @@ class WorkBooks {
   #activeTable;
   #field = new Map();
   #fields = new Map();
-  #metric = new Map();
   #metrics = new Map();
   #join = new Map();
   #joins = new Map();
@@ -312,22 +312,8 @@ class WorkBooks {
 
   get nTables() { return this.#nTables; }*/
 
-  set metric(object) {
-    this.#metric.set(object.token, object.value);
-  }
-
-  get metric() { return this.#metric; }
-
-  set metrics(token) {
-    if (!this.#metrics.has(this.#metric.get(token).workBook.tableAlias)) {
-      this.#metrics.set(this.#metric.get(token).workBook.tableAlias, {
-        [token]: this.#metric.get(token)
-      });
-    } else {
-      // alias di tabella già presente
-      this.#metrics.get(this.#metric.get(token).workBook.tableAlias)[token] = this.#metric.get(token);
-    }
-    console.log('#metrics : ', this.#metrics);
+  set metrics(object) {
+    this.#metrics.set(object.token, object.value);
   }
 
   get metrics() { return this.#metrics; }
@@ -371,7 +357,6 @@ class WorkSheets extends WorkBooks {
   */
   #filter = new Map();
   #filters = new Map();
-  // #metrics = new Map();
   #advMetrics = new Map();
   #columns = new Map();
   constructor(name) {
@@ -384,13 +369,6 @@ class WorkSheets extends WorkBooks {
   }
 
   get columns() { return this.#columns; }
-
-  /* set metrics(object) {
-    this.#metrics.set(object.token, object.value);
-    console.log('sheet metrics : ', this.#metrics);
-  }
-
-  get metrics() { return this.#metrics; } */
 
   set advMetrics(object) {
     this.#advMetrics.set(object.token, object.value);
@@ -471,12 +449,8 @@ class WorkSheets extends WorkBooks {
     }
 
     // metriche aggiunte allo WorkSheet
-    for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.metrics)) {
-      // per ogni tabella
-      for (const [token, metric] of Object.entries(values)) {
-        this.metric = { token, value: metric };
-        this.metrics = token;
-      }
+    for (const [token, values] of Object.entries(WorkBookStorage.workBook.metrics)) {
+      this.metrics = { token, value: values };
     }
 
     // metriche avanzate aggiunte allo WorkSheet

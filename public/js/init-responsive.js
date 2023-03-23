@@ -423,27 +423,26 @@ var Sheet;
     let span = field.querySelector('span');
     field.dataset.type = elementRef.dataset.type;
     field.dataset.id = elementRef.id;
-    const rand = () => Math.random(0).toString(36).substring(2);
-    const token = rand().substring(0, 7);
+    // const rand = () => Math.random(0).toString(36).substring(2);
+    // const token = rand().substring(0, 7);
     let metricProp, metric;
     switch (field.dataset.type) {
       case 'metric':
-        metricProp = WorkSheet.metric.get(elementRef.id);
+        metricProp = WorkSheet.metrics.get(elementRef.id);
         metric = {
-          token,
-          alias: metricProp.alias,
+          field: metricProp.field,
+          token: metricProp.formula.token,
           formula: {
-            token: metricProp.formula.token,
             aggregateFn: metricProp.formula.aggregateFn,
             alias: `${metricProp.formula.alias}_${metricProp.formula.aggregateFn}`,
             distinct: metricProp.formula.distinct,
-            field: metricProp.formula.field
+            SQL: metricProp.formula.SQL
           },
           workBook: { table: metricProp.workBook.table, tableAlias: metricProp.workBook.tableAlias }
         }
-        Sheet.metrics = { token, value: metric };
+        debugger;
+        Sheet.metrics = metric;
         app.addMetric(e.currentTarget, token);
-
         break;
       case 'advMetric':
         debugger;
@@ -647,7 +646,7 @@ var Sheet;
     console.log('arr_sql : ', arr_sql);
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
-    WorkSheet.metric = {
+    WorkSheet.metrics = {
       token,
       value: {
         alias: name,
@@ -658,15 +657,13 @@ var Sheet;
         formula: {
           token,
           aggregateFn: 'SUM', // default
-          field: `${arr_sql.join(' ')}`,
+          SQL: `${arr_sql.join(' ')}`,
           distinct: false, // default
           alias: name, // es.:costo
-          fields, // es.:[przMedio, quantita]
-          formula_old_logic: arr_sql
+          fields // es.:[przMedio, quantita]
         }
       }
     };
-    WorkSheet.metrics = token;
   }
 
   /* selezione di una colonna dalla table-preview, aggiungo la colonna alla dialog-custom-metric 
@@ -706,21 +703,21 @@ var Sheet;
     debugger;
 
     // metric Map Object
-    WorkSheet.metric = {
+    WorkSheet.metrics = {
       token,
       value: {
         alias,
+        field: e.target.dataset.field,
         workBook: { table, tableAlias },
         formula: {
           token,
           aggregateFn: 'SUM', // default
-          field,
+          SQL: field,
           distinct: false, // default
           alias
         }
       }
     };
-    WorkSheet.metrics = token;
   }
 
   app.textareaDragEnter = (e) => {
@@ -1386,7 +1383,7 @@ var Sheet;
     const field = e.target.dataset.field;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
-    WorkSheet.metric = {
+    WorkSheet.metrics = {
       token,
       value: {
         alias,
@@ -1400,8 +1397,11 @@ var Sheet;
         }
       }
     };
-    WorkSheet.metrics = token;
     WorkSheet.save();
+  }
+
+  app.saveCompositeMetric = () => {
+    debugger;
   }
 
   app.setSheet = () => {
@@ -1743,8 +1743,8 @@ var Sheet;
     console.log(e.target);
     const token = e.currentTarget.dataset.token;
     // recupero la metrica da WorkSheet.metric
-    console.log(WorkSheet.metric.get(token));
-    const metric = WorkSheet.metric.get(token);
+    console.log(WorkSheet.metrics.get(token));
+    const metric = WorkSheet.metrics.get(token);
     const textarea = app.dialogMetric.querySelector('#textarea-metric');
     const span = document.createElement('span');
     span.innerHTML = `${metric.formula.aggregateFn}(${metric.formula.field})`;
@@ -1770,7 +1770,7 @@ var Sheet;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
     let filters = {};
-    const baseMetric = WorkSheet.metric.get(e.target.dataset.token);
+    const baseMetric = WorkSheet.metrics.get(e.target.dataset.token);
     // recupero tutti i filtri droppati in #filter-drop
     app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => {
       filters[filter.dataset.token] = WorkSheet.filters.get(filter.dataset.token);
@@ -1902,8 +1902,8 @@ var Sheet;
   app.addDefinedMetrics = () => {
     // metriche mappate sul cubo
     const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
-    if (WorkSheet.metrics.has(WorkSheet.activeTable.dataset.alias)) {
-      for (const [token, value] of Object.entries(WorkSheet.metrics.get(WorkSheet.activeTable.dataset.alias))) {
+    if (WorkSheet.metrics.size !== 0) {
+      for (const [token, value] of WorkSheet.metrics) {
         const tmpl = app.tmplList.content.cloneNode(true);
         const li = tmpl.querySelector('li[data-li-drag][data-base-metrics]');
         const content = li.querySelector('.li-content');
@@ -1915,7 +1915,6 @@ var Sheet;
         li.dataset.type = 'metric';
         // li.dataset.id = tableId;
         // li.dataset.schema = value.schema;
-        debugger;
         li.dataset.table = value.workBook.table;
         li.dataset.tableAlias = value.workBook.tableAlias;
         li.dataset.field = value.formula.alias;
@@ -1973,10 +1972,10 @@ var Sheet;
       summary.innerHTML = value.name;
       summary.dataset.tableId = tableId;
       parent.appendChild(details);
-      app.addDefinedMetrics(li);
       app.addDefinedFields(details);
     }
     if (WorkSheet.filters.size !== 0) app.addDefinedFilters();
+    app.addDefinedMetrics();
     app.addDefinedAdvMetrics();
   }
 
