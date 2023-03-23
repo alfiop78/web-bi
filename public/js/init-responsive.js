@@ -625,7 +625,6 @@ var Sheet;
     }
   }
 
-
   // save metrica composta di base
   app.saveCustomMetric = () => {
     const name = document.getElementById('custom-metric-name').value;

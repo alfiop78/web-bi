@@ -230,7 +230,7 @@
                     <input type="text" id="custom-filter-name" value="" autocomplete="off" />
                     <label for="custom-filter-name" class="">Nome</label>
                   </div>
-                  <div id="textarea-filter" data-content-editable></div>
+                  <div id="textarea-filter" data-fn="addText" class="textarea" data-content-editable></div>
                 </section>
               </section>
               <section class="buttons">
@@ -334,6 +334,7 @@
                           <section id="workbook-name" class="data-source" contenteditable="true">WorkSpace 1</section>
                           <button data-fn="workBookNew" id="btn-workbook-new" value="Nuovo" disabled>Nuovo</button>
                           <button data-fn="workBookOpen" id="btn-workbook-open" value="open">Apri</button>
+                          <button data-fn="workBookClose" id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button>
                         </menu>
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
                           <svg id="svg" class="dropzone" data-level="0">
