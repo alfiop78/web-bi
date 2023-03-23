@@ -23,6 +23,7 @@ var Sheet;
     dialogFilters: document.getElementById('dlg-filters'),
     dialogMetric: document.getElementById('dlg-metric'),
     dialogCustomMetric: document.getElementById('dlg-custom-metric'),
+    dialogCompositeMetric: document.getElementById('dlg-composite-metric'),
     windowJoin: document.getElementById('window-join'),
     dialogColumns: document.getElementById('dlg-columns'),
     // buttons
@@ -39,6 +40,7 @@ var Sheet;
     // columns and rows dropzone (step 2)
     columnsDropzone: document.getElementById('dropzone-columns'),
     rowsDropzone: document.getElementById('dropzone-rows'),
+    textareaCompositeMetric: document.getElementById('textarea-composite-metric'),
 
     textAreaMetric: document.getElementById('textarea-metric')
   }
@@ -701,6 +703,7 @@ var Sheet;
     const alias = e.target.dataset.field;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
+    debugger;
 
     // metric Map Object
     WorkSheet.metric = {
@@ -761,10 +764,16 @@ var Sheet;
     e.currentTarget.classList.remove('dragging');
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
-    const field = document.createTextNode(elementRef.dataset.field);
-    // const span = document.createElement('span');
-    // span.innerText = elementRef.dataset.field;
-    e.currentTarget.appendChild(field);
+    // const field = document.createTextNode(elementRef.dataset.field);
+    // e.currentTarget.appendChild(field);
+    const templateContent = app.tmplFormula.content.cloneNode(true);
+    const span = templateContent.querySelector('span');
+    const mark = templateContent.querySelector('mark');
+    mark.dataset.metricToken = elementRef.id;
+    mark.innerText = elementRef.dataset.field;
+    app.textareaCompositeMetric.appendChild(span);
+    // aggiungo anche uno span per il proseguimento della scrittura della formula
+    app.addSpan(app.textareaCompositeMetric, null, 'metric');
   }
 
   app.columnsDropzone.addEventListener('dragenter', app.columnDragEnter, false);
@@ -835,12 +844,8 @@ var Sheet;
     Sheet.fields.get(token).name = e.target.innerHTML;
   }
 
-  app.btnMetricNew = () => {
-    console.log(WorkSheet.activeTable.dataset.table);
-    // app.dialogMetric.show();
-    // TODO: popolo la <nav> con i filtri
-
-  }
+  // apertura dialog per creazione metrica composta
+  app.btnCompositeMetric = () => app.dialogCompositeMetric.show();
 
   // apertura dialog con lista WorkBooks
   document.querySelector('#btn-workbook-open').onclick = () => {
@@ -1768,7 +1773,6 @@ var Sheet;
     const baseMetric = WorkSheet.metric.get(e.target.dataset.token);
     // recupero tutti i filtri droppati in #filter-drop
     app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => {
-      debugger;
       filters[filter.dataset.token] = WorkSheet.filters.get(filter.dataset.token);
       // TODO: ogni filtro aggiunto nella metrica deve controllare le tabelle da includere e le sue join (come fatto per setSheet)
     });
@@ -1776,6 +1780,8 @@ var Sheet;
     debugger;
     // TODO: aggiungere opzione 'distinct'.
     // salvo la nuova metrica nello WorkSheet
+    // TODO: probabilmente qui dovrò usare la stessa logica dei filtri, quindi non serve la tabelAlias
+    // come key e non servono due metodi (metric e metrics)
     WorkSheet.advMetrics = {
       token,
       value: {
@@ -1818,6 +1824,80 @@ var Sheet;
     // span.innerHTML = value.formula.field;
     parent.appendChild(li);
   }
+
+  // salvataggio metrica composta
+  // save compositeMetric
+  app.btnCompositeMetricSave.onclick = (e) => {
+    const alias = document.getElementById('composite-metric-name').value;
+    const parent = document.getElementById('ul-metrics');
+    const rand = () => Math.random(0).toString(36).substring(2);
+    const token = rand().substring(0, 7);
+
+
+
+
+    // *************************************
+    let arr_sql = [];
+    const date = new Date();
+    const token = (!e.target.dataset.token) ? rand().substring(0, 21) : e.target.dataset.token;
+    let metricsAlias = {}; // contiene un'elenco di object con nome_metrica : alias che compongono la metrica composta
+    let cubes = new Set(); // contiene i cubi relativi alle metriche all'interno della metrica composta
+    if (e.target.dataset.token) StorageMetric.selected = token;
+    document.querySelectorAll('#composite-metric-formula *').forEach(element => {
+      if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
+      // se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
+      if (element.nodeName === 'MARK') {
+        StorageMetric.selected = element.dataset.metricToken;
+        // recupero il nome del cubo a cui appartiene la metrica. Questo lo visualizzerò nell'elenco delle metriche composte
+        // ciclo i cubi, per le metriche_type =4
+        /* if (StorageMetric.selected.metric_type === 4) {
+          StorageMetric.selected.include.cubes.forEach(cubeToken => cubes.add(cubeToken));
+        } else {
+          cubes.add(StorageMetric.selected.include.cubes);
+        } */
+        StorageMetric.selected.include.cubes.forEach(cubeToken => cubes.add(cubeToken));
+        console.log(cubes);
+        debugger;
+        // TODO: probabilmente qui meglio inserire tutto il contenuto della metrica e non solo l'alias
+        metricsAlias[element.innerText] = { token: element.dataset.metricToken, alias: StorageMetric.selected.formula.alias };
+        // TODO: verificare se è presente il distinct : true in ogni metrica
+        arr_sql.push(StorageMetric.selected.name);
+      } else {
+        arr_sql.push(element.innerText.trim());
+      }
+    });
+    // arr_sql.push(`AS '${inputAlias.value}'`);
+    let metricObj = {
+      type: 'COMP_METRIC', name: inputName.value, token, metric_type: 4,
+      formula: { token, formula_sql: arr_sql, alias: inputAlias.value, metrics_alias: metricsAlias },
+      include: { cubes: [...cubes] },
+      updated_at: date.toLocaleDateString('it-IT', options),
+    };
+    // metricObj.nested = (metric.dataset.nested) ? true : false;
+    metricObj.created_at = (e.target.dataset.token) ? StorageMetric.selected.created_at : date.toLocaleDateString('it-IT', options);
+    console.log(metricObj);
+    debugger;
+    StorageMetric.save(metricObj);
+    // salvo nel DB
+    // app.saveMetricDB(metricObj);
+    if (e.target.dataset.token) {
+      // aggiornamento metrica
+      document.querySelector("#ul-composite-metrics section[data-metric-token='" + token + "']").dataset.label = inputName.value;
+      document.querySelector("#ul-composite-metrics .selectable[data-metric-token='" + token + "'] span[metric]").innerText = inputName.value;
+    } else {
+      // reimposto, come metrica selezionata, la metrica appena creata che è da aggiungere a #ul-composite-metrics
+      StorageMetric.selected = token;
+      // salvataggio nuova metrica, le aggiungo alle <ul>
+      List.addCompositeMetric();
+      List.addAllMetric();
+    }
+    inputName.value = "";
+    inputAlias.value = "";
+    document.querySelectorAll('#composite-metric-formula *').forEach(item => item.remove());
+    app.btnCompositeMetricSave.disabled = true;
+    // **********************************
+  }
+
 
   app.addDefinedFields = (parent) => {
     if (WorkSheet.fields.has(WorkSheet.activeTable.dataset.alias)) {
@@ -1897,9 +1977,10 @@ var Sheet;
         li.dataset.type = 'metric';
         // li.dataset.id = tableId;
         // li.dataset.schema = value.schema;
+        debugger;
         li.dataset.table = value.workBook.table;
-        li.dataset.alias = value.workBook.tableAlias;
-        li.dataset.field = value.formula.field;
+        li.dataset.tableAlias = value.workBook.tableAlias;
+        li.dataset.field = value.formula.alias;
         // TODO: gli eventi drag dovranno essere posizionati sul btnDrag, quindi anche l'attributo id
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
@@ -2072,5 +2153,10 @@ var Sheet;
   }
 
   /* NOTE: END SUPPORT FUNCTIONS */
+
+  app.textareaCompositeMetric.addEventListener('dragenter', app.textareaDragEnter, false);
+  app.textareaCompositeMetric.addEventListener('dragover', app.textareaDragOver, false);
+  app.textareaCompositeMetric.addEventListener('dragleave', app.textareaDragLeave, false);
+  app.textareaCompositeMetric.addEventListener('drop', app.textareaDrop, false);
 
 })();

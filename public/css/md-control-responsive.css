@@ -34,6 +34,10 @@
   min-height: 300px;
 }
 
+.textarea{
+  background-color: white;
+}
+
 /* *[data-content-editable][data-mode="all"] {display: none;} */
 *[data-content-editable][data-mode="all"] {opacity: .6;}
 *[data-content-editable][data-mode="id"] *[data-mode="ds"] {display: none;}

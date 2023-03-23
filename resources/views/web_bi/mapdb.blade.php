@@ -176,6 +176,27 @@
             </section>
           </dialog>
 
+          <!-- creazione metrica composta -->
+          <dialog id="dlg-composite-metric" class="medium">
+            <section class="dlg-grid">
+              <section class="dlg-title">Creazione Metrica</section>
+              <section class="dlg-content col col-1">
+                <section class="textarea-formula">
+                  <div class="md-field">
+                    <input type="text" id="composite-metric-name" value="" autocomplete="off" />
+                    <label for="composite-metric-name" class="">Nome</label>
+                  </div>
+                  <div id="textarea-composite-metric" data-fn="addText" data-content-editable class="dropzone textarea"></div>
+                </section>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button data-fn="saveCompositeMetric" id="btn-composite-metric-save" value="salva">Salva</button>
+              </section>
+            </section>
+          </dialog>
+
+          <!-- creazione metrica filtrata -->
           <dialog id="dlg-metric" class="medium">
             <section class="dlg-grid">
               <section class="dlg-title">Creazione Metrica</section>
@@ -284,26 +305,6 @@
                 </div>
               </section>
             </div>
-
-            <!--<div class="absolute-window" id="window-columns" data-x="0" data-y="0" data-open="false">
-              <section class="wc-content">
-                <section class="w-title">
-                  <p class="title">Definizione colonna</p>
-                </section>
-                <section class="define-fields">
-                  <div class="textarea">
-                    <textarea id="textarea-column-id-formula" data-mode="field" rows="10" placeholder="ID Formula" autocomplete="off" autofocus="" required="" minlength="1"></textarea>
-                  </div>
-                  <div class="textarea">
-                    <textarea id="textarea-column-ds-formula" data-mode="field" rows="10" placeholder="DS Formula" autocomplete="off" autofocus="" required="" minlength="1"></textarea>
-                  </div>
-                </section>
-                <div class="dialog-buttons">
-                  <button type="button" name="cancel" class="md-button">annulla</button>
-                  <button id="btn-columns-define" data-fn="saveColumn" type="button" name="done" class="md-button">SALVA</button>
-                </div>
-              </section>
-            </div>-->
 
             <dialog id="dlg-columns" data-x="0" data-y="0" class="medium absolute">
               <section class="dlg-grid">
@@ -415,7 +416,7 @@
                               <ul id="ul-metrics" class="custom-scrollbar"></ul>
                               <li class="new-worksheet-object">
                                 <i class="material-icons-round md-18 new-object">add</i>
-                                <button class="new-object" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica composta</button>
+                                <button class="new-object" data-fn="btnCompositeMetric" type="button" value="Nuova Metrica">Nuova Metrica</button>
                               </li>
                             </section>
                             <section data-worksheet-object class="custom-scrollbar">
