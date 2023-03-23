@@ -61,8 +61,15 @@ class Sheets {
   get filters() { return this.#filters; }
 
   set metrics(object) {
-    this.#metrics.set(object.field, object);
-    console.info('this.#metrics : ', this.#metrics);
+    this.#metrics.set(object.token, {
+      alias: object.value.alias,
+      field: object.value.field,
+      token: object.value.token, // il token di origine della metrica
+      aggregateFn: object.value.aggregateFn,
+      distinct: object.value.distinct,
+      SQL: object.value.SQL
+    });
+    console.info('sheet.#metrics : ', this.#metrics);
     debugger;
   }
 
@@ -313,7 +320,9 @@ class WorkBooks {
   get nTables() { return this.#nTables; }*/
 
   set metrics(object) {
-    this.#metrics.set(object.token, object.value);
+    this.#metrics.set(object.token, object);
+    console.log('worksheet metrics : ', this.#metrics);
+    debugger;
   }
 
   get metrics() { return this.#metrics; }
@@ -450,7 +459,7 @@ class WorkSheets extends WorkBooks {
 
     // metriche aggiunte allo WorkSheet
     for (const [token, values] of Object.entries(WorkBookStorage.workBook.metrics)) {
-      this.metrics = { token, value: values };
+      this.metrics = values;
     }
 
     // metriche avanzate aggiunte allo WorkSheet

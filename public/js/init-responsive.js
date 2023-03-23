@@ -382,16 +382,13 @@ var Sheet;
     const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('.metric-defined');
     const formula = field.querySelector('.formula');
-    formula.dataset.token = token;
     const fieldName = formula.querySelector('code[data-field]');
-    // fieldName.dataset.field = Sheet.metrics.get(token).alias;
-    fieldName.dataset.field = Sheet.metrics.get(token).formula.field;
-    // fieldName.dataset.field = elementRef.dataset.field;
-    fieldName.innerHTML = Sheet.metrics.get(token).formula.field;
-    fieldName.dataset.tableAlias = Sheet.metrics.get(token).workBook.tableAlias;
-    Sheet.tables = Sheet.metrics.get(token).workBook.tableAlias;
+    formula.dataset.token = token;
+    fieldName.dataset.field = Sheet.metrics.get(token).field;
+    fieldName.innerHTML = Sheet.metrics.get(token).alias;
+    // fieldName.dataset.tableAlias = Sheet.metrics.get(token).workBook.tableAlias;
+    // Sheet.tables = Sheet.metrics.get(token).workBook.tableAlias;
     target.appendChild(field);
-    app.setSheet();
   }
 
   app.addAdvMetric = (target, token) => {
@@ -423,25 +420,16 @@ var Sheet;
     let span = field.querySelector('span');
     field.dataset.type = elementRef.dataset.type;
     field.dataset.id = elementRef.id;
-    // const rand = () => Math.random(0).toString(36).substring(2);
+    const rand = () => Math.random(0).toString(36).substring(2);
     // const token = rand().substring(0, 7);
-    let metricProp, metric;
+    let workSheetMetric, metric;
     switch (field.dataset.type) {
       case 'metric':
-        metricProp = WorkSheet.metrics.get(elementRef.id);
-        metric = {
-          field: metricProp.field,
-          token: metricProp.formula.token,
-          formula: {
-            aggregateFn: metricProp.formula.aggregateFn,
-            alias: `${metricProp.formula.alias}_${metricProp.formula.aggregateFn}`,
-            distinct: metricProp.formula.distinct,
-            SQL: metricProp.formula.SQL
-          },
-          workBook: { table: metricProp.workBook.table, tableAlias: metricProp.workBook.tableAlias }
-        }
+        const token = rand().substring(0, 7);
         debugger;
-        Sheet.metrics = metric;
+        Sheet.metrics = { token, value: WorkSheet.metrics.get(elementRef.id) };
+        // Sheet.metrics = metric;
+        debugger;
         app.addMetric(e.currentTarget, token);
         break;
       case 'advMetric':
@@ -697,26 +685,19 @@ var Sheet;
     const table = WorkSheet.activeTable.dataset.table;
     const tableAlias = WorkSheet.activeTable.dataset.alias;
     const field = `${tableAlias}.${e.target.dataset.field}`;
-    const alias = e.target.dataset.field;
+    const alias = `${e.target.dataset.field}_alias`;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
-    debugger;
 
     // metric Map Object
     WorkSheet.metrics = {
       token,
-      value: {
-        alias,
-        field: e.target.dataset.field,
-        workBook: { table, tableAlias },
-        formula: {
-          token,
-          aggregateFn: 'SUM', // default
-          SQL: field,
-          distinct: false, // default
-          alias
-        }
-      }
+      alias,
+      field: e.target.dataset.field,
+      workBook: { table, tableAlias },
+      aggregateFn: 'SUM', // default
+      SQL: field,
+      distinct: false, // default
     };
   }
 
@@ -827,13 +808,13 @@ var Sheet;
   // edit di una funzione di aggregazione sulla metrica aggiunta allo Shet
   app.editAggregate = (e) => {
     const token = e.target.parentElement.dataset.token;
-    Sheet.metrics.get(token).formula.aggregateFn = e.target.innerHTML;
+    Sheet.metrics.get(token).aggregateFn = e.target.innerHTML;
   }
 
   // edit di un alias della metrica dopo essere stata aggiunta allo Sheet
   app.editMetricAlias = (e) => {
     const token = e.target.parentElement.dataset.token;
-    Sheet.metrics.get(token).formula.alias = e.target.innerHTML;
+    Sheet.metrics.get(token).alias = e.target.innerHTML;
   }
 
   app.editFieldAlias = (e) => {
@@ -1910,6 +1891,7 @@ var Sheet;
         const btnDrag = content.querySelector('i');
         const span = content.querySelector('span');
         const btnAdd = li.querySelector('i[data-id="filters-add"]');
+        debugger;
         li.id = token;
         // TODO: questo potrei eliminarlo perchè questa lista avrà l'attributo data-base-metrics
         li.dataset.type = 'metric';
@@ -1917,17 +1899,17 @@ var Sheet;
         // li.dataset.schema = value.schema;
         li.dataset.table = value.workBook.table;
         li.dataset.tableAlias = value.workBook.tableAlias;
-        li.dataset.field = value.formula.alias;
+        li.dataset.field = value.field;
         // TODO: gli eventi drag dovranno essere posizionati sul btnDrag, quindi anche l'attributo id
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
         li.addEventListener('contextmenu', app.contextMenuMetrics);
         btnAdd.dataset.table = value.workBook.table;
         btnAdd.dataset.alias = value.workBook.tableAlias;
-        btnAdd.dataset.field = value.formula.field;
+        btnAdd.dataset.field = value.field;
         btnAdd.dataset.token = token;
         btnAdd.addEventListener('click', app.handlerMetric);
-        span.innerHTML = value.formula.alias;
+        span.innerHTML = value.alias;
         // span.innerHTML = value.formula.field;
         parent.appendChild(li);
       }
