@@ -18,6 +18,7 @@ class Cube
   private $_metrics_advanced_datamart = array();
   private $_composite_sql_formula;
   private $_composite_metrics = array();
+  private $cm = array();
 
   public function __get($value)
   {
@@ -665,11 +666,8 @@ class Cube
         $arrayMetrics[$metric->alias] = "NVL({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
         // dd($arrayMetrics);
         // _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
-        $this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\nNVL({$metric->aggregateFn}($tableName.'{$metric->alias}'), 0) AS '{$metric->alias}'";
-        // verifico se sono presenti metriche composte che contengono la metrica in ciclo, stessa logica utilizzata per le metriche di base
-        // if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($tableName, $metric);
-        // aggiungo la FROM inclusa nella metrica filtrata alla FROM_baseTable
-        // dd($metric->formula->filters);
+        $this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\nNVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
+        // $this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\nNVL({$metric->aggregateFn}($tableName.'{$metric->alias}'), 0) AS '{$metric->alias}'";
         // per ogni filtro presente nella metrica
         foreach ($metric->filters as $filter) {
           if (property_exists($filter, 'from')) $this->setSheetFromMetricTable($filter->from);
@@ -886,14 +884,12 @@ class Cube
 
       // dd(property_exists($this, 'compositeMetrics'));
       if (property_exists($this, 'compositeMetrics')) {
-        // $this->createCompositeMetrics();
-        // sono presenti metriche composte
         // dd($this->compositeMetrics);
         foreach ($this->compositeMetrics as $cm) {
-          $this->cm = implode(" ", $cm->sql) . " AS {$cm->alias}";
+          $this->cm[] = "NVL(" . implode(" ", $cm->sql) . ",0) AS {$cm->alias}";
         }
         $sql .= ",\n";
-        $sql .= $this->cm;
+        $sql .= implode(",\n", $this->cm);
       }
       $sql .= "\nFROM\ndecisyon_cache.$this->baseTableName";
       $sql .= "$leftJoin\nGROUP BY $this->_fieldsSQL);";
@@ -907,10 +903,10 @@ class Cube
         // sono presenti metriche composte
         // dd($this->compositeMetrics);
         foreach ($this->compositeMetrics as $cm) {
-          $this->cm = implode(" ", $cm->sql) . " AS {$cm->alias}";
+          $this->cm[] = "NVL(" . implode(" ", $cm->sql) . ",0) AS {$cm->alias}";
         }
         $s .= ",\n";
-        $s .= $this->cm;
+        $s .= implode(",\n", $this->cm);
       }
       $s .= "\nFROM decisyon_cache.$this->baseTableName";
       $s .= "\nGROUP BY $this->_fieldsSQL";
