@@ -612,7 +612,6 @@ class Cube
     return $result;
   }
 
-
   public function baseTable($mode)
   {
     // creo una TEMP_TABLE su cui, successivamente andrò a fare una LEFT JOIN con le TEMP_TABLE contenenti le metriche
@@ -837,7 +836,6 @@ class Cube
     return $result;
   }
 
-
   public function sheetCreateDatamart($mode)
   {
     // dd($this->_metricTable);
@@ -886,7 +884,7 @@ class Cube
             ;
             */
 
-      // dd(property_exists($this, 'compositeMetrics'));
+      dd(property_exists($this, 'compositeMetrics'));
       if (property_exists($this, 'compositeMetrics')) {
         $this->createCompositeMetrics();
         foreach ($this->_composite_sql_formula as $alias_formula) {
@@ -904,18 +902,19 @@ class Cube
       // non sono presenti metriche filtrate
       $s = "SELECT $this->_fieldsSQL";
       if (property_exists($this, 'sheetBaseMetrics')) $s .= ", $this->_metrics_base_datamart";
+      // dd(property_exists($this, 'compositeMetrics'));
       if (property_exists($this, 'compositeMetrics')) {
-        $this->createCompositeMetrics();
+        // $this->createCompositeMetrics();
         // sono presenti metriche composte
-        foreach ($this->_composite_sql_formula as $alias_formula) {
-          $this->_composite_metrics[] = implode(" ", $alias_formula['formula']) . " AS '{$alias_formula["alias"]}'";
+        // dd($this->compositeMetrics);
+        foreach ($this->compositeMetrics as $cm) {
+          $this->cm = implode(" ", $cm->sql) . " AS {$cm->alias}";
         }
         $s .= ",\n";
-        $s .= implode(", ", $this->_composite_metrics);
+        $s .= $this->cm;
       }
       $s .= "\nFROM decisyon_cache.$this->baseTableName";
       $s .= "\nGROUP BY $this->_fieldsSQL";
-      // return $s;
       $sql = "/*Creazione DATAMART finale :\n{$this->datamartName}\n*/\nCREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS\n($s);";
     }
     // dd($sql);
@@ -1003,7 +1002,6 @@ class Cube
             ;
             */
 
-      // dd(property_exists($this, 'compositeMetrics'));
       if (property_exists($this, 'compositeMetrics')) {
         $this->createCompositeMetrics();
         foreach ($this->_composite_sql_formula as $alias_formula) {

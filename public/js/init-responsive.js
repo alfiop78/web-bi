@@ -449,7 +449,6 @@ var Sheet;
         Sheet.compositeMetrics = WorkSheet.compositeMetrics.get(elementRef.id);
         app.addCompositeMetric(e.currentTarget, elementRef.id);
         // TODO: dopo aver aggiunto una metrica composta allo Sheet, è necessario aggiungere anche le metriche al suo interno per consentirne l'elaborazione
-        debugger;
         for (const token of Object.keys(Sheet.compositeMetrics.get(elementRef.id).metrics)) {
           if (WorkSheet.metrics.has(token)) Sheet.metrics = WorkSheet.metrics.get(token);
           if (WorkSheet.advMetrics.has(token)) Sheet.advMetrics = WorkSheet.advMetrics.get(token);
