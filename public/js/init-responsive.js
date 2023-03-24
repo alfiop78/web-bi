@@ -383,8 +383,10 @@ var Sheet;
     const field = tmpl.querySelector('.metric-defined');
     const formula = field.querySelector('.formula');
     const fieldName = formula.querySelector('code[data-field]');
-    formula.dataset.token = token;
+    const aggregateFn = formula.querySelector('code[data-aggregate]');
     fieldName.dataset.field = Sheet.metrics.get(token).field;
+    aggregateFn.innerText = Sheet.metrics.get(token).aggregateFn;
+    formula.dataset.id = token;
     fieldName.innerHTML = Sheet.metrics.get(token).alias;
     // fieldName.dataset.tableAlias = Sheet.metrics.get(token).workBook.tableAlias;
     // Sheet.tables = Sheet.metrics.get(token).workBook.tableAlias;
@@ -395,16 +397,14 @@ var Sheet;
     const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('.metric-defined');
     const formula = field.querySelector('.formula');
-    formula.dataset.token = token;
     const fieldName = formula.querySelector('code[data-field]');
-    // fieldName.dataset.field = Sheet.metrics.get(token).alias;
-    fieldName.dataset.field = Sheet.advMetrics.get(token).formula.field;
-    // fieldName.dataset.field = elementRef.dataset.field;
-    fieldName.innerHTML = Sheet.advMetrics.get(token).formula.field;
-    fieldName.dataset.tableAlias = Sheet.advMetrics.get(token).workBook.tableAlias;
-    Sheet.tables = Sheet.advMetrics.get(token).workBook.tableAlias;
+    const aggregateFn = formula.querySelector('code[data-aggregate]');
+    formula.dataset.token = token;
+    fieldName.dataset.field = Sheet.advMetrics.get(token).field;
+    aggregateFn.innerText = Sheet.advMetrics.get(token).aggregateFn;
+    formula.dataset.id = token;
+    fieldName.innerHTML = Sheet.advMetrics.get(token).alias;
     target.appendChild(field);
-    app.setSheet();
   }
 
   app.columnDrop = (e) => {
@@ -423,33 +423,16 @@ var Sheet;
     const rand = () => Math.random(0).toString(36).substring(2);
     // const token = rand().substring(0, 7);
     let workSheetMetric, metric;
+    debugger;
     switch (field.dataset.type) {
-      case 'metric':
-        const token = rand().substring(0, 7);
-        debugger;
-        Sheet.metrics = { token, value: WorkSheet.metrics.get(elementRef.id) };
-        // Sheet.metrics = metric;
-        debugger;
-        app.addMetric(e.currentTarget, token);
+      case 'basic':
+        Sheet.metrics = WorkSheet.metrics.get(elementRef.id);
+        app.addMetric(e.currentTarget, elementRef.id);
         break;
-      case 'advMetric':
+      case 'advanced':
         debugger;
-        metricProp = WorkSheet.advMetrics.get(elementRef.id);
-        metric = {
-          token,
-          alias: metricProp.alias,
-          formula: {
-            token: metricProp.formula.token,
-            aggregateFn: metricProp.formula.aggregateFn,
-            alias: `${metricProp.formula.alias}_${metricProp.formula.aggregateFn}`,
-            filters: metricProp.formula.filters,
-            distinct: metricProp.formula.distinct,
-            field: metricProp.formula.field
-          },
-          workBook: { table: metricProp.workBook.table, tableAlias: metricProp.workBook.tableAlias }
-        }
-        Sheet.advMetrics = { token, value: metric };
-        app.addAdvMetric(e.currentTarget, token);
+        Sheet.advMetrics = WorkSheet.advMetrics.get(elementRef.id);
+        app.addAdvMetric(e.currentTarget, elementRef.id);
         break;
       default:
         // column
@@ -685,7 +668,7 @@ var Sheet;
     const table = WorkSheet.activeTable.dataset.table;
     const tableAlias = WorkSheet.activeTable.dataset.alias;
     const field = `${tableAlias}.${e.target.dataset.field}`;
-    const alias = `${e.target.dataset.field}_alias`;
+    const alias = e.target.dataset.field;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
 
@@ -694,10 +677,11 @@ var Sheet;
       token,
       alias,
       field: e.target.dataset.field,
-      workBook: { table, tableAlias },
+      // workBook: { table, tableAlias },
       aggregateFn: 'SUM', // default
       SQL: field,
       distinct: false, // default
+      type: 'basic'
     };
   }
 
@@ -807,8 +791,10 @@ var Sheet;
 
   // edit di una funzione di aggregazione sulla metrica aggiunta allo Shet
   app.editAggregate = (e) => {
-    const token = e.target.parentElement.dataset.token;
-    Sheet.metrics.get(token).aggregateFn = e.target.innerHTML;
+    debugger;
+    e.target.dataset.aggregate = e.target.innerText;
+    // const id = e.target.parentElement.dataset.id;
+    // Sheet.metric[id].aggregateFn = e.target.innerHTML;
   }
 
   // edit di un alias della metrica dopo essere stata aggiunta allo Sheet
@@ -1352,7 +1338,7 @@ var Sheet;
   /* NOTE: SUPPORT FUNCTIONS */
 
   // creazione nuova metrica dalla dialog-metric
-  app.saveMetric = () => {
+  /* app.saveMetric = () => {
     const text = app.textAreaMetric.textContent;
     // cerco la metrica all'interno della textarea
     console.log(text.indexOf('NettoRiga'));
@@ -1379,7 +1365,7 @@ var Sheet;
       }
     };
     WorkSheet.save();
-  }
+  } */
 
   app.saveCompositeMetric = () => {
     debugger;
@@ -1727,9 +1713,15 @@ var Sheet;
     console.log(WorkSheet.metrics.get(token));
     const metric = WorkSheet.metrics.get(token);
     const textarea = app.dialogMetric.querySelector('#textarea-metric');
-    const span = document.createElement('span');
-    span.innerHTML = `${metric.formula.aggregateFn}(${metric.formula.field})`;
-    textarea.appendChild(span);
+    const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
+    const field = tmpl.querySelector('.metric-defined');
+    const formula = field.querySelector('.formula');
+    const aggregateFn = formula.querySelector('code[data-aggregate]');
+    const fieldName = formula.querySelector('code[data-field]');
+    // const span = document.createElement('span');
+    aggregateFn.innerText = metric.aggregateFn;
+    fieldName.innerText = metric.field;
+    textarea.appendChild(field);
     // il token presente qui lo recupero in saveAdvMetric() in modo da duplicare la metrica di base ed aggiungerci l'array di filtri
     document.querySelector('#btn-metric-save').dataset.token = token;
     debugger;
@@ -1738,13 +1730,11 @@ var Sheet;
     filterDrop.addEventListener('dragenter', app.handlerDragEnterFilter, false);
     filterDrop.addEventListener('dragleave', app.handlerDragLeaveFilter, false);
     filterDrop.addEventListener('drop', app.handlerDropFilter, false);
-
     app.dialogMetric.show();
-
   }
 
-  // salvataggio metrica avanzata (filtrata)
-  app.saveAdvMetric = (e) => {
+  // salvataggio metrica avanzataa o di base
+  app.saveMetric = (e) => {
     const alias = document.getElementById('adv-metric-name').value;
     // qui aggiungerà la metrica appena creata
     const parent = document.getElementById('ul-metrics');
@@ -1752,56 +1742,72 @@ var Sheet;
     const token = rand().substring(0, 7);
     let filters = {};
     const baseMetric = WorkSheet.metrics.get(e.target.dataset.token);
+    // WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
+    const aggregateFn = app.dialogMetric.querySelector('.formula > code[data-aggregate]').innerText;
+    // const aggregateFn = app.dialogMetric.querySelector('.formula > code[data-aggregate]').dataset.aggregate;
     // recupero tutti i filtri droppati in #filter-drop
     app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => {
       filters[filter.dataset.token] = WorkSheet.filters.get(filter.dataset.token);
       // TODO: ogni filtro aggiunto nella metrica deve controllare le tabelle da includere e le sue join (come fatto per setSheet)
     });
-    console.log(filters);
-    debugger;
-    // TODO: aggiungere opzione 'distinct'.
-    // salvo la nuova metrica nello WorkSheet
-    // TODO: probabilmente qui dovrò usare la stessa logica dei filtri, quindi non serve la tabelAlias
-    // come key e non servono due metodi (metric e metrics)
-    WorkSheet.advMetrics = {
-      token,
-      value: {
+    console.log(Object.keys(filters).length);
+    // TODO: se ci sono filtri la salvo in WorkSheet.advMetrics altrimenti in WorkSheet.metrics
+    if (Object.keys(filters).length !== 0) {
+      // TODO: aggiungere opzione 'distinct'.
+      // TODO: probabilmente qui dovrò usare la stessa logica dei filtri, quindi non serve la tabelAlias
+      // come key e non servono due metodi (metric e metrics)
+      WorkSheet.advMetrics = {
+        token,
         alias,
-        workBook: { table: baseMetric.workBook.table, tableAlias: baseMetric.workBook.tableAlias },
-        formula: {
-          token,
-          aggregateFn: baseMetric.formula.aggregateFn,
-          field: baseMetric.formula.field,
-          filters,
-          distinct: false,
-          alias
-        }
-      }
-    };
+        field: baseMetric.field,
+        aggregateFn,
+        SQL: baseMetric.SQL,
+        filters,
+        distinct: false,
+        type: 'advanced'
+      };
+    } else {
+      debugger;
+      WorkSheet.metrics = {
+        token,
+        alias,
+        field: baseMetric.field,
+        aggregateFn,
+        SQL: baseMetric.SQL,
+        distinct: false, // default
+        type: 'basic'
+      };
+    }
+    // salvo la nuova metrica nello WorkSheet
     WorkSheet.save();
+    // TODO: il codice che aggiunge una metrica al tablesStruct è codice ripetuto
     // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
     const tmpl = app.tmplList.content.cloneNode(true);
     const li = tmpl.querySelector('li[data-li-drag][data-advanced-metrics]');
     const content = li.querySelector('.li-content');
     const btnDrag = content.querySelector('i');
     const span = content.querySelector('span');
-    const btnEdit = li.querySelector('i[data-id="metric-edit"]');
+    // const btnEdit = li.querySelector('i[data-id="metric-edit"]');
     li.id = token;
-    li.dataset.type = 'advMetric';
-    // li.dataset.id = tableId;
-    // li.dataset.schema = value.schema;
-    li.dataset.table = baseMetric.workBook.table;
-    li.dataset.alias = baseMetric.workBook.tableAlias;
-    li.dataset.field = baseMetric.formula.field;
     // TODO: da impostare sull'icona drag
     li.addEventListener('dragstart', app.fieldDragStart);
     li.addEventListener('dragend', app.fieldDragEnd);
-    btnEdit.dataset.table = baseMetric.workBook.table;
-    btnEdit.dataset.alias = baseMetric.workBook.tableAlias;
-    btnEdit.dataset.field = baseMetric.formula.field;
-    btnEdit.dataset.token = token;
-    btnEdit.addEventListener('click', app.editAdvancedMetric);
-    span.innerHTML = baseMetric.formula.alias;
+    li.addEventListener('contextmenu', app.contextMenuMetrics);
+    // btnEdit.dataset.table = baseMetric.workBook.table;
+    // btnEdit.dataset.alias = baseMetric.workBook.tableAlias;
+    // btnEdit.dataset.field = WorkSheet.metrics.get(token).field;
+    // btnEdit.dataset.token = token;
+    // btnEdit.addEventListener('click', app.editAdvancedMetric);
+    // WARN : per il momento inserisco un IF ma sarebbe meglio usare una logica di memorizzare tutti gli elementi del report in un unico oggetto Map
+    if (WorkSheet.metrics.has(token)) {
+      li.dataset.type = WorkSheet.metrics.get(token).type;
+      li.dataset.field = WorkSheet.metrics.get(token).field;
+      span.innerHTML = WorkSheet.metrics.get(token).alias;
+    } else if (WorkSheet.advMetrics.has(token)) {
+      li.dataset.type = WorkSheet.advMetrics.get(token).type;
+      li.dataset.field = WorkSheet.advMetrics.get(token).field;
+      span.innerHTML = WorkSheet.advMetrics.get(token).alias;
+    }
     // span.innerHTML = value.formula.field;
     parent.appendChild(li);
   }
@@ -1851,21 +1857,21 @@ var Sheet;
       const span = content.querySelector('span');
       const btnEdit = li.querySelector('i[data-id="metric-edit"]');
       li.id = token;
-      li.dataset.type = 'advMetric';
+      li.dataset.type = value.type;
       // li.dataset.id = tableId;
       // li.dataset.schema = value.schema;
-      li.dataset.table = value.workBook.table;
-      li.dataset.alias = value.workBook.tableAlias;
-      li.dataset.field = value.formula.field;
+      // li.dataset.table = value.workBook.table;
+      // li.dataset.alias = value.workBook.tableAlias;
+      li.dataset.field = value.field;
       // TODO: da impostare sull'icona drag
       li.addEventListener('dragstart', app.fieldDragStart);
       li.addEventListener('dragend', app.fieldDragEnd);
-      btnEdit.dataset.table = value.workBook.table;
-      btnEdit.dataset.alias = value.workBook.tableAlias;
-      btnEdit.dataset.field = value.formula.field;
+      // btnEdit.dataset.table = value.workBook.table;
+      // btnEdit.dataset.alias = value.workBook.tableAlias;
+      btnEdit.dataset.field = value.field;
       btnEdit.dataset.token = token;
       btnEdit.addEventListener('click', app.editAdvancedMetric);
-      span.innerHTML = value.formula.alias;
+      span.innerHTML = value.alias;
       // span.innerHTML = value.formula.field;
       parent.appendChild(li);
     }
@@ -1891,21 +1897,21 @@ var Sheet;
         const btnDrag = content.querySelector('i');
         const span = content.querySelector('span');
         const btnAdd = li.querySelector('i[data-id="filters-add"]');
-        debugger;
         li.id = token;
         // TODO: questo potrei eliminarlo perchè questa lista avrà l'attributo data-base-metrics
-        li.dataset.type = 'metric';
+        li.dataset.type = value.type;
         // li.dataset.id = tableId;
         // li.dataset.schema = value.schema;
-        li.dataset.table = value.workBook.table;
-        li.dataset.tableAlias = value.workBook.tableAlias;
+        // li.dataset.table = value.workBook.table;
+        // li.dataset.tableAlias = value.workBook.tableAlias;
         li.dataset.field = value.field;
+        li.dataset.id = value.alias;
         // TODO: gli eventi drag dovranno essere posizionati sul btnDrag, quindi anche l'attributo id
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
         li.addEventListener('contextmenu', app.contextMenuMetrics);
-        btnAdd.dataset.table = value.workBook.table;
-        btnAdd.dataset.alias = value.workBook.tableAlias;
+        // btnAdd.dataset.table = value.workBook.table;
+        // btnAdd.dataset.alias = value.workBook.tableAlias;
         btnAdd.dataset.field = value.field;
         btnAdd.dataset.token = token;
         btnAdd.addEventListener('click', app.handlerMetric);

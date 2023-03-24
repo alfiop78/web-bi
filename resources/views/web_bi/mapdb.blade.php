@@ -128,7 +128,7 @@
     <template id="tmpl-metrics-defined">
       <div class="metric-defined">
         <section class="formula" data-token>
-          <code data-aggregate="SUM" contenteditable="true" data-blur-fn="editAggregate">SUM</code><span>(</span><code data-field="" data-table-alias></code><span>)&nbsp;</span><code data-alias="" data-blur-fn="editMetricAlias" contenteditable="true">alias</code>
+          <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate">SUM</code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span>
         </section>
       </div>
     </template>
@@ -215,7 +215,7 @@
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
-                <button data-fn="saveAdvMetric" id="btn-metric-save" value="salva">Salva</button>
+                <button data-fn="saveMetric" id="btn-metric-save" value="salva">Salva</button>
               </section>
             </section>
           </dialog>

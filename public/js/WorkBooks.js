@@ -61,22 +61,14 @@ class Sheets {
   get filters() { return this.#filters; }
 
   set metrics(object) {
-    this.#metrics.set(object.token, {
-      alias: object.value.alias,
-      field: object.value.field,
-      token: object.value.token, // il token di origine della metrica
-      aggregateFn: object.value.aggregateFn,
-      distinct: object.value.distinct,
-      SQL: object.value.SQL
-    });
+    this.#metrics.set(object.token, object);
     console.info('sheet.#metrics : ', this.#metrics);
-    debugger;
   }
 
   get metrics() { return this.#metrics; }
 
   set advMetrics(object) {
-    this.#advMetrics.set(object.token, object.value);
+    this.#advMetrics.set(object.token, object);
     console.info('this.#advMetrics : ', this.#advMetrics);
   }
 
@@ -262,7 +254,7 @@ class WorkBooks {
       // alias di tabella già presente
       this.#fields.get(this.#field.get(token).tableAlias)[token] = this.#field.get(token);
     }
-    console.log('#fields : ', this.#fields);
+    // console.log('#fields : ', this.#fields);
   }
 
   get fields() { return this.#fields; }
@@ -270,7 +262,7 @@ class WorkBooks {
   set join(object) {
     // this.#join.set(object.token, { table: object.table, alias: object.alias, from: object.from, to: object.to });
     this.#join.set(object.token, object.value);
-    console.log('#join :', this.#join);
+    // console.log('#join :', this.#join);
   }
 
   get join() { return this.#join; }
@@ -285,7 +277,7 @@ class WorkBooks {
       // alias di tabella già presente
       this.#joins.get(this.#join.get(token).alias)[token] = this.#join.get(token);
     }
-    console.log('#joins : ', this.#joins);
+    // console.log('#joins : ', this.#joins);
   }
 
   get joins() { return this.#joins; }
@@ -322,7 +314,6 @@ class WorkBooks {
   set metrics(object) {
     this.#metrics.set(object.token, object);
     console.log('worksheet metrics : ', this.#metrics);
-    debugger;
   }
 
   get metrics() { return this.#metrics; }
@@ -364,7 +355,6 @@ class WorkSheets extends WorkBooks {
     * Potrei avere filtri creati in fase di mapping e filtri creati nel WorkSheet (Questo è da implementare)
     * Al momento ho filtri solo nel WorkSheet e non nel WorkBook
   */
-  #filter = new Map();
   #filters = new Map();
   #advMetrics = new Map();
   #columns = new Map();
@@ -380,7 +370,7 @@ class WorkSheets extends WorkBooks {
   get columns() { return this.#columns; }
 
   set advMetrics(object) {
-    this.#advMetrics.set(object.token, object.value);
+    this.#advMetrics.set(object.token, object);
     console.log('sheet advMetrics : ', this.#advMetrics);
   }
 
@@ -391,20 +381,6 @@ class WorkSheets extends WorkBooks {
   }
 
   get filters() { return this.#filters; }
-
-  /* set filters(token) {
-    if (!this.#filters.has(this.#filter.get(token).workBook.tableAlias)) {
-      this.#filters.set(this.#filter.get(token).workBook.tableAlias, {
-        [token]: this.#filter.get(token)
-      });
-    } else {
-      // alias di tabella già presente
-      this.#filters.get(this.#filter.get(token).workBook.tableAlias)[token] = this.#filter.get(token);
-    }
-    console.log('#filters : ', this.#filters);
-  }
-
-  get filters() { return this.#filters; } */
 
   open(token) {
     // TODO: ottimizzare
@@ -464,9 +440,9 @@ class WorkSheets extends WorkBooks {
 
     // metriche avanzate aggiunte allo WorkSheet
     if (WorkBookStorage.workSheet.hasOwnProperty('advMetrics')) {
-      for (const [token, advMetric] of Object.entries(WorkBookStorage.workSheet.advMetrics)) {
+      for (const [token, value] of Object.entries(WorkBookStorage.workSheet.advMetrics)) {
         // per ogni tabella
-        this.advMetrics = { token, value: advMetric };
+        this.advMetrics = value;
       }
 
     }
