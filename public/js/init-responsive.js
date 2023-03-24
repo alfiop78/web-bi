@@ -743,6 +743,8 @@ var Sheet;
     const span = templateContent.querySelector('span');
     const mark = templateContent.querySelector('mark');
     mark.dataset.token = elementRef.id;
+    debugger;
+    mark.dataset.aggregateFn = elementRef.dataset.aggregateFn;
     mark.innerText = elementRef.dataset.alias;
     app.textareaCompositeMetric.appendChild(span);
     // aggiungo anche uno span per il proseguimento della scrittura della formula
@@ -1348,36 +1350,6 @@ var Sheet;
 
   /* NOTE: SUPPORT FUNCTIONS */
 
-  // creazione nuova metrica dalla dialog-metric
-  /* app.saveMetric = () => {
-    const text = app.textAreaMetric.textContent;
-    // cerco la metrica all'interno della textarea
-    console.log(text.indexOf('NettoRiga'));
-    const aggregateFn = 'AVG';
-    // console.log(WorkSheet.activeTable);
-    const table = WorkSheet.activeTable.dataset.table;
-    const tableAlias = WorkSheet.activeTable.dataset.alias;
-    debugger;
-    const field = e.target.dataset.field;
-    const rand = () => Math.random(0).toString(36).substring(2);
-    const token = rand().substring(0, 7);
-    WorkSheet.metrics = {
-      token,
-      value: {
-        alias,
-        workBook: { table, tableAlias },
-        formula: {
-          token,
-          aggregateFn,
-          field,
-          distinct: false,
-          alias
-        }
-      }
-    };
-    WorkSheet.save();
-  } */
-
   // creazione metrica composta
   app.saveCompositeMetric = () => {
     const alias = document.getElementById('composite-metric-name').value;
@@ -1390,12 +1362,13 @@ var Sheet;
       if (element.nodeName === 'MARK') {
         object.metrics[element.dataset.token] = element.innerText;
         // object.metrics[element.innerText] = { token: element.dataset.token, alias: element.innerText };
-        object.sql.push(element.innerText);
+        object.sql.push(`${element.dataset.aggregateFn}(${element.innerText})`);
       } else {
         object.sql.push(element.innerText.trim());
       }
     });
     console.log(object);
+    debugger;
     WorkSheet.compositeMetrics = object;
     WorkSheet.save();
     debugger;
@@ -1765,7 +1738,8 @@ var Sheet;
     const fieldName = formula.querySelector('code[data-field]');
     // const span = document.createElement('span');
     aggregateFn.innerText = metric.aggregateFn;
-    fieldName.innerText = metric.field;
+    // fieldName.innerText = metric.field;
+    fieldName.innerText = metric.alias;
     textarea.appendChild(field);
     // il token presente qui lo recupero in saveAdvMetric() in modo da duplicare la metrica di base ed aggiungerci l'array di filtri
     document.querySelector('#btn-metric-save').dataset.token = token;
@@ -1838,22 +1812,19 @@ var Sheet;
     li.addEventListener('dragstart', app.fieldDragStart);
     li.addEventListener('dragend', app.fieldDragEnd);
     li.addEventListener('contextmenu', app.contextMenuMetrics);
-    // btnEdit.dataset.table = baseMetric.workBook.table;
-    // btnEdit.dataset.alias = baseMetric.workBook.tableAlias;
-    // btnEdit.dataset.field = WorkSheet.metrics.get(token).field;
-    // btnEdit.dataset.token = token;
     // btnEdit.addEventListener('click', app.editAdvancedMetric);
     // WARN : per il momento inserisco un IF ma sarebbe meglio usare una logica di memorizzare tutti gli elementi del report in un unico oggetto Map
     if (WorkSheet.metrics.has(token)) {
       li.dataset.type = WorkSheet.metrics.get(token).type;
       if (WorkSheet.metrics.get(token).hasOwnProperty('field')) li.dataset.field = WorkSheet.metrics.get(token).field;
+      li.dataset.aggregateFn = WorkSheet.metrics.get(token).aggregateFn;
       span.innerHTML = WorkSheet.metrics.get(token).alias;
     } else if (WorkSheet.advMetrics.has(token)) {
       li.dataset.type = WorkSheet.advMetrics.get(token).type;
       if (WorkSheet.advMetrics.get(token).hasOwnProperty('field')) li.dataset.field = WorkSheet.advMetrics.get(token).field;
+      li.dataset.aggregateFn = WorkSheet.advMetrics.get(token).aggregateFn;
       span.innerHTML = WorkSheet.advMetrics.get(token).alias;
     }
-    // span.innerHTML = value.formula.field;
     parent.appendChild(li);
   }
 
@@ -1907,6 +1878,7 @@ var Sheet;
       // li.dataset.schema = value.schema;
       // li.dataset.table = value.workBook.table;
       li.dataset.alias = value.alias;
+      li.dataset.aggregateFn = value.aggregateFn;
       if (value.field) li.dataset.field = value.field;
       // TODO: da impostare sull'icona drag
       li.addEventListener('dragstart', app.fieldDragStart);
@@ -1979,6 +1951,7 @@ var Sheet;
         // la metrica przmedio*Quantita non ha la proprieta 'fields'
         if (value.field) li.dataset.field = value.field;
         li.dataset.alias = value.alias;
+        li.dataset.aggregateFn = value.aggregateFn;
         // TODO: gli eventi drag dovranno essere posizionati sul btnDrag, quindi anche l'attributo id
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
