@@ -663,23 +663,23 @@ class Cube
       foreach ($m as $metric) {
         unset($this->_sql);
         // dd($metric);
-        $arrayMetrics[$metric->formula->alias] = "NVL({$metric->formula->aggregateFn}({$metric->formula->field}), 0) AS '{$metric->formula->alias}'";
+        $arrayMetrics[$metric->alias] = "NVL({$metric->aggregateFn}({$metric->field}), 0) AS '{$metric->alias}'";
         // dd($arrayMetrics);
         // _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
-        $this->_metrics_advanced_datamart[$tableName][$metric->formula->alias] = "\nNVL({$metric->formula->aggregateFn}($tableName.'{$metric->formula->alias}'), 0) AS '{$metric->formula->alias}'";
+        $this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\nNVL({$metric->aggregateFn}($tableName.'{$metric->alias}'), 0) AS '{$metric->alias}'";
         // verifico se sono presenti metriche composte che contengono la metrica in ciclo, stessa logica utilizzata per le metriche di base
         // if (property_exists($this, 'compositeMetrics')) $this->buildCompositeMetrics($tableName, $metric);
         // aggiungo la FROM inclusa nella metrica filtrata alla FROM_baseTable
         // dd($metric->formula->filters);
         // per ogni filtro presente nella metrica
-        foreach ($metric->formula->filters as $filter) {
+        foreach ($metric->filters as $filter) {
           if (property_exists($filter, 'from')) $this->setSheetFromMetricTable($filter->from);
           // aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
           // se, nella metrica in ciclo, non è presente la WHERE devo ripulire WHERE_metricTable altrimenti verranno aggiunte WHERE della precedente metrica filtrata
           (property_exists($filter, 'joins')) ? $this->setSheetWhereMetricTable($filter->joins) : $this->WHERE_metricTable = array();
         }
         // aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
-        $this->setSheetFiltersMetricTable($metric->formula->filters);
+        $this->setSheetFiltersMetricTable($metric->filters);
         // dd($this->filters_baseTable, $this->filters_metricTable);
       }
       // dd($arrayMetrics);

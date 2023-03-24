@@ -407,6 +407,20 @@ var Sheet;
     target.appendChild(field);
   }
 
+  app.addCompositeMetric = (target, token) => {
+    const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
+    const field = tmpl.querySelector('div[data-composite]');
+    const formula = field.querySelector('.formula');
+    const sql = formula.querySelector('code');
+    // const aggregateFn = formula.querySelector('code[data-aggregate]');
+    formula.dataset.token = token;
+    // fieldName.dataset.field = Sheet.compositeMetrics.get(token).field;
+    // aggregateFn.innerText = Sheet.advMetrics.get(token).aggregateFn;
+    formula.dataset.id = token;
+    sql.innerHTML = `${Sheet.compositeMetrics.get(token).alias} - ${Sheet.compositeMetrics.get(token).sql}`;
+    target.appendChild(field);
+  }
+
   app.columnDrop = (e) => {
     e.preventDefault();
     e.currentTarget.classList.replace('dropping', 'dropped');
@@ -422,17 +436,24 @@ var Sheet;
     field.dataset.id = elementRef.id;
     const rand = () => Math.random(0).toString(36).substring(2);
     // const token = rand().substring(0, 7);
-    let workSheetMetric, metric;
-    debugger;
     switch (field.dataset.type) {
       case 'basic':
         Sheet.metrics = WorkSheet.metrics.get(elementRef.id);
         app.addMetric(e.currentTarget, elementRef.id);
         break;
       case 'advanced':
-        debugger;
         Sheet.advMetrics = WorkSheet.advMetrics.get(elementRef.id);
         app.addAdvMetric(e.currentTarget, elementRef.id);
+        break;
+      case 'composite':
+        Sheet.compositeMetrics = WorkSheet.compositeMetrics.get(elementRef.id);
+        app.addCompositeMetric(e.currentTarget, elementRef.id);
+        // TODO: dopo aver aggiunto una metrica composta allo Sheet, è necessario aggiungere anche le metriche al suo interno per consentirne l'elaborazione
+        debugger;
+        for (const token of Object.keys(Sheet.compositeMetrics.get(elementRef.id).metrics)) {
+          if (WorkSheet.metrics.has(token)) Sheet.metrics = WorkSheet.metrics.get(token);
+          if (WorkSheet.advMetrics.has(token)) Sheet.advMetrics = WorkSheet.advMetrics.get(token);
+        }
         break;
       default:
         // column
@@ -599,7 +620,9 @@ var Sheet;
 
   // save metrica composta di base
   app.saveCustomMetric = () => {
-    const name = document.getElementById('custom-metric-name').value;
+    const alias = document.getElementById('custom-metric-name').value;
+    const rand = () => Math.random(0).toString(36).substring(2);
+    const token = rand().substring(0, 7);
     let arr_sql = [];
     let fields = [];
     document.querySelectorAll('#textarea-custom-metric *').forEach(element => {
@@ -615,25 +638,14 @@ var Sheet;
       }
     });
     console.log('arr_sql : ', arr_sql);
-    const rand = () => Math.random(0).toString(36).substring(2);
-    const token = rand().substring(0, 7);
     WorkSheet.metrics = {
       token,
-      value: {
-        alias: name,
-        workBook: {
-          table: WorkSheet.activeTable.dataset.table,
-          tableAlias: WorkSheet.activeTable.dataset.alias
-        },
-        formula: {
-          token,
-          aggregateFn: 'SUM', // default
-          SQL: `${arr_sql.join(' ')}`,
-          distinct: false, // default
-          alias: name, // es.:costo
-          fields // es.:[przMedio, quantita]
-        }
-      }
+      alias,
+      fields, // es.:[przMedio, quantita]
+      aggregateFn: 'SUM', // default
+      SQL: `${arr_sql.join(' ')}`,
+      distinct: false, // default
+      type: 'basic'
     };
   }
 
@@ -731,8 +743,8 @@ var Sheet;
     const templateContent = app.tmplFormula.content.cloneNode(true);
     const span = templateContent.querySelector('span');
     const mark = templateContent.querySelector('mark');
-    mark.dataset.metricToken = elementRef.id;
-    mark.innerText = elementRef.dataset.field;
+    mark.dataset.token = elementRef.id;
+    mark.innerText = elementRef.dataset.alias;
     app.textareaCompositeMetric.appendChild(span);
     // aggiungo anche uno span per il proseguimento della scrittura della formula
     app.addSpan(app.textareaCompositeMetric, null, 'metric');
@@ -1367,8 +1379,42 @@ var Sheet;
     WorkSheet.save();
   } */
 
+  // creazione metrica composta
   app.saveCompositeMetric = () => {
+    const alias = document.getElementById('composite-metric-name').value;
+    const parent = document.getElementById('ul-metrics');
+    const rand = () => Math.random(0).toString(36).substring(2);
+    const token = rand().substring(0, 7);
+    let object = { token, alias, sql: [], metrics: {}, type: 'composite' };
+    document.querySelectorAll('#textarea-composite-metric *').forEach(element => {
+      if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
+      if (element.nodeName === 'MARK') {
+        object.metrics[element.dataset.token] = element.innerText;
+        // object.metrics[element.innerText] = { token: element.dataset.token, alias: element.innerText };
+        object.sql.push(element.innerText);
+      } else {
+        object.sql.push(element.innerText.trim());
+      }
+    });
+    console.log(object);
+    WorkSheet.compositeMetrics = object;
+    WorkSheet.save();
     debugger;
+    // TODO: il codice che aggiunge una metrica al tablesStruct è codice ripetuto
+    // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
+    const tmpl = app.tmplList.content.cloneNode(true);
+    const li = tmpl.querySelector('li[data-li-drag][data-composite-metrics]');
+    const content = li.querySelector('.li-content');
+    const btnDrag = content.querySelector('i');
+    const span = content.querySelector('span');
+    li.id = token;
+    // TODO: da impostare sull'icona drag
+    li.addEventListener('dragstart', app.fieldDragStart);
+    li.addEventListener('dragend', app.fieldDragEnd);
+    li.addEventListener('contextmenu', app.contextMenuMetrics);
+    li.dataset.type = WorkSheet.compositeMetrics.get(token).type;
+    span.innerHTML = WorkSheet.compositeMetrics.get(token).alias;
+    parent.appendChild(li);
   }
 
   app.setSheet = () => {
@@ -1801,11 +1847,11 @@ var Sheet;
     // WARN : per il momento inserisco un IF ma sarebbe meglio usare una logica di memorizzare tutti gli elementi del report in un unico oggetto Map
     if (WorkSheet.metrics.has(token)) {
       li.dataset.type = WorkSheet.metrics.get(token).type;
-      li.dataset.field = WorkSheet.metrics.get(token).field;
+      if (WorkSheet.metrics.get(token).hasOwnProperty('field')) li.dataset.field = WorkSheet.metrics.get(token).field;
       span.innerHTML = WorkSheet.metrics.get(token).alias;
     } else if (WorkSheet.advMetrics.has(token)) {
       li.dataset.type = WorkSheet.advMetrics.get(token).type;
-      li.dataset.field = WorkSheet.advMetrics.get(token).field;
+      if (WorkSheet.advMetrics.get(token).hasOwnProperty('field')) li.dataset.field = WorkSheet.advMetrics.get(token).field;
       span.innerHTML = WorkSheet.advMetrics.get(token).alias;
     }
     // span.innerHTML = value.formula.field;
@@ -1861,16 +1907,43 @@ var Sheet;
       // li.dataset.id = tableId;
       // li.dataset.schema = value.schema;
       // li.dataset.table = value.workBook.table;
-      // li.dataset.alias = value.workBook.tableAlias;
-      li.dataset.field = value.field;
+      li.dataset.alias = value.alias;
+      if (value.field) li.dataset.field = value.field;
       // TODO: da impostare sull'icona drag
       li.addEventListener('dragstart', app.fieldDragStart);
       li.addEventListener('dragend', app.fieldDragEnd);
       // btnEdit.dataset.table = value.workBook.table;
       // btnEdit.dataset.alias = value.workBook.tableAlias;
-      btnEdit.dataset.field = value.field;
-      btnEdit.dataset.token = token;
-      btnEdit.addEventListener('click', app.editAdvancedMetric);
+      // btnEdit.dataset.field = value.field;
+      // btnEdit.dataset.token = token;
+      // btnEdit.addEventListener('click', app.editAdvancedMetric);
+      span.innerHTML = value.alias;
+      // span.innerHTML = value.formula.field;
+      parent.appendChild(li);
+    }
+  }
+
+  app.addDefinedCompositeMetrics = () => {
+    // metriche mappate sul cubo
+    const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
+    for (const [token, value] of WorkSheet.compositeMetrics) {
+      const tmpl = app.tmplList.content.cloneNode(true);
+      const li = tmpl.querySelector('li[data-li-drag][data-composite-metrics]');
+      const content = li.querySelector('.li-content');
+      const btnDrag = content.querySelector('i');
+      const span = content.querySelector('span');
+      const btnEdit = li.querySelector('i[data-id="metric-edit"]');
+      li.id = token;
+      li.dataset.type = value.type;
+      li.dataset.alias = value.alias;
+      // TODO: da impostare sull'icona drag
+      li.addEventListener('dragstart', app.fieldDragStart);
+      li.addEventListener('dragend', app.fieldDragEnd);
+      // btnEdit.dataset.table = value.workBook.table;
+      // btnEdit.dataset.alias = value.workBook.tableAlias;
+      // btnEdit.dataset.field = value.field;
+      // btnEdit.dataset.token = token;
+      // btnEdit.addEventListener('click', app.editAdvancedMetric);
       span.innerHTML = value.alias;
       // span.innerHTML = value.formula.field;
       parent.appendChild(li);
@@ -1904,8 +1977,9 @@ var Sheet;
         // li.dataset.schema = value.schema;
         // li.dataset.table = value.workBook.table;
         // li.dataset.tableAlias = value.workBook.tableAlias;
-        li.dataset.field = value.field;
-        li.dataset.id = value.alias;
+        // la metrica przmedio*Quantita non ha la proprieta 'fields'
+        if (value.field) li.dataset.field = value.field;
+        li.dataset.alias = value.alias;
         // TODO: gli eventi drag dovranno essere posizionati sul btnDrag, quindi anche l'attributo id
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
@@ -1965,6 +2039,7 @@ var Sheet;
     if (WorkSheet.filters.size !== 0) app.addDefinedFilters();
     app.addDefinedMetrics();
     app.addDefinedAdvMetrics();
+    app.addDefinedCompositeMetrics();
   }
 
   // creo la struttura tabelle nelladialog-filters

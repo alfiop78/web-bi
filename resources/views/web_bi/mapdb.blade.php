@@ -60,6 +60,14 @@
       </span>
       <i data-id="metric-edit" class="material-icons-round md-18">edit</i>
     </li>
+
+    <li data-li-drag data-element-search data-label data-composite-metrics data-searchable="true" draggable="true">
+      <span class="li-content">
+        <i class="material-icons-round md-18">drag_handle</i>
+        <span></span>
+      </span>
+      <i data-id="metric-edit" class="material-icons-round md-18">edit</i>
+    </li>
   </template>
 
   <template id="tmpl-dl-element">
@@ -129,6 +137,12 @@
       <div class="metric-defined">
         <section class="formula" data-token>
           <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate">SUM</code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span>
+        </section>
+      </div>
+
+      <div data-composite class="metric-defined">
+        <section class="formula" data-token>
+          <code></code>
         </section>
       </div>
     </template>
