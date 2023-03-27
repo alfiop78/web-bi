@@ -914,7 +914,7 @@ class Cube
       $s .= "\nGROUP BY $this->_fieldsSQL";
       $sql = "/*Creazione DATAMART finale :\n{$this->datamartName}\n*/\nCREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS\n($s);";
     }
-    dd($sql);
+    // dd($sql);
     /* vecchio metodo, prima di MyVerticaGrammar.php
             $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_$this->reportId' AND SCHEMA_NAME='decisyon_cache';");
             // dd($FX);
