@@ -449,10 +449,19 @@ var Sheet;
       case 'composite':
         Sheet.compositeMetrics = WorkSheet.compositeMetrics.get(elementRef.id);
         app.addCompositeMetric(e.currentTarget, elementRef.id);
-        // TODO: dopo aver aggiunto una metrica composta allo Sheet, è necessario aggiungere anche le metriche al suo interno per consentirne l'elaborazione
+        // dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
+        // ...al suo interno per consentirne l'elaborazione
         for (const token of Object.keys(Sheet.compositeMetrics.get(elementRef.id).metrics)) {
-          if (WorkSheet.metrics.has(token)) Sheet.metrics = WorkSheet.metrics.get(token);
-          if (WorkSheet.advMetrics.has(token)) Sheet.advMetrics = WorkSheet.advMetrics.get(token);
+          if (WorkSheet.metrics.has(token)) {
+            Sheet.metrics = WorkSheet.metrics.get(token);
+            // TODO: nell'oggetto Sheet.metrics aggiungo una prop 'nested' per specificare
+            // ... che questa metrica è stata aggiunta perchè è all'interno di una metrica composta
+            Sheet.metrics.get(token).dependencies = true;
+          }
+          if (WorkSheet.advMetrics.has(token)) {
+            Sheet.advMetrics = WorkSheet.advMetrics.get(token);
+            Sheet.advMetrics.get(token).dependencies = true;
+          }
         }
         break;
       default:
@@ -1368,10 +1377,9 @@ var Sheet;
     document.querySelectorAll('#textarea-composite-metric *').forEach((element, index) => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
-        // TODO: verifico se sto droppando una metrica composta, in questo caso si utilizza una logica diversa (da implementare)
+        // TODO: verifico se sto droppando una metrica composta, in questo caso si utilizza una logica diversa
         switch (element.dataset.type) {
           case 'composite':
-            debugger;
             object.sql.push(WorkSheet.compositeMetrics.get(element.dataset.token).sql.join(' '));
             for (const [token, metric] of Object.entries(WorkSheet.compositeMetrics.get(element.dataset.token).metrics)) {
               object.metrics[token] = metric;
