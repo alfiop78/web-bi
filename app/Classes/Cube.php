@@ -894,8 +894,7 @@ class Cube
         $sql .= implode(",\n", $this->cm);
       }
       $sql .= "\nFROM\ndecisyon_cache.$this->baseTableName";
-      $sql .= "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$leftJoin\nGROUP BY $this->_fieldsSQL);";
-      // dd
+      $sql .= "$leftJoin\nGROUP BY $this->_fieldsSQL);";
     } else {
       // non sono presenti metriche filtrate
       $s = "SELECT $this->_fieldsSQL";
