@@ -411,13 +411,14 @@ var Sheet;
     const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('div[data-composite]');
     const formula = field.querySelector('.formula');
+    const fieldName = formula.querySelector('code[data-field]');
+    const aggregateFn = formula.querySelector('code[data-aggregate]');
+    debugger;
     const sql = formula.querySelector('code');
-    // const aggregateFn = formula.querySelector('code[data-aggregate]');
     formula.dataset.token = token;
-    // fieldName.dataset.field = Sheet.compositeMetrics.get(token).field;
-    // aggregateFn.innerText = Sheet.advMetrics.get(token).aggregateFn;
     formula.dataset.id = token;
-    sql.innerHTML = `${Sheet.compositeMetrics.get(token).alias} - ${Sheet.compositeMetrics.get(token).sql}`;
+    sql.innerHTML = Sheet.compositeMetrics.get(token).alias;
+    // sql.innerHTML = `${Sheet.compositeMetrics.get(token).alias} - ${Sheet.compositeMetrics.get(token).sql}`;
     target.appendChild(field);
   }
 
@@ -743,7 +744,7 @@ var Sheet;
     const span = templateContent.querySelector('span');
     const mark = templateContent.querySelector('mark');
     mark.dataset.token = elementRef.id;
-    debugger;
+    mark.dataset.type = elementRef.dataset.type;
     mark.dataset.aggregateFn = elementRef.dataset.aggregateFn;
     mark.innerText = elementRef.dataset.alias;
     app.textareaCompositeMetric.appendChild(span);
@@ -907,6 +908,12 @@ var Sheet;
     for (const [token, advMetrics] of Sheet.advMetrics) {
       const target = document.getElementById('dropzone-columns');
       app.addAdvMetric(target, token);
+    }
+
+    // compositeMetrics
+    for (const [token, compositeMetric] of Sheet.compositeMetrics) {
+      const target = document.getElementById('dropzone-columns');
+      app.addCompositeMetric(target, token);
     }
 
     // filters
@@ -1356,13 +1363,31 @@ var Sheet;
     const parent = document.getElementById('ul-metrics');
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
+    // let object = { token, alias, sql: [], metrics: {}, type: 'composite' };
     let object = { token, alias, sql: [], metrics: {}, type: 'composite' };
-    document.querySelectorAll('#textarea-composite-metric *').forEach(element => {
+    document.querySelectorAll('#textarea-composite-metric *').forEach((element, index) => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
-        object.metrics[element.dataset.token] = element.innerText;
-        // object.metrics[element.innerText] = { token: element.dataset.token, alias: element.innerText };
-        object.sql.push(`${element.dataset.aggregateFn}(${element.innerText})`);
+        // TODO: verifico se sto droppando una metrica composta, in questo caso si utilizza una logica diversa (da implementare)
+        switch (element.dataset.type) {
+          case 'composite':
+            debugger;
+            object.sql.push(WorkSheet.compositeMetrics.get(element.dataset.token).sql.join(' '));
+            for (const [token, metric] of Object.entries(WorkSheet.compositeMetrics.get(element.dataset.token).metrics)) {
+              object.metrics[token] = metric;
+            }
+            break;
+          default:
+            // basic and advanced
+            object.metrics[element.dataset.token] = element.innerText;
+            // object.metrics[element.innerText] = { token: element.dataset.token, alias: element.innerText };
+            // TODO: Creare una Classe JS che gestisce la sintassi dei vari db (come laravel MyVerticaGrammar.php)
+            // .. in modo da poter inserire, ad es.: funzioni come NVL o IFNULL.
+            // Un'altra soluzione è creare qui un array (da trasformare in associativo in PHP) per poi poter
+            // ... utilizzare MyVerticaGrammar.php oppure altre grammatiche relative ad altri DB già predisposti in Laravel
+            object.sql.push(`NVL(${element.dataset.aggregateFn}(${element.innerText}),0)`);
+            break;
+        }
       } else {
         object.sql.push(element.innerText.trim());
       }
@@ -1371,7 +1396,6 @@ var Sheet;
     debugger;
     WorkSheet.compositeMetrics = object;
     WorkSheet.save();
-    debugger;
     // TODO: il codice che aggiunge una metrica al tablesStruct è codice ripetuto
     // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
     const tmpl = app.tmplList.content.cloneNode(true);

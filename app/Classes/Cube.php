@@ -234,6 +234,7 @@ class Cube
     foreach ($from as $table) {
       if ((!in_array($table, $this->FROM_metricTable)) && (!in_array($table, $this->FROM_baseTable))) $this->FROM_metricTable[] = $table;
     } */
+    $this->FROM_metricTable = array();
     foreach ($from as $alias => $prop) {
       $this->FROM_metricTable[$alias] = "{$prop->schema}.{$prop->table} AS {$alias}";
     }
@@ -591,6 +592,7 @@ class Cube
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
     // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
+    // var_dump($sql);
     // dd($sql);
     // $result = DB::connection('vertica_odbc')->raw($sql);
     // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
@@ -683,7 +685,7 @@ class Cube
       // dd($this->_metrics_advanced_datamart);
       // creo il datamart, passo a createMetricTable il nome della tabella temporanea e l'array di metriche che lo compongono
       if ($mode === 'sql') {
-        $sqlFilteredMetrics[] = $this->createMetricTable($tableName, $arrayMetrics, $mode);
+        $sqlFilteredMetrics[] = $this->sheetCreateMetricTable($tableName, $arrayMetrics, $mode);
       } else {
         $this->sheetCreateMetricTable($tableName, $arrayMetrics, null);
       }
@@ -809,7 +811,7 @@ class Cube
     $comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($metrics)) . "\n*/\n";
 
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
-    // dd($sql);
+    // var_dump($sql);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
     if ($mode === 'sql') {
       $result = $sql;
@@ -912,7 +914,7 @@ class Cube
       $s .= "\nGROUP BY $this->_fieldsSQL";
       $sql = "/*Creazione DATAMART finale :\n{$this->datamartName}\n*/\nCREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS\n($s);";
     }
-    // dd($sql);
+    dd($sql);
     /* vecchio metodo, prima di MyVerticaGrammar.php
             $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_$this->reportId' AND SCHEMA_NAME='decisyon_cache';");
             // dd($FX);
