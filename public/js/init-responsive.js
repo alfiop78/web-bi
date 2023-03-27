@@ -435,15 +435,19 @@ var Sheet;
     let span = field.querySelector('span');
     field.dataset.type = elementRef.dataset.type;
     field.dataset.id = elementRef.id;
-    const rand = () => Math.random(0).toString(36).substring(2);
+    // const rand = () => Math.random(0).toString(36).substring(2);
     // const token = rand().substring(0, 7);
     switch (field.dataset.type) {
       case 'basic':
-        Sheet.metrics = WorkSheet.metrics.get(elementRef.id);
+        const metric = { ...WorkSheet.metrics.get(elementRef.id) };
+        metric.dependencies = false;
+        Sheet.metrics = metric;
         app.addMetric(e.currentTarget, elementRef.id);
         break;
       case 'advanced':
-        Sheet.advMetrics = WorkSheet.advMetrics.get(elementRef.id);
+        const advancedMetric = { ...WorkSheet.advMetrics.get(elementRef.id) };
+        advancedMetric.dependencies = false;
+        Sheet.advMetrics = advancedMetric;
         app.addAdvMetric(e.currentTarget, elementRef.id);
         break;
       case 'composite':
@@ -452,15 +456,19 @@ var Sheet;
         // dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
         // ...al suo interno per consentirne l'elaborazione
         for (const token of Object.keys(Sheet.compositeMetrics.get(elementRef.id).metrics)) {
+          // nell'oggetto Sheet.metrics aggiungo una prop 'dependencies' per specificare
+          // ... che questa metrica è stata aggiunta perchè è all'interno di una metrica composta
           if (WorkSheet.metrics.has(token)) {
-            Sheet.metrics = WorkSheet.metrics.get(token);
-            // TODO: nell'oggetto Sheet.metrics aggiungo una prop 'nested' per specificare
-            // ... che questa metrica è stata aggiunta perchè è all'interno di una metrica composta
-            Sheet.metrics.get(token).dependencies = true;
+            const metric = { ...WorkSheet.metrics.get(token) };
+            metric.dependencies = true;
+            if (!Sheet.metrics.has(token)) Sheet.metrics = metric;
           }
+          // NOTE: clonazione di un object con syntax ES6.
+          // In questo caso, la prop 'dependencies' viene modificata in Sheet.advMetrics ma NON in WorkSheet.advMetrics
           if (WorkSheet.advMetrics.has(token)) {
-            Sheet.advMetrics = WorkSheet.advMetrics.get(token);
-            Sheet.advMetrics.get(token).dependencies = true;
+            const advancedMetric = { ...WorkSheet.advMetrics.get(token) };
+            advancedMetric.dependencies = true;
+            if (!Sheet.advMetrics.has(token)) Sheet.advMetrics = advancedMetric;
           }
         }
         break;
@@ -899,7 +907,7 @@ var Sheet;
     name.innerText = Sheet.name;
     name.dataset.value = Sheet.name;
     app.dialogSheet.close();
-    /* TODO: Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...) 
+    /* Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...) 
     * della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
     */
     for (const [token, field] of Sheet.fields) {
@@ -911,12 +919,12 @@ var Sheet;
     // imposto un data-selected sui filtri per rendere visibile il fatto che sono stati aggiunti al report
     for (const [token, metrics] of Sheet.metrics) {
       const target = document.getElementById('dropzone-columns');
-      app.addMetric(target, token);
+      if (!metrics.hasOwnProperty('dependencies')) app.addMetric(target, token);
     }
 
     for (const [token, advMetrics] of Sheet.advMetrics) {
       const target = document.getElementById('dropzone-columns');
-      app.addAdvMetric(target, token);
+      if (!advMetrics.hasOwnProperty('dependencies')) app.addAdvMetric(target, token);
     }
 
     // compositeMetrics
