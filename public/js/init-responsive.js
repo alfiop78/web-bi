@@ -459,16 +459,23 @@ var Sheet;
           // nell'oggetto Sheet.metrics aggiungo una prop 'dependencies' per specificare
           // ... che questa metrica è stata aggiunta perchè è all'interno di una metrica composta
           if (WorkSheet.metrics.has(token)) {
-            const metric = { ...WorkSheet.metrics.get(token) };
-            metric.dependencies = true;
-            if (!Sheet.metrics.has(token)) Sheet.metrics = metric;
+            // verifico se la metrica all'interno di quella composta è stata già aggiunta allo Sheet
+            if (!Sheet.metrics.has(token)) {
+              // la metrica in ciclo non è stata aggiunta allo Sheet, la aggiungo con la prop 'dependencies'
+              //... per specificare che è stata aggiunta indirettamente, essa si trova in una metrica composta
+              const metric = { ...WorkSheet.metrics.get(token) };
+              metric.dependencies = true;
+              Sheet.metrics = metric;
+            }
           }
           // NOTE: clonazione di un object con syntax ES6.
           // In questo caso, la prop 'dependencies' viene modificata in Sheet.advMetrics ma NON in WorkSheet.advMetrics
           if (WorkSheet.advMetrics.has(token)) {
-            const advancedMetric = { ...WorkSheet.advMetrics.get(token) };
-            advancedMetric.dependencies = true;
-            if (!Sheet.advMetrics.has(token)) Sheet.advMetrics = advancedMetric;
+            if (!Sheet.advMetrics.has(token)) {
+              const advancedMetric = { ...WorkSheet.advMetrics.get(token) };
+              advancedMetric.dependencies = true;
+              Sheet.advMetrics = advancedMetric;
+            }
           }
         }
         break;
@@ -899,7 +906,7 @@ var Sheet;
 
   // apertura nuovo Sheet, viene recuperato dal localStorage
   app.sheetSelected = (e) => {
-    // TODO: chiamare il metodo open() dell'oggetto Sheet e seguire la stessa logica utilizzata per workBookSelected()
+    // chiamare il metodo open() dell'oggetto Sheet e seguire la stessa logica utilizzata per workBookSelected()
     Sheet = new Sheets(e.currentTarget.dataset.token, Sheet.sheet.workBook_ref);
     // reimposto tutte le proprietà della Classe
     Sheet.open();
@@ -919,12 +926,12 @@ var Sheet;
     // imposto un data-selected sui filtri per rendere visibile il fatto che sono stati aggiunti al report
     for (const [token, metrics] of Sheet.metrics) {
       const target = document.getElementById('dropzone-columns');
-      if (!metrics.hasOwnProperty('dependencies')) app.addMetric(target, token);
+      if (!metrics.dependencies) app.addMetric(target, token);
     }
 
     for (const [token, advMetrics] of Sheet.advMetrics) {
       const target = document.getElementById('dropzone-columns');
-      if (!advMetrics.hasOwnProperty('dependencies')) app.addAdvMetric(target, token);
+      if (!advMetrics.dependencies) app.addAdvMetric(target, token);
     }
 
     // compositeMetrics
