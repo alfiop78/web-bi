@@ -120,9 +120,24 @@ class Sheets {
       * altrimenti visualizzo un AVVISO perchè l'esecuzione potrebbe essere troppo lunga
     */
     this.sheet.filters = Object.fromEntries(this.filters);
-    if (this.metrics.size > 0) this.sheet.metrics = Object.fromEntries(this.metrics);
-    if (this.advMetrics.size > 0) this.sheet.advMetrics = Object.fromEntries(this.advMetrics);
-    if (this.compositeMetrics.size > 0) this.sheet.compositeMetrics = Object.fromEntries(this.compositeMetrics);
+    for (const [token, metric] of this.metrics) {
+      switch (metric.type) {
+        case 'basic':
+          (!this.sheet.hasOwnProperty('metrics')) ? this.sheet.metrics = { [token]: metric } : this.sheet.metrics[token] = metric;
+          break;
+        case 'advanced':
+          (!this.sheet.hasOwnProperty('advMetrics')) ? this.sheet.advMetrics = { [token]: metric } : this.sheet.advMetrics[token] = metric;
+          break;
+        default:
+          // compositeMetrics
+          (!this.sheet.hasOwnProperty('compositeMetrics')) ? this.sheet.compositeMetrics = { [token]: metric } : this.sheet.compositeMetrics[token] = metric;
+          // this.sheet.compositeMetrics[token] = metric;
+          break;
+      }
+    }
+    // if (this.metrics.size > 0) this.sheet.metrics = Object.fromEntries(this.metrics);
+    // if (this.advMetrics.size > 0) this.sheet.advMetrics = Object.fromEntries(this.advMetrics);
+    // if (this.compositeMetrics.size > 0) this.sheet.compositeMetrics = Object.fromEntries(this.compositeMetrics);
     console.info(this.sheet);
     SheetStorage.save(this.sheet);
   }
@@ -173,13 +188,13 @@ class Sheets {
 
     if (SheetStorage.sheet.hasOwnProperty('advMetrics')) {
       for (const value of Object.values(SheetStorage.sheet.advMetrics)) {
-        this.advMetrics = value;
+        this.metrics = value;
       }
     }
 
     if (SheetStorage.sheet.hasOwnProperty('compositeMetrics')) {
       for (const value of Object.values(SheetStorage.sheet.compositeMetrics)) {
-        this.compositeMetrics = value;
+        this.metrics = value;
       }
     }
 
@@ -316,19 +331,33 @@ class WorkBooks {
     this.workBook.fields = Object.fromEntries(this.fields);
     this.workBook.joins = Object.fromEntries(this.joins);
     this.workBook.tablesMap = Object.fromEntries(this.tablesMap);
-    this.workBook.metrics = Object.fromEntries(this.metrics);
+    // this.workBook.metrics = Object.fromEntries(this.metrics);
     this.workBook.svg = {
       tables: Object.fromEntries(Draw.tables),
       lines: Object.fromEntries(Draw.joinLines),
       levelId: +Draw.svg.dataset.level
     }
-    console.info('WorkBook : ', this.workBook);
-    WorkBookStorage.save(this.workBook);
     // nell'oggetto WorkSheet andrò a memorizzare gli elementi aggiunti nel WorkSheet (es.: metriche/colonne custom)
     // metriche avanzate sono presenti solo nello WorkSheet e non nel WorkBook
     if (this.filters.size !== 0) this.workSheet.filters = Object.fromEntries(this.filters);
-    if (this.advMetrics.size !== 0) this.workSheet.advMetrics = Object.fromEntries(this.advMetrics);
-    if (this.compositeMetrics.size !== 0) this.workSheet.compositeMetrics = Object.fromEntries(this.compositeMetrics);
+    // if (this.advMetrics.size !== 0) this.workSheet.advMetrics = Object.fromEntries(this.advMetrics);
+    // if (this.compositeMetrics.size !== 0) this.workSheet.compositeMetrics = Object.fromEntries(this.compositeMetrics);
+    for (const [token, metric] of this.metrics) {
+      switch (metric.type) {
+        case 'basic':
+          (!this.workBook.hasOwnProperty('metrics')) ? this.workBook.metrics = { [token]: metric } : this.workBook.metrics[token] = metric;
+          break;
+        case 'advanced':
+          (!this.workSheet.hasOwnProperty('advMetrics')) ? this.workSheet.advMetrics = { [token]: metric } : this.workSheet.advMetrics[token] = metric;
+          break;
+        default:
+          // compositeMetrics
+          (!this.workSheet.hasOwnProperty('compositeMetrics')) ? this.workSheet.compositeMetrics = { [token]: metric } : this.workSheet.compositeMetrics[token] = metric;
+          break;
+      }
+    }
+    console.info('WorkBook : ', this.workBook);
+    WorkBookStorage.save(this.workBook);
     console.info('WorkSheet : ', this.workSheet);
     WorkBookStorage.save(this.workSheet);
   }
@@ -350,9 +379,9 @@ class WorkSheets extends WorkBooks {
     * Al momento ho filtri solo nel WorkSheet e non nel WorkBook
   */
   #filters = new Map();
-  #advMetrics = new Map();
+  // #advMetrics = new Map();
   #columns = new Map();
-  #compositeMetrics = new Map();
+  // #compositeMetrics = new Map();
   constructor(name) {
     super(name);
   }
@@ -364,7 +393,7 @@ class WorkSheets extends WorkBooks {
 
   get columns() { return this.#columns; }
 
-  set advMetrics(object) {
+  /* set advMetrics(object) {
     this.#advMetrics.set(object.token, object);
     console.log('sheet advMetrics : ', this.#advMetrics);
   }
@@ -376,7 +405,7 @@ class WorkSheets extends WorkBooks {
     console.info('sheet.#compositeMetrics : ', this.#compositeMetrics);
   }
 
-  get compositeMetrics() { return this.#compositeMetrics; }
+  get compositeMetrics() { return this.#compositeMetrics; } */
 
   set filters(object) {
     this.#filters.set(object.token, object.value);
@@ -436,15 +465,21 @@ class WorkSheets extends WorkBooks {
     }
 
     // metriche aggiunte allo WorkSheet
-    for (const [token, values] of Object.entries(WorkBookStorage.workBook.metrics)) {
+    /* for (const [token, values] of Object.entries(WorkBookStorage.workBook.metrics)) {
       this.metrics = values;
+    } */
+
+    if (WorkBookStorage.workBook.hasOwnProperty('metrics')) {
+      for (const value of Object.values(WorkBookStorage.workBook.metrics)) {
+        this.metrics = value;
+      }
     }
 
     // metriche avanzate aggiunte allo WorkSheet
     if (WorkBookStorage.workSheet.hasOwnProperty('advMetrics')) {
-      for (const [token, value] of Object.entries(WorkBookStorage.workSheet.advMetrics)) {
+      for (const value of Object.values(WorkBookStorage.workSheet.advMetrics)) {
         // per ogni tabella
-        this.advMetrics = value;
+        this.metrics = value;
       }
     }
 
@@ -452,7 +487,7 @@ class WorkSheets extends WorkBooks {
     if (WorkBookStorage.workSheet.hasOwnProperty('compositeMetrics')) {
       for (const value of Object.values(WorkBookStorage.workSheet.compositeMetrics)) {
         // per ogni tabella
-        this.compositeMetrics = value;
+        this.metrics = value;
       }
     }
 

@@ -45,6 +45,8 @@ var Sheet;
     textAreaMetric: document.getElementById('textarea-metric')
   }
 
+  const rand = () => Math.random(0).toString(36).substring(2);
+
   App.init();
 
   app.body.addEventListener('click', (e) => {
@@ -380,45 +382,20 @@ var Sheet;
   // stesso funzionamento di addField()
   app.addMetric = (target, token) => {
     const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
+    const metric = Sheet.metrics.get(token);
     const field = tmpl.querySelector('.metric-defined');
     const formula = field.querySelector('.formula');
     const fieldName = formula.querySelector('code[data-field]');
     const aggregateFn = formula.querySelector('code[data-aggregate]');
-    fieldName.dataset.field = Sheet.metrics.get(token).field;
-    aggregateFn.innerText = Sheet.metrics.get(token).aggregateFn;
-    formula.dataset.id = token;
-    fieldName.innerHTML = Sheet.metrics.get(token).alias;
-    // fieldName.dataset.tableAlias = Sheet.metrics.get(token).workBook.tableAlias;
-    // Sheet.tables = Sheet.metrics.get(token).workBook.tableAlias;
-    target.appendChild(field);
-  }
 
-  app.addAdvMetric = (target, token) => {
-    const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
-    const field = tmpl.querySelector('.metric-defined');
-    const formula = field.querySelector('.formula');
-    const fieldName = formula.querySelector('code[data-field]');
-    const aggregateFn = formula.querySelector('code[data-aggregate]');
-    formula.dataset.token = token;
-    fieldName.dataset.field = Sheet.advMetrics.get(token).field;
-    aggregateFn.innerText = Sheet.advMetrics.get(token).aggregateFn;
+    field.dataset.type = metric.type;
     formula.dataset.id = token;
-    fieldName.innerHTML = Sheet.advMetrics.get(token).alias;
-    target.appendChild(field);
-  }
-
-  app.addCompositeMetric = (target, token) => {
-    const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
-    const field = tmpl.querySelector('div[data-composite]');
-    const formula = field.querySelector('.formula');
-    const fieldName = formula.querySelector('code[data-field]');
-    const aggregateFn = formula.querySelector('code[data-aggregate]');
-    debugger;
-    const sql = formula.querySelector('code');
     formula.dataset.token = token;
-    formula.dataset.id = token;
-    sql.innerHTML = Sheet.compositeMetrics.get(token).alias;
-    // sql.innerHTML = `${Sheet.compositeMetrics.get(token).alias} - ${Sheet.compositeMetrics.get(token).sql}`;
+    fieldName.innerHTML = metric.alias;
+    if (metric.type !== 'compositeMetric') {
+      aggregateFn.innerText = metric.aggregateFn;
+      fieldName.dataset.field = metric.field;
+    }
     target.appendChild(field);
   }
 
@@ -437,45 +414,31 @@ var Sheet;
     field.dataset.id = elementRef.id;
     // const rand = () => Math.random(0).toString(36).substring(2);
     // const token = rand().substring(0, 7);
-    switch (field.dataset.type) {
+    const metric = { ...WorkSheet.metrics.get(elementRef.id) };
+    switch (metric.type) {
       case 'basic':
-        const metric = { ...WorkSheet.metrics.get(elementRef.id) };
+      case 'advanced':
+        // const metric = { ...WorkSheet.metrics.get(elementRef.id) };
         metric.dependencies = false;
         Sheet.metrics = metric;
         app.addMetric(e.currentTarget, elementRef.id);
         break;
-      case 'advanced':
-        const advancedMetric = { ...WorkSheet.advMetrics.get(elementRef.id) };
-        advancedMetric.dependencies = false;
-        Sheet.advMetrics = advancedMetric;
-        app.addAdvMetric(e.currentTarget, elementRef.id);
-        break;
       case 'composite':
-        Sheet.compositeMetrics = WorkSheet.compositeMetrics.get(elementRef.id);
-        app.addCompositeMetric(e.currentTarget, elementRef.id);
+        Sheet.metrics = metric;
+        app.addMetric(e.currentTarget, elementRef.id);
         // dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
         // ...al suo interno per consentirne l'elaborazione
-        for (const token of Object.keys(Sheet.compositeMetrics.get(elementRef.id).metrics)) {
+        for (const token of Object.keys(Sheet.metrics.get(elementRef.id).metrics)) {
           // nell'oggetto Sheet.metrics aggiungo una prop 'dependencies' per specificare
           // ... che questa metrica è stata aggiunta perchè è all'interno di una metrica composta
-          if (WorkSheet.metrics.has(token)) {
-            // verifico se la metrica all'interno di quella composta è stata già aggiunta allo Sheet
-            if (!Sheet.metrics.has(token)) {
-              // la metrica in ciclo non è stata aggiunta allo Sheet, la aggiungo con la prop 'dependencies'
-              //... per specificare che è stata aggiunta indirettamente, essa si trova in una metrica composta
-              const metric = { ...WorkSheet.metrics.get(token) };
-              metric.dependencies = true;
-              Sheet.metrics = metric;
-            }
-          }
-          // NOTE: clonazione di un object con syntax ES6.
-          // In questo caso, la prop 'dependencies' viene modificata in Sheet.advMetrics ma NON in WorkSheet.advMetrics
-          if (WorkSheet.advMetrics.has(token)) {
-            if (!Sheet.advMetrics.has(token)) {
-              const advancedMetric = { ...WorkSheet.advMetrics.get(token) };
-              advancedMetric.dependencies = true;
-              Sheet.advMetrics = advancedMetric;
-            }
+          // verifico se la metrica all'interno di quella composta è stata già aggiunta allo Sheet
+          if (!Sheet.metrics.has(token)) {
+            // la metrica in ciclo non è stata aggiunta allo Sheet, la aggiungo con la prop 'dependencies'
+            //... per specificare che è stata aggiunta indirettamente, essa si trova in una metrica composta
+            // NOTE: clonazione di un object con syntax ES6.
+            const nestedMetric = { ...WorkSheet.metrics.get(token) };
+            nestedMetric.dependencies = true;
+            Sheet.metrics = nestedMetric;
           }
         }
         break;
@@ -701,11 +664,10 @@ var Sheet;
   // dialog-metric per definire le metriche di base del WorkBook (non custom metric di base, come (przmedio*quantita))
   app.setMetric = (e) => {
     // console.log(WorkSheet.activeTable);
-    const table = WorkSheet.activeTable.dataset.table;
+    // const table = WorkSheet.activeTable.dataset.table;
     const tableAlias = WorkSheet.activeTable.dataset.alias;
     const field = `${tableAlias}.${e.target.dataset.field}`;
     const alias = e.target.dataset.field;
-    const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
 
     // metric Map Object
@@ -713,7 +675,6 @@ var Sheet;
       token,
       alias,
       field: e.target.dataset.field,
-      // workBook: { table, tableAlias },
       aggregateFn: 'SUM', // default
       SQL: field,
       distinct: false, // default
@@ -923,26 +884,15 @@ var Sheet;
       app.addField(target, token)
     }
 
-    // imposto un data-selected sui filtri per rendere visibile il fatto che sono stati aggiunti al report
     for (const [token, metrics] of Sheet.metrics) {
       const target = document.getElementById('dropzone-columns');
       if (!metrics.dependencies) app.addMetric(target, token);
     }
 
-    for (const [token, advMetrics] of Sheet.advMetrics) {
-      const target = document.getElementById('dropzone-columns');
-      if (!advMetrics.dependencies) app.addAdvMetric(target, token);
-    }
-
-    // compositeMetrics
-    for (const [token, compositeMetric] of Sheet.compositeMetrics) {
-      const target = document.getElementById('dropzone-columns');
-      app.addCompositeMetric(target, token);
-    }
-
     // filters
     for (const [token, filters] of Sheet.filters) {
       const filterRef = document.getElementById('ul-filters');
+      // imposto un data-selected sui filtri per rendere visibile il fatto che sono stati aggiunti al report
       filterRef.querySelector(`li[id='${token}']`).dataset.selected = 'true';
     }
     Sheet.save();
@@ -1395,8 +1345,8 @@ var Sheet;
         // TODO: verifico se sto droppando una metrica composta, in questo caso si utilizza una logica diversa
         switch (element.dataset.type) {
           case 'composite':
-            object.sql.push(WorkSheet.compositeMetrics.get(element.dataset.token).sql.join(' '));
-            for (const [token, metric] of Object.entries(WorkSheet.compositeMetrics.get(element.dataset.token).metrics)) {
+            object.sql.push(WorkSheet.metrics.get(element.dataset.token).sql.join(' '));
+            for (const [token, metric] of Object.entries(WorkSheet.metrics.get(element.dataset.token).metrics)) {
               object.metrics[token] = metric;
             }
             break;
@@ -1417,7 +1367,7 @@ var Sheet;
     });
     console.log(object);
     debugger;
-    WorkSheet.compositeMetrics = object;
+    WorkSheet.metrics = object;
     WorkSheet.save();
     // TODO: il codice che aggiunge una metrica al tablesStruct è codice ripetuto
     // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
@@ -1431,8 +1381,8 @@ var Sheet;
     li.addEventListener('dragstart', app.fieldDragStart);
     li.addEventListener('dragend', app.fieldDragEnd);
     li.addEventListener('contextmenu', app.contextMenuMetrics);
-    li.dataset.type = WorkSheet.compositeMetrics.get(token).type;
-    span.innerHTML = WorkSheet.compositeMetrics.get(token).alias;
+    li.dataset.type = WorkSheet.metrics.get(token).type;
+    span.innerHTML = WorkSheet.metrics.get(token).alias;
     parent.appendChild(li);
   }
 
@@ -1790,7 +1740,7 @@ var Sheet;
     textarea.appendChild(field);
     // il token presente qui lo recupero in saveAdvMetric() in modo da duplicare la metrica di base ed aggiungerci l'array di filtri
     document.querySelector('#btn-metric-save').dataset.token = token;
-    debugger;
+    // debugger;
     const filterDrop = document.getElementById('filter-drop');
     filterDrop.addEventListener('dragover', app.handlerDragOverFilter, false);
     filterDrop.addEventListener('dragenter', app.handlerDragEnterFilter, false);
@@ -1817,12 +1767,12 @@ var Sheet;
       // TODO: ogni filtro aggiunto nella metrica deve controllare le tabelle da includere e le sue join (come fatto per setSheet)
     });
     console.log(Object.keys(filters).length);
-    // TODO: se ci sono filtri la salvo in WorkSheet.advMetrics altrimenti in WorkSheet.metrics
+    // TODO: se ci sono filtri la salvo in WorkSheet.metrics altrimenti in WorkSheet.metrics
     if (Object.keys(filters).length !== 0) {
       // TODO: aggiungere opzione 'distinct'.
       // TODO: probabilmente qui dovrò usare la stessa logica dei filtri, quindi non serve la tabelAlias
       // come key e non servono due metodi (metric e metrics)
-      WorkSheet.advMetrics = {
+      WorkSheet.metrics = {
         token,
         alias,
         field: baseMetric.field,
@@ -1833,7 +1783,7 @@ var Sheet;
         type: 'advanced'
       };
     } else {
-      debugger;
+      // debugger;
       WorkSheet.metrics = {
         token,
         alias,
@@ -1866,26 +1816,9 @@ var Sheet;
       if (WorkSheet.metrics.get(token).hasOwnProperty('field')) li.dataset.field = WorkSheet.metrics.get(token).field;
       li.dataset.aggregateFn = WorkSheet.metrics.get(token).aggregateFn;
       span.innerHTML = WorkSheet.metrics.get(token).alias;
-    } else if (WorkSheet.advMetrics.has(token)) {
-      li.dataset.type = WorkSheet.advMetrics.get(token).type;
-      if (WorkSheet.advMetrics.get(token).hasOwnProperty('field')) li.dataset.field = WorkSheet.advMetrics.get(token).field;
-      li.dataset.aggregateFn = WorkSheet.advMetrics.get(token).aggregateFn;
-      span.innerHTML = WorkSheet.advMetrics.get(token).alias;
     }
     parent.appendChild(li);
   }
-
-  // salvataggio metrica composta
-  // save compositeMetric
-  app.btnCompositeMetricSave = (e) => {
-    const alias = document.getElementById('composite-metric-name').value;
-    const parent = document.getElementById('ul-metrics');
-    const rand = () => Math.random(0).toString(36).substring(2);
-    const token = rand().substring(0, 7);
-    debugger;
-
-  }
-
 
   app.addDefinedFields = (parent) => {
     if (WorkSheet.fields.has(WorkSheet.activeTable.dataset.alias)) {
@@ -1912,7 +1845,7 @@ var Sheet;
   app.addDefinedAdvMetrics = () => {
     // metriche mappate sul cubo
     const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
-    for (const [token, value] of WorkSheet.advMetrics) {
+    for (const [token, value] of WorkSheet.metrics) {
       const tmpl = app.tmplList.content.cloneNode(true);
       const li = tmpl.querySelector('li[data-li-drag][data-advanced-metrics]');
       const content = li.querySelector('.li-content');
@@ -1944,7 +1877,7 @@ var Sheet;
   app.addDefinedCompositeMetrics = () => {
     // metriche mappate sul cubo
     const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
-    for (const [token, value] of WorkSheet.compositeMetrics) {
+    for (const [token, value] of WorkSheet.metrics) {
       const tmpl = app.tmplList.content.cloneNode(true);
       const li = tmpl.querySelector('li[data-li-drag][data-composite-metrics]');
       const content = li.querySelector('.li-content');
@@ -2039,7 +1972,8 @@ var Sheet;
 
   app.addTablesStruct = async () => {
     // ripulisco la struttura già presente.
-    // TODO: in futuro dovrò aggiornare la struttura già presente (e non resettare). In questo modo, gli elementi aggiunti al report non verranno resettati
+    // TODO: in futuro dovrò aggiornare la struttura già presente (e non resettare).
+    // ...in questo modo, gli elementi aggiunti al report non verranno resettati
     app.workbookTablesStruct.querySelectorAll('details').forEach(detail => detail.remove());
     const parent = app.workbookTablesStruct.querySelector('#nav-fields');
     for (const [tableId, value] of WorkSheet.hierTables) {
@@ -2057,8 +1991,6 @@ var Sheet;
     }
     if (WorkSheet.filters.size !== 0) app.addDefinedFilters();
     app.addDefinedMetrics();
-    app.addDefinedAdvMetrics();
-    app.addDefinedCompositeMetrics();
   }
 
   // creo la struttura tabelle nelladialog-filters

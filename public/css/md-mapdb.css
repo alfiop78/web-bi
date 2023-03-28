@@ -380,6 +380,22 @@ section[data-table-from] .table, section[data-table-to] .table{
   color: white;
 }
 
+.metric-defined[data-type="basic"] {
+
+}
+
+.metric-defined[data-type="advanced"] {
+
+}
+
+.metric-defined[data-type="composite"] {
+
+}
+
+.metric-defined[data-type="composite"] code[data-aggregate] {
+  display: none;
+}
+
 i[data-id="btn-set-metric"]:hover, i[data-id='btn-set-filter']:hover{
   cursor: pointer;
 }

@@ -142,7 +142,7 @@
 
       <div data-composite class="metric-defined">
         <section class="formula" data-token>
-          <code></code>
+          <code data-field></code>
         </section>
       </div>
     </template>
