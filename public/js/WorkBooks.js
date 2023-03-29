@@ -1,16 +1,11 @@
 // nella Class Sheets verranno aggiunti gli oggetti che consentono di creare il report.
-/*
-Es. : Quando viene aggiunta un campo alla dropzone 'rows' (questo è già presente in WorkSheets o la sua derivata) il campo
-  * verrà aggiunto alla Sheets (tramite l'istanza Sheet per ogni nuovo report da creare) e quindi diventa 'disponibile'
-  * per essere processato da MapDatabaseController -> Cube.php
-*/
 class Sheets {
   #fields = new Map();
   #tables = new Set(); // tutte le tabelle usate nel report. In base a questo Set() posso creare la from e la where
   #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
-  #filters = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
-  #metrics = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
-  #advMetrics = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
+  #filters = new Map();
+  #metrics = new Map();
+  #advMetrics = new Map();
   #compositeMetrics = new Map();
   #joins = new Map();
   #name;

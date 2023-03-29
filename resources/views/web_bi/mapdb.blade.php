@@ -155,9 +155,30 @@
       </span>
     </template>
 
+
     <div id="container">
       <div id="content">
         <div id="body">
+
+          <dialog id="dialog-time" class="medium">
+            <section class="dlg-grid">
+              <h5>Imposta relazione con tabella TIME</h5>
+              <section class="dlg-content col col-2-equals">
+                <ul id="time-fields">
+                  <li data-field="date" data-fn="handlerTimeField" data-selected>DATE <small>Es.: 2023-12-31</small></li>
+                  <li data-field="month_id" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
+                  <li data-field="year" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
+                </ul>
+                <ul id="ul-columns"></ul>
+              </section>
+              <section class="buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button data-fn="saveTimeDimension" id="btn-time-dimension-save" value="salva">Salva</button>
+              </section>
+            </section>
+
+          </dialog>
+
           <div id="context-menu" class="context-menu">
             <ul id="ul-context-menu">
               <li>item 1</li>
@@ -166,6 +187,7 @@
               <li>item 4</li>
             </ul>
           </div>
+
           <dialog id="dialog-workbook-open">
             <section class="dlg-grid">
               <section class="dlg-title">Apri WorkBook</section>
@@ -344,6 +366,14 @@
                 <div id="stepTranslate" data-translate-x="0">
                   <section class="step" data-step="1" selected>
                     <section class="wrapper-step">
+                      <div id="context-menu-table" class="context-menu">
+                        <ul id="ul-context-menu-table">
+                          <li id="time-dimension" data-fn="handlerTimeDimension">Dimensione TIME</li>
+                          <li data-fn="removeTable">Rimuovi</li>
+                          <li>Aggiungi alias</li>
+                          <li>item 4</li>
+                        </ul>
+                      </div>
                       <section id="canvas-area">
                         <menu>
                           <section id="workbook-name" class="data-source" contenteditable="true">WorkSpace 1</section>
@@ -357,8 +387,8 @@
                               <g id="table-struct" class="struct">
                                 <rect x="0" y="0" />
                                 <text x="18" y="20" font-family="Barlow" font-size=".85rem" font-weight="normal"></text>
-                                <image id="backspace" href="{{ asset('/images/backspace.svg') }}" data-id data-fn="contextMenu" x="152" y="0" width="18" height="18">
-                                </image>
+                                <!--<image id="backspace" href="{{ asset('/images/backspace.svg') }}" data-id data-fn="contextMenu" x="175" y="0" width="18" height="18">
+                                </image>-->
                               </g>
                             </defs>
                           </svg>

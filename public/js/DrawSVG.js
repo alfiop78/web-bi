@@ -58,7 +58,7 @@ class DrawSVG {
     clonedStruct.id = `struct-${this.currentTable.key}`;
     clonedStruct.classList.add('struct');
     clonedStruct.querySelector('text').innerHTML = this.currentTable.table;
-    clonedStruct.querySelector('image').dataset.id = this.currentTable.key;
+    // clonedStruct.querySelector('image').dataset.id = this.currentTable.key;
     // lo aggiungo al defs
     this.svg.querySelector('defs').appendChild(clonedStruct);
     const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');

@@ -11,6 +11,7 @@ var Sheet;
     tmplJoin: document.getElementById('tmpl-join-field'),
     tmplDL: document.getElementById('tmpl-dl-element'),
     contextMenuRef: document.getElementById('context-menu'),
+    contextMenuTableRef: document.getElementById('context-menu-table'),
     // tmplDD: document.getElementById('tmpl-dd-element'),
     tmplDetails: document.getElementById('tmpl-details-element'),
     tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
@@ -26,6 +27,7 @@ var Sheet;
     dialogCompositeMetric: document.getElementById('dlg-composite-metric'),
     windowJoin: document.getElementById('window-join'),
     dialogColumns: document.getElementById('dlg-columns'),
+    dialogTime: document.getElementById('dialog-time'),
     // buttons
     btnSelectSchema: document.getElementById('btn-select-schema'),
     editWorkBookName: document.getElementById('workbook-name'),
@@ -322,6 +324,8 @@ var Sheet;
     Draw.currentTable = Draw.tables.get(`svg-data-${tableId}`);
     // creo nel DOM la tabella appena droppata
     Draw.drawTable();
+    // imposto event contextmenu
+    Draw.svg.querySelector(`#${Draw.currentTable.key}`).addEventListener('contextmenu', app.contextMenuTable);
     // posizionamento delle joinTable (tabelle che hanno data-join > 1)
     Draw.joinTablePositioning();
   }
@@ -1162,6 +1166,9 @@ var Sheet;
   document.querySelectorAll('.translate').forEach(el => {
     el.onmousedown = (e) => {
       // console.log(app.coords);
+      if (e.button === 2) return;
+      // chiudo gli eventuali contextmenu aperti
+      document.querySelector('.context-menu[open]').toggleAttribute('open');
       app.coords = { x: +e.currentTarget.dataset.translateX, y: +e.currentTarget.dataset.translateY };
       app.el = e.currentTarget;
     }
@@ -1592,9 +1599,24 @@ var Sheet;
     app.windowJoin.dataset.open = 'false';
   }
 
+  app.handlerTimeDimension = async (e) => {
+    console.log(e.target);
+    app.contextMenuTableRef.toggleAttribute('open');
+    /* TODO:
+    * 1- recupero le colonne della tabella selezionata
+    * 2- apro la dialog per poter associare una colonna della WEB_BI_TIME con una colonna della FACT
+    */
+
+    const data = await app.getTable();
+    app.addFields_test(document.getElementById('ul-columns'), data);
+    app.dialogTime.show();
+  }
+
   // rimozione tabella dal draw SVG
-  /* app.removeTable = (e) => {
+  app.removeTable = (e) => {
     // tabella in join con e.currentTarget
+    debugger;
+    // TODO: da implementare
     const tableJoin = Draw.tables.get(e.currentTarget.dataset.id).join;
     const tableJoinRef = Draw.svg.querySelector(`#${tableJoin}`);
     // se è presente una tabella legata a currentTarget, in join, sto eliminando una tabella nella prop 'to' della joinLines
@@ -1618,17 +1640,43 @@ var Sheet;
     console.log(Draw.tables);
     // rimuovo anche il <g> all'interno di <defs>
     Draw.svg.querySelector(`g#struct-${e.currentTarget.dataset.id}`).remove();
-  } */
+  }
 
-  app.contextMenu = (e) => {
+  app.saveTimeDimension = () => {
+    const timeField = document.querySelector('#time-fields > li[data-selected]').dataset.field;
+    const timeColumn = document.querySelector('#ul-columns > li[data-selected]').dataset.label;
+    const table = document.querySelector('#ul-columns > li[data-selected]').dataset.alias;
+    const token = rand().substring(0, 7);
+    // WARN: solo per vertica in questo caso.
+    // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
+
+    // const join = [`TO_CHAR(${table.timeColumn})::DATE`,`WEB_BI_TIME.${timeField}`];
+    WorkSheet.join = {
+      token,
+      value: {
+        alias: 'WEB_BI_TIME',
+        SQL: [`TO_CHAR(${table}.${timeColumn})::DATE`, `WEB_BI_TIME.${timeField}`],
+        from: { table: 'WEB_BI_TIME', alias: 'WEB_BI_TIME', field: timeField },
+        to: { table, alias: table, field: timeColumn }
+      }
+    };
+    WorkSheet.joins = token; // nome della tabella con le proprie join (WorkSheet.nJoin) all'interno
+    debugger;
+
+  }
+
+  /* app.contextMenu = (e) => {
     console.log(e.currentTarget);
+    console.log(e.target);
+    debugger;
     // tabella selezionata
     const table = Draw.tables.get(e.currentTarget.dataset.id);
     const tablesvg = Draw.svg.querySelector(`#${e.currentTarget.dataset.id}`);
     console.log(table);
     console.log(tablesvg);
     // TODO: apro un context menu (con dialog.show()) con le voci : Rimuovi, Crea metrica, ecc...
-  }
+    app.contextMenuTableRef.toggleAttribute('open');
+  } */
 
   // inserisco la colonna selezionata per la creazione della join
   app.addFieldToJoin = (e) => {
@@ -1685,6 +1733,37 @@ var Sheet;
       // span.id = key;
       // fn da associare all'evento in 'mutation observe'
       li.dataset.fn = 'addFieldToJoin';
+      ul.appendChild(li);
+    }
+  }
+
+  app.addFields_test = (ul, response) => {
+    // source : from, to
+    for (const [key, value] of Object.entries(response)) {
+      const content = app.tmplList.content.cloneNode(true);
+      const li = content.querySelector('li[data-li]');
+      const span = li.querySelector('span');
+      li.dataset.label = value.COLUMN_NAME;
+      // li.dataset.elementSearch = `${source}-fields`;
+      li.dataset.tableId = WorkSheet.activeTable.id;
+      li.dataset.table = WorkSheet.activeTable.dataset.table;
+      li.dataset.alias = WorkSheet.activeTable.dataset.alias;
+      li.dataset.label = value.COLUMN_NAME;
+      li.dataset.key = value.CONSTRAINT_NAME;
+      span.innerText = value.COLUMN_NAME;
+      // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
+      let pos = value.DATA_TYPE.indexOf('(');
+      let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
+      span.dataset.type = type;
+      // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
+      li.dataset.id = key;
+      // span.id = key;
+      // fn da associare all'evento in 'mutation observe'
+      li.addEventListener('click', (e) => {
+        // reset precedenti selezini
+        ul.querySelectorAll('li[data-selected]').forEach(element => delete element.dataset.selected);
+        (e.target.dataset.selected) ? delete e.target.dataset.selected : e.target.dataset.selected = 'true';
+      });
       ul.appendChild(li);
     }
   }
@@ -1908,6 +1987,18 @@ var Sheet;
     app.contextMenuRef.style.top = `${mouseY}px`;
     app.contextMenuRef.style.left = `${mouseX}px`;
     app.contextMenuRef.toggleAttribute('open');
+  }
+
+  app.contextMenuTable = (e) => {
+    e.preventDefault();
+    console.log(e.target);
+    console.log(e.target.getBoundingClientRect());
+    // const { clientX: mouseX, clientY: mouseY } = e;
+    const { right: mouseX, top: mouseY } = e.target.getBoundingClientRect();
+    app.contextMenuTableRef.style.top = `${mouseY}px`;
+    app.contextMenuTableRef.style.left = `${mouseX + 4}px`;
+    WorkSheet.activeTable = e.currentTarget.id;
+    app.contextMenuTableRef.toggleAttribute('open');
   }
 
   app.addDefinedMetrics = () => {
