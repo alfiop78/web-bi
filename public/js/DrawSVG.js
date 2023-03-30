@@ -88,6 +88,23 @@ class DrawSVG {
     use.appendChild(animate);
   }
 
+  drawTime() {
+    debugger;
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    use.setAttribute('href', '#time');
+    use.id = this.currentTable.key;
+    use.classList.add('time');
+    use.dataset.id = `data-${this.currentTable.id}`;
+    use.dataset.table = this.currentTable.table;
+    use.dataset.alias = this.currentTable.alias;
+    use.dataset.schema = this.currentTable.schema;
+    use.setAttribute('x', this.currentTable.x);
+    use.setAttribute('y', this.currentTable.y);
+    use.dataset.x = this.currentTable.x;
+    use.dataset.y = this.currentTable.y;
+    Draw.svg.appendChild(use);
+  }
+
   drawLine() {
     // console.log(this.currentLine.from, this.currentLine.to);
     if (Object.keys(this.currentLine).length === 0) return;

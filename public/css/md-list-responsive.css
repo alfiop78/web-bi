@@ -116,3 +116,20 @@ nav[data-filters-defined] > li[data-selected] {
   background-color: chocolate;
   color: white;
 }
+
+ul.custom-scrollbar {
+  overflow: auto;
+}
+
+.overflow-y {
+  overflow-y: auto;
+}
+
+dd {
+  font-size: smaller;
+}
+
+dt[selected] {
+  background-color: orange;
+  color: #494949;
+}

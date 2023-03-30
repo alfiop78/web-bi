@@ -152,6 +152,10 @@ dialog .textarea-formula{
   grid-template-columns: 260px 1fr;
 }
 
+.col-3{
+  grid-auto-flow: column;
+}
+
 .col-2-equals{
   grid-template-columns: 50% 50%;
 }

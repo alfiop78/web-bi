@@ -169,7 +169,7 @@
                   <li data-field="month_id" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
                   <li data-field="year" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
                 </ul>
-                <ul id="ul-columns"></ul>
+                <ul id="ul-columns" class="custom-scrollbar"></ul>
               </section>
               <section class="buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
@@ -236,7 +236,7 @@
           <dialog id="dlg-metric" class="medium">
             <section class="dlg-grid">
               <section class="dlg-title">Creazione Metrica</section>
-              <section class="dlg-content col col-2">
+              <section class="dlg-content col col-3">
                 <section class="filter-area-drop">
                   <small>Aggiungere qui i filtri per creare una metrica filtrata</small>
                   <nav id="filter-drop" class="custom-scrollbar dropzone"></nav>
@@ -247,6 +247,55 @@
                     <label for="adv-metric-name" class="">Nome</label>
                   </div>
                   <div id="textarea-metric" class="dropzone textarea" data-content-editable contenteditable="true"></div>
+                </section>
+                <section class="overflow-y">
+                  <small>Funzioni temporali</small>
+                  <dl id="dl-timing-functions" class="custom-scrollbar">
+                    <dt>Last Period/Day</dt>
+                    <dd>Periodo temporale precedente, rispetto al livello più basso presente nel report.<br /> Ad esempio se nel report è presente il livello giorno, la funzione presenta i dati del giorno precedente, se invece è presente la settimana, presenta i dati della settimana precedente, ecc</dd>
+
+                    <dt>Last Week</dt>
+                    <dd>description</dd>
+
+                    <dt>Last Month</dt>
+                    <dd>description</dd>
+
+                    <dt>Last Quarter</dt>
+                    <dd>description</dd>
+
+                    <dt data-value="last-year" data-fn="handlerTimingFunctions">Last Year</dt>
+                    <dd>La funzione presenta i dati relativi all’anno precedente, rispetto al livello presente nel report.<br /> Ad esempio se nel report è presente il livello mese, la funzione presenta i dati relativi allo stesso mese, ma dell’anno precedente, per il livello trimestre, presenta invece i dati dello stesso trimestre, ma dell’anno precedente</dd>
+
+                    <dt>MAT</dt>
+                    <dd>La funzione aggrega i dati relativi ai 12 mesi precedenti quello corrente.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito.</dd>
+
+                    <dt>Last Year MAT</dt>
+                    <dd>Analoga alla MAT, solamente che è applicata rispetto al mese corrente dell’anno precedente.</dd>
+
+                    <dt>Last To Date</dt>
+                    <dd>La funzione aggrega i dati da inizio mese fino al giorno corrente.<br /> Il livello DAY deve essere presente nel report</dd>
+
+                    <dt>Last Year MTD</dt>
+                    <dd>Analoga alla Month to date, solamente che è applicata sui dati dell’anno precedente: da inizio mese al giorno corrente dell’anno precedente.</dd>
+
+                    <dt>Year To Date</dt>
+                    <dd>La funzione aggrega i dati da inizio anno fino al giorno corrente. Il livello DAY deve essere presente nel report.</dd>
+
+                    <dt>Last Year YTD</dt>
+                    <dd>Analoga alla Year to date, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al giorno corrente, sempre riferito all’anno precedente</dd>
+
+                    <dt>Year To Month</dt>
+                    <dd>La funzione aggrega i dati da inizio anno fino al mese corrente. Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
+
+                    <dt>Last Year YTM</dt>
+                    <dd>Analoga alla Year to month, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al mese corrente, sempre riferito all’anno precedente</dd>
+
+                    <dt>Last 2 Month</dt>
+                    <dd>La funzione presenta i dati relativi ai due mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
+
+                    <dt>Last 3 Month</dt>
+                    <dd>La funzione presenta i dati relativi ai tre mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
+                    </ul>
                 </section>
               </section>
               <section class="dlg-buttons">
@@ -390,6 +439,9 @@
                                 <!--<image id="backspace" href="{{ asset('/images/backspace.svg') }}" data-id data-fn="contextMenu" x="175" y="0" width="18" height="18">
                                 </image>-->
                               </g>
+                              <g id="web-bi-time">
+                                <image id="time" href="{{ asset('/images/backspace.svg') }}" height="18" width="18"></image>
+                              </g>
                             </defs>
                           </svg>
                           <span id="coords"></span>
@@ -468,7 +520,7 @@
                               <ul id="ul-filters" class="custom-scrollbar"></ul>
                               <li class="new-worksheet-object">
                                 <i class="material-icons-round md-18 new-object">add</i>
-                                <button class="new-object" data-fn="btnFilterNew" type="button" value="crea filtro">nuova filtro</button>
+                                <button class="new-object" data-fn="btnFilterNew" type="button" value="crea filtro">nuovo filtro</button>
                               </li>
                             </section>
                           </section>

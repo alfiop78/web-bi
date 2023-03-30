@@ -1001,6 +1001,7 @@ var Sheet;
   app.btnFilterNew = async () => {
     // creo la struttura tabelle per poter creare nuovi filtri
     let urls = [];
+    // TODO: reset della struttura già presente
     for (const [tableId, value] of WorkSheet.hierTables) {
       WorkSheet.activeTable = tableId;
       urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/table_info');
@@ -1168,7 +1169,7 @@ var Sheet;
       // console.log(app.coords);
       if (e.button === 2) return;
       // chiudo gli eventuali contextmenu aperti
-      document.querySelector('.context-menu[open]').toggleAttribute('open');
+      if (document.querySelector('.context-menu[open]')) document.querySelector('.context-menu[open]').toggleAttribute('open');
       app.coords = { x: +e.currentTarget.dataset.translateX, y: +e.currentTarget.dataset.translateY };
       app.el = e.currentTarget;
     }
@@ -1462,19 +1463,12 @@ var Sheet;
     // debugger;
     const levelId = +Draw.svg.dataset.level;
     WorkSheet.hierTables.clear();
-    let tables = [];
     let recursiveLevels = (levelId) => {
       // per ogni tabella creo un Map() con, al suo interno, le tabelle gerarchicamente inferiori (verso la FACT)
       // questa mi servirà per stabilire, nello sheet, quali tabelle includere nella FROM e le relative Join nella WHERE
       Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}']`).forEach(table => {
         // console.log(table.dataset.alias);
-        // tables = [table.id];
         // della tabella corrente recupero tutte le sue discendenze fino alla FACT
-        /* let recursive = (tableId) => {
-          joinTables.push(tableId);
-          if (Draw.tables.get(tableId).join) recursive(Draw.tables.get(tableId).join);
-        }
-        if (Draw.tables.get(table.id).join) recursive(Draw.tables.get(table.id).join); */
         WorkSheet.hierTables = {
           id: table.id,
           table: {
@@ -1487,7 +1481,6 @@ var Sheet;
       });
     }
     recursiveLevels(levelId);
-    // console.log(WorkSheet.hierTables);
   }
 
 
@@ -1642,27 +1635,54 @@ var Sheet;
     Draw.svg.querySelector(`g#struct-${e.currentTarget.dataset.id}`).remove();
   }
 
+  // salvataggio dimensione TIME
   app.saveTimeDimension = () => {
     const timeField = document.querySelector('#time-fields > li[data-selected]').dataset.field;
     const timeColumn = document.querySelector('#ul-columns > li[data-selected]').dataset.label;
-    const table = document.querySelector('#ul-columns > li[data-selected]').dataset.alias;
+    const tableAlias = document.querySelector('#ul-columns > li[data-selected]').dataset.alias;
+    const table = document.querySelector('#ul-columns > li[data-selected]').dataset.table;
     const token = rand().substring(0, 7);
     // WARN: solo per vertica in questo caso.
     // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
-
-    // const join = [`TO_CHAR(${table.timeColumn})::DATE`,`WEB_BI_TIME.${timeField}`];
     WorkSheet.join = {
       token,
       value: {
         alias: 'WEB_BI_TIME',
-        SQL: [`TO_CHAR(${table}.${timeColumn})::DATE`, `WEB_BI_TIME.${timeField}`],
+        SQL: [`TO_CHAR(${tableAlias}.${timeColumn})::DATE`, `WEB_BI_TIME.${timeField}`], // [DocVenditaDettaglio_xxx.DataDocumento, WEB_BI_TIME.date]
         from: { table: 'WEB_BI_TIME', alias: 'WEB_BI_TIME', field: timeField },
-        to: { table, alias: table, field: timeColumn }
+        to: { table, alias: tableAlias, field: timeColumn }
       }
     };
     WorkSheet.joins = token; // nome della tabella con le proprie join (WorkSheet.nJoin) all'interno
-    debugger;
+    Draw.tables = {
+      id: 'svg-data-web_bi_time', properties: {
+        id: 'web_bi_time',
+        key: 'svg-data-web_bi_time',
+        x: 10,
+        y: 10,
+        /* line: {
+          from: { x: coords.x + 180, y: coords.y + 15 },
+          to: { x: coords.x - 10, y: coords.y + 15 }
+        }, */
+        table: 'WEB_BI_TIME',
+        alias: 'WEB_BI_TIME',
+        schema: 'decisyon_cache',
+        joins: 0,
+        // per il momento la TIME và impostata sempre sulla svg-data-0 (tabella dei fatti)
+        join: 'svg-data-web_bi_time',
+        levelId: 0
+      }
+    };
+    Draw.currentTable = Draw.tables.get('svg-data-web_bi_time');
+    Draw.drawTime();
 
+    WorkSheet.hierTables = {
+      id: 'svg-data-web_bi_time',
+      table: {
+        name: 'WEB_BI_TIME',
+        alias: 'WEB_BI_TIME'
+      }
+    };
   }
 
   /* app.contextMenu = (e) => {
@@ -1708,6 +1728,12 @@ var Sheet;
     }
   }
 
+  app.handlerTimingFunctions = (e) => {
+    // reset di eventuali selezioni precedenti
+    document.querySelectorAll('dl-timing-functions > dt[selected]').forEach(element => element.toggleAttribute('selected'));
+    e.target.toggleAttribute('selected');
+  }
+
   // aggiungo i campi di una tabella per creare la join
   app.addFields = (source, response) => {
     // source : from, to
@@ -1738,7 +1764,6 @@ var Sheet;
   }
 
   app.addFields_test = (ul, response) => {
-    // source : from, to
     for (const [key, value] of Object.entries(response)) {
       const content = app.tmplList.content.cloneNode(true);
       const li = content.querySelector('li[data-li]');
@@ -1749,6 +1774,7 @@ var Sheet;
       li.dataset.table = WorkSheet.activeTable.dataset.table;
       li.dataset.alias = WorkSheet.activeTable.dataset.alias;
       li.dataset.label = value.COLUMN_NAME;
+      li.dataset.field = value.COLUMN_NAME;
       li.dataset.key = value.CONSTRAINT_NAME;
       span.innerText = value.COLUMN_NAME;
       // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
@@ -1762,7 +1788,7 @@ var Sheet;
       li.addEventListener('click', (e) => {
         // reset precedenti selezini
         ul.querySelectorAll('li[data-selected]').forEach(element => delete element.dataset.selected);
-        (e.target.dataset.selected) ? delete e.target.dataset.selected : e.target.dataset.selected = 'true';
+        (e.currentTarget.dataset.selected) ? delete e.currentTarget.dataset.selected : e.currentTarget.dataset.selected = 'true';
       });
       ul.appendChild(li);
     }
@@ -1845,6 +1871,8 @@ var Sheet;
       filters[filter.dataset.token] = WorkSheet.filters.get(filter.dataset.token);
       // TODO: ogni filtro aggiunto nella metrica deve controllare le tabelle da includere e le sue join (come fatto per setSheet)
     });
+    // TODO: se ci sono funzioni temporali selezionate le aggiungo all'object 'filters' con token = alla funzione scelta (es.: last-year)
+    document.querySelectorAll('#dl-timing-functions > dt[selected]').forEach(timingFn => filters[timingFn.dataset.value] = timingFn.dataset.value);
     console.log(Object.keys(filters).length);
     // TODO: se ci sono filtri la salvo in WorkSheet.metrics altrimenti in WorkSheet.metrics
     if (Object.keys(filters).length !== 0) {
