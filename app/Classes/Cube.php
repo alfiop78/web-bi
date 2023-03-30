@@ -309,7 +309,7 @@ class Cube
     foreach ($joins as $token => $join) {
       // il token è l'identificativo della join
       // var_dump($join);
-      // TODO: qui potrei utilizzare la proprietà SQL con implode(' = ', $join->SQL) (da valutare)
+      // qui utilizzo la proprietà SQL con implode(' = ', $join->SQL)
       if ($join->alias === 'WEB_BI_TIME') {
         $this->WHERE_timeDimension[$token] = implode(" = ", $join->SQL);
       } else {
@@ -323,8 +323,8 @@ class Cube
     } */
     // dd($this->WHERE_baseTable, $this->WHERE_timeDimension);
     /*
-		es.:
 			WHERE\n
+      es.:
 			Azienda_997.id = CodSedeDealer_765.id_Azienda \n
 			AND CodSedeDealer_765.id = DocVenditaIntestazione_055.id_CodSedeDealer \n
 			AND DocVenditaIntestazione_055.NumRifInt = DocVenditaDettaglio_560.NumRifInt \n
@@ -350,7 +350,11 @@ class Cube
     $this->WHERE_metricTable = array();
     // dd($joins);
     foreach ($joins as $token => $join) {
-      $this->WHERE_metricTable[$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
+      if ($join->alias === 'WEB_BI_TIME') {
+        $this->WHERE_metricTable[$token] = implode(" = ", $join->SQL);
+      } else {
+        $this->WHERE_metricTable[$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
+      }
     }
     // dd($this->WHERE_metricTable);
   }
@@ -405,15 +409,21 @@ class Cube
   {
     $this->filters_metricTable = [];
     foreach ($filters as $token => $filter) {
-      // dd($token, $filter);
-      $timingFunctions = ['last-year', 'altre...'];
+      // dd($filter);
+      $timingFunctions = ['last-year', 'year', 'r0f4im9', 'altre...'];
+      // dd($timingFunctions, $token);
       if (in_array($token, $timingFunctions)) {
         /* è una funzione temporale. 
           Aggiungo, alla WHERE la condizione per applicare il filtro last-year.
           Da valutare se utilizzare (MapJSONExtractor(WEB_BI_TIME.last))['year']::DATE = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE
           ...oppure (WEB_BI_TIME.trans_ly) = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE.
         */
-        $this->WHERE_timingFn[$token] = implode(" = ", $filter->join);
+        // dd($filter->joins);
+        foreach ($filter->joins as $join) {
+          // dd($join);
+          $this->WHERE_timingFn[$token] = implode(" = ", $join->SQL);
+        }
+        $this->filters_metricTable[$filter->name] = implode(" ", $filter->sql);
         // $this->WHERE_timingFn[$token] = "WEB_BI_TIME_055.trans_ly = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE";
         // dd($this->WHERE_timingFn);
         // dd("(MapJSONExtractor({$filter->table}.{$filter->field}))['$filter->func']::DATE");
@@ -425,6 +435,7 @@ class Cube
         $this->filters_metricTable[$filter->name] = implode(" ", $filter->sql);
       }
     }
+    // dd($this->filters_metricTable);
   }
 
   /*
@@ -436,7 +447,7 @@ class Cube
     $this->filters_metricTable = [];
     foreach ($filters as $token => $filter) {
       // dd($token, $filter);
-      $timingFunctions = ['last-year', 'altre...'];
+      $timingFunctions = ['last-year', 'year', 'r0f4im9'];
       if (in_array($token, $timingFunctions)) {
         /* è una funzione temporale. 
           Aggiungo, alla WHERE la condizione per applicare il filtro last-year.
@@ -673,17 +684,17 @@ class Cube
         // dd($arrayMetrics);
         // _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
         $this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\nNVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
-        // $this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\nNVL({$metric->aggregateFn}($tableName.'{$metric->alias}'), 0) AS '{$metric->alias}'";
+        // aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
+        $this->setSheetFiltersMetricTable($metric->filters);
         // per ogni filtro presente nella metrica
         foreach ($metric->filters as $filter) {
           if (property_exists($filter, 'from')) $this->setSheetFromMetricTable($filter->from);
           // aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
           // se, nella metrica in ciclo, non è presente la WHERE devo ripulire WHERE_metricTable altrimenti verranno aggiunte WHERE della precedente metrica filtrata
+          // dd($filter->joins);
           (property_exists($filter, 'joins')) ? $this->setSheetWhereMetricTable($filter->joins) : $this->WHERE_metricTable = array();
         }
-        // aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
-        $this->setSheetFiltersMetricTable($metric->filters);
-        // dd($this->filters_baseTable, $this->filters_metricTable);
+        // dd($this->filters_baseTable, $this->filters_metricTable, $this->WHERE_timingFn);
       }
       // dd($arrayMetrics);
       // dd($this->_metrics_advanced_datamart);
@@ -815,7 +826,7 @@ class Cube
     $comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($metrics)) . "\n*/\n";
 
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
-    // var_dump($sql);
+    dd($sql);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
     if ($mode === 'sql') {
       $result = $sql;
@@ -886,7 +897,7 @@ class Cube
                 LEFT JOIN W_AP_metric_3_1 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_1`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_1`.`Sede`
                 LEFT JOIN W_AP_metric_3_2 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_2`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_2`.`Sede`
             ;
-            */
+      */
 
       // dd(property_exists($this, 'compositeMetrics'));
       if (property_exists($this, 'compositeMetrics')) {
@@ -919,10 +930,10 @@ class Cube
     }
     // dd($sql);
     /* vecchio metodo, prima di MyVerticaGrammar.php
-            $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_$this->reportId' AND SCHEMA_NAME='decisyon_cache';");
-            // dd($FX);
-            if ($FX) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.FX_$this->reportId;");
-        */
+      $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_$this->reportId' AND SCHEMA_NAME='decisyon_cache';");
+      // dd($FX);
+      if ($FX) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.FX_$this->reportId;");
+    */
     if ($mode === 'sql') {
       return $sql;
     } else {
