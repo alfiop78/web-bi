@@ -420,7 +420,7 @@ class WorkSheets extends WorkBooks {
     for (const [key, value] of Object.entries(WorkBookStorage.workBook.svg.tables)) {
       Draw.tables = { id: key, properties: value };
       Draw.currentTable = Draw.tables.get(key);
-      Draw.drawTable();
+      (key === 'svg-data-web_bi_time') ? Draw.drawTime() : Draw.drawTable();
     }
 
     for (const [key, value] of Object.entries(WorkBookStorage.workBook.svg.lines)) {

@@ -308,15 +308,19 @@ class Cube
     // NOTE : caso in qui viene passato tutto l'object
     foreach ($joins as $token => $join) {
       // il token è l'identificativo della join
-      // dd($token, $join);
-      $this->WHERE_baseTable[$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
+      // var_dump($join);
+      // TODO: qui potrei utilizzare la proprietà SQL con implode(' = ', $join->SQL) (da valutare)
+      if ($join->alias === 'WEB_BI_TIME') {
+        $this->WHERE_timeDimension[$token] = implode(" = ", $join->SQL);
+      } else {
+        $this->WHERE_baseTable[$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
+      }
     }
     // NOTE: caso in qui viene passato, a joins, solo la proprietà SQL
     /* foreach ($joins as $token => $join) {
       // dd($token, $join);
       $this->WHERE_baseTable[$token] = implode(" = ", $join);
     } */
-    // dd($this->WHERE_baseTable);
     // dd($this->WHERE_baseTable, $this->WHERE_timeDimension);
     /*
 		es.:
@@ -901,7 +905,6 @@ class Cube
       if (property_exists($this, 'sheetBaseMetrics')) $s .= ", $this->_metrics_base_datamart";
       // dd(property_exists($this, 'compositeMetrics'));
       if (property_exists($this, 'compositeMetrics')) {
-        // $this->createCompositeMetrics();
         // sono presenti metriche composte
         // dd($this->compositeMetrics);
         foreach ($this->compositeMetrics as $cm) {

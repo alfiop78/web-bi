@@ -1441,7 +1441,7 @@ var Sheet;
     let recursiveLevels = (levelId) => {
       // per ogni tabella creo un Map() con, al suo interno, le tabelle gerarchicamente inferiori (verso la FACT)
       // questa mi servirà per stabilire, nello sheet, quali tabelle includere nella FROM e le relative Join nella WHERE
-      Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}']`).forEach(table => {
+      Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'], use.time`).forEach(table => {
         // console.log(table.dataset.alias);
         joinTables = [table.id];
         // della tabella corrente recupero tutte le sue discendenze fino alla FACT
@@ -1466,7 +1466,7 @@ var Sheet;
     let recursiveLevels = (levelId) => {
       // per ogni tabella creo un Map() con, al suo interno, le tabelle gerarchicamente inferiori (verso la FACT)
       // questa mi servirà per stabilire, nello sheet, quali tabelle includere nella FROM e le relative Join nella WHERE
-      Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}']`).forEach(table => {
+      Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'], use.time`).forEach(table => {
         // console.log(table.dataset.alias);
         // della tabella corrente recupero tutte le sue discendenze fino alla FACT
         WorkSheet.hierTables = {
@@ -1476,8 +1476,10 @@ var Sheet;
             alias: table.dataset.alias
           }
         };
-        levelId--;
-        recursiveLevels(levelId);
+        if (levelId !== 0) {
+          levelId--;
+          recursiveLevels(levelId);
+        }
       });
     }
     recursiveLevels(levelId);
@@ -1636,7 +1638,7 @@ var Sheet;
   }
 
   // salvataggio dimensione TIME
-  app.saveTimeDimension = () => {
+  app.saveTimeDimension = async () => {
     const timeField = document.querySelector('#time-fields > li[data-selected]').dataset.field;
     const timeColumn = document.querySelector('#ul-columns > li[data-selected]').dataset.label;
     const tableAlias = document.querySelector('#ul-columns > li[data-selected]').dataset.alias;
@@ -1660,29 +1662,42 @@ var Sheet;
         key: 'svg-data-web_bi_time',
         x: 10,
         y: 10,
-        /* line: {
-          from: { x: coords.x + 180, y: coords.y + 15 },
-          to: { x: coords.x - 10, y: coords.y + 15 }
-        }, */
         table: 'WEB_BI_TIME',
         alias: 'WEB_BI_TIME',
         schema: 'decisyon_cache',
         joins: 0,
         // per il momento la TIME và impostata sempre sulla svg-data-0 (tabella dei fatti)
-        join: 'svg-data-web_bi_time',
+        join: 'svg-data-0',
         levelId: 0
       }
     };
     Draw.currentTable = Draw.tables.get('svg-data-web_bi_time');
     Draw.drawTime();
 
-    WorkSheet.hierTables = {
-      id: 'svg-data-web_bi_time',
-      table: {
-        name: 'WEB_BI_TIME',
-        alias: 'WEB_BI_TIME'
-      }
-    };
+    app.tablesMap();
+    app.hierTables();
+    // recupero tutti i campi della WEB_BI_TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
+    WorkSheet.activeTable = 'svg-data-web_bi_time';
+    const web_bi_timeFields = await app.getTable();
+    web_bi_timeFields.forEach(field => {
+      const tokenField = rand().substring(0, 7);
+      WorkSheet.field = {
+        token: tokenField,
+        value: {
+          token: tokenField,
+          type: 'column',
+          schema: WorkSheet.activeTable.dataset.schema,
+          tableAlias: WorkSheet.activeTable.dataset.alias,
+          table: WorkSheet.activeTable.dataset.table,
+          name: field.COLUMN_NAME,
+          field: {
+            id: { field: field.COLUMN_NAME, type: 'da implementare', origin_field: field.COLUMN_NAME },
+            ds: { field: field.COLUMN_NAME, type: 'da implementare', origin_field: field.COLUMN_NAME }
+          }
+        }
+      };
+      WorkSheet.fields = tokenField;
+    });
   }
 
   /* app.contextMenu = (e) => {
