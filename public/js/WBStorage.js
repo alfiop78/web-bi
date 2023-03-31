@@ -56,11 +56,16 @@ class Storages {
 
   // salvataggio delle colonne delle tabelle
   saveSession(data) {
-    data.forEach(tables => {
+    // salvataggio in sessionStorage da una chiamata promise.all
+    /* data.forEach(tables => {
       for (const [table, columns] of Object.entries(tables)) {
         window.sessionStorage.setItem(table, JSON.stringify(columns));
       }
-    });
+    }); */
+    // salvo in sessionStorage la tabella appena droppata nel canvas
+    for (const [table, columns] of Object.entries(data)) {
+      window.sessionStorage.setItem(table, JSON.stringify(columns));
+    }
   }
 
   getTable(table) {

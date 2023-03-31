@@ -180,28 +180,25 @@ var Sheet;
   app.handlerDragEnd = async (e) => {
     e.preventDefault();
     if (e.dataTransfer.dropEffect === 'copy') {
-      console.log(Draw.svg.querySelectorAll('use.table').length);
+      // se la tabella non presente in sessionStorage la scarico
+      if (!window.sessionStorage.getItem(WorkSheet.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
+      // se sono presenti almeno due tabelle visualizzo la dialog per la join
       if (Draw.countTables > 1) {
         // tabella 'from'
         WorkSheet.tableJoins = {
           from: app.windowJoin.querySelector('.wj-joins section[data-table-from]').dataset.tableId,
           to: app.windowJoin.querySelector('.wj-joins section[data-table-to]').dataset.tableId
         }
-        console.log(WorkSheet.tableJoins);
+        // console.log(WorkSheet.tableJoins);
         for (const [key, value] of Object.entries(WorkSheet.tableJoins)) {
           WorkSheet.activeTable = value.id;
-          // TODO: in questo caso, in cui vengono richiamate due tabelle, fare una promiseAll
-          const data = await app.getTable();
+          const data = WorkBookStorage.getTable(WorkSheet.activeTable.dataset.table);
           app.addFields(key, data);
-          console.log(data);
         }
       }
     }
-    // creo le gerarchie
-    // app.createHierarchies();
     app.tablesMap();
     app.hierTables();
-
   }
 
   app.handlerDrop = (e) => {
@@ -324,6 +321,8 @@ var Sheet;
     Draw.currentTable = Draw.tables.get(`svg-data-${tableId}`);
     // creo nel DOM la tabella appena droppata
     Draw.drawTable();
+    // imposto la tabella attiva per poter scaricare le colonne in sessionStorage (in handlerDragEnd())
+    WorkSheet.activeTable = `svg-data-${tableId}`;
     // imposto event contextmenu
     Draw.svg.querySelector(`#${Draw.currentTable.key}`).addEventListener('contextmenu', app.contextMenuTable);
     // posizionamento delle joinTable (tabelle che hanno data-join > 1)
@@ -916,7 +915,7 @@ var Sheet;
   document.getElementById('prev').onclick = () => Step.previous();
 
   document.getElementById('next').onclick = async () => {
-    /* TODO: recupero dal DB (promise.all) tutte le tabelle mappate nel WorkBook
+    /* recupero dal DB (promise.all) tutte le tabelle mappate nel WorkBook
     * - salvo i campi delle tabelle in sessionStorage in modo da poterci accedere più rapidamente
     * - creo la struttura delle tabelle->fields nella dialog filter
     */
@@ -924,11 +923,12 @@ var Sheet;
       let urls = [];
       for (const tableId of WorkSheet.hierTables.keys()) {
         WorkSheet.activeTable = tableId;
-        // TODO: sela tabella è già presente in sessionStorage non rieseguo la query
+        // TODO: se la tabella è già presente in sessionStorage non rieseguo la query
         if (!window.sessionStorage.getItem(WorkSheet.activeTable.dataset.table)) {
           urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/tables_info');
         }
       }
+      // in app.getTables() c'è il controllo se sono presenti urls da scaricare
       WorkBookStorage.saveSession(await app.getTables(urls));
       Step.next();
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
@@ -1519,7 +1519,10 @@ var Sheet;
   }
 
   app.lineSelected = async (e) => {
-    console.log(`line selected ${e.currentTarget.dataset.from} -> ${e.currentTarget.dataset.to}`);
+    debugger;
+    // TODO: da implementare
+
+    /* console.log(`line selected ${e.currentTarget.dataset.from} -> ${e.currentTarget.dataset.to}`);
     Draw.currentLineRef = e.target.id;
     WorkSheet.tableJoins = {
       from: Draw.currentLineRef.dataset.from,
@@ -1533,7 +1536,7 @@ var Sheet;
       app.addFields(key, data);
       // console.log(data);
     }
-    app.openJoinWindow();
+    app.openJoinWindow(); */
   }
 
   // imposto questo field come data-active
@@ -1597,13 +1600,12 @@ var Sheet;
   app.handlerTimeDimension = async (e) => {
     console.log(e.target);
     app.contextMenuTableRef.toggleAttribute('open');
-    /* TODO:
-    * 1- recupero le colonne della tabella selezionata
-    * 2- apro la dialog per poter associare una colonna della WEB_BI_TIME con una colonna della FACT
+    /* 
+    * - recupero le colonne della tabella selezionata
+    * - apro la dialog per poter associare una colonna della WEB_BI_TIME con una colonna della FACT
     */
-
-    const data = await app.getTable();
-    app.addFields_test(document.getElementById('ul-columns'), data);
+    if (!window.sessionStorage.getItem(WorkSheet.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
+    app.addFields_test(document.getElementById('ul-columns'), WorkBookStorage.getTable(WorkSheet.activeTable.dataset.table));
     app.dialogTime.show();
   }
 
@@ -1680,8 +1682,9 @@ var Sheet;
     // recupero tutti i campi della WEB_BI_TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     WorkSheet.activeTable = 'svg-data-web_bi_time';
     const web_bi_timeFields = await app.getTable();
-    web_bi_timeFields.forEach(field => {
+    for (const [table, columns] of Object.entries(web_bi_timeFields)) {
       const tokenField = rand().substring(0, 7);
+      debugger;
       WorkSheet.field = {
         token: tokenField,
         value: {
@@ -1690,15 +1693,16 @@ var Sheet;
           schema: WorkSheet.activeTable.dataset.schema,
           tableAlias: WorkSheet.activeTable.dataset.alias,
           table: WorkSheet.activeTable.dataset.table,
-          name: field.COLUMN_NAME,
+          name: columns.COLUMN_NAME,
           field: {
-            id: { field: field.COLUMN_NAME, type: 'da implementare', origin_field: field.COLUMN_NAME },
-            ds: { field: field.COLUMN_NAME, type: 'da implementare', origin_field: field.COLUMN_NAME }
+            id: { field: columns.COLUMN_NAME, type: 'da implementare', origin_field: columns.COLUMN_NAME },
+            ds: { field: columns.COLUMN_NAME, type: 'da implementare', origin_field: columns.COLUMN_NAME }
           }
         }
       };
       WorkSheet.fields = tokenField;
-    });
+
+    }
   }
 
   /* app.contextMenu = (e) => {

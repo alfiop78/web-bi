@@ -101,7 +101,8 @@ class MapDatabaseController extends Controller
                 AND CC.CONSTRAINT_TYPE='p' 
                 WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table' 
                 ORDER BY c.ordinal_position ASC;");
-    return response()->json($info);
+    return response()->json([$table => $info]);
+    // return response()->json($info);
   }
 
   // chiamata con promise.all
