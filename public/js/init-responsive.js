@@ -1644,6 +1644,7 @@ var Sheet;
     const tableAlias = document.querySelector('#ul-columns > li[data-selected]').dataset.alias;
     const table = document.querySelector('#ul-columns > li[data-selected]').dataset.table;
     const token = rand().substring(0, 7);
+    WorkSheet.dateTime = { tableAlias, timeField: timeColumn };
     // WARN: solo per vertica in questo caso.
     // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
     WorkSheet.join = {
@@ -1887,7 +1888,18 @@ var Sheet;
       // TODO: ogni filtro aggiunto nella metrica deve controllare le tabelle da includere e le sue join (come fatto per setSheet)
     });
     // TODO: se ci sono funzioni temporali selezionate le aggiungo all'object 'filters' con token = alla funzione scelta (es.: last-year)
-    document.querySelectorAll('#dl-timing-functions > dt[selected]').forEach(timingFn => filters[timingFn.dataset.value] = timingFn.dataset.value);
+    if (document.querySelector('#dl-timing-functions > dt[selected]')) {
+      const timingFn = document.querySelector('#dl-timing-functions > dt[selected]');
+      if (['last-year', 'last-month', 'ecc...'].includes(timingFn.dataset.value)) {
+        filters[timingFn.dataset.value] = {
+          alias: 'WEB_BI_TIME',
+          SQL: [
+            'WEB_BI_TIME.trans_ly',
+            `TO_CHAR(${WorkSheet.dateTime.tableAlias}.${WorkSheet.dateTime.timeField})::DATE`
+          ]
+        };
+      }
+    }
     console.log(Object.keys(filters).length);
     // TODO: se ci sono filtri la salvo in WorkSheet.metrics altrimenti in WorkSheet.metrics
     if (Object.keys(filters).length !== 0) {

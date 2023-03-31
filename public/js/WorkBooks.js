@@ -206,6 +206,7 @@ class WorkBooks {
   #metrics = new Map();
   #join = new Map();
   #joins = new Map();
+  #dateTime;
   // #nTables = new Map();
   // #hierarchies = new Map();
   #tableJoins = { from: null, to: null }; // refs 
@@ -233,6 +234,12 @@ class WorkBooks {
   }
 
   get tableJoins() { return this.#tableJoins; }
+
+  set dateTime(object) {
+    this.#dateTime = object;
+  }
+
+  get dateTime() { return this.#dateTime; }
 
   set activeTable(id) {
     this.#activeTable = Draw.svg.querySelector(`#${id}`);
@@ -326,6 +333,7 @@ class WorkBooks {
     this.workBook.fields = Object.fromEntries(this.fields);
     this.workBook.joins = Object.fromEntries(this.joins);
     this.workBook.tablesMap = Object.fromEntries(this.tablesMap);
+    this.workBook.dateTime = this.dateTime;
     // this.workBook.metrics = Object.fromEntries(this.metrics);
     this.workBook.svg = {
       tables: Object.fromEntries(Draw.tables),
@@ -414,6 +422,8 @@ class WorkSheets extends WorkBooks {
     WorkBookStorage.workBook = token;
     WorkBookStorage.workSheet = `workSheet_${token}`;
     // reimposto la Classe
+
+    this.dateTime = WorkBookStorage.workBook.dateTime;
 
     Draw.svg.dataset.level = WorkBookStorage.workBook.svg.levelId;
     // ciclo sulle tables presenti in svg.tables

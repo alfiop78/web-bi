@@ -350,6 +350,7 @@ class Cube
     $this->WHERE_metricTable = array();
     // dd($joins);
     foreach ($joins as $token => $join) {
+      // dd($token, $join);
       if ($join->alias === 'WEB_BI_TIME') {
         $this->WHERE_metricTable[$token] = implode(" = ", $join->SQL);
       } else {
@@ -410,7 +411,7 @@ class Cube
     $this->filters_metricTable = [];
     foreach ($filters as $token => $filter) {
       // dd($filter);
-      $timingFunctions = ['last-year', 'year', 'r0f4im9', 'altre...'];
+      $timingFunctions = ['last-year', 'altre...'];
       // dd($timingFunctions, $token);
       if (in_array($token, $timingFunctions)) {
         /* è una funzione temporale. 
@@ -419,11 +420,13 @@ class Cube
           ...oppure (WEB_BI_TIME.trans_ly) = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE.
         */
         // dd($filter->joins);
-        foreach ($filter->joins as $join) {
+        /* foreach ($filter->joins as $join) {
           // dd($join);
           $this->WHERE_timingFn[$token] = implode(" = ", $join->SQL);
-        }
-        $this->filters_metricTable[$filter->name] = implode(" ", $filter->sql);
+        } */
+        $this->WHERE_timingFn[$token] = implode(" = ", $filter->SQL);
+        // $this->WHERE_timingFn[$token] = implode(" = ", $filter->sql);
+
         // $this->WHERE_timingFn[$token] = "WEB_BI_TIME_055.trans_ly = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE";
         // dd($this->WHERE_timingFn);
         // dd("(MapJSONExtractor({$filter->table}.{$filter->field}))['$filter->func']::DATE");
@@ -826,7 +829,7 @@ class Cube
     $comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($metrics)) . "\n*/\n";
 
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
-    dd($sql);
+    // dd($sql);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
     if ($mode === 'sql') {
       $result = $sql;
@@ -861,6 +864,7 @@ class Cube
     }
     $this->_fieldsSQL = implode(",", $table_fields);
     // dd($this->_fieldsSQL);
+    // WARN: qui è presente del codice ripetuto nell'if che verifica se ci sono metriche filtrate
     // dd(!empty($this->_metrics_advanced_datamart));
     if (!empty($this->_metrics_advanced_datamart)) {
       // dd('metriche filtrate presenti');
@@ -888,15 +892,15 @@ class Cube
         }
       }
       /*
-            QUERY CHE GENERA IL DATAMART
-                select W_AP_base_3.*, `W_AP_metric_3_1`.`Listino`, `W_AP_metric_3_2`.`sconto` FROM W_AP_base_3
-                LEFT JOIN W_AP_metric_3_1 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_1`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_1`.`Sede`
-                LEFT JOIN W_AP_metric_3_2 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_2`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_2`.`Sede`
-                con metriche composte
-                select W_AP_base_3.*, `W_AP_metric_3_1`.`Listino`, `W_AP_metric_3_2`.`sconto`, (W_AP_base_3.aliasMetric + W_AP_base_3.aliasMetric) AS 'alias' FROM W_AP_base_3
-                LEFT JOIN W_AP_metric_3_1 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_1`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_1`.`Sede`
-                LEFT JOIN W_AP_metric_3_2 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_2`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_2`.`Sede`
-            ;
+        QUERY CHE GENERA IL DATAMART
+            select W_AP_base_3.*, `W_AP_metric_3_1`.`Listino`, `W_AP_metric_3_2`.`sconto` FROM W_AP_base_3
+            LEFT JOIN W_AP_metric_3_1 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_1`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_1`.`Sede`
+            LEFT JOIN W_AP_metric_3_2 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_2`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_2`.`Sede`
+            con metriche composte
+            select W_AP_base_3.*, `W_AP_metric_3_1`.`Listino`, `W_AP_metric_3_2`.`sconto`, (W_AP_base_3.aliasMetric + W_AP_base_3.aliasMetric) AS 'alias' FROM W_AP_base_3
+            LEFT JOIN W_AP_metric_3_1 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_1`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_1`.`Sede`
+            LEFT JOIN W_AP_metric_3_2 ON `W_AP_base_3`.`Cod.Sede` = `W_AP_metric_3_2`.`Cod.Sede` AND `W_AP_base_3`.`Sede` = `W_AP_metric_3_2`.`Sede`
+        ;
       */
 
       // dd(property_exists($this, 'compositeMetrics'));
@@ -928,7 +932,6 @@ class Cube
       $s .= "\nGROUP BY $this->_fieldsSQL";
       $sql = "/*Creazione DATAMART finale :\n{$this->datamartName}\n*/\nCREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS\n($s);";
     }
-    // dd($sql);
     /* vecchio metodo, prima di MyVerticaGrammar.php
       $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_$this->reportId' AND SCHEMA_NAME='decisyon_cache';");
       // dd($FX);
@@ -963,6 +966,7 @@ class Cube
         }
         // dd($this->_metricTable);
         // ritorno il nome della FX in modo da poter mostrare un anteprima dei dati
+        // dd($sql);
         return $this->datamartName;
       }
     }

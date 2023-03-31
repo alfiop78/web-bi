@@ -222,7 +222,7 @@ class MapDatabaseController extends Controller
       // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
       $datamartName = $q->sheetCreateDatamart(null);
       // dd($datamartName);
-      // restituisco un ANTEPRIMA del json con i dati del datamart appena creato
+      // restituisco un ANTEPRIMA del datamart appena creato
       $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.$q->datamartName LIMIT 5000;");
       return response()->json($datamartResult);
     } else {
