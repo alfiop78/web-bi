@@ -193,6 +193,8 @@ var Sheet;
         for (const [key, value] of Object.entries(WorkSheet.tableJoins)) {
           WorkSheet.activeTable = value.id;
           const data = WorkBookStorage.getTable(WorkSheet.activeTable.dataset.table);
+          console.log(data);
+          debugger;
           app.addFields(key, data);
         }
       }
@@ -929,7 +931,7 @@ var Sheet;
         }
       }
       // in app.getTables() c'è il controllo se sono presenti urls da scaricare
-      WorkBookStorage.saveSession(await app.getTables(urls));
+      WorkBookStorage.saveTables(await app.getTables(urls));
       Step.next();
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
       app.addTablesStruct();
@@ -1002,6 +1004,7 @@ var Sheet;
     // creo la struttura tabelle per poter creare nuovi filtri
     let urls = [];
     // TODO: reset della struttura già presente
+    app.dialogFilters.querySelectorAll('nav > details').forEach(element => element.remove());
     for (const [tableId, value] of WorkSheet.hierTables) {
       WorkSheet.activeTable = tableId;
       urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/table_info');
@@ -1681,10 +1684,10 @@ var Sheet;
     app.hierTables();
     // recupero tutti i campi della WEB_BI_TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     WorkSheet.activeTable = 'svg-data-web_bi_time';
-    const web_bi_timeFields = await app.getTable();
-    for (const [table, columns] of Object.entries(web_bi_timeFields)) {
+    if (!window.sessionStorage.getItem(WorkSheet.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
+    const data = WorkBookStorage.getTable(WorkSheet.activeTable.dataset.table);
+    data.forEach(column => {
       const tokenField = rand().substring(0, 7);
-      debugger;
       WorkSheet.field = {
         token: tokenField,
         value: {
@@ -1693,16 +1696,15 @@ var Sheet;
           schema: WorkSheet.activeTable.dataset.schema,
           tableAlias: WorkSheet.activeTable.dataset.alias,
           table: WorkSheet.activeTable.dataset.table,
-          name: columns.COLUMN_NAME,
+          name: column.COLUMN_NAME,
           field: {
-            id: { field: columns.COLUMN_NAME, type: 'da implementare', origin_field: columns.COLUMN_NAME },
-            ds: { field: columns.COLUMN_NAME, type: 'da implementare', origin_field: columns.COLUMN_NAME }
+            id: { field: column.COLUMN_NAME, type: 'da implementare', origin_field: column.COLUMN_NAME },
+            ds: { field: column.COLUMN_NAME, type: 'da implementare', origin_field: column.COLUMN_NAME }
           }
         }
       };
       WorkSheet.fields = tokenField;
-
-    }
+    });
   }
 
   /* app.contextMenu = (e) => {

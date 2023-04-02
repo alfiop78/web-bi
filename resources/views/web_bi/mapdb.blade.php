@@ -86,7 +86,7 @@
   </template>-->
 
   <template id="tmpl-details-element">
-    <details data-id="dt-tables" open>
+    <details data-id="dt-tables">
       <summary></summary>
     </details>
     <li class="new-worksheet-object">
