@@ -860,6 +860,11 @@ var Sheet;
     app.hierTables();
     // scarico le tabelle del canvas in sessionStorage, questo controllo va fatto dopo aver definito WorkSheet.hierTables
     app.checkSessionStorage();
+    // reimposto l'evento contextmenu sugli elementi del canvas
+    for (const tableId of Draw.tables.keys()) {
+      // se la tabella è già presente in sessionStorage non rieseguo la query
+      Draw.svg.querySelector(`#${tableId}`).addEventListener('contextmenu', app.contextMenuTable);
+    }
     app.dialogWorkBook.close();
   }
 
