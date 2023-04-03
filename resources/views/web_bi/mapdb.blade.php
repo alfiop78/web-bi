@@ -257,13 +257,13 @@
                     <dt>Last Week</dt>
                     <dd>description</dd>
 
-                    <dt>Last Month</dt>
+                    <dt data-value="last-month" data-fn="handlerTimingFunctions" data-time-field="month">Last Month</dt>
                     <dd>description</dd>
 
                     <dt>Last Quarter</dt>
                     <dd>description</dd>
 
-                    <dt data-value="last-year" data-fn="handlerTimingFunctions">Last Year</dt>
+                    <dt data-value="last-year" data-fn="handlerTimingFunctions" data-time-field="year">Last Year</dt>
                     <dd>La funzione presenta i dati relativi all’anno precedente, rispetto al livello presente nel report.<br /> Ad esempio se nel report è presente il livello mese, la funzione presenta i dati relativi allo stesso mese, ma dell’anno precedente, per il livello trimestre, presenta invece i dati dello stesso trimestre, ma dell’anno precedente</dd>
 
                     <dt>MAT</dt>

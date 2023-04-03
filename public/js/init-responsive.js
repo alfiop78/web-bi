@@ -834,8 +834,22 @@ var Sheet;
     app.dialogWorkBook.showModal();
   }
 
+  app.checkSessionStorage = async () => {
+    // TODO: scarico in sessionStorage tutte le tabelle del canvas
+    let urls = [];
+    for (const tableId of WorkSheet.hierTables.keys()) {
+      WorkSheet.activeTable = tableId;
+      // se la tabella è già presente in sessionStorage non rieseguo la query
+      if (!window.sessionStorage.getItem(WorkSheet.activeTable.dataset.table)) {
+        urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/tables_info');
+      }
+    }
+    // in app.getTables() c'è il controllo se sono presenti urls da scaricare
+    WorkBookStorage.saveTables(await app.getTables(urls));
+  }
+
   // apertura del WorkBook
-  app.workBookSelected = (e) => {
+  app.workBookSelected = async (e) => {
     WorkSheet = WorkSheet.open(e.currentTarget.dataset.token);
     WorkSheet.workBook.token = e.currentTarget.dataset.token;
     WorkSheet.workSheet.token = `workSheet_${e.currentTarget.dataset.token}`;
@@ -844,6 +858,8 @@ var Sheet;
     document.getElementById('workbook-name').innerText = WorkSheet.name;
     app.tablesMap();
     app.hierTables();
+    // scarico le tabelle del canvas in sessionStorage, questo controllo va fatto dopo aver definito WorkSheet.hierTables
+    app.checkSessionStorage();
     app.dialogWorkBook.close();
   }
 
@@ -922,16 +938,7 @@ var Sheet;
     * - creo la struttura delle tabelle->fields nella dialog filter
     */
     if (WorkSheet.tablesMap.size !== 0) {
-      let urls = [];
-      for (const tableId of WorkSheet.hierTables.keys()) {
-        WorkSheet.activeTable = tableId;
-        // TODO: se la tabella è già presente in sessionStorage non rieseguo la query
-        if (!window.sessionStorage.getItem(WorkSheet.activeTable.dataset.table)) {
-          urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/tables_info');
-        }
-      }
-      // in app.getTables() c'è il controllo se sono presenti urls da scaricare
-      WorkBookStorage.saveTables(await app.getTables(urls));
+      app.checkSessionStorage();
       Step.next();
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
       app.addTablesStruct();
@@ -1488,7 +1495,6 @@ var Sheet;
     recursiveLevels(levelId);
   }
 
-
   /* app.createHierarchies = () => {
     // salvo le gerarchie / dimensioni create nel canvas
     // recupero gli elementi del level-id più alto, il data-level presente su <svg> identifica il livello più alto presente
@@ -1881,7 +1887,7 @@ var Sheet;
     const alias = document.getElementById('adv-metric-name').value;
     // qui aggiungerà la metrica appena creata
     const parent = document.getElementById('ul-metrics');
-    const rand = () => Math.random(0).toString(36).substring(2);
+    // const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
     let filters = {};
     const baseMetric = WorkSheet.metrics.get(e.target.dataset.token);
@@ -1893,14 +1899,25 @@ var Sheet;
       filters[filter.dataset.token] = WorkSheet.filters.get(filter.dataset.token);
       // TODO: ogni filtro aggiunto nella metrica deve controllare le tabelle da includere e le sue join (come fatto per setSheet)
     });
-    // TODO: se ci sono funzioni temporali selezionate le aggiungo all'object 'filters' con token = alla funzione scelta (es.: last-year)
+    // se ci sono funzioni temporali selezionate le aggiungo all'object 'filters' con token = alla funzione scelta (es.: last-year)
     if (document.querySelector('#dl-timing-functions > dt[selected]')) {
       const timingFn = document.querySelector('#dl-timing-functions > dt[selected]');
-      if (['last-year', 'last-month', 'ecc...'].includes(timingFn.dataset.value)) {
+      /* if (['last-year', 'last-month', 'ecc...'].includes(timingFn.dataset.value)) {
         filters[timingFn.dataset.value] = {
           alias: 'WEB_BI_TIME',
           SQL: [
             'WEB_BI_TIME.trans_ly',
+            `TO_CHAR(${WorkSheet.dateTime.tableAlias}.${WorkSheet.dateTime.timeField})::DATE`
+          ]
+        };
+      } */
+      debugger;
+      if (['last-year', 'last-month', 'ecc...'].includes(timingFn.dataset.value)) {
+        const timeField = timingFn.dataset.timeField;
+        filters[timingFn.dataset.value] = {
+          alias: 'WEB_BI_TIME',
+          SQL: [
+            `(MapJSONExtractor(WEB_BI_TIME.last))['${timeField}']::DATE`,
             `TO_CHAR(${WorkSheet.dateTime.tableAlias}.${WorkSheet.dateTime.timeField})::DATE`
           ]
         };

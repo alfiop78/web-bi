@@ -411,7 +411,7 @@ class Cube
     $this->filters_metricTable = [];
     foreach ($filters as $token => $filter) {
       // dd($filter);
-      $timingFunctions = ['last-year', 'altre...'];
+      $timingFunctions = ['last-year', 'last-month', 'altre funzioni temporali...'];
       // dd($timingFunctions, $token);
       if (in_array($token, $timingFunctions)) {
         /* è una funzione temporale. 
@@ -851,6 +851,7 @@ class Cube
         // dd($tables);
         if ($table) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
         */
+    // dd($sql);
     return $result;
   }
 
