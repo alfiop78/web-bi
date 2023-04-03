@@ -25,6 +25,7 @@ var Sheet;
     dialogMetric: document.getElementById('dlg-metric'),
     dialogCustomMetric: document.getElementById('dlg-custom-metric'),
     dialogCompositeMetric: document.getElementById('dlg-composite-metric'),
+    dialogRename: document.getElementById('dialog-rename'),
     windowJoin: document.getElementById('window-join'),
     dialogColumns: document.getElementById('dlg-columns'),
     dialogTime: document.getElementById('dialog-time'),
@@ -95,6 +96,34 @@ var Sheet;
   observerList.observe(document.getElementById('body'), config);
   observerList.observe(app.drawer, config);
   // observerList.observe(Draw.svg, config);
+
+  app.contextMenuTable = (e) => {
+    e.preventDefault();
+    // console.log(e.target);
+    console.log(e.currentTarget);
+    // console.log(e.target.getBoundingClientRect());
+    // const { clientX: mouseX, clientY: mouseY } = e;
+    const { right: mouseX, top: mouseY } = e.target.getBoundingClientRect();
+    app.contextMenuTableRef.style.top = `${mouseY}px`;
+    app.contextMenuTableRef.style.left = `${mouseX + 4}px`;
+    WorkSheet.activeTable = e.currentTarget.id;
+    app.contextMenuTableRef.toggleAttribute('open');
+  }
+
+  // imposto un alias per tabella aggiunta al canvas
+  app.setAliasTable = () => app.dialogRename.showModal();
+
+  app.saveAliasTable = () => {
+    // recupero lo struct all'interno del <defs>
+    const struct = Draw.svg.querySelector(`#struct-${WorkSheet.activeTable.id}`);
+    const input = document.getElementById('table-alias');
+    struct.querySelector('text').innerHTML = input.value;
+    // imposto attributo data-alias-note sull'elemento <use>
+    debugger;
+    Draw.svg.querySelector(`#${WorkSheet.activeTable.id}`).dataset.aliasNote = input.value;
+    Draw.tables.get(WorkSheet.activeTable.id).aliasNote = input.value;
+    app.dialogRename.close();
+  }
 
   /* NOTE: DRAG&DROP EVENTS */
 
@@ -233,6 +262,7 @@ var Sheet;
           },
           table: liElement.dataset.label,
           alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
+          aliasNote: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
           schema: liElement.dataset.schema,
           join: null,
           joins: 0,
@@ -302,6 +332,7 @@ var Sheet;
           },
           table: liElement.dataset.label,
           alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
+          aliasNote: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
           schema: liElement.dataset.schema,
           joins: 0,
           join: Draw.tableJoin.table.id,
@@ -1488,7 +1519,8 @@ var Sheet;
           id: table.id,
           table: {
             name: table.dataset.table,
-            alias: table.dataset.alias
+            alias: table.dataset.alias,
+            aliasNote: table.dataset.aliasNote
           }
         };
         if (levelId !== 0) {
@@ -1681,6 +1713,7 @@ var Sheet;
         y: 10,
         table: 'WEB_BI_TIME',
         alias: 'WEB_BI_TIME',
+        aliasNote: 'WEB_BI_TIME',
         schema: 'decisyon_cache',
         joins: 0,
         // per il momento la TIME và impostata sempre sulla svg-data-0 (tabella dei fatti)
@@ -2072,18 +2105,6 @@ var Sheet;
     app.contextMenuRef.toggleAttribute('open');
   }
 
-  app.contextMenuTable = (e) => {
-    e.preventDefault();
-    console.log(e.target);
-    console.log(e.target.getBoundingClientRect());
-    // const { clientX: mouseX, clientY: mouseY } = e;
-    const { right: mouseX, top: mouseY } = e.target.getBoundingClientRect();
-    app.contextMenuTableRef.style.top = `${mouseY}px`;
-    app.contextMenuTableRef.style.left = `${mouseX + 4}px`;
-    WorkSheet.activeTable = e.currentTarget.id;
-    app.contextMenuTableRef.toggleAttribute('open');
-  }
-
   app.addDefinedMetrics = () => {
     // metriche mappate sul cubo
     const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
@@ -2157,6 +2178,7 @@ var Sheet;
       const summary = details.querySelector('summary');
       WorkSheet.activeTable = tableId;
       details.dataset.alias = value.alias;
+      debugger;
       details.dataset.table = value.name;
       summary.innerHTML = value.name;
       summary.dataset.tableId = tableId;

@@ -160,6 +160,17 @@
       <div id="content">
         <div id="body">
 
+          <dialog id="dialog-rename">
+            <div class="md-field">
+              <input type="text" id="table-alias" value="" autocomplete="on" />
+              <label for="table-alias" class="">Alias per la tabella</label>
+            </div>
+            <section class="buttons">
+              <button name="cancel" value="chiudi">Chiudi</button>
+              <button data-fn="saveAliasTable" value="ok">Salva</button>
+            </section>
+          </dialog>
+
           <dialog id="dialog-time" class="medium">
             <section class="dlg-grid">
               <h5>Imposta relazione con tabella TIME</h5>
@@ -419,7 +430,7 @@
                         <ul id="ul-context-menu-table">
                           <li id="time-dimension" data-fn="handlerTimeDimension">Dimensione TIME</li>
                           <li data-fn="removeTable">Rimuovi</li>
-                          <li>Aggiungi alias</li>
+                          <li data-fn="setAliasTable">Alias tabella</li>
                           <li>item 4</li>
                         </ul>
                       </div>
@@ -435,9 +446,9 @@
                             <defs>
                               <g id="table-struct" class="struct">
                                 <rect x="0" y="0" />
-                                <text x="18" y="20" font-family="Barlow" font-size=".85rem" font-weight="normal"></text>
-                                <!--<image id="backspace" href="{{ asset('/images/backspace.svg') }}" data-id data-fn="contextMenu" x="175" y="0" width="18" height="18">
+                                <!--<image class="material-icons-round md-18 table-icon" href="{{ asset('/images/table_view_black_18dp.svg') }}" data-id x="5" y="6" width="18" height="18">
                                 </image>-->
+                                <text x="26" y="20" font-family="Barlow" font-size=".85rem" font-weight="normal"></text>
                               </g>
                               <g id="web-bi-time">
                                 <image id="time" href="{{ asset('/images/backspace.svg') }}" height="18" width="18"></image>

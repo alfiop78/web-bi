@@ -154,10 +154,10 @@ path[data-joined]{
   stroke-linecap: round;
 }
 
-
 .struct > rect {
   /* fill: lightblue; */
   rx : 2.5;
+  /* fill: #dcdcdca1; */
   width: 170px;
   height: 30px;
   stroke: #494949;
@@ -170,7 +170,7 @@ path[data-joined]{
 }
 
 use.table{
-  fill: #dcdcdca1;
+  fill: #e2e2e2;
   font-weight: normal;
 }
 
