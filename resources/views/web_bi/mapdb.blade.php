@@ -446,12 +446,13 @@
                             <defs>
                               <g id="table-struct" class="struct">
                                 <rect x="0" y="0" />
-                                <!--<image class="material-icons-round md-18 table-icon" href="{{ asset('/images/table_view_black_18dp.svg') }}" data-id x="5" y="6" width="18" height="18">
-                                </image>-->
+                                <image href="{{ asset('/images/grid_on_5C7893_18dp.svg') }}" data-id x="5" y="6" width="18" height="18">
+                                </image>
                                 <text x="26" y="20" font-family="Barlow" font-size=".85rem" font-weight="normal"></text>
+                                <image data-columns-defined="false" href="{{ asset('/images/view_column_black_18dp.svg') }}" x="5" y="35" width="18" height="18"></image>
                               </g>
                               <g id="web-bi-time">
-                                <image id="time" href="{{ asset('/images/backspace.svg') }}" height="18" width="18"></image>
+                                <image id="time" href="{{ asset('/images/access_time_filled_865858_18dp.svg') }}" height="18" width="18"></image>
                               </g>
                             </defs>
                           </svg>

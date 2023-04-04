@@ -169,14 +169,22 @@ path[data-joined]{
   font-weight: normal;
 }
 
+.struct > image[data-columns-defined="false"] {
+  visibility: hidden;
+}
+
+.struct > image[data-columns-defined="true"] {
+  visibility: visible;
+}
+
 use.table{
-  fill: #e2e2e2;
+  fill: #f1f1f1;
   font-weight: normal;
 }
 
 use.table:hover{
   cursor: pointer;
-  fill: #d9d7d7;
+  fill: #e2e2e2;
   stroke: #494949;
   stroke-width: 0.3;
 }

@@ -1885,6 +1885,9 @@ var Sheet;
     WorkSheet.fields = token;
     // Storages.save();
     app.dialogColumns.close();
+    // visualizzo image[data-columns-defined]
+    const struct = Draw.svg.querySelector(`#struct-${WorkSheet.activeTable.id}`);
+    struct.querySelector('image[data-columns-defined]').dataset.columnsDefined = true;
   }
 
   app.handlerMetric = (e) => {
