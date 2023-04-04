@@ -133,3 +133,9 @@ dt[selected] {
   background-color: orange;
   color: #494949;
 }
+
+*[data-id="value-icons"] > div {
+  display: flex;
+  align-items: center;
+
+}

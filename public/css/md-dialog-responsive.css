@@ -48,6 +48,14 @@ dialog.medium{
   /* max-height: 50%; */
 }
 
+dialog.large{
+  width: 80%;
+  /* max-width: 60%; */
+  height: 65%;
+  /* max-height: 50%; */
+}
+
+
 .dialog-wrapper {
   display: flex;
   position: relative;

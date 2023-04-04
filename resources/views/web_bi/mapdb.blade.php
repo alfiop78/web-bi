@@ -76,14 +76,29 @@
     </dl>
   </template>
 
-  <!--<template id="tmpl-dd-element">
-    <dd>
-      <details data-id="dt-tables">
-        <summary></summary>
-      </details>
-      <button class="new-worksheet-object" data-fn="btnMetricNew" type="button" value="crea metrica">nuova metrica</button>
+  <template id="tmpl-dt">
+    <dt data-id="value-icons">
+      <div>
+        <span data-value></span>
+        <span>
+          <button data-fn="uploadWorkBook" data-id="upload" class="button-icon material-icons-round md-18">upload</button>
+          <button data-fn="deleteWorkBook" data-id="delete" class="button-icon material-icons-round md-18">delete</button>
+        </span>
+      </div>
+    </dt>
+  </template>
+
+  <template id="tmpl-dd">
+    <dd data-id="value-icons">
+      <div>
+        <span data-value></span>
+        <span>
+          <button data-fn="uploadSheet" data-upload class="button-icon material-icons-round md-18">upload</button>
+          <button data-fn="deleteSheet" data-delete class="button-icon material-icons-round md-18">delete</button>
+        </span>
+      </div>
     </dd>
-  </template>-->
+  </template>
 
   <template id="tmpl-details-element">
     <details data-id="dt-tables">
@@ -357,6 +372,21 @@
             </section>
           </dialog>
 
+          <dialog id="dialog-versioning" class="large">
+            <section class="dlg-grid">
+              <h5>Sincronizzazione elementi</h5>
+              <section class="dlg-content col">
+                <section>
+                  <dl id="dl-local-objects"></dl>
+                  <dl id="dl-DB-objects"></dl>
+                </section>
+              </section>
+              <section class="buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+              </section>
+            </section>
+          </dialog>
+
           <div class="wrapper">
             <div id="window-join" class="absolute-window" data-x="0" data-y="0" data-open="false">
               <section class="wj-content">
@@ -438,8 +468,9 @@
                         <menu>
                           <section id="workbook-name" class="data-source" contenteditable="true">WorkSpace 1</section>
                           <button data-fn="workBookNew" id="btn-workbook-new" value="Nuovo" disabled>Nuovo</button>
-                          <button data-fn="workBookOpen" id="btn-workbook-open" value="open">Apri</button>
+                          <button id="btn-workbook-open" value="open">Apri</button>
                           <button data-fn="workBookClose" id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button>
+                          <button id="btn-versioning" value="Versionamento">Versionamento</button>
                         </menu>
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
                           <svg id="svg" class="dropzone" data-level="0">
@@ -599,6 +630,7 @@
     </svg>
   </div>
   <script type="text/javascript" src="{{ asset('/js/init-responsive.js') }}" async></script>
+  <script type="text/javascript" src="{{ asset('/js/versioning.js') }}" async></script>
 </body>
 
 </html>

@@ -103,4 +103,15 @@ class SheetStorages extends Storages {
     return this.#sheets;
   }
 
+  getSheets(workBookToken) {
+    let sheets = {};
+    for (const [token, object] of Object.entries(this.storage)) {
+      if (JSON.parse(object).type === 'Sheet' && JSON.parse(object).workBook_ref === workBookToken) {
+        sheets[token] = JSON.parse(object);
+      }
+    }
+    return sheets;
+  }
+
+
 }
