@@ -120,8 +120,8 @@ var Sheet;
     struct.querySelector('text').innerHTML = input.value;
     // imposto attributo data-alias-note sull'elemento <use>
     debugger;
-    Draw.svg.querySelector(`#${WorkSheet.activeTable.id}`).dataset.aliasNote = input.value;
-    Draw.tables.get(WorkSheet.activeTable.id).aliasNote = input.value;
+    Draw.svg.querySelector(`#${WorkSheet.activeTable.id}`).dataset.name = input.value;
+    Draw.tables.get(WorkSheet.activeTable.id).name = input.value;
     app.dialogRename.close();
   }
 
@@ -222,8 +222,6 @@ var Sheet;
         for (const [key, value] of Object.entries(WorkSheet.tableJoins)) {
           WorkSheet.activeTable = value.id;
           const data = WorkBookStorage.getTable(WorkSheet.activeTable.dataset.table);
-          console.log(data);
-          debugger;
           app.addFields(key, data);
         }
       }
@@ -262,7 +260,7 @@ var Sheet;
           },
           table: liElement.dataset.label,
           alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
-          aliasNote: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
+          name: liElement.dataset.label,
           schema: liElement.dataset.schema,
           join: null,
           joins: 0,
@@ -332,7 +330,7 @@ var Sheet;
           },
           table: liElement.dataset.label,
           alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
-          aliasNote: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
+          name: liElement.dataset.label,
           schema: liElement.dataset.schema,
           joins: 0,
           join: Draw.tableJoin.table.id,
@@ -1518,9 +1516,9 @@ var Sheet;
         WorkSheet.hierTables = {
           id: table.id,
           table: {
-            name: table.dataset.table,
+            table: table.dataset.table,
             alias: table.dataset.alias,
-            aliasNote: table.dataset.aliasNote
+            name: table.dataset.name
           }
         };
         if (levelId !== 0) {
@@ -1713,7 +1711,7 @@ var Sheet;
         y: 10,
         table: 'WEB_BI_TIME',
         alias: 'WEB_BI_TIME',
-        aliasNote: 'WEB_BI_TIME',
+        name: 'WEB_BI_TIME',
         schema: 'decisyon_cache',
         joins: 0,
         // per il momento la TIME và impostata sempre sulla svg-data-0 (tabella dei fatti)
@@ -2178,7 +2176,6 @@ var Sheet;
       const summary = details.querySelector('summary');
       WorkSheet.activeTable = tableId;
       details.dataset.alias = value.alias;
-      debugger;
       details.dataset.table = value.name;
       summary.innerHTML = value.name;
       summary.dataset.tableId = tableId;
@@ -2189,7 +2186,7 @@ var Sheet;
     app.addDefinedMetrics();
   }
 
-  // creo la struttura tabelle nelladialog-filters
+  // creo la struttura tabelle nella dialog-filters
   app.addWorkBookContent = () => {
     // reset
     app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
@@ -2201,7 +2198,7 @@ var Sheet;
       const summary = details.querySelector('summary');
       WorkSheet.activeTable = tableId;
       // recupero le tabelle dal sessionStorage
-      const columns = WorkBookStorage.getTable(value.name);
+      const columns = WorkBookStorage.getTable(value.table);
       details.dataset.schema = WorkSheet.activeTable.dataset.schema;
       details.dataset.table = value.name;
       details.dataset.alias = value.alias;
