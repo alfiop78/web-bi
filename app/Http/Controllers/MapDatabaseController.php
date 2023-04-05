@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\MapDatabase;
-use App\Models\BIdimension;
-use App\Models\BIprocess;
+// use App\Models\MapDatabase;
+// use App\Models\BIdimension;
+// use App\Models\BIprocess;
 use Illuminate\Support\Facades\DB;
 use App\Classes\Cube;
 use Exception;
@@ -236,6 +236,88 @@ class MapDatabaseController extends Controller
       // return abort(500, "ERRORE ESECUZIONE QUERY : $msg");
       abort(500, "ERRORE ESECUZIONE QUERY : $msg");
     } */
+  }
+
+  public function sheetCurlProcess($json)
+  {
+    // curl http://127.0.0.1:8000/curl/process/210wu29ifoh/schedule
+    // con il login : curl https://user:psw@gaia.automotive-cloud.com/curl/process/{processToken}/schedule
+    // ...oppure : curl -u 'user:psw' https://gaia.automotive-cloud.com/curl/process/{processToken}/schedule
+    $json_decoded = json_decode($json); // object
+    $json_value = json_decode($json_decoded->{'json_value'});
+    $report = $json_value;
+    // $reportName = $json_value->{'name'};
+
+    $q = new Cube();
+    // imposto le proprietà con i magic methods
+    $q->reportId = $report->{'id'};
+    $q->baseTableName = "WEB_BI_TMP_BASE_$q->reportId";
+    $q->datamartName = "WEB_BI_$q->reportId";
+    $q->baseColumns = $report->{'fields'};
+
+    // imposto le colonne da includere nel datamart finale
+    $q->sheetFields();
+    $q->sheetSelect($report->{'fields'});
+    if (property_exists($report, 'compositeMetrics')) $q->compositeMetrics = $report->{'compositeMetrics'};
+    if (property_exists($report, 'metrics')) {
+      $q->sheetBaseMetrics = $report->{'metrics'};
+      $q->sheetMetrics();
+    }
+    $q->sheetFrom($report->{'from'});
+    $q->sheetWhere($report->{'joins'});
+    if (property_exists($report, 'filters')) $q->sheetFilters($report->{'filters'});
+    $q->sheetGroupBy($report->{'fields'});
+    /* dd($q); */
+    // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
+    try {
+      $baseTable = $q->sheetBaseTable(null);
+      if (!$baseTable) {
+        // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
+        // creo una tabella temporanea per ogni metrica filtrata
+        // TODO: 2022-05-06 qui occorre una verifica più approfondita sui filtri contenuti nella metrica, allo stato attuale faccio una query per ogni metrica filtrata, anche se i filtri all'interno della metrica sono uguali. Includere più metriche che contengono gli stessi filtri in un unica query
+        if (property_exists($report, 'advMetrics')) {
+          $q->filteredMetrics = $report->{'advMetrics'};
+          // verifico quali, tra le metriche filtrate, contengono gli stessi filtri. Le metriche che contengono gli stessi filtri vanno eseguite in un unica query
+          // oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
+          $q->groupMetricsByFilters = (object)[];
+          // raggruppare per tipologia dei filtri
+          $groupFilters = array();
+          // creo un gruppo di filtri
+          foreach ($q->filteredMetrics as $metric) {
+            // dd($metric->formula->filters);
+            // ogni gruppo di filtri ha un tokenGrouup diverso come key dekk'array
+            $tokenGroup = "group_" . bin2hex(random_bytes(4));
+            if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
+          }
+          // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
+          foreach ($groupFilters as $token => $group) {
+            $metrics = array();
+            foreach ($q->filteredMetrics as $metric) {
+              if (get_object_vars($metric->filters) == get_object_vars($group)) {
+                // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
+                array_push($metrics, $metric);
+              }
+            }
+            // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
+            $q->groupMetricsByFilters->$token = $metrics;
+          }
+          // dd($q->groupMetricsByFilters);
+          $metricTable = $q->sheetCreateMetricDatamarts(null);
+        }
+        // echo 'elaborazione createDatamart';
+        // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
+        $datamartName = $q->sheetCreateDatamart(null);
+        // echo $datamartName;
+        // var_dump($datamartName);
+        // if ($datamartName) return "Datamart ({$datamartName}) per il report {$reportName} creato con successo!\n";
+        if ($datamartName) return "OK\n";
+      }
+    } catch (Exception $e) {
+      $msg = $e->getMessage();
+      return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
+      // abort(500, "ERRORE ESECUZIONE QUERY : $msg");
+    }
+    // dd($baseTable);
   }
 
   // processo la FX

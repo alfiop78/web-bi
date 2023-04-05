@@ -70,6 +70,8 @@ var Storage = new SheetStorages();
       dt.id = token;
       span.dataset.value = object.name;
       span.innerText = object.name;
+      btnUpload.dataset.token = token;
+      btnDelete.dataset.token = token;
       app.dlLocalObjects.appendChild(dt);
       // lista di tutti gli sheet del workbook in ciclo
       for (const [sheetToken, sheet] of Object.entries(Storage.getSheets(token))) {
@@ -84,6 +86,8 @@ var Storage = new SheetStorages();
         dd.id = sheetToken;
         span.dataset.value = sheet.name;
         span.innerText = sheet.name;
+        btnUpload.dataset.token = sheetToken;
+        btnDelete.dataset.token = sheetToken;
         dt.appendChild(dd);
       }
     }
@@ -98,6 +102,36 @@ var Storage = new SheetStorages();
     app.getLocalObjects();
     app.dialogVersioning.showModal();
   }
+
+  app.uploadObject = async (e) => {
+    // let url = '/fetch_api/json/workbook_store';
+    let url = `/fetch_api/json/${e.currentTarget.dataset.upload}_store`;
+    const json = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token));
+    const params = JSON.stringify(json);
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    // recupero l'elemento da salvare su db, presente nello storage
+    // console.log(JSON.stringify(json));
+    const req = new Request(url, init);
+    await fetch(req)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        if (data) {
+          console.log('data : ', data);
+        } else {
+          console.error('Elemento non salvato su DB');
+        }
+      })
+      .catch((err) => console.error(err));
+
+  }
+
+  // -------------------------
+
 
   app.checkVersioning = () => {
     // elementi in locale diversi dalla copia su DB, occorre azione manuale

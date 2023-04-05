@@ -81,8 +81,8 @@
       <div>
         <span data-value></span>
         <span>
-          <button data-fn="uploadWorkBook" data-id="upload" class="button-icon material-icons-round md-18">upload</button>
-          <button data-fn="deleteWorkBook" data-id="delete" class="button-icon material-icons-round md-18">delete</button>
+          <button data-fn="uploadObject" data-upload="workbook" class="button-icon material-icons-round md-18">upload</button>
+          <button data-fn="deleteWorkBook" data-delete class="button-icon material-icons-round md-18">delete</button>
         </span>
       </div>
     </dt>
@@ -93,7 +93,7 @@
       <div>
         <span data-value></span>
         <span>
-          <button data-fn="uploadSheet" data-upload class="button-icon material-icons-round md-18">upload</button>
+          <button data-fn="uploadObject" data-upload="sheet" class="button-icon material-icons-round md-18">upload</button>
           <button data-fn="deleteSheet" data-delete class="button-icon material-icons-round md-18">delete</button>
         </span>
       </div>

@@ -7,14 +7,18 @@ use App\Http\Controllers\UserController;
 // aggiungo il controller MapDatabase, collegato a vertica
 use App\Http\Controllers\MapDatabaseController;
 // aggiungo il controller MetadataController, collegato al 192.168.2.7 web_bi_md per il metadato
-use App\Http\Controllers\MetadataController;
-use App\Http\Controllers\BIdimensionController;
-use App\Http\Controllers\BIcubeController;
+// use App\Http\Controllers\MetadataController;
+// use App\Http\Controllers\BIdimensionController;
+use App\Http\Controllers\BIworkbookController;
+use App\Http\Controllers\BIsheetController;
+// use App\Http\Controllers\BIcubeController;
 use App\Http\Controllers\BImetricController;
 use App\Http\Controllers\BIfilterController;
 use App\Http\Controllers\BIprocessController;
 // uso il Model BIprocess che viene utilizzato nella route curlprocess (web_bi.schedule_report)
 use App\Models\BIprocess;
+// uso il Model BIsheet che viene utilizzato nella route curlprocess (web_bi.schedule_report)
+use App\Models\BIsheet;
 // test 22.12.2022 aggiunta per utilizzare /fetch_api/dimension/time
 use Illuminate\Support\Facades\DB;
 
@@ -157,20 +161,29 @@ Route::post('/fetch_api/dimension/time', function () {
 // curl https://gaia.automotive-cloud.com/curl/process/j8ykcl339r9/schedule
 // con il login : curl https://user:psw@gaia.automotive-cloud.com/curl/process/{processToken}/schedule
 // ...oppure : curl -u 'user:psw' https://gaia.automotive-cloud.com/curl/process/{processToken}/schedule
-Route::get('/curl/process/{token}/schedule', function (BIprocess $biProcess, $token) {
+/* Route::get('/curl/process/{token}/schedule', function (BIprocess $biProcess, $token) {
   $map = new MapDatabaseController();
   // interrogo la tabella bi_processes per recuperare il json_value relativo al report indicato nel token
   $json_value = BIprocess::where("token", "=", $token)->first('json_value');
   return $map->curlprocess($json_value);
+})->name('web_bi.schedule_report'); */
+
+Route::get('/curl/process/{token}/schedule', function (BIsheet $biSheet, $token) {
+  $map = new MapDatabaseController();
+  // interrogo la tabella bi_processes per recuperare il json_value relativo al report indicato nel token
+  $json_value = BIsheet::where("token", "=", $token)->first('json_value');
+  return $map->sheetCurlProcess($json_value);
 })->name('web_bi.schedule_report');
 
 // store json
 Route::prefix('/fetch_api/json/')->group(function () {
-  Route::post('/dimension_store', [BIdimensionController::class, 'store']);
-  Route::post('/cube_store', [BIcubeController::class, 'store']);
+  // Route::post('/dimension_store', [BIdimensionController::class, 'store']);
+  // Route::post('/cube_store', [BIcubeController::class, 'store']);
+  Route::post('/workbook_store', [BIworkbookController::class, 'store']);
+  Route::post('/sheet_store', [BIsheetController::class, 'store']);
   Route::post('/metric_store', [BImetricController::class, 'store']);
   Route::post('/filter_store', [BIfilterController::class, 'store']);
-  Route::post('/process_store', [BIprocessController::class, 'store']);
+  // Route::post('/process_store', [BIprocessController::class, 'store']);
 });
 // destroy json
 Route::prefix('/fetch_api/name/')->group(function () {
