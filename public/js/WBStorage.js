@@ -24,14 +24,6 @@ class Storages {
     return JSON.parse(window.localStorage.getItem(this.#workbook));
   }
 
-  set workSheet(value) {
-    this.#workSheet = value;
-  }
-
-  get workSheet() {
-    return JSON.parse(window.localStorage.getItem(this.#workSheet));
-  }
-
   save(object) {
     window.localStorage.setItem(object.token, JSON.stringify(object));
   }

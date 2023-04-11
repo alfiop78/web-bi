@@ -2,7 +2,7 @@ var App = new Application();
 var Draw = new DrawSVG('svg');
 var SheetStorage = new SheetStorages();
 var WorkBookStorage = new Storages();
-var WorkSheet = new WorkSheets('WorkBook 1');
+var WorkBook = new WorkBooks('WorkBook 1');
 var Sheet;
 (() => {
   var app = {
@@ -106,7 +106,7 @@ var Sheet;
     const { right: mouseX, top: mouseY } = e.target.getBoundingClientRect();
     app.contextMenuTableRef.style.top = `${mouseY}px`;
     app.contextMenuTableRef.style.left = `${mouseX + 4}px`;
-    WorkSheet.activeTable = e.currentTarget.id;
+    WorkBook.activeTable = e.currentTarget.id;
     app.contextMenuTableRef.toggleAttribute('open');
   }
 
@@ -115,13 +115,13 @@ var Sheet;
 
   app.saveAliasTable = () => {
     // recupero lo struct all'interno del <defs>
-    const struct = Draw.svg.querySelector(`#struct-${WorkSheet.activeTable.id}`);
+    const struct = Draw.svg.querySelector(`#struct-${WorkBook.activeTable.id}`);
     const input = document.getElementById('table-alias');
     struct.querySelector('text').innerHTML = input.value;
     // imposto attributo data-alias-note sull'elemento <use>
     debugger;
-    Draw.svg.querySelector(`#${WorkSheet.activeTable.id}`).dataset.name = input.value;
-    Draw.tables.get(WorkSheet.activeTable.id).name = input.value;
+    Draw.svg.querySelector(`#${WorkBook.activeTable.id}`).dataset.name = input.value;
+    Draw.tables.get(WorkBook.activeTable.id).name = input.value;
     app.dialogRename.close();
   }
 
@@ -210,18 +210,18 @@ var Sheet;
     e.preventDefault();
     if (e.dataTransfer.dropEffect === 'copy') {
       // se la tabella non presente in sessionStorage la scarico
-      if (!window.sessionStorage.getItem(WorkSheet.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
+      if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
       // se sono presenti almeno due tabelle visualizzo la dialog per la join
       if (Draw.countTables > 1) {
         // tabella 'from'
-        WorkSheet.tableJoins = {
+        WorkBook.tableJoins = {
           from: app.windowJoin.querySelector('.wj-joins section[data-table-from]').dataset.tableId,
           to: app.windowJoin.querySelector('.wj-joins section[data-table-to]').dataset.tableId
         }
-        // console.log(WorkSheet.tableJoins);
-        for (const [key, value] of Object.entries(WorkSheet.tableJoins)) {
-          WorkSheet.activeTable = value.id;
-          const data = WorkBookStorage.getTable(WorkSheet.activeTable.dataset.table);
+        // console.log(WorkBook.tableJoins);
+        for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
+          WorkBook.activeTable = value.id;
+          const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
           app.addFields(key, data);
         }
       }
@@ -353,7 +353,7 @@ var Sheet;
     // creo nel DOM la tabella appena droppata
     Draw.drawTable();
     // imposto la tabella attiva per poter scaricare le colonne in sessionStorage (in handlerDragEnd())
-    WorkSheet.activeTable = `svg-data-${tableId}`;
+    WorkBook.activeTable = `svg-data-${tableId}`;
     // imposto event contextmenu
     Draw.svg.querySelector(`#${Draw.currentTable.key}`).addEventListener('contextmenu', app.contextMenuTable);
     // posizionamento delle joinTable (tabelle che hanno data-join > 1)
@@ -448,11 +448,11 @@ var Sheet;
     field.dataset.id = elementRef.id;
     // const rand = () => Math.random(0).toString(36).substring(2);
     // const token = rand().substring(0, 7);
-    const metric = { ...WorkSheet.metrics.get(elementRef.id) };
+    const metric = { ...WorkBook.metrics.get(elementRef.id) };
     switch (metric.type) {
       case 'basic':
       case 'advanced':
-        // const metric = { ...WorkSheet.metrics.get(elementRef.id) };
+        // const metric = { ...WorkBook.metrics.get(elementRef.id) };
         metric.dependencies = false;
         Sheet.metrics = metric;
         app.addMetric(e.currentTarget, elementRef.id);
@@ -470,7 +470,7 @@ var Sheet;
             // la metrica in ciclo non è stata aggiunta allo Sheet, la aggiungo con la prop 'dependencies'
             //... per specificare che è stata aggiunta indirettamente, essa si trova in una metrica composta
             // NOTE: clonazione di un object con syntax ES6.
-            const nestedMetric = { ...WorkSheet.metrics.get(token) };
+            const nestedMetric = { ...WorkBook.metrics.get(token) };
             nestedMetric.dependencies = true;
             Sheet.metrics = nestedMetric;
           }
@@ -558,7 +558,7 @@ var Sheet;
     console.log(elementRef);
     const li = document.createElement('li');
     li.dataset.token = elementRef.id;
-    li.innerText = WorkSheet.filters.get(elementRef.id).name;
+    li.innerText = WorkBook.filters.get(elementRef.id).name;
     e.target.appendChild(li);
   }
 
@@ -582,9 +582,9 @@ var Sheet;
     code.innerHTML = Sheet.fields.get(token).name;
     // aggiungo la colonna al report (Sheet)
     // TODO: aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
-    // Sheet.fields = { token: elementRef.id, value: WorkSheet.field.get(elementRef.id) };
-    // passo, a Sheet.fields, la colonna creata in WorkSheet
-    // Sheet.fields = WorkSheet.field.get(elementRef.id);
+    // Sheet.fields = { token: elementRef.id, value: WorkBook.field.get(elementRef.id) };
+    // passo, a Sheet.fields, la colonna creata in WorkBook
+    // Sheet.fields = WorkBook.field.get(elementRef.id);
     Sheet.tables = Sheet.fields.get(token).tableAlias;
     target.appendChild(field);
     // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
@@ -602,7 +602,7 @@ var Sheet;
     console.log(elementRef);
     // elementRef : è l'elemento nella lista di sinistra che ho draggato
     // TODO: rinominare elementRef.id in elementRef.dataset.token
-    Sheet.fields = WorkSheet.field.get(elementRef.id);
+    Sheet.fields = WorkBook.field.get(elementRef.id);
     app.addField(e.currentTarget, elementRef.id);
   }
 
@@ -659,7 +659,7 @@ var Sheet;
       }
     });
     console.log('arr_sql : ', arr_sql);
-    WorkSheet.metrics = {
+    WorkBook.metrics = {
       token,
       alias,
       fields, // es.:[przMedio, quantita]
@@ -683,7 +683,7 @@ var Sheet;
     const mark = templateContent.querySelector('mark');
     // mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
     mark.innerText = field;
-    mark.dataset.tableAlias = WorkSheet.activeTable.dataset.alias;
+    mark.dataset.tableAlias = WorkBook.activeTable.dataset.alias;
     textarea.appendChild(span);
     // aggiungo anche uno span per il proseguimento della scrittura della formula
     app.addSpan(textarea, null, 'metric');
@@ -697,22 +697,23 @@ var Sheet;
 
   // dialog-metric per definire le metriche di base del WorkBook (non custom metric di base, come (przmedio*quantita))
   app.setMetric = (e) => {
-    // console.log(WorkSheet.activeTable);
-    // const table = WorkSheet.activeTable.dataset.table;
-    const tableAlias = WorkSheet.activeTable.dataset.alias;
+    // console.log(WorkBook.activeTable);
+    // const table = WorkBook.activeTable.dataset.table;
+    const tableAlias = WorkBook.activeTable.dataset.alias;
     const field = `${tableAlias}.${e.target.dataset.field}`;
     const alias = e.target.dataset.field;
     const token = rand().substring(0, 7);
 
     // metric Map Object
-    WorkSheet.metrics = {
+    WorkBook.metrics = {
       token,
       alias,
       field: e.target.dataset.field,
       aggregateFn: 'SUM', // default
       SQL: field,
       distinct: false, // default
-      type: 'basic'
+      type: 'metric',
+      metric_type: 'basic'
     };
   }
 
@@ -866,11 +867,11 @@ var Sheet;
   app.checkSessionStorage = async () => {
     // TODO: scarico in sessionStorage tutte le tabelle del canvas
     let urls = [];
-    for (const tableId of WorkSheet.hierTables.keys()) {
-      WorkSheet.activeTable = tableId;
+    for (const tableId of WorkBook.hierTables.keys()) {
+      WorkBook.activeTable = tableId;
       // se la tabella è già presente in sessionStorage non rieseguo la query
-      if (!window.sessionStorage.getItem(WorkSheet.activeTable.dataset.table)) {
-        urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/tables_info');
+      if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) {
+        urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/tables_info');
       }
     }
     // in app.getTables() c'è il controllo se sono presenti urls da scaricare
@@ -879,15 +880,14 @@ var Sheet;
 
   // apertura del WorkBook
   app.workBookSelected = async (e) => {
-    WorkSheet = WorkSheet.open(e.currentTarget.dataset.token);
-    WorkSheet.workBook.token = e.currentTarget.dataset.token;
-    WorkSheet.workSheet.token = `workSheet_${e.currentTarget.dataset.token}`;
-    WorkSheet.name = e.currentTarget.dataset.name;
+    WorkBook = WorkBook.open(e.currentTarget.dataset.token);
+    WorkBook.workBook.token = e.currentTarget.dataset.token;
+    WorkBook.name = e.currentTarget.dataset.name;
     // modifico il nome del WorkBook in #workbook-name
-    document.getElementById('workbook-name').innerText = WorkSheet.name;
+    document.getElementById('workbook-name').innerText = WorkBook.name;
     app.tablesMap();
     app.hierTables();
-    // scarico le tabelle del canvas in sessionStorage, questo controllo va fatto dopo aver definito WorkSheet.hierTables
+    // scarico le tabelle del canvas in sessionStorage, questo controllo va fatto dopo aver definito WorkBook.hierTables
     app.checkSessionStorage();
     // reimposto l'evento contextmenu sugli elementi del canvas
     for (const tableId of Draw.tables.keys()) {
@@ -905,7 +905,7 @@ var Sheet;
     const parent = document.querySelector('nav[data-sheet-defined]');
     // reset list
     parent.querySelectorAll('li').forEach(sheet => sheet.remove());
-    const sheets = SheetStorage.sheets(WorkSheet.workBook.token);
+    const sheets = SheetStorage.sheets(WorkBook.workBook.token);
     if (sheets) {
       for (const [token, object] of Object.entries(sheets)) {
         const tmpl = app.tmplList.content.cloneNode(true);
@@ -962,7 +962,7 @@ var Sheet;
 
   app.handlerEditSheetName = (e) => e.target.dataset.value = e.target.innerText;
 
-  app.editWorkBookName.onblur = (e) => WorkSheet.name = e.target.innerText;
+  app.editWorkBookName.onblur = (e) => WorkBook.name = e.target.innerText;
 
   document.getElementById('prev').onclick = () => Step.previous();
 
@@ -971,15 +971,15 @@ var Sheet;
     * - salvo i campi delle tabelle in sessionStorage in modo da poterci accedere più rapidamente
     * - creo la struttura delle tabelle->fields nella dialog filter
     */
-    if (WorkSheet.tablesMap.size !== 0) {
+    if (WorkBook.tablesMap.size !== 0) {
       app.checkSessionStorage();
       Step.next();
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
       app.addTablesStruct();
       // salvo il workbook creato
-      WorkSheet.save();
+      WorkBook.save();
       const rand = () => Math.random(0).toString(36).substring(2);
-      Sheet = new Sheets(rand().substring(0, 7), WorkSheet.workBook.token);
+      Sheet = new Sheets(rand().substring(0, 7), WorkBook.workBook.token);
     }
   }
 
@@ -997,8 +997,8 @@ var Sheet;
     Draw.svg.querySelectorAll("use.table[data-active='true']").forEach(use => delete use.dataset.active);
     e.currentTarget.dataset.active = 'true';
     // recupero 50 record della tabella selezionata per visualizzare un anteprima
-    WorkSheet.activeTable = e.currentTarget.id;
-    WorkSheet.schema = e.currentTarget.dataset.schema;
+    WorkBook.activeTable = e.currentTarget.id;
+    WorkBook.schema = e.currentTarget.dataset.schema;
     // debugger;
     let DT = new Table(await app.getPreviewTable(), 'preview-table');
     // DataTable.data = await app.getPreviewTable();
@@ -1046,9 +1046,9 @@ var Sheet;
     let urls = [];
     // TODO: reset della struttura già presente
     app.dialogFilters.querySelectorAll('nav > details').forEach(element => element.remove());
-    for (const [tableId, value] of WorkSheet.hierTables) {
-      WorkSheet.activeTable = tableId;
-      urls.push('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/table_info');
+    for (const [tableId, value] of WorkBook.hierTables) {
+      WorkBook.activeTable = tableId;
+      urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info');
     }
     // promiseAll per recuperare tutte le tabelle del canvas, successivamente vado a popolare la dialogFilters con i dati ricevuti
     app.addWorkBookContent();
@@ -1057,8 +1057,8 @@ var Sheet;
 
   // selezione della tabella dalla dialogFilters
   app.handlerSelectField = (e) => {
-    WorkSheet.activeTable = e.currentTarget.dataset.tableId;
-    console.log(WorkSheet.activeTable.dataset.table);
+    WorkBook.activeTable = e.currentTarget.dataset.tableId;
+    console.log(WorkBook.activeTable.dataset.table);
     const field = e.currentTarget.dataset.field;
     const table = e.currentTarget.dataset.table;
     const alias = e.currentTarget.dataset.alias;
@@ -1088,17 +1088,17 @@ var Sheet;
   app.addFilter = (e) => {
     // TODO: Implementare anche qui il drag&drop per i filtri
     // Sheet.filters = e.currentTarget.id;
-    Sheet.filters = WorkSheet.filters.get(e.currentTarget.id);
+    Sheet.filters = WorkBook.filters.get(e.currentTarget.id);
     e.currentTarget.dataset.selected = 'true';
     // aggiungo le tabelle all'interno del filtro a Sheet.tables
-    WorkSheet.filters.get(e.currentTarget.id).tables.forEach(table => Sheet.tables = table);
+    WorkBook.filters.get(e.currentTarget.id).tables.forEach(table => Sheet.tables = table);
     app.setSheet();
   }
 
   /* app.setFrom = (tableAlias) => {
     let from = {};
-    if (WorkSheet.tablesMap.has(tableAlias)) {
-      WorkSheet.tablesMap.get(tableAlias).forEach(tableId => {
+    if (WorkBook.tablesMap.has(tableAlias)) {
+      WorkBook.tablesMap.get(tableAlias).forEach(tableId => {
         from[Draw.tables.get(tableId).alias] = {
           schema: Draw.tables.get(tableId).schema,
           table: Draw.tables.get(tableId).table
@@ -1110,10 +1110,10 @@ var Sheet;
 
   app.setJoins = (tableAlias) => {
     let joins = {};
-    if (WorkSheet.tablesMap.has(tableAlias)) {
-      WorkSheet.tablesMap.get(tableAlias).forEach(tableId => {
-        if (WorkSheet.joins.has(Draw.tables.get(tableId).alias)) {
-          for (const [token, join] of Object.entries(WorkSheet.joins.get(Draw.tables.get(tableId).alias))) {
+    if (WorkBook.tablesMap.has(tableAlias)) {
+      WorkBook.tablesMap.get(tableAlias).forEach(tableId => {
+        if (WorkBook.joins.has(Draw.tables.get(tableId).alias)) {
+          for (const [token, join] of Object.entries(WorkBook.joins.get(Draw.tables.get(tableId).alias))) {
             console.log(token, join);
             joins[token] = join;
           }
@@ -1123,13 +1123,13 @@ var Sheet;
     }
   } */
 
-  // salvataggio di un filtro in WorkSheet
+  // salvataggio di un filtro in WorkBook
   app.saveFilter = (e) => {
     // l'oggetto filter lo salvo nella Classe Sheet (ex Query.js)
     const name = document.getElementById('custom-filter-name').value;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
-    let object = { token, name, tables: new Set(), sql: [], from: new Map(), joins: {} };
+    let object = { token, name, tables: new Set(), sql: [], from: new Map(), joins: {}, type: 'filter', workbook_ref: WorkBook.workBook.token };
     const textarea = document.getElementById('textarea-filter');
     document.querySelectorAll('#textarea-filter *').forEach(element => {
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
@@ -1150,8 +1150,8 @@ var Sheet;
       /* per ogni tabella di tablesMap, recupero le tabelle gerarchicamente inferiori e le aggiungo a 
       * object.from solo se non sono già state aggiunte da precedenti tabelle
       */
-      if (WorkSheet.tablesMap.has(table)) {
-        WorkSheet.tablesMap.get(table).forEach(tableId => {
+      if (WorkBook.tablesMap.has(table)) {
+        WorkBook.tablesMap.get(table).forEach(tableId => {
           if (!object.from.has(Draw.tables.get(tableId).alias)) {
             object.from.set(Draw.tables.get(tableId).alias, {
               schema: Draw.tables.get(tableId).schema,
@@ -1159,8 +1159,8 @@ var Sheet;
             });
           }
           // joins
-          if (WorkSheet.joins.has(Draw.tables.get(tableId).alias)) {
-            for (const [token, join] of Object.entries(WorkSheet.joins.get(Draw.tables.get(tableId).alias))) {
+          if (WorkBook.joins.has(Draw.tables.get(tableId).alias)) {
+            for (const [token, join] of Object.entries(WorkBook.joins.get(Draw.tables.get(tableId).alias))) {
               object.joins[token] = join;
             }
           }
@@ -1170,15 +1170,15 @@ var Sheet;
     //converto from Map() in object altrimenti non può essere salvato in localStorage e DB
     object.from = Object.fromEntries(object.from);
     object.tables = [...object.tables];
-    debugger;
-    WorkSheet.filters = {
+    WorkBook.filters = {
       token,
       value: object
     };
     // reset della textarea
     textarea.querySelectorAll('*').forEach(element => element.remove());
     // salvo il nuovo filtro appena creato
-    WorkSheet.save();
+    debugger;
+    window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
     // aggiungo il filtro alla nav[data-filters-defined]
     // TODO: creare una fn "addFilter" in modo da utilizzarla sia qui che quanado apro il workbook (nel caricamento degli oggetti)
     const parent = document.getElementById('ul-filters');
@@ -1306,7 +1306,7 @@ var Sheet;
   }
 
   app.getTable = async () => {
-    return await fetch('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/table_info')
+    return await fetch('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info')
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -1366,7 +1366,7 @@ var Sheet;
   } */
 
   app.getPreviewTable = async () => {
-    return await fetch('/fetch_api/' + WorkSheet.activeTable.dataset.schema + '/schema/' + WorkSheet.activeTable.dataset.table + '/table_preview')
+    return await fetch('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_preview')
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -1397,8 +1397,8 @@ var Sheet;
         // TODO: verifico se sto droppando una metrica composta, in questo caso si utilizza una logica diversa
         switch (element.dataset.type) {
           case 'composite':
-            object.sql.push(WorkSheet.metrics.get(element.dataset.token).sql.join(' '));
-            for (const [token, metric] of Object.entries(WorkSheet.metrics.get(element.dataset.token).metrics)) {
+            object.sql.push(WorkBook.metrics.get(element.dataset.token).sql.join(' '));
+            for (const [token, metric] of Object.entries(WorkBook.metrics.get(element.dataset.token).metrics)) {
               object.metrics[token] = metric;
             }
             break;
@@ -1419,8 +1419,8 @@ var Sheet;
     });
     console.log(object);
     debugger;
-    WorkSheet.metrics = object;
-    WorkSheet.save();
+    WorkBook.metrics = object;
+    WorkBook.save();
     // TODO: il codice che aggiunge una metrica al tablesStruct è codice ripetuto
     // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
     const tmpl = app.tmplList.content.cloneNode(true);
@@ -1433,8 +1433,8 @@ var Sheet;
     li.addEventListener('dragstart', app.fieldDragStart);
     li.addEventListener('dragend', app.fieldDragEnd);
     li.addEventListener('contextmenu', app.contextMenuMetrics);
-    li.dataset.type = WorkSheet.metrics.get(token).type;
-    span.innerHTML = WorkSheet.metrics.get(token).alias;
+    li.dataset.type = WorkBook.metrics.get(token).type;
+    span.innerHTML = WorkBook.metrics.get(token).alias;
     parent.appendChild(li);
   }
 
@@ -1444,12 +1444,12 @@ var Sheet;
     * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
     */
     Sheet.tables.forEach(alias => {
-      console.log('tablesMap : ', WorkSheet.tablesMap);
+      console.log('tablesMap : ', WorkBook.tablesMap);
       /* tablesMap contiene un oggetto Map() con {tableAlias : [svg-data-2, svg-data-1, svg-data-0, ecc...]}
       * e un'array di tabelle presenti nella gerarchia create nel canvas
       */
-      if (WorkSheet.tablesMap.has(alias)) {
-        WorkSheet.tablesMap.get(alias).forEach(tableId => {
+      if (WorkBook.tablesMap.has(alias)) {
+        WorkBook.tablesMap.get(alias).forEach(tableId => {
           /* nel tableId sono presenti le tabelle gerarchicamente inferiori a 'alias', 
           * quindi tabelle da aggiungere alla 'from' e alla 'where'
           */
@@ -1462,7 +1462,7 @@ var Sheet;
           * e quindi, in questo caso, avrei una join anche sulla Fact (e quindi nella proprietà WorkBook.joins)
           */
           // se ci sono joins per questa tableAlias la aggiungo allo Sheet
-          if (WorkSheet.joins.has(Draw.tables.get(tableId).alias)) Sheet.joins = WorkSheet.joins.get(Draw.tables.get(tableId).alias);
+          if (WorkBook.joins.has(Draw.tables.get(tableId).alias)) Sheet.joins = WorkBook.joins.get(Draw.tables.get(tableId).alias);
         });
       }
     });
@@ -1481,7 +1481,7 @@ var Sheet;
     // creo tablesMap : qui sono presenti tutte le tabelle del canvas, al suo interno le tabelle in join fino alla tabella dei fatti
     // debugger;
     const levelId = +Draw.svg.dataset.level;
-    WorkSheet.tablesMap.clear();
+    WorkBook.tablesMap.clear();
     let recursiveLevels = (levelId) => {
       // per ogni tabella creo un Map() con, al suo interno, le tabelle gerarchicamente inferiori (verso la FACT)
       // questa mi servirà per stabilire, nello sheet, quali tabelle includere nella FROM e le relative Join nella WHERE
@@ -1494,7 +1494,7 @@ var Sheet;
           if (Draw.tables.get(tableId).join) recursive(Draw.tables.get(tableId).join);
         }
         if (Draw.tables.get(table.id).join) recursive(Draw.tables.get(table.id).join);
-        WorkSheet.tablesMap = { name: table.dataset.alias, joinTables };
+        WorkBook.tablesMap = { name: table.dataset.alias, joinTables };
       });
       levelId--;
       if (levelId !== 0) recursiveLevels(levelId);
@@ -1503,17 +1503,17 @@ var Sheet;
   }
 
   app.hierTables = () => {
-    // creo hierTables : qui sono presenti tutte le tabelle del canvas. Questa mi serve per creare la struttura nello WorkSheet
+    // creo hierTables : qui sono presenti tutte le tabelle del canvas. Questa mi serve per creare la struttura nello WorkBook
     // debugger;
     const levelId = +Draw.svg.dataset.level;
-    WorkSheet.hierTables.clear();
+    WorkBook.hierTables.clear();
     let recursiveLevels = (levelId) => {
       // per ogni tabella creo un Map() con, al suo interno, le tabelle gerarchicamente inferiori (verso la FACT)
       // questa mi servirà per stabilire, nello sheet, quali tabelle includere nella FROM e le relative Join nella WHERE
       Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'], use.time`).forEach(table => {
         // console.log(table.dataset.alias);
         // della tabella corrente recupero tutte le sue discendenze fino alla FACT
-        WorkSheet.hierTables = {
+        WorkBook.hierTables = {
           id: table.id,
           table: {
             table: table.dataset.table,
@@ -1534,7 +1534,7 @@ var Sheet;
     // salvo le gerarchie / dimensioni create nel canvas
     // recupero gli elementi del level-id più alto, il data-level presente su <svg> identifica il livello più alto presente
     const levelId = +Draw.svg.dataset.level;
-    WorkSheet.hierarchies.clear();
+    WorkBook.hierarchies.clear();
     let recursiveLevels = (levelId) => {
       // per ogni level-id recupero le tabelle che hanno data-joins=0 (l'ultima tabella della gerarchia, che quindi non ha altre tabelle legate in join)
       Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'][data-joins='0']`).forEach(table => {
@@ -1548,7 +1548,7 @@ var Sheet;
         }
         recursive(table.id);
         // console.log(hier);
-        WorkSheet.hierarchies = hier;
+        WorkBook.hierarchies = hier;
       });
 
       levelId--;
@@ -1568,13 +1568,13 @@ var Sheet;
 
     /* console.log(`line selected ${e.currentTarget.dataset.from} -> ${e.currentTarget.dataset.to}`);
     Draw.currentLineRef = e.target.id;
-    WorkSheet.tableJoins = {
+    WorkBook.tableJoins = {
       from: Draw.currentLineRef.dataset.from,
       to: Draw.currentLineRef.dataset.to
     }
-    console.log(WorkSheet.tableJoins);
-    for (const [key, value] of Object.entries(WorkSheet.tableJoins)) {
-      WorkSheet.activeTable = value.id;
+    console.log(WorkBook.tableJoins);
+    for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
+      WorkBook.activeTable = value.id;
       // TODO: in questo caso, in cui vengono richiamate due tabelle, fare una promiseAll
       const data = await app.getTable();
       app.addFields(key, data);
@@ -1648,8 +1648,8 @@ var Sheet;
     * - recupero le colonne della tabella selezionata
     * - apro la dialog per poter associare una colonna della WEB_BI_TIME con una colonna della FACT
     */
-    if (!window.sessionStorage.getItem(WorkSheet.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
-    app.addFields_test(document.getElementById('ul-columns'), WorkBookStorage.getTable(WorkSheet.activeTable.dataset.table));
+    if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
+    app.addFields_test(document.getElementById('ul-columns'), WorkBookStorage.getTable(WorkBook.activeTable.dataset.table));
     app.dialogTime.show();
   }
 
@@ -1690,10 +1690,10 @@ var Sheet;
     const tableAlias = document.querySelector('#ul-columns > li[data-selected]').dataset.alias;
     const table = document.querySelector('#ul-columns > li[data-selected]').dataset.table;
     const token = rand().substring(0, 7);
-    WorkSheet.dateTime = { tableAlias, timeField: timeColumn };
+    WorkBook.dateTime = { tableAlias, timeField: timeColumn };
     // WARN: solo per vertica in questo caso.
     // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
-    WorkSheet.join = {
+    WorkBook.join = {
       token,
       value: {
         alias: 'WEB_BI_TIME',
@@ -1702,7 +1702,7 @@ var Sheet;
         to: { table, alias: tableAlias, field: timeColumn }
       }
     };
-    WorkSheet.joins = token; // nome della tabella con le proprie join (WorkSheet.nJoin) all'interno
+    WorkBook.joins = token; // nome della tabella con le proprie join (WorkBook.nJoin) all'interno
     Draw.tables = {
       id: 'svg-data-web_bi_time', properties: {
         id: 'web_bi_time',
@@ -1725,19 +1725,19 @@ var Sheet;
     app.tablesMap();
     app.hierTables();
     // recupero tutti i campi della WEB_BI_TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
-    WorkSheet.activeTable = 'svg-data-web_bi_time';
-    if (!window.sessionStorage.getItem(WorkSheet.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
-    const data = WorkBookStorage.getTable(WorkSheet.activeTable.dataset.table);
+    WorkBook.activeTable = 'svg-data-web_bi_time';
+    if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
+    const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
     data.forEach(column => {
       const tokenField = rand().substring(0, 7);
-      WorkSheet.field = {
+      WorkBook.field = {
         token: tokenField,
         value: {
           token: tokenField,
           type: 'column',
-          schema: WorkSheet.activeTable.dataset.schema,
-          tableAlias: WorkSheet.activeTable.dataset.alias,
-          table: WorkSheet.activeTable.dataset.table,
+          schema: WorkBook.activeTable.dataset.schema,
+          tableAlias: WorkBook.activeTable.dataset.alias,
+          table: WorkBook.activeTable.dataset.table,
           name: column.COLUMN_NAME,
           field: {
             id: { field: column.COLUMN_NAME, type: 'da implementare', origin_field: column.COLUMN_NAME },
@@ -1745,7 +1745,7 @@ var Sheet;
           }
         }
       };
-      WorkSheet.fields = tokenField;
+      WorkBook.fields = tokenField;
     });
   }
 
@@ -1776,7 +1776,7 @@ var Sheet;
     let joins = [...app.windowJoin.querySelectorAll(`.join-field[data-active][data-field][data-join-id='${joinId}']`)].filter(field => +field.dataset.joinId === joinId);
     // console.log(joins);
     if (joins.length === 2) {
-      WorkSheet.join = {
+      WorkBook.join = {
         token: fieldRef.dataset.token,
         value: {
           // table: joins[0].dataset.table,
@@ -1786,7 +1786,7 @@ var Sheet;
           to: { table: joins[0].dataset.table, alias: joins[0].dataset.alias, field: joins[0].dataset.field }
         }
       };
-      WorkSheet.joins = fieldRef.dataset.token; // nome della tabella con le proprie join (WorkSheet.nJoin) all'interno
+      WorkBook.joins = fieldRef.dataset.token; // nome della tabella con le proprie join (WorkBook.nJoin) all'interno
       // dopo aver completato la join coloro la linea in modo diverso
       Draw.currentLineRef.dataset.joined = 'true';
     }
@@ -1808,9 +1808,9 @@ var Sheet;
       const span = li.querySelector('span');
       li.dataset.label = value.COLUMN_NAME;
       li.dataset.elementSearch = `${source}-fields`;
-      li.dataset.tableId = WorkSheet.activeTable.id;
-      li.dataset.table = WorkSheet.activeTable.dataset.table;
-      li.dataset.alias = WorkSheet.activeTable.dataset.alias;
+      li.dataset.tableId = WorkBook.activeTable.id;
+      li.dataset.table = WorkBook.activeTable.dataset.table;
+      li.dataset.alias = WorkBook.activeTable.dataset.alias;
       li.dataset.label = value.COLUMN_NAME;
       li.dataset.key = value.CONSTRAINT_NAME;
       span.innerText = value.COLUMN_NAME;
@@ -1834,9 +1834,9 @@ var Sheet;
       const span = li.querySelector('span');
       li.dataset.label = value.COLUMN_NAME;
       // li.dataset.elementSearch = `${source}-fields`;
-      li.dataset.tableId = WorkSheet.activeTable.id;
-      li.dataset.table = WorkSheet.activeTable.dataset.table;
-      li.dataset.alias = WorkSheet.activeTable.dataset.alias;
+      li.dataset.tableId = WorkBook.activeTable.id;
+      li.dataset.table = WorkBook.activeTable.dataset.table;
+      li.dataset.alias = WorkBook.activeTable.dataset.alias;
       li.dataset.label = value.COLUMN_NAME;
       li.dataset.field = value.COLUMN_NAME;
       li.dataset.key = value.CONSTRAINT_NAME;
@@ -1864,17 +1864,17 @@ var Sheet;
     const ds = app.dialogColumns.querySelector('#textarea-column-ds-formula');
     let fieldObjectId = { field: id.value, type: 'da_completare', origin_field: field };
     let fieldObjectDs = { field: ds.value, type: 'da_completare', origin_field: field };
-    // WorkSheet.field = { id: fieldObjectId, ds: fieldObjectDs };
+    // WorkBook.field = { id: fieldObjectId, ds: fieldObjectDs };
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
-    WorkSheet.field = {
+    WorkBook.field = {
       token,
       value: {
         token,
         type: 'column',
-        schema: WorkSheet.schema,
-        tableAlias: WorkSheet.activeTable.dataset.alias,
-        table: WorkSheet.activeTable.dataset.table,
+        schema: WorkBook.schema,
+        tableAlias: WorkBook.activeTable.dataset.alias,
+        table: WorkBook.activeTable.dataset.table,
         name: field,
         field: {
           id: fieldObjectId,
@@ -1882,11 +1882,11 @@ var Sheet;
         }
       }
     };
-    WorkSheet.fields = token;
+    WorkBook.fields = token;
     // Storages.save();
     app.dialogColumns.close();
     // visualizzo image[data-columns-defined]
-    const struct = Draw.svg.querySelector(`#struct-${WorkSheet.activeTable.id}`);
+    const struct = Draw.svg.querySelector(`#struct-${WorkBook.activeTable.id}`);
     struct.querySelector('image[data-columns-defined]').dataset.columnsDefined = true;
   }
 
@@ -1896,9 +1896,9 @@ var Sheet;
     console.clear();
     console.log(e.target);
     const token = e.currentTarget.dataset.token;
-    // recupero la metrica da WorkSheet.metric
-    console.log(WorkSheet.metrics.get(token));
-    const metric = WorkSheet.metrics.get(token);
+    // recupero la metrica da WorkBook.metric
+    console.log(WorkBook.metrics.get(token));
+    const metric = WorkBook.metrics.get(token);
     const textarea = app.dialogMetric.querySelector('#textarea-metric');
     const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('.metric-defined');
@@ -1928,14 +1928,15 @@ var Sheet;
     const parent = document.getElementById('ul-metrics');
     // const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
-    let filters = {};
-    const baseMetric = WorkSheet.metrics.get(e.target.dataset.token);
+    let filters = new Set();
+    const baseMetric = WorkBook.metrics.get(e.target.dataset.token);
     // WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
     const aggregateFn = app.dialogMetric.querySelector('.formula > code[data-aggregate]').innerText;
     // const aggregateFn = app.dialogMetric.querySelector('.formula > code[data-aggregate]').dataset.aggregate;
     // recupero tutti i filtri droppati in #filter-drop
     app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => {
-      filters[filter.dataset.token] = WorkSheet.filters.get(filter.dataset.token);
+      // salvo solo il riferimento al filtro e non tutta la definizione del filtro
+      filters.add(filter.dataset.token);
       // TODO: ogni filtro aggiunto nella metrica deve controllare le tabelle da includere e le sue join (come fatto per setSheet)
     });
     // se ci sono funzioni temporali selezionate le aggiungo all'object 'filters' con token = alla funzione scelta (es.: last-year)
@@ -1946,29 +1947,43 @@ var Sheet;
           alias: 'WEB_BI_TIME',
           SQL: [
             'WEB_BI_TIME.trans_ly',
-            `TO_CHAR(${WorkSheet.dateTime.tableAlias}.${WorkSheet.dateTime.timeField})::DATE`
+            `TO_CHAR(${WorkBook.dateTime.tableAlias}.${WorkBook.dateTime.timeField})::DATE`
           ]
         };
       } */
       debugger;
       if (['last-year', 'last-month', 'ecc...'].includes(timingFn.dataset.value)) {
         const timeField = timingFn.dataset.timeField;
-        filters[timingFn.dataset.value] = {
+        filters.add(timingFn.dataset.value);
+        /* filters[timingFn.dataset.value] = {
           alias: 'WEB_BI_TIME',
           SQL: [
             `(MapJSONExtractor(WEB_BI_TIME.last))['${timeField}']::DATE`,
-            `TO_CHAR(${WorkSheet.dateTime.tableAlias}.${WorkSheet.dateTime.timeField})::DATE`
+            `TO_CHAR(${WorkBook.dateTime.tableAlias}.${WorkBook.dateTime.timeField})::DATE`
           ]
-        };
+        }; */
       }
     }
     console.log(Object.keys(filters).length);
-    // TODO: se ci sono filtri la salvo in WorkSheet.metrics altrimenti in WorkSheet.metrics
-    if (Object.keys(filters).length !== 0) {
+    // TODO: se ci sono filtri la salvo in WorkBook.metrics altrimenti in WorkBook.metrics
+    let object = {
+      token,
+      alias,
+      field: baseMetric.field,
+      aggregateFn,
+      SQL: baseMetric.SQL,
+      distinct: false,
+      type: 'metric',
+      workbook_ref: WorkBook.workBook.token
+    };
+    if (filters.size !== 0) {
       // TODO: aggiungere opzione 'distinct'.
       // TODO: probabilmente qui dovrò usare la stessa logica dei filtri, quindi non serve la tabelAlias
       // come key e non servono due metodi (metric e metrics)
-      WorkSheet.metrics = {
+      object.filters = [...filters];
+      object.metric_type = 'advanced';
+
+      /* WorkBook.metrics = {
         token,
         alias,
         field: baseMetric.field,
@@ -1977,10 +1992,11 @@ var Sheet;
         filters,
         distinct: false,
         type: 'advanced'
-      };
+      }; */
     } else {
+      object.metric_type = 'basic';
       // debugger;
-      WorkSheet.metrics = {
+      /* WorkBook.metrics = {
         token,
         alias,
         field: baseMetric.field,
@@ -1988,10 +2004,11 @@ var Sheet;
         SQL: baseMetric.SQL,
         distinct: false, // default
         type: 'basic'
-      };
+      }; */
     }
-    // salvo la nuova metrica nello WorkSheet
-    WorkSheet.save();
+    WorkBook.metrics = object;
+    // salvo la nuova metrica nello storage
+    window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
     // TODO: il codice che aggiunge una metrica al tablesStruct è codice ripetuto
     // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
     const tmpl = app.tmplList.content.cloneNode(true);
@@ -2007,18 +2024,18 @@ var Sheet;
     li.addEventListener('contextmenu', app.contextMenuMetrics);
     // btnEdit.addEventListener('click', app.editAdvancedMetric);
     // WARN : per il momento inserisco un IF ma sarebbe meglio usare una logica di memorizzare tutti gli elementi del report in un unico oggetto Map
-    if (WorkSheet.metrics.has(token)) {
-      li.dataset.type = WorkSheet.metrics.get(token).type;
-      if (WorkSheet.metrics.get(token).hasOwnProperty('field')) li.dataset.field = WorkSheet.metrics.get(token).field;
-      li.dataset.aggregateFn = WorkSheet.metrics.get(token).aggregateFn;
-      span.innerHTML = WorkSheet.metrics.get(token).alias;
+    if (WorkBook.metrics.has(token)) {
+      li.dataset.type = WorkBook.metrics.get(token).type;
+      if (WorkBook.metrics.get(token).hasOwnProperty('field')) li.dataset.field = WorkBook.metrics.get(token).field;
+      li.dataset.aggregateFn = WorkBook.metrics.get(token).aggregateFn;
+      span.innerHTML = WorkBook.metrics.get(token).alias;
     }
     parent.appendChild(li);
   }
 
   app.addDefinedFields = (parent) => {
-    if (WorkSheet.fields.has(WorkSheet.activeTable.dataset.alias)) {
-      for (const [token, value] of Object.entries(WorkSheet.fields.get(WorkSheet.activeTable.dataset.alias))) {
+    if (WorkBook.fields.has(WorkBook.activeTable.dataset.alias)) {
+      for (const [token, value] of Object.entries(WorkBook.fields.get(WorkBook.activeTable.dataset.alias))) {
         const tmpl = app.tmplList.content.cloneNode(true);
         const li = tmpl.querySelector('li[data-li-drag]');
         const i = li.querySelector('i');
@@ -2041,7 +2058,7 @@ var Sheet;
   app.addDefinedAdvMetrics = () => {
     // metriche mappate sul cubo
     const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
-    for (const [token, value] of WorkSheet.metrics) {
+    for (const [token, value] of WorkBook.metrics) {
       const tmpl = app.tmplList.content.cloneNode(true);
       const li = tmpl.querySelector('li[data-li-drag][data-advanced-metrics]');
       const content = li.querySelector('.li-content');
@@ -2073,7 +2090,7 @@ var Sheet;
   app.addDefinedCompositeMetrics = () => {
     // metriche mappate sul cubo
     const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
-    for (const [token, value] of WorkSheet.metrics) {
+    for (const [token, value] of WorkBook.metrics) {
       const tmpl = app.tmplList.content.cloneNode(true);
       const li = tmpl.querySelector('li[data-li-drag][data-composite-metrics]');
       const content = li.querySelector('.li-content');
@@ -2109,8 +2126,8 @@ var Sheet;
   app.addDefinedMetrics = () => {
     // metriche mappate sul cubo
     const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
-    if (WorkSheet.metrics.size !== 0) {
-      for (const [token, value] of WorkSheet.metrics) {
+    if (WorkBook.metrics.size !== 0) {
+      for (const [token, value] of WorkBook.metrics) {
         const tmpl = app.tmplList.content.cloneNode(true);
         const li = tmpl.querySelector('li[data-li-drag][data-base-metrics]');
         const content = li.querySelector('.li-content');
@@ -2147,7 +2164,7 @@ var Sheet;
   app.addDefinedFilters = () => {
     const parent = document.getElementById('ul-filters');
     // filtri mappati sul WorkBook
-    for (const [token, value] of WorkSheet.filters) {
+    for (const [token, value] of WorkBook.filters) {
       const tmpl = app.tmplList.content.cloneNode(true);
       const li = tmpl.querySelector('li[data-filter]');
       const content = li.querySelector('.li-content');
@@ -2172,12 +2189,12 @@ var Sheet;
     // ...in questo modo, gli elementi aggiunti al report non verranno resettati
     app.workbookTablesStruct.querySelectorAll('details').forEach(detail => detail.remove());
     const parent = app.workbookTablesStruct.querySelector('#nav-fields');
-    for (const [tableId, value] of WorkSheet.hierTables) {
+    for (const [tableId, value] of WorkBook.hierTables) {
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
       const li = tmpl.querySelector("li");
       const summary = details.querySelector('summary');
-      WorkSheet.activeTable = tableId;
+      WorkBook.activeTable = tableId;
       details.dataset.alias = value.alias;
       details.dataset.table = value.name;
       summary.innerHTML = value.name;
@@ -2185,7 +2202,7 @@ var Sheet;
       parent.appendChild(details);
       app.addDefinedFields(details);
     }
-    if (WorkSheet.filters.size !== 0) app.addDefinedFilters();
+    if (WorkBook.filters.size !== 0) app.addDefinedFilters();
     app.addDefinedMetrics();
   }
 
@@ -2195,14 +2212,14 @@ var Sheet;
     app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
     // parent
     let parent = app.dialogFilters.querySelector('nav');
-    for (const [tableId, value] of WorkSheet.hierTables) {
+    for (const [tableId, value] of WorkBook.hierTables) {
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
       const summary = details.querySelector('summary');
-      WorkSheet.activeTable = tableId;
+      WorkBook.activeTable = tableId;
       // recupero le tabelle dal sessionStorage
       const columns = WorkBookStorage.getTable(value.table);
-      details.dataset.schema = WorkSheet.activeTable.dataset.schema;
+      details.dataset.schema = WorkBook.activeTable.dataset.schema;
       details.dataset.table = value.name;
       details.dataset.alias = value.alias;
       details.dataset.id = tableId;

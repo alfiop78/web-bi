@@ -116,7 +116,7 @@ class Sheets {
     */
     this.sheet.filters = Object.fromEntries(this.filters);
     for (const [token, metric] of this.metrics) {
-      switch (metric.type) {
+      switch (metric.metric_type) {
         case 'basic':
           (!this.sheet.hasOwnProperty('metrics')) ? this.sheet.metrics = { [token]: metric } : this.sheet.metrics[token] = metric;
           break;
@@ -203,6 +203,7 @@ class WorkBooks {
   #activeTable;
   #field = new Map();
   #fields = new Map();
+  #filters = new Map();
   #metrics = new Map();
   #join = new Map();
   #joins = new Map();
@@ -218,7 +219,6 @@ class WorkBooks {
     console.log(this.token);
     this.title = name;
     this.workBook = { token: this.token, type: 'WorkBook' };
-    this.workSheet = { token: `workSheet_${this.token}`, type: 'WorkSheet' };
     this.schema;
   }
 
@@ -293,6 +293,12 @@ class WorkBooks {
 
   get joins() { return this.#joins; }
 
+  set filters(object) {
+    this.#filters.set(object.token, object.value);
+  }
+
+  get filters() { return this.#filters; }
+
   /* set hierarchies(value) {
     this.#hierarchies.set(value.name, value.hierarchies);
     console.log(this.#hierarchies);
@@ -302,14 +308,14 @@ class WorkBooks {
 
   set tablesMap(value) {
     this.#tablesMap.set(value.name, value.joinTables);
-    console.log('this.#tablesMap : ', this.#tablesMap);
+    // console.log('this.#tablesMap : ', this.#tablesMap);
   }
 
   get tablesMap() { return this.#tablesMap; }
 
   set hierTables(value) {
     this.#hierTables.set(value.id, value.table);
-    console.log('this.#hierTables : ', this.#hierTables);
+    // console.log('this.#hierTables : ', this.#hierTables);
   }
 
   get hierTables() { return this.#hierTables; }
@@ -343,85 +349,31 @@ class WorkBooks {
     }
     // nell'oggetto WorkSheet andrò a memorizzare gli elementi aggiunti nel WorkSheet (es.: metriche/colonne custom)
     // metriche avanzate sono presenti solo nello WorkSheet e non nel WorkBook
-    if (this.filters.size !== 0) this.workSheet.filters = Object.fromEntries(this.filters);
+    if (this.filters.size !== 0) this.workBook.filters = Object.fromEntries(this.filters);
     // if (this.advMetrics.size !== 0) this.workSheet.advMetrics = Object.fromEntries(this.advMetrics);
     // if (this.compositeMetrics.size !== 0) this.workSheet.compositeMetrics = Object.fromEntries(this.compositeMetrics);
     for (const [token, metric] of this.metrics) {
-      switch (metric.type) {
+      switch (metric.metric_type) {
         case 'basic':
           (!this.workBook.hasOwnProperty('metrics')) ? this.workBook.metrics = { [token]: metric } : this.workBook.metrics[token] = metric;
           break;
         case 'advanced':
-          (!this.workSheet.hasOwnProperty('advMetrics')) ? this.workSheet.advMetrics = { [token]: metric } : this.workSheet.advMetrics[token] = metric;
+          (!this.workBook.hasOwnProperty('advMetrics')) ? this.workBook.advMetrics = { [token]: metric } : this.workBook.advMetrics[token] = metric;
           break;
         default:
           // compositeMetrics
-          (!this.workSheet.hasOwnProperty('compositeMetrics')) ? this.workSheet.compositeMetrics = { [token]: metric } : this.workSheet.compositeMetrics[token] = metric;
+          (!this.workBook.hasOwnProperty('compositeMetrics')) ? this.workBook.compositeMetrics = { [token]: metric } : this.workBook.compositeMetrics[token] = metric;
           break;
       }
     }
     console.info('WorkBook : ', this.workBook);
     WorkBookStorage.save(this.workBook);
-    console.info('WorkSheet : ', this.workSheet);
-    WorkBookStorage.save(this.workSheet);
   }
-
-}
-
-class WorkSheets extends WorkBooks {
-  /*
-  * in quesa classe andrò ad inserire tutti gli elementi (metriche filtrate, composte, colonne custom SQL, ad es. quelle concatenate) 
-  * che saranno poi disponibili per poter crear il report.
-  * Quando un filtro viene aggiunto al report (Sheets) lo recupero da questa classe e lo copio nella proprietà 'filters' della classe Sheets.
-  * Stesso discorso per le metriche e le colonne.
-  * Questa classe, e la sua derivata, sono disponibili come Modello per la creazione del report.
-  */
-
-  /* 
-  TODO: come per le colonne.
-    * Potrei avere filtri creati in fase di mapping e filtri creati nel WorkSheet (Questo è da implementare)
-    * Al momento ho filtri solo nel WorkSheet e non nel WorkBook
-  */
-  #filters = new Map();
-  // #advMetrics = new Map();
-  #columns = new Map();
-  // #compositeMetrics = new Map();
-  constructor(name) {
-    super(name);
-  }
-
-  set columns(token) {
-    this.#columns.set(token, this.field.get(token));
-    console.log('sheet columns : ', this.#columns);
-  }
-
-  get columns() { return this.#columns; }
-
-  /* set advMetrics(object) {
-    this.#advMetrics.set(object.token, object);
-    console.log('sheet advMetrics : ', this.#advMetrics);
-  }
-
-  get advMetrics() { return this.#advMetrics; }
-
-  set compositeMetrics(object) {
-    this.#compositeMetrics.set(object.token, object);
-    console.info('sheet.#compositeMetrics : ', this.#compositeMetrics);
-  }
-
-  get compositeMetrics() { return this.#compositeMetrics; } */
-
-  set filters(object) {
-    this.#filters.set(object.token, object.value);
-  }
-
-  get filters() { return this.#filters; }
 
   open(token) {
     // TODO: ottimizzare
     // recupero dallo storage il workBook, tutte le sue proprietà le caricherò nella Classe 
     WorkBookStorage.workBook = token;
-    WorkBookStorage.workSheet = `workSheet_${token}`;
     // reimposto la Classe
 
     this.dateTime = WorkBookStorage.workBook.dateTime;
@@ -450,8 +402,8 @@ class WorkSheets extends WorkBooks {
     for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.fields)) {
       // per ogni tabella
       for (const [token, column] of Object.entries(values)) {
-        super.field = { token, value: column };
-        super.fields = token;
+        this.field = { token, value: column };
+        this.fields = token;
       }
     }
 
@@ -459,30 +411,35 @@ class WorkSheets extends WorkBooks {
     for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.joins)) {
       // per ogni tabella
       for (const [token, join] of Object.entries(values)) {
-        super.join = { token, value: join };
-        super.joins = token;
+        this.join = { token, value: join };
+        this.joins = token;
       }
     }
     // filtri aggiunti allo WorkSheet
-    if (WorkBookStorage.workSheet.hasOwnProperty('filters')) {
+    // TODO: da recuperare dallo storage
+    /* if (WorkBookStorage.workSheet.hasOwnProperty('filters')) {
       for (const [token, filter] of Object.entries(WorkBookStorage.workSheet.filters)) {
         this.filters = { token, value: filter };
       }
+    }*/
+
+    for (const [token, filter] of Object.entries(WorkBookStorage.storage)) {
+      this.json = JSON.parse(filter);
+      if (this.json.type === 'filter' && this.json.workbook_ref === WorkBookStorage.workBook.token) {
+        this.filters = { token, value: this.json };
+      }
     }
 
-    // metriche aggiunte allo WorkSheet
-    /* for (const [token, values] of Object.entries(WorkBookStorage.workBook.metrics)) {
-      this.metrics = values;
-    } */
 
     if (WorkBookStorage.workBook.hasOwnProperty('metrics')) {
+      debugger;
       for (const value of Object.values(WorkBookStorage.workBook.metrics)) {
         this.metrics = value;
       }
     }
 
     // metriche avanzate aggiunte allo WorkSheet
-    if (WorkBookStorage.workSheet.hasOwnProperty('advMetrics')) {
+    /*if (WorkBookStorage.workSheet.hasOwnProperty('advMetrics')) {
       for (const value of Object.values(WorkBookStorage.workSheet.advMetrics)) {
         // per ogni tabella
         this.metrics = value;
@@ -495,7 +452,7 @@ class WorkSheets extends WorkBooks {
         // per ogni tabella
         this.metrics = value;
       }
-    }
+    }*/
 
     return this;
   }
