@@ -416,19 +416,19 @@ var Sheet;
   // stesso funzionamento di addField()
   app.addMetric = (target, token) => {
     const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
-    const metric = Sheet.metrics.get(token);
     const field = tmpl.querySelector('.metric-defined');
     const formula = field.querySelector('.formula');
     const fieldName = formula.querySelector('code[data-field]');
     const aggregateFn = formula.querySelector('code[data-aggregate]');
 
+    const metric = Sheet.metrics.get(token);
     field.dataset.type = metric.type;
-    formula.dataset.id = token;
-    formula.dataset.token = token;
+    formula.dataset.id = metric.token;
+    formula.dataset.token = metric.token;
     fieldName.innerHTML = metric.alias;
-    if (metric.type !== 'compositeMetric') {
+    if (metric.type !== 'composite') {
       aggregateFn.innerText = metric.aggregateFn;
-      fieldName.dataset.field = metric.field;
+      // fieldName.dataset.field = metric.field;
     }
     target.appendChild(field);
   }
@@ -439,25 +439,24 @@ var Sheet;
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
-    console.log(elementRef);
     // elementRef : è l'elemento nella lista di sinistra che ho draggato
     let tmpl = app.tmplColumnsDefined.content.cloneNode(true);
     let field = tmpl.querySelector('.column-defined');
     let span = field.querySelector('span');
     field.dataset.type = elementRef.dataset.type;
     field.dataset.id = elementRef.id;
-    // const rand = () => Math.random(0).toString(36).substring(2);
-    // const token = rand().substring(0, 7);
     const metric = { ...WorkBook.metrics.get(elementRef.id) };
-    switch (metric.type) {
+    // const metric = WorkBook.metrics.get(elementRef.id);
+    switch (metric.metric_type) {
       case 'basic':
       case 'advanced':
-        // const metric = { ...WorkBook.metrics.get(elementRef.id) };
-        metric.dependencies = false;
-        Sheet.metrics = metric;
+        // aggiungo a Sheet.metrics solo gli elementi che possono essere modificati, le proprieta di sola lettura le prenderò sempre da WorkBook.metrics
+        Sheet.metrics = { token: metric.token, alias: metric.alias, type: metric.metric_type, aggregateFn: metric.aggregateFn, dependencies: false };
+        debugger;
         app.addMetric(e.currentTarget, elementRef.id);
         break;
       case 'composite':
+        debugger;
         Sheet.metrics = metric;
         app.addMetric(e.currentTarget, elementRef.id);
         // dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
@@ -568,7 +567,7 @@ var Sheet;
     e.currentTarget.classList.remove('dropping');
   }
 
-  /* addField viene utilizzate sia quando si effettua il drag&drop sulla dropzone-rows che 
+  /* addField viene utilizzate sia quando si effettua il drag&drop sulla dropzone-rows che
   * quando si apre un nuovo Sheet per ripololare la dropzone-rows con gli elementi proveniente da Sheet.open()
   */
   app.addField = (target, token) => {
@@ -579,18 +578,18 @@ var Sheet;
     field.dataset.id = token;
     // field.dataset.token = elementRef.id;
     code.dataset.token = token;
-    code.innerHTML = Sheet.fields.get(token).name;
+    code.innerHTML = Sheet.fields.get(token);
     // aggiungo la colonna al report (Sheet)
     // TODO: aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
     // Sheet.fields = { token: elementRef.id, value: WorkBook.field.get(elementRef.id) };
     // passo, a Sheet.fields, la colonna creata in WorkBook
     // Sheet.fields = WorkBook.field.get(elementRef.id);
-    Sheet.tables = Sheet.fields.get(token).tableAlias;
+    // TODO: da aggiungere in fase di creazione del process
+    Sheet.tables = WorkBook.field.get(token).tableAlias;
     target.appendChild(field);
     // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
     // i.addEventListener('click', app.handlerSetMetric);
-    app.setSheet();
-
+    // app.setSheet();
   }
 
   app.rowDrop = (e) => {
@@ -599,10 +598,11 @@ var Sheet;
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
-    console.log(elementRef);
+    // console.log(elementRef);
     // elementRef : è l'elemento nella lista di sinistra che ho draggato
     // TODO: rinominare elementRef.id in elementRef.dataset.token
-    Sheet.fields = WorkBook.field.get(elementRef.id);
+    // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
+    Sheet.fields = { token: elementRef.id, name: WorkBook.field.get(elementRef.id).name };
     app.addField(e.currentTarget, elementRef.id);
   }
 
@@ -670,7 +670,7 @@ var Sheet;
     };
   }
 
-  /* selezione di una colonna dalla table-preview, aggiungo la colonna alla dialog-custom-metric 
+  /* selezione di una colonna dalla table-preview, aggiungo la colonna alla dialog-custom-metric
   * per la creazione di una metrica composta di base (przmedio * quantita)
   TODO: questa funzionalità andrà sostituita con il drag&drop
   */
@@ -791,7 +791,7 @@ var Sheet;
 
   /* NOTE: END DRAG&DROP EVENTS */
 
-  // selezione schema/i 
+  // selezione schema/i
   app.handlerSchema = async (e) => {
     e.preventDefault();
     e.currentTarget.toggleAttribute('data-selected');
@@ -839,7 +839,8 @@ var Sheet;
 
   app.editFieldAlias = (e) => {
     const token = e.target.dataset.token;
-    Sheet.fields.get(token).name = e.target.innerHTML;
+    Sheet.fields = { token, name: e.target.innerHTML };
+    console.log(Sheet.fields.get(token));
   }
 
   // apertura dialog per creazione metrica composta
@@ -899,8 +900,8 @@ var Sheet;
 
   app.openSheetDialog = (e) => {
     console.log('Sheet open');
-    /* popolo la dialog con gli Sheet presenti, gli Sheet hanno un workBook_ref : token, quindi 
-    * recupero solo gli Sheet appartenenti al WorkBook aperto 
+    /* popolo la dialog con gli Sheet presenti, gli Sheet hanno un workBook_ref : token, quindi
+    * recupero solo gli Sheet appartenenti al WorkBook aperto
     */
     const parent = document.querySelector('nav[data-sheet-defined]');
     // reset list
@@ -930,7 +931,7 @@ var Sheet;
     name.innerText = Sheet.name;
     name.dataset.value = Sheet.name;
     app.dialogSheet.close();
-    /* Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...) 
+    /* Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...)
     * della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
     */
     for (const [token, field] of Sheet.fields) {
@@ -945,11 +946,11 @@ var Sheet;
     }
 
     // filters
-    for (const [token, filters] of Sheet.filters) {
+    Sheet.filters.forEach(token => {
       const filterRef = document.getElementById('ul-filters');
       // imposto un data-selected sui filtri per rendere visibile il fatto che sono stati aggiunti al report
       filterRef.querySelector(`li[id='${token}']`).dataset.selected = 'true';
-    }
+    });
     Sheet.save();
   }
 
@@ -1006,13 +1007,55 @@ var Sheet;
     DT.draw();
   }
 
-  app.process = async () => {
+  app.createProcess = () => {
+    let process = { from: {}, joins: {} };
+    let fields = new Map();
+    let metrics = new Map();
+    let filters = new Map();
+    // per ogni 'fields' aggiunto a Sheet.fields ne recupero le proprietà 'field', 'tableAlias' e 'name'
+    for (const [token, field] of Sheet.fields) {
+      // verifico le tabelle da includere in tables Sheet.tables
+      Sheet.tables = WorkBook.field.get(token).tableAlias;
+      fields.set(token, {
+        field: WorkBook.field.get(token).field,
+        tableAlias: WorkBook.field.get(token).tableAlias,
+        name: field
+      });
+    }
+    for (const [token, metric] of Sheet.metrics) {
+      metrics.set(token, {
+        alias: metric.alias,
+        aggregateFn: metric.aggregateFn,
+        field: WorkBook.metrics.get(token).field,
+        SQL: WorkBook.metrics.get(token).SQL,
+        distinct: WorkBook.metrics.get(token).distinct
+      });
+    }
+    Sheet.filters.forEach(token => {
+      WorkBook.filters.get(token).tables.forEach(table => Sheet.tables = table);
+      // recupero l'object da inviare al process
+      filters.set(token, WorkBook.filters.get(token));
+    });
+    process.fields = Object.fromEntries(fields);
+    app.setSheet();
+    process.from = Object.fromEntries(Sheet.from);
+    process.joins = Object.fromEntries(Sheet.joins);
+    process.filters = Object.fromEntries(filters);
+    process.metrics = Object.fromEntries(metrics);
+    app.process(process);
+
+  }
+
+  app.process = async (process) => {
     // lo Sheet.id può essere già presente quando è stato aperto
     if (!Sheet.id) Sheet.id = Date.now();
+    process.id = Sheet.id;
+    console.log(process);
+    debugger;
     app.saveSheet();
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
-    const params = JSON.stringify(Sheet.sheet);
-    // console.log(params);
+    const params = JSON.stringify(process);
+    console.log(params);
     // App.showConsole('Elaborazione in corso...', 'info');
     // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
     const url = "/fetch_api/cube/sheet";
@@ -1087,12 +1130,12 @@ var Sheet;
   // aggiungo il filtro selezionato, allo Sheet
   app.addFilter = (e) => {
     // TODO: Implementare anche qui il drag&drop per i filtri
-    // Sheet.filters = e.currentTarget.id;
-    Sheet.filters = WorkBook.filters.get(e.currentTarget.id);
+    Sheet.filters = e.currentTarget.id;
+    // Sheet.filters = WorkBook.filters.get(e.currentTarget.id);
     e.currentTarget.dataset.selected = 'true';
     // aggiungo le tabelle all'interno del filtro a Sheet.tables
-    WorkBook.filters.get(e.currentTarget.id).tables.forEach(table => Sheet.tables = table);
-    app.setSheet();
+    // WorkBook.filters.get(e.currentTarget.id).tables.forEach(table => Sheet.tables = table);
+    // app.setSheet();
   }
 
   /* app.setFrom = (tableAlias) => {
@@ -1147,7 +1190,7 @@ var Sheet;
     // imposto le proprietà from e joins in base a quello che si trova in object.tables
     // object.tables contiene l'elenco delle tabelle incluse nella formula del filtro
     object.tables.forEach(table => {
-      /* per ogni tabella di tablesMap, recupero le tabelle gerarchicamente inferiori e le aggiungo a 
+      /* per ogni tabella di tablesMap, recupero le tabelle gerarchicamente inferiori e le aggiungo a
       * object.from solo se non sono già state aggiunte da precedenti tabelle
       */
       if (WorkBook.tablesMap.has(table)) {
@@ -1440,7 +1483,7 @@ var Sheet;
 
   app.setSheet = () => {
     // TODO: questa logica va applicata anche quando si aggiunge un filtro
-    /* 
+    /*
     * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
     */
     Sheet.tables.forEach(alias => {
@@ -1450,13 +1493,13 @@ var Sheet;
       */
       if (WorkBook.tablesMap.has(alias)) {
         WorkBook.tablesMap.get(alias).forEach(tableId => {
-          /* nel tableId sono presenti le tabelle gerarchicamente inferiori a 'alias', 
+          /* nel tableId sono presenti le tabelle gerarchicamente inferiori a 'alias',
           * quindi tabelle da aggiungere alla 'from' e alla 'where'
           */
           Sheet.from = Draw.tables.get(tableId);
           /*
-          * nel metodo joins() verifico se la tabella in ciclo ha una join 
-          * (per il momento la Fact non ha altre Join però potrei utilizzare 
+          * nel metodo joins() verifico se la tabella in ciclo ha una join
+          * (per il momento la Fact non ha altre Join però potrei utilizzare
           * la funzionalitò di "entrare" nel livello fisico di una tabella per aggiungerci altre join)
           * ad es. : potrei aggiungere, al DocVenditaDettaglio (fact), la tabella dei TipiMovimento,
           * e quindi, in questo caso, avrei una join anche sulla Fact (e quindi nella proprietà WorkBook.joins)
@@ -1644,7 +1687,7 @@ var Sheet;
   app.handlerTimeDimension = async (e) => {
     console.log(e.target);
     app.contextMenuTableRef.toggleAttribute('open');
-    /* 
+    /*
     * - recupero le colonne della tabella selezionata
     * - apro la dialog per poter associare una colonna della WEB_BI_TIME con una colonna della FACT
     */

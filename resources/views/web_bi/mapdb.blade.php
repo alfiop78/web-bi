@@ -582,7 +582,7 @@
                           <section class="report-preview">
                             <section class="">
                               <!--<span>report preview</span>-->
-                              <button id="btn-sheet-preview" data-fn="process" value="Elabora">Elabora</button>
+                              <button id="btn-sheet-preview" data-fn="createProcess" value="Elabora">Elabora</button>
                             </section>
                           </section>
                         </div>

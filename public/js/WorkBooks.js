@@ -3,7 +3,7 @@ class Sheets {
   #fields = new Map();
   #tables = new Set(); // tutte le tabelle usate nel report. In base a questo Set() posso creare la from e la where
   #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
-  #filters = new Map();
+  #filters = new Set();
   #metrics = new Map();
   #advMetrics = new Map();
   #compositeMetrics = new Map();
@@ -36,21 +36,14 @@ class Sheets {
 
   // passaggio del token e recupero del field in WorkSheet tramite l'oggetto WorkBook passato al Costruttore
   set fields(object) {
-    /* qui viene creato, all'interno dell'oggetto Map() un nuovo oggetto, quindi, le modifiche
-    * fatte sui fields non influiscono sui fields della Classe WorkBooks/Sheets.
-    * TODO: questa logica può essere provata (ed utilizzata) anche su Sheet.metrics, dove, attualmente 
-    * l'oggettto viene creato nel metodo rowDrop()
-    */
-    this.#fields.set(object.token, {
-      field: object.field,
-      tableAlias: object.tableAlias,
-      name: object.name
-    });
+    this.#fields.set(object.token, object.name);
     console.info('this.#fields : ', this.#fields);
   }
 
-  set filters(object) {
-    this.#filters.set(object.token, object);
+  get fields() { return this.#fields; }
+
+  set filters(token) {
+    this.#filters.add(token);
     console.info('this.#filters : ', this.#filters);
   }
 
@@ -58,6 +51,7 @@ class Sheets {
 
   set metrics(object) {
     this.#metrics.set(object.token, object);
+    // this.#metrics.set(object.token, { name: object.name, type: object.metric_type, aggregateFn: object.aggregateFn });
     console.info('sheet.#metrics : ', this.#metrics);
   }
 
@@ -76,8 +70,6 @@ class Sheets {
   }
 
   get compositeMetrics() { return this.#compositeMetrics; }
-
-  get fields() { return this.#fields; }
 
   set from(object) {
     this.#from.set(object.alias, { schema: object.schema, table: object.table });
@@ -114,9 +106,9 @@ class Sheets {
       * Se non sono presenti ma sono presenti in metriche filtrate elaboro comunque il report
       * altrimenti visualizzo un AVVISO perchè l'esecuzione potrebbe essere troppo lunga
     */
-    this.sheet.filters = Object.fromEntries(this.filters);
+    this.sheet.filters = [...this.filters];
     for (const [token, metric] of this.metrics) {
-      switch (metric.metric_type) {
+      switch (metric.type) {
         case 'basic':
           (!this.sheet.hasOwnProperty('metrics')) ? this.sheet.metrics = { [token]: metric } : this.sheet.metrics[token] = metric;
           break;
@@ -146,13 +138,9 @@ class Sheets {
     this.name = SheetStorage.sheet.name;
     this.id = SheetStorage.sheet.id;
 
-    for (const [token, object] of Object.entries(SheetStorage.sheet.fields)) {
-      this.fields = {
-        token,
-        field: object.field,
-        tableAlias: object.tableAlias,
-        name: object.name
-      };
+    for (const [token, field] of Object.entries(SheetStorage.sheet.fields)) {
+      debugger;
+      this.fields = { token, name: field };
     }
 
     // from
@@ -330,7 +318,7 @@ class WorkBooks {
 
   set metrics(object) {
     this.#metrics.set(object.token, object);
-    console.log('worksheet metrics : ', this.#metrics);
+    console.log('workBook Metrics : ', this.#metrics);
   }
 
   get metrics() { return this.#metrics; }
