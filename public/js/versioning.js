@@ -53,6 +53,68 @@ var Storage = new SheetStorages();
       .catch(err => console.error(err));
   }
 
+  app.getSheets = (dt, wbToken) => {
+    // lista di tutti gli sheet del workbook in ciclo
+    for (const [token, sheet] of Object.entries(Storage.getSheets(wbToken))) {
+      const contentDD = app.tmplDD.content.cloneNode(true);
+      const dd = contentDD.querySelector('dd');
+      const divDD = contentDD.querySelector('div');
+      const span = divDD.querySelector('span[data-value]');
+      const btnUpload = divDD.querySelector('button[data-upload]');
+      const btnDelete = divDD.querySelector('button[data-delete]');
+      dd.dataset.label = sheet.name;
+      dd.dataset.elementSearch = 'sheet';
+      dd.id = token;
+      span.dataset.value = sheet.name;
+      span.innerText = sheet.name;
+      btnUpload.dataset.token = token;
+      btnDelete.dataset.token = token;
+      dt.appendChild(dd);
+    }
+  }
+
+  app.getFilters = (dt, wbToken) => {
+    // lista di tutti gli sheet del workbook in ciclo
+    for (const [token, filter] of Object.entries(Storage.getFilters(wbToken))) {
+      const contentDD = app.tmplDD.content.cloneNode(true);
+      const dd = contentDD.querySelector('dd');
+      const divDD = contentDD.querySelector('div');
+      const span = divDD.querySelector('span[data-value]');
+      const btnUpload = divDD.querySelector('button[data-upload]');
+      const btnDelete = divDD.querySelector('button[data-delete]');
+      dd.dataset.label = filter.name;
+      dd.dataset.elementSearch = 'filter';
+      dd.id = token;
+      span.dataset.value = filter.name;
+      span.innerText = filter.name;
+      btnUpload.dataset.token = token;
+      btnUpload.dataset.upload = 'filter';
+      btnDelete.dataset.token = token;
+      dt.appendChild(dd);
+    }
+  }
+
+  app.getMetrics = (dt, wbToken) => {
+    // lista di tutti gli sheet del workbook in ciclo
+    for (const [token, metric] of Object.entries(Storage.getMetrics(wbToken))) {
+      const contentDD = app.tmplDD.content.cloneNode(true);
+      const dd = contentDD.querySelector('dd');
+      const divDD = contentDD.querySelector('div');
+      const span = divDD.querySelector('span[data-value]');
+      const btnUpload = divDD.querySelector('button[data-upload]');
+      const btnDelete = divDD.querySelector('button[data-delete]');
+      dd.dataset.label = metric.name;
+      dd.dataset.elementSearch = 'filter';
+      dd.id = token;
+      span.dataset.value = metric.name;
+      span.innerText = metric.name;
+      btnUpload.dataset.token = token;
+      btnUpload.dataset.upload = 'metric';
+      btnDelete.dataset.token = token;
+      dt.appendChild(dd);
+    }
+  }
+
   app.getLocalObjects = () => {
     const workBooks = Storage.workBooks();
     console.log(workBooks);
@@ -73,23 +135,9 @@ var Storage = new SheetStorages();
       btnUpload.dataset.token = token;
       btnDelete.dataset.token = token;
       app.dlLocalObjects.appendChild(dt);
-      // lista di tutti gli sheet del workbook in ciclo
-      for (const [sheetToken, sheet] of Object.entries(Storage.getSheets(token))) {
-        const contentDD = app.tmplDD.content.cloneNode(true);
-        const dd = contentDD.querySelector('dd');
-        const divDD = contentDD.querySelector('div');
-        const span = divDD.querySelector('span[data-value]');
-        const btnUpload = divDD.querySelector('button[data-upload]');
-        const btnDelete = divDD.querySelector('button[data-delete]');
-        dd.dataset.label = sheet.name;
-        dd.dataset.elementSearch = 'sheet';
-        dd.id = sheetToken;
-        span.dataset.value = sheet.name;
-        span.innerText = sheet.name;
-        btnUpload.dataset.token = sheetToken;
-        btnDelete.dataset.token = sheetToken;
-        dt.appendChild(dd);
-      }
+      app.getSheets(dt, token);
+      app.getFilters(dt, token);
+      app.getMetrics(dt, token);
     }
   }
 

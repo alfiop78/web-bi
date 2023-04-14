@@ -68,7 +68,25 @@ class Storages {
     return JSON.parse(window.sessionStorage.getItem(table));
   }
 
+  getFilters(workBookToken) {
+    let filters = {};
+    for (const [token, object] of Object.entries(this.storage)) {
+      if (JSON.parse(object).type === 'filter' && JSON.parse(object).workbook_ref === workBookToken) {
+        filters[token] = JSON.parse(object);
+      }
+    }
+    return filters;
+  }
 
+  getMetrics(workBookToken) {
+    let metrics = {};
+    for (const [token, object] of Object.entries(this.storage)) {
+      if (JSON.parse(object).type === 'metrics' && JSON.parse(object).workbook_ref === workBookToken) {
+        metrics[token] = JSON.parse(object);
+      }
+    }
+    return metrics;
+  }
 }
 
 class SheetStorages extends Storages {

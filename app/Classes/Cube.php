@@ -630,6 +630,8 @@ class Cube
         // dd('la tabella non esiste');
       }
     }
+    echo $sql;
+    exit;
     return $result;
   }
 

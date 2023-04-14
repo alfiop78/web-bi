@@ -14,11 +14,14 @@ use App\Http\Controllers\BIsheetController;
 // use App\Http\Controllers\BIcubeController;
 use App\Http\Controllers\BImetricController;
 use App\Http\Controllers\BIfilterController;
-use App\Http\Controllers\BIprocessController;
+// use App\Http\Controllers\BIprocessController;
 // uso il Model BIprocess che viene utilizzato nella route curlprocess (web_bi.schedule_report)
-use App\Models\BIprocess;
+// use App\Models\BIprocess;
 // uso il Model BIsheet che viene utilizzato nella route curlprocess (web_bi.schedule_report)
 use App\Models\BIsheet;
+use App\Models\BIworkbook;
+use App\Models\BIfilter;
+use App\Models\BImetric;
 // test 22.12.2022 aggiunta per utilizzare /fetch_api/dimension/time
 use Illuminate\Support\Facades\DB;
 
@@ -168,11 +171,51 @@ Route::post('/fetch_api/dimension/time', function () {
   return $map->curlprocess($json_value);
 })->name('web_bi.schedule_report'); */
 
-Route::get('/curl/process/{token}/schedule', function (BIsheet $biSheet, $token) {
+Route::get('/curl/process/{token}/schedule', function ($token) {
   $map = new MapDatabaseController();
   // interrogo la tabella bi_processes per recuperare il json_value relativo al report indicato nel token
-  $json_value = BIsheet::where("token", "=", $token)->first('json_value');
-  return $map->sheetCurlProcess($json_value);
+  // $json_sheet = BIsheet::where("token", "=", $token)->first('json_value');
+  $json_sheet = json_decode(BIsheet::where("token", "=", $token)->first('json_value')->{'json_value'});
+  $json_workbook = json_decode(BIworkbook::where("token", "=", $json_sheet->{'workBook_ref'})->first('json_value')->{'json_value'});
+  // creo l'object 'process' da inviare a MapDatabaseController -> sheetCurlProcess()
+  $process = (object)[
+    "id" => $json_sheet->{'id'},
+    "name" => $json_sheet->{'name'},
+    "from" => $json_sheet->{'from'},
+    "joins" => $json_sheet->{'joins'}
+  ];
+  $fields = (object)[];
+  $metrics = (object)[];
+  // var_dump($json_sheet);
+  // fields da recuperare nel WorkBook
+  foreach ($json_sheet->{'fields'} as $token => $name) {
+    // recupero le proprietà 'field', 'tableAlias' mentre la proprietà 'name' la utilizzo dallo Sheet
+    $fields->$token = (object)[
+      "field" => $json_workbook->{'fields_new'}->{$token}->{'field'},
+      "name" => $name,
+      "tableAlias" => $json_workbook->{'fields_new'}->{$token}->{'tableAlias'}
+    ];
+  }
+  // recupero i filtri impostati nello Sheet
+  foreach ($json_sheet->{'filters'} as $token) {
+    // TODO: utilizzare la stessa logica di 'fields' (con object e non con array)
+    $json_filters[] = json_decode(BIfilter::where("token", "=", $token)->first('json_value')->{'json_value'});
+  }
+  foreach ($json_sheet->{'metrics'} as $token => $object) {
+    // anche qui, come in 'fields', alcune proprietà vanno recuperato da json_sheet mentre altre dal WorkBook
+    $metrics->$token = (object)[
+      "alias" => $object->alias,
+      "aggregateFn" => $object->aggregateFn,
+      "SQL" => $json_workbook->{'metrics'}->{$token}->SQL,
+      "distinct" => $json_workbook->{'metrics'}->{$token}->distinct
+    ];
+  }
+  $process->fields = $fields;
+  $process->filters = $json_filters;
+  $process->metrics = $metrics;
+  // var_dump($process);
+  // exit;
+  return $map->sheetCurlProcess($process);
 })->name('web_bi.schedule_report');
 
 // store json
@@ -187,35 +230,35 @@ Route::prefix('/fetch_api/json/')->group(function () {
 });
 // destroy json
 Route::prefix('/fetch_api/name/')->group(function () {
-  Route::get('{token}/dimension_destroy', [BIdimensionController::class, 'destroy']);
-  Route::get('{token}/cube_destroy', [BIcubeController::class, 'destroy']);
+  // Route::get('{token}/dimension_destroy', [BIdimensionController::class, 'destroy']);
+  // Route::get('{token}/cube_destroy', [BIcubeController::class, 'destroy']);
   Route::get('{token}/metric_destroy', [BImetricController::class, 'destroy']);
   Route::get('{token}/filter_destroy', [BIfilterController::class, 'destroy']);
-  Route::get('{token}/process_destroy', [BIprocessController::class, 'destroy']);
+  // Route::get('{token}/process_destroy', [BIprocessController::class, 'destroy']);
 });
 // index
 Route::prefix('/fetch_api/versioning/')->group(function () {
-  Route::get('dimensions', [BIdimensionController::class, 'index']);
-  Route::get('cubes', [BIcubeController::class, 'index']);
+  // Route::get('dimensions', [BIdimensionController::class, 'index']);
+  // Route::get('cubes', [BIcubeController::class, 'index']);
   Route::get('metrics', [BImetricController::class, 'index']);
   Route::get('filters', [BIfilterController::class, 'index']);
-  Route::get('processes', [BIprocessController::class, 'index']);
+  // Route::get('processes', [BIprocessController::class, 'index']);
 });
 // show
 Route::prefix('/fetch_api/name/')->group(function () {
-  Route::get('{token}/dimension_show', [BIdimensionController::class, 'show']);
-  Route::get('{token}/cube_show', [BIcubeController::class, 'show']);
+  // Route::get('{token}/dimension_show', [BIdimensionController::class, 'show']);
+  // Route::get('{token}/cube_show', [BIcubeController::class, 'show']);
   Route::get('{token}/metric_show', [BImetricController::class, 'show']);
   Route::get('{token}/filter_show', [BIfilterController::class, 'show']);
-  Route::get('{token}/process_show', [BIprocessController::class, 'show']);
+  // Route::get('{token}/process_show', [BIprocessController::class, 'show']);
 });
 // update
 Route::prefix('/fetch_api/json/')->group(function () {
-  Route::post('/dimension_update', [BIdimensionController::class, 'update']);
-  Route::post('/cube_update', [BIcubeController::class, 'update']);
+  // Route::post('/dimension_update', [BIdimensionController::class, 'update']);
+  // Route::post('/cube_update', [BIcubeController::class, 'update']);
   Route::post('/metric_update', [BImetricController::class, 'update']);
   Route::post('/filter_update', [BIfilterController::class, 'update']);
-  Route::post('/process_update', [BIprocessController::class, 'update']);
+  // Route::post('/process_update', [BIprocessController::class, 'update']);
 });
 
 // test vertica

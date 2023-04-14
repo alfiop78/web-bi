@@ -326,6 +326,7 @@ class WorkBooks {
   save() {
     this.workBook.name = this.title;
     this.workBook.fields = Object.fromEntries(this.fields);
+    this.workBook.fields_new = Object.fromEntries(this.field);
     this.workBook.joins = Object.fromEntries(this.joins);
     this.workBook.tablesMap = Object.fromEntries(this.tablesMap);
     this.workBook.dateTime = this.dateTime;

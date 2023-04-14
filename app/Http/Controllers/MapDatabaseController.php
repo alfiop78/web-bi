@@ -238,14 +238,17 @@ class MapDatabaseController extends Controller
     } */
   }
 
-  public function sheetCurlProcess($json)
+  public function sheetCurlProcess($report)
   {
     // curl http://127.0.0.1:8000/curl/process/210wu29ifoh/schedule
     // con il login : curl https://user:psw@gaia.automotive-cloud.com/curl/process/{processToken}/schedule
     // ...oppure : curl -u 'user:psw' https://gaia.automotive-cloud.com/curl/process/{processToken}/schedule
-    $json_decoded = json_decode($json); // object
-    $json_value = json_decode($json_decoded->{'json_value'});
-    $report = $json_value;
+    // var_dump($report);
+    // var_dump($json->fields);
+    // exit;
+    // $json_decoded = json_decode($json); // object
+    // $json_value = json_decode($json_decoded->{'json_value'});
+    // $report = $json_value;
     // $reportName = $json_value->{'name'};
 
     $q = new Cube();
