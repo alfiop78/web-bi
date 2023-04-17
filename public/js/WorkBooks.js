@@ -140,7 +140,6 @@ class Sheets {
     this.id = SheetStorage.sheet.id;
 
     for (const [token, field] of Object.entries(SheetStorage.sheet.fields)) {
-      debugger;
       this.fields = { token, name: field };
     }
 

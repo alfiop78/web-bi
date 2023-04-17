@@ -1023,7 +1023,6 @@ var Sheet;
       });
     }
     for (const [token, metric] of Sheet.metrics) {
-      debugger;
       switch (metric.type) {
         case 'composite':
           compositeMetrics.set(token, {
@@ -1069,9 +1068,9 @@ var Sheet;
     process.from = Object.fromEntries(Sheet.from);
     process.joins = Object.fromEntries(Sheet.joins);
     process.filters = Object.fromEntries(filters);
-    process.metrics = Object.fromEntries(metrics);
-    process.advancedMeasures = Object.fromEntries(advancedMetrics);
-    process.compositeMeasures = Object.fromEntries(compositeMetrics);
+    if (metrics.size !== 0) process.metrics = Object.fromEntries(metrics);
+    if (advancedMetrics.size !== 0) process.advancedMeasures = Object.fromEntries(advancedMetrics);
+    if (compositeMetrics.size !== 0) process.compositeMeasures = Object.fromEntries(compositeMetrics);
     app.process(process);
 
   }
