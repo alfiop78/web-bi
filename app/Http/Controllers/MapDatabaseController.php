@@ -261,7 +261,7 @@ class MapDatabaseController extends Controller
     // imposto le colonne da includere nel datamart finale
     $q->sheetFields();
     $q->sheetSelect($report->{'fields'});
-    if (property_exists($report, 'compositeMetrics')) $q->compositeMetrics = $report->{'compositeMetrics'};
+    if (property_exists($report, 'compositeMeasures')) $q->compositeMetrics = $report->{'compositeMeasures'};
     if (property_exists($report, 'metrics')) {
       $q->sheetBaseMetrics = $report->{'metrics'};
       $q->sheetMetrics();
