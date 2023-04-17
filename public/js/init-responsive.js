@@ -426,7 +426,7 @@ var Sheet;
     formula.dataset.id = metric.token;
     formula.dataset.token = metric.token;
     fieldName.innerHTML = metric.alias;
-    if (metric.type !== 'composite') {
+    if (metric.metric_type !== 'composite') {
       aggregateFn.innerText = metric.aggregateFn;
       // fieldName.dataset.field = metric.field;
     }
@@ -452,12 +452,10 @@ var Sheet;
       case 'advanced':
         // aggiungo a Sheet.metrics solo gli elementi che possono essere modificati, le proprieta di sola lettura le prenderò sempre da WorkBook.metrics
         Sheet.metrics = { token: metric.token, alias: metric.alias, type: metric.metric_type, aggregateFn: metric.aggregateFn, dependencies: false };
-        debugger;
         app.addMetric(e.currentTarget, elementRef.id);
         break;
       case 'composite':
-        debugger;
-        Sheet.metrics = metric;
+        Sheet.metrics = { token: metric.token, alias: metric.alias, type: metric.metric_type, metrics: metric.metrics };
         app.addMetric(e.currentTarget, elementRef.id);
         // dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
         // ...al suo interno per consentirne l'elaborazione
@@ -470,8 +468,9 @@ var Sheet;
             //... per specificare che è stata aggiunta indirettamente, essa si trova in una metrica composta
             // NOTE: clonazione di un object con syntax ES6.
             const nestedMetric = { ...WorkBook.metrics.get(token) };
-            nestedMetric.dependencies = true;
-            Sheet.metrics = nestedMetric;
+            Sheet.metrics = { token: nestedMetric.token, alias: nestedMetric.alias, type: nestedMetric.metric_type, aggregateFn: nestedMetric.aggregateFn, dependencies: true };
+            // nestedMetric.dependencies = true;
+            // Sheet.metrics = nestedMetric;
           }
         }
         break;
@@ -765,9 +764,9 @@ var Sheet;
     const span = templateContent.querySelector('span');
     const mark = templateContent.querySelector('mark');
     mark.dataset.token = elementRef.id;
-    mark.dataset.type = elementRef.dataset.type;
-    mark.dataset.aggregateFn = elementRef.dataset.aggregateFn;
-    mark.innerText = elementRef.dataset.alias;
+    mark.dataset.type = WorkBook.metrics.get(elementRef.id).metric_type;
+    mark.dataset.aggregateFn = WorkBook.metrics.get(elementRef.id).aggregateFn;
+    mark.innerText = WorkBook.metrics.get(elementRef.id).alias;
     app.textareaCompositeMetric.appendChild(span);
     // aggiungo anche uno span per il proseguimento della scrittura della formula
     app.addSpan(app.textareaCompositeMetric, null, 'metric');
@@ -1024,14 +1023,13 @@ var Sheet;
       });
     }
     for (const [token, metric] of Sheet.metrics) {
+      debugger;
       switch (metric.type) {
-        case 'basic':
-          metrics.set(token, {
+        case 'composite':
+          compositeMetrics.set(token, {
             alias: metric.alias,
-            aggregateFn: metric.aggregateFn,
-            field: WorkBook.metrics.get(token).field,
-            SQL: WorkBook.metrics.get(token).SQL,
-            distinct: WorkBook.metrics.get(token).distinct
+            SQL: WorkBook.metrics.get(token).sql,
+            metrics: WorkBook.metrics.get(token).metrics
           });
           break;
         case 'advanced':
@@ -1047,10 +1045,16 @@ var Sheet;
           WorkBook.metrics.get(token).filters.forEach(filterToken => {
             advancedMetrics.get(token).filters[filterToken] = WorkBook.filters.get(filterToken);
           });
-          console.log(advancedMetrics);
-          debugger;
           break;
         default:
+          // basic
+          metrics.set(token, {
+            alias: metric.alias,
+            aggregateFn: metric.aggregateFn,
+            field: WorkBook.metrics.get(token).field,
+            SQL: WorkBook.metrics.get(token).SQL,
+            distinct: WorkBook.metrics.get(token).distinct
+          });
           break;
       }
     }
@@ -1067,6 +1071,7 @@ var Sheet;
     process.filters = Object.fromEntries(filters);
     process.metrics = Object.fromEntries(metrics);
     process.advancedMeasures = Object.fromEntries(advancedMetrics);
+    process.compositeMeasures = Object.fromEntries(compositeMetrics);
     app.process(process);
 
   }
@@ -1458,7 +1463,7 @@ var Sheet;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
     // let object = { token, alias, sql: [], metrics: {}, type: 'composite' };
-    let object = { token, alias, sql: [], metrics: {}, type: 'composite' };
+    let object = { token, alias, sql: [], metrics: {}, type: 'metric', metric_type: 'composite', workbook_ref: WorkBook.workBook.token };
     document.querySelectorAll('#textarea-composite-metric *').forEach((element, index) => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
@@ -1488,7 +1493,8 @@ var Sheet;
     console.log(object);
     debugger;
     WorkBook.metrics = object;
-    WorkBook.save();
+    // salvo la nuova metrica nello storage
+    window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
     // TODO: il codice che aggiunge una metrica al tablesStruct è codice ripetuto
     // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
     const tmpl = app.tmplList.content.cloneNode(true);
@@ -2050,29 +2056,8 @@ var Sheet;
       // come key e non servono due metodi (metric e metrics)
       object.filters = [...filters];
       object.metric_type = 'advanced';
-
-      /* WorkBook.metrics = {
-        token,
-        alias,
-        field: baseMetric.field,
-        aggregateFn,
-        SQL: baseMetric.SQL,
-        filters,
-        distinct: false,
-        type: 'advanced'
-      }; */
     } else {
       object.metric_type = 'basic';
-      // debugger;
-      /* WorkBook.metrics = {
-        token,
-        alias,
-        field: baseMetric.field,
-        aggregateFn,
-        SQL: baseMetric.SQL,
-        distinct: false, // default
-        type: 'basic'
-      }; */
     }
     WorkBook.metrics = object;
     // salvo la nuova metrica nello storage

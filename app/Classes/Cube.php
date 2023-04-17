@@ -909,7 +909,7 @@ class Cube
       if (property_exists($this, 'compositeMetrics')) {
         // dd($this->compositeMetrics);
         foreach ($this->compositeMetrics as $cm) {
-          $this->cm[] = "NVL(" . implode(" ", $cm->sql) . ",0) AS {$cm->alias}";
+          $this->cm[] = "NVL(" . implode(" ", $cm->SQL) . ",0) AS {$cm->alias}";
         }
         $sql .= ",\n";
         $sql .= implode(",\n", $this->cm);
@@ -925,7 +925,7 @@ class Cube
         // sono presenti metriche composte
         // dd($this->compositeMetrics);
         foreach ($this->compositeMetrics as $cm) {
-          $this->cm[] = "NVL(" . implode(" ", $cm->sql) . ",0) AS {$cm->alias}";
+          $this->cm[] = "NVL(" . implode(" ", $cm->SQL) . ",0) AS {$cm->alias}";
         }
         $s .= ",\n";
         $s .= implode(",\n", $this->cm);

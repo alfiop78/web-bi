@@ -151,7 +151,7 @@
     <template id="tmpl-metrics-defined">
       <div class="metric-defined">
         <section class="formula" data-token>
-          <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate">SUM</code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span>
+          <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span>
         </section>
       </div>
 
