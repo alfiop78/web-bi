@@ -337,11 +337,13 @@ class WorkBooks {
     }
     // nell'oggetto WorkSheet andrò a memorizzare gli elementi aggiunti nel WorkSheet (es.: metriche/colonne custom)
     // metriche avanzate sono presenti solo nello WorkSheet e non nel WorkBook
-    if (this.filters.size !== 0) this.workBook.filters = Object.fromEntries(this.filters);
+    // if (this.filters.size !== 0) this.workBook.filters = Object.fromEntries(this.filters);
     // if (this.advMetrics.size !== 0) this.workSheet.advMetrics = Object.fromEntries(this.advMetrics);
     // if (this.compositeMetrics.size !== 0) this.workSheet.compositeMetrics = Object.fromEntries(this.compositeMetrics);
     for (const [token, metric] of this.metrics) {
-      (!this.workBook.hasOwnProperty('metrics')) ? this.workBook.metrics = { [token]: metric } : this.workBook.metrics[token] = metric;
+      if (metric.metric_type === 'basic') {
+        (!this.workBook.hasOwnProperty('metrics')) ? this.workBook.metrics = { [token]: metric } : this.workBook.metrics[token] = metric;
+      }
       /* switch (metric.metric_type) {
         case 'basic':
           (!this.workBook.hasOwnProperty('metrics')) ? this.workBook.metrics = { [token]: metric } : this.workBook.metrics[token] = metric;
