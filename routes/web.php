@@ -186,6 +186,7 @@ Route::get('/curl/process/{token}/schedule', function ($token) {
   ];
   $fields = (object)[];
   $metrics = (object)[];
+  $advancedMeasures = (object)[];
   // var_dump($json_sheet);
   // fields da recuperare nel WorkBook
   foreach ($json_sheet->{'fields'} as $token => $name) {
@@ -210,9 +211,30 @@ Route::get('/curl/process/{token}/schedule', function ($token) {
       "distinct" => $json_workbook->{'metrics'}->{$token}->distinct
     ];
   }
+  // metriche avanzate
+  foreach ($json_sheet->{'advMetrics'} as $token => $object) {
+    // recupero la metrica avanzata dal DB
+    $json_advanced_measures = json_decode(BImetric::where("token", "=", $token)->first('json_value')->{'json_value'});
+    // recupero i filtri contenuti all'interno della metrica avanzata in ciclo
+    $json_filters_metric = (object)[];
+    foreach ($json_advanced_measures->{'filters'} as $filterToken) {
+      $json_filters_metric->$filterToken = json_decode(BIfilter::where("token", "=", $filterToken)->first('json_value')->{'json_value'});
+    }
+    $advancedMeasures->$token = (object)[
+      "alias" => $object->alias,
+      "aggregateFn" => $object->aggregateFn,
+      "SQL" => $json_advanced_measures->SQL,
+      "distinct" => $json_advanced_measures->distinct,
+      "filters" => $json_filters_metric
+    ];
+  }
+
   $process->fields = $fields;
   $process->filters = $json_filters;
   $process->metrics = $metrics;
+  $process->advancedMeasures = $advancedMeasures;
+  // var_dump($process->advancedMeasures);
+  // exit;
   // var_dump($process);
   // exit;
   return $map->sheetCurlProcess($process);

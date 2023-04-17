@@ -272,54 +272,54 @@ class MapDatabaseController extends Controller
     $q->sheetGroupBy($report->{'fields'});
     /* dd($q); */
     // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
-    try {
-      $baseTable = $q->sheetBaseTable(null);
-      if (!$baseTable) {
-        // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
-        // creo una tabella temporanea per ogni metrica filtrata
-        // TODO: 2022-05-06 qui occorre una verifica più approfondita sui filtri contenuti nella metrica, allo stato attuale faccio una query per ogni metrica filtrata, anche se i filtri all'interno della metrica sono uguali. Includere più metriche che contengono gli stessi filtri in un unica query
-        if (property_exists($report, 'advMetrics')) {
-          $q->filteredMetrics = $report->{'advMetrics'};
-          // verifico quali, tra le metriche filtrate, contengono gli stessi filtri. Le metriche che contengono gli stessi filtri vanno eseguite in un unica query
-          // oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
-          $q->groupMetricsByFilters = (object)[];
-          // raggruppare per tipologia dei filtri
-          $groupFilters = array();
-          // creo un gruppo di filtri
-          foreach ($q->filteredMetrics as $metric) {
-            // dd($metric->formula->filters);
-            // ogni gruppo di filtri ha un tokenGrouup diverso come key dekk'array
-            $tokenGroup = "group_" . bin2hex(random_bytes(4));
-            if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
-          }
-          // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
-          foreach ($groupFilters as $token => $group) {
-            $metrics = array();
-            foreach ($q->filteredMetrics as $metric) {
-              if (get_object_vars($metric->filters) == get_object_vars($group)) {
-                // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
-                array_push($metrics, $metric);
-              }
-            }
-            // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
-            $q->groupMetricsByFilters->$token = $metrics;
-          }
-          // dd($q->groupMetricsByFilters);
-          $metricTable = $q->sheetCreateMetricDatamarts(null);
+    // try {
+    $baseTable = $q->sheetBaseTable(null);
+    if (!$baseTable) {
+      // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
+      // creo una tabella temporanea per ogni metrica filtrata
+      // TODO: 2022-05-06 qui occorre una verifica più approfondita sui filtri contenuti nella metrica, allo stato attuale faccio una query per ogni metrica filtrata, anche se i filtri all'interno della metrica sono uguali. Includere più metriche che contengono gli stessi filtri in un unica query
+      if (property_exists($report, 'advancedMeasures')) {
+        $q->filteredMetrics = $report->{'advancedMeasures'};
+        // verifico quali, tra le metriche filtrate, contengono gli stessi filtri. Le metriche che contengono gli stessi filtri vanno eseguite in un unica query
+        // oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
+        $q->groupMetricsByFilters = (object)[];
+        // raggruppare per tipologia dei filtri
+        $groupFilters = array();
+        // creo un gruppo di filtri
+        foreach ($q->filteredMetrics as $metric) {
+          // dd($metric->formula->filters);
+          // ogni gruppo di filtri ha un tokenGrouup diverso come key dekk'array
+          $tokenGroup = "group_" . bin2hex(random_bytes(4));
+          if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
         }
-        // echo 'elaborazione createDatamart';
-        // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-        $datamartName = $q->sheetCreateDatamart(null);
-        // echo $datamartName;
-        // var_dump($datamartName);
-        // if ($datamartName) return "Datamart ({$datamartName}) per il report {$reportName} creato con successo!\n";
-        if ($datamartName) return "OK\n";
+        // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
+        foreach ($groupFilters as $token => $group) {
+          $metrics = array();
+          foreach ($q->filteredMetrics as $metric) {
+            if (get_object_vars($metric->filters) == get_object_vars($group)) {
+              // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
+              array_push($metrics, $metric);
+            }
+          }
+          // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
+          $q->groupMetricsByFilters->$token = $metrics;
+        }
+        // dd($q->groupMetricsByFilters);
+        $metricTable = $q->sheetCreateMetricDatamarts(null);
       }
-    } catch (Exception $e) {
-      $msg = $e->getMessage();
-      return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
-      // abort(500, "ERRORE ESECUZIONE QUERY : $msg");
+      // echo 'elaborazione createDatamart';
+      // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
+      $datamartName = $q->sheetCreateDatamart(null);
+      // echo $datamartName;
+      // var_dump($datamartName);
+      // if ($datamartName) return "Datamart ({$datamartName}) per il report {$reportName} creato con successo!\n";
+      if ($datamartName) return "OK\n";
     }
+    // } catch (Exception $e) {
+    //   $msg = $e->getMessage();
+    //   return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
+    //   // abort(500, "ERRORE ESECUZIONE QUERY : $msg");
+    // }
     // dd($baseTable);
   }
 

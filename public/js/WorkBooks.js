@@ -176,7 +176,7 @@ class Sheets {
       }
     }
 
-    if (SheetStorage.sheet.hasOwnProperty('compositeMeasures')) {
+    if (SheetStorage.sheet.hasOwnProperty('compositeMetrics')) {
       for (const value of Object.values(SheetStorage.sheet.compositeMetrics)) {
         this.metrics = value;
       }

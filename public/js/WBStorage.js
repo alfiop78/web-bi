@@ -81,7 +81,7 @@ class Storages {
   getMetrics(workBookToken) {
     let metrics = {};
     for (const [token, object] of Object.entries(this.storage)) {
-      if (JSON.parse(object).type === 'metrics' && JSON.parse(object).workbook_ref === workBookToken) {
+      if (JSON.parse(object).type === 'metric' && JSON.parse(object).workbook_ref === workBookToken) {
         metrics[token] = JSON.parse(object);
       }
     }
