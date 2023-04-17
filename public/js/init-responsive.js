@@ -443,7 +443,7 @@ var Sheet;
     let tmpl = app.tmplColumnsDefined.content.cloneNode(true);
     let field = tmpl.querySelector('.column-defined');
     let span = field.querySelector('span');
-    field.dataset.type = elementRef.dataset.type;
+    // field.dataset.type = elementRef.dataset.type;
     field.dataset.id = elementRef.id;
     const metric = { ...WorkBook.metrics.get(elementRef.id) };
     // const metric = WorkBook.metrics.get(elementRef.id);
@@ -639,7 +639,7 @@ var Sheet;
     }
   }
 
-  // save metrica composta di base
+  // salva metrica composta di base
   app.saveCustomMetric = () => {
     const alias = document.getElementById('custom-metric-name').value;
     const rand = () => Math.random(0).toString(36).substring(2);
@@ -666,7 +666,8 @@ var Sheet;
       aggregateFn: 'SUM', // default
       SQL: `${arr_sql.join(' ')}`,
       distinct: false, // default
-      type: 'basic'
+      type: 'metric',
+      metric_type: 'basic'
     };
   }
 
@@ -1010,7 +1011,7 @@ var Sheet;
   app.createProcess = () => {
     let process = { from: {}, joins: {} };
     let fields = new Map();
-    let metrics = new Map();
+    let metrics = new Map(), advancedMetrics = new Map(), compositeMetrics = new Map();
     let filters = new Map();
     // per ogni 'fields' aggiunto a Sheet.fields ne recupero le proprietà 'field', 'tableAlias' e 'name'
     for (const [token, field] of Sheet.fields) {
@@ -1023,25 +1024,49 @@ var Sheet;
       });
     }
     for (const [token, metric] of Sheet.metrics) {
-      metrics.set(token, {
-        alias: metric.alias,
-        aggregateFn: metric.aggregateFn,
-        field: WorkBook.metrics.get(token).field,
-        SQL: WorkBook.metrics.get(token).SQL,
-        distinct: WorkBook.metrics.get(token).distinct
-      });
+      switch (metric.type) {
+        case 'basic':
+          metrics.set(token, {
+            alias: metric.alias,
+            aggregateFn: metric.aggregateFn,
+            field: WorkBook.metrics.get(token).field,
+            SQL: WorkBook.metrics.get(token).SQL,
+            distinct: WorkBook.metrics.get(token).distinct
+          });
+          break;
+        case 'advanced':
+          advancedMetrics.set(token, {
+            alias: metric.alias,
+            aggregateFn: metric.aggregateFn,
+            field: WorkBook.metrics.get(token).field,
+            SQL: WorkBook.metrics.get(token).SQL,
+            distinct: WorkBook.metrics.get(token).distinct,
+            filters: {}
+          });
+          // aggiungo i filtri definiti all'interno della metrica avanzata
+          WorkBook.metrics.get(token).filters.forEach(filterToken => {
+            advancedMetrics.get(token).filters[filterToken] = WorkBook.filters.get(filterToken);
+          });
+          console.log(advancedMetrics);
+          debugger;
+          break;
+        default:
+          break;
+      }
     }
     Sheet.filters.forEach(token => {
       WorkBook.filters.get(token).tables.forEach(table => Sheet.tables = table);
       // recupero l'object da inviare al process
       filters.set(token, WorkBook.filters.get(token));
     });
+
     process.fields = Object.fromEntries(fields);
     app.setSheet();
     process.from = Object.fromEntries(Sheet.from);
     process.joins = Object.fromEntries(Sheet.joins);
     process.filters = Object.fromEntries(filters);
     process.metrics = Object.fromEntries(metrics);
+    process.advancedMeasures = Object.fromEntries(advancedMetrics);
     app.process(process);
 
   }
@@ -2178,23 +2203,22 @@ var Sheet;
         const span = content.querySelector('span');
         const btnAdd = li.querySelector('i[data-id="filters-add"]');
         li.id = token;
-        // TODO: questo potrei eliminarlo perchè questa lista avrà l'attributo data-base-metrics
-        li.dataset.type = value.type;
+        li.dataset.type = value.metric_type;
         // li.dataset.id = tableId;
         // li.dataset.schema = value.schema;
         // li.dataset.table = value.workBook.table;
         // li.dataset.tableAlias = value.workBook.tableAlias;
         // la metrica przmedio*Quantita non ha la proprieta 'fields'
-        if (value.field) li.dataset.field = value.field;
-        li.dataset.alias = value.alias;
-        li.dataset.aggregateFn = value.aggregateFn;
+        // if (value.field) li.dataset.field = value.field;
+        // li.dataset.alias = value.alias;
+        // li.dataset.aggregateFn = value.aggregateFn;
         // TODO: gli eventi drag dovranno essere posizionati sul btnDrag, quindi anche l'attributo id
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
         li.addEventListener('contextmenu', app.contextMenuMetrics);
         // btnAdd.dataset.table = value.workBook.table;
         // btnAdd.dataset.alias = value.workBook.tableAlias;
-        btnAdd.dataset.field = value.field;
+        // btnAdd.dataset.field = value.field;
         btnAdd.dataset.token = token;
         btnAdd.addEventListener('click', app.handlerMetric);
         span.innerHTML = value.alias;

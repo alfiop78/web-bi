@@ -57,19 +57,19 @@ class Sheets {
 
   get metrics() { return this.#metrics; }
 
-  set advMetrics(object) {
+  /* set advMetrics(object) {
     this.#advMetrics.set(object.token, object);
     console.info('this.#advMetrics : ', this.#advMetrics);
   }
 
-  get advMetrics() { return this.#advMetrics; }
+  get advMetrics() { return this.#advMetrics; } */
 
-  set compositeMetrics(object) {
+  /* set compositeMetrics(object) {
     this.#compositeMetrics.set(object.token, object);
     console.info('this.#compositeMetrics : ', this.#compositeMetrics);
   }
 
-  get compositeMetrics() { return this.#compositeMetrics; }
+  get compositeMetrics() { return this.#compositeMetrics; } */
 
   set from(object) {
     this.#from.set(object.alias, { schema: object.schema, table: object.table });
@@ -126,6 +126,7 @@ class Sheets {
     // if (this.advMetrics.size > 0) this.sheet.advMetrics = Object.fromEntries(this.advMetrics);
     // if (this.compositeMetrics.size > 0) this.sheet.compositeMetrics = Object.fromEntries(this.compositeMetrics);
     console.info(this.sheet);
+    debugger;
     SheetStorage.save(this.sheet);
   }
 
@@ -175,7 +176,7 @@ class Sheets {
       }
     }
 
-    if (SheetStorage.sheet.hasOwnProperty('compositeMetrics')) {
+    if (SheetStorage.sheet.hasOwnProperty('compositeMeasures')) {
       for (const value of Object.values(SheetStorage.sheet.compositeMetrics)) {
         this.metrics = value;
       }
@@ -183,7 +184,6 @@ class Sheets {
 
     return this;
   }
-
 
 }
 
@@ -342,7 +342,8 @@ class WorkBooks {
     // if (this.advMetrics.size !== 0) this.workSheet.advMetrics = Object.fromEntries(this.advMetrics);
     // if (this.compositeMetrics.size !== 0) this.workSheet.compositeMetrics = Object.fromEntries(this.compositeMetrics);
     for (const [token, metric] of this.metrics) {
-      switch (metric.metric_type) {
+      (!this.workBook.hasOwnProperty('metrics')) ? this.workBook.metrics = { [token]: metric } : this.workBook.metrics[token] = metric;
+      /* switch (metric.metric_type) {
         case 'basic':
           (!this.workBook.hasOwnProperty('metrics')) ? this.workBook.metrics = { [token]: metric } : this.workBook.metrics[token] = metric;
           break;
@@ -353,7 +354,7 @@ class WorkBooks {
           // compositeMetrics
           (!this.workBook.hasOwnProperty('compositeMetrics')) ? this.workBook.compositeMetrics = { [token]: metric } : this.workBook.compositeMetrics[token] = metric;
           break;
-      }
+      } */
     }
     console.info('WorkBook : ', this.workBook);
     WorkBookStorage.save(this.workBook);
@@ -404,13 +405,6 @@ class WorkBooks {
         this.joins = token;
       }
     }
-    // filtri aggiunti allo WorkSheet
-    // TODO: da recuperare dallo storage
-    /* if (WorkBookStorage.workSheet.hasOwnProperty('filters')) {
-      for (const [token, filter] of Object.entries(WorkBookStorage.workSheet.filters)) {
-        this.filters = { token, value: filter };
-      }
-    }*/
 
     for (const [token, filter] of Object.entries(WorkBookStorage.storage)) {
       this.json = JSON.parse(filter);
@@ -419,29 +413,19 @@ class WorkBooks {
       }
     }
 
-
     if (WorkBookStorage.workBook.hasOwnProperty('metrics')) {
-      debugger;
       for (const value of Object.values(WorkBookStorage.workBook.metrics)) {
         this.metrics = value;
       }
     }
 
-    // metriche avanzate aggiunte allo WorkSheet
-    /*if (WorkBookStorage.workSheet.hasOwnProperty('advMetrics')) {
-      for (const value of Object.values(WorkBookStorage.workSheet.advMetrics)) {
-        // per ogni tabella
-        this.metrics = value;
+    for (const [token, metric] of Object.entries(WorkBookStorage.storage)) {
+      // qui vengono recuperate metriche advanced/composite
+      this.json = JSON.parse(metric);
+      if (this.json.type === 'metric' && this.json.workbook_ref === WorkBookStorage.workBook.token) {
+        this.metrics = this.json;
       }
     }
-
-    // metriche composite aggiunte allo WorkSheet
-    if (WorkBookStorage.workSheet.hasOwnProperty('compositeMetrics')) {
-      for (const value of Object.values(WorkBookStorage.workSheet.compositeMetrics)) {
-        // per ogni tabella
-        this.metrics = value;
-      }
-    }*/
 
     return this;
   }
