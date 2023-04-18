@@ -203,14 +203,17 @@ Route::get('/curl/process/{token}/schedule', function ($token) {
     // TODO: utilizzare la stessa logica di 'fields' (con object e non con array)
     $json_filters[] = json_decode(BIfilter::where("token", "=", $token)->first('json_value')->{'json_value'});
   }
-  foreach ($json_sheet->{'metrics'} as $token => $object) {
-    // anche qui, come in 'fields', alcune proprietà vanno recuperato da json_sheet mentre altre dal WorkBook
-    $metrics->$token = (object)[
-      "alias" => $object->alias,
-      "aggregateFn" => $object->aggregateFn,
-      "SQL" => $json_workbook->{'metrics'}->{$token}->SQL,
-      "distinct" => $json_workbook->{'metrics'}->{$token}->distinct
-    ];
+
+  if (property_exists($json_sheet, 'metrics')) {
+    foreach ($json_sheet->{'metrics'} as $token => $object) {
+      // anche qui, come in 'fields', alcune proprietà vanno recuperato da json_sheet mentre altre dal WorkBook
+      $metrics->$token = (object)[
+        "alias" => $object->alias,
+        "aggregateFn" => $object->aggregateFn,
+        "SQL" => $json_workbook->{'metrics'}->{$token}->SQL,
+        "distinct" => $json_workbook->{'metrics'}->{$token}->distinct
+      ];
+    }
   }
   // metriche avanzate
   if (property_exists($json_sheet, 'advMetrics')) {
@@ -245,9 +248,9 @@ Route::get('/curl/process/{token}/schedule', function ($token) {
 
   $process->fields = $fields;
   $process->filters = $json_filters;
-  $process->metrics = $metrics;
-  $process->advancedMeasures = $advancedMeasures;
-  $process->compositeMeasures = $compositeMeasures;
+  if (count(get_object_vars($metrics)) !== 0) $process->metrics = $metrics;
+  if (count(get_object_vars($advancedMeasures)) !== 0) $process->advancedMeasures = $advancedMeasures;
+  if (count(get_object_vars($compositeMeasures)) !== 0) $process->compositeMeasures = $compositeMeasures;
   // var_dump($process);
   // exit;
   return $map->sheetCurlProcess($process);

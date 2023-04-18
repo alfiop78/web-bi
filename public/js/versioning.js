@@ -103,7 +103,6 @@ var Storage = new SheetStorages();
       const span = divDD.querySelector('span[data-value]');
       const btnUpload = divDD.querySelector('button[data-upload]');
       const btnDelete = divDD.querySelector('button[data-delete]');
-      debugger;
       dd.dataset.label = metric.alias;
       dd.dataset.elementSearch = 'metric';
       dd.id = token;

@@ -1042,8 +1042,10 @@ var Sheet;
           });
           // aggiungo i filtri definiti all'interno della metrica avanzata
           WorkBook.metrics.get(token).filters.forEach(filterToken => {
+            // se, nei filtri della metrica, sono presenti filtri di funzioni temprali, le aggiungo qui
             advancedMetrics.get(token).filters[filterToken] = WorkBook.filters.get(filterToken);
           });
+
           break;
         default:
           // basic
