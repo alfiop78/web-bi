@@ -13,6 +13,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-input-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-versioning.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
   <script src="{{ asset('/js/WBStorage.js') }}"></script>
@@ -22,85 +23,13 @@
 <body class="antialiased">
 
   <template id="tmpl-li">
-    <li data-li data-element-search data-label data-searchable="true">
-      <span></span>
-    </li>
-
-    <li data-li-drag data-element-search data-label data-searchable="true" draggable="true">
-      <i class="material-icons-round md-18">drag_handle</i>
-      <span></span>
-    </li>
-
-    <li data-li-drag data-filter data-element-search data-label data-searchable="true" draggable="true">
+    <li data-li data-fn="selectObject" data-element-search data-label data-searchable="true">
       <span class="li-content">
-        <i class="material-icons-round md-18">drag_handle</i>
-        <span></span>
-      </span>
-      <i data-id="filters-edit" class="material-icons-round md-18">edit</i>
-    </li>
-
-    <li data-li-drag data-element-search data-label data-base-metrics data-searchable="true" draggable="true">
-      <span class="li-content">
-        <i class="material-icons-round md-18">drag_handle</i>
-        <span></span>
-      </span>
-      <i data-id="filters-add" class="material-icons-round md-18">add</i>
-    </li>
-
-    <li data-li-drag data-element-search data-label data-advanced-metrics data-searchable="true" draggable="true">
-      <span class="li-content">
-        <i class="material-icons-round md-18">drag_handle</i>
-        <span></span>
-      </span>
-      <i data-id="metric-edit" class="material-icons-round md-18">edit</i>
-    </li>
-
-    <li data-li-drag data-element-search data-label data-composite-metrics data-searchable="true" draggable="true">
-      <span class="li-content">
-        <i class="material-icons-round md-18">drag_handle</i>
-        <span></span>
-      </span>
-      <i data-id="metric-edit" class="material-icons-round md-18">edit</i>
-    </li>
-  </template>
-
-  <template id="tmpl-dl-element">
-    <dl data-id="dt-hierarchies">
-      <dt></dt>
-    </dl>
-  </template>
-
-  <template id="tmpl-dt">
-    <dt data-id="value-icons">
-      <div>
+        <!-- <i class="material-icons-round md-18">drag_handle</i> -->
         <span data-value></span>
-        <span>
-          <button data-fn="uploadObject" data-upload="workbook" class="button-icon material-icons-round md-18">upload</button>
-          <button data-fn="deleteWorkBook" data-delete class="button-icon material-icons-round md-18">delete</button>
-        </span>
-      </div>
-    </dt>
-  </template>
-
-  <template id="tmpl-dd">
-    <dd data-id="value-icons">
-      <div>
-        <span data-value></span>
-        <span>
-          <button data-fn="uploadObject" data-upload="sheet" class="button-icon material-icons-round md-18">upload</button>
-          <button data-fn="deleteSheet" data-delete class="button-icon material-icons-round md-18">delete</button>
-        </span>
-      </div>
-    </dd>
-  </template>
-
-  <template id="tmpl-details-element">
-    <details data-id="dt-tables">
-      <summary></summary>
-    </details>
-    <li class="new-worksheet-object">
-      <i class="material-icons-round md-18 new-object">add</i>
-      <button class="new-object" data-fn="btnMetricNew" type="button" value="crea metrica">Metrica Composta</button>
+      </span>
+      <button data-fn="uploadObject" data-upload="workbook" class="button-icons material-icons-round md-18">edit</button>
+      <button data-fn="deleteObject" data-delete="workbook" class="button-icons material-icons-round md-18">remove</button>
     </li>
   </template>
 
@@ -132,7 +61,23 @@
         <div id="body">
 
           <div class="wrapper">
-            <section class="dlg-grid">
+            <section class="wrapper-content">
+              <section class="grid">
+                <div class="content">
+                  <div class="header">
+                    <h5>Sincronizzazione elementi</h5>
+                  </div>
+                  <div class="body grid-section-2">
+                    <ul id="ul-workbooks"></ul>
+                    <ul id="ul-elements"></ul>
+                  </div>
+                  <div class="footer">
+                    <!-- <button name="cancel" value="chiudi">Chiudi</button> -->
+                  </div>
+                </div>
+              </section>
+            </section>
+            <!-- <section class="dlg-grid">
               <h5>Sincronizzazione elementi</h5>
               <section class="dlg-content col">
                 <section>
@@ -143,12 +88,9 @@
               <section class="buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
               </section>
-            </section>
-
+            </section> -->
           </div>
-
         </div>
-
       </div>
 
       <div id="controls">

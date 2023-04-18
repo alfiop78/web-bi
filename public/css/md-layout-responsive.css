@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@100;200;400;600&display=swap');
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp&display=swap");
-* {box-sizing: border-box;}
+* {box-sizing: border-box; font-family: 'Barlow'; font-size: .9rem;}
+
 :root{
   --main-bg-color: #e2e2e2;
   --main-primary-color: #796465;
@@ -29,7 +30,12 @@ header h1{font-size: 1.4rem;font-weight: 400;margin: 0 8px;flex-grow: 1;flex-shr
   white-space: nowrap;text-overflow: ellipsis;overflow: hidden;width: 0;}
 #content{display: block;width: 100%;position: absolute;top: 0;left: 0;right: 0; bottom: 0;/*padding-top: 32px;*/overflow-y: auto;
   overflow-x: hidden;background: var(--main-bg-color);transition: all 500ms;}
-#content > #body{font-size: .9rem;margin: 0 auto;margin-bottom: 64px;color: #3f3f40;padding: 1em 1em 0em;height: calc(100% - 64px);}
+#content > #body{
+  font-size: .9rem;
+  margin: 0 auto;
+  color: #3f3f40;
+  height: 100%;
+}
 #console{/*position: absolute;*/ position: fixed;bottom: -64px;left: 0;right: 0;display: flex;justify-content: center; transition: bottom 500ms;
   padding: 0 16px;flex-direction: column;z-index: 1002;background: #1d1d1d; color: whitesmoke;font-size: .85rem;height: 64px;}
 #console i[data-icon="info"]{color: #d0c5ab;}
@@ -236,4 +242,13 @@ span.markContent {
   position: absolute;
   left: 100%;
   top: 8px;
+}
+
+#body > .wrapper{
+  display: grid;
+  grid-template-columns: 100%;
+  height: inherit;
+  position: relative;
+  grid-template-rows: 1fr;
+  padding: 1em;
 }

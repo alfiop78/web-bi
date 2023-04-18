@@ -1,0 +1,16 @@
+* {box-sizing: border-box; font-family: 'Barlow'; font-size: .9rem;}
+.grid{
+  display: grid;
+  height: 100%;
+  grid-template-rows: 100%;
+}
+
+.grid > .content{
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.grid > .content > .body.grid-section-2 {
+  display: grid;
+  grid-template-columns: auto auto;
+}

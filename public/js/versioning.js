@@ -6,15 +6,49 @@ var Storage = new SheetStorages();
     // checkbox switch Locale / DB
     // btnSwitchLocalDB: document.getElementById('chk-local-db-switch'),
     // dialog
-    dlLocalObjects: document.getElementById('dl-local-objects'),
-    tmplDT: document.getElementById('tmpl-dt'),
-    tmplDD: document.getElementById('tmpl-dd'),
+    ulWorkBooks: document.getElementById('ul-workbooks'),
+    ulElements: document.getElementById('ul-elements'),
+    tmpl_li: document.getElementById('tmpl-li'),
 
     // template per lo status degli oggetti da versionare
     // tmplVersioningDB: document.getElementById('versioning-db'),
     // btnVersioningStatus: document.getElementById('btn-versioning-status'),
     // btnVersioningProcess: document.getElementById('btn-versioning')
   }
+
+  App.init();
+
+  const config = { attributes: true, childList: true, subtree: true };
+
+  const callback = (mutationList, observer) => {
+    // console.log(mutationList, observer);
+    for (const mutation of mutationList) {
+      if (mutation.type === 'childList') {
+        // console.info('A child node has been added or removed.');
+        Array.from(mutation.addedNodes).forEach(node => {
+          // console.log(node.nodeName);
+          if (node.nodeName !== '#text') {
+            if (node.hasAttribute('data-fn')) node.addEventListener('click', app[node.dataset.fn]);
+            if (node.hasChildNodes()) {
+              node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+            }
+          }
+        });
+      } else if (mutation.type === 'attributes') {
+        // console.log(`The ${mutation.attributeName} attribute was modified.`);
+        // console.log(mutation.target);
+        if (mutation.target.hasChildNodes()) {
+          mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+        }
+      }
+    }
+  };
+  // Create an observer instance linked to the callback function
+  const observerList = new MutationObserver(callback);
+  // Start observing the target node for configured mutations
+  // observerList.observe(targetNode, config);
+  console.log(document.getElementById('body'));
+  observerList.observe(document.getElementById('body'), config);
 
   app.getDBObjects = async () => {
     // promise.all, recupero tutti gli elementi presenti sul DB (dimensioni, cubi, filtri, ecc...)
@@ -70,45 +104,43 @@ var Storage = new SheetStorages();
     }
   }
 
-  app.getFilters = (dt, wbToken) => {
+  app.getFilters = (wbToken) => {
     // lista di tutti gli sheet del workbook in ciclo
     for (const [token, filter] of Object.entries(Storage.getFilters(wbToken))) {
-      const contentDD = app.tmplDD.content.cloneNode(true);
-      const dd = contentDD.querySelector('dd');
-      const divDD = contentDD.querySelector('div');
-      const span = divDD.querySelector('span[data-value]');
-      const btnUpload = divDD.querySelector('button[data-upload]');
-      const btnDelete = divDD.querySelector('button[data-delete]');
-      dd.dataset.label = filter.name;
-      dd.dataset.elementSearch = 'filter';
-      dd.id = token;
+      const content_li = app.tmpl_li.content.cloneNode(true);
+      const li = content_li.querySelector('li');
+      const span = li.querySelector('span[data-value]');
+      const btnUpload = li.querySelector('button[data-upload]');
+      const btnDelete = li.querySelector('button[data-delete]');
+      li.dataset.label = filter.name;
+      li.dataset.elementSearch = 'filter';
+      li.id = token;
       span.dataset.value = filter.name;
       span.innerText = filter.name;
       btnUpload.dataset.token = token;
       btnUpload.dataset.upload = 'filter';
       btnDelete.dataset.token = token;
-      dt.appendChild(dd);
+      app.ulElements.appendChild(li);
     }
   }
 
-  app.getMetrics = (dt, wbToken) => {
+  app.getMetrics = (wbToken) => {
     // lista di tutti gli sheet del workbook in ciclo
     for (const [token, metric] of Object.entries(Storage.getMetrics(wbToken))) {
-      const contentDD = app.tmplDD.content.cloneNode(true);
-      const dd = contentDD.querySelector('dd');
-      const divDD = contentDD.querySelector('div');
-      const span = divDD.querySelector('span[data-value]');
-      const btnUpload = divDD.querySelector('button[data-upload]');
-      const btnDelete = divDD.querySelector('button[data-delete]');
-      dd.dataset.label = metric.alias;
-      dd.dataset.elementSearch = 'metric';
-      dd.id = token;
+      const content_li = app.tmpl_li.content.cloneNode(true);
+      const li = content_li.querySelector('li');
+      const span = li.querySelector('span[data-value]');
+      const btnUpload = li.querySelector('button[data-upload]');
+      const btnDelete = li.querySelector('button[data-delete]');
+      li.dataset.label = metric.alias;
+      li.dataset.elementSearch = 'metric';
+      li.id = token;
       span.dataset.value = metric.alias;
       span.innerText = metric.alias;
       btnUpload.dataset.token = token;
       btnUpload.dataset.upload = 'metric';
       btnDelete.dataset.token = token;
-      dt.appendChild(dd);
+      app.ulElements.appendChild(li);
     }
   }
 
@@ -116,36 +148,42 @@ var Storage = new SheetStorages();
     const workBooks = Storage.workBooks();
     console.log(workBooks);
     for (const [token, object] of Object.entries(workBooks)) {
-      const contentDT = app.tmplDT.content.cloneNode(true);
-      const dt = contentDT.querySelector('dt');
-      const div = contentDT.querySelector('div');
-      const span = div.querySelector('span[data-value]');
-      const btnUpload = div.querySelector('button[data-upload]');
-      const btnDelete = div.querySelector('button[data-delete]');
+      const content_li = app.tmpl_li.content.cloneNode(true);
+      const li = content_li.querySelector('li');
+      const span = li.querySelector('span[data-value]');
+      const btnUpload = li.querySelector('button[data-upload]');
+      const btnDelete = li.querySelector('button[data-delete]');
       // li.dataset.fn = "handlerTable";
-      dt.dataset.label = object.name;
+      li.dataset.label = object.name;
       // li.dataset.schema = schema;
-      dt.dataset.elementSearch = 'objects';
-      dt.id = token;
+      li.dataset.elementSearch = 'workbooks';
+      li.id = token;
       span.dataset.value = object.name;
       span.innerText = object.name;
       btnUpload.dataset.token = token;
       btnDelete.dataset.token = token;
-      app.dlLocalObjects.appendChild(dt);
-      app.getSheets(dt, token);
-      app.getFilters(dt, token);
-      app.getMetrics(dt, token);
+      app.ulWorkBooks.appendChild(li);
+      // app.getSheets(dt, token);
+      // app.getFilters(dt, token);
+      // app.getMetrics(dt, token);
     }
   }
 
   app.init = () => {
-    debugger;
     // scarico elenco oggetti dal DB (WorkBooks, WorkSheets e Sheets)
-    // app.getDBObjects();
     // visualizzo oggetti locali (da qui possono essere salvati su DB)
     // reset list
-    app.dlLocalObjects.querySelectorAll('dt').forEach(dt => dt.remove());
+    app.ulWorkBooks.querySelectorAll('li').forEach(li => li.remove());
     app.getLocalObjects();
+  }
+
+  app.selectObject = (e) => {
+    console.log('object selected ', e.currentTarget.dataset.label, e.currentTarget.id);
+    // reset
+    app.ulElements.querySelectorAll('li').forEach(li => li.remove());
+    // TODO: visualizzo tutti gli elementi del workbook selezionato e il dettaglio di questo workbook
+    app.getFilters(e.currentTarget.id);
+    app.getMetrics(e.currentTarget.id);
   }
 
   app.uploadObject = async (e) => {
@@ -673,35 +711,4 @@ var Storage = new SheetStorages();
     }
   }); */
 
-  const config = { attributes: true, childList: true, subtree: true };
-
-  const callback = (mutationList, observer) => {
-    // console.log(mutationList, observer);
-    for (const mutation of mutationList) {
-      if (mutation.type === 'childList') {
-        // console.info('A child node has been added or removed.');
-        Array.from(mutation.addedNodes).forEach(node => {
-          // console.log(node.nodeName);
-          if (node.nodeName !== '#text') {
-            if (node.hasAttribute('data-fn')) node.addEventListener('click', app[node.dataset.fn]);
-            if (node.hasChildNodes()) {
-              node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
-            }
-          }
-        });
-      } else if (mutation.type === 'attributes') {
-        // console.log(`The ${mutation.attributeName} attribute was modified.`);
-        // console.log(mutation.target);
-        if (mutation.target.hasChildNodes()) {
-          mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
-        }
-      }
-    }
-  };
-  // Create an observer instance linked to the callback function
-  const observerList = new MutationObserver(callback);
-  // Start observing the target node for configured mutations
-  // observerList.observe(targetNode, config);
-  console.log(document.getElementById('body'));
-  observerList.observe(document.getElementById('body'), config);
 })();

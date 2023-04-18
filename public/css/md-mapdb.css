@@ -44,15 +44,6 @@ main > #container{
   transition: all 500ms;
 }
 
-#content > #body{
-  font-size: .9rem;
-  margin: 0 auto;
-  margin-bottom: 64px;
-  color: #3f3f40;
-  padding: 1em 1em 0em;
-  height: calc(100% - 64px);
-}
-
 .wrapper-step{
   display: grid;
   grid-template-rows: 65% 1fr;
