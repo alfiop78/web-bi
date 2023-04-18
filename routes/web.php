@@ -172,6 +172,7 @@ Route::post('/fetch_api/dimension/time', function () {
 })->name('web_bi.schedule_report'); */
 
 Route::get('/curl/process/{token}/schedule', function ($token) {
+  // TODO: molto probabilmente converrà spostare la function di questa Route in MapDatabaseController
   $map = new MapDatabaseController();
   // interrogo la tabella bi_processes per recuperare il json_value relativo al report indicato nel token
   // $json_sheet = BIsheet::where("token", "=", $token)->first('json_value');
