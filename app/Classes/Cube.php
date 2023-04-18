@@ -785,7 +785,7 @@ class Cube
 
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
     // TODO: eliminare la tabella temporanea come fatto per baseTable
-    // dd($sql);
+    dd($sql);
     if ($mode === 'sql') {
       $result = $sql;
     } else {
@@ -830,7 +830,7 @@ class Cube
     $comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($metrics)) . "\n*/\n";
 
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
-    // dd($sql);
+    // var_dump($sql);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
     if ($mode === 'sql') {
       $result = $sql;

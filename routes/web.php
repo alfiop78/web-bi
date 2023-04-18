@@ -217,13 +217,19 @@ Route::get('/curl/process/{token}/schedule', function ($token) {
   }
   // metriche avanzate
   if (property_exists($json_sheet, 'advMetrics')) {
+    $timingFunctions = ['last-year', 'last-month', 'ecc..'];
     foreach ($json_sheet->{'advMetrics'} as $token => $object) {
       // recupero la metrica avanzata dal DB
       $json_advanced_measures = json_decode(BImetric::where("token", "=", $token)->first('json_value')->{'json_value'});
       // recupero i filtri contenuti all'interno della metrica avanzata in ciclo
       $json_filters_metric = (object)[];
       foreach ($json_advanced_measures->{'filters'} as $filterToken) {
-        $json_filters_metric->$filterToken = json_decode(BIfilter::where("token", "=", $filterToken)->first('json_value')->{'json_value'});
+        // se il filtro è un timingFn recupero la definizione $object-timingFn che si trova all'interno della metrica
+        if (in_array($filterToken, $timingFunctions)) {
+          $json_filters_metric->$filterToken = $json_advanced_measures->timingFn->$filterToken;
+        } else {
+          $json_filters_metric->$filterToken = json_decode(BIfilter::where("token", "=", $filterToken)->first('json_value')->{'json_value'});
+        }
       }
       $advancedMeasures->$token = (object)[
         "alias" => $object->alias,
@@ -251,7 +257,7 @@ Route::get('/curl/process/{token}/schedule', function ($token) {
   if (count(get_object_vars($metrics)) !== 0) $process->metrics = $metrics;
   if (count(get_object_vars($advancedMeasures)) !== 0) $process->advancedMeasures = $advancedMeasures;
   if (count(get_object_vars($compositeMeasures)) !== 0) $process->compositeMeasures = $compositeMeasures;
-  // var_dump($process);
+  // var_dump($process->advancedMeasures);
   // exit;
   return $map->sheetCurlProcess($process);
 })->name('web_bi.schedule_report');
