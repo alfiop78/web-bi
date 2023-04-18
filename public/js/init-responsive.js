@@ -1042,10 +1042,15 @@ var Sheet;
           });
           // aggiungo i filtri definiti all'interno della metrica avanzata
           WorkBook.metrics.get(token).filters.forEach(filterToken => {
-            // se, nei filtri della metrica, sono presenti filtri di funzioni temprali, le aggiungo qui
-            advancedMetrics.get(token).filters[filterToken] = WorkBook.filters.get(filterToken);
+            // se, nei filtri della metrica, sono presenti filtri di funzioni temporali,
+            // ...la definizione del filtro và recuperata da WorkBook.metrics.timingFn
+            if (['last-year', 'last-month', 'ecc...'].includes(filterToken)) {
+              advancedMetrics.get(token).filters[filterToken] = WorkBook.metrics.get(token).timingFn[filterToken];
+            } else {
+              advancedMetrics.get(token).filters[filterToken] = WorkBook.filters.get(filterToken);
+            }
           });
-
+          debugger;
           break;
         default:
           // basic
@@ -1081,7 +1086,7 @@ var Sheet;
     // lo Sheet.id può essere già presente quando è stato aperto
     if (!Sheet.id) Sheet.id = Date.now();
     process.id = Sheet.id;
-    console.log(process);
+    // console.log(process);
     debugger;
     app.saveSheet();
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
@@ -2004,16 +2009,26 @@ var Sheet;
     // const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
     let filters = new Set();
+    let timingFunctions = {};
     const baseMetric = WorkBook.metrics.get(e.target.dataset.token);
     // WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
     const aggregateFn = app.dialogMetric.querySelector('.formula > code[data-aggregate]').innerText;
+    // TODO: aggiungere opzione 'distinct'.
+    let object = {
+      token,
+      alias,
+      field: baseMetric.field,
+      aggregateFn,
+      SQL: baseMetric.SQL,
+      distinct: false,
+      type: 'metric',
+      metric_type: 'basic', // default: se ci sono dei filtri (o timingFn) in questa metrica verrà sovrascritto in 'advanced'
+      workbook_ref: WorkBook.workBook.token
+    };
     // const aggregateFn = app.dialogMetric.querySelector('.formula > code[data-aggregate]').dataset.aggregate;
     // recupero tutti i filtri droppati in #filter-drop
-    app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => {
-      // salvo solo il riferimento al filtro e non tutta la definizione del filtro
-      filters.add(filter.dataset.token);
-      // TODO: ogni filtro aggiunto nella metrica deve controllare le tabelle da includere e le sue join (come fatto per setSheet)
-    });
+    // salvo solo il riferimento al filtro e non tutta la definizione del filtro
+    app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.add(filter.dataset.token));
     // se ci sono funzioni temporali selezionate le aggiungo all'object 'filters' con token = alla funzione scelta (es.: last-year)
     if (document.querySelector('#dl-timing-functions > dt[selected]')) {
       const timingFn = document.querySelector('#dl-timing-functions > dt[selected]');
@@ -2029,7 +2044,19 @@ var Sheet;
       debugger;
       if (['last-year', 'last-month', 'ecc...'].includes(timingFn.dataset.value)) {
         const timeField = timingFn.dataset.timeField;
+        // Per questa metrica è stata aggiunta una timingFn.
+        // oltre ad aggiungere il token (es.: 'last-year') nel Set 'filters' devo aggiungere anche la definizione di
+        // ... questa timingFn, questo perchè la timingFn non è un filtro che 'separato' che viene salvato in storage
         filters.add(timingFn.dataset.value);
+        object.timingFn = {
+          [timingFn.dataset.value]: {
+            alias: 'WEB_BI_TIME',
+            SQL: [
+              `(MapJSONExtractor(WEB_BI_TIME.last))['${timeField}']::DATE`,
+              `TO_CHAR(${WorkBook.dateTime.tableAlias}.${WorkBook.dateTime.timeField})::DATE`
+            ]
+          }
+        };
         /* filters[timingFn.dataset.value] = {
           alias: 'WEB_BI_TIME',
           SQL: [
@@ -2039,26 +2066,9 @@ var Sheet;
         }; */
       }
     }
-    console.log(Object.keys(filters).length);
-    // TODO: se ci sono filtri la salvo in WorkBook.metrics altrimenti in WorkBook.metrics
-    let object = {
-      token,
-      alias,
-      field: baseMetric.field,
-      aggregateFn,
-      SQL: baseMetric.SQL,
-      distinct: false,
-      type: 'metric',
-      workbook_ref: WorkBook.workBook.token
-    };
     if (filters.size !== 0) {
-      // TODO: aggiungere opzione 'distinct'.
-      // TODO: probabilmente qui dovrò usare la stessa logica dei filtri, quindi non serve la tabelAlias
-      // come key e non servono due metodi (metric e metrics)
       object.filters = [...filters];
       object.metric_type = 'advanced';
-    } else {
-      object.metric_type = 'basic';
     }
     WorkBook.metrics = object;
     // salvo la nuova metrica nello storage
