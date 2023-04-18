@@ -44,6 +44,8 @@ var Sheet;
     columnsDropzone: document.getElementById('dropzone-columns'),
     rowsDropzone: document.getElementById('dropzone-rows'),
     textareaCompositeMetric: document.getElementById('textarea-composite-metric'),
+    // buttons
+    btnVersioning: document.getElementById('btn-versioning'),
 
     textAreaMetric: document.getElementById('textarea-metric')
   }
@@ -2385,5 +2387,7 @@ var Sheet;
   app.textareaCompositeMetric.addEventListener('dragover', app.textareaDragOver, false);
   app.textareaCompositeMetric.addEventListener('dragleave', app.textareaDragLeave, false);
   app.textareaCompositeMetric.addEventListener('drop', app.textareaDrop, false);
+
+  app.btnVersioning.onclick = () => window.location.href = '/versioning';
 
 })();

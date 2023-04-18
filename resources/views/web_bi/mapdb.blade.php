@@ -372,21 +372,6 @@
             </section>
           </dialog>
 
-          <dialog id="dialog-versioning" class="large">
-            <section class="dlg-grid">
-              <h5>Sincronizzazione elementi</h5>
-              <section class="dlg-content col">
-                <section>
-                  <dl id="dl-local-objects"></dl>
-                  <dl id="dl-DB-objects"></dl>
-                </section>
-              </section>
-              <section class="buttons">
-                <button name="cancel" value="chiudi">Chiudi</button>
-              </section>
-            </section>
-          </dialog>
-
           <div class="wrapper">
             <div id="window-join" class="absolute-window" data-x="0" data-y="0" data-open="false">
               <section class="wj-content">
@@ -630,7 +615,6 @@
     </svg>
   </div>
   <script type="text/javascript" src="{{ asset('/js/init-responsive.js') }}" async></script>
-  <script type="text/javascript" src="{{ asset('/js/versioning.js') }}" async></script>
 </body>
 
 </html>

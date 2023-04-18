@@ -53,6 +53,9 @@ Route::get('/', function () {
 
 Route::get('/mapping', [MapDatabaseController::class, 'mapping'])->name('web_bi.mapping'); // page mapping
 Route::get('/mapdb', [MapDatabaseController::class, 'mapdb'])->name('web_bi.mapdb');
+Route::get('/versioning', function () {
+  return view('web_bi.versioning');
+})->name('web_bi.versioning');
 
 Route::get('/report', function () {
   return view('web_bi.report');

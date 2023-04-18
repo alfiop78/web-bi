@@ -6,8 +6,6 @@ var Storage = new SheetStorages();
     // checkbox switch Locale / DB
     // btnSwitchLocalDB: document.getElementById('chk-local-db-switch'),
     // dialog
-    dialogVersioning: document.getElementById('dialog-versioning'),
-    btnOpen: document.getElementById('btn-versioning'),
     dlLocalObjects: document.getElementById('dl-local-objects'),
     tmplDT: document.getElementById('tmpl-dt'),
     tmplDD: document.getElementById('tmpl-dd'),
@@ -48,7 +46,6 @@ var Storage = new SheetStorages();
         // app.checkVersioning();
         // imposto la data di ultima sincronizzazione nello span[data-dialog-info]
         // const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false, timeZone: 'Europe/Rome' };
-        // app.dialogVersioning.querySelector('span[data-dialog-info]').innerText = new Intl.DateTimeFormat('it-IT', options).format(new Date());
       })
       .catch(err => console.error(err));
   }
@@ -141,14 +138,14 @@ var Storage = new SheetStorages();
     }
   }
 
-  app.btnOpen.onclick = () => {
+  app.init = () => {
+    debugger;
     // scarico elenco oggetti dal DB (WorkBooks, WorkSheets e Sheets)
     // app.getDBObjects();
     // visualizzo oggetti locali (da qui possono essere salvati su DB)
     // reset list
     app.dlLocalObjects.querySelectorAll('dt').forEach(dt => dt.remove());
     app.getLocalObjects();
-    app.dialogVersioning.showModal();
   }
 
   app.uploadObject = async (e) => {
@@ -177,6 +174,8 @@ var Storage = new SheetStorages();
       .catch((err) => console.error(err));
 
   }
+
+  app.init();
 
   // -------------------------
 
