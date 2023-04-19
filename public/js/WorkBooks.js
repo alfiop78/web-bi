@@ -13,7 +13,7 @@ class Sheets {
   constructor(token, WorkBookToken) {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
     this.workBookToken = WorkBookToken;
-    this.sheet = { token, type: 'Sheet', workBook_ref: WorkBookToken };
+    this.sheet = { token, type: 'sheet', workBook_ref: WorkBookToken };
   }
 
   set name(value) {
@@ -205,7 +205,7 @@ class WorkBooks {
     this.token = rand().substring(0, 7);
     console.log(this.token);
     this.title = name;
-    this.workBook = { token: this.token, type: 'WorkBook' };
+    this.workBook = { token: this.token, type: 'workbook' };
     this.schema;
   }
 
@@ -344,18 +344,6 @@ class WorkBooks {
       if (metric.metric_type === 'basic') {
         (!this.workBook.hasOwnProperty('metrics')) ? this.workBook.metrics = { [token]: metric } : this.workBook.metrics[token] = metric;
       }
-      /* switch (metric.metric_type) {
-        case 'basic':
-          (!this.workBook.hasOwnProperty('metrics')) ? this.workBook.metrics = { [token]: metric } : this.workBook.metrics[token] = metric;
-          break;
-        case 'advanced':
-          (!this.workBook.hasOwnProperty('advMetrics')) ? this.workBook.advMetrics = { [token]: metric } : this.workBook.advMetrics[token] = metric;
-          break;
-        default:
-          // compositeMetrics
-          (!this.workBook.hasOwnProperty('compositeMetrics')) ? this.workBook.compositeMetrics = { [token]: metric } : this.workBook.compositeMetrics[token] = metric;
-          break;
-      } */
     }
     console.info('WorkBook : ', this.workBook);
     WorkBookStorage.save(this.workBook);

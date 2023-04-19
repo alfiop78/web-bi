@@ -12,10 +12,39 @@
 
 .grid > .content > .body.grid-section-2 {
   display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.grid > .content > .body.grid-section-2 .objects {
+  display: grid;
   grid-template-columns: repeat(auto-fill, 340px);
   grid-auto-rows: 50%;
 }
 
 ul {
   overflow: auto;
+}
+
+/* elementi presenti in storage/DB. */
+li[data-sync="true"] {
+  color: lightskyblue;
+}
+
+li[data-sync="false"] {
+  color: dimgray;
+}
+
+/* in questo caso visualizzo solo l'icona delete, gli oggetti sono sincornizzati ed identici*/
+li[data-identical="true"] {
+  color: darkgreen;
+}
+
+li[data-identical="true"] button[data-upload],
+li[data-identical="true"] button[data-download],
+li[data-identical="true"] button[data-upgrade] {
+  visibility: hidden;
+}
+
+li[data-identical="false"] {
+  color: indianred;
 }

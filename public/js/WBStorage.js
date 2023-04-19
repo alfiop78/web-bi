@@ -39,7 +39,7 @@ class Storages {
   // tutti gli workBooks
   workBooks() {
     for (const [token, object] of Object.entries(this.storage)) {
-      if (JSON.parse(object).type === 'WorkBook') {
+      if (JSON.parse(object).type === 'workbook') {
         this.#workBooks[token] = JSON.parse(object);
       }
     }
@@ -106,6 +106,18 @@ class Storages {
       }
     }
     return metrics;
+  }
+
+  getAll() {
+    let all = {};
+    for (const [token, object] of Object.entries(this.storage)) {
+      all[token] = JSON.parse(object);
+      // if (JSON.parse(object).type === 'metric') {
+      //   metrics[token] = JSON.parse(object);
+      // }
+    }
+    return all;
+
   }
 }
 

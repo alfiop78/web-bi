@@ -3,20 +3,12 @@ var Storage = new SheetStorages();
 // var storage = new Storages();
 (() => {
   var app = {
-    // checkbox switch Locale / DB
-    // btnSwitchLocalDB: document.getElementById('chk-local-db-switch'),
-    // dialog
     ulWorkBooks: document.getElementById('ul-workbooks'),
     ulSheets: document.getElementById('ul-sheets'),
     ulFilters: document.getElementById('ul-filters'),
     ulMetrics: document.getElementById('ul-metrics'),
     btnWorkBooks: document.getElementById('workbooks'),
     tmpl_li: document.getElementById('tmpl-li'),
-
-    // template per lo status degli oggetti da versionare
-    // tmplVersioningDB: document.getElementById('versioning-db'),
-    // btnVersioningStatus: document.getElementById('btn-versioning-status'),
-    // btnVersioningProcess: document.getElementById('btn-versioning')
   }
 
   App.init();
@@ -38,7 +30,7 @@ var Storage = new SheetStorages();
           }
         });
       } else if (mutation.type === 'attributes') {
-        console.log(`The ${mutation.attributeName} attribute was modified.`);
+        // console.log(`The ${mutation.attributeName} attribute was modified.`);
         // console.log(mutation.target);
         if (mutation.target.hasChildNodes()) {
           mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
@@ -53,14 +45,48 @@ var Storage = new SheetStorages();
   console.log(document.getElementById('body'));
   observerList.observe(document.getElementById('body'), config);
 
-  app.getDBObjects = async () => {
+  app.checkObjects = (data) => {
+    for (const [type, elements] of Object.entries(data)) {
+      elements.forEach(element => {
+        const dbElement = JSON.parse(element.json_value);
+        const localElement = JSON.parse(localStorage.getItem(dbElement.token));
+        // console.log(element, element.token);
+        // verifico lo stato dell'elemento in ciclo rispetto al localStorage 
+        // (sincronizzato, non sincronizzato, ecc...)
+        const ul = document.querySelector(`ul[data-type='${type}']`);
+        let li;
+        if (ul.querySelector(`li[id='${dbElement.token}']`)) {
+          // l'elemento in ciclo (dal db) è presente anche in locale
+          li = ul.querySelector(`li[id='${dbElement.token}']`);
+          const statusIcon = li.querySelector('i[data-sync-status]');
+          li.dataset.sync = 'true';
+          // verifico se l'elemento in ciclo è "identico" all'elemento in storage
+          if (dbElement.updated_at && (localElement.updated_at === dbElement.updated_at)) {
+            // oggetti identici
+            li.dataset.identical = 'true';
+            statusIcon.innerText = "done";
+          } else {
+            // oggetti con updated_at diverse
+            // TODO: qui devo scegliere se fare un aggiornamento locale->DB oppure DB->locale
+            li.dataset.identical = 'false';
+            statusIcon.innerText = "sync_problem";
+          }
+        } else {
+          // l'elemento non è presente in locale
+          // TODO: aggiungo l'elemento alla <ul>
+        }
+      })
+    }
+  }
+
+  app.getDB = async () => {
     // promise.all, recupero tutti gli elementi presenti sul DB (dimensioni, cubi, filtri, ecc...)
     const urls = [
       //'/fetch_api/versioning/dimensions',
-      '/fetch_api/versioning/cubes',
-      //'/fetch_api/versioning/metrics',
-      //'/fetch_api/versioning/filters',
-      '/fetch_api/versioning/processes'
+      // '/fetch_api/versioning/cubes',
+      '/fetch_api/versioning/metrics',
+      '/fetch_api/versioning/filters',
+      // '/fetch_api/versioning/processes'
     ];
     // ottengo tutte le risposte in un array
     await Promise.all(urls.map(url => fetch(url)))
@@ -71,14 +97,7 @@ var Storage = new SheetStorages();
         }))
       })
       .then((data) => {
-        console.log(data);
-        debugger;
-        /* data.forEach( (elementData) => {
-          console.log('elementData : ', elementData);
-          app.createVersioningElements(elementData);
-          // controllo inverso, recupero gli elementi in locale che non sono presenti sul DB (es.: Dimensioni e cubi in fase di sviluppo)
-          app.getLocalElements(elementData);
-        }); */
+        data.forEach((elementData) => app.checkObjects(elementData));
         // dopo aver caricato tutti gli elementi nella dialog versioning, imposto il colore del tasto btnVersioningStatus in base allo status degli elementi
         // app.checkVersioning();
         // imposto la data di ultima sincronizzazione nello span[data-dialog-info]
@@ -87,104 +106,55 @@ var Storage = new SheetStorages();
       .catch(err => console.error(err));
   }
 
-  app.getSheets = () => {
-    // lista di tutti gli sheet del workbook in ciclo
-    for (const [token, sheet] of Object.entries(Storage.getSheets())) {
-      const content_li = app.tmpl_li.content.cloneNode(true);
-      const li = content_li.querySelector('li');
-      const span = li.querySelector('span[data-value]');
-      const btnUpload = li.querySelector('button[data-upload]');
-      const btnDelete = li.querySelector('button[data-delete]');
-      li.dataset.label = sheet.name;
-      li.dataset.elementSearch = 'sheet';
-      li.id = token;
-      span.dataset.value = sheet.name;
-      span.innerText = sheet.name;
-      btnUpload.dataset.token = token;
-      btnDelete.dataset.token = token;
-      app.ulSheets.appendChild(li);
+  app.addElement = (token, object) => {
+    const content_li = app.tmpl_li.content.cloneNode(true);
+    const li = content_li.querySelector('li');
+    const statusIcon = li.querySelector('i[data-sync-status]');
+    const span = li.querySelector('span[data-value]');
+    const btnUpload = li.querySelector('button[data-upload]');
+    const btnDelete = li.querySelector('button[data-delete]');
+    li.dataset.elementSearch = object.type;
+    li.id = token;
+    btnUpload.dataset.token = token;
+    btnDelete.dataset.token = token;
+    switch (object.type) {
+      case 'sheet':
+      case 'workbook':
+      case 'filter':
+        li.dataset.label = object.name;
+        span.dataset.value = object.name;
+        span.innerText = object.name;
+        break;
+      default:
+        li.dataset.label = object.alias;
+        span.dataset.value = object.alias;
+        span.innerText = object.alias;
+        break;
     }
+    btnUpload.dataset.upload = object.type;
+    document.querySelector(`#ul-${object.type}`).appendChild(li);
   }
 
-  app.getFilters = () => {
+  app.getLocal = () => {
     // lista di tutti gli sheet del workbook in ciclo
-    for (const [token, filter] of Object.entries(Storage.getFilters())) {
-      const content_li = app.tmpl_li.content.cloneNode(true);
-      const li = content_li.querySelector('li');
-      const span = li.querySelector('span[data-value]');
-      const btnUpload = li.querySelector('button[data-upload]');
-      const btnDelete = li.querySelector('button[data-delete]');
-      li.dataset.label = filter.name;
-      li.dataset.elementSearch = 'filter';
-      li.id = token;
-      span.dataset.value = filter.name;
-      span.innerText = filter.name;
-      btnUpload.dataset.token = token;
-      btnUpload.dataset.upload = 'filter';
-      btnDelete.dataset.token = token;
-      app.ulFilters.appendChild(li);
-    }
-  }
-
-  app.getMetrics = () => {
-    // lista di tutti gli sheet del workbook in ciclo
-    for (const [token, metric] of Object.entries(Storage.getMetrics())) {
-      const content_li = app.tmpl_li.content.cloneNode(true);
-      const li = content_li.querySelector('li');
-      const span = li.querySelector('span[data-value]');
-      const btnUpload = li.querySelector('button[data-upload]');
-      const btnDelete = li.querySelector('button[data-delete]');
-      li.dataset.label = metric.alias;
-      li.dataset.elementSearch = 'metric';
-      li.id = token;
-      span.dataset.value = metric.alias;
-      span.innerText = metric.alias;
-      btnUpload.dataset.token = token;
-      btnUpload.dataset.upload = 'metric';
-      btnDelete.dataset.token = token;
-      app.ulMetrics.appendChild(li);
-    }
-  }
-
-  app.getWorkBooks = () => {
-    const workBooks = Storage.workBooks();
-    console.log(workBooks);
-    for (const [token, object] of Object.entries(workBooks)) {
-      const content_li = app.tmpl_li.content.cloneNode(true);
-      const li = content_li.querySelector('li');
-      const span = li.querySelector('span[data-value]');
-      const btnUpload = li.querySelector('button[data-upload]');
-      const btnDelete = li.querySelector('button[data-delete]');
-      // li.dataset.fn = "handlerTable";
-      li.dataset.label = object.name;
-      // li.dataset.schema = schema;
-      li.dataset.elementSearch = 'workbooks';
-      li.id = token;
-      span.dataset.value = object.name;
-      span.innerText = object.name;
-      btnUpload.dataset.token = token;
-      btnDelete.dataset.token = token;
-      app.ulWorkBooks.appendChild(li);
+    for (const [token, object] of Object.entries(Storage.getAll())) {
+      app.addElement(token, object);
     }
   }
 
   app.init = () => {
     // scarico elenco oggetti dal DB (WorkBooks, WorkSheets e Sheets)
     // visualizzo oggetti locali (da qui possono essere salvati su DB)
-    // reset list
-    // app.ulWorkBooks.querySelectorAll('li').forEach(li => li.remove());
     // imposto data-fn sugli elementi di ul-objects
-    document.querySelector('#ul-objects').dataset.init = 'true';
+    document.querySelector('menu').dataset.init = 'true';
     // recupero tutti gli elementi in localStorage per inserirli nelle rispettive <ul> impostate in hidden
-    app.getWorkBooks();
-    app.getSheets();
-    app.getFilters();
-    app.getMetrics();
-    // app.getDBObjects();
+    app.getLocal();
+    app.getDB();
   }
 
   app.selectObject = (e) => {
-    console.log('object selected ', e.currentTarget.id);
+    document.querySelectorAll('menu button[data-selected]').forEach(button => delete button.dataset.selected);
+    e.target.dataset.selected = 'true';
     // nascondo la <ul> attualmente visibile
     document.querySelector('ul.elements:not([hidden])').hidden = true;
     // visualizzo la <ul> corrispondente all'object selezionato

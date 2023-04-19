@@ -23,13 +23,15 @@
 <body class="antialiased">
 
   <template id="tmpl-li">
-    <li data-li data-fn="selectObject" data-element-search data-label data-searchable="true">
+    <li data-li data-element-search data-label data-searchable="true" data-sync="false">
       <span class="li-content">
-        <!-- <i class="material-icons-round md-18">drag_handle</i> -->
+        <i class="material-icons-round md-18" data-sync-status>storage</i>
         <span data-value></span>
       </span>
-      <button data-fn="uploadObject" data-upload="workbook" class="button-icons material-icons-round md-18">edit</button>
-      <button data-fn="deleteObject" data-delete="workbook" class="button-icons material-icons-round md-18">remove</button>
+      <button data-fn="uploadObject" data-upload class="button-icons material-icons-round md-18">upload</button>
+      <button data-fn="downloadObject" data-download class="button-icons material-icons-round md-18">download</button>
+      <button data-fn="upgradeObject" data-upgrade class="button-icons material-icons-round md-18">remove</button>
+      <button data-fn="deleteObject" data-delete class="button-icons material-icons-round md-18">delete</button>
     </li>
   </template>
 
@@ -68,17 +70,23 @@
                     <h5>Sincronizzazione elementi</h5>
                   </div>
                   <div class="body grid-section-2">
-                    <ul id="ul-objects">
-                      <li id="workbooks" data-fn="selectObject" selected>WorkBooks</li>
-                      <li id="sheets" data-fn="selectObject">Sheets</li>
-                      <li id="metrics" data-fn="selectObject">Metriche</li>
-                      <li id="filters" data-fn="selectObject">Filtri</li>
-                    </ul>
-                    <ul class="elements" id="ul-workbooks"></ul>
-                    <ul class="elements" id="ul-sheets" hidden></ul>
-                    <ul class="elements" id="ul-metrics" hidden></ul>
-                    <ul class="elements" id="ul-filters" hidden></ul>
-                    <section class="element-detail">dettaglio dell'elemento selezionato</section>
+                    <menu>
+                      <button id="workbook" data-fn="selectObject" data-selected="true">WorkBooks</button>
+                      <button id="sheet" data-fn="selectObject">Sheets</button>
+                      <button id="metric" data-fn="selectObject">Metriche</button>
+                      <button id="filter" data-fn="selectObject">Filtri</button>
+                    </menu>
+                    <div class="objects">
+                      <ul class="elements" id="ul-workbook"></ul>
+                      <ul class="elements" id="ul-sheet" hidden></ul>
+                      <ul class="elements" id="ul-metric" data-type="metrics" hidden></ul>
+                      <ul class="elements" id="ul-filter" data-type="filters" hidden></ul>
+                      <!-- <ul class="elements" id="ul-db-workbook"></ul>
+                      <ul class="elements" id="ul-db-sheet" hidden></ul>
+                      <ul class="elements" id="ul-db-metric" hidden></ul>
+                      <ul class="elements" id="ul-db-filter" hidden></ul> -->
+                      <!-- <section class="element-detail">dettaglio dell'elemento selezionato</section> -->
+                    </div>
                   </div>
                   <div class="footer">
                     <!-- <button name="cancel" value="chiudi">Chiudi</button> -->

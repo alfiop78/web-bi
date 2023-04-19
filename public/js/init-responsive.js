@@ -51,6 +51,7 @@ var Sheet;
   }
 
   const rand = () => Math.random(0).toString(36).substring(2);
+  const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
 
   App.init();
 
@@ -1210,7 +1211,8 @@ var Sheet;
     const name = document.getElementById('custom-filter-name').value;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
-    let object = { token, name, tables: new Set(), sql: [], from: new Map(), joins: {}, type: 'filter', workbook_ref: WorkBook.workBook.token };
+    const date = new Date().toLocaleDateString('it-IT', options);
+    let object = { token, name, tables: new Set(), sql: [], from: new Map(), joins: {}, type: 'filter', workbook_ref: WorkBook.workBook.token, created_at: date, updated_at: date };
     const textarea = document.getElementById('textarea-filter');
     document.querySelectorAll('#textarea-filter *').forEach(element => {
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
