@@ -68,8 +68,17 @@
                     <h5>Sincronizzazione elementi</h5>
                   </div>
                   <div class="body grid-section-2">
-                    <ul id="ul-workbooks"></ul>
-                    <ul id="ul-elements"></ul>
+                    <ul id="ul-objects">
+                      <li id="workbooks" data-fn="selectObject" selected>WorkBooks</li>
+                      <li id="sheets" data-fn="selectObject">Sheets</li>
+                      <li id="metrics" data-fn="selectObject">Metriche</li>
+                      <li id="filters" data-fn="selectObject">Filtri</li>
+                    </ul>
+                    <ul class="elements" id="ul-workbooks"></ul>
+                    <ul class="elements" id="ul-sheets" hidden></ul>
+                    <ul class="elements" id="ul-metrics" hidden></ul>
+                    <ul class="elements" id="ul-filters" hidden></ul>
+                    <section class="element-detail">dettaglio dell'elemento selezionato</section>
                   </div>
                   <div class="footer">
                     <!-- <button name="cancel" value="chiudi">Chiudi</button> -->

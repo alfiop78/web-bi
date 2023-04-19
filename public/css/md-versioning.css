@@ -12,5 +12,10 @@
 
 .grid > .content > .body.grid-section-2 {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: repeat(auto-fill, 340px);
+  grid-auto-rows: 50%;
+}
+
+ul {
+  overflow: auto;
 }

@@ -68,7 +68,7 @@ class Storages {
     return JSON.parse(window.sessionStorage.getItem(table));
   }
 
-  getFilters(workBookToken) {
+  /* getFilters(workBookToken) {
     let filters = {};
     for (const [token, object] of Object.entries(this.storage)) {
       if (JSON.parse(object).type === 'filter' && JSON.parse(object).workbook_ref === workBookToken) {
@@ -76,12 +76,32 @@ class Storages {
       }
     }
     return filters;
+  } */
+
+  getFilters() {
+    let filters = {};
+    for (const [token, object] of Object.entries(this.storage)) {
+      if (JSON.parse(object).type === 'filter') {
+        filters[token] = JSON.parse(object);
+      }
+    }
+    return filters;
   }
 
-  getMetrics(workBookToken) {
+  /* getMetrics(workBookToken) {
     let metrics = {};
     for (const [token, object] of Object.entries(this.storage)) {
       if (JSON.parse(object).type === 'metric' && JSON.parse(object).workbook_ref === workBookToken) {
+        metrics[token] = JSON.parse(object);
+      }
+    }
+    return metrics;
+  } */
+
+  getMetrics() {
+    let metrics = {};
+    for (const [token, object] of Object.entries(this.storage)) {
+      if (JSON.parse(object).type === 'metric') {
         metrics[token] = JSON.parse(object);
       }
     }
@@ -113,7 +133,7 @@ class SheetStorages extends Storages {
     return this.#sheets;
   }
 
-  getSheets(workBookToken) {
+  /* getSheets(workBookToken) {
     let sheets = {};
     for (const [token, object] of Object.entries(this.storage)) {
       if (JSON.parse(object).type === 'Sheet' && JSON.parse(object).workBook_ref === workBookToken) {
@@ -121,7 +141,17 @@ class SheetStorages extends Storages {
       }
     }
     return sheets;
-  }
+  } */
 
+  // recupero tutti gli sheets
+  getSheets() {
+    let sheets = {};
+    for (const [token, object] of Object.entries(this.storage)) {
+      if (JSON.parse(object).type === 'Sheet') {
+        sheets[token] = JSON.parse(object);
+      }
+    }
+    return sheets;
+  }
 
 }

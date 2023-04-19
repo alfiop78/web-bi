@@ -7,7 +7,10 @@ var Storage = new SheetStorages();
     // btnSwitchLocalDB: document.getElementById('chk-local-db-switch'),
     // dialog
     ulWorkBooks: document.getElementById('ul-workbooks'),
-    ulElements: document.getElementById('ul-elements'),
+    ulSheets: document.getElementById('ul-sheets'),
+    ulFilters: document.getElementById('ul-filters'),
+    ulMetrics: document.getElementById('ul-metrics'),
+    btnWorkBooks: document.getElementById('workbooks'),
     tmpl_li: document.getElementById('tmpl-li'),
 
     // template per lo status degli oggetti da versionare
@@ -35,7 +38,7 @@ var Storage = new SheetStorages();
           }
         });
       } else if (mutation.type === 'attributes') {
-        // console.log(`The ${mutation.attributeName} attribute was modified.`);
+        console.log(`The ${mutation.attributeName} attribute was modified.`);
         // console.log(mutation.target);
         if (mutation.target.hasChildNodes()) {
           mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
@@ -84,29 +87,28 @@ var Storage = new SheetStorages();
       .catch(err => console.error(err));
   }
 
-  app.getSheets = (dt, wbToken) => {
+  app.getSheets = () => {
     // lista di tutti gli sheet del workbook in ciclo
-    for (const [token, sheet] of Object.entries(Storage.getSheets(wbToken))) {
-      const contentDD = app.tmplDD.content.cloneNode(true);
-      const dd = contentDD.querySelector('dd');
-      const divDD = contentDD.querySelector('div');
-      const span = divDD.querySelector('span[data-value]');
-      const btnUpload = divDD.querySelector('button[data-upload]');
-      const btnDelete = divDD.querySelector('button[data-delete]');
-      dd.dataset.label = sheet.name;
-      dd.dataset.elementSearch = 'sheet';
-      dd.id = token;
+    for (const [token, sheet] of Object.entries(Storage.getSheets())) {
+      const content_li = app.tmpl_li.content.cloneNode(true);
+      const li = content_li.querySelector('li');
+      const span = li.querySelector('span[data-value]');
+      const btnUpload = li.querySelector('button[data-upload]');
+      const btnDelete = li.querySelector('button[data-delete]');
+      li.dataset.label = sheet.name;
+      li.dataset.elementSearch = 'sheet';
+      li.id = token;
       span.dataset.value = sheet.name;
       span.innerText = sheet.name;
       btnUpload.dataset.token = token;
       btnDelete.dataset.token = token;
-      dt.appendChild(dd);
+      app.ulSheets.appendChild(li);
     }
   }
 
-  app.getFilters = (wbToken) => {
+  app.getFilters = () => {
     // lista di tutti gli sheet del workbook in ciclo
-    for (const [token, filter] of Object.entries(Storage.getFilters(wbToken))) {
+    for (const [token, filter] of Object.entries(Storage.getFilters())) {
       const content_li = app.tmpl_li.content.cloneNode(true);
       const li = content_li.querySelector('li');
       const span = li.querySelector('span[data-value]');
@@ -120,13 +122,13 @@ var Storage = new SheetStorages();
       btnUpload.dataset.token = token;
       btnUpload.dataset.upload = 'filter';
       btnDelete.dataset.token = token;
-      app.ulElements.appendChild(li);
+      app.ulFilters.appendChild(li);
     }
   }
 
-  app.getMetrics = (wbToken) => {
+  app.getMetrics = () => {
     // lista di tutti gli sheet del workbook in ciclo
-    for (const [token, metric] of Object.entries(Storage.getMetrics(wbToken))) {
+    for (const [token, metric] of Object.entries(Storage.getMetrics())) {
       const content_li = app.tmpl_li.content.cloneNode(true);
       const li = content_li.querySelector('li');
       const span = li.querySelector('span[data-value]');
@@ -140,11 +142,11 @@ var Storage = new SheetStorages();
       btnUpload.dataset.token = token;
       btnUpload.dataset.upload = 'metric';
       btnDelete.dataset.token = token;
-      app.ulElements.appendChild(li);
+      app.ulMetrics.appendChild(li);
     }
   }
 
-  app.getLocalObjects = () => {
+  app.getWorkBooks = () => {
     const workBooks = Storage.workBooks();
     console.log(workBooks);
     for (const [token, object] of Object.entries(workBooks)) {
@@ -163,9 +165,6 @@ var Storage = new SheetStorages();
       btnUpload.dataset.token = token;
       btnDelete.dataset.token = token;
       app.ulWorkBooks.appendChild(li);
-      // app.getSheets(dt, token);
-      // app.getFilters(dt, token);
-      // app.getMetrics(dt, token);
     }
   }
 
@@ -173,17 +172,23 @@ var Storage = new SheetStorages();
     // scarico elenco oggetti dal DB (WorkBooks, WorkSheets e Sheets)
     // visualizzo oggetti locali (da qui possono essere salvati su DB)
     // reset list
-    app.ulWorkBooks.querySelectorAll('li').forEach(li => li.remove());
-    app.getLocalObjects();
+    // app.ulWorkBooks.querySelectorAll('li').forEach(li => li.remove());
+    // imposto data-fn sugli elementi di ul-objects
+    document.querySelector('#ul-objects').dataset.init = 'true';
+    // recupero tutti gli elementi in localStorage per inserirli nelle rispettive <ul> impostate in hidden
+    app.getWorkBooks();
+    app.getSheets();
+    app.getFilters();
+    app.getMetrics();
+    // app.getDBObjects();
   }
 
   app.selectObject = (e) => {
-    console.log('object selected ', e.currentTarget.dataset.label, e.currentTarget.id);
-    // reset
-    app.ulElements.querySelectorAll('li').forEach(li => li.remove());
-    // TODO: visualizzo tutti gli elementi del workbook selezionato e il dettaglio di questo workbook
-    app.getFilters(e.currentTarget.id);
-    app.getMetrics(e.currentTarget.id);
+    console.log('object selected ', e.currentTarget.id);
+    // nascondo la <ul> attualmente visibile
+    document.querySelector('ul.elements:not([hidden])').hidden = true;
+    // visualizzo la <ul> corrispondente all'object selezionato
+    document.querySelector(`#ul-${e.currentTarget.id}`).hidden = false;
   }
 
   app.uploadObject = async (e) => {
