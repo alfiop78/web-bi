@@ -292,7 +292,8 @@ Route::prefix('/fetch_api/versioning/')->group(function () {
 Route::prefix('/fetch_api/name/')->group(function () {
   Route::get('{token}/metric_show', [BImetricController::class, 'show']);
   Route::get('{token}/filter_show', [BIfilterController::class, 'show']);
-  // Route::get('{token}/process_show', [BIprocessController::class, 'show']);
+  Route::get('{token}/workbook_show', [BIworkbookController::class, 'show']);
+  Route::get('{token}/sheet_show', [BIsheetController::class, 'show']);
 });
 // update
 Route::prefix('/fetch_api/json/')->group(function () {

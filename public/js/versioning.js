@@ -243,6 +243,39 @@ var Storage = new SheetStorages();
       .catch((err) => console.error(err));
   }
 
+  app.downloadObject = async (e) => {
+    await fetch(`/fetch_api/name/${e.currentTarget.dataset.token}/${e.currentTarget.dataset.download}_show`)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data) {
+          console.log('data : ', JSON.parse(data.json_value));
+          console.log('ELEMENTO SCARICATO CON SUCCESSO!');
+          // lo salvo nello storage
+          Storage.save(JSON.parse(data.json_value));
+          // TODO: lo visualizzo nel DOM impostandolo come elemento sincronizzato e identico
+
+          /* const sectionElement = app.dialogVersioning.querySelector("section[data-object-name='" + name + "'][data-object-type='" + type + "']");
+          console.log('sectionElement : ', sectionElement);
+          // modifico l'icona in .vers-status impostando sync con la classe md-status al posto di md-warning
+          sectionElement.querySelector('.vers-status > button').innerText = 'sync';
+          sectionElement.querySelector('.vers-status > button').classList.replace('md-warning', 'md-status');
+          // modifico la descrizione in .vers-status-descr impostando "Sincronizzato"
+          sectionElement.querySelector('.vers-status-descr').innerText = 'Sincronizzato';
+          // nascondo l'icona btn-download e btn-upgrade-production
+          sectionElement.querySelector('.vers-actions button[data-id="btn-download"]').disabled = true;
+          sectionElement.querySelector('.vers-actions button[data-id="btn-upgrade-production"]').disabled = true; */
+
+        } else {
+          console.error("Errore nella cancellazione della risorsa!");
+        }
+      })
+      .catch((err) => console.error(err));
+  }
+
   app.init();
 
   // -------------------------

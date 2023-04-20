@@ -25,6 +25,10 @@ li{
   /* padding: 0px 1rem; */
 }
 
+li[data-li-drag] {
+  justify-content: start;
+}
+
 li[hidden] {display: none;}
 
 /* ul > li:hover{
