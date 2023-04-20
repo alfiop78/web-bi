@@ -5,15 +5,13 @@ class Sheets {
   #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #filters = new Set();
   #metrics = new Map();
-  #advMetrics = new Map();
-  #compositeMetrics = new Map();
   #joins = new Map();
   #name;
   #id;
   constructor(token, WorkBookToken) {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
     this.workBookToken = WorkBookToken;
-    this.sheet = { token, type: 'sheet', workBook_ref: WorkBookToken };
+    this.sheet = { token, type: 'sheet', workbook_ref: WorkBookToken };
   }
 
   set name(value) {
@@ -101,7 +99,7 @@ class Sheets {
     this.sheet.fields = Object.fromEntries(this.fields);
     this.sheet.from = Object.fromEntries(this.from);
     this.sheet.joins = Object.fromEntries(this.joins);
-    this.sheet.workBook_ref = this.workBookToken;
+    this.sheet.workbook_ref = this.workBookToken;
     /* WARN : verifica dei filtri del report.
       * Se non sono presenti ma sono presenti in metriche filtrate elaboro comunque il report
       * altrimenti visualizzo un AVVISO perchè l'esecuzione potrebbe essere troppo lunga
@@ -122,9 +120,6 @@ class Sheets {
           break;
       }
     }
-    // if (this.metrics.size > 0) this.sheet.metrics = Object.fromEntries(this.metrics);
-    // if (this.advMetrics.size > 0) this.sheet.advMetrics = Object.fromEntries(this.advMetrics);
-    // if (this.compositeMetrics.size > 0) this.sheet.compositeMetrics = Object.fromEntries(this.compositeMetrics);
     console.info(this.sheet);
     debugger;
     SheetStorage.save(this.sheet);
@@ -138,6 +133,8 @@ class Sheets {
     SheetStorage.sheet = this.sheet.token;
     this.name = SheetStorage.sheet.name;
     this.id = SheetStorage.sheet.id;
+    this.sheet.created_at = SheetStorage.sheet.created_at;
+    this.sheet.updated_at = SheetStorage.sheet.updated_at;
 
     for (const [token, field] of Object.entries(SheetStorage.sheet.fields)) {
       this.fields = { token, name: field };

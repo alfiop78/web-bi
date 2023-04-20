@@ -92,7 +92,7 @@ class BImetricController extends Controller
   public function update(Request $request, BImetric $bImetric)
   {
     $token = $request->collect()->get('token');
-    $name = $request->collect()->get('name');
+    $name = $request->collect()->get('alias');
     // codifico tutta la $request in json per poterla inserire nel DB 
     $json = json_encode($request->all());
     // cerco nel DB il token del PROCESS da aggiornare

@@ -180,7 +180,7 @@ Route::get('/curl/process/{token}/schedule', function ($token) {
   // interrogo la tabella bi_processes per recuperare il json_value relativo al report indicato nel token
   // $json_sheet = BIsheet::where("token", "=", $token)->first('json_value');
   $json_sheet = json_decode(BIsheet::where("token", "=", $token)->first('json_value')->{'json_value'});
-  $json_workbook = json_decode(BIworkbook::where("token", "=", $json_sheet->{'workBook_ref'})->first('json_value')->{'json_value'});
+  $json_workbook = json_decode(BIworkbook::where("token", "=", $json_sheet->{'workbook_ref'})->first('json_value')->{'json_value'});
   // creo l'object 'process' da inviare a MapDatabaseController -> sheetCurlProcess()
   $process = (object)[
     "id" => $json_sheet->{'id'},
@@ -268,21 +268,17 @@ Route::get('/curl/process/{token}/schedule', function ($token) {
 
 // store json
 Route::prefix('/fetch_api/json/')->group(function () {
-  // Route::post('/dimension_store', [BIdimensionController::class, 'store']);
-  // Route::post('/cube_store', [BIcubeController::class, 'store']);
   Route::post('/workbook_store', [BIworkbookController::class, 'store']);
   Route::post('/sheet_store', [BIsheetController::class, 'store']);
   Route::post('/metric_store', [BImetricController::class, 'store']);
   Route::post('/filter_store', [BIfilterController::class, 'store']);
-  // Route::post('/process_store', [BIprocessController::class, 'store']);
 });
 // destroy json
 Route::prefix('/fetch_api/name/')->group(function () {
-  // Route::get('{token}/dimension_destroy', [BIdimensionController::class, 'destroy']);
-  // Route::get('{token}/cube_destroy', [BIcubeController::class, 'destroy']);
+  Route::get('{token}/workbook_destroy', [BIworkbookController::class, 'destroy']);
+  Route::get('{token}/sheet_destroy', [BIsheetController::class, 'destroy']);
   Route::get('{token}/metric_destroy', [BImetricController::class, 'destroy']);
   Route::get('{token}/filter_destroy', [BIfilterController::class, 'destroy']);
-  // Route::get('{token}/process_destroy', [BIprocessController::class, 'destroy']);
 });
 // index
 Route::prefix('/fetch_api/versioning/')->group(function () {
@@ -300,11 +296,10 @@ Route::prefix('/fetch_api/name/')->group(function () {
 });
 // update
 Route::prefix('/fetch_api/json/')->group(function () {
-  // Route::post('/dimension_update', [BIdimensionController::class, 'update']);
-  // Route::post('/cube_update', [BIcubeController::class, 'update']);
+  Route::post('/workbook_update', [BIworkbookController::class, 'update']);
+  Route::post('/sheet_update', [BIsheetController::class, 'update']);
   Route::post('/metric_update', [BImetricController::class, 'update']);
   Route::post('/filter_update', [BIfilterController::class, 'update']);
-  // Route::post('/process_update', [BIprocessController::class, 'update']);
 });
 
 // test vertica

@@ -927,7 +927,7 @@ var Sheet;
   // apertura nuovo Sheet, viene recuperato dal localStorage
   app.sheetSelected = (e) => {
     // chiamare il metodo open() dell'oggetto Sheet e seguire la stessa logica utilizzata per workBookSelected()
-    Sheet = new Sheets(e.currentTarget.dataset.token, Sheet.sheet.workBook_ref);
+    Sheet = new Sheets(e.currentTarget.dataset.token, Sheet.sheet.workbook_ref);
     // reimposto tutte le proprietà della Classe
     Sheet.open();
     const name = document.getElementById('sheet-name');

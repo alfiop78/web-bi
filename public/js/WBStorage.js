@@ -112,9 +112,6 @@ class Storages {
     let all = {};
     for (const [token, object] of Object.entries(this.storage)) {
       all[token] = JSON.parse(object);
-      // if (JSON.parse(object).type === 'metric') {
-      //   metrics[token] = JSON.parse(object);
-      // }
     }
     return all;
 
@@ -138,7 +135,7 @@ class SheetStorages extends Storages {
 
   sheets(workBookToken) {
     for (const [token, object] of Object.entries(this.storage)) {
-      if (JSON.parse(object).type === 'Sheet' && JSON.parse(object).workBook_ref === workBookToken) {
+      if (JSON.parse(object).type === 'sheet' && JSON.parse(object).workbook_ref === workBookToken) {
         this.#sheets[token] = JSON.parse(object);
       }
     }
@@ -159,7 +156,7 @@ class SheetStorages extends Storages {
   getSheets() {
     let sheets = {};
     for (const [token, object] of Object.entries(this.storage)) {
-      if (JSON.parse(object).type === 'Sheet') {
+      if (JSON.parse(object).type === 'sheet') {
         sheets[token] = JSON.parse(object);
       }
     }

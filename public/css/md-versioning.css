@@ -35,7 +35,7 @@ ul {
   overflow: auto;
 }
 
-ul > li > .li-content{
+ul > li > .li-content, ul > li > .li-buttons{
   display: flex;
   align-items: center;
 }
