@@ -1472,8 +1472,9 @@ var Sheet;
     const parent = document.getElementById('ul-metrics');
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
+    const date = new Date().toLocaleDateString('it-IT', options);
     // let object = { token, alias, sql: [], metrics: {}, type: 'composite' };
-    let object = { token, alias, sql: [], metrics: {}, type: 'metric', metric_type: 'composite', workbook_ref: WorkBook.workBook.token };
+    let object = { token, alias, sql: [], metrics: {}, type: 'metric', metric_type: 'composite', workbook_ref: WorkBook.workBook.token, created_at: date, updated_at: date };
     document.querySelectorAll('#textarea-composite-metric *').forEach((element, index) => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
@@ -2012,6 +2013,7 @@ var Sheet;
     const parent = document.getElementById('ul-metrics');
     // const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
+    const date = new Date().toLocaleDateString('it-IT', options);
     let filters = new Set();
     let timingFunctions = {};
     const baseMetric = WorkBook.metrics.get(e.target.dataset.token);
@@ -2027,7 +2029,8 @@ var Sheet;
       distinct: false,
       type: 'metric',
       metric_type: 'basic', // default: se ci sono dei filtri (o timingFn) in questa metrica verrà sovrascritto in 'advanced'
-      workbook_ref: WorkBook.workBook.token
+      workbook_ref: WorkBook.workBook.token,
+      created_at: date, updated_at: date
     };
     // const aggregateFn = app.dialogMetric.querySelector('.formula > code[data-aggregate]').dataset.aggregate;
     // recupero tutti i filtri droppati in #filter-drop

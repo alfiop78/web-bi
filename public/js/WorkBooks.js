@@ -202,6 +202,7 @@ class WorkBooks {
   #hierTables = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   constructor(name) {
     const rand = () => Math.random(0).toString(36).substring(2);
+    this.options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
     this.token = rand().substring(0, 7);
     console.log(this.token);
     this.title = name;
@@ -329,23 +330,19 @@ class WorkBooks {
     this.workBook.joins = Object.fromEntries(this.joins);
     this.workBook.tablesMap = Object.fromEntries(this.tablesMap);
     this.workBook.dateTime = this.dateTime;
-    // this.workBook.metrics = Object.fromEntries(this.metrics);
     this.workBook.svg = {
       tables: Object.fromEntries(Draw.tables),
       lines: Object.fromEntries(Draw.joinLines),
       levelId: +Draw.svg.dataset.level
     }
-    // nell'oggetto WorkSheet andrò a memorizzare gli elementi aggiunti nel WorkSheet (es.: metriche/colonne custom)
-    // metriche avanzate sono presenti solo nello WorkSheet e non nel WorkBook
-    // if (this.filters.size !== 0) this.workBook.filters = Object.fromEntries(this.filters);
-    // if (this.advMetrics.size !== 0) this.workSheet.advMetrics = Object.fromEntries(this.advMetrics);
-    // if (this.compositeMetrics.size !== 0) this.workSheet.compositeMetrics = Object.fromEntries(this.compositeMetrics);
     for (const [token, metric] of this.metrics) {
       if (metric.metric_type === 'basic') {
         (!this.workBook.hasOwnProperty('metrics')) ? this.workBook.metrics = { [token]: metric } : this.workBook.metrics[token] = metric;
       }
     }
     console.info('WorkBook : ', this.workBook);
+    if (!this.workBook.hasOwnProperty('created_at')) this.workBook.created_at = new Date().toLocaleDateString('it-IT', this.options);
+    this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.options);
     WorkBookStorage.save(this.workBook);
   }
 
@@ -353,6 +350,8 @@ class WorkBooks {
     // TODO: ottimizzare
     // recupero dallo storage il workBook, tutte le sue proprietà le caricherò nella Classe 
     WorkBookStorage.workBook = token;
+    this.workBook.created_at = WorkBookStorage.workBook.created_at;
+    this.workBook.updated_at = WorkBookStorage.workBook.updated_at;
     // reimposto la Classe
 
     this.dateTime = WorkBookStorage.workBook.dateTime;
