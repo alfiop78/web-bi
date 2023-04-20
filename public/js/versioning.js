@@ -73,7 +73,8 @@ var Storage = new SheetStorages();
           }
         } else {
           // l'elemento non è presente in locale
-          // TODO: aggiungo l'elemento alla <ul>
+          // aggiungo l'elemento alla <ul> con attributo data-storage="db"
+          app.addElement(dbElement.token, dbElement, 'db');
         }
       })
     }
@@ -82,11 +83,10 @@ var Storage = new SheetStorages();
   app.getDB = async () => {
     // promise.all, recupero tutti gli elementi presenti sul DB (dimensioni, cubi, filtri, ecc...)
     const urls = [
-      //'/fetch_api/versioning/dimensions',
-      // '/fetch_api/versioning/cubes',
+      '/fetch_api/versioning/workbooks',
+      '/fetch_api/versioning/sheets',
       '/fetch_api/versioning/metrics',
       '/fetch_api/versioning/filters',
-      // '/fetch_api/versioning/processes'
     ];
     // ottengo tutte le risposte in un array
     await Promise.all(urls.map(url => fetch(url)))
@@ -98,22 +98,20 @@ var Storage = new SheetStorages();
       })
       .then((data) => {
         data.forEach((elementData) => app.checkObjects(elementData));
-        // dopo aver caricato tutti gli elementi nella dialog versioning, imposto il colore del tasto btnVersioningStatus in base allo status degli elementi
-        // app.checkVersioning();
-        // imposto la data di ultima sincronizzazione nello span[data-dialog-info]
-        // const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false, timeZone: 'Europe/Rome' };
       })
       .catch(err => console.error(err));
   }
 
-  app.addElement = (token, object) => {
+  app.addElement = (token, object, storage) => {
     const content_li = app.tmpl_li.content.cloneNode(true);
     const li = content_li.querySelector('li');
     const statusIcon = li.querySelector('i[data-sync-status]');
     const span = li.querySelector('span[data-value]');
+    const workBookRef = li.querySelector('span[data-workbook_ref]');
     const btnUpload = li.querySelector('button[data-upload]');
     const btnDelete = li.querySelector('button[data-delete]');
     li.dataset.elementSearch = object.type;
+    li.dataset.storage = storage;
     li.id = token;
     btnUpload.dataset.token = token;
     btnDelete.dataset.token = token;
@@ -129,6 +127,7 @@ var Storage = new SheetStorages();
         li.dataset.label = object.alias;
         span.dataset.value = object.alias;
         span.innerText = object.alias;
+        workBookRef.innerText = object.workbook_ref;
         break;
     }
     btnUpload.dataset.upload = object.type;
@@ -138,7 +137,7 @@ var Storage = new SheetStorages();
   app.getLocal = () => {
     // lista di tutti gli sheet del workbook in ciclo
     for (const [token, object] of Object.entries(Storage.getAll())) {
-      app.addElement(token, object);
+      app.addElement(token, object, 'local');
     }
   }
 

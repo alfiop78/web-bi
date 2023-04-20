@@ -24,14 +24,21 @@
 
   <template id="tmpl-li">
     <li data-li data-element-search data-label data-searchable="true" data-sync="false">
-      <span class="li-content">
+      <div class="li-content">
         <i class="material-icons-round md-18" data-sync-status>storage</i>
-        <span data-value></span>
-      </span>
-      <button data-fn="uploadObject" data-upload class="button-icons material-icons-round md-18">upload</button>
-      <button data-fn="downloadObject" data-download class="button-icons material-icons-round md-18">download</button>
-      <button data-fn="upgradeObject" data-upgrade class="button-icons material-icons-round md-18">remove</button>
-      <button data-fn="deleteObject" data-delete class="button-icons material-icons-round md-18">delete</button>
+        <div class="li-content-details">
+          <span data-value class="text-ellipsis"></span>
+          <span data-created_at></span>
+          <span data-updated_at></span>
+          <span data-workbook_ref class="sub-elements text-ellipsis"></span>
+        </div>
+      </div>
+      <div class="li-buttons">
+        <button data-fn="uploadObject" data-upload class="button-icons material-icons-round md-18">upload</button>
+        <button data-fn="downloadObject" data-download class="button-icons material-icons-round md-18">download</button>
+        <button data-fn="upgradeObject" data-upgrade class="button-icons material-icons-round md-18">upgrade</button>
+        <button data-fn="deleteObject" data-delete class="button-icons material-icons-round md-18">delete</button>
+      </div>
     </li>
   </template>
 
@@ -64,10 +71,10 @@
 
           <div class="wrapper">
             <section class="wrapper-content">
-              <section class="grid">
+              <section class="grid-layout">
                 <div class="content">
                   <div class="header">
-                    <h5>Sincronizzazione elementi</h5>
+                    <h5>Sincronizzazione risorse</h5>
                   </div>
                   <div class="body grid-section-2">
                     <menu>
@@ -77,15 +84,10 @@
                       <button id="filter" data-fn="selectObject">Filtri</button>
                     </menu>
                     <div class="objects">
-                      <ul class="elements" id="ul-workbook"></ul>
-                      <ul class="elements" id="ul-sheet" hidden></ul>
+                      <ul class="elements" id="ul-workbook" data-type="workbooks"></ul>
+                      <ul class="elements" id="ul-sheet" data-type="sheets" hidden></ul>
                       <ul class="elements" id="ul-metric" data-type="metrics" hidden></ul>
                       <ul class="elements" id="ul-filter" data-type="filters" hidden></ul>
-                      <!-- <ul class="elements" id="ul-db-workbook"></ul>
-                      <ul class="elements" id="ul-db-sheet" hidden></ul>
-                      <ul class="elements" id="ul-db-metric" hidden></ul>
-                      <ul class="elements" id="ul-db-filter" hidden></ul> -->
-                      <!-- <section class="element-detail">dettaglio dell'elemento selezionato</section> -->
                     </div>
                   </div>
                   <div class="footer">

@@ -19,7 +19,8 @@ li{
   line-height: 1.7rem;
   position: relative;
   display: flex;
-  margin: 0px 1em;
+  justify-content: space-between;
+  /* margin: 0px 1em; */
   align-items: center;
   /* padding: 0px 1rem; */
 }
@@ -138,4 +139,15 @@ dt[selected] {
   display: flex;
   align-items: center;
 
+}
+
+.text-ellipsis {
+  width: 150px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sub-elements{
+  color: gray;
 }

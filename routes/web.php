@@ -286,16 +286,14 @@ Route::prefix('/fetch_api/name/')->group(function () {
 });
 // index
 Route::prefix('/fetch_api/versioning/')->group(function () {
-  // Route::get('dimensions', [BIdimensionController::class, 'index']);
-  // Route::get('cubes', [BIcubeController::class, 'index']);
+  Route::get('workbooks', [BIworkbookController::class, 'index']);
+  Route::get('sheets', [BIsheetController::class, 'index']);
   Route::get('metrics', [BImetricController::class, 'index']);
   Route::get('filters', [BIfilterController::class, 'index']);
   // Route::get('processes', [BIprocessController::class, 'index']);
 });
 // show
 Route::prefix('/fetch_api/name/')->group(function () {
-  // Route::get('{token}/dimension_show', [BIdimensionController::class, 'show']);
-  // Route::get('{token}/cube_show', [BIcubeController::class, 'show']);
   Route::get('{token}/metric_show', [BImetricController::class, 'show']);
   Route::get('{token}/filter_show', [BIfilterController::class, 'show']);
   // Route::get('{token}/process_show', [BIprocessController::class, 'show']);
