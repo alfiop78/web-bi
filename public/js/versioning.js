@@ -276,6 +276,13 @@ var Storage = new SheetStorages();
       .catch((err) => console.error(err));
   }
 
+  app.showResource = (e) => {
+    debugger;
+    // TODO: visualizzo il dettaglio della risorsa selezionata
+    // la risorsa in locale viene recuperata dal localStorage
+    // per la risorsa su DB verrà eseguita la query tramite il Controller
+  }
+
   app.init();
 
   // -------------------------

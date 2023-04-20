@@ -24,7 +24,7 @@
 
   <template id="tmpl-li">
     <li data-li data-element-search data-label data-searchable="true" data-sync="false">
-      <div class="li-content">
+      <div class="li-content" data-fn="showResource">
         <i class="material-icons-round md-18" data-sync-status>storage</i>
         <div class="li-content-details">
           <span data-value class="text-ellipsis"></span>
@@ -88,6 +88,9 @@
                       <ul class="elements" id="ul-sheet" data-type="sheets" hidden></ul>
                       <ul class="elements" id="ul-metric" data-type="metrics" hidden></ul>
                       <ul class="elements" id="ul-filter" data-type="filters" hidden></ul>
+                      <div class="details">
+                        <section>Dettaglio risorsa</section>
+                      </div>
                     </div>
                   </div>
                   <div class="footer">
@@ -96,18 +99,6 @@
                 </div>
               </section>
             </section>
-            <!-- <section class="dlg-grid">
-              <h5>Sincronizzazione elementi</h5>
-              <section class="dlg-content col">
-                <section>
-                  <dl id="dl-local-objects"></dl>
-                  <dl id="dl-DB-objects"></dl>
-                </section>
-              </section>
-              <section class="buttons">
-                <button name="cancel" value="chiudi">Chiudi</button>
-              </section>
-            </section> -->
           </div>
         </div>
       </div>
