@@ -11,7 +11,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-icons.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-input-responsive.css') }}" />
+  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-input-responsive.css') }}" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-steps-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-preview-table.css') }}" />
@@ -487,13 +487,12 @@
                             </div>
                           </section>
                           <section class="table-preview">
+                            <menu>
+                              <input type="search" id="columns-search-id" placeholder="Ricerca colonne" />
+                            </menu>
                             <div class="table-content">
-                              <!--<table id="table-header-fixed">
-                                <thead>
-                                  <tr></tr>
-                                </thead>
-                              </table>-->
-                              <table id="preview-table">
+                              <!-- data-search-input : definisce la input che effettua la ricerca di colonne in questa tabella -->
+                              <table id="preview-table" data-search-input="columns-search-id">
                                 <thead>
                                   <tr></tr>
                                 </thead>

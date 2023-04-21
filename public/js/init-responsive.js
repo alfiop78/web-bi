@@ -55,7 +55,7 @@ var Sheet;
 
   App.init();
 
-  app.body.addEventListener('click', (e) => {
+  app.body.addEventListener('click', () => {
     if (app.contextMenuRef.hasAttribute('open')) app.contextMenuRef.toggleAttribute('open');
   });
   // la Classe Steps deve impostare alcune proprietà DOPO che viene visualizzato il body, non può essere posizionato prima di App.init();
@@ -1008,6 +1008,7 @@ var Sheet;
     // DataTable.data = await app.getPreviewTable();
     // console.log(DT.data);
     DT.draw();
+    DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
   }
 
   app.createProcess = () => {
