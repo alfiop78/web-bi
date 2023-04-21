@@ -11,7 +11,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-icons.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-input-responsive.css') }}" />
+  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-input-responsive.css') }}" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-versioning.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
@@ -28,8 +28,8 @@
         <i class="material-icons-round md-18" data-sync-status>storage</i>
         <div class="li-content-details">
           <span data-value class="text-ellipsis"></span>
-          <span data-created_at></span>
-          <span data-updated_at></span>
+          <!-- <span data-created_at></span> -->
+          <span class="sub-elements">Aggiornato : <span data-updated_at class=" sub-elements"></span></span>
           <span data-workbook_ref class="sub-elements text-ellipsis"></span>
         </div>
       </div>
@@ -50,7 +50,7 @@
       </section>
 
       <nav>
-        <a href="#" id="mdc-back">home</a>
+        <a href="{{ url('/mapdb') }}">home</a>
       </nav>
 
     </div>
@@ -82,6 +82,7 @@
                       <button id="sheet" data-fn="selectObject">Sheets</button>
                       <button id="metric" data-fn="selectObject">Metriche</button>
                       <button id="filter" data-fn="selectObject">Filtri</button>
+                      <input id="resource-search" type="search" data-element-search placeholder="Ricerca" />
                     </menu>
                     <div class="objects">
                       <ul class="elements" id="ul-workbook" data-type="workbooks"></ul>

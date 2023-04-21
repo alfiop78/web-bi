@@ -1,13 +1,7 @@
 var App = new Application();
 var Storage = new SheetStorages();
-// var storage = new Storages();
 (() => {
   var app = {
-    ulWorkBooks: document.getElementById('ul-workbooks'),
-    ulSheets: document.getElementById('ul-sheets'),
-    ulFilters: document.getElementById('ul-filters'),
-    ulMetrics: document.getElementById('ul-metrics'),
-    btnWorkBooks: document.getElementById('workbooks'),
     tmpl_li: document.getElementById('tmpl-li'),
   }
 
@@ -107,6 +101,7 @@ var Storage = new SheetStorages();
     const li = content_li.querySelector('li');
     const statusIcon = li.querySelector('i[data-sync-status]');
     const span = li.querySelector('span[data-value]');
+    const updated_at = li.querySelector('span[data-updated_at]');
     const workBookRef = li.querySelector('span[data-workbook_ref]');
     const btnDownload = li.querySelector('button[data-download]');
     const btnUpload = li.querySelector('button[data-upload]');
@@ -127,19 +122,25 @@ var Storage = new SheetStorages();
         li.dataset.label = object.name;
         span.dataset.value = object.name;
         span.innerText = object.name;
-        if (object.type === 'filter') workBookRef.innerText = object.workbook_ref;
+        if (object.hasOwnProperty('workbook_ref')) {
+          // recupero il nome del workBook a cui si riferisce la risorsa in ciclo
+          const workBook = JSON.parse(window.localStorage.getItem(object.workbook_ref)).name;
+          workBookRef.innerText = workBook;
+        }
         break;
       default:
         li.dataset.label = object.alias;
         span.dataset.value = object.alias;
         span.innerText = object.alias;
-        workBookRef.innerText = object.workbook_ref;
+        const workBook = JSON.parse(window.localStorage.getItem(object.workbook_ref)).name;
+        workBookRef.innerText = workBook;
         break;
     }
     btnUpload.dataset.upload = object.type;
     btnUpgrade.dataset.upgrade = object.type;
     btnDownload.dataset.download = object.type;
     btnDelete.dataset.delete = object.type;
+    updated_at.innerText = object.updated_at;
     document.querySelector(`#ul-${object.type}`).appendChild(li);
   }
 
@@ -167,6 +168,8 @@ var Storage = new SheetStorages();
     document.querySelector('ul.elements:not([hidden])').hidden = true;
     // visualizzo la <ul> corrispondente all'object selezionato
     document.querySelector(`#ul-${e.currentTarget.id}`).hidden = false;
+    // TODO: imposto l'attributo data-element-search nella input #resource-search
+    document.querySelector('#resource-search').dataset.elementSearch = e.target.id;
   }
 
   app.uploadObject = async (e) => {

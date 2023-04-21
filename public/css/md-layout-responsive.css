@@ -252,3 +252,7 @@ span.markContent {
   grid-template-rows: 1fr;
   padding: 1em;
 }
+
+small {
+  font-size: smaller;
+}

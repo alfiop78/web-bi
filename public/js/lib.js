@@ -2,11 +2,10 @@ window.onload = function() {
   var App = new Application();
   console.log('onload');
   // TODO: input search, non tutte le input
-  document.addEventListener('input', App.genericSearch.bind(this.App));
+  // document.addEventListener('input', App.genericSearch.bind(this.App));
   // document.addEventListener('input', App.handlerSearch);
-  document.addEventListener('input', App.initInput); // gestione della label con class="has-content"
-  document.addEventListener('input', App.inputSearch); // gestione della label con class="has-content"
-
+  // document.addEventListener('input', App.initInput); // gestione della label con class="has-content"
+  document.addEventListener('input', App.inputSearch);
   // se le input non hanno contenuto non evidenzio le label come :invalid, aggiungendo una class=has-content sulle label
   // var inputs = document.querySelectorAll("input:not([type='checkbox']):not([type='radio'])");
   /*inputs.forEach((input) => {
@@ -41,6 +40,7 @@ window.onload = function() {
     btn.onclick = () => document.querySelector('dialog[open]').close();
   });
 
+  // TODO: da eliminare perchè verranno sostituite dalle <dialog> aperte con show() anzihè showModal()
   document.querySelectorAll("button[name='cancelAbsoluteWindow']").forEach(btn => {
     btn.onclick = () => delete document.querySelector('#absolute-window').dataset.open;
   });
