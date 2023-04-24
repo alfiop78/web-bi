@@ -356,7 +356,14 @@
             <section class="dlg-grid">
               <h5>Creazione Filtro</h5>
               <section class="dlg-content col col-2">
-                <nav class="custom-scrollbar"></nav>
+                <nav class="custom-scrollbar">
+                  <section class="input-search">
+                    <div class="md-field">
+                      <input type="search" id="column-search" placeholder="ricerca" data-fn-search="searchDetails" data-element-search="columns" autocomplete="off">
+                      <label for="column-search" class="">Ricerca</label>
+                    </div>
+                  </section>
+                </nav>
                 <section class="textarea-formula">
                   <div class="md-field">
                     <input type="text" id="custom-filter-name" value="" autocomplete="off" />
@@ -444,6 +451,7 @@
                       <div id="context-menu-table" class="context-menu">
                         <ul id="ul-context-menu-table">
                           <li id="time-dimension" data-fn="handlerTimeDimension">Dimensione TIME</li>
+                          <li id="context-custom-metric" data-fn="addCustomMetric">Aggiungi metrica custom</li>
                           <li data-fn="removeTable">Rimuovi</li>
                           <li data-fn="setAliasTable">Alias tabella</li>
                           <li>item 4</li>
@@ -483,8 +491,11 @@
                               <label for="tables-search" class="">Ricerca</label>
                             </div>
                             <div class="relative-ul">
-                              <ul id="ul-tables" class="custom-scrollbar"></ul>
+                              <ul id="ul-tables" data-search-id="table-search" class="custom-scrollbar"></ul>
                             </div>
+                          </section>
+                          <section>
+                            <button id="btnSearch" class="button-icon material-icons-round md-18">search</button>
                           </section>
                           <section class="table-preview">
                             <menu>
@@ -614,6 +625,7 @@
     </svg>
   </div>
   <script type="text/javascript" src="{{ asset('/js/init-responsive.js') }}" async></script>
+  <script type="text/javascript" src="{{ asset('/js/supportFn.js') }}" async></script>
 </body>
 
 </html>

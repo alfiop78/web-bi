@@ -25,27 +25,12 @@ class Table {
   */
   columnSearch(e) {
     const value = e.target.value.toLowerCase();
-    console.log(this.ref.rows);
-    console.log(this.ref.rows[0].cells);
-    // https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableElement/rows
-    debugger;
-    // let hiddenColumns = [];
-    let test = Array.from(this.thead.querySelectorAll('th[data-field]')).filter(column => column.dataset.field.toLowerCase().indexOf(value) !== -1);
-    console.log(test);
-    // creo un array con gli elementi trovati
-    test.forEach(tt => {
-      console.log('visualizzo ', tt.getAttribute('col'));
-      this.thead.querySelectorAll('*[col]').forEach(head => {
-        head.hidden = (head.getAttribute('col') === tt.getAttribute('col')) ? false : true;
-      });
-    });
-    // console.log(test);
-    /* this.thead.querySelectorAll('th[data-field]').forEach(column => {
-      const field = column.dataset.field.toLowerCase();
-      // se la colonna non viene trovata la nascondo (con hidden = true)
-      hiddenColumns.push((field.indexOf(value) === -1) ? true : false);
-      column.hidden = (field.indexOf(value) === -1) ? true : false;
-    }); */
+    // console.log(this.ref.rows);
+    // console.log(this.ref.rows[0].cells);
+    // NOTE:https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableElement/rows
+    // TODO: da ottimizzare
+    Array.from(this.thead.querySelectorAll('th[data-field]')).filter(column => column.hidden = (column.dataset.field.toLowerCase().indexOf(value) === -1) ? true : false);
+    Array.from(this.tbody.querySelectorAll('td[data-field]')).filter(column => column.hidden = (column.dataset.field.toLowerCase().indexOf(value) === -1) ? true : false);
   }
 
   draw() {
@@ -54,7 +39,6 @@ class Table {
     this.header();
     this.tbody.querySelectorAll('tr').forEach(tr => tr.remove());
     this.addRows();
-    this.addCompositeColumn();
   }
 
   header() {
@@ -93,26 +77,6 @@ class Table {
     });
   }
 
-  addCompositeColumn() {
-    this.tr = this.thead.querySelector('tr');
-    // TODO: invece di utilizzare questa struttura potrei passare, al metodo, l'id del template HTML da utilizzare
-    const th = document.createElement('th');
-    const td = document.createElement('td');
-    const span = document.createElement('span');
-    const buttons = document.createElement('div');
-    const btnMetric = document.createElement('button');
-    th.classList.add('custom-field');
-    span.innerHTML = 'Nuovo Campo';
-    th.dataset.fn = 'setCustomField';
-    btnMetric.classList.add('button-icon', 'material-icons-round', 'md-18');
-    btnMetric.innerHTML = 'add';
-    this.tr.appendChild(th);
-    td.appendChild(span);
-    buttons.appendChild(btnMetric);
-    td.appendChild(buttons);
-    th.appendChild(td);
-  }
-
   addRows() {
     console.log('addRows');
     // TODO: provare questi metodi: https://developer.mozilla.org/en-US/docs/Web/API/HTMLTableElement/insertRow
@@ -121,9 +85,10 @@ class Table {
       this.tr = document.createElement('tr');
       this.tr.setAttribute('row', 'body');
       this.tbody.appendChild(this.tr);
-      Object.values(row).forEach((value, i) => {
+      Object.entries(row).forEach(([name, value], i) => {
         this.td = document.createElement('td');
         this.td.setAttribute('col', i);
+        this.td.dataset.field = name;
         // this.td.innerHTML = data.toUpperCase().trim()
         this.td.innerHTML = value;
         this.tr.appendChild(this.td);

@@ -692,12 +692,6 @@ var Sheet;
     app.addSpan(textarea, null, 'metric');
   }
 
-  // aggiunta di una nuova metrica
-  app.setCustomField = (e) => {
-    // TODO: apro la dialog 'dlg-custom-metric'
-    app.dialogCustomMetric.show();
-  }
-
   // dialog-metric per definire le metriche di base del WorkBook (non custom metric di base, come (przmedio*quantita))
   app.setMetric = (e) => {
     // console.log(WorkBook.activeTable);
@@ -2294,6 +2288,7 @@ var Sheet;
       details.dataset.table = value.name;
       details.dataset.alias = value.alias;
       details.dataset.id = tableId;
+      details.dataset.searchId = 'column-search';
       summary.innerHTML = value.name;
       summary.dataset.tableId = tableId;
       parent.appendChild(details);
@@ -2303,7 +2298,7 @@ var Sheet;
         const span = li.querySelector('span');
         li.dataset.label = column.COLUMN_NAME;
         li.dataset.fn = 'handlerSelectField';
-        // li.dataset.elementSearch = `${source}-fields`;
+        li.dataset.elementSearch = 'columns';
         li.dataset.tableId = tableId;
         li.dataset.table = value.name;
         li.dataset.alias = value.alias;

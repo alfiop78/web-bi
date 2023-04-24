@@ -210,13 +210,22 @@ class Application {
     }
   }
 
-  inputSearch(e) {
+  /* inputSearch(e) {
     const searchAttr = e.target.getAttribute('data-element-search');
     let li = Array.from(document.querySelectorAll(`li[data-element-search='${searchAttr}']`));
     li.forEach(item => {
       item.hidden = (item.getAttribute('data-label').indexOf(e.target.value) === -1 && item.getAttribute('data-label').toLowerCase().indexOf(e.target.value) === -1) ? true : false;
     });
+  } */
+
+  inputSearch(e) {
+    const searchAttr = e.target.getAttribute('data-element-search');
+    const id = e.target.id;
+    const value = e.target.value.toLowerCase();
+    let li = Array.from(document.querySelectorAll(`*[data-search-id='${id}'] li[data-element-search='${searchAttr}']`));
+    li.filter(item => item.hidden = (item.dataset.label.toLowerCase().indexOf(value) === -1) ? true : false);
   }
+
 
   showConsole(message, icon, time) {
     // console.log(message+icon);
