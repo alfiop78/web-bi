@@ -420,6 +420,7 @@ i[data-id="btn-set-metric"]:hover, i[data-id='btn-set-filter']:hover{
   /* grid-template-rows: repeat(auto-fill, minmax(auto,  300px)); */
   grid-template-rows: auto minmax(auto, 300px);
   grid-row-gap: 1px;
+  transition :grid-template-rows 1s;
   background-color: gainsboro;
 }
 

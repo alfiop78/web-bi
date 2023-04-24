@@ -210,14 +210,6 @@ class Application {
     }
   }
 
-  /* inputSearch(e) {
-    const searchAttr = e.target.getAttribute('data-element-search');
-    let li = Array.from(document.querySelectorAll(`li[data-element-search='${searchAttr}']`));
-    li.forEach(item => {
-      item.hidden = (item.getAttribute('data-label').indexOf(e.target.value) === -1 && item.getAttribute('data-label').toLowerCase().indexOf(e.target.value) === -1) ? true : false;
-    });
-  } */
-
   inputSearch(e) {
     const searchAttr = e.target.getAttribute('data-element-search');
     const id = e.target.id;
