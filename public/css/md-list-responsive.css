@@ -24,7 +24,7 @@ li{
   align-items: center;
   /* padding: 0px 1rem; */
   /* border-top: solid thin gainsboro; */
-  border-bottom: solid thin gainsboro;
+  /* border-bottom: solid thin gainsboro; */
 }
 
 li[data-li-drag] {

@@ -416,12 +416,32 @@ i[data-id="btn-set-metric"]:hover, i[data-id='btn-set-filter']:hover{
   height: 100%;
   width: 100%;
   display: grid;
-  /* grid-template-rows: 2fr auto auto 1fr auto; */
-  /* grid-template-rows: repeat(auto-fill, minmax(auto,  300px)); */
-  grid-template-rows: auto minmax(auto, 300px);
   grid-row-gap: 1px;
-  transition :grid-template-rows 1s;
-  background-color: gainsboro;
+  transition :grid-template-rows 250ms;
+}
+
+#workbook-objects > section[data-section] {
+  overflow: auto;
+}
+
+#workbook-objects > p {
+  margin:0px;
+  color: cadetblue;
+}
+
+#workbook-objects[data-section-active="1"] {
+  grid-template-rows: min-content 2fr min-content 4fr min-content 1fr min-content 1fr;
+}
+
+#workbook-objects[data-section-active="2"] {
+  grid-template-rows: min-content 1fr min-content 4fr min-content 2fr min-content 1fr;
+}
+
+#workbook-objects[data-section-active="3"] {
+  grid-template-rows: min-content 1fr min-content 1fr min-content 4fr min-content 2fr;
+}
+#workbook-objects[data-section-active="4"] {
+  grid-template-rows: min-content 1fr min-content 1fr min-content 2fr min-content 4fr;
 }
 
 #workbook-objects > *[data-worksheet-object] {
@@ -505,8 +525,7 @@ li:hover > i {
 }
 
 #ul-filters > li[data-filter] > .li-content {
-  background-color: darkorange;
-  color: white;
+  color: #915b1a;
   display: flex;
   align-items: center;
   width: 100%;

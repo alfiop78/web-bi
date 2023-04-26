@@ -170,7 +170,6 @@
       </span>
     </template>
 
-
     <div id="container">
       <div id="content">
         <div id="body">
@@ -531,30 +530,30 @@
                       </menu>
                       <section class="wrapper-sheet">
                         <div class="properties">
-                          <section id="workbook-objects">
-                            <section data-worksheet-object>
-                              <p>WorkBook</p>
+                          <section id="workbook-objects" data-section-active="2">
+                            <p><i><b>WorkBooks</b></i></p>
+                            <section data-worksheet-object data-section="1">
                               <li data-workbook>workbook 1</li>
                               <li data-workbook>workbook 2</li>
                             </section>
-                            <section data-worksheet-object class="custom-scrollbar">
-                              <p>Campi</p>
+                            <p><i><b>Campi</b></i></p>
+                            <section data-worksheet-object class="custom-scrollbar" data-section="2">
                               <ul id="nav-fields" class="custom-scrollbar"></ul>
                               <li class="new-worksheet-object">
                                 <i class="material-icons-round md-18 new-object">add</i>
                                 <button class="new-object" data-fn="btnColumnNew" type="button" value="Crea Colonna">Crea colonna</button>
                               </li>
                             </section>
-                            <section data-worksheet-object class="custom-scrollbar">
-                              <p>Metriche</p>
+                            <p><i><b>Metriche</b></i></p>
+                            <section data-worksheet-object class="custom-scrollbar" data-section="3">
                               <ul id="ul-metrics" class="custom-scrollbar"></ul>
                               <li class="new-worksheet-object">
                                 <i class="material-icons-round md-18 new-object">add</i>
                                 <button class="new-object" data-fn="btnCompositeMetric" type="button" value="Nuova Metrica">Nuova Metrica</button>
                               </li>
                             </section>
-                            <section data-worksheet-object class="custom-scrollbar">
-                              <p>Filtri</p>
+                            <p><i><b>Filtri</b></i></p>
+                            <section data-worksheet-object class="custom-scrollbar" data-section="4">
                               <ul id="ul-filters" class="custom-scrollbar"></ul>
                               <li class="new-worksheet-object">
                                 <i class="material-icons-round md-18 new-object">add</i>
