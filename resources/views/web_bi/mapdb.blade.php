@@ -585,11 +585,19 @@
                               <section id="dropzone-rows" class="dropzone rows"></section>
                             </section>
                           </section>
-                          <section class="report-preview">
-                            <section class="">
-                              <!--<span>report preview</span>-->
+                          <section class="table-preview">
+                            <menu>
+                              <input type="search" placeholder="Ricerca colonne" />
                               <button id="btn-sheet-preview" data-fn="createProcess" value="Elabora">Elabora</button>
-                            </section>
+                            </menu>
+                            <div class="table-content">
+                              <table id="preview-datamart">
+                                <thead>
+                                  <tr></tr>
+                                </thead>
+                                <tbody></tbody>
+                              </table>
+                            </div>
                           </section>
                         </div>
                       </section>
@@ -615,9 +623,9 @@
       <div id="controls">
         <div id="fabs">
           <!--<button id="mdc-back" class="button dense raised">home</button>
-          <button id="prev" class="button dense raised">WorkBook</button>
-          <div class="spacer"></div>
-          <button id="next" class="button dense raised">report</button>-->
+            <button id="prev" class="button dense raised">WorkBook</button>
+            <div class="spacer"></div>
+            <button id="next" class="button dense raised">report</button>-->
         </div>
       </div>
 

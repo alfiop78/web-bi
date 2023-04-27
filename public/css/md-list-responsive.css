@@ -6,11 +6,11 @@
 }
 
 ul{
-  padding-block-start: 1em;
+  padding-block-start: 0em;
   padding-inline-start: .5em;
   padding-inline-end: .5em;
   margin-block-start: unset;
-  padding-block-end: 1em;
+  padding-block-end: 0em;
   margin-block-end: unset;
 }
 

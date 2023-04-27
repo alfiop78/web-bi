@@ -11,12 +11,8 @@ use App\Http\Controllers\MapDatabaseController;
 // use App\Http\Controllers\BIdimensionController;
 use App\Http\Controllers\BIworkbookController;
 use App\Http\Controllers\BIsheetController;
-// use App\Http\Controllers\BIcubeController;
 use App\Http\Controllers\BImetricController;
 use App\Http\Controllers\BIfilterController;
-// use App\Http\Controllers\BIprocessController;
-// uso il Model BIprocess che viene utilizzato nella route curlprocess (web_bi.schedule_report)
-// use App\Models\BIprocess;
 // uso il Model BIsheet che viene utilizzato nella route curlprocess (web_bi.schedule_report)
 use App\Models\BIsheet;
 use App\Models\BIworkbook;
@@ -57,11 +53,12 @@ Route::get('/versioning', function () {
   return view('web_bi.versioning');
 })->name('web_bi.versioning');
 
+// page report
 Route::get('/report', function () {
   return view('web_bi.report');
-})->name('web_bi.report'); // page report
+})->name('web_bi.report');
 // pagina Scheduler
-Route::get('/scheduler', [MapDatabaseController::class, 'scheduler'])->name('web_bi.scheduler');
+// Route::get('/scheduler', [MapDatabaseController::class, 'scheduler'])->name('web_bi.scheduler');
 
 Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']); // recupero l'elenco dei database presenti (schema)
 Route::get('/fetch_api/schema/{schema}/tables', [MapDatabaseController::class, 'tables'])->name('web_bi.fetch_api.tables'); // recupero elenco tabelle dello schema selezionato
@@ -265,6 +262,9 @@ Route::get('/curl/process/{token}/schedule', function ($token) {
   // exit;
   return $map->sheetCurlProcess($process);
 })->name('web_bi.schedule_report');
+
+// Route per verificare se esiste il datamart dello Sheet selezionato (visualizzazione anteprima datamart)
+Route::get('/fetch_api/{id}/datamart', [MapDatabaseController::class, 'datamart'])->name('web_bi.fetch_api.datamart');
 
 // store json
 Route::prefix('/fetch_api/json/')->group(function () {

@@ -925,6 +925,27 @@ var Sheet;
     }
   }
 
+  app.sheetPreview = async (token) => {
+    console.log(token);
+    // recupero l'id dello Sheet
+    const sheet = JSON.parse(window.localStorage.getItem(token));
+    await fetch(`/fetch_api/${sheet.id}/datamart`)
+      .then((response) => {
+        console.log(response);
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(data => {
+        let DT = new Table(data, 'preview-datamart');
+        DT.draw();
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+  }
+
   // apertura nuovo Sheet, viene recuperato dal localStorage
   app.sheetSelected = (e) => {
     // chiamare il metodo open() dell'oggetto Sheet e seguire la stessa logica utilizzata per workBookSelected()
@@ -956,6 +977,9 @@ var Sheet;
       filterRef.querySelector(`li[id='${token}']`).dataset.selected = 'true';
     });
     Sheet.save();
+    // verifico se il datamart, per lo Sheet selezionato, è già presente sul DB.
+    // In caso positivo lo apro in preview-datamart.
+    app.sheetPreview(e.currentTarget.dataset.token);;
   }
 
   app.saveSheet = () => {
@@ -1092,7 +1116,6 @@ var Sheet;
     if (!Sheet.id) Sheet.id = Date.now();
     process.id = Sheet.id;
     // console.log(process);
-    debugger;
     app.saveSheet();
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(process);
@@ -1112,6 +1135,8 @@ var Sheet;
       .then((response) => {
         if (response) {
           console.log('data : ', response);
+          let DT = new Table(response, 'preview-datamart');
+          DT.draw();
         } else {
           // TODO: Da testare se il codice arriva qui o viene gestito sempre dal catch()
           console.debug('FX non è stata creata');
