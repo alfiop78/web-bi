@@ -820,6 +820,13 @@ var Sheet;
 
   /* NOTE: ONCLICK EVENTS*/
 
+  app.handlerWorkSheetSearch = (e) => {
+    // l'attributo data-id contiene l'id della input da attivare per la ricerca
+    const input = document.getElementById(e.target.dataset.id);
+    input.removeAttribute('readonly');
+    input.focus();
+  }
+
   // edit di una funzione di aggregazione sulla metrica aggiunta allo Shet
   app.editAggregate = (e) => {
     debugger;
@@ -2108,6 +2115,8 @@ var Sheet;
         const span = li.querySelector('span');
         li.id = token;
         li.dataset.type = 'column';
+        li.dataset.elementSearch = 'fields';
+        li.dataset.label = value.field.ds.field;
         // li.dataset.id = tableId;
         li.dataset.schema = value.schema;
         li.dataset.table = value.table;
@@ -2133,9 +2142,8 @@ var Sheet;
       const btnEdit = li.querySelector('i[data-id="metric-edit"]');
       li.id = token;
       li.dataset.type = value.type;
-      // li.dataset.id = tableId;
-      // li.dataset.schema = value.schema;
-      // li.dataset.table = value.workBook.table;
+      li.dataset.elementSearch = 'metrics';
+      li.dataset.label = value.alias;
       li.dataset.alias = value.alias;
       li.dataset.aggregateFn = value.aggregateFn;
       if (value.field) li.dataset.field = value.field;
@@ -2164,6 +2172,8 @@ var Sheet;
       const span = content.querySelector('span');
       const btnEdit = li.querySelector('i[data-id="metric-edit"]');
       li.id = token;
+      li.dataset.elementSearch = 'metrics';
+      li.dataset.label = value.alias;
       li.dataset.type = value.type;
       li.dataset.alias = value.alias;
       // TODO: da impostare sull'icona drag
@@ -2202,6 +2212,8 @@ var Sheet;
         const btnAdd = li.querySelector('i[data-id="filters-add"]');
         li.id = token;
         li.dataset.type = value.metric_type;
+        li.dataset.elementSearch = 'metrics';
+        li.dataset.label = value.alias;
         // li.dataset.id = tableId;
         // li.dataset.schema = value.schema;
         // li.dataset.table = value.workBook.table;
@@ -2237,6 +2249,8 @@ var Sheet;
       const span = content.querySelector('span');
       const btnEdit = li.querySelector('i[data-id="filters-edit"]');
       li.id = token;
+      li.dataset.elementSearch = 'filters';
+      li.dataset.label = value.name;
       // li.dataset.type = 'filter';
       li.dataset.field = value.field;
       li.addEventListener('click', app.addFilter);
@@ -2396,6 +2410,13 @@ var Sheet;
       subSection.addEventListener('mouseenter', (e) => {
         // console.log(section, e.target);
         section.dataset.sectionActive = e.target.dataset.section;
+      }, false);
+      subSection.addEventListener('mouseleave', () => {
+        console.log('mouseLeave');
+        // reimposto eventuali input utilizzate per la ricerca se è stato cancellato il testo al loro interno
+        section.querySelectorAll("input[type='search']").forEach(input => {
+          if (input.value.length === 0) input.setAttribute('readonly', 'true');
+        });
       }, false);
     });
   });

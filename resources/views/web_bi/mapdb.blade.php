@@ -355,10 +355,10 @@
             <section class="dlg-grid">
               <h5>Creazione Filtro</h5>
               <section class="dlg-content col col-2">
-                <nav class="custom-scrollbar">
+                <nav class="custom-scrollbar" data-search-id="input-search-columns">
                   <section class="input-search">
                     <div class="md-field">
-                      <input type="search" id="column-search" placeholder="ricerca" data-fn-search="searchDetails" data-element-search="columns" autocomplete="off">
+                      <input type="search" id="input-search-columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off" autocomplete="off">
                       <label for="column-search" class="">Ricerca</label>
                     </div>
                   </section>
@@ -531,30 +531,42 @@
                       <section class="wrapper-sheet">
                         <div class="properties">
                           <section id="workbook-objects" data-section-active="2">
-                            <p><i><b>WorkBooks</b></i></p>
+                            <p class="field-search">
+                              <input id="input-search-workbooks" data-element-search="workbooks" autocomplete="off" type="search" class="input-search" readonly placeholder="WorkBooks" />
+                              <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-workbooks">search</button>
+                            </p>
                             <section data-worksheet-object data-section="1">
                               <li data-workbook>workbook 1</li>
                               <li data-workbook>workbook 2</li>
                             </section>
-                            <p><i><b>Campi</b></i></p>
+                            <p class="field-search">
+                              <input id="input-search-fields" data-element-search="fields" autocomplete="off" type="search" class="input-search" readonly placeholder="Campi" />
+                              <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-fields">search</button>
+                            </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="2">
-                              <ul id="nav-fields" class="custom-scrollbar"></ul>
+                              <ul id="nav-fields" class="custom-scrollbar" data-search-id="input-search-fields"></ul>
                               <li class="new-worksheet-object">
                                 <i class="material-icons-round md-18 new-object">add</i>
                                 <button class="new-object" data-fn="btnColumnNew" type="button" value="Crea Colonna">Crea colonna</button>
                               </li>
                             </section>
-                            <p><i><b>Metriche</b></i></p>
+                            <p class="field-search">
+                              <input id="input-search-metrics" data-element-search="metrics" autocomplete="off" type="search" class="input-search" readonly placeholder="Metriche" />
+                              <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-metrics">search</button>
+                            </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="3">
-                              <ul id="ul-metrics" class="custom-scrollbar"></ul>
+                              <ul id="ul-metrics" class="custom-scrollbar" data-search-id="input-search-metrics"></ul>
                               <li class="new-worksheet-object">
                                 <i class="material-icons-round md-18 new-object">add</i>
                                 <button class="new-object" data-fn="btnCompositeMetric" type="button" value="Nuova Metrica">Nuova Metrica</button>
                               </li>
                             </section>
-                            <p><i><b>Filtri</b></i></p>
+                            <p class="field-search">
+                              <input id="input-search-filters" data-element-search="filters" autocomplete="off" type="search" class="input-search" readonly placeholder="Filtri" />
+                              <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-filters">search</button>
+                            </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="4">
-                              <ul id="ul-filters" class="custom-scrollbar"></ul>
+                              <ul id="ul-filters" class="custom-scrollbar" data-search-id="input-search-filters"></ul>
                               <li class="new-worksheet-object">
                                 <i class="material-icons-round md-18 new-object">add</i>
                                 <button class="new-object" data-fn="btnFilterNew" type="button" value="crea filtro">nuovo filtro</button>

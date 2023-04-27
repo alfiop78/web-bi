@@ -31,7 +31,7 @@ li[data-li-drag] {
   justify-content: start;
 }
 
-li[hidden] {display: none;}
+li[hidden] {display: none !important;}
 
 /* ul > li:hover{
   cursor: pointer;
