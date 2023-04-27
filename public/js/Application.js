@@ -212,12 +212,15 @@ class Application {
 
   inputSearch(e) {
     const searchAttr = e.target.getAttribute('data-element-search');
-    const id = e.target.id;
-    const value = e.target.value.toLowerCase();
-    // se sono presenti <details> li apro tutti
-    document.querySelectorAll(`*[data-search-id='${id}'] > details`).forEach(detail => detail.setAttribute('open', 'true'));
-    let li = Array.from(document.querySelectorAll(`*[data-search-id='${id}'] li[data-element-search='${searchAttr}']`));
-    li.filter(item => item.hidden = (item.dataset.label.toLowerCase().indexOf(value) === -1) ? true : false);
+    if (searchAttr) {
+      const id = e.target.id;
+      const value = e.target.value.toLowerCase();
+      // se sono presenti <details> li apro tutti
+      document.querySelectorAll(`*[data-search-id='${id}'] > details`).forEach(detail => detail.setAttribute('open', 'true'));
+      let li = Array.from(document.querySelectorAll(`*[data-search-id='${id}'] li[data-element-search='${searchAttr}']`));
+      li.filter(item => item.hidden = (item.dataset.label.toLowerCase().indexOf(value) === -1) ? true : false);
+
+    }
   }
 
 

@@ -42,7 +42,7 @@
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
-      <i data-id="filters-edit" class="material-icons-round md-18">edit</i>
+      <i data-id="filters-add" class="material-icons-round md-18">add</i>
     </li>
 
     <li data-li-drag data-element-search data-label data-base-metrics data-searchable="true" draggable="true">
@@ -206,10 +206,10 @@
 
           <div id="context-menu" class="context-menu">
             <ul id="ul-context-menu">
-              <li>item 1</li>
-              <li>item 2</li>
-              <li>item 3</li>
-              <li>item 4</li>
+              <li>Modifica</li>
+              <li>Elimina</li>
+              <li>Rinomina</li>
+              <li>ecc...</li>
             </ul>
           </div>
 

@@ -929,6 +929,7 @@ var Sheet;
     console.log(token);
     // recupero l'id dello Sheet
     const sheet = JSON.parse(window.localStorage.getItem(token));
+    if (!sheet.id) return false;
     await fetch(`/fetch_api/${sheet.id}/datamart`)
       .then((response) => {
         console.log(response);
@@ -1195,13 +1196,10 @@ var Sheet;
 
   // aggiungo il filtro selezionato, allo Sheet
   app.addFilter = (e) => {
-    // TODO: Implementare anche qui il drag&drop per i filtri
-    Sheet.filters = e.currentTarget.id;
-    // Sheet.filters = WorkBook.filters.get(e.currentTarget.id);
-    e.currentTarget.dataset.selected = 'true';
-    // aggiungo le tabelle all'interno del filtro a Sheet.tables
-    // WorkBook.filters.get(e.currentTarget.id).tables.forEach(table => Sheet.tables = table);
-    // app.setSheet();
+    Sheet.filters = e.currentTarget.dataset.token;
+    // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
+    const li = document.getElementById(e.currentTarget.dataset.token);
+    li.dataset.selected = 'true';
   }
 
   /* app.setFrom = (tableAlias) => {
@@ -1297,7 +1295,7 @@ var Sheet;
     const content = li.querySelector('.li-content');
     const btnDrag = content.querySelector('i');
     const span = content.querySelector('span');
-    const btnEdit = li.querySelector('i[data-id="filters-edit"]');
+    const btnAdd = li.querySelector('i[data-id="filters-add"]');
     // TODO: da valutare se usare id come token oppure il dataset.token
     li.id = token;
     li.dataset.type = 'filter';
@@ -1305,10 +1303,12 @@ var Sheet;
     li.dataset.token = token;
     li.addEventListener('dragstart', app.fieldDragStart);
     li.addEventListener('dragend', app.fieldDragEnd);
-    li.dataset.fn = "addFilter";
+    // li.dataset.fn = "addFilter";
     // li.dataset.table = value.workBook.table;
     // li.dataset.alias = value.workBook.tableAlias;
     li.dataset.field = object.name;
+    btnAdd.dataset.token = token;
+    btnAdd.addEventListener('click', app.addFilter);
     span.innerHTML = object.name;
     parent.appendChild(li);
   }
@@ -1544,7 +1544,7 @@ var Sheet;
     // TODO: da impostare sull'icona drag
     li.addEventListener('dragstart', app.fieldDragStart);
     li.addEventListener('dragend', app.fieldDragEnd);
-    li.addEventListener('contextmenu', app.contextMenuMetrics);
+    li.addEventListener('contextmenu', app.contextMenu);
     li.dataset.type = WorkBook.metrics.get(token).type;
     span.innerHTML = WorkBook.metrics.get(token).alias;
     parent.appendChild(li);
@@ -2033,6 +2033,9 @@ var Sheet;
     app.dialogMetric.show();
   }
 
+  // edit di un filtro
+  app.handlerFilter = (e) => { }
+
   // salvataggio metrica avanzataa o di base
   app.saveMetric = (e) => {
     const alias = document.getElementById('adv-metric-name').value;
@@ -2119,7 +2122,7 @@ var Sheet;
     // TODO: da impostare sull'icona drag
     li.addEventListener('dragstart', app.fieldDragStart);
     li.addEventListener('dragend', app.fieldDragEnd);
-    li.addEventListener('contextmenu', app.contextMenuMetrics);
+    li.addEventListener('contextmenu', app.contextMenu);
     // btnEdit.addEventListener('click', app.editAdvancedMetric);
     // WARN : per il momento inserisco un IF ma sarebbe meglio usare una logica di memorizzare tutti gli elementi del report in un unico oggetto Map
     if (WorkBook.metrics.has(token)) {
@@ -2215,9 +2218,11 @@ var Sheet;
     }
   }
 
-  app.contextMenuMetrics = (e) => {
+  app.contextMenu = (e) => {
     e.preventDefault();
-    console.log(e.target);
+    // console.log(e.target.id);
+    console.log(e.currentTarget.id);
+    document.querySelectorAll('#ul-context-menu > li').forEach(li => li.dataset.token = e.currentTarget.id);
     const { clientX: mouseX, clientY: mouseY } = e;
     app.contextMenuRef.style.top = `${mouseY}px`;
     app.contextMenuRef.style.left = `${mouseX}px`;
@@ -2250,7 +2255,7 @@ var Sheet;
         // TODO: gli eventi drag dovranno essere posizionati sul btnDrag, quindi anche l'attributo id
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
-        li.addEventListener('contextmenu', app.contextMenuMetrics);
+        li.addEventListener('contextmenu', app.contextMenu);
         // btnAdd.dataset.table = value.workBook.table;
         // btnAdd.dataset.alias = value.workBook.tableAlias;
         // btnAdd.dataset.field = value.field;
@@ -2272,16 +2277,19 @@ var Sheet;
       const content = li.querySelector('.li-content');
       const btnDrag = content.querySelector('i');
       const span = content.querySelector('span');
-      const btnEdit = li.querySelector('i[data-id="filters-edit"]');
+      const btnAdd = li.querySelector('i[data-id="filters-add"]');
       li.id = token;
       li.dataset.elementSearch = 'filters';
       li.dataset.label = value.name;
       // li.dataset.type = 'filter';
       li.dataset.field = value.field;
-      li.addEventListener('click', app.addFilter);
+      // li.addEventListener('click', app.addFilter);
       // TODO: eventi drag sull'icona drag
       li.addEventListener('dragstart', app.fieldDragStart);
       li.addEventListener('dragend', app.fieldDragEnd);
+      li.addEventListener('contextmenu', app.contextMenu);
+      btnAdd.dataset.token = token;
+      btnAdd.addEventListener('click', app.addFilter);
       span.innerHTML = value.name;
       parent.appendChild(li);
     }
