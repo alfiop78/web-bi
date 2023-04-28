@@ -170,6 +170,21 @@
       </span>
     </template>
 
+    <template id="tmpl-context-menu-content">
+      <ul id="ul-context-menu-filter">
+        <li data-fn="editFilter">Modifica</li>
+        <li data-fn="removeFilter">Elimina</li>
+        <li data-fn="renameFilter">Rinomina</li>
+        <li>ecc...</li>
+      </ul>
+
+      <ul id="ul-context-menu-basic-metric">
+        <li data-fn="removeMetric">Elimina</li>
+        <li data-fn="renameMetric">Rinomina</li>
+        <li>ecc...</li>
+      </ul>
+    </template>
+
     <div id="container">
       <div id="content">
         <div id="body">
@@ -204,14 +219,7 @@
 
           </dialog>
 
-          <div id="context-menu" class="context-menu">
-            <ul id="ul-context-menu">
-              <li>Modifica</li>
-              <li>Elimina</li>
-              <li>Rinomina</li>
-              <li>ecc...</li>
-            </ul>
-          </div>
+          <div id="context-menu" class="context-menu"></div>
 
           <dialog id="dialog-workbook-open">
             <section class="dlg-grid">
@@ -569,7 +577,7 @@
                               <ul id="ul-filters" class="custom-scrollbar" data-search-id="input-search-filters"></ul>
                               <li class="new-worksheet-object">
                                 <i class="material-icons-round md-18 new-object">add</i>
-                                <button class="new-object" data-fn="btnFilterNew" type="button" value="crea filtro">nuovo filtro</button>
+                                <button class="new-object" data-fn="openDialogFilter" type="button" value="crea filtro">nuovo filtro</button>
                               </li>
                             </section>
                           </section>

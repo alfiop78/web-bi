@@ -10,6 +10,7 @@ var Sheet;
     tmplList: document.getElementById('tmpl-li'),
     tmplJoin: document.getElementById('tmpl-join-field'),
     tmplDL: document.getElementById('tmpl-dl-element'),
+    tmplContextMenu: document.getElementById('tmpl-context-menu-content'),
     contextMenuRef: document.getElementById('context-menu'),
     contextMenuTableRef: document.getElementById('context-menu-table'),
     // tmplDD: document.getElementById('tmpl-dd-element'),
@@ -1151,11 +1152,12 @@ var Sheet;
       });
   }
 
-  app.btnFilterNew = async () => {
+  app.openDialogFilter = async () => {
     // creo la struttura tabelle per poter creare nuovi filtri
     let urls = [];
-    // TODO: reset della struttura già presente
+    // reset della struttura già presente
     app.dialogFilters.querySelectorAll('nav > details').forEach(element => element.remove());
+    // TODO: in ciclo serve solo il tableId
     for (const [tableId, value] of WorkBook.hierTables) {
       WorkBook.activeTable = tableId;
       urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info');
@@ -1202,6 +1204,57 @@ var Sheet;
     li.dataset.selected = 'true';
   }
 
+  /*
+    * modifica di un filtro.
+    * -inserisco il contenuto della formula nella #textarea-filter
+    * -recupero la definizione dell'elemento per reimpostare, nella textarea, la formula del filtro
+  */
+  app.editFilter = (e) => {
+    // console.log(e.target.dataset.token);
+    // il context-menu è sempre aperto in questo caso, lo chiudo
+    app.contextMenuRef.toggleAttribute('open');
+    app.openDialogFilter();
+    console.log(WorkBook.filters.get(e.target.dataset.token));
+    let filter = WorkBook.filters.get(e.target.dataset.token);
+    const txtArea = app.dialogFilters.querySelector('#textarea-filter');
+    /* 
+    *  metto in ciclo gli elementi della proprietà 'formula' del filtro.
+    *  Qui possono esserci sia campi che definiscono il <mark> sia elementi, della formula, che definiscono lo <span>
+    */
+    filter.formula.forEach(element => {
+      if (element.hasOwnProperty('field')) {
+        // determino il <mark>
+        const templateContent = app.tmplFormula.content.cloneNode(true);
+        const i = templateContent.querySelector('i');
+        i.addEventListener('click', app.cancelFormulaObject);
+        const span = templateContent.querySelector('span');
+        const mark = templateContent.querySelector('mark');
+        const small = templateContent.querySelector('small');
+        mark.dataset.tableAlias = element.table_alias;
+        mark.dataset.table = element.table;
+        mark.dataset.field = element.field;
+        mark.innerText = element.field;
+        small.innerText = element.table;
+        txtArea.appendChild(span);
+      } else {
+        const span = document.createElement('span');
+        span.dataset.check = 'filter';
+        span.setAttribute('contenteditable', 'true');
+        span.setAttribute('tabindex', 0);
+        span.innerText = element;
+        txtArea.appendChild(span);
+      }
+    });
+  }
+
+  app.removeFilter = (e) => {
+    console.log(e.target.dataset.token);
+  }
+
+  app.renameFilter = (e) => {
+    console.log(e.target.dataset.token);
+  }
+
   /* app.setFrom = (tableAlias) => {
     let from = {};
     if (WorkBook.tablesMap.has(tableAlias)) {
@@ -1237,7 +1290,7 @@ var Sheet;
     const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
-    let object = { token, name, tables: new Set(), sql: [], from: new Map(), joins: {}, type: 'filter', workbook_ref: WorkBook.workBook.token, created_at: date, updated_at: date };
+    let object = { token, name, tables: new Set(), sql: [], from: new Map(), joins: {}, type: 'filter', formula: [], workbook_ref: WorkBook.workBook.token, created_at: date, updated_at: date };
     const textarea = document.getElementById('textarea-filter');
     document.querySelectorAll('#textarea-filter *').forEach(element => {
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
@@ -1246,9 +1299,11 @@ var Sheet;
       if (element.nodeName === 'MARK') {
         // object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
         object.tables.add(element.dataset.tableAlias);
+        object.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
         object.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
         object.field = element.dataset.field;
       } else {
+        object.formula.push(element.innerText.trim());
         object.sql.push(element.innerText.trim());
       }
     });
@@ -2222,7 +2277,14 @@ var Sheet;
     e.preventDefault();
     // console.log(e.target.id);
     console.log(e.currentTarget.id);
-    document.querySelectorAll('#ul-context-menu > li').forEach(li => li.dataset.token = e.currentTarget.id);
+    // reset #context-menu
+    if (app.contextMenuRef.hasChildNodes()) app.contextMenuRef.querySelector('*').remove();
+    const tmpl = app.tmplContextMenu.content.cloneNode(true);
+    const content = tmpl.querySelector(`#${e.currentTarget.dataset.contextmenu}`);
+    // aggiungo, a tutti gli elementi del context-menu, il token dell'elemento selezionato
+    content.querySelectorAll('li').forEach(li => li.dataset.token = e.currentTarget.id);
+    app.contextMenuRef.appendChild(content);
+
     const { clientX: mouseX, clientY: mouseY } = e;
     app.contextMenuRef.style.top = `${mouseY}px`;
     app.contextMenuRef.style.left = `${mouseX}px`;
@@ -2281,6 +2343,8 @@ var Sheet;
       li.id = token;
       li.dataset.elementSearch = 'filters';
       li.dataset.label = value.name;
+      // definisco quale context-menu-template apre questo elemento
+      li.dataset.contextmenu = 'ul-context-menu-filter';
       // li.dataset.type = 'filter';
       li.dataset.field = value.field;
       // li.addEventListener('click', app.addFilter);
