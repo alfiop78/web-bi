@@ -381,7 +381,7 @@
               </section>
               <section class="buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
-                <button data-fn="saveFilter" id="btn-filter-save" value="salva">Salva</button>
+                <button data-fn="saveFilter" id="btn-filter-save" value="salva" data-mode="new">Salva</button>
               </section>
             </section>
           </dialog>

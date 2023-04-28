@@ -1217,6 +1217,12 @@ var Sheet;
     console.log(WorkBook.filters.get(e.target.dataset.token));
     let filter = WorkBook.filters.get(e.target.dataset.token);
     const txtArea = app.dialogFilters.querySelector('#textarea-filter');
+    const btnFilterSave = document.getElementById('btn-filter-save');
+    const inputName = document.getElementById('custom-filter-name');
+    inputName.value = filter.name;
+    app.dialogFilters.dataset.mode = 'edit'
+    // imposto il token sul tasto btnFilterSave, in questo modo posso salvare/aggiornare il filtro in base alla presenza o meno di data-token
+    btnFilterSave.dataset.token = e.target.dataset.token;
     /* 
     *  metto in ciclo gli elementi della proprietà 'formula' del filtro.
     *  Qui possono esserci sia campi che definiscono il <mark> sia elementi, della formula, che definiscono lo <span>
@@ -1288,7 +1294,11 @@ var Sheet;
     // l'oggetto filter lo salvo nella Classe Sheet (ex Query.js)
     const name = document.getElementById('custom-filter-name').value;
     const rand = () => Math.random(0).toString(36).substring(2);
-    const token = rand().substring(0, 7);
+    // WARN: in fase di edit NON devo modificare 'created_at' ma solo 'updated_at'
+
+    // in edit recupero il token da e.target.dataset.token
+    const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
+    // const token = rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
     let object = { token, name, tables: new Set(), sql: [], from: new Map(), joins: {}, type: 'filter', formula: [], workbook_ref: WorkBook.workBook.token, created_at: date, updated_at: date };
     const textarea = document.getElementById('textarea-filter');
@@ -1340,7 +1350,8 @@ var Sheet;
     // reset della textarea
     textarea.querySelectorAll('*').forEach(element => element.remove());
     // salvo il nuovo filtro appena creato
-    debugger;
+    // completato il salvataggio rimuovo l'attributo data-token da e.target
+    delete e.target.dataset.token;
     window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
     // aggiungo il filtro alla nav[data-filters-defined]
     // TODO: creare una fn "addFilter" in modo da utilizzarla sia qui che quanado apro il workbook (nel caricamento degli oggetti)
@@ -1358,9 +1369,6 @@ var Sheet;
     li.dataset.token = token;
     li.addEventListener('dragstart', app.fieldDragStart);
     li.addEventListener('dragend', app.fieldDragEnd);
-    // li.dataset.fn = "addFilter";
-    // li.dataset.table = value.workBook.table;
-    // li.dataset.alias = value.workBook.tableAlias;
     li.dataset.field = object.name;
     btnAdd.dataset.token = token;
     btnAdd.addEventListener('click', app.addFilter);
