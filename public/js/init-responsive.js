@@ -1289,6 +1289,7 @@ var Sheet;
     textarea.appendChild(field);
     // imposto il token sul tasto btnMetricSave, in questo modo posso salvare/aggiornare il filtro in base alla presenza o meno di data-token
     document.querySelector('#btn-metric-save').dataset.token = e.target.dataset.token;
+    document.querySelector('#btn-metric-save').dataset.edit = 'true';
     const inputName = document.getElementById('adv-metric-name');
     // reimposto le proprietà della metrica nella dialog
     inputName.value = metric.alias;
@@ -2024,7 +2025,7 @@ var Sheet;
 
   app.handlerTimingFunctions = (e) => {
     // reset di eventuali selezioni precedenti
-    document.querySelectorAll('dl-timing-functions > dt[selected]').forEach(element => element.toggleAttribute('selected'));
+    document.querySelectorAll('#dl-timing-functions > dt[selected]').forEach(element => element.toggleAttribute('selected'));
     e.target.toggleAttribute('selected');
   }
 
@@ -2139,36 +2140,33 @@ var Sheet;
     // fieldName.innerText = metric.field;
     fieldName.innerText = metric.alias;
     textarea.appendChild(field);
-    // il token presente qui lo recupero in saveMetric() per recuperare la metrica basic.
-    // la metrica di base viene utilizzata per recuperare alcune proprietà non modificabili
-    document.querySelector('#btn-metric-save').dataset.basicToken = token;
+    // il token presente qui lo recupero in saveMetric() per recuperare la metrica dal WorkBook.
+    // la metrica recuperata viene utilizzata per recuperare alcune proprietà non modificabili
+    document.querySelector('#btn-metric-save').dataset.token = token;
     app.openDialogMetric();
   }
 
   // salvataggio metrica avanzata o di base
   app.saveMetric = (e) => {
+    debugger;
     const alias = document.getElementById('adv-metric-name').value;
-    // qui aggiungerò la metrica appena creata
-    const parent = document.getElementById('ul-metrics');
-    const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
-    // const token = rand().substring(0, 7);
+    const token = (e.target.dataset.edit) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
     let filters = new Set();
-    const baseMetric = WorkBook.metrics.get(e.target.dataset.basicToken);
+    const metric = WorkBook.metrics.get(e.target.dataset.token);
     // WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
     const aggregateFn = app.dialogMetric.querySelector('.formula > code[data-aggregate]').innerText;
     // TODO: aggiungere opzione 'distinct'.
     let object = {
       token,
       alias,
-      field: baseMetric.field,
+      field: metric.field,
       aggregateFn,
-      SQL: baseMetric.SQL,
+      SQL: metric.SQL,
       distinct: false,
       type: 'metric',
       metric_type: 'basic', // default: se ci sono dei filtri (o timingFn) in questa metrica verrà sovrascritto in 'advanced'
       workbook_ref: WorkBook.workBook.token,
-      created_at: date,
       updated_at: date
     };
     // recupero tutti i filtri droppati in #filter-drop
@@ -2215,34 +2213,40 @@ var Sheet;
       object.filters = [...filters];
       object.metric_type = 'advanced';
     }
+    // aggiornamento della metrica
+    object.created_at = (e.target.dataset.edit) ? metric.created_at : date;
     WorkBook.metrics = object;
     // salvo la nuova metrica nello storage
     window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
     // TODO: il codice che aggiunge una metrica al tablesStruct è codice ripetuto
     // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
-    const tmpl = app.tmplList.content.cloneNode(true);
-    // BUG: in caso di salvataggio di una metrica basic
-    const li = tmpl.querySelector('li[data-li-drag][data-advanced-metrics]');
-    const content = li.querySelector('.li-content');
-    const btnDrag = content.querySelector('i');
-    const span = content.querySelector('span');
-    // const btnEdit = li.querySelector('i[data-id="metric-edit"]');
-    li.id = token;
-    // BUG: in caso di salvataggio di una metrica basic
-    li.dataset.contextmenu = 'ul-context-menu-advanced-metric';
-    // TODO: da impostare sull'icona drag
-    li.addEventListener('dragstart', app.fieldDragStart);
-    li.addEventListener('dragend', app.fieldDragEnd);
-    li.addEventListener('contextmenu', app.contextMenu);
-    // btnEdit.addEventListener('click', app.editAdvancedMetric);
-    // WARN : per il momento inserisco un IF ma sarebbe meglio usare una logica di memorizzare tutti gli elementi del report in un unico oggetto Map
-    if (WorkBook.metrics.has(token)) {
-      li.dataset.type = WorkBook.metrics.get(token).type;
-      if (WorkBook.metrics.get(token).hasOwnProperty('field')) li.dataset.field = WorkBook.metrics.get(token).field;
-      li.dataset.aggregateFn = WorkBook.metrics.get(token).aggregateFn;
-      span.innerHTML = WorkBook.metrics.get(token).alias;
+    if (!e.target.dataset.edit) {
+      delete e.target.dataset.edit;
+      const parent = document.getElementById('ul-metrics');
+      const tmpl = app.tmplList.content.cloneNode(true);
+      // BUG: in caso di salvataggio di una metrica basic, qui va modificato il tmpl [data-base-metrics]
+      const li = tmpl.querySelector('li[data-li-drag][data-advanced-metrics]');
+      const content = li.querySelector('.li-content');
+      const btnDrag = content.querySelector('i');
+      const span = content.querySelector('span');
+      // const btnEdit = li.querySelector('i[data-id="metric-edit"]');
+      li.id = token;
+      // BUG: in caso di salvataggio di una metrica basic, qui va modificato il tmpl [data-base-metrics]
+      li.dataset.contextmenu = 'ul-context-menu-advanced';
+      // TODO: da impostare sull'icona drag
+      li.addEventListener('dragstart', app.fieldDragStart);
+      li.addEventListener('dragend', app.fieldDragEnd);
+      li.addEventListener('contextmenu', app.contextMenu);
+      // btnEdit.addEventListener('click', app.editAdvancedMetric);
+      // WARN : per il momento inserisco un IF ma sarebbe meglio usare una logica di memorizzare tutti gli elementi del report in un unico oggetto Map
+      if (WorkBook.metrics.has(token)) {
+        li.dataset.type = WorkBook.metrics.get(token).type;
+        if (WorkBook.metrics.get(token).hasOwnProperty('field')) li.dataset.field = WorkBook.metrics.get(token).field;
+        li.dataset.aggregateFn = WorkBook.metrics.get(token).aggregateFn;
+        span.innerHTML = WorkBook.metrics.get(token).alias;
+      }
+      parent.appendChild(li);
     }
-    parent.appendChild(li);
   }
 
   app.addDefinedFields = (parent) => {
