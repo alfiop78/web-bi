@@ -42,4 +42,17 @@
     app.contextMenuTableRef.toggleAttribute('open');
   }
 
+  app.closeDialogMetric = () => {
+    const input = document.getElementById('adv-metric-name');
+    const textarea = document.getElementById('textarea-metric');
+    const timingFunctions = document.getElementById('dl-timing-functions');
+    input.value = '';
+    textarea.querySelectorAll('*').forEach(element => element.remove());
+    textarea.value = '';
+    // se è presente una timingFunction selezionata la deseleziono
+    if (timingFunctions.querySelector('dt[selected]')) timingFunctions.querySelector('dt[selected]').removeAttribute('selected');
+    // reset della lista dei filtri
+    document.querySelectorAll('#filter-drop > li').forEach(li => li.remove());
+  }
+
 })();

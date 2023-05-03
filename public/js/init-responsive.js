@@ -1254,11 +1254,60 @@ var Sheet;
   }
 
   app.removeFilter = (e) => {
+    // TODO: implementazione
     console.log(e.target.dataset.token);
   }
 
   app.renameFilter = (e) => {
+    // TODO: implementazione
     console.log(e.target.dataset.token);
+  }
+
+  app.openDialogMetric = () => {
+    const filterDrop = document.getElementById('filter-drop');
+    filterDrop.addEventListener('dragover', app.handlerDragOverFilter, false);
+    filterDrop.addEventListener('dragenter', app.handlerDragEnterFilter, false);
+    filterDrop.addEventListener('dragleave', app.handlerDragLeaveFilter, false);
+    filterDrop.addEventListener('drop', app.handlerDropFilter, false);
+    app.dialogMetric.show();
+  }
+
+  app.editAdvancedMetric = (e) => {
+    app.contextMenuRef.toggleAttribute('open');
+    const metric = WorkBook.metrics.get(e.target.dataset.token);
+    const filterDrop = document.getElementById('filter-drop');
+    const textarea = app.dialogMetric.querySelector('#textarea-metric');
+    const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
+    const field = tmpl.querySelector('.metric-defined');
+    const formula = field.querySelector('.formula');
+    const aggregateFn = formula.querySelector('code[data-aggregate]');
+    const fieldName = formula.querySelector('code[data-field]');
+    // const span = document.createElement('span');
+    aggregateFn.innerText = metric.aggregateFn;
+    // fieldName.innerText = metric.field;
+    fieldName.innerText = metric.alias;
+    textarea.appendChild(field);
+    // imposto il token sul tasto btnMetricSave, in questo modo posso salvare/aggiornare il filtro in base alla presenza o meno di data-token
+    document.querySelector('#btn-metric-save').dataset.token = e.target.dataset.token;
+    const inputName = document.getElementById('adv-metric-name');
+    // reimposto le proprietà della metrica nella dialog
+    inputName.value = metric.alias;
+    // aggiungo i filtri alla <nav> #filter-drop
+    if (metric.hasOwnProperty('filters')) {
+      metric.filters.forEach(token => {
+        if (['last-year', 'last-month', 'ecc'].includes(token)) {
+          // è un filtro con una funzione temporale, seleziono la funzione temporale nell'elemento
+          // ... #dl-timing-functions
+          document.querySelector(`#dl-timing-functions > dt[data-value='${token}']`).setAttribute('selected', 'true');
+        } else {
+          const li = document.createElement('li');
+          li.dataset.token = token;
+          li.innerText = WorkBook.filters.get(token).name;
+          filterDrop.appendChild(li);
+        }
+      });
+    }
+    app.openDialogMetric();
   }
 
   /* app.setFrom = (tableAlias) => {
@@ -1291,11 +1340,7 @@ var Sheet;
 
   // salvataggio di un filtro in WorkBook
   app.saveFilter = (e) => {
-    // l'oggetto filter lo salvo nella Classe Sheet (ex Query.js)
     const name = document.getElementById('custom-filter-name').value;
-    const rand = () => Math.random(0).toString(36).substring(2);
-    // WARN: in fase di edit NON devo modificare 'created_at' ma solo 'updated_at'
-
     // in edit recupero il token da e.target.dataset.token
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
@@ -1339,7 +1384,7 @@ var Sheet;
         });
       }
     });
-    //converto from Map() in object altrimenti non può essere salvato in localStorage e DB
+    // converto da Map() in object altrimenti non può essere salvato in localStorage e DB
     object.from = Object.fromEntries(object.from);
     object.tables = [...object.tables];
     // la prop 'created_at' va aggiunta solo in fase di nuovo filtro e non quando si aggiorna il filtro
@@ -1383,7 +1428,6 @@ var Sheet;
       btnAdd.addEventListener('click', app.addFilter);
       span.innerHTML = object.name;
       parent.appendChild(li);
-
     }
   }
 
@@ -2076,14 +2120,13 @@ var Sheet;
     struct.querySelector('image[data-columns-defined]').dataset.columnsDefined = true;
   }
 
-  app.handlerMetric = (e) => {
+  // apertura dialog per la creazione di una nuova metrica
+  app.newMetric = (e) => {
     // TODO: aggiungo la formula della metrica (SUM(NettoRiga)) nella textarea ma, in questo caso la textarea è disabilitata.
     // nella metrica filtrata posso modificare solo la funzione di aggregazione
-    console.clear();
     console.log(e.target);
     const token = e.currentTarget.dataset.token;
     // recupero la metrica da WorkBook.metric
-    console.log(WorkBook.metrics.get(token));
     const metric = WorkBook.metrics.get(token);
     const textarea = app.dialogMetric.querySelector('#textarea-metric');
     const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
@@ -2096,31 +2139,22 @@ var Sheet;
     // fieldName.innerText = metric.field;
     fieldName.innerText = metric.alias;
     textarea.appendChild(field);
-    // il token presente qui lo recupero in saveAdvMetric() in modo da duplicare la metrica di base ed aggiungerci l'array di filtri
-    document.querySelector('#btn-metric-save').dataset.token = token;
-    // debugger;
-    const filterDrop = document.getElementById('filter-drop');
-    filterDrop.addEventListener('dragover', app.handlerDragOverFilter, false);
-    filterDrop.addEventListener('dragenter', app.handlerDragEnterFilter, false);
-    filterDrop.addEventListener('dragleave', app.handlerDragLeaveFilter, false);
-    filterDrop.addEventListener('drop', app.handlerDropFilter, false);
-    app.dialogMetric.show();
+    // il token presente qui lo recupero in saveMetric() per recuperare la metrica basic.
+    // la metrica di base viene utilizzata per recuperare alcune proprietà non modificabili
+    document.querySelector('#btn-metric-save').dataset.basicToken = token;
+    app.openDialogMetric();
   }
 
-  // edit di un filtro
-  app.handlerFilter = (e) => { }
-
-  // salvataggio metrica avanzataa o di base
+  // salvataggio metrica avanzata o di base
   app.saveMetric = (e) => {
     const alias = document.getElementById('adv-metric-name').value;
-    // qui aggiungerà la metrica appena creata
+    // qui aggiungerò la metrica appena creata
     const parent = document.getElementById('ul-metrics');
-    // const rand = () => Math.random(0).toString(36).substring(2);
-    const token = rand().substring(0, 7);
+    const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
+    // const token = rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
     let filters = new Set();
-    let timingFunctions = {};
-    const baseMetric = WorkBook.metrics.get(e.target.dataset.token);
+    const baseMetric = WorkBook.metrics.get(e.target.dataset.basicToken);
     // WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
     const aggregateFn = app.dialogMetric.querySelector('.formula > code[data-aggregate]').innerText;
     // TODO: aggiungere opzione 'distinct'.
@@ -2134,9 +2168,9 @@ var Sheet;
       type: 'metric',
       metric_type: 'basic', // default: se ci sono dei filtri (o timingFn) in questa metrica verrà sovrascritto in 'advanced'
       workbook_ref: WorkBook.workBook.token,
-      created_at: date, updated_at: date
+      created_at: date,
+      updated_at: date
     };
-    // const aggregateFn = app.dialogMetric.querySelector('.formula > code[data-aggregate]').dataset.aggregate;
     // recupero tutti i filtri droppati in #filter-drop
     // salvo solo il riferimento al filtro e non tutta la definizione del filtro
     app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.add(filter.dataset.token));
@@ -2187,12 +2221,15 @@ var Sheet;
     // TODO: il codice che aggiunge una metrica al tablesStruct è codice ripetuto
     // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
     const tmpl = app.tmplList.content.cloneNode(true);
+    // BUG: in caso di salvataggio di una metrica basic
     const li = tmpl.querySelector('li[data-li-drag][data-advanced-metrics]');
     const content = li.querySelector('.li-content');
     const btnDrag = content.querySelector('i');
     const span = content.querySelector('span');
     // const btnEdit = li.querySelector('i[data-id="metric-edit"]');
     li.id = token;
+    // BUG: in caso di salvataggio di una metrica basic
+    li.dataset.contextmenu = 'ul-context-menu-advanced-metric';
     // TODO: da impostare sull'icona drag
     li.addEventListener('dragstart', app.fieldDragStart);
     li.addEventListener('dragend', app.fieldDragEnd);
@@ -2232,7 +2269,7 @@ var Sheet;
     }
   }
 
-  app.addDefinedAdvMetrics = () => {
+  /* app.addDefinedAdvMetrics = () => {
     // metriche mappate sul cubo
     const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
     for (const [token, value] of WorkBook.metrics) {
@@ -2248,10 +2285,13 @@ var Sheet;
       li.dataset.label = value.alias;
       li.dataset.alias = value.alias;
       li.dataset.aggregateFn = value.aggregateFn;
+      // definisco quale context-menu-template apre questo elemento
+      li.dataset.contextmenu = 'ul-context-menu-advanced-metric';
       if (value.field) li.dataset.field = value.field;
       // TODO: da impostare sull'icona drag
       li.addEventListener('dragstart', app.fieldDragStart);
       li.addEventListener('dragend', app.fieldDragEnd);
+      li.addEventListener('contextmenu', app.contextMenu);
       // btnEdit.dataset.table = value.workBook.table;
       // btnEdit.dataset.alias = value.workBook.tableAlias;
       // btnEdit.dataset.field = value.field;
@@ -2261,9 +2301,9 @@ var Sheet;
       // span.innerHTML = value.formula.field;
       parent.appendChild(li);
     }
-  }
+  } */
 
-  app.addDefinedCompositeMetrics = () => {
+  /* app.addDefinedCompositeMetrics = () => {
     // metriche mappate sul cubo
     const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
     for (const [token, value] of WorkBook.metrics) {
@@ -2290,7 +2330,7 @@ var Sheet;
       // span.innerHTML = value.formula.field;
       parent.appendChild(li);
     }
-  }
+  } */
 
   app.contextMenu = (e) => {
     e.preventDefault();
@@ -2325,6 +2365,8 @@ var Sheet;
         li.dataset.type = value.metric_type;
         li.dataset.elementSearch = 'metrics';
         li.dataset.label = value.alias;
+        // definisco quale context-menu-template apre questo elemento
+        li.dataset.contextmenu = `ul-context-menu-${value.metric_type}`;
         // li.dataset.id = tableId;
         // li.dataset.schema = value.schema;
         // li.dataset.table = value.workBook.table;
@@ -2341,7 +2383,7 @@ var Sheet;
         // btnAdd.dataset.alias = value.workBook.tableAlias;
         // btnAdd.dataset.field = value.field;
         btnAdd.dataset.token = token;
-        btnAdd.addEventListener('click', app.handlerMetric);
+        btnAdd.addEventListener('click', app.newMetric);
         span.innerHTML = value.alias;
         // span.innerHTML = value.formula.field;
         parent.appendChild(li);

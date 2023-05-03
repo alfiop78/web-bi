@@ -178,9 +178,16 @@
         <li>ecc...</li>
       </ul>
 
-      <ul id="ul-context-menu-basic-metric">
+      <ul id="ul-context-menu-basic">
         <li data-fn="removeMetric">Elimina</li>
         <li data-fn="renameMetric">Rinomina</li>
+        <li>ecc...</li>
+      </ul>
+
+      <ul id="ul-context-menu-advanced">
+        <li data-fn="editAdvancedMetric">Modifica</li>
+        <li data-fn="removeAdvancedMetric">Elimina</li>
+        <li data-fn="renameAdvancedMetric">Rinomina</li>
         <li>ecc...</li>
       </ul>
     </template>
@@ -332,7 +339,7 @@
                 </section>
               </section>
               <section class="dlg-buttons">
-                <button name="cancel" value="chiudi">Chiudi</button>
+                <button name="cancel" data-fn="closeDialogMetric" value="chiudi">Chiudi</button>
                 <button data-fn="saveMetric" id="btn-metric-save" value="salva">Salva</button>
               </section>
             </section>
