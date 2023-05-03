@@ -1298,9 +1298,8 @@ var Sheet;
 
     // in edit recupero il token da e.target.dataset.token
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
-    // const token = rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
-    let object = { token, name, tables: new Set(), sql: [], from: new Map(), joins: {}, type: 'filter', formula: [], workbook_ref: WorkBook.workBook.token, created_at: date, updated_at: date };
+    let object = { token, name, tables: new Set(), sql: [], from: new Map(), joins: {}, type: 'filter', formula: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
     const textarea = document.getElementById('textarea-filter');
     document.querySelectorAll('#textarea-filter *').forEach(element => {
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
@@ -1343,6 +1342,15 @@ var Sheet;
     //converto from Map() in object altrimenti non può essere salvato in localStorage e DB
     object.from = Object.fromEntries(object.from);
     object.tables = [...object.tables];
+    // la prop 'created_at' va aggiunta solo in fase di nuovo filtro e non quando si aggiorna il filtro
+    if (e.target.dataset.token) {
+      // aggiornamento del filtro
+      // recupero il filtro dallo storage per recuperare created_at
+      const filter = JSON.parse(window.localStorage.getItem(e.target.dataset.token));
+      object.created_at = filter.created_at;
+    } else {
+      object.created_at = date;
+    }
     WorkBook.filters = {
       token,
       value: object
@@ -1351,29 +1359,32 @@ var Sheet;
     textarea.querySelectorAll('*').forEach(element => element.remove());
     // salvo il nuovo filtro appena creato
     // completato il salvataggio rimuovo l'attributo data-token da e.target
-    delete e.target.dataset.token;
     window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
     // aggiungo il filtro alla nav[data-filters-defined]
-    // TODO: creare una fn "addFilter" in modo da utilizzarla sia qui che quanado apro il workbook (nel caricamento degli oggetti)
-    const parent = document.getElementById('ul-filters');
-    const tmpl = app.tmplList.content.cloneNode(true);
-    const li = tmpl.querySelector('li[data-filter]');
-    const content = li.querySelector('.li-content');
-    const btnDrag = content.querySelector('i');
-    const span = content.querySelector('span');
-    const btnAdd = li.querySelector('i[data-id="filters-add"]');
-    // TODO: da valutare se usare id come token oppure il dataset.token
-    li.id = token;
-    li.dataset.type = 'filter';
-    li.dataset.name = object.name;
-    li.dataset.token = token;
-    li.addEventListener('dragstart', app.fieldDragStart);
-    li.addEventListener('dragend', app.fieldDragEnd);
-    li.dataset.field = object.name;
-    btnAdd.dataset.token = token;
-    btnAdd.addEventListener('click', app.addFilter);
-    span.innerHTML = object.name;
-    parent.appendChild(li);
+    if (!e.target.dataset.token) {
+      delete e.target.dataset.token;
+      // TODO: creare una fn "addFilter" in modo da utilizzarla sia qui che quanado apro il workbook (nel caricamento degli oggetti)
+      const parent = document.getElementById('ul-filters');
+      const tmpl = app.tmplList.content.cloneNode(true);
+      const li = tmpl.querySelector('li[data-filter]');
+      const content = li.querySelector('.li-content');
+      const btnDrag = content.querySelector('i');
+      const span = content.querySelector('span');
+      const btnAdd = li.querySelector('i[data-id="filters-add"]');
+      // TODO: da valutare se usare id come token oppure il dataset.token
+      li.id = token;
+      li.dataset.type = 'filter';
+      li.dataset.name = object.name;
+      li.dataset.token = token;
+      li.addEventListener('dragstart', app.fieldDragStart);
+      li.addEventListener('dragend', app.fieldDragEnd);
+      li.dataset.field = object.name;
+      btnAdd.dataset.token = token;
+      btnAdd.addEventListener('click', app.addFilter);
+      span.innerHTML = object.name;
+      parent.appendChild(li);
+
+    }
   }
 
   app.addFiltersMetric = e => e.currentTarget.toggleAttribute('selected');
