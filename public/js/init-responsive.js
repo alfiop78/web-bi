@@ -2222,15 +2222,14 @@ var Sheet;
       delete e.target.dataset.edit;
       const parent = document.getElementById('ul-metrics');
       const tmpl = app.tmplList.content.cloneNode(true);
-      // BUG: in caso di salvataggio di una metrica basic, qui va modificato il tmpl [data-base-metrics]
-      const li = tmpl.querySelector('li[data-li-drag][data-advanced-metrics]');
+      // BUG: da ricontrollare la logica di modifica di una metrica di base.
+      // Il salvataggio di una metrica basic deve includere anche il tasto btnAdd, come fatto in addDefinedMetrics()
+      const li = tmpl.querySelector(`li[data-li-drag][data-${object.metric_type}]`);
       const content = li.querySelector('.li-content');
       const btnDrag = content.querySelector('i');
       const span = content.querySelector('span');
-      // const btnEdit = li.querySelector('i[data-id="metric-edit"]');
       li.id = token;
-      // BUG: in caso di salvataggio di una metrica basic, qui va modificato il tmpl [data-base-metrics]
-      li.dataset.contextmenu = 'ul-context-menu-advanced';
+      li.dataset.contextmenu = `ul-context-menu-${object.metric_type}`;
       // TODO: da impostare sull'icona drag
       li.addEventListener('dragstart', app.fieldDragStart);
       li.addEventListener('dragend', app.fieldDragEnd);
@@ -2358,11 +2357,13 @@ var Sheet;
     if (WorkBook.metrics.size !== 0) {
       for (const [token, value] of WorkBook.metrics) {
         const tmpl = app.tmplList.content.cloneNode(true);
-        const li = tmpl.querySelector('li[data-li-drag][data-base-metrics]');
+        const li = tmpl.querySelector(`li[data-li-drag][data-${value.metric_type}]`);
         const content = li.querySelector('.li-content');
         const btnDrag = content.querySelector('i');
         const span = content.querySelector('span');
-        const btnAdd = li.querySelector('i[data-id="filters-add"]');
+        let btnAdd;
+        // il tasto metric-new è presente solo sulla metrica di base
+        if (value.metric_type === 'basic') btnAdd = li.querySelector('i[data-id="metric-new"]');
         li.id = token;
         li.dataset.type = value.metric_type;
         li.dataset.elementSearch = 'metrics';
@@ -2384,8 +2385,10 @@ var Sheet;
         // btnAdd.dataset.table = value.workBook.table;
         // btnAdd.dataset.alias = value.workBook.tableAlias;
         // btnAdd.dataset.field = value.field;
-        btnAdd.dataset.token = token;
-        btnAdd.addEventListener('click', app.newMetric);
+        if (value.metric_type === 'basic') {
+          btnAdd.dataset.token = token;
+          btnAdd.addEventListener('click', app.newMetric);
+        }
         span.innerHTML = value.alias;
         // span.innerHTML = value.formula.field;
         parent.appendChild(li);

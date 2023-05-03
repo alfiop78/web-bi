@@ -542,7 +542,7 @@ li:hover > i {
   width: 100%;
 }
 
-#ul-metrics > li[data-advanced-metrics] > .li-content {
+#ul-metrics > li[data-advanced] > .li-content {
   background-color: lightgreen;
   color: #494949;
   display: flex;

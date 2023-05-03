@@ -45,28 +45,26 @@
       <i data-id="filters-add" class="material-icons-round md-18">add</i>
     </li>
 
-    <li data-li-drag data-element-search data-label data-base-metrics data-searchable="true" draggable="true">
+    <li data-li-drag data-element-search data-label data-basic data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
-      <i data-id="filters-add" class="material-icons-round md-18">add</i>
+      <i data-id="metric-new" class="material-icons-round md-18">add</i>
     </li>
 
-    <li data-li-drag data-element-search data-label data-advanced-metrics data-searchable="true" draggable="true">
+    <li data-li-drag data-element-search data-label data-advanced data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
-      <i data-id="metric-edit" class="material-icons-round md-18">edit</i>
     </li>
 
-    <li data-li-drag data-element-search data-label data-composite-metrics data-searchable="true" draggable="true">
+    <li data-li-drag data-element-search data-label data-composite data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
-      <i data-id="metric-edit" class="material-icons-round md-18">edit</i>
     </li>
   </template>
 
