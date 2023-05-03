@@ -2148,7 +2148,6 @@ var Sheet;
 
   // salvataggio metrica avanzata o di base
   app.saveMetric = (e) => {
-    debugger;
     const alias = document.getElementById('adv-metric-name').value;
     const token = (e.target.dataset.edit) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
@@ -2184,7 +2183,6 @@ var Sheet;
           ]
         };
       } */
-      debugger;
       if (['last-year', 'last-month', 'ecc...'].includes(timingFn.dataset.value)) {
         const timeField = timingFn.dataset.timeField;
         // Per questa metrica è stata aggiunta una timingFn.
@@ -2213,7 +2211,7 @@ var Sheet;
       object.filters = [...filters];
       object.metric_type = 'advanced';
     }
-    // aggiornamento della metrica
+    // aggiornamento/creazione della metrica imposta created_at
     object.created_at = (e.target.dataset.edit) ? metric.created_at : date;
     WorkBook.metrics = object;
     // salvo la nuova metrica nello storage

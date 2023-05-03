@@ -46,6 +46,7 @@
     const input = document.getElementById('adv-metric-name');
     const textarea = document.getElementById('textarea-metric');
     const timingFunctions = document.getElementById('dl-timing-functions');
+    const btnMetricSave = document.getElementById('btn-metric-save');
     input.value = '';
     textarea.querySelectorAll('*').forEach(element => element.remove());
     textarea.value = '';
@@ -53,6 +54,8 @@
     if (timingFunctions.querySelector('dt[selected]')) timingFunctions.querySelector('dt[selected]').removeAttribute('selected');
     // reset della lista dei filtri
     document.querySelectorAll('#filter-drop > li').forEach(li => li.remove());
+    // se il tasto #btn-metric-save ha l'attributo 'edit' lo rimuovo
+    if (btnMetricSave.dataset.edit) delete btnMetricSave.dataset.edit;
   }
 
 })();
