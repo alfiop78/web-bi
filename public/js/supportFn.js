@@ -1,3 +1,5 @@
+// TODO: queste funzioni di supporto dovrei scriverle senza arrow function ma con la normale definizione di function,
+// in questo modo potranno essere invocate anche da init-responsice.js (da verificare)
 (() => {
   var app = {
     contextMenuTableRef: document.getElementById('context-menu-table'),

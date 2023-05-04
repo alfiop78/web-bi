@@ -188,6 +188,13 @@
         <li data-fn="renameAdvancedMetric">Rinomina</li>
         <li>ecc...</li>
       </ul>
+
+      <ul id="ul-context-menu-composite">
+        <li data-fn="editCompositeMetric">Modifica</li>
+        <li data-fn="removeCompositeMetric">Elimina</li>
+        <li data-fn="renameCompositeMetric">Rinomina</li>
+        <li>ecc...</li>
+      </ul>
     </template>
 
     <div id="container">
