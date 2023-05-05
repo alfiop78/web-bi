@@ -260,7 +260,7 @@
           <!-- creazione metrica composta -->
           <dialog id="dlg-composite-metric" class="medium">
             <section class="dlg-grid">
-              <section class="dlg-title">Creazione Metrica</section>
+              <section class="dlg-title">Creazione Metrica Composta</section>
               <section class="dlg-content col col-1">
                 <section class="textarea-formula">
                   <div class="md-field">
@@ -271,7 +271,7 @@
                 </section>
               </section>
               <section class="dlg-buttons">
-                <button name="cancel" value="chiudi">Chiudi</button>
+                <button name="cancel" data-fn="closeDialogCompositeMetric" value="chiudi">Chiudi</button>
                 <button data-fn="saveCompositeMetric" id="btn-composite-metric-save" value="salva">Salva</button>
               </section>
             </section>

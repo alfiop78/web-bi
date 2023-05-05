@@ -763,8 +763,6 @@ var Sheet;
     const span = templateContent.querySelector('span');
     const mark = templateContent.querySelector('mark');
     mark.dataset.token = elementRef.id;
-    mark.dataset.type = WorkBook.metrics.get(elementRef.id).metric_type;
-    mark.dataset.aggregateFn = WorkBook.metrics.get(elementRef.id).aggregateFn;
     mark.innerText = WorkBook.metrics.get(elementRef.id).alias;
     app.textareaCompositeMetric.appendChild(span);
     // aggiungo anche uno span per il proseguimento della scrittura della formula
@@ -1315,7 +1313,7 @@ var Sheet;
   app.editCompositeMetric = (e) => {
     app.contextMenuRef.toggleAttribute('open');
     const metric = WorkBook.metrics.get(e.target.dataset.token);
-    // TODO: ricostruisco la formula all'interno del div #textarea-composite-metric 
+    // ricostruisco la formula all'interno del div #textarea-composite-metric 
     const textarea = document.getElementById('textarea-composite-metric');
     const btnMetricSave = document.getElementById('btn-composite-metric-save');
     const inputName = document.getElementById('composite-metric-name');
@@ -1325,13 +1323,25 @@ var Sheet;
     // ciclo la proprietà 'formula' per inserire la formula
     metric.formula.forEach(element => {
       // se l'elemento contiene la proprietà token utilizzo il template <mark> altrimenti lo <span>
-      debugger;
-      console.log(element);
-      console.log(element.hasOwnProperty('token'));
-
+      if (element.hasOwnProperty('token')) {
+        const templateContent = app.tmplFormula.content.cloneNode(true);
+        const i = templateContent.querySelector('i');
+        i.addEventListener('click', app.cancelFormulaObject);
+        const span = templateContent.querySelector('span');
+        const mark = templateContent.querySelector('mark');
+        mark.dataset.token = element.token;
+        mark.innerText = element.alias;
+        textarea.appendChild(span);
+      } else {
+        const span = document.createElement('span');
+        span.dataset.check = 'metric';
+        span.setAttribute('contenteditable', 'true');
+        span.setAttribute('tabindex', 0);
+        span.innerText = element;
+        textarea.appendChild(span);
+      }
     });
     app.dialogCompositeMetric.show()
-
   }
 
   /* app.setFrom = (tableAlias) => {
@@ -1637,34 +1647,34 @@ var Sheet;
   app.saveCompositeMetric = (e) => {
     const alias = document.getElementById('composite-metric-name').value;
     const parent = document.getElementById('ul-metrics');
-    const token = rand().substring(0, 7);
+    const token = (e.target.dataset.edit) ? e.target.dataset.token : rand().substring(0, 7);
+    // const token = rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
-    // let object = { token, alias, sql: [], metrics: {}, type: 'composite' };
     let object = { token, alias, sql: [], metrics: {}, type: 'metric', formula: [], metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
     document.querySelectorAll('#textarea-composite-metric *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
-        // TODO: verifico se sto droppando una metrica composta, in questo caso si utilizza una logica diversa
-        switch (element.dataset.type) {
+        // verifico se sto droppando una metrica composta, in questo caso si utilizza una logica diversa
+        const metricFormula = WorkBook.metrics.get(element.dataset.token);
+        switch (metricFormula.metric_type) {
           case 'composite':
-            object.sql.push(WorkBook.metrics.get(element.dataset.token).sql.join(' '));
+            object.sql.push(metricFormula.sql.join(' '));
             // la proprietà 'formula' mi servrà per ricreare la formula della metrica in fase di edit
-            object.formula.push({ token: element.dataset.token, type: element.dataset.type, aggregateFn: element.dataset.aggregateFn });
-            for (const [token, metric] of Object.entries(WorkBook.metrics.get(element.dataset.token).metrics)) {
+            object.formula.push({ token: metricFormula.token, alias: metricFormula.alias });
+            for (const [token, metric] of Object.entries(WorkBook.metrics.get(metricFormula.token).metrics)) {
               object.metrics[token] = metric;
             }
             break;
           default:
             // basic and advanced
-            debugger;
-            object.metrics[element.dataset.token] = element.innerText;
+            object.metrics[metricFormula.token] = element.innerText;
             // object.metrics[element.innerText] = { token: element.dataset.token, alias: element.innerText };
             // TODO: Creare una Classe JS che gestisce la sintassi dei vari db (come laravel MyVerticaGrammar.php)
             // .. in modo da poter inserire, ad es.: funzioni come NVL o IFNULL.
             // Un'altra soluzione è creare qui un array (da trasformare in associativo in PHP) per poi poter
             // ... utilizzare MyVerticaGrammar.php oppure altre grammatiche relative ad altri DB già predisposti in Laravel
-            object.sql.push(`NVL(${element.dataset.aggregateFn}(${element.innerText}),0)`);
-            object.formula.push({ token: element.dataset.token, type: element.dataset.type, aggregateFn: element.dataset.aggregateFn });
+            object.sql.push(`NVL(${metricFormula.aggregateFn}(${element.innerText}),0)`);
+            object.formula.push({ token: metricFormula.token, alias: metricFormula.alias });
             break;
         }
       } else {
@@ -1674,28 +1684,31 @@ var Sheet;
     });
     console.log(object);
     // aggiornamento/creazione della metrica imposta created_at
-    object.created_at = (e.target.dataset.edit) ? metric.created_at : date;
+    object.created_at = (e.target.dataset.edit) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
     debugger;
     WorkBook.metrics = object;
     // salvo la nuova metrica nello storage
     window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
     // TODO: il codice che aggiunge una metrica al tablesStruct è codice ripetuto
     // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
-    const tmpl = app.tmplList.content.cloneNode(true);
-    const li = tmpl.querySelector('li[data-li-drag][data-composite]');
-    const content = li.querySelector('.li-content');
-    const btnDrag = content.querySelector('i');
-    const span = content.querySelector('span');
-    li.id = token;
-    // definisco quale context-menu-template apre questo elemento
-    li.dataset.contextmenu = `ul-context-menu-${object.metric_type}`;
-    // TODO: da impostare sull'icona drag
-    li.addEventListener('dragstart', app.fieldDragStart);
-    li.addEventListener('dragend', app.fieldDragEnd);
-    li.addEventListener('contextmenu', app.contextMenu);
-    li.dataset.type = WorkBook.metrics.get(token).type;
-    span.innerHTML = WorkBook.metrics.get(token).alias;
-    parent.appendChild(li);
+    if (!e.target.dataset.edit) {
+      delete e.target.dataset.edit;
+      const tmpl = app.tmplList.content.cloneNode(true);
+      const li = tmpl.querySelector('li[data-li-drag][data-composite]');
+      const content = li.querySelector('.li-content');
+      const btnDrag = content.querySelector('i');
+      const span = content.querySelector('span');
+      li.id = token;
+      // definisco quale context-menu-template apre questo elemento
+      li.dataset.contextmenu = `ul-context-menu-${object.metric_type}`;
+      // TODO: da impostare sull'icona drag
+      li.addEventListener('dragstart', app.fieldDragStart);
+      li.addEventListener('dragend', app.fieldDragEnd);
+      li.addEventListener('contextmenu', app.contextMenu);
+      li.dataset.type = WorkBook.metrics.get(token).type;
+      span.innerHTML = WorkBook.metrics.get(token).alias;
+      parent.appendChild(li);
+    }
   }
 
   app.setSheet = () => {
@@ -2185,18 +2198,9 @@ var Sheet;
     // WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
     const aggregateFn = app.dialogMetric.querySelector('.formula > code[data-aggregate]').innerText;
     // TODO: aggiungere opzione 'distinct'.
-    let object = {
-      token,
-      alias,
-      field: metric.field,
-      aggregateFn,
-      SQL: metric.SQL,
-      distinct: false,
-      type: 'metric',
-      metric_type: 'basic', // default: se ci sono dei filtri (o timingFn) in questa metrica verrà sovrascritto in 'advanced'
-      workbook_ref: WorkBook.workBook.token,
-      updated_at: date
-    };
+
+    // metric_type: se ci sono dei filtri (o timingFn) in questa metrica verrà sovrascritto in 'advanced'
+    let object = { token, alias, field: metric.field, aggregateFn, SQL: metric.SQL, distinct: false, type: 'metric', metric_type: 'basic', workbook_ref: WorkBook.workBook.token, updated_at: date };
     // recupero tutti i filtri droppati in #filter-drop
     // salvo solo il riferimento al filtro e non tutta la definizione del filtro
     app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.add(filter.dataset.token));

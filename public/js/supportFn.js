@@ -60,4 +60,15 @@
     if (btnMetricSave.dataset.edit) delete btnMetricSave.dataset.edit;
   }
 
+  app.closeDialogCompositeMetric = () => {
+    const input = document.getElementById('composite-metric-name');
+    const textarea = document.getElementById('textarea-composite-metric');
+    const btnMetricSave = document.getElementById('btn-composite-metric-save');
+    input.value = '';
+    textarea.querySelectorAll('*').forEach(element => element.remove());
+    textarea.value = '';
+    // se il tasto #btn-metric-save ha l'attributo 'edit' lo rimuovo
+    if (btnMetricSave.dataset.edit) delete btnMetricSave.dataset.edit;
+  }
+
 })();
