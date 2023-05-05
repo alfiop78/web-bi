@@ -616,6 +616,7 @@ var Sheet;
   }
 
   // apro la dialog column per definire le colonne del WorkBook
+  // TODO: da spostare in supportFn.js
   app.setColumn = (e) => {
     app.dialogColumns.show();
     app.dialogColumns.dataset.field = e.currentTarget.dataset.field;
@@ -629,6 +630,7 @@ var Sheet;
   }
 
   // click all'interno di una textarea
+  // TODO: da spostare in supportFn.js
   app.addText = (e) => {
     console.log('e : ', e);
     console.log('e.target : ', e.target);
@@ -787,6 +789,7 @@ var Sheet;
   /* NOTE: END DRAG&DROP EVENTS */
 
   // selezione schema/i
+  // TODO: da spostare in supportFn.js
   app.handlerSchema = async (e) => {
     e.preventDefault();
     e.currentTarget.toggleAttribute('data-selected');
@@ -818,6 +821,7 @@ var Sheet;
 
   /* NOTE: ONCLICK EVENTS*/
 
+  // TODO: da spostare in supportFn.js
   app.handlerWorkSheetSearch = (e) => {
     // l'attributo data-id contiene l'id della input da attivare per la ricerca
     const input = document.getElementById(e.target.dataset.id);
@@ -846,6 +850,7 @@ var Sheet;
   }
 
   // apertura dialog per creazione metrica composta
+  // TODO: da spostare in supportFn.js
   app.btnCompositeMetric = () => app.dialogCompositeMetric.show();
 
   // apertura dialog con lista WorkBooks
@@ -923,6 +928,7 @@ var Sheet;
     }
   }
 
+  // TODO: da spostare in supportFn.js
   app.sheetPreview = async (token) => {
     console.log(token);
     // recupero l'id dello Sheet
@@ -988,6 +994,7 @@ var Sheet;
     Sheet.save();
   }
 
+  // TODO: da spostare in supportFn.js
   app.handlerEditSheetName = (e) => e.target.dataset.value = e.target.innerText;
 
   app.editWorkBookName.onblur = (e) => WorkBook.name = e.target.innerText;
@@ -1013,10 +1020,6 @@ var Sheet;
 
   // imposto attribute init sul <nav>, in questo modo verranno associati gli eventi data-fn sui child di <nav>
   app.drawer.querySelectorAll('nav').forEach(a => a.dataset.init = 'true');
-
-  app.metricSelect = (e) => {
-
-  }
 
   app.tableSelected = async (e) => {
     console.log(`table selected ${e.currentTarget.dataset.table}`);
@@ -1463,11 +1466,13 @@ var Sheet;
     }
   }
 
+  // TODO: spostare in supportFn.js
   app.addFiltersMetric = e => e.currentTarget.toggleAttribute('selected');
 
   /* NOTE: END ONCLICK EVENTS*/
 
   /* NOTE: MOUSE EVENTS */
+  // TODO: spostare in supportFn.js
   document.querySelectorAll('.translate').forEach(el => {
     el.onmousedown = (e) => {
       // console.log(app.coords);
@@ -1496,11 +1501,13 @@ var Sheet;
     }
   });
 
+  // TODO: spostare in supportFn.js
   app.windowJoin.onmousedown = (e) => {
     app.coords = { x: +e.currentTarget.dataset.x, y: +e.currentTarget.dataset.y };
     if (e.target.classList.contains('title')) app.el = e.target;
   }
 
+  // TODO: spostare in supportFn.js
   app.windowJoin.onmousemove = (e) => {
     if (app.el) {
       app.coords.x += e.movementX;
@@ -1511,6 +1518,7 @@ var Sheet;
     }
   }
 
+  // TODO: spostare in supportFn.js
   app.windowJoin.onmouseup = () => delete app.el;
 
   /*  NOTE: END MOUSE EVENTS */
@@ -1532,7 +1540,6 @@ var Sheet;
   /* NOTE: FETCH API */
 
   // TODO: potrei creare un unica function (in supportFn.js) che esegue la FETCH API passandogli la url
-
   // recupero le tabelle del database in base allo schema selezionato
   app.getTable = async () => {
     return await fetch('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info')
@@ -1751,6 +1758,7 @@ var Sheet;
     if (levelId > 0) recursiveLevels(levelId);
   } */
 
+  // TODO: potrebbe essere spostata in supportFn.js
   app.handlerToggleDrawer = (e) => {
     console.log('toggleDrawer');
     document.querySelector('#' + e.currentTarget.dataset.drawerId).toggleAttribute('open');
@@ -1778,6 +1786,7 @@ var Sheet;
   }
 
   // imposto questo field come data-active
+  // TODO: potrebbe essere spostata in supportFn.js
   app.handlerJoin = (e) => {
     const joinId = +e.currentTarget.dataset.joinId;
     app.windowJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => {
@@ -1789,6 +1798,7 @@ var Sheet;
     });
   }
 
+  // TODO: potrebbe essere spostata in supportFn.js
   app.addJoin = () => {
     const tmplJoinFrom = app.tmplJoin.content.cloneNode(true);
     const tmplJoinTo = app.tmplJoin.content.cloneNode(true);
@@ -1828,6 +1838,7 @@ var Sheet;
     app.windowJoin.querySelector('.wj-joins section[data-table-to] .table').innerHTML = to.table;
   }
 
+  // TODO: potrebbe essere spostata in supportFn.js
   app.closeWindowJoin = () => {
     // ripulisco la window dalla precedente join creata
     app.windowJoin.querySelectorAll('.join-field').forEach(joinField => joinField.remove());
@@ -1973,6 +1984,7 @@ var Sheet;
     }
   }
 
+  // TODO: potrebbe essere spostata in supportFn.js
   app.handlerTimingFunctions = (e) => {
     // reset di eventuali selezioni precedenti
     document.querySelectorAll('#dl-timing-functions > dt[selected]').forEach(element => element.toggleAttribute('selected'));
