@@ -124,16 +124,20 @@ var Storage = new SheetStorages();
         span.innerText = object.name;
         if (object.hasOwnProperty('workbook_ref')) {
           // recupero il nome del workBook a cui si riferisce la risorsa in ciclo
-          const workBook = JSON.parse(window.localStorage.getItem(object.workbook_ref)).name;
-          workBookRef.innerText = workBook;
+          if (window.localStorage.getItem(object.workbook_ref)) {
+            const workBook = JSON.parse(window.localStorage.getItem(object.workbook_ref)).name;
+            workBookRef.innerText = workBook;
+          }
         }
         break;
       default:
         li.dataset.label = object.alias;
         span.dataset.value = object.alias;
         span.innerText = object.alias;
-        const workBook = JSON.parse(window.localStorage.getItem(object.workbook_ref)).name;
-        workBookRef.innerText = workBook;
+        if (window.localStorage.getItem(object.workbook_ref)) {
+          const workBook = JSON.parse(window.localStorage.getItem(object.workbook_ref)).name;
+          workBookRef.innerText = workBook;
+        }
         break;
     }
     btnUpload.dataset.upload = object.type;
