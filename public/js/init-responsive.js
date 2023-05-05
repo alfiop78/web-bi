@@ -10,11 +10,9 @@ var Sheet;
     // templates
     tmplList: document.getElementById('tmpl-li'),
     tmplJoin: document.getElementById('tmpl-join-field'),
-    tmplDL: document.getElementById('tmpl-dl-element'),
-    tmplContextMenu: document.getElementById('tmpl-context-menu-content'),
+    // tmplContextMenu: document.getElementById('tmpl-context-menu-content'),
     contextMenuRef: document.getElementById('context-menu'),
     contextMenuTableRef: document.getElementById('context-menu-table'),
-    // tmplDD: document.getElementById('tmpl-dd-element'),
     tmplDetails: document.getElementById('tmpl-details-element'),
     tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
     tmplMetricsDefined: document.getElementById('tmpl-metrics-defined'),
@@ -795,7 +793,7 @@ var Sheet;
     if (e.currentTarget.hasAttribute('data-selected')) {
       const schema = e.currentTarget.dataset.schema;
       // recupero le tabelle dello schema selezionato
-      const data = await app.getDatabaseTable(schema);
+      const data = await getDatabaseTable(schema);
       console.log(data);
       // TODO: attivo i tasti ("Crea dimensione", "Modifica dimensione", "Crea cubo", ecc...)
       // TODO: popolo elenco tabelle
@@ -880,7 +878,7 @@ var Sheet;
       }
     }
     // in app.getTables() c'è il controllo se sono presenti urls da scaricare
-    WorkBookStorage.saveTables(await app.getTables(urls));
+    WorkBookStorage.saveTables(await getTables(urls));
   }
 
   // apertura del WorkBook
@@ -1515,22 +1513,7 @@ var Sheet;
 
   app.windowJoin.onmouseup = () => delete app.el;
 
-  app.dialogColumns.onmousedown = (e) => {
-    app.coords = { x: +e.currentTarget.dataset.x, y: +e.currentTarget.dataset.y };
-    if (e.target.classList.contains('title')) app.el = e.target;
-  }
-
-  app.dialogColumns.onmousemove = (e) => {
-    if (app.el) {
-      app.coords.x += e.movementX;
-      app.coords.y += e.movementY;
-      e.currentTarget.style.transform = "translate(" + app.coords.x + "px, " + app.coords.y + "px)";
-      e.currentTarget.dataset.x = app.coords.x;
-      e.currentTarget.dataset.y = app.coords.y;
-    }
-  }
-
-  app.dialogColumns.onmouseup = () => delete app.el;
+  /*  NOTE: END MOUSE EVENTS */
 
   // visualizzo l'icona delete utilizzando <use> in svg
   app.tableEnter = (e) => {
@@ -1546,27 +1529,11 @@ var Sheet;
     // TODO: rimuovo anche l'elemento <g> in <defs> relativo a questa tabella
   }
 
-  /*  NOTE: END MOUSE EVENTS */
-
   /* NOTE: FETCH API */
 
-  // recupero le tabelle del database in base allo schema selezionato
-  app.getDatabaseTable = async (schema) => {
-    const url = '/fetch_api/schema/' + schema + '/tables';
-    return await fetch(url)
-      .then((response) => {
-        console.log(response);
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then(data => data)
-      .catch(err => {
-        App.showConsole(err, 'error');
-        console.error(err);
-      });
-  }
+  // TODO: potrei creare un unica function (in supportFn.js) che esegue la FETCH API passandogli la url
 
+  // recupero le tabelle del database in base allo schema selezionato
   app.getTable = async () => {
     return await fetch('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info')
       .then((response) => {
@@ -1580,52 +1547,6 @@ var Sheet;
         console.error(err);
       });
   }
-
-  app.getTables = async (urls) => {
-    if (urls) {
-      return await Promise.all(urls.map(url => fetch(url)))
-        .then(responses => {
-          return Promise.all(responses.map(response => {
-            if (!response.ok) {
-              throw Error(response.statusText);
-            }
-            return response.json();
-          }))
-        })
-        .then(data => data)
-        .catch(err => console.error(err));
-
-      // ottengo le risposte separatamente
-      /* return await Promise.all(urls.map(url => {
-        fetch(url)
-          .then(response => {
-            if (!response.ok) { throw Error(response.statusText); }
-            return response;
-          })
-          .then(response => response.json())
-          .then(data => data)
-          .catch(err => {
-            App.showConsole(err, 'error');
-            console.error(err);
-          })
-      })); */
-
-    }
-  }
-
-  /* app.getColumns = async (urls) => {
-    return await Promise.all(urls.map(url => fetch(url)))
-      .then(responses => {
-        return Promise.all(responses.map(response => {
-          if (!response.ok) {
-            throw Error(response.statusText);
-          }
-          return response.json();
-        }))
-      })
-      .then(data => data)
-      .catch(err => console.error(err));
-  } */
 
   app.getPreviewTable = async () => {
     return await fetch('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_preview')
@@ -1704,7 +1625,7 @@ var Sheet;
       // TODO: da impostare sull'icona drag
       li.addEventListener('dragstart', app.fieldDragStart);
       li.addEventListener('dragend', app.fieldDragEnd);
-      li.addEventListener('contextmenu', app.contextMenu);
+      li.addEventListener('contextmenu', openContextMenu);
       li.dataset.type = WorkBook.metrics.get(token).type;
       span.innerHTML = WorkBook.metrics.get(token).alias;
       parent.appendChild(li);
@@ -2022,19 +1943,6 @@ var Sheet;
     });
   }
 
-  /* app.contextMenu = (e) => {
-    console.log(e.currentTarget);
-    console.log(e.target);
-    debugger;
-    // tabella selezionata
-    const table = Draw.tables.get(e.currentTarget.dataset.id);
-    const tablesvg = Draw.svg.querySelector(`#${e.currentTarget.dataset.id}`);
-    console.log(table);
-    console.log(tablesvg);
-    // TODO: apro un context menu (con dialog.show()) con le voci : Rimuovi, Crea metrica, ecc...
-    app.contextMenuTableRef.toggleAttribute('open');
-  } */
-
   // inserisco la colonna selezionata per la creazione della join
   app.addFieldToJoin = (e) => {
     const fieldRef = app.windowJoin.querySelector(`section[data-table-id='${e.currentTarget.dataset.tableId}'] .join-field[data-active]`);
@@ -2266,7 +2174,7 @@ var Sheet;
       // TODO: da impostare sull'icona drag
       li.addEventListener('dragstart', app.fieldDragStart);
       li.addEventListener('dragend', app.fieldDragEnd);
-      li.addEventListener('contextmenu', app.contextMenu);
+      li.addEventListener('contextmenu', openContextMenu);
       // btnEdit.addEventListener('click', app.editAdvancedMetric);
       // WARN : per il momento inserisco un IF ma sarebbe meglio usare una logica di memorizzare tutti gli elementi del report in un unico oggetto Map
       if (WorkBook.metrics.has(token)) {
@@ -2303,87 +2211,6 @@ var Sheet;
     }
   }
 
-  /* app.addDefinedAdvMetrics = () => {
-    // metriche mappate sul cubo
-    const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
-    for (const [token, value] of WorkBook.metrics) {
-      const tmpl = app.tmplList.content.cloneNode(true);
-      const li = tmpl.querySelector('li[data-li-drag][data-advanced-metrics]');
-      const content = li.querySelector('.li-content');
-      const btnDrag = content.querySelector('i');
-      const span = content.querySelector('span');
-      const btnEdit = li.querySelector('i[data-id="metric-edit"]');
-      li.id = token;
-      li.dataset.type = value.type;
-      li.dataset.elementSearch = 'metrics';
-      li.dataset.label = value.alias;
-      li.dataset.alias = value.alias;
-      li.dataset.aggregateFn = value.aggregateFn;
-      // definisco quale context-menu-template apre questo elemento
-      li.dataset.contextmenu = 'ul-context-menu-advanced-metric';
-      if (value.field) li.dataset.field = value.field;
-      // TODO: da impostare sull'icona drag
-      li.addEventListener('dragstart', app.fieldDragStart);
-      li.addEventListener('dragend', app.fieldDragEnd);
-      li.addEventListener('contextmenu', app.contextMenu);
-      // btnEdit.dataset.table = value.workBook.table;
-      // btnEdit.dataset.alias = value.workBook.tableAlias;
-      // btnEdit.dataset.field = value.field;
-      // btnEdit.dataset.token = token;
-      // btnEdit.addEventListener('click', app.editAdvancedMetric);
-      span.innerHTML = value.alias;
-      // span.innerHTML = value.formula.field;
-      parent.appendChild(li);
-    }
-  } */
-
-  /* app.addDefinedCompositeMetrics = () => {
-    // metriche mappate sul cubo
-    const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
-    for (const [token, value] of WorkBook.metrics) {
-      const tmpl = app.tmplList.content.cloneNode(true);
-      const li = tmpl.querySelector('li[data-li-drag][data-composite-metrics]');
-      const content = li.querySelector('.li-content');
-      const btnDrag = content.querySelector('i');
-      const span = content.querySelector('span');
-      const btnEdit = li.querySelector('i[data-id="metric-edit"]');
-      li.id = token;
-      li.dataset.elementSearch = 'metrics';
-      li.dataset.label = value.alias;
-      li.dataset.type = value.type;
-      li.dataset.alias = value.alias;
-      // TODO: da impostare sull'icona drag
-      li.addEventListener('dragstart', app.fieldDragStart);
-      li.addEventListener('dragend', app.fieldDragEnd);
-      // btnEdit.dataset.table = value.workBook.table;
-      // btnEdit.dataset.alias = value.workBook.tableAlias;
-      // btnEdit.dataset.field = value.field;
-      // btnEdit.dataset.token = token;
-      // btnEdit.addEventListener('click', app.editAdvancedMetric);
-      span.innerHTML = value.alias;
-      // span.innerHTML = value.formula.field;
-      parent.appendChild(li);
-    }
-  } */
-
-  app.contextMenu = (e) => {
-    e.preventDefault();
-    // console.log(e.target.id);
-    console.log(e.currentTarget.id);
-    // reset #context-menu
-    if (app.contextMenuRef.hasChildNodes()) app.contextMenuRef.querySelector('*').remove();
-    const tmpl = app.tmplContextMenu.content.cloneNode(true);
-    const content = tmpl.querySelector(`#${e.currentTarget.dataset.contextmenu}`);
-    // aggiungo, a tutti gli elementi del context-menu, il token dell'elemento selezionato
-    content.querySelectorAll('li').forEach(li => li.dataset.token = e.currentTarget.id);
-    app.contextMenuRef.appendChild(content);
-
-    const { clientX: mouseX, clientY: mouseY } = e;
-    app.contextMenuRef.style.top = `${mouseY}px`;
-    app.contextMenuRef.style.left = `${mouseX}px`;
-    app.contextMenuRef.toggleAttribute('open');
-  }
-
   app.addDefinedMetrics = () => {
     // metriche mappate sul cubo
     const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
@@ -2403,27 +2230,15 @@ var Sheet;
         li.dataset.label = value.alias;
         // definisco quale context-menu-template apre questo elemento
         li.dataset.contextmenu = `ul-context-menu-${value.metric_type}`;
-        // li.dataset.id = tableId;
-        // li.dataset.schema = value.schema;
-        // li.dataset.table = value.workBook.table;
-        // li.dataset.tableAlias = value.workBook.tableAlias;
-        // la metrica przmedio*Quantita non ha la proprieta 'fields'
-        // if (value.field) li.dataset.field = value.field;
-        // li.dataset.alias = value.alias;
-        // li.dataset.aggregateFn = value.aggregateFn;
         // TODO: gli eventi drag dovranno essere posizionati sul btnDrag, quindi anche l'attributo id
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
-        li.addEventListener('contextmenu', app.contextMenu);
-        // btnAdd.dataset.table = value.workBook.table;
-        // btnAdd.dataset.alias = value.workBook.tableAlias;
-        // btnAdd.dataset.field = value.field;
+        li.addEventListener('contextmenu', openContextMenu);
         if (value.metric_type === 'basic') {
           btnAdd.dataset.token = token;
           btnAdd.addEventListener('click', app.newMetric);
         }
         span.innerHTML = value.alias;
-        // span.innerHTML = value.formula.field;
         parent.appendChild(li);
       }
     }
@@ -2450,7 +2265,7 @@ var Sheet;
       // TODO: eventi drag sull'icona drag
       li.addEventListener('dragstart', app.fieldDragStart);
       li.addEventListener('dragend', app.fieldDragEnd);
-      li.addEventListener('contextmenu', app.contextMenu);
+      li.addEventListener('contextmenu', openContextMenu);
       btnAdd.dataset.token = token;
       btnAdd.addEventListener('click', app.addFilter);
       span.innerHTML = value.name;

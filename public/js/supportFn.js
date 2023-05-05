@@ -1,9 +1,85 @@
+const contextMenuRef = document.getElementById('context-menu');
+const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
+
+function openContextMenu(e) {
+  e.preventDefault();
+  // console.log(e.target.id);
+  console.log(e.currentTarget.id);
+  // reset #context-menu
+  if (contextMenuRef.hasChildNodes()) contextMenuRef.querySelector('*').remove();
+  const tmpl = tmplContextMenu.content.cloneNode(true);
+  const content = tmpl.querySelector(`#${e.currentTarget.dataset.contextmenu}`);
+  // aggiungo, a tutti gli elementi del context-menu, il token dell'elemento selezionato
+  content.querySelectorAll('li').forEach(li => li.dataset.token = e.currentTarget.id);
+  contextMenuRef.appendChild(content);
+
+  const { clientX: mouseX, clientY: mouseY } = e;
+  contextMenuRef.style.top = `${mouseY}px`;
+  contextMenuRef.style.left = `${mouseX}px`;
+  contextMenuRef.toggleAttribute('open');
+}
+
+/* fetch aPI functions */
+
+async function getDatabaseTable(schema) {
+  const url = '/fetch_api/schema/' + schema + '/tables';
+  return await fetch(url)
+    .then((response) => {
+      console.log(response);
+      if (!response.ok) { throw Error(response.statusText); }
+      return response;
+    })
+    .then((response) => response.json())
+    .then(data => data)
+    .catch(err => {
+      App.showConsole(err, 'error');
+      console.error(err);
+    });
+}
+
+async function getTables(urls) {
+  if (urls) {
+    return await Promise.all(urls.map(url => fetch(url)))
+      .then(responses => {
+        return Promise.all(responses.map(response => {
+          if (!response.ok) {
+            throw Error(response.statusText);
+          }
+          return response.json();
+        }))
+      })
+      .then(data => data)
+      .catch(err => console.error(err));
+
+    // ottengo le risposte separatamente
+    /* return await Promise.all(urls.map(url => {
+      fetch(url)
+        .then(response => {
+          if (!response.ok) { throw Error(response.statusText); }
+          return response;
+        })
+        .then(response => response.json())
+        .then(data => data)
+        .catch(err => {
+          App.showConsole(err, 'error');
+          console.error(err);
+        })
+    })); */
+
+  }
+
+}
+
+/* end fetch API functions */
+
 // TODO: queste funzioni di supporto dovrei scriverle senza arrow function ma con la normale definizione di function,
 // in questo modo potranno essere invocate anche da init-responsice.js (da verificare)
 (() => {
   var app = {
     contextMenuTableRef: document.getElementById('context-menu-table'),
     dialogCustomMetric: document.getElementById('dlg-custom-metric'),
+    dialogCompositeMetric: document.getElementById('dlg-composite-metric'),
+    dialogColumns: document.getElementById('dlg-columns'),
   }
 
   const config = { attributes: true, childList: true, subtree: true };
@@ -71,4 +147,26 @@
     if (btnMetricSave.dataset.edit) delete btnMetricSave.dataset.edit;
   }
 
+  /* mouse event */
+
+  document.querySelectorAll('dialog.moveable').forEach(dialog => {
+    dialog.onmousedown = (e) => {
+      app.coords = { x: +e.currentTarget.dataset.x, y: +e.currentTarget.dataset.y };
+      if (e.target.classList.contains('title')) app.el = e.target;
+    }
+
+    dialog.onmousemove = (e) => {
+      if (app.el) {
+        app.coords.x += e.movementX;
+        app.coords.y += e.movementY;
+        e.currentTarget.style.transform = "translate(" + app.coords.x + "px, " + app.coords.y + "px)";
+        e.currentTarget.dataset.x = app.coords.x;
+        e.currentTarget.dataset.y = app.coords.y;
+      }
+    }
+
+    dialog.onmouseup = () => delete app.el;
+  });
+
+  /* end mouse event */
 })();

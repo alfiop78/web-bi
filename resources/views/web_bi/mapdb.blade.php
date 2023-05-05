@@ -258,9 +258,9 @@
           </dialog>
 
           <!-- creazione metrica composta -->
-          <dialog id="dlg-composite-metric" class="medium">
+          <dialog id="dlg-composite-metric" data-x="0" data-y="0" class="medium absolute moveable">
             <section class="dlg-grid">
-              <section class="dlg-title">Creazione Metrica Composta</section>
+              <h5 class="title moveable">Creazione Metrica Composta</h5>
               <section class="dlg-content col col-1">
                 <section class="textarea-formula">
                   <div class="md-field">
@@ -278,9 +278,9 @@
           </dialog>
 
           <!-- creazione metrica filtrata -->
-          <dialog id="dlg-metric" class="medium">
+          <dialog id="dlg-metric" data-x="0" data-y="0" class="medium absolute moveable">
             <section class="dlg-grid">
-              <section class="dlg-title">Creazione Metrica</section>
+              <h5 class="title moveable">Creazione Metrica</h5>
               <section class="dlg-content col col-3">
                 <section class="filter-area-drop">
                   <small>Aggiungere qui i filtri per creare una metrica filtrata</small>
@@ -350,9 +350,9 @@
             </section>
           </dialog>
 
-          <dialog id="dlg-custom-metric" class="small">
+          <dialog id="dlg-custom-metric" data-x="0" data-y="0" class="small absolute moveable">
             <section class="dlg-grid">
-              <section class="dlg-title">Creazione Metrica</section>
+              <h5 class="title moveable">Creazione Metrica</h5>
               <section class="dlg-content col col-1">
                 <section>
                   <div class="md-field">
@@ -371,9 +371,9 @@
             </section>
           </dialog>
 
-          <dialog id="dlg-filters" class="medium">
+          <dialog id="dlg-filters" data-x="0" data-y="0" class="medium absolute moveable">
             <section class="dlg-grid">
-              <h5>Creazione Filtro</h5>
+              <h5 class="title moveable">Creazione Filtro</h5>
               <section class="dlg-content col col-2">
                 <nav class="custom-scrollbar" data-search-id="input-search-columns">
                   <section class="input-search">
@@ -443,7 +443,7 @@
               </section>
             </div>
 
-            <dialog id="dlg-columns" data-x="0" data-y="0" class="medium absolute">
+            <dialog id="dlg-columns" data-x="0" data-y="0" class="medium absolute moveable">
               <section class="dlg-grid">
                 <h5 class="title moveable">Definizione campi id/ds</h5>
                 <section class="dlg-content col columns-2">
