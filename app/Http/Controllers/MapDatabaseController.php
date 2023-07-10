@@ -29,6 +29,8 @@ class MapDatabaseController extends Controller
     // NOTE: il support alle query su colonne JSON è per mysql 5.7+ https://laravel.com/docs/8.x/queries#json-where-clauses
     // $dimensions = DB::table('bi_dimensions')->get('json_value'); // QueryBuilder
     // $dimensions = BIdimension::get('json_value'); // Eloquent
+    // TODO: connessione a mysql
+    // $schemaList = DB::connection('mysql')->select("SHOW SCHEMAS;");
     $schemaList = DB::connection('vertica_odbc')->select("SELECT SCHEMA_NAME FROM V_CATALOG.SCHEMATA WHERE IS_SYSTEM_SCHEMA = FALSE ORDER BY SCHEMA_NAME;");
     // dd($schemaList);
     return view('web_bi.mapdb')->with('schemes', $schemaList);
@@ -96,10 +98,10 @@ class MapDatabaseController extends Controller
     /* $tables = DB::connection('mysql')->select("DESCRIBE Azienda"); */
     $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME
                 FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
-                ON C.TABLE_ID=CC.TABLE_ID 
-                AND C.COLUMN_NAME=CC.COLUMN_NAME 
-                AND CC.CONSTRAINT_TYPE='p' 
-                WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table' 
+                ON C.TABLE_ID=CC.TABLE_ID
+                AND C.COLUMN_NAME=CC.COLUMN_NAME
+                AND CC.CONSTRAINT_TYPE='p'
+                WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table'
                 ORDER BY c.ordinal_position ASC;");
     return response()->json([$table => $info]);
     // return response()->json($info);
@@ -112,10 +114,10 @@ class MapDatabaseController extends Controller
     /* $tables = DB::connection('mysql')->select("DESCRIBE Azienda"); */
     $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME
                 FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
-                ON C.TABLE_ID=CC.TABLE_ID 
-                AND C.COLUMN_NAME=CC.COLUMN_NAME 
-                AND CC.CONSTRAINT_TYPE='p' 
-                WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table' 
+                ON C.TABLE_ID=CC.TABLE_ID
+                AND C.COLUMN_NAME=CC.COLUMN_NAME
+                AND CC.CONSTRAINT_TYPE='p'
+                WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table'
                 ORDER BY c.ordinal_position ASC;");
     return response()->json([$table => $info]);
   }
@@ -126,9 +128,9 @@ class MapDatabaseController extends Controller
     /* $tables = DB::connection('mysql')->select("DESCRIBE Azienda"); */
     $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME, C.TABLE_SCHEMA, C.TABLE_NAME
                 FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
-                ON C.TABLE_ID=CC.TABLE_ID 
-                AND C.COLUMN_NAME=CC.COLUMN_NAME 
-                AND CC.CONSTRAINT_TYPE='p' 
+                ON C.TABLE_ID=CC.TABLE_ID
+                AND C.COLUMN_NAME=CC.COLUMN_NAME
+                AND CC.CONSTRAINT_TYPE='p'
                 WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table'
                 AND C.COLUMN_NAME = '$column'
                 ORDER BY c.ordinal_position ASC;");
