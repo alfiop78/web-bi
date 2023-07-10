@@ -431,7 +431,7 @@
                         <label for="field-from-search" class="">Ricerca</label>
                       </div>
                       <div class="relative-ul">
-                        <ul id="ul-from-fields" class="custom-scrollbar"></ul>
+                        <ul id="ul-from-fields" data-search-id="field-from-search" class="custom-scrollbar"></ul>
                       </div>
                     </section>
                   </section>
@@ -442,7 +442,7 @@
                         <label for="field-to-search" class="">Ricerca</label>
                       </div>
                       <div class="relative-ul">
-                        <ul id="ul-to-fields" class="custom-scrollbar"></ul>
+                        <ul id="ul-to-fields" data-search-id="field-to-search" class="custom-scrollbar"></ul>
                       </div>
                     </section>
                   </section>
