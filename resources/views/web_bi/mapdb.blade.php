@@ -168,6 +168,13 @@
       </span>
     </template>
 
+    <template id="tmpl-composite-formula">
+      <span class="markContent">
+        <i class="material-icons-round md-14">cancel</i>
+        <mark></mark>
+      </span>
+    </template>
+
     <template id="tmpl-context-menu-content">
       <ul id="ul-context-menu-filter">
         <li data-fn="editFilter">Modifica</li>

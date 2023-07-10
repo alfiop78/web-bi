@@ -1,6 +1,6 @@
 const contextMenuRef = document.getElementById('context-menu');
 const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
-console.log(WorkBook.metrics);
+// console.log(WorkBook.metrics);
 
 function openContextMenu(e) {
   e.preventDefault();

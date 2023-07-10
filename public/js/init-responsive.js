@@ -17,6 +17,7 @@ var Sheet;
     tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
     tmplMetricsDefined: document.getElementById('tmpl-metrics-defined'),
     tmplFormula: document.getElementById('tmpl-formula'),
+    tmplCompositeFormula: document.getElementById('tmpl-composite-formula'),
     // dialogs
     dialogWorkBook: document.getElementById('dialog-workbook-open'),
     dialogSheet: document.getElementById('dialog-sheet-open'),
@@ -651,7 +652,7 @@ var Sheet;
     let arr_sql = [];
     let fields = [];
     document.querySelectorAll('#textarea-custom-metric *').forEach(element => {
-      if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I' || element.innerText.length === 0) return;
+      if (element.classList.contains('markContent') || element.nodeName === 'I' || element.innerText.length === 0) return;
       // console.log('element : ', element);
       // console.log('element : ', element.nodeName);
       // se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
@@ -683,7 +684,7 @@ var Sheet;
     const field = e.target.dataset.field;
     // aggiungo la metrica alla textarea-metric
     const textarea = app.dialogCustomMetric.querySelector('#textarea-custom-metric');
-    const templateContent = app.tmplFormula.content.cloneNode(true);
+    const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
     const span = templateContent.querySelector('span');
     const mark = templateContent.querySelector('mark');
     // mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
@@ -759,7 +760,8 @@ var Sheet;
     const elementRef = document.getElementById(elementId);
     // const field = document.createTextNode(elementRef.dataset.field);
     // e.currentTarget.appendChild(field);
-    const templateContent = app.tmplFormula.content.cloneNode(true);
+    debugger;
+    const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
     const span = templateContent.querySelector('span');
     const mark = templateContent.querySelector('mark');
     mark.dataset.token = elementRef.id;
@@ -1223,7 +1225,7 @@ var Sheet;
     app.dialogFilters.dataset.mode = 'edit'
     // imposto il token sul tasto btnFilterSave, in questo modo posso salvare/aggiornare il filtro in base alla presenza o meno di data-token
     btnFilterSave.dataset.token = e.target.dataset.token;
-    /* 
+    /*
     *  metto in ciclo gli elementi della proprietà 'formula' del filtro.
     *  Qui possono esserci sia campi che definiscono il <mark> sia elementi, della formula, che definiscono lo <span>
     */
@@ -1314,7 +1316,7 @@ var Sheet;
   app.editCompositeMetric = (e) => {
     app.contextMenuRef.toggleAttribute('open');
     const metric = WorkBook.metrics.get(e.target.dataset.token);
-    // ricostruisco la formula all'interno del div #textarea-composite-metric 
+    // ricostruisco la formula all'interno del div #textarea-composite-metric
     const textarea = document.getElementById('textarea-composite-metric');
     const btnMetricSave = document.getElementById('btn-composite-metric-save');
     const inputName = document.getElementById('composite-metric-name');
@@ -1325,7 +1327,7 @@ var Sheet;
     metric.formula.forEach(element => {
       // se l'elemento contiene la proprietà token utilizzo il template <mark> altrimenti lo <span>
       if (element.hasOwnProperty('token')) {
-        const templateContent = app.tmplFormula.content.cloneNode(true);
+        const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
         const i = templateContent.querySelector('i');
         i.addEventListener('click', app.cancelFormulaObject);
         const span = templateContent.querySelector('span');
@@ -1580,7 +1582,7 @@ var Sheet;
     const date = new Date().toLocaleDateString('it-IT', options);
     let object = { token, alias, sql: [], metrics: {}, type: 'metric', formula: [], metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
     document.querySelectorAll('#textarea-composite-metric *').forEach(element => {
-      if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
+      if (element.classList.contains('markContent') || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         // verifico se sto droppando una metrica composta, in questo caso si utilizza una logica diversa
         const metricFormula = WorkBook.metrics.get(element.dataset.token);
