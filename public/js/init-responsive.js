@@ -27,7 +27,7 @@ var Sheet;
     dialogCustomMetric: document.getElementById('dlg-custom-metric'),
     dialogCompositeMetric: document.getElementById('dlg-composite-metric'),
     dialogRename: document.getElementById('dialog-rename'),
-    windowJoin: document.getElementById('window-join'),
+    dialogJoin: document.getElementById('dlg-join'),
     dialogColumns: document.getElementById('dlg-columns'),
     dialogTime: document.getElementById('dialog-time'),
     // buttons
@@ -219,10 +219,11 @@ var Sheet;
       if (Draw.countTables > 1) {
         // tabella 'from'
         WorkBook.tableJoins = {
-          from: app.windowJoin.querySelector('.wj-joins section[data-table-from]').dataset.tableId,
-          to: app.windowJoin.querySelector('.wj-joins section[data-table-to]').dataset.tableId
+          from: app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
+          to: app.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId
         }
-        // console.log(WorkBook.tableJoins);
+        console.log(WorkBook.tableJoins);
+        debugger;
         for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
           WorkBook.activeTable = value.id;
           const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
@@ -1504,13 +1505,13 @@ var Sheet;
   });
 
   // TODO: spostare in supportFn.js
-  app.windowJoin.onmousedown = (e) => {
+  app.dialogJoin.onmousedown = (e) => {
     app.coords = { x: +e.currentTarget.dataset.x, y: +e.currentTarget.dataset.y };
     if (e.target.classList.contains('title')) app.el = e.target;
   }
 
   // TODO: spostare in supportFn.js
-  app.windowJoin.onmousemove = (e) => {
+  app.dialogJoin.onmousemove = (e) => {
     if (app.el) {
       app.coords.x += e.movementX;
       app.coords.y += e.movementY;
@@ -1521,7 +1522,7 @@ var Sheet;
   }
 
   // TODO: spostare in supportFn.js
-  app.windowJoin.onmouseup = () => delete app.el;
+  app.dialogJoin.onmouseup = () => delete app.el;
 
   /*  NOTE: END MOUSE EVENTS */
 
@@ -1791,11 +1792,11 @@ var Sheet;
   // TODO: potrebbe essere spostata in supportFn.js
   app.handlerJoin = (e) => {
     const joinId = +e.currentTarget.dataset.joinId;
-    app.windowJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => {
+    app.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => {
       delete joinField.dataset.active;
     });
     // imposto il data-active sugli .join-field[data-join-id] = joinId;
-    app.windowJoin.querySelectorAll(`.join-field[data-join-id='${joinId}']`).forEach(field => {
+    app.dialogJoin.querySelectorAll(`.join-field[data-join-id='${joinId}']`).forEach(field => {
       field.dataset.active = 'true';
     });
   }
@@ -1810,42 +1811,38 @@ var Sheet;
     joinFieldFrom.dataset.fn = 'handlerJoin';
     joinFieldTo.dataset.fn = 'handlerJoin';
     joinFieldTo.innerHTML = 'Campo';
-    const divJoins = app.windowJoin.querySelector('section[data-table-from] > .joins').childElementCount;
+    const divJoins = app.dialogJoin.querySelector('section[data-table-from] > .join').childElementCount;
     joinFieldFrom.dataset.joinId = divJoins;
     joinFieldTo.dataset.joinId = divJoins;
-    const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
     joinFieldFrom.dataset.token = token;
     joinFieldTo.dataset.token = token;
     // rimuovo eventuali joinField che hanno l'attributo data-active prima di aggiungere quelli nuovi
-    app.windowJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
-    app.windowJoin.querySelector('.wj-joins section[data-table-from] > .joins').appendChild(joinFieldFrom);
-    app.windowJoin.querySelector('.wj-joins section[data-table-to] > .joins').appendChild(joinFieldTo);
+    app.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
+    app.dialogJoin.querySelector('.joins section[data-table-from] > .join').appendChild(joinFieldFrom);
+    app.dialogJoin.querySelector('.joins section[data-table-to] > .join').appendChild(joinFieldTo);
   }
 
   app.openJoinWindow = () => {
-    // visualizzo la windowJoin
-    app.windowJoin.dataset.open = 'true';
-    app.windowJoin.dataset.lineId = Draw.currentLineRef.id;
+    // ripulisco la dialogJoin
+    // TODO: da inserire in un evento close della dialog
+    app.dialogJoin.querySelectorAll('.join-field').forEach(joinField => joinField.remove());
+    app.dialogJoin.querySelectorAll('ul > li').forEach(li => li.remove());
+    app.dialogJoin.dataset.open = 'false';
+    // apertura dialogJoin
+    app.dialogJoin.show();
+    app.dialogJoin.dataset.lineId = Draw.currentLineRef.id;
     // aggiungo i template per join-field
     app.addJoin();
     const from = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).from);
     const to = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).to);
 
-    app.windowJoin.querySelector('.wj-joins section[data-table-from]').dataset.tableFrom = from.table;
-    app.windowJoin.querySelector('.wj-joins section[data-table-from]').dataset.tableId = from.key;
-    app.windowJoin.querySelector('.wj-joins section[data-table-from] .table').innerHTML = from.table;
-    app.windowJoin.querySelector('.wj-joins section[data-table-to]').dataset.tableTo = to.table;
-    app.windowJoin.querySelector('.wj-joins section[data-table-to]').dataset.tableId = to.key;
-    app.windowJoin.querySelector('.wj-joins section[data-table-to] .table').innerHTML = to.table;
-  }
-
-  // TODO: potrebbe essere spostata in supportFn.js
-  app.closeWindowJoin = () => {
-    // ripulisco la window dalla precedente join creata
-    app.windowJoin.querySelectorAll('.join-field').forEach(joinField => joinField.remove());
-    app.windowJoin.querySelectorAll('ul > li').forEach(li => li.remove());
-    app.windowJoin.dataset.open = 'false';
+    app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableFrom = from.table;
+    app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId = from.key;
+    app.dialogJoin.querySelector('.joins section[data-table-from] .table').innerHTML = from.table;
+    app.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableTo = to.table;
+    app.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId = to.key;
+    app.dialogJoin.querySelector('.joins section[data-table-to] .table').innerHTML = to.table;
   }
 
   app.handlerTimeDimension = async (e) => {
@@ -1958,7 +1955,7 @@ var Sheet;
 
   // inserisco la colonna selezionata per la creazione della join
   app.addFieldToJoin = (e) => {
-    const fieldRef = app.windowJoin.querySelector(`section[data-table-id='${e.currentTarget.dataset.tableId}'] .join-field[data-active]`);
+    const fieldRef = app.dialogJoin.querySelector(`section[data-table-id='${e.currentTarget.dataset.tableId}'] .join-field[data-active]`);
     // console.log(fieldRef);
     fieldRef.dataset.field = e.currentTarget.dataset.label;
     fieldRef.dataset.table = e.currentTarget.dataset.table;
@@ -1967,7 +1964,7 @@ var Sheet;
     const joinId = +fieldRef.dataset.joinId;
     // verifico se i due fieldRef[data-active] hanno il data-field impostato. Se vero, posso creare la join tra le due tabelle
     // recupero, con la funzione filter, i due field da mettere in join
-    let joins = [...app.windowJoin.querySelectorAll(`.join-field[data-active][data-field][data-join-id='${joinId}']`)].filter(field => +field.dataset.joinId === joinId);
+    let joins = [...app.dialogJoin.querySelectorAll(`.join-field[data-active][data-field][data-join-id='${joinId}']`)].filter(field => +field.dataset.joinId === joinId);
     // console.log(joins);
     if (joins.length === 2) {
       WorkBook.join = {
@@ -1996,7 +1993,9 @@ var Sheet;
   // aggiungo i campi di una tabella per creare la join
   app.addFields = (source, response) => {
     // source : from, to
-    const ul = app.windowJoin.querySelector(`section[data-table-${source}] ul`);
+    console.log(source, response);
+    debugger;
+    const ul = app.dialogJoin.querySelector(`section[data-table-${source}] ul`);
     for (const [key, value] of Object.entries(response)) {
       const content = app.tmplList.content.cloneNode(true);
       const li = content.querySelector('li[data-li]');

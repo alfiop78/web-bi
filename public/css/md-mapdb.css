@@ -192,25 +192,6 @@ use.table[data-active]{
   bottom: 0px;
 }
 
-
-#window-join[data-open="false"], #window-columns[data-open="false"]{
-  position: absolute;
-  display: none;
-}
-
-#window-join[data-open="true"]{
-  display: grid;
-  background-color: gainsboro;
-  z-index: 300;
-  /* padding: 2em 1em; */
-  box-shadow: 0px 2px 5px 0px grey;
-  position: absolute;
-  top: 200px;
-  left: 350px;
-  width: 600px;
-  height: auto;
-}
-
 #window-columns[data-open="true"]{
   display: grid;
   background-color: gainsboro;
@@ -253,9 +234,9 @@ use.table[data-active]{
 
 
 .wj-joins, .wj-fields-list{
-  display: flex;
-  flex-flow: wrap;
-  justify-content: space-evenly;
+  display: grid;
+  grid-template-columns: 50% 50%;
+  grid-template-rows: 200px;
 }
 
 .wj-joins > section{
@@ -266,14 +247,11 @@ use.table[data-active]{
 }
 
 .wj-fields-list > section{
-  display: grid;
-  grid-template-rows: 200px;
-  width: 45%;
-  position: relative;
+  padding: .5em;
 }
 
 .wj-fields-list .list-search{
-  background-color: white;
+  height: 100%;
 }
 
 .join-field {
@@ -283,9 +261,8 @@ use.table[data-active]{
 }
 
 .join-field[data-active] {
-  background-color: lightslategray;
-  border: solid thin lightgray;
-  color: white;
+  border-bottom: solid 3px steelblue;
+  color: #494949;
 }
 
 .join-field:hover{cursor: pointer;}
@@ -648,7 +625,7 @@ p.field-search {
   justify-content: space-between;
 }
 input {
-  padding: 6px;
+  padding: 8px 4px;
   border: none;
   width: 100%;
   outline: none;
@@ -656,9 +633,16 @@ input {
 
 input:read-write {
   border-radius: 4px;
-  background-color: white;
+  background-color: whitesmoke;
   color: #494949;
   box-shadow: 0px 1px 4px -1px #898585;
+}
+
+input:read-write:focus {
+  border-radius: 4px;
+  background-color: white;
+  color: #494949;
+  box-shadow: 0px 2px 5px -1px #898585;
 }
 
 input:read-write::before {
@@ -686,4 +670,16 @@ input:read-write::placeholder{
   color: cadetblue;
   font-style: italic;
   font-weight: bold;
+}
+
+button.btn-link{
+  border: unset;
+  background-color: unset;
+  color: steelblue;
+  font-style: italic;
+}
+
+button.btn-link:hover{
+  cursor: pointer;
+  text-decoration: underline;
 }

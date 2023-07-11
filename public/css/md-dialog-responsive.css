@@ -96,7 +96,7 @@ dialog.large{
 }
 
 .small{
-  height: 40%;
+  /* height: 40%; */
   width: 50%;
   min-height: 40%;
   min-width: 40%;
@@ -127,9 +127,9 @@ dialog > .dlg-grid{
 
 dialog > .dlg-grid > .dlg-content.col{
   display: grid;
-  overflow-y: auto;
-  grid-column-gap: 1em;
+  grid-template-rows: auto auto 1fr;
   padding: 0px 1rem;
+  row-gap: .5em;
 }
 
 dialog nav{
@@ -190,4 +190,9 @@ dialog .buttons{
   z-index: 999;
   background-color: whitesmoke;
   box-shadow: 0px 1px 4px -1px #494949;
+}
+
+dialog .joins{
+  display: grid;
+  grid-template-columns: 50% 50%;
 }

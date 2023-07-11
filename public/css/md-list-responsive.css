@@ -85,11 +85,17 @@ ul li:hover::before{
   position: absolute;
   width: 100%;
   height: 100%;
-  background-color: white;
+  background-color: whitesmoke;
   overflow: auto;
-  padding-inline-start: 0px;
-  padding-block-start: 4px;
-  padding-block-end: 4px;
+  padding-inline-start: 6px;
+  padding-block-start: 6px;
+  padding-block-end: 6px;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px -1px #898585;
+}
+
+.relative-ul > ul:hover{
+  background-color: white;
 }
 
 .btn-toggle {

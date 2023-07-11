@@ -378,6 +378,48 @@
             </section>
           </dialog>
 
+          <dialog id="dlg-join" data-x="0" data-y="0" class="small absolute moveable">
+            <section class="dlg-grid">
+              <h5 class="title moveable">Creazione Join</h5>
+              <section class="dlg-content col">
+                <section class="joins">
+                  <section data-table-from data-table-id>
+                    <div class="table"></div>
+                    <div class="join"></div>
+                  </section>
+                  <section data-table-to data-table-id>
+                    <div class="table"></div>
+                    <div class="join"></div>
+                  </section>
+                </section>
+                <section class="btn-link">
+                  <button id="btn-add-join" class="btn-link" data-fn="addJoin" value="Aggiungi Join">Aggiungi join</button>
+                </section>
+                <div class="wj-fields-list">
+                  <section data-table-from>
+                    <section class="list-search">
+                      <input type="search" id="field-from-search" placeholder="Ricerca" data-element-search="from-fields" autocomplete="off" />
+                      <div class="relative-ul">
+                        <ul id="ul-from-fields" data-search-id="field-from-search" class="custom-scrollbar"></ul>
+                      </div>
+                    </section>
+                  </section>
+                  <section data-table-to>
+                    <section class="list-search">
+                      <input type="search" id="field-to-search" placeholder="Ricerca" data-element-search="to-fields" autocomplete="off" />
+                      <div class="relative-ul">
+                        <ul id="ul-to-fields" data-search-id="field-to-search" class="custom-scrollbar"></ul>
+                      </div>
+                    </section>
+                  </section>
+                </div>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+              </section>
+            </section>
+          </dialog>
+
           <dialog id="dlg-filters" data-x="0" data-y="0" class="medium absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Filtro</h5>
@@ -406,7 +448,7 @@
           </dialog>
 
           <div class="wrapper">
-            <div id="window-join" class="absolute-window" data-x="0" data-y="0" data-open="false">
+            <!-- <div id="window-join" class="absolute-window" data-x="0" data-y="0" data-open="false">
               <section class="wj-content">
                 <section class="w-title">
                   <p class="title">Creazione relazione</p>
@@ -448,7 +490,7 @@
                   </section>
                 </div>
               </section>
-            </div>
+            </div> -->
 
             <dialog id="dlg-columns" data-x="0" data-y="0" class="medium absolute moveable">
               <section class="dlg-grid">
