@@ -52,3 +52,12 @@ span[contenteditable]{
     border-radius: 4px;
     display: inline-block;
 }
+
+button {
+  border: none;
+  background-color: transparent;
+}
+
+button:not([disabled]):hover{
+  color: steelblue;
+}

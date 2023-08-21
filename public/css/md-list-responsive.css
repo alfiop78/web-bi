@@ -16,15 +16,23 @@ ul{
 
 li{
   list-style: none;
+  left: 0px;
   line-height: 1.7rem;
   position: relative;
   display: flex;
   justify-content: space-between;
-  /* margin: 0px 1em; */
+  transition: left 150ms;
   align-items: center;
-  /* padding: 0px 1rem; */
-  /* border-top: solid thin gainsboro; */
-  /* border-bottom: solid thin gainsboro; */
+}
+
+li:hover {
+  cursor: pointer;
+  color: steelblue;
+  left: 2px;
+}
+
+li:hover > i {
+  color: steelblue;
 }
 
 li[data-li-drag] {
@@ -32,11 +40,6 @@ li[data-li-drag] {
 }
 
 li[hidden] {display: none !important;}
-
-/* ul > li:hover{
-  cursor: pointer;
-  background-color: salmon;
-} */
 
 section.data-item{position: relative;}
 
@@ -48,34 +51,28 @@ li.icon > span{
   margin-left: .5rem;
 }
 
-li:hover{
-  cursor: pointer;
-  background-color: gainsboro;
-}
+/* li[draggable].dragging{
+  border: solid thin gainsboro;
+  border-radius: 1px;
+} */
 
-li[draggable].dragging{
-  border: solid thin gray;
-  border-radius: 2px;
-  width: 140px;
-}
-
-ul li[data-selected]::before {
+/* ul li[data-selected]::before {
   content: '';
   background: sienna;
   width: 5px;
   height: 100%;
   position: absolute;
   left: 0px;
-}
+} */
 
-ul li:hover::before{
+/* ul li:not([draggable]):hover::before{
   content: '';
   background: sienna;
   width: 5px;
   height: 100%;
   position: absolute;
   left: 0px;
-}
+} */
 
 .relative-ul {
   position: relative;
@@ -85,17 +82,13 @@ ul li:hover::before{
   position: absolute;
   width: 100%;
   height: 100%;
-  background-color: whitesmoke;
+  background-color: white;
   overflow: auto;
   padding-inline-start: 6px;
   padding-block-start: 6px;
   padding-block-end: 6px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px -1px #898585;
-}
-
-.relative-ul > ul:hover{
-  background-color: white;
+  /* border-radius: 4px; */
+  /* box-shadow: 0px 1px 4px -1px #898585; */
 }
 
 .btn-toggle {

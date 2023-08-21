@@ -2025,7 +2025,7 @@ var Sheet;
       const li = content.querySelector('li[data-li]');
       const span = li.querySelector('span');
       li.dataset.label = value.COLUMN_NAME;
-      // li.dataset.elementSearch = `${source}-fields`;
+      li.dataset.elementSearch = 'time-column';
       li.dataset.tableId = WorkBook.activeTable.id;
       li.dataset.table = WorkBook.activeTable.dataset.table;
       li.dataset.alias = WorkBook.activeTable.dataset.alias;

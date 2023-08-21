@@ -209,28 +209,35 @@
         <div id="body">
 
           <dialog id="dialog-rename">
-            <div class="md-field">
-              <input type="text" id="table-alias" value="" autocomplete="on" />
-              <label for="table-alias" class="">Alias per la tabella</label>
-            </div>
-            <section class="buttons">
-              <button name="cancel" value="chiudi">Chiudi</button>
-              <button data-fn="saveAliasTable" value="ok">Salva</button>
+            <section class="dlg-grid">
+              <h5 class="title moveable">Alias tabella</h5>
+              <section class="dlg-content col col-1 row-1">
+                <input type="text" id="table-alias" placeholder="Alias" value="" autocomplete="on" />
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button data-fn="saveAliasTable" value="ok">Salva</button>
+              </section>
             </section>
           </dialog>
 
-          <dialog id="dialog-time" class="medium">
+          <dialog id="dialog-time" data-x="0" data-y="0" class="medium absolute moveable">
             <section class="dlg-grid">
-              <h5>Imposta relazione con tabella TIME</h5>
+              <h5 class="title moveable">Imposta relazione con tabella TIME</h5>
               <section class="dlg-content col col-2-equals">
                 <ul id="time-fields">
                   <li data-field="date" data-fn="handlerTimeField" data-selected>DATE <small>Es.: 2023-12-31</small></li>
                   <li data-field="month_id" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
                   <li data-field="year" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
                 </ul>
-                <ul id="ul-columns" class="custom-scrollbar"></ul>
+                <section class="list-search">
+                  <input type="search" id="time-column-search" data-element-search="time-column" placeholder="Ricerca colonna" autocomplete="off" />
+                  <div class="relative-ul">
+                    <ul id="ul-columns" data-search-id="time-column-search" class="custom-scrollbar"></ul>
+                  </div>
+                </section>
               </section>
-              <section class="buttons">
+              <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
                 <button data-fn="saveTimeDimension" id="btn-time-dimension-save" value="salva">Salva</button>
               </section>
@@ -242,7 +249,7 @@
 
           <dialog id="dialog-workbook-open">
             <section class="dlg-grid">
-              <section class="dlg-title">Apri WorkBook</section>
+              <h5 class="title">Apri WorkBook</h5>
               <section class="dlg-content col col-1">
                 <nav data-workbook-defined></nav>
               </section>
@@ -362,10 +369,7 @@
               <h5 class="title moveable">Creazione Metrica</h5>
               <section class="dlg-content col col-1">
                 <section>
-                  <div class="md-field">
-                    <input type="text" id="custom-metric-name" value="" autocomplete="off" />
-                    <label for="custom-metric-name" class="">Nome</label>
-                  </div>
+                  <input type="text" id="custom-metric-name" placeholder="Nome" value="" autocomplete="off" />
                   <!--<div id="textarea-metric" class="dropzone" data-content-editable contenteditable="true"></div>-->
                   <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea"></div>
                   <!--<textarea id="textarea-metric" cols="20" class="dropzone" rows="10">SUM(</textarea>-->
@@ -460,7 +464,7 @@
                     <textarea id="textarea-column-ds-formula" data-mode="field" rows="6" placeholder="DS Formula" autocomplete="off" autofocus="" required="" minlength="1"></textarea>
                   </div>
                 </section>
-                <section class="buttons">
+                <section class="dlg-buttons">
                   <button name="cancel" value="chiudi">Chiudi</button>
                   <button data-fn="saveColumn" id="btn-columns-define" value="salva">Ok</button>
                 </section>
@@ -510,21 +514,13 @@
                       <section id="tables-area">
                         <section class="table-area-wrapper">
                           <section class="list-search">
-                            <div class="md-field">
-                              <input type="search" id="table-search" data-element-search="tables" autocomplete="off" />
-                              <label for="tables-search" class="">Ricerca</label>
-                            </div>
+                            <input type="search" id="table-search" data-element-search="tables" placeholder="Ricerca tabelle" autocomplete="off" />
                             <div class="relative-ul">
                               <ul id="ul-tables" data-search-id="table-search" class="custom-scrollbar"></ul>
                             </div>
                           </section>
-                          <section>
-                            <button id="btnSearch" class="button-icon material-icons-round md-18">search</button>
-                          </section>
                           <section class="table-preview">
-                            <menu>
-                              <input type="search" id="columns-search-id" placeholder="Ricerca colonne" />
-                            </menu>
+                            <input type="search" id="columns-search-id" placeholder="Ricerca colonne" />
                             <div class="table-content">
                               <!-- data-search-input : definisce la input che effettua la ricerca di colonne in questa tabella -->
                               <table id="preview-table" data-search-input="columns-search-id">
@@ -557,7 +553,7 @@
                         <div class="properties">
                           <section id="workbook-objects" data-section-active="2">
                             <p class="field-search">
-                              <input id="input-search-workbooks" data-element-search="workbooks" autocomplete="off" type="search" class="input-search" readonly placeholder="WorkBooks" />
+                              <input id="input-search-workbooks" data-element-search="workbooks" autocomplete="off" type="search" class="input-search workbooks" readonly placeholder="WorkBooks" />
                               <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-workbooks">search</button>
                             </p>
                             <section data-worksheet-object data-section="1">
@@ -565,37 +561,28 @@
                               <li data-workbook>workbook 2</li>
                             </section>
                             <p class="field-search">
-                              <input id="input-search-fields" data-element-search="fields" autocomplete="off" type="search" class="input-search" readonly placeholder="Campi" />
+                              <input id="input-search-fields" data-element-search="fields" autocomplete="off" type="search" class="input-search columns" readonly placeholder="Campi" />
                               <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-fields">search</button>
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="2">
                               <ul id="nav-fields" class="custom-scrollbar" data-search-id="input-search-fields"></ul>
-                              <li class="new-worksheet-object">
-                                <i class="material-icons-round md-18 new-object">add</i>
-                                <button class="new-object" data-fn="btnColumnNew" type="button" value="Crea Colonna">Crea colonna</button>
-                              </li>
+                              <button class="btn-link" data-fn="btnColumnNew" type="button" value="Nuova Colonna">Nuova Colonna</button>
                             </section>
                             <p class="field-search">
-                              <input id="input-search-metrics" data-element-search="metrics" autocomplete="off" type="search" class="input-search" readonly placeholder="Metriche" />
+                              <input id="input-search-metrics" data-element-search="metrics" autocomplete="off" type="search" class="input-search metrics" readonly placeholder="Metriche" />
                               <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-metrics">search</button>
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="3">
                               <ul id="ul-metrics" class="custom-scrollbar" data-search-id="input-search-metrics"></ul>
-                              <li class="new-worksheet-object">
-                                <i class="material-icons-round md-18 new-object">add</i>
-                                <button class="new-object" data-fn="btnCompositeMetric" type="button" value="Nuova Metrica">Nuova Metrica</button>
-                              </li>
+                              <button class="btn-link" data-fn="btnCompositeMetric" type="button" value="Nuova Metrica">Nuova Metrica</button>
                             </section>
                             <p class="field-search">
-                              <input id="input-search-filters" data-element-search="filters" autocomplete="off" type="search" class="input-search" readonly placeholder="Filtri" />
+                              <input id="input-search-filters" data-element-search="filters" autocomplete="off" type="search" class="input-search filters" readonly placeholder="Filtri" />
                               <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-filters">search</button>
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="4">
                               <ul id="ul-filters" class="custom-scrollbar" data-search-id="input-search-filters"></ul>
-                              <li class="new-worksheet-object">
-                                <i class="material-icons-round md-18 new-object">add</i>
-                                <button class="new-object" data-fn="openDialogFilter" type="button" value="crea filtro">nuovo filtro</button>
-                              </li>
+                              <button class="btn-link" data-fn="openDialogFilter" type="button" value="Nuovo Filtro">Nuovo Filtro</button>
                             </section>
                           </section>
                         </div>

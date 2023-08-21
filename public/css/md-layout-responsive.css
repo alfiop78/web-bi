@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@100;200;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@100;200;400;500;600&display=swap');
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp&display=swap");
 * {box-sizing: border-box; font-family: 'Barlow'; font-size: .9rem;}
 
@@ -53,7 +53,7 @@ h3{font-size: 1.1rem;margin: 4px;font-weight: lighter;text-align: center;}
 
 h5{
   font-size: 1rem;
-  padding: 8px 0px 16px;
+  padding: 1em;
   margin: 0px;
   font-weight: normal;
 }
@@ -214,8 +214,8 @@ span.markContent {
 
 .table-area-wrapper{
   display: grid;
-  grid-template-columns: 280px auto 1fr;
-  grid-column-gap: 8px;
+  grid-template-columns: 280px 1fr;
+  grid-column-gap: 4px;
   /* background-color: lightcyan; */
   position: relative;
 }

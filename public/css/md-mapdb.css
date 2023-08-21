@@ -262,7 +262,7 @@ use.table[data-active]{
 
 .join-field[data-active] {
   border-bottom: solid 3px steelblue;
-  color: #494949;
+  color: darkgray;
 }
 
 .join-field:hover{cursor: pointer;}
@@ -282,6 +282,7 @@ use.table[data-active]{
 
 section[data-table-from] .table, section[data-table-to] .table{
   padding: .5em;
+  font-weight: bold;
 }
 
 .wrapper-sheet{
@@ -486,8 +487,6 @@ details > li {
 
 #ul-metrics > li, #ul-filters > li {
   line-height: 1.6rem;
-  width: 200px;
-  max-width: 200px;
   margin: 2px;
   border-radius: 2px;
   display: flex;
@@ -495,16 +494,15 @@ details > li {
   justify-content: space-between;
 }
 
-li > i{
+li:not([draggable]) > i{
   visibility: hidden;
 }
 
-li:hover > i {
+li:not([draggable]):hover > i {
   visibility: visible;
 }
 
 #ul-metrics > li[data-basic] > .li-content {
-  background-color: #BFB78F;
   color: #494949;
   display: flex;
   align-items: center;
@@ -512,32 +510,25 @@ li:hover > i {
 }
 
 #ul-filters > li[data-filter] > .li-content {
-  background-color: #F2A71B;
-  color: #494949;
+  color: peru;
   display: flex;
   align-items: center;
   width: 100%;
 }
 
 #ul-metrics > li[data-advanced] > .li-content {
-  background-color: lightgreen;
-  color: #494949;
+  color: seagreen;
   display: flex;
   align-items: center;
   width: 100%;
 }
 
 #ul-metrics > li[data-composite] > .li-content {
-  background-color: sienna;
-  color: white;
+  color: sienna;
   display: flex;
   align-items: center;
   width: 100%;
 }
-/* #ul-metrics > li[data-type="advMetric"] {
-  background-color: lightgreen;
-  color: #494949;
-} */
 
 details > li[data-type="column"] {
   background-color: #025E73;
@@ -552,19 +543,6 @@ details > li[data-type="column"] {
 
 #textarea-metric.dropzone.dropping{
   border: solid thin brown;
-}
-
-.new-worksheet-object {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-}
-
-.new-object {
-  outline: none;
-  color: dimgray;
-  font-style: italic;
-  border: none;
 }
 
 code[contenteditable="true"] {
@@ -632,17 +610,17 @@ input {
 }
 
 input:read-write {
-  border-radius: 4px;
-  background-color: whitesmoke;
+  border-radius: 2px;
+  background-color: white;
   color: #494949;
-  box-shadow: 0px 1px 4px -1px #898585;
+  box-shadow: 0px 4px 2px -3px #898585;
 }
 
 input:read-write:focus {
-  border-radius: 4px;
+  border-radius: 2px;
   background-color: white;
   color: #494949;
-  box-shadow: 0px 2px 5px -1px #898585;
+  box-shadow: 0px 4px 2px -3px steelblue;
 }
 
 input:read-write::before {
@@ -667,10 +645,26 @@ input:read-write::placeholder{
 }
 
 .input-search::placeholder {
-  color: cadetblue;
   font-style: italic;
   font-weight: bold;
 }
+
+.input-search.workbooks::placeholder {
+  color: black;
+}
+
+.input-search.columns::placeholder {
+  color: #025E73;
+}
+
+.input-search.metrics::placeholder {
+  color: seagreen;
+}
+
+.input-search.filters::placeholder {
+  color: peru;
+}
+
 
 button.btn-link{
   border: unset;

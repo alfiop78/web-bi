@@ -3,7 +3,7 @@
 } */
 
 dialog{
-  background-color: #e2e2e2;
+  background-color: #f2f2f2;
   color: #494949;
   width: 30%;
 }
@@ -20,14 +20,12 @@ dialog{
 
 dialog h5 {
   font-weight: bold;
-  color: seagreen;
+  color: steelblue;
 }
 
 /* elemento spostabile*/
 h5.moveable:hover {
-  cursor: grab;
-  background-color: lightgoldenrodyellow;
-  color: #494949;
+  cursor: move;
 }
 
 dialog[open]{
@@ -35,6 +33,7 @@ dialog[open]{
   box-shadow: 0 2px 5px 1px rgba(10,10,10,.35);
   border-radius: 4px;
   z-index:20;
+  padding: 0px;
 }
 
 dialog::backdrop {
@@ -55,6 +54,11 @@ dialog.large{
   /* max-height: 50%; */
 }
 
+.dlg-buttons {
+  padding: 1em;
+  display: flex;
+  justify-content: space-between;
+}
 
 .dialog-wrapper {
   display: flex;
@@ -127,7 +131,7 @@ dialog > .dlg-grid{
 
 dialog > .dlg-grid > .dlg-content.col{
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  /* grid-template-rows: auto auto 1fr; */
   padding: 0px 1rem;
   row-gap: .5em;
 }
@@ -170,6 +174,10 @@ dialog .textarea-formula{
 
 .col-1{
   grid-template-columns: 1fr;
+}
+
+.row-1{
+  grid-template-rows: auto;
 }
 
 dialog .buttons{
