@@ -448,49 +448,6 @@
           </dialog>
 
           <div class="wrapper">
-            <!-- <div id="window-join" class="absolute-window" data-x="0" data-y="0" data-open="false">
-              <section class="wj-content">
-                <section class="w-title">
-                  <p class="title">Creazione relazione</p>
-                  <button type="button" data-fn="closeWindowJoin" class="button-icon material-icons-round md-18">close</button>
-                </section>
-                <div class="wj-joins">
-                  <section data-table-from data-table-id>
-                    <div class="table"></div>
-                    <div class="joins"></div>
-                  </section>
-                  <section data-table-to data-table-id>
-                    <div class="table"></div>
-                    <div class="joins"></div>
-                  </section>
-                </div>
-                <button id="btn-add-join" data-fn="addJoin" class="button-icon material-icons-round md-18" value="Aggiungi join">add</button>
-                <div class="wj-fields-list">
-                  <section data-table-from>
-                    <section class="list-search">
-                      <div class="md-field">
-                        <input type="search" id="field-from-search" data-element-search="from-fields" autocomplete="off" />
-                        <label for="field-from-search" class="">Ricerca</label>
-                      </div>
-                      <div class="relative-ul">
-                        <ul id="ul-from-fields" data-search-id="field-from-search" class="custom-scrollbar"></ul>
-                      </div>
-                    </section>
-                  </section>
-                  <section data-table-to>
-                    <section class="list-search">
-                      <div class="md-field">
-                        <input type="search" id="field-to-search" data-element-search="to-fields" autocomplete="off" />
-                        <label for="field-to-search" class="">Ricerca</label>
-                      </div>
-                      <div class="relative-ul">
-                        <ul id="ul-to-fields" data-search-id="field-to-search" class="custom-scrollbar"></ul>
-                      </div>
-                    </section>
-                  </section>
-                </div>
-              </section>
-            </div> -->
 
             <dialog id="dlg-columns" data-x="0" data-y="0" class="medium absolute moveable">
               <section class="dlg-grid">
@@ -511,7 +468,6 @@
             </dialog>
 
             <section class="steps" data-step="1">
-              <!--<button type="button" id="prev" class="button-icon material-icons-round md-48" disabled tooltip="Precedente" flow="right">skip_previous</button>-->
               <div class="overflow">
                 <div id="stepTranslate" data-translate-x="0">
                   <section class="step" data-step="1" selected>
@@ -680,7 +636,6 @@
                 <button id="next">Sheet</button>
               </section>
 
-              <!--<button type="button" id="next" class="button-icon material-icons-round md-48" tooltip="Anteprima report" flow="left">skip_next</button>-->
             </section>
 
           </div>

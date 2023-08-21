@@ -213,7 +213,7 @@ var Sheet;
   app.handlerDragEnd = async (e) => {
     e.preventDefault();
     if (e.dataTransfer.dropEffect === 'copy') {
-      // se la tabella non presente in sessionStorage la scarico
+      // se la tabella non è presente in sessionStorage la scarico
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
       // se sono presenti almeno due tabelle visualizzo la dialog per la join
       if (Draw.countTables > 1) {
@@ -222,8 +222,7 @@ var Sheet;
           from: app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
           to: app.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId
         }
-        console.log(WorkBook.tableJoins);
-        debugger;
+        // console.log(WorkBook.tableJoins);
         for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
           WorkBook.activeTable = value.id;
           const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
@@ -231,7 +230,9 @@ var Sheet;
         }
       }
     }
+    // creo una mappatura di tutte le tabelle del Canvas
     app.tablesMap();
+    // creo una mappatura per popolare il WorkBook nello step successivo
     app.hierTables();
   }
 
@@ -1682,8 +1683,7 @@ var Sheet;
   }
 
   app.tablesMap = () => {
-    // creo tablesMap : qui sono presenti tutte le tabelle del canvas, al suo interno le tabelle in join fino alla tabella dei fatti
-    // debugger;
+    // creo tablesMap : qui sono presenti tutte le tabelle del canvas, al suo interno le tabelle in join fino alla FACT
     const levelId = +Draw.svg.dataset.level;
     WorkBook.tablesMap.clear();
     let recursiveLevels = (levelId) => {
@@ -1708,7 +1708,6 @@ var Sheet;
 
   app.hierTables = () => {
     // creo hierTables : qui sono presenti tutte le tabelle del canvas. Questa mi serve per creare la struttura nello WorkBook
-    // debugger;
     const levelId = +Draw.svg.dataset.level;
     WorkBook.hierTables.clear();
     let recursiveLevels = (levelId) => {
@@ -1994,7 +1993,6 @@ var Sheet;
   app.addFields = (source, response) => {
     // source : from, to
     console.log(source, response);
-    debugger;
     const ul = app.dialogJoin.querySelector(`section[data-table-${source}] ul`);
     for (const [key, value] of Object.entries(response)) {
       const content = app.tmplList.content.cloneNode(true);
@@ -2008,7 +2006,7 @@ var Sheet;
       li.dataset.label = value.COLUMN_NAME;
       li.dataset.key = value.CONSTRAINT_NAME;
       span.innerText = value.COLUMN_NAME;
-      // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
+      // scrivo il tipo di dato senza specificare la lunghezza, int(8) voglio che mi scriva solo int
       let pos = value.DATA_TYPE.indexOf('(');
       let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
       span.dataset.type = type;

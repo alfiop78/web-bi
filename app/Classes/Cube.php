@@ -3,6 +3,7 @@
 namespace App\Classes;
 
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class Cube
 {
@@ -262,7 +263,7 @@ class Cube
       // var_dump($join);
       $relation = implode(" = ", $join);
       // var_dump($join);
-      /* le join relative alla TIME le inserisco in un altro array e non in WHERE_baseTable, altrimenti verrà aggiunta 
+      /* le join relative alla TIME le inserisco in un altro array e non in WHERE_baseTable, altrimenti verrà aggiunta
         la join riguardante la time anche sulle metriche filtrate
       */
       // if (!in_array($join, $this->WHERE_baseTable)) $this->WHERE_baseTable[$token] = $relation;
@@ -291,7 +292,7 @@ class Cube
 			Azienda_997.id = CodSedeDealer_765.id_Azienda \n
 			AND CodSedeDealer_765.id = DocVenditaIntestazione_055.id_CodSedeDealer \n
 			AND DocVenditaIntestazione_055.NumRifInt = DocVenditaDettaglio_560.NumRifInt \n
-			AND DocVenditaIntestazione_055.id_Azienda = DocVenditaDettaglio_560.id_Azienda 
+			AND DocVenditaIntestazione_055.id_Azienda = DocVenditaDettaglio_560.id_Azienda
 		*/
   }
 
@@ -328,7 +329,7 @@ class Cube
 			Azienda_997.id = CodSedeDealer_765.id_Azienda \n
 			AND CodSedeDealer_765.id = DocVenditaIntestazione_055.id_CodSedeDealer \n
 			AND DocVenditaIntestazione_055.NumRifInt = DocVenditaDettaglio_560.NumRifInt \n
-			AND DocVenditaIntestazione_055.id_Azienda = DocVenditaDettaglio_560.id_Azienda 
+			AND DocVenditaIntestazione_055.id_Azienda = DocVenditaDettaglio_560.id_Azienda
 		*/
   }
 
@@ -414,7 +415,7 @@ class Cube
       $timingFunctions = ['last-year', 'last-month', 'altre funzioni temporali...'];
       // dd($timingFunctions, $token);
       if (in_array($token, $timingFunctions)) {
-        /* è una funzione temporale. 
+        /* è una funzione temporale.
           Aggiungo, alla WHERE la condizione per applicare il filtro last-year.
           Da valutare se utilizzare (MapJSONExtractor(WEB_BI_TIME.last))['year']::DATE = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE
           ...oppure (WEB_BI_TIME.trans_ly) = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE.
@@ -452,7 +453,7 @@ class Cube
       // dd($token, $filter);
       $timingFunctions = ['last-year', 'year', 'r0f4im9'];
       if (in_array($token, $timingFunctions)) {
-        /* è una funzione temporale. 
+        /* è una funzione temporale.
           Aggiungo, alla WHERE la condizione per applicare il filtro last-year.
           Da valutare se utilizzare (MapJSONExtractor(WEB_BI_TIME.last))['year']::DATE = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE
           ...oppure (WEB_BI_TIME.trans_ly) = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE.
@@ -593,7 +594,7 @@ class Cube
 
   public function sheetBaseTable($mode)
   {
-    // creo una TEMP_TABLE su cui, successivamente andrò a fare una LEFT JOIN con le TEMP_TABLE contenenti le metriche
+    // creo una TEMP_TABLE su cui, successivamente, andrò a fare una LEFT JOIN con le TEMP_TABLE contenenti le metriche
     // dd($this->SELECT);
     $this->_sql = $this->SELECT;
     // se ci sono metriche a livello di report le aggiungo
@@ -626,8 +627,9 @@ class Cube
           $result = DB::connection('vertica_odbc')->statement($sql);
         }
       } else {
-        $result = DB::connection('vertica_odbc')->statement($sql);
+        // Tabella non esistente
         // dd('la tabella non esiste');
+        $result = DB::connection('vertica_odbc')->statement($sql);
       }
     }
     // dd($sql);
@@ -835,23 +837,24 @@ class Cube
     if ($mode === 'sql') {
       $result = $sql;
     } else {
-      if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
-        // dd('la tabella già esiste, la elimino');
-        $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
-        if (!$drop) {
-          // null : tabella eliminata, ricreo la tabella temporanea
+      try {
+        if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
+          // dd('la tabella già esiste, la elimino');
+          $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
+          if (!$drop) {
+            // null : tabella eliminata, ricreo la tabella temporanea
+            $result = DB::connection('vertica_odbc')->statement($sql);
+          }
+        } else {
+          // dd('la tabella non esiste');
           $result = DB::connection('vertica_odbc')->statement($sql);
         }
-      } else {
-        // dd('la tabella non esiste');
-        $result = DB::connection('vertica_odbc')->statement($sql);
+      } catch (Exception $e) {
+        // dd('ERrore gestito');
+        $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTableName;");
+        throw new Exception("Errore elaborazione richiesta", 1);
       }
     }
-    /* vecchio metodo, senza MyVerticaGrammar.php
-        $table = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='$tableName' AND SCHEMA_NAME='decisyon_cache';");
-        // dd($tables);
-        if ($table) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
-        */
     // dd($sql);
     return $result;
   }
@@ -955,6 +958,8 @@ class Cube
         // dd('Datamart non presente, lo creo');
         $result = DB::connection('vertica_odbc')->statement($sql);
       }
+      // TODO: Intercettare l'errore in caso di tabella non creata, in caso di errore bisogna eliminare
+      // le temp table relative a $this->reportId
 
       if (!$result) {
         // TODO: aggiungere un controllo sulla drop delle tabelle temporanee
