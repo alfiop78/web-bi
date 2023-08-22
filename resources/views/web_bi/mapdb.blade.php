@@ -481,7 +481,7 @@
                       </div>
                       <section id="canvas-area">
                         <menu class="standard">
-                          <section id="workbook-name" class="data-source" contenteditable="true">WorkSpace 1</section>
+                          <section id="workbook-name" class="name data-source" contenteditable="true">WorkSpace 1</section>
                           <button data-fn="workBookNew" id="btn-workbook-new" value="Nuovo" disabled>Nuovo</button>
                           <button id="btn-workbook-open" value="open">Apri</button>
                           <button data-fn="workBookClose" id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button>
@@ -540,7 +540,7 @@
                           <button type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
                         </section>
                         <section class="sheet-title">
-                          <div id="sheet-name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Sheet 1">Sheet 1</div>
+                          <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Sheet 1">Sheet 1</div>
                         </section>
                       </menu>
                       <section class="wrapper-sheet">

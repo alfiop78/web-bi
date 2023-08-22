@@ -1035,8 +1035,7 @@ var Sheet;
     WorkBook.activeTable = e.currentTarget.id;
     WorkBook.schema = e.currentTarget.dataset.schema;
     // debugger;
-    let DT = new Table(await app.getPreviewTable(), 'preview-table');
-    // DataTable.data = await app.getPreviewTable();
+    let DT = new Table(await app.getPreviewSVGTable(), 'preview-table');
     // console.log(DT.data);
     DT.draw();
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
@@ -1563,8 +1562,22 @@ var Sheet;
       });
   }
 
-  app.getPreviewTable = async () => {
+  app.getPreviewSVGTable = async () => {
     return await fetch('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_preview')
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(response => response)
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+  }
+
+  app.getPreviewTable = async (table, schema) => {
+    return await fetch('/fetch_api/' + schema + '/schema/' + table + '/table_preview')
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -1677,13 +1690,11 @@ var Sheet;
     });
   }
 
-  app.handlerTable = (e) => {
-    console.log('select table');
-    e.currentTarget.toggleAttribute('data-selected');
-    // const cardStruct = document.querySelector('*[data-waiting="true"]');
-    // cardStruct.querySelector('span').innerHTML = e.currentTarget.dataset.label;
-    // delete cardStruct.dataset.waiting;
-    // cardStruct.dataset.defined = e.currentTarget.dataset.label;
+  app.handlerTable = async (e) => {
+    let DT = new Table(await app.getPreviewTable(e.currentTarget.dataset.label, e.currentTarget.dataset.schema), 'preview-table');
+    // console.log(DT.data);
+    DT.draw();
+    DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
   }
 
   app.tablesMap = () => {

@@ -204,6 +204,11 @@ use.table[data-active]{
   height: auto;
 }
 
+.name{
+  font-weight: bold;
+  color: brown;
+}
+
 .wj-content{
   display: grid;
   grid-template-rows: auto 1fr auto 210px;
