@@ -339,7 +339,7 @@ section[data-table-from] .table, section[data-table-to] .table{
   align-items: center;
   position: relative;
   padding: 4px;
-  border-radius: 4px;
+  border-radius: 2px;
   width: 160px;
   /* height: 25px; */
 }
@@ -396,7 +396,7 @@ i[data-id="btn-set-metric"]:hover, i[data-id='btn-set-filter']:hover{
   width: 100%;
   display: grid;
   grid-row-gap: 1px;
-  transition :grid-template-rows 250ms;
+  transition: grid-template-rows 250ms;
 }
 
 #workbook-objects > section[data-section] {
@@ -427,6 +427,7 @@ i[data-id="btn-set-metric"]:hover, i[data-id='btn-set-filter']:hover{
 #workbook-objects > *[data-worksheet-object] {
   background-color: white;
   color: #494949;
+  padding: .5em;
   overflow-y: auto;
 }
 
@@ -458,18 +459,18 @@ dt dd{
 details > summary:hover{
   cursor: pointer;
   color: #005148;
-  padding-left: 4px;
+  padding-left: 2px;
 }
 
 details > summary{
   font-weight: bold;
   line-height: 1.6rem;
   padding-left: 0px;
-  transition: padding-left 250ms;
+  transition: padding 150ms;
 }
 
 details[open] > summary {
-  padding-left: 4px;
+  padding-left: 2px;
   color: #025E73;
 }
 
@@ -480,7 +481,7 @@ details > li[data-datatype='float'] {
 
 details > li {
   margin: 2px 8px;
-  margin-inline-start: 2em;
+  margin-inline-start: 1.2em;
   line-height: 1.6rem;
   border-radius: 2px;
 }
@@ -531,14 +532,7 @@ li:not([draggable]):hover > i {
 }
 
 details > li[data-type="column"] {
-  background-color: #025E73;
-  color: white;
-  width: 180px;
-  max-width: 180px;
-}
-
-#textarea-metric.dropzone{
-  border: solid thin #494949;
+  color: #025E73;
 }
 
 #textarea-metric.dropzone.dropping{
@@ -569,13 +563,19 @@ code[data-alias] {
   width: 100%;
 }
 
-menu {
+menu{
+  padding: 8px;
+  margin: 0px;
+}
+
+menu.standard {
   display: flex;
   align-items: center;
   padding: 8px;
   margin: 0;
   gap: 1em;
-  background-color: #BFB78F;
+  box-shadow: 0px 0px 8px 0px grey;
+  /* background-color: #BFB78F; */
 }
 
 menu.horizontal-menu {
@@ -585,7 +585,6 @@ menu.horizontal-menu {
   padding: 4px;
   margin: 0;
   gap: 1em;
-  background-color: darkkhaki;
 }
 
 section.filter-area-drop {
@@ -602,10 +601,12 @@ p.field-search {
   flex-direction: row;
   justify-content: space-between;
 }
+
 input {
   padding: 8px 4px;
   border: none;
   width: 100%;
+  max-width: 400px;
   outline: none;
 }
 
@@ -665,7 +666,6 @@ input:read-write::placeholder{
   color: peru;
 }
 
-
 button.btn-link{
   border: unset;
   background-color: unset;
@@ -674,6 +674,18 @@ button.btn-link{
 }
 
 button.btn-link:hover{
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.btn-link{
+  border: unset;
+  background-color: unset;
+  color: brown;
+  font-style: italic;
+}
+
+.btn-link:hover{
   cursor: pointer;
   text-decoration: underline;
 }

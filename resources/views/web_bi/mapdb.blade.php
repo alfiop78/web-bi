@@ -50,7 +50,7 @@
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
-      <i data-id="metric-new" class="material-icons-round md-18">add</i>
+      <!-- <i data-id="metric-new" class="material-icons-round md-18">add</i> -->
     </li>
 
     <li data-li-drag data-element-search data-label data-advanced data-searchable="true" draggable="true">
@@ -184,6 +184,7 @@
       </ul>
 
       <ul id="ul-context-menu-basic">
+        <li data-fn="newAdvMeasure">Crea metrica filtrata</li>
         <li data-fn="removeMetric">Elimina</li>
         <li data-fn="renameMetric">Rinomina</li>
         <li>ecc...</li>
@@ -292,69 +293,68 @@
           </dialog>
 
           <!-- creazione metrica filtrata -->
-          <dialog id="dlg-metric" data-x="0" data-y="0" class="medium absolute moveable">
+          <dialog id="dlg-metric" data-x="0" data-y="0" class="large absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Metrica</h5>
               <section class="dlg-content col col-3">
                 <section class="filter-area-drop">
-                  <small>Aggiungere qui i filtri per creare una metrica filtrata</small>
+                  <h6>Aggiungere qui i filtri per creare una metrica filtrata</h6>
                   <nav id="filter-drop" class="custom-scrollbar dropzone"></nav>
                 </section>
                 <section class="textarea-formula">
-                  <div class="md-field">
-                    <input type="text" id="adv-metric-name" value="" autocomplete="off" />
-                    <label for="adv-metric-name" class="">Nome</label>
-                  </div>
+                  <input type="text" id="adv-metric-name" placeholder="Nome" value="" autocomplete="off" />
                   <div id="textarea-metric" class="dropzone textarea" data-content-editable contenteditable="true"></div>
                 </section>
-                <section class="overflow-y">
-                  <small>Funzioni temporali</small>
-                  <dl id="dl-timing-functions" class="custom-scrollbar">
-                    <dt>Last Period/Day</dt>
-                    <dd>Periodo temporale precedente, rispetto al livello più basso presente nel report.<br /> Ad esempio se nel report è presente il livello giorno, la funzione presenta i dati del giorno precedente, se invece è presente la settimana, presenta i dati della settimana precedente, ecc</dd>
+                <section class="list-search">
+                  <h6>Funzioni temporali</h6>
+                  <div class="relative-ul">
+                    <dl id="dl-timing-functions" class="custom-scrollbar">
+                      <dt class="btn-link">Last Period/Day</dt>
+                      <dd>Periodo temporale precedente, rispetto al livello più basso presente nel report.<br /> Ad esempio se nel report è presente il livello giorno, la funzione presenta i dati del giorno precedente, se invece è presente la settimana, presenta i dati della settimana precedente, ecc</dd>
 
-                    <dt>Last Week</dt>
-                    <dd>description</dd>
+                      <dt class="btn-link">Last Week</dt>
+                      <dd>description</dd>
 
-                    <dt data-value="last-month" data-fn="handlerTimingFunctions" data-time-field="month">Last Month</dt>
-                    <dd>description</dd>
+                      <dt data-value="last-month" class="btn-link" data-fn="handlerTimingFunctions" data-time-field="month">Last Month</dt>
+                      <dd>description</dd>
 
-                    <dt>Last Quarter</dt>
-                    <dd>description</dd>
+                      <dt class="btn-link">Last Quarter</dt>
+                      <dd>description</dd>
 
-                    <dt data-value="last-year" data-fn="handlerTimingFunctions" data-time-field="year">Last Year</dt>
-                    <dd>La funzione presenta i dati relativi all’anno precedente, rispetto al livello presente nel report.<br /> Ad esempio se nel report è presente il livello mese, la funzione presenta i dati relativi allo stesso mese, ma dell’anno precedente, per il livello trimestre, presenta invece i dati dello stesso trimestre, ma dell’anno precedente</dd>
+                      <dt class="btn-link" data-value="last-year" data-fn="handlerTimingFunctions" data-time-field="year">Last Year</dt>
+                      <dd>La funzione presenta i dati relativi all’anno precedente, rispetto al livello presente nel report.<br /> Ad esempio se nel report è presente il livello mese, la funzione presenta i dati relativi allo stesso mese, ma dell’anno precedente, per il livello trimestre, presenta invece i dati dello stesso trimestre, ma dell’anno precedente</dd>
 
-                    <dt>MAT</dt>
-                    <dd>La funzione aggrega i dati relativi ai 12 mesi precedenti quello corrente.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito.</dd>
+                      <dt class="btn-link">MAT</dt>
+                      <dd>La funzione aggrega i dati relativi ai 12 mesi precedenti quello corrente.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito.</dd>
 
-                    <dt>Last Year MAT</dt>
-                    <dd>Analoga alla MAT, solamente che è applicata rispetto al mese corrente dell’anno precedente.</dd>
+                      <dt class="btn-link">Last Year MAT</dt>
+                      <dd>Analoga alla MAT, solamente che è applicata rispetto al mese corrente dell’anno precedente.</dd>
 
-                    <dt>Last To Date</dt>
-                    <dd>La funzione aggrega i dati da inizio mese fino al giorno corrente.<br /> Il livello DAY deve essere presente nel report</dd>
+                      <dt class="btn-link">Last To Date</dt>
+                      <dd>La funzione aggrega i dati da inizio mese fino al giorno corrente.<br /> Il livello DAY deve essere presente nel report</dd>
 
-                    <dt>Last Year MTD</dt>
-                    <dd>Analoga alla Month to date, solamente che è applicata sui dati dell’anno precedente: da inizio mese al giorno corrente dell’anno precedente.</dd>
+                      <dt class="btn-link">Last Year MTD</dt>
+                      <dd>Analoga alla Month to date, solamente che è applicata sui dati dell’anno precedente: da inizio mese al giorno corrente dell’anno precedente.</dd>
 
-                    <dt>Year To Date</dt>
-                    <dd>La funzione aggrega i dati da inizio anno fino al giorno corrente. Il livello DAY deve essere presente nel report.</dd>
+                      <dt class="btn-link">Year To Date</dt>
+                      <dd>La funzione aggrega i dati da inizio anno fino al giorno corrente. Il livello DAY deve essere presente nel report.</dd>
 
-                    <dt>Last Year YTD</dt>
-                    <dd>Analoga alla Year to date, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al giorno corrente, sempre riferito all’anno precedente</dd>
+                      <dt class="btn-link">Last Year YTD</dt>
+                      <dd>Analoga alla Year to date, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al giorno corrente, sempre riferito all’anno precedente</dd>
 
-                    <dt>Year To Month</dt>
-                    <dd>La funzione aggrega i dati da inizio anno fino al mese corrente. Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
+                      <dt class="btn-link">Year To Month</dt>
+                      <dd>La funzione aggrega i dati da inizio anno fino al mese corrente. Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
 
-                    <dt>Last Year YTM</dt>
-                    <dd>Analoga alla Year to month, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al mese corrente, sempre riferito all’anno precedente</dd>
+                      <dt class="btn-link">Last Year YTM</dt>
+                      <dd>Analoga alla Year to month, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al mese corrente, sempre riferito all’anno precedente</dd>
 
-                    <dt>Last 2 Month</dt>
-                    <dd>La funzione presenta i dati relativi ai due mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
+                      <dt class="btn-link">Last 2 Month</dt>
+                      <dd>La funzione presenta i dati relativi ai due mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
 
-                    <dt>Last 3 Month</dt>
-                    <dd>La funzione presenta i dati relativi ai tre mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
-                    </ul>
+                      <dt class="btn-link">Last 3 Month</dt>
+                      <dd>La funzione presenta i dati relativi ai tre mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
+                    </dl>
+                  </div>
                 </section>
               </section>
               <section class="dlg-buttons">
@@ -486,7 +486,7 @@
                         </ul>
                       </div>
                       <section id="canvas-area">
-                        <menu>
+                        <menu class="standard">
                           <section id="workbook-name" class="data-source" contenteditable="true">WorkSpace 1</section>
                           <button data-fn="workBookNew" id="btn-workbook-new" value="Nuovo" disabled>Nuovo</button>
                           <button id="btn-workbook-open" value="open">Apri</button>
@@ -538,7 +538,7 @@
                   </section>
                   <section class="step" data-step="2">
                     <section class="wrapper-content">
-                      <menu>
+                      <menu class="standard">
                         <section class="buttons-menu">
                           <button type="button" disabled>Aggiungi WorkBook (analisi multifatti)</button>
                           <button type="button" id="btn-sheet-new" data-fn="newSheet" disabled>Nuovo Sheet</button>
@@ -598,7 +598,7 @@
                             </section>
                           </section>
                           <section class="table-preview">
-                            <menu>
+                            <menu class="">
                               <input type="search" placeholder="Ricerca colonne" />
                               <button id="btn-sheet-preview" data-fn="createProcess" value="Elabora">Elabora</button>
                             </menu>

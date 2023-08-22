@@ -12,23 +12,36 @@ ul{
   margin-block-start: unset;
   padding-block-end: 0em;
   margin-block-end: unset;
+  background-color: white;
+}
+
+dl{
+  background-color: transparent;
+}
+
+dt{
+  margin: 8px 0px;
+}
+
+dd{
+  margin-inline-start: 2em;
 }
 
 li{
   list-style: none;
-  left: 0px;
+  padding-left: 0px;
   line-height: 1.7rem;
   position: relative;
   display: flex;
   justify-content: space-between;
-  transition: left 150ms;
+  transition: padding 150ms;
   align-items: center;
 }
 
 li:hover {
   cursor: pointer;
   color: steelblue;
-  left: 2px;
+  padding-left: 2px;
 }
 
 li:hover > i {
@@ -78,17 +91,14 @@ li.icon > span{
   position: relative;
 }
 
-.relative-ul > ul {
+.relative-ul > ul, .relative-ul > dl {
   position: absolute;
   width: 100%;
   height: 100%;
-  background-color: white;
   overflow: auto;
   padding-inline-start: 6px;
   padding-block-start: 6px;
   padding-block-end: 6px;
-  /* border-radius: 4px; */
-  /* box-shadow: 0px 1px 4px -1px #898585; */
 }
 
 .btn-toggle {
@@ -123,12 +133,8 @@ nav[data-filters-defined] > li[data-selected] {
   color: white;
 }
 
-ul.custom-scrollbar {
+.custom-scrollbar {
   overflow: auto;
-}
-
-.overflow-y {
-  overflow-y: auto;
 }
 
 dd {
@@ -136,8 +142,7 @@ dd {
 }
 
 dt[selected] {
-  background-color: orange;
-  color: #494949;
+  font-weight: bold;
 }
 
 *[data-id="value-icons"] > div {

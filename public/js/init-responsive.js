@@ -2083,7 +2083,8 @@ var Sheet;
   }
 
   // apertura dialog per la creazione di una nuova metrica
-  app.newMetric = (e) => {
+  app.newAdvMeasure = (e) => {
+    app.contextMenuRef.toggleAttribute('open');
     // TODO: aggiungo la formula della metrica (SUM(NettoRiga)) nella textarea ma, in questo caso la textarea è disabilitata.
     // nella metrica filtrata posso modificare solo la funzione di aggregazione
     console.log(e.target);
@@ -2230,25 +2231,24 @@ var Sheet;
         const tmpl = app.tmplList.content.cloneNode(true);
         const li = tmpl.querySelector(`li[data-li-drag][data-${value.metric_type}]`);
         const content = li.querySelector('.li-content');
-        const btnDrag = content.querySelector('i');
+        // const btnDrag = content.querySelector('i');
         const span = content.querySelector('span');
-        let btnAdd;
+        // let btnAdd;
         // il tasto metric-new è presente solo sulla metrica di base
-        if (value.metric_type === 'basic') btnAdd = li.querySelector('i[data-id="metric-new"]');
+        // if (value.metric_type === 'basic') btnAdd = li.querySelector('i[data-id="metric-new"]');
         li.id = token;
         li.dataset.type = value.metric_type;
         li.dataset.elementSearch = 'metrics';
         li.dataset.label = value.alias;
         // definisco quale context-menu-template apre questo elemento
         li.dataset.contextmenu = `ul-context-menu-${value.metric_type}`;
-        // TODO: gli eventi drag dovranno essere posizionati sul btnDrag, quindi anche l'attributo id
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
         li.addEventListener('contextmenu', openContextMenu);
-        if (value.metric_type === 'basic') {
+        /* if (value.metric_type === 'basic') {
           btnAdd.dataset.token = token;
-          btnAdd.addEventListener('click', app.newMetric);
-        }
+          btnAdd.addEventListener('click', app.newAdvMeasure);
+        } */
         span.innerHTML = value.alias;
         parent.appendChild(li);
       }

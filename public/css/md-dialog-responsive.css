@@ -134,10 +134,12 @@ dialog > .dlg-grid > .dlg-content.col{
   /* grid-template-rows: auto auto 1fr; */
   padding: 0px 1rem;
   row-gap: .5em;
+  column-gap: .5em;
 }
 
 dialog nav{
   overflow-y: auto;
+  padding: .5em;
 }
 
 dialog nav > details > li {
@@ -164,9 +166,9 @@ dialog .textarea-formula{
   grid-template-columns: 260px 1fr;
 }
 
-.col-3{
+/* .col-3{
   grid-auto-flow: column;
-}
+} */
 
 .col-2-equals{
   grid-template-columns: 50% 50%;
