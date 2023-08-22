@@ -110,8 +110,11 @@ var Sheet;
     const { right: mouseX, top: mouseY } = e.target.getBoundingClientRect();
     app.contextMenuTableRef.style.top = `${mouseY}px`;
     app.contextMenuTableRef.style.left = `${mouseX + 4}px`;
+    // Imposto la tabella attiva, su cui si è attivato il context-menu
     WorkBook.activeTable = e.currentTarget.id;
+    // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
     app.contextMenuTableRef.toggleAttribute('open');
+    document.querySelectorAll('#ul-context-menu-table li').forEach(item => item.dataset.id = WorkBook.activeTable.id);
   }
 
   // imposto un alias per tabella aggiunta al canvas

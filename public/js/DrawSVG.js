@@ -14,6 +14,7 @@ class DrawSVG {
 
   set tables(value) {
     this.#tables.set(value.id, value.properties);
+    console.log(this.#tables);
   }
 
   get countTables() {
@@ -163,8 +164,8 @@ class DrawSVG {
           if (properties.join === table.id) y += properties.y;
         }
         // la tabella in ciclo verrà riposizionata in base a y calcolato.
-        // Se sono presenti due tabelle in join con 'table' (in ciclo) le posizioni y di queste tabelle vengono sommate (nel for) e 
-        // ...poi divise per il numero di tabelle join, in questo modo la tabella in ciclo viene posizionata al centro 
+        // Se sono presenti due tabelle in join con 'table' (in ciclo) le posizioni y di queste tabelle vengono sommate (nel for) e
+        // ...poi divise per il numero di tabelle join, in questo modo la tabella in ciclo viene posizionata al centro
         this.tables.get(table.id).y = (y / table.dataset.joins);
         this.tables.get(table.id).line.from.y = (y / table.dataset.joins) + 15;
         this.tables.get(table.id).line.to.y = (y / table.dataset.joins) + 15;
