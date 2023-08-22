@@ -64,29 +64,6 @@ li.icon > span{
   margin-left: .5rem;
 }
 
-/* li[draggable].dragging{
-  border: solid thin gainsboro;
-  border-radius: 1px;
-} */
-
-/* ul li[data-selected]::before {
-  content: '';
-  background: sienna;
-  width: 5px;
-  height: 100%;
-  position: absolute;
-  left: 0px;
-} */
-
-/* ul li:not([draggable]):hover::before{
-  content: '';
-  background: sienna;
-  width: 5px;
-  height: 100%;
-  position: absolute;
-  left: 0px;
-} */
-
 .relative-ul {
   position: relative;
 }
@@ -99,6 +76,13 @@ li.icon > span{
   padding-inline-start: 6px;
   padding-block-start: 6px;
   padding-block-end: 6px;
+}
+
+.relative-ul > nav {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
 }
 
 .btn-toggle {

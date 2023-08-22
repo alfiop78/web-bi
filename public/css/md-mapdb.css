@@ -338,23 +338,26 @@ section[data-table-from] .table, section[data-table-to] .table{
   display: flex;
   align-items: center;
   position: relative;
-  padding: 4px;
+  padding: 4px 8px;
   border-radius: 2px;
-  width: 160px;
-  /* height: 25px; */
+  width: auto;
 }
 
 .column-defined[data-type="column"]{
-  background-color: lightcyan;
+  background-color: #025E73;
+}
+
+.column-defined[data-type="column"] > i{
+  color: whitesmoke;
 }
 
 .column-defined[data-type="metric"]{
-  background-color: lightgreen;
+  background-color: seagreen;
 }
 
 .metric-defined{
-  background-color:teal;
-  color: white;
+  background-color: seagreen;
+  color: whitesmoke;
 }
 
 .metric-defined[data-type="basic"] {
@@ -495,6 +498,26 @@ details > li {
   justify-content: space-between;
 }
 
+li[data-selected] {
+  font-weight: bold;
+}
+
+li[data-selected] > i[data-mode="add"] {
+  display: none;
+}
+
+li[data-selected] > i[data-mode="remove"] {
+  display: block;
+}
+
+li:not([data-selected]) > i[data-mode="add"] {
+  display: block;
+}
+
+li:not([data-selected]) > i[data-mode="remove"] {
+  display: none;
+}
+
 li:not([draggable]) > i{
   visibility: hidden;
 }
@@ -541,8 +564,7 @@ details > li[data-type="column"] {
 
 code[contenteditable="true"] {
   outline: none;
-  background-color: green;
-  padding: 2px 4px;
+  color: whitesmoke;
   font-family: monospace;
 }
 

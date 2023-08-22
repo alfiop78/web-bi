@@ -1200,12 +1200,21 @@ var Sheet;
     app.addSpan(txtArea, null, 'filter');
   }
 
-  // aggiungo il filtro selezionato, allo Sheet
+  // aggiungo il filtro selezionato allo Sheet
   app.addFilter = (e) => {
     Sheet.filters = e.currentTarget.dataset.token;
     // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
     const li = document.getElementById(e.currentTarget.dataset.token);
     li.dataset.selected = 'true';
+  }
+
+  // rimuovo il filtro selezionato dallo Sheet
+  app.removeFilter = (e) => {
+    Sheet.filters = e.currentTarget.dataset.token;
+    // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
+    const li = document.getElementById(e.currentTarget.dataset.token);
+    delete li.dataset.selected;
+    // TODO: implementazione
   }
 
   /*
@@ -1255,11 +1264,6 @@ var Sheet;
         txtArea.appendChild(span);
       }
     });
-  }
-
-  app.removeFilter = (e) => {
-    // TODO: implementazione
-    console.log(e.target.dataset.token);
   }
 
   app.renameFilter = (e) => {
@@ -2265,6 +2269,7 @@ var Sheet;
       const btnDrag = content.querySelector('i');
       const span = content.querySelector('span');
       const btnAdd = li.querySelector('i[data-id="filters-add"]');
+      const btnRemove = li.querySelector('i[data-id="filters-remove"]');
       li.id = token;
       li.dataset.elementSearch = 'filters';
       li.dataset.label = value.name;
@@ -2278,14 +2283,16 @@ var Sheet;
       li.addEventListener('dragend', app.fieldDragEnd);
       li.addEventListener('contextmenu', openContextMenu);
       btnAdd.dataset.token = token;
+      btnRemove.dataset.token = token;
       btnAdd.addEventListener('click', app.addFilter);
+      btnRemove.addEventListener('click', app.removeFilter);
       span.innerHTML = value.name;
       parent.appendChild(li);
     }
   }
 
+  // Apertura step Sheet, vengono caricati gli elementi del WorkBook
   app.addTablesStruct = async () => {
-    // ripulisco la struttura già presente.
     // TODO: in futuro dovrò aggiornare la struttura già presente (e non resettare).
     // ...in questo modo, gli elementi aggiunti al report non verranno resettati
     app.workbookTablesStruct.querySelectorAll('details').forEach(detail => detail.remove());

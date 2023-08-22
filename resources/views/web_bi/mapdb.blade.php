@@ -42,7 +42,8 @@
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
-      <i data-id="filters-add" class="material-icons-round md-18">add</i>
+      <i data-id="filters-add" class="material-icons-round md-18" data-mode="add">add</i>
+      <i data-id="filters-remove" class="material-icons-round md-18" data-mode="remove">remove</i>
     </li>
 
     <li data-li-drag data-element-search data-label data-basic data-searchable="true" draggable="true">
@@ -262,7 +263,7 @@
 
           <dialog id="dialog-sheet-open">
             <section class="dlg-grid">
-              <section class="dlg-title">Apertura nuovo Sheet</section>
+              <h5 class="title">Apertura Sheet</h5>
               <section class="dlg-content col col-1">
                 <nav data-sheet-defined></nav>
               </section>
@@ -278,10 +279,7 @@
               <h5 class="title moveable">Creazione Metrica Composta</h5>
               <section class="dlg-content col col-1">
                 <section class="textarea-formula">
-                  <div class="md-field">
-                    <input type="text" id="composite-metric-name" value="" autocomplete="off" />
-                    <label for="composite-metric-name" class="">Nome</label>
-                  </div>
+                  <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" />
                   <div id="textarea-composite-metric" data-fn="addText" data-content-editable class="dropzone textarea"></div>
                 </section>
               </section>
@@ -428,23 +426,19 @@
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Filtro</h5>
               <section class="dlg-content col col-2">
-                <nav class="custom-scrollbar" data-search-id="input-search-columns">
-                  <section class="input-search">
-                    <div class="md-field">
-                      <input type="search" id="input-search-columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off" autocomplete="off">
-                      <label for="column-search" class="">Ricerca</label>
-                    </div>
-                  </section>
-                </nav>
-                <section class="textarea-formula">
-                  <div class="md-field">
-                    <input type="text" id="custom-filter-name" value="" autocomplete="off" />
-                    <label for="custom-filter-name" class="">Nome</label>
+                <div class="list-search">
+                  <input type="search" id="input-search-columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off" autocomplete="off">
+                  <div class="relative-ul">
+                    <nav class="custom-scrollbar" data-search-id="input-search-columns">
+                    </nav>
                   </div>
+                </div>
+                <section class="textarea-formula">
+                  <input type="text" id="custom-filter-name" placeholder="Nome" value="" autocomplete="off" />
                   <div id="textarea-filter" data-fn="addText" class="textarea" data-content-editable></div>
                 </section>
               </section>
-              <section class="buttons">
+              <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
                 <button data-fn="saveFilter" id="btn-filter-save" value="salva" data-mode="new">Salva</button>
               </section>
