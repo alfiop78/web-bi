@@ -909,6 +909,7 @@ var Sheet;
       // se la tabella è già presente in sessionStorage non rieseguo la query
       Draw.svg.querySelector(`#${tableId}`).addEventListener('contextmenu', app.contextMenuTable);
     }
+    Draw.checkResizeSVG();
     app.dialogWorkBook.close();
   }
 
@@ -1875,11 +1876,38 @@ var Sheet;
   }
 
   // rimozione tabella dal draw SVG
+  // TODO: da implementare
   app.removeTable = (e) => {
-    // tabella in join con e.currentTarget
-    debugger;
-    // TODO: da implementare
-    const tableJoin = Draw.tables.get(e.currentTarget.dataset.id).join;
+    app.contextMenuTableRef.toggleAttribute('open');
+    // Elimino la tabella corrente
+    Draw.svg.querySelector(`use.table[id='${e.currentTarget.dataset.id}']`).remove();
+    Draw.tables.delete(e.currentTarget.dataset.id); // svg-data-x
+    Draw.svg.querySelector(`g#struct-${e.currentTarget.dataset.id}`).remove();
+    // Elimino la joinLine che contiene e.currentTarget.id
+    const line = Draw.svg.querySelector(`path[data-from='${e.currentTarget.dataset.id}'], path[data-to='${e.currentTarget.dataset.id}']`);
+    if (line) Draw.deleteJoinLine(line.id);
+
+    let recursive = (key) => {
+      // utilizzo la funzione filter per trovare tutte le tabelle che hanno
+      // data-table-join = key per poterle eliminare
+      [...Draw.svg.querySelectorAll(`use.table[data-table-join='${key}']`)].filter(table => {
+        // rimuovo il <g> all'interno di <defs>
+        Draw.svg.querySelector(`g#struct-${table.id}`).remove();
+        table.remove();
+        Draw.tables.delete(table.id);
+        // Elimino anche le joinLine relative alla tabella eliminata
+        let line = Draw.svg.querySelector(`path[data-from='${table.id}'], path[data-to='${table.id}']`);
+        if (line) Draw.deleteJoinLine(line.id);
+        // richiamo la Fn ricorsiva per poter utilizzare la stessa logica partendo
+        // dalla tabella appena rimossa
+        recursive(table.id);
+      });
+    }
+    recursive(e.currentTarget.dataset.id);
+    // Se è presente una sola tabella resetto Draw.tableJoin
+    if (Draw.tables.size <= 1) delete Draw.tableJoin;
+    // Elimino la tabella e le joinLine legate a questa tabella
+    /* const tableJoin = Draw.tables.get(e.currentTarget.dataset.id).join;
     const tableJoinRef = Draw.svg.querySelector(`#${tableJoin}`);
     // se è presente una tabella legata a currentTarget, in join, sto eliminando una tabella nella prop 'to' della joinLines
     const joinLineKey = () => {
@@ -1899,9 +1927,9 @@ var Sheet;
     Draw.svg.querySelector(`#${e.currentTarget.dataset.id}`).remove();
     Draw.tables.delete(e.currentTarget.dataset.id); // svg-data-x
     delete Draw.tableJoin;
-    console.log(Draw.tables);
+    console.log(Draw.tables); */
     // rimuovo anche il <g> all'interno di <defs>
-    Draw.svg.querySelector(`g#struct-${e.currentTarget.dataset.id}`).remove();
+    // Draw.svg.querySelector(`g#struct-${e.currentTarget.dataset.id}`).remove();
   }
 
   // salvataggio dimensione TIME

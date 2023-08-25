@@ -470,6 +470,13 @@
                 <div id="stepTranslate" data-translate-x="0">
                   <section class="step" data-step="1" selected>
                     <section class="wrapper-step">
+                      <menu class="standard">
+                        <section id="workbook-name" class="name data-source" contenteditable="true">WorkSpace 1</section>
+                        <button data-fn="workBookNew" id="btn-workbook-new" value="Nuovo" disabled>Nuovo</button>
+                        <button id="btn-workbook-open" value="open">Apri</button>
+                        <button data-fn="workBookClose" id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button>
+                        <button id="btn-versioning" value="Versionamento">Versionamento</button>
+                      </menu>
                       <div id="context-menu-table" class="context-menu">
                         <ul id="ul-context-menu-table">
                           <li id="time-dimension" data-fn="handlerTimeDimension">Dimensione TIME</li>
@@ -480,13 +487,6 @@
                         </ul>
                       </div>
                       <section id="canvas-area">
-                        <menu class="standard">
-                          <section id="workbook-name" class="name data-source" contenteditable="true">WorkSpace 1</section>
-                          <button data-fn="workBookNew" id="btn-workbook-new" value="Nuovo" disabled>Nuovo</button>
-                          <button id="btn-workbook-open" value="open">Apri</button>
-                          <button data-fn="workBookClose" id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button>
-                          <button id="btn-versioning" value="Versionamento">Versionamento</button>
-                        </menu>
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
                           <svg id="svg" class="dropzone" data-level="0">
                             <defs>

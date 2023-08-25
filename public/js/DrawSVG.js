@@ -40,15 +40,16 @@ class DrawSVG {
       return (+current.dataset.y > +prev.dataset.y) ? current : prev;
     });
     if (1 - (+maxHeightTable.dataset.y / +this.svg.dataset.height) < 0.30) {
-      this.svg.dataset.height = +this.svg.dataset.height + 60;
+      // this.svg.dataset.height = +this.svg.dataset.height + 60;
+      this.svg.dataset.height = +maxHeightTable.dataset.y + 60;
       this.svg.style.height = `${+this.svg.dataset.height}px`;
     }
-
     let maxWidthTable = [...this.svg.querySelectorAll('use.table')].reduce((prev, current) => {
       return (+current.dataset.x > +prev.dataset.x) ? current : prev;
     });
     if (1 - (+maxWidthTable.dataset.x / +this.svg.dataset.width) < 0.40) {
-      this.svg.dataset.width = +this.svg.dataset.width + 180;
+      // this.svg.dataset.width = +this.svg.dataset.width + 180;
+      this.svg.dataset.width = +maxWidthTable.dataset.x + 180;
       this.svg.style.width = `${+this.svg.dataset.width}px`;
     }
   }
