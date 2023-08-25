@@ -143,8 +143,11 @@ var Sheet;
     // creo la linea
     if (Draw.svg.querySelectorAll('.table').length > 0) {
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      line.id = `line-${Draw.svg.querySelectorAll('use.table').length}`;
-      line.dataset.id = Draw.svg.querySelectorAll('use.table').length;
+      const token = rand().substring(0, 4);
+      // line.id = `line-${Draw.svg.querySelectorAll('use.table').length}`;
+      // line.dataset.id = Draw.svg.querySelectorAll('use.table').length;
+      line.id = `line-${token}`;
+      line.dataset.id = token;
       Draw.svg.appendChild(line);
       Draw.currentLineRef = line.id;
     }
@@ -247,11 +250,11 @@ var Sheet;
     // const elementId = e.dataTransfer.getData('text/plain');
     const liElement = document.getElementById(e.dataTransfer.getData('text/plain'));
     liElement.classList.remove('dragging');
-    const tableId = Draw.svg.querySelectorAll('use.table').length;
-    // let coords = { x: e.offsetX - app.dragElementPosition.x, y: e.offsetY - app.dragElementPosition.y }
+    const time = Date.now().toString();
+    const tableId = time.substring(time.length - 5);
+    // const tableId = Draw.svg.querySelectorAll('use.table').length;
     let coords;
     // TODO: alias per la tabella appena aggiunta (in sospeso)
-    const time = Date.now().toString();
     // card.dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`;
 
     // se non è presente una tableJoin significa che sto aggiungendo la prima tabella
@@ -652,7 +655,6 @@ var Sheet;
   // salva metrica composta di base
   app.saveCustomMetric = () => {
     const alias = document.getElementById('custom-metric-name').value;
-    const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
     let arr_sql = [];
     let fields = [];

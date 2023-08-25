@@ -156,6 +156,7 @@ class DrawSVG {
   joinTablePositioning() {
     // recupero tutte le tabelle con data-joins > 1 partendo dal livello più alto (l'ultimo)
     // ciclo dal penultimo livello fino a 0 per riposizionare tutti gli elementi che hanno più di 1 join con altre tabelle
+    debugger;
     this.arrayLevels.forEach(levelId => {
       // il primo ciclo recupera le tabelle del penultimo level (le tabelle dell'ultimo level non hanno altre tabelle collegate ad esse)
       // this.svg.querySelectorAll(`use.table[data-level-id='${levelId}']:not([data-joins='1'], [data-joins='0'])`).forEach(table => {
