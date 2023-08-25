@@ -1885,6 +1885,7 @@ var Sheet;
     if (tableJoin) {
       const tableJoinRef = Draw.svg.querySelector(`#${tableJoin}`);
       tableJoinRef.dataset.joins--;
+      Draw.tables.get(tableJoin).joins--;
     }
     Draw.tables.delete(e.currentTarget.dataset.id); // svg-data-x
     Draw.svg.querySelector(`g#struct-${e.currentTarget.dataset.id}`).remove();

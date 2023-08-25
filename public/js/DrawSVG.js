@@ -158,19 +158,23 @@ class DrawSVG {
     // ciclo dal penultimo livello fino a 0 per riposizionare tutti gli elementi che hanno più di 1 join con altre tabelle
     this.arrayLevels.forEach(levelId => {
       // il primo ciclo recupera le tabelle del penultimo level (le tabelle dell'ultimo level non hanno altre tabelle collegate ad esse)
-      this.svg.querySelectorAll(`use.table[data-level-id='${levelId}']:not([data-joins='1'], [data-joins='0'])`).forEach(table => {
+      // this.svg.querySelectorAll(`use.table[data-level-id='${levelId}']:not([data-joins='1'], [data-joins='0'])`).forEach(table => {
+      this.svg.querySelectorAll(`use.table[data-level-id='${levelId}']:not([data-joins='0'])`).forEach(table => {
         // this.svg.querySelectorAll(`use.table[data-level-id='${levelId}']`).forEach(table => {
         let y = 0;
         // verifico la posizione y delle tabelle legate in join con quella in ciclo
         for (let properties of this.tables.values()) {
           if (properties.join === table.id) y += properties.y;
         }
+        const yResult = (y / +table.dataset.joins);
         // la tabella in ciclo verrà riposizionata in base a y calcolato.
         // Se sono presenti due tabelle in join con 'table' (in ciclo) le posizioni y di queste tabelle vengono sommate (nel for) e
         // ...poi divise per il numero di tabelle join, in questo modo la tabella in ciclo viene posizionata al centro
-        this.tables.get(table.id).y = (y / +table.dataset.joins);
-        this.tables.get(table.id).line.from.y = (y / +table.dataset.joins) + 15;
-        this.tables.get(table.id).line.to.y = (y / +table.dataset.joins) + 15;
+        this.tables.get(table.id).y = yResult;
+        this.tables.get(table.id).line.from.y = yResult + 15;
+        this.tables.get(table.id).line.to.y = yResult + 15;
+        // this.tables.get(table.id).line.from.y = (y / +table.dataset.joins) + 15;
+        // this.tables.get(table.id).line.to.y = (y / +table.dataset.joins) + 15;
         this.currentTable = this.tables.get(table.id);
         this.autoPosition();
       });
