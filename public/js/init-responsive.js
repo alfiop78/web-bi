@@ -1876,11 +1876,16 @@ var Sheet;
   }
 
   // rimozione tabella dal draw SVG
-  // TODO: da implementare
   app.removeTable = (e) => {
     app.contextMenuTableRef.toggleAttribute('open');
     // Elimino la tabella corrente
     Draw.svg.querySelector(`use.table[id='${e.currentTarget.dataset.id}']`).remove();
+    // decremento data-joins della tabella in relazione con questa che sto eliminando
+    const tableJoin = Draw.tables.get(e.currentTarget.dataset.id).join;
+    if (tableJoin) {
+      const tableJoinRef = Draw.svg.querySelector(`#${tableJoin}`);
+      tableJoinRef.dataset.joins--;
+    }
     Draw.tables.delete(e.currentTarget.dataset.id); // svg-data-x
     Draw.svg.querySelector(`g#struct-${e.currentTarget.dataset.id}`).remove();
     // Elimino la joinLine che contiene e.currentTarget.id
@@ -1906,30 +1911,14 @@ var Sheet;
     recursive(e.currentTarget.dataset.id);
     // Se è presente una sola tabella resetto Draw.tableJoin
     if (Draw.tables.size <= 1) delete Draw.tableJoin;
-    // Elimino la tabella e le joinLine legate a questa tabella
-    /* const tableJoin = Draw.tables.get(e.currentTarget.dataset.id).join;
-    const tableJoinRef = Draw.svg.querySelector(`#${tableJoin}`);
-    // se è presente una tabella legata a currentTarget, in join, sto eliminando una tabella nella prop 'to' della joinLines
-    const joinLineKey = () => {
-      for (const [key, value] of Draw.joinLines) {
-        if ((value.to === e.currentTarget.dataset.id && value.from === tableJoin) || (value.from === e.currentTarget.dataset.id && value.to === tableJoin)) {
-          // console.log(`linea da eliminare ${key}`);
-          return key;
-        }
-      }
+    // ricalcolo del levelId dopo l'eliminazione di una o più tabelle.
+    // Il data-level è impostato sull'elemento <svg> Draw.svg
+    // Ciclo Draw.tables per trovare il levelId più alto
+    Draw.svg.dataset.level = 0;
+    for (const values of Draw.tables.values()) {
+      if (+Draw.svg.dataset.level < values.levelId) Draw.svg.dataset.level = values.levelId;
     }
-    Draw.deleteJoinLine(joinLineKey());
-    if (tableJoin) {
-      // decremento dataset.joins della tabella legata a questa
-      tableJoinRef.dataset.joins--;
-    }
-    // lo rimuovo dal DOM
-    Draw.svg.querySelector(`#${e.currentTarget.dataset.id}`).remove();
-    Draw.tables.delete(e.currentTarget.dataset.id); // svg-data-x
-    delete Draw.tableJoin;
-    console.log(Draw.tables); */
-    // rimuovo anche il <g> all'interno di <defs>
-    // Draw.svg.querySelector(`g#struct-${e.currentTarget.dataset.id}`).remove();
+    Draw.joinTablePositioning();
   }
 
   // salvataggio dimensione TIME
