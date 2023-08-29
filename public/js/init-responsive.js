@@ -1821,22 +1821,27 @@ var Sheet;
     });
   }
 
-  // TODO: potrebbe essere spostata in supportFn.js
-  app.addJoin = () => {
+  // Questa funzione restituisce i due elementi da aggiungere al DOM
+  // Può essere invocata sia per creare una nuova join che
+  // per creare/popolare una join esistente (ad es.: click sulla join line)
+  app.createJoinField = (token) => {
     const tmplJoinFrom = app.tmplJoin.content.cloneNode(true);
     const tmplJoinTo = app.tmplJoin.content.cloneNode(true);
     const joinFieldFrom = tmplJoinFrom.querySelector('.join-field');
     const joinFieldTo = tmplJoinTo.querySelector('.join-field');
-    const divJoins = app.dialogJoin.querySelector('section[data-table-from] > .join').childElementCount;
-    joinFieldFrom.dataset.joinId = divJoins;
-    joinFieldTo.dataset.joinId = divJoins;
-    const token = rand().substring(0, 7);
     joinFieldFrom.dataset.token = token;
     joinFieldTo.dataset.token = token;
+    return { from: joinFieldFrom, to: joinFieldTo };
+  }
+
+  // TODO: potrebbe essere spostata in supportFn.js
+  app.addJoin = () => {
+    // recupero i riferimenti del template da aggiungere al DOM
+    let joinFields = app.createJoinField(rand().substring(0, 7));
     // rimuovo eventuali joinField che hanno l'attributo data-active prima di aggiungere quelli nuovi
     app.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
-    app.dialogJoin.querySelector('.joins section[data-table-from] > .join').appendChild(joinFieldFrom);
-    app.dialogJoin.querySelector('.joins section[data-table-to] > .join').appendChild(joinFieldTo);
+    app.dialogJoin.querySelector('.joins section[data-table-from] > .join').appendChild(joinFields.from);
+    app.dialogJoin.querySelector('.joins section[data-table-to] > .join').appendChild(joinFields.to);
   }
 
   app.openJoinWindow = () => {
@@ -1998,16 +2003,16 @@ var Sheet;
 
   // inserisco la colonna selezionata per la creazione della join
   app.addFieldToJoin = (e) => {
+    debugger;
     const fieldRef = app.dialogJoin.querySelector(`section[data-table-id='${e.currentTarget.dataset.tableId}'] .join-field[data-active]`);
-    // console.log(fieldRef);
     fieldRef.dataset.field = e.currentTarget.dataset.label;
     fieldRef.dataset.table = e.currentTarget.dataset.table;
     fieldRef.dataset.alias = e.currentTarget.dataset.alias;
     fieldRef.innerHTML = e.currentTarget.dataset.label;
-    const joinId = +fieldRef.dataset.joinId;
+    const tokenJoin = fieldRef.dataset.token;
     // verifico se i due fieldRef[data-active] hanno il data-field impostato. Se vero, posso creare la join tra le due tabelle
     // recupero, con la funzione filter, i due field da mettere in join
-    let joins = [...app.dialogJoin.querySelectorAll(`.join-field[data-active][data-field][data-join-id='${joinId}']`)].filter(field => +field.dataset.joinId === joinId);
+    let joins = [...app.dialogJoin.querySelectorAll(`.join-field[data-active][data-field][data-token='${tokenJoin}']`)].filter(field => field.dataset.token === tokenJoin);
     // console.log(joins);
     if (joins.length === 2) {
       WorkBook.join = {
