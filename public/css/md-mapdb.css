@@ -129,17 +129,17 @@ path{
   stroke-linecap: round;
 }
 
-path:hover{
-  cursor: pointer;
+path[data-join-id]{
   fill: transparent;
-  stroke: brown;
+  stroke: #92afb7;
   stroke-width: 2.5;
   stroke-linecap: round;
 }
 
-path[data-joined]{
+path:hover{
+  cursor: pointer;
   fill: transparent;
-  stroke: #92afb7;
+  stroke: brown;
   stroke-width: 2.5;
   stroke-linecap: round;
 }
@@ -699,7 +699,6 @@ input:read-write::placeholder{
 button.btn-link{
   border: unset;
   background-color: unset;
-  color: steelblue;
   font-style: italic;
 }
 
@@ -708,14 +707,11 @@ button.btn-link:hover{
   text-decoration: underline;
 }
 
-.btn-link{
-  border: unset;
-  background-color: unset;
-  color: brown;
-  font-style: italic;
+/* TODO: da spostare in layout*/
+.default {
+  color: steelblue;
 }
 
-.btn-link:hover{
-  cursor: pointer;
-  text-decoration: underline;
+.attention{
+  color: brown;
 }

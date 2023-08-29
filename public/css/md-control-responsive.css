@@ -58,6 +58,10 @@ button {
   background-color: transparent;
 }
 
-button:not([disabled]):hover{
+button.default:not([disabled]):hover{
   color: steelblue;
+}
+
+button.attention:not([disabled]):hover{
+  color: darkred;
 }

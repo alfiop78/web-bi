@@ -1796,7 +1796,6 @@ var Sheet;
       from: e.currentTarget.dataset.from,
       to: e.currentTarget.dataset.to
     }
-    // BUG: WorkBook.tableJoin non viene impostato quando si apre un WorkBook già presente
     for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
       WorkBook.activeTable = value.id;
       const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
@@ -1805,17 +1804,13 @@ var Sheet;
     app.openJoinWindow();
   }
 
-  // imposto questo field come data-active
+  // imposto la join selezionata come data-active
   // TODO: potrebbe essere spostata in supportFn.js
   app.handlerJoin = (e) => {
-    const joinId = +e.currentTarget.dataset.joinId;
-    app.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => {
-      delete joinField.dataset.active;
-    });
-    // imposto il data-active sugli .join-field[data-join-id] = joinId;
-    app.dialogJoin.querySelectorAll(`.join-field[data-join-id='${joinId}']`).forEach(field => {
-      field.dataset.active = 'true';
-    });
+    const token = e.currentTarget.dataset.token;
+    app.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
+    // imposto il data-active sugli .join-field[data-token] = token;
+    app.dialogJoin.querySelectorAll(`.join-field[data-token='${token}']`).forEach(field => field.dataset.active = 'true');
   }
 
   // Questa funzione restituisce i due elementi da aggiungere al DOM
@@ -1842,13 +1837,34 @@ var Sheet;
     joinFields.to.dataset.token = token;
   }
 
+  // TODO: potrebbe essere spostata in supportFn.js
+  // elimino la join attiva (data-active)
+  app.removeJoin = () => {
+    // TODO: potrei eliminare dal DOM con la funzione array.filter....
+    // successivamente devo eliminare la join da WorkBook.join[s]
+
+    /* app.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => {
+      // TODO: recupero la tabella 'from' perchè è impostata in WorkBook.joins
+
+      if (WorkBook.join.has(joinField.dataset.token)) WorkBook.join.delete(joinField.dataset.token);
+      debugger;
+      if (WorkBook.joins.get(joinField.dataset.alias).hasOwnProperty(joinField.dataset.token)) delete WorkBook.joins.get(joinField.dataset.alias)[joinField.dataset.token];
+
+      // TODO: Se WorkBook.joins.get(alias_tabella) contiene 0 elementi deve essere eliminata
+      //
+      if (WorkBook.joins.size === 0) WorkBook.joins.clear();
+      // elimino la join anche dal DOM
+      joinField.remove();
+    }); */
+  }
+
   app.openJoinWindow = () => {
     // app.dialogJoin.dataset.open = 'false';
     app.dialogJoin.show();
     app.dialogJoin.dataset.lineId = Draw.currentLineRef.id;
     // aggiungo i template per join-field se non ci sono ancora join create
-    // verifico se il join-token è presente in WorkBook.join
-    if (!Draw.currentLineRef.dataset.joined) {
+    // verifico se è presente una join su questa line
+    if (!Draw.currentLineRef.dataset.joinId) {
       // join non presente
       app.addJoin();
     } else {
@@ -1856,9 +1872,9 @@ var Sheet;
       // recupero le join appartenenti a questa relazione
       // Le join sono salvate in WorkBook.joins e la key corrisponde alla tabella 'from'
       // messa in relazione
-      for (const [key, value] of Object.entries(WorkBook.joins.get(Draw.tables.get(Draw.currentLineRef.dataset.from).alias))) {
+      // for (const [key, value] of Object.entries(WorkBook.joins.get(Draw.tables.get(Draw.currentLineRef.dataset.from).alias))) {
+      for (const [key, value] of Object.entries(WorkBook.joins.get(Draw.currentLineRef.dataset.joinId))) {
         // key : join token
-        // console.log(key, value);
         // per ogni join devo creare i due campi .join-field e popolarli
         // con i dati presenti in WorkBook.join (che corrisponde a value in questo caso)
         let joinFields = app.createJoinField();
@@ -2025,12 +2041,6 @@ var Sheet;
     if (joins.length === 2) {
       WorkBook.join = {
         token: fieldRef.dataset.token,
-        // value: {
-        //   alias: joins[1].dataset.alias,
-        //   SQL: [`${joins[1].dataset.alias}.${joins[1].dataset.field}`, `${joins[0].dataset.alias}.${joins[0].dataset.field}`],
-        //   from: { table: joins[1].dataset.table, alias: joins[1].dataset.alias, field: joins[1].dataset.field },
-        //   to: { table: joins[0].dataset.table, alias: joins[0].dataset.alias, field: joins[0].dataset.field }
-        // }
         value: {
           alias: joins[0].dataset.alias,
           SQL: [`${joins[0].dataset.alias}.${joins[0].dataset.field}`, `${joins[1].dataset.alias}.${joins[1].dataset.field}`],
@@ -2039,8 +2049,10 @@ var Sheet;
         }
       };
       WorkBook.joins = fieldRef.dataset.token; // nome della tabella con le proprie join (WorkBook.nJoin) all'interno
-      // dataset.joined=true indica che è presente almeno una join tra le due tabelle
-      Draw.currentLineRef.dataset.joined = 'true';
+      // dataset.join-id=nome_tabella_from indica che è presente una join tra le due tabelle
+      Draw.joinLines.get(Draw.currentLineRef.id).name = joins[0].dataset.alias;
+      // la join viene identificata con il nome della tabella 'from', come in WorkBook.joins
+      Draw.currentLineRef.dataset.joinId = joins[0].dataset.alias;
     }
   }
 
@@ -2081,6 +2093,7 @@ var Sheet;
     }
   }
 
+  // TODO: test fn
   app.addFields_test = (ul, response) => {
     for (const [key, value] of Object.entries(response)) {
       const content = app.tmplList.content.cloneNode(true);

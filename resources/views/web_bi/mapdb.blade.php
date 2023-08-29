@@ -395,7 +395,8 @@
                   </section>
                 </section>
                 <section class="btn-link">
-                  <button id="btn-add-join" class="btn-link" data-fn="addJoin" value="Aggiungi Join">Aggiungi join</button>
+                  <button id="btn-add-join" class="btn-link default" data-fn="addJoin" value="Aggiungi Join">Aggiungi join</button>
+                  <button id="btn-remove-join" class="btn-link attention" data-fn="removeJoin" value="Elimina Join">Elimina join</button>
                 </section>
                 <div class="wj-fields-list">
                   <section data-table-from>

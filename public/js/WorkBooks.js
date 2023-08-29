@@ -128,7 +128,7 @@ class Sheets {
   open() {
     // il token è presente all'interno dell'oggetto sheet
 
-    // recupero dallo storage il workBook, tutte le sue proprietà le caricherò nella Classe 
+    // recupero dallo storage il workBook, tutte le sue proprietà le caricherò nella Classe
     // reimposto la Classe
     SheetStorage.sheet = this.sheet.token;
     this.name = SheetStorage.sheet.name;
@@ -194,7 +194,7 @@ class WorkBooks {
   #dateTime;
   // #nTables = new Map();
   // #hierarchies = new Map();
-  #tableJoins = { from: null, to: null }; // refs 
+  #tableJoins = { from: null, to: null }; // refs
   #tablesMap = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   #hierTables = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   constructor(name) {
@@ -309,7 +309,7 @@ class WorkBooks {
   /* set nTables(value) {
     this.#nTables.set(value.table, value.alias);
     console.log(this.#nTables);
-  } 
+  }
 
   get nTables() { return this.#nTables; }*/
 
@@ -345,7 +345,7 @@ class WorkBooks {
 
   open(token) {
     // TODO: ottimizzare
-    // recupero dallo storage il workBook, tutte le sue proprietà le caricherò nella Classe 
+    // recupero dallo storage il workBook, tutte le sue proprietà le caricherò nella Classe
     WorkBookStorage.workBook = token;
     this.workBook.created_at = WorkBookStorage.workBook.created_at;
     this.workBook.updated_at = WorkBookStorage.workBook.updated_at;
