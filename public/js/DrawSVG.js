@@ -17,11 +17,11 @@ class DrawSVG {
     console.log(this.#tables);
   }
 
+  get tables() { return this.#tables; }
+
   get countTables() {
     return this.svg.querySelectorAll('use.table').length;
   }
-
-  get tables() { return this.#tables; }
 
   set currentLineRef(value) {
     this.#currentLineRef = this.svg.querySelector(`#${value}`);

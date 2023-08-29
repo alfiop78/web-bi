@@ -137,7 +137,7 @@
     </header>
 
     <template id="tmpl-join-field">
-      <div class="join-field" data-active></div>
+      <div class="join-field" data-fn="handlerJoin" data-active>Campo</div>
     </template>
 
     <template id="tmpl-columns-defined">

@@ -223,7 +223,6 @@ var Sheet;
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
       // se sono presenti almeno due tabelle visualizzo la dialog per la join
       if (Draw.countTables > 1) {
-        // tabella 'from'
         WorkBook.tableJoins = {
           from: app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
           to: app.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId
@@ -282,6 +281,9 @@ var Sheet;
     } else {
       // è presente una tableJoin
       // imposto data.joins anche sull'elemento SVG
+      // OPTIMIZE: potrei creare un Metodo nella Classe Draw che imposta la prop 'join'
+      // ...in Draw.tables e, allo stesso tempo, imposta anche 'dataset.joins'
+      // ...sull'elemento 'use.table' come fatto sulle due righe successive
       Draw.svg.querySelector(`use.table[id="${Draw.tableJoin.table.id}"]`).dataset.joins = ++Draw.tableJoin.joins;
       // ... lo imposto anche nell'oggetto Map() tables
       Draw.tables.get(Draw.tableJoin.table.id).joins = Draw.tableJoin.joins;
@@ -293,7 +295,6 @@ var Sheet;
       Draw.svg.dataset.level = (Draw.svg.dataset.level < levelId) ? levelId : Draw.svg.dataset.level;
       // quante tabelle ci sono per il livello corrente che appartengono alla stessa tableJoin
       const tableRelated = Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'][data-table-join='${Draw.tableJoin.table.id}']`);
-      const tableInLevel = tableRelated.length;
       let lastTableInLevel;
       // recupero la posizione dell'ultima tabella appartenete al livello corrente e legata alla stessa tableJoin
       tableRelated.forEach(table => {
@@ -315,7 +316,7 @@ var Sheet;
           // incremento il levelId perchè, in questo caso (a differenza di joinTablePositioning()) devo iniziare dall'ultimo levelId
           levelId++;
           // per ogni livello, partendo dall'ultimo
-          console.log(levelId);
+          // console.log(levelId);
           // se sono presenti, in questo livello, tabelle con y > di quella che sto droppando le devo spostare y+60
           Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}']`).forEach(table => {
             // console.log(`Livello ${levelId}`);
@@ -330,6 +331,7 @@ var Sheet;
           });
         });
       }
+      // imposto la proprietà 'tables' della Classe Draw
       Draw.tables = {
         id: `svg-data-${tableId}`, properties: {
           id: tableId,
@@ -358,7 +360,7 @@ var Sheet;
           to: `svg-data-${tableId}`
         }
       };
-      console.info('create JOIN');
+      // console.info('create JOIN');
       app.openJoinWindow();
     }
     Draw.currentTable = Draw.tables.get(`svg-data-${tableId}`);
@@ -1788,24 +1790,22 @@ var Sheet;
   }
 
   app.lineSelected = async (e) => {
-    debugger;
-    // TODO: da implementare
-
-    /* console.log(`line selected ${e.currentTarget.dataset.from} -> ${e.currentTarget.dataset.to}`);
-    Draw.currentLineRef = e.target.id;
+    // TODO: verifico se è stata già impostata una join tra le due tabelle
+    // dalla proprietà WorkBook.join. Per fare questo dovrò inserire il
+    // token della join sull'elemento svg 'path' (che è la linea di join)
+    //
+    // imposto la join line corrente
+    Draw.currentLineRef = e.currentTarget.id;
     WorkBook.tableJoins = {
-      from: Draw.currentLineRef.dataset.from,
-      to: Draw.currentLineRef.dataset.to
+      from: e.currentTarget.dataset.from,
+      to: e.currentTarget.dataset.to
     }
-    console.log(WorkBook.tableJoins);
     for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
       WorkBook.activeTable = value.id;
-      // TODO: in questo caso, in cui vengono richiamate due tabelle, fare una promiseAll
-      const data = await app.getTable();
+      const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
       app.addFields(key, data);
-      // console.log(data);
     }
-    app.openJoinWindow(); */
+    app.openJoinWindow();
   }
 
   // imposto questo field come data-active
@@ -1827,10 +1827,6 @@ var Sheet;
     const tmplJoinTo = app.tmplJoin.content.cloneNode(true);
     const joinFieldFrom = tmplJoinFrom.querySelector('.join-field');
     const joinFieldTo = tmplJoinTo.querySelector('.join-field');
-    joinFieldFrom.innerHTML = 'Campo';
-    joinFieldFrom.dataset.fn = 'handlerJoin';
-    joinFieldTo.dataset.fn = 'handlerJoin';
-    joinFieldTo.innerHTML = 'Campo';
     const divJoins = app.dialogJoin.querySelector('section[data-table-from] > .join').childElementCount;
     joinFieldFrom.dataset.joinId = divJoins;
     joinFieldTo.dataset.joinId = divJoins;
@@ -1844,16 +1840,26 @@ var Sheet;
   }
 
   app.openJoinWindow = () => {
-    // ripulisco la dialogJoin
-    // TODO: da inserire in un evento close della dialog
-    app.dialogJoin.querySelectorAll('.join-field').forEach(joinField => joinField.remove());
-    app.dialogJoin.querySelectorAll('ul > li').forEach(li => li.remove());
-    app.dialogJoin.dataset.open = 'false';
-    // apertura dialogJoin
+    // app.dialogJoin.querySelectorAll('.join-field').forEach(joinField => joinField.remove());
+    // app.dialogJoin.dataset.open = 'false';
     app.dialogJoin.show();
     app.dialogJoin.dataset.lineId = Draw.currentLineRef.id;
-    // aggiungo i template per join-field
-    app.addJoin();
+    // aggiungo i template per join-field se non ci sono ancora join create
+    // verifico se il join-token è presente in WorkBook.join
+    if (!Draw.currentLineRef.dataset.joined) {
+      // join non presente
+      app.addJoin();
+    } else {
+      // join presente, popolo i join-field
+      // TODO: recupero le join appartenenti a questa relazione
+      // Le join sono salvate in WorkBook.joins e la key corrisponde alla tabella 'to'
+      // messa in relazione
+      for (const [key, value] of Object.entries(WorkBook.joins.get(Draw.tables.get(Draw.currentLineRef.dataset.to).alias))) {
+        // key : join token
+        console.log(key, value);
+        // TODO: per ogni join devo creare i due campi .join-field
+      }
+    }
     const from = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).from);
     const to = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).to);
 
@@ -2015,7 +2021,7 @@ var Sheet;
         }
       };
       WorkBook.joins = fieldRef.dataset.token; // nome della tabella con le proprie join (WorkBook.nJoin) all'interno
-      // dopo aver completato la join coloro la linea in modo diverso
+      // dataset.joined=true indica che è presente almeno una join tra le due tabelle
       Draw.currentLineRef.dataset.joined = 'true';
     }
   }
@@ -2482,5 +2488,10 @@ var Sheet;
         });
       }, false);
     });
+  });
+
+  app.dialogJoin.addEventListener('close', () => {
+    // ripulisco gli elementi delle <ul> (I campi delle tabelle)
+    app.dialogJoin.querySelectorAll('ul > li').forEach(li => li.remove());
   });
 })();
