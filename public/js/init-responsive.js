@@ -1824,28 +1824,30 @@ var Sheet;
   // Questa funzione restituisce i due elementi da aggiungere al DOM
   // Può essere invocata sia per creare una nuova join che
   // per creare/popolare una join esistente (ad es.: click sulla join line)
-  app.createJoinField = (token) => {
+  app.createJoinField = () => {
     const tmplJoinFrom = app.tmplJoin.content.cloneNode(true);
     const tmplJoinTo = app.tmplJoin.content.cloneNode(true);
     const joinFieldFrom = tmplJoinFrom.querySelector('.join-field');
     const joinFieldTo = tmplJoinTo.querySelector('.join-field');
-    joinFieldFrom.dataset.token = token;
-    joinFieldTo.dataset.token = token;
+    // joinFieldFrom.dataset.token = token;
+    // joinFieldTo.dataset.token = token;
+    // rimuovo eventuali joinField che hanno l'attributo data-active prima di aggiungere quelli nuovi
+    app.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
+    app.dialogJoin.querySelector('.joins section[data-table-from] > .join').appendChild(joinFieldFrom);
+    app.dialogJoin.querySelector('.joins section[data-table-to] > .join').appendChild(joinFieldTo);
     return { from: joinFieldFrom, to: joinFieldTo };
   }
 
   // TODO: potrebbe essere spostata in supportFn.js
   app.addJoin = () => {
     // recupero i riferimenti del template da aggiungere al DOM
-    let joinFields = app.createJoinField(rand().substring(0, 7));
-    // rimuovo eventuali joinField che hanno l'attributo data-active prima di aggiungere quelli nuovi
-    app.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
-    app.dialogJoin.querySelector('.joins section[data-table-from] > .join').appendChild(joinFields.from);
-    app.dialogJoin.querySelector('.joins section[data-table-to] > .join').appendChild(joinFields.to);
+    let joinFields = app.createJoinField();
+    const token = rand().substring(0, 7);
+    joinFields.from.dataset.token = token;
+    joinFields.to.dataset.token = token;
   }
 
   app.openJoinWindow = () => {
-    // app.dialogJoin.querySelectorAll('.join-field').forEach(joinField => joinField.remove());
     // app.dialogJoin.dataset.open = 'false';
     app.dialogJoin.show();
     app.dialogJoin.dataset.lineId = Draw.currentLineRef.id;
@@ -1862,7 +1864,24 @@ var Sheet;
       for (const [key, value] of Object.entries(WorkBook.joins.get(Draw.tables.get(Draw.currentLineRef.dataset.to).alias))) {
         // key : join token
         console.log(key, value);
-        // TODO: per ogni join devo creare i due campi .join-field
+        // TODO: per ogni join devo creare i due campi .join-field e popolarli
+        // con i dati presenti in WorkBook.join (che corrisponde a value in questo caso)
+        let joinFields = app.createJoinField();
+        joinFields.from.dataset.token = key;
+        joinFields.to.dataset.token = key;
+        // from : la tabella di destra (gerarchia più alta)
+        // to : la tabella di sinistra (gerarchia più bassa, verso la FACT)
+        // Devono essere invertiti perchè il campo 'from' della relazione (WorkBook.join[s])
+        // voglio farlo comparire a destra, nella dialog, quindi nel campo <section data-table-to>
+        // TODO: dovrei modificare le proprietà della join line (in fase di creazione per poter fare il contrario)
+        joinFields.from.dataset.field = value.to.field;
+        joinFields.from.dataset.table = value.to.table;
+        joinFields.from.dataset.alias = value.to.alias;
+        joinFields.from.innerHTML = value.to.field;
+        joinFields.to.dataset.field = value.from.field;
+        joinFields.to.dataset.table = value.from.table;
+        joinFields.to.dataset.alias = value.from.alias;
+        joinFields.to.innerHTML = value.from.field;
       }
     }
     const from = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).from);
@@ -2003,22 +2022,20 @@ var Sheet;
 
   // inserisco la colonna selezionata per la creazione della join
   app.addFieldToJoin = (e) => {
-    debugger;
     const fieldRef = app.dialogJoin.querySelector(`section[data-table-id='${e.currentTarget.dataset.tableId}'] .join-field[data-active]`);
     fieldRef.dataset.field = e.currentTarget.dataset.label;
     fieldRef.dataset.table = e.currentTarget.dataset.table;
     fieldRef.dataset.alias = e.currentTarget.dataset.alias;
     fieldRef.innerHTML = e.currentTarget.dataset.label;
-    const tokenJoin = fieldRef.dataset.token;
+    const token = fieldRef.dataset.token;
     // verifico se i due fieldRef[data-active] hanno il data-field impostato. Se vero, posso creare la join tra le due tabelle
     // recupero, con la funzione filter, i due field da mettere in join
-    let joins = [...app.dialogJoin.querySelectorAll(`.join-field[data-active][data-field][data-token='${tokenJoin}']`)].filter(field => field.dataset.token === tokenJoin);
+    let joins = [...app.dialogJoin.querySelectorAll(`.join-field[data-active][data-field][data-token='${token}']`)].filter(field => field.dataset.token === token);
     // console.log(joins);
     if (joins.length === 2) {
       WorkBook.join = {
         token: fieldRef.dataset.token,
         value: {
-          // table: joins[0].dataset.table,
           alias: joins[1].dataset.alias,
           SQL: [`${joins[1].dataset.alias}.${joins[1].dataset.field}`, `${joins[0].dataset.alias}.${joins[0].dataset.field}`],
           from: { table: joins[1].dataset.table, alias: joins[1].dataset.alias, field: joins[1].dataset.field },
@@ -2498,5 +2515,6 @@ var Sheet;
   app.dialogJoin.addEventListener('close', () => {
     // ripulisco gli elementi delle <ul> (I campi delle tabelle)
     app.dialogJoin.querySelectorAll('ul > li').forEach(li => li.remove());
+    app.dialogJoin.querySelectorAll('.join-field').forEach(joinField => joinField.remove());
   });
 })();

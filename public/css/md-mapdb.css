@@ -267,6 +267,9 @@ use.table[data-active]{
 
 .join-field[data-active] {
   border-bottom: solid 3px steelblue;
+}
+
+.join-field:not([data-active]) {
   color: darkgray;
 }
 
