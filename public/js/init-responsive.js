@@ -135,7 +135,7 @@ var Sheet;
   /* NOTE: DRAG&DROP EVENTS */
 
   app.handlerDragStart = (e) => {
-    console.log('e.target : ', e.target.id);
+    // console.log('e.target : ', e.target.id);
     e.target.classList.add('dragging');
     app.dragElementPosition = { x: e.offsetX, y: e.offsetY };
     // console.log(app.dragElementPosition);
@@ -161,11 +161,11 @@ var Sheet;
       e.dataTransfer.dropEffect = "copy";
       app.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
       if (Draw.svg.querySelectorAll('use.table').length > 0) {
-        // TODO: da commentare
+        // TODO: da commentare (...viene utilizzato il calcolo dell'ipotenusa)
         let nearestTable = [...Draw.svg.querySelectorAll('use.table')].reduce((prev, current) => {
           return (Math.hypot(e.offsetX - (+current.dataset.x + 180), e.offsetY - (+current.dataset.y + 15)) < Math.hypot(e.offsetX - (+prev.dataset.x + 180), e.offsetY - (+prev.dataset.y + 15))) ? current : prev;
         });
-        console.log(nearestTable.id);
+        // console.log(nearestTable.id);
         const rectBounding = nearestTable.getBoundingClientRect();
         Draw.tableJoin = {
           table: nearestTable,
@@ -181,8 +181,8 @@ var Sheet;
             id: Draw.currentLineRef.id, properties: {
               id: Draw.currentLineRef.dataset.id,
               key: Draw.currentLineRef.id,
-              from: Draw.tableJoin.table.id,
-              to: { x: (e.offsetX - app.dragElementPosition.x - 10), y: (e.offsetY - app.dragElementPosition.y + 17.5) } // in questo caso non c'è l'id della tabella perchè questa deve essere ancora droppata, metto le coordinate e.offsetX, e.offsetY
+              to: Draw.tableJoin.table.id,
+              from: { x: (e.offsetX - app.dragElementPosition.x - 10), y: (e.offsetY - app.dragElementPosition.y + 17.5) } // in questo caso non c'è l'id della tabella perchè questa deve essere ancora droppata, metto le coordinate e.offsetX, e.offsetY
             }
           };
           Draw.currentLine = Draw.joinLines.get(Draw.currentLineRef.id);
@@ -266,8 +266,8 @@ var Sheet;
           x: coords.x,
           y: coords.y,
           line: {
-            from: { x: coords.x + 180, y: coords.y + 15 },
-            to: { x: coords.x - 10, y: coords.y + 15 }
+            to: { x: coords.x + 180, y: coords.y + 15 },
+            from: { x: coords.x - 10, y: coords.y + 15 }
           },
           table: liElement.dataset.label,
           alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
@@ -339,8 +339,8 @@ var Sheet;
           x: coords.x,
           y: coords.y,
           line: {
-            from: { x: coords.x + 180, y: coords.y + 15 },
-            to: { x: coords.x - 10, y: coords.y + 15 }
+            to: { x: coords.x + 180, y: coords.y + 15 },
+            from: { x: coords.x - 10, y: coords.y + 15 }
           },
           table: liElement.dataset.label,
           alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
@@ -356,8 +356,8 @@ var Sheet;
         id: Draw.currentLineRef.id, properties: {
           id: Draw.currentLineRef.dataset.id,
           key: Draw.currentLineRef.id,
-          from: Draw.tableJoin.table.id,
-          to: `svg-data-${tableId}`
+          to: Draw.tableJoin.table.id,
+          from: `svg-data-${tableId}`
         }
       };
       // console.info('create JOIN');
@@ -1790,16 +1790,13 @@ var Sheet;
   }
 
   app.lineSelected = async (e) => {
-    // TODO: verifico se è stata già impostata una join tra le due tabelle
-    // dalla proprietà WorkBook.join. Per fare questo dovrò inserire il
-    // token della join sull'elemento svg 'path' (che è la linea di join)
-    //
     // imposto la join line corrente
     Draw.currentLineRef = e.currentTarget.id;
     WorkBook.tableJoins = {
       from: e.currentTarget.dataset.from,
       to: e.currentTarget.dataset.to
     }
+    // BUG: WorkBook.tableJoin non viene impostato quando si apre un WorkBook già presente
     for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
       WorkBook.activeTable = value.id;
       const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
@@ -1829,8 +1826,6 @@ var Sheet;
     const tmplJoinTo = app.tmplJoin.content.cloneNode(true);
     const joinFieldFrom = tmplJoinFrom.querySelector('.join-field');
     const joinFieldTo = tmplJoinTo.querySelector('.join-field');
-    // joinFieldFrom.dataset.token = token;
-    // joinFieldTo.dataset.token = token;
     // rimuovo eventuali joinField che hanno l'attributo data-active prima di aggiungere quelli nuovi
     app.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
     app.dialogJoin.querySelector('.joins section[data-table-from] > .join').appendChild(joinFieldFrom);
@@ -1858,30 +1853,25 @@ var Sheet;
       app.addJoin();
     } else {
       // join presente, popolo i join-field
-      // TODO: recupero le join appartenenti a questa relazione
-      // Le join sono salvate in WorkBook.joins e la key corrisponde alla tabella 'to'
+      // recupero le join appartenenti a questa relazione
+      // Le join sono salvate in WorkBook.joins e la key corrisponde alla tabella 'from'
       // messa in relazione
-      for (const [key, value] of Object.entries(WorkBook.joins.get(Draw.tables.get(Draw.currentLineRef.dataset.to).alias))) {
+      for (const [key, value] of Object.entries(WorkBook.joins.get(Draw.tables.get(Draw.currentLineRef.dataset.from).alias))) {
         // key : join token
-        console.log(key, value);
-        // TODO: per ogni join devo creare i due campi .join-field e popolarli
+        // console.log(key, value);
+        // per ogni join devo creare i due campi .join-field e popolarli
         // con i dati presenti in WorkBook.join (che corrisponde a value in questo caso)
         let joinFields = app.createJoinField();
         joinFields.from.dataset.token = key;
         joinFields.to.dataset.token = key;
-        // from : la tabella di destra (gerarchia più alta)
-        // to : la tabella di sinistra (gerarchia più bassa, verso la FACT)
-        // Devono essere invertiti perchè il campo 'from' della relazione (WorkBook.join[s])
-        // voglio farlo comparire a destra, nella dialog, quindi nel campo <section data-table-to>
-        // TODO: dovrei modificare le proprietà della join line (in fase di creazione per poter fare il contrario)
-        joinFields.from.dataset.field = value.to.field;
-        joinFields.from.dataset.table = value.to.table;
-        joinFields.from.dataset.alias = value.to.alias;
-        joinFields.from.innerHTML = value.to.field;
-        joinFields.to.dataset.field = value.from.field;
-        joinFields.to.dataset.table = value.from.table;
-        joinFields.to.dataset.alias = value.from.alias;
-        joinFields.to.innerHTML = value.from.field;
+        joinFields.from.dataset.field = value.from.field;
+        joinFields.from.dataset.table = value.from.table;
+        joinFields.from.dataset.alias = value.from.alias;
+        joinFields.from.innerHTML = value.from.field;
+        joinFields.to.dataset.field = value.to.field;
+        joinFields.to.dataset.table = value.to.table;
+        joinFields.to.dataset.alias = value.to.alias;
+        joinFields.to.innerHTML = value.to.field;
       }
     }
     const from = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).from);
@@ -2035,11 +2025,17 @@ var Sheet;
     if (joins.length === 2) {
       WorkBook.join = {
         token: fieldRef.dataset.token,
+        // value: {
+        //   alias: joins[1].dataset.alias,
+        //   SQL: [`${joins[1].dataset.alias}.${joins[1].dataset.field}`, `${joins[0].dataset.alias}.${joins[0].dataset.field}`],
+        //   from: { table: joins[1].dataset.table, alias: joins[1].dataset.alias, field: joins[1].dataset.field },
+        //   to: { table: joins[0].dataset.table, alias: joins[0].dataset.alias, field: joins[0].dataset.field }
+        // }
         value: {
-          alias: joins[1].dataset.alias,
-          SQL: [`${joins[1].dataset.alias}.${joins[1].dataset.field}`, `${joins[0].dataset.alias}.${joins[0].dataset.field}`],
-          from: { table: joins[1].dataset.table, alias: joins[1].dataset.alias, field: joins[1].dataset.field },
-          to: { table: joins[0].dataset.table, alias: joins[0].dataset.alias, field: joins[0].dataset.field }
+          alias: joins[0].dataset.alias,
+          SQL: [`${joins[0].dataset.alias}.${joins[0].dataset.field}`, `${joins[1].dataset.alias}.${joins[1].dataset.field}`],
+          from: { table: joins[0].dataset.table, alias: joins[0].dataset.alias, field: joins[0].dataset.field },
+          to: { table: joins[1].dataset.table, alias: joins[1].dataset.alias, field: joins[1].dataset.field }
         }
       };
       WorkBook.joins = fieldRef.dataset.token; // nome della tabella con le proprie join (WorkBook.nJoin) all'interno

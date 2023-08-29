@@ -111,30 +111,30 @@ class DrawSVG {
   drawLine() {
     // console.log(this.currentLine.from, this.currentLine.to);
     if (Object.keys(this.currentLine).length === 0) return;
-    const coordsFrom = {
-      x: this.tables.get(this.currentLine.from).line.from.x,
-      y: this.tables.get(this.currentLine.from).line.from.y
+    const coordsTo = {
+      x: this.tables.get(this.currentLine.to).line.to.x,
+      y: this.tables.get(this.currentLine.to).line.to.y
     };
-    let coordsTo;
-    if (typeof this.currentLine.to === 'object') {
+    let coordsFrom;
+    if (typeof this.currentLine.from === 'object') {
       // coordinate e.offsetX, e.offsetY. In questo caso provengo da dragOver.
-      coordsTo = { x: this.currentLine.to.x, y: this.currentLine.to.y };
+      coordsFrom = { x: this.currentLine.from.x, y: this.currentLine.from.y };
     } else {
       // tabella To
-      coordsTo = {
-        x: this.tables.get(this.currentLine.to).line.to.x,
-        y: this.tables.get(this.currentLine.to).line.to.y
+      coordsFrom = {
+        x: this.tables.get(this.currentLine.from).line.from.x,
+        y: this.tables.get(this.currentLine.from).line.from.y
       };
     }
     this.line = {
-      x1: coordsFrom.x, // start point
-      y1: coordsFrom.y,
-      p1x: coordsFrom.x + 40, // control point 1
-      p1y: coordsFrom.y,
-      p2x: coordsTo.x - 40, // control point 2
-      p2y: coordsTo.y,
-      x2: coordsTo.x, // end point
-      y2: coordsTo.y
+      x1: coordsTo.x, // start point
+      y1: coordsTo.y,
+      p1x: coordsTo.x + 40, // control point 1
+      p1y: coordsTo.y,
+      p2x: coordsFrom.x - 40, // control point 2
+      p2y: coordsFrom.y,
+      x2: coordsFrom.x, // end point
+      y2: coordsFrom.y
     };
     const d = `M${this.line.x1},${this.line.y1} C${this.line.p1x},${this.line.p1y} ${this.line.p2x},${this.line.p2y} ${this.line.x2},${this.line.y2}`;
     this.currentLineRef = this.currentLine.key;
