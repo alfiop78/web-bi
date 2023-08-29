@@ -206,7 +206,7 @@ class DrawSVG {
       this.currentLineRef.dataset.fn = 'lineSelected';
       this.currentLineRef.dataset.from = properties.from;
       this.currentLineRef.dataset.to = properties.to;
-      this.currentLineRef.dataset.joinId = properties.name;
+      if (properties.name) this.currentLineRef.dataset.joinId = properties.name;
       // per ogni linea creo un'elemento <animation>
       const animLine = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
       animLine.setAttribute('attributeName', 'd');

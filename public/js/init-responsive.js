@@ -1853,7 +1853,12 @@ var Sheet;
       WorkBook.join.delete(e.currentTarget.dataset.token);
       delete WorkBook.joins.get(aliasJoin)[e.currentTarget.dataset.token];
       // Se WorkBook.joins.get(alias_tabella) contiene 0 elementi deve essere eliminata
-      if (WorkBook.joins.size === 0) WorkBook.joins.clear();
+      if (Object.keys(WorkBook.joins.get(aliasJoin)).length === 0) {
+        WorkBook.joins.delete(aliasJoin);
+        // Eliminare dataset.joinId dalla currentLineRef
+        delete Draw.currentLineRef.dataset.joinId;
+        delete Draw.joinLines.get(Draw.currentLineRef.id).name;
+      }
     }
     // Imposto l'ultima join presente come data-active
     // console.log(document.querySelector('.join-field:last-child'));
@@ -1876,10 +1881,8 @@ var Sheet;
       app.addJoin();
     } else {
       // join presente, popolo i join-field
-      // recupero le join appartenenti a questa relazione
       // Le join sono salvate in WorkBook.joins e la key corrisponde alla tabella 'from'
       // messa in relazione
-      // for (const [key, value] of Object.entries(WorkBook.joins.get(Draw.tables.get(Draw.currentLineRef.dataset.from).alias))) {
       for (const [key, value] of Object.entries(WorkBook.joins.get(Draw.currentLineRef.dataset.joinId))) {
         // key : join token
         // per ogni join devo creare i due campi .join-field e popolarli

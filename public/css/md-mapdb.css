@@ -129,9 +129,9 @@ path{
   stroke-linecap: round;
 }
 
-path[data-token]{
+path[data-join-id]{
   fill: transparent;
-  stroke: #92afb7;
+  stroke: steelblue;
   stroke-width: 3;
   stroke-linecap: round;
 }
