@@ -1811,6 +1811,9 @@ var Sheet;
     app.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
     // imposto il data-active sugli .join-field[data-token] = token;
     app.dialogJoin.querySelectorAll(`.join-field[data-token='${token}']`).forEach(field => field.dataset.active = 'true');
+    // imposto il data-token della join attiva sul tasto "Elimina join"
+    // In questo modo, la gestione della eliminazione della join è più semplice nella fn removeJoin
+    document.querySelector('#btn-remove-join').dataset.token = token;
   }
 
   // Questa funzione restituisce i due elementi da aggiungere al DOM
@@ -1835,27 +1838,31 @@ var Sheet;
     const token = rand().substring(0, 7);
     joinFields.from.dataset.token = token;
     joinFields.to.dataset.token = token;
+    document.querySelector('#btn-remove-join').dataset.token = token;
   }
 
-  // TODO: potrebbe essere spostata in supportFn.js
   // elimino la join attiva (data-active)
-  app.removeJoin = () => {
-    // TODO: potrei eliminare dal DOM con la funzione array.filter....
-    // successivamente devo eliminare la join da WorkBook.join[s]
-
-    /* app.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => {
-      // TODO: recupero la tabella 'from' perchè è impostata in WorkBook.joins
-
-      if (WorkBook.join.has(joinField.dataset.token)) WorkBook.join.delete(joinField.dataset.token);
-      debugger;
-      if (WorkBook.joins.get(joinField.dataset.alias).hasOwnProperty(joinField.dataset.token)) delete WorkBook.joins.get(joinField.dataset.alias)[joinField.dataset.token];
-
-      // TODO: Se WorkBook.joins.get(alias_tabella) contiene 0 elementi deve essere eliminata
-      //
+  app.removeJoin = (e) => {
+    [...app.dialogJoin.querySelectorAll('.join-field[data-active]')].filter(join => join.remove());
+    // elimino la join anche da WorkBook.join
+    // Prima di eliminarla recupero l'alias della tabella  'from', mi servirà per eliminare
+    // la join anche da WorkBook.joins
+    let aliasJoin;
+    if (WorkBook.join.has(e.currentTarget.dataset.token)) {
+      aliasJoin = WorkBook.join.get(e.currentTarget.dataset.token).alias;
+      WorkBook.join.delete(e.currentTarget.dataset.token);
+      delete WorkBook.joins.get(aliasJoin)[e.currentTarget.dataset.token];
+      // Se WorkBook.joins.get(alias_tabella) contiene 0 elementi deve essere eliminata
       if (WorkBook.joins.size === 0) WorkBook.joins.clear();
-      // elimino la join anche dal DOM
-      joinField.remove();
-    }); */
+    }
+    // Imposto l'ultima join presente come data-active
+    // console.log(document.querySelector('.join-field:last-child'));
+    // document.querySelector('.join-field:last-child').dataset.active = 'true';
+    [...app.dialogJoin.querySelectorAll('.join-field:last-child')].filter(join => {
+      join.dataset.active = 'true';
+      document.querySelector('#btn-remove-join').dataset.token = join.dataset.token;
+
+    });
   }
 
   app.openJoinWindow = () => {
@@ -1888,6 +1895,7 @@ var Sheet;
         joinFields.to.dataset.table = value.to.table;
         joinFields.to.dataset.alias = value.to.alias;
         joinFields.to.innerHTML = value.to.field;
+        document.querySelector('#btn-remove-join').dataset.token = key;
       }
     }
     const from = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).from);

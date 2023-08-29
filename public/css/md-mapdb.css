@@ -125,14 +125,14 @@ svg.dropzone.dropping{
 path{
   fill: transparent;
   stroke: darkgray;
-  stroke-width: 2;
+  stroke-width: 3;
   stroke-linecap: round;
 }
 
-path[data-join-id]{
+path[data-token]{
   fill: transparent;
   stroke: #92afb7;
-  stroke-width: 2.5;
+  stroke-width: 3;
   stroke-linecap: round;
 }
 
@@ -140,7 +140,7 @@ path:hover{
   cursor: pointer;
   fill: transparent;
   stroke: brown;
-  stroke-width: 2.5;
+  stroke-width: 3;
   stroke-linecap: round;
 }
 
