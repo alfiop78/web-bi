@@ -1991,6 +1991,8 @@ var Sheet;
       }
     };
     WorkBook.joins = token; // nome della tabella con le proprie join (WorkBook.nJoin) all'interno
+    console.log(WorkBook.activeTable);
+    debugger;
     Draw.tables = {
       id: 'svg-data-web_bi_time', properties: {
         id: 'web_bi_time',
@@ -2002,8 +2004,7 @@ var Sheet;
         name: 'WEB_BI_TIME',
         schema: 'decisyon_cache',
         joins: 0,
-        // per il momento la TIME và impostata sempre sulla svg-data-0 (tabella dei fatti)
-        join: 'svg-data-0',
+        join: WorkBook.activeTable.id,
         levelId: 0
       }
     };

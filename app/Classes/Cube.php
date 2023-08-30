@@ -837,23 +837,23 @@ class Cube
     if ($mode === 'sql') {
       $result = $sql;
     } else {
-      try {
-        if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
-          // dd('la tabella già esiste, la elimino');
-          $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
-          if (!$drop) {
-            // null : tabella eliminata, ricreo la tabella temporanea
-            $result = DB::connection('vertica_odbc')->statement($sql);
-          }
-        } else {
-          // dd('la tabella non esiste');
+      // try {
+      if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
+        // dd('la tabella già esiste, la elimino');
+        $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
+        if (!$drop) {
+          // null : tabella eliminata, ricreo la tabella temporanea
           $result = DB::connection('vertica_odbc')->statement($sql);
         }
-      } catch (Exception $e) {
-        // dd('ERrore gestito');
-        $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTableName;");
-        throw new Exception("Errore elaborazione richiesta", 1);
+      } else {
+        // dd('la tabella non esiste');
+        $result = DB::connection('vertica_odbc')->statement($sql);
       }
+      // } catch (Exception $e) {
+      // dd('ERrore gestito');
+      $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTableName;");
+      // throw new Exception("Errore elaborazione richiesta", 1);
+      // }
     }
     // dd($sql);
     return $result;

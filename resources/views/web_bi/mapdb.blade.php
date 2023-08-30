@@ -561,7 +561,7 @@
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="2">
                               <ul id="nav-fields" class="custom-scrollbar" data-search-id="input-search-fields"></ul>
-                              <button class="btn-link" data-fn="btnColumnNew" type="button" value="Nuova Colonna">Nuova Colonna</button>
+                              <button class="btn-link default" data-fn="btnColumnNew" type="button" value="Nuova Colonna">Nuova Colonna</button>
                             </section>
                             <p class="field-search">
                               <input id="input-search-metrics" data-element-search="metrics" autocomplete="off" type="search" class="input-search metrics" readonly placeholder="Metriche" />
@@ -569,7 +569,7 @@
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="3">
                               <ul id="ul-metrics" class="custom-scrollbar" data-search-id="input-search-metrics"></ul>
-                              <button class="btn-link" data-fn="btnCompositeMetric" type="button" value="Nuova Metrica">Nuova Metrica</button>
+                              <button class="btn-link default" data-fn="btnCompositeMetric" type="button" value="Nuova Metrica">Nuova Metrica</button>
                             </section>
                             <p class="field-search">
                               <input id="input-search-filters" data-element-search="filters" autocomplete="off" type="search" class="input-search filters" readonly placeholder="Filtri" />
@@ -577,7 +577,7 @@
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="4">
                               <ul id="ul-filters" class="custom-scrollbar" data-search-id="input-search-filters"></ul>
-                              <button class="btn-link" data-fn="openDialogFilter" type="button" value="Nuovo Filtro">Nuovo Filtro</button>
+                              <button class="btn-link default" data-fn="openDialogFilter" type="button" value="Nuovo Filtro">Nuovo Filtro</button>
                             </section>
                           </section>
                         </div>
