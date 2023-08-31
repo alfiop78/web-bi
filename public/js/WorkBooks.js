@@ -120,6 +120,8 @@ class Sheets {
           break;
       }
     }
+    if (!this.sheet.hasOwnProperty('created_at')) this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.options);
+    this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.options);
     console.info(this.sheet);
     debugger;
     SheetStorage.save(this.sheet);

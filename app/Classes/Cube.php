@@ -851,7 +851,7 @@ class Cube
       }
       // } catch (Exception $e) {
       // dd('ERrore gestito');
-      $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTableName;");
+      // $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTableName;");
       // throw new Exception("Errore elaborazione richiesta", 1);
       // }
     }
