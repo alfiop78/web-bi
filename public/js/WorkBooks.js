@@ -12,6 +12,7 @@ class Sheets {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
     this.workBookToken = WorkBookToken;
     this.sheet = { token, type: 'sheet', workbook_ref: WorkBookToken };
+    this.options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
   }
 
   set name(value) {
