@@ -45,7 +45,7 @@ var Storage = new SheetStorages();
         const dbElement = JSON.parse(element.json_value);
         const localElement = JSON.parse(localStorage.getItem(dbElement.token));
         // console.log(element, element.token);
-        // verifico lo stato dell'elemento in ciclo rispetto al localStorage 
+        // verifico lo stato dell'elemento in ciclo rispetto al localStorage
         // (sincronizzato, non sincronizzato, ecc...)
         const ul = document.querySelector(`ul[data-type='${type}']`);
         let li;
@@ -115,6 +115,14 @@ var Storage = new SheetStorages();
     btnUpload.dataset.token = token;
     btnUpgrade.dataset.token = token;
     btnDelete.dataset.token = token;
+    // la proprietà workbook_ref viene impostata come dataset
+    if (object.hasOwnProperty('workbook_ref')) {
+      li.dataset.workbookRef = object.workbook_ref;
+      btnDownload.dataset.workbookRef = object.workbook_ref;
+      btnUpload.dataset.workbookRef = object.workbook_ref;
+      btnUpgrade.dataset.workbookRef = object.workbook_ref;
+      btnDelete.dataset.workbookRef = object.workbook_ref;
+    }
     switch (object.type) {
       case 'sheet':
       case 'workbook':
@@ -122,22 +130,22 @@ var Storage = new SheetStorages();
         li.dataset.label = object.name;
         span.dataset.value = object.name;
         span.innerText = object.name;
-        if (object.hasOwnProperty('workbook_ref')) {
+        /* if (object.hasOwnProperty('workbook_ref')) {
           // recupero il nome del workBook a cui si riferisce la risorsa in ciclo
           if (window.localStorage.getItem(object.workbook_ref)) {
             const workBook = JSON.parse(window.localStorage.getItem(object.workbook_ref)).name;
             workBookRef.innerText = workBook;
           }
-        }
+        } */
         break;
       default:
         li.dataset.label = object.alias;
         span.dataset.value = object.alias;
         span.innerText = object.alias;
-        if (window.localStorage.getItem(object.workbook_ref)) {
+        /* if (window.localStorage.getItem(object.workbook_ref)) {
           const workBook = JSON.parse(window.localStorage.getItem(object.workbook_ref)).name;
           workBookRef.innerText = workBook;
-        }
+        } */
         break;
     }
     btnUpload.dataset.upload = object.type;
@@ -336,7 +344,7 @@ var Storage = new SheetStorages();
           sectionElement.querySelector('.vers-actions button[data-id="btn-download"]').disabled = true;
           sectionElement.querySelector('.vers-actions button[data-id="btn-upgrade-production"]').disabled = true;
         } else {
-          // TODO: 
+          // TODO:
         }
       })
       .catch((err) => console.error(err));
