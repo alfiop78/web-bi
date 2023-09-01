@@ -728,14 +728,7 @@ var Sheet;
       const ds = document.querySelector('#textarea-column-ds');
       app.addMark({ table, alias, field }, id);
       app.addMark({ table, alias, field }, ds);
-      // id.innerHTML = e.currentTarget.dataset.field;
-      // ds.innerHTML = e.currentTarget.dataset.field;
-
-      // id.value = e.currentTarget.dataset.field;
-      // ds.value = e.currentTarget.dataset.field;
-      // ds.focus();
-      // ds.select();
-      // TODO: carico elenco tabelle del canvas
+      // carico elenco tabelle del canvas
       app.loadTableStruct();
       app.dialogColumns.show();
     }
@@ -2122,8 +2115,10 @@ var Sheet;
           table: WorkBook.activeTable.dataset.table,
           name: column.COLUMN_NAME,
           field: {
-            id: { field: column.COLUMN_NAME, type: 'da implementare', origin_field: column.COLUMN_NAME },
-            ds: { field: column.COLUMN_NAME, type: 'da implementare', origin_field: column.COLUMN_NAME }
+            // id: { field: column.COLUMN_NAME, type: 'da implementare', origin_field: column.COLUMN_NAME },
+            // ds: { field: column.COLUMN_NAME, type: 'da implementare', origin_field: column.COLUMN_NAME }
+            id: { sql: [column.COLUMN_NAME], type: 'da implementare', origin_field: column.COLUMN_NAME },
+            ds: { sql: [column.COLUMN_NAME], type: 'da implementare', origin_field: column.COLUMN_NAME }
           }
         }
       };
@@ -2232,12 +2227,28 @@ var Sheet;
 
   app.saveColumn = () => {
     const field = app.dialogColumns.dataset.field;
-    const id = document.getElementById('textarea-column-id');
-    const ds = document.getElementById('textarea-column-ds');
-    let fieldObjectId = { field: id.value, type: 'da_completare', origin_field: field };
-    let fieldObjectDs = { field: ds.value, type: 'da_completare', origin_field: field };
-    // WorkBook.field = { id: fieldObjectId, ds: fieldObjectDs };
+    // const id = document.getElementById('textarea-column-id');
+    // const ds = document.getElementById('textarea-column-ds');
     const token = rand().substring(0, 7);
+    let fieldObjectId = { /* field: id.value, */ sql: [], type: 'da_completare', origin_field: field };
+    let fieldObjectDs = { /* field: ds.value, */ sql: [], type: 'da_completare', origin_field: field };
+    document.querySelectorAll('#textarea-column-id *').forEach(element => {
+      if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
+      if (element.nodeName === 'MARK') {
+        fieldObjectId.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
+      } else {
+        fieldObjectId.sql.push(element.innerText.trim());
+      }
+    });
+    document.querySelectorAll('#textarea-column-ds *').forEach(element => {
+      if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
+      if (element.nodeName === 'MARK') {
+        fieldObjectDs.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
+      } else {
+        fieldObjectDs.sql.push(element.innerText.trim());
+      }
+    });
+
     WorkBook.field = {
       token,
       value: {
@@ -2387,15 +2398,17 @@ var Sheet;
         li.id = token;
         li.dataset.type = 'column';
         li.dataset.elementSearch = 'fields';
-        li.dataset.label = value.field.ds.field;
+        // li.dataset.label = value.field.ds.field;
+        // li.dataset.label = value.field.ds.origin_field;
+        li.dataset.label = value.field.ds.sql.join('');
         // li.dataset.id = tableId;
         li.dataset.schema = value.schema;
         li.dataset.table = value.table;
         li.dataset.alias = value.tableAlias;
-        li.dataset.field = value.field.ds.field;
+        li.dataset.field = value.field.ds.origin_field;
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
-        span.innerHTML = value.field.ds.field;
+        span.innerHTML = value.field.ds.sql.join('');
         parent.appendChild(li);
       }
     }
