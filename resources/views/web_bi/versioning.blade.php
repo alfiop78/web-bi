@@ -91,6 +91,10 @@
                       <ul class="elements" id="ul-filter" data-type="filters" hidden></ul>
                       <div class="details">
                         <section>Dettaglio risorsa</section>
+                        <div>Data creazione</div>
+                        <div>Tabella TIME</div>
+                        <div>Metriche</div>
+                        <div>Elenco tabelle</div>
                       </div>
                     </div>
                   </div>

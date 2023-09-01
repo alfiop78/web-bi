@@ -122,6 +122,10 @@ var Storage = new SheetStorages();
       btnUpload.dataset.workbookRef = object.workbook_ref;
       btnUpgrade.dataset.workbookRef = object.workbook_ref;
       btnDelete.dataset.workbookRef = object.workbook_ref;
+      // TODO: recupero il nome del WorkBook a cui è associato questa risorsa
+      // Questo deve essere fatto DOPO il caricamento degli oggetti dal DB
+      // const workbookName = document.querySelector(`#ul-workbook > li[id='${object.workbook_ref}']`);
+      // workBookRef.innerText = workbookName.dataset.label;
     }
     switch (object.type) {
       case 'sheet':
