@@ -23,8 +23,8 @@
 /* elementi con all'interno altri elementi che possono essere contenteditable (es. : textarea SQL formula) */
 *[data-content-editable] {
   background-color: white;
-  padding: 1em;
-  margin: 1em 0px;
+  padding: 2em 1em 1em;
+  position: relative;
   border-radius: 2px;
   color: #494949;
 }
@@ -64,4 +64,19 @@ button.default:not([disabled]):hover{
 
 button.attention:not([disabled]):hover{
   color: darkred;
+}
+
+.textarea-content::before {
+  color: darkgray;
+  position: absolute;
+  left: 1em;
+  top: 4px;
+}
+
+div#textarea-column-id::before {
+  content: 'ID';
+}
+
+div#textarea-column-ds::before {
+  content: 'Descrizione';
 }

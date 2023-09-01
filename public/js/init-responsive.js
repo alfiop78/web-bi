@@ -720,16 +720,99 @@ var Sheet;
   // TODO: da spostare in supportFn.js
   app.setColumn = (e) => {
     if (e.currentTarget.dataset.editable === 'true') {
-      app.dialogColumns.show();
       app.dialogColumns.dataset.field = e.currentTarget.dataset.field;
-      const id = app.dialogColumns.querySelector('#textarea-column-id-formula');
-      const ds = app.dialogColumns.querySelector('#textarea-column-ds-formula');
-      // id.value = 'id';
-      id.value = e.currentTarget.dataset.field;
-      ds.value = e.currentTarget.dataset.field;
-      ds.focus();
-      ds.select();
+      const table = WorkBook.activeTable.dataset.table;
+      const alias = WorkBook.activeTable.dataset.alias;
+      const field = e.currentTarget.dataset.field;
+      const id = document.querySelector('#textarea-column-id');
+      const ds = document.querySelector('#textarea-column-ds');
+      app.addMark({ table, alias, field }, id);
+      app.addMark({ table, alias, field }, ds);
+      // id.innerHTML = e.currentTarget.dataset.field;
+      // ds.innerHTML = e.currentTarget.dataset.field;
+
+      // id.value = e.currentTarget.dataset.field;
+      // ds.value = e.currentTarget.dataset.field;
+      // ds.focus();
+      // ds.select();
+      // TODO: carico elenco tabelle del canvas
+      app.loadTableStruct();
+      app.dialogColumns.show();
     }
+  }
+
+  app.loadTableStruct = () => {
+    // reset
+    document.querySelectorAll('nav#table-field-list dl').forEach(element => element.remove());
+    let parent = document.getElementById('table-field-list');
+    for (const [tableId, value] of WorkBook.hierTables) {
+      const tmpl = app.tmplDetails.content.cloneNode(true);
+      const details = tmpl.querySelector("details");
+      const summary = details.querySelector('summary');
+      WorkBook.activeTable = tableId;
+      // recupero le tabelle dal sessionStorage
+      const columns = WorkBookStorage.getTable(value.table);
+      details.dataset.schema = WorkBook.activeTable.dataset.schema;
+      details.dataset.table = value.name;
+      details.dataset.alias = value.alias;
+      details.dataset.id = tableId;
+      details.dataset.searchId = 'field-search';
+      summary.innerHTML = value.name;
+      summary.dataset.tableId = tableId;
+      parent.appendChild(details);
+      columns.forEach(column => {
+        const content = app.tmplList.content.cloneNode(true);
+        const li = content.querySelector('li[data-li]');
+        const span = li.querySelector('span');
+        li.dataset.label = column.COLUMN_NAME;
+        li.dataset.fn = 'addToColumnFormula';
+        li.dataset.elementSearch = 'fields';
+        li.dataset.tableId = tableId;
+        li.dataset.table = value.name;
+        li.dataset.alias = value.alias;
+        li.dataset.field = column.COLUMN_NAME;
+        li.dataset.key = column.CONSTRAINT_NAME;
+        span.innerText = column.COLUMN_NAME;
+        // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
+        let pos = column.DATA_TYPE.indexOf('(');
+        let type = (pos !== -1) ? column.DATA_TYPE.substring(0, pos) : column.DATA_TYPE;
+        span.dataset.type = type;
+        // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
+        // li.dataset.id = key;
+        // span.id = key;
+        // li.dataset.fn = 'addFieldToJoin';
+        details.appendChild(li);
+      });
+    }
+  }
+
+  app.addMark = (data, ref) => {
+    const templateContent = app.tmplFormula.content.cloneNode(true);
+    const i = templateContent.querySelector('i');
+    i.addEventListener('click', app.cancelFormulaObject);
+    const span = templateContent.querySelector('span');
+    const mark = templateContent.querySelector('mark');
+    const small = templateContent.querySelector('small');
+    // aggiungo il tableAlias e table come attributo.
+    mark.dataset.tableAlias = data.alias;
+    mark.dataset.table = data.table;
+    mark.dataset.field = data.field;
+    mark.innerText = data.field;
+    small.innerText = data.table;
+    ref.appendChild(span);
+  }
+
+  app.addToColumnFormula = (e) => {
+    WorkBook.activeTable = e.currentTarget.dataset.tableId;
+    console.log(WorkBook.activeTable.dataset.table);
+    const field = e.currentTarget.dataset.field;
+    const table = e.currentTarget.dataset.table;
+    const alias = e.currentTarget.dataset.alias;
+    console.log(field);
+    // textarea
+    const txtArea = document.querySelector('.textarea-content[data-active]');
+    app.addMark({ table, alias, field }, txtArea);
+    // app.addSpan(txtArea, null, 'column');
   }
 
   app.textareaDragEnter = (e) => {
@@ -1364,6 +1447,10 @@ var Sheet;
       }
     });
     app.dialogCompositeMetric.show()
+  }
+
+  app.cancelFormulaObject = (e) => {
+    e.currentTarget.parentElement.remove();
   }
 
   /* app.setFrom = (tableAlias) => {
@@ -2145,12 +2232,11 @@ var Sheet;
 
   app.saveColumn = () => {
     const field = app.dialogColumns.dataset.field;
-    const id = app.dialogColumns.querySelector('#textarea-column-id-formula');
-    const ds = app.dialogColumns.querySelector('#textarea-column-ds-formula');
+    const id = document.getElementById('textarea-column-id');
+    const ds = document.getElementById('textarea-column-ds');
     let fieldObjectId = { field: id.value, type: 'da_completare', origin_field: field };
     let fieldObjectDs = { field: ds.value, type: 'da_completare', origin_field: field };
     // WorkBook.field = { id: fieldObjectId, ds: fieldObjectDs };
-    const rand = () => Math.random(0).toString(36).substring(2);
     const token = rand().substring(0, 7);
     WorkBook.field = {
       token,
@@ -2168,7 +2254,6 @@ var Sheet;
       }
     };
     WorkBook.fields = token;
-    // Storages.save();
     app.dialogColumns.close();
     // visualizzo image[data-columns-defined]
     const struct = Draw.svg.querySelector(`#struct-${WorkBook.activeTable.id}`);

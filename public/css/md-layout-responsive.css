@@ -257,3 +257,13 @@ span.markContent {
 small {
   font-size: smaller;
 }
+
+.dlg-content {
+  display: grid;
+  grid-gap: 1em;
+  padding: 1em;
+}
+
+.col-4.col-8 {
+  grid-template-columns: 4fr 8fr;
+}

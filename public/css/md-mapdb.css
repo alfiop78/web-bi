@@ -715,3 +715,26 @@ button.btn-link:hover{
 .attention{
   color: brown;
 }
+
+.textareas {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  grid-row-gap: 1em;
+}
+
+.textarea-column {
+  display: grid;
+  /* grid-template-rows: auto 1fr; */
+}
+
+textarea {
+  padding: 1em;
+  margin: 1em 0px;
+  border-radius: 2px;
+  border: solid thin gainsboro;
+  color: #494949;
+}
+
+textarea:focus, textarea:active {
+  border: solid thin darkgrey;
+}

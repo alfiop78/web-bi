@@ -428,10 +428,9 @@
               <h5 class="title moveable">Creazione Filtro</h5>
               <section class="dlg-content col col-2">
                 <div class="list-search">
-                  <input type="search" id="input-search-columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off" autocomplete="off">
+                  <input type="search" id="input-search-columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off">
                   <div class="relative-ul">
-                    <nav class="custom-scrollbar" data-search-id="input-search-columns">
-                    </nav>
+                    <nav class="custom-scrollbar" data-search-id="input-search-columns"></nav>
                   </div>
                 </div>
                 <section class="textarea-formula">
@@ -450,14 +449,22 @@
 
             <dialog id="dlg-columns" data-x="0" data-y="0" class="medium absolute moveable">
               <section class="dlg-grid">
-                <h5 class="title moveable">Definizione campi id/ds</h5>
-                <section class="dlg-content col columns-2">
-                  <div class="textarea">
-                    <textarea id="textarea-column-id-formula" data-mode="field" rows="6" placeholder="ID Formula" autocomplete="off" autofocus="" required="" minlength="1"></textarea>
+                <h5 class="title moveable">Definizione colonne</h5>
+                <section class="dlg-content col-4 col-8">
+                  <div class="list-search">
+                    <input type="search" id="input-search-fields-dc" placeholder="Ricerca" data-element-search="fields" class="input-search" autocomplete="off">
+                    <div class="relative-ul">
+                      <nav id="table-field-list" class="custom-scrollbar" data-search-id="input-search-fields-dc"></nav>
+                    </div>
                   </div>
-                  <div class="textarea">
-                    <textarea id="textarea-column-ds-formula" data-mode="field" rows="6" placeholder="DS Formula" autocomplete="off" autofocus="" required="" minlength="1"></textarea>
-                  </div>
+                  <section class="textareas">
+                    <section class="textarea-column">
+                      <div id="textarea-column-id" data-fn="addText" class="textarea-content" data-content-editable data-active></div>
+                    </section>
+                    <section class="textarea-column">
+                      <div id="textarea-column-ds" data-fn="addText" class="textarea-content" data-content-editable></div>
+                    </section>
+                  </section>
                 </section>
                 <section class="dlg-buttons">
                   <button name="cancel" value="chiudi">Chiudi</button>
