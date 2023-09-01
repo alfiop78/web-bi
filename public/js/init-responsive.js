@@ -626,20 +626,6 @@ var Sheet;
     }
   }
 
-  // apro la dialog column per definire le colonne del WorkBook
-  // TODO: da spostare in supportFn.js
-  app.setColumn = (e) => {
-    app.dialogColumns.show();
-    app.dialogColumns.dataset.field = e.currentTarget.dataset.field;
-    const id = app.dialogColumns.querySelector('#textarea-column-id-formula');
-    const ds = app.dialogColumns.querySelector('#textarea-column-ds-formula');
-    // id.value = 'id';
-    id.value = e.currentTarget.dataset.field;
-    ds.value = e.currentTarget.dataset.field;
-    ds.focus();
-    ds.select();
-  }
-
   // click all'interno di una textarea
   // TODO: da spostare in supportFn.js
   app.addText = (e) => {
@@ -690,40 +676,60 @@ var Sheet;
   TODO: questa funzionalità andrà sostituita con il drag&drop
   */
   app.handlerSelectColumn = (e) => {
-    const field = e.target.dataset.field;
-    // aggiungo la metrica alla textarea-metric
-    const textarea = app.dialogCustomMetric.querySelector('#textarea-custom-metric');
-    const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
-    const span = templateContent.querySelector('span');
-    const mark = templateContent.querySelector('mark');
-    // mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
-    mark.innerText = field;
-    mark.dataset.tableAlias = WorkBook.activeTable.dataset.alias;
-    textarea.appendChild(span);
-    // aggiungo anche uno span per il proseguimento della scrittura della formula
-    app.addSpan(textarea, null, 'metric');
+    if (e.currentTarget.dataset.editable === 'true') {
+      const field = e.target.dataset.field;
+      // aggiungo la metrica alla textarea-metric
+      const textarea = app.dialogCustomMetric.querySelector('#textarea-custom-metric');
+      const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
+      const span = templateContent.querySelector('span');
+      const mark = templateContent.querySelector('mark');
+      // mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
+      mark.innerText = field;
+      mark.dataset.tableAlias = WorkBook.activeTable.dataset.alias;
+      textarea.appendChild(span);
+      // aggiungo anche uno span per il proseguimento della scrittura della formula
+      app.addSpan(textarea, null, 'metric');
+    }
   }
 
   // dialog-metric per definire le metriche di base del WorkBook (non custom metric di base, come (przmedio*quantita))
   app.setMetric = (e) => {
     // console.log(WorkBook.activeTable);
     // const table = WorkBook.activeTable.dataset.table;
-    const tableAlias = WorkBook.activeTable.dataset.alias;
-    const field = `${tableAlias}.${e.target.dataset.field}`;
-    const alias = e.target.dataset.field;
-    const token = rand().substring(0, 7);
+    if (e.currentTarget.dataset.editable === 'true') {
+      const tableAlias = WorkBook.activeTable.dataset.alias;
+      const field = `${tableAlias}.${e.target.dataset.field}`;
+      const alias = e.target.dataset.field;
+      const token = rand().substring(0, 7);
 
-    // metric Map Object
-    WorkBook.metrics = {
-      token,
-      alias,
-      field: e.target.dataset.field,
-      aggregateFn: 'SUM', // default
-      SQL: field,
-      distinct: false, // default
-      type: 'metric',
-      metric_type: 'basic'
-    };
+      // metric Map Object
+      WorkBook.metrics = {
+        token,
+        alias,
+        field: e.target.dataset.field,
+        aggregateFn: 'SUM', // default
+        SQL: field,
+        distinct: false, // default
+        type: 'metric',
+        metric_type: 'basic'
+      };
+    }
+  }
+
+  // apro la dialog column per definire le colonne del WorkBook
+  // TODO: da spostare in supportFn.js
+  app.setColumn = (e) => {
+    if (e.currentTarget.dataset.editable === 'true') {
+      app.dialogColumns.show();
+      app.dialogColumns.dataset.field = e.currentTarget.dataset.field;
+      const id = app.dialogColumns.querySelector('#textarea-column-id-formula');
+      const ds = app.dialogColumns.querySelector('#textarea-column-ds-formula');
+      // id.value = 'id';
+      id.value = e.currentTarget.dataset.field;
+      ds.value = e.currentTarget.dataset.field;
+      ds.focus();
+      ds.select();
+    }
   }
 
   app.textareaDragEnter = (e) => {
@@ -954,7 +960,7 @@ var Sheet;
       })
       .then((response) => response.json())
       .then(data => {
-        let DT = new Table(data, 'preview-datamart');
+        let DT = new Table(data, 'preview-datamart', false);
         DT.draw();
       })
       .catch(err => {
@@ -1043,7 +1049,7 @@ var Sheet;
     WorkBook.activeTable = e.currentTarget.id;
     WorkBook.schema = e.currentTarget.dataset.schema;
     // debugger;
-    let DT = new Table(await app.getPreviewSVGTable(), 'preview-table');
+    let DT = new Table(await app.getPreviewSVGTable(), 'preview-table', true);
     // console.log(DT.data);
     DT.draw();
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
@@ -1148,7 +1154,7 @@ var Sheet;
       .then((response) => {
         if (response) {
           console.log('data : ', response);
-          let DT = new Table(response, 'preview-datamart');
+          let DT = new Table(response, 'preview-datamart', false);
           DT.draw();
         } else {
           // TODO: Da testare se il codice arriva qui o viene gestito sempre dal catch()
@@ -1699,7 +1705,7 @@ var Sheet;
   }
 
   app.handlerTable = async (e) => {
-    let DT = new Table(await app.getPreviewTable(e.currentTarget.dataset.label, e.currentTarget.dataset.schema), 'preview-table');
+    let DT = new Table(await app.getPreviewTable(e.currentTarget.dataset.label, e.currentTarget.dataset.schema), 'preview-table', false);
     // console.log(DT.data);
     DT.draw();
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));

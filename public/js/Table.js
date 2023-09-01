@@ -1,11 +1,17 @@
 class Table {
   #inputSearch;
-  constructor(data, ref) {
+  constructor(data, ref, editable) {
+    // data : la risposta della query che recupera i dati della tabella
+    // ref : il riferimento nel DOM, dove verrà costruita la tabella
+    // editable (bool) : possibilità di aggiunta colonne e metriche.
+    // Se la tabella non è stata selezionata dal canvas non posso aggiungere colonne e metriche
+    // al WorkBook
     this.data = data;
     // this.refTableHeader = document.getElementById('table-header-fixed');
     this.ref = document.getElementById(ref);
     // this.thead = this.refTableHeader.querySelector('thead');
     this.thead = this.ref.querySelector('thead');
+    this.editable = editable;
     // console.log(this.thead);
     this.tbody = this.ref.querySelector('tbody');
     // console.log(this.ref);
@@ -61,11 +67,14 @@ class Table {
       span.innerHTML = column;
       span.dataset.field = column;
       span.dataset.fn = 'handlerSelectColumn';
+      span.dataset.editable = this.editable;
       btnColumn.dataset.fn = 'setColumn';
+      btnColumn.dataset.editable = this.editable;
       btnColumn.innerHTML = 'table_rows';
       btnColumn.dataset.field = column;
       btnColumn.classList.add('button-icon', 'material-icons-round', 'md-18');
       btnMetric.dataset.fn = 'setMetric';
+      btnMetric.dataset.editable = this.editable;
       btnMetric.classList.add('button-icon', 'material-icons-round', 'md-18');
       btnMetric.innerHTML = 'query_stats';
       btnMetric.dataset.field = column;
