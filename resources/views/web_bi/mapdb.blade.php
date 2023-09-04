@@ -499,7 +499,7 @@
                         <ul id="ul-context-menu-column">
                           <li id="add-column" data-fn="setColumn">Aggiungi colonna</li>
                           <li id="edit-column" data-fn="editColumn">Modifica colonna</li>
-                          <li id="remove-column" data-fn="deleteColumn">Elimina colonna</li>
+                          <li id="remove-column" data-fn="removeColumn">Elimina colonna</li>
                           <!-- <li id="context-custom-metric" data-fn="addCustomMetric">Aggiungi metrica custom</li> -->
                           <li>item 4</li>
                         </ul>

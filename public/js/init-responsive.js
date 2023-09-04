@@ -804,7 +804,22 @@ var Sheet;
     app.dialogColumns.show();
   }
 
-  app.removeColumn = (e) => { }
+
+  // Cancellazione della colonna precedentemente definita in WorkBook.table[s]
+  app.removeColumn = (e) => {
+    // WARN: attenzione perchè la colonna potrebbe essere stata usata in qualche report
+
+    // WorkBook.activeTable è già valorizzato, quando si seleziona la tabella dal canvas
+    // Elimino l'oggetto all'interno del Map 'fields'
+    delete WorkBook.fields.get(WorkBook.activeTable.dataset.alias)[e.currentTarget.dataset.token];
+    WorkBook.field.delete(e.currentTarget.dataset.token);
+    // verifico che l'oggetto Map con l'alias della tabella contenga altri elementi, altrimenti
+    // devo eliminare anche workBook.fields(tableAlias)
+    if (Object.keys(WorkBook.fields.get(WorkBook.activeTable.dataset.alias)).length === 0) {
+      WorkBook.fields.delete(WorkBook.activeTable.dataset.alias);
+    }
+    delete document.querySelector(`#preview-table th[data-token='${e.currentTarget.dataset.token}']`).dataset.token;
+  }
 
   app.contextMenuColumn = (e) => {
     e.preventDefault();
