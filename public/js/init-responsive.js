@@ -13,6 +13,7 @@ var Sheet;
     // tmplContextMenu: document.getElementById('tmpl-context-menu-content'),
     contextMenuRef: document.getElementById('context-menu'),
     contextMenuTableRef: document.getElementById('context-menu-table'),
+    contextMenuColumnRef: document.getElementById('context-menu-column'),
     tmplDetails: document.getElementById('tmpl-details-element'),
     tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
     tmplMetricsDefined: document.getElementById('tmpl-metrics-defined'),
@@ -57,7 +58,8 @@ var Sheet;
   App.init();
 
   app.body.addEventListener('click', () => {
-    if (app.contextMenuRef.hasAttribute('open')) app.contextMenuRef.toggleAttribute('open');
+    document.querySelectorAll('.context-menu[open]').forEach(menu => menu.toggleAttribute('open'));
+    // if (app.contextMenuRef.hasAttribute('open')) app.contextMenuRef.toggleAttribute('open');
   });
   // la Classe Steps deve impostare alcune proprietà DOPO che viene visualizzato il body, non può essere posizionato prima di App.init();
   var Step = new Steps('stepTranslate');
@@ -73,9 +75,10 @@ var Sheet;
           // console.log(node.nodeName);
           if (node.nodeName !== '#text') {
             if (node.hasAttribute('data-fn')) node.addEventListener('click', app[node.dataset.fn]);
+            if (node.hasAttribute('data-context-fn')) node.addEventListener('contextmenu', app[node.dataset.contextFn]);
+
             if (node.hasChildNodes()) {
               node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
-              node.querySelectorAll('*[data-context-fn]').forEach(element => element.addEventListener('contextmenu', app[element.dataset.contextFn]));
               node.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
               node.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
               node.querySelectorAll('*[data-blur-fn]').forEach(element => element.addEventListener('blur', app[element.dataset.blurFn]));
@@ -87,7 +90,6 @@ var Sheet;
         // console.log(mutation.target);
         if (mutation.target.hasChildNodes()) {
           mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
-          mutation.target.querySelectorAll('*[data-context-fn]').forEach(element => element.addEventListener('contextmenu', app[element.dataset.contextFn]));
           mutation.target.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
           mutation.target.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
           mutation.target.querySelectorAll('*[data-blur-fn]').forEach(element => element.addEventListener('blur', app[element.dataset.blurFn]));
@@ -721,24 +723,33 @@ var Sheet;
   // apro la dialog column per definire le colonne del WorkBook
   // TODO: da spostare in supportFn.js
   app.setColumn = (e) => {
-    if (e.currentTarget.dataset.editable === 'true') {
-      app.dialogColumns.dataset.field = e.currentTarget.dataset.field;
-      document.getElementById('column-name').value = e.currentTarget.dataset.field;
-      const table = WorkBook.activeTable.dataset.table;
-      const alias = WorkBook.activeTable.dataset.alias;
-      const field = e.currentTarget.dataset.field;
-      const id = document.querySelector('#textarea-column-id');
-      const ds = document.querySelector('#textarea-column-ds');
-      app.addMark({ table, alias, field }, id);
-      app.addMark({ table, alias, field }, ds);
-      // carico elenco tabelle del canvas
-      app.loadTableStruct();
-      app.dialogColumns.show();
-    }
+    app.dialogColumns.dataset.field = e.currentTarget.dataset.field;
+    document.getElementById('column-name').value = e.currentTarget.dataset.field;
+    const table = WorkBook.activeTable.dataset.table;
+    const alias = WorkBook.activeTable.dataset.alias;
+    const field = e.currentTarget.dataset.field;
+    const id = document.querySelector('#textarea-column-id');
+    const ds = document.querySelector('#textarea-column-ds');
+    app.addMark({ table, alias, field }, id);
+    app.addMark({ table, alias, field }, ds);
+    // carico elenco tabelle del canvas
+    app.loadTableStruct();
+    app.dialogColumns.show();
   }
 
   app.contextMenuColumn = (e) => {
-    debugger;
+    e.preventDefault();
+    // console.log(e.target.getBoundingClientRect());
+    // const { clientX: mouseX, clientY: mouseY } = e;
+    const { right: mouseX, top: mouseY } = e.target.getBoundingClientRect();
+    app.contextMenuColumnRef.style.top = `${mouseY}px`;
+    app.contextMenuColumnRef.style.left = `${mouseX + 4}px`;
+    // Imposto la tabella attiva, su cui si è attivato il context-menu
+    WorkBook.activeTable = e.currentTarget.dataset.id;
+    // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
+    app.contextMenuColumnRef.toggleAttribute('open');
+    // document.querySelectorAll('#ul-context-menu-column li').forEach(item => item.dataset.id = WorkBook.activeTable.id);
+    document.querySelectorAll('#ul-context-menu-column li').forEach(item => item.dataset.field = e.currentTarget.dataset.field);
   }
 
   app.loadTableStruct = () => {
@@ -1042,7 +1053,7 @@ var Sheet;
       })
       .then((response) => response.json())
       .then(data => {
-        let DT = new Table(data, 'preview-datamart', false);
+        let DT = new Table(data, 'preview-datamart');
         DT.draw();
       })
       .catch(err => {
@@ -1130,7 +1141,7 @@ var Sheet;
     // recupero 50 record della tabella selezionata per visualizzare un anteprima
     WorkBook.activeTable = e.currentTarget.id;
     WorkBook.schema = e.currentTarget.dataset.schema;
-    let DT = new Table(await app.getPreviewSVGTable(), 'preview-table', true);
+    let DT = new Table(await app.getPreviewSVGTable(), 'preview-table');
     // console.log(DT.data);
     DT.draw();
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
@@ -1238,7 +1249,7 @@ var Sheet;
       .then((response) => {
         if (response) {
           console.log('data : ', response);
-          let DT = new Table(response, 'preview-datamart', false);
+          let DT = new Table(response, 'preview-datamart');
           DT.draw();
         } else {
           // TODO: Da testare se il codice arriva qui o viene gestito sempre dal catch()
@@ -1793,7 +1804,7 @@ var Sheet;
   }
 
   app.handlerTable = async (e) => {
-    let DT = new Table(await app.getPreviewTable(e.currentTarget.dataset.label, e.currentTarget.dataset.schema), 'preview-table', false);
+    let DT = new Table(await app.getPreviewTable(e.currentTarget.dataset.label, e.currentTarget.dataset.schema), 'preview-table');
     // console.log(DT.data);
     DT.draw();
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));

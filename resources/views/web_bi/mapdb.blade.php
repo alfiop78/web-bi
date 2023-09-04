@@ -495,6 +495,15 @@
                           <li>item 4</li>
                         </ul>
                       </div>
+                      <div id="context-menu-column" class="context-menu">
+                        <ul id="ul-context-menu-column">
+                          <li id="add-new-field" data-fn="setColumn">Aggiungi colonna</li>
+                          <li id="edit-field" data-fn="editField">Modifica colonna</li>
+                          <li id="remove-field" data-fn="deleteField">Elimina colonna</li>
+                          <!-- <li id="context-custom-metric" data-fn="addCustomMetric">Aggiungi metrica custom</li> -->
+                          <li>item 4</li>
+                        </ul>
+                      </div>
                       <section id="canvas-area">
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
                           <svg id="svg" class="dropzone" data-level="0">

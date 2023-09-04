@@ -34,7 +34,7 @@ thead th:hover{
   background-color: lightcoral;
 }
 
-thead th.defined{
+thead th[data-token]{
   background-color: steelblue!important;
   color: whitesmoke!important;
 }

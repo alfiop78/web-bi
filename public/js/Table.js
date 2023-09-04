@@ -1,9 +1,8 @@
 class Table {
   #inputSearch;
-  constructor(data, ref, editable) {
+  constructor(data, ref) {
     // data : la risposta della query che recupera i dati della tabella
     // ref : il riferimento nel DOM, dove verrà costruita la tabella
-    // editable (bool) : possibilità di aggiunta colonne e metriche.
     // Se la tabella non è stata selezionata dal canvas non posso aggiungere colonne e metriche
     // al WorkBook
     this.data = data;
@@ -11,7 +10,6 @@ class Table {
     this.ref = document.getElementById(ref);
     // this.thead = this.refTableHeader.querySelector('thead');
     this.thead = this.ref.querySelector('thead');
-    this.editable = editable;
     // console.log(this.thead);
     this.tbody = this.ref.querySelector('tbody');
     // console.log(this.ref);
@@ -56,31 +54,20 @@ class Table {
       const td = document.createElement('td');
       const span = document.createElement('span');
       const buttons = document.createElement('div');
-      const btnColumn = document.createElement('button');
       const btnMetric = document.createElement('button');
-      // th.innerHTML = column;
-      // evento click sulle intestazioni di colonna
-      // th.dataset.fn = 'handlerColumn';
       th.setAttribute('col', i);
       th.dataset.field = column;
       th.dataset.contextFn = 'contextMenuColumn';
+      th.dataset.id = WorkBook.activeTable.id;
       this.tr.appendChild(th);
       span.innerHTML = column;
       span.dataset.field = column;
       span.dataset.fn = 'handlerSelectColumn';
-      span.dataset.editable = this.editable;
-      btnColumn.dataset.fn = 'setColumn';
-      btnColumn.dataset.editable = this.editable;
-      btnColumn.innerHTML = 'table_rows';
-      btnColumn.dataset.field = column;
-      btnColumn.classList.add('button-icon', 'material-icons-round', 'md-18');
       btnMetric.dataset.fn = 'setMetric';
-      btnMetric.dataset.editable = this.editable;
       btnMetric.classList.add('button-icon', 'material-icons-round', 'md-18');
       btnMetric.innerHTML = 'query_stats';
       btnMetric.dataset.field = column;
       td.appendChild(span);
-      buttons.appendChild(btnColumn);
       buttons.appendChild(btnMetric);
       td.appendChild(buttons);
       th.appendChild(td);
@@ -108,10 +95,13 @@ class Table {
   }
 
   fields(fields) {
-    for (const [key, value] of Object.entries(fields)) {
-      console.log(key, value.field.id.origin_field);
-      // cerco, in thead, la colonna corrispondente e gli applico una class per il colore diverso
-      [...this.thead.querySelectorAll(`th[data-field='${value.field.id.origin_field}']`)].filter(th => th.classList.add('defined'));
+    if (fields) {
+      for (const [key, value] of Object.entries(fields)) {
+        console.log(key, value);
+        // cerco, in thead, la colonna corrispondente e gli applico una class per il colore diverso
+        // [...this.thead.querySelectorAll(`th[data-field='${value.field.id.origin_field}']`)].filter(th => th.classList.add('defined'));
+        [...this.thead.querySelectorAll(`th[data-field='${value.field.id.origin_field}']`)].filter(th => th.dataset.token = key);
+      }
     }
   }
 
