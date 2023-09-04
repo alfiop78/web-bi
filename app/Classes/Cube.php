@@ -49,11 +49,17 @@ class Cube
       // ... per ogni colonna
       // all'interno delle tabelle ci sono i token che corrispondo ognuno a una colonna id-ds
       foreach ($column->field as $key => $value) {
-        // ...ciclo id/ds
+        // key : id/ds
         $this->_fields[] = "{$column->name}_{$key}";
+        // $table_field = implode("", $value->sql);
+        // $this->_fields[] = "{$table_field}_{$key}";
       }
     }
-    // dd($this->_fields);
+    dd($this->_fields);
+    /* array:2 [
+      0 => "descrizione_id"
+      1 => "descrizione_ds"
+    ] */
   }
 
   public function select($columns)
@@ -86,7 +92,6 @@ class Cube
     // var_dump($this->_columns);
   }
 
-
   public function sheetSelect($columns)
   {
     $fieldList = array();
@@ -95,9 +100,11 @@ class Cube
     // per ogni tabella
     foreach ($columns as $column) {
       // ... per ogni colonna
+      // dd($column);
       foreach ($column->field as $key => $value) {
-        // ...ciclo id/ds
-        $fieldList["{$column->name}_{$key}"] = "{$column->tableAlias}.{$value->field} AS {$column->name}_{$key}"; // $fieldType : id/ds
+        // key: id/ds
+        // $fieldList["{$column->name}_{$key}"] = "{$column->tableAlias}.{$value->field} AS {$column->name}_{$key}"; // $fieldType : id/ds
+        $fieldList["{$column->name}_{$key}"] = implode("", $value->sql) . " AS {$column->name}_{$key}"; // $fieldType : id/ds
         $this->_columns[] = "{$column->name}_id"; // questo viene utilizzato nella clausola ON della LEFT JOIN
       }
     }
@@ -193,7 +200,8 @@ class Cube
     $this->groupBy = "GROUP BY\n";
     foreach ($groups as $column) {
       foreach ($column->field as $key => $value) {
-        $fieldList["{$column->name}_{$key}"] = "{$column->tableAlias}.{$value->field}"; // $fieldType : id/ds
+        // $fieldList["{$column->name}_{$key}"] = "{$column->tableAlias}.{$value->field}"; // $fieldType : id/ds
+        $fieldList["{$column->name}_{$key}"] = implode("", $value->sql);
         // $fieldList[$column->name] = "{$column->tableAlias}.{$value->field}"; // $fieldType : id/ds
       }
     }
@@ -978,6 +986,7 @@ class Cube
       }
     }
   }
+
   // creo il datamart finale, mettendo insieme, base table con metric table (LEFT JOIN)
   public function createDatamart($mode)
   {

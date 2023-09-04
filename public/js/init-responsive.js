@@ -742,10 +742,9 @@ var Sheet;
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
       const summary = details.querySelector('summary');
-      WorkBook.activeTable = tableId;
       // recupero le tabelle dal sessionStorage
       const columns = WorkBookStorage.getTable(value.table);
-      details.dataset.schema = WorkBook.activeTable.dataset.schema;
+      details.dataset.schema = value.schema;
       details.dataset.table = value.name;
       details.dataset.alias = value.alias;
       details.dataset.id = tableId;
@@ -1124,7 +1123,6 @@ var Sheet;
     // recupero 50 record della tabella selezionata per visualizzare un anteprima
     WorkBook.activeTable = e.currentTarget.id;
     WorkBook.schema = e.currentTarget.dataset.schema;
-    // debugger;
     let DT = new Table(await app.getPreviewSVGTable(), 'preview-table', true);
     // console.log(DT.data);
     DT.draw();
@@ -1828,6 +1826,7 @@ var Sheet;
         WorkBook.hierTables = {
           id: table.id,
           table: {
+            schema: table.dataset.schema,
             table: table.dataset.table,
             alias: table.dataset.alias,
             name: table.dataset.name
@@ -2235,6 +2234,8 @@ var Sheet;
     document.querySelectorAll('#textarea-column-id *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
+        // il campo potrebbe appartenere ad una tabella diversa da quella selezionata
+        // quindi  aggiungo anche il table alias
         fieldObjectId.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
       } else {
         fieldObjectId.sql.push(element.innerText.trim());

@@ -184,18 +184,27 @@ class MapDatabaseController extends Controller
     $q->datamartName = "WEB_BI_$q->reportId";
     $q->baseColumns = $cube->{'fields'};
     // imposto le colonne da includere nel datamart finale
+    // TODO: da rinominare in 'fields'
     $q->sheetFields();
+    // TODO: da rinominare in 'select'
     $q->sheetSelect($cube->{'fields'});
     if (property_exists($cube, 'compositeMeasures')) $q->compositeMetrics = $cube->{'compositeMeasures'};
     if (property_exists($cube, 'metrics')) {
+      // TODO: da rinominare in 'baseMetrics'
       $q->sheetBaseMetrics = $cube->{'metrics'};
+      // TODO: da rinominare in 'metrics'
       $q->sheetMetrics();
     }
+    // TODO: da rinominare in 'from'
     $q->sheetFrom($cube->{'from'});
+    // TODO: da rinominare in 'where'
     $q->sheetWhere($cube->{'joins'});
+    // TODO: da rinominare in 'filters' oppure 'conditions'
     if (property_exists($cube, 'filters')) $q->sheetFilters($cube->{'filters'});
+    // TODO: da rinominare in 'group'
     $q->sheetGroupBy($cube->{'fields'});
     // try {
+    // TODO: da rinominare in 'baseTable'
     $baseTable = $q->sheetBaseTable(null);
     // dd($baseTable);
     if (!$baseTable) {
@@ -229,10 +238,12 @@ class MapDatabaseController extends Controller
           $q->groupMetricsByFilters->$token = $metrics;
         }
         // dd($q->groupMetricsByFilters);
+        // TODO: da rinominare in 'createMetricDatamarts'
         $metricTable = $q->sheetCreateMetricDatamarts(null);
       }
       // echo 'elaborazione createDatamart';
       // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
+      // TODO: da rinominare in 'createDatamart'
       $datamartName = $q->sheetCreateDatamart(null);
       // dd($datamartName);
       // restituisco un ANTEPRIMA del datamart appena creato
