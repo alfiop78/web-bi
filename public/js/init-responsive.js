@@ -740,11 +740,9 @@ var Sheet;
     document.querySelector('#btn-columns-define').dataset.token = e.currentTarget.dataset.token;
     const textAreaId = document.querySelector('#textarea-column-id');
     const textAreaDs = document.querySelector('#textarea-column-ds');
-    // nome del campo
-    // console.log(e.currentTarget.dataset.field);
     // token della colonna già definita
     // console.log(WorkBook.field.get(e.currentTarget.dataset.token));
-    // TODO: Nella proprietà 'field.id[ds].formula' è presente l'oggetto che
+    // Nella proprietà 'field.id[ds].formula' è presente l'oggetto che
     // consente di ricostruire la formula (come per i filtri o le metriche composte)
     const column = WorkBook.field.get(e.currentTarget.dataset.token);
     // TODO: Il codice che crea il mark, per le formule, è ripetuto, sia qui che
@@ -806,6 +804,13 @@ var Sheet;
   // Cancellazione della colonna precedentemente definita in WorkBook.table[s]
   app.removeColumn = (e) => {
     // WARN: attenzione perchè la colonna potrebbe essere stata usata in qualche report
+    // Stabilire se la colonna può essere eliminata, anche se utilizzata sugli Sheet (in questo caso
+    // eliminerò a cascata su tutti gli Sheet questa colonna) oppure disabilitare 'Elimina colonna'
+    // se questa è utilizzata sugli Sheet
+
+    // console.log(WorkBook.workBook.token);
+    const workbook_ref = WorkBook.workBook.token;
+    return;
 
     // WorkBook.activeTable è già valorizzato, quando si seleziona la tabella dal canvas
     // Elimino l'oggetto all'interno del Map 'fields'
@@ -817,6 +822,9 @@ var Sheet;
       WorkBook.fields.delete(WorkBook.activeTable.dataset.alias);
     }
     delete document.querySelector(`#preview-table th[data-token='${e.currentTarget.dataset.token}']`).dataset.token;
+    // TODO: Visualizzare un avviso che indica la cancellazione della colonna anche su tutti gli sheet dove è stato creato
+    // 1 - Cerco lo sheet, nello storage, con workbook_ref attivo
+    // 2 - Elimino la colonna all'interno della prop 'fields'
   }
 
   app.contextMenuColumn = (e) => {
@@ -1315,7 +1323,6 @@ var Sheet;
     if (advancedMetrics.size !== 0) process.advancedMeasures = Object.fromEntries(advancedMetrics);
     if (compositeMetrics.size !== 0) process.compositeMeasures = Object.fromEntries(compositeMetrics);
     app.process(process);
-
   }
 
   app.process = async (process) => {
