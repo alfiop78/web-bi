@@ -97,10 +97,10 @@ class Table {
   fields(fields) {
     if (fields) {
       for (const [key, value] of Object.entries(fields)) {
-        console.log(key, value);
-        // cerco, in thead, la colonna corrispondente e gli applico una class per il colore diverso
-        // [...this.thead.querySelectorAll(`th[data-field='${value.field.id.origin_field}']`)].filter(th => th.classList.add('defined'));
-        [...this.thead.querySelectorAll(`th[data-field='${value.field.id.origin_field}']`)].filter(th => th.dataset.token = key);
+        // console.log(key, value);
+        // cerco, in thead, la colonna corrispondente e gli applico il token per identificare una colonna
+        // già definita
+        [...this.thead.querySelectorAll(`th[data-field='${value.origin_field}']`)].filter(th => th.dataset.token = key);
       }
     }
   }

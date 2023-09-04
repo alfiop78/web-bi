@@ -680,20 +680,18 @@ var Sheet;
   TODO: questa funzionalità andrà sostituita con il drag&drop
   */
   app.handlerSelectColumn = (e) => {
-    if (e.currentTarget.dataset.editable === 'true') {
-      const field = e.target.dataset.field;
-      // aggiungo la metrica alla textarea-metric
-      const textarea = app.dialogCustomMetric.querySelector('#textarea-custom-metric');
-      const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
-      const span = templateContent.querySelector('span');
-      const mark = templateContent.querySelector('mark');
-      // mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
-      mark.innerText = field;
-      mark.dataset.tableAlias = WorkBook.activeTable.dataset.alias;
-      textarea.appendChild(span);
-      // aggiungo anche uno span per il proseguimento della scrittura della formula
-      app.addSpan(textarea, null, 'metric');
-    }
+    const field = e.target.dataset.field;
+    // aggiungo la metrica alla textarea-metric
+    const textarea = app.dialogCustomMetric.querySelector('#textarea-custom-metric');
+    const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
+    const span = templateContent.querySelector('span');
+    const mark = templateContent.querySelector('mark');
+    // mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
+    mark.innerText = field;
+    mark.dataset.tableAlias = WorkBook.activeTable.dataset.alias;
+    textarea.appendChild(span);
+    // aggiungo anche uno span per il proseguimento della scrittura della formula
+    app.addSpan(textarea, null, 'metric');
   }
 
   // dialog-metric per definire le metriche di base del WorkBook (non custom metric di base, come (przmedio*quantita))
@@ -737,6 +735,77 @@ var Sheet;
     app.dialogColumns.show();
   }
 
+  app.editColumn = (e) => {
+    app.dialogColumns.dataset.field = e.currentTarget.dataset.field;
+    // la colonna già definita avrà sicuramente un token, lo imposto sul tasto 'salva'
+    // per poter aggiornare la colonna e non inserirne una nuova
+    document.querySelector('#btn-columns-define').dataset.token = e.currentTarget.dataset.token;
+    const textAreaId = document.querySelector('#textarea-column-id');
+    const textAreaDs = document.querySelector('#textarea-column-ds');
+    // nome del campo
+    // console.log(e.currentTarget.dataset.field);
+    // token della colonna già definita
+    // console.log(WorkBook.field.get(e.currentTarget.dataset.token));
+    // TODO: Nella proprietà 'field.id[ds].formula' è presente l'oggetto che
+    // consente di ricostruire la formula (come per i filtri o le metriche composte)
+    const column = WorkBook.field.get(e.currentTarget.dataset.token);
+    // TODO: Il codice che crea il mark, per le formule, è ripetuto, sia qui che
+    // per quanto riguarda i filtri, scrivere una fn per non duplicare il codice
+    column.field.id.formula.forEach(element => {
+      if (element.hasOwnProperty('field')) {
+        // determino il <mark>
+        const templateContent = app.tmplFormula.content.cloneNode(true);
+        const i = templateContent.querySelector('i');
+        i.addEventListener('click', app.cancelFormulaObject);
+        const span = templateContent.querySelector('span');
+        const mark = templateContent.querySelector('mark');
+        const small = templateContent.querySelector('small');
+        mark.dataset.tableAlias = element.table_alias;
+        mark.dataset.table = element.table;
+        mark.dataset.field = element.field;
+        mark.innerText = element.field;
+        small.innerText = element.table;
+        textAreaId.appendChild(span);
+      } else {
+        const span = document.createElement('span');
+        span.dataset.check = 'column';
+        span.setAttribute('contenteditable', 'true');
+        span.setAttribute('tabindex', 0);
+        span.innerText = element;
+        textAreaId.appendChild(span);
+      }
+    });
+    column.field.ds.formula.forEach(element => {
+      if (element.hasOwnProperty('field')) {
+        // determino il <mark>
+        const templateContent = app.tmplFormula.content.cloneNode(true);
+        const i = templateContent.querySelector('i');
+        i.addEventListener('click', app.cancelFormulaObject);
+        const span = templateContent.querySelector('span');
+        const mark = templateContent.querySelector('mark');
+        const small = templateContent.querySelector('small');
+        mark.dataset.tableAlias = element.table_alias;
+        mark.dataset.table = element.table;
+        mark.dataset.field = element.field;
+        mark.innerText = element.field;
+        small.innerText = element.table;
+        textAreaDs.appendChild(span);
+      } else {
+        const span = document.createElement('span');
+        span.dataset.check = 'column';
+        span.setAttribute('contenteditable', 'true');
+        span.setAttribute('tabindex', 0);
+        span.innerText = element;
+        textAreaDs.appendChild(span);
+      }
+    });
+    // TODO: imposto il nome della colonna assegnato in fase di creazione, prop origin_field
+    document.getElementById('column-name').value = column.name;
+    app.dialogColumns.show();
+  }
+
+  app.removeColumn = (e) => { }
+
   app.contextMenuColumn = (e) => {
     e.preventDefault();
     // console.log(e.target.getBoundingClientRect());
@@ -749,7 +818,10 @@ var Sheet;
     // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
     app.contextMenuColumnRef.toggleAttribute('open');
     // document.querySelectorAll('#ul-context-menu-column li').forEach(item => item.dataset.id = WorkBook.activeTable.id);
-    document.querySelectorAll('#ul-context-menu-column li').forEach(item => item.dataset.field = e.currentTarget.dataset.field);
+    document.querySelectorAll('#ul-context-menu-column li').forEach(item => {
+      item.dataset.field = e.currentTarget.dataset.field;
+      item.dataset.token = e.currentTarget.dataset.token;
+    });
   }
 
   app.loadTableStruct = () => {
@@ -2134,11 +2206,12 @@ var Sheet;
           tableAlias: WorkBook.activeTable.dataset.alias,
           table: WorkBook.activeTable.dataset.table,
           name: column.COLUMN_NAME,
+          origin_field: column.COLUMN_NAME,
           field: {
             // id: { field: column.COLUMN_NAME, type: 'da implementare', origin_field: column.COLUMN_NAME },
             // ds: { field: column.COLUMN_NAME, type: 'da implementare', origin_field: column.COLUMN_NAME }
-            id: { sql: [column.COLUMN_NAME], type: 'da implementare', origin_field: column.COLUMN_NAME },
-            ds: { sql: [column.COLUMN_NAME], type: 'da implementare', origin_field: column.COLUMN_NAME }
+            id: { sql: [column.COLUMN_NAME], type: 'da implementare' },
+            ds: { sql: [column.COLUMN_NAME], type: 'da implementare' }
           }
         }
       };
@@ -2245,11 +2318,13 @@ var Sheet;
     }
   }
 
-  app.saveColumn = () => {
+  app.saveColumn = (e) => {
     const field = app.dialogColumns.dataset.field;
-    const token = rand().substring(0, 7);
-    let fieldId = { sql: [], formula: [], type: 'da_completare', origin_field: field };
-    let fieldDs = { sql: [], formula: [], type: 'da_completare', origin_field: field };
+    const fieldName = document.getElementById('column-name').value;
+    const token = (e.currentTarget.dataset.token) ? e.currentTarget.dataset.token : rand().substring(0, 7);
+    // const token = rand().substring(0, 7);
+    let fieldId = { sql: [], formula: [], type: 'da_completare' };
+    let fieldDs = { sql: [], formula: [], type: 'da_completare' };
     document.querySelectorAll('#textarea-column-id *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
@@ -2281,7 +2356,8 @@ var Sheet;
         schema: WorkBook.schema,
         tableAlias: WorkBook.activeTable.dataset.alias,
         table: WorkBook.activeTable.dataset.table,
-        name: field,
+        name: fieldName,
+        origin_field: field,
         field: {
           id: fieldId,
           ds: fieldDs
@@ -2423,13 +2499,13 @@ var Sheet;
         li.dataset.type = 'column';
         li.dataset.elementSearch = 'fields';
         // li.dataset.label = value.field.ds.field;
-        // li.dataset.label = value.field.ds.origin_field;
+        // TODO: rivedere la descrizione da far comparire per le colonne e colonne custom
         li.dataset.label = value.field.ds.sql.join('');
         // li.dataset.id = tableId;
         li.dataset.schema = value.schema;
         li.dataset.table = value.table;
         li.dataset.alias = value.tableAlias;
-        li.dataset.field = value.field.ds.origin_field;
+        li.dataset.field = value.name;
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
         span.innerHTML = value.field.ds.sql.join('');

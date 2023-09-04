@@ -497,9 +497,9 @@
                       </div>
                       <div id="context-menu-column" class="context-menu">
                         <ul id="ul-context-menu-column">
-                          <li id="add-new-field" data-fn="setColumn">Aggiungi colonna</li>
-                          <li id="edit-field" data-fn="editField">Modifica colonna</li>
-                          <li id="remove-field" data-fn="deleteField">Elimina colonna</li>
+                          <li id="add-column" data-fn="setColumn">Aggiungi colonna</li>
+                          <li id="edit-column" data-fn="editColumn">Modifica colonna</li>
+                          <li id="remove-column" data-fn="deleteColumn">Elimina colonna</li>
                           <!-- <li id="context-custom-metric" data-fn="addCustomMetric">Aggiungi metrica custom</li> -->
                           <li>item 4</li>
                         </ul>
