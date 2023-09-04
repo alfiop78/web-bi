@@ -55,7 +55,7 @@ class Cube
         // $this->_fields[] = "{$table_field}_{$key}";
       }
     }
-    dd($this->_fields);
+    // dd($this->_fields);
     /* array:2 [
       0 => "descrizione_id"
       1 => "descrizione_ds"

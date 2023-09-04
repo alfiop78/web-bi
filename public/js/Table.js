@@ -63,6 +63,7 @@ class Table {
       // th.dataset.fn = 'handlerColumn';
       th.setAttribute('col', i);
       th.dataset.field = column;
+      th.dataset.contextFn = 'contextMenuColumn';
       this.tr.appendChild(th);
       span.innerHTML = column;
       span.dataset.field = column;
@@ -104,6 +105,14 @@ class Table {
       });
 
     });
+  }
+
+  fields(fields) {
+    for (const [key, value] of Object.entries(fields)) {
+      console.log(key, value.field.id.origin_field);
+      // cerco, in thead, la colonna corrispondente e gli applico una class per il colore diverso
+      [...this.thead.querySelectorAll(`th[data-field='${value.field.id.origin_field}']`)].filter(th => th.classList.add('defined'));
+    }
   }
 
 }

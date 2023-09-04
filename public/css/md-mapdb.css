@@ -718,7 +718,7 @@ button.btn-link:hover{
 
 .textareas {
   display: grid;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: auto 1fr 1fr;
   grid-row-gap: 1em;
 }
 

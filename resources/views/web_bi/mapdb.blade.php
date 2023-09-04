@@ -458,6 +458,7 @@
                     </div>
                   </div>
                   <section class="textareas">
+                    <input type="text" id="column-name" placeholder="Nome" autocomplete="off">
                     <section class="textarea-column">
                       <div id="textarea-column-id" data-fn="addText" class="textarea-content" data-content-editable data-active></div>
                     </section>

@@ -75,6 +75,7 @@ var Sheet;
             if (node.hasAttribute('data-fn')) node.addEventListener('click', app[node.dataset.fn]);
             if (node.hasChildNodes()) {
               node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+              node.querySelectorAll('*[data-context-fn]').forEach(element => element.addEventListener('contextmenu', app[element.dataset.contextFn]));
               node.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
               node.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
               node.querySelectorAll('*[data-blur-fn]').forEach(element => element.addEventListener('blur', app[element.dataset.blurFn]));
@@ -86,6 +87,7 @@ var Sheet;
         // console.log(mutation.target);
         if (mutation.target.hasChildNodes()) {
           mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+          mutation.target.querySelectorAll('*[data-context-fn]').forEach(element => element.addEventListener('contextmenu', app[element.dataset.contextFn]));
           mutation.target.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
           mutation.target.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
           mutation.target.querySelectorAll('*[data-blur-fn]').forEach(element => element.addEventListener('blur', app[element.dataset.blurFn]));
@@ -721,6 +723,7 @@ var Sheet;
   app.setColumn = (e) => {
     if (e.currentTarget.dataset.editable === 'true') {
       app.dialogColumns.dataset.field = e.currentTarget.dataset.field;
+      document.getElementById('column-name').value = e.currentTarget.dataset.field;
       const table = WorkBook.activeTable.dataset.table;
       const alias = WorkBook.activeTable.dataset.alias;
       const field = e.currentTarget.dataset.field;
@@ -732,6 +735,10 @@ var Sheet;
       app.loadTableStruct();
       app.dialogColumns.show();
     }
+  }
+
+  app.contextMenuColumn = (e) => {
+    debugger;
   }
 
   app.loadTableStruct = () => {
@@ -1115,8 +1122,8 @@ var Sheet;
   app.drawer.querySelectorAll('nav').forEach(a => a.dataset.init = 'true');
 
   app.tableSelected = async (e) => {
-    console.log(`table selected ${e.currentTarget.dataset.table}`);
-    console.log(e.currentTarget);
+    // console.log(`table selected ${e.currentTarget.dataset.table}`);
+    // console.log(e.currentTarget);
     // deseleziono le altre tabelle con attributo active
     Draw.svg.querySelectorAll("use.table[data-active='true']").forEach(use => delete use.dataset.active);
     e.currentTarget.dataset.active = 'true';
@@ -1127,6 +1134,8 @@ var Sheet;
     // console.log(DT.data);
     DT.draw();
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
+    // coloro in modo diverso le colonne già definite nel workbook
+    DT.fields(WorkBook.fields.get(WorkBook.activeTable.dataset.alias));
   }
 
   app.createProcess = () => {
@@ -1212,6 +1221,7 @@ var Sheet;
     app.saveSheet();
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(process);
+    debugger;
     // console.log(params);
     // App.showConsole('Elaborazione in corso...', 'info');
     // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
@@ -2226,27 +2236,29 @@ var Sheet;
 
   app.saveColumn = () => {
     const field = app.dialogColumns.dataset.field;
-    // const id = document.getElementById('textarea-column-id');
-    // const ds = document.getElementById('textarea-column-ds');
     const token = rand().substring(0, 7);
-    let fieldObjectId = { /* field: id.value, */ sql: [], type: 'da_completare', origin_field: field };
-    let fieldObjectDs = { /* field: ds.value, */ sql: [], type: 'da_completare', origin_field: field };
+    let fieldId = { sql: [], formula: [], type: 'da_completare', origin_field: field };
+    let fieldDs = { sql: [], formula: [], type: 'da_completare', origin_field: field };
     document.querySelectorAll('#textarea-column-id *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         // il campo potrebbe appartenere ad una tabella diversa da quella selezionata
         // quindi  aggiungo anche il table alias
-        fieldObjectId.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
+        fieldId.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
+        fieldId.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
       } else {
-        fieldObjectId.sql.push(element.innerText.trim());
+        fieldId.sql.push(element.innerText.trim());
+        fieldId.formula.push(element.innerText.trim());
       }
     });
     document.querySelectorAll('#textarea-column-ds *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
-        fieldObjectDs.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
+        fieldDs.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
+        fieldDs.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
       } else {
-        fieldObjectDs.sql.push(element.innerText.trim());
+        fieldDs.sql.push(element.innerText.trim());
+        fieldDs.formula.push(element.innerText.trim());
       }
     });
 
@@ -2260,8 +2272,8 @@ var Sheet;
         table: WorkBook.activeTable.dataset.table,
         name: field,
         field: {
-          id: fieldObjectId,
-          ds: fieldObjectDs
+          id: fieldId,
+          ds: fieldDs
         }
       }
     };

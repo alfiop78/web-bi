@@ -34,6 +34,11 @@ thead th:hover{
   background-color: lightcoral;
 }
 
+thead th.defined{
+  background-color: steelblue!important;
+  color: whitesmoke!important;
+}
+
 thead th > td{
   display: flex;
   justify-content: space-between;
