@@ -698,24 +698,22 @@ var Sheet;
   app.setMetric = (e) => {
     // console.log(WorkBook.activeTable);
     // const table = WorkBook.activeTable.dataset.table;
-    if (e.currentTarget.dataset.editable === 'true') {
-      const tableAlias = WorkBook.activeTable.dataset.alias;
-      const field = `${tableAlias}.${e.target.dataset.field}`;
-      const alias = e.target.dataset.field;
-      const token = rand().substring(0, 7);
+    const tableAlias = WorkBook.activeTable.dataset.alias;
+    const field = `${tableAlias}.${e.target.dataset.field}`;
+    const alias = e.target.dataset.field;
+    const token = rand().substring(0, 7);
 
-      // metric Map Object
-      WorkBook.metrics = {
-        token,
-        alias,
-        field: e.target.dataset.field,
-        aggregateFn: 'SUM', // default
-        SQL: field,
-        distinct: false, // default
-        type: 'metric',
-        metric_type: 'basic'
-      };
-    }
+    // metric Map Object
+    WorkBook.metrics = {
+      token,
+      alias,
+      field: e.target.dataset.field,
+      aggregateFn: 'SUM', // default
+      SQL: field,
+      distinct: false, // default
+      type: 'metric',
+      metric_type: 'basic'
+    };
   }
 
   // apro la dialog column per definire le colonne del WorkBook
@@ -799,11 +797,11 @@ var Sheet;
         textAreaDs.appendChild(span);
       }
     });
-    // TODO: imposto il nome della colonna assegnato in fase di creazione, prop origin_field
+    // imposto il nome della colonna assegnato in fase di creazione, prop name
     document.getElementById('column-name').value = column.name;
+    app.loadTableStruct();
     app.dialogColumns.show();
   }
-
 
   // Cancellazione della colonna precedentemente definita in WorkBook.table[s]
   app.removeColumn = (e) => {
@@ -825,17 +823,26 @@ var Sheet;
     e.preventDefault();
     // console.log(e.target.getBoundingClientRect());
     // const { clientX: mouseX, clientY: mouseY } = e;
-    const { right: mouseX, top: mouseY } = e.target.getBoundingClientRect();
+    // const { right: mouseX, top: mouseY } = e.target.getBoundingClientRect();
+    const { right: mouseX, top: mouseY } = e.currentTarget.getBoundingClientRect();
     app.contextMenuColumnRef.style.top = `${mouseY}px`;
     app.contextMenuColumnRef.style.left = `${mouseX + 4}px`;
     // Imposto la tabella attiva, su cui si è attivato il context-menu
     WorkBook.activeTable = e.currentTarget.dataset.id;
     // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
     app.contextMenuColumnRef.toggleAttribute('open');
-    // document.querySelectorAll('#ul-context-menu-column li').forEach(item => item.dataset.id = WorkBook.activeTable.id);
     document.querySelectorAll('#ul-context-menu-column li').forEach(item => {
+      // imposto il data-token solo sui tasti 'Elimina' e 'Modifica' (colonna già definita)
+      // console.log(item);
       item.dataset.field = e.currentTarget.dataset.field;
-      item.dataset.token = e.currentTarget.dataset.token;
+      if (e.currentTarget.dataset.token && item.id !== 'add-column') {
+        item.dataset.token = e.currentTarget.dataset.token;
+      } else {
+        // TODO: Sostituire gli elementi <li> con <button> in modo da poter
+        // utlizzare anche l'attributo 'disabled' per, ad esempio, disabilitare
+        // 'Elimina' e 'Modifica' su campi non ancora definiti
+        // button.disabled = 'true';
+      }
     });
   }
 
@@ -2515,7 +2522,8 @@ var Sheet;
         li.dataset.elementSearch = 'fields';
         // li.dataset.label = value.field.ds.field;
         // TODO: rivedere la descrizione da far comparire per le colonne e colonne custom
-        li.dataset.label = value.field.ds.sql.join('');
+        // li.dataset.label = value.field.ds.sql.join('');
+        li.dataset.label = value.name;
         // li.dataset.id = tableId;
         li.dataset.schema = value.schema;
         li.dataset.table = value.table;
@@ -2523,7 +2531,8 @@ var Sheet;
         li.dataset.field = value.name;
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
-        span.innerHTML = value.field.ds.sql.join('');
+        // span.innerHTML = value.field.ds.sql.join('');
+        span.innerHTML = value.name;
         parent.appendChild(li);
       }
     }
@@ -2756,5 +2765,16 @@ var Sheet;
     // ripulisco gli elementi delle <ul> (I campi delle tabelle)
     app.dialogJoin.querySelectorAll('ul > li').forEach(li => li.remove());
     app.dialogJoin.querySelectorAll('.join-field').forEach(joinField => joinField.remove());
+  });
+
+  app.dialogColumns.addEventListener('close', (e) => {
+    // ripulisco gli elementi delle <ul> (I campi delle tabelle)
+    // reset della textarea
+    const textAreaId = document.getElementById('textarea-column-id');
+    const textAreaDs = document.getElementById('textarea-column-ds');
+    textAreaId.querySelectorAll('*').forEach(element => element.remove());
+    textAreaDs.querySelectorAll('*').forEach(element => element.remove());
+    // reset <nav> laterale
+    e.target.querySelectorAll('nav > details').forEach(element => element.remove());
   });
 })();
