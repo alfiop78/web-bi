@@ -211,8 +211,10 @@ class Cube
     $this->groupBy .= implode(",\n", $fieldList);
     // dd($this->groupBy);
     // dd($this->segmented);
-    $segmented = implode(",\n", $this->segmented);
-    $this->groupBy .= "\nSEGMENTED BY HASH({$segmented}) ALL NODES";
+    if (count($this->segmented) > 48) {
+      $segmented = implode(",\n", $this->segmented);
+      $this->groupBy .= "\nSEGMENTED BY HASH({$segmented}) ALL NODES";
+    }
     // dd($this->groupBy);
   }
 
