@@ -13,6 +13,7 @@ class Cube
   private $WHERE_metricTable = array(), $WHERE_timingFn = array();
   private $WHERE_baseTable = array(), $WHERE_timeDimension = array();
   private $groupBy;
+  private $segmented = array();
   private $filters_baseTable = array();
   private $reportId;
   private $_metrics_base, $_metrics_base_datamart;
@@ -203,10 +204,15 @@ class Cube
         // $fieldList["{$column->name}_{$key}"] = "{$column->tableAlias}.{$value->field}"; // $fieldType : id/ds
         $fieldList["{$column->name}_{$key}"] = implode("", $value->sql);
         // $fieldList[$column->name] = "{$column->tableAlias}.{$value->field}"; // $fieldType : id/ds
+        array_push($this->segmented, "{$column->name}_{$key}");
       }
     }
     // dd($fieldList);
     $this->groupBy .= implode(",\n", $fieldList);
+    // dd($this->groupBy);
+    // dd($this->segmented);
+    $segmented = implode(",\n", $this->segmented);
+    $this->groupBy .= "\nSEGMENTED BY HASH({$segmented}) ALL NODES";
     // dd($this->groupBy);
   }
 
