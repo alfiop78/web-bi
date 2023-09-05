@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
   <link rel="icon" href="/favicon.png" type="image/png" />
   <title>mapping - new</title>
+  <!-- TODO: tooltip e loader -->
+  <!-- <link rel="stylesheet" href="{{ asset('/css/md-tooltip.css') }}"> -->
+  <!-- <link rel="stylesheet" type="text/css" href="/css/md-loader.css" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-icons.css') }}" />

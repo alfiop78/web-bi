@@ -12,17 +12,6 @@ use Exception;
 
 class MapDatabaseController extends Controller
 {
-  public function mapping()
-  {
-    // recupero l'elenco delle dimensioni create da bi_dimensions.
-    // NOTE: il support alle query su colonne JSON è per mysql 5.7+ https://laravel.com/docs/8.x/queries#json-where-clauses
-    // $dimensions = DB::table('bi_dimensions')->get('json_value'); // QueryBuilder
-    // $dimensions = BIdimension::get('json_value'); // Eloquent
-    $schemaList = DB::connection('vertica_odbc')->select("SELECT SCHEMA_NAME FROM V_CATALOG.SCHEMATA WHERE IS_SYSTEM_SCHEMA = FALSE ORDER BY SCHEMA_NAME;");
-    return view('web_bi.mapping')->with('schemes', $schemaList);
-    // return view('web_bi.mapping')->with(['dimensions' => json_encode($dimensions), 'schemes' => $schemaList]);
-  }
-
   public function mapdb()
   {
     // recupero l'elenco delle dimensioni create da bi_dimensions.
@@ -34,6 +23,8 @@ class MapDatabaseController extends Controller
     $schemaList = DB::connection('vertica_odbc')->select("SELECT SCHEMA_NAME FROM V_CATALOG.SCHEMATA WHERE IS_SYSTEM_SCHEMA = FALSE ORDER BY SCHEMA_NAME;");
     // dd($schemaList);
     return view('web_bi.mapdb')->with('schemes', $schemaList);
+    // altro esempio
+    // return view('web_bi.mapping')->with(['dimensions' => json_encode($dimensions), 'schemes' => $schemaList]);
   }
 
   // test connessione vertica (senza utilizzo di Eloquen/ORM)
