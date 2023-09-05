@@ -1656,8 +1656,9 @@ var Sheet;
       token,
       value: object
     };
-    // reset della textarea
+    // reset della textarea e della custom-filter-name
     textarea.querySelectorAll('*').forEach(element => element.remove());
+    document.getElementById('custom-filter-name').value = '';
     // salvo il nuovo filtro appena creato
     // completato il salvataggio rimuovo l'attributo data-token da e.target
     window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
