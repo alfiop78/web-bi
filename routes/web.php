@@ -47,30 +47,36 @@ Route::get('/', function () {
   return view('web_bi.index');
 })->name('web_bi.index');
 
-Route::get('/mapping', [MapDatabaseController::class, 'mapping'])->name('web_bi.mapping'); // page mapping
 Route::get('/mapdb', [MapDatabaseController::class, 'mapdb'])->name('web_bi.mapdb');
 Route::get('/versioning', function () {
   return view('web_bi.versioning');
 })->name('web_bi.versioning');
 
-// page report
-Route::get('/report', function () {
-  return view('web_bi.report');
-})->name('web_bi.report');
-// pagina Scheduler
-// Route::get('/scheduler', [MapDatabaseController::class, 'scheduler'])->name('web_bi.scheduler');
+// recupero l'elenco dei database presenti (schema)
+Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']);
+// recupero elenco tabelle dello schema selezionato
+Route::get('/fetch_api/schema/{schema}/tables', [MapDatabaseController::class, 'tables'])->name('web_bi.fetch_api.tables');
 
-Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']); // recupero l'elenco dei database presenti (schema)
-Route::get('/fetch_api/schema/{schema}/tables', [MapDatabaseController::class, 'tables'])->name('web_bi.fetch_api.tables'); // recupero elenco tabelle dello schema selezionato
-Route::get('/fetch_api/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('web_bi.fetch_api.table_info'); // recupero il DESCRIBE della tabella
-Route::get('/fetch_api/{schema}/schema/{table}/tables_info', [MapDatabaseController::class, 'tables_info'])->name('web_bi.fetch_api.tables_info'); // recupero il DESCRIBE della tabella
-Route::get('/fetch_api/{schema}/schema/{table}/table/{column}/column_name', [MapDatabaseController::class, 'columns_info'])->name('web_bi.fetch_api.columns_info'); // recupero il DESCRIBE della tabella
-Route::get('/fetch_api/{schema}/schema/{table}/table_preview', [MapDatabaseController::class, 'table_preview'])->name('web_bi.fetch_api.table_preview'); // recupero il DESCRIBE della tabella
+// recupero il DESCRIBE della tabella
+// viene utilizzata dalla request getTable() e altre fn in init-responsive.js
+Route::get('/fetch_api/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('web_bi.fetch_api.table_info');
+// utilizzata da checkSessionStorage()
+Route::get('/fetch_api/{schema}/schema/{table}/tables_info', [MapDatabaseController::class, 'tables_info'])->name('web_bi.fetch_api.tables_info');
 
-Route::get('/fetch_api/schema/{schema}/table/{table}/field/{field}/distinct_values', [MapDatabaseController::class, 'distinct_values'])->name('web_bi.fetch_api.distinct_values'); // recupero i valori distinti del campo field passato come parametro
-Route::post('/fetch_api/cube/process', [MapDatabaseController::class, 'process'])->name('web_bi.fetch_api.process'); // processo la query che crea la FX
-Route::post('/fetch_api/cube/sheet', [MapDatabaseController::class, 'sheet'])->name('web_bi.fetch_api.sheet'); // processo la query che crea la FX
-Route::post('/fetch_api/cube/sqlInfo', [MapDatabaseController::class, 'sqlInfo'])->name('web_bi.fetch_api.sqlInfo'); // restituisco SQL del process
+// recupero il DESCRIBE della tabella
+Route::get('/fetch_api/{schema}/schema/{table}/table/{column}/column_name', [MapDatabaseController::class, 'columns_info'])->name('web_bi.fetch_api.columns_info');
+// viene utilizzata da getPreviewSVGTable() e getPreviewTable()
+Route::get('/fetch_api/{schema}/schema/{table}/table_preview', [MapDatabaseController::class, 'table_preview'])->name('web_bi.fetch_api.table_preview');
+
+// TODO: viene utilizzata ?
+// recupero i valori distinti del campo field passato come parametro
+Route::get('/fetch_api/schema/{schema}/table/{table}/field/{field}/distinct_values', [MapDatabaseController::class, 'distinct_values'])->name('web_bi.fetch_api.distinct_values');
+
+// processo la query che crea la FX
+Route::post('/fetch_api/cube/sheet', [MapDatabaseController::class, 'sheet'])->name('web_bi.fetch_api.sheet');
+// restituisco SQL del process
+// TODO: da reimplementare da quando è cambiata la logica con workbook/sheet
+Route::post('/fetch_api/cube/sqlInfo', [MapDatabaseController::class, 'sqlInfo'])->name('web_bi.fetch_api.sqlInfo');
 
 Route::get('/500', function () {
   return view('errors.500');
@@ -263,7 +269,7 @@ Route::get('/curl/process/{token}/schedule', function ($token) {
   return $map->sheetCurlProcess($process);
 })->name('web_bi.schedule_report');
 
-// Route per verificare se esiste il datamart dello Sheet selezionato (visualizzazione anteprima datamart)
+// visualizzazione anteprima datamart, 'Apri Sheet' sheetPreview()
 Route::get('/fetch_api/{id}/datamart', [MapDatabaseController::class, 'datamart'])->name('web_bi.fetch_api.datamart');
 
 // store json
@@ -286,7 +292,6 @@ Route::prefix('/fetch_api/versioning/')->group(function () {
   Route::get('sheets', [BIsheetController::class, 'index']);
   Route::get('metrics', [BImetricController::class, 'index']);
   Route::get('filters', [BIfilterController::class, 'index']);
-  // Route::get('processes', [BIprocessController::class, 'index']);
 });
 // show
 Route::prefix('/fetch_api/name/')->group(function () {

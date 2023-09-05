@@ -163,6 +163,7 @@ class MapDatabaseController extends Controller
     return response()->json($tables);
   }
 
+  // recupero una preview del datamart già presente, viene elaborata dal tasto 'Apri Sheet'
   public function datamart($id)
   {
     // $datamart = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='decisyon_cache' AND TABLE_NAME='WEB_BI_$id';");
@@ -184,28 +185,24 @@ class MapDatabaseController extends Controller
     $q->datamartName = "WEB_BI_$q->reportId";
     $q->baseColumns = $cube->{'fields'};
     // imposto le colonne da includere nel datamart finale
-    // TODO: da rinominare in 'fields'
-    $q->sheetFields();
-    // TODO: da rinominare in 'select'
-    $q->sheetSelect($cube->{'fields'});
+    $q->fields();
+    $q->select($cube->{'fields'});
     if (property_exists($cube, 'compositeMeasures')) $q->compositeMetrics = $cube->{'compositeMeasures'};
     if (property_exists($cube, 'metrics')) {
       // TODO: da rinominare in 'baseMetrics'
-      $q->sheetBaseMetrics = $cube->{'metrics'};
+      $q->baseMeasures = $cube->{'metrics'};
       // TODO: da rinominare in 'metrics'
-      $q->sheetMetrics();
+      $q->metrics();
     }
-    // TODO: da rinominare in 'from'
-    $q->sheetFrom($cube->{'from'});
+    $q->from($cube->{'from'});
     // TODO: da rinominare in 'where'
-    $q->sheetWhere($cube->{'joins'});
+    $q->where($cube->{'joins'});
     // TODO: da rinominare in 'filters' oppure 'conditions'
-    if (property_exists($cube, 'filters')) $q->sheetFilters($cube->{'filters'});
-    // TODO: da rinominare in 'group'
-    $q->sheetGroupBy($cube->{'fields'});
+    if (property_exists($cube, 'filters')) $q->filters($cube->{'filters'});
+    $q->groupBy($cube->{'fields'});
     // try {
     // TODO: da rinominare in 'baseTable'
-    $baseTable = $q->sheetBaseTable(null);
+    $baseTable = $q->baseTable(null);
     // dd($baseTable);
     if (!$baseTable) {
       // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
@@ -239,12 +236,12 @@ class MapDatabaseController extends Controller
         }
         // dd($q->groupMetricsByFilters);
         // TODO: da rinominare in 'createMetricDatamarts'
-        $metricTable = $q->sheetCreateMetricDatamarts(null);
+        $metricTable = $q->createMetricDatamarts(null);
       }
       // echo 'elaborazione createDatamart';
       // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
       // TODO: da rinominare in 'createDatamart'
-      $datamartName = $q->sheetCreateDatamart(null);
+      $datamartName = $q->createDatamart(null);
       // dd($datamartName);
       // restituisco un ANTEPRIMA del datamart appena creato
       $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.$q->datamartName LIMIT 500;");
@@ -282,21 +279,21 @@ class MapDatabaseController extends Controller
     $q->baseColumns = $report->{'fields'};
 
     // imposto le colonne da includere nel datamart finale
-    $q->sheetFields();
-    $q->sheetSelect($report->{'fields'});
+    $q->fields();
+    $q->select($report->{'fields'});
     if (property_exists($report, 'compositeMeasures')) $q->compositeMetrics = $report->{'compositeMeasures'};
     if (property_exists($report, 'metrics')) {
-      $q->sheetBaseMetrics = $report->{'metrics'};
-      $q->sheetMetrics();
+      $q->baseMeasures = $report->{'metrics'};
+      $q->metrics();
     }
-    $q->sheetFrom($report->{'from'});
-    $q->sheetWhere($report->{'joins'});
-    if (property_exists($report, 'filters')) $q->sheetFilters($report->{'filters'});
-    $q->sheetGroupBy($report->{'fields'});
+    $q->from($report->{'from'});
+    $q->where($report->{'joins'});
+    if (property_exists($report, 'filters')) $q->filters($report->{'filters'});
+    $q->groupBy($report->{'fields'});
     /* dd($q); */
     // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
     // try {
-    $baseTable = $q->sheetBaseTable(null);
+    $baseTable = $q->baseTable(null);
     if (!$baseTable) {
       // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
       // creo una tabella temporanea per ogni metrica filtrata
@@ -328,11 +325,11 @@ class MapDatabaseController extends Controller
           $q->groupMetricsByFilters->$token = $metrics;
         }
         // dd($q->groupMetricsByFilters);
-        $metricTable = $q->sheetCreateMetricDatamarts(null);
+        $metricTable = $q->createMetricDatamarts(null);
       }
       // echo 'elaborazione createDatamart';
       // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-      $datamartName = $q->sheetCreateDatamart(null);
+      $datamartName = $q->createDatamart(null);
       // echo $datamartName;
       // var_dump($datamartName);
       // if ($datamartName) return "Datamart ({$datamartName}) per il report {$reportName} creato con successo!\n";
@@ -344,105 +341,6 @@ class MapDatabaseController extends Controller
     //   // abort(500, "ERRORE ESECUZIONE QUERY : $msg");
     // }
     // dd($baseTable);
-  }
-
-  // processo la FX
-  public function process(Request $request)
-  {
-    // TODO: Ottimizzazione. Molti di questi Metodi e Proprietà vengono utilizzati anche in curlprocess() e sqlInfo() per cui potrei evitare codice duplicato
-    // echo gettype($cube);
-    // dd($request);
-    // per accedere al contenuto della $request lo converto in json codificando la $request e decodificandolo in json
-    $cube = json_decode(json_encode($request->all())); // object
-    $q = new Cube();
-    // imposto le proprietà con i magic methods
-    $q->reportId = $cube->{'processId'};
-    $q->baseTableName = "WEB_BI_TMP_BASE_$q->reportId";
-    $q->datamartName = "WEB_BI_$q->reportId";
-    // TODO: baseColumns potrei utilizzarlo anche nella chiamata a $q->select e $q->groupBy
-    $q->baseColumns = $cube->{'select'};
-    $q->json__info = (object)[
-      "SELECT" => "SELECT",
-      "columns" => (object)[],
-      "FROM" => "FROM",
-      "from" => (object)[],
-      "WHERE" => "WHERE",
-      "where" => (object)[],
-      "filters" => (object)[],
-      "GROUP" => "GROUP BY",
-      "groupBy" => (object)[]
-    ];
-    // imposto le colonne da includere nel datamart finale
-    $q->fields();
-    // imposto il magic method con le metriche composte
-    if (property_exists($cube, 'compositeMetrics')) $q->compositeMetrics = $cube->{'compositeMetrics'};
-    // verifico se sono presenti metriche di base
-    if (property_exists($cube, 'metrics')) {
-      $q->baseMetrics = $cube->{'metrics'};
-      $q->metrics();
-    }
-
-    // creo le clausole per SQL
-    $q->select($cube->{'select'});
-    $q->from($cube->{'from'});
-    $q->where($cube->{'where'});
-    if (property_exists($cube, 'filters')) $q->filters($cube->{'filters'});
-    // TODO: siccome il group by viene creato uguale alla clausola SELECT potrei unirli e non fare qui 2 chiamate
-    $q->groupBy($cube->{'select'});
-    /* dd($q); */
-    // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
-    try {
-      $baseTable = $q->baseTable(null);
-      // dd($baseTable);
-      if (!$baseTable) {
-        // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
-        // creo una tabella temporanea per ogni metrica filtrata
-        // TODO: 2022-05-06 qui occorre una verifica più approfondita sui filtri contenuti nella metrica, allo stato attuale faccio una query per ogni metrica filtrata, anche se i filtri all'interno della metrica sono uguali. Includere più metriche che contengono gli stessi filtri in un unica query
-        if (property_exists($cube, 'advancedMetrics')) {
-          $q->filteredMetrics = $cube->{'advancedMetrics'};
-          // verifico quali, tra le metriche filtrate, contengono gli stessi filtri. Le metriche che contengono gli stessi filtri vanno eseguite in un unica query
-          // oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
-          $q->groupMetricsByFilters = (object)[];
-          // raggruppare per tipologia dei filtri
-          $groupFilters = array();
-          // creo un gruppo di filtri
-          foreach ($q->filteredMetrics as $metric) {
-            // ogni gruppo di filtri ha un tokenGrouup diverso come key dekk'array
-            $tokenGroup = "group_" . bin2hex(random_bytes(4));
-            if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
-          }
-          // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
-          foreach ($groupFilters as $token => $group) {
-            $metrics = array();
-            foreach ($q->filteredMetrics as $metric) {
-              if (get_object_vars($metric->filters) == get_object_vars($group)) {
-                // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
-                array_push($metrics, $metric);
-              }
-            }
-            // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
-            $q->groupMetricsByFilters->$token = $metrics;
-          }
-          // dd($q->groupMetricsByFilters);
-          $metricTable = $q->createMetricDatamarts(null);
-        }
-        // echo 'elaborazione createDatamart';
-        // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-        $datamartName = $q->createDatamart(null);
-        // dd($datamartName);
-        // restituisco un ANTEPRIMA del json con i dati del datamart appena creato
-        $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.$q->datamartName LIMIT 500;");
-        return response()->json($datamartResult);
-      } else {
-        return 'BaseTable non create';
-      }
-    } catch (Exception $e) {
-      $msg = $e->getMessage();
-      // return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
-      // header($_SERVER["SERVER_PROTOCOL"] . ' 500 Internal Server Error', true, 500);
-      // return abort(500, "ERRORE ESECUZIONE QUERY : $msg");
-      abort(500, "ERRORE ESECUZIONE QUERY : $msg");
-    }
   }
 
   public function sqlInfo(Request $request)
