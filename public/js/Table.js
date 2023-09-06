@@ -4,25 +4,14 @@ class Table {
   constructor(data, ref) {
     // data : la risposta della query che recupera i dati della tabella
     // ref : il riferimento nel DOM, dove verrà costruita la tabella
-    // active (bool) : true = imposto header con eventi, altrimenti senza eventi
     // Se la tabella non è stata selezionata dal canvas non posso aggiungere colonne e metriche
     // al WorkBook
     this.data = data;
     this.ref = document.getElementById(ref);
-    // this.template = document.getElementById(template);
-    // this.templateContent = this.template.content.cloneNode(true);
-    // this.thead = this.templateContent.querySelector('thead');
-    // this.tbody = this.templateContent.querySelector('tbody');
     this.#inputSearch = document.getElementById(this.ref.dataset.searchInput);
   }
 
   get inputSearch() { return this.#inputSearch; }
-
-  /* set data(value) {
-    this.#data = value;
-  }
-
-  get data() { return this.#data; } */
 
   set template(value) {
     this.#template = document.getElementById(value);

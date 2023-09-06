@@ -1243,9 +1243,10 @@ var Sheet;
     // recupero 50 record della tabella selezionata per visualizzare un anteprima
     WorkBook.activeTable = e.currentTarget.id;
     WorkBook.schema = e.currentTarget.dataset.schema;
-    let DT = new Table(await app.getPreviewSVGTable(), 'preview-table', 'tmpl-preview-table', true);
-    // console.log(DT.data);
-    DT.draw();
+    let DT = new Table(await app.getPreviewSVGTable(), 'preview-table');
+    DT.template = 'tmpl-preview-table';
+    DT.addColumns();
+    DT.addRows();
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
     // coloro in modo diverso le colonne già definite nel workbook
     DT.fields(WorkBook.fields.get(WorkBook.activeTable.dataset.alias));
@@ -1907,12 +1908,12 @@ var Sheet;
   app.showTablePreview = async (e) => {
     const table = e.currentTarget.dataset.label;
     const schema = e.currentTarget.dataset.schema;
-    let DataTable = new Table(await app.getPreviewTable(table, schema), 'preview-table');
+    let DT = new Table(await app.getPreviewTable(table, schema), 'preview-table');
     // console.log(DT.data);
-    DataTable.template = 'tmpl-preview-table';
-    DataTable.addColumns();
-    DataTable.addRows();
-    DataTable.inputSearch.addEventListener('input', DataTable.columnSearch.bind(DataTable));
+    DT.template = 'tmpl-preview-table';
+    DT.addColumns();
+    DT.addRows();
+    DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
   }
 
   app.tablesMap = () => {
