@@ -133,6 +133,7 @@ class SheetStorages extends Storages {
     return JSON.parse(window.localStorage.getItem(this.#sheet));
   }
 
+  // restituisce gli sheet con il workbook_ref passato come parametro
   sheets(workBookToken) {
     for (const [token, object] of Object.entries(this.storage)) {
       if (JSON.parse(object).type === 'sheet' && JSON.parse(object).workbook_ref === workBookToken) {

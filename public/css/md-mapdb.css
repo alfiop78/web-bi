@@ -574,6 +574,7 @@ code[contenteditable="true"] {
   outline: none;
   color: whitesmoke;
   font-family: monospace;
+  font-size: .85rem;
 }
 
 code[data-alias] {

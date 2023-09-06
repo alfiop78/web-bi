@@ -810,7 +810,6 @@ var Sheet;
 
     // console.log(WorkBook.workBook.token);
     const workbook_ref = WorkBook.workBook.token;
-    return;
 
     // WorkBook.activeTable è già valorizzato, quando si seleziona la tabella dal canvas
     // Elimino l'oggetto all'interno del Map 'fields'
@@ -822,9 +821,21 @@ var Sheet;
       WorkBook.fields.delete(WorkBook.activeTable.dataset.alias);
     }
     delete document.querySelector(`#preview-table th[data-token='${e.currentTarget.dataset.token}']`).dataset.token;
+
     // TODO: Visualizzare un avviso che indica la cancellazione della colonna anche su tutti gli sheet dove è stato creato
-    // 1 - Cerco lo sheet, nello storage, con workbook_ref attivo
+
+    // 1 - Cerco lo sheet, nello storage, con workbook_ref relativo a questo workbook
     // 2 - Elimino la colonna all'interno della prop 'fields'
+    const sheets = SheetStorage.sheets(workbook_ref);
+    // WARN: se sono presenti sheet, li aggiorno, però c'è da valutare se annullare la cache del datamart
+    // altrimenti le colonne dello sheet non corrispondono a quelle impostate in righe/colonne (nella pagina)
+    if (sheets) {
+      for (const value of Object.values(sheets)) {
+        delete value.fields[e.currentTarget.dataset.token];
+        value.updated_at = new Date().toLocaleDateString('it-IT', options);
+        SheetStorage.save(value);
+      }
+    }
   }
 
   app.contextMenuColumn = (e) => {
@@ -1253,7 +1264,7 @@ var Sheet;
     DT.addColumns();
     DT.addRows();
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
-    // coloro in modo diverso le colonne già definite nel workbook
+    // imposto un colore diverso le colonne già definite nel workbook
     DT.fields(WorkBook.fields.get(WorkBook.activeTable.dataset.alias));
   }
 
