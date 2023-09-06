@@ -13,20 +13,14 @@ table tbody{
 
 th,
 td{
-  padding: 5px 10px;
+  padding: 4px 12px;
 }
 
-table[data-active="true"] thead {
+thead {
   height: 35px;
-  background-color: lightskyblue;
 }
 
-table[data-active="false"] thead {
-  height: 35px;
-  background-color: gainsboro;
-}
-
-thead th {
+th {
   position: sticky;
   top: 0;
   vertical-align: middle;
@@ -34,14 +28,12 @@ thead th {
   white-space: nowrap;
 }
 
-th .headers-active {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+table[data-active="true"] thead th {
+  background-color: lightskyblue;
 }
 
-thead th.custom-field{
-  background-color: lightslategray;
+table[data-active="false"] thead th {
+  background-color: gainsboro;
 }
 
 table[data-active="true"] thead th:hover{
@@ -52,15 +44,6 @@ table[data-active="true"] thead th:hover{
 thead th[data-token]{
   background-color: steelblue!important;
   color: whitesmoke!important;
-}
-
-thead th > td{
-  display: flex;
-  justify-content: space-between;
-}
-
-thead th > td > div{
-  display: flex;
 }
 
 .table-preview{

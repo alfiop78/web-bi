@@ -1158,7 +1158,7 @@ var Sheet;
       })
       .then((response) => response.json())
       .then(data => {
-        let DT = new Table(data, 'preview-datamart', 'tmpl-preview-table', false);
+        let DT = new Table(data, 'preview-datamart', false);
         DT.template = 'tmpl-preview-table';
         DT.addColumns();
         DT.addRows();
@@ -1355,7 +1355,7 @@ var Sheet;
       .then((response) => {
         if (response) {
           console.log('data : ', response);
-          let DT = new Table(response, 'preview-datamart', 'tmpl-preview-table', false);
+          let DT = new Table(response, 'preview-datamart', false);
           DT.template = 'tmpl-preview-table';
           DT.addColumns();
           DT.addRows();

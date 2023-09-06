@@ -117,16 +117,9 @@
       <tr></tr>
     </thead>
     <tbody></tbody>
-    <th data-field scope="col">
-      <!-- <div class="headers-active">
-        <span data-fn="handlerSelectColumn"></span>
-        <section>
-          <button data-id="add-metric" class="button-icon material-icons-round md-18">query_stats</button>
-        </section>
-      </div> -->
-    </th>
-    <td scope="row"></td>
+    <th data-field scope="col"></th>
     <tr></tr>
+    <td scope="row"></td>
   </template>
 
   <main>
