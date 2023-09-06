@@ -145,3 +145,10 @@ dt[selected] {
 .sub-elements{
   color: gray;
 }
+
+ul.context-menu-items {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+}

@@ -700,9 +700,22 @@ button.btn-link{
   border: unset;
   background-color: unset;
   font-style: italic;
+  display: block;
 }
 
 button.btn-link:hover{
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+button.btn-link-context{
+  border: unset;
+  background-color: unset;
+  padding: 4px 6px;
+  display: flex;
+}
+
+button.btn-link-context:hover{
   cursor: pointer;
   text-decoration: underline;
 }

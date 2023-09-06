@@ -16,11 +16,20 @@ td{
   padding: 5px 10px;
 }
 
+table[data-active="true"] thead {
+  height: 35px;
+  background-color: lightskyblue;
+}
+
+table[data-active="false"] thead {
+  height: 35px;
+  background-color: gainsboro;
+}
+
 thead th {
   position: sticky;
   top: 0;
   vertical-align: middle;
-  background-color: lightskyblue;
   border: solid thin gainsboro;
   white-space: nowrap;
 }
@@ -35,7 +44,7 @@ thead th.custom-field{
   background-color: lightslategray;
 }
 
-thead th:hover{
+table[data-active="true"] thead th:hover{
   cursor: pointer;
   background-color: lightcoral;
 }

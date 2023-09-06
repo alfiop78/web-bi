@@ -117,13 +117,13 @@
       <tr></tr>
     </thead>
     <tbody></tbody>
-    <th scope="col">
-      <div class="headers-active">
+    <th data-field scope="col">
+      <!-- <div class="headers-active">
         <span data-fn="handlerSelectColumn"></span>
         <section>
           <button data-id="add-metric" class="button-icon material-icons-round md-18">query_stats</button>
         </section>
-      </div>
+      </div> -->
     </th>
     <td scope="row"></td>
     <tr></tr>
@@ -516,11 +516,11 @@
                         </ul>
                       </div>
                       <div id="context-menu-column" class="context-menu">
-                        <ul id="ul-context-menu-column">
-                          <li id="add-column" data-fn="setColumn">Aggiungi colonna</li>
-                          <li id="edit-column" data-fn="editColumn">Modifica colonna</li>
-                          <li id="remove-column" data-fn="removeColumn">Elimina colonna</li>
-                          <!-- <li>item 4</li> -->
+                        <ul id="ul-context-menu-column" class="context-menu-items">
+                          <button id="btn-add-metric" data-fn="setMetric" class="btn-link-context">Metrica</button>
+                          <button id="btn-add-column" data-fn="setColumn" class="btn-link-context">Definisci colonna</button>
+                          <button id="btn-edit-column" data-fn="editColumn" class="btn-link-context">Modifica colonna</button>
+                          <button id="btn-remove-column" data-fn="removeColumn" class="btn-link-context">Elimina colonna</button>
                         </ul>
                       </div>
                       <section id="canvas-area">

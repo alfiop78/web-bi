@@ -1,13 +1,16 @@
 class Table {
   #inputSearch;
   #template;
-  constructor(data, ref) {
+  constructor(data, ref, active) {
     // data : la risposta della query che recupera i dati della tabella
     // ref : il riferimento nel DOM, dove verrà costruita la tabella
+    // active (bool) indica se il <th> deve contenere gli eventi oppure no
     // Se la tabella non è stata selezionata dal canvas non posso aggiungere colonne e metriche
     // al WorkBook
     this.data = data;
     this.ref = document.getElementById(ref);
+    this.active = active;
+    this.ref.dataset.active = active;
     this.#inputSearch = document.getElementById(this.ref.dataset.searchInput);
   }
 
@@ -43,18 +46,14 @@ class Table {
     Object.keys(this.data[0]).forEach((column, i) => {
       this.templateContent = this.#template.content.cloneNode(true);
       const th = this.templateContent.querySelector('th');
-      const span = th.querySelector('span');
       th.setAttribute('col', i);
       th.dataset.field = column;
-      span.innerHTML = column;
-      span.dataset.field = column;
-      span.dataset.fn = 'handlerSelectColumn';
-      const btnMetric = th.querySelector("button[data-id='add-metric']");
-      th.dataset.contextFn = 'contextMenuColumn';
-      btnMetric.dataset.fn = 'setMetric';
-      btnMetric.dataset.field = column;
-      // TODO: decommentare sulle tabelle con header "attiva"
-      // th.dataset.id = WorkBook.activeTable.id;
+      th.innerHTML = column;
+      if (this.active) {
+        th.dataset.id = WorkBook.activeTable.id;
+        th.dataset.fn = 'handlerSelectColumn';
+        th.dataset.contextFn = 'contextMenuColumn';
+      }
       this.tr.appendChild(th);
     });
   }

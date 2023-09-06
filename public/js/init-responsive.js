@@ -829,6 +829,7 @@ var Sheet;
 
   app.contextMenuColumn = (e) => {
     e.preventDefault();
+    if (!e.currentTarget.dataset.id) return false;
     // console.log(e.target.getBoundingClientRect());
     // const { clientX: mouseX, clientY: mouseY } = e;
     // const { right: mouseX, top: mouseY } = e.target.getBoundingClientRect();
@@ -839,17 +840,19 @@ var Sheet;
     WorkBook.activeTable = e.currentTarget.dataset.id;
     // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
     app.contextMenuColumnRef.toggleAttribute('open');
-    document.querySelectorAll('#ul-context-menu-column li').forEach(item => {
+    document.querySelectorAll('#ul-context-menu-column button').forEach(item => {
       // imposto il data-token solo sui tasti 'Elimina' e 'Modifica' (colonna già definita)
       // console.log(item);
+      item.removeAttribute('disabled');
       item.dataset.field = e.currentTarget.dataset.field;
-      if (e.currentTarget.dataset.token && item.id !== 'add-column') {
-        item.dataset.token = e.currentTarget.dataset.token;
-      } else {
-        // TODO: Sostituire gli elementi <li> con <button> in modo da poter
-        // utlizzare anche l'attributo 'disabled' per, ad esempio, disabilitare
-        // 'Elimina' e 'Modifica' su campi non ancora definiti
-        // button.disabled = 'true';
+      switch (item.id) {
+        case 'btn-add-column':
+        case 'btn-add-metric':
+          break;
+        default:
+          // Disabilito le voci 'elimina/modifica' se non è presente il token (colonna non definita nel workbook)
+          (e.currentTarget.dataset.token) ? item.dataset.token = e.currentTarget.dataset.token : item.disabled = 'true';
+          break;
       }
     });
   }
@@ -1156,7 +1159,9 @@ var Sheet;
       .then((response) => response.json())
       .then(data => {
         let DT = new Table(data, 'preview-datamart', 'tmpl-preview-table', false);
-        DT.draw();
+        DT.template = 'tmpl-preview-table';
+        DT.addColumns();
+        DT.addRows();
       })
       .catch(err => {
         App.showConsole(err, 'error');
@@ -1243,7 +1248,7 @@ var Sheet;
     // recupero 50 record della tabella selezionata per visualizzare un anteprima
     WorkBook.activeTable = e.currentTarget.id;
     WorkBook.schema = e.currentTarget.dataset.schema;
-    let DT = new Table(await app.getPreviewSVGTable(), 'preview-table');
+    let DT = new Table(await app.getPreviewSVGTable(), 'preview-table', true);
     DT.template = 'tmpl-preview-table';
     DT.addColumns();
     DT.addRows();
@@ -1351,7 +1356,9 @@ var Sheet;
         if (response) {
           console.log('data : ', response);
           let DT = new Table(response, 'preview-datamart', 'tmpl-preview-table', false);
-          DT.draw();
+          DT.template = 'tmpl-preview-table';
+          DT.addColumns();
+          DT.addRows();
         } else {
           // TODO: Da testare se il codice arriva qui o viene gestito sempre dal catch()
           console.debug('FX non è stata creata');
@@ -1908,8 +1915,7 @@ var Sheet;
   app.showTablePreview = async (e) => {
     const table = e.currentTarget.dataset.label;
     const schema = e.currentTarget.dataset.schema;
-    let DT = new Table(await app.getPreviewTable(table, schema), 'preview-table');
-    // console.log(DT.data);
+    let DT = new Table(await app.getPreviewTable(table, schema), 'preview-table', false);
     DT.template = 'tmpl-preview-table';
     DT.addColumns();
     DT.addRows();
