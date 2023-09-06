@@ -1017,7 +1017,7 @@ var Sheet;
         const content = app.tmplList.content.cloneNode(true);
         const li = content.querySelector('li[data-li-drag]');
         const span = li.querySelector('span');
-        li.dataset.fn = "handlerTable";
+        li.dataset.fn = "showTablePreview";
         li.dataset.label = value.TABLE_NAME;
         li.dataset.schema = schema;
         li.dataset.elementSearch = 'tables';
@@ -1143,7 +1143,7 @@ var Sheet;
 
   // TODO: da spostare in supportFn.js
   app.sheetPreview = async (token) => {
-    console.log(token);
+    // console.log(token);
     // recupero l'id dello Sheet
     const sheet = JSON.parse(window.localStorage.getItem(token));
     if (!sheet.id) return false;
@@ -1155,7 +1155,7 @@ var Sheet;
       })
       .then((response) => response.json())
       .then(data => {
-        let DT = new Table(data, 'preview-datamart');
+        let DT = new Table(data, 'preview-datamart', 'tmpl-preview-table', false);
         DT.draw();
       })
       .catch(err => {
@@ -1243,7 +1243,7 @@ var Sheet;
     // recupero 50 record della tabella selezionata per visualizzare un anteprima
     WorkBook.activeTable = e.currentTarget.id;
     WorkBook.schema = e.currentTarget.dataset.schema;
-    let DT = new Table(await app.getPreviewSVGTable(), 'preview-table');
+    let DT = new Table(await app.getPreviewSVGTable(), 'preview-table', 'tmpl-preview-table', true);
     // console.log(DT.data);
     DT.draw();
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
@@ -1349,7 +1349,7 @@ var Sheet;
       .then((response) => {
         if (response) {
           console.log('data : ', response);
-          let DT = new Table(response, 'preview-datamart');
+          let DT = new Table(response, 'preview-datamart', 'tmpl-preview-table', false);
           DT.draw();
         } else {
           // TODO: Da testare se il codice arriva qui o viene gestito sempre dal catch()
@@ -1904,11 +1904,15 @@ var Sheet;
     });
   }
 
-  app.handlerTable = async (e) => {
-    let DT = new Table(await app.getPreviewTable(e.currentTarget.dataset.label, e.currentTarget.dataset.schema), 'preview-table');
+  app.showTablePreview = async (e) => {
+    const table = e.currentTarget.dataset.label;
+    const schema = e.currentTarget.dataset.schema;
+    let DataTable = new Table(await app.getPreviewTable(table, schema), 'preview-table');
     // console.log(DT.data);
-    DT.draw();
-    DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
+    DataTable.template = 'tmpl-preview-table';
+    DataTable.addColumns();
+    DataTable.addRows();
+    DataTable.inputSearch.addEventListener('input', DataTable.columnSearch.bind(DataTable));
   }
 
   app.tablesMap = () => {

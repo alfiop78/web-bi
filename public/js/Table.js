@@ -1,18 +1,18 @@
 class Table {
   #inputSearch;
+  #template;
   constructor(data, ref) {
     // data : la risposta della query che recupera i dati della tabella
     // ref : il riferimento nel DOM, dove verrà costruita la tabella
+    // active (bool) : true = imposto header con eventi, altrimenti senza eventi
     // Se la tabella non è stata selezionata dal canvas non posso aggiungere colonne e metriche
     // al WorkBook
     this.data = data;
-    // this.refTableHeader = document.getElementById('table-header-fixed');
     this.ref = document.getElementById(ref);
-    // this.thead = this.refTableHeader.querySelector('thead');
-    this.thead = this.ref.querySelector('thead');
-    // console.log(this.thead);
-    this.tbody = this.ref.querySelector('tbody');
-    // console.log(this.ref);
+    // this.template = document.getElementById(template);
+    // this.templateContent = this.template.content.cloneNode(true);
+    // this.thead = this.templateContent.querySelector('thead');
+    // this.tbody = this.templateContent.querySelector('tbody');
     this.#inputSearch = document.getElementById(this.ref.dataset.searchInput);
   }
 
@@ -23,6 +23,18 @@ class Table {
   }
 
   get data() { return this.#data; } */
+
+  set template(value) {
+    this.#template = document.getElementById(value);
+    this.templateContent = this.#template.content.cloneNode(true);
+    this.thead = this.templateContent.querySelector('thead');
+    this.tbody = this.templateContent.querySelector('tbody');
+    this.ref.querySelectorAll('thead, tbody').forEach(element => element.remove());
+    this.ref.appendChild(this.thead);
+    this.ref.appendChild(this.tbody);
+  }
+
+  get template() { return this.#template; }
 
   /*
   * ricerca colonne
@@ -37,40 +49,24 @@ class Table {
     Array.from(this.tbody.querySelectorAll('td[data-field]')).filter(column => column.hidden = (column.dataset.field.toLowerCase().indexOf(value) === -1) ? true : false);
   }
 
-  draw() {
-    // reset table-content
-    this.thead.querySelectorAll('th').forEach(th => th.remove());
-    this.header();
-    this.tbody.querySelectorAll('tr').forEach(tr => tr.remove());
-    this.addRows();
-  }
-
-  header() {
-    // creazione intestazioni
+  addColumns() {
     this.tr = this.thead.querySelector('tr');
     Object.keys(this.data[0]).forEach((column, i) => {
-      // TODO: invece di utilizzare questa struttura potrei passare, al metodo, l'id del template HTML da utilizzare
-      const th = document.createElement('th');
-      const td = document.createElement('td');
-      const span = document.createElement('span');
-      const buttons = document.createElement('div');
-      const btnMetric = document.createElement('button');
+      this.templateContent = this.#template.content.cloneNode(true);
+      const th = this.templateContent.querySelector('th');
+      const span = th.querySelector('span');
       th.setAttribute('col', i);
       th.dataset.field = column;
-      th.dataset.contextFn = 'contextMenuColumn';
-      th.dataset.id = WorkBook.activeTable.id;
-      this.tr.appendChild(th);
       span.innerHTML = column;
       span.dataset.field = column;
       span.dataset.fn = 'handlerSelectColumn';
+      const btnMetric = th.querySelector("button[data-id='add-metric']");
+      th.dataset.contextFn = 'contextMenuColumn';
       btnMetric.dataset.fn = 'setMetric';
-      btnMetric.classList.add('button-icon', 'material-icons-round', 'md-18');
-      btnMetric.innerHTML = 'query_stats';
       btnMetric.dataset.field = column;
-      td.appendChild(span);
-      buttons.appendChild(btnMetric);
-      td.appendChild(buttons);
-      th.appendChild(td);
+      // TODO: decommentare sulle tabelle con header "attiva"
+      // th.dataset.id = WorkBook.activeTable.id;
+      this.tr.appendChild(th);
     });
   }
 

@@ -25,6 +25,12 @@ thead th {
   white-space: nowrap;
 }
 
+th .headers-active {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 thead th.custom-field{
   background-color: lightslategray;
 }

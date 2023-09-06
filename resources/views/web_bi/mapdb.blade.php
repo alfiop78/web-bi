@@ -112,6 +112,23 @@
     </li>
   </template>
 
+  <template id="tmpl-preview-table">
+    <thead>
+      <tr></tr>
+    </thead>
+    <tbody></tbody>
+    <th scope="col">
+      <div class="headers-active">
+        <span data-fn="handlerSelectColumn"></span>
+        <section>
+          <button data-id="add-metric" class="button-icon material-icons-round md-18">query_stats</button>
+        </section>
+      </div>
+    </th>
+    <td scope="row"></td>
+    <tr></tr>
+  </template>
+
   <main>
     <div id="drawer">
 
@@ -534,15 +551,10 @@
                             </div>
                           </section>
                           <section class="table-preview">
-                            <input type="search" id="columns-search-id" placeholder="Ricerca colonne" />
+                            <input type="search" id="columns-search-id" autocomplete="off" placeholder="Ricerca colonne" />
                             <div class="table-content">
                               <!-- data-search-input : definisce la input che effettua la ricerca di colonne in questa tabella -->
-                              <table id="preview-table" data-search-input="columns-search-id">
-                                <thead>
-                                  <tr></tr>
-                                </thead>
-                                <tbody></tbody>
-                              </table>
+                              <table id="preview-table" data-search-input="columns-search-id"></table>
                             </div>
                           </section>
                         </section>
