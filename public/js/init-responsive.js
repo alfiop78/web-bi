@@ -59,7 +59,6 @@ var Sheet;
 
   app.body.addEventListener('click', () => {
     document.querySelectorAll('.context-menu[open]').forEach(menu => menu.toggleAttribute('open'));
-    // if (app.contextMenuRef.hasAttribute('open')) app.contextMenuRef.toggleAttribute('open');
   });
   // la Classe Steps deve impostare alcune proprietà DOPO che viene visualizzato il body, non può essere posizionato prima di App.init();
   var Step = new Steps('stepTranslate');
@@ -107,13 +106,12 @@ var Sheet;
 
   app.contextMenuTable = (e) => {
     e.preventDefault();
-    // console.log(e.target);
-    console.log(e.currentTarget);
     // console.log(e.target.getBoundingClientRect());
     // const { clientX: mouseX, clientY: mouseY } = e;
-    const { right: mouseX, top: mouseY } = e.target.getBoundingClientRect();
+    // const { left: mouseX, top: mouseY } = e.target.getBoundingClientRect();
+    const { left: mouseX, bottom: mouseY } = e.currentTarget.getBoundingClientRect();
     app.contextMenuTableRef.style.top = `${mouseY}px`;
-    app.contextMenuTableRef.style.left = `${mouseX + 4}px`;
+    app.contextMenuTableRef.style.left = `${mouseX}px`;
     // Imposto la tabella attiva, su cui si è attivato il context-menu
     WorkBook.activeTable = e.currentTarget.id;
     // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
@@ -844,8 +842,10 @@ var Sheet;
     // console.log(e.target.getBoundingClientRect());
     // const { clientX: mouseX, clientY: mouseY } = e;
     // const { right: mouseX, top: mouseY } = e.target.getBoundingClientRect();
-    const { right: mouseX, top: mouseY } = e.currentTarget.getBoundingClientRect();
-    app.contextMenuColumnRef.style.top = `${mouseY}px`;
+    // const { left: mouseX, top: mouseY } = e.currentTarget.getBoundingClientRect();
+    const { left: mouseX, bottom: mouseY } = e.currentTarget.getBoundingClientRect();
+    // console.log(e.currentTarget.getBoundingClientRect());
+    app.contextMenuColumnRef.style.top = `${mouseY + 4}px`;
     app.contextMenuColumnRef.style.left = `${mouseX + 4}px`;
     // Imposto la tabella attiva, su cui si è attivato il context-menu
     WorkBook.activeTable = e.currentTarget.dataset.id;
@@ -1765,16 +1765,11 @@ var Sheet;
 
   // visualizzo l'icona delete utilizzando <use> in svg
   app.tableEnter = (e) => {
-    // debugger;
-    // const deleteIcon = Draw.svg.querySelector(`${e.currentTarget.href.baseVal} > image`);
-    // deleteIcon.setAttribute('y', -18);
-    // deleteIcon.dataset.fn = 'removeTable';
+    console.log(e);
   }
 
   app.tableLeave = (e) => {
-    // debugger;
-    // e.currentTarget.remove();
-    // TODO: rimuovo anche l'elemento <g> in <defs> relativo a questa tabella
+
   }
 
   /* NOTE: FETCH API */
