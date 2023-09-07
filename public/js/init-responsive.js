@@ -134,9 +134,11 @@ var Sheet;
     const struct = Draw.svg.querySelector(`#struct-${WorkBook.activeTable.id}`);
     const input = document.getElementById('table-alias');
     struct.querySelector('text').innerHTML = input.value;
-    // imposto attributo data-alias-note sull'elemento <use>
-    debugger;
     Draw.svg.querySelector(`#${WorkBook.activeTable.id}`).dataset.name = input.value;
+    // modifico la prop 'name' di WorkBook.hierTables. Questa viene letta da
+    // app.addTablesStruct() per popolare la ppagina 'Sheet'
+    WorkBook.hierTables.get(WorkBook.activeTable.id).name = input.value;
+    // WorkBook.svg
     Draw.tables.get(WorkBook.activeTable.id).name = input.value;
     app.dialogRename.close();
   }
@@ -2435,9 +2437,6 @@ var Sheet;
     };
     WorkBook.fields = token;
     app.dialogColumns.close();
-    // visualizzo image[data-columns-defined]
-    const struct = Draw.svg.querySelector(`#struct-${WorkBook.activeTable.id}`);
-    struct.querySelector('image[data-columns-defined]').dataset.columnsDefined = true;
   }
 
   // apertura dialog per la creazione di una nuova metrica

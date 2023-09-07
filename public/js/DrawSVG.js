@@ -59,7 +59,8 @@ class DrawSVG {
     // assegno l'id e il testo (nome tabella) all'elemento clonato
     clonedStruct.id = `struct-${this.currentTable.key}`;
     clonedStruct.classList.add('struct');
-    clonedStruct.querySelector('text').innerHTML = this.currentTable.table;
+    clonedStruct.querySelector('text').innerHTML = this.currentTable.name;
+    // clonedStruct.querySelector('text').innerHTML = this.currentTable.table;
     // clonedStruct.querySelector('image').dataset.id = this.currentTable.key;
     // lo aggiungo al defs
     this.svg.querySelector('defs').appendChild(clonedStruct);
