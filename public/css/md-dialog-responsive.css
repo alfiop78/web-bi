@@ -121,9 +121,9 @@ dialog.large{
 }
 
 .small{
-  width: 30%;
+  width: 40%;
   min-height: 40%;
-  min-width: 30%;
+  min-width: 530px;
   max-width: 50%;
 }
 

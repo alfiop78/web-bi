@@ -702,7 +702,6 @@ button.btn-link{
   border: unset;
   background-color: unset;
   font-style: italic;
-  display: block;
 }
 
 button.btn-link:hover{
