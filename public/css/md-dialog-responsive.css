@@ -8,6 +8,27 @@ dialog{
   width: 30%;
 }
 
+dialog.popup {
+  width: 170px;
+  height: 40px;
+  background-color: transparent;
+}
+
+/* posizionamento personalizzato della dialog*/
+dialog.positioned {
+  margin: 0px;
+  top: var(--top);
+  left: var(--left);
+}
+
+dialog[open].popup {
+  border: unset;
+  z-index: 999;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
 /* dialog[open] {
   animation: 150ms ease-in forwards dialogOpen;
 } */
@@ -28,7 +49,7 @@ h5.moveable:hover {
   cursor: move;
 }
 
-dialog[open]{
+dialog[open]:not(.popup){
   border: none;
   box-shadow: 0 2px 5px 1px rgba(10,10,10,.35);
   border-radius: 4px;
@@ -100,10 +121,9 @@ dialog.large{
 }
 
 .small{
-  /* height: 40%; */
-  width: 50%;
+  width: 30%;
   min-height: 40%;
-  min-width: 40%;
+  min-width: 30%;
   max-width: 50%;
 }
 

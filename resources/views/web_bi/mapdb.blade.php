@@ -517,7 +517,14 @@
                         </ul>
                       </div>
                       <section id="canvas-area">
+                        <!-- <dialog id="dlg-info" class="small positioned popup"></dialog> -->
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
+                          <dialog id="dlg-info" class="positioned popup">
+                            <button class="button-icon material-icons-round md-18 columns" disabled>view_column</button>
+                            <button class="button-icon material-icons-round md-18 metrics" disabled>multiline_chart</button>
+                            <button class="button-icon material-icons-round md-18" disabled>history</button>
+                            <button class="button-icon material-icons-round md-18" disabled>info</button>
+                          </dialog>
                           <svg id="svg" class="dropzone" data-level="0">
                             <defs>
                               <g id="table-struct" class="struct">
@@ -525,7 +532,7 @@
                                 <image href="{{ asset('/images/grid_on_5C7893_18dp.svg') }}" data-id x="5" y="6" width="18" height="18">
                                 </image>
                                 <text x="26" y="20" font-family="Barlow" font-size=".85rem" font-weight="normal"></text>
-                                <image data-columns-defined="false" href="{{ asset('/images/view_column_black_18dp.svg') }}" x="5" y="35" width="18" height="18"></image>
+                                <!-- <image data-columns-defined="false" href="{{ asset('/images/view_column_black_18dp.svg') }}" x="5" y="35" width="18" height="18"></image> -->
                               </g>
                               <g id="web-bi-time">
                                 <image id="time" href="{{ asset('/images/access_time_filled_865858_18dp.svg') }}" height="18" width="18"></image>

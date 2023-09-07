@@ -239,7 +239,7 @@ class WorkBooks {
   // 'field/s' colonne create in fase di Mapping (quindi aggiunte al WorkBook)
   set field(object) {
     this.#field.set(object.token, object.value);
-    console.log(this.#field);
+    // console.log(this.#field);
   }
 
   get field() { return this.#field; }

@@ -1,5 +1,7 @@
 :root{
   --main-highlight-icons-color: sienna;
+  --columns-color: steelblue;
+  --metrics-color: darkgreen;
 }
 
 .material-icons{padding: 6px;user-select: none;cursor: pointer;}
@@ -112,3 +114,13 @@ button.md-dark{color: gainsboro;} /*disabled dark*/
 .material-icons-round.align-self-center{width: min-content; align-self: center;}
 .material-icons-round.md-opacity{opacity:.7;}
 .material-icons-round.md-opacity:hover{opacity:1;}
+
+
+/* colors */
+.material-icons-round.md-18.columns:not([disabled]){
+  color: var(--columns-color);
+}
+
+.material-icons-round.md-18.metrics:not([disabled]){
+  color: var(--metrics-color);
+}

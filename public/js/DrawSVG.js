@@ -14,7 +14,7 @@ class DrawSVG {
 
   set tables(value) {
     this.#tables.set(value.id, value.properties);
-    console.log(this.#tables);
+    // console.log(this.#tables);
   }
 
   get tables() { return this.#tables; }
@@ -76,7 +76,7 @@ class DrawSVG {
     use.dataset.tableJoin = this.currentTable.join;
     use.dataset.fn = 'tableSelected';
     use.dataset.enterFn = 'tableEnter';
-    use.dataset.leaveFn = 'tableLeave';
+    // use.dataset.leaveFn = 'tableLeave';
     use.dataset.x = this.currentTable.x;
     use.dataset.y = this.currentTable.y;
     use.dataset.levelId = this.currentTable.levelId;

@@ -31,6 +31,7 @@ var Sheet;
     dialogJoin: document.getElementById('dlg-join'),
     dialogColumns: document.getElementById('dlg-columns'),
     dialogTime: document.getElementById('dialog-time'),
+    dialogInfo: document.getElementById('dlg-info'),
     // buttons
     btnSelectSchema: document.getElementById('btn-select-schema'),
     editWorkBookName: document.getElementById('workbook-name'),
@@ -51,6 +52,10 @@ var Sheet;
 
     textAreaMetric: document.getElementById('textarea-metric')
   }
+
+  document.body.addEventListener('mousemove', (e) => {
+    // console.log({ clientX: e.clientX, clientY: e.clientY, offsetX: e.offsetX, offsetY: e.offsetY, pageX: e.pageX, pageY: e.pageY, x: e.x, y: e.y });
+  }, false);
 
   const rand = () => Math.random(0).toString(36).substring(2);
   const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
@@ -110,12 +115,14 @@ var Sheet;
     // const { clientX: mouseX, clientY: mouseY } = e;
     // const { left: mouseX, top: mouseY } = e.target.getBoundingClientRect();
     const { left: mouseX, bottom: mouseY } = e.currentTarget.getBoundingClientRect();
-    app.contextMenuTableRef.style.top = `${mouseY}px`;
+    app.contextMenuTableRef.style.top = `${mouseY + 8}px`;
     app.contextMenuTableRef.style.left = `${mouseX}px`;
     // Imposto la tabella attiva, su cui si è attivato il context-menu
     WorkBook.activeTable = e.currentTarget.id;
-    // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
+    // Chiudo eventuali dlg-info aperte sul mouseEnter della use.table
+    if (document.querySelector('#dlg-info[open]')) app.dialogInfo.close();
     app.contextMenuTableRef.toggleAttribute('open');
+    // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
     document.querySelectorAll('#ul-context-menu-table li').forEach(item => item.dataset.id = WorkBook.activeTable.id);
   }
 
@@ -1739,6 +1746,12 @@ var Sheet;
       // e.target.dataset.translateX = app.x;
       delete app.el;
     }
+
+    el.onmouseover = (e) => {
+      if (e.target.nodeName === 'svg') {
+        if (document.querySelector('#dlg-info[open]')) app.dialogInfo.close();
+      }
+    }
   });
 
   // TODO: spostare in supportFn.js
@@ -1765,12 +1778,22 @@ var Sheet;
 
   // visualizzo l'icona delete utilizzando <use> in svg
   app.tableEnter = (e) => {
-    console.log(e);
+    // Imposto le coordinate per il posizionamneto della dialog sotto alla tabella
+    // TODO: valutare la possibilità di utilizzare la funzione attr() di CSS
+    app.dialogInfo.style.setProperty('--top', `${+e.currentTarget.dataset.y + 30}px`);
+    app.dialogInfo.style.setProperty('--left', `${e.currentTarget.dataset.x}px`);
+
+    // verifico i dati della tabella, se ha colonne/metriche definite
+    // TODO: Per le metriche dovrei aggiungere, in WorkBook.metrics, una prop 'table_alias'
+    // per riuscire a recuperare le metriche impostate per una determinata tabella (seguendo
+    // la stessa logica delle colonne, come fatto qui)
+    (WorkBook.fields.has(e.target.dataset.alias)) ?
+      app.dialogInfo.querySelector('button.columns').removeAttribute('disabled') :
+      app.dialogInfo.querySelector('button.columns').setAttribute('disabled', 'true');
+    app.dialogInfo.show();
   }
 
-  app.tableLeave = (e) => {
-
-  }
+  app.tableLeave = () => { }
 
   /* NOTE: FETCH API */
 
