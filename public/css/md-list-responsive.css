@@ -150,5 +150,8 @@ ul.context-menu-items {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+}
 
+* [data-contextmenu]:hover{
+  cursor: context-menu!important;
 }

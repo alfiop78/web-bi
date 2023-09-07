@@ -157,6 +157,7 @@
       <div class="column-defined">
         <i class="button-icon material-icons-round md-18">table_rows</i>
         <code contenteditable="true" data-blur-fn="editFieldAlias"></code>
+        <i data-column-remove data-fn="removeDefinedColumn" class="button-icon material-icons-round md-18">delete</i>
       </div>
     </template>
 
