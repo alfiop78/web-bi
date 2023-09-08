@@ -1,0 +1,28 @@
+.column-defined[data-added]{
+  background-color: rosybrown;
+}
+
+.column-defined[data-removed]{
+  background-color: #025e7352;
+}
+
+.column-defined[data-removed] > code{
+  text-decoration: line-through;
+  color: #494949;
+}
+
+.column-defined > button[data-remove]{
+  display: block;
+}
+
+.column-defined > button[data-undo]{
+  display: none;
+}
+
+.column-defined[data-removed] > button[data-undo]{
+  display: block;
+}
+
+.column-defined[data-removed] > button[data-remove]{
+  display: none;
+}

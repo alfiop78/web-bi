@@ -2,6 +2,7 @@
   --main-highlight-icons-color: sienna;
   --columns-color: steelblue;
   --metrics-color: darkgreen;
+  --btn-remove-column-defined: whitesmoke;
 }
 
 .material-icons{padding: 6px;user-select: none;cursor: pointer;}
@@ -123,4 +124,8 @@ button.md-dark{color: gainsboro;} /*disabled dark*/
 
 .material-icons-round.md-18.metrics:not([disabled]){
   color: var(--metrics-color);
+}
+
+.material-icons-round.md-18.column-defined:not([disabled]){
+  color: var(--btn-remove-column-defined);
 }

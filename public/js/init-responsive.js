@@ -594,12 +594,19 @@ var Sheet;
   /* addField viene utilizzate sia quando si effettua il drag&drop sulla dropzone-rows che
   * quando si apre un nuovo Sheet per ripololare la dropzone-rows con gli elementi proveniente da Sheet.open()
   */
-  app.addField = (target, token) => {
+  app.addField = (target, token, editMode) => {
+    // editMode : indica che il report è in fase di edit e che gli oggetti
+    // aggiunti allo sheet avranno un attributo (su .column-defined) data-added
     const tmpl = app.tmplColumnsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('.column-defined');
     const code = field.querySelector('code');
+    const btnRemove = field.querySelector('button[data-remove]');
+    const btnUndo = field.querySelector('button[data-undo]');
     field.dataset.type = 'column';
     field.dataset.id = token;
+    if (editMode) field.dataset.added = 'true';
+    btnRemove.dataset.columnToken = token;
+    btnUndo.dataset.columnToken = token;
     // field.dataset.token = elementRef.id;
     code.dataset.token = token;
     code.innerHTML = Sheet.fields.get(token);
@@ -627,7 +634,10 @@ var Sheet;
     // TODO: rinominare elementRef.id in elementRef.dataset.token
     // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
     Sheet.fields = { token: elementRef.id, name: WorkBook.field.get(elementRef.id).name };
-    app.addField(e.currentTarget, elementRef.id);
+    // Sheet in fase di edit (boolean)
+    (document.querySelector('#wrapper-sheet').dataset.sheetToken) ?
+      app.addField(e.currentTarget, elementRef.id, true) :
+      app.addField(e.currentTarget, elementRef.id, false);
   }
 
   app.rowDragEnd = (e) => {
@@ -1196,9 +1206,10 @@ var Sheet;
     // reimposto tutte le proprietà della Classe
     Sheet.open();
     const name = document.getElementById('sheet-name');
+    // Imposto il token dello Sheet su .wrapper-sheet[data-sheet-token]
+    document.querySelector('#wrapper-sheet').dataset.sheetToken = Sheet.sheet.token;
     name.innerText = Sheet.name;
     name.dataset.value = Sheet.name;
-    app.dialogSheet.close();
     /* Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...)
     * della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
     */
@@ -1220,6 +1231,7 @@ var Sheet;
       filterRef.querySelector(`li[id='${token}']`).dataset.selected = 'true';
     });
     Sheet.save();
+    app.dialogSheet.close();
     // verifico se il datamart, per lo Sheet selezionato, è già presente sul DB.
     // In caso positivo lo apro in preview-datamart.
     app.sheetPreview(e.currentTarget.dataset.token);;
@@ -1230,6 +1242,31 @@ var Sheet;
     const name = document.getElementById('sheet-name');
     Sheet.name = name.dataset.value;
     Sheet.save();
+  }
+
+  app.removeDefinedColumn = (e) => {
+    const token = e.target.dataset.columnToken;
+    // Se la colonna che si sta per eliminare è stata aggiunta (non era inclusa nello Sheet)
+    // elimino tutto il div anziché marcarlo come data-removed
+    const field = document.querySelector(`.column-defined[data-id='${token}']`);
+    if (field.dataset.added) {
+      field.remove();
+    } else {
+      // Aggiungo, al div .column-defined[data-id] un attributo data-removed per poterlo
+      // contrassegnare come "cancellato" (ed impostarne anche il css con line-through)
+      field.dataset.removed = 'true';
+      // Memorizzo l'oggetto da eliminare in un 'magic method' della Classe Sheet.
+      // Nel ripristino (undoDefinedColumn()) di questa colonna userò questo oggetto
+      Sheet.removedFields = { token, value: Sheet.fields.get(token) };
+    }
+    Sheet.fields.delete(token);
+  }
+
+  app.undoDefinedColumn = (e) => {
+    const token = e.target.dataset.columnToken;
+    // Recupero, da Sheet.removedFields, gli elementi rimossi per poterli ripristinare
+    Sheet.fields.set(Sheet.removedFields.token, Sheet.removedFields.value);
+    delete document.querySelector(`.column-defined[data-id='${token}']`).dataset.removed;
   }
 
   // TODO: da spostare in supportFn.js

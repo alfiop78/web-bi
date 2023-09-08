@@ -19,6 +19,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-steps-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-preview-table.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-mapdb.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-sheet-page.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/Step.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
@@ -157,7 +158,8 @@
       <div class="column-defined">
         <i class="button-icon material-icons-round md-18">table_rows</i>
         <code contenteditable="true" data-blur-fn="editFieldAlias"></code>
-        <i data-column-remove data-fn="removeDefinedColumn" class="button-icon material-icons-round md-18">delete</i>
+        <button type="button" data-remove class="button-icon material-icons-round md-18 column-defined" data-fn="removeDefinedColumn" data-column-token>delete</i>
+          <button type="button" data-undo class="button-icon material-icons-round md-18 column-defined" data-fn="undoDefinedColumn" data-column-token>undo</i>
       </div>
     </template>
 
@@ -576,7 +578,7 @@
                           <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Sheet 1">Sheet 1</div>
                         </section>
                       </menu>
-                      <section class="wrapper-sheet">
+                      <section id="wrapper-sheet" class="wrapper-sheet">
                         <div class="properties">
                           <section id="workbook-objects" data-section-active="2">
                             <p class="field-search">
@@ -682,6 +684,7 @@
     </svg>
   </div>
   <script type="text/javascript" src="{{ asset('/js/init-responsive.js') }}" async></script>
+  <script type="text/javascript" src="{{ asset('/js/init-sheet.js') }}" async></script>
   <script type="text/javascript" src="{{ asset('/js/supportFn.js') }}" async></script>
 </body>
 
