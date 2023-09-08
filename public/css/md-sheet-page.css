@@ -48,6 +48,7 @@
 
 .column-defined[data-type="column"]{
   background-color: #025E73;
+  color: whitesmoke;
 }
 
 .column-defined[data-type="column"] > i[data-column-remove]{
@@ -66,42 +67,38 @@
   background-color: seagreen;
 }
 
-.column-defined[data-added]{
+.column-defined[data-added], .metric-defined[data-added]{
   background-color: rosybrown;
 }
 
-.column-defined[data-removed]{
-  background-color: #025e7352;
-}
-
-.column-defined[data-removed] > code{
-  text-decoration: line-through;
+.column-defined[data-removed], .metric-defined[data-removed]{
+  background-color: lightgrey;
   color: #494949;
 }
 
-.column-defined > button[data-remove]{
+.column-defined > button[data-remove], .metric-defined > button[data-remove]{
   display: block;
 }
 
-.column-defined > button[data-undo]{
+.column-defined > button[data-undo], .metric-defined > button[data-undo]{
   display: none;
 }
 
-.column-defined[data-removed] > button[data-undo]{
+.column-defined[data-removed] > button[data-undo], .metric-defined[data-removed] > button[data-undo]{
   display: block;
 }
 
-.column-defined[data-removed] > button[data-remove]{
+.column-defined[data-removed] > button[data-remove], .metric-defined[data-removed] > button[data-remove]{
   display: none;
 }
 
-.metric-defined[data-type="basic"] {
+.metric-defined[data-type="basic"]:not([data-removed]) {
   background-color: seagreen;
-  color: #494949;
+  color: whitesmoke;
 }
 
-.metric-defined[data-type="advanced"] {
-  background-color: darkseagreen;
+.metric-defined[data-type="advanced"]:not([data-removed]) {
+  background-color: seagreen;
   color: whitesmoke;
 }
 
@@ -190,15 +187,15 @@
 code[contenteditable="true"] {
   outline: none;
   transition: all 150ms;
-  padding: 4px 6px;
-  color: whitesmoke;
+  padding: 4px 2px;
+  /* color: whitesmoke; */
   /* font-family: monospace; */
   font-size: .85rem;
 }
 
 code[contenteditable="true"]:hover, code[contenteditable="true"]:focus {
   outline: none;
-  padding: 4px 8px;
+  padding: 4px;
   border-radius: 2px;
   color: #494949;
   /* font-family: monospace; */

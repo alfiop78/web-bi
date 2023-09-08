@@ -178,7 +178,8 @@
 
       <!-- 08-09-2023 -->
       <div class="metric-defined">
-        <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span>
+        <!-- <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span> -->
+        <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span data-field></span>
         <button type="button" data-remove class="button-icon material-icons-round md-18 metric-defined" data-fn="removeDefinedMetric" data-metric-token>delete</button>
         <button type="button" data-undo class="button-icon material-icons-round md-18 metric-defined" data-fn="undoDefinedMetric" data-metric-token>undo</button>
       </div>

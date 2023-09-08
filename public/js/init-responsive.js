@@ -442,15 +442,19 @@ var Sheet;
   app.addMetric = (target, token) => {
     const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('.metric-defined');
-    const formula = field.querySelector('.formula');
-    const fieldName = formula.querySelector('code[data-field]');
-    const aggregateFn = formula.querySelector('code[data-aggregate]');
-
+    const btnRemove = tmpl.querySelector('button[data-remove]');
+    const btnUndo = tmpl.querySelector('button[data-undo]');
+    btnRemove.dataset.metricToken = token;
+    btnUndo.dataset.metricToken = token;
+    // const formula = field.querySelector('.formula');
+    const aggregateFn = field.querySelector('code[data-aggregate]');
+    const fieldName = field.querySelector('span[data-field]');
     const metric = Sheet.metrics.get(token);
     field.dataset.type = metric.type;
-    formula.dataset.id = metric.token;
-    formula.dataset.token = metric.token;
-    fieldName.innerHTML = metric.alias;
+    field.dataset.id = metric.token;
+    // formula.dataset.id = metric.token;
+    // formula.dataset.token = metric.token;
+    fieldName.innerHTML = `(${metric.alias})`;
     if (metric.metric_type !== 'composite') {
       aggregateFn.innerText = metric.aggregateFn;
       // fieldName.dataset.field = metric.field;
@@ -1269,6 +1273,47 @@ var Sheet;
     delete document.querySelector(`.column-defined[data-id='${token}']`).dataset.removed;
   }
 
+  app.removeDefinedMetric = (e) => {
+    const token = e.target.dataset.metricToken;
+    // Se la metrica che si sta per eliminare è stata aggiunta (non era inclusa nello Sheet)
+    // elimino tutto il div anziché marcarlo come data-removed
+    const metric = document.querySelector(`.metric-defined[data-id='${token}']`);
+    if (metric.dataset.added) {
+      metric.remove();
+    } else {
+      // Aggiungo, al div .metric-defined[data-id] un attributo data-removed per poterlo
+      // contrassegnare come "cancellato" (ed impostarne anche il css con line-through)
+      metric.dataset.removed = 'true';
+      // Memorizzo l'oggetto da eliminare in un 'magic method' della Classe Sheet.
+      // Nel ripristino (undoDefinedMetric()) di questa metrica userò questo oggetto
+      Sheet.removedMetrics = { token, value: Sheet.metrics.get(token) };
+    }
+    // elimino l'object iin base al tipo di metrica
+    switch (Sheet.metrics.get(token).type) {
+      case 'advanced':
+        delete Sheet.sheet.advMetrics[token];
+        if (Object.keys(Sheet.sheet.advMetrics).length === 0) delete Sheet.sheet.advMetrics;
+        break;
+      case 'composite':
+        delete Sheet.sheet.compositeMetrics[token];
+        if (Object.keys(Sheet.sheet.compositeMetrics).length === 0) delete Sheet.sheet.compositeMetrics;
+        break;
+      default:
+        delete Sheet.sheet.metrics[token];
+        if (Object.keys(Sheet.sheet.metrics).length === 0) delete Sheet.sheet.metrics;
+        break;
+    }
+    Sheet.metrics.delete(token);
+    if (Sheet.metrics.size === 0) Sheet.metrics.clear();
+  }
+
+  app.undoDefinedMetric = (e) => {
+    const token = e.target.dataset.metricToken;
+    // Recupero, da Sheet.removedMetrics, gli elementi rimossi per poterli ripristinare
+    Sheet.metrics.set(Sheet.removedMetrics.token, Sheet.removedMetrics.value);
+    delete document.querySelector(`.metric-defined[data-id='${token}']`).dataset.removed;
+  }
+
   // TODO: da spostare in supportFn.js
   app.handlerEditSheetName = (e) => e.target.dataset.value = e.target.innerText;
 
@@ -1385,6 +1430,7 @@ var Sheet;
     if (metrics.size !== 0) process.metrics = Object.fromEntries(metrics);
     if (advancedMetrics.size !== 0) process.advancedMeasures = Object.fromEntries(advancedMetrics);
     if (compositeMetrics.size !== 0) process.compositeMeasures = Object.fromEntries(compositeMetrics);
+    debugger;
     app.process(process);
   }
 

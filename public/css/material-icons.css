@@ -126,6 +126,10 @@ button.md-dark{color: gainsboro;} /*disabled dark*/
   color: var(--metrics-color);
 }
 
-.material-icons-round.md-18.column-defined:not([disabled]){
+.material-icons-round.md-18.column-defined:not([disabled]), .material-icons-round.md-18.metric-defined{
   color: var(--btn-remove-column-defined);
 }
+
+* *[data-removed] > .material-icons-round.md-18 {
+  color: #4949497a!important;
+  }
