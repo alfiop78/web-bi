@@ -304,171 +304,13 @@ section[data-table-from] .table, section[data-table-to] .table{
   padding: .5em;
 }
 
-.report-area{
-  display: grid;
-  grid-template-rows: auto 1fr;
-  grid-row-gap: 1em;
-}
-
-.report-area .columns-rows{
-  display: grid;
-  grid-template-rows: auto auto;
-  grid-row-gap: .5em;
-}
-
-.sheet-elements .dropzone{
-  border: solid thin lightgrey;
-  /* overflow: auto; */
-  display: flex;
-  column-gap: 1em;
-  row-gap: .5em;
-  flex-wrap: wrap;
-  width: 100%;
-  transition: height 500ms;
-  align-items: center;
-  padding: 8px;
-}
-
-.sheet-elements .dropzone.dropping{
-  border: solid thin darkgreen;
-}
-
-.report-area .columns-rows > section{
-  display: grid;
-  grid-template-columns: 80px 1fr;
-}
-
 .dropzone.columns .columns-area{
   display: flex;
   flex-flow: wrap;
 }
 
-.column-defined, .metric-defined{
-  display: flex;
-  align-items: center;
-  position: relative;
-  gap: 4px;
-  padding: 2px 6px;
-  border-radius: 2px;
-  width: auto;
-}
-
-.column-defined[data-type="column"]{
-  background-color: #025E73;
-}
-
-.column-defined[data-type="column"] > i[data-column-remove]{
-  visibility: hidden;
-}
-
-.column-defined[data-type="column"]:hover > i[data-column-remove]{
-  visibility: visible;
-}
-
-.column-defined[data-type="column"] > i{
-  color: whitesmoke;
-}
-
-.column-defined[data-type="metric"]{
-  background-color: seagreen;
-}
-
-.metric-defined{
-  background-color: seagreen;
-  color: whitesmoke;
-}
-
-.metric-defined[data-type="basic"] {
-
-}
-
-.metric-defined[data-type="advanced"] {
-
-}
-
-.metric-defined[data-type="composite"] {
-
-}
-
-.metric-defined[data-type="composite"] code[data-aggregate] {
-  display: none;
-}
-
 i[data-id="btn-set-metric"]:hover, i[data-id='btn-set-filter']:hover{
   cursor: pointer;
-}
-
-.column-defined > i[data-id="btn-set-metric"], .metric-defined > i[data-id="btn-set-filter"]{
-  position: absolute;
-  color: #494949;
-  left: 100%;
-}
-
-.wrapper-sheet .properties{
-  position: relative;
-  height: 100%;
-  width: 100%;
-  max-width: 340px;
-}
-
-#workbook-objects {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  display: grid;
-  grid-row-gap: 1px;
-  transition: grid-template-rows 250ms;
-}
-
-#workbook-objects > section[data-section] {
-  overflow: auto;
-  box-shadow: 0px 4px 3px -3px grey;
-}
-
-#workbook-objects > p {
-  margin:0px;
-  color: #011F26;
-}
-
-#workbook-objects[data-section-active="1"] {
-  grid-template-rows: min-content 2fr min-content 4fr min-content 1fr min-content 1fr;
-}
-
-#workbook-objects[data-section-active="2"] {
-  grid-template-rows: min-content 1fr min-content 4fr min-content 2fr min-content 1fr;
-}
-
-#workbook-objects[data-section-active="3"] {
-  grid-template-rows: min-content 1fr min-content 1fr min-content 4fr min-content 2fr;
-}
-#workbook-objects[data-section-active="4"] {
-  grid-template-rows: min-content 1fr min-content 1fr min-content 2fr min-content 4fr;
-}
-
-#workbook-objects > *[data-worksheet-object] {
-  background-color: white;
-  color: #494949;
-  padding: .5em;
-  overflow-y: auto;
-}
-
-*[data-worksheet-object] > p{
-  font-size: .9rem;
-  margin: 0px;
-  padding: 0px;
-}
-
-#workbook-tables > ul {
-  overflow: auto;
-}
-
-.properties nav{
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.wrapper-sheet .properties > section{
-  overflow-y: auto;
 }
 
 dt dd{
@@ -578,34 +420,6 @@ details > li[data-type="column"] {
 
 #textarea-metric.dropzone.dropping{
   border: solid thin brown;
-}
-
-code[contenteditable="true"] {
-  outline: none;
-  transition: all 150ms;
-  padding: 4px 6px;
-  color: whitesmoke;
-  font-family: monospace;
-  font-size: .85rem;
-}
-
-code[contenteditable="true"]:hover, code[contenteditable="true"]:focus {
-  outline: none;
-  padding: 4px 8px;
-  border-radius: 2px;
-  color: #494949;
-  font-family: monospace;
-  background-color: whitesmoke;
-  font-size: .85rem;
-}
-
-code[data-alias] {
-  font-weight: bold;
-  font-style: italic;
-}
-
-.report-area .report-preview{
-  border: solid thin gainsboro;
 }
 
 .wrapper-content{

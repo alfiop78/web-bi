@@ -1,3 +1,71 @@
+.report-area{
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-row-gap: 1em;
+}
+
+.report-area .columns-rows{
+  display: grid;
+  grid-template-rows: auto auto;
+  grid-row-gap: .5em;
+}
+
+.report-area .columns-rows > section{
+  display: grid;
+  grid-template-columns: 80px 1fr;
+}
+
+.report-area .report-preview{
+  border: solid thin gainsboro;
+}
+
+.sheet-elements .dropzone{
+  border: solid thin lightgrey;
+  /* overflow: auto; */
+  display: flex;
+  column-gap: 1em;
+  row-gap: .5em;
+  flex-wrap: wrap;
+  width: 100%;
+  transition: height 500ms;
+  align-items: center;
+  padding: 8px;
+}
+
+.sheet-elements .dropzone.dropping{
+  border: solid thin darkgreen;
+}
+
+.column-defined, .metric-defined{
+  display: flex;
+  align-items: center;
+  position: relative;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  width: auto;
+}
+
+.column-defined[data-type="column"]{
+  background-color: #025E73;
+}
+
+.column-defined[data-type="column"] > i[data-column-remove]{
+  visibility: hidden;
+}
+
+.column-defined[data-type="column"]:hover > i[data-column-remove]{
+  visibility: visible;
+}
+
+.column-defined[data-type="column"] > i{
+  color: whitesmoke;
+}
+
+.column-defined[data-type="metric"]{
+  background-color: seagreen;
+}
+
 .column-defined[data-added]{
   background-color: rosybrown;
 }
@@ -25,4 +93,120 @@
 
 .column-defined[data-removed] > button[data-remove]{
   display: none;
+}
+
+.metric-defined[data-type="basic"] {
+  background-color: seagreen;
+  color: #494949;
+}
+
+.metric-defined[data-type="advanced"] {
+  background-color: darkseagreen;
+  color: whitesmoke;
+}
+
+.metric-defined[data-type="composite"] {
+  background-color: rosybrown;
+  color: #494949;
+}
+
+.metric-defined[data-type="composite"] code[data-aggregate] {
+  display: none;
+}
+
+.column-defined > i[data-id="btn-set-metric"], .metric-defined > i[data-id="btn-set-filter"]{
+  position: absolute;
+  color: #494949;
+  left: 100%;
+}
+
+.wrapper-sheet .properties{
+  position: relative;
+  height: 100%;
+  width: 100%;
+  max-width: 340px;
+}
+
+#workbook-objects {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-row-gap: 1px;
+  transition: grid-template-rows 250ms;
+}
+
+#workbook-objects > section[data-section] {
+  overflow: auto;
+  box-shadow: 0px 4px 3px -3px grey;
+}
+
+#workbook-objects > p {
+  margin:0px;
+  color: #011F26;
+}
+
+#workbook-objects[data-section-active="1"] {
+  grid-template-rows: min-content 2fr min-content 4fr min-content 1fr min-content 1fr;
+}
+
+#workbook-objects[data-section-active="2"] {
+  grid-template-rows: min-content 1fr min-content 4fr min-content 2fr min-content 1fr;
+}
+
+#workbook-objects[data-section-active="3"] {
+  grid-template-rows: min-content 1fr min-content 1fr min-content 4fr min-content 2fr;
+}
+#workbook-objects[data-section-active="4"] {
+  grid-template-rows: min-content 1fr min-content 1fr min-content 2fr min-content 4fr;
+}
+
+#workbook-objects > *[data-worksheet-object] {
+  background-color: white;
+  color: #494949;
+  padding: .5em;
+  overflow-y: auto;
+}
+
+*[data-worksheet-object] > p{
+  font-size: .9rem;
+  margin: 0px;
+  padding: 0px;
+}
+
+#workbook-tables > ul {
+  overflow: auto;
+}
+
+.properties nav{
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.wrapper-sheet .properties > section{
+  overflow-y: auto;
+}
+
+code[contenteditable="true"] {
+  outline: none;
+  transition: all 150ms;
+  padding: 4px 6px;
+  color: whitesmoke;
+  /* font-family: monospace; */
+  font-size: .85rem;
+}
+
+code[contenteditable="true"]:hover, code[contenteditable="true"]:focus {
+  outline: none;
+  padding: 4px 8px;
+  border-radius: 2px;
+  color: #494949;
+  /* font-family: monospace; */
+  background-color: whitesmoke;
+  font-size: .85rem;
+}
+
+code[data-alias] {
+  font-weight: bold;
+  font-style: italic;
 }

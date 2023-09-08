@@ -158,13 +158,13 @@
       <div class="column-defined">
         <i class="button-icon material-icons-round md-18">table_rows</i>
         <code contenteditable="true" data-blur-fn="editFieldAlias"></code>
-        <button type="button" data-remove class="button-icon material-icons-round md-18 column-defined" data-fn="removeDefinedColumn" data-column-token>delete</i>
-          <button type="button" data-undo class="button-icon material-icons-round md-18 column-defined" data-fn="undoDefinedColumn" data-column-token>undo</i>
+        <button type="button" data-remove class="button-icon material-icons-round md-18 column-defined" data-fn="removeDefinedColumn" data-column-token>delete</button>
+        <button type="button" data-undo class="button-icon material-icons-round md-18 column-defined" data-fn="undoDefinedColumn" data-column-token>undo</button>
       </div>
     </template>
 
     <template id="tmpl-metrics-defined">
-      <div class="metric-defined">
+      <!-- <div class="metric-defined">
         <section class="formula" data-token>
           <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span>
         </section>
@@ -174,6 +174,13 @@
         <section class="formula" data-token>
           <code data-field></code>
         </section>
+      </div> -->
+
+      <!-- 08-09-2023 -->
+      <div class="metric-defined">
+        <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span>
+        <button type="button" data-remove class="button-icon material-icons-round md-18 metric-defined" data-fn="removeDefinedMetric" data-metric-token>delete</button>
+        <button type="button" data-undo class="button-icon material-icons-round md-18 metric-defined" data-fn="undoDefinedMetric" data-metric-token>undo</button>
       </div>
     </template>
 
