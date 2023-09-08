@@ -544,6 +544,23 @@ button.btn-link:hover{
   text-decoration: underline;
 }
 
+button.btn-link.important{
+  border: unset;
+  font-weight: bold;
+  color: whitesmoke;
+  background-color: #4682b4d9;
+  border-radius: 2px;
+  font-style: normal;
+  padding: 8px 16px;
+}
+
+button.btn-link.important:hover{
+  cursor: pointer;
+  background-color: steelblue;
+  text-decoration: unset;
+}
+
+
 button.btn-link-context{
   border: unset;
   background-color: unset;

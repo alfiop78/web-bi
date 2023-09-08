@@ -1314,6 +1314,10 @@ var Sheet;
     delete document.querySelector(`.metric-defined[data-id='${token}']`).dataset.removed;
   }
 
+  app.showSheetFilters = (e) => {
+    document.querySelector('#side-sheet-filters').toggleAttribute('open');
+  }
+
   // TODO: da spostare in supportFn.js
   app.handlerEditSheetName = (e) => e.target.dataset.value = e.target.innerText;
 
@@ -1336,6 +1340,8 @@ var Sheet;
       const rand = () => Math.random(0).toString(36).substring(2);
       Sheet = new Sheets(rand().substring(0, 7), WorkBook.workBook.token);
     }
+    document.querySelector('#next').hidden = true;
+    document.querySelector('#btn-sheet-preview').hidden = false;
   }
 
   // imposto attribute init sul <nav>, in questo modo verranno associati gli eventi data-fn sui child di <nav>
@@ -1528,7 +1534,8 @@ var Sheet;
   }
 
   // rimuovo il filtro selezionato dallo Sheet
-  app.removeFilter = (e) => {
+  app.removeDefinedFilter = (e) => {
+    debugger;
     Sheet.filters = e.currentTarget.dataset.token;
     // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
     const li = document.getElementById(e.currentTarget.dataset.token);
@@ -2725,7 +2732,7 @@ var Sheet;
       btnAdd.dataset.token = token;
       btnRemove.dataset.token = token;
       btnAdd.addEventListener('click', app.addFilter);
-      btnRemove.addEventListener('click', app.removeFilter);
+      btnRemove.addEventListener('click', app.removeDefinedFilter);
       span.innerHTML = value.name;
       parent.appendChild(li);
     }

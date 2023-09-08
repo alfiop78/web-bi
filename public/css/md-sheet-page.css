@@ -6,13 +6,13 @@
 
 .report-area .columns-rows{
   display: grid;
-  grid-template-rows: auto auto;
+  grid-template-rows: auto;
   grid-row-gap: .5em;
 }
 
-.report-area .columns-rows > section{
+.report-area .sheet-elements{
   display: grid;
-  grid-template-columns: 80px 1fr;
+  grid-template-columns: 1fr;
 }
 
 .report-area .report-preview{
@@ -21,16 +21,38 @@
 
 .sheet-elements .dropzone{
   border: solid thin lightgrey;
-  /* overflow: auto; */
+  position: relative;
+  overflow: auto;
   display: flex;
   column-gap: 1em;
   row-gap: .5em;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */
   width: 100%;
   transition: height 500ms;
   align-items: center;
-  padding: 8px;
+  padding: 32px 8px 8px 8px;
 }
+
+.relative{
+  position: relative;
+}
+
+#sheet-columns .sheet-elements::before {
+  content: 'Colonne';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  color: darkgray;
+}
+
+#sheet-rows .sheet-elements::before {
+  content: 'Righe';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  color: darkgray;
+}
+
 
 .sheet-elements .dropzone.dropping{
   border: solid thin darkgreen;
@@ -44,6 +66,14 @@
   padding: 2px 6px;
   border-radius: 2px;
   width: auto;
+}
+
+.column-defined > button[data-remove], .metric-defined > button[data-remove] {
+  visibility: hidden;
+}
+
+.column-defined:hover > button[data-remove], .metric-defined:hover > button[data-remove] {
+  visibility: visible;
 }
 
 .column-defined[data-type="column"]{
@@ -74,6 +104,10 @@
 .column-defined[data-removed], .metric-defined[data-removed]{
   background-color: lightgrey;
   color: #494949;
+}
+
+.column-defined[data-removed] > code, .metric-defined[data-removed] > span {
+  text-decoration: line-through;
 }
 
 .column-defined > button[data-remove], .metric-defined > button[data-remove]{
@@ -206,4 +240,23 @@ code[contenteditable="true"]:hover, code[contenteditable="true"]:focus {
 code[data-alias] {
   font-weight: bold;
   font-style: italic;
+}
+
+#side-sheet-filters{
+  position: absolute;
+  height: 100%;
+  background-color: whitesmoke;
+  transform: translateX(-100%);
+  transition: transform 250ms;
+  z-index: 0;
+}
+
+#side-sheet-filters[open]{
+  /* position: absolute; */
+  /* height: 100%; */
+  z-index: 999;
+  transform: translateX(0px);
+  transition: transform 250ms;
+  min-width: 360px;
+  border: solid thin gainsboro;
 }

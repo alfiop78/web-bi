@@ -54,5 +54,5 @@ thead th[data-token]{
 .table-content{
   position: absolute;
   width: 100%;
-  height: calc(100% - 48px); /* 38px corrisponde all'elemento <menu>*/
+  height: 100%
 }

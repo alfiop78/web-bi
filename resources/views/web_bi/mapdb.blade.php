@@ -625,20 +625,35 @@
                         </div>
                         <div class="report-area">
                           <section class="columns-rows">
-                            <section class="sheet-elements">
-                              <h5>Colonne</h5>
-                              <section id="dropzone-columns" class="dropzone columns"></section>
+                            <!-- <section id="sheet-columns" class="sheet-elements">
+                              <section id="dropzone-columns" class="dropzone columns custom-scrollbar"></section>
                             </section>
-                            <section class="sheet-elements">
-                              <h5>Righe</h5>
-                              <section id="dropzone-rows" class="dropzone rows"></section>
-                            </section>
+                            <section id="sheet-rows" class="sheet-elements">
+                              <section id="dropzone-rows" class="dropzone rows custom-scrollbar"></section>
+                            </section> -->
+                            <div id="sheet-columns" class="relative">
+                              <section class="sheet-elements">
+                                <section id="dropzone-columns" class="dropzone columns custom-scrollbar"></section>
+                              </section>
+                            </div>
+                            <div id="sheet-rows" class="relative">
+                              <section class="sheet-elements">
+                                <section id="dropzone-rows" class="dropzone rows custom-scrollbar"></section>
+                              </section>
+
+                            </div>
+                            <div>
+                              <button id="filters" data-fn="showSheetFilters" type="button" class="btn-link default" value="Filtri">Filtri</button>
+                            </div>
                           </section>
                           <section class="table-preview">
-                            <menu class="">
-                              <input type="search" placeholder="Ricerca colonne" />
-                              <button id="btn-sheet-preview" data-fn="createProcess" value="Elabora">Elabora</button>
-                            </menu>
+                            <section id="side-sheet-filters">
+                              <li>filtro 1</li>
+                              <li>filtro 2</li>
+                              <li>filtro 3</li>
+                              <li>filtro 4</li>
+                            </section>
+
                             <div class="table-content">
                               <table id="preview-datamart">
                                 <thead>
@@ -658,6 +673,7 @@
               <section class="actions">
                 <button id="prev">Workbook</button>
                 <button id="next">Sheet</button>
+                <button id="btn-sheet-preview" class="btn-link important" data-fn="createProcess" value="Elabora" hidden>Elabora</button>
               </section>
 
             </section>
