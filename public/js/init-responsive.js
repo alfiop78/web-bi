@@ -47,7 +47,7 @@ var Sheet;
     // columns and rows dropzone (step 2)
     columnsDropzone: document.getElementById('dropzone-columns'),
     rowsDropzone: document.getElementById('dropzone-rows'),
-    filtersDropzone: document.getElementById('side-sheet-filters'),
+    filtersDropzone: document.getElementById('dropzone-filters'),
     textareaCompositeMetric: document.getElementById('textarea-composite-metric'),
     // buttons
     btnVersioning: document.getElementById('btn-versioning'),
@@ -629,8 +629,20 @@ var Sheet;
     e.currentTarget.classList.remove('dropping');
   }
 
-  app.addFilters = () => {
-
+  app.addFilters = (target, elementRef, editMode) => {
+    const tmpl = app.tmplFiltersDefined.content.cloneNode(true);
+    const field = tmpl.querySelector('.filter-defined');
+    const span = field.querySelector('span');
+    const btnRemove = field.querySelector('button[data-remove]');
+    const btnUndo = field.querySelector('button[data-undo]');
+    field.dataset.type = 'filter';
+    field.dataset.id = elementRef.id;
+    if (editMode) field.dataset.added = 'true';
+    btnRemove.dataset.filterToken = elementRef.id;
+    btnUndo.dataset.filterToken = elementRef.id;
+    span.dataset.token = elementRef.id;
+    span.innerHTML = elementRef.dataset.label;
+    target.appendChild(field);
   }
 
   app.filterDrop = (e) => {
@@ -642,25 +654,9 @@ var Sheet;
     console.log(elementRef);
     Sheet.filters = elementId;
     // Sheet in fase di edit (boolean)
-    /* (document.querySelector('#wrapper-sheet').dataset.sheetToken) ?
-      app.addFilters(elementRef, true) :
-      app.addFilters(elementRef, false); */
-    // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
-    // elementRef : è l'elemento nella lista di sinistra che ho draggato
-    const tmpl = app.tmplFiltersDefined.content.cloneNode(true);
-    const field = tmpl.querySelector('.filter-defined');
-    const span = field.querySelector('span');
-    const btnRemove = field.querySelector('button[data-remove]');
-    const btnUndo = field.querySelector('button[data-undo]');
-    field.dataset.type = 'filter';
-    field.dataset.id = elementId;
-    // if (editMode) field.dataset.added = 'true';
-    btnRemove.dataset.filterToken = elementId;
-    btnUndo.dataset.filterToken = elementId;
-    span.dataset.token = elementId;
-    // span.innerHTML = Sheet.fields.get(token);
-    span.innerHTML = elementRef.dataset.label;
-    e.target.appendChild(field);
+    (document.querySelector('#wrapper-sheet').dataset.sheetToken) ?
+      app.addFilters(e.currentTarget, elementRef, true) :
+      app.addFilters(e.currentTarget, elementRef, false);
   }
 
   app.rowDragEnd = (e) => {
@@ -2812,10 +2808,10 @@ var Sheet;
       li.addEventListener('dragstart', app.fieldDragStart);
       li.addEventListener('dragend', app.fieldDragEnd);
       li.addEventListener('contextmenu', openContextMenu);
-      btnAdd.dataset.token = token;
-      btnRemove.dataset.token = token;
-      btnAdd.addEventListener('click', app.addFilter);
-      btnRemove.addEventListener('click', app.removeDefinedFilter);
+      // btnAdd.dataset.token = token;
+      // btnRemove.dataset.token = token;
+      // btnAdd.addEventListener('click', app.addFilter);
+      // btnRemove.addEventListener('click', app.removeDefinedFilter);
       span.innerHTML = value.name;
       parent.appendChild(li);
     }

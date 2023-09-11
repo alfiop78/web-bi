@@ -46,8 +46,8 @@
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
-      <i data-id="filters-add" class="material-icons-round md-18" data-mode="add">add</i>
-      <i data-id="filters-remove" class="material-icons-round md-18" data-mode="remove">remove</i>
+      <!-- <i data-id="filters-add" class="material-icons-round md-18" data-mode="add">add</i> -->
+      <!-- <i data-id="filters-remove" class="material-icons-round md-18" data-mode="remove">remove</i> -->
     </li>
 
     <li data-li-drag data-element-search data-label data-basic data-searchable="true" draggable="true">
@@ -649,15 +649,11 @@
                                 <section id="dropzone-filters" class="dropzone filters custom-scrollbar"></section>
                               </section>
                             </div>
-                            <div>
+                            <!-- <div>
                               <button id="filters" data-fn="showSheetFilters" type="button" class="btn-link default" value="Filtri">Filtri</button>
-                            </div>
+                            </div> -->
                           </section>
                           <section class="table-preview">
-                            <nav class="custom-scrollbar">
-                              <section id="side-sheet-filters" class="relative-ul dropzone"></section>
-                            </nav>
-
                             <div class="table-content">
                               <table id="preview-datamart">
                                 <thead>

@@ -96,7 +96,7 @@
 }
 
 .filter-defined[data-type="filter"]{
-  background-color: peru;
+  background-color: #cd853f8c;
   color: #494949;
   padding: 4px 2px;
   font-size: .85rem;
