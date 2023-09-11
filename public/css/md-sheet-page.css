@@ -122,12 +122,16 @@
   background-color: rosybrown;
 }
 
-.column-defined[data-removed], .metric-defined[data-removed]{
+.column-defined[data-removed],
+.metric-defined[data-removed],
+.filter-defined[data-removed] {
   background-color: lightgrey;
   color: #494949;
 }
 
-.column-defined[data-removed] > code, .metric-defined[data-removed] > span {
+.column-defined[data-removed] > code,
+.metric-defined[data-removed] > span,
+.filter-defined[data-removed] > span {
   text-decoration: line-through;
 }
 

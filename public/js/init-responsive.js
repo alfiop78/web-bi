@@ -1310,8 +1310,12 @@ var Sheet;
     // filters
     Sheet.filters.forEach(token => {
       const filterRef = document.getElementById('ul-filters');
+      const target = document.getElementById('dropzone-filters');
       // imposto un data-selected sui filtri per rendere visibile il fatto che sono stati aggiunti al report
-      filterRef.querySelector(`li[id='${token}']`).dataset.selected = 'true';
+      const elementRef = filterRef.querySelector(`li[id='${token}']`);
+      debugger;
+      // TODO: utilizzare la stessa logica dell'aggiunta di righe/colonne
+      app.addFilters(target, elementRef, true);
     });
     Sheet.save();
     app.dialogSheet.close();
@@ -1614,12 +1618,28 @@ var Sheet;
 
   // rimuovo il filtro selezionato dallo Sheet
   app.removeDefinedFilter = (e) => {
-    debugger;
-    Sheet.filters = e.currentTarget.dataset.token;
+    const token = e.target.dataset.filterToken;
+    const field = document.querySelector(`.filter-defined[data-id='${token}']`);
+    if (field.dataset.added) {
+      field.remove();
+    } else {
+      // Aggiungo, al div .column-defined[data-id] un attributo data-removed per poterlo
+      // contrassegnare come "cancellato" (ed impostarne anche il css con line-through)
+      field.dataset.removed = 'true';
+      // Memorizzo l'oggetto da eliminare in un 'magic method' della Classe Sheet.
+      // Nel ripristino (undoDefinedColumn()) di questa colonna userò questo oggetto
+      Sheet.removedFilters = { [token]: token };
+    }
+    Sheet.filters.delete(token);
     // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
-    const li = document.getElementById(e.currentTarget.dataset.token);
-    delete li.dataset.selected;
-    // TODO: implementazione
+  }
+
+  // ripristino il filtro selezionato dallo Sheet
+  app.undoDefinedFilter = (e) => {
+    const token = e.target.dataset.filterToken;
+    // Recupero, da Sheet.removedFilters, gli elementi rimossi per poterli ripristinare
+    Sheet.filters.add(Sheet.removedFilters[token]);
+    delete document.querySelector(`.filter-defined[data-id='${token}']`).dataset.removed;
   }
 
   /*
@@ -1868,6 +1888,7 @@ var Sheet;
       const content = li.querySelector('.li-content');
       const btnDrag = content.querySelector('i');
       const span = content.querySelector('span');
+      debugger;
       const btnAdd = li.querySelector('i[data-id="filters-add"]');
       // TODO: da valutare se usare id come token oppure il dataset.token
       li.id = token;
@@ -2794,8 +2815,8 @@ var Sheet;
       const content = li.querySelector('.li-content');
       const btnDrag = content.querySelector('i');
       const span = content.querySelector('span');
-      const btnAdd = li.querySelector('i[data-id="filters-add"]');
-      const btnRemove = li.querySelector('i[data-id="filters-remove"]');
+      // const btnAdd = li.querySelector('i[data-id="filters-add"]');
+      // const btnRemove = li.querySelector('i[data-id="filters-remove"]');
       li.id = token;
       li.dataset.elementSearch = 'filters';
       li.dataset.label = value.name;
