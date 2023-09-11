@@ -17,6 +17,7 @@ var Sheet;
     tmplDetails: document.getElementById('tmpl-details-element'),
     tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
     tmplMetricsDefined: document.getElementById('tmpl-metrics-defined'),
+    tmplFiltersDefined: document.getElementById('tmpl-filters-defined'),
     tmplFormula: document.getElementById('tmpl-formula'),
     tmplCompositeFormula: document.getElementById('tmpl-composite-formula'),
     // dialogs
@@ -46,6 +47,7 @@ var Sheet;
     // columns and rows dropzone (step 2)
     columnsDropzone: document.getElementById('dropzone-columns'),
     rowsDropzone: document.getElementById('dropzone-rows'),
+    filtersDropzone: document.getElementById('side-sheet-filters'),
     textareaCompositeMetric: document.getElementById('textarea-composite-metric'),
     // buttons
     btnVersioning: document.getElementById('btn-versioning'),
@@ -595,6 +597,81 @@ var Sheet;
     e.currentTarget.classList.remove('dropping');
   }
 
+  /* sezione #side-sheet-filters*/
+  app.filterDragEnter = (e) => {
+    e.preventDefault();
+    console.log(e.currentTarget);
+    if (e.currentTarget.classList.contains('dropzone')) {
+      // console.log(e.currentTarget, e.target);
+      // e.dataTransfer.dropEffect = "copy";
+      // coloro il border differente per la dropzone
+      e.currentTarget.classList.add('dropping');
+    } else {
+      console.warn('non in dropzone');
+      // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
+
+  app.filterDragOver = (e) => {
+    e.preventDefault();
+    // console.log(e.currentTarget);
+    if (e.currentTarget.classList.contains('dropzone')) {
+      e.dataTransfer.dropEffect = "copy";
+    } else {
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
+
+  app.filterDragLeave = (e) => {
+    e.preventDefault();
+    // console.log(e.currentTarget);
+    e.currentTarget.classList.remove('dropping');
+  }
+
+  app.addFilters = () => {
+
+  }
+
+  app.filterDrop = (e) => {
+    e.preventDefault();
+    e.currentTarget.classList.replace('dropping', 'dropped');
+    if (!e.currentTarget.classList.contains('dropzone')) return;
+    const elementId = e.dataTransfer.getData('text/plain');
+    const elementRef = document.getElementById(elementId);
+    console.log(elementRef);
+    Sheet.filters = elementId;
+    // Sheet in fase di edit (boolean)
+    /* (document.querySelector('#wrapper-sheet').dataset.sheetToken) ?
+      app.addFilters(elementRef, true) :
+      app.addFilters(elementRef, false); */
+    // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
+    // elementRef : è l'elemento nella lista di sinistra che ho draggato
+    const tmpl = app.tmplFiltersDefined.content.cloneNode(true);
+    const field = tmpl.querySelector('.filter-defined');
+    const span = field.querySelector('span');
+    const btnRemove = field.querySelector('button[data-remove]');
+    const btnUndo = field.querySelector('button[data-undo]');
+    field.dataset.type = 'filter';
+    field.dataset.id = elementId;
+    // if (editMode) field.dataset.added = 'true';
+    btnRemove.dataset.filterToken = elementId;
+    btnUndo.dataset.filterToken = elementId;
+    span.dataset.token = elementId;
+    // span.innerHTML = Sheet.fields.get(token);
+    span.innerHTML = elementRef.dataset.label;
+    e.target.appendChild(field);
+  }
+
+  app.rowDragEnd = (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.dropEffect === 'copy') {
+
+    }
+  }
+
+  /* sezione #side-sheet-filters*/
+
   /* addField viene utilizzate sia quando si effettua il drag&drop sulla dropzone-rows che
   * quando si apre un nuovo Sheet per ripololare la dropzone-rows con gli elementi proveniente da Sheet.open()
   */
@@ -1034,6 +1111,12 @@ var Sheet;
   app.textAreaMetric.addEventListener('dragenter', app.textareaDragEnter, false);
   app.textAreaMetric.addEventListener('dragleave', app.textareaDragLeave, false);
   app.textAreaMetric.addEventListener('drop', app.textareaDrop, false);
+  // dropzone #side-sheet-filters
+  app.filtersDropzone.addEventListener('dragenter', app.filterDragEnter, false);
+  app.filtersDropzone.addEventListener('dragover', app.filterDragOver, false);
+  app.filtersDropzone.addEventListener('dragleave', app.filterDragLeave, false);
+  app.filtersDropzone.addEventListener('drop', app.filterDrop, false);
+  app.filtersDropzone.addEventListener('drop', app.filterDragEnd, false);
 
   /* NOTE: END DRAG&DROP EVENTS */
 

@@ -163,6 +163,15 @@
       </div>
     </template>
 
+    <template id="tmpl-filters-defined">
+      <div class="filter-defined">
+        <i class="button-icon material-icons-round md-18">filter_alt</i>
+        <span></span>
+        <button type="button" data-remove class="button-icon material-icons-round md-18 filter-defined" data-fn="removeDefinedFilter" data-filter-token>delete</button>
+        <button type="button" data-undo class="button-icon material-icons-round md-18 filter-defined" data-fn="undoDefinedFilter" data-filter-token>undo</button>
+      </div>
+    </template>
+
     <template id="tmpl-metrics-defined">
       <!-- <div class="metric-defined">
         <section class="formula" data-token>
@@ -625,12 +634,6 @@
                         </div>
                         <div class="report-area">
                           <section class="columns-rows">
-                            <!-- <section id="sheet-columns" class="sheet-elements">
-                              <section id="dropzone-columns" class="dropzone columns custom-scrollbar"></section>
-                            </section>
-                            <section id="sheet-rows" class="sheet-elements">
-                              <section id="dropzone-rows" class="dropzone rows custom-scrollbar"></section>
-                            </section> -->
                             <div id="sheet-columns" class="relative">
                               <section class="sheet-elements">
                                 <section id="dropzone-columns" class="dropzone columns custom-scrollbar"></section>
@@ -640,19 +643,20 @@
                               <section class="sheet-elements">
                                 <section id="dropzone-rows" class="dropzone rows custom-scrollbar"></section>
                               </section>
-
+                            </div>
+                            <div id="sheet-filters" class="relative">
+                              <section class="sheet-elements">
+                                <section id="dropzone-filters" class="dropzone filters custom-scrollbar"></section>
+                              </section>
                             </div>
                             <div>
                               <button id="filters" data-fn="showSheetFilters" type="button" class="btn-link default" value="Filtri">Filtri</button>
                             </div>
                           </section>
                           <section class="table-preview">
-                            <section id="side-sheet-filters">
-                              <li>filtro 1</li>
-                              <li>filtro 2</li>
-                              <li>filtro 3</li>
-                              <li>filtro 4</li>
-                            </section>
+                            <nav class="custom-scrollbar">
+                              <section id="side-sheet-filters" class="relative-ul dropzone"></section>
+                            </nav>
 
                             <div class="table-content">
                               <table id="preview-datamart">

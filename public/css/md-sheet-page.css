@@ -53,12 +53,22 @@
   color: darkgray;
 }
 
+#sheet-filters .sheet-elements::before {
+  content: 'Filtri';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  color: darkgray;
+}
+
 
 .sheet-elements .dropzone.dropping{
   border: solid thin darkgreen;
 }
 
-.column-defined, .metric-defined{
+.column-defined,
+.metric-defined,
+.filter-defined {
   display: flex;
   align-items: center;
   position: relative;
@@ -68,17 +78,28 @@
   width: auto;
 }
 
-.column-defined > button[data-remove], .metric-defined > button[data-remove] {
+.column-defined > button[data-remove],
+.metric-defined > button[data-remove],
+.filter-defined > button[data-remove] {
   visibility: hidden;
 }
 
-.column-defined:hover > button[data-remove], .metric-defined:hover > button[data-remove] {
+.column-defined:hover > button[data-remove],
+.metric-defined:hover > button[data-remove],
+.filter-defined:hover > button[data-remove] {
   visibility: visible;
 }
 
 .column-defined[data-type="column"]{
   background-color: #025E73;
   color: whitesmoke;
+}
+
+.filter-defined[data-type="filter"]{
+  background-color: peru;
+  color: #494949;
+  padding: 4px 2px;
+  font-size: .85rem;
 }
 
 .column-defined[data-type="column"] > i[data-column-remove]{
@@ -110,19 +131,27 @@
   text-decoration: line-through;
 }
 
-.column-defined > button[data-remove], .metric-defined > button[data-remove]{
+.column-defined > button[data-remove],
+.metric-defined > button[data-remove],
+.filter-defined > button[data-remove]{
   display: block;
 }
 
-.column-defined > button[data-undo], .metric-defined > button[data-undo]{
+.column-defined > button[data-undo],
+.metric-defined > button[data-undo],
+.filter-defined > button[data-undo] {
   display: none;
 }
 
-.column-defined[data-removed] > button[data-undo], .metric-defined[data-removed] > button[data-undo]{
+.column-defined[data-removed] > button[data-undo],
+.metric-defined[data-removed] > button[data-undo],
+.filter-defined[data-removed] > button[data-undo] {
   display: block;
 }
 
-.column-defined[data-removed] > button[data-remove], .metric-defined[data-removed] > button[data-remove]{
+.column-defined[data-removed] > button[data-remove],
+.metric-defined[data-removed] > button[data-remove],
+.filter-defined[data-removed] > button[data-remove] {
   display: none;
 }
 
@@ -252,11 +281,8 @@ code[data-alias] {
 }
 
 #side-sheet-filters[open]{
-  /* position: absolute; */
-  /* height: 100%; */
   z-index: 999;
   transform: translateX(0px);
-  transition: transform 250ms;
   min-width: 360px;
   border: solid thin gainsboro;
 }
