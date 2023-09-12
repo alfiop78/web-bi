@@ -123,12 +123,11 @@ async function getTables(urls) {
 
   app.closeDialogMetric = () => {
     const input = document.getElementById('adv-metric-name');
-    const textarea = document.getElementById('textarea-metric');
+    const formula = document.getElementById('input-metric');
     const timingFunctions = document.getElementById('dl-timing-functions');
     const btnMetricSave = document.getElementById('btn-metric-save');
     input.value = '';
-    textarea.querySelectorAll('*').forEach(element => element.remove());
-    textarea.value = '';
+    formula.querySelectorAll('*').forEach(element => element.remove());
     // se è presente una timingFunction selezionata la deseleziono
     if (timingFunctions.querySelector('dt[selected]')) timingFunctions.querySelector('dt[selected]').removeAttribute('selected');
     // reset della lista dei filtri

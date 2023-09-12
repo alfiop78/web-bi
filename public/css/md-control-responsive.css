@@ -80,3 +80,7 @@ div#textarea-column-id::before {
 div#textarea-column-ds::before {
   content: 'Descrizione';
 }
+
+input[type="checkbox"] {
+  width: auto;
+}

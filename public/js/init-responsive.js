@@ -10,6 +10,7 @@ var Sheet;
     // templates
     tmplList: document.getElementById('tmpl-li'),
     tmplJoin: document.getElementById('tmpl-join-field'),
+    tmplFilterDropped: document.getElementById('tmpl-filter-dropped-adv-metric'),
     // tmplContextMenu: document.getElementById('tmpl-context-menu-content'),
     contextMenuRef: document.getElementById('context-menu'),
     contextMenuTableRef: document.getElementById('context-menu-table'),
@@ -17,6 +18,7 @@ var Sheet;
     tmplDetails: document.getElementById('tmpl-details-element'),
     tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
     tmplMetricsDefined: document.getElementById('tmpl-metrics-defined'),
+    tmplAdvMetricsDefined: document.getElementById('tmpl-adv-metric'),
     tmplFiltersDefined: document.getElementById('tmpl-filters-defined'),
     tmplFormula: document.getElementById('tmpl-formula'),
     tmplCompositeFormula: document.getElementById('tmpl-composite-formula'),
@@ -50,9 +52,7 @@ var Sheet;
     filtersDropzone: document.getElementById('dropzone-filters'),
     textareaCompositeMetric: document.getElementById('textarea-composite-metric'),
     // buttons
-    btnVersioning: document.getElementById('btn-versioning'),
-
-    textAreaMetric: document.getElementById('textarea-metric')
+    btnVersioning: document.getElementById('btn-versioning')
   }
 
   document.body.addEventListener('mousemove', (e) => {
@@ -587,10 +587,19 @@ var Sheet;
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
     console.log(elementRef);
-    const li = document.createElement('li');
+    const tmplFilter = app.tmplFilterDropped.content.cloneNode(true);
+    const li = tmplFilter.querySelector('li');
+    const span = li.querySelector('span');
+    const btnRemove = li.querySelector('button');
     li.dataset.token = elementRef.id;
-    li.innerText = WorkBook.filters.get(elementRef.id).name;
+    span.innerText = WorkBook.filters.get(elementRef.id).name;
+    btnRemove.dataset.token = elementRef.id;
     e.target.appendChild(li);
+  }
+
+  app.removeFilterByAdvMetric = (e) => {
+
+    debugger;
   }
 
   app.rowDragLeave = (e) => {
@@ -1100,10 +1109,6 @@ var Sheet;
   app.rowsDropzone.addEventListener('drop', app.rowDrop, false);
   app.rowsDropzone.addEventListener('drop', app.rowDragEnd, false);
 
-  app.textAreaMetric.addEventListener('dragover', app.textareaDragOver, false);
-  app.textAreaMetric.addEventListener('dragenter', app.textareaDragEnter, false);
-  app.textAreaMetric.addEventListener('dragleave', app.textareaDragLeave, false);
-  app.textAreaMetric.addEventListener('drop', app.textareaDrop, false);
   // dropzone #side-sheet-filters
   app.filtersDropzone.addEventListener('dragenter', app.filterDragEnter, false);
   app.filtersDropzone.addEventListener('dragover', app.filterDragOver, false);
@@ -1733,17 +1738,15 @@ var Sheet;
     app.contextMenuRef.toggleAttribute('open');
     const metric = WorkBook.metrics.get(e.target.dataset.token);
     const filterDrop = document.getElementById('filter-drop');
-    const textarea = app.dialogMetric.querySelector('#textarea-metric');
-    const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
-    const field = tmpl.querySelector('.metric-defined');
+    const input = app.dialogMetric.querySelector('#input-metric');
+    const tmpl = app.tmplAdvMetricsDefined.content.cloneNode(true);
+    const field = tmpl.querySelector('#adv-metric-defined');
     const formula = field.querySelector('.formula');
     const aggregateFn = formula.querySelector('code[data-aggregate]');
-    const fieldName = formula.querySelector('code[data-field]');
-    // const span = document.createElement('span');
+    const fieldName = formula.querySelector('span');
     aggregateFn.innerText = metric.aggregateFn;
-    // fieldName.innerText = metric.field;
-    fieldName.innerText = metric.alias;
-    textarea.appendChild(field);
+    fieldName.innerText = `( ${metric.alias} )`;
+    input.appendChild(field);
     // imposto il token sul tasto btnMetricSave, in questo modo posso salvare/aggiornare il filtro in base alla presenza o meno di data-token
     document.querySelector('#btn-metric-save').dataset.token = e.target.dataset.token;
     document.querySelector('#btn-metric-save').dataset.edit = 'true';
@@ -1758,9 +1761,14 @@ var Sheet;
           // ... #dl-timing-functions
           document.querySelector(`#dl-timing-functions > dt[data-value='${token}']`).setAttribute('selected', 'true');
         } else {
-          const li = document.createElement('li');
+          // TODO: questo codice è ripetuto in handlerDropFilter()
+          const tmplFilter = app.tmplFilterDropped.content.cloneNode(true);
+          const li = tmplFilter.querySelector('li');
+          const span = li.querySelector('span');
+          const btnRemove = li.querySelector('button');
           li.dataset.token = token;
-          li.innerText = WorkBook.filters.get(token).name;
+          span.innerText = WorkBook.filters.get(token).name;
+          btnRemove.dataset.token = token;
           filterDrop.appendChild(li);
         }
       });
@@ -2125,6 +2133,7 @@ var Sheet;
       span.innerHTML = WorkBook.metrics.get(token).alias;
       parent.appendChild(li);
     }
+    app.dialogCompositeMetric.close();
   }
 
   app.setSheet = () => {
@@ -2662,17 +2671,15 @@ var Sheet;
     const token = e.currentTarget.dataset.token;
     // recupero la metrica da WorkBook.metric
     const metric = WorkBook.metrics.get(token);
-    const textarea = app.dialogMetric.querySelector('#textarea-metric');
-    const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
-    const field = tmpl.querySelector('.metric-defined');
+    const input = app.dialogMetric.querySelector('#input-metric');
+    const tmpl = app.tmplAdvMetricsDefined.content.cloneNode(true);
+    const field = tmpl.querySelector('#adv-metric-defined');
     const formula = field.querySelector('.formula');
     const aggregateFn = formula.querySelector('code[data-aggregate]');
-    const fieldName = formula.querySelector('code[data-field]');
-    // const span = document.createElement('span');
+    const fieldName = formula.querySelector('span');
     aggregateFn.innerText = metric.aggregateFn;
-    // fieldName.innerText = metric.field;
-    fieldName.innerText = metric.alias;
-    textarea.appendChild(field);
+    fieldName.innerText = `( ${metric.alias} )`;
+    input.appendChild(field);
     // il token presente qui lo recupero in saveMetric() per recuperare la metrica dal WorkBook.
     // la metrica recuperata viene utilizzata per recuperare alcune proprietà non modificabili
     document.querySelector('#btn-metric-save').dataset.token = token;
@@ -2767,7 +2774,13 @@ var Sheet;
         span.innerHTML = WorkBook.metrics.get(token).alias;
       }
       parent.appendChild(li);
+    } else {
+      // la metrica già esiste, aggiorno il nome
+      // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
+      const liElement = document.getElementById(token);
+      liElement.querySelector('span > span').innerHTML = alias;
     }
+    app.dialogMetric.close();
   }
 
   app.addDefinedFields = (parent) => {

@@ -293,3 +293,23 @@ code[data-alias] {
   min-width: 360px;
   border: solid thin gainsboro;
 }
+
+.input-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+#adv-metric-defined {
+  display: flex;
+}
+
+#adv-metric-defined .formula {
+  width: auto;
+  display: flex;
+  border-radius: 2px;
+  align-items: center;
+  padding: 4px 8px;
+  background-color: seagreen;
+  color: white;
+}

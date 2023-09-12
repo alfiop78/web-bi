@@ -378,7 +378,7 @@ li:not([data-selected]) > i[data-mode="remove"] {
   display: none;
 }
 
-li:not([draggable]) > i{
+li:not(.li-content-icons):not([draggable]) > i{
   visibility: hidden;
 }
 
@@ -454,13 +454,25 @@ menu.horizontal-menu {
   gap: 1em;
 }
 
-section.filter-area-drop {
+section#filter-area-drop {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: 1fr;
+  position: relative;
+  padding: 46px 8px 8px;
+  background-color: white;
+  border-radius: 2px;
+}
+
+section#filter-area-drop::before {
+  content: 'Trascinare qui i filtri da aggiungere alla metrica';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  color: darkgray;
 }
 
 #filter-drop.dropzone{
-  border: solid thin grey;
+  padding: 1em;
 }
 
 p.field-search {

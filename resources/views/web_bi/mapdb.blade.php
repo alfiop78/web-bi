@@ -46,8 +46,6 @@
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
-      <!-- <i data-id="filters-add" class="material-icons-round md-18" data-mode="add">add</i> -->
-      <!-- <i data-id="filters-remove" class="material-icons-round md-18" data-mode="remove">remove</i> -->
     </li>
 
     <li data-li-drag data-element-search data-label data-basic data-searchable="true" draggable="true">
@@ -123,6 +121,14 @@
     <td scope="row"></td>
   </template>
 
+  <template id="tmpl-filter-dropped-adv-metric">
+    <li data-token class="li-content-icons">
+      <i class="material-icons-round md-18">filter_alt</i>
+      <span></span>
+      <button data-token data-fn="removeFilterByAdvMetric" type="button" class="button-icon material-icons-round md-18">delete</button>
+    </li>
+  </template>
+
   <main>
     <div id="drawer">
 
@@ -172,18 +178,21 @@
       </div>
     </template>
 
-    <template id="tmpl-metrics-defined">
-      <!-- <div class="metric-defined">
+    <template id="tmpl-adv-metric">
+      <div id="adv-metric-defined">
         <section class="formula" data-token>
-          <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span>
+          <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span data-field></span>
         </section>
       </div>
 
-      <div data-composite class="metric-defined">
+      <!-- <div data-composite class="metric-defined">
         <section class="formula" data-token>
           <code data-field></code>
         </section>
       </div> -->
+    </template>
+
+    <template id="tmpl-metrics-defined">
 
       <!-- 08-09-2023 -->
       <div class="metric-defined">
@@ -328,16 +337,18 @@
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Metrica</h5>
               <section class="dlg-content col col-3">
-                <section class="filter-area-drop">
-                  <h6>Aggiungere qui i filtri per creare una metrica filtrata</h6>
+                <section id="filter-area-drop">
                   <nav id="filter-drop" class="custom-scrollbar dropzone"></nav>
                 </section>
-                <section class="textarea-formula">
+                <section class="input-area">
                   <input type="text" id="adv-metric-name" placeholder="Nome" value="" autocomplete="off" />
-                  <div id="textarea-metric" class="dropzone textarea" data-content-editable contenteditable="true"></div>
+                  <div id="input-metric" class="" data-content-editable contenteditable="true"></div>
+                  <div>
+                    <input type="checkbox" id="check-distinct" disabled />
+                    <label for="check-distinct">DISTINCT</label>
+                  </div>
                 </section>
-                <section class="list-search">
-                  <h6>Funzioni temporali</h6>
+                <section class="list-search placeholder">
                   <div class="relative-ul">
                     <dl id="dl-timing-functions" class="custom-scrollbar">
                       <dt class="btn-link">Last Period/Day</dt>
@@ -401,9 +412,7 @@
               <section class="dlg-content col col-1">
                 <section>
                   <input type="text" id="custom-metric-name" placeholder="Nome" value="" autocomplete="off" />
-                  <!--<div id="textarea-metric" class="dropzone" data-content-editable contenteditable="true"></div>-->
                   <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea"></div>
-                  <!--<textarea id="textarea-metric" cols="20" class="dropzone" rows="10">SUM(</textarea>-->
                 </section>
               </section>
               <section class="dlg-buttons">
