@@ -219,32 +219,28 @@
     </template>
 
     <template id="tmpl-context-menu-content">
-      <ul id="ul-context-menu-filter">
-        <li data-fn="editFilter">Modifica</li>
-        <li data-fn="removeFilter">Elimina</li>
-        <li data-fn="renameFilter">Rinomina</li>
-        <li>ecc...</li>
+      <ul id="ul-context-menu-filter" class="context-menu-items">
+        <button data-fn="editFilter" class="btn-link-context">Modifica</button>
+        <button data-fn="removeFilter" class="btn-link-context" disabled>Elimina</button>
+        <button data-fn="renameFilter" class="btn-link-context" disabled>Rinomina</button>
       </ul>
 
-      <ul id="ul-context-menu-basic">
-        <li data-fn="newAdvMeasure">Crea metrica avanzata</li>
-        <li data-fn="removeMetric">Elimina</li>
-        <li data-fn="renameMetric">Rinomina</li>
-        <li>ecc...</li>
+      <ul id="ul-context-menu-basic" class="context-menu-items">
+        <button data-fn="newAdvMeasure" class="btn-link-context">Metrica avanzata</button>
+        <button data-fn="removeMetric" class="btn-link-context" disabled>Elimina</button>
+        <button data-fn="renameMetric" class="btn-link-context" disabled>Rinomina</button>
       </ul>
 
-      <ul id="ul-context-menu-advanced">
-        <li data-fn="editAdvancedMetric">Modifica</li>
-        <li data-fn="removeAdvancedMetric">Elimina</li>
-        <li data-fn="renameAdvancedMetric">Rinomina</li>
-        <li>ecc...</li>
+      <ul id="ul-context-menu-advanced" class="context-menu-items">
+        <button data-fn="editAdvancedMetric" class="btn-link-context">Modifica</button>
+        <button data-fn="removeAdvancedMetric" class="btn-link-context" disabled>Elimina</button>
+        <button data-fn="renameAdvancedMetric" class="btn-link-context" disabled>Rinomina</button>
       </ul>
 
-      <ul id="ul-context-menu-composite">
-        <li data-fn="editCompositeMetric">Modifica</li>
-        <li data-fn="removeCompositeMetric">Elimina</li>
-        <li data-fn="renameCompositeMetric">Rinomina</li>
-        <li>ecc...</li>
+      <ul id="ul-context-menu-composite" class="context-menu-items">
+        <button data-fn="editCompositeMetric" class="btn-link-context">Modifica</button>
+        <button data-fn="removeCompositeMetric" class="btn-link-context" disabled>Elimina</button>
+        <button data-fn="renameCompositeMetric" class="btn-link-context" disabled>Rinomina</button>
       </ul>
     </template>
 
@@ -529,12 +525,11 @@
                         <button id="btn-versioning" value="Versionamento">Versionamento</button>
                       </menu>
                       <div id="context-menu-table" class="context-menu">
-                        <ul id="ul-context-menu-table">
-                          <li id="time-dimension" data-fn="handlerTimeDimension">Dimensione TIME</li>
-                          <li id="context-custom-metric" data-fn="addCustomMetric">Aggiungi metrica custom</li>
-                          <li data-fn="removeTable">Rimuovi</li>
-                          <li data-fn="setAliasTable">Alias tabella</li>
-                          <li>item 4</li>
+                        <ul id="ul-context-menu-table" class="context-menu-items">
+                          <button id="time-dimension" data-fn="handlerTimeDimension" class="btn-link-context">Dimensione TIME</button>
+                          <button id="context-custom-metric" data-fn="addCustomMetric" class="btn-link-context">Metrica person.</button>
+                          <button data-fn="removeTable" class="btn-link-context">Rimuovi</button>
+                          <button data-fn="setAliasTable" class="btn-link-context">Imposta alias</button>
                         </ul>
                       </div>
                       <div id="context-menu-column" class="context-menu">

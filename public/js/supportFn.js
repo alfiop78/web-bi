@@ -11,7 +11,7 @@ function openContextMenu(e) {
   const tmpl = tmplContextMenu.content.cloneNode(true);
   const content = tmpl.querySelector(`#${e.currentTarget.dataset.contextmenu}`);
   // aggiungo, a tutti gli elementi del context-menu, il token dell'elemento selezionato
-  content.querySelectorAll('li').forEach(li => li.dataset.token = e.currentTarget.id);
+  content.querySelectorAll('button').forEach(li => li.dataset.token = e.currentTarget.id);
   contextMenuRef.appendChild(content);
 
   const { clientX: mouseX, clientY: mouseY } = e;

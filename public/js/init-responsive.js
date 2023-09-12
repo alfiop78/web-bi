@@ -64,6 +64,7 @@ var Sheet;
 
   App.init();
 
+  // Chiudo qualsiasi context-menu aperto
   app.body.addEventListener('click', () => {
     document.querySelectorAll('.context-menu[open]').forEach(menu => menu.toggleAttribute('open'));
   });
@@ -125,7 +126,7 @@ var Sheet;
     if (document.querySelector('#dlg-info[open]')) app.dialogInfo.close();
     app.contextMenuTableRef.toggleAttribute('open');
     // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
-    document.querySelectorAll('#ul-context-menu-table li').forEach(item => item.dataset.id = WorkBook.activeTable.id);
+    document.querySelectorAll('#ul-context-menu-table button').forEach(item => item.dataset.id = WorkBook.activeTable.id);
   }
 
   // imposto un alias per tabella aggiunta al canvas
