@@ -227,7 +227,7 @@
       </ul>
 
       <ul id="ul-context-menu-basic">
-        <li data-fn="newAdvMeasure">Crea metrica filtrata</li>
+        <li data-fn="newAdvMeasure">Crea metrica avanzata</li>
         <li data-fn="removeMetric">Elimina</li>
         <li data-fn="renameMetric">Rinomina</li>
         <li>ecc...</li>
@@ -335,7 +335,7 @@
           <!-- creazione metrica filtrata -->
           <dialog id="dlg-metric" data-x="0" data-y="0" class="large absolute moveable">
             <section class="dlg-grid">
-              <h5 class="title moveable">Creazione Metrica</h5>
+              <h5 class="title moveable">Creazione Metrica avanzata</h5>
               <section class="dlg-content col col-3">
                 <section id="filter-area-drop">
                   <nav id="filter-drop" class="custom-scrollbar dropzone"></nav>
@@ -410,9 +410,9 @@
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Metrica</h5>
               <section class="dlg-content col col-1">
-                <section>
+                <section class="textarea-formula">
                   <input type="text" id="custom-metric-name" placeholder="Nome" value="" autocomplete="off" />
-                  <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea"></div>
+                  <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea placeholder"></div>
                 </section>
               </section>
               <section class="dlg-buttons">

@@ -172,6 +172,7 @@ dialog nav > details > li {
 dialog .textarea-formula{
   display: grid;
   grid-template-rows: auto 1fr;
+  grid-row-gap: 1em;
 }
 
 .col-3{

@@ -138,7 +138,7 @@ ul > section[data-sublist-table-card] > .sublist > span{width: 100%; padding: 8p
 mark{
     background-color: sienna;
     color: white;
-    border-radius: 4px;
+    border-radius: 2px;
     padding: 2px 12px;
     display: inline-flex;
     width: 100%;
@@ -151,8 +151,12 @@ mark{
 .justify-self-center{justify-self: center;}
 
 span.markContent {
-    position: relative; color: dimgrey; margin-bottom: 8px;
-    display: inline-grid; justify-items: center;
+  position: relative;
+  color: dimgrey;
+  margin-bottom: 8px;
+  display: inline-grid;
+  justify-items: center;
+  margin-right: 4px;
 }
 /*mark.markContent::before {content: attr(data-attr); position: absolute; top: 100%; color: dimgray;}*/
 .markContent > i {position: absolute; left: -7px; top: -7px; color: black; visibility: hidden;}

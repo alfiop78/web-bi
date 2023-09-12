@@ -313,3 +313,19 @@ code[data-alias] {
   background-color: seagreen;
   color: white;
 }
+
+#textarea-filter::before {
+  content: "Selezionare le colonne qui a sinistra per creare la formula";
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  color: darkgray;
+}
+
+#textarea-composite-metric::before {
+  content: "Trascinare le metriche in questa sezione per creare la formula";
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  color: darkgray;
+}

@@ -616,3 +616,11 @@ textarea {
 textarea:focus, textarea:active {
   border: solid thin darkgrey;
 }
+
+#textarea-custom-metric::before{
+  content: "Trascinare qui le colonne dell'anteprima tabella in basso";
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  color: darkgray;
+}
