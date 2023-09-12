@@ -66,6 +66,10 @@
   border: solid thin darkgreen;
 }
 
+.defined {
+  white-space: nowrap;
+}
+
 .column-defined,
 .metric-defined,
 .filter-defined {
@@ -174,6 +178,7 @@
 .metric-defined[data-type="composite"] {
   background-color: rosybrown;
   color: #494949;
+  padding: 4px 6px;
 }
 
 .metric-defined[data-type="composite"] code[data-aggregate] {

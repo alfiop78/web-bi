@@ -172,7 +172,7 @@
     <template id="tmpl-filters-defined">
       <div class="filter-defined">
         <i class="button-icon material-icons-round md-18">filter_alt</i>
-        <span></span>
+        <span class="defined"></span>
         <button type="button" data-remove class="button-icon material-icons-round md-18 filter-defined" data-fn="removeDefinedFilter" data-filter-token>delete</button>
         <button type="button" data-undo class="button-icon material-icons-round md-18 filter-defined" data-fn="undoDefinedFilter" data-filter-token>undo</button>
       </div>
