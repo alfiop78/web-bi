@@ -20,7 +20,7 @@
 }
 
 .sheet-elements .dropzone{
-  border: solid thin lightgrey;
+  border: solid thin #ededed;
   position: relative;
   overflow: auto;
   display: flex;
@@ -30,7 +30,7 @@
   width: 100%;
   transition: height 500ms;
   align-items: center;
-  padding: 32px 8px 8px 8px;
+  padding: 28px 8px 6px 8px;
 }
 
 .relative{
@@ -118,8 +118,10 @@
   background-color: seagreen;
 }
 
-.column-defined[data-added], .metric-defined[data-added]{
-  background-color: rosybrown;
+.column-defined[data-adding],
+.metric-defined[data-adding],
+.filter-defined[data-adding] {
+  opacity: .6;
 }
 
 .column-defined[data-removed],
@@ -202,7 +204,8 @@
 
 #workbook-objects > section[data-section] {
   overflow: auto;
-  box-shadow: 0px 4px 3px -3px grey;
+  border: solid thin #ededed;
+  border-radius: 2px;
 }
 
 #workbook-objects > p {

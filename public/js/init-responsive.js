@@ -454,6 +454,8 @@ var Sheet;
     const metric = Sheet.metrics.get(token);
     field.dataset.type = metric.type;
     field.dataset.id = metric.token;
+    // Se lo Sheet è in modifica imposto il dataset 'added'
+    (!Sheet.edit) ? field.dataset.added = 'true' : field.dataset.adding = 'true';
     // formula.dataset.id = metric.token;
     // formula.dataset.token = metric.token;
     fieldName.innerHTML = `(${metric.alias})`;
@@ -629,7 +631,7 @@ var Sheet;
     e.currentTarget.classList.remove('dropping');
   }
 
-  app.addFilters = (target, elementRef, editMode) => {
+  app.addFilters = (target, elementRef) => {
     const tmpl = app.tmplFiltersDefined.content.cloneNode(true);
     const field = tmpl.querySelector('.filter-defined');
     const span = field.querySelector('span');
@@ -637,7 +639,7 @@ var Sheet;
     const btnUndo = field.querySelector('button[data-undo]');
     field.dataset.type = 'filter';
     field.dataset.id = elementRef.id;
-    if (editMode) field.dataset.added = 'true';
+    (!Sheet.edit) ? field.dataset.added = 'true' : field.dataset.adding = 'true';
     btnRemove.dataset.filterToken = elementRef.id;
     btnUndo.dataset.filterToken = elementRef.id;
     span.dataset.token = elementRef.id;
@@ -653,10 +655,7 @@ var Sheet;
     const elementRef = document.getElementById(elementId);
     console.log(elementRef);
     Sheet.filters = elementId;
-    // Sheet in fase di edit (boolean)
-    (document.querySelector('#wrapper-sheet').dataset.sheetToken) ?
-      app.addFilters(e.currentTarget, elementRef, true) :
-      app.addFilters(e.currentTarget, elementRef, false);
+    app.addFilters(e.currentTarget, elementRef);
   }
 
   app.rowDragEnd = (e) => {
@@ -671,8 +670,7 @@ var Sheet;
   /* addField viene utilizzate sia quando si effettua il drag&drop sulla dropzone-rows che
   * quando si apre un nuovo Sheet per ripololare la dropzone-rows con gli elementi proveniente da Sheet.open()
   */
-  app.addField = (target, token, editMode) => {
-    // editMode : indica che il report è in fase di edit e che gli oggetti
+  app.addField = (target, token) => {
     // aggiunti allo sheet avranno un attributo (su .column-defined) data-added
     const tmpl = app.tmplColumnsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('.column-defined');
@@ -681,7 +679,9 @@ var Sheet;
     const btnUndo = field.querySelector('button[data-undo]');
     field.dataset.type = 'column';
     field.dataset.id = token;
-    if (editMode) field.dataset.added = 'true';
+    // if (!Sheet.edit) field.dataset.added = 'true';
+    // In edit:true imposto il dataset.adding altrimenti dataset.added
+    (!Sheet.edit) ? field.dataset.added = 'true' : field.dataset.adding = 'true';
     btnRemove.dataset.columnToken = token;
     btnUndo.dataset.columnToken = token;
     // field.dataset.token = elementRef.id;
@@ -711,10 +711,7 @@ var Sheet;
     // TODO: rinominare elementRef.id in elementRef.dataset.token
     // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
     Sheet.fields = { token: elementRef.id, name: WorkBook.field.get(elementRef.id).name };
-    // Sheet in fase di edit (boolean)
-    (document.querySelector('#wrapper-sheet').dataset.sheetToken) ?
-      app.addField(e.currentTarget, elementRef.id, true) :
-      app.addField(e.currentTarget, elementRef.id, false);
+    app.addField(e.currentTarget, elementRef.id);
   }
 
   app.rowDragEnd = (e) => {
@@ -1289,8 +1286,6 @@ var Sheet;
     // reimposto tutte le proprietà della Classe
     Sheet.open();
     const name = document.getElementById('sheet-name');
-    // Imposto il token dello Sheet su .wrapper-sheet[data-sheet-token]
-    document.querySelector('#wrapper-sheet').dataset.sheetToken = Sheet.sheet.token;
     name.innerText = Sheet.name;
     name.dataset.value = Sheet.name;
     /* Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...)
@@ -1313,8 +1308,6 @@ var Sheet;
       const target = document.getElementById('dropzone-filters');
       // imposto un data-selected sui filtri per rendere visibile il fatto che sono stati aggiunti al report
       const elementRef = filterRef.querySelector(`li[id='${token}']`);
-      debugger;
-      // TODO: utilizzare la stessa logica dell'aggiunta di righe/colonne
       app.addFilters(target, elementRef, true);
     });
     Sheet.save();
@@ -1322,6 +1315,8 @@ var Sheet;
     // verifico se il datamart, per lo Sheet selezionato, è già presente sul DB.
     // In caso positivo lo apro in preview-datamart.
     app.sheetPreview(e.currentTarget.dataset.token);;
+    // Imposto la prop 'edit' = true perchè andrò ad operare su uno Sheet aperto
+    Sheet.edit = true;
   }
 
   app.saveSheet = () => {
@@ -1329,6 +1324,9 @@ var Sheet;
     const name = document.getElementById('sheet-name');
     Sheet.name = name.dataset.value;
     Sheet.save();
+    // da questo momento in poi le modifiche (aggiunta/rimozione) di elementi allo Sheet
+    // verranno contrassegnate come edit:true
+    Sheet.edit = true;
   }
 
   app.removeDefinedColumn = (e) => {
@@ -1336,15 +1334,22 @@ var Sheet;
     // Se la colonna che si sta per eliminare è stata aggiunta (non era inclusa nello Sheet)
     // elimino tutto il div anziché marcarlo come data-removed
     const field = document.querySelector(`.column-defined[data-id='${token}']`);
-    if (field.dataset.added) {
-      field.remove();
-    } else {
+    const removeField = () => {
       // Aggiungo, al div .column-defined[data-id] un attributo data-removed per poterlo
       // contrassegnare come "cancellato" (ed impostarne anche il css con line-through)
       field.dataset.removed = 'true';
       // Memorizzo l'oggetto da eliminare in un 'magic method' della Classe Sheet.
       // Nel ripristino (undoDefinedColumn()) di questa colonna userò questo oggetto
       Sheet.removedFields = { token, value: Sheet.fields.get(token) };
+    }
+    // In edit=true i campi aggiunti allo Sheet sono contrassegnati con dataset.adding
+    // ed è già presente il dataset.added. Perr questo motivo elimino dal DOM gli elementi
+    // 'adding', in edit:true, e added in edit:false
+    if (Sheet.edit) {
+      // edit mode
+      (field.dataset.adding) ? field.remove() : removeField();
+    } else {
+      (field.dataset.added) ? field.remove() : removeField();
     }
     Sheet.fields.delete(token);
   }
@@ -1361,9 +1366,7 @@ var Sheet;
     // Se la metrica che si sta per eliminare è stata aggiunta (non era inclusa nello Sheet)
     // elimino tutto il div anziché marcarlo come data-removed
     const metric = document.querySelector(`.metric-defined[data-id='${token}']`);
-    if (metric.dataset.added) {
-      metric.remove();
-    } else {
+    const removeMetric = () => {
       // Aggiungo, al div .metric-defined[data-id] un attributo data-removed per poterlo
       // contrassegnare come "cancellato" (ed impostarne anche il css con line-through)
       metric.dataset.removed = 'true';
@@ -1371,21 +1374,30 @@ var Sheet;
       // Nel ripristino (undoDefinedMetric()) di questa metrica userò questo oggetto
       Sheet.removedMetrics = { token, value: Sheet.metrics.get(token) };
     }
-    // elimino l'object iin base al tipo di metrica
-    switch (Sheet.metrics.get(token).type) {
-      case 'advanced':
-        delete Sheet.sheet.advMetrics[token];
-        if (Object.keys(Sheet.sheet.advMetrics).length === 0) delete Sheet.sheet.advMetrics;
-        break;
-      case 'composite':
-        delete Sheet.sheet.compositeMetrics[token];
-        if (Object.keys(Sheet.sheet.compositeMetrics).length === 0) delete Sheet.sheet.compositeMetrics;
-        break;
-      default:
-        delete Sheet.sheet.metrics[token];
-        if (Object.keys(Sheet.sheet.metrics).length === 0) delete Sheet.sheet.metrics;
-        break;
+    if (Sheet.edit) {
+      (metric.dataset.adding) ? metric.remove() : removeMetric();
+      // Le proprietà 'advMetrics', 'compositeMetrics' e 'metrics' all'interno di Sheet.sheet
+      // sono presenti solo in caso di edit:true dello Sheet. Quindi non posso eliminarle
+      // se lo Sheet NON è in fase di edit
+      // elimino l'object in base al tipo di metrica
+      /* switch (Sheet.metrics.get(token).type) {
+        case 'advanced':
+          delete Sheet.sheet.advMetrics[token];
+          if (Object.keys(Sheet.sheet.advMetrics).length === 0) delete Sheet.sheet.advMetrics;
+          break;
+        case 'composite':
+          delete Sheet.sheet.compositeMetrics[token];
+          if (Object.keys(Sheet.sheet.compositeMetrics).length === 0) delete Sheet.sheet.compositeMetrics;
+          break;
+        default:
+          delete Sheet.sheet.metrics[token];
+          if (Object.keys(Sheet.sheet.metrics).length === 0) delete Sheet.sheet.metrics;
+          break;
+      } */
+    } else {
+      (metric.dataset.added) ? metric.remove() : removeMetric();
     }
+
     Sheet.metrics.delete(token);
     if (Sheet.metrics.size === 0) Sheet.metrics.clear();
   }
@@ -1422,6 +1434,9 @@ var Sheet;
       WorkBook.save();
       const rand = () => Math.random(0).toString(36).substring(2);
       Sheet = new Sheets(rand().substring(0, 7), WorkBook.workBook.token);
+      // Imposto la prop 'edit' = false, verrà impostata a 'true' quando si apre uno Sheet
+      // dal tasto 'Apri Sheet'
+      Sheet.edit = false;
     }
     document.querySelector('#next').hidden = true;
     document.querySelector('#btn-sheet-preview').hidden = false;
@@ -1551,6 +1566,12 @@ var Sheet;
           DT.template = 'tmpl-preview-table';
           DT.addColumns();
           DT.addRows();
+          // Al termine del process elimino dalle dropzones gli elementi che sono stati
+          // eliminati dallo Sheet, quindi gli elementi con dataset.removed
+          document.querySelectorAll('div[data-removed]').forEach(element => element.remove());
+          // Allo stesso modo, elimino il dataset.adding per rendere "finali" gli elementi aggiunti
+          // al report in fase di edit
+          document.querySelectorAll('div[data-adding]').forEach(element => delete element.dataset.adding);
         } else {
           // TODO: Da testare se il codice arriva qui o viene gestito sempre dal catch()
           console.debug('FX non è stata creata');
@@ -1619,16 +1640,19 @@ var Sheet;
   // rimuovo il filtro selezionato dallo Sheet
   app.removeDefinedFilter = (e) => {
     const token = e.target.dataset.filterToken;
-    const field = document.querySelector(`.filter-defined[data-id='${token}']`);
-    if (field.dataset.added) {
-      field.remove();
-    } else {
+    const filter = document.querySelector(`.filter-defined[data-id='${token}']`);
+    const removeFilter = () => {
       // Aggiungo, al div .column-defined[data-id] un attributo data-removed per poterlo
       // contrassegnare come "cancellato" (ed impostarne anche il css con line-through)
-      field.dataset.removed = 'true';
+      filter.dataset.removed = 'true';
       // Memorizzo l'oggetto da eliminare in un 'magic method' della Classe Sheet.
       // Nel ripristino (undoDefinedColumn()) di questa colonna userò questo oggetto
       Sheet.removedFilters = { [token]: token };
+    }
+    if (Sheet.edit) {
+      (filter.dataset.adding) ? filter.remove() : removeFilter();
+    } else {
+      (filter.dataset.added) ? filter.remove() : removeFilter();
     }
     Sheet.filters.delete(token);
     // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()

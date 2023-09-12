@@ -106,6 +106,10 @@ class Sheets {
       * altrimenti visualizzo un AVVISO perchè l'esecuzione potrebbe essere troppo lunga
     */
     this.sheet.filters = [...this.filters];
+    // reset delle metriche
+    delete this.sheet.metrics;
+    delete this.sheet.advMetrics;
+    delete this.sheet.compositeMetrics;
     for (const [token, metric] of this.metrics) {
       switch (metric.type) {
         case 'basic':
