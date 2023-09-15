@@ -130,18 +130,18 @@
   </template>
 
   <main>
-    <div id="drawer">
+    <div id="drawer" open>
 
       <section class="account">
         <h5>user</h5><i class="material-icons md-light">person</i>
       </section>
 
       <nav>
-        <a href="#" id="mdc-back">home</a>
-        {{-- {{ dd($schemes) }} --}}
-        @foreach($schemes as $schema)
-        <a href="#" data-fn="handlerSchema" data-schema="{{ $schema['SCHEMA_NAME'] }}">{{ $schema['SCHEMA_NAME'] }}</a>
-        @endforeach
+        <!-- <a href="#" id="mdc-back">HOME</a> -->
+        <section class="icon-vertical-menu">
+          <button id="btn-datanase" class="material-icons-round md-24 main-menu" disabled>storage</button>
+          <button id="btn-schema" class="material-icons-round md-24 main-menu">schema</button>
+        </section>
       </nav>
 
     </div>
@@ -149,7 +149,7 @@
     <header>
       <div class="nav-button">
         <!-- codelab-nav-button-->
-        <a href="/" id="arrow-back"><i class="material-icons md-light">close</i></a>
+        <!-- <a href="/" id="arrow-back"><i class="material-icons md-light">close</i></a> -->
         <a href="#" id="menu" onclick="App.menu()"><i class="material-icons md-light">menu</i></a>
       </div>
 
@@ -247,6 +247,20 @@
     <div id="container">
       <div id="content">
         <div id="body">
+          <dialog id="dlg-schema" class="small">
+            <section class="dlg-grid">
+              <h5 class="">Seleziona schema Database</h5>
+              <nav>
+                {{-- {{ dd($schemes) }} --}}
+                @foreach($schemes as $schema)
+                <a href="#" data-fn="handlerSchema" data-schema="{{ $schema['SCHEMA_NAME'] }}">{{ $schema['SCHEMA_NAME'] }}</a>
+                @endforeach
+              </nav>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+              </section>
+            </section>
+          </dialog>
 
           <dialog id="dialog-rename">
             <section class="dlg-grid">

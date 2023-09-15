@@ -12,14 +12,6 @@ html, body{
   padding: 0;
 }
 
-main{
-  display: flex;
-  width: 100%;
-  height: 100%;
-  padding-top: 64px;
-  transition: padding 350ms;
-}
-
 main > #container{
   display: flex;
   flex-direction: column;
@@ -83,7 +75,7 @@ svg {
   height: 100%;
   position: absolute;
   user-select: none;
-  /* background-color: #3b629540; */
+  background-color: #ededed;
   border: dashed thin lightgray;
   z-index: 1;
 }
@@ -147,12 +139,12 @@ path:hover{
 
 .struct > rect {
   /* fill: lightblue; */
-  rx : 2.5;
-  /* fill: #dcdcdca1; */
+  rx : 4;
+  /* fill: white; */
   width: 170px;
   height: 30px;
-  stroke: #494949;
-  stroke-width: 0.2;
+  /* stroke: #494949; */
+  /* stroke-width: 0.2; */
 }
 
 .struct > text {
@@ -169,21 +161,21 @@ path:hover{
 }
 
 use.table{
-  fill: #f1f1f1;
+  fill: white;
   font-weight: normal;
 }
 
 use.table:hover{
   cursor: pointer;
-  fill: #e2e2e2;
-  stroke: #494949;
-  stroke-width: 0.3;
+  fill: lightblue;
+  /* stroke: #494949; */
+  /* stroke-width: 0.1; */
 }
 
 use.table[data-active]{
   fill: lightblue;
-  stroke: #494949;
-  stroke-width: 0.3;
+  /* stroke: #494949; */
+  /* stroke-width: 0.1; */
 }
 
 #coords{
@@ -191,6 +183,7 @@ use.table[data-active]{
   background-color: #494949;
   color: white;
   bottom: 0px;
+  z-index: 1;
 }
 
 #window-columns[data-open="true"]{
@@ -297,7 +290,7 @@ section[data-table-from] .table, section[data-table-to] .table{
 .wrapper-sheet{
   display: grid;
   grid-auto-flow: column;
-  grid-template-columns: 1.5fr 4fr;
+  grid-template-columns: 340px 4fr;
   grid-column-gap: .5rem;
   width: 100%;
   height: 100%;

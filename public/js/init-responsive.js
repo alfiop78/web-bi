@@ -35,6 +35,7 @@ var Sheet;
     dialogColumns: document.getElementById('dlg-columns'),
     dialogTime: document.getElementById('dialog-time'),
     dialogInfo: document.getElementById('dlg-info'),
+    dialogSchema: document.getElementById('dlg-schema'),
     // buttons
     btnSelectSchema: document.getElementById('btn-select-schema'),
     editWorkBookName: document.getElementById('workbook-name'),
@@ -1130,7 +1131,6 @@ var Sheet;
       const data = await getDatabaseTable(schema);
       console.log(data);
       // TODO: attivo i tasti ("Crea dimensione", "Modifica dimensione", "Crea cubo", ecc...)
-      // TODO: popolo elenco tabelle
       let ul = document.getElementById('ul-tables');
       for (const [key, value] of Object.entries(data)) {
         const content = app.tmplList.content.cloneNode(true);
@@ -1146,7 +1146,7 @@ var Sheet;
         span.innerText = value.TABLE_NAME;
         ul.appendChild(li);
       }
-      drawer.toggleAttribute('open');
+      app.dialogSchema.close();
     }
   }
 

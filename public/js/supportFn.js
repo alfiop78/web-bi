@@ -81,6 +81,8 @@ async function getTables(urls) {
     dialogCustomMetric: document.getElementById('dlg-custom-metric'),
     dialogCompositeMetric: document.getElementById('dlg-composite-metric'),
     dialogColumns: document.getElementById('dlg-columns'),
+    btnSchema: document.getElementById('btn-schema'),
+    dialogSchema: document.getElementById('dlg-schema')
   }
 
   const config = { attributes: true, childList: true, subtree: true };
@@ -169,4 +171,6 @@ async function getTables(urls) {
   });
 
   /* end mouse event */
+
+  app.btnSchema.onclick = () => app.dialogSchema.showModal();
 })();
