@@ -145,6 +145,7 @@ var Sheet;
     // WorkBook.svg
     Draw.tables.get(WorkBook.activeTable.id).name = input.value;
     app.dialogRename.close();
+    app.checkWorkBookChange(`alias-${input - value}`);
   }
 
   /* NOTE: DRAG&DROP EVENTS */
@@ -775,6 +776,7 @@ var Sheet;
       type: 'metric',
       metric_type: 'basic'
     };
+    app.checkWorkBookChange(token);
   }
 
   /* selezione di una colonna dalla table-preview, aggiungo la colonna alla dialog-custom-metric
@@ -816,6 +818,7 @@ var Sheet;
       type: 'metric',
       metric_type: 'basic'
     };
+    app.checkWorkBookChange(token);
   }
 
   // apro la dialog column per definire le colonne del WorkBook
@@ -1235,7 +1238,7 @@ var Sheet;
     }
     Draw.checkResizeSVG();
     app.dialogWorkBook.close();
-    // Imposto il WorkBook come edit = true (stessa logica di Sheet.edit)
+    // il WorkBook è già creato quindi da questo momento è in fase di edit
     WorkBook.edit = true;
   }
 
@@ -2445,6 +2448,8 @@ var Sheet;
       if (+Draw.svg.dataset.level < values.levelId) Draw.svg.dataset.level = values.levelId;
     }
     Draw.joinTablePositioning();
+    // imposto un elemento true per evidenziare che c'è una modifica nel canvas
+    app.checkWorkBookChange(true);
   }
 
   // salvataggio dimensione TIME
@@ -2540,6 +2545,7 @@ var Sheet;
         }
       };
       WorkBook.joins = fieldRef.dataset.token; // nome della tabella con le proprie join (WorkBook.nJoin) all'interno
+      app.checkWorkBookChange(token);
       // dataset.join-id=nome_tabella_from indica che è presente una join tra le due tabelle
       Draw.joinLines.get(Draw.currentLineRef.id).name = joins[0].dataset.alias;
       // la join viene identificata con il nome della tabella 'from', come in WorkBook.joins
@@ -2664,6 +2670,11 @@ var Sheet;
     };
     WorkBook.fields = token;
     app.dialogColumns.close();
+    app.checkWorkBookChange(token);
+  }
+
+  app.checkWorkBookChange = (token) => {
+    if (WorkBook.edit) WorkBook.workBookChange.add(token);
   }
 
   // apertura dialog per la creazione di una nuova metrica

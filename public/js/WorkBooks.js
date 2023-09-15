@@ -212,6 +212,7 @@ class WorkBooks {
     this.title = name;
     this.workBook = { token: this.token, type: 'workbook' };
     this.schema;
+    this.workBookChange = new Set();
     this.edit = false;
   }
 
