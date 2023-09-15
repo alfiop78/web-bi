@@ -37,7 +37,8 @@ main > #container{
 
 .wrapper-step{
   display: grid;
-  grid-template-rows: auto 60% 1fr;
+  /* grid-template-rows: auto 60% 1fr; */
+  grid-template-rows: auto 1fr .8fr;
   background-color: white;
   height: 100%;
   width: 100%;

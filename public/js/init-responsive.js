@@ -610,7 +610,7 @@ var Sheet;
     e.currentTarget.classList.remove('dropping');
   }
 
-  /* sezione #side-sheet-filters*/
+  /* sezione #sheet-filters*/
   app.filterDragEnter = (e) => {
     e.preventDefault();
     console.log(e.currentTarget);
@@ -1235,6 +1235,8 @@ var Sheet;
     }
     Draw.checkResizeSVG();
     app.dialogWorkBook.close();
+    // Imposto il WorkBook come edit = true (stessa logica di Sheet.edit)
+    WorkBook.edit = true;
   }
 
   app.openSheetDialog = (e) => {
@@ -1415,16 +1417,16 @@ var Sheet;
     delete document.querySelector(`.metric-defined[data-id='${token}']`).dataset.removed;
   }
 
-  app.showSheetFilters = (e) => {
-    document.querySelector('#side-sheet-filters').toggleAttribute('open');
-  }
-
   // TODO: da spostare in supportFn.js
   app.handlerEditSheetName = (e) => e.target.dataset.value = e.target.innerText;
 
   app.editWorkBookName.onblur = (e) => WorkBook.name = e.target.innerText;
 
-  document.getElementById('prev').onclick = () => Step.previous();
+  document.getElementById('prev').onclick = () => {
+    document.querySelector('#next').toggleAttribute('hidden');
+    document.querySelector('#btn-sheet-preview').toggleAttribute('hidden');
+    Step.previous();
+  }
 
   document.getElementById('next').onclick = async () => {
     /* recupero dal DB (promise.all) tutte le tabelle mappate nel WorkBook
@@ -1437,19 +1439,20 @@ var Sheet;
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
       app.addTablesStruct();
       // salvo il workbook creato
+      // TODO: Se non ci sono state modifiche il WorkBook non deve essere salvato
       WorkBook.save();
-      const rand = () => Math.random(0).toString(36).substring(2);
-      Sheet = new Sheets(rand().substring(0, 7), WorkBook.workBook.token);
-      // Imposto la prop 'edit' = false, verrà impostata a 'true' quando si apre uno Sheet
-      // dal tasto 'Apri Sheet'
-      Sheet.edit = false;
+      // se lo Sheet è già aperto non posso ricreare l'oggetto Sheet
+      if (!Sheet) {
+        // Sheet non è definito (prima attivazione del tasto Sheet)
+        Sheet = new Sheets(rand().substring(0, 7), WorkBook.workBook.token);
+        // Imposto la prop 'edit' = false, verrà impostata a 'true' quando si apre uno Sheet
+        // dal tasto 'Apri Sheet'
+        Sheet.edit = false;
+      }
     }
-    document.querySelector('#next').hidden = true;
-    document.querySelector('#btn-sheet-preview').hidden = false;
+    document.querySelector('#next').toggleAttribute('hidden');
+    document.querySelector('#btn-sheet-preview').toggleAttribute('hidden');
   }
-
-  // imposto attribute init sul <nav>, in questo modo verranno associati gli eventi data-fn sui child di <nav>
-  app.drawer.querySelectorAll('nav').forEach(a => a.dataset.init = 'true');
 
   app.tableSelected = async (e) => {
     // console.log(`table selected ${e.currentTarget.dataset.table}`);
@@ -2878,9 +2881,9 @@ var Sheet;
 
   // Apertura step Sheet, vengono caricati gli elementi del WorkBook
   app.addTablesStruct = async () => {
-    // TODO: in futuro dovrò aggiornare la struttura già presente (e non resettare).
-    // ...in questo modo, gli elementi aggiunti al report non verranno resettati
-    app.workbookTablesStruct.querySelectorAll('details').forEach(detail => detail.remove());
+    // reset degli elementi in #workbook-objects
+    // app.workbookTablesStruct.querySelectorAll('details').forEach(detail => detail.remove());
+    app.workbookTablesStruct.querySelectorAll('#ul-metrics > li, #ul-filters > li, details').forEach(element => element.remove());
     const parent = app.workbookTablesStruct.querySelector('#nav-fields');
     for (const [tableId, value] of WorkBook.hierTables) {
       const tmpl = app.tmplDetails.content.cloneNode(true);

@@ -596,7 +596,7 @@
                             <input type="search" id="columns-search-id" autocomplete="off" placeholder="Ricerca colonne" />
                             <div class="table-content">
                               <!-- data-search-input : definisce la input che effettua la ricerca di colonne in questa tabella -->
-                              <table id="preview-table" data-search-input="columns-search-id"></table>
+                              <table id="preview-table" class="custom-scrollbar" data-search-input="columns-search-id"></table>
                             </div>
                           </section>
                         </section>
@@ -671,13 +671,10 @@
                                 <section id="dropzone-filters" class="dropzone filters custom-scrollbar"></section>
                               </section>
                             </div>
-                            <!-- <div>
-                              <button id="filters" data-fn="showSheetFilters" type="button" class="btn-link default" value="Filtri">Filtri</button>
-                            </div> -->
                           </section>
                           <section class="table-preview">
                             <div class="table-content">
-                              <table id="preview-datamart">
+                              <table id="preview-datamart" class="custom-scrollbar">
                                 <thead>
                                   <tr></tr>
                                 </thead>

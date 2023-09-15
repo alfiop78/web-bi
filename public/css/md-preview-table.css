@@ -29,7 +29,7 @@ th {
 }
 
 table[data-active="true"] thead th {
-  background-color: lightskyblue;
+  background-color: beige;
 }
 
 table[data-active="false"] thead th {
@@ -38,7 +38,7 @@ table[data-active="false"] thead th {
 
 table[data-active="true"] thead th:hover{
   cursor: pointer;
-  background-color: lightcoral;
+  background-color: burlywood;
 }
 
 thead th[data-token]{
@@ -54,5 +54,5 @@ thead th[data-token]{
 .table-content{
   position: absolute;
   width: 100%;
-  height: 100%
+  height: calc(100% - 32px);
 }
