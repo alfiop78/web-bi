@@ -171,7 +171,7 @@ dialog nav > details > li {
 /* textarea all'interno di una dialog */
 dialog .textarea-formula{
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 2fr 1fr;
   grid-row-gap: 1em;
 }
 

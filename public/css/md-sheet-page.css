@@ -300,9 +300,11 @@ code[data-alias] {
 }
 
 .input-area {
-  display: flex;
+  /* display: flex;
   flex-direction: column;
-  gap: 1em;
+  gap: 1em; */
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
 }
 
 #adv-metric-defined {

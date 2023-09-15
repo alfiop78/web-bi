@@ -319,6 +319,7 @@
                 <section class="textarea-formula">
                   <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" />
                   <div id="textarea-composite-metric" data-fn="addText" data-content-editable class="dropzone textarea"></div>
+                  <textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
                 </section>
               </section>
               <section class="dlg-buttons">
@@ -343,6 +344,7 @@
                     <input type="checkbox" id="check-distinct" disabled />
                     <label for="check-distinct">DISTINCT</label>
                   </div>
+                  <textarea id="advanced-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                 </section>
                 <section class="list-search placeholder">
                   <div class="relative-ul">
@@ -409,6 +411,7 @@
                 <section class="textarea-formula">
                   <input type="text" id="custom-metric-name" placeholder="Nome" value="" autocomplete="off" />
                   <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea placeholder"></div>
+                  <textarea id="custom-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                 </section>
               </section>
               <section class="dlg-buttons">
@@ -474,6 +477,7 @@
                 <section class="textarea-formula">
                   <input type="text" id="custom-filter-name" placeholder="Nome" value="" autocomplete="off" />
                   <div id="textarea-filter" data-fn="addText" class="textarea" data-content-editable></div>
+                  <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                 </section>
               </section>
               <section class="dlg-buttons">

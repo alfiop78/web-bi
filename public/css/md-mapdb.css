@@ -485,7 +485,7 @@ input {
   padding: 8px 4px;
   border: none;
   width: 100%;
-  max-width: 400px;
+  /* max-width: 400px; */
   outline: none;
 }
 
@@ -609,7 +609,7 @@ textarea {
   padding: 1em;
   margin: 1em 0px;
   border-radius: 2px;
-  border: solid thin gainsboro;
+  border-color: transparent;
   color: #494949;
 }
 

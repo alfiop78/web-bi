@@ -30,8 +30,8 @@
 }
 
 .textarea[data-content-editable] {
-  min-width: 300px;
-  min-height: 300px;
+  /* min-width: 300px; */
+  min-height: 200px;
 }
 
 .textarea{
