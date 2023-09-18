@@ -212,6 +212,8 @@ class WorkBooks {
     this.title = name;
     this.workBook = { token: this.token, type: 'workbook' };
     this.schema;
+    // Intercetto le modifiche fatte al WorkBook per valutare se aggiornare o meno
+    // la prop 'updated_at'
     this.workBookChange = new Set();
     this.edit = false;
   }
@@ -330,6 +332,11 @@ class WorkBooks {
 
   get metrics() { return this.#metrics; }
 
+  checkChanges(token) {
+    // Solo se sono in edit mode aggiungo gli elementi al workBookChange
+    if (this.edit) this.workBookChange.add(token);
+  }
+
   save() {
     this.workBook.name = this.title;
     this.workBook.fields = Object.fromEntries(this.fields);
@@ -349,7 +356,13 @@ class WorkBooks {
     }
     console.info('WorkBook : ', this.workBook);
     if (!this.workBook.hasOwnProperty('created_at')) this.workBook.created_at = new Date().toLocaleDateString('it-IT', this.options);
-    this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.options);
+    if (this.edit) {
+      // sono in edit mode, se sono state fatte modifiche aggiorno 'updated_at'
+      if (this.workBookChange.size !== 0) this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.options);
+    } else {
+      // non sono in edit mode, salvo sempre 'updated_at'
+      this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.options);
+    }
     WorkBookStorage.save(this.workBook);
   }
 

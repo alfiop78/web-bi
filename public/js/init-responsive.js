@@ -145,7 +145,7 @@ var Sheet;
     // WorkBook.svg
     Draw.tables.get(WorkBook.activeTable.id).name = input.value;
     app.dialogRename.close();
-    app.checkWorkBookChange(`alias-${input - value}`);
+    WorkBook.checkChanges(`alias-${input.value}`);
   }
 
   /* NOTE: DRAG&DROP EVENTS */
@@ -776,7 +776,7 @@ var Sheet;
       type: 'metric',
       metric_type: 'basic'
     };
-    app.checkWorkBookChange(token);
+    WorkBook.checkChanges(token);
   }
 
   /* selezione di una colonna dalla table-preview, aggiungo la colonna alla dialog-custom-metric
@@ -818,7 +818,7 @@ var Sheet;
       type: 'metric',
       metric_type: 'basic'
     };
-    app.checkWorkBookChange(token);
+    WorkBook.checkChanges(token);
   }
 
   // apro la dialog column per definire le colonne del WorkBook
@@ -903,6 +903,7 @@ var Sheet;
     // imposto il nome della colonna assegnato in fase di creazione, prop name
     document.getElementById('column-name').value = column.name;
     app.loadTableStruct();
+    WorkBook.checkChanges('time');
     app.dialogColumns.show();
   }
 
@@ -941,6 +942,7 @@ var Sheet;
         SheetStorage.save(value);
       }
     }
+    WorkBook.checkChanges('time');
   }
 
   app.contextMenuColumn = (e) => {
@@ -1473,6 +1475,8 @@ var Sheet;
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
     // imposto un colore diverso le colonne già definite nel workbook
     DT.fields(WorkBook.fields.get(WorkBook.activeTable.dataset.alias));
+    // imposto un colore diverso per le meriche già definite nel workbook
+    // DT.metrics(WorkBook.metrics);
   }
 
   app.createProcess = () => {
@@ -2448,8 +2452,8 @@ var Sheet;
       if (+Draw.svg.dataset.level < values.levelId) Draw.svg.dataset.level = values.levelId;
     }
     Draw.joinTablePositioning();
-    // imposto un elemento true per evidenziare che c'è una modifica nel canvas
-    app.checkWorkBookChange(true);
+    // imposto un elemento 'canvas' per evidenziare che c'è una modifica nel canvas
+    WorkBook.checkChanges('canvas');
   }
 
   // salvataggio dimensione TIME
@@ -2520,6 +2524,7 @@ var Sheet;
       };
       WorkBook.fields = tokenField;
     });
+    WorkBook.checkChanges('time');
   }
 
   // inserisco la colonna selezionata per la creazione della join
@@ -2545,7 +2550,7 @@ var Sheet;
         }
       };
       WorkBook.joins = fieldRef.dataset.token; // nome della tabella con le proprie join (WorkBook.nJoin) all'interno
-      app.checkWorkBookChange(token);
+      WorkBook.checkChanges(token);
       // dataset.join-id=nome_tabella_from indica che è presente una join tra le due tabelle
       Draw.joinLines.get(Draw.currentLineRef.id).name = joins[0].dataset.alias;
       // la join viene identificata con il nome della tabella 'from', come in WorkBook.joins
@@ -2670,11 +2675,7 @@ var Sheet;
     };
     WorkBook.fields = token;
     app.dialogColumns.close();
-    app.checkWorkBookChange(token);
-  }
-
-  app.checkWorkBookChange = (token) => {
-    if (WorkBook.edit) WorkBook.workBookChange.add(token);
+    WorkBook.checkChanges(token);
   }
 
   // apertura dialog per la creazione di una nuova metrica

@@ -552,10 +552,14 @@
                       </div>
                       <div id="context-menu-column" class="context-menu">
                         <ul id="ul-context-menu-column" class="context-menu-items">
-                          <button id="btn-add-metric" data-fn="setMetric" class="btn-link-context">Metrica</button>
-                          <button id="btn-add-column" data-fn="setColumn" class="btn-link-context">Definisci colonna</button>
-                          <button id="btn-edit-column" data-fn="editColumn" class="btn-link-context">Modifica colonna</button>
-                          <button id="btn-remove-column" data-fn="removeColumn" class="btn-link-context">Elimina colonna</button>
+                          <!-- <span>Metrica</span> -->
+                          <button id="btn-add-metric" data-fn="setMetric" class="btn-link-context">Nuova metrica</button>
+                          <!-- <button id="btn-edit-wb-metric" data-fn="editWBMetric" class="btn-link-context">Modifica</button> -->
+                          <!-- <button id="btn-remove-wb-metric" data-fn="removeWBMetric" class="btn-link-context">Elimina</button> -->
+                          <!-- <span>Colonna</span> -->
+                          <button id="btn-add-column" data-fn="setColumn" class="btn-link-context">Nuova colonna</button>
+                          <button id="btn-edit-column" data-fn="editColumn" class="btn-link-context">Modifica</button>
+                          <button id="btn-remove-column" data-fn="removeColumn" class="btn-link-context">Elimina</button>
                         </ul>
                       </div>
                       <section id="canvas-area">

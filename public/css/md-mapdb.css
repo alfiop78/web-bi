@@ -566,11 +566,16 @@ button.btn-link.important:hover{
   text-decoration: unset;
 }
 
+.context-menu span {
+  font-weight: bold;
+  padding: 4px;
+  border-bottom: solid thin gainsboro;
+}
 
 button.btn-link-context{
   border: unset;
   background-color: unset;
-  padding: 4px 6px;
+  padding: 4px 6px 4px 12px;
   display: flex;
 }
 
