@@ -1,4 +1,4 @@
-const contextMenuRef = document.getElementById('context-menu');
+/* const contextMenuRef = document.getElementById('context-menu');
 const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
 // console.log(WorkBook.metrics);
 
@@ -18,7 +18,7 @@ function openContextMenu(e) {
   contextMenuRef.style.top = `${mouseY}px`;
   contextMenuRef.style.left = `${mouseX}px`;
   contextMenuRef.toggleAttribute('open');
-}
+} */
 
 /* fetch aPI functions */
 
@@ -78,6 +78,7 @@ async function getTables(urls) {
 (() => {
   var app = {
     dialogCompositeMetric: document.getElementById('dlg-composite-metric'),
+    dialogFilter: document.getElementById('dlg-filters'),
     dialogCustomMetric: document.getElementById('dlg-custom-metric'),
     dialogColumns: document.getElementById('dlg-columns'),
     btnSchema: document.getElementById('btn-schema'),
@@ -177,5 +178,12 @@ async function getTables(urls) {
     ul.querySelectorAll('li').forEach(metric => metric.remove());
     delete document.querySelector('#btn-custom-metric-save').dataset.token;
     delete document.querySelector('#btn-custom-metric-save').dataset.edit;
+  });
+
+  app.dialogFilter.addEventListener('close', () => {
+    document.getElementById('custom-filter-name').value = '';
+    document.querySelectorAll('#textarea-filter *').forEach(element => element.remove());
+    delete document.querySelector('#btn-filter-save').dataset.token;
+    delete document.querySelector('#btn-filter-save').dataset.mode;
   });
 })();

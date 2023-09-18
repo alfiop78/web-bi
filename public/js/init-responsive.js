@@ -11,7 +11,7 @@ var Sheet;
     tmplList: document.getElementById('tmpl-li'),
     tmplJoin: document.getElementById('tmpl-join-field'),
     tmplFilterDropped: document.getElementById('tmpl-filter-dropped-adv-metric'),
-    // tmplContextMenu: document.getElementById('tmpl-context-menu-content'),
+    tmplContextMenu: document.getElementById('tmpl-context-menu-content'),
     contextMenuRef: document.getElementById('context-menu'),
     contextMenuTableRef: document.getElementById('context-menu-table'),
     contextMenuColumnRef: document.getElementById('context-menu-column'),
@@ -129,6 +129,28 @@ var Sheet;
     // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
     document.querySelectorAll('#ul-context-menu-table button').forEach(item => item.dataset.id = WorkBook.activeTable.id);
   }
+
+  app.openContextMenu = (e) => {
+    e.preventDefault();
+    // console.log(e.target.id);
+    console.log(e.currentTarget.id);
+    // reset #context-menu
+    if (app.contextMenuRef.hasChildNodes()) app.contextMenuRef.querySelector('*').remove();
+    const tmpl = app.tmplContextMenu.content.cloneNode(true);
+    const content = tmpl.querySelector(`#${e.currentTarget.dataset.contextmenu}`);
+    // aggiungo, a tutti gli elementi del context-menu, il token dell'elemento selezionato
+    content.querySelectorAll('button').forEach(button => {
+      button.dataset.token = e.currentTarget.id;
+      if (button.dataset.button === 'delete' && Sheet.edit) button.disabled = 'true';
+    });
+    app.contextMenuRef.appendChild(content);
+
+    const { clientX: mouseX, clientY: mouseY } = e;
+    app.contextMenuRef.style.top = `${mouseY}px`;
+    app.contextMenuRef.style.left = `${mouseX}px`;
+    app.contextMenuRef.toggleAttribute('open');
+  }
+
 
   // Aggiunta metrica composta di base
   app.addCustomMetric = () => {
@@ -782,7 +804,6 @@ var Sheet;
     const inputName = document.getElementById('custom-metric-name');
     inputName.value = metric.alias;
     btnMetricSave.dataset.token = e.currentTarget.dataset.token;
-    btnMetricSave.dataset.edit = 'true';
     metric.formula.forEach(element => {
       if (element.hasOwnProperty('tableAlias')) {
         const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
@@ -803,9 +824,9 @@ var Sheet;
 
   // salva metrica composta di base
   app.saveCustomMetric = (e) => {
-    // se presente il dataset.edit sul btn-custom-metric-save sto modificando la metrica, altrimenti
+    // se presente il dataset.token sul btn-custom-metric-save sto modificando la metrica, altrimenti
     // è una nuova metrica
-    const token = (e.target.dataset.edit) ? e.target.dataset.token : rand().substring(0, 7);
+    const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const alias = document.getElementById('custom-metric-name').value;
     let arr_sql = [];
     let fields = [], formula = [];
@@ -1631,6 +1652,12 @@ var Sheet;
       // recupero l'object da inviare al process
       filters.set(token, WorkBook.filters.get(token));
     });
+    // se non ci sono filtri nel Report bisogna far comparire un avviso
+    // perchè l'elaborazione potrebbe essere troppo onerosa
+    if (Sheet.filters.size === 0) {
+      App.showConsole('Non sono presenti filtri nel report', 'error', 5000);
+      return false;
+    }
 
     process.fields = Object.fromEntries(fields);
     app.setSheet();
@@ -1743,7 +1770,28 @@ var Sheet;
     li.dataset.selected = 'true';
   }
 
-  // rimuovo il filtro selezionato dallo Sheet
+  app.removeWBFilter = (e) => {
+    // recupero il workbook_ref dal filtro che sto per eliminare
+    const workbook_ref = WorkBook.filters.get(e.currentTarget.dataset.token).workbook_ref;
+    // cerco gli sheet creati su questo workbook_ref, dovrò eliminare il
+    // filtro anche dagli sheet dove è stato utilizzato
+    const sheets = SheetStorage.sheets(workbook_ref);
+    if (sheets) {
+      // TODO: visualizzare una dialog con l'elenco dei report dove verrà cancellato il filtro
+      // Il tasto 'Conferma', nella dialog eliminerà il filtro da tutti i report
+      for (const value of Object.values(sheets)) {
+        const index = value.filters.indexOf(e.currentTarget.dataset.token);
+        value.filters.splice(index, 1);
+        value.updated_at = new Date().toLocaleDateString('it-IT', options);
+        SheetStorage.save(value);
+      }
+    }
+    WorkBook.filters.delete(e.currentTarget.dataset.token);
+    window.localStorage.removeItem(e.currentTarget.dataset.token);
+    document.querySelector(`li[id='${e.currentTarget.dataset.token}']`).remove();
+  }
+
+  // rimuovo il filtro aggiunto allo Sheet
   app.removeDefinedFilter = (e) => {
     const token = e.target.dataset.filterToken;
     const filter = document.querySelector(`.filter-defined[data-id='${token}']`);
@@ -1819,11 +1867,6 @@ var Sheet;
         txtArea.appendChild(span);
       }
     });
-  }
-
-  app.renameFilter = (e) => {
-    // TODO: implementazione
-    console.log(e.target.dataset.token);
   }
 
   app.openDialogMetric = () => {
@@ -2008,33 +2051,13 @@ var Sheet;
     // reset della textarea e della custom-filter-name
     textarea.querySelectorAll('*').forEach(element => element.remove());
     document.getElementById('custom-filter-name').value = '';
+    delete e.target.dataset.token;
     // salvo il nuovo filtro appena creato
     // completato il salvataggio rimuovo l'attributo data-token da e.target
     window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
-    // aggiungo il filtro alla nav[data-filters-defined]
+    debugger;
     if (!e.target.dataset.token) {
-      delete e.target.dataset.token;
-      // TODO: creare una fn "addFilter" in modo da utilizzarla sia qui che quanado apro il workbook (nel caricamento degli oggetti)
-      const parent = document.getElementById('ul-filters');
-      const tmpl = app.tmplList.content.cloneNode(true);
-      const li = tmpl.querySelector('li[data-filter]');
-      const content = li.querySelector('.li-content');
-      const btnDrag = content.querySelector('i');
-      const span = content.querySelector('span');
-      debugger;
-      const btnAdd = li.querySelector('i[data-id="filters-add"]');
-      // TODO: da valutare se usare id come token oppure il dataset.token
-      li.id = token;
-      li.dataset.type = 'filter';
-      li.dataset.name = object.name;
-      li.dataset.token = token;
-      li.addEventListener('dragstart', app.fieldDragStart);
-      li.addEventListener('dragend', app.fieldDragEnd);
-      li.dataset.field = object.name;
-      btnAdd.dataset.token = token;
-      btnAdd.addEventListener('click', app.addFilter);
-      span.innerHTML = object.name;
-      parent.appendChild(li);
+      app.appendFilter(document.getElementById('ul-filters'), token, object);
     }
   }
 
@@ -2173,7 +2196,6 @@ var Sheet;
     const alias = document.getElementById('composite-metric-name').value;
     const parent = document.getElementById('ul-metrics');
     const token = (e.target.dataset.edit) ? e.target.dataset.token : rand().substring(0, 7);
-    // const token = rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
     let object = { token, alias, sql: [], metrics: {}, type: 'metric', formula: [], metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
     document.querySelectorAll('#textarea-composite-metric *').forEach(element => {
@@ -2207,7 +2229,7 @@ var Sheet;
         object.formula.push(element.innerText.trim());
       }
     });
-    console.log(object);
+    // console.log(object);
     // aggiornamento/creazione della metrica imposta created_at
     object.created_at = (e.target.dataset.edit) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
     debugger;
@@ -2229,7 +2251,7 @@ var Sheet;
       // TODO: da impostare sull'icona drag
       li.addEventListener('dragstart', app.fieldDragStart);
       li.addEventListener('dragend', app.fieldDragEnd);
-      li.addEventListener('contextmenu', openContextMenu);
+      li.addEventListener('contextmenu', app.openContextMenu);
       li.dataset.type = WorkBook.metrics.get(token).type;
       span.innerHTML = WorkBook.metrics.get(token).alias;
       parent.appendChild(li);
@@ -2870,7 +2892,7 @@ var Sheet;
       // TODO: da impostare sull'icona drag
       li.addEventListener('dragstart', app.fieldDragStart);
       li.addEventListener('dragend', app.fieldDragEnd);
-      li.addEventListener('contextmenu', openContextMenu);
+      li.addEventListener('contextmenu', app.openContextMenu);
       // btnEdit.addEventListener('click', app.editAdvancedMetric);
       // WARN : per il momento inserisco un IF ma sarebbe meglio usare una logica di memorizzare tutti gli elementi del report in un unico oggetto Map
       if (WorkBook.metrics.has(token)) {
@@ -2938,7 +2960,7 @@ var Sheet;
         li.dataset.contextmenu = `ul-context-menu-${value.metric_type}`;
         li.addEventListener('dragstart', app.fieldDragStart);
         li.addEventListener('dragend', app.fieldDragEnd);
-        li.addEventListener('contextmenu', openContextMenu);
+        li.addEventListener('contextmenu', app.openContextMenu);
         /* if (value.metric_type === 'basic') {
           btnAdd.dataset.token = token;
           btnAdd.addEventListener('click', app.newAdvMeasure);
@@ -2949,35 +2971,31 @@ var Sheet;
     }
   }
 
+  app.appendFilter = (parent, token, filter) => {
+    const tmpl = app.tmplList.content.cloneNode(true);
+    const li = tmpl.querySelector('li[data-filter]');
+    const content = li.querySelector('.li-content');
+    const btnDrag = content.querySelector('i');
+    const span = content.querySelector('span');
+    li.id = token;
+    li.dataset.elementSearch = 'filters';
+    li.dataset.label = filter.name;
+    // definisco quale context-menu-template apre questo elemento
+    li.dataset.contextmenu = 'ul-context-menu-filter';
+    li.dataset.field = filter.field;
+    // TODO: eventi drag sull'icona drag
+    li.addEventListener('dragstart', app.fieldDragStart);
+    li.addEventListener('dragend', app.fieldDragEnd);
+    li.addEventListener('contextmenu', app.openContextMenu);
+    span.innerHTML = filter.name;
+    parent.appendChild(li);
+  }
+
   app.addDefinedFilters = () => {
     const parent = document.getElementById('ul-filters');
     // filtri mappati sul WorkBook
     for (const [token, value] of WorkBook.filters) {
-      const tmpl = app.tmplList.content.cloneNode(true);
-      const li = tmpl.querySelector('li[data-filter]');
-      const content = li.querySelector('.li-content');
-      const btnDrag = content.querySelector('i');
-      const span = content.querySelector('span');
-      // const btnAdd = li.querySelector('i[data-id="filters-add"]');
-      // const btnRemove = li.querySelector('i[data-id="filters-remove"]');
-      li.id = token;
-      li.dataset.elementSearch = 'filters';
-      li.dataset.label = value.name;
-      // definisco quale context-menu-template apre questo elemento
-      li.dataset.contextmenu = 'ul-context-menu-filter';
-      // li.dataset.type = 'filter';
-      li.dataset.field = value.field;
-      // li.addEventListener('click', app.addFilter);
-      // TODO: eventi drag sull'icona drag
-      li.addEventListener('dragstart', app.fieldDragStart);
-      li.addEventListener('dragend', app.fieldDragEnd);
-      li.addEventListener('contextmenu', openContextMenu);
-      // btnAdd.dataset.token = token;
-      // btnRemove.dataset.token = token;
-      // btnAdd.addEventListener('click', app.addFilter);
-      // btnRemove.addEventListener('click', app.removeDefinedFilter);
-      span.innerHTML = value.name;
-      parent.appendChild(li);
+      app.appendFilter(parent, token, value);
     }
   }
 

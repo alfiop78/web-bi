@@ -68,6 +68,7 @@
 
 .defined {
   white-space: nowrap;
+  user-select: none;
 }
 
 .column-defined,
@@ -305,6 +306,7 @@ code[data-alias] {
   gap: 1em; */
   display: grid;
   grid-template-rows: auto auto auto 1fr;
+  grid-gap: 1em;
 }
 
 #adv-metric-defined {

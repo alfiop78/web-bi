@@ -230,26 +230,24 @@
     <template id="tmpl-context-menu-content">
       <ul id="ul-context-menu-filter" class="context-menu-items">
         <button data-fn="editFilter" class="btn-link-context">Modifica</button>
-        <button data-fn="removeFilter" class="btn-link-context" disabled>Elimina</button>
-        <button data-fn="renameFilter" class="btn-link-context" disabled>Rinomina</button>
+        <button data-button="delete" data-fn="removeWBFilter" class="btn-link-context">Elimina</button>
       </ul>
 
       <ul id="ul-context-menu-basic" class="context-menu-items">
-        <button data-fn="newAdvMeasure" class="btn-link-context">Metrica avanzata</button>
-        <button data-fn="removeMetric" class="btn-link-context" disabled>Elimina</button>
-        <button data-fn="renameMetric" class="btn-link-context" disabled>Rinomina</button>
+        <button data-fn="newAdvMeasure" class="btn-link-context">Crea metrica avanzata</button>
+        <button data-button="delete" data-fn="removeMetric" class="btn-link-context" disabled>Elimina</button>
       </ul>
 
       <ul id="ul-context-menu-advanced" class="context-menu-items">
         <button data-fn="editAdvancedMetric" class="btn-link-context">Modifica</button>
         <button data-fn="removeAdvancedMetric" class="btn-link-context" disabled>Elimina</button>
-        <button data-fn="renameAdvancedMetric" class="btn-link-context" disabled>Rinomina</button>
+        <!-- <button data-fn="renameAdvancedMetric" class="btn-link-context" disabled>Rinomina</button> -->
       </ul>
 
       <ul id="ul-context-menu-composite" class="context-menu-items">
         <button data-fn="editCompositeMetric" class="btn-link-context">Modifica</button>
         <button data-fn="removeCompositeMetric" class="btn-link-context" disabled>Elimina</button>
-        <button data-fn="renameCompositeMetric" class="btn-link-context" disabled>Rinomina</button>
+        <!-- <button data-fn="renameCompositeMetric" class="btn-link-context" disabled>Rinomina</button> -->
       </ul>
     </template>
 
