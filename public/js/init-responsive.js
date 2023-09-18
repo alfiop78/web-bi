@@ -1836,7 +1836,7 @@ var Sheet;
     const btnFilterSave = document.getElementById('btn-filter-save');
     const inputName = document.getElementById('custom-filter-name');
     inputName.value = filter.name;
-    app.dialogFilters.dataset.mode = 'edit'
+    // app.dialogFilters.dataset.mode = 'edit'
     // imposto il token sul tasto btnFilterSave, in questo modo posso salvare/aggiornare il filtro in base alla presenza o meno di data-token
     btnFilterSave.dataset.token = e.target.dataset.token;
     /*
@@ -1929,7 +1929,7 @@ var Sheet;
     const inputName = document.getElementById('composite-metric-name');
     inputName.value = metric.alias;
     btnMetricSave.dataset.token = e.target.dataset.token;
-    btnMetricSave.dataset.edit = 'true';
+    // btnMetricSave.dataset.edit = 'true';
     // ciclo la proprietà 'formula' per inserire la formula
     metric.formula.forEach(element => {
       // se l'elemento contiene la proprietà token utilizzo il template <mark> altrimenti lo <span>
@@ -2051,13 +2051,14 @@ var Sheet;
     // reset della textarea e della custom-filter-name
     textarea.querySelectorAll('*').forEach(element => element.remove());
     document.getElementById('custom-filter-name').value = '';
-    delete e.target.dataset.token;
     // salvo il nuovo filtro appena creato
     // completato il salvataggio rimuovo l'attributo data-token da e.target
     window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
     debugger;
     if (!e.target.dataset.token) {
       app.appendFilter(document.getElementById('ul-filters'), token, object);
+    } else {
+      delete e.target.dataset.token;
     }
   }
 
@@ -2195,7 +2196,7 @@ var Sheet;
   app.saveCompositeMetric = (e) => {
     const alias = document.getElementById('composite-metric-name').value;
     const parent = document.getElementById('ul-metrics');
-    const token = (e.target.dataset.edit) ? e.target.dataset.token : rand().substring(0, 7);
+    const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
     let object = { token, alias, sql: [], metrics: {}, type: 'metric', formula: [], metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
     document.querySelectorAll('#textarea-composite-metric *').forEach(element => {
@@ -2231,16 +2232,17 @@ var Sheet;
     });
     // console.log(object);
     // aggiornamento/creazione della metrica imposta created_at
-    object.created_at = (e.target.dataset.edit) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
+    object.created_at = (e.target.dataset.token) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
     debugger;
     WorkBook.metrics = object;
     // salvo la nuova metrica nello storage
     window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
     // TODO: il codice che aggiunge una metrica al tablesStruct è codice ripetuto
     // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
-    if (!e.target.dataset.edit) {
-      delete e.target.dataset.edit;
-      const tmpl = app.tmplList.content.cloneNode(true);
+    if (!e.target.dataset.token) {
+      delete e.target.dataset.token;
+      app.appendMetric(parent, token, object);
+      /* const tmpl = app.tmplList.content.cloneNode(true);
       const li = tmpl.querySelector('li[data-li-drag][data-composite]');
       const content = li.querySelector('.li-content');
       const btnDrag = content.querySelector('i');
@@ -2248,13 +2250,12 @@ var Sheet;
       li.id = token;
       // definisco quale context-menu-template apre questo elemento
       li.dataset.contextmenu = `ul-context-menu-${object.metric_type}`;
-      // TODO: da impostare sull'icona drag
       li.addEventListener('dragstart', app.fieldDragStart);
       li.addEventListener('dragend', app.fieldDragEnd);
       li.addEventListener('contextmenu', app.openContextMenu);
       li.dataset.type = WorkBook.metrics.get(token).type;
       span.innerHTML = WorkBook.metrics.get(token).alias;
-      parent.appendChild(li);
+      parent.appendChild(li); */
     }
     app.dialogCompositeMetric.close();
   }
@@ -2939,34 +2940,33 @@ var Sheet;
     }
   }
 
+  app.appendMetric = (parent, token, value) => {
+    const tmpl = app.tmplList.content.cloneNode(true);
+    const li = tmpl.querySelector(`li[data-li-drag][data-${value.metric_type}]`);
+    const content = li.querySelector('.li-content');
+    // const btnDrag = content.querySelector('i');
+    const span = content.querySelector('span');
+    // il tasto metric-new è presente solo sulla metrica di base
+    // if (value.metric_type === 'basic') btnAdd = li.querySelector('i[data-id="metric-new"]');
+    li.id = token;
+    li.dataset.type = value.metric_type;
+    li.dataset.elementSearch = 'metrics';
+    li.dataset.label = value.alias;
+    // definisco quale context-menu-template apre questo elemento
+    li.dataset.contextmenu = `ul-context-menu-${value.metric_type}`;
+    li.addEventListener('dragstart', app.fieldDragStart);
+    li.addEventListener('dragend', app.fieldDragEnd);
+    li.addEventListener('contextmenu', app.openContextMenu);
+    span.innerHTML = value.alias;
+    parent.appendChild(li);
+  }
+
   app.addDefinedMetrics = () => {
     // metriche mappate sul cubo
     const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
     if (WorkBook.metrics.size !== 0) {
       for (const [token, value] of WorkBook.metrics) {
-        const tmpl = app.tmplList.content.cloneNode(true);
-        const li = tmpl.querySelector(`li[data-li-drag][data-${value.metric_type}]`);
-        const content = li.querySelector('.li-content');
-        // const btnDrag = content.querySelector('i');
-        const span = content.querySelector('span');
-        // let btnAdd;
-        // il tasto metric-new è presente solo sulla metrica di base
-        // if (value.metric_type === 'basic') btnAdd = li.querySelector('i[data-id="metric-new"]');
-        li.id = token;
-        li.dataset.type = value.metric_type;
-        li.dataset.elementSearch = 'metrics';
-        li.dataset.label = value.alias;
-        // definisco quale context-menu-template apre questo elemento
-        li.dataset.contextmenu = `ul-context-menu-${value.metric_type}`;
-        li.addEventListener('dragstart', app.fieldDragStart);
-        li.addEventListener('dragend', app.fieldDragEnd);
-        li.addEventListener('contextmenu', app.openContextMenu);
-        /* if (value.metric_type === 'basic') {
-          btnAdd.dataset.token = token;
-          btnAdd.addEventListener('click', app.newAdvMeasure);
-        } */
-        span.innerHTML = value.alias;
-        parent.appendChild(li);
+        app.appendMetric(parent, token, value);
       }
     }
   }
