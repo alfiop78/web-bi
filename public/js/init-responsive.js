@@ -130,9 +130,12 @@ var Sheet;
     document.querySelectorAll('#ul-context-menu-table button').forEach(item => item.dataset.id = WorkBook.activeTable.id);
   }
 
+  // Aggiunta metrica composta di base
   app.addCustomMetric = () => {
-    // TODO: carico elenco metrica composte di base
+    // carico elenco metrica composte di base
     const ul = document.getElementById('ul-custom-metrics');
+    ul.querySelectorAll('li').forEach(metric => metric.remove());
+    delete document.querySelector('#btn-custom-metric-save').dataset.token;
     for (const [key, value] of WorkBook.metrics) {
       console.log(key, value);
       if (value.hasOwnProperty('fields')) {
@@ -778,7 +781,6 @@ var Sheet;
     btnMetricSave.dataset.token = e.currentTarget.dataset.token;
     btnMetricSave.dataset.edit = 'true';
     metric.formula.forEach(element => {
-      // console.log(element);
       if (element.hasOwnProperty('tableAlias')) {
         const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
         const span = templateContent.querySelector('span');
@@ -798,11 +800,10 @@ var Sheet;
 
   // salva metrica composta di base
   app.saveCustomMetric = (e) => {
-    debugger;
-    console.log(e.currentTarget.dataset);
-    // TODO: aggiornamento / creazione ?
+    // se presente il dataset.edit sul btn-custom-metric-save sto modificando la metrica, altrimenti
+    // è una nuova metrica
+    const token = (e.target.dataset.edit) ? e.target.dataset.token : rand().substring(0, 7);
     const alias = document.getElementById('custom-metric-name').value;
-    const token = rand().substring(0, 7);
     let arr_sql = [];
     let fields = [], formula = [];
     document.querySelectorAll('#textarea-custom-metric *').forEach(element => {
@@ -819,7 +820,7 @@ var Sheet;
         formula.push(element.innerText.trim());
       }
     });
-    console.log('arr_sql : ', arr_sql);
+    // console.log('arr_sql : ', arr_sql);
     WorkBook.metrics = {
       token,
       alias,
@@ -832,6 +833,7 @@ var Sheet;
       metric_type: 'basic'
     };
     WorkBook.checkChanges(token);
+    app.dialogCustomMetric.close();
   }
 
   /* selezione di una colonna dalla table-preview, aggiungo la colonna alla dialog-custom-metric

@@ -46,11 +46,14 @@
     <div id="drawer">
 
       <section class="account">
-        <h5>user</h5><i class="material-icons md-light">person</i>
+        <i class="material-icons md-light">person</i>
       </section>
 
       <nav>
-        <a href="{{ url('/mapdb') }}">home</a>
+        <!-- <a href="{{ url('/mapdb') }}"><i class="material-icons-round md-24">home</i></a> -->
+        <section class="icon-vertical-menu">
+          <a href="{{ url('/mapdb') }}"><i class="material-icons-round md-24">home</i></a>
+        </section>
       </nav>
 
     </div>

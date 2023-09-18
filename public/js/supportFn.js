@@ -78,6 +78,7 @@ async function getTables(urls) {
 (() => {
   var app = {
     dialogCompositeMetric: document.getElementById('dlg-composite-metric'),
+    dialogCustomMetric: document.getElementById('dlg-custom-metric'),
     dialogColumns: document.getElementById('dlg-columns'),
     btnSchema: document.getElementById('btn-schema'),
     dialogSchema: document.getElementById('dlg-schema')
@@ -166,4 +167,15 @@ async function getTables(urls) {
   /* end mouse event */
 
   app.btnSchema.onclick = () => app.dialogSchema.showModal();
+
+  app.dialogCustomMetric.addEventListener('close', () => {
+    const textArea = document.getElementById('textarea-custom-metric');
+    const ul = document.getElementById('ul-custom-metrics');
+    document.getElementById('custom-metric-name').value = '';
+    document.getElementById('custom-metric-note').value = '';
+    textArea.querySelectorAll('*').forEach(element => element.remove());
+    ul.querySelectorAll('li').forEach(metric => metric.remove());
+    delete document.querySelector('#btn-custom-metric-save').dataset.token;
+    delete document.querySelector('#btn-custom-metric-save').dataset.edit;
+  });
 })();

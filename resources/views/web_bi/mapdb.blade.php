@@ -133,7 +133,7 @@
     <div id="drawer" open>
 
       <section class="account">
-        <h5>user</h5><i class="material-icons md-light">person</i>
+        <i class="material-icons md-light">person</i>
       </section>
 
       <nav>
