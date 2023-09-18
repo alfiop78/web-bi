@@ -38,6 +38,11 @@ li{
   align-items: center;
 }
 
+li[data-li-icon] > div {
+  display: flex;
+  align-items: center;
+}
+
 .li-content-icons {
   display: grid;
   grid-template-columns: auto 1fr auto;

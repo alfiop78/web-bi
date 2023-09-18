@@ -137,16 +137,19 @@ var Sheet;
     ul.querySelectorAll('li').forEach(metric => metric.remove());
     delete document.querySelector('#btn-custom-metric-save').dataset.token;
     for (const [key, value] of WorkBook.metrics) {
-      console.log(key, value);
+      // console.log(key, value);
       if (value.hasOwnProperty('fields')) {
         // è una metrica composta di base, quindi definita sul cubo (es. przmedio * quantita)
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li[data-li]');
+        const li = content.querySelector('li[data-li-icon]');
         const span = li.querySelector('span');
-        li.dataset.fn = "selectCustomMetric";
+        const btnEdit = li.querySelector('button[data-edit]');
+        const btnRemove = li.querySelector('button[data-delete]');
         li.dataset.token = value.token;
         li.dataset.label = value.alias;
         li.dataset.elementSearch = 'custom-metrics';
+        btnEdit.dataset.token = value.token;
+        btnRemove.dataset.metricToken = value.token;
         span.innerText = value.alias;
         ul.appendChild(li);
       }
@@ -772,7 +775,7 @@ var Sheet;
     }
   }
 
-  app.selectCustomMetric = (e) => {
+  app.editCustomMetric = (e) => {
     const metric = WorkBook.metrics.get(e.currentTarget.dataset.token);
     const textarea = document.getElementById('textarea-custom-metric');
     const btnMetricSave = document.getElementById('btn-custom-metric-save');
@@ -1010,7 +1013,7 @@ var Sheet;
     // verifico che l'oggetto Map con l'alias della tabella contenga altri elementi, altrimenti
     // devo eliminare anche workBook.fields(tableAlias)
     if (WorkBook.metrics.size === 0) WorkBook.metrics.clear();
-    delete document.querySelector(`#preview-table th[data-metric-token='${e.currentTarget.dataset.metricToken}']`).dataset.metricToken;
+    // delete document.querySelector(`#preview-table th[data-metric-token='${e.currentTarget.dataset.metricToken}']`).dataset.metricToken;
     // 1 - Cerco lo sheet, nello storage, con workbook_ref relativo a questo workbook
     // 2 - Elimino la colonna all'interno della prop 'fields'
     const sheets = SheetStorage.sheets(workbook_ref);

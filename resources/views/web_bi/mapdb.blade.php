@@ -36,6 +36,15 @@
       <span></span>
     </li>
 
+    <!-- li con icona 'delete' -->
+    <li data-li-icon data-element-search data-label data-searchable="true">
+      <span></span>
+      <div>
+        <button type="button" data-edit data-fn="editCustomMetric" class="button-icon material-icons-round md-18">edit</button>
+        <button type="button" data-delete data-fn="removeWBMetric" class="button-icon material-icons-round md-18">delete</button>
+      </div>
+    </li>
+
     <li data-li-drag data-element-search data-label data-searchable="true" draggable="true">
       <i class="material-icons-round md-18">drag_handle</i>
       <span></span>
