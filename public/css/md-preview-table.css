@@ -46,6 +46,11 @@ thead th[data-token]{
   color: whitesmoke!important;
 }
 
+thead th[data-metric-token]{
+  background-color: peru!important;
+  color: whitesmoke!important;
+}
+
 .table-preview{
   overflow: auto;
   position: relative;

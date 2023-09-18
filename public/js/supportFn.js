@@ -77,8 +77,6 @@ async function getTables(urls) {
 // in questo modo potranno essere invocate anche da init-responsice.js (da verificare)
 (() => {
   var app = {
-    contextMenuTableRef: document.getElementById('context-menu-table'),
-    dialogCustomMetric: document.getElementById('dlg-custom-metric'),
     dialogCompositeMetric: document.getElementById('dlg-composite-metric'),
     dialogColumns: document.getElementById('dlg-columns'),
     btnSchema: document.getElementById('btn-schema'),
@@ -117,11 +115,6 @@ async function getTables(urls) {
   observerList.observe(document.getElementById('body'), config);
   // observerList.observe(Draw.svg, config);
   // aggiunta di una nuova metrica
-
-  app.addCustomMetric = () => {
-    app.dialogCustomMetric.show();
-    app.contextMenuTableRef.toggleAttribute('open');
-  }
 
   app.closeDialogMetric = () => {
     const input = document.getElementById('adv-metric-name');

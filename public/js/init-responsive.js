@@ -130,6 +130,28 @@ var Sheet;
     document.querySelectorAll('#ul-context-menu-table button').forEach(item => item.dataset.id = WorkBook.activeTable.id);
   }
 
+  app.addCustomMetric = () => {
+    // TODO: carico elenco metrica composte di base
+    const ul = document.getElementById('ul-custom-metrics');
+    for (const [key, value] of WorkBook.metrics) {
+      console.log(key, value);
+      if (value.hasOwnProperty('fields')) {
+        // è una metrica composta di base, quindi definita sul cubo (es. przmedio * quantita)
+        const content = app.tmplList.content.cloneNode(true);
+        const li = content.querySelector('li[data-li]');
+        const span = li.querySelector('span');
+        li.dataset.fn = "selectCustomMetric";
+        li.dataset.token = value.token;
+        li.dataset.label = value.alias;
+        li.dataset.elementSearch = 'custom-metrics';
+        span.innerText = value.alias;
+        ul.appendChild(li);
+      }
+    }
+    app.dialogCustomMetric.show();
+    app.contextMenuTableRef.toggleAttribute('open');
+  }
+
   // imposto un alias per tabella aggiunta al canvas
   app.setAliasTable = () => app.dialogRename.showModal();
 
@@ -747,12 +769,42 @@ var Sheet;
     }
   }
 
+  app.selectCustomMetric = (e) => {
+    const metric = WorkBook.metrics.get(e.currentTarget.dataset.token);
+    const textarea = document.getElementById('textarea-custom-metric');
+    const btnMetricSave = document.getElementById('btn-custom-metric-save');
+    const inputName = document.getElementById('custom-metric-name');
+    inputName.value = metric.alias;
+    btnMetricSave.dataset.token = e.currentTarget.dataset.token;
+    btnMetricSave.dataset.edit = 'true';
+    metric.formula.forEach(element => {
+      // console.log(element);
+      if (element.hasOwnProperty('tableAlias')) {
+        const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
+        const span = templateContent.querySelector('span');
+        const mark = templateContent.querySelector('mark');
+        mark.dataset.tableAlias = element.tableAlias;
+        mark.innerText = element.field;
+        textarea.appendChild(span);
+      } else {
+        const span = document.createElement('span');
+        span.setAttribute('contenteditable', 'true');
+        span.setAttribute('tabindex', 0);
+        span.innerText = element;
+        textarea.appendChild(span);
+      }
+    });
+  }
+
   // salva metrica composta di base
-  app.saveCustomMetric = () => {
+  app.saveCustomMetric = (e) => {
+    debugger;
+    console.log(e.currentTarget.dataset);
+    // TODO: aggiornamento / creazione ?
     const alias = document.getElementById('custom-metric-name').value;
     const token = rand().substring(0, 7);
     let arr_sql = [];
-    let fields = [];
+    let fields = [], formula = [];
     document.querySelectorAll('#textarea-custom-metric *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'I' || element.innerText.length === 0) return;
       // console.log('element : ', element);
@@ -761,8 +813,10 @@ var Sheet;
       if (element.nodeName === 'MARK') {
         arr_sql.push(`${element.dataset.tableAlias}.${element.innerText}`);
         fields.push(`${element.dataset.tableAlias}.${element.innerText}`);
+        formula.push({ tableAlias: element.dataset.tableAlias, field: element.innerText });
       } else {
         arr_sql.push(element.innerText.trim());
+        formula.push(element.innerText.trim());
       }
     });
     console.log('arr_sql : ', arr_sql);
@@ -770,6 +824,7 @@ var Sheet;
       token,
       alias,
       fields, // es.:[przMedio, quantita]
+      formula: formula,
       aggregateFn: 'SUM', // default
       SQL: `${arr_sql.join(' ')}`,
       distinct: false, // default
@@ -903,7 +958,7 @@ var Sheet;
     // imposto il nome della colonna assegnato in fase di creazione, prop name
     document.getElementById('column-name').value = column.name;
     app.loadTableStruct();
-    WorkBook.checkChanges('time');
+    WorkBook.checkChanges(e.currentTarget.dataset.token);
     app.dialogColumns.show();
   }
 
@@ -942,7 +997,34 @@ var Sheet;
         SheetStorage.save(value);
       }
     }
-    WorkBook.checkChanges('time');
+    WorkBook.checkChanges(e.currentTarget.dataset.token);
+  }
+
+  app.removeWBMetric = (e) => {
+    console.log(e.currentTarget.dataset.metricToken);
+    const workbook_ref = WorkBook.workBook.token;
+    // WorkBook.activeTable è già valorizzato, quando si seleziona la tabella dal canvas
+    WorkBook.metrics.delete(e.currentTarget.dataset.metricToken);
+    // verifico che l'oggetto Map con l'alias della tabella contenga altri elementi, altrimenti
+    // devo eliminare anche workBook.fields(tableAlias)
+    if (WorkBook.metrics.size === 0) WorkBook.metrics.clear();
+    delete document.querySelector(`#preview-table th[data-metric-token='${e.currentTarget.dataset.metricToken}']`).dataset.metricToken;
+    // 1 - Cerco lo sheet, nello storage, con workbook_ref relativo a questo workbook
+    // 2 - Elimino la colonna all'interno della prop 'fields'
+    const sheets = SheetStorage.sheets(workbook_ref);
+    // WARN: se sono presenti sheet, li aggiorno, però c'è da valutare se annullare la cache del datamart
+    // altrimenti le colonne dello sheet non corrispondono a quelle impostate in righe/colonne (nella pagina)
+    if (sheets) {
+      for (const value of Object.values(sheets)) {
+        console.log(value);
+        if (value.metrics.hasOwnProperty(e.currentTarget.dataset.metricToken)) delete value.metrics[e.currentTarget.dataset.metricToken];
+        value.updated_at = new Date().toLocaleDateString('it-IT', options);
+        SheetStorage.save(value);
+        // TODO: qui bisogna fare un controllo più approfondito anche sulle metriche avanzate a composte
+        // eventualmente utilizzate da questa che si sta eliminado
+      }
+    }
+    WorkBook.checkChanges(e.currentTarget.dataset.metricToken);
   }
 
   app.contextMenuColumn = (e) => {
@@ -961,17 +1043,20 @@ var Sheet;
     // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
     app.contextMenuColumnRef.toggleAttribute('open');
     document.querySelectorAll('#ul-context-menu-column button').forEach(item => {
-      // imposto il data-token solo sui tasti 'Elimina' e 'Modifica' (colonna già definita)
+      // imposto il data-token solo sui tasti 'Elimina' e 'Modifica' (colonna o metrica già definita)
       // console.log(item);
       item.removeAttribute('disabled');
       item.dataset.field = e.currentTarget.dataset.field;
       switch (item.id) {
-        case 'btn-add-column':
-        case 'btn-add-metric':
+        case 'btn-remove-wb-metric':
+          (e.currentTarget.dataset.metricToken) ? item.dataset.metricToken = e.currentTarget.dataset.metricToken : item.disabled = 'true';
           break;
-        default:
+        case 'btn-edit-column':
+        case 'btn-remove-column':
           // Disabilito le voci 'elimina/modifica' se non è presente il token (colonna non definita nel workbook)
           (e.currentTarget.dataset.token) ? item.dataset.token = e.currentTarget.dataset.token : item.disabled = 'true';
+          break;
+        default:
           break;
       }
     });
@@ -1473,10 +1558,10 @@ var Sheet;
     DT.addColumns();
     DT.addRows();
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
-    // imposto un colore diverso le colonne già definite nel workbook
+    // imposto un colore diverso per le colonne già definite nel workbook
     DT.fields(WorkBook.fields.get(WorkBook.activeTable.dataset.alias));
     // imposto un colore diverso per le meriche già definite nel workbook
-    // DT.metrics(WorkBook.metrics);
+    DT.metrics(WorkBook.metrics);
   }
 
   app.createProcess = () => {

@@ -418,10 +418,16 @@
             </section>
           </dialog>
 
-          <dialog id="dlg-custom-metric" data-x="0" data-y="0" class="small absolute moveable">
+          <dialog id="dlg-custom-metric" data-x="0" data-y="0" class="medium absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Metrica</h5>
-              <section class="dlg-content col col-1">
+              <section class="dlg-content col col-2">
+                <div class="list-search">
+                  <input type="search" id="input-search-custom-metrics" placeholder="Ricerca" data-element-search="custom-metrics" class="input-search" autocomplete="off">
+                  <div class="relative-ul">
+                    <ul id="ul-custom-metrics" class="custom-scrollbar" data-search-id="input-search-custom-metrics"></ul>
+                  </div>
+                </div>
                 <section class="textarea-formula">
                   <input type="text" id="custom-metric-name" placeholder="Nome" value="" autocomplete="off" />
                   <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea placeholder"></div>
@@ -552,11 +558,10 @@
                       </div>
                       <div id="context-menu-column" class="context-menu">
                         <ul id="ul-context-menu-column" class="context-menu-items">
-                          <!-- <span>Metrica</span> -->
+                          <span>Metrica</span>
                           <button id="btn-add-metric" data-fn="setMetric" class="btn-link-context">Nuova metrica</button>
-                          <!-- <button id="btn-edit-wb-metric" data-fn="editWBMetric" class="btn-link-context">Modifica</button> -->
-                          <!-- <button id="btn-remove-wb-metric" data-fn="removeWBMetric" class="btn-link-context">Elimina</button> -->
-                          <!-- <span>Colonna</span> -->
+                          <button id="btn-remove-wb-metric" data-fn="removeWBMetric" class="btn-link-context">Elimina</button>
+                          <span>Colonna</span>
                           <button id="btn-add-column" data-fn="setColumn" class="btn-link-context">Nuova colonna</button>
                           <button id="btn-edit-column" data-fn="editColumn" class="btn-link-context">Modifica</button>
                           <button id="btn-remove-column" data-fn="removeColumn" class="btn-link-context">Elimina</button>
