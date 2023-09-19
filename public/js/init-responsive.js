@@ -1727,8 +1727,6 @@ var Sheet;
   app.openDialogFilter = async () => {
     // creo la struttura tabelle per poter creare nuovi filtri
     let urls = [];
-    // reset della struttura già presente
-    app.dialogFilters.querySelectorAll('nav > details').forEach(element => element.remove());
     // TODO: in ciclo serve solo il tableId
     for (const [tableId, value] of WorkBook.hierTables) {
       WorkBook.activeTable = tableId;
@@ -1840,7 +1838,7 @@ var Sheet;
     let filter = WorkBook.filters.get(e.target.dataset.token);
     const txtArea = app.dialogFilters.querySelector('#textarea-filter');
     const btnFilterSave = document.getElementById('btn-filter-save');
-    const inputName = document.getElementById('custom-filter-name');
+    const inputName = document.getElementById('input-filter-name');
     inputName.value = filter.name;
     // app.dialogFilters.dataset.mode = 'edit'
     // imposto il token sul tasto btnFilterSave, in questo modo posso salvare/aggiornare il filtro in base alla presenza o meno di data-token
@@ -1940,7 +1938,6 @@ var Sheet;
     const inputName = document.getElementById('composite-metric-name');
     inputName.value = metric.alias;
     btnMetricSave.dataset.token = e.target.dataset.token;
-    // btnMetricSave.dataset.edit = 'true';
     // ciclo la proprietà 'formula' per inserire la formula
     metric.formula.forEach(element => {
       // se l'elemento contiene la proprietà token utilizzo il template <mark> altrimenti lo <span>
@@ -1965,9 +1962,7 @@ var Sheet;
     app.dialogCompositeMetric.show()
   }
 
-  app.cancelFormulaObject = (e) => {
-    e.currentTarget.parentElement.remove();
-  }
+  app.cancelFormulaObject = (e) => e.currentTarget.parentElement.remove();
 
   /* app.setFrom = (tableAlias) => {
     let from = {};
@@ -1999,7 +1994,8 @@ var Sheet;
 
   // salvataggio di un filtro in WorkBook
   app.saveFilter = (e) => {
-    const name = document.getElementById('custom-filter-name').value;
+    const input = document.getElementById('input-filter-name');
+    const name = input.value;
     // in edit recupero il token da e.target.dataset.token
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
@@ -2049,7 +2045,7 @@ var Sheet;
     // la prop 'created_at' va aggiunta solo in fase di nuovo filtro e non quando si aggiorna il filtro
     if (e.target.dataset.token) {
       // aggiornamento del filtro
-      // recupero il filtro dallo storage per recuperare created_at
+      // recupero il filtro dallo storage per leggere 'created_at'
       const filter = JSON.parse(window.localStorage.getItem(e.target.dataset.token));
       object.created_at = filter.created_at;
     } else {
@@ -2059,18 +2055,23 @@ var Sheet;
       token,
       value: object
     };
-    // reset della textarea e della custom-filter-name
-    textarea.querySelectorAll('*').forEach(element => element.remove());
-    document.getElementById('custom-filter-name').value = '';
     // salvo il nuovo filtro appena creato
     // completato il salvataggio rimuovo l'attributo data-token da e.target
     window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
-    debugger;
     if (!e.target.dataset.token) {
       app.appendFilter(document.getElementById('ul-filters'), token, object);
     } else {
-      delete e.target.dataset.token;
+      // filtro modificato, aggiorno solo il nome eventualmente modificato
+      // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
+      const liElement = document.getElementById(token);
+      liElement.dataset.label = name;
+      liElement.querySelector('span > span').innerHTML = name;
+      app.dialogFilters.close();
     }
+    input.value = '';
+    document.querySelectorAll('#textarea-filter *').forEach(element => element.remove());
+    delete e.target.dataset.token;
+    document.getElementById('filter-note').value = '';
   }
 
   // TODO: spostare in supportFn.js
@@ -2207,7 +2208,6 @@ var Sheet;
   app.saveCompositeMetric = (e) => {
     const alias = document.getElementById('composite-metric-name').value;
     const parent = document.getElementById('ul-metrics');
-    debugger;
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
     let object = { token, alias, sql: [], metrics: {}, type: 'metric', formula: [], metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
@@ -2248,13 +2248,14 @@ var Sheet;
     WorkBook.metrics = object;
     // salvo la nuova metrica nello storage
     window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
-    // TODO: il codice che aggiunge una metrica al tablesStruct è codice ripetuto
-    // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
-    debugger;
     if (!e.target.dataset.token) {
       app.appendMetric(parent, token, object);
     } else {
-      delete e.target.dataset.token;
+      // la metrica già esiste, aggiorno il nome
+      // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
+      const liElement = document.getElementById(token);
+      liElement.dataset.label = alias;
+      liElement.querySelector('span > span').innerHTML = alias;
     }
     app.dialogCompositeMetric.close();
   }
@@ -2882,8 +2883,8 @@ var Sheet;
       // la metrica già esiste, aggiorno il nome
       // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
       const liElement = document.getElementById(token);
+      liElement.dataset.label = alias;
       liElement.querySelector('span > span').innerHTML = alias;
-      // delete e.target.dataset.token;
     }
     app.dialogMetric.close();
   }
@@ -2953,7 +2954,6 @@ var Sheet;
     const btnDrag = content.querySelector('i');
     const span = content.querySelector('span');
     li.id = token;
-    li.dataset.elementSearch = 'filters';
     li.dataset.label = filter.name;
     // definisco quale context-menu-template apre questo elemento
     li.dataset.contextmenu = 'ul-context-menu-filter';

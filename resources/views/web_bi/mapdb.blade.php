@@ -50,7 +50,7 @@
       <span></span>
     </li>
 
-    <li data-li-drag data-filter data-element-search data-label data-searchable="true" draggable="true">
+    <li data-li-drag data-filter data-element-search="filters" data-label data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
@@ -484,7 +484,7 @@
                   </div>
                 </div>
                 <section class="textarea-formula">
-                  <input type="text" id="custom-filter-name" placeholder="Nome" value="" autocomplete="off" />
+                  <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" />
                   <div id="textarea-filter" data-fn="addText" class="textarea" data-content-editable></div>
                   <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                 </section>

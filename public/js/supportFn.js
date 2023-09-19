@@ -154,11 +154,12 @@ async function getTables(urls) {
     delete document.querySelector('#btn-custom-metric-save').dataset.token;
   });
 
-  app.dialogFilter.addEventListener('close', () => {
-    document.getElementById('custom-filter-name').value = '';
+  app.dialogFilter.addEventListener('close', (e) => {
+    e.target.querySelectorAll('nav > details').forEach(element => element.remove());
+    document.getElementById('input-filter-name').value = '';
     document.querySelectorAll('#textarea-filter *').forEach(element => element.remove());
     delete document.querySelector('#btn-filter-save').dataset.token;
-    delete document.querySelector('#btn-filter-save').dataset.mode;
+    document.getElementById('filter-note').value = '';
   });
 
   app.dialogAdvMetric.addEventListener('close', () => {
