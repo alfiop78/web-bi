@@ -76,7 +76,7 @@ Route::get('/fetch_api/schema/{schema}/table/{table}/field/{field}/distinct_valu
 Route::post('/fetch_api/cube/sheet', [MapDatabaseController::class, 'sheet'])->name('web_bi.fetch_api.sheet');
 // restituisco SQL del process
 // TODO: da reimplementare da quando è cambiata la logica con workbook/sheet
-Route::post('/fetch_api/cube/sqlInfo', [MapDatabaseController::class, 'sqlInfo'])->name('web_bi.fetch_api.sqlInfo');
+Route::post('/fetch_api/cube/sql', [MapDatabaseController::class, 'sql'])->name('web_bi.fetch_api.sql');
 
 Route::get('/500', function () {
   return view('errors.500');

@@ -24,6 +24,7 @@ var Sheet;
     tmplCompositeFormula: document.getElementById('tmpl-composite-formula'),
     // dialogs
     dialogWorkBook: document.getElementById('dialog-workbook-open'),
+    dialogSQL: document.getElementById('dlg-sql-info'),
     dialogSheet: document.getElementById('dialog-sheet-open'),
     dialogTables: document.getElementById('dlg-tables'),
     dialogFilters: document.getElementById('dlg-filters'),
@@ -1596,7 +1597,7 @@ var Sheet;
     DT.metrics(WorkBook.metrics);
   }
 
-  app.createProcess = () => {
+  app.createProcess = (e) => {
     let process = { from: {}, joins: {} };
     let fields = new Map();
     let metrics = new Map(), advancedMetrics = new Map(), compositeMetrics = new Map();
@@ -1639,7 +1640,7 @@ var Sheet;
               advancedMetrics.get(token).filters[filterToken] = WorkBook.filters.get(filterToken);
             }
           });
-          debugger;
+          // debugger;
           break;
         default:
           // basic
@@ -1673,8 +1674,45 @@ var Sheet;
     if (metrics.size !== 0) process.metrics = Object.fromEntries(metrics);
     if (advancedMetrics.size !== 0) process.advancedMeasures = Object.fromEntries(advancedMetrics);
     if (compositeMetrics.size !== 0) process.compositeMeasures = Object.fromEntries(compositeMetrics);
-    debugger;
-    app.process(process);
+    // debugger;
+    (e.target.id === 'btn-sheet-preview') ? app.process(process) : app.generateSQL(process);
+  }
+
+  app.generateSQL = async (process) => {
+    // lo Sheet.id può essere già presente quando è stato aperto
+    if (!Sheet.id) Sheet.id = Date.now();
+    process.id = Sheet.id;
+    // console.log(process);
+    app.saveSheet();
+    // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
+    const params = JSON.stringify(process);
+    // console.log(params);
+    App.showConsole('Elaborazione in corso...', 'info');
+    // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
+    const url = "/fetch_api/cube/sql";
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    const req = new Request(url, init);
+    await fetch(req)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((response) => {
+        if (response) {
+          // console.log('data : ', response);
+          // app.dialogSQL.show();
+          showSQLInfo(response);
+        } else {
+          App.showConsole("Errori nella generazione dell'SQL", 'error', 5000);
+        }
+        App.closeConsole();
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+
   }
 
   app.process = async (process) => {
@@ -2268,7 +2306,7 @@ var Sheet;
     * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
     */
     Sheet.tables.forEach(alias => {
-      console.log('tablesMap : ', WorkBook.tablesMap);
+      // console.log('tablesMap : ', WorkBook.tablesMap);
       /* tablesMap contiene un oggetto Map() con {tableAlias : [svg-data-2, svg-data-1, svg-data-0, ecc...]}
       * e un'array di tabelle presenti nella gerarchia create nel canvas
       */

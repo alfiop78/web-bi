@@ -17,7 +17,8 @@ class Cube
   private $reportId;
   private $_metrics_base, $_metrics_base_datamart;
   private $_metrics_advanced_datamart = array();
-  private $cm = array();
+  private $cm = array(); // composite metrics
+  private $json_info_advanced = [];
 
   public function __get($value)
   {
@@ -64,20 +65,26 @@ class Cube
   {
     $fieldList = array();
     $this->_select = "SELECT\n";
+    $name_key = NULL;
     // dd($columns);
     // per ogni tabella
-    foreach ($columns as $column) {
+    foreach ($columns as $token => $column) {
       // ... per ogni colonna
       // dd($column);
+      // dd($token);
       foreach ($column->field as $key => $value) {
         // key: id/ds
+        $name_key = "{$column->name}_{$key}";
         $fieldList["{$column->name}_{$key}"] = implode("", $value->sql) . " AS {$column->name}_{$key}"; // $fieldType : id/ds
         // questo viene utilizzato nella clausola ON della LEFT JOIN
         $this->_columns[] = "{$column->name}_id";
+        $this->json__info->{'SELECT'}->{$name_key} = implode("", $value->sql) . " AS {$column->name}_{$key}";
       }
     }
     // dd($fieldList);
+    // dd($test);
     $this->_select .= implode(",\n ", $fieldList);
+    // dd($this->json__info);
     // dd($this->_select);
     // var_dump($this->_columns);
   }
@@ -99,21 +106,27 @@ class Cube
     // dd($from);
     foreach ($from as $alias => $prop) {
       $this->FROM_baseTable[$alias] = "{$prop->schema}.{$prop->table} AS {$alias}";
+      $this->json__info->{'FROM'}->{$alias} = "{$prop->schema}.{$prop->table} AS {$alias}";
     }
+    // dd($this->json__info);
   }
 
   // Qui viene utilizzata la stessa logica del metodo select()
   public function groupBy($groups)
   {
     $fieldList = array();
+    $name_key = NULL;
     $this->_groupBy = "GROUP BY\n";
     foreach ($groups as $column) {
       foreach ($column->field as $key => $value) {
+        $name_key = "{$column->name}_{$key}";
         $fieldList["{$column->name}_{$key}"] = implode("", $value->sql);
+        $this->json__info->{'GROUP BY'}->{$name_key} = implode("", $value->sql);
         array_push($this->segmented, "{$column->name}_{$key}");
       }
     }
     // dd($fieldList);
+    // dd($this->json__info);
     $this->_groupBy .= implode(",\n", $fieldList);
     // dd($this->_groupBy);
     // dd($this->segmented);
@@ -125,11 +138,13 @@ class Cube
   }
 
   // Aggiunta di tabelle "provenienti" dalle metriche filtrate
-  private function setFromMetricTable($from)
+  private function setFromMetricTable($from, $tableName)
   {
     $this->FROM_metricTable = array();
     foreach ($from as $alias => $prop) {
       $this->FROM_metricTable[$alias] = "{$prop->schema}.{$prop->table} AS {$alias}";
+      // TODO: da testare con una metrica filtrata contenente la prop 'from'
+      $this->json_info_advanced[$tableName]->{'FROM'}->{$alias} = "{$prop->schema}.{$prop->table} AS {$alias}";
     }
   }
 
@@ -155,10 +170,13 @@ class Cube
       // qui utilizzo la proprietà SQL con implode(' = ', $join->SQL)
       if ($join->alias === 'WEB_BI_TIME') {
         $this->WHERE_timeDimension[$token] = implode(" = ", $join->SQL);
+        $this->json__info->{'WHERE'}->{$token} = implode(" = ", $join->SQL);
       } else {
         $this->WHERE_baseTable[$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
+        $this->json__info->{'WHERE'}->{$token} = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
       }
     }
+    // dd($this->json__info);
 
     // NOTE: caso in qui viene passato, a joins, solo la proprietà SQL
     //
@@ -170,7 +188,7 @@ class Cube
   }
 
   // Imposto la WHERE in base alle metriche filtrate
-  private function setWhereMetricTable($joins)
+  private function setWhereMetricTable($joins, $tableName)
   {
     $this->WHERE_metricTable = array();
     // dd($joins);
@@ -178,8 +196,10 @@ class Cube
       // dd($token, $join);
       if ($join->alias === 'WEB_BI_TIME') {
         $this->WHERE_metricTable[$token] = implode(" = ", $join->SQL);
+        $this->json_info_advanced[$tableName]->{'WHERE'}->{$token} = implode(" = ", $join->SQL);
       } else {
         $this->WHERE_metricTable[$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
+        $this->json_info_advanced[$tableName]->{'WHERE'}->{$token} = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
       }
     }
     // dd($this->WHERE_metricTable);
@@ -192,15 +212,17 @@ class Cube
     foreach ($filters as $filter) {
       // dd($filter);
       $this->filters_baseTable[$filter->name] = implode(" ", $filter->sql);
+      $this->json__info->{'AND'}->{$filter->name} = implode(" ", $filter->sql);
     }
     // dd($this->filters_baseTable);
+    // dd($this->json__info);
   }
 
   /*
 		aggiungo a $this->filters_metricTable i filtri presenti su una metrica filtrata.
 		Stessa logica del Metodo filters()
 	*/
-  private function setFiltersMetricTable($filters)
+  private function setFiltersMetricTable($filters, $tableName)
   {
     $this->filters_metricTable = [];
     foreach ($filters as $token => $filter) {
@@ -220,6 +242,7 @@ class Cube
           $this->WHERE_timingFn[$token] = implode(" = ", $join->SQL);
         } */
         $this->WHERE_timingFn[$token] = implode(" = ", $filter->SQL);
+        $this->json_info_advanced[$tableName]->{'AND'}->{$filter->alias} = implode(" = ", $filter->SQL);
         // $this->WHERE_timingFn[$token] = implode(" = ", $filter->sql);
 
         // $this->WHERE_timingFn[$token] = "WEB_BI_TIME_055.trans_ly = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE";
@@ -231,6 +254,7 @@ class Cube
         /* if (!in_array($filter->SQL, $this->filters_metricTable) && !in_array($filter->SQL, $this->filters_baseTable))
           $this->filters_metricTable[] = $filter->SQL; */
         $this->filters_metricTable[$filter->name] = implode(" ", $filter->sql);
+        $this->json_info_advanced[$tableName]->{'AND'}->{$filter->name} = implode(" = ", $filter->sql);
       }
     }
     // dd($this->filters_metricTable);
@@ -248,11 +272,13 @@ class Cube
       // $metrics_base[] = "\nNVL({$value->formula->aggregateFn}({$value->workBook->tableAlias}.{$value->formula->field}), 0) AS '{$value->formula->alias}'";
       // $metrics_base_datamart[] = "\nNVL({$value->formula->aggregateFn}({$this->baseTableName}.'{$value->formula->alias}'), 0) AS '{$value->formula->alias}'";
       $metrics_base[] = "\nNVL({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
+      $this->json__info->{'METRICS'}->{$value->alias} = "\nNVL({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
       // TODO: da provare senza la baseTableName
       $metrics_base_datamart[] = "\nNVL({$value->aggregateFn}({$this->baseTableName}.'{$value->alias}'), 0) AS '{$value->alias}'";
     }
     $this->_metrics_base = implode(", ", $metrics_base);
     $this->_metrics_base_datamart = implode(", ", $metrics_base_datamart);
+    // dd($this->json__info);
     // dd($this->_metrics_base);
     // dd($this->_metrics_base_datamart);
   }
@@ -281,8 +307,8 @@ class Cube
     // $result = DB::connection('vertica_odbc')->raw($sql);
     // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
     /* il metodo getSchemaBuilder() funziona con mysql, non con vertica. Ho creato MyVerticaGrammar.php dove c'è la sintassi corretta per vertica (solo alcuni Metodi ho modificato) */
-    if ($mode === 'sql') {
-      $result = $sql;
+    if ($mode) {
+      $result = ["raw_sql" => nl2br($sql), "format_sql" => $this->json__info];
     } else {
       if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($this->baseTableName)) {
         // dd('la tabella già esiste, la elimino');
@@ -307,36 +333,52 @@ class Cube
     foreach ($this->groupMetricsByFilters as $groupToken => $m) {
       $arrayMetrics = [];
       $tableName = "WEB_BI_TMP_METRIC_{$this->reportId}_{$groupToken}";
+      // dd($this->json__info->{'SELECT'});
+      $this->json_info_advanced[$tableName] = (object)[
+        "SELECT" => (object) $this->json__info->{'SELECT'},
+        "METRICS" => (object)[],
+        "FROM" => (object) $this->json__info->{'FROM'},
+        "WHERE" => (object)  $this->json__info->{'WHERE'},
+        "AND" => (object) $this->json__info->{'AND'},
+        "GROUP BY" => (object) $this->json__info->{'GROUP BY'}
+      ];
+      // dd($this->json_info_advanced);
       // dd($m);
       foreach ($m as $metric) {
         unset($this->_sql);
         // dd($metric);
         $arrayMetrics[$metric->alias] = "NVL({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
+        // TODO: testare con un alias contenente spazi
+        $this->json_info_advanced[$tableName]->{'METRICS'}->{"$metric->alias"} = "NVL({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
         // dd($arrayMetrics);
+        // dd($this->json_info_advanced);
         // _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
         $this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\nNVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
         // aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
-        $this->setFiltersMetricTable($metric->filters);
+        $this->setFiltersMetricTable($metric->filters, $tableName);
+        // dd($this->json_info_advanced);
         // per ogni filtro presente nella metrica
         foreach ($metric->filters as $filter) {
-          if (property_exists($filter, 'from')) $this->setFromMetricTable($filter->from);
+          if (property_exists($filter, 'from')) $this->setFromMetricTable($filter->from, $tableName);
+          // dd($this->json_info_advanced);
           // aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
           // se, nella metrica in ciclo, non è presente la WHERE devo ripulire WHERE_metricTable altrimenti verranno aggiunte WHERE della precedente metrica filtrata
           // dd($filter->joins);
-          (property_exists($filter, 'joins')) ? $this->setWhereMetricTable($filter->joins) : $this->WHERE_metricTable = array();
+          (property_exists($filter, 'joins')) ? $this->setWhereMetricTable($filter->joins, $tableName) : $this->WHERE_metricTable = array();
         }
         // dd($this->filters_baseTable, $this->filters_metricTable, $this->WHERE_timingFn);
       }
       // dd($arrayMetrics);
       // dd($this->_metrics_advanced_datamart);
       // creo il datamart, passo a createMetricTable il nome della tabella temporanea e l'array di metriche che lo compongono
-      if ($mode === 'sql') {
+      if ($mode) {
         $sqlFilteredMetrics[] = $this->createMetricTable($tableName, $arrayMetrics, $mode);
+        unset($this->json_info_advanced[$tableName]);
       } else {
-        $this->createMetricTable($tableName, $arrayMetrics, null);
+        $this->createMetricTable($tableName, $arrayMetrics, false);
       }
     }
-    if ($mode === 'sql') return $sqlFilteredMetrics;
+    if ($mode) return $sqlFilteredMetrics;
   }
 
   private function createMetricTable($tableName, $metrics, $mode)
@@ -362,8 +404,8 @@ class Cube
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
     // var_dump($sql);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
-    if ($mode === 'sql') {
-      $result = $sql;
+    if ($mode) {
+      $result = ["raw_sql" => nl2br($sql), "format_sql" => $this->json_info_advanced];
     } else {
       // try {
       if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
@@ -393,7 +435,9 @@ class Cube
     // TODO: commentare tutta la logica
     $table_fields = array();
     foreach ($this->_fields as $field) {
-      $table_fields[] = "\n$this->baseTableName.$field";
+      $table_fields[$field] = "\n$this->baseTableName.$field";
+      // NOTE: aggiungere qui la stessa logica utilizzata per json__info, se necessario formattare
+      // anche la creazione del datamart finale, da valutare.
     }
     $this->_fieldsSQL = implode(",", $table_fields);
     // dd($this->_fieldsSQL);
@@ -470,8 +514,8 @@ class Cube
       // dd($FX);
       if ($FX) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.FX_$this->reportId;");
     */
-    if ($mode === 'sql') {
-      return $sql;
+    if ($mode) {
+      return nl2br($sql);
     } else {
       if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($this->datamartName)) {
         // dd('la tabella già esiste, la elimino');

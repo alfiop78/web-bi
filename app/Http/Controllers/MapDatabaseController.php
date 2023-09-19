@@ -189,11 +189,13 @@ class MapDatabaseController extends Controller
     // TODO: da rinominare in 'where'
     $q->where($cube->{'joins'});
     // TODO: da rinominare in 'filters' oppure 'conditions'
+    // TODO: un filtro deve essere sempre presente, qui dovrei togliere il controllo
+    // su property_exists
     if (property_exists($cube, 'filters')) $q->filters($cube->{'filters'});
     $q->groupBy($cube->{'fields'});
     // try {
     // TODO: da rinominare in 'baseTable'
-    $baseTable = $q->baseTable(null);
+    $baseTable = $q->baseTable(false);
     // dd($baseTable);
     if (!$baseTable) {
       // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
@@ -334,7 +336,7 @@ class MapDatabaseController extends Controller
     // dd($baseTable);
   }
 
-  public function sqlInfo(Request $request)
+  public function sql(Request $request)
   {
     // echo gettype($cube);
     // dd($request);
@@ -342,50 +344,62 @@ class MapDatabaseController extends Controller
     $cube = json_decode(json_encode($request->all())); // object
     $q = new Cube();
     // imposto le proprietà con i magic methods
-    $q->reportId = $cube->{'processId'};
+    $q->reportId = $cube->{'id'};
     $q->baseTableName = "WEB_BI_TMP_BASE_$q->reportId";
     $q->datamartName = "WEB_BI_$q->reportId";
-    // TODO: baseColumns potrei utilizzarlo anche nella chiamata a $q->select e $q->groupBy
-    $q->baseColumns = $cube->{'select'};
+    $q->baseColumns = $cube->{'fields'};
     $q->json__info = (object)[
-      "SELECT" => "SELECT",
-      "columns" => (object)[],
-      "FROM" => "FROM",
-      "from" => (object)[],
-      "WHERE" => "WHERE",
-      "where" => (object)[],
-      "filters" => (object)[],
-      "GROUP" => "GROUP BY",
-      "groupBy" => (object)[]
+      "SELECT" => (object)[],
+      "METRICS" => (object)[],
+      "FROM" => (object)[],
+      "WHERE" => (object)[],
+      "AND" => (object)[],
+      "GROUP BY" => (object)[]
     ];
+    /* $q->json_info_advanced = [
+      (object)[
+        "SELECT" => (object)[],
+        "FROM" => (object)[],
+        "WHERE" => (object)[],
+        "AND" => (object)[],
+        "GROUP BY" => (object)[]
+      ]
+    ]; */
+    // $q->json__info = (object)[
+    //   "BASE" => (object) [
+    //     "SELECT" => (object)[],
+    //     "FROM" => (object)[],
+    //     "WHERE" => (object)[],
+    //     "AND" => (object)[],
+    //     "GROUP BY" => (object)[]
+    //   ],
+    //   "ADVANCED" => []
+    // ];
     // imposto le colonne da includere nel datamart finale
     $q->fields();
+    $q->select($cube->{'fields'});
     // imposto il magic method con le metriche composte
-    if (property_exists($cube, 'compositeMetrics')) $q->compositeMetrics = $cube->{'compositeMetrics'};
+    if (property_exists($cube, 'compositeMeasures')) $q->compositeMetrics = $cube->{'compositeMeasures'};
     // verifico se sono presenti metriche di base
     if (property_exists($cube, 'metrics')) {
-      $q->baseMetrics = $cube->{'metrics'};
+      $q->baseMeasures = $cube->{'metrics'};
       $q->metrics();
     }
-
     // creo le clausole per SQL
-    $q->select($cube->{'select'});
     $q->from($cube->{'from'});
-    $q->where($cube->{'where'});
-    // $q->joinFact($cube->{'factJoin'});
+    $q->where($cube->{'joins'});
+    // TODO: un filtro deve essere sempre presente, qui dovrei togliere il controllo
+    // su property_exists
     if (property_exists($cube, 'filters')) $q->filters($cube->{'filters'});
-    // TODO: siccome il group by viene creato uguale alla clausola SELECT potrei unirli e non fare qui 2 chiamate
-    $q->groupBy($cube->{'select'});
-    // return json_encode($q->json__info);
+    $q->groupBy($cube->{'fields'});
     // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
-    $resultSQL[] = $q->baseTable('sql');
-    // dd($SQLBaseTable);
+    $resultSQL['base'] = $q->baseTable(true);
+    // dd($resultSQL);
     // return $resultSQL;
     // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
     // creo una tabella temporanea per ogni metrica filtrata
-    // TODO: 2022-05-06 qui occorre una verifica più approfondita sui filtri contenuti nella metrica, allo stato attuale faccio una query per ogni metrica filtrata, anche se i filtri all'interno della metrica sono uguali. Includere più metriche che contengono gli stessi filtri in un unica query
-    if (property_exists($cube, 'advancedMetrics')) {
-      $q->filteredMetrics = $cube->{'advancedMetrics'};
+    if (property_exists($cube, 'advancedMeasures')) {
+      $q->filteredMetrics = $cube->{'advancedMeasures'};
       // verifico quali, tra le metriche filtrate, contengono gli stessi filtri. Le metriche che contengono gli stessi filtri vanno eseguite in un unica query
       // oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
       $q->groupMetricsByFilters = (object)[];
@@ -411,12 +425,16 @@ class MapDatabaseController extends Controller
         $q->groupMetricsByFilters->$token = $metrics;
       }
       // dd($q->groupMetricsByFilters);
-      $resultSQL[] = implode("\n\n\n", $q->createMetricDatamarts('sql'));
-      //dd($resultSQL);
+      $resultSQL['advanced'] = $q->createMetricDatamarts(true);
+      // WARN: Attenzione, nel comando dd() gli oggetti all'interno di json_info_advanced non
+      // sono visibili ma hanno un numero di riferimento che punta all'oggetto originale.
+
+      // return $resultSQL;
     }
     // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-    $resultSQL[] = $q->createDatamart('sql');
-    return nl2br(implode("\n\n\n", $resultSQL));
+    $resultSQL['datamart'] = $q->createDatamart(true);
+    return $resultSQL;
+    // return nl2br(implode("\n\n\n", $resultSQL));
   }
 
   // curl

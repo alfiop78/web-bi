@@ -339,3 +339,9 @@ code[data-alias] {
   left: 8px;
   color: darkgray;
 }
+
+#sql-info {
+  padding: 1em;
+  overflow: auto;
+  background-color: white;
+}

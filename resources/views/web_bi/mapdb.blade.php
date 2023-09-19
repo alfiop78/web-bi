@@ -254,6 +254,18 @@
     <div id="container">
       <div id="content">
         <div id="body">
+
+          <dialog id="dlg-sql-info" class="large">
+            <section class="dlg-grid">
+              <h5 class="">SQL</h5>
+              <div id="sql-info"></div>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+              </section>
+            </section>
+
+          </dialog>
+
           <dialog id="dlg-schema" class="small">
             <section class="dlg-grid">
               <h5 class="">Seleziona schema Database</h5>
@@ -610,6 +622,7 @@
                           <button type="button" id="btn-sheet-new" data-fn="newSheet" disabled>Nuovo Sheet</button>
                           <button type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri Sheet</button>
                           <button type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
+                          <button id="btn-sql-preview" class="btn-link important" data-fn="createProcess" value="SQL">SQL</button>
                         </section>
                         <section class="sheet-title">
                           <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Sheet 1">Sheet 1</div>

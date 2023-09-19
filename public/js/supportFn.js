@@ -1,3 +1,4 @@
+const dialogSQL = document.getElementById('dlg-sql-info');
 /* const contextMenuRef = document.getElementById('context-menu');
 const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
 // console.log(WorkBook.metrics);
@@ -19,6 +20,15 @@ function openContextMenu(e) {
   contextMenuRef.style.left = `${mouseX}px`;
   contextMenuRef.toggleAttribute('open');
 } */
+
+function showSQLInfo(data) {
+  console.log(data);
+  const div = document.getElementById('sql-info');
+  div.innerHTML = data.base.raw_sql;
+  div.innerHTML += data.datamart;
+  dialogSQL.show();
+
+}
 
 /* fetch aPI functions */
 

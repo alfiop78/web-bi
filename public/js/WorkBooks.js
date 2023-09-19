@@ -72,7 +72,7 @@ class Sheets {
 
   set from(object) {
     this.#from.set(object.alias, { schema: object.schema, table: object.table });
-    console.info('this.#from : ', this.#from);
+    // console.info('this.#from : ', this.#from);
   }
 
   get from() { return this.#from; }
@@ -89,7 +89,7 @@ class Sheets {
       this.#joins.set(token, join);
       // this.#joins.set(token, join.SQL);
     }
-    console.info('this.#joins : ', this.#joins);
+    // console.info('this.#joins : ', this.#joins);
   }
 
   get joins() { return this.#joins; }
