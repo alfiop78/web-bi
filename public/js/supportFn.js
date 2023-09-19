@@ -177,7 +177,6 @@ async function getTables(urls) {
     textArea.querySelectorAll('*').forEach(element => element.remove());
     ul.querySelectorAll('li').forEach(metric => metric.remove());
     delete document.querySelector('#btn-custom-metric-save').dataset.token;
-    delete document.querySelector('#btn-custom-metric-save').dataset.edit;
   });
 
   app.dialogFilter.addEventListener('close', () => {

@@ -57,7 +57,7 @@
       </span>
     </li>
 
-    <li data-li-drag data-element-search data-label data-basic data-searchable="true" draggable="true">
+    <li data-li-drag data-element-search="metrics" data-label data-basic data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
@@ -65,14 +65,14 @@
       <!-- <i data-id="metric-new" class="material-icons-round md-18">add</i> -->
     </li>
 
-    <li data-li-drag data-element-search data-label data-advanced data-searchable="true" draggable="true">
+    <li data-li-drag data-element-search="metrics" data-label data-advanced data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
     </li>
 
-    <li data-li-drag data-element-search data-label data-composite data-searchable="true" draggable="true">
+    <li data-li-drag data-element-search="metrics" data-label data-composite data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
@@ -332,26 +332,8 @@
             </section>
           </dialog>
 
-          <!-- creazione metrica composta -->
-          <dialog id="dlg-composite-metric" data-x="0" data-y="0" class="medium absolute moveable">
-            <section class="dlg-grid">
-              <h5 class="title moveable">Creazione Metrica Composta</h5>
-              <section class="dlg-content col col-1">
-                <section class="textarea-formula">
-                  <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" />
-                  <div id="textarea-composite-metric" data-fn="addText" data-content-editable class="dropzone textarea"></div>
-                  <textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
-                </section>
-              </section>
-              <section class="dlg-buttons">
-                <button name="cancel" data-fn="closeDialogCompositeMetric" value="chiudi">Chiudi</button>
-                <button data-fn="saveCompositeMetric" id="btn-composite-metric-save" value="salva">Salva</button>
-              </section>
-            </section>
-          </dialog>
-
           <!-- creazione metrica filtrata -->
-          <dialog id="dlg-metric" data-x="0" data-y="0" class="large absolute moveable">
+          <dialog id="dlg-metric" data-x="0" data-y="0" class="large absolute moveable droppable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Metrica avanzata</h5>
               <section class="dlg-content col col-3">
@@ -689,6 +671,24 @@
                             </div>
                           </section>
                           <section class="table-preview">
+                            <!-- creazione metrica composta -->
+                            <dialog id="dlg-composite-metric" data-x="0" data-y="0" class="small absolute moveable droppable">
+                              <section class="dlg-grid">
+                                <h5 class="title moveable">Creazione Metrica Composta</h5>
+                                <section class="dlg-content col col-1">
+                                  <section class="textarea-formula">
+                                    <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" />
+                                    <div id="textarea-composite-metric" data-fn="addText" data-content-editable class="dropzone textarea"></div>
+                                    <textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
+                                  </section>
+                                </section>
+                                <section class="dlg-buttons">
+                                  <button name="cancel" data-fn="closeDialogCompositeMetric" value="chiudi">Chiudi</button>
+                                  <button data-fn="saveCompositeMetric" id="btn-composite-metric-save" value="salva">Salva</button>
+                                </section>
+                              </section>
+                            </dialog>
+
                             <div class="table-content">
                               <table id="preview-datamart" class="custom-scrollbar">
                                 <thead>

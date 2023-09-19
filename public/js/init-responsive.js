@@ -151,13 +151,12 @@ var Sheet;
     app.contextMenuRef.toggleAttribute('open');
   }
 
-
   // Aggiunta metrica composta di base
   app.addCustomMetric = () => {
     // carico elenco metrica composte di base
     const ul = document.getElementById('ul-custom-metrics');
-    ul.querySelectorAll('li').forEach(metric => metric.remove());
-    delete document.querySelector('#btn-custom-metric-save').dataset.token;
+    // ul.querySelectorAll('li').forEach(metric => metric.remove());
+    // delete document.querySelector('#btn-custom-metric-save').dataset.token;
     for (const [key, value] of WorkBook.metrics) {
       // console.log(key, value);
       if (value.hasOwnProperty('fields')) {
@@ -797,6 +796,7 @@ var Sheet;
     }
   }
 
+  // Modifica di una metrica composta di base
   app.editCustomMetric = (e) => {
     const metric = WorkBook.metrics.get(e.currentTarget.dataset.token);
     const textarea = document.getElementById('textarea-custom-metric');
@@ -832,8 +832,6 @@ var Sheet;
     let fields = [], formula = [];
     document.querySelectorAll('#textarea-custom-metric *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'I' || element.innerText.length === 0) return;
-      // console.log('element : ', element);
-      // console.log('element : ', element.nodeName);
       // se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
       if (element.nodeName === 'MARK') {
         arr_sql.push(`${element.dataset.tableAlias}.${element.innerText}`);
@@ -1298,7 +1296,15 @@ var Sheet;
 
   // apertura dialog per creazione metrica composta
   // TODO: da spostare in supportFn.js
-  app.btnCompositeMetric = () => app.dialogCompositeMetric.show();
+  app.btnCompositeMetric = () => {
+    // recupero le coordinate di section[data-worksheet-object][data-section=3] (metriche)
+    // per visualizzare la dialog vicino alla sezione metriche
+    // const metricSection = document.querySelector("#workbook-objects section[data-section='3']");
+    // const { right: mouseX, top: mouseY } = metricSection.getBoundingClientRect();
+    // app.dialogCompositeMetric.style.top = `${mouseY - 64}px`;
+    // app.dialogCompositeMetric.style.left = `${mouseX - 50}px`;
+    app.dialogCompositeMetric.show();
+  }
 
   // apertura dialog con lista WorkBooks
   document.querySelector('#btn-workbook-open').onclick = () => {
@@ -2196,6 +2202,7 @@ var Sheet;
   app.saveCompositeMetric = (e) => {
     const alias = document.getElementById('composite-metric-name').value;
     const parent = document.getElementById('ul-metrics');
+    debugger;
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
     let object = { token, alias, sql: [], metrics: {}, type: 'metric', formula: [], metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
@@ -2233,29 +2240,16 @@ var Sheet;
     // console.log(object);
     // aggiornamento/creazione della metrica imposta created_at
     object.created_at = (e.target.dataset.token) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
-    debugger;
     WorkBook.metrics = object;
     // salvo la nuova metrica nello storage
     window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
     // TODO: il codice che aggiunge una metrica al tablesStruct è codice ripetuto
     // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
+    debugger;
     if (!e.target.dataset.token) {
-      delete e.target.dataset.token;
       app.appendMetric(parent, token, object);
-      /* const tmpl = app.tmplList.content.cloneNode(true);
-      const li = tmpl.querySelector('li[data-li-drag][data-composite]');
-      const content = li.querySelector('.li-content');
-      const btnDrag = content.querySelector('i');
-      const span = content.querySelector('span');
-      li.id = token;
-      // definisco quale context-menu-template apre questo elemento
-      li.dataset.contextmenu = `ul-context-menu-${object.metric_type}`;
-      li.addEventListener('dragstart', app.fieldDragStart);
-      li.addEventListener('dragend', app.fieldDragEnd);
-      li.addEventListener('contextmenu', app.openContextMenu);
-      li.dataset.type = WorkBook.metrics.get(token).type;
-      span.innerHTML = WorkBook.metrics.get(token).alias;
-      parent.appendChild(li); */
+    } else {
+      delete e.target.dataset.token;
     }
     app.dialogCompositeMetric.close();
   }
@@ -2797,10 +2791,9 @@ var Sheet;
     // TODO: aggiungo la formula della metrica (SUM(NettoRiga)) nella textarea ma, in questo caso la textarea è disabilitata.
     // nella metrica filtrata posso modificare solo la funzione di aggregazione
     console.log(e.target);
-    const token = e.currentTarget.dataset.token;
     // recupero la metrica da WorkBook.metric
-    const metric = WorkBook.metrics.get(token);
-    const input = app.dialogMetric.querySelector('#input-metric');
+    const metric = WorkBook.metrics.get(e.currentTarget.dataset.token);
+    const input = document.getElementById('input-metric');
     const tmpl = app.tmplAdvMetricsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('#adv-metric-defined');
     const formula = field.querySelector('.formula');
@@ -2811,12 +2804,14 @@ var Sheet;
     input.appendChild(field);
     // il token presente qui lo recupero in saveMetric() per recuperare la metrica dal WorkBook.
     // la metrica recuperata viene utilizzata per recuperare alcune proprietà non modificabili
-    document.querySelector('#btn-metric-save').dataset.token = token;
+    document.querySelector('#btn-metric-save').dataset.token = e.currentTarget.dataset.token;
+    // TODO: valutare se spostarla in Application.js oppure in supportFn
     app.openDialogMetric();
   }
 
-  // salvataggio metrica avanzata o di base
+  // salvataggio metrica avanzata
   app.saveMetric = (e) => {
+    debugger;
     const alias = document.getElementById('adv-metric-name').value;
     const token = (e.target.dataset.edit) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
@@ -2881,28 +2876,26 @@ var Sheet;
     if (!e.target.dataset.edit) {
       delete e.target.dataset.edit;
       const parent = document.getElementById('ul-metrics');
-      const tmpl = app.tmplList.content.cloneNode(true);
-      // BUG: da ricontrollare la logica di modifica di una metrica di base.
-      // Il salvataggio di una metrica basic deve includere anche il tasto btnAdd, come fatto in addDefinedMetrics()
+      /* const tmpl = app.tmplList.content.cloneNode(true);
       const li = tmpl.querySelector(`li[data-li-drag][data-${object.metric_type}]`);
       const content = li.querySelector('.li-content');
       const btnDrag = content.querySelector('i');
       const span = content.querySelector('span');
       li.id = token;
       li.dataset.contextmenu = `ul-context-menu-${object.metric_type}`;
-      // TODO: da impostare sull'icona drag
       li.addEventListener('dragstart', app.fieldDragStart);
       li.addEventListener('dragend', app.fieldDragEnd);
       li.addEventListener('contextmenu', app.openContextMenu);
       // btnEdit.addEventListener('click', app.editAdvancedMetric);
       // WARN : per il momento inserisco un IF ma sarebbe meglio usare una logica di memorizzare tutti gli elementi del report in un unico oggetto Map
+
       if (WorkBook.metrics.has(token)) {
         li.dataset.type = WorkBook.metrics.get(token).type;
         if (WorkBook.metrics.get(token).hasOwnProperty('field')) li.dataset.field = WorkBook.metrics.get(token).field;
         li.dataset.aggregateFn = WorkBook.metrics.get(token).aggregateFn;
         span.innerHTML = WorkBook.metrics.get(token).alias;
       }
-      parent.appendChild(li);
+      parent.appendChild(li); */
     } else {
       // la metrica già esiste, aggiorno il nome
       // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
@@ -2945,12 +2938,11 @@ var Sheet;
     const li = tmpl.querySelector(`li[data-li-drag][data-${value.metric_type}]`);
     const content = li.querySelector('.li-content');
     // const btnDrag = content.querySelector('i');
+    debugger;
     const span = content.querySelector('span');
-    // il tasto metric-new è presente solo sulla metrica di base
-    // if (value.metric_type === 'basic') btnAdd = li.querySelector('i[data-id="metric-new"]');
     li.id = token;
     li.dataset.type = value.metric_type;
-    li.dataset.elementSearch = 'metrics';
+    // li.dataset.elementSearch = 'metrics';
     li.dataset.label = value.alias;
     // definisco quale context-menu-template apre questo elemento
     li.dataset.contextmenu = `ul-context-menu-${value.metric_type}`;
@@ -3158,12 +3150,14 @@ var Sheet;
     });
   });
 
+  // TODO: spostare in supportFn oppure Application.js
   app.dialogJoin.addEventListener('close', () => {
     // ripulisco gli elementi delle <ul> (I campi delle tabelle)
     app.dialogJoin.querySelectorAll('ul > li').forEach(li => li.remove());
     app.dialogJoin.querySelectorAll('.join-field').forEach(joinField => joinField.remove());
   });
 
+  // TODO: spostare in supportFn oppure Application.js
   app.dialogColumns.addEventListener('close', (e) => {
     // ripulisco gli elementi delle <ul> (I campi delle tabelle)
     // reset della textarea
