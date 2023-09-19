@@ -632,7 +632,7 @@
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="2">
                               <ul id="nav-fields" class="custom-scrollbar" data-search-id="input-search-fields"></ul>
-                              <button class="btn-link default" data-fn="btnColumnNew" type="button" value="Nuova Colonna">Nuova Colonna</button>
+                              <button class="btn-link default" data-fn="btnColumnNew" type="button" value="Nuova Colonna" disabled>Nuova Colonna</button>
                             </section>
                             <p class="field-search">
                               <input id="input-search-metrics" data-element-search="metrics" autocomplete="off" type="search" class="input-search metrics" readonly placeholder="Metriche" />

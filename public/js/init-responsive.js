@@ -2039,6 +2039,9 @@ var Sheet;
         });
       }
     });
+    console.log(object.from);
+    // TODO: ricontrollare il corretto funzionamento di questa logica utilizzando vari tipi di filtri
+    debugger;
     // converto da Map() in object altrimenti non può essere salvato in localStorage e DB
     object.from = Object.fromEntries(object.from);
     object.tables = [...object.tables];
@@ -2261,7 +2264,6 @@ var Sheet;
   }
 
   app.setSheet = () => {
-    // TODO: questa logica va applicata anche quando si aggiunge un filtro
     /*
     * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
     */

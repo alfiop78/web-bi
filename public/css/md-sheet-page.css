@@ -13,6 +13,7 @@
 .report-area .sheet-elements{
   display: grid;
   grid-template-columns: 1fr;
+  user-select: none;
 }
 
 .report-area .report-preview{

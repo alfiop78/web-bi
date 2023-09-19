@@ -539,18 +539,22 @@ input:read-write::placeholder{
   color: peru;
 }
 
+button.btn-link[disabled] {
+  color: gray;
+}
+
 button.btn-link{
   border: unset;
   background-color: unset;
   font-style: italic;
 }
 
-button.btn-link:hover{
+button:not([disabled]).btn-link:hover{
   cursor: pointer;
   text-decoration: underline;
 }
 
-button.btn-link.important{
+button:not([disabled]).btn-link.important{
   border: unset;
   font-weight: bold;
   color: whitesmoke;
@@ -560,7 +564,7 @@ button.btn-link.important{
   padding: 8px 16px;
 }
 
-button.btn-link.important:hover{
+button:not([disabled]).btn-link.important:hover{
   cursor: pointer;
   background-color: steelblue;
   text-decoration: unset;
