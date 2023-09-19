@@ -1892,14 +1892,19 @@ var Sheet;
     const tmpl = app.tmplAdvMetricsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('#adv-metric-defined');
     const formula = field.querySelector('.formula');
+    const btnSave = document.getElementById('btn-metric-save');
     const aggregateFn = formula.querySelector('code[data-aggregate]');
     const fieldName = formula.querySelector('span');
     aggregateFn.innerText = metric.aggregateFn;
     fieldName.innerText = `( ${metric.alias} )`;
     input.appendChild(field);
-    // imposto il token sul tasto btnMetricSave, in questo modo posso salvare/aggiornare il filtro in base alla presenza o meno di data-token
-    document.querySelector('#btn-metric-save').dataset.token = e.target.dataset.token;
-    document.querySelector('#btn-metric-save').dataset.edit = 'true';
+    // Nella creazione di una metrica filtrata, alcune proprietà, vengono "riprese" dalla metrica di base da cui deriva.
+    // Per questo motivo ho bisogno sempre del token della metrica di base, lo imposto sul btn-metric-save[data-origin-token]
+    btnSave.dataset.originToken = e.target.dataset.token;
+    // ...inoltre, siccome questo tasto entra in 'edit' della metrica, aggiungo anche il token
+    // della metrica che si sta modificando. In questo modo, in saveMetric() posso usare la logica di
+    // aggiornamento/creazione in base al data-token presente su btnSave
+    btnSave.dataset.token = e.target.dataset.token;
     const inputName = document.getElementById('adv-metric-name');
     // reimposto le proprietà della metrica nella dialog
     inputName.value = metric.alias;
@@ -2797,26 +2802,26 @@ var Sheet;
     const tmpl = app.tmplAdvMetricsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('#adv-metric-defined');
     const formula = field.querySelector('.formula');
+    const btnSave = document.getElementById('btn-metric-save');
     const aggregateFn = formula.querySelector('code[data-aggregate]');
     const fieldName = formula.querySelector('span');
     aggregateFn.innerText = metric.aggregateFn;
     fieldName.innerText = `( ${metric.alias} )`;
     input.appendChild(field);
-    // il token presente qui lo recupero in saveMetric() per recuperare la metrica dal WorkBook.
-    // la metrica recuperata viene utilizzata per recuperare alcune proprietà non modificabili
-    document.querySelector('#btn-metric-save').dataset.token = e.currentTarget.dataset.token;
+    // Nella creazione di una metrica filtrata, alcune proprietà, vengono "riprese" dalla metrica di base da cui deriva.
+    // Per questo motivo ho bisogno sempre del token della metrica di base, lo imposto sul btn-metric-save[data-origin-token]
+    btnSave.dataset.originToken = e.target.dataset.token;
     // TODO: valutare se spostarla in Application.js oppure in supportFn
     app.openDialogMetric();
   }
 
   // salvataggio metrica avanzata
   app.saveMetric = (e) => {
-    debugger;
     const alias = document.getElementById('adv-metric-name').value;
-    const token = (e.target.dataset.edit) ? e.target.dataset.token : rand().substring(0, 7);
+    const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
     let filters = new Set();
-    const metric = WorkBook.metrics.get(e.target.dataset.token);
+    const metric = WorkBook.metrics.get(e.target.dataset.originToken);
     // WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
     const aggregateFn = app.dialogMetric.querySelector('.formula > code[data-aggregate]').innerText;
     // TODO: aggiungere opzione 'distinct'.
@@ -2867,40 +2872,18 @@ var Sheet;
       object.metric_type = 'advanced';
     }
     // aggiornamento/creazione della metrica imposta created_at
-    object.created_at = (e.target.dataset.edit) ? metric.created_at : date;
+    object.created_at = (e.target.dataset.token) ? metric.created_at : date;
     WorkBook.metrics = object;
     // salvo la nuova metrica nello storage
     window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
-    // TODO: il codice che aggiunge una metrica al tablesStruct è codice ripetuto
-    // aggiungo la nuova metrica nella struttura delle tabelle di sinistra
-    if (!e.target.dataset.edit) {
-      delete e.target.dataset.edit;
-      const parent = document.getElementById('ul-metrics');
-      /* const tmpl = app.tmplList.content.cloneNode(true);
-      const li = tmpl.querySelector(`li[data-li-drag][data-${object.metric_type}]`);
-      const content = li.querySelector('.li-content');
-      const btnDrag = content.querySelector('i');
-      const span = content.querySelector('span');
-      li.id = token;
-      li.dataset.contextmenu = `ul-context-menu-${object.metric_type}`;
-      li.addEventListener('dragstart', app.fieldDragStart);
-      li.addEventListener('dragend', app.fieldDragEnd);
-      li.addEventListener('contextmenu', app.openContextMenu);
-      // btnEdit.addEventListener('click', app.editAdvancedMetric);
-      // WARN : per il momento inserisco un IF ma sarebbe meglio usare una logica di memorizzare tutti gli elementi del report in un unico oggetto Map
-
-      if (WorkBook.metrics.has(token)) {
-        li.dataset.type = WorkBook.metrics.get(token).type;
-        if (WorkBook.metrics.get(token).hasOwnProperty('field')) li.dataset.field = WorkBook.metrics.get(token).field;
-        li.dataset.aggregateFn = WorkBook.metrics.get(token).aggregateFn;
-        span.innerHTML = WorkBook.metrics.get(token).alias;
-      }
-      parent.appendChild(li); */
+    if (!e.target.dataset.token) {
+      app.appendMetric(document.getElementById('ul-metrics'), token, object);
     } else {
       // la metrica già esiste, aggiorno il nome
       // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
       const liElement = document.getElementById(token);
       liElement.querySelector('span > span').innerHTML = alias;
+      // delete e.target.dataset.token;
     }
     app.dialogMetric.close();
   }
@@ -2938,7 +2921,7 @@ var Sheet;
     const li = tmpl.querySelector(`li[data-li-drag][data-${value.metric_type}]`);
     const content = li.querySelector('.li-content');
     // const btnDrag = content.querySelector('i');
-    debugger;
+    // debugger;
     const span = content.querySelector('span');
     li.id = token;
     li.dataset.type = value.metric_type;

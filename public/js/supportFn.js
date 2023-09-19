@@ -79,6 +79,7 @@ async function getTables(urls) {
   var app = {
     dialogCompositeMetric: document.getElementById('dlg-composite-metric'),
     dialogFilter: document.getElementById('dlg-filters'),
+    dialogAdvMetric: document.getElementById('dlg-metric'),
     dialogCustomMetric: document.getElementById('dlg-custom-metric'),
     dialogColumns: document.getElementById('dlg-columns'),
     btnSchema: document.getElementById('btn-schema'),
@@ -117,32 +118,6 @@ async function getTables(urls) {
   observerList.observe(document.getElementById('body'), config);
   // observerList.observe(Draw.svg, config);
   // aggiunta di una nuova metrica
-
-  app.closeDialogMetric = () => {
-    const input = document.getElementById('adv-metric-name');
-    const formula = document.getElementById('input-metric');
-    const timingFunctions = document.getElementById('dl-timing-functions');
-    const btnMetricSave = document.getElementById('btn-metric-save');
-    input.value = '';
-    formula.querySelectorAll('*').forEach(element => element.remove());
-    // se è presente una timingFunction selezionata la deseleziono
-    if (timingFunctions.querySelector('dt[selected]')) timingFunctions.querySelector('dt[selected]').removeAttribute('selected');
-    // reset della lista dei filtri
-    document.querySelectorAll('#filter-drop > li').forEach(li => li.remove());
-    // se il tasto #btn-metric-save ha l'attributo 'edit' lo rimuovo
-    if (btnMetricSave.dataset.edit) delete btnMetricSave.dataset.edit;
-  }
-
-  app.closeDialogCompositeMetric = () => {
-    const input = document.getElementById('composite-metric-name');
-    const textarea = document.getElementById('textarea-composite-metric');
-    const btnMetricSave = document.getElementById('btn-composite-metric-save');
-    input.value = '';
-    textarea.querySelectorAll('*').forEach(element => element.remove());
-    textarea.value = '';
-    // se il tasto #btn-metric-save ha l'attributo 'edit' lo rimuovo
-    if (btnMetricSave.dataset.edit) delete btnMetricSave.dataset.edit;
-  }
 
   /* mouse event */
 
@@ -185,4 +160,30 @@ async function getTables(urls) {
     delete document.querySelector('#btn-filter-save').dataset.token;
     delete document.querySelector('#btn-filter-save').dataset.mode;
   });
+
+  app.dialogAdvMetric.addEventListener('close', () => {
+    document.getElementById('adv-metric-name').value = '';
+    const formula = document.getElementById('input-metric');
+    const timingFunctions = document.getElementById('dl-timing-functions');
+    const btnMetricSave = document.getElementById('btn-metric-save');
+    formula.querySelectorAll('*').forEach(element => element.remove());
+    // se è presente una timingFunction selezionata la deseleziono
+    if (timingFunctions.querySelector('dt[selected]')) timingFunctions.querySelector('dt[selected]').removeAttribute('selected');
+    // reset della lista dei filtri
+    document.querySelectorAll('#filter-drop > li').forEach(li => li.remove());
+    // se il tasto #btn-metric-save ha l'attributo 'edit' lo rimuovo
+    delete btnMetricSave.dataset.token;
+    delete btnMetricSave.dataset.originToken;
+  });
+
+  app.dialogCompositeMetric.addEventListener('close', () => {
+    document.getElementById('composite-metric-name').value = '';
+    const textarea = document.getElementById('textarea-composite-metric');
+    const btnMetricSave = document.getElementById('btn-composite-metric-save');
+    textarea.querySelectorAll('*').forEach(element => element.remove());
+    textarea.value = '';
+    // se il tasto #btn-metric-save ha l'attributo 'edit' lo rimuovo
+    delete btnMetricSave.dataset.token;
+  });
+
 })();

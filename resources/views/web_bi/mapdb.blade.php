@@ -401,7 +401,7 @@
                 </section>
               </section>
               <section class="dlg-buttons">
-                <button name="cancel" data-fn="closeDialogMetric" value="chiudi">Chiudi</button>
+                <button name="cancel" value="chiudi">Chiudi</button>
                 <button data-fn="saveMetric" id="btn-metric-save" value="salva">Salva</button>
               </section>
             </section>
@@ -683,7 +683,7 @@
                                   </section>
                                 </section>
                                 <section class="dlg-buttons">
-                                  <button name="cancel" data-fn="closeDialogCompositeMetric" value="chiudi">Chiudi</button>
+                                  <button name="cancel" value="chiudi">Chiudi</button>
                                   <button data-fn="saveCompositeMetric" id="btn-composite-metric-save" value="salva">Salva</button>
                                 </section>
                               </section>
