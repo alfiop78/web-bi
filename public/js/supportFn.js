@@ -1,33 +1,85 @@
 const dialogSQL = document.getElementById('dlg-sql-info');
-/* const contextMenuRef = document.getElementById('context-menu');
-const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
-// console.log(WorkBook.metrics);
-
-function openContextMenu(e) {
-  e.preventDefault();
-  // console.log(e.target.id);
-  console.log(e.currentTarget.id);
-  // reset #context-menu
-  if (contextMenuRef.hasChildNodes()) contextMenuRef.querySelector('*').remove();
-  const tmpl = tmplContextMenu.content.cloneNode(true);
-  const content = tmpl.querySelector(`#${e.currentTarget.dataset.contextmenu}`);
-  // aggiungo, a tutti gli elementi del context-menu, il token dell'elemento selezionato
-  content.querySelectorAll('button').forEach(li => li.dataset.token = e.currentTarget.id);
-  contextMenuRef.appendChild(content);
-
-  const { clientX: mouseX, clientY: mouseY } = e;
-  contextMenuRef.style.top = `${mouseY}px`;
-  contextMenuRef.style.left = `${mouseX}px`;
-  contextMenuRef.toggleAttribute('open');
-} */
+const tmplSQLInfo = document.getElementById('tmpl-sql-info-element');
+const tmplSQLRaw = document.getElementById('tmpl-sql-raw');
 
 function showSQLInfo(data) {
+  const sqlRaw = document.getElementById('sql-info-raw');
+  const sqlFormat = document.getElementById('sql-info-format');
+  const tmplRaw = tmplSQLRaw.content.cloneNode(true);
+  const div = tmplRaw.querySelector('div');
+  const divSQL = div.querySelector('div');
+  // base
+  divSQL.innerHTML = data.base.raw_sql;
+  sqlRaw.appendChild(div);
   console.log(data);
-  const div = document.getElementById('sql-info');
-  div.innerHTML = data.base.raw_sql;
-  div.innerHTML += data.datamart;
-  dialogSQL.show();
+  // advanced
+  if (data.advanced) {
+    data.advanced.forEach(sql => {
+      const tmplRaw = tmplSQLRaw.content.cloneNode(true);
+      const div = tmplRaw.querySelector('div');
+      const divSQL = div.querySelector('div');
+      divSQL.innerHTML = sql.raw_sql;
+      sqlRaw.appendChild(div);
+    });
+  }
+  // datamart
+  const tmplRawDatamart = tmplSQLRaw.content.cloneNode(true);
+  const divDatamart = tmplRawDatamart.querySelector('div');
+  const divSQLDatamart = divDatamart.querySelector('div');
+  divSQLDatamart.innerHTML = data.datamart;
+  sqlRaw.appendChild(divDatamart);
 
+  const tmpl = tmplSQLInfo.content.cloneNode(true);
+  const divMain = tmpl.querySelector('.sql-raw');
+  sqlFormat.appendChild(divMain);
+  // popolo il div sql-info-format
+  for (const [clause, value] of Object.entries(data.base.format_sql)) {
+    // console.log(clause, value);
+    const tmpl = tmplSQLInfo.content.cloneNode(true);
+    const details = tmpl.querySelector('details');
+    const summary = tmpl.querySelector('summary');
+    summary.innerHTML = clause;
+    for (const [key, sql] of Object.entries(value)) {
+      const tmpl = tmplSQLInfo.content.cloneNode(true);
+      const div = tmpl.querySelector('div.sql-row');
+      const dataKey = div.querySelector('span[data-key]');
+      const dataSQL = div.querySelector('span[data-sql]');
+      dataKey.dataset.clause = clause;
+      dataKey.innerHTML = key;
+      dataSQL.innerHTML = sql;
+      details.appendChild(div);
+    }
+    divMain.appendChild(details);
+  }
+
+  if (data.advanced) {
+    data.advanced.forEach(query => {
+      const tmpl = tmplSQLInfo.content.cloneNode(true);
+      const divMain = tmpl.querySelector('.sql-raw');
+      sqlFormat.appendChild(divMain);
+      for (const clauses of Object.values(query.format_sql)) {
+        for (const [clause, value] of Object.entries(clauses)) {
+          // console.log(clause, value);
+          const tmpl = tmplSQLInfo.content.cloneNode(true);
+          const details = tmpl.querySelector('details');
+          const summary = tmpl.querySelector('summary');
+          summary.innerHTML = clause;
+          for (const [key, sql] of Object.entries(value)) {
+            const tmpl = tmplSQLInfo.content.cloneNode(true);
+            const div = tmpl.querySelector('div.sql-row');
+            const dataKey = div.querySelector('span[data-key]');
+            const dataSQL = div.querySelector('span[data-sql]');
+            dataKey.dataset.clause = clause;
+            dataKey.innerHTML = key;
+            dataSQL.innerHTML = sql;
+            details.appendChild(div);
+          }
+          divMain.appendChild(details);
+        }
+      }
+    });
+  }
+  dialogSQL.show();
 }
 
 /* fetch aPI functions */
@@ -128,6 +180,14 @@ async function getTables(urls) {
   observerList.observe(document.getElementById('body'), config);
   // observerList.observe(Draw.svg, config);
   // aggiunta di una nuova metrica
+
+  // switch tra sql-raw e sql-format per la dialog dlg-sql-info
+  app.btnSQLInfo = (e) => {
+    document.querySelectorAll('button[data-sql]').forEach(button => delete button.dataset.active);
+    document.querySelector(`.sql-info:not([data-sql='${e.target.dataset.sql}'])`).hidden = 'true';
+    document.querySelector(`.sql-info[data-sql='${e.target.dataset.sql}']`).removeAttribute('hidden');
+    e.target.dataset.active = 'true';
+  }
 
   /* mouse event */
 

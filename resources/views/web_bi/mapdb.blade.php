@@ -138,6 +138,21 @@
     </li>
   </template>
 
+  <template id="tmpl-sql-info-element">
+    <div class="sql-raw"></div>
+    <details class="sql-details" open>
+      <summary data-id></summary>
+    </details>
+    <div class="sql-row"><span data-key></span><span data-sql></span></div>
+  </template>
+
+  <template id="tmpl-sql-raw">
+    <div class="sql-raw">
+      <button data-copy class="material-icons-round md-18">copy</button>
+      <div></div>
+    </div>
+  </template>
+
   <main>
     <div id="drawer" open>
 
@@ -256,9 +271,16 @@
         <div id="body">
 
           <dialog id="dlg-sql-info" class="large">
-            <section class="dlg-grid">
+            <section class="grid dlg-grid row-4">
               <h5 class="">SQL</h5>
-              <div id="sql-info"></div>
+              <menu>
+                <button type="button" data-sql="0" id="btn-sql-info-raw" data-active data-fn="btnSQLInfo" value="SQL">SQL</button>
+                <button type="button" data-sql="1" id="btn-sql-info-format" data-fn="btnSQLInfo" value="SQL Formattato">SQL Formattato</button>
+              </menu>
+              <section class="content">
+                <div data-sql="0" id="sql-info-raw" class="sql-info custom-scrollbar"></div>
+                <div data-sql="1" id="sql-info-format" class="sql-info custom-scrollbar" hidden></div>
+              </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
               </section>

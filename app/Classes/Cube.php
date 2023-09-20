@@ -373,7 +373,8 @@ class Cube
       // creo il datamart, passo a createMetricTable il nome della tabella temporanea e l'array di metriche che lo compongono
       if ($mode) {
         $sqlFilteredMetrics[] = $this->createMetricTable($tableName, $arrayMetrics, $mode);
-        unset($this->json_info_advanced[$tableName]);
+        // unset($this->json_info_advanced[$tableName]);
+        // unset($this->json_info_advanced[$tableName]->{'AND'});
       } else {
         $this->createMetricTable($tableName, $arrayMetrics, false);
       }

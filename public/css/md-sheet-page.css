@@ -340,8 +340,65 @@ code[data-alias] {
   color: darkgray;
 }
 
-#sql-info {
-  padding: 1em;
+.grid > .content {
   overflow: auto;
+  padding: 0em 1em;
+}
+
+.sql-info {
+  padding: 1em;
   background-color: white;
+  border-radius: 2px;
+  overflow: auto;
+  height: 100%;
+}
+
+button[data-sql][data-active] {
+  font-weight: bold;
+}
+
+span[data-key] {
+  padding: 2px 4px;
+  border-radius: 2px;
+  margin: 0px 4px;
+}
+
+span[data-key][data-clause="SELECT"], [data-clause="GROUP BY"] {
+  background-color: aquamarine;
+}
+
+span[data-key][data-clause="METRICS"] {
+  background-color: rosybrown;
+  color: white;
+}
+
+span[data-key][data-clause="FROM"] {
+  background-color: gainsboro;
+  color: #494949;
+}
+
+span[data-key][data-clause="WHERE"], [data-clause="AND"] {
+  background-color: skyblue;
+  color: #494949;
+}
+
+/* details.sql-details{
+  line-height: 2em;
+} */
+
+details .sql-row{
+  margin: 6px 2px;
+}
+
+.sql-info .sql-raw {
+  border: solid thin gainsboro;
+  padding: 8px;
+  margin: 1em 0em;
+  position: relative;
+}
+
+.sql-raw > button[data-copy] {
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }

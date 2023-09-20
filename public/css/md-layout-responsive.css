@@ -167,57 +167,6 @@ span.markContent {
 .flex-h{display:flex; flex-flow:wrap; justify-content:space-around;}
 .flex-v{display: flex; flex-direction:column; align-items: center;}
 
-.sql-info{display: flow-root;}
-.sql-info mark[data-info]{
-  display: unset;
-  background-color: sienna;
-  border-radius:4px;
-  padding: 2px 4px;
-  color: whitesmoke;
-  line-height: 1.5rem;
-}
-.sql-info mark[data-clause]{
-  display: unset;
-  background-color: darkblue;
-  border-radius:4px;
-  padding: 2px 4px;
-  color: whitesmoke;
-  line-height: 1.5rem;
-}
-
-.absolute-window{
-  display: flex;
-  flex-flow: column;
-  align-self: center;
-  height: calc(100% - 2px);
-  position:absolute;
-  background-color: white;
-  width: 300px;
-  z-index:0;
-  left: -300px;
-}
-
-.absolute-window[data-open="false"]{
-  z-index:0;
-  animation: closeAbsoluteWindow 150ms ease-in-out forwards;
-}
-
-.absolute-window[data-open="true"]{
-  z-index:900;
-  animation: openAbsoluteWindow 150ms ease-in-out forwards;
-}
-
-@keyframes openAbsoluteWindow {
-	0% {left: -300px;}
-	80% {left: 15px;}
-	100% {left: 1px; box-shadow:0px 0px 7px -3px black;}
-}
-
-@keyframes closeAbsoluteWindow {
-	0% {left: 1px;}
-	20% {left: 15px;}
-	100% {left: -300px;}
-}
 .no-wrap{white-space: nowrap;}
 
 #tables-area{
