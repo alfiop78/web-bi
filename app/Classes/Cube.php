@@ -245,7 +245,7 @@ class Cube
   {
     $this->filters_metricTable = [];
     foreach ($filters as $token => $filter) {
-      // dd($filter);
+      // dd($token, $filter);
       // TODO: aggiungere le altre funzioni temporali
       $timingFunctions = ['last-year', 'last-month'];
       // dd($timingFunctions, $token);
@@ -262,7 +262,8 @@ class Cube
         } */
         $this->WHERE_timingFn[$token] = implode(" = ", $filter->SQL);
         if (property_exists($this, 'json__info')) {
-          $this->json_info_advanced[$tableName]->{'AND'}->{$filter->alias} = implode(" = ", $filter->SQL);
+          $this->json_info_advanced[$tableName]->{'AND'}->{$token} = implode(" = ", $filter->SQL);
+          // $this->json_info_advanced[$tableName]->{'AND'}->{$filter->alias} = implode(" = ", $filter->SQL);
           // elimino la prop 'WHERE-TIME' da json_info_advanced perchè la metrica filtrata
           // contiene una funzione temporale, quindi non può coesistere insieme ad un altra relazione
           // con la WEB_BI_TIME

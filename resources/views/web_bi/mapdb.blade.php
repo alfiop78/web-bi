@@ -270,29 +270,6 @@
       <div id="content">
         <div id="body">
 
-          <dialog id="dlg-sql-info" class="large">
-            <section class="grid dlg-grid row-4">
-              <h5 class="">SQL</h5>
-              <menu>
-                <button type="button" data-sql="0" id="btn-sql-info-raw" data-active data-fn="btnSQLInfo" value="SQL">SQL</button>
-                <button type="button" data-sql="1" id="btn-sql-info-format" data-fn="btnSQLInfo" value="SQL Formattato">SQL Formattato</button>
-              </menu>
-              <!-- <section class="content col m2">
-                <div data-sql="0" id="sql-info-raw" class="sql-info custom-scrollbar"></div>
-                <div data-sql="1" id="sql-info-format" class="sql-info custom-scrollbar" hidden></div>
-              </section> -->
-              <section class="content">
-                <div data-sql="0" id="sql-info-raw" class="sql-info custom-scrollbar"></div>
-                <div data-sql="1" id="sql-info-format" class="sql-info custom-scrollbar" hidden></div>
-              </section>
-              <output id="outbox"></output>
-              <section class="dlg-buttons">
-                <button name="cancel" value="chiudi">Chiudi</button>
-              </section>
-            </section>
-
-          </dialog>
-
           <dialog id="dlg-schema" class="small">
             <section class="dlg-grid">
               <h5 class="">Seleziona schema Database</h5>
@@ -512,6 +489,29 @@
             </section>
           </dialog>
 
+          <dialog id="dlg-sql-info" data-x="0" data-y="0" class="medium absolute moveable">
+            <section class="grid dlg-grid row-4">
+              <h5 class="title moveable">SQL</h5>
+              <menu>
+                <button type="button" data-sql="0" id="btn-sql-info-raw" data-active data-fn="btnSQLInfo" value="SQL">SQL</button>
+                <button type="button" data-sql="1" id="btn-sql-info-format" data-fn="btnSQLInfo" value="SQL Formattato">SQL Formattato</button>
+              </menu>
+              <!-- <section class="content col m2">
+                <div data-sql="0" id="sql-info-raw" class="sql-info custom-scrollbar"></div>
+                <div data-sql="1" id="sql-info-format" class="sql-info custom-scrollbar" hidden></div>
+              </section> -->
+              <section class="content">
+                <div data-sql="0" id="sql-info-raw" class="sql-info custom-scrollbar"></div>
+                <div data-sql="1" id="sql-info-format" class="sql-info custom-scrollbar" hidden></div>
+              </section>
+              <output id="outbox"></output>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+              </section>
+            </section>
+
+          </dialog>
+
           <dialog id="dlg-filters" data-x="0" data-y="0" class="medium absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Filtro</h5>
@@ -692,6 +692,7 @@
                           </section>
                         </div>
                         <div class="report-area">
+
                           <section class="columns-rows">
                             <div id="sheet-columns" class="relative">
                               <section class="sheet-elements">
@@ -727,6 +728,7 @@
                                 </section>
                               </section>
                             </dialog>
+
 
                             <div class="table-content">
                               <table id="preview-datamart" class="custom-scrollbar">

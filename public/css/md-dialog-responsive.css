@@ -81,6 +81,12 @@ dialog.large{
   /* max-height: 50%; */
 }
 
+dialog.large-max {
+  width: 95%;
+  height: 95%;
+  margin: 1em auto;
+}
+
 .dlg-buttons {
   padding: 1em;
   display: flex;

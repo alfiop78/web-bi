@@ -89,7 +89,8 @@ function showSQLInfo(data) {
       }
     });
   }
-  dialogSQL.show();
+  // dialogSQL.show();
+  dialogSQL.showModal();
 }
 
 dialogSQL.addEventListener('close', () => document.querySelectorAll('.sql-info *').forEach(element => element.remove()));
