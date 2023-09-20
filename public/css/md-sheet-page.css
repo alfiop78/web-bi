@@ -345,6 +345,12 @@ code[data-alias] {
   padding: 0em 1em;
 }
 
+.col.m2 {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  grid-column-gap: 1em;
+}
+
 .sql-info {
   padding: 1em;
   background-color: white;
@@ -377,7 +383,7 @@ span[data-key][data-clause="FROM"] {
   color: #494949;
 }
 
-span[data-key][data-clause="WHERE"], [data-clause="AND"] {
+span[data-key][data-clause="WHERE"], [data-clause="WHERE-TIME"], [data-clause="AND"] {
   background-color: skyblue;
   color: #494949;
 }
@@ -401,4 +407,13 @@ details .sql-row{
   position: absolute;
   top: 10px;
   right: 10px;
+}
+
+mark.keyword {
+  background-color: transparent;
+  padding: unset;
+  display: unset;
+  font-weight: bold;
+  border-radius: unset;
+  color: darkcyan;
 }

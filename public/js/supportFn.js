@@ -1,6 +1,8 @@
 const dialogSQL = document.getElementById('dlg-sql-info');
 const tmplSQLInfo = document.getElementById('tmpl-sql-info-element');
 const tmplSQLRaw = document.getElementById('tmpl-sql-raw');
+const tmplLi = document.getElementById('tmpl-li');
+const keywords = ['SELECT', 'FROM', 'WHERE', 'AND', 'GROUP BY', 'ORDER BY', ' AS ', 'NVL', 'CREATE TEMPORARY TABLE', 'COMMIT', 'OR'];
 
 function showSQLInfo(data) {
   const sqlRaw = document.getElementById('sql-info-raw');
@@ -9,9 +11,17 @@ function showSQLInfo(data) {
   const div = tmplRaw.querySelector('div');
   const divSQL = div.querySelector('div');
   // base
-  divSQL.innerHTML = data.base.raw_sql;
+  let baseRawSQL = data.base.raw_sql;
+  keywords.forEach(keyword => {
+    const myRe = new RegExp(keyword, 'g');
+    // const myRe = /keyword/g;
+    baseRawSQL = baseRawSQL.replaceAll(myRe, `<mark class="keyword">${keyword}</mark>`);
+  });
+  divSQL.innerHTML = baseRawSQL;
+  // divSQL.innerHTML = data.base.raw_sql.replace('FROM', "<mark class='keyword'>FROM</mark>");
   sqlRaw.appendChild(div);
   console.log(data);
+
   // advanced
   if (data.advanced) {
     data.advanced.forEach(sql => {
@@ -81,6 +91,8 @@ function showSQLInfo(data) {
   }
   dialogSQL.show();
 }
+
+dialogSQL.addEventListener('close', () => document.querySelectorAll('.sql-info *').forEach(element => element.remove()));
 
 /* fetch aPI functions */
 
@@ -256,5 +268,35 @@ async function getTables(urls) {
     // se il tasto #btn-metric-save ha l'attributo 'edit' lo rimuovo
     delete btnMetricSave.dataset.token;
   });
+
+  app.copyToClipboard = (e) => {
+    // TODO: Questa funzionalità può essere utilizzata anche per copiare il canvas, vedere
+    // se si può copiare anche l'svg
+    // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/write
+
+    // const type = "text/plain";
+    const text = document.querySelector('.sql-raw > div').innerHTML;
+    // const blob = new Blob([text], { type });
+    // const data = [new ClipboardItem({ [type]: blob })];
+
+    /* navigator.clipboard.write(data).then(
+      () => {
+        console.log('copiato');
+      },
+      () => {
+        console.log('errore copia');
+      },
+    ); */
+    navigator.clipboard.writeText(text).then(
+      () => {
+        /* clipboard successfully set */
+        console.log('copiato');
+      },
+      () => {
+        /* clipboard write failed */
+        console.log('errore copia');
+      },
+    );
+  }
 
 })();

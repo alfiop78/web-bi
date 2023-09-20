@@ -195,7 +195,7 @@ class MapDatabaseController extends Controller
     $q->groupBy($cube->{'fields'});
     // try {
     // TODO: da rinominare in 'baseTable'
-    $baseTable = $q->baseTable(false);
+    $baseTable = $q->baseTable();
     // dd($baseTable);
     if (!$baseTable) {
       // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
@@ -229,12 +229,12 @@ class MapDatabaseController extends Controller
         }
         // dd($q->groupMetricsByFilters);
         // TODO: da rinominare in 'createMetricDatamarts'
-        $metricTable = $q->createMetricDatamarts(null);
+        $metricTable = $q->createMetricDatamarts();
       }
       // echo 'elaborazione createDatamart';
       // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
       // TODO: da rinominare in 'createDatamart'
-      $datamartName = $q->createDatamart(null);
+      $datamartName = $q->createDatamart();
       // dd($datamartName);
       // restituisco un ANTEPRIMA del datamart appena creato
       $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.$q->datamartName LIMIT 500;");
@@ -353,28 +353,10 @@ class MapDatabaseController extends Controller
       "METRICS" => (object)[],
       "FROM" => (object)[],
       "WHERE" => (object)[],
+      "WHERE-TIME" => (object)[],
       "AND" => (object)[],
       "GROUP BY" => (object)[]
     ];
-    /* $q->json_info_advanced = [
-      (object)[
-        "SELECT" => (object)[],
-        "FROM" => (object)[],
-        "WHERE" => (object)[],
-        "AND" => (object)[],
-        "GROUP BY" => (object)[]
-      ]
-    ]; */
-    // $q->json__info = (object)[
-    //   "BASE" => (object) [
-    //     "SELECT" => (object)[],
-    //     "FROM" => (object)[],
-    //     "WHERE" => (object)[],
-    //     "AND" => (object)[],
-    //     "GROUP BY" => (object)[]
-    //   ],
-    //   "ADVANCED" => []
-    // ];
     // imposto le colonne da includere nel datamart finale
     $q->fields();
     $q->select($cube->{'fields'});
@@ -393,13 +375,14 @@ class MapDatabaseController extends Controller
     if (property_exists($cube, 'filters')) $q->filters($cube->{'filters'});
     $q->groupBy($cube->{'fields'});
     // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
-    $resultSQL['base'] = $q->baseTable(true);
+    $resultSQL['base'] = $q->baseTable();
     // dd($resultSQL);
     // return $resultSQL;
     // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
     // creo una tabella temporanea per ogni metrica filtrata
     if (property_exists($cube, 'advancedMeasures')) {
       $q->filteredMetrics = $cube->{'advancedMeasures'};
+      $q->json_info_advanced = array();
       // verifico quali, tra le metriche filtrate, contengono gli stessi filtri. Le metriche che contengono gli stessi filtri vanno eseguite in un unica query
       // oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
       $q->groupMetricsByFilters = (object)[];
@@ -425,14 +408,14 @@ class MapDatabaseController extends Controller
         $q->groupMetricsByFilters->$token = $metrics;
       }
       // dd($q->groupMetricsByFilters);
-      $resultSQL['advanced'] = $q->createMetricDatamarts(true);
+      $resultSQL['advanced'] = $q->createMetricDatamarts();
       // WARN: Attenzione, nel comando dd() gli oggetti all'interno di json_info_advanced non
       // sono visibili ma hanno un numero di riferimento che punta all'oggetto originale.
 
       // return $resultSQL;
     }
     // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-    $resultSQL['datamart'] = $q->createDatamart(true);
+    $resultSQL['datamart'] = $q->createDatamart();
     return $resultSQL;
     // return nl2br(implode("\n\n\n", $resultSQL));
   }

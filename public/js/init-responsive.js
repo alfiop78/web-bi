@@ -1448,6 +1448,7 @@ var Sheet;
     app.sheetPreview(e.currentTarget.dataset.token);;
     // Imposto la prop 'edit' = true perchè andrò ad operare su uno Sheet aperto
     Sheet.edit = true;
+    document.querySelectorAll('#btn-sql-preview, #btn-sheet-preview').forEach(button => button.removeAttribute('disabled'));
   }
 
   app.saveSheet = () => {
@@ -1548,6 +1549,7 @@ var Sheet;
   document.getElementById('prev').onclick = () => {
     document.querySelector('#next').toggleAttribute('hidden');
     document.querySelector('#btn-sheet-preview').toggleAttribute('hidden');
+    document.querySelector('#btn-sql-preview').toggleAttribute('hidden');
     Step.previous();
   }
 
@@ -1575,6 +1577,7 @@ var Sheet;
     }
     document.querySelector('#next').toggleAttribute('hidden');
     document.querySelector('#btn-sheet-preview').toggleAttribute('hidden');
+    document.querySelector('#btn-sql-preview').toggleAttribute('hidden');
   }
 
   app.tableSelected = async (e) => {

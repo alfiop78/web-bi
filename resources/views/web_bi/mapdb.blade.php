@@ -148,7 +148,7 @@
 
   <template id="tmpl-sql-raw">
     <div class="sql-raw">
-      <button data-copy class="material-icons-round md-18">copy</button>
+      <button data-fn="copyToClipboard" data-copy class="material-icons-round md-18">copy</button>
       <div></div>
     </div>
   </template>
@@ -277,10 +277,15 @@
                 <button type="button" data-sql="0" id="btn-sql-info-raw" data-active data-fn="btnSQLInfo" value="SQL">SQL</button>
                 <button type="button" data-sql="1" id="btn-sql-info-format" data-fn="btnSQLInfo" value="SQL Formattato">SQL Formattato</button>
               </menu>
+              <!-- <section class="content col m2">
+                <div data-sql="0" id="sql-info-raw" class="sql-info custom-scrollbar"></div>
+                <div data-sql="1" id="sql-info-format" class="sql-info custom-scrollbar" hidden></div>
+              </section> -->
               <section class="content">
                 <div data-sql="0" id="sql-info-raw" class="sql-info custom-scrollbar"></div>
                 <div data-sql="1" id="sql-info-format" class="sql-info custom-scrollbar" hidden></div>
               </section>
+              <output id="outbox"></output>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
               </section>
@@ -644,7 +649,6 @@
                           <button type="button" id="btn-sheet-new" data-fn="newSheet" disabled>Nuovo Sheet</button>
                           <button type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri Sheet</button>
                           <button type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
-                          <button id="btn-sql-preview" class="btn-link important" data-fn="createProcess" value="SQL">SQL</button>
                         </section>
                         <section class="sheet-title">
                           <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Sheet 1">Sheet 1</div>
@@ -742,8 +746,12 @@
               </div>
               <section class="actions">
                 <button id="prev">Workbook</button>
-                <button id="next">Sheet</button>
-                <button id="btn-sheet-preview" class="btn-link important" data-fn="createProcess" value="Elabora" hidden>Elabora</button>
+                <div>
+
+                  <button id="next">Sheet</button>
+                  <button id="btn-sql-preview" class="btn-link important" disabled data-fn="createProcess" value="SQL" hidden>SQL</button>
+                  <button id="btn-sheet-preview" class="btn-link important" disabled data-fn="createProcess" value="Elabora" hidden>Elabora</button>
+                </div>
               </section>
 
             </section>
