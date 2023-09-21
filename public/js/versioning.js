@@ -100,6 +100,7 @@ var Storage = new SheetStorages();
   app.addElement = (token, object, storage) => {
     const content_li = app.tmpl_li.content.cloneNode(true);
     const li = content_li.querySelector('li');
+    const liContent = li.querySelector('.li-content');
     const statusIcon = li.querySelector('i[data-sync-status]');
     const span = li.querySelector('span[data-value]');
     const updated_at = li.querySelector('span[data-updated_at]');
@@ -112,6 +113,9 @@ var Storage = new SheetStorages();
     li.dataset.elementSearch = object.type;
     li.dataset.storage = storage;
     li.id = token;
+    liContent.dataset.token = token;
+    liContent.dataset.storage = storage;
+    liContent.dataset.type = object.type;
     btnDownload.dataset.token = token;
     btnUpload.dataset.token = token;
     btnUpgrade.dataset.token = token;
@@ -182,10 +186,11 @@ var Storage = new SheetStorages();
     document.querySelectorAll('menu button[data-selected]').forEach(button => delete button.dataset.selected);
     e.target.dataset.selected = 'true';
     // nascondo la <ul> attualmente visibile
-    document.querySelector('.objects[data-local] .relative-ul:not([hidden])').hidden = true;
+    // debugger;
+    // console.log(document.querySelector(`.details div.relative-ul[data-id='${e.target.id}']`));
+    document.querySelector(".hideable.relative-ul:not([hidden])").hidden = true;
     // visualizzo la <ul> corrispondente all'object selezionato
     document.querySelector(`div[data-id='${e.currentTarget.id}']`).hidden = false;
-    // TODO: imposto l'attributo data-element-search nella input #resource-search
     document.querySelector('#resource-search').dataset.elementSearch = e.target.id;
   }
 
@@ -297,10 +302,43 @@ var Storage = new SheetStorages();
   }
 
   app.showResource = (e) => {
-    debugger;
-    // TODO: visualizzo il dettaglio della risorsa selezionata
-    // la risorsa in locale viene recuperata dal localStorage
-    // per la risorsa su DB verrà eseguita la query tramite il Controller
+    e.currentTarget.toggleAttribute('data-selected');
+    if (e.currentTarget.hasAttribute('data-selected')) {
+      // visualizzo alcune informazione sull'elemento selezionato
+      const refs = {
+        "local": {
+          "created_at": document.querySelector('#created_at > span[data-value]'),
+        }
+      };
+      if (e.currentTarget.dataset.storage === 'local') {
+        const resource = window.localStorage.getItem(e.currentTarget.dataset.token);
+        const json = JSON.parse(resource);
+        console.log(json);
+        // se l'elemento ha dataset.storage='DB' vuol dire che NON è presente in locale, quindi per
+        // visualizzare le sue proprietà dovrò fare una FETCH verso il DB, altrimenti lo recupero dallo storage
+        refs.local.created_at.innerText = json.created_at;
+      } else {
+        // DB
+      }
+      // TODO: visualizzo il dettaglio della risorsa selezionata
+      // la risorsa in locale viene recuperata dal localStorage
+      // per la risorsa su DB verrà eseguita la query tramite il Controller
+
+      // TODO: Verifico quale elemento è stato selezionato con uno switch
+      // In caso di selezione di un WorkBook, visualizzo i suoi Sheets, metrics e filters
+      // In case di selezione di uno Sheet, visualizzo le sue metrics e filters
+      if (e.target.dataset.type === 'workbook') {
+        [...document.querySelectorAll(`li:not([data-workbook-ref='${e.currentTarget.dataset.token}'])`)].filter(element => {
+          if (e.currentTarget.dataset.token !== element.id) element.hidden = true;
+        });
+
+      }
+    } else {
+      // elemento de-selezionato
+      [...document.querySelectorAll(`li:not([data-workbook-ref='${e.currentTarget.dataset.token}'])`)].filter(element => {
+        if (e.currentTarget.dataset.token !== element.id) element.hidden = false;
+      });
+    }
   }
 
   app.init();

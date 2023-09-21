@@ -68,7 +68,7 @@
         <a href="#" id="menu" onclick="App.menu()"><i class="material-icons md-light">menu</i></a>
       </div>
 
-      <h1 class="title">Map database</h1>
+      <h1 class="title">Sincronizzazione risorse</h1>
     </header>
 
     <div id="container">
@@ -79,50 +79,47 @@
             <section class="wrapper-content">
               <section class="grid-layout">
                 <div class="content">
-                  <div class="header">
-                    <h5>Sincronizzazione risorse</h5>
-                  </div>
+                  <input id="resource-search" type="search" data-element-search placeholder="Ricerca" autocomplete="on" />
                   <div class="body grid-section-2">
-                    <menu>
-                      <button type="button" class="btn-link default" id="workbook" data-fn="selectObject" data-selected="true">WorkBooks</button>
-                      <button id="sheet" class="btn-link default" data-fn="selectObject">Sheets</button>
-                      <button id="metric" class="btn-link default" data-fn="selectObject">Metriche</button>
-                      <button id="filter" class="btn-link default" data-fn="selectObject">Filtri</button>
-                      <input id="resource-search" type="search" data-element-search placeholder="Ricerca" autocomplete="on" />
-                    </menu>
                     <div class="objects" data-local>
-                      <div class="relative-ul" data-id="workbook" data-type="workbooks">
-                        <ul class="elements custom-scrollbar" id="ul-workbook"></ul>
-                      </div>
-                      <div class="relative-ul custom-scrollbar" data-id="sheet" data-type="sheets" hidden>
-                        <ul class="elements custom-scrollbar" id="ul-sheet"></ul>
-                      </div>
-                      <div class="relative-ul custom-scrollbar" data-id="metric" data-type="metrics" hidden>
-                        <ul class="elements custom-scrollbar" id="ul-metric"></ul>
-                      </div>
-                      <div class="relative-ul custom-scrollbar" data-id="filter" data-type="filters" hidden>
-                        <ul class="elements custom-scrollbar" id="ul-filter"></ul>
+                      <div class="details reverse">
+                        <section>
+                          <h6>WorkBooks</h6>
+                          <div class="relative-ul" data-id="workbook" data-type="workbooks">
+                            <ul class="elements custom-scrollbar" id="ul-workbook"></ul>
+                          </div>
+                        </section>
+                        <section>
+                          <h6>Sheets</h6>
+                          <div class="relative-ul custom-scrollbar" data-id="sheet" data-type="sheets">
+                            <ul class="elements custom-scrollbar" id="ul-sheet"></ul>
+                          </div>
+                        </section>
                       </div>
                       <div class="details">
-                        <section id="info-resource-local" class="placeholder" data-attr="Risorse locali">
-                          <section>Dettaglio risorsa</section>
-                          <div>Data creazione</div>
-                          <div>Tabella TIME</div>
-                          <div>Metriche</div>
-                          <div>Elenco tabelle</div>
+                        <section>
+                          <menu>
+                            <button id="metric" class="btn-link default" data-fn="selectObject" data-selected>Metriche</button>
+                            <button id="filter" class="btn-link default" data-fn="selectObject">Filtri</button>
+                          </menu>
+                          <div class="relative-ul hideable custom-scrollbar" data-id="metric" data-type="metrics">
+                            <ul class="elements custom-scrollbar" id="ul-metric"></ul>
+                          </div>
+                          <div class="relative-ul hideable custom-scrollbar" data-id="filter" data-type="filters" hidden>
+                            <ul class="elements custom-scrollbar" id="ul-filter"></ul>
+                          </div>
                         </section>
-                        <section id="info-resource-db" class="placeholder" data-attr="Risorse DB (Sincronizzate)">
-                          <section>Dettaglio risorsa</section>
-                          <div>Data creazione</div>
-                          <div>Tabella TIME</div>
-                          <div>Metriche</div>
-                          <div>Elenco tabelle</div>
+                        <section id="info-resource" class="placeholder" data-attr="Dettaglio risorsa">
+                          <div id="created_at" class="item-resources">
+                            <span>Data Creazione</span>
+                            <span data-value></span>
+                          </div>
                         </section>
                       </div>
                     </div>
                   </div>
                   <div class="footer">
-                    <!-- <button name="cancel" value="chiudi">Chiudi</button> -->
+                    <button name="cancel" value="chiudi">Chiudi</button>
                   </div>
                 </div>
               </section>
