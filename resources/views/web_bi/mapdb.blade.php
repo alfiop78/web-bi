@@ -148,8 +148,10 @@
 
   <template id="tmpl-sql-raw">
     <div class="sql-raw">
-      <button data-fn="copyToClipboard" data-copy class="material-icons-round md-18">copy</button>
-      <div></div>
+      <div class="absolute-icons">
+        <button data-fn="copyToClipboard" data-copy class="material-icons-round md-18">copy</button>
+      </div>
+      <div class="sql-content"></div>
     </div>
   </template>
 

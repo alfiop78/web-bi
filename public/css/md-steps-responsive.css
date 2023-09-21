@@ -12,6 +12,7 @@
 
 .steps > .overflow{
   position: relative;
+  user-select: none;
   display: flex;
   height: 100%;
   width: 100%;

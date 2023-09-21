@@ -2,40 +2,58 @@ const dialogSQL = document.getElementById('dlg-sql-info');
 const tmplSQLInfo = document.getElementById('tmpl-sql-info-element');
 const tmplSQLRaw = document.getElementById('tmpl-sql-raw');
 const tmplLi = document.getElementById('tmpl-li');
-const keywords = ['SELECT', 'FROM', 'WHERE', 'AND', 'GROUP BY', 'ORDER BY', ' AS ', 'NVL', 'CREATE TEMPORARY TABLE', 'COMMIT', 'OR'];
+// const keywords = ['SELECT', 'FROM', 'WHERE', 'AND', 'GROUP BY', 'ORDER BY', ' AS ', 'NVL', 'CREATE TEMPORARY TABLE', 'COMMIT', 'OR'];
 
 function showSQLInfo(data) {
+  console.log(data);
   const sqlRaw = document.getElementById('sql-info-raw');
   const sqlFormat = document.getElementById('sql-info-format');
   const tmplRaw = tmplSQLRaw.content.cloneNode(true);
-  const div = tmplRaw.querySelector('div');
-  const divSQL = div.querySelector('div');
+  const div = tmplRaw.querySelector('div.sql-raw');
+  const divIcon = div.querySelector('.absolute-icons');
+  const btnCopy = divIcon.querySelector('button');
+  const divSQL = div.querySelector('div.sql-content');
   // base
-  let baseRawSQL = data.base.raw_sql;
+
+  /* let baseRawSQL = data.base.raw_sql;
   keywords.forEach(keyword => {
     const myRe = new RegExp(keyword, 'g');
     // const myRe = /keyword/g;
     baseRawSQL = baseRawSQL.replaceAll(myRe, `<mark class="keyword">${keyword}</mark>`);
   });
-  divSQL.innerHTML = baseRawSQL;
+  divSQL.innerHTML = baseRawSQL; */
+  div.id = 'BASE';
+  divSQL.innerHTML = data.base.raw_sql;
+
+  divIcon.dataset.id = 'BASE';
+  btnCopy.dataset.id = 'BASE';
   // divSQL.innerHTML = data.base.raw_sql.replace('FROM', "<mark class='keyword'>FROM</mark>");
   sqlRaw.appendChild(div);
-  console.log(data);
 
   // advanced
   if (data.advanced) {
-    data.advanced.forEach(sql => {
+    data.advanced.forEach((sql, i) => {
       const tmplRaw = tmplSQLRaw.content.cloneNode(true);
-      const div = tmplRaw.querySelector('div');
-      const divSQL = div.querySelector('div');
+      const div = tmplRaw.querySelector('div.sql-raw');
+      const divIcon = div.querySelector('.absolute-icons');
+      const btnCopy = div.querySelector('button');
+      const divSQL = div.querySelector('div.sql-content');
+      div.id = `advanced-${i}`;
+      divIcon.dataset.id = `advanced-${i}`;
+      btnCopy.dataset.id = `advanced-${i}`;
       divSQL.innerHTML = sql.raw_sql;
       sqlRaw.appendChild(div);
     });
   }
   // datamart
   const tmplRawDatamart = tmplSQLRaw.content.cloneNode(true);
-  const divDatamart = tmplRawDatamart.querySelector('div');
-  const divSQLDatamart = divDatamart.querySelector('div');
+  const divDatamart = tmplRawDatamart.querySelector('div.sql-raw');
+  const divIconDatamart = divDatamart.querySelector('.absolute-icons');
+  const btnCopyDatamart = divDatamart.querySelector('button');
+  const divSQLDatamart = divDatamart.querySelector('div.sql-content');
+  divDatamart.id = 'DATAMART';
+  divIconDatamart.dataset.id = 'DATAMART';
+  btnCopyDatamart.dataset.id = 'DATAMART';
   divSQLDatamart.innerHTML = data.datamart;
   sqlRaw.appendChild(divDatamart);
 
@@ -276,7 +294,8 @@ async function getTables(urls) {
     // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/write
 
     // const type = "text/plain";
-    const text = document.querySelector('.sql-raw > div').innerHTML;
+    const divIcon = document.querySelector(`.absolute-icons[data-id='${e.target.dataset.id}']`);
+    const text = document.querySelector(`#${e.target.dataset.id} > .sql-content`).innerText;
     // const blob = new Blob([text], { type });
     // const data = [new ClipboardItem({ [type]: blob })];
 
@@ -292,10 +311,13 @@ async function getTables(urls) {
       () => {
         /* clipboard successfully set */
         console.log('copiato');
+        divIcon.dataset.copied = 'true';
+        setTimeout(() => delete divIcon.dataset.copied, 700);
       },
       () => {
         /* clipboard write failed */
-        console.log('errore copia');
+        console.error('errore copia');
+        delete divIcon.dataset.copied;
       },
     );
   }
