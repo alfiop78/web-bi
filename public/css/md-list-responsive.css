@@ -179,7 +179,7 @@ dt[selected] {
 }
 
 .text-ellipsis {
-  width: 150px;
+  /* width: 150px; */
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

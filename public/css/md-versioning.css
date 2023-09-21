@@ -1,26 +1,40 @@
+.wrapper-content{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
 .button-icons {
   border: none;
   outline: none;
 }
 
 .grid-layout{
-  display: grid;
+  display: flex;
+  position: relative;
+  width: 100%;
   height: 100%;
-  grid-template-rows: 100%;
-  padding: 1em;
+  flex-flow: column;
+  align-items: center;
+  overflow: hidden;
   background-color: white;
   box-shadow: 0 1px 4px 3px lightgrey;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 .grid-layout > .content{
   display: grid;
   grid-template-rows: auto 1fr auto;
+  width: 100%;
+  height: 100%;
 }
 
 .grid-layout > .content > .body.grid-section-2 {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr 1fr;
 }
 
 .grid-layout > .content > .body.grid-section-2 .objects {
@@ -32,6 +46,11 @@
 
 ul {
   overflow: auto;
+}
+
+li {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
 }
 
 ul > li > .li-content, ul > li > .li-buttons{
@@ -90,6 +109,19 @@ li[data-sync="false"][data-storage="db"] button[data-delete] {
 /* NOTE: esempio di media query per responsive layout */
 @media screen and (min-width: 1024px) {
   .grid-layout > .content > .body.grid-section-2 .objects {
-    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(calc(50% - 2em), 1fr));
+    grid-column-gap: 1em;
+    padding: 0em 1em;
+    position: relative;
   }
 }
+
+/* .objects[data-local]::before {
+  position: absolute;
+  content: 'Elementi in locale';
+  top: 1em;
+  left: 1em;
+  color: #494949;
+  padding: 1em;
+  z-index: 10;
+} */

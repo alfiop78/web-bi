@@ -165,6 +165,7 @@
       <nav>
         <!-- <a href="#" id="mdc-back">HOME</a> -->
         <section class="icon-vertical-menu">
+          <a href="{{ url('/') }}"><i class="material-icons-round md-24">home</i></a>
           <button id="btn-datanase" class="material-icons-round md-24 main-menu" disabled>storage</button>
           <button id="btn-schema" class="material-icons-round md-24 main-menu">schema</button>
         </section>
@@ -576,7 +577,6 @@
                         <button data-fn="workBookNew" id="btn-workbook-new" value="Nuovo" disabled>Nuovo</button>
                         <button id="btn-workbook-open" value="open">Apri</button>
                         <button data-fn="workBookClose" id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button>
-                        <button id="btn-versioning" value="Versionamento">Versionamento</button>
                       </menu>
                       <div id="context-menu-table" class="context-menu">
                         <ul id="ul-context-menu-table" class="context-menu-items">

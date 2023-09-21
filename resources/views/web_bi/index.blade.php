@@ -43,10 +43,11 @@
         <div class="abs">
           <div class="">
             <a href="{{ route('web_bi.mapdb') }}" class="text-sm text-gray-700 dark:text-gray-500 underline"><img src="/favicon.png" alt="Map Database" /></a>
-            <h2>Map Database</h2>
+            <h2>WorkSpace</h2>
           </div>
           <div class="">
-            <a href="{{ route('web_bi.mapdb') }}" class="text-sm text-gray-700 dark:text-gray-500 underline"><img src="/favicon.png" alt="Map Database" /></a>
+            <a href="{{ route('web_bi.versioning') }}" class="text-sm text-gray-700 dark:text-gray-500 underline"><img src="/favicon.png" alt="Map Database" /></a>
+            <h2>Versionamento</h2>
           </div>
           <div class="">
             <a href="{{ route('web_bi.mapdb') }}" class="text-sm text-gray-700 dark:text-gray-500 underline"><img src="/favicon.png" alt="Map Database" /></a>

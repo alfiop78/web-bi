@@ -51,14 +51,6 @@ main > #container{
   padding: 1em;
 }
 
-.wrapper{
-  display: grid;
-  grid-template-columns: 100%;
-  height: 100%;
-  position: relative;
-  grid-template-rows: 1fr;
-}
-
 #canvas-area{
   width: 100%;
   position: relative;
@@ -475,54 +467,6 @@ p.field-search {
   justify-content: space-between;
 }
 
-input {
-  padding: 8px 4px;
-  border: none;
-  width: 100%;
-  /* max-width: 400px; */
-  outline: none;
-}
-
-input:read-write {
-  border-radius: 2px;
-  background-color: white;
-  color: #494949;
-  box-shadow: 0px 4px 2px -3px #898585;
-}
-
-input:read-write:focus {
-  border-radius: 2px;
-  background-color: white;
-  color: #494949;
-  box-shadow: 0px 4px 2px -3px steelblue;
-}
-
-input:read-write::before {
-  content: '';
-  width: 6px;
-  height: 8px;
-  background-color: lightsalmon;
-}
-
-input:focus {
-  outline: none;
-}
-
-input:read-only:hover {
-  cursor: auto;
-}
-
-input:read-write::placeholder{
-  font-style: normal;
-  font-weight: normal;
-  color: grey;
-}
-
-.input-search::placeholder {
-  font-style: italic;
-  font-weight: bold;
-}
-
 .input-search.workbooks::placeholder {
   color: black;
 }
@@ -539,59 +483,12 @@ input:read-write::placeholder{
   color: peru;
 }
 
-button.btn-link[disabled] {
-  color: gray;
-}
-
-button.btn-link{
-  border: unset;
-  background-color: unset;
-  font-style: italic;
-}
-
-button:not([disabled]).btn-link:hover{
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-button:not([disabled]).btn-link.important{
-  border: unset;
-  font-weight: bold;
-  color: whitesmoke;
-  background-color: #4682b4d9;
-  border-radius: 2px;
-  font-style: normal;
-  padding: 8px 16px;
-}
-
-button:not([disabled]).btn-link.important:hover{
-  cursor: pointer;
-  background-color: steelblue;
-  text-decoration: unset;
-}
-
 .context-menu span {
   font-weight: bold;
   padding: 4px;
   border-bottom: solid thin gainsboro;
 }
 
-button.btn-link-context{
-  border: unset;
-  background-color: unset;
-  padding: 4px 6px 4px 12px;
-  display: flex;
-}
-
-button.btn-link-context:hover{
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-/* TODO: da spostare in layout*/
-.default {
-  color: steelblue;
-}
 
 .attention{
   color: brown;

@@ -25,13 +25,16 @@
   <template id="tmpl-li">
     <li data-li data-element-search data-label data-searchable="true" data-sync="false">
       <div class="li-content" data-fn="showResource">
-        <i class="material-icons-round md-18" data-sync-status>storage</i>
+        <!-- <i class="material-icons-round md-18" data-sync-status>storage</i> -->
         <div class="li-content-details">
           <span data-value class="text-ellipsis"></span>
           <!-- <span data-created_at></span> -->
-          <span class="sub-elements">Aggiornato : <span data-updated_at class=" sub-elements"></span></span>
-          <span data-workbook_ref class="sub-elements text-ellipsis"></span>
+          <!-- <span class="sub-elements">Aggiornato : <span data-updated_at class=" sub-elements"></span></span> -->
+          <!-- <span data-workbook_ref class="sub-elements text-ellipsis"></span> -->
         </div>
+      </div>
+      <div class="updated_at">
+        <span class="sub-elements">Aggiornato : <span data-updated_at class=" sub-elements"></span></span>
       </div>
       <div class="li-buttons">
         <button data-fn="uploadObject" data-upload class="button-icons material-icons-round md-18">upload</button>
@@ -52,7 +55,7 @@
       <nav>
         <!-- <a href="{{ url('/mapdb') }}"><i class="material-icons-round md-24">home</i></a> -->
         <section class="icon-vertical-menu">
-          <a href="{{ url('/mapdb') }}"><i class="material-icons-round md-24">home</i></a>
+          <a href="{{ url('/') }}"><i class="material-icons-round md-24">home</i></a>
         </section>
       </nav>
 
@@ -81,14 +84,35 @@
                   </div>
                   <div class="body grid-section-2">
                     <menu>
-                      <button id="workbook" data-fn="selectObject" data-selected="true">WorkBooks</button>
-                      <button id="sheet" data-fn="selectObject">Sheets</button>
-                      <button id="metric" data-fn="selectObject">Metriche</button>
-                      <button id="filter" data-fn="selectObject">Filtri</button>
-                      <input id="resource-search" type="search" data-element-search placeholder="Ricerca" />
+                      <button type="button" class="btn-link default" id="workbook" data-fn="selectObject" data-selected="true">WorkBooks</button>
+                      <button id="sheet" class="btn-link default" data-fn="selectObject">Sheets</button>
+                      <button id="metric" class="btn-link default" data-fn="selectObject">Metriche</button>
+                      <button id="filter" class="btn-link default" data-fn="selectObject">Filtri</button>
+                      <input id="resource-search" type="search" data-element-search placeholder="Ricerca" autocomplete="on" />
                     </menu>
+                    <div class="objects" data-local>
+                      <div class="relative-ul" data-id="workbook" data-type="workbooks">
+                        <ul class="elements custom-scrollbar" id="ul-workbook"></ul>
+                      </div>
+                      <div class="relative-ul custom-scrollbar" data-id="sheet" data-type="sheets" hidden>
+                        <ul class="elements custom-scrollbar" id="ul-sheet"></ul>
+                      </div>
+                      <div class="relative-ul custom-scrollbar" data-id="metric" data-type="metrics" hidden>
+                        <ul class="elements custom-scrollbar" id="ul-metric"></ul>
+                      </div>
+                      <div class="relative-ul custom-scrollbar" data-id="filter" data-type="filters" hidden>
+                        <ul class="elements custom-scrollbar" id="ul-filter"></ul>
+                      </div>
+                      <div class="details">
+                        <section>Dettaglio risorsa</section>
+                        <div>Data creazione</div>
+                        <div>Tabella TIME</div>
+                        <div>Metriche</div>
+                        <div>Elenco tabelle</div>
+                      </div>
+                    </div>
                     <div class="objects">
-                      <ul class="elements" id="ul-workbook" data-type="workbooks"></ul>
+                      <!-- <ul class="elements" id="ul-workbook" data-type="workbooks"></ul>
                       <ul class="elements" id="ul-sheet" data-type="sheets" hidden></ul>
                       <ul class="elements" id="ul-metric" data-type="metrics" hidden></ul>
                       <ul class="elements" id="ul-filter" data-type="filters" hidden></ul>
@@ -98,7 +122,7 @@
                         <div>Tabella TIME</div>
                         <div>Metriche</div>
                         <div>Elenco tabelle</div>
-                      </div>
+                      </div> -->
                     </div>
                   </div>
                   <div class="footer">

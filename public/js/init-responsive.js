@@ -3158,8 +3158,6 @@ var Sheet;
   app.textareaCompositeMetric.addEventListener('dragleave', app.textareaDragLeave, false);
   app.textareaCompositeMetric.addEventListener('drop', app.textareaDrop, false);
 
-  app.btnVersioning.onclick = () => window.location.href = '/versioning';
-
   document.querySelectorAll('#workbook-objects[data-section-active]').forEach(section => {
     section.querySelectorAll('*[data-section]').forEach(subSection => {
       subSection.addEventListener('mouseenter', (e) => {

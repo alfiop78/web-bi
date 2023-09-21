@@ -174,16 +174,16 @@ var Storage = new SheetStorages();
     document.querySelector('menu').dataset.init = 'true';
     // recupero tutti gli elementi in localStorage per inserirli nelle rispettive <ul> impostate in hidden
     app.getLocal();
-    app.getDB();
+    // app.getDB();
   }
 
   app.selectObject = (e) => {
     document.querySelectorAll('menu button[data-selected]').forEach(button => delete button.dataset.selected);
     e.target.dataset.selected = 'true';
     // nascondo la <ul> attualmente visibile
-    document.querySelector('ul.elements:not([hidden])').hidden = true;
+    document.querySelector('.objects[data-local] .relative-ul:not([hidden])').hidden = true;
     // visualizzo la <ul> corrispondente all'object selezionato
-    document.querySelector(`#ul-${e.currentTarget.id}`).hidden = false;
+    document.querySelector(`div[data-id='${e.currentTarget.id}']`).hidden = false;
     // TODO: imposto l'attributo data-element-search nella input #resource-search
     document.querySelector('#resource-search').dataset.elementSearch = e.target.id;
   }
