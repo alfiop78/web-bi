@@ -47,17 +47,18 @@ var Storage = new SheetStorages();
         // console.log(element, element.token);
         // verifico lo stato dell'elemento in ciclo rispetto al localStorage
         // (sincronizzato, non sincronizzato, ecc...)
-        const ul = document.querySelector(`ul[data-type='${type}']`);
+        const div = document.querySelector(`div[data-type='${type}']`);
         let li;
-        if (ul.querySelector(`li[id='${dbElement.token}']`)) {
+        if (div.querySelector(`li[id='${dbElement.token}']`)) {
           // l'elemento in ciclo (dal db) è presente anche in locale
-          li = ul.querySelector(`li[id='${dbElement.token}']`);
+          li = div.querySelector(`li[id='${dbElement.token}']`);
           const statusIcon = li.querySelector('i[data-sync-status]');
           li.dataset.sync = 'true';
           // verifico se l'elemento in ciclo è "identico" all'elemento in storage
           if (dbElement.updated_at && (localElement.updated_at === dbElement.updated_at)) {
             // oggetti identici
             li.dataset.identical = 'true';
+            statusIcon.classList.add('done');
             statusIcon.innerText = "done";
           } else {
             // oggetti con updated_at diverse
@@ -174,7 +175,7 @@ var Storage = new SheetStorages();
     document.querySelector('menu').dataset.init = 'true';
     // recupero tutti gli elementi in localStorage per inserirli nelle rispettive <ul> impostate in hidden
     app.getLocal();
-    // app.getDB();
+    app.getDB();
   }
 
   app.selectObject = (e) => {

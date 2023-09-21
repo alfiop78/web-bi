@@ -89,6 +89,10 @@ button.btn-link[disabled] {
   color: gray;
 }
 
+button.btn-link[data-selected] {
+  font-weight: bold;
+}
+
 button.btn-link{
   border: unset;
   background-color: unset;

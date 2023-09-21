@@ -3,6 +3,8 @@
   --columns-color: steelblue;
   --metrics-color: darkgreen;
   --btn-remove-column-defined: whitesmoke;
+  --danger-color: indianred;
+  --done-color: seagreen;
 }
 
 .material-icons{padding: 6px;user-select: none;cursor: pointer;}
@@ -118,6 +120,14 @@ button.md-dark{color: gainsboro;} /*disabled dark*/
 
 
 /* colors */
+.material-icons-round.md-18.danger:not([disabled]){
+  color: var(--danger-color)!important;
+}
+
+.material-icons-round.md-18.done:not([disabled]){
+  color: var(--done-color)!important;
+}
+
 .material-icons-round.md-18.columns:not([disabled]){
   color: var(--columns-color);
 }

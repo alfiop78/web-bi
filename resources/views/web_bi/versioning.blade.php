@@ -25,7 +25,7 @@
   <template id="tmpl-li">
     <li data-li data-element-search data-label data-searchable="true" data-sync="false">
       <div class="li-content" data-fn="showResource">
-        <!-- <i class="material-icons-round md-18" data-sync-status>storage</i> -->
+        <i class="material-icons-round md-18" data-sync-status>label</i>
         <div class="li-content-details">
           <span data-value class="text-ellipsis"></span>
           <!-- <span data-created_at></span> -->
@@ -39,8 +39,8 @@
       <div class="li-buttons">
         <button data-fn="uploadObject" data-upload class="button-icons material-icons-round md-18">upload</button>
         <button data-fn="downloadObject" data-download class="button-icons material-icons-round md-18">download</button>
-        <button data-fn="upgradeObject" data-upgrade class="button-icons material-icons-round md-18">upgrade</button>
-        <button data-fn="deleteObject" data-delete class="button-icons material-icons-round md-18">delete</button>
+        <button data-fn="upgradeObject" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
+        <button data-fn="deleteObject" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
       </div>
     </li>
   </template>
@@ -104,25 +104,21 @@
                         <ul class="elements custom-scrollbar" id="ul-filter"></ul>
                       </div>
                       <div class="details">
-                        <section>Dettaglio risorsa</section>
-                        <div>Data creazione</div>
-                        <div>Tabella TIME</div>
-                        <div>Metriche</div>
-                        <div>Elenco tabelle</div>
+                        <section id="info-resource-local" class="placeholder" data-attr="Risorse locali">
+                          <section>Dettaglio risorsa</section>
+                          <div>Data creazione</div>
+                          <div>Tabella TIME</div>
+                          <div>Metriche</div>
+                          <div>Elenco tabelle</div>
+                        </section>
+                        <section id="info-resource-db" class="placeholder" data-attr="Risorse DB (Sincronizzate)">
+                          <section>Dettaglio risorsa</section>
+                          <div>Data creazione</div>
+                          <div>Tabella TIME</div>
+                          <div>Metriche</div>
+                          <div>Elenco tabelle</div>
+                        </section>
                       </div>
-                    </div>
-                    <div class="objects">
-                      <!-- <ul class="elements" id="ul-workbook" data-type="workbooks"></ul>
-                      <ul class="elements" id="ul-sheet" data-type="sheets" hidden></ul>
-                      <ul class="elements" id="ul-metric" data-type="metrics" hidden></ul>
-                      <ul class="elements" id="ul-filter" data-type="filters" hidden></ul>
-                      <div class="details">
-                        <section>Dettaglio risorsa</section>
-                        <div>Data creazione</div>
-                        <div>Tabella TIME</div>
-                        <div>Metriche</div>
-                        <div>Elenco tabelle</div>
-                      </div> -->
                     </div>
                   </div>
                   <div class="footer">

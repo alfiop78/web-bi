@@ -229,3 +229,19 @@ small {
 .col-4.col-8 {
   grid-template-columns: 4fr 8fr;
 }
+
+.placeholder[data-attr] {
+  position: relative;
+  padding: 3em 1em 1em;
+}
+
+.placeholder[data-attr]::before {
+  content: attr(data-attr);
+  background-color: #494949;
+  border-radius: 2px;
+  color: white;
+  top: 8px;
+  padding: 4px 6px;
+  left: 1em;
+  position: absolute;
+}
