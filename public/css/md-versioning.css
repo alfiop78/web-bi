@@ -52,7 +52,7 @@ ul {
 
 li {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: auto 1fr auto;
   grid-column-gap: 8px;
   margin: 6px 4px;
 }
@@ -62,12 +62,17 @@ ul > li > .li-content, ul > li > .li-buttons{
   align-items: center;
 }
 
+/* .li-content:hover > div {
+  font-weight: bold;
+  background-color: #ebebeb;
+  border-radius: 2px;
+} */
+
 .li-content:hover {
   font-weight: bold;
   background-color: #ebebeb;
   border-radius: 2px;
 }
-
 
 .li-content[data-selected] {
   font-weight: bold;
@@ -94,14 +99,18 @@ li[data-sync="false"][data-storage="db"] {
 }
 
 /* nascondo tutti i button dentro <li> per poi visualizzarli in base ai data-attribute*/
-li > .li-buttons button {visibility: hidden;}
+li:not(:hover) > .li-buttons button {visibility: hidden;}
 
 /* in questo caso visualizzo solo l'icona delete, gli oggetti sono sincornizzati ed identici*/
 li[data-identical="true"] {
   color: seagreen;
 }
 
-li[data-identical="true"] button[data-delete] {
+/* li:not(:hover)[data-identical="true"] button[data-delete] {
+  visibility: visible;
+} */
+
+li:hover[data-identical="true"] button[data-delete] {
   visibility: visible;
 }
 
@@ -109,21 +118,48 @@ li[data-identical="false"] {
   color: indianred;
 }
 
-li[data-identical="false"] button[data-download],
-li[data-identical="false"] button[data-upgrade],
-li[data-identical="false"] button[data-delete] {
+/* risorse prenti su db ma non in locale */
+li:hover[data-sync="false"][data-storage="db"] button[data-download] {
   visibility: visible;
+}
+
+li:hover[data-sync="false"][data-storage="db"] button[data-upload],
+li:hover[data-sync="false"][data-storage="db"] button[data-upgrade] {
+  visibility: hidden;
 }
 
 /* risorsa presente in locale ma NON sul DB*/
-li[data-sync="false"][data-storage="local"] button[data-upload],
-li[data-sync="false"][data-storage="local"] button[data-delete] {
+li:hover[data-sync="false"][data-storage="local"] button[data-upload],
+li:hover[data-sync="false"][data-storage="local"] button[data-delete] {
   visibility: visible;
 }
 
+li:hover[data-sync="false"][data-storage="local"] button[data-download],
+li:hover[data-sync="false"][data-storage="local"] button[data-upgrade] {
+  visibility: hidden;
+}
+
+/* risorse sincronizzate */
+li:hover[data-sync="true"][data-storage="local"] button[data-upload],
+li:hover[data-sync="true"][data-storage="local"] button[data-download],
+li:hover[data-sync="true"][data-storage="local"] button[data-upgrade] {
+  visibility: hidden;
+}
+
+/* risorse sincronizzate ma non identiche */
+li:hover[data-sync="true"][data-storage="local"][data-identical="false"] button[data-download],
+li:hover[data-sync="true"][data-storage="local"][data-identical="false"] button[data-delete],
+li:hover[data-sync="true"][data-storage="local"][data-identical="false"] button[data-upgrade] {
+  visibility: visible;
+}
+
+li:hover[data-sync="true"][data-storage="local"][data-identical="false"] button[data-upload] {
+  visibility: hidden;
+}
+
 /* risorsa disponibile sul DB ma NON in localStorage*/
-li[data-sync="false"][data-storage="db"] button[data-download],
-li[data-sync="false"][data-storage="db"] button[data-delete] {
+li:hover[data-sync="false"][data-storage="db"] button[data-download],
+li:hover[data-sync="false"][data-storage="db"] button[data-delete] {
   visibility: visible;
 }
 
@@ -139,9 +175,18 @@ li[data-sync="false"][data-storage="db"] button[data-delete] {
 
 .details {
   display: grid;
-  grid-template-rows: 2fr 1fr;
+  grid-template-rows: auto 3fr 1fr;
   grid-row-gap: 1em;
 }
+
+.details.menu section{
+  grid-template-rows: 1fr;
+}
+
+.details.menu section[hidden]{
+  display: none;
+}
+
 
 .details h6 {
   /* padding: 8px 16px; */
@@ -155,9 +200,20 @@ li[data-sync="false"][data-storage="db"] button[data-delete] {
 }
 
 .details > section {
+  position: relative;
   border: solid thin #ebebeb;
   display: grid;
+  padding: 3em 0em 2em;
   grid-template-rows: auto 1fr;
+}
+
+.details > section[data-attr] {
+  grid-template-rows: 1fr;
+}
+
+menu.allButtons {
+  position: absolute;
+  right: 1em;
 }
 
 .item-resources {
@@ -170,4 +226,33 @@ li[data-sync="false"][data-storage="db"] button[data-delete] {
   align-items: center;
   justify-content: space-between;
   padding-inline-end: 40px;
+}
+
+li button {
+  visibility: hidden;
+}
+
+li:hover button {
+  visibility: visible;
+}
+
+li input:not(:checked) {
+  visibility: hidden;
+}
+
+li:hover input {
+  visibility: visible;
+}
+
+li input:checked {
+  visibility: visible;
+}
+
+.hideableButtons {
+  position: absolute;
+  bottom: 4px;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
 }

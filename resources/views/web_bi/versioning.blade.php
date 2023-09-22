@@ -24,6 +24,7 @@
 
   <template id="tmpl-li">
     <li data-li data-element-search data-label data-searchable="true" data-sync="false">
+      <input type="checkbox" />
       <div class="li-content" data-fn="showResource">
         <i class="material-icons-round md-18" data-sync-status>label</i>
         <div class="li-content-details">
@@ -81,31 +82,74 @@
                     <div class="objects" data-local>
                       <div class="details reverse">
                         <section class="placeholder" data-attr="WorkBooks">
-                          <div></div>
+                          <menu class="allButtons" data-id="workbook" hidden>
+                            <button data-fn="uploadAll" data-upload class="button-icons material-icons-round md-18">upload</button>
+                            <button data-fn="downloadAll" data-download class="button-icons material-icons-round md-18">download</button>
+                            <button data-fn="upgradeAll" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
+                            <button data-fn="deleteAll" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
+                          </menu>
                           <div class="relative-ul" data-id="workbook" data-type="workbooks">
                             <ul class="elements custom-scrollbar" id="ul-workbook"></ul>
                           </div>
+                          <section class="hideableButtons">
+                            <button type="button" class="btn-link default" data-select-all data-type="workbook">Select All</button>
+                            <button type="button" class="btn-link default" data-unselect-all data-type="workbook">Unselect All</button>
+                          </section>
                         </section>
                         <section class="placeholder" data-attr="Sheets">
-                          <div></div>
+                          <menu class="allButtons" data-id="sheet" hidden>
+                            <button data-fn="uploadAll" data-upload class="button-icons material-icons-round md-18">upload</button>
+                            <button data-fn="downloadAll" data-download class="button-icons material-icons-round md-18">download</button>
+                            <button data-fn="upgradeAll" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
+                            <button data-fn="deleteAll" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
+                          </menu>
                           <div class="relative-ul custom-scrollbar" data-id="sheet" data-type="sheets">
                             <ul class="elements custom-scrollbar" id="ul-sheet"></ul>
                           </div>
+                          <section class="hideableButtons">
+                            <button type="button" class="btn-link default" data-select-all data-type="sheet">Select All</button>
+                            <button type="button" class="btn-link default" data-unselect-all data-type="sheet">Unselect All</button>
+                          </section>
                         </section>
                       </div>
-                      <div class="details">
-                        <section>
-                          <menu>
-                            <button id="metric" class="btn-link default" data-fn="selectObject" data-selected>Metriche</button>
-                            <button id="filter" class="btn-link default" data-fn="selectObject">Filtri</button>
+                      <div class="details menu">
+                        <menu>
+                          <button id="metric" class="btn-link default" data-fn="selectObject" data-selected>Metriche</button>
+                          <button id="filter" class="btn-link default" data-fn="selectObject">Filtri</button>
+                        </menu>
+                        <!-- metric -->
+                        <section data-id="metric" class="placeholder" data-attr="Metriche">
+                          <menu class="allButtons" data-id="metric" hidden>
+                            <button data-fn="uploadAll" data-upload class="button-icons material-icons-round md-18">upload</button>
+                            <button data-fn="downloadAll" data-download class="button-icons material-icons-round md-18">download</button>
+                            <button data-fn="upgradeAll" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
+                            <button data-fn="deleteAll" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
                           </menu>
-                          <div class="relative-ul hideable custom-scrollbar" data-id="metric" data-type="metrics">
+                          <div class="relative-ul custom-scrollbar" data-id="metric" data-type="metrics">
                             <ul class="elements custom-scrollbar" id="ul-metric"></ul>
                           </div>
-                          <div class="relative-ul hideable custom-scrollbar" data-id="filter" data-type="filters" hidden>
+                          <section class="hideableButtons">
+                            <button type="button" class="btn-link default" data-select-all data-type="metric">Select All</button>
+                            <button type="button" class="btn-link default" data-unselect-all data-type="metric">Unselect All</button>
+                          </section>
+                        </section>
+                        <!-- filter -->
+                        <section data-id="filter" hidden class="placeholder" data-attr="Filtri">
+                          <menu class="allButtons" data-id="filter" hidden>
+                            <button data-fn="uploadAll" data-upload class="button-icons material-icons-round md-18">upload</button>
+                            <button data-fn="downloadAll" data-download class="button-icons material-icons-round md-18">download</button>
+                            <button data-fn="upgradeAll" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
+                            <button data-fn="deleteAll" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
+                          </menu>
+                          <div class="relative-ul custom-scrollbar" data-id="filter" data-type="filters">
                             <ul class="elements custom-scrollbar" id="ul-filter"></ul>
                           </div>
+                          <section class="hideableButtons">
+                            <button type="button" class="btn-link default" data-select-all data-type="filter">Select All</button>
+                            <button type="button" class="btn-link default" data-unselect-all data-type="filter">Unselect All</button>
+                          </section>
                         </section>
+
                         <section id="info-resource" class="placeholder" data-attr="Dettaglio risorsa">
                           <section id="info">
                             <div id="created_at" class="item-resources">

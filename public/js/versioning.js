@@ -13,8 +13,9 @@ var Storage = new SheetStorages();
     // console.log(mutationList, observer);
     for (const mutation of mutationList) {
       if (mutation.type === 'childList') {
-        // console.info('A child node has been added or removed.');
+        console.info('A child node has been added or removed.');
         Array.from(mutation.addedNodes).forEach(node => {
+          // console.log(node);
           // console.log(node.nodeName);
           if (node.nodeName !== '#text') {
             if (node.hasAttribute('data-fn')) node.addEventListener('click', app[node.dataset.fn]);
@@ -36,7 +37,7 @@ var Storage = new SheetStorages();
   const observerList = new MutationObserver(callback);
   // Start observing the target node for configured mutations
   // observerList.observe(targetNode, config);
-  console.log(document.getElementById('body'));
+  // console.log(document.getElementById('body'));
   observerList.observe(document.getElementById('body'), config);
 
   app.checkObjects = (data) => {
@@ -101,6 +102,7 @@ var Storage = new SheetStorages();
     const content_li = app.tmpl_li.content.cloneNode(true);
     const li = content_li.querySelector('li');
     const liContent = li.querySelector('.li-content');
+    const inputCheck = li.querySelector('input');
     const statusIcon = li.querySelector('i[data-sync-status]');
     const span = li.querySelector('span[data-value]');
     // const updated_at = li.querySelector('span[data-updated_at]');
@@ -110,6 +112,7 @@ var Storage = new SheetStorages();
     const btnUpgrade = li.querySelector('button[data-upgrade]');
     const btnDelete = li.querySelector('button[data-delete]');
     if (storage === 'db') statusIcon.innerText = 'sync';
+    inputCheck.dataset.id = token;
     li.dataset.elementSearch = object.type;
     li.dataset.storage = storage;
     li.id = token;
@@ -172,11 +175,29 @@ var Storage = new SheetStorages();
     }
   }
 
+  document.querySelectorAll('button[data-select-all]').forEach(button => {
+    button.addEventListener('click', (e) => {
+      let type = e.currentTarget.dataset.type;
+      document.querySelectorAll(`.relative-ul[data-id='${type}'] input`).forEach(input => input.checked = true);
+      // visualizzo il menu.allButtons corrispondente
+      document.querySelector(`menu.allButtons[data-id='${type}']`).hidden = false;
+    });
+  });
+
+  document.querySelectorAll('button[data-unselect-all]').forEach(button => {
+    button.addEventListener('click', (e) => {
+      let type = e.currentTarget.dataset.type;
+      document.querySelectorAll(`.relative-ul[data-id='${type}'] input`).forEach(input => input.checked = false);
+      // visualizzo il menu.allButtons corrispondente
+      document.querySelector(`menu.allButtons[data-id='${type}']`).hidden = true;
+    });
+  });
+
   app.init = () => {
     // scarico elenco oggetti dal DB (WorkBooks, WorkSheets e Sheets)
     // visualizzo oggetti locali (da qui possono essere salvati su DB)
     // imposto data-fn sugli elementi di ul-objects
-    document.querySelector('menu').dataset.init = 'true';
+    document.querySelectorAll('menu').forEach(menu => menu.dataset.init = 'true');
     // recupero tutti gli elementi in localStorage per inserirli nelle rispettive <ul> impostate in hidden
     app.getLocal();
     app.getDB();
@@ -187,11 +208,11 @@ var Storage = new SheetStorages();
     e.target.dataset.selected = 'true';
     // nascondo la <ul> attualmente visibile
     // debugger;
-    // console.log(document.querySelector(`.details div.relative-ul[data-id='${e.target.id}']`));
-    document.querySelector(".hideable.relative-ul:not([hidden])").hidden = true;
     // visualizzo la <ul> corrispondente all'object selezionato
-    document.querySelector(`div[data-id='${e.currentTarget.id}']`).hidden = false;
-    document.querySelector('#resource-search').dataset.elementSearch = e.target.id;
+    // debugger;
+    document.querySelectorAll('.details.menu section[data-id]').forEach(section => {
+      section.hidden = (section.dataset.id === e.currentTarget.id) ? false : true;
+    });
   }
 
   app.uploadObject = async (e) => {

@@ -232,7 +232,7 @@ small {
 
 .placeholder[data-attr] {
   position: relative;
-  padding: 3em 1em 1em;
+  padding: 3em 1em 2em;
 }
 
 .placeholder[data-attr]::before {
