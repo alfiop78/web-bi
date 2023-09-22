@@ -27,7 +27,7 @@
 
 .grid-layout > .content{
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: 1fr auto;
   grid-row-gap: 1em;
   width: 100%;
   height: 100%;
@@ -36,6 +36,7 @@
 .grid-layout > .content > .body.grid-section-2 {
   display: grid;
   grid-template-rows: 1fr;
+  padding: 1em;
 }
 
 .grid-layout > .content > .body.grid-section-2 .objects {
@@ -51,8 +52,9 @@ ul {
 
 li {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  margin: 8px;
+  grid-template-columns: 1fr auto;
+  grid-column-gap: 8px;
+  margin: 6px 4px;
 }
 
 ul > li > .li-content, ul > li > .li-buttons{
@@ -60,8 +62,17 @@ ul > li > .li-content, ul > li > .li-buttons{
   align-items: center;
 }
 
+.li-content:hover {
+  font-weight: bold;
+  background-color: #ebebeb;
+  border-radius: 2px;
+}
+
+
 .li-content[data-selected] {
   font-weight: bold;
+  background-color: #ebebeb;
+  border-radius: 2px;
 }
 
 .li-content > .li-content-details{
@@ -76,6 +87,10 @@ li[data-sync="true"] {
 
 li[data-sync="false"] {
   color: dimgray;
+}
+
+li[data-sync="false"][data-storage="db"] {
+  color: steelblue;
 }
 
 /* nascondo tutti i button dentro <li> per poi visualizzarli in base ai data-attribute*/
@@ -117,7 +132,7 @@ li[data-sync="false"][data-storage="db"] button[data-delete] {
   .grid-layout > .content > .body.grid-section-2 .objects {
     grid-template-columns: repeat(auto-fill, minmax(calc(50% - 2em), 1fr));
     grid-column-gap: 1em;
-    padding: 0em 1em;
+    /* padding: 0em 1em; */
     position: relative;
   }
 }
@@ -129,7 +144,10 @@ li[data-sync="false"][data-storage="db"] button[data-delete] {
 }
 
 .details h6 {
-  padding: 8px 16px;
+  /* padding: 8px 16px; */
+  font-weight: bold;
+  font-size: .9rem;
+  color: steelblue;
 }
 
 .details.reverse {
@@ -145,4 +163,11 @@ li[data-sync="false"][data-storage="db"] button[data-delete] {
 .item-resources {
   display: grid;
   grid-template-columns: 2fr 3fr;
+}
+
+.items-menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline-end: 40px;
 }

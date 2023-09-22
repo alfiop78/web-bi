@@ -4,6 +4,7 @@
   --metrics-color: darkgreen;
   --btn-remove-column-defined: whitesmoke;
   --danger-color: indianred;
+  --warning-color: #c5791b;
   --done-color: seagreen;
 }
 
@@ -120,6 +121,10 @@ button.md-dark{color: gainsboro;} /*disabled dark*/
 
 
 /* colors */
+.material-icons-round.md-18.warning:not([disabled]){
+  color: var(--warning-color)!important;
+}
+
 .material-icons-round.md-18.danger:not([disabled]){
   color: var(--danger-color)!important;
 }

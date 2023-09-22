@@ -103,7 +103,7 @@ var Storage = new SheetStorages();
     const liContent = li.querySelector('.li-content');
     const statusIcon = li.querySelector('i[data-sync-status]');
     const span = li.querySelector('span[data-value]');
-    const updated_at = li.querySelector('span[data-updated_at]');
+    // const updated_at = li.querySelector('span[data-updated_at]');
     const workBookRef = li.querySelector('span[data-workbook_ref]');
     const btnDownload = li.querySelector('button[data-download]');
     const btnUpload = li.querySelector('button[data-upload]');
@@ -161,7 +161,7 @@ var Storage = new SheetStorages();
     btnUpgrade.dataset.upgrade = object.type;
     btnDownload.dataset.download = object.type;
     btnDelete.dataset.delete = object.type;
-    updated_at.innerText = object.updated_at;
+    // updated_at.innerText = object.updated_at;
     document.querySelector(`#ul-${object.type}`).appendChild(li);
   }
 
@@ -302,41 +302,43 @@ var Storage = new SheetStorages();
   }
 
   app.showResource = (e) => {
+    const refs = {
+      "created_at": document.querySelector('#created_at > span[data-value]'),
+      "updated_at": document.querySelector('#updated_at > span[data-value]'),
+      "note": document.querySelector('#note > span[data-value]')
+    };
+    if (e.currentTarget.dataset.type === 'workbook') {
+      // è stato selezionato un workbook, rivisualizzo eventuali elementi nascosti da precedenti
+      // selezioni (un altro workbook) per nascondere
+      // reset elementi precedendemente selezionati
+      document.querySelectorAll(`#ul-workbook li:not([id='${e.currentTarget.dataset.token}']) > div[data-selected]`).forEach(element => delete element.dataset.selected);
+    } else {
+      // reset elementi precedendemente selezionati
+      document.querySelectorAll(`li[data-workbook-ref]:not([id='${e.currentTarget.dataset.token}']) > div[data-selected]`).forEach(element => delete element.dataset.selected);
+    }
     e.currentTarget.toggleAttribute('data-selected');
     if (e.currentTarget.hasAttribute('data-selected')) {
       // visualizzo alcune informazione sull'elemento selezionato
-      const refs = {
-        "local": {
-          "created_at": document.querySelector('#created_at > span[data-value]'),
-        }
-      };
+      // e le inserisco nel template corrispondente
       if (e.currentTarget.dataset.storage === 'local') {
         const resource = window.localStorage.getItem(e.currentTarget.dataset.token);
         const json = JSON.parse(resource);
         console.log(json);
         // se l'elemento ha dataset.storage='DB' vuol dire che NON è presente in locale, quindi per
         // visualizzare le sue proprietà dovrò fare una FETCH verso il DB, altrimenti lo recupero dallo storage
-        refs.local.created_at.innerText = json.created_at;
+        for (const [key, value] of Object.entries(refs)) {
+          value.innerText = (json[key]) ? json[key] : null;
+        }
       } else {
         // DB
       }
-      // TODO: visualizzo il dettaglio della risorsa selezionata
-      // la risorsa in locale viene recuperata dal localStorage
-      // per la risorsa su DB verrà eseguita la query tramite il Controller
-
-      // TODO: Verifico quale elemento è stato selezionato con uno switch
-      // In caso di selezione di un WorkBook, visualizzo i suoi Sheets, metrics e filters
-      // In case di selezione di uno Sheet, visualizzo le sue metrics e filters
-      if (e.target.dataset.type === 'workbook') {
-        [...document.querySelectorAll(`li:not([data-workbook-ref='${e.currentTarget.dataset.token}'])`)].filter(element => {
-          if (e.currentTarget.dataset.token !== element.id) element.hidden = true;
-        });
-
-      }
     } else {
-      // elemento de-selezionato
-      [...document.querySelectorAll(`li:not([data-workbook-ref='${e.currentTarget.dataset.token}'])`)].filter(element => {
-        if (e.currentTarget.dataset.token !== element.id) element.hidden = false;
+      // ripulisco i riferimenti del refs
+      refs.created_at.innerText = '';
+    }
+    if (e.currentTarget.dataset.type === 'workbook') {
+      [...document.querySelectorAll('li[data-workbook-ref]')].filter(element => {
+        element.hidden = (element.dataset.workbookRef === e.currentTarget.dataset.token || e.currentTarget.dataset.selected === undefined) ? false : true;
       });
     }
   }

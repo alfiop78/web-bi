@@ -28,14 +28,11 @@
         <i class="material-icons-round md-18" data-sync-status>label</i>
         <div class="li-content-details">
           <span data-value class="text-ellipsis"></span>
-          <!-- <span data-created_at></span> -->
-          <!-- <span class="sub-elements">Aggiornato : <span data-updated_at class=" sub-elements"></span></span> -->
-          <!-- <span data-workbook_ref class="sub-elements text-ellipsis"></span> -->
         </div>
       </div>
-      <div class="updated_at">
-        <span class="sub-elements">Aggiornato : <span data-updated_at class=" sub-elements"></span></span>
-      </div>
+      <!-- <div class="updated_at"> -->
+      <!--   <span class="sub-elements">Aggiornato : <span data-updated_at class=" sub-elements"></span></span> -->
+      <!-- </div> -->
       <div class="li-buttons">
         <button data-fn="uploadObject" data-upload class="button-icons material-icons-round md-18">upload</button>
         <button data-fn="downloadObject" data-download class="button-icons material-icons-round md-18">download</button>
@@ -79,18 +76,18 @@
             <section class="wrapper-content">
               <section class="grid-layout">
                 <div class="content">
-                  <input id="resource-search" type="search" data-element-search placeholder="Ricerca" autocomplete="on" />
+                  <!-- <input id="resource-search" type="search" data-element-search placeholder="Ricerca" autocomplete="on" /> -->
                   <div class="body grid-section-2">
                     <div class="objects" data-local>
                       <div class="details reverse">
-                        <section>
-                          <h6>WorkBooks</h6>
+                        <section class="placeholder" data-attr="WorkBooks">
+                          <div></div>
                           <div class="relative-ul" data-id="workbook" data-type="workbooks">
                             <ul class="elements custom-scrollbar" id="ul-workbook"></ul>
                           </div>
                         </section>
-                        <section>
-                          <h6>Sheets</h6>
+                        <section class="placeholder" data-attr="Sheets">
+                          <div></div>
                           <div class="relative-ul custom-scrollbar" data-id="sheet" data-type="sheets">
                             <ul class="elements custom-scrollbar" id="ul-sheet"></ul>
                           </div>
@@ -110,10 +107,20 @@
                           </div>
                         </section>
                         <section id="info-resource" class="placeholder" data-attr="Dettaglio risorsa">
-                          <div id="created_at" class="item-resources">
-                            <span>Data Creazione</span>
-                            <span data-value></span>
-                          </div>
+                          <section id="info">
+                            <div id="created_at" class="item-resources">
+                              <span>Data Creazione</span>
+                              <span data-value></span>
+                            </div>
+                            <div id="updated_at" class="item-resources">
+                              <span>Data aggiorn.</span>
+                              <span data-value></span>
+                            </div>
+                            <div id="note" class="item-resources">
+                              <span>Note</span>
+                              <span data-value></span>
+                            </div>
+                          </section>
                         </section>
                       </div>
                     </div>
