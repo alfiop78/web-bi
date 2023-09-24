@@ -200,7 +200,7 @@ var Storage = new SheetStorages();
     document.querySelectorAll('menu').forEach(menu => menu.dataset.init = 'true');
     // recupero tutti gli elementi in localStorage per inserirli nelle rispettive <ul> impostate in hidden
     app.getLocal();
-    app.getDB();
+    // app.getDB();
   }
 
   app.selectObject = (e) => {

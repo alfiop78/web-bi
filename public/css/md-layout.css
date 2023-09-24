@@ -1,0 +1,119 @@
+/* @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&effect=canvas-print&display=swap'); /*font-family: 'Open Sans', sans-serif;*/
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&display=swap'); /*font-family: 'Open Sans', sans-serif;*/
+@import url("https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp&display=swap");
+* {box-sizing: border-box;}
+:root{
+  --main-bg-color: #e2e2e2;
+  --main-primary-color: #918268; /*8b8060, 968969,918268*/
+  --main-secondary-color: #511e1a;
+  --main-color-outisde-card: #424242;
+  --main-color-button-flat: #8c5f11;
+}
+html, body{width: 100%; height: 100%;margin: 0;padding: 0;
+  font-family: 'Open Sans', sans-serif;
+}
+
+main{display: flex;width: 100%; height: 100%;padding-top: 64px;transition: padding 350ms;}
+main > #container{display: flex;flex-direction: column;flex-grow: 1;position: relative;background: var(--main-bg-color);}
+header{position: fixed;top: 0;left: 0;width: 100%;background: var(--main-primary-color);
+  box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15);
+  color: white;display: flex;align-items: center;justify-content: space-between;height: 64px;padding: 0 36px 0 16px;
+  -webkit-font-smoothing: antialiased;z-index: 1001;}
+a{color: var(--main-secondary-color);text-decoration: none;}
+.nav-button{display: flex;align-items: center;flex-grow: 0;flex-shrink: 0;}
+.nav-button #arrow-back, .nav-button #menu{display: flex;text-decoration: none;color: #3C4043;width: 40px;height: 40px;
+  justify-content: center;align-items: center;}
+#logo{display: flex;text-decoration: none;color: #3C4043;width: 40px;height: 40px;justify-content: center;align-items: center;}
+header h1{font-size: 1.4rem;font-weight: 400;margin: 0 8px;flex-grow: 1;flex-shrink: 1;
+  white-space: nowrap;text-overflow: ellipsis;overflow: hidden;width: 0;}
+#content{display: block;width: 100%;position: absolute;top: 0;left: 0;right: 0; bottom: 0;/*padding-top: 32px;*/overflow-y: auto;
+  overflow-x: hidden;background: var(--main-bg-color);}
+#content > #body{/*box-shadow: 0px 1px 2px 0px rgba(60,64,67,0.3), 0px 2px 6px 2px rgba(60,64,67,0.15);*/max-width: 800px;
+  font-size: .9rem;margin: 0 auto;margin-bottom: 90px;border-radius: 4px;color: #3f3f40;}
+#console{/*position: absolute;*/ position: fixed;bottom: -64px;left: 0;right: 0;display: flex;justify-content: center; transition: bottom 500ms;
+  padding: 0 16px;flex-direction: column;z-index: 1002;background: #1d1d1d; color: whitesmoke;font-size: .85rem;height: 64px;}
+#console i.info{color: #d0c5ab;}
+#console i.error{color: brown;}
+#console i.warning{color: chocolate;}
+#console i.done{color: green;}
+#console[open]{bottom: 0;}
+#nodata{display: flex;height: 100%;justify-content: center;align-items: center;}
+#nodata[hidden]{display: none;}
+#nodata > p{font-size: 1.2rem;font-weight: lighter;padding: 2em;text-align: center;}
+span.highlighted{padding: 1px 6px;background-color: var(--main-secondary-color);border-radius: 4px;color: white;font-weight: 400;}
+
+#fabsConsole{
+  display: flex;
+  flex-grow: 1;
+  max-width: 1025px;
+  width: 100%;
+  margin: 0 auto;
+  align-items: center;
+}
+
+.center{justify-self: center;margin: 8px 0;text-align: center;}
+
+.inner{padding: 24px;line-height: 24px;}
+
+h3{text-align: center; font-size: 1.5rem; font-weight: lighter;}
+h4{padding: 16px 0; font-weight: 400;margin: 0 auto;color: var(--main-color-outisde-card);}
+
+h4 ~ h5{padding: 0;font-size: 1rem;margin: 0 0 1em;font-weight: 300;color: var(--main-color-outisde-card);}
+
+#body > footer{font-size: .8rem;padding: 0 16px;line-height: 1.2rem;margin: auto;color: dimgrey;width: 100%;}
+footer div span{color: #3a3a3a;}
+.scene{width: 100%;height: 400px;}
+.scene.multi{display: flex;align-items: center;justify-content: center;margin-bottom: 2em;width: 100%;}
+
+@media screen and (min-device-width: 769px) {
+  #drawer{width: 340px;}
+  /* nascondo il tasto menu che è già aperto */
+  .nav-button #menu{display: none;}
+  h4 {font-size: 1.7rem;}
+  .scene > img{float: left;margin-top: 2em;margin-bottom: 2em;transition: all 500ms;opacity: .8;
+    transform: perspective(283px) rotateY(17deg) scale(.8);box-shadow: 0 3px 7px 0;}
+  .scene > img:hover, div.overflow > img:hover{transform: scale(1);opacity: 1;z-index: 1;}
+  .scene p{float: right; width: 50%;font-size: .8rem;}
+  div.overflow{width: 100%;display: flex;justify-content: center;}
+  div.overflow > img{transform: perspective(282px) rotateY(7deg) scale(.8);box-shadow: 0 3px 7px 0;margin-left: 12px;margin-right: -63px;transition: all 500ms;opacity: .7;}
+  p{font-size: .8rem;}
+}
+
+@media screen and (max-device-width: 768px) {
+  main{display: block;position: relative;}
+  main > #container{height: 100%;}
+  .nav-button #menu{display: flex;}
+  .nav-button #arrow-back{display: none;}
+
+  h4{font-size: 1.6rem;}
+  p{font-size: .8rem;}
+
+  .scene > img {float: left;margin-top: 2em;margin-bottom: 2em;transform: perspective(282px) rotateY(7deg);box-shadow: 0 3px 7px 0;}
+  /* .scene.multi > img{margin-left: -32px;margin-right: -32px;} */
+  .scene p{float: right; width: 40%;font-size: .8rem;}
+  p{font-size: .9rem;}
+
+  .scene.multi > div.overflow{width: 100%;overflow-x: scroll;display: flex;margin-left: .5em;margin-right: .5em;align-items: center;height: 100%;}
+  div.overflow > img{transform: perspective(282px) rotateY(7deg) scale(.8);opacity: .8;box-shadow: 0 3px 7px 0;margin-left: 6px;margin-right: -68px;transition: all 350ms;}
+  div.overflow > img:hover{transform: scale(1);opacity: 1;z-index: 1;}
+}
+
+
+@media screen and (max-device-width: 360px) {
+  main{display: block;padding-top: 56px;position: relative;}
+  header{height: 56px;padding: 0 24px 0 8px}
+  header h1{font-size: 1.1rem;}
+  nav{font-size: .8rem;}
+  #content #body{font-size: .75rem;}
+  #body > footer{font-size: .75rem;}
+  h3{font-size: 1.1rem;}
+  h4{font-size: 1.4rem;}
+
+  #controls{bottom: 32px;padding: 0 16px;}
+
+  .scene p{float: right; width: 35%;font-size: .75rem;}
+  .scene.multi > img{margin-left: -40px;margin-right: -40px;}
+  p{font-size: .75rem;}
+
+}
+

@@ -39,7 +39,8 @@
   padding: 1em;
 }
 
-.grid-layout > .content > .body.grid-section-2 .objects {
+/* .grid-layout > .content > .body.grid-section-2 .objects { */
+.objects {
   display: grid;
   /* grid-template-columns: repeat(auto-fill, 340px); */
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
