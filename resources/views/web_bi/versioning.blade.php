@@ -67,13 +67,13 @@
 
     <div id="container">
 
-      <div id="content">
+      <div id="content" class="custom-scrollbar">
 
         <div id="body" hidden>
 
           <div class="objects">
 
-            <div class="details reverse">
+            <div class="details">
               <section class="placeholder" data-attr="WorkBooks">
                 <menu class="allButtons" data-id="workbook" hidden>
                   <button data-fn="uploadAll" data-upload class="button-icons material-icons-round md-18">upload</button>
@@ -89,6 +89,9 @@
                   <button type="button" class="btn-link default" data-unselect-all data-type="workbook">Unselect All</button>
                 </section>
               </section>
+            </div>
+
+            <div class="details">
               <section class="placeholder" data-attr="Sheets">
                 <menu class="allButtons" data-id="sheet" hidden>
                   <button data-fn="uploadAll" data-upload class="button-icons material-icons-round md-18">upload</button>
@@ -104,10 +107,9 @@
                   <button type="button" class="btn-link default" data-unselect-all data-type="sheet">Unselect All</button>
                 </section>
               </section>
+
             </div>
-
             <div class="details menu">
-
               <menu>
                 <button id="metric" class="btn-link default" data-fn="selectObject" data-selected>Metriche</button>
                 <button id="filter" class="btn-link default" data-fn="selectObject">Filtri</button>
@@ -145,89 +147,26 @@
                 </section>
               </section>
 
-              <section id="info-resource" class="placeholder" data-attr="Dettaglio risorsa">
-                <section id="info">
-                  <div id="created_at" class="item-resources">
-                    <span>Data Creazione</span>
-                    <span data-value></span>
-                  </div>
-                  <div id="updated_at" class="item-resources">
-                    <span>Data aggiorn.</span>
-                    <span data-value></span>
-                  </div>
-                  <div id="note" class="item-resources">
-                    <span>Note</span>
-                    <span data-value></span>
-                  </div>
-                </section>
+            </div>
+
+
+            <section id="info-resource" class="placeholder" data-attr="Dettaglio risorsa">
+              <section id="info">
+                <div id="created_at" class="item-resources">
+                  <span>Data Creazione</span>
+                  <span data-value></span>
+                </div>
+                <div id="updated_at" class="item-resources">
+                  <span>Data aggiorn.</span>
+                  <span data-value></span>
+                </div>
+                <div id="note" class="item-resources">
+                  <span>Note</span>
+                  <span data-value></span>
+                </div>
               </section>
-
-            </div>
-          </div>
-
-          <div class="md-card" data-summary="month">
-            <section class="headerCard">
-              <div class="left">
-                <h4>Spese mensili</h4>
-                <h6>Riepilogo spese mensili</h6>
-              </div>
             </section>
-
-            <div class="content">
-              <div class="bodyCard">
-
-                <div class="grid-row">
-
-                </div>
-
-              </div>
-            </div>
-
-            <div class="footer buttons">
-              <span class="spacer"></span>
-
-              <button id="mdc-stats-month" class="md-button accept" tabindex="1">statistiche</button>
-            </div>
-
           </div>
-
-          <div class="md-card" data-summary="year">
-            <section class="headerCard">
-              <div class="left">
-                <h4>Costi annuali</h4>
-                <h6>Confronto costi con anno precedente</h6>
-              </div>
-            </section>
-            <div class="content">
-              <div class="bodyCard">
-
-                <div id="nodata-chart">
-                  <!-- non ci sono dati per il grafico-->
-                </div>
-
-                <div id="barchart_material" style="width: 100%; height: 200px;margin: 2em auto;" hidden></div>
-
-                <div class="grid-row"></div>
-
-              </div>
-
-            </div>
-            <div class="footer buttons">
-              <span class="spacer"></span>
-              <button id="mdc-stats-year" class="md-button accept" tabindex="1">statistiche</button>
-            </div>
-          </div>
-
-          <div class="no-data" hidden>
-            <h5 class="md-card deadlineHasNotData">Non sono presenti scadenze nei prossimi 3 mesi</h5>
-          </div>
-
-          <footer>
-            <div>
-              L'ultimo accesso è stato effettuato il <span class="lastAccessData"></span> alle ore <span class="lastAccessTime"></span>
-              da dispositivo <span class="os"></span>
-            </div>
-          </footer>
 
         </div>
 

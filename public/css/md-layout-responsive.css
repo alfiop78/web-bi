@@ -105,7 +105,9 @@ section > h3 ~ h5{font-weight: lighter;}
 }
 
 /* ul::-webkit-scrollbar{display: none;} */
-.custom-scrollbar::-webkit-scrollbar{display:none;}
+.custom-scrollbar::-webkit-scrollbar{
+  display: none;
+}
 .custom-scrollbar:hover::-webkit-scrollbar{
   display: block;
   width: 4px;
@@ -116,8 +118,13 @@ section > h3 ~ h5{font-weight: lighter;}
   background-color: #5f6162c7;
   border-radius: 2px;
 }
-.custom-scrollbar:hover::-webkit-scrollbar-track{display:block;background-color:gainsboro;}
-div.elements::-webkit-scrollbar{display: none;}
+.custom-scrollbar:hover::-webkit-scrollbar-track{
+  display: block;
+  background-color: gainsboro;
+}
+div.elements::-webkit-scrollbar{
+  display: none;
+}
 
 .elements:not([selectionType='multiple']) > section{display: none;}
 .elements[selectionType='multiple'] > section{text-align: right;padding: .5em;}
