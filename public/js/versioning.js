@@ -113,6 +113,8 @@ var Storage = new SheetStorages();
     const btnDelete = li.querySelector('button[data-delete]');
     if (storage === 'db') statusIcon.innerText = 'sync';
     inputCheck.dataset.id = token;
+    inputCheck.dataset.type = object.type;
+    inputCheck.addEventListener('click', app.checked);
     li.dataset.elementSearch = object.type;
     li.dataset.storage = storage;
     li.id = token;
@@ -175,12 +177,130 @@ var Storage = new SheetStorages();
     }
   }
 
+  // Verifico gli elementi selezionati in modo da abilitare/disabilitare alcuni tasti in
+  // .allButtons
+
+  app.checkVersioning = (type) => {
+    // Ciclo gli elementi selezionati
+    console.clear();
+    // se è stato selezionato più di un elemento visualizzo .allButtons
+    const countChecked = document.querySelectorAll(`#ul-${type} li input:checked`).length;
+    document.querySelector(`menu.allButtons[data-id='${type}']`).hidden = (countChecked > 1) ? false : true;
+  }
+
+  app.downloadAll = async (e) => {
+    const type = e.target.dataset.type;
+    let urls = [];
+    document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
+      urls.push(`/fetch_api/name/${el.dataset.id}/${type}_show`);
+    });
+    console.log(urls);
+    debugger;
+    return;
+    // ottengo tutte le risposte in un array
+    await Promise.all(urls.map(url => fetch(url)))
+      .then(responses => {
+        return Promise.all(responses.map(response => {
+          if (!response.ok) { throw Error(response.statusText); }
+          return response.json();
+        }))
+      })
+      .then((data) => {
+        console.log(data);
+        // reimposto l'oggetto dopo la promise, impostando i vari dataset, sync, identical, ecc...
+        // app.checkObject(data);
+      })
+      .catch(err => console.error(err));
+  }
+
+  app.uploadAll = async (e) => {
+    const type = e.target.dataset.type;
+    let requests = [];
+    document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
+      const json = JSON.parse(window.localStorage.getItem(el.dataset.id));
+      const params = JSON.stringify(json);
+      const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+      requests.push(new Request(`/fetch_api/json/${type}_store`, init));
+    });
+    console.log(requests);
+    debugger;
+    return;
+    // ottengo tutte le risposte in un array
+    await Promise.all(requests.map(req => fetch(req)))
+      .then(responses => {
+        return Promise.all(responses.map(response => {
+          if (!response.ok) { throw Error(response.statusText); }
+          return response.json();
+        }))
+      })
+      .then((data) => {
+        console.log(data);
+        // reimposto l'oggetto dopo la promise, impostando i vari dataset, sync, identical, ecc...
+        // app.checkObject(data);
+      })
+      .catch(err => console.error(err));
+  }
+
+  app.upgradeAll = async (e) => {
+    const type = e.target.dataset.type;
+    let requests = [];
+    document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
+      const json = JSON.parse(window.localStorage.getItem(el.dataset.id));
+      const params = JSON.stringify(json);
+      const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+      requests.push(new Request(`/fetch_api/json/${type}_update`, init));
+    });
+    console.log(requests);
+    debugger;
+    return;
+    // ottengo tutte le risposte in un array
+    await Promise.all(requests.map(req => fetch(req)))
+      .then(responses => {
+        return Promise.all(responses.map(response => {
+          if (!response.ok) { throw Error(response.statusText); }
+          return response.json();
+        }))
+      })
+      .then((data) => {
+        console.log(data);
+        // reimposto l'oggetto dopo la promise, impostando i vari dataset, sync, identical, ecc...
+        // app.checkObject(data);
+      })
+      .catch(err => console.error(err));
+  }
+
+  app.deleteAll = async (e) => {
+    const type = e.target.dataset.type;
+    let urls = [];
+    document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
+      urls.push(`/fetch_api/name/${el.dataset.id}/${type}_destroy`);
+    });
+    console.log(urls);
+    debugger;
+    return;
+    // ottengo tutte le risposte in un array
+    await Promise.all(urls.map(url => fetch(url)))
+      .then(responses => {
+        return Promise.all(responses.map(response => {
+          if (!response.ok) { throw Error(response.statusText); }
+          return response.json();
+        }))
+      })
+      .then((data) => {
+        console.log(data);
+        // reimposto l'oggetto dopo la promise, impostando i vari dataset, sync, identical, ecc...
+        // app.checkObject(data);
+      })
+      .catch(err => console.error(err));
+  }
+
   document.querySelectorAll('button[data-select-all]').forEach(button => {
     button.addEventListener('click', (e) => {
       let type = e.currentTarget.dataset.type;
       document.querySelectorAll(`.relative-ul[data-id='${type}'] input`).forEach(input => input.checked = true);
       // visualizzo il menu.allButtons corrispondente
       document.querySelector(`menu.allButtons[data-id='${type}']`).hidden = false;
+      app.checkVersioning(type);
     });
   });
 
@@ -193,6 +313,8 @@ var Storage = new SheetStorages();
     });
   });
 
+  app.checked = (e) => app.checkVersioning(e.target.dataset.type);
+
   app.init = () => {
     // scarico elenco oggetti dal DB (WorkBooks, WorkSheets e Sheets)
     // visualizzo oggetti locali (da qui possono essere salvati su DB)
@@ -200,7 +322,7 @@ var Storage = new SheetStorages();
     document.querySelectorAll('menu').forEach(menu => menu.dataset.init = 'true');
     // recupero tutti gli elementi in localStorage per inserirli nelle rispettive <ul> impostate in hidden
     app.getLocal();
-    // app.getDB();
+    app.getDB();
   }
 
   app.selectObject = (e) => {
@@ -365,8 +487,6 @@ var Storage = new SheetStorages();
   }
 
   app.init();
-
-  // -------------------------
 
   app.downloadObjectFromDB = async (name, type) => {
     let url;

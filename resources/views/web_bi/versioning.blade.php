@@ -76,10 +76,10 @@
             <div class="details">
               <section class="placeholder" data-attr="WorkBooks">
                 <menu class="allButtons" data-id="workbook" hidden>
-                  <button data-fn="uploadAll" data-upload class="button-icons material-icons-round md-18">upload</button>
-                  <button data-fn="downloadAll" data-download class="button-icons material-icons-round md-18">download</button>
-                  <button data-fn="upgradeAll" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
-                  <button data-fn="deleteAll" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
+                  <button data-fn="uploadAll" data-type="workbook" data-upload class="button-icons material-icons-round md-18">upload</button>
+                  <button data-fn="downloadAll" data-type="workbook" data-download class="button-icons material-icons-round md-18">download</button>
+                  <button data-fn="upgradeAll" data-type="workbook" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
+                  <button data-fn="deleteAll" data-type="workbook" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
                 </menu>
                 <div class="relative-ul" data-id="workbook" data-type="workbooks">
                   <ul class="elements custom-scrollbar" id="ul-workbook"></ul>
@@ -94,10 +94,10 @@
             <div class="details">
               <section class="placeholder" data-attr="Sheets">
                 <menu class="allButtons" data-id="sheet" hidden>
-                  <button data-fn="uploadAll" data-upload class="button-icons material-icons-round md-18">upload</button>
-                  <button data-fn="downloadAll" data-download class="button-icons material-icons-round md-18">download</button>
-                  <button data-fn="upgradeAll" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
-                  <button data-fn="deleteAll" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
+                  <button data-fn="uploadAll" data-type="sheet" data-upload class="button-icons material-icons-round md-18">upload</button>
+                  <button data-fn="downloadAll" data-type="sheet" data-download class="button-icons material-icons-round md-18">download</button>
+                  <button data-fn="upgradeAll" data-type="sheet" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
+                  <button data-fn="deleteAll" data-type="sheet" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
                 </menu>
                 <div class="relative-ul custom-scrollbar" data-id="sheet" data-type="sheets">
                   <ul class="elements custom-scrollbar" id="ul-sheet"></ul>
@@ -117,10 +117,10 @@
 
               <section data-id="metric" class="placeholder" data-attr="Metriche">
                 <menu class="allButtons" data-id="metric" hidden>
-                  <button data-fn="uploadAll" data-upload class="button-icons material-icons-round md-18">upload</button>
-                  <button data-fn="downloadAll" data-download class="button-icons material-icons-round md-18">download</button>
-                  <button data-fn="upgradeAll" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
-                  <button data-fn="deleteAll" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
+                  <button data-fn="uploadAll" data-type="metric" data-upload class="button-icons material-icons-round md-18">upload</button>
+                  <button data-fn="downloadAll" data-type="metric" data-download class="button-icons material-icons-round md-18">download</button>
+                  <button data-fn="upgradeAll" data-type="metric" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
+                  <button data-fn="deleteAll" data-type="metric" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
                 </menu>
                 <div class="relative-ul custom-scrollbar" data-id="metric" data-type="metrics">
                   <ul class="elements custom-scrollbar" id="ul-metric"></ul>
@@ -133,10 +133,10 @@
 
               <section data-id="filter" hidden class="placeholder" data-attr="Filtri">
                 <menu class="allButtons" data-id="filter" hidden>
-                  <button data-fn="uploadAll" data-upload class="button-icons material-icons-round md-18">upload</button>
-                  <button data-fn="downloadAll" data-download class="button-icons material-icons-round md-18">download</button>
-                  <button data-fn="upgradeAll" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
-                  <button data-fn="deleteAll" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
+                  <button data-fn="uploadAll" data-type="filter" data-upload class="button-icons material-icons-round md-18">upload</button>
+                  <button data-fn="downloadAll" data-type="filter" data-download class="button-icons material-icons-round md-18">download</button>
+                  <button data-fn="upgradeAll" data-type="filter" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
+                  <button data-fn="deleteAll" data-type="filter" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
                 </menu>
                 <div class="relative-ul custom-scrollbar" data-id="filter" data-type="filters">
                   <ul class="elements custom-scrollbar" id="ul-filter"></ul>
