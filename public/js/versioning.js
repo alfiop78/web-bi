@@ -205,6 +205,9 @@ var Storage = new SheetStorages();
         allButtons.download.disabled = true;
         allButtons.upgrade.disabled = true;
       }
+      // data-synx=false data-storage=db : Visualizzazione download e delete
+      const NotSyncDB = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'false' && el.parentElement.dataset.storage === 'db');
+      (NotSyncDB) ? allButtons.download.disabled = false : allButtons.download.disabled = true;
     }
   }
 
