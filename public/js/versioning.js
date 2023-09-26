@@ -179,13 +179,33 @@ var Storage = new SheetStorages();
 
   // Verifico gli elementi selezionati in modo da abilitare/disabilitare alcuni tasti in
   // .allButtons
-
   app.checkVersioning = (type) => {
     // Ciclo gli elementi selezionati
     console.clear();
     // se è stato selezionato più di un elemento visualizzo .allButtons
     const countChecked = document.querySelectorAll(`#ul-${type} li input:checked`).length;
+    // visualizzo/nascondo .allButtons
     document.querySelector(`menu.allButtons[data-id='${type}']`).hidden = (countChecked > 1) ? false : true;
+    if (countChecked > 1) {
+      const allButtons = {
+        upload: document.querySelector(`button[data-type='${type}'][data-upload]`),
+        download: document.querySelector(`button[data-type='${type}'][data-download]`),
+        upgrade: document.querySelector(`button[data-type='${type}'][data-upgrade]`),
+        delete: document.querySelector(`button[data-type='${type}'][data-delete]`),
+      }
+      // Not Sync abilita i tasti download, upgrade, delete
+      const NotSync = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'false' && el.parentElement.dataset.storage === 'local');
+      (NotSync) ? allButtons.upload.disabled = false : allButtons.upload.disabled = true;
+      // data-sync=true e data-identical=false
+      const notIdentical = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'true' && el.parentElement.dataset.identical === 'false');
+      if (notIdentical) {
+        allButtons.download.disabled = false;
+        allButtons.upgrade.disabled = false;
+      } else {
+        allButtons.download.disabled = true;
+        allButtons.upgrade.disabled = true;
+      }
+    }
   }
 
   app.downloadAll = async (e) => {
