@@ -15,7 +15,7 @@ class BImetricController extends Controller
   public function index()
   {
     $metrics = BImetric::all();
-    return response()->json(['metrics' => $metrics]);
+    return response()->json(['metric' => $metrics]);
   }
 
   /**
@@ -93,7 +93,7 @@ class BImetricController extends Controller
   {
     $token = $request->collect()->get('token');
     $name = $request->collect()->get('alias');
-    // codifico tutta la $request in json per poterla inserire nel DB 
+    // codifico tutta la $request in json per poterla inserire nel DB
     $json = json_encode($request->all());
     // cerco nel DB il token del PROCESS da aggiornare
     $metric = $bImetric::findOrFail($token);

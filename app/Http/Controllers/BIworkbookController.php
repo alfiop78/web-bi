@@ -15,7 +15,7 @@ class BIworkbookController extends Controller
   public function index()
   {
     $workbooks = BIworkbook::all();
-    return response()->json(['workbooks' => $workbooks]);
+    return response()->json(['workbook' => $workbooks]);
   }
 
   /**
@@ -82,7 +82,7 @@ class BIworkbookController extends Controller
   {
     $token = $request->collect()->get('token');
     $name = $request->collect()->get('name');
-    // codifico tutta la $request in json per poterla inserire nel DB 
+    // codifico tutta la $request in json per poterla inserire nel DB
     $json = json_encode($request->all());
     // cerco nel DB il token del PROCESS da aggiornare
     $workbook = $bIworkbook::findOrFail($token);

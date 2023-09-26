@@ -15,7 +15,7 @@ class BIsheetController extends Controller
   public function index()
   {
     $sheets = BIsheet::all();
-    return response()->json(['sheets' => $sheets]);
+    return response()->json(['sheet' => $sheets]);
   }
 
   /**
@@ -82,7 +82,7 @@ class BIsheetController extends Controller
   {
     $token = $request->collect()->get('token');
     $name = $request->collect()->get('name');
-    // codifico tutta la $request in json per poterla inserire nel DB 
+    // codifico tutta la $request in json per poterla inserire nel DB
     $json = json_encode($request->all());
     // cerco nel DB il token del PROCESS da aggiornare
     $sheet = $bIsheet::findOrFail($token);

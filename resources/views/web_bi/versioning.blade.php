@@ -81,7 +81,7 @@
                   <button data-fn="upgradeAll" data-type="workbook" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
                   <button data-fn="deleteAll" data-type="workbook" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
                 </menu>
-                <div class="relative-ul" data-id="workbook" data-type="workbooks">
+                <div class="relative-ul" data-id="workbook" data-type="workbook">
                   <ul class="elements custom-scrollbar" id="ul-workbook"></ul>
                 </div>
                 <section class="hideableButtons">
@@ -99,7 +99,7 @@
                   <button data-fn="upgradeAll" data-type="sheet" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
                   <button data-fn="deleteAll" data-type="sheet" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
                 </menu>
-                <div class="relative-ul custom-scrollbar" data-id="sheet" data-type="sheets">
+                <div class="relative-ul custom-scrollbar" data-id="sheet" data-type="sheet">
                   <ul class="elements custom-scrollbar" id="ul-sheet"></ul>
                 </div>
                 <section class="hideableButtons">
@@ -122,7 +122,7 @@
                   <button data-fn="upgradeAll" data-type="metric" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
                   <button data-fn="deleteAll" data-type="metric" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
                 </menu>
-                <div class="relative-ul custom-scrollbar" data-id="metric" data-type="metrics">
+                <div class="relative-ul custom-scrollbar" data-id="metric" data-type="metric">
                   <ul class="elements custom-scrollbar" id="ul-metric"></ul>
                 </div>
                 <section class="hideableButtons">
@@ -138,7 +138,7 @@
                   <button data-fn="upgradeAll" data-type="filter" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
                   <button data-fn="deleteAll" data-type="filter" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
                 </menu>
-                <div class="relative-ul custom-scrollbar" data-id="filter" data-type="filters">
+                <div class="relative-ul custom-scrollbar" data-id="filter" data-type="filter">
                   <ul class="elements custom-scrollbar" id="ul-filter"></ul>
                 </div>
                 <section class="hideableButtons">
@@ -192,126 +192,6 @@
       </div>
     </div>
 
-    <!-- <div id="container">
-      <div id="content">
-        <div id="body">
-
-          <div class="wrapper">
-            <section class="wrapper-content">
-              <section class="grid-layout">
-                <div class="content">
-                  <div class="body grid-section-2">
-                    <div class="objects" data-local>
-                      <div class="details reverse">
-                        <section class="placeholder" data-attr="WorkBooks">
-                          <menu class="allButtons" data-id="workbook" hidden>
-                            <button data-fn="uploadAll" data-upload class="button-icons material-icons-round md-18">upload</button>
-                            <button data-fn="downloadAll" data-download class="button-icons material-icons-round md-18">download</button>
-                            <button data-fn="upgradeAll" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
-                            <button data-fn="deleteAll" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
-                          </menu>
-                          <div class="relative-ul" data-id="workbook" data-type="workbooks">
-                            <ul class="elements custom-scrollbar" id="ul-workbook"></ul>
-                          </div>
-                          <section class="hideableButtons">
-                            <button type="button" class="btn-link default" data-select-all data-type="workbook">Select All</button>
-                            <button type="button" class="btn-link default" data-unselect-all data-type="workbook">Unselect All</button>
-                          </section>
-                        </section>
-                        <section class="placeholder" data-attr="Sheets">
-                          <menu class="allButtons" data-id="sheet" hidden>
-                            <button data-fn="uploadAll" data-upload class="button-icons material-icons-round md-18">upload</button>
-                            <button data-fn="downloadAll" data-download class="button-icons material-icons-round md-18">download</button>
-                            <button data-fn="upgradeAll" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
-                            <button data-fn="deleteAll" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
-                          </menu>
-                          <div class="relative-ul custom-scrollbar" data-id="sheet" data-type="sheets">
-                            <ul class="elements custom-scrollbar" id="ul-sheet"></ul>
-                          </div>
-                          <section class="hideableButtons">
-                            <button type="button" class="btn-link default" data-select-all data-type="sheet">Select All</button>
-                            <button type="button" class="btn-link default" data-unselect-all data-type="sheet">Unselect All</button>
-                          </section>
-                        </section>
-                      </div>
-                      <div class="details menu">
-                        <menu>
-                          <button id="metric" class="btn-link default" data-fn="selectObject" data-selected>Metriche</button>
-                          <button id="filter" class="btn-link default" data-fn="selectObject">Filtri</button>
-                        </menu>
-                        <section data-id="metric" class="placeholder" data-attr="Metriche">
-                          <menu class="allButtons" data-id="metric" hidden>
-                            <button data-fn="uploadAll" data-upload class="button-icons material-icons-round md-18">upload</button>
-                            <button data-fn="downloadAll" data-download class="button-icons material-icons-round md-18">download</button>
-                            <button data-fn="upgradeAll" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
-                            <button data-fn="deleteAll" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
-                          </menu>
-                          <div class="relative-ul custom-scrollbar" data-id="metric" data-type="metrics">
-                            <ul class="elements custom-scrollbar" id="ul-metric"></ul>
-                          </div>
-                          <section class="hideableButtons">
-                            <button type="button" class="btn-link default" data-select-all data-type="metric">Select All</button>
-                            <button type="button" class="btn-link default" data-unselect-all data-type="metric">Unselect All</button>
-                          </section>
-                        </section>
-                        <section data-id="filter" hidden class="placeholder" data-attr="Filtri">
-                          <menu class="allButtons" data-id="filter" hidden>
-                            <button data-fn="uploadAll" data-upload class="button-icons material-icons-round md-18">upload</button>
-                            <button data-fn="downloadAll" data-download class="button-icons material-icons-round md-18">download</button>
-                            <button data-fn="upgradeAll" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
-                            <button data-fn="deleteAll" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
-                          </menu>
-                          <div class="relative-ul custom-scrollbar" data-id="filter" data-type="filters">
-                            <ul class="elements custom-scrollbar" id="ul-filter"></ul>
-                          </div>
-                          <section class="hideableButtons">
-                            <button type="button" class="btn-link default" data-select-all data-type="filter">Select All</button>
-                            <button type="button" class="btn-link default" data-unselect-all data-type="filter">Unselect All</button>
-                          </section>
-                        </section>
-
-                        <section id="info-resource" class="placeholder" data-attr="Dettaglio risorsa">
-                          <section id="info">
-                            <div id="created_at" class="item-resources">
-                              <span>Data Creazione</span>
-                              <span data-value></span>
-                            </div>
-                            <div id="updated_at" class="item-resources">
-                              <span>Data aggiorn.</span>
-                              <span data-value></span>
-                            </div>
-                            <div id="note" class="item-resources">
-                              <span>Note</span>
-                              <span data-value></span>
-                            </div>
-                          </section>
-                        </section>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="footer">
-                    <button name="cancel" value="chiudi">Chiudi</button>
-                  </div>
-                </div>
-              </section>
-            </section>
-          </div>
-        </div>
-      </div>
-
-      <div id="controls">
-        <div id="fabs">
-        </div>
-      </div>
-
-      <div id="console">
-        <div id="fabsConsole">
-          <i class="material-icons md-18">info</i>
-          <p></p>
-        </div>
-      </div>
-
-    </div> -->
   </main>
   <div class="loader">
     <svg viewBox="0 0 32 32" width="32" height="32">

@@ -40,39 +40,44 @@ var Storage = new SheetStorages();
   // console.log(document.getElementById('body'));
   observerList.observe(document.getElementById('body'), config);
 
+  app.statusObject = (type, element) => {
+    const dbElement = JSON.parse(element.json_value);
+    const localElement = JSON.parse(localStorage.getItem(dbElement.token));
+    // console.log(element, element.token);
+    // verifico lo stato dell'elemento in ciclo rispetto al localStorage
+    // (sincronizzato, non sincronizzato, ecc...)
+    const div = document.querySelector(`div[data-type='${type}']`);
+    let li;
+    if (div.querySelector(`li[id='${dbElement.token}']`)) {
+      // l'elemento in ciclo (dal db) è presente anche in locale
+      li = div.querySelector(`li[id='${dbElement.token}']`);
+      const statusIcon = li.querySelector('i[data-sync-status]');
+      li.dataset.sync = 'true';
+      // verifico se l'elemento in ciclo è "identico" all'elemento in storage
+      if (dbElement.updated_at && (localElement.updated_at === dbElement.updated_at)) {
+        // oggetti identici
+        li.dataset.identical = 'true';
+        statusIcon.classList.add('done');
+        statusIcon.innerText = "done";
+      } else {
+        // oggetti con updated_at diverse
+        // TODO: qui devo scegliere se fare un aggiornamento locale->DB oppure DB->locale
+        li.dataset.identical = 'false';
+        statusIcon.innerText = "sync_problem";
+      }
+    } else {
+      // l'elemento non è presente in locale
+      // aggiungo l'elemento alla <ul> con attributo data-storage="db"
+      app.addElement(dbElement.token, dbElement, 'db');
+    }
+  }
+
   app.checkObjects = (data) => {
     for (const [type, elements] of Object.entries(data)) {
+      // console.log(elements);
       elements.forEach(element => {
-        const dbElement = JSON.parse(element.json_value);
-        const localElement = JSON.parse(localStorage.getItem(dbElement.token));
-        // console.log(element, element.token);
-        // verifico lo stato dell'elemento in ciclo rispetto al localStorage
-        // (sincronizzato, non sincronizzato, ecc...)
-        const div = document.querySelector(`div[data-type='${type}']`);
-        let li;
-        if (div.querySelector(`li[id='${dbElement.token}']`)) {
-          // l'elemento in ciclo (dal db) è presente anche in locale
-          li = div.querySelector(`li[id='${dbElement.token}']`);
-          const statusIcon = li.querySelector('i[data-sync-status]');
-          li.dataset.sync = 'true';
-          // verifico se l'elemento in ciclo è "identico" all'elemento in storage
-          if (dbElement.updated_at && (localElement.updated_at === dbElement.updated_at)) {
-            // oggetti identici
-            li.dataset.identical = 'true';
-            statusIcon.classList.add('done');
-            statusIcon.innerText = "done";
-          } else {
-            // oggetti con updated_at diverse
-            // TODO: qui devo scegliere se fare un aggiornamento locale->DB oppure DB->locale
-            li.dataset.identical = 'false';
-            statusIcon.innerText = "sync_problem";
-          }
-        } else {
-          // l'elemento non è presente in locale
-          // aggiungo l'elemento alla <ul> con attributo data-storage="db"
-          app.addElement(dbElement.token, dbElement, 'db');
-        }
-      })
+        app.statusObject(type, element);
+      });
     }
   }
 
@@ -258,9 +263,9 @@ var Storage = new SheetStorages();
         }))
       })
       .then((data) => {
+        debugger;
         console.log(data);
-        // reimposto l'oggetto dopo la promise, impostando i vari dataset, sync, identical, ecc...
-        // app.checkObject(data);
+        // TODO: reimposto l'oggetto dopo la promise, impostando i vari dataset, sync, identical, ecc...
       })
       .catch(err => console.error(err));
   }
@@ -362,9 +367,9 @@ var Storage = new SheetStorages();
   }
 
   app.uploadObject = async (e) => {
-    // let url = '/fetch_api/json/workbook_store';
     let url = `/fetch_api/json/${e.currentTarget.dataset.upload}_store`;
-    const json = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token));
+    const token = e.currentTarget.dataset.token;
+    const json = JSON.parse(window.localStorage.getItem(token));
     const params = JSON.stringify(json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     // recupero l'elemento da salvare su db, presente nello storage
@@ -379,7 +384,13 @@ var Storage = new SheetStorages();
       .then((data) => {
         console.log(data);
         if (data) {
-          console.log('data : ', data);
+          // aggiorno lo status dell'elemento dopo l'upload
+          const li = document.getElementById(`${token}`);
+          const statusIcon = li.querySelector('i[data-sync-status]');
+          li.dataset.sync = 'true';
+          li.dataset.identical = 'true';
+          statusIcon.classList.add('done');
+          statusIcon.innerText = "done";
         } else {
           console.error("Errore nell'aggiornamento della risorsa");
         }
@@ -449,17 +460,6 @@ var Storage = new SheetStorages();
           // lo salvo nello storage
           Storage.save(JSON.parse(data.json_value));
           // TODO: lo visualizzo nel DOM impostandolo come elemento sincronizzato e identico
-
-          /* const sectionElement = app.dialogVersioning.querySelector("section[data-object-name='" + name + "'][data-object-type='" + type + "']");
-          console.log('sectionElement : ', sectionElement);
-          // modifico l'icona in .vers-status impostando sync con la classe md-status al posto di md-warning
-          sectionElement.querySelector('.vers-status > button').innerText = 'sync';
-          sectionElement.querySelector('.vers-status > button').classList.replace('md-warning', 'md-status');
-          // modifico la descrizione in .vers-status-descr impostando "Sincronizzato"
-          sectionElement.querySelector('.vers-status-descr').innerText = 'Sincronizzato';
-          // nascondo l'icona btn-download e btn-upgrade-production
-          sectionElement.querySelector('.vers-actions button[data-id="btn-download"]').disabled = true;
-          sectionElement.querySelector('.vers-actions button[data-id="btn-upgrade-production"]').disabled = true; */
 
         } else {
           console.error("Errore nella cancellazione della risorsa!");
