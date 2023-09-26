@@ -216,7 +216,6 @@ var Storage = new SheetStorages();
     });
     console.log(urls);
     debugger;
-    return;
     // ottengo tutte le risposte in un array
     await Promise.all(urls.map(url => fetch(url)))
       .then(responses => {
@@ -244,7 +243,6 @@ var Storage = new SheetStorages();
     });
     console.log(requests);
     debugger;
-    return;
     // ottengo tutte le risposte in un array
     await Promise.all(requests.map(req => fetch(req)))
       .then(responses => {
