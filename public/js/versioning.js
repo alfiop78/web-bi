@@ -245,15 +245,14 @@ var Storage = new SheetStorages();
 
   app.uploadAll = async (e) => {
     const type = e.target.dataset.type;
-    let requests = [];
+    let requests = [], tokens = [];
     document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
       const json = JSON.parse(window.localStorage.getItem(el.dataset.id));
+      tokens.push(el.dataset.id);
       const params = JSON.stringify(json);
       const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
       requests.push(new Request(`/fetch_api/json/${type}_store`, init));
     });
-    console.log(requests);
-    debugger;
     // ottengo tutte le risposte in un array
     await Promise.all(requests.map(req => fetch(req)))
       .then(responses => {
@@ -263,8 +262,15 @@ var Storage = new SheetStorages();
         }))
       })
       .then((data) => {
-        debugger;
-        console.log(data);
+        tokens.forEach(token => {
+          // aggiorno lo status dell'elemento dopo l'upload
+          const li = document.getElementById(`${token}`);
+          const statusIcon = li.querySelector('i[data-sync-status]');
+          li.dataset.sync = 'true';
+          li.dataset.identical = 'true';
+          statusIcon.classList.add('done');
+          statusIcon.innerText = "done";
+        });
         // TODO: reimposto l'oggetto dopo la promise, impostando i vari dataset, sync, identical, ecc...
       })
       .catch(err => console.error(err));
