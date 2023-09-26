@@ -229,6 +229,9 @@ var Storage = new SheetStorages();
       })
       .then((data) => {
         console.log(data);
+        console.log('ELEMENTI SCARICATI CON SUCCESSO!');
+        // lo salvo nello storage
+        data.forEach(json => Storage.save(JSON.parse(json)));
         // reimposto l'oggetto dopo la promise, impostando i vari dataset, sync, identical, ecc...
         // app.checkObject(data);
       })
