@@ -40,43 +40,39 @@ var Storage = new SheetStorages();
   // console.log(document.getElementById('body'));
   observerList.observe(document.getElementById('body'), config);
 
-  app.statusObject = (type, element) => {
-    const dbElement = JSON.parse(element.json_value);
-    const localElement = JSON.parse(localStorage.getItem(dbElement.token));
-    // console.log(element, element.token);
-    // verifico lo stato dell'elemento in ciclo rispetto al localStorage
-    // (sincronizzato, non sincronizzato, ecc...)
-    const div = document.querySelector(`div[data-type='${type}']`);
-    let li;
-    if (div.querySelector(`li[id='${dbElement.token}']`)) {
-      // l'elemento in ciclo (dal db) è presente anche in locale
-      li = div.querySelector(`li[id='${dbElement.token}']`);
-      const statusIcon = li.querySelector('i[data-sync-status]');
-      li.dataset.sync = 'true';
-      // verifico se l'elemento in ciclo è "identico" all'elemento in storage
-      if (dbElement.updated_at && (localElement.updated_at === dbElement.updated_at)) {
-        // oggetti identici
-        li.dataset.identical = 'true';
-        statusIcon.classList.add('done');
-        statusIcon.innerText = "done";
-      } else {
-        // oggetti con updated_at diverse
-        // TODO: qui devo scegliere se fare un aggiornamento locale->DB oppure DB->locale
-        li.dataset.identical = 'false';
-        statusIcon.innerText = "sync_problem";
-      }
-    } else {
-      // l'elemento non è presente in locale
-      // aggiungo l'elemento alla <ul> con attributo data-storage="db"
-      app.addElement(dbElement.token, dbElement, 'db');
-    }
-  }
-
   app.checkObjects = (data) => {
     for (const [type, elements] of Object.entries(data)) {
       // console.log(elements);
       elements.forEach(element => {
-        app.statusObject(type, element);
+        const dbElement = JSON.parse(element.json_value);
+        const localElement = JSON.parse(localStorage.getItem(dbElement.token));
+        // console.log(element, element.token);
+        // verifico lo stato dell'elemento in ciclo rispetto al localStorage
+        // (sincronizzato, non sincronizzato, ecc...)
+        const div = document.querySelector(`div[data-type='${type}']`);
+        let li;
+        if (div.querySelector(`li[id='${dbElement.token}']`)) {
+          // l'elemento in ciclo (dal db) è presente anche in locale
+          li = div.querySelector(`li[id='${dbElement.token}']`);
+          const statusIcon = li.querySelector('i[data-sync-status]');
+          li.dataset.sync = 'true';
+          // verifico se l'elemento in ciclo è "identico" all'elemento in storage
+          if (dbElement.updated_at && (localElement.updated_at === dbElement.updated_at)) {
+            // oggetti identici
+            li.dataset.identical = 'true';
+            statusIcon.classList.add('done');
+            statusIcon.innerText = "done";
+          } else {
+            // oggetti con updated_at diverse
+            // TODO: qui devo scegliere se fare un aggiornamento locale->DB oppure DB->locale
+            li.dataset.identical = 'false';
+            statusIcon.innerText = "sync_problem";
+          }
+        } else {
+          // l'elemento non è presente in locale
+          // aggiungo l'elemento alla <ul> con attributo data-storage="db"
+          app.addElement(dbElement.token, dbElement, 'db');
+        }
       });
     }
   }
@@ -222,8 +218,6 @@ var Storage = new SheetStorages();
     document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
       urls.push(`/fetch_api/name/${el.dataset.id}/${type}_show`);
     });
-    console.log(urls);
-    debugger;
     // ottengo tutte le risposte in un array
     await Promise.all(urls.map(url => fetch(url)))
       .then(responses => {
@@ -233,12 +227,20 @@ var Storage = new SheetStorages();
         }))
       })
       .then((data) => {
-        console.log(data);
-        console.log('ELEMENTI SCARICATI CON SUCCESSO!');
-        // lo salvo nello storage
-        data.forEach(json => Storage.save(JSON.parse(json)));
-        // reimposto l'oggetto dopo la promise, impostando i vari dataset, sync, identical, ecc...
-        // app.checkObject(data);
+        if (data) {
+          data.forEach(json => {
+            Storage.save(JSON.parse(json.json_value))
+            // aggiorno lo status dell'elemento dopo l'upload
+            const li = document.getElementById(`${json.token}`);
+            const statusIcon = li.querySelector('i[data-sync-status]');
+            li.dataset.sync = 'true';
+            li.dataset.identical = 'true';
+            statusIcon.classList.add('done');
+            statusIcon.innerText = "done";
+          });
+        } else {
+          console.error("Errore nell'aggiornamento della risorsa");
+        }
       })
       .catch(err => console.error(err));
   }
@@ -262,32 +264,34 @@ var Storage = new SheetStorages();
         }))
       })
       .then((data) => {
-        tokens.forEach(token => {
-          // aggiorno lo status dell'elemento dopo l'upload
-          const li = document.getElementById(`${token}`);
-          const statusIcon = li.querySelector('i[data-sync-status]');
-          li.dataset.sync = 'true';
-          li.dataset.identical = 'true';
-          statusIcon.classList.add('done');
-          statusIcon.innerText = "done";
-        });
-        // TODO: reimposto l'oggetto dopo la promise, impostando i vari dataset, sync, identical, ecc...
+        // console.log(data);
+        if (data) {
+          tokens.forEach(token => {
+            // aggiorno lo status dell'elemento dopo l'upload
+            const li = document.getElementById(`${token}`);
+            const statusIcon = li.querySelector('i[data-sync-status]');
+            li.dataset.sync = 'true';
+            li.dataset.identical = 'true';
+            statusIcon.classList.add('done');
+            statusIcon.innerText = "done";
+          });
+        } else {
+          console.error("Errore nell'aggiornamento della risorsa");
+        }
       })
       .catch(err => console.error(err));
   }
 
   app.upgradeAll = async (e) => {
     const type = e.target.dataset.type;
-    let requests = [];
+    let requests = [], tokens = [];
     document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
       const json = JSON.parse(window.localStorage.getItem(el.dataset.id));
+      tokens.push(el.dataset.id);
       const params = JSON.stringify(json);
       const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
       requests.push(new Request(`/fetch_api/json/${type}_update`, init));
     });
-    console.log(requests);
-    debugger;
-    return;
     // ottengo tutte le risposte in un array
     await Promise.all(requests.map(req => fetch(req)))
       .then(responses => {
@@ -297,22 +301,30 @@ var Storage = new SheetStorages();
         }))
       })
       .then((data) => {
-        console.log(data);
-        // reimposto l'oggetto dopo la promise, impostando i vari dataset, sync, identical, ecc...
-        // app.checkObject(data);
+        if (data) {
+          tokens.forEach(token => {
+            // aggiorno lo status dell'elemento dopo l'upload
+            const li = document.getElementById(`${token}`);
+            const statusIcon = li.querySelector('i[data-sync-status]');
+            li.dataset.sync = 'true';
+            li.dataset.identical = 'true';
+            statusIcon.classList.add('done');
+            statusIcon.innerText = "done";
+          });
+        } else {
+          console.error("Errore nell'aggiornamento della risorsa");
+        }
       })
       .catch(err => console.error(err));
   }
 
   app.deleteAll = async (e) => {
     const type = e.target.dataset.type;
-    let urls = [];
+    let urls = [], tokens = [];
     document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
       urls.push(`/fetch_api/name/${el.dataset.id}/${type}_destroy`);
+      tokens.push(el.dataset.id);
     });
-    console.log(urls);
-    debugger;
-    return;
     // ottengo tutte le risposte in un array
     await Promise.all(urls.map(url => fetch(url)))
       .then(responses => {
@@ -324,7 +336,13 @@ var Storage = new SheetStorages();
       .then((data) => {
         console.log(data);
         // reimposto l'oggetto dopo la promise, impostando i vari dataset, sync, identical, ecc...
-        // app.checkObject(data);
+        tokens.forEach(token => {
+          // aggiorno lo status dell'elemento dopo l'upload
+          const li = document.getElementById(`${token}`);
+          window.localStorage.removeItem(token);
+          // elimino anche dal DOM l'elemento
+          li.remove();
+        });
       })
       .catch(err => console.error(err));
   }
@@ -407,7 +425,8 @@ var Storage = new SheetStorages();
   app.upgradeObject = async (e) => {
     // TODO: questa Fn è identica a app.uploadObject(), trovare il modo di utilizzarne solo una
     let url = `/fetch_api/json/${e.currentTarget.dataset.upgrade}_update`;
-    const json = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token));
+    const token = e.currentTarget.dataset.token;
+    const json = JSON.parse(window.localStorage.getItem(token));
     const params = JSON.stringify(json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     // recupero l'elemento da salvare su db, presente nello storage
@@ -422,7 +441,13 @@ var Storage = new SheetStorages();
       .then((data) => {
         console.log(data);
         if (data) {
-          console.log('data : ', data);
+          // aggiorno lo status dell'elemento dopo l'upload
+          const li = document.getElementById(`${token}`);
+          const statusIcon = li.querySelector('i[data-sync-status]');
+          li.dataset.sync = 'true';
+          li.dataset.identical = 'true';
+          statusIcon.classList.add('done');
+          statusIcon.innerText = "done";
         } else {
           console.error("Errore nell'aggiornamento della risorsa");
         }
@@ -431,7 +456,8 @@ var Storage = new SheetStorages();
   }
 
   app.deleteObject = async (e) => {
-    await fetch(`/fetch_api/name/${e.currentTarget.dataset.token}/${e.currentTarget.dataset.delete}_destroy`)
+    const token = e.currentTarget.dataset.token;
+    await fetch(`/fetch_api/name/${token}/${e.currentTarget.dataset.delete}_destroy`)
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -441,10 +467,12 @@ var Storage = new SheetStorages();
         // console.log(data);
         if (data) {
           console.log('data : ', data);
-          console.log('ELEMENTO ELIMINATO CON SUCCESSO!');
-          // TODO: lo elimino anche dal localStorage se presente
-          // window.localStorage.removeItem(e.currentTarget.dataset.token);
-          // TODO: elimino anche dal DOM l'elemento
+          // console.log('ELEMENTO ELIMINATO CON SUCCESSO!');
+          // lo elimino anche dal localStorage se presente
+          window.localStorage.removeItem(token);
+          const li = document.getElementById(`${token}`);
+          // elimino anche dal DOM l'elemento
+          li.remove();
         } else {
           console.error("Errore nella cancellazione della risorsa!");
         }
@@ -453,7 +481,8 @@ var Storage = new SheetStorages();
   }
 
   app.downloadObject = async (e) => {
-    await fetch(`/fetch_api/name/${e.currentTarget.dataset.token}/${e.currentTarget.dataset.download}_show`)
+    const token = e.currentTarget.dataset.token;
+    await fetch(`/fetch_api/name/${token}/${e.currentTarget.dataset.download}_show`)
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -465,8 +494,13 @@ var Storage = new SheetStorages();
           console.log('ELEMENTO SCARICATO CON SUCCESSO!');
           // lo salvo nello storage
           Storage.save(JSON.parse(data.json_value));
-          // TODO: lo visualizzo nel DOM impostandolo come elemento sincronizzato e identico
-
+          // aggiorno lo status dell'elemento dopo l'upload
+          const li = document.getElementById(`${token}`);
+          const statusIcon = li.querySelector('i[data-sync-status]');
+          li.dataset.sync = 'true';
+          li.dataset.identical = 'true';
+          statusIcon.classList.add('done');
+          statusIcon.innerText = "done";
         } else {
           console.error("Errore nella cancellazione della risorsa!");
         }
