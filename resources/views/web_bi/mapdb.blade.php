@@ -361,7 +361,7 @@
                 </section>
                 <section class="input-area">
                   <input type="text" id="adv-metric-name" placeholder="Nome" value="" autocomplete="off" />
-                  <div id="input-metric" class="" data-content-editable contenteditable="true"></div>
+                  <div id="input-metric"></div>
                   <div>
                     <input type="checkbox" id="check-distinct" disabled />
                     <label for="check-distinct">DISTINCT</label>

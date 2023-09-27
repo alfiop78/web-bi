@@ -12,29 +12,6 @@ html, body{
   padding: 0;
 }
 
-main > #container{
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  position: relative;
-  background: var(--main-bg-color);
-}
-
-#content{
-  display: block;
-  width: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  /* padding-top: 32px; */
-  overflow-y: auto;
-  overflow-x: hidden;
-  background: var(--main-bg-color);
-  transition: all 500ms;
-}
-
 .wrapper-step{
   display: grid;
   /* grid-template-rows: auto 60% 1fr; */

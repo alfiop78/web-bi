@@ -29,6 +29,15 @@
   color: #494949;
 }
 
+#input-metric{
+  background-color: white;
+  padding: 1rem;
+  position: relative;
+  border-radius: 2px;
+  color: #494949;
+
+}
+
 .textarea[data-content-editable] {
   /* min-width: 300px; */
   min-height: 200px;

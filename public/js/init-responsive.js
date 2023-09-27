@@ -507,6 +507,7 @@ var Sheet;
     const metric = Sheet.metrics.get(token);
     field.dataset.type = metric.type;
     field.dataset.id = metric.token;
+    aggregateFn.dataset.metricId = metric.token;
     // Se lo Sheet è in modifica imposto il dataset 'added'
     (!Sheet.edit) ? field.dataset.added = 'true' : field.dataset.adding = 'true';
     // formula.dataset.id = metric.token;
@@ -1275,12 +1276,13 @@ var Sheet;
     input.focus();
   }
 
-  // edit di una funzione di aggregazione sulla metrica aggiunta allo Shet
+  // edit di una funzione di aggregazione sulla metrica aggiunta allo Sheet
   app.editAggregate = (e) => {
-    debugger;
     e.target.dataset.aggregate = e.target.innerText;
-    // const id = e.target.parentElement.dataset.id;
-    // Sheet.metric[id].aggregateFn = e.target.innerHTML;
+    const token = e.target.dataset.metricId;
+    // console.log(Sheet.metrics.get(token).aggregateFn);
+    // console.log(Sheet.sheet.metrics[token].aggregateFn);
+    Sheet.metrics.get(token).aggregateFn = e.target.innerText;
   }
 
   // edit di un alias della metrica dopo essere stata aggiunta allo Sheet

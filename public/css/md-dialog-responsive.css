@@ -71,6 +71,7 @@ dialog.medium{
   width: 65%;
   /* max-width: 60%; */
   height: 55%;
+  /* height: auto; */
   /* max-height: 50%; */
 }
 
