@@ -402,9 +402,7 @@ var Storage = new SheetStorages();
     document.querySelectorAll('menu button[data-selected]').forEach(button => delete button.dataset.selected);
     e.target.dataset.selected = 'true';
     // nascondo la <ul> attualmente visibile
-    // debugger;
     // visualizzo la <ul> corrispondente all'object selezionato
-    // debugger;
     document.querySelectorAll('.details.menu section[data-id]').forEach(section => {
       section.hidden = (section.dataset.id === e.currentTarget.id) ? false : true;
     });
@@ -566,6 +564,7 @@ var Storage = new SheetStorages();
     if (e.currentTarget.dataset.type === 'workbook') {
       [...document.querySelectorAll('li[data-workbook-ref]')].filter(element => {
         element.hidden = (element.dataset.workbookRef === e.currentTarget.dataset.token || e.currentTarget.dataset.selected === undefined) ? false : true;
+        element.dataset.searchable = (element.dataset.workbookRef === e.currentTarget.dataset.token || e.currentTarget.dataset.selected === undefined) ? true : false;
       });
     }
   }

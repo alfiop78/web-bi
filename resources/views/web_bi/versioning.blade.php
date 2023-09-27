@@ -81,8 +81,9 @@
                   <button data-fn="upgradeAll" data-type="workbook" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
                   <button data-fn="deleteAll" data-type="workbook" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
                 </menu>
+                <input id="search-workbook" type="search" autocomplete="off" data-search-id="search-workbook" data-element-search="workbook" placeholder="Ricerca" />
                 <div class="relative-ul" data-id="workbook" data-type="workbook">
-                  <ul class="elements custom-scrollbar" id="ul-workbook"></ul>
+                  <ul class="elements custom-scrollbar" data-search-id="search-workbook" id="ul-workbook"></ul>
                 </div>
                 <section class="hideableButtons">
                   <button type="button" class="btn-link default" data-select-all data-type="workbook">Select All</button>
@@ -99,8 +100,9 @@
                   <button data-fn="upgradeAll" data-type="sheet" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
                   <button data-fn="deleteAll" data-type="sheet" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
                 </menu>
+                <input id="search-sheet" type="search" autocomplete="off" data-search-id="search-sheet" data-element-search="sheet" placeholder="Ricerca" />
                 <div class="relative-ul custom-scrollbar" data-id="sheet" data-type="sheet">
-                  <ul class="elements custom-scrollbar" id="ul-sheet"></ul>
+                  <ul class="elements custom-scrollbar" data-search-id="search-sheet" id="ul-sheet"></ul>
                 </div>
                 <section class="hideableButtons">
                   <button type="button" class="btn-link default" data-select-all data-type="sheet">Select All</button>
@@ -122,8 +124,9 @@
                   <button data-fn="upgradeAll" data-type="metric" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
                   <button data-fn="deleteAll" data-type="metric" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
                 </menu>
+                <input id="search-metric" type="search" autocomplete="off" data-search-id="search-metric" data-element-search="metric" placeholder="Ricerca" />
                 <div class="relative-ul custom-scrollbar" data-id="metric" data-type="metric">
-                  <ul class="elements custom-scrollbar" id="ul-metric"></ul>
+                  <ul class="elements custom-scrollbar" data-search-id="search-metric" id="ul-metric"></ul>
                 </div>
                 <section class="hideableButtons">
                   <button type="button" class="btn-link default" data-select-all data-type="metric">Select All</button>
@@ -138,8 +141,9 @@
                   <button data-fn="upgradeAll" data-type="filter" data-upgrade class="button-icons material-icons-round md-18 danger">upgrade</button>
                   <button data-fn="deleteAll" data-type="filter" data-delete class="button-icons material-icons-round md-18 danger">delete</button>
                 </menu>
+                <input id="search-filter" type="search" autocomplete="off" data-search-id="search-filter" data-element-search="filter" placeholder="Ricerca" />
                 <div class="relative-ul custom-scrollbar" data-id="filter" data-type="filter">
-                  <ul class="elements custom-scrollbar" id="ul-filter"></ul>
+                  <ul class="elements custom-scrollbar" data-search-id="search-filter" id="ul-filter"></ul>
                 </div>
                 <section class="hideableButtons">
                   <button type="button" class="btn-link default" data-select-all data-type="filter">Select All</button>

@@ -217,12 +217,11 @@ class Application {
       const value = e.target.value.toLowerCase();
       // se sono presenti <details> li apro tutti
       document.querySelectorAll(`*[data-search-id='${id}'] > details`).forEach(detail => detail.setAttribute('open', 'true'));
-      let li = Array.from(document.querySelectorAll(`*[data-search-id='${id}'] li[data-element-search='${searchAttr}']`));
+      let li = Array.from(document.querySelectorAll(`*[data-search-id='${id}'] li[data-searchable='true'][data-element-search='${searchAttr}']`));
       li.filter(item => item.hidden = (item.dataset.label.toLowerCase().indexOf(value) === -1) ? true : false);
 
     }
   }
-
 
   showConsole(message, icon, time) {
     // console.log(message+icon);
