@@ -197,18 +197,21 @@ var Storage = new SheetStorages();
       // Not Sync abilita i tasti download, upgrade, delete
       const NotSync = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'false' && el.parentElement.dataset.storage === 'local');
       (NotSync) ? allButtons.upload.disabled = false : allButtons.upload.disabled = true;
-      // data-sync=true e data-identical=false
-      const notIdentical = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'true' && el.parentElement.dataset.identical === 'false');
-      if (notIdentical) {
-        allButtons.download.disabled = false;
-        allButtons.upgrade.disabled = false;
-      } else {
-        allButtons.download.disabled = true;
-        allButtons.upgrade.disabled = true;
-      }
-      // data-synx=false data-storage=db : Visualizzazione download e delete
+      // data-synx=false data-storage=db : Visualizzazione download
+      // elementi presenti SOLO su DB
       const NotSyncDB = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'false' && el.parentElement.dataset.storage === 'db');
       (NotSyncDB) ? allButtons.download.disabled = false : allButtons.download.disabled = true;
+      if (!NotSyncDB && !NotSync) {
+        // data-sync=true e data-identical=false
+        const notIdentical = [...document.querySelectorAll(`#ul-${type} input:checked`)].every(el => el.parentElement.dataset.sync === 'true' && el.parentElement.dataset.identical === 'false');
+        if (notIdentical) {
+          allButtons.download.disabled = false;
+          allButtons.upgrade.disabled = false;
+        } else {
+          allButtons.download.disabled = true;
+          allButtons.upgrade.disabled = true;
+        }
+      }
     }
   }
 
@@ -230,7 +233,7 @@ var Storage = new SheetStorages();
         if (data) {
           data.forEach(json => {
             Storage.save(JSON.parse(json.json_value))
-            // aggiorno lo status dell'elemento dopo l'upload
+            // aggiorno lo status dell'elemento dopo il download
             const li = document.getElementById(`${json.token}`);
             const statusIcon = li.querySelector('i[data-sync-status]');
             li.dataset.sync = 'true';
@@ -238,8 +241,11 @@ var Storage = new SheetStorages();
             statusIcon.classList.add('done');
             statusIcon.innerText = "done";
           });
+          // de-seleziono gli elementi selezionati
+          app.unselect(type);
+          App.showConsole('Sincronizzazione completata con successo!', 'done', 3000);
         } else {
-          console.error("Errore nell'aggiornamento della risorsa");
+          App.showConsole('Errori nella sincronizzazione degli elementi', 'error', 3000);
         }
       })
       .catch(err => console.error(err));
@@ -275,8 +281,12 @@ var Storage = new SheetStorages();
             statusIcon.classList.add('done');
             statusIcon.innerText = "done";
           });
+          // de-seleziono gli elementi selezionati
+          app.unselect(type);
+          App.showConsole('Sincronizzazione completata con successo!', 'done', 3000);
         } else {
-          console.error("Errore nell'aggiornamento della risorsa");
+          // console.error("Errore nell'aggiornamento della risorsa");
+          App.showConsole('Errori nella sincronizzazione degli elementi', 'error', 3000);
         }
       })
       .catch(err => console.error(err));
@@ -311,8 +321,11 @@ var Storage = new SheetStorages();
             statusIcon.classList.add('done');
             statusIcon.innerText = "done";
           });
+          // de-seleziono gli elementi selezionati
+          app.unselect(type);
+          App.showConsole('Sincronizzazione completata con successo!', 'done', 3000);
         } else {
-          console.error("Errore nell'aggiornamento della risorsa");
+          App.showConsole('Errori nella sincronizzazione degli elementi', 'error', 3000);
         }
       })
       .catch(err => console.error(err));
@@ -334,15 +347,21 @@ var Storage = new SheetStorages();
         }))
       })
       .then((data) => {
-        console.log(data);
+        if (data) {
+          // console.log(data);
+          tokens.forEach(token => {
+            // aggiorno lo status dell'elemento dopo l'upload
+            const li = document.getElementById(`${token}`);
+            window.localStorage.removeItem(token);
+            // elimino anche dal DOM l'elemento
+            li.remove();
+          });
+          App.showConsole('Sincronizzazione completata con successo!', 'done', 3000);
+        } else {
+          // console.error("Errore nell'aggiornamento della risorsa");
+          App.showConsole('Errori nella sincronizzazione degli elementi', 'error', 3000);
+        }
         // reimposto l'oggetto dopo la promise, impostando i vari dataset, sync, identical, ecc...
-        tokens.forEach(token => {
-          // aggiorno lo status dell'elemento dopo l'upload
-          const li = document.getElementById(`${token}`);
-          window.localStorage.removeItem(token);
-          // elimino anche dal DOM l'elemento
-          li.remove();
-        });
       })
       .catch(err => console.error(err));
   }
@@ -350,21 +369,22 @@ var Storage = new SheetStorages();
   document.querySelectorAll('button[data-select-all]').forEach(button => {
     button.addEventListener('click', (e) => {
       let type = e.currentTarget.dataset.type;
-      document.querySelectorAll(`.relative-ul[data-id='${type}'] input`).forEach(input => input.checked = true);
+      document.querySelectorAll(`.relative-ul[data-id='${type}'] li:not([hidden]) input`).forEach(input => input.checked = true);
       // visualizzo il menu.allButtons corrispondente
       document.querySelector(`menu.allButtons[data-id='${type}']`).hidden = false;
       app.checkVersioning(type);
     });
   });
 
-  document.querySelectorAll('button[data-unselect-all]').forEach(button => {
-    button.addEventListener('click', (e) => {
-      let type = e.currentTarget.dataset.type;
-      document.querySelectorAll(`.relative-ul[data-id='${type}'] input`).forEach(input => input.checked = false);
-      // visualizzo il menu.allButtons corrispondente
-      document.querySelector(`menu.allButtons[data-id='${type}']`).hidden = true;
-    });
-  });
+  // de-seleziono tutti gli elementi selezionati
+  app.unselect = (type) => {
+    // type : workbook, sheet, metric, filter
+    document.querySelectorAll(`.relative-ul[data-id='${type}'] input:checked`).forEach(input => input.checked = false);
+    // nascondo il menu.allButtons corrispondente
+    document.querySelector(`menu.allButtons[data-id='${type}']`).hidden = true;
+  }
+
+  document.querySelectorAll('button[data-unselect-all]').forEach(button => button.addEventListener('click', (e) => app.unselect(e.currentTarget.dataset.type)));
 
   app.checked = (e) => app.checkVersioning(e.target.dataset.type);
 

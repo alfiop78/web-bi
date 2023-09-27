@@ -175,9 +175,9 @@
       <div id="controls">
         <div id="fabs">
           <!-- <a href="#" id="previous-step" title="Previous step">logout</a> -->
-          <button id="mdc-logout" class="button dense raised">logout</button>
+          <button id="mdc-logout" class="button dense raised">HOME</button>
           <div class="spacer"></div>
-          <button id="mdc-home" class="button dense raised" onclick="location.href='home/'">i miei veicoli</button>
+          <!-- <button id="mdc-home" class="button dense raised" onclick="location.href='home/'">i miei veicoli</button> -->
           <!-- <a href="#" id="next-step" title="Next step">i miei veicoli</a> -->
           <!-- <i class="material-icons md-circle md-right md-24" onclick="">navigate_before</i> -->
           <!-- <a href="/" id="done" hidden="" title="Codelab complete">Done</a> -->
