@@ -1,0 +1,60 @@
+{
+  "parentElement_id": "template-layout",
+  "name": "generic data table",
+  "comment": "Semplice layout con una sezione per i filtri e una per la datatable",
+  "tag": "section",
+  "class": [
+    "grid",
+    "rows-1"
+  ],
+  "filters": [],
+  "comment": "Filtri da impostare per tutta la pagina",
+  "attributes": {
+    "id": "layout-1"
+  },
+  "dshControls": {
+    "tag": "div",
+    "attributes": {
+      "id": "dsh-controls"
+    },
+    "class": [
+      "horizontal"
+    ]
+  },
+  "rows": [
+    {
+      "comment": "riga superiore, una colonna",
+      "tag": "div",
+      "class": [
+        "grid",
+        "cols-1"
+      ],
+      "attributes": {
+        "data-grid-todo": "auto"
+      },
+      "cols": [
+        {
+          "comment": "una sola colonna larga per tutta la larghezza della pagina",
+          "tag": "div",
+          "class": [
+            "col",
+            "flex-start"
+          ],
+          "attributes": {
+            "data-comment": "questa è la posizione 1-1"
+          },
+          "child": {
+            "tag": "div",
+            "class": [
+              "position"
+            ],
+            "attributes": {
+              "id": "position-1-1"
+            },
+            "data-example": "<div class=example>position-1-1</div>"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -52,6 +52,10 @@ Route::get('/versioning', function () {
   return view('web_bi.versioning');
 })->name('web_bi.versioning');
 
+Route::get('/dashboards', function () {
+  return view('web_bi.dashboards');
+})->name('web_bi.dashboards');
+
 // recupero l'elenco dei database presenti (schema)
 Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']);
 // recupero elenco tabelle dello schema selezionato

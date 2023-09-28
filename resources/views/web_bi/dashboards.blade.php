@@ -17,6 +17,8 @@
   <script src="{{ asset('/js/lib.js') }}"></script>
   <script src="{{ asset('/js/WBStorage.js') }}"></script>
   <script src="{{ asset('/js/WorkBooks.js') }}"></script>
+  <script src="{{ asset('/js/Templates.js') }}"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 
 <body class="antialiased">
@@ -52,9 +54,10 @@
       <div id="content" class="custom-scrollbar">
 
         <div id="body" hidden>
+          <div id="template-layout"></div>
 
           <div class="objects">
-
+            <div id="chart_div"></div>
           </div>
 
         </div>
@@ -87,7 +90,7 @@
       <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
     </svg>
   </div>
-  <script type="text/javascript" src="{{ asset('/js/dashboards.js') }}" async></script>
+  <script type="text/javascript" src="{{ asset('/js/chart.js') }}" async></script>
 </body>
 
 </html>
