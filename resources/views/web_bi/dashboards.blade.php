@@ -10,9 +10,10 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-icons.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer-responsive.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-versioning.css') }}" />
+  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" /> -->
+  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" /> -->
+  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-versioning.css') }}" /> -->
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dashboards.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
   <script src="{{ asset('/js/WBStorage.js') }}"></script>
@@ -54,6 +55,16 @@
       <div id="content" class="custom-scrollbar">
 
         <div id="body" hidden>
+          <!--Div that will hold the dashboard-->
+          <div id="dashboard_div">
+            <!--Divs that will hold each control and chart-->
+            <div id="filter_div">
+              <div class="filters" id="filter-telaio"></div>
+              <div class="filters" id="filter-ubicazione"></div>
+            </div>
+            <div id="chart_div"></div>
+          </div>
+
           <div id="template-layout"></div>
 
           <div class="objects">

@@ -39,7 +39,6 @@ class Templates extends Application {
     // recupero l'elemento 'parent' a cui aggiungere il template json (presente in data)
     this.parent = document.getElementById(this.layoutData.parentElement_id);
     console.log(this.parent);
-    debugger;
     // se esiste un nodo child lo elimino per ricreare il template (è stata attivata un'altra dashboard)
     this.sectionDynamic = this.parent.querySelector('section');
     if (this.sectionDynamic) { this.sectionDynamic.remove(); }
