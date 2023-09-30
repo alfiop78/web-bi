@@ -19,6 +19,7 @@
   <script src="{{ asset('/js/WBStorage.js') }}"></script>
   <script src="{{ asset('/js/WorkBooks.js') }}"></script>
   <script src="{{ asset('/js/Templates.js') }}"></script>
+  <script src="{{ asset('/js/Dashboards.js') }}"></script>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 
@@ -56,20 +57,20 @@
 
         <div id="body" hidden>
           <!--Div that will hold the dashboard-->
-          <div id="dashboard_div">
-            <!--Divs that will hold each control and chart-->
-            <div id="filter_div">
-              <div class="filters" id="filter-telaio"></div>
+          <!-- <div id="dashboard_div"> -->
+          <!--Divs that will hold each control and chart-->
+          <!-- <div id="filter_div">
               <div class="filters" id="filter-ubicazione"></div>
+              <div class="filters" id="filter-telaio"></div>
             </div>
-            <div id="chart_div"></div>
-          </div>
+            <div id="chart_div"></div> -->
+          <!-- </div> -->
 
           <div id="template-layout"></div>
 
-          <div class="objects">
+          <!-- <div class="objects">
             <div id="chart_div"></div>
-          </div>
+          </div> -->
 
         </div>
 

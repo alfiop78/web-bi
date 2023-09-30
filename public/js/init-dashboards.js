@@ -1,5 +1,6 @@
 var App = new Application();
 var Template = new Templates();
+var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizializzare quando ricevuti i dati dal datamart
 (() => {
   var app = {
     // templates
@@ -54,18 +55,17 @@ var Template = new Templates();
         console.log(data);
         // app.createLayout(data);
         // imposto i dati di questo Template nella classe
-        Template.templateLayoutData = data;
+        Template.data = data;
         // creo il template nel DOM
-        Template.createLayout();
+        Template.create();
         // recupero i dati del template-reports-*
-        // app.getTemplateReports();
-        app.stock();
-        app.dashboardExample();
+        app.getSheetSpecs();
+        // app.stock();
+        // app.dashboardExample();
       })
       .catch(err => console.error(err));
   }
 
-  app.getLayout();
 
   app.drawTable = (queryData) => {
     // Metodo più veloce
@@ -142,24 +142,23 @@ var Template = new Templates();
       }
       prepareData.rows.push({ c: v });
     });
-    var dashboard = new google.visualization.Dashboard(document.getElementById('dashboard_div'));
-    // Creo un filtro di tipo CategoryFilter
-    var categoryFilter = new google.visualization.ControlWrapper({
-      'controlType': 'CategoryFilter',
-      'containerId': 'filter-telaio',
-      'options': {
-        'filterColumnLabel': 'Telaio_ds',
-        'ui': {
-          'caption': 'Telaio',
-          'label': '',
-          'cssClass': 'g-category-filter',
-          'selectedValuesLayout': 'belowStacked'
-          // 'labelStacking': 'vertical'
-        }
-      }
-    });
-
-    var categoryFilterUbicazione = new google.visualization.ControlWrapper({
+    // var gdashboard = new google.visualization.Dashboard(document.getElementById('dashboard_div'));
+    var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
+    // TODO: per lo stock creare i filtri (da configurare in un file JSON):
+    // SEDE (Ubicazione)
+    // MARCA
+    // MODELLI
+    // STATO
+    // SETTORE
+    // STATO ORDINE
+    // STATO VHC
+    // GIACENZA
+    // ...poi i tasti "filtri"
+    // CONTRATTI, IN TRATTATIVA, LIBERI, ARRIVATI, IN TRANSITO
+    // TODO: Creo i filtri nella Classe Dashboards
+    Dashboard.drawControls();
+    // return;
+    /* var filter_ubicazione = new google.visualization.ControlWrapper({
       'controlType': 'CategoryFilter',
       'containerId': 'filter-ubicazione',
       'options': {
@@ -172,7 +171,22 @@ var Template = new Templates();
           // 'labelStacking': 'horizontal'
         }
       }
-    });
+    }); */
+    // Creo un filtro di tipo CategoryFilter
+    /* var filter_vin = new google.visualization.ControlWrapper({
+      'controlType': 'CategoryFilter',
+      'containerId': 'filter-telaio',
+      'options': {
+        'filterColumnLabel': 'Telaio_ds',
+        'ui': {
+          'caption': 'Telaio',
+          'label': '',
+          'cssClass': 'g-category-filter',
+          'selectedValuesLayout': 'belowStacked'
+          // 'labelStacking': 'vertical'
+        }
+      }
+    }); */
 
     // imposto le class per i CSS
     const cssClasses = {
@@ -201,16 +215,23 @@ var Template = new Templates();
     });
     // 'pieChart' will update whenever you interact with 'donutRangeSlider'
     // to match the selected range.
-    dashboard.bind([categoryFilter, categoryFilterUbicazione], table);
+    // dashboard.bind([categoryFilter, categoryFilterUbicazione], table);
+    // Il filter_ubicazione influenza il filter_vin, il quale a sua volta, influenza la tabella
+    // gdashboard.bind(filter_ubicazione, filter_vin).bind(filter_vin, table);
+    // gdashboard.bind(Dashboard.controlsWrapper[0], Dashboard.controlsWrapper[1], Dashboard.controlsWrapper[2], Dashboard.controlsWrapper[3]).bind(Dashboard.controlsWrapper[3], table);
+    // gdashboard.bind([Dashboard.controlsWrapper[0], Dashboard.controlsWrapper[1], Dashboard.controlsWrapper[2], Dashboard.controlsWrapper[3]], table);
+    console.log(Dashboard.controlsWrapper);
+    gdashboard.bind(Dashboard.controlsWrapper[0], Dashboard.controlsWrapper[1], Dashboard.controlsWrapper[2]).bind(Dashboard.controlsWrapper[2], table);
 
-    dashboard.draw(prepareData);
+    gdashboard.draw(prepareData);
   }
 
   // Simulazione della selezione del datamart dello stock
   // token : hdkglro
   // id: 1693909302808
   // leggo il datamart e lo inserisco nel Google Table chart
-  app.stock = async () => {
+  // esempio riferito alla creazione della DataTable SENZA la logica del Dashboard (quindi senza l'utilizzo di ControlWrapper)
+  /* app.stock = async () => {
     // recupero l'id dello Sheet
     const sheet = JSON.parse(window.localStorage.getItem('hdkglro'));
     if (!sheet.id) return false;
@@ -229,10 +250,11 @@ var Template = new Templates();
         App.showConsole(err, 'error');
         console.error(err);
       });
-  }
+  } */
 
+  // recupero il datamrt
   app.dashboardExample = async () => {
-    // recupero l'id dello Sheet
+    // recupero l'id dello Sheet stock veicoli nuovi
     const sheet = JSON.parse(window.localStorage.getItem('hdkglro'));
     if (!sheet.id) return false;
     await fetch(`/fetch_api/${sheet.id}/datamart`)
@@ -244,6 +266,7 @@ var Template = new Templates();
       .then((response) => response.json())
       .then(data => {
         console.log(data);
+        Dashboard.data = data;
         google.charts.setOnLoadCallback(app.drawDashboard(data));
       })
       .catch(err => {
@@ -251,5 +274,26 @@ var Template = new Templates();
         console.error(err);
       });
   }
+
+  /* Recupero il .json delle specifiche del report dello Stock */
+  app.getSheetSpecs = async () => {
+    console.log('getSheetSpecs()');
+    const sheetLayout = 'stock';
+    await fetch('/js/json-sheets/' + sheetLayout + '.json', { method: 'POST' })
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        Dashboard.sheetSpecs = data;
+        app.dashboardExample();
+      })
+      .catch(err => console.error(err));
+  }
+
+  // TODO: implementare il layoutche ho lasciato in sospeso dopo l'utilizzo di Dashboard e ControlWrapper
+  app.getLayout();
 
 })();
