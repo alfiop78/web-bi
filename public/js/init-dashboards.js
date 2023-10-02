@@ -220,8 +220,12 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // gdashboard.bind(filter_ubicazione, filter_vin).bind(filter_vin, table);
     // gdashboard.bind(Dashboard.controlsWrapper[0], Dashboard.controlsWrapper[1], Dashboard.controlsWrapper[2], Dashboard.controlsWrapper[3]).bind(Dashboard.controlsWrapper[3], table);
     // gdashboard.bind([Dashboard.controlsWrapper[0], Dashboard.controlsWrapper[1], Dashboard.controlsWrapper[2], Dashboard.controlsWrapper[3]], table);
-    console.log(Dashboard.controlsWrapper);
-    gdashboard.bind(Dashboard.controlsWrapper[0], Dashboard.controlsWrapper[1], Dashboard.controlsWrapper[2]).bind(Dashboard.controlsWrapper[2], table);
+    // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
+    // -> "modello_ds" infleunza "settore_ds" e tutti (l'array Dashboard.controlsWrapper) influenzano la table
+    gdashboard.bind(Dashboard.controlsWrapper[0], Dashboard.controlsWrapper[1])
+      .bind(Dashboard.controlsWrapper[1], Dashboard.controlsWrapper[2])
+      .bind(Dashboard.controlsWrapper[2], Dashboard.controlsWrapper[3])
+      .bind(Dashboard.controlsWrapper, table);
 
     gdashboard.draw(prepareData);
   }

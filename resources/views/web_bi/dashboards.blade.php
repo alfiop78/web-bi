@@ -48,7 +48,7 @@
         <a href="#" id="menu" onclick="App.menu()"><i class="material-icons md-light">menu</i></a>
       </div>
 
-      <h1 class="title">Sincronizzazione risorse</h1>
+      <h1 class="title">Dashboard</h1>
     </header>
 
     <div id="container">

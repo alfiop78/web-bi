@@ -1,22 +1,22 @@
 {
   "filters": [
     {
-      "containerId": "ubicazione_ds",
+      "containerId": "flt-1",
       "filterColumnLabel": "ubicazione_ds",
       "caption": "Ubicazione"
     },
     {
-      "containerId": "marca_veicolo_ds",
+      "containerId": "flt-2",
       "filterColumnLabel": "marca_veicolo_ds",
       "caption": "Marca"
     },
     {
-      "containerId": "modello_ds",
+      "containerId": "flt-3",
       "filterColumnLabel": "modello_ds",
       "caption": "Modello"
     },
     {
-      "containerId": "settore_ds",
+      "containerId": "flt-4",
       "filterColumnLabel": "settore_ds",
       "caption": "Settore"
     }

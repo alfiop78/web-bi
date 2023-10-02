@@ -13,28 +13,28 @@
           "classes": [
             "filters"
           ],
-          "id": "ubicazione_ds"
+          "id": "flt-1"
         },
         {
           "tag": "div",
           "classes": [
             "filters"
           ],
-          "id": "marca_veicolo_ds"
+          "id": "flt-2"
         },
         {
           "tag": "div",
           "classes": [
             "filters"
           ],
-          "id": "modello_ds"
+          "id": "flt-3"
         },
         {
           "tag": "div",
           "classes": [
             "filters"
           ],
-          "id": "settore_ds"
+          "id": "flt-4"
         }
       ]
     },
