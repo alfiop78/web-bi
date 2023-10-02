@@ -43,29 +43,36 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     chart.draw(data, options);
   }
 
-  app.getLayout = async () => {
-    const templateLayoutName = 'layout-1';
-    await fetch('/js/json-templates/' + templateLayoutName + '.json', { method: 'POST' })
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
+  // Recupero del template-layout e dello sheetSpecs
+  app.getLayouts = async () => {
+    const sheetLayout = 'stock';
+    const templateLayout = 'layout-1';
+    const urls = [
+      `/js/json-templates/${templateLayout}.json`,
+      `/js/json-sheets/${sheetLayout}.json`
+    ];
+
+    const init = { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, method: 'POST' };
+    // ottengo tutte le risposte in un array
+    await Promise.all(urls.map(url => fetch(url, init)))
+      .then(responses => {
+        return Promise.all(responses.map(response => {
+          if (!response.ok) { throw Error(response.statusText); }
+          return response.json();
+        }))
       })
-      .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        // app.createLayout(data);
+        if (!data) return;
         // imposto i dati di questo Template nella classe
-        Template.data = data;
+        Template.data = data[0];
         // creo il template nel DOM
         Template.create();
-        // recupero i dati del template-reports-*
-        app.getSheetSpecs();
-        // app.stock();
-        // app.dashboardExample();
+        Dashboard.sheetSpecs = data[1];
+        app.dashboardExample();
       })
       .catch(err => console.error(err));
   }
-
 
   app.drawTable = (queryData) => {
     // Metodo più veloce
@@ -113,7 +120,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     ]); */
     // Fine metodo più leggibile
 
-    var table = new google.visualization.Table(document.getElementById('position-1-1'));
+    var tableRef = new google.visualization.Table(document.getElementById('chart_div'));
     // Set chart options
     const options = {
       'title': 'Stock veicoli',
@@ -124,40 +131,60 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       'height': 500
     };
 
-    table.draw(data, options);
-    // table.draw(data, { showRowNumber: true, width: '100%', height: '100%' });
+    // utilizzo della DataView
+    var view = new google.visualization.DataView(data);
+    // nascondo la prima colonna
+    view.hideColumns([0]);
+    tableRef.draw(view, options);
+    // utilizzo della DataView
+
+    // utilizzo della DataTable
+    // tableRef.draw(data, options);
+    // utilizzo della DataTable
   }
 
   app.drawDashboard = (queryData) => {
     const prepareData = { cols: [], rows: [] };
+    // const prepareDataTEST = { cols: [], rows: [] };
     // aggiungo le colonne
     for (const key of Object.keys(queryData[0])) {
-      prepareData.cols.push({ id: key, label: key });
+      // prepareData.cols.push({ id: key, label: key });
+      // console.log(key);
+      prepareData.cols.push({
+        id: key,
+        label: Dashboard.sheetSpecs.data.columns[key].label,
+        type: Dashboard.sheetSpecs.data.columns[key].type
+      });
+
     }
     // aggiungo le righe
     queryData.forEach(row => {
       let v = [];
       for (const [key, value] of Object.entries(row)) {
+        // console.log(key);
         v.push({ v: value });
       }
       prepareData.rows.push({ c: v });
     });
-    // var gdashboard = new google.visualization.Dashboard(document.getElementById('dashboard_div'));
+    console.log(prepareData);
+    // console.log(prepareDataTEST);
+    // debugger;
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
-    // TODO: per lo stock creare i filtri (da configurare in un file JSON):
-    // SEDE (Ubicazione)
-    // MARCA
-    // MODELLI
-    // STATO
-    // SETTORE
-    // STATO ORDINE
-    // STATO VHC
-    // GIACENZA
-    // ...poi i tasti "filtri"
-    // CONTRATTI, IN TRATTATIVA, LIBERI, ARRIVATI, IN TRANSITO
-    // TODO: Creo i filtri nella Classe Dashboards
-    Dashboard.drawControls();
-    // return;
+    /*
+       * SEDE (Ubicazione)
+       * MARCA
+       * MODELLI
+       * STATO
+       * SETTORE
+       * STATO ORDINE
+       * STATO VHC
+       * GIACENZA
+       * ...poi i tasti "filtro" CONTRATTI, IN TRATTATIVA, LIBERI, ARRIVATI, IN TRANSITO
+    */
+
+    // Creo i filtri nella Classe Dashboards
+    const controls = Dashboard.drawControls();
+
     /* var filter_ubicazione = new google.visualization.ControlWrapper({
       'controlType': 'CategoryFilter',
       'containerId': 'filter-ubicazione',
@@ -189,7 +216,9 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     }); */
 
     // imposto le class per i CSS
-    const cssClasses = {
+    // NOTE: Definita nel file stock.json
+
+    /* const cssClasses = {
       'headerRow': 'g-table-header',
       'tableRow': 'g-table-row',
       'oddTableRow': '',
@@ -198,10 +227,11 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       'headerCell': 'g-header-cell',
       'tableCell': 'g-table-cell',
       'rowNumberCell': ''
+    }; */
 
-    };
-    // Create a pie chart, passing some options
-    var table = new google.visualization.ChartWrapper({
+    // Per aggiungere una DataView, in un ChartWrapper, non è necessario istanziare un nuovo ogetto DataView
+    // ...come fatto in app.drawTable(), la 'view' la dichiaro all'interno del ChartWrapper
+    /* var table = new google.visualization.ChartWrapper({
       'chartType': 'Table',
       'containerId': 'chart_div',
       'options': {
@@ -211,21 +241,18 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         'pageSize': 15,
         'allowHTML': true,
         'cssClassNames': cssClasses
-      }
-    });
-    // 'pieChart' will update whenever you interact with 'donutRangeSlider'
-    // to match the selected range.
-    // dashboard.bind([categoryFilter, categoryFilterUbicazione], table);
-    // Il filter_ubicazione influenza il filter_vin, il quale a sua volta, influenza la tabella
-    // gdashboard.bind(filter_ubicazione, filter_vin).bind(filter_vin, table);
-    // gdashboard.bind(Dashboard.controlsWrapper[0], Dashboard.controlsWrapper[1], Dashboard.controlsWrapper[2], Dashboard.controlsWrapper[3]).bind(Dashboard.controlsWrapper[3], table);
-    // gdashboard.bind([Dashboard.controlsWrapper[0], Dashboard.controlsWrapper[1], Dashboard.controlsWrapper[2], Dashboard.controlsWrapper[3]], table);
+      },
+      'view': { 'columns': [0] }
+    }); */
+    // NOTE: le proprietà definite nel ChartWrapper vengono impostate nel template-sheet .json, proprietà "wrapper"
+    var table = new google.visualization.ChartWrapper(Dashboard.sheetSpecs.wrapper);
+
     // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
     // -> "modello_ds" infleunza "settore_ds" e tutti (l'array Dashboard.controlsWrapper) influenzano la table
-    gdashboard.bind(Dashboard.controlsWrapper[0], Dashboard.controlsWrapper[1])
-      .bind(Dashboard.controlsWrapper[1], Dashboard.controlsWrapper[2])
-      .bind(Dashboard.controlsWrapper[2], Dashboard.controlsWrapper[3])
-      .bind(Dashboard.controlsWrapper, table);
+    gdashboard.bind(controls[0], controls[1])
+      .bind(controls[1], controls[2])
+      .bind(controls[2], controls[3])
+      .bind(controls, table);
 
     gdashboard.draw(prepareData);
   }
@@ -270,8 +297,10 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       .then((response) => response.json())
       .then(data => {
         console.log(data);
+        // debugger;
         Dashboard.data = data;
         google.charts.setOnLoadCallback(app.drawDashboard(data));
+        // google.charts.setOnLoadCallback(app.drawTable(data));
       })
       .catch(err => {
         App.showConsole(err, 'error');
@@ -280,7 +309,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
   }
 
   /* Recupero il .json delle specifiche del report dello Stock */
-  app.getSheetSpecs = async () => {
+  /* app.getSheetSpecs = async () => {
     console.log('getSheetSpecs()');
     const sheetLayout = 'stock';
     await fetch('/js/json-sheets/' + sheetLayout + '.json', { method: 'POST' })
@@ -295,9 +324,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         app.dashboardExample();
       })
       .catch(err => console.error(err));
-  }
+  } */
 
-  // TODO: implementare il layoutche ho lasciato in sospeso dopo l'utilizzo di Dashboard e ControlWrapper
-  app.getLayout();
+  app.getLayouts();
 
 })();

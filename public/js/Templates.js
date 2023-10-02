@@ -9,13 +9,13 @@ class Templates {
   get data() { return this.#data; }
 
   create() {
-    console.log(this.#data);
+    // console.log(this.#data);
     // recupero l'elemento 'parent' a cui aggiungere il template json (presente in data)
     this.parent = document.getElementById(this.#data.parentElement_id);
     // console.log(this.parent);
     this.recursive = (parent, childs) => {
       childs.forEach(child => {
-        console.log(child);
+        // console.log(child);
         const tag = document.createElement(child.tag);
         tag.id = child.id;
         // l'array "classes" è sempre presente però potrebbe essere vuoto, se non ci sono classi da impostare

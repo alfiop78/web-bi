@@ -1,4 +1,230 @@
 {
+  "name": "Stock",
+  "comment": "Report stock veicoli nuovi",
+  "data": {
+    "columns": {
+      "Telaio_id": {
+        "label": "Telaio_id",
+        "type": "number"
+      },
+      "Telaio_ds": {
+        "label": "TELAIO",
+        "type": "string"
+      },
+      "custom_id_id": {
+        "label": "custom_id_id",
+        "type": "number"
+      },
+      "custom_id_ds": {
+        "label": "custom_id_ds",
+        "type": "string"
+      },
+      "NumeroTarga_id": {
+        "label": "targa_id",
+        "type": "string"
+      },
+      "NumeroTarga_ds": {
+        "label": "TARGA",
+        "type": "string"
+      },
+      "ubicazione_id": {
+        "label": "ubicazione_id",
+        "type": "number"
+      },
+      "ubicazione_ds": {
+        "label": "ubicazione_ds",
+        "type": "string"
+      },
+      "DtFattAcq_id": {
+        "label": "DtFattAcq_id",
+        "type": "string"
+      },
+      "DtFattAcq_ds": {
+        "label": "DATA FATT. ACQ.",
+        "type": "string"
+      },
+      "DtArrivo_id": {
+        "label": "DtArrivo_id",
+        "type": "string"
+      },
+      "DtArrivo_ds": {
+        "label": "DATA ARRIVO",
+        "type": "string"
+      },
+      "DtFattVendita_id": {
+        "label": "DtFattVendita_id",
+        "type": "string"
+      },
+      "DtFattVendita_ds": {
+        "label": "DATA FATT. VENDITA",
+        "type": "string"
+      },
+      "codice_modello_id": {
+        "label": "codice_modello_id",
+        "type": "string"
+      },
+      "codice_modello_ds": {
+        "label": "codice_modello_ds",
+        "type": "string"
+      },
+      "codice_veicolo_id": {
+        "label": "codice_veicolo_id",
+        "type": "string"
+      },
+      "codice_veicolo_ds": {
+        "label": "codice_veicolo_ds",
+        "type": "string"
+      },
+      "ds_veicolo_id": {
+        "label": "ds_veicolo_id",
+        "type": "string"
+      },
+      "ds_veicolo_ds": {
+        "label": "ds_veicolo_ds",
+        "type": "string"
+      },
+      "fornitore_id": {
+        "label": "fornitore_id",
+        "type": "string"
+      },
+      "fornitore_ds": {
+        "label": "fornitore_ds",
+        "type": "string"
+      },
+      "NumOrdineFab_id": {
+        "label": "NumOrdineFab_id",
+        "type": "string"
+      },
+      "NumOrdineFab_ds": {
+        "label": "NumOrdineFab_ds",
+        "type": "string"
+      },
+      "NrContrattoVendita_id": {
+        "label": "NrContrattoVendita_id",
+        "type": "string"
+      },
+      "NrContrattoVendita_ds": {
+        "label": "NrContrattoVendita_ds",
+        "type": "string"
+      },
+      "colore_est_id": {
+        "label": "colore_est_id",
+        "type": "string"
+      },
+      "colore_est_ds": {
+        "label": "colore_est_ds",
+        "type": "string"
+      },
+      "colore_int_id": {
+        "label": "colore_int_id",
+        "type": "string"
+      },
+      "colore_int_ds": {
+        "label": "colore_int_ds",
+        "type": "string"
+      },
+      "DtConsCliente_id": {
+        "label": "DtConsCliente_id",
+        "type": "string"
+      },
+      "DtConsCliente_ds": {
+        "label": "DATA CONSEGNA",
+        "type": "string"
+      },
+      "codice_cliente_id": {
+        "label": "codice_cliente_id",
+        "type": "string"
+      },
+      "codice_cliente_ds": {
+        "label": "CLIENTE",
+        "type": "string"
+      },
+      "MarcaConcessionaria_id": {
+        "label": "MarcaConcessionaria_id",
+        "type": "string"
+      },
+      "MarcaConcessionaria_ds": {
+        "label": "MarcaConcessionaria_ds",
+        "type": "string"
+      },
+      "NumFatAcqCasaM_id": {
+        "label": "NumFatAcqCasaM_id",
+        "type": "string"
+      },
+      "NumFatAcqCasaM_ds": {
+        "label": "NumFatAcqCasaM_ds",
+        "type": "string"
+      },
+      "NrFattAcq_id": {
+        "label": "NrFattAcq_id",
+        "type": "string"
+      },
+      "NrFattAcq_ds": {
+        "label": "NrFattAcq_ds",
+        "type": "string"
+      },
+      "optional_id": {
+        "label": "optional_id",
+        "type": "string"
+      },
+      "optional_ds": {
+        "label": "optional_ds",
+        "type": "string"
+      },
+      "marca_veicolo_id": {
+        "label": "marca_veicolo_id",
+        "type": "string"
+      },
+      "marca_veicolo_ds": {
+        "label": "marca_veicolo_ds",
+        "type": "string"
+      },
+      "modello_id": {
+        "label": "modello_id",
+        "type": "string"
+      },
+      "modello_ds": {
+        "label": "modello_ds",
+        "type": "string"
+      },
+      "settore_id": {
+        "label": "settore_id",
+        "type": "string"
+      },
+      "settore_ds": {
+        "label": "settore_ds",
+        "type": "string"
+      },
+      "DtOrdine_id": {
+        "label": "DtOrdine_id",
+        "type": "string"
+      },
+      "DtOrdine_ds": {
+        "label": "DtOrdine_ds",
+        "type": "string"
+      },
+      "DtAssegnaz_id": {
+        "label": "DtAssegnaz_id",
+        "type": "string"
+      },
+      "DtAssegnaz_ds": {
+        "label": "DtAssegnaz_ds",
+        "type": "string"
+      },
+      "id_id": {
+        "label": "id_id",
+        "type": "string"
+      },
+      "id_ds": {
+        "label": "id_ds",
+        "type": "string"
+      },
+      "TotaleFA": {
+        "label": "TotaleFA",
+        "type": "number"
+      }
+    }
+  },
   "filters": [
     {
       "containerId": "flt-1",
@@ -21,6 +247,58 @@
       "caption": "Settore"
     }
   ],
-  "name": "Stock",
-  "comment": "Report stock veicoli nuovi"
+  "wrapper": {
+    "chartType": "Table",
+    "containerId": "chart_div",
+    "options": {
+      "width": "100%",
+      "height": "auto",
+      "page": "enabled",
+      "pageSize": 15,
+      "allowHTML": true,
+      "cssClassNames": {
+        "headerRow": "g-table-header",
+        "tableRow": "g-table-row",
+        "oddTableRow": "",
+        "selectedTableRow": "",
+        "hoverTableRow": "",
+        "headerCell": "g-header-cell",
+        "tableCell": "g-table-cell",
+        "rowNumberCell": ""
+      }
+    },
+    "view": {
+      "columns": [
+        "Telaio_ds",
+        "NumOrdineFab_ds",
+        "ubicazione_ds",
+        "DtArrivo_ds",
+        "DtAssegnaz_ds",
+        "NumeroTarga_ds",
+        "DtFattAcq_ds",
+        "DtFattVendita_ds",
+        "codice_modello_ds",
+        "codice_veicolo_ds",
+        "ds_veicolo_ds",
+        "fornitore_ds",
+        "NrContrattoVendita_ds",
+        "colore_est_ds",
+        "colore_int_ds",
+        "DtConsCliente_ds",
+        "codice_cliente_id",
+        "codice_cliente_ds",
+        "MarcaConcessionaria_ds",
+        "NumFatAcqCasaM_ds",
+        "NrFattAcq_ds",
+        "optional_ds",
+        "marca_veicolo_ds",
+        "modello_ds",
+        "settore_ds",
+        "DtOrdine_ds",
+        "id_ds",
+        "TotaleFA"
+      ]
+    }
+  },
+  "wrapperComment": "nella prop 'view' definisco le colonne da visualizzare per questo ChartWrapper"
 }
