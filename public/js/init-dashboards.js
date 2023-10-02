@@ -10,7 +10,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
   App.init();
 
   // Load the Visualization API and the corechart package.
-  google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls'], 'language': 'it' });
+  google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
 
   // Set a callback to run when the Google Visualization API is loaded.
   // google.charts.setOnLoadCallback(drawChart);
@@ -79,13 +79,21 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     const prepareData = { cols: [], rows: [] };
     // aggiungo le colonne
     for (const key of Object.keys(queryData[0])) {
-      prepareData.cols.push({ id: key, label: key });
+      if (key === "TotaleFA") {
+        prepareData.cols.push({ id: key, label: key, type: 'number' });
+      } else {
+        prepareData.cols.push({ id: key, label: key });
+      }
     }
     // aggiungo le righe
     queryData.forEach(row => {
       let v = [];
       for (const [key, value] of Object.entries(row)) {
-        v.push({ v: value });
+        if (key === "TotaleFA") {
+          v.push({ v: parseFloat(value) });
+        } else {
+          v.push({ v: value });
+        }
       }
       prepareData.rows.push({ c: v });
     });
@@ -125,11 +133,18 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     const options = {
       'title': 'Stock veicoli',
       'showRowNumber': false,
+      "allowHTML": true,
       'frozenColumns': 2,
       'alternatingRowStyle': true,
       'width': '100%',
       'height': 500
     };
+
+    var formatter = new google.visualization.NumberFormat(
+      { suffix: ' €', negativeColor: 'brown', negativeParens: true });
+    // nella proprietà "formatter" del file stock.json viene indicato quale colonna
+    // deve essere formattata  "currency", "date", "color", ecc...
+    formatter.format(data, Dashboard.sheetSpecs.data.formatter.currency);
 
     // utilizzo della DataView
     var view = new google.visualization.DataView(data);
@@ -155,20 +170,28 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         label: Dashboard.sheetSpecs.data.columns[key].label,
         type: Dashboard.sheetSpecs.data.columns[key].type
       });
-
     }
     // aggiungo le righe
     queryData.forEach(row => {
       let v = [];
       for (const [key, value] of Object.entries(row)) {
-        // console.log(key);
-        v.push({ v: value });
+        // if (key === 'DtArrivo_ds') console.log(new Date(value));
+        // console.log(value);
+        (Dashboard.sheetSpecs.data.columns[key].type === 'number') ?
+          v.push({ v: parseFloat(value) }) :
+          v.push({ v: value });
       }
       prepareData.rows.push({ c: v });
     });
-    console.log(prepareData);
-    // console.log(prepareDataTEST);
-    // debugger;
+    // console.log(prepareData);
+    // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
+    // è consentità con la DataView perchè questa è read-only
+    var dataFormatted = new google.visualization.DataTable(prepareData);
+    // applico la formattazione
+    var formatter = new google.visualization.NumberFormat(
+      { suffix: ' €', negativeColor: 'brown', negativeParens: true });
+    formatter.format(dataFormatted, 54); // applico la formattazione € alla colonna TotaleFA
+    // console.log(dataFormatted);
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
     /*
        * SEDE (Ubicazione)
@@ -181,10 +204,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
        * GIACENZA
        * ...poi i tasti "filtro" CONTRATTI, IN TRATTATIVA, LIBERI, ARRIVATI, IN TRANSITO
     */
-
     // Creo i filtri nella Classe Dashboards
     const controls = Dashboard.drawControls();
-
     /* var filter_ubicazione = new google.visualization.ControlWrapper({
       'controlType': 'CategoryFilter',
       'containerId': 'filter-ubicazione',
@@ -214,7 +235,6 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         }
       }
     }); */
-
     // imposto le class per i CSS
     // NOTE: Definita nel file stock.json
 
@@ -228,7 +248,6 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       'tableCell': 'g-table-cell',
       'rowNumberCell': ''
     }; */
-
     // Per aggiungere una DataView, in un ChartWrapper, non è necessario istanziare un nuovo ogetto DataView
     // ...come fatto in app.drawTable(), la 'view' la dichiaro all'interno del ChartWrapper
     /* var table = new google.visualization.ChartWrapper({
@@ -254,7 +273,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       .bind(controls[2], controls[3])
       .bind(controls, table);
 
-    gdashboard.draw(prepareData);
+    gdashboard.draw(dataFormatted);
+    // gdashboard.draw(prepareData);
   }
 
   // Simulazione della selezione del datamart dello stock

@@ -32,7 +32,7 @@
         "type": "number"
       },
       "ubicazione_ds": {
-        "label": "ubicazione_ds",
+        "label": "UBICAZIONE",
         "type": "string"
       },
       "DtFattAcq_id": {
@@ -48,7 +48,7 @@
         "type": "string"
       },
       "DtArrivo_ds": {
-        "label": "DATA ARRIVO",
+        "label": "ARRIVO",
         "type": "string"
       },
       "DtFattVendita_id": {
@@ -64,7 +64,7 @@
         "type": "string"
       },
       "codice_modello_ds": {
-        "label": "codice_modello_ds",
+        "label": "DARTS",
         "type": "string"
       },
       "codice_veicolo_id": {
@@ -72,7 +72,7 @@
         "type": "string"
       },
       "codice_veicolo_ds": {
-        "label": "codice_veicolo_ds",
+        "label": "CODICE VEICOLO",
         "type": "string"
       },
       "ds_veicolo_id": {
@@ -80,7 +80,7 @@
         "type": "string"
       },
       "ds_veicolo_ds": {
-        "label": "ds_veicolo_ds",
+        "label": "VEICOLO",
         "type": "string"
       },
       "fornitore_id": {
@@ -88,7 +88,7 @@
         "type": "string"
       },
       "fornitore_ds": {
-        "label": "fornitore_ds",
+        "label": "VENDITORE DMS",
         "type": "string"
       },
       "NumOrdineFab_id": {
@@ -96,7 +96,7 @@
         "type": "string"
       },
       "NumOrdineFab_ds": {
-        "label": "NumOrdineFab_ds",
+        "label": "N. ORDINE",
         "type": "string"
       },
       "NrContrattoVendita_id": {
@@ -104,7 +104,7 @@
         "type": "string"
       },
       "NrContrattoVendita_ds": {
-        "label": "NrContrattoVendita_ds",
+        "label": "N. CONTRATTO",
         "type": "string"
       },
       "colore_est_id": {
@@ -112,7 +112,7 @@
         "type": "string"
       },
       "colore_est_ds": {
-        "label": "colore_est_ds",
+        "label": "COLORE EST.",
         "type": "string"
       },
       "colore_int_id": {
@@ -120,7 +120,7 @@
         "type": "string"
       },
       "colore_int_ds": {
-        "label": "colore_int_ds",
+        "label": "COLORE INT.",
         "type": "string"
       },
       "DtConsCliente_id": {
@@ -132,7 +132,7 @@
         "type": "string"
       },
       "codice_cliente_id": {
-        "label": "codice_cliente_id",
+        "label": "CLIENTE",
         "type": "string"
       },
       "codice_cliente_ds": {
@@ -168,7 +168,7 @@
         "type": "string"
       },
       "optional_ds": {
-        "label": "optional_ds",
+        "label": "OPTIONALS",
         "type": "string"
       },
       "marca_veicolo_id": {
@@ -184,7 +184,7 @@
         "type": "string"
       },
       "modello_ds": {
-        "label": "modello_ds",
+        "label": "MODELLO",
         "type": "string"
       },
       "settore_id": {
@@ -200,7 +200,7 @@
         "type": "string"
       },
       "DtOrdine_ds": {
-        "label": "DtOrdine_ds",
+        "label": "DATA ORDINE",
         "type": "string"
       },
       "DtAssegnaz_id": {
@@ -208,7 +208,7 @@
         "type": "string"
       },
       "DtAssegnaz_ds": {
-        "label": "DtAssegnaz_ds",
+        "label": "ARRIVO STIMATO",
         "type": "string"
       },
       "id_id": {
@@ -220,15 +220,21 @@
         "type": "string"
       },
       "TotaleFA": {
-        "label": "TotaleFA",
+        "label": "IMP. FATT. ACQ",
         "type": "number"
       }
+    },
+    "formatter": {
+      "currency": [
+        54
+      ],
+      "date": []
     }
   },
   "filters": [
     {
       "containerId": "flt-1",
-      "filterColumnLabel": "ubicazione_ds",
+      "filterColumnLabel": "UBICAZIONE",
       "caption": "Ubicazione"
     },
     {
@@ -238,7 +244,7 @@
     },
     {
       "containerId": "flt-3",
-      "filterColumnLabel": "modello_ds",
+      "filterColumnLabel": "MODELLO",
       "caption": "Modello"
     },
     {
@@ -254,6 +260,7 @@
       "width": "100%",
       "height": "auto",
       "page": "enabled",
+      "frozenColumns": 2,
       "pageSize": 15,
       "allowHTML": true,
       "cssClassNames": {
@@ -274,28 +281,22 @@
         "ubicazione_ds",
         "DtArrivo_ds",
         "DtAssegnaz_ds",
-        "NumeroTarga_ds",
         "DtFattAcq_ds",
-        "DtFattVendita_ds",
+        "NrContrattoVendita_ds",
+        "NumeroTarga_ds",
         "codice_modello_ds",
+        "modello_ds",
         "codice_veicolo_ds",
         "ds_veicolo_ds",
-        "fornitore_ds",
-        "NrContrattoVendita_ds",
         "colore_est_ds",
         "colore_int_ds",
-        "DtConsCliente_ds",
+        "optional_ds",
         "codice_cliente_id",
         "codice_cliente_ds",
-        "MarcaConcessionaria_ds",
-        "NumFatAcqCasaM_ds",
-        "NrFattAcq_ds",
-        "optional_ds",
-        "marca_veicolo_ds",
-        "modello_ds",
-        "settore_ds",
+        "DtFattVendita_ds",
+        "fornitore_ds",
+        "DtConsCliente_ds",
         "DtOrdine_ds",
-        "id_ds",
         "TotaleFA"
       ]
     }

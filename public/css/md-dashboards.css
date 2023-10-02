@@ -12,6 +12,15 @@
 
 .g-table-header {
   background-color: steelblue;
+  white-space: nowrap;
+}
+
+th.frozen-column {
+  background-color: steelblue;
+}
+
+td.frozen-column {
+  background-color: white;
 }
 
 /* .g-table-row { */
@@ -26,6 +35,10 @@
   color: #494949;
   padding: 8px 12px!important;
   white-space: nowrap;
+}
+.google-visualization-table-type-number {
+  text-align: right;
+  font-weight: bold;
 }
 
 .g-category-filter {
