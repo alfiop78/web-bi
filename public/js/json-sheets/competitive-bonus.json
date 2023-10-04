@@ -1,0 +1,203 @@
+{
+  "name": "Competitive Bonus",
+  "comment": "Report competitive bonus",
+  "data": {
+    "columns": {
+      "CodDealerCM_id": {
+        "label": "CodDealerCM_id",
+        "type": "string"
+      },
+      "CodDealerCM_ds": {
+        "label": "CodDealerCM_ds",
+        "type": "string"
+      },
+      "MLI_id": {
+        "label": "MLI_id",
+        "type": "number"
+      },
+      "MLI_ds": {
+        "label": "MLI_ds",
+        "type": "string"
+      },
+      "area_id": {
+        "label": "area_id",
+        "type": "string"
+      },
+      "area_ds": {
+        "label": "area_ds",
+        "type": "string"
+      },
+      "costo_rapp_4_no_trader": {
+        "label": "costo_rapp_4_no_trader",
+        "type": "number"
+      },
+      "costo_rapp_4_trader": {
+        "label": "costo_rapp_4_trader",
+        "type": "number"
+      },
+      "costo_rapporto_2": {
+        "label": "costo_rapporto_2",
+        "type": "number"
+      },
+      "costo_rapporto_6": {
+        "label": "costo_rapporto_6",
+        "type": "number"
+      },
+      "costo_ve_cb": {
+        "label": "costo_ve_cb",
+        "type": "number"
+      },
+      "dealer_id": {
+        "label": "dealer_id",
+        "type": "string"
+      },
+      "dealer_ds": {
+        "label": "dealer_ds",
+        "type": "string"
+      },
+      "marginalita": {
+        "label": "marginalita",
+        "type": "number"
+      },
+      "month_id": {
+        "label": "month_id",
+        "type": "string"
+      },
+      "month_ds": {
+        "label": "month_ds",
+        "type": "string"
+      },
+      "perc_margine_rapp_2": {
+        "label": "perc_margine_rapp_2",
+        "type": "string"
+      },
+      "quarter_id": {
+        "label": "quarter_id",
+        "type": "string"
+      },
+      "quarter_ds": {
+        "label": "quarter_ds",
+        "type": "string"
+      },
+      "ricavo_rapp_4_no_trader": {
+        "label": "ricavo_rapp_4_no_trader",
+        "type": "number"
+      },
+      "ricavo_rapp_4_trader_2022": {
+        "label": "ricavo_rapp_4_trader_2022",
+        "type": "number"
+      },
+      "ricavo_rapp_5_emiliana": {
+        "label": "ricavo_rapp_5_emiliana",
+        "type": "number"
+      },
+      "costo_rapp_5_emiliana": {
+        "label": "costo_rapp_5_emiliana",
+        "type": "number"
+      },
+      "ricavo_rapporto_2": {
+        "label": "ricavo_rapporto_2",
+        "type": "number"
+      },
+      "ricavo_ve_cb": {
+        "label": "ricavo_ve_cb",
+        "type": "number"
+      },
+      "year_id": {
+        "label": "year_id",
+        "type": "number"
+      },
+      "year_ds": {
+        "label": "year_ds",
+        "type": "number"
+      },
+      "zona_id": {
+        "label": "zona_id",
+        "type": "string"
+      },
+      "zona_ds": {
+        "label": "zona_ds",
+        "type": "string"
+      }
+    },
+    "formatter": {
+      "currency": []
+    }
+  },
+  "filters": [
+    {
+      "containerId": "flt-1",
+      "filterColumnLabel": "area_ds",
+      "caption": "DISTRETTO"
+    },
+    {
+      "containerId": "flt-2",
+      "filterColumnLabel": "zona_ds",
+      "caption": "ZONA"
+    },
+    {
+      "containerId": "flt-3",
+      "filterColumnLabel": "CodDealerCM_ds",
+      "caption": "COD. FORD"
+    },
+    {
+      "containerId": "flt-4",
+      "filterColumnLabel": "dealer_ds",
+      "caption": "DEALER"
+    }
+  ],
+  "bind-comment": "un array con 3 elementi, ogni elemento ha un array che definisce il bind dei filtri del dashboard",
+  "bind": [
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      2,
+      3
+    ]
+  ],
+  "wrapper": {
+    "chartType": "Table",
+    "containerId": "chart_div",
+    "options": {
+      "width": "100%",
+      "height": "auto",
+      "page": "enabled",
+      "frozenColumns": 2,
+      "pageSize": 20,
+      "allowHTML": true,
+      "cssClassNames": {
+        "headerRow": "g-table-header",
+        "tableRow": "g-table-row",
+        "oddTableRow": "",
+        "selectedTableRow": "",
+        "hoverTableRow": "",
+        "headerCell": "g-header-cell",
+        "tableCell": "g-table-cell",
+        "rowNumberCell": ""
+      }
+    },
+    "view": {
+      "columns": [
+        "area_ds",
+        "zona_ds",
+        "CodDealerCM_ds",
+        "dealer_ds",
+        "MLI_ds",
+        "costo_rapporto_6",
+        "costo_rapporto_2",
+        "ricavo_rapporto_2",
+        "perc_margine_rapp_2",
+        "costo_ve_cb",
+        "ricavo_ve_cb",
+        "marginalita"
+      ]
+    }
+  },
+  "wrapperComment": "nella prop 'view' definisco le colonne da visualizzare per questo ChartWrapper"
+}

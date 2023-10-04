@@ -23,22 +23,32 @@ td.frozen-column {
   background-color: white;
 }
 
+td.align-right {
+  text-align: right;
+}
+
 /* .g-table-row { */
 /*   color: #494949; */
 /* } */
 
 .g-header-cell{
   color: white;
+  border: none!important;
 }
 
 .g-table-cell {
   color: #494949;
   padding: 8px 12px!important;
   white-space: nowrap;
+  border: none!important;
 }
 .google-visualization-table-type-number {
   text-align: right;
   font-weight: bold;
+}
+
+.google-visualization-table-type-date {
+  text-align: right;
 }
 
 .g-category-filter {
@@ -78,4 +88,22 @@ td.frozen-column {
   background: none!important;
   box-shadow: none;
   border: unset;
+}
+
+.chart-elements {
+  box-shadow: 0px 0px 5px 0px grey;
+}
+
+.google-visualization-table-div-page{
+  background: indianred!important;
+  height: 35px;
+}
+
+.google-visualization-table-div-page [role="button"]{
+  padding: 6px;
+  height: 30px;
+}
+
+.google-visualization-table-page-numbers {
+  padding: 6px;
 }

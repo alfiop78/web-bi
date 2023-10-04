@@ -45,7 +45,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
 
   // Recupero del template-layout e dello sheetSpecs
   app.getLayouts = async () => {
-    const sheetLayout = 'stock';
+    // const sheetLayout = 'stock';
+    const sheetLayout = 'competitive-bonus';
     const templateLayout = 'layout-1';
     const urls = [
       `/js/json-templates/${templateLayout}.json`,
@@ -159,6 +160,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
   }
 
   app.drawDashboard = (queryData) => {
+    // return;
     const prepareData = { cols: [], rows: [] };
     // const prepareDataTEST = { cols: [], rows: [] };
     // aggiungo le colonne
@@ -171,15 +173,40 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         type: Dashboard.sheetSpecs.data.columns[key].type
       });
     }
+    let dateOptions = {
+      // weekday: "long",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    };
     // aggiungo le righe
     queryData.forEach(row => {
       let v = [];
       for (const [key, value] of Object.entries(row)) {
         // if (key === 'DtArrivo_ds') console.log(new Date(value));
         // console.log(value);
-        (Dashboard.sheetSpecs.data.columns[key].type === 'number') ?
+        switch (Dashboard.sheetSpecs.data.columns[key].type) {
+          case 'date':
+            if (value.length === 8) {
+              // console.log('Data di 8 cifre (YYYYMMDD)', value);
+              const date = new Date(`${value.substring(0, 4)}-${value.substring(4, 6)}-${value.substring(6, 8)}`);
+              // console.log(new Intl.DateTimeFormat("it-IT", dateOptions).format(date));
+              v.push({ v: date, f: new Intl.DateTimeFormat("it-IT", dateOptions).format(date), p: { className: 'myClass' } });
+            } else {
+              v.push({ v: null });
+            }
+            break;
+          case 'number':
+            v.push({ v: parseFloat(value) });
+            break;
+          default:
+            (!Dashboard.sheetSpecs.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: Dashboard.sheetSpecs.data.columns[key].p } });
+            // v.push({ v: value });
+            break;
+        }
+        /* (Dashboard.sheetSpecs.data.columns[key].type === 'number') ?
           v.push({ v: parseFloat(value) }) :
-          v.push({ v: value });
+          v.push({ v: value }); */
       }
       prepareData.rows.push({ c: v });
     });
@@ -187,10 +214,12 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
     // è consentità con la DataView perchè questa è read-only
     var dataFormatted = new google.visualization.DataTable(prepareData);
-    // applico la formattazione
-    var formatter = new google.visualization.NumberFormat(
+    var currencyFormatter = new google.visualization.NumberFormat(
       { suffix: ' €', negativeColor: 'brown', negativeParens: true });
-    formatter.format(dataFormatted, 54); // applico la formattazione € alla colonna TotaleFA
+    // verifico se ci sono colonne da formattare "Currency €"
+    Dashboard.sheetSpecs.data.formatter.currency.forEach(columnIndex => {
+      currencyFormatter.format(dataFormatted, columnIndex);
+    });
     // console.log(dataFormatted);
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
     /*
@@ -268,10 +297,34 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
 
     // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
     // -> "modello_ds" infleunza "settore_ds" e tutti (l'array Dashboard.controlsWrapper) influenzano la table
-    gdashboard.bind(controls[0], controls[1])
+    // per ogni bind, nel template....
+    let binds;
+    /* NOTE: viene creata questa struttura di gdashboard.bind()
+     *
+    * let test = gdashboard.bind(controls[0], controls[1]);
+    test.bind(controls[1], controls[2]);
+    test.bind(controls[2], controls[3]);
+    test.bind(controls, table);
+    *
+    * che corrisponde a:
+     gdashboard.bind(controls[0], controls[1])
       .bind(controls[1], controls[2])
       .bind(controls[2], controls[3])
       .bind(controls, table);
+    */
+    // Questa logica funziona con il bind() di un filtro verso quello successivo ma
+    // possono esserci anche situazioni diverse, che sono a implementare
+    Dashboard.sheetSpecs.bind.forEach((v, index) => {
+      // console.log('index', index);
+      if (index === 0) {
+        // il primo bind deve essere creato dall'istanza gdashboard, i successivi posso legarli ad una variabile
+        binds = gdashboard.bind(controls[v[0]], controls[v[1]]);
+      } else {
+        binds.bind(controls[v[0]], controls[v[1]]);
+      }
+    });
+    // Tutti i controlli influenzano la table
+    binds.bind(controls, table);
 
     gdashboard.draw(dataFormatted);
     // gdashboard.draw(prepareData);
@@ -306,9 +359,15 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
   // recupero il datamrt
   app.dashboardExample = async () => {
     // recupero l'id dello Sheet stock veicoli nuovi
-    const sheet = JSON.parse(window.localStorage.getItem('hdkglro'));
+    // const sheet = JSON.parse(window.localStorage.getItem('hdkglro'));
+    const sheet = JSON.parse(window.localStorage.getItem('59yblqr'));
     if (!sheet.id) return false;
-    await fetch(`/fetch_api/${sheet.id}/datamart`)
+    const params = sheet.id;
+    // const url = `/fetch_api/${sheet.id}/datamart`;
+    const url = `/fetch_api/datamart`;
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    const req = new Request(url, init);
+    await fetch(req)
       .then((response) => {
         console.log(response);
         if (!response.ok) { throw Error(response.statusText); }

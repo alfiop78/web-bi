@@ -41,7 +41,7 @@
       },
       "DtFattAcq_ds": {
         "label": "DATA FATT. ACQ.",
-        "type": "string"
+        "type": "date"
       },
       "DtArrivo_id": {
         "label": "DtArrivo_id",
@@ -49,7 +49,7 @@
       },
       "DtArrivo_ds": {
         "label": "ARRIVO",
-        "type": "string"
+        "type": "date"
       },
       "DtFattVendita_id": {
         "label": "DtFattVendita_id",
@@ -57,7 +57,7 @@
       },
       "DtFattVendita_ds": {
         "label": "DATA FATT. VENDITA",
-        "type": "string"
+        "type": "date"
       },
       "codice_modello_id": {
         "label": "codice_modello_id",
@@ -97,7 +97,8 @@
       },
       "NumOrdineFab_ds": {
         "label": "N. ORDINE",
-        "type": "string"
+        "type": "string",
+        "p": "align-right"
       },
       "NrContrattoVendita_id": {
         "label": "NrContrattoVendita_id",
@@ -105,7 +106,8 @@
       },
       "NrContrattoVendita_ds": {
         "label": "N. CONTRATTO",
-        "type": "string"
+        "type": "string",
+        "p": "align-right"
       },
       "colore_est_id": {
         "label": "colore_est_id",
@@ -129,7 +131,7 @@
       },
       "DtConsCliente_ds": {
         "label": "DATA CONSEGNA",
-        "type": "string"
+        "type": "date"
       },
       "codice_cliente_id": {
         "label": "CLIENTE",
@@ -201,7 +203,7 @@
       },
       "DtOrdine_ds": {
         "label": "DATA ORDINE",
-        "type": "string"
+        "type": "date"
       },
       "DtAssegnaz_id": {
         "label": "DtAssegnaz_id",
@@ -209,7 +211,7 @@
       },
       "DtAssegnaz_ds": {
         "label": "ARRIVO STIMATO",
-        "type": "string"
+        "type": "date"
       },
       "id_id": {
         "label": "id_id",
@@ -227,8 +229,7 @@
     "formatter": {
       "currency": [
         54
-      ],
-      "date": []
+      ]
     }
   },
   "filters": [
@@ -253,6 +254,21 @@
       "caption": "Settore"
     }
   ],
+  "bind-comment": "un array con 3 elementi, ogni elemento ha un array che definisce il bind dei filtri del dashboard",
+  "bind": [
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      2,
+      3
+    ]
+  ],
   "wrapper": {
     "chartType": "Table",
     "containerId": "chart_div",
@@ -261,7 +277,7 @@
       "height": "auto",
       "page": "enabled",
       "frozenColumns": 2,
-      "pageSize": 15,
+      "pageSize": 20,
       "allowHTML": true,
       "cssClassNames": {
         "headerRow": "g-table-header",

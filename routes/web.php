@@ -274,7 +274,8 @@ Route::get('/curl/process/{token}/schedule', function ($token) {
 })->name('web_bi.schedule_report');
 
 // visualizzazione anteprima datamart, 'Apri Sheet' sheetPreview()
-Route::get('/fetch_api/{id}/datamart', [MapDatabaseController::class, 'datamart'])->name('web_bi.fetch_api.datamart');
+// Route::get('/fetch_api/{id}/datamart', [MapDatabaseController::class, 'datamart'])->name('web_bi.fetch_api.datamart');
+Route::post('/fetch_api/datamart', [MapDatabaseController::class, 'datamart'])->name('web_bi.fetch_api.datamart');
 
 // store json
 Route::prefix('/fetch_api/json/')->group(function () {

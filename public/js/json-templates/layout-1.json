@@ -41,7 +41,9 @@
     {
       "tag": "div",
       "id": "chart_div",
-      "classes": []
+      "classes": [
+        "chart-elements"
+      ]
     }
   ]
 }
