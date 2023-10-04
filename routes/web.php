@@ -48,6 +48,7 @@ Route::get('/', function () {
 })->name('web_bi.index');
 
 Route::get('/mapdb', [MapDatabaseController::class, 'mapdb'])->name('web_bi.mapdb');
+
 Route::get('/versioning', function () {
   return view('web_bi.versioning');
 })->name('web_bi.versioning');
@@ -55,6 +56,10 @@ Route::get('/versioning', function () {
 Route::get('/dashboards', function () {
   return view('web_bi.dashboards');
 })->name('web_bi.dashboards');
+
+Route::get('/create-dashboard', function () {
+  return view('web_bi.create-dashboard');
+})->name('web_bi.dashboard_create');
 
 // recupero l'elenco dei database presenti (schema)
 Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']);
