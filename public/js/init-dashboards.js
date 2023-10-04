@@ -197,30 +197,37 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
             }
             break;
           case 'number':
-            v.push({ v: parseFloat(value) });
+            // TODO: valutare se formattare qui i valori (come sopra per le date) oppure con le funzioni Formatter (sotto)
+            // di GoogleChart
+            (isNaN(parseFloat(value))) ? v.push({ v: null }) : v.push({ v: parseFloat(value) });
             break;
           default:
             (!Dashboard.sheetSpecs.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: Dashboard.sheetSpecs.data.columns[key].p } });
             // v.push({ v: value });
             break;
         }
-        /* (Dashboard.sheetSpecs.data.columns[key].type === 'number') ?
-          v.push({ v: parseFloat(value) }) :
-          v.push({ v: value }); */
       }
       prepareData.rows.push({ c: v });
     });
-    // console.log(prepareData);
+    console.log(prepareData);
     // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
     // è consentità con la DataView perchè questa è read-only
     var dataFormatted = new google.visualization.DataTable(prepareData);
+
+    var percFormatter = new google.visualization.NumberFormat(
+      { suffix: ' %', negativeColor: 'red', negativeParens: true, fractionDigits: 1 });
     var currencyFormatter = new google.visualization.NumberFormat(
       { suffix: ' €', negativeColor: 'brown', negativeParens: true });
     // verifico se ci sono colonne da formattare "Currency €"
     Dashboard.sheetSpecs.data.formatter.currency.forEach(columnIndex => {
       currencyFormatter.format(dataFormatted, columnIndex);
     });
-    // console.log(dataFormatted);
+    // Formattazione colonne percentuali
+    Dashboard.sheetSpecs.data.formatter.percent.forEach(columnIndex => {
+      percFormatter.format(dataFormatted, columnIndex);
+    });
+    console.log(dataFormatted);
+    // return;
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
     /*
        * SEDE (Ubicazione)

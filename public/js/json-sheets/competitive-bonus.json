@@ -8,7 +8,7 @@
         "type": "string"
       },
       "CodDealerCM_ds": {
-        "label": "CodDealerCM_ds",
+        "label": "COD. FORD",
         "type": "string"
       },
       "MLI_id": {
@@ -24,7 +24,7 @@
         "type": "string"
       },
       "area_ds": {
-        "label": "area_ds",
+        "label": "D",
         "type": "string"
       },
       "costo_rapp_4_no_trader": {
@@ -36,15 +36,15 @@
         "type": "number"
       },
       "costo_rapporto_2": {
-        "label": "costo_rapporto_2",
+        "label": "R.A. DIRETTA (Costo)",
         "type": "number"
       },
       "costo_rapporto_6": {
-        "label": "costo_rapporto_6",
+        "label": "OFFICINA INTERNA (Costo)",
         "type": "number"
       },
       "costo_ve_cb": {
-        "label": "costo_ve_cb",
+        "label": "V.E. NO TRADER NO G.A. (Costo)",
         "type": "number"
       },
       "dealer_id": {
@@ -52,11 +52,11 @@
         "type": "string"
       },
       "dealer_ds": {
-        "label": "dealer_ds",
+        "label": "DEALER",
         "type": "string"
       },
       "marginalita": {
-        "label": "marginalita",
+        "label": "% MARG. V.E. NO TRADER NO G.A.",
         "type": "number"
       },
       "month_id": {
@@ -68,8 +68,8 @@
         "type": "string"
       },
       "perc_margine_rapp_2": {
-        "label": "perc_margine_rapp_2",
-        "type": "string"
+        "label": "% MARG. R.A. DIRETTA",
+        "type": "number"
       },
       "quarter_id": {
         "label": "quarter_id",
@@ -96,11 +96,11 @@
         "type": "number"
       },
       "ricavo_rapporto_2": {
-        "label": "ricavo_rapporto_2",
+        "label": "R.A. DIRETTA (Ricavo)",
         "type": "number"
       },
       "ricavo_ve_cb": {
-        "label": "ricavo_ve_cb",
+        "label": "V.E. No Trader No G.A. (Ricavo)",
         "type": "number"
       },
       "year_id": {
@@ -116,33 +116,44 @@
         "type": "string"
       },
       "zona_ds": {
-        "label": "zona_ds",
+        "label": "ZONA",
         "type": "string"
       }
     },
     "formatter": {
-      "currency": []
-    }
+      "currency": [
+        16,
+        17,
+        18,
+        26,
+        27
+      ],
+      "percent": [
+        25,
+        28
+      ]
+    },
+    "comment": "Indice di colonna che saranno formattate con lee funzioni Formatter di GoogleChart"
   },
   "filters": [
     {
       "containerId": "flt-1",
-      "filterColumnLabel": "area_ds",
+      "filterColumnLabel": "D",
       "caption": "DISTRETTO"
     },
     {
       "containerId": "flt-2",
-      "filterColumnLabel": "zona_ds",
+      "filterColumnLabel": "ZONA",
       "caption": "ZONA"
     },
     {
       "containerId": "flt-3",
-      "filterColumnLabel": "CodDealerCM_ds",
+      "filterColumnLabel": "COD. FORD",
       "caption": "COD. FORD"
     },
     {
       "containerId": "flt-4",
-      "filterColumnLabel": "dealer_ds",
+      "filterColumnLabel": "DEALER",
       "caption": "DEALER"
     }
   ],
@@ -168,7 +179,7 @@
       "width": "100%",
       "height": "auto",
       "page": "enabled",
-      "frozenColumns": 2,
+      "frozenColumns": 4,
       "pageSize": 20,
       "allowHTML": true,
       "cssClassNames": {
@@ -188,7 +199,6 @@
         "zona_ds",
         "CodDealerCM_ds",
         "dealer_ds",
-        "MLI_ds",
         "costo_rapporto_6",
         "costo_rapporto_2",
         "ricavo_rapporto_2",
