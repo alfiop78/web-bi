@@ -155,21 +155,25 @@ class MapDatabaseController extends Controller
   }
 
   // recupero una preview del datamart già presente, viene elaborata dal tasto 'Apri Sheet'
-  /* public function datamart($id)
+  public function datamart($id)
   {
     // dd($id);
     // $datamart = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='decisyon_cache' AND TABLE_NAME='WEB_BI_$id';");
     // if ($datamart) {
-    $data = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.WEB_BI_$id LIMIT 40000");
+    // TODO: utilizzare il chunk di laravel per estrarre dati un blocco per volta
+    // https://laravel.com/docs/8.x/queries#chunking-results
+    $data = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.WEB_BI_$id LIMIT 10000");
     // }
     // dd($datamart);
     // dd($data);
     return response()->json($data);
-  } */
+  }
 
   // Questo metodo l'ho messo in POST dopo aver ricevuto gli errori di memory_limit.
-  // Siccome si verificano ugualmente, in futuro si può spostare di nuovo con la logica del metodo GET (sopra)
-  public function datamart(Request $request)
+  // Siccome si verificano ugualmente ho commentato questo Metodo, che usa il POST. In futuro mi
+  // potrà servire se decido di inviare qui alcuni dati, ad esempio, alcuni parametri per la query, come la definizione
+  // delle colonne
+  /* public function datamart(Request $request)
   {
     $id = $request->input(0);
     // dd($id);
@@ -183,7 +187,7 @@ class MapDatabaseController extends Controller
     // dd($datamart);
     // dd($data);
     return response()->json($data);
-  }
+  } */
 
   // sheet
   public function sheet(Request $request)

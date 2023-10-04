@@ -383,8 +383,10 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // const sheet = JSON.parse(window.localStorage.getItem('hdkglro'));
     const sheet = JSON.parse(window.localStorage.getItem('59yblqr'));
     if (!sheet.id) return false;
-    const params = sheet.id;
-    // const url = `/fetch_api/${sheet.id}/datamart`;
+    // Chiamta in POST
+    // WARN: per la chiamata in POST bisogna aggiungere la route in VerifyCrsfToken.php
+
+    /* const params = sheet.id;
     const url = `/fetch_api/datamart`;
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
@@ -405,7 +407,28 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       .catch(err => {
         App.showConsole(err, 'error');
         console.error(err);
+      }); */
+    // end chiamta in POST
+    // Chiamata in GET
+    await fetch(`/fetch_api/${sheet.id}/datamart`)
+      .then((response) => {
+        console.log(response);
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(data => {
+        console.log(data);
+        // debugger;
+        Dashboard.data = data;
+        google.charts.setOnLoadCallback(app.drawDashboard(data));
+        // google.charts.setOnLoadCallback(app.drawTable(data));
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
       });
+    // end chiamata in GET
   }
 
   /* Recupero il .json delle specifiche del report dello Stock */
