@@ -209,10 +209,10 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       prepareData.rows.push({ c: v });
     });
     console.log(prepareData);
-    let data;
+    let dataTable;
     // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
     // è consentità con la DataView perchè questa è read-only
-    data = new google.visualization.DataTable(prepareData);
+    dataTable = new google.visualization.DataTable(prepareData);
     // definisco la formattazione per le percentuali e per i valori currency
     var percFormatter = new google.visualization.NumberFormat(
       { suffix: ' %', negativeColor: 'red', negativeParens: true, fractionDigits: 1 });
@@ -294,16 +294,16 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       Dashboard.sheetSpecs.data.group.columns.forEach(col => {
         groupColumns.push({ column: col.column, aggregation: google.visualization.data[col.aggregation], type: col.type });
       });
-      data = new google.visualization.data.group(
-        data,
+      dataTable = new google.visualization.data.group(
+        dataTable,
         Dashboard.sheetSpecs.data.group.key,
         groupColumns,
       );
     }
     // funzioni di formattazione
-    Dashboard.sheetSpecs.data.formatter.currency.forEach(columnIndex => currencyFormatter.format(data, columnIndex));
-    Dashboard.sheetSpecs.data.formatter.percent.forEach(columnIndex => percFormatter.format(data, columnIndex));
-    console.log(data);
+    Dashboard.sheetSpecs.data.formatter.currency.forEach(columnIndex => currencyFormatter.format(dataTable, columnIndex));
+    Dashboard.sheetSpecs.data.formatter.percent.forEach(columnIndex => percFormatter.format(dataTable, columnIndex));
+    console.log(dataTable);
 
     // NOTE: le proprietà definite nel ChartWrapper vengono impostate nel template-sheet .json, proprietà "wrapper"
     var table = new google.visualization.ChartWrapper(Dashboard.sheetSpecs.wrapper);
@@ -340,7 +340,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     binds.bind(controls, table);
 
     // gdashboard.draw(dataFormatted);
-    gdashboard.draw(data); // utilizzo della funzione group
+    gdashboard.draw(dataTable); // utilizzo della funzione group
     // gdashboard.draw(prepareData);
   }
 
