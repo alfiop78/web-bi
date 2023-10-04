@@ -160,7 +160,6 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
   }
 
   app.drawDashboard = (queryData) => {
-    // return;
     const prepareData = { cols: [], rows: [] };
     // const prepareDataTEST = { cols: [], rows: [] };
     // aggiungo le colonne
@@ -210,22 +209,15 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       prepareData.rows.push({ c: v });
     });
     console.log(prepareData);
+    let data;
     // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
     // è consentità con la DataView perchè questa è read-only
-    var dataFormatted = new google.visualization.DataTable(prepareData);
-
+    data = new google.visualization.DataTable(prepareData);
+    // definisco la formattazione per le percentuali e per i valori currency
     var percFormatter = new google.visualization.NumberFormat(
       { suffix: ' %', negativeColor: 'red', negativeParens: true, fractionDigits: 1 });
     var currencyFormatter = new google.visualization.NumberFormat(
       { suffix: ' €', negativeColor: 'brown', negativeParens: true });
-    // verifico se ci sono colonne da formattare "Currency €"
-    /* Dashboard.sheetSpecs.data.formatter.currency.forEach(columnIndex => {
-      currencyFormatter.format(dataFormatted, columnIndex);
-    }); */
-    // Formattazione colonne percentuali
-    /* Dashboard.sheetSpecs.data.formatter.percent.forEach(columnIndex => {
-      percFormatter.format(dataFormatted, columnIndex);
-    }); */
     // console.log(dataFormatted);
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
     // Creo i filtri nella Classe Dashboards
@@ -278,7 +270,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       'view': { 'columns': [0] }
     }); */
     // La funzione group() utilizza, come primo parametro, una DataTable, quindi si può anche impostare
-    // sul chartWrapper, la funzione getDataTable() ChartWrapper.getDataTable()
+    // facendo riferimento al chartWrapper con la funzione getDataTable(), ChartWrapper.getDataTable().
     /* let dataGroup = new google.visualization.data.group(dataFormatted, [1, 3, 5, 7],
       [
         // OFFICINA INTERNA (costo_rapporto_6)
@@ -296,22 +288,23 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         // marginalità
         { 'column': 28, 'aggregation': google.visualization.data.avg, 'type': 'number' }
       ]); */
-    let dataGroup;
+    // NOTE: La funzione group() commentata (sopra) la ricreo utilizzando il template-sheet json
     if (Dashboard.sheetSpecs.data.group) {
       let groupColumns = [];
       Dashboard.sheetSpecs.data.group.columns.forEach(col => {
         groupColumns.push({ column: col.column, aggregation: google.visualization.data[col.aggregation], type: col.type });
       });
-      dataGroup = new google.visualization.data.group(
-        dataFormatted,
+      data = new google.visualization.data.group(
+        data,
         Dashboard.sheetSpecs.data.group.key,
         groupColumns,
       );
     }
-    console.log(dataGroup);
+    // funzioni di formattazione
+    Dashboard.sheetSpecs.data.formatter.currency.forEach(columnIndex => currencyFormatter.format(data, columnIndex));
+    Dashboard.sheetSpecs.data.formatter.percent.forEach(columnIndex => percFormatter.format(data, columnIndex));
+    console.log(data);
 
-    Dashboard.sheetSpecs.data.formatter.currency.forEach(columnIndex => currencyFormatter.format(dataGroup, columnIndex));
-    Dashboard.sheetSpecs.data.formatter.percent.forEach(columnIndex => percFormatter.format(dataGroup, columnIndex));
     // NOTE: le proprietà definite nel ChartWrapper vengono impostate nel template-sheet .json, proprietà "wrapper"
     var table = new google.visualization.ChartWrapper(Dashboard.sheetSpecs.wrapper);
 
@@ -347,7 +340,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     binds.bind(controls, table);
 
     // gdashboard.draw(dataFormatted);
-    gdashboard.draw(dataGroup);
+    gdashboard.draw(data); // utilizzo della funzione group
     // gdashboard.draw(prepareData);
   }
 

@@ -1,5 +1,6 @@
 #filter_div {
   display: flex;
+  user-select: none;
 }
 
 .gradient {

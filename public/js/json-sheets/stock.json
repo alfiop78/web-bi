@@ -229,7 +229,8 @@
     "formatter": {
       "currency": [
         54
-      ]
+      ],
+      "percent": []
     }
   },
   "filters": [
