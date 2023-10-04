@@ -3,12 +3,36 @@
   "comment": "Report competitive bonus",
   "data": {
     "columns": {
+      "area_id": {
+        "label": "area_id",
+        "type": "string"
+      },
+      "area_ds": {
+        "label": "D",
+        "type": "string"
+      },
+      "zona_id": {
+        "label": "zona_id",
+        "type": "string"
+      },
+      "zona_ds": {
+        "label": "ZONA",
+        "type": "string"
+      },
       "CodDealerCM_id": {
         "label": "CodDealerCM_id",
         "type": "string"
       },
       "CodDealerCM_ds": {
         "label": "COD. FORD",
+        "type": "string"
+      },
+      "dealer_id": {
+        "label": "dealer_id",
+        "type": "string"
+      },
+      "dealer_ds": {
+        "label": "DEALER",
         "type": "string"
       },
       "MLI_id": {
@@ -19,56 +43,12 @@
         "label": "MLI_ds",
         "type": "string"
       },
-      "area_id": {
-        "label": "area_id",
-        "type": "string"
-      },
-      "area_ds": {
-        "label": "D",
-        "type": "string"
-      },
-      "costo_rapp_4_no_trader": {
-        "label": "costo_rapp_4_no_trader",
+      "year_id": {
+        "label": "year_id",
         "type": "number"
       },
-      "costo_rapp_4_trader": {
-        "label": "costo_rapp_4_trader",
-        "type": "number"
-      },
-      "costo_rapporto_2": {
-        "label": "R.A. DIRETTA (Costo)",
-        "type": "number"
-      },
-      "costo_rapporto_6": {
-        "label": "OFFICINA INTERNA (Costo)",
-        "type": "number"
-      },
-      "costo_ve_cb": {
-        "label": "V.E. NO TRADER NO G.A. (Costo)",
-        "type": "number"
-      },
-      "dealer_id": {
-        "label": "dealer_id",
-        "type": "string"
-      },
-      "dealer_ds": {
-        "label": "DEALER",
-        "type": "string"
-      },
-      "marginalita": {
-        "label": "% MARG. V.E. NO TRADER NO G.A.",
-        "type": "number"
-      },
-      "month_id": {
-        "label": "month_id",
-        "type": "string"
-      },
-      "month_ds": {
-        "label": "month_ds",
-        "type": "string"
-      },
-      "perc_margine_rapp_2": {
-        "label": "% MARG. R.A. DIRETTA",
+      "year_ds": {
+        "label": "year_ds",
         "type": "number"
       },
       "quarter_id": {
@@ -79,61 +59,126 @@
         "label": "quarter_ds",
         "type": "string"
       },
-      "ricavo_rapp_4_no_trader": {
-        "label": "ricavo_rapp_4_no_trader",
+      "month_id": {
+        "label": "month_id",
+        "type": "string"
+      },
+      "month_ds": {
+        "label": "month_ds",
+        "type": "string"
+      },
+      "costo_rapporto_6": {
+        "label": "OFFICINA INTERNA (Costo)",
         "type": "number"
       },
-      "ricavo_rapp_4_trader_2022": {
-        "label": "ricavo_rapp_4_trader_2022",
-        "type": "number"
-      },
-      "ricavo_rapp_5_emiliana": {
-        "label": "ricavo_rapp_5_emiliana",
-        "type": "number"
-      },
-      "costo_rapp_5_emiliana": {
-        "label": "costo_rapp_5_emiliana",
+      "costo_rapporto_2": {
+        "label": "R.A. DIRETTA (Costo)",
         "type": "number"
       },
       "ricavo_rapporto_2": {
         "label": "R.A. DIRETTA (Ricavo)",
         "type": "number"
       },
+      "costo_rapp_4_no_trader": {
+        "label": "costo_rapp_4_no_trader",
+        "type": "number"
+      },
+      "ricavo_rapp_4_no_trader": {
+        "label": "ricavo_rapp_4_no_trader",
+        "type": "number"
+      },
+      "costo_rapp_4_trader": {
+        "label": "costo_rapp_4_trader",
+        "type": "number"
+      },
+      "ricavo_rapp_4_trader_2022": {
+        "label": "ricavo_rapp_4_trader_2022",
+        "type": "number"
+      },
+      "costo_rapp_5_emiliana": {
+        "label": "costo_rapp_5_emiliana",
+        "type": "number"
+      },
+      "ricavo_rapp_5_emiliana": {
+        "label": "ricavo_rapp_5_emiliana",
+        "type": "number"
+      },
+      "perc_margine_rapp_2": {
+        "label": "% MARG. R.A. DIRETTA",
+        "type": "number"
+      },
+      "costo_ve_cb": {
+        "label": "V.E. NO TRADER NO G.A. (Costo)",
+        "type": "number"
+      },
       "ricavo_ve_cb": {
         "label": "V.E. No Trader No G.A. (Ricavo)",
         "type": "number"
       },
-      "year_id": {
-        "label": "year_id",
+      "marginalita": {
+        "label": "% MARG. V.E. NO TRADER NO G.A.",
         "type": "number"
-      },
-      "year_ds": {
-        "label": "year_ds",
-        "type": "number"
-      },
-      "zona_id": {
-        "label": "zona_id",
-        "type": "string"
-      },
-      "zona_ds": {
-        "label": "ZONA",
-        "type": "string"
       }
     },
     "formatter": {
       "currency": [
-        16,
-        17,
-        18,
-        26,
-        27
+        4,
+        5,
+        6,
+        8,
+        9
       ],
       "percent": [
-        25,
-        28
+        7,
+        10
       ]
     },
-    "comment": "Indice di colonna che saranno formattate con lee funzioni Formatter di GoogleChart"
+    "comment": "Indice di colonna che saranno formattate con lee funzioni Formatter di GoogleChart",
+    "group": {
+      "key": [
+        1,
+        3,
+        5,
+        7
+      ],
+      "columns": [
+        {
+          "column": 16,
+          "aggregation": "sum",
+          "type": "number"
+        },
+        {
+          "column": 17,
+          "aggregation": "sum",
+          "type": "number"
+        },
+        {
+          "column": 18,
+          "aggregation": "sum",
+          "type": "number"
+        },
+        {
+          "column": 25,
+          "aggregation": "avg",
+          "type": "number"
+        },
+        {
+          "column": 26,
+          "aggregation": "sum",
+          "type": "number"
+        },
+        {
+          "column": 27,
+          "aggregation": "sum",
+          "type": "number"
+        },
+        {
+          "column": 28,
+          "aggregation": "avg",
+          "type": "number"
+        }
+      ]
+    }
   },
   "filters": [
     {
@@ -192,21 +237,6 @@
         "tableCell": "g-table-cell",
         "rowNumberCell": ""
       }
-    },
-    "view": {
-      "columns": [
-        "area_ds",
-        "zona_ds",
-        "CodDealerCM_ds",
-        "dealer_ds",
-        "costo_rapporto_6",
-        "costo_rapporto_2",
-        "ricavo_rapporto_2",
-        "perc_margine_rapp_2",
-        "costo_ve_cb",
-        "ricavo_ve_cb",
-        "marginalita"
-      ]
     }
   },
   "wrapperComment": "nella prop 'view' definisco le colonne da visualizzare per questo ChartWrapper"

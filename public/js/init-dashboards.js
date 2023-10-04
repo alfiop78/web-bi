@@ -219,27 +219,15 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     var currencyFormatter = new google.visualization.NumberFormat(
       { suffix: ' €', negativeColor: 'brown', negativeParens: true });
     // verifico se ci sono colonne da formattare "Currency €"
-    Dashboard.sheetSpecs.data.formatter.currency.forEach(columnIndex => {
+    /* Dashboard.sheetSpecs.data.formatter.currency.forEach(columnIndex => {
       currencyFormatter.format(dataFormatted, columnIndex);
-    });
+    }); */
     // Formattazione colonne percentuali
-    Dashboard.sheetSpecs.data.formatter.percent.forEach(columnIndex => {
+    /* Dashboard.sheetSpecs.data.formatter.percent.forEach(columnIndex => {
       percFormatter.format(dataFormatted, columnIndex);
-    });
-    console.log(dataFormatted);
-    // return;
+    }); */
+    // console.log(dataFormatted);
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
-    /*
-       * SEDE (Ubicazione)
-       * MARCA
-       * MODELLI
-       * STATO
-       * SETTORE
-       * STATO ORDINE
-       * STATO VHC
-       * GIACENZA
-       * ...poi i tasti "filtro" CONTRATTI, IN TRATTATIVA, LIBERI, ARRIVATI, IN TRANSITO
-    */
     // Creo i filtri nella Classe Dashboards
     const controls = Dashboard.drawControls();
     /* var filter_ubicazione = new google.visualization.ControlWrapper({
@@ -273,17 +261,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     }); */
     // imposto le class per i CSS
     // NOTE: Definita nel file stock.json
-
-    /* const cssClasses = {
-      'headerRow': 'g-table-header',
-      'tableRow': 'g-table-row',
-      'oddTableRow': '',
-      'selectedTableRow': '',
-      'hoverTableRow': '',
-      'headerCell': 'g-header-cell',
-      'tableCell': 'g-table-cell',
-      'rowNumberCell': ''
-    }; */
+    //
     // Per aggiungere una DataView, in un ChartWrapper, non è necessario istanziare un nuovo ogetto DataView
     // ...come fatto in app.drawTable(), la 'view' la dichiaro all'interno del ChartWrapper
     /* var table = new google.visualization.ChartWrapper({
@@ -299,6 +277,41 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       },
       'view': { 'columns': [0] }
     }); */
+    // La funzione group() utilizza, come primo parametro, una DataTable, quindi si può anche impostare
+    // sul chartWrapper, la funzione getDataTable() ChartWrapper.getDataTable()
+    /* let dataGroup = new google.visualization.data.group(dataFormatted, [1, 3, 5, 7],
+      [
+        // OFFICINA INTERNA (costo_rapporto_6)
+        { 'column': 16, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+        // RA DIRETTA COSTO (costo_rapporto_2)
+        { 'column': 17, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+        // RA DIRETTA RICAVO (ricavo_rapporto_2)
+        { 'column': 18, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+        // % MARG. RA DIRETTA (perc_margine_rapporto_2)
+        { 'column': 25, 'aggregation': google.visualization.data.avg, 'type': 'number' },
+        // costo ve_cb
+        { 'column': 26, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+        // ricavo_ve_cb
+        { 'column': 27, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+        // marginalità
+        { 'column': 28, 'aggregation': google.visualization.data.avg, 'type': 'number' }
+      ]); */
+    let dataGroup;
+    if (Dashboard.sheetSpecs.data.group) {
+      let groupColumns = [];
+      Dashboard.sheetSpecs.data.group.columns.forEach(col => {
+        groupColumns.push({ column: col.column, aggregation: google.visualization.data[col.aggregation], type: col.type });
+      });
+      dataGroup = new google.visualization.data.group(
+        dataFormatted,
+        Dashboard.sheetSpecs.data.group.key,
+        groupColumns,
+      );
+    }
+    console.log(dataGroup);
+
+    Dashboard.sheetSpecs.data.formatter.currency.forEach(columnIndex => currencyFormatter.format(dataGroup, columnIndex));
+    Dashboard.sheetSpecs.data.formatter.percent.forEach(columnIndex => percFormatter.format(dataGroup, columnIndex));
     // NOTE: le proprietà definite nel ChartWrapper vengono impostate nel template-sheet .json, proprietà "wrapper"
     var table = new google.visualization.ChartWrapper(Dashboard.sheetSpecs.wrapper);
 
@@ -333,7 +346,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // Tutti i controlli influenzano la table
     binds.bind(controls, table);
 
-    gdashboard.draw(dataFormatted);
+    // gdashboard.draw(dataFormatted);
+    gdashboard.draw(dataGroup);
     // gdashboard.draw(prepareData);
   }
 

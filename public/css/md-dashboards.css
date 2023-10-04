@@ -107,3 +107,6 @@ td.align-right {
 .google-visualization-table-page-numbers {
   padding: 6px;
 }
+.google-visualization-table {
+  user-select: none;
+}
