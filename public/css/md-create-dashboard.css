@@ -1,0 +1,29 @@
+.preview-area {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-gap: 1em;
+  margin: 1em;
+}
+
+.layout-previews {
+  background-color: #e2e2e2;
+  width: 300px;
+  height: 250px;
+
+}
+
+/* NOTE: esempio di media query per responsive layout */
+@media screen and (min-width: 1024px) {
+  .preview-area {
+    /* grid-template-columns: repeat(auto-fill, minmax(calc(50% - 2em), 1fr)); */
+    grid-template-columns: repeat(auto-fill, 300px);
+    grid-template-rows: 250px;
+    justify-content: center;
+    grid-column-gap: 1em;
+    position: relative;
+  }
+}
+
+.thumb-layout[data-selected] {
+  border: solid thin steelblue;
+}
