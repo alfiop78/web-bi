@@ -27,3 +27,34 @@
 .thumb-layout[data-selected] {
   border: solid thin steelblue;
 }
+
+.layout-previews .col {
+  display: grid;
+}
+
+.layout-previews > .grid {
+  display: grid;
+}
+
+.layout-previews > .grid.rows-2 {
+  grid-template-rows: 30% calc(70% - 6px);
+  grid-row-gap: 6px;
+  height: inherit;
+}
+
+.layout-previews .col.col-1 {
+  grid-template-columns: 1fr;
+  margin: 0px auto;
+  width: 80%;
+  height: 100%;
+}
+
+.layout-previews .col #filter_div {
+  background: #b5b0b0;
+  border-radius: 2px;
+}
+
+.layout-previews .col #chart_div {
+  background: #b5b0b0;
+  border-radius: 2px;
+}

@@ -2,18 +2,99 @@
   "parentElement_id": "template-layout",
   "id": "layout-1",
   "name": "generic data table",
-  "comment": "Semplice layout con una sezione per i filtri e una per la datatable",
-  "childs": [
+  "comment": "Template con 2 righe, una per i filtri e una per la DataTable",
+  "grid": {
+    "tag": "div",
+    "classes": [
+      "grid",
+      "rows-2"
+    ],
+    "rows": [
+      {
+        "tag": "section",
+        "classes": [
+          "row"
+        ],
+        "columns": [
+          {
+            "tag": "div",
+            "classes": [
+              "col",
+              "col-1"
+            ],
+            "childs": [
+              {
+                "tag": "div",
+                "id": "filter_div",
+                "classes": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "section",
+        "classes": [
+          "row"
+        ],
+        "columns": [
+          {
+            "tag": "div",
+            "classes": [
+              "col",
+              "col-1"
+            ],
+            "childs": [
+              {
+                "tag": "div",
+                "id": "chart_div",
+                "classes": [
+                  "chart-elements"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "rows-backup": [
     {
-      "tag": "div",
-      "id": "filter_div",
-      "classes": []
+      "columns": [
+        {
+          "tag": "div",
+          "classes": [
+            "col",
+            "col-1"
+          ],
+          "childs": [
+            {
+              "tag": "div",
+              "id": "filter_div",
+              "classes": []
+            }
+          ]
+        }
+      ]
     },
     {
-      "tag": "div",
-      "id": "chart_div",
-      "classes": [
-        "chart-elements"
+      "columns": [
+        {
+          "tag": "div",
+          "classes": [
+            "col",
+            "col-1"
+          ],
+          "childs": [
+            {
+              "tag": "div",
+              "id": "chart_div",
+              "classes": [
+                "chart-elements"
+              ]
+            }
+          ]
+        }
       ]
     }
   ]
