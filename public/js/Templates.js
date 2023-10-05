@@ -27,4 +27,28 @@ class Templates {
     if (this.#data.childs) this.recursive(this.parent, this.#data.childs);
   }
 
+  thumbnails() {
+    this.tmplThumbnail = document.getElementById('tmpl-thumbnails');
+    this.tmplContent = this.tmplThumbnail.content.cloneNode(true);
+    this.parent = this.tmplContent.querySelector('.thumb-layout');
+    this.title = this.parent.querySelector('.title');
+    this.layoutPreview = this.parent.querySelector('.layout-previews');
+    this.parent.id = this.data.id;
+    this.title.innerText = this.data.name;
+    document.getElementById('thumbnails').appendChild(this.tmplContent);
+    // return;
+    this.recursive = (parent, childs) => {
+      childs.forEach(child => {
+        // console.log(child);
+        const tag = document.createElement(child.tag);
+        tag.id = child.id;
+        // l'array "classes" è sempre presente però potrebbe essere vuoto, se non ci sono classi da impostare
+        child.classes.forEach(cssClass => tag.classList.add(cssClass));
+        parent.appendChild(tag);
+        if (child.childs) this.recursive(tag, child.childs);
+      });
+    }
+    if (this.#data.childs) this.recursive(this.layoutPreview, this.#data.childs);
+  }
+
 }

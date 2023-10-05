@@ -221,7 +221,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // console.log(dataFormatted);
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
     // Creo i filtri nella Classe Dashboards
-    const controls = Dashboard.drawControls();
+    const controls = Dashboard.drawControls(document.getElementById('filter_div'));
     /* var filter_ubicazione = new google.visualization.ControlWrapper({
       'controlType': 'CategoryFilter',
       'containerId': 'filter-ubicazione',

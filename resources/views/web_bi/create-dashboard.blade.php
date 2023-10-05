@@ -12,7 +12,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
-  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-create-dashboards.css') }}" /> -->
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-create-dashboard.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
   <script src="{{ asset('/js/WBStorage.js') }}"></script>
@@ -22,6 +22,13 @@
 </head>
 
 <body class="antialiased">
+
+  <template id="tmpl-thumbnails">
+    <section id class="thumb-layout" data-fn="layoutSelected">
+      <div class="title"></div>
+      <div class="layout-previews"></div>
+    </section>
+  </template>
 
   <main>
     <div id="drawer">
@@ -46,7 +53,7 @@
         <a href="#" id="menu" onclick="App.menu()"><i class="material-icons md-light">menu</i></a>
       </div>
 
-      <h1 class="title">Dashboard</h1>
+      <h1 class="title">Creazione Dashboard</h1>
     </header>
 
     <div id="container">
@@ -54,17 +61,48 @@
       <div id="content" class="custom-scrollbar">
 
         <div id="body" hidden>
+          <dialog id="dlg-template-layout" class="large">
+            <section class="dlg-grid">
+              <h5 class="title">Selezione del Layout pagina</h5>
+              <section class="dlg-content col col-1 search">
+                <input type="search" id="search-templates" placeholder="Ricerca" autocomplete="on" />
+                <section id="thumbnails" class="preview-area"></section>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button data-fn="btnTemplateDone" id="btn-template-save">OK</button>
+              </section>
+            </section>
+          </dialog>
+          <dialog id="dlg-sheets">
+            <h5>Selezione del/i Report</h5>
+          </dialog>
           <fieldset>
             <legend>Parametri Dashboard</legend>
-            <input type="text" placeholder="Titolo" />
-            <textarea id="note" rows="10" cols="60" name="note" placeholder="Note"></textarea>
+            <input type="text" id="title" placeholder="Titolo" />
+            <section>
+              <p>Selezione del Layout (dialog per la visualizzazione delle preview dei layout e scelta del layout)</p>
+              <button type="button" id="btn-dlg-layout" data-fn="openDlgTemplateLayout">Seleziona Template</button>
+            </section>
+            <p>Selezione del Report (dialog per la selezione del/i report/s)</p>
             <p>Definizione Colonne</p>
             <p>Definizione Filtri</p>
             <p>Formattazione delle colonne</p>
             <p>Definizione della relazione tra i Filtri</p>
             <p>Definizione delle funzioni di group</p>
             <p>Opzioni del grafico/Tabella</p>
+            <textarea id="note" rows="10" cols="60" name="note" placeholder="Note"></textarea>
           </fieldset>
+          <section class="buttons">
+            <button id="btnPreview" type="button" data-fn="preview">Anteprima</button>
+            <button id="btnSave" type="button" data-fn="save">Salva</button>
+          </section>
+          <section id="dashboard-preview">
+            <div id="template-layout">
+
+            </div>
+            <!-- Qui inserirò una preview del Template Layout. Questa preview consente di aggiungere gli elementi della pagina e configurarli-->
+          </section>
 
         </div>
 

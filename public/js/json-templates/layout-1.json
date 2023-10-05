@@ -1,42 +1,13 @@
 {
   "parentElement_id": "template-layout",
+  "id": "layout-1",
   "name": "generic data table",
   "comment": "Semplice layout con una sezione per i filtri e una per la datatable",
   "childs": [
     {
       "tag": "div",
       "id": "filter_div",
-      "classes": [],
-      "childs": [
-        {
-          "tag": "div",
-          "classes": [
-            "filters"
-          ],
-          "id": "flt-1"
-        },
-        {
-          "tag": "div",
-          "classes": [
-            "filters"
-          ],
-          "id": "flt-2"
-        },
-        {
-          "tag": "div",
-          "classes": [
-            "filters"
-          ],
-          "id": "flt-3"
-        },
-        {
-          "tag": "div",
-          "classes": [
-            "filters"
-          ],
-          "id": "flt-4"
-        }
-      ]
+      "classes": []
     },
     {
       "tag": "div",
