@@ -1,96 +1,58 @@
 {
   "parentElement_id": "template-layout",
-  "id": "layout-1",
+  "id": "layout-2",
   "name": "generic data table",
   "comment": "Template con 2 righe, una per i filtri e una per la DataTable",
-  "grid": {
-    "tag": "div",
-    "classes": [
-      "grid",
-      "rows-2"
-    ],
-    "rows": [
-      {
-        "tag": "section",
-        "classes": [
-          "row"
-        ],
-        "columns": [
-          {
-            "tag": "div",
-            "classes": [
-              "col",
-              "col-1"
-            ],
-            "childs": [
-              {
-                "tag": "div",
-                "id": "filter_div",
-                "classes": []
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "tag": "section",
-        "classes": [
-          "row"
-        ],
-        "columns": [
-          {
-            "tag": "div",
-            "classes": [
-              "col",
-              "col-1"
-            ],
-            "childs": [
-              {
-                "tag": "div",
-                "id": "chart_div",
-                "classes": [
-                  "chart-elements"
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  "rows-backup": [
+  "childs": [
     {
-      "columns": [
+      "tag": "div",
+      "classes": [
+        "grid",
+        "rows-2"
+      ],
+      "childs": [
         {
-          "tag": "div",
+          "tag": "section",
           "classes": [
-            "col",
-            "col-1"
+            "row"
           ],
           "childs": [
             {
               "tag": "div",
-              "id": "filter_div",
-              "classes": []
+              "classes": [
+                "col",
+                "col-1"
+              ],
+              "childs": [
+                {
+                  "tag": "div",
+                  "id": "filter_div",
+                  "classes": []
+                }
+              ]
             }
           ]
-        }
-      ]
-    },
-    {
-      "columns": [
+        },
         {
-          "tag": "div",
+          "tag": "section",
           "classes": [
-            "col",
-            "col-1"
+            "row"
           ],
           "childs": [
             {
               "tag": "div",
-              "id": "chart_div",
               "classes": [
-                "chart-elements"
+                "col",
+                "col-1"
+              ],
+              "childs": [
+                {
+                  "tag": "div",
+                  "id": "chart_div",
+                  "classes": [
+                    "chart-elements"
+                  ]
+                }
               ]
             }
           ]
