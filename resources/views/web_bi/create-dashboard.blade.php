@@ -23,6 +23,12 @@
 
 <body class="antialiased">
 
+  <template id="tmpl-li">
+    <li data-li data-element-search data-label data-searchable="true">
+      <span></span>
+    </li>
+  </template>
+
   <template id="tmpl-thumbnails">
     <section id class="thumb-layout" data-fn="layoutSelected">
       <div class="title"></div>
@@ -61,6 +67,25 @@
       <div id="content" class="custom-scrollbar">
 
         <div id="body" hidden>
+
+          <dialog id="dlg-chart" class="small">
+            <section class="dlg-grid">
+              <h5 class="title">Selezione del report</h5>
+              <section class="dlg-content col col-1">
+                <section class="list-search">
+                  <input type="search" id="" data-element-search="" placeholder="Ricerca" autocomplete="off" />
+                  <div class="relative-ul">
+                    <ul id="ul-sheets" data-search-id="" class="custom-scrollbar"></ul>
+                  </div>
+                </section>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button data-fn="btnSheetDone" id="btn-chart-save">Salva</button>
+              </section>
+            </section>
+          </dialog>
+          <!-- dialog Templates per i layout -->
           <dialog id="dlg-template-layout" class="large">
             <section class="dlg-grid">
               <h5 class="title">Selezione del Layout pagina</h5>
@@ -74,9 +99,7 @@
               </section>
             </section>
           </dialog>
-          <dialog id="dlg-sheets">
-            <h5>Selezione del/i Report</h5>
-          </dialog>
+
           <fieldset>
             <legend>Parametri Dashboard</legend>
             <input type="text" id="title" placeholder="Titolo" />

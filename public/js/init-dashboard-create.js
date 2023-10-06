@@ -1,6 +1,7 @@
 var App = new Application();
 var Template = new Templates();
 var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizializzare quando ricevuti i dati dal datamart
+var Storage = new SheetStorages();
 (() => {
   var app = {
     // templates
@@ -8,6 +9,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // dialogs
     dlgTemplateLayout: document.getElementById('dlg-template-layout'),
     dlgSheets: document.getElementById('dlg-sheets'),
+    dlgChartSection: document.getElementById('dlg-chart'),
   }
 
   const config = { attributes: true, childList: true, subtree: true };
@@ -68,6 +70,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
 
   app.preview = (e) => {
     console.log(e.target);
+    // TODO: da valutare, potrei visualizzare una preview del dashboard completo di dati
   }
 
   app.openDlgTemplateLayout = async () => {
@@ -122,27 +125,50 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // qui si può "creare" il json template report
     Template.create();
     // aggiungo il tasto + nel #filter_div
-    const filterSection = document.querySelector('.dashboard #filter_div');
+    // TODO: valutare se aggiungere questi elementi nel template (che però è lo stesso template utilizzato
+    // per il dashboard reale)
     const chartSection = document.querySelector('.dashboard #chart_div');
-    const btnAddFilter = document.createElement('button');
-    btnAddFilter.innerText = 'Add filter';
-    // button.dataset.fn = 'addFilter';
-    btnAddFilter.addEventListener('click', app.addFilter);
-    filterSection.appendChild(btnAddFilter);
     const btnAddChart = document.createElement('button');
     btnAddChart.innerText = 'Add Chart';
     btnAddChart.addEventListener('click', app.addChart);
     chartSection.appendChild(btnAddChart);
+    // opzioni
+    const btnOptions = document.createElement('button');
+    btnOptions.innerText = 'Opzioni';
+    btnOptions.disabled = true;
+    btnOptions.addEventListener('click', app.settingOptions);
+    chartSection.appendChild(btnOptions);
   }
 
-  app.addFilter = () => {
-    console.log('addFilter');
-    // TODO: apertura dialog per l'aggiunta di una colonna relativa al filtro
-  }
-
+  // apertura dialog per l'aggiunta del chart o DataTable
   app.addChart = () => {
     console.log('addChart');
-    // TODO: apertura dialog per l'aggiunta del chart o DataTable
+    app.dlgChartSection.showModal();
+    const ul = document.getElementById('ul-sheets');
+    // TODO: carico elenco sheets del localStorage
+    for (const [token, sheet] of Object.entries(Storage.getSheets())) {
+      console.log(token, sheet);
+      const content = app.tmplList.content.cloneNode(true);
+      const li = content.querySelector('li[data-li]');
+      const span = li.querySelector('span');
+      li.dataset.token = sheet.token;
+      li.dataset.label = sheet.name;
+      li.addEventListener('click', app.sheetSelected);
+      li.dataset.elementSearch = 'sheets';
+      span.innerText = sheet.name;
+      ul.appendChild(li);
+    }
+  }
+
+  // Selezione del report che alimenta il chart_div
+  app.sheetSelected = (e) => {
+    console.log('sheetSelected');
+    const token = e.currentTarget.dataset.token;
+  }
+
+  app.btnSheetDone = () => {
+    console.log('sheetDone');
+    // TODO: Sheet selezionato, abilito il tasto Opzioni
   }
   // end onclick events
 
@@ -151,6 +177,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // reset dei layout già presenti, verrano ricreati all'apertura della dialog
     document.querySelectorAll('#thumbnails *').forEach(layouts => layouts.remove());
   }
+
+  app.dlgChartSection.onclose = () => { }
   // end onclose dialogs
 
 })();
