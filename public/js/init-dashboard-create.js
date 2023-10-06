@@ -108,14 +108,49 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
 
   app.layoutSelected = (e) => {
     // elimino eventuali selezioni precedenti
-    document.querySelectorAll('.thumb-layout[data-seleted]').forEach(el => delete el.dataset.selected);
+    document.querySelectorAll('.thumb-layout[data-selected]').forEach(el => delete el.dataset.selected);
     e.currentTarget.dataset.selected = true;
   }
   // Template selezionato e chiusura dialog
   app.btnTemplateDone = () => {
-    // TODO: recupero il template selezionato
-    // TODO: creo l'anteprima nel DOM e la inserisco in #dashboard-preview -> #template-layout
+    app.dlgTemplateLayout.close();
+    //  recupero il template selezionato
+    const template = document.querySelector('.thumb-layout[data-selected]').id;
+    console.log(template);
+
+    // creo l'anteprima nel DOM, questa anteprima è interattive, quindi da
+    // qui si può "creare" il json template report
+    Template.create();
+    // aggiungo il tasto + nel #filter_div
+    const filterSection = document.querySelector('.dashboard #filter_div');
+    const chartSection = document.querySelector('.dashboard #chart_div');
+    const btnAddFilter = document.createElement('button');
+    btnAddFilter.innerText = 'Add filter';
+    // button.dataset.fn = 'addFilter';
+    btnAddFilter.addEventListener('click', app.addFilter);
+    filterSection.appendChild(btnAddFilter);
+    const btnAddChart = document.createElement('button');
+    btnAddChart.innerText = 'Add Chart';
+    btnAddChart.addEventListener('click', app.addChart);
+    chartSection.appendChild(btnAddChart);
+  }
+
+  app.addFilter = () => {
+    console.log('addFilter');
+    // TODO: apertura dialog per l'aggiunta di una colonna relativa al filtro
+  }
+
+  app.addChart = () => {
+    console.log('addChart');
+    // TODO: apertura dialog per l'aggiunta del chart o DataTable
   }
   // end onclick events
+
+  // onclose dialogs
+  app.dlgTemplateLayout.onclose = () => {
+    // reset dei layout già presenti, verrano ricreati all'apertura della dialog
+    document.querySelectorAll('#thumbnails *').forEach(layouts => layouts.remove());
+  }
+  // end onclose dialogs
 
 })();

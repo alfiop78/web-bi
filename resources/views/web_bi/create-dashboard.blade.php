@@ -26,7 +26,7 @@
   <template id="tmpl-thumbnails">
     <section id class="thumb-layout" data-fn="layoutSelected">
       <div class="title"></div>
-      <div class="layout-previews"></div>
+      <div class="thumbnails"></div>
     </section>
   </template>
 
@@ -97,11 +97,8 @@
             <button id="btnPreview" type="button" data-fn="preview">Anteprima</button>
             <button id="btnSave" type="button" data-fn="save">Salva</button>
           </section>
-          <section id="dashboard-preview">
-            <div id="template-layout">
-
-            </div>
-            <!-- Qui inserirò una preview del Template Layout. Questa preview consente di aggiungere gli elementi della pagina e configurarli-->
+          <section id="dashboard-preview" class="dashboard-preview">
+            <div id="template-layout" class="dashboard"></div>
           </section>
 
         </div>

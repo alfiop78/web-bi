@@ -32,12 +32,10 @@ class Templates {
     this.tmplContent = this.tmplThumbnail.content.cloneNode(true);
     this.parent = this.tmplContent.querySelector('.thumb-layout');
     this.title = this.parent.querySelector('.title');
-    this.layoutPreview = this.parent.querySelector('.layout-previews');
+    this.thumbnailsRef = this.parent.querySelector('.thumbnails');
     this.parent.id = this.data.id;
     this.title.innerText = this.data.name;
     document.getElementById('thumbnails').appendChild(this.tmplContent);
-    // return;
-    // Aggiungo il div.grid al layoutPreview
 
     this.recursive = (parent, childs) => {
       childs.forEach(child => {
@@ -50,7 +48,7 @@ class Templates {
         if (child.childs) this.recursive(tag, child.childs);
       });
     }
-    if (this.#data.childs) this.recursive(this.layoutPreview, this.#data.childs);
+    if (this.#data.childs) this.recursive(this.thumbnailsRef, this.#data.childs);
   }
 
 }

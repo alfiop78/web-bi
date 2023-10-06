@@ -1,6 +1,6 @@
 {
   "parentElement_id": "template-layout",
-  "id": "layout-2",
+  "id": "layout-1",
   "name": "generic data table",
   "comment": "Template con 2 righe, una per i filtri e una per la DataTable",
   "childs": [
