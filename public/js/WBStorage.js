@@ -15,7 +15,7 @@ class Storages {
   }
 
   set workBook(value) {
-    // current workbook
+    // value : il token del workbook
     this.#workbook = value;
   }
 
@@ -124,7 +124,7 @@ class SheetStorages extends Storages {
   constructor() { super(); }
 
   set sheet(value) {
-    // current sheet
+    // value : il token dello sheet
     this.#sheet = value;
   }
 

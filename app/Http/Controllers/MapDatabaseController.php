@@ -162,7 +162,7 @@ class MapDatabaseController extends Controller
     // if ($datamart) {
     // TODO: utilizzare il chunk di laravel per estrarre dati un blocco per volta
     // https://laravel.com/docs/8.x/queries#chunking-results
-    $data = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.WEB_BI_$id LIMIT 10000");
+    $data = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.WEB_BI_$id LIMIT 20");
     // }
     // dd($datamart);
     // dd($data);

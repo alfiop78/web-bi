@@ -10,7 +10,11 @@ var Storage = new SheetStorages();
     dlgTemplateLayout: document.getElementById('dlg-template-layout'),
     dlgSheets: document.getElementById('dlg-sheets'),
     dlgChartSection: document.getElementById('dlg-chart'),
+    dlgConfig: document.getElementById('dlg-config'),
   }
+
+  // Load the Visualization API and the corechart package.
+  google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
 
   const config = { attributes: true, childList: true, subtree: true };
 
@@ -133,17 +137,16 @@ var Storage = new SheetStorages();
     btnAddChart.addEventListener('click', app.addChart);
     chartSection.appendChild(btnAddChart);
     // opzioni
-    const btnOptions = document.createElement('button');
-    btnOptions.innerText = 'Opzioni';
-    btnOptions.disabled = true;
-    btnOptions.addEventListener('click', app.settingOptions);
-    chartSection.appendChild(btnOptions);
+    const btnConfigure = document.createElement('button');
+    btnConfigure.innerText = 'Configura';
+    // btnConfigure.disabled = true;
+    btnConfigure.addEventListener('click', app.chartSettings);
+    chartSection.appendChild(btnConfigure);
   }
 
   // apertura dialog per l'aggiunta del chart o DataTable
   app.addChart = () => {
     console.log('addChart');
-    app.dlgChartSection.showModal();
     const ul = document.getElementById('ul-sheets');
     // TODO: carico elenco sheets del localStorage
     for (const [token, sheet] of Object.entries(Storage.getSheets())) {
@@ -158,27 +161,162 @@ var Storage = new SheetStorages();
       span.innerText = sheet.name;
       ul.appendChild(li);
     }
+    app.dlgChartSection.showModal();
+  }
+
+  app.createJsonColumns = (token) => {
+    console.log(Storage.workBook.fields_new[token]);
+    Dashboard.addColumns(Storage.workBook.fields_new[token]);
+
+  }
+
+  app.dashboardExample = async () => {
+    // recupero l'id dello Sheet stock veicoli nuovi
+    const sheet = JSON.parse(window.localStorage.getItem('hdkglro')); // stock
+    // const sheet = JSON.parse(window.localStorage.getItem('59yblqr')); // cb
+    if (!sheet.id) return false;
+    await fetch(`/fetch_api/${sheet.id}/datamart`)
+      .then((response) => {
+        console.log(response);
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(data => {
+        console.log(data);
+        // debugger;
+        Dashboard.data = data;
+        google.charts.setOnLoadCallback(app.drawTable(data));
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
   }
 
   // Selezione del report che alimenta il chart_div
   app.sheetSelected = (e) => {
-    console.log('sheetSelected');
-    const token = e.currentTarget.dataset.token;
+    app.dashboardExample();
+    app.dlgChartSection.close();
+    /* Storage.sheet = e.currentTarget.dataset.token;
+    Storage.workBook = Storage.sheet.workbook_ref;
+    const ul = document.getElementById('ul-columns');
+    // console.log(Storage.sheet);
+    // console.log(Storage.workBook);
+    for (const [token, field] of Object.entries(Storage.sheet.fields)) {
+      console.log(Storage.workBook.fields_new[token]);
+      const content = app.tmplList.content.cloneNode(true);
+      const li = content.querySelector('li[data-li-detail]');
+      const value = li.querySelector('span[data-value]');
+      const detail = li.querySelector('small[data-detail]');
+      li.dataset.token = token;
+      li.dataset.label = Storage.workBook.fields_new[token].name;
+      li.addEventListener('click', app.columnSelected);
+      li.dataset.elementSearch = 'fields';
+      // value.innerText = Storage.workBook.fields_new[token].name;
+      value.innerText = field;
+      detail.innerText = Storage.workBook.fields_new[token].table;
+      app.createJsonColumns(token);
+      ul.appendChild(li);
+    }
+    app.dlgChartSection.close(); */
   }
 
-  app.btnSheetDone = () => {
-    console.log('sheetDone');
-    // TODO: Sheet selezionato, abilito il tasto Opzioni
+  app.drawTable = () => {
+    var data = new google.visualization.DataTable(Dashboard.prepareDataPreview());
+
+    var tableRef = new google.visualization.Table(document.getElementById('chart_div'));
+    // Set chart options
+    const options = {
+      'title': 'Stock veicoli',
+      'showRowNumber': true,
+      "allowHTML": true,
+      'alternatingRowStyle': true,
+      'width': '900px',
+      'page': 'enabled',
+      'pageSize': 10,
+      'height': 'auto'
+    };
+
+    // utilizzo della DataView
+    var view = new google.visualization.DataView(data);
+    // nascondo la prima colonna
+    view.hideColumns([0]);
+    tableRef.draw(view, options);
+    // utilizzo della DataView
+
+    // utilizzo della DataTable
+    // tableRef.draw(data, options);
+    // utilizzo della DataTable
   }
+
+  // Selezione di una colonna per la configurazione
+  app.columnSelected = (e) => {
+    console.log(e.currentTarget.dataset.token);
+    document.querySelector('#btnSaveField').dataset.token = e.currentTarget.dataset.token;
+    const label = document.getElementById('field-label');
+    label.value = Storage.sheet.fields[e.currentTarget.dataset.token];
+  }
+
+  app.btnSaveField = (e) => {
+    /* let json = {};
+    let data = { columns: {}, formatter: { currency: [], percent: [] } };
+    let filters = [];
+    let bind = [];
+    let wrapper = {
+      chartType: null,
+      containerId: null,
+      options: {
+        width: "100%",
+        height: "auto",
+        page: "enabled",
+        frozenColumns: 0,
+        pageSize: 20,
+        allowHTML: true,
+        cssClassNames: {
+          headerRow: "g-table-header",
+          tableRow: "g-table-row",
+          oddTableRow: "",
+          selectedTableRow: "",
+          hoverTableRow: "",
+          headerCell: "g-header-cell",
+          tableCell: "g-table-cell",
+          rowNumberCell: ""
+        }
+      },
+      view: {
+        columns: []
+      }
+    }; */
+    let columnKey = Storage.workBook.fields_new[e.currentTarget.dataset.token].name;
+    // nome della colonna deciso nello sheet
+    // const column = Storage.sheet.fields[e.currentTarget.dataset.token];
+    const label = document.getElementById('field-label');
+    const select = document.getElementById('field-datatype');
+    const index = select.selectedIndex;
+    const type = select.options[index].value;
+    const key = `${columnKey}_ds`;
+    // console.log(Dashboard.json.data.columns[key]);
+    Dashboard.json.data.columns[key].type = type;
+    Dashboard.json.data.columns[key].label = label.value.toUpperCase();
+    // Dashboard.addFormatter();
+  }
+
+  app.chartSettings = () => app.dlgConfig.showModal();
+
+  app.btnSaveConfig = () => {
+    debugger;
+
+  }
+
   // end onclick events
 
   // onclose dialogs
-  app.dlgTemplateLayout.onclose = () => {
-    // reset dei layout già presenti, verrano ricreati all'apertura della dialog
-    document.querySelectorAll('#thumbnails *').forEach(layouts => layouts.remove());
-  }
+  // reset dei layout già presenti, verrano ricreati all'apertura della dialog
+  app.dlgTemplateLayout.onclose = () => document.querySelectorAll('#thumbnails *').forEach(layouts => layouts.remove());
 
-  app.dlgChartSection.onclose = () => { }
+  // reset sheets
+  app.dlgChartSection.onclose = () => document.querySelectorAll('#ul-sheets > li').forEach(el => el.remove());
   // end onclose dialogs
 
 })();

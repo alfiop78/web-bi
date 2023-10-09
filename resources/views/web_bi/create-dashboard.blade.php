@@ -19,6 +19,7 @@
   <script src="{{ asset('/js/WorkBooks.js') }}"></script>
   <script src="{{ asset('/js/Templates.js') }}"></script>
   <script src="{{ asset('/js/Dashboards.js') }}"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 
 <body class="antialiased">
@@ -26,6 +27,11 @@
   <template id="tmpl-li">
     <li data-li data-element-search data-label data-searchable="true">
       <span></span>
+    </li>
+
+    <li data-li-detail data-element-search data-label data-searchable="true">
+      <span data-value></span>
+      <small data-detail></small>
     </li>
   </template>
 
@@ -81,7 +87,41 @@
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
-                <button data-fn="btnSheetDone" id="btn-chart-save">Salva</button>
+                <button id="btn-chart-save">Salva</button>
+              </section>
+            </section>
+          </dialog>
+          <!-- dialog "configurazione chart/DataTable" -->
+          <dialog id="dlg-config" class="large">
+            <section class="dlg-grid">
+              <h5 class="title">Configurazione</h5>
+              <section class="dlg-content col col-2">
+                <section class="list-search">
+                  <input type="search" id="" data-element-search="" placeholder="Ricerca" autocomplete="off" />
+                  <div class="relative-ul">
+                    <ul id="ul-columns" data-search-id="" class="custom-scrollbar"></ul>
+                  </div>
+                </section>
+                <section class="">
+                  <input id="field-label" type="text" value="" placeholder="Etichetta colonna" />
+                  <label for="field-datatype">Tipo di dato</label>
+                  <select id="field-datatype">
+                    <option value="string" selected>Stringa</option>
+                    <option value="number">Numero</option>
+                    <option value="date">Data</option>
+                  </select>
+                  <select id="field-format">
+                    <option value="currency">Valuta €</option>
+                    <option value="percent">Percentuale</option>
+                  </select>
+                  <input type="checkbox" id="hide-column" name="hide-column" />
+                  <label for="hide-column">Nascondi colonna</label>
+                  <button type="button" id="btnSaveField" data-fn="btnSaveField" data-token>Salva</button>
+                </section>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button data-fn="btnSaveConfig" id="btn-config-save">Ok</button>
               </section>
             </section>
           </dialog>
