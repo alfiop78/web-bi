@@ -49,10 +49,12 @@ class Dashboards {
 
   prepareDataPreview() {
     // aggiungo le colonne
+    // TODO: probabilmente qui è meglio utilizzare il metodo con addColumn/addRows di GoogleChart
     for (const key of Object.keys(this.data[0])) {
       // Le colonne _id non vengono visualizzate nell'anteprima del report
-      const regex = new RegExp('_id$');
-      if (!regex.test(key)) this.#prepareData.cols.push({ id: key, label: key });
+      /* const regex = new RegExp('_id$');
+      if (!regex.test(key)) this.#prepareData.cols.push({ id: key, label: key }); */
+      this.#prepareData.cols.push({ id: key, label: key });
     }
     // aggiungo le righe
     this.data.forEach(row => {

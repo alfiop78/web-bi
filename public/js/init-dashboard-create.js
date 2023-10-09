@@ -22,7 +22,7 @@ var Storage = new SheetStorages();
     // console.log(mutationList, observer);
     for (const mutation of mutationList) {
       if (mutation.type === 'childList') {
-        console.info('A child node has been added or removed.');
+        // console.info('A child node has been added or removed.');
         Array.from(mutation.addedNodes).forEach(node => {
           // console.log(node.nodeName);
           if (node.nodeName !== '#text') {
@@ -38,7 +38,7 @@ var Storage = new SheetStorages();
           }
         });
       } else if (mutation.type === 'attributes') {
-        console.log(`The ${mutation.attributeName} attribute was modified.`);
+        // console.log(`The ${mutation.attributeName} attribute was modified.`);
         // console.log(mutation.target);
         if (mutation.target.hasChildNodes()) {
           mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
@@ -232,22 +232,33 @@ var Storage = new SheetStorages();
       'showRowNumber': true,
       "allowHTML": true,
       'alternatingRowStyle': true,
-      'width': '900px',
+      'width': '80vw',
+      'height': 'auto',
       'page': 'enabled',
-      'pageSize': 10,
-      'height': 'auto'
+      'pageSize': 5
     };
 
     // utilizzo della DataView
-    var view = new google.visualization.DataView(data);
+    // var view = new google.visualization.DataView(data);
     // nascondo la prima colonna
-    view.hideColumns([0]);
-    tableRef.draw(view, options);
+    // view.hideColumns([0]);
+    // tableRef.draw(view, options);
     // utilizzo della DataView
 
     // utilizzo della DataTable
-    // tableRef.draw(data, options);
+    tableRef.draw(data, options);
     // utilizzo della DataTable
+    google.visualization.events.addListener(tableRef, 'ready', () => {
+      console.log('ready');
+      document.querySelectorAll('table thead').forEach(thead => {
+        thead.onclick = (e) => {
+          console.log(e.target);
+          console.log(data.getColumnId(1));
+          console.log(data.getColumnLabel(1));
+          debugger;
+        }
+      });
+    });
   }
 
   // Selezione di una colonna per la configurazione

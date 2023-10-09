@@ -66,7 +66,7 @@
 }
 
 .thumbnails .col.col-1, .dashboard .col.col-1 {
-  grid-template-columns: 1fr;
+  grid-template-columns: 100%;
   margin: 0px auto;
   width: 80%;
   height: 100%;
@@ -75,4 +75,5 @@
 .thumbnails .col div, .dashboard .col div {
   background: #c9c9c9;
   border-radius: 2px;
+  padding: 4px;
 }
