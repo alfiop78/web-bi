@@ -65,7 +65,7 @@ class Dashboards {
       this.#prepareData.rows.push({ c: v });
     });
     console.log(this.#prepareData);
-    debugger;
+    // debugger;
     return this.#prepareData;
   }
 
@@ -160,15 +160,13 @@ class Dashboards {
     return this.controls;
   }
 
-  addColumns(fields) {
-    // TODO: negli object id/ds c'è il capo 'type' che avevo lasciato "da completare",
-    // qui mi può servire per impostare una settaggio di default per il campo 'type'
-    for (const key of Object.keys(fields.field)) {
-      this.json.data.columns[`${fields.name}_${key}`] = {
-        label: `${fields.name}_${key}`,
-        type: 'string'
-      };
-    }
+  addColumnProperty(values) {
+    // debugger;
+    // console.log(values);
+    values.forEach(value => {
+      // console.log(value);
+      this.json.data.columns[value.id] = { label: value.label, type: value.type };
+    });
 
     /* this.#json = {
       data,
@@ -177,10 +175,6 @@ class Dashboards {
       wrapper
     } */
     console.log(this.json);
-  }
-
-  addFormatter(field) {
-
   }
 
 }

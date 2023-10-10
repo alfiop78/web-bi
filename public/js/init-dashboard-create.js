@@ -136,12 +136,10 @@ var Storage = new SheetStorages();
     btnAddChart.innerText = 'Add Chart';
     btnAddChart.addEventListener('click', app.addChart);
     chartSection.appendChild(btnAddChart);
-    // opzioni
-    const btnConfigure = document.createElement('button');
-    btnConfigure.innerText = 'Configura';
-    // btnConfigure.disabled = true;
-    btnConfigure.addEventListener('click', app.chartSettings);
-    chartSection.appendChild(btnConfigure);
+    const btnGrouping = document.createElement('button');
+    btnGrouping.innerText = 'Raggruppamento';
+    btnGrouping.addEventListener('click', app.addGroup);
+    chartSection.appendChild(btnGrouping);
   }
 
   // apertura dialog per l'aggiunta del chart o DataTable
@@ -162,12 +160,6 @@ var Storage = new SheetStorages();
       ul.appendChild(li);
     }
     app.dlgChartSection.showModal();
-  }
-
-  app.createJsonColumns = (token) => {
-    console.log(Storage.workBook.fields_new[token]);
-    Dashboard.addColumns(Storage.workBook.fields_new[token]);
-
   }
 
   app.dashboardExample = async () => {
@@ -195,129 +187,120 @@ var Storage = new SheetStorages();
   }
 
   // Selezione del report che alimenta il chart_div
-  app.sheetSelected = (e) => {
+  app.sheetSelected = () => {
     app.dashboardExample();
     app.dlgChartSection.close();
-    /* Storage.sheet = e.currentTarget.dataset.token;
-    Storage.workBook = Storage.sheet.workbook_ref;
-    const ul = document.getElementById('ul-columns');
-    // console.log(Storage.sheet);
-    // console.log(Storage.workBook);
-    for (const [token, field] of Object.entries(Storage.sheet.fields)) {
-      console.log(Storage.workBook.fields_new[token]);
-      const content = app.tmplList.content.cloneNode(true);
-      const li = content.querySelector('li[data-li-detail]');
-      const value = li.querySelector('span[data-value]');
-      const detail = li.querySelector('small[data-detail]');
-      li.dataset.token = token;
-      li.dataset.label = Storage.workBook.fields_new[token].name;
-      li.addEventListener('click', app.columnSelected);
-      li.dataset.elementSearch = 'fields';
-      // value.innerText = Storage.workBook.fields_new[token].name;
-      value.innerText = field;
-      detail.innerText = Storage.workBook.fields_new[token].table;
-      app.createJsonColumns(token);
-      ul.appendChild(li);
-    }
-    app.dlgChartSection.close(); */
   }
 
   app.drawTable = () => {
-    var data = new google.visualization.DataTable(Dashboard.prepareDataPreview());
+    Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareDataPreview());
 
     var tableRef = new google.visualization.Table(document.getElementById('chart_div'));
     // Set chart options
     const options = {
       'title': 'Stock veicoli',
       'showRowNumber': true,
-      "allowHTML": true,
+      'allowHTML': true,
       'alternatingRowStyle': true,
       'width': '80vw',
       'height': 'auto',
       'page': 'enabled',
-      'pageSize': 5
+      'pageSize': 5,
+      "cssClassNames": {
+        "headerRow": "g-table-header",
+        "tableRow": "g-table-row",
+        "oddTableRow": "",
+        "selectedTableRow": "",
+        "hoverTableRow": "",
+        "headerCell": "g-header-cell",
+        "tableCell": "g-table-cell",
+        "rowNumberCell": ""
+      }
     };
 
+    for (const [key, values] of Object.entries(JSON.parse(Dashboard.dataTable.toJSON()))) {
+      // key : (rows/cols)
+      // creo la proprietà json.data.column del report template (file .json)
+      if (key === 'cols') {
+        // console.log(key, values);
+        Dashboard.addColumnProperty(values);
+      }
+    }
+
+    // gestione eventi
+    google.visualization.events.addListener(tableRef, 'ready', ready);
+    google.visualization.events.addListener(tableRef, 'select', () => {
+      console.log(tableRef.getSelection());
+      // console.log(dashboard.dataTable.getValue(0, 1));
+    });
+    google.visualization.events.addListener(tableRef, 'sort', sort);
+    // end gestione eventi
+
     // utilizzo della DataView
-    // var view = new google.visualization.DataView(data);
+    // var view = new google.visualization.DataView(Dashboard.dataTable);
     // nascondo la prima colonna
     // view.hideColumns([0]);
     // tableRef.draw(view, options);
     // utilizzo della DataView
 
     // utilizzo della DataTable
-    tableRef.draw(data, options);
+    tableRef.draw(Dashboard.dataTable, options);
     // utilizzo della DataTable
-    google.visualization.events.addListener(tableRef, 'ready', () => {
+    function ready() {
       console.log('ready');
-      document.querySelectorAll('table thead').forEach(thead => {
-        thead.onclick = (e) => {
-          console.log(e.target);
-          console.log(data.getColumnId(1));
-          console.log(data.getColumnLabel(1));
-          debugger;
+    }
+
+    function sort(e) {
+      // console.log(e);
+      Dashboard.columnIndex = e['column'];
+      const columnName = Dashboard.dataTable.getColumnId(Dashboard.columnIndex);
+      // app.dlgConfig.dataset.columnIndex = columnIndex;
+      // app.dlgConfig.dataset.columnName = columnName;
+      // app.dlgConfig.dataset.columnType = Dashboard.dataTable.getColumnType(columnIndex);
+      console.log(Dashboard.columnIndex, columnName);
+      // console.log(data.getColumnProperties(1));
+      // console.log(data.getColumnProperty(1));
+      // console.log(Dashboard.dataTable.getColumnType(columnIndex));
+      document.getElementById('field-label').value = columnName;
+      // imposto, nella 'select #field-datatype' il dataType della colonna selezionata
+      const selectDataType = document.getElementById('field-datatype');
+      // NOTE: utilizzo di selectedIndex
+
+      // selectDataType.selectedIndex = 2;
+      // console.log(selectDataType.options);
+      [...selectDataType.options].forEach((option, index) => {
+        // console.log(index, option);
+        if (option.value === Dashboard.dataTable.getColumnType(Dashboard.columnIndex)) {
+          selectDataType.selectedIndex = index;
         }
       });
-    });
-  }
-
-  // Selezione di una colonna per la configurazione
-  app.columnSelected = (e) => {
-    console.log(e.currentTarget.dataset.token);
-    document.querySelector('#btnSaveField').dataset.token = e.currentTarget.dataset.token;
-    const label = document.getElementById('field-label');
-    label.value = Storage.sheet.fields[e.currentTarget.dataset.token];
-  }
-
-  app.btnSaveField = (e) => {
-    /* let json = {};
-    let data = { columns: {}, formatter: { currency: [], percent: [] } };
-    let filters = [];
-    let bind = [];
-    let wrapper = {
-      chartType: null,
-      containerId: null,
-      options: {
-        width: "100%",
-        height: "auto",
-        page: "enabled",
-        frozenColumns: 0,
-        pageSize: 20,
-        allowHTML: true,
-        cssClassNames: {
-          headerRow: "g-table-header",
-          tableRow: "g-table-row",
-          oddTableRow: "",
-          selectedTableRow: "",
-          hoverTableRow: "",
-          headerCell: "g-header-cell",
-          tableCell: "g-table-cell",
-          rowNumberCell: ""
-        }
-      },
-      view: {
-        columns: []
-      }
-    }; */
-    let columnKey = Storage.workBook.fields_new[e.currentTarget.dataset.token].name;
-    // nome della colonna deciso nello sheet
-    // const column = Storage.sheet.fields[e.currentTarget.dataset.token];
-    const label = document.getElementById('field-label');
-    const select = document.getElementById('field-datatype');
-    const index = select.selectedIndex;
-    const type = select.options[index].value;
-    const key = `${columnKey}_ds`;
-    // console.log(Dashboard.json.data.columns[key]);
-    Dashboard.json.data.columns[key].type = type;
-    Dashboard.json.data.columns[key].label = label.value.toUpperCase();
-    // Dashboard.addFormatter();
+      app.dlgConfig.showModal();
+    }
   }
 
   app.chartSettings = () => app.dlgConfig.showModal();
 
-  app.btnSaveConfig = () => {
+  // Salvataggio della configurazione colonna dalla dialog dlg-config
+  app.btnSaveColumn = () => {
+    // console.log(Dashboard.dataTable);
+    const column = Dashboard.dataTable.getColumnId(Dashboard.columnIndex);
+    // label
+    const label = document.getElementById('field-label').value;
+    // dataType
+    const typeRef = document.getElementById('field-datatype');
+    // formattazione colonna
+    const formatterRef = document.getElementById('field-format');
+    // console.log(typeRef.selectedIndex);
+    // console.log(typeRef.options.item(typeRef.selectedIndex).value);
+    const type = typeRef.options.item(typeRef.selectedIndex).value.toLowerCase();
+    // aggiorno Dashboard.json con i valori inseriti nella #dlg-config
+    Dashboard.json.data.columns[column].label = label;
+    Dashboard.json.data.columns[column].type = type;
+    if (formatterRef.selectedIndex !== 0) {
+      const format = formatterRef.options.item(formatterRef.selectedIndex).value;
+      Dashboard.json.data.formatter[format].push(Dashboard.columnIndex);
+    }
     debugger;
-
   }
 
   // end onclick events
