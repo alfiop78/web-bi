@@ -4,6 +4,7 @@ class Dashboards {
   #prepareData = { cols: [], rows: [] };
   constructor() {
     this.json = {
+      name: null,
       data: {
         columns: {},
         formatter: {
@@ -117,7 +118,7 @@ class Dashboards {
       }
       this.#prepareData.rows.push({ c: v });
     });
-    debugger;
+    // debugger;
     console.log(this.#prepareData);
     return this.#prepareData;
   }

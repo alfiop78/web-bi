@@ -45,12 +45,12 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
 
   // Recupero del template-layout e dello sheetSpecs
   app.getLayouts = async () => {
-    const sheetLayout = 'stock';
+    // const sheetLayout = 'stock';
     // const sheetLayout = 'competitive-bonus';
     const templateLayout = 'layout-1';
     const urls = [
-      `/js/json-templates/${templateLayout}.json`,
-      `/js/json-sheets/${sheetLayout}.json`
+      `/js/json-templates/${templateLayout}.json`
+      // `/js/json-sheets/${sheetLayout}.json`
     ];
 
     const init = { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, method: 'POST' };
@@ -69,7 +69,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         Template.data = data[0];
         // creo il template nel DOM
         Template.create();
-        Dashboard.sheetSpecs = data[1];
+        // Dashboard.sheetSpecs = data[1];
+        Dashboard.sheetSpecs = JSON.parse(window.localStorage.getItem('tmpl_stock'));
         app.dashboardExample();
       })
       .catch(err => console.error(err));
@@ -278,7 +279,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       .bind(controls, table);
     */
     // Questa logica funziona con il bind() di un filtro verso quello successivo ma
-    // possono esserci anche situazioni diverse, che sono a implementare
+    // possono esserci anche situazioni diverse, che sono da implementare
     Dashboard.sheetSpecs.bind.forEach((v, index) => {
       // console.log('index', index);
       if (index === 0) {

@@ -296,6 +296,7 @@ var Storage = new SheetStorages();
     // formattazione colonna
     const formatterRef = document.getElementById('field-format');
     const hideColumn = document.getElementById('hide-column');
+    const filterColumn = document.getElementById('filter-column');
     // console.log(typeRef.selectedIndex);
     // console.log(typeRef.options.item(typeRef.selectedIndex).value);
     const type = typeRef.options.item(typeRef.selectedIndex).value.toLowerCase();
@@ -306,12 +307,31 @@ var Storage = new SheetStorages();
       const format = formatterRef.options.item(formatterRef.selectedIndex).value;
       Dashboard.json.data.formatter[format].push(Dashboard.columnIndex);
     }
-    if (hideColumn.checked === true) {
-
-    }
     // Colonne da nascondere (oltre alle colonne _id già nascoste)
-
+    if (hideColumn.checked === true) {
+      const index = Dashboard.json.wrapper.view.columns.indexOf(column);
+      Dashboard.json.wrapper.view.columns.splice(index, 1);
+      console.log(Dashboard.json.wrapper.view.columns);
+    }
+    if (filterColumn.checked === true) {
+      // array dei filtri, quanti elementi ci sono ?
+      const length = Dashboard.json.filters.length;
+      const label = Dashboard.json.data.columns[column].label;
+      Dashboard.json.filters.push({
+        containerId: `flt-${length}`,
+        filterColumnLabel: label,
+        caption: label
+      });
+    }
+    Dashboard.json.wrapper.chartType = 'Table';
+    Dashboard.json.wrapper.containerId = 'chart_div';
+    Dashboard.json.name = 'stock';
+    // TODO: al momento configuro manualmente il bind
+    Dashboard.json.bind.push([0, 1]);
+    console.log(Dashboard.json)
     debugger;
+    window.localStorage.setItem('tmpl_stock', JSON.stringify(Dashboard.json));
+    app.dlgConfig.close();
   }
 
   // end onclick events
@@ -322,6 +342,11 @@ var Storage = new SheetStorages();
 
   // reset sheets
   app.dlgChartSection.onclose = () => document.querySelectorAll('#ul-sheets > li').forEach(el => el.remove());
+
+  app.dlgConfig.onclose = () => {
+    document.getElementById('hide-column').checked = false;
+    document.getElementById('filter-column').checked = false;
+  }
   // end onclose dialogs
 
 })();
