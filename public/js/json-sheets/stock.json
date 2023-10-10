@@ -293,7 +293,7 @@
     },
     "view": {
       "columns": [
-        "Telaio_ds",
+        1,
         "NumOrdineFab_ds",
         "ubicazione_ds",
         "DtArrivo_ds",

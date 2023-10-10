@@ -223,37 +223,42 @@ var Storage = new SheetStorages();
       // creo la proprietà json.data.column del report template (file .json)
       if (key === 'cols') {
         // console.log(key, values);
-        Dashboard.addColumnProperty(values);
+        // Definisco le colonne e nascondo, dalla view, le colonne_id
+        Dashboard.defineColumns(values);
       }
     }
 
     // gestione eventi
     google.visualization.events.addListener(tableRef, 'ready', ready);
-    google.visualization.events.addListener(tableRef, 'select', () => {
-      console.log(tableRef.getSelection());
-      // console.log(dashboard.dataTable.getValue(0, 1));
-    });
+    google.visualization.events.addListener(tableRef, 'select', selectRow);
     google.visualization.events.addListener(tableRef, 'sort', sort);
     // end gestione eventi
 
     // utilizzo della DataView
-    // var view = new google.visualization.DataView(Dashboard.dataTable);
+    Dashboard.view = new google.visualization.DataView(Dashboard.dataTable);
     // nascondo la prima colonna
     // view.hideColumns([0]);
-    // tableRef.draw(view, options);
+    // visualizzo le colonne _ds, come appena impostato in defineColumns()
+    Dashboard.view.setColumns(Dashboard.json.wrapper.view.columns);
+    tableRef.draw(Dashboard.view, options);
     // utilizzo della DataView
 
     // utilizzo della DataTable
-    tableRef.draw(Dashboard.dataTable, options);
+    // tableRef.draw(Dashboard.dataTable, options);
     // utilizzo della DataTable
     function ready() {
       console.log('ready');
     }
 
+    function selectRow() {
+      // WARN: ottengo la selezione corretta solo dopo che l'evento ready si è verificato, da rivedere
+      console.log(tableRef.getSelection());
+    }
+
     function sort(e) {
       // console.log(e);
       Dashboard.columnIndex = e['column'];
-      const columnName = Dashboard.dataTable.getColumnId(Dashboard.columnIndex);
+      const columnName = Dashboard.view.getColumnId(Dashboard.columnIndex);
       // app.dlgConfig.dataset.columnIndex = columnIndex;
       // app.dlgConfig.dataset.columnName = columnName;
       // app.dlgConfig.dataset.columnType = Dashboard.dataTable.getColumnType(columnIndex);
@@ -270,7 +275,7 @@ var Storage = new SheetStorages();
       // console.log(selectDataType.options);
       [...selectDataType.options].forEach((option, index) => {
         // console.log(index, option);
-        if (option.value === Dashboard.dataTable.getColumnType(Dashboard.columnIndex)) {
+        if (option.value === Dashboard.view.getColumnType(Dashboard.columnIndex)) {
           selectDataType.selectedIndex = index;
         }
       });
@@ -283,13 +288,14 @@ var Storage = new SheetStorages();
   // Salvataggio della configurazione colonna dalla dialog dlg-config
   app.btnSaveColumn = () => {
     // console.log(Dashboard.dataTable);
-    const column = Dashboard.dataTable.getColumnId(Dashboard.columnIndex);
+    const column = Dashboard.view.getColumnId(Dashboard.columnIndex);
     // label
     const label = document.getElementById('field-label').value;
     // dataType
     const typeRef = document.getElementById('field-datatype');
     // formattazione colonna
     const formatterRef = document.getElementById('field-format');
+    const hideColumn = document.getElementById('hide-column');
     // console.log(typeRef.selectedIndex);
     // console.log(typeRef.options.item(typeRef.selectedIndex).value);
     const type = typeRef.options.item(typeRef.selectedIndex).value.toLowerCase();
@@ -300,6 +306,11 @@ var Storage = new SheetStorages();
       const format = formatterRef.options.item(formatterRef.selectedIndex).value;
       Dashboard.json.data.formatter[format].push(Dashboard.columnIndex);
     }
+    if (hideColumn.checked === true) {
+
+    }
+    // Colonne da nascondere (oltre alle colonne _id già nascoste)
+
     debugger;
   }
 

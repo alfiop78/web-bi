@@ -160,12 +160,14 @@ class Dashboards {
     return this.controls;
   }
 
-  addColumnProperty(values) {
+  defineColumns(values) {
     // debugger;
-    // console.log(values);
     values.forEach(value => {
       // console.log(value);
       this.json.data.columns[value.id] = { label: value.label, type: value.type };
+      // Le colonne _id non vengono visualizzate nell'anteprima del report
+      const regex = new RegExp('_id$');
+      if (!regex.test(value.id)) this.json.wrapper.view.columns.push(value.id);
     });
 
     /* this.#json = {
@@ -174,7 +176,8 @@ class Dashboards {
       bind,
       wrapper
     } */
-    console.log(this.json);
+    console.log('columns :', this.json.data.columns);
+    console.log('wrapper.view :', this.json.wrapper.view);
   }
 
 }

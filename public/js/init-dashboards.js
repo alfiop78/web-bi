@@ -45,8 +45,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
 
   // Recupero del template-layout e dello sheetSpecs
   app.getLayouts = async () => {
-    // const sheetLayout = 'stock';
-    const sheetLayout = 'competitive-bonus';
+    const sheetLayout = 'stock';
+    // const sheetLayout = 'competitive-bonus';
     const templateLayout = 'layout-1';
     const urls = [
       `/js/json-templates/${templateLayout}.json`,
@@ -325,8 +325,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
   // recupero il datamrt
   app.dashboardExample = async () => {
     // recupero l'id dello Sheet stock veicoli nuovi
-    // const sheet = JSON.parse(window.localStorage.getItem('hdkglro'));
-    const sheet = JSON.parse(window.localStorage.getItem('59yblqr'));
+    const sheet = JSON.parse(window.localStorage.getItem('hdkglro'));
+    // const sheet = JSON.parse(window.localStorage.getItem('59yblqr'));
     if (!sheet.id) return false;
     // Chiamta in POST
     // WARN: per la chiamata in POST bisogna aggiungere la route in VerifyCrsfToken.php
