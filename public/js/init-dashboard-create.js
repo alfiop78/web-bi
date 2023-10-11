@@ -195,7 +195,6 @@ var Storage = new SheetStorages();
     // if (localStorage.getItem('tmpl_stock')) Dashboard.json = localStorage.getItem('tmpl_stock');
     (localStorage.getItem(`template-${sheetToken}`)) ?
       Dashboard.json = localStorage.getItem(`template-${sheetToken}`) : Dashboard.json.name = `template-${sheetToken}`;
-    debugger;
 
     Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareDataPreview());
     // var tableRef = new google.visualization.Table(document.getElementById('chart_div'));
@@ -221,7 +220,6 @@ var Storage = new SheetStorages();
         "rowNumberCell": ""
       }
     };
-
 
     // const localStorageTemplate = JSON.parse(localStorage.getItem('tmpl_stock'));
 

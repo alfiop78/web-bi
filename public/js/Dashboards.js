@@ -148,6 +148,7 @@ class Dashboards {
           'controlType': 'CategoryFilter',
           'containerId': filter.containerId,
           'options': {
+            'filterColumnIndex': filter.filterColumnIndex,
             'filterColumnLabel': filter.filterColumnLabel,
             'ui': {
               'caption': filter.caption,
