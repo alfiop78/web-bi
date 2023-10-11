@@ -193,9 +193,12 @@ var Storage = new SheetStorages();
   }
 
   app.drawTable = () => {
-    Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareDataPreview());
+    // se il json, in localStorage non esiste, verrà inizializzato in base alla proprietà #json della Classe Dashboards
+    if (localStorage.getItem('tmpl_stock')) Dashboard.json = localStorage.getItem('tmpl_stock');
 
-    var tableRef = new google.visualization.Table(document.getElementById('chart_div'));
+    Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareDataPreview());
+    // var tableRef = new google.visualization.Table(document.getElementById('chart_div'));
+    Dashboard.DOMref = new google.visualization.Table(document.getElementById('chart_div'));
     // Set chart options
     const options = {
       'title': 'Stock veicoli',
@@ -218,33 +221,50 @@ var Storage = new SheetStorages();
       }
     };
 
+
+    // const localStorageTemplate = JSON.parse(localStorage.getItem('tmpl_stock'));
+
     for (const [key, values] of Object.entries(JSON.parse(Dashboard.dataTable.toJSON()))) {
       // key : (rows/cols)
+      // values : array di object
       // creo la proprietà json.data.column del report template (file .json)
       if (key === 'cols') {
-        // console.log(key, values);
-        // Definisco le colonne e nascondo, dalla view, le colonne_id
-        Dashboard.defineColumns(values);
+        values.forEach(value => {
+          // console.log(key, value);
+          // value : {id: nome_colonna, label: nome_label, type: datatype}
+          // Verifico se questa colonna è già presente nel template report (in localStorage)
+          // Dashboard.defineColumns(value);
+          if (Dashboard.json.data.columns[value.id]) {
+            Dashboard.defineColumns(Dashboard.json.data.columns[value.id]);
+          } else {
+            // Definisco le colonne e nascondo, dalla view, le colonne_id
+            Dashboard.defineColumns(value);
+          }
+        });
       }
     }
-
-    // gestione eventi
-    google.visualization.events.addListener(tableRef, 'ready', ready);
-    google.visualization.events.addListener(tableRef, 'select', selectRow);
-    google.visualization.events.addListener(tableRef, 'sort', sort);
-    // end gestione eventi
+    console.log(JSON.parse(Dashboard.dataTable.toJSON()));
 
     // utilizzo della DataView
     Dashboard.view = new google.visualization.DataView(Dashboard.dataTable);
     // nascondo la prima colonna
     // view.hideColumns([0]);
     // visualizzo le colonne _ds, come appena impostato in defineColumns()
-    Dashboard.view.setColumns(Dashboard.json.wrapper.view.columns);
-    tableRef.draw(Dashboard.view, options);
+    // Dashboard.view.setColumns(Dashboard.json.wrapper.view.columns);
+
+    // gestione eventi
+    google.visualization.events.addListener(Dashboard.DOMref, 'ready', ready);
+    // la selezione della riga la imposto DOPO aver configurato la DataView.
+    // Quando l'ho impostata prima l'index della riga non corrispondeva alla riga selezionata
+    google.visualization.events.addListener(Dashboard.DOMref, 'select', selectRow);
+    google.visualization.events.addListener(Dashboard.DOMref, 'sort', app.sort);
+    // end gestione eventi
+
+    Dashboard.DOMref.draw(Dashboard.view, options);
     // utilizzo della DataView
 
     // utilizzo della DataTable
-    // tableRef.draw(Dashboard.dataTable, options);
+    // Dashboard.DOMref.draw(Dashboard.dataTable, options);
     // utilizzo della DataTable
     function ready() {
       console.log('ready');
@@ -252,35 +272,70 @@ var Storage = new SheetStorages();
 
     function selectRow() {
       // WARN: ottengo la selezione corretta solo dopo che l'evento ready si è verificato, da rivedere
-      console.log(tableRef.getSelection());
+      console.log(Dashboard.DOMref.getSelection());
     }
 
-    function sort(e) {
-      // console.log(e);
-      Dashboard.columnIndex = e['column'];
-      const columnName = Dashboard.view.getColumnId(Dashboard.columnIndex);
-      // app.dlgConfig.dataset.columnIndex = columnIndex;
-      // app.dlgConfig.dataset.columnName = columnName;
-      // app.dlgConfig.dataset.columnType = Dashboard.dataTable.getColumnType(columnIndex);
-      console.log(Dashboard.columnIndex, columnName);
-      // console.log(data.getColumnProperties(1));
-      // console.log(data.getColumnProperty(1));
-      // console.log(Dashboard.dataTable.getColumnType(columnIndex));
-      document.getElementById('field-label').value = columnName;
-      // imposto, nella 'select #field-datatype' il dataType della colonna selezionata
-      const selectDataType = document.getElementById('field-datatype');
-      // NOTE: utilizzo di selectedIndex
+  }
 
-      // selectDataType.selectedIndex = 2;
-      // console.log(selectDataType.options);
-      [...selectDataType.options].forEach((option, index) => {
+  // event proveniente dalla Dashboard
+  app.sort = (e) => {
+    // console.log(e);
+    Dashboard.columnIndex = e['column'];
+    // TODO: potrei inserire tutto il resto della funzione in onopen della dialog
+    const columnName = Dashboard.view.getColumnId(Dashboard.columnIndex);
+    const columnLabel = Dashboard.view.getColumnLabel(Dashboard.columnIndex);
+    // imposto, nella 'select #field-datatype' il dataType della colonna selezionata
+    const selectDataType = document.getElementById('field-datatype');
+    const chkboxFilter = document.getElementById('filter-column');
+    const chkboxHide = document.getElementById('hide-column');
+    const selectFormatter = document.getElementById('field-format');
+    console.log(Dashboard.columnIndex, columnName);
+    // console.log(Dashboard.view.getColumnProperties(Dashboard.columnIndex));
+    // console.log(data.getColumnProperty(1));
+    // TODO: Popolo la dialog in base ai valori, per questa colonna, trovati in Dashboard.json
+    console.log(Dashboard.json.data.columns[columnName]);
+    // document.getElementById('field-label').value = columnName;
+    document.getElementById('field-label').value = Dashboard.json.data.columns[columnName].label;
+    // dataType
+    // recupero il dataType della colonna selezionata dall'object Dashboard.json.data.columns[columnIndex]
+    // selectDataType.selectedIndex = 2;
+    // console.log(selectDataType.options);
+    [...selectDataType.options].forEach((option, index) => {
+      // console.log(index, option);
+      if (option.value === Dashboard.json.data.columns[columnName].type) {
+        selectDataType.selectedIndex = index;
+      }
+    });
+    // NOTE: utilizzo di selectedIndex
+
+    // selectDataType.selectedIndex = 2;
+    // console.log(selectDataType.options);
+    /* [...selectDataType.options].forEach((option, index) => {
+      // console.log(index, option);
+      if (option.value === Dashboard.view.getColumnType(Dashboard.columnIndex)) {
+        selectDataType.selectedIndex = index;
+      }
+    }); */
+
+    // se la colonna è stata nascosta, il columnName non è presente nell'array json.wrapper.view.columns
+    // if (!Dashboard.json.wrapper.view.columns.includes(columnName)) hideCheckbox.checked = true;
+    // TODO: recupero la formattazione della colonna
+    if (Dashboard.json.data.formatter[Dashboard.columnIndex]) {
+      // formattazione presente su questa colonna
+      [...selectFormatter.options].forEach((option, index) => {
         // console.log(index, option);
-        if (option.value === Dashboard.view.getColumnType(Dashboard.columnIndex)) {
-          selectDataType.selectedIndex = index;
+        if (option.value === Dashboard.json.data.formatter[Dashboard.columnIndex].format) {
+          selectFormatter.selectedIndex = index;
         }
       });
-      app.dlgConfig.showModal();
+
     }
+
+    // recupero la proprietà della checkbox #filter-column se questa colonna è stata impostata come filtro
+    // find restituisce il primo elemento trovato in base al test della funzione fornita
+    const filterCheckbox = Dashboard.json.filters.find(filterProperty => filterProperty.filterColumnLabel === columnLabel);
+    if (filterCheckbox) chkboxFilter.checked = true;
+    app.dlgConfig.showModal();
   }
 
   app.chartSettings = () => app.dlgConfig.showModal();
@@ -288,8 +343,8 @@ var Storage = new SheetStorages();
   // Salvataggio della configurazione colonna dalla dialog dlg-config
   app.btnSaveColumn = () => {
     // console.log(Dashboard.dataTable);
-    const column = Dashboard.view.getColumnId(Dashboard.columnIndex);
-    // label
+    const column = Dashboard.view.getColumnId(Dashboard.columnIndex); // nome colonna
+    // input label
     const label = document.getElementById('field-label').value;
     // dataType
     const typeRef = document.getElementById('field-datatype');
@@ -305,7 +360,7 @@ var Storage = new SheetStorages();
     Dashboard.json.data.columns[column].type = type;
     if (formatterRef.selectedIndex !== 0) {
       const format = formatterRef.options.item(formatterRef.selectedIndex).value;
-      Dashboard.json.data.formatter[format].push(Dashboard.columnIndex);
+      Dashboard.json.data.formatter[Dashboard.columnIndex] = { format, numberDecimal: 2 };
     }
     // Colonne da nascondere (oltre alle colonne _id già nascoste)
     if (hideColumn.checked === true) {
@@ -314,7 +369,8 @@ var Storage = new SheetStorages();
       console.log(Dashboard.json.wrapper.view.columns);
     }
     if (filterColumn.checked === true) {
-      // array dei filtri, quanti elementi ci sono ?
+      // array dei filtri, imposto i 'containerId' in base al numero di elementi che ci sono
+      // in Dashboard.json.filters
       const length = Dashboard.json.filters.length;
       const label = Dashboard.json.data.columns[column].label;
       Dashboard.json.filters.push({
@@ -327,8 +383,8 @@ var Storage = new SheetStorages();
     Dashboard.json.wrapper.containerId = 'chart_div';
     Dashboard.json.name = 'stock';
     // TODO: al momento configuro manualmente il bind
-    Dashboard.json.bind.push([0, 1]);
-    console.log(Dashboard.json)
+    if (Dashboard.json.bind.length === 0) Dashboard.json.bind.push([0, 1]);
+    console.log(Dashboard.json);
     debugger;
     window.localStorage.setItem('tmpl_stock', JSON.stringify(Dashboard.json));
     app.dlgConfig.close();

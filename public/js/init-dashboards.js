@@ -162,10 +162,9 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
 
   app.drawDashboard = (queryData) => {
     const prepareData = Dashboard.prepareData();
-    let dataTable;
     // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
     // è consentità con la DataView perchè questa è read-only
-    dataTable = new google.visualization.DataTable(prepareData);
+    let dataTable = new google.visualization.DataTable(prepareData);
     // definisco la formattazione per le percentuali e per i valori currency
     var percFormatter = new google.visualization.NumberFormat(
       { suffix: ' %', negativeColor: 'red', negativeParens: true, fractionDigits: 1 });
@@ -253,13 +252,23 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         groupColumns,
       );
     }
-    // funzioni di formattazione
-    Dashboard.sheetSpecs.data.formatter.currency.forEach(columnIndex => currencyFormatter.format(dataTable, columnIndex));
-    Dashboard.sheetSpecs.data.formatter.percent.forEach(columnIndex => percFormatter.format(dataTable, columnIndex));
-    console.log(dataTable);
 
     // NOTE: le proprietà definite nel ChartWrapper vengono impostate nel template-sheet .json, proprietà "wrapper"
     var table = new google.visualization.ChartWrapper(Dashboard.sheetSpecs.wrapper);
+    // funzioni di formattazione
+    for (const [colIndex, properties] of Object.entries(Dashboard.sheetSpecs.data.formatter)) {
+      switch (properties.format) {
+        case 'currency':
+          currencyFormatter.format(dataTable, +colIndex);
+          break;
+        case 'percent':
+          percFormatter.format(dataTable, +colIndex);
+          break;
+        default:
+          break;
+      }
+    }
+    // console.log(dataTable);
 
     // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
     // -> "modello_ds" infleunza "settore_ds" e tutti (l'array Dashboard.controlsWrapper) influenzano la table
