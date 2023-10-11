@@ -70,7 +70,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         // creo il template nel DOM
         Template.create();
         // Dashboard.sheetSpecs = data[1];
-        Dashboard.sheetSpecs = JSON.parse(window.localStorage.getItem('tmpl_stock'));
+        Dashboard.sheetSpecs = JSON.parse(window.localStorage.getItem('template-59yblqr')); // cb
+        // Dashboard.sheetSpecs = JSON.parse(window.localStorage.getItem('template-hdkglro')); // stock
         app.dashboardExample();
       })
       .catch(err => console.error(err));
@@ -160,7 +161,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // utilizzo della DataTable
   }
 
-  app.drawDashboard = (queryData) => {
+  app.drawDashboard = () => {
     const prepareData = Dashboard.prepareData();
     // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
     // è consentità con la DataView perchè questa è read-only
@@ -223,25 +224,26 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     }); */
     // La funzione group() utilizza, come primo parametro, una DataTable, quindi si può anche impostare
     // facendo riferimento al chartWrapper con la funzione getDataTable(), ChartWrapper.getDataTable().
-    /* let dataGroup = new google.visualization.data.group(dataFormatted, [1, 3, 5, 7],
+    let dataGroup = new google.visualization.data.group(dataTable, [0, 1, 2, 3, 4, 5, 6, 8, 9],
       [
         // OFFICINA INTERNA (costo_rapporto_6)
         { 'column': 16, 'aggregation': google.visualization.data.sum, 'type': 'number' },
         // RA DIRETTA COSTO (costo_rapporto_2)
-        { 'column': 17, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+        // { 'column': 17, 'aggregation': google.visualization.data.sum, 'type': 'number' },
         // RA DIRETTA RICAVO (ricavo_rapporto_2)
-        { 'column': 18, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+        // { 'column': 18, 'aggregation': google.visualization.data.sum, 'type': 'number' },
         // % MARG. RA DIRETTA (perc_margine_rapporto_2)
-        { 'column': 25, 'aggregation': google.visualization.data.avg, 'type': 'number' },
+        // { 'column': 25, 'aggregation': google.visualization.data.avg, 'type': 'number' },
         // costo ve_cb
-        { 'column': 26, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+        // { 'column': 26, 'aggregation': google.visualization.data.sum, 'type': 'number' },
         // ricavo_ve_cb
-        { 'column': 27, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+        // { 'column': 27, 'aggregation': google.visualization.data.sum, 'type': 'number' },
         // marginalità
-        { 'column': 28, 'aggregation': google.visualization.data.avg, 'type': 'number' }
-      ]); */
+        // { 'column': 28, 'aggregation': google.visualization.data.avg, 'type': 'number' } */
+      ]);
     // NOTE: La funzione group() commentata (sopra) la ricreo utilizzando il template-sheet json
-    if (Dashboard.sheetSpecs.data.group) {
+
+    /* if (Object.keys(Dashboard.sheetSpecs.data.group).length !== 0) {
       let groupColumns = [];
       Dashboard.sheetSpecs.data.group.columns.forEach(col => {
         groupColumns.push({ column: col.column, aggregation: google.visualization.data[col.aggregation], type: col.type });
@@ -251,7 +253,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         Dashboard.sheetSpecs.data.group.key,
         groupColumns,
       );
-    }
+    } */
 
     // NOTE: le proprietà definite nel ChartWrapper vengono impostate nel template-sheet .json, proprietà "wrapper"
     var table = new google.visualization.ChartWrapper(Dashboard.sheetSpecs.wrapper);
@@ -302,8 +304,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     binds.bind(controls, table);
 
     // gdashboard.draw(dataFormatted);
-    gdashboard.draw(dataTable); // utilizzo della funzione group
-    // gdashboard.draw(prepareData);
+    // gdashboard.draw(dataTable);
+    gdashboard.draw(dataGroup); // utilizzo della funzione group
   }
 
   // Simulazione della selezione del datamart dello stock
@@ -335,8 +337,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
   // recupero il datamrt
   app.dashboardExample = async () => {
     // recupero l'id dello Sheet stock veicoli nuovi
-    const sheet = JSON.parse(window.localStorage.getItem('hdkglro'));
-    // const sheet = JSON.parse(window.localStorage.getItem('59yblqr'));
+    // const sheet = JSON.parse(window.localStorage.getItem('hdkglro')); // stock
+    const sheet = JSON.parse(window.localStorage.getItem('59yblqr')); // cb
     if (!sheet.id) return false;
     // Chiamta in POST
     // WARN: per la chiamata in POST bisogna aggiungere la route in VerifyCrsfToken.php
@@ -376,7 +378,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         console.log(data);
         // debugger;
         Dashboard.data = data;
-        google.charts.setOnLoadCallback(app.drawDashboard(data));
+        google.charts.setOnLoadCallback(app.drawDashboard());
         // google.charts.setOnLoadCallback(app.drawTable(data));
       })
       .catch(err => {

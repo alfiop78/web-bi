@@ -111,7 +111,7 @@ class Storages {
   getAll() {
     let all = {};
     for (const [token, object] of Object.entries(this.storage)) {
-      all[token] = JSON.parse(object);
+      if (token.indexOf('template-') === -1) all[token] = JSON.parse(object);
     }
     return all;
 

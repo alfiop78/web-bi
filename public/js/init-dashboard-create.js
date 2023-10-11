@@ -66,14 +66,12 @@ var Storage = new SheetStorages();
     console.log(e.target);
     const title = document.getElementById('title').value;
     const note = document.getElementById('note').value;
-    const json = {
-      title, note
-    }
-    window.localStorage.setItem('dashboardToken', JSON.stringify(json));
+    debugger;
   }
 
   app.preview = (e) => {
     console.log(e.target);
+    debugger;
     // TODO: da valutare, potrei visualizzare una preview del dashboard completo di dati
   }
 
@@ -144,11 +142,10 @@ var Storage = new SheetStorages();
 
   // apertura dialog per l'aggiunta del chart o DataTable
   app.addChart = () => {
-    console.log('addChart');
     const ul = document.getElementById('ul-sheets');
-    // TODO: carico elenco sheets del localStorage
+    // carico elenco sheets del localStorage
     for (const [token, sheet] of Object.entries(Storage.getSheets())) {
-      console.log(token, sheet);
+      // console.log(token, sheet);
       const content = app.tmplList.content.cloneNode(true);
       const li = content.querySelector('li[data-li]');
       const span = li.querySelector('span');
@@ -164,8 +161,8 @@ var Storage = new SheetStorages();
 
   app.dashboardExample = async () => {
     // recupero l'id dello Sheet stock veicoli nuovi
-    const sheet = JSON.parse(window.localStorage.getItem('hdkglro')); // stock
-    // const sheet = JSON.parse(window.localStorage.getItem('59yblqr')); // cb
+    // const sheet = JSON.parse(window.localStorage.getItem('hdkglro')); // stock
+    const sheet = JSON.parse(window.localStorage.getItem('59yblqr')); // cb
     if (!sheet.id) return false;
     await fetch(`/fetch_api/${sheet.id}/datamart`)
       .then((response) => {
@@ -178,7 +175,7 @@ var Storage = new SheetStorages();
         console.log(data);
         // debugger;
         Dashboard.data = data;
-        google.charts.setOnLoadCallback(app.drawTable(data));
+        google.charts.setOnLoadCallback(app.drawTable(sheet.token));
       })
       .catch(err => {
         App.showConsole(err, 'error');
@@ -192,9 +189,13 @@ var Storage = new SheetStorages();
     app.dlgChartSection.close();
   }
 
-  app.drawTable = () => {
+  app.drawTable = (sheetToken) => {
+    console.log(sheetToken);
     // se il json, in localStorage non esiste, verrà inizializzato in base alla proprietà #json della Classe Dashboards
-    if (localStorage.getItem('tmpl_stock')) Dashboard.json = localStorage.getItem('tmpl_stock');
+    // if (localStorage.getItem('tmpl_stock')) Dashboard.json = localStorage.getItem('tmpl_stock');
+    (localStorage.getItem(`template-${sheetToken}`)) ?
+      Dashboard.json = localStorage.getItem(`template-${sheetToken}`) : Dashboard.json.name = `template-${sheetToken}`;
+    debugger;
 
     Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareDataPreview());
     // var tableRef = new google.visualization.Table(document.getElementById('chart_div'));
@@ -381,12 +382,11 @@ var Storage = new SheetStorages();
     }
     Dashboard.json.wrapper.chartType = 'Table';
     Dashboard.json.wrapper.containerId = 'chart_div';
-    Dashboard.json.name = 'stock';
     // TODO: al momento configuro manualmente il bind
     if (Dashboard.json.bind.length === 0) Dashboard.json.bind.push([0, 1]);
     console.log(Dashboard.json);
     debugger;
-    window.localStorage.setItem('tmpl_stock', JSON.stringify(Dashboard.json));
+    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
     app.dlgConfig.close();
   }
 

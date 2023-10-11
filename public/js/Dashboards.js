@@ -6,7 +6,8 @@ class Dashboards {
     name: null,
     data: {
       columns: {},
-      formatter: {}
+      formatter: {},
+      group: {}
     },
     filters: [],
     bind: [],
