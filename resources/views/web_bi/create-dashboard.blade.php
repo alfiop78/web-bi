@@ -12,12 +12,11 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-create-dashboard.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dashboards.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-create-dashboard.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
   <script src="{{ asset('/js/WBStorage.js') }}"></script>
-  <script src="{{ asset('/js/WorkBooks.js') }}"></script>
   <script src="{{ asset('/js/Templates.js') }}"></script>
   <script src="{{ asset('/js/Dashboards.js') }}"></script>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -29,11 +28,10 @@
     <li data-li data-element-search data-label data-searchable="true">
       <span></span>
     </li>
+  </template>
 
-    <li data-li-detail data-element-search data-label data-searchable="true">
-      <span data-value></span>
-      <small data-detail></small>
-    </li>
+  <template id="template-filter">
+    <div class="previewFilter" data-draggable="true"></div>
   </template>
 
   <template id="tmpl-thumbnails">
@@ -156,7 +154,6 @@
               <p>Selezione del Layout (dialog per la visualizzazione delle preview dei layout e scelta del layout)</p>
               <button type="button" id="btn-dlg-layout" data-fn="openDlgTemplateLayout">Seleziona Template</button>
             </section>
-            <p>Selezione del Report (dialog per la selezione del/i report/s)</p>
             <p>Definizione della relazione tra i Filtri</p>
             <p>Opzioni del grafico/Tabella</p>
             <textarea id="note" rows="10" cols="60" name="note" placeholder="Note"></textarea>
@@ -166,7 +163,7 @@
             <button id="btnSave" type="button" data-fn="save">Salva</button>
           </section>
           <section id="dashboard-preview" class="dashboard-preview">
-            <div id="template-layout" class="dashboard"></div>
+            <div id="template-layout" class="preview"></div>
           </section>
 
         </div>

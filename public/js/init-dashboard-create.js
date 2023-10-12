@@ -129,7 +129,7 @@ var Storage = new SheetStorages();
     // aggiungo il tasto + nel #filter_div
     // TODO: valutare se aggiungere questi elementi nel template (che però è lo stesso template utilizzato
     // per il dashboard reale)
-    const chartSection = document.querySelector('.dashboard #chart_div');
+    const chartSection = document.querySelector('.preview #chart_div');
     const btnAddChart = document.createElement('button');
     btnAddChart.innerText = 'Add Chart';
     btnAddChart.addEventListener('click', app.addChart);
@@ -195,6 +195,16 @@ var Storage = new SheetStorages();
     // if (localStorage.getItem('tmpl_stock')) Dashboard.json = localStorage.getItem('tmpl_stock');
     (localStorage.getItem(`template-${sheetToken}`)) ?
       Dashboard.json = localStorage.getItem(`template-${sheetToken}`) : Dashboard.json.name = `template-${sheetToken}`;
+    // aggiungo i filtri se sono presenti nel json
+    Dashboard.json.filters.forEach(filter => {
+      console.log(filter);
+      const filterRef = document.getElementById('filter_div');
+      const tmplFilter = document.getElementById('template-filter');
+      const tmplFilterContent = tmplFilter.content.cloneNode(true);
+      const div = tmplFilterContent.querySelector('div');
+      div.innerText = filter.caption;
+      filterRef.appendChild(div);
+    });
 
     Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareDataPreview());
     // var tableRef = new google.visualization.Table(document.getElementById('chart_div'));
@@ -222,7 +232,6 @@ var Storage = new SheetStorages();
     };
 
     // const localStorageTemplate = JSON.parse(localStorage.getItem('tmpl_stock'));
-
     for (const [key, values] of Object.entries(JSON.parse(Dashboard.dataTable.toJSON()))) {
       // key : (rows/cols)
       // values : array di object
@@ -236,7 +245,7 @@ var Storage = new SheetStorages();
           if (Dashboard.json.data.columns[value.id]) {
             Dashboard.defineColumns(Dashboard.json.data.columns[value.id]);
           } else {
-            // Definisco le colonne e nascondo, dalla view, le colonne_id
+            // Definisco le colonne
             Dashboard.defineColumns(value);
           }
         });
@@ -273,7 +282,6 @@ var Storage = new SheetStorages();
       // WARN: ottengo la selezione corretta solo dopo che l'evento ready si è verificato, da rivedere
       console.log(Dashboard.DOMref.getSelection());
     }
-
   }
 
   // event proveniente dalla Dashboard
@@ -377,6 +385,15 @@ var Storage = new SheetStorages();
         filterColumnLabel: label,
         caption: label
       });
+      // TODO: Aggiungo al DOM, nella sezione #filter_div, il template 'template-filter'.
+      // L'elemento aggiunto potrà essere spostato (drag&drop) per consentire l'ordinamento dei
+      // vari filtri creati nella pagina di dashboard
+      const filterRef = document.getElementById('filter_div');
+      const tmplFilter = document.getElementById('template-filter');
+      const tmplFilterContent = tmplFilter.content.cloneNode(true);
+      const div = tmplFilterContent.querySelector('div');
+      div.innerText = label;
+      filterRef.appendChild(div);
     }
     Dashboard.json.wrapper.chartType = 'Table';
     Dashboard.json.wrapper.containerId = 'chart_div';

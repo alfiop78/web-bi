@@ -179,8 +179,8 @@ class Dashboards {
       bind,
       wrapper
     } */
-    console.log('columns :', this.json.data.columns);
-    console.log('wrapper.view :', this.json.wrapper.view);
+    // console.log('columns :', this.json.data.columns);
+    // console.log('wrapper.view :', this.json.wrapper.view);
   }
 
 }

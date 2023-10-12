@@ -27,7 +27,9 @@
                 {
                   "tag": "div",
                   "id": "filter_div",
-                  "classes": []
+                  "classes": [
+                    "contentObject"
+                  ]
                 }
               ]
             }
@@ -50,7 +52,8 @@
                   "tag": "div",
                   "id": "chart_div",
                   "classes": [
-                    "chart-elements"
+                    "chart-elements",
+                    "contentObject"
                   ]
                 }
               ]
