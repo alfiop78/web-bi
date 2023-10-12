@@ -177,76 +177,70 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
     // Creo i filtri nella Classe Dashboards
     const controls = Dashboard.drawControls(document.getElementById('filter_div'));
-    // imposto le class per i CSS
-    // NOTE: Definita nel file stock.json
 
-    // La funzione group() utilizza, come primo parametro, una DataTable, quindi si può anche impostare
-    // facendo riferimento al chartWrapper con la funzione getDataTable(), ChartWrapper.getDataTable().
-    /* let dataGroup = new google.visualization.data.group(
-      dataTable, [0, 1, 2, 3, 4, 5, 6, 7],
-      [
-        // OFFICINA INTERNA (costo_rapporto_6)
-        { 'column': 16, 'aggregation': google.visualization.data.sum, 'type': 'number' },
-        // RA DIRETTA COSTO (costo_rapporto_2)
-        // { 'column': 17, 'aggregation': google.visualization.data.sum, 'type': 'number' },
-        // RA DIRETTA RICAVO (ricavo_rapporto_2)
-        // { 'column': 18, 'aggregation': google.visualization.data.sum, 'type': 'number' },
-        // % MARG. RA DIRETTA (perc_margine_rapporto_2)
-        // { 'column': 25, 'aggregation': google.visualization.data.avg, 'type': 'number' },
-        // costo ve_cb
-        // { 'column': 26, 'aggregation': google.visualization.data.sum, 'type': 'number' },
-        // ricavo_ve_cb
-        // { 'column': 27, 'aggregation': google.visualization.data.sum, 'type': 'number' },
-        // marginalità
-        // { 'column': 28, 'aggregation': google.visualization.data.avg, 'type': 'number' }
-      ]
-    ); */
-    // console.log(JSON.parse(dataGroup.toJSON()));
-    // debugger;
     // Dashboard.view = new google.visualization.DataView(dataGroup);
     // Dashboard.view.setColumns([0, 1, 2, 3, 4, 5, 6, 7, 9]);
     // console.log(JSON.parse(Dashboard.view.toJSON()));
-    // debugger;
-
-    // var table1 = new google.visualization.ChartWrapper(Dashboard.sheetSpecs.wrapper);
     var table = new google.visualization.ChartWrapper(Dashboard.sheetSpecs.wrapper);
-    // esempio array di View
+    // NOTE: esempio array di View
     // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
-    table.setView({ columns: [1, 3, 5, 7, 9, 16] });
-    // table.draw(document.getElementById('chart_div'));
-    // console.log(table.getView());
-    // var table2 = new google.visualization.ChartWrapper(Dashboard.sheetSpecs.wrapper);
-    // table
+    // table.setView({ columns: [1, 3, 5, 7, 9, 16] });
+
     google.visualization.events.addListener(table, 'ready', function() {
       console.log('ready');
+      // Nell'evento ready vado a disegnare la dataTable, senza l'utilizzo dell'istanza gdashboard, che
+      // andrebbe in errore perchè qui vado a nascondere alcune colonne.
+      // es.: competitive-bonus
+      // Ho il filtro MLI ma nella tabella non deve essere raggruppato (e quindi nemmeno visibile).
+      // Imposto qui il tableRef perchè, per la gdashboard, è impostato nel ChartWrapper
       let tableRef = new google.visualization.Table(document.getElementById('chart_div'));
-      let tableCloned = table.clone();
-      console.log(table.getDataTable());
-      tableCloned.setView({ columns: [0, 1, 2, 3, 4] });
-      console.log(tableCloned.getDataTable());
       let dataGroup = new google.visualization.data.group(
-        tableCloned.getDataTable(), [0, 1, 2, 3, 4, 5, 6, 7],
+        // tableCloned.getDataTable(), [0, 1, 2, 3, 4, 5, 6, 7],
+        // 'table' è il ChartWrapper e contiene i dati originali, così come restituiti dal datamart
+        table.getDataTable(), [1, 3, 5, 7],
         [
           // OFFICINA INTERNA (costo_rapporto_6)
           { 'column': 16, 'aggregation': google.visualization.data.sum, 'type': 'number' },
           // RA DIRETTA COSTO (costo_rapporto_2)
-          // { 'column': 17, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          { 'column': 17, 'aggregation': google.visualization.data.sum, 'type': 'number' },
           // RA DIRETTA RICAVO (ricavo_rapporto_2)
-          // { 'column': 18, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          { 'column': 18, 'aggregation': google.visualization.data.sum, 'type': 'number' },
           // % MARG. RA DIRETTA (perc_margine_rapporto_2)
-          // { 'column': 25, 'aggregation': google.visualization.data.avg, 'type': 'number' },
+          { 'column': 25, 'aggregation': google.visualization.data.avg, 'type': 'number' },
           // costo ve_cb
-          // { 'column': 26, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          { 'column': 26, 'aggregation': google.visualization.data.sum, 'type': 'number' },
           // ricavo_ve_cb
-          // { 'column': 27, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          { 'column': 27, 'aggregation': google.visualization.data.sum, 'type': 'number' },
           // marginalità
-          // { 'column': 28, 'aggregation': google.visualization.data.avg, 'type': 'number' }
+          { 'column': 28, 'aggregation': google.visualization.data.avg, 'type': 'number' }
         ]
       );
-      // gdashboard.draw(dataGroup);
-      tableRef.draw(dataGroup);
-      // tableCloned.draw(document.getElementById('chart_div'));
+      // funzioni di formattazione
+      currencyFormatter.format(dataGroup, 4);
+      currencyFormatter.format(dataGroup, 5);
+      currencyFormatter.format(dataGroup, 6);
+      percFormatter.format(dataGroup, 7);
+      currencyFormatter.format(dataGroup, 8);
+      currencyFormatter.format(dataGroup, 9);
+      percFormatter.format(dataGroup, 10);
+      // TODO: da implementare
 
+      /* for (const [colIndex, properties] of Object.entries(Dashboard.sheetSpecs.data.formatter)) {
+        switch (properties.format) {
+          case 'currency':
+            currencyFormatter.format(dataTable, +colIndex);
+            break;
+          case 'percent':
+            percFormatter.format(dataTable, +colIndex);
+            break;
+          default:
+            break;
+        }
+      } */
+      // metodo draw() sul tableRef e non sulla gdashboard.
+      // Questo perchè la gdashboard genera, in questo caso, un errore sui filtri, ad es. MLI
+      // non verrebbe trovato nella dataTable
+      tableRef.draw(dataGroup, Dashboard.sheetSpecs.wrapper.options);
     });
 
     // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
