@@ -202,6 +202,9 @@ var Storage = new SheetStorages();
       const tmplFilter = document.getElementById('template-filter');
       const tmplFilterContent = tmplFilter.content.cloneNode(true);
       const div = tmplFilterContent.querySelector('div');
+      // debugger;
+      div.id = filter.containerId;
+      div.addEventListener('dragstart', app.filterDragStart);
       div.innerText = filter.caption;
       filterRef.appendChild(div);
     });
@@ -419,5 +422,15 @@ var Storage = new SheetStorages();
     document.getElementById('filter-column').checked = false;
   }
   // end onclose dialogs
+  //
+  // Drag events
+  app.filterDragStart = (e) => {
+    console.log(e.target.id);
+    e.target.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', e.target.id);
+    e.dataTransfer.effectAllowed = "copy";
+  }
+
+  // End Drag events
 
 })();

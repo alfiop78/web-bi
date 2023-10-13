@@ -31,7 +31,7 @@
   </template>
 
   <template id="template-filter">
-    <div class="previewFilter" data-draggable="true"></div>
+    <div class="previewFilter" draggable="true"></div>
   </template>
 
   <template id="tmpl-thumbnails">
