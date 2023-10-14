@@ -197,16 +197,22 @@ var Storage = new SheetStorages();
       Dashboard.json = localStorage.getItem(`template-${sheetToken}`) : Dashboard.json.name = `template-${sheetToken}`;
     // aggiungo i filtri se sono presenti nel json
     Dashboard.json.filters.forEach(filter => {
-      console.log(filter);
+      // console.log(filter);
       const filterRef = document.getElementById('filter_div');
       const tmplFilter = document.getElementById('template-filter');
       const tmplFilterContent = tmplFilter.content.cloneNode(true);
-      const div = tmplFilterContent.querySelector('div');
+      const containerDiv = tmplFilterContent.querySelector('.filter-container.dropzone');
+      const filterDiv = containerDiv.querySelector('.preview-filter');
       // debugger;
-      div.id = filter.containerId;
-      div.addEventListener('dragstart', app.filterDragStart);
-      div.innerText = filter.caption;
-      filterRef.appendChild(div);
+      filterDiv.id = filter.containerId;
+      filterDiv.addEventListener('dragstart', app.filterDragStart);
+      containerDiv.addEventListener('dragover', app.filterDragOver);
+      containerDiv.addEventListener('dragenter', app.filterDragEnter);
+      containerDiv.addEventListener('dragleave', app.filterDragLeave);
+      containerDiv.addEventListener('drop', app.filterDrop);
+      containerDiv.addEventListener('dragend', app.filterDragEnd);
+      filterDiv.innerText = filter.caption;
+      filterRef.appendChild(containerDiv);
     });
 
     Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareDataPreview());
@@ -343,6 +349,7 @@ var Storage = new SheetStorages();
 
     // recupero la proprietà della checkbox #filter-column se questa colonna è stata impostata come filtro
     // find restituisce il primo elemento trovato in base al test della funzione fornita
+    // NOTE: utilizzo di find() su un array
     const filterCheckbox = Dashboard.json.filters.find(filterProperty => filterProperty.filterColumnLabel === columnLabel);
     if (filterCheckbox) chkboxFilter.checked = true;
     app.dlgConfig.showModal();
@@ -383,11 +390,13 @@ var Storage = new SheetStorages();
       // in Dashboard.json.filters
       const length = Dashboard.json.filters.length;
       const label = Dashboard.json.data.columns[column].label;
+      // creo l'object che verrà memorizzato nell'oggetto Map()
       Dashboard.json.filters.push({
         containerId: `flt-${length}`,
         filterColumnLabel: label,
         caption: label
       });
+
       // TODO: Aggiungo al DOM, nella sezione #filter_div, il template 'template-filter'.
       // L'elemento aggiunto potrà essere spostato (drag&drop) per consentire l'ordinamento dei
       // vari filtri creati nella pagina di dashboard
@@ -425,10 +434,77 @@ var Storage = new SheetStorages();
   //
   // Drag events
   app.filterDragStart = (e) => {
+    // console.log('dragStart');
     console.log(e.target.id);
     e.target.classList.add('dragging');
     e.dataTransfer.setData('text/plain', e.target.id);
     e.dataTransfer.effectAllowed = "copy";
+  }
+
+  app.filterDragEnter = (e) => {
+    // console.log('dragEnter');
+    e.preventDefault();
+    if (e.target.classList.contains('dropzone')) {
+      e.target.classList.add('dropping');
+    } else {
+      console.log('non in dropzone');
+      e.dataTransfer.dropEffect = 'none';
+    }
+  }
+
+  app.filterDragOver = (e) => {
+    // console.log('dragOver');
+    e.preventDefault();
+    // console.log(e.target);
+    if (e.target.classList.contains('dropzone')) {
+      e.dataTransfer.dropEffect = 'move';
+    }
+  }
+
+  app.filterDragLeave = (e) => {
+    // console.log('dragLeave');
+    e.preventDefault();
+    if (e.target.classList.contains('dropzone')) {
+      e.dataTransfer.dropEffect = 'move';
+    }
+  }
+
+  app.filterDragEnd = (e) => {
+    // console.log('dragEnd');
+    e.preventDefault();
+    if (e.dataTransfer.dropEffect === 'move') { }
+  }
+
+  app.filterDrop = (e) => {
+    e.preventDefault();
+    e.currentTarget.classList.replace('dropping', 'dropped');
+    // target corrisponde all'elemento .preview-filter, mentre currentTarget corrisponde al
+    // contenitore del filtro
+    // console.log(e.target);
+    // console.log(e.currentTarget);
+    if (!e.currentTarget.classList.contains('dropzone')) return;
+    // id filtro che sto draggando (flt-0, flt-1, ecc...)
+    const elementId = e.dataTransfer.getData('text/plain');
+    // elementRef è l'elemento che sto spostando "newFilter"...
+    const elementRef = document.getElementById(elementId);
+    const previousTarget = elementRef.parentElement;
+    // ...questo elemento lo devo inserire in e.currentTarget
+    // sostituendo quello già presente in e.currentTarget
+    const oldFilter = e.currentTarget.querySelector('.preview-filter');
+    // ... oldFilter lo inserisco nel .filter-container di provenienza
+    e.currentTarget.replaceChild(elementRef, oldFilter);
+    previousTarget.appendChild(oldFilter);
+    // TODO: devo spostare i due filtri switchati anche nel json, i filtri
+    // sono memorizzati come un array di objects
+    // Dashboard.json.filters
+    // Recupero l'indice dell'elemento di origine drag&drop
+    const originFilter = Dashboard.json.filters.find(filterObject => filterObject.containerId === elementId);
+    const indexOriginFilter = Dashboard.json.filters.indexOf(originFilter);
+    // Recupero l'elemento di destinazione drag&drop
+    const destinationFilter = Dashboard.json.filters.find(filterObject => filterObject.containerId === oldFilter.id);
+    const indexDestinationFilter = Dashboard.json.filters.indexOf(destinationFilter);
+    Dashboard.json.filters.splice(indexDestinationFilter, 1, originFilter);
+    Dashboard.json.filters.splice(indexOriginFilter, 1, destinationFilter);
   }
 
   // End Drag events

@@ -31,7 +31,9 @@
   </template>
 
   <template id="template-filter">
-    <div class="previewFilter" draggable="true"></div>
+    <div class="filter-container dropzone">
+      <div class="preview-filter" draggable="true"></div>
+    </div>
   </template>
 
   <template id="tmpl-thumbnails">
