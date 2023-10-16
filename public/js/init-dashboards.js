@@ -246,7 +246,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
     // -> "modello_ds" infleunza "settore_ds" e tutti (l'array Dashboard.controlsWrapper) influenzano la table
     // per ogni bind, nel template....
-    /* let binds;
+    let binds;
     // Questa logica funziona con il bind() di un filtro verso quello successivo ma
     // possono esserci anche situazioni diverse, che sono da implementare
     Dashboard.sheetSpecs.bind.forEach((v, index) => {
@@ -259,9 +259,9 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       }
     });
     // Tutti i controlli influenzano la table
-    binds.bind(controls, table); */
+    binds.bind(controls, table);
 
-    gdashboard.bind(controls, table);
+    // gdashboard.bind(controls, table);
 
     // gdashboard.draw(dataFormatted);
     gdashboard.draw(dataTable);
