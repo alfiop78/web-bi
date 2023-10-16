@@ -470,7 +470,7 @@ var Storage = new SheetStorages();
   }
 
   app.filterDragEnd = (e) => {
-    // console.log('dragEnd');
+    console.log('dragEnd');
     e.preventDefault();
     if (e.dataTransfer.dropEffect === 'move') { }
   }
@@ -483,28 +483,42 @@ var Storage = new SheetStorages();
     // console.log(e.target);
     // console.log(e.currentTarget);
     if (!e.currentTarget.classList.contains('dropzone')) return;
+    const parentDiv = document.getElementById('filter_div');
     // id filtro che sto draggando (flt-0, flt-1, ecc...)
     const elementId = e.dataTransfer.getData('text/plain');
     // elementRef è l'elemento che sto spostando "newFilter"...
     const elementRef = document.getElementById(elementId);
-    const previousTarget = elementRef.parentElement;
     // ...questo elemento lo devo inserire in e.currentTarget
     // sostituendo quello già presente in e.currentTarget
     const oldFilter = e.currentTarget.querySelector('.preview-filter');
     // ... oldFilter lo inserisco nel .filter-container di provenienza
-    e.currentTarget.replaceChild(elementRef, oldFilter);
-    previousTarget.appendChild(oldFilter);
+    parentDiv.insertBefore(elementRef.parentElement, oldFilter.parentElement);
+    // elementRef.parentElement.remove();
+    // Salvo tutti i filtri nell'ordine in cui sono stati spostati con drag&drop
+    Dashboard.json.filters = [];
+    parentDiv.querySelectorAll('.filter-container').forEach(filter => {
+      const filterDiv = filter.querySelector('.preview-filter');
+      Dashboard.json.filters.push({
+        containerId: filterDiv.id,
+        filterColumnLabel: filterDiv.innerText,
+        caption: filterDiv.innerText
+      });
+      // console.log(filterDiv);
+    });
+
     // TODO: devo spostare i due filtri switchati anche nel json, i filtri
     // sono memorizzati come un array di objects
     // Dashboard.json.filters
     // Recupero l'indice dell'elemento di origine drag&drop
-    const originFilter = Dashboard.json.filters.find(filterObject => filterObject.containerId === elementId);
+    /* const originFilter = Dashboard.json.filters.find(filterObject => filterObject.containerId === elementId);
     const indexOriginFilter = Dashboard.json.filters.indexOf(originFilter);
     // Recupero l'elemento di destinazione drag&drop
     const destinationFilter = Dashboard.json.filters.find(filterObject => filterObject.containerId === oldFilter.id);
     const indexDestinationFilter = Dashboard.json.filters.indexOf(destinationFilter);
-    Dashboard.json.filters.splice(indexDestinationFilter, 1, originFilter);
-    Dashboard.json.filters.splice(indexOriginFilter, 1, destinationFilter);
+    // Dashboard.json.filters.splice(indexDestinationFilter, 0, originFilter); */
+    console.log(Dashboard.json);
+    // debugger;
+    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
   }
 
   // End Drag events
