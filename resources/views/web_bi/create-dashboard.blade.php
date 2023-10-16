@@ -123,6 +123,10 @@
                     <label for="hide-column">Nascondi colonna</label>
                   </section>
                   <section>
+                    <input type="checkbox" id="frozen-column" name="frozen-column" />
+                    <label for="frozen-column">Blocca colonna</label>
+                  </section>
+                  <section>
                     <input type="checkbox" id="filter-column" name="filter-column" />
                     <label for="filter-column">Imposta come filtro</label>
                   </section>

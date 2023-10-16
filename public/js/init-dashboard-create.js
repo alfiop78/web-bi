@@ -390,27 +390,43 @@ var Storage = new SheetStorages();
       // in Dashboard.json.filters
       const length = Dashboard.json.filters.length;
       const label = Dashboard.json.data.columns[column].label;
-      // creo l'object che verrà memorizzato nell'oggetto Map()
       Dashboard.json.filters.push({
         containerId: `flt-${length}`,
         filterColumnLabel: label,
         caption: label
       });
 
-      // TODO: Aggiungo al DOM, nella sezione #filter_div, il template 'template-filter'.
+      // Aggiungo al DOM, nella sezione #filter_div, il template 'template-filter'.
       // L'elemento aggiunto potrà essere spostato (drag&drop) per consentire l'ordinamento dei
       // vari filtri creati nella pagina di dashboard
       const filterRef = document.getElementById('filter_div');
       const tmplFilter = document.getElementById('template-filter');
       const tmplFilterContent = tmplFilter.content.cloneNode(true);
-      const div = tmplFilterContent.querySelector('div');
-      div.innerText = label;
-      filterRef.appendChild(div);
+      const containerDiv = tmplFilterContent.querySelector('.filter-container.dropzone');
+      const filterDiv = tmplFilterContent.querySelector('.preview-filter');
+      filterDiv.id = `flt-${length}`;
+      filterDiv.addEventListener('dragstart', app.filterDragStart);
+      containerDiv.addEventListener('dragover', app.filterDragOver);
+      containerDiv.addEventListener('dragenter', app.filterDragEnter);
+      containerDiv.addEventListener('dragleave', app.filterDragLeave);
+      containerDiv.addEventListener('drop', app.filterDrop);
+      containerDiv.addEventListener('dragend', app.filterDragEnd);
+      filterDiv.innerText = label;
+      filterRef.appendChild(containerDiv);
+      // TODO: stabilisco il bind per i filtri
+      let testBind = [];
+      /* Dashboard.json.filters.forEach((filter, index) => {
+        debugger;
+        (testBind.length <= 2) ? testBind.push(index) : testBind = [];
+      });
+      console.log(testBind); */
+      debugger;
     }
+
     Dashboard.json.wrapper.chartType = 'Table';
     Dashboard.json.wrapper.containerId = 'chart_div';
     // TODO: al momento configuro manualmente il bind
-    if (Dashboard.json.bind.length === 0) Dashboard.json.bind.push([0, 1]);
+    // if (Dashboard.json.bind.length === 0) Dashboard.json.bind.push([0, 1]);
     console.log(Dashboard.json);
     debugger;
     window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
