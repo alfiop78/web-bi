@@ -189,6 +189,28 @@ var Storage = new SheetStorages();
     app.dlgChartSection.close();
   }
 
+  app.createTemplateFilter = (filter) => {
+    const filterRef = document.getElementById('filter_div');
+    const tmplFilter = document.getElementById('template-filter');
+    const tmplFilterContent = tmplFilter.content.cloneNode(true);
+    const containerDiv = tmplFilterContent.querySelector('.filter-container.dropzone');
+    const filterDiv = containerDiv.querySelector('.preview-filter');
+    const btnRemove = containerDiv.querySelector('button');
+    // debugger;
+    filterDiv.id = filter.containerId;
+    // TODO: potrei impostarle con data-fn in MutationObserver
+    filterDiv.addEventListener('dragstart', app.filterDragStart);
+    containerDiv.addEventListener('dragover', app.filterDragOver);
+    containerDiv.addEventListener('dragenter', app.filterDragEnter);
+    containerDiv.addEventListener('dragleave', app.filterDragLeave);
+    containerDiv.addEventListener('drop', app.filterDrop);
+    containerDiv.addEventListener('dragend', app.filterDragEnd);
+    btnRemove.dataset.id = filter.containerId;
+    btnRemove.dataset.label = filter.filterColumnLabel;
+    filterDiv.innerText = filter.caption;
+    filterRef.appendChild(containerDiv);
+  }
+
   app.drawTable = (sheetToken) => {
     console.log(sheetToken);
     // se il json, in localStorage non esiste, verrà inizializzato in base alla proprietà #json della Classe Dashboards
@@ -196,24 +218,8 @@ var Storage = new SheetStorages();
     (localStorage.getItem(`template-${sheetToken}`)) ?
       Dashboard.json = localStorage.getItem(`template-${sheetToken}`) : Dashboard.json.name = `template-${sheetToken}`;
     // aggiungo i filtri se sono presenti nel json
-    Dashboard.json.filters.forEach(filter => {
-      // console.log(filter);
-      const filterRef = document.getElementById('filter_div');
-      const tmplFilter = document.getElementById('template-filter');
-      const tmplFilterContent = tmplFilter.content.cloneNode(true);
-      const containerDiv = tmplFilterContent.querySelector('.filter-container.dropzone');
-      const filterDiv = containerDiv.querySelector('.preview-filter');
-      // debugger;
-      filterDiv.id = filter.containerId;
-      filterDiv.addEventListener('dragstart', app.filterDragStart);
-      containerDiv.addEventListener('dragover', app.filterDragOver);
-      containerDiv.addEventListener('dragenter', app.filterDragEnter);
-      containerDiv.addEventListener('dragleave', app.filterDragLeave);
-      containerDiv.addEventListener('drop', app.filterDrop);
-      containerDiv.addEventListener('dragend', app.filterDragEnd);
-      filterDiv.innerText = filter.caption;
-      filterRef.appendChild(containerDiv);
-    });
+    // Dashboard.name = `template-${sheetToken}`;
+    Dashboard.json.filters.forEach(filter => app.createTemplateFilter(filter));
 
     Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareDataPreview());
     // var tableRef = new google.visualization.Table(document.getElementById('chart_div'));
@@ -291,6 +297,33 @@ var Storage = new SheetStorages();
       // WARN: ottengo la selezione corretta solo dopo che l'evento ready si è verificato, da rivedere
       console.log(Dashboard.DOMref.getSelection());
     }
+  }
+
+  app.btnRemoveFilter = (e) => {
+    const filterId = e.target.dataset.id;
+    // const f = Dashboard.json.filters.find(filter => filter.containerId === filterId);
+    // Cerco, con findIndex(), l'indice corrispondente all'elemento da rimuovere
+    const index = Dashboard.json.filters.findIndex(filter => filter.containerId === filterId);
+    Dashboard.json.filters.splice(index, 1);
+    // lo rimuovo anche dal DOM
+    const filterRef = document.getElementById(filterId);
+    filterRef.parentElement.remove();
+    // BUG: A questo punto, se viene creato un nuovo filtro viene duplicato l'id
+    // perchè viene utilizzato il length in btnSaveColumn()
+    // ricreo il bind()
+    let bind = [];
+    document.querySelectorAll('#filter_div .filter-container').forEach((container, index) => {
+      let subBind = [];
+      subBind.push(index);
+      const nextFilter = container.nextElementSibling;
+      if (nextFilter) {
+        subBind.push(index + 1);
+        bind.push(subBind);
+      }
+    });
+    Dashboard.json.bind = bind;
+    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+
   }
 
   // event proveniente dalla Dashboard
@@ -385,10 +418,13 @@ var Storage = new SheetStorages();
       Dashboard.json.wrapper.view.columns.splice(index, 1);
       console.log(Dashboard.json.wrapper.view.columns);
     }
+
     if (filterColumn.checked === true) {
       // array dei filtri, imposto i 'containerId' in base al numero di elementi che ci sono
       // in Dashboard.json.filters
       const length = Dashboard.json.filters.length;
+      console.log([...document.querySelectorAll('#filter_div').childElementCount]);
+      debugger;
       const label = Dashboard.json.data.columns[column].label;
       Dashboard.json.filters.push({
         containerId: `flt-${length}`,
@@ -400,7 +436,12 @@ var Storage = new SheetStorages();
       // L'elemento aggiunto potrà essere spostato (drag&drop) per consentire l'ordinamento dei
       // vari filtri creati nella pagina di dashboard
       // TODO: questo codice si ripete in drawTable
-      const filterRef = document.getElementById('filter_div');
+      app.createTemplateFilter({
+        containerId: `flt-${length}`,
+        filterColumnLabel: label,
+        caption: label
+      });
+      /* const filterRef = document.getElementById('filter_div');
       const tmplFilter = document.getElementById('template-filter');
       const tmplFilterContent = tmplFilter.content.cloneNode(true);
       const containerDiv = tmplFilterContent.querySelector('.filter-container.dropzone');
@@ -413,7 +454,7 @@ var Storage = new SheetStorages();
       containerDiv.addEventListener('drop', app.filterDrop);
       containerDiv.addEventListener('dragend', app.filterDragEnd);
       filterDiv.innerText = label;
-      filterRef.appendChild(containerDiv);
+      filterRef.appendChild(containerDiv); */
       // stabilisco il bind per i filtri, ogni filtro segue quello successivo
       let bind = [];
       document.querySelectorAll('#filter_div .filter-container').forEach((container, index) => {

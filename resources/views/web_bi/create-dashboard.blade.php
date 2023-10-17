@@ -33,6 +33,7 @@
   <template id="template-filter">
     <div class="filter-container dropzone">
       <div class="preview-filter" draggable="true"></div>
+      <button type="button" data-fn="btnRemoveFilter" class="material-icons-round md-18">delete</button>
     </div>
   </template>
 
