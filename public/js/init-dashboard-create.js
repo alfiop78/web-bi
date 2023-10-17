@@ -299,18 +299,7 @@ var Storage = new SheetStorages();
     }
   }
 
-  app.btnRemoveFilter = (e) => {
-    const filterId = e.target.dataset.id;
-    // const f = Dashboard.json.filters.find(filter => filter.containerId === filterId);
-    // Cerco, con findIndex(), l'indice corrispondente all'elemento da rimuovere
-    const index = Dashboard.json.filters.findIndex(filter => filter.containerId === filterId);
-    Dashboard.json.filters.splice(index, 1);
-    // lo rimuovo anche dal DOM
-    const filterRef = document.getElementById(filterId);
-    filterRef.parentElement.remove();
-    // BUG: A questo punto, se viene creato un nuovo filtro viene duplicato l'id
-    // perchè viene utilizzato il length in btnSaveColumn()
-    // ricreo il bind()
+  app.setDashboardBind = () => {
     let bind = [];
     document.querySelectorAll('#filter_div .filter-container').forEach((container, index) => {
       let subBind = [];
@@ -322,8 +311,29 @@ var Storage = new SheetStorages();
       }
     });
     Dashboard.json.bind = bind;
-    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+  }
 
+  app.btnRemoveFilter = (e) => {
+    const filterId = e.target.dataset.id;
+    // const f = Dashboard.json.filters.find(filter => filter.containerId === filterId);
+    // Cerco, con findIndex(), l'indice corrispondente all'elemento da rimuovere
+    const index = Dashboard.json.filters.findIndex(filter => filter.containerId === filterId);
+    Dashboard.json.filters.splice(index, 1);
+    // lo rimuovo anche dal DOM
+    const filterRef = document.getElementById(filterId);
+    filterRef.parentElement.remove();
+    /* let bind = [];
+    document.querySelectorAll('#filter_div .filter-container').forEach((container, index) => {
+      let subBind = [];
+      subBind.push(index);
+      const nextFilter = container.nextElementSibling;
+      if (nextFilter) {
+        subBind.push(index + 1);
+        bind.push(subBind);
+      }
+    });
+    Dashboard.json.bind = bind; */
+    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
   }
 
   // event proveniente dalla Dashboard
@@ -422,12 +432,10 @@ var Storage = new SheetStorages();
     if (filterColumn.checked === true) {
       // array dei filtri, imposto i 'containerId' in base al numero di elementi che ci sono
       // in Dashboard.json.filters
-      const length = Dashboard.json.filters.length;
-      console.log([...document.querySelectorAll('#filter_div').childElementCount]);
-      debugger;
-      const label = Dashboard.json.data.columns[column].label;
+      // const length = Dashboard.json.filters.length;
+      // const label = Dashboard.json.data.columns[column].label;
       Dashboard.json.filters.push({
-        containerId: `flt-${length}`,
+        containerId: `flt-${label}`,
         filterColumnLabel: label,
         caption: label
       });
@@ -435,28 +443,14 @@ var Storage = new SheetStorages();
       // Aggiungo al DOM, nella sezione #filter_div, il template 'template-filter'.
       // L'elemento aggiunto potrà essere spostato (drag&drop) per consentire l'ordinamento dei
       // vari filtri creati nella pagina di dashboard
-      // TODO: questo codice si ripete in drawTable
       app.createTemplateFilter({
-        containerId: `flt-${length}`,
+        containerId: `flt-${label}`,
         filterColumnLabel: label,
         caption: label
       });
-      /* const filterRef = document.getElementById('filter_div');
-      const tmplFilter = document.getElementById('template-filter');
-      const tmplFilterContent = tmplFilter.content.cloneNode(true);
-      const containerDiv = tmplFilterContent.querySelector('.filter-container.dropzone');
-      const filterDiv = tmplFilterContent.querySelector('.preview-filter');
-      filterDiv.id = `flt-${length}`;
-      filterDiv.addEventListener('dragstart', app.filterDragStart);
-      containerDiv.addEventListener('dragover', app.filterDragOver);
-      containerDiv.addEventListener('dragenter', app.filterDragEnter);
-      containerDiv.addEventListener('dragleave', app.filterDragLeave);
-      containerDiv.addEventListener('drop', app.filterDrop);
-      containerDiv.addEventListener('dragend', app.filterDragEnd);
-      filterDiv.innerText = label;
-      filterRef.appendChild(containerDiv); */
       // stabilisco il bind per i filtri, ogni filtro segue quello successivo
-      let bind = [];
+      app.setDashboardBind();
+      /* let bind = [];
       document.querySelectorAll('#filter_div .filter-container').forEach((container, index) => {
         let subBind = [];
         subBind.push(index);
@@ -466,7 +460,17 @@ var Storage = new SheetStorages();
           bind.push(subBind);
         }
       });
-      Dashboard.json.bind = bind;
+      Dashboard.json.bind = bind; */
+    } else {
+      // rimozione del filtro, se presente
+      const index = Dashboard.json.filters.findIndex(filter => filter.containerId === `flt-${label}`);
+      if (index !== -1) {
+        Dashboard.json.filters.splice(index, 1);
+        // lo rimuovo anche dal DOM
+        const filterRef = document.getElementById(`flt-${label}`);
+        filterRef.parentElement.remove();
+        app.setDashboardBind();
+      }
     }
 
     Dashboard.json.wrapper.chartType = 'Table';
