@@ -3,9 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-// use App\Models\MapDatabase;
-// use App\Models\BIdimension;
-// use App\Models\BIprocess;
 use Illuminate\Support\Facades\DB;
 use App\Classes\Cube;
 use Exception;
@@ -159,13 +156,19 @@ class MapDatabaseController extends Controller
   {
     // dd($id);
     // $datamart = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='decisyon_cache' AND TABLE_NAME='WEB_BI_$id';");
-    // if ($datamart) {
     // TODO: utilizzare il chunk di laravel per estrarre dati un blocco per volta
     // https://laravel.com/docs/8.x/queries#chunking-results
-    $data = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.WEB_BI_$id LIMIT 5000");
-    // }
-    // dd($datamart);
-    // dd($data);
+    // $data = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.WEB_BI_$id LIMIT 5000");
+    $table = "decisyon_cache.WEB_BI_$id";
+    // $data = DB::connection('vertica_odbc')->table($table)->limit(10)->get(); // ok
+    $data = DB::connection('vertica_odbc')->table($table)->orderBy('area_id')->chunk(15000, function ($dt) {
+      foreach ($dt as $value) {
+        // dd($value);
+        return $value;
+      }
+    });
+    // ob_clean();
+    dd($data);
     return response()->json($data);
   }
 
