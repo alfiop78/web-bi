@@ -399,6 +399,7 @@ var Storage = new SheetStorages();
       // Aggiungo al DOM, nella sezione #filter_div, il template 'template-filter'.
       // L'elemento aggiunto potrà essere spostato (drag&drop) per consentire l'ordinamento dei
       // vari filtri creati nella pagina di dashboard
+      // TODO: questo codice si ripete in drawTable
       const filterRef = document.getElementById('filter_div');
       const tmplFilter = document.getElementById('template-filter');
       const tmplFilterContent = tmplFilter.content.cloneNode(true);
@@ -413,20 +414,22 @@ var Storage = new SheetStorages();
       containerDiv.addEventListener('dragend', app.filterDragEnd);
       filterDiv.innerText = label;
       filterRef.appendChild(containerDiv);
-      // TODO: stabilisco il bind per i filtri
-      let testBind = [];
-      /* Dashboard.json.filters.forEach((filter, index) => {
-        debugger;
-        (testBind.length <= 2) ? testBind.push(index) : testBind = [];
+      // stabilisco il bind per i filtri, ogni filtro segue quello successivo
+      let bind = [];
+      document.querySelectorAll('#filter_div .filter-container').forEach((container, index) => {
+        let subBind = [];
+        subBind.push(index);
+        const nextFilter = container.nextElementSibling;
+        if (nextFilter) {
+          subBind.push(index + 1);
+          bind.push(subBind);
+        }
       });
-      console.log(testBind); */
-      debugger;
+      Dashboard.json.bind = bind;
     }
 
     Dashboard.json.wrapper.chartType = 'Table';
     Dashboard.json.wrapper.containerId = 'chart_div';
-    // TODO: al momento configuro manualmente il bind
-    // if (Dashboard.json.bind.length === 0) Dashboard.json.bind.push([0, 1]);
     console.log(Dashboard.json);
     debugger;
     window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
