@@ -197,7 +197,26 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       let dataGroup = new google.visualization.data.group(
         // tableCloned.getDataTable(), [0, 1, 2, 3, 4, 5, 6, 7],
         // 'table' è il ChartWrapper e contiene i dati originali, così come restituiti dal datamart
-        table.getDataTable(), [1, 3, 5, 7],
+        // Implementazione manuale
+        /* table.getDataTable(), [1, 3, 5, 7],
+        [
+          // OFFICINA INTERNA (costo_rapporto_6)
+          { 'column': 16, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          // RA DIRETTA COSTO (costo_rapporto_2)
+          { 'column': 17, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          // RA DIRETTA RICAVO (ricavo_rapporto_2)
+          { 'column': 18, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          // % MARG. RA DIRETTA (perc_margine_rapporto_2)
+          { 'column': 25, 'aggregation': google.visualization.data.avg, 'type': 'number' },
+          // costo ve_cb
+          { 'column': 26, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          // ricavo_ve_cb
+          { 'column': 27, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          // marginalità
+          { 'column': 28, 'aggregation': google.visualization.data.avg, 'type': 'number' }
+        ] */
+        // Implementazione proveniente dal .json template
+        table.getDataTable(), Dashboard.sheetSpecs.data.group.key,
         [
           // OFFICINA INTERNA (costo_rapporto_6)
           { 'column': 16, 'aggregation': google.visualization.data.sum, 'type': 'number' },

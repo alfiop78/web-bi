@@ -7,7 +7,10 @@ class Dashboards {
     data: {
       columns: {},
       formatter: {},
-      group: {}
+      group: {
+        key: [],
+        columns: []
+      }
     },
     filters: [],
     bind: [],

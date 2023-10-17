@@ -347,6 +347,7 @@ var Storage = new SheetStorages();
     const selectDataType = document.getElementById('field-datatype');
     const chkboxFilter = document.getElementById('filter-column');
     const chkboxHide = document.getElementById('hide-column');
+    const groupColumn = document.getElementById('group-column');
     const selectFormatter = document.getElementById('field-format');
     console.log(Dashboard.columnIndex, columnName);
     // console.log(Dashboard.view.getColumnProperties(Dashboard.columnIndex));
@@ -387,8 +388,10 @@ var Storage = new SheetStorages();
           selectFormatter.selectedIndex = index;
         }
       });
-
     }
+
+    // group checkbox
+    groupColumn.checked = (Dashboard.json.data.group.key.includes(Dashboard.columnIndex)) ? true : false;
 
     // recupero la proprietà della checkbox #filter-column se questa colonna è stata impostata come filtro
     // find restituisce il primo elemento trovato in base al test della funzione fornita
@@ -411,6 +414,7 @@ var Storage = new SheetStorages();
     // formattazione colonna
     const formatterRef = document.getElementById('field-format');
     const hideColumn = document.getElementById('hide-column');
+    const groupColumn = document.getElementById('group-column');
     const filterColumn = document.getElementById('filter-column');
     // console.log(typeRef.selectedIndex);
     // console.log(typeRef.options.item(typeRef.selectedIndex).value);
@@ -422,11 +426,25 @@ var Storage = new SheetStorages();
       const format = formatterRef.options.item(formatterRef.selectedIndex).value;
       Dashboard.json.data.formatter[Dashboard.columnIndex] = { format, numberDecimal: 2 };
     }
-    // Colonne da nascondere (oltre alle colonne _id già nascoste)
+    // raggruppameneto e visualizzazione (funzione group() di Google Chart)
+    // Le colonne impostate nel raggruppamento determinano anche la visualizzazione
+    // sulla dashboard, per cui, vengono visualizzate solo le colonne raggruppate
+    if (groupColumn.checked === true) {
+      console.log(Dashboard.columnIndex);
+      debugger;
+      Dashboard.json.data.group.key.push(Dashboard.columnIndex);
+    } else {
+      // TODO: elimina il raggruppamento per questa colonna
+    }
+
+    // Colonne da nascondere
     if (hideColumn.checked === true) {
       const index = Dashboard.json.wrapper.view.columns.indexOf(column);
       Dashboard.json.wrapper.view.columns.splice(index, 1);
       console.log(Dashboard.json.wrapper.view.columns);
+    } else {
+      // TODO: eliminare l'impostazione della colonna nascosta, se era
+      // già stata impostata in precedenza
     }
 
     if (filterColumn.checked === true) {
