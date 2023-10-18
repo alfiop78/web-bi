@@ -1393,7 +1393,7 @@ var Sheet;
     // recupero l'id dello Sheet
     const sheet = JSON.parse(window.localStorage.getItem(token));
     if (!sheet.id) return false;
-    await fetch(`/fetch_api/${sheet.id}/datamart`)
+    await fetch(`/fetch_api/${sheet.id}/preview`)
       .then((response) => {
         console.log(response);
         if (!response.ok) { throw Error(response.statusText); }

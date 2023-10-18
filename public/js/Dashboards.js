@@ -114,7 +114,8 @@ class Dashboards {
           case 'number':
             // TODO: valutare se formattare qui i valori (come sopra per le date) oppure con le funzioni Formatter (sotto)
             // di GoogleChart
-            (isNaN(parseFloat(value))) ? v.push({ v: null }) : v.push({ v: parseFloat(value) });
+            // (isNaN(parseFloat(value))) ? v.push({ v: null }) : v.push({ v: parseFloat(value) });
+            (isNaN(parseFloat(value))) ? v.push({ v: 0 }) : v.push({ v: parseFloat(value) });
             break;
           default:
             (!this.sheetSpecs.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: this.sheetSpecs.data.columns[key].p } });

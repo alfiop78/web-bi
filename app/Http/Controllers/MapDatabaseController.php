@@ -151,13 +151,21 @@ class MapDatabaseController extends Controller
     return response()->json($tables);
   }
 
-  // recupero una preview del datamart già presente, viene elaborata dal tasto 'Apri Sheet'
+  // preview del datamart, 100 righe
+  public function preview($id)
+  {
+    // dd($id);
+    // $datamart = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='decisyon_cache' AND TABLE_NAME='WEB_BI_$id';");
+    $table = "decisyon_cache.WEB_BI_$id";
+    $data = DB::connection('vertica_odbc')->table($table)->limit(100)->get(); // ok
+    return response()->json($data);
+  }
+
   public function datamart($id)
   {
     // dd($id);
     // $datamart = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='decisyon_cache' AND TABLE_NAME='WEB_BI_$id';");
-    // TODO: utilizzare il chunk di laravel per estrarre dati un blocco per volta
-    // https://laravel.com/docs/8.x/queries#chunking-results
+    // TODO: viene utilizzata anche dalla preview, forse per la preview meglio utilizzare un'altra function
     // $data = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.WEB_BI_$id LIMIT 5000");
     $table = "decisyon_cache.WEB_BI_$id";
     // $data = DB::connection('vertica_odbc')->table($table)->limit(10)->get(); // ok

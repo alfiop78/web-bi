@@ -164,7 +164,7 @@ var Storage = new SheetStorages();
     // const sheet = JSON.parse(window.localStorage.getItem('hdkglro')); // stock
     const sheet = JSON.parse(window.localStorage.getItem('59yblqr')); // cb
     if (!sheet.id) return false;
-    await fetch(`/fetch_api/${sheet.id}/datamart`)
+    await fetch(`/fetch_api/${sheet.id}/preview`)
       .then((response) => {
         console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
