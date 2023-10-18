@@ -494,6 +494,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       }); */
     // end chiamta in POST
     // Chiamata in GET
+    let partialData = [];
     await fetch(`/fetch_api/${sheet.id}/datamart`)
       .then((response) => {
         console.log(response);
@@ -501,12 +502,44 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         return response;
       })
       .then((response) => response.json())
-      .then(data => {
-        console.log(data);
+      .then(async (paginateData) => {
+        console.log(paginateData);
+        console.log(paginateData.data);
         // debugger;
-        Dashboard.data = data;
+        // Dashboard.data = paginateData.data;
+        // TODO: potrei fare una funzione ricorsiva fino a quando è presente next_page_url
+        partialData = paginateData.data;
+        // recupero le altre pagine
+        let urls = [];
+        paginateData.links.forEach((link, index) => {
+          if (index !== 0) urls.push(link.url);
+        });
+        // ottengo tutte le risposte in un array
+        await Promise.all(urls.map(url => fetch(url)))
+          .then(responses => {
+            return Promise.all(responses.map(response => {
+              if (!response.ok) { throw Error(response.statusText); }
+              return response.json();
+            }))
+          })
+          .then((data) => {
+            console.log(data);
+            data.forEach(pagData => {
+              debugger;
+              if (pagData.current_page > 1) partialData = partialData.concat(pagData.data);
+            });
+            console.log('partialData:', partialData);
+            debugger;
+            Dashboard.data = partialData;
+            google.charts.setOnLoadCallback(app.drawDashboardCB());
+          })
+          .catch(err => console.error(err));
+        /* if (paginateData.next_page_url) {
+          console.info('next page presente');
+          debugger;
+        } */
         // google.charts.setOnLoadCallback(app.drawDashboard());
-        google.charts.setOnLoadCallback(app.drawDashboardCB());
+        // google.charts.setOnLoadCallback(app.drawDashboardCB());
         // google.charts.setOnLoadCallback(app.drawTable(data));
       })
       .catch(err => {

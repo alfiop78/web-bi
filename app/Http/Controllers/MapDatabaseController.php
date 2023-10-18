@@ -161,15 +161,13 @@ class MapDatabaseController extends Controller
     // $data = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.WEB_BI_$id LIMIT 5000");
     $table = "decisyon_cache.WEB_BI_$id";
     // $data = DB::connection('vertica_odbc')->table($table)->limit(10)->get(); // ok
-    $data = DB::connection('vertica_odbc')->table($table)->orderBy('area_id')->chunk(15000, function ($dt) {
-      foreach ($dt as $value) {
-        // dd($value);
-        return $value;
-      }
-    });
-    // ob_clean();
-    dd($data);
-    return response()->json($data);
+
+    // $data = DB::connection('vertica_odbc')->table($table)->select("area_id", "zona_id", "dealer_id")->get();
+    // Utilizzo di paginate()
+    $data = DB::connection('vertica_odbc')->table($table)->select("dealer_id", "dealer_ds")->paginate(15000);
+    return $data;
+
+    // return response()->json($data);
   }
 
   // Questo metodo l'ho messo in POST dopo aver ricevuto gli errori di memory_limit.
