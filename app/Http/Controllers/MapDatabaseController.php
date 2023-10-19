@@ -175,6 +175,7 @@ class MapDatabaseController extends Controller
     // $data = DB::connection('vertica_odbc')->table($table)->select("dealer_id", "dealer_ds")->paginate(15000);
     // $data = DB::connection('vertica_odbc')->table($table)->where("dealer_id", "=", 447)->paginate(15000);
     $data = DB::connection('vertica_odbc')->table($table)->whereIn("dealer_id", [447, 497])->paginate(15000);
+    // $data = DB::connection('vertica_odbc')->table($table)->paginate(15000);
     return $data;
 
     // return response()->json($data);

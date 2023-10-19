@@ -186,10 +186,128 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
     // table.setView({ columns: [1, 3, 5, 7, 9, 16] });
 
-    google.visualization.events.addListener(table, 'ready', onReady);
+    // google.visualization.events.addListener(table, 'ready', onReady_v0);
+    google.visualization.events.addListener(table, 'ready', onReady_v1);
+    function onReady_v1() {
+      // copia di onReady_v0
+      console.log('ready_v1');
+      let tableRef = new google.visualization.Table(document.getElementById('chart_div'));
+      let dataGroup = new google.visualization.data.group(
+        // raggruppamento per area_ds, zona_ds, coddealer_ds e dealer_ds
+        table.getDataTable(), [1, 3, 5, 7],
+        [
+          // OFFICINA INTERNA (costo_rapporto_6)
+          { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
+          // RA DIRETTA COSTO (costo_rapporto_2)
+          { column: 17, aggregation: google.visualization.data.sum, type: 'number' },
+          // RA DIRETTA RICAVO (ricavo_rapporto_2)
+          { column: 18, aggregation: google.visualization.data.sum, type: 'number' },
+          // % MARG. RA DIRETTA (perc_margine_rapporto_2)
+          { id: 'perc_marg', column: 25, aggregation: google.visualization.data.sum, type: 'number' },
+          // { id: 'perc_marg', 'column': 25, 'aggregation': google.visualization.data.sum, 'type': 'number', label: 'mr2' },
+          // costo ve_cb
+          { column: 26, aggregation: google.visualization.data.sum, type: 'number' },
+          // ricavo_ve_cb
+          { column: 27, aggregation: google.visualization.data.sum, type: 'number' },
+          // marginalità
+          { column: 28, aggregation: google.visualization.data.sum, type: 'number' }
+        ]
+      );
+      // console.log(dataGroup.getColumnIndex('perc_marg'));
+      // Creo una DataView per effettuare calcoli su dati raggruppati (es.: Margine = ((ric_tot-costo_tot) / ric_tot) *100)
+      // DataView in base al dataGroup impostato qui sopra
+      var view = new google.visualization.DataView(dataGroup);
+      view.setColumns([0, 1, 2, 3, 4, 5, 6, {
+        calc: function(dt, row) {
+          // return ((dt.getValue(row, 6) - dt.getValue(row, 5)) / dt.getValue(row, 6)) * 100 || 0;
+          const costo = Dashboard.json.data.calc.perc_marg[0];
+          const ricavo = Dashboard.json.data.calc.perc_marg[1];
+          return ((dt.getValue(row, ricavo) - dt.getValue(row, costo)) / dt.getValue(row, ricavo)) * 100 || 0;
+        },
+        type: 'number', label: 'margine'//, properties: [5, 6]
+      }, 8, 9, {
+          calc: function(dt, row) {
+            const costo = Dashboard.json.data.calc.marginalita[0];
+            const ricavo = Dashboard.json.data.calc.marginalita[1];
+            return ((dt.getValue(row, ricavo) - dt.getValue(row, costo)) / dt.getValue(row, ricavo)) * 100 || 0;
+          },
+          type: 'number', label: 'marginalita'//, properties: [8, 9]
+        }]
+      );
+      // console.log(view.getViewColumns());
+      // debugger;
 
-    function onReady() {
-      console.log('ready');
+      /* NOTE: test della funzione 'calc'
+       * function margine(dt, rowNum) {
+        console.log(dt, rowNum);
+        console.log(table.getDataTable().getColumnIndex('perc_margine_rapp_2')); // 25
+        // le colonne che NON sono numero, ma sono object (ad es.: le colonne 'calc'), hanno una funzione 'calc'
+        // console.log(dt.getColumnIndex('mr2')); // se imposto la prop 'label' nel group()
+        console.log(dt.getColumnIndex('perc_marg')); // 7
+        const colIndex = dt.getColumnIndex('perc_marg');
+        // console.log(dt.getColumnIndex());
+        // console.log(dt.getColumnIndex(7));
+        console.log(dt.getColumnId(colIndex)); // perc_marg
+        // nelle properties della colonna definita nella view posso mettere le colonne su cui
+        // effettuare il calcolo (vedere quali altre proprietà si possono inserire)
+        console.log(view.getColumnProperties(colIndex));
+        const prop = view.getColumnProperties(colIndex);
+        const cst = dt.getValue(rowNum, 5);
+        const ric = dt.getValue(rowNum, 6);
+        return ((ric - cst) / ric) * 100 || 0;
+      } */
+      // group() sulla view appena impostata (sopra)
+      let dataGroupFinally = new google.visualization.data.group(
+        view, [0, 1, 2, 3],
+        [
+          // OFFICINA INTERNA (costo_rapporto_6)
+          { column: 4, aggregation: google.visualization.data.sum, type: 'number' },
+          // RA DIRETTA COSTO (costo_rapporto_2)
+          { column: 5, aggregation: google.visualization.data.sum, type: 'number' },
+          // RA DIRETTA RICAVO (ricavo_rapporto_2)
+          { column: 6, aggregation: google.visualization.data.sum, type: 'number' },
+          // % MARG. RA DIRETTA (perc_margine_rapporto_2)
+          { column: 7, aggregation: google.visualization.data.sum, type: 'number' },
+          // costo ve cb
+          { column: 8, aggregation: google.visualization.data.sum, type: 'number' },
+          // ricavo ve cb
+          { column: 9, aggregation: google.visualization.data.sum, type: 'number' },
+          // marginalità
+          { column: 10, aggregation: google.visualization.data.sum, type: 'number' }
+        ]
+      );
+
+      // funzioni di formattazione
+      // currencyFormatter.format(dataGroup, 4);
+      // currencyFormatter.format(dataGroup, 5);
+      // currencyFormatter.format(dataGroup, 6);
+      // percFormatter.format(dataGroup, 7);
+      // currencyFormatter.format(dataGroup, 8);
+      // currencyFormatter.format(dataGroup, 9);
+      // percFormatter.format(dataGroup, 10);
+      // TODO: da implementare
+
+      /* for (const [colIndex, properties] of Object.entries(Dashboard.sheetSpecs.data.formatter)) {
+        switch (properties.format) {
+          case 'currency':
+            currencyFormatter.format(dataTable, +colIndex);
+            break;
+          case 'percent':
+            percFormatter.format(dataTable, +colIndex);
+            break;
+          default:
+            break;
+        }
+      } */
+      // metodo draw() sul tableRef e non sulla gdashboard.
+      // Questo perchè la gdashboard genera, in questo caso, un errore sui filtri, ad es. MLI
+      // non verrebbe trovato nella dataTable
+      // tableRef.draw(dataGroup, Dashboard.sheetSpecs.wrapper.options);
+      tableRef.draw(dataGroupFinally, Dashboard.sheetSpecs.wrapper.options);
+    }
+
+    function onReady_v0() {
+      console.log('ready_v0');
       // Nell'evento ready vado a disegnare la dataTable, senza l'utilizzo dell'istanza gdashboard, che
       // andrebbe in errore perchè qui vado a nascondere alcune colonne.
       // es.: competitive-bonus
@@ -262,6 +380,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         return d;
       } */
       // group() utilizzato con DataTable
+
       let dataGroup = new google.visualization.data.group(
         table.getDataTable(), [1, 3, 5, 7],
         [
@@ -282,7 +401,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
           { column: 28, aggregation: google.visualization.data.sum, type: 'number' }
         ]
       );
-      // console.log(dataGroup);
+      console.log(dataGroup);
+      debugger;
       // console.log(dataGroup.getColumnIndex('perc_marg'));
       // Creo una DataView per effettuare calcoli su dati raggruppati (es.: Margine = ((ric_tot-costo_tot) / ric_tot) *100)
       // DataView in base al dataGroup impostato qui sopra

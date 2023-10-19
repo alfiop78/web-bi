@@ -266,10 +266,17 @@ var Storage = new SheetStorages();
         });
       }
     }
-    console.log(JSON.parse(Dashboard.dataTable.toJSON()));
+    // console.log(Dashboard.json.data.view);
+    // debugger;
+    // console.log(JSON.parse(Dashboard.dataTable.toJSON()));
 
     // utilizzo della DataView
     Dashboard.view = new google.visualization.DataView(Dashboard.dataTable);
+    // Dashboard.view.setColumns(Dashboard.json.data.view);
+    // console.log(Dashboard.json);
+    // debugger;
+    // window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+
     // nascondo la prima colonna
     // view.hideColumns([0]);
     // visualizzo le colonne _ds, come appena impostato in defineColumns()
@@ -322,17 +329,6 @@ var Storage = new SheetStorages();
     // lo rimuovo anche dal DOM
     const filterRef = document.getElementById(filterId);
     filterRef.parentElement.remove();
-    /* let bind = [];
-    document.querySelectorAll('#filter_div .filter-container').forEach((container, index) => {
-      let subBind = [];
-      subBind.push(index);
-      const nextFilter = container.nextElementSibling;
-      if (nextFilter) {
-        subBind.push(index + 1);
-        bind.push(subBind);
-      }
-    });
-    Dashboard.json.bind = bind; */
     app.setDashboardBind();
     window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
   }
@@ -431,18 +427,25 @@ var Storage = new SheetStorages();
     // Le colonne impostate nel raggruppamento determinano anche la visualizzazione
     // sulla dashboard, per cui, vengono visualizzate solo le colonne raggruppate
     if (groupColumn.checked === true) {
-      console.log(Dashboard.columnIndex);
+      // aggiungo questa colonna al raggruppamento, se già non è presente
       debugger;
-      Dashboard.json.data.group.key.push(Dashboard.columnIndex);
+      if (!Dashboard.json.data.group.key.includes(Dashboard.columnIndex)) {
+        // group per questa colonna non presente, lo aggiungo
+        console.log(Dashboard.columnIndex);
+        Dashboard.json.data.group.key.push(Dashboard.columnIndex);
+      }
     } else {
-      // TODO: elimina il raggruppamento per questa colonna
+      // elimina il raggruppamento per questa colonna
+      // cerco l'indice con il valore = columnIndex
+      const index = Dashboard.json.data.group.key.indexOf(Dashboard.columnIndex);
+      debugger;
+      Dashboard.json.data.group.key.splice(index, 1);
     }
 
     // Colonne da nascondere
     if (hideColumn.checked === true) {
-      const index = Dashboard.json.wrapper.view.columns.indexOf(column);
-      Dashboard.json.wrapper.view.columns.splice(index, 1);
-      console.log(Dashboard.json.wrapper.view.columns);
+      const index = Dashboard.json.data.view.indexOf(column);
+      debugger;
     } else {
       // TODO: eliminare l'impostazione della colonna nascosta, se era
       // già stata impostata in precedenza
@@ -453,33 +456,26 @@ var Storage = new SheetStorages();
       // in Dashboard.json.filters
       // const length = Dashboard.json.filters.length;
       // const label = Dashboard.json.data.columns[column].label;
-      Dashboard.json.filters.push({
-        containerId: `flt-${label}`,
-        filterColumnLabel: label,
-        caption: label
-      });
-
-      // Aggiungo al DOM, nella sezione #filter_div, il template 'template-filter'.
-      // L'elemento aggiunto potrà essere spostato (drag&drop) per consentire l'ordinamento dei
-      // vari filtri creati nella pagina di dashboard
-      app.createTemplateFilter({
-        containerId: `flt-${label}`,
-        filterColumnLabel: label,
-        caption: label
-      });
-      // stabilisco il bind per i filtri, ogni filtro segue quello successivo
-      app.setDashboardBind();
-      /* let bind = [];
-      document.querySelectorAll('#filter_div .filter-container').forEach((container, index) => {
-        let subBind = [];
-        subBind.push(index);
-        const nextFilter = container.nextElementSibling;
-        if (nextFilter) {
-          subBind.push(index + 1);
-          bind.push(subBind);
-        }
-      });
-      Dashboard.json.bind = bind; */
+      // TODO: se il filtro è già presente non devo reinserirlo
+      const index = Dashboard.json.filters.findIndex(filter => filter.containerId === `flt-${label}`);
+      if (index === -1) {
+        // non è presente, lo aggiungo
+        Dashboard.json.filters.push({
+          containerId: `flt-${label}`,
+          filterColumnLabel: label,
+          caption: label
+        });
+        // Aggiungo al DOM, nella sezione #filter_div, il template 'template-filter'.
+        // L'elemento aggiunto potrà essere spostato (drag&drop) per consentire l'ordinamento dei
+        // vari filtri creati nella pagina di dashboard
+        app.createTemplateFilter({
+          containerId: `flt-${label}`,
+          filterColumnLabel: label,
+          caption: label
+        });
+        // stabilisco il bind per i filtri, ogni filtro segue quello successivo
+        app.setDashboardBind();
+      }
     } else {
       // rimozione del filtro, se presente
       const index = Dashboard.json.filters.findIndex(filter => filter.containerId === `flt-${label}`);

@@ -14,7 +14,8 @@ class Dashboards {
       group: {
         key: [],
         columns: []
-      }
+      },
+      view: []
     },
     filters: [],
     bind: [],
@@ -177,16 +178,11 @@ class Dashboards {
     // debugger;
     // console.log(value);
     this.json.data.columns[value.id] = { id: value.id, label: value.label, type: value.type };
+    // Creo l'array json.view con le colonne che saranno visualizzate
     // Le colonne _id non vengono visualizzate nell'anteprima del report
     /* const regex = new RegExp('_id$');
-    if (!regex.test(value.id)) this.json.wrapper.view.columns.push(value.id); */
+    if (!regex.test(value.id)) this.json.data.view.push(value.id); */
 
-    /* this.#json = {
-      data,
-      filters,
-      bind,
-      wrapper
-    } */
     // console.log('columns :', this.json.data.columns);
     // console.log('wrapper.view :', this.json.wrapper.view);
   }
