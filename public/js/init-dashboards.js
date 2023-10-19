@@ -71,7 +71,9 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         // creo il template nel DOM
         Template.create();
         // Dashboard.sheetSpecs = data[1];
-        Dashboard.sheetSpecs = JSON.parse(window.localStorage.getItem('template-59yblqr')); // cb
+        // Dashboard.json = JSON.parse(window.localStorage.getItem('template-59yblqr')); // cb
+        // il parse viene effettuato direttamente nel set della Classe Dashboards
+        Dashboard.json = window.localStorage.getItem('template-59yblqr'); // cb
         // Dashboard.sheetSpecs = JSON.parse(window.localStorage.getItem('template-hdkglro')); // stock
         app.dashboardExample();
       })
@@ -148,7 +150,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       { suffix: ' €', negativeColor: 'brown', negativeParens: true });
     // nella proprietà "formatter" del file stock.json viene indicato quale colonna
     // deve essere formattata  "currency", "date", "color", ecc...
-    formatter.format(data, Dashboard.sheetSpecs.data.formatter.currency);
+    formatter.format(data, Dashboard.json.data.formatter.currency);
 
     // utilizzo della DataView
     var view = new google.visualization.DataView(data);
@@ -181,20 +183,26 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // Dashboard.view = new google.visualization.DataView(dataGroup);
     // Dashboard.view.setColumns([0, 1, 2, 3, 4, 5, 6, 7, 9]);
     // console.log(JSON.parse(Dashboard.view.toJSON()));
-    var table = new google.visualization.ChartWrapper(Dashboard.sheetSpecs.wrapper);
+    var table = new google.visualization.ChartWrapper(Dashboard.json.wrapper);
     // NOTE: esempio array di View
     // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
     // table.setView({ columns: [1, 3, 5, 7, 9, 16] });
 
     // google.visualization.events.addListener(table, 'ready', onReady_v0);
-    google.visualization.events.addListener(table, 'ready', onReady_v1);
-    function onReady_v1() {
-      // copia di onReady_v0
-      console.log('ready_v1');
+    // google.visualization.events.addListener(table, 'ready', onReady_v1);
+    // google.visualization.events.addListener(table, 'ready', onReady_v2);
+    google.visualization.events.addListener(table, 'ready', onReady_v3);
+
+    function onReady_v3() {
+      console.log('ready_v3');
       let tableRef = new google.visualization.Table(document.getElementById('chart_div'));
+      // eseguo prima il group per area, zona, cod.ford, dealer e...
+      // ... successivamente posso calcolare il margine nella DataView
+      // test lettura json.group.key
       let dataGroup = new google.visualization.data.group(
         // raggruppamento per area_ds, zona_ds, coddealer_ds e dealer_ds
-        table.getDataTable(), [1, 3, 5, 7],
+        table.getDataTable(), Dashboard.json.data.group.key, // NOTE: utilizzo dinamico (Dashboard.json)
+        // table.getDataTable(), [1, 3, 5, 7],
         [
           // OFFICINA INTERNA (costo_rapporto_6)
           { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
@@ -214,22 +222,47 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         ]
       );
       // console.log(dataGroup.getColumnIndex('perc_marg'));
+      // recupero il numero di colonne presenti nel dataGroup
+      console.log(dataGroup.getNumberOfColumns());
+      debugger;
       // Creo una DataView per effettuare calcoli su dati raggruppati (es.: Margine = ((ric_tot-costo_tot) / ric_tot) *100)
       // DataView in base al dataGroup impostato qui sopra
       var view = new google.visualization.DataView(dataGroup);
-      view.setColumns([0, 1, 2, 3, 4, 5, 6, {
+
+      /* // esempio con 11 colonne
+       view.setColumns([0, 1, 2, 3, 4, 5, 6, {
         calc: function(dt, row) {
-          // return ((dt.getValue(row, 6) - dt.getValue(row, 5)) / dt.getValue(row, 6)) * 100 || 0;
-          const costo = Dashboard.json.data.calc.perc_marg[0];
-          const ricavo = Dashboard.json.data.calc.perc_marg[1];
-          return ((dt.getValue(row, ricavo) - dt.getValue(row, costo)) / dt.getValue(row, ricavo)) * 100 || 0;
+          return ((dt.getValue(row, 6) - dt.getValue(row, 5)) / dt.getValue(row, 6)) * 100 || 0;
+          // Codice utilizzabile dalla lettura del .json
+          // const costo = Dashboard.json.data.calc.perc_marg[0];
+          // const ricavo = Dashboard.json.data.calc.perc_marg[1];
+          // return ((dt.getValue(row, ricavo) - dt.getValue(row, costo)) / dt.getValue(row, ricavo)) * 100 || 0;
+          // Codice utilizzabile dalla lettura del .json
         },
         type: 'number', label: 'margine'//, properties: [5, 6]
       }, 8, 9, {
           calc: function(dt, row) {
-            const costo = Dashboard.json.data.calc.marginalita[0];
-            const ricavo = Dashboard.json.data.calc.marginalita[1];
-            return ((dt.getValue(row, ricavo) - dt.getValue(row, costo)) / dt.getValue(row, ricavo)) * 100 || 0;
+            return ((dt.getValue(row, 9) - dt.getValue(row, 8)) / dt.getValue(row, 9)) * 100 || 0;
+            // Codice utilizzabile dalla lettura del .json
+            // const costo = Dashboard.json.data.calc.marginalita[0];
+            // const ricavo = Dashboard.json.data.calc.marginalita[1];
+            // return ((dt.getValue(row, ricavo) - dt.getValue(row, costo)) / dt.getValue(row, ricavo)) * 100 || 0;
+            // Codice utilizzabile dalla lettura del .json
+          },
+          type: 'number', label: 'marginalita'//, properties: [8, 9]
+        }]
+      */
+
+      // esempio con 11 colonne, in questo caso ho rimosso il group() su dealer_ds
+      // ...(dalla pagina di creazione del dashboard)
+      view.setColumns([0, 1, 2, 3, 4, 5, {
+        calc: function(dt, row) {
+          return ((dt.getValue(row, 5) - dt.getValue(row, 4)) / dt.getValue(row, 5)) * 100 || 0;
+        },
+        type: 'number', label: 'margine'//, properties: [5, 6]
+      }, 7, 8, {
+          calc: function(dt, row) {
+            return ((dt.getValue(row, 8) - dt.getValue(row, 7)) / dt.getValue(row, 8)) * 100 || 0;
           },
           type: 'number', label: 'marginalita'//, properties: [8, 9]
         }]
@@ -256,26 +289,6 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         const ric = dt.getValue(rowNum, 6);
         return ((ric - cst) / ric) * 100 || 0;
       } */
-      // group() sulla view appena impostata (sopra)
-      let dataGroupFinally = new google.visualization.data.group(
-        view, [0, 1, 2, 3],
-        [
-          // OFFICINA INTERNA (costo_rapporto_6)
-          { column: 4, aggregation: google.visualization.data.sum, type: 'number' },
-          // RA DIRETTA COSTO (costo_rapporto_2)
-          { column: 5, aggregation: google.visualization.data.sum, type: 'number' },
-          // RA DIRETTA RICAVO (ricavo_rapporto_2)
-          { column: 6, aggregation: google.visualization.data.sum, type: 'number' },
-          // % MARG. RA DIRETTA (perc_margine_rapporto_2)
-          { column: 7, aggregation: google.visualization.data.sum, type: 'number' },
-          // costo ve cb
-          { column: 8, aggregation: google.visualization.data.sum, type: 'number' },
-          // ricavo ve cb
-          { column: 9, aggregation: google.visualization.data.sum, type: 'number' },
-          // marginalità
-          { column: 10, aggregation: google.visualization.data.sum, type: 'number' }
-        ]
-      );
 
       // funzioni di formattazione
       // currencyFormatter.format(dataGroup, 4);
@@ -303,8 +316,158 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       // Questo perchè la gdashboard genera, in questo caso, un errore sui filtri, ad es. MLI
       // non verrebbe trovato nella dataTable
       // tableRef.draw(dataGroup, Dashboard.sheetSpecs.wrapper.options);
-      tableRef.draw(dataGroupFinally, Dashboard.sheetSpecs.wrapper.options);
+      tableRef.draw(view, Dashboard.json.wrapper.options);
     }
+
+    function onReady_v2() {
+      console.log('ready_v2');
+      let tableRef = new google.visualization.Table(document.getElementById('chart_div'));
+      // eseguo prima il group per area, zona, cod.ford, dealer e...
+      // ... successivamente posso calcolare il margine nella DataView
+      // test lettura json.group.key
+      let dataGroup = new google.visualization.data.group(
+        // raggruppamento per area_ds, zona_ds, coddealer_ds e dealer_ds
+        table.getDataTable(), Dashboard.json.data.group.key, // NOTE: utilizzo dinamico (Dashboard.json)
+        // table.getDataTable(), [1, 3, 5, 7],
+        [
+          // OFFICINA INTERNA (costo_rapporto_6)
+          { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
+          // RA DIRETTA COSTO (costo_rapporto_2)
+          { column: 17, aggregation: google.visualization.data.sum, type: 'number' },
+          // RA DIRETTA RICAVO (ricavo_rapporto_2)
+          { column: 18, aggregation: google.visualization.data.sum, type: 'number' },
+          // % MARG. RA DIRETTA (perc_margine_rapporto_2)
+          { id: 'perc_marg', column: 25, aggregation: google.visualization.data.sum, type: 'number' },
+          // { id: 'perc_marg', 'column': 25, 'aggregation': google.visualization.data.sum, 'type': 'number', label: 'mr2' },
+          // costo ve_cb
+          { column: 26, aggregation: google.visualization.data.sum, type: 'number' },
+          // ricavo_ve_cb
+          { column: 27, aggregation: google.visualization.data.sum, type: 'number' },
+          // marginalità
+          { column: 28, aggregation: google.visualization.data.sum, type: 'number' }
+        ]
+      );
+      // console.log(dataGroup.getColumnIndex('perc_marg'));
+      // Creo una DataView per effettuare calcoli su dati raggruppati (es.: Margine = ((ric_tot-costo_tot) / ric_tot) *100)
+      // DataView in base al dataGroup impostato qui sopra
+      var view = new google.visualization.DataView(dataGroup);
+      view.setColumns([0, 1, 2, 3, 4, 5, 6, {
+        calc: function(dt, row) {
+          return ((dt.getValue(row, 6) - dt.getValue(row, 5)) / dt.getValue(row, 6)) * 100 || 0;
+          // Codice utilizzabile dalla lettura del .json
+          // const costo = Dashboard.json.data.calc.perc_marg[0];
+          // const ricavo = Dashboard.json.data.calc.perc_marg[1];
+          // return ((dt.getValue(row, ricavo) - dt.getValue(row, costo)) / dt.getValue(row, ricavo)) * 100 || 0;
+          // Codice utilizzabile dalla lettura del .json
+        },
+        type: 'number', label: 'margine'//, properties: [5, 6]
+      }, 8, 9, {
+          calc: function(dt, row) {
+            return ((dt.getValue(row, 9) - dt.getValue(row, 8)) / dt.getValue(row, 9)) * 100 || 0;
+            // Codice utilizzabile dalla lettura del .json
+            // const costo = Dashboard.json.data.calc.marginalita[0];
+            // const ricavo = Dashboard.json.data.calc.marginalita[1];
+            // return ((dt.getValue(row, ricavo) - dt.getValue(row, costo)) / dt.getValue(row, ricavo)) * 100 || 0;
+            // Codice utilizzabile dalla lettura del .json
+          },
+          type: 'number', label: 'marginalita'//, properties: [8, 9]
+        }]
+      );
+      // console.log(view.getViewColumns());
+      // debugger;
+
+      /* NOTE: test della funzione 'calc'
+       * function margine(dt, rowNum) {
+        console.log(dt, rowNum);
+        console.log(table.getDataTable().getColumnIndex('perc_margine_rapp_2')); // 25
+        // le colonne che NON sono numero, ma sono object (ad es.: le colonne 'calc'), hanno una funzione 'calc'
+        // console.log(dt.getColumnIndex('mr2')); // se imposto la prop 'label' nel group()
+        console.log(dt.getColumnIndex('perc_marg')); // 7
+        const colIndex = dt.getColumnIndex('perc_marg');
+        // console.log(dt.getColumnIndex());
+        // console.log(dt.getColumnIndex(7));
+        console.log(dt.getColumnId(colIndex)); // perc_marg
+        // nelle properties della colonna definita nella view posso mettere le colonne su cui
+        // effettuare il calcolo (vedere quali altre proprietà si possono inserire)
+        console.log(view.getColumnProperties(colIndex));
+        const prop = view.getColumnProperties(colIndex);
+        const cst = dt.getValue(rowNum, 5);
+        const ric = dt.getValue(rowNum, 6);
+        return ((ric - cst) / ric) * 100 || 0;
+      } */
+
+      // funzioni di formattazione
+      // currencyFormatter.format(dataGroup, 4);
+      // currencyFormatter.format(dataGroup, 5);
+      // currencyFormatter.format(dataGroup, 6);
+      // percFormatter.format(dataGroup, 7);
+      // currencyFormatter.format(dataGroup, 8);
+      // currencyFormatter.format(dataGroup, 9);
+      // percFormatter.format(dataGroup, 10);
+      // TODO: da implementare
+
+      /* for (const [colIndex, properties] of Object.entries(Dashboard.sheetSpecs.data.formatter)) {
+        switch (properties.format) {
+          case 'currency':
+            currencyFormatter.format(dataTable, +colIndex);
+            break;
+          case 'percent':
+            percFormatter.format(dataTable, +colIndex);
+            break;
+          default:
+            break;
+        }
+      } */
+      // metodo draw() sul tableRef e non sulla gdashboard.
+      // Questo perchè la gdashboard genera, in questo caso, un errore sui filtri, ad es. MLI
+      // non verrebbe trovato nella dataTable
+      // tableRef.draw(dataGroup, Dashboard.sheetSpecs.wrapper.options);
+      tableRef.draw(view, Dashboard.json.wrapper.options);
+    }
+
+    /* function onReady_v1() {
+      // NOTE: questo metodo NON utilizzaa il primo group()...
+      // esegue la view con la colonna per il margine calcolata...
+      // e successivamente le raggruppa per area,zona,codford,dealer.
+      // In questo modo il calcolo del margine non è corretto.
+      // Il calcolo del margine va eseguito sulle colonne raggruppate
+      // perchè viene fatto con ( (sum(ricavo)-sum(costo))/ sum(ricavo))*100
+
+      console.log('ready_v1');
+      let tableRef = new google.visualization.Table(document.getElementById('chart_div'));
+      // Creo una DataView per effettuare calcoli su dati raggruppati (es.: Margine = ((ric_tot-costo_tot) / ric_tot) *100)
+      // DataView in base al dataGroup impostato qui sopra
+      var view = new google.visualization.DataView(table.getDataTable());
+      view.setColumns([1, 3, 5, 7, 16, 17, 18, 25, {
+        calc: function(dt, row) {
+          return ((dt.getValue(row, 18) - dt.getValue(row, 17)) / dt.getValue(row, 18)) * 100 || 0;
+        }, type: 'number', label: 'marg_rapp_2'
+      }]);
+      // console.log(view.getViewColumns());
+      // group() sulla view appena impostata (sopra)
+      let groupFinally = new google.visualization.data.group(
+        view, [0, 1, 2, 3],
+        [
+          // OFFICINA INTERNA (costo_rapporto_6)
+          { column: 4, aggregation: google.visualization.data.sum, type: 'number' },
+          // RA DIRETTA COSTO (costo_rapporto_2)
+          { column: 5, aggregation: google.visualization.data.sum, type: 'number' },
+          // RA DIRETTA RICAVO (ricavo_rapporto_2)
+          { column: 6, aggregation: google.visualization.data.sum, type: 'number' },
+          // % MARG. RA DIRETTA (perc_margine_rapporto_2)
+          { column: 7, aggregation: google.visualization.data.sum, type: 'number' },
+          // marg_rapp_2
+          { column: 8, aggregation: google.visualization.data.avg, type: 'number' },
+        ]
+      );
+
+      // metodo draw() sul tableRef e non sulla gdashboard.
+      // Questo perchè la gdashboard genera, in questo caso, un errore sui filtri, ad es. MLI
+      // non verrebbe trovato nella dataTable
+      // tableRef.draw(dataGroup, Dashboard.sheetSpecs.wrapper.options);
+      // tableRef.draw(view, Dashboard.sheetSpecs.wrapper.options);
+      tableRef.draw(groupFinally, Dashboard.sheetSpecs.wrapper.options);
+    } */
 
     function onReady_v0() {
       console.log('ready_v0');
@@ -493,7 +656,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       // Questo perchè la gdashboard genera, in questo caso, un errore sui filtri, ad es. MLI
       // non verrebbe trovato nella dataTable
       // tableRef.draw(dataGroup, Dashboard.sheetSpecs.wrapper.options);
-      tableRef.draw(dataGroupFinally, Dashboard.sheetSpecs.wrapper.options);
+      tableRef.draw(dataGroupFinally, Dashboard.json.wrapper.options);
     }
 
     // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
@@ -502,7 +665,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     let binds;
     // Questa logica funziona con il bind() di un filtro verso quello successivo ma
     // possono esserci anche situazioni diverse, che sono da implementare
-    Dashboard.sheetSpecs.bind.forEach((v, index) => {
+    Dashboard.json.bind.forEach((v, index) => {
       // console.log('index', index);
       if (index === 0) {
         // il primo bind deve essere creato dall'istanza gdashboard, i successivi posso legarli ad una variabile
@@ -602,22 +765,22 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       ]); */
     // NOTE: La funzione group() commentata (sopra) la ricreo utilizzando il template-sheet json
 
-    if (Object.keys(Dashboard.sheetSpecs.data.group).length !== 0) {
+    if (Object.keys(Dashboard.json.data.group).length !== 0) {
       let groupColumns = [];
-      Dashboard.sheetSpecs.data.group.columns.forEach(col => {
+      Dashboard.json.data.group.columns.forEach(col => {
         groupColumns.push({ column: col.column, aggregation: google.visualization.data[col.aggregation], type: col.type });
       });
       dataTable = new google.visualization.data.group(
         dataTable,
-        Dashboard.sheetSpecs.data.group.key,
+        Dashboard.json.data.group.key,
         groupColumns,
       );
     }
 
     // NOTE: le proprietà definite nel ChartWrapper vengono impostate nel template-sheet .json, proprietà "wrapper"
-    var table = new google.visualization.ChartWrapper(Dashboard.sheetSpecs.wrapper);
+    var table = new google.visualization.ChartWrapper(Dashboard.json.wrapper);
     // funzioni di formattazione
-    for (const [colIndex, properties] of Object.entries(Dashboard.sheetSpecs.data.formatter)) {
+    for (const [colIndex, properties] of Object.entries(Dashboard.json.data.formatter)) {
       switch (properties.format) {
         case 'currency':
           currencyFormatter.format(dataTable, +colIndex);
@@ -650,7 +813,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     */
     // Questa logica funziona con il bind() di un filtro verso quello successivo ma
     // possono esserci anche situazioni diverse, che sono da implementare
-    Dashboard.sheetSpecs.bind.forEach((v, index) => {
+    Dashboard.json.bind.forEach((v, index) => {
       // console.log('index', index);
       if (index === 0) {
         // il primo bind deve essere creato dall'istanza gdashboard, i successivi posso legarli ad una variabile

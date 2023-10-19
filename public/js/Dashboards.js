@@ -1,5 +1,5 @@
 class Dashboards {
-  #sheetSpecs;
+  // #sheetSpecs;
   #data;
   #prepareData = { cols: [], rows: [] };
   #json = {
@@ -88,8 +88,8 @@ class Dashboards {
       // console.log(key);
       this.#prepareData.cols.push({
         id: key,
-        label: this.sheetSpecs.data.columns[key].label,
-        type: this.sheetSpecs.data.columns[key].type
+        label: this.json.data.columns[key].label,
+        type: this.json.data.columns[key].type
       });
     }
 
@@ -105,7 +105,7 @@ class Dashboards {
       for (const [key, value] of Object.entries(row)) {
         // if (key === 'DtArrivo_ds') console.log(new Date(value));
         // console.log(value);
-        switch (this.sheetSpecs.data.columns[key].type) {
+        switch (this.json.data.columns[key].type) {
           case 'date':
             if (value.length === 8) {
               // console.log('Data di 8 cifre (YYYYMMDD)', value);
@@ -123,7 +123,7 @@ class Dashboards {
             // (isNaN(parseFloat(value))) ? v.push({ v: 0 }) : v.push({ v: parseFloat(value) });
             break;
           default:
-            (!this.sheetSpecs.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: this.sheetSpecs.data.columns[key].p } });
+            (!this.json.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: this.json.data.columns[key].p } });
             // v.push({ v: value });
             break;
         }
@@ -135,17 +135,17 @@ class Dashboards {
     return this.#prepareData;
   }
 
-  set sheetSpecs(value) {
+  /* set sheetSpecs(value) {
     this.#sheetSpecs = value;
   }
 
-  get sheetSpecs() { return this.#sheetSpecs; }
+  get sheetSpecs() { return this.#sheetSpecs; } */
 
   drawControls(filtersRef) {
     this.controls = [];
     // console.log(this.sheetSpecs);
-    if (this.sheetSpecs.filters) {
-      this.sheetSpecs.filters.forEach(filter => {
+    if (this.json.filters) {
+      this.json.filters.forEach(filter => {
         // creo qui il div class="filters" che conterrà il filtro
         // In questo modo non è necessario specificare i filtri nel template layout
         this.filterRef = document.createElement('div');

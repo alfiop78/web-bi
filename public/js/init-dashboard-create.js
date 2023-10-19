@@ -271,7 +271,7 @@ var Storage = new SheetStorages();
     // console.log(JSON.parse(Dashboard.dataTable.toJSON()));
 
     // utilizzo della DataView
-    Dashboard.view = new google.visualization.DataView(Dashboard.dataTable);
+    // Dashboard.view = new google.visualization.DataView(Dashboard.dataTable);
     // Dashboard.view.setColumns(Dashboard.json.data.view);
     // console.log(Dashboard.json);
     // debugger;
@@ -290,11 +290,12 @@ var Storage = new SheetStorages();
     google.visualization.events.addListener(Dashboard.DOMref, 'sort', app.sort);
     // end gestione eventi
 
-    Dashboard.DOMref.draw(Dashboard.view, options);
+    // utilizzo della DataView
+    // Dashboard.DOMref.draw(Dashboard.view, options);
     // utilizzo della DataView
 
     // utilizzo della DataTable
-    // Dashboard.DOMref.draw(Dashboard.dataTable, options);
+    Dashboard.DOMref.draw(Dashboard.dataTable, options);
     // utilizzo della DataTable
     function ready() {
       console.log('ready');
@@ -338,8 +339,11 @@ var Storage = new SheetStorages();
     // console.log(e);
     Dashboard.columnIndex = e['column'];
     // TODO: potrei inserire tutto il resto della funzione in onopen della dialog
-    const columnName = Dashboard.view.getColumnId(Dashboard.columnIndex);
-    const columnLabel = Dashboard.view.getColumnLabel(Dashboard.columnIndex);
+
+    // const columnName = Dashboard.view.getColumnId(Dashboard.columnIndex);
+    // const columnLabel = Dashboard.view.getColumnLabel(Dashboard.columnIndex);
+    const columnName = Dashboard.dataTable.getColumnId(Dashboard.columnIndex);
+    const columnLabel = Dashboard.dataTable.getColumnLabel(Dashboard.columnIndex);
     // imposto, nella 'select #field-datatype' il dataType della colonna selezionata
     const selectDataType = document.getElementById('field-datatype');
     const chkboxFilter = document.getElementById('filter-column');
@@ -403,7 +407,8 @@ var Storage = new SheetStorages();
   // Salvataggio della configurazione colonna dalla dialog dlg-config
   app.btnSaveColumn = () => {
     // console.log(Dashboard.dataTable);
-    const column = Dashboard.view.getColumnId(Dashboard.columnIndex); // nome colonna
+    // const column = Dashboard.view.getColumnId(Dashboard.columnIndex); // nome colonna
+    const column = Dashboard.dataTable.getColumnId(Dashboard.columnIndex); // nome colonna
     // input label
     const label = document.getElementById('field-label').value;
     // dataType
@@ -452,11 +457,8 @@ var Storage = new SheetStorages();
     }
 
     if (filterColumn.checked === true) {
-      // array dei filtri, imposto i 'containerId' in base al numero di elementi che ci sono
-      // in Dashboard.json.filters
-      // const length = Dashboard.json.filters.length;
-      // const label = Dashboard.json.data.columns[column].label;
-      // TODO: se il filtro è già presente non devo reinserirlo
+      // Proprietà Dashboard.json.filters
+      // Inserisco il filtro solo se non è ancora presente in Dashboard.json.filters
       const index = Dashboard.json.filters.findIndex(filter => filter.containerId === `flt-${label}`);
       if (index === -1) {
         // non è presente, lo aggiungo
