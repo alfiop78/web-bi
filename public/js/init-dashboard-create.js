@@ -333,6 +333,7 @@ var Storage = new SheetStorages();
       }
     });
     Dashboard.json.bind = bind; */
+    app.setDashboardBind();
     window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
   }
 
