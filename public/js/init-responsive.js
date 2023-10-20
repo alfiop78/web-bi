@@ -1388,10 +1388,7 @@ var Sheet;
     }
   }
 
-  app.createJsonTemplate = () => {
-    // TODO: questa Fn può essere posizionata anche prima della fetch_api/sheet_token/preview...
-    // ...in modo da creare il Google Chart già con le colonne/metriche definite qui
-    // let columns = {};
+  /* app.createJsonTemplate = () => {
     // utilizzo un oggetto Map() in modo da preservare l'ordine di inserimento
     // ed avere, quindi, un index corretto per proseguire l'inserimento di data.columns
     let columnsMap = new Map();
@@ -1433,16 +1430,141 @@ var Sheet;
           // TEST: con questa impostazione, le metriche contenute nelle
           // composite non vengono visualizzate in Dashboard.prepareData()
           // columns[metricName] = { id: metricName, label: metricName, type: 'number', altre_prop: null };
+          // TODO: è necessario salvare qui anche le metriche incluse nelle composite
+          // l'object Sheet.sheet.compositeMetrics[token].metrics contiene le metriche incluse
+          // nella composite
+          // const metricsInside = Sheet.sheet.compositeMetrics[token].metrics;
+          debugger;
+          const metricsInside = Object.keys(Sheet.sheet.compositeMetrics[token].metrics);
+          // TODO: bisogna cercarle sia in 'advMetrics' (metriche avanzate) che in 'metrics' (base)
+          // ...inoltre è da valutare se creare una Fn ricorsiva per recuperare altre metriche
+          // ...in profondità
+          metricsInside.forEach(token => {
+            if (Sheet.sheet.advMetrics[token]) {
+              const metricName = Sheet.sheet.advMetrics[token].alias;
+              const aggregation = Sheet.sheet.advMetrics[token].aggregateFn.toLowerCase();
+              columnsMap.set(metricName, { id: metricName, label: metricName, type: 'number', aggregation });
+            } else if (Sheet.sheet.metrics[token]) {
+              const metricName = Sheet.sheet.metrics[token].alias;
+              const aggregation = Sheet.sheet.metrics[token].aggregateFn.toLowerCase();
+              columnsMap.set(metricName, { id: metricName, label: metricName, type: 'number', aggregation });
+            }
+          });
           columnsMap.set(metricName, { id: metricName, label: metricName, type: 'number', altre_prop: null });
           break;
         default:
-          // TODO: Metriche di base : da implementare, provare con il report menu pricing
+          // TODO: Metriche di base : da testare, provare con il report menu pricing
+          // metricName = Sheet.sheet.metrics[token].alias;
+          // aggregation = Sheet.sheet.metrics[token].aggregateFn.toLowerCase();
+          // columnsMap.set(metricName, { id: metricName, label: metricName, type: 'number', aggregation });
           break;
       }
       // aggiungo tutte le metriche a data.group.columns con la propria Fn di aggregazione
       // recupero l'indice della metrica appena aggiunta (nello switch) per aggiungerla a
+      debugger;
       metrics.push({ column: columnsMap.size - 1, aggregation, type: 'number' });
     });
+    debugger;
+
+    if (Dashboard.json) {
+      // converto il Map() in Object
+      Dashboard.json.data.columns = Object.fromEntries(columnsMap);
+      Dashboard.json.data.group.columns = metrics;
+    }
+    debugger;
+    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+  } */
+
+  app.createJsonTemplate = (data) => {
+    // utilizzo un oggetto Map() in modo da preservare l'ordine di inserimento
+    // ed avere, quindi, un index corretto per proseguire l'inserimento di data.columns
+    let columnsMap = new Map();
+    let metrics = [];
+    (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) ?
+      Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
+      Dashboard.json.name = `template-${Sheet.sheet.token}`;
+    for (const field of Object.keys(data[0])) {
+      // prepareData.cols.push({ id: key, label: key });
+      console.log(field);
+      // console.log(Sheet.sheet.fields);
+      if (Dashboard.json.data.columns[field]) {
+        columnsMap.set(field, {
+          id: field,
+          label: Dashboard.json.data.columns[field].label,
+          type: Dashboard.json.data.columns[field].type,
+          other: 'altre proprieta...(template esistente)'
+        });
+      } else {
+        // TODO: per stabilire il type potrei analizzare il contenuto della colonna e
+        // tentare di impostare il 'type' oppure vado a cercare il 'field' tra le metriche
+        // advanced, basic, composite. Se trovo la metrica imposto type: 'number'
+        columnsMap.set(field, { id: field, label: field, type: 'string', other: 'altre proprieta...' });
+      }
+    }
+    console.log(columnsMap);
+    if (Dashboard.json) {
+      // converto il Map() in Object
+      Dashboard.json.data.columns = Object.fromEntries(columnsMap);
+      // Dashboard.json.data.group.columns = metrics;
+    }
+    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+    return;
+    // recupero tutte le metriche e le aggiungo all'object 'columns'
+    // Per preservare l'ordine delle metriche è meglio recuperarle dal DOM
+    // anzichè da sheet.advMetrics
+    // console.log(document.querySelectorAll('div.metric-defined[data-type]'));
+    // debugger;
+    document.querySelectorAll('div.metric-defined[data-type]').forEach(metric => {
+      const token = metric.dataset.id;
+      let metricName, aggregation;
+      switch (metric.dataset.type) {
+        case 'advanced':
+          metricName = Sheet.sheet.advMetrics[token].alias;
+          aggregation = Sheet.sheet.advMetrics[token].aggregateFn.toLowerCase();
+          // columns[metricName] = { id: metricName, label: metricName, type: 'number', aggregateFn };
+          columnsMap.set(metricName, { id: metricName, label: metricName, type: 'number', aggregation });
+          break;
+        case 'composite':
+          metricName = Sheet.sheet.compositeMetrics[token].alias;
+          aggregation = 'sum';
+          // TEST: con questa impostazione, le metriche contenute nelle
+          // composite non vengono visualizzate in Dashboard.prepareData()
+          // columns[metricName] = { id: metricName, label: metricName, type: 'number', altre_prop: null };
+          // TODO: è necessario salvare qui anche le metriche incluse nelle composite
+          // l'object Sheet.sheet.compositeMetrics[token].metrics contiene le metriche incluse
+          // nella composite
+          // const metricsInside = Sheet.sheet.compositeMetrics[token].metrics;
+          debugger;
+          const metricsInside = Object.keys(Sheet.sheet.compositeMetrics[token].metrics);
+          // TODO: bisogna cercarle sia in 'advMetrics' (metriche avanzate) che in 'metrics' (base)
+          // ...inoltre è da valutare se creare una Fn ricorsiva per recuperare altre metriche
+          // ...in profondità
+          metricsInside.forEach(token => {
+            if (Sheet.sheet.advMetrics[token]) {
+              const metricName = Sheet.sheet.advMetrics[token].alias;
+              const aggregation = Sheet.sheet.advMetrics[token].aggregateFn.toLowerCase();
+              columnsMap.set(metricName, { id: metricName, label: metricName, type: 'number', aggregation });
+            } else if (Sheet.sheet.metrics[token]) {
+              const metricName = Sheet.sheet.metrics[token].alias;
+              const aggregation = Sheet.sheet.metrics[token].aggregateFn.toLowerCase();
+              columnsMap.set(metricName, { id: metricName, label: metricName, type: 'number', aggregation });
+            }
+          });
+          columnsMap.set(metricName, { id: metricName, label: metricName, type: 'number', altre_prop: null });
+          break;
+        default:
+          // TODO: Metriche di base : da testare, provare con il report menu pricing
+          // metricName = Sheet.sheet.metrics[token].alias;
+          // aggregation = Sheet.sheet.metrics[token].aggregateFn.toLowerCase();
+          // columnsMap.set(metricName, { id: metricName, label: metricName, type: 'number', aggregation });
+          break;
+      }
+      // aggiungo tutte le metriche a data.group.columns con la propria Fn di aggregazione
+      // recupero l'indice della metrica appena aggiunta (nello switch) per aggiungerla a
+      debugger;
+      metrics.push({ column: columnsMap.size - 1, aggregation, type: 'number' });
+    });
+    debugger;
 
     if (Dashboard.json) {
       // converto il Map() in Object
@@ -1459,8 +1581,6 @@ var Sheet;
     // recupero l'id dello Sheet
     const sheet = JSON.parse(window.localStorage.getItem(token));
     if (!sheet.id) return false;
-    // TODO: impostare la prop dashboard.json.data.columns con i rispettivi dataType
-    app.createJsonTemplate();
     await fetch(`/fetch_api/${sheet.id}/preview`)
       .then((response) => {
         console.log(response);
@@ -1474,6 +1594,8 @@ var Sheet;
         DT.template = 'tmpl-preview-table';
         DT.addColumns();
         DT.addRows();
+        // impostare la prop dashboard.json.data.columns con i rispettivi dataType
+        app.createJsonTemplate(data);
       })
       .catch(err => {
         App.showConsole(err, 'error');
