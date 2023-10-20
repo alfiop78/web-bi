@@ -1387,6 +1387,54 @@ var Sheet;
     }
   }
 
+  app.createJsonTemplate = () => {
+    let columns = {};
+    // recupero tutte le colonne nel formato nome_[id,ds]
+    console.log(Sheet.sheet.fields);
+    Object.values(Sheet.sheet.fields).forEach(field => {
+      columns[`${field}_id`] = { id: `${field}_id`, label: `${field}_id`, type: 'string', other: 'altre proprieta...' };
+      columns[`${field}_ds`] = { id: `${field}_ds`, label: field, type: 'string' };
+    });
+    // recupero tutte le metriche e le aggiungo all'object 'columns'
+    // Per preservare l'ordine delle metriche è meglio recuperarle dal DOM
+    // anzichè da sheet.advMetrics
+    document.querySelectorAll('.metric-defined').forEach(metric => {
+      const token = metric.dataset.id;
+      let metricName, aggregateFn;
+      switch (metric.dataset.type) {
+        case 'advanced':
+          metricName = Sheet.sheet.advMetrics[token].alias;
+          aggregateFn = Sheet.sheet.advMetrics[token].aggregateFn;
+          columns[metricName] = { id: metricName, label: metricName, type: 'number', aggregateFn };
+          break;
+        case 'composite':
+          metricName = Sheet.sheet.compositeMetrics[token].alias;
+          columns[metricName] = { id: metricName, label: metricName, type: 'number', altre_prop: null };
+          break;
+        default:
+          // TODO: da implementare, provare con il report menu pricing
+          break;
+      }
+    });
+    console.log(columns);
+
+    // TODO: creo una base del template-[sheetname] e lo salvo in localStorage.
+    // Creo il template-sheetname, se non esiste
+    console.log(JSON.parse(window.localStorage.getItem(`template-${Sheet.sheet.token}`)));
+    if (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) {
+      // storage per questo sheet è già presente, sovrascrivo la prop data.columns
+      const sheetTemplate = JSON.parse(window.localStorage.getItem(`template-${Sheet.sheet.token}`));
+      sheetTemplate.data.columns = columns;
+      debugger;
+      window.localStorage.setItem(sheetTemplate.name, JSON.stringify(sheetTemplate));
+    } else {
+      // TODO: non presente, da implementare
+    }
+    // Se già presente, in storage, lo recupero prima, altrimenti tutto il
+    // contenuto verrà sovrascritto
+    debugger;
+  }
+
   // TODO: da spostare in supportFn.js
   app.sheetPreview = async (token) => {
     // console.log(token);
@@ -1401,10 +1449,13 @@ var Sheet;
       })
       .then((response) => response.json())
       .then(data => {
+        // TODO: utilizzare Google Chart
         let DT = new Table(data, 'preview-datamart', false);
         DT.template = 'tmpl-preview-table';
         DT.addColumns();
         DT.addRows();
+        // TODO: impostare la prop dashboard.json.data.columns con i rispettivi dataType
+        app.createJsonTemplate();
       })
       .catch(err => {
         App.showConsole(err, 'error');

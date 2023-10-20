@@ -157,7 +157,7 @@ class MapDatabaseController extends Controller
     // dd($id);
     // $datamart = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='decisyon_cache' AND TABLE_NAME='WEB_BI_$id';");
     $table = "decisyon_cache.WEB_BI_$id";
-    $data = DB::connection('vertica_odbc')->table($table)->limit(100)->get(); // ok
+    $data = DB::connection('vertica_odbc')->table($table)->limit(10)->get(); // ok
     return response()->json($data);
   }
 

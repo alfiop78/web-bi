@@ -246,36 +246,41 @@ var Storage = new SheetStorages();
       }
     };
 
-    // const localStorageTemplate = JSON.parse(localStorage.getItem('tmpl_stock'));
-    for (const [key, values] of Object.entries(JSON.parse(Dashboard.dataTable.toJSON()))) {
+    // La prop data.columns dovrei averla già definita nella preview dello sheet, al momento
+    // commento questo 'for'
+    /* for (const [key, values] of Object.entries(JSON.parse(Dashboard.dataTable.toJSON()))) {
       // key : (rows/cols)
       // values : array di object
       // creo la proprietà json.data.column del report template (file .json)
       if (key === 'cols') {
-        values.forEach(value => {
+        values.forEach((value, index) => {
           // console.log(key, value);
           // value : {id: nome_colonna, label: nome_label, type: datatype}
           // Verifico se questa colonna è già presente nel template report (in localStorage)
           // Dashboard.defineColumns(value);
           if (Dashboard.json.data.columns[value.id]) {
-            Dashboard.defineColumns(Dashboard.json.data.columns[value.id]);
+            Dashboard.defineColumns(Dashboard.json.data.columns[value.id], index);
           } else {
             // Definisco le colonne
-            Dashboard.defineColumns(value);
+            Dashboard.defineColumns(value, index);
           }
         });
       }
-    }
+    } */
+    // window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+    // console.log(Dashboard.json);
     // console.log(Dashboard.json.data.view);
     // debugger;
     // console.log(JSON.parse(Dashboard.dataTable.toJSON()));
 
-    // utilizzo della DataView
+    Dashboard.defineGroup();
+    debugger;
+    Dashboard.defineMetrics();
     // Dashboard.view = new google.visualization.DataView(Dashboard.dataTable);
     // Dashboard.view.setColumns(Dashboard.json.data.view);
     // console.log(Dashboard.json);
     // debugger;
-    // window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
 
     // nascondo la prima colonna
     // view.hideColumns([0]);
@@ -391,6 +396,8 @@ var Storage = new SheetStorages();
       });
     }
 
+    // se la colonna NON è inclusa nella prop json.data.view vuol dire che è nascosta
+    chkboxHide.checked = (Dashboard.json.data.view.includes(Dashboard.columnIndex)) ? false : true;
     // group checkbox
     groupColumn.checked = (Dashboard.json.data.group.key.includes(Dashboard.columnIndex)) ? true : false;
 
@@ -431,29 +438,38 @@ var Storage = new SheetStorages();
     // raggruppameneto e visualizzazione (funzione group() di Google Chart)
     // Le colonne impostate nel raggruppamento determinano anche la visualizzazione
     // sulla dashboard, per cui, vengono visualizzate solo le colonne raggruppate
+    function compareNumbers(a, b) {
+      return a - b;
+    }
+    const groupIndex = Dashboard.json.data.group.key.indexOf(Dashboard.columnIndex);
     if (groupColumn.checked === true) {
       // aggiungo questa colonna al raggruppamento, se già non è presente
-      debugger;
-      if (!Dashboard.json.data.group.key.includes(Dashboard.columnIndex)) {
+      if (groupIndex === -1) {
         // group per questa colonna non presente, lo aggiungo
-        console.log(Dashboard.columnIndex);
+        // console.log(Dashboard.columnIndex);
         Dashboard.json.data.group.key.push(Dashboard.columnIndex);
+        Dashboard.json.data.group.key.sort(compareNumbers);
       }
     } else {
       // elimina il raggruppamento per questa colonna
       // cerco l'indice con il valore = columnIndex
-      const index = Dashboard.json.data.group.key.indexOf(Dashboard.columnIndex);
-      debugger;
-      Dashboard.json.data.group.key.splice(index, 1);
+      // const index = Dashboard.json.data.group.key.indexOf(Dashboard.columnIndex);
+      Dashboard.json.data.group.key.splice(groupIndex, 1);
     }
 
     // Colonne da nascondere
+    const hideIndex = Dashboard.json.data.view.indexOf(Dashboard.columnIndex);
     if (hideColumn.checked === true) {
-      const index = Dashboard.json.data.view.indexOf(column);
-      debugger;
+      // nascondi colonna, elimino l'indice della colonna da json.data.view
+      // const index = Dashboard.json.data.view.indexOf(column);
+      Dashboard.json.data.view.splice(hideIndex, 1);
+      Dashboard.json.data.view.sort(compareNumbers);
     } else {
-      // TODO: eliminare l'impostazione della colonna nascosta, se era
-      // già stata impostata in precedenza
+      // Colonna da visualizzare, aggiungo l'indice della colonna a json.data.view
+      if (hideIndex === -1) {
+        Dashboard.json.data.view.push(Dashboard.columnIndex);
+        Dashboard.json.data.view.sort(compareNumbers);
+      }
     }
 
     if (filterColumn.checked === true) {

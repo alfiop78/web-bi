@@ -45,8 +45,7 @@ class Dashboards {
       } */
     }
   }
-  constructor() {
-  }
+  constructor() { }
 
   set data(value) {
     this.#data = value;
@@ -67,7 +66,8 @@ class Dashboards {
       // preparo i dati delle colonne tenendo in considerazione le eventuali modifiche fatte in
       // localStorage.json... (nel template report)
       (this.#json.data.columns[key]) ?
-        this.#prepareData.cols.push({ id: key, label: this.#json.data.columns[key].label }) : this.#prepareData.cols.push({ id: key, label: key });
+        this.#prepareData.cols.push({ id: key, label: this.#json.data.columns[key].label }) :
+        this.#prepareData.cols.push({ id: key, label: key });
     }
     // aggiungo le righe
     this.data.forEach(row => {
@@ -174,7 +174,7 @@ class Dashboards {
     return this.controls;
   }
 
-  defineColumns(value) {
+  defineColumns(value, index) {
     // debugger;
     // console.log(value);
     this.json.data.columns[value.id] = { id: value.id, label: value.label, type: value.type };
@@ -185,6 +185,52 @@ class Dashboards {
 
     // console.log('columns :', this.json.data.columns);
     // console.log('wrapper.view :', this.json.wrapper.view);
+    // TODO: imposto tutte le colonne _ds visibili
+    // const regex = new RegExp('_id$');
+    /* const regex = new RegExp('_ds$');
+    if (regex.test(value.id)) {
+      // verifico prima se esiste per non duplicarlo
+      // if (!this.json.data.view.includes(value.id)) this.json.data.view.push(value.id);
+      if (!this.json.data.view.includes(index)) this.json.data.view.push(index);
+    } */
+  }
+
+  hideIdColumns() {
+    const data = JSON.parse(this.dataTable.toJSON());
+    console.log(data);
+    data.cols.forEach((col, index) => {
+      // console.log(col, index);
+      const regex = new RegExp('_ds$');
+      if (regex.test(col.id)) {
+        // verifico prima se esiste per non duplicarlo
+        // if (!this.json.data.view.includes(value.id)) this.json.data.view.push(value.id);
+        if (!this.json.data.view.includes(index)) this.json.data.view.push(index);
+        if (!this.json.data.group.key.includes(index)) this.json.data.group.key.push(index);
+      }
+    });
+  }
+
+  defineGroup() {
+    const data = JSON.parse(this.dataTable.toJSON());
+    console.log(data);
+    data.cols.forEach((col, index) => {
+      // console.log(col, index);
+      const regex = new RegExp('_ds$');
+      if (regex.test(col.id)) {
+        // verifico prima se esiste per non duplicarlo
+        // if (!this.json.data.view.includes(value.id)) this.json.data.view.push(value.id);
+        // se questi valori sono già presenti non li modifico
+        if (this.json.data.view.length === 0) {
+          if (!this.json.data.view.includes(index)) this.json.data.view.push(index);
+        }
+        if (this.json.data.group.key.length === 0) {
+          if (!this.json.data.group.key.includes(index)) this.json.data.group.key.push(index);
+        }
+      }
+    });
+  }
+
+  defineMetrics() {
   }
 
 }

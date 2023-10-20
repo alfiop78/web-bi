@@ -224,13 +224,15 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       // console.log(dataGroup.getColumnIndex('perc_marg'));
       // recupero il numero di colonne presenti nel dataGroup
       console.log(dataGroup.getNumberOfColumns());
-      debugger;
       // Creo una DataView per effettuare calcoli su dati raggruppati (es.: Margine = ((ric_tot-costo_tot) / ric_tot) *100)
       // DataView in base al dataGroup impostato qui sopra
       var view = new google.visualization.DataView(dataGroup);
+      /* // test, Recupero l'array di key riferito alla dataGroup [0,1,2,3,....]
+      view.setColumns([...Dashboard.json.data.group.key.keys()]);
+      // test */
 
-      /* // esempio con 11 colonne
-       view.setColumns([0, 1, 2, 3, 4, 5, 6, {
+      // esempio con 11 colonne
+      view.setColumns([0, 1, 2, 3, 4, 5, 6, {
         calc: function(dt, row) {
           return ((dt.getValue(row, 6) - dt.getValue(row, 5)) / dt.getValue(row, 6)) * 100 || 0;
           // Codice utilizzabile dalla lettura del .json
@@ -251,22 +253,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
           },
           type: 'number', label: 'marginalita'//, properties: [8, 9]
         }]
-      */
-
-      // esempio con 11 colonne, in questo caso ho rimosso il group() su dealer_ds
-      // ...(dalla pagina di creazione del dashboard)
-      view.setColumns([0, 1, 2, 3, 4, 5, {
-        calc: function(dt, row) {
-          return ((dt.getValue(row, 5) - dt.getValue(row, 4)) / dt.getValue(row, 5)) * 100 || 0;
-        },
-        type: 'number', label: 'margine'//, properties: [5, 6]
-      }, 7, 8, {
-          calc: function(dt, row) {
-            return ((dt.getValue(row, 8) - dt.getValue(row, 7)) / dt.getValue(row, 8)) * 100 || 0;
-          },
-          type: 'number', label: 'marginalita'//, properties: [8, 9]
-        }]
       );
+
       // console.log(view.getViewColumns());
       // debugger;
 
