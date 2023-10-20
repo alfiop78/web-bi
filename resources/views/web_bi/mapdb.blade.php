@@ -25,8 +25,11 @@
   <script src="{{ asset('/js/lib.js') }}"></script>
   <script src="{{ asset('/js/WBStorage.js') }}"></script>
   <script src="{{ asset('/js/WorkBooks.js') }}"></script>
+  <!-- non utilizzata se tutte le istanze Table vengono convertite in Google Chart -->
   <script src="{{ asset('/js/Table.js') }}"></script>
   <script src="{{ asset('/js/DrawSVG.js') }}"></script>
+  <script src="{{ asset('/js/Dashboards.js') }}"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 
 <body class="antialiased">

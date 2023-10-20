@@ -4,6 +4,7 @@ var Draw = new DrawSVG('svg');
 var SheetStorage = new SheetStorages();
 var WorkBookStorage = new Storages();
 var WorkBook = new WorkBooks('WorkBook 1');
+var Dashboard = new Dashboards();
 var Sheet;
 (() => {
   var app = {
@@ -1388,51 +1389,68 @@ var Sheet;
   }
 
   app.createJsonTemplate = () => {
-    let columns = {};
+    // TODO: questa Fn può essere posizionata anche prima della fetch_api/sheet_token/preview...
+    // ...in modo da creare il Google Chart già con le colonne/metriche definite qui
+    // let columns = {};
+    // utilizzo un oggetto Map() in modo da preservare l'ordine di inserimento
+    // ed avere, quindi, un index corretto per proseguire l'inserimento di data.columns
+    let columnsMap = new Map();
+    let metrics = [];
+    (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) ?
+      Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
+      Dashboard.json.name = `template-${Sheet.sheet.token}`;
     // recupero tutte le colonne nel formato nome_[id,ds]
     console.log(Sheet.sheet.fields);
     Object.values(Sheet.sheet.fields).forEach(field => {
-      columns[`${field}_id`] = { id: `${field}_id`, label: `${field}_id`, type: 'string', other: 'altre proprieta...' };
-      columns[`${field}_ds`] = { id: `${field}_ds`, label: field, type: 'string' };
+      // se il json template già esiste non vado a sovrascrivere qui la label
+      if (Dashboard.json) {
+        columnsMap.set(`${field}_id`, { id: `${field}_id`, label: Dashboard.json.data.columns[`${field}_id`].label, type: 'string', other: 'altre proprieta...' });
+        columnsMap.set(`${field}_ds`, { id: `${field}_ds`, label: Dashboard.json.data.columns[`${field}_ds`].label, type: 'string' });
+      } else {
+        columnsMap.set(`${field}_id`, { id: `${field}_id`, label: `${field}_id`, type: 'string', other: 'altre proprieta...' });
+        columnsMap(`${field}_ds`, { id: `${field}_ds`, label: field, type: 'string' });
+      }
     });
+    console.log(columnsMap);
     // recupero tutte le metriche e le aggiungo all'object 'columns'
     // Per preservare l'ordine delle metriche è meglio recuperarle dal DOM
     // anzichè da sheet.advMetrics
-    document.querySelectorAll('.metric-defined').forEach(metric => {
+    // console.log(document.querySelectorAll('div.metric-defined[data-type]'));
+    // debugger;
+    document.querySelectorAll('div.metric-defined[data-type]').forEach(metric => {
       const token = metric.dataset.id;
-      let metricName, aggregateFn;
+      let metricName, aggregation;
       switch (metric.dataset.type) {
         case 'advanced':
           metricName = Sheet.sheet.advMetrics[token].alias;
-          aggregateFn = Sheet.sheet.advMetrics[token].aggregateFn;
-          columns[metricName] = { id: metricName, label: metricName, type: 'number', aggregateFn };
+          aggregation = Sheet.sheet.advMetrics[token].aggregateFn.toLowerCase();
+          // columns[metricName] = { id: metricName, label: metricName, type: 'number', aggregateFn };
+          columnsMap.set(metricName, { id: metricName, label: metricName, type: 'number', aggregation });
           break;
         case 'composite':
           metricName = Sheet.sheet.compositeMetrics[token].alias;
-          columns[metricName] = { id: metricName, label: metricName, type: 'number', altre_prop: null };
+          aggregation = 'sum';
+          // TEST: con questa impostazione, le metriche contenute nelle
+          // composite non vengono visualizzate in Dashboard.prepareData()
+          // columns[metricName] = { id: metricName, label: metricName, type: 'number', altre_prop: null };
+          columnsMap.set(metricName, { id: metricName, label: metricName, type: 'number', altre_prop: null });
           break;
         default:
-          // TODO: da implementare, provare con il report menu pricing
+          // TODO: Metriche di base : da implementare, provare con il report menu pricing
           break;
       }
+      // aggiungo tutte le metriche a data.group.columns con la propria Fn di aggregazione
+      // recupero l'indice della metrica appena aggiunta (nello switch) per aggiungerla a
+      metrics.push({ column: columnsMap.size - 1, aggregation, type: 'number' });
     });
-    console.log(columns);
 
-    // TODO: creo una base del template-[sheetname] e lo salvo in localStorage.
-    // Creo il template-sheetname, se non esiste
-    console.log(JSON.parse(window.localStorage.getItem(`template-${Sheet.sheet.token}`)));
-    if (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) {
-      // storage per questo sheet è già presente, sovrascrivo la prop data.columns
-      const sheetTemplate = JSON.parse(window.localStorage.getItem(`template-${Sheet.sheet.token}`));
-      sheetTemplate.data.columns = columns;
-      debugger;
-      window.localStorage.setItem(sheetTemplate.name, JSON.stringify(sheetTemplate));
-    } else {
-      // TODO: non presente, da implementare
+    if (Dashboard.json) {
+      // converto il Map() in Object
+      Dashboard.json.data.columns = Object.fromEntries(columnsMap);
+      Dashboard.json.data.group.columns = metrics;
     }
-    // Se già presente, in storage, lo recupero prima, altrimenti tutto il
-    // contenuto verrà sovrascritto
     debugger;
+    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
   }
 
   // TODO: da spostare in supportFn.js
@@ -1441,6 +1459,8 @@ var Sheet;
     // recupero l'id dello Sheet
     const sheet = JSON.parse(window.localStorage.getItem(token));
     if (!sheet.id) return false;
+    // TODO: impostare la prop dashboard.json.data.columns con i rispettivi dataType
+    app.createJsonTemplate();
     await fetch(`/fetch_api/${sheet.id}/preview`)
       .then((response) => {
         console.log(response);
@@ -1454,8 +1474,6 @@ var Sheet;
         DT.template = 'tmpl-preview-table';
         DT.addColumns();
         DT.addRows();
-        // TODO: impostare la prop dashboard.json.data.columns con i rispettivi dataType
-        app.createJsonTemplate();
       })
       .catch(err => {
         App.showConsole(err, 'error');

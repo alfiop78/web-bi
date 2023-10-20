@@ -396,8 +396,14 @@ var Storage = new SheetStorages();
       });
     }
 
+    console.log(Dashboard.json.data.group.columns);
     // se la colonna NON è inclusa nella prop json.data.view vuol dire che è nascosta
-    chkboxHide.checked = (Dashboard.json.data.view.includes(Dashboard.columnIndex)) ? false : true;
+    // ...effettuo lo stesso controllo anche in data.group.columns perchè le
+    // metriche vengono messe qui (che corrisponde al 2° parm della Fn group() di GChart)
+    let metricIndex = Dashboard.json.data.group.columns.findIndex(el => el.column === Dashboard.columnIndex);
+    // la colonna selezionata non è trovata nè in json.data.view nè in json.data.group.columns
+    chkboxHide.checked = (Dashboard.json.data.view.includes(Dashboard.columnIndex) || metricIndex !== -1) ? false : true;
+
     // group checkbox
     groupColumn.checked = (Dashboard.json.data.group.key.includes(Dashboard.columnIndex)) ? true : false;
 

@@ -62,6 +62,7 @@ class Dashboards {
   prepareDataPreview() {
     // aggiungo le colonne
     // TODO: probabilmente qui è meglio utilizzare il metodo con addColumn/addRows di GoogleChart
+    // debugger;
     for (const key of Object.keys(this.data[0])) {
       // preparo i dati delle colonne tenendo in considerazione le eventuali modifiche fatte in
       // localStorage.json... (nel template report)
@@ -85,12 +86,19 @@ class Dashboards {
     // aggiungo le colonne
     for (const key of Object.keys(this.data[0])) {
       // prepareData.cols.push({ id: key, label: key });
-      // console.log(key);
-      this.#prepareData.cols.push({
-        id: key,
-        label: this.json.data.columns[key].label,
-        type: this.json.data.columns[key].type
-      });
+      console.log(key);
+      /* TEST: provo ad impostare solo le colonne contenute in
+      * json.data.columns, le metriche contenute nelle composite non vengono
+      * considerate
+      * */
+
+      if (this.json.data.columns[key]) {
+        this.#prepareData.cols.push({
+          id: key,
+          label: this.json.data.columns[key].label,
+          type: this.json.data.columns[key].type
+        });
+      }
     }
 
     let dateOptions = {
@@ -105,27 +113,29 @@ class Dashboards {
       for (const [key, value] of Object.entries(row)) {
         // if (key === 'DtArrivo_ds') console.log(new Date(value));
         // console.log(value);
-        switch (this.json.data.columns[key].type) {
-          case 'date':
-            if (value.length === 8) {
-              // console.log('Data di 8 cifre (YYYYMMDD)', value);
-              const date = new Date(`${value.substring(0, 4)}-${value.substring(4, 6)}-${value.substring(6, 8)}`);
-              // console.log(new Intl.DateTimeFormat("it-IT", dateOptions).format(date));
-              v.push({ v: date, f: new Intl.DateTimeFormat("it-IT", dateOptions).format(date), p: { className: 'myClass' } });
-            } else {
-              v.push({ v: null });
-            }
-            break;
-          case 'number':
-            // TODO: valutare se formattare qui i valori (come sopra per le date) oppure con le funzioni Formatter (sotto)
-            // di GoogleChart
-            (isNaN(parseFloat(value))) ? v.push({ v: null }) : v.push({ v: parseFloat(value) });
-            // (isNaN(parseFloat(value))) ? v.push({ v: 0 }) : v.push({ v: parseFloat(value) });
-            break;
-          default:
-            (!this.json.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: this.json.data.columns[key].p } });
-            // v.push({ v: value });
-            break;
+        if (this.json.data.columns[key]) {
+          switch (this.json.data.columns[key].type) {
+            case 'date':
+              if (value.length === 8) {
+                // console.log('Data di 8 cifre (YYYYMMDD)', value);
+                const date = new Date(`${value.substring(0, 4)}-${value.substring(4, 6)}-${value.substring(6, 8)}`);
+                // console.log(new Intl.DateTimeFormat("it-IT", dateOptions).format(date));
+                v.push({ v: date, f: new Intl.DateTimeFormat("it-IT", dateOptions).format(date), p: { className: 'myClass' } });
+              } else {
+                v.push({ v: null });
+              }
+              break;
+            case 'number':
+              // TODO: valutare se formattare qui i valori (come sopra per le date) oppure con le funzioni Formatter (sotto)
+              // di GoogleChart
+              (isNaN(parseFloat(value))) ? v.push({ v: null }) : v.push({ v: parseFloat(value) });
+              // (isNaN(parseFloat(value))) ? v.push({ v: 0 }) : v.push({ v: parseFloat(value) });
+              break;
+            default:
+              (!this.json.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: this.json.data.columns[key].p } });
+              // v.push({ v: value });
+              break;
+          }
         }
       }
       this.#prepareData.rows.push({ c: v });
@@ -195,7 +205,7 @@ class Dashboards {
     } */
   }
 
-  hideIdColumns() {
+  /* hideIdColumns() {
     const data = JSON.parse(this.dataTable.toJSON());
     console.log(data);
     data.cols.forEach((col, index) => {
@@ -208,7 +218,7 @@ class Dashboards {
         if (!this.json.data.group.key.includes(index)) this.json.data.group.key.push(index);
       }
     });
-  }
+  } */
 
   defineGroup() {
     const data = JSON.parse(this.dataTable.toJSON());
