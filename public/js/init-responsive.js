@@ -1540,15 +1540,16 @@ var Sheet;
     if (Dashboard.json) {
       // converto il columnsSet (array) in Object
       columnsSet.forEach(col => Dashboard.json.data.columns[col.id] = col);
-      // TODO: definisco data.group.key
+      // TODO: definisco data.group.key cerando i campi _ds nell'array columnsSet
       // Dashboard.json.data.group.key.push(index);
-      const testIndex = [...columnsSet].findIndex(col => {
+      let keys = [];
+      [...columnsSet].forEach((col, index) => {
         const regex = new RegExp('_ds$');
         debugger;
-        console.log(columnsSet.indexOf(col.id));
-        if (regex.test(col.id)) return col;
+        if (regex.test(col.id)) keys.push(index);
       });
-      console.log(testIndex);
+      Dashboard.json.data.group.key = keys;
+      debugger;
       // nel data.group.columns vanno messe tutte le metriche, come array di object
       Dashboard.json.data.group.columns = metrics;
     }
