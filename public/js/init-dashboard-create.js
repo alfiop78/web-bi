@@ -402,7 +402,11 @@ var Storage = new SheetStorages();
     // metriche vengono messe qui (che corrisponde al 2° parm della Fn group() di GChart)
     let metricIndex = Dashboard.json.data.group.columns.findIndex(el => el.column === Dashboard.columnIndex);
     // la colonna selezionata non è trovata nè in json.data.view nè in json.data.group.columns
-    chkboxHide.checked = (Dashboard.json.data.view.includes(Dashboard.columnIndex) || metricIndex !== -1) ? false : true;
+    debugger;
+    chkboxHide.checked = (Dashboard.json.data.view.includes(Dashboard.columnIndex)
+      ||
+      metricIndex !== -1
+      || Dashboard.json.data.group.key.includes(Dashboard.columnIndex)) ? false : true;
 
     // group checkbox
     groupColumn.checked = (Dashboard.json.data.group.key.includes(Dashboard.columnIndex)) ? true : false;

@@ -204,10 +204,31 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       console.log(JSON.parse(dataTable.toJSON()));
       // debugger;
       // NOTE: utilizzo dinamico (Dashboard.json)
+      console.log(Dashboard.json.data.group.columns);
+      debugger;
       let dataGroup = new google.visualization.data.group(
         // raggruppamento per area_ds, zona_ds, coddealer_ds e dealer_ds
         table.getDataTable(), Dashboard.json.data.group.key,
-        Dashboard.json.data.group.columns
+        // WARN: l'utilizzo di json.data.group.columns genera un errore perchè
+        // aggregation : 'sum' anzichè aggregation: google.visualization.data.sum
+        // Dashboard.json.data.group.columns
+        [
+          // OFFICINA INTERNA (costo_rapporto_6)
+          { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
+          // RA DIRETTA COSTO (costo_rapporto_2)
+          { column: 17, aggregation: google.visualization.data.sum, type: 'number' },
+          // RA DIRETTA RICAVO (ricavo_rapporto_2)
+          { column: 18, aggregation: google.visualization.data.sum, type: 'number' },
+          // % MARG. RA DIRETTA (perc_margine_rapporto_2)
+          { id: 'perc_marg', column: 25, aggregation: google.visualization.data.sum, type: 'number' },
+          // { id: 'perc_marg', 'column': 25, 'aggregation': google.visualization.data.sum, 'type': 'number', label: 'mr2' },
+          // costo ve_cb
+          { column: 26, aggregation: google.visualization.data.sum, type: 'number' },
+          // ricavo_ve_cb
+          { column: 27, aggregation: google.visualization.data.sum, type: 'number' },
+          // marginalità
+          { column: 28, aggregation: google.visualization.data.sum, type: 'number' }
+        ]
       );
       // console.log(dataGroup.getColumnIndex('perc_marg'));
       // recupero il numero di colonne presenti nel dataGroup
