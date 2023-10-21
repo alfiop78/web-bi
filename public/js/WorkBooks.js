@@ -36,14 +36,14 @@ class Sheets {
   // passaggio del token e recupero del field in WorkSheet tramite l'oggetto WorkBook passato al Costruttore
   set fields(object) {
     this.#fields.set(object.token, object.name);
-    console.info('this.#fields : ', this.#fields);
+    // console.info('this.#fields : ', this.#fields);
   }
 
   get fields() { return this.#fields; }
 
   set filters(token) {
     this.#filters.add(token);
-    console.info('this.#filters : ', this.#filters);
+    // console.info('this.#filters : ', this.#filters);
   }
 
   get filters() { return this.#filters; }
@@ -51,7 +51,7 @@ class Sheets {
   set metrics(object) {
     this.#metrics.set(object.token, object);
     // this.#metrics.set(object.token, { name: object.name, type: object.metric_type, aggregateFn: object.aggregateFn });
-    console.info('sheet.#metrics : ', this.#metrics);
+    // console.info('sheet.#metrics : ', this.#metrics);
   }
 
   get metrics() { return this.#metrics; }
@@ -327,7 +327,7 @@ class WorkBooks {
 
   set metrics(object) {
     this.#metrics.set(object.token, object);
-    console.log('workBook Metrics : ', this.#metrics);
+    // console.log('workBook Metrics : ', this.#metrics);
   }
 
   get metrics() { return this.#metrics; }
