@@ -1478,11 +1478,36 @@ var Sheet;
   app.createJsonTemplate = (data) => {
     // utilizzo un oggetto Map() in modo da preservare l'ordine di inserimento
     // ed avere, quindi, un index corretto per proseguire l'inserimento di data.columns
+    // TODO: 1- Recupero tutte le metriche create (base, avanzate, composite)
+    let mapMetrics = new Map();
+    // metriche di base, se presenti
+    // metriche avanzate, se presenti
+    // metriche composite, se presenti.
+    const sheetMetrics = Sheet.sheet.metrics;
+    if (Sheet.sheet.advMetrics) Object.values(Sheet.sheet.advMetrics).forEach(metric => {
+      mapMetrics.set(metric.alias, {
+        aggregation: metric.aggregateFn.toLowerCase(),
+        type: metric.type, dependencies: metric.dependencies
+      });
+    });
+    if (Sheet.sheet.compositeMetrics) Object.values(Sheet.sheet.compositeMetrics).forEach(metric => {
+      mapMetrics.set(metric.alias, {
+        aggregation: 'sum',
+        type: metric.type, dependencies: metric.dependencies
+      });
+    });
+    console.log(mapMetrics);
+    debugger;
+
+
+
+
     let columnsMap = new Map();
     let metrics = [];
     (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) ?
       Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
       Dashboard.json.name = `template-${Sheet.sheet.token}`;
+
     for (const field of Object.keys(data[0])) {
       // prepareData.cols.push({ id: key, label: key });
       console.log(field);
