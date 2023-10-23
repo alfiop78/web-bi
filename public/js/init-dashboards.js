@@ -241,10 +241,31 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       view.setColumns([...Dashboard.json.data.group.key.keys()]);
       // test */
       let columnsView = [];
-      Dashboard.json.data.group.key.forEach(col => columnsView.push(col));
-      Dashboard.json.data.group.columns.forEach(col => columnsView.push(col));
+      // Dashboard.json.data.group.key.forEach(col => columnsView.push(col));
+      // Dashboard.json.data.group.columns.forEach(col => columnsView.push(col));
+      // TODO: nell'array .json.data.view sono definite le colonna da prendere
+      // da dataGroup.
+      // per creare l'array da passare a view.setColumns ciclo .json.data.view
+      // aggiungendo a columnsView solo quelle corrispondenti all'indice
+      /* Dashboard.json.data.view.forEach(col => {
+        console.log(col);
+        if (typeof col === 'object') {
+          // è una metrica
+          const index = Dashboard.json.data.group.columns.findIndex(c => c.column === col.column);
+          debugger;
+          columnsView.push(index);
+        } else {
+          // console.log(Dashboard.json.data.group.key.indexOf(col));
+          const index = Dashboard.json.data.group.key.indexOf(col);
+          columnsView.push(index);
+        }
+      });
+      debugger;
+      console.log(Dashboard.json.data.view);
+      console.log([...Dashboard.json.data.view]); */
 
-      view.setColumns([...columnsView.keys()]);
+      // view.setColumns([...columnsView.keys()]);
+      view.setColumns([...Dashboard.json.data.view.keys()]);
 
       /* view.setColumns([0, 1, 2, 3, 4, 5, 6, {
         calc: function(dt, row) {

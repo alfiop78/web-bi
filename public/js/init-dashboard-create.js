@@ -304,14 +304,13 @@ var Storage = new SheetStorages();
     // utilizzo della DataTable
     function ready() {
       console.log('ready');
-      // TODO: Creo la prop 'view' in json.data.view
+      // Creo la prop 'view' in json.data.view
       // Qui inserisco le colonne incluse in data.group.key/columns
-      if (Dashboard.json.data.view.length !== 0) {
+      /* if (Dashboard.json.data.view.length !== 0) {
         Dashboard.json.data.view = Dashboard.json.data.view;
       } else {
         Dashboard.json.data.view = Dashboard.json.data.group.key.concat(Dashboard.json.data.group.columns);
-      }
-      debugger;
+      } */
     }
 
     function selectRow() {
@@ -483,7 +482,6 @@ var Storage = new SheetStorages();
       if (metricIndex !== -1) {
         // si sta nascondendo una metrica
         Dashboard.json.data.group.columns[metricIndex].hidden = true;
-        debugger;
       }
       /* Dashboard.json.data.view.splice(hideIndex, 1);
       Dashboard.json.data.view.sort(compareNumbers); */
@@ -494,11 +492,10 @@ var Storage = new SheetStorages();
         Dashboard.json.data.view.sort(compareNumbers);
       } */
     }
-    let view = Dashboard.json.data.group.key.concat(Dashboard.json.data.group.columns);
-    // elimino dall'array 'view' le colonne contrassegnate con hidden:true
-    view.forEach((col, index) => {
-      if (col.hidden) view.splice(index, 1);
-    });
+    // aggiungo, a view, solo le colonne che NON hanno la prop hidden: true
+    let view = [];
+    Dashboard.json.data.group.key.forEach(col => view.push(col));
+    Dashboard.json.data.group.columns.forEach(col => { if (!col.hidden) view.push(col); });
     console.log(view);
 
     if (filterColumn.checked === true) {
