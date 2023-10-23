@@ -229,8 +229,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         //   { column: 28, aggregation: google.visualization.data.sum, type: 'number' }
         // ]
       );
-      console.log(dataGroup.getColumnIndex('perc_marg'));
-      console.log(JSON.parse(dataTable.toJSON()));
+      console.log(dataGroup.getColumnIndex('perc_margine_rapp_2'));
+      console.log(JSON.parse(dataGroup.toJSON()));
       console.log(dataGroup.getNumberOfColumns());
       debugger;
       // recupero il numero di colonne presenti nel dataGroup
@@ -240,8 +240,13 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       /* // test, Recupero l'array di key riferito alla dataGroup [0,1,2,3,....]
       view.setColumns([...Dashboard.json.data.group.key.keys()]);
       // test */
+      let columnsView = [];
+      Dashboard.json.data.group.key.forEach(col => columnsView.push(col));
+      Dashboard.json.data.group.columns.forEach(col => columnsView.push(col));
 
-      view.setColumns([0, 1, 2, 3, 4, 5, 6, {
+      view.setColumns([...columnsView.keys()]);
+
+      /* view.setColumns([0, 1, 2, 3, 4, 5, 6, {
         calc: function(dt, row) {
           return ((dt.getValue(row, 6) - dt.getValue(row, 5)) / dt.getValue(row, 6)) * 100 || 0;
           // Codice utilizzabile dalla lettura del .json
@@ -262,7 +267,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
           },
           type: 'number', label: 'marginalita'//, properties: [8, 9]
         }]
-      );
+      ); */
 
       // console.log(view.getViewColumns());
       // metodo draw() sul tableRef e non sulla gdashboard.

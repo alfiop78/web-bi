@@ -87,7 +87,7 @@ class Dashboards {
     // aggiungo le colonne
     for (const key of Object.keys(this.data[0])) {
       // prepareData.cols.push({ id: key, label: key });
-      console.log(key);
+      // console.log(key);
       this.#prepareData.cols.push({
         id: key,
         label: this.json.data.columns[key].label,
@@ -135,7 +135,7 @@ class Dashboards {
       this.#prepareData.rows.push({ c: v });
     });
     // debugger;
-    console.log(this.#prepareData);
+    // console.log(this.#prepareData);
     return this.#prepareData;
   }
 

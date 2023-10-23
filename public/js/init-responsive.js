@@ -1393,7 +1393,6 @@ var Sheet;
     // ed avere, quindi, un index corretto per proseguire l'inserimento di data.columns
     // 1- Recupero tutte le metriche create (base, avanzate, composite)
     let mapMetrics = new Map();
-    // metriche di base, avanzate e composite se presenti
     if (Sheet.sheet.metrics) Object.values(Sheet.sheet.metrics).forEach(metric => {
       mapMetrics.set(metric.alias, {
         aggregation: metric.aggregateFn.toLowerCase(),
@@ -1442,12 +1441,12 @@ var Sheet;
     }
     // console.log('data.columns', columnsSet);
     for (const [id, value] of mapMetrics) {
+      debugger;
       // recupero l'indice della metrica in 'columnSet'
       const metricIndex = [...columnsSet].findIndex(el => el.id === id);
       // console.log(metricIndex);
-      metrics.push({ column: metricIndex, aggregation: value.aggregation, type: 'number' });
+      metrics.push({ id, column: metricIndex, aggregation: value.aggregation, type: 'number' });
     }
-    // console.log(metrics);
 
     // Salvataggio del json
     if (Dashboard.json) {

@@ -304,6 +304,14 @@ var Storage = new SheetStorages();
     // utilizzo della DataTable
     function ready() {
       console.log('ready');
+      // TODO: Creo la prop 'view' in json.data.view
+      // Qui inserisco le colonne incluse in data.group.key/columns
+      if (Dashboard.json.data.view.length !== 0) {
+        Dashboard.json.data.view = Dashboard.json.data.view;
+      } else {
+        Dashboard.json.data.view = Dashboard.json.data.group.key.concat(Dashboard.json.data.group.columns);
+      }
+      debugger;
     }
 
     function selectRow() {
@@ -397,16 +405,14 @@ var Storage = new SheetStorages();
     }
 
     console.log(Dashboard.json.data.group.columns);
-    // se la colonna NON è inclusa nella prop json.data.view vuol dire che è nascosta
-    // ...effettuo lo stesso controllo anche in data.group.columns perchè le
-    // metriche vengono messe qui (che corrisponde al 2° parm della Fn group() di GChart)
+    // Verifico se la colonna selezionata è presente in .json.data.group.key/columns
+    // Se presente in 'key' è stata "contrassegnata" come colonna da raggruppare, se
+    // presente in 'columns' è "contrassegnata" come metrica.
     let metricIndex = Dashboard.json.data.group.columns.findIndex(el => el.column === Dashboard.columnIndex);
-    // la colonna selezionata non è trovata nè in json.data.view nè in json.data.group.columns
-    debugger;
-    chkboxHide.checked = (Dashboard.json.data.view.includes(Dashboard.columnIndex)
-      ||
-      metricIndex !== -1
-      || Dashboard.json.data.group.key.includes(Dashboard.columnIndex)) ? false : true;
+    let columnIndex = Dashboard.json.data.group.key.indexOf(Dashboard.columnIndex);
+    // se la colonna selezionata è presente in uno dei due array la chkbox è false (non selezionata)
+    // altrimenti risulta selezionata, quindi come "colonna nascosta".
+    chkboxHide.checked = (metricIndex !== -1 || columnIndex !== -1) ? false : true;
 
     // group checkbox
     groupColumn.checked = (Dashboard.json.data.group.key.includes(Dashboard.columnIndex)) ? true : false;
@@ -448,9 +454,8 @@ var Storage = new SheetStorages();
     // raggruppameneto e visualizzazione (funzione group() di Google Chart)
     // Le colonne impostate nel raggruppamento determinano anche la visualizzazione
     // sulla dashboard, per cui, vengono visualizzate solo le colonne raggruppate
-    function compareNumbers(a, b) {
-      return a - b;
-    }
+    function compareNumbers(a, b) { return a - b; }
+    debugger;
     const groupIndex = Dashboard.json.data.group.key.indexOf(Dashboard.columnIndex);
     if (groupColumn.checked === true) {
       // aggiungo questa colonna al raggruppamento, se già non è presente
@@ -464,23 +469,37 @@ var Storage = new SheetStorages();
       // elimina il raggruppamento per questa colonna
       // cerco l'indice con il valore = columnIndex
       // const index = Dashboard.json.data.group.key.indexOf(Dashboard.columnIndex);
-      Dashboard.json.data.group.key.splice(groupIndex, 1);
+      if (groupIndex !== -1) Dashboard.json.data.group.key.splice(groupIndex, 1);
     }
 
     // Colonne da nascondere
-    const hideIndex = Dashboard.json.data.view.indexOf(Dashboard.columnIndex);
+    // const hideIndex = Dashboard.json.data.view.indexOf(Dashboard.columnIndex);
+    debugger;
     if (hideColumn.checked === true) {
-      // nascondi colonna, elimino l'indice della colonna da json.data.view
-      // const index = Dashboard.json.data.view.indexOf(column);
-      Dashboard.json.data.view.splice(hideIndex, 1);
-      Dashboard.json.data.view.sort(compareNumbers);
+      // TODO: da implementare
+      // se la colonna selezionata è una metrica la contrassegno come hide: true, aggiungendo una
+      // prop all'interno dell'object
+      let metricIndex = Dashboard.json.data.group.columns.findIndex(el => el.column === Dashboard.columnIndex);
+      if (metricIndex !== -1) {
+        // si sta nascondendo una metrica
+        Dashboard.json.data.group.columns[metricIndex].hidden = true;
+        debugger;
+      }
+      /* Dashboard.json.data.view.splice(hideIndex, 1);
+      Dashboard.json.data.view.sort(compareNumbers); */
     } else {
-      // Colonna da visualizzare, aggiungo l'indice della colonna a json.data.view
+      /* // Colonna da visualizzare, aggiungo l'indice della colonna a json.data.view
       if (hideIndex === -1) {
         Dashboard.json.data.view.push(Dashboard.columnIndex);
         Dashboard.json.data.view.sort(compareNumbers);
-      }
+      } */
     }
+    let view = Dashboard.json.data.group.key.concat(Dashboard.json.data.group.columns);
+    // elimino dall'array 'view' le colonne contrassegnate con hidden:true
+    view.forEach((col, index) => {
+      if (col.hidden) view.splice(index, 1);
+    });
+    console.log(view);
 
     if (filterColumn.checked === true) {
       // Proprietà Dashboard.json.filters
@@ -518,6 +537,10 @@ var Storage = new SheetStorages();
 
     Dashboard.json.wrapper.chartType = 'Table';
     Dashboard.json.wrapper.containerId = 'chart_div';
+    // metto in un array "temporaneo" tutte le colonne, quelle impostate come nascoste, con
+    // la prop 'hidden': true non verranno messe in questo array perchè è l'array che userò nel merge
+    // per creare .json.data.view
+    Dashboard.json.data.view = view;
     console.log(Dashboard.json);
     debugger;
     window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
