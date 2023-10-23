@@ -202,37 +202,38 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       // ... successivamente posso calcolare il margine nella DataView
       // test lettura json.group.key
       console.log(JSON.parse(dataTable.toJSON()));
-      // debugger;
       // NOTE: utilizzo dinamico (Dashboard.json)
-      console.log(Dashboard.json.data.group.columns);
-      debugger;
+      // Imposto google.visualization.data.sum/avg/ecc... per le metriche
+      Dashboard.json.data.group.columns.forEach(column => column.aggregation = google.visualization.data[column.aggregation]);
       let dataGroup = new google.visualization.data.group(
         // raggruppamento per area_ds, zona_ds, coddealer_ds e dealer_ds
-        table.getDataTable(), Dashboard.json.data.group.key,
+        table.getDataTable(), Dashboard.json.data.group.key, Dashboard.json.data.group.columns
         // WARN: l'utilizzo di json.data.group.columns genera un errore perchè
         // aggregation : 'sum' anzichè aggregation: google.visualization.data.sum
         // Dashboard.json.data.group.columns
-        [
-          // OFFICINA INTERNA (costo_rapporto_6)
-          { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
-          // RA DIRETTA COSTO (costo_rapporto_2)
-          { column: 17, aggregation: google.visualization.data.sum, type: 'number' },
-          // RA DIRETTA RICAVO (ricavo_rapporto_2)
-          { column: 18, aggregation: google.visualization.data.sum, type: 'number' },
-          // % MARG. RA DIRETTA (perc_margine_rapporto_2)
-          { id: 'perc_marg', column: 25, aggregation: google.visualization.data.sum, type: 'number' },
-          // { id: 'perc_marg', 'column': 25, 'aggregation': google.visualization.data.sum, 'type': 'number', label: 'mr2' },
-          // costo ve_cb
-          { column: 26, aggregation: google.visualization.data.sum, type: 'number' },
-          // ricavo_ve_cb
-          { column: 27, aggregation: google.visualization.data.sum, type: 'number' },
-          // marginalità
-          { column: 28, aggregation: google.visualization.data.sum, type: 'number' }
-        ]
+        // [
+        //   // OFFICINA INTERNA (costo_rapporto_6)
+        //   { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
+        //   // RA DIRETTA COSTO (costo_rapporto_2)
+        //   { column: 17, aggregation: google.visualization.data.sum, type: 'number' },
+        //   // RA DIRETTA RICAVO (ricavo_rapporto_2)
+        //   { column: 18, aggregation: google.visualization.data.sum, type: 'number' },
+        //   // % MARG. RA DIRETTA (perc_margine_rapporto_2)
+        //   { id: 'perc_marg', column: 25, aggregation: google.visualization.data.sum, type: 'number' },
+        //   // { id: 'perc_marg', 'column': 25, 'aggregation': google.visualization.data.sum, 'type': 'number', label: 'mr2' },
+        //   // costo ve_cb
+        //   { column: 26, aggregation: google.visualization.data.sum, type: 'number' },
+        //   // ricavo_ve_cb
+        //   { column: 27, aggregation: google.visualization.data.sum, type: 'number' },
+        //   // marginalità
+        //   { column: 28, aggregation: google.visualization.data.sum, type: 'number' }
+        // ]
       );
-      // console.log(dataGroup.getColumnIndex('perc_marg'));
-      // recupero il numero di colonne presenti nel dataGroup
+      console.log(dataGroup.getColumnIndex('perc_marg'));
+      console.log(JSON.parse(dataTable.toJSON()));
       console.log(dataGroup.getNumberOfColumns());
+      debugger;
+      // recupero il numero di colonne presenti nel dataGroup
       // Creo una DataView per effettuare calcoli su dati raggruppati (es.: Margine = ((ric_tot-costo_tot) / ric_tot) *100)
       // DataView in base al dataGroup impostato qui sopra
       var view = new google.visualization.DataView(dataGroup);
@@ -240,7 +241,6 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       view.setColumns([...Dashboard.json.data.group.key.keys()]);
       // test */
 
-      // esempio con 11 colonne
       view.setColumns([0, 1, 2, 3, 4, 5, 6, {
         calc: function(dt, row) {
           return ((dt.getValue(row, 6) - dt.getValue(row, 5)) / dt.getValue(row, 6)) * 100 || 0;
