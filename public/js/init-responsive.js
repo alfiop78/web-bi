@@ -1396,23 +1396,25 @@ var Sheet;
     if (Sheet.sheet.metrics) Object.values(Sheet.sheet.metrics).forEach(metric => {
       mapMetrics.set(metric.alias, {
         aggregation: metric.aggregateFn.toLowerCase(),
-        type: metric.type, dependencies: metric.dependencies
+        type: metric.type, properties: { dependencies: metric.dependencies }
       });
     });
     if (Sheet.sheet.advMetrics) Object.values(Sheet.sheet.advMetrics).forEach(metric => {
       mapMetrics.set(metric.alias, {
         aggregation: metric.aggregateFn.toLowerCase(),
-        type: metric.type, dependencies: metric.dependencies
+        type: metric.type, properties: { dependencies: metric.dependencies }
       });
     });
     if (Sheet.sheet.compositeMetrics) Object.values(Sheet.sheet.compositeMetrics).forEach(metric => {
       mapMetrics.set(metric.alias, {
         aggregation: 'sum',
-        type: metric.type, dependencies: metric.dependencies
+        type: metric.type, properties: {
+          metrics: Object.values(metric.metrics)
+        }
       });
     });
     console.log(mapMetrics);
-    // debugger;
+    debugger;
     let columnsSet = new Set();
     let metrics = [];
     (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) ?
@@ -1441,11 +1443,11 @@ var Sheet;
     }
     // console.log('data.columns', columnsSet);
     for (const [id, value] of mapMetrics) {
-      debugger;
+      // debugger;
       // recupero l'indice della metrica in 'columnSet'
       const metricIndex = [...columnsSet].findIndex(el => el.id === id);
       // console.log(metricIndex);
-      metrics.push({ id, column: metricIndex, aggregation: value.aggregation, type: 'number' });
+      metrics.push({ id, column: metricIndex, aggregation: value.aggregation, type: 'number', properties: value.properties });
     }
 
     // Salvataggio del json

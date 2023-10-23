@@ -475,18 +475,20 @@ var Storage = new SheetStorages();
     // const hideIndex = Dashboard.json.data.view.indexOf(Dashboard.columnIndex);
     debugger;
     if (hideColumn.checked === true) {
-      // TODO: da implementare
+      // da implementare
       // se la colonna selezionata è una metrica la contrassegno come hide: true, aggiungendo una
       // prop all'interno dell'object
       let metricIndex = Dashboard.json.data.group.columns.findIndex(el => el.column === Dashboard.columnIndex);
       if (metricIndex !== -1) {
         // si sta nascondendo una metrica
-        Dashboard.json.data.group.columns[metricIndex].hidden = true;
+        // Dashboard.json.data.group.columns[metricIndex].hidden = true;
+        Dashboard.json.data.group.columns[metricIndex].properties = {
+          hidden: true
+        };
       }
-      /* Dashboard.json.data.view.splice(hideIndex, 1);
-      Dashboard.json.data.view.sort(compareNumbers); */
     } else {
-      /* // Colonna da visualizzare, aggiungo l'indice della colonna a json.data.view
+      /* TODO:
+      // Colonna da visualizzare, aggiungo l'indice della colonna a json.data.view
       if (hideIndex === -1) {
         Dashboard.json.data.view.push(Dashboard.columnIndex);
         Dashboard.json.data.view.sort(compareNumbers);
@@ -495,7 +497,7 @@ var Storage = new SheetStorages();
     // aggiungo, a view, solo le colonne che NON hanno la prop hidden: true
     let view = [];
     Dashboard.json.data.group.key.forEach(col => view.push(col));
-    Dashboard.json.data.group.columns.forEach(col => { if (!col.hidden) view.push(col); });
+    Dashboard.json.data.group.columns.forEach(col => { if (!col.properties.hidden) view.push(col); });
     console.log(view);
 
     if (filterColumn.checked === true) {

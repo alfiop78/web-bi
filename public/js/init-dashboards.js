@@ -204,30 +204,26 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       console.log(JSON.parse(dataTable.toJSON()));
       // NOTE: utilizzo dinamico (Dashboard.json)
       // Imposto google.visualization.data.sum/avg/ecc... per le metriche
-      Dashboard.json.data.group.columns.forEach(column => column.aggregation = google.visualization.data[column.aggregation]);
+      // Oltre ad impostare google.visualization.data[sum] creo una copia dell'array
+      // Dashboard.json.data.group.columns in modo da poter eliminare le colonne
+      // impostate con la prop 'hidden' in modo da ottenere ed inserire nella Func
+      // group() solo le colonne da visualizzare, le stesse coincidono con
+      // Dashboard.json.data.view
+      let groupColumns = [];
+      Dashboard.json.data.group.columns.forEach(column => {
+        // debugger;
+        if (!column.properties.hidden) {
+          // column.aggregation = google.visualization.data[column.aggregation];
+          column.aggregation = (typeof column.aggregation === 'string') ?
+            google.visualization.data[column.aggregation] :
+            column.aggregation;
+          groupColumns.push(column);
+        }
+      });
+      debugger;
+      // raggruppamento per area_ds, zona_ds, coddealer_ds e dealer_ds
       let dataGroup = new google.visualization.data.group(
-        // raggruppamento per area_ds, zona_ds, coddealer_ds e dealer_ds
-        table.getDataTable(), Dashboard.json.data.group.key, Dashboard.json.data.group.columns
-        // WARN: l'utilizzo di json.data.group.columns genera un errore perchè
-        // aggregation : 'sum' anzichè aggregation: google.visualization.data.sum
-        // Dashboard.json.data.group.columns
-        // [
-        //   // OFFICINA INTERNA (costo_rapporto_6)
-        //   { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
-        //   // RA DIRETTA COSTO (costo_rapporto_2)
-        //   { column: 17, aggregation: google.visualization.data.sum, type: 'number' },
-        //   // RA DIRETTA RICAVO (ricavo_rapporto_2)
-        //   { column: 18, aggregation: google.visualization.data.sum, type: 'number' },
-        //   // % MARG. RA DIRETTA (perc_margine_rapporto_2)
-        //   { id: 'perc_marg', column: 25, aggregation: google.visualization.data.sum, type: 'number' },
-        //   // { id: 'perc_marg', 'column': 25, 'aggregation': google.visualization.data.sum, 'type': 'number', label: 'mr2' },
-        //   // costo ve_cb
-        //   { column: 26, aggregation: google.visualization.data.sum, type: 'number' },
-        //   // ricavo_ve_cb
-        //   { column: 27, aggregation: google.visualization.data.sum, type: 'number' },
-        //   // marginalità
-        //   { column: 28, aggregation: google.visualization.data.sum, type: 'number' }
-        // ]
+        table.getDataTable(), Dashboard.json.data.group.key, groupColumns
       );
       console.log(dataGroup.getColumnIndex('perc_margine_rapp_2'));
       console.log(JSON.parse(dataGroup.toJSON()));
@@ -240,30 +236,6 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       /* // test, Recupero l'array di key riferito alla dataGroup [0,1,2,3,....]
       view.setColumns([...Dashboard.json.data.group.key.keys()]);
       // test */
-      let columnsView = [];
-      // Dashboard.json.data.group.key.forEach(col => columnsView.push(col));
-      // Dashboard.json.data.group.columns.forEach(col => columnsView.push(col));
-      // TODO: nell'array .json.data.view sono definite le colonna da prendere
-      // da dataGroup.
-      // per creare l'array da passare a view.setColumns ciclo .json.data.view
-      // aggiungendo a columnsView solo quelle corrispondenti all'indice
-      /* Dashboard.json.data.view.forEach(col => {
-        console.log(col);
-        if (typeof col === 'object') {
-          // è una metrica
-          const index = Dashboard.json.data.group.columns.findIndex(c => c.column === col.column);
-          debugger;
-          columnsView.push(index);
-        } else {
-          // console.log(Dashboard.json.data.group.key.indexOf(col));
-          const index = Dashboard.json.data.group.key.indexOf(col);
-          columnsView.push(index);
-        }
-      });
-      debugger;
-      console.log(Dashboard.json.data.view);
-      console.log([...Dashboard.json.data.view]); */
-
       // view.setColumns([...columnsView.keys()]);
       view.setColumns([...Dashboard.json.data.view.keys()]);
 
