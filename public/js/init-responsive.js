@@ -1455,11 +1455,14 @@ var Sheet;
     if (Dashboard.json) {
       // converto il columnsSet (array) in Object
       columnsSet.forEach(col => Dashboard.json.data.columns[col.id] = col);
-      // definisco data.group.key cerando i campi _ds nell'array columnsSet
+      // definisco data.group.key creando i campi _ds nell'array columnsSet
       let keys = [];
       [...columnsSet].forEach((col, index) => {
-        const regex = new RegExp('_ds$');
-        if (regex.test(col.id)) keys.push(index);
+        // const regex = new RegExp('_ds$');
+        // if (regex.test(col.id)) keys.push(index);
+        // se l'id colonna è presente in metrics non la inserisco qui, in 'data.group.key'
+        let metricsIndex = metrics.findIndex(metric => metric.id === col.id);
+        if (metricsIndex === -1) keys.push(index);
       });
       Dashboard.json.data.group.key = keys;
       // nel data.group.columns vanno messe tutte le metriche, come array di object
@@ -1472,13 +1475,11 @@ var Sheet;
 
   app.drawDatamart = (ref) => {
     const prepareData = Dashboard.prepareData();
-    // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
-    // è consentità con la DataView perchè questa è read-only
     let dataTable = new google.visualization.DataTable(prepareData);
     // Dashboard.dataTable = new google.visualization.DataTable(prepareData);
     var tableRef = new google.visualization.Table(document.getElementById(ref));
     // utilizzo della DataView
-    var view = new google.visualization.DataView(dataTable);
+    /* var view = new google.visualization.DataView(dataTable);
     let dataView = JSON.parse(view.toDataTable().toJSON());
     // console.log(dataView);
     let idsColumns = [];
@@ -1494,7 +1495,7 @@ var Sheet;
     // TEST: effettuando il calcolo del margine ((ricavo-costo)/ricavo*100) qui, cioè prima della
     // funzione di group(), il risultato non è corretto, questi calcoli vanno effettuati con una
     // DataView DOPO la function group()
-    view.hideColumns(idsColumns);
+    view.hideColumns(idsColumns); */
     const options = {
       'title': 'titolo report',
       'showRowNumber': true,
@@ -1505,11 +1506,60 @@ var Sheet;
       'height': 500
     };
     google.visualization.events.addListener(tableRef, 'sort', sort);
-    google.visualization.events.addListener(tableRef, 'ready', readyV1);
+    // google.visualization.events.addListener(tableRef, 'ready', readyV1);
+    google.visualization.events.addListener(tableRef, 'ready', readyV2);
+
+    function readyV2() {
+      // raggruppo le colonne
+      // Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
+      const tableRefGroup = new google.visualization.Table(document.getElementById(ref));
+      console.log('DataTable', dataTable);
+      // Individuo le metriche per inserirle nel 3° parametro di group()
+      console.log(dataTable.getColumnIndex('costo_rapporto_6'));
+      // potrei recuperare, dal json.data.columns, l'elenco delle metriche da calcolare ed
+      // ottenere gli indici da inserire nella Fn group()
+      // TODO: aggiungo tutte le colonne nel parametro 'key' della funzione group()
+      // Inizialmente il report deve raggruppare tutte le colonne presenti
+      // Successivamente, quando avrò impostato il json.data.group.key, raggrupperò solo
+      // per le colonne presenti in json.data.group.key
+
+      // le metriche che hanno la proprietà dependencies: true, sono quelle NON aggiunte DIRETTAMENTE
+      // al report ma derivano da quelle composite, quindi creo l'array con le sole colonne da visualizzare
+      // nel report, prendendo i dati da 'data.group.columns'
+      let columns = [];
+      Dashboard.json.data.group.columns.forEach(col => {
+        if (col.properties.dependencies === false || !col.properties.hasOwnProperty('dependencies')) {
+          if (typeof col.aggregation === 'string') col.aggregation = google.visualization.data[col.aggregation];
+          columns.push(col);
+        }
+      });
+      console.log(columns);
+      let dataGroup = new google.visualization.data.group(
+        dataTable, Dashboard.json.data.group.key, columns
+      );
+      console.log(dataGroup);
+      let dataViewGrouped = new google.visualization.DataView(dataGroup);
+      // DataView con le funzioni 'calc' sui dati raggruppati
+      // TEST: recupero gli indici delle colonne area_ds, zona_ds (colonna da visualizzare)
+      console.log('costo_rapporto_6 (index):', dataGroup.getColumnIndex('costo_rapporto_6'));
+      console.log('costo_rapporto_2 (index):', dataGroup.getColumnIndex('costo_rapporto_2'));
+      console.log('ricavo_rapporto_2 (index):', dataGroup.getColumnIndex('ricavo_rapporto_2'));
+      console.log('area_ds index : ', dataTable.getColumnIndex('area_ds'));
+      console.log('zona_ds index : ', dataTable.getColumnIndex('zona_ds'));
+      debugger;
+      dataViewGrouped.setColumns([1, 3, 5, 7, 9, 11, 13, 15, 16, 17, 18, {
+        calc: function(dt, row) {
+          return ((dt.getValue(row, 18) - dt.getValue(row, 17)) / dt.getValue(row, 18)) * 100 || 0;
+        }, type: 'number', label: 'margine_calc'
+      }]
+      );
+      // tableRefGroup.draw(dataGroup, options);
+      tableRefGroup.draw(dataViewGrouped, options);
+    }
 
     function readyV1() {
       // raggruppo le colonne
-      // Imposto un altro riferimento a tableRed altrimenti l'evento ready viene ciclato ricorsivamente (errore)
+      // Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
       const tableRefGroup = new google.visualization.Table(document.getElementById(ref));
       console.log('DataTable -> DataView', view.toDataTable());
       console.log('DataTable', dataTable);
@@ -1521,6 +1571,8 @@ var Sheet;
       debugger;
       // NOTE: Utilizzando la view non posso utilizzare group() con le colonne _id, da valutare
       // se è corretto, ma nel frattempo utilizzo il group() sulla dataTable anzichè sulla DataView
+      // In questo caso, utilizzando la DataTable nel group() invece della DataView con _id nascosti
+      // non serve creare la DataView come fatto sopra con la variabile 'view'
       let dataGroup = new google.visualization.data.group(
         // raggruppamento per area, zona, coddealer e dealer
         dataTable, [0, 1, 2, 3, 4, 5, 6, 7], // DataTable
@@ -1570,9 +1622,9 @@ var Sheet;
       const dataTableIndex = view.getTableColumnIndex(colIndex);
       console.log(dataTableIndex);
     }
-    tableRef.draw(view, options);
+    // tableRef.draw(view, options);
+    tableRef.draw(dataTable, options);
   }
-
 
   // TODO: da spostare in supportFn.js
   app.sheetPreview = async (token) => {
