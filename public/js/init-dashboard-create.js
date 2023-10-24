@@ -274,8 +274,6 @@ var Storage = new SheetStorages();
     // console.log(JSON.parse(Dashboard.dataTable.toJSON()));
 
     Dashboard.defineGroup();
-    debugger;
-    Dashboard.defineMetrics();
     // Dashboard.view = new google.visualization.DataView(Dashboard.dataTable);
     // Dashboard.view.setColumns(Dashboard.json.data.view);
     // console.log(Dashboard.json);

@@ -67,6 +67,8 @@ var Sheet;
 
   App.init();
 
+  google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
+
   // Chiudo qualsiasi context-menu aperto
   app.body.addEventListener('click', () => {
     document.querySelectorAll('.context-menu[open]').forEach(menu => menu.toggleAttribute('open'));
@@ -1388,7 +1390,7 @@ var Sheet;
     }
   }
 
-  app.createJsonTemplate = (data) => {
+  app.createJsonTemplate = () => {
     // utilizzo un oggetto Map() in modo da preservare l'ordine di inserimento
     // ed avere, quindi, un index corretto per proseguire l'inserimento di data.columns
     // 1- Recupero tutte le metriche create (base, avanzate, composite)
@@ -1414,14 +1416,13 @@ var Sheet;
       });
     });
     console.log(mapMetrics);
-    debugger;
     let columnsSet = new Set();
     let metrics = [];
     (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) ?
       Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
       Dashboard.json.name = `template-${Sheet.sheet.token}`;
 
-    for (const field of Object.keys(data[0])) {
+    for (const field of Object.keys(Dashboard.data[0])) {
       // console.log(field);
       const type = (mapMetrics.has(field)) ? 'number' : 'string';
       if (Dashboard.json.data.columns[field]) {
@@ -1469,6 +1470,110 @@ var Sheet;
     window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
   }
 
+  app.drawDatamart = (ref) => {
+    const prepareData = Dashboard.prepareData();
+    // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
+    // è consentità con la DataView perchè questa è read-only
+    let dataTable = new google.visualization.DataTable(prepareData);
+    // Dashboard.dataTable = new google.visualization.DataTable(prepareData);
+    var tableRef = new google.visualization.Table(document.getElementById(ref));
+    // utilizzo della DataView
+    var view = new google.visualization.DataView(dataTable);
+    let dataView = JSON.parse(view.toDataTable().toJSON());
+    // console.log(dataView);
+    let idsColumns = [];
+    // nascondo colonne _id
+    dataView.cols.forEach((col, index) => {
+      const regex = new RegExp('_id$');
+      if (regex.test(col.id)) {
+        // verifico prima se esiste per non duplicarlo
+        // if (!this.json.data.view.includes(index)) this.json.data.view.push(index);
+        idsColumns.push(index);
+      }
+    });
+    // TEST: effettuando il calcolo del margine ((ricavo-costo)/ricavo*100) qui, cioè prima della
+    // funzione di group(), il risultato non è corretto, questi calcoli vanno effettuati con una
+    // DataView DOPO la function group()
+    view.hideColumns(idsColumns);
+    const options = {
+      'title': 'titolo report',
+      'showRowNumber': true,
+      "allowHTML": true,
+      'frozenColumns': 0,
+      'alternatingRowStyle': true,
+      'width': '100%',
+      'height': 500
+    };
+    google.visualization.events.addListener(tableRef, 'sort', sort);
+    google.visualization.events.addListener(tableRef, 'ready', readyV1);
+
+    function readyV1() {
+      // raggruppo le colonne
+      // Imposto un altro riferimento a tableRed altrimenti l'evento ready viene ciclato ricorsivamente (errore)
+      const tableRefGroup = new google.visualization.Table(document.getElementById(ref));
+      console.log('DataTable -> DataView', view.toDataTable());
+      console.log('DataTable', dataTable);
+      // Individuo le metriche per inserirle nel 3° parametro di group()
+      console.log(view.getColumnIndex('costo_rapporto_6'));
+      console.log(dataTable.getColumnIndex('costo_rapporto_6'));
+      // potrei recuperare, dal json.data.columns, l'elenco delle metriche da calcolare ed
+      // ottenere gli indici da inserire nella Fn grooup()
+      debugger;
+      // NOTE: Utilizzando la view non posso utilizzare group() con le colonne _id, da valutare
+      // se è corretto, ma nel frattempo utilizzo il group() sulla dataTable anzichè sulla DataView
+      let dataGroup = new google.visualization.data.group(
+        // raggruppamento per area, zona, coddealer e dealer
+        dataTable, [0, 1, 2, 3, 4, 5, 6, 7], // DataTable
+        // view, [1, 3, 5, 7], // DataView
+        [
+          // DataView
+          // OFFICINA INTERNA (costo_rapporto_6)
+          // { column: 8, aggregation: google.visualization.data.sum, type: 'number' },
+          // DataView
+          // ***DataTable***
+          // OFFICINA INTERNA (costo_rapporto_6)
+          { 'column': 16, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          // RA DIRETTA COSTO (costo_rapporto_2)
+          { 'column': 17, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          // RA DIRETTA RICAVO (ricavo_rapporto_2)
+          { 'column': 18, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          // % MARG. RA DIRETTA (perc_margine_rapporto_2)
+          { 'column': 25, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          // costo ve_cb
+          { 'column': 26, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          // ricavo_ve_cb
+          { 'column': 27, 'aggregation': google.visualization.data.sum, 'type': 'number' },
+          // marginalità
+          { 'column': 28, 'aggregation': google.visualization.data.sum, 'type': 'number' }
+          // ***DataTable***
+        ]
+      );
+      console.log(dataGroup);
+      let dataViewGrouped = new google.visualization.DataView(dataGroup);
+      // TODO: Creare una DataView con le funzioni 'calc' sui dati raggruppati
+      dataViewGrouped.setColumns([1, 3, 5, 7, 8, 9, 10, {
+        calc: function(dt, row) {
+          return ((dt.getValue(row, 10) - dt.getValue(row, 9)) / dt.getValue(row, 10)) * 100 || 0;
+        }, type: 'number', label: 'margine_calc'
+      }]
+      );
+      // tableRefGroup.draw(dataGroup, options);
+      tableRefGroup.draw(dataViewGrouped, options);
+    }
+
+    // TODO: valutare l'utilizzo di trigger() per gli "eventi custom". In questo caso
+    // è necessario un evento click sulle intestazioni di colonna.
+    function sort(e) {
+      // l'indice della colonna nella DataView
+      const colIndex = e['column'];
+      // Indice della colonna nella DataTable sottostante
+      const dataTableIndex = view.getTableColumnIndex(colIndex);
+      console.log(dataTableIndex);
+    }
+    tableRef.draw(view, options);
+  }
+
+
   // TODO: da spostare in supportFn.js
   app.sheetPreview = async (token) => {
     // console.log(token);
@@ -1483,13 +1588,15 @@ var Sheet;
       })
       .then((response) => response.json())
       .then(data => {
-        // TODO: utilizzare Google Chart
-        let DT = new Table(data, 'preview-datamart', false);
+        // impostare la prop dashboard.json.data.columns con i rispettivi dataType
+        Dashboard.data = data;
+        app.createJsonTemplate();
+        // Creazione preview del datamart
+        google.charts.setOnLoadCallback(app.drawDatamart('preview-datamart'));
+        /* let DT = new Table(data, 'preview-datamart', false);
         DT.template = 'tmpl-preview-table';
         DT.addColumns();
-        DT.addRows();
-        // impostare la prop dashboard.json.data.columns con i rispettivi dataType
-        app.createJsonTemplate(data);
+        DT.addRows(); */
       })
       .catch(err => {
         App.showConsole(err, 'error');

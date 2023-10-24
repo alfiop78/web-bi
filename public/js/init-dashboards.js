@@ -238,6 +238,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       // test */
       // view.setColumns([...columnsView.keys()]);
       view.setColumns([...Dashboard.json.data.view.keys()]);
+      console.log(view.getViewColumns());
+      debugger;
 
       /* view.setColumns([0, 1, 2, 3, 4, 5, 6, {
         calc: function(dt, row) {

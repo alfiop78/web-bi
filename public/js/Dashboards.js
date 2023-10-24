@@ -199,21 +199,6 @@ class Dashboards {
     } */
   }
 
-  /* hideIdColumns() {
-    const data = JSON.parse(this.dataTable.toJSON());
-    console.log(data);
-    data.cols.forEach((col, index) => {
-      // console.log(col, index);
-      const regex = new RegExp('_ds$');
-      if (regex.test(col.id)) {
-        // verifico prima se esiste per non duplicarlo
-        // if (!this.json.data.view.includes(value.id)) this.json.data.view.push(value.id);
-        if (!this.json.data.view.includes(index)) this.json.data.view.push(index);
-        if (!this.json.data.group.key.includes(index)) this.json.data.group.key.push(index);
-      }
-    });
-  } */
-
   defineGroup() {
     const data = JSON.parse(this.dataTable.toJSON());
     console.log(data);
@@ -232,9 +217,6 @@ class Dashboards {
         }
       }
     });
-  }
-
-  defineMetrics() {
   }
 
 }
