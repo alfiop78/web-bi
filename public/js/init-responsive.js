@@ -1408,10 +1408,15 @@ var Sheet;
       });
     });
     if (Sheet.sheet.compositeMetrics) Object.values(Sheet.sheet.compositeMetrics).forEach(metric => {
+      const metricDef = JSON.parse(localStorage.getItem(metric.token));
+      let formula = [];
+      metricDef.formula.forEach(formulaEl => {
+        (formulaEl.token) ? formula.push(formulaEl.alias) : formula.push(formulaEl);
+      });
       mapMetrics.set(metric.alias, {
         aggregation: 'sum',
         type: metric.type, properties: {
-          metrics: Object.values(metric.metrics)
+          calc: { margine: formula }
         }
       });
     });
