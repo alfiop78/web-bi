@@ -734,6 +734,52 @@
                               </section>
                             </dialog>
 
+                            <dialog id="dlg-sheet-config" data-x="0" data-y="0" class="medium absolute moveable">
+                              <section class="dlg-grid">
+                                <h5 class="title">Configurazione</h5>
+                                <section class="dlg-content col col-1">
+                                  <section class="">
+                                    <input id="field-label" type="text" value="" placeholder="Etichetta colonna" />
+                                    <section>
+                                      <label for="field-datatype">Tipo di dato</label>
+                                      <select id="field-datatype">
+                                        <option value="string">Stringa</option>
+                                        <option value="number">Numero</option>
+                                        <option value="date">Data</option>
+                                        <option value="datetime">Date Time</option>
+                                        <option value="timeofday">Time of Day</option>
+                                        <option value="boolean">Vero/Falso</option>
+                                      </select>
+                                    </section>
+                                    <section>
+                                      <label for="field-format">Formattazione colonna</label>
+                                      <select id="field-format">
+                                        <option value="none" selected>Default</option>
+                                        <option value="currency">Valuta €</option>
+                                        <option value="percent">Percentuale</option>
+                                      </select>
+                                    </section>
+                                    <section>
+                                      <input type="checkbox" id="hide-column" name="hide-column" />
+                                      <label for="hide-column">Nascondi colonna</label>
+                                    </section>
+                                    <!-- <section>
+                                      <input type="checkbox" id="group-column" name="group-column" />
+                                      <label for="group-column">Raggruppa colonna</label>
+                                    </section> -->
+                                    <section>
+                                      <input type="checkbox" id="filter-column" name="filter-column" />
+                                      <label for="filter-column">Imposta come filtro</label>
+                                    </section>
+                                  </section>
+                                </section>
+                                <section class="dlg-buttons">
+                                  <button name="cancel" value="chiudi">Chiudi</button>
+                                  <button id="btn-column-save">Ok</button>
+                                  <!-- <button data-fn="btnSaveColumn" id="btn-column-save">Ok</button> -->
+                                </section>
+                              </section>
+                            </dialog>
 
                             <div class="table-content">
                               <table id="preview-datamart" class="custom-scrollbar">
