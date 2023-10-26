@@ -78,17 +78,20 @@ function drawDatamart(ref) {
     console.log('group.key:', Dashboard.json.data.group.key);
     // creo l'object che verrà messo nel 3° param di group()
     // Es.: { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
+    // NOTE: posso recuperare le metriche in base alla sua cssClass?
 
     // le metriche che hanno la proprietà dependencies: true, sono quelle NON aggiunte DIRETTAMENTE
     // al report ma derivano da quelle composite, quindi creo l'array con le sole colonne da visualizzare
     // nel report, prendendo i dati da 'data.group.columns'
-    Dashboard.json.data.group.columns.forEach(col => {
+    Dashboard.json.data.group.columns.forEach(metric => {
       // TODO: visualizzare solo le metriche presenti nello Sheet, quelle contenute
       // nelle 'composite' ma NON inserite nel report NON devono essere visualizzate
-      const index = Dashboard.dataTable.getColumnIndex(col.alias);
-      const aggregation = (col.aggregateFn) ? col.aggregateFn.toLowerCase() : 'sum';
-      let object = { id: col.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', properties: { className: 'metric-col' } };
-      groupColumnsIndex.push(object);
+      if (metric.dependencies === false) {
+        const index = Dashboard.dataTable.getColumnIndex(metric.alias);
+        const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
+        let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', properties: { className: 'metric-col' } };
+        groupColumnsIndex.push(object);
+      }
     });
     Dashboard.dataGroup = new google.visualization.data.group(
       Dashboard.dataTable, Dashboard.json.data.group.key, groupColumnsIndex
@@ -121,8 +124,10 @@ function drawDatamart(ref) {
     });
     // dalla datagroup, recupero gli indici di colonna delle metriche
     Dashboard.json.data.group.columns.forEach(col => {
-      const index = Dashboard.dataGroup.getColumnIndex(col.alias);
-      viewMetrics.push(index);
+      if (!col.dependencies) {
+        const index = Dashboard.dataGroup.getColumnIndex(col.alias);
+        viewMetrics.push(index);
+      }
     });
     let viewDefined = viewColumns.concat(viewMetrics)
     Dashboard.dataViewGrouped.setColumns(viewDefined);
@@ -138,8 +143,6 @@ function drawDatamart(ref) {
       }
       ]
     ); */
-
-    // esempio con tutte le colonne
     google.visualization.events.addListener(Dashboard.tableRefGroup, 'sort', sort);
     // con l'opzione sort: 'event' viene comunque processato l'evento 'sort'
     // per non viene automaticamente ordinata la colonna. Utilizzo ottimale
@@ -411,20 +414,21 @@ function columnHander(e) {
   console.log(e.target.dataset.index, e.target.dataset.columnId);
   // array di colonne attualmente presente nella dataView
   // console.log(Dashboard.dataViewGrouped.getViewColumns());
+  // NOTE: codice ripetuto (readyV2())
   let groupColumnsIndex = [];
-  Dashboard.json.data.group.columns.forEach(col => {
+  Dashboard.json.data.group.columns.forEach(metric => {
     // const index = Dashboard.dataViewGrouped.getColumnIndex(col.alias);
-    const index = Dashboard.dataTable.getColumnIndex(col.alias);
-    const aggregation = (col.aggregateFn) ? col.aggregateFn.toLowerCase() : 'sum';
-    let object = { id: col.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', properties: { className: 'metric-col' } };
+    const index = Dashboard.dataTable.getColumnIndex(metric.alias);
+    const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
+    let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', properties: { className: 'metric-col' } };
     groupColumnsIndex.push(object);
   });
+  // NOTE: end codice ripetuto (readyV2())
   console.log(groupColumnsIndex);
   Dashboard.json.data.group.key.splice(dataTableIndex - 1, 2); // colonna _id e _ds (selezionata)
   const columnIndex = Dashboard.json.data.group.names.indexOf(e.target.dataset.columnId);
   Dashboard.json.data.group.names.splice(columnIndex);
   let temp = Dashboard.json.data.group.key;
-
   Dashboard.dataGroup = new google.visualization.data.group(
     Dashboard.dataTable, temp, groupColumnsIndex
   );
@@ -438,9 +442,11 @@ function columnHander(e) {
     viewColumns.push(Dashboard.dataGroup.getColumnIndex(column));
   });
   // dalla datagroup, recupero gli indici di colonna delle metriche
-  Dashboard.json.data.group.columns.forEach(col => {
-    const index = Dashboard.dataGroup.getColumnIndex(col.alias);
-    viewMetrics.push(index);
+  Dashboard.json.data.group.columns.forEach(metric => {
+    if (!metric.dependencies) {
+      const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
+      viewMetrics.push(index);
+    }
   });
   let viewDefined = viewColumns.concat(viewMetrics)
   Dashboard.dataViewGrouped.setColumns(viewDefined);

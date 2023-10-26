@@ -546,7 +546,7 @@ var Sheet;
         app.addMetric(e.currentTarget, elementRef.id);
         break;
       case 'composite':
-        Sheet.metrics = { token: metric.token, alias: metric.alias, type: metric.metric_type, metrics: metric.metrics };
+        Sheet.metrics = { token: metric.token, alias: metric.alias, type: metric.metric_type, metrics: metric.metrics, dependencies: false };
         app.addMetric(e.currentTarget, elementRef.id);
         // dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
         // ...al suo interno per consentirne l'elaborazione
