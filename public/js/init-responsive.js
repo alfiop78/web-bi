@@ -1393,16 +1393,22 @@ var Sheet;
   }
 
   app.createJsonTemplateV1 = () => {
-    // utilizzo un oggetto Map() in modo da preservare l'ordine di inserimento
-    // ed avere, quindi, un index corretto per proseguire l'inserimento di data.columns
-    // 1- Recupero tutte le metriche create (base, avanzate, composite)
-    const columns = Sheet.sheet.sheetColumns;
-    const metrics = Sheet.sheet.sheetMetrics;
-    let columnsSet = new Set();
     (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) ?
       Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
       Dashboard.json.name = `template-${Sheet.sheet.token}`;
-
+    // 1- Recupero tutte le metriche create (base, avanzate, composite)
+    // se, in json.data.group.names esiste già questa colonna, non la modifico
+    // creo l'array di object che mi servirà per nascondere/visualizzare le colonne
+    let columnProperties = [];
+    Sheet.sheet.sheetColumns.forEach(col => {
+      const column = Dashboard.json.data.group.names.find(columnName => columnName.id === col);
+      const visible = (column) ? column.properties.visible : true;
+      columnProperties.push({ id: col, properties: { visible } });
+      // temporaneo, per reimpostare tutte le colonne visibili
+      // columnProperties.push({ id: col, properties: { visible: true } });
+    });
+    const metrics = Sheet.sheet.sheetMetrics;
+    let columnsSet = new Set();
     // se la colonna in ciclo è presente in 'metrics' la imposto come type: 'number' altrimenti 'string'
     for (const field of Object.keys(Dashboard.data[0])) {
       const findMetricIndex = metrics.findIndex(metric => metric.alias === field);
@@ -1424,7 +1430,8 @@ var Sheet;
       columnsSet.forEach(col => Dashboard.json.data.columns[col.id] = col);
       // definisco data.group.key creando i campi _ds nell'array columnsSet
       // creo un array con le colonne da visualizzare in fase di inizializzazione del dashboard
-      Dashboard.json.data.group.names = columns;
+      // Dashboard.json.data.group.names = columns;
+      Dashboard.json.data.group.names = columnProperties;
       // nel data.group.columns vanno messe tutte le metriche, come array di object
       Dashboard.json.data.group.columns = metrics;
       let keys = [];
@@ -1433,7 +1440,14 @@ var Sheet;
         // if (regex.test(col.id)) keys.push(index);
         // se l'id colonna è presente in metrics non la inserisco qui, in 'data.group.key'
         let metricsIndex = metrics.findIndex(metric => metric.alias === col.id);
-        if (metricsIndex === -1) keys.push(index);
+        // if (metricsIndex === -1) keys.push(index);
+        // TODO: utilizzare la stessa logica di columnProperties (sopra) se il dato nel json è già presente
+        // altrimenti qui viene sovrascritto
+
+        // const column = Dashboard.json.data.group.names.find(columnName => columnName.id === col.id);
+        // const visible = (col) ? column.properties.visible : true;
+        // if (metricsIndex === -1) keys.push({ id: col.id, index, properties: { visible } });
+        if (metricsIndex === -1) keys.push({ id: col.id, index, properties: { visible: true } });
       });
       Dashboard.json.data.group.key = keys;
     }
