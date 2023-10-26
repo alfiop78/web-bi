@@ -61,3 +61,10 @@ thead th[data-metric-token]{
   width: 100%;
   height: calc(100% - 32px);
 }
+
+.table-content.columnsHandler {
+  display: grid;
+  grid-template-columns: 200px auto;
+}
+
+.hiddenColumn {opacity: .4;}

@@ -781,7 +781,10 @@
                               </section>
                             </dialog>
 
-                            <div class="table-content">
+                            <div class="table-content columnsHandler">
+                              <div class="relative-ul" id="column-handler">
+                                <ul id="ul-columns-handler" class="custom-scrollbar"></ul>
+                              </div>
                               <table id="preview-datamart" class="custom-scrollbar">
                                 <thead>
                                   <tr></tr>

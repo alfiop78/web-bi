@@ -510,6 +510,7 @@ var Sheet;
     const metric = Sheet.metrics.get(token);
     field.dataset.type = metric.type;
     field.dataset.id = metric.token;
+    field.dataset.label = metric.alias;
     aggregateFn.dataset.metricId = metric.token;
     // Se lo Sheet è in modifica imposto il dataset 'added'
     (!Sheet.edit) ? field.dataset.added = 'true' : field.dataset.adding = 'true';
@@ -744,6 +745,7 @@ var Sheet;
     const btnRemove = field.querySelector('button[data-remove]');
     const btnUndo = field.querySelector('button[data-undo]');
     field.dataset.type = 'column';
+    field.dataset.label = Sheet.fields.get(token);
     field.dataset.id = token;
     // if (!Sheet.edit) field.dataset.added = 'true';
     // In edit:true imposto il dataset.adding altrimenti dataset.added
@@ -1390,6 +1392,56 @@ var Sheet;
     }
   }
 
+  app.createJsonTemplateV1 = () => {
+    // utilizzo un oggetto Map() in modo da preservare l'ordine di inserimento
+    // ed avere, quindi, un index corretto per proseguire l'inserimento di data.columns
+    // 1- Recupero tutte le metriche create (base, avanzate, composite)
+    const columns = Sheet.sheet.sheetColumns;
+    const metrics = Sheet.sheet.sheetMetrics;
+    let columnsSet = new Set();
+    (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) ?
+      Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
+      Dashboard.json.name = `template-${Sheet.sheet.token}`;
+
+    // se la colonna in ciclo è presente in 'metrics' la imposto come type: 'number' altrimenti 'string'
+    for (const field of Object.keys(Dashboard.data[0])) {
+      const findMetricIndex = metrics.findIndex(metric => metric.alias === field);
+      const type = (findMetricIndex === -1) ? 'string' : 'number';
+      if (Dashboard.json.data.columns[field]) {
+        // il data.columns già esiste, non sovrascrivo la prop 'label'
+        columnsSet.add({
+          id: field,
+          label: Dashboard.json.data.columns[field].label,
+          type, other: 'altre proprietà...'
+        });
+      } else {
+        columnsSet.add({ id: field, label: field, type, other: 'altre proprietà...' });
+      }
+    }
+    // Salvataggio del json
+    if (Dashboard.json) {
+      // converto il columnsSet (array) in Object
+      columnsSet.forEach(col => Dashboard.json.data.columns[col.id] = col);
+      // definisco data.group.key creando i campi _ds nell'array columnsSet
+      // creo un array con le colonne da visualizzare in fase di inizializzazione del dashboard
+      Dashboard.json.data.group.names = columns;
+      // nel data.group.columns vanno messe tutte le metriche, come array di object
+      Dashboard.json.data.group.columns = metrics;
+      let keys = [];
+      [...columnsSet].forEach((col, index) => {
+        // const regex = new RegExp('_ds$');
+        // if (regex.test(col.id)) keys.push(index);
+        // se l'id colonna è presente in metrics non la inserisco qui, in 'data.group.key'
+        let metricsIndex = metrics.findIndex(metric => metric.alias === col.id);
+        if (metricsIndex === -1) keys.push(index);
+      });
+      Dashboard.json.data.group.key = keys;
+    }
+    console.log(Dashboard.json);
+    // debugger;
+    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+  }
+
   app.createJsonTemplate = () => {
     // utilizzo un oggetto Map() in modo da preservare l'ordine di inserimento
     // ed avere, quindi, un index corretto per proseguire l'inserimento di data.columns
@@ -1484,6 +1536,34 @@ var Sheet;
     // recupero l'id dello Sheet
     const sheet = JSON.parse(window.localStorage.getItem(token));
     if (!sheet.id) return false;
+    console.log(sheet);
+    // debugger;
+
+    // NOTE: Chiamata in post per poter passare tutte le colonne, incluso l'alias, alla query
+    // TODO: Passo in param un object con le colonne da estrarre (tutte)
+    /* const params = JSON.stringify({ sheet_id: sheet.id });
+    const url = `/fetch_api/datamartpost`;
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    const req = new Request(url, init);
+    await fetch(req)
+      .then((response) => {
+        console.log(response);
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(data => {
+        console.log(data);
+        debugger;
+        Dashboard.data = data;
+        app.createJsonTemplate();
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      }); */
+    // end chiamta in POST
+
     await fetch(`/fetch_api/${sheet.id}/preview`)
       .then((response) => {
         console.log(response);
@@ -1494,18 +1574,14 @@ var Sheet;
       .then(data => {
         // impostare la prop dashboard.json.data.columns con i rispettivi dataType
         Dashboard.data = data;
-        app.createJsonTemplate();
+        app.createJsonTemplateV1();
         // Creazione preview del datamart
         // google.charts.setOnLoadCallback(app.drawDatamart('preview-datamart'));
         // Fn impostata in init-sheet.js
         google.charts.setOnLoadCallback(drawDatamart('preview-datamart'));
-        /* let DT = new Table(data, 'preview-datamart', false);
-        DT.template = 'tmpl-preview-table';
-        DT.addColumns();
-        DT.addRows(); */
       })
       .catch(err => {
-        App.showConsole(err, 'error');
+        App.showConsole(err, 'error', 3000);
         console.error(err);
       });
   }
@@ -1860,7 +1936,7 @@ var Sheet;
         }
       })
       .catch(err => {
-        App.showConsole(err, 'error');
+        App.showConsole(err, 'error', 3000);
         console.error(err);
       });
   }

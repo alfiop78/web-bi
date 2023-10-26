@@ -185,21 +185,22 @@ class MapDatabaseController extends Controller
   // Siccome si verificano ugualmente ho commentato questo Metodo, che usa il POST. In futuro mi
   // potrà servire se decido di inviare qui alcuni dati, ad esempio, alcuni parametri per la query, come la definizione
   // delle colonne
-  /* public function datamart(Request $request)
+  public function datamartPost(Request $request)
   {
+    dd($request);
     $id = $request->input(0);
-    // dd($id);
+    dd($id);
     // dd($id);
     // $datamart = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='decisyon_cache' AND TABLE_NAME='WEB_BI_$id';");
     // if ($datamart) {
-    $data = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.WEB_BI_$id LIMIT 10000");
+    $data = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.WEB_BI_$id LIMIT 20");
     // dd(memory_get_usage());
     // dd(memory_get_peak_usage());
     // }
     // dd($datamart);
     // dd($data);
     return response()->json($data);
-  } */
+  }
 
   // sheet
   public function sheet(Request $request)

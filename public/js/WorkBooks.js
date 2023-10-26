@@ -98,6 +98,9 @@ class Sheets {
     this.sheet.id = this.id;
     this.sheet.name = this.name;
     this.sheet.fields = Object.fromEntries(this.fields);
+    // creo un array con le colonne da visualizzare nello sheet
+    this.sheet.sheetColumns = [...this.fields.values()];
+    // creo un array con le metriche da visualizzare nello sheet
     this.sheet.from = Object.fromEntries(this.from);
     this.sheet.joins = Object.fromEntries(this.joins);
     this.sheet.workbook_ref = this.workBookToken;
@@ -110,6 +113,7 @@ class Sheets {
     delete this.sheet.metrics;
     delete this.sheet.advMetrics;
     delete this.sheet.compositeMetrics;
+    this.sheet.sheetMetrics = [...this.metrics.values()];
     for (const [token, metric] of this.metrics) {
       switch (metric.type) {
         case 'basic':
@@ -127,8 +131,7 @@ class Sheets {
     }
     if (!this.sheet.hasOwnProperty('created_at')) this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.options);
     this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.options);
-    console.info(this.sheet);
-    debugger;
+    console.info('sheet:', this.sheet);
     SheetStorage.save(this.sheet);
   }
 

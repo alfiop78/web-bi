@@ -47,8 +47,10 @@ class Cube
       // ... per ogni colonna
       // all'interno delle tabelle ci sono i token che corrispondo ognuno a una colonna id-ds
       foreach ($column->field as $key => $value) {
+        // dd($key);
         // key : id/ds
-        $this->_fields[] = "{$column->name}_{$key}";
+        $this->_fields[] = ($key === "id") ? "{$column->name}_{$key}" : "{$column->name}";
+        // $this->_fields[] = "{$column->name}_{$key}";
       }
     }
     // dd($this->_fields);
@@ -74,7 +76,8 @@ class Cube
       foreach ($column->field as $key => $value) {
         // key: id/ds
         $name_key = "{$column->name}_{$key}";
-        $fieldList["{$column->name}_{$key}"] = implode("", $value->sql) . " AS {$column->name}_{$key}"; // $fieldType : id/ds
+        $fieldList["{$column->name}_{$key}"] = ($key === "ds") ? implode("", $value->sql) . " AS $column->name" : implode("", $value->sql) . " AS {$column->name}_{$key}";
+        // $fieldList["{$column->name}_{$key}"] = implode("", $value->sql) . " AS {$column->name}_{$key}"; // $fieldType : id/ds
         // questo viene utilizzato nella clausola ON della LEFT JOIN
         $this->_columns[] = "{$column->name}_id";
         if (property_exists($this, 'json__info')) {

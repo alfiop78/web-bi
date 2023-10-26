@@ -284,7 +284,7 @@ Route::get('/fetch_api/{id}/datamart', [MapDatabaseController::class, 'datamart'
 Route::get('/fetch_api/{id}/preview', [MapDatabaseController::class, 'preview'])->name('web_bi.fetch_api.preview');
 
 // Metodo POST commentato, possibile utilizzo futuro, vedere commenti in MapDatabaseController
-// Route::post('/fetch_api/datamart', [MapDatabaseController::class, 'datamart'])->name('web_bi.fetch_api.datamart');
+Route::post('/fetch_api/datamartpost', [MapDatabaseController::class, 'datamartPost'])->name('web_bi.fetch_api.datamartPost');
 
 // store json
 Route::prefix('/fetch_api/json/')->group(function () {
