@@ -13,7 +13,8 @@ class Dashboards {
       formatter: {},
       group: {
         key: [],
-        columns: []
+        columns: [],
+        names: []
       },
       view: []
     },

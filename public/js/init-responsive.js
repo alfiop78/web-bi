@@ -1396,7 +1396,6 @@ var Sheet;
     (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) ?
       Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
       Dashboard.json.name = `template-${Sheet.sheet.token}`;
-    // 1- Recupero tutte le metriche create (base, avanzate, composite)
     // se, in json.data.group.names esiste già questa colonna, non la modifico
     // creo l'array di object che mi servirà per nascondere/visualizzare le colonne
     let columnProperties = [];
@@ -1413,46 +1412,47 @@ var Sheet;
     for (const field of Object.keys(Dashboard.data[0])) {
       const findMetricIndex = metrics.findIndex(metric => metric.alias === field);
       const type = (findMetricIndex === -1) ? 'string' : 'number';
+      const columnType = (findMetricIndex === -1) ? 'column' : 'metric';
       if (Dashboard.json.data.columns[field]) {
         // il data.columns già esiste, non sovrascrivo la prop 'label'
         columnsSet.add({
           id: field,
           label: Dashboard.json.data.columns[field].label,
-          type, other: 'altre proprietà...'
+          type, properties: { columnType }, other: 'altre proprietà...'
         });
       } else {
-        columnsSet.add({ id: field, label: field, type, other: 'altre proprietà...' });
+        columnsSet.add({ id: field, label: field, type, properties: { columnType }, other: 'altre proprietà...' });
       }
     }
     // Salvataggio del json
     if (Dashboard.json) {
       // converto il columnsSet (array) in Object
       columnsSet.forEach(col => Dashboard.json.data.columns[col.id] = col);
-      // definisco data.group.key creando i campi _ds nell'array columnsSet
       // creo un array con le colonne da visualizzare in fase di inizializzazione del dashboard
       // Dashboard.json.data.group.names = columns;
+      // la prop 'names' mi servirà per popolare la DataView dopo il group()
       Dashboard.json.data.group.names = columnProperties;
       // nel data.group.columns vanno messe tutte le metriche, come array di object
       Dashboard.json.data.group.columns = metrics;
       let keys = [];
+      console.log(columnsSet);
+      // imposto tutte le colonne (colonne dimensionali, non metriche) in
+      // json.data.group.key.
       [...columnsSet].forEach((col, index) => {
-        // const regex = new RegExp('_ds$');
-        // if (regex.test(col.id)) keys.push(index);
-        // se l'id colonna è presente in metrics non la inserisco qui, in 'data.group.key'
-        let metricsIndex = metrics.findIndex(metric => metric.alias === col.id);
-        // if (metricsIndex === -1) keys.push(index);
-        // TODO: utilizzare la stessa logica di columnProperties (sopra) se il dato nel json è già presente
-        // altrimenti qui viene sovrascritto
-
-        // const column = Dashboard.json.data.group.names.find(columnName => columnName.id === col.id);
-        // const visible = (col) ? column.properties.visible : true;
-        // if (metricsIndex === -1) keys.push({ id: col.id, index, properties: { visible } });
-        if (metricsIndex === -1) keys.push({ id: col.id, index, properties: { visible: true } });
+        if (col.properties.columnType === 'column') {
+          const column = Dashboard.json.data.group.key.find(columnName => columnName.id === col.id);
+          // se la colonna in ciclo è già presente in json.data.group.key non sovrascrivo la proprieta
+          // 'grouped', questa proprietà viene impostata quando l'utente nasconde la
+          // colonna e quindi non deve essere inclusa nel raggruppamento
+          // debugger;
+          const grouped = (column) ? column.properties.grouped : true;
+          keys.push({ id: col.id, index, properties: { grouped } });
+          // keys.push({ id: col.id, index });
+        }
       });
       Dashboard.json.data.group.key = keys;
     }
     console.log(Dashboard.json);
-    // debugger;
     window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
   }
 

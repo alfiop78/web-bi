@@ -68,43 +68,47 @@ function drawDatamart(ref) {
   // google.visualization.events.addListener(tableRef, 'ready', readyV2);
   google.visualization.events.addListener(tableRef, 'ready', readyV3);
   function readyV3() {
-    // raggruppo le colonne per effettuare i calcoli delle metriche composte
     // Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
-    // const tableRefGroup = new google.visualization.Table(document.getElementById(ref));
     Dashboard.tableRefGroup = new google.visualization.Table(document.getElementById(ref));
     // recupero gli indici delle colonne da visualizzare
     console.log(Dashboard.json.data.group);
-    let groupColumnsIndex = [];
     console.log('group.key:', Dashboard.json.data.group.key);
     // TODO: trasformo il data.group.key in un array di indici di colonne (anche se potrebbe funzionare
     // anche con un object, da rivedere su Google Chart)
     let keyColumns = [];
+    // l'array keyColumns conterrà gli index delle colonne per le quali il report viene raggruppato.
+    // Questo consente di fare i calcoli per le metriche composte sui dati raggruppati
     Dashboard.json.data.group.key.forEach(column => {
-      if (column.properties.visible) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
+      if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
     });
-    debugger;
+    console.log(keyColumns);
+
     // creo l'object che verrà messo nel 3° param di group()
     // Es.: { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
-    // NOTE: posso recuperare le metriche in base alla sua cssClass?
-
     // le metriche che hanno la proprietà dependencies: true, sono quelle NON aggiunte DIRETTAMENTE
-    // al report ma derivano da quelle composite, quindi creo l'array con le sole colonne da visualizzare
-    // nel report, prendendo i dati da 'data.group.columns'
+    // al report ma derivano/dipendono da quelle composite, quindi creo l'array con le sole colonne
+    // da visualizzare nel report, prendendo i dati da 'data.group.columns'
+    let groupColumnsIndex = [];
     Dashboard.json.data.group.columns.forEach(metric => {
-      // TODO: visualizzare solo le metriche presenti nello Sheet, quelle contenute
-      // nelle 'composite' ma NON inserite nel report NON devono essere visualizzate
-      if (metric.dependencies === false) {
-        const index = Dashboard.dataTable.getColumnIndex(metric.alias);
-        const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
-        let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', properties: { className: 'metric-col' } };
-        groupColumnsIndex.push(object);
-      }
+      // salvo in groupColumnsIndex tutte le metriche.
+      // Qquelle contenute nelle 'composite' ma NON inserite nel report non saranno visualizzate, ma
+      // viene impostato nella DataView, in base alla prop 'dependencies'
+      // recupero l'indice della colonna in base al suo nome
+      const index = Dashboard.dataTable.getColumnIndex(metric.alias);
+      // TODO: modificare la prop 'aggregateFn' in 'aggregation' in fase di creazione delle metriche
+      const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
+      let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', properties: { className: 'metric-col' } };
+      // Creo l'object per il 3 parametro di group()
+      // Es.: { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
+      groupColumnsIndex.push(object);
+      // }
     });
+    // raggruppo i dati in base alle key presenti in keyColumns
     Dashboard.dataGroup = new google.visualization.data.group(
-      // Dashboard.dataTable, Dashboard.json.data.group.key, groupColumnsIndex
       Dashboard.dataTable, keyColumns, groupColumnsIndex
     );
     console.log('group():', Dashboard.dataGroup);
+
     // TEST: aggiunta di una classe a una colonna, nella dataGroup
     // Dashboard.dataGroup.setColumnProperty(1, 'className', 'cssc1')
     // console.log(Dashboard.dataGroup.getColumnProperty(1, 'className'));
@@ -119,24 +123,28 @@ function drawDatamart(ref) {
     // console.log('ricavo_rapporto_2 (index):', Dashboard.dataGroup.getColumnIndex('ricavo_rapporto_2'));
     // console.log('area_ds index : ', Dashboard.dataTable.getColumnIndex('area_ds'));
     // console.log('zona_ds index : ', Dashboard.dataTable.getColumnIndex('zona_ds'));
-    // console.log(groupKeyIndex, groupColumnsIndex);
-    // per le colonne dimensionali, potrei recuperare gli indici, da mettere ini DataView.setColumns()
+    // per le colonne dimensionali, potrei recuperare gli indici, da mettere in DataView.setColumns()
     // con il getColumnId() sulla dataGroup TEST:
     console.log(Dashboard.dataGroup.getColumnId(3));
     console.log(Dashboard.dataGroup.getColumnIndex('zona'));
 
     // recupero le colonne presenti nel report, per la visualizzazione nella DataView, dopo il group() delle colonne _id,_ds
     let viewColumns = [], viewMetrics = [];
+    // In .data.group.names sono presenti tutte le colonne del report, tramite la
+    // prop 'visible' (bool) posso decidere di visualizzarla/nascondere a seconda della scelta
+    // dell'utente. TODO: questa proprietà potrei spostarla eliminandola da .data.group e mettendola in
+    // json.data.view
     Dashboard.json.data.group.names.forEach(column => {
       if (column.properties.visible) viewColumns.push(Dashboard.dataGroup.getColumnIndex(column.id));
     });
     // dalla datagroup, recupero gli indici di colonna delle metriche
-    Dashboard.json.data.group.columns.forEach(col => {
-      if (!col.dependencies) {
-        const index = Dashboard.dataGroup.getColumnIndex(col.alias);
+    Dashboard.json.data.group.columns.forEach(metric => {
+      if (!metric.dependencies) {
+        const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
         viewMetrics.push(index);
       }
     });
+    // concateno i due array che popoleranno la DataView.setColumns()
     let viewDefined = viewColumns.concat(viewMetrics)
     Dashboard.dataViewGrouped.setColumns(viewDefined);
 
@@ -421,12 +429,25 @@ function columnHander(e) {
   console.log(Dashboard.dataTable.getColumnIndex(e.target.dataset.columnId));
   const dataTableIndex = Dashboard.dataTable.getColumnIndex(e.target.dataset.columnId);
   console.log(e.target.dataset.index, e.target.dataset.columnId);
-  // array di colonne attualmente presente nella dataView
-  // console.log(Dashboard.dataViewGrouped.getViewColumns());
+  // invece di fare lo splice, imposto grouped:false in data.group.key
+  // per la colonna _id e per la colonna che è stata nascosta.
+  // In questo modo (anzichè la cancellazione dell'elemento dall'array) posso
+  // recuperare la colonna nascosta reimpostando 'properties.grouped : true'
+  Dashboard.json.data.group.key[dataTableIndex - 1].properties.grouped = false;
+  Dashboard.json.data.group.key[dataTableIndex].properties.grouped = false;
+  // Dashboard.json.data.group.key.splice(dataTableIndex - 1, 2); // colonna _id e _ds (selezionata)
+  const columnIndex = Dashboard.json.data.group.names.findIndex(col => col.id === e.target.dataset.columnId);
+  // const columnIndex = Dashboard.json.data.group.names.indexOf(e.target.dataset.columnId);
+  // Dashboard.json.data.group.names.splice(columnIndex);
+  // TODO: invece di cercare prima con findIndex() potrei usare la stessa logica di json.data.group.key (sopra)
+  Dashboard.json.data.group.names[columnIndex].properties.visible = false;
   // NOTE: codice ripetuto (readyV2())
+  let keyColumns = [];
+  Dashboard.json.data.group.key.forEach(column => {
+    if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
+  });
   let groupColumnsIndex = [];
   Dashboard.json.data.group.columns.forEach(metric => {
-    // const index = Dashboard.dataViewGrouped.getColumnIndex(col.alias);
     const index = Dashboard.dataTable.getColumnIndex(metric.alias);
     const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
     let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', properties: { className: 'metric-col' } };
@@ -434,24 +455,11 @@ function columnHander(e) {
   });
   // NOTE: end codice ripetuto (readyV2())
   console.log(groupColumnsIndex);
-  // invece di fare lo splice, imposto visible:false in data.group.key
-  Dashboard.json.data.group.key[dataTableIndex - 1].properties.visible = false;
-  Dashboard.json.data.group.key[dataTableIndex].properties.visible = false;
-  // Dashboard.json.data.group.key.splice(dataTableIndex - 1, 2); // colonna _id e _ds (selezionata)
-  const columnIndex = Dashboard.json.data.group.names.findIndex(col => col.id === e.target.dataset.columnId);
-  // const columnIndex = Dashboard.json.data.group.names.indexOf(e.target.dataset.columnId);
-  // Dashboard.json.data.group.names.splice(columnIndex);
-  // TODO: invece di cercare prima con findIndex() potrei usare la stessa logica di json.data.group.key (sopra)
-  Dashboard.json.data.group.names[columnIndex].properties.visible = false;
-  let keyColumns = [];
-  Dashboard.json.data.group.key.forEach(column => {
-    if (column.properties.visible) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
-  });
   Dashboard.dataGroup = new google.visualization.data.group(
     Dashboard.dataTable, keyColumns, groupColumnsIndex
   );
   console.log(Dashboard.dataGroup);
-  console.log(Dashboard.dataViewGrouped.getColumnIndex(e.target.dataset.columnId));
+  // console.log(Dashboard.dataViewGrouped.getColumnIndex(e.target.dataset.columnId));
   Dashboard.dataViewGrouped = new google.visualization.DataView(Dashboard.dataGroup);
   // Dashboard.dataViewGrouped.hideColumns([7]);
   console.log(Dashboard.dataViewGrouped);
@@ -466,6 +474,7 @@ function columnHander(e) {
       viewMetrics.push(index);
     }
   });
+  // concateno i due array che popoleranno la DataView.setColumns()
   let viewDefined = viewColumns.concat(viewMetrics)
   Dashboard.dataViewGrouped.setColumns(viewDefined);
   Dashboard.tableRefGroup.draw(Dashboard.dataViewGrouped);
