@@ -143,7 +143,7 @@ function previewReady() {
   // dalla datagroup, recupero gli indici di colonna delle metriche
   Dashboard.json.data.group.columns.forEach(metric => {
     if (!metric.dependencies) {
-      // console.log(metric);
+      console.log(metric);
       const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
       // TODO Implementare la funzione 'calc' impostata sulle metriche composite.
       if (metric.type === 'composite') {
@@ -152,40 +152,33 @@ function previewReady() {
         // Es.: margine = ((ricavo - costo) / ricavo) * 100, recuperare gli indici
         // delle colonne ricavo e costo per creare la metrica margine :
         // recupero la formula della metrica composta
-        let metricNames = [], test = [];
+        let rebaseFormula = [], metricNames = [];
         const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
         formula.forEach(el => {
+          // (el.alias) ? rebaseFormula.push(el.alias) : rebaseFormula.push(el);
           // es. : [ricavo_rapporto_2, costo_rapporto_2]
           if (el.alias) metricNames.push(el.alias);
-
         });
-        // console.log(metricNames);
-        // debugger;
+        console.log(metricNames);
+        debugger;
         let calcMargine = function(dt, row) {
           let value1, value2, result;
           // let f = (dt.getValue(row, test[0]) - dt.getValue(row, test[1])) / dt.getValue(row, test[0]) * 100;
           // array da passare qui è [ricavo_rapporto_2, costo_rapporto_2]
           // formula del margine
+          // TEST: 1
+          value1 = dt.getColumnIndex(metricNames[0]);
+          value2 = dt.getColumnIndex(metricNames[1]);
+          result = (dt.getValue(row, value1) - dt.getValue(row, value2)) / dt.getValue(row, value1) * 100;
           // TEST: 2
-          // value1 = dt.getValue(row, dt.getColumnIndex(metricNames[0]));
-          // value2 = dt.getValue(row, dt.getColumnIndex(metricNames[1]));
-          // result = (value1 - value2) / value1 * 100;
-          // TEST: 3
-          formula.forEach(el => {
-            if (el.alias) {
-              test.push(dt.getValue(row, dt.getColumnIndex(el.alias)));
-            } else {
-              test.push(el);
-            }
-          });
-          console.log(test.join(''));
-          result = test.join('');
+          value1 = dt.getValue(row, dt.getColumnIndex(metricNames[0]));
+          value2 = dt.getValue(dt.getColumnIndex(metricNames[1]));
+          result = (value1 - value2) / value1 * 100;
 
           // TEST: con i nomi delle metriche (OK)
           // let f = (dt.getValue(row, dt.getColumnIndex('ricavo_rapporto_2')) - dt.getValue(row, dt.getColumnIndex('costo_rapporto_2'))) / dt.getValue(row, dt.getColumnIndex('ricavo_rapporto_2')) * 100;
           console.log(result);
-          console.log(eval(result));
-          return eval(result);
+          return result;
         }
         console.log(calcMargine);
         viewMetrics.push({ calc: calcMargine, type: 'number', label: metric.alias });

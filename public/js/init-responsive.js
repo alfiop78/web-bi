@@ -1392,7 +1392,7 @@ var Sheet;
     }
   }
 
-  app.createJsonTemplateV1 = () => {
+  app.createSheetTemplate = () => {
     (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) ?
       Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
       Dashboard.json.name = `template-${Sheet.sheet.token}`;
@@ -1406,11 +1406,10 @@ var Sheet;
       // temporaneo, per reimpostare tutte le colonne visibili
       // columnProperties.push({ id: col, properties: { visible: true } });
     });
-    const metrics = Sheet.sheet.sheetMetrics;
     let columnsSet = new Set();
-    // se la colonna in ciclo è presente in 'metrics' la imposto come type: 'number' altrimenti 'string'
+    // se la colonna in ciclo è presente in 'Sheet.sheet.sheetMetrics' la imposto come type: 'number' altrimenti 'string'
     for (const field of Object.keys(Dashboard.data[0])) {
-      const findMetricIndex = metrics.findIndex(metric => metric.alias === field);
+      const findMetricIndex = Sheet.sheet.sheetMetrics.findIndex(metric => metric.alias === field);
       const type = (findMetricIndex === -1) ? 'string' : 'number';
       const columnType = (findMetricIndex === -1) ? 'column' : 'metric';
       if (Dashboard.json.data.columns[field]) {
@@ -1433,7 +1432,7 @@ var Sheet;
       // la prop 'names' mi servirà per popolare la DataView dopo il group()
       Dashboard.json.data.group.names = columnProperties;
       // nel data.group.columns vanno messe tutte le metriche, come array di object
-      Dashboard.json.data.group.columns = metrics;
+      Dashboard.json.data.group.columns = Sheet.sheet.sheetMetrics;
       let keys = [];
       console.log(columnsSet);
       // imposto tutte le colonne (colonne dimensionali, non metriche) in
@@ -1453,94 +1452,6 @@ var Sheet;
       Dashboard.json.data.group.key = keys;
     }
     console.log(Dashboard.json);
-    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
-  }
-
-  app.createJsonTemplate = () => {
-    // utilizzo un oggetto Map() in modo da preservare l'ordine di inserimento
-    // ed avere, quindi, un index corretto per proseguire l'inserimento di data.columns
-    // 1- Recupero tutte le metriche create (base, avanzate, composite)
-    let mapMetrics = new Map();
-    if (Sheet.sheet.metrics) Object.values(Sheet.sheet.metrics).forEach(metric => {
-      mapMetrics.set(metric.alias, {
-        aggregation: metric.aggregateFn.toLowerCase(),
-        type: metric.type, properties: { dependencies: metric.dependencies }
-      });
-    });
-    if (Sheet.sheet.advMetrics) Object.values(Sheet.sheet.advMetrics).forEach(metric => {
-      mapMetrics.set(metric.alias, {
-        aggregation: metric.aggregateFn.toLowerCase(),
-        type: metric.type, properties: { dependencies: metric.dependencies }
-      });
-    });
-    if (Sheet.sheet.compositeMetrics) Object.values(Sheet.sheet.compositeMetrics).forEach(metric => {
-      const metricDef = JSON.parse(localStorage.getItem(metric.token));
-      let formula = [];
-      metricDef.formula.forEach(formulaEl => {
-        (formulaEl.token) ? formula.push(formulaEl.alias) : formula.push(formulaEl);
-      });
-      mapMetrics.set(metric.alias, {
-        aggregation: 'sum',
-        type: metric.type, properties: {
-          calc: { margine: formula }
-        }
-      });
-    });
-    console.log(mapMetrics);
-    let columnsSet = new Set();
-    let metrics = [];
-    (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) ?
-      Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
-      Dashboard.json.name = `template-${Sheet.sheet.token}`;
-
-    for (const field of Object.keys(Dashboard.data[0])) {
-      // console.log(field);
-      const type = (mapMetrics.has(field)) ? 'number' : 'string';
-      if (Dashboard.json.data.columns[field]) {
-        // il data.columns già esiste, non sovrascrivo la prop 'label'
-        columnsSet.add({
-          id: field,
-          label: Dashboard.json.data.columns[field].label,
-          type, other: 'altre proprietà...'
-        });
-      } else {
-        // TODO: per stabilire il type potrei analizzare il contenuto della colonna e
-        // tentare di impostare il 'type' oppure vado a cercare il 'field' tra le metriche
-        // advanced, basic, composite. Se trovo la metrica imposto type: 'number'
-
-        // Al momento, senza analizzare il dato nella colonna, verifico se 'field' è presente in mapMetrics.
-        // Se presente, è una metrica a va impostato il type: 'number'
-        columnsSet.add({ id: field, label: field, type, other: 'altre proprietà...' });
-      }
-    }
-    // console.log('data.columns', columnsSet);
-    for (const [id, value] of mapMetrics) {
-      // debugger;
-      // recupero l'indice della metrica in 'columnSet'
-      const metricIndex = [...columnsSet].findIndex(el => el.id === id);
-      // console.log(metricIndex);
-      metrics.push({ id, column: metricIndex, aggregation: value.aggregation, type: 'number', properties: value.properties });
-    }
-
-    // Salvataggio del json
-    if (Dashboard.json) {
-      // converto il columnsSet (array) in Object
-      columnsSet.forEach(col => Dashboard.json.data.columns[col.id] = col);
-      // definisco data.group.key creando i campi _ds nell'array columnsSet
-      let keys = [];
-      [...columnsSet].forEach((col, index) => {
-        // const regex = new RegExp('_ds$');
-        // if (regex.test(col.id)) keys.push(index);
-        // se l'id colonna è presente in metrics non la inserisco qui, in 'data.group.key'
-        let metricsIndex = metrics.findIndex(metric => metric.id === col.id);
-        if (metricsIndex === -1) keys.push(index);
-      });
-      Dashboard.json.data.group.key = keys;
-      // nel data.group.columns vanno messe tutte le metriche, come array di object
-      Dashboard.json.data.group.columns = metrics;
-    }
-    console.log(Dashboard.json);
-    // debugger;
     window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
   }
 
@@ -1590,7 +1501,7 @@ var Sheet;
         Dashboard.data = data;
         // imposto il riferimento della tabella nel DOM
         Dashboard.ref = 'preview-datamart';
-        app.createJsonTemplateV1();
+        app.createSheetTemplate();
         // Creazione preview del datamart
         // google.charts.setOnLoadCallback(app.drawDatamart('preview-datamart'));
         // Fn impostata in init-sheet.js
