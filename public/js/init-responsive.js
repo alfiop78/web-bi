@@ -1588,6 +1588,8 @@ var Sheet;
       .then(data => {
         // impostare la prop dashboard.json.data.columns con i rispettivi dataType
         Dashboard.data = data;
+        // imposto il riferimento della tabella nel DOM
+        Dashboard.ref = 'preview-datamart';
         app.createJsonTemplateV1();
         // Creazione preview del datamart
         // google.charts.setOnLoadCallback(app.drawDatamart('preview-datamart'));

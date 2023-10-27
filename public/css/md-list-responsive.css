@@ -209,3 +209,7 @@ ul.context-menu-items {
 * [data-contextmenu]:hover{
   cursor: context-menu!important;
 }
+
+li[data-visible="false"] {
+  opacity: .5;
+}
