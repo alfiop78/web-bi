@@ -14,23 +14,31 @@ function drawDatamart() {
   // livelli dimensionali
   const prepareData = Dashboard.prepareData();
   // ciclo il prepareData.cols per aggiungere l'elenco delle colonne in #ul-columns-handler.
-  // Da questo elenco si potrà interagire con la DataTable, impostare un diverso raggruppamento
+  // Da questo elenco si potranno nascondere/visualizzare le colonne e le metriche
   prepareData.cols.forEach((col, index) => {
     const ulColumnsHandler = document.getElementById('ul-columns-handler');
     const tmplContent = tmplList.content.cloneNode(true);
     const li = tmplContent.querySelector('li');
     // const span = li.querySelector('span');
     const regex = new RegExp('_id$');
-    // in questo elenco non aggiungo le colonne _id, queste devono essere
-    // automaticamente nascoste dalla DataTable, però devono essere incluse nella
-    // funzione group()
+    // in questo elenco non aggiungo le colonne _id e le metriche con 'dependencies':true.
+    // Le colonne _id sono automaticamente nascoste dalla DataTable, anche se sono
+    // presenti nel func group() (json.data.group.key)
     if (!regex.test(col.id)) {
-      li.innerText = col.id;
-      li.dataset.columnId = col.id;
-      li.dataset.index = index;
+      // TODO Verifico se è una metrica con 'dependencies' : false
+      console.log(Dashboard.json.data.group.columns);
+      const metric = Dashboard.json.data.group.columns.find(metric => (metric.alias === col.id && metric.dependencies === false));
+      // se metric ha è stato trovato devo aggiungerla all'elenco, altrimenti
+      // o non è una metrica oppure è una metrica con 'dependencies' : true
+      console.log(metric);
+      debugger;
+      // if (metric) { }
       // se la colonna è nascosta, imposto il dataset.hidden = true
       const column = Dashboard.json.data.group.names.find(column => (column.id === col.id));
       if (column) li.dataset.visible = column.properties.visible;
+      li.innerText = col.id;
+      li.dataset.columnId = col.id;
+      li.dataset.index = index;
       // TODO Stesso controllo anche per le metriche in json.data.group.columns
       li.addEventListener('click', columnHander);
       ulColumnsHandler.appendChild(li);
@@ -152,7 +160,7 @@ function previewReady() {
       // }
       // console.log(evil('12/5*9+9.4*2')); // => 40.4     const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
 
-      // TODO Implementare la funzione 'calc' impostata sulle metriche composite.
+      // Implementazione della func 'calc' per le metriche composite.
       if (metric.type === 'composite') {
         // è una metrica composta, creo la funzione calc, sostituendo i nomi
         // delle metriche contenute nella formula, con gli indici corrispondenti.
@@ -180,7 +188,6 @@ function previewReady() {
           // console.log(result);
           return (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
         }
-        // console.log(calcMargine);
         viewMetrics.push({ calc: calcFunction, type: 'number', label: metric.alias });
       } else {
         viewMetrics.push(index);
