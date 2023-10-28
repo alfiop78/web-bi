@@ -1410,17 +1410,19 @@ var Sheet;
     // TEST:
     Sheet.sheet.sheetMetrics.forEach(metric => {
       const metricFind = Dashboard.json.data.group.columns.find(name => name.alias === metric.alias);
+      // la metrica è semprpe trovata in .json.data.group.columns perchè qui
+      // vengono messe anche le metriche con dependencies:true (metriche incluse nelle metriche composte)
       console.log(metricFind);
       // metrica presentem verificco se esiste già la proprietà 'visible'
-      if (metric.dependencies === false) {
+      if (metricFind.dependencies === false) {
         // è una metrica che deve avere la proprietà 'visible'
-        if (!metric.properties) {
+        if (!metricFind.properties) {
           // la metrica non ha nessuna proprietà impostata, quindi imposto 'visible' : true
           // altrimenti la lascio inalterata
-          metric.properties = { visible: true };
+          metricFind.properties = { visible: true };
         }
       }
-      debugger;
+      metricProperties.push(metricFind);
     });
     // TEST:
     let columnsSet = new Set();
@@ -1449,12 +1451,11 @@ var Sheet;
       // la prop 'names' mi servirà per popolare la DataView dopo il group()
       Dashboard.json.data.group.names = columnProperties;
       // nel data.group.columns vanno messe tutte le metriche, come array di object
-      console.log(metricProperties);
-      debugger;
-      Dashboard.json.data.group.columns = Sheet.sheet.sheetMetrics;
+      Dashboard.json.data.group.columns = metricProperties;
+      // Dashboard.json.data.group.columns = Sheet.sheet.sheetMetrics;
       let keys = [];
       console.log(columnsSet);
-      // imposto tutte le colonne (colonne dimensionali, non metriche) in
+      // salvo tutte le colonne (colonne dimensionali, non metriche) in
       // json.data.group.key.
       [...columnsSet].forEach((col, index) => {
         if (col.properties.columnType === 'column') {
@@ -1462,7 +1463,6 @@ var Sheet;
           // se la colonna in ciclo è già presente in json.data.group.key non sovrascrivo la proprieta
           // 'grouped', questa proprietà viene impostata quando l'utente nasconde la
           // colonna e quindi non deve essere inclusa nel raggruppamento
-          // debugger;
           const grouped = (column) ? column.properties.grouped : true;
           keys.push({ id: col.id, index, properties: { grouped } });
           // keys.push({ id: col.id, index });

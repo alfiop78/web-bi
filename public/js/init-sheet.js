@@ -24,24 +24,22 @@ function drawDatamart() {
     // in questo elenco non aggiungo le colonne _id e le metriche con 'dependencies':true.
     // Le colonne _id sono automaticamente nascoste dalla DataTable, anche se sono
     // presenti nel func group() (json.data.group.key)
-    if (!regex.test(col.id)) {
-      // TODO Verifico se è una metrica con 'dependencies' : false
-      console.log(Dashboard.json.data.group.columns);
-      const metric = Dashboard.json.data.group.columns.find(metric => (metric.alias === col.id && metric.dependencies === false));
-      // se metric ha è stato trovato devo aggiungerla all'elenco, altrimenti
-      // o non è una metrica oppure è una metrica con 'dependencies' : true
-      console.log(metric);
-      debugger;
-      // if (metric) { }
+    // TODO Verifico se è una metrica con 'dependencies' : false
+    // se è una metrica con 'dependencies' : true non devo aggiungerla alla ul
+    const metric = Dashboard.json.data.group.columns.find(metric => (metric.alias === col.id && metric.dependencies === false));
+    if (!regex.test(col.id) || metric) {
       // se la colonna è nascosta, imposto il dataset.hidden = true
       const column = Dashboard.json.data.group.names.find(column => (column.id === col.id));
       if (column) li.dataset.visible = column.properties.visible;
-      li.innerText = col.id;
-      li.dataset.columnId = col.id;
-      li.dataset.index = index;
-      // TODO Stesso controllo anche per le metriche in json.data.group.columns
-      li.addEventListener('click', columnHander);
-      ulColumnsHandler.appendChild(li);
+      if (metric) li.dataset.visible = metric.properties.visible;
+      if (column || metric) {
+        // se è una colonna _ds oppure una metrica 'dependencies':false la aggiungo alla ul
+        li.innerText = col.id;
+        li.dataset.columnId = col.id;
+        li.dataset.index = index;
+        li.addEventListener('click', columnHander);
+        ulColumnsHandler.appendChild(li);
+      }
     }
   });
   Dashboard.dataTable = new google.visualization.DataTable(prepareData);
