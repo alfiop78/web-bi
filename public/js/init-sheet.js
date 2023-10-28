@@ -143,8 +143,15 @@ function previewReady() {
   // dalla datagroup, recupero gli indici di colonna delle metriche
   Dashboard.json.data.group.columns.forEach(metric => {
     if (!metric.dependencies) {
-      // console.log(metric);
       const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
+      // console.log(metric);
+      // NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo
+      // modo come alternativa a eval() (non è stato testato)
+      // function evil(fn) {
+      //   return new Function('return ' + fn)();
+      // }
+      // console.log(evil('12/5*9+9.4*2')); // => 40.4     const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
+
       // TODO Implementare la funzione 'calc' impostata sulle metriche composite.
       if (metric.type === 'composite') {
         // è una metrica composta, creo la funzione calc, sostituendo i nomi
@@ -152,43 +159,29 @@ function previewReady() {
         // Es.: margine = ((ricavo - costo) / ricavo) * 100, recuperare gli indici
         // delle colonne ricavo e costo per creare la metrica margine :
         // recupero la formula della metrica composta
-        let metricNames = [], test = [];
         const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
-        formula.forEach(el => {
-          // es. : [ricavo_rapporto_2, costo_rapporto_2]
-          if (el.alias) metricNames.push(el.alias);
-
-        });
-        // console.log(metricNames);
-        // debugger;
-        let calcMargine = function(dt, row) {
-          let value1, value2, result;
-          // let f = (dt.getValue(row, test[0]) - dt.getValue(row, test[1])) / dt.getValue(row, test[0]) * 100;
-          // array da passare qui è [ricavo_rapporto_2, costo_rapporto_2]
-          // formula del margine
-          // TEST: 2
-          // value1 = dt.getValue(row, dt.getColumnIndex(metricNames[0]));
-          // value2 = dt.getValue(row, dt.getColumnIndex(metricNames[1]));
-          // result = (value1 - value2) / value1 * 100;
-          // TEST: 3
-          formula.forEach(el => {
-            if (el.alias) {
-              test.push(dt.getValue(row, dt.getColumnIndex(el.alias)));
+        // Creo una Func "dinamica"
+        let calcFunction = function(dt, row) {
+          let formulaJoined = [];
+          // in formulaJoined ciclo tutti gli elementi della Formula, imposto i
+          // valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
+          formula.forEach(formulaEl => {
+            if (formulaEl.alias) {
+              formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
             } else {
-              test.push(el);
+              formulaJoined.push(formulaEl);
             }
           });
-          console.log(test.join(''));
-          result = test.join('');
-
-          // TEST: con i nomi delle metriche (OK)
-          // let f = (dt.getValue(row, dt.getColumnIndex('ricavo_rapporto_2')) - dt.getValue(row, dt.getColumnIndex('costo_rapporto_2'))) / dt.getValue(row, dt.getColumnIndex('ricavo_rapporto_2')) * 100;
-          console.log(result);
-          console.log(eval(result));
-          return eval(result);
+          // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
+          // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
+          // effettuo un controllo sul risultato in caso fosse NaN
+          // console.log(metric.alias, formulaJoined.join(''));
+          // const result = (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
+          // console.log(result);
+          return (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
         }
-        console.log(calcMargine);
-        viewMetrics.push({ calc: calcMargine, type: 'number', label: metric.alias });
+        // console.log(calcMargine);
+        viewMetrics.push({ calc: calcFunction, type: 'number', label: metric.alias });
       } else {
         viewMetrics.push(index);
       }
@@ -413,6 +406,8 @@ function columnHander(e) {
   console.log(Dashboard.dataTable.getColumnIndex(e.target.dataset.columnId));
   const dataTableIndex = Dashboard.dataTable.getColumnIndex(e.target.dataset.columnId);
   let keyColumns = [], groupColumnsIndex = [];
+  // Recupero l'index della colonna da nascondere/visualizzare
+  const columnIndex = Dashboard.json.data.group.names.findIndex(col => col.id === e.target.dataset.columnId);
   if (e.target.dataset.visible === 'false') {
     // la colonna è nascosta, la visualizzo e raggruppo.
     e.target.dataset.visible = true;
@@ -420,19 +415,7 @@ function columnHander(e) {
     // dell'else (quando si nasconde una colonna)
     Dashboard.json.data.group.key[dataTableIndex - 1].properties.grouped = true;
     Dashboard.json.data.group.key[dataTableIndex].properties.grouped = true;
-    const columnIndex = Dashboard.json.data.group.names.findIndex(col => col.id === e.target.dataset.columnId);
     Dashboard.json.data.group.names[columnIndex].properties.visible = true;
-    // NOTE: codice ripetuto (readyV2())
-    Dashboard.json.data.group.key.forEach(column => {
-      if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
-    });
-    Dashboard.json.data.group.columns.forEach(metric => {
-      const index = Dashboard.dataTable.getColumnIndex(metric.alias);
-      const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
-      let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', properties: { className: 'metric-col' } };
-      groupColumnsIndex.push(object);
-    });
-    console.log(groupColumnsIndex);
   } else {
     e.target.dataset.visible = false;
     // la colonna è visibile, la nascondo e la elimino dal group()
@@ -444,25 +427,25 @@ function columnHander(e) {
     // Elimino il raggruppamento per la colonna che l'utente ha nascosto
     Dashboard.json.data.group.key[dataTableIndex - 1].properties.grouped = false;
     Dashboard.json.data.group.key[dataTableIndex].properties.grouped = false;
-    // Per json.data.group.names, utilizzo la stessa logica utilizzata
-    // per il raggruppamento, in json.data.group.key, l'unica differenza è la prop
-    // 'visible', anzichè 'grouped' per nascondere una colonna, in questo caso, dalla DataView
-    // e non dal group()
-    // Recupero l'index della colonna da nascondere
-    const columnIndex = Dashboard.json.data.group.names.findIndex(col => col.id === e.target.dataset.columnId);
     Dashboard.json.data.group.names[columnIndex].properties.visible = false;
-    // NOTE: codice ripetuto (readyV2())
-    Dashboard.json.data.group.key.forEach(column => {
-      if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
-    });
-    Dashboard.json.data.group.columns.forEach(metric => {
-      const index = Dashboard.dataTable.getColumnIndex(metric.alias);
-      const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
-      let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', properties: { className: 'metric-col' } };
-      groupColumnsIndex.push(object);
-    });
-    console.log(groupColumnsIndex);
   }
+
+  // Per json.data.group.names, utilizzo la stessa logica utilizzata
+  // per il raggruppamento, in json.data.group.key, l'unica differenza è la prop
+  // 'visible', anzichè 'grouped' per nascondere una colonna, in questo caso, dalla DataView
+  // e non dal group()
+  // NOTE: codice ripetuto in previewReady()
+  Dashboard.json.data.group.key.forEach(column => {
+    if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
+  });
+
+  Dashboard.json.data.group.columns.forEach(metric => {
+    const index = Dashboard.dataTable.getColumnIndex(metric.alias);
+    const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
+    let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', properties: { className: 'metric-col' } };
+    groupColumnsIndex.push(object);
+  });
+  console.log(groupColumnsIndex);
 
   Dashboard.dataGroup = new google.visualization.data.group(
     Dashboard.dataTable, keyColumns, groupColumnsIndex
@@ -480,14 +463,31 @@ function columnHander(e) {
   Dashboard.json.data.group.columns.forEach(metric => {
     if (!metric.dependencies) {
       const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
-      viewMetrics.push(index);
+      if (metric.type === 'composite') {
+        // La logica è descritta nella Func previewReady()
+        const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
+        let calcFunction = function(dt, row) {
+          let formulaJoined = [];
+          formula.forEach(formulaEl => {
+            if (formulaEl.alias) {
+              formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
+            } else {
+              formulaJoined.push(formulaEl);
+            }
+          });
+          return (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
+        }
+        viewMetrics.push({ calc: calcFunction, type: 'number', label: metric.alias });
+      } else {
+        viewMetrics.push(index);
+      }
     }
   });
   // concateno i due array che popoleranno la DataView.setColumns()
   let viewDefined = viewColumns.concat(viewMetrics)
   Dashboard.dataViewGrouped.setColumns(viewDefined);
   Dashboard.tableRefGroup.draw(Dashboard.dataViewGrouped);
-  // NOTE: end codice ripetuto (readyV2())
+  // NOTE: end codice ripetuto in previewReady()
   window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
 
   // TEST:
