@@ -1398,7 +1398,7 @@ var Sheet;
       Dashboard.json.name = `template-${Sheet.sheet.token}`;
     // se, in json.data.group.names esiste già questa colonna, non la modifico
     // creo l'array di object che mi servirà per nascondere/visualizzare le colonne
-    let columnProperties = [];
+    let columnProperties = [], metricProperties = [];
     Sheet.sheet.sheetColumns.forEach(col => {
       const column = Dashboard.json.data.group.names.find(columnName => columnName.id === col);
       const visible = (column) ? column.properties.visible : true;
@@ -1406,6 +1406,23 @@ var Sheet;
       // temporaneo, per reimpostare tutte le colonne visibili
       // columnProperties.push({ id: col, properties: { visible: true } });
     });
+
+    // TEST:
+    Sheet.sheet.sheetMetrics.forEach(metric => {
+      const metricFind = Dashboard.json.data.group.columns.find(name => name.alias === metric.alias);
+      console.log(metricFind);
+      // metrica presentem verificco se esiste già la proprietà 'visible'
+      if (metric.dependencies === false) {
+        // è una metrica che deve avere la proprietà 'visible'
+        if (!metric.properties) {
+          // la metrica non ha nessuna proprietà impostata, quindi imposto 'visible' : true
+          // altrimenti la lascio inalterata
+          metric.properties = { visible: true };
+        }
+      }
+      debugger;
+    });
+    // TEST:
     let columnsSet = new Set();
     // se la colonna in ciclo è presente in 'Sheet.sheet.sheetMetrics' la imposto come type: 'number' altrimenti 'string'
     for (const field of Object.keys(Dashboard.data[0])) {
@@ -1432,6 +1449,8 @@ var Sheet;
       // la prop 'names' mi servirà per popolare la DataView dopo il group()
       Dashboard.json.data.group.names = columnProperties;
       // nel data.group.columns vanno messe tutte le metriche, come array di object
+      console.log(metricProperties);
+      debugger;
       Dashboard.json.data.group.columns = Sheet.sheet.sheetMetrics;
       let keys = [];
       console.log(columnsSet);
