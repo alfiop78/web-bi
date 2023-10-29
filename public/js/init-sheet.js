@@ -148,9 +148,8 @@ function previewReady() {
   });
   // dalla datagroup, recupero gli indici di colonna delle metriche
   Dashboard.json.data.group.columns.forEach(metric => {
-    if (!metric.dependencies) {
+    if (!metric.dependencies && metric.properties.visible) {
       const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
-      // console.log(metric);
       // NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo
       // modo come alternativa a eval() (non è stato testato)
       // function evil(fn) {
@@ -413,14 +412,18 @@ function columnHander(e) {
   let keyColumns = [], groupColumnsIndex = [];
   // Recupero l'index della colonna da nascondere/visualizzare
   const columnIndex = Dashboard.json.data.group.names.findIndex(col => col.id === e.target.dataset.columnId);
+  const metricIndex = Dashboard.json.data.group.columns.findIndex(metric => metric.alias === e.target.dataset.columnId);
   if (e.target.dataset.visible === 'false') {
     // la colonna è nascosta, la visualizzo e raggruppo.
     e.target.dataset.visible = true;
-    // La logica è descritta nei commenti
-    // dell'else (quando si nasconde una colonna)
-    Dashboard.json.data.group.key[dataTableIndex - 1].properties.grouped = true;
-    Dashboard.json.data.group.key[dataTableIndex].properties.grouped = true;
-    Dashboard.json.data.group.names[columnIndex].properties.visible = true;
+    // La logica è descritta nell'else (quando si nasconde una colonna)
+    if (columnIndex !== -1) {
+      Dashboard.json.data.group.key[dataTableIndex - 1].properties.grouped = true;
+      Dashboard.json.data.group.key[dataTableIndex].properties.grouped = true;
+      Dashboard.json.data.group.names[columnIndex].properties.visible = true;
+    } else {
+      Dashboard.json.data.group.columns[metricIndex].properties.visible = true;
+    }
   } else {
     e.target.dataset.visible = false;
     // la colonna è visibile, la nascondo e la elimino dal group()
@@ -430,9 +433,15 @@ function columnHander(e) {
     // In questo modo posso ripristinarla. Insieme alla colonna che sto nascondendo, va
     // nascosta anche la sua relativa colonna _id, quindi dataTableIndex -1
     // Elimino il raggruppamento per la colonna che l'utente ha nascosto
-    Dashboard.json.data.group.key[dataTableIndex - 1].properties.grouped = false;
-    Dashboard.json.data.group.key[dataTableIndex].properties.grouped = false;
-    Dashboard.json.data.group.names[columnIndex].properties.visible = false;
+    // se è una colonna dimensionale cerco in .group.key
+    // altrimenti cerco in .group.columns
+    if (columnIndex !== -1) {
+      Dashboard.json.data.group.key[dataTableIndex - 1].properties.grouped = false;
+      Dashboard.json.data.group.key[dataTableIndex].properties.grouped = false;
+      Dashboard.json.data.group.names[columnIndex].properties.visible = false;
+    } else {
+      Dashboard.json.data.group.columns[metricIndex].properties.visible = false;
+    }
   }
 
   // Per json.data.group.names, utilizzo la stessa logica utilizzata
@@ -466,7 +475,7 @@ function columnHander(e) {
   });
   // dalla datagroup, recupero gli indici di colonna delle metriche
   Dashboard.json.data.group.columns.forEach(metric => {
-    if (!metric.dependencies) {
+    if (!metric.dependencies && metric.properties.visible) {
       const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
       if (metric.type === 'composite') {
         // La logica è descritta nella Func previewReady()
