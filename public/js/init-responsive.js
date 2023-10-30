@@ -1396,6 +1396,7 @@ var Sheet;
     (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) ?
       Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
       Dashboard.json.name = `template-${Sheet.sheet.token}`;
+
     Dashboard.json.wrapper.chartType = 'Table';
     // se, in json.data.view esiste già questa colonna, non la modifico
     // creo l'array di object che mi servirà per nascondere/visualizzare le colonne
@@ -1407,23 +1408,19 @@ var Sheet;
       // temporaneo, per reimpostare tutte le colonne visibili
       // columnProperties.push({ id: col, properties: { visible: true } });
     });
+    // console.log(columnProperties);
+    // debugger;
 
     Sheet.sheet.sheetMetrics.forEach(metric => {
-      const metricFind = Dashboard.json.data.group.columns.find(name => name.alias === metric.alias);
-      // la metrica è semprpe trovata in .json.data.group.columns perchè qui
-      // vengono messe anche le metriche con dependencies:true (metriche incluse nelle metriche composte)
-      // console.log(metricFind);
-      // metrica presentem verificco se esiste già la proprietà 'visible'
-      if (metricFind.dependencies === false) {
-        // è una metrica che deve avere la proprietà 'visible'
-        if (!metricFind.properties) {
-          // la metrica non ha nessuna proprietà impostata, quindi imposto 'visible' : true
-          // altrimenti la lascio inalterata
-          metricFind.properties = { visible: true };
-        }
+      let metricFind = Dashboard.json.data.group.columns.find(name => name.alias === metric.alias);
+      if (!metric.dependencies) {
+        metric.properties = (metricFind) ? { visible: metricFind.properties.visible } : { visible: true };
       }
-      metricProperties.push(metricFind);
+      metricProperties.push(metric);
     });
+    console.log(metricProperties);
+    debugger;
+
     let columnsSet = new Set();
     // se la colonna in ciclo è presente in 'Sheet.sheet.sheetMetrics' la imposto come type: 'number' altrimenti 'string'
     for (const field of Object.keys(Dashboard.data[0])) {
@@ -1464,10 +1461,6 @@ var Sheet;
           // 'grouped', questa proprietà viene impostata quando l'utente nasconde la
           // colonna e quindi non deve essere inclusa nel raggruppamento
           const grouped = (column) ? column.properties.grouped : true;
-          /* let label;
-          if (column) {
-            label = (column.label) ? column.label : col.id;
-          } */
           keys.push({ id: col.id, index, properties: { grouped } });
         }
       });
