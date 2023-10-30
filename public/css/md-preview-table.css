@@ -7,6 +7,12 @@ table{
   border-spacing: 0;
 }
 
+table .col-metrics {
+  background-color: mintcream;
+  color: #494949;
+  font-weight: bold;
+}
+
 table tbody{
   white-space: nowrap;
 }

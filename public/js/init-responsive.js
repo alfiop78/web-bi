@@ -1,4 +1,4 @@
-// TODO: le funzioni che non utilizzano la classe WorkBook possono essere spostate in supportFn.js
+// TODO le funzioni che non utilizzano la classe WorkBook possono essere spostate in supportFn.js
 var App = new Application();
 var Draw = new DrawSVG('svg');
 var SheetStorage = new SheetStorages();
@@ -1396,23 +1396,23 @@ var Sheet;
     (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) ?
       Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
       Dashboard.json.name = `template-${Sheet.sheet.token}`;
-    // se, in json.data.group.names esiste già questa colonna, non la modifico
+    Dashboard.json.wrapper.chartType = 'Table';
+    // se, in json.data.view esiste già questa colonna, non la modifico
     // creo l'array di object che mi servirà per nascondere/visualizzare le colonne
     let columnProperties = [], metricProperties = [];
     Sheet.sheet.sheetColumns.forEach(col => {
-      const column = Dashboard.json.data.group.names.find(columnName => columnName.id === col);
+      const column = Dashboard.json.data.view.find(columnName => columnName.id === col);
       const visible = (column) ? column.properties.visible : true;
       columnProperties.push({ id: col, properties: { visible } });
       // temporaneo, per reimpostare tutte le colonne visibili
       // columnProperties.push({ id: col, properties: { visible: true } });
     });
 
-    // TEST:
     Sheet.sheet.sheetMetrics.forEach(metric => {
       const metricFind = Dashboard.json.data.group.columns.find(name => name.alias === metric.alias);
       // la metrica è semprpe trovata in .json.data.group.columns perchè qui
       // vengono messe anche le metriche con dependencies:true (metriche incluse nelle metriche composte)
-      console.log(metricFind);
+      // console.log(metricFind);
       // metrica presentem verificco se esiste già la proprietà 'visible'
       if (metricFind.dependencies === false) {
         // è una metrica che deve avere la proprietà 'visible'
@@ -1424,7 +1424,6 @@ var Sheet;
       }
       metricProperties.push(metricFind);
     });
-    // TEST:
     let columnsSet = new Set();
     // se la colonna in ciclo è presente in 'Sheet.sheet.sheetMetrics' la imposto come type: 'number' altrimenti 'string'
     for (const field of Object.keys(Dashboard.data[0])) {
@@ -1447,9 +1446,10 @@ var Sheet;
       // converto il columnsSet (array) in Object
       columnsSet.forEach(col => Dashboard.json.data.columns[col.id] = col);
       // creo un array con le colonne da visualizzare in fase di inizializzazione del dashboard
-      // Dashboard.json.data.group.names = columns;
+      // Dashboard.json.data.view = columns;
       // la prop 'names' mi servirà per popolare la DataView dopo il group()
-      Dashboard.json.data.group.names = columnProperties;
+      // Dashboard.json.data.view = columnProperties;
+      Dashboard.json.data.view = columnProperties;
       // nel data.group.columns vanno messe tutte le metriche, come array di object
       Dashboard.json.data.group.columns = metricProperties;
       // Dashboard.json.data.group.columns = Sheet.sheet.sheetMetrics;
@@ -1464,8 +1464,11 @@ var Sheet;
           // 'grouped', questa proprietà viene impostata quando l'utente nasconde la
           // colonna e quindi non deve essere inclusa nel raggruppamento
           const grouped = (column) ? column.properties.grouped : true;
+          /* let label;
+          if (column) {
+            label = (column.label) ? column.label : col.id;
+          } */
           keys.push({ id: col.id, index, properties: { grouped } });
-          // keys.push({ id: col.id, index });
         }
       });
       Dashboard.json.data.group.key = keys;
@@ -1474,7 +1477,7 @@ var Sheet;
     window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
   }
 
-  // TODO: da spostare in supportFn.js
+  // TODO da spostare in supportFn.js
   app.sheetPreview = async (token) => {
     // console.log(token);
     // recupero l'id dello Sheet

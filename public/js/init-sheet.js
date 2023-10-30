@@ -24,12 +24,11 @@ function drawDatamart() {
     // in questo elenco non aggiungo le colonne _id e le metriche con 'dependencies':true.
     // Le colonne _id sono automaticamente nascoste dalla DataTable, anche se sono
     // presenti nel func group() (json.data.group.key)
-    // TODO Verifico se è una metrica con 'dependencies' : false
     // se è una metrica con 'dependencies' : true non devo aggiungerla alla ul
     const metric = Dashboard.json.data.group.columns.find(metric => (metric.alias === col.id && metric.dependencies === false));
     if (!regex.test(col.id) || metric) {
       // se la colonna è nascosta, imposto il dataset.hidden = true
-      const column = Dashboard.json.data.group.names.find(column => (column.id === col.id));
+      const column = Dashboard.json.data.view.find(column => (column.id === col.id));
       if (column) li.dataset.visible = column.properties.visible;
       if (metric) li.dataset.visible = metric.properties.visible;
       if (column || metric) {
@@ -60,6 +59,8 @@ function drawDatamart() {
   };
   // NOTE: prova impostazione CSS su una colonna
   // Dashboard.dataTable.setColumnProperty(1, 'className', 'cssc1')
+  // Dashboard.dataTable.setColumnProperty(2, 'className', 'cssc1')
+  // Dashboard.dataTable.setColumnProperty(3, 'className', 'cssc1')
   // console.log(Dashboard.dataTable.getColumnProperty(1, 'className'));
   // console.log(Dashboard.dataTable.getColumnProperties(1));
   // END NOTE: prova impostazione CSS su una colonna
@@ -103,19 +104,27 @@ function previewReady() {
     const index = Dashboard.dataTable.getColumnIndex(metric.alias);
     // TODO modificare la prop 'aggregateFn' in 'aggregation' in fase di creazione delle metriche
     const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
-    let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', properties: { className: 'metric-col' } };
+    let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', label: metric.label };
     groupColumnsIndex.push(object);
   });
+  // console.log(groupColumnsIndex);
   // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
   Dashboard.dataGroup = new google.visualization.data.group(
     Dashboard.dataTable, keyColumns, groupColumnsIndex
   );
   // console.log('group():', Dashboard.dataGroup);
+  // Imposto le label memorizzate in group.key. In questo caso potrei utilizzare gli object da passare
+  // a group(), invece degli indici, per le colonne, è la stessa logica utilizzata per le metriche.
+  // Utilizzando un object al posto degli indici potrei impostare la prop 'label' direttamente nell'object
+  // invece di fare questo ciclo...
+  // Dashboard.json.data.group.key.forEach(column => {
+  //   Dashboard.dataGroup.setColumnLabel(Dashboard.dataTable.getColumnIndex(column.id), column.label);
+  // });
+  // console.log(Dashboard.dataGroup);
 
   // TEST: aggiunta di una CSS class a una colonna, nella dataGroup
   // Dashboard.dataGroup.setColumnProperty(1, 'className', 'cssc1')
   // console.log(Dashboard.dataGroup.getColumnProperty(1, 'className'));
-  // TODO Creo un array con i nomi delle colonne che popoleranno la DataView (qui vanno nascoste le colonne _id)
 
   // DataView, mi consente di visualizzare SOLO le colonne definite nel report ed
   // effettuare eventuali calcoli per le metriche composite ('calc')
@@ -134,16 +143,18 @@ function previewReady() {
   // END TEST:
 
   // recupero le colonne presenti nel report, tramite le impostazioni di
-  // json.data.group.names (contiene i nomi delle colonne "_ds", da visualizzare)
+  // json.data.view (contiene i nomi delle colonne "_ds", da visualizzare)
   // e json.data.group.columns (contiene le metriche, con dependencies:false)
   // che saranno visualizzate nella preview.
   let viewColumns = [], viewMetrics = [];
-  // In .data.group.names sono presenti tutte le colonne del report, tramite la
+  // In .data.view sono presenti tutte le colonne del report, tramite la
   // prop 'visible' (bool) posso decidere di visualizzarla/nascondere a seconda della scelta
   // dell'utente.
-  // TODO questa proprietà potrei spostarla da json.data.group a json.data.view
   // Dalla datagroup, recupero gli indici delle colonne impostato con 'visible:true'
-  Dashboard.json.data.group.names.forEach(column => {
+  // Dashboard.json.data.view.forEach(column => {
+  //   if (column.properties.visible) viewColumns.push(Dashboard.dataGroup.getColumnIndex(column.id));
+  // });
+  Dashboard.json.data.view.forEach(column => {
     if (column.properties.visible) viewColumns.push(Dashboard.dataGroup.getColumnIndex(column.id));
   });
   // dalla datagroup, recupero gli indici di colonna delle metriche
@@ -185,9 +196,11 @@ function previewReady() {
           // console.log(result);
           return (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
         }
-        viewMetrics.push({ calc: calcFunction, type: 'number', label: metric.alias });
+        viewMetrics.push({ calc: calcFunction, type: 'number', label: metric.alias, properties: { className: 'col-metrics' } });
       } else {
         viewMetrics.push(index);
+        Dashboard.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
+        // console.log(Dashboard.dataGroup.getColumnProperty(index, 'className'));
       }
       /*
        * {
@@ -200,19 +213,14 @@ function previewReady() {
   });
   // concateno i due array che popoleranno la DataView.setColumns()
   let viewDefined = viewColumns.concat(viewMetrics)
+  // Dashboard.dataGroup.setColumnProperty(0, 'className', 'cssc1')
+  // console.log(Dashboard.dataGroup.getColumnProperty(0, 'className'));
+  // console.log(Dashboard.dataGroup.getColumnProperties(0));
   Dashboard.dataViewGrouped.setColumns(viewDefined);
 
   // NOTE: l'array in setColumns() funziona anche con i nomi delle colonne (id) non solo con gli indici
   /* dataViewGrouped.setColumns(['area_ds', 3, 5, 7, 9, 11, 13, 15, 16, 17, 18, ... */
   // esempio con tutte le colonne
-  /* Dashboard.dataViewGrouped.setColumns(
-    [1, 3, 5, 7, 9, 11, 13, 15, 16, 17, 18, {
-      calc: function(dt, row) {
-        return ((dt.getValue(row, 18) - dt.getValue(row, 17)) / dt.getValue(row, 18)) * 100 || 0;
-      }, type: 'number', label: 'margine_calc'
-    }
-    ]
-  ); */
 
   google.visualization.events.addListener(Dashboard.tableRefGroup, 'sort', sort);
   // con l'opzione sort: 'event' viene comunque processato l'evento 'sort'
@@ -255,6 +263,7 @@ function sort(e) {
 // Salvataggio della configurazione colonna dalla dialog dlg-config
 saveColumnConfig.onclick = () => {
   // console.log(Dashboard.dataTable);
+  dlgConfig.close();
   console.log({
     "dataTable (index)": Dashboard.dataTableIndex,
     "dataView (index)": Dashboard.colIndex,
@@ -266,141 +275,32 @@ saveColumnConfig.onclick = () => {
   const typeRef = document.getElementById('field-datatype');
   // formattazione colonna
   const formatterRef = document.getElementById('field-format');
-  const hideColumn = document.getElementById('hide-column');
   const type = typeRef.options.item(typeRef.selectedIndex).value.toLowerCase();
-  // aggiorno Dashboard.json con i valori inseriti nella #dlg-config
-  Dashboard.json.data.columns[Dashboard.columnId].label = label;
-  Dashboard.json.data.columns[Dashboard.columnId].type = type;
-  if (formatterRef.selectedIndex !== 0) {
-    const format = formatterRef.options.item(formatterRef.selectedIndex).value;
-    Dashboard.json.data.formatter[Dashboard.columnIndex] = { format, numberDecimal: 2 };
-  }
-
-  // Colonne da nascondere. Le colonne nascoste saranno eliminate anche dal data.group.key
-  // const hideIndex = Dashboard.json.data.view.indexOf(Dashboard.columnIndex);
-  if (hideColumn.checked === true) {
-    // TODO: nuova logica.v1
-    // contrassegno la colonna da nascondere tramite CSS...
-    // ...con la dataGroup è possibile farlo, non con la dataView
-    console.log(Dashboard.colIndex);
-    console.log(Dashboard.dataTableIndex);
-    // NOTE: prova impostazione CSS su una colonna
-    Dashboard.dataGroup.setColumnProperty(Dashboard.dataTableIndex, 'className', 'hiddenColumn')
-    console.log(Dashboard.dataGroup.getColumnProperty(Dashboard.dataTableIndex, 'className'));
-    Dashboard.tableRefGroup.draw(Dashboard.dataViewGrouped);
-
-    // nuova logica.v1
-    return;
-
-    // nuova logica
-    // elimino la colonna da data.group.key, se la colonna è una colonna dimensionale, se
-    // è una metrica la elimino da data.group.columns
-    console.log(Dashboard.tableRefGroup);
-    console.log(Dashboard.dataViewGrouped);
-    // Dashboard.dataViewGrouped.hideColumns([Dashboard.dataTableIndex]);
-    // TODO: Ricreo il group() senza le colonne che ho appena nascosto
-    // Dopo aver nascosto una colonna dimensionale, devo eliminare _ds (che è la colonna nascosta) e _id da
-    // json.data.group.key per ridisegnare il report senza il raggruppamento per le colonne nascoste
-    Dashboard.json.data.group.key.splice(Dashboard.dataTableIndex - 1, 2);
-    // temporaneamente, elimino, da .data.group.key, anche le colonne [13,11,9]
-    Dashboard.json.data.group.key.splice(13 - 1, 2);
-    Dashboard.json.data.group.key.splice(11 - 1, 2);
-    Dashboard.json.data.group.key.splice(9 - 1, 2);
-    // window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
-    // TODO: da spostare in fondo a questa Fn, in modo da ridisegnare il report con
-    // tutte le modifiche fatte nella dialog-sheet-config
-    console.log(Dashboard.json.data.group.key);
-    let columns = [];
-    Dashboard.json.data.group.columns.forEach(col => {
-      // prendo in considerazione le metriche che hanno la prop 'dependencies:false' oppure che non
-      // hanno la prop 'dependencies' (composite)
-      if (col.properties.dependencies === false || !col.properties.hasOwnProperty('dependencies')) {
-        if (typeof col.aggregation === 'string') col.aggregation = google.visualization.data[col.aggregation];
-        columns.push(col);
-      }
-    });
-    console.log(columns);
-    let dataGroup = new google.visualization.data.group(
-      Dashboard.dataTable, Dashboard.json.data.group.key, columns
-    );
-    console.log('dataGroup:', dataGroup);
-    debugger;
-    console.log('costo_rapporto_6 (index):', dataGroup.getColumnIndex('costo_rapporto_6'));
-    console.log('costo_rapporto_2 (index):', dataGroup.getColumnIndex('costo_rapporto_2'));
-    console.log('ricavo_rapporto_2 (index):', dataGroup.getColumnIndex('ricavo_rapporto_2'));
-    console.log('area_ds dataTable (index) : ', Dashboard.dataTable.getColumnIndex('area_ds'));
-    console.log('area_ds dataGroup (index) : ', dataGroup.getColumnIndex('area_ds'));
-    console.log('zona_ds dataTable (index) : ', Dashboard.dataTable.getColumnIndex('zona_ds'));
-    console.log('zona_ds dataGroup (index) : ', dataGroup.getColumnIndex('zona_ds'));
-    Dashboard.dataViewGrouped = new google.visualization.DataView(dataGroup);
-    console.log('dataViewGroup:', JSON.parse(Dashboard.dataViewGrouped.toJSON()));
-    // TODO: visualizzo tutte le colonne _ds, recupero gli indici dalla dataGroup
-    let columnsView = [], colView = [];
-    JSON.parse(dataGroup.toJSON()).cols.forEach(col => {
-      console.log(col);
-      const regex = new RegExp('_ds$');
-      if (regex.test(col.id)) columnsView.push(col.id);
-    });
-    colView = columnsView.concat([8, 9, 10, {
-      calc: function(dt, row) {
-        // TODO: qui bisogna utilizzare gli indici, che posso recuperare dal nome della colonna
-        return ((dt.getValue(row, 10) - dt.getValue(row, 9)) / dt.getValue(row, 10)) * 100 || 0;
-      }, type: 'number', label: 'margine_calc'
-    }]);
-    console.log(colView);
-    debugger;
-    Dashboard.dataViewGrouped.setColumns(colView);
-    /* Dashboard.dataViewGrouped.setColumns(
-      [1, 3, 5, 7, 8, 9, 10, {
-        calc: function(dt, row) {
-          return ((dt.getValue(row, 10) - dt.getValue(row, 9)) / dt.getValue(row, 10)) * 100 || 0;
-        }, type: 'number', label: 'margine_calc'
-      }
-      ]
-    ); */
-    console.log(Dashboard.dataViewGrouped);
-    debugger;
-
-    Dashboard.tableRefGroup.draw(Dashboard.dataViewGrouped);
-    return;
-    // nuova logica
-
-    // da implementare
-    // se la colonna selezionata è una metrica la contrassegno come hide: true, aggiungendo una
-    // prop all'interno dell'object
-    // let metricIndex = Dashboard.json.data.group.columns.findIndex(el => el.column === Dashboard.columnIndex);
-    // if (metricIndex !== -1) {
-    //   // si sta nascondendo una metrica
-    //   // Dashboard.json.data.group.columns[metricIndex].hidden = true;
-    //   Dashboard.json.data.group.columns[metricIndex].properties = {
-    //     hidden: true
-    //   };
-    // }
-  } else {
-    /* TODO:
-    // Colonna da visualizzare, aggiungo l'indice della colonna a json.data.view
-    if (hideIndex === -1) {
-      Dashboard.json.data.view.push(Dashboard.columnIndex);
-      Dashboard.json.data.view.sort(compareNumbers);
-    } */
-  }
-  // aggiungo, a view, solo le colonne che NON hanno la prop hidden: true
-  // let view = [];
-  // Dashboard.json.data.group.key.forEach(col => view.push(col));
-  // Dashboard.json.data.group.columns.forEach(col => { if (!col.properties.hidden) view.push(col); });
-  // console.log(view);
-  return;
-
-
-  Dashboard.json.wrapper.chartType = 'Table';
-  Dashboard.json.wrapper.containerId = 'chart_div';
-  // metto in un array "temporaneo" tutte le colonne, quelle impostate come nascoste, con
-  // la prop 'hidden': true non verranno messe in questo array perchè è l'array che userò nel merge
-  // per creare .json.data.view
-  console.log(Dashboard.json);
+  // const columnIndex = Dashboard.json.data.view.findIndex(col => col.id === Dashboard.columnId);
+  // if (columnIndex !== -1) Dashboard.dataGroup.setColumnLabel(7, 'test');
+  // if (columnIndex !== -1) Dashboard.dataGroup.setColumnLabel(3, 'test-3');
+  // if (columnIndex !== -1) Dashboard.dataGroup.setColumnLabel(Dashboard.dataTableIndex, 'test-2');
+  const column = Dashboard.json.data.group.key.find(col => col.id === Dashboard.columnId);
+  if (column) column.label = label;
+  const metric = Dashboard.json.data.group.columns.find(metric => metric.alias === Dashboard.columnId);
+  if (metric) metric.label = label;
   debugger;
+
+  // aggiorno Dashboard.json con i valori inseriti nella #dlg-config
+  // Dashboard.json.data.columns[Dashboard.columnId].label = label;
+  // Dashboard.json.data.columns[Dashboard.columnId].type = type;
+  if (formatterRef.selectedIndex !== 0) {
+    debugger;
+    const format = formatterRef.options.item(formatterRef.selectedIndex).value;
+    Dashboard.json.data.formatter[Dashboard.colIndex] = { format, numberDecimal: 2 };
+  }
+
+  // TODO Il containerId deve essere deciso in init-dashboard-create.js
+  Dashboard.json.wrapper.containerId = 'chart_div';
+  console.log(Dashboard.json);
   window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
   dlgConfig.close();
+  previewReady();
 }
 
 function columnHander(e) {
@@ -411,7 +311,7 @@ function columnHander(e) {
   const dataTableIndex = Dashboard.dataTable.getColumnIndex(e.target.dataset.columnId);
   let keyColumns = [], groupColumnsIndex = [];
   // Recupero l'index della colonna da nascondere/visualizzare
-  const columnIndex = Dashboard.json.data.group.names.findIndex(col => col.id === e.target.dataset.columnId);
+  const columnIndex = Dashboard.json.data.view.findIndex(col => col.id === e.target.dataset.columnId);
   const metricIndex = Dashboard.json.data.group.columns.findIndex(metric => metric.alias === e.target.dataset.columnId);
   if (e.target.dataset.visible === 'false') {
     // la colonna è nascosta, la visualizzo e raggruppo.
@@ -420,7 +320,7 @@ function columnHander(e) {
     if (columnIndex !== -1) {
       Dashboard.json.data.group.key[dataTableIndex - 1].properties.grouped = true;
       Dashboard.json.data.group.key[dataTableIndex].properties.grouped = true;
-      Dashboard.json.data.group.names[columnIndex].properties.visible = true;
+      Dashboard.json.data.view[columnIndex].properties.visible = true;
     } else {
       Dashboard.json.data.group.columns[metricIndex].properties.visible = true;
     }
@@ -438,13 +338,13 @@ function columnHander(e) {
     if (columnIndex !== -1) {
       Dashboard.json.data.group.key[dataTableIndex - 1].properties.grouped = false;
       Dashboard.json.data.group.key[dataTableIndex].properties.grouped = false;
-      Dashboard.json.data.group.names[columnIndex].properties.visible = false;
+      Dashboard.json.data.view[columnIndex].properties.visible = false;
     } else {
       Dashboard.json.data.group.columns[metricIndex].properties.visible = false;
     }
   }
 
-  // Per json.data.group.names, utilizzo la stessa logica utilizzata
+  // Per json.data.view, utilizzo la stessa logica utilizzata
   // per il raggruppamento, in json.data.group.key, l'unica differenza è la prop
   // 'visible', anzichè 'grouped' per nascondere una colonna, in questo caso, dalla DataView
   // e non dal group()
@@ -470,7 +370,7 @@ function columnHander(e) {
   // Dashboard.dataViewGrouped.hideColumns([7]);
   console.log(Dashboard.dataViewGrouped);
   let viewColumns = [], viewMetrics = [];
-  Dashboard.json.data.group.names.forEach(column => {
+  Dashboard.json.data.view.forEach(column => {
     if (column.properties.visible) viewColumns.push(Dashboard.dataGroup.getColumnIndex(column.id));
   });
   // dalla datagroup, recupero gli indici di colonna delle metriche
@@ -491,9 +391,10 @@ function columnHander(e) {
           });
           return (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
         }
-        viewMetrics.push({ calc: calcFunction, type: 'number', label: metric.alias });
+        viewMetrics.push({ calc: calcFunction, type: 'number', label: metric.alias, properties: { className: 'col-metrics' } });
       } else {
         viewMetrics.push(index);
+        Dashboard.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
       }
     }
   });
@@ -505,13 +406,6 @@ function columnHander(e) {
   window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
 
   // TEST:
-  // recupero le colonne da visualizzare da un array nell'object sheet in localStorage
-  // const area = Dashboard.dataGroup.getColumnIndex('area');
-  // const zona = Dashboard.dataGroup.getColumnIndex('zona');
-  // const dealer = Dashboard.dataGroup.getColumnIndex('dealer');
-  // const rapp_6 = Dashboard.dataGroup.getColumnIndex('costo_rapporto_6');
-  // const cstRapp_2 = Dashboard.dataGroup.getColumnIndex('costo_rapporto_2');
-  // const ricRapp_2 = Dashboard.dataGroup.getColumnIndex('ricavo_rapporto_2');
   // Dashboard.dataViewGrouped.setColumns([area, zona, dealer, rapp_6, cstRapp_2, ricRapp_2]);
   // END TEST:
 }

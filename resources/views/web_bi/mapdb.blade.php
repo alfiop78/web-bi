@@ -760,14 +760,6 @@
                                       </select>
                                     </section>
                                     <section>
-                                      <input type="checkbox" id="hide-column" name="hide-column" />
-                                      <label for="hide-column">Nascondi colonna</label>
-                                    </section>
-                                    <!-- <section>
-                                      <input type="checkbox" id="group-column" name="group-column" />
-                                      <label for="group-column">Raggruppa colonna</label>
-                                    </section> -->
-                                    <section>
                                       <input type="checkbox" id="filter-column" name="filter-column" />
                                       <label for="filter-column">Imposta come filtro</label>
                                     </section>

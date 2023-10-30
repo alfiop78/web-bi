@@ -5,16 +5,11 @@ class Dashboards {
   #json = {
     name: null,
     data: {
-      calc: {
-        perc_marg: [5, 6],
-        marginalita: [8, 9]
-      },
       columns: {},
       formatter: {},
       group: {
         key: [],
-        columns: [],
-        names: []
+        columns: []
       },
       view: []
     },
@@ -41,9 +36,6 @@ class Dashboards {
           rowNumberCell: ""
         }
       }
-      /* view: {
-        columns: []
-      } */
     }
   }
   constructor() { }
