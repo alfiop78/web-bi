@@ -88,9 +88,15 @@ function previewReady() {
   // json.data.group.key) per le quali il report viene raggruppato.
   // Questo consente di fare i calcoli per le metriche composte sui dati raggruppati
   Dashboard.json.data.group.key.forEach(column => {
-    if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
+    // if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
+    // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
+    // che viene modificata dall'utente a runtime
+    if (column.properties.grouped) {
+      keyColumns.push({ id: column.id, column: Dashboard.dataTable.getColumnIndex(column.id), label: column.label });
+    }
   });
   // console.log(keyColumns);
+
   // creo l'object che verrà messo nel terzo param di group()
   // Es.: { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
   // le metriche che hanno la proprietà dependencies: true, sono quelle NON aggiunte DIRETTAMENTE
@@ -112,6 +118,37 @@ function previewReady() {
   Dashboard.dataGroup = new google.visualization.data.group(
     Dashboard.dataTable, keyColumns, groupColumnsIndex
   );
+  var currencyFormatter = new google.visualization.NumberFormat(
+    { suffix: ' €', negativeColor: 'brown', negativeParens: true });
+  // debugger;
+  for (const [columnId, properties] of Object.entries(Dashboard.json.data.formatter)) {
+    switch (properties.format) {
+      case 'currency':
+        console.log(Dashboard.dataGroup.getColumnIndex(columnId));
+        debugger;
+        currencyFormatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
+        break;
+      default:
+        break;
+    }
+
+  }
+  // console.log(Dashboard.dataGroup.getColumnIndex())
+  // currencyFormatter.format(Dashboard.dataGroup, Dashboard.dataTableIndex);
+  /* for (const [colIndex, properties] of Object.entries(Dashboard.json.data.formatter)) {
+    switch (properties.format) {
+      case 'currency':
+        // currencyFormatter.format(dataTable, +colIndex);
+        // currencyFormatter.format(Dashboard.dataGroup, +colIndex);
+        currencyFormatter.format(Dashboard.dataGroup, +colIndex);
+        break;
+      case 'percent':
+        percFormatter.format(dataTable, +colIndex);
+        break;
+      default:
+        break;
+    }
+  } */
   // console.log('group():', Dashboard.dataGroup);
   // Imposto le label memorizzate in group.key. In questo caso potrei utilizzare gli object da passare
   // a group(), invece degli indici, per le colonne, è la stessa logica utilizzata per le metriche.
@@ -196,7 +233,8 @@ function previewReady() {
           // console.log(result);
           return (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
         }
-        viewMetrics.push({ calc: calcFunction, type: 'number', label: metric.alias, properties: { className: 'col-metrics' } });
+        // viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.alias, properties: { className: 'col-metrics' } });
+        viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
       } else {
         viewMetrics.push(index);
         Dashboard.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
@@ -246,15 +284,13 @@ function sort(e) {
   Dashboard.columnLabel = Dashboard.dataViewGrouped.getColumnLabel(Dashboard.colIndex);
   const labelRef = document.getElementById('field-label');
   const selectDataType = document.getElementById('field-datatype');
-  // se la label della colonna è già presente in json.data.columns inserisco quello
-  labelRef.value = (Dashboard.json.data.columns[Dashboard.columnId].label) ?
-    Dashboard.json.data.columns[Dashboard.columnId].label : Dashboard.columnLabel;
+  labelRef.value = Dashboard.columnLabel;
   // recupero il dataType della colonna selezionata dall'object Dashboard.json.data.columns[columnId]
   // selectDataType.selectedIndex = 2;
   // console.log(selectDataType.options);
   [...selectDataType.options].forEach((option, index) => {
     // console.log(index, option);
-    if (option.value === Dashboard.json.data.columns[Dashboard.columnId].type) {
+    if (option.value === Dashboard.dataViewGrouped.getColumnType(Dashboard.colIndex)) {
       selectDataType.selectedIndex = index;
     }
   });
@@ -263,7 +299,6 @@ function sort(e) {
 // Salvataggio della configurazione colonna dalla dialog dlg-config
 saveColumnConfig.onclick = () => {
   // console.log(Dashboard.dataTable);
-  dlgConfig.close();
   console.log({
     "dataTable (index)": Dashboard.dataTableIndex,
     "dataView (index)": Dashboard.colIndex,
@@ -280,19 +315,18 @@ saveColumnConfig.onclick = () => {
   // if (columnIndex !== -1) Dashboard.dataGroup.setColumnLabel(7, 'test');
   // if (columnIndex !== -1) Dashboard.dataGroup.setColumnLabel(3, 'test-3');
   // if (columnIndex !== -1) Dashboard.dataGroup.setColumnLabel(Dashboard.dataTableIndex, 'test-2');
+  // cerco la colonna sia in data.group.key (colonne dimensionali) che in data.group.columns (metriche)
   const column = Dashboard.json.data.group.key.find(col => col.id === Dashboard.columnId);
   if (column) column.label = label;
   const metric = Dashboard.json.data.group.columns.find(metric => metric.alias === Dashboard.columnId);
   if (metric) metric.label = label;
-  debugger;
 
   // aggiorno Dashboard.json con i valori inseriti nella #dlg-config
   // Dashboard.json.data.columns[Dashboard.columnId].label = label;
   // Dashboard.json.data.columns[Dashboard.columnId].type = type;
   if (formatterRef.selectedIndex !== 0) {
-    debugger;
     const format = formatterRef.options.item(formatterRef.selectedIndex).value;
-    Dashboard.json.data.formatter[Dashboard.colIndex] = { format, numberDecimal: 2 };
+    Dashboard.json.data.formatter[Dashboard.columnId] = { format, numberDecimal: 2 };
   }
 
   // TODO Il containerId deve essere deciso in init-dashboard-create.js
@@ -350,13 +384,16 @@ function columnHander(e) {
   // e non dal group()
   // NOTE: codice ripetuto in previewReady()
   Dashboard.json.data.group.key.forEach(column => {
-    if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
+    // if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
+    if (column.properties.grouped) {
+      keyColumns.push({ id: column.id, column: Dashboard.dataTable.getColumnIndex(column.id), label: column.label });
+    }
   });
 
   Dashboard.json.data.group.columns.forEach(metric => {
     const index = Dashboard.dataTable.getColumnIndex(metric.alias);
     const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
-    let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', properties: { className: 'metric-col' } };
+    let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', label: metric.label, properties: { className: 'metric-col' } };
     groupColumnsIndex.push(object);
   });
   console.log(groupColumnsIndex);
@@ -365,10 +402,28 @@ function columnHander(e) {
     Dashboard.dataTable, keyColumns, groupColumnsIndex
   );
   console.log(Dashboard.dataGroup);
+  // var currencyFormatter = new google.visualization.NumberFormat(
+  //   { suffix: ' €', negativeColor: 'brown', negativeParens: true });
+  // currencyFormatter.format(Dashboard.dataGroup, Dashboard.dataTableIndex);
+  /* debugger;
+  for (const [colIndex, properties] of Object.entries(Dashboard.json.data.formatter)) {
+    switch (properties.format) {
+      case 'currency':
+        // currencyFormatter.format(dataTable, +colIndex);
+        currencyFormatter.format(Dashboard.dataGroup, +colIndex);
+        break;
+      case 'percent':
+        percFormatter.format(dataTable, +colIndex);
+        break;
+      default:
+        break;
+    }
+  } */
+
   // console.log(Dashboard.dataViewGrouped.getColumnIndex(e.target.dataset.columnId));
   Dashboard.dataViewGrouped = new google.visualization.DataView(Dashboard.dataGroup);
   // Dashboard.dataViewGrouped.hideColumns([7]);
-  console.log(Dashboard.dataViewGrouped);
+  // console.log(Dashboard.dataViewGrouped);
   let viewColumns = [], viewMetrics = [];
   Dashboard.json.data.view.forEach(column => {
     if (column.properties.visible) viewColumns.push(Dashboard.dataGroup.getColumnIndex(column.id));
@@ -391,7 +446,7 @@ function columnHander(e) {
           });
           return (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
         }
-        viewMetrics.push({ calc: calcFunction, type: 'number', label: metric.alias, properties: { className: 'col-metrics' } });
+        viewMetrics.push({ calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
       } else {
         viewMetrics.push(index);
         Dashboard.dataGroup.setColumnProperty(index, 'className', 'col-metrics');

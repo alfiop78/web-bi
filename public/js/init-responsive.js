@@ -1414,12 +1414,18 @@ var Sheet;
     Sheet.sheet.sheetMetrics.forEach(metric => {
       let metricFind = Dashboard.json.data.group.columns.find(name => name.alias === metric.alias);
       if (!metric.dependencies) {
-        metric.properties = (metricFind) ? { visible: metricFind.properties.visible } : { visible: true };
+        if (metricFind) {
+          metric.properties = { visible: metricFind.properties.visible };
+          metric.label = metricFind.label;
+        } else {
+          metric.properties = { visible: true };
+          metric.label = metric.alias;
+        }
       }
       metricProperties.push(metric);
     });
-    console.log(metricProperties);
-    debugger;
+    // console.log(metricProperties);
+    // debugger;
 
     let columnsSet = new Set();
     // se la colonna in ciclo è presente in 'Sheet.sheet.sheetMetrics' la imposto come type: 'number' altrimenti 'string'
@@ -1456,12 +1462,18 @@ var Sheet;
       // json.data.group.key.
       [...columnsSet].forEach((col, index) => {
         if (col.properties.columnType === 'column') {
-          const column = Dashboard.json.data.group.key.find(columnName => columnName.id === col.id);
+          const columnFind = Dashboard.json.data.group.key.find(columnName => columnName.id === col.id);
           // se la colonna in ciclo è già presente in json.data.group.key non sovrascrivo la proprieta
-          // 'grouped', questa proprietà viene impostata quando l'utente nasconde la
-          // colonna e quindi non deve essere inclusa nel raggruppamento
-          const grouped = (column) ? column.properties.grouped : true;
-          keys.push({ id: col.id, index, properties: { grouped } });
+          // 'grouped', questa proprietà viene impostata quando l'utente nasconde/visualizza una colonna
+          if (columnFind) {
+            col.properties.grouped = columnFind.properties.grouped;
+          } else {
+            col.properties.grouped = true;
+            col.label = col.id;
+          }
+          // const grouped = (column) ? column.properties.grouped : true;
+          // keys.push({ id: col.id, index, properties: { grouped } });
+          keys.push(col);
         }
       });
       Dashboard.json.data.group.key = keys;
