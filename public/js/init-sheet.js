@@ -13,16 +13,22 @@ let app = {
       { prefix: ' T', negativeColor: 'red', negativeParens: true, fractionDigits }
     );
   },
-  currency: function(fractionDigits) {
-    return new google.visualization.NumberFormat(
-      { suffix: ' €', negativeColor: 'brown', negativeParens: true, fractionDigits }
-    );
+  // currency: function(fractionDigits) {
+  //   return new google.visualization.NumberFormat(
+  //     { suffix: ' €', negativeColor: 'brown', negativeParens: true, fractionDigits }
+  //   );
+  // },
+  currency: function(properties) {
+    return new google.visualization.NumberFormat(properties);
   },
-  percent: function(fractionDigits) {
-    return new google.visualization.NumberFormat(
-      { suffix: ' %', negativeColor: 'red', negativeParens: true, fractionDigits }
-    );
-  },
+  // percent: function(fractionDigits) {
+  //   return new google.visualization.NumberFormat(
+  //     { suffix: ' %', negativeColor: 'red', negativeParens: true, fractionDigits }
+  //   );
+  // },
+  percent: function(properties) {
+    return new google.visualization.NumberFormat(properties);
+  }
 }
 
 function drawDatamart() {
@@ -149,9 +155,10 @@ function previewReady() {
   // Formattazione colonne
   for (const [columnId, properties] of Object.entries(Dashboard.json.data.formatter)) {
     // console.log('Formattazione ', Dashboard.dataGroup.getColumnIndex(columnId));
+    // debugger;
     switch (properties.type) {
       case 'number':
-        let formatter = app[properties.format](properties.numberDecimal);
+        let formatter = app[properties.format](properties.prop);
         formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
         break;
       // case 'date':
@@ -233,30 +240,41 @@ function previewReady() {
           // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
           // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
           // effettuo un controllo sul risultato in caso fosse NaN
-          // const result = (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
+          const result = (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
+          let total = (result) ? { v: result } : { v: result, f: '-' };
           // console.log(result);
-          const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
+          // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
           let resultFormatted;
           // formattazione della cella con formatValue()
-          switch (Dashboard.json.data.formatter[metric.alias].format) {
-            case 'currency':
-              // non visualizzo i valori = 0
-              let currencyFormatter = new google.visualization.NumberFormat(
-                { suffix: ' €', negativeColor: 'brown', negativeParens: true, fractionDigits: Dashboard.json.data.formatter[metric.alias].numberDecimal });
-              resultFormatted = (result) ? currencyFormatter.formatValue(result) : '-';
-              // resultFormatted = currencyFormatter.formatValue(result);
-              break;
-            case 'percent':
-              // non visualizzo i valori = 0
-              let percFormatter = new google.visualization.NumberFormat(
-                { suffix: ' %', negativeColor: 'red', negativeParens: true, fractionDigits: Dashboard.json.data.formatter[metric.alias].numberDecimal });
-              resultFormatted = (result) ? percFormatter.formatValue(result) : '-';
-              // resultFormatted = percFormatter.formatValue(result);
-              break;
-            default:
-              break;
+          // TODO Chiamare le function in app come fatto nel previewReady()
+          if (Dashboard.json.data.formatter[metric.alias]) {
+            const metricFormat = Dashboard.json.data.formatter[metric.alias];
+            let formatter;
+            formatter = app[metricFormat.format](metricFormat.prop);
+            resultFormatted = (result) ? formatter.formatValue(result) : '-';
+            /* switch (metricFormat.format) {
+              case 'currency':
+                debugger;
+                // non visualizzo i valori = 0
+                // TODO STESSO CODICE
+                formatter = app[metricFormat.format](metricFormat.prop);
+                resultFormatted = (result) ? formatter.formatValue(result) : '-';
+                // resultFormatted = (result) ? currencyFormatter.formatValue(result) : '-';
+                break;
+              case 'percent':
+                // non visualizzo i valori = 0
+                formatter = app[metricFormat.format](metricFormat.prop);
+                resultFormatted = (result) ? formatter.formatValue(result) : '-';
+                break;
+              default:
+                break;
+            } */
+            total = { v: result, f: resultFormatted };
+          } else {
+            resultFormatted = (result) ? result : '-';
+            total = (result) ? { v: result } : { v: result, f: '-' };
           }
-          return { v: result, f: resultFormatted }
+          return total;
         }
         viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
       } else {
@@ -364,13 +382,15 @@ saveColumnConfig.onclick = () => {
   // Dashboard.json.data.columns[Dashboard.columnId].type = type;
   // formattazione
   const format = formatterRef.options.item(formatterRef.selectedIndex).value;
+  debugger;
   switch (type) {
     case 'number':
       if (format === 'number') {
         // numero senza decimale, con separatore migliaia
         Dashboard.json.data.formatter[Dashboard.columnId] = { type, format, numberDecimal: 0 };
       } else {
-        Dashboard.json.data.formatter[Dashboard.columnId] = { type, format, numberDecimal: 2 };
+        if (format === 'percent') Dashboard.json.data.formatter[Dashboard.columnId] = { type, format, prop: { suffix: ' %', negativeColor: 'red', negativeParens: true, fractionDigits: 2 } };
+        if (format === 'currency') Dashboard.json.data.formatter[Dashboard.columnId] = { type, format, prop: { suffix: ' €', negativeColor: 'brown', negativeParens: true, fractionDigits: 2 } };
       }
       break;
     case 'date':
