@@ -743,21 +743,23 @@
                                     <section>
                                       <label for="field-datatype">Tipo di dato</label>
                                       <select id="field-datatype">
-                                        <option value="string">Stringa</option>
-                                        <option value="number">Numero</option>
-                                        <option value="date">Data</option>
-                                        <option value="datetime">Date Time</option>
-                                        <option value="timeofday">Time of Day</option>
-                                        <option value="boolean">Vero/Falso</option>
+                                        <option id="string" value="string">Stringa</option>
+                                        <option id="number" value="number">Numero</option>
+                                        <option id="date" value="date">Data</option>
+                                        <option id="datetime" value="datetime">Date Time</option>
+                                        <option id="timeofday" value="timeofday">Time of Day</option>
+                                        <option id="boolean" value="boolean">Vero/Falso</option>
                                       </select>
                                     </section>
                                     <section>
                                       <label for="field-format">Formattazione colonna</label>
                                       <select id="field-format">
-                                        <option value="none" selected>Default</option>
+                                        <option value="number" selected>Default</option>
                                         <option value="currency">Valuta €</option>
                                         <option value="percent">Percentuale</option>
                                       </select>
+                                      <label for="frationDigits">Posizioni decimali</label>
+                                      <input id="frationDigits" type="number" value="2" />
                                     </section>
                                     <section>
                                       <input type="checkbox" id="filter-column" name="filter-column" />

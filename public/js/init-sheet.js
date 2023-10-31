@@ -7,6 +7,24 @@ function testFn() {
   console.log(WorkBook);
 }
 
+let app = {
+  number: function(fractionDigits) {
+    return new google.visualization.NumberFormat(
+      { prefix: ' T', negativeColor: 'red', negativeParens: true, fractionDigits }
+    );
+  },
+  currency: function(fractionDigits) {
+    return new google.visualization.NumberFormat(
+      { suffix: ' €', negativeColor: 'brown', negativeParens: true, fractionDigits }
+    );
+  },
+  percent: function(fractionDigits) {
+    return new google.visualization.NumberFormat(
+      { suffix: ' %', negativeColor: 'red', negativeParens: true, fractionDigits }
+    );
+  },
+}
+
 function drawDatamart() {
   // Il dato iniziale non è raggruppato, la query sul datamart è eseguita con SELECT *...
   // La preview deve consentire la personalizzazione del report, quindi la possibilità
@@ -78,10 +96,6 @@ function drawDatamart() {
 function previewReady() {
   // Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
   Dashboard.tableRefGroup = new google.visualization.Table(document.getElementById(Dashboard.ref));
-  var currencyFormatter = new google.visualization.NumberFormat(
-    { suffix: ' €', negativeColor: 'brown', negativeParens: true });
-  var percFormatter = new google.visualization.NumberFormat(
-    { suffix: ' %', negativeColor: 'red', negativeParens: true, fractionDigits: 1 });
   // console.log('group.key:', Dashboard.json.data.group.key);
   // trasformo il data.group.key in un array di indici di colonne (anche se potrebbe funzionare
   // anche con un object, da rivedere su Google Chart)
@@ -96,7 +110,7 @@ function previewReady() {
     // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
     // che viene modificata dall'utente a runtime
     if (column.properties.grouped) {
-      keyColumns.push({ id: column.id, column: Dashboard.dataTable.getColumnIndex(column.id), label: column.label });
+      keyColumns.push({ id: column.id, column: Dashboard.dataTable.getColumnIndex(column.id), label: column.label, type: column.type });
     }
   });
   // console.log(keyColumns);
@@ -122,23 +136,8 @@ function previewReady() {
   Dashboard.dataGroup = new google.visualization.data.group(
     Dashboard.dataTable, keyColumns, groupColumnsIndex
   );
+  console.log('group():', Dashboard.dataGroup);
   // console.log(Dashboard.dataGroup.getColumnIndex())
-  // currencyFormatter.format(Dashboard.dataGroup, Dashboard.dataTableIndex);
-  /* for (const [colIndex, properties] of Object.entries(Dashboard.json.data.formatter)) {
-    switch (properties.format) {
-      case 'currency':
-        // currencyFormatter.format(dataTable, +colIndex);
-        // currencyFormatter.format(Dashboard.dataGroup, +colIndex);
-        currencyFormatter.format(Dashboard.dataGroup, +colIndex);
-        break;
-      case 'percent':
-        percFormatter.format(dataTable, +colIndex);
-        break;
-      default:
-        break;
-    }
-  } */
-  // console.log('group():', Dashboard.dataGroup);
   // Imposto le label memorizzate in group.key. In questo caso potrei utilizzare gli object da passare
   // a group(), invece degli indici, per le colonne, è la stessa logica utilizzata per le metriche.
   // Utilizzando un object al posto degli indici potrei impostare la prop 'label' direttamente nell'object
@@ -147,6 +146,23 @@ function previewReady() {
   //   Dashboard.dataGroup.setColumnLabel(Dashboard.dataTable.getColumnIndex(column.id), column.label);
   // });
   // console.log(Dashboard.dataGroup);
+  // Formattazione colonne
+  for (const [columnId, properties] of Object.entries(Dashboard.json.data.formatter)) {
+    // console.log('Formattazione ', Dashboard.dataGroup.getColumnIndex(columnId));
+    switch (properties.type) {
+      case 'number':
+        let formatter = app[properties.format](properties.numberDecimal);
+        formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
+        break;
+      // case 'date':
+      // TODO Da implementare
+      // let formatter = app[properties.format](properties.numberDecimal);
+      // formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
+      // break;
+      default:
+        break;
+    }
+  }
 
   // TEST: aggiunta di una CSS class a una colonna, nella dataGroup
   // Dashboard.dataGroup.setColumnProperty(1, 'className', 'cssc1')
@@ -176,19 +192,19 @@ function previewReady() {
   // In .data.view sono presenti tutte le colonne del report, tramite la
   // prop 'visible' (bool) posso decidere di visualizzarla/nascondere a seconda della scelta
   // dell'utente.
-  // Dalla datagroup, recupero gli indici delle colonne impostato con 'visible:true'
+  // Dalla dataGroup, recupero gli indici delle colonne impostato con 'visible:true'
   // Dashboard.json.data.view.forEach(column => {
   //   if (column.properties.visible) viewColumns.push(Dashboard.dataGroup.getColumnIndex(column.id));
   // });
   Dashboard.json.data.view.forEach(column => {
     if (column.properties.visible) viewColumns.push(Dashboard.dataGroup.getColumnIndex(column.id));
   });
-  // dalla datagroup, recupero gli indici di colonna delle metriche
+  // dalla dataGroup, recupero gli indici di colonna delle metriche
   Dashboard.json.data.group.columns.forEach(metric => {
     if (!metric.dependencies && metric.properties.visible) {
       const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
       // NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo
-      // modo come alternativa a eval() (non è stato testato)
+      // modo come alternativa a eval() (non l'ho testato)
       // function evil(fn) {
       //   return new Function('return ' + fn)();
       // }
@@ -217,10 +233,30 @@ function previewReady() {
           // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
           // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
           // effettuo un controllo sul risultato in caso fosse NaN
-          // console.log(metric.alias, formulaJoined.join(''));
           // const result = (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
           // console.log(result);
-          return (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
+          const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
+          let resultFormatted;
+          // formattazione della cella con formatValue()
+          switch (Dashboard.json.data.formatter[metric.alias].format) {
+            case 'currency':
+              // non visualizzo i valori = 0
+              let currencyFormatter = new google.visualization.NumberFormat(
+                { suffix: ' €', negativeColor: 'brown', negativeParens: true, fractionDigits: Dashboard.json.data.formatter[metric.alias].numberDecimal });
+              resultFormatted = (result) ? currencyFormatter.formatValue(result) : '-';
+              // resultFormatted = currencyFormatter.formatValue(result);
+              break;
+            case 'percent':
+              // non visualizzo i valori = 0
+              let percFormatter = new google.visualization.NumberFormat(
+                { suffix: ' %', negativeColor: 'red', negativeParens: true, fractionDigits: Dashboard.json.data.formatter[metric.alias].numberDecimal });
+              resultFormatted = (result) ? percFormatter.formatValue(result) : '-';
+              // resultFormatted = percFormatter.formatValue(result);
+              break;
+            default:
+              break;
+          }
+          return { v: result, f: resultFormatted }
         }
         viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
       } else {
@@ -243,33 +279,6 @@ function previewReady() {
   // console.log(Dashboard.dataGroup.getColumnProperty(0, 'className'));
   // console.log(Dashboard.dataGroup.getColumnProperties(0));
   Dashboard.dataViewGrouped.setColumns(viewDefined);
-  // console.log(Dashboard.dataGroup.getColumnIndex(columnId));
-  // console.log(Dashboard.dataViewGrouped.getColumnIndex(columnId));
-  // console.log(Dashboard.dataViewGrouped.getColumnLabel(7));
-  // console.log(Dashboard.dataViewGrouped.getColumnPattern(7));
-  // percFormatter.format(Dashboard.dataGroup, 7);
-  // console.log(Dashboard.dataViewGrouped.toDataTable());
-  // Converto la DataView in DataTable perchè non posso applicare la
-  // formattazione (%) per le colonne calcolate con 'calc' nel Metodo setColumns()
-  // della DataView
-  Dashboard.dataViewConvert = Dashboard.dataViewGrouped.toDataTable();
-  // percFormatter.format(dataViewConvert, 7);
-
-  for (const [columnId, properties] of Object.entries(Dashboard.json.data.formatter)) {
-    switch (properties.format) {
-      case 'currency':
-        currencyFormatter.format(Dashboard.dataViewConvert, Dashboard.dataViewGrouped.getColumnIndex(columnId));
-        break;
-      case 'percent':
-        // console.log(Dashboard.dataViewGrouped.getColumnIndex(columnId));
-        // console.log(Dashboard.dataViewGrouped.getColumnLabel(7));
-        percFormatter.format(Dashboard.dataViewConvert, Dashboard.dataViewGrouped.getColumnIndex(columnId));
-        break;
-      default:
-        break;
-    }
-
-  }
 
   // NOTE: l'array in setColumns() funziona anche con i nomi delle colonne (id) non solo con gli indici
   /* dataViewGrouped.setColumns(['area_ds', 3, 5, 7, 9, 11, 13, 15, 16, 17, 18, ... */
@@ -278,11 +287,13 @@ function previewReady() {
   google.visualization.events.addListener(Dashboard.tableRefGroup, 'sort', sort);
   // con l'opzione sort: 'event' viene comunque processato l'evento 'sort'
   // senza effettuare l'ordinamento.
-  // Dashboard.tableRefGroup.draw(Dashboard.dataViewGrouped, Dashboard.options);
-  Dashboard.tableRefGroup.draw(Dashboard.dataViewConvert, Dashboard.options);
+  Dashboard.tableRefGroup.draw(Dashboard.dataViewGrouped, Dashboard.options);
 }
 
 function sort(e) {
+  const labelRef = document.getElementById('field-label');
+  const selectDataType = document.getElementById('field-datatype');
+  const selectFormat = document.getElementById('field-format');
   // l'indice della colonna nella DataView
   Dashboard.colIndex = e['column'];
   console.log('index della dataView', Dashboard.colIndex);
@@ -298,29 +309,25 @@ function sort(e) {
   Dashboard.columnId = Dashboard.dataViewGrouped.getColumnId(Dashboard.colIndex);
   // etichetta colonna, questa viene impostata nella dlg-sheet-config
   Dashboard.columnLabel = Dashboard.dataViewGrouped.getColumnLabel(Dashboard.colIndex);
-  const labelRef = document.getElementById('field-label');
-  const selectDataType = document.getElementById('field-datatype');
-  const selectFormat = document.getElementById('field-format');
   labelRef.value = Dashboard.columnLabel;
   // recupero il dataType della colonna selezionata dall'object Dashboard.json.data.columns[columnId]
   // selectDataType.selectedIndex = 2;
   // console.log(selectDataType.options);
   [...selectDataType.options].forEach((option, index) => {
     // console.log(index, option);
+    console.log(Dashboard.dataViewGrouped.getColumnType(Dashboard.colIndex));
     if (option.value === Dashboard.dataViewGrouped.getColumnType(Dashboard.colIndex)) {
       selectDataType.selectedIndex = index;
     }
   });
-  // select formattazione
+  // recupero la formattazione impostata per la colonna
   [...selectFormat.options].forEach((option, index) => {
     // console.log(index, option);
-    console.log(Dashboard.json.data.formatter[Dashboard.columnId].format);
     if (Dashboard.json.data.formatter[Dashboard.columnId]) {
       if (option.value === Dashboard.json.data.formatter[Dashboard.columnId].format) {
         selectFormat.selectedIndex = index;
       }
     }
-    debugger;
   });
   dlgConfig.show();
 }
@@ -345,17 +352,41 @@ saveColumnConfig.onclick = () => {
   // if (columnIndex !== -1) Dashboard.dataGroup.setColumnLabel(Dashboard.dataTableIndex, 'test-2');
   // cerco la colonna sia in data.group.key (colonne dimensionali) che in data.group.columns (metriche)
   const column = Dashboard.json.data.group.key.find(col => col.id === Dashboard.columnId);
-  if (column) column.label = label;
+  if (column) {
+    column.type = type;
+    column.label = label;
+  }
   const metric = Dashboard.json.data.group.columns.find(metric => metric.alias === Dashboard.columnId);
   if (metric) metric.label = label;
 
   // aggiorno Dashboard.json con i valori inseriti nella #dlg-config
   // Dashboard.json.data.columns[Dashboard.columnId].label = label;
   // Dashboard.json.data.columns[Dashboard.columnId].type = type;
-  if (formatterRef.selectedIndex !== 0) {
-    const format = formatterRef.options.item(formatterRef.selectedIndex).value;
-    Dashboard.json.data.formatter[Dashboard.columnId] = { format, numberDecimal: 2 };
+  // formattazione
+  const format = formatterRef.options.item(formatterRef.selectedIndex).value;
+  switch (type) {
+    case 'number':
+      if (format === 'number') {
+        // numero senza decimale, con separatore migliaia
+        Dashboard.json.data.formatter[Dashboard.columnId] = { type, format, numberDecimal: 0 };
+      } else {
+        Dashboard.json.data.formatter[Dashboard.columnId] = { type, format, numberDecimal: 2 };
+      }
+      break;
+    case 'date':
+      // TODO da implementare
+      Dashboard.json.data.formatter[Dashboard.columnId] = { format: 'date' };
+      break;
+    default:
+      // Le colonne 'string', al momento le imposto senza nessuna formattazione, quindi lo elimino
+      // da Dashboard.json.data.formatter
+      delete Dashboard.json.data.formatter[Dashboard.columnId];
+      break;
   }
+  // if (formatterRef.selectedIndex !== 0) {
+  //   const format = formatterRef.options.item(formatterRef.selectedIndex).value;
+  //   Dashboard.json.data.formatter[Dashboard.columnId] = { format, numberDecimal: 2 };
+  // }
 
   // TODO Il containerId deve essere deciso in init-dashboard-create.js
   Dashboard.json.wrapper.containerId = 'chart_div';
@@ -367,11 +398,9 @@ saveColumnConfig.onclick = () => {
 
 function columnHander(e) {
   // Stessa logica della Func 'previewReady()'
-  // WARN: Codice da ottimizzare, è presente codice ripetuto in previewReady()
   console.log(Dashboard.dataViewGrouped.getColumnIndex(e.target.dataset.columnId));
   console.log(Dashboard.dataTable.getColumnIndex(e.target.dataset.columnId));
   const dataTableIndex = Dashboard.dataTable.getColumnIndex(e.target.dataset.columnId);
-  let keyColumns = [], groupColumnsIndex = [];
   // Recupero l'index della colonna da nascondere/visualizzare
   const columnIndex = Dashboard.json.data.view.findIndex(col => col.id === e.target.dataset.columnId);
   const metricIndex = Dashboard.json.data.group.columns.findIndex(metric => metric.alias === e.target.dataset.columnId);
@@ -405,100 +434,6 @@ function columnHander(e) {
       Dashboard.json.data.group.columns[metricIndex].properties.visible = false;
     }
   }
-
-  var currencyFormatter = new google.visualization.NumberFormat(
-    { suffix: ' €', negativeColor: 'brown', negativeParens: true });
-  var percFormatter = new google.visualization.NumberFormat(
-    { suffix: ' %', negativeColor: 'red', negativeParens: true, fractionDigits: 1 });
-
-  // Per json.data.view, utilizzo la stessa logica utilizzata
-  // per il raggruppamento, in json.data.group.key, l'unica differenza è la prop
-  // 'visible', anzichè 'grouped' per nascondere una colonna, in questo caso, dalla DataView
-  // e non dal group()
-  // NOTE: codice ripetuto in previewReady()
-  Dashboard.json.data.group.key.forEach(column => {
-    // if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
-    if (column.properties.grouped) {
-      keyColumns.push({ id: column.id, column: Dashboard.dataTable.getColumnIndex(column.id), label: column.label });
-    }
-  });
-
-  Dashboard.json.data.group.columns.forEach(metric => {
-    const index = Dashboard.dataTable.getColumnIndex(metric.alias);
-    const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
-    let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', label: metric.label, properties: { className: 'metric-col' } };
-    groupColumnsIndex.push(object);
-  });
-  console.log(groupColumnsIndex);
-
-  Dashboard.dataGroup = new google.visualization.data.group(
-    Dashboard.dataTable, keyColumns, groupColumnsIndex
-  );
-  console.log(Dashboard.dataGroup);
-
-  // console.log(Dashboard.dataViewGrouped.getColumnIndex(e.target.dataset.columnId));
-  Dashboard.dataViewGrouped = new google.visualization.DataView(Dashboard.dataGroup);
-  // Dashboard.dataViewGrouped.hideColumns([7]);
-  // console.log(Dashboard.dataViewGrouped);
-  let viewColumns = [], viewMetrics = [];
-  Dashboard.json.data.view.forEach(column => {
-    if (column.properties.visible) viewColumns.push(Dashboard.dataGroup.getColumnIndex(column.id));
-  });
-  // dalla datagroup, recupero gli indici di colonna delle metriche
-  Dashboard.json.data.group.columns.forEach(metric => {
-    if (!metric.dependencies && metric.properties.visible) {
-      const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
-      if (metric.type === 'composite') {
-        // La logica è descritta nella Func previewReady()
-        const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
-        let calcFunction = function(dt, row) {
-          let formulaJoined = [];
-          formula.forEach(formulaEl => {
-            if (formulaEl.alias) {
-              formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
-            } else {
-              formulaJoined.push(formulaEl);
-            }
-          });
-          return (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
-        }
-        viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
-      } else {
-        viewMetrics.push(index);
-        Dashboard.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
-      }
-    }
-  });
-  // concateno i due array che popoleranno la DataView.setColumns()
-  let viewDefined = viewColumns.concat(viewMetrics)
-  Dashboard.dataViewGrouped.setColumns(viewDefined);
-  // Converto la DataView in DataTable perchè non posso applicare la
-  // formattazione (%) per le colonne calcolate con 'calc' nel Metodo setColumns()
-  // della DataView
-  Dashboard.dataViewConvert = Dashboard.dataViewGrouped.toDataTable();
-  // percFormatter.format(dataViewConvert, 7);
-
-  for (const [columnId, properties] of Object.entries(Dashboard.json.data.formatter)) {
-    switch (properties.format) {
-      case 'currency':
-        currencyFormatter.format(Dashboard.dataViewConvert, Dashboard.dataViewGrouped.getColumnIndex(columnId));
-        break;
-      case 'percent':
-        // console.log(Dashboard.dataViewGrouped.getColumnIndex(columnId));
-        // console.log(Dashboard.dataViewGrouped.getColumnLabel(7));
-        percFormatter.format(Dashboard.dataViewConvert, Dashboard.dataViewGrouped.getColumnIndex(columnId));
-        break;
-      default:
-        break;
-    }
-
-  }
-  // Dashboard.tableRefGroup.draw(Dashboard.dataViewGrouped);
-  Dashboard.tableRefGroup.draw(Dashboard.dataViewConvert);
-  // NOTE: end codice ripetuto in previewReady()
   window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
-
-  // TEST:
-  // Dashboard.dataViewGrouped.setColumns([area, zona, dealer, rapp_6, cstRapp_2, ricRapp_2]);
-  // END TEST:
+  previewReady();
 }

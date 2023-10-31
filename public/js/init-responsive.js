@@ -1431,16 +1431,23 @@ var Sheet;
     // se la colonna in ciclo è presente in 'Sheet.sheet.sheetMetrics' la imposto come type: 'number' altrimenti 'string'
     for (const field of Object.keys(Dashboard.data[0])) {
       const findMetricIndex = Sheet.sheet.sheetMetrics.findIndex(metric => metric.alias === field);
-      const type = (findMetricIndex === -1) ? 'string' : 'number';
+      // type = (findMetricIndex === -1) ? 'string' : 'number';
+      // if (Dashboard.json.data.columns[field]) {
+      //   type = Dashboard.json.data.columns[field].type;
+      // } else {
+      //   type = (findMetricIndex === -1) ? 'string' : 'number';
+      // }
       const columnType = (findMetricIndex === -1) ? 'column' : 'metric';
       if (Dashboard.json.data.columns[field]) {
-        // il data.columns già esiste, non sovrascrivo la prop 'label'
+        // il data.columns già esiste, non sovrascrivo la prop 'label' e 'type'
         columnsSet.add({
           id: field,
           label: Dashboard.json.data.columns[field].label,
-          type, properties: { columnType }, other: 'altre proprietà...'
+          type: Dashboard.json.data.columns[field].type,
+          properties: { columnType }, other: 'altre proprietà...'
         });
       } else {
+        type = (findMetricIndex === -1) ? 'string' : 'number';
         columnsSet.add({ id: field, label: field, type, properties: { columnType }, other: 'altre proprietà...' });
       }
     }
