@@ -756,14 +756,14 @@ var Sheet;
     code.dataset.token = token;
     code.innerHTML = Sheet.fields.get(token);
     // aggiungo la colonna al report (Sheet)
-    // TODO: aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
+    // TODO aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
     // Sheet.fields = { token: elementRef.id, value: WorkBook.field.get(elementRef.id) };
     // passo, a Sheet.fields, la colonna creata in WorkBook
     // Sheet.fields = WorkBook.field.get(elementRef.id);
-    // TODO: da aggiungere in fase di creazione del process
+    // TODO da aggiungere in fase di creazione del process
     Sheet.tables = WorkBook.field.get(token).tableAlias;
     target.appendChild(field);
-    // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
+    // TODO impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
     // i.addEventListener('click', app.handlerSetMetric);
     // app.setSheet();
   }

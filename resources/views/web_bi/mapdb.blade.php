@@ -754,7 +754,7 @@
                                     <section>
                                       <label for="field-format">Formattazione colonna</label>
                                       <select id="field-format">
-                                        <option value="number" selected>Default</option>
+                                        <option value="default" selected>Default</option>
                                         <option value="currency">Valuta €</option>
                                         <option value="percent">Percentuale</option>
                                       </select>
