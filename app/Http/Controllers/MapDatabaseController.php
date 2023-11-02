@@ -174,7 +174,7 @@ class MapDatabaseController extends Controller
     // Utilizzo di paginate()
     // $data = DB::connection('vertica_odbc')->table($table)->select("dealer_id", "dealer_ds")->paginate(15000);
     // $data = DB::connection('vertica_odbc')->table($table)->where("dealer_id", "=", 447)->paginate(15000);
-    $data = DB::connection('vertica_odbc')->table($table)->whereIn("dealer_id", [447, 497])->paginate(15000);
+    $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [447, 497])->paginate(15000);
     // $data = DB::connection('vertica_odbc')->table($table)->paginate(15000);
     return $data;
 

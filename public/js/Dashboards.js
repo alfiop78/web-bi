@@ -192,7 +192,7 @@ class Dashboards {
     } */
   }
 
-  defineGroup() {
+  /* defineGroup() {
     const data = JSON.parse(this.dataTable.toJSON());
     console.log(data);
     data.cols.forEach((col, index) => {
@@ -210,6 +210,6 @@ class Dashboards {
         }
       }
     });
-  }
+  } */
 
 }

@@ -8,28 +8,9 @@ function testFn() {
 }
 
 let app = {
-  // default: function(properties) {
-  //   return new google.visualization.NumberFormat(properties);
-  // },
   number: function(properties) {
     return new google.visualization.NumberFormat(properties);
-  },
-  // currency: function(fractionDigits) {
-  //   return new google.visualization.NumberFormat(
-  //     { suffix: ' €', negativeColor: 'brown', negativeParens: true, fractionDigits }
-  //   );
-  // },
-  // currency: function(properties) {
-  //   return new google.visualization.NumberFormat(properties);
-  // },
-  // percent: function(fractionDigits) {
-  //   return new google.visualization.NumberFormat(
-  //     { suffix: ' %', negativeColor: 'red', negativeParens: true, fractionDigits }
-  //   );
-  // },
-  // percent: function(properties) {
-  //   return new google.visualization.NumberFormat(properties);
-  // }
+  }
 }
 
 function drawDatamart() {
@@ -39,7 +20,7 @@ function drawDatamart() {
   // livelli dimensionali
   const prepareData = Dashboard.prepareData();
   // ciclo il prepareData.cols per aggiungere l'elenco delle colonne in #ul-columns-handler.
-  // Da questo elenco si potranno nascondere/visualizzare le colonne e le metriche
+  // Da questo elenco si potranno nascondere/visualizzare le colonne e le metreehe
   prepareData.cols.forEach((col, index) => {
     const ulColumnsHandler = document.getElementById('ul-columns-handler');
     const tmplContent = tmplList.content.cloneNode(true);
@@ -156,7 +137,7 @@ function previewReady() {
   // Formattazione colonne
   for (const [columnId, properties] of Object.entries(Dashboard.json.data.formatter)) {
     console.log('Formattazione ', Dashboard.dataGroup.getColumnIndex(columnId));
-    let formatter;
+    let formatter = null;
     // debugger;
     switch (properties.type) {
       case 'number':
@@ -168,10 +149,10 @@ function previewReady() {
       // formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
       // break;
       default:
-        debugger;
+        // debugger;
         break;
     }
-    formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
+    if (formatter) formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
   }
 
   // TEST: aggiunta di una CSS class a una colonna, nella dataGroup
@@ -287,6 +268,7 @@ function sort(e) {
   const labelRef = document.getElementById('field-label');
   const selectDataType = document.getElementById('field-datatype');
   const selectFormat = document.getElementById('field-format');
+  const checkboxFilter = document.getElementById('filter-column');
   // l'indice della colonna nella DataView
   Dashboard.colIndex = e['column'];
   console.log('index della dataView', Dashboard.colIndex);
@@ -314,6 +296,7 @@ function sort(e) {
     }
   });
   // recupero la formattazione impostata per la colonna
+  selectFormat.selectedIndex = 0; // default
   [...selectFormat.options].forEach((option, index) => {
     // console.log(index, option);
     if (Dashboard.json.data.formatter[Dashboard.columnId]) {
@@ -322,8 +305,16 @@ function sort(e) {
       }
     }
   });
+  // recupero l'informazione .json.filter (colonna impostata come filtro)
+  if (Dashboard.json.filters.find(name => name.filterColumnLabel === Dashboard.columnLabel)) {
+    // colonna impostata come filtro
+    checkboxFilter.checked = true;
+  } else {
+    checkboxFilter.checked = false;
+  }
   dlgConfig.show();
 }
+
 // Salvataggio della configurazione colonna dalla dialog dlg-config
 saveColumnConfig.onclick = () => {
   // console.log(Dashboard.dataTable);
@@ -338,6 +329,7 @@ saveColumnConfig.onclick = () => {
   const typeRef = document.getElementById('field-datatype');
   // formattazione colonna
   const formatterRef = document.getElementById('field-format');
+  const filterColumn = document.getElementById('filter-column');
   const type = typeRef.options.item(typeRef.selectedIndex).value.toLowerCase();
   // const columnIndex = Dashboard.json.data.view.findIndex(col => col.id === Dashboard.columnId);
   // if (columnIndex !== -1) Dashboard.dataGroup.setColumnLabel(7, 'test');
@@ -346,7 +338,6 @@ saveColumnConfig.onclick = () => {
   // cerco la colonna sia in data.group.key (colonne dimensionali) che in data.group.columns (metriche)
   const column = Dashboard.json.data.group.key.find(col => col.id === Dashboard.columnId);
   if (column) {
-    // column.type = type;
     column.label = label;
   }
   const metric = Dashboard.json.data.group.columns.find(metric => metric.alias === Dashboard.columnId);
@@ -372,6 +363,30 @@ saveColumnConfig.onclick = () => {
       break;
   }
   Dashboard.json.data.formatter[Dashboard.columnId] = { type, format, prop: formatterProperties };
+  // filtri definiti per il report
+  if (filterColumn.checked === true) {
+    // Proprietà Dashboard.json.filters
+    // Inserisco il filtro solo se non è ancora presente in Dashboard.json.filters
+    const index = Dashboard.json.filters.findIndex(filter => filter.containerId === `flt-${label}`);
+    if (index === -1) {
+      // non è presente, lo aggiungo
+      Dashboard.json.filters.push({
+        containerId: `flt-${label}`,
+        filterColumnLabel: label,
+        caption: label
+      });
+    }
+  } else {
+    // rimozione del filtro, se presente
+    const index = Dashboard.json.filters.findIndex(filter => filter.containerId === `flt-${label}`);
+    if (index !== -1) {
+      Dashboard.json.filters.splice(index, 1);
+      // lo rimuovo anche dal DOM
+      /* const filterRef = document.getElementById(`flt-${label}`);
+      filterRef.parentElement.remove();
+      app.setDashboardBind(); */
+    }
+  }
 
   // TODO Il containerId deve essere deciso in init-dashboard-create.js
   Dashboard.json.wrapper.containerId = 'chart_div';

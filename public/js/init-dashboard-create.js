@@ -10,7 +10,9 @@ var Storage = new SheetStorages();
     dlgTemplateLayout: document.getElementById('dlg-template-layout'),
     dlgSheets: document.getElementById('dlg-sheets'),
     dlgChartSection: document.getElementById('dlg-chart'),
-    dlgConfig: document.getElementById('dlg-config'),
+    number: function(properties) {
+      return new google.visualization.NumberFormat(properties);
+    },
   }
 
   // Load the Visualization API and the corechart package.
@@ -116,6 +118,7 @@ var Storage = new SheetStorages();
     document.querySelectorAll('.thumb-layout[data-selected]').forEach(el => delete el.dataset.selected);
     e.currentTarget.dataset.selected = true;
   }
+
   // Template selezionato e chiusura dialog
   app.btnTemplateDone = () => {
     app.dlgTemplateLayout.close();
@@ -134,10 +137,6 @@ var Storage = new SheetStorages();
     btnAddChart.innerText = 'Add Chart';
     btnAddChart.addEventListener('click', app.addChart);
     chartSection.appendChild(btnAddChart);
-    const btnGrouping = document.createElement('button');
-    btnGrouping.innerText = 'Raggruppamento';
-    btnGrouping.addEventListener('click', app.addGroup);
-    chartSection.appendChild(btnGrouping);
   }
 
   // apertura dialog per l'aggiunta del chart o DataTable
@@ -162,7 +161,7 @@ var Storage = new SheetStorages();
   app.dashboardExample = async () => {
     // recupero l'id dello Sheet stock veicoli nuovi
     // const sheet = JSON.parse(window.localStorage.getItem('hdkglro')); // stock
-    const sheet = JSON.parse(window.localStorage.getItem('59yblqr')); // cb
+    const sheet = JSON.parse(window.localStorage.getItem('5ytvr56')); // cb-26-10.2023
     if (!sheet.id) return false;
     await fetch(`/fetch_api/${sheet.id}/preview`)
       .then((response) => {
@@ -220,8 +219,11 @@ var Storage = new SheetStorages();
     // aggiungo i filtri se sono presenti nel json
     // Dashboard.name = `template-${sheetToken}`;
     Dashboard.json.filters.forEach(filter => app.createTemplateFilter(filter));
+    // impostazione del legame tra i filtri (bind)
+    app.setDashboardBind();
 
-    Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareDataPreview());
+    // Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareDataPreview());
+    Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareData());
     // var tableRef = new google.visualization.Table(document.getElementById('chart_div'));
     Dashboard.DOMref = new google.visualization.Table(document.getElementById('chart_div'));
     // Set chart options
@@ -246,75 +248,129 @@ var Storage = new SheetStorages();
       }
     };
 
-    // La prop data.columns dovrei averla già definita nella preview dello sheet, al momento
-    // commento questo 'for'
-    /* for (const [key, values] of Object.entries(JSON.parse(Dashboard.dataTable.toJSON()))) {
-      // key : (rows/cols)
-      // values : array di object
-      // creo la proprietà json.data.column del report template (file .json)
-      if (key === 'cols') {
-        values.forEach((value, index) => {
-          // console.log(key, value);
-          // value : {id: nome_colonna, label: nome_label, type: datatype}
-          // Verifico se questa colonna è già presente nel template report (in localStorage)
-          // Dashboard.defineColumns(value);
-          if (Dashboard.json.data.columns[value.id]) {
-            Dashboard.defineColumns(Dashboard.json.data.columns[value.id], index);
-          } else {
-            // Definisco le colonne
-            Dashboard.defineColumns(value, index);
-          }
-        });
+    let keyColumns = [];
+    Dashboard.json.data.group.key.forEach(column => {
+      if (column.properties.grouped) {
+        keyColumns.push({ id: column.id, column: Dashboard.dataTable.getColumnIndex(column.id), label: column.label, type: column.type });
       }
-    } */
-    // window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
-    // console.log(Dashboard.json);
-    // console.log(Dashboard.json.data.view);
-    // debugger;
-    // console.log(JSON.parse(Dashboard.dataTable.toJSON()));
+    });
 
-    Dashboard.defineGroup();
-    // Dashboard.view = new google.visualization.DataView(Dashboard.dataTable);
-    // Dashboard.view.setColumns(Dashboard.json.data.view);
-    // console.log(Dashboard.json);
-    // debugger;
-    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+    let groupColumnsIndex = [];
+    Dashboard.json.data.group.columns.forEach(metric => {
+      // salvo in groupColumnsIndex TUTTE le metriche, deciderò nella DataView
+      // quali dovranno essere visibili (quelle con dependencies:false)
+      // recupero l'indice della colonna in base al suo nome
+      const index = Dashboard.dataTable.getColumnIndex(metric.alias);
+      // TODO modificare la prop 'aggregateFn' in 'aggregation' in fase di creazione delle metriche
+      const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
+      let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', label: metric.label };
+      groupColumnsIndex.push(object);
+    });
 
-    // nascondo la prima colonna
-    // view.hideColumns([0]);
-    // visualizzo le colonne _ds, come appena impostato in defineColumns()
-    // Dashboard.view.setColumns(Dashboard.json.wrapper.view.columns);
+    // console.log(groupColumnsIndex);
+    // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
+    Dashboard.dataGroup = new google.visualization.data.group(
+      Dashboard.dataTable, keyColumns, groupColumnsIndex
+    );
+    console.log('group():', Dashboard.dataGroup);
 
-    // gestione eventi
-    google.visualization.events.addListener(Dashboard.DOMref, 'ready', ready);
-    // la selezione della riga la imposto DOPO aver configurato la DataView.
-    // Quando l'ho impostata prima l'index della riga non corrispondeva alla riga selezionata
-    google.visualization.events.addListener(Dashboard.DOMref, 'select', selectRow);
-    google.visualization.events.addListener(Dashboard.DOMref, 'sort', app.sort);
-    // end gestione eventi
-
-    // utilizzo della DataView
-    // Dashboard.DOMref.draw(Dashboard.view, options);
-    // utilizzo della DataView
-
-    // utilizzo della DataTable
-    Dashboard.DOMref.draw(Dashboard.dataTable, options);
-    // utilizzo della DataTable
-    function ready() {
-      console.log('ready');
-      // Creo la prop 'view' in json.data.view
-      // Qui inserisco le colonne incluse in data.group.key/columns
-      /* if (Dashboard.json.data.view.length !== 0) {
-        Dashboard.json.data.view = Dashboard.json.data.view;
-      } else {
-        Dashboard.json.data.view = Dashboard.json.data.group.key.concat(Dashboard.json.data.group.columns);
-      } */
+    for (const [columnId, properties] of Object.entries(Dashboard.json.data.formatter)) {
+      console.log('Formattazione ', Dashboard.dataGroup.getColumnIndex(columnId));
+      let formatter = null;
+      // debugger;
+      switch (properties.type) {
+        case 'number':
+          formatter = app[properties.type](properties.prop);
+          break;
+        // case 'date':
+        // TODO Da implementare
+        // let formatter = app[properties.format](properties.numberDecimal);
+        // formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
+        // break;
+        default:
+          // debugger;
+          break;
+      }
+      if (formatter) formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
     }
 
-    function selectRow() {
-      // WARN: ottengo la selezione corretta solo dopo che l'evento ready si è verificato, da rivedere
-      console.log(Dashboard.DOMref.getSelection());
-    }
+    Dashboard.dataViewGrouped = new google.visualization.DataView(Dashboard.dataGroup);
+
+    let viewColumns = [], viewMetrics = [];
+    Dashboard.json.data.view.forEach(column => {
+      if (column.properties.visible) viewColumns.push(Dashboard.dataGroup.getColumnIndex(column.id));
+    });
+    // dalla dataGroup, recupero gli indici di colonna delle metriche
+    Dashboard.json.data.group.columns.forEach(metric => {
+      if (!metric.dependencies && metric.properties.visible) {
+        const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
+        // NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo
+        // modo come alternativa a eval() (non l'ho testato)
+        // function evil(fn) {
+        //   return new Function('return ' + fn)();
+        // }
+        // console.log(evil('12/5*9+9.4*2')); // => 40.4     const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
+
+        // Implementazione della func 'calc' per le metriche composite.
+        if (metric.type === 'composite') {
+          // è una metrica composta, creo la funzione calc, sostituendo i nomi
+          // delle metriche contenute nella formula, con gli indici corrispondenti.
+          // Es.: margine = ((ricavo - costo) / ricavo) * 100, recuperare gli indici
+          // delle colonne ricavo e costo per creare la metrica margine :
+          // recupero la formula della metrica composta
+          const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
+          // Creo una Func "dinamica"
+          let calcFunction = function(dt, row) {
+            let formulaJoined = [];
+            // in formulaJoined ciclo tutti gli elementi della Formula, imposto i
+            // valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
+            formula.forEach(formulaEl => {
+              if (formulaEl.alias) {
+                formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
+              } else {
+                formulaJoined.push(formulaEl);
+              }
+            });
+            // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
+            // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
+            // effettuo un controllo sul risultato in caso fosse NaN
+            const result = (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
+            let total = (result) ? { v: result } : { v: result, f: '-' };
+            // console.log(result);
+            // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
+            let resultFormatted;
+            // formattazione della cella con formatValue()
+            if (Dashboard.json.data.formatter[metric.alias]) {
+              const metricFormat = Dashboard.json.data.formatter[metric.alias];
+              let formatter;
+              formatter = app[metricFormat.type](metricFormat.prop);
+              resultFormatted = (result) ? formatter.formatValue(result) : '-';
+              total = { v: result, f: resultFormatted };
+            } else {
+              resultFormatted = (result) ? result : '-';
+              total = (result) ? { v: result } : { v: result, f: '-' };
+            }
+            return total;
+          }
+          viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
+        } else {
+          viewMetrics.push(index);
+          Dashboard.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
+          // console.log(Dashboard.dataGroup.getColumnProperty(index, 'className'));
+        }
+      }
+    });
+    // concateno i due array che popoleranno la DataView.setColumns()
+    let viewDefined = viewColumns.concat(viewMetrics)
+    // Dashboard.dataGroup.setColumnProperty(0, 'className', 'cssc1')
+    // console.log(Dashboard.dataGroup.getColumnProperty(0, 'className'));
+    // console.log(Dashboard.dataGroup.getColumnProperties(0));
+    Dashboard.dataViewGrouped.setColumns(viewDefined);
+    console.info('DataView', Dashboard.dataViewGrouped);
+
+    // con l'opzione sort: 'event' viene comunque processato l'evento 'sort'
+    // senza effettuare l'ordinamento.
+    Dashboard.DOMref.draw(Dashboard.dataViewGrouped, options);
   }
 
   app.setDashboardBind = () => {
@@ -329,6 +385,7 @@ var Storage = new SheetStorages();
       }
     });
     Dashboard.json.bind = bind;
+    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
   }
 
   app.btnRemoveFilter = (e) => {
@@ -343,86 +400,6 @@ var Storage = new SheetStorages();
     app.setDashboardBind();
     window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
   }
-
-  // event proveniente dalla Dashboard
-  app.sort = (e) => {
-    // console.log(e);
-    Dashboard.columnIndex = e['column'];
-    // TODO: potrei inserire tutto il resto della funzione in onopen della dialog
-
-    // const columnName = Dashboard.view.getColumnId(Dashboard.columnIndex);
-    // const columnLabel = Dashboard.view.getColumnLabel(Dashboard.columnIndex);
-    const columnName = Dashboard.dataTable.getColumnId(Dashboard.columnIndex);
-    const columnLabel = Dashboard.dataTable.getColumnLabel(Dashboard.columnIndex);
-    // imposto, nella 'select #field-datatype' il dataType della colonna selezionata
-    const selectDataType = document.getElementById('field-datatype');
-    const chkboxFilter = document.getElementById('filter-column');
-    const chkboxHide = document.getElementById('hide-column');
-    const groupColumn = document.getElementById('group-column');
-    const selectFormatter = document.getElementById('field-format');
-    console.log(Dashboard.columnIndex, columnName);
-    // console.log(Dashboard.view.getColumnProperties(Dashboard.columnIndex));
-    // console.log(data.getColumnProperty(1));
-    // TODO: Popolo la dialog in base ai valori, per questa colonna, trovati in Dashboard.json
-    console.log(Dashboard.json.data.columns[columnName]);
-    // document.getElementById('field-label').value = columnName;
-    document.getElementById('field-label').value = Dashboard.json.data.columns[columnName].label;
-    // dataType
-    // recupero il dataType della colonna selezionata dall'object Dashboard.json.data.columns[columnIndex]
-    // selectDataType.selectedIndex = 2;
-    // console.log(selectDataType.options);
-    [...selectDataType.options].forEach((option, index) => {
-      // console.log(index, option);
-      if (option.value === Dashboard.json.data.columns[columnName].type) {
-        selectDataType.selectedIndex = index;
-      }
-    });
-    // NOTE: utilizzo di selectedIndex
-
-    // selectDataType.selectedIndex = 2;
-    // console.log(selectDataType.options);
-    /* [...selectDataType.options].forEach((option, index) => {
-      // console.log(index, option);
-      if (option.value === Dashboard.view.getColumnType(Dashboard.columnIndex)) {
-        selectDataType.selectedIndex = index;
-      }
-    }); */
-
-    // se la colonna è stata nascosta, il columnName non è presente nell'array json.wrapper.view.columns
-    // if (!Dashboard.json.wrapper.view.columns.includes(columnName)) hideCheckbox.checked = true;
-    // TODO: recupero la formattazione della colonna
-    if (Dashboard.json.data.formatter[Dashboard.columnIndex]) {
-      // formattazione presente su questa colonna
-      [...selectFormatter.options].forEach((option, index) => {
-        // console.log(index, option);
-        if (option.value === Dashboard.json.data.formatter[Dashboard.columnIndex].format) {
-          selectFormatter.selectedIndex = index;
-        }
-      });
-    }
-
-    console.log(Dashboard.json.data.group.columns);
-    // Verifico se la colonna selezionata è presente in .json.data.group.key/columns
-    // Se presente in 'key' è stata "contrassegnata" come colonna da raggruppare, se
-    // presente in 'columns' è "contrassegnata" come metrica.
-    let metricIndex = Dashboard.json.data.group.columns.findIndex(el => el.column === Dashboard.columnIndex);
-    let columnIndex = Dashboard.json.data.group.key.indexOf(Dashboard.columnIndex);
-    // se la colonna selezionata è presente in uno dei due array la chkbox è false (non selezionata)
-    // altrimenti risulta selezionata, quindi come "colonna nascosta".
-    chkboxHide.checked = (metricIndex !== -1 || columnIndex !== -1) ? false : true;
-
-    // group checkbox
-    groupColumn.checked = (Dashboard.json.data.group.key.includes(Dashboard.columnIndex)) ? true : false;
-
-    // recupero la proprietà della checkbox #filter-column se questa colonna è stata impostata come filtro
-    // find restituisce il primo elemento trovato in base al test della funzione fornita
-    // NOTE: utilizzo di find() su un array
-    const filterCheckbox = Dashboard.json.filters.find(filterProperty => filterProperty.filterColumnLabel === columnLabel);
-    if (filterCheckbox) chkboxFilter.checked = true;
-    app.dlgConfig.showModal();
-  }
-
-  app.chartSettings = () => app.dlgConfig.showModal();
 
   // Salvataggio della configurazione colonna dalla dialog dlg-config
   app.btnSaveColumn = () => {
@@ -541,7 +518,6 @@ var Storage = new SheetStorages();
     console.log(Dashboard.json);
     debugger;
     window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
-    app.dlgConfig.close();
   }
 
   // end onclick events
@@ -553,12 +529,6 @@ var Storage = new SheetStorages();
   // reset sheets
   app.dlgChartSection.onclose = () => document.querySelectorAll('#ul-sheets > li').forEach(el => el.remove());
 
-  app.dlgConfig.onclose = () => {
-    document.getElementById('hide-column').checked = false;
-    document.getElementById('filter-column').checked = false;
-  }
-  // end onclose dialogs
-  //
   // Drag events
   app.filterDragStart = (e) => {
     // console.log('dragStart');
