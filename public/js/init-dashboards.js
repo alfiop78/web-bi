@@ -214,12 +214,11 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       // console.log(groupColumnsIndex);
       // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
       Dashboard.dataGroup = new google.visualization.data.group(
-        dataTable, keyColumns, groupColumnsIndex
+        table.getDataTable(), keyColumns, groupColumnsIndex
       );
       console.log('group():', Dashboard.dataGroup);
-      debugger;
       for (const [columnId, properties] of Object.entries(Dashboard.json.data.formatter)) {
-        console.log('Formattazione ', Dashboard.dataGroup.getColumnIndex(columnId));
+        // console.log('Formattazione ', Dashboard.dataGroup.getColumnIndex(columnId));
         let formatter = null;
         // debugger;
         switch (properties.type) {
@@ -292,7 +291,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       // console.log(Dashboard.dataGroup.getColumnProperty(0, 'className'));
       // console.log(Dashboard.dataGroup.getColumnProperties(0));
       Dashboard.dataViewGrouped.setColumns(viewDefined);
-      tableRef.draw(Dashboard.dataViewGrouped);
+      tableRef.draw(Dashboard.dataViewGrouped, Dashboard.json.wrapper.options);
     }
 
     // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
