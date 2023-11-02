@@ -1,5 +1,4 @@
 class Dashboards {
-  // #sheetSpecs;
   #data;
   #prepareData = { cols: [], rows: [] };
   #json = {
@@ -51,30 +50,6 @@ class Dashboards {
   }
 
   get json() { return this.#json; }
-
-  prepareDataPreview() {
-    // aggiungo le colonne
-    // TODO: probabilmente qui è meglio utilizzare il metodo con addColumn/addRows di GoogleChart
-    // debugger;
-    for (const key of Object.keys(this.data[0])) {
-      // preparo i dati delle colonne tenendo in considerazione le eventuali modifiche fatte in
-      // localStorage.json... (nel template report)
-      this.#prepareData.cols.push({ id: key, label: this.#json.data.columns[key].label });
-      // (this.#json.data.columns[key]) ?
-      //   this.#prepareData.cols.push({ id: key, label: this.#json.data.columns[key].label }) :
-      //   this.#prepareData.cols.push({ id: key, label: key });
-    }
-    // aggiungo le righe
-    this.data.forEach(row => {
-      let v = [];
-      for (const [key, value] of Object.entries(row)) {
-        v.push({ v: value });
-      }
-      this.#prepareData.rows.push({ c: v });
-    });
-    console.log(this.#prepareData);
-    return this.#prepareData;
-  }
 
   prepareData() {
     // aggiungo le colonne
@@ -132,12 +107,6 @@ class Dashboards {
     return this.#prepareData;
   }
 
-  /* set sheetSpecs(value) {
-    this.#sheetSpecs = value;
-  }
-
-  get sheetSpecs() { return this.#sheetSpecs; } */
-
   drawControls(filtersRef) {
     this.controls = [];
     // console.log(this.sheetSpecs);
@@ -191,25 +160,5 @@ class Dashboards {
       if (!this.json.data.view.includes(index)) this.json.data.view.push(index);
     } */
   }
-
-  /* defineGroup() {
-    const data = JSON.parse(this.dataTable.toJSON());
-    console.log(data);
-    data.cols.forEach((col, index) => {
-      // console.log(col, index);
-      const regex = new RegExp('_ds$');
-      if (regex.test(col.id)) {
-        // verifico prima se esiste per non duplicarlo
-        // if (!this.json.data.view.includes(value.id)) this.json.data.view.push(value.id);
-        // se questi valori sono già presenti non li modifico
-        if (this.json.data.view.length === 0) {
-          if (!this.json.data.view.includes(index)) this.json.data.view.push(index);
-        }
-        if (this.json.data.group.key.length === 0) {
-          if (!this.json.data.group.key.includes(index)) this.json.data.group.key.push(index);
-        }
-      }
-    });
-  } */
 
 }

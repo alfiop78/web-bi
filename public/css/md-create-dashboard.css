@@ -1,3 +1,34 @@
+#wrapper {
+  display: grid;
+  grid-template-columns: 100%;
+}
+
+.horizontal-flex {
+  display: flex;
+  flex-direction: column;
+}
+
+#wrapper menu {
+  background-color: white;
+  box-shadow: 0px 1px 2px 0px grey;
+  padding: 8px;
+
+}
+
+fieldset {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  grid-column-gap: 1em;
+  border-radius: 2px;
+  border: solid thin #c6c6c6;
+  padding: 2em;
+}
+
+fieldset legend {
+  padding-inline-start: 8px;
+  padding-inline-end: 8px;
+}
+
 .thumbnails .col, .preview .col {
   display: grid;
 }
@@ -84,6 +115,9 @@
   width: 100%;
   height: 100%;
   padding: 1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .title {
@@ -110,4 +144,8 @@
 
 .thumb-layout[data-selected] {
   border: solid thin steelblue;
+}
+
+.absolute {
+  position: absolute;
 }

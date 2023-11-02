@@ -8,7 +8,6 @@ var Storage = new SheetStorages();
     tmplList: document.getElementById('tmpl-li'),
     // dialogs
     dlgTemplateLayout: document.getElementById('dlg-template-layout'),
-    dlgSheets: document.getElementById('dlg-sheets'),
     dlgChartSection: document.getElementById('dlg-chart'),
     number: function(properties) {
       return new google.visualization.NumberFormat(properties);
@@ -124,8 +123,7 @@ var Storage = new SheetStorages();
     app.dlgTemplateLayout.close();
     //  recupero il template selezionato
     const template = document.querySelector('.thumb-layout[data-selected]').id;
-    console.log(template);
-
+    // console.log(template);
     // creo l'anteprima nel DOM, questa anteprima è interattive, quindi da
     // qui si può "creare" il json template report
     Template.create();
@@ -158,10 +156,11 @@ var Storage = new SheetStorages();
     app.dlgChartSection.showModal();
   }
 
-  app.dashboardExample = async () => {
+  app.dashboardExample = async (token) => {
     // recupero l'id dello Sheet stock veicoli nuovi
     // const sheet = JSON.parse(window.localStorage.getItem('hdkglro')); // stock
-    const sheet = JSON.parse(window.localStorage.getItem('5ytvr56')); // cb-26-10.2023
+    // const sheet = JSON.parse(window.localStorage.getItem('5ytvr56')); // cb-26-10.2023
+    const sheet = JSON.parse(window.localStorage.getItem(token));
     if (!sheet.id) return false;
     await fetch(`/fetch_api/${sheet.id}/preview`)
       .then((response) => {
@@ -183,8 +182,8 @@ var Storage = new SheetStorages();
   }
 
   // Selezione del report che alimenta il chart_div
-  app.sheetSelected = () => {
-    app.dashboardExample();
+  app.sheetSelected = (e) => {
+    app.dashboardExample(e.currentTarget.dataset.token);
     app.dlgChartSection.close();
   }
 
@@ -216,68 +215,36 @@ var Storage = new SheetStorages();
     // if (localStorage.getItem('tmpl_stock')) Dashboard.json = localStorage.getItem('tmpl_stock');
     (localStorage.getItem(`template-${sheetToken}`)) ?
       Dashboard.json = localStorage.getItem(`template-${sheetToken}`) : Dashboard.json.name = `template-${sheetToken}`;
-    // aggiungo i filtri se sono presenti nel json
-    // Dashboard.name = `template-${sheetToken}`;
+    // aggiungo i filtri se sono stati impostati nel preview sheet
     Dashboard.json.filters.forEach(filter => app.createTemplateFilter(filter));
     // impostazione del legame tra i filtri (bind)
+    // WARN: probabilmente qui, se non ci sono filtri, può verificarsi un errore
     app.setDashboardBind();
 
-    // Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareDataPreview());
     Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareData());
-    // var tableRef = new google.visualization.Table(document.getElementById('chart_div'));
     Dashboard.DOMref = new google.visualization.Table(document.getElementById('chart_div'));
-    // Set chart options
-    const options = {
-      'title': 'Stock veicoli',
-      'showRowNumber': true,
-      'allowHTML': true,
-      'alternatingRowStyle': true,
-      'width': '80vw',
-      'height': 'auto',
-      'page': 'enabled',
-      'pageSize': 5,
-      "cssClassNames": {
-        "headerRow": "g-table-header",
-        "tableRow": "g-table-row",
-        "oddTableRow": "",
-        "selectedTableRow": "",
-        "hoverTableRow": "",
-        "headerCell": "g-header-cell",
-        "tableCell": "g-table-cell",
-        "rowNumberCell": ""
-      }
-    };
-
+    // NOTE: utilizzo della stessa logica utilizzata in init-sheet.js
     let keyColumns = [];
     Dashboard.json.data.group.key.forEach(column => {
       if (column.properties.grouped) {
         keyColumns.push({ id: column.id, column: Dashboard.dataTable.getColumnIndex(column.id), label: column.label, type: column.type });
       }
     });
-
     let groupColumnsIndex = [];
     Dashboard.json.data.group.columns.forEach(metric => {
-      // salvo in groupColumnsIndex TUTTE le metriche, deciderò nella DataView
-      // quali dovranno essere visibili (quelle con dependencies:false)
-      // recupero l'indice della colonna in base al suo nome
       const index = Dashboard.dataTable.getColumnIndex(metric.alias);
-      // TODO modificare la prop 'aggregateFn' in 'aggregation' in fase di creazione delle metriche
       const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
       let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', label: metric.label };
       groupColumnsIndex.push(object);
     });
 
-    // console.log(groupColumnsIndex);
     // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
     Dashboard.dataGroup = new google.visualization.data.group(
       Dashboard.dataTable, keyColumns, groupColumnsIndex
     );
-    console.log('group():', Dashboard.dataGroup);
 
     for (const [columnId, properties] of Object.entries(Dashboard.json.data.formatter)) {
-      console.log('Formattazione ', Dashboard.dataGroup.getColumnIndex(columnId));
       let formatter = null;
-      // debugger;
       switch (properties.type) {
         case 'number':
           formatter = app[properties.type](properties.prop);
@@ -304,12 +271,6 @@ var Storage = new SheetStorages();
     Dashboard.json.data.group.columns.forEach(metric => {
       if (!metric.dependencies && metric.properties.visible) {
         const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
-        // NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo
-        // modo come alternativa a eval() (non l'ho testato)
-        // function evil(fn) {
-        //   return new Function('return ' + fn)();
-        // }
-        // console.log(evil('12/5*9+9.4*2')); // => 40.4     const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
 
         // Implementazione della func 'calc' per le metriche composite.
         if (metric.type === 'composite') {
@@ -366,11 +327,9 @@ var Storage = new SheetStorages();
     // console.log(Dashboard.dataGroup.getColumnProperty(0, 'className'));
     // console.log(Dashboard.dataGroup.getColumnProperties(0));
     Dashboard.dataViewGrouped.setColumns(viewDefined);
-    console.info('DataView', Dashboard.dataViewGrouped);
-
-    // con l'opzione sort: 'event' viene comunque processato l'evento 'sort'
-    // senza effettuare l'ordinamento.
-    Dashboard.DOMref.draw(Dashboard.dataViewGrouped, options);
+    // console.info('DataView', Dashboard.dataViewGrouped);
+    Dashboard.DOMref.draw(Dashboard.dataViewGrouped, Dashboard.json.wrapper.options);
+    // Dashboard.DOMref.draw(Dashboard.dataViewGrouped, options);
   }
 
   app.setDashboardBind = () => {
@@ -398,125 +357,6 @@ var Storage = new SheetStorages();
     const filterRef = document.getElementById(filterId);
     filterRef.parentElement.remove();
     app.setDashboardBind();
-    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
-  }
-
-  // Salvataggio della configurazione colonna dalla dialog dlg-config
-  app.btnSaveColumn = () => {
-    // console.log(Dashboard.dataTable);
-    // const column = Dashboard.view.getColumnId(Dashboard.columnIndex); // nome colonna
-    const column = Dashboard.dataTable.getColumnId(Dashboard.columnIndex); // nome colonna
-    // input label
-    const label = document.getElementById('field-label').value;
-    // dataType
-    const typeRef = document.getElementById('field-datatype');
-    // formattazione colonna
-    const formatterRef = document.getElementById('field-format');
-    const hideColumn = document.getElementById('hide-column');
-    const groupColumn = document.getElementById('group-column');
-    const filterColumn = document.getElementById('filter-column');
-    // console.log(typeRef.selectedIndex);
-    // console.log(typeRef.options.item(typeRef.selectedIndex).value);
-    const type = typeRef.options.item(typeRef.selectedIndex).value.toLowerCase();
-    // aggiorno Dashboard.json con i valori inseriti nella #dlg-config
-    Dashboard.json.data.columns[column].label = label;
-    Dashboard.json.data.columns[column].type = type;
-    if (formatterRef.selectedIndex !== 0) {
-      const format = formatterRef.options.item(formatterRef.selectedIndex).value;
-      Dashboard.json.data.formatter[Dashboard.columnIndex] = { format, numberDecimal: 2 };
-    }
-    // raggruppameneto e visualizzazione (funzione group() di Google Chart)
-    // Le colonne impostate nel raggruppamento determinano anche la visualizzazione
-    // sulla dashboard, per cui, vengono visualizzate solo le colonne raggruppate
-    function compareNumbers(a, b) { return a - b; }
-    debugger;
-    const groupIndex = Dashboard.json.data.group.key.indexOf(Dashboard.columnIndex);
-    if (groupColumn.checked === true) {
-      // aggiungo questa colonna al raggruppamento, se già non è presente
-      if (groupIndex === -1) {
-        // group per questa colonna non presente, lo aggiungo
-        // console.log(Dashboard.columnIndex);
-        Dashboard.json.data.group.key.push(Dashboard.columnIndex);
-        Dashboard.json.data.group.key.sort(compareNumbers);
-      }
-    } else {
-      // elimina il raggruppamento per questa colonna
-      // cerco l'indice con il valore = columnIndex
-      // const index = Dashboard.json.data.group.key.indexOf(Dashboard.columnIndex);
-      if (groupIndex !== -1) Dashboard.json.data.group.key.splice(groupIndex, 1);
-    }
-
-    // Colonne da nascondere
-    // const hideIndex = Dashboard.json.data.view.indexOf(Dashboard.columnIndex);
-    debugger;
-    if (hideColumn.checked === true) {
-      // da implementare
-      // se la colonna selezionata è una metrica la contrassegno come hide: true, aggiungendo una
-      // prop all'interno dell'object
-      let metricIndex = Dashboard.json.data.group.columns.findIndex(el => el.column === Dashboard.columnIndex);
-      if (metricIndex !== -1) {
-        // si sta nascondendo una metrica
-        // Dashboard.json.data.group.columns[metricIndex].hidden = true;
-        Dashboard.json.data.group.columns[metricIndex].properties = {
-          hidden: true
-        };
-      }
-    } else {
-      /* TODO:
-      // Colonna da visualizzare, aggiungo l'indice della colonna a json.data.view
-      if (hideIndex === -1) {
-        Dashboard.json.data.view.push(Dashboard.columnIndex);
-        Dashboard.json.data.view.sort(compareNumbers);
-      } */
-    }
-    // aggiungo, a view, solo le colonne che NON hanno la prop hidden: true
-    let view = [];
-    Dashboard.json.data.group.key.forEach(col => view.push(col));
-    Dashboard.json.data.group.columns.forEach(col => { if (!col.properties.hidden) view.push(col); });
-    console.log(view);
-
-    if (filterColumn.checked === true) {
-      // Proprietà Dashboard.json.filters
-      // Inserisco il filtro solo se non è ancora presente in Dashboard.json.filters
-      const index = Dashboard.json.filters.findIndex(filter => filter.containerId === `flt-${label}`);
-      if (index === -1) {
-        // non è presente, lo aggiungo
-        Dashboard.json.filters.push({
-          containerId: `flt-${label}`,
-          filterColumnLabel: label,
-          caption: label
-        });
-        // Aggiungo al DOM, nella sezione #filter_div, il template 'template-filter'.
-        // L'elemento aggiunto potrà essere spostato (drag&drop) per consentire l'ordinamento dei
-        // vari filtri creati nella pagina di dashboard
-        app.createTemplateFilter({
-          containerId: `flt-${label}`,
-          filterColumnLabel: label,
-          caption: label
-        });
-        // stabilisco il bind per i filtri, ogni filtro segue quello successivo
-        app.setDashboardBind();
-      }
-    } else {
-      // rimozione del filtro, se presente
-      const index = Dashboard.json.filters.findIndex(filter => filter.containerId === `flt-${label}`);
-      if (index !== -1) {
-        Dashboard.json.filters.splice(index, 1);
-        // lo rimuovo anche dal DOM
-        const filterRef = document.getElementById(`flt-${label}`);
-        filterRef.parentElement.remove();
-        app.setDashboardBind();
-      }
-    }
-
-    Dashboard.json.wrapper.chartType = 'Table';
-    Dashboard.json.wrapper.containerId = 'chart_div';
-    // metto in un array "temporaneo" tutte le colonne, quelle impostate come nascoste, con
-    // la prop 'hidden': true non verranno messe in questo array perchè è l'array che userò nel merge
-    // per creare .json.data.view
-    Dashboard.json.data.view = view;
-    console.log(Dashboard.json);
-    debugger;
     window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
   }
 

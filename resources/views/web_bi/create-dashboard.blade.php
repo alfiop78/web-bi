@@ -108,21 +108,42 @@
             </section>
           </dialog>
 
-          <fieldset>
-            <legend>Parametri Dashboard</legend>
-            <input type="text" id="title" placeholder="Titolo" />
-            <section>
-              <p>Selezione del Layout (dialog per la visualizzazione delle preview dei layout e scelta del layout)</p>
-              <button type="button" id="btn-dlg-layout" data-fn="openDlgTemplateLayout">Seleziona Template</button>
-            </section>
-            <p>Opzioni del grafico/Tabella</p>
-            <textarea id="note" rows="10" cols="60" name="note" placeholder="Note"></textarea>
-          </fieldset>
+          <div id="wrapper">
+            <menu>
+              <button type="button" id="">Apri</button>
+              <button type="button" id="">Chiudi</button>
+            </menu>
+
+            <h1 id="dashboardTitle" contenteditable="true">Titolo</h1>
+
+            <fieldset>
+              <legend>Parametri Dashboard</legend>
+
+              <div>
+                <section>
+                  <!-- <p>Selezione del Layout (dialog per la visualizzazione delle preview dei layout e scelta del layout)</p> -->
+                  <!-- <button type="button" class="btn-link" id="btn-dlg-layout" data-fn="openDlgTemplateLayout">Selezione del Layout</button> -->
+                </section>
+                <p>Opzioni del grafico/Tabella</p>
+              </div>
+
+              <div>
+                <textarea id="note" rows="10" cols="60" name="note" placeholder="Note"></textarea>
+              </div>
+
+            </fieldset>
+
+          </div>
+
           <section class="buttons">
             <button id="btnPreview" type="button" data-fn="preview">Anteprima</button>
             <button id="btnSave" type="button" data-fn="save">Salva</button>
           </section>
           <section id="dashboard-preview" class="dashboard-preview">
+            <section class="absolute horizontal-flex">
+              <button type="button" id="addLayout" data-fn="openDlgTemplateLayout" class="material-icons-round md-48">add</button>
+              <label for="addLayout">Seleziona un template Layout</label>
+            </section>
             <div id="template-layout" class="preview"></div>
           </section>
 
