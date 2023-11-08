@@ -2,6 +2,7 @@ var App = new Application();
 var Template = new Templates();
 var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizializzare quando ricevuti i dati dal datamart
 var Storage = new SheetStorages();
+var Resource;
 (() => {
   var app = {
     // templates
@@ -124,21 +125,23 @@ var Storage = new SheetStorages();
     //  recupero il template selezionato
     const template = document.querySelector('.thumb-layout[data-selected]').id;
     // console.log(template);
-    // creo l'anteprima nel DOM, questa anteprima è interattive, quindi da
-    // qui si può "creare" il json template report
+    Template.dashboardRef = document.getElementById('dashboard-preview');
+    // creo l'anteprima nel DOM
     Template.create();
+
     // aggiungo il tasto + nel #filter_div
     // TODO: valutare se aggiungere questi elementi nel template (che però è lo stesso template utilizzato
     // per il dashboard reale)
-    const chartSection = document.querySelector('.preview #chart_div');
-    const btnAddChart = document.createElement('button');
-    btnAddChart.innerText = 'Add Chart';
-    btnAddChart.addEventListener('click', app.addChart);
-    chartSection.appendChild(btnAddChart);
+    // const chartSection = document.querySelector('.preview #chart_div');
+    // const btnAddChart = document.createElement('button');
+    // btnAddChart.innerText = 'Add Chart';
+    // btnAddChart.addEventListener('click', app.addChart);
+    // chartSection.appendChild(btnAddChart);
   }
 
   // apertura dialog per l'aggiunta del chart o DataTable
   app.addChart = () => {
+    debugger;
     const ul = document.getElementById('ul-sheets');
     // carico elenco sheets del localStorage
     for (const [token, sheet] of Object.entries(Storage.getSheets())) {
@@ -183,6 +186,7 @@ var Storage = new SheetStorages();
 
   // Selezione del report che alimenta il chart_div
   app.sheetSelected = (e) => {
+    debugger;
     app.dashboardExample(e.currentTarget.dataset.token);
     app.dlgChartSection.close();
   }

@@ -138,15 +138,11 @@
           <section class="buttons">
             <button id="btnPreview" type="button" data-fn="preview">Anteprima</button>
             <button id="btnSave" type="button" data-fn="save">Salva</button>
+            <button type="button" id="addLayout" data-fn="openDlgTemplateLayout" class="btn-link default">Seleziona Layout</button>
           </section>
           <section id="dashboard-preview" class="dashboard-preview">
-            <section class="absolute horizontal-flex">
-              <button type="button" id="addLayout" data-fn="openDlgTemplateLayout" class="material-icons-round md-48">add</button>
-              <label for="addLayout">Seleziona un template Layout</label>
-            </section>
             <div id="template-layout" class="preview"></div>
           </section>
-
         </div>
 
       </div>

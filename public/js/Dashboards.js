@@ -162,3 +162,11 @@ class Dashboards {
   }
 
 }
+
+class Resources extends Dashboards {
+  constructor(ref) {
+    // ref : il riferimento nel DOM del div in cui verrà disegnato il chart/table
+    this.ref = ref;
+
+  }
+}
