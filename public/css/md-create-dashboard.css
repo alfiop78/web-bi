@@ -149,3 +149,27 @@ fieldset legend {
 .absolute {
   position: absolute;
 }
+
+.chart-elements.defined {
+  display: flex;
+  align-items: start;
+  justify-content: start;
+}
+
+.chart-elements:not(.defined)::after {
+  content: 'Aggiungi risorsa';
+  display: block;
+  color: grey;
+}
+
+.chart-elements:not(.defined)::before {
+  font-family: 'Material Icons Round';
+  content: 'add';
+  font-size: 48px;
+  color: grey;
+}
+
+.chart-elements:not(.defined):hover::before {
+  cursor: pointer;
+  color: #494949;
+}

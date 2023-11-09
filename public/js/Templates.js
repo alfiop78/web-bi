@@ -20,14 +20,13 @@ class Templates {
         if (child.id) tag.id = child.id;
         // l'array "classes" è sempre presente però potrebbe essere vuoto, se non ci sono classi da impostare
         child.classes.forEach(cssClass => tag.classList.add(cssClass));
-        // Gli elementi con .chart-elements avranno il tasto + per poter
-        // aggiungere la risorsa (il report)
-        if (child.classes.includes('chart-elements')) {
-          const btnAdd = document.createElement('button');
-          btnAdd.className = 'material-icons-round md-48';
-          btnAdd.innerText = 'add';
-          btnAdd.dataset.fn = 'addChart';
-          tag.appendChild(btnAdd);
+        // se, l'elemento che sto creando è un .chart-elements dovrò
+        // aggiungere anche le icone per configurarlo, eliminarlo ecc...
+        if (child.attributes) {
+          for (const [key, value] of Object.entries(child.attributes)) {
+            tag.dataset[key] = value
+          }
+          if (child.type === 'icon') tag.innerText = child.text;
         }
         parent.appendChild(tag);
         if (child.childs) this.recursive(tag, child.childs);

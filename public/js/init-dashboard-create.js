@@ -128,21 +128,14 @@ var Resource;
     Template.dashboardRef = document.getElementById('dashboard-preview');
     // creo l'anteprima nel DOM
     Template.create();
-
-    // aggiungo il tasto + nel #filter_div
-    // TODO: valutare se aggiungere questi elementi nel template (che però è lo stesso template utilizzato
-    // per il dashboard reale)
-    // const chartSection = document.querySelector('.preview #chart_div');
-    // const btnAddChart = document.createElement('button');
-    // btnAddChart.innerText = 'Add Chart';
-    // btnAddChart.addEventListener('click', app.addChart);
-    // chartSection.appendChild(btnAddChart);
   }
 
   // apertura dialog per l'aggiunta del chart o DataTable
-  app.addChart = () => {
-    debugger;
+  app.addResource = (e) => {
+    Resource = new Resources(e.currentTarget.id);
     const ul = document.getElementById('ul-sheets');
+    // pulisco <ul>
+    ul.querySelectorAll('li').forEach(el => el.remove());
     // carico elenco sheets del localStorage
     for (const [token, sheet] of Object.entries(Storage.getSheets())) {
       // console.log(token, sheet);
@@ -186,9 +179,11 @@ var Resource;
 
   // Selezione del report che alimenta il chart_div
   app.sheetSelected = (e) => {
-    debugger;
     app.dashboardExample(e.currentTarget.dataset.token);
     app.dlgChartSection.close();
+    // aggiungo la class 'defined' nel div che contiene il grafico/tabella
+    Resource.ref.classList.add('defined');
+
   }
 
   app.createTemplateFilter = (filter) => {
@@ -226,7 +221,8 @@ var Resource;
     app.setDashboardBind();
 
     Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareData());
-    Dashboard.DOMref = new google.visualization.Table(document.getElementById('chart_div'));
+    // Dashboard.DOMref = new google.visualization.Table(document.getElementById('chart_div'));
+    Dashboard.DOMref = new google.visualization.Table(Resource.ref);
     // NOTE: utilizzo della stessa logica utilizzata in init-sheet.js
     let keyColumns = [];
     Dashboard.json.data.group.key.forEach(column => {

@@ -54,6 +54,44 @@
                   "classes": [
                     "chart-elements",
                     "contentObject"
+                  ],
+                  "attributes": {
+                    "fn": "addResource"
+                  }
+                },
+                {
+                  "tag": "section",
+                  "id": "btn-resource-section",
+                  "classes": [
+                    "resourceActions"
+                  ],
+                  "childs": [
+                    {
+                      "tag": "button",
+                      "type": "icon",
+                      "id": "resource-1-settings",
+                      "text": "settings",
+                      "classes": [
+                        "material-icons-round",
+                        "md-18"
+                      ],
+                      "attributes": {
+                        "fn": "resourceSettings"
+                      }
+                    },
+                    {
+                      "tag": "button",
+                      "type": "icon",
+                      "id": "resource-2-settings",
+                      "text": "delete",
+                      "classes": [
+                        "material-icons-round",
+                        "md-18"
+                      ],
+                      "attributes": {
+                        "fn": "resourceRemove"
+                      }
+                    }
                   ]
                 }
               ]
