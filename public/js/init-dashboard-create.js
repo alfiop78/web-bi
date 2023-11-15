@@ -69,6 +69,12 @@ var Resource;
     const title = document.getElementById('title').value;
     const note = document.getElementById('note').value;
     debugger;
+    // TODO salvo il json 'dashboard-token' in localStorage e su DB
+    let json = {
+      title, note,
+      layout: Template.id
+      // div1 : table1, div2: table2, ecc...
+    };
   }
 
   app.preview = (e) => {
@@ -124,6 +130,8 @@ var Resource;
     app.dlgTemplateLayout.close();
     //  recupero il template selezionato
     const template = document.querySelector('.thumb-layout[data-selected]').id;
+    debugger;
+    Template.id = template;
     // console.log(template);
     Template.dashboardRef = document.getElementById('dashboard-preview');
     // creo l'anteprima nel DOM
@@ -183,7 +191,6 @@ var Resource;
     app.dlgChartSection.close();
     // aggiungo la class 'defined' nel div che contiene il grafico/tabella
     Resource.ref.classList.add('defined');
-
   }
 
   app.createTemplateFilter = (filter) => {

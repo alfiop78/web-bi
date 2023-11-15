@@ -58,6 +58,16 @@ fieldset legend {
   height: 100%;
 }
 
+.preview .col.col-1[data-resource="true"] {
+  grid-template-rows: 1fr auto;
+}
+
+.resourceActions {
+  padding: 1em;
+  display: flex;
+  gap: 1em;
+}
+
 .thumbnails .col div, .preview .col .contentObject {
   background-color: #c9c9c9;
   border-radius: 2px;

@@ -47,6 +47,9 @@
                 "col",
                 "col-1"
               ],
+              "attributes": {
+                "resource": true
+              },
               "childs": [
                 {
                   "tag": "div",

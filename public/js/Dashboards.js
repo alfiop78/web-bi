@@ -168,6 +168,5 @@ class Resources extends Dashboards {
     // ref : il riferimento nel DOM del div in cui verrà disegnato il chart/table
     super();
     this.ref = document.getElementById(ref);
-
   }
 }
