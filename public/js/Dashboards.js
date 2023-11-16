@@ -164,9 +164,20 @@ class Dashboards {
 }
 
 class Resources extends Dashboards {
-  constructor(ref) {
-    // ref : il riferimento nel DOM del div in cui verrà disegnato il chart/table
+  #resource = new Map();
+  constructor() {
     super();
-    this.ref = document.getElementById(ref);
+  }
+
+  /*
+   * Viene creato un Object Map() con il token del report e il suo elemento nel DOM corrispondente
+   * */
+  set resource(value) {
+    // value: il token del report che è stato aggiunto, in this.ref (nel DOM)
+    this.#resource.set(value, this.ref.id);
+  }
+
+  get resource() {
+    return this.#resource;
   }
 }

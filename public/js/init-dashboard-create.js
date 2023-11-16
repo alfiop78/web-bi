@@ -2,7 +2,7 @@ var App = new Application();
 var Template = new Templates();
 var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizializzare quando ricevuti i dati dal datamart
 var Storage = new SheetStorages();
-var Resource;
+var Resource = new Resources();
 (() => {
   var app = {
     // templates
@@ -14,6 +14,8 @@ var Resource;
       return new google.visualization.NumberFormat(properties);
     },
   }
+
+  const rand = () => Math.random(0).toString(36).substring(2);
 
   // Load the Visualization API and the corechart package.
   google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
@@ -60,21 +62,25 @@ var Resource;
   // Viene rimosso 'hidden' dal #body. In questo modo la modifica viene
   // intercettata dall'observer e vengono associate le funzioni sugli elementi
   // che hanno l'attributo data-fn
-  // TODO: utilizzare questa logica anche sulle altre pagine
+  // TODO utilizzare questa logica anche sulle altre pagine
   App.init();
 
   // onclick events
   app.save = (e) => {
     console.log(e.target);
-    const title = document.getElementById('title').value;
+    const token = rand().substring(0, 7);
+    const title = document.getElementById('dashboardTitle').dataset.value;
     const note = document.getElementById('note').value;
-    debugger;
-    // TODO salvo il json 'dashboard-token' in localStorage e su DB
+    // salvo il json 'dashboard-token' in localStorage e su DB
     let json = {
-      title, note,
-      layout: Template.id
-      // div1 : table1, div2: table2, ecc...
+      title, note, token,
+      layout: Template.id,
+      // resources: [...Resource.resource]
+      resources: Object.fromEntries(Resource.resource)
     };
+    console.log(json);
+    debugger;
+    window.localStorage.setItem(`dashboard-${token}`, JSON.stringify(json));
   }
 
   app.preview = (e) => {
@@ -140,7 +146,8 @@ var Resource;
 
   // apertura dialog per l'aggiunta del chart o DataTable
   app.addResource = (e) => {
-    Resource = new Resources(e.currentTarget.id);
+    // il ref corrente, appena aggiunto
+    Resource.ref = document.getElementById(e.currentTarget.id);
     const ul = document.getElementById('ul-sheets');
     // pulisco <ul>
     ul.querySelectorAll('li').forEach(el => el.remove());
@@ -188,6 +195,8 @@ var Resource;
   // Selezione del report che alimenta il chart_div
   app.sheetSelected = (e) => {
     app.dashboardExample(e.currentTarget.dataset.token);
+    // un Map() di ref aggiunti alla pagina, questo verrà salvato nel json 'dashboard-token'
+    Resource.resource = e.currentTarget.dataset.token;
     app.dlgChartSection.close();
     // aggiungo la class 'defined' nel div che contiene il grafico/tabella
     Resource.ref.classList.add('defined');

@@ -114,7 +114,7 @@
               <button type="button" id="">Chiudi</button>
             </menu>
 
-            <h1 id="dashboardTitle" contenteditable="true">Titolo</h1>
+            <h1 id="dashboardTitle" contenteditable="true" data-value="Titolo">Titolo</h1>
 
             <fieldset>
               <legend>Parametri Dashboard</legend>
