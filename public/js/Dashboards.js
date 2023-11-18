@@ -1,5 +1,6 @@
 class Dashboards {
   #data;
+  #dashboards = {};
   #prepareData = { cols: [], rows: [] };
   #json = {
     name: null,
@@ -159,6 +160,15 @@ class Dashboards {
       // if (!this.json.data.view.includes(value.id)) this.json.data.view.push(value.id);
       if (!this.json.data.view.includes(index)) this.json.data.view.push(index);
     } */
+  }
+
+  getDashboards() {
+    for (const [token, object] of Object.entries(window.localStorage)) {
+      if (JSON.parse(object).type === 'dashboard') {
+        this.#dashboards[token] = JSON.parse(object);
+      }
+    }
+    return this.#dashboards;
   }
 
 }

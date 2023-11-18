@@ -47,6 +47,45 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     chart.draw(data, options);
   } */
 
+  app.init = () => {
+    const ul = document.getElementById('ul-dashboards');
+    for (const [token, value] of Object.entries(Dashboard.getDashboards())) {
+      console.log(token, value);
+      const content = app.tmplList.content.cloneNode(true);
+      const li = content.querySelector('li[data-li]');
+      const span = li.querySelector('span');
+      li.id = token;
+      li.dataset.token = value.token;
+      li.dataset.label = value.title;
+      li.addEventListener('click', app.dashboardSelected);
+      li.dataset.elementSearch = 'dashboards';
+      span.innerText = value.title;
+      ul.appendChild(li);
+    }
+  }
+
+  app.getLayout = (layout) => {
+    fetch(`/js/json-templates/${layout}.json`)
+      .then((response) => {
+        console.log(response);
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(data => {
+        if (!data) return;
+        console.log(data);
+        debugger;
+        Template.data = data;
+        // creo il template nel DOM
+        Template.create();
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+  }
+
   // Recupero del template-layout e dello sheetSpecs
   app.getLayouts = async () => {
     // const sheetLayout = 'stock';
@@ -596,6 +635,16 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       .catch(err => console.error(err));
   } */
 
-  app.getLayouts();
+  app.dashboardSelected = (e) => {
+    const id = e.currentTarget.id;
+    const dashboard = JSON.parse(window.localStorage.getItem(id));
+    app.getLayout(dashboard.layout);
+  }
+
+
+  // TODO carico elenco dashboards in una <ul>
+  app.init();
+
+  // app.getLayouts();
 
 })();

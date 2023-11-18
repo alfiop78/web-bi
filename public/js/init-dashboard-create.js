@@ -73,7 +73,7 @@ var Resource = new Resources();
     const note = document.getElementById('note').value;
     // salvo il json 'dashboard-token' in localStorage e su DB
     let json = {
-      title, note, token,
+      title, note, token, type: 'dashboard',
       layout: Template.id,
       // resources: [...Resource.resource]
       resources: Object.fromEntries(Resource.resource)

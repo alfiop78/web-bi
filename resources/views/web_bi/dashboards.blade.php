@@ -24,6 +24,11 @@
 </head>
 
 <body class="antialiased">
+  <template id="tmpl-li">
+    <li data-li data-element-search data-label data-searchable="true">
+      <span></span>
+    </li>
+  </template>
 
   <main>
     <div id="drawer">
@@ -65,6 +70,7 @@
             </div>
             <div id="chart_div"></div> -->
           <!-- </div> -->
+          <ul id="ul-dashboards"></ul>
 
           <div id="template-layout"></div>
 
