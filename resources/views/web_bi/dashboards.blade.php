@@ -11,13 +11,11 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-icons.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer-responsive.css') }}" />
   <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" /> -->
-  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" /> -->
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
   <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-versioning.css') }}" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dashboards.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
-  <script src="{{ asset('/js/WBStorage.js') }}"></script>
-  <script src="{{ asset('/js/WorkBooks.js') }}"></script>
   <script src="{{ asset('/js/Templates.js') }}"></script>
   <script src="{{ asset('/js/Dashboards.js') }}"></script>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -61,6 +59,22 @@
       <div id="content" class="custom-scrollbar">
 
         <div id="body" hidden>
+          <dialog id="dlg-dashboard-list" class="small">
+            <section class="dlg-grid">
+              <h5 class="title">Seleziona Dashboard</h5>
+              <section class="dlg-content col col-1">
+                <section class="list-search">
+                  <input type="search" id="" data-element-search="" placeholder="Ricerca" autocomplete="off" />
+                  <div class="relative-ul">
+                    <ul id="ul-dashboards" data-search-id="" class="custom-scrollbar"></ul>
+                  </div>
+                </section>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="annulla">Annulla</button>
+              </section>
+            </section>
+          </dialog>
           <!--Div that will hold the dashboard-->
           <!-- <div id="dashboard_div"> -->
           <!--Divs that will hold each control and chart-->
@@ -70,7 +84,6 @@
             </div>
             <div id="chart_div"></div> -->
           <!-- </div> -->
-          <ul id="ul-dashboards"></ul>
 
           <div id="template-layout"></div>
 

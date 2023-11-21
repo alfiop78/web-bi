@@ -5,6 +5,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
   var app = {
     // templates
     tmplList: document.getElementById('tmpl-li'),
+    dlgDashboards: document.getElementById('dlg-dashboard-list'),
     number: function(properties) {
       return new google.visualization.NumberFormat(properties);
     }
@@ -64,8 +65,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     }
   }
 
-  app.getLayout = (layout) => {
-    fetch(`/js/json-templates/${layout}.json`)
+  app.getLayout = (dashboard) => {
+    fetch(`/js/json-templates/${dashboard.layout}.json`)
       .then((response) => {
         console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
@@ -75,10 +76,10 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       .then(data => {
         if (!data) return;
         console.log(data);
-        debugger;
         Template.data = data;
         // creo il template nel DOM
         Template.create();
+        app.loadResources(dashboard.resources);
       })
       .catch(err => {
         App.showConsole(err, 'error');
@@ -87,7 +88,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
   }
 
   // Recupero del template-layout e dello sheetSpecs
-  app.getLayouts = async () => {
+  /* app.getLayouts = async () => {
     // const sheetLayout = 'stock';
     // const sheetLayout = 'competitive-bonus';
     const templateLayout = 'layout-1';
@@ -120,8 +121,9 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         app.dashboardExample();
       })
       .catch(err => console.error(err));
-  }
+  } */
 
+  // NOTE: non utilizzato
   app.drawTable = (queryData) => {
     // Metodo più veloce
     const prepareData = { cols: [], rows: [] };
@@ -206,8 +208,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // utilizzo della DataTable
   }
 
-  // esempio per competitive-bonus
-  app.drawDashboardCB = () => {
+  app.draw = () => {
     const prepareData = Dashboard.prepareData();
     // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
     // è consentità con la DataView perchè questa è read-only
@@ -350,12 +351,161 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     });
     // Tutti i controlli influenzano la table
     binds.bind(controls, table);
-
     // gdashboard.bind(controls, table);
     gdashboard.draw(dataTable);
     // gdashboard.draw(view); // utilizzo della DataView
   }
 
+  // esempio per competitive-bonus
+  /* app.drawDashboardCB = () => {
+    const prepareData = Dashboard.prepareData();
+    // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
+    // è consentità con la DataView perchè questa è read-only
+    let dataTable = new google.visualization.DataTable(prepareData);
+    // definisco la formattazione per le percentuali e per i valori currency
+    // console.log(dataFormatted);
+    var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
+    // Creo i filtri nella Classe Dashboards
+    const controls = Dashboard.drawControls(document.getElementById('filter_div'));
+
+    // console.log(JSON.parse(Dashboard.view.toJSON()));
+    var table = new google.visualization.ChartWrapper(Dashboard.json.wrapper);
+    // NOTE: esempio array di View
+    // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
+    // table.setView({ columns: [1, 3, 5, 7, 9, 16] });
+
+    google.visualization.events.addListener(table, 'ready', onReady);
+
+    function onReady() {
+      // esempio utilizzato senza impostare le metriche contenute nelle composite
+      console.log('onReady');
+      let tableRef = new google.visualization.Table(document.getElementById('chart_div'));
+      let keyColumns = [];
+      Dashboard.json.data.group.key.forEach(column => {
+        // if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
+        // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
+        // che viene modificata dall'utente a runtime
+        if (column.properties.grouped) {
+          keyColumns.push({ id: column.id, column: dataTable.getColumnIndex(column.id), label: column.label, type: column.type });
+        }
+      });
+      let groupColumnsIndex = [];
+      Dashboard.json.data.group.columns.forEach(metric => {
+        // salvo in groupColumnsIndex TUTTE le metriche, deciderò nella DataView
+        // quali dovranno essere visibili (quelle con dependencies:false)
+        // recupero l'indice della colonna in base al suo nome
+        const index = dataTable.getColumnIndex(metric.alias);
+        // TODO modificare la prop 'aggregateFn' in 'aggregation' in fase di creazione delle metriche
+        const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
+        let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', label: metric.label };
+        groupColumnsIndex.push(object);
+      });
+      // console.log(groupColumnsIndex);
+      // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
+      Dashboard.dataGroup = new google.visualization.data.group(
+        table.getDataTable(), keyColumns, groupColumnsIndex
+      );
+      console.log('group():', Dashboard.dataGroup);
+      for (const [columnId, properties] of Object.entries(Dashboard.json.data.formatter)) {
+        // console.log('Formattazione ', Dashboard.dataGroup.getColumnIndex(columnId));
+        let formatter = null;
+        // debugger;
+        switch (properties.type) {
+          case 'number':
+            formatter = app[properties.type](properties.prop);
+            break;
+          // case 'date':
+          // TODO Da implementare
+          // let formatter = app[properties.format](properties.numberDecimal);
+          // formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
+          // break;
+          default:
+            // debugger;
+            break;
+        }
+        if (formatter) formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
+      }
+
+      Dashboard.dataViewGrouped = new google.visualization.DataView(Dashboard.dataGroup);
+
+      let viewColumns = [], viewMetrics = [];
+      Dashboard.json.data.view.forEach(column => {
+        if (column.properties.visible) viewColumns.push(Dashboard.dataGroup.getColumnIndex(column.id));
+      });
+      // dalla dataGroup, recupero gli indici di colonna delle metriche
+      Dashboard.json.data.group.columns.forEach(metric => {
+        if (!metric.dependencies && metric.properties.visible) {
+          const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
+
+          // Implementazione della func 'calc' per le metriche composite.
+          if (metric.type === 'composite') {
+            const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
+            let calcFunction = function(dt, row) {
+              let formulaJoined = [];
+              formula.forEach(formulaEl => {
+                if (formulaEl.alias) {
+                  formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
+                } else {
+                  formulaJoined.push(formulaEl);
+                }
+              });
+              const result = (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
+              let total = (result) ? { v: result } : { v: result, f: '-' };
+              // console.log(result);
+              // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
+              let resultFormatted;
+              // formattazione della cella con formatValue()
+              if (Dashboard.json.data.formatter[metric.alias]) {
+                const metricFormat = Dashboard.json.data.formatter[metric.alias];
+                let formatter;
+                formatter = app[metricFormat.type](metricFormat.prop);
+                resultFormatted = (result) ? formatter.formatValue(result) : '-';
+                total = { v: result, f: resultFormatted };
+              } else {
+                resultFormatted = (result) ? result : '-';
+                total = (result) ? { v: result } : { v: result, f: '-' };
+              }
+              return total;
+            }
+            viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
+          } else {
+            viewMetrics.push(index);
+            Dashboard.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
+          }
+        }
+      });
+      // concateno i due array che popoleranno la DataView.setColumns()
+      let viewDefined = viewColumns.concat(viewMetrics)
+      // Dashboard.dataGroup.setColumnProperty(0, 'className', 'cssc1')
+      // console.log(Dashboard.dataGroup.getColumnProperty(0, 'className'));
+      // console.log(Dashboard.dataGroup.getColumnProperties(0));
+      Dashboard.dataViewGrouped.setColumns(viewDefined);
+      tableRef.draw(Dashboard.dataViewGrouped, Dashboard.json.wrapper.options);
+    }
+
+    // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
+    // -> "modello_ds" infleunza "settore_ds" e tutti (l'array Dashboard.controlsWrapper) influenzano la table
+    // per ogni bind, nel template....
+    let binds;
+    // Questa logica funziona con il bind() di un filtro verso quello successivo ma
+    // possono esserci anche situazioni diverse, che sono da implementare
+    Dashboard.json.bind.forEach((v, index) => {
+      // console.log('index', index);
+      if (index === 0) {
+        // il primo bind deve essere creato dall'istanza gdashboard, i successivi posso legarli ad una variabile
+        binds = gdashboard.bind(controls[v[0]], controls[v[1]]);
+      } else {
+        binds.bind(controls[v[0]], controls[v[1]]);
+      }
+    });
+    // Tutti i controlli influenzano la table
+    binds.bind(controls, table);
+    // gdashboard.bind(controls, table);
+    gdashboard.draw(dataTable);
+    // gdashboard.draw(view); // utilizzo della DataView
+  } */
+
+  // NOTE: non utilizzato
   app.drawDashboard = () => {
     const prepareData = Dashboard.prepareData();
     // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
@@ -503,37 +653,18 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // gdashboard.draw(dataGroup); // utilizzo della funzione group
   }
 
-  // Simulazione della selezione del datamart dello stock
-  // token : hdkglro
-  // id: 1693909302808
-  // leggo il datamart e lo inserisco nel Google Table chart
-  // esempio riferito alla creazione della DataTable SENZA la logica del Dashboard (quindi senza l'utilizzo di ControlWrapper)
-  /* app.stock = async () => {
-    // recupero l'id dello Sheet
-    const sheet = JSON.parse(window.localStorage.getItem('hdkglro'));
-    if (!sheet.id) return false;
-    await fetch(`/fetch_api/${sheet.id}/datamart`)
-      .then((response) => {
-        console.log(response);
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then(data => {
-        console.log(data);
-        // google.charts.setOnLoadCallback(app.drawTable(data));
-      })
-      .catch(err => {
-        App.showConsole(err, 'error');
-        console.error(err);
-      });
-  } */
+  // per ogni report lancio la fetch (in getData()) per recuperare i dati
+  app.loadResources = (resources) => {
+    for (const [token, value] of Object.entries(resources)) {
+      // il parse viene effettuato direttamente nel set della Classe Dashboards
+      Dashboard.json = window.localStorage.getItem(`template-${token}`); // cb-26.10.2023
+      app.getData(token);
+    }
+  }
 
   // recupero il datamrt
-  app.dashboardExample = async () => {
-    // recupero l'id dello Sheet stock veicoli nuovi
-    // const sheet = JSON.parse(window.localStorage.getItem('hdkglro')); // stock
-    const sheet = JSON.parse(window.localStorage.getItem('5ytvr56')); // cb-26.10.2023
+  app.getData = async (token) => {
+    const sheet = JSON.parse(window.localStorage.getItem(token)); // cb-26.10.2023
     if (!sheet.id) return false;
     // Chiamta in POST
     // WARN: per la chiamata in POST bisogna aggiungere la route in VerifyCrsfToken.php
@@ -564,6 +695,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
 
     // Chiamata in GET con laravel paginate()
     let partialData = [];
+    // TODO provare con la promise.all quando ci saranno più report da recuperare in una sola dashboard
     await fetch(`/fetch_api/${sheet.id}/datamart?page=1`)
       .then((response) => {
         console.log(response);
@@ -592,7 +724,9 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
               // Non sono presenti altre pagine, visualizzo il dashboard
               console.log('tutte le paginate completate :', partialData);
               Dashboard.data = partialData;
-              google.charts.setOnLoadCallback(app.drawDashboardCB());
+              // TODO probabilmente, nella prop 'resources', conviene mettere il nome della Fn da richiamare qui
+              // google.charts.setOnLoadCallback(app.drawDashboardCB());
+              google.charts.setOnLoadCallback(app.draw());
             }
           }).catch((err) => {
             App.showConsole(err, 'error');
@@ -605,9 +739,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         } else {
           // Non sono presenti altre pagine, visualizzo il dashboard
           Dashboard.data = partialData;
-          // google.charts.setOnLoadCallback(app.drawDashboard());
-          google.charts.setOnLoadCallback(app.drawDashboardCB());
-          // google.charts.setOnLoadCallback(app.drawTable(data));
+          // google.charts.setOnLoadCallback(app.drawDashboardCB());
+          google.charts.setOnLoadCallback(app.draw());
         }
       })
       .catch(err => {
@@ -617,34 +750,15 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     // end chiamata in GET
   }
 
-  /* Recupero il .json delle specifiche del report dello Stock */
-  /* app.getSheetSpecs = async () => {
-    console.log('getSheetSpecs()');
-    const sheetLayout = 'stock';
-    await fetch('/js/json-sheets/' + sheetLayout + '.json', { method: 'POST' })
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        Dashboard.sheetSpecs = data;
-        app.dashboardExample();
-      })
-      .catch(err => console.error(err));
-  } */
-
   app.dashboardSelected = (e) => {
-    const id = e.currentTarget.id;
-    const dashboard = JSON.parse(window.localStorage.getItem(id));
-    app.getLayout(dashboard.layout);
+    const dashboard = JSON.parse(window.localStorage.getItem(e.currentTarget.id));
+    app.getLayout(dashboard);
+    app.dlgDashboards.close();
   }
 
-
-  // TODO carico elenco dashboards in una <ul>
+  // carico elenco dashboards in una <ul>
   app.init();
 
-  // app.getLayouts();
+  app.dlgDashboards.showModal();
 
 })();
