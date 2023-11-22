@@ -53,6 +53,7 @@ class Dashboards {
   get json() { return this.#json; }
 
   prepareData() {
+    this.#prepareData = { cols: [], rows: [] };
     // aggiungo le colonne
     for (const key of Object.keys(this.data[0])) {
       // prepareData.cols.push({ id: key, label: key });

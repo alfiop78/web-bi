@@ -1497,9 +1497,9 @@ var Sheet;
     if (!sheet.id) return false;
     console.log(sheet);
     // debugger;
-
     // NOTE: Chiamata in post per poter passare tutte le colonne, incluso l'alias, alla query
-    // TODO: Passo in param un object con le colonne da estrarre (tutte)
+
+    // TODO Passo in param un object con le colonne da estrarre (tutte)
     /* const params = JSON.stringify({ sheet_id: sheet.id });
     const url = `/fetch_api/datamartpost`;
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
@@ -1537,9 +1537,8 @@ var Sheet;
         Dashboard.ref = 'preview-datamart';
         app.createSheetTemplate();
         // Creazione preview del datamart
-        // google.charts.setOnLoadCallback(app.drawDatamart('preview-datamart'));
-        // Fn impostata in init-sheet.js
-        google.charts.setOnLoadCallback(drawDatamart('preview-datamart'));
+        // drawDatamart() impostata in init-sheet.js
+        google.charts.setOnLoadCallback(drawDatamart());
       })
       .catch(err => {
         App.showConsole(err, 'error', 3000);
@@ -1852,7 +1851,6 @@ var Sheet;
         App.showConsole(err, 'error');
         console.error(err);
       });
-
   }
 
   app.process = async (process) => {
@@ -1871,18 +1869,18 @@ var Sheet;
     const req = new Request(url, init);
     await fetch(req)
       .then((response) => {
-        // TODO: Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
+        // TODO Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
         if (!response.ok) { throw Error(response.statusText); }
         return response;
       })
       .then((response) => response.json())
-      .then((response) => {
-        if (response) {
-          console.log('data : ', response);
-          let DT = new Table(response, 'preview-datamart', false);
-          DT.template = 'tmpl-preview-table';
-          DT.addColumns();
-          DT.addRows();
+      .then(data => {
+        if (data) {
+          // console.log('data : ', data);
+          Dashboard.data = data;
+          Dashboard.ref = 'preview-datamart';
+          app.createSheetTemplate();
+          google.charts.setOnLoadCallback(drawDatamart());
           // Al termine del process elimino dalle dropzones gli elementi che sono stati
           // eliminati dallo Sheet, quindi gli elementi con dataset.removed
           document.querySelectorAll('div[data-removed]').forEach(element => element.remove());
@@ -1890,9 +1888,8 @@ var Sheet;
           // al report in fase di edit
           document.querySelectorAll('div[data-adding]').forEach(element => delete element.dataset.adding);
         } else {
-          // TODO: Da testare se il codice arriva qui o viene gestito sempre dal catch()
+          // TODO Da testare se il codice arriva qui o viene gestito sempre dal catch()
           console.debug('FX non è stata creata');
-          // debugger;
           App.showConsole('Errori nella creazione del datamart', 'error', 5000);
         }
       })

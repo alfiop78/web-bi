@@ -157,7 +157,7 @@ class MapDatabaseController extends Controller
     // dd($id);
     // $datamart = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='decisyon_cache' AND TABLE_NAME='WEB_BI_$id';");
     $table = "decisyon_cache.WEB_BI_$id";
-    $data = DB::connection('vertica_odbc')->table($table)->limit(10)->get(); // ok
+    $data = DB::connection('vertica_odbc')->table($table)->limit(5)->get(); // ok
     return response()->json($data);
   }
 
@@ -165,7 +165,7 @@ class MapDatabaseController extends Controller
   {
     // dd($id);
     // $datamart = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='decisyon_cache' AND TABLE_NAME='WEB_BI_$id';");
-    // TODO: viene utilizzata anche dalla preview, forse per la preview meglio utilizzare un'altra function
+    // TODO viene utilizzata anche dalla preview, forse per la preview meglio utilizzare un'altra function
     // $data = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.WEB_BI_$id LIMIT 5000");
     $table = "decisyon_cache.WEB_BI_$id";
     // $data = DB::connection('vertica_odbc')->table($table)->limit(10)->get(); // ok
@@ -274,7 +274,7 @@ class MapDatabaseController extends Controller
       $datamartName = $q->createDatamart();
       // dd($datamartName);
       // restituisco un ANTEPRIMA del datamart appena creato
-      $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.$q->datamartName LIMIT 500;");
+      $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.$q->datamartName LIMIT 5;");
       return response()->json($datamartResult);
     } else {
       return 'BaseTable non create';

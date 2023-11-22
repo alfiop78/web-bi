@@ -61,7 +61,7 @@ function drawDatamart() {
     alternatingRowStyle: true,
     sort: 'event',
     width: '100%',
-    height: 500
+    height: 'auto'
   };
   // NOTE: prova impostazione CSS su una colonna
   // Dashboard.dataTable.setColumnProperty(1, 'className', 'cssc1')
@@ -76,6 +76,7 @@ function drawDatamart() {
   // aggiungere/rimuovere colonne. Prima di creare la DataView viene effettuata
   // una group(), questa consente di raggruppare la visualizzazione in base ai livelli
   // dimensionali scelti (aggiunta/rimozione di livelli dimensionali)
+  // tableRef.clearChart();
   google.visualization.events.addListener(tableRef, 'ready', previewReady);
 
   tableRef.draw(Dashboard.dataTable, Dashboard.options);
