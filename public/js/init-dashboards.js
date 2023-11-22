@@ -16,38 +16,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
   // Load the Visualization API and the corechart package.
   google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
 
-  // Set a callback to run when the Google Visualization API is loaded.
-  // google.charts.setOnLoadCallback(drawChart);
-
-  // Callback that creates and populates a data table,
-  // instantiates the pie chart, passes in the data and
-  // draws it.
-  // esempio base
-  /* function drawChart() {
-    // Create the data table.
-    var data = new google.visualization.DataTable();
-    data.addColumn('string', 'Topping');
-    data.addColumn('number', 'Slices');
-    data.addRows([
-      ['Mushrooms', 3],
-      ['Onions', 1],
-      ['Olives', 1],
-      ['Zucchini', 1],
-      ['Pepperoni', 2]
-    ]);
-
-    // Set chart options
-    var options = {
-      'title': 'How Much Pizza I Ate Last Night',
-      'width': 400,
-      'height': 300
-    };
-
-    // Instantiate and draw our chart, passing in some options.
-    var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
-    chart.draw(data, options);
-  } */
-
+  // Carico elenco dashboards create
   app.init = () => {
     const ul = document.getElementById('ul-dashboards');
     for (const [token, value] of Object.entries(Dashboard.getDashboards())) {
@@ -79,6 +48,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
         Template.data = data;
         // creo il template nel DOM
         Template.create();
+        // carico le risorse (sheet) necessarie alla dashboard
         app.loadResources(dashboard.resources);
       })
       .catch(err => {
@@ -122,91 +92,6 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       })
       .catch(err => console.error(err));
   } */
-
-  // NOTE: non utilizzato
-  app.drawTable = (queryData) => {
-    // Metodo più veloce
-    const prepareData = { cols: [], rows: [] };
-    // aggiungo le colonne
-    for (const key of Object.keys(queryData[0])) {
-      if (key === "TotaleFA") {
-        prepareData.cols.push({ id: key, label: key, type: 'number' });
-      } else {
-        prepareData.cols.push({ id: key, label: key });
-      }
-    }
-    // aggiungo le righe
-    queryData.forEach(row => {
-      let v = [];
-      for (const [key, value] of Object.entries(row)) {
-        if (key === "TotaleFA") {
-          v.push({ v: parseFloat(value) });
-        } else {
-          v.push({ v: value });
-        }
-      }
-      prepareData.rows.push({ c: v });
-    });
-    // return;
-    /* prepareData.cols.push(
-      { id: 'task', label: 'Employee Name', type: 'string' },
-      { id: 'startDate', label: 'Start Date', type: 'date' }
-    );
-    prepareData.rows.push(
-      { c: [{ v: 'Mike' }, { v: new Date(2008, 1, 28), f: 'February 28, 2008' }] },
-      { c: [{ v: 'Bob' }, { v: new Date(2007, 5, 1) }] },
-      { c: [{ v: 'Alice' }, { v: new Date(2006, 7, 16) }] },
-      { c: [{ v: 'Frank' }, { v: new Date(2007, 11, 28) }] },
-      { c: [{ v: 'Floyd' }, { v: new Date(2005, 3, 13) }] },
-      { c: [{ v: 'Alfio' }, { v: new Date(2011, 6, 1) }] }
-    );
-    console.log(prepareData); */
-    // console.log(prepareData2);
-    // return;
-    // Fine metodo più veloce
-
-    var data = new google.visualization.DataTable(prepareData);
-    // Metodo più leggibile
-    /* data.addColumn('string', 'Name');
-    data.addColumn('number', 'Salary');
-    data.addColumn('boolean', 'Full Time Employee');
-    data.addRows([
-      ['Mike', { v: 10000, f: '$10,000' }, true],
-      ['Jim', { v: 8000, f: '$8,000' }, false],
-      ['Alice', { v: 12500, f: '$12,500' }, true],
-      ['Bob', { v: 7000, f: '$7,000' }, true]
-    ]); */
-    // Fine metodo più leggibile
-
-    var tableRef = new google.visualization.Table(document.getElementById('chart_div'));
-    // Set chart options
-    const options = {
-      'title': 'Stock veicoli',
-      'showRowNumber': false,
-      "allowHTML": true,
-      'frozenColumns': 2,
-      'alternatingRowStyle': true,
-      'width': '100%',
-      'height': 500
-    };
-
-    var formatter = new google.visualization.NumberFormat(
-      { suffix: ' €', negativeColor: 'brown', negativeParens: true });
-    // nella proprietà "formatter" del file stock.json viene indicato quale colonna
-    // deve essere formattata  "currency", "date", "color", ecc...
-    formatter.format(data, Dashboard.json.data.formatter.currency);
-
-    // utilizzo della DataView
-    var view = new google.visualization.DataView(data);
-    // nascondo la prima colonna
-    view.hideColumns([0]);
-    tableRef.draw(view, options);
-    // utilizzo della DataView
-
-    // utilizzo della DataTable
-    // tableRef.draw(data, options);
-    // utilizzo della DataTable
-  }
 
   app.draw = () => {
     const prepareData = Dashboard.prepareData();
@@ -657,7 +542,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
   app.loadResources = (resources) => {
     for (const [token, value] of Object.entries(resources)) {
       // il parse viene effettuato direttamente nel set della Classe Dashboards
-      Dashboard.json = window.localStorage.getItem(`template-${token}`); // cb-26.10.2023
+      Dashboard.json = window.localStorage.getItem(value.template); // cb-26.10.2023
       app.getData(token);
     }
   }
@@ -725,7 +610,6 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
               console.log('tutte le paginate completate :', partialData);
               Dashboard.data = partialData;
               // TODO probabilmente, nella prop 'resources', conviene mettere il nome della Fn da richiamare qui
-              // google.charts.setOnLoadCallback(app.drawDashboardCB());
               google.charts.setOnLoadCallback(app.draw());
             }
           }).catch((err) => {

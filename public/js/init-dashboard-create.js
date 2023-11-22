@@ -13,6 +13,7 @@ var Resource = new Resources();
     number: function(properties) {
       return new google.visualization.NumberFormat(properties);
     },
+    titleRef: document.getElementById('dashboardTitle')
   }
 
   const rand = () => Math.random(0).toString(36).substring(2);
@@ -196,6 +197,7 @@ var Resource = new Resources();
   app.sheetSelected = (e) => {
     app.dashboardExample(e.currentTarget.dataset.token);
     // un Map() di ref aggiunti alla pagina, questo verrà salvato nel json 'dashboard-token'
+    // Resource.resource = {sheet : e.currentTarget.dataset.token, template : `template-${e.currentTarget.dataset.token}`};
     Resource.resource = e.currentTarget.dataset.token;
     app.dlgChartSection.close();
     // aggiungo la class 'defined' nel div che contiene il grafico/tabella
@@ -462,5 +464,9 @@ var Resource = new Resources();
   }
 
   // End Drag events
+
+  app.titleRef.addEventListener('blur', (e) => {
+    e.target.dataset.value = e.target.innerHTML;
+  });
 
 })();
