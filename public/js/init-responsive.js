@@ -1523,25 +1523,83 @@ var Sheet;
       }); */
     // end chiamta in POST
 
-    await fetch(`/fetch_api/${sheet.id}/preview`)
+    // await fetch(`/fetch_api/${sheet.id}/preview`)
+    //   .then((response) => {
+    //     console.log(response);
+    //     if (!response.ok) { throw Error(response.statusText); }
+    //     return response;
+    //   })
+    //   .then((response) => response.json())
+    //   .then(data => {
+    //     // impostare la prop dashboard.json.data.columns con i rispettivi dataType
+    //     Dashboard.data = data;
+    //     // imposto il riferimento della tabella nel DOM
+    //     Dashboard.ref = 'preview-datamart';
+    //     app.createSheetTemplate();
+    //     // Creazione preview del datamart
+    //     // drawDatamart() impostata in init-sheet.js
+    //     google.charts.setOnLoadCallback(drawDatamart());
+    //   })
+    //   .catch(err => {
+    //     App.showConsole(err, 'error', 3000);
+    //     console.error(err);
+    //   });
+    let partialData = [];
+    // TODO provare con la promise.all quando ci saranno più report da recuperare in una sola dashboard
+    await fetch(`/fetch_api/${sheet.id}/preview?page=1`)
       .then((response) => {
-        console.log(response);
+        // console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
         return response;
       })
       .then((response) => response.json())
-      .then(data => {
-        // impostare la prop dashboard.json.data.columns con i rispettivi dataType
-        Dashboard.data = data;
-        // imposto il riferimento della tabella nel DOM
-        Dashboard.ref = 'preview-datamart';
-        app.createSheetTemplate();
-        // Creazione preview del datamart
-        // drawDatamart() impostata in init-sheet.js
-        google.charts.setOnLoadCallback(drawDatamart());
+      .then(async (paginateData) => {
+        console.log(paginateData);
+        console.log(paginateData.data);
+        // debugger;
+        // Dashboard.data = paginateData.data;
+        // funzione ricorsiva fino a quando è presente next_page_url
+        let recursivePaginate = async (url) => {
+          // console.log(url);
+          await fetch(url).then((response) => {
+            // console.log(response);
+            if (!response.ok) { throw Error(response.statusText); }
+            return response;
+          }).then(response => response.json()).then((paginate) => {
+            partialData = partialData.concat(paginate.data);
+            if (paginate.next_page_url) {
+              recursivePaginate(paginate.next_page_url);
+              console.log(partialData);
+            } else {
+              // Non sono presenti altre pagine, visualizzo il dashboard
+              console.log('tutte le paginate completate :', partialData);
+              Dashboard.data = partialData;
+              // imposto il riferimento della tabella nel DOM
+              Dashboard.ref = 'preview-datamart';
+              app.createSheetTemplate();
+              google.charts.setOnLoadCallback(drawDatamart());
+              // google.charts.setOnLoadCallback(drawTest());
+            }
+          }).catch((err) => {
+            App.showConsole(err, 'error');
+            console.error(err);
+          });
+        }
+        partialData = paginateData.data;
+        if (paginateData.next_page_url) {
+          recursivePaginate(paginateData.next_page_url);
+        } else {
+          // Non sono presenti altre pagine, visualizzo il dashboard
+          Dashboard.data = partialData;
+          // imposto il riferimento della tabella nel DOM
+          Dashboard.ref = 'preview-datamart';
+          app.createSheetTemplate();
+          // google.charts.setOnLoadCallback(drawTest());
+          google.charts.setOnLoadCallback(drawDatamart());
+        }
       })
       .catch(err => {
-        App.showConsole(err, 'error', 3000);
+        App.showConsole(err, 'error');
         console.error(err);
       });
   }

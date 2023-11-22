@@ -13,6 +13,21 @@ let app = {
   }
 }
 
+/* function drawTest() {
+  const prepareData = Dashboard.prepareData();
+  let DataTable = new google.visualization.DataTable(prepareData);
+  var wrapper = new google.visualization.ChartWrapper({
+    chartType: 'Table',
+    containerId: 'preview-datamart',
+    dataTable: DataTable,
+    options: {
+      page: "enabled",
+      pageSize: 500
+    }
+  });
+  wrapper.draw();
+} */
+
 function drawDatamart() {
   // Il dato iniziale non è raggruppato, la query sul datamart è eseguita con SELECT *...
   // La preview deve consentire la personalizzazione del report, quindi la possibilità
@@ -58,6 +73,8 @@ function drawDatamart() {
     showRowNumber: true,
     allowHTML: true,
     frozenColumns: 0,
+    page: 'enabled',
+    pageSize: 50,
     alternatingRowStyle: true,
     sort: 'event',
     width: '100%',
@@ -124,8 +141,7 @@ function previewReady() {
   Dashboard.dataGroup = new google.visualization.data.group(
     Dashboard.dataTable, keyColumns, groupColumnsIndex
   );
-  console.log('group():', Dashboard.dataGroup);
-  // debugger;
+  // console.log('group():', Dashboard.dataGroup);
   // console.log(Dashboard.dataGroup.getColumnIndex())
   // Imposto le label memorizzate in group.key. In questo caso potrei utilizzare gli object da passare
   // a group(), invece degli indici, per le colonne, è la stessa logica utilizzata per le metriche.
@@ -257,7 +273,7 @@ function previewReady() {
   // console.log(Dashboard.dataGroup.getColumnProperty(0, 'className'));
   // console.log(Dashboard.dataGroup.getColumnProperties(0));
   Dashboard.dataViewGrouped.setColumns(viewDefined);
-  console.info('DataView', Dashboard.dataViewGrouped);
+  // console.info('DataView', Dashboard.dataViewGrouped);
 
   google.visualization.events.addListener(Dashboard.tableRefGroup, 'sort', sort);
   // con l'opzione sort: 'event' viene comunque processato l'evento 'sort'
