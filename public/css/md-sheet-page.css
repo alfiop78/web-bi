@@ -13,8 +13,12 @@
 
 .report-area .sheet-elements{
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: auto 1fr;
+  border: solid thin #ededed;
   user-select: none;
+  align-items: center;
+  grid-column-gap: 4px;
+  padding: 4px;
 }
 
 .report-area .report-preview{
@@ -22,7 +26,7 @@
 }
 
 .sheet-elements .dropzone{
-  border: solid thin #ededed;
+  /* border: solid thin #ededed; */
   position: relative;
   overflow: auto;
   display: flex;
@@ -32,37 +36,36 @@
   width: 100%;
   transition: height 500ms;
   align-items: center;
-  padding: 28px 8px 6px 8px;
+  padding: 4px 8px;
 }
 
 .relative{
   position: relative;
 }
 
-#sheet-columns .sheet-elements::before {
-  content: 'Colonne';
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  color: darkgray;
-}
+/* #sheet-columns .sheet-elements::before { */
+/*   content: 'Colonne'; */
+/*   position: absolute; */
+/*   top: 8px; */
+/*   left: 8px; */
+/*   color: darkgray; */
+/* } */
 
-#sheet-rows .sheet-elements::before {
-  content: 'Righe';
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  color: darkgray;
-}
+/* #sheet-rows .sheet-elements::before { */
+/*   content: 'Righe'; */
+/*   position: absolute; */
+/*   top: 8px; */
+/*   left: 8px; */
+/*   color: darkgray; */
+/* } */
 
-#sheet-filters .sheet-elements::before {
-  content: 'Filtri';
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  color: darkgray;
-}
-
+/* #sheet-filters .sheet-elements::before { */
+/*   content: 'Filtri'; */
+/*   position: absolute; */
+/*   top: 8px; */
+/*   left: 8px; */
+/*   color: darkgray; */
+/* } */
 
 .sheet-elements .dropzone.dropping{
   border: solid thin darkgreen;

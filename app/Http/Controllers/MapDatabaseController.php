@@ -159,7 +159,8 @@ class MapDatabaseController extends Controller
     $table = "decisyon_cache.WEB_BI_$id";
     // $data = DB::connection('vertica_odbc')->table($table)->limit(5)->get(); // ok
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497, 43, 473, 437, 445, 461, 485, 549, 621, 1000002079, 455, 471, 179])->paginate(15000);
-    $data = DB::connection('vertica_odbc')->table($table)->paginate(15000);
+    $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497])->paginate(15000);
+    // $data = DB::connection('vertica_odbc')->table($table)->paginate(15000);
     return $data;
     // return response()->json($data);
   }
