@@ -159,8 +159,8 @@ class MapDatabaseController extends Controller
     $table = "decisyon_cache.WEB_BI_$id";
     // $data = DB::connection('vertica_odbc')->table($table)->limit(5)->get(); // ok
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497, 43, 473, 437, 445, 461, 485, 549, 621, 1000002079, 455, 471, 179])->paginate(15000);
-    $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497])->paginate(15000);
-    // $data = DB::connection('vertica_odbc')->table($table)->paginate(15000);
+    // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497])->paginate(15000);
+    $data = DB::connection('vertica_odbc')->table($table)->paginate(15000);
     return $data;
     // return response()->json($data);
   }
@@ -269,17 +269,18 @@ class MapDatabaseController extends Controller
           $q->groupMetricsByFilters->$token = $metrics;
         }
         // dd($q->groupMetricsByFilters);
-        // TODO: da rinominare in 'createMetricDatamarts'
         $metricTable = $q->createMetricDatamarts();
       }
       // echo 'elaborazione createDatamart';
       // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-      // TODO: da rinominare in 'createDatamart'
       $datamartName = $q->createDatamart();
       // dd($datamartName);
       // restituisco un ANTEPRIMA del datamart appena creato
-      $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.$q->datamartName LIMIT 5;");
-      return response()->json($datamartResult);
+      // WARN: Errore di memory exhausted, bisogna utilizzare il paginate()
+      // $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.$q->datamartName LIMIT 10000;");
+      // return response()->json($datamartResult);
+      $datamartResult = DB::connection('vertica_odbc')->table("decisyon_cache.$q->datamartName")->paginate(15000);
+      return $datamartResult;
     } else {
       return 'BaseTable non create';
     }

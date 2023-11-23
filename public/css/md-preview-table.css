@@ -65,7 +65,7 @@ thead th[data-metric-token]{
 .table-content{
   position: absolute;
   width: 100%;
-  height: calc(100% - 32px);
+  height: 100%;
 }
 
 .table-content.columnsHandler {

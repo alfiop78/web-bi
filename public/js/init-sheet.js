@@ -78,7 +78,7 @@ function drawDatamart() {
     alternatingRowStyle: true,
     sort: 'event',
     width: '100%',
-    height: 'auto'
+    height: '100%'
   };
   // NOTE: prova impostazione CSS su una colonna
   // Dashboard.dataTable.setColumnProperty(1, 'className', 'cssc1')

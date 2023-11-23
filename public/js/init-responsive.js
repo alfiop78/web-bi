@@ -1523,29 +1523,31 @@ var Sheet;
       }); */
     // end chiamta in POST
 
-    // await fetch(`/fetch_api/${sheet.id}/preview`)
-    //   .then((response) => {
-    //     console.log(response);
-    //     if (!response.ok) { throw Error(response.statusText); }
-    //     return response;
-    //   })
-    //   .then((response) => response.json())
-    //   .then(data => {
-    //     // impostare la prop dashboard.json.data.columns con i rispettivi dataType
-    //     Dashboard.data = data;
-    //     // imposto il riferimento della tabella nel DOM
-    //     Dashboard.ref = 'preview-datamart';
-    //     app.createSheetTemplate();
-    //     // Creazione preview del datamart
-    //     // drawDatamart() impostata in init-sheet.js
-    //     google.charts.setOnLoadCallback(drawDatamart());
-    //   })
-    //   .catch(err => {
-    //     App.showConsole(err, 'error', 3000);
-    //     console.error(err);
-    //   });
+    // chiamata in GET
+    /* await fetch(`/fetch_api/${sheet.id}/preview`)
+      .then((response) => {
+        console.log(response);
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(data => {
+        // impostare la prop dashboard.json.data.columns con i rispettivi dataType
+        Dashboard.data = data;
+        // imposto il riferimento della tabella nel DOM
+        Dashboard.ref = 'preview-datamart';
+        app.createSheetTemplate();
+        // Creazione preview del datamart
+        // drawDatamart() impostata in init-sheet.js
+        google.charts.setOnLoadCallback(drawDatamart());
+      })
+      .catch(err => {
+        App.showConsole(err, 'error', 3000);
+        console.error(err);
+      }); */
+    // end chiamata in GET
+
     let partialData = [];
-    // TODO provare con la promise.all quando ci saranno più report da recuperare in una sola dashboard
     await fetch(`/fetch_api/${sheet.id}/preview?page=1`)
       .then((response) => {
         // console.log(response);
@@ -1911,7 +1913,7 @@ var Sheet;
       });
   }
 
-  app.process = async (process) => {
+  /* app.process = async (process) => {
     // lo Sheet.id può essere già presente quando è stato aperto
     if (!Sheet.id) Sheet.id = Date.now();
     process.id = Sheet.id;
@@ -1934,7 +1936,8 @@ var Sheet;
       .then((response) => response.json())
       .then(data => {
         if (data) {
-          // console.log('data : ', data);
+          console.log('data : ', data);
+          debugger;
           Dashboard.data = data;
           Dashboard.ref = 'preview-datamart';
           app.createSheetTemplate();
@@ -1945,6 +1948,87 @@ var Sheet;
           // Allo stesso modo, elimino il dataset.adding per rendere "finali" gli elementi aggiunti
           // al report in fase di edit
           document.querySelectorAll('div[data-adding]').forEach(element => delete element.dataset.adding);
+        } else {
+          // TODO Da testare se il codice arriva qui o viene gestito sempre dal catch()
+          console.debug('FX non è stata creata');
+          App.showConsole('Errori nella creazione del datamart', 'error', 5000);
+        }
+      })
+      .catch(err => {
+        App.showConsole(err, 'error', 3000);
+        console.error(err);
+      });
+  } */
+
+  app.process = async (process) => {
+    // lo Sheet.id può essere già presente quando è stato aperto
+    if (!Sheet.id) Sheet.id = Date.now();
+    process.id = Sheet.id;
+    // console.log(process);
+    app.saveSheet();
+    // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
+    const params = JSON.stringify(process);
+    // console.log(params);
+    // App.showConsole('Elaborazione in corso...', 'info');
+    // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
+    const url = "/fetch_api/cube/sheet";
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    const req = new Request(url, init);
+    await fetch(req)
+      .then((response) => {
+        // TODO Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(async (paginateData) => {
+        if (paginateData) {
+          // console.log(paginateData);
+          let recursivePaginate = async (url) => {
+            // console.log(url);
+            await fetch(url).then((response) => {
+              // console.log(response);
+              if (!response.ok) { throw Error(response.statusText); }
+              return response;
+            }).then(response => response.json()).then((paginate) => {
+              partialData = partialData.concat(paginate.data);
+              if (paginate.next_page_url) {
+                recursivePaginate(paginate.next_page_url);
+                console.log(partialData);
+              } else {
+                // Non sono presenti altre pagine, visualizzo il dashboard
+                console.log('tutte le paginate completate :', partialData);
+                Dashboard.data = partialData;
+                // imposto il riferimento della tabella nel DOM
+                Dashboard.ref = 'preview-datamart';
+                app.createSheetTemplate();
+                google.charts.setOnLoadCallback(drawDatamart());
+                // google.charts.setOnLoadCallback(drawTest());
+              }
+            }).catch((err) => {
+              App.showConsole(err, 'error');
+              console.error(err);
+            });
+          }
+          // TODO Nel partialData potrei scegliere di visualizzare già la tabella, i successivi
+          // paginate aggiungeranno dati alla DataTable
+          partialData = paginateData.data;
+          if (paginateData.next_page_url) {
+            recursivePaginate(paginateData.next_page_url);
+          } else {
+            // Non sono presenti altre pagine, visualizzo il dashboard
+            Dashboard.data = partialData;
+            // imposto il riferimento della tabella nel DOM
+            Dashboard.ref = 'preview-datamart';
+            app.createSheetTemplate();
+            google.charts.setOnLoadCallback(drawDatamart());
+            // Al termine del process elimino dalle dropzones gli elementi che sono stati
+            // eliminati dallo Sheet, quindi gli elementi con dataset.removed
+            document.querySelectorAll('div[data-removed]').forEach(element => element.remove());
+            // Allo stesso modo, elimino il dataset.adding per rendere "finali" gli elementi aggiunti
+            // al report in fase di edit
+            document.querySelectorAll('div[data-adding]').forEach(element => delete element.dataset.adding);
+          }
         } else {
           // TODO Da testare se il codice arriva qui o viene gestito sempre dal catch()
           console.debug('FX non è stata creata');

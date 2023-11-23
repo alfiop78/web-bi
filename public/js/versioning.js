@@ -133,7 +133,7 @@ var Storage = new SheetStorages();
       btnUpload.dataset.workbookRef = object.workbook_ref;
       btnUpgrade.dataset.workbookRef = object.workbook_ref;
       btnDelete.dataset.workbookRef = object.workbook_ref;
-      // TODO: recupero il nome del WorkBook a cui è associato questa risorsa
+      // TODO recupero il nome del WorkBook a cui è associato questa risorsa
       // Questo deve essere fatto DOPO il caricamento degli oggetti dal DB
       // const workbookName = document.querySelector(`#ul-workbook > li[id='${object.workbook_ref}']`);
       // workBookRef.innerText = workbookName.dataset.label;
@@ -174,7 +174,11 @@ var Storage = new SheetStorages();
   app.getLocal = () => {
     // lista di tutti gli sheet del workbook in ciclo
     for (const [token, object] of Object.entries(Storage.getAll())) {
-      app.addElement(token, object, 'local');
+      console.log(object);
+      // FIX: i dashboard e i template verrano salvati solo su DB.
+      // 23.11.2023 - Attualmente sono disponibili in localStorage, quindi aggiungo
+      // questo if temporaneamente
+      if (object.type !== 'dashboard' && !object.type.startsWith('template-')) app.addElement(token, object, 'local');
     }
   }
 

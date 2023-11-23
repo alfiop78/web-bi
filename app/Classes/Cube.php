@@ -130,7 +130,7 @@ class Cube
         if (property_exists($this, 'json__info')) {
           $this->json__info->{'GROUP BY'}->{$name_key} = implode("", $value->sql);
         }
-        array_push($this->segmented, "{$column->name}_{$key}");
+        ($key === "id") ? array_push($this->segmented, "{$column->name}_{$key}") : array_push($this->segmented, "{$column->name}");
       }
     }
     // dd($fieldList);

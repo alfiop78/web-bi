@@ -174,7 +174,7 @@ var Resource = new Resources();
     // const sheet = JSON.parse(window.localStorage.getItem('5ytvr56')); // cb-26-10.2023
     const sheet = JSON.parse(window.localStorage.getItem(token));
     if (!sheet.id) return false;
-    await fetch(`/fetch_api/${sheet.id}/preview`)
+    /* await fetch(`/fetch_api/${sheet.id}/preview`)
       .then((response) => {
         console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
@@ -186,6 +186,55 @@ var Resource = new Resources();
         // debugger;
         Dashboard.data = data;
         google.charts.setOnLoadCallback(app.drawTable(sheet.token));
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      }); */
+    let partialData = [];
+    await fetch(`/fetch_api/${sheet.id}/preview?page=1`)
+      .then((response) => {
+        // console.log(response);
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(async (paginateData) => {
+        console.log(paginateData);
+        console.log(paginateData.data);
+        // debugger;
+        // Dashboard.data = paginateData.data;
+        // funzione ricorsiva fino a quando è presente next_page_url
+        let recursivePaginate = async (url) => {
+          // console.log(url);
+          await fetch(url).then((response) => {
+            // console.log(response);
+            if (!response.ok) { throw Error(response.statusText); }
+            return response;
+          }).then(response => response.json()).then((paginate) => {
+            partialData = partialData.concat(paginate.data);
+            if (paginate.next_page_url) {
+              recursivePaginate(paginate.next_page_url);
+              console.log(partialData);
+            } else {
+              // Non sono presenti altre pagine, visualizzo il dashboard
+              console.log('tutte le paginate completate :', partialData);
+              Dashboard.data = partialData;
+              google.charts.setOnLoadCallback(app.drawTable(sheet.token));
+            }
+          }).catch((err) => {
+            App.showConsole(err, 'error');
+            console.error(err);
+          });
+        }
+        partialData = paginateData.data;
+        if (paginateData.next_page_url) {
+          recursivePaginate(paginateData.next_page_url);
+        } else {
+          // Non sono presenti altre pagine, visualizzo il dashboard
+          Dashboard.data = partialData;
+          google.charts.setOnLoadCallback(app.drawTable(sheet.token));
+        }
       })
       .catch(err => {
         App.showConsole(err, 'error');
