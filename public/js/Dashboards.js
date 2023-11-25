@@ -178,6 +178,7 @@ class Resources extends Dashboards {
   #resource = new Map();
   constructor() {
     super();
+    this.ref;
   }
 
   /*

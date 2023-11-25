@@ -1,6 +1,7 @@
 var App = new Application();
 var Template = new Templates();
 var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizializzare quando ricevuti i dati dal datamart
+var Resource = new Resources();
 (() => {
   var app = {
     // templates
@@ -19,6 +20,9 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
   // Carico elenco dashboards create
   app.init = () => {
     const ul = document.getElementById('ul-dashboards');
+    // TODO recuperare i dashboard con la chiamata all'apertura della pagina.
+    // Temporaneamente le Dashboard vengono caricate dal localStorage.
+    // Inserisco il codice di esempio utilizzato per gli schemi, nel drawer della pagina
     for (const [token, value] of Object.entries(Dashboard.getDashboards())) {
       console.log(token, value);
       const content = app.tmplList.content.cloneNode(true);
@@ -105,17 +109,24 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     const controls = Dashboard.drawControls(document.getElementById('filter_div'));
 
     // console.log(JSON.parse(Dashboard.view.toJSON()));
-    var table = new google.visualization.ChartWrapper(Dashboard.json.wrapper);
+    // utilizzo senza i metodi setter. Le proprietà del ChartWrapper sono incluse in Dashboard.json
+    // var wrap = new google.visualization.ChartWrapper(Dashboard.json.wrapper);
+    // utilizzo con i metodi setter
+    var wrap = new google.visualization.ChartWrapper();
+    wrap.setChartType('Table');
+    wrap.setContainerId(Resource.ref);
+    wrap.setOptions(Dashboard.json.wrapper.options);
+
     // NOTE: esempio array di View
     // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
     // table.setView({ columns: [1, 3, 5, 7, 9, 16] });
 
-    google.visualization.events.addListener(table, 'ready', onReady);
+    google.visualization.events.addListener(wrap, 'ready', onReady);
 
     function onReady() {
       // esempio utilizzato senza impostare le metriche contenute nelle composite
       console.log('onReady');
-      let tableRef = new google.visualization.Table(document.getElementById('chart_div'));
+      let tableRef = new google.visualization.Table(document.getElementById(Resource.ref));
       let keyColumns = [];
       Dashboard.json.data.group.key.forEach(column => {
         // if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
@@ -139,7 +150,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       // console.log(groupColumnsIndex);
       // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
       Dashboard.dataGroup = new google.visualization.data.group(
-        table.getDataTable(), keyColumns, groupColumnsIndex
+        wrap.getDataTable(), keyColumns, groupColumnsIndex
       );
       console.log('group():', Dashboard.dataGroup);
       for (const [columnId, properties] of Object.entries(Dashboard.json.data.formatter)) {
@@ -235,8 +246,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
       }
     });
     // Tutti i controlli influenzano la table
-    binds.bind(controls, table);
-    // gdashboard.bind(controls, table);
+    binds.bind(controls, wrap);
+    // gdashboard.bind(controls, wrap);
     gdashboard.draw(dataTable);
     // gdashboard.draw(view); // utilizzo della DataView
   }
@@ -543,6 +554,8 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
     for (const [token, value] of Object.entries(resources)) {
       // il parse viene effettuato direttamente nel set della Classe Dashboards
       Dashboard.json = window.localStorage.getItem(value.template); // cb-26.10.2023
+      // imposto il riferimento nel DOM, del layout, per questa risorsa/report
+      Resource.ref = value.ref;
       app.getData(token);
     }
   }

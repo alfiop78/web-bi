@@ -9,7 +9,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-icons.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer-responsive.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dashboard-drawer.css') }}" />
   <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
   <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-versioning.css') }}" /> -->
@@ -33,14 +33,18 @@
     <div id="drawer">
 
       <section class="account">
-        <i class="material-icons md-light">person</i>
+        <h5>user</h5><i class="material-icons md-light">person</i>
       </section>
 
       <nav>
-        <!-- <a href="{{ url('/mapdb') }}"><i class="material-icons-round md-24">home</i></a> -->
-        <section class="icon-vertical-menu">
-          <a href="{{ url('/') }}"><i class="material-icons-round md-24">home</i></a>
-        </section>
+        <a href="#" title="Dashboard 1" onclick="App.menuOpen('profile/')"><i class="material-icons md-18">person</i><span>Dashboard 1</span></a>
+
+        <a href="" title="Dashboard 2"><i class="material-icons md-18">settings</i><span>Dashboard 2</span></a>
+        {{-- {{ dd($schemes) }} --}}
+        {{-- @foreach($schemes as $schema)
+        <a href="#" data-fn="handlerSchema" data-schema="{{ $schema['SCHEMA_NAME'] }}">{{ $schema['SCHEMA_NAME'] }}</a>
+        @endforeach --}}
+
       </nav>
 
     </div>
