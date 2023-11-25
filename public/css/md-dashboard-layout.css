@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@100;200;400;500;600&display=swap');
+
+.layout {
+  display: flex;
+  overflow: auto;
+}
+
+.layout .grid {
+  display: grid;
+  grid-template-rows: auto;
+  grid-gap: 1em;
+}
+
+.layout .row {
+  padding: 8px;
+}
+
+.layout .col {
+  display: grid;
+}
+

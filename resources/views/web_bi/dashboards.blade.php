@@ -14,6 +14,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
   <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-versioning.css') }}" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dashboards.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dashboard-layout.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
   <script src="{{ asset('/js/Templates.js') }}"></script>
@@ -85,7 +86,7 @@
             <div id="chart_div"></div> -->
           <!-- </div> -->
 
-          <div id="template-layout"></div>
+          <div id="template-layout" class="layout"></div>
 
           <!-- <div class="objects">
             <div id="chart_div"></div>
