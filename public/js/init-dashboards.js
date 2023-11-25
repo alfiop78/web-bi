@@ -636,6 +636,7 @@ var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizial
 
   app.dashboardSelected = (e) => {
     const dashboard = JSON.parse(window.localStorage.getItem(e.currentTarget.id));
+    document.querySelector('h1.title').innerHTML = dashboard.title;
     app.getLayout(dashboard);
     app.dlgDashboards.close();
   }
