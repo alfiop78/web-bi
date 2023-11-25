@@ -13,11 +13,13 @@ use App\Http\Controllers\BIworkbookController;
 use App\Http\Controllers\BIsheetController;
 use App\Http\Controllers\BImetricController;
 use App\Http\Controllers\BIfilterController;
+use App\Http\Controllers\BIdashboardController;
 // uso il Model BIsheet che viene utilizzato nella route curlprocess (web_bi.schedule_report)
 use App\Models\BIsheet;
 use App\Models\BIworkbook;
 use App\Models\BIfilter;
 use App\Models\BImetric;
+// use App\Models\BIdashboard;
 // test 22.12.2022 aggiunta per utilizzare /fetch_api/dimension/time
 use Illuminate\Support\Facades\DB;
 
@@ -53,9 +55,11 @@ Route::get('/versioning', function () {
   return view('web_bi.versioning');
 })->name('web_bi.versioning');
 
-Route::get('/dashboards', function () {
-  return view('web_bi.dashboards');
-})->name('web_bi.dashboards');
+// Route::get('/dashboards', function () {
+//   return view('web_bi.dashboards');
+// })->name('web_bi.dashboards');
+
+Route::get('/dashboards', [BIdashboardController::class, 'index'])->name('web_bi.dashboards');
 
 Route::get('/create-dashboard', function () {
   return view('web_bi.create-dashboard');
@@ -292,6 +296,7 @@ Route::prefix('/fetch_api/json/')->group(function () {
   Route::post('/sheet_store', [BIsheetController::class, 'store']);
   Route::post('/metric_store', [BImetricController::class, 'store']);
   Route::post('/filter_store', [BIfilterController::class, 'store']);
+  Route::post('/dashboard_store', [BIdashboardController::class, 'store']);
 });
 // destroy json
 Route::prefix('/fetch_api/name/')->group(function () {
@@ -306,6 +311,7 @@ Route::prefix('/fetch_api/versioning/')->group(function () {
   Route::get('sheets', [BIsheetController::class, 'index']);
   Route::get('metrics', [BImetricController::class, 'index']);
   Route::get('filters', [BIfilterController::class, 'index']);
+  Route::get('dashboards', [BIdashboardController::class, 'index']);
 });
 // show
 Route::prefix('/fetch_api/name/')->group(function () {

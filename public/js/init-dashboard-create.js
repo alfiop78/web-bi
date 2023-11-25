@@ -67,7 +67,7 @@ var Resource = new Resources();
   App.init();
 
   // onclick events
-  app.save = (e) => {
+  app.save = async (e) => {
     console.log(e.target);
     const token = rand().substring(0, 7);
     const title = document.getElementById('dashboardTitle').dataset.value;
@@ -76,12 +76,25 @@ var Resource = new Resources();
     let json = {
       title, note, token, type: 'dashboard',
       layout: Template.id,
-      // resources: [...Resource.resource]
       resources: Object.fromEntries(Resource.resource)
     };
     console.log(json);
-    debugger;
-    window.localStorage.setItem(`dashboard-${token}`, JSON.stringify(json));
+    const url = `/fetch_api/json/dashboard_store`;
+    const params = JSON.stringify(json);
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    const req = new Request(url, init);
+    await fetch(req)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        debugger;
+      })
+      .catch((err) => console.error(err));
+    // window.localStorage.setItem(`dashboard-${token}`, JSON.stringify(json));
   }
 
   app.preview = (e) => {
