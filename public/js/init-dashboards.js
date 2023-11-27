@@ -657,6 +657,6 @@ var Resource = new Resources();
   // carico elenco dashboards in una <ul>
   // app.init();
 
-  app.dlgDashboards.showModal();
+  // app.dlgDashboards.showModal();
 
 })();

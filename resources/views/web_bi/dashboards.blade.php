@@ -40,10 +40,10 @@
         <a href="#" title="Dashboard 1" onclick="App.menuOpen('profile/')"><i class="material-icons md-18">person</i><span>Dashboard 1</span></a>
 
         <a href="" title="Dashboard 2"><i class="material-icons md-18">settings</i><span>Dashboard 2</span></a>
-        {{-- {{ dd($schemes) }} --}}
-        {{-- @foreach($schemes as $schema)
-        <a href="#" data-fn="handlerSchema" data-schema="{{ $schema['SCHEMA_NAME'] }}">{{ $schema['SCHEMA_NAME'] }}</a>
-        @endforeach --}}
+        {{-- {{ dd($dashboards) }} --}}
+        @foreach($dashboards as $dashboard)
+        <a href="#" data-fn="handlerSchema" data-schema="{{ json_decode($dashboard)->token }}">{{ json_decode($dashboard)->name }}</a>
+        @endforeach
 
       </nav>
 

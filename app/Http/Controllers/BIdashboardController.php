@@ -14,9 +14,15 @@ class BIdashboardController extends Controller
    */
   public function index()
   {
-    $dashboards = BIdashboard::all();
-    dd($dashboards);
-    return view('web_bi.dashboards')->with('dashboards', $dashboards);
+    $dashboards = BIdashboard::get(['name', 'token']);
+    $names = [];
+    // dd($dashboards);
+    foreach ($dashboards as $das) {
+      // dd($das->name);
+      $names[] = $das;
+    }
+    return view('web_bi.dashboards')->with('dashboards', $names);
+    // return view('web_bi.dashboards')->with('dashboards', $dashboards);
     // return response()->json(['dashboard' => $dashboards]);
   }
 
