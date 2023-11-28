@@ -8,7 +8,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MapDatabaseController;
 // aggiungo il controller MetadataController, collegato al 192.168.2.7 web_bi_md per il metadato
 // use App\Http\Controllers\MetadataController;
-// use App\Http\Controllers\BIdimensionController;
 use App\Http\Controllers\BIworkbookController;
 use App\Http\Controllers\BIsheetController;
 use App\Http\Controllers\BImetricController;
@@ -19,7 +18,6 @@ use App\Models\BIsheet;
 use App\Models\BIworkbook;
 use App\Models\BIfilter;
 use App\Models\BImetric;
-// use App\Models\BIdashboard;
 // test 22.12.2022 aggiunta per utilizzare /fetch_api/dimension/time
 use Illuminate\Support\Facades\DB;
 
@@ -319,6 +317,7 @@ Route::prefix('/fetch_api/name/')->group(function () {
   Route::get('{token}/filter_show', [BIfilterController::class, 'show']);
   Route::get('{token}/workbook_show', [BIworkbookController::class, 'show']);
   Route::get('{token}/sheet_show', [BIsheetController::class, 'show']);
+  Route::get('{token}/dashboard_show', [BIdashboardController::class, 'show']);
 });
 // update
 Route::prefix('/fetch_api/json/')->group(function () {

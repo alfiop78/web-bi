@@ -62,9 +62,10 @@ class BIdashboardController extends Controller
    * @param  \App\Models\BIdashboard  $bIdashboard
    * @return \Illuminate\Http\Response
    */
-  public function show(BIdashboard $bIdashboard)
+  public function show(BIdashboard $bIdashboard, $token)
   {
-    //
+    $element = $bIdashboard::findOrFail($token);
+    return response()->json($element);
   }
 
   /**

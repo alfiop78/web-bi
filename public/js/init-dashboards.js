@@ -6,7 +6,6 @@ var Resource = new Resources();
   var app = {
     // templates
     tmplList: document.getElementById('tmpl-li'),
-    dlgDashboards: document.getElementById('dlg-dashboard-list'),
     number: function(properties) {
       return new google.visualization.NumberFormat(properties);
     }
@@ -648,15 +647,34 @@ var Resource = new Resources();
   }
 
   app.dashboardSelected = (e) => {
+    debugger;
     const dashboard = JSON.parse(window.localStorage.getItem(e.currentTarget.id));
     document.querySelector('h1.title').innerHTML = dashboard.title;
     app.getLayout(dashboard);
-    app.dlgDashboards.close();
   }
 
-  // carico elenco dashboards in una <ul>
-  // app.init();
-
-  // app.dlgDashboards.showModal();
+  document.querySelectorAll('a[data-token]').forEach(a => {
+    a.addEventListener('click', async (e) => {
+      // scarico il json dal DB, lo salvo in sessionStorage
+      await fetch(`/fetch_api/name/${e.target.dataset.token}/dashboard_show`)
+        .then((response) => {
+          console.log(response);
+          if (!response.ok) { throw Error(response.statusText); }
+          return response;
+        })
+        .then((response) => response.json())
+        .then(data => {
+          console.log(data);
+          let json = JSON.parse(data.json_value);
+          window.sessionStorage.setItem(json.token, JSON.stringify(json));
+          document.querySelector('h1.title').innerHTML = json.title;
+          app.getLayout(json);
+        })
+        .catch(err => {
+          App.showConsole(err, 'error');
+          console.error(err);
+        });
+    });
+  });
 
 })();

@@ -37,14 +37,13 @@
       </section>
 
       <nav>
-        <a href="#" title="Dashboard 1" onclick="App.menuOpen('profile/')"><i class="material-icons md-18">person</i><span>Dashboard 1</span></a>
+        <!-- <a href="#" title="Dashboard 1" onclick="App.menuOpen('profile/')"><i class="material-icons md-18">person</i><span>Dashboard 1</span></a> -->
 
-        <a href="" title="Dashboard 2"><i class="material-icons md-18">settings</i><span>Dashboard 2</span></a>
+        <!-- <a href="" title="Dashboard 2"><i class="material-icons md-18">settings</i><span>Dashboard 2</span></a> -->
         {{-- {{ dd($dashboards) }} --}}
         @foreach($dashboards as $dashboard)
-        <a href="#" data-fn="handlerSchema" data-schema="{{ json_decode($dashboard)->token }}">{{ json_decode($dashboard)->name }}</a>
+        <a href="#" data-token="{{ json_decode($dashboard)->token }}">{{ json_decode($dashboard)->name }}</a>
         @endforeach
-
       </nav>
 
     </div>
@@ -64,22 +63,6 @@
       <div id="content" class="custom-scrollbar">
 
         <div id="body" hidden>
-          <dialog id="dlg-dashboard-list" class="small">
-            <section class="dlg-grid">
-              <h5 class="title">Seleziona Dashboard</h5>
-              <section class="dlg-content col col-1">
-                <section class="list-search">
-                  <input type="search" id="" data-element-search="" placeholder="Ricerca" autocomplete="off" />
-                  <div class="relative-ul">
-                    <ul id="ul-dashboards" data-search-id="" class="custom-scrollbar"></ul>
-                  </div>
-                </section>
-              </section>
-              <section class="dlg-buttons">
-                <button name="cancel" value="annulla">Annulla</button>
-              </section>
-            </section>
-          </dialog>
           <!--Div that will hold the dashboard-->
           <!-- <div id="dashboard_div"> -->
           <!--Divs that will hold each control and chart-->
