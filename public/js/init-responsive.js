@@ -1392,13 +1392,12 @@ var Sheet;
     }
   }
 
-  app.saveSheetSpecs = async () => {
+  app.saveSheetSpecs = () => {
     let url = `/fetch_api/json/sheet_specs_store`;
     const params = JSON.stringify(Dashboard.json);
-    debugger;
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
-    await fetch(req)
+    fetch(req)
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -1424,13 +1423,15 @@ var Sheet;
       })
       .then((response) => response.json())
       .then((data) => {
-        if (Object.keys(data).length !== 0) {
+        // console.log(data);
+        (Object.keys(data).length !== 0) ? Dashboard.json = data.json_value : Dashboard.json.name = `specs_${Sheet.sheet.token}`;
+        /* if (Object.keys(data).length !== 0) {
           // Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
           Dashboard.json = JSON.parse(data.json_value);
         } else {
           // non trovato, lo creo
           Dashboard.json.name = `specs-${Sheet.sheet.token}`;
-        }
+        } */
         Dashboard.json.wrapper.chartType = 'Table';
         // se, in json.data.view esiste già questa colonna, non la modifico
         // creo l'array di object che mi servirà per nascondere/visualizzare le colonne
@@ -1517,7 +1518,8 @@ var Sheet;
         });
         Dashboard.json.data.group.key = keys;
         console.log('save sheet_specs : ', Dashboard.json);
-        app.saveSheetSpecs();
+        debugger;
+        // if (Object.keys(data).length !== 0) app.saveSheetSpecs() : app.updateSheetSpecs();
         // window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
       })
       .catch((err) => console.error(err));
@@ -1534,7 +1536,6 @@ var Sheet;
     // NOTE: Chiamata in post per poter passare tutte le colonne, incluso l'alias, alla query
 
     // TODO Passo in param un object con le colonne da estrarre (tutte)
-    // TODO: tes
     /* const params = JSON.stringify({ sheet_id: sheet.id });
     const url = `/fetch_api/datamartpost`;
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
@@ -1613,8 +1614,8 @@ var Sheet;
               Dashboard.data = partialData;
               // imposto il riferimento della tabella nel DOM
               Dashboard.ref = 'preview-datamart';
-              app.createSheetTemplate();
-              // google.charts.setOnLoadCallback(drawDatamart());
+              // app.createSheetTemplate();
+              google.charts.setOnLoadCallback(drawDatamart());
             }
           }).catch((err) => {
             App.showConsole(err, 'error');
@@ -1629,8 +1630,8 @@ var Sheet;
           Dashboard.data = partialData;
           // imposto il riferimento della tabella nel DOM
           Dashboard.ref = 'preview-datamart';
-          app.createSheetTemplate();
-          // google.charts.setOnLoadCallback(drawDatamart());
+          // app.createSheetTemplate();
+          google.charts.setOnLoadCallback(drawDatamart());
         }
       })
       .catch(err => {
@@ -1640,7 +1641,7 @@ var Sheet;
   }
 
   // apertura nuovo Sheet, viene recuperato dal localStorage
-  app.sheetSelected = (e) => {
+  app.sheetSelected = async (e) => {
     // chiamare il metodo open() dell'oggetto Sheet e seguire la stessa logica utilizzata per workBookSelected()
     Sheet = new Sheets(e.currentTarget.dataset.token, Sheet.sheet.workbook_ref);
     // reimposto tutte le proprietà della Classe
@@ -1674,7 +1675,9 @@ var Sheet;
     app.dialogSheet.close();
     // verifico se il datamart, per lo Sheet selezionato, è già presente sul DB.
     // In caso positivo lo apro in preview-datamart.
-    app.sheetPreview(e.currentTarget.dataset.token);;
+    await app.createSheetTemplate();
+    // debugger;
+    app.sheetPreview(e.currentTarget.dataset.token);
     // Imposto la prop 'edit' = true perchè andrò ad operare su uno Sheet aperto
     Sheet.edit = true;
     document.querySelectorAll('#btn-sql-preview, #btn-sheet-preview').forEach(button => button.removeAttribute('disabled'));
@@ -2034,7 +2037,7 @@ var Sheet;
                 Dashboard.data = partialData;
                 // imposto il riferimento della tabella nel DOM
                 Dashboard.ref = 'preview-datamart';
-                app.createSheetTemplate();
+                // app.createSheetTemplate();
                 google.charts.setOnLoadCallback(drawDatamart());
                 // google.charts.setOnLoadCallback(drawTest());
               }
@@ -2053,7 +2056,7 @@ var Sheet;
             Dashboard.data = partialData;
             // imposto il riferimento della tabella nel DOM
             Dashboard.ref = 'preview-datamart';
-            app.createSheetTemplate();
+            // app.createSheetTemplate();
             google.charts.setOnLoadCallback(drawDatamart());
             // Al termine del process elimino dalle dropzones gli elementi che sono stati
             // eliminati dallo Sheet, quindi gli elementi con dataset.removed
