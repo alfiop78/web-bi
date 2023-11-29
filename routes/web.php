@@ -13,6 +13,7 @@ use App\Http\Controllers\BIsheetController;
 use App\Http\Controllers\BImetricController;
 use App\Http\Controllers\BIfilterController;
 use App\Http\Controllers\BIdashboardController;
+use App\Http\Controllers\BIsheetSpecsController;
 // uso il Model BIsheet che viene utilizzato nella route curlprocess (web_bi.schedule_report)
 use App\Models\BIsheet;
 use App\Models\BIworkbook;
@@ -295,6 +296,7 @@ Route::prefix('/fetch_api/json/')->group(function () {
   Route::post('/metric_store', [BImetricController::class, 'store']);
   Route::post('/filter_store', [BIfilterController::class, 'store']);
   Route::post('/dashboard_store', [BIdashboardController::class, 'store']);
+  Route::post('/sheet_specs_store', [BIsheetSpecsController::class, 'store']);
 });
 // destroy json
 Route::prefix('/fetch_api/name/')->group(function () {
@@ -318,6 +320,7 @@ Route::prefix('/fetch_api/name/')->group(function () {
   Route::get('{token}/workbook_show', [BIworkbookController::class, 'show']);
   Route::get('{token}/sheet_show', [BIsheetController::class, 'show']);
   Route::get('{token}/dashboard_show', [BIdashboardController::class, 'show']);
+  Route::get('{token}/sheet_specs_show', [BIsheetSpecsController::class, 'show']);
 });
 // update
 Route::prefix('/fetch_api/json/')->group(function () {

@@ -1392,101 +1392,135 @@ var Sheet;
     }
   }
 
-  app.createSheetTemplate = () => {
-    (window.localStorage.getItem(`template-${Sheet.sheet.token}`)) ?
-      Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
-      Dashboard.json.name = `template-${Sheet.sheet.token}`;
-
-    Dashboard.json.wrapper.chartType = 'Table';
-    // se, in json.data.view esiste già questa colonna, non la modifico
-    // creo l'array di object che mi servirà per nascondere/visualizzare le colonne
-    let columnProperties = [], metricProperties = [];
-    Sheet.sheet.sheetColumns.forEach(col => {
-      const column = Dashboard.json.data.view.find(columnName => columnName.id === col);
-      const visible = (column) ? column.properties.visible : true;
-      columnProperties.push({ id: col, properties: { visible } });
-      // temporaneo, per reimpostare tutte le colonne visibili
-      // columnProperties.push({ id: col, properties: { visible: true } });
-    });
-    // console.log(columnProperties);
-    // debugger;
-
-    Sheet.sheet.sheetMetrics.forEach(metric => {
-      let metricFind = Dashboard.json.data.group.columns.find(name => name.alias === metric.alias);
-      if (!metric.dependencies) {
-        if (metricFind) {
-          metric.properties = { visible: metricFind.properties.visible };
-          metric.label = metricFind.label;
+  app.saveSheetSpecs = async () => {
+    let url = `/fetch_api/json/sheet_specs_store`;
+    const params = JSON.stringify(Dashboard.json);
+    debugger;
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    const req = new Request(url, init);
+    await fetch(req)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        debugger;
+        if (data) {
+          console.log('elemento salvato con successo');
         } else {
-          metric.properties = { visible: true };
-          metric.label = metric.alias;
         }
-      }
-      metricProperties.push(metric);
-    });
-    // console.log(metricProperties);
-    // debugger;
+      })
+      .catch((err) => console.error(err));
+  }
 
-    let columnsSet = new Set();
-    // se la colonna in ciclo è presente in 'Sheet.sheet.sheetMetrics' la imposto come type: 'number' altrimenti 'string'
-    for (const field of Object.keys(Dashboard.data[0])) {
-      const findMetricIndex = Sheet.sheet.sheetMetrics.findIndex(metric => metric.alias === field);
-      // type = (findMetricIndex === -1) ? 'string' : 'number';
-      // if (Dashboard.json.data.columns[field]) {
-      //   type = Dashboard.json.data.columns[field].type;
-      // } else {
-      //   type = (findMetricIndex === -1) ? 'string' : 'number';
-      // }
-      const columnType = (findMetricIndex === -1) ? 'column' : 'metric';
-      if (Dashboard.json.data.columns[field]) {
-        // il data.columns già esiste, non sovrascrivo la prop 'label' e 'type'
-        columnsSet.add({
-          id: field,
-          label: Dashboard.json.data.columns[field].label,
-          type: Dashboard.json.data.columns[field].type,
-          properties: { columnType }, other: 'altre proprietà...'
-        });
-      } else {
-        type = (findMetricIndex === -1) ? 'string' : 'number';
-        columnsSet.add({ id: field, label: field, type, properties: { columnType }, other: 'altre proprietà...' });
-      }
-    }
-    // Salvataggio del json
-    if (Dashboard.json) {
-      // converto il columnsSet (array) in Object
-      columnsSet.forEach(col => Dashboard.json.data.columns[col.id] = col);
-      // creo un array con le colonne da visualizzare in fase di inizializzazione del dashboard
-      // Dashboard.json.data.view = columns;
-      // la prop 'names' mi servirà per popolare la DataView dopo il group()
-      // Dashboard.json.data.view = columnProperties;
-      Dashboard.json.data.view = columnProperties;
-      // nel data.group.columns vanno messe tutte le metriche, come array di object
-      Dashboard.json.data.group.columns = metricProperties;
-      // Dashboard.json.data.group.columns = Sheet.sheet.sheetMetrics;
-      let keys = [];
-      console.log(columnsSet);
-      // salvo tutte le colonne (colonne dimensionali, non metriche) in
-      // json.data.group.key.
-      [...columnsSet].forEach((col, index) => {
-        if (col.properties.columnType === 'column') {
-          const columnFind = Dashboard.json.data.group.key.find(columnName => columnName.id === col.id);
-          // se la colonna in ciclo è già presente in json.data.group.key non sovrascrivo la proprieta
-          // 'grouped', questa proprietà viene impostata quando l'utente nasconde/visualizza una colonna
-          if (columnFind) {
-            col.properties.grouped = columnFind.properties.grouped;
-          } else {
-            col.properties.grouped = true;
-            col.label = col.id;
-          }
-          // const grouped = (column) ? column.properties.grouped : true;
-          // keys.push({ id: col.id, index, properties: { grouped } });
-          keys.push(col);
+  app.createSheetTemplate = () => {
+    // Verifico se le specifiche per questo report già esistono.
+    fetch(`/fetch_api/name/specs_${Sheet.sheet.token}/sheet_specs_show`)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        if (Object.keys(data).length !== 0) {
+          // Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
+          Dashboard.json = JSON.parse(data.json_value);
+        } else {
+          // non trovato, lo creo
+          Dashboard.json.name = `specs-${Sheet.sheet.token}`;
         }
-      });
-      Dashboard.json.data.group.key = keys;
-    }
-    console.log(Dashboard.json);
-    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+        Dashboard.json.wrapper.chartType = 'Table';
+        // se, in json.data.view esiste già questa colonna, non la modifico
+        // creo l'array di object che mi servirà per nascondere/visualizzare le colonne
+        let columnProperties = [], metricProperties = [];
+        Sheet.sheet.sheetColumns.forEach(col => {
+          const column = Dashboard.json.data.view.find(columnName => columnName.id === col);
+          const visible = (column) ? column.properties.visible : true;
+          columnProperties.push({ id: col, properties: { visible } });
+          // temporaneo, per reimpostare tutte le colonne visibili
+          // columnProperties.push({ id: col, properties: { visible: true } });
+        });
+        // console.log(columnProperties);
+        // debugger;
+        Sheet.sheet.sheetMetrics.forEach(metric => {
+          let metricFind = Dashboard.json.data.group.columns.find(name => name.alias === metric.alias);
+          if (!metric.dependencies) {
+            if (metricFind) {
+              metric.properties = { visible: metricFind.properties.visible };
+              metric.label = metricFind.label;
+            } else {
+              metric.properties = { visible: true };
+              metric.label = metric.alias;
+            }
+          }
+          metricProperties.push(metric);
+        });
+        // console.log(metricProperties);
+        // debugger;
+
+        let columnsSet = new Set();
+        // se la colonna in ciclo è presente in 'Sheet.sheet.sheetMetrics' la imposto come type: 'number' altrimenti 'string'
+        for (const field of Object.keys(Dashboard.data[0])) {
+          const findMetricIndex = Sheet.sheet.sheetMetrics.findIndex(metric => metric.alias === field);
+          // type = (findMetricIndex === -1) ? 'string' : 'number';
+          // if (Dashboard.json.data.columns[field]) {
+          //   type = Dashboard.json.data.columns[field].type;
+          // } else {
+          //   type = (findMetricIndex === -1) ? 'string' : 'number';
+          // }
+          const columnType = (findMetricIndex === -1) ? 'column' : 'metric';
+          if (Dashboard.json.data.columns[field]) {
+            // il data.columns già esiste, non sovrascrivo la prop 'label' e 'type'
+            columnsSet.add({
+              id: field,
+              label: Dashboard.json.data.columns[field].label,
+              type: Dashboard.json.data.columns[field].type,
+              properties: { columnType }, other: 'altre proprietà...'
+            });
+          } else {
+            type = (findMetricIndex === -1) ? 'string' : 'number';
+            columnsSet.add({ id: field, label: field, type, properties: { columnType }, other: 'altre proprietà...' });
+          }
+        }
+        // Salvataggio del json
+        // converto il columnsSet (array) in Object
+        columnsSet.forEach(col => Dashboard.json.data.columns[col.id] = col);
+        // creo un array con le colonne da visualizzare in fase di inizializzazione del dashboard
+        // Dashboard.json.data.view = columns;
+        // la prop 'names' mi servirà per popolare la DataView dopo il group()
+        // Dashboard.json.data.view = columnProperties;
+        Dashboard.json.data.view = columnProperties;
+        // nel data.group.columns vanno messe tutte le metriche, come array di object
+        Dashboard.json.data.group.columns = metricProperties;
+        // Dashboard.json.data.group.columns = Sheet.sheet.sheetMetrics;
+        let keys = [];
+        console.log(columnsSet);
+        // salvo tutte le colonne (colonne dimensionali, non metriche) in
+        // json.data.group.key.
+        [...columnsSet].forEach((col, index) => {
+          if (col.properties.columnType === 'column') {
+            const columnFind = Dashboard.json.data.group.key.find(columnName => columnName.id === col.id);
+            // se la colonna in ciclo è già presente in json.data.group.key non sovrascrivo la proprieta
+            // 'grouped', questa proprietà viene impostata quando l'utente nasconde/visualizza una colonna
+            if (columnFind) {
+              col.properties.grouped = columnFind.properties.grouped;
+            } else {
+              col.properties.grouped = true;
+              col.label = col.id;
+            }
+            // const grouped = (column) ? column.properties.grouped : true;
+            // keys.push({ id: col.id, index, properties: { grouped } });
+            keys.push(col);
+          }
+        });
+        Dashboard.json.data.group.key = keys;
+        console.log('save sheet_specs : ', Dashboard.json);
+        app.saveSheetSpecs();
+        // window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+      })
+      .catch((err) => console.error(err));
   }
 
   // TODO da spostare in supportFn.js
@@ -1500,6 +1534,7 @@ var Sheet;
     // NOTE: Chiamata in post per poter passare tutte le colonne, incluso l'alias, alla query
 
     // TODO Passo in param un object con le colonne da estrarre (tutte)
+    // TODO: tes
     /* const params = JSON.stringify({ sheet_id: sheet.id });
     const url = `/fetch_api/datamartpost`;
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
@@ -1579,8 +1614,7 @@ var Sheet;
               // imposto il riferimento della tabella nel DOM
               Dashboard.ref = 'preview-datamart';
               app.createSheetTemplate();
-              google.charts.setOnLoadCallback(drawDatamart());
-              // google.charts.setOnLoadCallback(drawTest());
+              // google.charts.setOnLoadCallback(drawDatamart());
             }
           }).catch((err) => {
             App.showConsole(err, 'error');
@@ -1596,8 +1630,7 @@ var Sheet;
           // imposto il riferimento della tabella nel DOM
           Dashboard.ref = 'preview-datamart';
           app.createSheetTemplate();
-          // google.charts.setOnLoadCallback(drawTest());
-          google.charts.setOnLoadCallback(drawDatamart());
+          // google.charts.setOnLoadCallback(drawDatamart());
         }
       })
       .catch(err => {
