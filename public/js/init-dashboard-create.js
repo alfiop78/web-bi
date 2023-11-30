@@ -94,7 +94,29 @@ var Resource = new Resources();
         debugger;
       })
       .catch((err) => console.error(err));
-    // window.localStorage.setItem(`dashboard-${token}`, JSON.stringify(json));
+  }
+
+  // TODO: potrei spostarla in Dashboards.js
+  app.specsSave = () => {
+    const url = `/fetch_api/json/sheet_specs_update`;
+    const params = JSON.stringify(Dashboard.json);
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    const req = new Request(url, init);
+    fetch(req)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        debugger;
+        if (data) {
+          console.log('elemento salvato con successo');
+        } else {
+        }
+      })
+      .catch((err) => console.error(err));
   }
 
   app.preview = (e) => {
@@ -171,7 +193,7 @@ var Resource = new Resources();
       const content = app.tmplList.content.cloneNode(true);
       const li = content.querySelector('li[data-li]');
       const span = li.querySelector('span');
-      li.dataset.token = sheet.token;
+      li.dataset.token = token;
       li.dataset.label = sheet.name;
       li.addEventListener('click', app.sheetSelected);
       li.dataset.elementSearch = 'sheets';
@@ -181,7 +203,7 @@ var Resource = new Resources();
     app.dlgChartSection.showModal();
   }
 
-  app.dashboardExample = async (token) => {
+  app.getData = async (token) => {
     // recupero l'id dello Sheet stock veicoli nuovi
     // const sheet = JSON.parse(window.localStorage.getItem('hdkglro')); // stock
     // const sheet = JSON.parse(window.localStorage.getItem('5ytvr56')); // cb-26-10.2023
@@ -257,13 +279,28 @@ var Resource = new Resources();
 
   // Selezione del report che alimenta il chart_div
   app.sheetSelected = (e) => {
-    app.dashboardExample(e.currentTarget.dataset.token);
-    // un Map() di ref aggiunti alla pagina, questo verrà salvato nel json 'dashboard-token'
-    // Resource.resource = {sheet : e.currentTarget.dataset.token, template : `template-${e.currentTarget.dataset.token}`};
-    Resource.resource = e.currentTarget.dataset.token;
-    app.dlgChartSection.close();
-    // aggiungo la class 'defined' nel div che contiene il grafico/tabella
-    Resource.ref.classList.add('defined');
+    // recupero le specifiche per questo report (resource)
+    // successivamente recupero i dati del datamart
+    const token = e.currentTarget.dataset.token;
+    fetch(`/fetch_api/name/${token}/sheet_specs_show`)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        Dashboard.json = data.json_value;
+        console.log('save sheet_specs : ', Dashboard.json);
+        debugger;
+        app.getData(token);
+        // un Map() di ref aggiunti alla pagina, questo verrà salvato nel json 'dashboard-token'
+        // Resource.resource = {sheet : e.currentTarget.dataset.token, template : `template-${e.currentTarget.dataset.token}`};
+        Resource.resource = token;
+        app.dlgChartSection.close();
+        // aggiungo la class 'defined' nel div che contiene il grafico/tabella
+        Resource.ref.classList.add('defined');
+      })
+      .catch((err) => console.error(err));
   }
 
   app.createTemplateFilter = (filter) => {
@@ -290,10 +327,6 @@ var Resource = new Resources();
 
   app.drawTable = (sheetToken) => {
     console.log(sheetToken);
-    // se il json, in localStorage non esiste, verrà inizializzato in base alla proprietà #json della Classe Dashboards
-    // if (localStorage.getItem('tmpl_stock')) Dashboard.json = localStorage.getItem('tmpl_stock');
-    (localStorage.getItem(`template-${sheetToken}`)) ?
-      Dashboard.json = localStorage.getItem(`template-${sheetToken}`) : Dashboard.json.name = `template-${sheetToken}`;
     // aggiungo i filtri se sono stati impostati nel preview sheet
     Dashboard.json.filters.forEach(filter => app.createTemplateFilter(filter));
     // impostazione del legame tra i filtri (bind)
@@ -424,7 +457,7 @@ var Resource = new Resources();
       }
     });
     Dashboard.json.bind = bind;
-    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+    app.specsSave();
   }
 
   app.btnRemoveFilter = (e) => {
@@ -437,7 +470,7 @@ var Resource = new Resources();
     const filterRef = document.getElementById(filterId);
     filterRef.parentElement.remove();
     app.setDashboardBind();
-    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+    app.specsSave();
   }
 
   // end onclick events
@@ -522,7 +555,7 @@ var Resource = new Resources();
     });
     console.log(Dashboard.json);
     // debugger;
-    window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+    app.specsSave();
   }
 
   // End Drag events

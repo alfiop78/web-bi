@@ -328,6 +328,7 @@ Route::prefix('/fetch_api/json/')->group(function () {
   Route::post('/sheet_update', [BIsheetController::class, 'update']);
   Route::post('/metric_update', [BImetricController::class, 'update']);
   Route::post('/filter_update', [BIfilterController::class, 'update']);
+  Route::post('/sheet_specs_update', [BIsheetSpecsController::class, 'update']);
 });
 
 // test vertica

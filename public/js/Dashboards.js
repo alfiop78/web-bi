@@ -3,7 +3,7 @@ class Dashboards {
   #dashboards = {};
   #prepareData = { cols: [], rows: [] };
   #json = {
-    name: null,
+    token: null,
     data: {
       columns: {},
       formatter: {},
@@ -23,7 +23,7 @@ class Dashboards {
         height: "auto",
         page: "enabled",
         frozenColumns: 0,
-        pageSize: 20,
+        pageSize: 15,
         allowHTML: true,
         cssClassNames: {
           headerRow: "g-table-header",
@@ -186,7 +186,8 @@ class Resources extends Dashboards {
    * */
   set resource(value) {
     // value: il token del report che è stato aggiunto, in this.ref (nel DOM)
-    this.#resource.set(value, { ref: this.ref.id, template: `template-${value}` });
+    this.#resource.set(value, { ref: this.ref.id });
+    // this.#resource.set(value, { ref: this.ref.id, template: `template-${value}` });
   }
 
   get resource() {

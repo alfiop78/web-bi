@@ -550,12 +550,23 @@ var Resource = new Resources();
 
   // per ogni report lancio la fetch (in getData()) per recuperare i dati
   app.loadResources = (resources) => {
+    // TODO: qui dovrò fare una promise.all per richiamare tutti i report e le loro specifiche
     for (const [token, value] of Object.entries(resources)) {
       // il parse viene effettuato direttamente nel set della Classe Dashboards
-      Dashboard.json = window.localStorage.getItem(value.template); // cb-26.10.2023
-      // imposto il riferimento nel DOM, del layout, per questa risorsa/report
-      Resource.ref = value.ref;
-      app.getData(token);
+      // scarico la risorsa (le specs) dal DB e successivamente invoco getData()
+      fetch(`/fetch_api/name/${token}/sheet_specs_show`)
+        .then((response) => {
+          if (!response.ok) { throw Error(response.statusText); }
+          return response;
+        })
+        .then((response) => response.json())
+        .then((data) => {
+          Dashboard.json = data.json_value;
+          // imposto il riferimento nel DOM, del layout, per questa risorsa/report
+          Resource.ref = value.ref;
+          app.getData(token);
+        })
+        .catch((err) => console.error(err));
     }
   }
 
@@ -592,7 +603,6 @@ var Resource = new Resources();
 
     // Chiamata in GET con laravel paginate()
     let partialData = [];
-    // TODO provare con la promise.all quando ci saranno più report da recuperare in una sola dashboard
     await fetch(`/fetch_api/${sheet.id}/datamart?page=1`)
       .then((response) => {
         console.log(response);

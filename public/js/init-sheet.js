@@ -408,7 +408,7 @@ saveColumnConfig.onclick = () => {
   // TODO Il containerId deve essere deciso in init-dashboard-create.js
   Dashboard.json.wrapper.containerId = 'chart_div';
   console.log(Dashboard.json);
-  window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+  window.sessionStorage.setItem(Dashboard.json.token, JSON.stringify(Dashboard.json));
   dlgConfig.close();
   previewReady();
 }
@@ -451,6 +451,6 @@ function columnHander(e) {
       Dashboard.json.data.group.columns[metricIndex].properties.visible = false;
     }
   }
-  window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+  window.sessionStorage.setItem(Dashboard.json.token, JSON.stringify(Dashboard.json));
   previewReady();
 }

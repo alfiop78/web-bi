@@ -19,6 +19,7 @@ class VerifyCsrfToken extends Middleware
     '/fetch_api/json/sheet_update',
     '/fetch_api/json/filter_update',
     '/fetch_api/json/dashboard_update',
+    '/fetch_api/json/sheet_specs_update',
     '/fetch_api/json/workbook_store',
     '/fetch_api/json/sheet_store',
     '/fetch_api/json/metric_store',

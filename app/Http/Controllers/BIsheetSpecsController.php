@@ -36,12 +36,12 @@ class BIsheetSpecsController extends Controller
    */
   public function store(Request $request)
   {
-    $token_name = $request->collect()->get('name');
+    $token = $request->collect()->get('token');
     // codifico tutta la $request in json per poterla inserire nel DB
     $json = json_encode($request->all());
     $sheet_specs = new BIsheet_specs();
     // salvo su DB
-    $sheet_specs->token = $token_name;
+    $sheet_specs->token = $token;
     $sheet_specs->json_value = $json;
     return $sheet_specs->save();
   }
@@ -81,7 +81,12 @@ class BIsheetSpecsController extends Controller
    */
   public function update(Request $request, BIsheet_specs $bIsheet_specs)
   {
-    //
+    $token = $request->collect()->get('token');
+    $json = json_encode($request->all());
+    $specs = $bIsheet_specs::findOrFail($token);
+    $specs->token = $token;
+    $specs->json_value = $json;
+    return $specs->save();
   }
 
   /**

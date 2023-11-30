@@ -41,6 +41,7 @@ var Sheet;
     // buttons
     btnSelectSchema: document.getElementById('btn-select-schema'),
     editWorkBookName: document.getElementById('workbook-name'),
+    btnSaveSheet: document.getElementById('btn-sheet-save'),
     // drawer
     drawer: document.getElementById('drawer'),
     // body
@@ -1393,7 +1394,8 @@ var Sheet;
   }
 
   app.saveSheetSpecs = () => {
-    let url = `/fetch_api/json/sheet_specs_store`;
+    debugger;
+    const url = `/fetch_api/json/sheet_specs_${app.btnSaveSheet.dataset.dbSaveSpecs}`;
     const params = JSON.stringify(Dashboard.json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
@@ -1408,15 +1410,18 @@ var Sheet;
         debugger;
         if (data) {
           console.log('elemento salvato con successo');
+          app.btnSaveSheet.dataset.dbSaveSpecs = "update";
         } else {
+          app.btnSaveSheet.dataset.dbSaveSpecs = "store";
         }
       })
       .catch((err) => console.error(err));
   }
 
   app.createSheetTemplate = () => {
+    debugger;
     // Verifico se le specifiche per questo report già esistono.
-    fetch(`/fetch_api/name/specs_${Sheet.sheet.token}/sheet_specs_show`)
+    fetch(`/fetch_api/name/${Sheet.sheet.token}/sheet_specs_show`)
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -1424,14 +1429,18 @@ var Sheet;
       .then((response) => response.json())
       .then((data) => {
         // console.log(data);
-        (Object.keys(data).length !== 0) ? Dashboard.json = data.json_value : Dashboard.json.name = `specs_${Sheet.sheet.token}`;
-        /* if (Object.keys(data).length !== 0) {
-          // Dashboard.json = localStorage.getItem(`template-${Sheet.sheet.token}`) :
-          Dashboard.json = JSON.parse(data.json_value);
+        // (Object.keys(data).length !== 0) ? Dashboard.json = data.json_value : Dashboard.json.token = `specs-${Sheet.sheet.token}`;
+        if (Object.keys(data).length !== 0) {
+          Dashboard.json = data.json_value;
+          app.btnSaveSheet.dataset.dbSaveSpecs = 'update';
+          // le specifiche per questo report sono già presenti sul db, imposto
+          // un attributo, nel tasto btn-sheet-save per indicare se eseguire l'update oppure la insert
+          // dello specs-token_sheet
         } else {
-          // non trovato, lo creo
-          Dashboard.json.name = `specs-${Sheet.sheet.token}`;
-        } */
+          Dashboard.json.token = Sheet.sheet.token;
+          app.btnSaveSheet.dataset.dbSaveSpecs = 'store';
+        }
+        debugger;
         Dashboard.json.wrapper.chartType = 'Table';
         // se, in json.data.view esiste già questa colonna, non la modifico
         // creo l'array di object che mi servirà per nascondere/visualizzare le colonne
@@ -1440,8 +1449,6 @@ var Sheet;
           const column = Dashboard.json.data.view.find(columnName => columnName.id === col);
           const visible = (column) ? column.properties.visible : true;
           columnProperties.push({ id: col, properties: { visible } });
-          // temporaneo, per reimpostare tutte le colonne visibili
-          // columnProperties.push({ id: col, properties: { visible: true } });
         });
         // console.log(columnProperties);
         // debugger;
@@ -1518,9 +1525,9 @@ var Sheet;
         });
         Dashboard.json.data.group.key = keys;
         console.log('save sheet_specs : ', Dashboard.json);
-        debugger;
-        // if (Object.keys(data).length !== 0) app.saveSheetSpecs() : app.updateSheetSpecs();
-        // window.localStorage.setItem(Dashboard.json.name, JSON.stringify(Dashboard.json));
+        google.charts.setOnLoadCallback(drawDatamart());
+        // salvo lo sheet_specs in storage, il salvataggio su DB avviene dal tasto "Salva" app.saveSheet()
+        window.sessionStorage.setItem(Dashboard.json.token, JSON.stringify(Dashboard.json));
       })
       .catch((err) => console.error(err));
   }
@@ -1614,8 +1621,8 @@ var Sheet;
               Dashboard.data = partialData;
               // imposto il riferimento della tabella nel DOM
               Dashboard.ref = 'preview-datamart';
-              // app.createSheetTemplate();
-              google.charts.setOnLoadCallback(drawDatamart());
+              app.createSheetTemplate();
+              // google.charts.setOnLoadCallback(drawDatamart());
             }
           }).catch((err) => {
             App.showConsole(err, 'error');
@@ -1630,8 +1637,8 @@ var Sheet;
           Dashboard.data = partialData;
           // imposto il riferimento della tabella nel DOM
           Dashboard.ref = 'preview-datamart';
-          // app.createSheetTemplate();
-          google.charts.setOnLoadCallback(drawDatamart());
+          app.createSheetTemplate();
+          // google.charts.setOnLoadCallback(drawDatamart());
         }
       })
       .catch(err => {
@@ -1649,6 +1656,7 @@ var Sheet;
     const name = document.getElementById('sheet-name');
     name.innerText = Sheet.name;
     name.dataset.value = Sheet.name;
+    app.btnSaveSheet.dataset.dbSaveSpecs = 'update';
     /* Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...)
     * della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
     */
@@ -1675,8 +1683,6 @@ var Sheet;
     app.dialogSheet.close();
     // verifico se il datamart, per lo Sheet selezionato, è già presente sul DB.
     // In caso positivo lo apro in preview-datamart.
-    await app.createSheetTemplate();
-    // debugger;
     app.sheetPreview(e.currentTarget.dataset.token);
     // Imposto la prop 'edit' = true perchè andrò ad operare su uno Sheet aperto
     Sheet.edit = true;
@@ -1691,6 +1697,8 @@ var Sheet;
     // da questo momento in poi le modifiche (aggiunta/rimozione) di elementi allo Sheet
     // verranno contrassegnate come edit:true
     Sheet.edit = true;
+    if (!Dashboard.json.token) Dashboard.json.token = Sheet.sheet.token;
+    app.saveSheetSpecs();
   }
 
   app.removeDefinedColumn = (e) => {
@@ -2037,9 +2045,8 @@ var Sheet;
                 Dashboard.data = partialData;
                 // imposto il riferimento della tabella nel DOM
                 Dashboard.ref = 'preview-datamart';
-                // app.createSheetTemplate();
-                google.charts.setOnLoadCallback(drawDatamart());
-                // google.charts.setOnLoadCallback(drawTest());
+                app.createSheetTemplate();
+                // google.charts.setOnLoadCallback(drawDatamart());
               }
             }).catch((err) => {
               App.showConsole(err, 'error');
@@ -2056,8 +2063,8 @@ var Sheet;
             Dashboard.data = partialData;
             // imposto il riferimento della tabella nel DOM
             Dashboard.ref = 'preview-datamart';
-            // app.createSheetTemplate();
-            google.charts.setOnLoadCallback(drawDatamart());
+            app.createSheetTemplate();
+            // google.charts.setOnLoadCallback(drawDatamart());
             // Al termine del process elimino dalle dropzones gli elementi che sono stati
             // eliminati dallo Sheet, quindi gli elementi con dataset.removed
             document.querySelectorAll('div[data-removed]').forEach(element => element.remove());
