@@ -373,13 +373,14 @@ saveColumnConfig.onclick = () => {
       formatterProperties = { suffix: ' %', negativeColor: 'brown', negativeParens: true, fractionDigits: 2 };
       break;
     case 'date':
-      // TODO da implementare
+      // TODO: da implementare
       // Dashboard.json.data.formatter[Dashboard.columnId] = { format: 'date' };
       break;
     default:
       break;
   }
   Dashboard.json.data.formatter[Dashboard.columnId] = { type, format, prop: formatterProperties };
+  // Dashboard.json.data.formatter = { [Dashboard.columnId]: { type, format, prop: formatterProperties } };
   // filtri definiti per il report
   if (filterColumn.checked === true) {
     // Proprietà Dashboard.json.filters
@@ -405,10 +406,12 @@ saveColumnConfig.onclick = () => {
     }
   }
 
-  // TODO Il containerId deve essere deciso in init-dashboard-create.js
+  // TODO: Il containerId deve essere deciso in init-dashboard-create.js
   Dashboard.json.wrapper.containerId = 'chart_div';
   console.log(Dashboard.json);
   window.sessionStorage.setItem(Dashboard.json.token, JSON.stringify(Dashboard.json));
+  // window.localStorage.setItem(`specs_${Dashboard.json.token}`, JSON.stringify(Dashboard.json));
+  debugger;
   dlgConfig.close();
   previewReady();
 }

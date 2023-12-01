@@ -577,9 +577,9 @@
                     <section class="wrapper-step">
                       <menu class="standard">
                         <section id="workbook-name" class="name data-source" contenteditable="true">WorkSpace 1</section>
-                        <button data-fn="workBookNew" id="btn-workbook-new" value="Nuovo" disabled>Nuovo</button>
+                        <button id="btn-workbook-new" value="Nuovo" disabled>Nuovo</button>
                         <button id="btn-workbook-open" value="open">Apri</button>
-                        <button data-fn="workBookClose" id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button>
+                        <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button>
                       </menu>
                       <div id="context-menu-table" class="context-menu">
                         <ul id="ul-context-menu-table" class="context-menu-items">
@@ -651,12 +651,13 @@
                       <menu class="standard">
                         <section class="buttons-menu">
                           <button type="button" disabled>Aggiungi WorkBook (analisi multifatti)</button>
-                          <button type="button" id="btn-sheet-new" data-fn="newSheet" disabled>Nuovo Sheet</button>
-                          <button type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri Sheet</button>
-                          <button type="button" id="btn-sheet-save" data-db-save-specs="store" data-fn="saveSheet">Salva</button>
+                          <button type="button" id="btn-sheet-new" data-fn="newSheet" disabled>Nuovo</button>
+                          <button type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri</button>
+                          <button type="button" id="btn-sheet-save" data-fn="saveSheet" disabled>Salva</button>
+                          <button type="button" id="btn-sheet-close" data-fn="closeSheet" disabled>Chiudi</button>
                         </section>
                         <section class="sheet-title">
-                          <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Sheet 1">Sheet 1</div>
+                          <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Titolo Report">Titolo Report</div>
                         </section>
                       </menu>
                       <section id="wrapper-sheet" class="wrapper-sheet">

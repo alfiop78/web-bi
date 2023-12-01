@@ -1334,6 +1334,28 @@ var Sheet;
     app.dialogWorkBook.showModal();
   }
 
+  document.querySelector('#btn-workbook-close').onclick = (e) => {
+    // elimino tutti gli elemeneti svg tranne i <defs>
+    // console.log(Draw.svg.querySelectorAll('*:not(#table-struct, #web-bi-time, defs)'));
+    // console.log(Draw.svg.querySelectorAll(":where(use, path), g.struct[id^='struct']"));
+    Draw.svg.querySelectorAll(":where(use, path), g.struct[id^='struct']").forEach(el => el.remove());
+    WorkBook = new WorkBooks('WorkBook 1');
+    Draw = new DrawSVG('svg');
+    e.target.disabled = true;
+    // Sheet = null;
+    debugger;
+    if (Sheet) delete Sheet.sheet;
+    // console.log(Sheet.sheet);
+    // delete Sheet.sheet;
+    Sheet = undefined;
+    console.log(Sheet);
+    document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
+  }
+
+  document.querySelector('#btn-workbook-new').onclick = () => {
+    debugger;
+  }
+
   app.checkSessionStorage = async () => {
     // TODO: scarico in sessionStorage tutte le tabelle del canvas
     let urls = [];
@@ -1368,10 +1390,12 @@ var Sheet;
     app.dialogWorkBook.close();
     // il WorkBook è già creato quindi da questo momento è in fase di edit
     WorkBook.edit = true;
+    // abilito il tasto workbookClose
+    document.getElementById('btn-workbook-close').disabled = false;
   }
 
-  app.openSheetDialog = (e) => {
-    console.log('Sheet open');
+  app.openSheetDialog = () => {
+    // console.log('Sheet open');
     /* popolo la dialog con gli Sheet presenti, gli Sheet hanno un workBook_ref : token, quindi
     * recupero solo gli Sheet appartenenti al WorkBook aperto
     */
@@ -1394,9 +1418,9 @@ var Sheet;
   }
 
   app.saveSheetSpecs = () => {
-    debugger;
-    const url = `/fetch_api/json/sheet_specs_${app.btnSaveSheet.dataset.dbSaveSpecs}`;
+    const url = (Dashboard.jsonExists) ? '/fetch_api/json/sheet_specs_update' : '/fetch_api/json/sheet_specs_update';
     const params = JSON.stringify(Dashboard.json);
+    console.log(Dashboard.json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
     fetch(req)
@@ -1406,20 +1430,17 @@ var Sheet;
       })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
-        debugger;
+        // console.log(data);
         if (data) {
-          console.log('elemento salvato con successo');
-          app.btnSaveSheet.dataset.dbSaveSpecs = "update";
+          App.showConsole('Report salvato correttamente!', 'done', 2000);
         } else {
-          app.btnSaveSheet.dataset.dbSaveSpecs = "store";
+          // TODO:
         }
       })
       .catch((err) => console.error(err));
   }
 
   app.createSheetTemplate = () => {
-    debugger;
     // Verifico se le specifiche per questo report già esistono.
     fetch(`/fetch_api/name/${Sheet.sheet.token}/sheet_specs_show`)
       .then((response) => {
@@ -1428,19 +1449,14 @@ var Sheet;
       })
       .then((response) => response.json())
       .then((data) => {
-        // console.log(data);
-        // (Object.keys(data).length !== 0) ? Dashboard.json = data.json_value : Dashboard.json.token = `specs-${Sheet.sheet.token}`;
+        console.log(data);
         if (Object.keys(data).length !== 0) {
           Dashboard.json = data.json_value;
-          app.btnSaveSheet.dataset.dbSaveSpecs = 'update';
-          // le specifiche per questo report sono già presenti sul db, imposto
-          // un attributo, nel tasto btn-sheet-save per indicare se eseguire l'update oppure la insert
-          // dello specs-token_sheet
+          Dashboard.jsonExists = true;
         } else {
           Dashboard.json.token = Sheet.sheet.token;
-          app.btnSaveSheet.dataset.dbSaveSpecs = 'store';
+          Dashboard.jsonExists = false;
         }
-        debugger;
         Dashboard.json.wrapper.chartType = 'Table';
         // se, in json.data.view esiste già questa colonna, non la modifico
         // creo l'array di object che mi servirà per nascondere/visualizzare le colonne
@@ -1504,7 +1520,7 @@ var Sheet;
         Dashboard.json.data.group.columns = metricProperties;
         // Dashboard.json.data.group.columns = Sheet.sheet.sheetMetrics;
         let keys = [];
-        console.log(columnsSet);
+        // console.log(columnsSet);
         // salvo tutte le colonne (colonne dimensionali, non metriche) in
         // json.data.group.key.
         [...columnsSet].forEach((col, index) => {
@@ -1526,13 +1542,16 @@ var Sheet;
         Dashboard.json.data.group.key = keys;
         console.log('save sheet_specs : ', Dashboard.json);
         google.charts.setOnLoadCallback(drawDatamart());
-        // salvo lo sheet_specs in storage, il salvataggio su DB avviene dal tasto "Salva" app.saveSheet()
+        // salvo lo sheet_specs in storage e sul DB.
+        // Tutte le eventuali modifiche al json verranno salvate in storage, quando l'utente clicca
+        // su "Salva" (il report) recupero i dati dallo storage e salvo le specs su DB.
         window.sessionStorage.setItem(Dashboard.json.token, JSON.stringify(Dashboard.json));
+        app.saveSheetSpecs();
       })
       .catch((err) => console.error(err));
   }
 
-  // TODO da spostare in supportFn.js
+  // TODO: da spostare in supportFn.js
   app.sheetPreview = async (token) => {
     // console.log(token);
     // recupero l'id dello Sheet
@@ -1650,13 +1669,13 @@ var Sheet;
   // apertura nuovo Sheet, viene recuperato dal localStorage
   app.sheetSelected = async (e) => {
     // chiamare il metodo open() dell'oggetto Sheet e seguire la stessa logica utilizzata per workBookSelected()
-    Sheet = new Sheets(e.currentTarget.dataset.token, Sheet.sheet.workbook_ref);
+    // Sheet = new Sheets(e.currentTarget.dataset.token, Sheet.sheet.workbook_ref);
+    Sheet = new Sheets(e.currentTarget.dataset.token, WorkBook.workBook.token);
     // reimposto tutte le proprietà della Classe
     Sheet.open();
     const name = document.getElementById('sheet-name');
     name.innerText = Sheet.name;
     name.dataset.value = Sheet.name;
-    app.btnSaveSheet.dataset.dbSaveSpecs = 'update';
     /* Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...)
     * della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
     */
@@ -1686,6 +1705,8 @@ var Sheet;
     app.sheetPreview(e.currentTarget.dataset.token);
     // Imposto la prop 'edit' = true perchè andrò ad operare su uno Sheet aperto
     Sheet.edit = true;
+    document.querySelector('#btn-sheet-close').disabled = false;
+    document.querySelector('#btn-sheet-save').disabled = false;
     document.querySelectorAll('#btn-sql-preview, #btn-sheet-preview').forEach(button => button.removeAttribute('disabled'));
   }
 
@@ -1697,8 +1718,16 @@ var Sheet;
     // da questo momento in poi le modifiche (aggiunta/rimozione) di elementi allo Sheet
     // verranno contrassegnate come edit:true
     Sheet.edit = true;
-    if (!Dashboard.json.token) Dashboard.json.token = Sheet.sheet.token;
     app.saveSheetSpecs();
+  }
+
+  app.closeSheet = () => {
+    delete Sheet.sheet;
+    Sheet = undefined;
+    console.log(Sheet);
+    document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
+    document.querySelector('#btn-sheet-close').disabled = true;
+    document.querySelector('#btn-sheet-save').disabled = true;
   }
 
   app.removeDefinedColumn = (e) => {
@@ -1840,6 +1869,7 @@ var Sheet;
     DT.metrics(WorkBook.metrics);
   }
 
+  // tasto Elabora e SQL
   app.createProcess = (e) => {
     let process = { from: {}, joins: {} };
     let fields = new Map();
@@ -2053,8 +2083,9 @@ var Sheet;
               console.error(err);
             });
           }
-          // TODO Nel partialData potrei scegliere di visualizzare già la tabella, i successivi
-          // paginate aggiungeranno dati alla DataTable
+          // TODO: Nel partialData potrei scegliere di visualizzare già la tabella, i successivi
+          // paginate aggiungeranno dati alla DataTable. Vedere su Google Developers come aggiungere
+          // dati a una tabella già esistente
           partialData = paginateData.data;
           if (paginateData.next_page_url) {
             recursivePaginate(paginateData.next_page_url);
