@@ -3,9 +3,8 @@ var App = new Application();
 var Draw = new DrawSVG('svg');
 var SheetStorage = new SheetStorages();
 var WorkBookStorage = new Storages();
-var WorkBook = new WorkBooks('WorkBook 1');
 var Dashboard = new Dashboards();
-var Sheet;
+var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 (() => {
   var app = {
     // templates
@@ -38,7 +37,8 @@ var Sheet;
     dialogTime: document.getElementById('dialog-time'),
     dialogInfo: document.getElementById('dlg-info'),
     dialogSchema: document.getElementById('dlg-schema'),
-    dialogNewWorkBook: document.getElementById('dialog-workbook-title'),
+    dialogNewWorkBook: document.getElementById('dialog-new-workbook'),
+    dialogNewSheet: document.getElementById('dialog-new-sheet'),
     // buttons
     btnSelectSchema: document.getElementById('btn-select-schema'),
     editWorkBookName: document.getElementById('workbook-name'),
@@ -781,6 +781,7 @@ var Sheet;
     // elementRef : è l'elemento nella lista di sinistra che ho draggato
     // TODO: rinominare elementRef.id in elementRef.dataset.token
     // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
+    debugger;
     Sheet.fields = { token: elementRef.id, name: WorkBook.field.get(elementRef.id).name };
     app.addField(e.currentTarget, elementRef.id);
   }
@@ -1130,7 +1131,8 @@ var Sheet;
         // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
         let pos = column.DATA_TYPE.indexOf('(');
         let type = (pos !== -1) ? column.DATA_TYPE.substring(0, pos) : column.DATA_TYPE;
-        span.dataset.type = type;
+        li.dataset.type = type;
+        li.dataset.datatype = column.DATA_TYPE;
         // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
         // li.dataset.id = key;
         // span.id = key;
@@ -1376,6 +1378,7 @@ var Sheet;
 
   // apertura del WorkBook
   app.workBookSelected = async (e) => {
+    WorkBook = new WorkBooks(e.currentTarget.dataset.name);
     WorkBook = WorkBook.open(e.currentTarget.dataset.token);
     WorkBook.workBook.token = e.currentTarget.dataset.token;
     WorkBook.name = e.currentTarget.dataset.name;
@@ -1394,8 +1397,6 @@ var Sheet;
     app.dialogWorkBook.close();
     // il WorkBook è già creato quindi da questo momento è in fase di edit
     WorkBook.edit = true;
-    // abilito il tasto workbookClose
-    document.getElementById('btn-workbook-close').disabled = false;
   }
 
   app.openSheetDialog = () => {
@@ -1414,6 +1415,7 @@ var Sheet;
         const span = li.querySelector('li[data-li] span');
         li.dataset.fn = 'sheetSelected';
         li.dataset.token = token;
+        li.dataset.name = object.name;
         span.innerHTML = object.name;
         parent.appendChild(li);
       }
@@ -1672,9 +1674,16 @@ var Sheet;
 
   // apertura nuovo Sheet, viene recuperato dal localStorage
   app.sheetSelected = async (e) => {
+    // delete Sheet.sheet;
+    // Sheet = undefined;
+    // console.log(Sheet);
+    document.getElementById('sheet-name').dataset.value = '';
+    document.getElementById('sheet-name').innerText = 'Titolo';
+    document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
+    document.querySelector('#btn-sheet-save').disabled = true;
     // chiamare il metodo open() dell'oggetto Sheet e seguire la stessa logica utilizzata per workBookSelected()
     // Sheet = new Sheets(e.currentTarget.dataset.token, Sheet.sheet.workbook_ref);
-    Sheet = new Sheets(e.currentTarget.dataset.token, WorkBook.workBook.token);
+    Sheet = new Sheets(e.currentTarget.dataset.name, e.currentTarget.dataset.token, WorkBook.workBook.token);
     // reimposto tutte le proprietà della Classe
     Sheet.open();
     const name = document.getElementById('sheet-name');
@@ -1709,9 +1718,8 @@ var Sheet;
     app.sheetPreview(e.currentTarget.dataset.token);
     // Imposto la prop 'edit' = true perchè andrò ad operare su uno Sheet aperto
     Sheet.edit = true;
-    document.querySelector('#btn-sheet-close').disabled = false;
     document.querySelector('#btn-sheet-save').disabled = false;
-    document.querySelectorAll('#btn-sql-preview, #btn-sheet-preview').forEach(button => button.removeAttribute('disabled'));
+    document.querySelectorAll('#btn-sql-preview, #btn-sheet-preview').forEach(button => button.disabled = false);
   }
 
   app.saveSheet = () => {
@@ -1725,13 +1733,27 @@ var Sheet;
     app.saveSheetSpecs();
   }
 
-  app.closeSheet = () => {
-    delete Sheet.sheet;
-    Sheet = undefined;
-    console.log(Sheet);
+  app.newSheetDialog = () => {
+    // if (Sheet) delete Sheet.sheet;
+    // Sheet = undefined;
+    // console.log(Sheet);
+    document.getElementById('sheet-name').dataset.value = '';
+    document.getElementById('sheet-name').innerText = 'Titolo';
     document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
-    document.querySelector('#btn-sheet-close').disabled = true;
     document.querySelector('#btn-sheet-save').disabled = true;
+    app.dialogNewSheet.showModal();
+  }
+
+  app.newSheet = () => {
+    const name = document.getElementById('input-sheet-name').value;
+    // Sheet non è definito (prima attivazione del tasto Sheet)
+    Sheet = new Sheets(name, rand().substring(0, 7), WorkBook.workBook.token);
+    document.getElementById('sheet-name').dataset.value = Sheet.name;
+    document.getElementById('sheet-name').innerText = Sheet.name;
+    // Imposto la prop 'edit' = false, verrà impostata a 'true' quando si apre uno Sheet
+    // dal tasto 'Apri Sheet'
+    Sheet.edit = false;
+    app.dialogNewSheet.close();
   }
 
   app.removeDefinedColumn = (e) => {
@@ -1815,7 +1837,10 @@ var Sheet;
   }
 
   // TODO: da spostare in supportFn.js
-  app.handlerEditSheetName = (e) => e.target.dataset.value = e.target.innerText;
+  app.handlerEditSheetName = (e) => {
+    e.target.dataset.value = e.target.innerText;
+    Sheet.name = e.target.innerText;
+  };
 
   app.editWorkBookName.onblur = (e) => WorkBook.name = e.target.innerText;
 
@@ -1840,13 +1865,13 @@ var Sheet;
       // TODO: Se non ci sono state modifiche il WorkBook non deve essere salvato
       WorkBook.save();
       // se lo Sheet è già aperto non posso ricreare l'oggetto Sheet
-      if (!Sheet) {
+      /* if (!Sheet) {
         // Sheet non è definito (prima attivazione del tasto Sheet)
         Sheet = new Sheets(rand().substring(0, 7), WorkBook.workBook.token);
         // Imposto la prop 'edit' = false, verrà impostata a 'true' quando si apre uno Sheet
         // dal tasto 'Apri Sheet'
         Sheet.edit = false;
-      }
+      } */
     }
     document.querySelector('#next').toggleAttribute('hidden');
     document.querySelector('#btn-sheet-preview').toggleAttribute('hidden');

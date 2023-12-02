@@ -304,7 +304,7 @@
             </section>
           </dialog>
 
-          <dialog id="dialog-workbook-title">
+          <dialog id="dialog-new-workbook">
             <section class="dlg-grid">
               <h5 class="title moveable">Titolo WorkBook</h5>
               <section class="dlg-content col col-1 row-1">
@@ -313,6 +313,19 @@
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
                 <button data-fn="newWorkBook" value="ok">Salva</button>
+              </section>
+            </section>
+          </dialog>
+
+          <dialog id="dialog-new-sheet">
+            <section class="dlg-grid">
+              <h5 class="title moveable">Titolo Sheet</h5>
+              <section class="dlg-content col col-1 row-1">
+                <input type="text" id="input-sheet-name" placeholder="Nome" value="" autocomplete="on" />
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button data-fn="newSheet" value="ok">Salva</button>
               </section>
             </section>
           </dialog>
@@ -664,10 +677,9 @@
                       <menu class="standard">
                         <section class="buttons-menu">
                           <button type="button" disabled>Aggiungi WorkBook (analisi multifatti)</button>
-                          <button type="button" id="btn-sheet-new" data-fn="newSheet" disabled>Nuovo</button>
+                          <button type="button" id="btn-sheet-new" data-fn="newSheetDialog">Nuovo</button>
                           <button type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri</button>
                           <button type="button" id="btn-sheet-save" data-fn="saveSheet" disabled>Salva</button>
-                          <button type="button" id="btn-sheet-close" data-fn="closeSheet" disabled>Chiudi</button>
                         </section>
                         <section class="sheet-title">
                           <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Titolo Report">Titolo Report</div>
@@ -816,8 +828,8 @@
                 <div>
 
                   <button id="next">Sheet</button>
-                  <button id="btn-sql-preview" class="btn-link important" data-fn="createProcess" value="SQL" hidden>SQL</button>
-                  <button id="btn-sheet-preview" class="btn-link important" data-fn="createProcess" value="Elabora" hidden>Elabora</button>
+                  <button id="btn-sql-preview" class="btn-link important" data-fn="createProcess" value="SQL" hidden disabled>SQL</button>
+                  <button id="btn-sheet-preview" class="btn-link important" data-fn="createProcess" value="Elabora" hidden disabled>Elabora</button>
                 </div>
               </section>
 

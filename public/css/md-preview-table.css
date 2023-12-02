@@ -60,6 +60,7 @@ thead th[data-metric-token]{
 .table-preview{
   overflow: auto;
   position: relative;
+  border: solid thin #d3d3d3;
 }
 
 .table-content{

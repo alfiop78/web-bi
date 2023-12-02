@@ -6,20 +6,14 @@ class Sheets {
   #filters = new Set();
   #metrics = new Map();
   #joins = new Map();
-  #name;
   #id;
-  constructor(token, WorkBookToken) {
+  #options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+  constructor(name, token, WorkBookToken) {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
     this.workBookToken = WorkBookToken;
     this.sheet = { token, type: 'sheet', workbook_ref: WorkBookToken };
-    this.options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+    this.name = name;
   }
-
-  set name(value) {
-    this.#name = value;
-  }
-
-  get name() { return this.#name; }
 
   set id(timestamp) {
     this.#id = timestamp;
@@ -129,8 +123,8 @@ class Sheets {
           break;
       }
     }
-    if (!this.sheet.hasOwnProperty('created_at')) this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.options);
-    this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.options);
+    if (!this.sheet.hasOwnProperty('created_at')) this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.#options);
+    this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
     console.info('sheet:', this.sheet);
     SheetStorage.save(this.sheet);
   }
@@ -207,9 +201,10 @@ class WorkBooks {
   #tableJoins = { from: null, to: null }; // refs
   #tablesMap = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   #hierTables = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
+  #options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
+
   constructor(name) {
     const rand = () => Math.random(0).toString(36).substring(2);
-    this.options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
     this.token = rand().substring(0, 7);
     console.log(this.token);
     this.title = name;
@@ -358,13 +353,13 @@ class WorkBooks {
       }
     }
     console.info('WorkBook : ', this.workBook);
-    if (!this.workBook.hasOwnProperty('created_at')) this.workBook.created_at = new Date().toLocaleDateString('it-IT', this.options);
+    if (!this.workBook.hasOwnProperty('created_at')) this.workBook.created_at = new Date().toLocaleDateString('it-IT', this.#options);
     if (this.edit) {
       // sono in edit mode, se sono state fatte modifiche aggiorno 'updated_at'
-      if (this.workBookChange.size !== 0) this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.options);
+      if (this.workBookChange.size !== 0) this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
     } else {
       // non sono in edit mode, salvo sempre 'updated_at'
-      this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.options);
+      this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
     }
     WorkBookStorage.save(this.workBook);
   }
