@@ -304,6 +304,19 @@
             </section>
           </dialog>
 
+          <dialog id="dialog-workbook-title">
+            <section class="dlg-grid">
+              <h5 class="title moveable">Titolo WorkBook</h5>
+              <section class="dlg-content col col-1 row-1">
+                <input type="text" id="input-workbook-name" placeholder="Nome" value="" autocomplete="on" />
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button data-fn="newWorkBook" value="ok">Salva</button>
+              </section>
+            </section>
+          </dialog>
+
           <dialog id="dialog-time" data-x="0" data-y="0" class="medium absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Imposta relazione con tabella TIME</h5>
@@ -576,10 +589,10 @@
                   <section class="step" data-step="1" selected>
                     <section class="wrapper-step">
                       <menu class="standard">
-                        <section id="workbook-name" class="name data-source" contenteditable="true">WorkSpace 1</section>
-                        <button id="btn-workbook-new" value="Nuovo" disabled>Nuovo</button>
+                        <button id="btn-workbook-new" value="Nuovo">Nuovo</button>
                         <button id="btn-workbook-open" value="open">Apri</button>
-                        <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button>
+                        <!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
+                        <section id="workbook-name" class="name data-source" contenteditable="true">Titolo</section>
                       </menu>
                       <div id="context-menu-table" class="context-menu">
                         <ul id="ul-context-menu-table" class="context-menu-items">

@@ -38,10 +38,12 @@ var Sheet;
     dialogTime: document.getElementById('dialog-time'),
     dialogInfo: document.getElementById('dlg-info'),
     dialogSchema: document.getElementById('dlg-schema'),
+    dialogNewWorkBook: document.getElementById('dialog-workbook-title'),
     // buttons
     btnSelectSchema: document.getElementById('btn-select-schema'),
     editWorkBookName: document.getElementById('workbook-name'),
     btnSaveSheet: document.getElementById('btn-sheet-save'),
+    btnWorkBookNew: document.getElementById('btn-workbook-new'),
     // drawer
     drawer: document.getElementById('drawer'),
     // body
@@ -1334,26 +1336,28 @@ var Sheet;
     app.dialogWorkBook.showModal();
   }
 
-  document.querySelector('#btn-workbook-close').onclick = (e) => {
+  app.btnWorkBookNew.onclick = () => {
     // elimino tutti gli elemeneti svg tranne i <defs>
     // console.log(Draw.svg.querySelectorAll('*:not(#table-struct, #web-bi-time, defs)'));
     // console.log(Draw.svg.querySelectorAll(":where(use, path), g.struct[id^='struct']"));
     Draw.svg.querySelectorAll(":where(use, path), g.struct[id^='struct']").forEach(el => el.remove());
-    WorkBook = new WorkBooks('WorkBook 1');
-    Draw = new DrawSVG('svg');
-    e.target.disabled = true;
-    // Sheet = null;
-    debugger;
+    // debugger;
     if (Sheet) delete Sheet.sheet;
     // console.log(Sheet.sheet);
     // delete Sheet.sheet;
     Sheet = undefined;
-    console.log(Sheet);
+    // console.log(Sheet);
     document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
+    app.dialogNewWorkBook.showModal();
   }
 
-  document.querySelector('#btn-workbook-new').onclick = () => {
-    debugger;
+  app.newWorkBook = () => {
+    const name = document.getElementById('input-workbook-name').value;
+    WorkBook = new WorkBooks(name);
+    Draw = new DrawSVG('svg');
+    document.getElementById('workbook-name').dataset.value = name;
+    document.getElementById('workbook-name').innerText = name;
+    app.dialogNewWorkBook.close();
   }
 
   app.checkSessionStorage = async () => {
@@ -3542,4 +3546,6 @@ var Sheet;
     // reset <nav> laterale
     e.target.querySelectorAll('nav > details').forEach(element => element.remove());
   });
+
+  app.dialogNewWorkBook.addEventListener('close', (e) => document.getElementById('input-workbook-name').value = '');
 })();
