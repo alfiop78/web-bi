@@ -77,7 +77,6 @@ class Dashboards {
       for (const [key, value] of Object.entries(row)) {
         // if (key === 'DtArrivo_ds') console.log(new Date(value));
         // console.log(value);
-        // if (this.json.data.columns[key]) {
         switch (this.json.data.columns[key].type) {
           case 'date':
             if (value.length === 8) {
@@ -100,7 +99,6 @@ class Dashboards {
             // v.push({ v: value });
             break;
         }
-        // }
       }
       this.#prepareData.rows.push({ c: v });
     });

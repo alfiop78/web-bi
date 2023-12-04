@@ -10,9 +10,13 @@ class Sheets {
   #options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
   constructor(name, token, WorkBookToken) {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
-    this.workBookToken = WorkBookToken;
+    // this.workBookToken = WorkBookToken;
     this.sheet = { token, type: 'sheet', workbook_ref: WorkBookToken };
     this.name = name;
+    // Intercetto le modifiche fatte allo Sheet per valutare se aggiornare o meno
+    // la prop 'updated_at'
+    this.changes = new Set();
+    this.removedFields = {}, this.removedMetrics = {}, this.removedFilters = {};
   }
 
   set id(timestamp) {
@@ -50,20 +54,6 @@ class Sheets {
 
   get metrics() { return this.#metrics; }
 
-  /* set advMetrics(object) {
-    this.#advMetrics.set(object.token, object);
-    console.info('this.#advMetrics : ', this.#advMetrics);
-  }
-
-  get advMetrics() { return this.#advMetrics; } */
-
-  /* set compositeMetrics(object) {
-    this.#compositeMetrics.set(object.token, object);
-    console.info('this.#compositeMetrics : ', this.#compositeMetrics);
-  }
-
-  get compositeMetrics() { return this.#compositeMetrics; } */
-
   set from(object) {
     this.#from.set(object.alias, { schema: object.schema, table: object.table });
     // console.info('this.#from : ', this.#from);
@@ -97,7 +87,8 @@ class Sheets {
     // creo un array con le metriche da visualizzare nello sheet
     this.sheet.from = Object.fromEntries(this.from);
     this.sheet.joins = Object.fromEntries(this.joins);
-    this.sheet.workbook_ref = this.workBookToken;
+    // this.sheet.workbook_ref = this.workBookToken;
+    this.sheet.workbook_ref = this.sheet.workbook_ref;
     /* WARN : verifica dei filtri del report.
       * Se non sono presenti ma sono presenti in metriche filtrate elaboro comunque il report
       * altrimenti visualizzo un AVVISO perchè l'esecuzione potrebbe essere troppo lunga
@@ -108,6 +99,7 @@ class Sheets {
     delete this.sheet.advMetrics;
     delete this.sheet.compositeMetrics;
     this.sheet.sheetMetrics = [...this.metrics.values()];
+
     for (const [token, metric] of this.metrics) {
       switch (metric.type) {
         case 'basic':
@@ -123,8 +115,12 @@ class Sheets {
           break;
       }
     }
-    if (!this.sheet.hasOwnProperty('created_at')) this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.#options);
-    this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+    if (!this.sheet.hasOwnProperty('created_at')) {
+      this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.#options);
+      this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+    }
+    debugger;
+    if (Object.keys(this.removedFields).length !== 0 || Object.keys(this.removedMetrics).length !== 0 || Object.keys(this.removedFilters).length !== 0) this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
     console.info('sheet:', this.sheet);
     SheetStorage.save(this.sheet);
   }
