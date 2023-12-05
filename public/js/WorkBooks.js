@@ -16,11 +16,9 @@ class Sheets {
     // Intercetto le modifiche fatte allo Sheet per valutare se aggiornare o meno
     // la prop 'updated_at'
     this.changes = new Set();
-    this.removedFields = {}, this.removedMetrics = {}, this.removedFilters = {};
-    this.objectRemoved = new Map();
     // mappo gli elmenti rimossi dal report in fase di edit. Questo mi consentirà
     // di stabilire se aggiornare "updated_at" del report oppure no
-    // this.objectRemoved = new Map();
+    this.objectRemoved = new Map();
   }
 
   set id(timestamp) {

@@ -1,6 +1,54 @@
 class Dashboards {
-  #data;
   #dashboards = {};
+  constructor() { }
+
+  drawControls(filtersRef) {
+    this.controls = [];
+    // console.log(this.sheetSpecs);
+    if (this.json.filters) {
+      this.json.filters.forEach(filter => {
+        // creo qui il div class="filters" che conterrà il filtro
+        // In questo modo non è necessario specificare i filtri nel template layout
+        this.filterRef = document.createElement('div');
+        this.filterRef.className = 'filters';
+        this.filterRef.id = filter.containerId;
+        filtersRef.appendChild(this.filterRef);
+        // console.log(filter.containerId, filter.filterColumnLabel);
+        this.filter = new google.visualization.ControlWrapper({
+          'controlType': 'CategoryFilter',
+          'containerId': filter.containerId,
+          'options': {
+            'filterColumnIndex': filter.filterColumnIndex,
+            'filterColumnLabel': filter.filterColumnLabel,
+            'ui': {
+              'caption': filter.caption,
+              'label': '',
+              'cssClass': 'g-category-filter',
+              'selectedValuesLayout': 'aside'
+              // 'labelStacking': 'horizontal'
+            }
+          }
+        });
+        this.controls.push(this.filter);
+      });
+    }
+    return this.controls;
+  }
+
+  getDashboards() {
+    for (const [token, object] of Object.entries(window.localStorage)) {
+      if (JSON.parse(object).type === 'dashboard') {
+        this.#dashboards[token] = JSON.parse(object);
+      }
+    }
+    return this.#dashboards;
+  }
+
+}
+
+class Resources extends Dashboards {
+  #data;
+  #resource = new Map();
   #prepareData = { cols: [], rows: [] };
   #json = {
     token: null,
@@ -38,13 +86,30 @@ class Dashboards {
       }
     }
   }
-  constructor() { }
+
+  constructor(ref) {
+    super();
+    this.ref = document.getElementById(ref);
+  }
 
   set data(value) {
     this.#data = value;
   }
 
   get data() { return this.#data; }
+
+  /*
+   * Viene creato un Object Map() con il token del report e il suo elemento nel DOM corrispondente
+   * */
+  set resource(value) {
+    // value: il token del report che è stato aggiunto, in this.ref (nel DOM)
+    this.#resource.set(value, { ref: this.ref.id });
+    // this.#resource.set(value, { ref: this.ref.id, template: `template-${value}` });
+  }
+
+  get resource() {
+    return this.#resource;
+  }
 
   set json(value) {
     this.#json = JSON.parse(value);
@@ -53,6 +118,32 @@ class Dashboards {
   get json() { return this.#json; }
 
   prepareData() {
+    this.#prepareData = { cols: [], rows: [] };
+    // aggiungo le colonne
+    for (const key of Object.keys(this.data[0])) {
+      // prepareData.cols.push({ id: key, label: key });
+      // console.log(key);
+      this.#prepareData.cols.push({
+        id: key,
+        label: this.json.data.columns[key].label,
+        type: this.json.data.columns[key].type
+      });
+    }
+
+    // aggiungo le righe
+    this.data.forEach(row => {
+      let v = [];
+      for (const [key, value] of Object.entries(row)) {
+        v.push({ v: value });
+      }
+      this.#prepareData.rows.push({ c: v });
+    });
+    // console.log(this.#prepareData);
+    debugger;
+    return this.#prepareData;
+  }
+
+  /* prepareData() {
     this.#prepareData = { cols: [], rows: [] };
     // aggiungo le colonne
     for (const key of Object.keys(this.data[0])) {
@@ -105,90 +196,6 @@ class Dashboards {
     // debugger;
     // console.log(this.#prepareData);
     return this.#prepareData;
-  }
+  } */
 
-  drawControls(filtersRef) {
-    this.controls = [];
-    // console.log(this.sheetSpecs);
-    if (this.json.filters) {
-      this.json.filters.forEach(filter => {
-        // creo qui il div class="filters" che conterrà il filtro
-        // In questo modo non è necessario specificare i filtri nel template layout
-        this.filterRef = document.createElement('div');
-        this.filterRef.className = 'filters';
-        this.filterRef.id = filter.containerId;
-        filtersRef.appendChild(this.filterRef);
-        // console.log(filter.containerId, filter.filterColumnLabel);
-        this.filter = new google.visualization.ControlWrapper({
-          'controlType': 'CategoryFilter',
-          'containerId': filter.containerId,
-          'options': {
-            'filterColumnIndex': filter.filterColumnIndex,
-            'filterColumnLabel': filter.filterColumnLabel,
-            'ui': {
-              'caption': filter.caption,
-              'label': '',
-              'cssClass': 'g-category-filter',
-              'selectedValuesLayout': 'aside'
-              // 'labelStacking': 'horizontal'
-            }
-          }
-        });
-        this.controls.push(this.filter);
-      });
-    }
-    return this.controls;
-  }
-
-  defineColumns(value, index) {
-    // debugger;
-    // console.log(value);
-    this.json.data.columns[value.id] = { id: value.id, label: value.label, type: value.type };
-    // Creo l'array json.view con le colonne che saranno visualizzate
-    // Le colonne _id non vengono visualizzate nell'anteprima del report
-    /* const regex = new RegExp('_id$');
-    if (!regex.test(value.id)) this.json.data.view.push(value.id); */
-
-    // console.log('columns :', this.json.data.columns);
-    // console.log('wrapper.view :', this.json.wrapper.view);
-    // TODO: imposto tutte le colonne _ds visibili
-    // const regex = new RegExp('_id$');
-    /* const regex = new RegExp('_ds$');
-    if (regex.test(value.id)) {
-      // verifico prima se esiste per non duplicarlo
-      // if (!this.json.data.view.includes(value.id)) this.json.data.view.push(value.id);
-      if (!this.json.data.view.includes(index)) this.json.data.view.push(index);
-    } */
-  }
-
-  getDashboards() {
-    for (const [token, object] of Object.entries(window.localStorage)) {
-      if (JSON.parse(object).type === 'dashboard') {
-        this.#dashboards[token] = JSON.parse(object);
-      }
-    }
-    return this.#dashboards;
-  }
-
-}
-
-class Resources extends Dashboards {
-  #resource = new Map();
-  constructor() {
-    super();
-    this.ref;
-  }
-
-  /*
-   * Viene creato un Object Map() con il token del report e il suo elemento nel DOM corrispondente
-   * */
-  set resource(value) {
-    // value: il token del report che è stato aggiunto, in this.ref (nel DOM)
-    this.#resource.set(value, { ref: this.ref.id });
-    // this.#resource.set(value, { ref: this.ref.id, template: `template-${value}` });
-  }
-
-  get resource() {
-    return this.#resource;
-  }
 }

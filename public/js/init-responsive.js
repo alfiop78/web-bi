@@ -4,6 +4,7 @@ var Draw = new DrawSVG('svg');
 var SheetStorage = new SheetStorages();
 var WorkBookStorage = new Storages();
 var Dashboard = new Dashboards();
+var Resource;
 var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 (() => {
   var app = {
@@ -919,10 +920,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const table = WorkBook.activeTable.dataset.table;
     const alias = WorkBook.activeTable.dataset.alias;
     const field = e.currentTarget.dataset.field;
+    debugger;
+    const datatype = e.currentTarget.dataset.datatype;
     const id = document.querySelector('#textarea-column-id');
     const ds = document.querySelector('#textarea-column-ds');
-    app.addMark({ table, alias, field }, id);
-    app.addMark({ table, alias, field }, ds);
+    app.addMark({ table, alias, field, datatype }, id);
+    app.addMark({ table, alias, field, datatype }, ds);
     // carico elenco tabelle del canvas
     app.loadTableStruct();
     app.dialogColumns.show();
@@ -1153,6 +1156,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     mark.dataset.tableAlias = data.alias;
     mark.dataset.table = data.table;
     mark.dataset.field = data.field;
+    debugger;
+    mark.dataset.datatype = data.datatype;
     mark.innerText = data.field;
     small.innerText = data.table;
     ref.appendChild(span);
@@ -1164,10 +1169,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const field = e.currentTarget.dataset.field;
     const table = e.currentTarget.dataset.table;
     const alias = e.currentTarget.dataset.alias;
+    debugger;
+    const datatype = e.currentTarget.dataset.type;
     console.log(field);
     // textarea
     const txtArea = document.querySelector('.textarea-content[data-active]');
-    app.addMark({ table, alias, field }, txtArea);
+    app.addMark({ table, alias, field, datatype }, txtArea);
     // app.addSpan(txtArea, null, 'column');
   }
 
@@ -1431,9 +1438,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   }
 
   app.saveSheetSpecs = () => {
-    const url = (Dashboard.jsonExists) ? '/fetch_api/json/sheet_specs_update' : '/fetch_api/json/sheet_specs_update';
-    const params = JSON.stringify(Dashboard.json);
-    console.log(Dashboard.json);
+    debugger;
+    const url = (Resource.jsonExists) ? '/fetch_api/json/sheet_specs_update' : '/fetch_api/json/sheet_specs_update';
+    const params = JSON.stringify(Resource.json);
+    console.log(Resource.json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
     fetch(req)
@@ -1453,7 +1461,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       .catch((err) => console.error(err));
   }
 
-  app.createSheetTemplate = () => {
+  app.getSheetSpecifics = () => {
     // Verifico se le specifiche per questo report già esistono.
     fetch(`/fetch_api/name/${Sheet.sheet.token}/sheet_specs_show`)
       .then((response) => {
@@ -1464,25 +1472,26 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       .then((data) => {
         console.log(data);
         if (Object.keys(data).length !== 0) {
-          Dashboard.json = data.json_value;
-          Dashboard.jsonExists = true;
+          Resource.json = data.json_value;
+          Resource.jsonExists = true;
         } else {
-          Dashboard.json.token = Sheet.sheet.token;
-          Dashboard.jsonExists = false;
+          Resource.json.token = Sheet.sheet.token;
+          Resource.jsonExists = false;
         }
-        Dashboard.json.wrapper.chartType = 'Table';
+        debugger;
+        Resource.json.wrapper.chartType = 'Table';
         // se, in json.data.view esiste già questa colonna, non la modifico
         // creo l'array di object che mi servirà per nascondere/visualizzare le colonne
         let columnProperties = [], metricProperties = [];
         Sheet.sheet.sheetColumns.forEach(col => {
-          const column = Dashboard.json.data.view.find(columnName => columnName.id === col);
+          const column = Resource.json.data.view.find(columnName => columnName.id === col);
           const visible = (column) ? column.properties.visible : true;
           columnProperties.push({ id: col, properties: { visible } });
         });
         // console.log(columnProperties);
         // debugger;
         Sheet.sheet.sheetMetrics.forEach(metric => {
-          let metricFind = Dashboard.json.data.group.columns.find(name => name.alias === metric.alias);
+          let metricFind = Resource.json.data.group.columns.find(name => name.alias === metric.alias);
           if (!metric.dependencies) {
             if (metricFind) {
               metric.properties = { visible: metricFind.properties.visible };
@@ -1499,7 +1508,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
         let columnsSet = new Set();
         // se la colonna in ciclo è presente in 'Sheet.sheet.sheetMetrics' la imposto come type: 'number' altrimenti 'string'
-        for (const field of Object.keys(Dashboard.data[0])) {
+        for (const field of Object.keys(Resource.data[0])) {
           const findMetricIndex = Sheet.sheet.sheetMetrics.findIndex(metric => metric.alias === field);
           // type = (findMetricIndex === -1) ? 'string' : 'number';
           // if (Dashboard.json.data.columns[field]) {
@@ -1508,12 +1517,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           //   type = (findMetricIndex === -1) ? 'string' : 'number';
           // }
           const columnType = (findMetricIndex === -1) ? 'column' : 'metric';
-          if (Dashboard.json.data.columns[field]) {
+          if (Resource.json.data.columns[field]) {
             // il data.columns già esiste, non sovrascrivo la prop 'label' e 'type'
             columnsSet.add({
               id: field,
-              label: Dashboard.json.data.columns[field].label,
-              type: Dashboard.json.data.columns[field].type,
+              label: Resource.json.data.columns[field].label,
+              type: Resource.json.data.columns[field].type,
               properties: { columnType }, other: 'altre proprietà...'
             });
           } else {
@@ -1523,14 +1532,14 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         }
         // Salvataggio del json
         // converto il columnsSet (array) in Object
-        columnsSet.forEach(col => Dashboard.json.data.columns[col.id] = col);
+        columnsSet.forEach(col => Resource.json.data.columns[col.id] = col);
         // creo un array con le colonne da visualizzare in fase di inizializzazione del dashboard
         // Dashboard.json.data.view = columns;
         // la prop 'names' mi servirà per popolare la DataView dopo il group()
         // Dashboard.json.data.view = columnProperties;
-        Dashboard.json.data.view = columnProperties;
+        Resource.json.data.view = columnProperties;
         // nel data.group.columns vanno messe tutte le metriche, come array di object
-        Dashboard.json.data.group.columns = metricProperties;
+        Resource.json.data.group.columns = metricProperties;
         // Dashboard.json.data.group.columns = Sheet.sheet.sheetMetrics;
         let keys = [];
         // console.log(columnsSet);
@@ -1538,7 +1547,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         // json.data.group.key.
         [...columnsSet].forEach((col, index) => {
           if (col.properties.columnType === 'column') {
-            const columnFind = Dashboard.json.data.group.key.find(columnName => columnName.id === col.id);
+            const columnFind = Resource.json.data.group.key.find(columnName => columnName.id === col.id);
             // se la colonna in ciclo è già presente in json.data.group.key non sovrascrivo la proprieta
             // 'grouped', questa proprietà viene impostata quando l'utente nasconde/visualizza una colonna
             if (columnFind) {
@@ -1552,19 +1561,19 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             keys.push(col);
           }
         });
-        Dashboard.json.data.group.key = keys;
-        console.log('save sheet_specs : ', Dashboard.json);
+        Resource.json.data.group.key = keys;
+        console.log('save sheet_specs : ', Resource.json);
         google.charts.setOnLoadCallback(drawDatamart());
         // salvo lo sheet_specs in storage e sul DB.
         // Tutte le eventuali modifiche al json verranno salvate in storage, quando l'utente clicca
         // su "Salva" (il report) recupero i dati dallo storage e salvo le specs su DB.
-        window.sessionStorage.setItem(Dashboard.json.token, JSON.stringify(Dashboard.json));
-        app.saveSheetSpecs();
+        window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
+        debugger;
+        // app.saveSheetSpecs();
       })
       .catch((err) => console.error(err));
   }
 
-  // TODO: da spostare in supportFn.js
   app.sheetPreview = async (token) => {
     // console.log(token);
     // recupero l'id dello Sheet
@@ -1574,7 +1583,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // debugger;
     // NOTE: Chiamata in post per poter passare tutte le colonne, incluso l'alias, alla query
 
-    // TODO Passo in param un object con le colonne da estrarre (tutte)
+    // TODO: Passo in param un object con le colonne da estrarre (tutte)
     /* const params = JSON.stringify({ sheet_id: sheet.id });
     const url = `/fetch_api/datamartpost`;
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
@@ -1611,7 +1620,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         Dashboard.data = data;
         // imposto il riferimento della tabella nel DOM
         Dashboard.ref = 'preview-datamart';
-        app.createSheetTemplate();
+        app.getSheetSpecifics();
         // Creazione preview del datamart
         // drawDatamart() impostata in init-sheet.js
         google.charts.setOnLoadCallback(drawDatamart());
@@ -1622,6 +1631,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       }); */
     // end chiamata in GET
 
+    Resource = new Resources('preview-datamart');
     let partialData = [];
     await fetch(`/fetch_api/${sheet.id}/preview?page=1`)
       .then((response) => {
@@ -1650,11 +1660,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             } else {
               // Non sono presenti altre pagine, visualizzo il dashboard
               console.log('tutte le paginate completate :', partialData);
-              Dashboard.data = partialData;
+              // Dashboard.data = partialData;
               // imposto il riferimento della tabella nel DOM
-              Dashboard.ref = 'preview-datamart';
-              app.createSheetTemplate();
-              // google.charts.setOnLoadCallback(drawDatamart());
+              debugger;
+              Resource.data = partialData;
+              // Dashboard.ref = 'preview-datamart';
+              app.getSheetSpecifics();
             }
           }).catch((err) => {
             App.showConsole(err, 'error');
@@ -1666,11 +1677,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           recursivePaginate(paginateData.next_page_url);
         } else {
           // Non sono presenti altre pagine, visualizzo il dashboard
-          Dashboard.data = partialData;
-          // imposto il riferimento della tabella nel DOM
-          Dashboard.ref = 'preview-datamart';
-          app.createSheetTemplate();
-          // google.charts.setOnLoadCallback(drawDatamart());
+          // Dashboard.data = partialData;
+          // // imposto il riferimento della tabella nel DOM
+          // Dashboard.ref = 'preview-datamart';
+          debugger;
+          Resource.data = partialData;
+          app.getSheetSpecifics();
         }
       })
       .catch(err => {
@@ -1729,6 +1741,40 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     document.querySelectorAll('#btn-sql-preview, #btn-sheet-preview').forEach(button => button.disabled = false);
   }
 
+  app.getSpecifics = () => {
+    fetch(`/fetch_api/name/${Sheet.sheet.token}/sheet_specs_show`)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        debugger;
+        if (Object.keys(data).length !== 0) {
+          // specifiche già esistenti
+          Resource.json = data.json_value;
+          Resource.jsonExists = true;
+        } else {
+          Resource.json.token = Sheet.sheet.token;
+          Resource.jsonExists = false;
+          // Recupero le colonne del report
+          // TODO: salvo il Resource.json con le proprietà del report (sheet_specifics)
+          let columns = new Set();
+          Sheet.fields.forEach(field => {
+            debugger;
+            console.log(field);
+            columns.add({ id: field, label: field, type: 'string' });
+          });
+          // ... e creo json.data.columns
+          debugger;
+          Resource.json.data.columns = columns;
+        }
+      })
+      .catch((err) => console.error(err));
+
+  }
+
   app.saveSheet = () => {
     // imposto il nome recuperandolo dallo #sheet-name
     const name = document.getElementById('sheet-name');
@@ -1737,7 +1783,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // da questo momento in poi le modifiche (aggiunta/rimozione) di elementi allo Sheet
     // verranno contrassegnate come edit:true
     Sheet.edit = true;
-    app.saveSheetSpecs();
+    // TODO: recupero le specs per questo report, se esistono
+    // app.getSpecifics();
   }
 
   app.newSheetDialog = () => {
@@ -1747,7 +1794,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     document.getElementById('sheet-name').dataset.value = '';
     document.getElementById('sheet-name').innerText = 'Titolo';
     document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
-    document.querySelector('#btn-sheet-save').disabled = true;
+    // document.querySelector('#btn-sheet-save').disabled = true;
     app.dialogNewSheet.showModal();
   }
 
@@ -2008,7 +2055,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           debugger;
           Dashboard.data = data;
           Dashboard.ref = 'preview-datamart';
-          app.createSheetTemplate();
+          app.getSheetSpecifics();
           google.charts.setOnLoadCallback(drawDatamart());
           // Al termine del process elimino dalle dropzones gli elementi che sono stati
           // eliminati dallo Sheet, quindi gli elementi con dataset.removed
@@ -2042,6 +2089,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const url = "/fetch_api/cube/sheet";
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
+    Resource = new Resources('preview-datamart');
     await fetch(req)
       .then((response) => {
         // TODO Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
@@ -2066,11 +2114,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
               } else {
                 // Non sono presenti altre pagine, visualizzo il dashboard
                 console.log('tutte le paginate completate :', partialData);
-                Dashboard.data = partialData;
-                // imposto il riferimento della tabella nel DOM
-                Dashboard.ref = 'preview-datamart';
-                app.createSheetTemplate();
-                // google.charts.setOnLoadCallback(drawDatamart());
+                debugger;
+                Resource.data = partialData;
+                app.getSheetSpecifics();
               }
             }).catch((err) => {
               App.showConsole(err, 'error');
@@ -2085,11 +2131,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             recursivePaginate(paginateData.next_page_url);
           } else {
             // Non sono presenti altre pagine, visualizzo il dashboard
-            Dashboard.data = partialData;
-            // imposto il riferimento della tabella nel DOM
-            Dashboard.ref = 'preview-datamart';
-            app.createSheetTemplate();
-            // google.charts.setOnLoadCallback(drawDatamart());
+            debugger;
+            Resource.data = partialData;
+            app.getSheetSpecifics();
             // Al termine del process elimino dalle dropzones gli elementi che sono stati
             // eliminati dallo Sheet, quindi gli elementi con dataset.removed
             document.querySelectorAll('div[data-removed]').forEach(element => element.remove());
@@ -3124,15 +3168,16 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const fieldName = document.getElementById('column-name').value;
     const token = (e.currentTarget.dataset.token) ? e.currentTarget.dataset.token : rand().substring(0, 7);
     // const token = rand().substring(0, 7);
-    let fieldId = { sql: [], formula: [], type: 'da_completare' };
-    let fieldDs = { sql: [], formula: [], type: 'da_completare' };
+    let fieldId = { sql: [], formula: [] };
+    let fieldDs = { sql: [], formula: [] };
+    debugger;
     document.querySelectorAll('#textarea-column-id *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         // il campo potrebbe appartenere ad una tabella diversa da quella selezionata
         // quindi  aggiungo anche il table alias
         fieldId.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
-        fieldId.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
+        fieldId.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field, datatype: element.dataset.datatype });
       } else {
         fieldId.sql.push(element.innerText.trim());
         fieldId.formula.push(element.innerText.trim());
@@ -3142,7 +3187,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         fieldDs.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
-        fieldDs.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
+        fieldDs.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field, datatype: element.dataset.datatype });
       } else {
         fieldDs.sql.push(element.innerText.trim());
         fieldDs.formula.push(element.innerText.trim());

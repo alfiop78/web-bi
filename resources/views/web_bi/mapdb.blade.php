@@ -679,7 +679,7 @@
                           <button type="button" disabled>Aggiungi WorkBook (analisi multifatti)</button>
                           <button type="button" id="btn-sheet-new" data-fn="newSheetDialog">Nuovo</button>
                           <button type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri</button>
-                          <button type="button" id="btn-sheet-save" data-fn="saveSheet" disabled>Salva</button>
+                          <button type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
                         </section>
                         <section class="sheet-title">
                           <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Titolo">Titolo</div>
@@ -828,8 +828,8 @@
                 <div>
 
                   <button id="next">Sheet</button>
-                  <button id="btn-sql-preview" class="btn-link important" data-fn="createProcess" value="SQL" disabled>SQL</button>
-                  <button id="btn-sheet-preview" class="btn-link important" data-fn="createProcess" value="Elabora" disabled>Elabora</button>
+                  <button id="btn-sql-preview" class="btn-link important" data-fn="createProcess" value="SQL">SQL</button>
+                  <button id="btn-sheet-preview" class="btn-link important" data-fn="createProcess" value="Elabora">Elabora</button>
                 </div>
               </section>
 
