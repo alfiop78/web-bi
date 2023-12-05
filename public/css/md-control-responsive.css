@@ -192,3 +192,28 @@ input:read-write::placeholder{
   font-style: italic;
   font-weight: bold;
 }
+
+/* visualizzo / nascondo i tasti per l'elaborazione in base allo step in cui mi trovo*/
+.steps[data-step="1"] #next {
+  display: inline;
+}
+
+.steps[data-step="1"] #btn-sheet-preview {
+  display: none;
+}
+
+.steps[data-step="1"] #btn-sql-preview {
+  display: none;
+}
+
+.steps[data-step="2"] #next {
+  display: none;
+}
+
+.steps[data-step="2"] #btn-sheet-preview {
+  display: inline;
+}
+
+.steps[data-step="2"] #btn-sql-preview {
+  display: inline;
+}

@@ -17,6 +17,10 @@ class Sheets {
     // la prop 'updated_at'
     this.changes = new Set();
     this.removedFields = {}, this.removedMetrics = {}, this.removedFilters = {};
+    this.objectRemoved = new Map();
+    // mappo gli elmenti rimossi dal report in fase di edit. Questo mi consentirà
+    // di stabilire se aggiornare "updated_at" del report oppure no
+    // this.objectRemoved = new Map();
   }
 
   set id(timestamp) {
@@ -78,6 +82,14 @@ class Sheets {
 
   get joins() { return this.#joins; }
 
+  removeObject(field, token, object = token) {
+    // il Set() filters contiene, come object, il token, quindi imposto un valore di
+    // default per l'argomento object quando (da removeDefinedFilters()) non viene
+    // passato il 3 argomento
+    field.dataset.removed = 'true';
+    this.objectRemoved.set(token, object);
+  }
+
   save() {
     this.sheet.id = this.id;
     this.sheet.name = this.name;
@@ -120,7 +132,7 @@ class Sheets {
       this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
     }
     debugger;
-    if (Object.keys(this.removedFields).length !== 0 || Object.keys(this.removedMetrics).length !== 0 || Object.keys(this.removedFilters).length !== 0) this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+    if (this.objectRemoved.size !== 0) this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
     console.info('sheet:', this.sheet);
     SheetStorage.save(this.sheet);
   }

@@ -682,7 +682,7 @@
                           <button type="button" id="btn-sheet-save" data-fn="saveSheet" disabled>Salva</button>
                         </section>
                         <section class="sheet-title">
-                          <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Titolo Report">Titolo Report</div>
+                          <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Titolo">Titolo</div>
                         </section>
                       </menu>
                       <section id="wrapper-sheet" class="wrapper-sheet">
@@ -828,8 +828,8 @@
                 <div>
 
                   <button id="next">Sheet</button>
-                  <button id="btn-sql-preview" class="btn-link important" data-fn="createProcess" value="SQL" hidden disabled>SQL</button>
-                  <button id="btn-sheet-preview" class="btn-link important" data-fn="createProcess" value="Elabora" hidden disabled>Elabora</button>
+                  <button id="btn-sql-preview" class="btn-link important" data-fn="createProcess" value="SQL" disabled>SQL</button>
+                  <button id="btn-sheet-preview" class="btn-link important" data-fn="createProcess" value="Elabora" disabled>Elabora</button>
                 </div>
               </section>
 

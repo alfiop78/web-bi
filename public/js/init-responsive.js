@@ -1,4 +1,4 @@
-// TODO le funzioni che non utilizzano la classe WorkBook possono essere spostate in supportFn.js
+// TODO: le funzioni che non utilizzano la classe WorkBook possono essere spostate in supportFn.js
 var App = new Application();
 var Draw = new DrawSVG('svg');
 var SheetStorage = new SheetStorages();
@@ -1338,18 +1338,22 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     app.dialogWorkBook.showModal();
   }
 
-  app.btnWorkBookNew.onclick = () => {
+  app.closeWorkBook = () => {
     // elimino tutti gli elemeneti svg tranne i <defs>
     // console.log(Draw.svg.querySelectorAll('*:not(#table-struct, #web-bi-time, defs)'));
     // console.log(Draw.svg.querySelectorAll(":where(use, path), g.struct[id^='struct']"));
     Draw.svg.querySelectorAll(":where(use, path), g.struct[id^='struct']").forEach(el => el.remove());
     // debugger;
     if (Sheet) delete Sheet.sheet;
-    // console.log(Sheet.sheet);
-    // delete Sheet.sheet;
-    Sheet = undefined;
-    // console.log(Sheet);
+    document.getElementById('sheet-name').value = 'Titolo';
+    document.getElementById('sheet-name').innerText = 'Titolo';
+    // Sheet = undefined;
     document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
+
+  }
+
+  app.btnWorkBookNew.onclick = () => {
+    app.closeWorkBook();
     app.dialogNewWorkBook.showModal();
   }
 
@@ -1378,6 +1382,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   // apertura del WorkBook
   app.workBookSelected = async (e) => {
+    // chiudo l'eventuale workbook già aperto
+    app.closeWorkBook();
+    Draw = new DrawSVG('svg');
     WorkBook = new WorkBooks(e.currentTarget.dataset.name);
     WorkBook = WorkBook.open(e.currentTarget.dataset.token);
     WorkBook.workBook.token = e.currentTarget.dataset.token;
@@ -1761,32 +1768,27 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // Se la colonna che si sta per eliminare è stata aggiunta (non era inclusa nello Sheet)
     // elimino tutto il div anziché marcarlo come data-removed
     const field = document.querySelector(`.column-defined[data-id='${token}']`);
-    const removeField = () => {
-      // Aggiungo, al div .column-defined[data-id] un attributo data-removed per poterlo
-      // contrassegnare come "cancellato" (ed impostarne anche il css con line-through)
-      field.dataset.removed = 'true';
-      // Memorizzo l'oggetto da eliminare in un object
-      // Nel ripristino (undoDefinedColumn()) di questa colonna userò questo object
-      Sheet.removedFields[token] = { name: Sheet.fields.get(token) };
-    }
+
     // In edit=true i campi aggiunti allo Sheet sono contrassegnati con dataset.adding
     // ed è già presente il dataset.added. Perr questo motivo elimino dal DOM gli elementi
     // 'adding', in edit:true, e added in edit:false
     if (Sheet.edit) {
       // edit mode
-      (field.dataset.adding) ? field.remove() : removeField();
+      // (field.dataset.adding) ? field.remove() : removeField();
+      // Memorizzo l'elemento eliminato in un oggetto Map(), da qui posso ripristinarlo
+      (field.dataset.adding) ? field.remove() : Sheet.removeObject(field, token, Sheet.fields.get(token));
     } else {
-      (field.dataset.added) ? field.remove() : removeField();
+      // FIX: da rivedere questa logica 05.12.2023
+      (field.dataset.added) ? field.remove() : Sheet.removeObject(field, token, Sheet.fields.get(token));
     }
     Sheet.fields.delete(token);
   }
 
   app.undoDefinedColumn = (e) => {
     const token = e.target.dataset.columnToken;
-    // Recupero, da Sheet.removedFields, gli elementi rimossi per poterli ripristinare
-    // Sheet.fields.set(token, Sheet.removedFields[token].value);
-    Sheet.fields = { token, name: Sheet.removedFields[token].name };
-    delete Sheet.removedFields[token];
+    // Recupero, da Sheet.objectRemoved, gli elementi rimossi per poterli ripristinare
+    Sheet.fields = { token, name: Sheet.objectRemoved.get(token) };
+    Sheet.objectRemoved.delete(token);
     delete document.querySelector(`.column-defined[data-id='${token}']`).dataset.removed;
   }
 
@@ -1795,18 +1797,11 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // Se la metrica che si sta per eliminare è stata aggiunta (non era inclusa nello Sheet)
     // elimino tutto il div anziché marcarlo come data-removed
     const metric = document.querySelector(`.metric-defined[data-id='${token}']`);
-    const removeMetric = () => {
-      // Aggiungo, al div .metric-defined[data-id] un attributo data-removed per poterlo
-      // contrassegnare come "cancellato" (ed impostarne anche il css con line-through)
-      metric.dataset.removed = 'true';
-      // Memorizzo l'oggetto da eliminare in un 'magic method' della Classe Sheet.
-      // Nel ripristino (undoDefinedMetric()) di questa metrica userò questo oggetto
-      Sheet.removedMetrics[token] = Sheet.metrics.get(token);
-    }
     if (Sheet.edit) {
-      (metric.dataset.adding) ? metric.remove() : removeMetric();
+      // (metric.dataset.adding) ? metric.remove() : removeMetric();
+      (metric.dataset.adding) ? metric.remove() : Sheet.removeObject(metric, token, Sheet.metrics.get(token));
     } else {
-      (metric.dataset.added) ? metric.remove() : removeMetric();
+      (metric.dataset.added) ? metric.remove() : Sheet.removeObject(metric, token, Sheet.metrics.get(token));
     }
 
     Sheet.metrics.delete(token);
@@ -1816,9 +1811,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   app.undoDefinedMetric = (e) => {
     const token = e.target.dataset.metricToken;
     // Recupero, da Sheet.removedMetrics, gli elementi rimossi per poterli ripristinare
-    Sheet.metrics = Sheet.removedMetrics[token];
+    Sheet.metrics = Sheet.objectRemoved.get(token);
     // elimino da removedMetrics l'oggetto appena ripristinato
-    delete Sheet.removedMetrics[token];
+    Sheet.objectRemoved.delete(token);
     delete document.querySelector(`.metric-defined[data-id='${token}']`).dataset.removed;
   }
 
@@ -1830,12 +1825,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.editWorkBookName.onblur = (e) => WorkBook.name = e.target.innerText;
 
-  document.getElementById('prev').onclick = () => {
-    document.querySelector('#next').toggleAttribute('hidden');
-    document.querySelector('#btn-sheet-preview').toggleAttribute('hidden');
-    document.querySelector('#btn-sql-preview').toggleAttribute('hidden');
-    Step.previous();
-  }
+  document.getElementById('prev').onclick = () => Step.previous();
 
   document.getElementById('next').onclick = async () => {
     /* recupero dal DB (promise.all) tutte le tabelle mappate nel WorkBook
@@ -1847,13 +1837,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       Step.next();
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
       app.addTablesStruct();
-      // salvo il workbook creato
-      // TODO: Se non ci sono state modifiche il WorkBook non deve essere salvato
+      // salvo il workbook creato, tenendo conto della prop 'updated_at', se ci sono
+      // state variazioni la aggiorno altrimenti no
       WorkBook.save();
     }
-    document.querySelector('#next').toggleAttribute('hidden');
-    document.querySelector('#btn-sheet-preview').toggleAttribute('hidden');
-    document.querySelector('#btn-sql-preview').toggleAttribute('hidden');
   }
 
   app.tableSelected = async (e) => {
@@ -2197,33 +2184,20 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   app.removeDefinedFilter = (e) => {
     const token = e.target.dataset.filterToken;
     const filter = document.querySelector(`.filter-defined[data-id='${token}']`);
-    const removeFilter = () => {
-      // Aggiungo, al div .column-defined[data-id] un attributo data-removed per poterlo
-      // contrassegnare come "cancellato" (ed impostarne anche il css con line-through)
-      filter.dataset.removed = 'true';
-      // Memorizzo l'oggetto da eliminare in un 'magic method' della Classe Sheet.
-      // Nel ripristino (undoDefinedColumn()) di questa colonna userò questo oggetto
-      // Sheet.removedFilters = { [token]: token };
-      Sheet.removedFilters[token] = token;
-      debugger;
-    }
     if (Sheet.edit) {
-      (filter.dataset.adding) ? filter.remove() : removeFilter();
+      (filter.dataset.adding) ? filter.remove() : Sheet.removeObject(filter, token);
     } else {
-      (filter.dataset.added) ? filter.remove() : removeFilter();
+      (filter.dataset.added) ? filter.remove() : Sheet.removeObject(filter, token);
     }
     Sheet.filters.delete(token);
-    // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
   }
 
   // ripristino il filtro selezionato dallo Sheet
   app.undoDefinedFilter = (e) => {
     const token = e.target.dataset.filterToken;
     // Recupero, da Sheet.removedFilters, gli elementi rimossi per poterli ripristinare
-    // Sheet.filters.add(Sheet.removedFilters[token]);
     Sheet.filters = token;
-    debugger;
-    delete Sheet.removedFilters[token];
+    Sheet.objectRemoved.delete(token);
     delete document.querySelector(`.filter-defined[data-id='${token}']`).dataset.removed;
   }
 
