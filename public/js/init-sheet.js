@@ -14,7 +14,7 @@ let app = {
 }
 
 /* function drawTest() {
-  const prepareData = Dashboard.prepareData();
+  const prepareData = Resource.prepareData();
   let DataTable = new google.visualization.DataTable(prepareData);
   var wrapper = new google.visualization.ChartWrapper({
     chartType: 'Table',
@@ -64,7 +64,8 @@ function drawDatamart() {
     }
   });
   Resource.dataTable = new google.visualization.DataTable(prepareData);
-  var tableRef = new google.visualization.Table(document.getElementById(Resource.ref));
+  // var tableRef = new google.visualization.Table(document.getElementById(Resource.ref));
+  var tableRef = new google.visualization.Table(Resource.ref);
   // effettuando il calcolo del margine ((ricavo-costo)/ricavo*100) qui, cioè prima della
   // funzione di group(), il risultato non è corretto, questi calcoli vanno effettuati con una
   // DataView DOPO la function group()
@@ -82,11 +83,11 @@ function drawDatamart() {
     height: '100%'
   };
   // NOTE: prova impostazione CSS su una colonna
-  // Dashboard.dataTable.setColumnProperty(1, 'className', 'cssc1')
-  // Dashboard.dataTable.setColumnProperty(2, 'className', 'cssc1')
-  // Dashboard.dataTable.setColumnProperty(3, 'className', 'cssc1')
-  // console.log(Dashboard.dataTable.getColumnProperty(1, 'className'));
-  // console.log(Dashboard.dataTable.getColumnProperties(1));
+  // Resource.dataTable.setColumnProperty(1, 'className', 'cssc1')
+  // Resource.dataTable.setColumnProperty(2, 'className', 'cssc1')
+  // Resource.dataTable.setColumnProperty(3, 'className', 'cssc1')
+  // console.log(Resource.dataTable.getColumnProperty(1, 'className'));
+  // console.log(Resource.dataTable.getColumnProperties(1));
   // END NOTE: prova impostazione CSS su una colonna
 
   // L'evento 'ready' genera un'ulteriore visualizzazione della dataTable.
@@ -102,8 +103,9 @@ function drawDatamart() {
 
 function previewReady() {
   // Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
-  Resource.tableRefGroup = new google.visualization.Table(document.getElementById(Resource.ref));
-  // console.log('group.key:', Dashboard.json.data.group.key);
+  // Resource.tableRefGroup = new google.visualization.Table(document.getElementById(Resource.ref));
+  Resource.tableRefGroup = new google.visualization.Table(Resource.ref);
+  // console.log('group.key:', Resource.json.data.group.key);
   // trasformo il data.group.key in un array di indici di colonne (anche se potrebbe funzionare
   // anche con un object, da rivedere su Google Chart)
   // Questo è il secondo param della funzione group() e, in questo array sono incluse
@@ -113,7 +115,7 @@ function previewReady() {
   // json.data.group.key) per le quali il report viene raggruppato.
   // Questo consente di fare i calcoli per le metriche composte sui dati raggruppati
   Resource.json.data.group.key.forEach(column => {
-    // if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
+    // if (column.properties.grouped) keyColumns.push(Resource.dataTable.getColumnIndex(column.id));
     // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
     // che viene modificata dall'utente a runtime
     if (column.properties.grouped) {
@@ -142,19 +144,19 @@ function previewReady() {
   Resource.dataGroup = new google.visualization.data.group(
     Resource.dataTable, keyColumns, groupColumnsIndex
   );
-  // console.log('group():', Dashboard.dataGroup);
-  // console.log(Dashboard.dataGroup.getColumnIndex())
+  // console.log('group():', Resource.dataGroup);
+  // console.log(Resource.dataGroup.getColumnIndex())
   // Imposto le label memorizzate in group.key. In questo caso potrei utilizzare gli object da passare
   // a group(), invece degli indici, per le colonne, è la stessa logica utilizzata per le metriche.
   // Utilizzando un object al posto degli indici potrei impostare la prop 'label' direttamente nell'object
   // invece di fare questo ciclo...
-  // Dashboard.json.data.group.key.forEach(column => {
-  //   Dashboard.dataGroup.setColumnLabel(Dashboard.dataTable.getColumnIndex(column.id), column.label);
+  // Resource.json.data.group.key.forEach(column => {
+  //   Resource.dataGroup.setColumnLabel(Resource.dataTable.getColumnIndex(column.id), column.label);
   // });
-  // console.log(Dashboard.dataGroup);
+  // console.log(Resource.dataGroup);
   // Formattazione colonne
   for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
-    console.log('Formattazione ', Dashboard.dataGroup.getColumnIndex(columnId));
+    console.log('Formattazione ', Resource.dataGroup.getColumnIndex(columnId));
     let formatter = null;
     // debugger;
     switch (properties.type) {
@@ -164,7 +166,7 @@ function previewReady() {
       // case 'date':
       // TODO Da implementare
       // let formatter = app[properties.format](properties.numberDecimal);
-      // formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
+      // formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
       // break;
       default:
         // debugger;
@@ -174,23 +176,23 @@ function previewReady() {
   }
 
   // TEST: aggiunta di una CSS class a una colonna, nella dataGroup
-  // Dashboard.dataGroup.setColumnProperty(1, 'className', 'cssc1')
-  // console.log(Dashboard.dataGroup.getColumnProperty(1, 'className'));
+  // Resource.dataGroup.setColumnProperty(1, 'className', 'cssc1')
+  // console.log(Resource.dataGroup.getColumnProperty(1, 'className'));
 
   // DataView, mi consente di visualizzare SOLO le colonne definite nel report ed
   // effettuare eventuali calcoli per le metriche composite ('calc')
   Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
 
   // TEST: recupero gli indici delle colonne area_ds, zona_ds (colonna da visualizzare)
-  // console.log('costo_rapporto_6 (index):', Dashboard.dataGroup.getColumnIndex('costo_rapporto_6'));
-  // console.log('costo_rapporto_2 (index):', Dashboard.dataGroup.getColumnIndex('costo_rapporto_2'));
-  // console.log('ricavo_rapporto_2 (index):', Dashboard.dataGroup.getColumnIndex('ricavo_rapporto_2'));
-  // console.log('area_ds index : ', Dashboard.dataTable.getColumnIndex('area_ds'));
-  // console.log('zona_ds index : ', Dashboard.dataTable.getColumnIndex('zona_ds'));
+  // console.log('costo_rapporto_6 (index):', Resource.dataGroup.getColumnIndex('costo_rapporto_6'));
+  // console.log('costo_rapporto_2 (index):', Resource.dataGroup.getColumnIndex('costo_rapporto_2'));
+  // console.log('ricavo_rapporto_2 (index):', Resource.dataGroup.getColumnIndex('ricavo_rapporto_2'));
+  // console.log('area_ds index : ', Resource.dataTable.getColumnIndex('area_ds'));
+  // console.log('zona_ds index : ', Resource.dataTable.getColumnIndex('zona_ds'));
   // per le colonne dimensionali, potrei recuperare gli indici, da mettere in DataView.setColumns()
   // con il getColumnId() sulla dataGroup
-  // console.log(Dashboard.dataGroup.getColumnId(3));
-  // console.log(Dashboard.dataGroup.getColumnIndex('zona'));
+  // console.log(Resource.dataGroup.getColumnId(3));
+  // console.log(Resource.dataGroup.getColumnIndex('zona'));
   // END TEST:
 
   // recupero le colonne presenti nel report, tramite le impostazioni di
@@ -202,9 +204,10 @@ function previewReady() {
   // prop 'visible' (bool) posso decidere di visualizzarla/nascondere a seconda della scelta
   // dell'utente.
   // Dalla dataGroup, recupero gli indici delle colonne impostato con 'visible:true'
-  // Dashboard.json.data.view.forEach(column => {
-  //   if (column.properties.visible) viewColumns.push(Dashboard.dataGroup.getColumnIndex(column.id));
+  // Resource.json.data.view.forEach(column => {
+  //   if (column.properties.visible) viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
   // });
+  debugger;
   Resource.json.data.view.forEach(column => {
     if (column.properties.visible) viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
   });
@@ -217,7 +220,7 @@ function previewReady() {
       // function evil(fn) {
       //   return new Function('return ' + fn)();
       // }
-      // console.log(evil('12/5*9+9.4*2')); // => 40.4     const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
+      // console.log(evil('12/5*9+9.4*2')); // => 40.4     const index = Resource.dataGroup.getColumnIndex(metric.alias);
 
       // Implementazione della func 'calc' per le metriche composite.
       if (metric.type === 'composite') {
@@ -264,17 +267,17 @@ function previewReady() {
       } else {
         viewMetrics.push(index);
         Resource.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
-        // console.log(Dashboard.dataGroup.getColumnProperty(index, 'className'));
+        // console.log(Resource.dataGroup.getColumnProperty(index, 'className'));
       }
     }
   });
   // concateno i due array che popoleranno la DataView.setColumns()
   let viewDefined = viewColumns.concat(viewMetrics)
-  // Dashboard.dataGroup.setColumnProperty(0, 'className', 'cssc1')
-  // console.log(Dashboard.dataGroup.getColumnProperty(0, 'className'));
-  // console.log(Dashboard.dataGroup.getColumnProperties(0));
+  // Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
+  // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
+  // console.log(Resource.dataGroup.getColumnProperties(0));
   Resource.dataViewGrouped.setColumns(viewDefined);
-  // console.info('DataView', Dashboard.dataViewGrouped);
+  // console.info('DataView', Resource.dataViewGrouped);
 
   google.visualization.events.addListener(Resource.tableRefGroup, 'sort', sort);
   // con l'opzione sort: 'event' viene comunque processato l'evento 'sort'
@@ -296,19 +299,19 @@ function sort(e) {
   // NOTE: getViewColumnIndex() resituisce l'indice della DataView impostata
   // con setColumns(), il valore passato è l'indice della dataTable
   // se setColumns([1,3,5,7]) getViewColumnIndex(7) restituisce 4
-  // Dashboard.dataViewIndex = Dashboard.dataViewGrouped.getViewColumnIndex(7);
+  // Resource.dataViewIndex = Resource.dataViewGrouped.getViewColumnIndex(7);
   console.log('index della dataTable', Resource.dataTableIndex);
   // recupero il nome della colonna in base al suo indice
   Resource.columnId = Resource.dataViewGrouped.getColumnId(Resource.colIndex);
   // etichetta colonna, questa viene impostata nella dlg-sheet-config
   Resource.columnLabel = Resource.dataViewGrouped.getColumnLabel(Resource.colIndex);
   labelRef.value = Resource.columnLabel;
-  // recupero il dataType della colonna selezionata dall'object Dashboard.json.data.columns[columnId]
+  // recupero il dataType della colonna selezionata dall'object Resource.json.data.columns[columnId]
   // selectDataType.selectedIndex = 2;
   // console.log(selectDataType.options);
   [...selectDataType.options].forEach((option, index) => {
     console.log(Resource.dataViewGrouped.getColumnType(Resource.colIndex));
-    // console.log(Dashboard.dataViewGrouped.getColumnProperties(Dashboard.colIndex));
+    // console.log(Resource.dataViewGrouped.getColumnProperties(Resource.colIndex));
     if (option.value === Resource.dataViewGrouped.getColumnType(Resource.colIndex)) {
       selectDataType.selectedIndex = index;
     }
@@ -335,7 +338,7 @@ function sort(e) {
 
 // Salvataggio della configurazione colonna dalla dialog dlg-config
 saveColumnConfig.onclick = () => {
-  // console.log(Dashboard.dataTable);
+  // console.log(Resource.dataTable);
   console.log({
     "dataTable (index)": Resource.dataTableIndex,
     "dataView (index)": Resource.colIndex,
@@ -349,10 +352,10 @@ saveColumnConfig.onclick = () => {
   const formatterRef = document.getElementById('field-format');
   const filterColumn = document.getElementById('filter-column');
   const type = typeRef.options.item(typeRef.selectedIndex).value.toLowerCase();
-  // const columnIndex = Dashboard.json.data.view.findIndex(col => col.id === Dashboard.columnId);
-  // if (columnIndex !== -1) Dashboard.dataGroup.setColumnLabel(7, 'test');
-  // if (columnIndex !== -1) Dashboard.dataGroup.setColumnLabel(3, 'test-3');
-  // if (columnIndex !== -1) Dashboard.dataGroup.setColumnLabel(Dashboard.dataTableIndex, 'test-2');
+  // const columnIndex = Resource.json.data.view.findIndex(col => col.id === Resource.columnId);
+  // if (columnIndex !== -1) Resource.dataGroup.setColumnLabel(7, 'test');
+  // if (columnIndex !== -1) Resource.dataGroup.setColumnLabel(3, 'test-3');
+  // if (columnIndex !== -1) Resource.dataGroup.setColumnLabel(Resource.dataTableIndex, 'test-2');
   // cerco la colonna sia in data.group.key (colonne dimensionali) che in data.group.columns (metriche)
   const column = Resource.json.data.group.key.find(col => col.id === Resource.columnId);
   if (column) {
@@ -375,17 +378,17 @@ saveColumnConfig.onclick = () => {
       break;
     case 'date':
       // TODO: da implementare
-      // Dashboard.json.data.formatter[Dashboard.columnId] = { format: 'date' };
+      // Resource.json.data.formatter[Resource.columnId] = { format: 'date' };
       break;
     default:
       break;
   }
   Resource.json.data.formatter[Resource.columnId] = { type, format, prop: formatterProperties };
-  // Dashboard.json.data.formatter = { [Dashboard.columnId]: { type, format, prop: formatterProperties } };
+  // Resource.json.data.formatter = { [Resource.columnId]: { type, format, prop: formatterProperties } };
   // filtri definiti per il report
   if (filterColumn.checked === true) {
-    // Proprietà Dashboard.json.filters
-    // Inserisco il filtro solo se non è ancora presente in Dashboard.json.filters
+    // Proprietà Resource.json.filters
+    // Inserisco il filtro solo se non è ancora presente in Resource.json.filters
     const index = Resource.json.filters.findIndex(filter => filter.containerId === `flt-${label}`);
     if (index === -1) {
       // non è presente, lo aggiungo
@@ -411,7 +414,7 @@ saveColumnConfig.onclick = () => {
   Resource.json.wrapper.containerId = 'chart_div';
   console.log(Resource.json);
   window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
-  // window.localStorage.setItem(`specs_${Dashboard.json.token}`, JSON.stringify(Dashboard.json));
+  // window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
   debugger;
   dlgConfig.close();
   previewReady();

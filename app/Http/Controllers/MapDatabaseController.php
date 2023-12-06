@@ -91,10 +91,16 @@ class MapDatabaseController extends Controller
     //             AND CC.CONSTRAINT_TYPE='p'
     //             WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table'
     //             ORDER BY c.ordinal_position ASC;");
-    $info = DB::connection('vertica_odbc')->select("SELECT C.column_name, c.is_nullable, types.type_name, c.data_type_length, c.ordinal_position
-                FROM COLUMNS C, TYPES types
-                WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table' and C.data_type_id = types.type_id
-                ORDER BY c.ordinal_position ASC;");
+
+    // $info = DB::connection('vertica_odbc')->select("SELECT C.column_name, c.is_nullable, types.type_name, c.data_type_length, c.ordinal_position
+    //             FROM COLUMNS C, TYPES types
+    //             WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table' and C.data_type_id = types.type_id
+    //             ORDER BY c.ordinal_position ASC;");
+
+    $info = DB::connection('vertica_odbc')->table('COLUMNS')
+      ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
+      ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
+      ->where('TABLE_SCHEMA', $schema)->where('TABLE_NAME', $table)->orderBy('ordinal_position')->get();
     return response()->json([$table => $info]);
     // return response()->json($info);
   }
@@ -104,13 +110,20 @@ class MapDatabaseController extends Controller
   {
     /* dd($table); */
     /* $tables = DB::connection('mysql')->select("DESCRIBE Azienda"); */
-    $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME
-                FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
-                ON C.TABLE_ID=CC.TABLE_ID
-                AND C.COLUMN_NAME=CC.COLUMN_NAME
-                AND CC.CONSTRAINT_TYPE='p'
-                WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table'
-                ORDER BY c.ordinal_position ASC;");
+    // $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME
+    //             FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
+    //             ON C.TABLE_ID=CC.TABLE_ID
+    //             AND C.COLUMN_NAME=CC.COLUMN_NAME
+    //             AND CC.CONSTRAINT_TYPE='p'
+    //             WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table'
+    //             ORDER BY c.ordinal_position ASC;");
+
+    // $info = DB::connection('vertica_odbc')->select("SELECT C.column_name, c.is_nullable, types.type_name, c.data_type_length, c.ordinal_position FROM COLUMNS C, TYPES types WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table' and C.data_type_id = types.type_id ORDER BY c.ordinal_position ASC;");
+    $info = DB::connection('vertica_odbc')->table('COLUMNS')
+      ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
+      ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
+      ->where('TABLE_SCHEMA', $schema)->where('TABLE_NAME', $table)->orderBy('ordinal_position')->get();
+
     return response()->json([$table => $info]);
   }
 
@@ -165,8 +178,13 @@ class MapDatabaseController extends Controller
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497, 43, 473, 437, 445, 461, 485, 549, 621, 1000002079, 455, 471, 179])->paginate(15000);
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497])->paginate(15000);
     $data = DB::connection('vertica_odbc')->table($table)->paginate(15000);
-    return $data;
-    // return response()->json($data);
+    $info = DB::connection('vertica_odbc')->table('COLUMNS')
+      ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
+      ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
+      ->where('TABLE_SCHEMA', 'decisyon_cache')->where('TABLE_NAME', "WEB_BI_$id")->orderBy('ordinal_position')->get();
+    // dd($datamartResult, $info);
+    return response()->json(['columns' => $info, 'data' => $data]);
+    // return $data;
   }
 
   public function datamart($id)
@@ -284,7 +302,13 @@ class MapDatabaseController extends Controller
       // $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.$q->datamartName LIMIT 10000;");
       // return response()->json($datamartResult);
       $datamartResult = DB::connection('vertica_odbc')->table("decisyon_cache.$q->datamartName")->paginate(15000);
-      return $datamartResult;
+      // return $datamartResult;
+      $info = DB::connection('vertica_odbc')->table('COLUMNS')
+        ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
+        ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
+        ->where('TABLE_SCHEMA', 'decisyon_cache')->where('TABLE_NAME', $q->datamartName)->orderBy('ordinal_position')->get();
+      // dd($datamartResult, $info);
+      return response()->json([$q->datamartName => $info, 'data' => $datamartResult]);
     } else {
       return 'BaseTable non create';
     }

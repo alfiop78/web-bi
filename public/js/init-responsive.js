@@ -919,14 +919,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const table = WorkBook.activeTable.dataset.table;
     const alias = WorkBook.activeTable.dataset.alias;
     const field = e.currentTarget.dataset.field;
-    // TODO: nel sessionStorage ho già la tabella aggiunta al canvas, quindi
+    // nel sessionStorage ho già la tabella aggiunta al canvas, quindi
     // posso recuperare il datatype dal sessionStorage
-    console.log(window.sessionStorage.getItem(table));
     const tableSpecs = JSON.parse(window.sessionStorage.getItem(table));
+    // cerco la colonna per poterne recuperare il datatype
     const fieldSpecs = tableSpecs.find(column => column.column_name === field);
     const datatype = fieldSpecs.type_name;
-
-    // const datatype = e.currentTarget.dataset.datatype;
     const id = document.querySelector('#textarea-column-id');
     const ds = document.querySelector('#textarea-column-ds');
     app.addMark({ table, alias, field, datatype }, id);
@@ -1465,6 +1463,74 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       .catch((err) => console.error(err));
   }
 
+  app.createSheetSpecs = () => {
+    console.log(Resource.columns);
+    // creo resource.json.data.columns : {}
+    let object = {}, datatype;
+    Resource.columns.forEach(column => {
+      const findMetricIndex = Sheet.sheet.sheetMetrics.findIndex(metric => metric.alias === column.column_name);
+      const columnType = (findMetricIndex === -1) ? 'column' : 'metric';
+      // Imposto i datatype di Google Chart
+      // TODO: completare i case per i datatype
+      switch (column.type_name) {
+        case 'Varchar':
+        case 'Char':
+          datatype = 'string';
+          break;
+        default:
+          datatype = 'number';
+          break;
+      }
+      object[column.column_name] = {
+        id: column.column_name,
+        label: column.column_name,
+        type: datatype,
+        properties: {
+          grouped: true,
+          columnType
+        }
+      };
+    });
+    // oggetto per impostare il datatype nelle colonne, in prepareData
+    Resource.json.data.columns = object;
+    let keys = [];
+    for (const [key, value] of Object.entries(Resource.json.data.columns)) {
+      // group.key
+      if (value.properties.columnType === 'column') {
+        // value.properties.grouped = true;
+        // value.label = col.id;
+        console.log(value);
+        keys.push(value);
+      }
+    }
+    Resource.json.data.group.key = keys;
+    debugger;
+    // creo l'array di object che mi servirà per nascondere/visualizzare le colonne
+    let columnProperties = [], metricProperties = [];
+    Sheet.sheet.sheetColumns.forEach(col => {
+      columnProperties.push({ id: col, properties: { visible: true } });
+    });
+    console.log(columnProperties);
+    // creo un array con le colonne da visualizzare in fase di inizializzazione del dashboard
+    // la prop 'names' mi servirà per popolare la DataView dopo il group()
+    // Dashboard.json.data.view = columnProperties;
+    Resource.json.data.view = columnProperties;
+    // metriche
+    debugger;
+    Sheet.sheet.sheetMetrics.forEach(metric => {
+      if (!metric.dependencies) {
+        metric.properties = { visible: true };
+        metric.label = metric.alias;
+      }
+      metricProperties.push(metric);
+    });
+    console.log(metricProperties);
+    debugger;
+    // nel data.group.columns vanno messe tutte le metriche, come array di object
+    Resource.json.data.group.columns = metricProperties;
+    console.log('save sheet_specs : ', Resource.json);
+  }
+
   app.getSheetSpecifics = () => {
     // Verifico se le specifiche per questo report già esistono.
     fetch(`/fetch_api/name/${Sheet.sheet.token}/sheet_specs_show`)
@@ -1481,7 +1547,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         } else {
           Resource.json.token = Sheet.sheet.token;
           Resource.jsonExists = false;
+          console.info('specifiche non presenti');
+          debugger;
+          Resource.json.wrapper.chartType = 'Table';
+          app.createSheetSpecs();
         }
+        return;
         debugger;
         Resource.json.wrapper.chartType = 'Table';
         // se, in json.data.view esiste già questa colonna, non la modifico
@@ -1647,7 +1718,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       .then(async (paginateData) => {
         console.log(paginateData);
         console.log(paginateData.data);
-        // debugger;
+        console.log(paginateData.columns);
+        debugger;
         // Dashboard.data = paginateData.data;
         // funzione ricorsiva fino a quando è presente next_page_url
         let recursivePaginate = async (url) => {
@@ -1668,6 +1740,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
               // imposto il riferimento della tabella nel DOM
               debugger;
               Resource.data = partialData;
+              Resource.columns = paginateData.columns;
               // Dashboard.ref = 'preview-datamart';
               app.getSheetSpecifics();
             }
@@ -1686,6 +1759,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           // Dashboard.ref = 'preview-datamart';
           debugger;
           Resource.data = partialData;
+          Resource.columns = paginateData.columns;
           app.getSheetSpecifics();
         }
       })
@@ -3128,7 +3202,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       // scrivo il tipo di dato senza specificare la lunghezza, int(8) voglio che mi scriva solo int
       // let pos = value.DATA_TYPE.indexOf('(');
       // let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-      debugger;
       span.dataset.datatype = value.type_name;
       // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
       li.dataset.id = key;
@@ -3141,6 +3214,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   // TODO: test fn
   app.addFields_test = (ul, response) => {
+    debugger;
     for (const [key, value] of Object.entries(response)) {
       const content = app.tmplList.content.cloneNode(true);
       const li = content.querySelector('li[data-li]');
@@ -3152,12 +3226,11 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       li.dataset.alias = WorkBook.activeTable.dataset.alias;
       li.dataset.label = value.column_name;
       li.dataset.field = value.column_name;
+      span.innerText = value.column_name;
       // li.dataset.key = value.CONSTRAINT_NAME;
-      // span.innerText = value.COLUMN_NAME;
       // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
       // let pos = value.DATA_TYPE.indexOf('(');
       // let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-      debugger;
       span.dataset.datatype = value.type_name;
       // span.dataset.type = type;
       // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
@@ -3461,7 +3534,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         const content = app.tmplList.content.cloneNode(true);
         const li = content.querySelector('li[data-li]');
         const span = li.querySelector('span');
-        debugger;
         li.dataset.label = column.column_name;
         li.dataset.fn = 'handlerSelectField';
         li.dataset.elementSearch = 'columns';
@@ -3471,13 +3543,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         li.dataset.field = column.column_name;
         // li.dataset.key = column.CONSTRAINT_NAME;
         span.innerText = column.column_name;
-        // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
-        // let pos = column.DATA_TYPE.indexOf('(');
-        // let type = (pos !== -1) ? column.DATA_TYPE.substring(0, pos) : column.DATA_TYPE;
         span.dataset.datatype = column.type_name;
         // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
-        // li.dataset.id = key;
-        // span.id = key;
         // li.dataset.fn = 'addFieldToJoin';
         details.appendChild(li);
       });
