@@ -913,15 +913,20 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   }
 
   // apro la dialog column per definire le colonne del WorkBook
-  // TODO: da spostare in supportFn.js
   app.setColumn = (e) => {
     app.dialogColumns.dataset.field = e.currentTarget.dataset.field;
     document.getElementById('column-name').value = e.currentTarget.dataset.field;
     const table = WorkBook.activeTable.dataset.table;
     const alias = WorkBook.activeTable.dataset.alias;
     const field = e.currentTarget.dataset.field;
-    debugger;
-    const datatype = e.currentTarget.dataset.datatype;
+    // TODO: nel sessionStorage ho già la tabella aggiunta al canvas, quindi
+    // posso recuperare il datatype dal sessionStorage
+    console.log(window.sessionStorage.getItem(table));
+    const tableSpecs = JSON.parse(window.sessionStorage.getItem(table));
+    const fieldSpecs = tableSpecs.find(column => column.column_name === field);
+    const datatype = fieldSpecs.type_name;
+
+    // const datatype = e.currentTarget.dataset.datatype;
     const id = document.querySelector('#textarea-column-id');
     const ds = document.querySelector('#textarea-column-ds');
     app.addMark({ table, alias, field, datatype }, id);
@@ -1122,20 +1127,20 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         const content = app.tmplList.content.cloneNode(true);
         const li = content.querySelector('li[data-li]');
         const span = li.querySelector('span');
-        li.dataset.label = column.COLUMN_NAME;
+        li.dataset.label = column.column_name;
         li.dataset.fn = 'addToColumnFormula';
         li.dataset.elementSearch = 'fields';
         li.dataset.tableId = tableId;
         li.dataset.table = value.name;
         li.dataset.alias = value.alias;
-        li.dataset.field = column.COLUMN_NAME;
-        li.dataset.key = column.CONSTRAINT_NAME;
-        span.innerText = column.COLUMN_NAME;
+        li.dataset.field = column.column_name;
+        // li.dataset.key = column.CONSTRAINT_NAME;
+        span.innerText = column.column_name;
         // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
-        let pos = column.DATA_TYPE.indexOf('(');
-        let type = (pos !== -1) ? column.DATA_TYPE.substring(0, pos) : column.DATA_TYPE;
-        li.dataset.type = type;
-        li.dataset.datatype = column.DATA_TYPE;
+        // let pos = column.DATA_TYPE.indexOf('(');
+        // let type = (pos !== -1) ? column.DATA_TYPE.substring(0, pos) : column.DATA_TYPE;
+        // li.dataset.type = type;
+        li.dataset.datatype = column.type_name;
         // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
         // li.dataset.id = key;
         // span.id = key;
@@ -1156,7 +1161,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     mark.dataset.tableAlias = data.alias;
     mark.dataset.table = data.table;
     mark.dataset.field = data.field;
-    debugger;
     mark.dataset.datatype = data.datatype;
     mark.innerText = data.field;
     small.innerText = data.table;
@@ -1170,7 +1174,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const table = e.currentTarget.dataset.table;
     const alias = e.currentTarget.dataset.alias;
     debugger;
-    const datatype = e.currentTarget.dataset.type;
+    const datatype = e.currentTarget.dataset.datatype;
     console.log(field);
     // textarea
     const txtArea = document.querySelector('.textarea-content[data-active]');
@@ -1899,6 +1903,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // recupero 50 record della tabella selezionata per visualizzare un anteprima
     WorkBook.activeTable = e.currentTarget.id;
     WorkBook.schema = e.currentTarget.dataset.schema;
+    // TODO: potrei popolare qui il datatype delle colonne prendendo i dati dalle tabelle in
+    // sessionStorage, qui vengono salvati appena viene aggiunta la tabella al canvas.
+    // Attualmente questa operazione la faccio in setColumn()
     let DT = new Table(await app.getPreviewSVGTable(), 'preview-table', true);
     DT.template = 'tmpl-preview-table';
     DT.addColumns();
@@ -3048,13 +3055,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           schema: WorkBook.activeTable.dataset.schema,
           tableAlias: WorkBook.activeTable.dataset.alias,
           table: WorkBook.activeTable.dataset.table,
-          name: column.COLUMN_NAME,
-          origin_field: column.COLUMN_NAME,
+          name: column.column_name,
+          origin_field: column.column_name,
           field: {
-            // id: { field: column.COLUMN_NAME, type: 'da implementare', origin_field: column.COLUMN_NAME },
-            // ds: { field: column.COLUMN_NAME, type: 'da implementare', origin_field: column.COLUMN_NAME }
-            id: { sql: [column.COLUMN_NAME], type: 'da implementare' },
-            ds: { sql: [column.COLUMN_NAME], type: 'da implementare' }
+            // id: { field: column.column_name, type: 'da implementare', origin_field: column.column_name },
+            // ds: { field: column.column_name, type: 'da implementare', origin_field: column.column_name }
+            id: { sql: [column.column_name], type: 'da implementare' },
+            ds: { sql: [column.column_name], type: 'da implementare' }
           }
         }
       };
@@ -3110,18 +3117,19 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       const content = app.tmplList.content.cloneNode(true);
       const li = content.querySelector('li[data-li]');
       const span = li.querySelector('span');
-      li.dataset.label = value.COLUMN_NAME;
+      li.dataset.label = value.column_name;
       li.dataset.elementSearch = `${source}-fields`;
       li.dataset.tableId = WorkBook.activeTable.id;
       li.dataset.table = WorkBook.activeTable.dataset.table;
       li.dataset.alias = WorkBook.activeTable.dataset.alias;
-      li.dataset.label = value.COLUMN_NAME;
-      li.dataset.key = value.CONSTRAINT_NAME;
-      span.innerText = value.COLUMN_NAME;
+      li.dataset.label = value.column_name;
+      // li.dataset.key = value.CONSTRAINT_NAME;
+      span.innerText = value.column_name;
       // scrivo il tipo di dato senza specificare la lunghezza, int(8) voglio che mi scriva solo int
-      let pos = value.DATA_TYPE.indexOf('(');
-      let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-      span.dataset.type = type;
+      // let pos = value.DATA_TYPE.indexOf('(');
+      // let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
+      debugger;
+      span.dataset.datatype = value.type_name;
       // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
       li.dataset.id = key;
       // span.id = key;
@@ -3137,19 +3145,21 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       const content = app.tmplList.content.cloneNode(true);
       const li = content.querySelector('li[data-li]');
       const span = li.querySelector('span');
-      li.dataset.label = value.COLUMN_NAME;
+      li.dataset.label = value.column_name;
       li.dataset.elementSearch = 'time-column';
       li.dataset.tableId = WorkBook.activeTable.id;
       li.dataset.table = WorkBook.activeTable.dataset.table;
       li.dataset.alias = WorkBook.activeTable.dataset.alias;
-      li.dataset.label = value.COLUMN_NAME;
-      li.dataset.field = value.COLUMN_NAME;
-      li.dataset.key = value.CONSTRAINT_NAME;
-      span.innerText = value.COLUMN_NAME;
+      li.dataset.label = value.column_name;
+      li.dataset.field = value.column_name;
+      // li.dataset.key = value.CONSTRAINT_NAME;
+      // span.innerText = value.COLUMN_NAME;
       // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
-      let pos = value.DATA_TYPE.indexOf('(');
-      let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-      span.dataset.type = type;
+      // let pos = value.DATA_TYPE.indexOf('(');
+      // let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
+      debugger;
+      span.dataset.datatype = value.type_name;
+      // span.dataset.type = type;
       // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
       li.dataset.id = key;
       // span.id = key;
@@ -3168,26 +3178,30 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const fieldName = document.getElementById('column-name').value;
     const token = (e.currentTarget.dataset.token) ? e.currentTarget.dataset.token : rand().substring(0, 7);
     // const token = rand().substring(0, 7);
-    let fieldId = { sql: [], formula: [] };
-    let fieldDs = { sql: [], formula: [] };
+    let fieldId = { sql: [], formula: [], datatype: null };
+    let fieldDs = { sql: [], formula: [], datatype: null };
     debugger;
+    // colonna _id
     document.querySelectorAll('#textarea-column-id *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         // il campo potrebbe appartenere ad una tabella diversa da quella selezionata
         // quindi  aggiungo anche il table alias
         fieldId.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
-        fieldId.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field, datatype: element.dataset.datatype });
+        fieldId.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
+        fieldId.datatype = element.dataset.datatype;
       } else {
         fieldId.sql.push(element.innerText.trim());
         fieldId.formula.push(element.innerText.trim());
       }
     });
+    // colonna _ds
     document.querySelectorAll('#textarea-column-ds *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         fieldDs.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
-        fieldDs.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field, datatype: element.dataset.datatype });
+        fieldDs.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
+        fieldDs.datatype = element.dataset.datatype;
       } else {
         fieldDs.sql.push(element.innerText.trim());
         fieldDs.formula.push(element.innerText.trim());
@@ -3210,6 +3224,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         }
       }
     };
+    debugger;
     WorkBook.fields = token;
     app.dialogColumns.close();
     WorkBook.checkChanges(token);
@@ -3446,19 +3461,20 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         const content = app.tmplList.content.cloneNode(true);
         const li = content.querySelector('li[data-li]');
         const span = li.querySelector('span');
-        li.dataset.label = column.COLUMN_NAME;
+        debugger;
+        li.dataset.label = column.column_name;
         li.dataset.fn = 'handlerSelectField';
         li.dataset.elementSearch = 'columns';
         li.dataset.tableId = tableId;
         li.dataset.table = value.name;
         li.dataset.alias = value.alias;
-        li.dataset.field = column.COLUMN_NAME;
-        li.dataset.key = column.CONSTRAINT_NAME;
-        span.innerText = column.COLUMN_NAME;
+        li.dataset.field = column.column_name;
+        // li.dataset.key = column.CONSTRAINT_NAME;
+        span.innerText = column.column_name;
         // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
-        let pos = column.DATA_TYPE.indexOf('(');
-        let type = (pos !== -1) ? column.DATA_TYPE.substring(0, pos) : column.DATA_TYPE;
-        span.dataset.type = type;
+        // let pos = column.DATA_TYPE.indexOf('(');
+        // let type = (pos !== -1) ? column.DATA_TYPE.substring(0, pos) : column.DATA_TYPE;
+        span.dataset.datatype = column.type_name;
         // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
         // li.dataset.id = key;
         // span.id = key;

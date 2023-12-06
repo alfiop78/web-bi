@@ -84,12 +84,16 @@ class MapDatabaseController extends Controller
   {
     /* dd($table); */
     /* $tables = DB::connection('mysql')->select("DESCRIBE Azienda"); */
-    $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME
-                FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
-                ON C.TABLE_ID=CC.TABLE_ID
-                AND C.COLUMN_NAME=CC.COLUMN_NAME
-                AND CC.CONSTRAINT_TYPE='p'
-                WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table'
+    // $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME
+    //             FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
+    //             ON C.TABLE_ID=CC.TABLE_ID
+    //             AND C.COLUMN_NAME=CC.COLUMN_NAME
+    //             AND CC.CONSTRAINT_TYPE='p'
+    //             WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table'
+    //             ORDER BY c.ordinal_position ASC;");
+    $info = DB::connection('vertica_odbc')->select("SELECT C.column_name, c.is_nullable, types.type_name, c.data_type_length, c.ordinal_position
+                FROM COLUMNS C, TYPES types
+                WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table' and C.data_type_id = types.type_id
                 ORDER BY c.ordinal_position ASC;");
     return response()->json([$table => $info]);
     // return response()->json($info);
