@@ -193,7 +193,7 @@ function previewReady() {
   // con il getColumnId() sulla dataGroup
   // console.log(Resource.dataGroup.getColumnId(3));
   // console.log(Resource.dataGroup.getColumnIndex('zona'));
-  // END TEST:
+  // END TEST
 
   // recupero le colonne presenti nel report, tramite le impostazioni di
   // json.data.view (contiene i nomi delle colonne "_ds", da visualizzare)

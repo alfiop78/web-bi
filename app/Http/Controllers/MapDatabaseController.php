@@ -177,14 +177,11 @@ class MapDatabaseController extends Controller
     // $data = DB::connection('vertica_odbc')->table($table)->limit(5)->get(); // ok
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497, 43, 473, 437, 445, 461, 485, 549, 621, 1000002079, 455, 471, 179])->paginate(15000);
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497])->paginate(15000);
-    $data = DB::connection('vertica_odbc')->table($table)->paginate(15000);
-    $info = DB::connection('vertica_odbc')->table('COLUMNS')
-      ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
-      ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
-      ->where('TABLE_SCHEMA', 'decisyon_cache')->where('TABLE_NAME', "WEB_BI_$id")->orderBy('ordinal_position')->get();
-    // dd($datamartResult, $info);
-    return response()->json(['columns' => $info, 'data' => $data]);
-    // return $data;
+    $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_$id")->paginate(15000);
+    // return response()->json(['columns' => $info, 'data' => $data]);
+    return $data;
+    // TODO: da provare questo tipo di risposta
+    // return response()-json(['data' => $data]);
   }
 
   public function datamart($id)
@@ -308,7 +305,7 @@ class MapDatabaseController extends Controller
         ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
         ->where('TABLE_SCHEMA', 'decisyon_cache')->where('TABLE_NAME', $q->datamartName)->orderBy('ordinal_position')->get();
       // dd($datamartResult, $info);
-      return response()->json([$q->datamartName => $info, 'data' => $datamartResult]);
+      return response()->json(['columns' => $info, 'data' => $datamartResult]);
     } else {
       return 'BaseTable non create';
     }
