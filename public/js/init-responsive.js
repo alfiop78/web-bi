@@ -1530,9 +1530,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     console.log(Resource.json);
   }
 
-  app.getSheetSpecifics = () => {
+  app.getSpecifications = async () => {
     // Verifico se le specifiche per questo report già esistono.
-    fetch(`/fetch_api/name/${Sheet.sheet.token}/sheet_specs_show`)
+    await fetch(`/fetch_api/name/${Sheet.sheet.token}/sheet_specs_show`)
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -1547,6 +1547,42 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           Resource.json.token = Sheet.sheet.token;
           Resource.specifications = false;
           console.info('specifiche non presenti');
+        }
+        for (const [token, field] of Sheet.fields) {
+          debugger;
+          const workbookField = WorkBook.field.get(token).field;
+          // campo id
+          if (!Resource.json.data.columns[`${field}_id`]) {
+            Resource.json.data.columns[`${field}_id`] = {
+              id: `${field}_id`, label: `${field}_id`, type: Resource.getDataType(workbookField.id.datatype),
+              properties: {
+                type: 'column', grouped: true
+              }
+            };
+          };
+          // campo ds
+          if (!Resource.json.data.columns[field]) {
+            Resource.json.data.columns[field] = {
+              id: field, label: field, type: Resource.getDataType(workbookField.ds.datatype),
+              properties: {
+                type: 'column', grouped: true
+              }
+            };
+          };
+          // creo specsColumns per (json.data.group.key)
+
+          // // creo specsColumns per (json.data.group.key)
+          // Resource.json.data.group.key.push({
+          //   id: `${field}_id`, label: `${field}_id`, type: Resource.getDataType(WorkBook.field.get(token).field.id.datatype),
+          //   properties: { type: 'column', grouped: true }
+          // });
+          // Resource.json.data.group.key.push({
+          //   id: field, label: field, type: Resource.getDataType(WorkBook.field.get(token).field.ds.datatype),
+          //   properties: { type: 'column', grouped: true }
+          // });
+          // // creo anche json.data.view
+          // Resource.json.data.view.push({ id: `${field}_id`, properties: { visible: true } });
+          // Resource.json.data.view.push({ id: field, properties: { visible: true } });
         }
         /* return;
         debugger;
@@ -1691,7 +1727,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         Dashboard.data = data;
         // imposto il riferimento della tabella nel DOM
         Dashboard.ref = 'preview-datamart';
-        app.getSheetSpecifics();
+        app.getSpecifications();
         // Creazione preview del datamart
         // drawDatamart() impostata in init-sheet.js
         google.charts.setOnLoadCallback(drawDatamart());
@@ -1705,7 +1741,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // FIX: in fase di apertura della preview, le specifiche sono sicuramente già presenti.
     // Quindi è inutile recuperare le columns dalla risposta di questa fetch
     Resource = new Resources('preview-datamart');
-    await app.getSheetSpecifics();
+    await app.getSpecifications();
     console.log('test');
     let partialData = [];
     await fetch(`/fetch_api/${sheet.id}/preview?page=1`)
@@ -1739,10 +1775,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
               debugger;
               Resource.data = partialData;
               // TODO: le specifiche, in questo caso (nella preview), sono già presenti.
-              // Potrei chiamare getSheetSpecifics(), con await, anche prima di questa fetch
+              // Potrei chiamare getSpecifications(), con await, anche prima di questa fetch
               // senza aspettare i dati dal datamart, popolare Resource.json e invocare qui la
               // caalback di GoogleChart
-              // app.getSheetSpecifics();
+              // app.getSpecifications();
               google.charts.setOnLoadCallback(drawDatamart());
             }
           }).catch((err) => {
@@ -1760,10 +1796,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           // imposto il riferimento della tabella nel DOM
           Resource.data = partialData;
           // TODO: le specifiche, in questo caso (nella preview), sono già presenti.
-          // Potrei chiamare getSheetSpecifics(), con await, anche prima di questa fetch
+          // Potrei chiamare getSpecifications(), con await, anche prima di questa fetch
           // senza aspettare i dati dal datamart, popolare Resource.json e invocare qui la
           // caalback di GoogleChart
-          // app.getSheetSpecifics();
+          // app.getSpecifications();
           google.charts.setOnLoadCallback(drawDatamart());
         }
       })
@@ -1967,7 +2003,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     let filters = new Map();
     let object = {};
     Resource = new Resources('preview-datamart');
-    await app.getSheetSpecifics();
+    await app.getSpecifications();
+    // app.getSpecifications();
     console.log('test', Resource.specifications);
     debugger;
     // per ogni 'fields' aggiunto a Sheet.fields ne recupero le proprietà 'field', 'tableAlias' e 'name'
@@ -1984,38 +2021,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         name: field
       });
 
-      // creo specsColumns per (json.data.columns)
-      // se questa colonna è già presente nelle specifiche non sovrascirov le sue proprietà
-      if (!Resource.json.data.columns[`${field}_id`]) {
-        Resource.json.data.columns[`${field}_id`] = {
-          id: `${field}_id`, label: `${field}_id`, type: Resource.getDataType(WorkBook.field.get(token).field.id.datatype),
-          properties: {
-            type: 'column', grouped: true
-          }
-        };
-      };
-      if (!Resource.json.data.columns[field]) {
-        Resource.json.data.columns[field] = {
-          id: field, label: field, type: Resource.getDataType(WorkBook.field.get(token).field.id.datatype),
-          properties: {
-            type: 'column', grouped: true
-          }
-        };
-      };
-      debugger;
-      // creo specsColumns per (json.data.group.key)
-      Resource.json.data.group.key.push({
-        id: `${field}_id`, label: `${field}_id`, type: Resource.getDataType(WorkBook.field.get(token).field.id.datatype),
-        properties: { type: 'column', grouped: true }
-      });
-      Resource.json.data.group.key.push({
-        id: field, label: field, type: Resource.getDataType(WorkBook.field.get(token).field.ds.datatype),
-        properties: { type: 'column', grouped: true }
-      });
-      // creo anche json.data.view
-      Resource.json.data.view.push({ id: `${field}_id`, properties: { visible: true } });
-      Resource.json.data.view.push({ id: field, properties: { visible: true } });
     }
+
     for (const [token, metric] of Sheet.metrics) {
       Resource.json.data.columns[metric.alias] = {
         id: metric.alias, label: metric.alias, type: 'number',
@@ -2165,7 +2172,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           debugger;
           Dashboard.data = data;
           Dashboard.ref = 'preview-datamart';
-          app.getSheetSpecifics();
+          app.getSpecifications();
           google.charts.setOnLoadCallback(drawDatamart());
           // Al termine del process elimino dalle dropzones gli elementi che sono stati
           // eliminati dallo Sheet, quindi gli elementi con dataset.removed
@@ -2238,7 +2245,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
                 // Resource.saveSpecs();
                 debugger;
                 app.saveSheetSpecs();
-                // app.getSheetSpecifics();
+                // app.getSpecifications();
               }
             }).catch((err) => {
               App.showConsole(err, 'error');
@@ -2266,7 +2273,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             // Resource.saveSpecs();
             debugger;
             app.saveSheetSpecs();
-            // app.getSheetSpecifics();
+            // app.getSpecifications();
             // Al termine del process elimino dalle dropzones gli elementi che sono stati
             // eliminati dallo Sheet, quindi gli elementi con dataset.removed
             document.querySelectorAll('div[data-removed]').forEach(element => element.remove());
