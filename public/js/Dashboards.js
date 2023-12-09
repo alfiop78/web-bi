@@ -144,6 +144,20 @@ class Resources extends Dashboards {
     return this.#prepareData;
   }
 
+  getDataType(datatype) {
+    this.datatype;
+    switch (datatype) {
+      case 'Varchar':
+      case 'Char':
+        this.datatype = 'string';
+        break;
+      default:
+        this.datatype = 'number';
+        break;
+    }
+    return this.datatype;
+  }
+
   /* prepareData() {
     this.#prepareData = { cols: [], rows: [] };
     // aggiungo le colonne

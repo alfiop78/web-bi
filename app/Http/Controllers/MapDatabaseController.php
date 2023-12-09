@@ -237,7 +237,7 @@ class MapDatabaseController extends Controller
     $q->baseColumns = $cube->{'fields'};
     // imposto le colonne da includere nel datamart finale
     $q->fields();
-// TODO: l'argomento passato a SELECT è già incluso in $q->baseColumns
+    // TODO: l'argomento passato a SELECT è già incluso in $q->baseColumns
     $q->select($cube->{'fields'});
     if (property_exists($cube, 'compositeMeasures')) $q->compositeMetrics = $cube->{'compositeMeasures'};
     if (property_exists($cube, 'metrics')) {

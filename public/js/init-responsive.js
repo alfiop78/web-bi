@@ -782,6 +782,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // elementRef : è l'elemento nella lista di sinistra che ho draggato
     // TODO: rinominare elementRef.id in elementRef.dataset.token
     // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
+    debugger;
     Sheet.fields = { token: elementRef.id, name: WorkBook.field.get(elementRef.id).name };
     app.addField(e.currentTarget, elementRef.id);
   }
@@ -1964,17 +1965,63 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     let fields = new Map();
     let metrics = new Map(), advancedMetrics = new Map(), compositeMetrics = new Map();
     let filters = new Map();
+    Resource = new Resources('preview-datamart');
     // per ogni 'fields' aggiunto a Sheet.fields ne recupero le proprietà 'field', 'tableAlias' e 'name'
     for (const [token, field] of Sheet.fields) {
       // verifico le tabelle da includere in tables Sheet.tables
       Sheet.tables = WorkBook.field.get(token).tableAlias;
       fields.set(token, {
         field: WorkBook.field.get(token).field,
+        // TODO: potrei passare i campi _id e _ds anche in questo modo, valutare se
+        // è più semplice gestirli in cube.php
+        // id: WorkBook.field.get(token).field.id,
+        // ds: WorkBook.field.get(token).field.ds,
         tableAlias: WorkBook.field.get(token).tableAlias,
         name: field
       });
+
+      // creo specsColumns per (json.data.columns)
+      Resource.json.data.columns[`${field}_id`] = {
+        id: `${field}_id`, label: `${field}_id`, type: Resource.getDataType(WorkBook.field.get(token).field.id.datatype),
+        properties: {
+          type: 'column', grouped: true
+        }
+      };
+      Resource.json.data.columns[field] = {
+        id: field, label: field, type: Resource.getDataType(WorkBook.field.get(token).field.ds.datatype),
+        properties: {
+          type: 'column', grouped: true
+        }
+      };
+      // creo specsColumns per (json.data.group.key)
+      Resource.json.data.group.key.push({
+        id: `${field}_id`, label: `${field}_id`, type: Resource.getDataType(WorkBook.field.get(token).field.id.datatype),
+        properties: { type: 'column', grouped: true }
+      });
+      Resource.json.data.group.key.push({
+        id: field, label: field, type: Resource.getDataType(WorkBook.field.get(token).field.ds.datatype),
+        properties: { type: 'column', grouped: true }
+      });
+      // creo anche json.data.view
+      Resource.json.data.view.push({ id: `${field}_id`, properties: { visible: true } });
+      Resource.json.data.view.push({ id: field, properties: { visible: true } });
     }
     for (const [token, metric] of Sheet.metrics) {
+      Resource.json.data.columns[metric.alias] = {
+        id: metric.alias, label: metric.alias, type: 'number',
+        properties: {
+          type: 'metric'
+        }
+      };
+      Resource.json.data.group.columns.push({
+        token,
+        alias: metric.alias,
+        aggregateFn: metric.aggregateFn,
+        dependencies: metric.dependencies,
+        properties: { visible: true },
+        label: metric.alias
+      });
+
       switch (metric.type) {
         case 'composite':
           compositeMetrics.set(token, {
@@ -2016,6 +2063,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           break;
       }
     }
+
+    console.log(Resource.json.data);
+    debugger;
+
     Sheet.filters.forEach(token => {
       WorkBook.filters.get(token).tables.forEach(table => Sheet.tables = table);
       // recupero l'object da inviare al process
@@ -2029,6 +2080,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
 
     process.fields = Object.fromEntries(fields);
+    debugger;
     app.setSheet();
     process.from = Object.fromEntries(Sheet.from);
     process.joins = Object.fromEntries(Sheet.joins);
@@ -2138,7 +2190,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const url = "/fetch_api/cube/sheet";
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
-    Resource = new Resources('preview-datamart');
+    console.log()
+    debugger;
     await app.getSheetSpecifics();
     console.log('test');
     let partialData = [];
