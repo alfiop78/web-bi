@@ -1542,10 +1542,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         if (Object.keys(data).length !== 0) {
           console.info('specifiche presenti');
           Resource.json = data.json_value;
-          Resource.jsonExists = true;
+          Resource.specifications = true;
         } else {
           Resource.json.token = Sheet.sheet.token;
-          Resource.jsonExists = false;
+          Resource.specifications = false;
           console.info('specifiche non presenti');
         }
         /* return;
@@ -1960,12 +1960,16 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   }
 
   // tasto Elabora e SQL
-  app.createProcess = (e) => {
+  app.createProcess = async (e) => {
     let process = { from: {}, joins: {} };
     let fields = new Map();
     let metrics = new Map(), advancedMetrics = new Map(), compositeMetrics = new Map();
     let filters = new Map();
+    let object = {};
     Resource = new Resources('preview-datamart');
+    await app.getSheetSpecifics();
+    console.log('test', Resource.specifications);
+    debugger;
     // per ogni 'fields' aggiunto a Sheet.fields ne recupero le proprietà 'field', 'tableAlias' e 'name'
     for (const [token, field] of Sheet.fields) {
       // verifico le tabelle da includere in tables Sheet.tables
@@ -1981,18 +1985,24 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       });
 
       // creo specsColumns per (json.data.columns)
-      Resource.json.data.columns[`${field}_id`] = {
-        id: `${field}_id`, label: `${field}_id`, type: Resource.getDataType(WorkBook.field.get(token).field.id.datatype),
-        properties: {
-          type: 'column', grouped: true
-        }
+      // se questa colonna è già presente nelle specifiche non sovrascirov le sue proprietà
+      if (!Resource.json.data.columns[`${field}_id`]) {
+        Resource.json.data.columns[`${field}_id`] = {
+          id: `${field}_id`, label: `${field}_id`, type: Resource.getDataType(WorkBook.field.get(token).field.id.datatype),
+          properties: {
+            type: 'column', grouped: true
+          }
+        };
       };
-      Resource.json.data.columns[field] = {
-        id: field, label: field, type: Resource.getDataType(WorkBook.field.get(token).field.ds.datatype),
-        properties: {
-          type: 'column', grouped: true
-        }
+      if (!Resource.json.data.columns[field]) {
+        Resource.json.data.columns[field] = {
+          id: field, label: field, type: Resource.getDataType(WorkBook.field.get(token).field.id.datatype),
+          properties: {
+            type: 'column', grouped: true
+          }
+        };
       };
+      debugger;
       // creo specsColumns per (json.data.group.key)
       Resource.json.data.group.key.push({
         id: `${field}_id`, label: `${field}_id`, type: Resource.getDataType(WorkBook.field.get(token).field.id.datatype),
@@ -2191,9 +2201,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
     console.log()
-    debugger;
-    await app.getSheetSpecifics();
-    console.log('test');
     let partialData = [];
     await fetch(req)
       .then((response) => {
