@@ -33,7 +33,6 @@ function drawDatamart() {
   // La preview deve consentire la personalizzazione del report, quindi la possibilità
   // di nascondere/visualizzare una colonna e decidere anche il raggruppamento per i
   // livelli dimensionali
-  debugger;
   const prepareData = Resource.prepareData();
   // ciclo il prepareData.cols per aggiungere l'elenco delle colonne in #ul-columns-handler.
   // Da questo elenco si potranno nascondere/visualizzare le colonne e le metreehe
@@ -207,7 +206,6 @@ function previewReady() {
   // Resource.json.data.view.forEach(column => {
   //   if (column.properties.visible) viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
   // });
-  debugger;
   Resource.json.data.view.forEach(column => {
     if (column.properties.visible) viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
   });

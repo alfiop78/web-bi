@@ -1440,8 +1440,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   }
 
   app.saveSheetSpecs = () => {
-    debugger;
-    const url = (Resource.jsonExists === true) ? '/fetch_api/json/sheet_specs_update' : '/fetch_api/json/sheet_specs_store';
+    const url = (Resource.specifications === true) ? '/fetch_api/json/sheet_specs_update' : '/fetch_api/json/sheet_specs_store';
     const params = JSON.stringify(Resource.json);
     console.log(Resource.json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
@@ -1549,41 +1548,67 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           console.info('specifiche non presenti');
         }
         for (const [token, field] of Sheet.fields) {
-          debugger;
           const workbookField = WorkBook.field.get(token).field;
-          // campo id
-          if (!Resource.json.data.columns[`${field}_id`]) {
-            Resource.json.data.columns[`${field}_id`] = {
-              id: `${field}_id`, label: `${field}_id`, type: Resource.getDataType(workbookField.id.datatype),
-              properties: {
-                type: 'column', grouped: true
-              }
+          Object.keys(WorkBook.field.get(token).field).forEach(key => {
+            console.log(key);
+            let field_id_ds = (key === 'id') ? `${field}_${key}` : field;
+            if (!Resource.json.data.columns[field_id_ds]) {
+              // non presente
+              Resource.json.data.columns[field_id_ds] = {
+                id: field_id_ds, label: field_id_ds, type: Resource.getDataType(workbookField[key].datatype),
+                properties: {
+                  type: 'column', grouped: true
+                }
+              };
             };
-          };
-          // campo ds
-          if (!Resource.json.data.columns[field]) {
-            Resource.json.data.columns[field] = {
-              id: field, label: field, type: Resource.getDataType(workbookField.ds.datatype),
-              properties: {
-                type: 'column', grouped: true
-              }
-            };
-          };
-          // creo specsColumns per (json.data.group.key)
-
-          // // creo specsColumns per (json.data.group.key)
-          // Resource.json.data.group.key.push({
-          //   id: `${field}_id`, label: `${field}_id`, type: Resource.getDataType(WorkBook.field.get(token).field.id.datatype),
-          //   properties: { type: 'column', grouped: true }
-          // });
-          // Resource.json.data.group.key.push({
-          //   id: field, label: field, type: Resource.getDataType(WorkBook.field.get(token).field.ds.datatype),
-          //   properties: { type: 'column', grouped: true }
-          // });
-          // // creo anche json.data.view
-          // Resource.json.data.view.push({ id: `${field}_id`, properties: { visible: true } });
-          // Resource.json.data.view.push({ id: field, properties: { visible: true } });
+            // json.data.group.key
+            const columnFindKey = Resource.json.data.group.key.find(value => value.id === field_id_ds);
+            if (!columnFindKey) {
+              Resource.json.data.group.key.push({
+                id: field_id_ds, label: field_id_ds, type: Resource.getDataType(workbookField[key].datatype),
+                properties: { type: 'column', grouped: true }
+              });
+            }
+            // json.data.view
+            const columnFindView = Resource.json.data.view.find(value => value.id === field_id_ds);
+            if (!columnFindView) {
+              // la colnna _id la nascondo dalla DataView
+              const visible = (key === 'id') ? false : true;
+              Resource.json.data.view.push({ id: field_id_ds, properties: { visible } });
+            }
+          });
+          // for (const [key, object] of Object.entries(WorkBook.field.get(token).field)) {
+          // }
+          console.log(Resource.json.data.columns);
+          console.log(Resource.json.data.group.key);
+          console.log(Resource.json.data.view);
         }
+        for (const [token, metric] of Sheet.metrics) {
+          if (!Resource.json.data.columns[metric.alias]) {
+            // metrica non presente in json.data.columns
+            Resource.json.data.columns[metric.alias] = {
+              id: metric.alias, label: metric.alias, type: 'number',
+              properties: {
+                type: 'metric'
+              }
+            };
+            let find = Resource.json.data.group.columns.find(value => value.id === metric.alias);
+            if (!find) {
+              Resource.json.data.group.columns.push({
+                token,
+                alias: metric.alias,
+                aggregateFn: metric.aggregateFn,
+                dependencies: metric.dependencies,
+                properties: { visible: true },
+                label: metric.alias
+              });
+            } else {
+              Resource.json.data.group.columns[metric.alias].aggregateFn = metric.aggregateFn;
+            }
+          }
+        }
+        Resource.json.wrapper.chartType = 'Table';
+        app.saveSheetSpecs();
         /* return;
         debugger;
         Resource.json.wrapper.chartType = 'Table';
@@ -1742,7 +1767,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // Quindi è inutile recuperare le columns dalla risposta di questa fetch
     Resource = new Resources('preview-datamart');
     await app.getSpecifications();
-    console.log('test');
     let partialData = [];
     await fetch(`/fetch_api/${sheet.id}/preview?page=1`)
       .then((response) => {
@@ -1770,15 +1794,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             } else {
               // Non sono presenti altre pagine, visualizzo il dashboard
               console.log('tutte le paginate completate :', partialData);
-              // Dashboard.data = partialData;
-              // imposto il riferimento della tabella nel DOM
-              debugger;
               Resource.data = partialData;
-              // TODO: le specifiche, in questo caso (nella preview), sono già presenti.
-              // Potrei chiamare getSpecifications(), con await, anche prima di questa fetch
-              // senza aspettare i dati dal datamart, popolare Resource.json e invocare qui la
-              // caalback di GoogleChart
-              // app.getSpecifications();
               google.charts.setOnLoadCallback(drawDatamart());
             }
           }).catch((err) => {
@@ -1791,9 +1807,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           recursivePaginate(paginateData.next_page_url);
         } else {
           // Non sono presenti altre pagine, visualizzo il dashboard
-          // Dashboard.data = partialData;
-          debugger;
-          // imposto il riferimento della tabella nel DOM
           Resource.data = partialData;
           // TODO: le specifiche, in questo caso (nella preview), sono già presenti.
           // Potrei chiamare getSpecifications(), con await, anche prima di questa fetch
@@ -2024,21 +2037,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
 
     for (const [token, metric] of Sheet.metrics) {
-      Resource.json.data.columns[metric.alias] = {
-        id: metric.alias, label: metric.alias, type: 'number',
-        properties: {
-          type: 'metric'
-        }
-      };
-      Resource.json.data.group.columns.push({
-        token,
-        alias: metric.alias,
-        aggregateFn: metric.aggregateFn,
-        dependencies: metric.dependencies,
-        properties: { visible: true },
-        label: metric.alias
-      });
-
       switch (metric.type) {
         case 'composite':
           compositeMetrics.set(token, {
@@ -2081,9 +2079,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       }
     }
 
-    console.log(Resource.json.data);
-    debugger;
-
     Sheet.filters.forEach(token => {
       WorkBook.filters.get(token).tables.forEach(table => Sheet.tables = table);
       // recupero l'object da inviare al process
@@ -2097,7 +2092,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
 
     process.fields = Object.fromEntries(fields);
-    debugger;
     app.setSheet();
     process.from = Object.fromEntries(Sheet.from);
     process.joins = Object.fromEntries(Sheet.joins);
@@ -2105,7 +2099,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     if (metrics.size !== 0) process.metrics = Object.fromEntries(metrics);
     if (advancedMetrics.size !== 0) process.advancedMeasures = Object.fromEntries(advancedMetrics);
     if (compositeMetrics.size !== 0) process.compositeMeasures = Object.fromEntries(compositeMetrics);
-    // debugger;
     (e.target.id === 'btn-sheet-preview') ? app.process(process) : app.generateSQL(process);
   }
 
@@ -2207,7 +2200,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const url = "/fetch_api/cube/sheet";
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
-    console.log()
     let partialData = [];
     await fetch(req)
       .then((response) => {
@@ -2220,7 +2212,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         if (paginateData) {
           console.log(paginateData);
           console.log(paginateData.data);
-          console.log(paginateData.columns);
           let recursivePaginate = async (url) => {
             // console.log(url);
             await fetch(url).then((response) => {
@@ -2228,7 +2219,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
               if (!response.ok) { throw Error(response.statusText); }
               return response;
             }).then(response => response.json()).then((paginate) => {
-              partialData = partialData.concat(paginate.data.data);
+              partialData = partialData.concat(paginate.data);
               if (paginate.next_page_url) {
                 recursivePaginate(paginate.next_page_url);
                 console.log(partialData);
@@ -2236,16 +2227,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
                 // Non sono presenti altre pagine, visualizzo il dashboard
                 console.log('tutte le paginate completate :', partialData);
                 Resource.data = partialData;
-                Resource.columns = paginateData.columns;
-                console.log(Resource.jsonExists);
-                debugger;
-                if (Resource.jsonExists === false) app.createSheetSpecs();
                 google.charts.setOnLoadCallback(drawDatamart());
-                // TODO: il salvataggio delle specifiche potrei richiamarle nella Classe Resource
-                // Resource.saveSpecs();
-                debugger;
-                app.saveSheetSpecs();
-                // app.getSpecifications();
               }
             }).catch((err) => {
               App.showConsole(err, 'error');
@@ -2255,25 +2237,14 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           // TODO: Nel partialData potrei scegliere di visualizzare già la tabella, i successivi
           // paginate aggiungeranno dati alla DataTable. Vedere su Google Developers come aggiungere
           // dati a una tabella già esistente
-          partialData = paginateData.data.data;
+          partialData = paginateData.data;
           console.log(partialData);
-          debugger;
           if (paginateData.next_page_url) {
             recursivePaginate(paginateData.next_page_url);
           } else {
             // Non sono presenti altre pagine, visualizzo il dashboard
-            debugger;
             Resource.data = partialData;
-            Resource.columns = paginateData.columns;
-            console.log(Resource.jsonExists);
-            debugger;
-            if (Resource.jsonExists === false) app.createSheetSpecs();
             google.charts.setOnLoadCallback(drawDatamart());
-            // TODO: il salvataggio delle specifiche potrei richiamarle nella Classe Resource
-            // Resource.saveSpecs();
-            debugger;
-            app.saveSheetSpecs();
-            // app.getSpecifications();
             // Al termine del process elimino dalle dropzones gli elementi che sono stati
             // eliminati dallo Sheet, quindi gli elementi con dataset.removed
             document.querySelectorAll('div[data-removed]').forEach(element => element.remove());

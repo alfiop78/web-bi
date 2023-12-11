@@ -300,13 +300,13 @@ class MapDatabaseController extends Controller
       // $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.$q->datamartName LIMIT 10000;");
       // return response()->json($datamartResult);
       $datamartResult = DB::connection('vertica_odbc')->table("decisyon_cache.$q->datamartName")->paginate(15000);
-      // return $datamartResult;
-      $info = DB::connection('vertica_odbc')->table('COLUMNS')
-        ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
-        ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
-        ->where('TABLE_SCHEMA', 'decisyon_cache')->where('TABLE_NAME', $q->datamartName)->orderBy('ordinal_position')->get();
-      // dd($datamartResult, $info);
-      return response()->json(['columns' => $info, 'data' => $datamartResult]);
+      return $datamartResult;
+      // $info = DB::connection('vertica_odbc')->table('COLUMNS')
+      //   ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
+      //   ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
+      //   ->where('TABLE_SCHEMA', 'decisyon_cache')->where('TABLE_NAME', $q->datamartName)->orderBy('ordinal_position')->get();
+      // // dd($datamartResult, $info);
+      // return response()->json(['columns' => $info, 'data' => $datamartResult]);
     } else {
       return 'BaseTable non create';
     }

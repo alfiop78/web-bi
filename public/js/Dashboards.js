@@ -120,7 +120,6 @@ class Resources extends Dashboards {
   prepareData() {
     this.#prepareData = { cols: [], rows: [] };
     // aggiungo le colonne
-    debugger;
     for (const key of Object.keys(this.data[0])) {
       // prepareData.cols.push({ id: key, label: key });
       // console.log(key);
@@ -140,7 +139,6 @@ class Resources extends Dashboards {
       this.#prepareData.rows.push({ c: v });
     });
     // console.log(this.#prepareData);
-    debugger;
     return this.#prepareData;
   }
 
