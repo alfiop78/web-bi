@@ -121,7 +121,7 @@ function previewReady() {
       keyColumns.push({ id: column.id, column: Resource.dataTable.getColumnIndex(column.id), label: column.label, type: column.type });
     }
   });
-  // console.log(keyColumns);
+  console.log(keyColumns);
   // creo l'object che verrà messo nel terzo param di group()
   // Es.: { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
   // le metriche che hanno la proprietà dependencies: true, sono quelle NON aggiunte DIRETTAMENTE
@@ -133,7 +133,7 @@ function previewReady() {
     // quali dovranno essere visibili (quelle con dependencies:false)
     // recupero l'indice della colonna in base al suo nome
     const index = Resource.dataTable.getColumnIndex(metric.alias);
-    // TODO modificare la prop 'aggregateFn' in 'aggregation' in fase di creazione delle metriche
+    // TODO: modificare la prop 'aggregateFn' in 'aggregation' in fase di creazione delle metriche
     const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
     let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', label: metric.label };
     groupColumnsIndex.push(object);
@@ -163,7 +163,7 @@ function previewReady() {
         formatter = app[properties.type](properties.prop);
         break;
       // case 'date':
-      // TODO Da implementare
+      // TODO: Da implementare
       // let formatter = app[properties.format](properties.numberDecimal);
       // formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
       // break;
@@ -355,11 +355,13 @@ saveColumnConfig.onclick = () => {
   // if (columnIndex !== -1) Resource.dataGroup.setColumnLabel(3, 'test-3');
   // if (columnIndex !== -1) Resource.dataGroup.setColumnLabel(Resource.dataTableIndex, 'test-2');
   // cerco la colonna sia in data.group.key (colonne dimensionali) che in data.group.columns (metriche)
+  Resource.json.data.columns[Resource.columnId].label = label;
   const column = Resource.json.data.group.key.find(col => col.id === Resource.columnId);
-  if (column) {
-    column.label = label;
-  }
+  // TODO: probabilmente devo modificare anche l'id, se è stato modificato il nome nel report
+  if (column) column.label = label;
+
   const metric = Resource.json.data.group.columns.find(metric => metric.alias === Resource.columnId);
+  // TODO: probabilmente devo modificare anche l'id, se è stato modificato il nome nel report
   if (metric) metric.label = label;
 
   const format = formatterRef.options.item(formatterRef.selectedIndex).value;
@@ -382,7 +384,6 @@ saveColumnConfig.onclick = () => {
       break;
   }
   Resource.json.data.formatter[Resource.columnId] = { type, format, prop: formatterProperties };
-  // Resource.json.data.formatter = { [Resource.columnId]: { type, format, prop: formatterProperties } };
   // filtri definiti per il report
   if (filterColumn.checked === true) {
     // Proprietà Resource.json.filters
@@ -410,10 +411,10 @@ saveColumnConfig.onclick = () => {
 
   // TODO: Il containerId deve essere deciso in init-dashboard-create.js
   Resource.json.wrapper.containerId = 'chart_div';
-  console.log(Resource.json);
-  window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
+  console.log('specifications : ', Resource.json);
+  // window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
+  Resource.updateSpecifications();
   // window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
-  debugger;
   dlgConfig.close();
   previewReady();
 }

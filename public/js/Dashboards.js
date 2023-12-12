@@ -156,6 +156,26 @@ class Resources extends Dashboards {
     return this.datatype;
   }
 
+  setSpecifications(url) {
+    const params = JSON.stringify(this.json);
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    const req = new Request(url, init);
+    fetch(req)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((err) => console.error(err));
+  }
+
+  updateSpecifications() { this.setSpecifications('/fetch_api/json/sheet_specs_update'); }
+
+  saveSpecifications() { this.setSpecifications('/fetch_api/json/sheet_specs_store'); }
+
   /* prepareData() {
     this.#prepareData = { cols: [], rows: [] };
     // aggiungo le colonne

@@ -782,7 +782,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // elementRef : è l'elemento nella lista di sinistra che ho draggato
     // TODO: rinominare elementRef.id in elementRef.dataset.token
     // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
-    debugger;
     Sheet.fields = { token: elementRef.id, name: WorkBook.field.get(elementRef.id).name };
     app.addField(e.currentTarget, elementRef.id);
   }
@@ -1439,57 +1438,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  app.saveSpecifications = () => {
-    const url = '/fetch_api/json/sheet_specs_store';
-    const params = JSON.stringify(Resource.json);
-    console.log(Resource.json);
-    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
-    const req = new Request(url, init);
-    fetch(req)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        // console.log(data);
-        if (data) {
-          App.showConsole('Report salvato correttamente!', 'done', 2000);
-        } else {
-          // TODO:
-        }
-      })
-      .catch((err) => console.error(err));
-  }
-
-  /* app.updateSpecifications = () => {
-    const url = '/fetch_api/json/sheet_specs_update';
-    const params = JSON.stringify(Resource.json);
-    console.log(Resource.json);
-    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
-    const req = new Request(url, init);
-    fetch(req)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        // console.log(data);
-        if (data) {
-          App.showConsole('Report aggiornato correttamente!', 'done', 2000);
-        } else {
-          // TODO:
-        }
-      })
-      .catch((err) => console.error(err));
-  } */
-
   // creo le specifiche del report, per le colonne
   // che sono già presenti nellespecifiche NON devo sovrascrivere
   // determinate proprietà (es.: la visibilità o il raggruppamento)
   app.createSpecifications = () => {
-    debugger;
     Resource.json.token = Sheet.sheet.token;
     Resource.json.wrapper.chartType = 'Table';
     for (const [token, field] of Sheet.fields) {
@@ -1502,9 +1454,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           // colonna non presente, la aggiungo
           Resource.json.data.columns[field_id_ds] = {
             id: field_id_ds, label: field_id_ds, type: Resource.getDataType(workbookField[key].datatype),
-            properties: {
-              type: 'column', grouped: true
-            }
+            properties: { grouped: true }
           };
         }
         // json.data.group.key
@@ -1512,7 +1462,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         if (!columnFindKey) {
           Resource.json.data.group.key.push({
             id: field_id_ds, label: field_id_ds, type: Resource.getDataType(workbookField[key].datatype),
-            properties: { type: 'column', grouped: true }
+            properties: { grouped: true }
           });
         }
         // json.data.view
@@ -1533,10 +1483,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       if (!Resource.json.data.columns[metric.alias]) {
         // metrica non presente in json.data.columns
         Resource.json.data.columns[metric.alias] = {
-          id: metric.alias, label: metric.alias, type: 'number',
-          properties: {
-            type: 'metric'
-          }
+          id: metric.alias, label: metric.alias
         };
         let find = Resource.json.data.group.columns.find(value => value.id === metric.alias);
         if (!find) {
@@ -1546,7 +1493,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             aggregateFn: metric.aggregateFn,
             dependencies: metric.dependencies,
             properties: { visible: true },
-            label: metric.alias
+            label: metric.alias,
+            type: 'number'
           });
         } else {
           Resource.json.data.group.columns[metric.alias].aggregateFn = metric.aggregateFn;
@@ -1554,7 +1502,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       }
     }
     Resource.json.wrapper.chartType = 'Table';
-    app.saveSpecifications();
+    Resource.saveSpecifications();
   }
 
   app.getSpecifications = async () => {
@@ -1565,114 +1513,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         return response;
       })
       .then((response) => response.json())
-      .then((data) => {
-        debugger;
+      .then(data => {
+        console.log(data.json_value);
         Resource.json = data.json_value;
-        // if (Object.keys(data).length !== 0) {
-        //   console.info('specifiche presenti');
-        //   Resource.json = data.json_value;
-        //   Resource.specifications = true;
-        // } else {
-        //   Resource.json.token = Sheet.sheet.token;
-        //   Resource.specifications = false;
-        //   console.info('specifiche non presenti');
-        // }
-        // debugger;
-        // app.updateSpecifications();
-
-        /* return;
-        debugger;
-        Resource.json.wrapper.chartType = 'Table';
-        // se, in json.data.view esiste già questa colonna, non la modifico
-        // creo l'array di object che mi servirà per nascondere/visualizzare le colonne
-        let columnProperties = [], metricProperties = [];
-        Sheet.sheet.sheetColumns.forEach(col => {
-          const column = Resource.json.data.view.find(columnName => columnName.id === col);
-          const visible = (column) ? column.properties.visible : true;
-          columnProperties.push({ id: col, properties: { visible } });
-        });
-        // console.log(columnProperties);
-        // debugger;
-        Sheet.sheet.sheetMetrics.forEach(metric => {
-          let metricFind = Resource.json.data.group.columns.find(name => name.alias === metric.alias);
-          if (!metric.dependencies) {
-            if (metricFind) {
-              metric.properties = { visible: metricFind.properties.visible };
-              metric.label = metricFind.label;
-            } else {
-              metric.properties = { visible: true };
-              metric.label = metric.alias;
-            }
-          }
-          metricProperties.push(metric);
-        });
-        // console.log(metricProperties);
-        // debugger;
-
-        let columnsSet = new Set();
-        // se la colonna in ciclo è presente in 'Sheet.sheet.sheetMetrics' la imposto come type: 'number' altrimenti 'string'
-        for (const field of Object.keys(Resource.data[0])) {
-          const findMetricIndex = Sheet.sheet.sheetMetrics.findIndex(metric => metric.alias === field);
-          // type = (findMetricIndex === -1) ? 'string' : 'number';
-          // if (Dashboard.json.data.columns[field]) {
-          //   type = Dashboard.json.data.columns[field].type;
-          // } else {
-          //   type = (findMetricIndex === -1) ? 'string' : 'number';
-          // }
-          const columnType = (findMetricIndex === -1) ? 'column' : 'metric';
-          if (Resource.json.data.columns[field]) {
-            // il data.columns già esiste, non sovrascrivo la prop 'label' e 'type'
-            columnsSet.add({
-              id: field,
-              label: Resource.json.data.columns[field].label,
-              type: Resource.json.data.columns[field].type,
-              properties: { columnType }, other: 'altre proprietà...'
-            });
-          } else {
-            type = (findMetricIndex === -1) ? 'string' : 'number';
-            columnsSet.add({ id: field, label: field, type, properties: { columnType }, other: 'altre proprietà...' });
-          }
-        }
-        // Salvataggio del json
-        // converto il columnsSet (array) in Object
-        columnsSet.forEach(col => Resource.json.data.columns[col.id] = col);
-        // creo un array con le colonne da visualizzare in fase di inizializzazione del dashboard
-        // Dashboard.json.data.view = columns;
-        // la prop 'names' mi servirà per popolare la DataView dopo il group()
-        // Dashboard.json.data.view = columnProperties;
-        Resource.json.data.view = columnProperties;
-        // nel data.group.columns vanno messe tutte le metriche, come array di object
-        Resource.json.data.group.columns = metricProperties;
-        // Dashboard.json.data.group.columns = Sheet.sheet.sheetMetrics;
-        let keys = [];
-        // console.log(columnsSet);
-        // salvo tutte le colonne (colonne dimensionali, non metriche) in
-        // json.data.group.key.
-        [...columnsSet].forEach((col, index) => {
-          if (col.properties.columnType === 'column') {
-            const columnFind = Resource.json.data.group.key.find(columnName => columnName.id === col.id);
-            // se la colonna in ciclo è già presente in json.data.group.key non sovrascrivo la proprieta
-            // 'grouped', questa proprietà viene impostata quando l'utente nasconde/visualizza una colonna
-            if (columnFind) {
-              col.properties.grouped = columnFind.properties.grouped;
-            } else {
-              col.properties.grouped = true;
-              col.label = col.id;
-            }
-            // const grouped = (column) ? column.properties.grouped : true;
-            // keys.push({ id: col.id, index, properties: { grouped } });
-            keys.push(col);
-          }
-        });
-        Resource.json.data.group.key = keys;
-        console.log('save sheet_specs : ', Resource.json);
-        google.charts.setOnLoadCallback(drawDatamart());
-        // salvo lo sheet_specs in storage e sul DB.
-        // Tutte le eventuali modifiche al json verranno salvate in storage, quando l'utente clicca
-        // su "Salva" (il report) recupero i dati dallo storage e salvo le specs su DB.
-        window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
-        debugger;
-        // app.saveSheetSpecs(); */
       })
       .catch((err) => console.error(err));
   }
@@ -1734,10 +1577,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       }); */
     // end chiamata in GET
 
-    // NOTE: in fase di apertura della preview, le specifiche sono sicuramente già presenti.
-    // Quindi è inutile recuperare le columns dalla risposta di questa fetch
-    Resource = new Resources('preview-datamart');
-    await app.getSpecifications();
     let partialData = [];
     await fetch(`/fetch_api/${sheet.id}/preview?page=1`)
       .then((response) => {
@@ -1778,11 +1617,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         } else {
           // Non sono presenti altre pagine, visualizzo il dashboard
           Resource.data = partialData;
-          // TODO: le specifiche, in questo caso (nella preview), sono già presenti.
-          // Potrei chiamare getSpecifications(), con await, anche prima di questa fetch
-          // senza aspettare i dati dal datamart, popolare Resource.json e invocare qui la
-          // caalback di GoogleChart
-          // app.getSpecifications();
           google.charts.setOnLoadCallback(drawDatamart());
         }
       })
@@ -1794,9 +1628,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   // apertura nuovo Sheet, viene recuperato dal localStorage
   app.sheetSelected = async (e) => {
-    // delete Sheet.sheet;
-    // Sheet = undefined;
-    // console.log(Sheet);
+    const sheetToken = e.currentTarget.dataset.token;
     document.getElementById('sheet-name').dataset.value = '';
     document.getElementById('sheet-name').innerText = 'Titolo';
     document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
@@ -1833,9 +1665,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     });
     // Sheet.save();
     app.dialogSheet.close();
+    // in fase di apertura della preview, le specifiche sono sicuramente già presenti.
+    Resource = new Resources('preview-datamart');
+    await app.getSpecifications();
     // TODO: verifico se il datamart, per lo Sheet selezionato, è già presente sul DB.
     // In caso positivo lo apro in preview-datamart.
-    app.sheetPreview(e.currentTarget.dataset.token);
+    debugger;
+    app.sheetPreview(sheetToken);
     // Imposto la prop 'edit' = true perchè andrò ad operare su uno Sheet aperto
     Sheet.edit = true;
     document.querySelector('#btn-sheet-save').disabled = false;
@@ -1984,13 +1820,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     let fields = new Map();
     let metrics = new Map(), advancedMetrics = new Map(), compositeMetrics = new Map();
     let filters = new Map();
-    let object = {};
     Resource = new Resources('preview-datamart');
-    // TODO: qui, le specifiche, le devo ricreare perchè sto elaborando/rielaborando il report
+    // qui, le specifiche, le devo ricreare perchè sto elaborando o rielaborando il report
     // e le specifiche potrebbero essere cambiate
     await app.createSpecifications();
-    console.log('test', Resource.specifications);
-    debugger;
     // per ogni 'fields' aggiunto a Sheet.fields ne recupero le proprietà 'field', 'tableAlias' e 'name'
     for (const [token, field] of Sheet.fields) {
       // verifico le tabelle da includere in tables Sheet.tables
@@ -2109,53 +1942,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       });
   }
 
-  /* app.process = async (process) => {
-    // lo Sheet.id può essere già presente quando è stato aperto
-    if (!Sheet.id) Sheet.id = Date.now();
-    process.id = Sheet.id;
-    // console.log(process);
-    app.saveSheet();
-    // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
-    const params = JSON.stringify(process);
-    // console.log(params);
-    // App.showConsole('Elaborazione in corso...', 'info');
-    // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
-    const url = "/fetch_api/cube/sheet";
-    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
-    const req = new Request(url, init);
-    await fetch(req)
-      .then((response) => {
-        // TODO Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then(data => {
-        if (data) {
-          console.log('data : ', data);
-          debugger;
-          Dashboard.data = data;
-          Dashboard.ref = 'preview-datamart';
-          app.getSpecifications();
-          google.charts.setOnLoadCallback(drawDatamart());
-          // Al termine del process elimino dalle dropzones gli elementi che sono stati
-          // eliminati dallo Sheet, quindi gli elementi con dataset.removed
-          document.querySelectorAll('div[data-removed]').forEach(element => element.remove());
-          // Allo stesso modo, elimino il dataset.adding per rendere "finali" gli elementi aggiunti
-          // al report in fase di edit
-          document.querySelectorAll('div[data-adding]').forEach(element => delete element.dataset.adding);
-        } else {
-          // TODO Da testare se il codice arriva qui o viene gestito sempre dal catch()
-          console.debug('FX non è stata creata');
-          App.showConsole('Errori nella creazione del datamart', 'error', 5000);
-        }
-      })
-      .catch(err => {
-        App.showConsole(err, 'error', 3000);
-        console.error(err);
-      });
-  } */
-
   // tasto ELABORA
   app.process = async (process) => {
     // lo Sheet.id può essere già presente quando è stato aperto
@@ -2174,7 +1960,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     let partialData = [];
     await fetch(req)
       .then((response) => {
-        // TODO Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
+        // TODO: Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
         if (!response.ok) { throw Error(response.statusText); }
         return response;
       })
