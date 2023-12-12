@@ -1439,8 +1439,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  app.saveSheetSpecs = () => {
-    const url = (Resource.specifications === true) ? '/fetch_api/json/sheet_specs_update' : '/fetch_api/json/sheet_specs_store';
+  app.saveSpecifications = () => {
+    const url = '/fetch_api/json/sheet_specs_store';
     const params = JSON.stringify(Resource.json);
     console.log(Resource.json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
@@ -1462,71 +1462,99 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       .catch((err) => console.error(err));
   }
 
-  app.createSheetSpecs = () => {
-    console.log(Resource.columns);
-    Resource.json.wrapper.chartType = 'Table';
-    // creo resource.json.data.columns : {}
-    let object = {}, datatype;
-    Resource.columns.forEach(column => {
-      const findMetricIndex = Sheet.sheet.sheetMetrics.findIndex(metric => metric.alias === column.column_name);
-      const columnType = (findMetricIndex === -1) ? 'column' : 'metric';
-      // Imposto i datatype di Google Chart
-      // TODO: completare i case per i datatype
-      switch (column.type_name) {
-        case 'Varchar':
-        case 'Char':
-          datatype = 'string';
-          break;
-        default:
-          datatype = 'number';
-          break;
-      }
-      object[column.column_name] = {
-        id: column.column_name,
-        label: column.column_name,
-        type: datatype,
-        properties: {
-          grouped: true,
-          columnType
-        }
-      };
-    });
-    // oggetto per impostare il datatype nelle colonne, in prepareData
-    Resource.json.data.columns = object;
-    let keys = [];
-    for (const [key, value] of Object.entries(Resource.json.data.columns)) {
-      // group.key
-      if (value.properties.columnType === 'column') keys.push(value);
-    }
-    Resource.json.data.group.key = keys;
-    debugger;
-    // creo l'array di object che mi servirà per nascondere/visualizzare le colonne
-    let columnProperties = [], metricProperties = [];
-    Sheet.sheet.sheetColumns.forEach(col => {
-      // columnProperties.push({ id: col, properties: { visible: true } });
-      Resource.json.data.view.push({ id: col, properties: { visible: true } });
-    });
-    console.log(Resource.json.data.view);
-    // console.log(columnProperties);
-    // creo un array con le colonne da visualizzare in fase di inizializzazione del dashboard
-    // la prop 'names' mi servirà per popolare la DataView dopo il group()
-    // Resource.json.data.view = columnProperties;
-    // metriche
-    debugger;
-    Sheet.sheet.sheetMetrics.forEach(metric => {
-      if (!metric.dependencies) {
-        metric.properties = { visible: true };
-        metric.label = metric.alias;
-        Resource.json.data.group.columns.push(metric);
-      }
-      // metricProperties.push(metric);
-      // Resource.json.data.group.columns = metricProperties;
-    });
-    // console.log(metricProperties);
-    console.log(Resource.json.data.group.columns);
-    // nel data.group.columns vanno messe tutte le metriche, come array di object
-    // Resource.json.data.group.columns = metricProperties;
+  /* app.updateSpecifications = () => {
+    const url = '/fetch_api/json/sheet_specs_update';
+    const params = JSON.stringify(Resource.json);
     console.log(Resource.json);
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    const req = new Request(url, init);
+    fetch(req)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        // console.log(data);
+        if (data) {
+          App.showConsole('Report aggiornato correttamente!', 'done', 2000);
+        } else {
+          // TODO:
+        }
+      })
+      .catch((err) => console.error(err));
+  } */
+
+  // creo le specifiche del report, per le colonne
+  // che sono già presenti nellespecifiche NON devo sovrascrivere
+  // determinate proprietà (es.: la visibilità o il raggruppamento)
+  app.createSpecifications = () => {
+    debugger;
+    Resource.json.token = Sheet.sheet.token;
+    Resource.json.wrapper.chartType = 'Table';
+    for (const [token, field] of Sheet.fields) {
+      const workbookField = WorkBook.field.get(token).field;
+      Object.keys(WorkBook.field.get(token).field).forEach(key => {
+        console.log(key);
+        let field_id_ds = (key === 'id') ? `${field}_${key}` : field;
+        // Se la colonna è già presente è stata modificata in init-sheet quando si editano le colonne
+        if (!Resource.json.data.columns[field_id_ds]) {
+          // colonna non presente, la aggiungo
+          Resource.json.data.columns[field_id_ds] = {
+            id: field_id_ds, label: field_id_ds, type: Resource.getDataType(workbookField[key].datatype),
+            properties: {
+              type: 'column', grouped: true
+            }
+          };
+        }
+        // json.data.group.key
+        const columnFindKey = Resource.json.data.group.key.find(value => value.id === field_id_ds);
+        if (!columnFindKey) {
+          Resource.json.data.group.key.push({
+            id: field_id_ds, label: field_id_ds, type: Resource.getDataType(workbookField[key].datatype),
+            properties: { type: 'column', grouped: true }
+          });
+        }
+        // json.data.view
+        const columnFindView = Resource.json.data.view.find(value => value.id === field_id_ds);
+        if (!columnFindView) {
+          // la colnna _id la nascondo dalla DataView
+          const visible = (key === 'id') ? false : true;
+          Resource.json.data.view.push({ id: field_id_ds, properties: { visible } });
+        }
+      });
+      // for (const [key, object] of Object.entries(WorkBook.field.get(token).field)) {
+      // }
+      console.log(Resource.json.data.columns);
+      console.log(Resource.json.data.group.key);
+      console.log(Resource.json.data.view);
+    }
+    for (const [token, metric] of Sheet.metrics) {
+      if (!Resource.json.data.columns[metric.alias]) {
+        // metrica non presente in json.data.columns
+        Resource.json.data.columns[metric.alias] = {
+          id: metric.alias, label: metric.alias, type: 'number',
+          properties: {
+            type: 'metric'
+          }
+        };
+        let find = Resource.json.data.group.columns.find(value => value.id === metric.alias);
+        if (!find) {
+          Resource.json.data.group.columns.push({
+            token,
+            alias: metric.alias,
+            aggregateFn: metric.aggregateFn,
+            dependencies: metric.dependencies,
+            properties: { visible: true },
+            label: metric.alias
+          });
+        } else {
+          Resource.json.data.group.columns[metric.alias].aggregateFn = metric.aggregateFn;
+        }
+      }
+    }
+    Resource.json.wrapper.chartType = 'Table';
+    app.saveSpecifications();
   }
 
   app.getSpecifications = async () => {
@@ -1538,77 +1566,20 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       })
       .then((response) => response.json())
       .then((data) => {
-        if (Object.keys(data).length !== 0) {
-          console.info('specifiche presenti');
-          Resource.json = data.json_value;
-          Resource.specifications = true;
-        } else {
-          Resource.json.token = Sheet.sheet.token;
-          Resource.specifications = false;
-          console.info('specifiche non presenti');
-        }
-        for (const [token, field] of Sheet.fields) {
-          const workbookField = WorkBook.field.get(token).field;
-          Object.keys(WorkBook.field.get(token).field).forEach(key => {
-            console.log(key);
-            let field_id_ds = (key === 'id') ? `${field}_${key}` : field;
-            if (!Resource.json.data.columns[field_id_ds]) {
-              // non presente
-              Resource.json.data.columns[field_id_ds] = {
-                id: field_id_ds, label: field_id_ds, type: Resource.getDataType(workbookField[key].datatype),
-                properties: {
-                  type: 'column', grouped: true
-                }
-              };
-            };
-            // json.data.group.key
-            const columnFindKey = Resource.json.data.group.key.find(value => value.id === field_id_ds);
-            if (!columnFindKey) {
-              Resource.json.data.group.key.push({
-                id: field_id_ds, label: field_id_ds, type: Resource.getDataType(workbookField[key].datatype),
-                properties: { type: 'column', grouped: true }
-              });
-            }
-            // json.data.view
-            const columnFindView = Resource.json.data.view.find(value => value.id === field_id_ds);
-            if (!columnFindView) {
-              // la colnna _id la nascondo dalla DataView
-              const visible = (key === 'id') ? false : true;
-              Resource.json.data.view.push({ id: field_id_ds, properties: { visible } });
-            }
-          });
-          // for (const [key, object] of Object.entries(WorkBook.field.get(token).field)) {
-          // }
-          console.log(Resource.json.data.columns);
-          console.log(Resource.json.data.group.key);
-          console.log(Resource.json.data.view);
-        }
-        for (const [token, metric] of Sheet.metrics) {
-          if (!Resource.json.data.columns[metric.alias]) {
-            // metrica non presente in json.data.columns
-            Resource.json.data.columns[metric.alias] = {
-              id: metric.alias, label: metric.alias, type: 'number',
-              properties: {
-                type: 'metric'
-              }
-            };
-            let find = Resource.json.data.group.columns.find(value => value.id === metric.alias);
-            if (!find) {
-              Resource.json.data.group.columns.push({
-                token,
-                alias: metric.alias,
-                aggregateFn: metric.aggregateFn,
-                dependencies: metric.dependencies,
-                properties: { visible: true },
-                label: metric.alias
-              });
-            } else {
-              Resource.json.data.group.columns[metric.alias].aggregateFn = metric.aggregateFn;
-            }
-          }
-        }
-        Resource.json.wrapper.chartType = 'Table';
-        app.saveSheetSpecs();
+        debugger;
+        Resource.json = data.json_value;
+        // if (Object.keys(data).length !== 0) {
+        //   console.info('specifiche presenti');
+        //   Resource.json = data.json_value;
+        //   Resource.specifications = true;
+        // } else {
+        //   Resource.json.token = Sheet.sheet.token;
+        //   Resource.specifications = false;
+        //   console.info('specifiche non presenti');
+        // }
+        // debugger;
+        // app.updateSpecifications();
+
         /* return;
         debugger;
         Resource.json.wrapper.chartType = 'Table';
@@ -1763,7 +1734,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       }); */
     // end chiamata in GET
 
-    // FIX: in fase di apertura della preview, le specifiche sono sicuramente già presenti.
+    // NOTE: in fase di apertura della preview, le specifiche sono sicuramente già presenti.
     // Quindi è inutile recuperare le columns dalla risposta di questa fetch
     Resource = new Resources('preview-datamart');
     await app.getSpecifications();
@@ -1778,7 +1749,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       .then(async (paginateData) => {
         console.log(paginateData);
         console.log(paginateData.data);
-        // Dashboard.data = paginateData.data;
         // funzione ricorsiva fino a quando è presente next_page_url
         let recursivePaginate = async (url) => {
           // console.log(url);
@@ -2016,8 +1986,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     let filters = new Map();
     let object = {};
     Resource = new Resources('preview-datamart');
-    await app.getSpecifications();
-    // app.getSpecifications();
+    // TODO: qui, le specifiche, le devo ricreare perchè sto elaborando/rielaborando il report
+    // e le specifiche potrebbero essere cambiate
+    await app.createSpecifications();
     console.log('test', Resource.specifications);
     debugger;
     // per ogni 'fields' aggiunto a Sheet.fields ne recupero le proprietà 'field', 'tableAlias' e 'name'
