@@ -157,8 +157,8 @@ class Resources extends Dashboards {
   }
 
   saveSpecifications() {
-    const url = (this.jsonExists === true) ? '/fetch_api/json/sheet_specs_update' : '/fetch_api/json/sheet_specs_store';
     debugger;
+    const url = (this.jsonExists === true) ? '/fetch_api/json/sheet_specs_update' : '/fetch_api/json/sheet_specs_store';
     const params = JSON.stringify(this.json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);

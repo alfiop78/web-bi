@@ -413,7 +413,7 @@ saveColumnConfig.onclick = () => {
   Resource.json.wrapper.containerId = 'chart_div';
   console.log('specifications : ', Resource.json);
   // window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
-  Resource.updateSpecifications();
+  Resource.saveSpecifications();
   // window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
   dlgConfig.close();
   previewReady();
