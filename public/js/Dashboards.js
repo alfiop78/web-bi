@@ -145,8 +145,8 @@ class Resources extends Dashboards {
   getDataType(datatype) {
     this.datatype;
     switch (datatype) {
-      case 'Varchar':
-      case 'Char':
+      case 'varchar':
+      case 'char':
         this.datatype = 'string';
         break;
       default:
@@ -156,7 +156,9 @@ class Resources extends Dashboards {
     return this.datatype;
   }
 
-  setSpecifications(url) {
+  saveSpecifications() {
+    const url = (this.jsonExists === true) ? '/fetch_api/json/sheet_specs_update' : '/fetch_api/json/sheet_specs_store';
+    debugger;
     const params = JSON.stringify(this.json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
@@ -170,11 +172,8 @@ class Resources extends Dashboards {
         console.log(data);
       })
       .catch((err) => console.error(err));
+
   }
-
-  updateSpecifications() { this.setSpecifications('/fetch_api/json/sheet_specs_update'); }
-
-  saveSpecifications() { this.setSpecifications('/fetch_api/json/sheet_specs_store'); }
 
   /* prepareData() {
     this.#prepareData = { cols: [], rows: [] };

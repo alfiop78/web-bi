@@ -367,6 +367,7 @@ class WorkBooks {
       // non sono in edit mode, salvo sempre 'updated_at'
       this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
     }
+    debugger;
     WorkBookStorage.save(this.workBook);
   }
 

@@ -923,7 +923,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const tableSpecs = JSON.parse(window.sessionStorage.getItem(table));
     // cerco la colonna per poterne recuperare il datatype
     const fieldSpecs = tableSpecs.find(column => column.column_name === field);
-    const datatype = fieldSpecs.type_name;
+    const datatype = fieldSpecs.type_name.toLowerCase();
     const id = document.querySelector('#textarea-column-id');
     const ds = document.querySelector('#textarea-column-ds');
     app.addMark({ table, alias, field, datatype }, id);
@@ -947,6 +947,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const column = WorkBook.field.get(e.currentTarget.dataset.token);
     // TODO: Il codice che crea il mark, per le formule, è ripetuto, sia qui che
     // per quanto riguarda i filtri, scrivere una fn per non duplicare il codice
+    debugger;
     column.field.id.formula.forEach(element => {
       if (element.hasOwnProperty('field')) {
         // determino il <mark>
@@ -959,6 +960,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         mark.dataset.tableAlias = element.table_alias;
         mark.dataset.table = element.table;
         mark.dataset.field = element.field;
+        mark.dataset.datatype = element.datatype;
         mark.innerText = element.field;
         small.innerText = element.table;
         textAreaId.appendChild(span);
@@ -971,6 +973,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         textAreaId.appendChild(span);
       }
     });
+
     column.field.ds.formula.forEach(element => {
       if (element.hasOwnProperty('field')) {
         // determino il <mark>
@@ -983,6 +986,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         mark.dataset.tableAlias = element.table_alias;
         mark.dataset.table = element.table;
         mark.dataset.field = element.field;
+        mark.dataset.datatype = element.datatype;
         mark.innerText = element.field;
         small.innerText = element.table;
         textAreaDs.appendChild(span);
@@ -1137,7 +1141,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         // let pos = column.DATA_TYPE.indexOf('(');
         // let type = (pos !== -1) ? column.DATA_TYPE.substring(0, pos) : column.DATA_TYPE;
         // li.dataset.type = type;
-        li.dataset.datatype = column.type_name;
+        li.dataset.datatype = column.type_name.toLowerCase();
         // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
         // li.dataset.id = key;
         // span.id = key;
@@ -1170,7 +1174,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const field = e.currentTarget.dataset.field;
     const table = e.currentTarget.dataset.table;
     const alias = e.currentTarget.dataset.alias;
-    debugger;
     const datatype = e.currentTarget.dataset.datatype;
     console.log(field);
     // textarea
@@ -1505,7 +1508,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     Resource.saveSpecifications();
   }
 
-  app.getSpecifications = async () => {
+  app.checkSpecifications = async () => {
     // Verifico se le specifiche per questo report già esistono.
     await fetch(`/fetch_api/name/${Sheet.sheet.token}/sheet_specs_show`)
       .then((response) => {
@@ -1514,8 +1517,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       })
       .then((response) => response.json())
       .then(data => {
-        console.log(data.json_value);
-        Resource.json = data.json_value;
+        if (Object.keys(data).length !== 0) {
+          Resource.json = data.json_value;
+          Resource.jsonExists = true;
+        } else {
+          Resource.jsonExists = false;
+        }
+        app.createSpecifications()
       })
       .catch((err) => console.error(err));
   }
@@ -1524,6 +1532,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // console.log(token);
     // recupero l'id dello Sheet
     const sheet = JSON.parse(window.localStorage.getItem(token));
+    debugger;
     if (!sheet.id) return false;
     console.log(sheet);
     // debugger;
@@ -1667,7 +1676,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     app.dialogSheet.close();
     // in fase di apertura della preview, le specifiche sono sicuramente già presenti.
     Resource = new Resources('preview-datamart');
-    await app.getSpecifications();
+    await app.checkSpecifications();
     // TODO: verifico se il datamart, per lo Sheet selezionato, è già presente sul DB.
     // In caso positivo lo apro in preview-datamart.
     debugger;
@@ -1823,7 +1832,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     Resource = new Resources('preview-datamart');
     // qui, le specifiche, le devo ricreare perchè sto elaborando o rielaborando il report
     // e le specifiche potrebbero essere cambiate
-    await app.createSpecifications();
+    await app.checkSpecifications();
     // per ogni 'fields' aggiunto a Sheet.fields ne recupero le proprietà 'field', 'tableAlias' e 'name'
     for (const [token, field] of Sheet.fields) {
       // verifico le tabelle da includere in tables Sheet.tables
@@ -2989,7 +2998,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       // scrivo il tipo di dato senza specificare la lunghezza, int(8) voglio che mi scriva solo int
       // let pos = value.DATA_TYPE.indexOf('(');
       // let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-      span.dataset.datatype = value.type_name;
+      span.dataset.datatype = value.type_name.toLowerCase();
       // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
       li.dataset.id = key;
       // span.id = key;
@@ -3018,7 +3027,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
       // let pos = value.DATA_TYPE.indexOf('(');
       // let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-      span.dataset.datatype = value.type_name;
+      span.dataset.datatype = value.type_name.toLowerCase();
       // span.dataset.type = type;
       // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
       li.dataset.id = key;
@@ -3040,7 +3049,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // const token = rand().substring(0, 7);
     let fieldId = { sql: [], formula: [], datatype: null };
     let fieldDs = { sql: [], formula: [], datatype: null };
-    debugger;
     // colonna _id
     document.querySelectorAll('#textarea-column-id *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
@@ -3048,7 +3056,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         // il campo potrebbe appartenere ad una tabella diversa da quella selezionata
         // quindi  aggiungo anche il table alias
         fieldId.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
-        fieldId.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
+        fieldId.formula.push(
+          {
+            table_alias: element.dataset.tableAlias,
+            table: element.dataset.table,
+            field: element.dataset.field,
+            datatype: element.dataset.datatype
+          });
         fieldId.datatype = element.dataset.datatype;
       } else {
         fieldId.sql.push(element.innerText.trim());
@@ -3060,7 +3074,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         fieldDs.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
-        fieldDs.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
+        fieldDs.formula.push(
+          {
+            table_alias: element.dataset.tableAlias,
+            table: element.dataset.table,
+            field: element.dataset.field,
+            datatype: element.dataset.datatype
+          });
         fieldDs.datatype = element.dataset.datatype;
       } else {
         fieldDs.sql.push(element.innerText.trim());
@@ -3084,8 +3104,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         }
       }
     };
-    debugger;
     WorkBook.fields = token;
+    debugger;
     app.dialogColumns.close();
     WorkBook.checkChanges(token);
   }
@@ -3330,7 +3350,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         li.dataset.field = column.column_name;
         // li.dataset.key = column.CONSTRAINT_NAME;
         span.innerText = column.column_name;
-        span.dataset.datatype = column.type_name;
+        span.dataset.datatype = column.type_name.toLowerCase();
         // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
         // li.dataset.fn = 'addFieldToJoin';
         details.appendChild(li);
