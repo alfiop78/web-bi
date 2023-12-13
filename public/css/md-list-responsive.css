@@ -99,6 +99,10 @@ li.icon > span{
   max-height: 500px;
 }
 
+.relative-ul.min-height {
+  min-height: 280px;
+}
+
 .relative-ul > ul, .relative-ul > dl {
   position: absolute;
   border-radius: 2px;

@@ -99,7 +99,7 @@ var Resource = new Resources();
   // TODO: potrei spostarla in Dashboards.js
   app.specsSave = () => {
     const url = `/fetch_api/json/sheet_specs_update`;
-    const params = JSON.stringify(Dashboard.json);
+    const params = JSON.stringify(Resource.json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
     fetch(req)
@@ -219,7 +219,7 @@ var Resource = new Resources();
       .then(data => {
         console.log(data);
         // debugger;
-        Dashboard.data = data;
+        Resource.data = data;
         google.charts.setOnLoadCallback(app.drawTable(sheet.token));
       })
       .catch(err => {
@@ -238,7 +238,7 @@ var Resource = new Resources();
         console.log(paginateData);
         console.log(paginateData.data);
         // debugger;
-        // Dashboard.data = paginateData.data;
+        // Resource.data = paginateData.data;
         // funzione ricorsiva fino a quando è presente next_page_url
         let recursivePaginate = async (url) => {
           // console.log(url);
@@ -254,7 +254,7 @@ var Resource = new Resources();
             } else {
               // Non sono presenti altre pagine, visualizzo il dashboard
               console.log('tutte le paginate completate :', partialData);
-              Dashboard.data = partialData;
+              Resource.data = partialData;
               google.charts.setOnLoadCallback(app.drawTable(sheet.token));
             }
           }).catch((err) => {
@@ -267,7 +267,7 @@ var Resource = new Resources();
           recursivePaginate(paginateData.next_page_url);
         } else {
           // Non sono presenti altre pagine, visualizzo il dashboard
-          Dashboard.data = partialData;
+          Resource.data = partialData;
           google.charts.setOnLoadCallback(app.drawTable(sheet.token));
         }
       })
@@ -289,8 +289,8 @@ var Resource = new Resources();
       })
       .then((response) => response.json())
       .then((data) => {
-        Dashboard.json = data.json_value;
-        console.log('save sheet_specs : ', Dashboard.json);
+        Resource.json = data.json_value;
+        console.log('save sheet_specs : ', Resource.json);
         debugger;
         app.getData(token);
         // un Map() di ref aggiunti alla pagina, questo verrà salvato nel json 'dashboard-token'
@@ -328,35 +328,35 @@ var Resource = new Resources();
   app.drawTable = (sheetToken) => {
     console.log(sheetToken);
     // aggiungo i filtri se sono stati impostati nel preview sheet
-    Dashboard.json.filters.forEach(filter => app.createTemplateFilter(filter));
+    Resource.json.filters.forEach(filter => app.createTemplateFilter(filter));
     // impostazione del legame tra i filtri (bind)
     // WARN: probabilmente qui, se non ci sono filtri, può verificarsi un errore
     app.setDashboardBind();
 
-    Dashboard.dataTable = new google.visualization.DataTable(Dashboard.prepareData());
-    // Dashboard.DOMref = new google.visualization.Table(document.getElementById('chart_div'));
-    Dashboard.DOMref = new google.visualization.Table(Resource.ref);
+    Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
+    // Resource.DOMref = new google.visualization.Table(document.getElementById('chart_div'));
+    Resource.DOMref = new google.visualization.Table(Resource.ref);
     // NOTE: utilizzo della stessa logica utilizzata in init-sheet.js
     let keyColumns = [];
-    Dashboard.json.data.group.key.forEach(column => {
+    Resource.json.data.group.key.forEach(column => {
       if (column.properties.grouped) {
-        keyColumns.push({ id: column.id, column: Dashboard.dataTable.getColumnIndex(column.id), label: column.label, type: column.type });
+        keyColumns.push({ id: column.id, column: Resource.dataTable.getColumnIndex(column.id), label: column.label, type: column.type });
       }
     });
     let groupColumnsIndex = [];
-    Dashboard.json.data.group.columns.forEach(metric => {
-      const index = Dashboard.dataTable.getColumnIndex(metric.alias);
+    Resource.json.data.group.columns.forEach(metric => {
+      const index = Resource.dataTable.getColumnIndex(metric.alias);
       const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
       let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', label: metric.label };
       groupColumnsIndex.push(object);
     });
 
     // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
-    Dashboard.dataGroup = new google.visualization.data.group(
-      Dashboard.dataTable, keyColumns, groupColumnsIndex
+    Resource.dataGroup = new google.visualization.data.group(
+      Resource.dataTable, keyColumns, groupColumnsIndex
     );
 
-    for (const [columnId, properties] of Object.entries(Dashboard.json.data.formatter)) {
+    for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
       let formatter = null;
       switch (properties.type) {
         case 'number':
@@ -365,25 +365,25 @@ var Resource = new Resources();
         // case 'date':
         // TODO Da implementare
         // let formatter = app[properties.format](properties.numberDecimal);
-        // formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
+        // formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
         // break;
         default:
           // debugger;
           break;
       }
-      if (formatter) formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
+      if (formatter) formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
     }
 
-    Dashboard.dataViewGrouped = new google.visualization.DataView(Dashboard.dataGroup);
+    Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
 
     let viewColumns = [], viewMetrics = [];
-    Dashboard.json.data.view.forEach(column => {
-      if (column.properties.visible) viewColumns.push(Dashboard.dataGroup.getColumnIndex(column.id));
+    Resource.json.data.view.forEach(column => {
+      if (column.properties.visible) viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
     });
     // dalla dataGroup, recupero gli indici di colonna delle metriche
-    Dashboard.json.data.group.columns.forEach(metric => {
+    Resource.json.data.group.columns.forEach(metric => {
       if (!metric.dependencies && metric.properties.visible) {
-        const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
+        const index = Resource.dataGroup.getColumnIndex(metric.alias);
 
         // Implementazione della func 'calc' per le metriche composite.
         if (metric.type === 'composite') {
@@ -414,8 +414,8 @@ var Resource = new Resources();
             // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
             let resultFormatted;
             // formattazione della cella con formatValue()
-            if (Dashboard.json.data.formatter[metric.alias]) {
-              const metricFormat = Dashboard.json.data.formatter[metric.alias];
+            if (Resource.json.data.formatter[metric.alias]) {
+              const metricFormat = Resource.json.data.formatter[metric.alias];
               let formatter;
               formatter = app[metricFormat.type](metricFormat.prop);
               resultFormatted = (result) ? formatter.formatValue(result) : '-';
@@ -429,20 +429,20 @@ var Resource = new Resources();
           viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
         } else {
           viewMetrics.push(index);
-          Dashboard.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
-          // console.log(Dashboard.dataGroup.getColumnProperty(index, 'className'));
+          Resource.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
+          // console.log(Resource.dataGroup.getColumnProperty(index, 'className'));
         }
       }
     });
     // concateno i due array che popoleranno la DataView.setColumns()
     let viewDefined = viewColumns.concat(viewMetrics)
-    // Dashboard.dataGroup.setColumnProperty(0, 'className', 'cssc1')
-    // console.log(Dashboard.dataGroup.getColumnProperty(0, 'className'));
-    // console.log(Dashboard.dataGroup.getColumnProperties(0));
-    Dashboard.dataViewGrouped.setColumns(viewDefined);
-    // console.info('DataView', Dashboard.dataViewGrouped);
-    Dashboard.DOMref.draw(Dashboard.dataViewGrouped, Dashboard.json.wrapper.options);
-    // Dashboard.DOMref.draw(Dashboard.dataViewGrouped, options);
+    // Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
+    // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
+    // console.log(Resource.dataGroup.getColumnProperties(0));
+    Resource.dataViewGrouped.setColumns(viewDefined);
+    // console.info('DataView', Resource.dataViewGrouped);
+    Resource.DOMref.draw(Resource.dataViewGrouped, Resource.json.wrapper.options);
+    // Resource.DOMref.draw(Resource.dataViewGrouped, options);
   }
 
   app.setDashboardBind = () => {
@@ -456,16 +456,16 @@ var Resource = new Resources();
         bind.push(subBind);
       }
     });
-    Dashboard.json.bind = bind;
+    Resource.json.bind = bind;
     app.specsSave();
   }
 
   app.btnRemoveFilter = (e) => {
     const filterId = e.target.dataset.id;
-    // const f = Dashboard.json.filters.find(filter => filter.containerId === filterId);
+    // const f = Resource.json.filters.find(filter => filter.containerId === filterId);
     // Cerco, con findIndex(), l'indice corrispondente all'elemento da rimuovere
-    const index = Dashboard.json.filters.findIndex(filter => filter.containerId === filterId);
-    Dashboard.json.filters.splice(index, 1);
+    const index = Resource.json.filters.findIndex(filter => filter.containerId === filterId);
+    Resource.json.filters.splice(index, 1);
     // lo rimuovo anche dal DOM
     const filterRef = document.getElementById(filterId);
     filterRef.parentElement.remove();
@@ -544,16 +544,16 @@ var Resource = new Resources();
     // ... oldFilter lo inserisco nel .filter-container di provenienza
     parentDiv.insertBefore(elementRef.parentElement, oldFilter.parentElement);
     // Salvo tutti i filtri nell'ordine in cui sono stati spostati con drag&drop
-    Dashboard.json.filters = [];
+    Resource.json.filters = [];
     parentDiv.querySelectorAll('.filter-container').forEach(filter => {
       const filterDiv = filter.querySelector('.preview-filter');
-      Dashboard.json.filters.push({
+      Resource.json.filters.push({
         containerId: filterDiv.id,
         filterColumnLabel: filterDiv.innerText,
         caption: filterDiv.innerText
       });
     });
-    console.log(Dashboard.json);
+    console.log(Resource.json);
     // debugger;
     app.specsSave();
   }

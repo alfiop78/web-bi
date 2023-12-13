@@ -22,7 +22,7 @@ var Resource = new Resources();
     // TODO recuperare i dashboard con la chiamata all'apertura della pagina.
     // Temporaneamente le Dashboard vengono caricate dal localStorage.
     // Inserisco il codice di esempio utilizzato per gli schemi, nel drawer della pagina
-    for (const [token, value] of Object.entries(Dashboard.getDashboards())) {
+    for (const [token, value] of Object.entries(Resource.getDashboards())) {
       console.log(token, value);
       const content = app.tmplList.content.cloneNode(true);
       const li = content.querySelector('li[data-li]');
@@ -86,18 +86,18 @@ var Resource = new Resources();
         Template.data = data[0];
         // creo il template nel DOM
         Template.create();
-        // Dashboard.sheetSpecs = data[1];
-        // Dashboard.json = JSON.parse(window.localStorage.getItem('template-59yblqr')); // cb
+        // Resource.sheetSpecs = data[1];
+        // Resource.json = JSON.parse(window.localStorage.getItem('template-59yblqr')); // cb
         // il parse viene effettuato direttamente nel set della Classe Dashboards
-        Dashboard.json = window.localStorage.getItem('template-5ytvr56'); // cb-26.10.2023
-        // Dashboard.sheetSpecs = JSON.parse(window.localStorage.getItem('template-hdkglro')); // stock
+        Resource.json = window.localStorage.getItem('template-5ytvr56'); // cb-26.10.2023
+        // Resource.sheetSpecs = JSON.parse(window.localStorage.getItem('template-hdkglro')); // stock
         app.dashboardExample();
       })
       .catch(err => console.error(err));
   } */
 
   app.draw = () => {
-    const prepareData = Dashboard.prepareData();
+    const prepareData = Resource.prepareData();
     // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
     // è consentità con la DataView perchè questa è read-only
     let dataTable = new google.visualization.DataTable(prepareData);
@@ -105,16 +105,16 @@ var Resource = new Resources();
     // console.log(dataFormatted);
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
     // Creo i filtri nella Classe Dashboards
-    const controls = Dashboard.drawControls(document.getElementById('filter_div'));
+    const controls = Resource.drawControls(document.getElementById('filter_div'));
 
-    // console.log(JSON.parse(Dashboard.view.toJSON()));
-    // utilizzo senza i metodi setter. Le proprietà del ChartWrapper sono incluse in Dashboard.json
-    // var wrap = new google.visualization.ChartWrapper(Dashboard.json.wrapper);
+    // console.log(JSON.parse(Resource.view.toJSON()));
+    // utilizzo senza i metodi setter. Le proprietà del ChartWrapper sono incluse in Resource.json
+    // var wrap = new google.visualization.ChartWrapper(Resource.json.wrapper);
     // utilizzo con i metodi setter
     var wrap = new google.visualization.ChartWrapper();
     wrap.setChartType('Table');
     wrap.setContainerId(Resource.ref);
-    wrap.setOptions(Dashboard.json.wrapper.options);
+    wrap.setOptions(Resource.json.wrapper.options);
 
     // NOTE: esempio array di View
     // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
@@ -127,8 +127,8 @@ var Resource = new Resources();
       console.log('onReady');
       let tableRef = new google.visualization.Table(document.getElementById(Resource.ref));
       let keyColumns = [];
-      Dashboard.json.data.group.key.forEach(column => {
-        // if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
+      Resource.json.data.group.key.forEach(column => {
+        // if (column.properties.grouped) keyColumns.push(Resource.dataTable.getColumnIndex(column.id));
         // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
         // che viene modificata dall'utente a runtime
         if (column.properties.grouped) {
@@ -136,7 +136,7 @@ var Resource = new Resources();
         }
       });
       let groupColumnsIndex = [];
-      Dashboard.json.data.group.columns.forEach(metric => {
+      Resource.json.data.group.columns.forEach(metric => {
         // salvo in groupColumnsIndex TUTTE le metriche, deciderò nella DataView
         // quali dovranno essere visibili (quelle con dependencies:false)
         // recupero l'indice della colonna in base al suo nome
@@ -148,12 +148,12 @@ var Resource = new Resources();
       });
       // console.log(groupColumnsIndex);
       // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
-      Dashboard.dataGroup = new google.visualization.data.group(
+      Resource.dataGroup = new google.visualization.data.group(
         wrap.getDataTable(), keyColumns, groupColumnsIndex
       );
-      console.log('group():', Dashboard.dataGroup);
-      for (const [columnId, properties] of Object.entries(Dashboard.json.data.formatter)) {
-        // console.log('Formattazione ', Dashboard.dataGroup.getColumnIndex(columnId));
+      console.log('group():', Resource.dataGroup);
+      for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
+        // console.log('Formattazione ', Resource.dataGroup.getColumnIndex(columnId));
         let formatter = null;
         // debugger;
         switch (properties.type) {
@@ -163,25 +163,25 @@ var Resource = new Resources();
           // case 'date':
           // TODO Da implementare
           // let formatter = app[properties.format](properties.numberDecimal);
-          // formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
+          // formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
           // break;
           default:
             // debugger;
             break;
         }
-        if (formatter) formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
+        if (formatter) formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
       }
 
-      Dashboard.dataViewGrouped = new google.visualization.DataView(Dashboard.dataGroup);
+      Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
 
       let viewColumns = [], viewMetrics = [];
-      Dashboard.json.data.view.forEach(column => {
-        if (column.properties.visible) viewColumns.push(Dashboard.dataGroup.getColumnIndex(column.id));
+      Resource.json.data.view.forEach(column => {
+        if (column.properties.visible) viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
       });
       // dalla dataGroup, recupero gli indici di colonna delle metriche
-      Dashboard.json.data.group.columns.forEach(metric => {
+      Resource.json.data.group.columns.forEach(metric => {
         if (!metric.dependencies && metric.properties.visible) {
-          const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
+          const index = Resource.dataGroup.getColumnIndex(metric.alias);
 
           // Implementazione della func 'calc' per le metriche composite.
           if (metric.type === 'composite') {
@@ -201,8 +201,8 @@ var Resource = new Resources();
               // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
               let resultFormatted;
               // formattazione della cella con formatValue()
-              if (Dashboard.json.data.formatter[metric.alias]) {
-                const metricFormat = Dashboard.json.data.formatter[metric.alias];
+              if (Resource.json.data.formatter[metric.alias]) {
+                const metricFormat = Resource.json.data.formatter[metric.alias];
                 let formatter;
                 formatter = app[metricFormat.type](metricFormat.prop);
                 resultFormatted = (result) ? formatter.formatValue(result) : '-';
@@ -216,26 +216,26 @@ var Resource = new Resources();
             viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
           } else {
             viewMetrics.push(index);
-            Dashboard.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
+            Resource.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
           }
         }
       });
       // concateno i due array che popoleranno la DataView.setColumns()
       let viewDefined = viewColumns.concat(viewMetrics)
-      // Dashboard.dataGroup.setColumnProperty(0, 'className', 'cssc1')
-      // console.log(Dashboard.dataGroup.getColumnProperty(0, 'className'));
-      // console.log(Dashboard.dataGroup.getColumnProperties(0));
-      Dashboard.dataViewGrouped.setColumns(viewDefined);
-      tableRef.draw(Dashboard.dataViewGrouped, Dashboard.json.wrapper.options);
+      // Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
+      // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
+      // console.log(Resource.dataGroup.getColumnProperties(0));
+      Resource.dataViewGrouped.setColumns(viewDefined);
+      tableRef.draw(Resource.dataViewGrouped, Resource.json.wrapper.options);
     }
 
     // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
-    // -> "modello_ds" infleunza "settore_ds" e tutti (l'array Dashboard.controlsWrapper) influenzano la table
+    // -> "modello_ds" infleunza "settore_ds" e tutti (l'array Resource.controlsWrapper) influenzano la table
     // per ogni bind, nel template....
     let binds;
     // Questa logica funziona con il bind() di un filtro verso quello successivo ma
     // possono esserci anche situazioni diverse, che sono da implementare
-    Dashboard.json.bind.forEach((v, index) => {
+    Resource.json.bind.forEach((v, index) => {
       // console.log('index', index);
       if (index === 0) {
         // il primo bind deve essere creato dall'istanza gdashboard, i successivi posso legarli ad una variabile
@@ -253,7 +253,7 @@ var Resource = new Resources();
 
   // esempio per competitive-bonus
   /* app.drawDashboardCB = () => {
-    const prepareData = Dashboard.prepareData();
+    const prepareData = Resource.prepareData();
     // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
     // è consentità con la DataView perchè questa è read-only
     let dataTable = new google.visualization.DataTable(prepareData);
@@ -261,10 +261,10 @@ var Resource = new Resources();
     // console.log(dataFormatted);
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
     // Creo i filtri nella Classe Dashboards
-    const controls = Dashboard.drawControls(document.getElementById('filter_div'));
+    const controls = Resource.drawControls(document.getElementById('filter_div'));
 
-    // console.log(JSON.parse(Dashboard.view.toJSON()));
-    var table = new google.visualization.ChartWrapper(Dashboard.json.wrapper);
+    // console.log(JSON.parse(Resource.view.toJSON()));
+    var table = new google.visualization.ChartWrapper(Resource.json.wrapper);
     // NOTE: esempio array di View
     // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
     // table.setView({ columns: [1, 3, 5, 7, 9, 16] });
@@ -276,8 +276,8 @@ var Resource = new Resources();
       console.log('onReady');
       let tableRef = new google.visualization.Table(document.getElementById('chart_div'));
       let keyColumns = [];
-      Dashboard.json.data.group.key.forEach(column => {
-        // if (column.properties.grouped) keyColumns.push(Dashboard.dataTable.getColumnIndex(column.id));
+      Resource.json.data.group.key.forEach(column => {
+        // if (column.properties.grouped) keyColumns.push(Resource.dataTable.getColumnIndex(column.id));
         // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
         // che viene modificata dall'utente a runtime
         if (column.properties.grouped) {
@@ -285,7 +285,7 @@ var Resource = new Resources();
         }
       });
       let groupColumnsIndex = [];
-      Dashboard.json.data.group.columns.forEach(metric => {
+      Resource.json.data.group.columns.forEach(metric => {
         // salvo in groupColumnsIndex TUTTE le metriche, deciderò nella DataView
         // quali dovranno essere visibili (quelle con dependencies:false)
         // recupero l'indice della colonna in base al suo nome
@@ -297,12 +297,12 @@ var Resource = new Resources();
       });
       // console.log(groupColumnsIndex);
       // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
-      Dashboard.dataGroup = new google.visualization.data.group(
+      Resource.dataGroup = new google.visualization.data.group(
         table.getDataTable(), keyColumns, groupColumnsIndex
       );
-      console.log('group():', Dashboard.dataGroup);
-      for (const [columnId, properties] of Object.entries(Dashboard.json.data.formatter)) {
-        // console.log('Formattazione ', Dashboard.dataGroup.getColumnIndex(columnId));
+      console.log('group():', Resource.dataGroup);
+      for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
+        // console.log('Formattazione ', Resource.dataGroup.getColumnIndex(columnId));
         let formatter = null;
         // debugger;
         switch (properties.type) {
@@ -312,25 +312,25 @@ var Resource = new Resources();
           // case 'date':
           // TODO Da implementare
           // let formatter = app[properties.format](properties.numberDecimal);
-          // formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
+          // formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
           // break;
           default:
             // debugger;
             break;
         }
-        if (formatter) formatter.format(Dashboard.dataGroup, Dashboard.dataGroup.getColumnIndex(columnId));
+        if (formatter) formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
       }
 
-      Dashboard.dataViewGrouped = new google.visualization.DataView(Dashboard.dataGroup);
+      Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
 
       let viewColumns = [], viewMetrics = [];
-      Dashboard.json.data.view.forEach(column => {
-        if (column.properties.visible) viewColumns.push(Dashboard.dataGroup.getColumnIndex(column.id));
+      Resource.json.data.view.forEach(column => {
+        if (column.properties.visible) viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
       });
       // dalla dataGroup, recupero gli indici di colonna delle metriche
-      Dashboard.json.data.group.columns.forEach(metric => {
+      Resource.json.data.group.columns.forEach(metric => {
         if (!metric.dependencies && metric.properties.visible) {
-          const index = Dashboard.dataGroup.getColumnIndex(metric.alias);
+          const index = Resource.dataGroup.getColumnIndex(metric.alias);
 
           // Implementazione della func 'calc' per le metriche composite.
           if (metric.type === 'composite') {
@@ -350,8 +350,8 @@ var Resource = new Resources();
               // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
               let resultFormatted;
               // formattazione della cella con formatValue()
-              if (Dashboard.json.data.formatter[metric.alias]) {
-                const metricFormat = Dashboard.json.data.formatter[metric.alias];
+              if (Resource.json.data.formatter[metric.alias]) {
+                const metricFormat = Resource.json.data.formatter[metric.alias];
                 let formatter;
                 formatter = app[metricFormat.type](metricFormat.prop);
                 resultFormatted = (result) ? formatter.formatValue(result) : '-';
@@ -365,26 +365,26 @@ var Resource = new Resources();
             viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
           } else {
             viewMetrics.push(index);
-            Dashboard.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
+            Resource.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
           }
         }
       });
       // concateno i due array che popoleranno la DataView.setColumns()
       let viewDefined = viewColumns.concat(viewMetrics)
-      // Dashboard.dataGroup.setColumnProperty(0, 'className', 'cssc1')
-      // console.log(Dashboard.dataGroup.getColumnProperty(0, 'className'));
-      // console.log(Dashboard.dataGroup.getColumnProperties(0));
-      Dashboard.dataViewGrouped.setColumns(viewDefined);
-      tableRef.draw(Dashboard.dataViewGrouped, Dashboard.json.wrapper.options);
+      // Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
+      // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
+      // console.log(Resource.dataGroup.getColumnProperties(0));
+      Resource.dataViewGrouped.setColumns(viewDefined);
+      tableRef.draw(Resource.dataViewGrouped, Resource.json.wrapper.options);
     }
 
     // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
-    // -> "modello_ds" infleunza "settore_ds" e tutti (l'array Dashboard.controlsWrapper) influenzano la table
+    // -> "modello_ds" infleunza "settore_ds" e tutti (l'array Resource.controlsWrapper) influenzano la table
     // per ogni bind, nel template....
     let binds;
     // Questa logica funziona con il bind() di un filtro verso quello successivo ma
     // possono esserci anche situazioni diverse, che sono da implementare
-    Dashboard.json.bind.forEach((v, index) => {
+    Resource.json.bind.forEach((v, index) => {
       // console.log('index', index);
       if (index === 0) {
         // il primo bind deve essere creato dall'istanza gdashboard, i successivi posso legarli ad una variabile
@@ -402,7 +402,7 @@ var Resource = new Resources();
 
   // NOTE: non utilizzato
   app.drawDashboard = () => {
-    const prepareData = Dashboard.prepareData();
+    const prepareData = Resource.prepareData();
     // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
     // è consentità con la DataView perchè questa è read-only
     let dataTable = new google.visualization.DataTable(prepareData);
@@ -414,7 +414,7 @@ var Resource = new Resources();
     // console.log(dataFormatted);
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
     // Creo i filtri nella Classe Dashboards
-    const controls = Dashboard.drawControls(document.getElementById('filter_div'));
+    const controls = Resource.drawControls(document.getElementById('filter_div'));
     /* var filter_ubicazione = new google.visualization.ControlWrapper({
       'controlType': 'CategoryFilter',
       'containerId': 'filter-ubicazione',
@@ -483,22 +483,22 @@ var Resource = new Resources();
       ]); */
     // NOTE: La funzione group() commentata (sopra) la ricreo utilizzando il template-sheet json
 
-    if (Object.keys(Dashboard.json.data.group).length !== 0) {
+    if (Object.keys(Resource.json.data.group).length !== 0) {
       let groupColumns = [];
-      Dashboard.json.data.group.columns.forEach(col => {
+      Resource.json.data.group.columns.forEach(col => {
         groupColumns.push({ column: col.column, aggregation: google.visualization.data[col.aggregation], type: col.type });
       });
       dataTable = new google.visualization.data.group(
         dataTable,
-        Dashboard.json.data.group.key,
+        Resource.json.data.group.key,
         groupColumns,
       );
     }
 
     // NOTE: le proprietà definite nel ChartWrapper vengono impostate nel template-sheet .json, proprietà "wrapper"
-    var table = new google.visualization.ChartWrapper(Dashboard.json.wrapper);
+    var table = new google.visualization.ChartWrapper(Resource.json.wrapper);
     // funzioni di formattazione
-    for (const [colIndex, properties] of Object.entries(Dashboard.json.data.formatter)) {
+    for (const [colIndex, properties] of Object.entries(Resource.json.data.formatter)) {
       switch (properties.format) {
         case 'currency':
           currencyFormatter.format(dataTable, +colIndex);
@@ -513,7 +513,7 @@ var Resource = new Resources();
     // console.log(dataTable);
 
     // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
-    // -> "modello_ds" infleunza "settore_ds" e tutti (l'array Dashboard.controlsWrapper) influenzano la table
+    // -> "modello_ds" infleunza "settore_ds" e tutti (l'array Resource.controlsWrapper) influenzano la table
     // per ogni bind, nel template....
     let binds;
     /* NOTE: viene creata questa struttura di gdashboard.bind()
@@ -531,7 +531,7 @@ var Resource = new Resources();
     */
     // Questa logica funziona con il bind() di un filtro verso quello successivo ma
     // possono esserci anche situazioni diverse, che sono da implementare
-    Dashboard.json.bind.forEach((v, index) => {
+    Resource.json.bind.forEach((v, index) => {
       // console.log('index', index);
       if (index === 0) {
         // il primo bind deve essere creato dall'istanza gdashboard, i successivi posso legarli ad una variabile
@@ -546,28 +546,6 @@ var Resource = new Resources();
     // gdashboard.draw(dataFormatted);
     gdashboard.draw(dataTable);
     // gdashboard.draw(dataGroup); // utilizzo della funzione group
-  }
-
-  // per ogni report lancio la fetch (in getData()) per recuperare i dati
-  app.loadResources = (resources) => {
-    // TODO: qui dovrò fare una promise.all per richiamare tutti i report e le loro specifiche
-    for (const [token, value] of Object.entries(resources)) {
-      // il parse viene effettuato direttamente nel set della Classe Dashboards
-      // scarico la risorsa (le specs) dal DB e successivamente invoco getData()
-      fetch(`/fetch_api/name/${token}/sheet_specs_show`)
-        .then((response) => {
-          if (!response.ok) { throw Error(response.statusText); }
-          return response;
-        })
-        .then((response) => response.json())
-        .then((data) => {
-          Dashboard.json = data.json_value;
-          // imposto il riferimento nel DOM, del layout, per questa risorsa/report
-          Resource.ref = value.ref;
-          app.getData(token);
-        })
-        .catch((err) => console.error(err));
-    }
   }
 
   // recupero il datamrt
@@ -591,7 +569,7 @@ var Resource = new Resources();
       .then(data => {
         console.log(data);
         // debugger;
-        Dashboard.data = data;
+        Resource.data = data;
         google.charts.setOnLoadCallback(app.drawDashboard(data));
         // google.charts.setOnLoadCallback(app.drawTable(data));
       })
@@ -614,7 +592,7 @@ var Resource = new Resources();
         console.log(paginateData);
         console.log(paginateData.data);
         // debugger;
-        // Dashboard.data = paginateData.data;
+        // Resource.data = paginateData.data;
         // funzione ricorsiva fino a quando è presente next_page_url
         let recursivePaginate = async (url) => {
           console.log(url);
@@ -630,8 +608,7 @@ var Resource = new Resources();
             } else {
               // Non sono presenti altre pagine, visualizzo il dashboard
               console.log('tutte le paginate completate :', partialData);
-              Dashboard.data = partialData;
-              // TODO probabilmente, nella prop 'resources', conviene mettere il nome della Fn da richiamare qui
+              Resource.data = partialData;
               google.charts.setOnLoadCallback(app.draw());
             }
           }).catch((err) => {
@@ -644,8 +621,7 @@ var Resource = new Resources();
           recursivePaginate(paginateData.next_page_url);
         } else {
           // Non sono presenti altre pagine, visualizzo il dashboard
-          Dashboard.data = partialData;
-          // google.charts.setOnLoadCallback(app.drawDashboardCB());
+          Resource.data = partialData;
           google.charts.setOnLoadCallback(app.draw());
         }
       })
@@ -655,6 +631,29 @@ var Resource = new Resources();
       });
     // end chiamata in GET
   }
+
+  // per ogni report lancio la fetch (in getData()) per recuperare i dati
+  app.loadResources = (resources) => {
+    // TODO: qui dovrò fare una promise.all per richiamare tutti i report e le loro specifiche
+    for (const [token, value] of Object.entries(resources)) {
+      // il parse viene effettuato direttamente nel set della Classe Dashboards
+      // scarico la risorsa (le specs) dal DB e successivamente invoco getData()
+      fetch(`/fetch_api/name/${token}/sheet_specs_show`)
+        .then((response) => {
+          if (!response.ok) { throw Error(response.statusText); }
+          return response;
+        })
+        .then((response) => response.json())
+        .then((data) => {
+          Resource.json = data.json_value;
+          // imposto il riferimento nel DOM, del layout, per questa risorsa/report
+          Resource.ref = value.ref;
+          app.getData(token);
+        })
+        .catch((err) => console.error(err));
+    }
+  }
+
 
   app.dashboardSelected = (e) => {
     debugger;

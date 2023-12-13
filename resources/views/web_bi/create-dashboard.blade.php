@@ -82,7 +82,7 @@
               <section class="dlg-content col col-1">
                 <section class="list-search">
                   <input type="search" id="" data-element-search="" placeholder="Ricerca" autocomplete="off" />
-                  <div class="relative-ul">
+                  <div class="relative-ul min-height">
                     <ul id="ul-sheets" data-search-id="" class="custom-scrollbar"></ul>
                   </div>
                 </section>
