@@ -368,7 +368,7 @@ saveColumnConfig.onclick = () => {
   let formatterProperties = {};
   switch (format) {
     case 'default':
-      formatterProperties = { negativeParens: false, fractionDigits: 0, groupingSymbol: '' };
+      formatterProperties = { negativeParens: false, fractionDigits: 0, groupingSymbol: '.' };
       break;
     case 'currency':
       formatterProperties = { suffix: ' €', negativeColor: 'brown', negativeParens: true, fractionDigits: 2 };
