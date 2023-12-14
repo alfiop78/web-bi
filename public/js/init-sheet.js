@@ -412,6 +412,7 @@ saveColumnConfig.onclick = () => {
   // TODO: Il containerId deve essere deciso in init-dashboard-create.js
   Resource.json.wrapper.containerId = 'chart_div';
   console.log('specifications : ', Resource.json);
+  debugger;
   // window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
   Resource.saveSpecifications();
   // window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));

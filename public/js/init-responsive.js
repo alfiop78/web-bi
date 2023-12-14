@@ -1446,6 +1446,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   // determinate proprietà (es.: la visibilità o il raggruppamento)
   app.createSpecifications = () => {
     Resource.json.token = Sheet.sheet.token;
+    Resource.json.name = Sheet.name;
     Resource.json.wrapper.chartType = 'Table';
     for (const [token, field] of Sheet.fields) {
       const workbookField = WorkBook.field.get(token).field;
@@ -1518,8 +1519,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         };
       }
     }
-    debugger;
     Resource.json.wrapper.chartType = 'Table';
+    debugger;
     Resource.saveSpecifications();
   }
 
@@ -1534,10 +1535,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       .then(data => {
         if (Object.keys(data).length !== 0) {
           Resource.json = data.json_value;
+          Resource.json.name = data.name;
           Resource.jsonExists = true;
         } else {
           Resource.jsonExists = false;
         }
+        debugger;
         app.createSpecifications()
       })
       .catch((err) => console.error(err));
