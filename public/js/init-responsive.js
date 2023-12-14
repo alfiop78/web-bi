@@ -1503,17 +1503,17 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           Resource.json.data.group.columns[metric.alias].aggregateFn = metric.aggregateFn;
         }
       }
-      // TODO: in fase di creazione di json.data.group.columns (metriche) imposto anche
+      // in fase di creazione di json.data.group.columns (metriche) imposto anche
       // una formattazione, di base, perchè siccomme il json.data.formatter è un {} ma
       // quando viene salvato su DB viene convertito in [] (forse perchè è vuoto) allora lo
       // imposto con i valori delle metriche, in modo da creare un {}
-      debugger;
-      // Resource.json.data.formatter[metric.alias] = { type: 'number', format: 'default', prop: { negativeParens: false, fractionDigits: 0, groupingSymbol: '' } };
       if (!Resource.json.data.formatter[metric.alias]) {
         // formattazione per questa metrica non presente
+        // groupSymbol dovrebbe essere default il punto (.) perchè il googleChart load è impostato
+        // language 'it'
         Resource.json.data.formatter[metric.alias] = {
           type: 'number', format: null, prop: {
-            negativeParens: false, fractionDigits: 2, groupingSymbol: ''
+            negativeParens: false, fractionDigits: 0, groupingSymbol: '.'
           }
         };
       }

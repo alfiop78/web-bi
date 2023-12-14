@@ -28,6 +28,7 @@ let app = {
   wrapper.draw();
 } */
 
+// TODO: spostarla nella Classe Resources
 function drawDatamart() {
   // Il dato iniziale non è raggruppato, la query sul datamart è eseguita con SELECT *...
   // La preview deve consentire la personalizzazione del report, quindi la possibilità
@@ -168,7 +169,6 @@ function previewReady() {
       // formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
       // break;
       default:
-        // debugger;
         break;
     }
     if (formatter) formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
