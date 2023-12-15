@@ -1498,7 +1498,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             dependencies: metric.dependencies,
             properties: { visible: true },
             label: metric.alias,
-            type: 'number'
+            type: metric.type,
+            datatype: 'number'
           });
         } else {
           Resource.json.data.group.columns[metric.alias].aggregateFn = metric.aggregateFn;
@@ -1864,7 +1865,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         tableAlias: WorkBook.field.get(token).tableAlias,
         name: field
       });
-
     }
 
     for (const [token, metric] of Sheet.metrics) {
@@ -1969,7 +1969,56 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       });
   }
 
-  // tasto ELABORA
+  app.loadPreview = async () => {
+    let partialData = [];
+    await fetch(`/fetch_api/${Sheet.id}/preview?page=1`)
+      .then((response) => {
+        // console.log(response);
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(async (paginateData) => {
+        console.log(paginateData);
+        console.log(paginateData.data);
+        // funzione ricorsiva fino a quando è presente next_page_url
+        let recursivePaginate = async (url) => {
+          // console.log(url);
+          await fetch(url).then((response) => {
+            // console.log(response);
+            if (!response.ok) { throw Error(response.statusText); }
+            return response;
+          }).then(response => response.json()).then((paginate) => {
+            partialData = partialData.concat(paginate.data);
+            if (paginate.next_page_url) {
+              recursivePaginate(paginate.next_page_url);
+              console.log(partialData);
+            } else {
+              // Non sono presenti altre pagine, visualizzo il dashboard
+              console.log('tutte le paginate completate :', partialData);
+              Resource.data = partialData;
+              google.charts.setOnLoadCallback(drawDatamart());
+            }
+          }).catch((err) => {
+            App.showConsole(err, 'error');
+            console.error(err);
+          });
+        }
+        partialData = paginateData.data;
+        if (paginateData.next_page_url) {
+          recursivePaginate(paginateData.next_page_url);
+        } else {
+          // Non sono presenti altre pagine, visualizzo il dashboard
+          Resource.data = partialData;
+          google.charts.setOnLoadCallback(drawDatamart());
+        }
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+  }
+
   app.process = async (process) => {
     // lo Sheet.id può essere già presente quando è stato aperto
     if (!Sheet.id) Sheet.id = Date.now();
@@ -1981,7 +2030,39 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // console.log(params);
     // App.showConsole('Elaborazione in corso...', 'info');
     // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
-    const url = "/fetch_api/cube/sheet";
+    const url = "/fetch_api/cube/sheet_create";
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    const req = new Request(url, init);
+    let partialData = [];
+    await fetch(req)
+      .then((response) => {
+        // TODO: Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(response => {
+        console.log(response);
+        app.loadPreview();
+      })
+      .catch(err => {
+        App.showConsole(err, 'error', 3000);
+        console.error(err);
+      });
+  }
+
+  /* app.process = async (process) => {
+    // lo Sheet.id può essere già presente quando è stato aperto
+    if (!Sheet.id) Sheet.id = Date.now();
+    process.id = Sheet.id;
+    // console.log(process);
+    app.saveSheet();
+    // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
+    const params = JSON.stringify(process);
+    // console.log(params);
+    // App.showConsole('Elaborazione in corso...', 'info');
+    // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
+    const url = "/fetch_api/cube/sheet_create";
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
     let partialData = [];
@@ -2046,7 +2127,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         App.showConsole(err, 'error', 3000);
         console.error(err);
       });
-  }
+  } */
 
   app.openDialogFilter = async () => {
     // creo la struttura tabelle per poter creare nuovi filtri
@@ -2908,7 +2989,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     };
     WorkBook.joins = token; // nome della tabella con le proprie join (WorkBook.nJoin) all'interno
     console.log(WorkBook.activeTable);
-    debugger;
     Draw.tables = {
       id: 'svg-data-web_bi_time', properties: {
         id: 'web_bi_time',
@@ -2948,8 +3028,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           field: {
             // id: { field: column.column_name, type: 'da implementare', origin_field: column.column_name },
             // ds: { field: column.column_name, type: 'da implementare', origin_field: column.column_name }
-            id: { sql: [column.column_name], type: 'da implementare' },
-            ds: { sql: [column.column_name], type: 'da implementare' }
+            id: { sql: [column.column_name], datatype: column.type_name.toLowerCase() },
+            ds: { sql: [column.column_name], datatype: column.type_name.toLowerCase() }
           }
         }
       };

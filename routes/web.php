@@ -85,7 +85,7 @@ Route::get('/fetch_api/{schema}/schema/{table}/table_preview', [MapDatabaseContr
 Route::get('/fetch_api/schema/{schema}/table/{table}/field/{field}/distinct_values', [MapDatabaseController::class, 'distinct_values'])->name('web_bi.fetch_api.distinct_values');
 
 // processo la query che crea la FX
-Route::post('/fetch_api/cube/sheet', [MapDatabaseController::class, 'sheet'])->name('web_bi.fetch_api.sheet');
+Route::post('/fetch_api/cube/sheet_create', [MapDatabaseController::class, 'sheetCreate'])->name('web_bi.fetch_api.sheet_create');
 // restituisco SQL del process
 // TODO: da reimplementare da quando è cambiata la logica con workbook/sheet
 Route::post('/fetch_api/cube/sql', [MapDatabaseController::class, 'sql'])->name('web_bi.fetch_api.sql');

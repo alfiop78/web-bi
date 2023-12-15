@@ -173,7 +173,6 @@ class MapDatabaseController extends Controller
   {
     // dd($id);
     // $datamart = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='decisyon_cache' AND TABLE_NAME='WEB_BI_$id';");
-    $table = "decisyon_cache.WEB_BI_$id";
     // $data = DB::connection('vertica_odbc')->table($table)->limit(5)->get(); // ok
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497, 43, 473, 437, 445, 461, 485, 549, 621, 1000002079, 455, 471, 179])->paginate(15000);
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497])->paginate(15000);
@@ -226,7 +225,7 @@ class MapDatabaseController extends Controller
   }
 
   // sheet
-  public function sheet(Request $request)
+  public function sheetCreate(Request $request)
   {
     $cube = json_decode(json_encode($request->all())); // object
     $q = new Cube();
@@ -293,20 +292,17 @@ class MapDatabaseController extends Controller
       }
       // echo 'elaborazione createDatamart';
       // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-      $datamartName = $q->createDatamart();
-      // dd($datamartName);
+      // $datamartName = $q->createDatamart();
+      // Restituisco il reportId
+      return $q->createDatamart();
+
       // restituisco un ANTEPRIMA del datamart appena creato
       // WARN: Errore di memory exhausted, bisogna utilizzare il paginate()
       // $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.$q->datamartName LIMIT 10000;");
       // return response()->json($datamartResult);
-      $datamartResult = DB::connection('vertica_odbc')->table("decisyon_cache.$q->datamartName")->paginate(15000);
-      return $datamartResult;
-      // $info = DB::connection('vertica_odbc')->table('COLUMNS')
-      //   ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
-      //   ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
-      //   ->where('TABLE_SCHEMA', 'decisyon_cache')->where('TABLE_NAME', $q->datamartName)->orderBy('ordinal_position')->get();
-      // // dd($datamartResult, $info);
-      // return response()->json(['columns' => $info, 'data' => $datamartResult]);
+
+      // $datamartResult = DB::connection('vertica_odbc')->table("decisyon_cache.$q->datamartName")->paginate(15000);
+      // return $datamartResult;
     } else {
       return 'BaseTable non create';
     }

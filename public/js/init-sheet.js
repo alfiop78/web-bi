@@ -156,6 +156,7 @@ function previewReady() {
   // console.log(Resource.dataGroup);
   // Formattazione colonne
   for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
+    debugger;
     console.log('Formattazione ', Resource.dataGroup.getColumnIndex(columnId));
     let formatter = null;
     // debugger;
@@ -171,7 +172,9 @@ function previewReady() {
       default:
         break;
     }
+    debugger;
     if (formatter) formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
+    debugger;
   }
 
   // TEST: aggiunta di una CSS class a una colonna, nella dataGroup
@@ -428,6 +431,7 @@ function columnHander(e) {
   // Recupero l'index della colonna da nascondere/visualizzare
   const columnIndex = Resource.json.data.view.findIndex(col => col.id === e.target.dataset.columnId);
   const metricIndex = Resource.json.data.group.columns.findIndex(metric => metric.alias === e.target.dataset.columnId);
+  debugger;
   if (e.target.dataset.visible === 'false') {
     // la colonna è nascosta, la visualizzo e raggruppo.
     e.target.dataset.visible = true;
@@ -458,6 +462,7 @@ function columnHander(e) {
       Resource.json.data.group.columns[metricIndex].properties.visible = false;
     }
   }
-  window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
+  debugger;
+  Resource.saveSpecifications();
   previewReady();
 }

@@ -584,7 +584,8 @@ class Cube
         // dd($this->_metricTable);
         // ritorno il nome della FX in modo da poter mostrare un anteprima dei dati
         // dd($sql);
-        return $this->datamartName;
+        // return $this->datamartName;
+        return $this->reportId;
       }
     }
   }
