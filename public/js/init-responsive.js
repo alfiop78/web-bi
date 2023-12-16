@@ -1521,7 +1521,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       }
     }
     Resource.json.wrapper.chartType = 'Table';
-    debugger;
+    // debugger;
     Resource.saveSpecifications();
   }
 
@@ -1541,7 +1541,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         } else {
           Resource.jsonExists = false;
         }
-        debugger;
         app.createSpecifications()
       })
       .catch((err) => console.error(err));
@@ -1551,7 +1550,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // console.log(token);
     // recupero l'id dello Sheet
     const sheet = JSON.parse(window.localStorage.getItem(token));
-    debugger;
+    // debugger;
     if (!sheet.id) return false;
     console.log(sheet);
     // debugger;
@@ -1698,7 +1697,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     await app.checkSpecifications();
     // TODO: verifico se il datamart, per lo Sheet selezionato, è già presente sul DB.
     // In caso positivo lo apro in preview-datamart.
-    debugger;
+    // debugger;
     app.sheetPreview(sheetToken);
     // Imposto la prop 'edit' = true perchè andrò ad operare su uno Sheet aperto
     Sheet.edit = true;
