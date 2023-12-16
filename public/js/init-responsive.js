@@ -1553,9 +1553,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // debugger;
     if (!sheet.id) return false;
     console.log(sheet);
-    // debugger;
     // NOTE: Chiamata in post per poter passare tutte le colonne, incluso l'alias, alla query
-
     // TODO: Passo in param un object con le colonne da estrarre (tutte)
     /* const params = JSON.stringify({ sheet_id: sheet.id });
     const url = `/fetch_api/datamartpost`;
@@ -1604,6 +1602,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       }); */
     // end chiamata in GET
 
+    const progressBar = document.getElementById('progress-bar');
     let partialData = [];
     await fetch(`/fetch_api/${sheet.id}/preview?page=1`)
       .then((response) => {
@@ -1617,12 +1616,15 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         console.log(paginateData.data);
         // funzione ricorsiva fino a quando è presente next_page_url
         let recursivePaginate = async (url) => {
-          // console.log(url);
+          console.log(url);
           await fetch(url).then((response) => {
             // console.log(response);
             if (!response.ok) { throw Error(response.statusText); }
             return response;
           }).then(response => response.json()).then((paginate) => {
+            console.log(paginate);
+            progressBar.value = +((paginate.to / paginate.total) * 100);
+            console.log(progressBar.value);
             partialData = partialData.concat(paginate.data);
             if (paginate.next_page_url) {
               recursivePaginate(paginate.next_page_url);
@@ -1982,9 +1984,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         console.log(paginateData.data);
         // funzione ricorsiva fino a quando è presente next_page_url
         let recursivePaginate = async (url) => {
-          // console.log(url);
+          console.log(url);
           await fetch(url).then((response) => {
-            // console.log(response);
+            console.log(response);
             if (!response.ok) { throw Error(response.statusText); }
             return response;
           }).then(response => response.json()).then((paginate) => {

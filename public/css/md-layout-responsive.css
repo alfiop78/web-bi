@@ -252,3 +252,12 @@ small {
   left: 1em;
   position: absolute;
 }
+
+#datatable {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  padding: 1em;
+  row-gap: 1em;
+  overflow: auto;
+}

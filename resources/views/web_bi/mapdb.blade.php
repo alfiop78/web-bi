@@ -805,12 +805,14 @@
                             </dialog>
 
                             <div class="table-content columnsHandler">
-                              <!-- <progress id="progress-bar" max="100" value="70">70%</progress> -->
                               <div class="relative-ul" id="column-handler">
                                 <ul id="ul-columns-handler" class="custom-scrollbar"></ul>
                               </div>
-                              <table id="preview-datamart" class="custom-scrollbar">
-                              </table>
+                              <section id="datatable">
+                                <!-- <progress id="progress-bar" max="100" value="70">70%</progress> -->
+                                <progress id="progress-bar" max="100" value="0">70 %</progress>
+                                <table id="preview-datamart" class="custom-scrollbar"></table>
+                              </section>
                             </div>
                           </section>
                         </div>

@@ -580,6 +580,7 @@ var Resource = new Resources();
     // end chiamta in POST
 
     // Chiamata in GET con laravel paginate()
+    const progressBar = document.getElementById('progress-bar');
     let partialData = [];
     await fetch(`/fetch_api/${sheet.id}/datamart?page=1`)
       .then((response) => {
@@ -597,10 +598,13 @@ var Resource = new Resources();
         let recursivePaginate = async (url) => {
           console.log(url);
           await fetch(url).then((response) => {
-            console.log(response);
+            // console.log(response);
             if (!response.ok) { throw Error(response.statusText); }
             return response;
           }).then(response => response.json()).then((paginate) => {
+            console.log(paginate);
+            progressBar.value = +((paginate.to / paginate.total) * 100);
+            console.log(progressBar.value);
             partialData = partialData.concat(paginate.data);
             if (paginate.next_page_url) {
               recursivePaginate(paginate.next_page_url);

@@ -58,7 +58,7 @@ thead th[data-metric-token]{
 }
 
 .table-preview{
-  overflow: auto;
+  /* overflow: auto; */
   position: relative;
   border: solid thin #d3d3d3;
 }

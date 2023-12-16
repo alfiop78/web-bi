@@ -76,7 +76,7 @@ function drawDatamart() {
     allowHTML: true,
     frozenColumns: 0,
     page: 'enabled',
-    pageSize: 50,
+    pageSize: 20,
     alternatingRowStyle: true,
     sort: 'event',
     width: '100%',

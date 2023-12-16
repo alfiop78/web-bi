@@ -73,6 +73,7 @@
             <div id="chart_div"></div> -->
           <!-- </div> -->
 
+          <progress id="progress-bar" max="100" value="0"></progress>
           <div id="template-layout" class="layout"></div>
 
           <!-- <div class="objects">
