@@ -207,7 +207,7 @@ use.table[data-active]{
 .wj-joins, .wj-fields-list{
   display: grid;
   grid-template-columns: 50% 50%;
-  grid-template-rows: 200px;
+  grid-template-rows: 280px;
 }
 
 .wj-joins > section{
