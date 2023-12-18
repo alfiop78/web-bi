@@ -550,7 +550,7 @@ var Resource = new Resources();
 
   // recupero il datamrt
   app.getData = async (token) => {
-    const sheet = JSON.parse(window.localStorage.getItem(token)); // cb-26.10.2023
+    const sheet = JSON.parse(window.localStorage.getItem(token));
     if (!sheet.id) return false;
     // Chiamta in POST
     // WARN: per la chiamata in POST bisogna aggiungere la route in VerifyCrsfToken.php

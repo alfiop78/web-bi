@@ -1603,6 +1603,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // end chiamata in GET
 
     const progressBar = document.getElementById('progress-bar');
+    const progressTo = document.getElementById('progress-to');
+    const progressTotal = document.getElementById('progress-total');
+    const progressLabel = document.querySelector("label[for='progress-bar']");
     let partialData = [];
     await fetch(`/fetch_api/${sheet.id}/preview?page=1`)
       .then((response) => {
@@ -1612,6 +1615,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       })
       .then((response) => response.json())
       .then(async (paginateData) => {
+        progressBar.value = +((paginateData.to / paginateData.total) * 100);
+        progressLabel.hidden = false;
+        progressTo.innerText = paginateData.to;
+        progressTotal.innerText = paginateData.total;
         console.log(paginateData);
         console.log(paginateData.data);
         // funzione ricorsiva fino a quando è presente next_page_url
@@ -1624,6 +1631,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           }).then(response => response.json()).then((paginate) => {
             console.log(paginate);
             progressBar.value = +((paginate.to / paginate.total) * 100);
+            progressTo.innerText = paginate.to;
+            progressTotal.innerText = paginate.total;
             console.log(progressBar.value);
             partialData = partialData.concat(paginate.data);
             if (paginate.next_page_url) {

@@ -810,7 +810,7 @@
                               </div>
                               <section id="datatable">
                                 <!-- <progress id="progress-bar" max="100" value="70">70%</progress> -->
-                                <label for="progress-bar">record .... di .... totali</label>
+                                <label for="progress-bar" hidden>Record <span id="progress-to"></span>&nbsp;di&nbsp;<span id="progress-total"></span>&nbsp;totali</label>
                                 <progress id="progress-bar" max="100" value="0">70 %</progress>
                                 <table id="preview-datamart" class="custom-scrollbar"></table>
                               </section>
