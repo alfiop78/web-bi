@@ -660,7 +660,7 @@
                               <ul id="ul-tables" data-search-id="table-search" class="custom-scrollbar"></ul>
                             </div>
                           </section>
-                          <section class="table-preview">
+                          <section class="table-preview custom-scrollbar">
                             <input type="search" id="columns-search-id" autocomplete="off" placeholder="Ricerca colonne" />
                             <div class="table-content">
                               <!-- data-search-input : definisce la input che effettua la ricerca di colonne in questa tabella -->
