@@ -194,6 +194,8 @@ var Resource = new Resources();
       const li = content.querySelector('li[data-li]');
       const span = li.querySelector('span');
       li.dataset.token = token;
+      debugger;
+      li.dataset.datamartId = sheet.id;
       li.dataset.label = sheet.name;
       li.addEventListener('click', app.sheetSelected);
       li.dataset.elementSearch = 'sheets';
@@ -204,30 +206,11 @@ var Resource = new Resources();
   }
 
   app.getData = async (token) => {
-    // recupero l'id dello Sheet stock veicoli nuovi
-    // const sheet = JSON.parse(window.localStorage.getItem('hdkglro')); // stock
-    // const sheet = JSON.parse(window.localStorage.getItem('5ytvr56')); // cb-26-10.2023
-    const sheet = JSON.parse(window.localStorage.getItem(token));
-    if (!sheet.id) return false;
-    /* await fetch(`/fetch_api/${sheet.id}/preview`)
-      .then((response) => {
-        console.log(response);
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then(data => {
-        console.log(data);
-        // debugger;
-        Resource.data = data;
-        google.charts.setOnLoadCallback(app.drawTable(sheet.token));
-      })
-      .catch(err => {
-        App.showConsole(err, 'error');
-        console.error(err);
-      }); */
+    // const sheet = JSON.parse(window.localStorage.getItem(token));
+    // if (!sheet.id) return false;
     let partialData = [];
-    await fetch(`/fetch_api/${sheet.id}/preview?page=1`)
+    debugger;
+    await fetch(`/fetch_api/${Resource.datamart_id}/preview?page=1`)
       .then((response) => {
         // console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
@@ -268,7 +251,7 @@ var Resource = new Resources();
         } else {
           // Non sono presenti altre pagine, visualizzo il dashboard
           Resource.data = partialData;
-          google.charts.setOnLoadCallback(app.drawTable(sheet.token));
+          google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
         }
       })
       .catch(err => {
@@ -282,6 +265,8 @@ var Resource = new Resources();
     // recupero le specifiche per questo report (resource)
     // successivamente recupero i dati del datamart
     const token = e.currentTarget.dataset.token;
+    Resource.datamart_id = e.currentTarget.dataset.datamartId;
+    Resource.token = e.currentTarget.dataset.token;
     fetch(`/fetch_api/name/${token}/sheet_specs_show`)
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
@@ -291,7 +276,6 @@ var Resource = new Resources();
       .then((data) => {
         Resource.json = data.json_value;
         console.log('save sheet_specs : ', Resource.json);
-        debugger;
         app.getData(token);
         // un Map() di ref aggiunti alla pagina, questo verrà salvato nel json 'dashboard-token'
         // Resource.resource = {sheet : e.currentTarget.dataset.token, template : `template-${e.currentTarget.dataset.token}`};
@@ -325,8 +309,7 @@ var Resource = new Resources();
     filterRef.appendChild(containerDiv);
   }
 
-  app.drawTable = (sheetToken) => {
-    console.log(sheetToken);
+  app.drawTable = () => {
     // aggiungo i filtri se sono stati impostati nel preview sheet
     Resource.json.filters.forEach(filter => app.createTemplateFilter(filter));
     // impostazione del legame tra i filtri (bind)
@@ -356,7 +339,7 @@ var Resource = new Resources();
       Resource.dataTable, keyColumns, groupColumnsIndex
     );
 
-    for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
+    /* for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
       let formatter = null;
       switch (properties.type) {
         case 'number':
@@ -372,7 +355,7 @@ var Resource = new Resources();
           break;
       }
       if (formatter) formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
-    }
+    } */
 
     Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
 
