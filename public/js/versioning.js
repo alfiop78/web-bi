@@ -413,14 +413,12 @@ var Storage = new SheetStorages();
     });
   }
 
-  app.saveSpecifications = async (token) => {
-    const url = '/fetch_api/json/sheet_specs_store'
-    // const json = window.localStorage.getItem(`specs_${token}`);
+  app.saveSpecifications = async (method, token) => {
+    // method : store / update
+    const url = `/fetch_api/json/sheet_specs_${method}`;
     const params = window.localStorage.getItem(`specs_${token}`);
-    // const params = JSON.stringify(json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
-    debugger;
     await fetch(req)
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
@@ -429,6 +427,28 @@ var Storage = new SheetStorages();
       .then((response) => response.json())
       .then((data) => {
         console.log('specs salvate : ', data);
+      })
+      .catch((err) => console.error(err));
+  }
+
+  app.deleteSpecifications = async (token) => {
+    // method : store / update
+    await fetch(`/fetch_api/name/${token}/sheet_specs_destroy`)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        // console.log(data);
+        if (data) {
+          console.log('data : ', data);
+          // console.log('ELEMENTO ELIMINATO CON SUCCESSO!');
+          // lo elimino anche dal localStorage se presente
+          window.localStorage.removeItem(token);
+        } else {
+          console.error("Errore nella cancellazione della risorsa!");
+        }
       })
       .catch((err) => console.error(err));
   }
@@ -461,7 +481,7 @@ var Storage = new SheetStorages();
           statusIcon.innerText = "done";
           // Il tasto Upload implica che l'oggetto Sheet non è presente su DB, di consenguenza neanche le specs sono presenti
           // quindi effettuo lo store anche per le specs
-          if (type === 'sheet') app.saveSpecifications(token);
+          if (type === 'sheet') app.saveSpecifications('store', token);
         } else {
           console.error("Errore nell'aggiornamento della risorsa");
         }
@@ -471,7 +491,9 @@ var Storage = new SheetStorages();
 
   app.upgradeObject = async (e) => {
     // TODO: questa Fn è identica a app.uploadObject(), trovare il modo di utilizzarne solo una
-    let url = `/fetch_api/json/${e.currentTarget.dataset.upgrade}_update`;
+    const type = e.currentTarget.dataset.upgrade;
+    debugger;
+    let url = `/fetch_api/json/${type}_update`;
     const token = e.currentTarget.dataset.token;
     const json = JSON.parse(window.localStorage.getItem(token));
     const params = JSON.stringify(json);
@@ -489,12 +511,15 @@ var Storage = new SheetStorages();
         console.log(data);
         if (data) {
           // aggiorno lo status dell'elemento dopo l'upload
-          const li = document.getElementById(`${token}`);
+          const li = document.getElementById(token);
           const statusIcon = li.querySelector('i[data-sync-status]');
           li.dataset.sync = 'true';
           li.dataset.identical = 'true';
           statusIcon.classList.add('done');
           statusIcon.innerText = "done";
+          // Il tasto Upload implica che l'oggetto Sheet non è presente su DB, di consenguenza neanche le specs sono presenti
+          // quindi effettuo lo store anche per le specs
+          if (type === 'sheet') app.saveSpecifications('update', token);
         } else {
           console.error("Errore nell'aggiornamento della risorsa");
         }
@@ -503,8 +528,9 @@ var Storage = new SheetStorages();
   }
 
   app.deleteObject = async (e) => {
+    const type = e.currentTarget.dataset.delete;
     const token = e.currentTarget.dataset.token;
-    await fetch(`/fetch_api/name/${token}/${e.currentTarget.dataset.delete}_destroy`)
+    await fetch(`/fetch_api/name/${token}/${type}_destroy`)
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -518,6 +544,9 @@ var Storage = new SheetStorages();
           // lo elimino anche dal localStorage se presente
           window.localStorage.removeItem(token);
           const li = document.getElementById(`${token}`);
+          // Il tasto Upload implica che l'oggetto Sheet non è presente su DB, di consenguenza neanche le specs sono presenti
+          // quindi effettuo lo store anche per le specs
+          if (type === 'sheet') app.deleteSpecifications(token);
           // elimino anche dal DOM l'elemento
           li.remove();
         } else {

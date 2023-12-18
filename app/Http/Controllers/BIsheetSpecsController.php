@@ -99,8 +99,9 @@ class BIsheetSpecsController extends Controller
    * @param  \App\Models\BIsheet_specs  $bIsheet_specs
    * @return \Illuminate\Http\Response
    */
-  public function destroy(BIsheet_specs $bIsheet_specs)
+  public function destroy(BIsheet_specs $bIsheet_specs, $token)
   {
-    //
+    $element = $bIsheet_specs::findOrFail($token);
+    return $element->delete();
   }
 }

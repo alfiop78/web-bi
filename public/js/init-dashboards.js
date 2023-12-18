@@ -16,86 +16,6 @@ var Resource = new Resources();
   // Load the Visualization API and the corechart package.
   google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
 
-  // Carico elenco dashboards create
-  app.init = () => {
-    const ul = document.getElementById('ul-dashboards');
-    // TODO recuperare i dashboard con la chiamata all'apertura della pagina.
-    // Temporaneamente le Dashboard vengono caricate dal localStorage.
-    // Inserisco il codice di esempio utilizzato per gli schemi, nel drawer della pagina
-    for (const [token, value] of Object.entries(Resource.getDashboards())) {
-      console.log(token, value);
-      const content = app.tmplList.content.cloneNode(true);
-      const li = content.querySelector('li[data-li]');
-      const span = li.querySelector('span');
-      li.id = token;
-      li.dataset.token = value.token;
-      li.dataset.label = value.title;
-      li.addEventListener('click', app.dashboardSelected);
-      li.dataset.elementSearch = 'dashboards';
-      span.innerText = value.title;
-      ul.appendChild(li);
-    }
-  }
-
-  app.getLayout = (dashboard) => {
-    fetch(`/js/json-templates/${dashboard.layout}.json`)
-      .then((response) => {
-        console.log(response);
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then(data => {
-        if (!data) return;
-        console.log(data);
-        Template.data = data;
-        // creo il template nel DOM
-        Template.create();
-        // carico le risorse (sheet) necessarie alla dashboard
-        app.loadResources(dashboard.resources);
-      })
-      .catch(err => {
-        App.showConsole(err, 'error');
-        console.error(err);
-      });
-  }
-
-  // Recupero del template-layout e dello sheetSpecs
-  /* app.getLayouts = async () => {
-    // const sheetLayout = 'stock';
-    // const sheetLayout = 'competitive-bonus';
-    const templateLayout = 'layout-1';
-    const urls = [
-      `/js/json-templates/${templateLayout}.json`
-      // `/js/json-sheets/${sheetLayout}.json`
-    ];
-
-    const init = { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, method: 'POST' };
-    // ottengo tutte le risposte in un array
-    await Promise.all(urls.map(url => fetch(url, init)))
-      .then(responses => {
-        return Promise.all(responses.map(response => {
-          if (!response.ok) { throw Error(response.statusText); }
-          return response.json();
-        }))
-      })
-      .then((data) => {
-        console.log(data);
-        if (!data) return;
-        // imposto i dati di questo Template nella classe
-        Template.data = data[0];
-        // creo il template nel DOM
-        Template.create();
-        // Resource.sheetSpecs = data[1];
-        // Resource.json = JSON.parse(window.localStorage.getItem('template-59yblqr')); // cb
-        // il parse viene effettuato direttamente nel set della Classe Dashboards
-        Resource.json = window.localStorage.getItem('template-5ytvr56'); // cb-26.10.2023
-        // Resource.sheetSpecs = JSON.parse(window.localStorage.getItem('template-hdkglro')); // stock
-        app.dashboardExample();
-      })
-      .catch(err => console.error(err));
-  } */
-
   app.draw = () => {
     const prepareData = Resource.prepareData();
     // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
@@ -249,6 +169,168 @@ var Resource = new Resources();
     // gdashboard.bind(controls, wrap);
     gdashboard.draw(dataTable);
     // gdashboard.draw(view); // utilizzo della DataView
+  }
+
+  app.getLayout = (dashboard) => {
+    fetch(`/js/json-templates/${dashboard.layout}.json`)
+      .then((response) => {
+        console.log(response);
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(data => {
+        if (!data) return;
+        console.log(data);
+        Template.data = data;
+        // creo il template nel DOM
+        Template.create();
+        // carico le risorse (sheet) necessarie alla dashboard
+        app.loadResources(dashboard.resources);
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+  }
+
+  // per ogni report lancio la fetch (in getData()) per recuperare i dati
+  app.loadResources = (resources) => {
+    // TODO: predisporre una promise.all per scaricare tutte le risorse della Dashboard
+    for (const [token, value] of Object.entries(resources)) {
+      Resource.datamart_id = value.datamart_id;
+      // scarico la risorsa (le specs) dal DB e successivamente invoco getData()
+      debugger;
+      fetch(`/fetch_api/name/${token}/sheet_specs_show`)
+        .then((response) => {
+          if (!response.ok) { throw Error(response.statusText); }
+          return response;
+        })
+        .then((response) => response.json())
+        .then((data) => {
+          Resource.json = data.json_value;
+          // imposto il riferimento nel DOM, del layout, per questa risorsa/report
+          Resource.ref = value.ref;
+          app.getData();
+        })
+        .catch((err) => console.error(err));
+    }
+  }
+
+  app.dashboardSelected = (e) => {
+    debugger;
+    const dashboard = JSON.parse(window.localStorage.getItem(e.currentTarget.id));
+    document.querySelector('h1.title').innerHTML = dashboard.title;
+    app.getLayout(dashboard);
+  }
+
+  document.querySelectorAll('a[data-token]').forEach(a => {
+    a.addEventListener('click', async (e) => {
+      // scarico il json dal DB, lo salvo in sessionStorage
+      await fetch(`/fetch_api/name/${e.target.dataset.token}/dashboard_show`)
+        .then((response) => {
+          console.log(response);
+          if (!response.ok) { throw Error(response.statusText); }
+          return response;
+        })
+        .then((response) => response.json())
+        .then(data => {
+          console.log(data);
+          let json = JSON.parse(data.json_value);
+          window.sessionStorage.setItem(json.token, JSON.stringify(json));
+          document.querySelector('h1.title').innerHTML = json.title;
+          app.getLayout(json);
+        })
+        .catch(err => {
+          App.showConsole(err, 'error');
+          console.error(err);
+        });
+    });
+  });
+
+  // recupero il datamrt
+  app.getData = async () => {
+    // Chiamta in POST
+    // WARN: per la chiamata in POST bisogna aggiungere la route in VerifyCrsfToken.php
+    /* const params = sheet.id;
+    const url = `/fetch_api/datamart`;
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    const req = new Request(url, init);
+    await fetch(req)
+      .then((response) => {
+        console.log(response);
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(data => {
+        console.log(data);
+        // debugger;
+        Resource.data = data;
+        google.charts.setOnLoadCallback(app.drawDashboard(data));
+        // google.charts.setOnLoadCallback(app.drawTable(data));
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      }); */
+    // end chiamta in POST
+
+    // Chiamata in GET con laravel paginate()
+    const progressBar = document.getElementById('progress-bar');
+    let partialData = [];
+    await fetch(`/fetch_api/${Resource.datamart_id}/datamart?page=1`)
+      .then((response) => {
+        console.log(response);
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(async (paginateData) => {
+        console.log(paginateData);
+        console.log(paginateData.data);
+        // TODO: aggiungere laa progressBar
+        // debugger;
+        // funzione ricorsiva fino a quando è presente next_page_url
+        let recursivePaginate = async (url) => {
+          console.log(url);
+          await fetch(url).then((response) => {
+            // console.log(response);
+            if (!response.ok) { throw Error(response.statusText); }
+            return response;
+          }).then(response => response.json()).then((paginate) => {
+            console.log(paginate);
+            progressBar.value = +((paginate.to / paginate.total) * 100);
+            console.log(progressBar.value);
+            partialData = partialData.concat(paginate.data);
+            if (paginate.next_page_url) {
+              recursivePaginate(paginate.next_page_url);
+              console.log(partialData);
+            } else {
+              // Non sono presenti altre pagine, visualizzo il dashboard
+              console.log('tutte le paginate completate :', partialData);
+              Resource.data = partialData;
+              google.charts.setOnLoadCallback(app.draw());
+            }
+          }).catch((err) => {
+            App.showConsole(err, 'error');
+            console.error(err);
+          });
+        }
+        partialData = paginateData.data;
+        if (paginateData.next_page_url) {
+          recursivePaginate(paginateData.next_page_url);
+        } else {
+          // Non sono presenti altre pagine, visualizzo il dashboard
+          Resource.data = partialData;
+          google.charts.setOnLoadCallback(app.draw());
+        }
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+    // end chiamata in GET
   }
 
   // esempio per competitive-bonus
@@ -547,151 +629,5 @@ var Resource = new Resources();
     gdashboard.draw(dataTable);
     // gdashboard.draw(dataGroup); // utilizzo della funzione group
   }
-
-  // recupero il datamrt
-  app.getData = async (token) => {
-    // const sheet = JSON.parse(window.localStorage.getItem(token));
-    // if (!sheet.id) return false;
-    // Chiamta in POST
-    // WARN: per la chiamata in POST bisogna aggiungere la route in VerifyCrsfToken.php
-
-    /* const params = sheet.id;
-    const url = `/fetch_api/datamart`;
-    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
-    const req = new Request(url, init);
-    await fetch(req)
-      .then((response) => {
-        console.log(response);
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then(data => {
-        console.log(data);
-        // debugger;
-        Resource.data = data;
-        google.charts.setOnLoadCallback(app.drawDashboard(data));
-        // google.charts.setOnLoadCallback(app.drawTable(data));
-      })
-      .catch(err => {
-        App.showConsole(err, 'error');
-        console.error(err);
-      }); */
-    // end chiamta in POST
-
-    // Chiamata in GET con laravel paginate()
-    const progressBar = document.getElementById('progress-bar');
-    let partialData = [];
-    // TODO: lo Sheet.id va recuperato dalle resources e non da locale (l'utente finale non ha lo storage)
-    debugger;
-    await fetch(`/fetch_api/${Resource.datamart_id}/datamart?page=1`)
-      .then((response) => {
-        console.log(response);
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then(async (paginateData) => {
-        console.log(paginateData);
-        console.log(paginateData.data);
-        // debugger;
-        // Resource.data = paginateData.data;
-        // funzione ricorsiva fino a quando è presente next_page_url
-        let recursivePaginate = async (url) => {
-          console.log(url);
-          await fetch(url).then((response) => {
-            // console.log(response);
-            if (!response.ok) { throw Error(response.statusText); }
-            return response;
-          }).then(response => response.json()).then((paginate) => {
-            console.log(paginate);
-            progressBar.value = +((paginate.to / paginate.total) * 100);
-            console.log(progressBar.value);
-            partialData = partialData.concat(paginate.data);
-            if (paginate.next_page_url) {
-              recursivePaginate(paginate.next_page_url);
-              console.log(partialData);
-            } else {
-              // Non sono presenti altre pagine, visualizzo il dashboard
-              console.log('tutte le paginate completate :', partialData);
-              Resource.data = partialData;
-              google.charts.setOnLoadCallback(app.draw());
-            }
-          }).catch((err) => {
-            App.showConsole(err, 'error');
-            console.error(err);
-          });
-        }
-        partialData = paginateData.data;
-        if (paginateData.next_page_url) {
-          recursivePaginate(paginateData.next_page_url);
-        } else {
-          // Non sono presenti altre pagine, visualizzo il dashboard
-          Resource.data = partialData;
-          google.charts.setOnLoadCallback(app.draw());
-        }
-      })
-      .catch(err => {
-        App.showConsole(err, 'error');
-        console.error(err);
-      });
-    // end chiamata in GET
-  }
-
-  // per ogni report lancio la fetch (in getData()) per recuperare i dati
-  app.loadResources = (resources) => {
-    for (const [token, value] of Object.entries(resources)) {
-      Resource.datamart_id = value.datamart_id;
-      debugger;
-      // il parse viene effettuato direttamente nel set della Classe Dashboards
-      // scarico la risorsa (le specs) dal DB e successivamente invoco getData()
-      debugger;
-      fetch(`/fetch_api/name/${token}/sheet_specs_show`)
-        .then((response) => {
-          if (!response.ok) { throw Error(response.statusText); }
-          return response;
-        })
-        .then((response) => response.json())
-        .then((data) => {
-          Resource.json = data.json_value;
-          // imposto il riferimento nel DOM, del layout, per questa risorsa/report
-          Resource.ref = value.ref;
-          app.getData(token);
-        })
-        .catch((err) => console.error(err));
-    }
-  }
-
-
-  app.dashboardSelected = (e) => {
-    debugger;
-    const dashboard = JSON.parse(window.localStorage.getItem(e.currentTarget.id));
-    document.querySelector('h1.title').innerHTML = dashboard.title;
-    app.getLayout(dashboard);
-  }
-
-  document.querySelectorAll('a[data-token]').forEach(a => {
-    a.addEventListener('click', async (e) => {
-      // scarico il json dal DB, lo salvo in sessionStorage
-      await fetch(`/fetch_api/name/${e.target.dataset.token}/dashboard_show`)
-        .then((response) => {
-          console.log(response);
-          if (!response.ok) { throw Error(response.statusText); }
-          return response;
-        })
-        .then((response) => response.json())
-        .then(data => {
-          console.log(data);
-          let json = JSON.parse(data.json_value);
-          window.sessionStorage.setItem(json.token, JSON.stringify(json));
-          document.querySelector('h1.title').innerHTML = json.title;
-          app.getLayout(json);
-        })
-        .catch(err => {
-          App.showConsole(err, 'error');
-          console.error(err);
-        });
-    });
-  });
 
 })();

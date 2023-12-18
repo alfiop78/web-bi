@@ -107,9 +107,7 @@ class Resources extends Dashboards {
    * */
   set resource(value) {
     // value: il token del report che è stato aggiunto, in this.ref (nel DOM)
-    debugger;
     this.#resource.set(value, { token: this.token, ref: this.ref.id, datamart_id: this.datamart_id });
-    // this.#resource.set(value, { ref: this.ref.id, template: `template-${value}` });
   }
 
   get resource() {

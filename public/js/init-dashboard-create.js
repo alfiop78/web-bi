@@ -99,25 +99,6 @@ var Resource = new Resources();
   // TODO: potrei spostarla in Dashboards.js
   app.specsSave = () => {
     window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
-    /* const url = `/fetch_api/json/sheet_specs_update`;
-    const params = JSON.stringify(Resource.json);
-    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
-    const req = new Request(url, init);
-    fetch(req)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        debugger;
-        if (data) {
-          console.log('elemento salvato con successo');
-        } else {
-        }
-      })
-      .catch((err) => console.error(err)); */
   }
 
   app.preview = (e) => {
@@ -205,9 +186,7 @@ var Resource = new Resources();
     app.dlgChartSection.showModal();
   }
 
-  app.getData = async (token) => {
-    // const sheet = JSON.parse(window.localStorage.getItem(token));
-    // if (!sheet.id) return false;
+  app.getData = async () => {
     let partialData = [];
     debugger;
     await fetch(`/fetch_api/${Resource.datamart_id}/preview?page=1`)
@@ -238,7 +217,7 @@ var Resource = new Resources();
               // Non sono presenti altre pagine, visualizzo il dashboard
               console.log('tutte le paginate completate :', partialData);
               Resource.data = partialData;
-              google.charts.setOnLoadCallback(app.drawTable(sheet.token));
+              google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
             }
           }).catch((err) => {
             App.showConsole(err, 'error');
@@ -265,6 +244,8 @@ var Resource = new Resources();
     // recupero le specifiche per questo report (resource)
     // successivamente recupero i dati del datamart
     const token = e.currentTarget.dataset.token;
+    Resource.datamart_id = e.currentTarget.dataset.datamartId;
+    Resource.token = e.currentTarget.dataset.token;
     debugger;
     Resource.json = window.localStorage.getItem(`specs_${token}`);
     app.getData(token);
@@ -272,27 +253,6 @@ var Resource = new Resources();
     app.dlgChartSection.close();
     // aggiungo la class 'defined' nel div che contiene il grafico/tabella
     Resource.ref.classList.add('defined');
-    /* fetch(`/fetch_api/name/${token}/sheet_specs_show`)
-    Resource.datamart_id = e.currentTarget.dataset.datamartId;
-    Resource.token = e.currentTarget.dataset.token;
-    fetch(`/fetch_api/name/${token}/sheet_specs_show`)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        Resource.json = data.json_value;
-        console.log('save sheet_specs : ', Resource.json);
-        app.getData(token);
-        // un Map() di ref aggiunti alla pagina, questo verrà salvato nel json 'dashboard-token'
-        // Resource.resource = {sheet : e.currentTarget.dataset.token, template : `template-${e.currentTarget.dataset.token}`};
-        Resource.resource = token;
-        app.dlgChartSection.close();
-        // aggiungo la class 'defined' nel div che contiene il grafico/tabella
-        Resource.ref.classList.add('defined');
-      })
-      .catch((err) => console.error(err)); */
   }
 
   app.createTemplateFilter = (filter) => {
@@ -347,6 +307,23 @@ var Resource = new Resources();
       Resource.dataTable, keyColumns, groupColumnsIndex
     );
 
+    /* for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
+      let formatter = null;
+      switch (properties.type) {
+        case 'number':
+          formatter = app[properties.type](properties.prop);
+          break;
+        // case 'date':
+        // TODO: Da implementare
+        // let formatter = app[properties.format](properties.numberDecimal);
+        // formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
+        // break;
+        default:
+          // debugger;
+          break;
+      }
+      if (formatter) formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
+    } */
 
     Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
 

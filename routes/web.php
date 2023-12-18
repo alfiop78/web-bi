@@ -304,6 +304,7 @@ Route::prefix('/fetch_api/name/')->group(function () {
   Route::get('{token}/sheet_destroy', [BIsheetController::class, 'destroy']);
   Route::get('{token}/metric_destroy', [BImetricController::class, 'destroy']);
   Route::get('{token}/filter_destroy', [BIfilterController::class, 'destroy']);
+  Route::get('{token}/sheet_specs_destroy', [BIsheetSpecsController::class, 'destroy']);
 });
 // index
 Route::prefix('/fetch_api/versioning/')->group(function () {
