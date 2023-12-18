@@ -161,7 +161,7 @@ var Resource = new Resources();
             formatter = app[properties.type](properties.prop);
             break;
           // case 'date':
-          // TODO Da implementare
+          // TODO: Da implementare
           // let formatter = app[properties.format](properties.numberDecimal);
           // formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
           // break;
@@ -550,8 +550,8 @@ var Resource = new Resources();
 
   // recupero il datamrt
   app.getData = async (token) => {
-    const sheet = JSON.parse(window.localStorage.getItem(token));
-    if (!sheet.id) return false;
+    // const sheet = JSON.parse(window.localStorage.getItem(token));
+    // if (!sheet.id) return false;
     // Chiamta in POST
     // WARN: per la chiamata in POST bisogna aggiungere la route in VerifyCrsfToken.php
 
@@ -582,7 +582,9 @@ var Resource = new Resources();
     // Chiamata in GET con laravel paginate()
     const progressBar = document.getElementById('progress-bar');
     let partialData = [];
-    await fetch(`/fetch_api/${sheet.id}/datamart?page=1`)
+    // TODO: lo Sheet.id va recuperato dalle resources e non da locale (l'utente finale non ha lo storage)
+    debugger;
+    await fetch(`/fetch_api/${Resource.datamart_id}/datamart?page=1`)
       .then((response) => {
         console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
@@ -638,8 +640,9 @@ var Resource = new Resources();
 
   // per ogni report lancio la fetch (in getData()) per recuperare i dati
   app.loadResources = (resources) => {
-    // TODO: qui dovrò fare una promise.all per richiamare tutti i report e le loro specifiche
     for (const [token, value] of Object.entries(resources)) {
+      Resource.datamart_id = value.datamart_id;
+      debugger;
       // il parse viene effettuato direttamente nel set della Classe Dashboards
       // scarico la risorsa (le specs) dal DB e successivamente invoco getData()
       debugger;
