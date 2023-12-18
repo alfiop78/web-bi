@@ -178,7 +178,8 @@ var Storage = new SheetStorages();
       // FIX: i dashboard e i template verrano salvati solo su DB.
       // 23.11.2023 - Attualmente sono disponibili in localStorage, quindi aggiungo
       // questo if temporaneamente
-      if (object.type !== 'dashboard' && !object.type.startsWith('template-')) app.addElement(token, object, 'local');
+      // if (object.type !== 'dashboard' && !object.type.startsWith('specs_')) app.addElement(token, object, 'local');
+      if (object.type !== 'dashboard' && !object.hasOwnProperty('wrapper')) app.addElement(token, object, 'local');
     }
   }
 
@@ -412,8 +413,29 @@ var Storage = new SheetStorages();
     });
   }
 
+  app.saveSpecifications = async (token) => {
+    const url = '/fetch_api/json/sheet_specs_store'
+    // const json = window.localStorage.getItem(`specs_${token}`);
+    const params = window.localStorage.getItem(`specs_${token}`);
+    // const params = JSON.stringify(json);
+    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    const req = new Request(url, init);
+    debugger;
+    await fetch(req)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('specs salvate : ', data);
+      })
+      .catch((err) => console.error(err));
+  }
+
   app.uploadObject = async (e) => {
-    let url = `/fetch_api/json/${e.currentTarget.dataset.upload}_store`;
+    const type = e.currentTarget.dataset.upload;
+    let url = `/fetch_api/json/${type}_store`;
     const token = e.currentTarget.dataset.token;
     const json = JSON.parse(window.localStorage.getItem(token));
     const params = JSON.stringify(json);
@@ -437,6 +459,9 @@ var Storage = new SheetStorages();
           li.dataset.identical = 'true';
           statusIcon.classList.add('done');
           statusIcon.innerText = "done";
+          // Il tasto Upload implica che l'oggetto Sheet non è presente su DB, di consenguenza neanche le specs sono presenti
+          // quindi effettuo lo store anche per le specs
+          if (type === 'sheet') app.saveSpecifications(token);
         } else {
           console.error("Errore nell'aggiornamento della risorsa");
         }

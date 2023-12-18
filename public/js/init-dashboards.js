@@ -152,7 +152,7 @@ var Resource = new Resources();
         wrap.getDataTable(), keyColumns, groupColumnsIndex
       );
       console.log('group():', Resource.dataGroup);
-      for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
+      /* for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
         // console.log('Formattazione ', Resource.dataGroup.getColumnIndex(columnId));
         let formatter = null;
         // debugger;
@@ -170,7 +170,7 @@ var Resource = new Resources();
             break;
         }
         if (formatter) formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
-      }
+      } */
 
       Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
 
@@ -642,6 +642,7 @@ var Resource = new Resources();
     for (const [token, value] of Object.entries(resources)) {
       // il parse viene effettuato direttamente nel set della Classe Dashboards
       // scarico la risorsa (le specs) dal DB e successivamente invoco getData()
+      debugger;
       fetch(`/fetch_api/name/${token}/sheet_specs_show`)
         .then((response) => {
           if (!response.ok) { throw Error(response.statusText); }

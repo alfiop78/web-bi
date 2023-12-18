@@ -98,7 +98,8 @@ var Resource = new Resources();
 
   // TODO: potrei spostarla in Dashboards.js
   app.specsSave = () => {
-    const url = `/fetch_api/json/sheet_specs_update`;
+    window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
+    /* const url = `/fetch_api/json/sheet_specs_update`;
     const params = JSON.stringify(Resource.json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
@@ -116,7 +117,7 @@ var Resource = new Resources();
         } else {
         }
       })
-      .catch((err) => console.error(err));
+      .catch((err) => console.error(err)); */
   }
 
   app.preview = (e) => {
@@ -282,7 +283,14 @@ var Resource = new Resources();
     // recupero le specifiche per questo report (resource)
     // successivamente recupero i dati del datamart
     const token = e.currentTarget.dataset.token;
-    fetch(`/fetch_api/name/${token}/sheet_specs_show`)
+    debugger;
+    Resource.json = window.localStorage.getItem(`specs_${token}`);
+    app.getData(token);
+    Resource.resource = token;
+    app.dlgChartSection.close();
+    // aggiungo la class 'defined' nel div che contiene il grafico/tabella
+    Resource.ref.classList.add('defined');
+    /* fetch(`/fetch_api/name/${token}/sheet_specs_show`)
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -300,7 +308,7 @@ var Resource = new Resources();
         // aggiungo la class 'defined' nel div che contiene il grafico/tabella
         Resource.ref.classList.add('defined');
       })
-      .catch((err) => console.error(err));
+      .catch((err) => console.error(err)); */
   }
 
   app.createTemplateFilter = (filter) => {
@@ -356,23 +364,23 @@ var Resource = new Resources();
       Resource.dataTable, keyColumns, groupColumnsIndex
     );
 
-    for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
-      let formatter = null;
-      switch (properties.type) {
-        case 'number':
-          formatter = app[properties.type](properties.prop);
-          break;
-        // case 'date':
-        // TODO Da implementare
-        // let formatter = app[properties.format](properties.numberDecimal);
-        // formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
-        // break;
-        default:
-          // debugger;
-          break;
-      }
-      if (formatter) formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
-    }
+    // for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
+    //   let formatter = null;
+    //   switch (properties.type) {
+    //     case 'number':
+    //       formatter = app[properties.type](properties.prop);
+    //       break;
+    //     // case 'date':
+    //     // TODO: Da implementare
+    //     // let formatter = app[properties.format](properties.numberDecimal);
+    //     // formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
+    //     // break;
+    //     default:
+    //       // debugger;
+    //       break;
+    //   }
+    //   if (formatter) formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
+    // }
 
     Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
 
