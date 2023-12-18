@@ -37,8 +37,9 @@ function drawDatamart() {
   const prepareData = Resource.prepareData();
   // ciclo il prepareData.cols per aggiungere l'elenco delle colonne in #ul-columns-handler.
   // Da questo elenco si potranno nascondere/visualizzare le colonne e le metreehe
+  const ulColumnsHandler = document.getElementById('ul-columns-handler');
+  ulColumnsHandler.querySelectorAll('li').forEach(el => el.remove());
   prepareData.cols.forEach((col, index) => {
-    const ulColumnsHandler = document.getElementById('ul-columns-handler');
     const tmplContent = tmplList.content.cloneNode(true);
     const li = tmplContent.querySelector('li');
     // const span = li.querySelector('span');
@@ -456,7 +457,7 @@ function columnHander(e) {
       Resource.json.data.group.key[dataTableIndex - 1].properties.grouped = false;
       Resource.json.data.group.key[dataTableIndex].properties.grouped = false;
       Resource.json.data.view[columnIndex].properties.visible = false;
-      delete Resource.json.data.formatter[e.target.dataset.columnId];
+      // delete Resource.json.data.formatter[e.target.dataset.columnId];
     } else {
       // metrica
       Resource.json.data.group.columns[metricIndex].properties.visible = false;

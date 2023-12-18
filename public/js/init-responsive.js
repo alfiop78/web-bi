@@ -1605,7 +1605,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       }); */
     // end chiamata in GET
     Resource.json = window.localStorage.getItem(`specs_${token}`);
-    debugger;
 
     const progressBar = document.getElementById('progress-bar');
     const progressTo = document.getElementById('progress-to');
@@ -1729,6 +1728,15 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // da questo momento in poi le modifiche (aggiunta/rimozione) di elementi allo Sheet
     // verranno contrassegnate come edit:true
     Sheet.edit = true;
+    // qui, le specifiche, le devo ricreare perchè sto elaborando o rielaborando il report
+    // e le specifiche potrebbero essere cambiate
+    debugger;
+    if (window.localStorage.getItem(`specs_${Sheet.sheet.token}`)) {
+      Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`)
+      Resource.specifications_update();
+    } else {
+      Resource.specifications_create();
+    }
   }
 
   app.newSheetDialog = () => {
@@ -1751,6 +1759,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // Imposto la prop 'edit' = false, verrà impostata a 'true' quando si apre uno Sheet
     // dal tasto 'Apri Sheet'
     Sheet.edit = false;
+    Resource = new Resources('preview-datamart');
     app.dialogNewSheet.close();
   }
 
@@ -1863,16 +1872,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     let fields = new Map();
     let metrics = new Map(), advancedMetrics = new Map(), compositeMetrics = new Map();
     let filters = new Map();
-    Resource = new Resources('preview-datamart');
-    // qui, le specifiche, le devo ricreare perchè sto elaborando o rielaborando il report
-    // e le specifiche potrebbero essere cambiate
-    debugger;
-    if (window.localStorage.getItem(`specs_${Sheet.sheet.token}`)) {
-      Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`)
-      Resource.specifications_update();
-    } else {
-      Resource.specifications_create();
-    }
     // per ogni 'fields' aggiunto a Sheet.fields ne recupero le proprietà 'field', 'tableAlias' e 'name'
     for (const [token, field] of Sheet.fields) {
       // verifico le tabelle da includere in tables Sheet.tables

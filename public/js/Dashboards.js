@@ -54,7 +54,6 @@ class Resources extends Dashboards {
   #specs_columns = {};
   #specs_group = { key: [], columns: [] };
   #specs_view = [];
-  #specs_formatter = {}
   #json = {
     token: null,
     name: null,
@@ -124,6 +123,9 @@ class Resources extends Dashboards {
 
   specifications_update() {
     debugger;
+    this.#specs_columns = {};
+    this.#specs_group = { key: [], columns: [] };
+    this.#specs_view = [];
     this.json.name = Sheet.name;
     for (const [token, field] of Sheet.fields) {
       const workbookField = WorkBook.field.get(token).field;
