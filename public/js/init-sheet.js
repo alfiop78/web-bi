@@ -155,7 +155,7 @@ function previewReady() {
   // });
   // console.log(Resource.dataGroup);
   // Formattazione colonne
-  for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
+  /* for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
     console.log('Formattazione ', Resource.dataGroup.getColumnIndex(columnId));
     let formatter = null;
     // debugger;
@@ -172,7 +172,7 @@ function previewReady() {
         break;
     }
     if (formatter) formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
-  }
+  } */
   // debugger;
 
   // TEST: aggiunta di una CSS class a una colonna, nella dataGroup
@@ -317,14 +317,14 @@ function sort(e) {
   });
   // recupero la formattazione impostata per la colonna
   selectFormat.selectedIndex = 0; // default
-  [...selectFormat.options].forEach((option, index) => {
+  /* [...selectFormat.options].forEach((option, index) => {
     // console.log(index, option);
     if (Resource.json.data.formatter[Resource.columnId]) {
       if (option.value === Resource.json.data.formatter[Resource.columnId].format) {
         selectFormat.selectedIndex = index;
       }
     }
-  });
+  }); */
   // recupero l'informazione .json.filter (colonna impostata come filtro)
   if (Resource.json.filters.find(name => name.filterColumnLabel === Resource.columnLabel)) {
     // colonna impostata come filtro
@@ -365,7 +365,7 @@ saveColumnConfig.onclick = () => {
   // TODO: probabilmente devo modificare anche l'id, se è stato modificato il nome nel report
   if (metric) metric.label = label;
 
-  const format = formatterRef.options.item(formatterRef.selectedIndex).value;
+  /* const format = formatterRef.options.item(formatterRef.selectedIndex).value;
   let formatterProperties = {};
   switch (format) {
     case 'default':
@@ -384,7 +384,7 @@ saveColumnConfig.onclick = () => {
     default:
       break;
   }
-  Resource.json.data.formatter[Resource.columnId] = { type, format, prop: formatterProperties };
+  Resource.json.data.formatter[Resource.columnId] = { type, format, prop: formatterProperties }; */
   // filtri definiti per il report
   if (filterColumn.checked === true) {
     // Proprietà Resource.json.filters
@@ -416,8 +416,9 @@ saveColumnConfig.onclick = () => {
   // window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
   // window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
   dlgConfig.close();
+  // Resource.saveSpecifications();
+  window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
   previewReady();
-  Resource.saveSpecifications();
 }
 
 function columnHander(e) {
@@ -455,14 +456,14 @@ function columnHander(e) {
       Resource.json.data.group.key[dataTableIndex - 1].properties.grouped = false;
       Resource.json.data.group.key[dataTableIndex].properties.grouped = false;
       Resource.json.data.view[columnIndex].properties.visible = false;
-      debugger;
       delete Resource.json.data.formatter[e.target.dataset.columnId];
     } else {
+      // metrica
       Resource.json.data.group.columns[metricIndex].properties.visible = false;
     }
   }
   debugger;
+  window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
   previewReady();
-  debugger;
-  Resource.saveSpecifications();
+  // Resource.saveSpecifications();
 }

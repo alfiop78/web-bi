@@ -1522,9 +1522,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
     Resource.json.wrapper.chartType = 'Table';
     // debugger;
-    Resource.saveSpecifications();
+    // Resource.saveSpecifications();
+    debugger;
+    window.localStorage.setItem(`specs_${Sheet.sheet.token}`, JSON.stringify(Resource.json));
   }
 
+  // func richiamata con await
   app.checkSpecifications = async () => {
     // Verifico se le specifiche per questo report già esistono.
     await fetch(`/fetch_api/name/${Sheet.sheet.token}/sheet_specs_show`)
@@ -1550,9 +1553,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // console.log(token);
     // recupero l'id dello Sheet
     const sheet = JSON.parse(window.localStorage.getItem(token));
-    // debugger;
-    if (!sheet.id) return false;
     console.log(sheet);
+    debugger;
+    if (!sheet.id) return false;
     // NOTE: Chiamata in post per poter passare tutte le colonne, incluso l'alias, alla query
     // TODO: Passo in param un object con le colonne da estrarre (tutte)
     /* const params = JSON.stringify({ sheet_id: sheet.id });
@@ -1601,6 +1604,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         console.error(err);
       }); */
     // end chiamata in GET
+    Resource.json = window.localStorage.getItem(`specs_${token}`);
+    debugger;
 
     const progressBar = document.getElementById('progress-bar');
     const progressTo = document.getElementById('progress-to');
@@ -1705,7 +1710,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     app.dialogSheet.close();
     // in fase di apertura della preview, le specifiche sono sicuramente già presenti.
     Resource = new Resources('preview-datamart');
-    await app.checkSpecifications();
+    // await app.checkSpecifications();
     // TODO: verifico se il datamart, per lo Sheet selezionato, è già presente sul DB.
     // In caso positivo lo apro in preview-datamart.
     // debugger;
@@ -1861,7 +1866,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     Resource = new Resources('preview-datamart');
     // qui, le specifiche, le devo ricreare perchè sto elaborando o rielaborando il report
     // e le specifiche potrebbero essere cambiate
-    await app.checkSpecifications();
+    debugger;
+    if (window.localStorage.getItem(`specs_${Sheet.sheet.token}`)) {
+      Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`)
+      Resource.specifications_update();
+    } else {
+      Resource.specifications_create();
+    }
     // per ogni 'fields' aggiunto a Sheet.fields ne recupero le proprietà 'field', 'tableAlias' e 'name'
     for (const [token, field] of Sheet.fields) {
       // verifico le tabelle da includere in tables Sheet.tables
