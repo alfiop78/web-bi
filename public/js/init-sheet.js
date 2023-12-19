@@ -13,21 +13,6 @@ let app = {
   }
 }
 
-/* function drawTest() {
-  const prepareData = Resource.prepareData();
-  let DataTable = new google.visualization.DataTable(prepareData);
-  var wrapper = new google.visualization.ChartWrapper({
-    chartType: 'Table',
-    containerId: 'preview-datamart',
-    dataTable: DataTable,
-    options: {
-      page: "enabled",
-      pageSize: 500
-    }
-  });
-  wrapper.draw();
-} */
-
 // TODO: spostarla nella Classe Resources
 function drawDatamart() {
   // Il dato iniziale non è raggruppato, la query sul datamart è eseguita con SELECT *...
@@ -51,7 +36,7 @@ function drawDatamart() {
     const metric = Resource.json.data.group.columns.find(metric => (metric.alias === col.id && metric.dependencies === false));
     if (!regex.test(col.id) || metric) {
       // se la colonna è nascosta, imposto il dataset.hidden = true
-      const column = Resource.json.data.view.find(column => (column.id === col.id));
+      const column = Resource.json.data.group.key.find(column => (column.id === col.id));
       if (column) li.dataset.visible = column.properties.visible;
       if (metric) li.dataset.visible = metric.properties.visible;
       if (column || metric) {
@@ -111,26 +96,29 @@ function previewReady() {
   // anche con un object, da rivedere su Google Chart)
   // Questo è il secondo param della funzione group() e, in questo array sono incluse
   // anche le colonne _id
-  let keyColumns = [];
+  // let keyColumns = [];
   // keyColumns conterrà gli index delle colonne (recuperandoli da
   // json.data.group.key) per le quali il report viene raggruppato.
   // Questo consente di fare i calcoli per le metriche composte sui dati raggruppati
-  Resource.json.data.group.key.forEach(column => {
+  /* Resource.json.data.group.key.forEach(column => {
     // if (column.properties.grouped) keyColumns.push(Resource.dataTable.getColumnIndex(column.id));
     // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
     // che viene modificata dall'utente a runtime
     if (column.properties.grouped) {
       keyColumns.push({ id: column.id, column: Resource.dataTable.getColumnIndex(column.id), label: column.label, type: column.type });
     }
-  });
-  console.log(keyColumns);
+  }); */
+  Resource.groupFunction();
+  console.log(Resource.groupKey);
+  console.log(Resource.groupColumn);
+  debugger;
   // creo l'object che verrà messo nel terzo param di group()
   // Es.: { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
   // le metriche che hanno la proprietà dependencies: true, sono quelle NON aggiunte DIRETTAMENTE
   // al report ma "dipendono" da quelle composite, quindi creo l'array con le sole colonne
   // da visualizzare nel report, prendendo i dati da 'data.group.columns'
-  let groupColumnsIndex = [];
-  Resource.json.data.group.columns.forEach(metric => {
+  // let groupColumnsIndex = [];
+  /* Resource.json.data.group.columns.forEach(metric => {
     // salvo in groupColumnsIndex TUTTE le metriche, deciderò nella DataView
     // quali dovranno essere visibili (quelle con dependencies:false)
     // recupero l'indice della colonna in base al suo nome
@@ -139,12 +127,14 @@ function previewReady() {
     const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
     let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', label: metric.label };
     groupColumnsIndex.push(object);
-  });
+  }); */
   // console.log(groupColumnsIndex);
   // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
-  Resource.dataGroup = new google.visualization.data.group(
+  Resource.group();
+  debugger;
+  /* Resource.dataGroup = new google.visualization.data.group(
     Resource.dataTable, keyColumns, groupColumnsIndex
-  );
+  ); */
   // console.log('group():', Resource.dataGroup);
   // console.log(Resource.dataGroup.getColumnIndex())
   // Imposto le label memorizzate in group.key. In questo caso potrei utilizzare gli object da passare
@@ -208,8 +198,21 @@ function previewReady() {
   // Resource.json.data.view.forEach(column => {
   //   if (column.properties.visible) viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
   // });
-  Resource.json.data.view.forEach(column => {
-    if (column.properties.visible) viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
+  // TODO: L'array viewColumns potrebbe essere creata direttamente da json.data.group.key anziche da json.data.view
+  // Resource.json.data.view.forEach(column => {
+  //   if (column.properties.visible) {
+  //     viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
+  //     // imposto la classe per le colonne dimensionali
+  //     Resource.dataGroup.setColumnProperty(Resource.dataGroup.getColumnIndex(column.id), 'className', 'dimensional-column');
+  //   }
+  // });
+  Resource.json.data.group.key.forEach(column => {
+    if (column.properties.visible) {
+      viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
+      // imposto la classe per le colonne dimensionali
+      Resource.dataGroup.setColumnProperty(Resource.dataGroup.getColumnIndex(column.id), 'className', 'dimensional-column');
+    }
+
   });
   // dalla dataGroup, recupero gli indici di colonna delle metriche
   Resource.json.data.group.columns.forEach(metric => {
@@ -357,13 +360,15 @@ saveColumnConfig.onclick = () => {
   // if (columnIndex !== -1) Resource.dataGroup.setColumnLabel(3, 'test-3');
   // if (columnIndex !== -1) Resource.dataGroup.setColumnLabel(Resource.dataTableIndex, 'test-2');
   // cerco la colonna sia in data.group.key (colonne dimensionali) che in data.group.columns (metriche)
-  Resource.json.data.columns[Resource.columnId].label = label;
+  // Resource.json.data.columns[Resource.columnId].label = label;
+
+  debugger;
   const column = Resource.json.data.group.key.find(col => col.id === Resource.columnId);
-  // TODO: probabilmente devo modificare anche l'id, se è stato modificato il nome nel report
+  // TODO: probabilmente devo modificare anche l'id, se è stato modificato nel report
   if (column) column.label = label;
 
   const metric = Resource.json.data.group.columns.find(metric => metric.alias === Resource.columnId);
-  // TODO: probabilmente devo modificare anche l'id, se è stato modificato il nome nel report
+  // TODO: probabilmente devo modificare anche l'id, se è stato modificato nel report
   if (metric) metric.label = label;
 
   /* const format = formatterRef.options.item(formatterRef.selectedIndex).value;
@@ -424,47 +429,49 @@ saveColumnConfig.onclick = () => {
 
 function columnHander(e) {
   // Stessa logica della Func 'previewReady()'
-  console.log(Resource.dataViewGrouped.getColumnIndex(e.target.dataset.columnId));
-  console.log(Resource.dataTable.getColumnIndex(e.target.dataset.columnId));
   const dataTableIndex = Resource.dataTable.getColumnIndex(e.target.dataset.columnId);
-  // Recupero l'index della colonna da nascondere/visualizzare
-  const columnIndex = Resource.json.data.view.findIndex(col => col.id === e.target.dataset.columnId);
-  const metricIndex = Resource.json.data.group.columns.findIndex(metric => metric.alias === e.target.dataset.columnId);
-  // debugger;
-  if (e.target.dataset.visible === 'false') {
-    // la colonna è nascosta, la visualizzo e raggruppo.
-    e.target.dataset.visible = true;
-    // La logica è descritta nell'else (quando si nasconde una colonna)
-    if (columnIndex !== -1) {
+  console.log('index colonna DataTable', dataTableIndex);
+  console.log(Resource.dataTable.getColumnProperties(dataTableIndex));
+  const columnType = Resource.dataTable.getColumnProperty(dataTableIndex, 'data');
+  // let index;
+  if (columnType === 'column') {
+    // Recupero l'index della colonna da nascondere/visualizzare
+    // index = Resource.json.data.group.key.findIndex(col => col.id === e.target.dataset.columnId);
+    if (e.target.dataset.visible === 'false') {
+      // la colonna è nascosta, la visualizzo e raggruppo.
+      e.target.dataset.visible = true;
+      // La logica è descritta nell'else (quando si nasconde una colonna)
       Resource.json.data.group.key[dataTableIndex - 1].properties.grouped = true;
       Resource.json.data.group.key[dataTableIndex].properties.grouped = true;
-      Resource.json.data.view[columnIndex].properties.visible = true;
+      Resource.json.data.group.key[dataTableIndex].properties.visible = true;
     } else {
-      Resource.json.data.group.columns[metricIndex].properties.visible = true;
-    }
-  } else {
-    e.target.dataset.visible = false;
-    // la colonna è visibile, la nascondo e la elimino dal group()
-    // Il report è raggruppato (dataViewGrouped) in base ai livelli dimensionali
-    // presenti, quando viene nascosta una colonna, anzichè eliminarla
-    // dalle proprietà .json.data.group... le "contrassegno" con la prop 'grouped:false'
-    // In questo modo posso ripristinarla. Insieme alla colonna che sto nascondendo, va
-    // nascosta anche la sua relativa colonna _id, quindi dataTableIndex -1
-    // Elimino il raggruppamento per la colonna che l'utente ha nascosto
-    // se è una colonna dimensionale cerco in .group.key
-    // altrimenti cerco in .group.columns
-    if (columnIndex !== -1) {
+      e.target.dataset.visible = false;
+      // la colonna è visibile, la nascondo e la elimino dal group()
+      // Il report è raggruppato (dataViewGrouped) in base ai livelli dimensionali
+      // presenti, quando viene nascosta una colonna, anzichè eliminarla
+      // dalle proprietà .json.data.group... le "contrassegno" con la prop 'grouped:false'
+      // In questo modo posso ripristinarla. Insieme alla colonna che sto nascondendo, va
+      // nascosta anche la sua relativa colonna _id, quindi dataTableIndex -1
+      // Elimino il raggruppamento per la colonna che l'utente ha nascosto
+      // se è una colonna dimensionale cerco in .group.key
+      // altrimenti cerco in .group.columns
       Resource.json.data.group.key[dataTableIndex - 1].properties.grouped = false;
       Resource.json.data.group.key[dataTableIndex].properties.grouped = false;
-      Resource.json.data.view[columnIndex].properties.visible = false;
-      // delete Resource.json.data.formatter[e.target.dataset.columnId];
+      Resource.json.data.group.key[dataTableIndex].properties.visible = false;
+    }
+  } else {
+    // metrica
+    const metric = Resource.json.data.group.columns.find(metric => metric.alias === e.target.dataset.columnId);
+    if (e.target.dataset.visible === 'false') {
+      // la colonna è nascosta, la visualizzo e raggruppo.
+      e.target.dataset.visible = true;
+      metric.properties.visible = true;
     } else {
-      // metrica
-      Resource.json.data.group.columns[metricIndex].properties.visible = false;
+      e.target.dataset.visible = false;
+      metric.properties.visible = false;
     }
   }
-  debugger;
+  // debugger;
   window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
   previewReady();
-  // Resource.saveSpecifications();
 }

@@ -1821,7 +1821,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   app.handlerEditSheetName = (e) => {
     e.target.dataset.value = e.target.innerText;
     Sheet.name = e.target.innerText;
-  };
+  }
 
   app.editWorkBookName.onblur = (e) => WorkBook.name = e.target.innerText;
 
