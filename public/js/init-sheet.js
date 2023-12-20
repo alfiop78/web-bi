@@ -130,6 +130,13 @@ function previewReady() {
   /* Resource.dataGroup = new google.visualization.data.group(
     Resource.dataTable, keyColumns, groupColumnsIndex
   ); */
+  debugger;
+  for (const [key, value] of Object.entries(Resource.json.data.formatter)) {
+    debugger;
+    let formatter = app[value.type](value.prop);
+    formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(key));
+  }
+  debugger;
   // console.log('group():', Resource.dataGroup);
   // console.log(Resource.dataGroup.getColumnIndex())
   // Imposto le label memorizzate in group.key. In questo caso potrei utilizzare gli object da passare
@@ -168,6 +175,7 @@ function previewReady() {
   // DataView, mi consente di visualizzare SOLO le colonne definite nel report ed
   // effettuare eventuali calcoli per le metriche composite ('calc')
   Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
+  debugger;
 
   // TEST: recupero gli indici delle colonne area_ds, zona_ds (colonna da visualizzare)
   // console.log('costo_rapporto_6 (index):', Resource.dataGroup.getColumnIndex('costo_rapporto_6'));
