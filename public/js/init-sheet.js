@@ -268,6 +268,9 @@ saveColumnConfig.onclick = () => {
   const formatterRef = document.getElementById('field-format');
   const filterColumn = document.getElementById('filter-column');
   const type = typeRef.options.item(typeRef.selectedIndex).value.toLowerCase();
+  const format = formatterRef.options.item(formatterRef.selectedIndex).value;
+  let formatterProperties = {};
+
   // const columnIndex = Resource.json.data.view.findIndex(col => col.id === Resource.columnId);
   // if (columnIndex !== -1) Resource.dataGroup.setColumnLabel(7, 'test');
   // if (columnIndex !== -1) Resource.dataGroup.setColumnLabel(3, 'test-3');
@@ -275,25 +278,7 @@ saveColumnConfig.onclick = () => {
   // cerco la colonna sia in data.group.key (colonne dimensionali) che in data.group.columns (metriche)
   // Resource.json.data.columns[Resource.columnId].label = label;
 
-  Resource.dataGroup.setColumnLabel(Resource.dataTableIndex, 'test');
-  Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
-  debugger;
-  console.log(Resource.dataTable.getColumnProperties(Resource.dataTableIndex));
-  const columnType = Resource.dataTable.getColumnProperty(Resource.dataTableIndex, 'data');
-  if (columnType === 'column') {
-    const column = Resource.json.data.group.key.find(col => col.id === Resource.columnId);
-    // TODO: probabilmente devo modificare anche l'id, se è stato modificato nel report
-    if (column) column.label = label;
-  } else {
-    const metric = Resource.json.data.group.columns.find(metric => metric.alias === Resource.columnId);
-    // TODO: probabilmente devo modificare anche l'id, se è stato modificato nel report
-    if (metric) metric.label = label;
-  }
-  debugger;
-
-
-  /* const format = formatterRef.options.item(formatterRef.selectedIndex).value;
-  let formatterProperties = {};
+  Resource.dataGroup.setColumnLabel(Resource.dataTableIndex, label);
   switch (format) {
     case 'default':
       formatterProperties = { negativeParens: false, fractionDigits: 0, groupingSymbol: '.' };
@@ -311,9 +296,24 @@ saveColumnConfig.onclick = () => {
     default:
       break;
   }
-  Resource.json.data.formatter[Resource.columnId] = { type, format, prop: formatterProperties }; */
+  // console.log(Resource.dataTable.getColumnProperties(Resource.dataTableIndex));
+  const columnType = Resource.dataTable.getColumnProperty(Resource.dataTableIndex, 'data');
+  if (columnType === 'column') {
+    const column = Resource.json.data.group.key.find(col => col.id === Resource.columnId);
+    // TODO: probabilmente devo modificare anche l'id, se è stato modificato nel report
+    if (column) column.label = label;
+    column.formatter = { type, format, prop: formatterProperties };
+  } else {
+    const metric = Resource.json.data.group.columns.find(metric => metric.alias === Resource.columnId);
+    // TODO: probabilmente devo modificare anche l'id, se è stato modificato nel report
+    if (metric) metric.label = label;
+    metric.formatter = { type, format, prop: formatterProperties };
+    let formatter = app[type](formatterProperties);
+    formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
+  }
   // filtri definiti per il report
-  if (filterColumn.checked === true) {
+  // TODO: da testare
+  /* if (filterColumn.checked === true) {
     // Proprietà Resource.json.filters
     // Inserisco il filtro solo se non è ancora presente in Resource.json.filters
     const index = Resource.json.filters.findIndex(filter => filter.containerId === `flt-${label}`);
@@ -331,11 +331,11 @@ saveColumnConfig.onclick = () => {
     if (index !== -1) {
       Resource.json.filters.splice(index, 1);
       // lo rimuovo anche dal DOM
-      /* const filterRef = document.getElementById(`flt-${label}`);
-      filterRef.parentElement.remove();
-      app.setDashboardBind(); */
+      // const filterRef = document.getElementById(`flt-${label}`);
+      // filterRef.parentElement.remove();
+      // app.setDashboardBind();
     }
-  }
+  } */
 
   // TODO: Il containerId deve essere deciso in init-dashboard-create.js
   Resource.json.wrapper.containerId = 'chart_div';
