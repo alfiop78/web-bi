@@ -385,12 +385,88 @@ class Resources extends Dashboards {
       };
       this.groupColumn.push(object);
     });
+    this.dataGroup = new google.visualization.data.group(
+      this.dataTable, this.groupKey, this.groupColumn
+    );
   }
 
-  group() {
-    Resource.dataGroup = new google.visualization.data.group(
-      Resource.dataTable, keyColumns, groupColumnsIndex
-    );
+  createDataView() {
+    this.viewColumns = [], this.viewMetrics = [];
+    this.json.data.group.key.forEach(column => {
+      if (column.properties.visible) {
+        this.viewColumns.push(this.dataGroup.getColumnIndex(column.id));
+        // imposto la classe per le colonne dimensionali
+        this.dataGroup.setColumnProperty(this.dataGroup.getColumnIndex(column.id), 'className', 'dimensional-column');
+      }
+    });
+    // dalla dataGroup, recupero gli indici di colonna delle metriche
+    this.json.data.group.columns.forEach(metric => {
+      if (!metric.dependencies && metric.properties.visible) {
+        const index = this.dataGroup.getColumnIndex(metric.alias);
+        // NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo
+        // modo come alternativa a eval() (non l'ho testato)
+        // function evil(fn) {
+        //   return new Function('return ' + fn)();
+        // }
+        // console.log(evil('12/5*9+9.4*2')); // => 40.4     const index = Resource.dataGroup.getColumnIndex(metric.alias);
+
+        // Implementazione della func 'calc' per le metriche composite.
+        if (metric.type === 'composite') {
+          // è una metrica composta, creo la funzione calc, sostituendo i nomi
+          // delle metriche contenute nella formula, con gli indici corrispondenti.
+          // Es.: margine = ((ricavo - costo) / ricavo) * 100, recuperare gli indici
+          // delle colonne ricavo e costo per creare la metrica margine :
+          // recupero la formula della metrica composta
+          const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
+          // Creo una Func "dinamica"
+          let calcFunction = function(dt, row) {
+            let formulaJoined = [];
+            // in formulaJoined ciclo tutti gli elementi della Formula, imposto i
+            // valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
+            formula.forEach(formulaEl => {
+              if (formulaEl.alias) {
+                formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
+              } else {
+                formulaJoined.push(formulaEl);
+              }
+            });
+            // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
+            // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
+            // effettuo un controllo sul risultato in caso fosse NaN
+            const result = (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
+            let total = (result) ? { v: result } : { v: result, f: '-' };
+            // console.log(result);
+            // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
+            let resultFormatted;
+            // formattazione della cella con formatValue()
+            if (this.json.data.formatter[metric.alias]) {
+              const metricFormat = this.json.data.formatter[metric.alias];
+              let formatter;
+              formatter = app[metricFormat.type](metricFormat.prop);
+              resultFormatted = (result) ? formatter.formatValue(result) : '-';
+              total = { v: result, f: resultFormatted };
+            } else {
+              resultFormatted = (result) ? result : '-';
+              total = (result) ? { v: result } : { v: result, f: '-' };
+            }
+            return total;
+          }
+          this.viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
+        } else {
+          this.viewMetrics.push(index);
+          this.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
+          // console.log(Resource.dataGroup.getColumnProperty(index, 'className'));
+        }
+      }
+    });
+    // concateno i due array che popoleranno la DataView.setColumns()
+    this.viewDefined = this.viewColumns.concat(this.viewMetrics)
+    console.log('DataView defined:', this.viewDefined);
+    // Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
+    // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
+    // console.log(Resource.dataGroup.getColumnProperties(0));
+    this.dataViewGrouped.setColumns(this.viewDefined);
+
   }
 
   getDataType(datatype) {

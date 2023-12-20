@@ -109,9 +109,6 @@ function previewReady() {
     }
   }); */
   Resource.groupFunction();
-  console.log(Resource.groupKey);
-  console.log(Resource.groupColumn);
-  debugger;
   // creo l'object che verrà messo nel terzo param di group()
   // Es.: { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
   // le metriche che hanno la proprietà dependencies: true, sono quelle NON aggiunte DIRETTAMENTE
@@ -130,8 +127,6 @@ function previewReady() {
   }); */
   // console.log(groupColumnsIndex);
   // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
-  Resource.group();
-  debugger;
   /* Resource.dataGroup = new google.visualization.data.group(
     Resource.dataTable, keyColumns, groupColumnsIndex
   ); */
@@ -198,89 +193,7 @@ function previewReady() {
   // Resource.json.data.view.forEach(column => {
   //   if (column.properties.visible) viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
   // });
-  // TODO: L'array viewColumns potrebbe essere creata direttamente da json.data.group.key anziche da json.data.view
-  // Resource.json.data.view.forEach(column => {
-  //   if (column.properties.visible) {
-  //     viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
-  //     // imposto la classe per le colonne dimensionali
-  //     Resource.dataGroup.setColumnProperty(Resource.dataGroup.getColumnIndex(column.id), 'className', 'dimensional-column');
-  //   }
-  // });
-  Resource.json.data.group.key.forEach(column => {
-    if (column.properties.visible) {
-      viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
-      // imposto la classe per le colonne dimensionali
-      Resource.dataGroup.setColumnProperty(Resource.dataGroup.getColumnIndex(column.id), 'className', 'dimensional-column');
-    }
-
-  });
-  // dalla dataGroup, recupero gli indici di colonna delle metriche
-  Resource.json.data.group.columns.forEach(metric => {
-    if (!metric.dependencies && metric.properties.visible) {
-      const index = Resource.dataGroup.getColumnIndex(metric.alias);
-      // NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo
-      // modo come alternativa a eval() (non l'ho testato)
-      // function evil(fn) {
-      //   return new Function('return ' + fn)();
-      // }
-      // console.log(evil('12/5*9+9.4*2')); // => 40.4     const index = Resource.dataGroup.getColumnIndex(metric.alias);
-
-      // Implementazione della func 'calc' per le metriche composite.
-      if (metric.type === 'composite') {
-        // è una metrica composta, creo la funzione calc, sostituendo i nomi
-        // delle metriche contenute nella formula, con gli indici corrispondenti.
-        // Es.: margine = ((ricavo - costo) / ricavo) * 100, recuperare gli indici
-        // delle colonne ricavo e costo per creare la metrica margine :
-        // recupero la formula della metrica composta
-        const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
-        // Creo una Func "dinamica"
-        let calcFunction = function(dt, row) {
-          let formulaJoined = [];
-          // in formulaJoined ciclo tutti gli elementi della Formula, imposto i
-          // valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
-          formula.forEach(formulaEl => {
-            if (formulaEl.alias) {
-              formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
-            } else {
-              formulaJoined.push(formulaEl);
-            }
-          });
-          // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
-          // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
-          // effettuo un controllo sul risultato in caso fosse NaN
-          const result = (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
-          let total = (result) ? { v: result } : { v: result, f: '-' };
-          // console.log(result);
-          // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
-          let resultFormatted;
-          // formattazione della cella con formatValue()
-          if (Resource.json.data.formatter[metric.alias]) {
-            const metricFormat = Resource.json.data.formatter[metric.alias];
-            let formatter;
-            formatter = app[metricFormat.type](metricFormat.prop);
-            resultFormatted = (result) ? formatter.formatValue(result) : '-';
-            total = { v: result, f: resultFormatted };
-          } else {
-            resultFormatted = (result) ? result : '-';
-            total = (result) ? { v: result } : { v: result, f: '-' };
-          }
-          return total;
-        }
-        viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
-      } else {
-        viewMetrics.push(index);
-        Resource.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
-        // console.log(Resource.dataGroup.getColumnProperty(index, 'className'));
-      }
-    }
-  });
-  // concateno i due array che popoleranno la DataView.setColumns()
-  let viewDefined = viewColumns.concat(viewMetrics)
-  // Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
-  // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
-  // console.log(Resource.dataGroup.getColumnProperties(0));
-  Resource.dataViewGrouped.setColumns(viewDefined);
-  // console.info('DataView', Resource.dataViewGrouped);
+  Resource.createDataView();
 
   google.visualization.events.addListener(Resource.tableRefGroup, 'sort', sort);
   // con l'opzione sort: 'event' viene comunque processato l'evento 'sort'
@@ -362,14 +275,22 @@ saveColumnConfig.onclick = () => {
   // cerco la colonna sia in data.group.key (colonne dimensionali) che in data.group.columns (metriche)
   // Resource.json.data.columns[Resource.columnId].label = label;
 
+  Resource.dataGroup.setColumnLabel(Resource.dataTableIndex, 'test');
+  Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
   debugger;
-  const column = Resource.json.data.group.key.find(col => col.id === Resource.columnId);
-  // TODO: probabilmente devo modificare anche l'id, se è stato modificato nel report
-  if (column) column.label = label;
+  console.log(Resource.dataTable.getColumnProperties(Resource.dataTableIndex));
+  const columnType = Resource.dataTable.getColumnProperty(Resource.dataTableIndex, 'data');
+  if (columnType === 'column') {
+    const column = Resource.json.data.group.key.find(col => col.id === Resource.columnId);
+    // TODO: probabilmente devo modificare anche l'id, se è stato modificato nel report
+    if (column) column.label = label;
+  } else {
+    const metric = Resource.json.data.group.columns.find(metric => metric.alias === Resource.columnId);
+    // TODO: probabilmente devo modificare anche l'id, se è stato modificato nel report
+    if (metric) metric.label = label;
+  }
+  debugger;
 
-  const metric = Resource.json.data.group.columns.find(metric => metric.alias === Resource.columnId);
-  // TODO: probabilmente devo modificare anche l'id, se è stato modificato nel report
-  if (metric) metric.label = label;
 
   /* const format = formatterRef.options.item(formatterRef.selectedIndex).value;
   let formatterProperties = {};
@@ -424,16 +345,17 @@ saveColumnConfig.onclick = () => {
   dlgConfig.close();
   // Resource.saveSpecifications();
   window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
-  previewReady();
+  Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
+  debugger;
+  // previewReady();
 }
 
 function columnHander(e) {
   // Stessa logica della Func 'previewReady()'
   const dataTableIndex = Resource.dataTable.getColumnIndex(e.target.dataset.columnId);
   console.log('index colonna DataTable', dataTableIndex);
-  console.log(Resource.dataTable.getColumnProperties(dataTableIndex));
+  // console.log(Resource.dataTable.getColumnProperties(dataTableIndex));
   const columnType = Resource.dataTable.getColumnProperty(dataTableIndex, 'data');
-  // let index;
   if (columnType === 'column') {
     // Recupero l'index della colonna da nascondere/visualizzare
     // index = Resource.json.data.group.key.findIndex(col => col.id === e.target.dataset.columnId);
@@ -458,6 +380,11 @@ function columnHander(e) {
       Resource.json.data.group.key[dataTableIndex - 1].properties.grouped = false;
       Resource.json.data.group.key[dataTableIndex].properties.grouped = false;
       Resource.json.data.group.key[dataTableIndex].properties.visible = false;
+      // OPTIMIZE: se, invece di previewReady() provassi ad impostare i metodi hideColumn/showColumn di GoogleChart?
+      // TEST: aggiorna tabella con il metodo draw()
+      /* Resource.dataViewGrouped.hideColumns([dataTableIndex - 1, dataTableIndex]);
+      debugger;
+      Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options); */
     }
   } else {
     // metrica
