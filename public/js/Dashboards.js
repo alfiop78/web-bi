@@ -159,21 +159,10 @@ class Resources extends Dashboards {
             properties: { grouped: keyColumn.properties.grouped, visible: keyColumn.properties.visible }
           });
         }
-        // json.data.view
-        // const viewColumn = this.json.data.view.find(value => value.id === field_id_ds);
-        // if (!viewColumn) {
-        //   // la colnna _id la nascondo dalla DataView
-        //   const visible = (key === 'id') ? false : true;
-        //   this.#specs_view.push({ id: field_id_ds, properties: { visible } });
-        // } else {
-        //   this.#specs_view.push({ id: field_id_ds, properties: { visible: viewColumn.properties.visible } });
-        // }
       });
     }
     console.log(this.#specs_columns);
-    // console.log(this.#specs_view);
     console.log(this.#specs_group.key);
-    debugger;
     for (const [token, metric] of Sheet.metrics) {
       if (this.json.data.columns[metric.alias]) {
         // metrica già presente
@@ -208,26 +197,10 @@ class Resources extends Dashboards {
         // già presente
         this.#specs_group.columns.push(findMetric);
       }
-
-      // in fase di creazione di json.data.group.columns (metriche) imposto anche
-      // una formattazione, di base, perchè siccomme il json.data.formatter è un {} ma
-      // quando viene salvato su DB viene convertito in [] (forse perchè è vuoto) allora lo
-      // imposto con i valori delle metriche, in modo da creare un {}
-      /* if (!this.json.data.formatter[metric.alias]) {
-        // formattazione per questa metrica non presente
-        // groupSymbol dovrebbe essere default il punto (.) perchè il googleChart load è impostato
-        // language 'it'
-        this.json.data.formatter[metric.alias] = {
-          type: 'number', format: null, prop: {
-            negativeParens: false, fractionDigits: 0, groupingSymbol: '.'
-          }
-        };
-      } */
     }
     this.json.data.columns = this.#specs_columns;
     this.json.data.group.key = this.#specs_group.key;
     this.json.data.group.columns = this.#specs_group.columns;
-    // this.json.data.view = this.#specs_view;
     debugger;
     window.localStorage.setItem(`specs_${Sheet.sheet.token}`, JSON.stringify(this.json));
   }
@@ -300,22 +273,7 @@ class Resources extends Dashboards {
         type: metric.type,
         datatype: 'number'
       });
-      // TEST: impostare una formattazione di default per le metriche
       this.specs_formatter = { id: metric.alias, datatype: 'number' };
-      // in fase di creazione di json.data.group.columns (metriche) imposto anche
-      // una formattazione, di base, perchè siccomme il json.data.formatter è un {} ma
-      // quando viene salvato su DB viene convertito in [] (forse perchè è vuoto) allora lo
-      // imposto con i valori delle metriche, in modo da creare un {}
-      /* if (!this.json.data.formatter[metric.alias]) {
-        // formattazione per questa metrica non presente
-        // groupSymbol dovrebbe essere default il punto (.) perchè il googleChart load è impostato
-        // language 'it'
-        this.json.data.formatter[metric.alias] = {
-          type: 'number', format: null, prop: {
-            negativeParens: false, fractionDigits: 0, groupingSymbol: '.'
-          }
-        };
-      } */
     }
     this.json.wrapper.chartType = 'Table';
     this.json.data.columns = this.#specs_columns;

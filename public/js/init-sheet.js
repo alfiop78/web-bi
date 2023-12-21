@@ -130,13 +130,10 @@ function previewReady() {
   /* Resource.dataGroup = new google.visualization.data.group(
     Resource.dataTable, keyColumns, groupColumnsIndex
   ); */
-  debugger;
   for (const [key, value] of Object.entries(Resource.json.data.formatter)) {
-    debugger;
     let formatter = app[value.type](value.prop);
     formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(key));
   }
-  debugger;
   // console.log('group():', Resource.dataGroup);
   // console.log(Resource.dataGroup.getColumnIndex())
   // Imposto le label memorizzate in group.key. In questo caso potrei utilizzare gli object da passare
@@ -289,6 +286,7 @@ saveColumnConfig.onclick = () => {
   Resource.dataGroup.setColumnLabel(Resource.dataTableIndex, label);
   switch (format) {
     case 'default':
+      // numero senza decimali e con separatore migliaia
       formatterProperties = { negativeParens: false, fractionDigits: 0, groupingSymbol: '.' };
       break;
     case 'currency':
@@ -315,11 +313,14 @@ saveColumnConfig.onclick = () => {
     const metric = Resource.json.data.group.columns.find(metric => metric.alias === Resource.columnId);
     // TODO: probabilmente devo modificare anche l'id, se è stato modificato nel report
     if (metric) metric.label = label;
-    metric.formatter = { type, format, prop: formatterProperties };
+    Resource.json.data.formatter[metric.alias] = { type, format, prop: formatterProperties };
+    debugger;
     let formatter = app[type](formatterProperties);
     formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
   }
+
   // filtri definiti per il report
+  debugger;
   // TODO: da testare
   /* if (filterColumn.checked === true) {
     // Proprietà Resource.json.filters
