@@ -109,6 +109,10 @@ function previewReady() {
     }
   }); */
   Resource.groupFunction();
+  // imposto qui il metodo group() perchè per la dashboard è diverso (viene usato il ChartWrapper)
+  Resource.dataGroup = new google.visualization.data.group(
+    Resource.dataTable, Resource.groupKey, Resource.groupColumn
+  );
   // creo l'object che verrà messo nel terzo param di group()
   // Es.: { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
   // le metriche che hanno la proprietà dependencies: true, sono quelle NON aggiunte DIRETTAMENTE

@@ -363,26 +363,7 @@ class Resources extends Dashboards {
         label: metric.label
       };
       this.groupColumn.push(object);
-      /* if (metric.formatter) {
-        debugger;
-        let formatter = app[metric.formatter.type](metric.formatter.prop);
-        formatter.format(this.dataTable, Resource.dataTable.getColumnIndex(metric.alias));
-      } */
     });
-
-    this.dataGroup = new google.visualization.data.group(
-      this.dataTable, this.groupKey, this.groupColumn
-    );
-    // formattazione, va effettuata sulla DataGroup
-    /* this.json.data.group.columns.forEach(metric => {
-      // salvo in groupColumnsIndex TUTTE le metriche, deciderò nella DataView
-      // quali dovranno essere visibili (quelle con dependencies:false)
-      // recupero l'indice della colonna in base al suo nome
-      if (metric.formatter) {
-        let formatter = app[metric.formatter.type](metric.formatter.prop);
-        formatter.format(this.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
-      }
-    }); */
   }
 
   createDataView() {
@@ -461,7 +442,6 @@ class Resources extends Dashboards {
     // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
     // console.log(Resource.dataGroup.getColumnProperties(0));
     this.dataViewGrouped.setColumns(this.viewDefined);
-
   }
 
   getDataType(datatype) {

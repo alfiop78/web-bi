@@ -287,110 +287,15 @@ var Resource = new Resources();
     Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
     // Resource.DOMref = new google.visualization.Table(document.getElementById('chart_div'));
     Resource.DOMref = new google.visualization.Table(Resource.ref);
-    // NOTE: utilizzo della stessa logica utilizzata in init-sheet.js
-    let keyColumns = [];
-    Resource.json.data.group.key.forEach(column => {
-      if (column.properties.grouped) {
-        keyColumns.push({ id: column.id, column: Resource.dataTable.getColumnIndex(column.id), label: column.label, type: column.type });
-      }
-    });
-    let groupColumnsIndex = [];
-    Resource.json.data.group.columns.forEach(metric => {
-      const index = Resource.dataTable.getColumnIndex(metric.alias);
-      const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
-      let object = { id: metric.alias, column: index, aggregation: google.visualization.data[aggregation], type: 'number', label: metric.label };
-      groupColumnsIndex.push(object);
-    });
+    Resource.groupFunction();
 
-    // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
+    // imposto qui il metodo group() perchè per la dashboard è diverso (viene usato il ChartWrapper)
     Resource.dataGroup = new google.visualization.data.group(
-      Resource.dataTable, keyColumns, groupColumnsIndex
+      Resource.dataTable, Resource.groupKey, Resource.groupColumn
     );
-
-    /* for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
-      let formatter = null;
-      switch (properties.type) {
-        case 'number':
-          formatter = app[properties.type](properties.prop);
-          break;
-        // case 'date':
-        // TODO: Da implementare
-        // let formatter = app[properties.format](properties.numberDecimal);
-        // formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
-        // break;
-        default:
-          // debugger;
-          break;
-      }
-      if (formatter) formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
-    } */
-
     Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
 
-    let viewColumns = [], viewMetrics = [];
-    Resource.json.data.view.forEach(column => {
-      if (column.properties.visible) viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
-    });
-    // dalla dataGroup, recupero gli indici di colonna delle metriche
-    Resource.json.data.group.columns.forEach(metric => {
-      if (!metric.dependencies && metric.properties.visible) {
-        const index = Resource.dataGroup.getColumnIndex(metric.alias);
-
-        // Implementazione della func 'calc' per le metriche composite.
-        if (metric.type === 'composite') {
-          // è una metrica composta, creo la funzione calc, sostituendo i nomi
-          // delle metriche contenute nella formula, con gli indici corrispondenti.
-          // Es.: margine = ((ricavo - costo) / ricavo) * 100, recuperare gli indici
-          // delle colonne ricavo e costo per creare la metrica margine :
-          // recupero la formula della metrica composta
-          const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
-          // Creo una Func "dinamica"
-          let calcFunction = function(dt, row) {
-            let formulaJoined = [];
-            // in formulaJoined ciclo tutti gli elementi della Formula, imposto i
-            // valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
-            formula.forEach(formulaEl => {
-              if (formulaEl.alias) {
-                formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
-              } else {
-                formulaJoined.push(formulaEl);
-              }
-            });
-            // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
-            // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
-            // effettuo un controllo sul risultato in caso fosse NaN
-            const result = (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
-            let total = (result) ? { v: result } : { v: result, f: '-' };
-            // console.log(result);
-            // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
-            let resultFormatted;
-            // formattazione della cella con formatValue()
-            if (Resource.json.data.formatter[metric.alias]) {
-              const metricFormat = Resource.json.data.formatter[metric.alias];
-              let formatter;
-              formatter = app[metricFormat.type](metricFormat.prop);
-              resultFormatted = (result) ? formatter.formatValue(result) : '-';
-              total = { v: result, f: resultFormatted };
-            } else {
-              resultFormatted = (result) ? result : '-';
-              total = (result) ? { v: result } : { v: result, f: '-' };
-            }
-            return total;
-          }
-          viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
-        } else {
-          viewMetrics.push(index);
-          Resource.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
-          // console.log(Resource.dataGroup.getColumnProperty(index, 'className'));
-        }
-      }
-    });
-    // concateno i due array che popoleranno la DataView.setColumns()
-    let viewDefined = viewColumns.concat(viewMetrics)
-    // Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
-    // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
-    // console.log(Resource.dataGroup.getColumnProperties(0));
-    Resource.dataViewGrouped.setColumns(viewDefined);
+    Resource.createDataView();
     // console.info('DataView', Resource.dataViewGrouped);
     Resource.DOMref.draw(Resource.dataViewGrouped, Resource.json.wrapper.options);
     // Resource.DOMref.draw(Resource.dataViewGrouped, options);
