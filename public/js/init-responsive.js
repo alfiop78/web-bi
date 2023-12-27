@@ -58,6 +58,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     rowsDropzone: document.getElementById('dropzone-rows'),
     filtersDropzone: document.getElementById('dropzone-filters'),
     textareaCompositeMetric: document.getElementById('textarea-composite-metric'),
+    txtAreaIdColumn : document.getElementById('textarea-column-id'),
+    txtAreaDsColumn : document.getElementById('textarea-column-ds'),
     // buttons
     btnVersioning: document.getElementById('btn-versioning')
   }
@@ -226,6 +228,38 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
     // console.log(e.dataTransfer);
     e.dataTransfer.effectAllowed = "copy";
+  }
+
+  // creazione/modifica colonna _id e _ds
+  app.columnDragStart = (e) => {
+    console.log('column drag start');
+    console.log('e.target : ', e.target.id);
+    e.target.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', e.target.id);
+    console.log(e.dataTransfer);
+    e.dataTransfer.effectAllowed = "copy";
+  }
+
+  // column _id e _ds
+  app.setColumnDrop = (e) => {
+    e.preventDefault();
+    e.currentTarget.classList.replace('dropping', 'dropped');
+    if (!e.currentTarget.classList.contains('dropzone')) return;
+    const elementId = e.dataTransfer.getData('text/plain');
+    const elementRef = document.getElementById(elementId);
+    // elementRef : è l'elemento draggato
+    WorkBook.activeTable = elementRef.dataset.tableId;
+    console.log(WorkBook.activeTable.dataset.table);
+    debugger;
+    // OPTIMIZE: potrei utilizzare WorkBook.activeTable.dataset.table per
+    // memorizzare i valori di dataset.table e dataset.alias, mentre per
+    // memorizzare il field devo recuperarlo da elementRef (elemento droppato)
+    // const field = elementRef.dataset.field;
+    // const table = elementRef.dataset.table;
+    // const alias = elementRef.dataset.alias;
+    // const datatype = elementRef.dataset.datatype;
+    app.addMark({ field : elementRef.dataset.field, datatype : elementRef.dataset.datatype }, e.target);
+    // app.addSpan(txtArea, null, 'column');
   }
 
   app.handlerDragOver = (e) => {
@@ -1126,10 +1160,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       parent.appendChild(details);
       columns.forEach(column => {
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li[data-li]');
+        const li = content.querySelector('li[data-li-drag]');
         const span = li.querySelector('span');
         li.dataset.label = column.column_name;
-        li.dataset.fn = 'addToColumnFormula';
+        li.id = `${value.alias}_${column.column_name}`;
+        li.ondragstart = app.columnDragStart;
+        li.ondragend = app.columnDragEnd;
+        // li.dataset.fn = 'addToColumnFormula';
         li.dataset.elementSearch = 'fields';
         li.dataset.tableId = tableId;
         li.dataset.table = value.name;
@@ -1159,16 +1196,17 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const mark = templateContent.querySelector('mark');
     const small = templateContent.querySelector('small');
     // aggiungo il tableAlias e table come attributo.
-    mark.dataset.tableAlias = data.alias;
-    mark.dataset.table = data.table;
+    mark.dataset.tableAlias = WorkBook.activeTable.dataset.alias;
+    mark.dataset.table = WorkBook.activeTable.dataset.table;
     mark.dataset.field = data.field;
     mark.dataset.datatype = data.datatype;
     mark.innerText = data.field;
-    small.innerText = data.table;
+    small.innerText = WorkBook.activeTable.dataset.table;
     ref.appendChild(span);
   }
 
-  app.addToColumnFormula = (e) => {
+  // TODO: questa viene sostituita da setColumnDrop()
+  /* app.addToColumnFormula = (e) => {
     WorkBook.activeTable = e.currentTarget.dataset.tableId;
     console.log(WorkBook.activeTable.dataset.table);
     const field = e.currentTarget.dataset.field;
@@ -1180,7 +1218,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const txtArea = document.querySelector('.textarea-content[data-active]');
     app.addMark({ table, alias, field, datatype }, txtArea);
     // app.addSpan(txtArea, null, 'column');
-  }
+  } */
 
   app.textareaDragEnter = (e) => {
     e.preventDefault();
@@ -1235,6 +1273,14 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // aggiungo anche uno span per il proseguimento della scrittura della formula
     app.addSpan(app.textareaCompositeMetric, null, 'metric');
   }
+
+  // column _id e _ds
+  app.txtAreaIdColumn.addEventListener('dragenter', app.columnDragEnter, false);
+  app.txtAreaIdColumn.addEventListener('dragover', app.columnDragOver, false);
+  app.txtAreaIdColumn.addEventListener('dragleave', app.columnDragLeave, false);
+  app.txtAreaIdColumn.addEventListener('drop', app.setColumnDrop, false);
+  app.txtAreaDsColumn.addEventListener('drop', app.setColumnDrop, false);
+  app.txtAreaIdColumn.addEventListener('drop', app.columnDragEnd, false);
 
   app.columnsDropzone.addEventListener('dragenter', app.columnDragEnter, false);
   app.columnsDropzone.addEventListener('dragover', app.columnDragOver, false);

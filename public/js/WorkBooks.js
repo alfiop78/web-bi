@@ -21,6 +21,8 @@ class Sheets {
     this.objectRemoved = new Map();
   }
 
+  // TODO: molti di questi setter/getter posso crearli come magicMethod
+
   set id(timestamp) {
     this.#id = timestamp;
   }
