@@ -453,6 +453,26 @@ var Storage = new SheetStorages();
       .catch((err) => console.error(err));
   }
 
+  app.downloadSpecifications = async (token) => {
+    // method : store / update
+    await fetch(`/fetch_api/name/${token}/sheet_specs_show`)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        // console.log(data);
+        if (data) {
+          console.log('specs scaricate correttamente : ', data);
+          window.localStorage.setItem(`specs_${token}`, data.json_value);
+        } else {
+          console.error("Errore nella cancellazione della risorsa!");
+        }
+      })
+      .catch((err) => console.error(err));
+  }
+
   app.uploadObject = async (e) => {
     const type = e.currentTarget.dataset.upload;
     let url = `/fetch_api/json/${type}_store`;
@@ -557,8 +577,9 @@ var Storage = new SheetStorages();
   }
 
   app.downloadObject = async (e) => {
+    const type = e.currentTarget.dataset.download;
     const token = e.currentTarget.dataset.token;
-    await fetch(`/fetch_api/name/${token}/${e.currentTarget.dataset.download}_show`)
+    await fetch(`/fetch_api/name/${token}/${type}_show`)
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -577,6 +598,7 @@ var Storage = new SheetStorages();
           li.dataset.identical = 'true';
           statusIcon.classList.add('done');
           statusIcon.innerText = "done";
+          if (type === 'sheet') app.downloadSpecifications(token);
         } else {
           console.error("Errore nella cancellazione della risorsa!");
         }

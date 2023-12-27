@@ -53,6 +53,11 @@ var Resource = new Resources();
         wrap.getDataTable(), Resource.groupKey, Resource.groupColumn
       );
       console.log('group():', Resource.dataGroup);
+      // formatter
+      for (const [key, value] of Object.entries(Resource.json.data.formatter)) {
+        let formatter = app[value.type](value.prop);
+        formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(key));
+      }
 
       Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
       Resource.createDataView();
