@@ -20,6 +20,77 @@ var Resource = new Resources();
     const prepareData = Resource.prepareData();
     // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
     // è consentità con la DataView perchè questa è read-only
+    Resource.dataTable = new google.visualization.DataTable(prepareData);
+    // definisco la formattazione per le percentuali e per i valori currency
+    // console.log(dataFormatted);
+    var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
+    // Creo i filtri nella Classe Dashboards
+    const controls = Resource.drawControls(document.getElementById('filter_div'));
+
+    // console.log(JSON.parse(Resource.view.toJSON()));
+    // utilizzo senza i metodi setter. Le proprietà del ChartWrapper sono incluse in Resource.json
+    // var wrap = new google.visualization.ChartWrapper(Resource.json.wrapper);
+    // utilizzo con i metodi setter
+    var wrap = new google.visualization.ChartWrapper();
+    wrap.setChartType('Table');
+    wrap.setContainerId(Resource.ref);
+    wrap.setOptions(Resource.json.wrapper.options);
+
+    // NOTE: esempio array di View
+    // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
+    // table.setView({ columns: [1, 3, 5, 7, 9, 16] });
+
+    google.visualization.events.addListener(wrap, 'ready', onReady);
+
+    function onReady() {
+      // esempio utilizzato senza impostare le metriche contenute nelle composite
+      console.log('onReady');
+      let tableRef = new google.visualization.Table(document.getElementById(Resource.ref));
+      // console.log(groupColumnsIndex);
+      // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
+      Resource.groupFunction();
+      Resource.dataGroup = new google.visualization.data.group(
+        wrap.getDataTable(), Resource.groupKey, Resource.groupColumn
+      );
+      console.log('group():', Resource.dataGroup);
+      // formatter
+      for (const [key, value] of Object.entries(Resource.json.data.formatter)) {
+        let formatter = app[value.type](value.prop);
+        formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(key));
+      }
+
+      Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
+      Resource.createDataView();
+
+      tableRef.draw(Resource.dataViewGrouped, Resource.json.wrapper.options);
+    }
+
+    // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
+    // -> "modello_ds" infleunza "settore_ds" e tutti (l'array Resource.controlsWrapper) influenzano la table
+    // per ogni bind, nel template....
+    let binds;
+    // Questa logica funziona con il bind() di un filtro verso quello successivo ma
+    // possono esserci anche situazioni diverse, che sono da implementare
+    Resource.json.bind.forEach((v, index) => {
+      // console.log('index', index);
+      if (index === 0) {
+        // il primo bind deve essere creato dall'istanza gdashboard, i successivi posso legarli ad una variabile
+        binds = gdashboard.bind(controls[v[0]], controls[v[1]]);
+      } else {
+        binds.bind(controls[v[0]], controls[v[1]]);
+      }
+    });
+    // Tutti i controlli influenzano la table
+    binds.bind(controls, wrap);
+    // gdashboard.bind(controls, wrap);
+    gdashboard.draw(Resource.dataTable);
+    // gdashboard.draw(view); // utilizzo della DataView
+  }
+
+  app.draw_old = () => {
+    const prepareData = Resource.prepareData();
+    // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
+    // è consentità con la DataView perchè questa è read-only
     let dataTable = new google.visualization.DataTable(prepareData);
     // definisco la formattazione per le percentuali e per i valori currency
     // console.log(dataFormatted);
@@ -72,25 +143,6 @@ var Resource = new Resources();
         wrap.getDataTable(), keyColumns, groupColumnsIndex
       );
       console.log('group():', Resource.dataGroup);
-      /* for (const [columnId, properties] of Object.entries(Resource.json.data.formatter)) {
-        // console.log('Formattazione ', Resource.dataGroup.getColumnIndex(columnId));
-        let formatter = null;
-        // debugger;
-        switch (properties.type) {
-          case 'number':
-            formatter = app[properties.type](properties.prop);
-            break;
-          // case 'date':
-          // TODO: Da implementare
-          // let formatter = app[properties.format](properties.numberDecimal);
-          // formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
-          // break;
-          default:
-            // debugger;
-            break;
-        }
-        if (formatter) formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(columnId));
-      } */
 
       Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
 

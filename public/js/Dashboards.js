@@ -52,8 +52,8 @@ class Resources extends Dashboards {
   #resource = new Map();
   #prepareData = { cols: [], rows: [] };
   #specs_columns = {};
+  #specs_formatter = {};
   #specs_group = { key: [], columns: [] };
-  #specs_view = [];
   #json = {
     token: null,
     name: null,
@@ -62,8 +62,7 @@ class Resources extends Dashboards {
       group: {
         key: [],
         columns: []
-      },
-      view: []
+      }
     },
     filters: [],
     bind: [],
@@ -121,10 +120,8 @@ class Resources extends Dashboards {
   get json() { return this.#json; }
 
   specifications_update() {
-    debugger;
     this.#specs_columns = {};
     this.#specs_group = { key: [], columns: [] };
-    this.#specs_view = [];
     this.json.name = Sheet.name;
     for (const [token, field] of Sheet.fields) {
       const workbookField = WorkBook.field.get(token).field;
@@ -134,56 +131,53 @@ class Resources extends Dashboards {
         if (this.json.data.columns[field_id_ds]) {
           this.#specs_columns[field_id_ds] = {
             id: field_id_ds,
-            label: this.json.data.columns[field_id_ds].label,
-            type: this.json.data.columns[field_id_ds].type
+            // label: this.json.data.columns[field_id_ds].label,
+            type: this.json.data.columns[field_id_ds].type,
+            p: this.json.data.columns[field_id_ds].p
           };
         } else {
           this.#specs_columns[field_id_ds] = {
-            id: field_id_ds, label: field_id_ds, type: this.getDataType(workbookField[key].datatype)
+            id: field_id_ds,
+            // label: field_id_ds,
+            type: this.getDataType(workbookField[key].datatype),
+            p: { data: 'column' }
           };
         }
         // json.data.group.key
         const keyColumn = this.json.data.group.key.find(value => value.id === field_id_ds);
         if (!keyColumn) {
+          const visible = (key === 'id') ? false : true;
           // non presente
           this.#specs_group.key.push({
             id: field_id_ds, label: field_id_ds, type: this.getDataType(workbookField[key].datatype),
-            properties: { grouped: true }
+            properties: { grouped: true, visible }
           });
         } else {
           // già presente
           this.#specs_group.key.push({
             id: field_id_ds, label: keyColumn.label, type: keyColumn.type,
-            properties: { grouped: keyColumn.properties.grouped }
+            properties: { grouped: keyColumn.properties.grouped, visible: keyColumn.properties.visible }
           });
-        }
-        // json.data.view
-        const viewColumn = this.json.data.view.find(value => value.id === field_id_ds);
-        if (!viewColumn) {
-          // la colnna _id la nascondo dalla DataView
-          const visible = (key === 'id') ? false : true;
-          this.#specs_view.push({ id: field_id_ds, properties: { visible } });
-        } else {
-          this.#specs_view.push({ id: field_id_ds, properties: { visible: viewColumn.properties.visible } });
-
         }
       });
     }
     console.log(this.#specs_columns);
-    console.log(this.#specs_view);
     console.log(this.#specs_group.key);
-    debugger;
     for (const [token, metric] of Sheet.metrics) {
       if (this.json.data.columns[metric.alias]) {
         // metrica già presente
         this.#specs_columns[metric.alias] = {
           id: metric.alias,
-          label: this.json.data.columns[metric.alias].label,
-          type: this.json.data.columns[metric.alias].type
+          // label: this.json.data.columns[metric.alias].label,
+          type: this.json.data.columns[metric.alias].type,
+          p: this.json.data.columns[metric.alias].p
         };
       } else {
         this.#specs_columns[metric.alias] = {
-          id: metric.alias, label: metric.alias, type: this.getDataType(metric.datatype)
+          id: metric.alias,
+          // label: metric.alias,
+          type: this.getDataType(metric.datatype),
+          p: { data: 'measure' }
         };
       }
       const findMetric = this.json.data.group.columns.find(value => value.alias === metric.alias);
@@ -203,61 +197,71 @@ class Resources extends Dashboards {
         // già presente
         this.#specs_group.columns.push(findMetric);
       }
-
-      // in fase di creazione di json.data.group.columns (metriche) imposto anche
-      // una formattazione, di base, perchè siccomme il json.data.formatter è un {} ma
-      // quando viene salvato su DB viene convertito in [] (forse perchè è vuoto) allora lo
-      // imposto con i valori delle metriche, in modo da creare un {}
-      /* if (!this.json.data.formatter[metric.alias]) {
-        // formattazione per questa metrica non presente
-        // groupSymbol dovrebbe essere default il punto (.) perchè il googleChart load è impostato
-        // language 'it'
-        this.json.data.formatter[metric.alias] = {
-          type: 'number', format: null, prop: {
-            negativeParens: false, fractionDigits: 0, groupingSymbol: '.'
-          }
-        };
-      } */
     }
     this.json.data.columns = this.#specs_columns;
     this.json.data.group.key = this.#specs_group.key;
     this.json.data.group.columns = this.#specs_group.columns;
-    this.json.data.view = this.#specs_view;
     debugger;
     window.localStorage.setItem(`specs_${Sheet.sheet.token}`, JSON.stringify(this.json));
-
   }
+
+  set specs_formatter(object) {
+    switch (object.datatype) {
+      case 'number':
+        this.#specs_formatter[object.id] = {
+          type: object.datatype,
+          format: 'default',
+          prop: {
+            negativeParens: false, fractionDigits: 0, groupingSymbol: '.'
+          }
+        };
+        break;
+      case 'date':
+        break;
+      default:
+        break;
+    }
+  }
+
+  get specs_formatter() { return this.#specs_formatter; }
 
   specifications_create() {
     console.log(Sheet);
     this.json.token = Sheet.sheet.token;
     this.json.name = Sheet.name;
     this.json.wrapper.chartType = 'Table';
-    this.specs_columns = {};
+    this.#specs_formatter = {};
     for (const [token, field] of Sheet.fields) {
       const workbookField = WorkBook.field.get(token).field;
       Object.keys(WorkBook.field.get(token).field).forEach(key => {
         console.log(key);
         let field_id_ds = (key === 'id') ? `${field}_${key}` : field;
+        const datatype = this.getDataType(workbookField[key].datatype);
         this.#specs_columns[field_id_ds] = {
-          id: field_id_ds, label: field_id_ds, type: this.getDataType(workbookField[key].datatype)
+          id: field_id_ds,
+          // label: field_id_ds,
+          type: datatype,
+          // La className qui non è necessaria perchè verrà sovrascritta da quella create nella DataView
+          p: { data: 'column' }
         };
         // json.data.group.key
-        this.#specs_group.key.push({
-          id: field_id_ds, label: field_id_ds, type: this.getDataType(workbookField[key].datatype),
-          properties: { grouped: true }
-        });
-        // json.data.view
         const visible = (key === 'id') ? false : true;
-        this.#specs_view.push({ id: field_id_ds, properties: { visible } });
+        this.#specs_group.key.push({
+          id: field_id_ds, label: field_id_ds, type: datatype,
+          properties: { grouped: true, visible }
+        });
+        // TODO: per adesso ho implementato solo le metriche (sotto)
+        // this.specs_formatter = { id: field_id_ds, datatype };
       });
       console.log(this.#specs_columns);
       console.log(this.#specs_group);
-      console.log(this.#specs_view);
     }
     for (const [token, metric] of Sheet.metrics) {
       this.#specs_columns[metric.alias] = {
-        id: metric.alias, label: metric.alias, type: 'number'
+        id: metric.alias,
+        // label: metric.alias,
+        type: 'number',
+        p: { data: 'measure' }
       };
       this.#specs_group.columns.push({
         token,
@@ -269,112 +273,16 @@ class Resources extends Dashboards {
         type: metric.type,
         datatype: 'number'
       });
-      // in fase di creazione di json.data.group.columns (metriche) imposto anche
-      // una formattazione, di base, perchè siccomme il json.data.formatter è un {} ma
-      // quando viene salvato su DB viene convertito in [] (forse perchè è vuoto) allora lo
-      // imposto con i valori delle metriche, in modo da creare un {}
-      /* if (!this.json.data.formatter[metric.alias]) {
-        // formattazione per questa metrica non presente
-        // groupSymbol dovrebbe essere default il punto (.) perchè il googleChart load è impostato
-        // language 'it'
-        this.json.data.formatter[metric.alias] = {
-          type: 'number', format: null, prop: {
-            negativeParens: false, fractionDigits: 0, groupingSymbol: '.'
-          }
-        };
-      } */
+      this.specs_formatter = { id: metric.alias, datatype: 'number' };
     }
     this.json.wrapper.chartType = 'Table';
     this.json.data.columns = this.#specs_columns;
     this.json.data.group.key = this.#specs_group.key;
     this.json.data.group.columns = this.#specs_group.columns;
-    this.json.data.view = this.#specs_view;
+    this.json.data.formatter = this.specs_formatter;
     debugger;
     window.localStorage.setItem(`specs_${Sheet.sheet.token}`, JSON.stringify(this.json));
   }
-
-  /* createSpecs() {
-    console.log(Sheet);
-    this.json.token = Sheet.sheet.token;
-    this.json.name = Sheet.name;
-    this.json.wrapper.chartType = 'Table';
-    for (const [token, field] of Sheet.fields) {
-      const workbookField = WorkBook.field.get(token).field;
-      Object.keys(WorkBook.field.get(token).field).forEach(key => {
-        console.log(key);
-        let field_id_ds = (key === 'id') ? `${field}_${key}` : field;
-        // Se la colonna è già presente è stata modificata in init-sheet quando si editano le colonne
-        if (!this.json.data.columns[field_id_ds]) {
-          // colonna non presente, la aggiungo
-          this.json.data.columns[field_id_ds] = {
-            id: field_id_ds, label: field_id_ds, type: this.getDataType(workbookField[key].datatype)
-          };
-        }
-        // json.data.group.key
-        const columnFindKey = this.json.data.group.key.find(value => value.id === field_id_ds);
-        if (!columnFindKey) {
-          this.json.data.group.key.push({
-            id: field_id_ds, label: field_id_ds, type: this.getDataType(workbookField[key].datatype),
-            properties: { grouped: true }
-          });
-        }
-        // json.data.view
-        const columnFindView = this.json.data.view.find(value => value.id === field_id_ds);
-        if (!columnFindView) {
-          // la colnna _id la nascondo dalla DataView
-          const visible = (key === 'id') ? false : true;
-          this.json.data.view.push({ id: field_id_ds, properties: { visible } });
-        }
-      });
-      // for (const [key, object] of Object.entries(WorkBook.field.get(token).field)) {
-      // }
-      console.log(this.json.data.columns);
-      console.log(this.json.data.group.key);
-      console.log(this.json.data.view);
-    }
-    for (const [token, metric] of Sheet.metrics) {
-      if (!this.json.data.columns[metric.alias]) {
-        // metrica non presente in json.data.columns
-        this.json.data.columns[metric.alias] = {
-          id: metric.alias, label: metric.alias, type: 'number'
-        };
-        let find = this.json.data.group.columns.find(value => value.id === metric.alias);
-        if (!find) {
-          this.json.data.group.columns.push({
-            token,
-            alias: metric.alias,
-            aggregateFn: metric.aggregateFn,
-            dependencies: metric.dependencies,
-            properties: { visible: true },
-            label: metric.alias,
-            type: metric.type,
-            datatype: 'number'
-          });
-        } else {
-          this.json.data.group.columns[metric.alias].aggregateFn = metric.aggregateFn;
-        }
-      }
-      // in fase di creazione di json.data.group.columns (metriche) imposto anche
-      // una formattazione, di base, perchè siccomme il json.data.formatter è un {} ma
-      // quando viene salvato su DB viene convertito in [] (forse perchè è vuoto) allora lo
-      // imposto con i valori delle metriche, in modo da creare un {}
-      if (!this.json.data.formatter[metric.alias]) {
-        // formattazione per questa metrica non presente
-        // groupSymbol dovrebbe essere default il punto (.) perchè il googleChart load è impostato
-        // language 'it'
-        this.json.data.formatter[metric.alias] = {
-          type: 'number', format: null, prop: {
-            negativeParens: false, fractionDigits: 0, groupingSymbol: '.'
-          }
-        };
-      }
-    }
-    this.json.wrapper.chartType = 'Table';
-    // debugger;
-    // Resource.saveSpecifications();
-    debugger;
-    window.localStorage.setItem(`specs_${Sheet.sheet.token}`, JSON.stringify(this.json));
-  } */
 
   prepareData() {
     this.#prepareData = { cols: [], rows: [] };
@@ -384,9 +292,11 @@ class Resources extends Dashboards {
       console.log('prepareData : ', key);
       this.#prepareData.cols.push({
         id: key,
-        label: this.json.data.columns[key].label,
-        type: this.json.data.columns[key].type
+        label: key,
+        type: this.json.data.columns[key].type,
+        p: this.json.data.columns[key].p
       });
+      // debugger;
     }
 
     // aggiungo le righe
@@ -421,6 +331,117 @@ class Resources extends Dashboards {
     });
     // console.log(this.#prepareData);
     return this.#prepareData;
+  }
+
+  groupFunction() {
+    this.groupKey = [], this.groupColumn = [];
+    this.json.data.group.key.forEach(column => {
+      // if (column.properties.grouped) keyColumns.push(Resource.dataTable.getColumnIndex(column.id));
+      // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
+      // che viene modificata dall'utente a runtime
+      if (column.properties.grouped) {
+        this.groupKey.push({
+          id: column.id,
+          column: this.dataTable.getColumnIndex(column.id),
+          label: column.label,
+          type: column.type
+        });
+      }
+    });
+    this.json.data.group.columns.forEach(metric => {
+      // salvo in groupColumnsIndex TUTTE le metriche, deciderò nella DataView
+      // quali dovranno essere visibili (quelle con dependencies:false)
+      // recupero l'indice della colonna in base al suo nome
+      const index = this.dataTable.getColumnIndex(metric.alias);
+      // TODO: modificare la prop 'aggregateFn' in 'aggregation' in fase di creazione delle metriche
+      const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
+      let object = {
+        id: metric.alias,
+        column: index,
+        aggregation: google.visualization.data[aggregation],
+        type: 'number',
+        label: metric.label
+      };
+      this.groupColumn.push(object);
+    });
+  }
+
+  createDataView() {
+    this.viewColumns = [], this.viewMetrics = [];
+    this.json.data.group.key.forEach(column => {
+      if (column.properties.visible) {
+        this.viewColumns.push(this.dataGroup.getColumnIndex(column.id));
+        // imposto la classe per le colonne dimensionali
+        this.dataGroup.setColumnProperty(this.dataGroup.getColumnIndex(column.id), 'className', 'dimensional-column');
+      }
+    });
+    // dalla dataGroup, recupero gli indici di colonna delle metriche
+    this.json.data.group.columns.forEach(metric => {
+      if (!metric.dependencies && metric.properties.visible) {
+        const index = this.dataGroup.getColumnIndex(metric.alias);
+        // NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo
+        // modo come alternativa a eval() (non l'ho testato)
+        // function evil(fn) {
+        //   return new Function('return ' + fn)();
+        // }
+        // console.log(evil('12/5*9+9.4*2')); // => 40.4     const index = Resource.dataGroup.getColumnIndex(metric.alias);
+
+        // Implementazione della func 'calc' per le metriche composite.
+        if (metric.type === 'composite') {
+          // è una metrica composta, creo la funzione calc, sostituendo i nomi
+          // delle metriche contenute nella formula, con gli indici corrispondenti.
+          // Es.: margine = ((ricavo - costo) / ricavo) * 100, recuperare gli indici
+          // delle colonne ricavo e costo per creare la metrica margine :
+          // recupero la formula della metrica composta
+          const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
+          // Creo una Func "dinamica"
+          let calcFunction = function(dt, row) {
+            let formulaJoined = [];
+            // in formulaJoined ciclo tutti gli elementi della Formula, imposto i
+            // valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
+            formula.forEach(formulaEl => {
+              if (formulaEl.alias) {
+                formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
+              } else {
+                formulaJoined.push(formulaEl);
+              }
+            });
+            // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
+            // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
+            // effettuo un controllo sul risultato in caso fosse NaN
+            const result = (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
+            let total = (result) ? { v: result } : { v: result, f: '-' };
+            // console.log(result);
+            // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
+            let resultFormatted;
+            // formattazione della cella con formatValue()
+            if (this.json.data.formatter[metric.alias]) {
+              const metricFormat = this.json.data.formatter[metric.alias];
+              let formatter;
+              formatter = app[metricFormat.type](metricFormat.prop);
+              resultFormatted = (result) ? formatter.formatValue(result) : '-';
+              total = { v: result, f: resultFormatted };
+            } else {
+              resultFormatted = (result) ? result : '-';
+              total = (result) ? { v: result } : { v: result, f: '-' };
+            }
+            return total;
+          }
+          this.viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
+        } else {
+          this.viewMetrics.push(index);
+          this.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
+          // console.log(Resource.dataGroup.getColumnProperty(index, 'className'));
+        }
+      }
+    });
+    // concateno i due array che popoleranno la DataView.setColumns()
+    this.viewDefined = this.viewColumns.concat(this.viewMetrics)
+    console.log('DataView defined:', this.viewDefined);
+    // Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
+    // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
+    // console.log(Resource.dataGroup.getColumnProperties(0));
+    this.dataViewGrouped.setColumns(this.viewDefined);
   }
 
   getDataType(datatype) {
