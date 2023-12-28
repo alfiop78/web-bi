@@ -249,15 +249,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const elementRef = document.getElementById(elementId);
     // elementRef : è l'elemento draggato
     WorkBook.activeTable = elementRef.dataset.tableId;
-    console.log(WorkBook.activeTable.dataset.table);
-    debugger;
-    // OPTIMIZE: potrei utilizzare WorkBook.activeTable.dataset.table per
-    // memorizzare i valori di dataset.table e dataset.alias, mentre per
-    // memorizzare il field devo recuperarlo da elementRef (elemento droppato)
-    // const field = elementRef.dataset.field;
-    // const table = elementRef.dataset.table;
-    // const alias = elementRef.dataset.alias;
-    // const datatype = elementRef.dataset.datatype;
+    // console.log(WorkBook.activeTable.dataset.table);
     app.addMark({ field : elementRef.dataset.field, datatype : elementRef.dataset.datatype }, e.target);
     // app.addSpan(txtArea, null, 'column');
   }
@@ -947,21 +939,18 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   // apro la dialog column per definire le colonne del WorkBook
   app.setColumn = (e) => {
-    app.dialogColumns.dataset.field = e.currentTarget.dataset.field;
+    WorkBook.currentField = e.currentTarget.dataset.field;
     document.getElementById('column-name').value = e.currentTarget.dataset.field;
-    const table = WorkBook.activeTable.dataset.table;
-    const alias = WorkBook.activeTable.dataset.alias;
-    const field = e.currentTarget.dataset.field;
     // nel sessionStorage ho già la tabella aggiunta al canvas, quindi
     // posso recuperare il datatype dal sessionStorage
-    const tableSpecs = JSON.parse(window.sessionStorage.getItem(table));
+    const tableSpecs = JSON.parse(window.sessionStorage.getItem(WorkBook.activeTable.dataset.table));
     // cerco la colonna per poterne recuperare il datatype
-    const fieldSpecs = tableSpecs.find(column => column.column_name === field);
+    const fieldSpecs = tableSpecs.find(column => column.column_name === e.currentTarget.dataset.field);
     const datatype = fieldSpecs.type_name.toLowerCase();
     const id = document.querySelector('#textarea-column-id');
     const ds = document.querySelector('#textarea-column-ds');
-    app.addMark({ table, alias, field, datatype }, id);
-    app.addMark({ table, alias, field, datatype }, ds);
+    app.addMark({ field : e.currentTarget.dataset.field, datatype }, id);
+    app.addMark({ field : e.currentTarget.dataset.field, datatype }, ds);
     // carico elenco tabelle del canvas
     app.loadTableStruct();
     app.dialogColumns.show();
@@ -1276,11 +1265,15 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   // column _id e _ds
   app.txtAreaIdColumn.addEventListener('dragenter', app.columnDragEnter, false);
+  app.txtAreaDsColumn.addEventListener('dragenter', app.columnDragEnter, false);
   app.txtAreaIdColumn.addEventListener('dragover', app.columnDragOver, false);
+  app.txtAreaDsColumn.addEventListener('dragover', app.columnDragOver, false);
   app.txtAreaIdColumn.addEventListener('dragleave', app.columnDragLeave, false);
+  app.txtAreaDsColumn.addEventListener('dragleave', app.columnDragLeave, false);
   app.txtAreaIdColumn.addEventListener('drop', app.setColumnDrop, false);
   app.txtAreaDsColumn.addEventListener('drop', app.setColumnDrop, false);
   app.txtAreaIdColumn.addEventListener('drop', app.columnDragEnd, false);
+  app.txtAreaDsColumn.addEventListener('drop', app.columnDragEnd, false);
 
   app.columnsDropzone.addEventListener('dragenter', app.columnDragEnter, false);
   app.columnsDropzone.addEventListener('dragover', app.columnDragOver, false);
@@ -3207,51 +3200,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   }
 
   app.saveColumn = (e) => {
-    const field = app.dialogColumns.dataset.field;
     const fieldName = document.getElementById('column-name').value;
     const token = (e.currentTarget.dataset.token) ? e.currentTarget.dataset.token : rand().substring(0, 7);
-    // const token = rand().substring(0, 7);
-    let fieldId = { sql: [], formula: [], datatype: null };
-    let fieldDs = { sql: [], formula: [], datatype: null };
-    // colonna _id
-    document.querySelectorAll('#textarea-column-id *').forEach(element => {
-      if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
-      if (element.nodeName === 'MARK') {
-        // il campo potrebbe appartenere ad una tabella diversa da quella selezionata
-        // quindi  aggiungo anche il table alias
-        fieldId.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
-        fieldId.formula.push(
-          {
-            table_alias: element.dataset.tableAlias,
-            table: element.dataset.table,
-            field: element.dataset.field,
-            datatype: element.dataset.datatype
-          });
-        fieldId.datatype = element.dataset.datatype;
-      } else {
-        fieldId.sql.push(element.innerText.trim());
-        fieldId.formula.push(element.innerText.trim());
-      }
-    });
-    // colonna _ds
-    document.querySelectorAll('#textarea-column-ds *').forEach(element => {
-      if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
-      if (element.nodeName === 'MARK') {
-        fieldDs.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
-        fieldDs.formula.push(
-          {
-            table_alias: element.dataset.tableAlias,
-            table: element.dataset.table,
-            field: element.dataset.field,
-            datatype: element.dataset.datatype
-          });
-        fieldDs.datatype = element.dataset.datatype;
-      } else {
-        fieldDs.sql.push(element.innerText.trim());
-        fieldDs.formula.push(element.innerText.trim());
-      }
-    });
-
+    // imposto le colonne _id e _ds in WorkBook.columns
+    WorkBook.columns = ['id', 'ds'];
+    // WorkBook.field contiene l'elenco dei field aggiunti al WorkBook
+    // mentre WorkBook.fields contiene lo stesso elenco dei campi però
+    // all'interno delle rispettive tabelle
     WorkBook.field = {
       token,
       value: {
@@ -3261,15 +3216,11 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         tableAlias: WorkBook.activeTable.dataset.alias,
         table: WorkBook.activeTable.dataset.table,
         name: fieldName,
-        origin_field: field,
-        field: {
-          id: fieldId,
-          ds: fieldDs
-        }
+        origin_field: WorkBook.currentField,
+        field : WorkBook.columns
       }
     };
     WorkBook.fields = token;
-    debugger;
     app.dialogColumns.close();
     WorkBook.checkChanges(token);
   }
