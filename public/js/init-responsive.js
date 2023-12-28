@@ -58,8 +58,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     rowsDropzone: document.getElementById('dropzone-rows'),
     filtersDropzone: document.getElementById('dropzone-filters'),
     textareaCompositeMetric: document.getElementById('textarea-composite-metric'),
-    txtAreaIdColumn : document.getElementById('textarea-column-id'),
-    txtAreaDsColumn : document.getElementById('textarea-column-ds'),
+    txtAreaIdColumn: document.getElementById('textarea-column-id'),
+    txtAreaDsColumn: document.getElementById('textarea-column-ds'),
     // buttons
     btnVersioning: document.getElementById('btn-versioning')
   }
@@ -250,7 +250,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // elementRef : è l'elemento draggato
     WorkBook.activeTable = elementRef.dataset.tableId;
     // console.log(WorkBook.activeTable.dataset.table);
-    app.addMark({ field : elementRef.dataset.field, datatype : elementRef.dataset.datatype }, e.target);
+    app.addMark({ field: elementRef.dataset.field, datatype: elementRef.dataset.datatype }, e.target);
     // app.addSpan(txtArea, null, 'column');
   }
 
@@ -819,20 +819,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  // click all'interno di una textarea
-  // TODO: da spostare in supportFn.js
-  app.addText = (e) => {
-    console.log('e : ', e);
-    console.log('e.target : ', e.target);
-    console.log('e.currentTarget : ', e.currentTarget);
-    if (e.target.localName === 'div') {
-      const span = document.createElement('span');
-      span.setAttribute('contenteditable', true);
-      e.target.appendChild(span);
-      span.focus();
-    }
-  }
-
   // Modifica di una metrica composta di base
   app.editCustomMetric = (e) => {
     const metric = WorkBook.metrics.get(e.currentTarget.dataset.token);
@@ -949,79 +935,37 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const datatype = fieldSpecs.type_name.toLowerCase();
     const id = document.querySelector('#textarea-column-id');
     const ds = document.querySelector('#textarea-column-ds');
-    app.addMark({ field : e.currentTarget.dataset.field, datatype }, id);
-    app.addMark({ field : e.currentTarget.dataset.field, datatype }, ds);
+    app.addMark({ field: e.currentTarget.dataset.field, datatype }, id);
+    app.addMark({ field: e.currentTarget.dataset.field, datatype }, ds);
     // carico elenco tabelle del canvas
     app.loadTableStruct();
     app.dialogColumns.show();
   }
 
   app.editColumn = (e) => {
-    app.dialogColumns.dataset.field = e.currentTarget.dataset.field;
-    // la colonna già definita avrà sicuramente un token, lo imposto sul tasto 'salva'
-    // per poter aggiornare la colonna e non inserirne una nuova
+    WorkBook.currentField = e.currentTarget.dataset.field;
+    // imposto il token sul tasto "salva" in modo da poter distinguere
+    // l'aggiornamento/creazione di una colonna. Il dataset.token indica che
+    // la colonna esiste già e deve essere aggiornata
     document.querySelector('#btn-columns-define').dataset.token = e.currentTarget.dataset.token;
-    const textAreaId = document.querySelector('#textarea-column-id');
-    const textAreaDs = document.querySelector('#textarea-column-ds');
-    // token della colonna già definita
-    // console.log(WorkBook.field.get(e.currentTarget.dataset.token));
-    // Nella proprietà 'field.id[ds].formula' è presente l'oggetto che
+    // Nella proprietà 'field.[[id][ds]].formula' è presente l'oggetto che
     // consente di ricostruire la formula (come per i filtri o le metriche composte)
     const column = WorkBook.field.get(e.currentTarget.dataset.token);
-    // TODO: Il codice che crea il mark, per le formule, è ripetuto, sia qui che
-    // per quanto riguarda i filtri, scrivere una fn per non duplicare il codice
-    debugger;
-    column.field.id.formula.forEach(element => {
-      if (element.hasOwnProperty('field')) {
-        // determino il <mark>
-        const templateContent = app.tmplFormula.content.cloneNode(true);
-        const i = templateContent.querySelector('i');
-        i.addEventListener('click', app.cancelFormulaObject);
-        const span = templateContent.querySelector('span');
-        const mark = templateContent.querySelector('mark');
-        const small = templateContent.querySelector('small');
-        mark.dataset.tableAlias = element.table_alias;
-        mark.dataset.table = element.table;
-        mark.dataset.field = element.field;
-        mark.dataset.datatype = element.datatype;
-        mark.innerText = element.field;
-        small.innerText = element.table;
-        textAreaId.appendChild(span);
-      } else {
-        const span = document.createElement('span');
-        span.dataset.check = 'column';
-        span.setAttribute('contenteditable', 'true');
-        span.setAttribute('tabindex', 0);
-        span.innerText = element;
-        textAreaId.appendChild(span);
-      }
-    });
+    for (const [key, value] of Object.entries(column.field)) {
+      // console.log(key, value);
+      // se l'elemento della formula(element) contiene il campo "field" posso
+      // aggiungerlo, come <mark>, altrimenti è normale testo (es. || l'operatore di concatenazione)
+      const txtarea = (key === 'id') ? app.txtAreaIdColumn : app.txtAreaDsColumn;
+      value.formula.forEach(element => {
+        if (element.hasOwnProperty('field')) {
+          // determino il <mark>
+          app.addMark({ field: element.field, datatype: element.datatype }, txtarea);
+        } else {
+          app.addSpan(txtarea, element);
+        }
 
-    column.field.ds.formula.forEach(element => {
-      if (element.hasOwnProperty('field')) {
-        // determino il <mark>
-        const templateContent = app.tmplFormula.content.cloneNode(true);
-        const i = templateContent.querySelector('i');
-        i.addEventListener('click', app.cancelFormulaObject);
-        const span = templateContent.querySelector('span');
-        const mark = templateContent.querySelector('mark');
-        const small = templateContent.querySelector('small');
-        mark.dataset.tableAlias = element.table_alias;
-        mark.dataset.table = element.table;
-        mark.dataset.field = element.field;
-        mark.dataset.datatype = element.datatype;
-        mark.innerText = element.field;
-        small.innerText = element.table;
-        textAreaDs.appendChild(span);
-      } else {
-        const span = document.createElement('span');
-        span.dataset.check = 'column';
-        span.setAttribute('contenteditable', 'true');
-        span.setAttribute('tabindex', 0);
-        span.innerText = element;
-        textAreaDs.appendChild(span);
-      }
-    });
+      });
+    }
     // imposto il nome della colonna assegnato in fase di creazione, prop name
     document.getElementById('column-name').value = column.name;
     app.loadTableStruct();
@@ -1193,21 +1137,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     small.innerText = WorkBook.activeTable.dataset.table;
     ref.appendChild(span);
   }
-
-  // TODO: questa viene sostituita da setColumnDrop()
-  /* app.addToColumnFormula = (e) => {
-    WorkBook.activeTable = e.currentTarget.dataset.tableId;
-    console.log(WorkBook.activeTable.dataset.table);
-    const field = e.currentTarget.dataset.field;
-    const table = e.currentTarget.dataset.table;
-    const alias = e.currentTarget.dataset.alias;
-    const datatype = e.currentTarget.dataset.datatype;
-    console.log(field);
-    // textarea
-    const txtArea = document.querySelector('.textarea-content[data-active]');
-    app.addMark({ table, alias, field, datatype }, txtArea);
-    // app.addSpan(txtArea, null, 'column');
-  } */
 
   app.textareaDragEnter = (e) => {
     e.preventDefault();
@@ -3217,7 +3146,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         table: WorkBook.activeTable.dataset.table,
         name: fieldName,
         origin_field: WorkBook.currentField,
-        field : WorkBook.columns
+        field: WorkBook.columns
       }
     };
     WorkBook.fields = token;
@@ -3473,40 +3402,28 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  app.addSpan = (target, value, check, mode) => {
-    /*
-    * target : il div che contiene la formula
-    * check : filter, metric (filter se sto creando una formula per il filtro, metric per le metriche composte)
-    */
+  app.addSpan = (target, value = null) => {
+    // TODO: provare a crearlo da template
     const span = document.createElement('span');
-    span.dataset.check = check;
-    if (mode) span.dataset.mode = mode;
     span.setAttribute('contenteditable', 'true');
+    // WARN: il tabindex non è implementato, sarà sempre 0
     span.setAttribute('tabindex', 0);
-    // let evt = new KeyboardEvent("keydown", {
-    //   shiftKey: true,
-    //   key: "Tab"
-    // });
-    span.addEventListener('input', app.checkSpanFormula);
-    // Do nothing if the event was already processed
+    span.innerText = value;
     span.onkeydown = (e) => {
       if (e.defaultPrevented) return;
-      /* verifico prima se questo span è l'ultimo elemento della formula.
-      * In caso che lo span è l'ultimo elemento della formula ne aggiungo un'altro, altrimenti il Tab avrà il comportamento di default
-      */
       const lastSpan = (e.target === target.querySelector('span[contenteditable]:last-child'));
       switch (e.key) {
         case 'Tab':
-          // console.log(e.ctrlKey);
-          // se il tasto shift non è premuto e mi trovo sull'ultimo span, aggiungo un altro span. In caso contrario, la combinazione shift+tab oppure tab su un qualsiasi altro
-          // ...span che non sia l'ultimo, avrà il comportamento di default
-          if (!e.shiftKey && lastSpan) {
-            (mode) ? app.addSpan(target, null, check, mode) : app.addSpan(target, null, check);
+          // Tab : inserisce un nuovo <span> se è stato inserito del testo nello <span> corrente
+          // se il tasto shift non è premuto e mi trovo sull'ultimo span, aggiungo un altro span, se lo
+          // <span> attuale NON è vuoto.
+          if (!e.shiftKey && lastSpan && e.target.textContent.length !== 0) {
+            app.addSpan(target);
             e.preventDefault();
           }
           break;
         case 'Backspace':
-          // se lo span è vuoto devo eliminarlo, in caso contrario ha il comportamento di default
+          // Backspace : elimina lo <span> se è vuoto, altrimenti ha il comportamento di default
           if (span.textContent.length === 0) {
             // posiziono il focus sul primo span disponibile andando indietro nel DOM
             /* const event = new Event('build');
@@ -3516,25 +3433,29 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             span.dispatchEvent(event);
             */
             // span.dispatchEvent(evt);
-            // verifico il primo span[contenteditable] presente andando all'indietro (backspace keydown event)
-            let previousContentEditable = (span) => {
-              // se viene trovate uno <span> precedente a quello passato come argomento, lo restituisco, altrimenti restituisco quello passato come argomento
-              if (span.previousElementSibling) {
-                span = (span.previousElementSibling.hasAttribute('contenteditable')) ? span.previousElementSibling : previousContentEditable(span.previousElementSibling);
-              }
-              return span;
-            }
-            previousContentEditable(span).focus();
             span.remove();
+            // imposto il focus sull'ultimo <span> presente nella formula, se presente
+            const lastSpanFormula = target.querySelector('span[contenteditable]:last-child');
+            if (lastSpanFormula) lastSpanFormula.focus();
           }
           break;
         default:
           break;
       }
     }
-    if (value) span.innerText = value;
     target.appendChild(span);
     span.focus();
+  }
+
+  // click all'interno di una textarea
+  // TODO: da spostare in supportFn.js
+  app.addText = (e) => {
+    // console.log('e : ', e);
+    // console.log('e.target : ', e.target);
+    // console.log('e.currentTarget : ', e.currentTarget);
+    if (e.target.localName === 'div') {
+      app.addSpan(e.target);
+    }
   }
 
   /* NOTE: END SUPPORT FUNCTIONS */
