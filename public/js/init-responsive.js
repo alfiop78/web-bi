@@ -3406,8 +3406,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // TODO: provare a crearlo da template
     const span = document.createElement('span');
     span.setAttribute('contenteditable', 'true');
-    // WARN: il tabindex non è implementato, sarà sempre 0
-    span.setAttribute('tabindex', 0);
     span.innerText = value;
     span.onkeydown = (e) => {
       if (e.defaultPrevented) return;

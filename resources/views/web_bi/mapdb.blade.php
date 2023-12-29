@@ -591,7 +591,7 @@
                 </section>
                 <section class="dlg-buttons">
                   <button name="cancel" value="chiudi">Chiudi</button>
-                  <button data-fn="saveColumn" id="btn-columns-define" value="salva">Ok</button>
+                  <button data-fn="saveColumn" id="btn-columns-define" value="salva">Salva</button>
                 </section>
               </section>
             </dialog>
