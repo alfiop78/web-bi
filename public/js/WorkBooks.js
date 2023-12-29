@@ -94,8 +94,6 @@ class Sheets {
     this.sheet.id = this.id;
     this.sheet.name = this.name;
     this.sheet.fields = Object.fromEntries(this.fields);
-    // creo un array con le colonne da visualizzare nello sheet
-    this.sheet.sheetColumns = [...this.fields.values()];
     // creo un array con le metriche da visualizzare nello sheet
     this.sheet.from = Object.fromEntries(this.from);
     this.sheet.joins = Object.fromEntries(this.joins);
@@ -110,7 +108,6 @@ class Sheets {
     delete this.sheet.metrics;
     delete this.sheet.advMetrics;
     delete this.sheet.compositeMetrics;
-    this.sheet.sheetMetrics = [...this.metrics.values()];
 
     for (const [token, metric] of this.metrics) {
       switch (metric.type) {

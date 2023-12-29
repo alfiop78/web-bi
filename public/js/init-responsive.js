@@ -1702,6 +1702,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     if (window.localStorage.getItem(`specs_${Sheet.sheet.token}`)) {
       Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`)
       Resource.specifications_update();
+      // this.sheet.sheetMetrics = [...this.metrics.values()];
     } else {
       Resource.specifications_create();
     }
@@ -2021,7 +2022,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const url = "/fetch_api/cube/sheet_create";
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
-    let partialData = [];
     await fetch(req)
       .then((response) => {
         // TODO: Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
