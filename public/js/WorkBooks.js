@@ -250,8 +250,8 @@ class WorkBooks {
   set field(object) {
     this.#field.set(object.token, object.value);
     // TODO: dati utili al sistema di log
-    console.log('field aggiunto : ', `${object.value.name} (${object.token})`);
-    console.log('Elenco #field : ', this.#field);
+    // console.log('field aggiunto : ', `${object.value.name} (${object.token})`);
+    // console.log('Elenco #field : ', this.#field);
   }
 
   get field() { return this.#field; }
