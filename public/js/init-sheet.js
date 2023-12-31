@@ -255,11 +255,21 @@ function previewReady() {
 
   Resource.dataViewGrouped.setColumns(viewDefined);
   console.log('dataViewGrouped : ', Resource.dataViewGrouped);
+  // console.log(Resource.dataViewGrouped.toDataTable());
+  Resource.dataGrouped = Resource.dataViewGrouped.toDataTable();
+  Resource.dataView = new google.visualization.DataView(Resource.dataGrouped);
+  // Resource.json.data.group.columns.forEach(metric => {
+  //   let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
+  //   console.log(Resource.dataView.getTableColumnIndex(metric.alias));
+  //   formatter.format(Resource.dataGrouped, Resource.dataView.getTableColumnIndex(metric.alias));
+  // });
+  debugger;
 
   google.visualization.events.addListener(Resource.tableRefGroup, 'sort', sort);
   // con l'opzione sort: 'event' viene comunque processato l'evento 'sort'
   // senza effettuare l'ordinamento.
-  Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
+  Resource.tableRefGroup.draw(Resource.dataView, Resource.options);
+  // Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
 }
 
 function sort(e) {
@@ -270,11 +280,12 @@ function sort(e) {
   // l'indice della colonna nella DataView
   Resource.colIndex = e.column;
   // recupero il nome della colonna in base al suo indice
-  Resource.columnId = Resource.dataViewGrouped.getColumnId(Resource.colIndex);
+  Resource.columnId = Resource.dataView.getColumnId(Resource.colIndex);
+  // Resource.columnId = Resource.dataViewGrouped.getColumnId(Resource.colIndex);
   console.log('index della dataView', Resource.colIndex);
   console.log('column id : ', Resource.columnId);
-  Resource.dataTableIndex = Resource.dataTable.getColumnIndex(Resource.columnId);
-  Resource.dataGroupIndex = Resource.dataGroup.getColumnIndex(Resource.columnId);
+  // Resource.dataTableIndex = Resource.dataTable.getColumnIndex(Resource.columnId);
+  // Resource.dataGroupIndex = Resource.dataGroup.getColumnIndex(Resource.columnId);
   // Resource.dataGroupIndex = Resource.dataGroup.getColumnIndex(Resource.columnId);
   // Resource.dataTableIndex = Resource.dataTable.getColumnIndex(Resource.columnId);
   // Indice della colonna nella DataTable sottostante in base alla selezione
@@ -283,18 +294,18 @@ function sort(e) {
   // (questo è segnalato anche su GoogleChart in getTableColumnIndex che parla di colonne generate)
   // Per questo motivo non posso utilizzare il metodo draw() ma devo utilizzare il previewReady()
   // per ridisegnare il report
-  // Resource.dataTableIndex = Resource.dataViewGrouped.getTableColumnIndex(Resource.colIndex);
+  Resource.dataTableIndex = Resource.dataView.getTableColumnIndex(Resource.colIndex);
 
   // NOTE: getViewColumnIndex() resituisce l'indice della DataView impostata
   // con setColumns(), il valore passato è l'indice della dataTable
   // se setColumns([1,3,5,7]) getViewColumnIndex(7) restituisce 4
   // Resource.dataViewIndex = Resource.dataViewGrouped.getViewColumnIndex(7);
   console.log('index della dataTable', Resource.dataTableIndex);
-  console.log('index della dataGroup', Resource.dataGroupIndex);
+  // console.log('index della dataGroup', Resource.dataGroupIndex);
   debugger;
   // etichetta colonna, questa viene impostata nella dlg-sheet-config
   // Resource.columnLabel = Resource.dataViewGrouped.getColumnLabel(Resource.colIndex);
-  Resource.columnLabel = Resource.dataGroup.getColumnLabel(Resource.dataGroupIndex);
+  Resource.columnLabel = Resource.dataView.getColumnLabel(Resource.dataTableIndex);
   labelRef.value = Resource.columnLabel;
   // recupero il dataType della colonna selezionata dall'object Resource.json.data.columns[columnId]
   // selectDataType.selectedIndex = 2;
@@ -349,7 +360,7 @@ saveColumnConfig.onclick = () => {
   // if (columnIndex !== -1) Resource.dataGroup.setColumnLabel(3, 'test-3');
   // if (columnIndex !== -1) Resource.dataGroup.setColumnLabel(Resource.dataTableIndex, 'test-2');
 
-  Resource.dataGroup.setColumnLabel(Resource.dataGroupIndex, label);
+  Resource.dataGrouped.setColumnLabel(Resource.dataTableIndex, label);
   switch (format) {
     case 'default':
       // numero senza decimali e con separatore migliaia
@@ -369,7 +380,7 @@ saveColumnConfig.onclick = () => {
       break;
   }
   // console.log(Resource.dataTable.getColumnProperties(Resource.dataTableIndex));
-  const columnType = Resource.dataTable.getColumnProperty(Resource.dataTableIndex, 'data');
+  const columnType = Resource.dataGrouped.getColumnProperty(Resource.dataTableIndex, 'data');
   if (columnType === 'column') {
     const column = Resource.json.data.group.key.find(col => col.id === Resource.columnId);
     // TODO: probabilmente devo modificare anche l'id, se è stato modificato nel report
@@ -381,7 +392,7 @@ saveColumnConfig.onclick = () => {
     if (metric) metric.label = label;
     metric.properties.formatter = { type, format, prop: formatterProperties };
     let formatter = app[type](formatterProperties);
-    formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
+    formatter.format(Resource.dataGrouped, Resource.dataGrouped.getColumnIndex(metric.alias));
   }
   // console.log('DataGroup:', Resource.dataGroup);
 
@@ -420,8 +431,8 @@ saveColumnConfig.onclick = () => {
   // Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
   // console.log('DataViewGrouped :', Resource.dataViewGrouped);
   // debugger;
-  // Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
-  previewReady();
+  Resource.tableRefGroup.draw(Resource.dataView, Resource.options);
+  // previewReady();
   dlgConfig.close();
 }
 
