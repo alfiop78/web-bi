@@ -1614,7 +1614,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
               // Non sono presenti altre pagine, visualizzo il dashboard
               console.log('tutte le paginate completate :', partialData);
               Resource.data = partialData;
-              google.charts.setOnLoadCallback(newDraw());
+              google.charts.setOnLoadCallback(drawDatamart());
             }
           }).catch((err) => {
             App.showConsole(err, 'error');
@@ -1627,7 +1627,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         } else {
           // Non sono presenti altre pagine, visualizzo il dashboard
           Resource.data = partialData;
-          google.charts.setOnLoadCallback(newDraw());
+          google.charts.setOnLoadCallback(drawDatamart());
         }
       })
       .catch(err => {
@@ -1986,7 +1986,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
               // Non sono presenti altre pagine, visualizzo il dashboard
               console.log('tutte le paginate completate :', partialData);
               Resource.data = partialData;
-              google.charts.setOnLoadCallback(newDraw());
+              google.charts.setOnLoadCallback(drawDatamart());
             }
           }).catch((err) => {
             App.showConsole(err, 'error');
@@ -1999,7 +1999,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         } else {
           // Non sono presenti altre pagine, visualizzo il dashboard
           Resource.data = partialData;
-          google.charts.setOnLoadCallback(newDraw());
+          google.charts.setOnLoadCallback(drawDatamart());
         }
       })
       .catch(err => {
