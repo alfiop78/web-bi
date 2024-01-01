@@ -118,8 +118,7 @@ class Resources extends Dashboards {
 
   get json() { return this.#json; }
 
-  specifications_update() {
-    debugger;
+  setSpecifications() {
     this.#specs_columns = {};
     this.#specs_group = { key: [], columns: [] };
     this.json.name = Sheet.name;
@@ -129,13 +128,10 @@ class Resources extends Dashboards {
         // console.log(key);
         let field_id_ds = (key === 'id') ? `${field}_${key}` : field;
         if (this.json.data.columns[field_id_ds]) {
-          this.#specs_columns[field_id_ds] = {
-            id: field_id_ds,
-            // label: this.json.data.columns[field_id_ds].label,
-            type: this.json.data.columns[field_id_ds].type,
-            p: this.json.data.columns[field_id_ds].p
-          };
+          // colonna già presente, la aggiungo a #specs_columns ma non modifico le proprietà type e p
+          this.#specs_columns[field_id_ds] = this.json.data.columns[field_id_ds];
         } else {
+          // colonna non presente nelle specifiche
           this.#specs_columns[field_id_ds] = {
             id: field_id_ds,
             // label: field_id_ds,
@@ -143,36 +139,31 @@ class Resources extends Dashboards {
             p: { data: 'column' }
           };
         }
+
         // json.data.group.key
         const keyColumn = this.json.data.group.key.find(value => value.id === field_id_ds);
         if (!keyColumn) {
+          // colonna non presente in json.data.group.key
           const visible = (key === 'id') ? false : true;
-          // non presente
           this.#specs_group.key.push({
             id: field_id_ds, label: field_id_ds, type: this.getDataType(workbookField[key].datatype),
             properties: { grouped: true, visible }
           });
         } else {
           // già presente
-          this.#specs_group.key.push({
-            id: field_id_ds, label: keyColumn.label, type: keyColumn.type,
-            properties: { grouped: keyColumn.properties.grouped, visible: keyColumn.properties.visible }
-          });
+          this.#specs_group.key.push(keyColumn);
         }
       });
     }
     console.log(this.#specs_columns);
     console.log(this.#specs_group.key);
+
     for (const [token, metric] of Sheet.metrics) {
       if (this.json.data.columns[metric.alias]) {
-        // metrica già presente
-        this.#specs_columns[metric.alias] = {
-          id: metric.alias,
-          // label: this.json.data.columns[metric.alias].label,
-          type: this.json.data.columns[metric.alias].type,
-          p: this.json.data.columns[metric.alias].p
-        };
+        // metrica già presente in json.data.columns
+        this.#specs_columns[metric.alias] = this.json.data.columns[metric.alias];
       } else {
+        // colonna non presente in json.data.columns
         this.#specs_columns[metric.alias] = {
           id: metric.alias,
           // label: metric.alias,
@@ -180,6 +171,7 @@ class Resources extends Dashboards {
           p: { data: 'measure' }
         };
       }
+
       const findMetric = this.json.data.group.columns.find(value => value.alias === metric.alias);
       if (!findMetric) {
         // non presente
@@ -203,74 +195,8 @@ class Resources extends Dashboards {
       } else {
         // già presente
         this.#specs_group.columns.push(findMetric);
-        // this.#specs_formatter[metric.alias] = this.json.data.formatter[metric.alias];
       }
     }
-    this.json.data.columns = this.#specs_columns;
-    this.json.data.group.key = this.#specs_group.key;
-    this.json.data.group.columns = this.#specs_group.columns;
-    // this.json.data.formatter = this.#specs_formatter;
-    debugger;
-    window.localStorage.setItem(`specs_${Sheet.sheet.token}`, JSON.stringify(this.json));
-  }
-
-  specifications_create() {
-    console.log(Sheet);
-    debugger;
-    this.json.token = Sheet.sheet.token;
-    this.json.name = Sheet.name;
-    this.json.wrapper.chartType = 'Table';
-    for (const [token, field] of Sheet.fields) {
-      const workbookField = WorkBook.field.get(token).field;
-      Object.keys(WorkBook.field.get(token).field).forEach(key => {
-        console.log(key);
-        let field_id_ds = (key === 'id') ? `${field}_${key}` : field;
-        const datatype = this.getDataType(workbookField[key].datatype);
-        this.#specs_columns[field_id_ds] = {
-          id: field_id_ds,
-          // label: field_id_ds,
-          type: datatype,
-          // La className qui non è necessaria perchè verrà sovrascritta da quella create nella DataView
-          p: { data: 'column' }
-        };
-        // json.data.group.key
-        const visible = (key === 'id') ? false : true;
-        this.#specs_group.key.push({
-          id: field_id_ds, label: field_id_ds, type: datatype,
-          properties: { grouped: true, visible }
-        });
-        // TODO: per adesso ho implementato solo le metriche (sotto)
-        // this.specs_formatter = { id: field_id_ds, datatype };
-      });
-      console.log(this.#specs_columns);
-      console.log(this.#specs_group);
-    }
-    for (const [token, metric] of Sheet.metrics) {
-      this.#specs_columns[metric.alias] = {
-        id: metric.alias,
-        // label: metric.alias,
-        type: 'number',
-        p: { data: 'measure' }
-      };
-      this.#specs_group.columns.push({
-        token,
-        alias: metric.alias,
-        aggregateFn: metric.aggregateFn,
-        dependencies: metric.dependencies,
-        properties: {
-          visible: true,
-          formatter: {
-            type: 'number', format: 'default', prop: {
-              negativeParens: false, fractionDigits: 0, groupingSymbol: '.'
-            }
-          }
-        },
-        label: metric.alias,
-        type: metric.type,
-        datatype: 'number'
-      });
-    }
-    this.json.wrapper.chartType = 'Table';
     this.json.data.columns = this.#specs_columns;
     this.json.data.group.key = this.#specs_group.key;
     this.json.data.group.columns = this.#specs_group.columns;
@@ -390,7 +316,6 @@ class Resources extends Dashboards {
         console.log(data);
       })
       .catch((err) => console.error(err));
-
   }
 
   /* prepareData() {

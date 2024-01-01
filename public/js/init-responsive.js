@@ -1409,114 +1409,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  // creo le specifiche del report, per le colonne
-  // che sono già presenti nellespecifiche NON devo sovrascrivere
-  // determinate proprietà (es.: la visibilità o il raggruppamento)
-  app.createSpecifications = () => {
-    Resource.json.token = Sheet.sheet.token;
-    Resource.json.name = Sheet.name;
-    Resource.json.wrapper.chartType = 'Table';
-    for (const [token, field] of Sheet.fields) {
-      const workbookField = WorkBook.field.get(token).field;
-      Object.keys(WorkBook.field.get(token).field).forEach(key => {
-        console.log(key);
-        let field_id_ds = (key === 'id') ? `${field}_${key}` : field;
-        // Se la colonna è già presente è stata modificata in init-sheet quando si editano le colonne
-        if (!Resource.json.data.columns[field_id_ds]) {
-          // colonna non presente, la aggiungo
-          Resource.json.data.columns[field_id_ds] = {
-            id: field_id_ds, label: field_id_ds, type: Resource.getDataType(workbookField[key].datatype),
-            properties: { grouped: true }
-          };
-        }
-        // json.data.group.key
-        const columnFindKey = Resource.json.data.group.key.find(value => value.id === field_id_ds);
-        if (!columnFindKey) {
-          Resource.json.data.group.key.push({
-            id: field_id_ds, label: field_id_ds, type: Resource.getDataType(workbookField[key].datatype),
-            properties: { grouped: true }
-          });
-        }
-        // json.data.view
-        const columnFindView = Resource.json.data.view.find(value => value.id === field_id_ds);
-        if (!columnFindView) {
-          // la colnna _id la nascondo dalla DataView
-          const visible = (key === 'id') ? false : true;
-          Resource.json.data.view.push({ id: field_id_ds, properties: { visible } });
-        }
-      });
-      // for (const [key, object] of Object.entries(WorkBook.field.get(token).field)) {
-      // }
-      console.log(Resource.json.data.columns);
-      console.log(Resource.json.data.group.key);
-      console.log(Resource.json.data.view);
-    }
-    for (const [token, metric] of Sheet.metrics) {
-      if (!Resource.json.data.columns[metric.alias]) {
-        // metrica non presente in json.data.columns
-        Resource.json.data.columns[metric.alias] = {
-          id: metric.alias, label: metric.alias, type: 'number'
-        };
-        let find = Resource.json.data.group.columns.find(value => value.id === metric.alias);
-        if (!find) {
-          Resource.json.data.group.columns.push({
-            token,
-            alias: metric.alias,
-            aggregateFn: metric.aggregateFn,
-            dependencies: metric.dependencies,
-            properties: { visible: true },
-            label: metric.alias,
-            type: metric.type,
-            datatype: 'number'
-          });
-        } else {
-          Resource.json.data.group.columns[metric.alias].aggregateFn = metric.aggregateFn;
-        }
-      }
-      // in fase di creazione di json.data.group.columns (metriche) imposto anche
-      // una formattazione, di base, perchè siccomme il json.data.formatter è un {} ma
-      // quando viene salvato su DB viene convertito in [] (forse perchè è vuoto) allora lo
-      // imposto con i valori delle metriche, in modo da creare un {}
-      if (!Resource.json.data.formatter[metric.alias]) {
-        // formattazione per questa metrica non presente
-        // groupSymbol dovrebbe essere default il punto (.) perchè il googleChart load è impostato
-        // language 'it'
-        Resource.json.data.formatter[metric.alias] = {
-          type: 'number', format: null, prop: {
-            negativeParens: false, fractionDigits: 0, groupingSymbol: '.'
-          }
-        };
-      }
-    }
-    Resource.json.wrapper.chartType = 'Table';
-    // debugger;
-    // Resource.saveSpecifications();
-    debugger;
-    window.localStorage.setItem(`specs_${Sheet.sheet.token}`, JSON.stringify(Resource.json));
-  }
-
-  // func richiamata con await
-  app.checkSpecifications = async () => {
-    // Verifico se le specifiche per questo report già esistono.
-    await fetch(`/fetch_api/name/${Sheet.sheet.token}/sheet_specs_show`)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then(data => {
-        if (Object.keys(data).length !== 0) {
-          Resource.json = data.json_value;
-          Resource.json.name = data.name;
-          Resource.jsonExists = true;
-        } else {
-          Resource.jsonExists = false;
-        }
-        app.createSpecifications()
-      })
-      .catch((err) => console.error(err));
-  }
-
   app.sheetPreview = async (token) => {
     // console.log(token);
     // recupero l'id dello Sheet
@@ -1677,7 +1569,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     app.dialogSheet.close();
     // in fase di apertura della preview, le specifiche sono sicuramente già presenti.
     Resource = new Resources('preview-datamart');
-    // await app.checkSpecifications();
     // TODO: verifico se il datamart, per lo Sheet selezionato, è già presente sul DB.
     // In caso positivo lo apro in preview-datamart.
     // debugger;
@@ -1699,13 +1590,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // qui, le specifiche, le devo ricreare perchè sto elaborando o rielaborando il report
     // e le specifiche potrebbero essere cambiate
     debugger;
-    if (window.localStorage.getItem(`specs_${Sheet.sheet.token}`)) {
+    (window.localStorage.getItem(`specs_${Sheet.sheet.token}`)) ?
       Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`)
-      Resource.specifications_update();
-      // this.sheet.sheetMetrics = [...this.metrics.values()];
-    } else {
-      Resource.specifications_create();
-    }
+      :
+      Resource.json.token = Sheet.sheet.token;
+    ;
+    Resource.setSpecifications();
   }
 
   app.newSheetDialog = () => {
