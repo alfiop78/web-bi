@@ -49,15 +49,18 @@ var Resource = new Resources();
       // console.log(groupColumnsIndex);
       // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
       Resource.groupFunction();
+      // Al momento non utilizzo il Metodo groupFunction() nella classe Dashboard
+      // perchè da qui richiamo il wrapper del ChartWrapper invece dal report non c'è il ChartWrapper
+      // TODO: potrei crearlo anche l' il ChartWrapper
       Resource.dataGroup = new google.visualization.data.group(
         wrap.getDataTable(), Resource.groupKey, Resource.groupColumn
       );
       console.log('group():', Resource.dataGroup);
       // formatter
-      for (const [key, value] of Object.entries(Resource.json.data.formatter)) {
-        let formatter = app[value.type](value.prop);
-        formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(key));
-      }
+      Resource.json.data.group.columns.forEach(metric => {
+        let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
+        formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
+      });
 
       Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
       Resource.createDataView();

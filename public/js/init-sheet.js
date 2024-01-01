@@ -19,7 +19,7 @@ function drawDatamart() {
   // di nascondere/visualizzare una colonna e decidere anche il raggruppamento per i
   // livelli dimensionali
   const prepareData = Resource.prepareData();
-  // ciclo il prepareData.cols per aggiungere l'elenco delle colonne in #ul-columns-handler.
+  // ciclo il prpareData.cols per aggiungere l'elenco delle colonne in #ul-columns-handler.
   // Da questo elenco si potranno nascondere/visualizzare le colonne e le metreehe
   const ulColumnsHandler = document.getElementById('ul-columns-handler');
   ulColumnsHandler.querySelectorAll('li').forEach(el => el.remove());
@@ -340,6 +340,7 @@ saveColumnConfig.onclick = () => {
   const typeRef = document.getElementById('field-datatype');
   // formattazione colonna
   const formatterRef = document.getElementById('field-format');
+  const filterColumn = document.getElementById('filter-column');
   const type = typeRef.options.item(typeRef.selectedIndex).value.toLowerCase();
   const format = formatterRef.options.item(formatterRef.selectedIndex).value;
   let formatterProperties = {};
@@ -389,7 +390,7 @@ saveColumnConfig.onclick = () => {
 
   // filtri definiti per il report
   // TODO: da testare
-  /* if (filterColumn.checked === true) {
+  if (filterColumn.checked === true) {
     // Proprietà Resource.json.filters
     // Inserisco il filtro solo se non è ancora presente in Resource.json.filters
     const index = Resource.json.filters.findIndex(filter => filter.containerId === `flt-${label}`);
@@ -411,7 +412,7 @@ saveColumnConfig.onclick = () => {
       // filterRef.parentElement.remove();
       // app.setDashboardBind();
     }
-  } */
+  }
 
   // TODO: Il containerId deve essere deciso in init-dashboard-create.js
   Resource.json.wrapper.containerId = 'chart_div';

@@ -293,6 +293,10 @@ var Resource = new Resources();
     Resource.dataGroup = new google.visualization.data.group(
       Resource.dataTable, Resource.groupKey, Resource.groupColumn
     );
+    Resource.json.data.group.columns.forEach(metric => {
+      let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
+      formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
+    });
     Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
 
     Resource.createDataView();
