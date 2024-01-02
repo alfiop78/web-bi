@@ -1583,6 +1583,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // imposto il nome recuperandolo dallo #sheet-name
     const name = document.getElementById('sheet-name');
     Sheet.name = name.dataset.value;
+    // verifico se ci sono elementi modificati andando a controllare gli elmeneti con [data-adding] e [data-removed]
+    Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed]');
+    debugger;
     Sheet.save();
     // da questo momento in poi le modifiche (aggiunta/rimozione) di elementi allo Sheet
     // verranno contrassegnate come edit:true

@@ -13,9 +13,6 @@ class Sheets {
     // this.workBookToken = WorkBookToken;
     this.sheet = { token, type: 'sheet', workbook_ref: WorkBookToken };
     this.name = name;
-    // Intercetto le modifiche fatte allo Sheet per valutare se aggiornare o meno
-    // la prop 'updated_at'
-    this.changes = new Set();
     // mappo gli elmenti rimossi dal report in fase di edit. Questo mi consentirà
     // di stabilire se aggiornare "updated_at" del report oppure no
     this.objectRemoved = new Map();
@@ -128,8 +125,9 @@ class Sheets {
       this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.#options);
       this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
     }
+    // if (this.objectRemoved.size !== 0) this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+    if (this.changes.length !== 0) this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
     debugger;
-    if (this.objectRemoved.size !== 0) this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
     console.info('sheet:', this.sheet);
     SheetStorage.save(this.sheet);
   }
