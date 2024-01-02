@@ -194,7 +194,6 @@ class WorkBooks {
   #activeTable;
   #field = new Map();
   #fields = new Map();
-  #columns = { id: {}, ds: {} };
   #filters = new Map();
   #metrics = new Map();
   #join = new Map();
@@ -268,35 +267,6 @@ class WorkBooks {
   }
 
   get fields() { return this.#fields; }
-
-  // imposto le colonne _id e _ds
-  set columns(values) {
-    // value : (array) id/ds
-    values.forEach(key => {
-      this.#columns[key] = { sql: [], formula: [], datatype: null };
-      document.querySelectorAll(`#textarea-column-${key} *`).forEach(element => {
-        if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
-        if (element.nodeName === 'MARK') {
-          // il campo potrebbe appartenere ad una tabella diversa da quella selezionata
-          // quindi  aggiungo anche il table alias
-          this.#columns[key].sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
-          this.#columns[key].formula.push(
-            {
-              table_alias: element.dataset.tableAlias,
-              table: element.dataset.table,
-              field: element.dataset.field,
-              datatype: element.dataset.datatype
-            });
-          this.#columns[key].datatype = element.dataset.datatype;
-        } else {
-          this.#columns[key].sql.push(element.innerText.trim());
-          this.#columns[key].formula.push(element.innerText.trim());
-        }
-      });
-    });
-  }
-
-  get columns() { return this.#columns; }
 
   set join(object) {
     // this.#join.set(object.token, { table: object.table, alias: object.alias, from: object.from, to: object.to });

@@ -2904,6 +2904,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
     data.forEach(column => {
       const tokenField = rand().substring(0, 7);
+      debugger;
       WorkBook.field = {
         token: tokenField,
         value: {
@@ -3033,10 +3034,33 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const fieldName = document.getElementById('column-name').value;
     const token = (e.currentTarget.dataset.token) ? e.currentTarget.dataset.token : rand().substring(0, 7);
     // imposto le colonne _id e _ds in WorkBook.columns
-    WorkBook.columns = ['id', 'ds'];
-    // WorkBook.field contiene l'elenco dei field aggiunti al WorkBook
-    // mentre WorkBook.fields contiene lo stesso elenco dei campi però
-    // all'interno delle rispettive tabelle
+    debugger;
+    let fields = { id: { sql: [], formula: [], datatype: null }, ds: { sql: [], formula: [], datatype: null } };
+    // let fieldId = { sql: [], formula: [], datatype: null }
+    // let fieldDs = { sql: [], formula: [], datatype: null }
+    // colonna _id
+    ['id', 'ds'].forEach(key => {
+      document.querySelectorAll(`#textarea-column-${key} *`).forEach(element => {
+        if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
+        if (element.nodeName === 'MARK') {
+          // il campo potrebbe appartenere ad una tabella diversa da quella selezionata
+          // quindi  aggiungo anche il table alias
+          fields[key].sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
+          fields[key].formula.push(
+            {
+              table_alias: element.dataset.tableAlias,
+              table: element.dataset.table,
+              field: element.dataset.field,
+              datatype: element.dataset.datatype
+            });
+          fields[key].datatype = element.dataset.datatype;
+        } else {
+          fields[key].sql.push(element.innerText.trim());
+          fields[key].formula.push(element.innerText.trim());
+        }
+      });
+    });
+
     WorkBook.field = {
       token,
       value: {
@@ -3047,9 +3071,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         table: WorkBook.activeTable.dataset.table,
         name: fieldName,
         origin_field: WorkBook.currentField,
-        field: WorkBook.columns
+        field: fields
       }
     };
+    // WorkBook.field contiene l'elenco dei field aggiunti al WorkBook
+    // mentre WorkBook.fields contiene lo stesso elenco dei campi però
+    // all'interno delle rispettive tabelle
     WorkBook.fields = token;
     app.dialogColumns.close();
     WorkBook.checkChanges(token);
