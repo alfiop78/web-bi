@@ -50,7 +50,7 @@ function drawDatamart() {
   });
   Resource.dataTable = new google.visualization.DataTable(prepareData);
   // var tableRef = new google.visualization.Table(document.getElementById(Resource.ref));
-  var tableRef = new google.visualization.Table(Resource.ref);
+  Resource.tableRef = new google.visualization.Table(Resource.ref);
   // effettuando il calcolo del margine ((ricavo-costo)/ricavo*100) qui, cioè prima della
   // funzione di group(), il risultato non è corretto, questi calcoli vanno effettuati con una
   // DataView DOPO la function group()
@@ -81,9 +81,9 @@ function drawDatamart() {
   // una group(), questa consente di raggruppare la visualizzazione in base ai livelli
   // dimensionali scelti (aggiunta/rimozione di livelli dimensionali)
   // tableRef.clearChart();
-  google.visualization.events.addListener(tableRef, 'ready', previewReady);
+  google.visualization.events.addListener(Resource.tableRef, 'ready', previewReady);
 
-  tableRef.draw(Resource.dataTable, Resource.options);
+  Resource.tableRef.draw(Resource.dataTable, Resource.options);
 }
 
 function previewReady() {

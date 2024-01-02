@@ -8,7 +8,7 @@
   <title>Gaia-BI | Workspace</title>
   <!-- TODO: tooltip e loader -->
   <!-- <link rel="stylesheet" href="{{ asset('/css/md-tooltip.css') }}"> -->
-  <!-- <link rel="stylesheet" type="text/css" href="/css/md-loader.css" /> -->
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-icons.css') }}" />
@@ -723,6 +723,11 @@
                           </section>
                         </div>
                         <div class="report-area">
+                          <div class="local-loader" hidden="true">
+                            <svg viewBox="0 0 32 32" width="32" height="32">
+                              <circle id="local-spinner" cx="16" cy="16" r="14" fill="none"></circle>
+                            </svg>
+                          </div>
 
                           <section class="columns-rows">
                             <div id="sheet-columns" class="relative">
@@ -859,11 +864,11 @@
 
     </div>
   </main>
-  <div class="loader">
-    <svg viewBox="0 0 32 32" width="32" height="32">
-      <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
-    </svg>
-  </div>
+  <!-- <div class="loader"> -->
+  <!--   <svg viewBox="0 0 32 32" width="32" height="32"> -->
+  <!--     <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle> -->
+  <!--   </svg> -->
+  <!-- </div> -->
   <script type="text/javascript" src="{{ asset('/js/init-responsive.js') }}" async></script>
   <script type="text/javascript" src="{{ asset('/js/init-sheet.js') }}" async></script>
   <script type="text/javascript" src="{{ asset('/js/supportFn.js') }}" async></script>

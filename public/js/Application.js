@@ -15,7 +15,7 @@ class Application {
     let body = document.getElementById('body');
     // console.log(main);
     var spinner = document.querySelector('.loader');
-    spinner.setAttribute('hidden', true);
+    if (spinner) spinner.setAttribute('hidden', true);
     body.removeAttribute('hidden');
     // console.log('initLoader');
     // main.removeAttribute('hidden');
@@ -33,6 +33,16 @@ class Application {
     // document.getElementById("testTop").innerText = i.offsetTop+" - "+window.screen.availHeight;
     //document.getElementById("testTop").innerText = window.screenTop;
     // console.log(main.offsetHeight);
+  }
+
+  loaderStart() {
+    const spinner = document.querySelector('.local-loader');
+    spinner.hidden = false;
+  }
+
+  loaderStop() {
+    const spinner = document.querySelector('.local-loader');
+    spinner.hidden = true;
   }
 
   handlerScroll() {

@@ -1585,14 +1585,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     Sheet.name = name.dataset.value;
     // verifico se ci sono elementi modificati andando a controllare gli elmeneti con [data-adding] e [data-removed]
     Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed]');
-    debugger;
     Sheet.save();
     // da questo momento in poi le modifiche (aggiunta/rimozione) di elementi allo Sheet
     // verranno contrassegnate come edit:true
     Sheet.edit = true;
     // qui, le specifiche, le devo ricreare perchè sto elaborando o rielaborando il report
     // e le specifiche potrebbero essere cambiate
-    debugger;
     (window.localStorage.getItem(`specs_${Sheet.sheet.token}`)) ?
       Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`)
       :
@@ -1912,6 +1910,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // console.log(params);
     // App.showConsole('Elaborazione in corso...', 'info');
     // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
+    App.loaderStart();
+    if (Resource.tableRef) Resource.tableRef.clearChart();
     const url = "/fetch_api/cube/sheet_create";
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
@@ -1926,12 +1926,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         console.log(response);
         // TODO: elimino gli attributi data-added/removed sugli elementi del report modificati in base alla versione
         // precedente del report
-        debugger;
         document.querySelectorAll('div[data-adding]').forEach(el => {
           el.dataset.added = 'true;'
           delete el.dataset.adding;
         });
         document.querySelectorAll('div[data-removed]').forEach(el => el.remove());
+        App.loaderStop();
         app.loadPreview();
       })
       .catch(err => {
