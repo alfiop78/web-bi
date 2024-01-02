@@ -1134,7 +1134,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     mark.dataset.field = data.field;
     mark.dataset.datatype = data.datatype;
     mark.innerText = data.field;
-    small.innerText = WorkBook.activeTable.dataset.table;
+    small.innerText = WorkBook.activeTable.dataset.name;
     ref.appendChild(span);
   }
 
