@@ -1924,6 +1924,14 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       .then((response) => response.json())
       .then(response => {
         console.log(response);
+        // TODO: elimino gli attributi data-added/removed sugli elementi del report modificati in base alla versione
+        // precedente del report
+        debugger;
+        document.querySelectorAll('div[data-adding]').forEach(el => {
+          el.dataset.added = 'true;'
+          delete el.dataset.adding;
+        });
+        document.querySelectorAll('div[data-removed]').forEach(el => el.remove());
         app.loadPreview();
       })
       .catch(err => {
