@@ -64,7 +64,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     btnVersioning: document.getElementById('btn-versioning')
   }
 
-  const userId = 2;
+  const userId = 1;
 
   document.body.addEventListener('mousemove', (e) => {
     // console.log({ clientX: e.clientX, clientY: e.clientY, offsetX: e.offsetX, offsetY: e.offsetY, pageX: e.pageX, pageY: e.pageY, x: e.x, y: e.y });
@@ -1411,13 +1411,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  app.sheetPreview = async (token) => {
-    // console.log(token);
-    // recupero l'id dello Sheet
-    const sheet = JSON.parse(window.localStorage.getItem(token));
-    console.log(sheet);
-    debugger;
-    if (!sheet.id) return false;
+  app.sheetPreview = async () => {
     // NOTE: Chiamata in post per poter passare tutte le colonne, incluso l'alias, alla query
     // TODO: Passo in param un object con le colonne da estrarre (tutte)
     /* const params = JSON.stringify({ sheet_id: sheet.id });
@@ -1466,15 +1460,15 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         console.error(err);
       }); */
     // end chiamata in GET
-    Resource.json = window.localStorage.getItem(`specs_${token}`);
+    Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`);
 
     const progressBar = document.getElementById('progress-bar');
     const progressTo = document.getElementById('progress-to');
     const progressTotal = document.getElementById('progress-total');
     const progressLabel = document.querySelector("label[for='progress-bar']");
     let partialData = [];
-    debugger;
-    await fetch(`/fetch_api/${sheet.id}_${sheet.userId}/preview?page=1`)
+    App.loaderStart();
+    await fetch(`/fetch_api/${Sheet.sheet.id}_${Sheet.sheet.userId}/preview?page=1`)
       .then((response) => {
         // console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
@@ -1523,6 +1517,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           // Non sono presenti altre pagine, visualizzo il dashboard
           Resource.data = partialData;
           google.charts.setOnLoadCallback(drawDatamart());
+          App.loaderStop();
         }
       })
       .catch(err => {
@@ -1543,6 +1538,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     Sheet = new Sheets(e.currentTarget.dataset.name, e.currentTarget.dataset.token, WorkBook.workBook.token);
     // reimposto tutte le proprietà della Classe
     Sheet.open();
+    debugger;
     const name = document.getElementById('sheet-name');
     name.innerText = Sheet.name;
     name.dataset.value = Sheet.name;
@@ -1572,29 +1568,37 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     app.dialogSheet.close();
     // in fase di apertura della preview, le specifiche sono sicuramente già presenti.
     Resource = new Resources('preview-datamart');
-    // TODO: verifico se il datamart, per lo Sheet selezionato, è già presente sul DB.
+    // verifico se il datamart, per lo Sheet selezionato, è già presente sul DB.
     // In caso positivo lo apro in preview-datamart.
-    // debugger;
-    app.sheetPreview(sheetToken);
+    let exist = await Sheet.exist();
+    if (exist) app.sheetPreview();
     // Imposto la prop 'edit' = true perchè andrò ad operare su uno Sheet aperto
     Sheet.edit = true;
     document.querySelector('#btn-sheet-save').disabled = false;
     document.querySelectorAll('#btn-sql-preview, #btn-sheet-preview').forEach(button => button.disabled = false);
   }
 
-  app.saveSheet = () => {
+  app.saveSheet = async () => {
     // imposto il nome recuperandolo dallo #sheet-name
     const name = document.getElementById('sheet-name');
     Sheet.name = name.dataset.value;
     Sheet.userId = userId;
     // verifico se ci sono elementi modificati andando a controllare gli elmeneti con [data-adding] e [data-removed]
     Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed]');
-    debugger;
-    // se il report è in dedit ed è stata fatta una modifica eseguo update()
+    // se il report è in edit ed è stata fatta una modifica eseguo update()
     if (Sheet.edit === true) {
       // il report è già presente in local ed è stato aperto
       // se ci sono state delle modifiche eseguo update
-      if (Sheet.changes.length !== 0) Sheet.update();
+      if (Sheet.changes.length !== 0) {
+        Sheet.update();
+        // elimino il datamart perchè è stato modificato
+        let exist = await Sheet.exist();
+        if (exist) {
+          let result = await Sheet.delete();
+          console.log('datamart eliminato : ', result);
+          if (result && Resource.tableRef) Resource.tableRef.clearChart();
+        }
+      }
     } else {
       // il report è stato appena creato e faccio save()
       Sheet.save();
@@ -1913,11 +1917,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   }
 
   app.process = async (process) => {
-    // lo Sheet.id può essere già presente quando è stato aperto
-    // if (!Sheet.id) {
-    //   Sheet.id = Date.now();
-    // }
-    app.saveSheet();
+    // TODO: da rivedere, forse qui posso salvare il report e le specifiche senza richiamare saveSheet()
+    // ma creando un altra fn
+    // imposto await altrimenti viene prima creato il datamart e poi eliminato (in saveSheet())
+    await app.saveSheet();
     process.id = Sheet.sheet.id;
     process.datamartId = Sheet.sheet.userId;
     // console.log(process);
@@ -1948,6 +1951,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         });
         document.querySelectorAll('div[data-removed]').forEach(el => el.remove());
         App.loaderStop();
+        // app.saveSheet();
         app.loadPreview();
       })
       .catch(err => {

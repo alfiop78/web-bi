@@ -21,6 +21,7 @@ use App\Models\BIfilter;
 use App\Models\BImetric;
 // test 22.12.2022 aggiunta per utilizzare /fetch_api/dimension/time
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /*
 |--------------------------------------------------------------------------
@@ -285,6 +286,17 @@ Route::get('/curl/process/{token}/schedule', function ($token) {
 Route::get('/fetch_api/{id}/datamart', [MapDatabaseController::class, 'datamart'])->name('web_bi.fetch_api.datamart');
 // preview del datamart
 Route::get('/fetch_api/{id}/preview', [MapDatabaseController::class, 'preview'])->name('web_bi.fetch_api.preview');
+
+Route::get('/fetch_api/{id}/check_datamart', function ($id) {
+  // $result = DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable("WEB_BI_$id");
+  return Schema::connection('vertica_odbc')->hasTable("WEB_BI_$id");
+  // return (int) (empty($result)) ? 0 : 1; // TODO: testare
+})->name('web_bi.fetch_api.check_datamart');
+
+Route::get('/fetch_api/{id}/delete_datamart', function ($id) {
+  $dropResult = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.WEB_BI_{$id};");
+  return (!$dropResult) ? 1 : 0;
+})->name('web_bi.fetch_api.delete_datamart');
 
 // Metodo POST commentato, possibile utilizzo futuro, vedere commenti in MapDatabaseController
 Route::post('/fetch_api/datamartpost', [MapDatabaseController::class, 'datamartPost'])->name('web_bi.fetch_api.datamartPost');

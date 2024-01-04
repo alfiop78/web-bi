@@ -88,6 +88,7 @@ class Sheets {
   }
 
   // il tasto Aggiorna deve essere attivato solo quando ci sono delle modifiche fatte
+  // OPTIMIZE: il codice si ripete in update() e in save()
   update() {
     this.sheet.name = this.name;
     this.sheet.fields = Object.fromEntries(this.fields);
@@ -115,7 +116,6 @@ class Sheets {
           break;
       }
     }
-    debugger;
     this.sheet.userId = this.userId;
     this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
     console.info('sheet:', this.sheet);
@@ -222,6 +222,31 @@ class Sheets {
     return this;
   }
 
+  async exist() {
+    return await fetch(`/fetch_api/${this.sheet.id}_${this.sheet.userId}/check_datamart`)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.text())
+      .then(response => response)
+      .catch(err => {
+        console.error(err);
+      });
+  }
+
+  delete() {
+    return fetch(`/fetch_api/${this.sheet.id}_${this.sheet.userId}/delete_datamart`)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.text())
+      .then(response => response)
+      .catch(err => {
+        console.error(err);
+      });
+  }
 }
 
 class WorkBooks {
