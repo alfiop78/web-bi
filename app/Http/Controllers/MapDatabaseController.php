@@ -176,7 +176,7 @@ class MapDatabaseController extends Controller
     // $data = DB::connection('vertica_odbc')->table($table)->limit(5)->get(); // ok
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497, 43, 473, 437, 445, 461, 485, 549, 621, 1000002079, 455, 471, 179])->paginate(15000);
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497])->paginate(15000);
-    $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}_temp")->paginate(15000);
+    $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->paginate(15000);
     return $data;
   }
 
@@ -228,8 +228,9 @@ class MapDatabaseController extends Controller
     $q = new Cube();
     // imposto le proprietà con i magic methods
     $q->reportId = $cube->{'id'};
-    $q->baseTableName = "WEB_BI_TMP_BASE_$q->reportId";
-    $q->datamartName = "WEB_BI_{$q->reportId}_temp";
+    $q->datamartId = $cube->{'datamartId'};
+    $q->baseTableName = "WEB_BI_TMP_BASE_{$q->reportId}_{$q->datamartId}";
+    $q->datamartName = "WEB_BI_{$q->reportId}_{$q->datamartId}";
     $q->baseColumns = $cube->{'fields'};
     // imposto le colonne da includere nel datamart finale
     $q->fields();

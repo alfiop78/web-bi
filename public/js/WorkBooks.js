@@ -87,14 +87,51 @@ class Sheets {
     this.objectRemoved.set(token, object);
   }
 
-  save() {
-    this.sheet.id = this.id;
+  // il tasto Aggiorna deve essere attivato solo quando ci sono delle modifiche fatte
+  update() {
     this.sheet.name = this.name;
     this.sheet.fields = Object.fromEntries(this.fields);
-    // creo un array con le metriche da visualizzare nello sheet
     this.sheet.from = Object.fromEntries(this.from);
     this.sheet.joins = Object.fromEntries(this.joins);
-    // this.sheet.workbook_ref = this.workBookToken;
+    this.sheet.workbook_ref = this.sheet.workbook_ref;
+    this.sheet.filters = [...this.filters];
+    // reset delle metriche
+    delete this.sheet.metrics;
+    delete this.sheet.advMetrics;
+    delete this.sheet.compositeMetrics;
+
+    for (const [token, metric] of this.metrics) {
+      switch (metric.type) {
+        case 'basic':
+          (!this.sheet.hasOwnProperty('metrics')) ? this.sheet.metrics = { [token]: metric } : this.sheet.metrics[token] = metric;
+          break;
+        case 'advanced':
+          (!this.sheet.hasOwnProperty('advMetrics')) ? this.sheet.advMetrics = { [token]: metric } : this.sheet.advMetrics[token] = metric;
+          break;
+        default:
+          // compositeMetrics
+          (!this.sheet.hasOwnProperty('compositeMetrics')) ? this.sheet.compositeMetrics = { [token]: metric } : this.sheet.compositeMetrics[token] = metric;
+          // this.sheet.compositeMetrics[token] = metric;
+          break;
+      }
+    }
+    debugger;
+    this.sheet.userId = this.userId;
+    this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+    console.info('sheet:', this.sheet);
+    debugger;
+    SheetStorage.save(this.sheet);
+  }
+
+  save() {
+    // this.sheet.id = this.id;
+    this.sheet.id = Date.now();
+    debugger;
+    this.sheet.userId = this.userId;
+    this.sheet.name = this.name;
+    this.sheet.fields = Object.fromEntries(this.fields);
+    this.sheet.from = Object.fromEntries(this.from);
+    this.sheet.joins = Object.fromEntries(this.joins);
     this.sheet.workbook_ref = this.sheet.workbook_ref;
     /* WARN : verifica dei filtri del report.
       * Se non sono presenti ma sono presenti in metriche filtrate elaboro comunque il report
@@ -121,14 +158,10 @@ class Sheets {
           break;
       }
     }
-    if (!this.sheet.hasOwnProperty('created_at')) {
-      this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.#options);
-      this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
-    }
-    // if (this.objectRemoved.size !== 0) this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
-    if (this.changes.length !== 0) this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
-    debugger;
+    this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.#options);
+    this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
     console.info('sheet:', this.sheet);
+    debugger;
     SheetStorage.save(this.sheet);
   }
 
@@ -139,7 +172,8 @@ class Sheets {
     // reimposto la Classe
     SheetStorage.sheet = this.sheet.token;
     this.name = SheetStorage.sheet.name;
-    this.id = SheetStorage.sheet.id;
+    this.sheet.id = SheetStorage.sheet.id;
+    this.sheet.userId = SheetStorage.sheet.userId;
     this.sheet.created_at = SheetStorage.sheet.created_at;
     this.sheet.updated_at = SheetStorage.sheet.updated_at;
 

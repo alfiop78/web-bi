@@ -64,6 +64,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     btnVersioning: document.getElementById('btn-versioning')
   }
 
+  const userId = 2;
+
   document.body.addEventListener('mousemove', (e) => {
     // console.log({ clientX: e.clientX, clientY: e.clientY, offsetX: e.offsetX, offsetY: e.offsetY, pageX: e.pageX, pageY: e.pageY, x: e.x, y: e.y });
   }, false);
@@ -1471,7 +1473,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const progressTotal = document.getElementById('progress-total');
     const progressLabel = document.querySelector("label[for='progress-bar']");
     let partialData = [];
-    await fetch(`/fetch_api/${sheet.id}/preview?page=1`)
+    debugger;
+    await fetch(`/fetch_api/${sheet.id}_${sheet.userId}/preview?page=1`)
       .then((response) => {
         // console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
@@ -1583,9 +1586,19 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // imposto il nome recuperandolo dallo #sheet-name
     const name = document.getElementById('sheet-name');
     Sheet.name = name.dataset.value;
+    Sheet.userId = userId;
     // verifico se ci sono elementi modificati andando a controllare gli elmeneti con [data-adding] e [data-removed]
     Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed]');
-    Sheet.save();
+    debugger;
+    // se il report è in dedit ed è stata fatta una modifica eseguo update()
+    if (Sheet.edit === true) {
+      // il report è già presente in local ed è stato aperto
+      // se ci sono state delle modifiche eseguo update
+      if (Sheet.changes.length !== 0) Sheet.update();
+    } else {
+      // il report è stato appena creato e faccio save()
+      Sheet.save();
+    }
     // da questo momento in poi le modifiche (aggiunta/rimozione) di elementi allo Sheet
     // verranno contrassegnate come edit:true
     Sheet.edit = true;
@@ -1815,8 +1828,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.generateSQL = async (process) => {
     // lo Sheet.id può essere già presente quando è stato aperto
-    if (!Sheet.id) Sheet.id = Date.now();
-    process.id = Sheet.id;
+    if (!Sheet.sheet.id) Sheet.sheet.id = Date.now();
+    process.id = Sheet.sheet.id;
     // console.log(process);
     // app.saveSheet();
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
@@ -1851,7 +1864,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.loadPreview = async () => {
     let partialData = [];
-    await fetch(`/fetch_api/${Sheet.id}/preview?page=1`)
+    await fetch(`/fetch_api/${Sheet.sheet.id}_${Sheet.sheet.userId}/preview?page=1`)
       .then((response) => {
         // console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
@@ -1901,10 +1914,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.process = async (process) => {
     // lo Sheet.id può essere già presente quando è stato aperto
-    if (!Sheet.id) Sheet.id = Date.now();
-    process.id = Sheet.id;
-    // console.log(process);
+    // if (!Sheet.id) {
+    //   Sheet.id = Date.now();
+    // }
     app.saveSheet();
+    process.id = Sheet.sheet.id;
+    process.datamartId = Sheet.sheet.userId;
+    // console.log(process);
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(process);
     // console.log(params);
@@ -1921,10 +1937,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         if (!response.ok) { throw Error(response.statusText); }
         return response;
       })
-      .then((response) => response.json())
+      .then((response) => response.text())
       .then(response => {
         console.log(response);
-        // TODO: elimino gli attributi data-added/removed sugli elementi del report modificati in base alla versione
+        // elimino gli attributi data-added/removed sugli elementi del report modificati in base alla versione
         // precedente del report
         document.querySelectorAll('div[data-adding]').forEach(el => {
           el.dataset.added = 'true;'
