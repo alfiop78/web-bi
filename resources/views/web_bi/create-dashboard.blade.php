@@ -112,6 +112,7 @@
             <menu>
               <button type="button" id="">Apri</button>
               <button type="button" id="">Chiudi</button>
+              <button type="button" data-fn="publish" id="publish">Pubblica</button>
             </menu>
 
             <h1 id="dashboardTitle" contenteditable="true" data-value="Titolo">Titolo</h1>

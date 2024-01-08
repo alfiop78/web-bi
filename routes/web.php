@@ -95,6 +95,9 @@ Route::get('/500', function () {
   return view('errors.500');
 });
 
+// copy_table
+Route::get('/fetch_api/copy_from/{from_id}/copy_to/{to_id}/copy_table', [MapDatabaseController::class, 'copy_table'])->name('web_bi.fetch_api.copy_table');
+
 // creazione dimensione time
 // Route::post('/fetch_api/dimension/time', [MapDatabaseController::class, 'createTimeDimension'])->name('web_bi.fetch_api.time');
 Route::post('/fetch_api/dimension/time', function () {

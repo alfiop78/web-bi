@@ -66,11 +66,34 @@ var Resource = new Resources();
   // TODO: utilizzare questa logica anche sulle altre pagine
   App.init();
 
-  app.publish = () => {
+  app.publish = async () => {
     // TODO: il tasto "pubblica" deve :
-    // - recuperare, da bi_sheets, i datamart utili alla pagina
-    // - salvare le specifiche in bi_sheet_specifications
+    // - recuperare tutti gli oggetti della pagina (report)
+    console.log(Resource.resource);
+    let urls = [];
+    for (const [token, dashboard] of Resource.resource) {
+      urls.push(`/fetch_api/copy_from/${dashboard.datamart_id}_${dashboard.user_id}/copy_to/${dashboard.datamart_id}/copy_table`);
+    }
+    console.log(urls);
+
     // - crearne i COPY_TABLE da WEB_BI_timestamp_userId -> WEB_BI_timestamp
+    // - salvare le specifiche in bi_sheet_specifications
+    //
+    await Promise.all(urls.map(url => fetch(url)))
+      .then(responses => {
+        return Promise.all(responses.map(response => {
+          if (!response.ok) { throw Error(response.statusText); }
+          return response.text();
+        }))
+      })
+      .then(response => {
+        debugger;
+        console.log(response);
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
   }
 
   // onclick events
@@ -79,7 +102,10 @@ var Resource = new Resources();
     const token = rand().substring(0, 7);
     const title = document.getElementById('dashboardTitle').dataset.value;
     const note = document.getElementById('note').value;
-    // salvo il json 'dashboard-token' in localStorage e su DB
+    // salvo il json 'dashboard-token' in bi_dashboards
+    // TODO: aggiungere la prop 'published' (bool). Questa mi consentirà
+    // di visualizzare la dashboard, solo le dashboards pubblicate possono
+    // essere visualizzate
     let json = {
       title, note, token, type: 'dashboard',
       layout: Template.id,
@@ -170,6 +196,7 @@ var Resource = new Resources();
     Template.create();
   }
 
+  // Fn invocata dal tasto + che viene creato dinamicamente dal layout-template
   // apertura dialog per l'aggiunta del chart o DataTable
   app.addResource = (e) => {
     // il ref corrente, appena aggiunto
@@ -197,7 +224,7 @@ var Resource = new Resources();
 
   app.getData = async () => {
     let partialData = [];
-    await fetch(`/fetch_api/${Resource.datamart_id}_${Resource.userId}/preview?page=1`)
+    await fetch(`/fetch_api/${Resource.resource.get(Resource.token).datamart_id}_${Resource.resource.get(Resource.token).user_id}/preview?page=1`)
       .then((response) => {
         // console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
@@ -251,14 +278,19 @@ var Resource = new Resources();
   app.sheetSelected = (e) => {
     // recupero le specifiche per questo report (resource)
     // successivamente recupero i dati del datamart
-    const token = e.currentTarget.dataset.token;
-    Resource.datamart_id = e.currentTarget.dataset.datamartId;
-    Resource.userId = e.currentTarget.dataset.userId;
-    debugger;
     Resource.token = e.currentTarget.dataset.token;
-    Resource.json = window.localStorage.getItem(`specs_${token}`);
-    app.getData(token);
-    Resource.resource = token;
+    // aggiungo un token per identificare, in publish(), il report (datamart_id)
+    Resource.ref.dataset.token = e.currentTarget.dataset.token;
+    // Resource.datamart_id = e.currentTarget.dataset.datamartId;
+    // Resource.userId = e.currentTarget.dataset.userId;
+    debugger;
+    // Resource.token = e.currentTarget.dataset.token;
+    Resource.json = window.localStorage.getItem(`specs_${e.currentTarget.dataset.token}`);
+    Resource.resource = {
+      datamart_id: e.currentTarget.dataset.datamartId,
+      userId: e.currentTarget.dataset.userId
+    };
+    app.getData(e.currentTarget.dataset.token);
     app.dlgChartSection.close();
     // aggiungo la class 'defined' nel div che contiene il grafico/tabella
     Resource.ref.classList.add('defined');

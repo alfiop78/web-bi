@@ -344,6 +344,8 @@ class Cube
     if (property_exists($this, 'json__info')) {
       $result = ["raw_sql" => nl2br($sql), "format_sql" => $this->json__info];
     } else {
+      // TODO: getSchemaBuilder() qui può essere eliminato, ho utilizzato hasTable() anche in altre funzioni e
+      // non c'è stato bisogno di utilizzarlo
       if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($this->baseTableName)) {
         // dd('la tabella già esiste, la elimino');
         $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.{$this->baseTableName};");

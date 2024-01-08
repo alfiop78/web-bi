@@ -103,9 +103,14 @@ class Resources extends Dashboards {
   /*
    * Viene creato un Object Map() con il token del report e il suo elemento nel DOM corrispondente
    * */
-  set resource(value) {
-    // value: il token del report che è stato aggiunto, in this.ref (nel DOM)
-    this.#resource.set(value, { token: this.token, ref: this.ref.id, datamart_id: this.datamart_id });
+  set resource(object) {
+    // object: contiene ref (il riferimento nel DOM), il datamart_id e lo user_id
+    this.#resource.set(this.token, {
+      token: this.token,
+      ref: this.ref.id,
+      datamart_id: object.datamart_id,
+      user_id: object.userId
+    });
   }
 
   get resource() {

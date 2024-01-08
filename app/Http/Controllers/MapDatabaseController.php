@@ -168,6 +168,16 @@ class MapDatabaseController extends Controller
     return response()->json($tables);
   }
 
+  public function copy_table($fromId, $toId)
+  {
+    // dd($fromId, $toId);
+    $sql = "SELECT COPY_TABLE ('decisyon_cache.WEB_BI_{$fromId}','decisyon_cache.WEB_BI_{$toId}');";
+    // NOTE: forse può essere utilizzato ->select invece di ->statement
+    $copy = DB::connection('vertica_odbc')->statement($sql);
+    return $copy;
+  }
+
+
   // preview del datamart, 100 righe
   public function preview($id)
   {
