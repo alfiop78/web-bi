@@ -200,7 +200,6 @@ class Resources extends Dashboards {
     this.json.data.columns = this.#specs_columns;
     this.json.data.group.key = this.#specs_group.key;
     this.json.data.group.columns = this.#specs_group.columns;
-    debugger;
     window.localStorage.setItem(`specs_${Sheet.sheet.token}`, JSON.stringify(this.json));
   }
 

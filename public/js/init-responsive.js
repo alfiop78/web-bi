@@ -64,7 +64,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     btnVersioning: document.getElementById('btn-versioning')
   }
 
-  const userId = 1;
+  const userId = 2;
 
   document.body.addEventListener('mousemove', (e) => {
     // console.log({ clientX: e.clientX, clientY: e.clientY, offsetX: e.offsetX, offsetY: e.offsetY, pageX: e.pageX, pageY: e.pageY, x: e.x, y: e.y });
@@ -1468,7 +1468,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const progressLabel = document.querySelector("label[for='progress-bar']");
     let partialData = [];
     App.loaderStart();
-    await fetch(`/fetch_api/${Sheet.sheet.id}_${Sheet.sheet.userId}/preview?page=1`)
+    await fetch(`/fetch_api/${Sheet.sheet.id}_${Sheet.userId}/preview?page=1`)
       .then((response) => {
         // console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
@@ -1564,7 +1564,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       const elementRef = filterRef.querySelector(`li[id='${token}']`);
       app.addFilters(target, elementRef, true);
     });
-    // Sheet.save();
     app.dialogSheet.close();
     // in fase di apertura della preview, le specifiche sono sicuramente già presenti.
     Resource = new Resources('preview-datamart');
@@ -1601,7 +1600,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       }
     } else {
       // il report è stato appena creato e faccio save()
-      Sheet.save();
+      Sheet.create();
     }
     // da questo momento in poi le modifiche (aggiunta/rimozione) di elementi allo Sheet
     // verranno contrassegnate come edit:true
@@ -1612,7 +1611,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`)
       :
       Resource.json.token = Sheet.sheet.token;
-    ;
     Resource.setSpecifications();
   }
 
@@ -1868,7 +1866,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.loadPreview = async () => {
     let partialData = [];
-    await fetch(`/fetch_api/${Sheet.sheet.id}_${Sheet.sheet.userId}/preview?page=1`)
+    await fetch(`/fetch_api/${Sheet.sheet.id}_${Sheet.userId}/preview?page=1`)
       .then((response) => {
         // console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
@@ -1917,12 +1915,32 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   }
 
   app.process = async (process) => {
-    // TODO: da rivedere, forse qui posso salvare il report e le specifiche senza richiamare saveSheet()
-    // ma creando un altra fn
-    // imposto await altrimenti viene prima creato il datamart e poi eliminato (in saveSheet())
-    await app.saveSheet();
+    Sheet.userId = userId;
+    debugger;
+    if (Sheet.edit === true) {
+      Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed]');
+      if (Sheet.changes.length !== 0) {
+        Sheet.update();
+        // elimino il datamart perchè è stato modificato
+        let exist = await Sheet.exist();
+        if (exist) {
+          let result = await Sheet.delete();
+          console.log('datamart eliminato : ', result);
+          if (result && Resource.tableRef) Resource.tableRef.clearChart();
+        }
+      }
+    } else {
+      Sheet.create();
+    }
+    (window.localStorage.getItem(`specs_${Sheet.sheet.token}`)) ?
+      Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`)
+      :
+      Resource.json.token = Sheet.sheet.token;
+    Resource.setSpecifications();
+
     process.id = Sheet.sheet.id;
-    process.datamartId = Sheet.sheet.userId;
+    process.datamartId = Sheet.userId;
+    debugger;
     // console.log(process);
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(process);

@@ -87,48 +87,7 @@ class Sheets {
     this.objectRemoved.set(token, object);
   }
 
-  // il tasto Aggiorna deve essere attivato solo quando ci sono delle modifiche fatte
-  // OPTIMIZE: il codice si ripete in update() e in save()
-  update() {
-    this.sheet.name = this.name;
-    this.sheet.fields = Object.fromEntries(this.fields);
-    this.sheet.from = Object.fromEntries(this.from);
-    this.sheet.joins = Object.fromEntries(this.joins);
-    this.sheet.workbook_ref = this.sheet.workbook_ref;
-    this.sheet.filters = [...this.filters];
-    // reset delle metriche
-    delete this.sheet.metrics;
-    delete this.sheet.advMetrics;
-    delete this.sheet.compositeMetrics;
-
-    for (const [token, metric] of this.metrics) {
-      switch (metric.type) {
-        case 'basic':
-          (!this.sheet.hasOwnProperty('metrics')) ? this.sheet.metrics = { [token]: metric } : this.sheet.metrics[token] = metric;
-          break;
-        case 'advanced':
-          (!this.sheet.hasOwnProperty('advMetrics')) ? this.sheet.advMetrics = { [token]: metric } : this.sheet.advMetrics[token] = metric;
-          break;
-        default:
-          // compositeMetrics
-          (!this.sheet.hasOwnProperty('compositeMetrics')) ? this.sheet.compositeMetrics = { [token]: metric } : this.sheet.compositeMetrics[token] = metric;
-          // this.sheet.compositeMetrics[token] = metric;
-          break;
-      }
-    }
-    this.sheet.userId = this.userId;
-    this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
-    console.info('sheet:', this.sheet);
-    debugger;
-    SheetStorage.save(this.sheet);
-  }
-
   save() {
-    // this.sheet.id = this.id;
-    this.sheet.id = Date.now();
-    debugger;
-    this.sheet.userId = this.userId;
-    this.sheet.name = this.name;
     this.sheet.fields = Object.fromEntries(this.fields);
     this.sheet.from = Object.fromEntries(this.from);
     this.sheet.joins = Object.fromEntries(this.joins);
@@ -158,8 +117,28 @@ class Sheets {
           break;
       }
     }
+
+  }
+
+  // il tasto Aggiorna deve essere attivato solo quando ci sono delle modifiche fatte
+  // OPTIMIZE: il codice si ripete in update() e in save()
+  update() {
+    this.sheet.name = this.name;
+    this.sheet.userId = this.userId;
+    this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+    this.save();
+    console.info('sheet:', this.sheet);
+    SheetStorage.save(this.sheet);
+  }
+
+  create() {
+    // this.sheet.id = this.id;
+    this.sheet.id = Date.now();
+    this.sheet.userId = this.userId;
+    this.sheet.name = this.name;
     this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.#options);
     this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+    this.save();
     console.info('sheet:', this.sheet);
     debugger;
     SheetStorage.save(this.sheet);
@@ -173,7 +152,7 @@ class Sheets {
     SheetStorage.sheet = this.sheet.token;
     this.name = SheetStorage.sheet.name;
     this.sheet.id = SheetStorage.sheet.id;
-    this.sheet.userId = SheetStorage.sheet.userId;
+    this.userId = SheetStorage.sheet.userId;
     this.sheet.created_at = SheetStorage.sheet.created_at;
     this.sheet.updated_at = SheetStorage.sheet.updated_at;
 
@@ -223,7 +202,7 @@ class Sheets {
   }
 
   async exist() {
-    return await fetch(`/fetch_api/${this.sheet.id}_${this.sheet.userId}/check_datamart`)
+    return await fetch(`/fetch_api/${this.sheet.id}_${this.userId}/check_datamart`)
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
@@ -236,7 +215,7 @@ class Sheets {
   }
 
   delete() {
-    return fetch(`/fetch_api/${this.sheet.id}_${this.sheet.userId}/delete_datamart`)
+    return fetch(`/fetch_api/${this.sheet.id}_${this.userId}/delete_datamart`)
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
