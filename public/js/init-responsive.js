@@ -1577,6 +1577,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     document.querySelectorAll('#btn-sql-preview, #btn-sheet-preview').forEach(button => button.disabled = false);
   }
 
+  app.publish = () => {
+    // TODO: utilizzare upsert per fare il save or update, sia del report che delle metriche/filtri
+    // TODO: recupero tutti gli oggetti da versionare (metriche, filtri)
+    // TODO: verifico se è da versionare anche il workbook
+  }
+
   app.saveSheet = async () => {
     // imposto il nome recuperandolo dallo #sheet-name
     const name = document.getElementById('sheet-name');

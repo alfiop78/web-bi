@@ -233,19 +233,19 @@ code {
 }
 
 #workbook-objects[data-section-active="1"] {
-  grid-template-rows: min-content 2fr min-content 4fr min-content 1fr min-content 1fr;
+  grid-template-rows: min-content 4fr min-content 2fr min-content 2fr;
 }
 
 #workbook-objects[data-section-active="2"] {
-  grid-template-rows: min-content 1fr min-content 4fr min-content 2fr min-content 1fr;
+  grid-template-rows: min-content 2fr min-content 4fr min-content 2fr;
 }
 
 #workbook-objects[data-section-active="3"] {
-  grid-template-rows: min-content 1fr min-content 1fr min-content 4fr min-content 2fr;
+  grid-template-rows: min-content 2fr min-content 2fr min-content 4fr;
 }
-#workbook-objects[data-section-active="4"] {
+/* #workbook-objects[data-section-active="4"] {
   grid-template-rows: min-content 1fr min-content 1fr min-content 2fr min-content 4fr;
-}
+} */
 
 #workbook-objects > *[data-worksheet-object] {
   background-color: white;

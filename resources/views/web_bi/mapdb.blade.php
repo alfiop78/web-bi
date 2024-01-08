@@ -680,6 +680,7 @@
                           <button type="button" id="btn-sheet-new" data-fn="newSheetDialog">Nuovo</button>
                           <button type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri</button>
                           <button type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
+                          <button id="btn-publish" class="btn-link important" data-fn="publish" value="Pubblica">Pubblica</button>
                         </section>
                         <section class="sheet-title">
                           <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Titolo">Titolo</div>
@@ -689,18 +690,10 @@
                         <div class="properties">
                           <section id="workbook-objects" data-section-active="2">
                             <p class="field-search">
-                              <input id="input-search-workbooks" data-element-search="workbooks" autocomplete="off" type="search" class="input-search workbooks" readonly placeholder="WorkBooks" />
-                              <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-workbooks">search</button>
-                            </p>
-                            <section data-worksheet-object data-section="1">
-                              <li data-workbook>workbook 1</li>
-                              <li data-workbook>workbook 2</li>
-                            </section>
-                            <p class="field-search">
                               <input id="input-search-fields" data-element-search="fields" autocomplete="off" type="search" class="input-search columns" readonly placeholder="Campi" />
                               <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-fields">search</button>
                             </p>
-                            <section data-worksheet-object class="custom-scrollbar" data-section="2">
+                            <section data-worksheet-object class="custom-scrollbar" data-section="1">
                               <ul id="nav-fields" class="custom-scrollbar" data-search-id="input-search-fields"></ul>
                               <button class="btn-link default" data-fn="btnColumnNew" type="button" value="Nuova Colonna" disabled>Nuova Colonna</button>
                             </section>
@@ -708,7 +701,7 @@
                               <input id="input-search-metrics" data-element-search="metrics" autocomplete="off" type="search" class="input-search metrics" readonly placeholder="Metriche" />
                               <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-metrics">search</button>
                             </p>
-                            <section data-worksheet-object class="custom-scrollbar" data-section="3">
+                            <section data-worksheet-object class="custom-scrollbar" data-section="2">
                               <ul id="ul-metrics" class="custom-scrollbar" data-search-id="input-search-metrics"></ul>
                               <button class="btn-link default" data-fn="btnCompositeMetric" type="button" value="Nuova Metrica">Nuova Metrica</button>
                             </section>
@@ -716,7 +709,7 @@
                               <input id="input-search-filters" data-element-search="filters" autocomplete="off" type="search" class="input-search filters" readonly placeholder="Filtri" />
                               <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-filters">search</button>
                             </p>
-                            <section data-worksheet-object class="custom-scrollbar" data-section="4">
+                            <section data-worksheet-object class="custom-scrollbar" data-section="3">
                               <ul id="ul-filters" class="custom-scrollbar" data-search-id="input-search-filters"></ul>
                               <button class="btn-link default" data-fn="openDialogFilter" type="button" value="Nuovo Filtro">Nuovo Filtro</button>
                             </section>
@@ -831,7 +824,6 @@
               <section class="actions">
                 <button id="prev">Workbook</button>
                 <div>
-
                   <button id="next">Sheet</button>
                   <button id="btn-sql-preview" class="btn-link important" data-fn="createProcess" value="SQL">SQL</button>
                   <button id="btn-sheet-preview" class="btn-link important" data-fn="createProcess" value="Elabora">Elabora</button>

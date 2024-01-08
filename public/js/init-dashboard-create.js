@@ -63,8 +63,15 @@ var Resource = new Resources();
   // Viene rimosso 'hidden' dal #body. In questo modo la modifica viene
   // intercettata dall'observer e vengono associate le funzioni sugli elementi
   // che hanno l'attributo data-fn
-  // TODO utilizzare questa logica anche sulle altre pagine
+  // TODO: utilizzare questa logica anche sulle altre pagine
   App.init();
+
+  app.publish = () => {
+    // TODO: il tasto "pubblica" deve :
+    // - recuperare, da bi_sheets, i datamart utili alla pagina
+    // - salvare le specifiche in bi_sheet_specifications
+    // - crearne i COPY_TABLE da WEB_BI_timestamp_userId -> WEB_BI_timestamp
+  }
 
   // onclick events
   app.save = async (e) => {
@@ -78,6 +85,7 @@ var Resource = new Resources();
       layout: Template.id,
       resources: Object.fromEntries(Resource.resource)
     };
+    debugger;
     console.log(json);
     const url = `/fetch_api/json/dashboard_store`;
     const params = JSON.stringify(json);
@@ -177,6 +185,7 @@ var Resource = new Resources();
       const span = li.querySelector('span');
       li.dataset.token = token;
       li.dataset.datamartId = sheet.id;
+      li.dataset.userId = sheet.userId;
       li.dataset.label = sheet.name;
       li.addEventListener('click', app.sheetSelected);
       li.dataset.elementSearch = 'sheets';
@@ -188,8 +197,7 @@ var Resource = new Resources();
 
   app.getData = async () => {
     let partialData = [];
-    debugger;
-    await fetch(`/fetch_api/${Resource.datamart_id}/preview?page=1`)
+    await fetch(`/fetch_api/${Resource.datamart_id}_${Resource.userId}/preview?page=1`)
       .then((response) => {
         // console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
@@ -214,7 +222,7 @@ var Resource = new Resources();
               recursivePaginate(paginate.next_page_url);
               console.log(partialData);
             } else {
-              // Non sono presenti altre pagine, visualizzo il dashboard
+              // Non sono presenti altre pagine, visualizzo la dashboard
               console.log('tutte le paginate completate :', partialData);
               Resource.data = partialData;
               google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
@@ -245,8 +253,9 @@ var Resource = new Resources();
     // successivamente recupero i dati del datamart
     const token = e.currentTarget.dataset.token;
     Resource.datamart_id = e.currentTarget.dataset.datamartId;
-    Resource.token = e.currentTarget.dataset.token;
+    Resource.userId = e.currentTarget.dataset.userId;
     debugger;
+    Resource.token = e.currentTarget.dataset.token;
     Resource.json = window.localStorage.getItem(`specs_${token}`);
     app.getData(token);
     Resource.resource = token;
