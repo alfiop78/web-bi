@@ -776,26 +776,25 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const code = field.querySelector('code');
     const btnRemove = field.querySelector('button[data-remove]');
     const btnUndo = field.querySelector('button[data-undo]');
+    // const workBookField = WorkBook.field.get(token).origin_field;
     field.dataset.type = 'column';
     field.dataset.label = Sheet.fields.get(token);
+    // field.dataset.name = workBookField;
     field.dataset.id = token;
     // if (!Sheet.edit) field.dataset.added = 'true';
     // In edit:true imposto il dataset.adding altrimenti dataset.added
     (!Sheet.edit) ? field.dataset.added = 'true' : field.dataset.adding = 'true';
     btnRemove.dataset.columnToken = token;
+    btnRemove.dataset.label = Sheet.fields.get(token);
     btnUndo.dataset.columnToken = token;
     // field.dataset.token = elementRef.id;
     code.dataset.token = token;
     code.innerHTML = Sheet.fields.get(token);
-    // aggiungo la colonna al report (Sheet)
-    // TODO: aggiungere a Sheet.fields solo le proprietà utili alla creazione della query
-    // Sheet.fields = { token: elementRef.id, value: WorkBook.field.get(elementRef.id) };
-    // passo, a Sheet.fields, la colonna creata in WorkBook
-    // Sheet.fields = WorkBook.field.get(elementRef.id);
+    // aggiungo a Sheet.fields solo le proprietà utili alla creazione della query
     // TODO: da aggiungere in fase di creazione del process
     Sheet.tables = WorkBook.field.get(token).tableAlias;
     target.appendChild(field);
-    // TODO impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
+    // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
     // i.addEventListener('click', app.handlerSetMetric);
     // app.setSheet();
   }
@@ -1504,6 +1503,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
               console.log('tutte le paginate completate :', partialData);
               Resource.data = partialData;
               google.charts.setOnLoadCallback(drawDatamart());
+              App.loaderStop();
             }
           }).catch((err) => {
             App.showConsole(err, 'error');
@@ -1538,7 +1538,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     Sheet = new Sheets(e.currentTarget.dataset.name, e.currentTarget.dataset.token, WorkBook.workBook.token);
     // reimposto tutte le proprietà della Classe
     Sheet.open();
-    debugger;
     const name = document.getElementById('sheet-name');
     name.innerText = Sheet.name;
     name.dataset.value = Sheet.name;
@@ -1611,12 +1610,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // da questo momento in poi le modifiche (aggiunta/rimozione) di elementi allo Sheet
     // verranno contrassegnate come edit:true
     Sheet.edit = true;
-    // qui, le specifiche, le devo ricreare perchè sto elaborando o rielaborando il report
-    // e le specifiche potrebbero essere cambiate
-    // (window.localStorage.getItem(`specs_${Sheet.sheet.token}`)) ?
-    //   Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`)
-    //   :
-    //   Resource.json.token = Sheet.sheet.token;
+    // ricreo sempre le specifiche
     Resource.json.token = Sheet.sheet.token;
     Resource.setSpecifications();
   }
@@ -1664,6 +1658,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       (field.dataset.added) ? field.remove() : Sheet.removeObject(field, token, Sheet.fields.get(token));
     }
     Sheet.fields.delete(token);
+    const index = Resource.json.filters.findIndex(filter => filter.id === e.currentTarget.dataset.label);
+    // se il filtro è presente in Resource.json.filters, lo elimino
+    if (index !== -1) Resource.json.filters.splice(index, 1);
   }
 
   app.undoDefinedColumn = (e) => {
@@ -1939,10 +1936,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     } else {
       Sheet.create();
     }
-    // (window.localStorage.getItem(`specs_${Sheet.sheet.token}`)) ?
-    //   Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`)
-    //   :
-    //   Resource.json.token = Sheet.sheet.token;
     Resource.json.token = Sheet.sheet.token;
     Resource.setSpecifications();
 

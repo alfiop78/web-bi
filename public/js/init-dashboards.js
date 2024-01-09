@@ -72,19 +72,26 @@ var Resource = new Resources();
     // -> "modello_ds" infleunza "settore_ds" e tutti (l'array Resource.controlsWrapper) influenzano la table
     // per ogni bind, nel template....
     let binds;
-    // Questa logica funziona con il bind() di un filtro verso quello successivo ma
+    // NOTE: Questa logica funziona con il bind() di un filtro verso quello successivo ma
     // possono esserci anche situazioni diverse, che sono da implementare
-    Resource.json.bind.forEach((v, index) => {
-      // console.log('index', index);
-      if (index === 0) {
-        // il primo bind deve essere creato dall'istanza gdashboard, i successivi posso legarli ad una variabile
-        binds = gdashboard.bind(controls[v[0]], controls[v[1]]);
-      } else {
-        binds.bind(controls[v[0]], controls[v[1]]);
-      }
-    });
-    // Tutti i controlli influenzano la table
-    binds.bind(controls, wrap);
+
+    // Se presente un solo filtro effettuo il bind tra l'unico controller e il wrap
+    // altrimenti dovrò creare una struttura di bind(), commentata in
+    if (Resource.json.filters.length === 1) {
+      gdashboard.bind(controls, wrap);
+    } else {
+      Resource.json.bind.forEach((v, index) => {
+        // console.log('index', index);
+        if (index === 0) {
+          // il primo bind deve essere creato dall'istanza gdashboard, i successivi posso legarli ad una variabile
+          binds = gdashboard.bind(controls[v[0]], controls[v[1]]);
+        } else {
+          binds.bind(controls[v[0]], controls[v[1]]);
+        }
+      });
+      console.log(controls);
+      binds.bind(controls, wrap);
+    }
     // gdashboard.bind(controls, wrap);
     gdashboard.draw(Resource.dataTable);
     // gdashboard.draw(view); // utilizzo della DataView
@@ -264,6 +271,7 @@ var Resource = new Resources();
         .then((response) => response.json())
         .then((data) => {
           Resource.json = data.json_value;
+          debugger;
           // imposto il riferimento nel DOM, del layout, per questa risorsa/report
           Resource.ref = value.ref;
           app.getData();

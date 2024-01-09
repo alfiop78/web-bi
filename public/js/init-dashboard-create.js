@@ -303,8 +303,9 @@ var Resource = new Resources();
     const containerDiv = tmplFilterContent.querySelector('.filter-container.dropzone');
     const filterDiv = containerDiv.querySelector('.preview-filter');
     const btnRemove = containerDiv.querySelector('button');
-    // debugger;
     filterDiv.id = filter.containerId;
+    debugger;
+    filterDiv.name = filter.id;
     // TODO: potrei impostarle con data-fn in MutationObserver
     filterDiv.addEventListener('dragstart', app.filterDragStart);
     containerDiv.addEventListener('dragover', app.filterDragOver);
@@ -313,6 +314,7 @@ var Resource = new Resources();
     containerDiv.addEventListener('drop', app.filterDrop);
     containerDiv.addEventListener('dragend', app.filterDragEnd);
     btnRemove.dataset.id = filter.containerId;
+    btnRemove.dataset.name = filter.id;
     btnRemove.dataset.label = filter.filterColumnLabel;
     filterDiv.innerText = filter.caption;
     filterRef.appendChild(containerDiv);
@@ -348,16 +350,20 @@ var Resource = new Resources();
 
   app.setDashboardBind = () => {
     let bind = [];
-    document.querySelectorAll('#filter_div .filter-container').forEach((container, index) => {
-      let subBind = [];
-      subBind.push(index);
-      const nextFilter = container.nextElementSibling;
-      if (nextFilter) {
-        subBind.push(index + 1);
-        bind.push(subBind);
-      }
-    });
-    Resource.json.bind = bind;
+    console.log(Resource.json.filters);
+    debugger;
+    Resource.sheetBind();
+    // document.querySelectorAll('#filter_div .filter-container').forEach((container, index) => {
+    //   let subBind = [];
+    //   subBind.push(index);
+    //   const nextFilter = container.nextElementSibling;
+    //   if (nextFilter) {
+    //     subBind.push(index + 1);
+    //     bind.push(subBind);
+    //   }
+    // });
+    // Resource.json.bind = bind;
+    debugger;
     app.specsSave();
   }
 
@@ -449,6 +455,7 @@ var Resource = new Resources();
     parentDiv.querySelectorAll('.filter-container').forEach(filter => {
       const filterDiv = filter.querySelector('.preview-filter');
       Resource.json.filters.push({
+        // id: filter.
         containerId: filterDiv.id,
         filterColumnLabel: filterDiv.innerText,
         caption: filterDiv.innerText

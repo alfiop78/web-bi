@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Classes\Cube;
 use Exception;
+use Illuminate\Support\Facades\Schema;
 
 class MapDatabaseController extends Controller
 {
@@ -171,6 +172,12 @@ class MapDatabaseController extends Controller
   public function copy_table($fromId, $toId)
   {
     // dd($fromId, $toId);
+    // TODO: se la tabella di destinazione già esiste la elimino
+    if (Schema::connection('vertica_odbc')->hasTable("WEB_BI_{$toId}")) {
+      // tabella esiste
+      // echo ("tabella $toId esiste");
+      Schema::connection('vertica_odbc')->drop("decisyon_cache.WEB_BI_{$toId}");
+    }
     $sql = "SELECT COPY_TABLE ('decisyon_cache.WEB_BI_{$fromId}','decisyon_cache.WEB_BI_{$toId}');";
     // NOTE: forse può essere utilizzato ->select invece di ->statement
     $copy = DB::connection('vertica_odbc')->statement($sql);

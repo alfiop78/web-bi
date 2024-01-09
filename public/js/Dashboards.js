@@ -160,8 +160,8 @@ class Resources extends Dashboards {
         }
       });
     }
-    console.log(this.#specs_columns);
-    console.log(this.#specs_group.key);
+    // console.log(this.#specs_columns);
+    // console.log(this.#specs_group.key);
 
     for (const [token, metric] of Sheet.metrics) {
       if (this.json.data.columns[metric.alias]) {
@@ -205,7 +205,45 @@ class Resources extends Dashboards {
     this.json.data.columns = this.#specs_columns;
     this.json.data.group.key = this.#specs_group.key;
     this.json.data.group.columns = this.#specs_group.columns;
+    this.sheetBind();
+    debugger;
     window.localStorage.setItem(`specs_${Sheet.sheet.token}`, JSON.stringify(this.json));
+  }
+
+  sheetBind() {
+    let bind = [];
+    const iterator = this.json.filters.entries();
+    this.json.filters.forEach(() => {
+      let subBind = [];
+      const el = iterator.next();
+      // done = true NON sono presenti altri filtri
+      if (el.done === false) {
+        subBind.push(el.value[0]);
+        let nextElement = iterator.next();
+        // console.log(nextElement);
+        if (!nextElement.done) subBind.push(nextElement.value[0]);
+        bind.push(subBind);
+      }
+    });
+    console.info('bind : ', bind);
+    debugger;
+    this.json.bind = bind;
+  }
+
+  dashboardBind() {
+    let bind = [];
+    document.querySelectorAll('#filter_div .filter-container').forEach((container, index) => {
+      let subBind = [];
+      subBind.push(index);
+      const nextFilter = container.nextElementSibling;
+      if (nextFilter) {
+        subBind.push(index + 1);
+        bind.push(subBind);
+      }
+    });
+    console.log(bind);
+    debugger;
+    this.json.bind = bind;
   }
 
   prepareData() {

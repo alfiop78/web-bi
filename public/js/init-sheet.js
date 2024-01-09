@@ -389,14 +389,14 @@ saveColumnConfig.onclick = () => {
   // console.log('DataGroup:', Resource.dataGroup);
 
   // filtri definiti per il report
-  // TODO: da testare
   if (filterColumn.checked === true) {
     // Proprietà Resource.json.filters
     // Inserisco il filtro solo se non è ancora presente in Resource.json.filters
-    const index = Resource.json.filters.findIndex(filter => filter.containerId === `flt-${label}`);
+    const index = Resource.json.filters.findIndex(filter => filter.id === Resource.dataGroup.getColumnId(dataGroupIndex));
     if (index === -1) {
       // non è presente, lo aggiungo
       Resource.json.filters.push({
+        id: Resource.dataGroup.getColumnId(dataGroupIndex),
         containerId: `flt-${label}`,
         filterColumnLabel: label,
         caption: label
@@ -404,15 +404,11 @@ saveColumnConfig.onclick = () => {
     }
   } else {
     // rimozione del filtro, se presente
-    const index = Resource.json.filters.findIndex(filter => filter.containerId === `flt-${label}`);
-    if (index !== -1) {
-      Resource.json.filters.splice(index, 1);
-      // lo rimuovo anche dal DOM
-      // const filterRef = document.getElementById(`flt-${label}`);
-      // filterRef.parentElement.remove();
-      // app.setDashboardBind();
-    }
+    const index = Resource.json.filters.findIndex(filter => filter.id === Resource.dataGroup.getColumnId(dataGroupIndex));
+    if (index !== -1) Resource.json.filters.splice(index, 1);
   }
+  // definisco il bind in base ai filtri impostati
+  Resource.sheetBind();
 
   // TODO: Il containerId deve essere deciso in init-dashboard-create.js
   Resource.json.wrapper.containerId = 'chart_div';
@@ -420,9 +416,12 @@ saveColumnConfig.onclick = () => {
   // window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
   // window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
   window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
+  // le metriche calcolate restituisce -1 per getTableColumnIndex, quindi devo ridisegnare il report
+  // richiamando previewReady() altrimenti il metodo draw() di GoogleChart aggiorna la visualizzazione correttamente
   (Resource.dataTableIndex === -1) ?
     previewReady() : Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
   dlgConfig.close();
+  // TODO: lo Sheet bisogna contrassegnarlo come "modificato"
 }
 
 function columnHander(e) {
