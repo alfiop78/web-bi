@@ -64,7 +64,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     btnVersioning: document.getElementById('btn-versioning')
   }
 
-  const userId = 2;
+  const userId = 1;
 
   document.body.addEventListener('mousemove', (e) => {
     // console.log({ clientX: e.clientX, clientY: e.clientY, offsetX: e.offsetX, offsetY: e.offsetY, pageX: e.pageX, pageY: e.pageY, x: e.x, y: e.y });

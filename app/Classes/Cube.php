@@ -3,6 +3,7 @@
 namespace App\Classes;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Exception;
 
 class Cube
@@ -344,9 +345,20 @@ class Cube
     if (property_exists($this, 'json__info')) {
       $result = ["raw_sql" => nl2br($sql), "format_sql" => $this->json__info];
     } else {
-      // TODO: getSchemaBuilder() qui può essere eliminato, ho utilizzato hasTable() anche in altre funzioni e
-      // non c'è stato bisogno di utilizzarlo
-      if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($this->baseTableName)) {
+      // elimino la tabella temporanea, se esiste, prima di ricrearla
+      // La elimino anche in caso di errore nella creazione della tabella temporanea (WEB_BI_BASE_TABLE....)
+      $this->dropTemporaryTables($this->baseTableName);
+      try {
+        $result = DB::connection('vertica_odbc')->statement($sql);
+      } catch (Exception $e) {
+        // dd("ERrore gestito: {$e}");
+        $this->dropTemporaryTables($this->baseTableName);
+        // throw new Exception("Errore elaborazione richiesta", $e->getCode());
+        throw new Exception("Errore elaborazione richiesta", $e->getMessage());
+      }
+
+      /* gestione precedente, senza dropIfExists()
+       * if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($this->baseTableName)) {
         // dd('la tabella già esiste, la elimino');
         $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.{$this->baseTableName};");
         if (!$drop) {
@@ -357,7 +369,7 @@ class Cube
         // Tabella non esistente
         // dd('la tabella non esiste');
         $result = DB::connection('vertica_odbc')->statement($sql);
-      }
+      } */
     }
     // dd($sql);
     return $result;
@@ -447,8 +459,19 @@ class Cube
     if (property_exists($this, 'json__info')) {
       $result = ["raw_sql" => nl2br($sql), "format_sql" => $this->json_info_advanced];
     } else {
-      // try {
-      if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
+      // elimino la tabella temporanea, se esiste, prima di ricrearla
+      // La elimino anche in caso di errore nella creazione della tabella temporanea
+      $this->dropTemporaryTables($tableName);
+      try {
+        $result = DB::connection('vertica_odbc')->statement($sql);
+      } catch (Exception $e) {
+        // dd("Errore gestito: {$e}");
+        $this->dropTemporaryTables($tableName);
+        throw new Exception("Errore elaborazione richiesta", $e->getCode());
+      }
+
+      /* versione precedente, senza dropIfExists
+       * if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
         // dd('la tabella già esiste, la elimino');
         $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
         if (!$drop) {
@@ -458,7 +481,7 @@ class Cube
       } else {
         // dd('la tabella non esiste');
         $result = DB::connection('vertica_odbc')->statement($sql);
-      }
+      } */
       // } catch (Exception $e) {
       // dd('ERrore gestito');
       // $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTableName;");
@@ -467,6 +490,14 @@ class Cube
     }
     // dd($sql);
     return $result;
+  }
+
+  private function dropTemporaryTables($table)
+  {
+    if (Schema::connection('vertica_odbc')->hasTable($table)) {
+      // tabella esiste
+      Schema::connection('vertica_odbc')->drop("decisyon_cache.$table");
+    }
   }
 
   public function createDatamart()
@@ -489,6 +520,7 @@ class Cube
       // sono presenti metriche filtrate
       $comment = "/*Creazione DATAMART :\ndecisyon_cache.{$this->datamartName}\n*/\n";
       $sql = "{$comment}CREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS ";
+      dd($sql);
       $sql .= "\n(SELECT{$this->_fieldsSQL}";
       $leftJoin = null;
 
@@ -549,46 +581,90 @@ class Cube
       $s .= "\nGROUP BY $this->_fieldsSQL";
       $sql = "/*Creazione DATAMART finale :\n{$this->datamartName}\n*/\nCREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS\n($s);";
     }
-    /* vecchio metodo, prima di MyVerticaGrammar.php
-      $FX = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE TABLE_NAME='FX_$this->reportId' AND SCHEMA_NAME='decisyon_cache';");
-      // dd($FX);
-      if ($FX) DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.FX_$this->reportId;");
-    */
+
     if (property_exists($this, 'json__info') || property_exists($this, 'json__info')) {
       return nl2br($sql);
     } else {
-      if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($this->datamartName)) {
-        // dd('la tabella già esiste, la elimino');
-        $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.{$this->datamartName};");
-        if (!$drop) {
-          // null : tabella eliminata, ricreo di nuovo il datamart
-          $result = DB::connection('vertica_odbc')->statement($sql);
-        } else {
-          $result = "Errore : tabella non eliminata";
+      // se il datamart già esiste lo elimino prima di ricrearlo
+      $this->dropTemporaryTables($this->datamartName);
+      try {
+        DB::connection('vertica_odbc')->statement($sql);
+        // elimino la temp table decisyon_cache.$this->baseTableName
+        $this->dropTemporaryTables($this->baseTableName);
+
+        if (count($this->_metrics_advanced_datamart) !== 0) {
+          foreach ($this->_metrics_advanced_datamart as $tableName => $aliasM) {
+            $this->dropTemporaryTables($tableName);
+          }
         }
-      } else {
-        // dd('Datamart non presente, lo creo');
-        $result = DB::connection('vertica_odbc')->statement($sql);
+        return $this->reportId;
+      } catch (Exception $e) {
+        // dd("ERrore gestito: {$e}");
+        $this->dropTemporaryTables($this->datamartName);
+        if (count($this->_metrics_advanced_datamart) !== 0) {
+          foreach ($this->_metrics_advanced_datamart as $tableName => $aliasM) {
+            $this->dropTemporaryTables($tableName);
+          }
+        }
+        throw new Exception("Errore elaborazione richiesta", $e->getCode());
       }
       // TODO: Intercettare l'errore in caso di tabella non creata, in caso di errore bisogna eliminare
       // le temp table relative a $this->reportId
+      // if (!$result) {
+      //   // elimino anche le tabelle temporanee delle metriche filtrate
+      //   if (count($this->_metrics_advanced_datamart) !== 0) {
+      //     foreach ($this->_metrics_advanced_datamart as $tableName => $aliasM) {
+      //       //dd($tableName);
+      //       $dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
+      //     }
+      //   }
+      //   // dd($this->_metricTable);
+      //   // ritorno il nome della FX in modo da poter mostrare un anteprima dei dati
+      //   // dd($sql);
+      //   // return $this->datamartName;
+      //   return $this->reportId;
+      // }
 
-      if (!$result) {
-        // TODO: aggiungere un controllo sulla drop delle tabelle temporanee
-        $dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTableName;");
-        // elimino anche le tabelle temporanee delle metriche filtrate
-        if (count($this->_metrics_advanced_datamart) !== 0) {
-          foreach ($this->_metrics_advanced_datamart as $tableName => $aliasM) {
-            //dd($tableName);
-            $dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
-          }
-        }
-        // dd($this->_metricTable);
-        // ritorno il nome della FX in modo da poter mostrare un anteprima dei dati
-        // dd($sql);
-        // return $this->datamartName;
-        return $this->reportId;
-      }
+      /* gestione precedente senza l'utilizzo di dropIfExists()
+
+      // if (Schema::connection('vertica_odbc')->hasTable($this->datamartName)) {
+      //   // if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($this->datamartName)) {
+      //   // dd('la tabella già esiste, la elimino');
+      //   // echo "Elimino la tabella : {$this->datamartName}";
+      //   // dd($drop);
+      //   // $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.{$this->datamartName};");
+      //   // $drop = null -> tabella eliminata correttamente
+      //   $result = (!$drop) ? DB::connection('vertica_odbc')->statement($sql) : "Errore nella cancellazione della tabella";
+      //   // if (!$drop) {
+      //   //   // null : tabella eliminata, ricreo di nuovo il datamart
+      //   //   $result = DB::connection('vertica_odbc')->statement($sql);
+      //   // } else {
+      //   //   $result = "Errore : tabella non eliminata";
+      //   // }
+      // } else {
+      //   // dd('Datamart non presente, lo creo');
+      //   $result = DB::connection('vertica_odbc')->statement($sql);
+      // }
+      // TODO: Intercettare l'errore in caso di tabella non creata, in caso di errore bisogna eliminare
+      // le temp table relative a $this->reportId
+
+      // if (!$result) {
+      //   // TODO: aggiungere un controllo sulla drop delle tabelle temporanee
+      //   $dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTableName;");
+      //   // elimino anche le tabelle temporanee delle metriche filtrate
+      //   if (count($this->_metrics_advanced_datamart) !== 0) {
+      //     foreach ($this->_metrics_advanced_datamart as $tableName => $aliasM) {
+      //       //dd($tableName);
+      //       $dropTemp = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
+      //     }
+      //   }
+      //   // dd($this->_metricTable);
+      //   // ritorno il nome della FX in modo da poter mostrare un anteprima dei dati
+      //   // dd($sql);
+      //   // return $this->datamartName;
+      //   return $this->reportId;
+      // }
+      // */
     }
   }
 } // End Class

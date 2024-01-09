@@ -676,11 +676,10 @@
                     <section class="wrapper-content">
                       <menu class="standard">
                         <section class="buttons-menu">
-                          <button type="button" disabled>Aggiungi WorkBook (analisi multifatti)</button>
                           <button type="button" id="btn-sheet-new" data-fn="newSheetDialog">Nuovo</button>
                           <button type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri</button>
                           <button type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
-                          <button id="btn-publish" class="btn-link important" data-fn="publish" value="Pubblica">Pubblica</button>
+                          <!-- <button id="btn-publish" class="btn-link important" data-fn="publish" value="Pubblica">Pubblica</button> -->
                         </section>
                         <section class="sheet-title">
                           <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Titolo">Titolo</div>
