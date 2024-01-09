@@ -64,7 +64,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     btnVersioning: document.getElementById('btn-versioning')
   }
 
-  const userId = 1;
+  const userId = 2;
 
   document.body.addEventListener('mousemove', (e) => {
     // console.log({ clientX: e.clientX, clientY: e.clientY, offsetX: e.offsetX, offsetY: e.offsetY, pageX: e.pageX, pageY: e.pageY, x: e.x, y: e.y });
@@ -1613,10 +1613,11 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     Sheet.edit = true;
     // qui, le specifiche, le devo ricreare perchè sto elaborando o rielaborando il report
     // e le specifiche potrebbero essere cambiate
-    (window.localStorage.getItem(`specs_${Sheet.sheet.token}`)) ?
-      Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`)
-      :
-      Resource.json.token = Sheet.sheet.token;
+    // (window.localStorage.getItem(`specs_${Sheet.sheet.token}`)) ?
+    //   Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`)
+    //   :
+    //   Resource.json.token = Sheet.sheet.token;
+    Resource.json.token = Sheet.sheet.token;
     Resource.setSpecifications();
   }
 
@@ -1938,10 +1939,11 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     } else {
       Sheet.create();
     }
-    (window.localStorage.getItem(`specs_${Sheet.sheet.token}`)) ?
-      Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`)
-      :
-      Resource.json.token = Sheet.sheet.token;
+    // (window.localStorage.getItem(`specs_${Sheet.sheet.token}`)) ?
+    //   Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`)
+    //   :
+    //   Resource.json.token = Sheet.sheet.token;
+    Resource.json.token = Sheet.sheet.token;
     Resource.setSpecifications();
 
     process.id = Sheet.sheet.id;
