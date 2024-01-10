@@ -212,19 +212,22 @@ class Resources extends Dashboards {
 
   sheetBind() {
     let bind = [];
-    const iterator = this.json.filters.entries();
-    this.json.filters.forEach(() => {
-      let subBind = [];
-      const el = iterator.next();
-      // done = true NON sono presenti altri filtri
-      if (el.done === false) {
-        subBind.push(el.value[0]);
-        let nextElement = iterator.next();
-        // console.log(nextElement);
-        if (!nextElement.done) subBind.push(nextElement.value[0]);
-        bind.push(subBind);
+    if (this.json.filters.length === 1) {
+      bind = [0];
+    } else {
+      const iter = this.json.filters.entries();
+      let result = iter.next();
+      while (!result.done) {
+        let subBind = [];
+        // console.log(result.value[0]); // 1 3 5 7 9
+        subBind.push(result.value[0]);
+        result = iter.next();
+        if (!result.done) {
+          subBind.push(result.value[0]);
+          bind.push(subBind);
+        }
       }
-    });
+    }
     console.info('bind : ', bind);
     debugger;
     this.json.bind = bind;

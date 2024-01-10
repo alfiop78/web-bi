@@ -409,6 +409,7 @@ saveColumnConfig.onclick = () => {
   }
   // definisco il bind in base ai filtri impostati
   Resource.sheetBind();
+  debugger;
 
   // TODO: Il containerId deve essere deciso in init-dashboard-create.js
   Resource.json.wrapper.containerId = 'chart_div';
