@@ -351,6 +351,7 @@ saveColumnConfig.onclick = () => {
   Resource.dataGroup.setColumnLabel(dataGroupIndex, label);
   // Resource.dataGroup.setColumnLabel(Resource.colIndex, label);
   debugger;
+  // TODO: ipostazione del numero dei decimali
   switch (format) {
     case 'default':
       // numero senza decimali e con separatore migliaia
@@ -408,7 +409,7 @@ saveColumnConfig.onclick = () => {
     if (index !== -1) Resource.json.filters.splice(index, 1);
   }
   // definisco il bind in base ai filtri impostati
-  Resource.sheetBind();
+  Resource.bind();
   debugger;
 
   // TODO: Il containerId deve essere deciso in init-dashboard-create.js

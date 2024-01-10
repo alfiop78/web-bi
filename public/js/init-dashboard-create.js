@@ -67,10 +67,11 @@ var Resource = new Resources();
   App.init();
 
   app.publish = async () => {
-    // TODO: il tasto "pubblica" deve :
+    // il tasto "pubblica" deve :
     // - recuperare tutti gli oggetti della pagina (report)
     console.log(Resource.resource);
     let urls = [];
+    // TODO: token qui non viene utilizzato, provare ad utilizzare Resource.resource.values()
     for (const [token, dashboard] of Resource.resource) {
       urls.push(`/fetch_api/copy_from/${dashboard.datamart_id}_${dashboard.user_id}/copy_to/${dashboard.datamart_id}/copy_table`);
     }
@@ -113,6 +114,8 @@ var Resource = new Resources();
     };
     debugger;
     console.log(json);
+    // ISSUE: salvare anche le specifiche sul DB oppure salvarle quando si pubblica la dashboard?
+    Resource.saveSpecifications();
     const url = `/fetch_api/json/dashboard_store`;
     const params = JSON.stringify(json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
@@ -128,11 +131,6 @@ var Resource = new Resources();
         debugger;
       })
       .catch((err) => console.error(err));
-  }
-
-  // TODO: potrei spostarla in Dashboards.js
-  app.specsSave = () => {
-    window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
   }
 
   app.preview = (e) => {
@@ -224,6 +222,7 @@ var Resource = new Resources();
 
   app.getData = async () => {
     let partialData = [];
+    // TODO: aggiungere la progressBar anche qui
     await fetch(`/fetch_api/${Resource.resource.get(Resource.token).datamart_id}_${Resource.resource.get(Resource.token).user_id}/preview?page=1`)
       .then((response) => {
         // console.log(response);
@@ -281,10 +280,6 @@ var Resource = new Resources();
     Resource.token = e.currentTarget.dataset.token;
     // aggiungo un token per identificare, in publish(), il report (datamart_id)
     Resource.ref.dataset.token = e.currentTarget.dataset.token;
-    // Resource.datamart_id = e.currentTarget.dataset.datamartId;
-    // Resource.userId = e.currentTarget.dataset.userId;
-    debugger;
-    // Resource.token = e.currentTarget.dataset.token;
     Resource.json = window.localStorage.getItem(`specs_${e.currentTarget.dataset.token}`);
     Resource.resource = {
       datamart_id: e.currentTarget.dataset.datamartId,
@@ -304,8 +299,7 @@ var Resource = new Resources();
     const filterDiv = containerDiv.querySelector('.preview-filter');
     const btnRemove = containerDiv.querySelector('button');
     filterDiv.id = filter.containerId;
-    debugger;
-    filterDiv.name = filter.id;
+    filterDiv.dataset.name = filter.id;
     // TODO: potrei impostarle con data-fn in MutationObserver
     filterDiv.addEventListener('dragstart', app.filterDragStart);
     containerDiv.addEventListener('dragover', app.filterDragOver);
@@ -314,7 +308,6 @@ var Resource = new Resources();
     containerDiv.addEventListener('drop', app.filterDrop);
     containerDiv.addEventListener('dragend', app.filterDragEnd);
     btnRemove.dataset.id = filter.containerId;
-    btnRemove.dataset.name = filter.id;
     btnRemove.dataset.label = filter.filterColumnLabel;
     filterDiv.innerText = filter.caption;
     filterRef.appendChild(containerDiv);
@@ -323,9 +316,6 @@ var Resource = new Resources();
   app.drawTable = () => {
     // aggiungo i filtri se sono stati impostati nel preview sheet
     Resource.json.filters.forEach(filter => app.createTemplateFilter(filter));
-    // impostazione del legame tra i filtri (bind)
-    // WARN: probabilmente qui, se non ci sono filtri, può verificarsi un errore
-    app.setDashboardBind();
 
     Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
     // Resource.DOMref = new google.visualization.Table(document.getElementById('chart_div'));
@@ -345,26 +335,6 @@ var Resource = new Resources();
     Resource.createDataView();
     // console.info('DataView', Resource.dataViewGrouped);
     Resource.DOMref.draw(Resource.dataViewGrouped, Resource.json.wrapper.options);
-    // Resource.DOMref.draw(Resource.dataViewGrouped, options);
-  }
-
-  app.setDashboardBind = () => {
-    let bind = [];
-    console.log(Resource.json.filters);
-    debugger;
-    Resource.sheetBind();
-    // document.querySelectorAll('#filter_div .filter-container').forEach((container, index) => {
-    //   let subBind = [];
-    //   subBind.push(index);
-    //   const nextFilter = container.nextElementSibling;
-    //   if (nextFilter) {
-    //     subBind.push(index + 1);
-    //     bind.push(subBind);
-    //   }
-    // });
-    // Resource.json.bind = bind;
-    debugger;
-    app.specsSave();
   }
 
   app.btnRemoveFilter = (e) => {
@@ -376,8 +346,8 @@ var Resource = new Resources();
     // lo rimuovo anche dal DOM
     const filterRef = document.getElementById(filterId);
     filterRef.parentElement.remove();
-    app.setDashboardBind();
-    app.specsSave();
+    // ricostruisco il bind
+    Resource.bind()
   }
 
   // end onclick events
@@ -434,11 +404,11 @@ var Resource = new Resources();
 
   app.filterDrop = (e) => {
     e.preventDefault();
+    // TODO: implementare anche il drop inverso.
+    // Al momento il drop funziona soltanto se sposto un filtro "verso sinistra"
     e.currentTarget.classList.replace('dropping', 'dropped');
     // target corrisponde all'elemento .preview-filter, mentre currentTarget corrisponde al
     // contenitore del filtro
-    // console.log(e.target);
-    // console.log(e.currentTarget);
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const parentDiv = document.getElementById('filter_div');
     // id filtro che sto draggando (flt-0, flt-1, ecc...)
@@ -455,15 +425,13 @@ var Resource = new Resources();
     parentDiv.querySelectorAll('.filter-container').forEach(filter => {
       const filterDiv = filter.querySelector('.preview-filter');
       Resource.json.filters.push({
-        // id: filter.
+        id: filterDiv.dataset.name,
         containerId: filterDiv.id,
         filterColumnLabel: filterDiv.innerText,
         caption: filterDiv.innerText
       });
     });
-    console.log(Resource.json);
-    // debugger;
-    app.specsSave();
+    console.log('filters dopo il drop : ', Resource.json.filters);
   }
 
   // End Drag events

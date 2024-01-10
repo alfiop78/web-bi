@@ -210,8 +210,9 @@ class Resources extends Dashboards {
     window.localStorage.setItem(`specs_${Sheet.sheet.token}`, JSON.stringify(this.json));
   }
 
-  sheetBind() {
+  bind() {
     let bind = [];
+    // se il filtro impostato è uno solo salvo il bind con un solo elemento nell'array
     if (this.json.filters.length === 1) {
       bind = [0];
     } else {
@@ -233,20 +234,9 @@ class Resources extends Dashboards {
     this.json.bind = bind;
   }
 
-  dashboardBind() {
-    let bind = [];
-    document.querySelectorAll('#filter_div .filter-container').forEach((container, index) => {
-      let subBind = [];
-      subBind.push(index);
-      const nextFilter = container.nextElementSibling;
-      if (nextFilter) {
-        subBind.push(index + 1);
-        bind.push(subBind);
-      }
-    });
-    console.log(bind);
+  specificationsSave() {
     debugger;
-    this.json.bind = bind;
+    window.localStorage.setItem(`specs_${this.json.token}`, JSON.stringify(this.json));
   }
 
   prepareData() {
