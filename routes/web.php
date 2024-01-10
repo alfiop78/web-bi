@@ -303,6 +303,8 @@ Route::get('/fetch_api/{id}/delete_datamart', function ($id) {
 
 // Metodo POST commentato, possibile utilizzo futuro, vedere commenti in MapDatabaseController
 Route::post('/fetch_api/datamartpost', [MapDatabaseController::class, 'datamartPost'])->name('web_bi.fetch_api.datamartPost');
+// upsert
+Route::post('fetch_api/json/sheet_specs_upsert', [BIsheetSpecsController::class, 'upsert']);
 
 // store json
 Route::prefix('/fetch_api/json/')->group(function () {

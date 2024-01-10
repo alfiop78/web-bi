@@ -66,21 +66,16 @@ var Resource = new Resources();
   // TODO: utilizzare questa logica anche sulle altre pagine
   App.init();
 
-  app.publish = async () => {
-    // il tasto "pubblica" deve :
-    // - recuperare tutti gli oggetti della pagina (report)
-    console.log(Resource.resource);
-    let urls = [];
-    // TODO: token qui non viene utilizzato, provare ad utilizzare Resource.resource.values()
-    for (const [token, dashboard] of Resource.resource) {
-      urls.push(`/fetch_api/copy_from/${dashboard.datamart_id}_${dashboard.user_id}/copy_to/${dashboard.datamart_id}/copy_table`);
+  app.saveSpecifications = async () => {
+    let url, params, req = [];
+    for (const token of Resource.resource.keys()) {
+      url = `/fetch_api/json/sheet_specs_upsert`;
+      params = window.localStorage.getItem(`specs_${token}`);
+      const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+      req.push(new Request(url, init));
     }
-    console.log(urls);
 
-    // - crearne i COPY_TABLE da WEB_BI_timestamp_userId -> WEB_BI_timestamp
-    // - salvare le specifiche in bi_sheet_specifications
-    //
-    await Promise.all(urls.map(url => fetch(url)))
+    await Promise.all(req.map(req => fetch(req)))
       .then(responses => {
         return Promise.all(responses.map(response => {
           if (!response.ok) { throw Error(response.statusText); }
@@ -90,6 +85,34 @@ var Resource = new Resources();
       .then(response => {
         debugger;
         console.log(response);
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+  }
+
+  app.publish = async () => {
+    // il tasto "pubblica" deve :
+    // - recuperare tutti gli oggetti della pagina (report)
+    // - crearne i COPY_TABLE da WEB_BI_timestamp_userId -> WEB_BI_timestamp
+    // - salvare le specifiche in bi_sheet_specifications
+    console.log(Resource.resource);
+    let urls = [];
+    for (const dashboard of Resource.resource.values()) {
+      urls.push(`/fetch_api/copy_from/${dashboard.datamart_id}_${dashboard.user_id}/copy_to/${dashboard.datamart_id}/copy_table`);
+    }
+    console.log(urls);
+    await Promise.all(urls.map(url => fetch(url)))
+      .then(responses => {
+        return Promise.all(responses.map(response => {
+          if (!response.ok) { throw Error(response.statusText); }
+          return response.text();
+        }))
+      })
+      .then(response => {
+        console.log(response);
+        app.saveSpecifications();
       })
       .catch(err => {
         App.showConsole(err, 'error');
@@ -114,8 +137,8 @@ var Resource = new Resources();
     };
     debugger;
     console.log(json);
-    // ISSUE: salvare anche le specifiche sul DB oppure salvarle quando si pubblica la dashboard?
-    Resource.saveSpecifications();
+    // salvo le specifiche solo in locale, quando pubblico la dashboard salvo le specifiche su DB
+    window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
     const url = `/fetch_api/json/dashboard_store`;
     const params = JSON.stringify(json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };

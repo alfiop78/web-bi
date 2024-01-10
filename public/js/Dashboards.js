@@ -205,7 +205,7 @@ class Resources extends Dashboards {
     this.json.data.columns = this.#specs_columns;
     this.json.data.group.key = this.#specs_group.key;
     this.json.data.group.columns = this.#specs_group.columns;
-    this.sheetBind();
+    this.bind();
     debugger;
     window.localStorage.setItem(`specs_${Sheet.sheet.token}`, JSON.stringify(this.json));
   }
@@ -232,11 +232,6 @@ class Resources extends Dashboards {
     console.info('bind : ', bind);
     debugger;
     this.json.bind = bind;
-  }
-
-  specificationsSave() {
-    debugger;
-    window.localStorage.setItem(`specs_${this.json.token}`, JSON.stringify(this.json));
   }
 
   prepareData() {
@@ -414,7 +409,8 @@ class Resources extends Dashboards {
     console.log('dataViewGrouped : ', this.dataViewGrouped);
   }
 
-  saveSpecifications() {
+  // WARN: da eliminare perchè ho provato il updateOrCreate() in init-dashboard.js
+  /* saveSpecifications() {
     const url = (this.jsonExists === true) ? '/fetch_api/json/sheet_specs_update' : '/fetch_api/json/sheet_specs_store';
     const params = JSON.stringify(this.json);
     // debugger;
@@ -430,7 +426,7 @@ class Resources extends Dashboards {
         console.log(data);
       })
       .catch((err) => console.error(err));
-  }
+  } */
 
   /* prepareData() {
     this.#prepareData = { cols: [], rows: [] };

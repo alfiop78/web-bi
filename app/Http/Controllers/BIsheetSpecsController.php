@@ -93,6 +93,20 @@ class BIsheetSpecsController extends Controller
     return $specs->save();
   }
 
+  public function upsert(Request $request, BIsheet_specs $bIsheet_specs)
+  {
+    // dd("upsert : {$request}");
+    $token = $request->collect()->get('token');
+    $name = $request->collect()->get('name');
+    $json = json_encode($request->all());
+    // per poter utilizzare updateOrCreate è necessario impostare la proprietà '$fillable'
+    // sul campo 'json_value' nel Model
+    return $bIsheet_specs::updateOrCreate(
+      ['token' => $token, 'name' => $name],
+      ['json_value' => $json]
+    );
+  }
+
   /**
    * Remove the specified resource from storage.
    *
