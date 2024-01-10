@@ -7,6 +7,13 @@ function testFn() {
   console.log(WorkBook);
 }
 
+function updatedSheet() {
+  // la 'updated_at' dello sheet deve essere aggiornata perchè viene modificato lo Sheet
+  const sheet = SheetStorage.sheet;
+  sheet.updated_at = new Date().toLocaleDateString('it-IT', Sheet.options);
+  SheetStorage.save(sheet);
+}
+
 let app = {
   number: function(properties) {
     return new google.visualization.NumberFormat(properties);
@@ -410,20 +417,18 @@ saveColumnConfig.onclick = () => {
   }
   // definisco il bind in base ai filtri impostati
   Resource.bind();
-  debugger;
 
   // TODO: Il containerId deve essere deciso in init-dashboard-create.js
   Resource.json.wrapper.containerId = 'chart_div';
   console.log('specifications : ', Resource.json);
-  // window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
-  // window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
   window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
   // le metriche calcolate restituisce -1 per getTableColumnIndex, quindi devo ridisegnare il report
   // richiamando previewReady() altrimenti il metodo draw() di GoogleChart aggiorna la visualizzazione correttamente
   (Resource.dataTableIndex === -1) ?
     previewReady() : Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
   dlgConfig.close();
-  // TODO: lo Sheet bisogna contrassegnarlo come "modificato"
+  // la 'updated_at' dello sheet deve essere aggiornata perchè viene modificato lo Sheet
+  updatedSheet();
 }
 
 function columnHander(e) {
@@ -479,4 +484,5 @@ function columnHander(e) {
   // Qui dovrò sempre richiamare il previewReady() perchè devono essere ricalcolate le "colonne generate", in base al nuovo
   // raggruppamento definito qui
   previewReady();
+  updatedSheet();
 }

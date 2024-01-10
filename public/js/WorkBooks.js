@@ -7,10 +7,10 @@ class Sheets {
   #metrics = new Map();
   #joins = new Map();
   #id;
-  #options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
   constructor(name, token, WorkBookToken) {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
     // this.workBookToken = WorkBookToken;
+    this.options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
     this.sheet = { token, type: 'sheet', workbook_ref: WorkBookToken };
     this.name = name;
     // mappo gli elmenti rimossi dal report in fase di edit. Questo mi consentirà
@@ -125,19 +125,18 @@ class Sheets {
   update() {
     this.sheet.name = this.name;
     this.sheet.userId = this.userId;
-    this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+    this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.options);
     this.save();
     console.info('sheet:', this.sheet);
     SheetStorage.save(this.sheet);
   }
 
   create() {
-    // this.sheet.id = this.id;
     this.sheet.id = Date.now();
     this.sheet.userId = this.userId;
     this.sheet.name = this.name;
-    this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.#options);
-    this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+    this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.options);
+    this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.options);
     this.save();
     console.info('sheet:', this.sheet);
     debugger;
