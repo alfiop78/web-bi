@@ -54,6 +54,26 @@ class DrawSVG {
     }
   }
 
+  handlerOver(e) {
+    console.log(e.currentTarget);
+    // cerco le join line con [data-to="svg-data-e.target.id"]
+    console.log(Draw.svg.querySelectorAll(`path[data-to='${e.currentTarget.id}']`));
+    const lines = Draw.svg.querySelectorAll(`path[data-to='${e.currentTarget.id}']`);
+    // per ogni linea di join imposto un colore "di selezione" per tutte le tabelle
+    // [data-from] collegate ad ogni linea
+    lines.forEach(line => {
+      // console.log(line)
+      const tableJoin = Draw.svg.querySelector(`#${line.dataset.from}`);
+      console.log(tableJoin);
+      tableJoin.dataset.related = 'true';
+      // TODO: qui potrei utilizzare una recursiveFunc per ottenere le tabelle correlate a quella in ciclo
+    });
+    // debugger;
+  }
+
+  // rimuovo il data-related a tutte le tabelle
+  handlerLeave() { Draw.svg.querySelectorAll(`use.table[data-related]`).forEach(table => delete table.dataset.related); }
+
   drawTable() {
     const clonedStruct = this.svg.querySelector('#table-struct').cloneNode(true);
     // assegno l'id e il testo (nome tabella) all'elemento clonato
@@ -77,6 +97,8 @@ class DrawSVG {
     use.dataset.tableJoin = this.currentTable.join;
     use.dataset.fn = 'tableSelected';
     use.dataset.enterFn = 'tableEnter';
+    use.onmouseover = this.handlerOver;
+    use.onmouseleave = this.handlerLeave;
     // use.dataset.leaveFn = 'tableLeave';
     use.dataset.x = this.currentTable.x;
     use.dataset.y = this.currentTable.y;

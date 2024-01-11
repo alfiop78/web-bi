@@ -149,6 +149,12 @@ use.table[data-active]{
   /* stroke-width: 0.1; */
 }
 
+use.table[data-related]{
+  fill: orangered;
+  stroke: whitesmoke;
+  /* stroke-width: 0.1; */
+}
+
 #coords{
   position: absolute;
   background-color: #494949;
