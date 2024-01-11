@@ -217,3 +217,31 @@ input:read-write::placeholder{
 .steps[data-step="2"] #btn-sql-preview {
   display: inline;
 }
+
+div.field {
+  display: flex;
+}
+
+div.field.label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+div.field.hr {
+  flex-direction: row;
+  align-items: center;
+}
+
+select {
+  width: 100%;
+  border: none;
+  padding: 8px 4px;
+  background-color: white;
+  height: 32px;
+  box-shadow: 0px 4px 2px -3px #898585;
+}
+
+select:focus {
+  box-shadow: 0px 4px 2px -3px steelblue;
+}

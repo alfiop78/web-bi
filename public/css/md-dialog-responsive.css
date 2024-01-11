@@ -69,10 +69,7 @@ dialog::backdrop {
 
 dialog.medium{
   width: 65%;
-  /* max-width: 60%; */
-  height: 55%;
-  /* height: auto; */
-  /* max-height: 50%; */
+  height: auto;
 }
 
 dialog.large{
@@ -169,10 +166,10 @@ dialog > .dlg-grid{
 
 dialog > .dlg-grid > .dlg-content.col{
   display: grid;
-  /* grid-template-rows: auto auto 1fr; */
   padding: 0px 1rem;
   row-gap: .5em;
   column-gap: .5em;
+  overflow-y: auto;
 }
 
 .dlg-content.col.search {

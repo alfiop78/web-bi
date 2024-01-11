@@ -350,6 +350,7 @@ saveColumnConfig.onclick = () => {
   const filterColumn = document.getElementById('filter-column');
   const type = typeRef.options.item(typeRef.selectedIndex).value.toLowerCase();
   const format = formatterRef.options.item(formatterRef.selectedIndex).value;
+  const fractionDigits = +document.getElementById('frationDigits').value;
   let formatterProperties = {};
 
   // Resource.dataGroup.setColumnLabel(Resource.dataTableIndex, label);
@@ -362,13 +363,13 @@ saveColumnConfig.onclick = () => {
   switch (format) {
     case 'default':
       // numero senza decimali e con separatore migliaia
-      formatterProperties = { negativeParens: false, fractionDigits: 0, groupingSymbol: '.' };
+      formatterProperties = { negativeParens: false, fractionDigits, groupingSymbol: '.' };
       break;
     case 'currency':
-      formatterProperties = { suffix: ' €', negativeColor: 'brown', negativeParens: true, fractionDigits: 2 };
+      formatterProperties = { suffix: ' €', negativeColor: 'brown', negativeParens: true, fractionDigits };
       break;
     case 'percent':
-      formatterProperties = { suffix: ' %', negativeColor: 'brown', negativeParens: true, fractionDigits: 2 };
+      formatterProperties = { suffix: ' %', negativeColor: 'brown', negativeParens: true, fractionDigits };
       break;
     case 'date':
       // TODO: da implementare

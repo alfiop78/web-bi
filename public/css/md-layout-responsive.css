@@ -261,3 +261,33 @@ small {
   row-gap: 1em;
   overflow: auto;
 }
+
+input[type="number"] {
+  text-align: right;
+  letter-spacing: 4px;
+}
+
+/* grid 11.01.2024 */
+.row {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  padding: .5em;
+}
+
+.row > .col {
+  display: grid;
+  padding: .5em;
+}
+
+.row > .col.grid-1 { grid-column: 1; }
+.row > .col.grid-2 { grid-column: span 2; }
+.row > .col.grid-3 { grid-column: span 3; }
+.row > .col.grid-4 { grid-column: span 4; }
+.row > .col.grid-5 { grid-column: span 5; }
+.row > .col.grid-6 { grid-column: span 6; }
+.row > .col.grid-7 { grid-column: span 7; }
+.row > .col.grid-8 { grid-column: span 8; }
+.row > .col.grid-9 { grid-column: span 9; }
+.row > .col.grid-10 { grid-column: span 10; }
+.row > .col.grid-11 { grid-column: span 11; }
+.row > .col.grid-12 { grid-column: span 12; }

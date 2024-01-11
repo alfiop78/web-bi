@@ -764,38 +764,58 @@
                               <section class="dlg-grid">
                                 <h5 class="title">Configurazione</h5>
                                 <section class="dlg-content col col-1">
-                                  <section class="">
-                                    <input id="field-label" type="text" value="" placeholder="Etichetta colonna" />
-                                    <section>
-                                      <label for="field-datatype">Tipo di dato</label>
-                                      <select id="field-datatype">
-                                        <option id="string" value="string">Stringa</option>
-                                        <option id="number" value="number">Numero</option>
-                                        <option id="date" value="date">Data</option>
-                                        <option id="datetime" value="datetime">Date Time</option>
-                                        <option id="timeofday" value="timeofday">Time of Day</option>
-                                        <option id="boolean" value="boolean">Vero/Falso</option>
-                                      </select>
+                                  <section>
+                                    <section class="row">
+                                      <div class="col grid-12">
+                                        <div class="field">
+                                          <input id="field-label" type="text" value="" placeholder="Etichetta colonna" />
+                                        </div>
+                                      </div>
                                     </section>
-                                    <section>
-                                      <label for="field-format">Formattazione colonna</label>
-                                      <select id="field-format">
-                                        <option value="default" selected>Default</option>
-                                        <option value="currency">Valuta €</option>
-                                        <option value="percent">Percentuale</option>
-                                      </select>
-                                      <label for="frationDigits">Posizioni decimali</label>
-                                      <input id="frationDigits" type="number" value="2" />
+                                    <section class="row">
+                                      <div class="col grid-5">
+                                        <div class="field label">
+                                          <label for="field-datatype">Tipo di dato</label>
+                                          <select id="field-datatype">
+                                            <option id="string" value="string">Stringa</option>
+                                            <option id="number" value="number">Numero</option>
+                                            <option id="date" value="date">Data</option>
+                                            <option id="datetime" value="datetime">Date Time</option>
+                                            <option id="timeofday" value="timeofday">Time of Day</option>
+                                            <option id="boolean" value="boolean">Vero/Falso</option>
+                                          </select>
+                                        </div>
+                                      </div>
+                                      <div class="col grid-5">
+                                        <div class="field label">
+                                          <label for="field-format">Formattazione</label>
+                                          <select id="field-format">
+                                            <option value="default" selected>Default</option>
+                                            <option value="currency">Valuta €</option>
+                                            <option value="percent">Percentuale</option>
+                                          </select>
+                                        </div>
+                                      </div>
+                                      <div class="col grid-2">
+                                        <div class="field label">
+                                          <label for="frationDigits">Decimali</label>
+                                          <input id="frationDigits" type="number" value="2" />
+                                        </div>
+                                      </div>
                                     </section>
-                                    <section>
-                                      <input type="checkbox" id="filter-column" name="filter-column" />
-                                      <label for="filter-column">Imposta come filtro</label>
+                                    <section class="row">
+                                      <div class="col grid-5">
+                                        <div class="field hr">
+                                          <input type="checkbox" id="filter-column" name="filter-column" />
+                                          <label for="filter-column">Imposta filtro Dashboard</label>
+                                        </div>
+                                      </div>
                                     </section>
                                   </section>
                                 </section>
                                 <section class="dlg-buttons">
                                   <button name="cancel" value="chiudi">Chiudi</button>
-                                  <button id="btn-column-save">Ok</button>
+                                  <button id="btn-column-save">Salva</button>
                                   <!-- <button data-fn="btnSaveColumn" id="btn-column-save">Ok</button> -->
                                 </section>
                               </section>
