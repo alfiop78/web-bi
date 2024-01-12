@@ -46,7 +46,7 @@ svg#svg {
   height: 100%;
   position: absolute;
   user-select: none;
-  background-color: #ededed;
+  /* background-color: #ededed; */
   border: dashed thin lightgray;
   z-index: 1;
 }
@@ -58,7 +58,7 @@ svg.dropzone.dropping{
 
 .translate{
   height: 100%;
-  /* background-color: navajowhite; */
+  background-color: #e2e2e2;
   display: grid;
   grid-template-rows: 100%;
   /* grid-template-rows: repeat(auto-fit, 108px); */
@@ -95,7 +95,7 @@ path{
 
 path[data-join-id]{
   fill: transparent;
-  stroke: steelblue;
+  stroke: #6a92b39e;
   stroke-width: 2;
   stroke-linecap: round;
 }
@@ -110,7 +110,7 @@ path:hover{
 
 .struct > rect {
   /* fill: lightblue; */
-  rx : 4;
+  rx: 2;
   /* fill: white; */
   width: 170px;
   height: 30px;
@@ -134,11 +134,13 @@ path:hover{
 use.table{
   fill: white;
   font-weight: normal;
+  opacity: .8;
 }
 
 use.table:hover{
   cursor: pointer;
-  fill: lightblue;
+  /* fill: lightblue; */
+  opacity: 1;
   /* stroke: #494949; */
   /* stroke-width: 0.1; */
 }
@@ -150,9 +152,14 @@ use.table[data-active]{
 }
 
 use.table[data-related]{
-  fill: orangered;
-  stroke: whitesmoke;
-  /* stroke-width: 0.1; */
+  fill: #84c5849e;
+  /* stroke: whitesmoke; */
+}
+
+use.table[data-multifact]{
+  /* fill: #84c5849e; */
+  opacity: .8;
+  /* stroke: whitesmoke; */
 }
 
 #coords{
@@ -509,4 +516,15 @@ textarea:focus, textarea:active {
   top: 8px;
   left: 8px;
   color: darkgray;
+}
+
+section#canvas-area::before {
+  content: attr(data-message);
+  /* content: 'message info'; */
+  position: absolute;
+  z-index: 999;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
 }

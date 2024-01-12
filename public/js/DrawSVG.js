@@ -60,7 +60,7 @@ class DrawSVG {
     // console.log(e.currentTarget);
     // console.log(this);
     // NOTE: utilizzo di bind(). Qui, il this, si riferisce alla Classe Draw e non alla fn richiamata da evento
-    this.svg.querySelectorAll(`use.table[data-dimension-id='${+e.currentTarget.dataset.dimensionId}']`).forEach(table => {
+    this.svg.querySelectorAll(`use.table[data-multifact][data-dimension-id='${+e.currentTarget.dataset.dimensionId}']`).forEach(table => {
       table.dataset.related = 'true';
     });
   }
@@ -85,11 +85,14 @@ class DrawSVG {
     use.dataset.id = `data-${this.currentTable.id}`;
     use.dataset.table = this.currentTable.table;
     use.dataset.alias = this.currentTable.alias;
-    use.dataset.dimensionId = this.currentTable.dimensionId;
+    // la fact non ha la proprietà join
+    if (this.currentTable.join) {
+      use.dataset.tableJoin = this.currentTable.join;
+      use.dataset.dimensionId = this.currentTable.dimensionId;
+    }
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;
-    use.dataset.tableJoin = this.currentTable.join;
     use.dataset.fn = 'tableSelected';
     use.dataset.enterFn = 'tableEnter';
     use.onmouseover = this.handlerOver.bind(Draw);

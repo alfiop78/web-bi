@@ -136,7 +136,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // Imposto la tabella attiva, su cui si è attivato il context-menu
     WorkBook.activeTable = e.currentTarget.id;
     // Chiudo eventuali dlg-info aperte sul mouseEnter della use.table
-    if (document.querySelector('#dlg-info[open]')) app.dialogInfo.close();
+    if (app.dialogInfo.hasAttribute('open')) app.dialogInfo.close();
     app.contextMenuTableRef.toggleAttribute('open');
     // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
     document.querySelectorAll('#ul-context-menu-table button').forEach(item => item.dataset.id = WorkBook.activeTable.id);
@@ -1719,8 +1719,11 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  app.addMultifact = () => {
-    Draw.svg.querySelectorAll('use.table').forEach(table => table.hidden = true);
+  app.addMultifact = (e) => {
+    // console.log(e.target);
+    document.querySelector('#canvas-area').dataset.message = 'Selezionare almeno una dimenione da mettere in comune con ...';
+
+    Draw.svg.querySelectorAll('use.table').forEach(table => table.dataset.multifact = true);
   }
 
   app.tableSelected = async (e) => {
@@ -2439,7 +2442,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
     el.onmouseover = (e) => {
       if (e.target.nodeName === 'svg') {
-        if (document.querySelector('#dlg-info[open]')) app.dialogInfo.close();
+        if (app.dialogInfo.hasAttribute('open')) app.dialogInfo.close();
       }
     }
   });
@@ -2480,6 +2483,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     (WorkBook.fields.has(e.target.dataset.alias)) ?
       app.dialogInfo.querySelector('button.columns').removeAttribute('disabled') :
       app.dialogInfo.querySelector('button.columns').setAttribute('disabled', 'true');
+    // visualizzo #btn-multi-fact se e.target è la tabella dei fatti
+    app.dialogInfo.querySelector('#btn-multi-fact').hidden = (e.target.dataset.tableJoin) ? true : false;
     app.dialogInfo.show();
   }
 
