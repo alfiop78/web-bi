@@ -627,12 +627,12 @@
                         </ul>
                       </div>
                       <section id="canvas-area">
-                        <!-- <dialog id="dlg-info" class="small positioned popup"></dialog> -->
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
                           <dialog id="dlg-info" class="positioned popup">
                             <button class="button-icon material-icons-round md-18 columns" disabled>view_column</button>
                             <button class="button-icon material-icons-round md-18 metrics" disabled>multiline_chart</button>
                             <button class="button-icon material-icons-round md-18" disabled>history</button>
+                            <button type="button" id="btnMultifact" data-fn="addMultifact" class="button-icon material-icons-round md-18">library_add</button>
                             <button class="button-icon material-icons-round md-18" disabled>info</button>
                           </dialog>
                           <svg id="svg" class="dropzone" data-level="0">

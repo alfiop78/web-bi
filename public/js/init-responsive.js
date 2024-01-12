@@ -1719,6 +1719,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
   }
 
+  app.addMultifact = () => {
+    Draw.svg.querySelectorAll('use.table').forEach(table => table.hidden = true);
+  }
+
   app.tableSelected = async (e) => {
     // console.log(`table selected ${e.currentTarget.dataset.table}`);
     // console.log(e.currentTarget);
