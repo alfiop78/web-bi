@@ -344,18 +344,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.handlerDrop = (e) => {
     e.preventDefault();
-    // console.clear();
     e.currentTarget.classList.replace('dropping', 'dropped');
     if (!e.currentTarget.classList.contains('dropzone')) return;
-    // const elementId = e.dataTransfer.getData('text/plain');
     const liElement = document.getElementById(e.dataTransfer.getData('text/plain'));
     liElement.classList.remove('dragging');
     const time = Date.now().toString();
     const tableId = time.substring(time.length - 5);
-    // const tableId = Draw.svg.querySelectorAll('use.table').length;
     let coords;
-    // TODO: alias per la tabella appena aggiunta (in sospeso)
-    // card.dataset.alias = `${card.dataset.label}_${time.substring(time.length - 3)}`;
 
     // se non è presente una tableJoin significa che sto aggiungendo la prima tabella
     if (!Draw.tableJoin) {
@@ -392,7 +387,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       const levelId = Draw.tableJoin.levelId + 1;
       // creo un array dei livelli, ordinato in reverse per poter fare un ciclo dal penultimo livello fino al primo ed effettuare il posizionamento automatico
       if (!Draw.arrayLevels.includes(Draw.tableJoin.levelId)) Draw.arrayLevels.splice(0, 0, Draw.tableJoin.levelId);
-      // if (!Draw.arrayLevels.includes(levelId)) Draw.arrayLevels.splice(0, 0, levelId);
       Draw.svg.dataset.level = (Draw.svg.dataset.level < levelId) ? levelId : Draw.svg.dataset.level;
       // quante tabelle ci sono per il livello corrente che appartengono alla stessa tableJoin
       const tableRelated = Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'][data-table-join='${Draw.tableJoin.table.id}']`);
@@ -432,6 +426,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           });
         });
       }
+      // imposto il data-dimensionId
+      const dimensionId = (levelId === 1) ? +Draw.tableJoin.joins : +Draw.tableJoin.table.dataset.dimensionId;
       // imposto la proprietà 'tables' della Classe Draw
       Draw.tables = {
         id: `svg-data-${tableId}`, properties: {
@@ -449,6 +445,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           schema: liElement.dataset.schema,
           joins: 0,
           join: Draw.tableJoin.table.id,
+          dimensionId,
           levelId
         }
       };
