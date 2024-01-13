@@ -643,6 +643,7 @@
                             <defs>
                               <g id="table-struct" class="struct">
                                 <rect x="0" y="0" />
+                                <rect id="test" class="dropzone-fact" x="-15" y="34" />
                                 <image href="{{ asset('/images/grid_on_5C7893_18dp.svg') }}" data-id x="5" y="6" width="18" height="18">
                                 </image>
                                 <text x="26" y="20" font-family="Barlow" font-size=".85rem" font-weight="normal"></text>

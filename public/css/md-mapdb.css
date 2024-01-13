@@ -118,6 +118,17 @@ path:hover{
   /* stroke-width: 0.2; */
 }
 
+rect.dropzone-fact {
+  fill: transparent;
+  stroke: black;
+  width: 200px;
+  height: 40px;
+}
+
+rect.dropzone-fact[data-hidden] {
+  display: none;
+}
+
 .struct > text {
   fill: #494949;
   font-weight: normal;

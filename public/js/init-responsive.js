@@ -319,11 +319,11 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.handlerDragEnd = async (e) => {
     e.preventDefault();
+    debugger;
     if (e.dataTransfer.dropEffect === 'copy') {
       // se la tabella non è presente in sessionStorage la scarico
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
       // se sono presenti almeno due tabelle visualizzo la dialog per la join
-      debugger;
       if (Draw.countTables > 1) {
         WorkBook.tableJoins = {
           from: app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
@@ -345,6 +345,11 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.handlerDrop = (e) => {
     e.preventDefault();
+    console.log(e.target);
+    // se il drop viene effettuato su un altra tabella <use> questo viene gestito in Draw.handlerTableDrop()
+    if (e.target.nodeName !== 'SVG') return;
+    console.log(e.currentTarget);
+    debugger;
     e.currentTarget.classList.replace('dropping', 'dropped');
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const liElement = document.getElementById(e.dataTransfer.getData('text/plain'));
@@ -1720,14 +1725,14 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  app.addMultifact = (e) => {
-    console.log(e.target);
-    document.querySelector('#canvas-area').dataset.message = 'Aggiungere la tabella per l\'analisi multi fatti';
-    debugger;
-    // Draw.svg.querySelectorAll('use.table').forEach(table => table.dataset.multifact = true);
-    Draw.hidden();
-    // Draw.svg.querySelectorAll('use.table').forEach(table => table.dataset.hidden = 'true');
-  }
+  // app.addMultifact = (e) => {
+  //   console.log(e.target);
+  //   document.querySelector('#canvas-area').dataset.message = 'Aggiungere la tabella per l\'analisi multi fatti';
+  //   debugger;
+  //   // Draw.svg.querySelectorAll('use.table').forEach(table => table.dataset.multifact = true);
+  //   // Draw.hidden();
+  //   // Draw.svg.querySelectorAll('use.table').forEach(table => table.dataset.hidden = 'true');
+  // }
 
   app.tableSelected = async (e) => {
     // console.log(`table selected ${e.currentTarget.dataset.table}`);
