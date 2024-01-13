@@ -22,7 +22,7 @@ class DrawSVG {
   get tables() { return this.#tables; }
 
   get countTables() {
-    return this.svg.querySelectorAll('use.table').length;
+    return this.svg.querySelectorAll('use.table:not([data-hidden])').length;
   }
 
   set currentLineRef(value) {
@@ -68,6 +68,16 @@ class DrawSVG {
   // rimuovo il data-related a tutte le tabelle
   handlerLeave() { this.svg.querySelectorAll(`use.table[data-related]`).forEach(table => delete table.dataset.related); }
 
+  handlerDblClick(e) {
+    console.log(e.target);
+    console.log(this);
+    debugger;
+  }
+
+  hidden() {
+    this.svg.querySelectorAll('use.table, path').forEach(svgElement => svgElement.dataset.hidden = 'true');
+  }
+
   drawTable() {
     const clonedStruct = this.svg.querySelector('#table-struct').cloneNode(true);
     // assegno l'id e il testo (nome tabella) all'elemento clonato
@@ -97,6 +107,7 @@ class DrawSVG {
     use.dataset.enterFn = 'tableEnter';
     use.onmouseover = this.handlerOver.bind(Draw);
     use.onmouseleave = this.handlerLeave.bind(Draw);
+    use.ondblclick = this.handlerDblClick.bind(Draw);
     // use.dataset.leaveFn = 'tableLeave';
     use.dataset.x = this.currentTable.x;
     use.dataset.y = this.currentTable.y;

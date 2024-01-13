@@ -261,7 +261,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     if (e.currentTarget.classList.contains('dropzone')) {
       e.dataTransfer.dropEffect = "copy";
       app.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
-      if (Draw.svg.querySelectorAll('use.table').length > 0) {
+      if (Draw.svg.querySelectorAll('use.table:not([data-hidden])').length > 0) {
         // TODO: da commentare (...viene utilizzato il calcolo dell'ipotenusa)
         let nearestTable = [...Draw.svg.querySelectorAll('use.table')].reduce((prev, current) => {
           return (Math.hypot(e.offsetX - (+current.dataset.x + 180), e.offsetY - (+current.dataset.y + 15)) < Math.hypot(e.offsetX - (+prev.dataset.x + 180), e.offsetY - (+prev.dataset.y + 15))) ? current : prev;
@@ -323,6 +323,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       // se la tabella non è presente in sessionStorage la scarico
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
       // se sono presenti almeno due tabelle visualizzo la dialog per la join
+      debugger;
       if (Draw.countTables > 1) {
         WorkBook.tableJoins = {
           from: app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
@@ -1720,10 +1721,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   }
 
   app.addMultifact = (e) => {
-    // console.log(e.target);
-    document.querySelector('#canvas-area').dataset.message = 'Selezionare almeno una dimenione da mettere in comune con ...';
-
-    Draw.svg.querySelectorAll('use.table').forEach(table => table.dataset.multifact = true);
+    console.log(e.target);
+    document.querySelector('#canvas-area').dataset.message = 'Aggiungere la tabella per l\'analisi multi fatti';
+    debugger;
+    // Draw.svg.querySelectorAll('use.table').forEach(table => table.dataset.multifact = true);
+    Draw.hidden();
+    // Draw.svg.querySelectorAll('use.table').forEach(table => table.dataset.hidden = 'true');
   }
 
   app.tableSelected = async (e) => {
@@ -2472,7 +2475,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   // visualizzo l'icona delete utilizzando <use> in svg
   app.tableEnter = (e) => {
     // Imposto le coordinate per il posizionamneto della dialog sotto alla tabella
-    // TODO: valutare la possibilità di utilizzare la funzione attr() di CSS
     app.dialogInfo.style.setProperty('--top', `${+e.currentTarget.dataset.y + 30}px`);
     app.dialogInfo.style.setProperty('--left', `${e.currentTarget.dataset.x}px`);
 
@@ -2483,8 +2485,17 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     (WorkBook.fields.has(e.target.dataset.alias)) ?
       app.dialogInfo.querySelector('button.columns').removeAttribute('disabled') :
       app.dialogInfo.querySelector('button.columns').setAttribute('disabled', 'true');
+    // imposto un dataset.tableAlias nel tasto btn-multi-fact per poter recuperare l'id della tabella
+    // dei fatti quando si droppa una tabella per analisi multifact
+    /* if (!e.target.dataset.tableJoin) {
+      // non ha il dataset tableJoin, quindi questa è la fact
+      // visualizzo il tasto btn-multi-fact
+      app.dialogInfo.querySelector('#btn-multi-fact').hidden = false;
+      // imposto dataset.table-id
+      app.dialogInfo.querySelector('#btn-multi-fact').dataset.tableId = e.target.id;
+    } */
     // visualizzo #btn-multi-fact se e.target è la tabella dei fatti
-    app.dialogInfo.querySelector('#btn-multi-fact').hidden = (e.target.dataset.tableJoin) ? true : false;
+    // app.dialogInfo.querySelector('#btn-multi-fact').hidden = (e.target.dataset.tableJoin) ? true : false;
     app.dialogInfo.show();
   }
 
@@ -3079,7 +3090,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const fieldName = document.getElementById('column-name').value;
     const token = (e.currentTarget.dataset.token) ? e.currentTarget.dataset.token : rand().substring(0, 7);
     // imposto le colonne _id e _ds in WorkBook.columns
-    debugger;
     let fields = { id: { sql: [], formula: [], datatype: null }, ds: { sql: [], formula: [], datatype: null } };
     // let fieldId = { sql: [], formula: [], datatype: null }
     // let fieldDs = { sql: [], formula: [], datatype: null }

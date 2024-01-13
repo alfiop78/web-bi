@@ -528,3 +528,18 @@ section#canvas-area::before {
   align-items: center;
   justify-content: center;
 }
+
+use.table[data-hidden="true"], path[data-hidden="true"] {
+  display: none;
+}
+
+#informations {
+  position: absolute;
+  right: 0px;
+  width: 300px;
+  /* border-left: solid thin gray; */
+  height: 100%;
+  z-index: 2;
+  box-shadow: 0px 0px 8px 0px;
+  background-color: #c8c9c8;
+}
