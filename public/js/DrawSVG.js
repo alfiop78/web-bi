@@ -74,24 +74,8 @@ class DrawSVG {
     debugger;
   }
 
-  // hidden() {
-  //   this.svg.querySelectorAll('use.table, path').forEach(svgElement => svgElement.dataset.hidden = 'true');
-  // }
-
-  handlerTableDrop(e) {
-    e.preventDefault();
-    console.log(e.target);
-    // imposto tutte le dimensioni con il dataset.multi-fact per poterne consentire
-    // la selezione
-    this.svg.querySelectorAll('use.table').forEach(table => table.dataset.multifact = true);
-    console.log('dataset.multifact impostato');
-  }
-
-  handlerTableDragEnd(e) {
-    e.preventDefault();
-    debugger;
-    console.log('tableDragEnd');
-
+  hidden() {
+    this.svg.querySelectorAll('use.table, path').forEach(svgElement => svgElement.dataset.hidden = 'true');
   }
 
   drawTable() {
@@ -99,19 +83,12 @@ class DrawSVG {
     // assegno l'id e il testo (nome tabella) all'elemento clonato
     clonedStruct.id = `struct-${this.currentTable.key}`;
     clonedStruct.classList.add('struct');
-    // TODO: probabilmente serve creare un ulteriore struttura, al posto di subDropzone, da
-    // visualizzare soltanto sotto la fact table
-    const subDropzone = clonedStruct.querySelector('rect#test');
-    console.log(subDropzone);
     clonedStruct.querySelector('text').innerHTML = this.currentTable.name;
     // clonedStruct.querySelector('text').innerHTML = this.currentTable.table;
     // clonedStruct.querySelector('image').dataset.id = this.currentTable.key;
     // lo aggiungo al defs
     this.svg.querySelector('defs').appendChild(clonedStruct);
-    // creo l'elemento <use>
     const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-    // const subUse = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-    // lo linko alla struttura clonata presente in <defs>
     use.setAttribute('href', `#${clonedStruct.id}`);
     use.id = this.currentTable.key;
     use.classList.add('table');
@@ -120,8 +97,6 @@ class DrawSVG {
     use.dataset.alias = this.currentTable.alias;
     // la fact non ha la proprietà join
     if (this.currentTable.join) {
-      // fact table
-      subDropzone.dataset.hidden = true;
       use.dataset.tableJoin = this.currentTable.join;
       use.dataset.dimensionId = this.currentTable.dimensionId;
     }
@@ -139,11 +114,6 @@ class DrawSVG {
     use.dataset.levelId = this.currentTable.levelId;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
-    // aggiungo eventi drag&drop anche sulle singole tabelle
-    // use.ondrop = this.handlerTableDrop.bind(Draw);
-    // use.ondragend = this.handlerTableDragEnd.bind(Draw);
-    use.addEventListener('drop', this.handlerTableDrop.bind(Draw), true);
-    use.addEventListener('dragend', this.handlerTableDragEnd.bind(Draw), false);
     Draw.svg.appendChild(use);
     // <animate> tag
     const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
