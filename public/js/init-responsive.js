@@ -218,7 +218,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // console.log(app.dragElementPosition);
     e.dataTransfer.setData('text/plain', e.target.id);
     // creo la linea
-    if (Draw.svg.querySelectorAll('.table').length > 0) {
+    if (Draw.countTables > 0) {
+      // if (Draw.svg.querySelectorAll('.table').length > 0) {
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       const token = rand().substring(0, 4);
       // line.id = `line-${Draw.svg.querySelectorAll('use.table').length}`;
@@ -261,9 +262,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     if (e.currentTarget.classList.contains('dropzone')) {
       e.dataTransfer.dropEffect = "copy";
       app.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
-      if (Draw.svg.querySelectorAll('use.table:not([data-hidden])').length > 0) {
+      // if (Draw.svg.querySelectorAll('use.table:not([data-hidden])').length > 0) {
+      if (Draw.countTables > 0) {
         // TODO: da commentare (...viene utilizzato il calcolo dell'ipotenusa)
-        let nearestTable = [...Draw.svg.querySelectorAll('use.table')].reduce((prev, current) => {
+        // let nearestTable = [...Draw.svg.querySelectorAll('use.table')].reduce((prev, current) => {
+        //   return (Math.hypot(e.offsetX - (+current.dataset.x + 180), e.offsetY - (+current.dataset.y + 15)) < Math.hypot(e.offsetX - (+prev.dataset.x + 180), e.offsetY - (+prev.dataset.y + 15))) ? current : prev;
+        // });
+        let nearestTable = [...Draw.svg.querySelectorAll('use.table:not([data-hidden])')].reduce((prev, current) => {
           return (Math.hypot(e.offsetX - (+current.dataset.x + 180), e.offsetY - (+current.dataset.y + 15)) < Math.hypot(e.offsetX - (+prev.dataset.x + 180), e.offsetY - (+prev.dataset.y + 15))) ? current : prev;
         });
         // console.log(nearestTable.id);
@@ -461,6 +466,20 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       };
       // console.info('create JOIN');
       app.openJoinWindow();
+      const informations = document.getElementById('informations');
+      if (!Draw.dimensions.has(dimensionId)) {
+        // TODO: creare un template con la checkbox per la selezione delle dimensioni
+        Draw.dimensions = dimensionId;
+        const p = document.createElement('p');
+        p.id = `dimension-${dimensionId}`;
+        p.dataset.dimensionId = dimensionId;
+        p.innerText = liElement.dataset.label;
+        p.onclick = app.dimensionSelected;
+        p.onmouseover = app.highlightDimension;
+        p.onmouseleave = app.unhighlightDimension;
+        informations.appendChild(p);
+      }
+      Draw.tables.get(`svg-data-${tableId}`).name;
     }
     Draw.currentTable = Draw.tables.get(`svg-data-${tableId}`);
     // creo nel DOM la tabella appena droppata
@@ -1722,11 +1741,40 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.addMultifact = (e) => {
     console.log(e.target);
-    document.querySelector('#canvas-area').dataset.message = 'Aggiungere la tabella per l\'analisi multi fatti';
+    // TODO: visualizzo il div nascosto #informations
+    // Draw.hidden();
+    delete Draw.tableJoin;
+  }
+
+  // TODO: spostare in Draw
+  app.highlightDimension = (e) => {
+    // evidenzio con un colore diverso le tabelle appartenenti alla dimensione corrente
+    Draw.svg.querySelectorAll(`use.table[data-dimension-id='${+e.target.dataset.dimensionId}']`).forEach(table => {
+      table.dataset.related = 'true';
+    });
+  }
+
+  // TODO: spostare in Draw
+  app.unhighlightDimension = (e) => {
+    // evidenzio con un colore diverso le tabelle appartenenti alla dimensione corrente
+    Draw.svg.querySelectorAll(`use.table[data-dimension-id='${+e.target.dataset.dimensionId}']`).forEach(table => {
+      delete table.dataset.related;
+    });
+  }
+
+  app.dimensionSelected = (e) => {
+    console.log(e.target.dataset.dimensionId);
+    // memorizzo tutte le tabelle della dimensione selezionata
+    console.log(Draw.tables);
+    Draw.dimensionSelected = e.target.dataset.dimensionId;
+    console.log(Draw.dimensionSelected);
+    // Draw.dimensionSelected[e.target.dataset.dimensionId] =
     debugger;
-    // Draw.svg.querySelectorAll('use.table').forEach(table => table.dataset.multifact = true);
+  }
+
+  app.dimensionDone = () => {
+    // dopo aver scelto le dimensioni da associare alla nuova fact posso nascondere il cubo di origine
     Draw.hidden();
-    // Draw.svg.querySelectorAll('use.table').forEach(table => table.dataset.hidden = 'true');
   }
 
   app.tableSelected = async (e) => {

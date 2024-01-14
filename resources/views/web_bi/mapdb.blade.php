@@ -629,7 +629,8 @@
                       </div>
                       <section id="canvas-area" data-message="">
                         <section id="informations">
-
+                          <h6>Seleziona almeno una dimensione da mettere in relazione con la nuova tabella dei Fatti</h6>
+                          <button type="button" id="btn-dimension-done" data-fn="dimensionDone">Fatto</button>
                         </section>
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
                           <dialog id="dlg-info" class="positioned popup">

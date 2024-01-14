@@ -1,6 +1,8 @@
 class DrawSVG {
   #tables = new Map();
   #joinLines = new Map();
+  #dimensions = new Set();
+  #dimensionSelected = {};
   #currentLineRef; // ref
 
   constructor(element) {
@@ -31,11 +33,26 @@ class DrawSVG {
 
   get currentLineRef() { return this.#currentLineRef; }
 
+  set dimensionSelected(dimensionId) {
+    this.svg.querySelectorAll(`use.table[data-dimension-id='${dimensionId}']`).forEach(table => {
+      debugger;
+      this.#dimensionSelected[table.id] = this.tables.get(table.id);
+    });
+  }
+
+  get dimensionSelected() { return this.#dimensionSelected; }
+
   set joinLines(value) {
     this.#joinLines.set(value.id, value.properties);
   }
 
   get joinLines() { return this.#joinLines; }
+
+  set dimensions(id) {
+    this.#dimensions.add(id);
+  }
+
+  get dimensions() { return this.#dimensions; }
 
   checkResizeSVG() {
     let maxHeightTable = [...this.svg.querySelectorAll('use.table')].reduce((prev, current) => {
@@ -177,6 +194,7 @@ class DrawSVG {
       animLine.beginElement();
     }
   }
+
 
   deleteJoinLine(key) {
     if (key) {
