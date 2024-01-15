@@ -613,7 +613,7 @@
                           <button id="context-custom-metric" data-fn="addCustomMetric" class="btn-link-context">Metrica person.</button>
                           <button data-fn="removeTable" class="btn-link-context">Rimuovi</button>
                           <button data-fn="setAliasTable" class="btn-link-context">Imposta alias</button>
-                          <button data-fn="addMultifact" class="btn-link-context">Analisi MultiFatti</button>
+                          <!-- <button data-fn="addMultifact" class="btn-link-context">Analisi MultiFatti</button> -->
                         </ul>
                       </div>
                       <div id="context-menu-column" class="context-menu">

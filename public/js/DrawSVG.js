@@ -91,8 +91,19 @@ class DrawSVG {
     debugger;
   }
 
-  hidden() {
-    this.svg.querySelectorAll('use.table, path').forEach(svgElement => svgElement.dataset.hidden = 'true');
+  // hidden() {
+  //   this.svg.querySelectorAll('use.table, path').forEach(svgElement => svgElement.dataset.hidden = 'true');
+  // }
+
+  handlerTableDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    debugger;
+    console.log(e.target);
+    // imposto tutte le dimensioni con il dataset.multi-fact per poterne consentire
+    // l'evidenziazione e la selezione
+    this.svg.querySelectorAll('use.table').forEach(table => table.dataset.multifact = true);
+    console.log('dataset.multifact impostato');
   }
 
   drawTable() {
@@ -112,10 +123,15 @@ class DrawSVG {
     use.dataset.id = `data-${this.currentTable.id}`;
     use.dataset.table = this.currentTable.table;
     use.dataset.alias = this.currentTable.alias;
-    // la fact non ha la proprietà join
+    // tutte le tabelle hanno la prop join, tranne la fact, dove NON aggiungo 'tableJoin' e dimensionId
+    // TODO: credo, per l'analisi multifatti, di dover aggiungere un 'cubeId' per poter evidenziare
+    // le dimensioni appartenenti a un cubo (riguardo l'analisi multifatti)
     if (this.currentTable.join) {
       use.dataset.tableJoin = this.currentTable.join;
       use.dataset.dimensionId = this.currentTable.dimensionId;
+    } else {
+      // aggiungo l'evento drop sulla Fact, questo consentirà l'analisi multifatti
+      use.addEventListener('drop', this.handlerTableDrop.bind(Draw));
     }
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;

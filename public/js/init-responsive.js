@@ -324,6 +324,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.handlerDragEnd = async (e) => {
     e.preventDefault();
+    debugger;
     if (e.dataTransfer.dropEffect === 'copy') {
       // se la tabella non è presente in sessionStorage la scarico
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
@@ -1739,12 +1740,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  app.addMultifact = (e) => {
-    console.log(e.target);
-    // TODO: visualizzo il div nascosto #informations
-    // Draw.hidden();
-    delete Draw.tableJoin;
-  }
+  // app.addMultifact = (e) => {
+  //   console.log(e.target);
+  //   // TODO: visualizzo il div nascosto #informations
+  //   // Draw.hidden();
+  //   delete Draw.tableJoin;
+  // }
 
   // TODO: spostare in Draw
   app.highlightDimension = (e) => {
