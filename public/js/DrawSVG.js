@@ -98,12 +98,70 @@ class DrawSVG {
   handlerTableDrop(e) {
     e.preventDefault();
     e.stopPropagation();
-    debugger;
     console.log(e.target);
+    debugger;
+    delete this.currentLine;
+    this.currentLineRef.remove();
+    const liElement = document.getElementById(e.dataTransfer.getData('text/plain'));
+    const time = Date.now().toString();
+    const tableId = time.substring(time.length - 5);
     // imposto tutte le dimensioni con il dataset.multi-fact per poterne consentire
     // l'evidenziazione e la selezione
     this.svg.querySelectorAll('use.table').forEach(table => table.dataset.multifact = true);
     console.log('dataset.multifact impostato');
+    // rimuovo la linea di join
+    const coords = { x: 40, y: 140 };
+    this.tables = {
+      id: `svg-data-${tableId}`, properties: {
+        id: tableId,
+        key: `svg-data-${tableId}`,
+        x: coords.x,
+        y: coords.y,
+        line: {
+          to: { x: coords.x + 180, y: coords.y + 15 },
+          from: { x: coords.x - 10, y: coords.y + 15 }
+        },
+        table: liElement.dataset.label,
+        alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
+        name: liElement.dataset.label,
+        schema: liElement.dataset.schema,
+        join: null,
+        joins: 0,
+        levelId: 0
+      }
+    };
+    this.currentTable = this.tables.get(`svg-data-${tableId}`);
+    this.drawTable();
+    const rectBounding = e.target.getBoundingClientRect();
+    Draw.tableJoin = {
+      table: e.target,
+      x: +e.target.dataset.x + rectBounding.width + 10,
+      y: +e.target.dataset.y + (rectBounding.height / 2),
+      joins: +e.target.dataset.joins,
+      levelId: +e.target.dataset.levelId
+    }
+    // const info = document.getElementById('informations');
+  }
+
+  handlerTableDragEnter(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.target.classList.contains('dropzone')) {
+      // coloro il border differente per la dropzone
+      e.target.classList.add('dropping');
+    }
+  }
+
+  handlerTableDragLeave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.target.classList.remove('dropping');
+  }
+
+  handlerTableDragEnd(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('dragEnd');
   }
 
   drawTable() {
@@ -131,7 +189,11 @@ class DrawSVG {
       use.dataset.dimensionId = this.currentTable.dimensionId;
     } else {
       // aggiungo l'evento drop sulla Fact, questo consentirà l'analisi multifatti
+      use.classList.add('dropzone');
       use.addEventListener('drop', this.handlerTableDrop.bind(Draw));
+      use.addEventListener('dragenter', this.handlerTableDragEnter.bind(Draw));
+      use.addEventListener('dragleave', this.handlerTableDragLeave.bind(Draw));
+      use.addEventListener('dragend', this.handlerTableDragEnd.bind(Draw), false);
     }
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;

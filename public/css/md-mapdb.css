@@ -137,6 +137,13 @@ use.table{
   opacity: .8;
 }
 
+use.table.dropzone.dropping {
+  fill: red;
+  stroke: white;
+  font-weight: normal;
+  opacity: .8;
+}
+
 use.table:hover{
   cursor: pointer;
   /* fill: lightblue; */

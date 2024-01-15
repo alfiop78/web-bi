@@ -306,7 +306,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       console.info('DROPZONE');
       // console.log(e.currentTarget, e.target);
       if (e.target.nodeName === 'use') Draw.currentLevel = +e.target.dataset.levelId;
-      // Draw.currentLevel = e.targe
       // e.dataTransfer.dropEffect = "copy";
       // coloro il border differente per la dropzone
       e.currentTarget.classList.add('dropping');
@@ -324,12 +323,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.handlerDragEnd = async (e) => {
     e.preventDefault();
-    debugger;
+    // debugger;
     if (e.dataTransfer.dropEffect === 'copy') {
       // se la tabella non è presente in sessionStorage la scarico
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
       // se sono presenti almeno due tabelle visualizzo la dialog per la join
-      debugger;
+      // debugger;
       if (Draw.countTables > 1) {
         WorkBook.tableJoins = {
           from: app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
@@ -1784,6 +1783,15 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // deseleziono le altre tabelle con attributo active
     Draw.svg.querySelectorAll("use.table[data-active='true']").forEach(use => delete use.dataset.active);
     e.currentTarget.dataset.active = 'true';
+    // se è attiva l'attributo data-multifact sulla tabella selezionata, devo visualizzare la dialog join
+    // tra la tabella appena droppata e l'ultima tabella della dimensione scelta
+    if (e.target.dataset.multifact) {
+      // TODO: recupero l'ultima tabella della dimensione (quella legata al cubo)
+      const lastTable = Draw.svg.querySelector(`use.table[data-dimension-id='${+e.target.dataset.dimensionId}'][data-level-id='1']`);
+      debugger;
+      console.log(tableJoin);
+      console.log(lastTable);
+    }
     // recupero 50 record della tabella selezionata per visualizzare un anteprima
     WorkBook.activeTable = e.currentTarget.id;
     WorkBook.schema = e.currentTarget.dataset.schema;
