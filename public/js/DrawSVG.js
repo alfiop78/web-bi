@@ -91,15 +91,11 @@ class DrawSVG {
     debugger;
   }
 
-  // hidden() {
-  //   this.svg.querySelectorAll('use.table, path').forEach(svgElement => svgElement.dataset.hidden = 'true');
-  // }
-
   handlerTableDrop(e) {
-    e.preventDefault();
     e.stopPropagation();
+    e.preventDefault();
     console.log(e.target);
-    debugger;
+    // debugger;
     delete this.currentLine;
     this.currentLineRef.remove();
     const liElement = document.getElementById(e.dataTransfer.getData('text/plain'));
@@ -158,14 +154,10 @@ class DrawSVG {
     e.target.classList.remove('dropping');
   }
 
-  handlerTableDragEnd(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('dragEnd');
-  }
-
   drawTable() {
-    const clonedStruct = this.svg.querySelector('#table-struct').cloneNode(true);
+    let clonedStruct = (this.currentTable.levelId === 0 && !this.currentTable.join) ?
+      this.svg.querySelector('#table-struct-fact').cloneNode(true) :
+      this.svg.querySelector('#table-struct').cloneNode(true);
     // assegno l'id e il testo (nome tabella) all'elemento clonato
     clonedStruct.id = `struct-${this.currentTable.key}`;
     clonedStruct.classList.add('struct');
@@ -189,11 +181,9 @@ class DrawSVG {
       use.dataset.dimensionId = this.currentTable.dimensionId;
     } else {
       // aggiungo l'evento drop sulla Fact, questo consentirà l'analisi multifatti
-      use.classList.add('dropzone');
       use.addEventListener('drop', this.handlerTableDrop.bind(Draw));
-      use.addEventListener('dragenter', this.handlerTableDragEnter.bind(Draw));
-      use.addEventListener('dragleave', this.handlerTableDragLeave.bind(Draw));
-      use.addEventListener('dragend', this.handlerTableDragEnd.bind(Draw), false);
+      use.addEventListener('dragenter', this.handlerTableDragEnter);
+      use.addEventListener('dragleave', this.handlerTableDragLeave);
     }
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;

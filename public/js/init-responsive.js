@@ -36,7 +36,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     dialogJoin: document.getElementById('dlg-join'),
     dialogColumns: document.getElementById('dlg-columns'),
     dialogTime: document.getElementById('dialog-time'),
-    dialogInfo: document.getElementById('dlg-info'),
+    // dialogInfo: document.getElementById('dlg-info'),
     dialogSchema: document.getElementById('dlg-schema'),
     dialogNewWorkBook: document.getElementById('dialog-new-workbook'),
     dialogNewSheet: document.getElementById('dialog-new-sheet'),
@@ -136,7 +136,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // Imposto la tabella attiva, su cui si è attivato il context-menu
     WorkBook.activeTable = e.currentTarget.id;
     // Chiudo eventuali dlg-info aperte sul mouseEnter della use.table
-    if (app.dialogInfo.hasAttribute('open')) app.dialogInfo.close();
+    // if (app.dialogInfo.hasAttribute('open')) app.dialogInfo.close();
     app.contextMenuTableRef.toggleAttribute('open');
     // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
     document.querySelectorAll('#ul-context-menu-table button').forEach(item => item.dataset.id = WorkBook.activeTable.id);
@@ -262,13 +262,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     if (e.currentTarget.classList.contains('dropzone')) {
       e.dataTransfer.dropEffect = "copy";
       app.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
-      // if (Draw.svg.querySelectorAll('use.table:not([data-hidden])').length > 0) {
       if (Draw.countTables > 0) {
-        // TODO: da commentare (...viene utilizzato il calcolo dell'ipotenusa)
-        // let nearestTable = [...Draw.svg.querySelectorAll('use.table')].reduce((prev, current) => {
-        //   return (Math.hypot(e.offsetX - (+current.dataset.x + 180), e.offsetY - (+current.dataset.y + 15)) < Math.hypot(e.offsetX - (+prev.dataset.x + 180), e.offsetY - (+prev.dataset.y + 15))) ? current : prev;
-        // });
-        let nearestTable = [...Draw.svg.querySelectorAll('use.table:not([data-hidden])')].reduce((prev, current) => {
+        // viene utilizzato il calcolo dell'ipotenusa con il valore assoluto per stabilire qual'è la tabella più vicina
+        let nearestTable = [...Draw.svg.querySelectorAll('use.table')].reduce((prev, current) => {
           return (Math.hypot(e.offsetX - (+current.dataset.x + 180), e.offsetY - (+current.dataset.y + 15)) < Math.hypot(e.offsetX - (+prev.dataset.x + 180), e.offsetY - (+prev.dataset.y + 15))) ? current : prev;
         });
         // console.log(nearestTable.id);
@@ -323,7 +319,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.handlerDragEnd = async (e) => {
     e.preventDefault();
+    debugger;
     // debugger;
+    console.log('svgDragEnd');
     if (e.dataTransfer.dropEffect === 'copy') {
       // se la tabella non è presente in sessionStorage la scarico
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
@@ -501,7 +499,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   Draw.svg.addEventListener('dragleave', app.handlerDragLeave, false);
   Draw.svg.addEventListener('drop', app.handlerDrop, false);
   // drag end event va posizionato sullo stesso elemento che ha il dragStart
-  Draw.svg.addEventListener('dragend', app.handlerDragEnd, true);
+  Draw.svg.addEventListener('dragend', app.handlerDragEnd, false);
 
   // drag su campo per la creazione del report
   app.fieldDragStart = (e) => {
@@ -2502,7 +2500,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
     el.onmouseover = (e) => {
       if (e.target.nodeName === 'svg') {
-        if (app.dialogInfo.hasAttribute('open')) app.dialogInfo.close();
+        // if (app.dialogInfo.hasAttribute('open')) app.dialogInfo.close();
       }
     }
   });
@@ -2532,16 +2530,16 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   // visualizzo l'icona delete utilizzando <use> in svg
   app.tableEnter = (e) => {
     // Imposto le coordinate per il posizionamneto della dialog sotto alla tabella
-    app.dialogInfo.style.setProperty('--top', `${+e.currentTarget.dataset.y + 30}px`);
-    app.dialogInfo.style.setProperty('--left', `${e.currentTarget.dataset.x}px`);
+    // app.dialogInfo.style.setProperty('--top', `${+e.currentTarget.dataset.y + 30}px`);
+    // app.dialogInfo.style.setProperty('--left', `${e.currentTarget.dataset.x}px`);
 
     // verifico i dati della tabella, se ha colonne/metriche definite
     // TODO: Per le metriche dovrei aggiungere, in WorkBook.metrics, una prop 'table_alias'
     // per riuscire a recuperare le metriche impostate per una determinata tabella (seguendo
     // la stessa logica delle colonne, come fatto qui)
-    (WorkBook.fields.has(e.target.dataset.alias)) ?
-      app.dialogInfo.querySelector('button.columns').removeAttribute('disabled') :
-      app.dialogInfo.querySelector('button.columns').setAttribute('disabled', 'true');
+    // (WorkBook.fields.has(e.target.dataset.alias)) ?
+    //   app.dialogInfo.querySelector('button.columns').removeAttribute('disabled') :
+    //   app.dialogInfo.querySelector('button.columns').setAttribute('disabled', 'true');
     // imposto un dataset.tableAlias nel tasto btn-multi-fact per poter recuperare l'id della tabella
     // dei fatti quando si droppa una tabella per analisi multifact
     /* if (!e.target.dataset.tableJoin) {
@@ -2553,7 +2551,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     } */
     // visualizzo #btn-multi-fact se e.target è la tabella dei fatti
     // app.dialogInfo.querySelector('#btn-multi-fact').hidden = (e.target.dataset.tableJoin) ? true : false;
-    app.dialogInfo.show();
+    // app.dialogInfo.show();
   }
 
   app.tableLeave = () => { }

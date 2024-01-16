@@ -644,10 +644,17 @@
                             <defs>
                               <g id="table-struct" class="struct">
                                 <rect x="0" y="0" />
-                                <image href="{{ asset('/images/grid_on_5C7893_18dp.svg') }}" data-id x="5" y="6" width="18" height="18">
+                                <image href="{{ asset('/images/grid_on_5C7893_18dp.svg') }}" data-id x="4" y="6" width="18" height="18">
                                 </image>
                                 <text x="26" y="20" font-family="Barlow" font-size=".85rem" font-weight="normal"></text>
-                                <!-- <image data-columns-defined="false" href="{{ asset('/images/view_column_black_18dp.svg') }}" x="5" y="35" width="18" height="18"></image> -->
+                                <!-- <image data-icon="multi-fact-defined" href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="36" width="18" height="18"></image> -->
+                              </g>
+                              <g id="table-struct-fact" class="fact-struct">
+                                <rect x="0" y="0" />
+                                <text x="26" y="20" font-family="Barlow" font-size=".85rem" font-weight="bold"></text>
+                                <image data-icon="multi-fact-defined" href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="36" width="18" height="18"></image>
+                                <line x1="85" y1="30" x2="85" y2="60" stroke-dasharray="4" stroke-width="0.5" stroke="black" />
+                                <rect x="0" y="60" width="160" height="200px" fill="transparent" stroke-dasharray="4" stroke-width="0.5" stroke="black" />
                               </g>
                               <g id="web-bi-time">
                                 <image id="time" href="{{ asset('/images/access_time_filled_865858_18dp.svg') }}" height="18" width="18"></image>
