@@ -111,9 +111,8 @@ path:hover{
 .struct > rect {
   /* fill: lightblue; */
   rx: 2;
-  /* fill: white; */
-  width: 170px;
-  height: 30px;
+  width: 180px;
+  height: 26px;
   /* stroke: #494949; */
   /* stroke-width: 0.2; */
 }
@@ -154,19 +153,14 @@ use.table:hover{
 
 use.table[data-active]{
   fill: lightblue;
-  /* stroke: #494949; */
-  /* stroke-width: 0.1; */
 }
 
 use.table[data-related]{
   fill: #84c5849e;
-  /* stroke: whitesmoke; */
 }
 
 use.table[data-multifact]{
-  /* fill: #84c5849e; */
   opacity: .8;
-  /* stroke: whitesmoke; */
 }
 
 #coords{
@@ -534,19 +528,4 @@ section#canvas-area::before {
   width: 100%;
   align-items: center;
   justify-content: center;
-}
-
-use.table[data-hidden="true"], path[data-hidden="true"] {
-  display: none;
-}
-
-#informations {
-  position: absolute;
-  right: 0px;
-  width: 300px;
-  /* border-left: solid thin gray; */
-  height: 100%;
-  z-index: 2;
-  box-shadow: 0px 0px 8px 0px;
-  background-color: #c8c9c8;
 }

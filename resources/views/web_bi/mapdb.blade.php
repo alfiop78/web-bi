@@ -48,8 +48,8 @@
       </div>
     </li>
 
-    <li data-li-drag data-element-search data-label data-searchable="true" draggable="true">
-      <i class="material-icons-round md-18">drag_handle</i>
+    <li data-li-drag data-element-search data-label data-searchable="true">
+      <i class="material-icons-round md-18" draggable="true">drag_handle</i>
       <span></span>
     </li>
 
@@ -628,10 +628,6 @@
                         </ul>
                       </div>
                       <section id="canvas-area" data-message="">
-                        <section id="informations">
-                          <h6>Seleziona almeno una dimensione da mettere in relazione con la nuova tabella dei Fatti</h6>
-                          <!-- <button type="button" id="btn-dimension-done" data-fn="dimensionDone">Fatto</button> -->
-                        </section>
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
                           <dialog id="dlg-info" class="positioned popup">
                             <button class="button-icon material-icons-round md-18 columns" disabled>view_column</button>
@@ -644,17 +640,17 @@
                             <defs>
                               <g id="table-struct" class="struct">
                                 <rect x="0" y="0" />
-                                <image href="{{ asset('/images/grid_on_5C7893_18dp.svg') }}" data-id x="4" y="6" width="18" height="18">
+                                <image href="{{ asset('/images/grid_on_5C7893_18dp.svg') }}" data-id x="4" y="4" width="18" height="18">
                                 </image>
-                                <text x="26" y="20" font-family="Barlow" font-size=".85rem" font-weight="normal"></text>
+                                <text x="26" y="18" font-family="Barlow" font-size=".8rem" font-weight="normal"></text>
                                 <!-- <image data-icon="multi-fact-defined" href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="36" width="18" height="18"></image> -->
                               </g>
                               <g id="table-struct-fact" class="fact-struct">
                                 <rect x="0" y="0" />
-                                <text x="26" y="20" font-family="Barlow" font-size=".85rem" font-weight="bold"></text>
-                                <image data-icon="multi-fact-defined" href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="36" width="18" height="18"></image>
-                                <line x1="85" y1="30" x2="85" y2="60" stroke-dasharray="4" stroke-width="0.5" stroke="black" />
-                                <rect x="0" y="60" width="160" height="200px" fill="transparent" stroke-dasharray="4" stroke-width="0.5" stroke="black" />
+                                <text x="26" y="18" font-family="Barlow" font-size=".85rem" font-weight="bold"></text>
+                                <!-- <image data-icon="multi-fact-defined" href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="36" width="18" height="18"></image> -->
+                                <!-- <line x1="85" y1="30" x2="85" y2="60" stroke-dasharray="4" stroke-width="0.5" stroke="black" /> -->
+                                <!-- <rect x="0" y="60" width="160" height="200px" fill="transparent" stroke-dasharray="4" stroke-width="0.5" stroke="black" /> -->
                               </g>
                               <g id="web-bi-time">
                                 <image id="time" href="{{ asset('/images/access_time_filled_865858_18dp.svg') }}" height="18" width="18"></image>

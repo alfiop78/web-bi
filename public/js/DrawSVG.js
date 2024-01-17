@@ -24,7 +24,7 @@ class DrawSVG {
   get tables() { return this.#tables; }
 
   get countTables() {
-    return this.svg.querySelectorAll('use.table:not([data-hidden])').length;
+    return this.svg.querySelectorAll('use.table').length;
   }
 
   set currentLineRef(value) {
@@ -59,16 +59,16 @@ class DrawSVG {
       return (+current.dataset.y > +prev.dataset.y) ? current : prev;
     });
     if (1 - (+maxHeightTable.dataset.y / +this.svg.dataset.height) < 0.30) {
-      // this.svg.dataset.height = +this.svg.dataset.height + 60;
-      this.svg.dataset.height = +maxHeightTable.dataset.y + 60;
+      // this.svg.dataset.height = +this.svg.dataset.height + 40;
+      this.svg.dataset.height = +maxHeightTable.dataset.y + 40;
       this.svg.style.height = `${+this.svg.dataset.height}px`;
     }
     let maxWidthTable = [...this.svg.querySelectorAll('use.table')].reduce((prev, current) => {
       return (+current.dataset.x > +prev.dataset.x) ? current : prev;
     });
     if (1 - (+maxWidthTable.dataset.x / +this.svg.dataset.width) < 0.40) {
-      // this.svg.dataset.width = +this.svg.dataset.width + 180;
-      this.svg.dataset.width = +maxWidthTable.dataset.x + 180;
+      // this.svg.dataset.width = +this.svg.dataset.width + 190;
+      this.svg.dataset.width = +maxWidthTable.dataset.x + 190;
       this.svg.style.width = `${+this.svg.dataset.width}px`;
     }
   }
@@ -114,8 +114,8 @@ class DrawSVG {
         x: coords.x,
         y: coords.y,
         line: {
-          to: { x: coords.x + 180, y: coords.y + 15 },
-          from: { x: coords.x - 10, y: coords.y + 15 }
+          to: { x: coords.x + 190, y: coords.y + 13 },
+          from: { x: coords.x - 10, y: coords.y + 13 }
         },
         table: liElement.dataset.label,
         alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
@@ -136,7 +136,6 @@ class DrawSVG {
       joins: +e.target.dataset.joins,
       levelId: +e.target.dataset.levelId
     }
-    // const info = document.getElementById('informations');
   }
 
   handlerTableDragEnter(e) {
@@ -290,10 +289,10 @@ class DrawSVG {
         // Se sono presenti due tabelle in join con 'table' (in ciclo) le posizioni y di queste tabelle vengono sommate (nel for) e
         // ...poi divise per il numero di tabelle join, in questo modo la tabella in ciclo viene posizionata al centro
         this.tables.get(table.id).y = yResult;
-        this.tables.get(table.id).line.from.y = yResult + 15;
-        this.tables.get(table.id).line.to.y = yResult + 15;
-        // this.tables.get(table.id).line.from.y = (y / +table.dataset.joins) + 15;
-        // this.tables.get(table.id).line.to.y = (y / +table.dataset.joins) + 15;
+        this.tables.get(table.id).line.from.y = yResult + 13;
+        this.tables.get(table.id).line.to.y = yResult + 13;
+        // this.tables.get(table.id).line.from.y = (y / +table.dataset.joins) + 13;
+        // this.tables.get(table.id).line.to.y = (y / +table.dataset.joins) + 13;
         this.currentTable = this.tables.get(table.id);
         this.autoPosition();
       });

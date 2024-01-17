@@ -215,6 +215,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // console.log('e.target : ', e.target.id);
     e.target.classList.add('dragging');
     app.dragElementPosition = { x: e.offsetX, y: e.offsetY };
+    // app.dragElementPosition = { x: 0, y: 0 };
     // console.log(app.dragElementPosition);
     e.dataTransfer.setData('text/plain', e.target.id);
     // creo la linea
@@ -265,7 +266,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       if (Draw.countTables > 0) {
         // viene utilizzato il calcolo dell'ipotenusa con il valore assoluto per stabilire qual'è la tabella più vicina
         let nearestTable = [...Draw.svg.querySelectorAll('use.table')].reduce((prev, current) => {
-          return (Math.hypot(e.offsetX - (+current.dataset.x + 180), e.offsetY - (+current.dataset.y + 15)) < Math.hypot(e.offsetX - (+prev.dataset.x + 180), e.offsetY - (+prev.dataset.y + 15))) ? current : prev;
+          return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 13)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 13))) ? current : prev;
         });
         // console.log(nearestTable.id);
         const rectBounding = nearestTable.getBoundingClientRect();
@@ -284,7 +285,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
               id: Draw.currentLineRef.dataset.id,
               key: Draw.currentLineRef.id,
               to: Draw.tableJoin.table.id,
-              from: { x: (e.offsetX - app.dragElementPosition.x - 10), y: (e.offsetY - app.dragElementPosition.y + 17.5) } // in questo caso non c'è l'id della tabella perchè questa deve essere ancora droppata, metto le coordinate e.offsetX, e.offsetY
+              from: { x: (e.offsetX - app.dragElementPosition.x - 10), y: (e.offsetY - app.dragElementPosition.y + 13) } // in questo caso non c'è l'id della tabella perchè questa deve essere ancora droppata, metto le coordinate e.offsetX, e.offsetY
+              // from: { x: (e.offsetX - app.dragElementPosition.x - 10), y: (e.offsetY - app.dragElementPosition.y + 17.5) } // in questo caso non c'è l'id della tabella perchè questa deve essere ancora droppata, metto le coordinate e.offsetX, e.offsetY
             }
           };
           Draw.currentLine = Draw.joinLines.get(Draw.currentLineRef.id);
@@ -319,8 +321,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.handlerDragEnd = async (e) => {
     e.preventDefault();
-    debugger;
-    // debugger;
     console.log('svgDragEnd');
     if (e.dataTransfer.dropEffect === 'copy') {
       // se la tabella non è presente in sessionStorage la scarico
@@ -354,11 +354,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     liElement.classList.remove('dragging');
     const time = Date.now().toString();
     const tableId = time.substring(time.length - 5);
-    let coords;
 
     // se non è presente una tableJoin significa che sto aggiungendo la prima tabella
+    let coords = { x: e.offsetX, y: e.offsetY };
     if (!Draw.tableJoin) {
-      coords = { x: 40, y: 60 };
+      // console.log(e);
+      // debugger;
+      console.log(liElement.getBoundingClientRect());
       Draw.tables = {
         id: `svg-data-${tableId}`, properties: {
           id: tableId,
@@ -366,8 +368,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           x: coords.x,
           y: coords.y,
           line: {
-            to: { x: coords.x + 180, y: coords.y + 15 },
-            from: { x: coords.x - 10, y: coords.y + 15 }
+            to: { x: coords.x + 190, y: coords.y + 13 },
+            from: { x: coords.x - 10, y: coords.y + 13 }
           },
           table: liElement.dataset.label,
           alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
@@ -393,8 +395,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       if (!Draw.arrayLevels.includes(Draw.tableJoin.levelId)) Draw.arrayLevels.splice(0, 0, Draw.tableJoin.levelId);
       Draw.svg.dataset.level = (Draw.svg.dataset.level < levelId) ? levelId : Draw.svg.dataset.level;
       // quante tabelle ci sono per il livello corrente che appartengono alla stessa tableJoin
-      const tableRelated = Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'][data-table-join='${Draw.tableJoin.table.id}']`);
-      let lastTableInLevel;
+      // const tableRelated = Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'][data-table-join='${Draw.tableJoin.table.id}']`);
+      /* let lastTableInLevel;
       // recupero la posizione dell'ultima tabella appartenete al livello corrente e legata alla stessa tableJoin
       tableRelated.forEach(table => {
         if (lastTableInLevel) {
@@ -402,14 +404,15 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         } else {
           lastTableInLevel = table;
         }
-      });
-      let coords = { x: +Draw.tableJoin.table.dataset.x + 275, y: +Draw.tableJoin.table.dataset.y };
+      }); */
+      // let coords = { x: +Draw.tableJoin.table.dataset.x + 275, y: +Draw.tableJoin.table.dataset.y };
+      // let coords = { x: +Draw.tableJoin.table.dataset.x + 275, y: e.offsetY };
       // tabella aggiunta per questo livello, la imposto nella stessa y di tableJoin
-      if (lastTableInLevel) {
+      /* if (lastTableInLevel) {
         // sono presenti altre tabelle per questo livello
         // recupero la posizione dell'ultima tabella relativa a questa join, aggiungo la tabella corrente a +60y dopo l'ultima tabella trovata
         // lastTableInLevel è ricavata da tableRelated (tabelle con tableJoin uguale a quella che sto droppando)
-        coords.y = +lastTableInLevel.dataset.y + 60;
+        // coords.y = +lastTableInLevel.dataset.y + 60;
         // recupero altre tabelle presenti in questo livello > coords.y per spostarle 60 y più in basso
         Draw.arrayLevels.forEach(levelId => {
           // incremento il levelId perchè, in questo caso (a differenza di joinTablePositioning()) devo iniziare dall'ultimo levelId
@@ -421,15 +424,15 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             // console.log(`Livello ${levelId}`);
             // console.log(`tabelle ${table.id}`);
             if (+table.dataset.y >= coords.y) {
-              Draw.tables.get(table.id).y += 60;
-              Draw.tables.get(table.id).line.from.y += 60;
-              Draw.tables.get(table.id).line.to.y += 60;
+              Draw.tables.get(table.id).y += 40;
+              Draw.tables.get(table.id).line.from.y += 40;
+              Draw.tables.get(table.id).line.to.y += 40;
               Draw.currentTable = Draw.tables.get(table.id);
               Draw.autoPosition();
             }
           });
         });
-      }
+      } */
       // imposto il data-dimensionId
       const dimensionId = (levelId === 1) ? +Draw.tableJoin.joins : +Draw.tableJoin.table.dataset.dimensionId;
       // imposto la proprietà 'tables' della Classe Draw
@@ -440,8 +443,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           x: coords.x,
           y: coords.y,
           line: {
-            to: { x: coords.x + 180, y: coords.y + 15 },
-            from: { x: coords.x - 10, y: coords.y + 15 }
+            to: { x: coords.x - app.dragElementPosition.x + 190, y: coords.y + 13 }, // punto di ancoraggio di destra della tabella
+            from: { x: coords.x - app.dragElementPosition.x - 10, y: coords.y + 13 } // punto di ancoraggio di sinistra della tabella
           },
           table: liElement.dataset.label,
           alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
@@ -464,19 +467,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       };
       // console.info('create JOIN');
       app.openJoinWindow();
-      const informations = document.getElementById('informations');
-      if (!Draw.dimensions.has(dimensionId)) {
-        // TODO: creare un template con la checkbox per la selezione delle dimensioni
-        Draw.dimensions = dimensionId;
-        const p = document.createElement('p');
-        p.id = `dimension-${dimensionId}`;
-        p.dataset.dimensionId = dimensionId;
-        p.innerText = liElement.dataset.label;
-        p.onclick = app.dimensionSelected;
-        p.onmouseover = app.highlightDimension;
-        p.onmouseleave = app.unhighlightDimension;
-        informations.appendChild(p);
-      }
       Draw.tables.get(`svg-data-${tableId}`).name;
     }
     Draw.currentTable = Draw.tables.get(`svg-data-${tableId}`);
@@ -487,7 +477,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // imposto event contextmenu
     Draw.svg.querySelector(`#${Draw.currentTable.key}`).addEventListener('contextmenu', app.contextMenuTable);
     // posizionamento delle joinTable (tabelle che hanno data-join > 1)
-    Draw.joinTablePositioning();
+    // Draw.joinTablePositioning();
   }
 
   Draw.svg.addEventListener('mousemove', (e) => {
@@ -1251,19 +1241,19 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       // recupero le tabelle dello schema selezionato
       const data = await getDatabaseTable(schema);
       console.log(data);
-      // TODO: attivo i tasti ("Crea dimensione", "Modifica dimensione", "Crea cubo", ecc...)
       let ul = document.getElementById('ul-tables');
       for (const [key, value] of Object.entries(data)) {
         const content = app.tmplList.content.cloneNode(true);
         const li = content.querySelector('li[data-li-drag]');
         const span = li.querySelector('span');
+        const i = li.querySelector('i');
         li.dataset.fn = "showTablePreview";
-        li.dataset.label = value.TABLE_NAME;
-        li.dataset.schema = schema;
+        i.dataset.label = value.TABLE_NAME;
+        i.dataset.schema = schema;
         li.dataset.elementSearch = 'tables';
-        li.ondragstart = app.handlerDragStart;
-        li.ondragend = app.handlerDragEnd;
-        li.id = 'table-' + key;
+        i.ondragstart = app.handlerDragStart;
+        i.ondragend = app.handlerDragEnd;
+        i.id = 'table-' + key;
         span.innerText = value.TABLE_NAME;
         ul.appendChild(li);
       }
@@ -1736,13 +1726,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       WorkBook.save();
     }
   }
-
-  // app.addMultifact = (e) => {
-  //   console.log(e.target);
-  //   // TODO: visualizzo il div nascosto #informations
-  //   // Draw.hidden();
-  //   delete Draw.tableJoin;
-  // }
 
   // TODO: spostare in Draw
   app.highlightDimension = (e) => {

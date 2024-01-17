@@ -291,3 +291,8 @@ input[type="number"] {
 .row > .col.grid-10 { grid-column: span 10; }
 .row > .col.grid-11 { grid-column: span 11; }
 .row > .col.grid-12 { grid-column: span 12; }
+
+i[draggable="true"]:hover {
+  cursor: grab;
+  color: steelblue;
+}
