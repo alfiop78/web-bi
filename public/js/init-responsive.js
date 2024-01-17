@@ -215,8 +215,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // console.log('e.target : ', e.target.id);
     e.target.classList.add('dragging');
     app.dragElementPosition = { x: e.offsetX, y: e.offsetY };
-    // app.dragElementPosition = { x: 0, y: 0 };
-    // console.log(app.dragElementPosition);
+    console.log(app.dragElementPosition);
     e.dataTransfer.setData('text/plain', e.target.id);
     // creo la linea
     if (Draw.countTables > 0) {
@@ -286,7 +285,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
               key: Draw.currentLineRef.id,
               to: Draw.tableJoin.table.id,
               from: { x: (e.offsetX - app.dragElementPosition.x - 10), y: (e.offsetY - app.dragElementPosition.y + 13) } // in questo caso non c'è l'id della tabella perchè questa deve essere ancora droppata, metto le coordinate e.offsetX, e.offsetY
-              // from: { x: (e.offsetX - app.dragElementPosition.x - 10), y: (e.offsetY - app.dragElementPosition.y + 17.5) } // in questo caso non c'è l'id della tabella perchè questa deve essere ancora droppata, metto le coordinate e.offsetX, e.offsetY
             }
           };
           Draw.currentLine = Draw.joinLines.get(Draw.currentLineRef.id);
@@ -356,11 +354,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const tableId = time.substring(time.length - 5);
 
     // se non è presente una tableJoin significa che sto aggiungendo la prima tabella
-    let coords = { x: e.offsetX, y: e.offsetY };
+    let coords = { x: e.offsetX - app.dragElementPosition.x, y: e.offsetY - app.dragElementPosition.y };
+    console.log(coords);
     if (!Draw.tableJoin) {
-      // console.log(e);
-      // debugger;
-      console.log(liElement.getBoundingClientRect());
       Draw.tables = {
         id: `svg-data-${tableId}`, properties: {
           id: tableId,
@@ -443,8 +439,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           x: coords.x,
           y: coords.y,
           line: {
-            to: { x: coords.x - app.dragElementPosition.x + 190, y: coords.y + 13 }, // punto di ancoraggio di destra della tabella
-            from: { x: coords.x - app.dragElementPosition.x - 10, y: coords.y + 13 } // punto di ancoraggio di sinistra della tabella
+            to: { x: coords.x + 190, y: coords.y + 13 }, // punto di ancoraggio di destra della tabella
+            from: { x: coords.x - 10, y: coords.y + 13 } // punto di ancoraggio di sinistra della tabella
           },
           table: liElement.dataset.label,
           alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,

@@ -117,6 +117,13 @@ path:hover{
   /* stroke-width: 0.2; */
 }
 
+.struct > rect.fact {
+  fill: lightblue;
+  width: 22px;
+  height: 26px;
+}
+
+
 .struct > text {
   fill: #494949;
   font-weight: normal;

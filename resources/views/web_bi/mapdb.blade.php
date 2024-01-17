@@ -613,7 +613,6 @@
                           <button id="context-custom-metric" data-fn="addCustomMetric" class="btn-link-context">Metrica person.</button>
                           <button data-fn="removeTable" class="btn-link-context">Rimuovi</button>
                           <button data-fn="setAliasTable" class="btn-link-context">Imposta alias</button>
-                          <!-- <button data-fn="addMultifact" class="btn-link-context">Analisi MultiFatti</button> -->
                         </ul>
                       </div>
                       <div id="context-menu-column" class="context-menu">
@@ -633,7 +632,6 @@
                             <button class="button-icon material-icons-round md-18 columns" disabled>view_column</button>
                             <button class="button-icon material-icons-round md-18 metrics" disabled>multiline_chart</button>
                             <button class="button-icon material-icons-round md-18" disabled>history</button>
-                            <!-- <button type="button" id="btn-multi-fact" data-fn="addMultifact" class="button-icon material-icons-round md-18">library_add</button> -->
                             <button class="button-icon material-icons-round md-18" disabled>info</button>
                           </dialog>
                           <svg id="svg" class="dropzone" data-level="0">
@@ -647,6 +645,7 @@
                               </g>
                               <g id="table-struct-fact" class="fact-struct">
                                 <rect x="0" y="0" />
+                                <rect class="fact" x="0" y="0" />
                                 <text x="26" y="18" font-family="Barlow" font-size=".85rem" font-weight="bold"></text>
                                 <!-- <image data-icon="multi-fact-defined" href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="36" width="18" height="18"></image> -->
                                 <!-- <line x1="85" y1="30" x2="85" y2="60" stroke-dasharray="4" stroke-width="0.5" stroke="black" /> -->

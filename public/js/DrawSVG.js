@@ -262,7 +262,6 @@ class DrawSVG {
     }
   }
 
-
   deleteJoinLine(key) {
     if (key) {
       this.joinLines.delete(key);
