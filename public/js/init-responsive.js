@@ -1,6 +1,6 @@
 // TODO: le funzioni che non utilizzano la classe WorkBook possono essere spostate in supportFn.js
 var App = new Application();
-var Draw = new DrawSVG('svg');
+// var Draw = new DrawSVG('svg');
 var SheetStorage = new SheetStorages();
 var WorkBookStorage = new Storages();
 var Dashboard = new Dashboards();
@@ -10,7 +10,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   var app = {
     // templates
     tmplList: document.getElementById('tmpl-li'),
-    tmplJoin: document.getElementById('tmpl-join-field'),
     tmplFilterDropped: document.getElementById('tmpl-filter-dropped-adv-metric'),
     tmplContextMenu: document.getElementById('tmpl-context-menu-content'),
     contextMenuRef: document.getElementById('context-menu'),
@@ -50,7 +49,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // body
     body: document.getElementById('body'),
     translate: document.getElementById('translate'),
-    coordsRef: document.getElementById('coords'),
     wjTitle: document.querySelector('#window-join .wj-title'),
     workbookTablesStruct: document.querySelector('#workbook-objects'),
     // columns and rows dropzone (step 2)
@@ -163,6 +161,35 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     app.contextMenuRef.toggleAttribute('open');
   }
 
+  // l'evento dragend deve essere impostato sull'elemento che inizia il drag (start)
+  app.handlerSVGDragEnd = async (e) => {
+    e.preventDefault();
+    // e.stopPropagation();
+    console.log('svgDragEnd');
+    if (e.dataTransfer.dropEffect === 'copy') {
+      // se la tabella non è presente in sessionStorage la scarico
+      if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
+      // se sono presenti almeno due tabelle visualizzo la dialog per la join
+      // debugger;
+      if (Draw.countTables > 1) {
+        WorkBook.tableJoins = {
+          from: app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
+          to: app.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId
+        }
+        // console.log(WorkBook.tableJoins);
+        for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
+          WorkBook.activeTable = value.id;
+          const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
+          app.addFields(key, data);
+        }
+      }
+    }
+    // creo una mappatura di tutte le tabelle del Canvas
+    app.tablesMap();
+    // creo una mappatura per popolare il WorkBook nello step successivo
+    app.hierTables();
+  }
+
   // Aggiunta metrica composta di base
   app.addCustomMetric = () => {
     // carico elenco metrica composte di base
@@ -209,30 +236,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     WorkBook.checkChanges(`alias-${input.value}`);
   }
 
-  /* NOTE: DRAG&DROP EVENTS */
-
-  app.handlerDragStart = (e) => {
-    // console.log('e.target : ', e.target.id);
-    e.target.classList.add('dragging');
-    app.dragElementPosition = { x: e.offsetX, y: e.offsetY };
-    console.log(app.dragElementPosition);
-    e.dataTransfer.setData('text/plain', e.target.id);
-    // creo la linea
-    if (Draw.countTables > 0) {
-      // if (Draw.svg.querySelectorAll('.table').length > 0) {
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      const token = rand().substring(0, 4);
-      // line.id = `line-${Draw.svg.querySelectorAll('use.table').length}`;
-      // line.dataset.id = Draw.svg.querySelectorAll('use.table').length;
-      line.id = `line-${token}`;
-      line.dataset.id = token;
-      Draw.svg.appendChild(line);
-      Draw.currentLineRef = line.id;
-    }
-    // console.log(e.dataTransfer);
-    e.dataTransfer.effectAllowed = "copy";
-  }
-
   // creazione/modifica colonna _id e _ds
   app.columnDragStart = (e) => {
     console.log('column drag start');
@@ -256,236 +259,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     app.addMark({ field: elementRef.dataset.field, datatype: elementRef.dataset.datatype }, e.target);
     // app.addSpan(txtArea, null, 'column');
   }
-
-  app.handlerDragOver = (e) => {
-    e.preventDefault();
-    if (e.currentTarget.classList.contains('dropzone')) {
-      e.dataTransfer.dropEffect = "copy";
-      app.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
-      if (Draw.countTables > 0) {
-        // viene utilizzato il calcolo dell'ipotenusa con il valore assoluto per stabilire qual'è la tabella più vicina
-        let nearestTable = [...Draw.svg.querySelectorAll('use.table')].reduce((prev, current) => {
-          return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 13)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 13))) ? current : prev;
-        });
-        // console.log(nearestTable.id);
-        const rectBounding = nearestTable.getBoundingClientRect();
-        Draw.tableJoin = {
-          table: nearestTable,
-          x: +nearestTable.dataset.x + rectBounding.width + 10,
-          y: +nearestTable.dataset.y + (rectBounding.height / 2),
-          joins: +nearestTable.dataset.joins,
-          levelId: +nearestTable.dataset.levelId
-        }
-        // console.log('joinTable :', Draw.tableJoin);
-        // console.log('tableJoin :', Draw.tableJoin.table.id);
-        if (Draw.currentLineRef && Draw.tableJoin) {
-          Draw.joinLines = {
-            id: Draw.currentLineRef.id, properties: {
-              id: Draw.currentLineRef.dataset.id,
-              key: Draw.currentLineRef.id,
-              to: Draw.tableJoin.table.id,
-              from: { x: (e.offsetX - app.dragElementPosition.x - 10), y: (e.offsetY - app.dragElementPosition.y + 13) } // in questo caso non c'è l'id della tabella perchè questa deve essere ancora droppata, metto le coordinate e.offsetX, e.offsetY
-            }
-          };
-          Draw.currentLine = Draw.joinLines.get(Draw.currentLineRef.id);
-        }
-        Draw.drawLine();
-      }
-    } else {
-      e.dataTransfer.dropEffect = "none";
-    }
-  }
-
-  app.handlerDragEnter = (e) => {
-    e.preventDefault();
-    if (e.currentTarget.classList.contains('dropzone')) {
-      console.info('DROPZONE');
-      // console.log(e.currentTarget, e.target);
-      if (e.target.nodeName === 'use') Draw.currentLevel = +e.target.dataset.levelId;
-      // e.dataTransfer.dropEffect = "copy";
-      // coloro il border differente per la dropzone
-      e.currentTarget.classList.add('dropping');
-    } else {
-      console.warn('non in dropzone');
-      // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
-      e.dataTransfer.dropEffect = "none";
-    }
-  }
-
-  app.handlerDragLeave = (e) => {
-    e.preventDefault();
-    e.currentTarget.classList.remove('dropping');
-  }
-
-  app.handlerDragEnd = async (e) => {
-    e.preventDefault();
-    console.log('svgDragEnd');
-    if (e.dataTransfer.dropEffect === 'copy') {
-      // se la tabella non è presente in sessionStorage la scarico
-      if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
-      // se sono presenti almeno due tabelle visualizzo la dialog per la join
-      // debugger;
-      if (Draw.countTables > 1) {
-        WorkBook.tableJoins = {
-          from: app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
-          to: app.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId
-        }
-        // console.log(WorkBook.tableJoins);
-        for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
-          WorkBook.activeTable = value.id;
-          const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
-          app.addFields(key, data);
-        }
-      }
-    }
-    // creo una mappatura di tutte le tabelle del Canvas
-    app.tablesMap();
-    // creo una mappatura per popolare il WorkBook nello step successivo
-    app.hierTables();
-  }
-
-  app.handlerDrop = (e) => {
-    e.preventDefault();
-    e.currentTarget.classList.replace('dropping', 'dropped');
-    if (!e.currentTarget.classList.contains('dropzone')) return;
-    const liElement = document.getElementById(e.dataTransfer.getData('text/plain'));
-    liElement.classList.remove('dragging');
-    const time = Date.now().toString();
-    const tableId = time.substring(time.length - 5);
-
-    // se non è presente una tableJoin significa che sto aggiungendo la prima tabella
-    let coords = { x: e.offsetX - app.dragElementPosition.x, y: e.offsetY - app.dragElementPosition.y };
-    console.log(coords);
-    if (!Draw.tableJoin) {
-      Draw.tables = {
-        id: `svg-data-${tableId}`, properties: {
-          id: tableId,
-          key: `svg-data-${tableId}`,
-          x: coords.x,
-          y: coords.y,
-          line: {
-            to: { x: coords.x + 190, y: coords.y + 13 },
-            from: { x: coords.x - 10, y: coords.y + 13 }
-          },
-          table: liElement.dataset.label,
-          alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
-          name: liElement.dataset.label,
-          schema: liElement.dataset.schema,
-          join: null,
-          joins: 0,
-          levelId: 0
-        }
-      };
-    } else {
-      // è presente una tableJoin
-      // imposto data.joins anche sull'elemento SVG
-      // OPTIMIZE: potrei creare un Metodo nella Classe Draw che imposta la prop 'join'
-      // ...in Draw.tables e, allo stesso tempo, imposta anche 'dataset.joins'
-      // ...sull'elemento 'use.table' come fatto sulle due righe successive
-      Draw.svg.querySelector(`use.table[id="${Draw.tableJoin.table.id}"]`).dataset.joins = ++Draw.tableJoin.joins;
-      // ... lo imposto anche nell'oggetto Map() tables
-      Draw.tables.get(Draw.tableJoin.table.id).joins = Draw.tableJoin.joins;
-      // livello che sto aggiungendo
-      const levelId = Draw.tableJoin.levelId + 1;
-      // creo un array dei livelli, ordinato in reverse per poter fare un ciclo dal penultimo livello fino al primo ed effettuare il posizionamento automatico
-      if (!Draw.arrayLevels.includes(Draw.tableJoin.levelId)) Draw.arrayLevels.splice(0, 0, Draw.tableJoin.levelId);
-      Draw.svg.dataset.level = (Draw.svg.dataset.level < levelId) ? levelId : Draw.svg.dataset.level;
-      // quante tabelle ci sono per il livello corrente che appartengono alla stessa tableJoin
-      // const tableRelated = Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'][data-table-join='${Draw.tableJoin.table.id}']`);
-      /* let lastTableInLevel;
-      // recupero la posizione dell'ultima tabella appartenete al livello corrente e legata alla stessa tableJoin
-      tableRelated.forEach(table => {
-        if (lastTableInLevel) {
-          if (+lastTableInLevel.dataset.y < +table.dataset.y) lastTableInLevel = table;
-        } else {
-          lastTableInLevel = table;
-        }
-      }); */
-      // let coords = { x: +Draw.tableJoin.table.dataset.x + 275, y: +Draw.tableJoin.table.dataset.y };
-      // let coords = { x: +Draw.tableJoin.table.dataset.x + 275, y: e.offsetY };
-      // tabella aggiunta per questo livello, la imposto nella stessa y di tableJoin
-      /* if (lastTableInLevel) {
-        // sono presenti altre tabelle per questo livello
-        // recupero la posizione dell'ultima tabella relativa a questa join, aggiungo la tabella corrente a +60y dopo l'ultima tabella trovata
-        // lastTableInLevel è ricavata da tableRelated (tabelle con tableJoin uguale a quella che sto droppando)
-        // coords.y = +lastTableInLevel.dataset.y + 60;
-        // recupero altre tabelle presenti in questo livello > coords.y per spostarle 60 y più in basso
-        Draw.arrayLevels.forEach(levelId => {
-          // incremento il levelId perchè, in questo caso (a differenza di joinTablePositioning()) devo iniziare dall'ultimo levelId
-          levelId++;
-          // per ogni livello, partendo dall'ultimo
-          // console.log(levelId);
-          // se sono presenti, in questo livello, tabelle con y > di quella che sto droppando le devo spostare y+60
-          Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}']`).forEach(table => {
-            // console.log(`Livello ${levelId}`);
-            // console.log(`tabelle ${table.id}`);
-            if (+table.dataset.y >= coords.y) {
-              Draw.tables.get(table.id).y += 40;
-              Draw.tables.get(table.id).line.from.y += 40;
-              Draw.tables.get(table.id).line.to.y += 40;
-              Draw.currentTable = Draw.tables.get(table.id);
-              Draw.autoPosition();
-            }
-          });
-        });
-      } */
-      // imposto il data-dimensionId
-      const dimensionId = (levelId === 1) ? +Draw.tableJoin.joins : +Draw.tableJoin.table.dataset.dimensionId;
-      // imposto la proprietà 'tables' della Classe Draw
-      Draw.tables = {
-        id: `svg-data-${tableId}`, properties: {
-          id: tableId,
-          key: `svg-data-${tableId}`,
-          x: coords.x,
-          y: coords.y,
-          line: {
-            to: { x: coords.x + 190, y: coords.y + 13 }, // punto di ancoraggio di destra della tabella
-            from: { x: coords.x - 10, y: coords.y + 13 } // punto di ancoraggio di sinistra della tabella
-          },
-          table: liElement.dataset.label,
-          alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
-          name: liElement.dataset.label,
-          schema: liElement.dataset.schema,
-          joins: 0,
-          join: Draw.tableJoin.table.id,
-          dimensionId,
-          levelId
-        }
-      };
-      // linea di join da tableJoin alla tabella droppata
-      Draw.joinLines = {
-        id: Draw.currentLineRef.id, properties: {
-          id: Draw.currentLineRef.dataset.id,
-          key: Draw.currentLineRef.id,
-          to: Draw.tableJoin.table.id,
-          from: `svg-data-${tableId}`
-        }
-      };
-      // console.info('create JOIN');
-      app.openJoinWindow();
-      Draw.tables.get(`svg-data-${tableId}`).name;
-    }
-    Draw.currentTable = Draw.tables.get(`svg-data-${tableId}`);
-    // creo nel DOM la tabella appena droppata
-    Draw.drawTable();
-    // imposto la tabella attiva per poter scaricare le colonne in sessionStorage (in handlerDragEnd())
-    WorkBook.activeTable = `svg-data-${tableId}`;
-    // imposto event contextmenu
-    Draw.svg.querySelector(`#${Draw.currentTable.key}`).addEventListener('contextmenu', app.contextMenuTable);
-    // posizionamento delle joinTable (tabelle che hanno data-join > 1)
-    // Draw.joinTablePositioning();
-  }
-
-  Draw.svg.addEventListener('mousemove', (e) => {
-    app.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
-  }, true);
-
-  Draw.svg.addEventListener('dragover', app.handlerDragOver, false);
-  Draw.svg.addEventListener('dragenter', app.handlerDragEnter, false);
-  Draw.svg.addEventListener('dragleave', app.handlerDragLeave, false);
-  Draw.svg.addEventListener('drop', app.handlerDrop, false);
-  // drag end event va posizionato sullo stesso elemento che ha il dragStart
-  Draw.svg.addEventListener('dragend', app.handlerDragEnd, false);
 
   // drag su campo per la creazione del report
   app.fieldDragStart = (e) => {
@@ -1244,11 +1017,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         const span = li.querySelector('span');
         const i = li.querySelector('i');
         li.dataset.fn = "showTablePreview";
+        li.dataset.label = value.TABLE_NAME;
         i.dataset.label = value.TABLE_NAME;
         i.dataset.schema = schema;
         li.dataset.elementSearch = 'tables';
-        i.ondragstart = app.handlerDragStart;
-        i.ondragend = app.handlerDragEnd;
+        i.ondragstart = Draw.handlerDragStart.bind(Draw);
+        // drag end event va posizionato sullo stesso elemento che ha il dragStart
+        i.ondragend = app.handlerSVGDragEnd;
         i.id = 'table-' + key;
         span.innerText = value.TABLE_NAME;
         ul.appendChild(li);
@@ -1319,22 +1094,20 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     app.dialogWorkBook.showModal();
   }
 
-  app.closeWorkBook = () => {
-    // elimino tutti gli elemeneti svg tranne i <defs>
-    // console.log(Draw.svg.querySelectorAll('*:not(#table-struct, #web-bi-time, defs)'));
-    // console.log(Draw.svg.querySelectorAll(":where(use, path), g.struct[id^='struct']"));
-    Draw.svg.querySelectorAll(":where(use, path), g.struct[id^='struct']").forEach(el => el.remove());
-    // debugger;
-    if (Sheet) delete Sheet.sheet;
-    document.getElementById('sheet-name').value = 'Titolo';
-    document.getElementById('sheet-name').innerText = 'Titolo';
-    // Sheet = undefined;
-    document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
-
-  }
+  // app.closeWorkBook = () => {
+  //   // elimino tutti gli elemeneti svg tranne i <defs>
+  //   // console.log(Draw.svg.querySelectorAll('*:not(#table-struct, #web-bi-time, defs)'));
+  //   // console.log(Draw.svg.querySelectorAll(":where(use, path), g.struct[id^='struct']"));
+  //   Draw.svg.querySelectorAll(":where(use, path), g.struct[id^='struct']").forEach(el => el.remove());
+  //   // debugger;
+  //   if (Sheet) delete Sheet.sheet;
+  //   document.getElementById('sheet-name').value = 'Titolo';
+  //   document.getElementById('sheet-name').innerText = 'Titolo';
+  //   // Sheet = undefined;
+  //   document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
+  // }
 
   app.btnWorkBookNew.onclick = () => {
-    app.closeWorkBook();
     app.dialogNewWorkBook.showModal();
   }
 
@@ -1364,7 +1137,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   // apertura del WorkBook
   app.workBookSelected = async (e) => {
     // chiudo l'eventuale workbook già aperto
-    app.closeWorkBook();
+    // app.closeWorkBook();
     Draw = new DrawSVG('svg');
     WorkBook = new WorkBooks(e.currentTarget.dataset.name);
     WorkBook = WorkBook.open(e.currentTarget.dataset.token);
@@ -2790,30 +2563,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     document.querySelector('#btn-remove-join').dataset.token = token;
   }
 
-  // Questa funzione restituisce i due elementi da aggiungere al DOM
-  // Può essere invocata sia per creare una nuova join che
-  // per creare/popolare una join esistente (ad es.: click sulla join line)
-  app.createJoinField = () => {
-    const tmplJoinFrom = app.tmplJoin.content.cloneNode(true);
-    const tmplJoinTo = app.tmplJoin.content.cloneNode(true);
-    const joinFieldFrom = tmplJoinFrom.querySelector('.join-field');
-    const joinFieldTo = tmplJoinTo.querySelector('.join-field');
-    // rimuovo eventuali joinField che hanno l'attributo data-active prima di aggiungere quelli nuovi
-    app.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
-    app.dialogJoin.querySelector('.joins section[data-table-from] > .join').appendChild(joinFieldFrom);
-    app.dialogJoin.querySelector('.joins section[data-table-to] > .join').appendChild(joinFieldTo);
-    return { from: joinFieldFrom, to: joinFieldTo };
-  }
 
   // TODO: potrebbe essere spostata in supportFn.js
-  app.addJoin = () => {
-    // recupero i riferimenti del template da aggiungere al DOM
-    let joinFields = app.createJoinField();
-    const token = rand().substring(0, 7);
-    joinFields.from.dataset.token = token;
-    joinFields.to.dataset.token = token;
-    document.querySelector('#btn-remove-join').dataset.token = token;
-  }
 
   // elimino la join attiva (data-active)
   app.removeJoin = (e) => {
@@ -2842,48 +2593,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       document.querySelector('#btn-remove-join').dataset.token = join.dataset.token;
 
     });
-  }
-
-  app.openJoinWindow = () => {
-    // app.dialogJoin.dataset.open = 'false';
-    app.dialogJoin.show();
-    app.dialogJoin.dataset.lineId = Draw.currentLineRef.id;
-    // aggiungo i template per join-field se non ci sono ancora join create
-    // verifico se è presente una join su questa line
-    if (!Draw.currentLineRef.dataset.joinId) {
-      // join non presente
-      app.addJoin();
-    } else {
-      // join presente, popolo i join-field
-      // Le join sono salvate in WorkBook.joins e la key corrisponde alla tabella 'from'
-      // messa in relazione
-      for (const [key, value] of Object.entries(WorkBook.joins.get(Draw.currentLineRef.dataset.joinId))) {
-        // key : join token
-        // per ogni join devo creare i due campi .join-field e popolarli
-        // con i dati presenti in WorkBook.join (che corrisponde a value in questo caso)
-        let joinFields = app.createJoinField();
-        joinFields.from.dataset.token = key;
-        joinFields.to.dataset.token = key;
-        joinFields.from.dataset.field = value.from.field;
-        joinFields.from.dataset.table = value.from.table;
-        joinFields.from.dataset.alias = value.from.alias;
-        joinFields.from.innerHTML = value.from.field;
-        joinFields.to.dataset.field = value.to.field;
-        joinFields.to.dataset.table = value.to.table;
-        joinFields.to.dataset.alias = value.to.alias;
-        joinFields.to.innerHTML = value.to.field;
-        document.querySelector('#btn-remove-join').dataset.token = key;
-      }
-    }
-    const from = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).from);
-    const to = Draw.tables.get(Draw.joinLines.get(Draw.currentLineRef.id).to);
-
-    app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableFrom = from.table;
-    app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId = from.key;
-    app.dialogJoin.querySelector('.joins section[data-table-from] .table').innerHTML = from.table;
-    app.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableTo = to.table;
-    app.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId = to.key;
-    app.dialogJoin.querySelector('.joins section[data-table-to] .table').innerHTML = to.table;
   }
 
   app.handlerTimeDimension = async (e) => {

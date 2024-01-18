@@ -4,6 +4,8 @@ class DrawSVG {
   #dimensions = new Set();
   #dimensionSelected = {};
   #currentLineRef; // ref
+  tmplJoin = document.getElementById('tmpl-join-field');
+  dialogJoin = document.getElementById('dlg-join');
 
   constructor(element) {
     this.svg = document.getElementById(element);
@@ -12,9 +14,19 @@ class DrawSVG {
     this.currentLevel;
     this.currentTable = {}, this.currentLine = {};
     this.arrayLevels = [];
+    this.dragElementPosition = { x: 0, y: 0 };
+    this.coordsRef = document.getElementById('coords');
+    this.svg.addEventListener('dragover', this.handlerDragOver.bind(this), false);
+    this.svg.addEventListener('drop', this.handlerDrop.bind(this), false);
+    this.svg.addEventListener('dragenter', this.handlerDragEnter.bind(this), false);
+    this.svg.addEventListener('dragleave', this.handlerDragLeave.bind(this), false);
+
+    this.svg.addEventListener('mousemove', this.handlerMouseMove.bind(this), true);
     // altre proprietà
     // tableJoin : è la tabella a cui sto collegando quella corrente
   }
+
+  rand = () => Math.random(0).toString(36).substring(2);
 
   set tables(value) {
     this.#tables.set(value.id, value.properties);
@@ -54,6 +66,280 @@ class DrawSVG {
 
   get dimensions() { return this.#dimensions; }
 
+  /* NOTE: DRAG&DROP EVENTS */
+
+  handlerDragStart(e) {
+    // console.log('e.target : ', e.target.id);
+    e.target.classList.add('dragging');
+    this.dragElementPosition.x = e.offsetX;
+    this.dragElementPosition.y = e.offsetY;
+    // console.log(this.dragElementPosition);
+    e.dataTransfer.setData('text/plain', e.target.id);
+    // creo la linea
+    if (this.countTables > 0) {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const token = this.rand().substring(0, 4);
+      // line.id = `line-${Draw.svg.querySelectorAll('use.table').length}`;
+      // line.dataset.id = Draw.svg.querySelectorAll('use.table').length;
+      line.id = `line-${token}`;
+      line.dataset.id = token;
+      this.svg.appendChild(line);
+      this.currentLineRef = line.id;
+    }
+    // console.log(e.dataTransfer);
+    e.dataTransfer.effectAllowed = "copy";
+  }
+
+  handlerDragOver(e) {
+    e.preventDefault();
+    if (e.currentTarget.classList.contains('dropzone')) {
+      e.dataTransfer.dropEffect = "copy";
+      this.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
+      let nearestTable;
+      if (this.countTables > 0) {
+        // viene utilizzato il calcolo dell'ipotenusa con il valore assoluto per stabilire qual'è la tabella più vicina
+        nearestTable = [...this.svg.querySelectorAll('use.table')].reduce((prev, current) => {
+          return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 13)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 13))) ? current : prev;
+        });
+        console.log(nearestTable.id);
+        const rectBounding = nearestTable.getBoundingClientRect();
+        // console.log(rectBounding);
+        this.tableJoin = {
+          table: nearestTable,
+          x: +nearestTable.dataset.x + rectBounding.width + 10,
+          y: +nearestTable.dataset.y + (rectBounding.height / 2),
+          joins: +nearestTable.dataset.joins,
+          levelId: +nearestTable.dataset.levelId
+        }
+        // console.log('joinTable :', Draw.tableJoin);
+        // console.log('tableJoin :', Draw.tableJoin.table.id);
+        if (this.currentLineRef && this.tableJoin) {
+          this.joinLines = {
+            id: this.currentLineRef.id, properties: {
+              id: this.currentLineRef.dataset.id,
+              key: this.currentLineRef.id,
+              to: this.tableJoin.table.id,
+              // in questo caso non c'è l'id della tabella perchè questa deve essere ancora droppata, metto le coordinate e.offsetX, e.offsetY
+              from: { x: (e.offsetX - this.dragElementPosition.x - 10), y: (e.offsetY - this.dragElementPosition.y + 13) }
+            }
+          };
+          this.currentLine = this.joinLines.get(this.currentLineRef.id);
+        }
+        // let testCoords = [{ x: 305, y: 70 }, { x: 210, y: 85 }];
+        // creo 3 punti di ancoraggio (right, bottom e left)
+        let anchorPoints = [
+          { x: this.tableJoin.x, y: this.tableJoin.y, anchor: 'right' }, // right
+          { x: this.tableJoin.x - 95, y: this.tableJoin.y + 30, anchor: 'bottom' }, // botton
+          { x: +nearestTable.dataset.x - 10, y: this.tableJoin.y, anchor: 'left' } // left
+        ];
+
+        let nearestPoint = anchorPoints.reduce((prev, current) => {
+          // console.log(Math.hypot(e.offsetX - current.x, e.offsetY - current.y));
+          // console.log(Math.hypot(e.offsetX - prev.x, e.offsetY - prev.y));
+          return (Math.hypot(e.offsetX - current.x, e.offsetY - current.y) < Math.hypot(e.offsetX - prev.x, e.offsetY - prev.y)) ? current : prev;
+        });
+        console.log(nearestPoint);
+        this.drawLine(nearestPoint);
+      }
+    } else {
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
+
+  handlerDragEnter(e) {
+    e.preventDefault();
+    if (e.currentTarget.classList.contains('dropzone')) {
+      console.info('DROPZONE');
+      // console.log(e.currentTarget, e.target);
+      if (e.target.nodeName === 'use') this.currentLevel = +e.target.dataset.levelId;
+      // e.dataTransfer.dropEffect = "copy";
+      // coloro il border differente per la dropzone
+      e.currentTarget.classList.add('dropping');
+    } else {
+      console.warn('non in dropzone');
+      // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
+
+  handlerDragLeave(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('dropping');
+  }
+
+  handlerDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.replace('dropping', 'dropped');
+    if (!e.currentTarget.classList.contains('dropzone')) return;
+    const liElement = document.getElementById(e.dataTransfer.getData('text/plain'));
+    liElement.classList.remove('dragging');
+    const time = Date.now().toString();
+    const tableId = time.substring(time.length - 5);
+
+    // se non è presente una tableJoin significa che sto aggiungendo la prima tabella
+    console.log(this);
+    let coords = { x: e.offsetX - this.dragElementPosition.x, y: e.offsetY - this.dragElementPosition.y };
+    // console.log(this.dragElementPosition);
+    // console.log(coords);
+    if (!this.tableJoin) {
+      this.tables = {
+        id: `svg-data-${tableId}`, properties: {
+          id: tableId,
+          key: `svg-data-${tableId}`,
+          x: coords.x,
+          y: coords.y,
+          line: {
+            to: { x: coords.x + 190, y: coords.y + 13 },
+            from: { x: coords.x - 10, y: coords.y + 13 },
+            bottomTo: { x: coords.x + 95, y: coords.y + 30 }
+          },
+          table: liElement.dataset.label,
+          alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
+          name: liElement.dataset.label,
+          schema: liElement.dataset.schema,
+          join: null,
+          joins: 0,
+          levelId: 0
+        }
+      };
+    } else {
+      // è presente una tableJoin
+      // imposto data.joins anche sull'elemento SVG
+      // OPTIMIZE: potrei creare un Metodo nella Classe Draw che imposta la prop 'join'
+      // ...in Draw.tables e, allo stesso tempo, imposta anche 'dataset.joins'
+      // ...sull'elemento 'use.table' come fatto sulle due righe successive
+      this.svg.querySelector(`use.table[id="${this.tableJoin.table.id}"]`).dataset.joins = ++this.tableJoin.joins;
+      // ... lo imposto anche nell'oggetto Map() tables
+      this.tables.get(this.tableJoin.table.id).joins = this.tableJoin.joins;
+      // livello che sto aggiungendo
+      const levelId = this.tableJoin.levelId + 1;
+      // creo un array dei livelli, ordinato in reverse per poter fare un ciclo dal penultimo livello fino al primo ed effettuare il posizionamento automatico
+      if (!this.arrayLevels.includes(this.tableJoin.levelId)) this.arrayLevels.splice(0, 0, this.tableJoin.levelId);
+      this.svg.dataset.level = (this.svg.dataset.level < levelId) ? levelId : this.svg.dataset.level;
+      // imposto il data-dimensionId
+      const dimensionId = (levelId === 1) ? +this.tableJoin.joins : +this.tableJoin.table.dataset.dimensionId;
+      // imposto la proprietà 'tables' della Classe Draw
+      this.tables = {
+        id: `svg-data-${tableId}`, properties: {
+          id: tableId,
+          key: `svg-data-${tableId}`,
+          x: coords.x,
+          y: coords.y,
+          line: {
+            to: { x: coords.x + 190, y: coords.y + 13 }, // punto di ancoraggio di destra della tabella
+            from: { x: coords.x - 10, y: coords.y + 13 }, // punto di ancoraggio di sinistra della tabella
+            bottomTo: { x: coords.x + 95, y: coords.y + 30 }
+          },
+          table: liElement.dataset.label,
+          alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
+          name: liElement.dataset.label,
+          schema: liElement.dataset.schema,
+          joins: 0,
+          join: this.tableJoin.table.id,
+          dimensionId,
+          levelId
+        }
+      };
+      // linea di join da tableJoin alla tabella droppata
+      this.joinLines = {
+        id: this.currentLineRef.id, properties: {
+          id: this.currentLineRef.dataset.id,
+          key: this.currentLineRef.id,
+          to: this.tableJoin.table.id,
+          from: `svg-data-${tableId}`
+        }
+      };
+      // console.info('create JOIN');
+      this.openJoinWindow();
+      this.tables.get(`svg-data-${tableId}`).name;
+    }
+    this.currentTable = this.tables.get(`svg-data-${tableId}`);
+    // creo nel DOM la tabella appena droppata
+    this.drawTable();
+    // imposto la tabella attiva per poter scaricare le colonne in sessionStorage (in handlerDragEnd())
+    WorkBook.activeTable = `svg-data-${tableId}`;
+    // imposto event contextmenu
+    this.svg.querySelector(`#${this.currentTable.key}`).addEventListener('contextmenu', app.contextMenuTable);
+    // posizionamento delle joinTable (tabelle che hanno data-join > 1)
+    // this.joinTablePositioning();
+  }
+
+  /* NOTE: END DRAG&DROP EVENTS */
+
+  /* NOTE: mouse events */
+
+  handlerMouseMove(e) {
+    this.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
+  }
+
+  /* NOTE: end mouse events */
+
+  // Questa funzione restituisce i due elementi da aggiungere al DOM
+  // Può essere invocata sia per creare una nuova join che
+  // per creare/popolare una join esistente (ad es.: click sulla join line)
+  createJoinField() {
+    const tmplJoinFrom = this.tmplJoin.content.cloneNode(true);
+    const tmplJoinTo = this.tmplJoin.content.cloneNode(true);
+    const joinFieldFrom = tmplJoinFrom.querySelector('.join-field');
+    const joinFieldTo = tmplJoinTo.querySelector('.join-field');
+    // rimuovo eventuali joinField che hanno l'attributo data-active prima di aggiungere quelli nuovi
+    this.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
+    this.dialogJoin.querySelector('.joins section[data-table-from] > .join').appendChild(joinFieldFrom);
+    this.dialogJoin.querySelector('.joins section[data-table-to] > .join').appendChild(joinFieldTo);
+    return { from: joinFieldFrom, to: joinFieldTo };
+  }
+
+  addJoin() {
+    // recupero i riferimenti del template da aggiungere al DOM
+    let joinFields = this.createJoinField();
+    const token = this.rand().substring(0, 7);
+    joinFields.from.dataset.token = token;
+    joinFields.to.dataset.token = token;
+    document.querySelector('#btn-remove-join').dataset.token = token;
+  }
+
+  openJoinWindow() {
+    // app.dialogJoin.dataset.open = 'false';
+    this.dialogJoin.show();
+    this.dialogJoin.dataset.lineId = this.currentLineRef.id;
+    // aggiungo i template per join-field se non ci sono ancora join create
+    // verifico se è presente una join su questa line
+    if (!this.currentLineRef.dataset.joinId) {
+      // join non presente
+      this.addJoin();
+    } else {
+      // join presente, popolo i join-field
+      // Le join sono salvate in WorkBook.joins e la key corrisponde alla tabella 'from'
+      // messa in relazione
+      for (const [key, value] of Object.entries(WorkBook.joins.get(this.currentLineRef.dataset.joinId))) {
+        // key : join token
+        // per ogni join devo creare i due campi .join-field e popolarli
+        // con i dati presenti in WorkBook.join (che corrisponde a value in questo caso)
+        let joinFields = app.createJoinField();
+        joinFields.from.dataset.token = key;
+        joinFields.to.dataset.token = key;
+        joinFields.from.dataset.field = value.from.field;
+        joinFields.from.dataset.table = value.from.table;
+        joinFields.from.dataset.alias = value.from.alias;
+        joinFields.from.innerHTML = value.from.field;
+        joinFields.to.dataset.field = value.to.field;
+        joinFields.to.dataset.table = value.to.table;
+        joinFields.to.dataset.alias = value.to.alias;
+        joinFields.to.innerHTML = value.to.field;
+        document.querySelector('#btn-remove-join').dataset.token = key;
+      }
+    }
+    const from = this.tables.get(this.joinLines.get(this.currentLineRef.id).from);
+    const to = this.tables.get(this.joinLines.get(this.currentLineRef.id).to);
+
+    this.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableFrom = from.table;
+    this.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId = from.key;
+    this.dialogJoin.querySelector('.joins section[data-table-from] .table').innerHTML = from.table;
+    this.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableTo = to.table;
+    this.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId = to.key;
+    this.dialogJoin.querySelector('.joins section[data-table-to] .table').innerHTML = to.table;
+  }
+
   checkResizeSVG() {
     let maxHeightTable = [...this.svg.querySelectorAll('use.table')].reduce((prev, current) => {
       return (+current.dataset.y > +prev.dataset.y) ? current : prev;
@@ -92,8 +378,8 @@ class DrawSVG {
   }
 
   handlerTableDrop(e) {
-    e.stopPropagation();
     e.preventDefault();
+    e.stopPropagation();
     console.log(e.target);
     // debugger;
     delete this.currentLine;
@@ -181,8 +467,8 @@ class DrawSVG {
     } else {
       // aggiungo l'evento drop sulla Fact, questo consentirà l'analisi multifatti
       use.addEventListener('drop', this.handlerTableDrop.bind(Draw));
-      use.addEventListener('dragenter', this.handlerTableDragEnter);
-      use.addEventListener('dragleave', this.handlerTableDragLeave);
+      // use.addEventListener('dragenter', this.handlerTableDragEnter);
+      // use.addEventListener('dragleave', this.handlerTableDragLeave);
     }
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
@@ -224,13 +510,19 @@ class DrawSVG {
     Draw.svg.appendChild(use);
   }
 
-  drawLine() {
+  drawLine(nearestPoint) {
     // console.log(this.currentLine.from, this.currentLine.to);
     if (Object.keys(this.currentLine).length === 0) return;
+    // coordsTo : tabella a cui si aggancia la linea (tableJoin)
+    // coordsTo restituisce il punto "di destra" della tabella a cui collegare la tabella corrente
+    // console.log(this.tables.get(this.currentLine.to));
     const coordsTo = {
+      // x: this.tables.get(this.currentLine.to).line.bottomTo.x,
       x: this.tables.get(this.currentLine.to).line.to.x,
+      // y: this.tables.get(this.currentLine.to).line.bottomTo.y
       y: this.tables.get(this.currentLine.to).line.to.y
     };
+    // console.log(coordsTo);
     let coordsFrom;
     if (typeof this.currentLine.from === 'object') {
       // coordinate e.offsetX, e.offsetY. In questo caso provengo da dragOver.
@@ -242,16 +534,59 @@ class DrawSVG {
         y: this.tables.get(this.currentLine.from).line.from.y
       };
     }
-    this.line = {
-      x1: coordsTo.x, // start point
-      y1: coordsTo.y,
-      p1x: coordsTo.x + 40, // control point 1
-      p1y: coordsTo.y,
+    // OPTIMIZE:
+    switch (nearestPoint.anchor) {
+      case 'right':
+        this.line = {
+          x1: nearestPoint.x, // start point
+          y1: nearestPoint.y,
+          p1x: nearestPoint.x + 40, // control point 1
+          p1y: nearestPoint.y,
+          p2x: coordsFrom.x - 40, // control point 2
+          p2y: coordsFrom.y,
+          x2: coordsFrom.x, // end point
+          y2: coordsFrom.y
+        }
+        break;
+      case 'bottom':
+        this.line = {
+          x1: nearestPoint.x, // start point
+          y1: nearestPoint.y,
+          p1x: nearestPoint.x, // control point 1
+          p1y: nearestPoint.y,
+          p2x: coordsFrom.x, // control point 2
+          p2y: coordsFrom.y,
+          x2: coordsFrom.x, // end point
+          y2: coordsFrom.y
+        }
+        break;
+      case 'left':
+        this.line = {
+          x1: nearestPoint.x, // start point
+          y1: nearestPoint.y,
+          p1x: nearestPoint.x - 40, // control point 1
+          p1y: nearestPoint.y,
+          p2x: coordsFrom.x + 40, // control point 2
+          p2y: coordsFrom.y,
+          x2: coordsFrom.x, // end point
+          y2: coordsFrom.y
+        }
+        break;
+    }
+    /* this.line = {
+      // x1: coordsTo.x, // start point
+      // y1: coordsTo.y,
+      // p1x: coordsTo.x + 40, // control point 1
+      // p1y: coordsTo.y,
+      x1: nearestPoint.x, // start point
+      y1: nearestPoint.y,
+      p1x: nearestPoint.x + 40, // control point 1
+      p1y: nearestPoint.y,
       p2x: coordsFrom.x - 40, // control point 2
       p2y: coordsFrom.y,
       x2: coordsFrom.x, // end point
       y2: coordsFrom.y
-    };
+    }; */
     const d = `M${this.line.x1},${this.line.y1} C${this.line.p1x},${this.line.p1y} ${this.line.p2x},${this.line.p2y} ${this.line.x2},${this.line.y2}`;
     this.currentLineRef = this.currentLine.key;
     this.currentLineRef.setAttribute('d', d);

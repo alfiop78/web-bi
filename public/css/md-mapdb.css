@@ -118,7 +118,8 @@ path:hover{
 }
 
 .struct > rect.fact {
-  fill: lightblue;
+  fill: brown;
+  rx: 0;
   width: 22px;
   height: 26px;
 }
