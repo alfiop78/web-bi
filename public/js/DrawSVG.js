@@ -120,9 +120,10 @@ class DrawSVG {
             id: this.currentLineRef.id, properties: {
               id: this.currentLineRef.dataset.id,
               key: this.currentLineRef.id,
-              to: this.tableJoin.table.id,
-              from: { x: (e.offsetX - this.dragElementPosition.x - 10), y: (e.offsetY - this.dragElementPosition.y + 13) },
-              bottomFrom: { x: (e.offsetX - this.dragElementPosition.x + 13), y: (e.offsetY - this.dragElementPosition.y - 13) }
+              coordsFrom: { x: (e.offsetX - this.dragElementPosition.x - 10), y: (e.offsetY - this.dragElementPosition.y + 13) },
+              coordsBottomFrom: { x: (e.offsetX - this.dragElementPosition.x + 13), y: (e.offsetY - this.dragElementPosition.y - 13) },
+              from: null, // questo viene popolato nel handlerDrop, dopo aver ottenuto l'id dell'elemento nel DOM
+              to: this.tableJoin.table.id
             }
           };
           this.currentLine = this.joinLines.get(this.currentLineRef.id);
@@ -192,8 +193,7 @@ class DrawSVG {
           y: coords.y,
           line: {
             to: { x: coords.x + 190, y: coords.y + 13 },
-            from: { x: coords.x - 10, y: coords.y + 13 },
-            bottomTo: { x: coords.x + 95, y: coords.y + 30 }
+            from: { x: coords.x - 10, y: coords.y + 13 }
           },
           table: liElement.dataset.label,
           alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
@@ -229,8 +229,7 @@ class DrawSVG {
           y: coords.y,
           line: {
             to: { x: coords.x + 190, y: coords.y + 13 }, // punto di ancoraggio di destra della tabella
-            from: { x: coords.x - 10, y: coords.y + 13 }, // punto di ancoraggio di sinistra della tabella
-            bottomTo: { x: coords.x + 95, y: coords.y + 30 }
+            from: { x: coords.x - 10, y: coords.y + 13 } // punto di ancoraggio di sinistra della tabella
           },
           table: liElement.dataset.label,
           alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
@@ -243,14 +242,9 @@ class DrawSVG {
         }
       };
       // linea di join da tableJoin alla tabella droppata
-      this.joinLines = {
-        id: this.currentLineRef.id, properties: {
-          id: this.currentLineRef.dataset.id,
-          key: this.currentLineRef.id,
-          to: this.tableJoin.table.id,
-          from: `svg-data-${tableId}`
-        }
-      };
+      // imposto solo la proprietà 'from' rimasta "in sospeso" in handlerDragOver perchè in quell'evento non
+      // ho ancora l'elemento nel DOM
+      this.joinLines.get(this.currentLineRef.id).from = `svg-data-${tableId}`;
       // console.info('create JOIN');
       this.openJoinWindow();
       this.tables.get(`svg-data-${tableId}`).name;
@@ -471,6 +465,8 @@ class DrawSVG {
       // debugger;
       if (this.tableJoin.table.classList.contains('fact') && this.nearestPoint.anchor === 'bottom') {
         this.currentTable.x = +this.tableJoin.table.dataset.x;
+        this.currentTable.y = +this.tableJoin.table.dataset.y + 100;
+        this.autoPos();
       }
     } else {
       // aggiungo l'evento drop sulla Fact, questo consentirà l'analisi multifatti
@@ -520,28 +516,27 @@ class DrawSVG {
   }
 
   drawLine() {
+    // from: fa riferimento alla partenza della linea dalla tabella corrente
+    // to: fa riferimento alla tabella di destinazione della linea (tablejoin)
     // console.log(this.currentLine.from, this.currentLine.to);
     if (Object.keys(this.currentLine).length === 0) return;
     // coordsTo : tabella a cui si aggancia la linea (tableJoin)
     // coordsTo restituisce il punto "di destra" della tabella a cui collegare la tabella corrente
     // console.log(this.tables.get(this.currentLine.to));
     // INFO: con l'utilizzo della logica dei 3 punti di ancoraggio questa non mi serve più
-    const coordsTo = {
-      // x: this.tables.get(this.currentLine.to).line.bottomTo.x,
-      x: this.tables.get(this.currentLine.to).line.to.x,
-      // y: this.tables.get(this.currentLine.to).line.bottomTo.y
-      y: this.tables.get(this.currentLine.to).line.to.y
-    };
-    // console.log(coordsTo);
-    // console.log(this.currentLine);
-    // console.log(this.currentLine.from);
-    // console.log(this.dragElementPosition);
+    // const coordsTo = {
+    //   // x: this.tables.get(this.currentLine.to).line.bottomTo.x,
+    //   x: this.tables.get(this.currentLine.to).line.to.x,
+    //   // y: this.tables.get(this.currentLine.to).line.bottomTo.y
+    //   y: this.tables.get(this.currentLine.to).line.to.y
+    // };
+
     let coordsFrom; // il punto di ancoraggio della tabella che sto droppando
     switch (this.nearestPoint.anchor) {
       case 'bottom':
         // il punto di ancoraggio della tablejoin è 'bottom' quindi il punto di ancoraggio della tabella
         // corrente è top
-        coordsFrom = { x: this.currentLine.bottomFrom.x, y: this.currentLine.bottomFrom.y };
+        coordsFrom = { x: this.currentLine.coordsBottomFrom.x, y: this.currentLine.coordsBottomFrom.y };
         break;
       // case 'left':
       //   // left si riferisce alla tableJoin, quindi, il punto di ancoraggio della tabella corrente
@@ -549,70 +544,11 @@ class DrawSVG {
       //   coordsFrom = { x: this.currentLine.from.x + 30, y: this.currentLine.from.y + 10 };
       //   break;
       case 'right':
-        coordsFrom = { x: this.currentLine.from.x, y: this.currentLine.from.y };
+        coordsFrom = { x: this.currentLine.coordsFrom.x, y: this.currentLine.coordsFrom.y };
         break;
       default:
         break;
     }
-    /* if (typeof this.currentLine.from === 'object') {
-      // coordinate e.offsetX, e.offsetY. In questo caso provengo da dragOver.
-      // TODO: qui dovrei tener conto dell'offset sull'elemento li dragElementPosition
-      switch (this.nearestPoint.anchor) {
-        case 'bottom':
-          // il punto di ancoraggio della tablejoin è 'bottom' quindi il punto di ancoraggio della tabella
-          // corrente è top
-          console.log('bottom');
-          coordsFrom = {
-            x: this.currentLine.from.x + 13,
-            y: this.currentLine.from.y - this.dragElementPosition.y - 10
-          };
-          break;
-        case 'left':
-          // left si riferisce alla tableJoin, quindi, il punto di ancoraggio della tabella corrente
-          // è a destra.
-          coordsFrom = { x: this.currentLine.from.x + 30, y: this.currentLine.from.y + 10 };
-          break;
-        case 'right':
-          coordsFrom = { x: this.currentLine.from.x, y: this.currentLine.from.y };
-          break;
-        default:
-          break;
-      }
-      // console.log(coordsFrom);
-      // coordsFrom = { x: this.currentLine.from.x, y: this.currentLine.from.y };
-    } else {
-      // tabella To
-      // coordsFrom = {
-      //   x: this.tables.get(this.currentLine.from).line.from.x,
-      //   y: this.tables.get(this.currentLine.from).line.from.y
-      // };
-      // TODO: qui dovrei tener conto dell'offset sull'elemento li dragElementPosition
-      debugger;
-      switch (this.nearestPoint.anchor) {
-        case 'bottom':
-          console.log('bottom');
-          coordsFrom = {
-            x: this.tables.get(this.currentLine.from).line.from.x + 13,
-            y: this.tables.get(this.currentLine.from).line.from.y - this.dragElementPosition.y - 10
-          };
-          break;
-        case 'left':
-          coordsFrom = {
-            x: this.tables.get(this.currentLine.from).line.from.x,
-            // x: this.tables.get(this.currentLine.from).line.from.x + 30,
-            y: this.tables.get(this.currentLine.from).line.from.y
-          };
-          break;
-        case 'right':
-          coordsFrom = {
-            x: this.tables.get(this.currentLine.from).line.from.x,
-            y: this.tables.get(this.currentLine.from).line.from.y
-          };
-          break;
-        default:
-          break;
-      }
-    } */
 
     console.log(coordsFrom);
 
@@ -638,40 +574,21 @@ class DrawSVG {
         }
         break;
       case 'bottom':
+        if ((coordsFrom.x >= this.nearestPoint.x - 20) && (coordsFrom.x <= this.nearestPoint.x + 20)) coordsFrom.x = this.nearestPoint.x;
         this.line = {
           // x1: nearestPoint.x, // start point
           x1: this.tableJoin.bottom, // start point
           y1: this.nearestPoint.y,
           p1x: this.nearestPoint.x, // control point 1
-          // p1x: this.tableJoin.bottom, // control point 1
-          // p1x: this.nearestPoint.x, // control point 1
-          p1y: this.nearestPoint.y,
-          p2x: this.nearestPoint.x, // control point 2
-          // p2x: coordsFrom.x, // control point 2
-          p2y: coordsFrom.y,
-          // x2: coordsFrom.x, // end point
-          x2: this.nearestPoint.x, // end point
+          p1y: this.nearestPoint.y + 40,
+          p2x: coordsFrom.x, // control point 2
+          p2y: coordsFrom.y - 40,
+          x2: coordsFrom.x, // end point
           y2: coordsFrom.y
         }
         break;
-      // case 'left':
-      //   this.line = {
-      //     x1: this.nearestPoint.x, // start point
-      //     y1: this.nearestPoint.y,
-      //     p1x: this.nearestPoint.x - 40, // control point 1
-      //     p1y: this.nearestPoint.y,
-      //     p2x: coordsFrom.x + 40, // control point 2
-      //     p2y: coordsFrom.y,
-      //     x2: coordsFrom.x, // end point
-      //     y2: coordsFrom.y
-      //   }
-      //   break;
     }
     /* this.line = {
-      // x1: coordsTo.x, // start point
-      // y1: coordsTo.y,
-      // p1x: coordsTo.x + 40, // control point 1
-      // p1y: coordsTo.y,
       x1: nearestPoint.x, // start point
       y1: nearestPoint.y,
       p1x: nearestPoint.x + 40, // control point 1
@@ -726,6 +643,18 @@ class DrawSVG {
       });
     });
     this.autoPositionLine();
+  }
+
+  autoPos() {
+    const d = `M${this.line.x1},${this.line.y1} C${this.line.p1x},${this.line.y1} ${this.line.p2x},${this.currentTable.y - 10} ${this.line.x2},${this.currentTable.y - 10}`;
+    this.currentLineRef = this.currentLine.key;
+    this.currentLineRef.setAttribute('d', d);
+    if (this.currentLineRef.hasChildNodes()) {
+      const animLine = this.currentLineRef.querySelector('animate');
+      animLine.setAttribute('to', d);
+      animLine.beginElement();
+    }
+
   }
 
   autoPosition() {
