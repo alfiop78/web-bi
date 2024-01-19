@@ -93,6 +93,13 @@ path{
   stroke-linecap: round;
 }
 
+path.factLine {
+  stroke-dasharray: 4;
+  stroke-width: 1;
+  stroke: grey;
+  /* stroke: brown; */
+}
+
 path[data-join-id]{
   fill: transparent;
   stroke: #6a92b39e;
@@ -536,4 +543,10 @@ section#canvas-area::before {
   width: 100%;
   align-items: center;
   justify-content: center;
+}
+
+#ul-tables > li[data-li-drag] > i {
+  height: 26px;
+  display: flex;
+  align-items: center;
 }

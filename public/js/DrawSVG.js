@@ -16,6 +16,7 @@ class DrawSVG {
     this.arrayLevels = [];
     this.dragElementPosition = { x: 0, y: 0 };
     this.coordsRef = document.getElementById('coords');
+    this.nearestPoint = [];
     this.svg.addEventListener('dragover', this.handlerDragOver.bind(this), false);
     this.svg.addEventListener('drop', this.handlerDrop.bind(this), false);
     this.svg.addEventListener('dragenter', this.handlerDragEnter.bind(this), false);
@@ -101,12 +102,13 @@ class DrawSVG {
         nearestTable = [...this.svg.querySelectorAll('use.table')].reduce((prev, current) => {
           return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 13)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 13))) ? current : prev;
         });
-        console.log(nearestTable.id);
+        // console.log(nearestTable.id);
         const rectBounding = nearestTable.getBoundingClientRect();
         // console.log(rectBounding);
         this.tableJoin = {
           table: nearestTable,
           x: +nearestTable.dataset.x + rectBounding.width + 10,
+          bottom: +nearestTable.dataset.x + rectBounding.width + 10 - 95,
           y: +nearestTable.dataset.y + (rectBounding.height / 2),
           joins: +nearestTable.dataset.joins,
           levelId: +nearestTable.dataset.levelId
@@ -119,27 +121,27 @@ class DrawSVG {
               id: this.currentLineRef.dataset.id,
               key: this.currentLineRef.id,
               to: this.tableJoin.table.id,
-              // in questo caso non c'è l'id della tabella perchè questa deve essere ancora droppata, metto le coordinate e.offsetX, e.offsetY
-              from: { x: (e.offsetX - this.dragElementPosition.x - 10), y: (e.offsetY - this.dragElementPosition.y + 13) }
+              from: { x: (e.offsetX - this.dragElementPosition.x - 10), y: (e.offsetY - this.dragElementPosition.y + 13) },
+              bottomFrom: { x: (e.offsetX - this.dragElementPosition.x + 13), y: (e.offsetY - this.dragElementPosition.y - 13) }
             }
           };
           this.currentLine = this.joinLines.get(this.currentLineRef.id);
         }
         // let testCoords = [{ x: 305, y: 70 }, { x: 210, y: 85 }];
-        // creo 3 punti di ancoraggio (right, bottom e left)
-        let anchorPoints = [
+        // creo 2 punti di ancoraggio (right, bottom e left)
+        const anchorPoints = [
           { x: this.tableJoin.x, y: this.tableJoin.y, anchor: 'right' }, // right
-          { x: this.tableJoin.x - 95, y: this.tableJoin.y + 30, anchor: 'bottom' }, // botton
-          { x: +nearestTable.dataset.x - 10, y: this.tableJoin.y, anchor: 'left' } // left
+          { x: this.tableJoin.x - 95, y: this.tableJoin.y + 32, anchor: 'bottom' } // botton
+          // { x: +nearestTable.dataset.x - 10, y: this.tableJoin.y, anchor: 'left' } // left
         ];
 
-        let nearestPoint = anchorPoints.reduce((prev, current) => {
+        this.nearestPoint = anchorPoints.reduce((prev, current) => {
           // console.log(Math.hypot(e.offsetX - current.x, e.offsetY - current.y));
           // console.log(Math.hypot(e.offsetX - prev.x, e.offsetY - prev.y));
           return (Math.hypot(e.offsetX - current.x, e.offsetY - current.y) < Math.hypot(e.offsetX - prev.x, e.offsetY - prev.y)) ? current : prev;
         });
-        console.log(nearestPoint);
-        this.drawLine(nearestPoint);
+        // console.log(nearestPoint);
+        this.drawLine();
       }
     } else {
       e.dataTransfer.dropEffect = "none";
@@ -177,7 +179,7 @@ class DrawSVG {
     const tableId = time.substring(time.length - 5);
 
     // se non è presente una tableJoin significa che sto aggiungendo la prima tabella
-    console.log(this);
+    // console.log(this);
     let coords = { x: e.offsetX - this.dragElementPosition.x, y: e.offsetY - this.dragElementPosition.y };
     // console.log(this.dragElementPosition);
     // console.log(coords);
@@ -381,7 +383,8 @@ class DrawSVG {
     e.preventDefault();
     e.stopPropagation();
     console.log(e.target);
-    // debugger;
+    // rimuovo la linea di join
+    // TODO: invece di rimuoverla potrei impostarla al punto di ancoraggio 'bottom'
     delete this.currentLine;
     this.currentLineRef.remove();
     const liElement = document.getElementById(e.dataTransfer.getData('text/plain'));
@@ -391,8 +394,9 @@ class DrawSVG {
     // l'evidenziazione e la selezione
     this.svg.querySelectorAll('use.table').forEach(table => table.dataset.multifact = true);
     console.log('dataset.multifact impostato');
-    // rimuovo la linea di join
-    const coords = { x: 40, y: 140 };
+    // la nuova fact è visualizzata immediatamente sotto la prima fact
+    // recupero le coordinate del e.target
+    const coords = { x: +e.target.dataset.x, y: +e.target.dataset.y + 40 };
     this.tables = {
       id: `svg-data-${tableId}`, properties: {
         id: tableId,
@@ -414,14 +418,14 @@ class DrawSVG {
     };
     this.currentTable = this.tables.get(`svg-data-${tableId}`);
     this.drawTable();
-    const rectBounding = e.target.getBoundingClientRect();
-    Draw.tableJoin = {
-      table: e.target,
-      x: +e.target.dataset.x + rectBounding.width + 10,
-      y: +e.target.dataset.y + (rectBounding.height / 2),
-      joins: +e.target.dataset.joins,
-      levelId: +e.target.dataset.levelId
-    }
+    // const rectBounding = e.target.getBoundingClientRect();
+    // Draw.tableJoin = {
+    //   table: e.target,
+    //   x: +e.target.dataset.x + rectBounding.width + 10,
+    //   y: +e.target.dataset.y + (rectBounding.height / 2),
+    //   joins: +e.target.dataset.joins,
+    //   levelId: +e.target.dataset.levelId
+    // }
   }
 
   handlerTableDragEnter(e) {
@@ -464,8 +468,13 @@ class DrawSVG {
     if (this.currentTable.join) {
       use.dataset.tableJoin = this.currentTable.join;
       use.dataset.dimensionId = this.currentTable.dimensionId;
+      // debugger;
+      if (this.tableJoin.table.classList.contains('fact') && this.nearestPoint.anchor === 'bottom') {
+        this.currentTable.x = +this.tableJoin.table.dataset.x;
+      }
     } else {
       // aggiungo l'evento drop sulla Fact, questo consentirà l'analisi multifatti
+      use.classList.add('fact');
       use.addEventListener('drop', this.handlerTableDrop.bind(Draw));
       // use.addEventListener('dragenter', this.handlerTableDragEnter);
       // use.addEventListener('dragleave', this.handlerTableDragLeave);
@@ -510,12 +519,13 @@ class DrawSVG {
     Draw.svg.appendChild(use);
   }
 
-  drawLine(nearestPoint) {
+  drawLine() {
     // console.log(this.currentLine.from, this.currentLine.to);
     if (Object.keys(this.currentLine).length === 0) return;
     // coordsTo : tabella a cui si aggancia la linea (tableJoin)
     // coordsTo restituisce il punto "di destra" della tabella a cui collegare la tabella corrente
     // console.log(this.tables.get(this.currentLine.to));
+    // INFO: con l'utilizzo della logica dei 3 punti di ancoraggio questa non mi serve più
     const coordsTo = {
       // x: this.tables.get(this.currentLine.to).line.bottomTo.x,
       x: this.tables.get(this.currentLine.to).line.to.x,
@@ -523,25 +533,104 @@ class DrawSVG {
       y: this.tables.get(this.currentLine.to).line.to.y
     };
     // console.log(coordsTo);
-    let coordsFrom;
-    if (typeof this.currentLine.from === 'object') {
+    // console.log(this.currentLine);
+    // console.log(this.currentLine.from);
+    // console.log(this.dragElementPosition);
+    let coordsFrom; // il punto di ancoraggio della tabella che sto droppando
+    switch (this.nearestPoint.anchor) {
+      case 'bottom':
+        // il punto di ancoraggio della tablejoin è 'bottom' quindi il punto di ancoraggio della tabella
+        // corrente è top
+        coordsFrom = { x: this.currentLine.bottomFrom.x, y: this.currentLine.bottomFrom.y };
+        break;
+      // case 'left':
+      //   // left si riferisce alla tableJoin, quindi, il punto di ancoraggio della tabella corrente
+      //   // è a destra.
+      //   coordsFrom = { x: this.currentLine.from.x + 30, y: this.currentLine.from.y + 10 };
+      //   break;
+      case 'right':
+        coordsFrom = { x: this.currentLine.from.x, y: this.currentLine.from.y };
+        break;
+      default:
+        break;
+    }
+    /* if (typeof this.currentLine.from === 'object') {
       // coordinate e.offsetX, e.offsetY. In questo caso provengo da dragOver.
-      coordsFrom = { x: this.currentLine.from.x, y: this.currentLine.from.y };
+      // TODO: qui dovrei tener conto dell'offset sull'elemento li dragElementPosition
+      switch (this.nearestPoint.anchor) {
+        case 'bottom':
+          // il punto di ancoraggio della tablejoin è 'bottom' quindi il punto di ancoraggio della tabella
+          // corrente è top
+          console.log('bottom');
+          coordsFrom = {
+            x: this.currentLine.from.x + 13,
+            y: this.currentLine.from.y - this.dragElementPosition.y - 10
+          };
+          break;
+        case 'left':
+          // left si riferisce alla tableJoin, quindi, il punto di ancoraggio della tabella corrente
+          // è a destra.
+          coordsFrom = { x: this.currentLine.from.x + 30, y: this.currentLine.from.y + 10 };
+          break;
+        case 'right':
+          coordsFrom = { x: this.currentLine.from.x, y: this.currentLine.from.y };
+          break;
+        default:
+          break;
+      }
+      // console.log(coordsFrom);
+      // coordsFrom = { x: this.currentLine.from.x, y: this.currentLine.from.y };
     } else {
       // tabella To
-      coordsFrom = {
-        x: this.tables.get(this.currentLine.from).line.from.x,
-        y: this.tables.get(this.currentLine.from).line.from.y
-      };
-    }
+      // coordsFrom = {
+      //   x: this.tables.get(this.currentLine.from).line.from.x,
+      //   y: this.tables.get(this.currentLine.from).line.from.y
+      // };
+      // TODO: qui dovrei tener conto dell'offset sull'elemento li dragElementPosition
+      debugger;
+      switch (this.nearestPoint.anchor) {
+        case 'bottom':
+          console.log('bottom');
+          coordsFrom = {
+            x: this.tables.get(this.currentLine.from).line.from.x + 13,
+            y: this.tables.get(this.currentLine.from).line.from.y - this.dragElementPosition.y - 10
+          };
+          break;
+        case 'left':
+          coordsFrom = {
+            x: this.tables.get(this.currentLine.from).line.from.x,
+            // x: this.tables.get(this.currentLine.from).line.from.x + 30,
+            y: this.tables.get(this.currentLine.from).line.from.y
+          };
+          break;
+        case 'right':
+          coordsFrom = {
+            x: this.tables.get(this.currentLine.from).line.from.x,
+            y: this.tables.get(this.currentLine.from).line.from.y
+          };
+          break;
+        default:
+          break;
+      }
+    } */
+
+    console.log(coordsFrom);
+
+    // se la tableJoin è una fact agginugo la css class fact-line alla linea che sto disegnando
+    // La linea tratteggiata compare SOLO quando si sta aggiungendo al punto di ancoraggio 'bottom'.
+    // In questo modo, sto indicando all'utente, che in questo punto di ancoraggio si può droppare una
+    // Fact per consentire l'analisi multifatti
+    (this.tableJoin.table.classList.contains('fact') && this.nearestPoint.anchor === 'bottom') ?
+      this.currentLineRef.classList.add('factLine') :
+      this.currentLineRef.classList.remove('factLine');
     // OPTIMIZE:
-    switch (nearestPoint.anchor) {
+    switch (this.nearestPoint.anchor) {
       case 'right':
         this.line = {
-          x1: nearestPoint.x, // start point
-          y1: nearestPoint.y,
-          p1x: nearestPoint.x + 40, // control point 1
-          p1y: nearestPoint.y,
+          x1: this.nearestPoint.x, // start point
+          y1: this.nearestPoint.y,
+          p1x: this.nearestPoint.x + 40, // control point 1
+          p1y: this.nearestPoint.y,
           p2x: coordsFrom.x - 40, // control point 2
           p2y: coordsFrom.y,
           x2: coordsFrom.x, // end point
@@ -550,28 +639,33 @@ class DrawSVG {
         break;
       case 'bottom':
         this.line = {
-          x1: nearestPoint.x, // start point
-          y1: nearestPoint.y,
-          p1x: nearestPoint.x, // control point 1
-          p1y: nearestPoint.y,
-          p2x: coordsFrom.x, // control point 2
+          // x1: nearestPoint.x, // start point
+          x1: this.tableJoin.bottom, // start point
+          y1: this.nearestPoint.y,
+          p1x: this.nearestPoint.x, // control point 1
+          // p1x: this.tableJoin.bottom, // control point 1
+          // p1x: this.nearestPoint.x, // control point 1
+          p1y: this.nearestPoint.y,
+          p2x: this.nearestPoint.x, // control point 2
+          // p2x: coordsFrom.x, // control point 2
           p2y: coordsFrom.y,
-          x2: coordsFrom.x, // end point
+          // x2: coordsFrom.x, // end point
+          x2: this.nearestPoint.x, // end point
           y2: coordsFrom.y
         }
         break;
-      case 'left':
-        this.line = {
-          x1: nearestPoint.x, // start point
-          y1: nearestPoint.y,
-          p1x: nearestPoint.x - 40, // control point 1
-          p1y: nearestPoint.y,
-          p2x: coordsFrom.x + 40, // control point 2
-          p2y: coordsFrom.y,
-          x2: coordsFrom.x, // end point
-          y2: coordsFrom.y
-        }
-        break;
+      // case 'left':
+      //   this.line = {
+      //     x1: this.nearestPoint.x, // start point
+      //     y1: this.nearestPoint.y,
+      //     p1x: this.nearestPoint.x - 40, // control point 1
+      //     p1y: this.nearestPoint.y,
+      //     p2x: coordsFrom.x + 40, // control point 2
+      //     p2y: coordsFrom.y,
+      //     x2: coordsFrom.x, // end point
+      //     y2: coordsFrom.y
+      //   }
+      //   break;
     }
     /* this.line = {
       // x1: coordsTo.x, // start point
