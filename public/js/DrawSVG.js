@@ -1,6 +1,7 @@
 class DrawSVG {
   #tables = new Map();
   #joinLines = new Map();
+  #factId = 0;
   #dimensions = new Set();
   #dimensionSelected = {};
   #currentLineRef; // ref
@@ -200,6 +201,7 @@ class DrawSVG {
           name: liElement.dataset.label,
           schema: liElement.dataset.schema,
           join: null,
+          factId: this.#factId,
           joins: 0,
           levelId: 0
         }
@@ -237,6 +239,7 @@ class DrawSVG {
           schema: liElement.dataset.schema,
           joins: 0,
           join: this.tableJoin.table.id,
+          factId: this.tableJoin.factId,
           dimensionId,
           levelId
         }
@@ -390,7 +393,7 @@ class DrawSVG {
     console.log('dataset.multifact impostato');
     // la nuova fact è visualizzata immediatamente sotto la prima fact
     // recupero le coordinate del e.target
-    const coords = { x: +e.target.dataset.x, y: +e.target.dataset.y + 40 };
+    const coords = { x: +e.target.dataset.x, y: +e.target.dataset.y + 100 };
     this.tables = {
       id: `svg-data-${tableId}`, properties: {
         id: tableId,
@@ -406,6 +409,7 @@ class DrawSVG {
         name: liElement.dataset.label,
         schema: liElement.dataset.schema,
         join: null,
+        factId: this.#factId,
         joins: 0,
         levelId: 0
       }
@@ -464,13 +468,16 @@ class DrawSVG {
       use.dataset.dimensionId = this.currentTable.dimensionId;
       // debugger;
       if (this.tableJoin.table.classList.contains('fact') && this.nearestPoint.anchor === 'bottom') {
+        // si sta aggiungendo un'altra Fact
+        use.dataset.factId = this.currentTable.factId;
         this.currentTable.x = +this.tableJoin.table.dataset.x;
         this.currentTable.y = +this.tableJoin.table.dataset.y + 100;
         this.autoPos();
       }
     } else {
-      // aggiungo l'evento drop sulla Fact, questo consentirà l'analisi multifatti
+      use.dataset.factId = this.currentTable.factId;
       use.classList.add('fact');
+      // aggiungo l'evento drop sulla Fact, questo consentirà l'analisi multifatti
       use.addEventListener('drop', this.handlerTableDrop.bind(Draw));
       // use.addEventListener('dragenter', this.handlerTableDragEnter);
       // use.addEventListener('dragleave', this.handlerTableDragLeave);
