@@ -40,6 +40,10 @@ class DrawSVG {
     return this.svg.querySelectorAll('use.table').length;
   }
 
+  get countJoins() {
+    return this.svg.querySelectorAll('use.table:not(.fact)').length;
+  }
+
   set currentLineRef(value) {
     this.#currentLineRef = this.svg.querySelector(`#${value}`);
   }
@@ -172,6 +176,7 @@ class DrawSVG {
 
   handlerDrop(e) {
     e.preventDefault();
+    console.log('handlerDrop()');
     e.currentTarget.classList.replace('dropping', 'dropped');
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const liElement = document.getElementById(e.dataTransfer.getData('text/plain'));
@@ -378,6 +383,9 @@ class DrawSVG {
   handlerTableDrop(e) {
     e.preventDefault();
     e.stopPropagation();
+    e.target.classList.remove('dropping');
+    console.log('handlerTableDrop()');
+    // debugger;
     console.log(e.target);
     // rimuovo la linea di join
     // TODO: invece di rimuoverla potrei impostarla al punto di ancoraggio 'bottom'
@@ -392,7 +400,7 @@ class DrawSVG {
     console.log('dataset.multifact impostato');
     // la nuova fact è visualizzata immediatamente sotto la prima fact
     // recupero le coordinate del e.target
-    const coords = { x: +e.target.dataset.x, y: +e.target.dataset.y + 100 };
+    const coords = { x: +e.target.dataset.x, y: +e.target.dataset.y + 140 };
     this.tables = {
       id: `svg-data-${tableId}`, properties: {
         id: tableId,
@@ -413,7 +421,7 @@ class DrawSVG {
       }
     };
     this.currentTable = this.tables.get(`svg-data-${tableId}`);
-    this.drawTable();
+    this.drawFact();
     // const rectBounding = e.target.getBoundingClientRect();
     // Draw.tableJoin = {
     //   table: e.target,
@@ -430,13 +438,18 @@ class DrawSVG {
     if (e.target.classList.contains('dropzone')) {
       // coloro il border differente per la dropzone
       e.target.classList.add('dropping');
+      console.log(this.currentLineRef);
+      this.currentLineRef.setAttribute('hidden', 'true');
     }
   }
 
   handlerTableDragLeave(e) {
     e.preventDefault();
     e.stopPropagation();
-    e.target.classList.remove('dropping');
+    if (e.target.classList.contains('dropzone')) {
+      e.target.classList.remove('dropping');
+      this.currentLineRef.removeAttribute('hidden');
+    }
   }
 
   drawFact() {
@@ -455,11 +468,11 @@ class DrawSVG {
     use.dataset.table = this.currentTable.table;
     use.dataset.alias = this.currentTable.alias;
     // tutte le tabelle hanno la prop join, tranne la fact, dove NON aggiungo 'tableJoin' e dimensionId
-    use.classList.add('fact');
+    use.classList.add('fact', 'dropzone');
     // aggiungo l'evento drop sulla Fact, questo consentirà l'analisi multifatti
     use.addEventListener('drop', this.handlerTableDrop.bind(Draw));
-    // use.addEventListener('dragenter', this.handlerTableDragEnter);
-    // use.addEventListener('dragleave', this.handlerTableDragLeave);
+    use.addEventListener('dragenter', this.handlerTableDragEnter.bind(this));
+    use.addEventListener('dragleave', this.handlerTableDragLeave.bind(this));
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;
@@ -474,7 +487,7 @@ class DrawSVG {
     use.dataset.levelId = this.currentTable.levelId;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
-    Draw.svg.appendChild(use);
+    this.svg.appendChild(use);
     // <animate> tag
     const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
     animate.setAttribute('attributeName', 'y');
@@ -578,7 +591,7 @@ class DrawSVG {
         break;
     }
 
-    console.log(coordsFrom);
+    // console.log(coordsFrom);
 
     // se la tableJoin è una fact agginugo la css class fact-line alla linea che sto disegnando
     // La linea tratteggiata compare SOLO quando si sta aggiungendo al punto di ancoraggio 'bottom'.
@@ -628,6 +641,7 @@ class DrawSVG {
     }; */
     const d = `M${this.line.x1},${this.line.y1} C${this.line.p1x},${this.line.p1y} ${this.line.p2x},${this.line.p2y} ${this.line.x2},${this.line.y2}`;
     this.currentLineRef = this.currentLine.key;
+    console.log(this.currentLineRef);
     this.currentLineRef.setAttribute('d', d);
     if (this.currentLineRef.hasChildNodes()) {
       const animLine = this.currentLineRef.querySelector('animate');

@@ -650,13 +650,13 @@
                                 <text x="12" y="18" font-family="Barlow" font-size=".85rem" font-weight="bold"></text>
                                 <!-- <image data-icon="multi-fact-defined" href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="36" width="18" height="18"></image> -->
                               </g>
-                              <g id="fact-line" class="fact-line">
-                                <line x1="85" y1="30" x2="85" y2="60" stroke-dasharray="4" stroke-width="0.5" stroke="black" />
+                              <!-- <g id="fact-line" class="fact-line">
+                                <line x1="0" y1="0" x2="0" y2="0" stroke-dasharray="4" stroke-width="0.5" stroke="black" />
                               </g>
                               <g id="fact-dropzone" class="fact-dropzone">
-                                <rect x="0" y="60" width="160" height="200px" fill="transparent" stroke-dasharray="4" stroke-width="0.5" stroke="black" />
+                                <rect x="0" y="0" width="180" height="26px" fill="white" />
 
-                              </g>
+                              </g> -->
                               <g id="web-bi-time">
                                 <image id="time" href="{{ asset('/images/access_time_filled_865858_18dp.svg') }}" height="18" width="18"></image>
                               </g>

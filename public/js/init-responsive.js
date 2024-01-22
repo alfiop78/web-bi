@@ -171,7 +171,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
       // se sono presenti almeno due tabelle visualizzo la dialog per la join
       // debugger;
-      if (Draw.countTables > 1) {
+      if (Draw.countJoins > 0) {
         WorkBook.tableJoins = {
           from: app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
           to: app.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId

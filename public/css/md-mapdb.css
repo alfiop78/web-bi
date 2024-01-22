@@ -86,6 +86,10 @@ svg.dropzone.dropping{
   transform: translateY(50px);
 }
 
+path[hidden] {
+  visibility: hidden;
+}
+
 path{
   fill: transparent;
   stroke: darkgray;
@@ -118,6 +122,11 @@ path:hover{
   rx: 2;
   width: 180px;
   height: 26px;
+}
+
+line {
+  stroke: grey;
+  stroke-dasharray: 4;
 }
 
 .struct .symbol {
