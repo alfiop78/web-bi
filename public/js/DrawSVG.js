@@ -1,7 +1,6 @@
 class DrawSVG {
   #tables = new Map();
   #joinLines = new Map();
-  #factId = 0;
   #dimensions = new Set();
   #dimensionSelected = {};
   #currentLineRef; // ref
@@ -201,11 +200,12 @@ class DrawSVG {
           name: liElement.dataset.label,
           schema: liElement.dataset.schema,
           join: null,
-          factId: this.#factId,
           joins: 0,
           levelId: 0
         }
       };
+      this.currentTable = this.tables.get(`svg-data-${tableId}`);
+      this.drawFact();
     } else {
       // è presente una tableJoin
       // imposto data.joins anche sull'elemento SVG
@@ -239,7 +239,6 @@ class DrawSVG {
           schema: liElement.dataset.schema,
           joins: 0,
           join: this.tableJoin.table.id,
-          factId: this.tableJoin.factId,
           dimensionId,
           levelId
         }
@@ -251,10 +250,10 @@ class DrawSVG {
       // console.info('create JOIN');
       this.openJoinWindow();
       this.tables.get(`svg-data-${tableId}`).name;
+      this.currentTable = this.tables.get(`svg-data-${tableId}`);
+      // creo nel DOM la tabella appena droppata
+      this.drawTable();
     }
-    this.currentTable = this.tables.get(`svg-data-${tableId}`);
-    // creo nel DOM la tabella appena droppata
-    this.drawTable();
     // imposto la tabella attiva per poter scaricare le colonne in sessionStorage (in handlerDragEnd())
     WorkBook.activeTable = `svg-data-${tableId}`;
     // imposto event contextmenu
@@ -409,7 +408,6 @@ class DrawSVG {
         name: liElement.dataset.label,
         schema: liElement.dataset.schema,
         join: null,
-        factId: this.#factId,
         joins: 0,
         levelId: 0
       }
@@ -441,10 +439,52 @@ class DrawSVG {
     e.target.classList.remove('dropping');
   }
 
+  drawFact() {
+    let clonedStruct = this.svg.querySelector('#table-struct-fact').cloneNode(true);
+    // assegno l'id e il testo (nome tabella) all'elemento clonato
+    clonedStruct.id = `struct-${this.currentTable.key}`;
+    clonedStruct.classList.add('struct');
+    clonedStruct.querySelector('text').innerHTML = this.currentTable.name;
+    // lo aggiungo al defs
+    this.svg.querySelector('defs').appendChild(clonedStruct);
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    use.setAttribute('href', `#${clonedStruct.id}`);
+    use.id = this.currentTable.key;
+    use.classList.add('table');
+    use.dataset.id = `data-${this.currentTable.id}`;
+    use.dataset.table = this.currentTable.table;
+    use.dataset.alias = this.currentTable.alias;
+    // tutte le tabelle hanno la prop join, tranne la fact, dove NON aggiungo 'tableJoin' e dimensionId
+    use.classList.add('fact');
+    // aggiungo l'evento drop sulla Fact, questo consentirà l'analisi multifatti
+    use.addEventListener('drop', this.handlerTableDrop.bind(Draw));
+    // use.addEventListener('dragenter', this.handlerTableDragEnter);
+    // use.addEventListener('dragleave', this.handlerTableDragLeave);
+    use.dataset.name = this.currentTable.name;
+    use.dataset.schema = this.currentTable.schema;
+    use.dataset.joins = this.currentTable.joins;
+    use.dataset.fn = 'tableSelected';
+    use.dataset.enterFn = 'tableEnter';
+    use.onmouseover = this.handlerOver.bind(Draw);
+    use.onmouseleave = this.handlerLeave.bind(Draw);
+    use.ondblclick = this.handlerDblClick.bind(Draw);
+    // use.dataset.leaveFn = 'tableLeave';
+    use.dataset.x = this.currentTable.x;
+    use.dataset.y = this.currentTable.y;
+    use.dataset.levelId = this.currentTable.levelId;
+    use.setAttribute('x', this.currentTable.x);
+    use.setAttribute('y', this.currentTable.y);
+    Draw.svg.appendChild(use);
+    // <animate> tag
+    const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+    animate.setAttribute('attributeName', 'y');
+    animate.setAttribute('dur', '.15s');
+    animate.setAttribute('fill', 'freeze');
+    use.appendChild(animate);
+  }
+
   drawTable() {
-    let clonedStruct = (this.currentTable.levelId === 0 && !this.currentTable.join) ?
-      this.svg.querySelector('#table-struct-fact').cloneNode(true) :
-      this.svg.querySelector('#table-struct').cloneNode(true);
+    let clonedStruct = this.svg.querySelector('#table-struct').cloneNode(true);
     // assegno l'id e il testo (nome tabella) all'elemento clonato
     clonedStruct.id = `struct-${this.currentTable.key}`;
     clonedStruct.classList.add('struct');
@@ -461,27 +501,8 @@ class DrawSVG {
     use.dataset.table = this.currentTable.table;
     use.dataset.alias = this.currentTable.alias;
     // tutte le tabelle hanno la prop join, tranne la fact, dove NON aggiungo 'tableJoin' e dimensionId
-    // TODO: credo, per l'analisi multifatti, di dover aggiungere un 'cubeId' per poter evidenziare
-    // le dimensioni appartenenti a un cubo (riguardo l'analisi multifatti)
-    if (this.currentTable.join) {
-      use.dataset.tableJoin = this.currentTable.join;
-      use.dataset.dimensionId = this.currentTable.dimensionId;
-      // debugger;
-      if (this.tableJoin.table.classList.contains('fact') && this.nearestPoint.anchor === 'bottom') {
-        // si sta aggiungendo un'altra Fact
-        use.dataset.factId = this.currentTable.factId;
-        this.currentTable.x = +this.tableJoin.table.dataset.x;
-        this.currentTable.y = +this.tableJoin.table.dataset.y + 100;
-        this.autoPos();
-      }
-    } else {
-      use.dataset.factId = this.currentTable.factId;
-      use.classList.add('fact');
-      // aggiungo l'evento drop sulla Fact, questo consentirà l'analisi multifatti
-      use.addEventListener('drop', this.handlerTableDrop.bind(Draw));
-      // use.addEventListener('dragenter', this.handlerTableDragEnter);
-      // use.addEventListener('dragleave', this.handlerTableDragLeave);
-    }
+    use.dataset.tableJoin = this.currentTable.join;
+    use.dataset.dimensionId = this.currentTable.dimensionId;
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;

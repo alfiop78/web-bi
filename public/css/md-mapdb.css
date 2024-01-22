@@ -114,22 +114,25 @@ path:hover{
   stroke-linecap: round;
 }
 
-.struct > rect {
-  /* fill: lightblue; */
+.struct > rect.table {
   rx: 2;
   width: 180px;
   height: 26px;
-  /* stroke: #494949; */
-  /* stroke-width: 0.2; */
 }
 
-.struct > rect.fact {
-  fill: brown;
+.struct .symbol {
   rx: 0;
-  width: 22px;
+  width: 4px;
   height: 26px;
 }
 
+.struct > rect.symbol {
+  fill: gray;
+}
+
+.struct.fact > rect.symbol {
+  fill: brown;
+}
 
 .struct > text {
   fill: #494949;
