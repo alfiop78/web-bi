@@ -121,7 +121,7 @@ path:hover{
 .struct > rect.table {
   rx: 2;
   width: 180px;
-  height: 26px;
+  height: 24px;
 }
 
 line {
@@ -132,7 +132,7 @@ line {
 .struct .symbol {
   rx: 0;
   width: 4px;
-  height: 26px;
+  height: 24px;
 }
 
 .struct > rect.symbol {
@@ -146,6 +146,11 @@ line {
 .struct > text {
   fill: #494949;
   font-weight: normal;
+}
+
+.struct.fact > text {
+  fill: #494949;
+  font-weight: bold;
 }
 
 .struct > image[data-columns-defined="false"] {
@@ -557,7 +562,7 @@ section#canvas-area::before {
 }
 
 #ul-tables > li[data-li-drag] > i {
-  height: 26px;
+  height: 24px;
   display: flex;
   align-items: center;
 }

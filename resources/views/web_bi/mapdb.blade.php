@@ -639,15 +639,15 @@
                               <g id="table-struct" class="struct">
                                 <rect class="table" x="0" y="0" />
                                 <rect class="symbol" x="0" y="0" />
-                                <image href="{{ asset('/images/grid_on_5C7893_18dp.svg') }}" data-id x="4" y="4" width="18" height="18">
+                                <image href="{{ asset('/images/grid_on_5C7893_18dp.svg') }}" data-id x="4" y="3" width="18" height="18">
                                 </image>
-                                <text x="26" y="18" font-family="Barlow" font-size=".8rem" font-weight="normal"></text>
+                                <text x="26" y="17" font-family="Barlow" font-size=".8rem" font-weight="normal"></text>
                                 <!-- <image data-icon="multi-fact-defined" href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="36" width="18" height="18"></image> -->
                               </g>
                               <g id="table-struct-fact" class="struct fact">
                                 <rect class="table" x="0" y="0" />
                                 <rect class="symbol" x="0" y="0" />
-                                <text x="12" y="18" font-family="Barlow" font-size=".85rem" font-weight="bold"></text>
+                                <text x="12" y="17" font-family="Barlow" font-size=".85rem" font-weight="bold"></text>
                                 <!-- <image data-icon="multi-fact-defined" href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="36" width="18" height="18"></image> -->
                               </g>
                               <!-- <g id="fact-line" class="fact-line">

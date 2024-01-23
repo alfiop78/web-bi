@@ -104,7 +104,7 @@ class DrawSVG {
       if (this.countTables > 0) {
         // viene utilizzato il calcolo dell'ipotenusa con il valore assoluto per stabilire qual'è la tabella più vicina
         nearestTable = [...this.svg.querySelectorAll('use.table')].reduce((prev, current) => {
-          return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 13)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 13))) ? current : prev;
+          return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
         });
         // console.log(nearestTable.id);
         const rectBounding = nearestTable.getBoundingClientRect();
@@ -112,7 +112,8 @@ class DrawSVG {
         this.tableJoin = {
           table: nearestTable,
           x: +nearestTable.dataset.x + rectBounding.width + 10,
-          bottom: +nearestTable.dataset.x + rectBounding.width + 10 - 95,
+          bottom: +nearestTable.dataset.x + (rectBounding.width / 2),
+          // bottom: +nearestTable.dataset.x + rectBounding.width + 10 - 95,
           y: +nearestTable.dataset.y + (rectBounding.height / 2),
           joins: +nearestTable.dataset.joins,
           levelId: +nearestTable.dataset.levelId
@@ -124,8 +125,9 @@ class DrawSVG {
             id: this.currentLineRef.id, properties: {
               id: this.currentLineRef.dataset.id,
               key: this.currentLineRef.id,
-              coordsFrom: { x: (e.offsetX - this.dragElementPosition.x - 10), y: (e.offsetY - this.dragElementPosition.y + 13) },
-              coordsBottomFrom: { x: (e.offsetX - this.dragElementPosition.x + 13), y: (e.offsetY - this.dragElementPosition.y - 13) },
+              coordsFrom: { x: (e.offsetX - this.dragElementPosition.x - 10), y: (e.offsetY - this.dragElementPosition.y + 12) },
+              // coordsBottomFrom: { x: (e.offsetX - this.dragElementPosition.x + 12), y: (e.offsetY - this.dragElementPosition.y - 12) },
+              coordsBottomFrom: { x: (e.offsetX - this.dragElementPosition.x + 12), y: (e.offsetY - this.dragElementPosition.y - 4) },
               from: null, // questo viene popolato nel handlerDrop, dopo aver ottenuto l'id dell'elemento nel DOM
               to: this.tableJoin.table.id
             }
@@ -141,8 +143,7 @@ class DrawSVG {
         const anchorPoints = (this.countJoins >= 1) ?
           [
             { x: this.tableJoin.x, y: this.tableJoin.y, anchor: 'right' }, // right
-            { x: this.tableJoin.x - 95, y: this.tableJoin.y + 32, anchor: 'bottom' } // botton
-            // { x: +nearestTable.dataset.x - 10, y: this.tableJoin.y, anchor: 'left' } // left
+            { x: this.tableJoin.bottom, y: this.tableJoin.y + 16, anchor: 'bottom' } // botton
           ] :
           [
             { x: this.tableJoin.x, y: this.tableJoin.y, anchor: 'right' }, // right
@@ -208,8 +209,8 @@ class DrawSVG {
         x: coords.x,
         y: coords.y,
         line: {
-          to: { x: coords.x + 190, y: coords.y + 13 },
-          from: { x: coords.x - 10, y: coords.y + 13 }
+          to: { x: coords.x + 190, y: coords.y + 12 },
+          from: { x: coords.x - 10, y: coords.y + 12 }
         },
         table: liElement.dataset.label,
         alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
@@ -233,8 +234,8 @@ class DrawSVG {
       // recupero le coordinate del e.target
       // const coords = { x: +e.target.dataset.x, y: +e.target.dataset.y + 140 };
       this.tables.get(`svg-data-${tableId}`).x = +this.tableJoin.table.dataset.x;
-      this.tables.get(`svg-data-${tableId}`).line.to.y = coords.y + 13;
-      this.tables.get(`svg-data-${tableId}`).line.from.y = coords.y + 13;
+      this.tables.get(`svg-data-${tableId}`).line.to.y = coords.y + 12;
+      this.tables.get(`svg-data-${tableId}`).line.from.y = coords.y + 12;
       this.tables.get(`svg-data-${tableId}`).factId = +this.tableJoin.table.dataset.factId + 1;
       this.currentTable = this.tables.get(`svg-data-${tableId}`);
       this.drawFact();
@@ -622,8 +623,8 @@ class DrawSVG {
         // Se sono presenti due tabelle in join con 'table' (in ciclo) le posizioni y di queste tabelle vengono sommate (nel for) e
         // ...poi divise per il numero di tabelle join, in questo modo la tabella in ciclo viene posizionata al centro
         this.tables.get(table.id).y = yResult;
-        this.tables.get(table.id).line.from.y = yResult + 13;
-        this.tables.get(table.id).line.to.y = yResult + 13;
+        this.tables.get(table.id).line.from.y = yResult + 12;
+        this.tables.get(table.id).line.to.y = yResult + 12;
         // this.tables.get(table.id).line.from.y = (y / +table.dataset.joins) + 13;
         // this.tables.get(table.id).line.to.y = (y / +table.dataset.joins) + 13;
         this.currentTable = this.tables.get(table.id);
