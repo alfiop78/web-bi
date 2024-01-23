@@ -13,7 +13,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     tmplFilterDropped: document.getElementById('tmpl-filter-dropped-adv-metric'),
     tmplContextMenu: document.getElementById('tmpl-context-menu-content'),
     contextMenuRef: document.getElementById('context-menu'),
-    contextMenuTableRef: document.getElementById('context-menu-table'),
     contextMenuColumnRef: document.getElementById('context-menu-column'),
     tmplDetails: document.getElementById('tmpl-details-element'),
     tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
@@ -97,6 +96,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
             if (node.hasChildNodes()) {
               node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+              node.querySelectorAll('*[data-draw-fn]').forEach(element => element.addEventListener('click', Draw[element.dataset.drawFn]));
               node.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
               node.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
               node.querySelectorAll('*[data-blur-fn]').forEach(element => element.addEventListener('blur', app[element.dataset.blurFn]));
@@ -108,6 +108,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         // console.log(mutation.target);
         if (mutation.target.hasChildNodes()) {
           mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+          mutation.target.querySelectorAll('*[data-draw-fn]').forEach(element => element.addEventListener('click', Draw[element.dataset.drawFn]));
           mutation.target.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
           mutation.target.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
           mutation.target.querySelectorAll('*[data-blur-fn]').forEach(element => element.addEventListener('blur', app[element.dataset.blurFn]));
@@ -122,23 +123,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   observerList.observe(document.getElementById('body'), config);
   observerList.observe(app.drawer, config);
   // observerList.observe(Draw.svg, config);
-
-  app.contextMenuTable = (e) => {
-    e.preventDefault();
-    // console.log(e.target.getBoundingClientRect());
-    // const { clientX: mouseX, clientY: mouseY } = e;
-    // const { left: mouseX, top: mouseY } = e.target.getBoundingClientRect();
-    const { left: mouseX, bottom: mouseY } = e.currentTarget.getBoundingClientRect();
-    app.contextMenuTableRef.style.top = `${mouseY + 8}px`;
-    app.contextMenuTableRef.style.left = `${mouseX}px`;
-    // Imposto la tabella attiva, su cui si è attivato il context-menu
-    WorkBook.activeTable = e.currentTarget.id;
-    // Chiudo eventuali dlg-info aperte sul mouseEnter della use.table
-    // if (app.dialogInfo.hasAttribute('open')) app.dialogInfo.close();
-    app.contextMenuTableRef.toggleAttribute('open');
-    // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
-    document.querySelectorAll('#ul-context-menu-table button').forEach(item => item.dataset.id = WorkBook.activeTable.id);
-  }
 
   app.openContextMenu = (e) => {
     e.preventDefault();
@@ -215,7 +199,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       }
     }
     app.dialogCustomMetric.show();
-    app.contextMenuTableRef.toggleAttribute('open');
+    Draw.contextMenu.toggleAttribute('open');
   }
 
   // imposto un alias per tabella aggiunta al canvas
@@ -1152,7 +1136,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // reimposto l'evento contextmenu sugli elementi del canvas
     for (const tableId of Draw.tables.keys()) {
       // se la tabella è già presente in sessionStorage non rieseguo la query
-      Draw.svg.querySelector(`#${tableId}`).addEventListener('contextmenu', app.contextMenuTable);
+      Draw.svg.querySelector(`#${tableId}`).addEventListener('contextmenu', Draw.contextMenuTable);
     }
     Draw.checkResizeSVG();
     app.dialogWorkBook.close();
@@ -2597,7 +2581,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.handlerTimeDimension = async (e) => {
     console.log(e.target);
-    app.contextMenuTableRef.toggleAttribute('open');
+    Draw.contextMenu.toggleAttribute('open');
     /*
     * - recupero le colonne della tabella selezionata
     * - apro la dialog per poter associare una colonna della WEB_BI_TIME con una colonna della FACT
@@ -2609,7 +2593,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   // rimozione tabella dal draw SVG
   app.removeTable = (e) => {
-    app.contextMenuTableRef.toggleAttribute('open');
+    Draw.contextMenu.toggleAttribute('open');
     // Elimino la tabella corrente
     Draw.svg.querySelector(`use.table[id='${e.currentTarget.dataset.id}']`).remove();
     // decremento data-joins della tabella in relazione con questa che sto eliminando
@@ -2651,7 +2635,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     for (const values of Draw.tables.values()) {
       if (+Draw.svg.dataset.level < values.levelId) Draw.svg.dataset.level = values.levelId;
     }
-    Draw.joinTablePositioning();
+    // Draw.joinTablePositioning();
     // imposto un elemento 'canvas' per evidenziare che c'è una modifica nel canvas
     WorkBook.checkChanges('canvas');
   }

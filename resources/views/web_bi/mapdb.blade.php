@@ -609,6 +609,7 @@
                       </menu>
                       <div id="context-menu-table" class="context-menu">
                         <ul id="ul-context-menu-table" class="context-menu-items">
+                          <!-- <button id="addFactJoin" data-draw-fn="addFactJoin" class="btn-link-context" disabled>Aggiungi Join</button> -->
                           <button id="time-dimension" data-fn="handlerTimeDimension" class="btn-link-context">Dimensione TIME</button>
                           <button id="context-custom-metric" data-fn="addCustomMetric" class="btn-link-context">Metrica person.</button>
                           <button data-fn="removeTable" class="btn-link-context">Rimuovi</button>
@@ -628,12 +629,20 @@
                       </div>
                       <section id="canvas-area" data-message="">
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
-                          <dialog id="dlg-info" class="positioned popup">
+                          <dialog id="dlg-table-info" class="positioned popup">
                             <button class="button-icon material-icons-round md-18 columns" disabled>view_column</button>
                             <button class="button-icon material-icons-round md-18 metrics" disabled>multiline_chart</button>
                             <button class="button-icon material-icons-round md-18" disabled>history</button>
                             <button class="button-icon material-icons-round md-18" disabled>info</button>
                           </dialog>
+                          <div id="table-info">
+
+                            <section class="row">
+                              <div class="col grid-12 center">
+                                <p>Informazioni tabella</p>
+                              </div>
+                            </section>
+                          </div>
                           <svg id="svg" class="dropzone" data-level="0">
                             <defs>
                               <g id="table-struct" class="struct">
@@ -642,7 +651,7 @@
                                 <image href="{{ asset('/images/grid_on_5C7893_18dp.svg') }}" data-id x="4" y="3" width="18" height="18">
                                 </image>
                                 <text x="26" y="17" font-family="Barlow" font-size=".8rem" font-weight="normal"></text>
-                                <!-- <image data-icon="multi-fact-defined" href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="36" width="18" height="18"></image> -->
+                                <!-- <image data-icon="add-join" href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="26" width="18" height="18"></image> -->
                               </g>
                               <g id="table-struct-fact" class="struct fact">
                                 <rect class="table" x="0" y="0" />

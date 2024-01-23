@@ -11,6 +11,7 @@ class DrawSVG {
     this.svg = document.getElementById(element);
     this.svg.dataset.height = this.svg.parentElement.offsetHeight;
     this.svg.dataset.width = this.svg.parentElement.offsetWidth;
+    this.contextMenu = document.getElementById('context-menu-table');
     this.currentLevel;
     this.currentTable = {}, this.currentLine = {};
     this.arrayLevels = [];
@@ -71,10 +72,15 @@ class DrawSVG {
 
   get dimensions() { return this.#dimensions; }
 
+  // addFactJoin() {
+  //   // creo una linea che parte dalla tabella/dimensione corrente
+  // }
+
   /* NOTE: DRAG&DROP EVENTS */
 
   handlerDragStart(e) {
     // console.log('e.target : ', e.target.id);
+    e.stopPropagation();
     e.target.classList.add('dragging');
     this.dragElementPosition.x = e.offsetX;
     this.dragElementPosition.y = e.offsetY;
@@ -164,6 +170,39 @@ class DrawSVG {
     }
   }
 
+  contextMenuTable(e) {
+    e.preventDefault();
+    // console.log(e.target.dataset);
+    // console.log(e.target.getBoundingClientRect());
+    // const { clientX: mouseX, clientY: mouseY } = e;
+    // const { left: mouseX, top: mouseY } = e.target.getBoundingClientRect();
+    const { left: mouseX, bottom: mouseY } = e.currentTarget.getBoundingClientRect();
+    this.contextMenu.style.top = `${mouseY + 8}px`;
+    this.contextMenu.style.left = `${mouseX}px`;
+    // Imposto la activeTable relativa al context-menu
+    WorkBook.activeTable = e.currentTarget.id;
+    // Chiudo eventuali dlg-info aperte sul mouseEnter della use.table
+    // if (app.dialogInfo.hasAttribute('open')) app.dialogInfo.close();
+    this.contextMenu.toggleAttribute('open');
+    // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
+    document.querySelectorAll('#ul-context-menu-table button').forEach(item => item.dataset.id = WorkBook.activeTable.id);
+    // abilito "addJoin" se sono presenti due o più fact-table e se si è attivato il contextmenu
+    // su una tabella del data-level-id = 1 (dimensione)
+    // const facts = this.svg.querySelectorAll('use.table.fact').length;
+    // this.contextMenu.querySelector('#addFactJoin').disabled = (facts > 1 && +e.target.dataset.levelId === 1) ? false : true;
+  }
+
+  createDimensionInfo() {
+    const parent = document.getElementById('table-info');
+    debugger;
+    this.svg.querySelectorAll("use.table[data-level-id='1']").forEach(dim => {
+      const div = document.createElement('div');
+      div.innerText = dim.dataset.table;
+      parent.appendChild(div);
+    });
+
+  }
+
   handlerDragEnter(e) {
     e.preventDefault();
     if (e.currentTarget.classList.contains('dropzone')) {
@@ -228,8 +267,8 @@ class DrawSVG {
       this.currentTable = this.tables.get(`svg-data-${tableId}`);
       this.drawFact();
     } else if (this.tableJoin && this.currentLineRef.classList.contains('factLine')) {
-      this.svg.querySelectorAll('use.table:not(.fact)').forEach(table => table.dataset.multifact = true);
-      console.log('dataset.multifact impostato');
+      // this.svg.querySelectorAll('use.table:not(.fact)').forEach(table => table.dataset.multifact = true);
+      // console.log('dataset.multifact impostato');
       // la nuova fact è visualizzata immediatamente sotto la prima fact
       // recupero le coordinate del e.target
       // const coords = { x: +e.target.dataset.x, y: +e.target.dataset.y + 140 };
@@ -238,6 +277,7 @@ class DrawSVG {
       this.tables.get(`svg-data-${tableId}`).line.from.y = coords.y + 12;
       this.tables.get(`svg-data-${tableId}`).factId = +this.tableJoin.table.dataset.factId + 1;
       this.currentTable = this.tables.get(`svg-data-${tableId}`);
+      this.createDimensionInfo();
       this.drawFact();
     } else {
       // è presente una tableJoin
@@ -279,7 +319,7 @@ class DrawSVG {
     // imposto la tabella attiva per poter scaricare le colonne in sessionStorage (in handlerDragEnd())
     WorkBook.activeTable = `svg-data-${tableId}`;
     // imposto event contextmenu
-    this.svg.querySelector(`#${this.currentTable.key}`).addEventListener('contextmenu', app.contextMenuTable);
+    this.svg.querySelector(`#${this.currentTable.key}`).addEventListener('contextmenu', this.contextMenuTable.bind(Draw));
     // posizionamento delle joinTable (tabelle che hanno data-join > 1)
     // this.joinTablePositioning();
   }
@@ -441,6 +481,10 @@ class DrawSVG {
     animate.setAttribute('fill', 'freeze');
     use.appendChild(animate);
   }
+
+  // dragst(e) {
+
+  // }
 
   drawTable() {
     let clonedStruct = this.svg.querySelector('#table-struct').cloneNode(true);

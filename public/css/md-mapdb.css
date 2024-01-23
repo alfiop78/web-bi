@@ -161,6 +161,14 @@ line {
   visibility: visible;
 }
 
+.struct > image[data-icon="add-join"] {
+  visibility: hidden;
+}
+
+.struct:hover > image[data-icon="add-join"] {
+  visibility: visible;
+}
+
 use.table{
   fill: white;
   font-weight: normal;
@@ -565,4 +573,13 @@ section#canvas-area::before {
   height: 24px;
   display: flex;
   align-items: center;
+}
+
+#table-info {
+  position: absolute;
+  right: 0px;
+  background-color: white;
+  width: 250px;
+  height: 100%;
+  box-shadow: -4px 0px 5px -4px gray;
 }
