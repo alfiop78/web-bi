@@ -128,7 +128,8 @@ class DrawSVG {
         // console.log('tableJoin :', Draw.tableJoin.table.id);
         if (this.currentLineRef && this.tableJoin) {
           this.joinLines = {
-            id: this.currentLineRef.id, properties: {
+            id: this.currentLineRef.id,
+            properties: {
               id: this.currentLineRef.dataset.id,
               key: this.currentLineRef.id,
               coordsFrom: { x: (e.offsetX - this.dragElementPosition.x - 10), y: (e.offsetY - this.dragElementPosition.y + 12) },
@@ -437,6 +438,43 @@ class DrawSVG {
     debugger;
   }
 
+  tableMouseDown(e) {
+    // e.preventDefault();
+    e.stopPropagation();
+    // this.coordinate = { x: +e.currentTarget.dataset.x, y: +e.currentTarget.dataset.y };
+    this.coordinate = { x: +e.currentTarget.getAttribute('x'), y: +e.currentTarget.getAttribute('y') };
+    this.el = e.currentTarget;
+  }
+
+  tableMouseMove(e) {
+    // e.preventDefault();
+    e.stopPropagation();
+    // console.log('mousemove', e.currentTarget);
+    if (this.el) {
+      this.coordinate.x += e.movementX;
+      this.coordinate.y += e.movementY;
+      // console.log(e);
+      // e.currentTarget.style.transform = "translate(" + this.coordinate.x + "px, " + this.coordinate.y + "px)";
+      // e.currentTarget.dataset.translateX = this.coordinate.x;
+      // e.currentTarget.dataset.translateY = this.coordinate.y;
+      e.currentTarget.setAttribute('x', this.coordinate.x);
+      e.currentTarget.setAttribute('y', this.coordinate.y);
+
+      // linea di join, se presente
+      const line = this.svg.querySelector(`path[data-from='${e.target.id}']`);
+      console.log(line);
+      const d = `M${this.line.x1},${this.line.y1} C${this.line.p1x},${this.line.p1y} ${this.coordinate.x - 40},${this.coordinate.y} ${this.coordinate.x - 10},${this.coordinate.y}`;
+      line.setAttribute('d', d);
+    }
+  }
+
+  tableMouseUp(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    // console.log('mousemove', e.currentTarget);
+    delete this.el;
+  }
+
   drawFact() {
     let clonedStruct = this.svg.querySelector('#table-struct-fact').cloneNode(true);
     // assegno l'id e il testo (nome tabella) all'elemento clonato
@@ -462,7 +500,7 @@ class DrawSVG {
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;
-    use.dataset.fn = 'tableSelected';
+    // use.dataset.fn = 'tableSelected';
     use.dataset.enterFn = 'tableEnter';
     use.onmouseover = this.handlerOver.bind(Draw);
     use.onmouseleave = this.handlerLeave.bind(Draw);
@@ -473,13 +511,17 @@ class DrawSVG {
     use.dataset.levelId = this.currentTable.levelId;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
+    use.addEventListener('mousedown', this.tableMouseDown.bind(this));
+    use.addEventListener('mousemove', this.tableMouseMove.bind(this));
+    use.addEventListener('mouseup', this.tableMouseUp.bind(this));
+    use.addEventListener('mouseleave', this.tableMouseUp.bind(this));
     this.svg.appendChild(use);
     // <animate> tag
-    const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
-    animate.setAttribute('attributeName', 'y');
-    animate.setAttribute('dur', '.15s');
-    animate.setAttribute('fill', 'freeze');
-    use.appendChild(animate);
+    // const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+    // animate.setAttribute('attributeName', 'y');
+    // animate.setAttribute('dur', '.15s');
+    // animate.setAttribute('fill', 'freeze');
+    // use.appendChild(animate);
   }
 
   // dragst(e) {
@@ -510,7 +552,7 @@ class DrawSVG {
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;
-    use.dataset.fn = 'tableSelected';
+    // use.dataset.fn = 'tableSelected';
     use.dataset.enterFn = 'tableEnter';
     use.onmouseover = this.handlerOver.bind(Draw);
     use.onmouseleave = this.handlerLeave.bind(Draw);
@@ -521,13 +563,18 @@ class DrawSVG {
     use.dataset.levelId = this.currentTable.levelId;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
+    use.addEventListener('mousedown', this.tableMouseDown.bind(this));
+    use.addEventListener('mousemove', this.tableMouseMove.bind(this));
+    use.addEventListener('mouseup', this.tableMouseUp.bind(this));
+    use.addEventListener('mouseleave', this.tableMouseUp.bind(this));
     Draw.svg.appendChild(use);
+    this.currentLineRef.dataset.from = this.currentTable.key;
     // <animate> tag
-    const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
-    animate.setAttribute('attributeName', 'y');
-    animate.setAttribute('dur', '.15s');
-    animate.setAttribute('fill', 'freeze');
-    use.appendChild(animate);
+    // const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+    // animate.setAttribute('attributeName', 'y');
+    // animate.setAttribute('dur', '.15s');
+    // animate.setAttribute('fill', 'freeze');
+    // use.appendChild(animate);
   }
 
   drawTime() {
@@ -633,6 +680,12 @@ class DrawSVG {
     const d = `M${this.line.x1},${this.line.y1} C${this.line.p1x},${this.line.p1y} ${this.line.p2x},${this.line.p2y} ${this.line.x2},${this.line.y2}`;
     this.currentLineRef = this.currentLine.key;
     console.log(this.currentLineRef);
+    this.currentLineRef.dataset.startX = this.line.x1;
+    this.currentLineRef.dataset.startY = this.line.y1;
+    this.currentLineRef.dataset.endX = this.line.x2;
+    this.currentLineRef.dataset.endY = this.line.y2;
+    // 'from' viene impostato in drawTable(), perchè ancora non è stata droppata la tabella
+    this.currentLineRef.dataset.to = this.tableJoin.table.id;
     this.currentLineRef.setAttribute('d', d);
     if (this.currentLineRef.hasChildNodes()) {
       const animLine = this.currentLineRef.querySelector('animate');

@@ -2209,6 +2209,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   // TODO: spostare in supportFn.js
   document.querySelectorAll('.translate').forEach(el => {
     el.onmousedown = (e) => {
+      // e.stopPropagation();
+      console.log('mousedown', e.currentTarget);
       // console.log(app.coords);
       if (e.button === 2) return;
       // chiudo gli eventuali contextmenu aperti
@@ -2218,6 +2220,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     }
 
     el.onmousemove = (e) => {
+      // console.log('mousemove', e.currentTarget);
       if (app.el) {
         app.coords.x += e.movementX;
         app.coords.y += e.movementY;
