@@ -152,8 +152,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       // se la tabella non è presente in sessionStorage la scarico
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
       // se sono presenti almeno due tabelle visualizzo la dialog per la join
-      // debugger;
-      if (Draw.countJoins > 0) {
+      // se è presente almeno una tabella dimensionale oppure la tabella droppata è una fact NON eseguo la join
+      if (Draw.countJoins !== 0 && !Draw.table.classList.contains('fact')) {
         WorkBook.tableJoins = {
           from: app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
           to: app.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId
@@ -2437,8 +2437,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   }
 
   app.tablesMap = () => {
+    // TODO: invece di utilizzare questa logica, con il level-id, potrei cercare le prime tabelle, per ogni
+    // dimensione, andando a controllare l'attributo data-joins, se è 0 abbiamo trovato la prima tabella per ogni dimensione
+    // BUG: da rivedere meglio, al momento ottengo un errore quando si aggiunge una tabella clonata (multiFact)
+
     // creo tablesMap : qui sono presenti tutte le tabelle del canvas, al suo interno le tabelle in join fino alla FACT
     const levelId = +Draw.svg.dataset.level;
+    debugger;
     WorkBook.tablesMap.clear();
     let recursiveLevels = (levelId) => {
       // per ogni tabella creo un Map() con, al suo interno, le tabelle gerarchicamente inferiori (verso la FACT)
@@ -3200,9 +3205,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   });
 
   // TODO: spostare in supportFn oppure Application.js
-  app.dialogJoin.addEventListener('close', () => {
+  app.dialogJoin.addEventListener('close', (e) => {
     // ripulisco gli elementi delle <ul> (I campi delle tabelle)
     app.dialogJoin.querySelectorAll('ul > li').forEach(li => li.remove());
+    console.log(e.target.querySelectorAll('ul > li'));
     app.dialogJoin.querySelectorAll('.join-field').forEach(joinField => joinField.remove());
   });
 

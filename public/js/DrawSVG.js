@@ -6,7 +6,6 @@ class DrawSVG {
   #currentLineRef; // ref
   tmplJoin = document.getElementById('tmpl-join-field');
   dialogJoin = document.getElementById('dlg-join');
-  #table; // la tabella corrente, attivata dal contextMenuTable
 
   constructor(element) {
     this.svg = document.getElementById(element);
@@ -15,6 +14,7 @@ class DrawSVG {
     this.contextMenu = document.getElementById('context-menu-table');
     this.currentLevel;
     this.currentTable = {}, this.currentLine = {};
+    this.table; // la tabella corrente
     this.arrayLevels = [];
     this.dragElementPosition = { x: 0, y: 0 };
     this.coordsRef = document.getElementById('coords');
@@ -278,7 +278,7 @@ class DrawSVG {
       this.joinLines.get(this.currentLineRef.id).from = `svg-data-${tableId}`;
       // console.info('create JOIN');
       this.openJoinWindow();
-      this.tables.get(`svg-data-${tableId}`).name;
+      // this.tables.get(`svg-data-${tableId}`).name;
       this.currentTable = this.tables.get(`svg-data-${tableId}`);
       // creo nel DOM la tabella appena droppata
       this.drawTable();
@@ -351,7 +351,7 @@ class DrawSVG {
       // WARN: la Fact, se ha una joinLine, la devo cercare nel data-to anzichè data-from della linea
       this.currentLineRef = this.svg.querySelector(`path[data-from='${e.target.id}']`).id;
       this.currentLineRef.dataset.to = nearestTable.id;
-      console.log('currentLineRef:', this.currentLineRef);
+      // console.log('currentLineRef:', this.currentLineRef);
       // TODO: le coordinate all'interno dell'oggetto Map() joinLines vanno modificate, in base allo spostamento
       // che sto facendo qui
       this.joinLines.get(this.currentLineRef.id).coordsFrom = {
@@ -362,7 +362,7 @@ class DrawSVG {
 
       this.currentLine = this.joinLines.get(this.currentLineRef.id);
 
-      console.log('this.currentline:', this.currentLine);
+      // console.log('this.currentline:', this.currentLine);
 
       if (this.currentLineRef) {
         const d = `M${+nearestTable.dataset.x + 190},${+nearestTable.dataset.y + 12} C${+nearestTable.dataset.x + 190 + 40},${+nearestTable.dataset.y + 12} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
@@ -382,6 +382,7 @@ class DrawSVG {
     // }
     // se esiste già una join per questa tabella non visualizzo la dialogJoin
     if (!('joinId' in this.currentLineRef.dataset)) {
+      // debugger;
       this.openJoinWindow();
       WorkBook.tableJoins = {
         from: this.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
@@ -493,7 +494,6 @@ class DrawSVG {
     }
   } */
 
-
   drawFact() {
     let clonedStruct = this.svg.querySelector('#table-struct-fact').cloneNode(true);
     // assegno l'id e il testo (nome tabella) all'elemento clonato
@@ -535,6 +535,7 @@ class DrawSVG {
     use.addEventListener('mouseup', this.tableMouseUp.bind(this));
     // use.addEventListener('mouseleave', this.tableMouseUp.bind(this));
     this.svg.appendChild(use);
+    this.table = use;
     // <animate> tag
     // const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
     // animate.setAttribute('attributeName', 'y');
@@ -583,6 +584,7 @@ class DrawSVG {
     use.addEventListener('mouseup', this.tableMouseUp.bind(this));
     // use.addEventListener('mouseleave', this.tableMouseUp.bind(this));
     Draw.svg.appendChild(use);
+    this.table = use;
     this.currentLineRef.dataset.from = this.currentTable.key;
     // <animate> tag
     // const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
@@ -791,12 +793,12 @@ class DrawSVG {
 
   addFactJoin() {
     // clono la tabella
-    const clone = this.#table.cloneNode(true);
-    clone.id = `${this.#table.id}-clone`;
+    const clone = this.table.cloneNode(true);
+    clone.id = `${this.table.id}-clone`;
     clone.classList.add('clone');
     // la sposto leggermente rispetto alla tabella di origine
-    clone.setAttribute('x', +this.#table.getAttribute('x') + 8);
-    clone.setAttribute('y', +this.#table.getAttribute('y') + 36);
+    clone.setAttribute('x', +this.table.getAttribute('x') + 8);
+    clone.setAttribute('y', +this.table.getAttribute('y') + 36);
     clone.dataset.x = +clone.getAttribute('x');
     clone.dataset.y = +clone.getAttribute('y');
     // aggiungo gli stessi eventi della tabella originale
@@ -804,8 +806,8 @@ class DrawSVG {
     clone.addEventListener('mousemove', this.tableMouseMove.bind(this));
     clone.addEventListener('mouseup', this.tableMouseUp.bind(this));
     this.svg.appendChild(clone);
-    // TODO: clono anche la sua linea andando a cercare la line con data-from = this.#table.id
-    const line = this.svg.querySelector(`path[data-from='${this.#table.id}']`);
+    // TODO: clono anche la sua linea andando a cercare la line con data-from = this.table.id
+    const line = this.svg.querySelector(`path[data-from='${this.table.id}']`);
     const lineClone = line.cloneNode();
     lineClone.id = `${line.id}-clone`;
     lineClone.dataset.from = `${line.dataset.from}-clone`;
@@ -840,7 +842,7 @@ class DrawSVG {
     this.contextMenu.style.left = `${mouseX}px`;
     // Imposto la activeTable relativa al context-menu
     WorkBook.activeTable = e.currentTarget.id;
-    this.#table = e.currentTarget;
+    this.table = e.currentTarget;
     // Chiudo eventuali dlg-info aperte sul mouseEnter della use.table
     // if (app.dialogInfo.hasAttribute('open')) app.dialogInfo.close();
     this.contextMenu.toggleAttribute('open');
