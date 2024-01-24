@@ -6,6 +6,7 @@ class DrawSVG {
   #currentLineRef; // ref
   tmplJoin = document.getElementById('tmpl-join-field');
   dialogJoin = document.getElementById('dlg-join');
+  #table; // la tabella corrente, attivata dal contextMenuTable
 
   constructor(element) {
     this.svg = document.getElementById(element);
@@ -71,10 +72,6 @@ class DrawSVG {
   }
 
   get dimensions() { return this.#dimensions; }
-
-  // addFactJoin() {
-  //   // creo una linea che parte dalla tabella/dimensione corrente
-  // }
 
   /* NOTE: DRAG&DROP EVENTS */
 
@@ -171,6 +168,31 @@ class DrawSVG {
     }
   }
 
+  addFactJoin(e) {
+    // clono la tabella
+    const clone = this.table.cloneNode(true);
+    clone.id = `${this.table.id}-clone`;
+    clone.classList.add('clone');
+    // la sposto leggermente rispetto alla tabella di origine
+    clone.setAttribute('x', +this.table.getAttribute('x') + 8);
+    clone.setAttribute('y', +this.table.getAttribute('y') + 36);
+    // aggiungo gli stessi eventi della tabella originale
+    clone.addEventListener('mousedown', this.tableMouseDown.bind(this));
+    clone.addEventListener('mousemove', this.tableMouseMove.bind(this));
+    clone.addEventListener('mouseup', this.tableMouseUp.bind(this));
+    clone.addEventListener('mouseleave', this.tableMouseUp.bind(this));
+    this.svg.appendChild(clone);
+    // TODO: clono anche la sua line andando a cercare la line con data-from = this.table.id
+    const line = this.svg.querySelector(`path[data-from='${this.table.id}']`);
+    const lineClone = line.cloneNode();
+    lineClone.id = `${line.id}-clone`;
+    lineClone.dataset.from = `${line.dataset.from}-clone`;
+    // const d = `M${+nearestTable.dataset.x + 190},${+nearestTable.dataset.y + 12} C${+nearestTable.dataset.x + 190 + 40},${+nearestTable.dataset.y + 12} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
+    //     line.setAttribute('d', d);
+    this.svg.appendChild(lineClone);
+
+  }
+
   contextMenuTable(e) {
     e.preventDefault();
     // console.log(e.target.dataset);
@@ -182,6 +204,7 @@ class DrawSVG {
     this.contextMenu.style.left = `${mouseX}px`;
     // Imposto la activeTable relativa al context-menu
     WorkBook.activeTable = e.currentTarget.id;
+    this.table = e.currentTarget;
     // Chiudo eventuali dlg-info aperte sul mouseEnter della use.table
     // if (app.dialogInfo.hasAttribute('open')) app.dialogInfo.close();
     this.contextMenu.toggleAttribute('open');
@@ -189,8 +212,9 @@ class DrawSVG {
     document.querySelectorAll('#ul-context-menu-table button').forEach(item => item.dataset.id = WorkBook.activeTable.id);
     // abilito "addJoin" se sono presenti due o più fact-table e se si è attivato il contextmenu
     // su una tabella del data-level-id = 1 (dimensione)
-    // const facts = this.svg.querySelectorAll('use.table.fact').length;
-    // this.contextMenu.querySelector('#addFactJoin').disabled = (facts > 1 && +e.target.dataset.levelId === 1) ? false : true;
+    const facts = this.svg.querySelectorAll('use.table.fact').length;
+    this.contextMenu.querySelector('#addFactJoin').addEventListener('click', this.addFactJoin.bind(Draw));
+    this.contextMenu.querySelector('#addFactJoin').disabled = (facts > 1 && +e.target.dataset.levelId === 1) ? false : true;
   }
 
   createDimensionInfo() {
@@ -457,14 +481,24 @@ class DrawSVG {
       // e.currentTarget.style.transform = "translate(" + this.coordinate.x + "px, " + this.coordinate.y + "px)";
       // e.currentTarget.dataset.translateX = this.coordinate.x;
       // e.currentTarget.dataset.translateY = this.coordinate.y;
+      e.currentTarget.dataset.x = this.coordinate.x;
+      e.currentTarget.dataset.y = this.coordinate.y;
       e.currentTarget.setAttribute('x', this.coordinate.x);
       e.currentTarget.setAttribute('y', this.coordinate.y);
 
+      let nearestTable = [...this.svg.querySelectorAll(`use.table:not(#${e.target.id})`)].reduce((prev, current) => {
+        // return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
+        return (Math.hypot(+e.target.dataset.x - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(+e.target.dataset.x - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
+      });
+      console.log(nearestTable);
       // linea di join, se presente
-      const line = this.svg.querySelector(`path[data-from='${e.target.id}']`);
-      console.log(line);
-      const d = `M${this.line.x1},${this.line.y1} C${this.line.p1x},${this.line.p1y} ${this.coordinate.x - 40},${this.coordinate.y} ${this.coordinate.x - 10},${this.coordinate.y}`;
-      line.setAttribute('d', d);
+      let line = this.svg.querySelector(`path[data-from='${e.target.id}']`);
+      if (line) {
+        // console.log(line);
+        // const d = `M${this.line.x1},${this.line.y1} C${this.line.p1x},${this.line.p1y} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
+        const d = `M${+nearestTable.dataset.x + 190},${+nearestTable.dataset.y + 12} C${+nearestTable.dataset.x + 190 + 40},${+nearestTable.dataset.y + 12} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
+        line.setAttribute('d', d);
+      }
     }
   }
 
@@ -524,9 +558,6 @@ class DrawSVG {
     // use.appendChild(animate);
   }
 
-  // dragst(e) {
-
-  // }
 
   drawTable() {
     let clonedStruct = this.svg.querySelector('#table-struct').cloneNode(true);

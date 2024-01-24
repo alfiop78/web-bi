@@ -96,7 +96,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
             if (node.hasChildNodes()) {
               node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
-              node.querySelectorAll('*[data-draw-fn]').forEach(element => element.addEventListener('click', Draw[element.dataset.drawFn]));
               node.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
               node.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
               node.querySelectorAll('*[data-blur-fn]').forEach(element => element.addEventListener('blur', app[element.dataset.blurFn]));
@@ -108,7 +107,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         // console.log(mutation.target);
         if (mutation.target.hasChildNodes()) {
           mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
-          mutation.target.querySelectorAll('*[data-draw-fn]').forEach(element => element.addEventListener('click', Draw[element.dataset.drawFn]));
           mutation.target.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
           mutation.target.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
           mutation.target.querySelectorAll('*[data-blur-fn]').forEach(element => element.addEventListener('blur', app[element.dataset.blurFn]));

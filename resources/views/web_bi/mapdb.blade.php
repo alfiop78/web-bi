@@ -609,7 +609,7 @@
                       </menu>
                       <div id="context-menu-table" class="context-menu">
                         <ul id="ul-context-menu-table" class="context-menu-items">
-                          <!-- <button id="addFactJoin" data-draw-fn="addFactJoin" class="btn-link-context" disabled>Aggiungi Join</button> -->
+                          <button id="addFactJoin" class="btn-link-context" disabled>Aggiungi Join</button>
                           <button id="time-dimension" data-fn="handlerTimeDimension" class="btn-link-context">Dimensione TIME</button>
                           <button id="context-custom-metric" data-fn="addCustomMetric" class="btn-link-context">Metrica person.</button>
                           <button data-fn="removeTable" class="btn-link-context">Rimuovi</button>
