@@ -176,6 +176,10 @@ use.table{
   opacity: .8;
 }
 
+use.table.clone {
+  opacity: .5;
+}
+
 use.table.dropzone.dropping {
   fill: red;
   stroke: white;
@@ -185,10 +189,12 @@ use.table.dropzone.dropping {
 
 use.table:hover{
   cursor: pointer;
-  /* fill: lightblue; */
   opacity: 1;
-  /* stroke: #494949; */
-  /* stroke-width: 0.1; */
+}
+
+use.table.clone:hover{
+  cursor: pointer;
+  opacity: .5;
 }
 
 use.table[data-active]{

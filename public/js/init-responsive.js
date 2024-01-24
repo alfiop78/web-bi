@@ -146,7 +146,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   // l'evento dragend deve essere impostato sull'elemento che inizia il drag (start)
   app.handlerSVGDragEnd = async (e) => {
     e.preventDefault();
-    // e.stopPropagation();
+    e.stopPropagation();
     console.log('svgDragEnd');
     if (e.dataTransfer.dropEffect === 'copy') {
       // se la tabella non è presente in sessionStorage la scarico
@@ -1136,7 +1136,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       // se la tabella è già presente in sessionStorage non rieseguo la query
       Draw.svg.querySelector(`#${tableId}`).addEventListener('contextmenu', Draw.contextMenuTable);
     }
-    Draw.checkResizeSVG();
+    // Draw.checkResizeSVG();
     app.dialogWorkBook.close();
     // il WorkBook è già creato quindi da questo momento è in fase di edit
     WorkBook.edit = true;
@@ -2578,6 +2578,15 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       document.querySelector('#btn-remove-join').dataset.token = join.dataset.token;
 
     });
+  }
+
+  app.addJoin = () => {
+    // recupero i riferimenti del template da aggiungere al DOM
+    let joinFields = Draw.createJoinField();
+    const token = rand().substring(0, 7);
+    joinFields.from.dataset.token = token;
+    joinFields.to.dataset.token = token;
+    document.querySelector('#btn-remove-join').dataset.token = token;
   }
 
   app.handlerTimeDimension = async (e) => {
