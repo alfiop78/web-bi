@@ -167,7 +167,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       }
     }
     // creo una mappatura di tutte le tabelle del Canvas
-    app.tablesMap();
+    Draw.tablesMap();
     // creo una mappatura per popolare il WorkBook nello step successivo
     app.hierTables();
   }
@@ -1127,7 +1127,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     WorkBook.name = e.currentTarget.dataset.name;
     // modifico il nome del WorkBook in #workbook-name
     document.getElementById('workbook-name').innerText = WorkBook.name;
-    app.tablesMap();
+    Draw.tablesMap();
     app.hierTables();
     // scarico le tabelle del canvas in sessionStorage, questo controllo va fatto dopo aver definito WorkBook.hierTables
     app.checkSessionStorage();
@@ -2436,14 +2436,15 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
   }
 
-  app.tablesMap = () => {
+
+  /* app.tablesMap = () => {
     // TODO: invece di utilizzare questa logica, con il level-id, potrei cercare le prime tabelle, per ogni
     // dimensione, andando a controllare l'attributo data-joins, se è 0 abbiamo trovato la prima tabella per ogni dimensione
     // BUG: da rivedere meglio, al momento ottengo un errore quando si aggiunge una tabella clonata (multiFact)
 
     // creo tablesMap : qui sono presenti tutte le tabelle del canvas, al suo interno le tabelle in join fino alla FACT
     const levelId = +Draw.svg.dataset.level;
-    debugger;
+    // debugger;
     WorkBook.tablesMap.clear();
     let recursiveLevels = (levelId) => {
       // per ogni tabella creo un Map() con, al suo interno, le tabelle gerarchicamente inferiori (verso la FACT)
@@ -2463,7 +2464,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       if (levelId !== 0) recursiveLevels(levelId);
     }
     if (levelId > 0) recursiveLevels(levelId);
-  }
+  } */
 
   app.hierTables = () => {
     // creo hierTables : qui sono presenti tutte le tabelle del canvas. Questa mi serve per creare la struttura nello WorkBook
@@ -2694,7 +2695,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     Draw.currentTable = Draw.tables.get('svg-data-web_bi_time');
     Draw.drawTime();
 
-    app.tablesMap();
+    Draw.tablesMap();
     app.hierTables();
     // recupero tutti i campi della WEB_BI_TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     WorkBook.activeTable = 'svg-data-web_bi_time';

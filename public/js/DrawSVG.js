@@ -811,8 +811,10 @@ class DrawSVG {
     const lineClone = line.cloneNode();
     lineClone.id = `${line.id}-clone`;
     lineClone.dataset.from = `${line.dataset.from}-clone`;
-    // const d = `M${+nearestTable.dataset.x + 190},${+nearestTable.dataset.y + 12} C${+nearestTable.dataset.x + 190 + 40},${+nearestTable.dataset.y + 12} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
-    //     line.setAttribute('d', d);
+    // TODO: recupero la posizione a cui è legata la linea di origine
+    console.log()
+    const d = `M${+line.dataset.startX},${+line.dataset.startY} C${+line.dataset.startX + 40},${+line.dataset.startY} ${+clone.dataset.x - 40},${+clone.dataset.y + 12} ${+clone.dataset.x - 10},${+clone.dataset.y + 12}`;
+    lineClone.setAttribute('d', d);
     // elimino, dalla nuova linea clonata, il data-join-id, se presente, perchè qui sto creando una nuova join
     if ('joinId' in lineClone.dataset) delete lineClone.dataset.joinId;
     this.svg.appendChild(lineClone);
@@ -829,6 +831,47 @@ class DrawSVG {
         to: line.dataset.to
       }
     };
+    // TODO: aggiungo la nuova tabella a Draw.tables, anche se in  Draw.tables dovrei aggiungere le
+    // tabelle solo dopo aver coompletato la join dalla dialogJoin.. (Logica da rivedere 25.01.2024)
+    this.tables = {
+      id: clone.id,
+      properties: {
+        id: this.tables.get(this.table.id).id,
+        key: clone.id,
+        x: +clone.getAttribute('x'),
+        y: +clone.getAttribute('y'),
+        line: {
+          to: { x: +clone.getAttribute('x') + 190, y: +clone.getAttribute('y') + 12 },
+          from: { x: +clone.getAttribute('x') - 10, y: +clone.getAttribute('y') + 12 }
+        },
+        table: this.tables.get(this.table.id).table,
+        alias: this.tables.get(this.table.id).alias,
+        name: this.tables.get(this.table.id).name,
+        schema: this.tables.get(this.table.id).schema,
+        join: null,
+        joins: this.tables.get(this.table.id).joins,
+        levelId: this.tables.get(this.table.id).levelId,
+        dimensionId: this.tables.get(this.table.id).dimensionId
+      }
+    };
+  }
+
+  tablesMap() {
+    // hierarchies parte dalle tabelle che non hanno data-joins legate ad esse (il primo livello della gerarchia)
+    const hierarchies = this.svg.querySelectorAll("use.table[data-joins='0'][data-table-join]");
+    let joinTables = [];
+    hierarchies.forEach(table => {
+      joinTables.push(table.id);
+      let recursive = (tableId) => {
+        joinTables.push(tableId);
+        if (this.tables.get(tableId).join) recursive(this.tables.get(tableId).join);
+      }
+      // recupero la join associata alla tabella in ciclo
+      if (this.tables.get(table.id).join) recursive(this.tables.get(table.id).join);
+      WorkBook.tablesMap = { name: table.dataset.alias, joinTables };
+    });
+    console.log('WorkBook.tablesMap', WorkBook.tablesMap);
+    debugger;
   }
 
   contextMenuTable(e) {
