@@ -237,6 +237,7 @@ class WorkBooks {
   #joins = new Map();
   #dateTime;
   #tableJoins = { from: null, to: null }; // refs
+  #facts = {};
   #tablesMap = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   #hierTables = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   #options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };

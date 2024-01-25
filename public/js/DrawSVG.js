@@ -6,6 +6,8 @@ class DrawSVG {
   #currentLineRef; // ref
   tmplJoin = document.getElementById('tmpl-join-field');
   dialogJoin = document.getElementById('dlg-join');
+  #dataModelTables = new Map();
+  #dataModel = new Map();
 
   constructor(element) {
     this.svg = document.getElementById(element);
@@ -394,7 +396,7 @@ class DrawSVG {
         this.addFields(key, data);
       }
     }
-    delete this.el;
+    // delete this.el;
   }
 
   /* NOTE: end mouse events */
@@ -856,12 +858,13 @@ class DrawSVG {
     };
   }
 
-  tablesMap() {
-    // hierarchies parte dalle tabelle che non hanno data-joins legate ad esse (il primo livello della gerarchia)
-    const hierarchies = this.svg.querySelectorAll("use.table[data-joins='0'][data-table-join]");
-    let joinTables = [];
-    hierarchies.forEach(table => {
-      joinTables.push(table.id);
+  // viene invocata dal dragEnd (init-responsive) oltre che dal tableMouseUp()
+  /* tablesMap() {
+    // dimensions parte dalle tabelle che non hanno data-joins legate ad esse (il primo livello della gerarchia)
+    const dimensions = this.svg.querySelectorAll("use.table[data-joins='0'][data-table-join]");
+    dimensions.forEach(table => {
+      let joinTables = [table.id];
+      // joinTables.push(table.id);
       let recursive = (tableId) => {
         joinTables.push(tableId);
         if (this.tables.get(tableId).join) recursive(this.tables.get(tableId).join);
@@ -872,6 +875,27 @@ class DrawSVG {
     });
     console.log('WorkBook.tablesMap', WorkBook.tablesMap);
     debugger;
+  } */
+
+  tablesMap() {
+    this.svg.querySelectorAll("use.table.fact:not([data-joins='0'])").forEach(fact => {
+      let tables = {};
+      const dimensions = this.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${+fact.dataset.factId}']`);
+      dimensions.forEach(table => {
+        let joinTables = [table.id];
+        let recursive = (tableObject) => {
+          joinTables.push(tableObject.join);
+          if (this.tables.get(tableObject.join).join) recursive(this.tables.get(tableObject.join));
+        }
+        // recupero la join associata alla tabella in ciclo
+        if (this.tables.get(table.id).join) recursive(this.tables.get(table.id));
+        // console.log(table.dataset.alias, joinTables);
+        tables[table.dataset.alias] = joinTables;
+      });
+      // Creazione del DataModel con un oggetto Fact e, al suo interno, gli object relativi alle tabelle, per ogni fact
+      this.#dataModel.set(fact.dataset.name, tables);
+      console.log('this.#dataModel:', this.#dataModel);
+    });
   }
 
   contextMenuTable(e) {
