@@ -350,9 +350,14 @@ class WorkBooks {
   // tabelle al canvas
   createDataModel() {
     Draw.svg.querySelectorAll("use.table.fact:not([data-joins='0'])").forEach(fact => {
+      console.log(fact.id);
+      debugger;
       let tables = {};
       const dimensions = Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${+fact.dataset.factId}']`);
+      console.log(dimensions);
+      debugger;
       dimensions.forEach(table => {
+        // console.log('table : ', table);
         let joinTables = [table.id];
         let recursive = (tableObject) => {
           joinTables.push(tableObject.join);
@@ -360,12 +365,17 @@ class WorkBooks {
         }
         // recupero la join associata alla tabella in ciclo
         if (Draw.tables.get(table.id).join) recursive(Draw.tables.get(table.id));
-        tables[table.dataset.alias] = joinTables;
+        // tables[table.dataset.alias] = joinTables;
+        tables[table.id] = joinTables;
       });
       // Creazione del DataModel con un oggetto Fact e, al suo interno, gli object relativi alle tabelle, per ogni fact
-      this.#dataModel.set(fact.dataset.name, tables);
-      console.log('this.#dataModel:', this.#dataModel);
+      // TODO: inserire l'alias al posto del dataset.name
+      // this.#dataModel.set(fact.dataset.alias, tables);
+      console.log(fact.id);
+      debugger;
+      this.#dataModel.set(fact.id, tables);
     });
+    console.log('this.#dataModel:', this.#dataModel);
   }
 
   get dataModel() { return this.#dataModel; }

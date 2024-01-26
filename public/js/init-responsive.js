@@ -1,6 +1,5 @@
 // TODO: le funzioni che non utilizzano la classe WorkBook possono essere spostate in supportFn.js
 var App = new Application();
-// var Draw = new DrawSVG('svg');
 var SheetStorage = new SheetStorages();
 var WorkBookStorage = new Storages();
 var Dashboard = new Dashboards();
@@ -122,6 +121,35 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   observerList.observe(app.drawer, config);
   // observerList.observe(Draw.svg, config);
 
+  // TODO: observer sull'elemento <svg>, ogni modifica fatta in questo elemento salva il workbook_temp
+
+  /* const configSVG = { attributes: false, childList: true, subtree: true };
+  const callbackSVG = (mutationList, observer) => {
+    // console.log(mutationList, observer);
+    for (const mutation of mutationList) {
+      if (mutation.type === 'childList') {
+        // console.info('A child node has been added or removed.');
+        Array.from(mutation.addedNodes).forEach(node => {
+          // console.log(node.nodeName);
+          if (node.nodeName !== '#text') {
+
+            if (node.hasChildNodes()) {
+            }
+          }
+        });
+      } else if (mutation.type === 'attributes') {
+        // console.log(`The ${mutation.attributeName} attribute was modified.`);
+        // console.log(mutation.target);
+        if (mutation.target.hasChildNodes()) {
+        }
+      }
+    }
+  };
+  // Create an observer instance linked to the callback function
+  const observerListSVG = new MutationObserver(callbackSVG);
+  // Start observing the target node for configured mutations
+  observerListSVG.observe(document.getElementById('svg'), configSVG); */
+
   app.openContextMenu = (e) => {
     e.preventDefault();
     // console.log(e.target.id);
@@ -147,7 +175,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   app.handlerSVGDragEnd = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('svgDragEnd');
+    // console.log('svgDragEnd');
     if (e.dataTransfer.dropEffect === 'copy') {
       // se la tabella non è presente in sessionStorage la scarico
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
@@ -167,7 +195,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         }
       }
     }
-    // creo una mappatura di tutte le tabelle del Canvas
+    // creo/aggiorno la mappatura di tutte le tabelle del Canvas
     WorkBook.createDataModel();
     // creo una mappatura per popolare il WorkBook nello step successivo
     app.hierTables();
@@ -2741,7 +2769,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   // aggiungo i campi di una tabella per creare la join
   app.addFields = (source, response) => {
     // source : from, to
-    console.log(source, response);
+    // console.log(source, response);
     const ul = app.dialogJoin.querySelector(`section[data-table-${source}] ul`);
     for (const [key, value] of Object.entries(response)) {
       const content = app.tmplList.content.cloneNode(true);
@@ -3182,7 +3210,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   app.dialogJoin.addEventListener('close', (e) => {
     // ripulisco gli elementi delle <ul> (I campi delle tabelle)
     app.dialogJoin.querySelectorAll('ul > li').forEach(li => li.remove());
-    console.log(e.target.querySelectorAll('ul > li'));
     app.dialogJoin.querySelectorAll('.join-field').forEach(joinField => joinField.remove());
   });
 
