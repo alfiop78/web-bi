@@ -138,7 +138,9 @@ class DrawSVG {
               // coordsBottomFrom: { x: (e.offsetX - this.dragElementPosition.x + 12), y: (e.offsetY - this.dragElementPosition.y - 12) },
               coordsBottomFrom: { x: (e.offsetX - this.dragElementPosition.x + 12), y: (e.offsetY - this.dragElementPosition.y - 4) },
               from: null, // questo viene popolato nel handlerDrop, dopo aver ottenuto l'id dell'elemento nel DOM
-              to: this.tableJoin.table.id
+              to: this.tableJoin.table.id,
+              start: { x: this.tableJoin.x, y: this.tableJoin.y },
+              end: null
             }
           };
           this.currentLine = this.joinLines.get(this.currentLineRef.id);
@@ -219,10 +221,6 @@ class DrawSVG {
         key: `svg-data-${tableId}`,
         x: coords.x,
         y: coords.y,
-        // line: {
-        //   to: { x: coords.x + 190, y: coords.y + 12 },
-        //   from: { x: coords.x - 10, y: coords.y + 12 }
-        // },
         table: liElement.dataset.label,
         alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
         name: liElement.dataset.label,
@@ -270,12 +268,19 @@ class DrawSVG {
       this.tables.get(`svg-data-${tableId}`).join = this.tableJoin.table.id;
       this.tables.get(`svg-data-${tableId}`).factId = this.tableJoin.table.dataset.factId;
       this.tables.get(`svg-data-${tableId}`).dimensionId = dimensionId;
-      // this.tables.get(`svg-data-${tableId}`).levelId = levelId;
-      // linea di join da tableJoin alla tabella droppata
+      // salvo i dati della joinLines per poter essere salvata correttamente nel WorkBook in localStorage
+      this.currentTable = this.tables.get(`svg-data-${tableId}`);
+      // linea di join da tableJoin alla tabella droppata (questa deve essere impostata DOPO this.currentTable
+      // perchè vengono prese da lì le coordinate "finali" della tabella droppata)
       // imposto solo la proprietà 'from' rimasta "in sospeso" in handlerDragOver perchè in quell'evento non
       // ho ancora l'elemento nel DOM
       this.joinLines.get(this.currentLineRef.id).from = `svg-data-${tableId}`;
-      this.currentTable = this.tables.get(`svg-data-${tableId}`);
+      // imposto la proprietà end : {x,y} qui, dove il drop è terminato e definitivo
+      this.joinLines.get(this.currentLineRef.id).end = { x: this.currentTable.x - 10, y: this.currentTable.y + 12 };
+      // impostando il 'from' in joinLines automaticamente lo imposto anche in this.currentLine
+      // ... resta da impostare l'attributo from in this.currentLineRef
+      this.currentLineRef.dataset.from = `svg-data-${tableId}`;
+      console.log(this.currentLine);
       // creo nel DOM la tabella appena droppata
       this.drawTable();
     }
@@ -579,7 +584,6 @@ class DrawSVG {
   reDrawTable() {
     // qui aggiorno l'elemento del DOM che è stato spostato, quando non si utilizza il drag&drop
     const use = this.svg.querySelector(`#${this.currentTable.key}`);
-    debugger;
     // WARN: la Fact non ha il data-fact-id, da ricontrollare quando sposto una Fact
     use.dataset.factId = this.currentTable.factId;
     use.dataset.tableJoin = this.currentTable.join;
@@ -649,7 +653,7 @@ class DrawSVG {
     use.addEventListener('mouseleave', this.tableMouseLeave.bind(this));
     Draw.svg.appendChild(use);
     this.table = use;
-    this.currentLineRef.dataset.from = this.currentTable.key;
+
     // <animate> tag
     // const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
     // animate.setAttribute('attributeName', 'y');
@@ -765,7 +769,7 @@ class DrawSVG {
     this.currentLineRef.dataset.startY = this.line.y1;
     this.currentLineRef.dataset.endX = this.line.x2;
     this.currentLineRef.dataset.endY = this.line.y2;
-    // 'from' viene impostato in drawTable(), perchè ancora non è stata droppata la tabella
+    // 'from' viene impostato in handlerDrop(), perchè qui ancora non è stata droppata la tabella
     this.currentLineRef.dataset.to = this.tableJoin.table.id;
     this.currentLineRef.setAttribute('d', d);
     if (this.currentLineRef.hasChildNodes()) {
@@ -781,32 +785,6 @@ class DrawSVG {
       this.svg.querySelector(`#${key}`).remove();
     }
   }
-
-  /* joinTablePositioning() {
-    // recupero tutte le tabelle con data-joins > 1 partendo dal livello più alto (l'ultimo)
-    // ciclo dal penultimo livello fino a 0 per riposizionare tutti gli elementi che hanno più di 1 join con altre tabelle
-    // debugger;
-    this.arrayLevels.forEach(levelId => {
-      // il primo ciclo recupera le tabelle del penultimo level (le tabelle dell'ultimo level non hanno altre tabelle collegate ad esse)
-      this.svg.querySelectorAll(`use.table[data-level-id='${levelId}']:not([data-joins='0'])`).forEach(table => {
-        let y = 0;
-        // verifico la posizione y delle tabelle legate in join con quella in ciclo
-        for (let properties of this.tables.values()) {
-          if (properties.join === table.id) y += properties.y;
-        }
-        const yResult = (y / +table.dataset.joins);
-        // la tabella in ciclo verrà riposizionata in base a y calcolato.
-        // Se sono presenti due tabelle in join con 'table' (in ciclo) le posizioni y di queste tabelle vengono sommate (nel for) e
-        // ...poi divise per il numero di tabelle join, in questo modo la tabella in ciclo viene posizionata al centro
-        this.tables.get(table.id).y = yResult;
-        this.tables.get(table.id).line.from.y = yResult + 12;
-        this.tables.get(table.id).line.to.y = yResult + 12;
-        this.currentTable = this.tables.get(table.id);
-        this.autoPosition();
-      });
-    });
-    this.autoPositionLine();
-  } */
 
   autoPos() {
     const d = `M${this.line.x1},${this.line.y1} C${this.line.p1x},${this.line.y1} ${this.line.p2x},${this.currentTable.y - 10} ${this.line.x2},${this.currentTable.y - 10}`;
@@ -835,25 +813,6 @@ class DrawSVG {
     // verifico la posizione del max x/y all'interno dell'svg per fare un resize di width/height dell'svg
     this.checkResizeSVG();
   }
-
-  /* autoPositionLine() {
-    for (const [key, properties] of this.joinLines) {
-      this.currentLine = properties;
-      this.currentLineRef = key;
-      this.currentLineRef.dataset.fn = 'lineSelected';
-      this.currentLineRef.dataset.from = properties.from;
-      this.currentLineRef.dataset.to = properties.to;
-      if (properties.name) this.currentLineRef.dataset.joinId = properties.name;
-      // per ogni linea creo un'elemento <animation>
-      const animLine = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
-      animLine.setAttribute('attributeName', 'd');
-      animLine.setAttribute('fill', 'freeze');
-      animLine.setAttribute('dur', '.15s');
-      animLine.setAttribute('from', this.currentLineRef.getAttribute('d'));
-      this.currentLineRef.replaceChildren(animLine);
-      this.drawLine();
-    }
-  } */
 
   addFactJoin() {
     // clono la tabella

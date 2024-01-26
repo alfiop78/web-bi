@@ -198,7 +198,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // creo/aggiorno la mappatura di tutte le tabelle del Canvas
     WorkBook.createDataModel();
     // creo una mappatura per popolare il WorkBook nello step successivo
-    app.hierTables();
+    // app.hierTables();
   }
 
   // Aggiunta metrica composta di base
@@ -1147,8 +1147,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   // apertura del WorkBook
   app.workBookSelected = async (e) => {
-    // chiudo l'eventuale workbook già aperto
-    // app.closeWorkBook();
     Draw = new DrawSVG('svg');
     WorkBook = new WorkBooks(e.currentTarget.dataset.name);
     WorkBook = WorkBook.open(e.currentTarget.dataset.token);
@@ -1159,6 +1157,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // WARN: probabilmente, il DataModel, posso recuperarlo direttamente dallo storage, senza ricrearlo
     // WorkBook.createDataModel();
     app.hierTables();
+    debugger;
     // scarico le tabelle del canvas in sessionStorage, questo controllo va fatto dopo aver definito WorkBook.hierTables
     app.checkSessionStorage();
     // reimposto l'evento contextmenu sugli elementi del canvas
@@ -2466,61 +2465,38 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
   }
 
-
+  // viene invocata alla fine del drag&drop
   app.hierTables = () => {
+    // TODO: probabilmente dovrò utilizzare una struttura come quella in WorkBook.DataModel
+    // cioè con le tabelle strutturate all'interno degli oggetti fact
+    //
     // creo hierTables : qui sono presenti tutte le tabelle del canvas. Questa mi serve per creare la struttura nello WorkBook
-    const levelId = +Draw.svg.dataset.level;
-    WorkBook.hierTables.clear();
-    let recursiveLevels = (levelId) => {
-      // per ogni tabella creo un Map() con, al suo interno, le tabelle gerarchicamente inferiori (verso la FACT)
-      // questa mi servirà per stabilire, nello sheet, quali tabelle includere nella FROM e le relative Join nella WHERE
-      Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'], use.time`).forEach(table => {
-        // console.log(table.dataset.alias);
-        // della tabella corrente recupero tutte le sue discendenze fino alla FACT
-        WorkBook.hierTables = {
-          id: table.id,
-          table: {
-            schema: table.dataset.schema,
-            table: table.dataset.table,
-            alias: table.dataset.alias,
-            name: table.dataset.name
+    /*{
+     * {
+          "key": "svg-data-10261",
+          "value": {
+            "schema": "automotive_bi_data",
+            "table": "DocVenditaDettaglio",
+            "alias": "DocVenditaDettaglio_261",
+            "name": "DocVenditaDettaglio"
           }
-        };
-        if (levelId !== 0) {
-          levelId--;
-          recursiveLevels(levelId);
         }
-      });
-    }
-    recursiveLevels(levelId);
+      }
+    */
+    WorkBook.hierTables.clear();
+    Draw.svg.querySelectorAll('use.table, use.time').forEach(table => {
+      WorkBook.hierTables = {
+        id: table.id,
+        table: {
+          schema: table.dataset.schema,
+          table: table.dataset.table,
+          alias: table.dataset.alias,
+          name: table.dataset.name
+        }
+      };
+    });
   }
 
-  /* app.createHierarchies = () => {
-    // salvo le gerarchie / dimensioni create nel canvas
-    // recupero gli elementi del level-id più alto, il data-level presente su <svg> identifica il livello più alto presente
-    const levelId = +Draw.svg.dataset.level;
-    WorkBook.hierarchies.clear();
-    let recursiveLevels = (levelId) => {
-      // per ogni level-id recupero le tabelle che hanno data-joins=0 (l'ultima tabella della gerarchia, che quindi non ha altre tabelle legate in join)
-      Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'][data-joins='0']`).forEach(table => {
-        let hier = { name: table.dataset.alias, hierarchies: [] };
-        // table : tabella nell'ultimo level-id
-        // procedo da questa tabella, verso la fact, per ricostruire il percorso di questa gerarchia.
-        // Per farlo ho bisogno del dataset.tableJoin perchè qui viene identificata la tabella messa in join con questa in ciclo
-        let recursive = (tableId) => {
-          hier.hierarchies.push(tableId);
-          if (Draw.tables.get(tableId).join) recursive(Draw.tables.get(tableId).join);
-        }
-        recursive(table.id);
-        // console.log(hier);
-        WorkBook.hierarchies = hier;
-      });
-
-      levelId--;
-      if (levelId !== 0) recursiveLevels(levelId);
-    }
-    if (levelId > 0) recursiveLevels(levelId);
-  } */
 
   // TODO: potrebbe essere spostata in supportFn.js
   app.handlerToggleDrawer = (e) => {
@@ -2700,7 +2676,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     Draw.drawTime();
 
     WorkBook.createDataModel();
-    app.hierTables();
+    // app.hierTables();
     // recupero tutti i campi della WEB_BI_TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     WorkBook.activeTable = 'svg-data-web_bi_time';
     if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());

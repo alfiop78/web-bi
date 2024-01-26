@@ -341,10 +341,6 @@ class WorkBooks {
 
   get hierarchies() { return this.#hierarchies; } */
 
-  /* set dataModel(value) {
-    this.#dataModel.set(value.name, value.joinTables);
-    console.log('this.#dataModel : ', this.#dataModel);
-  } */
 
   // INFO: da valutare se salvare tutto il dataModel quando si salva il workbook oppure man mano che si aggiungono
   // tabelle al canvas
@@ -378,14 +374,6 @@ class WorkBooks {
 
   get hierTables() { return this.#hierTables; }
 
-  // qui viene memorizzato solo le tabelle che hanno almeno una colonna impostata nel workbook
-  /* set nTables(value) {
-    this.#nTables.set(value.table, value.alias);
-    console.log(this.#nTables);
-  }
-
-  get nTables() { return this.#nTables; }*/
-
   set metrics(object) {
     this.#metrics.set(object.token, object);
     // console.log('workBook Metrics : ', this.#metrics);
@@ -403,12 +391,12 @@ class WorkBooks {
     this.workBook.fields = Object.fromEntries(this.fields);
     this.workBook.fields_new = Object.fromEntries(this.field);
     this.workBook.joins = Object.fromEntries(this.joins);
+    // WARN: inutile salvarlo in localStorage, questo viene ricreato quando si apre un WorkBook
     this.workBook.dataModel = Object.fromEntries(this.dataModel);
     this.workBook.dateTime = this.dateTime;
     this.workBook.svg = {
       tables: Object.fromEntries(Draw.tables),
-      lines: Object.fromEntries(Draw.joinLines),
-      levelId: +Draw.svg.dataset.level
+      lines: Object.fromEntries(Draw.joinLines)
     }
     for (const [token, metric] of this.metrics) {
       if (metric.metric_type === 'basic') {
@@ -428,34 +416,44 @@ class WorkBooks {
   }
 
   open(token) {
-    // TODO: ottimizzare
-    // recupero dallo storage il workBook, tutte le sue proprietà le caricherò nella Classe
+    // OPTIMIZE: 25.01.2024 recupero dallo storage il workBook, tutte le sue proprietà le caricherò nella Classe
     WorkBookStorage.workBook = token;
     this.workBook.created_at = WorkBookStorage.workBook.created_at;
     this.workBook.updated_at = WorkBookStorage.workBook.updated_at;
-    // reimposto la Classe
 
+    // reimposto la Classe
     this.dateTime = WorkBookStorage.workBook.dateTime;
 
-    Draw.svg.dataset.level = WorkBookStorage.workBook.svg.levelId;
     // ciclo sulle tables presenti in svg.tables
+    // - ricreo l'oggetto Map() this.tables e ridisegno le tabelle
     for (const [key, value] of Object.entries(WorkBookStorage.workBook.svg.tables)) {
       Draw.tables = { id: key, properties: value };
       Draw.currentTable = Draw.tables.get(key);
-      (key === 'svg-data-web_bi_time') ? Draw.drawTime() : Draw.drawTable();
+      if (!value.join) {
+        Draw.drawFact();
+      } else {
+        (key === 'svg-data-web_bi_time') ? Draw.drawTime() : Draw.drawTable();
+      }
     }
+
+    // Il dataModel è un oggetto Map() per cui deve essere ricreato qui, dopo aver popolato l'altro oggetto
+    // Map() this.tables
+    this.createDataModel();
 
     for (const [key, value] of Object.entries(WorkBookStorage.workBook.svg.lines)) {
       Draw.joinLines = { id: key, properties: value };
-      // TODO: creare una funzione (qui o in DrawSVG) che crea la linea
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       line.id = key;
       line.dataset.id = value.id;
+      line.dataset.startX = value.start.x;
+      line.dataset.startY = value.start.y;
+      line.dataset.endX = value.end.x;
+      line.dataset.endY = value.end.y;
+      line.dataset.from = value.from;
+      line.dataset.to = value.to;
+      const d = `M${value.start.x},${value.start.y} C${value.start.x + 40},${value.start.y} ${value.end.x - 40},${value.end.y} ${value.end.x},${value.end.y}`;
+      line.setAttribute('d', d);
       Draw.svg.appendChild(line);
-      Draw.currentLineRef = key;
-      Draw.currentLine = value;
-      Draw.drawLine();
-      Draw.autoPositionLine();
     }
 
     for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.fields)) {
