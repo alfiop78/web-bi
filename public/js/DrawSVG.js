@@ -115,7 +115,8 @@ class DrawSVG {
         // console.log(nearestTable.id);
         const rectBounding = nearestTable.getBoundingClientRect();
         // console.log(rectBounding);
-        // tablejoi identifica la tabella più vicina trovata rispetto al movimento del mouse
+        // tableJoin identifica la tabella più vicina trovata rispetto al movimento del mouse
+        // TODO: 26.01.2024 - in tableJoin probabilmente ho bisogno solo dell'id
         this.tableJoin = {
           table: nearestTable,
           x: +nearestTable.dataset.x + rectBounding.width + 10,
@@ -123,7 +124,7 @@ class DrawSVG {
           // bottom: +nearestTable.dataset.x + rectBounding.width + 10 - 95,
           y: +nearestTable.dataset.y + (rectBounding.height / 2),
           joins: +nearestTable.dataset.joins,
-          levelId: +nearestTable.dataset.levelId
+          // levelId: +nearestTable.dataset.levelId
         }
         // console.log('joinTable :', Draw.tableJoin);
         // console.log('tableJoin :', Draw.tableJoin.table.id);
@@ -177,7 +178,7 @@ class DrawSVG {
     if (e.currentTarget.classList.contains('dropzone')) {
       console.info('DROPZONE');
       // console.log(e.currentTarget, e.target);
-      if (e.target.nodeName === 'use') this.currentLevel = +e.target.dataset.levelId;
+      // if (e.target.nodeName === 'use') this.currentLevel = +e.target.dataset.levelId;
       // e.dataTransfer.dropEffect = "copy";
       // coloro il border differente per la dropzone
       e.currentTarget.classList.add('dropping');
@@ -218,54 +219,48 @@ class DrawSVG {
         key: `svg-data-${tableId}`,
         x: coords.x,
         y: coords.y,
-        line: {
-          to: { x: coords.x + 190, y: coords.y + 12 },
-          from: { x: coords.x - 10, y: coords.y + 12 }
-        },
+        // line: {
+        //   to: { x: coords.x + 190, y: coords.y + 12 },
+        //   from: { x: coords.x - 10, y: coords.y + 12 }
+        // },
         table: liElement.dataset.label,
         alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
         name: liElement.dataset.label,
         schema: liElement.dataset.schema,
         join: null,
-        joins: 0,
-        levelId: 0
+        joins: 0
       }
     };
 
+    // TODO: invece di factId potrei impostare l'id dell'elemento del DOM (svg-data-xxxx)
     if (!this.tableJoin) {
-      this.tables.get(`svg-data-${tableId}`).levelId = 0;
-      this.tables.get(`svg-data-${tableId}`).factId = 0;
+      // nessuna tabella da mettere in join (prima tabella)
+      // this.tables.get(`svg-data-${tableId}`).levelId = 0;
+      this.tables.get(`svg-data-${tableId}`).factId = `svg-data-${tableId}`;
       this.currentTable = this.tables.get(`svg-data-${tableId}`);
       this.drawFact();
     } else if (this.tableJoin && this.currentLineRef.classList.contains('factLine')) {
-      // this.svg.querySelectorAll('use.table:not(.fact)').forEach(table => table.dataset.multifact = true);
-      // console.log('dataset.multifact impostato');
+      // Aggiunta di una Fact per l'analisi MultiFact (linea di join verticale)
       // la nuova fact è visualizzata immediatamente sotto la prima fact
       // recupero le coordinate del e.target
-      // const coords = { x: +e.target.dataset.x, y: +e.target.dataset.y + 140 };
       this.tables.get(`svg-data-${tableId}`).x = +this.tableJoin.table.dataset.x;
-      this.tables.get(`svg-data-${tableId}`).line.to.y = coords.y + 12;
-      this.tables.get(`svg-data-${tableId}`).line.from.y = coords.y + 12;
-      this.tables.get(`svg-data-${tableId}`).factId = +this.tableJoin.table.dataset.factId + 1;
+      this.tables.get(`svg-data-${tableId}`).factId = `svg-data-${tableId}`;
       this.currentTable = this.tables.get(`svg-data-${tableId}`);
       // this.createDimensionInfo();
       this.drawFact();
     } else {
       // è presente una tableJoin
-      // imposto data.joins anche sull'elemento SVG
       // OPTIMIZE: potrei creare un Metodo nella Classe Draw che imposta la prop 'join'
       // ...in Draw.tables e, allo stesso tempo, imposta anche 'dataset.joins'
       // ...sull'elemento 'use.table' come fatto sulle due righe successive
+
+      // Incremento l'attributo 'joins' sulla Fact, questo indica quante dimensioni ci sono collegate
+      // alla Fact
       this.svg.querySelector(`use.table[id="${this.tableJoin.table.id}"]`).dataset.joins = ++this.tableJoin.joins;
       // ... lo imposto anche nell'oggetto Map() tables
       this.tables.get(this.tableJoin.table.id).joins = this.tableJoin.joins;
-      // livello che sto aggiungendo
-      const levelId = this.tableJoin.levelId + 1;
-      // creo un array dei livelli, ordinato in reverse per poter fare un ciclo dal penultimo livello fino al primo ed effettuare il posizionamento automatico
-      // if (!this.arrayLevels.includes(this.tableJoin.levelId)) this.arrayLevels.splice(0, 0, this.tableJoin.levelId);
-      this.svg.dataset.level = (this.svg.dataset.level < levelId) ? levelId : this.svg.dataset.level;
       // imposto il data-dimensionId
-      // se laa tabella droppata è legata direttamente alla fact (ultima tabella della gerarchia)
+      // se la tabella droppata è legata direttamente alla fact (ultima tabella della gerarchia)
       // incremento il dimensionId (è una nuova dimensione, l'id è basato su tableJoin.dataset.joins)
       const dimensionId = (this.tableJoin.table.classList.contains('fact')) ?
         +this.tableJoin.joins : +this.tableJoin.table.dataset.dimensionId;
@@ -273,9 +268,9 @@ class DrawSVG {
       // imposto la proprietà 'tables' della Classe Draw
       // imposto solo le proprietà che sono presenti in una tabella dimensionale
       this.tables.get(`svg-data-${tableId}`).join = this.tableJoin.table.id;
-      this.tables.get(`svg-data-${tableId}`).factId = +this.tableJoin.table.dataset.factId;
+      this.tables.get(`svg-data-${tableId}`).factId = this.tableJoin.table.dataset.factId;
       this.tables.get(`svg-data-${tableId}`).dimensionId = dimensionId;
-      this.tables.get(`svg-data-${tableId}`).levelId = levelId;
+      // this.tables.get(`svg-data-${tableId}`).levelId = levelId;
       // linea di join da tableJoin alla tabella droppata
       // imposto solo la proprietà 'from' rimasta "in sospeso" in handlerDragOver perchè in quell'evento non
       // ho ancora l'elemento nel DOM
@@ -288,8 +283,6 @@ class DrawSVG {
     WorkBook.activeTable = `svg-data-${tableId}`;
     // imposto event contextmenu
     this.svg.querySelector(`#${this.currentTable.key}`).addEventListener('contextmenu', this.contextMenuTable.bind(Draw));
-    // posizionamento delle joinTable (tabelle che hanno data-join > 1)
-    // this.joinTablePositioning();
   }
 
   /* NOTE: END DRAG&DROP EVENTS */
@@ -346,7 +339,7 @@ class DrawSVG {
         // bottom: +nearestTable.dataset.x + rectBounding.width + 10 - 95,
         y: +nearestTable.dataset.y + (rectBounding.height / 2),
         joins: +nearestTable.dataset.joins,
-        levelId: +nearestTable.dataset.levelId
+        // levelId: +nearestTable.dataset.levelId
       }
       // imposto la linea corrente in base alla tabella che sto spostando
       // WARN: la Fact, se ha una joinLine, la devo cercare nel data-to anzichè data-from della linea
@@ -385,8 +378,8 @@ class DrawSVG {
     // console.log(this.el);
     delete this.el;
     if (e.button === 2 || this.countTables === 1) return false;
-    // TODO: aggiungo la nuova tabella a Draw.tables, anche se in  Draw.tables dovrei aggiungere le
-    // tabelle solo dopo aver coompletato la join dalla dialogJoin.. (Logica da rivedere 25.01.2024)
+    // OPTIMIZE: 25.01.2024 - aggiungo la nuova tabella a Draw.tables, anche se in Draw.tables dovrei aggiungere le
+    // tabelle solo dopo aver completato la join dalla dialogJoin..
     this.tables = {
       id: e.currentTarget.id,
       properties: {
@@ -400,8 +393,7 @@ class DrawSVG {
         schema: this.tables.get(this.table.id).schema,
         join: this.tableJoin.table.id,
         joins: this.tables.get(this.table.id).joins,
-        levelId: this.tables.get(this.table.id).levelId,
-        factId: +this.tableJoin.table.dataset.factId,
+        factId: this.tableJoin.table.dataset.factId,
         dimensionId: this.tables.get(this.table.id).dimensionId
       }
     };
@@ -541,8 +533,8 @@ class DrawSVG {
     use.classList.add('table');
     use.dataset.id = `data-${this.currentTable.id}`;
     use.dataset.table = this.currentTable.table;
-    use.dataset.alias = this.currentTable.alias;
     use.dataset.factId = this.currentTable.factId;
+    use.dataset.alias = this.currentTable.alias;
     // tutte le tabelle hanno la prop join, tranne la fact, dove NON aggiungo 'tableJoin' e dimensionId
     use.classList.add('fact');
     // aggiungo l'evento drop sulla Fact, questo consentirà l'analisi multifatti
@@ -561,7 +553,13 @@ class DrawSVG {
     // use.dataset.leaveFn = 'tableLeave';
     use.dataset.x = this.currentTable.x;
     use.dataset.y = this.currentTable.y;
-    use.dataset.levelId = this.currentTable.levelId;
+    // punto di ancoraggio di destra
+    use.dataset.anchorXTo = this.currentTable.x + 190;
+    use.dataset.anchorYTo = this.currentTable.y + 12;
+    // punto di ancoraggio sotto (solo per la fact) per l'aggiunta di MultiFact
+    // la Fact non ha un punto di ancoraggio di sinistra
+    use.dataset.anchorXBottom = this.currentTable.x + 10;
+    use.dataset.anchorYBottom = this.currentTable.y + 12;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
     use.addEventListener('mousedown', this.tableMouseDown.bind(this));
@@ -581,6 +579,8 @@ class DrawSVG {
   reDrawTable() {
     // qui aggiorno l'elemento del DOM che è stato spostato, quando non si utilizza il drag&drop
     const use = this.svg.querySelector(`#${this.currentTable.key}`);
+    debugger;
+    // WARN: la Fact non ha il data-fact-id, da ricontrollare quando sposto una Fact
     use.dataset.factId = this.currentTable.factId;
     use.dataset.tableJoin = this.currentTable.join;
     this.svg.querySelector(`use.table[id="${this.tableJoin.table.id}"]`).dataset.joins = ++this.tableJoin.joins;
@@ -591,9 +591,14 @@ class DrawSVG {
     // da testare
     use.dataset.x = this.currentTable.x;
     use.dataset.y = this.currentTable.y;
-    use.dataset.levelId = this.currentTable.levelId;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
+    // punto di ancoraggio di destra
+    use.dataset.anchorXTo = this.currentTable.x + 190;
+    use.dataset.anchorYTo = this.currentTable.y + 12;
+    // punto di ancoraggio di sinistra
+    use.dataset.anchorXFrom = this.currentTable.x - 10;
+    use.dataset.anchorYFrom = this.currentTable.y + 12;
     this.table = use;
     this.currentLineRef.dataset.from = this.currentTable.key;
   }
@@ -630,9 +635,14 @@ class DrawSVG {
     // use.dataset.leaveFn = 'tableLeave';
     use.dataset.x = this.currentTable.x;
     use.dataset.y = this.currentTable.y;
-    use.dataset.levelId = this.currentTable.levelId;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
+    // punto di ancoraggio di destra
+    use.dataset.anchorXTo = this.currentTable.x + 190;
+    use.dataset.anchorYTo = this.currentTable.y + 12;
+    // punto di ancoraggio di sinistra
+    use.dataset.anchorXFrom = this.currentTable.x - 10;
+    use.dataset.anchorYFrom = this.currentTable.y + 12;
     use.addEventListener('mousedown', this.tableMouseDown.bind(this));
     use.addEventListener('mousemove', this.tableMouseMove.bind(this));
     use.addEventListener('mouseup', this.tableMouseUp.bind(this));
@@ -889,6 +899,7 @@ class DrawSVG {
 
   contextMenuTable(e) {
     e.preventDefault();
+    const btnAddFactJoin = document.getElementById('addFactJoin');
     // console.log(e.target.dataset);
     // console.log(e.target.getBoundingClientRect());
     // const { clientX: mouseX, clientY: mouseY } = e;
@@ -905,10 +916,10 @@ class DrawSVG {
     // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
     document.querySelectorAll('#ul-context-menu-table button').forEach(item => item.dataset.id = WorkBook.activeTable.id);
     // abilito "addJoin" se sono presenti due o più fact-table e se si è attivato il contextmenu
-    // su una tabella del data-level-id = 1 (dimensione)
+    // sull'ULTIMA tabella di una dimensione, quella legata alla Fact
     const facts = this.svg.querySelectorAll('use.table.fact').length;
-    this.contextMenu.querySelector('#addFactJoin').addEventListener('click', this.addFactJoin.bind(Draw));
-    this.contextMenu.querySelector('#addFactJoin').disabled = (facts > 1 && +e.target.dataset.levelId === 1) ? false : true;
+    btnAddFactJoin.addEventListener('click', this.addFactJoin.bind(Draw));
+    btnAddFactJoin.disabled = (facts > 1 && this.table.dataset.tableJoin === this.table.dataset.factId) ? false : true;
   }
 
   // aggiungo i campi di una tabella per creare la join

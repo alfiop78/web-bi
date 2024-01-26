@@ -2648,10 +2648,11 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // ricalcolo del levelId dopo l'eliminazione di una o più tabelle.
     // Il data-level è impostato sull'elemento <svg> Draw.svg
     // Ciclo Draw.tables per trovare il levelId più alto
-    Draw.svg.dataset.level = 0;
+    // WARN: il ricalcolo del levelId non serve più da quando è stato eliminato il levelId
+    /* Draw.svg.dataset.level = 0;
     for (const values of Draw.tables.values()) {
       if (+Draw.svg.dataset.level < values.levelId) Draw.svg.dataset.level = values.levelId;
-    }
+    } */
     // Draw.joinTablePositioning();
     // imposto un elemento 'canvas' per evidenziare che c'è una modifica nel canvas
     WorkBook.checkChanges('canvas');
@@ -2689,8 +2690,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         name: 'WEB_BI_TIME',
         schema: 'decisyon_cache',
         joins: 0,
+        // TODO: aggiungere il factId
+        // factId : null
         join: WorkBook.activeTable.id,
-        levelId: 0
+        // levelId: 0
       }
     };
     Draw.currentTable = Draw.tables.get('svg-data-web_bi_time');
