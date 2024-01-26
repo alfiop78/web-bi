@@ -237,8 +237,7 @@ class WorkBooks {
   #joins = new Map();
   #dateTime;
   #tableJoins = { from: null, to: null }; // refs
-  #facts = {};
-  #tablesMap = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
+  #dataModel = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   #hierTables = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   #options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
 
@@ -342,12 +341,34 @@ class WorkBooks {
 
   get hierarchies() { return this.#hierarchies; } */
 
-  set tablesMap(value) {
-    this.#tablesMap.set(value.name, value.joinTables);
-    // console.log('this.#tablesMap : ', this.#tablesMap);
+  /* set dataModel(value) {
+    this.#dataModel.set(value.name, value.joinTables);
+    console.log('this.#dataModel : ', this.#dataModel);
+  } */
+
+  // INFO: da valutare se salvare tutto il dataModel quando si salva il workbook oppure man mano che si aggiungono
+  // tabelle al canvas
+  createDataModel() {
+    Draw.svg.querySelectorAll("use.table.fact:not([data-joins='0'])").forEach(fact => {
+      let tables = {};
+      const dimensions = Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${+fact.dataset.factId}']`);
+      dimensions.forEach(table => {
+        let joinTables = [table.id];
+        let recursive = (tableObject) => {
+          joinTables.push(tableObject.join);
+          if (Draw.tables.get(tableObject.join).join) recursive(Draw.tables.get(tableObject.join));
+        }
+        // recupero la join associata alla tabella in ciclo
+        if (Draw.tables.get(table.id).join) recursive(Draw.tables.get(table.id));
+        tables[table.dataset.alias] = joinTables;
+      });
+      // Creazione del DataModel con un oggetto Fact e, al suo interno, gli object relativi alle tabelle, per ogni fact
+      this.#dataModel.set(fact.dataset.name, tables);
+      console.log('this.#dataModel:', this.#dataModel);
+    });
   }
 
-  get tablesMap() { return this.#tablesMap; }
+  get dataModel() { return this.#dataModel; }
 
   set hierTables(value) {
     this.#hierTables.set(value.id, value.table);
@@ -381,7 +402,7 @@ class WorkBooks {
     this.workBook.fields = Object.fromEntries(this.fields);
     this.workBook.fields_new = Object.fromEntries(this.field);
     this.workBook.joins = Object.fromEntries(this.joins);
-    this.workBook.tablesMap = Object.fromEntries(this.tablesMap);
+    this.workBook.dataModel = Object.fromEntries(this.dataModel);
     this.workBook.dateTime = this.dateTime;
     this.workBook.svg = {
       tables: Object.fromEntries(Draw.tables),

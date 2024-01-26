@@ -6,8 +6,7 @@ class DrawSVG {
   #currentLineRef; // ref
   tmplJoin = document.getElementById('tmpl-join-field');
   dialogJoin = document.getElementById('dlg-join');
-  #dataModelTables = new Map();
-  #dataModel = new Map();
+  // #dataModel = new Map();
 
   constructor(element) {
     this.svg = document.getElementById(element);
@@ -278,8 +277,7 @@ class DrawSVG {
       // imposto solo la proprietà 'from' rimasta "in sospeso" in handlerDragOver perchè in quell'evento non
       // ho ancora l'elemento nel DOM
       this.joinLines.get(this.currentLineRef.id).from = `svg-data-${tableId}`;
-      // console.info('create JOIN');
-      this.openJoinWindow();
+      // this.openJoinWindow();
       // this.tables.get(`svg-data-${tableId}`).name;
       this.currentTable = this.tables.get(`svg-data-${tableId}`);
       // creo nel DOM la tabella appena droppata
@@ -404,6 +402,7 @@ class DrawSVG {
   // Questa funzione restituisce i due elementi da aggiungere al DOM
   // Può essere invocata sia per creare una nuova join che
   // per creare/popolare una join esistente (ad es.: click sulla join line)
+  // TODO: questi 3 metodi (createJoinField, addjoin e openJoinWindow) sono da ottimizzare,
   createJoinField() {
     const tmplJoinFrom = this.tmplJoin.content.cloneNode(true);
     const tmplJoinTo = this.tmplJoin.content.cloneNode(true);
@@ -426,9 +425,9 @@ class DrawSVG {
   }
 
   openJoinWindow() {
-    this.dialogJoin.show();
     // WARN: questa proprietà impostata sulla dialogJoin non è mai letta nel resto del codice, si potrebbe eliminare
-    this.dialogJoin.dataset.lineId = this.currentLineRef.id;
+    // this.dialogJoin.dataset.lineId = this.currentLineRef.id;
+
     // aggiungo i template per join-field se non ci sono ancora join create
     // verifico se è presente una join su questa line
     if (!this.currentLineRef.dataset.joinId) {
@@ -475,6 +474,7 @@ class DrawSVG {
     joinSectionTo.dataset.tableTo = to.table;
     joinSectionTo.dataset.tableId = to.key;
     joinSectionTo.querySelector('.table').innerHTML = to.table;
+    this.dialogJoin.show();
   }
 
   /* checkResizeSVG() {
@@ -877,7 +877,7 @@ class DrawSVG {
     debugger;
   } */
 
-  tablesMap() {
+  /* dataModel() {
     this.svg.querySelectorAll("use.table.fact:not([data-joins='0'])").forEach(fact => {
       let tables = {};
       const dimensions = this.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${+fact.dataset.factId}']`);
@@ -889,14 +889,13 @@ class DrawSVG {
         }
         // recupero la join associata alla tabella in ciclo
         if (this.tables.get(table.id).join) recursive(this.tables.get(table.id));
-        // console.log(table.dataset.alias, joinTables);
         tables[table.dataset.alias] = joinTables;
       });
       // Creazione del DataModel con un oggetto Fact e, al suo interno, gli object relativi alle tabelle, per ogni fact
       this.#dataModel.set(fact.dataset.name, tables);
       console.log('this.#dataModel:', this.#dataModel);
     });
-  }
+  } */
 
   contextMenuTable(e) {
     e.preventDefault();

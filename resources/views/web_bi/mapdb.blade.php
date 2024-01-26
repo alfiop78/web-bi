@@ -635,7 +635,7 @@
                             <button class="button-icon material-icons-round md-18" disabled>history</button>
                             <button class="button-icon material-icons-round md-18" disabled>info</button>
                           </dialog>
-                          <div id="table-info">
+                          <div id="table-info" hidden>
 
                             <section class="row">
                               <div class="col grid-12 center">

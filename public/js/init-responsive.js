@@ -154,6 +154,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       // se sono presenti almeno due tabelle visualizzo la dialog per la join
       // se è presente almeno una tabella dimensionale oppure la tabella droppata è una fact NON eseguo la join
       if (Draw.countJoins !== 0 && !Draw.table.classList.contains('fact')) {
+        Draw.openJoinWindow();
         WorkBook.tableJoins = {
           from: app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
           to: app.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId
@@ -167,7 +168,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       }
     }
     // creo una mappatura di tutte le tabelle del Canvas
-    Draw.tablesMap();
+    WorkBook.createDataModel();
     // creo una mappatura per popolare il WorkBook nello step successivo
     app.hierTables();
   }
@@ -1127,7 +1128,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     WorkBook.name = e.currentTarget.dataset.name;
     // modifico il nome del WorkBook in #workbook-name
     document.getElementById('workbook-name').innerText = WorkBook.name;
-    Draw.tablesMap();
+    // WARN: probabilmente, il DataModel, posso recuperarlo direttamente dallo storage, senza ricrearlo
+    // WorkBook.createDataModel();
     app.hierTables();
     // scarico le tabelle del canvas in sessionStorage, questo controllo va fatto dopo aver definito WorkBook.hierTables
     app.checkSessionStorage();
@@ -1467,7 +1469,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     * - salvo i campi delle tabelle in sessionStorage in modo da poterci accedere più rapidamente
     * - creo la struttura delle tabelle->fields nella dialog filter
     */
-    if (WorkBook.tablesMap.size !== 0) {
+    if (WorkBook.dataModel.size !== 0) {
       app.checkSessionStorage();
       Step.next();
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
@@ -2087,8 +2089,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   /* app.setFrom = (tableAlias) => {
     let from = {};
-    if (WorkBook.tablesMap.has(tableAlias)) {
-      WorkBook.tablesMap.get(tableAlias).forEach(tableId => {
+    if (WorkBook.dataModel.has(tableAlias)) {
+      WorkBook.dataModel.get(tableAlias).forEach(tableId => {
         from[Draw.tables.get(tableId).alias] = {
           schema: Draw.tables.get(tableId).schema,
           table: Draw.tables.get(tableId).table
@@ -2100,8 +2102,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   app.setJoins = (tableAlias) => {
     let joins = {};
-    if (WorkBook.tablesMap.has(tableAlias)) {
-      WorkBook.tablesMap.get(tableAlias).forEach(tableId => {
+    if (WorkBook.dataModel.has(tableAlias)) {
+      WorkBook.dataModel.get(tableAlias).forEach(tableId => {
         if (WorkBook.joins.has(Draw.tables.get(tableId).alias)) {
           for (const [token, join] of Object.entries(WorkBook.joins.get(Draw.tables.get(tableId).alias))) {
             console.log(token, join);
@@ -2140,11 +2142,11 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // imposto le proprietà from e joins in base a quello che si trova in object.tables
     // object.tables contiene l'elenco delle tabelle incluse nella formula del filtro
     object.tables.forEach(table => {
-      /* per ogni tabella di tablesMap, recupero le tabelle gerarchicamente inferiori e le aggiungo a
+      /* per ogni tabella di dataModel, recupero le tabelle gerarchicamente inferiori e le aggiungo a
       * object.from solo se non sono già state aggiunte da precedenti tabelle
       */
-      if (WorkBook.tablesMap.has(table)) {
-        WorkBook.tablesMap.get(table).forEach(tableId => {
+      if (WorkBook.dataModel.has(table)) {
+        WorkBook.dataModel.get(table).forEach(tableId => {
           if (!object.from.has(Draw.tables.get(tableId).alias)) {
             object.from.set(Draw.tables.get(tableId).alias, {
               schema: Draw.tables.get(tableId).schema,
@@ -2402,12 +2404,12 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
     */
     Sheet.tables.forEach(alias => {
-      // console.log('tablesMap : ', WorkBook.tablesMap);
-      /* tablesMap contiene un oggetto Map() con {tableAlias : [svg-data-2, svg-data-1, svg-data-0, ecc...]}
+      // console.log('dataModel : ', WorkBook.dataModel);
+      /* dataModel contiene un oggetto Map() con {tableAlias : [svg-data-2, svg-data-1, svg-data-0, ecc...]}
       * e un'array di tabelle presenti nella gerarchia create nel canvas
       */
-      if (WorkBook.tablesMap.has(alias)) {
-        WorkBook.tablesMap.get(alias).forEach(tableId => {
+      if (WorkBook.dataModel.has(alias)) {
+        WorkBook.dataModel.get(alias).forEach(tableId => {
           /* nel tableId sono presenti le tabelle gerarchicamente inferiori a 'alias',
           * quindi tabelle da aggiungere alla 'from' e alla 'where'
           */
@@ -2436,35 +2438,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
   }
 
-
-  /* app.tablesMap = () => {
-    // TODO: invece di utilizzare questa logica, con il level-id, potrei cercare le prime tabelle, per ogni
-    // dimensione, andando a controllare l'attributo data-joins, se è 0 abbiamo trovato la prima tabella per ogni dimensione
-    // BUG: da rivedere meglio, al momento ottengo un errore quando si aggiunge una tabella clonata (multiFact)
-
-    // creo tablesMap : qui sono presenti tutte le tabelle del canvas, al suo interno le tabelle in join fino alla FACT
-    const levelId = +Draw.svg.dataset.level;
-    // debugger;
-    WorkBook.tablesMap.clear();
-    let recursiveLevels = (levelId) => {
-      // per ogni tabella creo un Map() con, al suo interno, le tabelle gerarchicamente inferiori (verso la FACT)
-      // questa mi servirà per stabilire, nello sheet, quali tabelle includere nella FROM e le relative Join nella WHERE
-      Draw.svg.querySelectorAll(`use.table[data-level-id='${levelId}'], use.time`).forEach(table => {
-        // console.log(table.dataset.alias);
-        joinTables = [table.id];
-        // della tabella corrente recupero tutte le sue discendenze fino alla FACT
-        let recursive = (tableId) => {
-          joinTables.push(tableId);
-          if (Draw.tables.get(tableId).join) recursive(Draw.tables.get(tableId).join);
-        }
-        if (Draw.tables.get(table.id).join) recursive(Draw.tables.get(table.id).join);
-        WorkBook.tablesMap = { name: table.dataset.alias, joinTables };
-      });
-      levelId--;
-      if (levelId !== 0) recursiveLevels(levelId);
-    }
-    if (levelId > 0) recursiveLevels(levelId);
-  } */
 
   app.hierTables = () => {
     // creo hierTables : qui sono presenti tutte le tabelle del canvas. Questa mi serve per creare la struttura nello WorkBook
@@ -2695,7 +2668,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     Draw.currentTable = Draw.tables.get('svg-data-web_bi_time');
     Draw.drawTime();
 
-    Draw.tablesMap();
+    WorkBook.createDataModel();
     app.hierTables();
     // recupero tutti i campi della WEB_BI_TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     WorkBook.activeTable = 'svg-data-web_bi_time';
