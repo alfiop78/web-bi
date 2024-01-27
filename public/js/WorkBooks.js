@@ -349,7 +349,15 @@ class WorkBooks {
     Draw.svg.querySelectorAll("use.table.fact:not([data-joins='0'])").forEach(fact => {
       let joinTables = [];
       let recursive = (table) => {
+        // table : svg-data-xxxx (questa è sempre la tabella "di origine" e mai quella .clone)
         const tableRef = Draw.svg.querySelector(`use#${table}`);
+        // se la tabella passata come parametro è una tabella (.cloned) da cui derivano quelle .clone
+        // e la factId in ciclo è diversa da quella riferita alla tabella .cloned (parametro table)
+        // deve essere recuperata la tabella .clone riferita alla factId in ciclo sostituendola a
+        // "di origine" (parametro table)
+        // Es. Quando 'table' contiene .cloned e sto ciclando la Fact che corrisponde a 'table'
+        // recupero 'table', quando sto ciclando una fact diversa devo prendere la tabella relativa a
+        // quella fact per poter creare correttamente la relazione tra la tabella e la sua Fact
         const tableJoin = (tableRef.classList.contains('cloned') && tableRef.dataset.factId !== fact.id) ?
           Draw.svg.querySelector(`use.table.clone[data-fact-id='${fact.id}']`) :
           Draw.svg.querySelector(`use.table#${table}`);
@@ -361,8 +369,13 @@ class WorkBooks {
       // verifico se ci sono tabelle clonate
       const cloned = [...dimensionTables].find(table => table.classList.contains('clone'));
       if (cloned) {
+        // in questa dimensione, per questa factId, ci sono dimensioni in comune (clone)
+        // ...A questo punto devo recuperare la dimensione originale e ciclare tutte le tabelle di questa dimensione
         dimensionTables = Draw.svg.querySelectorAll(`use.table[data-table-join][data-dimension-id='${cloned.dataset.dimensionId}']:not(.clone)`);
         dimensionTables.forEach(table => {
+          // ciclo sulla tabella originale, quando si incontra una tabella (l'ultima della gerarchia) che
+          // è stata clonata, invece di prendere quella originale prendo quella clonata (è agganciata ad un'altra Fact)
+          // In questo modo, la tabella clonata avrà la corretta relazione con la propria Fact
           if (table.classList.contains('cloned')) table = Draw.svg.querySelector(`use.table.clone[data-fact-id='${fact.id}']`);
           joinTables = [table.id];
           // recupero la join associata alla tabella in ciclo
