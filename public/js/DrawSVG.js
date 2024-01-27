@@ -121,13 +121,9 @@ class DrawSVG {
           table: nearestTable,
           x: +nearestTable.dataset.x + rectBounding.width + 10,
           bottom: +nearestTable.dataset.x + (rectBounding.width / 2),
-          // bottom: +nearestTable.dataset.x + rectBounding.width + 10 - 95,
           y: +nearestTable.dataset.y + (rectBounding.height / 2),
           joins: +nearestTable.dataset.joins,
-          // levelId: +nearestTable.dataset.levelId
         }
-        // console.log('joinTable :', Draw.tableJoin);
-        // console.log('tableJoin :', Draw.tableJoin.table.id);
         if (this.currentLineRef && this.tableJoin) {
           this.joinLines = {
             id: this.currentLineRef.id,
@@ -179,9 +175,6 @@ class DrawSVG {
     e.preventDefault();
     if (e.currentTarget.classList.contains('dropzone')) {
       console.info('DROPZONE');
-      // console.log(e.currentTarget, e.target);
-      // if (e.target.nodeName === 'use') this.currentLevel = +e.target.dataset.levelId;
-      // e.dataTransfer.dropEffect = "copy";
       // coloro il border differente per la dropzone
       e.currentTarget.classList.add('dropping');
     } else {
@@ -210,10 +203,8 @@ class DrawSVG {
     // console.log(this);
     let coords = { x: e.offsetX - this.dragElementPosition.x, y: e.offsetY - this.dragElementPosition.y };
     // console.log(this.dragElementPosition);
-    // console.log(coords);
     // alcune proprietà di this.tables sono presente sia quando viene droppataa una Fact che quando
     // viene droppata una tabella dimensionale
-    // TODO: probabilmente qui alcune proprietà non servono, ad esempio è da rivedere la proprietà 'line'
     this.tables = {
       id: `svg-data-${tableId}`,
       properties: {
@@ -230,10 +221,8 @@ class DrawSVG {
       }
     };
 
-    // TODO: invece di factId potrei impostare l'id dell'elemento del DOM (svg-data-xxxx)
     if (!this.tableJoin) {
       // nessuna tabella da mettere in join (prima tabella)
-      // this.tables.get(`svg-data-${tableId}`).levelId = 0;
       this.tables.get(`svg-data-${tableId}`).factId = `svg-data-${tableId}`;
       this.currentTable = this.tables.get(`svg-data-${tableId}`);
       this.drawFact();
@@ -247,7 +236,7 @@ class DrawSVG {
       // this.createDimensionInfo();
       this.drawFact();
     } else {
-      // è presente una tableJoin
+      // è presente una tableJoin, è un livello dimensionale
       // OPTIMIZE: potrei creare un Metodo nella Classe Draw che imposta la prop 'join'
       // ...in Draw.tables e, allo stesso tempo, imposta anche 'dataset.joins'
       // ...sull'elemento 'use.table' come fatto sulle due righe successive
@@ -260,14 +249,17 @@ class DrawSVG {
       // imposto il data-dimensionId
       // se la tabella droppata è legata direttamente alla fact (ultima tabella della gerarchia)
       // incremento il dimensionId (è una nuova dimensione, l'id è basato su tableJoin.dataset.joins)
-      const dimensionId = (this.tableJoin.table.classList.contains('fact')) ?
-        +this.tableJoin.joins : +this.tableJoin.table.dataset.dimensionId;
+      // se la tabella corrente sta per essere legata a una Fact creo il token per identificare la dimensione
+      this.tables.get(`svg-data-${tableId}`).dimensionId = (this.tableJoin.table.classList.contains('fact')) ?
+        this.rand().substring(0, 4) : this.tableJoin.table.dataset.dimensionId;
+      // const dimensionId = (this.tableJoin.table.classList.contains('fact')) ?
+      //   +this.tableJoin.joins : +this.tableJoin.table.dataset.dimensionId;
       // const dimensionId = (levelId === 1) ? +this.tableJoin.joins : +this.tableJoin.table.dataset.dimensionId;
       // imposto la proprietà 'tables' della Classe Draw
       // imposto solo le proprietà che sono presenti in una tabella dimensionale
       this.tables.get(`svg-data-${tableId}`).join = this.tableJoin.table.id;
       this.tables.get(`svg-data-${tableId}`).factId = this.tableJoin.table.dataset.factId;
-      this.tables.get(`svg-data-${tableId}`).dimensionId = dimensionId;
+      // this.tables.get(`svg-data-${tableId}`).dimensionId = dimensionId;
       // salvo i dati della joinLines per poter essere salvata correttamente nel WorkBook in localStorage
       this.currentTable = this.tables.get(`svg-data-${tableId}`);
       // linea di join da tableJoin alla tabella droppata (questa deve essere impostata DOPO this.currentTable
@@ -829,6 +821,7 @@ class DrawSVG {
     clone.addEventListener('mousemove', this.tableMouseMove.bind(this));
     clone.addEventListener('mouseup', this.tableMouseUp.bind(this));
     clone.addEventListener('mouseleave', this.tableMouseLeave.bind(this));
+    this.table.classList.add('cloned');
     this.svg.appendChild(clone);
     // clono anche la sua linea andando a cercare la line con data-from = this.table.id
     const line = this.svg.querySelector(`path[data-from='${this.table.id}']`);

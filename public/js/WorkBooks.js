@@ -344,21 +344,40 @@ class WorkBooks {
 
   // INFO: da valutare se salvare tutto il dataModel quando si salva il workbook oppure man mano che si aggiungono
   // tabelle al canvas
+  // TODO: potrei utilizzare il set e passare al Metodo l'array di nodi della/e Fact
   createDataModel() {
     Draw.svg.querySelectorAll("use.table.fact:not([data-joins='0'])").forEach(fact => {
+      let joinTables = [];
+      let recursive = (table) => {
+        const tableRef = Draw.svg.querySelector(`use#${table}`);
+        const tableJoin = (tableRef.classList.contains('cloned') && tableRef.dataset.factId !== fact.id) ?
+          Draw.svg.querySelector(`use.table.clone[data-fact-id='${fact.id}']`) :
+          Draw.svg.querySelector(`use.table#${table}`);
+        joinTables.push(tableJoin.id);
+        if (tableJoin.dataset.tableJoin) recursive(tableJoin.dataset.tableJoin);
+      }
       let tables = {};
-      const dimensions = Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`);
-      // debugger;
-      dimensions.forEach(table => {
-        let joinTables = [table.id];
-        let recursive = (tableObject) => {
-          joinTables.push(tableObject.join);
-          if (Draw.tables.get(tableObject.join).join) recursive(Draw.tables.get(tableObject.join));
-        }
-        // recupero la join associata alla tabella in ciclo
-        if (Draw.tables.get(table.id).join) recursive(Draw.tables.get(table.id));
-        tables[table.id] = joinTables;
-      });
+      let dimensionTables = Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`);
+      // verifico se ci sono tabelle clonate
+      const cloned = [...dimensionTables].find(table => table.classList.contains('clone'));
+      if (cloned) {
+        dimensionTables = Draw.svg.querySelectorAll(`use.table[data-table-join][data-dimension-id='${cloned.dataset.dimensionId}']:not(.clone)`);
+        dimensionTables.forEach(table => {
+          if (table.classList.contains('cloned')) table = Draw.svg.querySelector(`use.table.clone[data-fact-id='${fact.id}']`);
+          joinTables = [table.id];
+          // recupero la join associata alla tabella in ciclo
+          if (table.dataset.tableJoin) recursive(table.dataset.tableJoin);
+          tables[table.id] = joinTables;
+        });
+      } else {
+        // nessuna tabella clonata
+        dimensionTables.forEach(table => {
+          joinTables = [table.id];
+          // recupero la join associata alla tabella in ciclo
+          if (table.dataset.tableJoin) recursive(table.dataset.tableJoin);
+          tables[table.id] = joinTables;
+        });
+      }
       // Creazione del DataModel con un oggetto Fact e, al suo interno, gli object relativi alle tabelle, per ogni fact
       this.#dataModel.set(fact.id, tables);
     });
