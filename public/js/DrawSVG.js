@@ -809,8 +809,8 @@ class DrawSVG {
   addFactJoin() {
     // clono la tabella
     const clone = this.table.cloneNode(true);
-    clone.id = `${this.table.id}-clone`;
-    clone.classList.add('clone');
+    clone.id = `${this.table.id}-common`;
+    clone.classList.add('common');
     // la sposto leggermente rispetto alla tabella di origine
     clone.setAttribute('x', +this.table.getAttribute('x') + 8);
     clone.setAttribute('y', +this.table.getAttribute('y') + 36);
@@ -821,13 +821,13 @@ class DrawSVG {
     clone.addEventListener('mousemove', this.tableMouseMove.bind(this));
     clone.addEventListener('mouseup', this.tableMouseUp.bind(this));
     clone.addEventListener('mouseleave', this.tableMouseLeave.bind(this));
-    this.table.classList.add('cloned');
+    this.table.classList.add('shared');
     this.svg.appendChild(clone);
     // clono anche la sua linea andando a cercare la line con data-from = this.table.id
     const line = this.svg.querySelector(`path[data-from='${this.table.id}']`);
     const lineClone = line.cloneNode();
-    lineClone.id = `${line.id}-clone`;
-    lineClone.dataset.from = `${line.dataset.from}-clone`;
+    lineClone.id = `${line.id}-common`;
+    lineClone.dataset.from = `${line.dataset.from}-common`;
     // recupero la posizione a cui è legata la linea di origine
     const d = `M${+line.dataset.startX},${+line.dataset.startY} C${+line.dataset.startX + 40},${+line.dataset.startY} ${+clone.dataset.x - 40},${+clone.dataset.y + 12} ${+clone.dataset.x - 10},${+clone.dataset.y + 12}`;
     lineClone.setAttribute('d', d);
