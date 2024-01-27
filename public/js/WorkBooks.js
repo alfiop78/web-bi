@@ -365,32 +365,27 @@ class WorkBooks {
         if (tableJoin.dataset.tableJoin) recursive(tableJoin.dataset.tableJoin);
       }
       let tables = {};
-      let dimensionTables = Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`);
       // verifico se ci sono tabelle clonate
-      const cloned = [...dimensionTables].find(table => table.classList.contains('clone'));
-      if (cloned) {
-        // in questa dimensione, per questa factId, ci sono dimensioni in comune (clone)
-        // ...A questo punto devo recuperare la dimensione originale e ciclare tutte le tabelle di questa dimensione
-        dimensionTables = Draw.svg.querySelectorAll(`use.table[data-table-join][data-dimension-id='${cloned.dataset.dimensionId}']:not(.clone)`);
-        dimensionTables.forEach(table => {
-          // ciclo sulla tabella originale, quando si incontra una tabella (l'ultima della gerarchia) che
-          // è stata clonata, invece di prendere quella originale prendo quella clonata (è agganciata ad un'altra Fact)
-          // In questo modo, la tabella clonata avrà la corretta relazione con la propria Fact
-          if (table.classList.contains('cloned')) table = Draw.svg.querySelector(`use.table.clone[data-fact-id='${fact.id}']`);
-          joinTables = [table.id];
-          // recupero la join associata alla tabella in ciclo
-          if (table.dataset.tableJoin) recursive(table.dataset.tableJoin);
-          tables[table.id] = joinTables;
-        });
-      } else {
-        // nessuna tabella clonata
-        dimensionTables.forEach(table => {
-          joinTables = [table.id];
-          // recupero la join associata alla tabella in ciclo
-          if (table.dataset.tableJoin) recursive(table.dataset.tableJoin);
-          tables[table.id] = joinTables;
-        });
-      }
+      const cloned = [...Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`)].find(table => table.classList.contains('clone'));
+      // quando ci sono tabelle .clone nella fact.id in ciclo, per poter mettere in relazione
+      // la tabelle.clone con la "sua" Fact devo recuperare le tabelle della dimensione
+      // "di origine". Successivamente, nel ciclo dimensionTables, qunado si incontra una tabella .cloned
+      // e la fact NON corrisponde a quella in ciclo, allora la tabella da recuperare è quella .clone
+      // (es.: quella presente nella seconda fact)
+      const dimensionTables = (cloned) ?
+        Draw.svg.querySelectorAll(`use.table[data-table-join][data-dimension-id='${cloned.dataset.dimensionId}']:not(.clone)`) :
+        Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`);
+
+      dimensionTables.forEach(table => {
+        // ciclo sulla tabella originale, quando si incontra una tabella (l'ultima della gerarchia) che
+        // è stata clonata, invece di prendere quella originale prendo quella clonata (è agganciata ad un'altra Fact)
+        // In questo modo, la tabella clonata avrà la corretta relazione con la propria Fact
+        if (table.classList.contains('cloned') && table.dataset.factId !== fact.id) table = Draw.svg.querySelector(`use.table.clone[data-fact-id='${fact.id}']`);
+        joinTables = [table.id];
+        // recupero la join associata alla tabella in ciclo
+        if (table.dataset.tableJoin) recursive(table.dataset.tableJoin);
+        tables[table.id] = joinTables;
+      });
       // Creazione del DataModel con un oggetto Fact e, al suo interno, gli object relativi alle tabelle, per ogni fact
       this.#dataModel.set(fact.id, tables);
     });
