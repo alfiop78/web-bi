@@ -455,11 +455,20 @@ class WorkBooks {
     // - ricreo l'oggetto Map() this.tables e ridisegno le tabelle
     for (const [key, value] of Object.entries(WorkBookStorage.workBook.svg.tables)) {
       Draw.tables = { id: key, properties: value };
+      debugger;
       Draw.currentTable = Draw.tables.get(key);
       if (!value.join) {
         Draw.drawFact();
       } else {
-        (key === 'svg-data-web_bi_time') ? Draw.drawTime() : Draw.drawTable();
+        debugger;
+        switch (value.cssClass) {
+          case 'common':
+            Draw.drawCommonTable();
+            break;
+          default:
+            (key === 'svg-data-web_bi_time') ? Draw.drawTime() : Draw.drawTable();
+            break;
+        }
       }
     }
 
