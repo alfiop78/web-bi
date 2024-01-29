@@ -470,6 +470,7 @@ class WorkBooks {
     for (const [key, value] of Object.entries(WorkBookStorage.workBook.svg.lines)) {
       Draw.joinLines = { id: key, properties: value };
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      let controlPoints = { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } };
       line.id = key;
       line.dataset.id = value.id;
       line.dataset.startX = value.start.x;
@@ -478,7 +479,21 @@ class WorkBooks {
       line.dataset.endY = value.end.y;
       line.dataset.from = value.from;
       line.dataset.to = value.to;
-      const d = `M${value.start.x},${value.start.y} C${value.start.x + 40},${value.start.y} ${value.end.x - 40},${value.end.y} ${value.end.x},${value.end.y}`;
+      let d;
+      if (value.hasOwnProperty('class')) {
+        line.classList.add(value.class);
+        controlPoints.start.x = value.start.x;
+        controlPoints.start.y = value.start.y + 40;
+        controlPoints.end.x = value.end.x;
+        controlPoints.end.y = value.end.y - 40;
+        d = `M${value.start.x},${value.start.y} C${controlPoints.start.x},${controlPoints.start.y} ${controlPoints.end.x},${controlPoints.end.y} ${value.end.x},${value.end.y}`;
+      } else {
+        controlPoints.start.x = value.start.x + 40;
+        controlPoints.start.y = value.start.y;
+        controlPoints.end.x = value.end.x - 40;
+        controlPoints.end.y = value.end.y;
+        d = `M${value.start.x},${value.start.y} C${controlPoints.start.x},${controlPoints.start.y} ${controlPoints.end.x},${controlPoints.end.y} ${value.end.x},${value.end.y}`;
+      }
       line.setAttribute('d', d);
       Draw.svg.appendChild(line);
     }
