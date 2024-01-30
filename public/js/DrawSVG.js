@@ -328,6 +328,7 @@ class DrawSVG {
     // console.log('mousemove', e.currentTarget);
     if (this.el) {
       this.coordinate.x += e.movementX;
+      this.nearestTable;
       this.coordinate.y += e.movementY;
       // console.log(e);
       e.currentTarget.dataset.x = this.coordinate.x;
@@ -347,49 +348,26 @@ class DrawSVG {
           this.svg.querySelectorAll(`use.table.fact:not(#${this.svg.querySelector('use.shared').dataset.factId})`) :
           this.svg.querySelectorAll(`use.table:not(#${e.target.id}, .common)`);
 
-        let nearestTable = [...tables].reduce((prev, current) => {
-          return (Math.hypot(+e.target.dataset.x - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(+e.target.dataset.x - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
+        this.nearestTable = [...tables].reduce((prev, current) => {
+          return (Math.hypot(+e.target.dataset.x - (+current.dataset.anchorXTo), e.offsetY - (+current.dataset.anchorYTo)) < Math.hypot(+e.target.dataset.x - (+prev.dataset.anchorXTo), e.offsetY - (+prev.dataset.anchorYTo))) ? current : prev;
+          // return (Math.hypot(+e.target.dataset.x - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(+e.target.dataset.x - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
         });
 
-        // console.log(nearestTable);
-        // identifico la tabella a cui mi sto collegando (tablejoin)
-        const rectBounding = nearestTable.getBoundingClientRect();
-        this.tableJoin = {
-          table: nearestTable,
-          x: +nearestTable.dataset.x + rectBounding.width + 10,
-          bottom: +nearestTable.dataset.x + (rectBounding.width / 2),
-          // bottom: +nearestTable.dataset.x + rectBounding.width + 10 - 95,
-          y: +nearestTable.dataset.y + (rectBounding.height / 2),
-          joins: +nearestTable.dataset.joins
-        }
+        e.currentTarget.dataset.factId = this.nearestTable.id;
+        e.currentTarget.dataset.tableJoin = this.nearestTable.id;
         // this.currentLineRef.dataset.to = nearestTable.id;
-        const d = `M${+nearestTable.dataset.anchorXTo},${+nearestTable.dataset.anchorYTo} C${+nearestTable.dataset.anchorXTo + 40},${+nearestTable.dataset.anchorYTo} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
+        const d = `M${+this.nearestTable.dataset.anchorXTo},${+this.nearestTable.dataset.anchorYTo} C${+this.nearestTable.dataset.anchorXTo + 40},${+this.nearestTable.dataset.anchorYTo} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
         this.currentLineRef.setAttribute('d', d);
+        this.currentLineRef.dataset.startX = +this.nearestTable.dataset.anchorXTo;
+        this.currentLineRef.dataset.startY = +this.nearestTable.dataset.anchorYTo;
       } else {
+        const controlPoints = +this.currentLineRef.dataset.startX + (this.coordinate.x - (+this.currentLineRef.dataset.startX)) / 2;
+        // const d = `M${+this.currentLineRef.dataset.startX},${+this.currentLineRef.dataset.startY} C${controlPoints},${+this.currentLineRef.dataset.startY} ${controlPoints},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
         const d = `M${+this.currentLineRef.dataset.startX},${+this.currentLineRef.dataset.startY} C${+this.currentLineRef.dataset.startX + 40},${+this.currentLineRef.dataset.startY} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
-        // const d = `M${+nearestTable.dataset.x + 190},${+nearestTable.dataset.y + 12} C${+nearestTable.dataset.x + 190 + 40},${+nearestTable.dataset.y + 12} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
         this.currentLineRef.setAttribute('d', d);
       }
-      // imposto la linea corrente in base alla tabella che sto spostando
-      // WARN: la Fact, se ha una joinLine, la devo cercare nel data-to anzichè data-from della linea
-      // this.currentLineRef = this.svg.querySelector(`path[data-from='${e.target.id}']`).id;
-      // this.currentLineRef.dataset.to = nearestTable.id;
-      // console.log('currentLineRef:', this.currentLineRef);
-      // TODO: le coordinate all'interno dell'oggetto Map() joinLines vanno modificate, in base allo spostamento
-      // che sto facendo qui
-      /* this.joinLines.get(this.currentLineRef.id).coordsFrom = {
-        x: +nearestTable.dataset.x + 190,
-        y: +nearestTable.dataset.y + 12
-      } */
-      // this.joinLines.get(this.currentLineRef.id).to = nearestTable.id;
-
-      // this.currentLine = this.joinLines.get(this.currentLineRef.id);
-
-      // console.log('this.currentline:', this.currentLine);
-      /* if (this.currentLineRef) {
-        const d = `M${+this.currentLineRef.dataset.startX},${+this.currentLineRef.dataset.startY} C${+this.currentLineRef.dataset.startX + 40},${+this.currentLineRef.dataset.startY} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
-        this.currentLineRef.setAttribute('d', d);
-      } */
+      this.currentLineRef.dataset.endX = this.coordinate.x - 10;
+      this.currentLineRef.dataset.endY = this.coordinate.y + 12;
       // TODO: 29.01.2024 - Implementare lo spostamento della linea di destra della tabella e.target
       // const lines = this.svg.querySelectorAll(`path[data-to='${e.target.id}']`);
       // console.log(lines);
@@ -406,24 +384,22 @@ class DrawSVG {
     e.preventDefault();
     e.stopPropagation();
     console.log('tableMouseUp');
-    // console.log(this.el);
     delete this.el;
     if (e.button === 2 || this.countTables === 1) return false;
-    // OPTIMIZE: 25.01.2024 - aggiungo la nuova tabella a Draw.tables, anche se in Draw.tables dovrei aggiungere le
-    // tabelle solo dopo aver completato la join dalla dialogJoin..
     console.log(this.currentTable);
     this.tables.get(e.currentTarget.id).x = +e.currentTarget.getAttribute('x');
     this.tables.get(e.currentTarget.id).y = +e.currentTarget.getAttribute('y');
-    this.tables.get(e.currentTarget.id).join = this.tableJoin.table.id;
-    this.tables.get(e.currentTarget.id).factId = this.tableJoin.table.dataset.factId;
+    // this.tables.get(e.currentTarget.id).join = this.tableJoin.table.id;
+    // this.tables.get(e.currentTarget.id).factId = this.tableJoin.table.dataset.factId;
     // TODO: qui non devo "disegnare" la tabella spostata
     // (perchè non è un drop ma la tabella è già all'interno del canvas), quindi aggiorno qui
     // l'elemento nel DOM (use.table)
     this.currentTable = this.tables.get(e.currentTarget.id);
-    this.reDrawTable();
-    this.joinLines.get(this.currentLineRef.id).to = this.tableJoin.table.id;
-    this.joinLines.get(this.currentLineRef.id).start = { x: this.tableJoin.x, y: this.tableJoin.y };
-    this.joinLines.get(this.currentLineRef.id).end = { x: this.currentTable.x - 10, y: this.currentTable.y + 12 };
+    debugger;
+    if (e.target.classList.contains('common')) this.nearestTable.dataset.joins = ++this.nearestTable.dataset.joins;
+    // ... lo imposto anche nell'oggetto Map() tables
+    this.tables.get(this.nearestTable.id).joins = this.nearestTable.dataset.joins;
+    this.updateTable();
     // se esiste già una join per questa tabella non visualizzo la dialogJoin
     if (!('joinId' in this.currentLineRef.dataset)) {
       // la join non è presente su questa linea
@@ -438,6 +414,12 @@ class DrawSVG {
         this.addFields(key, data);
       }
     }
+    // TODO: aggiorno le proprietà di joinLines
+    this.joinLines.get(this.currentLineRef.id).start.x = +this.currentLineRef.dataset.startX;
+    this.joinLines.get(this.currentLineRef.id).start.y = +this.currentLineRef.dataset.startY;
+    this.joinLines.get(this.currentLineRef.id).end.x = +this.currentLineRef.dataset.endX;
+    this.joinLines.get(this.currentLineRef.id).end.y = +this.currentLineRef.dataset.endY;
+
     // creo/aggiorno la mappatura di tutte le tabelle del Canvas
     WorkBook.createDataModel();
   }
@@ -506,8 +488,13 @@ class DrawSVG {
     // proprietà della tabella, per ora solo il nome e la key
     // (quest'ultima però ce l'ho già in this.joinLines)
     // INFO: queste proprietà potrei recuperarle anche direttamente dall'elemento use.table nell'<svg>
-    const from = this.tables.get(this.joinLines.get(this.currentLineRef.id).from);
-    const to = this.tables.get(this.joinLines.get(this.currentLineRef.id).to);
+    console.log(this.currentLineRef.dataset.from);
+
+    const from = this.tables.get(this.currentLineRef.dataset.from);
+    // const from = this.tables.get(this.joinLines.get(this.currentLineRef.id).from);
+    const to = this.tables.get(this.currentLineRef.dataset.to);
+    // const to = this.tables.get(this.joinLines.get(this.currentLineRef.id).to);
+    // debugger;
 
     // 'from' è la tabella che sto droppando
     const joinSectionFrom = this.dialogJoin.querySelector('.joins section[data-table-from]');
@@ -598,15 +585,9 @@ class DrawSVG {
     // use.appendChild(animate);
   }
 
-  reDrawTable() {
+  updateTable() {
     // qui aggiorno l'elemento del DOM che è stato spostato, quando non si utilizza il drag&drop
     const use = this.svg.querySelector(`#${this.currentTable.key}`);
-    // WARN: la Fact non ha il data-fact-id, da ricontrollare quando sposto una Fact
-    use.dataset.factId = this.currentTable.factId;
-    use.dataset.tableJoin = this.currentTable.join;
-    this.svg.querySelector(`use.table[id="${this.tableJoin.table.id}"]`).dataset.joins = ++this.tableJoin.joins;
-    // ... lo imposto anche nell'oggetto Map() tables
-    this.tables.get(this.tableJoin.table.id).joins = this.tableJoin.joins;
     use.dataset.enterFn = 'tableEnter';
     use.ondblclick = this.handlerDblClick.bind(Draw);
     // da testare
@@ -913,7 +894,6 @@ class DrawSVG {
     this.tables = {
       id: `${this.table.id}-common`,
       properties: {
-        // id: this.tables.get(this.table.id).id,
         key: `${this.table.id}-common`,
         x: +this.table.dataset.x + 8,
         y: +this.table.dataset.y + 26,
@@ -923,7 +903,7 @@ class DrawSVG {
         schema: this.table.dataset.schema,
         join: null,
         joins: 0,
-        factId: this.table.dataset.factId,
+        factId: null,
         dimensionId: this.table.dataset.dimensionId,
         cssClass: 'common'
       }
@@ -946,6 +926,9 @@ class DrawSVG {
     let nearestTable = [...this.svg.querySelectorAll(`use.table.fact:not(#${sharedFact})`)].reduce((prev, current) => {
       return (Math.hypot(this.currentTable.x - (+current.dataset.x + 190), this.currentTable.y - (+current.dataset.y + 12)) < Math.hypot(this.currentTable.x - (+prev.dataset.x + 190), this.currentTable.y - (+prev.dataset.y + 12))) ? current : prev;
     });
+    lineClone.dataset.to = nearestTable.id;
+    lineClone.dataset.startX = +nearestTable.dataset.anchorXTo;
+    lineClone.dataset.startY = +nearestTable.dataset.anchorYTo;
     const d = `M${+nearestTable.dataset.anchorXTo},${+nearestTable.dataset.anchorYTo} C${+nearestTable.dataset.anchorXTo + 40},${+nearestTable.dataset.anchorYTo} ${this.currentTable.x - 40},${this.currentTable.y + 12} ${this.currentTable.x - 10},${this.currentTable.y + 12}`;
     lineClone.setAttribute('d', d);
     // elimino, dalla nuova linea clonata, il data-join-id, se presente, perchè qui sto creando una nuova join
@@ -958,10 +941,10 @@ class DrawSVG {
       properties: {
         id: this.currentLineRef.dataset.id,
         key: this.currentLineRef.id,
-        coordsFrom: { x: this.currentTable.x, y: this.currentTable.y },
-        coordsBottomFrom: { x: this.currentTable.x + 90, y: this.currentTable.y + 12 },
         from: this.currentTable.key,
-        to: null
+        to: nearestTable.id,
+        start: { x: +nearestTable.dataset.anchorXTo, y: +nearestTable.dataset.anchorYTo },
+        end: { x: this.currentTable.x - 10, y: this.currentTable.y + 12 }
       }
     };
   }
