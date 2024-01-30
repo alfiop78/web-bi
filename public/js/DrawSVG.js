@@ -338,46 +338,48 @@ class DrawSVG {
       // di legare la linea di join
       if (this.countTables === 1) return false;
 
-      // se stso spostando una tabella da mettere in comune tra più fact la posso legare solo alle Fact
-      // nella ricerca della tabella più vicina escludo la tabella che sto spostando
-      let tables = (e.currentTarget.classList.contains('common')) ?
-        this.svg.querySelectorAll('use.table.fact') :
-        this.svg.querySelectorAll(`use.table:not(#${e.target.id}, .common)`);
-      let nearestTable = [...tables].reduce((prev, current) => {
-        // return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
-        return (Math.hypot(+e.target.dataset.x - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(+e.target.dataset.x - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
-      });
+      if (this.el.classList.contains('common')) {
+        // se sto spostando una tabella da mettere in comune tra più fact la posso legare solo alle Fact
+        // nella ricerca della tabella più vicina escludo la tabella che sto spostando
+        let tables = (e.currentTarget.classList.contains('common')) ?
+          this.svg.querySelectorAll('use.table.fact') :
+          this.svg.querySelectorAll(`use.table:not(#${e.target.id}, .common)`);
+        let nearestTable = [...tables].reduce((prev, current) => {
+          // return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
+          return (Math.hypot(+e.target.dataset.x - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(+e.target.dataset.x - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
+        });
 
-      // console.log(nearestTable);
-      // identifico la tabella a cui mi sto collegando (tablejoin)
-      const rectBounding = nearestTable.getBoundingClientRect();
-      this.tableJoin = {
-        table: nearestTable,
-        x: +nearestTable.dataset.x + rectBounding.width + 10,
-        bottom: +nearestTable.dataset.x + (rectBounding.width / 2),
-        // bottom: +nearestTable.dataset.x + rectBounding.width + 10 - 95,
-        y: +nearestTable.dataset.y + (rectBounding.height / 2),
-        joins: +nearestTable.dataset.joins
+        // console.log(nearestTable);
+        // identifico la tabella a cui mi sto collegando (tablejoin)
+        const rectBounding = nearestTable.getBoundingClientRect();
+        this.tableJoin = {
+          table: nearestTable,
+          x: +nearestTable.dataset.x + rectBounding.width + 10,
+          bottom: +nearestTable.dataset.x + (rectBounding.width / 2),
+          // bottom: +nearestTable.dataset.x + rectBounding.width + 10 - 95,
+          y: +nearestTable.dataset.y + (rectBounding.height / 2),
+          joins: +nearestTable.dataset.joins
+        }
       }
       // imposto la linea corrente in base alla tabella che sto spostando
       // WARN: la Fact, se ha una joinLine, la devo cercare nel data-to anzichè data-from della linea
       this.currentLineRef = this.svg.querySelector(`path[data-from='${e.target.id}']`).id;
-      this.currentLineRef.dataset.to = nearestTable.id;
+      // this.currentLineRef.dataset.to = nearestTable.id;
       // console.log('currentLineRef:', this.currentLineRef);
       // TODO: le coordinate all'interno dell'oggetto Map() joinLines vanno modificate, in base allo spostamento
       // che sto facendo qui
-      this.joinLines.get(this.currentLineRef.id).coordsFrom = {
+      /* this.joinLines.get(this.currentLineRef.id).coordsFrom = {
         x: +nearestTable.dataset.x + 190,
         y: +nearestTable.dataset.y + 12
-      }
-      this.joinLines.get(this.currentLineRef.id).to = nearestTable.id;
+      } */
+      // this.joinLines.get(this.currentLineRef.id).to = nearestTable.id;
 
-      this.currentLine = this.joinLines.get(this.currentLineRef.id);
+      // this.currentLine = this.joinLines.get(this.currentLineRef.id);
 
       // console.log('this.currentline:', this.currentLine);
-
       if (this.currentLineRef) {
-        const d = `M${+nearestTable.dataset.x + 190},${+nearestTable.dataset.y + 12} C${+nearestTable.dataset.x + 190 + 40},${+nearestTable.dataset.y + 12} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
+        const d = `M${+this.currentLineRef.dataset.start.x + 190},${+nearestTable.dataset.y + 12} C${+nearestTable.dataset.x + 190 + 40},${+nearestTable.dataset.y + 12} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
+        // const d = `M${+nearestTable.dataset.x + 190},${+nearestTable.dataset.y + 12} C${+nearestTable.dataset.x + 190 + 40},${+nearestTable.dataset.y + 12} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
         this.currentLineRef.setAttribute('d', d);
       }
       // TODO: 29.01.2024 - Implementare lo spostamento della linea di destra della tabella e.target
