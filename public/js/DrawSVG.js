@@ -338,14 +338,16 @@ class DrawSVG {
       // di legare la linea di join
       if (this.countTables === 1) return false;
 
+      this.currentLineRef = this.svg.querySelector(`path[data-from='${e.target.id}']`).id;
       if (this.el.classList.contains('common')) {
         // se sto spostando una tabella da mettere in comune tra più fact la posso legare solo alle Fact
         // nella ricerca della tabella più vicina escludo la tabella che sto spostando
+        // inoltre, la tabella .common, non può essere legata alla stessa Fact a cui è legata la tabella .shared
         let tables = (e.currentTarget.classList.contains('common')) ?
-          this.svg.querySelectorAll('use.table.fact') :
+          this.svg.querySelectorAll(`use.table.fact:not(#${this.svg.querySelector('use.shared').dataset.factId})`) :
           this.svg.querySelectorAll(`use.table:not(#${e.target.id}, .common)`);
+
         let nearestTable = [...tables].reduce((prev, current) => {
-          // return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
           return (Math.hypot(+e.target.dataset.x - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(+e.target.dataset.x - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
         });
 
@@ -360,10 +362,17 @@ class DrawSVG {
           y: +nearestTable.dataset.y + (rectBounding.height / 2),
           joins: +nearestTable.dataset.joins
         }
+        // this.currentLineRef.dataset.to = nearestTable.id;
+        const d = `M${+nearestTable.dataset.anchorXTo},${+nearestTable.dataset.anchorYTo} C${+nearestTable.dataset.anchorXTo + 40},${+nearestTable.dataset.anchorYTo} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
+        this.currentLineRef.setAttribute('d', d);
+      } else {
+        const d = `M${+this.currentLineRef.dataset.startX},${+this.currentLineRef.dataset.startY} C${+this.currentLineRef.dataset.startX + 40},${+this.currentLineRef.dataset.startY} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
+        // const d = `M${+nearestTable.dataset.x + 190},${+nearestTable.dataset.y + 12} C${+nearestTable.dataset.x + 190 + 40},${+nearestTable.dataset.y + 12} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
+        this.currentLineRef.setAttribute('d', d);
       }
       // imposto la linea corrente in base alla tabella che sto spostando
       // WARN: la Fact, se ha una joinLine, la devo cercare nel data-to anzichè data-from della linea
-      this.currentLineRef = this.svg.querySelector(`path[data-from='${e.target.id}']`).id;
+      // this.currentLineRef = this.svg.querySelector(`path[data-from='${e.target.id}']`).id;
       // this.currentLineRef.dataset.to = nearestTable.id;
       // console.log('currentLineRef:', this.currentLineRef);
       // TODO: le coordinate all'interno dell'oggetto Map() joinLines vanno modificate, in base allo spostamento
@@ -377,14 +386,13 @@ class DrawSVG {
       // this.currentLine = this.joinLines.get(this.currentLineRef.id);
 
       // console.log('this.currentline:', this.currentLine);
-      if (this.currentLineRef) {
-        const d = `M${+this.currentLineRef.dataset.start.x + 190},${+nearestTable.dataset.y + 12} C${+nearestTable.dataset.x + 190 + 40},${+nearestTable.dataset.y + 12} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
-        // const d = `M${+nearestTable.dataset.x + 190},${+nearestTable.dataset.y + 12} C${+nearestTable.dataset.x + 190 + 40},${+nearestTable.dataset.y + 12} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
+      /* if (this.currentLineRef) {
+        const d = `M${+this.currentLineRef.dataset.startX},${+this.currentLineRef.dataset.startY} C${+this.currentLineRef.dataset.startX + 40},${+this.currentLineRef.dataset.startY} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
         this.currentLineRef.setAttribute('d', d);
-      }
+      } */
       // TODO: 29.01.2024 - Implementare lo spostamento della linea di destra della tabella e.target
-      const lines = this.svg.querySelectorAll(`path[data-to='${e.target.id}']`);
-      console.log(lines);
+      // const lines = this.svg.querySelectorAll(`path[data-to='${e.target.id}']`);
+      // console.log(lines);
     }
   }
 
@@ -898,23 +906,24 @@ class DrawSVG {
   }
 
   addFactJoin() {
-    this.table.classList.add('shared');
     // imposto, sulla tabella di origine, la cssClass 'shared'
+    this.table.classList.add('shared');
     this.tables.get(this.table.id).cssClass = 'shared';
+
     this.tables = {
       id: `${this.table.id}-common`,
       properties: {
         // id: this.tables.get(this.table.id).id,
         key: `${this.table.id}-common`,
         x: +this.table.dataset.x + 8,
-        y: +this.table.dataset.y + 36,
+        y: +this.table.dataset.y + 26,
         table: this.table.dataset.name,
         alias: this.table.dataset.alias,
         name: this.table.dataset.name,
         schema: this.table.dataset.schema,
         join: null,
         joins: 0,
-        factId: null,
+        factId: this.table.dataset.factId,
         dimensionId: this.table.dataset.dimensionId,
         cssClass: 'common'
       }
@@ -929,8 +938,15 @@ class DrawSVG {
     const lineClone = line.cloneNode();
     lineClone.id = `${line.id}-common`;
     lineClone.dataset.from = this.currentTable.key;
-    // recupero la posizione a cui è legata la linea di origine
-    const d = `M${+line.dataset.startX},${+line.dataset.startY} C${+line.dataset.startX + 40},${+line.dataset.startY} ${this.currentTable.x - 40},${this.currentTable.y + 12} ${this.currentTable.x - 10},${this.currentTable.y + 12}`;
+    // imposto la linea come quella di origine però questa tabella .common NON può
+    // essere legata alla stessa Fact dove è legata la tabella .shared
+    // Quindi cerco la Fact più vicina che non sia quella a cui è legata la tabella .shared
+    // cerco la Fact a cui è legata .shared
+    const sharedFact = this.svg.querySelector('use.shared').dataset.factId;
+    let nearestTable = [...this.svg.querySelectorAll(`use.table.fact:not(#${sharedFact})`)].reduce((prev, current) => {
+      return (Math.hypot(this.currentTable.x - (+current.dataset.x + 190), this.currentTable.y - (+current.dataset.y + 12)) < Math.hypot(this.currentTable.x - (+prev.dataset.x + 190), this.currentTable.y - (+prev.dataset.y + 12))) ? current : prev;
+    });
+    const d = `M${+nearestTable.dataset.anchorXTo},${+nearestTable.dataset.anchorYTo} C${+nearestTable.dataset.anchorXTo + 40},${+nearestTable.dataset.anchorYTo} ${this.currentTable.x - 40},${this.currentTable.y + 12} ${this.currentTable.x - 10},${this.currentTable.y + 12}`;
     lineClone.setAttribute('d', d);
     // elimino, dalla nuova linea clonata, il data-join-id, se presente, perchè qui sto creando una nuova join
     if ('joinId' in lineClone.dataset) delete lineClone.dataset.joinId;
