@@ -109,7 +109,7 @@ class DrawSVG {
       let nearestTable;
       if (this.countTables > 0) {
         // viene utilizzato il calcolo dell'ipotenusa con il valore assoluto per stabilire qual'è la tabella più vicina
-        nearestTable = [...this.svg.querySelectorAll('use.table')].reduce((prev, current) => {
+        nearestTable = [...this.svg.querySelectorAll('use.table:not(.common)')].reduce((prev, current) => {
           return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
         });
         // console.log(nearestTable.id);
@@ -210,7 +210,7 @@ class DrawSVG {
     this.tables = {
       id: `svg-data-${tableId}`,
       properties: {
-        id: tableId,
+        // id: tableId,
         key: `svg-data-${tableId}`,
         x: coords.x,
         y: coords.y,
@@ -275,6 +275,7 @@ class DrawSVG {
       // imposto solo le proprietà che sono presenti in una tabella dimensionale
       this.tables.get(`svg-data-${tableId}`).join = this.tableJoin.table.id;
       this.tables.get(`svg-data-${tableId}`).factId = this.tableJoin.table.dataset.factId;
+      this.tables.get(`svg-data-${tableId}`).cssClass = 'tables';
       // this.tables.get(`svg-data-${tableId}`).dimensionId = dimensionId;
       // salvo i dati della joinLines per poter essere salvata correttamente nel WorkBook in localStorage
       this.currentTable = this.tables.get(`svg-data-${tableId}`);
@@ -337,11 +338,16 @@ class DrawSVG {
       // di legare la linea di join
       if (this.countTables === 1) return false;
 
+      // se stso spostando una tabella da mettere in comune tra più fact la posso legare solo alle Fact
       // nella ricerca della tabella più vicina escludo la tabella che sto spostando
-      let nearestTable = [...this.svg.querySelectorAll(`use.table:not(#${e.target.id})`)].reduce((prev, current) => {
+      let tables = (e.currentTarget.classList.contains('common')) ?
+        this.svg.querySelectorAll('use.table.fact') :
+        this.svg.querySelectorAll(`use.table:not(#${e.target.id}, .common)`);
+      let nearestTable = [...tables].reduce((prev, current) => {
         // return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
         return (Math.hypot(+e.target.dataset.x - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(+e.target.dataset.x - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
       });
+
       // console.log(nearestTable);
       // identifico la tabella a cui mi sto collegando (tablejoin)
       const rectBounding = nearestTable.getBoundingClientRect();
@@ -351,8 +357,7 @@ class DrawSVG {
         bottom: +nearestTable.dataset.x + (rectBounding.width / 2),
         // bottom: +nearestTable.dataset.x + rectBounding.width + 10 - 95,
         y: +nearestTable.dataset.y + (rectBounding.height / 2),
-        joins: +nearestTable.dataset.joins,
-        // levelId: +nearestTable.dataset.levelId
+        joins: +nearestTable.dataset.joins
       }
       // imposto la linea corrente in base alla tabella che sto spostando
       // WARN: la Fact, se ha una joinLine, la devo cercare nel data-to anzichè data-from della linea
@@ -375,6 +380,9 @@ class DrawSVG {
         const d = `M${+nearestTable.dataset.x + 190},${+nearestTable.dataset.y + 12} C${+nearestTable.dataset.x + 190 + 40},${+nearestTable.dataset.y + 12} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
         this.currentLineRef.setAttribute('d', d);
       }
+      // TODO: 29.01.2024 - Implementare lo spostamento della linea di destra della tabella e.target
+      const lines = this.svg.querySelectorAll(`path[data-to='${e.target.id}']`);
+      console.log(lines);
     }
   }
 
@@ -393,32 +401,17 @@ class DrawSVG {
     if (e.button === 2 || this.countTables === 1) return false;
     // OPTIMIZE: 25.01.2024 - aggiungo la nuova tabella a Draw.tables, anche se in Draw.tables dovrei aggiungere le
     // tabelle solo dopo aver completato la join dalla dialogJoin..
-    console.log(this.table);
     console.log(this.currentTable);
-    this.tables = {
-      id: e.currentTarget.id,
-      properties: {
-        id: this.tables.get(this.table.id).id,
-        key: e.currentTarget.id,
-        x: +e.currentTarget.getAttribute('x'),
-        y: +e.currentTarget.getAttribute('y'),
-        table: this.tables.get(this.table.id).table,
-        alias: this.tables.get(this.table.id).alias,
-        name: this.tables.get(this.table.id).name,
-        schema: this.tables.get(this.table.id).schema,
-        join: this.tableJoin.table.id,
-        joins: this.tables.get(this.table.id).joins,
-        factId: this.tableJoin.table.dataset.factId,
-        dimensionId: this.tables.get(this.table.id).dimensionId,
-        cssClass: this.tables.get(e.currentTarget.id).cssClass
-      }
-    };
-    debugger;
+    this.tables.get(e.currentTarget.id).x = +e.currentTarget.getAttribute('x');
+    this.tables.get(e.currentTarget.id).y = +e.currentTarget.getAttribute('y');
+    this.tables.get(e.currentTarget.id).join = this.tableJoin.table.id;
+    this.tables.get(e.currentTarget.id).factId = this.tableJoin.table.dataset.factId;
     // TODO: qui non devo "disegnare" la tabella spostata
     // (perchè non è un drop ma la tabella è già all'interno del canvas), quindi aggiorno qui
     // l'elemento nel DOM (use.table)
     this.currentTable = this.tables.get(e.currentTarget.id);
     this.reDrawTable();
+    this.joinLines.get(this.currentLineRef.id).to = this.tableJoin.table.id;
     this.joinLines.get(this.currentLineRef.id).start = { x: this.tableJoin.x, y: this.tableJoin.y };
     this.joinLines.get(this.currentLineRef.id).end = { x: this.currentTable.x - 10, y: this.currentTable.y + 12 };
     // se esiste già una join per questa tabella non visualizzo la dialogJoin
@@ -550,12 +543,12 @@ class DrawSVG {
     use.setAttribute('href', `#${clonedStruct.id}`);
     use.id = this.currentTable.key;
     use.classList.add('table');
-    use.dataset.id = `data-${this.currentTable.id}`;
+    // use.dataset.id = `data-${this.currentTable.id}`;
     use.dataset.table = this.currentTable.table;
     use.dataset.factId = this.currentTable.factId;
     use.dataset.alias = this.currentTable.alias;
     // tutte le tabelle hanno la prop join, tranne la fact, dove NON aggiungo 'tableJoin' e dimensionId
-    use.classList.add('fact');
+    use.classList.add(this.currentTable.cssClass);
     // aggiungo l'evento drop sulla Fact, questo consentirà l'analisi multifatti
     // use.addEventListener('drop', this.handlerTableDrop.bind(Draw));
     // use.addEventListener('dragenter', this.handlerTableDragEnter.bind(this));
@@ -617,7 +610,7 @@ class DrawSVG {
     // punto di ancoraggio di sinistra
     use.dataset.anchorXFrom = this.currentTable.x - 10;
     use.dataset.anchorYFrom = this.currentTable.y + 12;
-    this.table = use;
+    // this.table = use;
     this.currentLineRef.dataset.from = this.currentTable.key;
   }
 
@@ -632,8 +625,10 @@ class DrawSVG {
     use.setAttribute('href', `#${commonStruct.id}`);
 
     use.id = this.currentTable.key;
-    use.classList.add('table', 'common');
+    use.classList.add('table');
+    use.classList.add(this.currentTable.cssClass);
     // use.dataset.id = this.currentTable.id;
+    use.dataset.tableJoin = this.currentTable.join;
     use.dataset.table = this.currentTable.table;
     use.dataset.factId = this.currentTable.factId;
     use.dataset.alias = this.currentTable.alias;
@@ -645,13 +640,18 @@ class DrawSVG {
     use.dataset.y = this.currentTable.y;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
+    // punto di ancoraggio di destra
+    use.dataset.anchorXTo = this.currentTable.x + 190;
+    use.dataset.anchorYTo = this.currentTable.y + 12;
+    // punto di ancoraggio di sinistra
+    use.dataset.anchorXFrom = this.currentTable.x - 10;
+    use.dataset.anchorYFrom = this.currentTable.y + 12;
     use.addEventListener('mousedown', this.tableMouseDown.bind(this));
     use.addEventListener('mousemove', this.tableMouseMove.bind(this));
     use.addEventListener('mouseup', this.tableMouseUp.bind(this));
     use.addEventListener('mouseleave', this.tableMouseLeave.bind(this));
     // la tabella di origine viene "contrassegnata" con la cssClass "shared"
     this.svg.appendChild(use);
-
   }
 
   drawTable() {
@@ -668,8 +668,10 @@ class DrawSVG {
     use.setAttribute('href', `#${clonedStruct.id}`);
     use.id = this.currentTable.key;
     use.classList.add('table');
-    if (this.currentTable.cssClass === 'shared') use.classList.add(this.currentTable.cssClass);
-    use.dataset.id = `data-${this.currentTable.id}`;
+    use.classList.add(this.currentTable.cssClass);
+    // use.classList.add('table');
+    // if (this.currentTable.cssClass === 'shared') use.classList.add(this.currentTable.cssClass);
+    // use.dataset.id = `data-${this.currentTable.id}`;
     use.dataset.table = this.currentTable.table;
     use.dataset.alias = this.currentTable.alias;
     use.dataset.factId = this.currentTable.factId;
@@ -895,6 +897,7 @@ class DrawSVG {
 
   addFactJoin() {
     this.table.classList.add('shared');
+    // imposto, sulla tabella di origine, la cssClass 'shared'
     this.tables.get(this.table.id).cssClass = 'shared';
     this.tables = {
       id: `${this.table.id}-common`,
@@ -911,19 +914,19 @@ class DrawSVG {
         joins: 0,
         factId: null,
         dimensionId: this.table.dataset.dimensionId,
-        cssClass: 'common',
+        cssClass: 'common'
       }
     };
 
     this.currentTable = this.tables.get(`${this.table.id}-common`);
-    // console.log(this.currentTable);
+    console.log(this.currentTable);
     this.drawCommonTable();
 
     // clono anche la sua linea andando a cercare la line con data-from = this.table.id
     const line = this.svg.querySelector(`path[data-from='${this.table.id}']`);
     const lineClone = line.cloneNode();
     lineClone.id = `${line.id}-common`;
-    lineClone.dataset.from = `${line.dataset.from}-common`;
+    lineClone.dataset.from = this.currentTable.key;
     // recupero la posizione a cui è legata la linea di origine
     const d = `M${+line.dataset.startX},${+line.dataset.startY} C${+line.dataset.startX + 40},${+line.dataset.startY} ${this.currentTable.x - 40},${this.currentTable.y + 12} ${this.currentTable.x - 10},${this.currentTable.y + 12}`;
     lineClone.setAttribute('d', d);
@@ -939,54 +942,11 @@ class DrawSVG {
         key: this.currentLineRef.id,
         coordsFrom: { x: this.currentTable.x, y: this.currentTable.y },
         coordsBottomFrom: { x: this.currentTable.x + 90, y: this.currentTable.y + 12 },
-        from: line.dataset.from,
-        to: line.dataset.to
+        from: this.currentTable.key,
+        to: null
       }
     };
   }
-
-  /* addFactJoin() {
-    // clono la tabella
-    const clone = this.table.cloneNode(true);
-    clone.id = `${this.table.id}-common`;
-    clone.classList.add('common');
-    // la sposto leggermente rispetto alla tabella di origine
-    clone.setAttribute('x', +this.table.getAttribute('x') + 8);
-    clone.setAttribute('y', +this.table.getAttribute('y') + 36);
-    clone.dataset.x = +clone.getAttribute('x');
-    clone.dataset.y = +clone.getAttribute('y');
-    // aggiungo gli stessi eventi della tabella originale
-    clone.addEventListener('mousedown', this.tableMouseDown.bind(this));
-    clone.addEventListener('mousemove', this.tableMouseMove.bind(this));
-    clone.addEventListener('mouseup', this.tableMouseUp.bind(this));
-    clone.addEventListener('mouseleave', this.tableMouseLeave.bind(this));
-    this.table.classList.add('shared');
-    this.svg.appendChild(clone);
-    // clono anche la sua linea andando a cercare la line con data-from = this.table.id
-    const line = this.svg.querySelector(`path[data-from='${this.table.id}']`);
-    const lineClone = line.cloneNode();
-    lineClone.id = `${line.id}-common`;
-    lineClone.dataset.from = `${line.dataset.from}-common`;
-    // recupero la posizione a cui è legata la linea di origine
-    const d = `M${+line.dataset.startX},${+line.dataset.startY} C${+line.dataset.startX + 40},${+line.dataset.startY} ${+clone.dataset.x - 40},${+clone.dataset.y + 12} ${+clone.dataset.x - 10},${+clone.dataset.y + 12}`;
-    lineClone.setAttribute('d', d);
-    // elimino, dalla nuova linea clonata, il data-join-id, se presente, perchè qui sto creando una nuova join
-    if ('joinId' in lineClone.dataset) delete lineClone.dataset.joinId;
-    this.svg.appendChild(lineClone);
-    this.currentLineRef = lineClone.id;
-    // aggiungo all'oggetto Map() Draw.joinLines la nuova linea clonata
-    this.joinLines = {
-      id: this.currentLineRef.id,
-      properties: {
-        id: this.currentLineRef.dataset.id,
-        key: this.currentLineRef.id,
-        coordsFrom: { x: +clone.dataset.x, y: +clone.dataset.y },
-        coordsBottomFrom: { x: +clone.dataset.x + 90, y: +clone.dataset.y + 12 },
-        from: line.dataset.from,
-        to: line.dataset.to
-      }
-    };
-  } */
 
   contextMenuTable(e) {
     e.preventDefault();
