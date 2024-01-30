@@ -15,6 +15,8 @@ class DrawSVG {
     this.contextMenu = document.getElementById('context-menu-table');
     this.currentLevel;
     this.currentTable = {}, this.currentLine = {};
+    // la tabella più vicina alle coordinate del mouse (durante il drag&drop e il mousemove)
+    this.nearestTable = null;
     // la tabella corrente: viene impostata :
     // - al termine del drawTable/Fact
     // - Quando si attiva il contextMenu
@@ -96,6 +98,7 @@ class DrawSVG {
       line.dataset.id = token;
       this.svg.appendChild(line);
       this.currentLineRef = line.id;
+      this.nearestTable;
     }
     // console.log(e.dataTransfer);
     e.dataTransfer.effectAllowed = "copy";
@@ -106,23 +109,23 @@ class DrawSVG {
     if (e.currentTarget.classList.contains('dropzone')) {
       e.dataTransfer.dropEffect = "copy";
       this.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
-      let nearestTable;
       if (this.countTables > 0) {
         // viene utilizzato il calcolo dell'ipotenusa con il valore assoluto per stabilire qual'è la tabella più vicina
-        nearestTable = [...this.svg.querySelectorAll('use.table:not(.common)')].reduce((prev, current) => {
-          return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
+        this.nearestTable = [...this.svg.querySelectorAll('use.table:not(.common)')].reduce((prev, current) => {
+          return (Math.hypot(e.offsetX - (+current.dataset.anchorXTo), e.offsetY - (+current.dataset.anchorYTo)) < Math.hypot(e.offsetX - (+prev.dataset.anchorXTo), e.offsetY - (+prev.dataset.anchorYTo))) ? current : prev;
+          // return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
         });
         // console.log(nearestTable.id);
-        const rectBounding = nearestTable.getBoundingClientRect();
+        const rectBounding = this.nearestTable.getBoundingClientRect();
         // console.log(rectBounding);
         // tableJoin identifica la tabella più vicina trovata rispetto al movimento del mouse
         // TODO: 26.01.2024 - in tableJoin probabilmente ho bisogno solo dell'id
         this.tableJoin = {
-          table: nearestTable,
-          x: +nearestTable.dataset.x + rectBounding.width + 10,
-          bottom: +nearestTable.dataset.x + (rectBounding.width / 2),
-          y: +nearestTable.dataset.y + (rectBounding.height / 2),
-          joins: +nearestTable.dataset.joins,
+          table: this.nearestTable,
+          x: +this.nearestTable.dataset.x + rectBounding.width + 10,
+          bottom: +this.nearestTable.dataset.x + (rectBounding.width / 2),
+          y: +this.nearestTable.dataset.y + (rectBounding.height / 2),
+          joins: +this.nearestTable.dataset.joins,
         }
         if (this.currentLineRef && this.tableJoin) {
           this.joinLines = {
@@ -319,6 +322,7 @@ class DrawSVG {
     // this.coordinate = { x: +e.currentTarget.dataset.x, y: +e.currentTarget.dataset.y };
     this.coordinate = { x: +e.currentTarget.getAttribute('x'), y: +e.currentTarget.getAttribute('y') };
     if (e.button === 2) return false;
+    this.nearestTable = null;
     this.el = e.currentTarget;
   }
 
@@ -328,11 +332,10 @@ class DrawSVG {
     // console.log('mousemove', e.currentTarget);
     if (this.el) {
       this.coordinate.x += e.movementX;
-      this.nearestTable;
       this.coordinate.y += e.movementY;
       // console.log(e);
-      e.currentTarget.dataset.x = this.coordinate.x;
-      e.currentTarget.dataset.y = this.coordinate.y;
+      // e.currentTarget.dataset.x = this.coordinate.x;
+      // e.currentTarget.dataset.y = this.coordinate.y;
       e.currentTarget.setAttribute('x', this.coordinate.x);
       e.currentTarget.setAttribute('y', this.coordinate.y);
       // se è presente una sola tabella nel canvas non eseguo il codice successivo, non c'è bisogno
@@ -349,7 +352,7 @@ class DrawSVG {
           this.svg.querySelectorAll(`use.table:not(#${e.target.id}, .common)`);
 
         this.nearestTable = [...tables].reduce((prev, current) => {
-          return (Math.hypot(+e.target.dataset.x - (+current.dataset.anchorXTo), e.offsetY - (+current.dataset.anchorYTo)) < Math.hypot(+e.target.dataset.x - (+prev.dataset.anchorXTo), e.offsetY - (+prev.dataset.anchorYTo))) ? current : prev;
+          return (Math.hypot(this.coordinate.x - (+current.dataset.anchorXTo), this.coordinate.y - (+current.dataset.anchorYTo)) < Math.hypot(this.coordinate.x - (+prev.dataset.anchorXTo), this.coordinate.y - (+prev.dataset.anchorYTo))) ? current : prev;
           // return (Math.hypot(+e.target.dataset.x - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(+e.target.dataset.x - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
         });
 
@@ -361,9 +364,14 @@ class DrawSVG {
         this.currentLineRef.dataset.startX = +this.nearestTable.dataset.anchorXTo;
         this.currentLineRef.dataset.startY = +this.nearestTable.dataset.anchorYTo;
       } else {
-        const controlPoints = +this.currentLineRef.dataset.startX + (this.coordinate.x - (+this.currentLineRef.dataset.startX)) / 2;
-        // const d = `M${+this.currentLineRef.dataset.startX},${+this.currentLineRef.dataset.startY} C${controlPoints},${+this.currentLineRef.dataset.startY} ${controlPoints},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
-        const d = `M${+this.currentLineRef.dataset.startX},${+this.currentLineRef.dataset.startY} C${+this.currentLineRef.dataset.startX + 40},${+this.currentLineRef.dataset.startY} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
+        // in questo caso non devo cercare la nearestTable perchè non voglio modificare la join
+        // presente con questa tabella, lo valorizzo con il valore già presente
+        this.nearestTable = this.svg.querySelector(`#${e.target.dataset.tableJoin}`);
+        /* prova calcolo controPoints
+         * const controlPoints = +this.currentLineRef.dataset.startX + (this.coordinate.x - (+this.currentLineRef.dataset.startX)) / 2;
+        const d = `M${+this.currentLineRef.dataset.startX},${+this.currentLineRef.dataset.startY} C${controlPoints},${+this.currentLineRef.dataset.startY} ${controlPoints},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`; */
+        // const d = `M${+this.currentLineRef.dataset.startX},${+this.currentLineRef.dataset.startY} C${+this.currentLineRef.dataset.startX + 40},${+this.currentLineRef.dataset.startY} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
+        const d = `M${+this.nearestTable.dataset.anchorXTo},${+this.nearestTable.dataset.anchorYTo} C${+this.nearestTable.dataset.anchorXTo + 40},${+this.nearestTable.dataset.anchorYTo} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
         this.currentLineRef.setAttribute('d', d);
       }
       this.currentLineRef.dataset.endX = this.coordinate.x - 10;
@@ -395,10 +403,11 @@ class DrawSVG {
     // (perchè non è un drop ma la tabella è già all'interno del canvas), quindi aggiorno qui
     // l'elemento nel DOM (use.table)
     this.currentTable = this.tables.get(e.currentTarget.id);
-    debugger;
-    if (e.target.classList.contains('common')) this.nearestTable.dataset.joins = ++this.nearestTable.dataset.joins;
-    // ... lo imposto anche nell'oggetto Map() tables
-    this.tables.get(this.nearestTable.id).joins = this.nearestTable.dataset.joins;
+    // calcolo quante tabelle sono legate a q nearestTable (quante dimensioni ci sono)
+    // per aggiornare la proprietà 'joins'
+    const joins = this.svg.querySelectorAll(`use.table[data-table-join=${this.nearestTable.id}]`).length;
+    this.nearestTable.dataset.joins = joins;
+    this.tables.get(this.nearestTable.id).joins = joins;
     this.updateTable();
     // se esiste già una join per questa tabella non visualizzo la dialogJoin
     if (!('joinId' in this.currentLineRef.dataset)) {
@@ -414,11 +423,12 @@ class DrawSVG {
         this.addFields(key, data);
       }
     }
-    // TODO: aggiorno le proprietà di joinLines
     this.joinLines.get(this.currentLineRef.id).start.x = +this.currentLineRef.dataset.startX;
     this.joinLines.get(this.currentLineRef.id).start.y = +this.currentLineRef.dataset.startY;
     this.joinLines.get(this.currentLineRef.id).end.x = +this.currentLineRef.dataset.endX;
     this.joinLines.get(this.currentLineRef.id).end.y = +this.currentLineRef.dataset.endY;
+    this.nearestTable;
+    console.log('nearestTable', this.nearestTable);
 
     // creo/aggiorno la mappatura di tutte le tabelle del Canvas
     WorkBook.createDataModel();

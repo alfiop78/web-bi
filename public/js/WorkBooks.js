@@ -373,7 +373,7 @@ class WorkBooks {
       // e la fact NON corrisponde a quella in ciclo, allora la tabella da recuperare è quella .common
       // (es.: quella presente nella seconda fact)
       const dimensionTables = (shared) ?
-        Draw.svg.querySelectorAll(`use.table[data-table-join][data-dimension-id='${shared.dataset.dimensionId}']:not(.common)`) :
+        Draw.svg.querySelectorAll(`use.table[data-table-join][data-dimension-id='${shared.dataset.dimensionId}']:not(.common), use.table[data-table-join][data-fact-id='${fact.id}']:not(.common)`) :
         Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`);
 
       dimensionTables.forEach(table => {
