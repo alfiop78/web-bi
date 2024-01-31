@@ -146,6 +146,7 @@ class DrawSVG {
           };
           this.currentLine = this.joinLines.get(this.currentLineRef.id);
         }
+
         // let testCoords = [{ x: 305, y: 70 }, { x: 210, y: 85 }];
         // creo 2 punti di ancoraggio (right, bottom) per la Fact e un solo punto di anchor
         // per le tabelle dimensionali
@@ -167,7 +168,61 @@ class DrawSVG {
         this.nearestPoint = anchorPoints.reduce((prev, current) => {
           return (Math.hypot(e.offsetX - current.x, e.offsetY - current.y) < Math.hypot(e.offsetX - prev.x, e.offsetY - prev.y)) ? current : prev;
         });
-        this.drawLine();
+        console.log('nearestPoin: ', this.nearestPoint);
+        // this.drawLine();
+        if (this.currentLineRef) {
+          let from = { x: (e.offsetX - this.dragElementPosition.x - 10), y: (e.offsetY - this.dragElementPosition.y + 12) };
+          if (this.nearestPoint.anchor === 'right') {
+            this.line = {
+              x1: this.nearestPoint.x, // start point
+              y1: this.nearestPoint.y,
+              p1x: this.nearestPoint.x + 40, // control point 1
+              p1y: this.nearestPoint.y,
+              p2x: from.x - 40, // control point 2
+              p2y: from.y,
+              x2: from.x, // end point
+              y2: from.y
+            }
+          } else {
+            // bottom
+            let from = { x: (e.offsetX - this.dragElementPosition.x + 12), y: (e.offsetY - this.dragElementPosition.y - 4) };
+            if ((from.x >= this.nearestPoint.x - 20) && (from.x <= this.nearestPoint.x + 20)) from.x = this.nearestPoint.x;
+
+            // se la tableJoin è una fact agginugo la css class fact-line alla linea che sto disegnando
+            // La linea tratteggiata compare SOLO quando si sta aggiungendo al punto di ancoraggio 'bottom'.
+            // In questo modo, sto indicando all'utente, che in questo punto di ancoraggio si può droppare una
+            // Fact per consentire l'analisi multifatti
+            (this.nearestTable.classList.contains('fact')) ?
+              this.currentLineRef.classList.add('factLine') :
+              this.currentLineRef.classList.remove('factLine');
+
+            this.line = {
+              x1: this.nearestPoint.x, // start point
+              y1: this.nearestPoint.y + 4,
+              p1x: this.nearestPoint.x, // control point 1
+              p1y: this.nearestPoint.y + 40,
+              p2x: from.x, // control point 2
+              p2y: from.y - 40,
+              x2: from.x, // end point
+              y2: from.y
+            }
+          }
+
+          const d = `M${this.line.x1},${this.line.y1} C${this.line.p1x},${this.line.p1y} ${this.line.p2x},${this.line.p2y} ${this.line.x2},${this.line.y2}`;
+          this.currentLineRef.setAttribute('d', d);
+          this.currentLineRef.dataset.to = this.nearestTable.id;
+          /* if (this.currentLine.hasOwnProperty('class')) {
+            this.currentLineRef.classList.add = this.currentLine.class;
+          } else {
+            // 'from' viene impostato in handlerDrop(), perchè qui ancora non è stata droppata la tabella
+            this.currentLineRef.dataset.to = this.nearestTable.id;
+          } */
+        }
+        this.currentLineRef = this.currentLine.key;
+        this.currentLineRef.dataset.startX = this.line.x1;
+        this.currentLineRef.dataset.startY = this.line.y1;
+        this.currentLineRef.dataset.endX = this.line.x2;
+        this.currentLineRef.dataset.endY = this.line.y2;
       }
     } else {
       e.dataTransfer.dropEffect = "none";
@@ -725,79 +780,8 @@ class DrawSVG {
     Draw.svg.appendChild(use);
   }
 
-  drawLine() {
-    // from: fa riferimento alla partenza della linea dalla tabella corrente
-    // to: fa riferimento alla tabella di destinazione della linea (tablejoin)
-    // console.log(this.currentLine.from, this.currentLine.to);
-    if (Object.keys(this.currentLine).length === 0) return;
-    // coordsTo : tabella a cui si aggancia la linea (tableJoin)
-    // coordsTo restituisce il punto "di destra" della tabella a cui collegare la tabella corrente
-    // console.log(this.tables.get(this.currentLine.to));
-    // INFO: con l'utilizzo della logica dei 3 punti di ancoraggio questa non mi serve più
-    // const coordsTo = {
-    //   // x: this.tables.get(this.currentLine.to).line.bottomTo.x,
-    //   x: this.tables.get(this.currentLine.to).line.to.x,
-    //   // y: this.tables.get(this.currentLine.to).line.bottomTo.y
-    //   y: this.tables.get(this.currentLine.to).line.to.y
-    // };
+  /* drawLine() {
 
-    let coordsFrom; // il punto di ancoraggio della tabella che sto droppando
-    switch (this.nearestPoint.anchor) {
-      case 'bottom':
-        // il punto di ancoraggio della tablejoin è 'bottom' quindi il punto di ancoraggio della tabella
-        // corrente è top
-        coordsFrom = { x: this.currentLine.coordsBottomFrom.x, y: this.currentLine.coordsBottomFrom.y };
-        break;
-      // case 'left':
-      //   // left si riferisce alla tableJoin, quindi, il punto di ancoraggio della tabella corrente
-      //   // è a destra.
-      //   coordsFrom = { x: this.currentLine.from.x + 30, y: this.currentLine.from.y + 10 };
-      //   break;
-      case 'right':
-        coordsFrom = { x: this.currentLine.coordsFrom.x, y: this.currentLine.coordsFrom.y };
-        break;
-      default:
-        break;
-    }
-
-    // console.log(coordsFrom);
-
-    // se la tableJoin è una fact agginugo la css class fact-line alla linea che sto disegnando
-    // La linea tratteggiata compare SOLO quando si sta aggiungendo al punto di ancoraggio 'bottom'.
-    // In questo modo, sto indicando all'utente, che in questo punto di ancoraggio si può droppare una
-    // Fact per consentire l'analisi multifatti
-    (this.nearestTable.classList.contains('fact') && this.nearestPoint.anchor === 'bottom') ?
-      this.currentLineRef.classList.add('factLine') :
-      this.currentLineRef.classList.remove('factLine');
-    switch (this.nearestPoint.anchor) {
-      case 'right':
-        this.line = {
-          x1: this.nearestPoint.x, // start point
-          y1: this.nearestPoint.y,
-          p1x: this.nearestPoint.x + 40, // control point 1
-          p1y: this.nearestPoint.y,
-          p2x: coordsFrom.x - 40, // control point 2
-          p2y: coordsFrom.y,
-          x2: coordsFrom.x, // end point
-          y2: coordsFrom.y
-        }
-        break;
-      case 'bottom':
-        if ((coordsFrom.x >= this.nearestPoint.x - 20) && (coordsFrom.x <= this.nearestPoint.x + 20)) coordsFrom.x = this.nearestPoint.x;
-        this.line = {
-          // x1: nearestPoint.x, // start point
-          x1: this.nearestPoint.x, // start point
-          y1: this.nearestPoint.y + 4,
-          p1x: this.nearestPoint.x, // control point 1
-          p1y: this.nearestPoint.y + 40,
-          p2x: coordsFrom.x, // control point 2
-          p2y: coordsFrom.y - 40,
-          x2: coordsFrom.x, // end point
-          y2: coordsFrom.y
-        }
-        break;
-    }
-    const d = `M${this.line.x1},${this.line.y1} C${this.line.p1x},${this.line.p1y} ${this.line.p2x},${this.line.p2y} ${this.line.x2},${this.line.y2}`;
     this.currentLineRef = this.currentLine.key;
     // console.log(this.currentLineRef);
     this.currentLineRef.dataset.startX = this.line.x1;
@@ -816,7 +800,7 @@ class DrawSVG {
       animLine.setAttribute('to', d);
       animLine.beginElement();
     }
-  }
+  } */
 
   reDrawLine() {
     this.line = {
