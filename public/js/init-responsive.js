@@ -175,7 +175,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   app.handlerSVGDragEnd = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    // console.log('svgDragEnd');
+    console.log('svgDragEnd');
     if (e.dataTransfer.dropEffect === 'copy') {
       // se la tabella non è presente in sessionStorage la scarico
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());

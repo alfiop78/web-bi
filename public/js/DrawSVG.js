@@ -260,9 +260,8 @@ class DrawSVG {
 
       // calcolo quante tabelle sono legate a q nearestTable (quante dimensioni ci sono)
       // per aggiornare la proprietà 'joins'
-      const joins = this.svg.querySelectorAll(`use.table[data-table-join=${this.nearestTable.id}]`).length;
-      this.nearestTable.dataset.joins = joins;
-      this.tables.get(this.nearestTable.id).joins = joins;
+      this.nearestTable.dataset.joins = ++this.nearestTable.dataset.joins;
+      this.tables.get(this.nearestTable.id).joins = +this.nearestTable.dataset.joins;
       // imposto il data-dimensionId
       // se la tabella droppata è legata direttamente alla fact (ultima tabella della gerarchia)
       // incremento il dimensionId (è una nuova dimensione, l'id è basato su tableJoin.dataset.joins)
