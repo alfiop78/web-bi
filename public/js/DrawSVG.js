@@ -75,8 +75,19 @@ class DrawSVG {
 
   get dimensionSelected() { return this.#dimensionSelected; }
 
-  set joinLines(value) {
-    this.#joinLines.set(value.id, value.properties);
+  // set joinLines(value) {
+  //   this.#joinLines.set(value.id, value.properties);
+  // }
+
+  set joinLines(from) {
+    this.#joinLines.set(this.currentLineRef.id, {
+      key: this.currentLineRef.id,
+      start: { x: +this.currentLineRef.dataset.startX, y: +this.currentLineRef.dataset.startY },
+      end: { x: +this.currentLineRef.dataset.endX, y: +this.currentLineRef.dataset.endY },
+      from,
+      to: this.currentLineRef.dataset.to,
+      cssClasses: this.currentLineRef.classList
+    });
   }
 
   get joinLines() { return this.#joinLines; }
@@ -129,24 +140,6 @@ class DrawSVG {
         // TODO: creo il currentLine che mi servirà per disegnare la linea e, in drop(), creo il this.joinLines() che verrà
         // memorizzato in localStorage. Successivamente il this.joinLines viene richiamato in fase di open() del workbook
 
-        if (this.currentLineRef && this.nearestTable) {
-          this.joinLines = {
-            id: this.currentLineRef.id,
-            properties: {
-              id: this.currentLineRef.dataset.id,
-              key: this.currentLineRef.id,
-              coordsFrom: { x: (e.offsetX - this.dragElementPosition.x - 10), y: (e.offsetY - this.dragElementPosition.y + 12) },
-              // coordsBottomFrom: { x: (e.offsetX - this.dragElementPosition.x + 12), y: (e.offsetY - this.dragElementPosition.y - 12) },
-              coordsBottomFrom: { x: (e.offsetX - this.dragElementPosition.x + 12), y: (e.offsetY - this.dragElementPosition.y - 4) },
-              from: null, // questo viene popolato nel handlerDrop, dopo aver ottenuto l'id dell'elemento nel DOM
-              to: this.nearestTable.id,
-              start: { x: +this.nearestTable.dataset.anchorXTo, y: +this.nearestTable.dataset.anchorYTo },
-              end: null
-            }
-          };
-          this.currentLine = this.joinLines.get(this.currentLineRef.id);
-        }
-
         // let testCoords = [{ x: 305, y: 70 }, { x: 210, y: 85 }];
         // creo 2 punti di ancoraggio (right, bottom) per la Fact e un solo punto di anchor
         // per le tabelle dimensionali
@@ -156,73 +149,74 @@ class DrawSVG {
         // il livello dimensionale da mettere in comune tra le due fact
         const anchorPoints = (this.countJoins >= 1 && this.nearestTable.classList.contains('fact')) ?
           [
-            { x: +this.nearestTable.dataset.anchorXTo, y: +this.nearestTable.dataset.anchorYTo, anchor: 'right' }, // right
-            { x: +this.nearestTable.getAttribute('x') + (rectBounding.width / 2), y: +this.nearestTable.getAttribute('y') + (rectBounding.height / 2), anchor: 'bottom' } // botton
+            {
+              x: +this.nearestTable.dataset.anchorXTo, y: +this.nearestTable.dataset.anchorYTo,
+              controlPoints: {
+                p1x: +this.nearestTable.dataset.anchorXTo + 40,
+                p1y: +this.nearestTable.dataset.anchorYTo,
+                p2x: (e.offsetX - this.dragElementPosition.x - 10) - 40,
+                p2y: (e.offsetY - this.dragElementPosition.y + 12),
+              },
+              x2: (e.offsetX - this.dragElementPosition.x - 10), y2: (e.offsetY - this.dragElementPosition.y + 12),
+              anchor: 'right'
+            }, // right
+            {
+              x: +this.nearestTable.getAttribute('x') + (rectBounding.width / 2), y: +this.nearestTable.getAttribute('y') + (rectBounding.height + 6),
+              controlPoints: {
+                p1x: +this.nearestTable.getAttribute('x') + (rectBounding.width / 2),
+                p1y: +this.nearestTable.dataset.anchorYTo + 50,
+                p2x: (e.offsetX - this.dragElementPosition.x + 12),
+                p2y: (e.offsetY - this.dragElementPosition.y) - 50,
+              },
+              x2: (e.offsetX - this.dragElementPosition.x + 12), y2: (e.offsetY - this.dragElementPosition.y - 6),
+              anchor: 'bottom'
+            } // botton
           ] :
           [
-            { x: +this.nearestTable.dataset.anchorXTo, y: +this.nearestTable.dataset.anchorYTo, anchor: 'right' }, // right
-            // { x: this.tableJoin.x - 95, y: this.tableJoin.y + 32, anchor: 'bottom' } // botton
+            {
+              x: +this.nearestTable.dataset.anchorXTo, y: +this.nearestTable.dataset.anchorYTo,
+              controlPoints: {
+                p1x: +this.nearestTable.dataset.anchorXTo + 40,
+                p1y: +this.nearestTable.dataset.anchorYTo,
+                p2x: (e.offsetX - this.dragElementPosition.x - 10) - 40,
+                p2y: (e.offsetY - this.dragElementPosition.y + 12),
+              },
+              x2: (e.offsetX - this.dragElementPosition.x - 10), y2: (e.offsetY - this.dragElementPosition.y + 12),
+              anchor: 'right'
+            }, // right
             // { x: +nearestTable.dataset.x - 10, y: this.tableJoin.y, anchor: 'left' } // left
           ];
 
         this.nearestPoint = anchorPoints.reduce((prev, current) => {
           return (Math.hypot(e.offsetX - current.x, e.offsetY - current.y) < Math.hypot(e.offsetX - prev.x, e.offsetY - prev.y)) ? current : prev;
         });
-        console.log('nearestPoin: ', this.nearestPoint);
+
+        console.log(this.nearestPoint);
         // this.drawLine();
         if (this.currentLineRef) {
-          let from = { x: (e.offsetX - this.dragElementPosition.x - 10), y: (e.offsetY - this.dragElementPosition.y + 12) };
-          if (this.nearestPoint.anchor === 'right') {
-            this.line = {
-              x1: this.nearestPoint.x, // start point
-              y1: this.nearestPoint.y,
-              p1x: this.nearestPoint.x + 40, // control point 1
-              p1y: this.nearestPoint.y,
-              p2x: from.x - 40, // control point 2
-              p2y: from.y,
-              x2: from.x, // end point
-              y2: from.y
-            }
-          } else {
-            // bottom
-            let from = { x: (e.offsetX - this.dragElementPosition.x + 12), y: (e.offsetY - this.dragElementPosition.y - 4) };
-            if ((from.x >= this.nearestPoint.x - 20) && (from.x <= this.nearestPoint.x + 20)) from.x = this.nearestPoint.x;
+          this.currentLineRef.dataset.startX = this.nearestPoint.x; // start point x
+          this.currentLineRef.dataset.startY = this.nearestPoint.y; // start point y
+          this.currentLineRef.dataset.endX = this.nearestPoint.x2; // end point x
+          this.currentLineRef.dataset.endY = this.nearestPoint.y2; // end point y
+          //
+          // se la tableJoin è una fact agginugo la css class fact-line alla linea che sto disegnando
+          // La linea tratteggiata compare SOLO quando si sta aggiungendo al punto di ancoraggio 'bottom'.
+          // In questo modo, sto indicando all'utente, che in questo punto di ancoraggio si può droppare una
+          // Fact per consentire l'analisi multifatti
+          // (this.nearestTable.classList.contains('fact') && this.nearestPoint.anchor === 'bottom') ?
+          //   this.currentLineRef.classList.add('fact') :
+          //   this.currentLineRef.classList.remove('fact');
+          (this.nearestPoint.anchor === 'bottom') ?
+            this.currentLineRef.classList.add('fact') :
+            this.currentLineRef.classList.remove('fact');
 
-            // se la tableJoin è una fact agginugo la css class fact-line alla linea che sto disegnando
-            // La linea tratteggiata compare SOLO quando si sta aggiungendo al punto di ancoraggio 'bottom'.
-            // In questo modo, sto indicando all'utente, che in questo punto di ancoraggio si può droppare una
-            // Fact per consentire l'analisi multifatti
-            (this.nearestTable.classList.contains('fact')) ?
-              this.currentLineRef.classList.add('factLine') :
-              this.currentLineRef.classList.remove('factLine');
+          // TODO: if ((from.x >= this.nearestPoint.x - 20) && (from.x <= this.nearestPoint.x + 20)) from.x = this.nearestPoint.x;
 
-            this.line = {
-              x1: this.nearestPoint.x, // start point
-              y1: this.nearestPoint.y + 4,
-              p1x: this.nearestPoint.x, // control point 1
-              p1y: this.nearestPoint.y + 40,
-              p2x: from.x, // control point 2
-              p2y: from.y - 40,
-              x2: from.x, // end point
-              y2: from.y
-            }
-          }
-
-          const d = `M${this.line.x1},${this.line.y1} C${this.line.p1x},${this.line.p1y} ${this.line.p2x},${this.line.p2y} ${this.line.x2},${this.line.y2}`;
+          const d = `M${this.nearestPoint.x},${this.nearestPoint.y} C${this.nearestPoint.controlPoints.p1x},${this.nearestPoint.controlPoints.p1y} ${this.nearestPoint.controlPoints.p2x},${this.nearestPoint.controlPoints.p2y} ${this.nearestPoint.x2},${this.nearestPoint.y2}`;
           this.currentLineRef.setAttribute('d', d);
           this.currentLineRef.dataset.to = this.nearestTable.id;
-          /* if (this.currentLine.hasOwnProperty('class')) {
-            this.currentLineRef.classList.add = this.currentLine.class;
-          } else {
-            // 'from' viene impostato in handlerDrop(), perchè qui ancora non è stata droppata la tabella
-            this.currentLineRef.dataset.to = this.nearestTable.id;
-          } */
         }
-        this.currentLineRef = this.currentLine.key;
-        this.currentLineRef.dataset.startX = this.line.x1;
-        this.currentLineRef.dataset.startY = this.line.y1;
-        this.currentLineRef.dataset.endX = this.line.x2;
-        this.currentLineRef.dataset.endY = this.line.y2;
+        // this.currentLineRef = this.currentLine.key;
       }
     } else {
       e.dataTransfer.dropEffect = "none";
@@ -286,7 +280,7 @@ class DrawSVG {
       this.tables.get(`svg-data-${tableId}`).cssClass = 'fact';
       this.currentTable = this.tables.get(`svg-data-${tableId}`);
       this.drawFact();
-    } else if (this.nearestTable && this.currentLineRef.classList.contains('factLine')) {
+    } else if (this.nearestTable && this.currentLineRef.classList.contains('fact')) {
       // Aggiunta di una Fact per l'analisi MultiFact (linea di join verticale)
       // la nuova fact è visualizzata immediatamente sotto la prima fact
       // recupero le coordinate del e.target
@@ -294,16 +288,27 @@ class DrawSVG {
       this.tables.get(`svg-data-${tableId}`).factId = `svg-data-${tableId}`;
       this.tables.get(`svg-data-${tableId}`).cssClass = 'fact';
       this.currentTable = this.tables.get(`svg-data-${tableId}`);
-      delete this.joinLines.get(this.currentLineRef.id).from;
-      delete this.joinLines.get(this.currentLineRef.id).to;
+      // creo this.joinLines
+      this.joinLines = null;
+      /* this.joinLines = {
+        id: this.currentLineRef.id,
+        properties: {
+          // id: this.currentLineRef.dataset.id,
+          key: this.currentLineRef.id,
+          // start: { x: +this.nearestTable.dataset.anchorXTo, y: +this.nearestTable.dataset.anchorYTo },
+          start: { x: +this.currentLineRef.dataset.startX, y: +this.currentLineRef.dataset.startY },
+          end: { x: +this.currentLineRef.dataset.endX, y: +this.currentLineRef.dataset.endY },
+          cssClasses: 'fact'
+        }
+      }; */
+
       // imposto la proprietà end : {x,y} qui, dove il drop è terminato e definitivo
-      this.joinLines.get(this.currentLineRef.id).start = { x: this.nearestPoint.x, y: this.nearestPoint.y - 4 };
-      this.joinLines.get(this.currentLineRef.id).end = { x: this.currentTable.x + 90, y: this.currentTable.y - 4 };
-      this.joinLines.get(this.currentLineRef.id).class = 'factLine';
+      // this.joinLines.get(this.currentLineRef.id).start = { x: this.nearestPoint.x, y: this.nearestPoint.y - 4 };
+      // this.joinLines.get(this.currentLineRef.id).end = { x: this.currentTable.x + 90, y: this.currentTable.y - 4 };
+      // this.joinLines.get(this.currentLineRef.id).class = 'fact';
       // impostando il 'from' in joinLines automaticamente lo imposto anche in this.currentLine
       // ... resta da impostare l'attributo from in this.currentLineRef
       // this.currentLineRef.dataset.from = `svg-data-${tableId}`;
-      console.log(this.currentLine);
       // this.createDimensionInfo();
       this.drawFact();
       this.reDrawLine();
@@ -335,13 +340,13 @@ class DrawSVG {
       // perchè vengono prese da lì le coordinate "finali" della tabella droppata)
       // imposto solo la proprietà 'from' rimasta "in sospeso" in handlerDragOver perchè in quell'evento non
       // ho ancora l'elemento nel DOM
-      this.joinLines.get(this.currentLineRef.id).from = `svg-data-${tableId}`;
+      this.joinLines = `svg-data-${tableId}`;
+      this.currentLineRef.dataset.from = `svg-data-${tableId}`;
+      // this.joinLines.get(this.currentLineRef.id).from = `svg-data-${tableId}`;
       // imposto la proprietà end : {x,y} qui, dove il drop è terminato e definitivo
-      this.joinLines.get(this.currentLineRef.id).end = { x: this.currentTable.x - 10, y: this.currentTable.y + 12 };
+      // this.joinLines.get(this.currentLineRef.id).end = { x: this.currentTable.x - 10, y: this.currentTable.y + 12 };
       // impostando il 'from' in joinLines automaticamente lo imposto anche in this.currentLine
       // ... resta da impostare l'attributo from in this.currentLineRef
-      this.currentLineRef.dataset.from = `svg-data-${tableId}`;
-      console.log(this.currentLine);
       // creo nel DOM la tabella appena droppata
       this.drawTable();
     }
@@ -455,9 +460,13 @@ class DrawSVG {
     this.currentTable = this.tables.get(e.currentTarget.id);
     // calcolo quante tabelle sono legate a q nearestTable (quante dimensioni ci sono)
     // per aggiornare la proprietà 'joins'
+    //  31.01.2024 - aggiorno in ogni caso l'attributo joins perchè quando si attiva
+    // il addFactJoin e la linea viene automaticamente associata alla fact, questo attributo non
+    // viene valorizzato/incrementato
     const joins = this.svg.querySelectorAll(`use.table[data-table-join=${this.nearestTable.id}]`).length;
     this.nearestTable.dataset.joins = joins;
     this.tables.get(this.nearestTable.id).joins = joins;
+
     this.updateTable();
     // se esiste già una join per questa tabella non visualizzo la dialogJoin
     if (!('joinId' in this.currentLineRef.dataset)) {
@@ -803,21 +812,11 @@ class DrawSVG {
   } */
 
   reDrawLine() {
-    this.line = {
-      x1: this.nearestPoint.x, // start point
-      y1: this.nearestPoint.y + 4,
-      p1x: this.nearestPoint.x, // control point 1
-      p1y: this.nearestPoint.y + 40,
-      p2x: this.nearestPoint.x, // control point 2
-      p2y: this.currentLine.end.y - 40,
-      x2: this.nearestPoint.x, // end point
-      y2: this.currentLine.end.y
-    }
-    this.currentLineRef.dataset.startX = this.line.x1;
-    this.currentLineRef.dataset.startY = this.line.y1;
-    this.currentLineRef.dataset.endX = this.line.x2;
-    this.currentLineRef.dataset.endY = this.line.y2;
-    const d = `M${this.line.x1},${this.line.y1} C${this.line.p1x},${this.line.p1y} ${this.line.p2x},${this.line.p2y} ${this.line.x2},${this.line.y2}`;
+    this.currentLineRef.dataset.startX = this.nearestPoint.x;
+    this.currentLineRef.dataset.startY = this.nearestPoint.y;
+    this.currentLineRef.dataset.endX = this.nearestPoint.x2;
+    this.currentLineRef.dataset.endY = this.nearestPoint.y2;
+    const d = `M${this.nearestPoint.x},${this.nearestPoint.y} C${this.nearestPoint.x},${this.nearestPoint.y} ${this.nearestPoint.x},${this.nearestPoint.y2} ${this.nearestPoint.x},${this.nearestPoint.y2}`;
     this.currentLineRef.setAttribute('d', d);
     /* const animLine = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
     animLine.setAttribute('attributeName', 'd');

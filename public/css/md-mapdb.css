@@ -98,7 +98,7 @@ path{
   stroke-linecap: round;
 }
 
-path.factLine {
+path.fact {
   stroke-dasharray: 4;
   stroke-width: 1;
   stroke: grey;
