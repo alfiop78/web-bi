@@ -454,7 +454,7 @@ class WorkBooks {
     // ciclo sulle tables presenti in svg.tables
     // - ricreo l'oggetto Map() this.tables e ridisegno le tabelle
     for (const [key, value] of Object.entries(WorkBookStorage.workBook.svg.tables)) {
-      Draw.tables = { id: key, properties: value };
+      Draw.tables = value;
       Draw.currentTable = Draw.tables.get(key);
       if (!value.join) {
         Draw.drawFact();
@@ -475,11 +475,11 @@ class WorkBooks {
     this.createDataModel();
 
     for (const [key, value] of Object.entries(WorkBookStorage.workBook.svg.lines)) {
-      Draw.joinLines = { id: key, properties: value };
+      Draw.joinLines = value;
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       let controlPoints = { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } };
       line.id = key;
-      line.dataset.id = value.id;
+      // line.dataset.id = value.id;
       line.dataset.startX = value.start.x;
       line.dataset.startY = value.start.y;
       line.dataset.endX = value.end.x;
@@ -487,8 +487,9 @@ class WorkBooks {
       line.dataset.from = value.from;
       line.dataset.to = value.to;
       let d;
-      if (value.hasOwnProperty('class')) {
-        line.classList.add(value.class);
+      if (!value.from) {
+        // fact line
+        line.classList = value.cssClass;
         controlPoints.start.x = value.start.x;
         controlPoints.start.y = value.start.y + 40;
         controlPoints.end.x = value.end.x;

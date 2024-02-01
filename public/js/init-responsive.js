@@ -1160,11 +1160,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     debugger;
     // scarico le tabelle del canvas in sessionStorage, questo controllo va fatto dopo aver definito WorkBook.hierTables
     app.checkSessionStorage();
-    // reimposto l'evento contextmenu sugli elementi del canvas
-    for (const tableId of Draw.tables.keys()) {
-      // se la tabella è già presente in sessionStorage non rieseguo la query
-      Draw.svg.querySelector(`#${tableId}`).addEventListener('contextmenu', Draw.contextMenuTable);
-    }
     // Draw.checkResizeSVG();
     app.dialogWorkBook.close();
     // il WorkBook è già creato quindi da questo momento è in fase di edit

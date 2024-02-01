@@ -15,7 +15,6 @@ class DrawSVG {
     this.svg.dataset.height = this.svg.parentElement.offsetHeight;
     this.svg.dataset.width = this.svg.parentElement.offsetWidth;
     this.contextMenu = document.getElementById('context-menu-table');
-    this.currentLevel;
     this.currentTable = {}, this.currentLine = {};
     // la tabella più vicina alle coordinate del mouse (durante il drag&drop e il mousemove)
     this.nearestTable = null;
@@ -40,12 +39,23 @@ class DrawSVG {
 
   rand = () => Math.random(0).toString(36).substring(2);
 
-  set tables(value) {
+  /* set tables(value) {
     this.#tables.set(value.id, value.properties);
     // console.log(this.#tables);
+  } */
+
+  set tables(value) {
+    this.#tables.set(value.id, value);
   }
 
   get tables() { return this.#tables; }
+
+  set joinLines(value) {
+    this.#joinLines.set(value.key, value);
+  }
+
+  get joinLines() { return this.#joinLines; }
+
 
   get countTables() {
     return this.svg.querySelectorAll('use.table').length;
@@ -75,23 +85,6 @@ class DrawSVG {
   }
 
   get dimensionSelected() { return this.#dimensionSelected; }
-
-  // set joinLines(value) {
-  //   this.#joinLines.set(value.id, value.properties);
-  // }
-
-  set joinLines(from) {
-    this.#joinLines.set(this.currentLineRef.id, {
-      key: this.currentLineRef.id,
-      start: { x: +this.currentLineRef.dataset.startX, y: +this.currentLineRef.dataset.startY },
-      end: { x: +this.currentLineRef.dataset.endX, y: +this.currentLineRef.dataset.endY },
-      from,
-      to: this.currentLineRef.dataset.to,
-      cssClasses: this.currentLineRef.classList
-    });
-  }
-
-  get joinLines() { return this.#joinLines; }
 
   set dimensions(id) {
     this.#dimensions.add(id);
@@ -135,6 +128,7 @@ class DrawSVG {
           // return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
         });
         const rectBounding = this.nearestTable.getBoundingClientRect();
+
 
         // let testCoords = [{ x: 305, y: 70 }, { x: 210, y: 85 }];
         // creo 2 punti di ancoraggio (right, bottom) per la Fact e un solo punto di anchor
@@ -191,6 +185,7 @@ class DrawSVG {
 
         // console.log(this.nearestPoint);
         if (this.currentLineRef) {
+
           this.currentLineRef.dataset.startX = this.nearestPoint.x; // start point x
           this.currentLineRef.dataset.startY = this.nearestPoint.y; // start point y
           this.currentLineRef.dataset.endX = this.nearestPoint.x2; // end point x
@@ -248,22 +243,35 @@ class DrawSVG {
     // console.log(this.dragElementPosition);
     // alcune proprietà di this.tables sono presente sia quando viene droppataa una Fact che quando
     // viene droppata una tabella dimensionale
-    this.tables = {
+    const tableObj = {
       id,
-      properties: {
-        // id: tableId,
-        key: id,
-        x: coords.x,
-        y: coords.y,
-        table: liElement.dataset.label,
-        alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
-        name: liElement.dataset.label,
-        schema: liElement.dataset.schema,
-        join: null,
-        joins: 0,
-        cssClass: null
-      }
+      key: id,
+      x: coords.x,
+      y: coords.y,
+      table: liElement.dataset.label,
+      alias: `${liElement.dataset.label}_${time.substring(time.length - 3)}`,
+      name: liElement.dataset.label,
+      schema: liElement.dataset.schema,
+      joins: 0,
+      join: null,
+      cssClass: null
     };
+
+    this.tables = tableObj;
+
+    if (this.currentLineRef) {
+      console.log(this.currentLineRef.classList);
+      const lineObj = {
+        // id: this.currentLineRef.id,
+        key: this.currentLineRef.id,
+        start: { x: +this.currentLineRef.dataset.startX, y: +this.currentLineRef.dataset.startY },
+        end: { x: +this.currentLineRef.dataset.endX, y: +this.currentLineRef.dataset.endY },
+        from: null,
+        to: this.currentLineRef.dataset.to,
+        cssClass: this.currentLineRef.classList.value
+      };
+      this.joinLines = lineObj;
+    }
 
     if (!this.nearestTable) {
       // nessuna tabella da mettere in join (prima tabella)
@@ -282,8 +290,7 @@ class DrawSVG {
       // this.createDimensionInfo();
       this.drawFact();
       this.updateLine();
-      // creo this.joinLines
-      this.joinLines = null;
+      // TODO: aggiorno this.joinLines in base all'auto-posizionamento
     } else {
       // è presente una tableJoin, è un livello dimensionale
       // calcolo quante tabelle sono legate a q nearestTable (quante dimensioni ci sono)
@@ -302,28 +309,30 @@ class DrawSVG {
       this.tables.get(id).factId = this.nearestTable.dataset.factId;
       this.tables.get(id).cssClass = 'tables';
       // se il punto y del mouse è "nei pressi" di y della nearestTable imposto y alla stessa altezza di nearestTable.y
-      if (this.tables.get(id).y >= this.nearestPoint.y - 20 && this.tables.get(id).y <= this.nearestPoint.y + 20) this.tables.get(id).y = +this.nearestTable.getAttribute('y');
-      // salvo i dati della joinLines per poter essere salvata correttamente nel WorkBook in localStorage
+      if (this.tables.get(id).y >= this.nearestPoint.y - 20 && this.tables.get(id).y <= this.nearestPoint.y + 20) {
+        this.tables.get(id).y = +this.nearestTable.getAttribute('y');
+        // salvo i dati della joinLines per poter essere salvata correttamente nel WorkBook in localStorage
+        this.joinLines.get(this.currentLineRef.id).end.y = this.nearestPoint.y;
+        this.currentLineRef.dataset.endY = this.nearestPoint.y;
+      }
+
       this.currentTable = this.tables.get(id);
       // linea di join da tableJoin alla tabella droppata (questa deve essere impostata DOPO this.currentTable
       // perchè vengono prese da lì le coordinate "finali" della tabella droppata)
       // imposto solo la proprietà 'from' rimasta "in sospeso" in handlerDragOver perchè in quell'evento non
       // ho ancora l'elemento nel DOM
-      this.joinLines = id;
+      // this.joinLines = id;
+      this.joinLines.get(this.currentLineRef.id).from = id;
       this.currentLineRef.dataset.from = id;
-      // this.joinLines.get(this.currentLineRef.id).from = `svg-data-${tableId}`;
-      // imposto la proprietà end : {x,y} qui, dove il drop è terminato e definitivo
-      // this.joinLines.get(this.currentLineRef.id).end = { x: this.currentTable.x - 10, y: this.currentTable.y + 12 };
-      // impostando il 'from' in joinLines automaticamente lo imposto anche in this.currentLine
-      // ... resta da impostare l'attributo from in this.currentLineRef
-      // creo nel DOM la tabella appena droppata
       this.drawTable();
     }
+    // WARN: non utilizzata in altri punti del codice
     this.currentTableRef = id;
     // imposto la tabella attiva per poter scaricare le colonne in sessionStorage (in handlerDragEnd())
     WorkBook.activeTable = id;
     // imposto event contextmenu
-    this.svg.querySelector(`#${this.currentTable.key}`).addEventListener('contextmenu', this.contextMenuTable.bind(Draw));
+    // this.currentTableRef.addEventListener('contextmenu', this.contextMenuTable.bind(Draw));
+    // this.svg.querySelector(`#${this.currentTable.key}`).addEventListener('contextmenu', this.contextMenuTable.bind(Draw));
   }
 
   /* NOTE: END DRAG&DROP EVENTS */
@@ -731,6 +740,7 @@ class DrawSVG {
     use.addEventListener('mouseup', this.tableMouseUp.bind(this));
     use.addEventListener('mouseleave', this.tableMouseLeave.bind(this));
     Draw.svg.appendChild(use);
+    use.addEventListener('contextmenu', this.contextMenuTable.bind(this));
     this.table = use;
 
     // <animate> tag
@@ -765,6 +775,7 @@ class DrawSVG {
     this.currentLineRef.dataset.endY = this.nearestPoint.y2;
     const d = `M${this.nearestPoint.x},${this.nearestPoint.y} C${this.nearestPoint.x},${this.nearestPoint.y} ${this.nearestPoint.x},${this.nearestPoint.y2} ${this.nearestPoint.x},${this.nearestPoint.y2}`;
     this.currentLineRef.setAttribute('d', d);
+    this.joinLines.get(this.currentLineRef.id).end.x = this.nearestPoint.x;
     /* const animLine = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
     animLine.setAttribute('attributeName', 'd');
     animLine.setAttribute('fill', 'freeze');
@@ -831,24 +842,25 @@ class DrawSVG {
     // imposto, sulla tabella di origine, la cssClass 'shared'
     this.table.classList.add('shared');
     this.tables.get(this.table.id).cssClass = 'shared';
+    const id = `${this.table.id}-common`;
 
-    this.tables = {
-      id: `${this.table.id}-common`,
-      properties: {
-        key: `${this.table.id}-common`,
-        x: +this.table.dataset.x + 8,
-        y: +this.table.dataset.y + 26,
-        table: this.table.dataset.name,
-        alias: this.table.dataset.alias,
-        name: this.table.dataset.name,
-        schema: this.table.dataset.schema,
-        join: null,
-        joins: 0,
-        factId: null,
-        dimensionId: this.table.dataset.dimensionId,
-        cssClass: 'common'
-      }
+    const tableObj = {
+      id,
+      key: id,
+      x: +this.table.dataset.x + 8,
+      y: +this.table.dataset.y + 26,
+      table: this.table.dataset.name,
+      alias: this.table.dataset.alias,
+      name: this.table.dataset.name,
+      schema: this.table.dataset.schema,
+      joins: 0,
+      join: null,
+      factId: null,
+      dimensionId: this.table.dataset.dimensionId,
+      cssClass: 'common'
     };
+
+    this.tables = tableObj;
 
     this.currentTable = this.tables.get(`${this.table.id}-common`);
     console.log(this.currentTable);
@@ -876,7 +888,16 @@ class DrawSVG {
     if ('joinId' in lineClone.dataset) delete lineClone.dataset.joinId;
     this.svg.appendChild(lineClone);
     this.currentLineRef = lineClone.id;
-    this.joinLines = this.currentTable.key;
+    // this.joinLines = this.currentTable.key;
+    const lineObj = {
+      key: this.currentLineRef.id,
+      start: { x: +this.currentLineRef.dataset.startX, y: +this.currentLineRef.dataset.startY },
+      end: { x: +this.currentLineRef.dataset.endX, y: +this.currentLineRef.dataset.endY },
+      from: null,
+      to: this.currentLineRef.dataset.to,
+      cssClass: this.currentLineRef.classList.value
+    };
+    this.joinLines = lineObj;
   }
 
   contextMenuTable(e) {
@@ -887,6 +908,7 @@ class DrawSVG {
     // const { clientX: mouseX, clientY: mouseY } = e;
     // const { left: mouseX, top: mouseY } = e.target.getBoundingClientRect();
     const { left: mouseX, bottom: mouseY } = e.currentTarget.getBoundingClientRect();
+    debugger;
     this.contextMenu.style.top = `${mouseY + 8}px`;
     this.contextMenu.style.left = `${mouseX}px`;
     // Imposto la activeTable relativa al context-menu
