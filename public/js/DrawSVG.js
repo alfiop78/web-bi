@@ -352,16 +352,20 @@ class DrawSVG {
   tableMouseDown(e) {
     e.preventDefault();
     e.stopPropagation();
+    if (e.ctrlKey) return false;
+    console.log('event mouseDown');
     // this.coordinate = { x: +e.currentTarget.dataset.x, y: +e.currentTarget.dataset.y };
     this.coordinate = { x: +e.currentTarget.getAttribute('x'), y: +e.currentTarget.getAttribute('y') };
     if (e.button === 2) return false;
-    this.nearestTable = null;
+    this.nearestTable;
     this.el = e.currentTarget;
   }
 
   tableMouseMove(e) {
-    // e.preventDefault();
+    e.preventDefault();
     e.stopPropagation();
+    // console.log(e);
+    if (e.ctrlKey) return false;
     // console.log('mousemove', e.currentTarget);
     if (this.el) {
       this.coordinate.x += e.movementX;
@@ -415,6 +419,14 @@ class DrawSVG {
     }
   }
 
+  // imposto come tabella attiva (currentTableRef)
+  tableMouseEnter(e) {
+    e.preventDefault();
+    console.log('tableMouseEnter');
+    this.currentTableRef = e.target.id;
+    // console.log(this.currentTableRef);
+  }
+
   tableMouseLeave(e) {
     e.preventDefault();
     console.log('tableMouseLeave');
@@ -424,17 +436,13 @@ class DrawSVG {
   tableMouseUp(e) {
     e.preventDefault();
     e.stopPropagation();
-    console.log('tableMouseUp');
+    console.log('tableMouseUp event');
+    if (!this.el) return;
     delete this.el;
     if (e.button === 2 || this.countTables === 1) return false;
-    console.log(this.currentTable);
+    // console.log(this.currentTable);
     this.tables.get(e.currentTarget.id).x = +e.currentTarget.getAttribute('x');
     this.tables.get(e.currentTarget.id).y = +e.currentTarget.getAttribute('y');
-    // this.tables.get(e.currentTarget.id).join = this.tableJoin.table.id;
-    // this.tables.get(e.currentTarget.id).factId = this.tableJoin.table.dataset.factId;
-    // TODO: qui non devo "disegnare" la tabella spostata
-    // (perchè non è un drop ma la tabella è già all'interno del canvas), quindi aggiorno qui
-    // l'elemento nel DOM (use.table)
     this.currentTable = this.tables.get(e.currentTarget.id);
     // calcolo quante tabelle sono legate a q nearestTable (quante dimensioni ci sono)
     // per aggiornare la proprietà 'joins'
@@ -465,7 +473,6 @@ class DrawSVG {
     this.joinLines.get(this.currentLineRef.id).end.x = +this.currentLineRef.dataset.endX;
     this.joinLines.get(this.currentLineRef.id).end.y = +this.currentLineRef.dataset.endY;
     this.nearestTable;
-    console.log('nearestTable', this.nearestTable);
 
     // creo/aggiorno la mappatura di tutte le tabelle del Canvas
     WorkBook.createDataModel();
@@ -600,9 +607,10 @@ class DrawSVG {
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;
-    // use.dataset.fn = 'tableSelected';
+    use.dataset.fn = 'tableSelected';
     // INFO: gli eventi impostati con il dataset in questo modo possono essere legati anche a init-responsive.js
     use.dataset.enterFn = 'tableEnter';
+    // use.addEventListener('click', this.tableSelected.bind(this));
     // use.onmouseover = this.handlerOver.bind(Draw);
     // use.onmouseleave = this.handlerLeave.bind(Draw);
     use.ondblclick = this.handlerDblClick.bind(Draw);
@@ -622,7 +630,9 @@ class DrawSVG {
     use.addEventListener('mousemove', this.tableMouseMove.bind(this));
     use.addEventListener('mouseup', this.tableMouseUp.bind(this));
     use.addEventListener('mouseleave', this.tableMouseLeave.bind(this));
+    use.addEventListener('mouseenter', this.tableMouseEnter.bind(this));
     this.svg.appendChild(use);
+    use.addEventListener('contextmenu', this.contextMenuTable.bind(this));
     this.table = use;
     // <animate> tag
     // const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
@@ -671,6 +681,7 @@ class DrawSVG {
     use.dataset.factId = this.currentTable.factId;
     use.dataset.alias = this.currentTable.alias;
     use.dataset.dimensionId = this.currentTable.dimensionId;
+    use.dataset.fn = 'tableSelected';
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;
@@ -688,8 +699,10 @@ class DrawSVG {
     use.addEventListener('mousemove', this.tableMouseMove.bind(this));
     use.addEventListener('mouseup', this.tableMouseUp.bind(this));
     use.addEventListener('mouseleave', this.tableMouseLeave.bind(this));
+    use.addEventListener('mouseenter', this.tableMouseEnter.bind(this));
     // la tabella di origine viene "contrassegnata" con la cssClass "shared"
     this.svg.appendChild(use);
+    use.addEventListener('contextmenu', this.contextMenuTable.bind(this));
   }
 
   drawTable() {
@@ -719,8 +732,9 @@ class DrawSVG {
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;
-    // use.dataset.fn = 'tableSelected';
-    use.dataset.enterFn = 'tableEnter';
+    use.dataset.fn = 'tableSelected';
+    // use.addEventListener('click', this.tableSelected.bind(this), true);
+    // use.dataset.enterFn = 'tableEnter';
     // use.onmouseover = this.handlerOver.bind(Draw);
     // use.onmouseleave = this.handlerLeave.bind(Draw);
     use.ondblclick = this.handlerDblClick.bind(Draw);
@@ -739,6 +753,7 @@ class DrawSVG {
     use.addEventListener('mousemove', this.tableMouseMove.bind(this));
     use.addEventListener('mouseup', this.tableMouseUp.bind(this));
     use.addEventListener('mouseleave', this.tableMouseLeave.bind(this));
+    use.addEventListener('mouseenter', this.tableMouseEnter.bind(this));
     Draw.svg.appendChild(use);
     use.addEventListener('contextmenu', this.contextMenuTable.bind(this));
     this.table = use;
@@ -908,7 +923,6 @@ class DrawSVG {
     // const { clientX: mouseX, clientY: mouseY } = e;
     // const { left: mouseX, top: mouseY } = e.target.getBoundingClientRect();
     const { left: mouseX, bottom: mouseY } = e.currentTarget.getBoundingClientRect();
-    debugger;
     this.contextMenu.style.top = `${mouseY + 8}px`;
     this.contextMenu.style.left = `${mouseX}px`;
     // Imposto la activeTable relativa al context-menu

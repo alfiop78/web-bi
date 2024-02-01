@@ -198,7 +198,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // creo/aggiorno la mappatura di tutte le tabelle del Canvas
     WorkBook.createDataModel();
     // creo una mappatura per popolare il WorkBook nello step successivo
-    // app.hierTables();
+    app.hierTables();
   }
 
   // Aggiunta metrica composta di base
@@ -260,6 +260,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   // column _id e _ds
   app.setColumnDrop = (e) => {
     e.preventDefault();
+    console.log('target:', e.target);
+    console.log('currentTarget:', e.currentTarget);
     e.currentTarget.classList.replace('dropping', 'dropped');
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const elementId = e.dataTransfer.getData('text/plain');
@@ -594,6 +596,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // elementRef : è l'elemento nella lista di sinistra che ho draggato
     // TODO: rinominare elementRef.id in elementRef.dataset.token
     // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
+    debugger;
     Sheet.fields = { token: elementRef.id, name: WorkBook.field.get(elementRef.id).name };
     app.addField(e.currentTarget, elementRef.id);
   }
@@ -880,17 +883,21 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       columns.forEach(column => {
         const content = app.tmplList.content.cloneNode(true);
         const li = content.querySelector('li[data-li-drag]');
+        const i = content.querySelector('i[draggable]');
         const span = li.querySelector('span');
         li.dataset.label = column.column_name;
-        li.id = `${value.alias}_${column.column_name}`;
-        li.ondragstart = app.columnDragStart;
-        li.ondragend = app.columnDragEnd;
-        // li.dataset.fn = 'addToColumnFormula';
+        // li.id = `${value.alias}_${column.column_name}`;
+        i.id = `${value.alias}_${column.column_name}`;
+        i.dataset.tableId = tableId;
+        i.dataset.field = column.column_name;
+        i.dataset.datatype = column.type_name.toLowerCase();
+        i.ondragstart = app.columnDragStart;
+        i.ondragend = app.columnDragEnd;
         li.dataset.elementSearch = 'fields';
-        li.dataset.tableId = tableId;
+        // li.dataset.tableId = tableId;
         li.dataset.table = value.name;
         li.dataset.alias = value.alias;
-        li.dataset.field = column.column_name;
+        // li.dataset.field = column.column_name;
         // li.dataset.key = column.CONSTRAINT_NAME;
         span.innerText = column.column_name;
         // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
@@ -1157,7 +1164,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // WARN: probabilmente, il DataModel, posso recuperarlo direttamente dallo storage, senza ricrearlo
     // WorkBook.createDataModel();
     app.hierTables();
-    debugger;
     // scarico le tabelle del canvas in sessionStorage, questo controllo va fatto dopo aver definito WorkBook.hierTables
     app.checkSessionStorage();
     // Draw.checkResizeSVG();
@@ -1534,6 +1540,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   }
 
   app.tableSelected = async (e) => {
+    console.log(e.ctrlKey);
+    if (!e.ctrlKey) return false;
+    console.log('click event');
     // console.log(`table selected ${e.currentTarget.dataset.table}`);
     // console.log(e.currentTarget);
     // deseleziono le altre tabelle con attributo active
@@ -1541,19 +1550,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     e.currentTarget.dataset.active = 'true';
     // se è attiva l'attributo data-multifact sulla tabella selezionata, devo visualizzare la dialog join
     // tra la tabella appena droppata e l'ultima tabella della dimensione scelta
-    if (e.target.dataset.multifact) {
-      // TODO: recupero l'ultima tabella della dimensione (quella legata al cubo)
-      const lastTable = Draw.svg.querySelector(`use.table[data-dimension-id='${+e.target.dataset.dimensionId}'][data-level-id='1']`);
-      debugger;
-      console.log(tableJoin);
-      console.log(lastTable);
-    }
     // recupero 50 record della tabella selezionata per visualizzare un anteprima
     WorkBook.activeTable = e.currentTarget.id;
     WorkBook.schema = e.currentTarget.dataset.schema;
     // TODO: potrei popolare qui il datatype delle colonne prendendo i dati dalle tabelle in
     // sessionStorage, qui vengono salvati appena viene aggiunta la tabella al canvas.
     // Attualmente questa operazione la faccio in setColumn()
+    // TODO: utilizzare anche qui la DataTable di GoogleChart ed eliminare il file con la Classe Table
     let DT = new Table(await app.getPreviewSVGTable(), 'preview-table', true);
     DT.template = 'tmpl-preview-table';
     DT.addColumns();
@@ -2425,6 +2428,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     /*
     * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
     */
+    debugger;
     Sheet.tables.forEach(alias => {
       // console.log('dataModel : ', WorkBook.dataModel);
       /* dataModel contiene un oggetto Map() con {tableAlias : [svg-data-2, svg-data-1, svg-data-0, ecc...]}
@@ -2489,6 +2493,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
           name: table.dataset.name
         }
       };
+      console.log(WorkBook.hierTables);
     });
   }
 
@@ -2671,7 +2676,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     Draw.drawTime();
 
     WorkBook.createDataModel();
-    // app.hierTables();
+    app.hierTables();
     // recupero tutti i campi della WEB_BI_TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     WorkBook.activeTable = 'svg-data-web_bi_time';
     if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
@@ -2960,7 +2965,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         const li = tmpl.querySelector('li[data-li-drag]');
         const i = li.querySelector('i');
         const span = li.querySelector('span');
-        li.id = token;
+        li.dataset.id = token;
+        i.id = token;
         li.dataset.type = 'column';
         li.dataset.elementSearch = 'fields';
         // li.dataset.label = value.field.ds.field;
