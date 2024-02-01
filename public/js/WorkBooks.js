@@ -479,12 +479,12 @@ class WorkBooks {
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       let controlPoints = { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } };
       line.id = key;
-      // line.dataset.id = value.id;
       line.dataset.startX = value.start.x;
       line.dataset.startY = value.start.y;
       line.dataset.endX = value.end.x;
       line.dataset.endY = value.end.y;
       line.dataset.from = value.from;
+      line.dataset.joinId = value.name;
       line.dataset.to = value.to;
       let d;
       if (!value.from) {

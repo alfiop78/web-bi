@@ -1893,7 +1893,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     app.dialogFilters.showModal();
   }
 
-  // selezione della tabella dalla dialogFilters
+  // selezione della colonna dalla dialogFilters
   app.handlerSelectField = (e) => {
     WorkBook.activeTable = e.currentTarget.dataset.tableId;
     console.log(WorkBook.activeTable.dataset.table);
@@ -1915,6 +1915,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     mark.dataset.tableAlias = alias;
     mark.dataset.table = table;
     mark.dataset.field = field;
+    mark.dataset.tableId = e.currentTarget.dataset.tableId;
     mark.innerText = field;
     small.innerText = table;
     txtArea.appendChild(span);
@@ -2147,7 +2148,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // in edit recupero il token da e.target.dataset.token
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
-    let object = { token, name, tables: new Set(), sql: [], from: new Map(), joins: {}, type: 'filter', formula: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
+    let object = { token, name, tables: new Set(), sid: new Set(), sql: [], from: new Map(), joins: {}, type: 'filter', formula: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
     const textarea = document.getElementById('textarea-filter');
     document.querySelectorAll('#textarea-filter *').forEach(element => {
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
@@ -2156,6 +2157,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       if (element.nodeName === 'MARK') {
         // object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
         object.tables.add(element.dataset.tableAlias);
+        object.sid.add(element.dataset.tableId);
         object.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
         object.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
         object.field = element.dataset.field;
@@ -2166,10 +2168,15 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     });
     // imposto le proprietà from e joins in base a quello che si trova in object.tables
     // object.tables contiene l'elenco delle tabelle incluse nella formula del filtro
-    object.tables.forEach(table => {
+    debugger;
+    object.sid.forEach(table => {
       /* per ogni tabella di dataModel, recupero le tabelle gerarchicamente inferiori e le aggiungo a
       * object.from solo se non sono già state aggiunte da precedenti tabelle
       */
+      // per ogni cubo
+      for (const fact of WorkBook.dataModel) {
+        console.log('fact');
+      }
       if (WorkBook.dataModel.has(table)) {
         WorkBook.dataModel.get(table).forEach(tableId => {
           if (!object.from.has(Draw.tables.get(tableId).alias)) {
@@ -2483,7 +2490,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       }
     */
     WorkBook.hierTables.clear();
-    Draw.svg.querySelectorAll('use.table, use.time').forEach(table => {
+    Draw.svg.querySelectorAll('use.table:not(.common), use.time').forEach(table => {
       WorkBook.hierTables = {
         id: table.id,
         table: {

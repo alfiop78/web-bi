@@ -371,8 +371,6 @@ class DrawSVG {
       this.coordinate.x += e.movementX;
       this.coordinate.y += e.movementY;
       // console.log(e);
-      // e.currentTarget.dataset.x = this.coordinate.x;
-      // e.currentTarget.dataset.y = this.coordinate.y;
       e.currentTarget.setAttribute('x', this.coordinate.x);
       e.currentTarget.setAttribute('y', this.coordinate.y);
       // se è presente una sola tabella nel canvas non eseguo il codice successivo, non c'è bisogno
@@ -395,6 +393,8 @@ class DrawSVG {
 
         e.currentTarget.dataset.factId = this.nearestTable.id;
         e.currentTarget.dataset.tableJoin = this.nearestTable.id;
+        this.tables.get(e.currentTarget.id).factId = this.nearestTable.id;
+        this.tables.get(e.currentTarget.id).join = this.nearestTable.id;
         // this.currentLineRef.dataset.to = nearestTable.id;
         const d = `M${+this.nearestTable.dataset.anchorXTo},${+this.nearestTable.dataset.anchorYTo} C${+this.nearestTable.dataset.anchorXTo + 40},${+this.nearestTable.dataset.anchorYTo} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
         this.currentLineRef.setAttribute('d', d);
@@ -422,14 +422,14 @@ class DrawSVG {
   // imposto come tabella attiva (currentTableRef)
   tableMouseEnter(e) {
     e.preventDefault();
-    console.log('tableMouseEnter');
+    // console.log('tableMouseEnter');
     this.currentTableRef = e.target.id;
     // console.log(this.currentTableRef);
   }
 
   tableMouseLeave(e) {
     e.preventDefault();
-    console.log('tableMouseLeave');
+    // console.log('tableMouseLeave');
     if (this.el) delete this.el;
   }
 
@@ -611,12 +611,9 @@ class DrawSVG {
     // INFO: gli eventi impostati con il dataset in questo modo possono essere legati anche a init-responsive.js
     use.dataset.enterFn = 'tableEnter';
     // use.addEventListener('click', this.tableSelected.bind(this));
-    // use.onmouseover = this.handlerOver.bind(Draw);
-    // use.onmouseleave = this.handlerLeave.bind(Draw);
     use.ondblclick = this.handlerDblClick.bind(Draw);
-    // use.dataset.leaveFn = 'tableLeave';
-    use.dataset.x = this.currentTable.x;
-    use.dataset.y = this.currentTable.y;
+    // use.dataset.x = this.currentTable.x;
+    // use.dataset.y = this.currentTable.y;
     // punto di ancoraggio di destra
     use.dataset.anchorXTo = this.currentTable.x + 190;
     use.dataset.anchorYTo = this.currentTable.y + 12;
@@ -685,8 +682,8 @@ class DrawSVG {
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;
-    use.dataset.x = this.currentTable.x;
-    use.dataset.y = this.currentTable.y;
+    // use.dataset.x = this.currentTable.x;
+    // use.dataset.y = this.currentTable.y;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
     // punto di ancoraggio di destra
@@ -735,12 +732,7 @@ class DrawSVG {
     use.dataset.fn = 'tableSelected';
     // use.addEventListener('click', this.tableSelected.bind(this), true);
     // use.dataset.enterFn = 'tableEnter';
-    // use.onmouseover = this.handlerOver.bind(Draw);
-    // use.onmouseleave = this.handlerLeave.bind(Draw);
     use.ondblclick = this.handlerDblClick.bind(Draw);
-    // use.dataset.leaveFn = 'tableLeave';
-    use.dataset.x = this.currentTable.x;
-    use.dataset.y = this.currentTable.y;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
     // punto di ancoraggio di destra
@@ -862,8 +854,8 @@ class DrawSVG {
     const tableObj = {
       id,
       key: id,
-      x: +this.table.dataset.x + 8,
-      y: +this.table.dataset.y + 26,
+      x: +this.table.getAttribute('x') + 8,
+      y: +this.table.getAttribute('y') + 26,
       table: this.table.dataset.name,
       alias: this.table.dataset.alias,
       name: this.table.dataset.name,
@@ -892,7 +884,7 @@ class DrawSVG {
     // cerco la Fact a cui è legata .shared
     const sharedFact = this.svg.querySelector('use.shared').dataset.factId;
     let nearestTable = [...this.svg.querySelectorAll(`use.table.fact:not(#${sharedFact})`)].reduce((prev, current) => {
-      return (Math.hypot(this.currentTable.x - (+current.dataset.x + 190), this.currentTable.y - (+current.dataset.y + 12)) < Math.hypot(this.currentTable.x - (+prev.dataset.x + 190), this.currentTable.y - (+prev.dataset.y + 12))) ? current : prev;
+      return (Math.hypot(this.currentTable.x - (+current.dataset.anchorXTo), this.currentTable.y - (+current.anchorYTo)) < Math.hypot(this.currentTable.x - (+prev.dataset.anchorXTo), this.currentTable.y - (+prev.dataset.anchorYTo))) ? current : prev;
     });
     lineClone.dataset.to = nearestTable.id;
     lineClone.dataset.startX = +nearestTable.dataset.anchorXTo;
@@ -903,12 +895,11 @@ class DrawSVG {
     if ('joinId' in lineClone.dataset) delete lineClone.dataset.joinId;
     this.svg.appendChild(lineClone);
     this.currentLineRef = lineClone.id;
-    // this.joinLines = this.currentTable.key;
     const lineObj = {
       key: this.currentLineRef.id,
       start: { x: +this.currentLineRef.dataset.startX, y: +this.currentLineRef.dataset.startY },
       end: { x: +this.currentLineRef.dataset.endX, y: +this.currentLineRef.dataset.endY },
-      from: null,
+      from: this.currentTable.key,
       to: this.currentLineRef.dataset.to,
       cssClass: this.currentLineRef.classList.value
     };
