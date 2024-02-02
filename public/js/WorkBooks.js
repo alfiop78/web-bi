@@ -235,6 +235,7 @@ class WorkBooks {
   #metrics = new Map();
   #join = new Map();
   #joins = new Map();
+  #factJoins = new Map();
   #dateTime;
   #tableJoins = { from: null, to: null }; // refs
   #dataModel = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
@@ -314,6 +315,29 @@ class WorkBooks {
   get join() { return this.#join; }
 
   set joins(token) {
+    // this.#joins.set(object.factId, {
+    //   [this.#join.get(object.token).alias]: this.#join.get(object.token)
+    // });
+
+    if (!this.#joins.has(this.#join.get(token).alias)) {
+      // alias tabella non presente nelle #joins, la aggiungo
+      this.#joins.set(this.#join.get(token).alias, {
+        [token]: this.#join.get(token)
+      });
+    } else {
+      // alias di tabella già presente
+      this.#joins.get(this.#join.get(token).alias)[token] = this.#join.get(token);
+    }
+    console.log('#joins : ', this.#joins);
+  }
+
+  /* set factJoins(value) {
+    this.#factJoins.set(value, this.#joins);
+    debugger;
+  }
+
+  get factJoins() { return this.#factJoins; } */
+  /* set joins(token) {
     if (!this.#joins.has(this.#join.get(token).alias)) {
       // alias tabella non presente nelle #joins, la aggiungo
       this.#joins.set(this.#join.get(token).alias, {
@@ -324,7 +348,7 @@ class WorkBooks {
       this.#joins.get(this.#join.get(token).alias)[token] = this.#join.get(token);
     }
     // console.log('#joins : ', this.#joins);
-  }
+  } */
 
   get joins() { return this.#joins; }
 

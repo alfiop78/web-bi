@@ -513,6 +513,7 @@ class DrawSVG {
     // verifico se è presente una join su questa line
     if (!this.currentLineRef.dataset.joinId) {
       // join non presente
+      debugger;
       this.addJoin();
     } else {
       // join presente, popolo i join-field
@@ -522,6 +523,7 @@ class DrawSVG {
         // key : join token
         // per ogni join devo creare i due campi .join-field e popolarli
         // con i dati presenti in WorkBook.join (che corrisponde a value in questo caso)
+        debugger;
         let joinFields = this.createJoinField();
         joinFields.from.dataset.token = key;
         joinFields.to.dataset.token = key;
@@ -556,6 +558,7 @@ class DrawSVG {
     const joinSectionTo = this.dialogJoin.querySelector('.joins section[data-table-to]');
     joinSectionFrom.dataset.tableFrom = from.table;
     joinSectionFrom.dataset.tableId = from.key;
+    // if (from.cssClass === 'common') joinSectionFrom.querySelector('.join-field').dataset.factId = from.factId;
     joinSectionFrom.querySelector('.table').innerHTML = from.table;
     joinSectionTo.dataset.tableTo = to.table;
     joinSectionTo.dataset.tableId = to.key;
@@ -943,6 +946,7 @@ class DrawSVG {
       li.dataset.label = value.column_name;
       li.dataset.elementSearch = `${source}-fields`;
       li.dataset.tableId = WorkBook.activeTable.id;
+      // if (WorkBook.activeTable.classList.contains('common')) li.dataset.factId = WorkBook.activeTable.dataset.factId;
       li.dataset.table = WorkBook.activeTable.dataset.table;
       li.dataset.alias = WorkBook.activeTable.dataset.alias;
       li.dataset.label = value.column_name;
