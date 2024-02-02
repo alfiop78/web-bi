@@ -602,13 +602,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     app.addField(e.currentTarget, elementRef.id);
   }
 
-  app.rowDragEnd = (e) => {
-    e.preventDefault();
-    if (e.dataTransfer.dropEffect === 'copy') {
-
-    }
-  }
-
   // Modifica di una metrica composta di base
   app.editCustomMetric = (e) => {
     const metric = WorkBook.metrics.get(e.currentTarget.dataset.token);
@@ -995,27 +988,27 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   app.txtAreaDsColumn.addEventListener('dragleave', app.columnDragLeave, false);
   app.txtAreaIdColumn.addEventListener('drop', app.setColumnDrop, false);
   app.txtAreaDsColumn.addEventListener('drop', app.setColumnDrop, false);
-  app.txtAreaIdColumn.addEventListener('drop', app.columnDragEnd, false);
-  app.txtAreaDsColumn.addEventListener('drop', app.columnDragEnd, false);
+  app.txtAreaIdColumn.addEventListener('dragend', app.columnDragEnd, false);
+  app.txtAreaDsColumn.addEventListener('dragend', app.columnDragEnd, false);
 
   app.columnsDropzone.addEventListener('dragenter', app.columnDragEnter, false);
   app.columnsDropzone.addEventListener('dragover', app.columnDragOver, false);
   app.columnsDropzone.addEventListener('dragleave', app.columnDragLeave, false);
   app.columnsDropzone.addEventListener('drop', app.columnDrop, false);
-  app.columnsDropzone.addEventListener('drop', app.columnDragEnd, false);
+  app.columnsDropzone.addEventListener('dragend', app.columnDragEnd, false);
   // dropzone sheet rows
   app.rowsDropzone.addEventListener('dragenter', app.rowDragEnter, false);
   app.rowsDropzone.addEventListener('dragover', app.rowDragOver, false);
   app.rowsDropzone.addEventListener('dragleave', app.rowDragLeave, false);
   app.rowsDropzone.addEventListener('drop', app.rowDrop, false);
-  app.rowsDropzone.addEventListener('drop', app.rowDragEnd, false);
+  app.rowsDropzone.addEventListener('dragend', app.rowDragEnd, false);
 
   // dropzone #side-sheet-filters
   app.filtersDropzone.addEventListener('dragenter', app.filterDragEnter, false);
   app.filtersDropzone.addEventListener('dragover', app.filterDragOver, false);
   app.filtersDropzone.addEventListener('dragleave', app.filterDragLeave, false);
   app.filtersDropzone.addEventListener('drop', app.filterDrop, false);
-  app.filtersDropzone.addEventListener('drop', app.filterDragEnd, false);
+  app.filtersDropzone.addEventListener('dragend', app.filterDragEnd, false);
 
   /* NOTE: END DRAG&DROP EVENTS */
 
