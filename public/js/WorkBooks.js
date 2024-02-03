@@ -2,10 +2,11 @@
 class Sheets {
   #fields = new Map();
   #tables = new Set(); // tutte le tabelle usate nel report. In base a questo Set() posso creare la from e la where
-  #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
+  #sidTables = new Set(); // id delle tabelle del canvas (svg-data-xxxxx)
+  // #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #filters = new Set();
   #metrics = new Map();
-  #joins = new Map();
+  // #joins = new Map();
   #id;
   constructor(name, token, WorkBookToken) {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
@@ -16,6 +17,9 @@ class Sheets {
     // mappo gli elmenti rimossi dal report in fase di edit. Questo mi consentirà
     // di stabilire se aggiornare "updated_at" del report oppure no
     this.objectRemoved = new Map();
+    this.fact = new Set(); // le fact utilizzate nel report
+    this.from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
+    this.joins = new Map();
   }
 
   // TODO: molti di questi setter/getter posso crearli come magicMethod
@@ -31,6 +35,12 @@ class Sheets {
   }
 
   get tables() { return this.#tables; }
+
+  set sidTables(value) {
+    this.#sidTables.add(value);
+  }
+
+  get sidTables() { return this.#sidTables; }
 
   // passaggio del token e recupero del field in WorkSheet tramite l'oggetto WorkBook passato al Costruttore
   set fields(object) {
@@ -55,29 +65,37 @@ class Sheets {
 
   get metrics() { return this.#metrics; }
 
-  set from(object) {
-    this.#from.set(object.alias, { schema: object.schema, table: object.table });
-    // console.info('this.#from : ', this.#from);
-  }
+  // set from(object) {
+  //   this.#from.set(object.factId, object.from);
+  //   // this.#from.set(object.alias, { schema: object.schema, table: object.table });
+  //   // console.info('this.#from : ', this.#from);
+  // }
 
-  get from() { return this.#from; }
+  // get from() { return this.#from; }
 
-  // recupero la join dalla Proprietà join della classe WorkBook (quindi da this.workBook passato al Costruttore)
-  set joins(objects) {
-    // objects può contenere più join, quindi deve essere ciclato
-    for (const [token, join] of Object.entries(objects)) {
-      /* TODO: valutare se passare tutto l'oggetto oppure solo la proprieta SQL.
-        - Passando tutto l'oggetto posso avere più controllo su cosa costruire nella query.
-        - Passando solo l'array SQL, in php, posso utilizzare solo implode('=', join)
-        Al momento passo tutto l'oggetto
-      */
-      this.#joins.set(token, join);
-      // this.#joins.set(token, join.SQL);
-    }
-    // console.info('this.#joins : ', this.#joins);
-  }
+  // set joins(object) {
+  //   this.#joins.set(object.factId, object.joins);
+  // }
 
-  get joins() { return this.#joins; }
+  // get joins() { return this.#joins; }
+
+  // recupero la join dalla Proprietà join della classe WorkBook
+  // viene invocata da setSheet
+  // set joins(objects) {
+  //   // objects può contenere più join, quindi deve essere ciclato
+  //   for (const [token, join] of Object.entries(objects)) {
+  //     /* TODO: valutare se passare tutto l'oggetto oppure solo la proprieta SQL.
+  //       - Passando tutto l'oggetto posso avere più controllo su cosa costruire nella query.
+  //       - Passando solo l'array SQL, in php, posso utilizzare solo implode('=', join)
+  //       Al momento passo tutto l'oggetto
+  //     */
+  //     this.#joins.set(token, join);
+  //     // this.#joins.set(token, join.SQL);
+  //   }
+  //   // console.info('this.#joins : ', this.#joins);
+  // }
+
+  // get joins() { return this.#joins; }
 
   removeObject(field, token, object = token) {
     // il Set() filters contiene, come object, il token, quindi imposto un valore di

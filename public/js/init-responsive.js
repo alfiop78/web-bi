@@ -342,6 +342,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       // fieldName.dataset.field = metric.field;
     }
     target.appendChild(field);
+    // imposto le fact da utilizzare nel report in base alle metriche da calcolare
+    Sheet.fact.add(metric.factId);
   }
 
   app.columnDrop = (e) => {
@@ -362,11 +364,11 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       case 'basic':
       case 'advanced':
         // aggiungo a Sheet.metrics solo gli elementi che possono essere modificati, le proprieta di sola lettura le prenderò sempre da WorkBook.metrics
-        Sheet.metrics = { token: metric.token, alias: metric.alias, type: metric.metric_type, aggregateFn: metric.aggregateFn, dependencies: false };
+        Sheet.metrics = { token: metric.token, factId: metric.factId, alias: metric.alias, type: metric.metric_type, aggregateFn: metric.aggregateFn, dependencies: false };
         app.addMetric(e.currentTarget, elementRef.id);
         break;
       case 'composite':
-        Sheet.metrics = { token: metric.token, alias: metric.alias, type: metric.metric_type, metrics: metric.metrics, dependencies: false };
+        Sheet.metrics = { token: metric.token, factId: metric.factId, alias: metric.alias, type: metric.metric_type, metrics: metric.metrics, dependencies: false };
         app.addMetric(e.currentTarget, elementRef.id);
         // dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
         // ...al suo interno per consentirne l'elaborazione
@@ -379,7 +381,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             //... per specificare che è stata aggiunta indirettamente, essa si trova in una metrica composta
             // NOTE: clonazione di un object con syntax ES6.
             const nestedMetric = { ...WorkBook.metrics.get(token) };
-            Sheet.metrics = { token: nestedMetric.token, alias: nestedMetric.alias, type: nestedMetric.metric_type, aggregateFn: nestedMetric.aggregateFn, dependencies: true };
+            Sheet.metrics = { token: nestedMetric.token, factId: nestedMetric.factId, alias: nestedMetric.alias, type: nestedMetric.metric_type, aggregateFn: nestedMetric.aggregateFn, dependencies: true };
             // nestedMetric.dependencies = true;
             // Sheet.metrics = nestedMetric;
           }
@@ -581,10 +583,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // aggiungo a Sheet.fields solo le proprietà utili alla creazione della query
     // TODO: da aggiungere in fase di creazione del process
     Sheet.tables = WorkBook.field.get(token).tableAlias;
+    Sheet.sidTables = WorkBook.field.get(token).tableId;
     target.appendChild(field);
     // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
     // i.addEventListener('click', app.handlerSetMetric);
-    // app.setSheet();
   }
 
   app.rowDrop = (e) => {
@@ -691,12 +693,14 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const field = `${tableAlias}.${e.target.dataset.field}`;
     const alias = e.target.dataset.field;
     const token = rand().substring(0, 7);
+    const factId = WorkBook.activeTable.dataset.factId;
 
     // metric Map Object
     WorkBook.metrics = {
       token,
       alias,
       field: e.target.dataset.field,
+      factId,
       aggregateFn: 'SUM', // default
       SQL: field,
       distinct: false, // default
@@ -988,27 +992,27 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   app.txtAreaDsColumn.addEventListener('dragleave', app.columnDragLeave, false);
   app.txtAreaIdColumn.addEventListener('drop', app.setColumnDrop, false);
   app.txtAreaDsColumn.addEventListener('drop', app.setColumnDrop, false);
-  app.txtAreaIdColumn.addEventListener('dragend', app.columnDragEnd, false);
-  app.txtAreaDsColumn.addEventListener('dragend', app.columnDragEnd, false);
+  // app.txtAreaIdColumn.addEventListener('dragend', app.columnDragEnd, false);
+  // app.txtAreaDsColumn.addEventListener('dragend', app.columnDragEnd, false);
 
   app.columnsDropzone.addEventListener('dragenter', app.columnDragEnter, false);
   app.columnsDropzone.addEventListener('dragover', app.columnDragOver, false);
   app.columnsDropzone.addEventListener('dragleave', app.columnDragLeave, false);
   app.columnsDropzone.addEventListener('drop', app.columnDrop, false);
-  app.columnsDropzone.addEventListener('dragend', app.columnDragEnd, false);
+  // app.columnsDropzone.addEventListener('dragend', app.columnDragEnd, false);
   // dropzone sheet rows
   app.rowsDropzone.addEventListener('dragenter', app.rowDragEnter, false);
   app.rowsDropzone.addEventListener('dragover', app.rowDragOver, false);
   app.rowsDropzone.addEventListener('dragleave', app.rowDragLeave, false);
   app.rowsDropzone.addEventListener('drop', app.rowDrop, false);
-  app.rowsDropzone.addEventListener('dragend', app.rowDragEnd, false);
+  // app.rowsDropzone.addEventListener('dragend', app.rowDragEnd, false);
 
   // dropzone #side-sheet-filters
   app.filtersDropzone.addEventListener('dragenter', app.filterDragEnter, false);
   app.filtersDropzone.addEventListener('dragover', app.filterDragOver, false);
   app.filtersDropzone.addEventListener('dragleave', app.filterDragLeave, false);
   app.filtersDropzone.addEventListener('drop', app.filterDrop, false);
-  app.filtersDropzone.addEventListener('dragend', app.filterDragEnd, false);
+  // app.filtersDropzone.addEventListener('dragend', app.filterDragEnd, false);
 
   /* NOTE: END DRAG&DROP EVENTS */
 
@@ -1642,6 +1646,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     app.setSheet();
     process.from = Object.fromEntries(Sheet.from);
     process.joins = Object.fromEntries(Sheet.joins);
+    debugger;
     process.filters = Object.fromEntries(filters);
     if (metrics.size !== 0) process.metrics = Object.fromEntries(metrics);
     if (advancedMetrics.size !== 0) process.advancedMeasures = Object.fromEntries(advancedMetrics);
@@ -1650,10 +1655,26 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
   }
 
   app.generateSQL = async (process) => {
+    Sheet.userId = userId;
     // lo Sheet.id può essere già presente quando è stato aperto
-    if (!Sheet.sheet.id) Sheet.sheet.id = Date.now();
+    if (Sheet.edit === true) {
+      /* Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed]');
+      if (Sheet.changes.length !== 0) {
+        Sheet.update();
+        // elimino il datamart perchè è stato modificato
+        let exist = await Sheet.exist();
+        if (exist) {
+          let result = await Sheet.delete();
+          console.log('datamart eliminato : ', result);
+          if (result && Resource.tableRef) Resource.tableRef.clearChart();
+        }
+      } */
+    } else {
+      Sheet.create();
+    }
     process.id = Sheet.sheet.id;
-    // console.log(process);
+    console.log(process);
+    debugger;
     // app.saveSheet();
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(process);
@@ -2222,6 +2243,9 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // converto da Map() in object altrimenti non può essere salvato in localStorage e DB
     object.from = Object.fromEntries(object.from);
     object.tables = [...object.tables];
+    debugger;
+    // TODO: 2024.02.03 filtro da ricreare
+    object.sid = [...object.sid];
     // la prop 'created_at' va aggiunta solo in fase di nuovo filtro e non quando si aggiorna il filtro
     if (e.target.dataset.token) {
       // aggiornamento del filtro
@@ -2457,31 +2481,66 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     /*
     * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
     */
-    debugger;
-    Sheet.tables.forEach(alias => {
-      // console.log('dataModel : ', WorkBook.dataModel);
-      /* dataModel contiene un oggetto Map() con {tableAlias : [svg-data-2, svg-data-1, svg-data-0, ecc...]}
-      * e un'array di tabelle presenti nella gerarchia create nel canvas
-      */
-      if (WorkBook.dataModel.has(alias)) {
-        WorkBook.dataModel.get(alias).forEach(tableId => {
-          /* nel tableId sono presenti le tabelle gerarchicamente inferiori a 'alias',
-          * quindi tabelle da aggiungere alla 'from' e alla 'where'
-          */
-          Sheet.from = Draw.tables.get(tableId);
-          /*
-          * nel metodo joins() verifico se la tabella in ciclo ha una join
-          * (per il momento la Fact non ha altre Join però potrei utilizzare
-          * la funzionalitò di "entrare" nel livello fisico di una tabella per aggiungerci altre join)
-          * ad es. : potrei aggiungere, al DocVenditaDettaglio (fact), la tabella dei TipiMovimento,
-          * e quindi, in questo caso, avrei una join anche sulla Fact (e quindi nella proprietà WorkBook.joins)
-          */
-          // se ci sono joins per questa tableAlias la aggiungo allo Sheet
-          if (WorkBook.joins.has(Draw.tables.get(tableId).alias)) Sheet.joins = WorkBook.joins.get(Draw.tables.get(tableId).alias);
-        });
-      }
+    Sheet.fact.forEach(factId => {
+      let factTable = Draw.tables.get(factId).alias;
+      let from = new Map(), joins = new Map();
+      Sheet.sidTables.forEach(svg_id => {
+        const tables = WorkBook.dataModel.get(factId);
+        if (tables.hasOwnProperty(svg_id)) {
+          tables[svg_id].forEach(tableId => {
+            const data = Draw.tables.get(tableId);
+            from.set(data.alias, { schema: data.schema, table: data.table });
+            // if (WorkBook.joins.has(data.alias)) joins.set(data.alias, WorkBook.joins.get(data.alias));
+            if (WorkBook.joins.has(data.alias)) {
+              debugger;
+              for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
+                if (data.cssClass !== 'tables') {
+                  if (join.to.alias === factTable) joins.set(token, join);
+                } else {
+                  joins.set(token, join);
+                }
+              }
+            }
+          });
+        }
+      });
+      // TODO: potrei utilizzarle qui con set() senza creare setters nella classe
+      Sheet.from.set(factId, Object.fromEntries(from));
+      Sheet.joins.set(factId, Object.fromEntries(joins));
+      // Sheet.from = { factId, from };
+      // Sheet.joins = { factId, joins };
     });
   }
+
+  // app.setSheet = () => {
+  //   /*
+  //   * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
+  //   */
+  //   debugger;
+  //   Sheet.tables.forEach(alias => {
+  //     // console.log('dataModel : ', WorkBook.dataModel);
+  //     /* dataModel contiene un oggetto Map() con {tableAlias : [svg-data-2, svg-data-1, svg-data-0, ecc...]}
+  //     * e un'array di tabelle presenti nella gerarchia create nel canvas
+  //     */
+  //     if (WorkBook.dataModel.has(alias)) {
+  //       WorkBook.dataModel.get(alias).forEach(tableId => {
+  //         /* nel tableId sono presenti le tabelle gerarchicamente inferiori a 'alias',
+  //         * quindi tabelle da aggiungere alla 'from' e alla 'where'
+  //         */
+  //         Sheet.from = Draw.tables.get(tableId);
+  //         /*
+  //         * nel metodo joins() verifico se la tabella in ciclo ha una join
+  //         * (per il momento la Fact non ha altre Join però potrei utilizzare
+  //         * la funzionalitò di "entrare" nel livello fisico di una tabella per aggiungerci altre join)
+  //         * ad es. : potrei aggiungere, al DocVenditaDettaglio (fact), la tabella dei TipiMovimento,
+  //         * e quindi, in questo caso, avrei una join anche sulla Fact (e quindi nella proprietà WorkBook.joins)
+  //         */
+  //         // se ci sono joins per questa tableAlias la aggiungo allo Sheet
+  //         if (WorkBook.joins.has(Draw.tables.get(tableId).alias)) Sheet.joins = WorkBook.joins.get(Draw.tables.get(tableId).alias);
+  //       });
+  //     }
+  //   });
+  // }
 
   app.showTablePreview = async (e) => {
     const table = e.currentTarget.dataset.label;
@@ -2847,9 +2906,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     const token = (e.currentTarget.dataset.token) ? e.currentTarget.dataset.token : rand().substring(0, 7);
     // imposto le colonne _id e _ds in WorkBook.columns
     let fields = { id: { sql: [], formula: [], datatype: null }, ds: { sql: [], formula: [], datatype: null } };
-    // let fieldId = { sql: [], formula: [], datatype: null }
-    // let fieldDs = { sql: [], formula: [], datatype: null }
-    // colonna _id
+    // colonna _id e _ds
     ['id', 'ds'].forEach(key => {
       document.querySelectorAll(`#textarea-column-${key} *`).forEach(element => {
         if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
@@ -2879,12 +2936,14 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         type: 'column',
         schema: WorkBook.schema,
         tableAlias: WorkBook.activeTable.dataset.alias,
+        tableId: WorkBook.activeTable.id,
         table: WorkBook.activeTable.dataset.table,
         name: fieldName,
         origin_field: WorkBook.currentField,
         field: fields
       }
     };
+    debugger; // 03.02.2024 impostata la prop tableId
     // WorkBook.field contiene l'elenco dei field aggiunti al WorkBook
     // mentre WorkBook.fields contiene lo stesso elenco dei campi però
     // all'interno delle rispettive tabelle
