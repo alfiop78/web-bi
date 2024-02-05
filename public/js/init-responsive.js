@@ -599,7 +599,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // elementRef : è l'elemento nella lista di sinistra che ho draggato
     // TODO: rinominare elementRef.id in elementRef.dataset.token
     // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
-    debugger;
     Sheet.fields = { token: elementRef.id, name: WorkBook.field.get(elementRef.id).name };
     app.addField(e.currentTarget, elementRef.id);
   }
@@ -1602,6 +1601,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             aggregateFn: metric.aggregateFn,
             field: WorkBook.metrics.get(token).field,
             SQL: WorkBook.metrics.get(token).SQL,
+            factId: WorkBook.metrics.facid,
             distinct: WorkBook.metrics.get(token).distinct,
             filters: {}
           });
@@ -1624,6 +1624,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             aggregateFn: metric.aggregateFn,
             field: WorkBook.metrics.get(token).field,
             SQL: WorkBook.metrics.get(token).SQL,
+            factId: WorkBook.metrics.facid,
             distinct: WorkBook.metrics.get(token).distinct
           });
           break;
@@ -1644,8 +1645,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
     process.fields = Object.fromEntries(fields);
     app.setSheet();
-    process.from = Object.fromEntries(Sheet.from);
-    process.joins = Object.fromEntries(Sheet.joins);
+    process.facts = [...Sheet.fact];
+    debugger;
+    process.from = Sheet.from;
+    process.joins = Sheet.joins;
     debugger;
     process.filters = Object.fromEntries(filters);
     if (metrics.size !== 0) process.metrics = Object.fromEntries(metrics);
@@ -2492,7 +2495,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             from.set(data.alias, { schema: data.schema, table: data.table });
             // if (WorkBook.joins.has(data.alias)) joins.set(data.alias, WorkBook.joins.get(data.alias));
             if (WorkBook.joins.has(data.alias)) {
-              debugger;
               for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
                 if (data.cssClass !== 'tables') {
                   if (join.to.alias === factTable) joins.set(token, join);
@@ -2505,8 +2507,10 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         }
       });
       // TODO: potrei utilizzarle qui con set() senza creare setters nella classe
-      Sheet.from.set(factId, Object.fromEntries(from));
-      Sheet.joins.set(factId, Object.fromEntries(joins));
+      // Sheet.from.set(factId, Object.fromEntries(from));
+      Sheet.from[factId] = Object.fromEntries(from);
+      Sheet.joins[factId] = Object.fromEntries(joins);
+      // Sheet.joins.set(factId, Object.fromEntries(joins));
       // Sheet.from = { factId, from };
       // Sheet.joins = { factId, joins };
     });

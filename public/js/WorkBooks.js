@@ -18,8 +18,8 @@ class Sheets {
     // di stabilire se aggiornare "updated_at" del report oppure no
     this.objectRemoved = new Map();
     this.fact = new Set(); // le fact utilizzate nel report
-    this.from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
-    this.joins = new Map();
+    this.from = {}, this.joins = {}; // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
+    // this.joins = new Map();
   }
 
   // TODO: molti di questi setter/getter posso crearli come magicMethod
@@ -107,8 +107,10 @@ class Sheets {
 
   save() {
     this.sheet.fields = Object.fromEntries(this.fields);
-    this.sheet.from = Object.fromEntries(this.from);
-    this.sheet.joins = Object.fromEntries(this.joins);
+    this.sheet.from = this.from;
+    this.sheet.joins = this.joins;
+    // this.sheet.from = Object.fromEntries(this.from);
+    // this.sheet.joins = Object.fromEntries(this.joins);
     this.sheet.workbook_ref = this.sheet.workbook_ref;
     /* WARN : verifica dei filtri del report.
       * Se non sono presenti ma sono presenti in metriche filtrate elaboro comunque il report
@@ -178,13 +180,15 @@ class Sheets {
     }
 
     // from
-    for (const [tableAlias, object] of Object.entries(SheetStorage.sheet.from)) {
+    debugger;
+    this.from = SheetStorage.sheet.from;
+    /* for (const [tableAlias, object] of Object.entries(SheetStorage.sheet.from)) {
       this.from = {
         alias: tableAlias,
         schema: object.schema,
         table: object.table
       }
-    }
+    } */
 
     // filters
     for (const [token, filter] of Object.entries(SheetStorage.sheet.filters)) {

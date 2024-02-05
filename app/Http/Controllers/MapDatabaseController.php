@@ -424,8 +424,11 @@ class MapDatabaseController extends Controller
     $q = new Cube();
     // imposto le proprietà con i magic methods
     $q->reportId = $cube->{'id'};
-    $q->baseTableName = "WEB_BI_TMP_BASE_$q->reportId";
-    $q->datamartName = "WEB_BI_$q->reportId";
+    $q->datamartId = $cube->{'datamartId'};
+    $q->baseTableName = "WEB_BI_TMP_BASE_{$q->reportId}_{$q->datamartId}";
+    // $q->baseTableName = "WEB_BI_TMP_BASE_$q->reportId";
+    $q->datamartName = "WEB_BI_{$q->reportId}_{$q->datamartId}";
+    // $q->datamartName = "WEB_BI_$q->reportId";
     $q->baseColumns = $cube->{'fields'};
     $q->json__info = (object)[
       "SELECT" => (object)[],
