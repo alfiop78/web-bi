@@ -245,6 +245,7 @@ class MapDatabaseController extends Controller
     $q = new Cube();
     // imposto le proprietà con i magic methods
     $q->reportId = $cube->{'id'};
+    $q->facts = $cube->{'facts'}; // array
     $q->datamartId = $cube->{'datamartId'};
     $q->baseTableName = "WEB_BI_TMP_BASE_{$q->reportId}_{$q->datamartId}";
     $q->datamartName = "WEB_BI_{$q->reportId}_{$q->datamartId}";
@@ -252,7 +253,16 @@ class MapDatabaseController extends Controller
     // imposto le colonne da includere nel datamart finale
     $q->fields();
     // TODO: l'argomento passato a SELECT è già incluso in $q->baseColumns
-    $q->select($cube->{'fields'});
+    $q->select();
+    foreach ($q->facts as $factId) {
+      if (property_exists($cube, 'metrics')) {
+        // TODO: da rinominare in 'baseMetrics'
+        $q->baseMeasures = $cube->{'metrics'};
+        $q->metrics();
+      }
+      $q->from($cube->{'from'}->{$factId});
+    }
+    exit;
     if (property_exists($cube, 'compositeMeasures')) $q->compositeMetrics = $cube->{'compositeMeasures'};
     if (property_exists($cube, 'metrics')) {
       // TODO: da rinominare in 'baseMetrics'

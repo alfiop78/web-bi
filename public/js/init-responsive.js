@@ -1623,8 +1623,8 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             alias: metric.alias,
             aggregateFn: metric.aggregateFn,
             field: WorkBook.metrics.get(token).field,
+            factId: WorkBook.metrics.get(token).factId,
             SQL: WorkBook.metrics.get(token).SQL,
-            factId: WorkBook.metrics.facid,
             distinct: WorkBook.metrics.get(token).distinct
           });
           break;

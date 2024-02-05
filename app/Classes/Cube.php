@@ -109,12 +109,13 @@ class Cube
   {
     // dd($from);
     foreach ($from as $alias => $prop) {
+      // dd($alias, $prop);
       $this->FROM_baseTable[$alias] = "{$prop->schema}.{$prop->table} AS {$alias}";
       if (property_exists($this, 'json__info')) {
         $this->json__info->{'FROM'}->{$alias} = "{$prop->schema}.{$prop->table} AS {$alias}";
       }
     }
-    // dd($this->json__info);
+    dd($this->FROM_baseTable);
   }
 
   // Qui viene utilizzata la stessa logica del metodo select()
@@ -298,7 +299,7 @@ class Cube
     // metriche di base
     $metrics_base = array();
     $metrics_base_datamart = array();
-    // dd($this->baseMeasures);
+    dd($this->baseMeasures);
     foreach ($this->baseMeasures as $value) {
       // dd($value);
       // $metrics_base[] = "\nNVL({$value->formula->aggregateFn}({$value->workBook->tableAlias}.{$value->formula->field}), 0) AS '{$value->formula->alias}'";
