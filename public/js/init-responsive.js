@@ -1646,7 +1646,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     process.fields = Object.fromEntries(fields);
     app.setSheet();
     process.facts = [...Sheet.fact];
-    debugger;
     process.from = Sheet.from;
     process.joins = Sheet.joins;
     debugger;
@@ -1676,6 +1675,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       Sheet.create();
     }
     process.id = Sheet.sheet.id;
+    process.datamartId = Sheet.userId;
     console.log(process);
     debugger;
     // app.saveSheet();
@@ -1704,7 +1704,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         App.closeConsole();
       })
       .catch(err => {
-        App.showConsole(err, 'error');
+        App.showConsole(err, 'error', 3000);
         console.error(err);
       });
   }

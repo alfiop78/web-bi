@@ -63,14 +63,14 @@ class Cube
     CodSedeDealer_765.Descrizione AS sede_id,
     CodSedeDealer_765.Descrizione AS sede_ds
   */
-  public function select($columns)
+  public function select()
   {
     $fieldList = array();
     $this->_select = "SELECT\n";
     $name_key = NULL;
-    // dd($columns);
+    // dd($this->baseColumns);
     // per ogni tabella
-    foreach ($columns as $column) {
+    foreach ($this->baseColumns as $column) {
       // ... per ogni colonna
       // dd($column);
       // dd($token);
@@ -87,8 +87,7 @@ class Cube
       }
     }
     // dd($fieldList);
-    // dd($test);
-    $this->_select .= implode(",\n ", $fieldList);
+    $this->_select .= implode(",\n", $fieldList);
     // dd($this->json__info);
     // dd($this->_select);
     // var_dump($this->_columns);
