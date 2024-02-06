@@ -4,7 +4,7 @@ var SheetStorage = new SheetStorages();
 var WorkBookStorage = new Storages();
 var Dashboard = new Dashboards();
 var Resource;
-var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
+var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 (() => {
   var app = {
     // templates
@@ -1567,7 +1567,94 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
 
   // tasto Elabora e SQL
   app.createProcess = async (e) => {
-    let process = { from: {}, joins: {} };
+    Process = new Processes(Sheet);
+    console.log(Process);
+    let advancedMetrics = {}, compositeMetrics = {};
+    // Creo la struttura necessaria per creare la query
+    for (const [token, field] of Sheet.fields) {
+      // verifico le tabelle da includere in tables Sheet.tables
+      Sheet.tables = WorkBook.field.get(token).tableAlias;
+      // WARN: qui dovrei aggiungere anche Sheet.sidTables
+      Process.fields = {
+        token,
+        field: WorkBook.field.get(token).field,
+        // TODO: potrei passare i campi _id e _ds anche in questo modo, valutare se
+        // è più semplice gestirli in cube.php
+        // id: WorkBook.field.get(token).field.id,
+        // ds: WorkBook.field.get(token).field.ds,
+        tableAlias: WorkBook.field.get(token).tableAlias,
+        name: field
+      };
+    }
+    // INFO: definisco le metriche da elaborare
+
+    for (const [token, metric] of Sheet.metrics) {
+      switch (metric.type) {
+        case 'composite':
+          compositeMetrics.set(token, {
+            alias: metric.alias,
+            SQL: WorkBook.metrics.get(token).sql,
+            metrics: WorkBook.metrics.get(token).metrics
+          });
+          break;
+        case 'advanced':
+          advancedMetrics.set(token, {
+            alias: metric.alias,
+            aggregateFn: metric.aggregateFn,
+            field: WorkBook.metrics.get(token).field,
+            SQL: WorkBook.metrics.get(token).SQL,
+            factId: WorkBook.metrics.factId,
+            distinct: WorkBook.metrics.get(token).distinct,
+            filters: {}
+          });
+          // aggiungo i filtri definiti all'interno della metrica avanzata
+          WorkBook.metrics.get(token).filters.forEach(filterToken => {
+            // se, nei filtri della metrica, sono presenti filtri di funzioni temporali,
+            // ...la definizione del filtro và recuperata da WorkBook.metrics.timingFn
+            if (['last-year', 'last-month', 'ecc...'].includes(filterToken)) {
+              advancedMetrics.get(token).filters[filterToken] = WorkBook.metrics.get(token).timingFn[filterToken];
+            } else {
+              advancedMetrics.get(token).filters[filterToken] = WorkBook.filters.get(filterToken);
+            }
+          });
+          // debugger;
+          break;
+        default:
+          // basic
+          const wbMetrics = WorkBook.metrics.get(token);
+          Process.baseMeasures({
+            token,
+            alias: metric.alias,
+            aggregateFn: metric.aggregateFn,
+            field: wbMetrics.field,
+            factId: wbMetrics.factId,
+            SQL: wbMetrics.SQL,
+            distinct: wbMetrics.distinct
+          });
+          break;
+      }
+    }
+    Process.from();
+    Process.joins();
+    debugger;
+
+    // INFO: filtri
+    Sheet.filters.forEach(token => {
+      WorkBook.filters.get(token).tables.forEach(table => Sheet.tables = table);
+      debugger;
+      Process.filters = WorkBook.filters.get(token);
+    });
+    // se non ci sono filtri nel Report bisogna far comparire un avviso
+    // perchè l'elaborazione potrebbe essere troppo onerosa
+    if (Sheet.filters.size === 0) {
+      App.showConsole('Non sono presenti filtri nel report', 'error', 5000);
+      return false;
+    }
+
+    // app.setSheet();
+
+    //
+    /* let process = { from: {}, joins: {} };
     let fields = new Map();
     let metrics = new Map(), advancedMetrics = new Map(), compositeMetrics = new Map();
     let filters = new Map();
@@ -1601,7 +1688,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
             aggregateFn: metric.aggregateFn,
             field: WorkBook.metrics.get(token).field,
             SQL: WorkBook.metrics.get(token).SQL,
-            factId: WorkBook.metrics.facid,
+            factId: WorkBook.metrics.factId,
             distinct: WorkBook.metrics.get(token).distinct,
             filters: {}
           });
@@ -1648,12 +1735,17 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     process.facts = [...Sheet.fact];
     process.from = Sheet.from;
     process.joins = Sheet.joins;
-    debugger;
-    process.filters = Object.fromEntries(filters);
-    if (metrics.size !== 0) process.metrics = Object.fromEntries(metrics);
+    process.measures = Sheet.measures;
+    app.setSheet();
+    Process.from = Sheet.from;
+    Process.joins = Sheet.joins; */
+    // process.filters = Object.fromEntries(filters);
+    /* if (metrics.size !== 0) process.metrics = Object.fromEntries(metrics);
     if (advancedMetrics.size !== 0) process.advancedMeasures = Object.fromEntries(advancedMetrics);
-    if (compositeMetrics.size !== 0) process.compositeMeasures = Object.fromEntries(compositeMetrics);
-    (e.target.id === 'btn-sheet-preview') ? app.process(process) : app.generateSQL(process);
+    if (compositeMetrics.size !== 0) process.compositeMeasures = Object.fromEntries(compositeMetrics); */
+    // TODO: utilizzare un unica funzione, se viene passato 'json__info' deve essere
+    // elaborato il generateSQL() altrimenti il process()
+    (e.target.id === 'btn-sheet-preview') ? app.process() : app.generateSQL();
   }
 
   app.generateSQL = async (process) => {
@@ -1759,7 +1851,7 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
       });
   }
 
-  app.process = async (process) => {
+  app.process = async () => {
     Sheet.userId = userId;
     debugger;
     if (Sheet.edit === true) {
@@ -1780,13 +1872,13 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     Resource.json.token = Sheet.sheet.token;
     Resource.setSpecifications();
 
-    process.id = Sheet.sheet.id;
-    process.datamartId = Sheet.userId;
-    debugger;
+    Process.id = Sheet.sheet.id;
+    Process.datamartId = Sheet.userId;
     // console.log(process);
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
-    const params = JSON.stringify(process);
-    // console.log(params);
+    const params = JSON.stringify(Process.process);
+    console.log(params);
+    debugger;
     // App.showConsole('Elaborazione in corso...', 'info');
     // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
     App.loaderStart();
@@ -2486,20 +2578,23 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     */
     Sheet.fact.forEach(factId => {
       let factTable = Draw.tables.get(factId).alias;
-      let from = new Map(), joins = new Map();
+      // let from = new Map(), joins = new Map(), metrics = {};
+      let from = {}, joins = {}, metrics = {};
       Sheet.sidTables.forEach(svg_id => {
         const tables = WorkBook.dataModel.get(factId);
         if (tables.hasOwnProperty(svg_id)) {
           tables[svg_id].forEach(tableId => {
             const data = Draw.tables.get(tableId);
-            from.set(data.alias, { schema: data.schema, table: data.table });
+            // from.set(data.alias, { schema: data.schema, table: data.table });
+            from[data.alias] = { schema: data.schema, table: data.table };
             // if (WorkBook.joins.has(data.alias)) joins.set(data.alias, WorkBook.joins.get(data.alias));
             if (WorkBook.joins.has(data.alias)) {
               for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
                 if (data.cssClass !== 'tables') {
-                  if (join.to.alias === factTable) joins.set(token, join);
+                  if (join.to.alias === factTable) joins[token] = join;
                 } else {
-                  joins.set(token, join);
+                  // joins.set(token, join);
+                  joins[token] = join;
                 }
               }
             }
@@ -2507,44 +2602,16 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
         }
       });
       // TODO: potrei utilizzarle qui con set() senza creare setters nella classe
-      // Sheet.from.set(factId, Object.fromEntries(from));
-      Sheet.from[factId] = Object.fromEntries(from);
-      Sheet.joins[factId] = Object.fromEntries(joins);
-      // Sheet.joins.set(factId, Object.fromEntries(joins));
-      // Sheet.from = { factId, from };
-      // Sheet.joins = { factId, joins };
+      Sheet.from[factId] = from;
+      // Sheet.from[factId] = Object.fromEntries(from);
+      // Sheet.joins[factId] = Object.fromEntries(joins);
+      Sheet.joins[factId] = joins;
+      for (const [token, metric] of Sheet.metrics) {
+        if (metric.factId === factId) metrics[token] = metric;
+      }
+      Sheet.measures[factId] = metrics;
     });
   }
-
-  // app.setSheet = () => {
-  //   /*
-  //   * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
-  //   */
-  //   debugger;
-  //   Sheet.tables.forEach(alias => {
-  //     // console.log('dataModel : ', WorkBook.dataModel);
-  //     /* dataModel contiene un oggetto Map() con {tableAlias : [svg-data-2, svg-data-1, svg-data-0, ecc...]}
-  //     * e un'array di tabelle presenti nella gerarchia create nel canvas
-  //     */
-  //     if (WorkBook.dataModel.has(alias)) {
-  //       WorkBook.dataModel.get(alias).forEach(tableId => {
-  //         /* nel tableId sono presenti le tabelle gerarchicamente inferiori a 'alias',
-  //         * quindi tabelle da aggiungere alla 'from' e alla 'where'
-  //         */
-  //         Sheet.from = Draw.tables.get(tableId);
-  //         /*
-  //         * nel metodo joins() verifico se la tabella in ciclo ha una join
-  //         * (per il momento la Fact non ha altre Join però potrei utilizzare
-  //         * la funzionalitò di "entrare" nel livello fisico di una tabella per aggiungerci altre join)
-  //         * ad es. : potrei aggiungere, al DocVenditaDettaglio (fact), la tabella dei TipiMovimento,
-  //         * e quindi, in questo caso, avrei una join anche sulla Fact (e quindi nella proprietà WorkBook.joins)
-  //         */
-  //         // se ci sono joins per questa tableAlias la aggiungo allo Sheet
-  //         if (WorkBook.joins.has(Draw.tables.get(tableId).alias)) Sheet.joins = WorkBook.joins.get(Draw.tables.get(tableId).alias);
-  //       });
-  //     }
-  //   });
-  // }
 
   app.showTablePreview = async (e) => {
     const table = e.currentTarget.dataset.label;
@@ -2622,7 +2689,6 @@ var WorkBook, Sheet; // instanze della Classe WorkBooks e Sheets
     // In questo modo, la gestione della eliminazione della join è più semplice nella fn removeJoin
     document.querySelector('#btn-remove-join').dataset.token = token;
   }
-
 
   // TODO: potrebbe essere spostata in supportFn.js
 

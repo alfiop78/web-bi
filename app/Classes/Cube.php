@@ -108,6 +108,7 @@ class Cube
   public function from($from)
   {
     // dd($from);
+    $this->FROM_baseTable = [];
     foreach ($from as $alias => $prop) {
       // dd($alias, $prop);
       $this->FROM_baseTable[$alias] = "{$prop->schema}.{$prop->table} AS {$alias}";
@@ -115,7 +116,7 @@ class Cube
         $this->json__info->{'FROM'}->{$alias} = "{$prop->schema}.{$prop->table} AS {$alias}";
       }
     }
-    dd($this->FROM_baseTable);
+    // dd($this->FROM_baseTable);
   }
 
   // Qui viene utilizzata la stessa logica del metodo select()
@@ -175,6 +176,8 @@ class Cube
       Valutare quale approccio può essere migliore in base ai tipi di join che si dovranno implementare in futuro
     */
     // NOTE : caso in qui viene passato tutto l'object
+    $this->WHERE_baseTable = [];
+    $this->WHERE_timeDimension = [];
     foreach ($joins as $token => $join) {
       // il token è l'identificativo della join
       // var_dump($join);
@@ -299,11 +302,9 @@ class Cube
     // metriche di base
     $metrics_base = array();
     $metrics_base_datamart = array();
-    dd($this->baseMeasures);
-    foreach ($this->baseMeasures as $value) {
+    // dd($this->baseMetrics);
+    foreach ($this->baseMetrics as $value) {
       // dd($value);
-      // $metrics_base[] = "\nNVL({$value->formula->aggregateFn}({$value->workBook->tableAlias}.{$value->formula->field}), 0) AS '{$value->formula->alias}'";
-      // $metrics_base_datamart[] = "\nNVL({$value->formula->aggregateFn}({$this->baseTableName}.'{$value->formula->alias}'), 0) AS '{$value->formula->alias}'";
       $metrics_base[] = "\nNVL({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
       if (property_exists($this, 'json__info')) {
         $this->json__info->{'METRICS'}->{$value->alias} = "NVL({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
@@ -371,7 +372,6 @@ class Cube
         $result = DB::connection('vertica_odbc')->statement($sql);
       } */
     }
-    // dd($sql);
     return $result;
   }
 
@@ -524,7 +524,7 @@ class Cube
       $sql .= "\n(SELECT{$this->_fieldsSQL}";
       $leftJoin = null;
 
-      if (property_exists($this, 'baseMeasures') && $this->_metrics_base_datamart) $sql .= ", $this->_metrics_base_datamart";
+      if (property_exists($this, 'baseMetrics') && $this->_metrics_base_datamart) $sql .= ", $this->_metrics_base_datamart";
       if (property_exists($this, 'filteredMetrics')) {
         $ONClause = array();
         $ONConditions = NULL;
@@ -566,7 +566,7 @@ class Cube
     } else {
       // non sono presenti metriche filtrate
       $s = "SELECT $this->_fieldsSQL";
-      if (property_exists($this, 'baseMeasures')) $s .= ", $this->_metrics_base_datamart";
+      if (property_exists($this, 'baseMetrics')) $s .= ", $this->_metrics_base_datamart";
       // dd(property_exists($this, 'compositeMetrics'));
       if (property_exists($this, 'compositeMetrics')) {
         // sono presenti metriche composte

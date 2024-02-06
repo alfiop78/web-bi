@@ -18,7 +18,7 @@ class Sheets {
     // di stabilire se aggiornare "updated_at" del report oppure no
     this.objectRemoved = new Map();
     this.fact = new Set(); // le fact utilizzate nel report
-    this.from = {}, this.joins = {}; // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
+    this.from = {}, this.joins = {}, this.measures = {}; // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
     // this.joins = new Map();
   }
 
@@ -59,43 +59,9 @@ class Sheets {
 
   set metrics(object) {
     this.#metrics.set(object.token, object);
-    // this.#metrics.set(object.token, { name: object.name, type: object.metric_type, aggregateFn: object.aggregateFn });
-    // console.info('sheet.#metrics : ', this.#metrics);
   }
 
   get metrics() { return this.#metrics; }
-
-  // set from(object) {
-  //   this.#from.set(object.factId, object.from);
-  //   // this.#from.set(object.alias, { schema: object.schema, table: object.table });
-  //   // console.info('this.#from : ', this.#from);
-  // }
-
-  // get from() { return this.#from; }
-
-  // set joins(object) {
-  //   this.#joins.set(object.factId, object.joins);
-  // }
-
-  // get joins() { return this.#joins; }
-
-  // recupero la join dalla Proprietà join della classe WorkBook
-  // viene invocata da setSheet
-  // set joins(objects) {
-  //   // objects può contenere più join, quindi deve essere ciclato
-  //   for (const [token, join] of Object.entries(objects)) {
-  //     /* TODO: valutare se passare tutto l'oggetto oppure solo la proprieta SQL.
-  //       - Passando tutto l'oggetto posso avere più controllo su cosa costruire nella query.
-  //       - Passando solo l'array SQL, in php, posso utilizzare solo implode('=', join)
-  //       Al momento passo tutto l'oggetto
-  //     */
-  //     this.#joins.set(token, join);
-  //     // this.#joins.set(token, join.SQL);
-  //   }
-  //   // console.info('this.#joins : ', this.#joins);
-  // }
-
-  // get joins() { return this.#joins; }
 
   removeObject(field, token, object = token) {
     // il Set() filters contiene, come object, il token, quindi imposto un valore di
@@ -181,6 +147,7 @@ class Sheets {
 
     // from
     debugger;
+    // TODO: la proprietà 'from' viene ricreata, in setSheet() quindi potrei NON metterla qui
     this.from = SheetStorage.sheet.from;
     /* for (const [tableAlias, object] of Object.entries(SheetStorage.sheet.from)) {
       this.from = {
@@ -257,7 +224,6 @@ class WorkBooks {
   #metrics = new Map();
   #join = new Map();
   #joins = new Map();
-  #factJoins = new Map();
   #dateTime;
   #tableJoins = { from: null, to: null }; // refs
   #dataModel = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
@@ -353,25 +319,6 @@ class WorkBooks {
     console.log('#joins : ', this.#joins);
   }
 
-  /* set factJoins(value) {
-    this.#factJoins.set(value, this.#joins);
-    debugger;
-  }
-
-  get factJoins() { return this.#factJoins; } */
-  /* set joins(token) {
-    if (!this.#joins.has(this.#join.get(token).alias)) {
-      // alias tabella non presente nelle #joins, la aggiungo
-      this.#joins.set(this.#join.get(token).alias, {
-        [token]: this.#join.get(token)
-      });
-    } else {
-      // alias di tabella già presente
-      this.#joins.get(this.#join.get(token).alias)[token] = this.#join.get(token);
-    }
-    // console.log('#joins : ', this.#joins);
-  } */
-
   get joins() { return this.#joins; }
 
   set filters(object) {
@@ -379,14 +326,6 @@ class WorkBooks {
   }
 
   get filters() { return this.#filters; }
-
-  /* set hierarchies(value) {
-    this.#hierarchies.set(value.name, value.hierarchies);
-    console.log(this.#hierarchies);
-  }
-
-  get hierarchies() { return this.#hierarchies; } */
-
 
   // INFO: da valutare se salvare tutto il dataModel quando si salva il workbook oppure man mano che si aggiungono
   // tabelle al canvas
@@ -448,8 +387,13 @@ class WorkBooks {
   get hierTables() { return this.#hierTables; }
 
   set metrics(object) {
+    // if (this.#metrics.has(this.fact)) {
+    //   this.#metrics.get(this.fact)[object.token] = object;
+    // } else {
+    //   this.#metrics.set(fact, object);
+    // }
+    // debugger;
     this.#metrics.set(object.token, object);
-    // console.log('workBook Metrics : ', this.#metrics);
   }
 
   get metrics() { return this.#metrics; }
@@ -473,6 +417,7 @@ class WorkBooks {
     }
     for (const [token, metric] of this.metrics) {
       if (metric.metric_type === 'basic') {
+        // WARN: perchè non utilizzo Object.fromEntries ?
         (!this.workBook.hasOwnProperty('metrics')) ? this.workBook.metrics = { [token]: metric } : this.workBook.metrics[token] = metric;
       }
     }
@@ -591,6 +536,101 @@ class WorkBooks {
     }
 
     return this;
+  }
+
+}
+
+class Processes {
+  #fields = {};
+  #filters = {};
+  #facts = {};
+  constructor(Sheet) {
+    console.log(Sheet);
+    this.Sheet = Sheet;
+    console.log(this.Sheet);
+    this.facts = this.Sheet.fact;
+  }
+
+  set facts(value) {
+    value.forEach(fact => {
+      this.#facts[fact] = {};
+    });
+  }
+
+  get facts() { return this.#facts; }
+
+  set fields(value) {
+    this.#fields[value.token] = value;
+  }
+
+  get fields() { return this.#fields; }
+
+  set filters(value) {
+    this.#filters[value.token] = value;
+  }
+
+  get filters() { return this.#filters; }
+
+  set measures(value) {
+    this.#facts[value.factId].measures[value.token] = value;
+  }
+
+  baseMeasures(value) {
+    if (this.facts.hasOwnProperty('measures')) {
+      this.facts[value.factId].measures[value.token] = value;
+    } else {
+      this.facts[value.factId] = { measures: { [value.token]: value } };
+    }
+  }
+
+  from() {
+    this.Sheet.fact.forEach(factId => {
+      let from = {};
+      this.Sheet.sidTables.forEach(svg_id => {
+        const tables = WorkBook.dataModel.get(factId);
+        if (tables.hasOwnProperty(svg_id)) {
+          tables[svg_id].forEach(tableId => {
+            const data = Draw.tables.get(tableId);
+            from[data.alias] = { schema: data.schema, table: data.table };
+          });
+        }
+      });
+      this.facts[factId].from = from;
+    });
+  }
+
+  joins() {
+    this.Sheet.fact.forEach(factId => {
+      let factTable = Draw.tables.get(factId).alias;
+      let joins = {};
+      this.Sheet.sidTables.forEach(svg_id => {
+        const tables = WorkBook.dataModel.get(factId);
+        if (tables.hasOwnProperty(svg_id)) {
+          tables[svg_id].forEach(tableId => {
+            const data = Draw.tables.get(tableId);
+            if (WorkBook.joins.has(data.alias)) {
+              for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
+                if (data.cssClass !== 'tables') {
+                  if (join.to.alias === factTable) joins[token] = join;
+                } else {
+                  joins[token] = join;
+                }
+              }
+            }
+          });
+        }
+      });
+      this.facts[factId].joins = joins;
+    });
+  }
+
+  get process() {
+    return {
+      id: this.Sheet.sheet.id,
+      datamartId: this.Sheet.userId,
+      facts: this.facts, fields: this.fields,
+      filters: this.filters
+    };
   }
 
 }
