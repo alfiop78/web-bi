@@ -330,6 +330,54 @@ class WorkBooks {
   // INFO: da valutare se salvare tutto il dataModel quando si salva il workbook oppure man mano che si aggiungono
   // tabelle al canvas
   // TODO: potrei utilizzare il set e passare al Metodo l'array di nodi della/e Fact
+  /* createDataModel() {
+    Draw.svg.querySelectorAll("use.table.fact:not([data-joins='0'])").forEach(fact => {
+      let joinTables = [];
+      let recursive = (table) => {
+        // table : svg-data-xxxx (questa è sempre la tabella "di origine" e mai quella .common)
+        const tableRef = Draw.svg.querySelector(`use#${table}`);
+        // se la tabella passata come parametro è una tabella (.shared) da cui derivano quelle .common
+        // e la factId in ciclo è diversa da quella riferita alla tabella .shared (parametro table)
+        // deve essere recuperata la tabella .common riferita alla factId in ciclo sostituendola a
+        // "di origine" (parametro table)
+        // Es. Quando 'table' contiene .shared e sto ciclando la Fact che corrisponde a 'table'
+        // recupero 'table', quando sto ciclando una fact diversa devo prendere la tabella relativa a
+        // quella fact per poter creare correttamente la relazione tra la tabella e la sua Fact
+        const tableJoin = (tableRef.classList.contains('shared') && tableRef.dataset.factId !== fact.id) ?
+          Draw.svg.querySelector(`use.table.common[data-fact-id='${fact.id}']`) :
+          Draw.svg.querySelector(`use.table#${table}`);
+        joinTables.push(tableJoin.id);
+        if (tableJoin.dataset.tableJoin) recursive(tableJoin.dataset.tableJoin);
+      }
+      let tables = {};
+      // verifico se ci sono tabelle clonate
+      const common = [...Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`)].find(table => table.classList.contains('common'));
+      debugger;
+      // quando ci sono tabelle .common nella fact.id in ciclo, per poter mettere in relazione
+      // la tabelle.common con la "sua" Fact devo recuperare le tabelle della dimensione
+      // "di origine". Successivamente, nel ciclo dimensionTables, qunado si incontra una tabella .shared
+      // e la fact NON corrisponde a quella in ciclo, allora la tabella da recuperare è quella .common
+      // (es.: quella presente nella seconda fact)
+      const dimensionTables = (common) ?
+        Draw.svg.querySelectorAll(`use.table[data-table-join][data-dimension-id='${common.dataset.dimensionId}']:not(.common), use.table[data-table-join][data-fact-id='${fact.id}']:not(.common)`) :
+        Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`);
+
+      dimensionTables.forEach(table => {
+        // ciclo sulla tabella originale, quando si incontra una tabella che
+        // è stata clonata, invece di prendere quella originale prendo quella clonata (è agganciata ad un'altra Fact)
+        // In questo modo, la tabella clonata avrà la corretta relazione con la propria Fact
+        if (table.classList.contains('shared') && table.dataset.factId !== fact.id) table = Draw.svg.querySelector(`use.table.common[data-fact-id='${fact.id}']`);
+        joinTables = [table.id];
+        // recupero la join associata alla tabella in ciclo
+        if (table.dataset.tableJoin) recursive(table.dataset.tableJoin);
+        tables[table.id] = joinTables;
+      });
+      // Creazione del DataModel con un oggetto Fact e, al suo interno, gli object relativi alle tabelle, per ogni fact
+      this.#dataModel.set(fact.id, tables);
+    });
+    console.log('this.#dataModel:', this.#dataModel);
+  } */
+
   createDataModel() {
     Draw.svg.querySelectorAll("use.table.fact:not([data-joins='0'])").forEach(fact => {
       let joinTables = [];
@@ -351,21 +399,35 @@ class WorkBooks {
       }
       let tables = {};
       // verifico se ci sono tabelle clonate
-      const shared = [...Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`)].find(table => table.classList.contains('common'));
+      const common = [...Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`)].find(table => table.classList.contains('common'));
+      let originTables = [];
+      if (common) {
+        debugger;
+        // aggiungo .shared alle tabelle di origine partendo da shared_ref
+        let rec = (tableId) => {
+          Draw.svg.querySelectorAll(`use.table[data-table-join='${tableId}'][data-dimension-id='${common.dataset.dimensionId}']`).forEach(t => {
+            originTables.push(t);
+            rec(t.id);
+          });
+        }
+        rec(common.dataset.shared_ref);
+      }
       // quando ci sono tabelle .common nella fact.id in ciclo, per poter mettere in relazione
       // la tabelle.common con la "sua" Fact devo recuperare le tabelle della dimensione
       // "di origine". Successivamente, nel ciclo dimensionTables, qunado si incontra una tabella .shared
       // e la fact NON corrisponde a quella in ciclo, allora la tabella da recuperare è quella .common
       // (es.: quella presente nella seconda fact)
-      const dimensionTables = (shared) ?
-        Draw.svg.querySelectorAll(`use.table[data-table-join][data-dimension-id='${shared.dataset.dimensionId}']:not(.common), use.table[data-table-join][data-fact-id='${fact.id}']:not(.common)`) :
+      const dimensionTables = (common) ?
+        originTables :
+        // Draw.svg.querySelectorAll(`use.table[data-table-join][data-dimension-id='${common.dataset.dimensionId}'][data-fact-id='${fact.id}'].common, use.table[data-table-join][data-dimension-id='${common.dataset.dimensionId}']`) :
         Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`);
+      debugger;
 
       dimensionTables.forEach(table => {
-        // ciclo sulla tabella originale, quando si incontra una tabella (l'ultima della gerarchia) che
+        // ciclo sulla tabella originale, quando si incontra una tabella che
         // è stata clonata, invece di prendere quella originale prendo quella clonata (è agganciata ad un'altra Fact)
         // In questo modo, la tabella clonata avrà la corretta relazione con la propria Fact
-        if (table.classList.contains('shared') && table.dataset.factId !== fact.id) table = Draw.svg.querySelector(`use.table.common[data-fact-id='${fact.id}']`);
+        // if (table.classList.contains('shared') && table.dataset.factId !== fact.id) table = Draw.svg.querySelector(`use.table.common[data-fact-id='${fact.id}']`);
         joinTables = [table.id];
         // recupero la join associata alla tabella in ciclo
         if (table.dataset.tableJoin) recursive(table.dataset.tableJoin);

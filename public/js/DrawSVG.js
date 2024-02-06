@@ -680,6 +680,7 @@ class DrawSVG {
     use.dataset.table = this.currentTable.table;
     use.dataset.factId = this.currentTable.factId;
     use.dataset.alias = this.currentTable.alias;
+    use.dataset.shared_ref = this.currentTable.shared_ref;
     use.dataset.dimensionId = this.currentTable.dimensionId;
     use.dataset.fn = 'tableSelected';
     use.dataset.name = this.currentTable.name;
@@ -850,6 +851,20 @@ class DrawSVG {
 
   addFactJoin() {
     // imposto, sulla tabella di origine, la cssClass 'shared'
+    // TODO: è necessario impostare .shared su TUTTE le tabelle gerarchicamente
+    // superiori a quella selezionata
+    // cerco le tabelle
+
+    /* let recursive = (table) => {
+      this.svg.querySelectorAll(`use.table[data-table-join='${table.id}']`).forEach(joinTable => {
+        joinTable.setAttribute(shared_token, true);
+        this.tables.get(joinTable.id).shared.push(shared_token);
+        recursive(joinTable);
+      });
+    }
+    debugger;
+    recursive(this.table); */
+
     this.table.classList.add('shared');
     this.tables.get(this.table.id).cssClass = 'shared';
     const id = `${this.table.id}-common`;
@@ -863,6 +878,7 @@ class DrawSVG {
       alias: this.table.dataset.alias,
       name: this.table.dataset.name,
       schema: this.table.dataset.schema,
+      shared_ref: this.table.id, // tabella da cui far partire la condivisione della dimensione
       joins: 0,
       join: null,
       factId: null,
@@ -928,10 +944,10 @@ class DrawSVG {
     // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
     document.querySelectorAll('#ul-context-menu-table button').forEach(item => item.dataset.id = WorkBook.activeTable.id);
     // abilito "addJoin" se sono presenti due o più fact-table e se si è attivato il contextmenu
-    // sull'ULTIMA tabella di una dimensione, quella legata alla Fact
     const facts = this.svg.querySelectorAll('use.table.fact').length;
     btnAddFactJoin.addEventListener('click', this.addFactJoin.bind(Draw));
-    btnAddFactJoin.disabled = (facts > 1 && this.table.dataset.tableJoin === this.table.dataset.factId) ? false : true;
+    btnAddFactJoin.disabled = (facts !== 0) ? false : true;
+    // btnAddFactJoin.disabled = (facts > 1 && this.table.dataset.tableJoin === this.table.dataset.factId) ? false : true;
   }
 
   // aggiungo i campi di una tabella per creare la join
