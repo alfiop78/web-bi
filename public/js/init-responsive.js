@@ -1565,15 +1565,17 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   // tasto Elabora e SQL
   app.createProcess = async (e) => {
-    Process = new Processes(Sheet);
-    console.log(Process);
-    let advancedMetrics = {}, compositeMetrics = {};
+    // Process = new Processes(Sheet);
+    let proc = {
+      baseMeasures: {}, advancedMeasures: {}, compositeMeasures: {}
+    }, facts = {}, fields = {}, filters = {};
+    proc.facts = [...Sheet.fact];
     // Creo la struttura necessaria per creare la query
     for (const [token, field] of Sheet.fields) {
       // verifico le tabelle da includere in tables Sheet.tables
       Sheet.tables = WorkBook.field.get(token).tableAlias;
       // WARN: qui dovrei aggiungere anche Sheet.sidTables
-      Process.fields = {
+      fields[token] = {
         token,
         field: WorkBook.field.get(token).field,
         // TODO: potrei passare i campi _id e _ds anche in questo modo, valutare se
@@ -1584,63 +1586,81 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         name: field
       };
     }
-    // INFO: definisco le metriche da elaborare
+    proc.fields = fields;
 
-    for (const [token, metric] of Sheet.metrics) {
-      switch (metric.type) {
-        case 'composite':
-          compositeMetrics.set(token, {
-            alias: metric.alias,
-            SQL: WorkBook.metrics.get(token).sql,
-            metrics: WorkBook.metrics.get(token).metrics
-          });
-          break;
-        case 'advanced':
-          advancedMetrics.set(token, {
-            alias: metric.alias,
-            aggregateFn: metric.aggregateFn,
-            field: WorkBook.metrics.get(token).field,
-            SQL: WorkBook.metrics.get(token).SQL,
-            factId: WorkBook.metrics.factId,
-            distinct: WorkBook.metrics.get(token).distinct,
-            filters: {}
-          });
-          // aggiungo i filtri definiti all'interno della metrica avanzata
-          WorkBook.metrics.get(token).filters.forEach(filterToken => {
-            // se, nei filtri della metrica, sono presenti filtri di funzioni temporali,
-            // ...la definizione del filtro và recuperata da WorkBook.metrics.timingFn
-            if (['last-year', 'last-month', 'ecc...'].includes(filterToken)) {
-              advancedMetrics.get(token).filters[filterToken] = WorkBook.metrics.get(token).timingFn[filterToken];
-            } else {
-              advancedMetrics.get(token).filters[filterToken] = WorkBook.filters.get(filterToken);
+    Sheet.fact.forEach(factId => {
+      // es. :
+      // baseMeasures : {
+      //  fact-1 : {object di metriche di base}
+      //  fact-2 : {object di metriche di base}
+      // }
+      // advancedMeasures : {come sopra}
+      // compositeMeasures : {come sopra}
+
+      proc.baseMeasures[factId] = {};
+      proc.advancedMeasures[factId] = {};
+
+      for (const [token, metric] of Sheet.metrics) {
+        const wbMetrics = WorkBook.metrics.get(token);
+        switch (metric.type) {
+          case 'composite':
+            proc.compositeMeasures[token] = {
+              alias: metric.alias,
+              SQL: wbMetrics.sql,
+              metrics: wbMetrics.metrics
+            };
+            break;
+          case 'advanced':
+            if (wbMetrics.factId === factId) {
+              proc.advancedMeasures[factId][token] = {
+                alias: metric.alias,
+                aggregateFn: metric.aggregateFn,
+                field: wbMetrics.field,
+                SQL: wbMetrics.SQL,
+                distinct: wbMetrics.distinct,
+                filters: {}
+              };
+              // aggiungo i filtri definiti all'interno della metrica avanzata
+              wbMetrics.filters.forEach(filterToken => {
+                // se, nei filtri della metrica, sono presenti filtri di funzioni temporali,
+                // ...la definizione del filtro và recuperata da WorkBook.metrics.timingFn
+                // TODO: implementare le altre funzioni temporali
+                if (['last-year', 'last-month', 'ecc...'].includes(filterToken)) {
+                  // advancedMetrics.get(token).filters[filterToken] = wbMetrics.timingFn[filterToken];
+                  proc.advancedMeasures[factId][token].filters[filterToken] = wbMetrics.timingFn[filterToken];
+                } else {
+                  proc.advancedMeasures[factId][token].filters[filterToken] = WorkBook.filters.get(filterToken);
+                }
+              });
             }
-          });
-          // debugger;
-          break;
-        default:
-          // basic
-          const wbMetrics = WorkBook.metrics.get(token);
-          Process.baseMeasures({
-            token,
-            alias: metric.alias,
-            aggregateFn: metric.aggregateFn,
-            field: wbMetrics.field,
-            factId: wbMetrics.factId,
-            SQL: wbMetrics.SQL,
-            distinct: wbMetrics.distinct
-          });
-          break;
+            // debugger;
+            break;
+          default:
+            // basic
+            if (wbMetrics.factId === factId)
+              proc.baseMeasures[factId][token] = {
+                token,
+                alias: metric.alias,
+                aggregateFn: metric.aggregateFn,
+                field: wbMetrics.field,
+                SQL: wbMetrics.SQL,
+                distinct: wbMetrics.distinct
+              };
+            break;
+        }
       }
-    }
-    Process.from();
-    Process.joins();
+    });
+    console.log(proc);
     debugger;
 
-    // INFO: filtri
+    Process.from();
+    Process.joins();
+
     Sheet.filters.forEach(token => {
-      WorkBook.filters.get(token).tables.forEach(table => Sheet.tables = table);
+      const filter = WorkBook.filters.get(token);
+      filter.tables.forEach(table => Sheet.tables = table);
       debugger;
-      Process.filters = WorkBook.filters.get(token);
+      filters[token] = filter;
     });
     // se non ci sono filtri nel Report bisogna far comparire un avviso
     // perchè l'elaborazione potrebbe essere troppo onerosa
@@ -1648,6 +1668,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       App.showConsole('Non sono presenti filtri nel report', 'error', 5000);
       return false;
     }
+
+    process.filters = filters;
+    debugger;
 
     // app.setSheet();
 

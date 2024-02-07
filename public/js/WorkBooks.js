@@ -404,12 +404,6 @@ class WorkBooks {
   get hierTables() { return this.#hierTables; }
 
   set metrics(object) {
-    // if (this.#metrics.has(this.fact)) {
-    //   this.#metrics.get(this.fact)[object.token] = object;
-    // } else {
-    //   this.#metrics.set(fact, object);
-    // }
-    // debugger;
     this.#metrics.set(object.token, object);
   }
 
