@@ -850,21 +850,8 @@ class DrawSVG {
   } */
 
   addFactJoin() {
-    // imposto, sulla tabella di origine, la cssClass 'shared'
-    // TODO: è necessario impostare .shared su TUTTE le tabelle gerarchicamente
-    // superiori a quella selezionata
-    // cerco le tabelle
-
-    /* let recursive = (table) => {
-      this.svg.querySelectorAll(`use.table[data-table-join='${table.id}']`).forEach(joinTable => {
-        joinTable.setAttribute(shared_token, true);
-        this.tables.get(joinTable.id).shared.push(shared_token);
-        recursive(joinTable);
-      });
-    }
-    debugger;
-    recursive(this.table); */
-
+    // .shared indica che la tabella è una tabella condivisa con altre Fact.
+    // La logica per l'utilizzo di .shared è utilizzata in WorkBook.createDataModel() -> recursive()
     this.table.classList.add('shared');
     this.tables.get(this.table.id).cssClass = 'shared';
     const id = `${this.table.id}-common`;
