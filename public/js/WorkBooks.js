@@ -466,16 +466,10 @@ class WorkBooks {
       Draw.currentTable = Draw.tables.get(key);
       if (!value.join) {
         Draw.drawFact();
+      } else if (value.hasOwnProperty('shared_ref')) {
+        Draw.drawCommonTable();
       } else {
-        switch (value.hasOwnProperty('shared_ref')) {
-          // switch (value.cssClass) {
-          case 'common':
-            Draw.drawCommonTable();
-            break;
-          default:
-            (key === 'svg-data-web_bi_time') ? Draw.drawTime() : Draw.drawTable();
-            break;
-        }
+        (key === 'svg-data-web_bi_time') ? Draw.drawTime() : Draw.drawTable();
       }
     }
 
