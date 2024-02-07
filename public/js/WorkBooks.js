@@ -214,6 +214,22 @@ class Sheets {
         console.error(err);
       });
   }
+
+  /* from() {
+    this.fact.forEach(factId => {
+      let from = {};
+      this.sidTables.forEach(svg_id => {
+        const tables = WorkBook.dataModel.get(factId);
+        if (tables.hasOwnProperty(svg_id)) {
+          tables[svg_id].forEach(tableId => {
+            const data = Draw.tables.get(tableId);
+            from[data.alias] = { schema: data.schema, table: data.table };
+          });
+        }
+      });
+      this.facts[factId].from = from;
+    });
+  } */
 }
 
 class WorkBooks {

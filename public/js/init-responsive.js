@@ -1565,11 +1565,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   // tasto Elabora e SQL
   app.createProcess = async (e) => {
-    // Process = new Processes(Sheet);
-    let proc = {
-      baseMeasures: {}, advancedMeasures: {}, compositeMeasures: {}
-    }, facts = {}, fields = {}, filters = {};
-    proc.facts = [...Sheet.fact];
+    let process = {}, facts = {}, fields = {}, filters = {};
+    process.facts = [...Sheet.fact];
     // Creo la struttura necessaria per creare la query
     for (const [token, field] of Sheet.fields) {
       // verifico le tabelle da includere in tables Sheet.tables
@@ -1586,7 +1583,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         name: field
       };
     }
-    proc.fields = fields;
+    process.fields = fields;
 
     Sheet.fact.forEach(factId => {
       // es. :
@@ -1597,14 +1594,11 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       // advancedMeasures : {come sopra}
       // compositeMeasures : {come sopra}
 
-      proc.baseMeasures[factId] = {};
-      proc.advancedMeasures[factId] = {};
-
       for (const [token, metric] of Sheet.metrics) {
         const wbMetrics = WorkBook.metrics.get(token);
         switch (metric.type) {
           case 'composite':
-            proc.compositeMeasures[token] = {
+            process.compositeMeasures[token] = {
               alias: metric.alias,
               SQL: wbMetrics.sql,
               metrics: wbMetrics.metrics
@@ -1612,13 +1606,16 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             break;
           case 'advanced':
             if (wbMetrics.factId === factId) {
-              proc.advancedMeasures[factId][token] = {
-                alias: metric.alias,
-                aggregateFn: metric.aggregateFn,
-                field: wbMetrics.field,
-                SQL: wbMetrics.SQL,
-                distinct: wbMetrics.distinct,
-                filters: {}
+              const obj = {
+                [token]: {
+                  token,
+                  alias: metric.alias,
+                  aggregateFn: metric.aggregateFn,
+                  field: wbMetrics.field,
+                  SQL: wbMetrics.SQL,
+                  distinct: wbMetrics.distinct,
+                  filters: {}
+                }
               };
               // aggiungo i filtri definiti all'interno della metrica avanzata
               wbMetrics.filters.forEach(filterToken => {
@@ -1627,34 +1624,40 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
                 // TODO: implementare le altre funzioni temporali
                 if (['last-year', 'last-month', 'ecc...'].includes(filterToken)) {
                   // advancedMetrics.get(token).filters[filterToken] = wbMetrics.timingFn[filterToken];
-                  proc.advancedMeasures[factId][token].filters[filterToken] = wbMetrics.timingFn[filterToken];
+                  obj.filters[filterToken] = wbMetrics.timingFn[filterToken];
                 } else {
-                  proc.advancedMeasures[factId][token].filters[filterToken] = WorkBook.filters.get(filterToken);
+                  obj.filters[filterToken] = WorkBook.filters.get(filterToken);
                 }
               });
+              (process.hasOwnProperty('advancedMeasures')) ? process.advancedMeasures[factId] = obj : process.advancedMeasures = { [factId]: obj };
             }
             // debugger;
             break;
           default:
             // basic
-            if (wbMetrics.factId === factId)
-              proc.baseMeasures[factId][token] = {
-                token,
-                alias: metric.alias,
-                aggregateFn: metric.aggregateFn,
-                field: wbMetrics.field,
-                SQL: wbMetrics.SQL,
-                distinct: wbMetrics.distinct
+            if (wbMetrics.factId === factId) {
+              const obj = {
+                [token]: {
+                  token,
+                  alias: metric.alias,
+                  aggregateFn: metric.aggregateFn,
+                  field: wbMetrics.field,
+                  SQL: wbMetrics.SQL,
+                  distinct: wbMetrics.distinct
+                }
               };
+              (process.hasOwnProperty('baseMeasures')) ? process.baseMeasures[factId] = obj : process.baseMeasures = { [factId]: obj };
+            }
             break;
         }
       }
     });
-    console.log(proc);
+    console.log(process);
+    app.setSheet();
     debugger;
-
-    Process.from();
-    Process.joins();
+    process.from = Sheet.from;
+    process.joins = Sheet.joins;
+    debugger;
 
     Sheet.filters.forEach(token => {
       const filter = WorkBook.filters.get(token);
@@ -1671,8 +1674,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
     process.filters = filters;
     debugger;
-
-    // app.setSheet();
 
     //
     /* let process = { from: {}, joins: {} };
@@ -1758,15 +1759,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     process.joins = Sheet.joins;
     process.measures = Sheet.measures;
     app.setSheet();
-    Process.from = Sheet.from;
-    Process.joins = Sheet.joins; */
+    */
     // process.filters = Object.fromEntries(filters);
     /* if (metrics.size !== 0) process.metrics = Object.fromEntries(metrics);
     if (advancedMetrics.size !== 0) process.advancedMeasures = Object.fromEntries(advancedMetrics);
     if (compositeMetrics.size !== 0) process.compositeMeasures = Object.fromEntries(compositeMetrics); */
     // TODO: utilizzare un unica funzione, se viene passato 'json__info' deve essere
     // elaborato il generateSQL() altrimenti il process()
-    (e.target.id === 'btn-sheet-preview') ? app.process() : app.generateSQL();
+    (e.target.id === 'btn-sheet-preview') ? app.process(process) : app.generateSQL(process);
   }
 
   app.generateSQL = async (process) => {
@@ -1872,7 +1872,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       });
   }
 
-  app.process = async () => {
+  app.process = async (process) => {
     Sheet.userId = userId;
     debugger;
     if (Sheet.edit === true) {
@@ -1893,11 +1893,11 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     Resource.json.token = Sheet.sheet.token;
     Resource.setSpecifications();
 
-    Process.id = Sheet.sheet.id;
-    Process.datamartId = Sheet.userId;
+    process.id = Sheet.sheet.id;
+    process.datamartId = Sheet.userId;
     // console.log(process);
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
-    const params = JSON.stringify(Process.process);
+    const params = JSON.stringify(process.process);
     console.log(params);
     debugger;
     // App.showConsole('Elaborazione in corso...', 'info');
@@ -2598,17 +2598,15 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
     */
     Sheet.fact.forEach(factId => {
+      debugger;
       let factTable = Draw.tables.get(factId).alias;
-      // let from = new Map(), joins = new Map(), metrics = {};
-      let from = {}, joins = {}, metrics = {};
+      let from = {}, joins = {};
       Sheet.sidTables.forEach(svg_id => {
         const tables = WorkBook.dataModel.get(factId);
         if (tables.hasOwnProperty(svg_id)) {
           tables[svg_id].forEach(tableId => {
             const data = Draw.tables.get(tableId);
-            // from.set(data.alias, { schema: data.schema, table: data.table });
             from[data.alias] = { schema: data.schema, table: data.table };
-            // if (WorkBook.joins.has(data.alias)) joins.set(data.alias, WorkBook.joins.get(data.alias));
             if (WorkBook.joins.has(data.alias)) {
               for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
                 if (data.cssClass !== 'tables') {
@@ -2624,13 +2622,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       });
       // TODO: potrei utilizzarle qui con set() senza creare setters nella classe
       Sheet.from[factId] = from;
-      // Sheet.from[factId] = Object.fromEntries(from);
-      // Sheet.joins[factId] = Object.fromEntries(joins);
       Sheet.joins[factId] = joins;
-      for (const [token, metric] of Sheet.metrics) {
-        if (metric.factId === factId) metrics[token] = metric;
-      }
-      Sheet.measures[factId] = metrics;
     });
   }
 
