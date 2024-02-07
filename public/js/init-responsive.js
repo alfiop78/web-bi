@@ -590,7 +590,17 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   app.rowDrop = (e) => {
-
+    e.preventDefault();
+    e.currentTarget.classList.replace('dropping', 'dropped');
+    if (!e.currentTarget.classList.contains('dropzone')) return;
+    const elementId = e.dataTransfer.getData('text/plain');
+    const elementRef = document.getElementById(elementId);
+    // console.log(elementRef);
+    // elementRef : è l'elemento nella lista di sinistra che ho draggato
+    // TODO: rinominare elementRef.id in elementRef.dataset.token
+    // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
+    Sheet.fields = { token: elementRef.id, name: WorkBook.field.get(elementRef.id).name };
+    app.addField(e.currentTarget, elementRef.id);
   }
 
   // Modifica di una metrica composta di base
@@ -2630,6 +2640,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       }
     */
     WorkBook.hierTables.clear();
+    // non visualizzo le tabelle condivise tra le fact, altrimenti vengono duplicate le voci
     Draw.svg.querySelectorAll('use.table:not([data-shared_ref]), use.time').forEach(table => {
       WorkBook.hierTables = {
         id: table.id,
