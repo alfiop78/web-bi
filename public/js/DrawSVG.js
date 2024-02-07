@@ -123,12 +123,12 @@ class DrawSVG {
       this.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
       if (this.countTables > 0) {
         // viene utilizzato il calcolo dell'ipotenusa con il valore assoluto per stabilire qual'è la tabella più vicina
-        this.nearestTable = [...this.svg.querySelectorAll('use.table:not(.common)')].reduce((prev, current) => {
+        this.nearestTable = [...this.svg.querySelectorAll('use.table:not([data-shared_ref])')].reduce((prev, current) => {
+          // this.nearestTable = [...this.svg.querySelectorAll('use.table:not(.common)')].reduce((prev, current) => {
           return (Math.hypot(e.offsetX - (+current.dataset.anchorXTo), e.offsetY - (+current.dataset.anchorYTo)) < Math.hypot(e.offsetX - (+prev.dataset.anchorXTo), e.offsetY - (+prev.dataset.anchorYTo))) ? current : prev;
           // return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
         });
         const rectBounding = this.nearestTable.getBoundingClientRect();
-
 
         // let testCoords = [{ x: 305, y: 70 }, { x: 210, y: 85 }];
         // creo 2 punti di ancoraggio (right, bottom) per la Fact e un solo punto di anchor
@@ -378,17 +378,19 @@ class DrawSVG {
       if (this.countTables === 1) return false;
 
       this.currentLineRef = this.svg.querySelector(`path[data-from='${e.target.id}']`).id;
-      if (this.el.classList.contains('common')) {
+      if (this.el.dataset.shared_ref) {
+        // if (this.el.classList.contains('common')) {
         // se sto spostando una tabella da mettere in comune tra più fact la posso legare solo alle Fact
         // nella ricerca della tabella più vicina escludo la tabella che sto spostando
-        // inoltre, la tabella .common, non può essere legata alla stessa Fact a cui è legata la tabella .shared
-        let tables = (e.currentTarget.classList.contains('common')) ?
+        // inoltre, la tabella messa in comune (shared_ref), non può essere legata alla stessa Fact a cui è legata la tabella .shared
+        // let tables = (e.currentTarget.classList.contains('common')) ?
+        let tables = (e.currentTarget.dataset.shared_ref) ?
           this.svg.querySelectorAll(`use.table.fact:not(#${this.svg.querySelector('use.shared').dataset.factId})`) :
-          this.svg.querySelectorAll(`use.table:not(#${e.target.id}, .common)`);
+          // this.svg.querySelectorAll(`use.table:not(#${e.target.id}, .common)`);
+          this.svg.querySelectorAll(`use.table:not(#${e.target.id}, [data-shared_ref])`);
 
         this.nearestTable = [...tables].reduce((prev, current) => {
           return (Math.hypot(this.coordinate.x - (+current.dataset.anchorXTo), this.coordinate.y - (+current.dataset.anchorYTo)) < Math.hypot(this.coordinate.x - (+prev.dataset.anchorXTo), this.coordinate.y - (+prev.dataset.anchorYTo))) ? current : prev;
-          // return (Math.hypot(+e.target.dataset.x - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(+e.target.dataset.x - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
         });
 
         e.currentTarget.dataset.factId = this.nearestTable.id;
@@ -558,7 +560,6 @@ class DrawSVG {
     const joinSectionTo = this.dialogJoin.querySelector('.joins section[data-table-to]');
     joinSectionFrom.dataset.tableFrom = from.table;
     joinSectionFrom.dataset.tableId = from.key;
-    // if (from.cssClass === 'common') joinSectionFrom.querySelector('.join-field').dataset.factId = from.factId;
     joinSectionFrom.querySelector('.table').innerHTML = from.table;
     joinSectionTo.dataset.tableTo = to.table;
     joinSectionTo.dataset.tableId = to.key;
@@ -615,8 +616,6 @@ class DrawSVG {
     use.dataset.enterFn = 'tableEnter';
     // use.addEventListener('click', this.tableSelected.bind(this));
     use.ondblclick = this.handlerDblClick.bind(Draw);
-    // use.dataset.x = this.currentTable.x;
-    // use.dataset.y = this.currentTable.y;
     // punto di ancoraggio di destra
     use.dataset.anchorXTo = this.currentTable.x + 190;
     use.dataset.anchorYTo = this.currentTable.y + 12;
@@ -666,7 +665,8 @@ class DrawSVG {
     let commonStruct = this.svg.querySelector('#table-common').cloneNode(true);
     // const originTable = this.table;
     commonStruct.id = `struct-common-${this.currentTable.key}`;
-    commonStruct.classList.add('struct', 'common');
+    // commonStruct.classList.add('struct', 'common');
+    commonStruct.classList.add('struct');
     commonStruct.querySelector('text').innerHTML = this.currentTable.name;
     this.svg.querySelector('defs').appendChild(commonStruct);
     const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
@@ -674,8 +674,6 @@ class DrawSVG {
 
     use.id = this.currentTable.key;
     use.classList.add('table');
-    use.classList.add(this.currentTable.cssClass);
-    // use.dataset.id = this.currentTable.id;
     use.dataset.tableJoin = this.currentTable.join;
     use.dataset.table = this.currentTable.table;
     use.dataset.factId = this.currentTable.factId;
@@ -686,8 +684,6 @@ class DrawSVG {
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;
-    // use.dataset.x = this.currentTable.x;
-    // use.dataset.y = this.currentTable.y;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
     // punto di ancoraggio di destra
@@ -720,10 +716,9 @@ class DrawSVG {
     use.setAttribute('href', `#${clonedStruct.id}`);
     use.id = this.currentTable.key;
     use.classList.add('table');
+    // WARN: La proprietà cssClass, che era stata utilizzata per gestire l'analisi multifatti, è da
+    // rivedere perchè probabilmente può essere eliminata
     use.classList.add(this.currentTable.cssClass);
-    // use.classList.add('table');
-    // if (this.currentTable.cssClass === 'shared') use.classList.add(this.currentTable.cssClass);
-    // use.dataset.id = `data-${this.currentTable.id}`;
     use.dataset.table = this.currentTable.table;
     use.dataset.alias = this.currentTable.alias;
     use.dataset.factId = this.currentTable.factId;
@@ -870,7 +865,7 @@ class DrawSVG {
       join: null,
       factId: null,
       dimensionId: this.table.dataset.dimensionId,
-      cssClass: 'common'
+      // cssClass: 'common'
     };
 
     this.tables = tableObj;
