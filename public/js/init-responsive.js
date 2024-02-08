@@ -2643,7 +2643,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     WorkBook.checkChanges('canvas');
   }
 
-  // salvataggio dimensione TIME
+  // salvataggio dimensione TIME dalla dialog-time
   app.saveTimeDimension = async () => {
     const timeField = document.querySelector('#time-fields > li[data-selected]').dataset.field;
     const timeColumn = document.querySelector('#ul-columns > li[data-selected]').dataset.label;
@@ -2651,61 +2651,64 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const table = document.querySelector('#ul-columns > li[data-selected]').dataset.table;
     const token = rand().substring(0, 7);
     WorkBook.dateTime = { tableAlias, timeField: timeColumn };
+    console.log(WorkBook.activeTable);
+    debugger;
     // WARN: solo per vertica in questo caso.
     // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
     WorkBook.join = {
       token,
       value: {
         alias: 'WEB_BI_TIME',
-        SQL: [`TO_CHAR(${tableAlias}.${timeColumn})::DATE`, `WEB_BI_TIME.${timeField}`], // [DocVenditaDettaglio_xxx.DataDocumento, WEB_BI_TIME.date]
+        // [DocVenditaDettaglio.DataDocumento, WEB_BI_TIME.date]
+        SQL: [`TO_CHAR(${tableAlias}.${timeColumn})::DATE`, `WEB_BI_TIME.${timeField}`],
+        factId: WorkBook.activeTable.dataset.factId,
         from: { table: 'WEB_BI_TIME', alias: 'WEB_BI_TIME', field: timeField },
         to: { table, alias: tableAlias, field: timeColumn }
       }
     };
     WorkBook.joins = token; // nome della tabella con le proprie join (WorkBook.nJoin) all'interno
-    console.log(WorkBook.activeTable);
     Draw.tables = {
-      id: 'svg-data-web_bi_time', properties: {
-        id: 'web_bi_time',
-        key: 'svg-data-web_bi_time',
-        x: 10,
-        y: 10,
-        table: 'WEB_BI_TIME',
-        alias: 'WEB_BI_TIME',
-        name: 'WEB_BI_TIME',
-        schema: 'decisyon_cache',
-        joins: 0,
-        // TODO: aggiungere il factId
-        // factId : null
-        join: WorkBook.activeTable.id,
-        // levelId: 0
-      }
+      id: `svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`,
+      // id: 'svg-data-web_bi_time',
+      // key: `svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`,
+      key: 'svg-data-web_bi_time',
+      x: 20,
+      y: 20,
+      table: 'WEB_BI_TIME',
+      alias: 'WEB_BI_TIME',
+      name: 'WEB_BI_TIME',
+      schema: 'decisyon_cache',
+      joins: 0,
+      factId: WorkBook.activeTable.dataset.factId,
+      join: WorkBook.activeTable.id
     };
-    Draw.currentTable = Draw.tables.get('svg-data-web_bi_time');
+    // Draw.currentTable = Draw.tables.get('svg-data-web_bi_time');
+    Draw.currentTable = Draw.tables.get(`svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`);
     Draw.drawTime();
 
     WorkBook.createDataModel();
     app.hierTables();
     // recupero tutti i campi della WEB_BI_TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     WorkBook.activeTable = 'svg-data-web_bi_time';
+    // WorkBook.activeTable = `svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`;
+    debugger;
     if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
+    // creo tutte le colonne della tabella TIME nell'object WorkBook.field/s
     const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
     data.forEach(column => {
       const tokenField = rand().substring(0, 7);
-      debugger;
       WorkBook.field = {
         token: tokenField,
         value: {
           token: tokenField,
           type: 'column',
+          tableId: WorkBook.activeTable.id,
           schema: WorkBook.activeTable.dataset.schema,
           tableAlias: WorkBook.activeTable.dataset.alias,
           table: WorkBook.activeTable.dataset.table,
           name: column.column_name,
           origin_field: column.column_name,
           field: {
-            // id: { field: column.column_name, type: 'da implementare', origin_field: column.column_name },
-            // ds: { field: column.column_name, type: 'da implementare', origin_field: column.column_name }
             id: { sql: [column.column_name], datatype: column.type_name.toLowerCase() },
             ds: { sql: [column.column_name], datatype: column.type_name.toLowerCase() }
           }
@@ -2787,7 +2790,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   // TODO: test fn
   app.addFields_test = (ul, response) => {
-    debugger;
+    ul.querySelectorAll('li').forEach(li => li.remove());
     for (const [key, value] of Object.entries(response)) {
       const content = app.tmplList.content.cloneNode(true);
       const li = content.querySelector('li[data-li]');

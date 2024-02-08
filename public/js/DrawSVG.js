@@ -242,6 +242,8 @@ class DrawSVG {
     // console.log(this.dragElementPosition);
     // alcune proprietà di this.tables sono presente sia quando viene droppataa una Fact che quando
     // viene droppata una tabella dimensionale
+    // WARN: 2024.02.08 - Probabilmente la prop 'id' non è utilizzata (key ha lo stesso valore)
+    // WARN: 2024.02.08 - cssClass dovrebbe essere eliminato (in createDataModel() viene utilizzato data-shared_ref)
     const tableObj = {
       id,
       key: id,
@@ -720,7 +722,7 @@ class DrawSVG {
     use.setAttribute('href', `#${clonedStruct.id}`);
     use.id = this.currentTable.key;
     use.classList.add('table');
-    // WARN: La proprietà cssClass, che era stata utilizzata per gestire l'analisi multifatti, è da
+    // WARN: 2024.02.08 - La proprietà cssClass, che era stata utilizzata per gestire l'analisi multifatti, è da
     // rivedere perchè probabilmente può essere eliminata
     use.classList.add(this.currentTable.cssClass);
     use.dataset.table = this.currentTable.table;
@@ -766,15 +768,14 @@ class DrawSVG {
     use.setAttribute('href', '#time');
     use.id = this.currentTable.key;
     use.classList.add('time');
-    use.dataset.id = `data-${this.currentTable.id}`;
+    // use.dataset.id = `data-${this.currentTable.id}`;
     use.dataset.table = this.currentTable.table;
     use.dataset.name = this.currentTable.name;
     use.dataset.alias = this.currentTable.alias;
     use.dataset.schema = this.currentTable.schema;
+    use.dataset.factId = this.currentTable.factId;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
-    use.dataset.x = this.currentTable.x;
-    use.dataset.y = this.currentTable.y;
     Draw.svg.appendChild(use);
   }
 

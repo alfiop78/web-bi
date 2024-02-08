@@ -321,8 +321,6 @@ class WorkBooks {
 
   // INFO: da valutare se salvare tutto il dataModel quando si salva il workbook oppure man mano che si aggiungono
   // tabelle al canvas
-  // TODO: potrei utilizzare il set e passare al Metodo l'array di nodi della/e Fact
-
   createDataModel() {
     Draw.svg.querySelectorAll("use.table.fact:not([data-joins='0'])").forEach(fact => {
       let joinTables = [];
@@ -373,7 +371,8 @@ class WorkBooks {
       // Successivamente, nel ciclo dimensionTables, vado ad invocare una funzione ricorsiva
       // che cerca le tabelle gerarchicamente "inferiori", fino alla Fact, e le aggiunge a joinTables.
       const dimensionTables = (common) ? originTables :
-        Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`);
+        Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}'], use.time[data-fact-id='${fact.id}']`);
+      // Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`);
 
       dimensionTables.forEach(table => {
         joinTables = [{ table: table.dataset.alias, id: table.id }];
