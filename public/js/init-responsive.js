@@ -2148,34 +2148,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.cancelFormulaObject = (e) => e.currentTarget.parentElement.remove();
 
-  /* app.setFrom = (tableAlias) => {
-    let from = {};
-    if (WorkBook.dataModel.has(tableAlias)) {
-      WorkBook.dataModel.get(tableAlias).forEach(tableId => {
-        from[Draw.tables.get(tableId).alias] = {
-          schema: Draw.tables.get(tableId).schema,
-          table: Draw.tables.get(tableId).table
-        }
-      });
-      return from;
-    }
-  }
-
-  app.setJoins = (tableAlias) => {
-    let joins = {};
-    if (WorkBook.dataModel.has(tableAlias)) {
-      WorkBook.dataModel.get(tableAlias).forEach(tableId => {
-        if (WorkBook.joins.has(Draw.tables.get(tableId).alias)) {
-          for (const [token, join] of Object.entries(WorkBook.joins.get(Draw.tables.get(tableId).alias))) {
-            console.log(token, join);
-            joins[token] = join;
-          }
-        }
-      });
-      return joins;
-    }
-  } */
-
   // salvataggio di un filtro in WorkBook
   app.saveFilter = (e) => {
     const input = document.getElementById('input-filter-name');
