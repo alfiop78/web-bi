@@ -338,7 +338,7 @@ class Cube
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
     // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
-    // var_dump($sql);
+    var_dump($sql);
     // dd($sql);
     // $result = DB::connection('vertica_odbc')->raw($sql);
     // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
@@ -454,7 +454,7 @@ class Cube
     $comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($metrics)) . "\n*/\n";
 
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->_sql);";
-    // var_dump($sql);
+    var_dump($sql);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
     if (property_exists($this, 'json__info')) {
       $result = ["raw_sql" => nl2br($sql), "format_sql" => $this->json_info_advanced];
@@ -580,6 +580,8 @@ class Cube
       $s .= "\nFROM decisyon_cache.$this->baseTableName";
       $s .= "\nGROUP BY $this->_fieldsSQL";
       $sql = "/*Creazione DATAMART finale :\n{$this->datamartName}\n*/\nCREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS\n($s);";
+      var_dump($sql);
+      exit;
     }
 
     if (property_exists($this, 'json__info') || property_exists($this, 'json__info')) {
