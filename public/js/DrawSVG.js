@@ -185,7 +185,6 @@ class DrawSVG {
 
         // console.log(this.nearestPoint);
         if (this.currentLineRef) {
-
           this.currentLineRef.dataset.startX = this.nearestPoint.x; // start point x
           this.currentLineRef.dataset.startY = this.nearestPoint.y; // start point y
           this.currentLineRef.dataset.endX = this.nearestPoint.x2; // end point x
@@ -262,7 +261,6 @@ class DrawSVG {
     if (this.currentLineRef) {
       console.log(this.currentLineRef.classList);
       const lineObj = {
-        // id: this.currentLineRef.id,
         key: this.currentLineRef.id,
         start: { x: +this.currentLineRef.dataset.startX, y: +this.currentLineRef.dataset.startY },
         end: { x: +this.currentLineRef.dataset.endX, y: +this.currentLineRef.dataset.endY },
@@ -324,6 +322,8 @@ class DrawSVG {
       // this.joinLines = id;
       this.joinLines.get(this.currentLineRef.id).from = id;
       this.currentLineRef.dataset.from = id;
+      this.joinLines.get(this.currentLineRef.id).factId = this.nearestTable.dataset.factId;
+      this.currentLineRef.dataset.factId = this.nearestTable.dataset.factId;
       this.drawTable();
     }
     // WARN: non utilizzata in altri punti del codice
@@ -470,6 +470,8 @@ class DrawSVG {
         this.addFields(key, data);
       }
     }
+    this.currentLineRef.dataset.factId = this.nearestTable.dataset.factId;
+    this.joinLines.get(this.currentLineRef.id).factId = this.nearestTable.dataset.factId;
     this.joinLines.get(this.currentLineRef.id).start.x = +this.currentLineRef.dataset.startX;
     this.joinLines.get(this.currentLineRef.id).start.y = +this.currentLineRef.dataset.startY;
     this.joinLines.get(this.currentLineRef.id).end.x = +this.currentLineRef.dataset.endX;
@@ -495,6 +497,8 @@ class DrawSVG {
     this.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
     this.dialogJoin.querySelector('.joins section[data-table-from] > .join').appendChild(joinFieldFrom);
     this.dialogJoin.querySelector('.joins section[data-table-to] > .join').appendChild(joinFieldTo);
+    joinFieldFrom.dataset.factId = this.currentLineRef.dataset.factId;
+    joinFieldTo.dataset.factId = this.currentLineRef.dataset.factId;
     return { from: joinFieldFrom, to: joinFieldTo };
   }
 
@@ -515,7 +519,6 @@ class DrawSVG {
     // verifico se è presente una join su questa line
     if (!this.currentLineRef.dataset.joinId) {
       // join non presente
-      debugger;
       this.addJoin();
     } else {
       // join presente, popolo i join-field
@@ -552,16 +555,17 @@ class DrawSVG {
     // const from = this.tables.get(this.joinLines.get(this.currentLineRef.id).from);
     const to = this.tables.get(this.currentLineRef.dataset.to);
     // const to = this.tables.get(this.joinLines.get(this.currentLineRef.id).to);
-    // debugger;
 
     // 'from' è la tabella che sto droppando
     const joinSectionFrom = this.dialogJoin.querySelector('.joins section[data-table-from]');
     // 'to' è la tabella a cui collegare quella corrente (corrente si riferisce sempre a quella che sto droppando)
     const joinSectionTo = this.dialogJoin.querySelector('.joins section[data-table-to]');
     joinSectionFrom.dataset.tableFrom = from.table;
+    // joinSectionFrom.dataset.factId = from.factId;
     joinSectionFrom.dataset.tableId = from.key;
     joinSectionFrom.querySelector('.table').innerHTML = from.table;
     joinSectionTo.dataset.tableTo = to.table;
+    // joinSectionTo.dataset.factId = to.factId;
     joinSectionTo.dataset.tableId = to.key;
     joinSectionTo.querySelector('.table').innerHTML = to.table;
     this.dialogJoin.show();
@@ -890,21 +894,24 @@ class DrawSVG {
     lineClone.dataset.to = nearestTable.id;
     lineClone.dataset.startX = +nearestTable.dataset.anchorXTo;
     lineClone.dataset.startY = +nearestTable.dataset.anchorYTo;
+    debugger;
+    lineClone.dataset.factId = nearestTable.dataset.factId;
     const d = `M${+nearestTable.dataset.anchorXTo},${+nearestTable.dataset.anchorYTo} C${+nearestTable.dataset.anchorXTo + 40},${+nearestTable.dataset.anchorYTo} ${this.currentTable.x - 40},${this.currentTable.y + 12} ${this.currentTable.x - 10},${this.currentTable.y + 12}`;
     lineClone.setAttribute('d', d);
     // elimino, dalla nuova linea clonata, il data-join-id, se presente, perchè qui sto creando una nuova join
     if ('joinId' in lineClone.dataset) delete lineClone.dataset.joinId;
     this.svg.appendChild(lineClone);
     this.currentLineRef = lineClone.id;
-    const lineObj = {
+    this.joinLines = {
       key: this.currentLineRef.id,
       start: { x: +this.currentLineRef.dataset.startX, y: +this.currentLineRef.dataset.startY },
       end: { x: +this.currentLineRef.dataset.endX, y: +this.currentLineRef.dataset.endY },
       from: this.currentTable.key,
+      factId: this.currentLineRef.dataset.factId,
       to: this.currentLineRef.dataset.to,
       cssClass: this.currentLineRef.classList.value
     };
-    this.joinLines = lineObj;
+    debugger;
   }
 
   contextMenuTable(e) {

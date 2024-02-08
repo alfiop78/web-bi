@@ -583,7 +583,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // aggiungo a Sheet.fields solo le proprietà utili alla creazione della query
     // TODO: da aggiungere in fase di creazione del process
     Sheet.tables = WorkBook.field.get(token).tableAlias;
-    Sheet.sidTables = WorkBook.field.get(token).tableId;
+    // Sheet.sidTables = WorkBook.field.get(token).tableId;
+    Sheet.sidTables = WorkBook.field.get(token);
     target.appendChild(field);
     // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
     // i.addEventListener('click', app.handlerSetMetric);
@@ -1572,6 +1573,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       // verifico le tabelle da includere in tables Sheet.tables
       Sheet.tables = WorkBook.field.get(token).tableAlias;
       // WARN: qui dovrei aggiungere anche Sheet.sidTables
+      Sheet.sidTables = WorkBook.field.get(token);
       fields[token] = {
         token,
         field: WorkBook.field.get(token).field,
@@ -1631,7 +1633,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
               });
               (process.hasOwnProperty('advancedMeasures')) ? process.advancedMeasures[factId] = obj : process.advancedMeasures = { [factId]: obj };
             }
-            // debugger;
             break;
           default:
             // basic
@@ -1654,7 +1655,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     });
     console.log(process);
     app.setSheet();
-    debugger;
     process.from = Sheet.from;
     process.joins = Sheet.joins;
     debugger;
@@ -2279,7 +2279,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // in edit recupero il token da e.target.dataset.token
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
-    let object = { token, name, tables: new Set(), sid: new Set(), sql: [], from: new Map(), joins: {}, type: 'filter', formula: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
+    let object = { token, name, tables: new Set(), sidTables: new Map(), sql: [], from: new Map(), joins: {}, type: 'filter', formula: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
     const textarea = document.getElementById('textarea-filter');
     document.querySelectorAll('#textarea-filter *').forEach(element => {
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
@@ -2288,7 +2288,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       if (element.nodeName === 'MARK') {
         // object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
         object.tables.add(element.dataset.tableAlias);
-        object.sid.add(element.dataset.tableId);
+        object.sid.set(element.dataset.tableId, element.dataset.tableAlias);
         object.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
         object.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
         object.field = element.dataset.field;
@@ -2299,7 +2299,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     });
     // imposto le proprietà from e joins in base a quello che si trova in object.tables
     // object.tables contiene l'elenco delle tabelle incluse nella formula del filtro
-    object.sid.forEach(table => {
+    // object.sid.forEach(table => {
+    for (const [svg_id, table] of object.sidTables) {
+      // TEST: da testare dopo la modifica di sidTables in addField()
+
       /* per ogni tabella di dataModel, recupero le tabelle gerarchicamente inferiori e le aggiungo a
       * object.from solo se non sono già state aggiunte da precedenti tabelle
       */
@@ -2307,7 +2310,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       for (const factId of WorkBook.dataModel.keys()) {
         console.log('fact', factId);
         let factTable = Draw.tables.get(factId).alias;
-        // ottengo gli oggetti relativi a lla factId in ciclo
+        // ottengo gli oggetti relativi alla factId in ciclo
         const factRelated = WorkBook.dataModel.get(factId);
         if (factRelated.hasOwnProperty(table)) {
           let from = new Map(), joins = new Map();
@@ -2332,7 +2335,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             }
           });
           object.from.set(factTable, Object.fromEntries(from));
-          // object.joins[factTable] = joins;
           object.joins[factTable] = Object.fromEntries(joins);
         }
       }
@@ -2352,7 +2354,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
           }
         });
       } */
-    });
+    };
     console.log(object.from);
     console.log(object.joins);
     // TODO: ricontrollare il corretto funzionamento di questa logica utilizzando vari tipi di filtri
@@ -2598,31 +2600,31 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
     */
     Sheet.fact.forEach(factId => {
-      debugger;
-      let factTable = Draw.tables.get(factId).alias;
+      // let factTable = Draw.tables.get(factId).alias;
       let from = {}, joins = {};
-      Sheet.sidTables.forEach(svg_id => {
+      debugger;
+      // Sheet.tables.forEach(svg_id => {
+      // Sheet.sidTables.forEach(svg_id => {
+      for (const [tableAlias, svg_id] of Sheet.sidTables) {
         const tables = WorkBook.dataModel.get(factId);
         if (tables.hasOwnProperty(svg_id)) {
           tables[svg_id].forEach(tableId => {
             const data = Draw.tables.get(tableId);
             from[data.alias] = { schema: data.schema, table: data.table };
-            if (WorkBook.joins.has(data.alias)) {
+
+            // aggiungo le joins
+            /* if (WorkBook.joins.has(data.alias)) {
+              // esiste una join per questa tabella
               for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
-                if (data.cssClass !== 'tables') {
-                  if (join.to.alias === factTable) joins[token] = join;
-                } else {
-                  // joins.set(token, join);
-                  joins[token] = join;
-                }
+                if (join.factId === factId) joins[token] = join;
               }
-            }
+            } */
           });
         }
-      });
+      };
       // TODO: potrei utilizzarle qui con set() senza creare setters nella classe
       Sheet.from[factId] = from;
-      Sheet.joins[factId] = joins;
+      // Sheet.joins[factId] = joins;
     });
   }
 
@@ -2885,7 +2887,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     fieldRef.dataset.field = e.currentTarget.dataset.label;
     fieldRef.dataset.table = e.currentTarget.dataset.table;
     fieldRef.dataset.alias = e.currentTarget.dataset.alias;
-    // fieldRef.dataset.factId = e.currentTarget.dataset.factId;
     fieldRef.innerHTML = e.currentTarget.dataset.label;
     const token = fieldRef.dataset.token;
     // verifico se i due fieldRef[data-active] hanno il data-field impostato. Se vero, posso creare la join tra le due tabelle
@@ -2898,11 +2899,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
           alias: joins[0].dataset.alias,
           SQL: [`${joins[0].dataset.alias}.${joins[0].dataset.field}`, `${joins[1].dataset.alias}.${joins[1].dataset.field}`],
           from: { table: joins[0].dataset.table, alias: joins[0].dataset.alias, field: joins[0].dataset.field },
-          to: { table: joins[1].dataset.table, alias: joins[1].dataset.alias, field: joins[1].dataset.field }
+          to: { table: joins[1].dataset.table, alias: joins[1].dataset.alias, field: joins[1].dataset.field },
+          factId: fieldRef.dataset.factId
         }
-      };
-      if (joins[0].dataset.factId) WorkBook.join.get(fieldRef.dataset.token).factId = {
-        table: joins[0].dataset.factId, alias: Draw.tables.get(joins[0].dataset.factId).alias
       };
       WorkBook.joins = fieldRef.dataset.token; // nome della tabella con le proprie join (WorkBook.nJoin) all'interno
       WorkBook.checkChanges(token);

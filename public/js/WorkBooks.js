@@ -2,7 +2,7 @@
 class Sheets {
   #fields = new Map();
   #tables = new Set(); // tutte le tabelle usate nel report. In base a questo Set() posso creare la from e la where
-  #sidTables = new Set(); // id delle tabelle del canvas (svg-data-xxxxx)
+  #sidTables = new Map(); // id delle tabelle del canvas (svg-data-xxxxx)
   // #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #filters = new Set();
   #metrics = new Map();
@@ -37,7 +37,8 @@ class Sheets {
   get tables() { return this.#tables; }
 
   set sidTables(value) {
-    this.#sidTables.add(value);
+    this.#sidTables.set(value.tableAlias, value.tableId);
+    debugger;
   }
 
   get sidTables() { return this.#sidTables; }
@@ -509,6 +510,7 @@ class WorkBooks {
         line.dataset.from = value.from;
         line.dataset.joinId = value.name;
         line.dataset.to = value.to;
+        line.dataset.factId = value.factId;
         controlPoints.start.x = value.start.x + 40;
         controlPoints.start.y = value.start.y;
         controlPoints.end.x = value.end.x - 40;
@@ -558,101 +560,6 @@ class WorkBooks {
     }
 
     return this;
-  }
-
-}
-
-class Processes {
-  #fields = {};
-  #filters = {};
-  #facts = {};
-  constructor(Sheet) {
-    console.log(Sheet);
-    this.Sheet = Sheet;
-    console.log(this.Sheet);
-    this.facts = this.Sheet.fact;
-  }
-
-  set facts(value) {
-    value.forEach(fact => {
-      this.#facts[fact] = {};
-    });
-  }
-
-  get facts() { return this.#facts; }
-
-  set fields(value) {
-    this.#fields[value.token] = value;
-  }
-
-  get fields() { return this.#fields; }
-
-  set filters(value) {
-    this.#filters[value.token] = value;
-  }
-
-  get filters() { return this.#filters; }
-
-  set measures(value) {
-    this.#facts[value.factId].measures[value.token] = value;
-  }
-
-  baseMeasures(value) {
-    if (this.facts.hasOwnProperty('measures')) {
-      this.facts[value.factId].measures[value.token] = value;
-    } else {
-      this.facts[value.factId] = { measures: { [value.token]: value } };
-    }
-  }
-
-  from() {
-    this.Sheet.fact.forEach(factId => {
-      let from = {};
-      this.Sheet.sidTables.forEach(svg_id => {
-        const tables = WorkBook.dataModel.get(factId);
-        if (tables.hasOwnProperty(svg_id)) {
-          tables[svg_id].forEach(tableId => {
-            const data = Draw.tables.get(tableId);
-            from[data.alias] = { schema: data.schema, table: data.table };
-          });
-        }
-      });
-      this.facts[factId].from = from;
-    });
-  }
-
-  joins() {
-    this.Sheet.fact.forEach(factId => {
-      let factTable = Draw.tables.get(factId).alias;
-      let joins = {};
-      this.Sheet.sidTables.forEach(svg_id => {
-        const tables = WorkBook.dataModel.get(factId);
-        if (tables.hasOwnProperty(svg_id)) {
-          tables[svg_id].forEach(tableId => {
-            const data = Draw.tables.get(tableId);
-            if (WorkBook.joins.has(data.alias)) {
-              for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
-                if (data.cssClass !== 'tables') {
-                  if (join.to.alias === factTable) joins[token] = join;
-                } else {
-                  joins[token] = join;
-                }
-              }
-            }
-          });
-        }
-      });
-      this.facts[factId].joins = joins;
-    });
-  }
-
-  get process() {
-    return {
-      id: this.Sheet.sheet.id,
-      datamartId: this.Sheet.userId,
-      facts: this.facts, fields: this.fields,
-      filters: this.filters
-    };
   }
 
 }
