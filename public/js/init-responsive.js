@@ -2672,8 +2672,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       // id: 'svg-data-web_bi_time',
       // key: `svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`,
       key: 'svg-data-web_bi_time',
-      x: 20,
-      y: 20,
+      x: +WorkBook.activeTable.getAttribute('x'),
+      y: +WorkBook.activeTable.getAttribute('y') + 30,
       table: 'WEB_BI_TIME',
       alias: 'WEB_BI_TIME',
       name: 'WEB_BI_TIME',
@@ -2685,21 +2685,21 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // Draw.currentTable = Draw.tables.get('svg-data-web_bi_time');
     Draw.currentTable = Draw.tables.get(`svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`);
     Draw.drawTime();
+    WorkBook.activeTable.dataset.joins = ++WorkBook.activeTable.dataset.joins;
 
     WorkBook.createDataModel();
     app.hierTables();
     // recupero tutti i campi della WEB_BI_TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     WorkBook.activeTable = 'svg-data-web_bi_time';
     // WorkBook.activeTable = `svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`;
-    debugger;
     if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
     // creo tutte le colonne della tabella TIME nell'object WorkBook.field/s
     const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
-    data.forEach(column => {
-      const tokenField = rand().substring(0, 7);
-      WorkBook.field = {
-        token: tokenField,
-        value: {
+    if (!WorkBook.fields.has('WEB_BI_TIME')) {
+      data.forEach(column => {
+        const tokenField = rand().substring(0, 7);
+        debugger;
+        WorkBook.field = {
           token: tokenField,
           type: 'column',
           tableId: WorkBook.activeTable.id,
@@ -2712,10 +2712,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             id: { sql: [column.column_name], datatype: column.type_name.toLowerCase() },
             ds: { sql: [column.column_name], datatype: column.type_name.toLowerCase() }
           }
-        }
-      };
-      WorkBook.fields = tokenField;
-    });
+        };
+        WorkBook.fields = tokenField;
+      });
+    }
     WorkBook.checkChanges('time');
   }
 

@@ -263,7 +263,7 @@ class WorkBooks {
 
   // 'field/s' colonne create in fase di Mapping (quindi aggiunte al WorkBook)
   set field(object) {
-    this.#field.set(object.token, object.value);
+    this.#field.set(object.token, object);
     // TODO: dati utili al sistema di log
     // console.log('field aggiunto : ', `${object.value.name} (${object.token})`);
     // console.log('Elenco #field : ', this.#field);
@@ -323,7 +323,7 @@ class WorkBooks {
   // tabelle al canvas
   createDataModel() {
     Draw.svg.querySelectorAll("use.table.fact:not([data-joins='0'])").forEach(fact => {
-      let joinTables = [];
+      let joinTables = [], tables = {}, originTables = [];
       let recursive = (table) => {
         // table : svg-data-xxxx (questa è sempre la tabella "di origine" e mai quella .common)
         const tableRef = Draw.svg.querySelector(`use#${table}`);
@@ -340,15 +340,12 @@ class WorkBooks {
         joinTables.push({ table: tableJoin.dataset.alias, id: tableJoin.id });
         if (tableJoin.dataset.tableJoin) recursive(tableJoin.dataset.tableJoin);
       }
-      let tables = {};
       // verifico se, per la fact corrente, ci sono tabelle (quindi dimensioni) clonate.
       // Se ci sono tabelle in comune tra più fact 'common' sarà !== undefined
       // FIX: il metodo find() restituisce solo la prima shared_ref trovata, se ci sono più tabelle messe in
       // comune, sulla stessa fact, bisogna implementare una logica diversa, con .filter() anzichè .find().
       // Probabilmente si deve ciclare anche la dimensione attraverso dimensionId
       const common = [...Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`)].find(table => table.dataset.shared_ref);
-      // const common = [...Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`)].find(table => table.classList.contains('common'));
-      let originTables = [];
       if (common) {
         // nella Fact corrente (in ciclo) sono presenti dimensioni in comune con altre Fact.
         // In questo caso, recupero le tabelle gerarchicamente "superiori" a quella messa in comune.
@@ -364,6 +361,8 @@ class WorkBooks {
           });
         }
         recursiveDimension(common.dataset.shared_ref);
+        // verifico se esistono tabelle TIME appartenenti alla fact corrente
+        if (Draw.svg.querySelector(`use.time[data-fact-id='${fact.id}']`)) originTables.push(Draw.svg.querySelector(`use.time[data-fact-id='${fact.id}']`));
       }
       // quando ci sono tabelle .common nella fact.id in ciclo, per poter mettere in relazione
       // la tabelle.common con la "propria" Fact devo recuperare le tabelle della dimensione
@@ -456,7 +455,8 @@ class WorkBooks {
       } else if (value.hasOwnProperty('shared_ref')) {
         Draw.drawCommonTable();
       } else {
-        (key === 'svg-data-web_bi_time') ? Draw.drawTime() : Draw.drawTable();
+        debugger;
+        (value.key === 'svg-data-web_bi_time') ? Draw.drawTime() : Draw.drawTable();
       }
     }
 
