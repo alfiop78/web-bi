@@ -2,11 +2,8 @@
 class Sheets {
   #fields = new Map();
   #tables = new Set(); // tutte le tabelle usate nel report. In base a questo Set() posso creare la from e la where
-  #sidTables = new Map(); // id delle tabelle del canvas (svg-data-xxxxx)
-  // #from = new Map(); // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
   #filters = new Set();
   #metrics = new Map();
-  // #joins = new Map();
   #id;
   constructor(name, token, WorkBookToken) {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
@@ -35,13 +32,6 @@ class Sheets {
   }
 
   get tables() { return this.#tables; }
-
-  set sidTables(value) {
-    this.#sidTables.set(value.tableAlias, value.tableId);
-    debugger;
-  }
-
-  get sidTables() { return this.#sidTables; }
 
   // passaggio del token e recupero del field in WorkSheet tramite l'oggetto WorkBook passato al Costruttore
   set fields(object) {
@@ -216,21 +206,6 @@ class Sheets {
       });
   }
 
-  /* from() {
-    this.fact.forEach(factId => {
-      let from = {};
-      this.sidTables.forEach(svg_id => {
-        const tables = WorkBook.dataModel.get(factId);
-        if (tables.hasOwnProperty(svg_id)) {
-          tables[svg_id].forEach(tableId => {
-            const data = Draw.tables.get(tableId);
-            from[data.alias] = { schema: data.schema, table: data.table };
-          });
-        }
-      });
-      this.facts[factId].from = from;
-    });
-  } */
 }
 
 class WorkBooks {
@@ -363,7 +338,8 @@ class WorkBooks {
           Draw.svg.querySelector(`use.table[data-fact-id='${fact.id}'][data-shared_ref='${tableRef.id}']`) :
           // Draw.svg.querySelector(`use.table.common[data-fact-id='${fact.id}'][data-shared_ref='${tableRef.id}']`) :
           Draw.svg.querySelector(`use.table#${table}`);
-        joinTables.push(tableJoin.id);
+        // joinTables.push(tableJoin.dataset.alias);
+        joinTables.push({ table: tableJoin.dataset.alias, id: tableJoin.id });
         if (tableJoin.dataset.tableJoin) recursive(tableJoin.dataset.tableJoin);
       }
       let tables = {};
@@ -400,10 +376,11 @@ class WorkBooks {
         Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`);
 
       dimensionTables.forEach(table => {
-        joinTables = [table.id];
+        joinTables = [{ table: table.dataset.alias, id: table.id }];
+        // joinTables = [table.dataset.alias];
         // recupero la join associata alla tabella in ciclo
         if (table.dataset.tableJoin) recursive(table.dataset.tableJoin);
-        tables[table.id] = joinTables;
+        tables[table.dataset.alias] = joinTables;
       });
       // Creazione del DataModel con un oggetto Fact e, al suo interno, gli object relativi alle tabelle, per ogni fact
       this.#dataModel.set(fact.id, tables);

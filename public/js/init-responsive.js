@@ -583,8 +583,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // aggiungo a Sheet.fields solo le proprietà utili alla creazione della query
     // TODO: da aggiungere in fase di creazione del process
     Sheet.tables = WorkBook.field.get(token).tableAlias;
-    // Sheet.sidTables = WorkBook.field.get(token).tableId;
-    Sheet.sidTables = WorkBook.field.get(token);
     target.appendChild(field);
     // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
     // i.addEventListener('click', app.handlerSetMetric);
@@ -1572,8 +1570,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     for (const [token, field] of Sheet.fields) {
       // verifico le tabelle da includere in tables Sheet.tables
       Sheet.tables = WorkBook.field.get(token).tableAlias;
-      // WARN: qui dovrei aggiungere anche Sheet.sidTables
-      Sheet.sidTables = WorkBook.field.get(token);
       fields[token] = {
         token,
         field: WorkBook.field.get(token).field,
@@ -1653,119 +1649,27 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         }
       }
     });
-    console.log(process);
     app.setSheet();
     process.from = Sheet.from;
     process.joins = Sheet.joins;
-    debugger;
-
-    Sheet.filters.forEach(token => {
-      const filter = WorkBook.filters.get(token);
-      filter.tables.forEach(table => Sheet.tables = table);
-      debugger;
-      filters[token] = filter;
-    });
     // se non ci sono filtri nel Report bisogna far comparire un avviso
     // perchè l'elaborazione potrebbe essere troppo onerosa
     if (Sheet.filters.size === 0) {
       App.showConsole('Non sono presenti filtri nel report', 'error', 5000);
       return false;
-    }
-
-    process.filters = filters;
-    debugger;
-
-    //
-    /* let process = { from: {}, joins: {} };
-    let fields = new Map();
-    let metrics = new Map(), advancedMetrics = new Map(), compositeMetrics = new Map();
-    let filters = new Map();
-    // per ogni 'fields' aggiunto a Sheet.fields ne recupero le proprietà 'field', 'tableAlias' e 'name'
-    for (const [token, field] of Sheet.fields) {
-      // verifico le tabelle da includere in tables Sheet.tables
-      Sheet.tables = WorkBook.field.get(token).tableAlias;
-      fields.set(token, {
-        field: WorkBook.field.get(token).field,
-        // TODO: potrei passare i campi _id e _ds anche in questo modo, valutare se
-        // è più semplice gestirli in cube.php
-        // id: WorkBook.field.get(token).field.id,
-        // ds: WorkBook.field.get(token).field.ds,
-        tableAlias: WorkBook.field.get(token).tableAlias,
-        name: field
+    } else {
+      Sheet.filters.forEach(token => {
+        const filter = WorkBook.filters.get(token);
+        filter.tables.forEach(table => Sheet.tables = table);
+        filters[token] = filter;
       });
     }
 
-    for (const [token, metric] of Sheet.metrics) {
-      switch (metric.type) {
-        case 'composite':
-          compositeMetrics.set(token, {
-            alias: metric.alias,
-            SQL: WorkBook.metrics.get(token).sql,
-            metrics: WorkBook.metrics.get(token).metrics
-          });
-          break;
-        case 'advanced':
-          advancedMetrics.set(token, {
-            alias: metric.alias,
-            aggregateFn: metric.aggregateFn,
-            field: WorkBook.metrics.get(token).field,
-            SQL: WorkBook.metrics.get(token).SQL,
-            factId: WorkBook.metrics.factId,
-            distinct: WorkBook.metrics.get(token).distinct,
-            filters: {}
-          });
-          // aggiungo i filtri definiti all'interno della metrica avanzata
-          WorkBook.metrics.get(token).filters.forEach(filterToken => {
-            // se, nei filtri della metrica, sono presenti filtri di funzioni temporali,
-            // ...la definizione del filtro và recuperata da WorkBook.metrics.timingFn
-            if (['last-year', 'last-month', 'ecc...'].includes(filterToken)) {
-              advancedMetrics.get(token).filters[filterToken] = WorkBook.metrics.get(token).timingFn[filterToken];
-            } else {
-              advancedMetrics.get(token).filters[filterToken] = WorkBook.filters.get(filterToken);
-            }
-          });
-          // debugger;
-          break;
-        default:
-          // basic
-          metrics.set(token, {
-            alias: metric.alias,
-            aggregateFn: metric.aggregateFn,
-            field: WorkBook.metrics.get(token).field,
-            factId: WorkBook.metrics.get(token).factId,
-            SQL: WorkBook.metrics.get(token).SQL,
-            distinct: WorkBook.metrics.get(token).distinct
-          });
-          break;
-      }
-    }
+    process.filters = filters;
 
-    Sheet.filters.forEach(token => {
-      WorkBook.filters.get(token).tables.forEach(table => Sheet.tables = table);
-      // recupero l'object da inviare al process
-      filters.set(token, WorkBook.filters.get(token));
-    });
-    // se non ci sono filtri nel Report bisogna far comparire un avviso
-    // perchè l'elaborazione potrebbe essere troppo onerosa
-    if (Sheet.filters.size === 0) {
-      App.showConsole('Non sono presenti filtri nel report', 'error', 5000);
-      return false;
-    }
-
-    process.fields = Object.fromEntries(fields);
-    app.setSheet();
-    process.facts = [...Sheet.fact];
-    process.from = Sheet.from;
-    process.joins = Sheet.joins;
-    process.measures = Sheet.measures;
-    app.setSheet();
-    */
-    // process.filters = Object.fromEntries(filters);
-    /* if (metrics.size !== 0) process.metrics = Object.fromEntries(metrics);
-    if (advancedMetrics.size !== 0) process.advancedMeasures = Object.fromEntries(advancedMetrics);
-    if (compositeMetrics.size !== 0) process.compositeMeasures = Object.fromEntries(compositeMetrics); */
     // TODO: utilizzare un unica funzione, se viene passato 'json__info' deve essere
     // elaborato il generateSQL() altrimenti il process()
+    debugger;
     (e.target.id === 'btn-sheet-preview') ? app.process(process) : app.generateSQL(process);
   }
 
@@ -1897,7 +1801,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     process.datamartId = Sheet.userId;
     // console.log(process);
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
-    const params = JSON.stringify(process.process);
+    const params = JSON.stringify(process);
     console.log(params);
     debugger;
     // App.showConsole('Elaborazione in corso...', 'info');
@@ -2279,7 +2183,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // in edit recupero il token da e.target.dataset.token
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
-    let object = { token, name, tables: new Set(), sidTables: new Map(), sql: [], from: new Map(), joins: {}, type: 'filter', formula: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
+    let object = { token, name, tables: new Set(), sql: [], from: {}, joins: {}, type: 'filter', formula: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
     const textarea = document.getElementById('textarea-filter');
     document.querySelectorAll('#textarea-filter *').forEach(element => {
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
@@ -2288,7 +2192,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       if (element.nodeName === 'MARK') {
         // object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
         object.tables.add(element.dataset.tableAlias);
-        object.sid.set(element.dataset.tableId, element.dataset.tableAlias);
         object.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
         object.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
         object.field = element.dataset.field;
@@ -2298,72 +2201,34 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       }
     });
     // imposto le proprietà from e joins in base a quello che si trova in object.tables
-    // object.tables contiene l'elenco delle tabelle incluse nella formula del filtro
-    // object.sid.forEach(table => {
-    for (const [svg_id, table] of object.sidTables) {
-      // TEST: da testare dopo la modifica di sidTables in addField()
+    // per ogni Fact presente nel dataModel
+    for (const factId of WorkBook.dataModel.keys()) {
+      // WARN: 2024.02.08 questa logica è utilizzata anche in setSheet(). Creare un metodo riutilizzabile.
+      let from = {}, joins = {};
+      // object.tables : l'alias della tabella
+      object.tables.forEach(tableAlias => {
+        const tables = WorkBook.dataModel.get(factId);
+        if (tables.hasOwnProperty(tableAlias)) {
+          tables[tableAlias].forEach(table => {
+            const data = Draw.tables.get(table.id);
+            // 'from' del filtro, questo indica quali tabelle includere quando si utilizza
+            // questo filtro nel report
+            from[data.alias] = { schema: data.schema, table: data.table };
 
-      /* per ogni tabella di dataModel, recupero le tabelle gerarchicamente inferiori e le aggiungo a
-      * object.from solo se non sono già state aggiunte da precedenti tabelle
-      */
-      // per ogni cubo
-      for (const factId of WorkBook.dataModel.keys()) {
-        console.log('fact', factId);
-        let factTable = Draw.tables.get(factId).alias;
-        // ottengo gli oggetti relativi alla factId in ciclo
-        const factRelated = WorkBook.dataModel.get(factId);
-        if (factRelated.hasOwnProperty(table)) {
-          let from = new Map(), joins = new Map();
-          factRelated[table].forEach(tableId => {
-            // recupero alias, schema e nome tabella dall'oggetto Draw.tables
-            const tableData = Draw.tables.get(tableId);
-            // creo il 'from' del filtro, questo indica quali tabelle si devono utilizzare quando si usa questo filtro
-            // nel report
-            from.set(tableData.alias, {
-              schema: tableData.schema, table: tableData.table
-            });
-            // object.from.set(factTable, from);
-            // join, indica quali join utilizzare quando si utilizza questo filtro in un report
-            if (WorkBook.joins.has(tableData.alias)) {
-              for (const [token, join] of Object.entries(WorkBook.joins.get(tableData.alias))) {
-                if (tableData.cssClass !== 'tables') {
-                  if (join.to.alias === factTable) joins.set(token, join);
-                } else {
-                  joins.set(token, join);
-                }
+            // 'join', indica quali join utilizzare quando si utilizza questo filtro in un report
+            if (WorkBook.joins.has(data.alias)) {
+              // esiste una join per questa tabella
+              for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
+                if (join.factId === factId) joins[token] = join;
               }
             }
           });
-          object.from.set(factTable, Object.fromEntries(from));
-          object.joins[factTable] = Object.fromEntries(joins);
         }
-      }
-      /* if (WorkBook.dataModel.has(table)) {
-        WorkBook.dataModel.get(table).forEach(tableId => {
-          if (!object.from.has(Draw.tables.get(tableId).alias)) {
-            object.from.set(Draw.tables.get(tableId).alias, {
-              schema: Draw.tables.get(tableId).schema,
-              table: Draw.tables.get(tableId).table
-            });
-          }
-          // joins
-          if (WorkBook.joins.has(Draw.tables.get(tableId).alias)) {
-            for (const [token, join] of Object.entries(WorkBook.joins.get(Draw.tables.get(tableId).alias))) {
-              object.joins[token] = join;
-            }
-          }
-        });
-      } */
-    };
-    console.log(object.from);
-    console.log(object.joins);
-    // TODO: ricontrollare il corretto funzionamento di questa logica utilizzando vari tipi di filtri
-    // converto da Map() in object altrimenti non può essere salvato in localStorage e DB
-    object.from = Object.fromEntries(object.from);
+      });
+      object.from[factId] = from;
+      object.joins[factId] = joins;
+    }
     object.tables = [...object.tables];
-    debugger;
-    // TODO: 2024.02.03 filtro da ricreare
-    object.sid = [...object.sid];
     // la prop 'created_at' va aggiunta solo in fase di nuovo filtro e non quando si aggiorna il filtro
     if (e.target.dataset.token) {
       // aggiornamento del filtro
@@ -2600,31 +2465,29 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
     */
     Sheet.fact.forEach(factId => {
-      // let factTable = Draw.tables.get(factId).alias;
+      // WARN: 2024.02.08 questa logica è utilizzata anche in saveFilter(). Creare un metodo riutilizzabile.
       let from = {}, joins = {};
-      debugger;
-      // Sheet.tables.forEach(svg_id => {
-      // Sheet.sidTables.forEach(svg_id => {
-      for (const [tableAlias, svg_id] of Sheet.sidTables) {
+
+      Sheet.tables.forEach(tableAlias => {
         const tables = WorkBook.dataModel.get(factId);
-        if (tables.hasOwnProperty(svg_id)) {
-          tables[svg_id].forEach(tableId => {
-            const data = Draw.tables.get(tableId);
+        if (tables.hasOwnProperty(tableAlias)) {
+          tables[tableAlias].forEach(table => {
+            const data = Draw.tables.get(table.id);
             from[data.alias] = { schema: data.schema, table: data.table };
 
             // aggiungo le joins
-            /* if (WorkBook.joins.has(data.alias)) {
+            if (WorkBook.joins.has(data.alias)) {
               // esiste una join per questa tabella
               for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
                 if (join.factId === factId) joins[token] = join;
               }
-            } */
+            }
           });
         }
-      };
-      // TODO: potrei utilizzarle qui con set() senza creare setters nella classe
+
+      });
       Sheet.from[factId] = from;
-      // Sheet.joins[factId] = joins;
+      Sheet.joins[factId] = joins;
     });
   }
 

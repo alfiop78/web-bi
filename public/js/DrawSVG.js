@@ -894,7 +894,6 @@ class DrawSVG {
     lineClone.dataset.to = nearestTable.id;
     lineClone.dataset.startX = +nearestTable.dataset.anchorXTo;
     lineClone.dataset.startY = +nearestTable.dataset.anchorYTo;
-    debugger;
     lineClone.dataset.factId = nearestTable.dataset.factId;
     const d = `M${+nearestTable.dataset.anchorXTo},${+nearestTable.dataset.anchorYTo} C${+nearestTable.dataset.anchorXTo + 40},${+nearestTable.dataset.anchorYTo} ${this.currentTable.x - 40},${this.currentTable.y + 12} ${this.currentTable.x - 10},${this.currentTable.y + 12}`;
     lineClone.setAttribute('d', d);
@@ -911,7 +910,6 @@ class DrawSVG {
       to: this.currentLineRef.dataset.to,
       cssClass: this.currentLineRef.classList.value
     };
-    debugger;
   }
 
   contextMenuTable(e) {
