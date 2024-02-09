@@ -303,7 +303,7 @@ class MapDatabaseController extends Controller
           // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
           // $datamartName = $q->createDatamart();
           // Restituisco il reportId
-          return $q->createDatamart();
+          // return $q->createDatamart();
 
           // restituisco un ANTEPRIMA del datamart appena creato
           // WARN: Errore di memory exhausted, bisogna utilizzare il paginate()

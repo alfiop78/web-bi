@@ -1582,7 +1582,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       };
     }
     process.fields = fields;
-    debugger;
 
     Sheet.fact.forEach(factId => {
       // es. :
@@ -1650,10 +1649,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         }
       }
     });
-    app.setSheet();
-    process.from = Sheet.from;
-    process.joins = Sheet.joins;
-    debugger;
     // se non ci sono filtri nel Report bisogna far comparire un avviso
     // perchè l'elaborazione potrebbe essere troppo onerosa
     if (Sheet.filters.size === 0) {
@@ -1668,6 +1663,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
 
     process.filters = filters;
+    app.setSheet();
+    process.from = Sheet.from;
+    process.joins = Sheet.joins;
 
     // TODO: utilizzare un unica funzione, se viene passato 'json__info' deve essere
     // elaborato il generateSQL() altrimenti il process()
