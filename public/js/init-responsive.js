@@ -1582,6 +1582,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       };
     }
     process.fields = fields;
+    debugger;
 
     Sheet.fact.forEach(factId => {
       // es. :
@@ -1652,6 +1653,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.setSheet();
     process.from = Sheet.from;
     process.joins = Sheet.joins;
+    debugger;
     // se non ci sono filtri nel Report bisogna far comparire un avviso
     // perchè l'elaborazione potrebbe essere troppo onerosa
     if (Sheet.filters.size === 0) {
@@ -2434,6 +2436,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.setSheet = () => {
     Sheet.fact.forEach(factId => {
+      debugger;
       // WARN: 2024.02.08 questa logica è utilizzata anche in saveFilter(). Creare un metodo riutilizzabile.
       let from = {}, joins = {};
       Sheet.tables.forEach(tableAlias => {
@@ -2473,9 +2476,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   // viene invocata alla fine del drag&drop
   app.hierTables = () => {
-    // TODO: probabilmente dovrò utilizzare una struttura come quella in WorkBook.DataModel
-    // cioè con le tabelle strutturate all'interno degli oggetti fact
-    //
     // creo hierTables : qui sono presenti tutte le tabelle del canvas. Questa mi serve per creare la struttura nello WorkBook
     /*{
      * {
@@ -2504,7 +2504,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       console.log(WorkBook.hierTables);
     });
   }
-
 
   // TODO: potrebbe essere spostata in supportFn.js
   app.handlerToggleDrawer = (e) => {
@@ -3057,19 +3056,22 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // app.workbookTablesStruct.querySelectorAll('details').forEach(detail => detail.remove());
     app.workbookTablesStruct.querySelectorAll('#ul-metrics > li, #ul-filters > li, details').forEach(element => element.remove());
     const parent = app.workbookTablesStruct.querySelector('#nav-fields');
-    for (const [tableId, value] of WorkBook.hierTables) {
+
+    for (const [tableAlias, prop] of WorkBook.workBookMap) {
+      console.log(tableAlias);
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
-      const li = tmpl.querySelector("li");
       const summary = details.querySelector('summary');
-      WorkBook.activeTable = tableId;
-      details.dataset.alias = value.alias;
-      details.dataset.table = value.name;
-      summary.innerHTML = value.name;
-      summary.dataset.tableId = tableId;
+      WorkBook.activeTable = prop.key;
+      details.dataset.alias = tableAlias;
+      details.dataset.schema = prop.schema;
+      details.dataset.table = prop.name;
+      // summary.dataset.tableId = prop.key;
+      summary.innerHTML = prop.name;
       parent.appendChild(details);
       app.addDefinedFields(details);
     }
+
     if (WorkBook.filters.size !== 0) app.addDefinedFilters();
     app.addDefinedMetrics();
   }

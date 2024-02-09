@@ -64,6 +64,7 @@ class Sheets {
 
   save() {
     this.sheet.fields = Object.fromEntries(this.fields);
+    debugger;
     this.sheet.from = this.from;
     this.sheet.joins = this.joins;
     // this.sheet.from = Object.fromEntries(this.from);
@@ -434,6 +435,19 @@ class WorkBooks {
       this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
     }
     WorkBookStorage.save(this.workBook);
+  }
+
+  get workBookMap() {
+    let map = new Map();
+    Draw.svg.querySelectorAll('use').forEach(table => {
+      if (!map.has(table.dataset.alias)) map.set(table.dataset.alias, {
+        key: table.id,
+        schema: table.dataset.schema,
+        table: table.dataset.table,
+        name: table.dataset.name
+      });
+    });
+    return map;
   }
 
   open(token) {
