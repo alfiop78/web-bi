@@ -2433,13 +2433,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   app.setSheet = () => {
-    /*
-    * ogni tabella aggiunta al report comporta la ricostruzione di 'from' e 'joins'
-    */
     Sheet.fact.forEach(factId => {
       // WARN: 2024.02.08 questa logica è utilizzata anche in saveFilter(). Creare un metodo riutilizzabile.
       let from = {}, joins = {};
-
       Sheet.tables.forEach(tableAlias => {
         const tables = WorkBook.dataModel.get(factId);
         if (tables.hasOwnProperty(tableAlias)) {
@@ -2456,11 +2452,13 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             }
           });
         }
-
       });
       Sheet.from[factId] = from;
       Sheet.joins[factId] = joins;
     });
+    console.info('controllo from : ', Sheet.from);
+    console.info('controllo joins : ', Sheet.joins);
+    debugger;
   }
 
   app.showTablePreview = async (e) => {
@@ -2652,7 +2650,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const token = rand().substring(0, 7);
     WorkBook.dateTime = { tableAlias, timeField: timeColumn };
     console.log(WorkBook.activeTable);
-    debugger;
     // WARN: solo per vertica in questo caso.
     // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
     WorkBook.join = {
@@ -2684,21 +2681,21 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     };
     // Draw.currentTable = Draw.tables.get('svg-data-web_bi_time');
     Draw.currentTable = Draw.tables.get(`svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`);
-    Draw.drawTime();
     WorkBook.activeTable.dataset.joins = ++WorkBook.activeTable.dataset.joins;
+    Draw.tables.get(`${WorkBook.activeTable.id}`).joins = +WorkBook.activeTable.dataset.joins;
+    Draw.drawTime();
 
     WorkBook.createDataModel();
     app.hierTables();
     // recupero tutti i campi della WEB_BI_TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
-    WorkBook.activeTable = 'svg-data-web_bi_time';
-    // WorkBook.activeTable = `svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`;
+    // WorkBook.activeTable = 'svg-data-web_bi_time';
+    WorkBook.activeTable = `svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`;
     if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
     // creo tutte le colonne della tabella TIME nell'object WorkBook.field/s
     const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
     if (!WorkBook.fields.has('WEB_BI_TIME')) {
       data.forEach(column => {
         const tokenField = rand().substring(0, 7);
-        debugger;
         WorkBook.field = {
           token: tokenField,
           type: 'column',
@@ -2852,17 +2849,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
     WorkBook.field = {
       token,
-      value: {
-        token,
-        type: 'column',
-        schema: WorkBook.schema,
-        tableAlias: WorkBook.activeTable.dataset.alias,
-        tableId: WorkBook.activeTable.id,
-        table: WorkBook.activeTable.dataset.table,
-        name: fieldName,
-        origin_field: WorkBook.currentField,
-        field: fields
-      }
+      type: 'column',
+      schema: WorkBook.schema,
+      tableAlias: WorkBook.activeTable.dataset.alias,
+      tableId: WorkBook.activeTable.id,
+      table: WorkBook.activeTable.dataset.table,
+      name: fieldName,
+      origin_field: WorkBook.currentField,
+      field: fields
     };
     debugger; // 03.02.2024 impostata la prop tableId
     // WorkBook.field contiene l'elenco dei field aggiunti al WorkBook

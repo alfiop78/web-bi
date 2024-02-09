@@ -218,7 +218,7 @@ class WorkBooks {
   #joins = new Map();
   #dateTime;
   #tableJoins = { from: null, to: null }; // refs
-  #dataModel = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
+  #dataModel = new Map();
   #hierTables = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   #options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
 
@@ -455,7 +455,6 @@ class WorkBooks {
       } else if (value.hasOwnProperty('shared_ref')) {
         Draw.drawCommonTable();
       } else {
-        debugger;
         (value.key === 'svg-data-web_bi_time') ? Draw.drawTime() : Draw.drawTable();
       }
     }
@@ -500,7 +499,7 @@ class WorkBooks {
     for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.fields)) {
       // per ogni tabella
       for (const [token, column] of Object.entries(values)) {
-        this.field = { token, value: column };
+        this.field = column;
         this.fields = token;
       }
     }
