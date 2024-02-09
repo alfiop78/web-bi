@@ -100,9 +100,9 @@ Route::get('/fetch_api/copy_from/{from_id}/copy_to/{to_id}/copy_table', [MapData
 
 // creazione dimensione time
 // Route::post('/fetch_api/dimension/time', [MapDatabaseController::class, 'createTimeDimension'])->name('web_bi.fetch_api.time');
-Route::post('/fetch_api/dimension/time', function () {
+Route::get('/fetch_api/dimension/time', function () {
   $start = new DateTime('2021-01-01 00:00:00');
-  $end   = new DateTime('2024-01-01 00:00:00');
+  $end   = new DateTime('2025-01-01 00:00:00');
   $interval = new DateInterval('P1D');
   $period = new DatePeriod($start, $interval, $end);
   $json = (object) null;
@@ -122,7 +122,7 @@ Route::post('/fetch_api/dimension/time', function () {
         "ds" => $currDate->format('F'),
         "short" => $currDate->format('M')
       ],
-      "quarter" => (object) ["id" => $quarter, "ds" => "Q {$quarter}"],
+      "quarter" => (object) ["key" => "{$currDate->format('Y')}0{$quarter}", "id" => $quarter, "ds" => "Q {$quarter}"],
       "year" => $currDate->format('Y'),
       "day_of_year" => $currDate->format('z'),
       // "lastOfMonth" => $current->format('t'),
@@ -135,8 +135,12 @@ Route::post('/fetch_api/dimension/time', function () {
       ]
     ];
   }
-  if (!DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable('WEB_BI_TIME')) {
+  // dd($json);
+  // if (!DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable('WEB_BI_TIME')) {
+  if (!Schema::connection('vertica_odbc')->hasTable('WEB_BI_TIME')) {
     // la tabella non esiste, la creo
+    // TODO: utilizzare il complex datatype ROW (vertica) per creare le colonne come "strutture dati".
+    // Per recuperarne i valori non bisogna utilizzare MapJSONExtractor ma la sintassi xxx.yyy
     $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WEB_BI_TIME (
     date DATE NOT NULL PRIMARY KEY,
     trans_ly DATE,

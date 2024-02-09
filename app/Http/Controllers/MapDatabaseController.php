@@ -487,6 +487,91 @@ class MapDatabaseController extends Controller
     // echo gettype($cube);
     // dd($request);
     // per accedere al contenuto della $request lo converto in json codificando la $request e decodificandolo in json
+    $process = json_decode(json_encode($request->all())); // object
+    $q = new Cube();
+    // imposto le proprietà con i magic methods
+    $q->reportId = $process->{'id'};
+    $q->facts = $process->{'facts'}; // array
+    $q->datamartId = $process->{'datamartId'};
+    // $q->baseTableName = "WEB_BI_TMP_BASE_{$q->reportId}_{$q->datamartId}";
+    $q->datamartName = "WEB_BI_{$q->reportId}_{$q->datamartId}";
+    $q->baseColumns = $process->{'fields'};
+    $q->json__info = (object)[
+      "SELECT" => (object)[],
+      "METRICS" => (object)[],
+      "FROM" => (object)[],
+      "WHERE" => (object)[],
+      "WHERE-TIME" => (object)[],
+      "AND" => (object)[],
+      "GROUP BY" => (object)[]
+    ];
+    // imposto le colonne da includere nel datamart finale
+    $q->fields();
+    $q->select();
+    foreach ($q->facts as $factId) {
+      $factNumber = substr($factId, -5);
+      $q->baseTableName = "WEB_BI_TMP_BASE_{$q->reportId}_{$q->datamartId}_{$factNumber}";
+      if (property_exists($process, 'baseMeasures')) {
+        $q->baseMetrics = $process->{'baseMeasures'}->{$factId};
+        $q->metrics();
+        // var_dump($q->_metrics_base);
+        $q->from($process->{'from'}->{$factId});
+        $q->where($process->{'joins'}->{$factId});
+        if (property_exists($process, 'compositeMeasures')) $q->compositeMetrics = $process->{'compositeMeasures'};
+        // i filtri vengono verificati già nella funzione createProcess()
+        $q->filters($process->{'filters'});
+        $q->groupBy($process->{'fields'});
+        // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
+        $resultSQL['base'] = $q->baseTable();
+        if (property_exists($process, 'advancedMeasures')) {
+          $q->filteredMetrics = $process->{'advancedMeasures'};
+          $q->json_info_advanced = array();
+          // verifico quali, tra le metriche filtrate, contengono gli stessi filtri. Le metriche che contengono gli stessi filtri vanno eseguite in un unica query
+          // oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
+          $q->groupMetricsByFilters = (object)[];
+          // raggruppare per tipologia dei filtri
+          $groupFilters = array();
+          // creo un gruppo di filtri
+          foreach ($q->filteredMetrics as $metric) {
+            // var_dump($metric->filters);
+            // ogni gruppo di filtri ha un tokenGrouup diverso come key dell'array
+            $tokenGroup = "group_" . bin2hex(random_bytes(4));
+            if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
+          }
+          // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
+          foreach ($groupFilters as $token => $group) {
+            $metrics = array();
+            foreach ($q->filteredMetrics as $metric) {
+              if (get_object_vars($metric->filters) == get_object_vars($group)) {
+                // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
+                array_push($metrics, $metric);
+              }
+            }
+            // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
+            $q->groupMetricsByFilters->$token = $metrics;
+          }
+          // dd($q->groupMetricsByFilters);
+          $resultSQL['advanced'] = $q->createMetricDatamarts();
+          // WARN: Attenzione, nel comando dd() gli oggetti all'interno di json_info_advanced non
+          // sono visibili ma hanno un numero di riferimento che punta all'oggetto originale.
+
+          // return $resultSQL;
+        }
+      }
+    }
+    // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
+    // creo una tabella temporanea per ogni metrica filtrata
+    // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
+    $resultSQL['datamart'] = $q->createDatamart();
+    return $resultSQL;
+    // return nl2br(implode("\n\n\n", $resultSQL));
+  }
+
+  /* public function sql(Request $request)
+  {
+    // echo gettype($cube);
+    // dd($request);
+    // per accedere al contenuto della $request lo converto in json codificando la $request e decodificandolo in json
     $cube = json_decode(json_encode($request->all())); // object
     $q = new Cube();
     // imposto le proprietà con i magic methods
@@ -520,6 +605,7 @@ class MapDatabaseController extends Controller
     $q->where($cube->{'joins'});
     // TODO: un filtro deve essere sempre presente, qui dovrei togliere il controllo
     // su property_exists
+
     if (property_exists($cube, 'filters')) $q->filters($cube->{'filters'});
     $q->groupBy($cube->{'fields'});
     // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
@@ -566,7 +652,7 @@ class MapDatabaseController extends Controller
     $resultSQL['datamart'] = $q->createDatamart();
     return $resultSQL;
     // return nl2br(implode("\n\n\n", $resultSQL));
-  }
+  } */
 
   // curl
   public function curlprocess($json)

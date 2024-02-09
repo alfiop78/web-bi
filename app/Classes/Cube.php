@@ -10,6 +10,7 @@ class Cube
 {
   private $_select, $_groupBy, $_fields = array(), $_columns = array(), $_sql;
   private $FROM_baseTable = array();
+  private $baseTableNames = array();
   private $FROM_metricTable = array();
   private $WHERE_metricTable = array(), $WHERE_timingFn = array();
   private $WHERE_baseTable = array(), $WHERE_timeDimension = array();
@@ -338,12 +339,13 @@ class Cube
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
     // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $this->_sql;";
-    // var_dump($sql);
-    dd($sql);
+    array_push($this->baseTableNames, $this->baseTableName);
+    var_dump($sql);
+    // dd($sql);
     // $result = DB::connection('vertica_odbc')->raw($sql);
     // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
-    /* il metodo getSchemaBuilder() funziona con mysql, non con vertica. Ho creato MyVerticaGrammar.php dove c'è la sintassi corretta per vertica (solo alcuni Metodi ho modificato) */
     if (property_exists($this, 'json__info')) {
+      // dd("json__info esistente");
       $result = ["raw_sql" => nl2br($sql), "format_sql" => $this->json__info];
     } else {
       // elimino la tabella temporanea, se esiste, prima di ricrearla
@@ -502,6 +504,7 @@ class Cube
 
   public function createDatamart()
   {
+    // dd($this->baseTableNames, $this->baseTableName);
     // dd($this->_metricTable);
     // TODO: commentare tutta la logica
     $table_fields = array();
@@ -577,14 +580,15 @@ class Cube
         $s .= ",\n";
         $s .= implode(",\n", $this->cm);
       }
-      $s .= "\nFROM decisyon_cache.$this->baseTableName";
+      // $s .= "\nFROM decisyon_cache.$this->baseTableName";
+      $s .= "\nFROM " . implode(",\n", $this->baseTableNames);
+      dd($s);
       $s .= "\nGROUP BY $this->_fieldsSQL";
       $sql = "/*Creazione DATAMART finale :\n{$this->datamartName}\n*/\nCREATE TABLE decisyon_cache.{$this->datamartName} INCLUDE SCHEMA PRIVILEGES AS\n($s);";
-      var_dump($sql);
-      exit;
     }
 
     if (property_exists($this, 'json__info') || property_exists($this, 'json__info')) {
+      dd($sql);
       return nl2br($sql);
     } else {
       // se il datamart già esiste lo elimino prima di ricrearlo

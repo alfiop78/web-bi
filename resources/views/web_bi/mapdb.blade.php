@@ -604,6 +604,7 @@
                       <menu class="standard">
                         <button id="btn-workbook-new" value="Nuovo">Nuovo</button>
                         <button id="btn-workbook-open" value="open">Apri</button>
+                        <button id="btn-time-dimension" value="open">Tabella TIME</button>
                         <!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
                         <section id="workbook-name" class="name data-source" contenteditable="true">Titolo</section>
                       </menu>

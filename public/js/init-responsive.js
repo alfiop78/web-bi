@@ -1669,7 +1669,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
     // TODO: utilizzare un unica funzione, se viene passato 'json__info' deve essere
     // elaborato il generateSQL() altrimenti il process()
-    debugger;
     (e.target.id === 'btn-sheet-preview') ? app.process(process) : app.generateSQL(process);
   }
 
@@ -2434,7 +2433,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.setSheet = () => {
     Sheet.fact.forEach(factId => {
-      debugger;
       // WARN: 2024.02.08 questa logica è utilizzata anche in saveFilter(). Creare un metodo riutilizzabile.
       let from = {}, joins = {};
       Sheet.tables.forEach(tableAlias => {
@@ -2459,7 +2457,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     });
     console.info('controllo from : ', Sheet.from);
     console.info('controllo joins : ', Sheet.joins);
-    debugger;
   }
 
   app.showTablePreview = async (e) => {
@@ -3213,4 +3210,39 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   });
 
   app.dialogNewWorkBook.addEventListener('close', (e) => document.getElementById('input-workbook-name').value = '');
+
+  document.querySelector("#btn-time-dimension").onclick = async () => {
+    debugger;
+    // let jsonDataParsed = JSON.parse(window.localStorage.getItem(processToken));
+    // console.dir(jsonDataParsed.report);
+    // const jsonData = { start: "2022-01-01", end: "2023-01-01" };
+    // const params = JSON.stringify(jsonData);
+    // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
+    const url = "/fetch_api/dimension/time";
+    // const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
+    // const req = new Request(url, init);
+    App.showConsole('Elaborazione in corso...', 'info');
+    await fetch(url)
+      .then((response) => {
+        // TODO: Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then((response) => {
+        console.log(response);
+        if (response) {
+          App.closeConsole();
+          App.showConsole('result', 'done', 5000);
+        } else {
+          // TODO: Da testare se il codice arriva qui o viene gestito sempre dal catch()
+          debugger;
+          App.showConsole('Errori....', 'error', 5000);
+        }
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+  }
 })();
