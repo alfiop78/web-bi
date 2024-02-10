@@ -508,15 +508,16 @@ class MapDatabaseController extends Controller
     // imposto le colonne da includere nel datamart finale
     $q->datamartFields();
     $q->createSelect();
-    foreach ($q->facts as $factId) {
-      $factNumber = substr($factId, -5);
-      $q->baseTableName = "WEB_BI_TMP_BASE_{$q->reportId}_{$q->datamartId}_{$factNumber}";
-      if (property_exists($process, 'baseMeasures')) {
-        $q->baseMetrics = $process->{'baseMeasures'}->{$factId};
+    foreach ($q->facts as $fact) {
+      // $fact : svg-data-xxxxx
+      $factId = substr($fact, -5);
+      $q->baseTableName = "WEB_BI_TMP_BASE_{$q->report_id}_{$q->datamart_id}_{$factId}";
+      if (property_exists($q->process, 'baseMeasures')) {
+        $q->baseMetrics = $q->process->{'baseMeasures'}->{$fact};
         $q->metrics();
         // var_dump($q->_metrics_base);
-        $q->from($process->{'from'}->{$factId});
-        $q->where($process->{'joins'}->{$factId});
+        $q->from($process->{'from'}->{$fact});
+        $q->where($process->{'joins'}->{$fact});
         if (property_exists($process, 'compositeMeasures')) $q->compositeMetrics = $process->{'compositeMeasures'};
         // i filtri vengono verificati già nella funzione createProcess()
         $q->filters($process->{'filters'});

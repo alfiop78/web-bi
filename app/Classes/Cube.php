@@ -14,6 +14,11 @@ class Cube
   private $select_clause;
   private $groupBy_clause;
   private $datamart_fields = array();
+
+  // private $_metrics_base_datamart;
+  // da sostituire con...
+  private $datamart_baseMeasures = array();
+
   private $_columns = array();
   private $_sql = "";
   private $sql_datamart = "";
@@ -24,8 +29,7 @@ class Cube
   private $WHERE_baseTable = array(), $WHERE_timeDimension = array();
   private $segmented = array();
   private $filters_baseTable = array();
-  private $reportId;
-  private $_metrics_base, $_metrics_base_datamart;
+  private $_metrics_base;
   private $_metrics_advanced_datamart = array();
   private $cm = array(); // composite metrics
 
@@ -80,7 +84,6 @@ class Cube
   public function createSelect()
   {
     $fieldList = array();
-    // $this->select_clause = "SELECT\n";
     $name_key = NULL;
     // dd($this->fields);
     // per ogni tabella
@@ -95,15 +98,15 @@ class Cube
         // questo viene utilizzato nella clausola ON della LEFT JOIN
         // WARN: al posto di _columns[], in createDatamart(), può essere utilizzato $this->datamart_fields[]
         // $this->_columns[] = "{$column->name}_id";
-        if (property_exists($this, 'json__info')) {
-          $this->json__info->{'SELECT'}->{$name_key} = "{$sql} AS {$name_key}";
+        if (property_exists($this, 'sql_info')) {
+          $this->sql_info->{'SELECT'}->{$name_key} = "{$sql} AS {$name_key}";
         }
       }
     }
     // dd($fieldList);
     $this->select_clause = self::SELECT . implode(",\n", $fieldList);
     // dd($this->json__info);
-    dd($this->select_clause);
+    // dd($this->select_clause);
     // dd($this->_columns);
   }
 
@@ -315,22 +318,27 @@ class Cube
   {
     // metriche di base
     $metrics_base = array();
-    $metrics_base_datamart = array();
+    // $metrics_base_datamart = array();
+
     // dd($this->baseMetrics);
     foreach ($this->baseMetrics as $value) {
       // dd($value);
-      $metrics_base[] = "\nNVL({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
-      if (property_exists($this, 'json__info')) {
-        $this->json__info->{'METRICS'}->{$value->alias} = "NVL({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
+      $metric = "\nNVL({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
+      $metrics_base[] = $metric;
+      if (property_exists($this, 'sql_info')) {
+        $this->sql_info->{'METRICS'}->{$value->alias} = $metric;
       }
       // TODO: da provare senza la baseTableName
-      $metrics_base_datamart[] = "\nNVL({$value->aggregateFn}({$this->baseTableName}.'{$value->alias}'), 0) AS '{$value->alias}'";
+
+      // $metrics_base_datamart[] = "\nNVL({$value->aggregateFn}({$this->baseTableName}.'{$value->alias}'), 0) AS '{$value->alias}'";
+      $this->datamart_baseMeasures[] = "\nNVL({$value->aggregateFn}('{$value->alias}'), 0) AS '{$value->alias}'";
     }
     $this->_metrics_base = implode(", ", $metrics_base);
-    $this->_metrics_base_datamart = implode(", ", $metrics_base_datamart);
+    // viene utilizzata in createDatamart()
+    // $this->datamart_baseMeasures = implode(", ", $metrics_base_datamart);
     // dd($this->json__info);
     // dd($this->_metrics_base);
-    // dd($this->_metrics_base_datamart);
+    dd($this->datamart_baseMeasures);
   }
 
   public function baseTable()
