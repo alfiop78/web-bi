@@ -488,15 +488,15 @@ class MapDatabaseController extends Controller
     // dd($request);
     // per accedere al contenuto della $request lo converto in json codificando la $request e decodificandolo in json
     $process = json_decode(json_encode($request->all())); // object
-    $q = new Cube();
+    $q = new Cube($process);
     // imposto le proprietà con i magic methods
-    $q->reportId = $process->{'id'};
+    /* $q->reportId = $process->{'id'};
     $q->facts = $process->{'facts'}; // array
     $q->datamartId = $process->{'datamartId'};
     // $q->baseTableName = "WEB_BI_TMP_BASE_{$q->reportId}_{$q->datamartId}";
-    $q->datamartName = "WEB_BI_{$q->reportId}_{$q->datamartId}";
-    $q->baseColumns = $process->{'fields'};
-    $q->json__info = (object)[
+    $q->datamartName = "WEB_BI_{$q->reportId}_{$q->datamartId}"; */
+    // $q->baseColumns = $process->{'fields'};
+    $q->sql_info = (object)[
       "SELECT" => (object)[],
       "METRICS" => (object)[],
       "FROM" => (object)[],
@@ -506,8 +506,8 @@ class MapDatabaseController extends Controller
       "GROUP BY" => (object)[]
     ];
     // imposto le colonne da includere nel datamart finale
-    $q->fields();
-    $q->select();
+    $q->datamartFields();
+    $q->createSelect();
     foreach ($q->facts as $factId) {
       $factNumber = substr($factId, -5);
       $q->baseTableName = "WEB_BI_TMP_BASE_{$q->reportId}_{$q->datamartId}_{$factNumber}";

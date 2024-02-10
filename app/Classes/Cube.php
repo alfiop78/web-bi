@@ -8,7 +8,15 @@ use Exception;
 
 class Cube
 {
-  private $_select, $_groupBy, $_fields = array(), $_columns = array(), $_sql;
+  const SELECT = "SELECT\n";
+  const GROUPBY = "GROUP BY\n";
+  const WHERE = "WHERE\n";
+  private $select_clause;
+  private $groupBy_clause;
+  private $datamart_fields = array();
+  private $_columns = array();
+  private $_sql = "";
+  private $sql_datamart = "";
   private $FROM_baseTable = array();
   private $baseTableNames = array();
   private $FROM_metricTable = array();
@@ -21,9 +29,16 @@ class Cube
   private $_metrics_advanced_datamart = array();
   private $cm = array(); // composite metrics
 
-  public function __get($value)
+  function __construct($process)
   {
-    return $this->$value;
+    $this->process = $process;
+    $this->report_id = $this->process->{"id"};
+    $this->facts = $this->process->{"facts"};
+    $this->datamart_id = $this->process->{"datamartId"};
+    $this->datamart_name = "WEB_BI_{$this->report_id}_{$this->datamart_id}";
+    // il report deve necessariamente contenere almeno un livello dimensionale
+    // ...quindi $this->process->{fields} sarà sempre presente
+    $this->fields = $this->process->{"fields"};
   }
 
   public function __set($prop, $value)
@@ -31,31 +46,29 @@ class Cube
     $this->$prop = $value;
   }
 
+  public function __get($value)
+  {
+    return $this->$value;
+  }
+
+
   /* Creazione di un array contenenti le colonne da inserire nella creazione
     del datamart, sia nella clausola SELECT che in GROUPBY
     array:4 [
       0 => "'sid_id'"
-      1 => "'sid_ds'"
+      1 => "'sid'"
       2 => "'sede_id'"
-      3 => "'sede_ds'"
+      3 => "'sede'"
     ]
   */
-  public function fields()
+  public function datamartFields()
   {
-    // dd($this->baseColumns);
-    // field contiene un object con {token_colonna : {proprietà della colonna}}
-    foreach ($this->baseColumns as $column) {
-      // dd($column);
-      // ... per ogni colonna
-      // all'interno delle tabelle ci sono i token che corrispondo ognuno a una colonna id-ds
-      foreach ($column->field as $key => $value) {
-        // dd($key);
-        // key : id/ds
-        $this->_fields[] = ($key === "id") ? "{$column->name}_{$key}" : "{$column->name}";
-        // $this->_fields[] = "{$column->name}_{$key}";
-      }
+    // dd($this->fields);
+    foreach ($this->fields as $column) {
+      $this->datamart_fields[] = "{$column->name}_id";
+      $this->datamart_fields[] = $column->name;
     }
-    // dd($this->_fields);
+    // dd($this->datamart_fields);
   }
 
   // Creazione della clausola SELECT e dell'array _columns
@@ -64,34 +77,34 @@ class Cube
     CodSedeDealer_765.Descrizione AS sede_id,
     CodSedeDealer_765.Descrizione AS sede_ds
   */
-  public function select()
+  public function createSelect()
   {
     $fieldList = array();
-    $this->_select = "SELECT\n";
+    // $this->select_clause = "SELECT\n";
     $name_key = NULL;
-    // dd($this->baseColumns);
+    // dd($this->fields);
     // per ogni tabella
-    foreach ($this->baseColumns as $column) {
-      // ... per ogni colonna
+    foreach ($this->fields as $column) {
       // dd($column);
-      // dd($token);
       foreach ($column->field as $key => $value) {
         // key: id/ds
         $name_key = "{$column->name}_{$key}";
-        $fieldList["{$column->name}_{$key}"] = ($key === "ds") ? implode("", $value->sql) . " AS $column->name" : implode("", $value->sql) . " AS {$column->name}_{$key}";
-        // $fieldList["{$column->name}_{$key}"] = implode("", $value->sql) . " AS {$column->name}_{$key}"; // $fieldType : id/ds
+        $sql = implode("", $value->sql); // alias_tabella.nome_campo[_id]
+        $fieldList[$name_key] = ($key === "ds") ? "{$sql} AS {$column->name}" : "{$sql} AS {$name_key}";
+
         // questo viene utilizzato nella clausola ON della LEFT JOIN
-        $this->_columns[] = "{$column->name}_id";
+        // WARN: al posto di _columns[], in createDatamart(), può essere utilizzato $this->datamart_fields[]
+        // $this->_columns[] = "{$column->name}_id";
         if (property_exists($this, 'json__info')) {
-          $this->json__info->{'SELECT'}->{$name_key} = implode("", $value->sql) . " AS {$column->name}_{$key}";
+          $this->json__info->{'SELECT'}->{$name_key} = "{$sql} AS {$name_key}";
         }
       }
     }
     // dd($fieldList);
-    $this->_select .= implode(",\n", $fieldList);
+    $this->select_clause = self::SELECT . implode(",\n", $fieldList);
     // dd($this->json__info);
-    // dd($this->_select);
-    // var_dump($this->_columns);
+    dd($this->select_clause);
+    // dd($this->_columns);
   }
 
   /*
@@ -502,10 +515,15 @@ class Cube
     }
   }
 
+  public function datamart()
+  {
+  }
+
   public function createDatamart()
   {
     // dd($this->baseTableNames, $this->baseTableName);
     // dd($this->_metricTable);
+    $sql = '';
     // TODO: commentare tutta la logica
     $table_fields = array();
     foreach ($this->_fields as $field) {
