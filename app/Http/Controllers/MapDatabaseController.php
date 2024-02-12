@@ -489,13 +489,6 @@ class MapDatabaseController extends Controller
     // per accedere al contenuto della $request lo converto in json codificando la $request e decodificandolo in json
     $process = json_decode(json_encode($request->all())); // object
     $q = new Cube($process);
-    // imposto le proprietà con i magic methods
-    /* $q->reportId = $process->{'id'};
-    $q->facts = $process->{'facts'}; // array
-    $q->datamartId = $process->{'datamartId'};
-    // $q->baseTableName = "WEB_BI_TMP_BASE_{$q->reportId}_{$q->datamartId}";
-    $q->datamartName = "WEB_BI_{$q->reportId}_{$q->datamartId}"; */
-    // $q->baseColumns = $process->{'fields'};
     $q->sql_info = (object)[
       "SELECT" => (object)[],
       "METRICS" => (object)[],
@@ -505,13 +498,15 @@ class MapDatabaseController extends Controller
       "AND" => (object)[],
       "GROUP BY" => (object)[]
     ];
-    // imposto le colonne da includere nel datamart finale
+    // array di colonne che verranno incluse nel datamart finale
     $q->datamartFields();
-    $q->createSelect();
+    $q->select();
     foreach ($q->facts as $fact) {
       // $fact : svg-data-xxxxx
       $factId = substr($fact, -5);
       $q->baseTableName = "WEB_BI_TMP_BASE_{$q->report_id}_{$q->datamart_id}_{$factId}";
+      $q->base_tables[] = $q->baseTableName;
+      // se esistono metriche di base
       if (property_exists($q->process, 'baseMeasures')) {
         $q->baseMetrics = $q->process->{'baseMeasures'}->{$fact};
         $q->metrics();
@@ -521,7 +516,7 @@ class MapDatabaseController extends Controller
         if (property_exists($process, 'compositeMeasures')) $q->compositeMetrics = $process->{'compositeMeasures'};
         // i filtri vengono verificati già nella funzione createProcess()
         $q->filters($process->{'filters'});
-        $q->groupBy($process->{'fields'});
+        $q->groupBy();
         // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
         $resultSQL['base'] = $q->baseTable();
         if (property_exists($process, 'advancedMeasures')) {
@@ -582,7 +577,7 @@ class MapDatabaseController extends Controller
     $q->baseTableName = "WEB_BI_TMP_BASE_{$q->reportId}_{$q->datamartId}";
     $q->datamartName = "WEB_BI_{$q->reportId}_{$q->datamartId}";
     $q->baseColumns = $cube->{'fields'};
-    $q->json__info = (object)[
+    $q->sql_info = (object)[
       "SELECT" => (object)[],
       "METRICS" => (object)[],
       "FROM" => (object)[],
@@ -672,7 +667,7 @@ class MapDatabaseController extends Controller
     $q->baseTableName = "WEB_BI_TMP_BASE_$q->reportId";
     $q->datamartName = "WEB_BI_$q->reportId";
     $q->baseColumns = $cube->{'select'};
-    $q->json__info = (object)[
+    $q->sql_info = (object)[
       "SELECT" => "SELECT",
       "columns" => (object)[],
       "FROM" => "FROM",
