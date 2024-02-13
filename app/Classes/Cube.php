@@ -12,14 +12,16 @@ class Cube
   const FROM = "\nFROM\n";
   const GROUPBY = "\nGROUP BY\n";
   const WHERE = "\nWHERE\n";
+  public $results = [];
   private $select_clause;
-  private $datamart_fields = array();
+  public $datamart_fields = array();
   private $from_clause = array(); // utilizzata al posto di FROM_baseTable
   private $where_clause = array(); // utilizzata al posto di WHERE_baseTable
   private $where_time_clause = array(); // utilizzata al posto di WHERE_timeDimension
   private $report_metrics = array(); // da utilizzare al posto di $this->_metrics_base
   private $report_filters = array(); // utilizzato al posto di $filters_baseTable
   private $groupby_clause = array();
+  private $with_clause = "";
 
   // private $_metrics_base_datamart;
   // da sostituire con...
@@ -39,7 +41,7 @@ class Cube
   private $_metrics_base;
   private $_metrics_advanced_datamart = array();
   private $cm = array(); // composite metrics
-  public $base_tables = [];
+  public $queries = [];
 
   function __construct($process)
   {
@@ -126,6 +128,7 @@ class Cube
     // $metrics_base = array();
     // $metrics_base_datamart = array();
 
+    $this->report_metrics = [];
     // dd($this->baseMetrics);
     foreach ($this->baseMetrics as $value) {
       // dd($value);
@@ -283,12 +286,13 @@ class Cube
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
     // l'utilizzo di ON COMMIT PRESERVE ROWS consente, alla PROJECTION, di avere i dati all'interno della tempTable fino alla chiusura della sessione, altrimenti vertica non memorizza i dati nella temp table
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $sql_string;";
-    var_dump($sql);
+    // var_dump($sql);
     // dd($sql);
     // $result = DB::connection('vertica_odbc')->raw($sql);
     // devo controllare prima se la tabella esiste, se esiste la elimino e poi eseguo la CREATE TEMPORARY...
+    $result = "";
     if (property_exists($this, 'sql_info')) {
-      $result = ["raw_sql" => nl2br($sql), "format_sql" => $this->sql_info];
+      $this->results[] = ["raw_sql" => nl2br($sql), "format_sql" => $this->sql_info];
     } else {
       // elimino la tabella temporanea, se esiste, prima di ricrearla
       // La elimino anche in caso di errore nella creazione della tabella temporanea (WEB_BI_BASE_TABLE....)
@@ -521,36 +525,73 @@ class Cube
     }
   }
 
-  public function datamart()
-  {
-  }
-
   private function with_clause()
   {
-    // $table_fields = array();
-    // $select = [];
-    $fields = [];
-    $f = "";
-    // dd($this->datamart_fields);
-    foreach ($this->base_tables as $base_table_name) {
-      $select = "SELECT";
-      // $table_fields[$base_table_name] = $this->datamart_fields;
-      // $select[$base_table_name] = self::SELECT;
-      foreach ($this->datamart_fields as $column) {
-        $fields[$base_table_name][] = "{$base_table_name}.{$column}";
-      }
-
-      $select .= implode(",", $fields[$base_table_name]);
+    // dd($this->queries);
+    $union_sql = [];
+    foreach ($this->queries as $table => $fields) {
+      $union_sql[] = self::SELECT;
+      $union_sql[] = implode(",\n", $fields);
+      $union_sql[] = self::FROM . "{$table}\n";
     }
-    dd($select);
-    dd($fields);
+    // dd(implode("", $union_sql));
+    $sql = implode("", $union_sql);
+    $this->with_clause = "WITH distinct_fields AS ($sql)\n";
+    // dd($this->with_clause);
+  }
 
-    // foreach ($fields as $column) {
-    //   $f .= implode(",", $column);
-    // }
-    // dd($f);
+  public function datamart()
+  {
+    $this->with_clause();
+    $sql = self::SELECT;
+    $fields = [];
+    foreach ($this->datamart_fields as $field) {
+      $fields[] = "\tdistinct_fields.{$field}";
+    }
+    $sql .= implode(",\n", $fields);
+    if (property_exists($this, "baseMetrics")) $sql .= "," . implode(",", $this->datamart_baseMeasures);
+    $sql .= self::FROM . "distinct_fields";
+    $joinLEFT = "";
+    $ONClause = [];
+    foreach ($this->queries as $k => $v) {
+      $joinLEFT .= "\nLEFT JOIN decisyon_cache.{$k}\n\tON ";
+      foreach ($v as $field) {
+        $ONClause[] = "distinct_fields.'$field' = $k.'$field'";
+      }
+      $joinLEFT .= implode("\nAND ", $ONClause);
+      unset($ONClause);
+    }
+    $sql .= $joinLEFT;
+    $sql_final = $this->with_clause . $sql;
+    // dd($sql_final);
+    if (property_exists($this, 'sql_info')) {
+      // dd($sql_final);
+      return nl2br($sql_final);
+    } else {
+      // se il datamart già esiste lo elimino prima di ricrearlo
+      $this->dropTemporaryTables($this->datamartName);
+      try {
+        DB::connection('vertica_odbc')->statement($sql_final);
+        // elimino la temp table decisyon_cache.$this->baseTableName
+        /* $this->dropTemporaryTables($this->baseTableName);
 
-    // dd($table_fields);
+        if (count($this->_metrics_advanced_datamart) !== 0) {
+          foreach ($this->_metrics_advanced_datamart as $tableName => $aliasM) {
+            $this->dropTemporaryTables($tableName);
+          }
+        } */
+        return $this->reportId;
+      } catch (Exception $e) {
+        // dd("ERrore gestito: {$e}");
+        $this->dropTemporaryTables($this->datamartName);
+        if (count($this->_metrics_advanced_datamart) !== 0) {
+          foreach ($this->_metrics_advanced_datamart as $tableName => $aliasM) {
+            $this->dropTemporaryTables($tableName);
+          }
+        }
+        throw new Exception("Errore elaborazione richiesta", $e->getCode());
+      }
+    }
   }
 
   public function createDatamart()
@@ -564,7 +605,7 @@ class Cube
 
     $table_fields = array();
     // dd($this->datamart_fields);
-    foreach ($this->base_tables as $base_table_name) {
+    foreach ($this->queries as $base_table_name) {
       $table_fields[$base_table_name] = $this->datamart_fields;
     }
     dd($table_fields);

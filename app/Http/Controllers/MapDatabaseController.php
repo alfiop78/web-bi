@@ -489,26 +489,27 @@ class MapDatabaseController extends Controller
     // per accedere al contenuto della $request lo converto in json codificando la $request e decodificandolo in json
     $process = json_decode(json_encode($request->all())); // object
     $q = new Cube($process);
-    $q->sql_info = (object)[
-      "SELECT" => (object)[],
-      "METRICS" => (object)[],
-      "FROM" => (object)[],
-      "WHERE" => (object)[],
-      "WHERE-TIME" => (object)[],
-      "AND" => (object)[],
-      "GROUP BY" => (object)[]
-    ];
     // array di colonne che verranno incluse nel datamart finale
     $q->datamartFields();
     $q->select();
     foreach ($q->facts as $fact) {
+      $q->sql_info = (object)[
+        "SELECT" => (object)[],
+        "METRICS" => (object)[],
+        "FROM" => (object)[],
+        "WHERE" => (object)[],
+        "WHERE-TIME" => (object)[],
+        "AND" => (object)[],
+        "GROUP BY" => (object)[]
+      ];
       // $fact : svg-data-xxxxx
-      $factId = substr($fact, -5);
-      $q->baseTableName = "WEB_BI_TMP_BASE_{$q->report_id}_{$q->datamart_id}_{$factId}";
-      $q->base_tables[] = $q->baseTableName;
+      $q->factId = substr($fact, -5);
+      $q->baseTableName = "WB_BASE_{$q->report_id}_{$q->datamart_id}_{$q->factId}";
+      $q->queries[$q->baseTableName] = $q->datamart_fields;
       // se esistono metriche di base
       if (property_exists($q->process, 'baseMeasures')) {
         $q->baseMetrics = $q->process->{'baseMeasures'}->{$fact};
+
         $q->metrics();
         // var_dump($q->_metrics_base);
         $q->from($process->{'from'}->{$fact});
@@ -518,7 +519,8 @@ class MapDatabaseController extends Controller
         $q->filters($process->{'filters'});
         $q->groupBy();
         // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
-        $resultSQL['base'] = $q->baseTable();
+        // $resultSQL['base'] = $q->baseTable();
+        $q->baseTable();
         if (property_exists($process, 'advancedMeasures')) {
           $q->filteredMetrics = $process->{'advancedMeasures'};
           $q->json_info_advanced = array();
@@ -558,7 +560,9 @@ class MapDatabaseController extends Controller
     // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
     // creo una tabella temporanea per ogni metrica filtrata
     // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-    $resultSQL['datamart'] = $q->createDatamart();
+    // dd($q->results);
+    $resultSQL["base"] = $q->results;
+    $resultSQL['datamart'] = $q->datamart();
     return $resultSQL;
     // return nl2br(implode("\n\n\n", $resultSQL));
   }
