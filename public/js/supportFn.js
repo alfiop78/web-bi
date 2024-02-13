@@ -23,7 +23,14 @@ function showSQLInfo(data) {
   });
   divSQL.innerHTML = baseRawSQL; */
   div.id = 'BASE';
-  divSQL.innerHTML = data.base.raw_sql;
+  data.base.forEach(sql => {
+    const tmpldiv = document.getElementById('tmpl-content-div');
+    const tmplContent = tmpldiv.content.cloneNode(true);
+    const div = tmplContent.querySelector('div');
+    div.innerHTML = sql.raw_sql;
+    divSQL.appendChild(div);
+    // divSQL.innerHTML += sql.raw_sql;
+  });
 
   divIcon.dataset.id = 'BASE';
   btnCopy.dataset.id = 'BASE';
@@ -61,24 +68,26 @@ function showSQLInfo(data) {
   const divMain = tmpl.querySelector('.sql-raw');
   sqlFormat.appendChild(divMain);
   // popolo il div sql-info-format
-  for (const [clause, value] of Object.entries(data.base.format_sql)) {
-    // console.log(clause, value);
-    const tmpl = tmplSQLInfo.content.cloneNode(true);
-    const details = tmpl.querySelector('details');
-    const summary = tmpl.querySelector('summary');
-    summary.innerHTML = clause;
-    for (const [key, sql] of Object.entries(value)) {
+  data.base.forEach(sql => {
+    for (const [clause, value] of Object.entries(sql.format_sql)) {
+      // console.log(clause, value);
       const tmpl = tmplSQLInfo.content.cloneNode(true);
-      const div = tmpl.querySelector('div.sql-row');
-      const dataKey = div.querySelector('span[data-key]');
-      const dataSQL = div.querySelector('span[data-sql]');
-      dataKey.dataset.clause = clause;
-      dataKey.innerHTML = key;
-      dataSQL.innerHTML = sql;
-      details.appendChild(div);
+      const details = tmpl.querySelector('details');
+      const summary = tmpl.querySelector('summary');
+      summary.innerHTML = clause;
+      for (const [key, sql] of Object.entries(value)) {
+        const tmpl = tmplSQLInfo.content.cloneNode(true);
+        const div = tmpl.querySelector('div.sql-row');
+        const dataKey = div.querySelector('span[data-key]');
+        const dataSQL = div.querySelector('span[data-sql]');
+        dataKey.dataset.clause = clause;
+        dataKey.innerHTML = key;
+        dataSQL.innerHTML = sql;
+        details.appendChild(div);
+      }
+      divMain.appendChild(details);
     }
-    divMain.appendChild(details);
-  }
+  });
 
   if (data.advanced) {
     data.advanced.forEach(query => {

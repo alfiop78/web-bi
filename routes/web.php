@@ -103,6 +103,7 @@ Route::get('/fetch_api/copy_from/{from_id}/copy_to/{to_id}/copy_table', [MapData
 Route::get('/fetch_api/dimension/time', function () {
   $start = new DateTime('2021-01-01 00:00:00');
   $end   = new DateTime('2025-01-01 00:00:00');
+  // $end   = new DateTime('2021-01-31 00:00:00');
   $interval = new DateInterval('P1D');
   $period = new DatePeriod($start, $interval, $end);
   $json = (object) null;
@@ -122,7 +123,8 @@ Route::get('/fetch_api/dimension/time', function () {
         "ds" => $currDate->format('F'),
         "short" => $currDate->format('M')
       ],
-      "quarter" => (object) ["key" => "{$currDate->format('Y')}0{$quarter}", "id" => $quarter, "ds" => "Q {$quarter}"],
+      "quarter_id" => "{$currDate->format('Y')}0{$quarter}",
+      "quarter" => (object) ["id" => $quarter, "ds" => "Q {$quarter}"],
       "year" => $currDate->format('Y'),
       "day_of_year" => $currDate->format('z'),
       // "lastOfMonth" => $current->format('t'),
@@ -145,6 +147,7 @@ Route::get('/fetch_api/dimension/time', function () {
     date DATE NOT NULL PRIMARY KEY,
     trans_ly DATE,
     year INTEGER,
+    quarter_id INTEGER,
     quarter VARCHAR,
     month_id INTEGER,
     month VARCHAR,
@@ -172,6 +175,7 @@ Route::get('/fetch_api/dimension/time', function () {
       'date' => "{$date}",
       'trans_ly' => "{$value->trans_ly}",
       'year' => $value->year,
+      'quarter_id' => (int) $value->quarter_id,
       'quarter' => json_encode($value->quarter),
       'month_id' => $value->month_id,
       'month' => json_encode($value->month),

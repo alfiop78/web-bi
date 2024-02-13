@@ -297,14 +297,15 @@ class Cube
       // elimino la tabella temporanea, se esiste, prima di ricrearla
       // La elimino anche in caso di errore nella creazione della tabella temporanea (WEB_BI_BASE_TABLE....)
       $this->dropTemporaryTables($this->baseTableName);
-      try {
-        $result = DB::connection('vertica_odbc')->statement($sql);
-      } catch (Exception $e) {
-        // dd("ERrore gestito: {$e}");
-        $this->dropTemporaryTables($this->baseTableName);
-        // throw new Exception("Errore elaborazione richiesta", $e->getCode());
-        throw new Exception("Errore elaborazione richiesta", $e->getMessage());
-      }
+      // try {
+      $result = DB::connection('vertica_odbc')->statement($sql);
+      dd($result);
+      // } catch (Exception $e) {
+      // dd("ERrore gestito: {$e}");
+      // $this->dropTemporaryTables($this->baseTableName);
+      // throw new Exception("Errore elaborazione richiesta", $e->getCode());
+      // throw new Exception("Errore elaborazione richiesta", $e->getMessage());
+      // }
     }
     return $result;
   }
@@ -543,7 +544,9 @@ class Cube
   public function datamart()
   {
     $this->with_clause();
-    $sql = self::SELECT;
+    $comment = "/*Creazione DATAMART :\ndecisyon_cache.{$this->datamart_name}\n*/\n";
+    $sql = "{$comment}CREATE TABLE decisyon_cache.{$this->datamart_name} INCLUDE SCHEMA PRIVILEGES AS ";
+    $sql .= self::SELECT;
     $fields = [];
     foreach ($this->datamart_fields as $field) {
       $fields[] = "\tdistinct_fields.{$field}";
@@ -568,6 +571,7 @@ class Cube
       // dd($sql_final);
       return nl2br($sql_final);
     } else {
+      dd("PROCESS");
       // se il datamart già esiste lo elimino prima di ricrearlo
       $this->dropTemporaryTables($this->datamartName);
       try {

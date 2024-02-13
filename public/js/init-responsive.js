@@ -1106,19 +1106,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.dialogWorkBook.showModal();
   }
 
-  // app.closeWorkBook = () => {
-  //   // elimino tutti gli elemeneti svg tranne i <defs>
-  //   // console.log(Draw.svg.querySelectorAll('*:not(#table-struct, #web-bi-time, defs)'));
-  //   // console.log(Draw.svg.querySelectorAll(":where(use, path), g.struct[id^='struct']"));
-  //   Draw.svg.querySelectorAll(":where(use, path), g.struct[id^='struct']").forEach(el => el.remove());
-  //   // debugger;
-  //   if (Sheet) delete Sheet.sheet;
-  //   document.getElementById('sheet-name').value = 'Titolo';
-  //   document.getElementById('sheet-name').innerText = 'Titolo';
-  //   // Sheet = undefined;
-  //   document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
-  // }
-
   app.btnWorkBookNew.onclick = () => {
     app.dialogNewWorkBook.showModal();
   }
@@ -1692,6 +1679,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
     process.id = Sheet.sheet.id;
     process.datamartId = Sheet.userId;
+    process.sql_info = true;
     console.log(process);
     debugger;
     // app.saveSheet();
@@ -1807,7 +1795,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
     App.loaderStart();
     if (Resource.tableRef) Resource.tableRef.clearChart();
-    const url = "/fetch_api/cube/sheet_create";
+    const url = "/fetch_api/cube/sql";
+    // const url = "/fetch_api/cube/sheet_create";
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
     await fetch(req)
@@ -2635,14 +2624,26 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     WorkBook.checkChanges('canvas');
   }
 
+  app.handlerTimeField = (e) => {
+    // WorkBook.web_bi_time = e.target.dataset.field;
+    console.log(e.target);
+    delete document.querySelector('#time-fields > li[data-selected]').dataset.selected;
+    e.target.dataset.selected = true;
+  }
+
   // salvataggio dimensione TIME dalla dialog-time
   app.saveTimeDimension = async () => {
-    const timeField = document.querySelector('#time-fields > li[data-selected]').dataset.field;
-    const timeColumn = document.querySelector('#ul-columns > li[data-selected]').dataset.label;
+    const timeColumnRef = document.querySelector('#time-fields > li[data-selected]');
+    const timeColumn = timeColumnRef.dataset.field;
+    const timeColumnType = timeColumnRef.dataset.datatype;
+    const column = document.querySelector('#ul-columns > li[data-selected]').dataset.label;
+    const columnType = document.querySelector('#ul-columns > li[data-selected]').dataset.datatype;
     const tableAlias = document.querySelector('#ul-columns > li[data-selected]').dataset.alias;
     const table = document.querySelector('#ul-columns > li[data-selected]').dataset.table;
     const token = rand().substring(0, 7);
-    WorkBook.dateTime = { tableAlias, timeField: timeColumn };
+    let field = (timeColumnType === 'date' && columnType === 'integer') ?
+      `TO_CHAR(${tableAlias}.${column})::DATE` : `${tableAlias}.${column}`;
+    // WorkBook.dateTime = { tableAlias, timeField: tableColumn, datatype: tableColumnType };
     console.log(WorkBook.activeTable);
     // WARN: solo per vertica in questo caso.
     // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
@@ -2651,10 +2652,11 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       value: {
         alias: 'WEB_BI_TIME',
         // [DocVenditaDettaglio.DataDocumento, WEB_BI_TIME.date]
-        SQL: [`TO_CHAR(${tableAlias}.${timeColumn})::DATE`, `WEB_BI_TIME.${timeField}`],
+        // SQL: [`TO_CHAR(${tableAlias}.${tableColumn})::DATE`, `WEB_BI_TIME.${web_bi_timeField}`],
+        SQL: [field, `WEB_BI_TIME.${timeColumn}`],
         factId: WorkBook.activeTable.dataset.factId,
-        from: { table: 'WEB_BI_TIME', alias: 'WEB_BI_TIME', field: timeField },
-        to: { table, alias: tableAlias, field: timeColumn }
+        from: { table: 'WEB_BI_TIME', alias: 'WEB_BI_TIME', field: timeColumn },
+        to: { table, alias: tableAlias, field: column }
       }
     };
     WorkBook.joins = token; // nome della tabella con le proprie join (WorkBook.nJoin) all'interno
@@ -2798,7 +2800,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
       // let pos = value.DATA_TYPE.indexOf('(');
       // let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-      span.dataset.datatype = value.type_name.toLowerCase();
+      li.dataset.datatype = value.type_name.toLowerCase();
       // span.dataset.type = type;
       // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
       li.dataset.id = key;

@@ -249,11 +249,11 @@ class WorkBooks {
 
   get tableJoins() { return this.#tableJoins; }
 
-  set dateTime(object) {
+  /* set dateTime(object) {
     this.#dateTime = object;
   }
 
-  get dateTime() { return this.#dateTime; }
+  get dateTime() { return this.#dateTime; } */
 
   set activeTable(id) {
     // id : `svg-data-x`
@@ -414,7 +414,7 @@ class WorkBooks {
     this.workBook.joins = Object.fromEntries(this.joins);
     // WARN: inutile salvarlo in localStorage, questo viene ricreato quando si apre un WorkBook
     this.workBook.dataModel = Object.fromEntries(this.dataModel);
-    this.workBook.dateTime = this.dateTime;
+    // this.workBook.dateTime = this.dateTime;
     this.workBook.svg = {
       tables: Object.fromEntries(Draw.tables),
       lines: Object.fromEntries(Draw.joinLines)

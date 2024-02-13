@@ -491,21 +491,22 @@ class MapDatabaseController extends Controller
     $q = new Cube($process);
     // array di colonne che verranno incluse nel datamart finale
     $q->datamartFields();
-    $q->select();
     foreach ($q->facts as $fact) {
-      $q->sql_info = (object)[
-        "SELECT" => (object)[],
-        "METRICS" => (object)[],
-        "FROM" => (object)[],
-        "WHERE" => (object)[],
-        "WHERE-TIME" => (object)[],
-        "AND" => (object)[],
-        "GROUP BY" => (object)[]
-      ];
+      if (property_exists($process, 'sql_info')) {
+        $q->sql_info = (object)[
+          "SELECT" => (object)[],
+          "METRICS" => (object)[],
+          "FROM" => (object)[],
+          "WHERE" => (object)[],
+          "WHERE-TIME" => (object)[],
+          "AND" => (object)[],
+          "GROUP BY" => (object)[]
+        ];
+      }
+      $q->select();
       // $fact : svg-data-xxxxx
       $q->factId = substr($fact, -5);
       $q->baseTableName = "WB_BASE_{$q->report_id}_{$q->datamart_id}_{$q->factId}";
-      $q->queries[$q->baseTableName] = $q->datamart_fields;
       // se esistono metriche di base
       if (property_exists($q->process, 'baseMeasures')) {
         $q->baseMetrics = $q->process->{'baseMeasures'}->{$fact};
@@ -521,6 +522,8 @@ class MapDatabaseController extends Controller
         // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
         // $resultSQL['base'] = $q->baseTable();
         $q->baseTable();
+        // array di query elaborate
+        $q->queries[$q->baseTableName] = $q->datamart_fields;
         if (property_exists($process, 'advancedMeasures')) {
           $q->filteredMetrics = $process->{'advancedMeasures'};
           $q->json_info_advanced = array();
@@ -557,6 +560,7 @@ class MapDatabaseController extends Controller
         }
       }
     }
+    dd($q->queries);
     // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
     // creo una tabella temporanea per ogni metrica filtrata
     // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
@@ -564,7 +568,6 @@ class MapDatabaseController extends Controller
     $resultSQL["base"] = $q->results;
     $resultSQL['datamart'] = $q->datamart();
     return $resultSQL;
-    // return nl2br(implode("\n\n\n", $resultSQL));
   }
 
   /* public function sql(Request $request)

@@ -158,6 +158,10 @@
     </div>
   </template>
 
+  <template id="tmpl-content-div">
+    <div></div>
+  </template>
+
   <main>
     <div id="drawer" open>
 
@@ -335,9 +339,11 @@
               <h5 class="title moveable">Imposta relazione con tabella TIME</h5>
               <section class="dlg-content col col-2-equals">
                 <ul id="time-fields">
-                  <li data-field="date" data-fn="handlerTimeField" data-selected>DATE <small>Es.: 2023-12-31</small></li>
-                  <li data-field="month_id" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
-                  <li data-field="year" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
+                  <li data-field="year" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
+                  <li data-field="quarter_id" data-datatype="integer" data-fn="handlerTimeField">QUARTER <small>Es.: 202302</small></li>
+                  <li data-field="month_id" data-datatype="integer" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
+                  <li data-field="week_id" data-datatype="integer" data-fn="handlerTimeField">WEEK <small>Es.: 202312</small></li>
+                  <li data-field="date" data-datatype="date" data-fn="handlerTimeField" data-selected>DATE <small>Es.: 2023-12-31</small></li>
                 </ul>
                 <section class="list-search">
                   <input type="search" id="time-column-search" data-element-search="time-column" placeholder="Ricerca colonna" autocomplete="off" />
