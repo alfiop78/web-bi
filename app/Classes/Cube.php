@@ -21,7 +21,7 @@ class Cube
   private $report_metrics = array(); // da utilizzare al posto di $this->_metrics_base
   private $report_filters = array(); // utilizzato al posto di $filters_baseTable
   private $groupby_clause = array();
-  private $with_clause = "";
+  private $union_clause = "";
 
   // private $_metrics_base_datamart;
   // da sostituire con...
@@ -198,7 +198,8 @@ class Cube
       }
       // TODO: da provare senza la baseTableName
       // $metrics_base_datamart[] = "\nNVL({$value->aggregateFn}({$this->baseTableName}.'{$value->alias}'), 0) AS '{$value->alias}'";
-      $this->datamart_baseMeasures[] = "\nNVL({$value->aggregateFn}('{$value->alias}'), 0) AS '{$value->alias}'";
+      // $this->datamart_baseMeasures[] = "\nNVL({$value->aggregateFn}({$value->field}), 0) AS '{$value->alias}'";
+      $this->datamart_baseMeasures[] = "\n({$value->field}) AS '{$value->alias}'";
     }
     // dd($this->report_metrics);
 
@@ -700,25 +701,28 @@ class Cube
     }
   }
 
-  private function with_clause()
+  private function distinct_fields()
   {
-    // dd($this->queries);
-    $union_sql = [];
+    $union = [];
     foreach ($this->queries as $table => $fields) {
-      // TODO: 2024.02.14 - Aggiungere UNION
-      $union_sql[] = self::SELECT;
-      $union_sql[] = implode(",\n", $fields);
-      $union_sql[] = self::FROM . "{$table}\n";
+      $sql = self::SELECT;
+      $sql .= implode(",\n", $fields);
+      $sql .= self::FROM . "decisyon_cache.{$table}\n";
+      $union[$table] = $sql;
     }
-    // dd(implode("", $union_sql));
-    $sql = implode("", $union_sql);
-    $this->with_clause = "WITH distinct_fields AS ($sql)\n";
-    // dd($this->with_clause);
+    // dd(implode("UNION\n", $union));
+    $union_sql = implode("UNION\n", $union);
+    // FIX: utilizzare il report_id e datamart_id
+    // $token = bin2hex(random_bytes(4));
+    $this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS\n($union_sql);";
+    // dd($this->union_clause);
+    $this->dropTemporaryTables("union_{$this->report_id}_{$this->datamart_id}");
+    DB::connection('vertica_odbc')->statement($this->union_clause);
   }
 
   public function datamart()
   {
-    $this->with_clause();
+    $this->distinct_fields();
     $comment = "/*Creazione DATAMART :\ndecisyon_cache.{$this->datamart_name}\n*/\n";
     $sql = "{$comment}CREATE TABLE decisyon_cache.{$this->datamart_name} INCLUDE SCHEMA PRIVILEGES AS ";
     $sql .= self::SELECT;
@@ -775,34 +779,33 @@ class Cube
 
   public function datamart_new()
   {
-    $this->with_clause();
+    $this->distinct_fields();
     $comment = "/*Creazione DATAMART :\ndecisyon_cache.{$this->datamart_name}\n*/\n";
     $sql = "{$comment}CREATE TABLE decisyon_cache.{$this->datamart_name} INCLUDE SCHEMA PRIVILEGES AS ";
     $sql .= self::SELECT;
     $fields = [];
     foreach ($this->datamart_fields as $field) {
-      $fields[] = "\tdistinct_fields.{$field}";
+      $fields[] = "\tunion_{$this->report_id}_{$this->datamart_id}.{$field}";
     }
     $sql .= implode(",\n", $fields);
+    // dd($this->datamart_baseMeasures);
     if (property_exists($this, "baseMetrics")) $sql .= "," . implode(",", $this->datamart_baseMeasures);
-    $sql .= self::FROM . "distinct_fields";
+    $sql .= self::FROM . "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}";
     $joinLEFT = "";
     $ONClause = [];
     foreach ($this->queries as $k => $v) {
       $joinLEFT .= "\nLEFT JOIN decisyon_cache.{$k}\n\tON ";
       foreach ($v as $field) {
-        $ONClause[] = "distinct_fields.'$field' = $k.'$field'";
+        $ONClause[] = "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}.'$field' = $k.'$field'";
       }
       $joinLEFT .= implode("\nAND ", $ONClause);
       unset($ONClause);
     }
     $sql .= $joinLEFT;
     // dd($sql);
-    $sql_final = $this->with_clause . $sql;
-    // dd($sql_final);
     // se il datamart già esiste lo elimino prima di ricrearlo
     $this->dropTemporaryTables($this->datamart_name);
-    DB::connection('vertica_odbc')->statement($sql_final);
+    DB::connection('vertica_odbc')->statement($sql);
     return $this->report_id;
   }
 
