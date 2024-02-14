@@ -121,6 +121,36 @@ class Cube
     // dd($this->_columns);
   }
 
+  public function select_new()
+  {
+    // $fieldList = array();
+    $name_key = NULL;
+    // dd($this->fields);
+    // per ogni tabella
+    foreach ($this->fields as $column) {
+      // dd($column);
+      foreach ($column->field as $key => $value) {
+        // key: id/ds
+        $name_key = "{$column->name}_{$key}";
+        $sql = implode("", $value->sql); // alias_tabella.nome_campo[_id]
+        // $fieldList[$name_key] = ($key === "ds") ? "{$sql} AS {$column->name}" : "{$sql} AS {$name_key}";
+        $this->select_clause[$this->factId][$name_key] = ($key === "ds") ? "{$sql} AS {$column->name}" : "{$sql} AS {$name_key}";
+
+        // questo viene utilizzato nella clausola ON della LEFT JOIN
+        // WARN: al posto di _columns[], in createDatamart(), può essere utilizzato $this->datamart_fields[]
+        // $this->_columns[] = "{$column->name}_id";
+        if (property_exists($this, 'sql_info')) {
+          $this->sql_info->{'SELECT'}->{$name_key} = "{$sql} AS {$name_key}";
+        }
+      }
+    }
+    // dd($fieldList);
+    // $this->select_clause = self::SELECT . implode(",\n", $fieldList);
+    // dd($this->sql_info);
+    // dd($this->select_clause);
+    // dd($this->_columns);
+  }
+
   // Definizione del calcolo delle misure
   public function metrics()
   {
@@ -134,6 +164,34 @@ class Cube
       // dd($value);
       $metric = "\nNVL({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
       $this->report_metrics[] = $metric;
+      // $metrics_base[] = $metric;
+      if (property_exists($this, 'sql_info')) {
+        $this->sql_info->{'METRICS'}->{$value->alias} = $metric;
+      }
+      // TODO: da provare senza la baseTableName
+      // $metrics_base_datamart[] = "\nNVL({$value->aggregateFn}({$this->baseTableName}.'{$value->alias}'), 0) AS '{$value->alias}'";
+      $this->datamart_baseMeasures[] = "\nNVL({$value->aggregateFn}('{$value->alias}'), 0) AS '{$value->alias}'";
+    }
+    // dd($this->report_metrics);
+
+    // viene utilizzata in createDatamart()
+    // $this->datamart_baseMeasures = implode(", ", $metrics_base_datamart);
+    // dd($this->sql_info);
+    // dd($this->datamart_baseMeasures);
+  }
+
+  public function metrics_new()
+  {
+    // metriche di base
+    // $metrics_base = array();
+    // $metrics_base_datamart = array();
+
+    $this->report_metrics = [];
+    // dd($this->baseMetrics);
+    foreach ($this->baseMetrics as $value) {
+      // dd($value);
+      $metric = "\nNVL({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
+      $this->report_metrics[$this->factId][] = $metric;
       // $metrics_base[] = $metric;
       if (property_exists($this, 'sql_info')) {
         $this->sql_info->{'METRICS'}->{$value->alias} = $metric;
@@ -169,6 +227,21 @@ class Cube
     foreach ($from as $alias => $prop) {
       // dd($alias, $prop);
       $this->from_clause[$alias] = "{$prop->schema}.{$prop->table} AS {$alias}";
+      if (property_exists($this, 'sql_info')) {
+        $this->sql_info->{'FROM'}->{$alias} = "{$prop->schema}.{$prop->table} AS {$alias}";
+      }
+    }
+    // dd($this->from_clause);
+  }
+
+  public function from_new()
+  {
+    // dd($from);
+    $this->from_clause = []; // azzero la FROM che può variare in base alla Fact in ciclo
+    // dd($this->process->{"from"});
+    foreach ($this->process->{"from"}->{$this->fact} as $alias => $prop) {
+      // dd($alias, $prop);
+      $this->from_clause[$this->factId][$alias] = "{$prop->schema}.{$prop->table} AS {$alias}";
       if (property_exists($this, 'sql_info')) {
         $this->sql_info->{'FROM'}->{$alias} = "{$prop->schema}.{$prop->table} AS {$alias}";
       }
@@ -223,6 +296,44 @@ class Cube
     // dd($this->where_clause, $this->where_time_clause);
   }
 
+  public function where_new()
+  {
+    // dd($joins);
+    // dd($this->process->{"joins"}->{$this->fact});
+    /* TODO: metto in join le tabelle incluse nella FROM_baseTable.
+      Valutare quale approccio può essere migliore in base ai tipi di join che si dovranno implementare in futuro
+    */
+    // NOTE : caso in qui viene passato tutto l'object
+    // $this->WHERE_baseTable = [];
+    $this->where_clause = [];
+    $this->where_time_clause = [];
+    foreach ($this->process->{"joins"}->{$this->fact} as $token => $join) {
+      // il token è l'identificativo della join
+      // dd($join);
+      // qui utilizzo la proprietà SQL con implode(' = ', $join->SQL)
+      if ($join->alias === 'WEB_BI_TIME') {
+        $this->where_time_clause[$this->factId][$token] = implode(" = ", $join->SQL);
+        if (property_exists($this, 'sql_info')) {
+          // in questo caso imposto nella prop 'WHERE-TIME' anzichè nella 'WHERE'. In questo
+          // modo, se nelle metriche filtrate, presente una timingFn non ho problemi di
+          // sovrapposizione delle JOIN con la WEB_BI_TIME.
+          $this->sql_info->{'WHERE-TIME'}->{$token} = implode(" = ", $join->SQL);
+        }
+      } else {
+        $this->where_clause[$this->factId][$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
+        if (property_exists($this, 'sql_info')) $this->sql_info->{'WHERE'}->{$token} = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
+      }
+    }
+    // dd($this->sql_info);
+    // NOTE: caso in qui viene passato, a joins, solo la proprietà SQL
+    //
+    /* foreach ($joins as $token => $join) {
+      // dd($token, $join);
+      $this->WHERE_baseTable[$token] = implode(" = ", $join);
+    } */
+    // dd($this->where_clause, $this->where_time_clause);
+  }
+
   // definisco i filtri del report
   public function filters($filters)
   {
@@ -236,6 +347,14 @@ class Cube
     }
     // dd($this->report_filters);
     // dd($this->sql_info);
+  }
+
+  public function filters_new()
+  {
+    foreach ($this->process->{"filters"} as $filter) {
+      $this->report_filters[$this->factId][$filter->name] = implode(" ", $filter->sql);
+    }
+    // dd($this->report_filters);
   }
 
   // Qui viene utilizzata la stessa logica del metodo select()
@@ -266,6 +385,61 @@ class Cube
     }
     // dd($this->_groupBy);
     // dd($this->groupby_clause);
+  }
+
+  public function groupBy_new()
+  {
+    // dd($groups);
+    // $fieldList = array();
+    $this->groupby_clause = [];
+    $name_key = NULL;
+    foreach ($this->fields as $column) {
+      foreach ($column->field as $key => $value) {
+        $name_key = "{$column->name}_{$key}";
+        $sql = implode("", $value->sql); // alias_tabella.nome_campo[_id]
+        $this->groupby_clause[$this->factId][$name_key] = $sql;
+        if (property_exists($this, 'sql_info')) {
+          $this->sql_info->{'GROUP BY'}->{$name_key} = $sql;
+        }
+        ($key === "id") ? array_push($this->segmented, $name_key) : array_push($this->segmented, $column->name);
+      }
+    }
+    // $this->_groupBy .= implode(",\n", $fieldList);
+    // dd($this->_groupBy);
+    // dd($this->segmented);
+    if (count($this->segmented) > 40) {
+      $segmented = implode(",\n", $this->segmented);
+      // $this->_groupBy .= "\nSEGMENTED BY HASH({$segmented}) ALL NODES";
+      $this->groupby_clause['SEGMENTED'] = "\nSEGMENTED BY HASH({$segmented}) ALL NODES";
+    }
+    // dd($this->_groupBy);
+    // dd($this->groupby_clause);
+  }
+
+  public function base_table_new($fact)
+  {
+    if (property_exists($this->process, 'baseMeasures')) $this->baseMetrics = $this->process->{"baseMeasures"}->{$fact};
+    // dd($this->baseMetrics);
+    $this->select_new();
+    $this->metrics_new();
+    $this->from_new();
+    $this->where_new();
+    $this->filters_new();
+    $this->groupBy_new();
+    $sql = NULL;
+    $sql .= self::SELECT . implode(",\n", $this->select_clause[$this->factId]);
+    // dd($this->report_metrics[$this->factId]);
+    if (!is_null($this->report_metrics[$this->factId])) $sql .= "," . implode(", ", $this->report_metrics[$this->factId]);
+    $sql .= self::FROM . implode(",\n", $this->from_clause[$this->factId]);
+    $sql .= self::WHERE . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId]));
+    if (!is_null($this->report_filters[$this->factId])) $sql .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
+    $sql .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
+    $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
+    // dd($sql);
+    $query = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $sql;";
+    // dd($query);
+    $this->dropTemporaryTables($this->baseTableName);
+    return DB::connection('vertica_odbc')->statement($query);
   }
 
   public function baseTable()
@@ -531,6 +705,7 @@ class Cube
     // dd($this->queries);
     $union_sql = [];
     foreach ($this->queries as $table => $fields) {
+      // TODO: 2024.02.14 - Aggiungere UNION
       $union_sql[] = self::SELECT;
       $union_sql[] = implode(",\n", $fields);
       $union_sql[] = self::FROM . "{$table}\n";
@@ -596,6 +771,39 @@ class Cube
         throw new Exception("Errore elaborazione richiesta", $e->getCode());
       }
     }
+  }
+
+  public function datamart_new()
+  {
+    $this->with_clause();
+    $comment = "/*Creazione DATAMART :\ndecisyon_cache.{$this->datamart_name}\n*/\n";
+    $sql = "{$comment}CREATE TABLE decisyon_cache.{$this->datamart_name} INCLUDE SCHEMA PRIVILEGES AS ";
+    $sql .= self::SELECT;
+    $fields = [];
+    foreach ($this->datamart_fields as $field) {
+      $fields[] = "\tdistinct_fields.{$field}";
+    }
+    $sql .= implode(",\n", $fields);
+    if (property_exists($this, "baseMetrics")) $sql .= "," . implode(",", $this->datamart_baseMeasures);
+    $sql .= self::FROM . "distinct_fields";
+    $joinLEFT = "";
+    $ONClause = [];
+    foreach ($this->queries as $k => $v) {
+      $joinLEFT .= "\nLEFT JOIN decisyon_cache.{$k}\n\tON ";
+      foreach ($v as $field) {
+        $ONClause[] = "distinct_fields.'$field' = $k.'$field'";
+      }
+      $joinLEFT .= implode("\nAND ", $ONClause);
+      unset($ONClause);
+    }
+    $sql .= $joinLEFT;
+    // dd($sql);
+    $sql_final = $this->with_clause . $sql;
+    // dd($sql_final);
+    // se il datamart già esiste lo elimino prima di ricrearlo
+    $this->dropTemporaryTables($this->datamart_name);
+    DB::connection('vertica_odbc')->statement($sql_final);
+    return $this->report_id;
   }
 
   public function createDatamart()

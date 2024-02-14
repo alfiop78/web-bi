@@ -1795,8 +1795,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
     App.loaderStart();
     if (Resource.tableRef) Resource.tableRef.clearChart();
-    const url = "/fetch_api/cube/sql";
-    // const url = "/fetch_api/cube/sheet_create";
+    const url = "/fetch_api/cube/sheet_create";
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
     await fetch(req)
