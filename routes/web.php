@@ -100,7 +100,105 @@ Route::get('/fetch_api/copy_from/{from_id}/copy_to/{to_id}/copy_table', [MapData
 
 // creazione dimensione time
 // Route::post('/fetch_api/dimension/time', [MapDatabaseController::class, 'createTimeDimension'])->name('web_bi.fetch_api.time');
-Route::get('/fetch_api/dimension/time', function () {
+Route::get('/fetch_api/dimension/time', [MapDatabaseController::class, 'dimensionTIME'])->name('web_bi.fetch_api_time');
+
+/* Route::get('/fetch_api/dimension/time', function () {
+  // TODO: creare la struttura come quella di decisyon con le tabelle in relazione :
+  // YEAR, QUARTER, MONTH, DATE
+
+  $start = new DateTime('2021-01-01 00:00:00');
+  $end   = new DateTime('2025-01-01 00:00:00');
+  // $end   = new DateTime('2021-01-31 00:00:00');
+  $interval = new DateInterval('P1D');
+  $period = new DatePeriod($start, $interval, $end);
+  $json = (object) null;
+  foreach ($period as $date) {
+    $currDate = new DateTimeImmutable($date->format('Y-m-d'));
+    // calcolo il quarter
+    $quarter = ceil($currDate->format('n') / 3);
+    $json->{$currDate->format('Y-m-d')} = (object) [
+      "date" => $currDate->format('Y-m-d'),
+      "trans_ly" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d'),
+      "weekday" => $currDate->format('l'),
+      // "day" => (object)
+      "week" => $currDate->format('W'),
+      "month_id" => $currDate->format('Ym'),
+      "month" => (object) [
+        "id" => $currDate->format('m'),
+        "ds" => $currDate->format('F'),
+        "short" => $currDate->format('M')
+      ],
+      "quarter_id" => "{$currDate->format('Y')}0{$quarter}",
+      "quarter" => (object) ["id" => $quarter, "ds" => "Q {$quarter}"],
+      "year" => $currDate->format('Y'),
+      "day_of_year" => $currDate->format('z'),
+      // "lastOfMonth" => $current->format('t'),
+      "last" => (object) [
+        "day" => $currDate->sub(new DateInterval('P1D'))->format('Y-m-d'),
+        "week" => $currDate->sub(new DateInterval('P1W'))->format('Y-m-d'),
+        "month" => $currDate->sub(new DateInterval('P1M'))->format('Y-m-d'),
+        "quarter" => ceil($currDate->sub(new DateInterval('P3M'))->format('n') / 3), // quarter 3 mesi precedenti
+        "year" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d')
+      ]
+    ];
+  }
+  // dd($json);
+  // if (!DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable('WEB_BI_TIME')) {
+  if (!Schema::connection('vertica_odbc')->hasTable('WEB_BI_TIME')) {
+    // la tabella non esiste, la creo
+    // TODO: utilizzare il complex datatype ROW (vertica) per creare le colonne come "strutture dati".
+    // Per recuperarne i valori non bisogna utilizzare MapJSONExtractor ma la sintassi xxx.yyy
+
+    $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WEB_BI_TIME (
+    date DATE NOT NULL PRIMARY KEY,
+    trans_ly DATE,
+    year INTEGER,
+    quarter_id INTEGER,
+    quarter VARCHAR,
+    month_id INTEGER,
+    month VARCHAR,
+    week CHAR(2),
+    day VARCHAR,
+    last VARCHAR(1000)
+    ) INCLUDE SCHEMA PRIVILEGES";
+    $result = DB::connection('vertica_odbc')->statement($sql);
+    // if (!$result) echo "tabella creata";
+    // var_dump($result);
+    //last VARCHAR,
+    //json VARCHAR(2000)
+  }
+  // var_dump($json);
+  echo "\nstart JSON :" . date('H:i:s', time());
+
+  foreach ($json as $date => $value) {
+    // $str = json_encode($value);
+    // dd($value->last);
+    // $quarter = json_encode($value->quarter);
+    // $month = json_encode($value->month);
+    // NOTE: da vertica 11 è possibile fare la INSERT INTO con più record con la seguente sintassi:
+    // INSERT INTO nometabella (field1, field2) VALUES (1, 'test'), (2, 'test'), (3, 'test')....
+    $result_insert = DB::connection('vertica_odbc')->table('decisyon_cache.WEB_BI_TIME')->insert([
+      'date' => "{$date}",
+      'trans_ly' => "{$value->trans_ly}",
+      'year' => $value->year,
+      'quarter_id' => (int) $value->quarter_id,
+      'quarter' => json_encode($value->quarter),
+      'month_id' => $value->month_id,
+      'month' => json_encode($value->month),
+      'week' => $value->week,
+      'day' => json_encode(['weekday' => $value->weekday, 'day_of_year' => $value->day_of_year]),
+      'last' => json_encode($value->last)
+      // 'json' => "{$str}"
+    ]);
+  }
+  echo "\nend JSON :" . date('H:i:s', time());
+  $result_insert = DB::connection('vertica_odbc')->statement('COMMIT;');
+  return $result_insert;
+})->name('web_bi.fetch_api.time'); */
+
+/* Route::get('/fetch_api/dimension/time', function () {
+  // TODO: creare la struttura come quella di decisyon con le tabelle in relazione :
+  // YEAR, QUARTER, MONTH, DATE
   $start = new DateTime('2021-01-01 00:00:00');
   $end   = new DateTime('2025-01-01 00:00:00');
   // $end   = new DateTime('2021-01-31 00:00:00');
@@ -188,7 +286,7 @@ Route::get('/fetch_api/dimension/time', function () {
   echo "\nend JSON :" . date('H:i:s', time());
   $result_insert = DB::connection('vertica_odbc')->statement('COMMIT;');
   return $result_insert;
-})->name('web_bi.fetch_api.time');
+})->name('web_bi.fetch_api.time'); */
 
 // curl http://127.0.0.1:8000/curl/process/t1cm3v1nnso/schedule
 // curl https://gaia.automotive-cloud.com/curl/process/j8ykcl339r9/schedule

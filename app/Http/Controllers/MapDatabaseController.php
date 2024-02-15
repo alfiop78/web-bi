@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use DateTime;
+use DateInterval;
+use DatePeriod;
+// ... oppure quando si istanzia l'oggetto
+// new \DateTime() con lo slash perchè è un oggetto php
+
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Classes\Cube;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class MapDatabaseController extends Controller
@@ -156,6 +162,148 @@ class MapDatabaseController extends Controller
   {
     $values = DB::connection('vertica_odbc')->table($schema . "." . $table)->distinct()->orderBy($field, 'asc')->limit(500)->get($field);
     return response()->json($values);
+  }
+
+  private function web_bi_time_year($start, $end)
+  {
+    // $start = new DateTime('2021-01-01 00:00:00');
+    // $end   = new DateTime('2025-01-01 00:00:00');
+    $yearsInterval = new DateInterval('P1Y');
+    $yearPeriod = new DatePeriod($start, $yearsInterval, $end);
+    $years = [];
+    foreach ($yearPeriod as $year) {
+      // $currDate = new DateTimeImmutable($date->format('Y-m-d'));
+      $years[] = (int) $year->format('Y');
+    }
+    if (!Schema::connection('vertica_odbc')->hasTable('WEB_BI_TIME_YEAR')) {
+      // la tabella non esiste, la creo
+      $sql_year = "CREATE TABLE IF NOT EXISTS decisyon_cache.WEB_BI_TIME_YEAR (
+      id integer PRIMARY KEY NOT NULL
+      ) INCLUDE SCHEMA PRIVILEGES";
+      $result = DB::connection('vertica_odbc')->statement($sql_year);
+      if (!$result) {
+        // $result : null tabella creata correttamente
+        foreach ($years as $value) {
+          $result_insert_year = DB::connection('vertica_odbc')->table('decisyon_cache.WEB_BI_TIME_YEAR')->insert([
+            'id' => $value,
+          ]);
+        }
+        $result_insert_year = DB::connection('vertica_odbc')->statement('COMMIT;');
+        return $result_insert_year;
+      }
+    }
+  }
+
+  private function web_bi_time_quarter($start, $end)
+  {
+    $interval = new DateInterval('P3M');
+    $period = new DatePeriod($start, $interval, $end);
+    $json = (object) null;
+    $quarter = NULL;
+    foreach ($period as $months) {
+      // var_dump($months->format('m'));
+      switch ($months->format('m')) {
+        case '01':
+          $quarter = (int) $months->format('Y01');
+          break;
+        case '04':
+          $quarter = (int) $months->format('Y02');
+          break;
+        case '07':
+          $quarter = (int) $months->format('Y03');
+          break;
+        default:
+          $quarter = (int) $months->format('Y04');
+          break;
+      }
+      $json->{$quarter} = (object) [
+        "id" => $quarter,
+        "year_id" => (int) $months->format('Y')
+      ];
+    }
+    if (!Schema::connection('vertica_odbc')->hasTable('WEB_BI_TIME_QUARTER')) {
+      // la tabella non esiste, la creo
+      $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WEB_BI_TIME_QUARTER (
+      id integer PRIMARY KEY NOT NULL,
+      year_id integer
+      ) INCLUDE SCHEMA PRIVILEGES";
+      $result_create = DB::connection('vertica_odbc')->statement($sql);
+      if (!$result_create) {
+        // $result : null tabella creata correttamente
+        foreach ($json as $quarter => $value) {
+          DB::connection('vertica_odbc')->table('decisyon_cache.WEB_BI_TIME_QUARTER')->insert([
+            'id' => $quarter, 'year_id' => $value->year_id
+          ]);
+        }
+        return DB::connection('vertica_odbc')->statement('COMMIT;');
+      }
+    }
+  }
+
+  private function web_bi_time_month($start, $end)
+  {
+    $interval = new DateInterval('P3M');
+    $period = new DatePeriod($start, $interval, $end);
+    $json = (object) null;
+    $quarter = NULL;
+    foreach ($period as $months) {
+      // var_dump($months->format('m'));
+      switch ($months->format('m')) {
+        case '01':
+          $quarter = (int) $months->format('Y01');
+          break;
+        case '04':
+          $quarter = (int) $months->format('Y02');
+          break;
+        case '07':
+          $quarter = (int) $months->format('Y03');
+          break;
+        default:
+          $quarter = (int) $months->format('Y04');
+          break;
+      }
+      $json->{$quarter} = (object) [
+        "id" => $quarter,
+        "year_id" => (int) $months->format('Y')
+      ];
+    }
+    if (!Schema::connection('vertica_odbc')->hasTable('WEB_BI_TIME_QUARTER')) {
+      // la tabella non esiste, la creo
+      $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WEB_BI_TIME_QUARTER (
+      id integer PRIMARY KEY NOT NULL,
+      year_id integer
+      ) INCLUDE SCHEMA PRIVILEGES";
+      $result_create = DB::connection('vertica_odbc')->statement($sql);
+      if (!$result_create) {
+        // $result : null tabella creata correttamente
+        foreach ($json as $quarter => $value) {
+          DB::connection('vertica_odbc')->table('decisyon_cache.WEB_BI_TIME_QUARTER')->insert([
+            'id' => $quarter, 'year_id' => $value->year_id
+          ]);
+        }
+        return DB::connection('vertica_odbc')->statement('COMMIT;');
+      }
+    }
+  }
+
+  public function dimensionTIME()
+  {
+    $start = new DateTime('2021-01-01 00:00:00');
+    $end   = new DateTime('2025-01-01 00:00:00');
+    // $querter_result = $this->web_bi_time_quarter($start, $end);
+    $month_result = $this->web_bi_time_month($start, $end);
+
+    /* $year_result = $this->web_bi_time_year($start, $end);
+    if (!$year_result) {
+      // year inseriti
+      $quarter_result = $this->web_bi_time_quarter($start, $end);
+      if (!$quarter_result) {
+        $month_result = $this->web_bi_time_month($start, $end);
+        if (!$month_result) {
+          $date_result = $this->web_bi_time($start, $end);
+        }
+      }
+    } */
   }
 
   // Elenco delle tabelle dello schema selezionato
@@ -328,7 +476,6 @@ class MapDatabaseController extends Controller
     foreach ($query->facts as $fact) {
       $query->fact = $fact;
       $query->factId = substr($fact, -5);
-      // $query->select();
       $query->baseTableName = "WB_BASE_{$query->report_id}_{$query->datamart_id}_{$query->factId}";
       $res = $query->base_table_new($fact);
       $query->queries[$query->baseTableName] = $query->datamart_fields;

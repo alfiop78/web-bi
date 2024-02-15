@@ -439,6 +439,7 @@ class Cube
     // dd($sql);
     $query = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $sql;";
     // dd($query);
+    var_dump($query);
     $this->dropTemporaryTables($this->baseTableName);
     return DB::connection('vertica_odbc')->statement($query);
   }
@@ -712,10 +713,9 @@ class Cube
     }
     // dd(implode("UNION\n", $union));
     $union_sql = implode("UNION\n", $union);
-    // FIX: utilizzare il report_id e datamart_id
-    // $token = bin2hex(random_bytes(4));
     $this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS\n($union_sql);";
     // dd($this->union_clause);
+    var_dump($this->union_clause);
     $this->dropTemporaryTables("union_{$this->report_id}_{$this->datamart_id}");
     DB::connection('vertica_odbc')->statement($this->union_clause);
   }
@@ -802,7 +802,7 @@ class Cube
       unset($ONClause);
     }
     $sql .= $joinLEFT;
-    // dd($sql);
+    dd($sql);
     // se il datamart già esiste lo elimino prima di ricrearlo
     $this->dropTemporaryTables($this->datamart_name);
     DB::connection('vertica_odbc')->statement($sql);
