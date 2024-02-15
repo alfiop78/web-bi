@@ -103,8 +103,6 @@ Route::get('/fetch_api/copy_from/{from_id}/copy_to/{to_id}/copy_table', [MapData
 Route::get('/fetch_api/dimension/time', [MapDatabaseController::class, 'dimensionTIME'])->name('web_bi.fetch_api_time');
 
 /* Route::get('/fetch_api/dimension/time', function () {
-  // TODO: creare la struttura come quella di decisyon con le tabelle in relazione :
-  // YEAR, QUARTER, MONTH, DATE
 
   $start = new DateTime('2021-01-01 00:00:00');
   $end   = new DateTime('2025-01-01 00:00:00');
@@ -177,6 +175,7 @@ Route::get('/fetch_api/dimension/time', [MapDatabaseController::class, 'dimensio
     // $month = json_encode($value->month);
     // NOTE: da vertica 11 è possibile fare la INSERT INTO con più record con la seguente sintassi:
     // INSERT INTO nometabella (field1, field2) VALUES (1, 'test'), (2, 'test'), (3, 'test')....
+
     $result_insert = DB::connection('vertica_odbc')->table('decisyon_cache.WEB_BI_TIME')->insert([
       'date' => "{$date}",
       'trans_ly' => "{$value->trans_ly}",
