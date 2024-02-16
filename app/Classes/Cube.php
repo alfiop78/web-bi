@@ -576,7 +576,6 @@ class Cube
     // dd($this->json_info_advanced);
   }
 
-
   /* creo i datamart necessari per le metriche filtrate */
   public function createMetricDatamarts()
   {

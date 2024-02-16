@@ -2568,6 +2568,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     * - recupero le colonne della tabella selezionata
     * - apro la dialog per poter associare una colonna della WEB_BI_TIME con una colonna della FACT
     */
+    debugger;
     if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
     app.addFields_test(document.getElementById('ul-columns'), WorkBookStorage.getTable(WorkBook.activeTable.dataset.table));
     app.dialogTime.show();

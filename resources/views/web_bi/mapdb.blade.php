@@ -339,6 +339,7 @@
               <h5 class="title moveable">Imposta relazione con tabella TIME</h5>
               <section class="dlg-content col col-2-equals">
                 <ul id="time-fields">
+                  <!-- TODO: creare qui la struttura delle tabelle TIME con <summary> e <details> -->
                   <li data-field="year" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
                   <li data-field="quarter_id" data-datatype="integer" data-fn="handlerTimeField">QUARTER <small>Es.: 202302</small></li>
                   <li data-field="month_id" data-datatype="integer" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
