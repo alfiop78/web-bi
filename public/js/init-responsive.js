@@ -1116,6 +1116,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     Draw = new DrawSVG('svg');
     document.getElementById('workbook-name').dataset.value = name;
     document.getElementById('workbook-name').innerText = name;
+    // creo le tabelle TIME nel canvas
     app.dialogNewWorkBook.close();
   }
 
@@ -2633,9 +2634,11 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   // salvataggio dimensione TIME dalla dialog-time
   app.saveTimeDimension = async () => {
-    const timeColumnRef = document.querySelector('#time-fields > li[data-selected]');
-    const timeColumn = timeColumnRef.dataset.field;
-    const timeColumnType = timeColumnRef.dataset.datatype;
+    const timeRef = document.querySelector('#time-fields > li[data-selected]');
+    const timeTable = timeRef.dataset.table;
+    const timeColumn = timeRef.dataset.field;
+    debugger;
+    const timeColumnType = timeRef.dataset.datatype;
     const column = document.querySelector('#ul-columns > li[data-selected]').dataset.label;
     const columnType = document.querySelector('#ul-columns > li[data-selected]').dataset.datatype;
     const tableAlias = document.querySelector('#ul-columns > li[data-selected]').dataset.alias;
@@ -2647,15 +2650,19 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     console.log(WorkBook.activeTable);
     // WARN: solo per vertica in questo caso.
     // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
+    switch (timeTable) {
+      case 'WB_YEARS':
+        break;
+    }
     WorkBook.join = {
       token,
       value: {
-        alias: 'WEB_BI_TIME',
+        alias: timeTable,
         // [DocVenditaDettaglio.DataDocumento, WEB_BI_TIME.date]
         // SQL: [`TO_CHAR(${tableAlias}.${tableColumn})::DATE`, `WEB_BI_TIME.${web_bi_timeField}`],
-        SQL: [field, `WEB_BI_TIME.${timeColumn}`],
+        SQL: [field, `${timeTable}.${timeColumn}`],
         factId: WorkBook.activeTable.dataset.factId,
-        from: { table: 'WEB_BI_TIME', alias: 'WEB_BI_TIME', field: timeColumn },
+        from: { table: timeTable, alias: timeTable, field: timeColumn },
         to: { table, alias: tableAlias, field: column }
       }
     };

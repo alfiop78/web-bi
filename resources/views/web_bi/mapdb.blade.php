@@ -340,11 +340,11 @@
               <section class="dlg-content col col-2-equals">
                 <ul id="time-fields">
                   <!-- TODO: creare qui la struttura delle tabelle TIME con <summary> e <details> -->
-                  <li data-field="year" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
-                  <li data-field="quarter_id" data-datatype="integer" data-fn="handlerTimeField">QUARTER <small>Es.: 202302</small></li>
-                  <li data-field="month_id" data-datatype="integer" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
-                  <li data-field="week_id" data-datatype="integer" data-fn="handlerTimeField">WEEK <small>Es.: 202312</small></li>
-                  <li data-field="date" data-datatype="date" data-fn="handlerTimeField" data-selected>DATE <small>Es.: 2023-12-31</small></li>
+                  <li data-field="id" data-table="WB_YEARS" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
+                  <li data-field="id" data-table="WB_QUARTERS" data-field="id" data-datatype="integer" data-fn="handlerTimeField">QUARTER <small>Es.: 202302</small></li>
+                  <li data-field="id" data-table="WB_MONTHS" data-datatype="integer" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
+                  <!-- <li data-field="week_id" data-datatype="integer" data-fn="handlerTimeField">WEEK <small>Es.: 202312</small></li> -->
+                  <li data-field="date" data-table="WB_DATE" data-datatype="date" data-fn="handlerTimeField" data-selected>DATE <small>Es.: 2023-12-31</small></li>
                 </ul>
                 <section class="list-search">
                   <input type="search" id="time-column-search" data-element-search="time-column" placeholder="Ricerca colonna" autocomplete="off" />
@@ -675,6 +675,12 @@
                               </g>
                               <g id="web-bi-time">
                                 <image id="time" href="{{ asset('/images/access_time_filled_865858_18dp.svg') }}" height="18" width="18"></image>
+                              </g>
+                              <g id="time-dimension">
+                                <desc data-table="WB_YEARS" data-table-join="WB_QUARTERS" data-name="WB_YEARS" data-alias="WB_YEARS" data-schema="decisyon_cache">wb_years</desc>
+                                <desc data-table="WB_QUARTERS" data-table-join="WB_MONTHS" data-name="WB_QUARTERS" data-alias="WB_QUARTERS" data-schema="decisyon_cache">wb_quarters</desc>
+                                <desc data-table="WB_MONTHS" data-table-join="WB_DATE" data-name="WB_MONTHS" data-alias="WB_MONTHS" data-schema="decisyon_cache">wb_months</desc>
+                                <desc data-table="WB_DATE" data-name="WB_DATE" data-alias="WB_DATE" data-schema="decisyon_cache">wb_date</desc>
                               </g>
                             </defs>
                           </svg>
