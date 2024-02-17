@@ -217,7 +217,6 @@ class WorkBooks {
   #metrics = new Map();
   #join = new Map();
   #joins = new Map();
-  #dateTime;
   #tableJoins = { from: null, to: null }; // refs
   #dataModel = new Map();
   #hierTables = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
@@ -248,12 +247,6 @@ class WorkBooks {
   }
 
   get tableJoins() { return this.#tableJoins; }
-
-  /* set dateTime(object) {
-    this.#dateTime = object;
-  }
-
-  get dateTime() { return this.#dateTime; } */
 
   set activeTable(id) {
     // id : `svg-data-x`
@@ -370,13 +363,14 @@ class WorkBooks {
       // "di origine".
       // Successivamente, nel ciclo dimensionTables, vado ad invocare una funzione ricorsiva
       // che cerca le tabelle gerarchicamente "inferiori", fino alla Fact, e le aggiunge a joinTables.
-      const dimensionTables = (common) ? originTables :
+      let dimensionTables = (common) ? originTables :
         Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}'], use.time[data-fact-id='${fact.id}']`);
-      // Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}']`);
+      debugger;
 
       dimensionTables.forEach(table => {
+        // debugger;
         joinTables = [{ table: table.dataset.alias, id: table.id }];
-        // joinTables = [table.dataset.alias];
+        // if (table.classList.contains('time')) {}
         // recupero la join associata alla tabella in ciclo
         if (table.dataset.tableJoin) recursive(table.dataset.tableJoin);
         tables[table.dataset.alias] = joinTables;

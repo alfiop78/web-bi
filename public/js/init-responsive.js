@@ -1116,7 +1116,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     Draw = new DrawSVG('svg');
     document.getElementById('workbook-name').dataset.value = name;
     document.getElementById('workbook-name').innerText = name;
-    // creo le tabelle TIME nel canvas
     app.dialogNewWorkBook.close();
   }
 
@@ -2569,7 +2568,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     * - recupero le colonne della tabella selezionata
     * - apro la dialog per poter associare una colonna della WEB_BI_TIME con una colonna della FACT
     */
-    debugger;
     if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
     app.addFields_test(document.getElementById('ul-columns'), WorkBookStorage.getTable(WorkBook.activeTable.dataset.table));
     app.dialogTime.show();
@@ -2625,9 +2623,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     WorkBook.checkChanges('canvas');
   }
 
+  // contrassegno con l'attributo [data-selected] il campo selezionato delle tabelle TIME
   app.handlerTimeField = (e) => {
     // WorkBook.web_bi_time = e.target.dataset.field;
-    console.log(e.target);
     delete document.querySelector('#time-fields > li[data-selected]').dataset.selected;
     e.target.dataset.selected = true;
   }
@@ -2635,9 +2633,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   // salvataggio dimensione TIME dalla dialog-time
   app.saveTimeDimension = async () => {
     const timeRef = document.querySelector('#time-fields > li[data-selected]');
+    // recupero l'elemento <g> con la propria tabella
+    const descTable = Draw.svg.getElementById(timeRef.dataset.table);
     const timeTable = timeRef.dataset.table;
     const timeColumn = timeRef.dataset.field;
-    debugger;
     const timeColumnType = timeRef.dataset.datatype;
     const column = document.querySelector('#ul-columns > li[data-selected]').dataset.label;
     const columnType = document.querySelector('#ul-columns > li[data-selected]').dataset.datatype;
@@ -2650,9 +2649,23 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     console.log(WorkBook.activeTable);
     // WARN: solo per vertica in questo caso.
     // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
-    switch (timeTable) {
-      case 'WB_YEARS':
-        break;
+
+    let recursiveDimension = (ref) => {
+      Draw.svg.querySelectorAll(`g#time-dimension > desc[data-table-join='${ref.dataset.table}']`).forEach(t => {
+        const token = rand().substring(0, 7);
+        WorkBook.join = {
+          token,
+          value: {
+            alias: t.dataset.alias,
+            SQL: [`${t.dataset.table}.${t.dataset.field}`, `${ref.dataset.table}.${ref.dataset.joinField}`],
+            factId: WorkBook.activeTable.dataset.factId,
+            from: { table: t.dataset.table, alias: t.dataset.alias, field: t.dataset.field },
+            to: { table: ref.dataset.table, alias: ref.dataset.alias, field: ref.dataset.joinField }
+          }
+        };
+        WorkBook.joins = token;
+        if (t.dataset.joinField) recursiveDimension(t);
+      });
     }
     WorkBook.join = {
       token,
@@ -2666,19 +2679,19 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         to: { table, alias: tableAlias, field: column }
       }
     };
-    WorkBook.joins = token; // nome della tabella con le proprie join (WorkBook.nJoin) all'interno
+    WorkBook.joins = token;
+    // recupero lee tabelle della TIME gerarchicamente superiori a quella selezionata
+    recursiveDimension(descTable);
     Draw.tables = {
       id: `svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`,
-      // id: 'svg-data-web_bi_time',
-      // key: `svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`,
       key: 'svg-data-web_bi_time',
       x: +WorkBook.activeTable.getAttribute('x'),
       y: +WorkBook.activeTable.getAttribute('y') + 30,
-      table: 'WEB_BI_TIME',
-      alias: 'WEB_BI_TIME',
-      name: 'WEB_BI_TIME',
+      table: descTable.dataset.table,
+      alias: descTable.dataset.alias,
+      name: descTable.dataset.table,
       schema: 'decisyon_cache',
-      joins: 0,
+      joins: +descTable.dataset.joins,
       factId: WorkBook.activeTable.dataset.factId,
       join: WorkBook.activeTable.id
     };
@@ -2688,6 +2701,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     Draw.tables.get(`${WorkBook.activeTable.id}`).joins = +WorkBook.activeTable.dataset.joins;
     Draw.drawTime();
 
+    debugger;
     WorkBook.createDataModel();
     app.hierTables();
     // recupero tutti i campi della WEB_BI_TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook

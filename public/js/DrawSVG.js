@@ -770,7 +770,8 @@ class DrawSVG {
     use.id = this.currentTable.id;
     use.classList.add('time');
     use.dataset.table = this.currentTable.table;
-    use.dataset.name = this.currentTable.name;
+    use.dataset.joins = this.currentTable.joins,
+      use.dataset.name = this.currentTable.name;
     use.dataset.alias = this.currentTable.alias;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.factId = this.currentTable.factId;
