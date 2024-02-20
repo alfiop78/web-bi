@@ -2484,7 +2484,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
           name: table.dataset.name
         }
       };
-      console.log(WorkBook.hierTables);
+      // console.log(WorkBook.hierTables);
     });
   }
 
@@ -2650,7 +2650,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // WARN: solo per vertica in questo caso.
     // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
 
-    let recursiveDimension = (ref) => {
+    /* let recursiveDimension = (ref) => {
       Draw.svg.querySelectorAll(`g#time-dimension > desc[data-table-join='${ref.dataset.table}']`).forEach(t => {
         const token = rand().substring(0, 7);
         WorkBook.join = {
@@ -2664,9 +2664,23 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
           }
         };
         WorkBook.joins = token;
+        debugger;
+        Draw.tables = {
+          id: `svg-data-${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`,
+          key: `svg-data-${t.dataset.alias}`,
+          table: t.dataset.table,
+          alias: t.dataset.alias,
+          name: t.dataset.table,
+          schema: 'decisyon_cache',
+          joins: +t.dataset.joins,
+          factId: WorkBook.activeTable.dataset.factId,
+          join: ref.id
+        };
+        Draw.currentTable = Draw.tables.get(`svg-data-${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`);
+        Draw.drawTimeRelated(); // tabelle relative alla TIME (WB_YEARS, WB_QUARTERS, ecc...)
         if (t.dataset.joinField) recursiveDimension(t);
       });
-    }
+    } */
     WorkBook.join = {
       token,
       value: {
@@ -2680,11 +2694,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       }
     };
     WorkBook.joins = token;
+    // debugger;
     // recupero lee tabelle della TIME gerarchicamente superiori a quella selezionata
-    recursiveDimension(descTable);
+    // recursiveDimension(descTable);
     Draw.tables = {
-      id: `svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`,
-      key: 'svg-data-web_bi_time',
+      id: `${descTable.id}-${WorkBook.activeTable.dataset.factId}`,
+      // key: 'svg-data-time',
       x: +WorkBook.activeTable.getAttribute('x'),
       y: +WorkBook.activeTable.getAttribute('y') + 30,
       table: descTable.dataset.table,
@@ -2693,12 +2708,15 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       schema: 'decisyon_cache',
       joins: +descTable.dataset.joins,
       factId: WorkBook.activeTable.dataset.factId,
-      join: WorkBook.activeTable.id
+      join: WorkBook.activeTable.id,
+      joinField: descTable.dataset.joinField
     };
+    debugger;
     // Draw.currentTable = Draw.tables.get('svg-data-web_bi_time');
-    Draw.currentTable = Draw.tables.get(`svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`);
+    Draw.currentTable = Draw.tables.get(`${descTable.id}-${WorkBook.activeTable.dataset.factId}`);
     WorkBook.activeTable.dataset.joins = ++WorkBook.activeTable.dataset.joins;
     Draw.tables.get(`${WorkBook.activeTable.id}`).joins = +WorkBook.activeTable.dataset.joins;
+    debugger;
     Draw.drawTime();
 
     debugger;
@@ -2706,7 +2724,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.hierTables();
     // recupero tutti i campi della WEB_BI_TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     // WorkBook.activeTable = 'svg-data-web_bi_time';
-    WorkBook.activeTable = `svg-data-web_bi_time-${WorkBook.activeTable.dataset.factId}`;
+    WorkBook.activeTable = `${descTable.id}-${WorkBook.activeTable.dataset.factId}`;
     if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
     // creo tutte le colonne della tabella TIME nell'object WorkBook.field/s
     const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);

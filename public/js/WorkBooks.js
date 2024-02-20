@@ -321,6 +321,7 @@ class WorkBooks {
       let recursive = (table) => {
         // table : svg-data-xxxx (questa è sempre la tabella "di origine" e mai quella .common)
         const tableRef = Draw.svg.querySelector(`use#${table}`);
+        debugger;
         // Quando la tabella corrente è una .shared vuol dire che è una tabella condivisa
         // con più fact.
         // A questo punto, se sono in ciclo in una fact diversa da quella presente sulla
@@ -365,13 +366,13 @@ class WorkBooks {
       // che cerca le tabelle gerarchicamente "inferiori", fino alla Fact, e le aggiunge a joinTables.
       let dimensionTables = (common) ? originTables :
         Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}'], use.time[data-fact-id='${fact.id}']`);
-      debugger;
 
       dimensionTables.forEach(table => {
         // debugger;
         joinTables = [{ table: table.dataset.alias, id: table.id }];
         // if (table.classList.contains('time')) {}
         // recupero la join associata alla tabella in ciclo
+        debugger;
         if (table.dataset.tableJoin) recursive(table.dataset.tableJoin);
         tables[table.dataset.alias] = joinTables;
       });

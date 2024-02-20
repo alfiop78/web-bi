@@ -763,21 +763,73 @@ class DrawSVG {
     // use.appendChild(animate);
   }
 
+  drawTimeRelated() {
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    use.setAttribute('href', this.currentTable.id);
+    use.id = this.currentTable.id;
+    use.classList.add('table', 'time');
+    use.dataset.table = this.currentTable.table;
+    use.dataset.joins = this.currentTable.joins;
+    use.dataset.tableJoin = this.currentTable.join;
+    use.dataset.name = this.currentTable.name;
+    use.dataset.alias = this.currentTable.alias;
+    use.dataset.schema = this.currentTable.schema;
+    use.dataset.factId = this.currentTable.factId;
+    Draw.svg.appendChild(use);
+  }
+
+  recursiveHier(table) {
+    // cerco le tabelle gerarchicamente superiori a quella passata come argomento
+    Draw.svg.querySelectorAll(`g#time-dimension > desc[data-table-join='${table.dataset.table}']`).forEach(t => {
+      const token = this.rand().substring(0, 7);
+      WorkBook.join = {
+        token,
+        value: {
+          alias: t.dataset.alias,
+          SQL: [`${t.dataset.table}.${t.dataset.field}`, `${table.dataset.table}.${table.dataset.joinField}`],
+          factId: WorkBook.activeTable.dataset.factId,
+          from: { table: t.dataset.table, alias: t.dataset.alias, field: t.dataset.field },
+          to: { table: table.dataset.table, alias: table.dataset.alias, field: table.dataset.joinField }
+        }
+      };
+      WorkBook.joins = token;
+      this.tables = {
+        id: `${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`,
+        // key: `svg-data-${t.dataset.alias}`,
+        table: t.dataset.table,
+        alias: t.dataset.alias,
+        name: t.dataset.table,
+        schema: 'decisyon_cache',
+        joins: +t.dataset.joins,
+        factId: WorkBook.activeTable.dataset.factId,
+        join: `${t.dataset.tableJoin}-${WorkBook.activeTable.dataset.factId}`,
+        joinField: t.dataset.joinField,
+      };
+      this.currentTable = this.tables.get(`${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`);
+      this.drawTimeRelated(); // tabelle relative alla TIME (WB_YEARS, WB_QUARTERS, ecc...)
+      if (t.dataset.joinField) this.recursiveHier(t);
+    });
+  }
+
   drawTime() {
     const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
     use.setAttribute('href', '#time');
     // use.id = this.currentTable.key;
     use.id = this.currentTable.id;
-    use.classList.add('time');
+    use.classList.add('table', 'time');
     use.dataset.table = this.currentTable.table;
-    use.dataset.joins = this.currentTable.joins,
-      use.dataset.name = this.currentTable.name;
+    use.dataset.joins = this.currentTable.joins;
+    use.dataset.tableJoin = this.currentTable.join;
+    use.dataset.joinField = this.currentTable.joinField;
+    use.dataset.name = this.currentTable.name;
     use.dataset.alias = this.currentTable.alias;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.factId = this.currentTable.factId;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
     Draw.svg.appendChild(use);
+
+    this.recursiveHier(use);
   }
 
   updateLine() {

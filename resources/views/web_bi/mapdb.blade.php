@@ -677,10 +677,10 @@
                                 <image id="time" href="{{ asset('/images/access_time_filled_865858_18dp.svg') }}" height="18" width="18"></image>
                               </g>
                               <g id="time-dimension">
-                                <desc id="WB_YEARS" data-table="WB_YEARS" data-alias="WB_YEARS" data-hier-down="WB_QUARTERS" data-field="id" data-table-join="WB_QUARTERS" data-schema="decisyon_cache" data-joins="0">wb_years</desc>
-                                <desc id="WB_QUARTERS" data-table="WB_QUARTERS" data-hier-up="WB_YEARS" data-hier-down="WB_MONTHS" data-alias="WB_QUARTERS" data-join-field="year_id" data-field="id" data-table-join="WB_MONTHS" data-schema="decisyon_cache" data-joins="1">wb_quarters</desc>
-                                <desc id="WB_MONTHS" data-table="WB_MONTHS" data-hier-up="WB_QUARTERS" data-hier-down="WB_DATE" data-alias="WB_MONTHS" data-join-field="quarter_id" data-field="id" data-table-join="WB_DATE" data-schema="decisyon_cache" data-joins="1">wb_months</desc>
-                                <desc id="WB_DATE" data-table="WB_DATE" data-hier-up="WB_MONTHS" data-alias="WB_DATE" data-field="date" data-join-field="month_id" data-schema="decisyon_cache" data-joins="1">wb_date</desc>
+                                <desc id="WB_YEARS" data-table="WB_YEARS" data-alias="WB_YEARS" data-field="id" data-table-join="WB_QUARTERS" data-schema="decisyon_cache" data-joins="0">wb_years</desc>
+                                <desc id="WB_QUARTERS" data-table="WB_QUARTERS" data-alias="WB_QUARTERS" data-join-field="year_id" data-field="id" data-table-join="WB_MONTHS" data-schema="decisyon_cache" data-joins="1">wb_quarters</desc>
+                                <desc id="WB_MONTHS" data-table="WB_MONTHS" data-alias="WB_MONTHS" data-join-field="quarter_id" data-field="id" data-table-join="WB_DATE" data-schema="decisyon_cache" data-joins="1">wb_months</desc>
+                                <desc id="WB_DATE" data-table="WB_DATE" data-alias="WB_DATE" data-field="date" data-join-field="month_id" data-schema="decisyon_cache" data-joins="1">wb_date</desc>
                               </g>
                             </defs>
                           </svg>
