@@ -171,7 +171,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.contextMenuRef.toggleAttribute('open');
   }
 
-  // l'evento dragend deve essere impostato sull'elemento che inizia il drag (start)
   app.handlerSVGDragEnd = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -2475,6 +2474,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     WorkBook.hierTables.clear();
     // non visualizzo le tabelle condivise tra le fact, altrimenti vengono duplicate le voci
     Draw.svg.querySelectorAll('use.table:not([data-shared_ref]), use.time').forEach(table => {
+      WorkBook.tablesModel.set(table.dataset.alias, {
+        table: table.dataset.table,
+        schema: table.dataset.schema,
+        name: table.dataset.name
+      });
+
       WorkBook.hierTables = {
         id: table.id,
         table: {
@@ -2486,6 +2491,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       };
       // console.log(WorkBook.hierTables);
     });
+    console.log(WorkBook.tablesModel);
   }
 
   // TODO: potrebbe essere spostata in supportFn.js
@@ -2694,12 +2700,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       }
     };
     WorkBook.joins = token;
-    // debugger;
-    // recupero lee tabelle della TIME gerarchicamente superiori a quella selezionata
-    // recursiveDimension(descTable);
     Draw.tables = {
       id: `${descTable.id}-${WorkBook.activeTable.dataset.factId}`,
-      // key: 'svg-data-time',
       x: +WorkBook.activeTable.getAttribute('x'),
       y: +WorkBook.activeTable.getAttribute('y') + 30,
       table: descTable.dataset.table,
@@ -2711,23 +2713,48 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       join: WorkBook.activeTable.id,
       joinField: descTable.dataset.joinField
     };
-    debugger;
-    // Draw.currentTable = Draw.tables.get('svg-data-web_bi_time');
     Draw.currentTable = Draw.tables.get(`${descTable.id}-${WorkBook.activeTable.dataset.factId}`);
     WorkBook.activeTable.dataset.joins = ++WorkBook.activeTable.dataset.joins;
     Draw.tables.get(`${WorkBook.activeTable.id}`).joins = +WorkBook.activeTable.dataset.joins;
-    debugger;
     Draw.drawTime();
 
-    debugger;
     WorkBook.createDataModel();
     app.hierTables();
-    // recupero tutti i campi della WEB_BI_TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
-    // WorkBook.activeTable = 'svg-data-web_bi_time';
+    debugger;
+    // recupero tutti i campi delle TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     WorkBook.activeTable = `${descTable.id}-${WorkBook.activeTable.dataset.factId}`;
-    if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
+    Draw.svg.querySelectorAll(`use.time[data-fact-id='${WorkBook.activeTable.dataset.factId}']`).forEach(async table => {
+      WorkBook.activeTable = table.id;
+      if (!window.sessionStorage.getItem(table.dataset.alias)) WorkBookStorage.saveSession(await app.getTable());
+      // creo tutte le colonne della tabella TIME nell'object WorkBook.field/s
+      const data = WorkBookStorage.getTable(table.dataset.alias);
+      console.log(table.dataset.alias, data);
+      if (!WorkBook.fields.has(table.dataset.alias)) {
+        data.forEach(column => {
+          const tokenField = rand().substring(0, 7);
+          WorkBook.field = {
+            token: tokenField,
+            type: 'column',
+            tableId: WorkBook.activeTable.id,
+            schema: WorkBook.activeTable.dataset.schema,
+            tableAlias: WorkBook.activeTable.dataset.alias,
+            table: WorkBook.activeTable.dataset.table,
+            name: column.column_name,
+            origin_field: column.column_name,
+            field: {
+              id: { sql: [column.column_name], datatype: column.type_name.toLowerCase() },
+              ds: { sql: [column.column_name], datatype: column.type_name.toLowerCase() }
+            }
+          };
+          WorkBook.fields = tokenField;
+        });
+      }
+    });
+
+    /* if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
     // creo tutte le colonne della tabella TIME nell'object WorkBook.field/s
     const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
+    debugger;
     if (!WorkBook.fields.has('WEB_BI_TIME')) {
       data.forEach(column => {
         const tokenField = rand().substring(0, 7);
@@ -2747,7 +2774,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         };
         WorkBook.fields = tokenField;
       });
-    }
+    } */
     WorkBook.checkChanges('time');
   }
 

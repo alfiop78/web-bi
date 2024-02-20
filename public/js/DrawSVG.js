@@ -814,7 +814,6 @@ class DrawSVG {
   drawTime() {
     const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
     use.setAttribute('href', '#time');
-    // use.id = this.currentTable.key;
     use.id = this.currentTable.id;
     use.classList.add('table', 'time');
     use.dataset.table = this.currentTable.table;

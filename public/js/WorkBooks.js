@@ -233,6 +233,7 @@ class WorkBooks {
     // la prop 'updated_at'
     this.workBookChange = new Set();
     this.edit = false;
+    this.tablesModel = new Map();
   }
 
   set name(value) {
@@ -318,10 +319,9 @@ class WorkBooks {
   createDataModel() {
     Draw.svg.querySelectorAll("use.table.fact:not([data-joins='0'])").forEach(fact => {
       let joinTables = [], tables = {}, originTables = [];
-      let recursive = (table) => {
+      let recursiveDimensionDown = (table) => {
         // table : svg-data-xxxx (questa è sempre la tabella "di origine" e mai quella .common)
         const tableRef = Draw.svg.querySelector(`use#${table}`);
-        debugger;
         // Quando la tabella corrente è una .shared vuol dire che è una tabella condivisa
         // con più fact.
         // A questo punto, se sono in ciclo in una fact diversa da quella presente sulla
@@ -333,7 +333,7 @@ class WorkBooks {
           Draw.svg.querySelector(`use.table#${table}`);
         // joinTables.push(tableJoin.dataset.alias);
         joinTables.push({ table: tableJoin.dataset.alias, id: tableJoin.id });
-        if (tableJoin.dataset.tableJoin) recursive(tableJoin.dataset.tableJoin);
+        if (tableJoin.dataset.tableJoin) recursiveDimensionDown(tableJoin.dataset.tableJoin);
       }
       // verifico se, per la fact corrente, ci sono tabelle (quindi dimensioni) clonate.
       // Se ci sono tabelle in comune tra più fact 'common' sarà !== undefined
@@ -348,14 +348,14 @@ class WorkBooks {
         originTables.push(common);
         // eseguo una funzione ricorsiva per poter recuperare tutte le tabelle gerarchicamente superiori
         // a partire dalla tabella clonata (messa in relazione con altre Fact)
-        let recursiveDimension = (tableId) => {
+        let recursiveDimensionUp = (tableId) => {
           // return : un array di tabelle che verranno ricorsivamente aggiunte (in 'recursive()') al dataModel
           Draw.svg.querySelectorAll(`use.table[data-table-join='${tableId}'][data-dimension-id='${common.dataset.dimensionId}']`).forEach(t => {
             originTables.push(t);
             recursiveDimension(t.id);
           });
         }
-        recursiveDimension(common.dataset.shared_ref);
+        recursiveDimensionUp(common.dataset.shared_ref);
         // verifico se esistono tabelle TIME appartenenti alla fact corrente
         if (Draw.svg.querySelector(`use.time[data-fact-id='${fact.id}']`)) originTables.push(Draw.svg.querySelector(`use.time[data-fact-id='${fact.id}']`));
       }
@@ -368,12 +368,9 @@ class WorkBooks {
         Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}'], use.time[data-fact-id='${fact.id}']`);
 
       dimensionTables.forEach(table => {
-        // debugger;
         joinTables = [{ table: table.dataset.alias, id: table.id }];
-        // if (table.classList.contains('time')) {}
         // recupero la join associata alla tabella in ciclo
-        debugger;
-        if (table.dataset.tableJoin) recursive(table.dataset.tableJoin);
+        if (table.dataset.tableJoin) recursiveDimensionDown(table.dataset.tableJoin);
         tables[table.dataset.alias] = joinTables;
       });
       // Creazione del DataModel con un oggetto Fact e, al suo interno, gli object relativi alle tabelle, per ogni fact
