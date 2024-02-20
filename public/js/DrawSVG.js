@@ -2,8 +2,8 @@ class DrawSVG {
   #tables = new Map();
   // 2024.02.01 - Oggetto Map() contenente le "specifiche" delle linee
   #joinLines = new Map();
-  #dimensions = new Set();
-  #dimensionSelected = {};
+  // #dimensions = new Set();
+  // #dimensionSelected = {};
   tmplJoin = document.getElementById('tmpl-join-field');
   dialogJoin = document.getElementById('dlg-join');
   // ref nel DOM
@@ -22,7 +22,6 @@ class DrawSVG {
     // - al termine del drawTable/Fact
     // - Quando si attiva il contextMenu
     this.table; // la tabella corrente
-    this.arrayLevels = [];
     this.dragElementPosition = { x: 0, y: 0 };
     this.coordsRef = document.getElementById('coords');
     this.nearestPoint = [];
@@ -77,20 +76,14 @@ class DrawSVG {
 
   get currentTableRef() { return this.#currentTableRef; }
 
-  set dimensionSelected(dimensionId) {
+  /* set dimensionSelected(dimensionId) {
     this.svg.querySelectorAll(`use.table[data-dimension-id='${dimensionId}']`).forEach(table => {
       debugger;
       this.#dimensionSelected[table.id] = this.tables.get(table.id);
     });
   }
 
-  get dimensionSelected() { return this.#dimensionSelected; }
-
-  set dimensions(id) {
-    this.#dimensions.add(id);
-  }
-
-  get dimensions() { return this.#dimensions; }
+  get dimensionSelected() { return this.#dimensionSelected; } */
 
   /* NOTE: DRAG&DROP EVENTS */
 
@@ -795,7 +788,7 @@ class DrawSVG {
       WorkBook.joins = token;
       this.tables = {
         id: `${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`,
-        // key: `svg-data-${t.dataset.alias}`,
+        key: 'related-time',
         table: t.dataset.table,
         alias: t.dataset.alias,
         name: t.dataset.table,

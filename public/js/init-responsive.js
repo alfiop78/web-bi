@@ -861,6 +861,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // reset
     document.querySelectorAll('nav#table-field-list dl').forEach(element => element.remove());
     let parent = document.getElementById('table-field-list');
+    console.log(WorkBook.tablesModel);
+    debugger;
     for (const [tableId, value] of WorkBook.hierTables) {
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
@@ -1504,7 +1506,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     });
   }
 
-  app.dimensionSelected = (e) => {
+  /* app.dimensionSelected = (e) => {
     console.log(e.target.dataset.dimensionId);
     // memorizzo tutte le tabelle della dimensione selezionata
     console.log(Draw.tables);
@@ -1512,7 +1514,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     console.log(Draw.dimensionSelected);
     // Draw.dimensionSelected[e.target.dataset.dimensionId] =
     debugger;
-  }
+  } */
 
   app.dimensionDone = () => {
     // dopo aver scelto le dimensioni da associare alla nuova fact posso nascondere il cubo di origine
@@ -2656,37 +2658,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // WARN: solo per vertica in questo caso.
     // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
 
-    /* let recursiveDimension = (ref) => {
-      Draw.svg.querySelectorAll(`g#time-dimension > desc[data-table-join='${ref.dataset.table}']`).forEach(t => {
-        const token = rand().substring(0, 7);
-        WorkBook.join = {
-          token,
-          value: {
-            alias: t.dataset.alias,
-            SQL: [`${t.dataset.table}.${t.dataset.field}`, `${ref.dataset.table}.${ref.dataset.joinField}`],
-            factId: WorkBook.activeTable.dataset.factId,
-            from: { table: t.dataset.table, alias: t.dataset.alias, field: t.dataset.field },
-            to: { table: ref.dataset.table, alias: ref.dataset.alias, field: ref.dataset.joinField }
-          }
-        };
-        WorkBook.joins = token;
-        debugger;
-        Draw.tables = {
-          id: `svg-data-${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`,
-          key: `svg-data-${t.dataset.alias}`,
-          table: t.dataset.table,
-          alias: t.dataset.alias,
-          name: t.dataset.table,
-          schema: 'decisyon_cache',
-          joins: +t.dataset.joins,
-          factId: WorkBook.activeTable.dataset.factId,
-          join: ref.id
-        };
-        Draw.currentTable = Draw.tables.get(`svg-data-${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`);
-        Draw.drawTimeRelated(); // tabelle relative alla TIME (WB_YEARS, WB_QUARTERS, ecc...)
-        if (t.dataset.joinField) recursiveDimension(t);
-      });
-    } */
     WorkBook.join = {
       token,
       value: {
@@ -2702,6 +2673,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     WorkBook.joins = token;
     Draw.tables = {
       id: `${descTable.id}-${WorkBook.activeTable.dataset.factId}`,
+      key: 'time',
       x: +WorkBook.activeTable.getAttribute('x'),
       y: +WorkBook.activeTable.getAttribute('y') + 30,
       table: descTable.dataset.table,

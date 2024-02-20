@@ -443,7 +443,6 @@ class WorkBooks {
   }
 
   open(token) {
-    // OPTIMIZE: 25.01.2024 recupero dallo storage il workBook, tutte le sue proprietà le caricherò nella Classe
     WorkBookStorage.workBook = token;
     this.workBook.created_at = WorkBookStorage.workBook.created_at;
     this.workBook.updated_at = WorkBookStorage.workBook.updated_at;
@@ -456,12 +455,17 @@ class WorkBooks {
     for (const [key, value] of Object.entries(WorkBookStorage.workBook.svg.tables)) {
       Draw.tables = value;
       Draw.currentTable = Draw.tables.get(key);
-      if (!value.join) {
-        Draw.drawFact();
-      } else if (value.hasOwnProperty('shared_ref')) {
-        Draw.drawCommonTable();
-      } else {
-        (value.key === 'svg-data-web_bi_time') ? Draw.drawTime() : Draw.drawTable();
+      // le related-time vengono disegnate dalla drawTime
+      if (value.key !== 'related-time') {
+        if (!value.join) {
+          Draw.drawFact();
+        } else if (value.hasOwnProperty('shared_ref')) {
+          Draw.drawCommonTable();
+        } else {
+          debugger;
+          // TEST: da testare
+          (value.key === 'time') ? Draw.drawTime() : Draw.drawTable();
+        }
       }
     }
 
