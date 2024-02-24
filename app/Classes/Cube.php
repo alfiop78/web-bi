@@ -312,7 +312,7 @@ class Cube
       // il token è l'identificativo della join
       // dd($join);
       // qui utilizzo la proprietà SQL con implode(' = ', $join->SQL)
-      if ($join->alias === 'WEB_BI_TIME') {
+      if ($join->type === "TIME") {
         $this->where_time_clause[$this->factId][$token] = implode(" = ", $join->SQL);
         if (property_exists($this, 'sql_info')) {
           // in questo caso imposto nella prop 'WHERE-TIME' anzichè nella 'WHERE'. In questo
@@ -332,7 +332,7 @@ class Cube
       // dd($token, $join);
       $this->WHERE_baseTable[$token] = implode(" = ", $join);
     } */
-    // dd($this->where_clause, $this->where_time_clause);
+    dd($this->where_clause, $this->where_time_clause);
   }
 
   // definisco i filtri del report

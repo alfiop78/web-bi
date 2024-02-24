@@ -357,7 +357,11 @@ class WorkBooks {
         }
         recursiveDimensionUp(common.dataset.shared_ref);
         // verifico se esistono tabelle TIME appartenenti alla fact corrente
-        if (Draw.svg.querySelector(`use.time[data-fact-id='${fact.id}']`)) originTables.push(Draw.svg.querySelector(`use.time[data-fact-id='${fact.id}']`));
+        // if (Draw.svg.querySelector(`use.time[data-fact-id='${fact.id}']`)) originTables.push(Draw.svg.querySelector(`use.time[data-fact-id='${fact.id}']`));
+        // se sono presenti anche le tabelle time le aggiungo a originTables
+        Draw.svg.querySelectorAll(`use.time[data-fact-id='${fact.id}']`).forEach(time => {
+          originTables.push(time);
+        });
       }
       // quando ci sono tabelle .common nella fact.id in ciclo, per poter mettere in relazione
       // la tabelle.common con la "propria" Fact devo recuperare le tabelle della dimensione
@@ -453,16 +457,16 @@ class WorkBooks {
     // ciclo sulle tables presenti in svg.tables
     // - ricreo l'oggetto Map() this.tables e ridisegno le tabelle
     for (const [key, value] of Object.entries(WorkBookStorage.workBook.svg.tables)) {
-      Draw.tables = value;
-      Draw.currentTable = Draw.tables.get(key);
-      // le related-time vengono disegnate dalla drawTime
       if (value.key !== 'related-time') {
+        Draw.tables = value;
+        Draw.currentTable = Draw.tables.get(key);
+        // le related-time vengono disegnate dalla drawTime
         if (!value.join) {
           Draw.drawFact();
         } else if (value.hasOwnProperty('shared_ref')) {
           Draw.drawCommonTable();
         } else {
-          (value.key === 'time') ? Draw.drawTime() : Draw.drawTable();
+          (value.key === 'time') ? Draw.drawTime(false) : Draw.drawTable();
         }
       }
     }

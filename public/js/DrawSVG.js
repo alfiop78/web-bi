@@ -771,22 +771,25 @@ class DrawSVG {
     Draw.svg.appendChild(use);
   }
 
-  recursiveHier(table) {
+  recursiveHier(table, createJoin) {
     // cerco le tabelle gerarchicamente superiori a quella passata come argomento
     Draw.svg.querySelectorAll(`g#time-dimension > desc[data-table-join='${table.dataset.table}']`).forEach(t => {
-      const token = this.rand().substring(0, 7);
-      WorkBook.join = {
-        token,
-        value: {
-          alias: t.dataset.alias,
-          SQL: [`${t.dataset.table}.${t.dataset.field}`, `${table.dataset.table}.${table.dataset.joinField}`],
-          factId: this.currentTable.factId,
-          // factId: WorkBook.activeTable.dataset.factId,
-          from: { table: t.dataset.table, alias: t.dataset.alias, field: t.dataset.field },
-          to: { table: table.dataset.table, alias: table.dataset.alias, field: table.dataset.joinField }
-        }
-      };
-      WorkBook.joins = token;
+      if (createJoin) {
+        const token = this.rand().substring(0, 7);
+        WorkBook.join = {
+          token,
+          value: {
+            alias: t.dataset.alias,
+            type: 'TIME',
+            SQL: [`${t.dataset.table}.${t.dataset.field}`, `${table.dataset.table}.${table.dataset.joinField}`],
+            factId: this.currentTable.factId,
+            // factId: WorkBook.activeTable.dataset.factId,
+            from: { table: t.dataset.table, alias: t.dataset.alias, field: t.dataset.field },
+            to: { table: table.dataset.table, alias: table.dataset.alias, field: table.dataset.joinField }
+          }
+        };
+        WorkBook.joins = token;
+      }
       this.tables = {
         id: `${t.dataset.alias}-${this.currentTable.factId}`,
         // id: `${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`,
@@ -809,7 +812,7 @@ class DrawSVG {
     });
   }
 
-  drawTime() {
+  drawTime(createJoin = true) {
     const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
     use.setAttribute('href', '#time');
     use.id = this.currentTable.id;
@@ -826,7 +829,7 @@ class DrawSVG {
     use.setAttribute('y', this.currentTable.y);
     Draw.svg.appendChild(use);
 
-    this.recursiveHier(use);
+    this.recursiveHier(use, createJoin);
   }
 
   updateLine() {

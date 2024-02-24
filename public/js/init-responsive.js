@@ -1907,8 +1907,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // creo la struttura tabelle per poter creare nuovi filtri
     let urls = [];
     // TODO: in ciclo serve solo il tableId
-    for (const [tableId, value] of WorkBook.hierTables) {
-      WorkBook.activeTable = tableId;
+    for (const [alias, object] of WorkBook.tablesModel) {
+      WorkBook.activeTable = object.id;
       urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info');
     }
     // promiseAll per recuperare tutte le tabelle del canvas, successivamente vado a popolare la dialogFilters con i dati ricevuti
@@ -2144,7 +2144,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
     let object = { token, name, tables: new Set(), sql: [], from: {}, joins: {}, type: 'filter', formula: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
-    const textarea = document.getElementById('textarea-filter');
     document.querySelectorAll('#textarea-filter *').forEach(element => {
       // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
       // ... altrimenti devo recuperare il cubeToken. Ci sono anche filtri che possono essere fatti su un livello dimensionale e su una FACT
@@ -2188,6 +2187,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       object.from[factId] = from;
       object.joins[factId] = joins;
     }
+    debugger;
     object.tables = [...object.tables];
     // la prop 'created_at' va aggiunta solo in fase di nuovo filtro e non quando si aggiorna il filtro
     if (e.target.dataset.token) {
@@ -2424,6 +2424,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     Sheet.fact.forEach(factId => {
       // WARN: 2024.02.08 questa logica è utilizzata anche in saveFilter(). Creare un metodo riutilizzabile.
       let from = {}, joins = {};
+      debugger;
+      // FIX: 24.02.2024 - non viene inserita la WB_YEARS. In fase di aggiunta di una
+      // tabella time a Sheet.tables aggiungere ricorsivamente anche le tabelle delle gerarchie superiori
       Sheet.tables.forEach(tableAlias => {
         const tables = WorkBook.dataModel.get(factId);
         if (tables.hasOwnProperty(tableAlias)) {
@@ -2663,6 +2666,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       token,
       value: {
         alias: timeTable,
+        type: 'TIME',
         // [DocVenditaDettaglio.DataDocumento, WEB_BI_TIME.date]
         // SQL: [`TO_CHAR(${tableAlias}.${tableColumn})::DATE`, `WEB_BI_TIME.${web_bi_timeField}`],
         SQL: [field, `${timeTable}.${timeColumn}`],
@@ -2767,6 +2771,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         token: fieldRef.dataset.token,
         value: {
           alias: joins[0].dataset.alias,
+          type: 'table',
           SQL: [`${joins[0].dataset.alias}.${joins[0].dataset.field}`, `${joins[1].dataset.alias}.${joins[1].dataset.field}`],
           from: { table: joins[0].dataset.table, alias: joins[0].dataset.alias, field: joins[0].dataset.field },
           to: { table: joins[1].dataset.table, alias: joins[1].dataset.alias, field: joins[1].dataset.field },
@@ -3118,20 +3123,20 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
     // parent
     let parent = app.dialogFilters.querySelector('nav');
-    for (const [tableId, value] of WorkBook.hierTables) {
+    for (const [alias, object] of WorkBook.tablesModel) {
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
       const summary = details.querySelector('summary');
-      WorkBook.activeTable = tableId;
+      WorkBook.activeTable = object.id;
       // recupero le tabelle dal sessionStorage
-      const columns = WorkBookStorage.getTable(value.table);
+      const columns = WorkBookStorage.getTable(object.table);
       details.dataset.schema = WorkBook.activeTable.dataset.schema;
-      details.dataset.table = value.name;
-      details.dataset.alias = value.alias;
-      details.dataset.id = tableId;
+      details.dataset.table = object.name;
+      details.dataset.alias = alias;
+      details.dataset.id = object.id;
       details.dataset.searchId = 'column-search';
-      summary.innerHTML = value.name;
-      summary.dataset.tableId = tableId;
+      summary.innerHTML = object.name;
+      summary.dataset.tableId = object.id;
       parent.appendChild(details);
       columns.forEach(column => {
         const content = app.tmplList.content.cloneNode(true);
@@ -3140,9 +3145,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         li.dataset.label = column.column_name;
         li.dataset.fn = 'handlerSelectField';
         li.dataset.elementSearch = 'columns';
-        li.dataset.tableId = tableId;
-        li.dataset.table = value.name;
-        li.dataset.alias = value.alias;
+        li.dataset.tableId = object.id;
+        li.dataset.table = object.name;
+        li.dataset.alias = alias;
         li.dataset.field = column.column_name;
         // li.dataset.key = column.CONSTRAINT_NAME;
         span.innerText = column.column_name;
