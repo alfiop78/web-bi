@@ -861,21 +861,21 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // reset
     document.querySelectorAll('nav#table-field-list dl').forEach(element => element.remove());
     let parent = document.getElementById('table-field-list');
-    console.log(WorkBook.tablesModel);
-    debugger;
-    for (const [tableId, value] of WorkBook.hierTables) {
+    // console.log(WorkBook.tablesModel);
+    for (const [alias, object] of WorkBook.tablesModel) {
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
       const summary = details.querySelector('summary');
       // recupero le tabelle dal sessionStorage
-      const columns = WorkBookStorage.getTable(value.table);
-      details.dataset.schema = value.schema;
-      details.dataset.table = value.name;
-      details.dataset.alias = value.alias;
-      details.dataset.id = tableId;
+      const columns = WorkBookStorage.getTable(object.table);
+      // debugger;
+      details.dataset.schema = object.schema;
+      details.dataset.table = object.name;
+      details.dataset.alias = alias;
+      details.dataset.id = object.id;
       details.dataset.searchId = 'field-search';
-      summary.innerHTML = value.name;
-      summary.dataset.tableId = tableId;
+      summary.innerHTML = object.name;
+      summary.dataset.tableId = object.id;
       parent.appendChild(details);
       columns.forEach(column => {
         const content = app.tmplList.content.cloneNode(true);
@@ -883,15 +883,15 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         const i = content.querySelector('i[draggable]');
         const span = li.querySelector('span');
         li.dataset.label = column.column_name;
-        i.id = `${value.alias}_${column.column_name}`;
-        i.dataset.tableId = tableId;
+        i.id = `${alias}_${column.column_name}`;
+        i.dataset.tableId = object.id;
         i.dataset.field = column.column_name;
         i.dataset.datatype = column.type_name.toLowerCase();
         i.ondragstart = app.columnDragStart;
         i.ondragend = app.columnDragEnd;
         li.dataset.elementSearch = 'fields';
-        li.dataset.table = value.name;
-        li.dataset.alias = value.alias;
+        li.dataset.table = object.name;
+        li.dataset.alias = alias;
         // li.dataset.field = column.column_name;
         // li.dataset.key = column.CONSTRAINT_NAME;
         span.innerText = column.column_name;
@@ -2479,7 +2479,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       WorkBook.tablesModel.set(table.dataset.alias, {
         table: table.dataset.table,
         schema: table.dataset.schema,
-        name: table.dataset.name
+        name: table.dataset.name,
+        id: table.id
       });
 
       WorkBook.hierTables = {

@@ -780,25 +780,30 @@ class DrawSVG {
         value: {
           alias: t.dataset.alias,
           SQL: [`${t.dataset.table}.${t.dataset.field}`, `${table.dataset.table}.${table.dataset.joinField}`],
-          factId: WorkBook.activeTable.dataset.factId,
+          factId: this.currentTable.factId,
+          // factId: WorkBook.activeTable.dataset.factId,
           from: { table: t.dataset.table, alias: t.dataset.alias, field: t.dataset.field },
           to: { table: table.dataset.table, alias: table.dataset.alias, field: table.dataset.joinField }
         }
       };
       WorkBook.joins = token;
       this.tables = {
-        id: `${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`,
+        id: `${t.dataset.alias}-${this.currentTable.factId}`,
+        // id: `${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`,
         key: 'related-time',
         table: t.dataset.table,
         alias: t.dataset.alias,
         name: t.dataset.table,
         schema: 'decisyon_cache',
         joins: +t.dataset.joins,
-        factId: WorkBook.activeTable.dataset.factId,
-        join: `${t.dataset.tableJoin}-${WorkBook.activeTable.dataset.factId}`,
+        factId: this.currentTable.factId,
+        // factId: WorkBook.activeTable.dataset.factId,
+        join: `${t.dataset.tableJoin}-${this.currentTable.factId}`,
+        // join: `${t.dataset.tableJoin}-${WorkBook.activeTable.dataset.factId}`,
         joinField: t.dataset.joinField,
       };
-      this.currentTable = this.tables.get(`${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`);
+      this.currentTable = this.tables.get(`${t.dataset.alias}-${this.currentTable.factId}`);
+      // this.currentTable = this.tables.get(`${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`);
       this.drawTimeRelated(); // tabelle relative alla TIME (WB_YEARS, WB_QUARTERS, ecc...)
       if (t.dataset.joinField) this.recursiveHier(t);
     });

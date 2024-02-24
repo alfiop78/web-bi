@@ -462,8 +462,6 @@ class WorkBooks {
         } else if (value.hasOwnProperty('shared_ref')) {
           Draw.drawCommonTable();
         } else {
-          debugger;
-          // TEST: da testare
           (value.key === 'time') ? Draw.drawTime() : Draw.drawTable();
         }
       }
