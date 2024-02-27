@@ -581,6 +581,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     code.innerHTML = Sheet.fields.get(token);
     // aggiungo a Sheet.fields solo le proprietà utili alla creazione della query
     // TODO: da aggiungere in fase di creazione del process
+    debugger;
     Sheet.tables = WorkBook.field.get(token).tableAlias;
     target.appendChild(field);
     // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
@@ -1938,6 +1939,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     mark.dataset.tableAlias = alias;
     mark.dataset.table = table;
     mark.dataset.field = field;
+    mark.dataset.type = e.currentTarget.dataset.type;
     mark.dataset.tableId = e.currentTarget.dataset.tableId;
     mark.innerText = field;
     small.innerText = table;
@@ -2150,7 +2152,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
         // object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
-        object.tables.add(element.dataset.tableAlias);
+        // object.tables.add(element.dataset.tableAlias);
+        (element.dataset.type === 'time') ? object.tables.add('time') : object.tables.add(element.dataset.tableAlias);
         object.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
         object.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
         object.field = element.dataset.field;
@@ -2167,6 +2170,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       // object.tables : l'alias della tabella
       object.tables.forEach(tableAlias => {
         const tables = WorkBook.dataModel.get(factId);
+        // se si tratta di una tabella 'time' la converto in WB_YEARS, questa sarà sempre presente
+        // nella relazione con la tabella time
+        debugger
+        if (tableAlias === 'time') tableAlias = 'WB_YEARS';
         if (tables.hasOwnProperty(tableAlias)) {
           tables[tableAlias].forEach(table => {
             const data = Draw.tables.get(table.id);
@@ -2424,11 +2431,11 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     Sheet.fact.forEach(factId => {
       // WARN: 2024.02.08 questa logica è utilizzata anche in saveFilter(). Creare un metodo riutilizzabile.
       let from = {}, joins = {};
-      debugger;
-      // FIX: 24.02.2024 - non viene inserita la WB_YEARS. In fase di aggiunta di una
-      // tabella time a Sheet.tables aggiungere ricorsivamente anche le tabelle delle gerarchie superiori
       Sheet.tables.forEach(tableAlias => {
         const tables = WorkBook.dataModel.get(factId);
+        // se si tratta di una tabella 'time' la converto in WB_YEARS, questa sarà sempre presente
+        // nella relazione con la tabella time
+        if (tableAlias === 'time') tableAlias = 'WB_YEARS';
         if (tables.hasOwnProperty(tableAlias)) {
           tables[tableAlias].forEach(table => {
             const data = Draw.tables.get(table.id);
@@ -2479,12 +2486,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     WorkBook.hierTables.clear();
     // non visualizzo le tabelle condivise tra le fact, altrimenti vengono duplicate le voci
     Draw.svg.querySelectorAll('use.table:not([data-shared_ref]), use.time').forEach(table => {
-      WorkBook.tablesModel.set(table.dataset.alias, {
+      let object = {
         table: table.dataset.table,
         schema: table.dataset.schema,
         name: table.dataset.name,
-        id: table.id
-      });
+        id: table.id,
+        type: table.dataset.type
+      };
+      WorkBook.tablesModel.set(table.dataset.alias, object);
 
       WorkBook.hierTables = {
         id: table.id,
@@ -2728,30 +2737,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       }
     });
 
-    /* if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
-    // creo tutte le colonne della tabella TIME nell'object WorkBook.field/s
-    const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
-    debugger;
-    if (!WorkBook.fields.has('WEB_BI_TIME')) {
-      data.forEach(column => {
-        const tokenField = rand().substring(0, 7);
-        WorkBook.field = {
-          token: tokenField,
-          type: 'column',
-          tableId: WorkBook.activeTable.id,
-          schema: WorkBook.activeTable.dataset.schema,
-          tableAlias: WorkBook.activeTable.dataset.alias,
-          table: WorkBook.activeTable.dataset.table,
-          name: column.column_name,
-          origin_field: column.column_name,
-          field: {
-            id: { sql: [column.column_name], datatype: column.type_name.toLowerCase() },
-            ds: { sql: [column.column_name], datatype: column.type_name.toLowerCase() }
-          }
-        };
-        WorkBook.fields = tokenField;
-      });
-    } */
     WorkBook.checkChanges('time');
   }
 
@@ -3148,6 +3133,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         li.dataset.tableId = object.id;
         li.dataset.table = object.name;
         li.dataset.alias = alias;
+        li.dataset.type = object.type;
         li.dataset.field = column.column_name;
         // li.dataset.key = column.CONSTRAINT_NAME;
         span.innerText = column.column_name;

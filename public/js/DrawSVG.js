@@ -597,6 +597,7 @@ class DrawSVG {
     use.setAttribute('href', `#${clonedStruct.id}`);
     use.id = this.currentTable.key;
     use.classList.add('table');
+    use.dataset.type = 'fact';
     // use.dataset.id = `data-${this.currentTable.id}`;
     use.dataset.table = this.currentTable.table;
     use.dataset.factId = this.currentTable.factId;
@@ -673,6 +674,7 @@ class DrawSVG {
 
     use.id = this.currentTable.key;
     use.classList.add('table');
+    use.dataset.type = 'table';
     use.dataset.tableJoin = this.currentTable.join;
     use.dataset.table = this.currentTable.table;
     use.dataset.factId = this.currentTable.factId;
@@ -715,6 +717,7 @@ class DrawSVG {
     use.setAttribute('href', `#${clonedStruct.id}`);
     use.id = this.currentTable.key;
     use.classList.add('table');
+    use.dataset.type = 'table';
     // WARN: 2024.02.08 - La proprietà cssClass, che era stata utilizzata per gestire l'analisi multifatti, è da
     // rivedere perchè probabilmente può essere eliminata
     use.classList.add(this.currentTable.cssClass);
@@ -761,6 +764,7 @@ class DrawSVG {
     use.setAttribute('href', this.currentTable.id);
     use.id = this.currentTable.id;
     use.classList.add('table', 'time');
+    use.dataset.type = 'time';
     use.dataset.table = this.currentTable.table;
     use.dataset.joins = this.currentTable.joins;
     use.dataset.tableJoin = this.currentTable.join;
@@ -771,7 +775,7 @@ class DrawSVG {
     Draw.svg.appendChild(use);
   }
 
-  recursiveHier(table, createJoin) {
+  recursiveHier(table, createJoin = true) {
     // cerco le tabelle gerarchicamente superiori a quella passata come argomento
     Draw.svg.querySelectorAll(`g#time-dimension > desc[data-table-join='${table.dataset.table}']`).forEach(t => {
       if (createJoin) {
@@ -806,6 +810,7 @@ class DrawSVG {
         joinField: t.dataset.joinField,
       };
       this.currentTable = this.tables.get(`${t.dataset.alias}-${this.currentTable.factId}`);
+      debugger;
       // this.currentTable = this.tables.get(`${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`);
       this.drawTimeRelated(); // tabelle relative alla TIME (WB_YEARS, WB_QUARTERS, ecc...)
       if (t.dataset.joinField) this.recursiveHier(t);
@@ -817,6 +822,7 @@ class DrawSVG {
     use.setAttribute('href', '#time');
     use.id = this.currentTable.id;
     use.classList.add('table', 'time');
+    use.dataset.type = 'time';
     use.dataset.table = this.currentTable.table;
     use.dataset.joins = this.currentTable.joins;
     use.dataset.tableJoin = this.currentTable.join;

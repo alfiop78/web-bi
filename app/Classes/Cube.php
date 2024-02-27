@@ -332,7 +332,7 @@ class Cube
       // dd($token, $join);
       $this->WHERE_baseTable[$token] = implode(" = ", $join);
     } */
-    dd($this->where_clause, $this->where_time_clause);
+    // dd($this->where_clause, $this->where_time_clause);
   }
 
   // definisco i filtri del report
@@ -439,7 +439,7 @@ class Cube
     // dd($sql);
     $query = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $sql;";
     // dd($query);
-    var_dump($query);
+    // var_dump($query);
     $this->dropTemporaryTables($this->baseTableName);
     return DB::connection('vertica_odbc')->statement($query);
   }
@@ -801,7 +801,7 @@ class Cube
       unset($ONClause);
     }
     $sql .= $joinLEFT;
-    dd($sql);
+    // dd($sql);
     // se il datamart già esiste lo elimino prima di ricrearlo
     $this->dropTemporaryTables($this->datamart_name);
     DB::connection('vertica_odbc')->statement($sql);
