@@ -440,6 +440,7 @@ class Cube
     $query = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $sql;";
     // dd($query);
     // var_dump($query);
+    // elimino la tabella temporanea che sto creando, se già presente
     $this->dropTemporaryTables($this->baseTableName);
     return DB::connection('vertica_odbc')->statement($query);
   }
@@ -634,6 +635,65 @@ class Cube
     if (property_exists($this, 'sql_info')) return $sqlFilteredMetrics;
   }
 
+  /* creo i datamart necessari per le metriche filtrate */
+  public function createMetricDatamarts_new()
+  {
+    foreach ($this->groupMetricsByFilters as $groupToken => $m) {
+      $arrayMetrics = [];
+      $tableName = "WEB_BI_TMP_METRIC_{$this->reportId}_{$groupToken}";
+      if (property_exists($this, 'sql_info')) {
+        $this->json_info_advanced[$tableName] = (object) [
+          "SELECT" => $this->sql_info->{'SELECT'},
+          "METRICS" => (object)[],
+          "FROM" => clone $this->sql_info->{'FROM'},
+          "WHERE" => clone $this->sql_info->{'WHERE'},
+          "WHERE-TIME" => clone $this->sql_info->{'WHERE-TIME'},
+          "AND" => clone $this->sql_info->{'AND'},
+          "GROUP BY" => $this->sql_info->{'GROUP BY'}
+        ];
+      }
+      // dd($this->json_info_advanced);
+      // dd($m);
+      foreach ($m as $metric) {
+        unset($this->_sql);
+        // dd($metric);
+        $arrayMetrics[$metric->alias] = "NVL({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
+        if (property_exists($this, 'sql_info')) {
+          // TODO: testare con un alias contenente spazi
+          $this->json_info_advanced[$tableName]->{'METRICS'}->{"$metric->alias"} = "NVL({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
+          // dd($this->json_info_advanced);
+        }
+        // dd($arrayMetrics);
+        // _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
+        $this->_metrics_advanced_datamart[$tableName][$metric->alias] = "\nNVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
+        // aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
+        $this->setFiltersMetricTable($metric->filters, $tableName);
+        // dd($this->json_info_advanced);
+        // per ogni filtro presente nella metrica
+        foreach ($metric->filters as $filter) {
+          if (property_exists($filter, 'from')) $this->setFromMetricTable($filter->from, $tableName);
+          // dd($this->json_info_advanced);
+          // aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
+          // se, nella metrica in ciclo, non è presente la WHERE devo ripulire WHERE_metricTable altrimenti verranno aggiunte WHERE della precedente metrica filtrata
+          // dd($filter->joins);
+          (property_exists($filter, 'joins')) ? $this->setWhereMetricTable($filter->joins, $tableName) : $this->WHERE_metricTable = array();
+        }
+        // dd($this->filters_baseTable, $this->filters_metricTable, $this->WHERE_timingFn);
+      }
+      // dd($arrayMetrics);
+      // dd($this->_metrics_advanced_datamart);
+      // creo il datamart, passo a createMetricTable il nome della tabella temporanea e l'array di metriche che lo compongono
+      if (property_exists($this, 'sql_info')) {
+        $sqlFilteredMetrics[] = $this->createMetricTable($tableName, $arrayMetrics);
+        unset($this->json_info_advanced[$tableName]);
+      } else {
+        $this->createMetricTable($tableName, $arrayMetrics, false);
+      }
+    }
+    if (property_exists($this, 'sql_info')) return $sqlFilteredMetrics;
+  }
+
+
   private function createMetricTable($tableName, $metrics)
   {
     // dd('createMetricTable');
@@ -804,6 +864,7 @@ class Cube
     // dd($sql);
     // se il datamart già esiste lo elimino prima di ricrearlo
     $this->dropTemporaryTables($this->datamart_name);
+    // TODO: eliminare anche le altre tabelle temporanee, memorizzate in $this->queries
     DB::connection('vertica_odbc')->statement($sql);
     return $this->report_id;
   }

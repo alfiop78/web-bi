@@ -342,6 +342,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
     target.appendChild(field);
     // imposto le fact da utilizzare nel report in base alle metriche da calcolare
+    debugger;
     Sheet.fact.add(metric.factId);
   }
 
@@ -581,7 +582,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     code.innerHTML = Sheet.fields.get(token);
     // aggiungo a Sheet.fields solo le proprietà utili alla creazione della query
     // TODO: da aggiungere in fase di creazione del process
-    debugger;
     Sheet.tables = WorkBook.field.get(token).tableAlias;
     target.appendChild(field);
     // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
@@ -1553,7 +1553,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   // tasto Elabora e SQL
   app.createProcess = async (e) => {
-    let process = {}, facts = {}, fields = {}, filters = {};
+    let process = {}, fields = {}, filters = {};
     process.facts = [...Sheet.fact];
     // Creo la struttura necessaria per creare la query
     for (const [token, field] of Sheet.fields) {
@@ -1593,7 +1593,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             break;
           case 'advanced':
             if (wbMetrics.factId === factId) {
-              const obj = {
+              let obj = {
                 [token]: {
                   token,
                   alias: metric.alias,
@@ -1609,11 +1609,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
                 // se, nei filtri della metrica, sono presenti filtri di funzioni temporali,
                 // ...la definizione del filtro và recuperata da WorkBook.metrics.timingFn
                 // TODO: implementare le altre funzioni temporali
+                debugger;
                 if (['last-year', 'last-month', 'ecc...'].includes(filterToken)) {
                   // advancedMetrics.get(token).filters[filterToken] = wbMetrics.timingFn[filterToken];
-                  obj.filters[filterToken] = wbMetrics.timingFn[filterToken];
+                  obj[token].filters[filterToken] = wbMetrics.timingFn[filterToken];
                 } else {
-                  obj.filters[filterToken] = WorkBook.filters.get(filterToken);
+                  obj[token].filters[filterToken] = WorkBook.filters.get(filterToken);
                 }
               });
               (process.hasOwnProperty('advancedMeasures')) ? process.advancedMeasures[factId] = obj : process.advancedMeasures = { [factId]: obj };
@@ -1788,10 +1789,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
     process.id = Sheet.sheet.id;
     process.datamartId = Sheet.userId;
-    // console.log(process);
+    console.log(process);
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(process);
-    console.log(params);
     debugger;
     // App.showConsole('Elaborazione in corso...', 'info');
     // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
@@ -2929,7 +2929,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // TODO: aggiungere opzione 'distinct'.
 
     // metric_type: se ci sono dei filtri (o timingFn) in questa metrica verrà sovrascritto in 'advanced'
-    let object = { token, alias, field: metric.field, aggregateFn, SQL: metric.SQL, distinct: false, type: 'metric', metric_type: 'basic', workbook_ref: WorkBook.workBook.token, updated_at: date };
+    let object = { token, alias, field: metric.field, factId: metric.factId, aggregateFn, SQL: metric.SQL, distinct: false, type: 'metric', metric_type: 'basic', workbook_ref: WorkBook.workBook.token, updated_at: date };
     // recupero tutti i filtri droppati in #filter-drop
     // salvo solo il riferimento al filtro e non tutta la definizione del filtro
     app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.add(filter.dataset.token));
@@ -3083,6 +3083,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.workbookTablesStruct.querySelectorAll('#ul-metrics > li, #ul-filters > li, details').forEach(element => element.remove());
     const parent = app.workbookTablesStruct.querySelector('#nav-fields');
 
+    debugger;
     for (const [tableAlias, prop] of WorkBook.workBookMap) {
       console.log(tableAlias);
       const tmpl = app.tmplDetails.content.cloneNode(true);

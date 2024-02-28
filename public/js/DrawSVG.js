@@ -775,9 +775,10 @@ class DrawSVG {
     Draw.svg.appendChild(use);
   }
 
-  recursiveHier(table, createJoin = true) {
+  recursiveHier(table, createJoin) {
     // cerco le tabelle gerarchicamente superiori a quella passata come argomento
     Draw.svg.querySelectorAll(`g#time-dimension > desc[data-table-join='${table.dataset.table}']`).forEach(t => {
+      debugger;
       if (createJoin) {
         const token = this.rand().substring(0, 7);
         WorkBook.join = {
@@ -812,7 +813,7 @@ class DrawSVG {
       this.currentTable = this.tables.get(`${t.dataset.alias}-${this.currentTable.factId}`);
       // this.currentTable = this.tables.get(`${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`);
       this.drawTimeRelated(); // tabelle relative alla TIME (WB_YEARS, WB_QUARTERS, ecc...)
-      if (t.dataset.joinField) this.recursiveHier(t);
+      if (t.dataset.joinField) this.recursiveHier(t, createJoin);
     });
   }
 
