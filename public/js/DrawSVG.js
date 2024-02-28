@@ -810,7 +810,6 @@ class DrawSVG {
         joinField: t.dataset.joinField,
       };
       this.currentTable = this.tables.get(`${t.dataset.alias}-${this.currentTable.factId}`);
-      debugger;
       // this.currentTable = this.tables.get(`${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`);
       this.drawTimeRelated(); // tabelle relative alla TIME (WB_YEARS, WB_QUARTERS, ecc...)
       if (t.dataset.joinField) this.recursiveHier(t);

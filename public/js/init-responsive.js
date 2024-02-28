@@ -1124,8 +1124,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.checkSessionStorage = async () => {
     // TODO: scarico in sessionStorage tutte le tabelle del canvas
     let urls = [];
-    for (const tableId of WorkBook.hierTables.keys()) {
-      WorkBook.activeTable = tableId;
+    for (const object of WorkBook.tablesModel.values()) {
+      WorkBook.activeTable = object.id;
       // se la tabella è già presente in sessionStorage non rieseguo la query
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) {
         urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/tables_info');
