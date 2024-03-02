@@ -586,7 +586,7 @@ class MapDatabaseController extends Controller
           foreach ($query->filteredMetrics as $metric) {
             // dd($metric->formula->filters);
             // ogni gruppo di filtri ha un tokenGrouup diverso come key dell'array
-            $tokenGroup = "group_" . bin2hex(random_bytes(4));
+            $tokenGroup = "grp_" . bin2hex(random_bytes(4));
             if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
           }
           // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
@@ -601,7 +601,7 @@ class MapDatabaseController extends Controller
             // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
             $query->groupMetricsByFilters->$token = $metrics;
           }
-          dd($query->groupMetricsByFilters);
+          // dd($query->groupMetricsByFilters);
           $metricTable = $query->createMetricDatamarts_new();
         }
       }

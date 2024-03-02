@@ -778,7 +778,6 @@ class DrawSVG {
   recursiveHier(table, createJoin) {
     // cerco le tabelle gerarchicamente superiori a quella passata come argomento
     Draw.svg.querySelectorAll(`g#time-dimension > desc[data-table-join='${table.dataset.table}']`).forEach(t => {
-      debugger;
       if (createJoin) {
         const token = this.rand().substring(0, 7);
         WorkBook.join = {

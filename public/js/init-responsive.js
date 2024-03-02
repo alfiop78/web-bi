@@ -3083,7 +3083,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.workbookTablesStruct.querySelectorAll('#ul-metrics > li, #ul-filters > li, details').forEach(element => element.remove());
     const parent = app.workbookTablesStruct.querySelector('#nav-fields');
 
-    debugger;
+    // INFO: 2024.03.02 - Rivedere workBookMap forse può essere utilizzata questa al posto
+    // di tablesModel e hierTables
     for (const [tableAlias, prop] of WorkBook.workBookMap) {
       console.log(tableAlias);
       const tmpl = app.tmplDetails.content.cloneNode(true);
