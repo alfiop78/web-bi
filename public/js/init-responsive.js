@@ -1481,7 +1481,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     * - creo la struttura delle tabelle->fields nella dialog filter
     */
     if (WorkBook.dataModel.size !== 0) {
-      app.checkSessionStorage();
+      // app.checkSessionStorage();
       Step.next();
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
       app.addTablesStruct();

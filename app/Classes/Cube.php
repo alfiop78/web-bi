@@ -634,7 +634,7 @@ class Cube
           // dd($join);
           $this->WHERE_timingFn[$token] = implode(" = ", $join->SQL);
         } */
-        $this->WHERE_timingFn[$token] = implode(" = ", $filter->SQL);
+        $this->WHERE_timingFn[$this->factId][$token] = implode(" = ", $filter->SQL);
         if (property_exists($this, 'sql_info')) {
           $this->json_info_advanced[$tableName]->{'AND'}->{$token} = implode(" = ", $filter->SQL);
           // $this->json_info_advanced[$tableName]->{'AND'}->{$filter->alias} = implode(" = ", $filter->SQL);
@@ -659,7 +659,7 @@ class Cube
         // -----------nuova logica----------------
         // aggiungo senza verificare se già presente il codice SQL del filtro
         // perchè, essendo un array associativo, al massimo il codice SQL del filtro viene riscritto
-        $this->filters_metricTable[$filter->name] = implode(" ", $filter->sql);
+        $this->filters_metricTable[$this->factId][$filter->name] = implode(" ", $filter->sql);
         if (property_exists($this, 'sql_info')) {
           $this->json_info_advanced[$tableName]->{'AND'}->{$filter->name} = implode(" = ", $filter->sql);
         }
@@ -855,9 +855,11 @@ class Cube
     // dd($this->select_clause);
     // unisco gli array della clausola select aggiungendo le metriche avanzate
     // dd(array_merge($this->select_clause[$this->factId], $advancedMetrics[$this->factId]));
-    // dd(self::SELECT . implode($this->select_clause[$this->factId])) . implode($advancedMetrics[$this->factId]);
-    $this->sqlAdvancedMeasures = implode(",\n", array_merge($this->select_clause[$this->factId], $advancedMetrics[$this->factId]));
+    $this->sqlAdvancedMeasures = self::SELECT;
+
+    $this->sqlAdvancedMeasures .= implode(",\n", array_merge($this->select_clause[$this->factId], $advancedMetrics[$this->factId]));
     dd($this->sqlAdvancedMeasures);
+
     $this->sqlAdvancedMeasures .= self::FROM . implode(",\n", array_merge($this->from_clause, $this->FROM_metricTable));
     dd($this->sqlAdvancedMeasures);
     // nella metrica adv, se è presente una funzione temporale NON devo aggiungere la condizione WHERE_timeDimension
