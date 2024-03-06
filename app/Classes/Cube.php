@@ -508,7 +508,7 @@ class Cube
   {
     $this->FROM_metricTable = [];
     foreach ($from as $alias => $prop) {
-      $this->FROM_metricTable[$alias] = "{$prop->schema}.{$prop->table} AS {$alias}";
+      $this->FROM_metricTable[$this->factId][$alias] = "{$prop->schema}.{$prop->table} AS {$alias}";
       // TODO: da testare con una metrica filtrata contenente la prop 'from'
       if (property_exists($this, 'sql_info')) {
         $this->json_info_advanced[$tableName]->{'FROM'}->{$alias} = "{$prop->schema}.{$prop->table} AS {$alias}";
@@ -552,7 +552,7 @@ class Cube
           $this->json_info_advanced[$tableName]->{'WHERE'}->{$token} = implode(" = ", $join->SQL);
         }
       } else {
-        $this->WHERE_metricTable[$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
+        $this->WHERE_metricTable[$this->factId][$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
         if (property_exists($this, 'sql_info')) {
           $this->json_info_advanced[$tableName]->{'WHERE'}->{$token} = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
         }
@@ -853,14 +853,20 @@ class Cube
     // dd('createMetricTable');
     $this->fromFilteredMetric = NULL;
     // dd($this->select_clause);
-    // unisco gli array della clausola select aggiungendo le metriche avanzate
+    // unisco gli array della clausola select con le metriche da calcolare per il gruppo di metriche
     // dd(array_merge($this->select_clause[$this->factId], $advancedMetrics[$this->factId]));
     $this->sqlAdvancedMeasures = self::SELECT;
-
     $this->sqlAdvancedMeasures .= implode(",\n", array_merge($this->select_clause[$this->factId], $advancedMetrics[$this->factId]));
-    dd($this->sqlAdvancedMeasures);
-
-    $this->sqlAdvancedMeasures .= self::FROM . implode(",\n", array_merge($this->from_clause, $this->FROM_metricTable));
+    // dd($this->sqlAdvancedMeasures);
+    // dd($this->from_clause[$this->factId], $this->FROM_metricTable[$this->factId]);
+    if (array_key_exists($this->factId, $this->FROM_metricTable)) {
+      // dd($this->from_clause[$this->factId], $this->FROM_metricTable[$this->factId]);
+      $this->sqlAdvancedMeasures .= self::FROM . implode(",\n", array_merge($this->from_clause[$this->factId], $this->FROM_metricTable[$this->factId]));
+    } else {
+      // dd($this->from_clause[$this->factId]);
+      $this->sqlAdvancedMeasures .= self::FROM . implode(",\n", $this->from_clause[$this->factId]);
+    }
+    // $this->sqlAdvancedMeasures .= self::FROM . implode(",\n", array_merge($this->from_clause, $this->FROM_metricTable));
     dd($this->sqlAdvancedMeasures);
     // nella metrica adv, se è presente una funzione temporale NON devo aggiungere la condizione WHERE_timeDimension
     // dd($this->WHERE_timingFn);
