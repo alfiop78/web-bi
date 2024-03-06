@@ -867,23 +867,36 @@ class Cube
       $this->sqlAdvancedMeasures .= self::FROM . implode(",\n", $this->from_clause[$this->factId]);
     }
     // $this->sqlAdvancedMeasures .= self::FROM . implode(",\n", array_merge($this->from_clause, $this->FROM_metricTable));
-    dd($this->sqlAdvancedMeasures);
+    // dd($this->sqlAdvancedMeasures);
     // nella metrica adv, se è presente una funzione temporale NON devo aggiungere la condizione WHERE_timeDimension
-    // dd($this->WHERE_timingFn);
-    if (count($this->WHERE_timingFn) === 0) {
-      $this->sqlAdvancedMeasures .= "\nWHERE\n" . implode("\nAND ", array_merge($this->WHERE_baseTable, $this->WHERE_timeDimension, $this->WHERE_metricTable));
+    // if (count($this->WHERE_timingFn) === 0) {
+    $this->sqlAdvancedMeasures .= self::WHERE;
+    if (array_key_exists($this->factId, $this->where_clause)) $this->sqlAdvancedMeasures .= implode("\nAND ", $this->where_clause[$this->factId]);
+    if (array_key_exists($this->factId, $this->where_time_clause)) {
+      $this->sqlAdvancedMeasures .= "\nAND ";
+      $this->sqlAdvancedMeasures .= implode("\nAND ", $this->where_time_clause[$this->factId]);
+    }
+    if (array_key_exists($this->factId, $this->WHERE_metricTable)) {
+      $this->sqlAdvancedMeasures .= "\nAND ";
+      $this->sqlAdvancedMeasures .= implode("\nAND ", $this->WHERE_metricTable[$this->factId]);
+    }
+    /* if (!array_key_exists($this->factId, $this->WHERE_timingFn)) {
+    $this->sqlAdvancedMeasures .= "\nWHERE\n" . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId], $this->WHERE_metricTable[$this->factId]));
     } else {
       // Sono presenti delle funzioni temporali, per cui non posso mettere la WHERE_timeDimension
-      $this->sqlAdvancedMeasures .= "\nWHERE\n" . implode("\nAND ", array_merge($this->WHERE_baseTable, $this->WHERE_timingFn, $this->WHERE_metricTable));
-    }
-    $this->WHERE_timingFn = array();
+      $this->sqlAdvancedMeasures .= "\nWHERE\n" . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId], $this->WHERE_metricTable[$this->factId]));
+    } */
+    // dd($this->sqlAdvancedMeasures);
+    $this->WHERE_timingFn = [];
     // aggiungo i filtri del report e i filtri contenuti nella metrica
-    $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", array_merge($this->filters_baseTable, $this->filters_metricTable));
-    $this->sqlAdvancedMeasures .= "\n$this->_groupBy";
-    $comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($advancedMetrics)) . "\n*/\n";
+    $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", array_merge($this->report_filters[$this->factId], $this->filters_metricTable[$this->factId]));
+    $this->sqlAdvancedMeasures .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
+    // dd($this->sqlAdvancedMeasures);
+    $comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($advancedMetrics[$this->factId])) . "\n*/\n";
 
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->sqlAdvancedMeasures);";
-    var_dump($sql);
+    // dd($sql);
+    // var_dump($sql);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
     if (property_exists($this, 'sql_info')) {
       $result = ["raw_sql" => nl2br($sql), "format_sql" => $this->json_info_advanced];
@@ -891,13 +904,15 @@ class Cube
       // elimino la tabella temporanea, se esiste, prima di ricrearla
       // La elimino anche in caso di errore nella creazione della tabella temporanea
       $this->dropTemporaryTables($tableName);
-      try {
+      $result = DB::connection('vertica_odbc')->statement($sql);
+      /* try {
         $result = DB::connection('vertica_odbc')->statement($sql);
+        dd($result);
       } catch (Exception $e) {
         // dd("Errore gestito: {$e}");
         $this->dropTemporaryTables($tableName);
         throw new Exception("Errore elaborazione richiesta", $e->getCode());
-      }
+      } */
 
       /* versione precedente, senza dropIfExists
        * if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
@@ -942,7 +957,7 @@ class Cube
     $union_sql = implode("UNION\n", $union);
     $this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS\n($union_sql);";
     // dd($this->union_clause);
-    var_dump($this->union_clause);
+    // var_dump($this->union_clause);
     $this->dropTemporaryTables("union_{$this->report_id}_{$this->datamart_id}");
     DB::connection('vertica_odbc')->statement($this->union_clause);
   }
