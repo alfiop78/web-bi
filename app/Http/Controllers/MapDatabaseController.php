@@ -573,8 +573,8 @@ class MapDatabaseController extends Controller
       if (!$res) {
         // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
         // creo una tabella temporanea per ogni metrica filtrata
-        // TODO: 2022-05-06 qui occorre una verifica più approfondita sui filtri contenuti nella metrica, allo stato attuale faccio una query per ogni metrica filtrata, anche se i filtri all'interno della metrica sono uguali. Includere più metriche che contengono gli stessi filtri in un unica query
-        if (property_exists($query->process, "advancedMeasures")) {
+        // dd(property_exists($query->process->{"advancedMeasures"}, $fact));
+        if (property_exists($query->process->{"advancedMeasures"}, $fact)) {
           $query->filteredMetrics = $query->process->{'advancedMeasures'}->{$fact};
           // verifico quali, tra le metriche filtrate, contengono gli stessi filtri.
           // Le metriche che contengono gli stessi filtri vanno eseguite in un unica query.

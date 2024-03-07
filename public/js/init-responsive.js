@@ -1572,7 +1572,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
     process.fields = fields;
 
+    process.advancedMeasures = {}, process.baseMeasures = {};
     Sheet.fact.forEach(factId => {
+      let advancedMeasures = new Map(), baseMeasures = new Map();
       // es. :
       // baseMeasures : {
       //  fact-1 : {object di metriche di base}
@@ -1594,50 +1596,46 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
           case 'advanced':
             if (wbMetrics.factId === factId) {
               let obj = {
-                [token]: {
-                  token,
-                  alias: metric.alias,
-                  aggregateFn: metric.aggregateFn,
-                  field: wbMetrics.field,
-                  SQL: wbMetrics.SQL,
-                  distinct: wbMetrics.distinct,
-                  filters: {}
-                }
+                token,
+                alias: metric.alias,
+                aggregateFn: metric.aggregateFn,
+                field: wbMetrics.field,
+                SQL: wbMetrics.SQL,
+                distinct: wbMetrics.distinct,
+                filters: {}
               };
               // aggiungo i filtri definiti all'interno della metrica avanzata
               wbMetrics.filters.forEach(filterToken => {
                 // se, nei filtri della metrica, sono presenti filtri di funzioni temporali,
                 // ...la definizione del filtro và recuperata da WorkBook.metrics.timingFn
                 // TODO: implementare le altre funzioni temporali
-                debugger;
                 if (['last-year', 'last-month', 'ecc...'].includes(filterToken)) {
                   // advancedMetrics.get(token).filters[filterToken] = wbMetrics.timingFn[filterToken];
-                  obj[token].filters[filterToken] = wbMetrics.timingFn[filterToken];
+                  obj.filters[filterToken] = wbMetrics.timingFn[filterToken];
                 } else {
-                  obj[token].filters[filterToken] = WorkBook.filters.get(filterToken);
+                  obj.filters[filterToken] = WorkBook.filters.get(filterToken);
                 }
               });
-              (process.hasOwnProperty('advancedMeasures')) ? process.advancedMeasures[factId] = obj : process.advancedMeasures = { [factId]: obj };
+              advancedMeasures.set(token, obj);
             }
             break;
           default:
             // basic
             if (wbMetrics.factId === factId) {
-              const obj = {
-                [token]: {
-                  token,
-                  alias: metric.alias,
-                  aggregateFn: metric.aggregateFn,
-                  field: wbMetrics.field,
-                  SQL: wbMetrics.SQL,
-                  distinct: wbMetrics.distinct
-                }
-              };
-              (process.hasOwnProperty('baseMeasures')) ? process.baseMeasures[factId] = obj : process.baseMeasures = { [factId]: obj };
+              baseMeasures.set(token, {
+                token,
+                alias: metric.alias,
+                aggregateFn: metric.aggregateFn,
+                field: wbMetrics.field,
+                SQL: wbMetrics.SQL,
+                distinct: wbMetrics.distinct
+              });
             }
             break;
         }
       }
+      if (advancedMeasures.size !== 0) process.advancedMeasures[factId] = Object.fromEntries(advancedMeasures);
+      if (baseMeasures.size !== 0) process.baseMeasures[factId] = Object.fromEntries(baseMeasures);
     });
     // se non ci sono filtri nel Report bisogna far comparire un avviso
     // perchè l'elaborazione potrebbe essere troppo onerosa

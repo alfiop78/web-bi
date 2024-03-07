@@ -28,7 +28,7 @@ class Cube
   private $datamart_baseMeasures = array();
   // private $_metrics_advanced_datamart = array();
   // da sostituire con...
-  private $datamart_advancedMeasures = array();
+  private $datamart_advancedMeasures = array(); // sostituisce _metrics_advanced_datamart
 
   private $_columns = array();
   private $sqlAdvancedMeasures = NULL;
@@ -757,7 +757,10 @@ class Cube
         }
         // dd($groupAdvancedMeasures);
         // _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
-        $this->datamart_advancedMeasures[$tableName][$metric->alias] = "\nNVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
+        // TODO: probabilmente posso creare questo array nello stesso modo di datamart_baseMeasures
+        // (quindi senza le keys $tablename e $metric->alias)
+        $this->datamart_advancedMeasures[$tableName][$metric->alias] = "\n{$metric->alias} AS {$metric->alias}";
+        // $this->datamart_advancedMeasures[$tableName][$metric->alias] = "\nNVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
         // aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
         $this->setFiltersMetricTable_new($metric->filters, $tableName);
         // dd($this->json_info_advanced);
@@ -850,7 +853,7 @@ class Cube
 
   private function createMetricTable_new($tableName, $advancedMetrics)
   {
-    // dd('createMetricTable');
+    var_dump($advancedMetrics);
     $this->fromFilteredMetric = NULL;
     // dd($this->select_clause);
     // unisco gli array della clausola select con le metriche da calcolare per il gruppo di metriche
@@ -905,6 +908,8 @@ class Cube
       // La elimino anche in caso di errore nella creazione della tabella temporanea
       $this->dropTemporaryTables($tableName);
       $result = DB::connection('vertica_odbc')->statement($sql);
+      $this->queries[$tableName] = $this->datamart_fields;
+      // dd($this->queries);
       /* try {
         $result = DB::connection('vertica_odbc')->statement($sql);
         dd($result);
@@ -947,6 +952,7 @@ class Cube
   private function distinct_fields()
   {
     $union = [];
+    // dd($this->queries);
     foreach ($this->queries as $table => $fields) {
       $sql = self::SELECT;
       $sql .= implode(",\n", $fields);
@@ -1019,6 +1025,7 @@ class Cube
     }
   }
 
+  // versione modificata con implementazione metriche avanzate
   public function datamart_new()
   {
     $this->distinct_fields();
@@ -1032,6 +1039,13 @@ class Cube
     $sql .= implode(",\n", $fields);
     // dd($this->datamart_baseMeasures);
     if (property_exists($this, "baseMetrics")) $sql .= "," . implode(",", $this->datamart_baseMeasures);
+    // dd($this->datamart_advancedMeasures);
+    if (property_exists($this, "filteredMetrics")) {
+      foreach ($this->datamart_advancedMeasures as $metricAlias) {
+        $sql .= "," . implode(",", $metricAlias);
+      }
+    }
+    // dd($sql);
     $sql .= self::FROM . "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}";
     $joinLEFT = "";
     $ONClause = [];
@@ -1051,6 +1065,40 @@ class Cube
     DB::connection('vertica_odbc')->statement($sql);
     return $this->report_id;
   }
+
+  // versione originale
+  // public function datamart_new()
+  // {
+  //   $this->distinct_fields();
+  //   $comment = "/*Creazione DATAMART :\ndecisyon_cache.{$this->datamart_name}\n*/\n";
+  //   $sql = "{$comment}CREATE TABLE decisyon_cache.{$this->datamart_name} INCLUDE SCHEMA PRIVILEGES AS ";
+  //   $sql .= self::SELECT;
+  //   $fields = [];
+  //   foreach ($this->datamart_fields as $field) {
+  //     $fields[] = "\tunion_{$this->report_id}_{$this->datamart_id}.{$field}";
+  //   }
+  //   $sql .= implode(",\n", $fields);
+  //   // dd($this->datamart_baseMeasures);
+  //   if (property_exists($this, "baseMetrics")) $sql .= "," . implode(",", $this->datamart_baseMeasures);
+  //   $sql .= self::FROM . "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}";
+  //   $joinLEFT = "";
+  //   $ONClause = [];
+  //   foreach ($this->queries as $k => $v) {
+  //     $joinLEFT .= "\nLEFT JOIN decisyon_cache.{$k}\n\tON ";
+  //     foreach ($v as $field) {
+  //       $ONClause[] = "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}.'$field' = $k.'$field'";
+  //     }
+  //     $joinLEFT .= implode("\nAND ", $ONClause);
+  //     unset($ONClause);
+  //   }
+  //   $sql .= $joinLEFT;
+  //   // dd($sql);
+  //   // se il datamart già esiste lo elimino prima di ricrearlo
+  //   $this->dropTemporaryTables($this->datamart_name);
+  //   // TODO: eliminare anche le altre tabelle temporanee, memorizzate in $this->queries
+  //   DB::connection('vertica_odbc')->statement($sql);
+  //   return $this->report_id;
+  // }
 
   public function createDatamart()
   {
