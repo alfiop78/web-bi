@@ -138,7 +138,6 @@ class Sheets {
     }
 
     // from
-    debugger;
     // TODO: la proprietà 'from' viene ricreata, in setSheet() quindi potrei NON metterla qui
     this.from = SheetStorage.sheet.from;
     /* for (const [tableAlias, object] of Object.entries(SheetStorage.sheet.from)) {

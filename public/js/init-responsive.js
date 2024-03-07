@@ -342,8 +342,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
     target.appendChild(field);
     // imposto le fact da utilizzare nel report in base alle metriche da calcolare
-    debugger;
-    Sheet.fact.add(metric.factId);
+    // le metriche composte non hanno il factId
+    if (metric.factId) Sheet.fact.add(metric.factId);
   }
 
   app.columnDrop = (e) => {
@@ -368,7 +368,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         app.addMetric(e.currentTarget, elementRef.id);
         break;
       case 'composite':
-        Sheet.metrics = { token: metric.token, factId: metric.factId, alias: metric.alias, type: metric.metric_type, metrics: metric.metrics, dependencies: false };
+        Sheet.metrics = { token: metric.token, alias: metric.alias, type: metric.metric_type, metrics: metric.metrics, dependencies: false };
         app.addMetric(e.currentTarget, elementRef.id);
         // dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
         // ...al suo interno per consentirne l'elaborazione
@@ -634,6 +634,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // è una nuova metrica
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const alias = document.getElementById('custom-metric-name').value;
+    const factId = WorkBook.activeTable.dataset.factId;
     let arr_sql = [];
     let fields = [], formula = [];
     document.querySelectorAll('#textarea-custom-metric *').forEach(element => {
@@ -653,6 +654,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       token,
       alias,
       fields, // es.:[przMedio, quantita]
+      factId,
       formula: formula,
       aggregateFn: 'SUM', // default
       SQL: `${arr_sql.join(' ')}`,
@@ -1507,16 +1509,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     });
   }
 
-  /* app.dimensionSelected = (e) => {
-    console.log(e.target.dataset.dimensionId);
-    // memorizzo tutte le tabelle della dimensione selezionata
-    console.log(Draw.tables);
-    Draw.dimensionSelected = e.target.dataset.dimensionId;
-    console.log(Draw.dimensionSelected);
-    // Draw.dimensionSelected[e.target.dataset.dimensionId] =
-    debugger;
-  } */
-
   app.dimensionDone = () => {
     // dopo aver scelto le dimensioni da associare alla nuova fact posso nascondere il cubo di origine
     Draw.hidden();
@@ -1572,7 +1564,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
     process.fields = fields;
 
-    process.advancedMeasures = {}, process.baseMeasures = {};
+    process.advancedMeasures = {}, process.baseMeasures = {}, process.compositeMeasures = {};
     Sheet.fact.forEach(factId => {
       let advancedMeasures = new Map(), baseMeasures = new Map();
       // es. :
@@ -1580,8 +1572,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       //  fact-1 : {object di metriche di base}
       //  fact-2 : {object di metriche di base}
       // }
-      // advancedMeasures : {come sopra}
-      // compositeMeasures : {come sopra}
 
       for (const [token, metric] of Sheet.metrics) {
         const wbMetrics = WorkBook.metrics.get(token);
@@ -1655,8 +1645,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     process.from = Sheet.from;
     process.joins = Sheet.joins;
 
-    // TODO: utilizzare un unica funzione, se viene passato 'json__info' deve essere
-    // elaborato il generateSQL() altrimenti il process()
     (e.target.id === 'btn-sheet-preview') ? app.process(process) : app.generateSQL(process);
   }
 
@@ -2398,7 +2386,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             // .. in modo da poter inserire, ad es.: funzioni come NVL o IFNULL.
             // Un'altra soluzione è creare qui un array (da trasformare in associativo in PHP) per poi poter
             // ... utilizzare MyVerticaGrammar.php oppure altre grammatiche relative ad altri DB già predisposti in Laravel
-            object.sql.push(`NVL(${metricFormula.aggregateFn}(${element.innerText}),0)`);
+
+            // object.sql.push(`NVL(${metricFormula.aggregateFn}(${element.innerText}),0)`);
+            object.sql.push(element.innerText);
             object.formula.push({ token: metricFormula.token, alias: metricFormula.alias });
             break;
         }

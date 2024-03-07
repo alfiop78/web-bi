@@ -477,88 +477,6 @@ class MapDatabaseController extends Controller
     return response()->json($data);
   }
 
-  // sheet
-  /* public function sheetCreate(Request $request)
-  {
-    $process = json_decode(json_encode($request->all())); // object
-    $q = new Cube();
-    // imposto le proprietà con i magic methods
-    $q->reportId = $process->{'id'};
-    $q->facts = $process->{'facts'}; // array
-    $q->datamartId = $process->{'datamartId'};
-    $q->baseTableName = "WEB_BI_TMP_BASE_{$q->reportId}_{$q->datamartId}";
-    $q->datamartName = "WEB_BI_{$q->reportId}_{$q->datamartId}";
-    $q->baseColumns = $process->{'fields'};
-    // imposto le colonne da includere nel datamart finale
-    $q->fields();
-    $q->select();
-    foreach ($q->facts as $factId) {
-      if (property_exists($process, 'baseMeasures')) {
-        $q->baseMetrics = $process->{'baseMeasures'}->{$factId};
-        $q->metrics();
-        $q->from($process->{'from'}->{$factId});
-        $q->where($process->{'joins'}->{$factId});
-        if (property_exists($process, 'compositeMeasures')) $q->compositeMetrics = $process->{'compositeMeasures'};
-        // i filtri vengono verificati già nella funzione createProcess()
-        $q->filters($process->{'filters'});
-        $q->groupBy($process->{'fields'});
-        $baseTable = $q->baseTable();
-        if (!$baseTable) {
-          // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
-          // creo una tabella temporanea per ogni metrica filtrata
-          // TODO: 2022-05-06 qui occorre una verifica più approfondita sui filtri contenuti nella metrica, allo stato attuale faccio una query per ogni metrica filtrata, anche se i filtri all'interno della metrica sono uguali. Includere più metriche che contengono gli stessi filtri in un unica query
-          if (property_exists($process, 'advancedMeasures')) {
-            // TODO: rinominare 'advancedMeasures'
-            $q->filteredMetrics = $process->{'advancedMeasures'}->{$factId};
-            // verifico quali, tra le metriche filtrate, contengono gli stessi filtri.
-            // Le metriche che contengono gli stessi filtri vanno eseguite in un unica query.
-            // Oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
-            $q->groupMetricsByFilters = (object)[];
-            // raggruppare per tipologia dei filtri
-            $groupFilters = array();
-            // creo un gruppo di filtri
-            foreach ($q->filteredMetrics as $metric) {
-              // dd($metric->formula->filters);
-              // ogni gruppo di filtri ha un tokenGrouup diverso come key dell'array
-              $tokenGroup = "group_" . bin2hex(random_bytes(4));
-              if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
-            }
-            // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
-            foreach ($groupFilters as $token => $group) {
-              $metrics = array();
-              foreach ($q->filteredMetrics as $metric) {
-                if (get_object_vars($metric->filters) == get_object_vars($group)) {
-                  // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
-                  array_push($metrics, $metric);
-                }
-              }
-              // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
-              $q->groupMetricsByFilters->$token = $metrics;
-            }
-            // dd($q->groupMetricsByFilters);
-            $metricTable = $q->createMetricDatamarts();
-          }
-          // echo 'elaborazione createDatamart';
-          // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-          // $datamartName = $q->createDatamart();
-          // Restituisco il reportId
-          // return $q->createDatamart();
-
-          // restituisco un ANTEPRIMA del datamart appena creato
-          // WARN: Errore di memory exhausted, bisogna utilizzare il paginate()
-          // $datamartResult = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.$q->datamartName LIMIT 10000;");
-          // return response()->json($datamartResult);
-
-          // $datamartResult = DB::connection('vertica_odbc')->table("decisyon_cache.$q->datamartName")->paginate(15000);
-          // return $datamartResult;
-        } else {
-          return 'BaseTable non create';
-        }
-      }
-    }
-    return $q->createDatamart();
-  } */
-
   public function sheetCreate(Request $request)
   {
     $process = json_decode(json_encode($request->all())); // object
@@ -573,36 +491,40 @@ class MapDatabaseController extends Controller
       if (!$res) {
         // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
         // creo una tabella temporanea per ogni metrica filtrata
-        // dd(property_exists($query->process->{"advancedMeasures"}, $fact));
-        if (property_exists($query->process->{"advancedMeasures"}, $fact)) {
-          $query->filteredMetrics = $query->process->{'advancedMeasures'}->{$fact};
-          // verifico quali, tra le metriche filtrate, contengono gli stessi filtri.
-          // Le metriche che contengono gli stessi filtri vanno eseguite in un unica query.
-          // Oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
-          $query->groupMetricsByFilters = (object)[];
-          // raggruppare per tipologia dei filtri
-          $groupFilters = array();
-          // creo un gruppo di filtri
-          foreach ($query->filteredMetrics as $metric) {
-            // dd($metric->formula->filters);
-            // ogni gruppo di filtri ha un tokenGrouup diverso come key dell'array
-            $tokenGroup = "grp_" . bin2hex(random_bytes(4));
-            if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
-          }
-          // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
-          foreach ($groupFilters as $token => $group) {
-            $metrics = array();
+        // dd($query->process->{"advancedMeasures"});
+        // dd(empty($query->process->{"advancedMeasures"}));
+        if (!empty($query->process->{"advancedMeasures"})) {
+          // sono presenti metriche avanzate
+          if (property_exists($query->process->{"advancedMeasures"}, $fact)) {
+            $query->filteredMetrics = $query->process->{'advancedMeasures'}->{$fact};
+            // verifico quali, tra le metriche filtrate, contengono gli stessi filtri.
+            // Le metriche che contengono gli stessi filtri vanno eseguite in un unica query.
+            // Oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
+            $query->groupMetricsByFilters = (object)[];
+            // raggruppare per tipologia dei filtri
+            $groupFilters = array();
+            // creo un gruppo di filtri
             foreach ($query->filteredMetrics as $metric) {
-              if (get_object_vars($metric->filters) == get_object_vars($group)) {
-                // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
-                array_push($metrics, $metric);
-              }
+              // dd($metric->formula->filters);
+              // ogni gruppo di filtri ha un tokenGrouup diverso come key dell'array
+              $tokenGroup = "grp_" . bin2hex(random_bytes(4));
+              if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
             }
-            // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
-            $query->groupMetricsByFilters->$token = $metrics;
+            // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
+            foreach ($groupFilters as $token => $group) {
+              $metrics = array();
+              foreach ($query->filteredMetrics as $metric) {
+                if (get_object_vars($metric->filters) == get_object_vars($group)) {
+                  // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
+                  array_push($metrics, $metric);
+                }
+              }
+              // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
+              $query->groupMetricsByFilters->$token = $metrics;
+            }
+            // dd($query->groupMetricsByFilters);
+            $metricTable = $query->createMetricDatamarts_new();
           }
-          // dd($query->groupMetricsByFilters);
-          $metricTable = $query->createMetricDatamarts_new();
         }
       }
     }
