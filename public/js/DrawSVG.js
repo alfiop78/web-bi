@@ -408,6 +408,8 @@ class DrawSVG {
         const d = `M${+this.nearestTable.dataset.anchorXTo},${+this.nearestTable.dataset.anchorYTo} C${+this.nearestTable.dataset.anchorXTo + 40},${+this.nearestTable.dataset.anchorYTo} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
         this.currentLineRef.setAttribute('d', d);
       }
+      this.currentLineRef.dataset.startX = +this.nearestTable.dataset.anchorXTo;
+      this.currentLineRef.dataset.startY = +this.nearestTable.dataset.anchorYTo;
       this.currentLineRef.dataset.endX = this.coordinate.x - 10;
       this.currentLineRef.dataset.endY = this.coordinate.y + 12;
       // TODO: 29.01.2024 - Implementare lo spostamento della linea di destra della tabella e.target

@@ -14,21 +14,22 @@ class Cube
   const WHERE = "\nWHERE\n";
   public $results = [];
   private $select_clause;
-  public $datamart_fields = array();
-  private $from_clause = array();
-  private $where_clause = array();
-  private $where_time_clause = array();
-  private $report_metrics = array();
-  private $report_filters = array();
-  private $groupby_clause = array();
+  public $datamart_fields = [];
+  private $from_clause = [];
+  private $where_clause = [];
+  private $where_time_clause = [];
+  private $baseMeasures = [];
+  private $report_metrics = [];
+  private $report_filters = [];
+  private $groupby_clause = [];
   private $union_clause = "";
-  private $datamart_baseMeasures = array();
-  private $datamart_advancedMeasures = array();
+  private $datamart_baseMeasures = [];
+  private $datamart_advancedMeasures = [];
   private $sqlAdvancedMeasures = NULL;
-  private $FROM_metricTable = array(); // Clausola FROM per le metriche avanzate
-  private $WHERE_metricTable = array(); // Clausola WHERE per le metriche abanzate
-  private $WHERE_timingFn = array();
-  private $segmented = array();
+  private $FROM_metricTable = []; // Clausola FROM per le metriche avanzate
+  private $WHERE_metricTable = []; // Clausola WHERE per le metriche abanzate
+  private $WHERE_timingFn = [];
+  private $segmented = [];
   public $compositeMeasures = [];
   public $queries = [];
 
@@ -117,8 +118,7 @@ class Cube
     // $metrics_base_datamart = array();
 
     $this->report_metrics = [];
-    // dd($this->baseMetrics);
-    foreach ($this->baseMetrics as $value) {
+    foreach ($this->baseMeasures as $value) {
       // dd($value);
       $metric = "\nNVL({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
       $this->report_metrics[$this->factId][] = $metric;
@@ -252,11 +252,14 @@ class Cube
 
   public function base_table_new()
   {
-    // dd(property_exists($this->process->{"baseMeasures"}, $this->fact));
-    if (property_exists($this->process->{"baseMeasures"}, $this->fact)) $this->baseMetrics = $this->process->{"baseMeasures"}->{$this->fact};
-    // if (property_exists($this->process, 'baseMeasures')) $this->baseMetrics = $this->process->{"baseMeasures"}->{$fact};
-    // dd($this->baseMetrics);
     $this->select_new();
+    if (!empty($this->process->baseMeasures)) {
+      // dd("base metrics presenti");
+      if (property_exists($this->process->baseMeasures, $this->fact)) {
+        // metriche per la fact in ciclo presenti
+        $this->baseMeasures[] = $this->process->baseMeasures->{$this->fact};
+      }
+    }
     $this->metrics_new();
     $this->from_new();
     $this->where_new();
@@ -264,8 +267,7 @@ class Cube
     $this->groupBy_new();
     $sql = NULL;
     $sql .= self::SELECT . implode(",\n", $this->select_clause[$this->factId]);
-    // dd($this->report_metrics[$this->factId]);
-    if (!is_null($this->report_metrics[$this->factId])) $sql .= "," . implode(", ", $this->report_metrics[$this->factId]);
+    if (!empty($this->report_metrics[$this->factId])) $sql .= "," . implode(", ", $this->report_metrics[$this->factId]);
     $sql .= self::FROM . implode(",\n", $this->from_clause[$this->factId]);
     $sql .= self::WHERE . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId]));
     if (!is_null($this->report_filters[$this->factId])) $sql .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
