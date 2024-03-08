@@ -486,7 +486,7 @@ class MapDatabaseController extends Controller
       $query->fact = $fact;
       $query->factId = substr($fact, -5);
       $query->baseTableName = "WB_BASE_{$query->report_id}_{$query->datamart_id}_{$query->factId}";
-      $res = $query->base_table_new($fact);
+      $res = $query->base_table_new();
       $query->queries[$query->baseTableName] = $query->datamart_fields;
       if (!$res) {
         // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
@@ -528,10 +528,11 @@ class MapDatabaseController extends Controller
         }
       }
     }
-    // TODO: prima di creare il datamart potre inizializzare le metriche composite, come fatto con
-    // quelle avanzate, crendo un array che poi verrà unito (merge) in datamart_new()
-    // dd($query->queries);
-    // dd("base tables create");
+    if (!empty($query->process->compositeMeasures)) {
+      foreach ($query->process->compositeMeasures as $metric) {
+        $query->compositeMeasures[] = implode(" ", $metric->SQL) . " AS {$metric->alias}";
+      }
+    }
     return $query->datamart_new();
   }
 

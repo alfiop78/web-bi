@@ -16,34 +16,20 @@ class Cube
   private $select_clause;
   public $datamart_fields = array();
   private $from_clause = array();
-  private $where_clause = array(); // utilizzata al posto di WHERE_baseTable
-  private $where_time_clause = array(); // utilizzata al posto di WHERE_timeDimension
-  private $report_metrics = array(); // da utilizzare al posto di $this->_metrics_base
-  private $report_filters = array(); // utilizzato al posto di $filters_baseTable
+  private $where_clause = array();
+  private $where_time_clause = array();
+  private $report_metrics = array();
+  private $report_filters = array();
   private $groupby_clause = array();
   private $union_clause = "";
-
-  // private $_metrics_base_datamart;
-  // da sostituire con...
   private $datamart_baseMeasures = array();
-  // private $_metrics_advanced_datamart = array();
-  // da sostituire con...
-  private $datamart_advancedMeasures = array(); // sostituisce _metrics_advanced_datamart
-
-  private $_columns = array();
+  private $datamart_advancedMeasures = array();
   private $sqlAdvancedMeasures = NULL;
-  // private $FROM_baseTable = array();
-  private $baseTableNames = array();
   private $FROM_metricTable = array(); // Clausola FROM per le metriche avanzate
   private $WHERE_metricTable = array(); // Clausola WHERE per le metriche abanzate
   private $WHERE_timingFn = array();
-  // private $WHERE_baseTable = array();
-  // private $WHERE_timeDimension = array();
   private $segmented = array();
-  // private $filters_baseTable = array();
-  private $_metrics_base;
-  private $cm = array(); // composite metrics
-  private $compositeMeasures = [];
+  public $compositeMeasures = [];
   public $queries = [];
 
   function __construct($process)
@@ -264,9 +250,11 @@ class Cube
     // dd($this->groupby_clause);
   }
 
-  public function base_table_new($fact)
+  public function base_table_new()
   {
-    if (property_exists($this->process, 'baseMeasures')) $this->baseMetrics = $this->process->{"baseMeasures"}->{$fact};
+    // dd(property_exists($this->process->{"baseMeasures"}, $this->fact));
+    if (property_exists($this->process->{"baseMeasures"}, $this->fact)) $this->baseMetrics = $this->process->{"baseMeasures"}->{$this->fact};
+    // if (property_exists($this->process, 'baseMeasures')) $this->baseMetrics = $this->process->{"baseMeasures"}->{$fact};
     // dd($this->baseMetrics);
     $this->select_new();
     $this->metrics_new();
@@ -569,7 +557,9 @@ class Cube
     DB::connection('vertica_odbc')->statement($this->union_clause);
   }
 
-  // versione modificata con implementazione metriche avanzate
+  /* creazione datamart finale:
+ * Viene creata una query che unisce .....TODO: completare i commenti
+ * */
   public function datamart_new()
   {
     $this->distinct_fields();
@@ -580,31 +570,12 @@ class Cube
     foreach ($this->datamart_fields as $field) {
       $fields[] = "union_{$this->report_id}_{$this->datamart_id}.{$field}";
     }
-    $compositeMeasures = [];
-    // TEST: 2024.03.08
-    if (!empty($this->process->{"compositeMeasures"})) {
-      $this->compositeMeasures = $this->process->{"compositeMeasures"};
-      foreach ($this->compositeMeasures as $cm) {
-        // $this->cm[] = "NVL(" . implode(" ", $cm->SQL) . ",0) AS {$cm->alias}";
-        $this->cm[] = implode(" ", $cm->SQL) . " AS {$cm->alias}";
-      }
-      // dd($this->cm);
-      $compositeMeasures[] = $this->cm;
-    }
-    $sql .= implode(",\n", array_merge($fields, $this->datamart_baseMeasures, $this->datamart_advancedMeasures, $compositeMeasures));
+    // unisco i seguenti campi :
+    // - livelli dimensionali
+    // - metriche di base, metriche avanzate e metriche composte
+    $mergeElements = array_merge($fields, $this->datamart_baseMeasures, $this->datamart_advancedMeasures, $this->compositeMeasures);
+    $sql .= implode(",\n", $mergeElements);
     // dd($sql);
-    // dd($sql);
-    /* if (property_exists($this->process, "compositeMeasures")) {
-      $this->compositeMeasures = $this->process->{"compositeMeasures"};
-      // dd($this->compositeMeasures);
-      foreach ($this->compositeMeasures as $cm) {
-        // $this->cm[] = "NVL(" . implode(" ", $cm->SQL) . ",0) AS {$cm->alias}";
-        $this->cm[] = implode(" ", $cm->SQL) . " AS {$cm->alias}";
-      }
-      // dd($this->cm);
-      $sql .= ",\n";
-      $sql .= implode(",\n", $this->cm);
-    } */
     $sql .= self::FROM . "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}";
     $joinLEFT = "";
     $ONClause = [];
