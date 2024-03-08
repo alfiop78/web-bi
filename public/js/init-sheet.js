@@ -206,13 +206,6 @@ function previewReady() {
   Resource.json.data.group.columns.forEach(metric => {
     if (!metric.dependencies && metric.properties.visible) {
       const index = Resource.dataGroup.getColumnIndex(metric.alias);
-      // NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo
-      // modo come alternativa a eval() (non l'ho testato)
-      // function evil(fn) {
-      //   return new Function('return ' + fn)();
-      // }
-      // console.log(evil('12/5*9+9.4*2')); // => 40.4     const index = Resource.dataGroup.getColumnIndex(metric.alias);
-
       // Implementazione della func 'calc' per le metriche composite.
       if (metric.type === 'composite') {
         // è una metrica composta, creo la funzione calc, sostituendo i nomi
@@ -226,8 +219,14 @@ function previewReady() {
           let formulaJoined = [];
           // in formulaJoined ciclo tutti gli elementi della Formula, imposto i
           // valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
+          // if (metric.alias === 'marginalita') debugger;
           formula.forEach(formulaEl => {
             if (formulaEl.alias) {
+              if (metric.alias === 'marginalita') {
+                console.log(dt);
+                console.log(formulaEl.alias, dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
+                console.log('ricavo_rapporto_2', dt.getValue(row, dt.getColumnIndex('ricavo_rapporto_2')));
+              }
               formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
             } else {
               formulaJoined.push(formulaEl);
@@ -236,7 +235,8 @@ function previewReady() {
           // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
           // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
           // effettuo un controllo sul risultato in caso fosse NaN
-          const result = (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
+          const result = (isNaN(eval(formulaJoined.join(' ')))) ? 0 : eval(formulaJoined.join(' '));
+          if (metric.alias === 'marginalita') console.log(formulaJoined, result);
           let total = (result) ? { v: result } : { v: result, f: '-' };
           // console.log(result);
           // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
