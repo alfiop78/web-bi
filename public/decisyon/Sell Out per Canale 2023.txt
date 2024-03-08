@@ -1,0 +1,4 @@
+STRRLU
+
+DR sulla prima colonna/riga : crea il record
+VF sulla prima colonna/riga : crea il fields

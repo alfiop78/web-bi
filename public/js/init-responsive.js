@@ -2716,8 +2716,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             name: column.column_name,
             origin_field: column.column_name,
             field: {
-              id: { sql: [column.column_name], datatype: column.type_name.toLowerCase() },
-              ds: { sql: [column.column_name], datatype: column.type_name.toLowerCase() }
+              id: { sql: [`${WorkBook.activeTable.dataset.table}.${column.column_name}`], datatype: column.type_name.toLowerCase() },
+              ds: { sql: [`${WorkBook.activeTable.dataset.table}.${column.column_name}`], datatype: column.type_name.toLowerCase() }
             }
           };
           WorkBook.fields = tokenField;

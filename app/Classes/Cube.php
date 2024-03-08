@@ -143,7 +143,7 @@ class Cube
       // TODO: da provare senza la baseTableName
       // $metrics_base_datamart[] = "\nNVL({$value->aggregateFn}({$this->baseTableName}.'{$value->alias}'), 0) AS '{$value->alias}'";
       // $this->datamart_baseMeasures[] = "\nNVL({$value->aggregateFn}({$value->field}), 0) AS '{$value->alias}'";
-      $this->datamart_baseMeasures[] = "\n{$value->alias} AS '{$value->alias}'";
+      $this->datamart_baseMeasures[] = "{$value->alias} AS '{$value->alias}'";
     }
     // dd($this->report_metrics);
 
@@ -419,7 +419,9 @@ class Cube
         // _metrics_advanced_datamart verrà utilizzato nella creazione del datamart finale
         // TODO: probabilmente posso creare questo array nello stesso modo di datamart_baseMeasures
         // (quindi senza le keys $tablename e $metric->alias)
-        $this->datamart_advancedMeasures[$tableName][$metric->alias] = "\n{$metric->alias} AS {$metric->alias}";
+        // $this->datamart_advancedMeasures[$tableName][$metric->alias] = "\t{$metric->alias} AS {$metric->alias}";
+        // $this->datamart_advancedMeasures[] = "{$tableName}.{$metric->alias} AS {$metric->alias}";
+        $this->datamart_advancedMeasures[] = "{$metric->alias} AS {$metric->alias}";
         // $this->datamart_advancedMeasures[$tableName][$metric->alias] = "\nNVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
         // aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
         $this->setFiltersMetricTable_new($metric->filters, $tableName);
@@ -552,7 +554,6 @@ class Cube
   private function distinct_fields()
   {
     $union = [];
-    // dd($this->queries);
     foreach ($this->queries as $table => $fields) {
       $sql = self::SELECT;
       $sql .= implode(",\n", $fields);
@@ -577,19 +578,23 @@ class Cube
     $sql .= self::SELECT;
     $fields = [];
     foreach ($this->datamart_fields as $field) {
-      $fields[] = "\tunion_{$this->report_id}_{$this->datamart_id}.{$field}";
+      $fields[] = "union_{$this->report_id}_{$this->datamart_id}.{$field}";
     }
-    $sql .= implode(",\n", $fields);
-    // dd($this->datamart_baseMeasures);
-    if (property_exists($this, "baseMetrics")) $sql .= "," . implode(",", $this->datamart_baseMeasures);
-    // dd($this->datamart_advancedMeasures);
-    if (property_exists($this, "filteredMetrics")) {
-      foreach ($this->datamart_advancedMeasures as $metricAlias) {
-        $sql .= "," . implode(",", $metricAlias);
+    $compositeMeasures = [];
+    // TEST: 2024.03.08
+    if (!empty($this->process->{"compositeMeasures"})) {
+      $this->compositeMeasures = $this->process->{"compositeMeasures"};
+      foreach ($this->compositeMeasures as $cm) {
+        // $this->cm[] = "NVL(" . implode(" ", $cm->SQL) . ",0) AS {$cm->alias}";
+        $this->cm[] = implode(" ", $cm->SQL) . " AS {$cm->alias}";
       }
+      // dd($this->cm);
+      $compositeMeasures[] = $this->cm;
     }
-    // dd(property_exists($this->process, "compositeMeasures"));
-    if (property_exists($this->process, "compositeMeasures")) {
+    $sql .= implode(",\n", array_merge($fields, $this->datamart_baseMeasures, $this->datamart_advancedMeasures, $compositeMeasures));
+    // dd($sql);
+    // dd($sql);
+    /* if (property_exists($this->process, "compositeMeasures")) {
       $this->compositeMeasures = $this->process->{"compositeMeasures"};
       // dd($this->compositeMeasures);
       foreach ($this->compositeMeasures as $cm) {
@@ -599,8 +604,7 @@ class Cube
       // dd($this->cm);
       $sql .= ",\n";
       $sql .= implode(",\n", $this->cm);
-    }
-    // dd($sql);
+    } */
     $sql .= self::FROM . "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}";
     $joinLEFT = "";
     $ONClause = [];

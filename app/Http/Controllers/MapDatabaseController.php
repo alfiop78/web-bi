@@ -528,6 +528,8 @@ class MapDatabaseController extends Controller
         }
       }
     }
+    // TODO: prima di creare il datamart potre inizializzare le metriche composite, come fatto con
+    // quelle avanzate, crendo un array che poi verrà unito (merge) in datamart_new()
     // dd($query->queries);
     // dd("base tables create");
     return $query->datamart_new();
