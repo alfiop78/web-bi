@@ -128,8 +128,8 @@ class Cube
       }
       // TODO: da provare senza la baseTableName
       // $metrics_base_datamart[] = "\nNVL({$value->aggregateFn}({$this->baseTableName}.'{$value->alias}'), 0) AS '{$value->alias}'";
-      // $this->datamart_baseMeasures[] = "\nNVL({$value->aggregateFn}({$value->field}), 0) AS '{$value->alias}'";
-      $this->datamart_baseMeasures[] = "{$value->alias} AS '{$value->alias}'";
+      $this->datamart_baseMeasures[] = "\nNVL({$value->aggregateFn}({$value->field}), 0) AS '{$value->alias}'";
+      // $this->datamart_baseMeasures[] = "{$value->alias} AS '{$value->alias}'";
     }
     // dd($this->report_metrics);
 
@@ -411,8 +411,9 @@ class Cube
         // (quindi senza le keys $tablename e $metric->alias)
         // $this->datamart_advancedMeasures[$tableName][$metric->alias] = "\t{$metric->alias} AS {$metric->alias}";
         // $this->datamart_advancedMeasures[] = "{$tableName}.{$metric->alias} AS {$metric->alias}";
-        $this->datamart_advancedMeasures[] = "{$metric->alias} AS {$metric->alias}";
-        // $this->datamart_advancedMeasures[$tableName][$metric->alias] = "\nNVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
+
+        // $this->datamart_advancedMeasures[] = "{$metric->alias} AS {$metric->alias}";
+        $this->datamart_advancedMeasures[] = "NVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
         // aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
         $this->setFiltersMetricTable_new($metric->filters, $tableName);
         // dd($this->json_info_advanced);
@@ -590,6 +591,12 @@ class Cube
       unset($ONClause);
     }
     $sql .= $joinLEFT;
+    $sql .= "\nGROUP BY union_1709913555686_2.area_id,
+    union_1709913555686_2.area,
+    union_1709913555686_2.zona_id,
+    union_1709913555686_2.zona,
+    union_1709913555686_2.CodFord_id,
+    union_1709913555686_2.CodFord;";
     // dd($sql);
     // se il datamart già esiste lo elimino prima di ricrearlo
     $this->dropTemporaryTables($this->datamart_name);
