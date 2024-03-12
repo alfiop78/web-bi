@@ -2388,7 +2388,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             // ... utilizzare MyVerticaGrammar.php oppure altre grammatiche relative ad altri DB già predisposti in Laravel
 
             // object.sql.push(`NVL(${metricFormula.aggregateFn}(${element.innerText}),0)`);
-            object.sql.push(element.innerText);
+            object.sql.push(`NVL(${element.innerText},0)`);
+            // object.sql.push(element.innerText);
             object.formula.push({ token: metricFormula.token, alias: metricFormula.alias });
             break;
         }
