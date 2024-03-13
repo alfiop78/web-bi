@@ -594,12 +594,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
-    // console.log(elementRef);
-    // elementRef : è l'elemento nella lista di sinistra che ho draggato
-    // TODO: rinominare elementRef.id in elementRef.dataset.token
-    // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
-    Sheet.fields = { token: elementRef.id, name: WorkBook.field.get(elementRef.id).name };
-    app.addField(e.currentTarget, elementRef.id);
+    if (Sheet.checkMultiFactFields(elementRef.id)) {
+      // console.log(elementRef);
+      // elementRef : è l'elemento nella lista di sinistra che ho draggato
+      // TODO: rinominare elementRef.id in elementRef.dataset.token
+      // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
+      Sheet.fields = { token: elementRef.id, name: WorkBook.field.get(elementRef.id).name };
+      app.addField(e.currentTarget, elementRef.id);
+    }
   }
 
   // Modifica di una metrica composta di base
@@ -2872,7 +2874,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       origin_field: WorkBook.currentField,
       field: fields
     };
-    debugger; // 03.02.2024 impostata la prop tableId
+    // 03.02.2024 impostata la prop tableId
     // WorkBook.field contiene l'elenco dei field aggiunti al WorkBook
     // mentre WorkBook.fields contiene lo stesso elenco dei campi però
     // all'interno delle rispettive tabelle

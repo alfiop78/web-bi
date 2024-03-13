@@ -206,6 +206,22 @@ class Sheets {
       });
   }
 
+  // Verifica se un campo, in un report con più Fact, può essere aggiunto al Report.
+  // In un report con più Fact, i livelli dimensionali "inferiori" alla tabella in comune
+  // non può essere aggiunto.
+  // Es. : Dimensione Azienda -> sede -> DocVenditaIntestazione
+  // Tabella in comune tra due fact : Azienda
+  // I campi delle tabelle Sede e DocVenditaIntestazione NON possono essere legate ad entrambe le Fact
+  checkMultiFactFields(token) {
+    if (this.fact.size > 1) {
+      let result = true;
+      result = [...this.fact].every(fact => (WorkBook.dataModel.get(fact).hasOwnProperty(WorkBook.field.get(token).tableAlias)));
+      console.log(result);
+      debugger;
+      return result;
+    }
+  }
+
 }
 
 class WorkBooks {

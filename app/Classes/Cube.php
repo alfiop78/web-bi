@@ -13,7 +13,7 @@ class Cube
   const GROUPBY = "\nGROUP BY\n";
   const WHERE = "\nWHERE\n";
   public $results = [];
-  private $select_clause;
+  private $select_clause = [];
   public $datamart_fields = [];
   private $from_clause = [];
   private $where_clause = [];
