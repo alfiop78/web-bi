@@ -18,7 +18,7 @@ class Cube
   private $from_clause = [];
   private $where_clause = [];
   private $where_time_clause = [];
-  private $baseMeasures = [];
+  private $baseMeasures = NULL;
   private $report_metrics = [];
   private $report_filters = [];
   private $groupby_clause = [];
@@ -114,12 +114,8 @@ class Cube
   public function metrics_new()
   {
     // metriche di base
-    // $metrics_base = array();
-    // $metrics_base_datamart = array();
-
     $this->report_metrics = [];
     foreach ($this->baseMeasures as $value) {
-      // dd($value);
       $metric = "\nNVL({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
       $this->report_metrics[$this->factId][] = $metric;
       // $metrics_base[] = $metric;
@@ -257,7 +253,7 @@ class Cube
       // dd("base metrics presenti");
       if (property_exists($this->process->baseMeasures, $this->fact)) {
         // metriche per la fact in ciclo presenti
-        $this->baseMeasures[] = $this->process->baseMeasures->{$this->fact};
+        $this->baseMeasures = $this->process->baseMeasures->{$this->fact};
       }
     }
     $this->metrics_new();
