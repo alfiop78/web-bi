@@ -213,13 +213,12 @@ class Sheets {
   // Tabella in comune tra due fact : Azienda
   // I campi delle tabelle Sede e DocVenditaIntestazione NON possono essere legate ad entrambe le Fact
   checkMultiFactFields(token) {
+    let result = true;
     if (this.fact.size > 1) {
-      let result = true;
       result = [...this.fact].every(fact => (WorkBook.dataModel.get(fact).hasOwnProperty(WorkBook.field.get(token).tableAlias)));
-      console.log(result);
-      debugger;
-      return result;
+      // console.log(result);
     }
+    return result;
   }
 
 }

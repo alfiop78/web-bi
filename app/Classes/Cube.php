@@ -254,9 +254,9 @@ class Cube
       if (property_exists($this->process->baseMeasures, $this->fact)) {
         // metriche per la fact in ciclo presenti
         $this->baseMeasures = $this->process->baseMeasures->{$this->fact};
+        $this->metrics_new();
       }
     }
-    $this->metrics_new();
     $this->from_new();
     $this->where_new();
     $this->filters_new();

@@ -554,8 +554,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  /* sezione #side-sheet-filters*/
-
   /* addField viene utilizzate sia quando si effettua il drag&drop sulla dropzone-rows che
   * quando si apre un nuovo Sheet per ripololare la dropzone-rows con gli elementi proveniente da Sheet.open()
   */
@@ -594,14 +592,11 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
-    if (Sheet.checkMultiFactFields(elementRef.id)) {
-      // console.log(elementRef);
-      // elementRef : è l'elemento nella lista di sinistra che ho draggato
-      // TODO: rinominare elementRef.id in elementRef.dataset.token
-      // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
-      Sheet.fields = { token: elementRef.id, name: WorkBook.field.get(elementRef.id).name };
-      app.addField(e.currentTarget, elementRef.id);
-    }
+    // elementRef : è l'elemento nella lista di sinistra che ho draggato
+    // TODO: rinominare elementRef.id in elementRef.dataset.token
+    // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
+    Sheet.fields = { token: elementRef.id, name: WorkBook.field.get(elementRef.id).name };
+    app.addField(e.currentTarget, elementRef.id);
   }
 
   // Modifica di una metrica composta di base
@@ -1546,23 +1541,28 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   // tasto Elabora e SQL
+  // Creazione della struttura necessaria per creare le query
   app.createProcess = async (e) => {
     let process = {}, fields = {}, filters = {};
     process.facts = [...Sheet.fact];
-    // Creo la struttura necessaria per creare la query
     for (const [token, field] of Sheet.fields) {
       // verifico le tabelle da includere in tables Sheet.tables
-      Sheet.tables = WorkBook.field.get(token).tableAlias;
-      fields[token] = {
-        token,
-        field: WorkBook.field.get(token).field,
-        // TODO: potrei passare i campi _id e _ds anche in questo modo, valutare se
-        // è più semplice gestirli in cube.php
-        // id: WorkBook.field.get(token).field.id,
-        // ds: WorkBook.field.get(token).field.ds,
-        tableAlias: WorkBook.field.get(token).tableAlias,
-        name: field
-      };
+      if (Sheet.checkMultiFactFields(token)) {
+        Sheet.tables = WorkBook.field.get(token).tableAlias;
+        fields[token] = {
+          token,
+          field: WorkBook.field.get(token).field,
+          // TODO: potrei passare i campi _id e _ds anche in questo modo, valutare se
+          // è più semplice gestirli in cube.php
+          // id: WorkBook.field.get(token).field.id,
+          // ds: WorkBook.field.get(token).field.ds,
+          tableAlias: WorkBook.field.get(token).tableAlias,
+          name: field
+        };
+      } else {
+        App.showConsole(`Il campo ${field} non è in comune con tutte le tabelle dei Fatti`, 'error', 4000);
+        return false;
+      }
     }
     process.fields = fields;
 
