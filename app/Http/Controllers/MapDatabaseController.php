@@ -380,7 +380,7 @@ class MapDatabaseController extends Controller
   {
     // se la tabella è già presente la elimino
     $this->dropTIMEtables();
-    $start = new DateTime('2023-01-01 00:00:00');
+    $start = new DateTime('2019-01-01 00:00:00');
     $end   = new DateTime('2025-01-01 00:00:00');
 
     $year_result = $this->web_bi_time_year($start, $end);

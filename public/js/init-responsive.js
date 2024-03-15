@@ -2925,6 +2925,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // salvo solo il riferimento al filtro e non tutta la definizione del filtro
     app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.add(filter.dataset.token));
     // se ci sono funzioni temporali selezionate le aggiungo all'object 'filters' con token = alla funzione scelta (es.: last-year)
+    debugger;
     if (document.querySelector('#dl-timing-functions > dt[selected]')) {
       const timingFn = document.querySelector('#dl-timing-functions > dt[selected]');
       /* if (['last-year', 'last-month', 'ecc...'].includes(timingFn.dataset.value)) {
