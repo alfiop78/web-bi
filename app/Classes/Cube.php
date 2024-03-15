@@ -188,6 +188,7 @@ class Cube
       // qui utilizzo la proprietà SQL con implode(' = ', $join->SQL)
       if ($join->type === "TIME") {
         $this->where_time_clause[$this->factId][$token] = implode(" = ", $join->SQL);
+
         if (property_exists($this, 'sql_info')) {
           // in questo caso imposto nella prop 'WHERE-TIME' anzichè nella 'WHERE'. In questo
           // modo, se nelle metriche filtrate, presente una timingFn non ho problemi di
@@ -284,6 +285,7 @@ class Cube
     $this->FROM_metricTable = [];
     foreach ($from as $alias => $prop) {
       $this->FROM_metricTable[$this->factId][$alias] = "{$prop->schema}.{$prop->table} AS {$alias}";
+
       // TODO: da testare con una metrica filtrata contenente la prop 'from'
       if (property_exists($this, 'sql_info')) {
         $this->json_info_advanced[$tableName]->{'FROM'}->{$alias} = "{$prop->schema}.{$prop->table} AS {$alias}";
@@ -299,7 +301,10 @@ class Cube
     foreach ($joins as $token => $join) {
       // dd($token, $join);
       if ($join->alias === 'time') {
+        // FIX: l'esecuzione non dovrebbe mai raggiungere questo if perchè, in un filtro
+        // con funzioni temporali, queste vengono impostate in setFiltersMetricTable_new()
         $this->WHERE_metricTable[$token] = implode(" = ", $join->SQL);
+
         if (property_exists($this, 'sql_info')) {
           $this->json_info_advanced[$tableName]->{'WHERE'}->{$token} = implode(" = ", $join->SQL);
         }
@@ -338,7 +343,11 @@ class Cube
           // dd($join);
           $this->WHERE_timingFn[$token] = implode(" = ", $join->SQL);
         } */
+        $this->WHERE_timingFn[$this->factId]['years'] = "WB_YEARS.id = WB_QUARTERS.year_id";
+        $this->WHERE_timingFn[$this->factId]['quarters'] = "WB_QUARTERS.id = WB_MONTHS.quarter_id";
+        $this->WHERE_timingFn[$this->factId]['months'] = "WB_MONTHS.id = WB_DATE.month_id";
         $this->WHERE_timingFn[$this->factId][$token] = implode(" = ", $filter->SQL);
+
         if (property_exists($this, 'sql_info')) {
           $this->json_info_advanced[$tableName]->{'AND'}->{$token} = implode(" = ", $filter->SQL);
           // $this->json_info_advanced[$tableName]->{'AND'}->{$filter->alias} = implode(" = ", $filter->SQL);
@@ -364,12 +373,14 @@ class Cube
         // aggiungo senza verificare se già presente il codice SQL del filtro
         // perchè, essendo un array associativo, al massimo il codice SQL del filtro viene riscritto
         $this->filters_metricTable[$this->factId][$filter->name] = implode(" ", $filter->sql);
+
         if (property_exists($this, 'sql_info')) {
           $this->json_info_advanced[$tableName]->{'AND'}->{$filter->name} = implode(" = ", $filter->sql);
         }
       }
     }
     // dd($this->filters_metricTable);
+    // dd($this->WHERE_timingFn);
     // dd($this->json_info_advanced);
   }
 
@@ -416,14 +427,20 @@ class Cube
         // per ogni filtro presente nella metrica avanzata...
         foreach ($metric->filters as $filter) {
           // if (property_exists($filter, 'from')) $this->setFromMetricTable($filter->from, $tableName);
-          if (property_exists($filter->from, $this->fact)) $this->setFromClause_advancedMeasure($filter->from->{$this->fact}, $tableName);
+          // dd($filter);
+          // le funzioni temporali non contengono la clausola FROM
+          if (property_exists($filter, 'from')) {
+            if (property_exists($filter->from, $this->fact)) $this->setFromClause_advancedMeasure($filter->from->{$this->fact}, $tableName);
+          }
           // dd($this->filters_metricTable);
           // dd($this->json_info_advanced);
           // aggiungo la WHERE, relativa al filtro associato alla metrica, alla WHERE_baseTable
           // se, nella metrica in ciclo, non è presente la WHERE devo ripulire WHERE_metricTable altrimenti verranno aggiunte WHERE della precedente metrica filtrata
           // dd($filter->joins);
           // (property_exists($filter, 'joins')) ? $this->setWhereMetricTable($filter->joins, $tableName) : $this->WHERE_metricTable = array();
-          (property_exists($filter->joins, $this->fact)) ? $this->setWhereClause_advancedMeasure($filter->joins->{$this->fact}, $tableName) : $this->WHERE_metricTable = array();
+          if (property_exists($filter, 'joins')) {
+            (property_exists($filter->joins, $this->fact)) ? $this->setWhereClause_advancedMeasure($filter->joins->{$this->fact}, $tableName) : $this->WHERE_metricTable = array();
+          }
         }
         // dd($this->report_filters, $this->filters_metricTable, $this->WHERE_timingFn);
       }
@@ -458,34 +475,31 @@ class Cube
       // dd($this->from_clause[$this->factId]);
       $this->sqlAdvancedMeasures .= self::FROM . implode(",\n", $this->from_clause[$this->factId]);
     }
-    // $this->sqlAdvancedMeasures .= self::FROM . implode(",\n", array_merge($this->from_clause, $this->FROM_metricTable));
-    // dd($this->sqlAdvancedMeasures);
-    // nella metrica adv, se è presente una funzione temporale NON devo aggiungere la condizione WHERE_timeDimension
-    // if (count($this->WHERE_timingFn) === 0) {
     $this->sqlAdvancedMeasures .= self::WHERE;
-    if (array_key_exists($this->factId, $this->where_clause)) $this->sqlAdvancedMeasures .= implode("\nAND ", $this->where_clause[$this->factId]);
-    if (array_key_exists($this->factId, $this->where_time_clause)) {
-      $this->sqlAdvancedMeasures .= "\nAND ";
-      $this->sqlAdvancedMeasures .= implode("\nAND ", $this->where_time_clause[$this->factId]);
-    }
+    $this->sqlAdvancedMeasures .= implode("\nAND ", $this->where_clause[$this->factId]);
+    // $this->where_clause sarà sempre presente (almento un filtro deve essere sempre presente sul report)
+    // if (array_key_exists($this->factId, $this->where_clause)) $this->sqlAdvancedMeasures .= implode("\nAND ", $this->where_clause[$this->factId]);
+
     if (array_key_exists($this->factId, $this->WHERE_metricTable)) {
-      $this->sqlAdvancedMeasures .= "\nAND ";
-      $this->sqlAdvancedMeasures .= implode("\nAND ", $this->WHERE_metricTable[$this->factId]);
+      $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->WHERE_metricTable[$this->factId]);
     }
-    /* if (!array_key_exists($this->factId, $this->WHERE_timingFn)) {
-    $this->sqlAdvancedMeasures .= "\nWHERE\n" . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId], $this->WHERE_metricTable[$this->factId]));
+
+    // dd($this->where_time_clause, $this->WHERE_timingFn, $this->WHERE_metricTable);
+    if (array_key_exists($this->factId, $this->WHERE_timingFn)) {
+      $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->WHERE_timingFn[$this->factId]);
     } else {
-      // Sono presenti delle funzioni temporali, per cui non posso mettere la WHERE_timeDimension
-      $this->sqlAdvancedMeasures .= "\nWHERE\n" . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId], $this->WHERE_metricTable[$this->factId]));
-    } */
-    // dd($this->sqlAdvancedMeasures);
+      if (array_key_exists($this->factId, $this->where_time_clause)) {
+        $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->where_time_clause[$this->factId]);
+      }
+    }
     $this->WHERE_timingFn = [];
+    // dd($this->sqlAdvancedMeasures);
     // aggiungo i filtri del report e i filtri contenuti nella metrica
-    $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", array_merge($this->report_filters[$this->factId], $this->filters_metricTable[$this->factId]));
+    $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
+    if (array_key_exists($this->factId, $this->filters_metricTable)) $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->filters_metricTable[$this->factId]);
     $this->sqlAdvancedMeasures .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
     // dd($this->sqlAdvancedMeasures);
     $comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($advancedMetrics[$this->factId])) . "\n*/\n";
-
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->sqlAdvancedMeasures);";
     // dd($sql);
     // var_dump($sql);

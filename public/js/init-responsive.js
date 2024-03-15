@@ -2657,8 +2657,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const token = rand().substring(0, 7);
     let field = (timeColumnType === 'date' && columnType === 'integer') ?
       `TO_CHAR(${tableAlias}.${column})::DATE` : `${tableAlias}.${column}`;
-    // WorkBook.dateTime = { tableAlias, timeField: tableColumn, datatype: tableColumnType };
     console.log(WorkBook.activeTable);
+    WorkBook.dateTime[WorkBook.activeTable.dataset.factId] = { tableAlias, timeField: column, datatype: columnType };
     // WARN: solo per vertica in questo caso.
     // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
 
@@ -2925,7 +2925,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // salvo solo il riferimento al filtro e non tutta la definizione del filtro
     app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.add(filter.dataset.token));
     // se ci sono funzioni temporali selezionate le aggiungo all'object 'filters' con token = alla funzione scelta (es.: last-year)
-    debugger;
     if (document.querySelector('#dl-timing-functions > dt[selected]')) {
       const timingFn = document.querySelector('#dl-timing-functions > dt[selected]');
       /* if (['last-year', 'last-month', 'ecc...'].includes(timingFn.dataset.value)) {
@@ -2943,22 +2942,16 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         // oltre ad aggiungere il token (es.: 'last-year') nel Set 'filters' devo aggiungere anche la definizione di
         // ... questa timingFn, questo perchè la timingFn non è un filtro che 'separato' che viene salvato in storage
         filters.add(timingFn.dataset.value);
+        debugger;
         object.timingFn = {
           [timingFn.dataset.value]: {
-            alias: 'WEB_BI_TIME',
+            alias: 'WB_DATE',
             SQL: [
-              `(MapJSONExtractor(WEB_BI_TIME.last))['${timeField}']::DATE`,
-              `TO_CHAR(${WorkBook.dateTime.tableAlias}.${WorkBook.dateTime.timeField})::DATE`
+              `(MapJSONExtractor(WB_DATE.last))['${timeField}']::DATE`,
+              `TO_CHAR(${WorkBook.dateTime[metric.factId].tableAlias}.${WorkBook.dateTime[metric.factId].timeField})::DATE`
             ]
           }
         };
-        /* filters[timingFn.dataset.value] = {
-          alias: 'WEB_BI_TIME',
-          SQL: [
-            `(MapJSONExtractor(WEB_BI_TIME.last))['${timeField}']::DATE`,
-            `TO_CHAR(${WorkBook.dateTime.tableAlias}.${WorkBook.dateTime.timeField})::DATE`
-          ]
-        }; */
       }
     }
     if (filters.size !== 0) {

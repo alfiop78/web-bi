@@ -222,11 +222,11 @@ function previewReady() {
           // if (metric.alias === 'marginalita') debugger;
           formula.forEach(formulaEl => {
             if (formulaEl.alias) {
-              if (metric.alias === 'marginalita') {
-                console.log(dt);
-                console.log(formulaEl.alias, dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
-                console.log('ricavo_rapporto_2', dt.getValue(row, dt.getColumnIndex('ricavo_rapporto_2')));
-              }
+              // if (metric.alias === 'marginalita') {
+              //   console.log(dt);
+              //   console.log(formulaEl.alias, dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
+              //   console.log('ricavo_rapporto_2', dt.getValue(row, dt.getColumnIndex('ricavo_rapporto_2')));
+              // }
               formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
             } else {
               formulaJoined.push(formulaEl);
@@ -236,7 +236,7 @@ function previewReady() {
           // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
           // effettuo un controllo sul risultato in caso fosse NaN
           const result = (isNaN(eval(formulaJoined.join(' ')))) ? 0 : eval(formulaJoined.join(' '));
-          if (metric.alias === 'marginalita') console.log(formulaJoined, result);
+          // if (metric.alias === 'marginalita') console.log(formulaJoined, result);
           let total = (result) ? { v: result } : { v: result, f: '-' };
           // console.log(result);
           // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));

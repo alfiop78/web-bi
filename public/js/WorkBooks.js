@@ -248,6 +248,7 @@ class WorkBooks {
     this.workBookChange = new Set();
     this.edit = false;
     this.tablesModel = new Map();
+    this.dateTime = {};
   }
 
   set name(value) {
@@ -424,7 +425,7 @@ class WorkBooks {
     this.workBook.joins = Object.fromEntries(this.joins);
     // WARN: inutile salvarlo in localStorage, questo viene ricreato quando si apre un WorkBook
     this.workBook.dataModel = Object.fromEntries(this.dataModel);
-    // this.workBook.dateTime = this.dateTime;
+    this.workBook.dateTime = this.dateTime;
     this.workBook.svg = {
       tables: Object.fromEntries(Draw.tables),
       lines: Object.fromEntries(Draw.joinLines)
