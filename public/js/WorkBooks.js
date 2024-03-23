@@ -318,7 +318,7 @@ class WorkBooks {
       // alias di tabella già presente
       this.#joins.get(this.#join.get(token).alias)[token] = this.#join.get(token);
     }
-    console.log('#joins : ', this.#joins);
+    // console.log('#joins : ', this.#joins);
   }
 
   get joins() { return this.#joins; }
@@ -436,7 +436,7 @@ class WorkBooks {
         (!this.workBook.hasOwnProperty('metrics')) ? this.workBook.metrics = { [token]: metric } : this.workBook.metrics[token] = metric;
       }
     }
-    console.info('WorkBook : ', this.workBook);
+    // console.info('WorkBook : ', this.workBook);
     if (!this.workBook.hasOwnProperty('created_at')) this.workBook.created_at = new Date().toLocaleDateString('it-IT', this.#options);
     if (this.edit) {
       // sono in edit mode, se sono state fatte modifiche aggiorno 'updated_at'

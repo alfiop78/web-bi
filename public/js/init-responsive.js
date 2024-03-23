@@ -71,7 +71,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   App.init();
 
-  google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
+  // google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
+  // google.charts.load('upcoming', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
 
   // Chiudo qualsiasi context-menu aperto
   app.body.addEventListener('click', () => {
@@ -1204,73 +1205,51 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       }); */
     // end chiamta in POST
 
-    // chiamata in GET
-    /* await fetch(`/fetch_api/${sheet.id}/preview`)
-      .then((response) => {
-        console.log(response);
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then(data => {
-        // impostare la prop dashboard.json.data.columns con i rispettivi dataType
-        Dashboard.data = data;
-        // imposto il riferimento della tabella nel DOM
-        Dashboard.ref = 'preview-datamart';
-        app.getSpecifications();
-        // Creazione preview del datamart
-        // drawDatamart() impostata in init-sheet.js
-        google.charts.setOnLoadCallback(drawDatamart());
-      })
-      .catch(err => {
-        App.showConsole(err, 'error', 3000);
-        console.error(err);
-      }); */
-    // end chiamata in GET
     Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`);
 
     const progressBar = document.getElementById('progress-bar');
     const progressTo = document.getElementById('progress-to');
     const progressTotal = document.getElementById('progress-total');
     const progressLabel = document.querySelector("label[for='progress-bar']");
-    let partialData = [];
     App.loaderStart();
-    await fetch(`/fetch_api/${Sheet.sheet.id}_${Sheet.userId}/preview?page=1`)
+    await fetch(`/fetch_api/${Sheet.sheet.id}_${Sheet.userId}/preview`)
       .then((response) => {
-        // console.log(response);
+        console.log(response);
         if (!response.ok) { throw Error(response.statusText); }
         return response;
       })
       .then((response) => response.json())
       .then(async (paginateData) => {
-        progressBar.value = +((paginateData.to / paginateData.total) * 100);
-        progressLabel.hidden = false;
-        progressTo.innerText = paginateData.to;
-        progressTotal.innerText = paginateData.total;
+        let partialData = [];
+        // TODO: rivedere come utilizzare la progressBar con i dati provenienti dal cursorPaginate.
+        // La progress-bar veniva correttamente utilizzata con il paginate
+        // progressBar.value = +((paginateData.to / paginateData.total) * 100);
+        // progressLabel.hidden = false;
+        // progressTo.innerText = paginateData.to;
+        // progressTotal.innerText = paginateData.total;
         console.log(paginateData);
-        console.log(paginateData.data);
+        // console.log(paginateData.data);
         // funzione ricorsiva fino a quando è presente next_page_url
         let recursivePaginate = async (url) => {
-          console.log(url);
-          await fetch(url).then((response) => {
+          await fetch(url).then(response => {
             // console.log(response);
             if (!response.ok) { throw Error(response.statusText); }
             return response;
-          }).then(response => response.json()).then((paginate) => {
+          }).then(response => response.json()).then(paginate => {
             console.log(paginate);
-            progressBar.value = +((paginate.to / paginate.total) * 100);
-            progressTo.innerText = paginate.to;
-            progressTotal.innerText = paginate.total;
-            console.log(progressBar.value);
+            // progressBar.value = +((paginate.to / paginate.total) * 100);
+            // progressTo.innerText = paginate.to;
+            // progressTotal.innerText = paginate.total;
+            // console.log(progressBar.value);
             partialData = partialData.concat(paginate.data);
             if (paginate.next_page_url) {
               recursivePaginate(paginate.next_page_url);
-              console.log(partialData);
             } else {
               // Non sono presenti altre pagine, visualizzo il dashboard
               console.log('tutte le paginate completate :', partialData);
               Resource.data = partialData;
-              google.charts.setOnLoadCallback(drawDatamart());
+              // google.charts.setOnLoadCallback(drawDatamart());
+              test();
               App.loaderStop();
             }
           }).catch((err) => {
@@ -1284,7 +1263,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         } else {
           // Non sono presenti altre pagine, visualizzo il dashboard
           Resource.data = partialData;
-          google.charts.setOnLoadCallback(drawDatamart());
+          test();
+          // google.charts.setOnLoadCallback(drawDatamart());
           App.loaderStop();
         }
       })
@@ -1704,7 +1684,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       });
   }
 
-  app.loadPreview = async () => {
+  /* app.loadPreview = async () => {
     let partialData = [];
     await fetch(`/fetch_api/${Sheet.sheet.id}_${Sheet.userId}/preview?page=1`)
       .then((response) => {
@@ -1714,13 +1694,13 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       })
       .then((response) => response.json())
       .then(async (paginateData) => {
-        console.log(paginateData);
+        // console.log(paginateData);
         console.log(paginateData.data);
         // funzione ricorsiva fino a quando è presente next_page_url
         let recursivePaginate = async (url) => {
           console.log(url);
           await fetch(url).then((response) => {
-            console.log(response);
+            // console.log(response);
             if (!response.ok) { throw Error(response.statusText); }
             return response;
           }).then(response => response.json()).then((paginate) => {
@@ -1732,7 +1712,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
               // Non sono presenti altre pagine, visualizzo il dashboard
               console.log('tutte le paginate completate :', partialData);
               Resource.data = partialData;
-              google.charts.setOnLoadCallback(drawDatamart());
+              test();
+              // google.charts.setOnLoadCallback(drawDtm);
             }
           }).catch((err) => {
             App.showConsole(err, 'error');
@@ -1745,18 +1726,18 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         } else {
           // Non sono presenti altre pagine, visualizzo il dashboard
           Resource.data = partialData;
-          google.charts.setOnLoadCallback(drawDatamart());
+          test();
+          // google.charts.setOnLoadCallback(drawDtm);
         }
       })
       .catch(err => {
         App.showConsole(err, 'error');
         console.error(err);
       });
-  }
+  } */
 
   app.process = async (process) => {
     Sheet.userId = userId;
-    debugger;
     if (Sheet.edit === true) {
       Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed]');
       if (Sheet.changes.length !== 0) {
@@ -1780,7 +1761,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     console.log(process);
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(process);
-    debugger;
     // App.showConsole('Elaborazione in corso...', 'info');
     // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
     App.loaderStart();
@@ -1804,9 +1784,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
           delete el.dataset.adding;
         });
         document.querySelectorAll('div[data-removed]').forEach(el => el.remove());
-        App.loaderStop();
         // app.saveSheet();
-        app.loadPreview();
+        // app.loadPreview();
+        app.sheetPreview();
+        App.loaderStop();
       })
       .catch(err => {
         App.showConsole(err, 'error', 3000);
@@ -2649,6 +2630,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const descTable = Draw.svg.getElementById(timeRef.dataset.table);
     const timeTable = timeRef.dataset.table;
     const timeColumn = timeRef.dataset.field;
+    const timeColumnDs = timeRef.dataset.fieldDs;
+    debugger;
     const timeColumnType = timeRef.dataset.datatype;
     const column = document.querySelector('#ul-columns > li[data-selected]').dataset.label;
     const columnType = document.querySelector('#ul-columns > li[data-selected]').dataset.datatype;
@@ -2700,7 +2683,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     debugger;
     // recupero tutti i campi delle TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     WorkBook.activeTable = `${descTable.id}-${WorkBook.activeTable.dataset.factId}`;
-    Draw.svg.querySelectorAll(`use.time[data-fact-id='${WorkBook.activeTable.dataset.factId}']`).forEach(async table => {
+    /* Draw.svg.querySelectorAll(`use.time[data-fact-id='${WorkBook.activeTable.dataset.factId}']`).forEach(async table => {
       WorkBook.activeTable = table.id;
       if (!window.sessionStorage.getItem(table.dataset.alias)) WorkBookStorage.saveSession(await app.getTable());
       // creo tutte le colonne della tabella TIME nell'object WorkBook.field/s
@@ -2708,6 +2691,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       console.log(table.dataset.alias, data);
       if (!WorkBook.fields.has(table.dataset.alias)) {
         data.forEach(column => {
+          let field = {};
+          debugger;
           const tokenField = rand().substring(0, 7);
           WorkBook.field = {
             token: tokenField,
@@ -2726,6 +2711,54 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
           WorkBook.fields = tokenField;
         });
       }
+    }); */
+    Draw.svg.querySelectorAll(`use.time[data-fact-id='${WorkBook.activeTable.dataset.factId}']`).forEach(table => {
+      WorkBook.activeTable = table.id;
+      let field = {}, name;
+      switch (table.dataset.alias) {
+        case 'WB_YEARS':
+          if (!WorkBook.fields.has(table.dataset.alias)) { }
+          field = {
+            id: { sql: [`${table.dataset.alias}.id_year`], datatype: 'integer' },
+            ds: { sql: [`${table.dataset.alias}.year`], datatype: 'char' }
+          };
+          name = 'year';
+          break;
+        case 'WB_QUARTERS':
+          field = {
+            id: { sql: [`${table.dataset.alias}.id_quarter`], datatype: 'integer' },
+            ds: { sql: [`${table.dataset.alias}.quarter`], datatype: 'char' }
+          };
+          name = 'quarter';
+          break;
+        case 'WB_MONTHS':
+          field = {
+            id: { sql: [`${table.dataset.alias}.id_month`], datatype: 'integer' },
+            ds: { sql: [`${table.dataset.alias}.month`], datatype: 'char' }
+          };
+          name = 'month';
+          break;
+        default:
+          field = {
+            id: { sql: [`${table.dataset.alias}.id_date`], datatype: 'date' },
+            ds: { sql: [`${table.dataset.alias}.id_date`], datatype: 'date' }
+          };
+          name = 'date';
+          break;
+      }
+      const tokenField = rand().substring(0, 7);
+      WorkBook.field = {
+        token: tokenField,
+        type: 'column',
+        tableId: WorkBook.activeTable.id,
+        schema: WorkBook.activeTable.dataset.schema,
+        tableAlias: WorkBook.activeTable.dataset.alias,
+        table: WorkBook.activeTable.dataset.table,
+        name,
+        // origin_field: column.column_name,
+        field
+      };
+      WorkBook.fields = tokenField;
     });
 
     WorkBook.checkChanges('time');
@@ -3071,7 +3104,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // INFO: 2024.03.02 - Rivedere workBookMap forse può essere utilizzata questa al posto
     // di tablesModel e hierTables
     for (const [tableAlias, prop] of WorkBook.workBookMap) {
-      console.log(tableAlias);
+      // console.log(tableAlias);
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
       const summary = details.querySelector('summary');

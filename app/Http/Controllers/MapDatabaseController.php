@@ -197,14 +197,14 @@ class MapDatabaseController extends Controller
     }
     // la tabella non esiste, la creo
     $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_YEARS (
-    id integer PRIMARY KEY NOT NULL,
+    id_year integer PRIMARY KEY NOT NULL,
     year CHAR(6) NOT NULL) INCLUDE SCHEMA PRIVILEGES";
     // $result_create = DB::connection('vertica_odbc')->statement($sql);
     if (!DB::connection('vertica_odbc')->statement($sql)) {
       // $result : null tabella creata correttamente
       foreach ($years as $value) {
         DB::connection('vertica_odbc')->table('decisyon_cache.WB_YEARS')->insert([
-          'id' => $value,
+          'id_year' => $value,
           'year' => "Y {$value}"
         ]);
       }
@@ -223,40 +223,40 @@ class MapDatabaseController extends Controller
       // var_dump($months->format('m'));
       switch ($months->format('m')) {
         case '01':
-          $quarter_id = (int) $months->format('Y01');
+          $quarter_id = (int) $months->format('Y1');
           $quarter = "Q 1";
           break;
         case '04':
-          $quarter_id = (int) $months->format('Y02');
+          $quarter_id = (int) $months->format('Y2');
           $quarter = "Q 2";
           break;
         case '07':
-          $quarter_id = (int) $months->format('Y03');
+          $quarter_id = (int) $months->format('Y3');
           $quarter = "Q 3";
           break;
         default:
-          $quarter_id = (int) $months->format('Y04');
+          $quarter_id = (int) $months->format('Y4');
           $quarter = "Q 4";
           break;
       }
       $json->{$quarter_id} = (object) [
-        "id" => $quarter_id,
+        "id_quarter" => $quarter_id,
         "quarter" => $quarter,
         "year_id" => (int) $months->format('Y')
       ];
     }
 
     $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_QUARTERS (
-      id integer PRIMARY KEY NOT NULL,
+      id_quarter integer PRIMARY KEY NOT NULL,
       quarter CHAR(3) NOT NULL,
-      year_id integer NOT NULL CONSTRAINT fx_years REFERENCES decisyon_cache.WB_YEARS (id)
+      year_id integer NOT NULL CONSTRAINT fx_years REFERENCES decisyon_cache.WB_YEARS (id_year)
     ) INCLUDE SCHEMA PRIVILEGES";
     // $result_create = DB::connection('vertica_odbc')->statement($sql);
     if (!DB::connection('vertica_odbc')->statement($sql)) {
       // $result : null tabella creata correttamente
       foreach ($json as $quarter => $value) {
         DB::connection('vertica_odbc')->table('decisyon_cache.WB_QUARTERS')->insert([
-          'id' => $quarter,
+          'id_quarter' => $quarter,
           'quarter' => $value->quarter,
           'year_id' => $value->year_id
         ]);
@@ -275,22 +275,22 @@ class MapDatabaseController extends Controller
       // calcolo il quarter
       $quarter = ceil($currDate->format('n') / 3);
       $json->{$months->format('Ym')} = (object) [
-        "id" => (int) $months->format('Ym'),
+        "id_month" => (int) $months->format('Ym'),
         "month" => $months->format('F'),
-        "quarter_id" => (int) "{$currDate->format('Y')}0{$quarter}"
+        "quarter_id" => (int) "{$currDate->format('Y')}{$quarter}"
       ];
     }
     // la tabella non esiste, la creo
     $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_MONTHS (
-      id integer PRIMARY KEY NOT NULL,
+      id_month integer PRIMARY KEY NOT NULL,
       month VARCHAR NOT NULL,
-      quarter_id integer NOT NULL CONSTRAINT fx_quarters REFERENCES decisyon_cache.WB_QUARTERS (id)
+      quarter_id integer NOT NULL CONSTRAINT fx_quarters REFERENCES decisyon_cache.WB_QUARTERS (id_quarter)
       ) INCLUDE SCHEMA PRIVILEGES";
     if (!DB::connection('vertica_odbc')->statement($sql)) {
       // $result : null tabella creata correttamente
       foreach ($json as $month_id => $value) {
         DB::connection('vertica_odbc')->table('decisyon_cache.WB_MONTHS')->insert([
-          'id' => $month_id,
+          'id_month' => $month_id,
           'month' => $value->month,
           'quarter_id' => $value->quarter_id
         ]);
@@ -309,7 +309,7 @@ class MapDatabaseController extends Controller
       // calcolo il quarter
       $quarter = ceil($currDate->format('n') / 3);
       $json->{$currDate->format('Y-m-d')} = (object) [
-        "date" => $currDate->format('Y-m-d'),
+        "id_date" => $currDate->format('Y-m-d'),
         "trans_ly" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d'),
         "weekday" => $currDate->format('l'),
         // "day" => (object)
@@ -338,12 +338,12 @@ class MapDatabaseController extends Controller
     // creare le colonne come "strutture dati"
     // Per recuperarne i valori non bisogna utilizzare MapJSONExtractor ma la sintassi xxx.yyy
     $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_DATE (
-        date DATE NOT NULL PRIMARY KEY,
+        id_date DATE NOT NULL PRIMARY KEY,
         trans_ly DATE,
         year INTEGER,
         quarter_id INTEGER,
         quarter VARCHAR,
-        month_id INTEGER NOT NULL CONSTRAINT fx_months REFERENCES decisyon_cache.WB_MONTHS (id),
+        month_id INTEGER NOT NULL CONSTRAINT fx_months REFERENCES decisyon_cache.WB_MONTHS (id_month),
         month VARCHAR,
         week CHAR(2),
         day VARCHAR,
@@ -359,7 +359,7 @@ class MapDatabaseController extends Controller
         // INSERT INTO nometabella (field1, field2) VALUES (1, 'test'), (2, 'test'), (3, 'test')....
 
         DB::connection('vertica_odbc')->table('decisyon_cache.WB_DATE')->insert([
-          'date' => $date,
+          'id_date' => $date,
           'trans_ly' => $value->trans_ly,
           'year' => $value->year,
           'quarter_id' => (int) $value->quarter_id,
@@ -423,8 +423,6 @@ class MapDatabaseController extends Controller
     return $copy;
   }
 
-
-  // preview del datamart, 100 righe
   public function preview($id)
   {
     // dd($id);
@@ -432,7 +430,28 @@ class MapDatabaseController extends Controller
     // $data = DB::connection('vertica_odbc')->table($table)->limit(5)->get(); // ok
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497, 43, 473, 437, 445, 461, 485, 549, 621, 1000002079, 455, 471, 179])->paginate(15000);
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497])->paginate(15000);
-    $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->paginate(15000);
+
+    // BUG: 2024.03.24 : senza l'utilizzo di orderBy, il paginate non funziona correttamente quando deve
+    // essere disegnata la google DataTable
+    // $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->paginate(15000);
+
+    // $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->orderBy('area_id')->paginate(15000);
+
+    $columns = DB::connection('vertica_odbc')->table('COLUMNS')
+      ->select('column_name')
+      ->where('TABLE_SCHEMA', "decisyon_cache")->where('TABLE_NAME', "WEB_BI_{$id}")->orderBy('ordinal_position')->get();
+    dd($columns);
+
+    $query = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}");
+    $query->orderBy('area_id')->orderBy('area')
+      ->orderBy('zona_id')->orderBy('zona')
+      ->orderBy('descrizione_id')->orderBy('descrizione')
+      ->orderBy('year_id')->orderBy('year')
+      ->orderBy('quarter_id')->orderBy('quarter')
+      ->orderBy('month_id')->orderBy('month')
+      ->orderBy('basketMLI_id')->orderBy('basketMLI');
+    $data = $query->cursorPaginate(15000);
+    // dd($data);
     return $data;
   }
 
@@ -442,7 +461,7 @@ class MapDatabaseController extends Controller
     // $datamart = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='decisyon_cache' AND TABLE_NAME='WEB_BI_$id';");
     // TODO viene utilizzata anche dalla preview, forse per la preview meglio utilizzare un'altra function
     // $data = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.WEB_BI_$id LIMIT 5000");
-    $table = "decisyon_cache.WEB_BI_$id";
+    // $table = "decisyon_cache.WEB_BI_$id";
     // $data = DB::connection('vertica_odbc')->table($table)->limit(10)->get(); // ok
 
     // $data = DB::connection('vertica_odbc')->table($table)->select("area_id", "zona_id", "dealer_id")->get();
@@ -450,7 +469,7 @@ class MapDatabaseController extends Controller
     // $data = DB::connection('vertica_odbc')->table($table)->select("dealer_id", "dealer_ds")->paginate(15000);
     // $data = DB::connection('vertica_odbc')->table($table)->where("dealer_id", "=", 447)->paginate(15000);
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [447, 497])->paginate(15000);
-    $data = DB::connection('vertica_odbc')->table($table)->paginate(15000);
+    $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->paginate(20000);
     return $data;
 
     // return response()->json($data);

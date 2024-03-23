@@ -239,7 +239,7 @@ class Resources extends Dashboards {
     // aggiungo le colonne
     for (const key of Object.keys(this.data[0])) {
       // prepareData.cols.push({ id: key, label: key });
-      console.log('prepareData : ', key);
+      // console.log('prepareData : ', key);
       this.#prepareData.cols.push({
         id: key,
         label: key,

@@ -2,9 +2,10 @@ const dlgConfig = document.getElementById('dlg-sheet-config');
 const saveColumnConfig = document.getElementById('btn-column-save');
 const tmplList = document.getElementById('tmpl-li');
 
-function testFn() {
-  debugger;
-  console.log(WorkBook);
+google.charts.load('current', { 'packages': ['corechart', 'table'] });
+
+function test() {
+  google.charts.setOnLoadCallback(drawDtm);
 }
 
 function updatedSheet() {
@@ -18,6 +19,102 @@ let app = {
   number: function(properties) {
     return new google.visualization.NumberFormat(properties);
   }
+}
+
+function loadColumnsLeftSide(columns) {
+  const ulColumnsHandler = document.getElementById('ul-columns-handler');
+  ulColumnsHandler.querySelectorAll('li').forEach(el => el.remove());
+  columns.forEach((col, index) => {
+    const tmplContent = tmplList.content.cloneNode(true);
+    const li = tmplContent.querySelector('li');
+    // const span = li.querySelector('span');
+    const regex = new RegExp('_id$');
+    // in questo elenco non aggiungo le colonne _id e le metriche con 'dependencies':true.
+    // Le colonne _id sono automaticamente nascoste dalla DataTable, anche se sono
+    // presenti nel func group() (json.data.group.key)
+    // se è una metrica con 'dependencies' : true non devo aggiungerla alla ul
+    const metric = Resource.json.data.group.columns.find(metric => (metric.alias === col.id && metric.dependencies === false));
+    if (!regex.test(col.id) || metric) {
+      // se la colonna è nascosta, imposto il dataset.hidden = true
+      const column = Resource.json.data.group.key.find(column => (column.id === col.id));
+      if (column) li.dataset.visible = column.properties.visible;
+      if (metric) li.dataset.visible = metric.properties.visible;
+      if (column || metric) {
+        // se è una colonna _ds oppure una metrica 'dependencies':false la aggiungo alla ul
+        li.innerText = col.id;
+        li.dataset.columnId = col.id;
+        li.dataset.index = index;
+        li.addEventListener('click', columnHander);
+        ulColumnsHandler.appendChild(li);
+      }
+    }
+  });
+}
+
+function drawDtm() {
+  // console.log(Resource.data);
+  const data = { cols: [], rows: [] };
+  // intestazioni di colonna
+  // console.clear();
+  for (const [index, row] of Object.entries(Resource.data)) {
+    // console.log(row);
+    if (+index === 0) {
+      Object.keys(row).forEach(col => {
+        // header data columns
+        if (col === 'NettoRiga') {
+          data.cols.push({ id: col, label: col, type: 'number' });
+        } else {
+          data.cols.push({ id: col, label: col });
+        }
+      });
+    }
+    let rowValue = [];
+    for (const [key, value] of Object.entries(row)) {
+      if (key === 'NettoRiga') {
+        // console.log(+index + 1, parseFloat(value));
+        rowValue.push({ v: +value });
+        // (isNaN(parseFloat(value))) ? rowValue.push({ v: null }) : rowValue.push({ v: parseFloat(value) });
+      } else {
+        rowValue.push({ v: value });
+      }
+    }
+    data.rows.push({ c: rowValue });
+  }
+
+  console.log(data.cols);
+  console.log(data.rows);
+  // loadColumnsLeftSide(data.cols);
+  const dt = new google.visualization.DataTable(data);
+  // console.log(dt);
+  tableRef = new google.visualization.Table(Resource.ref);
+  const options = {
+    title: 'titolo report',
+    showRowNumber: true,
+    allowHTML: true,
+    frozenColumns: 0,
+    page: 'enabled',
+    pageSize: 2000,
+    alternatingRowStyle: true,
+    // sort: 'event',
+    width: '100%',
+    height: '100%'
+  };
+
+  google.visualization.events.addListener(tableRef, 'ready', function() {
+    const tableRefGroup = new google.visualization.Table(Resource.ref);
+    let grpFunction = new google.visualization.data.group(
+      dt,
+      [1],
+      [{ 'column': 14, 'aggregation': google.visualization.data.sum, 'type': 'number', 'label': 'venduto', 'id': 'vend_id' }]
+    );
+    // console.log(grpFunction);
+    // Resource.tableRef.clearChart();
+    // tableRefGroup.clearChart();
+    tableRefGroup.draw(grpFunction);
+  });
+
+  tableRef.draw(dt, options);
+
 }
 
 function drawDatamart() {
@@ -70,7 +167,7 @@ function drawDatamart() {
     page: 'enabled',
     pageSize: 20,
     alternatingRowStyle: true,
-    sort: 'event',
+    // sort: 'event',
     width: '100%',
     height: '100%'
   };
@@ -88,12 +185,16 @@ function drawDatamart() {
   // una group(), questa consente di raggruppare la visualizzazione in base ai livelli
   // dimensionali scelti (aggiunta/rimozione di livelli dimensionali)
   // tableRef.clearChart();
-  google.visualization.events.addListener(Resource.tableRef, 'ready', previewReady);
+  google.visualization.events.addListener(Resource.tableRef, 'ready', previewReadyTest);
+
+  // google.visualization.events.addListener(Resource.tableRef, 'sort', function() { });
 
   Resource.tableRef.draw(Resource.dataTable, Resource.options);
+  debugger;
 }
 
 function previewReady() {
+  debugger;
   // Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
   // Resource.tableRefGroup = new google.visualization.Table(document.getElementById(Resource.ref));
   Resource.tableRefGroup = new google.visualization.Table(Resource.ref);
@@ -120,6 +221,7 @@ function previewReady() {
     Resource.dataTable, Resource.groupKey, Resource.groupColumn
   );
   console.log('dataGroup : ', Resource.dataGroup);
+  // debugger;
   // creo l'object che verrà messo nel terzo param di group()
   // Es.: { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
   // le metriche che hanno la proprietà dependencies: true, sono quelle NON aggiunte DIRETTAMENTE
@@ -169,6 +271,7 @@ function previewReady() {
   // DataView, mi consente di visualizzare SOLO le colonne definite nel report ed
   // effettuare eventuali calcoli per le metriche composite ('calc')
   Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
+  debugger;
   console.log('DataViewGrouped :', Resource.dataViewGrouped);
 
   // TEST: recupero gli indici delle colonne area_ds, zona_ds (colonna da visualizzare)
@@ -260,6 +363,7 @@ function previewReady() {
   // concateno i due array che popoleranno la DataView.setColumns()
   let viewDefined = viewColumns.concat(viewMetrics)
   console.log('DataView defined:', viewDefined);
+  debugger;
   // Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
   // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
   // console.log(Resource.dataGroup.getColumnProperties(0));
@@ -480,7 +584,7 @@ function columnHander(e) {
       metric.properties.visible = false;
     }
   }
-  // debugger;
+  debugger;
   window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
   // Qui dovrò sempre richiamare il previewReady() perchè devono essere ricalcolate le "colonne generate", in base al nuovo
   // raggruppamento definito qui
