@@ -191,21 +191,24 @@ class MapDatabaseController extends Controller
     $yearsInterval = new DateInterval('P1Y');
     $yearPeriod = new DatePeriod($start, $yearsInterval, $end);
     $years = [];
-    foreach ($yearPeriod as $year) {
-      // $currDate = new DateTimeImmutable($date->format('Y-m-d'));
-      $years[] = (int) $year->format('Y');
+    foreach ($yearPeriod as $date) {
+      $currDate = new DateTimeImmutable($date->format('Y-m-d'));
+      $years[(int) $date->format('Y')] = (int) $currDate->sub($yearsInterval)->format('Y');
     }
+    // dd($years);
     // la tabella non esiste, la creo
     $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_YEARS (
-    id_year integer PRIMARY KEY NOT NULL,
+    id_year INTEGER PRIMARY KEY NOT NULL,
+    id_year_previous INTEGER,
     year CHAR(6) NOT NULL) INCLUDE SCHEMA PRIVILEGES";
     // $result_create = DB::connection('vertica_odbc')->statement($sql);
     if (!DB::connection('vertica_odbc')->statement($sql)) {
       // $result : null tabella creata correttamente
-      foreach ($years as $value) {
+      foreach ($years as $currentYear => $lastYear) {
         DB::connection('vertica_odbc')->table('decisyon_cache.WB_YEARS')->insert([
-          'id_year' => $value,
-          'year' => "Y {$value}"
+          'id_year' => $currentYear,
+          'id_year_previous' => $lastYear,
+          'year' => "Y {$currentYear}"
         ]);
       }
       return DB::connection('vertica_odbc')->statement('COMMIT;');
@@ -219,36 +222,29 @@ class MapDatabaseController extends Controller
     $json = (object) null;
     $quarter_id = NULL;
     $quarter_id = 0;
-    foreach ($period as $months) {
-      // var_dump($months->format('m'));
-      switch ($months->format('m')) {
-        case '01':
-          $quarter_id = (int) $months->format('Y1');
-          $quarter = "Q 1";
-          break;
-        case '04':
-          $quarter_id = (int) $months->format('Y2');
-          $quarter = "Q 2";
-          break;
-        case '07':
-          $quarter_id = (int) $months->format('Y3');
-          $quarter = "Q 3";
-          break;
-        default:
-          $quarter_id = (int) $months->format('Y4');
-          $quarter = "Q 4";
-          break;
-      }
+    foreach ($period as $date) {
+      $currDate = new DateTimeImmutable($date->format('Y-m-d'));
+      $quarter = ceil($currDate->format('n') / 3);
+      $quarter_id = (int) "{$currDate->format('Y')}0{$quarter}";
+      $last_year = (int) "{$currDate->sub(new DateInterval('P1Y'))->format('Y')}0{$quarter}";
+      $previous = ceil($currDate->sub(new DateInterval('P3M'))->format('n') / 3);
+      $previous_quarter_id = (int) "{$currDate->sub(new DateInterval('P3M'))->format('Y')}0{$previous}";
+
+      // dd($currDate, $previous_quarter_id);
       $json->{$quarter_id} = (object) [
         "id_quarter" => $quarter_id,
-        "quarter" => $quarter,
-        "year_id" => (int) $months->format('Y')
+        "quarter" => "Q {$quarter}",
+        "id_quarter_previous" => $previous_quarter_id, // quarter 3 mesi precedenti
+        "id_quarter_last_year" => $last_year,
+        "year_id" => (int) $date->format('Y')
       ];
     }
 
     $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_QUARTERS (
-      id_quarter integer PRIMARY KEY NOT NULL,
+      id_quarter INTEGER PRIMARY KEY NOT NULL,
       quarter CHAR(3) NOT NULL,
+      id_quarter_previous INTEGER,
+      id_quarter_last_year INTEGER,
       year_id integer NOT NULL CONSTRAINT fx_years REFERENCES decisyon_cache.WB_YEARS (id_year)
     ) INCLUDE SCHEMA PRIVILEGES";
     // $result_create = DB::connection('vertica_odbc')->statement($sql);
@@ -258,6 +254,8 @@ class MapDatabaseController extends Controller
         DB::connection('vertica_odbc')->table('decisyon_cache.WB_QUARTERS')->insert([
           'id_quarter' => $quarter,
           'quarter' => $value->quarter,
+          'id_quarter_previous' => $value->id_quarter_previous,
+          'id_quarter_last_year' => $value->id_quarter_last_year,
           'year_id' => $value->year_id
         ]);
       }
@@ -271,20 +269,24 @@ class MapDatabaseController extends Controller
     $period = new DatePeriod($start, $interval, $end);
     $json = (object) null;
     foreach ($period as $months) {
-      $currDate = new DateTimeImmutable($months->format('Y-m-01'));
+      $currDate = new DateTimeImmutable($months->format('Y-m-d'));
       // calcolo il quarter
       $quarter = ceil($currDate->format('n') / 3);
       $json->{$months->format('Ym')} = (object) [
         "id_month" => (int) $months->format('Ym'),
         "month" => $months->format('F'),
-        "quarter_id" => (int) "{$currDate->format('Y')}{$quarter}"
+        "id_month_previous" => (int) $currDate->sub(new DateInterval('P1M'))->format('Ym'),
+        "id_month_last_year" => (int) $currDate->sub(new DateInterval('P1Y'))->format('Ym'),
+        "quarter_id" => (int) "{$currDate->format('Y')}0{$quarter}"
       ];
     }
     // la tabella non esiste, la creo
     $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_MONTHS (
-      id_month integer PRIMARY KEY NOT NULL,
+      id_month INTEGER PRIMARY KEY NOT NULL,
       month VARCHAR NOT NULL,
-      quarter_id integer NOT NULL CONSTRAINT fx_quarters REFERENCES decisyon_cache.WB_QUARTERS (id_quarter)
+      id_month_previous INTEGER,
+      id_month_last_year INTEGER,
+      quarter_id INTEGER NOT NULL CONSTRAINT fx_quarters REFERENCES decisyon_cache.WB_QUARTERS (id_quarter)
       ) INCLUDE SCHEMA PRIVILEGES";
     if (!DB::connection('vertica_odbc')->statement($sql)) {
       // $result : null tabella creata correttamente
@@ -292,6 +294,8 @@ class MapDatabaseController extends Controller
         DB::connection('vertica_odbc')->table('decisyon_cache.WB_MONTHS')->insert([
           'id_month' => $month_id,
           'month' => $value->month,
+          'id_month_previous' => $value->id_month_previous,
+          'id_month_last_year' => $value->id_month_last_year,
           'quarter_id' => $value->quarter_id
         ]);
       }
@@ -310,28 +314,31 @@ class MapDatabaseController extends Controller
       $quarter = ceil($currDate->format('n') / 3);
       $json->{$currDate->format('Y-m-d')} = (object) [
         "id_date" => $currDate->format('Y-m-d'),
-        "trans_ly" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d'),
+        // "trans_ly" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d'),
         "weekday" => $currDate->format('l'),
-        // "day" => (object)
         "week" => $currDate->format('W'),
         "month_id" => $currDate->format('Ym'),
-        "month" => (object) [
+        "month" => $currDate->format('F'),
+        /* "month" => (object) [
           "id" => $currDate->format('m'),
           "ds" => $currDate->format('F'),
           "short" => $currDate->format('M')
-        ],
+        ], */
         "quarter_id" => "{$currDate->format('Y')}0{$quarter}",
-        "quarter" => (object) ["id" => $quarter, "ds" => "Q {$quarter}"],
+        "quarter" => "Q {$quarter}",
+        // "quarter" => (object) ["id" => $quarter, "ds" => "Q {$quarter}"],
         "year" => $currDate->format('Y'),
         "day_of_year" => $currDate->format('z'),
         // "lastOfMonth" => $current->format('t'),
-        "last" => (object) [
+        /* "last" => (object) [
           "day" => $currDate->sub(new DateInterval('P1D'))->format('Y-m-d'),
           "week" => $currDate->sub(new DateInterval('P1W'))->format('Y-m-d'),
           "month" => $currDate->sub(new DateInterval('P1M'))->format('Y-m-d'),
           "quarter" => ceil($currDate->sub(new DateInterval('P3M'))->format('n') / 3), // quarter 3 mesi precedenti
           "year" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d')
-        ]
+        ] */
+        "id_date_last_year" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d'),
+        "id_date_previous" => $currDate->sub(new DateInterval('P1D'))->format('Y-m-d')
       ];
     }
     // TODO: utilizzare il complex datatype ROW (vertica) per gli OBJECT, ad esempio la colonna 'last', per
@@ -339,7 +346,6 @@ class MapDatabaseController extends Controller
     // Per recuperarne i valori non bisogna utilizzare MapJSONExtractor ma la sintassi xxx.yyy
     $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_DATE (
         id_date DATE NOT NULL PRIMARY KEY,
-        trans_ly DATE,
         year INTEGER,
         quarter_id INTEGER,
         quarter VARCHAR,
@@ -347,7 +353,8 @@ class MapDatabaseController extends Controller
         month VARCHAR,
         week CHAR(2),
         day VARCHAR,
-        last VARCHAR(1000)
+        id_date_previous DATE,
+        id_date_last_year DATE
         ) INCLUDE SCHEMA PRIVILEGES";
     if (!DB::connection('vertica_odbc')->statement($sql)) {
       foreach ($json as $date => $value) {
@@ -360,16 +367,17 @@ class MapDatabaseController extends Controller
 
         DB::connection('vertica_odbc')->table('decisyon_cache.WB_DATE')->insert([
           'id_date' => $date,
-          'trans_ly' => $value->trans_ly,
           'year' => $value->year,
           'quarter_id' => (int) $value->quarter_id,
-          'quarter' => json_encode($value->quarter),
-          'month_id' => $value->month_id,
-          'month' => json_encode($value->month),
+          'quarter' => $value->quarter,
+          // 'quarter' => json_encode($value->quarter),
+          'month_id' => (int) $value->month_id,
+          // 'month' => json_encode($value->month),
+          'month' => $value->month,
           'week' => $value->week,
           'day' => json_encode(['weekday' => $value->weekday, 'day_of_year' => $value->day_of_year]),
-          'last' => json_encode($value->last)
-          // 'json' => "{$str}"
+          'id_date_previous' => $value->id_date_previous,
+          'id_date_last_year' => $value->id_date_last_year
         ]);
       }
     }
@@ -437,20 +445,28 @@ class MapDatabaseController extends Controller
 
     // $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->orderBy('area_id')->paginate(15000);
 
-    $columns = DB::connection('vertica_odbc')->table('COLUMNS')
+    $columnsResult = DB::connection('vertica_odbc')->table('COLUMNS')
       ->select('column_name')
       ->where('TABLE_SCHEMA', "decisyon_cache")->where('TABLE_NAME', "WEB_BI_{$id}")->orderBy('ordinal_position')->get();
-    dd($columns);
 
     $query = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}");
-    $query->orderBy('area_id')->orderBy('area')
-      ->orderBy('zona_id')->orderBy('zona')
-      ->orderBy('descrizione_id')->orderBy('descrizione')
-      ->orderBy('year_id')->orderBy('year')
-      ->orderBy('quarter_id')->orderBy('quarter')
-      ->orderBy('month_id')->orderBy('month')
-      ->orderBy('basketMLI_id')->orderBy('basketMLI');
-    $data = $query->cursorPaginate(15000);
+    foreach ($columnsResult as $columns) {
+      foreach ($columns as $column) {
+        $query->orderBy($column);
+      }
+    }
+
+    // $data = $query->cursorPaginate(10000);
+    $data = $query->paginate(10000);
+
+    // $query->orderBy('area_id')->orderBy('area')
+    //   ->orderBy('zona_id')->orderBy('zona')
+    //   ->orderBy('descrizione_id')->orderBy('descrizione')
+    //   ->orderBy('year_id')->orderBy('year')
+    //   ->orderBy('quarter_id')->orderBy('quarter')
+    //   ->orderBy('month_id')->orderBy('month')
+    //   ->orderBy('basketMLI_id')->orderBy('basketMLI');
+    // $data = $query->cursorPaginate(15000);
     // dd($data);
     return $data;
   }

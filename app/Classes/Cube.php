@@ -273,9 +273,9 @@ class Cube
     $sql .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
     // var_dump($sql);
-    $query = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS $sql;";
+    $query = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
     // dd($query);
-    // var_dump($query);
+    var_dump($query);
     // elimino la tabella temporanea che sto creando, se già presente
     $this->dropTemporaryTables($this->baseTableName);
     return DB::connection('vertica_odbc')->statement($query);
@@ -421,8 +421,8 @@ class Cube
         // $this->datamart_advancedMeasures[$tableName][$metric->alias] = "\t{$metric->alias} AS {$metric->alias}";
         // $this->datamart_advancedMeasures[] = "{$tableName}.{$metric->alias} AS {$metric->alias}";
 
-        // $this->datamart_advancedMeasures[] = "NVL({$metric->alias},0) AS {$metric->alias}";
-        $this->datamart_advancedMeasures[] = "NVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
+        $this->datamart_advancedMeasures[] = "NVL({$metric->alias},0) AS {$metric->alias}";
+        // $this->datamart_advancedMeasures[] = "NVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
         // aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
         $this->setFiltersMetricTable_new($metric->filters, $tableName);
         // dd($this->json_info_advanced);
@@ -504,7 +504,7 @@ class Cube
     $comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($advancedMetrics[$this->factId])) . "\n*/\n";
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->sqlAdvancedMeasures);";
     // dd($sql);
-    // var_dump($sql);
+    var_dump($sql);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
     if (property_exists($this, 'sql_info')) {
       $result = ["raw_sql" => nl2br($sql), "format_sql" => $this->json_info_advanced];
@@ -564,10 +564,10 @@ class Cube
       $union[$table] = $sql;
     }
     // dd(implode("UNION\n", $union));
-    $union_sql = implode("UNION ALL\n", $union);
+    $union_sql = implode("UNION\n", $union);
     $this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS\n($union_sql);";
     // dd($this->union_clause);
-    // var_dump($this->union_clause);
+    var_dump($this->union_clause);
     $this->dropTemporaryTables("union_{$this->report_id}_{$this->datamart_id}");
     DB::connection('vertica_odbc')->statement($this->union_clause);
   }
@@ -603,20 +603,7 @@ class Cube
       unset($ONClause);
     }
     $sql .= $joinLEFT;
-    // $sql .= "\nGROUP BY
-    // union_1710782062778_2.area_id,
-    // union_1710782062778_2.area,
-    // union_1710782062778_2.zona_id,
-    // union_1710782062778_2.zona,
-    // union_1710782062778_2.descrizione_id,
-    // union_1710782062778_2.descrizione,
-    // union_1710782062778_2.year_id,
-    // union_1710782062778_2.year,
-    // union_1710782062778_2.quarter_id,
-    // union_1710782062778_2.quarter,
-    // union_1710782062778_2.month_id,
-    // union_1710782062778_2.month;";
-    // dd($sql);
+    var_dump($sql);
     // se il datamart già esiste lo elimino prima di ricrearlo
     $this->dropTemporaryTables($this->datamart_name);
     // TODO: eliminare anche le altre tabelle temporanee, memorizzate in $this->queries

@@ -237,21 +237,19 @@ class Resources extends Dashboards {
   prepareData() {
     this.#prepareData = { cols: [], rows: [] };
     // aggiungo le colonne
-    for (const key of Object.keys(this.data[0])) {
-      // prepareData.cols.push({ id: key, label: key });
-      // console.log('prepareData : ', key);
-      this.#prepareData.cols.push({
-        id: key,
-        label: key,
-        type: this.json.data.columns[key].type,
-        p: this.json.data.columns[key].p
-      });
-      // debugger;
-    }
-
-    // aggiungo le righe
-    this.data.forEach(row => {
-      let v = [];
+    for (const [index, row] of Object.entries(this.data)) {
+      // prima riga, aggiungo anche le intestazioni
+      if (+index === 0) {
+        Object.keys(row).forEach(key => {
+          this.#prepareData.cols.push({
+            id: key,
+            label: key,
+            type: this.json.data.columns[key].type,
+            p: this.json.data.columns[key].p
+          });
+        });
+      }
+      let rowValue = [];
       for (const [key, value] of Object.entries(row)) {
         switch (this.json.data.columns[key].type) {
           case 'date':
@@ -267,19 +265,63 @@ class Resources extends Dashboards {
           case 'number':
             // TODO: valutare se formattare qui i valori (come sopra per le date) oppure con le funzioni Formatter (sotto)
             // di GoogleChart
-            (isNaN(parseFloat(value))) ? v.push({ v: null }) : v.push({ v: parseFloat(value) });
+            (isNaN(parseFloat(value))) ? rowValue.push({ v: null }) : rowValue.push({ v: parseFloat(value) });
             // (isNaN(parseFloat(value))) ? v.push({ v: 0 }) : v.push({ v: parseFloat(value) });
             break;
           default:
             // (!this.json.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: this.json.data.columns[key].p } });
-            v.push({ v: value });
+            rowValue.push({ v: value });
             break;
         }
-        // v.push({ v: value });
       }
-      this.#prepareData.rows.push({ c: v });
-    });
+      this.#prepareData.rows.push({ c: rowValue });
+    }
+
+    // --------------------------------
+    // for (const key of Object.keys(this.data[0])) {
+    //   // prepareData.cols.push({ id: key, label: key });
+    //   // console.log('prepareData : ', key);
+    //   this.#prepareData.cols.push({
+    //     id: key,
+    //     label: key,
+    //     type: this.json.data.columns[key].type,
+    //     p: this.json.data.columns[key].p
+    //   });
+    //   // debugger;
+    // }
+
+    // aggiungo le righe
+    // this.data.forEach(row => {
+    //   let v = [];
+    //   for (const [key, value] of Object.entries(row)) {
+    //     switch (this.json.data.columns[key].type) {
+    //       case 'date':
+    //         if (value.length === 8) {
+    //           // console.log('Data di 8 cifre (YYYYMMDD)', value);
+    //           const date = new Date(`${value.substring(0, 4)}-${value.substring(4, 6)}-${value.substring(6, 8)}`);
+    //           // console.log(new Intl.DateTimeFormat("it-IT", dateOptions).format(date));
+    //           v.push({ v: date, f: new Intl.DateTimeFormat("it-IT", dateOptions).format(date), p: { className: 'myClass' } });
+    //         } else {
+    //           v.push({ v: null });
+    //         }
+    //         break;
+    //       case 'number':
+    //         // TODO: valutare se formattare qui i valori (come sopra per le date) oppure con le funzioni Formatter (sotto)
+    //         // di GoogleChart
+    //         (isNaN(parseFloat(value))) ? v.push({ v: null }) : v.push({ v: parseFloat(value) });
+    //         // (isNaN(parseFloat(value))) ? v.push({ v: 0 }) : v.push({ v: parseFloat(value) });
+    //         break;
+    //       default:
+    //         // (!this.json.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: this.json.data.columns[key].p } });
+    //         v.push({ v: value });
+    //         break;
+    //     }
+    //     // v.push({ v: value });
+    //   }
+    //   this.#prepareData.rows.push({ c: v });
+    // });
     // console.log(this.#prepareData);
+    // --------------------------------
     return this.#prepareData;
   }
 

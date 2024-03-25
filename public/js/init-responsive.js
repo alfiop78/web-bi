@@ -1223,10 +1223,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         let partialData = [];
         // TODO: rivedere come utilizzare la progressBar con i dati provenienti dal cursorPaginate.
         // La progress-bar veniva correttamente utilizzata con il paginate
-        // progressBar.value = +((paginateData.to / paginateData.total) * 100);
-        // progressLabel.hidden = false;
-        // progressTo.innerText = paginateData.to;
-        // progressTotal.innerText = paginateData.total;
+        progressBar.value = +((paginateData.to / paginateData.total) * 100);
+        progressLabel.hidden = false;
+        progressTo.innerText = paginateData.to;
+        progressTotal.innerText = paginateData.total;
         console.log(paginateData);
         // console.log(paginateData.data);
         // funzione ricorsiva fino a quando è presente next_page_url
@@ -1237,9 +1237,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             return response;
           }).then(response => response.json()).then(paginate => {
             console.log(paginate);
-            // progressBar.value = +((paginate.to / paginate.total) * 100);
-            // progressTo.innerText = paginate.to;
-            // progressTotal.innerText = paginate.total;
+            progressBar.value = +((paginate.to / paginate.total) * 100);
+            progressTo.innerText = paginate.to;
+            progressTotal.innerText = paginate.total;
             // console.log(progressBar.value);
             partialData = partialData.concat(paginate.data);
             if (paginate.next_page_url) {
@@ -1248,8 +1248,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
               // Non sono presenti altre pagine, visualizzo il dashboard
               console.log('tutte le paginate completate :', partialData);
               Resource.data = partialData;
-              // google.charts.setOnLoadCallback(drawDatamart());
-              test();
+              google.charts.setOnLoadCallback(drawDatamart());
               App.loaderStop();
             }
           }).catch((err) => {
@@ -1263,8 +1262,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         } else {
           // Non sono presenti altre pagine, visualizzo il dashboard
           Resource.data = partialData;
-          test();
-          // google.charts.setOnLoadCallback(drawDatamart());
+          google.charts.setOnLoadCallback(drawDatamart());
           App.loaderStop();
         }
       })

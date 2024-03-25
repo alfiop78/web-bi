@@ -2,11 +2,7 @@ const dlgConfig = document.getElementById('dlg-sheet-config');
 const saveColumnConfig = document.getElementById('btn-column-save');
 const tmplList = document.getElementById('tmpl-li');
 
-google.charts.load('current', { 'packages': ['corechart', 'table'] });
-
-function test() {
-  google.charts.setOnLoadCallback(drawDtm);
-}
+google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
 
 function updatedSheet() {
   // la 'updated_at' dello sheet deve essere aggiornata perchè viene modificato lo Sheet
@@ -51,71 +47,6 @@ function loadColumnsLeftSide(columns) {
   });
 }
 
-function drawDtm() {
-  // console.log(Resource.data);
-  const data = { cols: [], rows: [] };
-  // intestazioni di colonna
-  // console.clear();
-  for (const [index, row] of Object.entries(Resource.data)) {
-    // console.log(row);
-    if (+index === 0) {
-      Object.keys(row).forEach(col => {
-        // header data columns
-        if (col === 'NettoRiga') {
-          data.cols.push({ id: col, label: col, type: 'number' });
-        } else {
-          data.cols.push({ id: col, label: col });
-        }
-      });
-    }
-    let rowValue = [];
-    for (const [key, value] of Object.entries(row)) {
-      if (key === 'NettoRiga') {
-        // console.log(+index + 1, parseFloat(value));
-        rowValue.push({ v: +value });
-        // (isNaN(parseFloat(value))) ? rowValue.push({ v: null }) : rowValue.push({ v: parseFloat(value) });
-      } else {
-        rowValue.push({ v: value });
-      }
-    }
-    data.rows.push({ c: rowValue });
-  }
-
-  console.log(data.cols);
-  console.log(data.rows);
-  // loadColumnsLeftSide(data.cols);
-  const dt = new google.visualization.DataTable(data);
-  // console.log(dt);
-  tableRef = new google.visualization.Table(Resource.ref);
-  const options = {
-    title: 'titolo report',
-    showRowNumber: true,
-    allowHTML: true,
-    frozenColumns: 0,
-    page: 'enabled',
-    pageSize: 2000,
-    alternatingRowStyle: true,
-    // sort: 'event',
-    width: '100%',
-    height: '100%'
-  };
-
-  google.visualization.events.addListener(tableRef, 'ready', function() {
-    const tableRefGroup = new google.visualization.Table(Resource.ref);
-    let grpFunction = new google.visualization.data.group(
-      dt,
-      [1],
-      [{ 'column': 14, 'aggregation': google.visualization.data.sum, 'type': 'number', 'label': 'venduto', 'id': 'vend_id' }]
-    );
-    // console.log(grpFunction);
-    // Resource.tableRef.clearChart();
-    // tableRefGroup.clearChart();
-    tableRefGroup.draw(grpFunction);
-  });
-
-  tableRef.draw(dt, options);
-
-}
 
 function drawDatamart() {
   // Il dato iniziale non è raggruppato, la query sul datamart è eseguita con SELECT *...
@@ -185,16 +116,12 @@ function drawDatamart() {
   // una group(), questa consente di raggruppare la visualizzazione in base ai livelli
   // dimensionali scelti (aggiunta/rimozione di livelli dimensionali)
   // tableRef.clearChart();
-  google.visualization.events.addListener(Resource.tableRef, 'ready', previewReadyTest);
-
-  // google.visualization.events.addListener(Resource.tableRef, 'sort', function() { });
+  google.visualization.events.addListener(Resource.tableRef, 'ready', previewReady);
 
   Resource.tableRef.draw(Resource.dataTable, Resource.options);
-  debugger;
 }
 
 function previewReady() {
-  debugger;
   // Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
   // Resource.tableRefGroup = new google.visualization.Table(document.getElementById(Resource.ref));
   Resource.tableRefGroup = new google.visualization.Table(Resource.ref);
@@ -271,7 +198,6 @@ function previewReady() {
   // DataView, mi consente di visualizzare SOLO le colonne definite nel report ed
   // effettuare eventuali calcoli per le metriche composite ('calc')
   Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
-  debugger;
   console.log('DataViewGrouped :', Resource.dataViewGrouped);
 
   // TEST: recupero gli indici delle colonne area_ds, zona_ds (colonna da visualizzare)
@@ -363,7 +289,6 @@ function previewReady() {
   // concateno i due array che popoleranno la DataView.setColumns()
   let viewDefined = viewColumns.concat(viewMetrics)
   console.log('DataView defined:', viewDefined);
-  debugger;
   // Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
   // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
   // console.log(Resource.dataGroup.getColumnProperties(0));
