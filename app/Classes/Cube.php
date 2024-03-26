@@ -303,6 +303,7 @@ class Cube
     foreach ($joins as $token => $join) {
       // dd($token, $join);
       if ($join->alias === 'time') {
+        dd("test");
         // FIX: l'esecuzione non dovrebbe mai raggiungere questo if perchè, in un filtro
         // con funzioni temporali, queste vengono impostate in setFiltersMetricTable_new()
         $this->WHERE_metricTable[$token] = implode(" = ", $join->SQL);
@@ -340,15 +341,13 @@ class Cube
           Da valutare se utilizzare (MapJSONExtractor(WEB_BI_TIME.last))['year']::DATE = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE
           ...oppure (WEB_BI_TIME.trans_ly) = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE.
         */
-        // dd($filter->joins);
-        /* foreach ($filter->joins as $join) {
-          // dd($join);
-          $this->WHERE_timingFn[$token] = implode(" = ", $join->SQL);
-        } */
+        // TODO: stabilire il livello più basso nella gerarchia della time (presente nella factId in ciclo)
+        // per poter impostare correttamente le relazioni
+        // if ()
         $this->WHERE_timingFn[$this->factId]['years'] = "WB_YEARS.id_year = WB_QUARTERS.year_id";
         $this->WHERE_timingFn[$this->factId]['quarters'] = "WB_QUARTERS.id_quarter = WB_MONTHS.quarter_id";
         $this->WHERE_timingFn[$this->factId]['months'] = "WB_MONTHS.id_month = WB_DATE.month_id";
-        $this->WHERE_timingFn[$this->factId][$token] = implode(" = ", $filter->SQL);
+        // $this->WHERE_timingFn[$this->factId][$token] = implode(" = ", $filter->SQL);
 
         if (property_exists($this, 'sql_info')) {
           $this->json_info_advanced[$tableName]->{'AND'}->{$token} = implode(" = ", $filter->SQL);
@@ -359,19 +358,10 @@ class Cube
           unset($this->json_info_advanced[$tableName]->{'WHERE-TIME'});
         }
         // $this->WHERE_timingFn[$token] = implode(" = ", $filter->sql);
-
-        // $this->WHERE_timingFn[$token] = "WEB_BI_TIME_055.trans_ly = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE";
         // dd($this->WHERE_timingFn);
         // dd("(MapJSONExtractor({$filter->table}.{$filter->field}))['$filter->func']::DATE");
       } else {
         // dd($filter->SQL, $this->filters_metricTable, $this->filters_baseTable);
-        // -----------logica precedente-----------
-        // se il filtro che si sta per aggiungere non è presente nè nei filtri del report nè in quelli "metric_table"
-        // lo aggiungo a filters_metricTable[]
-        /* if (!in_array($filter->SQL, $this->filters_metricTable) && !in_array($filter->SQL, $this->filters_baseTable))
-          $this->filters_metricTable[] = $filter->SQL; */
-        // -----------logica precedente-----------
-        // -----------nuova logica----------------
         // aggiungo senza verificare se già presente il codice SQL del filtro
         // perchè, essendo un array associativo, al massimo il codice SQL del filtro viene riscritto
         $this->filters_metricTable[$this->factId][$filter->name] = implode(" ", $filter->sql);
@@ -382,7 +372,7 @@ class Cube
       }
     }
     // dd($this->filters_metricTable);
-    // dd($this->WHERE_timingFn);
+    dd($this->WHERE_timingFn);
     // dd($this->json_info_advanced);
   }
 

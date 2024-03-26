@@ -2958,29 +2958,26 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // se ci sono funzioni temporali selezionate le aggiungo all'object 'filters' con token = alla funzione scelta (es.: last-year)
     if (document.querySelector('#dl-timing-functions > dt[selected]')) {
       const timingFn = document.querySelector('#dl-timing-functions > dt[selected]');
-      /* if (['last-year', 'last-month', 'ecc...'].includes(timingFn.dataset.value)) {
-        filters[timingFn.dataset.value] = {
-          alias: 'WEB_BI_TIME',
-          SQL: [
-            'WEB_BI_TIME.trans_ly',
-            `TO_CHAR(${WorkBook.dateTime.tableAlias}.${WorkBook.dateTime.timeField})::DATE`
-          ]
-        };
-      } */
       if (['last-year', 'last-month', 'ecc...'].includes(timingFn.dataset.value)) {
         const timeField = timingFn.dataset.timeField;
+        const timeTable = timingFn.dataset.table;
         // Per questa metrica è stata aggiunta una timingFn.
         // oltre ad aggiungere il token (es.: 'last-year') nel Set 'filters' devo aggiungere anche la definizione di
-        // ... questa timingFn, questo perchè la timingFn non è un filtro che 'separato' che viene salvato in storage
+        // ... questa timingFn, questo perchè la timingFn non è un filtro 'separato' che viene salvato in storage
         filters.add(timingFn.dataset.value);
-        debugger;
         object.timingFn = {
           [timingFn.dataset.value]: {
-            alias: 'WB_DATE',
-            SQL: [
-              `(MapJSONExtractor(WB_DATE.last))['${timeField}']::DATE`,
-              `TO_CHAR(${WorkBook.dateTime[metric.factId].tableAlias}.${WorkBook.dateTime[metric.factId].timeField})::DATE`
-            ]
+            // alias: timeTable,
+            field: timeField
+            // SQL: [`${timeTable}.${timeField}`]
+            // SQL: [
+            //   'WB_DATE.id_date',
+            //   `TO_CHAR(${WorkBook.dateTime[metric.factId].tableAlias}.${WorkBook.dateTime[metric.factId].timeField})::DATE`
+            // ]
+            // SQL: [
+            //   `(MapJSONExtractor(WB_DATE.last))['${timeField}']::DATE`,
+            //   `TO_CHAR(${WorkBook.dateTime[metric.factId].tableAlias}.${WorkBook.dateTime[metric.factId].timeField})::DATE`
+            // ]
           }
         };
       }
@@ -3278,7 +3275,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         if (!response.ok) { throw Error(response.statusText); }
         return response;
       })
-      .then((response) => response.json())
+      .then((response) => response.text())
       .then((response) => {
         console.log(response);
         if (response) {

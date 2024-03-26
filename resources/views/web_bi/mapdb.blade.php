@@ -413,7 +413,7 @@
                       <dt class="btn-link">Last Week</dt>
                       <dd>description</dd>
 
-                      <dt data-value="last-month" class="btn-link" data-fn="handlerTimingFunctions" data-time-field="month">Last Month</dt>
+                      <dt data-value="last-month" class="btn-link" data-fn="handlerTimingFunctions" data-table="WB_MONTHS" data-time-field="previous">Last Month</dt>
                       <dd>description</dd>
 
                       <dt class="btn-link">Last Quarter</dt>
