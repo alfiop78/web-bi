@@ -343,7 +343,9 @@ class Cube
         */
         // TODO: stabilire il livello più basso nella gerarchia della time (presente nella factId in ciclo)
         // per poter impostare correttamente le relazioni
-        // if ()
+        dd($this->from_clause);
+        if (property_exists($this->from_clause[$this->factId], 'WB_YEARS')) {
+        }
         $this->WHERE_timingFn[$this->factId]['years'] = "WB_YEARS.id_year = WB_QUARTERS.year_id";
         $this->WHERE_timingFn[$this->factId]['quarters'] = "WB_QUARTERS.id_quarter = WB_MONTHS.quarter_id";
         $this->WHERE_timingFn[$this->factId]['months'] = "WB_MONTHS.id_month = WB_DATE.month_id";

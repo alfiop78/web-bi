@@ -317,7 +317,7 @@ class MapDatabaseController extends Controller
         // "trans_ly" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d'),
         "weekday" => $currDate->format('l'),
         "week" => $currDate->format('W'),
-        "month_id" => $currDate->format('Ym'),
+        "month_id" => (int) $currDate->format('Ym'),
         "month" => $currDate->format('F'),
         /* "month" => (object) [
           "id" => $currDate->format('m'),
@@ -330,13 +330,13 @@ class MapDatabaseController extends Controller
         "year" => $currDate->format('Y'),
         "day_of_year" => $currDate->format('z'),
         // "lastOfMonth" => $current->format('t'),
-        /* "last" => (object) [
+        /* "previous_json" => (object) [
           "day" => $currDate->sub(new DateInterval('P1D'))->format('Y-m-d'),
           "week" => $currDate->sub(new DateInterval('P1W'))->format('Y-m-d'),
           "month" => $currDate->sub(new DateInterval('P1M'))->format('Y-m-d'),
           "quarter" => ceil($currDate->sub(new DateInterval('P3M'))->format('n') / 3), // quarter 3 mesi precedenti
           "year" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d')
-        ] */
+        ], */
         "last" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d'),
         "previous" => $currDate->sub(new DateInterval('P1D'))->format('Y-m-d')
       ];
@@ -359,7 +359,7 @@ class MapDatabaseController extends Controller
     if (!DB::connection('vertica_odbc')->statement($sql)) {
       foreach ($json as $date => $value) {
         // $str = json_encode($value);
-        // dd($value->last);
+        // dd(json_encode($value->previous_json));
         // $quarter = json_encode($value->quarter);
         // $month = json_encode($value->month);
         // NOTE: da vertica 11 è possibile fare la INSERT INTO con più record con la seguente sintassi:
@@ -371,13 +371,14 @@ class MapDatabaseController extends Controller
           'quarter_id' => (int) $value->quarter_id,
           'quarter' => $value->quarter,
           // 'quarter' => json_encode($value->quarter),
-          'month_id' => (int) $value->month_id,
+          'month_id' => $value->month_id,
           // 'month' => json_encode($value->month),
           'month' => $value->month,
           'week' => $value->week,
           'day' => json_encode(['weekday' => $value->weekday, 'day_of_year' => $value->day_of_year]),
           'previous' => $value->previous,
           'last' => $value->last
+          // 'previous_json' => json_encode($value->previous_json)
         ]);
       }
     }
