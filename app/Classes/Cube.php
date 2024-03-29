@@ -189,7 +189,8 @@ class Cube
       // dd($join);
       // qui utilizzo la proprietà SQL con implode(' = ', $join->SQL)
       if ($join->type === "TIME") {
-        $this->where_time_clause[$this->factId][$token] = implode(" = ", $join->SQL);
+        // $this->where_time_clause[$this->factId][$token] = implode(" = ", $join->SQL);
+        $this->where_time_clause[$this->factId][$join->alias] = implode(" = ", $join->SQL);
 
         if (property_exists($this, 'sql_info')) {
           // in questo caso imposto nella prop 'WHERE-TIME' anzichè nella 'WHERE'. In questo
@@ -275,7 +276,7 @@ class Cube
     // var_dump($sql);
     $query = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
     // dd($query);
-    var_dump($query);
+    // var_dump($query);
     // elimino la tabella temporanea che sto creando, se già presente
     $this->dropTemporaryTables($this->baseTableName);
     return DB::connection('vertica_odbc')->statement($query);
@@ -332,6 +333,8 @@ class Cube
     // dd($filters);
     foreach ($filters as $token => $filter) {
       // dd($token, $filter);
+      // token : es. 'last-month'
+      // nella proprietà SQL ci sono le join tra le tabelle TIME
       // TODO: aggiungere le altre funzioni temporali
       $timingFunctions = ['last-year', 'last-month'];
       // dd($timingFunctions, $token);
@@ -343,12 +346,25 @@ class Cube
         */
         // TODO: stabilire il livello più basso nella gerarchia della time (presente nella factId in ciclo)
         // per poter impostare correttamente le relazioni
-        dd($this->from_clause);
-        if (property_exists($this->from_clause[$this->factId], 'WB_YEARS')) {
+        // dd($this->from_clause[$this->factId]);
+        // dd(array_key_exists("WB_YEARS", $this->from_clause[$this->factId]));
+        if (array_key_exists("WB_YEARS", $this->from_clause[$this->factId])) {
+          $this->WHERE_timingFn[$this->factId]['WB_YEARS'] = implode(" = ", $filter->SQL[0]);
+          if (array_key_exists("WB_QUARTERS", $this->from_clause[$this->factId])) {
+            $this->WHERE_timingFn[$this->factId]['WB_QUARTERS'] = implode(" = ", $filter->SQL[1]);
+            if (array_key_exists("WB_MONTHS", $this->from_clause[$this->factId])) {
+              $this->WHERE_timingFn[$this->factId]['WB_MONTHS'] = implode(" = ", $filter->SQL[2]);
+              // if (array_key_exists("WB_DATE", $this->from_clause[$this->factId])) {
+              //   $this->WHERE_timingFn[$this->factId]['date'] = 'WB_MONTHS.id_month = WB_DATE.month_id';
+              // }
+            }
+          }
         }
-        $this->WHERE_timingFn[$this->factId]['years'] = "WB_YEARS.id_year = WB_QUARTERS.year_id";
-        $this->WHERE_timingFn[$this->factId]['quarters'] = "WB_QUARTERS.id_quarter = WB_MONTHS.quarter_id";
-        $this->WHERE_timingFn[$this->factId]['months'] = "WB_MONTHS.id_month = WB_DATE.month_id";
+        // dd($this->WHERE_timingFn);
+        // $this->WHERE_timingFn[$this->factId]['years'] = "WB_YEARS.id_year = WB_QUARTERS.year_id";
+        // $this->WHERE_timingFn[$this->factId]['quarters'] = "WB_QUARTERS.id_quarter = WB_MONTHS.quarter_id";
+        // $this->WHERE_timingFn[$this->factId]['months'] = "WB_MONTHS.id_month = WB_DATE.month_id";
+
         // $this->WHERE_timingFn[$this->factId][$token] = implode(" = ", $filter->SQL);
 
         if (property_exists($this, 'sql_info')) {
@@ -374,7 +390,7 @@ class Cube
       }
     }
     // dd($this->filters_metricTable);
-    dd($this->WHERE_timingFn);
+    // dd($this->WHERE_timingFn);
     // dd($this->json_info_advanced);
   }
 
@@ -471,32 +487,34 @@ class Cube
     }
     $this->sqlAdvancedMeasures .= self::WHERE;
     $this->sqlAdvancedMeasures .= implode("\nAND ", $this->where_clause[$this->factId]);
-    // $this->where_clause sarà sempre presente (almento un filtro deve essere sempre presente sul report)
-    // if (array_key_exists($this->factId, $this->where_clause)) $this->sqlAdvancedMeasures .= implode("\nAND ", $this->where_clause[$this->factId]);
 
     if (array_key_exists($this->factId, $this->WHERE_metricTable)) {
       $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->WHERE_metricTable[$this->factId]);
     }
 
+    // dd($this->sqlAdvancedMeasures);
     // dd($this->where_time_clause, $this->WHERE_timingFn, $this->WHERE_metricTable);
-    if (array_key_exists($this->factId, $this->WHERE_timingFn)) {
+    // utilizzo array_merge, verranno unite le join della TIME e, quelle con key uguale, verranno sovrascirtte
+    // dal secondo array passato come argomento. In questo caso, se è prsente una metrica con timing function sovrrascive
+    // le join della TIME "originale"
+    // dd(array_merge($this->where_time_clause[$this->factId], $this->WHERE_timingFn[$this->factId]));
+    $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", array_merge($this->where_time_clause[$this->factId], $this->WHERE_timingFn[$this->factId]));
+    /* if (array_key_exists($this->factId, $this->WHERE_timingFn)) {
       $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->WHERE_timingFn[$this->factId]);
     } else {
       if (array_key_exists($this->factId, $this->where_time_clause)) {
         $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->where_time_clause[$this->factId]);
       }
-    }
+    } */
     $this->WHERE_timingFn = [];
-    // dd($this->sqlAdvancedMeasures);
     // aggiungo i filtri del report e i filtri contenuti nella metrica
     $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
     if (array_key_exists($this->factId, $this->filters_metricTable)) $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->filters_metricTable[$this->factId]);
     $this->sqlAdvancedMeasures .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
-    // dd($this->sqlAdvancedMeasures);
     $comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($advancedMetrics[$this->factId])) . "\n*/\n";
     $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->sqlAdvancedMeasures);";
     // dd($sql);
-    var_dump($sql);
+    // var_dump($sql);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
     if (property_exists($this, 'sql_info')) {
       $result = ["raw_sql" => nl2br($sql), "format_sql" => $this->json_info_advanced];
@@ -559,7 +577,7 @@ class Cube
     $union_sql = implode("UNION\n", $union);
     $this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS\n($union_sql);";
     // dd($this->union_clause);
-    var_dump($this->union_clause);
+    // var_dump($this->union_clause);
     $this->dropTemporaryTables("union_{$this->report_id}_{$this->datamart_id}");
     DB::connection('vertica_odbc')->statement($this->union_clause);
   }

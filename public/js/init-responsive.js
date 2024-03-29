@@ -2715,7 +2715,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       let field = {}, name;
       switch (table.dataset.alias) {
         case 'WB_YEARS':
-          if (!WorkBook.fields.has(table.dataset.alias)) { }
+          // if (!WorkBook.fields.has(table.dataset.alias)) { }
           field = {
             id: { sql: [`${table.dataset.alias}.id_year`], datatype: 'integer' },
             ds: { sql: [`${table.dataset.alias}.year`], datatype: 'char' }
@@ -2968,8 +2968,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         object.timingFn = {
           [timingFn.dataset.value]: {
             // alias: timeTable,
-            field: timeField
-            // SQL: [`${timeTable}.${timeField}`]
+            field: timeField,
+            SQL: [
+              ['WB_YEARS.id_year', 'WB_QUARTERS.year_id'],
+              ['WB_QUARTERS.id_quarter', 'WB_MONTHS.quarter_id'],
+              ['WB_MONTHS.previous', 'WB_DATE.month_id'],
+            ]
             // SQL: [
             //   'WB_DATE.id_date',
             //   `TO_CHAR(${WorkBook.dateTime[metric.factId].tableAlias}.${WorkBook.dateTime[metric.factId].timeField})::DATE`
