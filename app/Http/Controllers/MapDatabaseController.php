@@ -458,6 +458,8 @@ class MapDatabaseController extends Controller
     }
 
     // $data = $query->cursorPaginate(10000);
+    // NOTE: il cursorPaginate dovrebbe essere più performante (da testare) ma non contiene i dati relativi al
+    // numero di pagine, al momento utilizzo paginate() con la clausola OrderBy
     $data = $query->paginate(10000);
 
     // $query->orderBy('area_id')->orderBy('area')
