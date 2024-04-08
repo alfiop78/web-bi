@@ -498,7 +498,13 @@ class Cube
     // dal secondo array passato come argomento. In questo caso, se è prsente una metrica con timing function sovrrascive
     // le join della TIME "originale"
     // dd(array_merge($this->where_time_clause[$this->factId], $this->WHERE_timingFn[$this->factId]));
-    $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", array_merge($this->where_time_clause[$this->factId], $this->WHERE_timingFn[$this->factId]));
+    // dd($this->where_time_clause[$this->factId]);
+    // dd($this->WHERE_timingFn);
+    if (array_key_exists($this->factId, $this->WHERE_timingFn)) {
+      $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", array_merge($this->where_time_clause[$this->factId], $this->WHERE_timingFn[$this->factId]));
+    } else {
+      $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->where_time_clause[$this->factId]);
+    }
     /* if (array_key_exists($this->factId, $this->WHERE_timingFn)) {
       $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->WHERE_timingFn[$this->factId]);
     } else {
