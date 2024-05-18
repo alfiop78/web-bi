@@ -25,9 +25,10 @@ class MapDatabaseController extends Controller
     // $dimensions = BIdimension::get('json_value'); // Eloquent
     // TODO: connessione a mysql
     // $schemaList = DB::connection('mysql')->select("SHOW SCHEMAS;");
-    $schemaList = DB::connection('vertica_odbc')->select("SELECT SCHEMA_NAME FROM V_CATALOG.SCHEMATA WHERE IS_SYSTEM_SCHEMA = FALSE ORDER BY SCHEMA_NAME;");
+    // $schemaList = DB::connection('vertica_odbc')->select("SELECT SCHEMA_NAME FROM V_CATALOG.SCHEMATA WHERE IS_SYSTEM_SCHEMA = FALSE ORDER BY SCHEMA_NAME;");
+    $schemaList = DB::connection('vertica_odbc')->table("V_CATALOG.SCHEMATA")->select("SCHEMA_NAME")->where("IS_SYSTEM_SCHEMA", FALSE)->orderBy("SCHEMA_NAME")->get();
     // dd($schemaList);
-    return view('web_bi.mapdb')->with('schemes', $schemaList);
+    return view('web_bi.mapdb')->with('schemata', $schemaList);
     // altro esempio
     // return view('web_bi.mapping')->with(['dimensions' => json_encode($dimensions), 'schemes' => $schemaList]);
   }

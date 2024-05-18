@@ -284,8 +284,8 @@
             <section class="dlg-grid">
               <h5 class="">Seleziona schema Database</h5>
               <nav>
-                {{-- {{ dd($schemes) }} --}}
-                @foreach($schemes as $schema)
+                {{-- {{ dd($schemata) }} --}}
+                @foreach($schemata as $schema)
                 <a href="#" data-fn="handlerSchema" data-schema="{{ $schema['SCHEMA_NAME'] }}">{{ $schema['SCHEMA_NAME'] }}</a>
                 @endforeach
               </nav>
