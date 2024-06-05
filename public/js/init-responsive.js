@@ -2679,7 +2679,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.hierTables();
     // recupero tutti i campi delle TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     WorkBook.activeTable = `${descTable.id}-${WorkBook.activeTable.dataset.factId}`;
-    // recupero i nomi delle tabelle time (univoci)
+    // recupero i nomi delle tabelle time e le aggiungo a un oggetto map()
     let timeTables = new Map();
     Draw.svg.querySelectorAll(`use.time[data-fact-id='${WorkBook.activeTable.dataset.factId}']`).forEach(table => {
       WorkBook.activeTable = table.id;
