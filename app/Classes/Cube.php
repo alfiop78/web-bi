@@ -104,11 +104,8 @@ class Cube
         }
       }
     }
-    // dd($fieldList);
-    // $this->select_clause = self::SELECT . implode(",\n", $fieldList);
     // dd($this->sql_info);
     // dd($this->select_clause);
-    // dd($this->_columns);
   }
 
   public function metrics_new()

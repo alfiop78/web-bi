@@ -2629,7 +2629,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const timeTable = timeRef.dataset.table;
     const timeColumn = timeRef.dataset.field;
     const timeColumnDs = timeRef.dataset.fieldDs;
-    debugger;
     const timeColumnType = timeRef.dataset.datatype;
     const column = document.querySelector('#ul-columns > li[data-selected]').dataset.label;
     const columnType = document.querySelector('#ul-columns > li[data-selected]').dataset.datatype;
@@ -2678,87 +2677,49 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
     WorkBook.createDataModel();
     app.hierTables();
-    debugger;
     // recupero tutti i campi delle TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     WorkBook.activeTable = `${descTable.id}-${WorkBook.activeTable.dataset.factId}`;
-    /* Draw.svg.querySelectorAll(`use.time[data-fact-id='${WorkBook.activeTable.dataset.factId}']`).forEach(async table => {
-      WorkBook.activeTable = table.id;
-      if (!window.sessionStorage.getItem(table.dataset.alias)) WorkBookStorage.saveSession(await app.getTable());
-      // creo tutte le colonne della tabella TIME nell'object WorkBook.field/s
-      const data = WorkBookStorage.getTable(table.dataset.alias);
-      console.log(table.dataset.alias, data);
-      if (!WorkBook.fields.has(table.dataset.alias)) {
-        data.forEach(column => {
-          let field = {};
-          debugger;
-          const tokenField = rand().substring(0, 7);
-          WorkBook.field = {
-            token: tokenField,
-            type: 'column',
-            tableId: WorkBook.activeTable.id,
-            schema: WorkBook.activeTable.dataset.schema,
-            tableAlias: WorkBook.activeTable.dataset.alias,
-            table: WorkBook.activeTable.dataset.table,
-            name: column.column_name,
-            origin_field: column.column_name,
-            field: {
-              id: { sql: [`${WorkBook.activeTable.dataset.table}.${column.column_name}`], datatype: column.type_name.toLowerCase() },
-              ds: { sql: [`${WorkBook.activeTable.dataset.table}.${column.column_name}`], datatype: column.type_name.toLowerCase() }
-            }
-          };
-          WorkBook.fields = tokenField;
-        });
-      }
-    }); */
+    // recupero i nomi delle tabelle time (univoci)
+    let timeTables = new Map();
     Draw.svg.querySelectorAll(`use.time[data-fact-id='${WorkBook.activeTable.dataset.factId}']`).forEach(table => {
       WorkBook.activeTable = table.id;
-      let field = {}, name;
-      switch (table.dataset.alias) {
-        case 'WB_YEARS':
-          // if (!WorkBook.fields.has(table.dataset.alias)) { }
-          field = {
-            id: { sql: [`${table.dataset.alias}.id_year`], datatype: 'integer' },
-            ds: { sql: [`${table.dataset.alias}.year`], datatype: 'char' }
-          };
-          name = 'year';
-          break;
-        case 'WB_QUARTERS':
-          field = {
-            id: { sql: [`${table.dataset.alias}.id_quarter`], datatype: 'integer' },
-            ds: { sql: [`${table.dataset.alias}.quarter`], datatype: 'char' }
-          };
-          name = 'quarter';
-          break;
-        case 'WB_MONTHS':
-          field = {
-            id: { sql: [`${table.dataset.alias}.id_month`], datatype: 'integer' },
-            ds: { sql: [`${table.dataset.alias}.month`], datatype: 'char' }
-          };
-          name = 'month';
-          break;
-        default:
-          field = {
-            id: { sql: [`${table.dataset.alias}.id_date`], datatype: 'date' },
-            ds: { sql: [`${table.dataset.alias}.id_date`], datatype: 'date' }
-          };
-          name = 'date';
-          break;
-      }
-      const tokenField = rand().substring(0, 7);
-      WorkBook.field = {
-        token: tokenField,
-        type: 'column',
-        tableId: WorkBook.activeTable.id,
+      timeTables.set(table.dataset.table, {
         schema: WorkBook.activeTable.dataset.schema,
         tableAlias: WorkBook.activeTable.dataset.alias,
         table: WorkBook.activeTable.dataset.table,
-        name,
-        // origin_field: column.column_name,
-        field
-      };
-      WorkBook.fields = tokenField;
+      });
     });
-
+    // TODO: da inizializzare nel WorkBook
+    const timeFields = {
+      WB_YEARS: {
+        id: { sql: ['WB_YEARS.id_year'], datatype: 'integer' },
+        ds: { sql: ['WB_YEARS.year'], datatype: 'char' }
+      },
+      WB_QUARTERS: {
+        id: { sql: ['WB_QUARTERS.id_quarter'], datatype: 'integer' },
+        ds: { sql: ['WB_QUARTERS.quarter'], datatype: 'char' }
+      },
+      WB_MONTHS: {
+        id: { sql: ['WB_MONTHS.id_month'], datatype: 'integer' },
+        ds: { sql: ['WB_MONTHS.month'], datatype: 'char' }
+      },
+      WB_DATE: {
+        id: { sql: ['WB_DATE.id_date'], datatype: 'date' },
+        ds: { sql: ['WB_DATE.date'], datatype: 'date' }
+      }
+    };
+    for (const [key, value] of timeTables) {
+      WorkBook.field = {
+        token: `tok_${key}`,
+        type: 'column',
+        schema: value.schema,
+        tableAlias: value.tableAlias,
+        table: value.table,
+        name: key,
+        field: timeFields[key]
+      };
+      WorkBook.fields = `tok_${key}`;
+    }
     WorkBook.checkChanges('time');
   }
 
@@ -3098,6 +3059,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // reset degli elementi in #workbook-objects
     // app.workbookTablesStruct.querySelectorAll('details').forEach(detail => detail.remove());
     app.workbookTablesStruct.querySelectorAll('#ul-metrics > li, #ul-filters > li, details').forEach(element => element.remove());
+    debugger;
     const parent = app.workbookTablesStruct.querySelector('#nav-fields');
 
     // INFO: 2024.03.02 - Rivedere workBookMap forse può essere utilizzata questa al posto
