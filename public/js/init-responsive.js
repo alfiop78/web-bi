@@ -2921,32 +2921,34 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       const timingFn = document.querySelector('#dl-timing-functions > dt[selected]');
       if (['last-year', 'last-month', 'ecc...'].includes(timingFn.dataset.value)) {
         const timeField = timingFn.dataset.timeField;
-        const timeTable = timingFn.dataset.table;
         // Per questa metrica è stata aggiunta una timingFn.
         // oltre ad aggiungere il token (es.: 'last-year') nel Set 'filters' devo aggiungere anche la definizione di
         // ... questa timingFn, questo perchè la timingFn non è un filtro 'separato' che viene salvato in storage
         filters.add(timingFn.dataset.value);
-        object.timingFn = {
-          [timingFn.dataset.value]: {
-            // alias: timeTable,
-            field: timeField,
-            SQL: [
+        let SQL;
+        // FIX: La variabile SQL deve essere impostata in app.createProcess()
+        // ... perchè è necessario verificare qual'è l'ultimo livello della dimensione TIME
+        // (Vedere istruzioni delle Timing Function nella dialog di creazione metrica avanzata)
+        switch (timingFn.dataset.value) {
+          case 'last-year':
+            SQL = [
+              ['WB_YEARS.previous', 'WB_QUARTERS.year_id'],
+              ['WB_QUARTERS.id_quarter', 'WB_MONTHS.quarter_id'],
+              ['WB_MONTHS.id_month', 'WB_DATE.month_id'],
+            ]
+            break;
+          case 'last-month':
+            SQL = [
               ['WB_YEARS.id_year', 'WB_QUARTERS.year_id'],
               ['WB_QUARTERS.id_quarter', 'WB_MONTHS.quarter_id'],
               ['WB_MONTHS.previous', 'WB_DATE.month_id'],
             ]
-            // SQL: [
-            //   'WB_DATE.id_date',
-            //   `TO_CHAR(${WorkBook.dateTime[metric.factId].tableAlias}.${WorkBook.dateTime[metric.factId].timeField})::DATE`
-            // ]
-            // SQL: [
-            //   `(MapJSONExtractor(WB_DATE.last))['${timeField}']::DATE`,
-            //   `TO_CHAR(${WorkBook.dateTime[metric.factId].tableAlias}.${WorkBook.dateTime[metric.factId].timeField})::DATE`
-            // ]
-          }
-        };
+            break;
+        }
+        object.timingFn = { [timingFn.dataset.value]: { field: timeField, SQL } };
       }
     }
+
     if (filters.size !== 0) {
       object.filters = [...filters];
       object.metric_type = 'advanced';
