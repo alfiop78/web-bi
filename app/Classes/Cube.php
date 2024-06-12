@@ -362,7 +362,7 @@ class Cube
         $this->time_sql = [
           ["WB_YEARS.id_year", "WB_QUARTERS.year_id"],
           ["WB_QUARTERS.id_quarter", "WB_MONTHS.quarter_id"],
-          ["WB_MONTHS.last", "WB_DATE.month_id"]
+          ["WB_MONTHS.previous", "WB_DATE.month_id"]
         ];
         break;
       default:
@@ -389,8 +389,6 @@ class Cube
         /* è una funzione temporale.
           Aggiungo, alla WHERE, la condizione per applicare il filtro last-year.
         */
-        // TODO: stabilire il livello più basso nella gerarchia della time (presente nella factId in ciclo)
-        // per poter impostare correttamente le relazioni
         // creo l'SQL join della dimensione TIME in base al livello più basso presente nel report (year, quarter, month, date)
         switch ($this->hierarchiesTimeLevel) {
           case "tok_WB_MONTHS":
