@@ -1545,14 +1545,19 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     process.fields = fields;
 
     // ottengo le keys dell'object 'process.fields' per verificare quali livelli della TIME sono presenti
-    // BUG: quando sono presenti year e month non viene correttamente trovato l'ultimo level
-    process.hierarchiesTimeLevel = Object.keys(process.fields).find(field => {
-      if (field === 'tok_WB_MONTHS') return true;
-      if (field === 'tok_WB_QUARTERS') return true;
-      if (field === 'tok_WB_YEARS') return true;
+    Object.keys(process.fields).forEach(timeField => {
+      switch (timeField) {
+        case "tok_WB_MONTHS":
+          process.hierarchiesTimeLevel = timeField;
+          break;
+        case "tok_WB_QUARTERS":
+          process.hierarchiesTimeLevel = timeField;
+          break;
+        default:
+          process.hierarchiesTimeLevel = timeField;
+          break;
+      }
     });
-    Object.keys(process.fields).forEach(timeField => { });
-    debugger;
 
     process.advancedMeasures = {}, process.baseMeasures = {}, process.compositeMeasures = {};
     Sheet.fact.forEach(factId => {
@@ -2929,6 +2934,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // se ci sono funzioni temporali selezionate le aggiungo all'object 'filters' con token = alla funzione scelta (es.: last-year)
     if (document.querySelector('#dl-timing-functions > dt[selected]')) {
       const timingFn = document.querySelector('#dl-timing-functions > dt[selected]');
+      // TODO: aggiungere le altre funzioni temporali
       if (['last-year', 'last-month', 'ecc...'].includes(timingFn.dataset.value)) {
         const timeField = timingFn.dataset.timeField;
         // Per questa metrica è stata aggiunta una timingFn.
