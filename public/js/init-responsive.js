@@ -1544,6 +1544,16 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
     process.fields = fields;
 
+    // ottengo le keys dell'object 'process.fields' per verificare quali livelli della TIME sono presenti
+    // BUG: quando sono presenti year e month non viene correttamente trovato l'ultimo level
+    process.hierarchiesTimeLevel = Object.keys(process.fields).find(field => {
+      if (field === 'tok_WB_MONTHS') return true;
+      if (field === 'tok_WB_QUARTERS') return true;
+      if (field === 'tok_WB_YEARS') return true;
+    });
+    Object.keys(process.fields).forEach(timeField => { });
+    debugger;
+
     process.advancedMeasures = {}, process.baseMeasures = {}, process.compositeMeasures = {};
     Sheet.fact.forEach(factId => {
       let advancedMeasures = new Map(), baseMeasures = new Map();
@@ -2925,26 +2935,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         // oltre ad aggiungere il token (es.: 'last-year') nel Set 'filters' devo aggiungere anche la definizione di
         // ... questa timingFn, questo perchè la timingFn non è un filtro 'separato' che viene salvato in storage
         filters.add(timingFn.dataset.value);
-        let SQL;
-        // FIX: La variabile SQL deve essere impostata in app.createProcess()
-        // ... perchè è necessario verificare qual'è l'ultimo livello della dimensione TIME
-        // (Vedere istruzioni delle Timing Function nella dialog di creazione metrica avanzata)
-        switch (timingFn.dataset.value) {
-          case 'last-year':
-            SQL = [
-              ['WB_YEARS.previous', 'WB_QUARTERS.year_id'],
-              ['WB_QUARTERS.id_quarter', 'WB_MONTHS.quarter_id'],
-              ['WB_MONTHS.id_month', 'WB_DATE.month_id'],
-            ]
-            break;
-          case 'last-month':
-            SQL = [
-              ['WB_YEARS.id_year', 'WB_QUARTERS.year_id'],
-              ['WB_QUARTERS.id_quarter', 'WB_MONTHS.quarter_id'],
-              ['WB_MONTHS.previous', 'WB_DATE.month_id'],
-            ]
-            break;
-        }
         object.timingFn = { [timingFn.dataset.value]: { field: timeField, SQL } };
       }
     }

@@ -32,6 +32,7 @@ class Cube
   private $segmented = [];
   public $compositeMeasures = [];
   public $queries = [];
+  private $time_sql = [];
 
   function __construct($process)
   {
@@ -43,6 +44,7 @@ class Cube
     // il report deve necessariamente contenere almeno un livello dimensionale
     // ...quindi $this->process->{fields} sarà sempre presente
     $this->fields = $this->process->{"fields"};
+    $this->hierarchiesTimeLevel = $this->process->{"hierarchiesTimeLevel"};
   }
 
   public function __set($prop, $value)
@@ -320,6 +322,54 @@ class Cube
     // dd($this->json_info_advanced);
   }
 
+  private function levelYear($timingFunction)
+  {
+    // ultimo livello del report YEAR
+    switch ($timingFunction) {
+      case "last-year":
+        // metrica last-year
+        $this->time_sql = [
+          ["WB_YEARS.previous", "WB_QUARTERS.year_id"],
+          ["WB_QUARTERS.id_quarter", "WB_MONTHS.quarter_id"],
+          ["WB_MONTHS.id_month", "WB_DATE.month_id"]
+        ];
+        break;
+      case "last-month":
+        // metrica last-month
+        $this->time_sql = [
+          ["WB_YEARS.id_year", "WB_QUARTERS.year_id"],
+          ["WB_QUARTERS.id_quarter", "WB_MONTHS.quarter_id"],
+          ["WB_MONTHS.last", "WB_DATE.month_id"]
+        ];
+        break;
+      default:
+        break;
+    }
+  }
+
+  private function levelMonth($timingFunction)
+  {
+    // livello MONTH nel report
+    switch ($timingFunction) {
+      case "last-year":
+        $this->time_sql = [
+          ["WB_YEARS.id_year", "WB_QUARTERS.year_id"],
+          ["WB_QUARTERS.id_quarter", "WB_MONTHS.quarter_id"],
+          ["WB_MONTHS.last", "WB_DATE.month_id"]
+        ];
+        break;
+      case "last-month":
+        $this->time_sql = [
+          ["WB_YEARS.id_year", "WB_QUARTERS.year_id"],
+          ["WB_QUARTERS.id_quarter", "WB_MONTHS.quarter_id"],
+          ["WB_MONTHS.last", "WB_DATE.month_id"]
+        ];
+        break;
+      default:
+        break;
+    }
+  }
+
   /*
 		aggiungo a $this->filters_metricTable i filtri presenti su una metrica filtrata.
 		Stessa logica del Metodo filters()
@@ -337,32 +387,39 @@ class Cube
       // dd($timingFunctions, $token);
       if (in_array($token, $timingFunctions)) {
         /* è una funzione temporale.
-          Aggiungo, alla WHERE la condizione per applicare il filtro last-year.
-          Da valutare se utilizzare (MapJSONExtractor(WEB_BI_TIME.last))['year']::DATE = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE
-          ...oppure (WEB_BI_TIME.trans_ly) = TO_CHAR(DocVenditaDettaglio_730.DataDocumento)::DATE.
+          Aggiungo, alla WHERE, la condizione per applicare il filtro last-year.
         */
         // TODO: stabilire il livello più basso nella gerarchia della time (presente nella factId in ciclo)
         // per poter impostare correttamente le relazioni
+        // creo l'SQL join della dimensione TIME in base al livello più basso presente nel report (year, quarter, month, date)
+        switch ($this->hierarchiesTimeLevel) {
+          case "tok_WB_MONTHS":
+            $this->levelMonth($token);
+            break;
+          case "tok_WB_QUARTERS":
+            break;
+          case "tok_WB_YEARS":
+            $this->levelYear($token);
+            break;
+          default:
+            break;
+        }
+        // dd($this->time_sql);
+
         // dd($this->from_clause[$this->factId]);
         // dd(array_key_exists("WB_YEARS", $this->from_clause[$this->factId]));
         if (array_key_exists("WB_YEARS", $this->from_clause[$this->factId])) {
-          $this->WHERE_timingFn[$this->factId]['WB_YEARS'] = implode(" = ", $filter->SQL[0]);
+          // $this->WHERE_timingFn[$this->factId]['WB_YEARS'] = implode(" = ", $filter->SQL[0]);
+          $this->WHERE_timingFn[$this->factId]['WB_YEARS'] = implode(" = ", $this->time_sql[0]);
           if (array_key_exists("WB_QUARTERS", $this->from_clause[$this->factId])) {
-            $this->WHERE_timingFn[$this->factId]['WB_QUARTERS'] = implode(" = ", $filter->SQL[1]);
+            // $this->WHERE_timingFn[$this->factId]['WB_QUARTERS'] = implode(" = ", $filter->SQL[1]);
+            $this->WHERE_timingFn[$this->factId]['WB_QUARTERS'] = implode(" = ", $this->time_sql[1]);
             if (array_key_exists("WB_MONTHS", $this->from_clause[$this->factId])) {
-              $this->WHERE_timingFn[$this->factId]['WB_MONTHS'] = implode(" = ", $filter->SQL[2]);
-              // if (array_key_exists("WB_DATE", $this->from_clause[$this->factId])) {
-              //   $this->WHERE_timingFn[$this->factId]['date'] = 'WB_MONTHS.id_month = WB_DATE.month_id';
-              // }
+              // $this->WHERE_timingFn[$this->factId]['WB_MONTHS'] = implode(" = ", $filter->SQL[2]);
+              $this->WHERE_timingFn[$this->factId]['WB_MONTHS'] = implode(" = ", $this->time_sql[2]);
             }
           }
         }
-        // dd($this->WHERE_timingFn);
-        // $this->WHERE_timingFn[$this->factId]['years'] = "WB_YEARS.id_year = WB_QUARTERS.year_id";
-        // $this->WHERE_timingFn[$this->factId]['quarters'] = "WB_QUARTERS.id_quarter = WB_MONTHS.quarter_id";
-        // $this->WHERE_timingFn[$this->factId]['months'] = "WB_MONTHS.id_month = WB_DATE.month_id";
-
-        // $this->WHERE_timingFn[$this->factId][$token] = implode(" = ", $filter->SQL);
 
         if (property_exists($this, 'sql_info')) {
           $this->json_info_advanced[$tableName]->{'AND'}->{$token} = implode(" = ", $filter->SQL);
@@ -374,7 +431,6 @@ class Cube
         }
         // $this->WHERE_timingFn[$token] = implode(" = ", $filter->sql);
         // dd($this->WHERE_timingFn);
-        // dd("(MapJSONExtractor({$filter->table}.{$filter->field}))['$filter->func']::DATE");
       } else {
         // dd($filter->SQL, $this->filters_metricTable, $this->filters_baseTable);
         // aggiungo senza verificare se già presente il codice SQL del filtro
