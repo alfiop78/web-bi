@@ -440,7 +440,7 @@
                       <dt class="btn-link">Last Year YTD</dt>
                       <dd>Analoga alla Year to date, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al giorno corrente, sempre riferito all’anno precedente</dd>
 
-                      <dt class="btn-link">Year To Month</dt>
+                      <dt class="btn-link" data-value="year-to-month" data-fn="handlerTimingFunctions" data-table="WB_MONTHS" data-time-field="year-to-month">Year To Month</dt>
                       <dd>La funzione aggrega i dati da inizio anno fino al mese corrente. Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
 
                       <dt class="btn-link">Last Year YTM</dt>

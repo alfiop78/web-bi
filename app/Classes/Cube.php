@@ -383,37 +383,42 @@ class Cube
       // token : es. 'last-month'
       // nella proprietà SQL ci sono le join tra le tabelle TIME
       // TODO: aggiungere le altre funzioni temporali
-      $timingFunctions = ['last-year', 'last-month'];
+      $timingFunctions = ['last-year', 'last-month', 'year-to-month'];
       // dd($timingFunctions, $token);
       if (in_array($token, $timingFunctions)) {
-        /* è una funzione temporale.
-          Aggiungo, alla WHERE, la condizione per applicare il filtro last-year.
+        /*
+         * è una funzione temporale. Aggiungo, alla WHERE, la condizione per applicare il filtro temporale.
         */
-        // creo l'SQL join della dimensione TIME in base al livello più basso presente nel report (year, quarter, month, date)
-        switch ($this->hierarchiesTimeLevel) {
-          case "tok_WB_MONTHS":
-            $this->levelMonth($token);
-            break;
-          case "tok_WB_QUARTERS":
-            break;
-          case "tok_WB_YEARS":
-            $this->levelYear($token);
-            break;
-          default:
-            break;
+        if ($token !== "year-to-month") {
+          // creo l'SQL join della dimensione TIME in base al livello più basso presente nel report (year, quarter, month, date)
+          switch ($this->hierarchiesTimeLevel) {
+            case "tok_WB_MONTHS":
+              $this->levelMonth($token);
+              break;
+            case "tok_WB_QUARTERS":
+              break;
+            case "tok_WB_YEARS":
+              $this->levelYear($token);
+              break;
+            default:
+              break;
+          }
+        } else {
+          $this->time_sql = [
+            ["WB_YEARS.id_year", "WB_QUARTERS.year_id"],
+            ["WB_QUARTERS.id_quarter", "WB_MONTHS.quarter_id"],
+            ["WB_MONTHS.id_month", "WB_DATE.month_id"]
+          ];
         }
         // dd($this->time_sql);
 
         // dd($this->from_clause[$this->factId]);
         // dd(array_key_exists("WB_YEARS", $this->from_clause[$this->factId]));
         if (array_key_exists("WB_YEARS", $this->from_clause[$this->factId])) {
-          // $this->WHERE_timingFn[$this->factId]['WB_YEARS'] = implode(" = ", $filter->SQL[0]);
           $this->WHERE_timingFn[$this->factId]['WB_YEARS'] = implode(" = ", $this->time_sql[0]);
           if (array_key_exists("WB_QUARTERS", $this->from_clause[$this->factId])) {
-            // $this->WHERE_timingFn[$this->factId]['WB_QUARTERS'] = implode(" = ", $filter->SQL[1]);
             $this->WHERE_timingFn[$this->factId]['WB_QUARTERS'] = implode(" = ", $this->time_sql[1]);
             if (array_key_exists("WB_MONTHS", $this->from_clause[$this->factId])) {
-              // $this->WHERE_timingFn[$this->factId]['WB_MONTHS'] = implode(" = ", $filter->SQL[2]);
               $this->WHERE_timingFn[$this->factId]['WB_MONTHS'] = implode(" = ", $this->time_sql[2]);
             }
           }
@@ -520,7 +525,7 @@ class Cube
 
   private function createMetricTable_new($tableName, $advancedMetrics)
   {
-    // var_dump($advancedMetrics);
+    // dd($advancedMetrics);
     $this->fromFilteredMetric = NULL;
     // dd($this->select_clause);
     // unisco gli array della clausola select con le metriche da calcolare per il gruppo di metriche

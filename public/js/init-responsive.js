@@ -1594,7 +1594,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
                 // se, nei filtri della metrica, sono presenti filtri di funzioni temporali,
                 // ...la definizione del filtro và recuperata da WorkBook.metrics.timingFn
                 // TODO: implementare le altre funzioni temporali
-                if (['last-year', 'last-month', 'ecc...'].includes(filterToken)) {
+                if (['last-year', 'last-month', 'year-to-month'].includes(filterToken)) {
                   // advancedMetrics.get(token).filters[filterToken] = wbMetrics.timingFn[filterToken];
                   obj.filters[filterToken] = wbMetrics.timingFn[filterToken];
                 } else {
@@ -2935,13 +2935,13 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     if (document.querySelector('#dl-timing-functions > dt[selected]')) {
       const timingFn = document.querySelector('#dl-timing-functions > dt[selected]');
       // TODO: aggiungere le altre funzioni temporali
-      if (['last-year', 'last-month', 'ecc...'].includes(timingFn.dataset.value)) {
+      if (['last-year', 'last-month', 'year-to-month'].includes(timingFn.dataset.value)) {
         const timeField = timingFn.dataset.timeField;
         // Per questa metrica è stata aggiunta una timingFn.
         // oltre ad aggiungere il token (es.: 'last-year') nel Set 'filters' devo aggiungere anche la definizione di
         // ... questa timingFn, questo perchè la timingFn non è un filtro 'separato' che viene salvato in storage
         filters.add(timingFn.dataset.value);
-        object.timingFn = { [timingFn.dataset.value]: { field: timeField, SQL } };
+        object.timingFn = { [timingFn.dataset.value]: { field: timeField } };
       }
     }
 

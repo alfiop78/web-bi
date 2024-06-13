@@ -23,6 +23,11 @@ dt{
   margin: 8px 0px;
 }
 
+dt.btn-link:hover {
+  cursor: pointer;
+  font-style: bold;
+}
+
 dd{
   margin-inline-start: 2em;
 }
