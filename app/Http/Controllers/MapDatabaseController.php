@@ -19,17 +19,17 @@ class MapDatabaseController extends Controller
 {
   public function mapdb()
   {
-    dump(Schema::connection("mysql")->hasTable("bi_sheets"));
-    dump(Schema::connection("vertica_odbc")->hasTable("decisyon_cache.WB_DATE"));
-    dump(Schema::connection("vertica_odbc")->hasTable("WB_DATE"));
-    dump(Schema::connection("vertica_odbc")->hasTable("automotive_bi_data.Azienda"));
+    // dump(Schema::connection("mysql")->hasTable("bi_sheets"));
+    // dump(Schema::connection("vertica_odbc")->hasTable("decisyon_cache.WB_DATE"));
+    // dump(Schema::connection("vertica_odbc")->hasTable("WB_DATE"));
+    // dump(Schema::connection("vertica_odbc")->hasTable("automotive_bi_data.Azienda"));
     // dd(DB::connection("vertica_odbc")->getSchemaBuilder()->hasTable("WB_DATE"));
     // recupero l'elenco delle dimensioni create da bi_dimensions.
     // NOTE: il support alle query su colonne JSON è per mysql 5.7+ https://laravel.com/docs/8.x/queries#json-where-clauses
     // $dimensions = DB::table('bi_dimensions')->get('json_value'); // QueryBuilder
     // $dimensions = BIdimension::get('json_value'); // Eloquent
     // TODO: connessione a mysql
-    $schemaList = DB::connection('mysql')->select("SHOW SCHEMAS;");
+    // $schemaList = DB::connection('mysql')->select("SHOW SCHEMAS;");
     // $schemaList = DB::connection('vertica_odbc')->select("SELECT SCHEMA_NAME FROM V_CATALOG.SCHEMATA WHERE IS_SYSTEM_SCHEMA = FALSE ORDER BY SCHEMA_NAME;");
     $schemaList = DB::connection('vertica_odbc')->table("V_CATALOG.SCHEMATA")->select("SCHEMA_NAME")->where("IS_SYSTEM_SCHEMA", FALSE)->orderBy("SCHEMA_NAME")->get();
     // dd($schemaList);
