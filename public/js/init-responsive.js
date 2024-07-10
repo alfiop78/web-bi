@@ -1491,7 +1491,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.tableSelected = async (e) => {
     console.log(e.ctrlKey);
-    if (!e.ctrlKey) return false;
+    if (e.ctrlKey || e.currentTarget.dataset.active) return;
     console.log('click event');
     // console.log(`table selected ${e.currentTarget.dataset.table}`);
     // console.log(e.currentTarget);

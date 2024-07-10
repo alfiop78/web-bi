@@ -338,20 +338,18 @@ class DrawSVG {
     this.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
   }
 
-  handlerDblClick(e) {
-    console.log(e.target);
-    console.log(this);
-    debugger;
-  }
+  // handlerDblClick(e) {
+  //   console.log(e.target);
+  //   console.log(this);
+  //   debugger;
+  // }
 
   tableMouseDown(e) {
     e.preventDefault();
     e.stopPropagation();
-    if (e.ctrlKey) return false;
+    if (!e.ctrlKey || e.button === 2) return;
     console.log('event mouseDown');
-    // this.coordinate = { x: +e.currentTarget.dataset.x, y: +e.currentTarget.dataset.y };
     this.coordinate = { x: +e.currentTarget.getAttribute('x'), y: +e.currentTarget.getAttribute('y') };
-    if (e.button === 2) return false;
     this.nearestTable;
     this.el = e.currentTarget;
   }
@@ -360,9 +358,8 @@ class DrawSVG {
     e.preventDefault();
     e.stopPropagation();
     // console.log(e);
-    if (e.ctrlKey) return false;
     // console.log('mousemove', e.currentTarget);
-    if (this.el) {
+    if (this.el && e.ctrlKey) {
       this.coordinate.x += e.movementX;
       this.coordinate.y += e.movementY;
       // console.log(e);
@@ -370,7 +367,7 @@ class DrawSVG {
       e.currentTarget.setAttribute('y', this.coordinate.y);
       // se è presente una sola tabella nel canvas non eseguo il codice successivo, non c'è bisogno
       // di legare la linea di join
-      if (this.countTables === 1) return false;
+      if (this.countTables === 1) return;
 
       this.currentLineRef = this.svg.querySelector(`path[data-from='${e.target.id}']`).id;
       if (this.el.dataset.shared_ref) {
@@ -617,7 +614,7 @@ class DrawSVG {
     // INFO: gli eventi impostati con il dataset in questo modo possono essere legati anche a init-responsive.js
     use.dataset.enterFn = 'tableEnter';
     // use.addEventListener('click', this.tableSelected.bind(this));
-    use.ondblclick = this.handlerDblClick.bind(Draw);
+    // use.ondblclick = this.handlerDblClick.bind(Draw);
     // punto di ancoraggio di destra
     use.dataset.anchorXTo = this.currentTable.x + 190;
     use.dataset.anchorYTo = this.currentTable.y + 12;
@@ -647,7 +644,7 @@ class DrawSVG {
     // qui aggiorno l'elemento del DOM che è stato spostato, quando non si utilizza il drag&drop
     const use = this.svg.querySelector(`#${this.currentTable.key}`);
     use.dataset.enterFn = 'tableEnter';
-    use.ondblclick = this.handlerDblClick.bind(Draw);
+    // use.ondblclick = this.handlerDblClick.bind(Draw);
     // da testare
     use.dataset.x = this.currentTable.x;
     use.dataset.y = this.currentTable.y;
@@ -735,7 +732,7 @@ class DrawSVG {
     use.dataset.fn = 'tableSelected';
     // use.addEventListener('click', this.tableSelected.bind(this), true);
     // use.dataset.enterFn = 'tableEnter';
-    use.ondblclick = this.handlerDblClick.bind(Draw);
+    // use.ondblclick = this.handlerDblClick.bind(Draw);
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
     // punto di ancoraggio di destra
