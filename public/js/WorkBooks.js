@@ -521,6 +521,7 @@ class WorkBooks {
       }
       line.setAttribute('d', d);
       Draw.svg.appendChild(line);
+      line.dataset.fn = "selectLine";
     }
 
     for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.fields)) {

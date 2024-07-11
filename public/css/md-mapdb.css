@@ -59,7 +59,7 @@ svg.dropzone.dropping{
 
 .translate{
   height: 100%;
-  background-color: #e6e6e6;
+  background-color: #ccc;
   display: grid;
   grid-template-rows: 100%;
   /* grid-template-rows: repeat(auto-fit, 108px); */
@@ -91,10 +91,27 @@ path[hidden] {
   visibility: hidden;
 }
 
-path{
+path:not([data-join-id]){
   fill: transparent;
-  stroke: darkgray;
-  stroke-width: 2;
+  stroke: darkgrey;
+  stroke-dasharray: 4;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+path[data-join-id]{
+  fill: transparent;
+  /* stroke: #aeaea9; */
+  stroke: white;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+path:hover{
+  cursor: pointer;
+  fill: transparent;
+  stroke: brown;
+  stroke-width: 2.5;
   stroke-linecap: round;
 }
 
@@ -104,26 +121,10 @@ path.fact {
   stroke: grey;
 }
 
-path[data-join-id]{
-  fill: transparent;
-  /* stroke: #6a92b39e; */
-  stroke: #a7b581;
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-
-path:hover{
-  cursor: pointer;
-  fill: transparent;
-  stroke: brown;
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-
 .struct > rect.table {
-  rx: 2;
-  width: 180px;
-  height: 24px;
+  rx: 4px;
+  width: 200px;
+  height: 30px;
 }
 
 line {
@@ -132,9 +133,8 @@ line {
 }
 
 .struct .symbol {
-  rx: 2;
-  width: 5px;
-  height: 24px;
+  width: 28px;
+  height: 30px;
 }
 
 .struct > rect.symbol {
@@ -152,14 +152,14 @@ line {
 }
 
 .struct.common > rect.common {
-  width: 180px;
-  height: 24px;
+  width: 200px;
+  height: 30px;
   fill: #3130301c;
 }
 
 .struct.common > rect.sub-common {
-  width: 180px;
-  height: 24px;
+  width: 200px;
+  height: 30px;
   fill: #31303017;
 }
 
@@ -191,7 +191,7 @@ line {
 
 use.table{
   /* fill: white; */
-  fill: #f2f2f2;
+  fill: #ededed;
   font-weight: normal;
   /* opacity: .8; */
 }

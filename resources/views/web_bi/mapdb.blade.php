@@ -656,22 +656,23 @@
                               <g id="table-struct" class="struct">
                                 <rect class="table" x="0" y="0" />
                                 <rect class="symbol" x="0" y="0" />
-                                {{-- <image href="{{ asset('/images/grid_on_black_18dp.svg') }}" data-id x="4" y="3" width="18" height="18"></image> --}}
-                                <text x="10" y="17" font-family="Barlow" font-size=".8rem" font-weight="normal"></text>
+                                <image href="{{ asset('/images/table_18dp_1.svg') }}" data-id x="4" y="6" width="18" height="18"></image>
+                                <text x="32" y="20" font-family="Barlow" font-size=".8rem" font-weight="normal"></text>
                               </g>
                               <g id="table-struct-fact" class="struct fact">
                                 <rect class="table" x="0" y="0" />
                                 <rect class="symbol" x="0" y="0" />
+                                <image href="{{ asset('/images/database_18dp_1.svg') }}" data-id x="4" y="6" width="18" height="18"></image>
                                 <!-- <text x="12" y="17" font-family="Barlow" font-size=".85rem" font-weight="bold"></text> -->
-                                <text x="10" y="17" font-family="Barlow" font-size=".85rem"></text>
+                                <text x="32" y="20" font-family="Barlow" font-size=".85rem"></text>
                               </g>
                               <g id="table-common" class="struct common">
                                 <rect class="common" x="6" y="4" />
                                 <rect class="sub-common" x="12" y="8" />
                                 <rect class="table" x="0" y="0" />
                                 <rect class="symbol" x="0" y="0" />
-                                <image href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="3" width="18" height="18"></image>
-                                <text x="26" y="17" font-family="Barlow" font-size=".85rem" font-style="italic"></text>
+                                <image href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="6" width="18" height="18"></image>
+                                <text x="32" y="20" font-family="Barlow" font-size=".85rem" font-style="italic"></text>
                               </g>
                               <g id="web-bi-time">
                                 <image id="time" href="{{ asset('/images/access_time_filled_865858_18dp.svg') }}" height="18" width="18"></image>

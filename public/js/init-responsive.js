@@ -478,6 +478,13 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     e.target.appendChild(li);
   }
 
+  app.selectLine = (e) => {
+    console.log(e.target);
+    Draw.currentLineRef = e.target.id;
+    Draw.openJoinWindow();
+    Draw.createWindowJoinContent();
+  }
+
   app.removeFilterByAdvMetric = (e) => {
 
     debugger;
@@ -2500,7 +2507,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     document.querySelector('#' + e.currentTarget.dataset.drawerId).toggleAttribute('open');
   }
 
-  app.lineSelected = async (e) => {
+  /* app.lineSelected = async (e) => {
     // imposto la join line corrente
     Draw.currentLineRef = e.currentTarget.id;
     WorkBook.tableJoins = {
@@ -2513,7 +2520,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       app.addFields(key, data);
     }
     app.openJoinWindow();
-  }
+  } */
 
   // imposto la join selezionata come data-active
   // TODO: potrebbe essere spostata in supportFn.js

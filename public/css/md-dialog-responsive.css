@@ -229,7 +229,7 @@ dialog .buttons{
 .context-menu {
   position: fixed;
   display: none;
-  width: 180px;
+  width: 200px;
   background-color: gainsboro;
   color: #494949;
   z-index: 0;
@@ -239,7 +239,8 @@ dialog .buttons{
   display: block;
   z-index: 999;
   background-color: whitesmoke;
-  box-shadow: 0px 1px 4px -1px #494949;
+  box-shadow: 0px 1px 4px 1px #acabab;
+  border-radius: 4px;
 }
 
 dialog .joins{

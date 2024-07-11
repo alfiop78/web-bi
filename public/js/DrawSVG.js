@@ -101,6 +101,7 @@ class DrawSVG {
       const token = this.rand().substring(0, 4);
       line.id = `line-${token}`;
       line.dataset.id = token;
+      line.dataset.fn = 'selectLine';
       this.svg.appendChild(line);
       this.currentLineRef = line.id;
       this.nearestTable;
@@ -117,7 +118,7 @@ class DrawSVG {
       if (this.countTables > 0) {
         // viene utilizzato il calcolo dell'ipotenusa con il valore assoluto per stabilire qual'è la tabella più vicina
         this.nearestTable = [...this.svg.querySelectorAll('use.table:not([data-shared_ref])')].reduce((prev, current) => {
-          // this.nearestTable = [...this.svg.querySelectorAll('use.table:not(.common)')].reduce((prev, current) => {
+          // this.nearetestTable = [...this.svg.querySelectorAll('use.table:not(.common)')].reduce((prev, current) => {
           return (Math.hypot(e.offsetX - (+current.dataset.anchorXTo), e.offsetY - (+current.dataset.anchorYTo)) < Math.hypot(e.offsetX - (+prev.dataset.anchorXTo), e.offsetY - (+prev.dataset.anchorYTo))) ? current : prev;
           // return (Math.hypot(e.offsetX - (+current.dataset.x + 190), e.offsetY - (+current.dataset.y + 12)) < Math.hypot(e.offsetX - (+prev.dataset.x + 190), e.offsetY - (+prev.dataset.y + 12))) ? current : prev;
         });
@@ -143,18 +144,18 @@ class DrawSVG {
               p1x: +this.nearestTable.dataset.anchorXTo + 40,
               p1y: +this.nearestTable.dataset.anchorYTo,
               p2x: (e.offsetX - this.dragElementPosition.x - 10) - 40,
-              p2y: (e.offsetY - this.dragElementPosition.y + 12),
+              p2y: (e.offsetY - this.dragElementPosition.y + 15),
               // punto end della linea
-              x2: (e.offsetX - this.dragElementPosition.x - 10), y2: (e.offsetY - this.dragElementPosition.y + 12),
+              x2: (e.offsetX - this.dragElementPosition.x - 10), y2: (e.offsetY - this.dragElementPosition.y + 15),
               anchor: 'right'
             }, // right
             {
               x: +this.nearestTable.getAttribute('x') + (rectBounding.width / 2), y: +this.nearestTable.getAttribute('y') + (rectBounding.height + 6),
               p1x: +this.nearestTable.getAttribute('x') + (rectBounding.width / 2),
               p1y: +this.nearestTable.dataset.anchorYTo + 50,
-              p2x: (e.offsetX - this.dragElementPosition.x + 12),
+              p2x: (e.offsetX - this.dragElementPosition.x + 15),
               p2y: (e.offsetY - this.dragElementPosition.y) - 50,
-              x2: (e.offsetX - this.dragElementPosition.x + 12), y2: (e.offsetY - this.dragElementPosition.y - 6),
+              x2: (e.offsetX - this.dragElementPosition.x + 15), y2: (e.offsetY - this.dragElementPosition.y - 6),
               anchor: 'bottom'
             } // bottom
           ] :
@@ -164,8 +165,8 @@ class DrawSVG {
               p1x: +this.nearestTable.dataset.anchorXTo + 40,
               p1y: +this.nearestTable.dataset.anchorYTo,
               p2x: (e.offsetX - this.dragElementPosition.x - 10) - 40,
-              p2y: (e.offsetY - this.dragElementPosition.y + 12),
-              x2: (e.offsetX - this.dragElementPosition.x - 10), y2: (e.offsetY - this.dragElementPosition.y + 12),
+              p2y: (e.offsetY - this.dragElementPosition.y + 15),
+              x2: (e.offsetX - this.dragElementPosition.x - 10), y2: (e.offsetY - this.dragElementPosition.y + 15),
               anchor: 'right'
             }, // right
             // { x: +nearestTable.dataset.x - 10, y: this.tableJoin.y, anchor: 'left' } // left
@@ -390,7 +391,7 @@ class DrawSVG {
         this.tables.get(e.currentTarget.id).factId = this.nearestTable.id;
         this.tables.get(e.currentTarget.id).join = this.nearestTable.id;
         // this.currentLineRef.dataset.to = nearestTable.id;
-        const d = `M${+this.nearestTable.dataset.anchorXTo},${+this.nearestTable.dataset.anchorYTo} C${+this.nearestTable.dataset.anchorXTo + 40},${+this.nearestTable.dataset.anchorYTo} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
+        const d = `M${+this.nearestTable.dataset.anchorXTo},${+this.nearestTable.dataset.anchorYTo} C${+this.nearestTable.dataset.anchorXTo + 40},${+this.nearestTable.dataset.anchorYTo} ${this.coordinate.x - 40},${this.coordinate.y + 15} ${this.coordinate.x - 10},${this.coordinate.y + 15}`;
         this.currentLineRef.setAttribute('d', d);
         this.currentLineRef.dataset.startX = +this.nearestTable.dataset.anchorXTo;
         this.currentLineRef.dataset.startY = +this.nearestTable.dataset.anchorYTo;
@@ -402,13 +403,13 @@ class DrawSVG {
          * const controlPoints = +this.currentLineRef.dataset.startX + (this.coordinate.x - (+this.currentLineRef.dataset.startX)) / 2;
         const d = `M${+this.currentLineRef.dataset.startX},${+this.currentLineRef.dataset.startY} C${controlPoints},${+this.currentLineRef.dataset.startY} ${controlPoints},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`; */
         // const d = `M${+this.currentLineRef.dataset.startX},${+this.currentLineRef.dataset.startY} C${+this.currentLineRef.dataset.startX + 40},${+this.currentLineRef.dataset.startY} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
-        const d = `M${+this.nearestTable.dataset.anchorXTo},${+this.nearestTable.dataset.anchorYTo} C${+this.nearestTable.dataset.anchorXTo + 40},${+this.nearestTable.dataset.anchorYTo} ${this.coordinate.x - 40},${this.coordinate.y + 12} ${this.coordinate.x - 10},${this.coordinate.y + 12}`;
+        const d = `M${+this.nearestTable.dataset.anchorXTo},${+this.nearestTable.dataset.anchorYTo} C${+this.nearestTable.dataset.anchorXTo + 40},${+this.nearestTable.dataset.anchorYTo} ${this.coordinate.x - 40},${this.coordinate.y + 15} ${this.coordinate.x - 10},${this.coordinate.y + 15}`;
         this.currentLineRef.setAttribute('d', d);
       }
       this.currentLineRef.dataset.startX = +this.nearestTable.dataset.anchorXTo;
       this.currentLineRef.dataset.startY = +this.nearestTable.dataset.anchorYTo;
       this.currentLineRef.dataset.endX = this.coordinate.x - 10;
-      this.currentLineRef.dataset.endY = this.coordinate.y + 12;
+      this.currentLineRef.dataset.endY = this.coordinate.y + 15;
       // TODO: 29.01.2024 - Implementare lo spostamento della linea di destra della tabella e.target
       // const lines = this.svg.querySelectorAll(`path[data-to='${e.target.id}']`);
       // console.log(lines);
@@ -454,15 +455,16 @@ class DrawSVG {
     if (!('joinId' in this.currentLineRef.dataset)) {
       // la join non è presente su questa linea
       this.openJoinWindow();
-      WorkBook.tableJoins = {
-        from: this.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
-        to: this.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId
-      }
-      for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
-        WorkBook.activeTable = value.id;
-        const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
-        this.addFields(key, data);
-      }
+      this.createWindowJoinContent();
+      // WorkBook.tableJoins = {
+      //   from: this.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
+      //   to: this.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId
+      // }
+      // for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
+      //   WorkBook.activeTable = value.id;
+      //   const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
+      //   this.addFields(key, data);
+      // }
     }
     this.currentLineRef.dataset.factId = this.nearestTable.dataset.factId;
     this.joinLines.get(this.currentLineRef.id).factId = this.nearestTable.dataset.factId;
@@ -474,6 +476,19 @@ class DrawSVG {
 
     // creo/aggiorno la mappatura di tutte le tabelle del Canvas
     WorkBook.createDataModel();
+  }
+
+  createWindowJoinContent() {
+      WorkBook.tableJoins = {
+        from: this.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
+        to: this.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId
+      }
+      for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
+        WorkBook.activeTable = value.id;
+        const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
+        this.addFields(key, data);
+      }
+
   }
 
   /* NOTE: end mouse events */
@@ -518,11 +533,11 @@ class DrawSVG {
       // join presente, popolo i join-field
       // Le join sono salvate in WorkBook.joins e la key corrisponde alla tabella 'from'
       // messa in relazione
+      debugger;
       for (const [key, value] of Object.entries(WorkBook.joins.get(this.currentLineRef.dataset.joinId))) {
         // key : join token
         // per ogni join devo creare i due campi .join-field e popolarli
         // con i dati presenti in WorkBook.join (che corrisponde a value in questo caso)
-        debugger;
         let joinFields = this.createJoinField();
         joinFields.from.dataset.token = key;
         joinFields.to.dataset.token = key;
@@ -616,12 +631,12 @@ class DrawSVG {
     // use.addEventListener('click', this.tableSelected.bind(this));
     // use.ondblclick = this.handlerDblClick.bind(Draw);
     // punto di ancoraggio di destra
-    use.dataset.anchorXTo = this.currentTable.x + 190;
-    use.dataset.anchorYTo = this.currentTable.y + 12;
+    use.dataset.anchorXTo = this.currentTable.x + 210;
+    use.dataset.anchorYTo = this.currentTable.y + 15;
     // punto di ancoraggio sotto (solo per la fact) per l'aggiunta di MultiFact
     // la Fact non ha un punto di ancoraggio di sinistra
     use.dataset.anchorXBottom = this.currentTable.x + 10;
-    use.dataset.anchorYBottom = this.currentTable.y + 12;
+    use.dataset.anchorYBottom = this.currentTable.y + 15;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
     use.addEventListener('mousedown', this.tableMouseDown.bind(this));
@@ -651,11 +666,11 @@ class DrawSVG {
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
     // punto di ancoraggio di destra
-    use.dataset.anchorXTo = this.currentTable.x + 190;
-    use.dataset.anchorYTo = this.currentTable.y + 12;
+    use.dataset.anchorXTo = this.currentTable.x + 210;
+    use.dataset.anchorYTo = this.currentTable.y + 15;
     // punto di ancoraggio di sinistra
     use.dataset.anchorXFrom = this.currentTable.x - 10;
-    use.dataset.anchorYFrom = this.currentTable.y + 12;
+    use.dataset.anchorYFrom = this.currentTable.y + 15;
     // this.table = use;
     this.currentLineRef.dataset.from = this.currentTable.key;
   }
@@ -687,11 +702,11 @@ class DrawSVG {
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
     // punto di ancoraggio di destra
-    use.dataset.anchorXTo = this.currentTable.x + 190;
-    use.dataset.anchorYTo = this.currentTable.y + 12;
+    use.dataset.anchorXTo = this.currentTable.x + 210;
+    use.dataset.anchorYTo = this.currentTable.y + 15;
     // punto di ancoraggio di sinistra
     use.dataset.anchorXFrom = this.currentTable.x - 10;
-    use.dataset.anchorYFrom = this.currentTable.y + 12;
+    use.dataset.anchorYFrom = this.currentTable.y + 15;
     use.addEventListener('mousedown', this.tableMouseDown.bind(this));
     use.addEventListener('mousemove', this.tableMouseMove.bind(this));
     use.addEventListener('mouseup', this.tableMouseUp.bind(this));
@@ -736,11 +751,11 @@ class DrawSVG {
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
     // punto di ancoraggio di destra
-    use.dataset.anchorXTo = this.currentTable.x + 190;
-    use.dataset.anchorYTo = this.currentTable.y + 12;
+    use.dataset.anchorXTo = this.currentTable.x + 210;
+    use.dataset.anchorYTo = this.currentTable.y + 15;
     // punto di ancoraggio di sinistra
     use.dataset.anchorXFrom = this.currentTable.x - 10;
-    use.dataset.anchorYFrom = this.currentTable.y + 12;
+    use.dataset.anchorYFrom = this.currentTable.y + 15;
     use.addEventListener('mousedown', this.tableMouseDown.bind(this));
     use.addEventListener('mousemove', this.tableMouseMove.bind(this));
     use.addEventListener('mouseup', this.tableMouseUp.bind(this));
@@ -829,8 +844,8 @@ class DrawSVG {
     use.dataset.alias = this.currentTable.alias;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.factId = this.currentTable.factId;
-    use.setAttribute('x', this.currentTable.x);
-    use.setAttribute('y', this.currentTable.y);
+    use.setAttribute('x', this.currentTable.x +4);
+    use.setAttribute('y', this.currentTable.y + 4);
     Draw.svg.appendChild(use);
 
     this.recursiveHier(use, createJoin);
@@ -953,7 +968,7 @@ class DrawSVG {
     lineClone.dataset.startX = +nearestTable.dataset.anchorXTo;
     lineClone.dataset.startY = +nearestTable.dataset.anchorYTo;
     lineClone.dataset.factId = nearestTable.dataset.factId;
-    const d = `M${+nearestTable.dataset.anchorXTo},${+nearestTable.dataset.anchorYTo} C${+nearestTable.dataset.anchorXTo + 40},${+nearestTable.dataset.anchorYTo} ${this.currentTable.x - 40},${this.currentTable.y + 12} ${this.currentTable.x - 10},${this.currentTable.y + 12}`;
+    const d = `M${+nearestTable.dataset.anchorXTo},${+nearestTable.dataset.anchorYTo} C${+nearestTable.dataset.anchorXTo + 40},${+nearestTable.dataset.anchorYTo} ${this.currentTable.x - 40},${this.currentTable.y + 15} ${this.currentTable.x - 10},${this.currentTable.y + 15}`;
     lineClone.setAttribute('d', d);
     // elimino, dalla nuova linea clonata, il data-join-id, se presente, perchè qui sto creando una nuova join
     if ('joinId' in lineClone.dataset) delete lineClone.dataset.joinId;
