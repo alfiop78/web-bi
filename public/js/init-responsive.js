@@ -1154,7 +1154,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.hierTables();
     // scarico le tabelle del canvas in sessionStorage, questo controllo va fatto dopo aver definito WorkBook.hierTables
     app.checkSessionStorage();
-    // Draw.checkResizeSVG();
+    Draw.checkResizeSVG();
     app.dialogWorkBook.close();
     // il WorkBook è già creato quindi da questo momento è in fase di edit
     WorkBook.edit = true;

@@ -334,7 +334,7 @@
             </section>
           </dialog>
 
-          <dialog id="dialog-time" data-x="0" data-y="0" class="medium absolute moveable">
+          <dialog id="dialog-time" data-x="0" data-y="40" class="medium absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Imposta relazione con tabella TIME</h5>
               <section class="dlg-content col col-2-equals">
@@ -388,7 +388,7 @@
           </dialog>
 
           <!-- creazione metrica filtrata -->
-          <dialog id="dlg-metric" data-x="0" data-y="0" class="large absolute moveable droppable">
+          <dialog id="dlg-metric" data-x="0" data-y="40" class="large absolute moveable droppable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Metrica avanzata</h5>
               <section class="dlg-content col col-3">
@@ -462,7 +462,7 @@
             </section>
           </dialog>
 
-          <dialog id="dlg-custom-metric" data-x="0" data-y="0" class="medium absolute moveable">
+          <dialog id="dlg-custom-metric" data-x="0" data-y="40" class="medium absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Metrica</h5>
               <section class="dlg-content col col-2">
@@ -485,7 +485,7 @@
             </section>
           </dialog>
 
-          <dialog id="dlg-join" data-x="0" data-y="0" class="small absolute moveable">
+          <dialog id="dlg-join" data-x="0" data-y="40" class="small absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Join</h5>
               <section class="dlg-content col">
@@ -528,7 +528,7 @@
             </section>
           </dialog>
 
-          <dialog id="dlg-sql-info" data-x="0" data-y="0" class="medium absolute moveable">
+          <dialog id="dlg-sql-info" data-x="0" data-y="40" class="medium absolute moveable">
             <section class="grid dlg-grid row-4">
               <h5 class="title moveable">SQL</h5>
               <menu>
@@ -551,7 +551,7 @@
 
           </dialog>
 
-          <dialog id="dlg-filters" data-x="0" data-y="0" class="medium absolute moveable">
+          <dialog id="dlg-filters" data-x="0" data-y="40" class="medium absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Filtro</h5>
               <section class="dlg-content col col-2">
@@ -576,7 +576,7 @@
 
           <div class="wrapper">
 
-            <dialog id="dlg-columns" data-x="0" data-y="0" class="medium absolute moveable">
+            <dialog id="dlg-columns" data-x="0" data-y="40" class="medium absolute moveable">
               <section class="dlg-grid">
                 <h5 class="title moveable">Definizione colonne</h5>
                 <section class="dlg-content col-4 col-8">

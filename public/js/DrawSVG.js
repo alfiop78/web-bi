@@ -565,24 +565,24 @@ class DrawSVG {
     this.dialogJoin.show();
   }
 
-  /* checkResizeSVG() {
+  checkResizeSVG() {
     let maxHeightTable = [...this.svg.querySelectorAll('use.table')].reduce((prev, current) => {
-      return (+current.dataset.y > +prev.dataset.y) ? current : prev;
+      return (+current.getAttribute('y') > +prev.getAttribute('y')) ? current : prev;
     });
-    if (1 - (+maxHeightTable.dataset.y / +this.svg.dataset.height) < 0.30) {
+    if (1 - (+maxHeightTable.getAttribute('y') / +this.svg.dataset.height) < 0.30) {
       // this.svg.dataset.height = +this.svg.dataset.height + 40;
-      this.svg.dataset.height = +maxHeightTable.dataset.y + 40;
+      this.svg.dataset.height = +maxHeightTable.getAttribute('y') + 80;
       this.svg.style.height = `${+this.svg.dataset.height}px`;
     }
     let maxWidthTable = [...this.svg.querySelectorAll('use.table')].reduce((prev, current) => {
-      return (+current.dataset.x > +prev.dataset.x) ? current : prev;
+      return (+current.getAttribute('x') > +prev.getAttribute('x')) ? current : prev;
     });
-    if (1 - (+maxWidthTable.dataset.x / +this.svg.dataset.width) < 0.40) {
+    if (1 - (+maxWidthTable.getAttribute('x') / +this.svg.dataset.width) < 0.40) {
       // this.svg.dataset.width = +this.svg.dataset.width + 190;
-      this.svg.dataset.width = +maxWidthTable.dataset.x + 190;
+      this.svg.dataset.width = +maxWidthTable.getAttribute('x') + 240;
       this.svg.style.width = `${+this.svg.dataset.width}px`;
     }
-  } */
+  }
 
   drawFact() {
     let clonedStruct = this.svg.querySelector('#table-struct-fact').cloneNode(true);

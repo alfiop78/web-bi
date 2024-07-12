@@ -55,6 +55,7 @@ dialog[open]:not(.popup){
   border-radius: 2px;
   z-index:20;
   padding: 0px;
+  transform: translateY(40px);
 }
 
 dialog[open]:not(.popup).droppable {

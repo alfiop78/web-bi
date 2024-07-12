@@ -38,7 +38,7 @@ html, body{
   grid-auto-flow: row;
   align-items: start;
   border-bottom: solid thick gainsboro;
-  /* background-color: gainsboro; */
+  background-color: gainsboro;
 }
 
 svg#svg {
@@ -47,8 +47,8 @@ svg#svg {
   position: absolute;
   /* position: relative; */
   user-select: none;
-  /* background-color: #ededed; */
-  border: dashed thin lightgray;
+  background-color: #ccc;
+  border: dashed thin #888787;
   z-index: 1;
 }
 
@@ -59,7 +59,6 @@ svg.dropzone.dropping{
 
 .translate{
   height: 100%;
-  background-color: #ccc;
   display: grid;
   grid-template-rows: 100%;
   /* grid-template-rows: repeat(auto-fit, 108px); */
