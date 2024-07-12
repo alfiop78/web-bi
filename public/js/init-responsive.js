@@ -182,18 +182,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       // se sono presenti almeno due tabelle visualizzo la dialog per la join
       // se è presente almeno una tabella dimensionale oppure la tabella droppata è una fact NON eseguo la join
       if (Draw.countJoins !== 0 && !Draw.table.classList.contains('fact')) {
-        Draw.openJoinWindow();
         WorkBook.tableJoins = {
-          from: app.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
-          to: app.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId
+          from : Draw.currentLineRef.dataset.from,
+          to : Draw.currentLineRef.dataset.to
         }
-        // console.log(WorkBook.tableJoins);
-        for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
-          WorkBook.activeTable = value.id;
-          const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
-          // TODO: utilizzare Draw.addFields()
-          app.addFields(key, data);
-        }
+        Draw.openJoinWindow();
+        Draw.createWindowJoinContent();
       }
     }
     // creo/aggiorno la mappatura di tutte le tabelle del Canvas
@@ -479,8 +473,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   app.selectLine = (e) => {
-    console.log(e.target);
+    // console.log(e.target);
     Draw.currentLineRef = e.target.id;
+    WorkBook.tableJoins = {
+      from : Draw.currentLineRef.dataset.from,
+      to:Draw.currentLineRef.dataset.to
+    }
     Draw.openJoinWindow();
     Draw.createWindowJoinContent();
   }
@@ -2507,21 +2505,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     document.querySelector('#' + e.currentTarget.dataset.drawerId).toggleAttribute('open');
   }
 
-  /* app.lineSelected = async (e) => {
-    // imposto la join line corrente
-    Draw.currentLineRef = e.currentTarget.id;
-    WorkBook.tableJoins = {
-      from: e.currentTarget.dataset.from,
-      to: e.currentTarget.dataset.to
-    }
-    for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
-      WorkBook.activeTable = value.id;
-      const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
-      app.addFields(key, data);
-    }
-    app.openJoinWindow();
-  } */
-
   // imposto la join selezionata come data-active
   // TODO: potrebbe essere spostata in supportFn.js
   app.handlerJoin = (e) => {
@@ -2534,7 +2517,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     document.querySelector('#btn-remove-join').dataset.token = token;
   }
 
-  // TODO: potrebbe essere spostata in supportFn.js
+  app.addJoin = () => Draw.addJoin()
 
   // elimino la join attiva (data-active)
   app.removeJoin = (e) => {
@@ -2563,15 +2546,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       document.querySelector('#btn-remove-join').dataset.token = join.dataset.token;
 
     });
-  }
-
-  app.addJoin = () => {
-    // recupero i riferimenti del template da aggiungere al DOM
-    let joinFields = Draw.createJoinField();
-    const token = rand().substring(0, 7);
-    joinFields.from.dataset.token = token;
-    joinFields.to.dataset.token = token;
-    document.querySelector('#btn-remove-join').dataset.token = token;
   }
 
   app.handlerTimeDimension = async (e) => {

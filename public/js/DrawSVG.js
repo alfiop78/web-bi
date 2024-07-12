@@ -454,17 +454,13 @@ class DrawSVG {
     // se esiste già una join per questa tabella non visualizzo la dialogJoin
     if (!('joinId' in this.currentLineRef.dataset)) {
       // la join non è presente su questa linea
+      // recupero gli id delle tabelle (from/to) per poter leggere le colonne in WorkBookStorage.getTable()
+      WorkBook.tableJoins = {
+        from: Draw.currentLineRef.dataset.from,
+        to: Draw.currentLineRef.dataset.to
+      }
       this.openJoinWindow();
       this.createWindowJoinContent();
-      // WorkBook.tableJoins = {
-      //   from: this.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
-      //   to: this.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId
-      // }
-      // for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
-      //   WorkBook.activeTable = value.id;
-      //   const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
-      //   this.addFields(key, data);
-      // }
     }
     this.currentLineRef.dataset.factId = this.nearestTable.dataset.factId;
     this.joinLines.get(this.currentLineRef.id).factId = this.nearestTable.dataset.factId;
@@ -479,41 +475,41 @@ class DrawSVG {
   }
 
   createWindowJoinContent() {
-      WorkBook.tableJoins = {
-        from: this.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
-        to: this.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId
-      }
-      for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
-        WorkBook.activeTable = value.id;
-        const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
-        this.addFields(key, data);
-      }
-
+    // WorkBook.tableJoins = {
+    //   from: this.dialogJoin.querySelector('.joins section[data-table-from]').dataset.tableId,
+    //   to: this.dialogJoin.querySelector('.joins section[data-table-to]').dataset.tableId
+    // }
+    for (const [key, value] of Object.entries(WorkBook.tableJoins)) {
+      WorkBook.activeTable = value.id;
+      const data = WorkBookStorage.getTable(WorkBook.activeTable.dataset.table);
+      this.addFields(key, data);
+    }
   }
 
   /* NOTE: end mouse events */
 
-  // Questa funzione restituisce i due elementi da aggiungere al DOM
+  // Questa funzione restituisce i due field da aggiungere al DOM
   // Può essere invocata sia per creare una nuova join che
   // per creare/popolare una join esistente (ad es.: click sulla join line)
-  // TODO: questi 3 metodi (createJoinField, addjoin e openJoinWindow) sono da ottimizzare,
-  createJoinField() {
+  get getJoinFieldsTemplate() {
     const tmplJoinFrom = this.tmplJoin.content.cloneNode(true);
     const tmplJoinTo = this.tmplJoin.content.cloneNode(true);
-    const joinFieldFrom = tmplJoinFrom.querySelector('.join-field');
-    const joinFieldTo = tmplJoinTo.querySelector('.join-field');
-    // rimuovo eventuali joinField che hanno l'attributo data-active prima di aggiungere quelli nuovi
+    const fieldFrom = tmplJoinFrom.querySelector('.join-field');
+    const fieldTo = tmplJoinTo.querySelector('.join-field');
+    // rimuovo eventuali attributi [active] nelle joinField prima di aggiungere quelli nuovi
     this.dialogJoin.querySelectorAll('.join-field[data-active]').forEach(joinField => delete joinField.dataset.active);
-    this.dialogJoin.querySelector('.joins section[data-table-from] > .join').appendChild(joinFieldFrom);
-    this.dialogJoin.querySelector('.joins section[data-table-to] > .join').appendChild(joinFieldTo);
-    joinFieldFrom.dataset.factId = this.currentLineRef.dataset.factId;
-    joinFieldTo.dataset.factId = this.currentLineRef.dataset.factId;
-    return { from: joinFieldFrom, to: joinFieldTo };
+
+    this.dialogJoin.querySelector('.joins section[data-table-from] > .join').appendChild(fieldFrom);
+    this.dialogJoin.querySelector('.joins section[data-table-to] > .join').appendChild(fieldTo);
+    fieldFrom.dataset.factId = this.currentLineRef.dataset.factId;
+    fieldTo.dataset.factId = this.currentLineRef.dataset.factId;
+    return { from: fieldFrom, to: fieldTo };
   }
 
   addJoin() {
     // recupero i riferimenti del template da aggiungere al DOM
-    let joinFields = this.createJoinField();
+    let joinFields = this.getJoinFieldsTemplate;
+    // imposto il token per la nuova join
     const token = this.rand().substring(0, 7);
     joinFields.from.dataset.token = token;
     joinFields.to.dataset.token = token;
@@ -521,9 +517,6 @@ class DrawSVG {
   }
 
   openJoinWindow() {
-    // WARN: questa proprietà impostata sulla dialogJoin non è mai letta nel resto del codice, si potrebbe eliminare
-    // this.dialogJoin.dataset.lineId = this.currentLineRef.id;
-
     // aggiungo i template per join-field se non ci sono ancora join create
     // verifico se è presente una join su questa line
     if (!this.currentLineRef.dataset.joinId) {
@@ -533,18 +526,17 @@ class DrawSVG {
       // join presente, popolo i join-field
       // Le join sono salvate in WorkBook.joins e la key corrisponde alla tabella 'from'
       // messa in relazione
-      debugger;
       for (const [key, value] of Object.entries(WorkBook.joins.get(this.currentLineRef.dataset.joinId))) {
         // key : join token
-        // per ogni join devo creare i due campi .join-field e popolarli
-        // con i dati presenti in WorkBook.join (che corrisponde a value in questo caso)
-        let joinFields = this.createJoinField();
+        // per ogni join devo creare i due campi .join-field (from/to) e popolarli
+        // con i dati presenti in WorkBook.joins
+        let joinFields = this.getJoinFieldsTemplate;
         joinFields.from.dataset.token = key;
-        joinFields.to.dataset.token = key;
         joinFields.from.dataset.field = value.from.field;
         joinFields.from.dataset.table = value.from.table;
         joinFields.from.dataset.alias = value.from.alias;
         joinFields.from.innerHTML = value.from.field;
+        joinFields.to.dataset.token = key;
         joinFields.to.dataset.field = value.to.field;
         joinFields.to.dataset.table = value.to.table;
         joinFields.to.dataset.alias = value.to.alias;
@@ -552,29 +544,22 @@ class DrawSVG {
         document.querySelector('#btn-remove-join').dataset.token = key;
       }
     }
-    // in base alla linea di join (this.joinLines) recupero le proprietà 'from' e 'to' che contengono
+    // in base alla linea di join corrente recupero le proprietà 'from' e 'to' che contengono
     // l'id delle tabelle collegate (all'interno del canvas)
-    // Tramite questo id utilizzo il .get() sull'oggetto Map() this.tables per recuperare il nome e/o altre
-    // proprietà della tabella, per ora solo il nome e la key
-    // (quest'ultima però ce l'ho già in this.joinLines)
-    // INFO: queste proprietà potrei recuperarle anche direttamente dall'elemento use.table nell'<svg>
-    console.log(this.currentLineRef.dataset.from);
 
+    // proprietà contenute in this.tables, recuperate attraverso il tableId (currentLineRef.dataset.from/to)
     const from = this.tables.get(this.currentLineRef.dataset.from);
-    // const from = this.tables.get(this.joinLines.get(this.currentLineRef.id).from);
     const to = this.tables.get(this.currentLineRef.dataset.to);
-    // const to = this.tables.get(this.joinLines.get(this.currentLineRef.id).to);
 
     // 'from' è la tabella che sto droppando
     const joinSectionFrom = this.dialogJoin.querySelector('.joins section[data-table-from]');
     // 'to' è la tabella a cui collegare quella corrente (corrente si riferisce sempre a quella che sto droppando)
     const joinSectionTo = this.dialogJoin.querySelector('.joins section[data-table-to]');
+    // imposto gli attributi sugli elementi section all'interno di .joins
     joinSectionFrom.dataset.tableFrom = from.table;
-    // joinSectionFrom.dataset.factId = from.factId;
     joinSectionFrom.dataset.tableId = from.key;
     joinSectionFrom.querySelector('.table').innerHTML = from.table;
     joinSectionTo.dataset.tableTo = to.table;
-    // joinSectionTo.dataset.factId = to.factId;
     joinSectionTo.dataset.tableId = to.key;
     joinSectionTo.querySelector('.table').innerHTML = to.table;
     this.dialogJoin.show();
@@ -844,7 +829,7 @@ class DrawSVG {
     use.dataset.alias = this.currentTable.alias;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.factId = this.currentTable.factId;
-    use.setAttribute('x', this.currentTable.x +4);
+    use.setAttribute('x', this.currentTable.x + 4);
     use.setAttribute('y', this.currentTable.y + 4);
     Draw.svg.appendChild(use);
 
