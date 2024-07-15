@@ -190,6 +190,16 @@ class DrawSVG {
           // Fact per consentire l'analisi multifatti
           (this.nearestPoint.anchor === 'bottom') ? this.currentLineRef.classList.add('fact') : this.currentLineRef.classList.remove('fact');
           this.autoPos();
+          // Imposto un posizionamento, sull'asse x, semi-automatico andando a verificare
+          // se ci sono altre tabelle nei pressi di quella corrente, per poterla
+          // posizionare sullo stesso asse x
+          this.svg.querySelectorAll('use.table').forEach(table => {
+            if ((+table.getAttribute('x') >= e.offsetX - 20) && (+table.getAttribute('x') <= e.offsetX + 20)) {
+              // auto-posizionamento per la line, rispetto alla tabella trovata sull'asse x
+              this.currentLineRef.dataset.endX = +table.dataset.anchorXFrom;
+              this.nearestPoint.x2 = +table.dataset.anchorXFrom;
+            }
+          });
 
           const d = `M${this.nearestPoint.x},${this.nearestPoint.y} C${this.nearestPoint.p1x},${this.nearestPoint.p1y} ${this.nearestPoint.p2x},${this.nearestPoint.p2y} ${this.nearestPoint.x2},${this.nearestPoint.y2}`;
           this.currentLineRef.setAttribute('d', d);
@@ -255,7 +265,7 @@ class DrawSVG {
     this.tables = tableObj;
 
     if (this.currentLineRef) {
-      console.log(this.currentLineRef.classList);
+      // console.log(this.currentLineRef.classList);
       const lineObj = {
         key: this.currentLineRef.id,
         start: { x: +this.currentLineRef.dataset.startX, y: +this.currentLineRef.dataset.startY },
@@ -302,6 +312,7 @@ class DrawSVG {
       this.tables.get(id).join = this.nearestTable.id;
       this.tables.get(id).factId = this.nearestTable.dataset.factId;
       this.tables.get(id).cssClass = 'tables';
+
       // se il punto y del mouse è "nei pressi" di y della nearestTable imposto y alla stessa altezza di nearestTable.y
       if (this.tables.get(id).y >= this.nearestPoint.y - 20 && this.tables.get(id).y <= this.nearestPoint.y + 20) {
         this.tables.get(id).y = +this.nearestTable.getAttribute('y');
@@ -310,12 +321,19 @@ class DrawSVG {
         this.currentLineRef.dataset.endY = this.nearestPoint.y;
       }
 
+      // // Imposto un posizionamento, sull'asse x, semi-automatico andando a verificare
+      // // se ci sono altre tabelle nei pressi di quella corrente, per poterla
+      // // posizionare sullo stesso asse x
+      this.svg.querySelectorAll('use.table').forEach(table => {
+        if ((+table.getAttribute('x') >= this.tables.get(id).x - 20) && (+table.getAttribute('x') <= this.tables.get(id).x + 20)) {
+          this.tables.get(id).x = +table.getAttribute('x');
+        }
+      });
       this.currentTable = this.tables.get(id);
       // linea di join da tableJoin alla tabella droppata (questa deve essere impostata DOPO this.currentTable
-      // perchè vengono prese da lì le coordinate "finali" della tabella droppata)
+      // perchè vengono prese da lì le coordinate finali della tabella droppata)
       // imposto solo la proprietà 'from' rimasta "in sospeso" in handlerDragOver perchè in quell'evento non
       // ho ancora l'elemento nel DOM
-      // this.joinLines = id;
       this.joinLines.get(this.currentLineRef.id).from = id;
       this.currentLineRef.dataset.from = id;
       this.joinLines.get(this.currentLineRef.id).factId = this.nearestTable.dataset.factId;
@@ -339,11 +357,11 @@ class DrawSVG {
     this.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
   }
 
-  // handlerDblClick(e) {
-  //   console.log(e.target);
-  //   console.log(this);
-  //   debugger;
-  // }
+  handlerDblClick(e) {
+    console.log(e.target);
+    console.log(this);
+    debugger;
+  }
 
   tableMouseDown(e) {
     e.preventDefault();
@@ -912,9 +930,9 @@ class DrawSVG {
     }
   }
 
+  // effettuo un auto-posizionamento quando il mouse è "nei pressi x" del punto anchor bottom
+  // "nei pressi Y" nel caso di un punto di anchor "right"
   autoPos() {
-    // effettuo un auto-posizionamento quando il mouse è "nei pressi x" del punto anchor bottom
-    // "nei pressi Y" nel caso di un punto di anchor "right"
     if (this.currentLineRef.classList.contains('fact')) {
       if ((this.nearestPoint.x2 >= this.nearestPoint.x - 20) && (this.nearestPoint.x2 <= this.nearestPoint.x + 20)) {
         this.nearestPoint.p1x = this.nearestPoint.x;
