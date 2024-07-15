@@ -101,7 +101,6 @@ class DrawSVG {
       const token = this.rand().substring(0, 4);
       line.id = `line-${token}`;
       line.dataset.id = token;
-      line.dataset.fn = 'selectLine';
       this.svg.appendChild(line);
       this.currentLineRef = line.id;
       this.nearestTable;
@@ -266,7 +265,7 @@ class DrawSVG {
 
     if (this.currentLineRef) {
       // console.log(this.currentLineRef.classList);
-      const lineObj = {
+      this.joinLines = {
         key: this.currentLineRef.id,
         start: { x: +this.currentLineRef.dataset.startX, y: +this.currentLineRef.dataset.startY },
         end: { x: +this.currentLineRef.dataset.endX, y: +this.currentLineRef.dataset.endY },
@@ -274,7 +273,6 @@ class DrawSVG {
         to: this.currentLineRef.dataset.to,
         cssClass: this.currentLineRef.classList.value
       };
-      this.joinLines = lineObj;
     }
 
     if (!this.nearestTable) {
@@ -293,7 +291,9 @@ class DrawSVG {
       this.currentTable = this.tables.get(id);
       // this.createDimensionInfo();
       this.drawFact();
-      this.updateLine();
+      this.currentLineRef.remove();
+      delete this.joinLines;
+      // this.updateLine();
       // TODO: aggiorno this.joinLines in base all'auto-posizionamento
     } else {
       // è presente una tableJoin, è un livello dimensionale
@@ -330,6 +330,8 @@ class DrawSVG {
         }
       });
       this.currentTable = this.tables.get(id);
+      // aggiungo qui l'evento click sulla linea perchè sulla line.fact non deve essere presente
+      this.currentLineRef.dataset.fn = 'selectLine';
       // linea di join da tableJoin alla tabella droppata (questa deve essere impostata DOPO this.currentTable
       // perchè vengono prese da lì le coordinate finali della tabella droppata)
       // imposto solo la proprietà 'from' rimasta "in sospeso" in handlerDragOver perchè in quell'evento non
@@ -978,11 +980,14 @@ class DrawSVG {
   addFactJoin() {
     // .shared indica che la tabella è una tabella condivisa con altre Fact.
     // La logica per l'utilizzo di .shared è utilizzata in WorkBook.createDataModel() -> recursive()
+    debugger;
+    console.log(this.table);
     this.table.classList.add('shared');
     this.tables.get(this.table.id).cssClass = 'shared';
-    const id = `${this.table.id}-common`;
+    const token = this.rand().substring(0, 3);
+    const id = `${this.table.id}-common-${token}`;
 
-    const tableObj = {
+    this.tables = {
       id,
       key: id,
       x: +this.table.getAttribute('x') + 8,
@@ -996,19 +1001,18 @@ class DrawSVG {
       join: null,
       factId: null,
       dimensionId: this.table.dataset.dimensionId,
-      // cssClass: 'common'
     };
 
-    this.tables = tableObj;
-
-    this.currentTable = this.tables.get(`${this.table.id}-common`);
+    // this.currentTable = this.tables.get(`${this.table.id}-common`);
+    this.currentTable = this.tables.get(id);
     console.log(this.currentTable);
+    debugger;
     this.drawCommonTable();
 
     // clono anche la sua linea andando a cercare la line con data-from = this.table.id
     const line = this.svg.querySelector(`path[data-from='${this.table.id}']`);
     const lineClone = line.cloneNode();
-    lineClone.id = `${line.id}-common`;
+    lineClone.id = `${line.id}-common-${token}`;
     lineClone.dataset.from = this.currentTable.key;
     // imposto la linea come quella di origine però questa tabella .common NON può
     // essere legata alla stessa Fact dove è legata la tabella .shared

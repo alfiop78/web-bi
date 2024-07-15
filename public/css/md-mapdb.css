@@ -116,7 +116,7 @@ path:hover{
 
 path.fact {
   stroke-dasharray: 4;
-  stroke-width: 1;
+  stroke-width: 2;
   stroke: grey;
 }
 
