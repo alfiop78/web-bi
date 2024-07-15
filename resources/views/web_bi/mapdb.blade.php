@@ -48,7 +48,7 @@
       </div>
     </li>
 
-    <li data-li-drag data-element-search data-label data-searchable="true">
+    <li data-li-drag data-tables data-element-search data-label data-searchable="true">
       <i class="material-icons-round md-18" draggable="true">drag_handle</i>
       <span></span>
     </li>

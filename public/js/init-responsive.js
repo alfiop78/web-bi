@@ -1032,11 +1032,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       let ul = document.getElementById('ul-tables');
       for (const [key, value] of Object.entries(data)) {
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li[data-li-drag]');
+        const li = content.querySelector('li[data-li-drag][data-tables]');
         const span = li.querySelector('span');
         const i = li.querySelector('i');
         li.dataset.fn = "showTablePreview";
         li.dataset.label = value.TABLE_NAME;
+        li.dataset.schema = schema;
         i.dataset.label = value.TABLE_NAME;
         i.dataset.schema = schema;
         li.dataset.elementSearch = 'tables';
