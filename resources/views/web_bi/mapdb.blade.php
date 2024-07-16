@@ -303,8 +303,12 @@
           <dialog id="dialog-rename">
             <section class="dlg-grid">
               <h5 class="title moveable">Alias tabella</h5>
-              <section class="dlg-content col col-1 row-1">
-                <input type="text" id="table-alias" placeholder="Alias" value="" autocomplete="on" />
+              <section class="dlg-content">
+                <section class="row">
+                  <div class="col grid-12">
+                    <input type="text" id="table-alias" placeholder="Alias" value="" autocomplete="on" />
+                  </div>
+                </section>
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
@@ -317,7 +321,11 @@
             <section class="dlg-grid">
               <h5 class="title moveable">Titolo WorkBook</h5>
               <section class="dlg-content">
-                <input type="text" id="input-workbook-name" placeholder="Nome" value="" autocomplete="on" />
+                <section class="row">
+                  <div class="col grid-12">
+                    <input type="text" id="input-workbook-name" placeholder="Nome" value="" autocomplete="on" />
+                  </div>
+                </section>
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
@@ -329,8 +337,12 @@
           <dialog id="dialog-new-sheet">
             <section class="dlg-grid">
               <h5 class="title moveable">Titolo Sheet</h5>
-              <section class="dlg-content col col-1 row-1">
-                <input type="text" id="input-sheet-name" placeholder="Nome" value="" autocomplete="on" />
+              <section class="dlg-content">
+                <section class="row">
+                  <div class="col grid-12">
+                    <input type="text" id="input-sheet-name" placeholder="Nome" value="" autocomplete="on" />
+                  </div>
+                </section>
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
@@ -339,26 +351,28 @@
             </section>
           </dialog>
 
-          <dialog id="dialog-time" data-x="0" data-y="40" class="medium-s fixed absolute moveable">
+          <dialog id="dialog-time" data-x="0" data-y="40" class="medium absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Imposta relazione con tabella TIME</h5>
-              <section class="row">
-                <section class="dlg-content col grid-6">
-                  <ul id="time-fields">
-                    <!-- TODO: creare qui la struttura delle tabelle TIME con <summary> e <details> -->
-                    <li data-field="id_year" data-field-ds="year" data-table="WB_YEARS" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
-                    <li data-field="id_quarter" data-field-ds="quarter" data-table="WB_QUARTERS" data-datatype="integer" data-fn="handlerTimeField">QUARTER <small>Es.: 202302</small></li>
-                    <li data-field="id_month" data-field-ds="month" data-table="WB_MONTHS" data-datatype="integer" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
-                    <!-- <li data-field="week_id" data-datatype="integer" data-fn="handlerTimeField">WEEK <small>Es.: 202312</small></li> -->
-                    <li data-field="id_date" data-field-ds="id_date" data-table="WB_DATE" data-datatype="date" data-fn="handlerTimeField" data-selected>DATE <small>Es.: 2023-12-31</small></li>
-                  </ul>
-                </section>
-                <section class="dlg-content col grid-6">
-                  <section class="list-search">
-                    <input type="search" id="time-column-search" data-element-search="time-column" placeholder="Ricerca colonna" autocomplete="off" />
-                    <div class="relative-ul">
-                      <ul id="ul-columns" data-search-id="time-column-search" class="custom-scrollbar"></ul>
-                    </div>
+              <section class="dlg-content">
+                <section class="row">
+                  <div class="col grid-6">
+                    <ul id="time-fields">
+                      <!-- TODO: creare qui la struttura delle tabelle TIME con <summary> e <details> -->
+                      <li data-field="id_year" data-field-ds="year" data-table="WB_YEARS" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
+                      <li data-field="id_quarter" data-field-ds="quarter" data-table="WB_QUARTERS" data-datatype="integer" data-fn="handlerTimeField">QUARTER <small>Es.: 202302</small></li>
+                      <li data-field="id_month" data-field-ds="month" data-table="WB_MONTHS" data-datatype="integer" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
+                      <!-- <li data-field="week_id" data-datatype="integer" data-fn="handlerTimeField">WEEK <small>Es.: 202312</small></li> -->
+                      <li data-field="id_date" data-field-ds="id_date" data-table="WB_DATE" data-datatype="date" data-fn="handlerTimeField" data-selected>DATE <small>Es.: 2023-12-31</small></li>
+                    </ul>
+                  </div>
+                  <section class="dlg-content col grid-6">
+                    <section class="list-search">
+                      <input type="search" id="time-column-search" data-element-search="time-column" placeholder="Ricerca colonna" autocomplete="off" />
+                      <div class="relative-ul">
+                        <ul id="ul-columns" data-search-id="time-column-search" class="custom-scrollbar"></ul>
+                      </div>
+                    </section>
                   </section>
                 </section>
               </section>
@@ -367,7 +381,6 @@
                 <button data-fn="saveTimeDimension" id="btn-time-dimension-save" value="salva">Salva</button>
               </section>
             </section>
-
           </dialog>
 
           <div id="context-menu" class="context-menu"></div>
@@ -391,8 +404,12 @@
           <dialog id="dialog-sheet-open">
             <section class="dlg-grid">
               <h5 class="title">Apertura Sheet</h5>
-              <section class="dlg-content col col-1">
-                <nav data-sheet-defined></nav>
+              <section class="dlg-content">
+                <section class="row">
+                  <div class="col grid-12 relative-ul">
+                    <ul id="ul-sheets" class="custom-scrollbar"></ul>
+                  </div>
+                </section>
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
@@ -401,7 +418,7 @@
           </dialog>
 
           <!-- creazione metrica filtrata -->
-          <dialog id="dlg-metric" data-x="0" data-y="40" class="medium-l fixed absolute moveable droppable">
+          <dialog id="dlg-metric" data-x="0" data-y="40" class="medium absolute moveable droppable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Metrica avanzata</h5>
               <section class="dlg-content">
@@ -473,12 +490,9 @@
                         <dd>La funzione presenta i dati relativi ai tre mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
                       </dl>
                     </div>
-
                   </section>
                 </section>
-
               </section>
-
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
                 <button data-fn="saveMetric" id="btn-metric-save" value="salva">Salva</button>
@@ -486,26 +500,48 @@
             </section>
           </dialog>
 
-          <dialog id="dlg-custom-metric" data-x="0" data-y="40" class="medium-l absolute moveable">
+          <dialog id="dlg-composite-metric" data-x="0" data-y="0" class="small absolute moveable droppable">
             <section class="dlg-grid">
-              <h5 class="title moveable">Creazione Metrica</h5>
-              <section class="row">
-                <section class="dlg-content col grid-4">
-                  <div class="list-search">
-                    <input type="search" id="input-search-custom-metrics" placeholder="Ricerca" data-element-search="custom-metrics" class="input-search" autocomplete="off" tabindex="2">
-                    <div class="relative-ul">
-                      <ul id="ul-custom-metrics" class="custom-scrollbar" data-search-id="input-search-custom-metrics"></ul>
-                    </div>
-                  </div>
-                </section>
-                <section class="dlg-content col grid-8">
-                  <section class="textarea-formula">
-                    <input type="text" id="custom-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
-                    <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea placeholder"></div>
-                    <textarea id="custom-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
+              <h5 class="title moveable">Creazione Metrica Composta</h5>
+              <section class="dlg-content">
+                <section class="row">
+                  <section class="col grid-12">
+                    <section class="textarea-formula">
+                      <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus />
+                      <div id="textarea-composite-metric" data-fn="addText" data-content-editable class="dropzone textarea"></div>
+                      <textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
+                    </section>
                   </section>
                 </section>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button data-fn="saveCompositeMetric" id="btn-composite-metric-save" value="salva">Salva</button>
+              </section>
+            </section>
+          </dialog>
 
+          <dialog id="dlg-custom-metric" data-x="0" data-y="40" class="medium absolute moveable">
+            <section class="dlg-grid">
+              <h5 class="title moveable">Creazione Metrica</h5>
+              <section class="dlg-content">
+                <section class="row">
+                  <section class="col grid-4">
+                    <div class="list-search">
+                      <input type="search" id="input-search-custom-metrics" placeholder="Ricerca" data-element-search="custom-metrics" class="input-search" autocomplete="off" tabindex="2">
+                      <div class="relative-ul">
+                        <ul id="ul-custom-metrics" class="custom-scrollbar" data-search-id="input-search-custom-metrics"></ul>
+                      </div>
+                    </div>
+                  </section>
+                  <section class="col grid-8">
+                    <section class="textarea-formula">
+                      <input type="text" id="custom-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
+                      <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea placeholder"></div>
+                      <textarea id="custom-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
+                    </section>
+                  </section>
+                </section>
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
@@ -577,10 +613,9 @@
                 <button name="cancel" value="chiudi">Chiudi</button>
               </section>
             </section>
-
           </dialog>
 
-          <dialog id="dlg-filters" data-x="0" data-y="40" class="medium-l fixed absolute moveable">
+          <dialog id="dlg-filters" data-x="0" data-y="40" class="medium absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Filtro</h5>
               <section class="dlg-content">
@@ -602,7 +637,6 @@
                   </section>
                 </section>
               </section>
-
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
                 <button data-fn="saveFilter" id="btn-filter-save" value="salva">Salva</button>
@@ -612,26 +646,28 @@
 
           <div class="wrapper">
 
-            <dialog id="dlg-columns" data-x="0" data-y="40" class="medium-l fixed absolute moveable">
+            <dialog id="dlg-columns" data-x="0" data-y="40" class="medium absolute moveable">
               <section class="dlg-grid">
                 <h5 class="title moveable">Definizione colonne</h5>
-                <section class="row">
-                  <section class="dlg-content col grid-4">
-                    <div class="list-search">
-                      <input type="search" id="input-search-fields-dc" placeholder="Ricerca" data-element-search="fields" class="input-search" autocomplete="off" autofocus tabindex="1">
-                      <div class="relative-ul">
-                        <nav id="table-field-list" class="custom-scrollbar" data-search-id="input-search-fields-dc"></nav>
+                <section class="dlg-content">
+                  <section class="row">
+                    <section class="col grid-4">
+                      <div class="list-search">
+                        <input type="search" id="input-search-fields-dc" placeholder="Ricerca" data-element-search="fields" class="input-search" autocomplete="off" autofocus tabindex="1">
+                        <div class="relative-ul">
+                          <nav id="table-field-list" class="custom-scrollbar" data-search-id="input-search-fields-dc"></nav>
+                        </div>
                       </div>
-                    </div>
-                  </section>
-                  <section class="dlg-content col grid-8">
-                    <section class="textareas">
-                      <input type="text" id="column-name" placeholder="Nome" autocomplete="off" tabindex="2">
-                      <section class="textarea-column">
-                        <div id="textarea-column-id" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
-                      </section>
-                      <section class="textarea-column">
-                        <div id="textarea-column-ds" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
+                    </section>
+                    <section class="col grid-8">
+                      <section class="textareas">
+                        <input type="text" id="column-name" placeholder="Nome" autocomplete="off" tabindex="2">
+                        <section class="textarea-column">
+                          <div id="textarea-column-id" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
+                        </section>
+                        <section class="textarea-column">
+                          <div id="textarea-column-ds" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
+                        </section>
                       </section>
                     </section>
                   </section>
@@ -818,29 +854,7 @@
                             </div>
                           </section>
                           <section class="table-preview">
-                            <!-- creazione metrica composta -->
-                            <dialog id="dlg-composite-metric" data-x="0" data-y="0" class="small absolute moveable droppable">
-                              <section class="dlg-grid">
-                                <h5 class="title moveable">Creazione Metrica Composta</h5>
-                                <section class="dlg-content">
-                                  <section class="row">
-                                    <section class="col grid-12">
-                                      <section class="textarea-formula">
-                                        <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus />
-                                        <div id="textarea-composite-metric" data-fn="addText" data-content-editable class="dropzone textarea"></div>
-                                        <textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
-                                      </section>
-                                    </section>
-                                  </section>
-                                </section>
-                                <section class="dlg-buttons">
-                                  <button name="cancel" value="chiudi">Chiudi</button>
-                                  <button data-fn="saveCompositeMetric" id="btn-composite-metric-save" value="salva">Salva</button>
-                                </section>
-                              </section>
-                            </dialog>
-
-                            <dialog id="dlg-sheet-config" data-x="0" data-y="0" class="medium-s absolute moveable">
+                            <dialog id="dlg-sheet-config" data-x="0" data-y="0" class="medium absolute moveable">
                               <section class="dlg-grid">
                                 <h5 class="title moveable">Configurazione</h5>
                                 <section class="dlg-content">

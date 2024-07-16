@@ -69,26 +69,8 @@ dialog::backdrop {
   background: rgb(0 0 0 / 26%);
 }
 
-dialog.medium-s{
-  width: 45%;
-  height: auto;
-  max-height: 35%;
-}
-
-dialog.medium-s.fixed{
-  width: 45%;
-  height: 35%;
-}
-
-dialog.medium-l{
-  width: 55%;
-  height: auto;
-  max-height: 45%;
-}
-
-dialog.medium-l.fixed{
-  width: 55%;
-  height: 45%;
+dialog.medium{
+  width: 60%;
 }
 
 dialog.large{
@@ -151,7 +133,6 @@ dialog.large-max {
 
 .small {
   width: 45%;
-  height: 45%;
 }
 
 dialog[open].grid{

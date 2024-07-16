@@ -1166,7 +1166,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     /* popolo la dialog con gli Sheet presenti, gli Sheet hanno un workBook_ref : token, quindi
     * recupero solo gli Sheet appartenenti al WorkBook aperto
     */
-    const parent = document.querySelector('nav[data-sheet-defined]');
+    const parent = document.getElementById("ul-sheets");
     // reset list
     parent.querySelectorAll('li').forEach(sheet => sheet.remove());
     const sheets = SheetStorage.sheets(WorkBook.workBook.token);
