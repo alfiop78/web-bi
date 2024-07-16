@@ -611,13 +611,13 @@
                       <menu class="standard">
                         <button id="btn-workbook-new" value="Nuovo">Nuovo</button>
                         <button id="btn-workbook-open" value="open">Apri</button>
-                        <button id="btn-time-dimension" value="open">Tabella TIME</button>
+                        <button id="btn-time-dimension" value="open" disabled>Tabella TIME</button>
                         <!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
                         <section id="workbook-name" class="name data-source" contenteditable="true">Titolo</section>
                       </menu>
                       <div id="context-menu-table" class="context-menu">
                         <ul id="ul-context-menu-table" class="context-menu-items">
-                          <button id="addFactJoin" class="btn-link-context" disabled>Aggiungi Join</button>
+                          <button id="addFactJoin" class="btn-link-context" data-fn="handlerAddJoin" disabled>Aggiungi Join</button>
                           <button id="time-dimension" data-fn="handlerTimeDimension" class="btn-link-context">Dimensione TIME</button>
                           <button id="context-custom-metric" data-fn="addCustomMetric" class="btn-link-context">Metrica person.</button>
                           <button data-fn="removeTable" class="btn-link-context">Rimuovi</button>

@@ -12,6 +12,7 @@ class DrawSVG {
 
   constructor(element) {
     this.svg = document.getElementById(element);
+    this.svg.querySelectorAll("use, path").forEach(element => element.remove());
     this.svg.dataset.height = this.svg.parentElement.offsetHeight;
     this.svg.dataset.width = this.svg.parentElement.offsetWidth;
     this.contextMenu = document.getElementById('context-menu-table');
@@ -980,8 +981,6 @@ class DrawSVG {
   addFactJoin() {
     // .shared indica che la tabella è una tabella condivisa con altre Fact.
     // La logica per l'utilizzo di .shared è utilizzata in WorkBook.createDataModel() -> recursive()
-    debugger;
-    console.log(this.table);
     this.table.classList.add('shared');
     this.tables.get(this.table.id).cssClass = 'shared';
     const token = this.rand().substring(0, 3);
@@ -1006,7 +1005,6 @@ class DrawSVG {
     // this.currentTable = this.tables.get(`${this.table.id}-common`);
     this.currentTable = this.tables.get(id);
     console.log(this.currentTable);
-    debugger;
     this.drawCommonTable();
 
     // clono anche la sua linea andando a cercare la line con data-from = this.table.id
@@ -1045,7 +1043,17 @@ class DrawSVG {
 
   contextMenuTable(e) {
     e.preventDefault();
+    this.table = e.currentTarget;
+    // Imposto la activeTable relativa al context-menu
+    WorkBook.activeTable = e.currentTarget.id;
     const btnAddFactJoin = document.getElementById('addFactJoin');
+    const btnTimeDimension = document.getElementById('time-dimension');
+    const btnCustomMetric = document.getElementById('context-custom-metric');
+    // per le tabelle con data-shared_ref disabilito alcuni tasti
+    btnAddFactJoin.disabled = (this.table.dataset.shared_ref || this.svg.querySelectorAll('use.table.fact').length === 1) ? true : false;
+    btnTimeDimension.disabled = (this.table.dataset.shared_ref) ? true : false;
+    btnCustomMetric.disabled = (this.table.dataset.shared_ref) ? true : false;
+
     // console.log(e.target.dataset);
     // console.log(e.target.getBoundingClientRect());
     // const { clientX: mouseX, clientY: mouseY } = e;
@@ -1053,19 +1061,13 @@ class DrawSVG {
     const { left: mouseX, bottom: mouseY } = e.currentTarget.getBoundingClientRect();
     this.contextMenu.style.top = `${mouseY + 8}px`;
     this.contextMenu.style.left = `${mouseX}px`;
-    // Imposto la activeTable relativa al context-menu
-    WorkBook.activeTable = e.currentTarget.id;
-    this.table = e.currentTarget;
     // Chiudo eventuali dlg-info aperte sul mouseEnter della use.table
     // if (app.dialogInfo.hasAttribute('open')) app.dialogInfo.close();
     this.contextMenu.toggleAttribute('open');
     // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
     document.querySelectorAll('#ul-context-menu-table button').forEach(item => item.dataset.id = WorkBook.activeTable.id);
-    // abilito "addJoin" se sono presenti due o più fact-table e se si è attivato il contextmenu
-    const facts = this.svg.querySelectorAll('use.table.fact').length;
-    btnAddFactJoin.addEventListener('click', this.addFactJoin.bind(Draw));
-    btnAddFactJoin.disabled = (facts !== 0) ? false : true;
-    // btnAddFactJoin.disabled = (facts > 1 && this.table.dataset.tableJoin === this.table.dataset.factId) ? false : true;
+    // abilito "addJoin" se sono presenti due o più fact-table
+    // btnAddFactJoin.disabled = (this.svg.querySelectorAll('use.table.fact').length > 1) ? false : true;
   }
 
   // aggiungo i campi di una tabella per creare la join

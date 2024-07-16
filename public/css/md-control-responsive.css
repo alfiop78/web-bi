@@ -136,9 +136,13 @@ button.btn-link-context{
   display: flex;
 }
 
-button.btn-link-context:hover{
+button.btn-link-context:not([disabled]):hover{
   cursor: pointer;
   text-decoration: underline;
+}
+
+button.btn-link-context[disabled]:hover {
+  cursor: not-allowed;
 }
 
 .default {

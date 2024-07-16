@@ -3150,6 +3150,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     span.focus();
   }
 
+  app.handlerAddJoin = () => Draw.addFactJoin();
+
   // click all'interno di una textarea
   // TODO: da spostare in supportFn.js
   app.addText = (e) => {
