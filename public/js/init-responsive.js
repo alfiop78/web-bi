@@ -33,6 +33,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     dialogJoin: document.getElementById('dlg-join'),
     dialogColumns: document.getElementById('dlg-columns'),
     dialogTime: document.getElementById('dialog-time'),
+    dialogTablePopup : document.getElementById("dlg-table-popup"),
     // dialogInfo: document.getElementById('dlg-info'),
     dialogSchema: document.getElementById('dlg-schema'),
     dialogNewWorkBook: document.getElementById('dialog-new-workbook'),
@@ -96,6 +97,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
             if (node.hasChildNodes()) {
               node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+              node.querySelectorAll('*[data-over-fn]').forEach(element => element.addEventListener('mouseover', app[element.dataset.overFn]));
               node.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
               node.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
               node.querySelectorAll('*[data-blur-fn]').forEach(element => element.addEventListener('blur', app[element.dataset.blurFn]));
@@ -107,6 +109,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         // console.log(mutation.target);
         if (mutation.target.hasChildNodes()) {
           mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
+          mutation.target.querySelectorAll('*[data-over-fn]').forEach(element => element.addEventListener('mouseover', app[element.dataset.overFn]));
           mutation.target.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
           mutation.target.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
           mutation.target.querySelectorAll('*[data-blur-fn]').forEach(element => element.addEventListener('blur', app[element.dataset.blurFn]));
@@ -3162,6 +3165,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     if (e.target.localName === 'div') {
       app.addSpan(e.target);
     }
+  }
+
+  app.tableMouseOver = (e) => {
+    app.dialogTablePopup.show();
+  }
+
+  app.tableMouseLeave = (e) => {
+    app.dialogTablePopup.close();
   }
 
   /* NOTE: END SUPPORT FUNCTIONS */

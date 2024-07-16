@@ -700,6 +700,10 @@
                           <button data-fn="setAliasTable" class="btn-link-context">Imposta alias</button>
                         </ul>
                       </div>
+                      <dialog id="dlg-table-popup" class="dlg-popup">
+                        <button class="material-icons-round md-18" data-fn="showTable">info</button>
+                        <button class="material-icons-round md-18">edit</button>
+                      </dialog>
                       <div id="context-menu-column" class="context-menu">
                         <ul id="ul-context-menu-column" class="context-menu-items">
                           <span>Metrica</span>

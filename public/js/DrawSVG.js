@@ -821,6 +821,9 @@ class DrawSVG {
     use.addEventListener('mouseup', this.tableMouseUp.bind(this));
     use.addEventListener('mouseleave', this.tableMouseLeave.bind(this));
     use.addEventListener('mouseenter', this.tableMouseEnter.bind(this));
+    // use.addEventListener('mouseover', this.tableMouseOver.bind(this));
+    use.dataset.overFn = "tableMouseOver";
+    use.dataset.leaveFn = "tableMouseLeave";
     Draw.svg.appendChild(use);
     use.addEventListener('contextmenu', this.contextMenuTable.bind(this));
     this.table = use;
