@@ -1098,7 +1098,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   // apertura dialog con lista WorkBooks
   document.querySelector('#btn-workbook-open').onclick = () => {
     // carico elenco dei workBook presenti
-    const parent = document.querySelector('nav[data-workbook-defined]');
+    const parent = document.getElementById("ul-workbooks");
     // reset list
     parent.querySelectorAll('li').forEach(workbook => workbook.remove());
     for (const [token, object] of Object.entries(WorkBookStorage.workBooks())) {
@@ -2719,6 +2719,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       WorkBook.fields = `tok_${key}`;
     }
     WorkBook.checkChanges('time');
+    app.dialogTime.close();
   }
 
   // inserisco la colonna selezionata per la creazione della join

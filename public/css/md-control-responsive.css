@@ -23,10 +23,11 @@
 /* elementi con all'interno altri elementi che possono essere contenteditable (es. : textarea SQL formula) */
 *[data-content-editable] {
   background-color: white;
-  padding: 3rem 1em 1em;
+  padding: 2.5rem 1em 1em;
   position: relative;
-  border-radius: 2px;
+  border-radius: 4px;
   color: #494949;
+  box-shadow: 0px 1px 6px -2px gray;
 }
 
 #input-metric{
@@ -94,6 +95,19 @@ input[type="checkbox"] {
   width: auto;
 }
 
+button {
+  border: unset;
+}
+
+button.btn-buttons {
+  font-weight: bold;
+  background-color: var(--main-primary-color);
+  color: white;
+  border-radius: 2px;
+  font-style: normal;
+  padding: 8px 12px;
+}
+
 button.btn-link[disabled] {
   color: gray;
 }
@@ -114,13 +128,12 @@ button:not([disabled]).btn-link:hover{
 }
 
 button:not([disabled]).btn-link.important{
-  border: unset;
   font-weight: bold;
-  color: whitesmoke;
+  color: white;
   background-color: #4682b4d9;
   border-radius: 2px;
   font-style: normal;
-  padding: 8px 16px;
+  padding: 8px 12px;
 }
 
 button:not([disabled]).btn-link.important:hover{
@@ -130,7 +143,6 @@ button:not([disabled]).btn-link.important:hover{
 }
 
 button.btn-link-context{
-  border: unset;
   background-color: unset;
   padding: 4px 6px 4px 12px;
   display: flex;

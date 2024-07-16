@@ -230,7 +230,8 @@ small {
 .dlg-content {
   display: grid;
   grid-gap: 1em;
-  padding: 1em;
+  grid-template-rows: auto;
+  padding: .5em 2em;
 }
 
 .col-4.col-8 {
@@ -271,7 +272,8 @@ input[type="number"] {
 .row {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  padding: .5em;
+  /* padding: .5em; */
+  grid-column-gap: 2em;
 }
 
 .row > .col {

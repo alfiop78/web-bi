@@ -567,6 +567,7 @@ textarea {
   border-radius: 2px;
   border-color: transparent;
   color: #494949;
+  resize: none;
 }
 
 textarea:focus, textarea:active {

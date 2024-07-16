@@ -283,17 +283,15 @@
           <dialog id="dlg-schema">
             <section class="dlg-grid">
               <h5 class="">Seleziona schema Database</h5>
-              <section class="dlg-content col col-1">
-                <section>
-                  <section class="row">
-                    <div class="col grid-12 relative-ul">
-                      <ul id="ul-schemata" class="custom-scrollbar">
-                        @foreach($schemata as $schema)
-                          <li data-fn="handlerSchema" data-schema="{{$schema['SCHEMA_NAME']}}">{{$schema['SCHEMA_NAME']}}</li>
-                        @endforeach
-                      </ul>
-                    </div>
-                  </section>
+              <section class="dlg-content">
+                <section class="row">
+                  <div class="col grid-12 relative-ul">
+                    <ul id="ul-schemata" class="custom-scrollbar">
+                      @foreach($schemata as $schema)
+                        <li data-fn="handlerSchema" data-schema="{{$schema['SCHEMA_NAME']}}">{{$schema['SCHEMA_NAME']}}</li>
+                      @endforeach
+                    </ul>
+                  </div>
                 </section>
               </section>
               <section class="dlg-buttons">
@@ -318,7 +316,7 @@
           <dialog id="dialog-new-workbook">
             <section class="dlg-grid">
               <h5 class="title moveable">Titolo WorkBook</h5>
-              <section class="dlg-content col col-1 row-1">
+              <section class="dlg-content">
                 <input type="text" id="input-workbook-name" placeholder="Nome" value="" autocomplete="on" />
               </section>
               <section class="dlg-buttons">
@@ -341,23 +339,27 @@
             </section>
           </dialog>
 
-          <dialog id="dialog-time" data-x="0" data-y="40" class="medium absolute moveable">
+          <dialog id="dialog-time" data-x="0" data-y="40" class="medium-s fixed absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Imposta relazione con tabella TIME</h5>
-              <section class="dlg-content col col-2-equals">
-                <ul id="time-fields">
-                  <!-- TODO: creare qui la struttura delle tabelle TIME con <summary> e <details> -->
-                  <li data-field="id_year" data-field-ds="year" data-table="WB_YEARS" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
-                  <li data-field="id_quarter" data-field-ds="quarter" data-table="WB_QUARTERS" data-datatype="integer" data-fn="handlerTimeField">QUARTER <small>Es.: 202302</small></li>
-                  <li data-field="id_month" data-field-ds="month" data-table="WB_MONTHS" data-datatype="integer" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
-                  <!-- <li data-field="week_id" data-datatype="integer" data-fn="handlerTimeField">WEEK <small>Es.: 202312</small></li> -->
-                  <li data-field="id_date" data-field-ds="id_date" data-table="WB_DATE" data-datatype="date" data-fn="handlerTimeField" data-selected>DATE <small>Es.: 2023-12-31</small></li>
-                </ul>
-                <section class="list-search">
-                  <input type="search" id="time-column-search" data-element-search="time-column" placeholder="Ricerca colonna" autocomplete="off" />
-                  <div class="relative-ul">
-                    <ul id="ul-columns" data-search-id="time-column-search" class="custom-scrollbar"></ul>
-                  </div>
+              <section class="row">
+                <section class="dlg-content col grid-6">
+                  <ul id="time-fields">
+                    <!-- TODO: creare qui la struttura delle tabelle TIME con <summary> e <details> -->
+                    <li data-field="id_year" data-field-ds="year" data-table="WB_YEARS" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
+                    <li data-field="id_quarter" data-field-ds="quarter" data-table="WB_QUARTERS" data-datatype="integer" data-fn="handlerTimeField">QUARTER <small>Es.: 202302</small></li>
+                    <li data-field="id_month" data-field-ds="month" data-table="WB_MONTHS" data-datatype="integer" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
+                    <!-- <li data-field="week_id" data-datatype="integer" data-fn="handlerTimeField">WEEK <small>Es.: 202312</small></li> -->
+                    <li data-field="id_date" data-field-ds="id_date" data-table="WB_DATE" data-datatype="date" data-fn="handlerTimeField" data-selected>DATE <small>Es.: 2023-12-31</small></li>
+                  </ul>
+                </section>
+                <section class="dlg-content col grid-6">
+                  <section class="list-search">
+                    <input type="search" id="time-column-search" data-element-search="time-column" placeholder="Ricerca colonna" autocomplete="off" />
+                    <div class="relative-ul">
+                      <ul id="ul-columns" data-search-id="time-column-search" class="custom-scrollbar"></ul>
+                    </div>
+                  </section>
                 </section>
               </section>
               <section class="dlg-buttons">
@@ -373,8 +375,12 @@
           <dialog id="dialog-workbook-open">
             <section class="dlg-grid">
               <h5 class="title">Apri WorkBook</h5>
-              <section class="dlg-content col col-1">
-                <nav data-workbook-defined></nav>
+              <section class="dlg-content">
+                <section class="row">
+                  <div class="col grid-12 relative-ul">
+                    <ul id="ul-workbooks" class="custom-scrollbar"></ul>
+                  </div>
+                </section>
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
@@ -395,73 +401,84 @@
           </dialog>
 
           <!-- creazione metrica filtrata -->
-          <dialog id="dlg-metric" data-x="0" data-y="40" class="large absolute moveable droppable">
+          <dialog id="dlg-metric" data-x="0" data-y="40" class="medium-l fixed absolute moveable droppable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Metrica avanzata</h5>
-              <section class="dlg-content col col-3">
-                <section id="filter-area-drop">
-                  <nav id="filter-drop" class="custom-scrollbar dropzone"></nav>
+              <section class="dlg-content">
+                <section class="row">
+                  <section class="col grid-3">
+                    <section id="filter-area-drop">
+                      <div class="relative-ul">
+                        <ul id="filter-drop" class="custom-scrollbar dropzone"></ul>
+                      </div>
+                    </section>
+                  </section>
+                  <section class="col grid-5">
+                    <section class="input-area">
+                      <input type="text" id="adv-metric-name" placeholder="Nome" value="" autocomplete="off" />
+                      <div id="input-metric"></div>
+                      <div>
+                        <input type="checkbox" id="check-distinct" disabled />
+                        <label for="check-distinct">DISTINCT</label>
+                      </div>
+                      <textarea id="advanced-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
+                    </section>
+                  </section>
+                  <section class="col grid-4">
+                    <div class="relative-ul">
+                      <dl id="dl-timing-functions" class="custom-scrollbar">
+                        <dt class="btn-link">Last Period/Day</dt>
+                        <dd>Periodo temporale precedente, rispetto al livello più basso presente nel report.<br /> Ad esempio se nel report è presente il livello giorno, la funzione presenta i dati del giorno precedente, se invece è presente la settimana, presenta i dati della settimana precedente, ecc</dd>
+
+                        <dt class="btn-link">Last Week</dt>
+                        <dd>description</dd>
+
+                        <dt data-value="last-month" class="btn-link" data-fn="handlerTimingFunctions" data-table="WB_MONTHS" data-time-field="previous">Last Month</dt>
+                        <dd>description</dd>
+
+                        <dt class="btn-link">Last Quarter</dt>
+                        <dd>description</dd>
+
+                        <dt class="btn-link" data-value="last-year" data-fn="handlerTimingFunctions" data-time-field="year">Last Year</dt>
+                        <dd>La funzione presenta i dati relativi all’anno precedente, rispetto al livello presente nel report.<br /> Ad esempio se nel report è presente il livello mese, la funzione presenta i dati relativi allo stesso mese, ma dell’anno precedente, per il livello trimestre, presenta invece i dati dello stesso trimestre, ma dell’anno precedente</dd>
+
+                        <dt class="btn-link">MAT</dt>
+                        <dd>La funzione aggrega i dati relativi ai 12 mesi precedenti quello corrente.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito.</dd>
+
+                        <dt class="btn-link">Last Year MAT</dt>
+                        <dd>Analoga alla MAT, solamente che è applicata rispetto al mese corrente dell’anno precedente.</dd>
+
+                        <dt class="btn-link">Last To Date</dt>
+                        <dd>La funzione aggrega i dati da inizio mese fino al giorno corrente.<br /> Il livello DAY deve essere presente nel report</dd>
+
+                        <dt class="btn-link">Last Year MTD</dt>
+                        <dd>Analoga alla Month to date, solamente che è applicata sui dati dell’anno precedente: da inizio mese al giorno corrente dell’anno precedente.</dd>
+
+                        <dt class="btn-link">Year To Date</dt>
+                        <dd>La funzione aggrega i dati da inizio anno fino al giorno corrente. Il livello DAY deve essere presente nel report.</dd>
+
+                        <dt class="btn-link">Last Year YTD</dt>
+                        <dd>Analoga alla Year to date, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al giorno corrente, sempre riferito all’anno precedente</dd>
+
+                        <dt class="btn-link" data-value="year-to-month" data-fn="handlerTimingFunctions" data-table="WB_MONTHS" data-time-field="year-to-month">Year To Month</dt>
+                        <dd>La funzione aggrega i dati da inizio anno fino al mese corrente. Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
+
+                        <dt class="btn-link">Last Year YTM</dt>
+                        <dd>Analoga alla Year to month, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al mese corrente, sempre riferito all’anno precedente</dd>
+
+                        <dt class="btn-link">Last 2 Month</dt>
+                        <dd>La funzione presenta i dati relativi ai due mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
+
+                        <dt class="btn-link">Last 3 Month</dt>
+                        <dd>La funzione presenta i dati relativi ai tre mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
+                      </dl>
+                    </div>
+
+                  </section>
                 </section>
-                <section class="input-area">
-                  <input type="text" id="adv-metric-name" placeholder="Nome" value="" autocomplete="off" />
-                  <div id="input-metric"></div>
-                  <div>
-                    <input type="checkbox" id="check-distinct" disabled />
-                    <label for="check-distinct">DISTINCT</label>
-                  </div>
-                  <textarea id="advanced-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
-                </section>
-                <section class="list-search placeholder">
-                  <div class="relative-ul">
-                    <dl id="dl-timing-functions" class="custom-scrollbar">
-                      <dt class="btn-link">Last Period/Day</dt>
-                      <dd>Periodo temporale precedente, rispetto al livello più basso presente nel report.<br /> Ad esempio se nel report è presente il livello giorno, la funzione presenta i dati del giorno precedente, se invece è presente la settimana, presenta i dati della settimana precedente, ecc</dd>
 
-                      <dt class="btn-link">Last Week</dt>
-                      <dd>description</dd>
-
-                      <dt data-value="last-month" class="btn-link" data-fn="handlerTimingFunctions" data-table="WB_MONTHS" data-time-field="previous">Last Month</dt>
-                      <dd>description</dd>
-
-                      <dt class="btn-link">Last Quarter</dt>
-                      <dd>description</dd>
-
-                      <dt class="btn-link" data-value="last-year" data-fn="handlerTimingFunctions" data-time-field="year">Last Year</dt>
-                      <dd>La funzione presenta i dati relativi all’anno precedente, rispetto al livello presente nel report.<br /> Ad esempio se nel report è presente il livello mese, la funzione presenta i dati relativi allo stesso mese, ma dell’anno precedente, per il livello trimestre, presenta invece i dati dello stesso trimestre, ma dell’anno precedente</dd>
-
-                      <dt class="btn-link">MAT</dt>
-                      <dd>La funzione aggrega i dati relativi ai 12 mesi precedenti quello corrente.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito.</dd>
-
-                      <dt class="btn-link">Last Year MAT</dt>
-                      <dd>Analoga alla MAT, solamente che è applicata rispetto al mese corrente dell’anno precedente.</dd>
-
-                      <dt class="btn-link">Last To Date</dt>
-                      <dd>La funzione aggrega i dati da inizio mese fino al giorno corrente.<br /> Il livello DAY deve essere presente nel report</dd>
-
-                      <dt class="btn-link">Last Year MTD</dt>
-                      <dd>Analoga alla Month to date, solamente che è applicata sui dati dell’anno precedente: da inizio mese al giorno corrente dell’anno precedente.</dd>
-
-                      <dt class="btn-link">Year To Date</dt>
-                      <dd>La funzione aggrega i dati da inizio anno fino al giorno corrente. Il livello DAY deve essere presente nel report.</dd>
-
-                      <dt class="btn-link">Last Year YTD</dt>
-                      <dd>Analoga alla Year to date, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al giorno corrente, sempre riferito all’anno precedente</dd>
-
-                      <dt class="btn-link" data-value="year-to-month" data-fn="handlerTimingFunctions" data-table="WB_MONTHS" data-time-field="year-to-month">Year To Month</dt>
-                      <dd>La funzione aggrega i dati da inizio anno fino al mese corrente. Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
-
-                      <dt class="btn-link">Last Year YTM</dt>
-                      <dd>Analoga alla Year to month, solamente che è applicata sui dati dell’anno precedente: da inizio anno precedente al mese corrente, sempre riferito all’anno precedente</dd>
-
-                      <dt class="btn-link">Last 2 Month</dt>
-                      <dd>La funzione presenta i dati relativi ai due mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
-
-                      <dt class="btn-link">Last 3 Month</dt>
-                      <dd>La funzione presenta i dati relativi ai tre mesi precedenti.<br />Il livello MONTH deve essere presente nel report ed essere il livello più basso della dimensione TIME inserito</dd>
-                    </dl>
-                  </div>
-                </section>
               </section>
+
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
                 <button data-fn="saveMetric" id="btn-metric-save" value="salva">Salva</button>
@@ -469,21 +486,26 @@
             </section>
           </dialog>
 
-          <dialog id="dlg-custom-metric" data-x="0" data-y="40" class="medium absolute moveable">
+          <dialog id="dlg-custom-metric" data-x="0" data-y="40" class="medium-l absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Metrica</h5>
-              <section class="dlg-content col col-2">
-                <div class="list-search">
-                  <input type="search" id="input-search-custom-metrics" placeholder="Ricerca" data-element-search="custom-metrics" class="input-search" autocomplete="off">
-                  <div class="relative-ul">
-                    <ul id="ul-custom-metrics" class="custom-scrollbar" data-search-id="input-search-custom-metrics"></ul>
+              <section class="row">
+                <section class="dlg-content col grid-4">
+                  <div class="list-search">
+                    <input type="search" id="input-search-custom-metrics" placeholder="Ricerca" data-element-search="custom-metrics" class="input-search" autocomplete="off" tabindex="2">
+                    <div class="relative-ul">
+                      <ul id="ul-custom-metrics" class="custom-scrollbar" data-search-id="input-search-custom-metrics"></ul>
+                    </div>
                   </div>
-                </div>
-                <section class="textarea-formula">
-                  <input type="text" id="custom-metric-name" placeholder="Nome" value="" autocomplete="off" />
-                  <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea placeholder"></div>
-                  <textarea id="custom-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                 </section>
+                <section class="dlg-content col grid-8">
+                  <section class="textarea-formula">
+                    <input type="text" id="custom-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
+                    <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea placeholder"></div>
+                    <textarea id="custom-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
+                  </section>
+                </section>
+
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
@@ -558,22 +580,29 @@
 
           </dialog>
 
-          <dialog id="dlg-filters" data-x="0" data-y="40" class="medium absolute moveable">
+          <dialog id="dlg-filters" data-x="0" data-y="40" class="medium-l fixed absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Filtro</h5>
-              <section class="dlg-content col col-2">
-                <div class="list-search">
-                  <input type="search" id="input-search-columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off">
-                  <div class="relative-ul">
-                    <nav class="custom-scrollbar" data-search-id="input-search-columns"></nav>
-                  </div>
-                </div>
-                <section class="textarea-formula">
-                  <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" />
-                  <div id="textarea-filter" data-fn="addText" class="textarea" data-content-editable></div>
-                  <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
+              <section class="dlg-content">
+                <section class="row">
+                  <section class="col grid-4">
+                    <div class="list-search">
+                      <input type="search" id="input-search-columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off" autofocus tabindex="1">
+                      <div class="relative-ul">
+                        <nav class="custom-scrollbar" data-search-id="input-search-columns"></nav>
+                      </div>
+                    </div>
+                  </section>
+                  <section class="col grid-8">
+                    <section class="textarea-formula">
+                      <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" tabindex="2" />
+                      <div id="textarea-filter" data-fn="addText" class="textarea" data-content-editable></div>
+                      <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
+                    </section>
+                  </section>
                 </section>
               </section>
+
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
                 <button data-fn="saveFilter" id="btn-filter-save" value="salva">Salva</button>
@@ -583,23 +612,27 @@
 
           <div class="wrapper">
 
-            <dialog id="dlg-columns" data-x="0" data-y="40" class="medium absolute moveable">
+            <dialog id="dlg-columns" data-x="0" data-y="40" class="medium-l fixed absolute moveable">
               <section class="dlg-grid">
                 <h5 class="title moveable">Definizione colonne</h5>
-                <section class="dlg-content col-4 col-8">
-                  <div class="list-search">
-                    <input type="search" id="input-search-fields-dc" placeholder="Ricerca" data-element-search="fields" class="input-search" autocomplete="off">
-                    <div class="relative-ul">
-                      <nav id="table-field-list" class="custom-scrollbar" data-search-id="input-search-fields-dc"></nav>
+                <section class="row">
+                  <section class="dlg-content col grid-4">
+                    <div class="list-search">
+                      <input type="search" id="input-search-fields-dc" placeholder="Ricerca" data-element-search="fields" class="input-search" autocomplete="off" autofocus tabindex="1">
+                      <div class="relative-ul">
+                        <nav id="table-field-list" class="custom-scrollbar" data-search-id="input-search-fields-dc"></nav>
+                      </div>
                     </div>
-                  </div>
-                  <section class="textareas">
-                    <input type="text" id="column-name" placeholder="Nome" autocomplete="off">
-                    <section class="textarea-column">
-                      <div id="textarea-column-id" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
-                    </section>
-                    <section class="textarea-column">
-                      <div id="textarea-column-ds" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
+                  </section>
+                  <section class="dlg-content col grid-8">
+                    <section class="textareas">
+                      <input type="text" id="column-name" placeholder="Nome" autocomplete="off" tabindex="2">
+                      <section class="textarea-column">
+                        <div id="textarea-column-id" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
+                      </section>
+                      <section class="textarea-column">
+                        <div id="textarea-column-ds" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
+                      </section>
                     </section>
                   </section>
                 </section>
@@ -789,11 +822,15 @@
                             <dialog id="dlg-composite-metric" data-x="0" data-y="0" class="small absolute moveable droppable">
                               <section class="dlg-grid">
                                 <h5 class="title moveable">Creazione Metrica Composta</h5>
-                                <section class="dlg-content col col-1">
-                                  <section class="textarea-formula">
-                                    <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" />
-                                    <div id="textarea-composite-metric" data-fn="addText" data-content-editable class="dropzone textarea"></div>
-                                    <textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
+                                <section class="dlg-content">
+                                  <section class="row">
+                                    <section class="col grid-12">
+                                      <section class="textarea-formula">
+                                        <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus />
+                                        <div id="textarea-composite-metric" data-fn="addText" data-content-editable class="dropzone textarea"></div>
+                                        <textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
+                                      </section>
+                                    </section>
                                   </section>
                                 </section>
                                 <section class="dlg-buttons">
@@ -803,58 +840,55 @@
                               </section>
                             </dialog>
 
-                            <dialog id="dlg-sheet-config" data-x="0" data-y="0" class="medium absolute moveable">
+                            <dialog id="dlg-sheet-config" data-x="0" data-y="0" class="medium-s absolute moveable">
                               <section class="dlg-grid">
-                                <h5 class="title">Configurazione</h5>
-                                <section class="dlg-content col col-1">
-                                  <section>
-                                    <section class="row">
-                                      <div class="col grid-12">
-                                        <div class="field">
-                                          <input id="field-label" type="text" value="" placeholder="Etichetta colonna" />
-                                        </div>
-                                      </div>
-                                    </section>
-                                    <section class="row">
-                                      <div class="col grid-5">
-                                        <div class="field label">
-                                          <label for="field-datatype">Tipo di dato</label>
-                                          <select id="field-datatype">
-                                            <option id="string" value="string">Stringa</option>
-                                            <option id="number" value="number">Numero</option>
-                                            <option id="date" value="date">Data</option>
-                                            <option id="datetime" value="datetime">Date Time</option>
-                                            <option id="timeofday" value="timeofday">Time of Day</option>
-                                            <option id="boolean" value="boolean">Vero/Falso</option>
-                                          </select>
-                                        </div>
-                                      </div>
-                                      <div class="col grid-5">
-                                        <div class="field label">
-                                          <label for="field-format">Formattazione</label>
-                                          <select id="field-format">
-                                            <option value="default" selected>Default</option>
-                                            <option value="currency">Valuta €</option>
-                                            <option value="percent">Percentuale</option>
-                                          </select>
-                                        </div>
-                                      </div>
-                                      <div class="col grid-2">
-                                        <div class="field label">
-                                          <label for="frationDigits">Decimali</label>
-                                          <input id="frationDigits" type="number" value="2" />
-                                        </div>
-                                      </div>
-                                    </section>
-                                    <section class="row">
-                                      <div class="col grid-5">
-                                        <div class="field hr">
-                                          <input type="checkbox" id="filter-column" name="filter-column" />
-                                          <label for="filter-column">Imposta filtro Dashboard</label>
-                                        </div>
-                                      </div>
-                                    </section>
+                                <h5 class="title moveable">Configurazione</h5>
+                                <section class="dlg-content">
+                                  <section class="row">
+                                    <div class="col grid-12">
+                                      <input id="field-label" type="text" value="" placeholder="Etichetta colonna" />
+                                    </div>
                                   </section>
+                                  <section class="row">
+                                    <div class="col grid-5">
+                                      <div class="field label">
+                                        <label for="field-datatype">Tipo di dato</label>
+                                        <select id="field-datatype">
+                                          <option id="string" value="string">Stringa</option>
+                                          <option id="number" value="number">Numero</option>
+                                          <option id="date" value="date">Data</option>
+                                          <option id="datetime" value="datetime">Date Time</option>
+                                          <option id="timeofday" value="timeofday">Time of Day</option>
+                                          <option id="boolean" value="boolean">Vero/Falso</option>
+                                        </select>
+                                      </div>
+                                    </div>
+                                    <div class="col grid-5">
+                                      <div class="field label">
+                                        <label for="field-format">Formattazione</label>
+                                        <select id="field-format">
+                                          <option value="default" selected>Default</option>
+                                          <option value="currency">Valuta €</option>
+                                          <option value="percent">Percentuale</option>
+                                        </select>
+                                      </div>
+                                    </div>
+                                    <div class="col grid-2">
+                                      <div class="field label">
+                                        <label for="frationDigits">Decimali</label>
+                                        <input id="frationDigits" type="number" value="2" />
+                                      </div>
+                                    </div>
+                                  </section>
+                                  <section class="row">
+                                    <div class="col grid-12">
+                                      <div class="field hr">
+                                        <input type="checkbox" id="filter-column" name="filter-column" />
+                                        <label for="filter-column">Imposta filtro Dashboard</label>
+                                      </div>
+                                    </div>
+                                  </section>
+
                                 </section>
                                 <section class="dlg-buttons">
                                   <button name="cancel" value="chiudi">Chiudi</button>
@@ -886,7 +920,7 @@
               <section class="actions">
                 <button id="prev">Workbook</button>
                 <div>
-                  <button id="next">Sheet</button>
+                  <button id="next" class="btn-buttons">Sheet</button>
                   <button id="btn-sql-preview" class="btn-link important" data-fn="createProcess" value="SQL">SQL</button>
                   <button id="btn-sheet-preview" class="btn-link important" data-fn="createProcess" value="Elabora">Elabora</button>
                 </div>
