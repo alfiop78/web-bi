@@ -1028,7 +1028,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       const schema = e.currentTarget.dataset.schema;
       // recupero le tabelle dello schema selezionato
       const data = await getDatabaseTable(schema);
-      console.log(data);
+      // console.log(data);
       let ul = document.getElementById('ul-tables');
       for (const [key, value] of Object.entries(data)) {
         const content = app.tmplList.content.cloneNode(true);

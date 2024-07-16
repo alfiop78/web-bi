@@ -93,7 +93,7 @@ path[hidden] {
 path:not([data-join-id]){
   fill: transparent;
   stroke: darkgrey;
-  stroke-dasharray: 4;
+  /* stroke-dasharray: 4; */
   stroke-width: 1.5;
   stroke-linecap: round;
 }

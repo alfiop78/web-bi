@@ -58,15 +58,14 @@ thead th[data-metric-token]{
 }
 
 .table-preview{
-  /* overflow: auto; */
+  overflow: auto;
   position: relative;
-  border: solid thin #d3d3d3;
 }
 
 .table-content{
   position: absolute;
   width: 100%;
-  height: 100%;
+  height: calc(100% - 38px);
 }
 
 .table-content.columnsHandler {

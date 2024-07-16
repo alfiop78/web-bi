@@ -12,7 +12,6 @@ ul{
   margin-block-start: unset;
   padding-block-end: 0em;
   margin-block-end: unset;
-  background-color: white;
 }
 
 dl{
@@ -101,7 +100,7 @@ li.icon > span{
   position: relative;
   /* min-height: 350px; */
   min-height: 220px;
-  max-height: 500px;
+  /* max-height: 500px; */
 }
 
 .relative-ul.min-height {

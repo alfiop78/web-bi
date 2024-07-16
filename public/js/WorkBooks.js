@@ -499,26 +499,15 @@ class WorkBooks {
       line.dataset.startY = value.start.y;
       line.dataset.endX = value.end.x;
       line.dataset.endY = value.end.y;
-      let d;
-      if (!value.from) {
-        // fact line
-        line.classList = value.cssClass;
-        controlPoints.start.x = value.start.x;
-        controlPoints.start.y = value.start.y + 40;
-        controlPoints.end.x = value.end.x;
-        controlPoints.end.y = value.end.y - 40;
-        d = `M${value.start.x},${value.start.y} C${controlPoints.start.x},${controlPoints.start.y} ${controlPoints.end.x},${controlPoints.end.y} ${value.end.x},${value.end.y}`;
-      } else {
-        line.dataset.from = value.from;
-        line.dataset.joinId = value.name;
-        line.dataset.to = value.to;
-        line.dataset.factId = value.factId;
-        controlPoints.start.x = value.start.x + 40;
-        controlPoints.start.y = value.start.y;
-        controlPoints.end.x = value.end.x - 40;
-        controlPoints.end.y = value.end.y;
-        d = `M${value.start.x},${value.start.y} C${controlPoints.start.x},${controlPoints.start.y} ${controlPoints.end.x},${controlPoints.end.y} ${value.end.x},${value.end.y}`;
-      }
+      line.dataset.from = value.from;
+      line.dataset.joinId = value.name;
+      line.dataset.to = value.to;
+      line.dataset.factId = value.factId;
+      controlPoints.start.x = value.start.x + 40;
+      controlPoints.start.y = value.start.y;
+      controlPoints.end.x = value.end.x - 40;
+      controlPoints.end.y = value.end.y;
+      const d = `M${value.start.x},${value.start.y} C${controlPoints.start.x},${controlPoints.start.y} ${controlPoints.end.x},${controlPoints.end.y} ${value.end.x},${value.end.y}`;
       line.setAttribute('d', d);
       Draw.svg.appendChild(line);
       line.dataset.fn = "selectLine";

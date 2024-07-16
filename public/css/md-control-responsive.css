@@ -155,20 +155,21 @@ input {
   width: 100%;
   /* max-width: 400px; */
   outline: none;
+  margin-bottom: 6px;
 }
 
 input:read-write {
   border-radius: 2px;
   background-color: white;
   color: #494949;
-  box-shadow: 0px 4px 2px -3px #898585;
+  box-shadow: 0px 4px 2px -3px darkgray;
 }
 
 input:read-write:focus {
   border-radius: 2px;
   background-color: white;
   color: #494949;
-  box-shadow: 0px 4px 2px -3px steelblue;
+  box-shadow: 0px 4px 4px -2px var(--main-primary-color);
 }
 
 input:read-write::before {

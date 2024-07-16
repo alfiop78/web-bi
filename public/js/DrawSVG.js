@@ -150,12 +150,13 @@ class DrawSVG {
               anchor: 'right'
             }, // right
             {
-              x: +this.nearestTable.getAttribute('x') + (rectBounding.width / 2), y: +this.nearestTable.getAttribute('y') + (rectBounding.height + 6),
+              x: +this.nearestTable.getAttribute('x') + (rectBounding.width / 2),
+              y: +this.nearestTable.getAttribute('y') + (rectBounding.height + 9),
               p1x: +this.nearestTable.getAttribute('x') + (rectBounding.width / 2),
               p1y: +this.nearestTable.dataset.anchorYTo + 50,
               p2x: (e.offsetX - this.dragElementPosition.x + 15),
               p2y: (e.offsetY - this.dragElementPosition.y) - 50,
-              x2: (e.offsetX - this.dragElementPosition.x + 15), y2: (e.offsetY - this.dragElementPosition.y - 6),
+              x2: (e.offsetX - this.dragElementPosition.x + 15), y2: (e.offsetY - this.dragElementPosition.y - 9),
               anchor: 'bottom'
             } // bottom
           ] :
@@ -293,9 +294,11 @@ class DrawSVG {
       // this.createDimensionInfo();
       this.drawFact();
       this.currentLineRef.remove();
-      delete this.joinLines;
-      // this.updateLine();
-      // TODO: aggiorno this.joinLines in base all'auto-posizionamento
+      console.log(this.joinLines);
+      debugger;
+      this.joinLines.delete(this.currentLineRef.id);
+      console.log(this.joinLines);
+      debugger;
     } else {
       // è presente una tableJoin, è un livello dimensionale
       // calcolo quante tabelle sono legate a q nearestTable (quante dimensioni ci sono)

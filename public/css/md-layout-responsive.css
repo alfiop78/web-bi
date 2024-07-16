@@ -183,7 +183,7 @@ span.markContent {
 
 .table-area-wrapper{
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 300px 1fr;
   grid-column-gap: 4px;
   /* background-color: lightcyan; */
   position: relative;

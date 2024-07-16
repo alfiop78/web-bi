@@ -280,15 +280,22 @@
       <div id="content">
         <div id="body">
 
-          <dialog id="dlg-schema" class="small">
+          <dialog id="dlg-schema">
             <section class="dlg-grid">
               <h5 class="">Seleziona schema Database</h5>
-              <nav>
-                {{-- {{ dd($schemata) }} --}}
-                @foreach($schemata as $schema)
-                <a href="#" data-fn="handlerSchema" data-schema="{{ $schema['SCHEMA_NAME'] }}">{{ $schema['SCHEMA_NAME'] }}</a>
-                @endforeach
-              </nav>
+              <section class="dlg-content col col-1">
+                <section>
+                  <section class="row">
+                    <div class="col grid-12 relative-ul">
+                      <ul id="ul-schemata" class="custom-scrollbar">
+                        @foreach($schemata as $schema)
+                          <li data-fn="handlerSchema" data-schema="{{$schema['SCHEMA_NAME']}}">{{$schema['SCHEMA_NAME']}}</li>
+                        @endforeach
+                      </ul>
+                    </div>
+                  </section>
+                </section>
+              </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
               </section>
@@ -485,7 +492,7 @@
             </section>
           </dialog>
 
-          <dialog id="dlg-join" data-x="0" data-y="40" class="small absolute moveable">
+          <dialog id="dlg-join" data-x="0" data-y="40" class="absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Creazione Join</h5>
               <section class="dlg-content col">
@@ -696,7 +703,7 @@
                               <ul id="ul-tables" data-search-id="table-search" class="custom-scrollbar"></ul>
                             </div>
                           </section>
-                          <section class="table-preview custom-scrollbar">
+                          <section class="table-preview">
                             <input type="search" id="columns-search-id" autocomplete="off" placeholder="Ricerca colonne" />
                             <div class="table-content">
                               <!-- data-search-input : definisce la input che effettua la ricerca di colonne in questa tabella -->
