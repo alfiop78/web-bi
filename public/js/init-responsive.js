@@ -33,7 +33,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     dialogJoin: document.getElementById('dlg-join'),
     dialogColumns: document.getElementById('dlg-columns'),
     dialogTime: document.getElementById('dialog-time'),
-    dialogTablePopup : document.getElementById("dlg-table-popup"),
     // dialogInfo: document.getElementById('dlg-info'),
     dialogSchema: document.getElementById('dlg-schema'),
     dialogNewWorkBook: document.getElementById('dialog-new-workbook'),
@@ -57,6 +56,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     textareaCompositeMetric: document.getElementById('textarea-composite-metric'),
     txtAreaIdColumn: document.getElementById('textarea-column-id'),
     txtAreaDsColumn: document.getElementById('textarea-column-ds'),
+    // popup
+    tablePopup: document.getElementById("table-popup"),
     // buttons
     btnVersioning: document.getElementById('btn-versioning')
   }
@@ -97,9 +98,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
             if (node.hasChildNodes()) {
               node.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
-              node.querySelectorAll('*[data-over-fn]').forEach(element => element.addEventListener('mouseover', app[element.dataset.overFn]));
-              node.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
-              node.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
+              // node.querySelectorAll('*[data-over-fn]').forEach(element => element.addEventListener('mouseover', app[element.dataset.overFn]));
+              // node.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
+              // node.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
               node.querySelectorAll('*[data-blur-fn]').forEach(element => element.addEventListener('blur', app[element.dataset.blurFn]));
             }
           }
@@ -109,9 +110,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         // console.log(mutation.target);
         if (mutation.target.hasChildNodes()) {
           mutation.target.querySelectorAll('*[data-fn]').forEach(element => element.addEventListener('click', app[element.dataset.fn]));
-          mutation.target.querySelectorAll('*[data-over-fn]').forEach(element => element.addEventListener('mouseover', app[element.dataset.overFn]));
-          mutation.target.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
-          mutation.target.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
+          // mutation.target.querySelectorAll('*[data-over-fn]').forEach(element => element.addEventListener('mouseover', app[element.dataset.overFn]));
+          // mutation.target.querySelectorAll('*[data-enter-fn]').forEach(element => element.addEventListener('mouseenter', app[element.dataset.enterFn]));
+          // mutation.target.querySelectorAll('*[data-leave-fn]').forEach(element => element.addEventListener('mouseleave', app[element.dataset.leaveFn]));
           mutation.target.querySelectorAll('*[data-blur-fn]').forEach(element => element.addEventListener('blur', app[element.dataset.blurFn]));
         }
       }
@@ -186,8 +187,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       // se è presente almeno una tabella dimensionale oppure la tabella droppata è una fact NON eseguo la join
       if (Draw.countJoins !== 0 && !Draw.table.classList.contains('fact')) {
         WorkBook.tableJoins = {
-          from : Draw.currentLineRef.dataset.from,
-          to : Draw.currentLineRef.dataset.to
+          from: Draw.currentLineRef.dataset.from,
+          to: Draw.currentLineRef.dataset.to
         }
         Draw.openJoinWindow();
         Draw.createWindowJoinContent();
@@ -479,8 +480,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // console.log(e.target);
     Draw.currentLineRef = e.target.id;
     WorkBook.tableJoins = {
-      from : Draw.currentLineRef.dataset.from,
-      to:Draw.currentLineRef.dataset.to
+      from: Draw.currentLineRef.dataset.from,
+      to: Draw.currentLineRef.dataset.to
     }
     Draw.openJoinWindow();
     Draw.createWindowJoinContent();
@@ -1501,18 +1502,22 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.tableSelected = async (e) => {
     console.log(e);
     console.log(e.ctrlKey);
-    if (e.ctrlKey) return;
+    // if (e.ctrlKey) return;
     console.log('click event');
     // console.log(`table selected ${e.currentTarget.dataset.table}`);
     // console.log(e.currentTarget);
     // deseleziono le altre tabelle con attributo active
     Draw.svg.querySelectorAll("use.table[data-active='true']").forEach(use => delete use.dataset.active);
-    e.currentTarget.dataset.active = 'true';
+    WorkBook.activeTable = e.currentTarget.dataset.id;
+    WorkBook.activeTable.dataset.active = 'true';
+    // e.currentTarget.dataset.active = 'true';
     // se è attiva l'attributo data-multifact sulla tabella selezionata, devo visualizzare la dialog join
     // tra la tabella appena droppata e l'ultima tabella della dimensione scelta
     // recupero 50 record della tabella selezionata per visualizzare un anteprima
-    WorkBook.activeTable = e.currentTarget.id;
-    WorkBook.schema = e.currentTarget.dataset.schema;
+    // WorkBook.activeTable = e.currentTarget.id;
+    // WorkBook.activeTable = e.currentTarget.dataset.id;
+    // WorkBook.schema = e.currentTarget.dataset.schema;
+    WorkBook.schema = WorkBook.activeTable.dataset.schema;
     // TODO: potrei popolare qui il datatype delle colonne prendendo i dati dalle tabelle in
     // sessionStorage, qui vengono salvati appena viene aggiunta la tabella al canvas.
     // Attualmente questa operazione la faccio in setColumn()
@@ -2260,6 +2265,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     el.onmouseover = (e) => {
       if (e.target.nodeName === 'svg') {
         // if (app.dialogInfo.hasAttribute('open')) app.dialogInfo.close();
+        // chiudo il div table-popup se è aperto
+        if (app.tablePopup.classList.contains("open")) app.tablePopup.classList.remove("open");
       }
     }
   });
@@ -3167,12 +3174,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  app.tableMouseOver = (e) => {
-    app.dialogTablePopup.show();
-  }
-
-  app.tableMouseLeave = (e) => {
-    app.dialogTablePopup.close();
+  app.tablePopup.onmouseleave = (e) => {
+    if (e.target.classList.contains("open")) e.target.classList.remove("open");
   }
 
   /* NOTE: END SUPPORT FUNCTIONS */

@@ -136,17 +136,20 @@ class DrawSVG {
         // ...punti finali (in base al mouse) della linea perchè questi variano
         // ...se sto droppando in 'bottom' o in 'right'
         // OPTIMIZE: 2024.02.01 - calcolo controlPoint dinamici
+        console.log(this.currentLineRef.getTotalLength());
         const anchorPoints = (this.countJoins >= 1 && this.nearestTable.classList.contains('fact')) ?
           [
             {
-              x: +this.nearestTable.dataset.anchorXTo, y: +this.nearestTable.dataset.anchorYTo,
+              x: +this.nearestTable.dataset.anchorXTo,
+              y: +this.nearestTable.dataset.anchorYTo,
               // punti di controllo della linea
               p1x: +this.nearestTable.dataset.anchorXTo + 40,
               p1y: +this.nearestTable.dataset.anchorYTo,
               p2x: (e.offsetX - this.dragElementPosition.x - 10) - 40,
               p2y: (e.offsetY - this.dragElementPosition.y + 15),
               // punto end della linea
-              x2: (e.offsetX - this.dragElementPosition.x - 10), y2: (e.offsetY - this.dragElementPosition.y + 15),
+              x2: (e.offsetX - this.dragElementPosition.x - 10),
+              y2: (e.offsetY - this.dragElementPosition.y + 15),
               anchor: 'right'
             }, // right
             {
@@ -204,6 +207,7 @@ class DrawSVG {
 
           const d = `M${this.nearestPoint.x},${this.nearestPoint.y} C${this.nearestPoint.p1x},${this.nearestPoint.p1y} ${this.nearestPoint.p2x},${this.nearestPoint.p2y} ${this.nearestPoint.x2},${this.nearestPoint.y2}`;
           this.currentLineRef.setAttribute('d', d);
+          console.log(this.currentLineRef.getTotalLength());
           this.currentLineRef.dataset.to = this.nearestTable.id;
         }
       }
@@ -372,11 +376,13 @@ class DrawSVG {
   tableMouseDown(e) {
     e.preventDefault();
     e.stopPropagation();
-    if (!e.ctrlKey || e.button === 2) return;
+    if (e.button === 2) return;
+    // if (!e.ctrlKey || e.button === 2) return;
     console.log('event mouseDown');
     this.coordinate = { x: +e.currentTarget.getAttribute('x'), y: +e.currentTarget.getAttribute('y') };
     this.nearestTable;
     this.el = e.currentTarget;
+    if (this.tablePopup.classList.contains("open")) this.tablePopup.classList.remove("open");
   }
 
   tableMouseMove(e) {
@@ -384,7 +390,8 @@ class DrawSVG {
     e.stopPropagation();
     // console.log(e);
     // console.log('mousemove', e.currentTarget);
-    if (this.el && e.ctrlKey) {
+    if (this.el) {
+      // if (this.el && e.ctrlKey) {
       this.coordinate.x += e.movementX;
       this.coordinate.y += e.movementY;
       // console.log(e);
@@ -436,6 +443,7 @@ class DrawSVG {
           // in questo caso non devo cercare la nearestTable perchè non voglio modificare la join
           // presente con questa tabella, lo valorizzo con il valore già presente
           this.nearestTable = this.svg.querySelector(`#${e.target.dataset.tableJoin}`);
+          // console.log(this.currentLineRef.getTotalLength());
           const d = `M${+this.nearestTable.dataset.anchorXTo},${+this.nearestTable.dataset.anchorYTo} C${+this.nearestTable.dataset.anchorXTo + 40},${+this.nearestTable.dataset.anchorYTo} ${this.coordinate.x - 40},${this.coordinate.y + 15} ${this.coordinate.x - 10},${this.coordinate.y + 15}`;
           if (this.currentLineRef) this.currentLineRef.setAttribute('d', d);
         }
@@ -446,6 +454,7 @@ class DrawSVG {
         this.currentLineRef.dataset.endX = this.coordinate.x - 10;
         this.currentLineRef.dataset.endY = this.coordinate.y + 15;
       }
+      // console.log(this.currentLineRef.getTotalLength());
       // linea di join di "destra" rispetto alla tabella che sto spostando
       this.svg.querySelectorAll(`path[data-to='${e.target.id}']`).forEach(line => {
         // console.log(line);
@@ -491,7 +500,12 @@ class DrawSVG {
     e.preventDefault();
     // console.log('tableMouseEnter');
     this.currentTableRef = e.target.id;
-    // console.log(this.currentTableRef);
+    this.tablePopup = document.getElementById("table-popup");
+    const { left: mouseX, bottom: mouseY } = e.currentTarget.getBoundingClientRect();
+    this.tablePopup.style.top = `${mouseY}px`;
+    this.tablePopup.style.left = `${mouseX + 28}px`;
+    this.tablePopup.querySelector("button").dataset.id = e.target.id;
+    this.tablePopup.classList.add("open");
   }
 
   tableMouseLeave(e) {
@@ -708,11 +722,11 @@ class DrawSVG {
     use.addEventListener('contextmenu', this.contextMenuTable.bind(this));
     this.table = use;
     // <animate> tag
-    // const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
-    // animate.setAttribute('attributeName', 'y');
-    // animate.setAttribute('dur', '.15s');
-    // animate.setAttribute('fill', 'freeze');
-    // use.appendChild(animate);
+    const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+    animate.setAttribute('attributeName', 'y');
+    animate.setAttribute('dur', '.15s');
+    animate.setAttribute('fill', 'freeze');
+    use.appendChild(animate);
   }
 
   updateTable() {
@@ -804,7 +818,7 @@ class DrawSVG {
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;
-    use.dataset.fn = 'tableSelected';
+    // use.dataset.fn = 'tableSelected';
     // use.addEventListener('click', this.tableSelected.bind(this), true);
     // use.dataset.enterFn = 'tableEnter';
     // use.ondblclick = this.handlerDblClick.bind(Draw);
@@ -821,9 +835,6 @@ class DrawSVG {
     use.addEventListener('mouseup', this.tableMouseUp.bind(this));
     use.addEventListener('mouseleave', this.tableMouseLeave.bind(this));
     use.addEventListener('mouseenter', this.tableMouseEnter.bind(this));
-    // use.addEventListener('mouseover', this.tableMouseOver.bind(this));
-    use.dataset.overFn = "tableMouseOver";
-    use.dataset.leaveFn = "tableMouseLeave";
     Draw.svg.appendChild(use);
     use.addEventListener('contextmenu', this.contextMenuTable.bind(this));
     this.table = use;

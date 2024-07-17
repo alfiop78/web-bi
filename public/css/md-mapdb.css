@@ -203,7 +203,7 @@ use.table.dropzone.dropping {
 }
 
 use.table:hover{
-  cursor: pointer;
+  cursor: move;
   /* opacity: 1; */
   fill: white;
 }

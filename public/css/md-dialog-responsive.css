@@ -15,6 +15,27 @@ dialog.popup {
   background-color: transparent;
 }
 
+.popup {
+  width: 170px;
+  /* height: 30px; */
+  position: fixed;
+  visibility: hidden;
+  /* background-color: gray; */
+  padding: 4px 0px;
+}
+
+.popup.open {
+  visibility: visible;
+  z-index: 20;
+}
+
+.popup > .content-popup {
+  /* background-color: indianred; */
+  display: flex;
+  column-gap: 2px;
+  padding: 4px 0px;
+}
+
 /* posizionamento personalizzato della dialog*/
 dialog.positioned {
   margin: 0px;

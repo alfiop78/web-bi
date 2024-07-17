@@ -288,7 +288,7 @@
                   <div class="col grid-12 relative-ul">
                     <ul id="ul-schemata" class="custom-scrollbar">
                       @foreach($schemata as $schema)
-                        <li data-fn="handlerSchema" data-schema="{{$schema['SCHEMA_NAME']}}">{{$schema['SCHEMA_NAME']}}</li>
+                      <li data-fn="handlerSchema" data-schema="{{$schema['SCHEMA_NAME']}}">{{$schema['SCHEMA_NAME']}}</li>
                       @endforeach
                     </ul>
                   </div>
@@ -700,10 +700,12 @@
                           <button data-fn="setAliasTable" class="btn-link-context">Imposta alias</button>
                         </ul>
                       </div>
-                      <dialog id="dlg-table-popup" class="dlg-popup">
-                        <button class="material-icons-round md-18" data-fn="showTable">info</button>
-                        <button class="material-icons-round md-18">edit</button>
-                      </dialog>
+                      <div id="table-popup" class="popup">
+                        <section class="content-popup">
+                          <button class="material-icons-round md-18" data-id="" data-fn="tableSelected">table_rows_narrow</button>
+                          <!-- <button class="material-icons-round md-18">edit</button> -->
+                        </section>
+                      </div>
                       <div id="context-menu-column" class="context-menu">
                         <ul id="ul-context-menu-column" class="context-menu-items">
                           <span>Metrica</span>
@@ -735,24 +737,31 @@
                             <defs>
                               <g id="table-struct" class="struct">
                                 <rect class="table" x="0" y="0" />
+                                <text x="32" y="20" font-family="Barlow" font-size=".8rem" font-weight="normal"></text>
                                 <rect class="symbol" x="0" y="0" />
                                 <image href="{{ asset('/images/table_18dp_1.svg') }}" data-id x="4" y="6" width="18" height="18"></image>
-                                <text x="32" y="20" font-family="Barlow" font-size=".8rem" font-weight="normal"></text>
+                                <!-- <rect id="startIconsAnimation" x="0" y="0" width="200px" height="60px" fill="transparent" /> -->
+                                <!-- <image href="{{ asset('/images/table_18dp_1.svg') }}" data-fn="showTableRows" data-id x="4" y="36" width="18" height="18"> -->
+                                <!-- <animate attributeName="y" begin="4s" from="0" to="40" dur="5s" fill="freeze" /> -->
+                                <!-- <animate attributeType="XML" attributeName="y" begin="me.click" from="0" to="40" dur="10s" fill="freeze" /> -->
+                                <!-- <animate attributeType="XML" attributeName="y" begin="startIconsAnimation.mouseenter" from="6" to="36" dur=".5s" fill="freeze" /> -->
+                                <!-- <animate attributeType="XML" attributeName="y" begin="startIconsAnimation.mouseleave" from="36" to="6" dur=".5s" fill="freeze" /> -->
+                                <!-- </image> -->
                               </g>
                               <g id="table-struct-fact" class="struct fact">
                                 <rect class="table" x="0" y="0" />
+                                <text x="32" y="20" font-family="Barlow" font-size=".85rem"></text>
                                 <rect class="symbol" x="0" y="0" />
                                 <image href="{{ asset('/images/database_18dp_1.svg') }}" data-id x="4" y="6" width="18" height="18"></image>
                                 <!-- <text x="12" y="17" font-family="Barlow" font-size=".85rem" font-weight="bold"></text> -->
-                                <text x="32" y="20" font-family="Barlow" font-size=".85rem"></text>
                               </g>
                               <g id="table-common" class="struct common">
                                 <rect class="common" x="6" y="4" />
+                                <text x="32" y="20" font-family="Barlow" font-size=".85rem" font-style="italic"></text>
                                 <rect class="sub-common" x="12" y="8" />
                                 <rect class="table" x="0" y="0" />
                                 <rect class="symbol" x="0" y="0" />
                                 <image href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="6" width="18" height="18"></image>
-                                <text x="32" y="20" font-family="Barlow" font-size=".85rem" font-style="italic"></text>
                               </g>
                               <g id="web-bi-time">
                                 <image id="time" href="{{ asset('/images/access_time_filled_865858_18dp.svg') }}" height="18" width="18"></image>
