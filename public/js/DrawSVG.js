@@ -286,6 +286,16 @@ class DrawSVG {
         to: this.currentLineRef.dataset.to,
         cssClass: this.currentLineRef.classList.value
       };
+      // TODO: creazione icona join sotto la linea di join, sarà un button referenziato con il tag foreignObject
+      /* const foreignObject = this.svg.getElementById("btn-join");
+      const btnJoin = foreignObject.cloneNode(true);
+      btnJoin.id = `btn-join-${this.currentLineRef.id}`;
+      btnJoin.dataset.id = this.currentLineRef.id;
+      btnJoin.setAttribute("x", (+this.currentLineRef.dataset.endX - 26));
+      btnJoin.setAttribute("y", (+this.currentLineRef.dataset.endY + 9));
+      // btnJoin.addEventListener("click", this.joinSelected);
+      // btnJoin.dataset.fn = "selectLine";
+      this.svg.appendChild(btnJoin); */
     }
 
     if (!this.nearestTable) {
@@ -1136,7 +1146,7 @@ class DrawSVG {
     const ul = this.dialogJoin.querySelector(`section[data-table-${source}] ul`);
     for (const [key, value] of Object.entries(response)) {
       const content = this.tmplList.content.cloneNode(true);
-      const li = content.querySelector('li[data-li]');
+      const li = content.querySelector('li.select-list');
       const span = li.querySelector('span');
       li.dataset.label = value.column_name;
       li.dataset.elementSearch = `${source}-fields`;

@@ -56,6 +56,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     textareaCompositeMetric: document.getElementById('textarea-composite-metric'),
     txtAreaIdColumn: document.getElementById('textarea-column-id'),
     txtAreaDsColumn: document.getElementById('textarea-column-ds'),
+    txtAreaFilters: document.getElementById("textarea-filter"),
     // popup
     tablePopup: document.getElementById("table-popup"),
     // buttons
@@ -211,7 +212,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       if (value.hasOwnProperty('fields')) {
         // è una metrica composta di base, quindi definita sul cubo (es. przmedio * quantita)
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li[data-li-icon]');
+        const li = content.querySelector('li.icons-list');
         const span = li.querySelector('span');
         const btnEdit = li.querySelector('button[data-edit]');
         const btnRemove = li.querySelector('button[data-delete]');
@@ -269,7 +270,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     WorkBook.activeTable = elementRef.dataset.tableId;
     // console.log(WorkBook.activeTable.dataset.table);
     app.addMark({ field: elementRef.dataset.field, datatype: elementRef.dataset.datatype }, e.target);
-    // app.addSpan(txtArea, null, 'column');
   }
 
   // drag su campo per la creazione del report
@@ -528,6 +528,19 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     e.preventDefault();
     // console.log(e.currentTarget);
     e.currentTarget.classList.remove('dropping');
+  }
+
+  app.newFilterDrop = (e) => {
+    e.preventDefault();
+    console.log('target:', e.target);
+    console.log('currentTarget:', e.currentTarget);
+    e.currentTarget.classList.replace('dropping', 'dropped');
+    if (!e.currentTarget.classList.contains('dropzone')) return;
+    const elementId = e.dataTransfer.getData('text/plain');
+    const elementRef = document.getElementById(elementId);
+    // elementRef : è l'elemento draggato
+    WorkBook.activeTable = elementRef.dataset.tableId;
+    app.addMark({ field: elementRef.dataset.field, datatype: elementRef.dataset.datatype }, e.target);
   }
 
   app.addFilters = (target, elementRef) => {
@@ -878,7 +891,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       const summary = details.querySelector('summary');
       // recupero le tabelle dal sessionStorage
       const columns = WorkBookStorage.getTable(object.table);
-      // debugger;
+      // INFO: l'attributo name non è supportato in firefox
+      // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details#browser_compatibility
+      details.setAttribute("name", "columns");
       details.dataset.schema = object.schema;
       details.dataset.table = object.name;
       details.dataset.alias = alias;
@@ -889,7 +904,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       parent.appendChild(details);
       columns.forEach(column => {
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li[data-li-drag]');
+        const li = content.querySelector('li.drag-list.generic');
         const i = content.querySelector('i[draggable]');
         const span = li.querySelector('span');
         li.dataset.label = column.column_name;
@@ -999,8 +1014,11 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.txtAreaDsColumn.addEventListener('dragleave', app.columnDragLeave, false);
   app.txtAreaIdColumn.addEventListener('drop', app.setColumnDrop, false);
   app.txtAreaDsColumn.addEventListener('drop', app.setColumnDrop, false);
-  // app.txtAreaIdColumn.addEventListener('dragend', app.columnDragEnd, false);
-  // app.txtAreaDsColumn.addEventListener('dragend', app.columnDragEnd, false);
+  // textarea nella dialog-filters
+  app.txtAreaFilters.addEventListener("dragenter", app.filterDragEnter, false);
+  app.txtAreaFilters.addEventListener("dragover", app.filterDragOver, false);
+  app.txtAreaFilters.addEventListener("dragleave", app.filterDragLeave, false);
+  app.txtAreaFilters.addEventListener("drop", app.newFilterDrop, false);
 
   app.columnsDropzone.addEventListener('dragenter', app.columnDragEnter, false);
   app.columnsDropzone.addEventListener('dragover', app.columnDragOver, false);
@@ -1023,8 +1041,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   /* NOTE: END DRAG&DROP EVENTS */
 
-  // selezione schema/i
   // TODO: da spostare in supportFn.js
+  // selezione schema per la visualizzazione dell'elenco tabelle
   app.handlerSchema = async (e) => {
     e.preventDefault();
     e.currentTarget.toggleAttribute('data-selected');
@@ -1032,13 +1050,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       const schema = e.currentTarget.dataset.schema;
       // recupero le tabelle dello schema selezionato
       const data = await getDatabaseTable(schema);
-      // console.log(data);
       let ul = document.getElementById('ul-tables');
       for (const [key, value] of Object.entries(data)) {
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li[data-li-drag][data-tables]');
-        const span = li.querySelector('span');
+        const li = content.querySelector('li.drag-list.generic');
         const i = li.querySelector('i');
+        const span = li.querySelector('span');
         li.dataset.fn = "showTablePreview";
         li.dataset.label = value.TABLE_NAME;
         li.dataset.schema = schema;
@@ -1107,8 +1124,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     parent.querySelectorAll('li').forEach(workbook => workbook.remove());
     for (const [token, object] of Object.entries(WorkBookStorage.workBooks())) {
       const tmpl = app.tmplList.content.cloneNode(true);
-      const li = tmpl.querySelector('li[data-li]');
-      const span = li.querySelector('li[data-li] span');
+      const li = tmpl.querySelector('li.select-list');
+      const span = li.querySelector('span');
       li.dataset.fn = 'workBookSelected';
       li.dataset.token = token;
       li.dataset.name = object.name;
@@ -1177,8 +1194,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     if (sheets) {
       for (const [token, object] of Object.entries(sheets)) {
         const tmpl = app.tmplList.content.cloneNode(true);
-        const li = tmpl.querySelector('li[data-li]');
-        const span = li.querySelector('li[data-li] span');
+        const li = tmpl.querySelector('li.select-list');
+        const span = li.querySelector('span');
         li.dataset.fn = 'sheetSelected';
         li.dataset.token = token;
         li.dataset.name = object.name;
@@ -1498,41 +1515,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // dopo aver scelto le dimensioni da associare alla nuova fact posso nascondere il cubo di origine
     Draw.hidden();
   }
-
-  // 2024.07.18 gestito con dblclick in DrawSVG.js
-  /* app.tableSelected = async (e) => {
-    console.log(e);
-    console.log(e.ctrlKey);
-    // if (e.ctrlKey) return;
-    console.log('click event');
-    // console.log(`table selected ${e.currentTarget.dataset.table}`);
-    // console.log(e.currentTarget);
-    // deseleziono le altre tabelle con attributo active
-    Draw.svg.querySelectorAll("use.table[data-active='true']").forEach(use => delete use.dataset.active);
-    WorkBook.activeTable = e.currentTarget.dataset.id;
-    WorkBook.activeTable.dataset.active = 'true';
-    // e.currentTarget.dataset.active = 'true';
-    // se è attiva l'attributo data-multifact sulla tabella selezionata, devo visualizzare la dialog join
-    // tra la tabella appena droppata e l'ultima tabella della dimensione scelta
-    // recupero 50 record della tabella selezionata per visualizzare un anteprima
-    // WorkBook.activeTable = e.currentTarget.id;
-    // WorkBook.activeTable = e.currentTarget.dataset.id;
-    // WorkBook.schema = e.currentTarget.dataset.schema;
-    WorkBook.schema = WorkBook.activeTable.dataset.schema;
-    // TODO: potrei popolare qui il datatype delle colonne prendendo i dati dalle tabelle in
-    // sessionStorage, qui vengono salvati appena viene aggiunta la tabella al canvas.
-    // Attualmente questa operazione la faccio in setColumn()
-    // TODO: utilizzare anche qui la DataTable di GoogleChart ed eliminare il file con la Classe Table
-    let DT = new Table(await app.getPreviewSVGTable(), 'preview-table', true);
-    DT.template = 'tmpl-preview-table';
-    DT.addColumns();
-    DT.addRows();
-    DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
-    // imposto un colore diverso per le colonne già definite nel workbook
-    DT.fields(WorkBook.fields.get(WorkBook.activeTable.dataset.alias));
-    // imposto un colore diverso per le meriche già definite nel workbook
-    DT.metrics(WorkBook.metrics);
-  } */
 
   // tasto Elabora e SQL
   // Creazione della struttura necessaria per creare le query
@@ -1915,8 +1897,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.dialogFilters.showModal();
   }
 
-  // selezione della colonna dalla dialogFilters
-  app.handlerSelectField = (e) => {
+  // aggiunta colonna, nella dialogFilters, alla textarea
+  // NOTE: sostituita da newFilterDrop dopo aver aggiunto la funzionalità del drag&drop anche nella dialog-filter
+  /* app.handlerSelectField = (e) => {
     WorkBook.activeTable = e.currentTarget.dataset.tableId;
     console.log(WorkBook.activeTable.dataset.table);
     const field = e.currentTarget.dataset.field;
@@ -1944,7 +1927,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     txtArea.appendChild(span);
 
     app.addSpan(txtArea, null, 'filter');
-  }
+  } */
 
   // aggiungo il filtro selezionato allo Sheet
   app.addFilter = (e) => {
@@ -2765,7 +2748,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const ul = app.dialogJoin.querySelector(`section[data-table-${source}] ul`);
     for (const [key, value] of Object.entries(response)) {
       const content = app.tmplList.content.cloneNode(true);
-      const li = content.querySelector('li[data-li]');
+      const li = content.querySelector('li.select-list');
       const span = li.querySelector('span');
       li.dataset.label = value.column_name;
       li.dataset.elementSearch = `${source}-fields`;
@@ -2794,7 +2777,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     ul.querySelectorAll('li').forEach(li => li.remove());
     for (const [key, value] of Object.entries(response)) {
       const content = app.tmplList.content.cloneNode(true);
-      const li = content.querySelector('li[data-li]');
+      const li = content.querySelector('li.select-list');
       const span = li.querySelector('span');
       li.dataset.label = value.column_name;
       li.dataset.elementSearch = 'time-column';
@@ -2951,7 +2934,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     if (WorkBook.fields.has(WorkBook.activeTable.dataset.alias)) {
       for (const [token, value] of Object.entries(WorkBook.fields.get(WorkBook.activeTable.dataset.alias))) {
         const tmpl = app.tmplList.content.cloneNode(true);
-        const li = tmpl.querySelector('li[data-li-drag]');
+        const li = tmpl.querySelector('li.drag-list.tables');
         const i = li.querySelector('i');
         const span = li.querySelector('span');
         li.dataset.id = token;
@@ -2978,7 +2961,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.appendMetric = (parent, token, value) => {
     const tmpl = app.tmplList.content.cloneNode(true);
-    const li = tmpl.querySelector(`li[data-li-drag][data-${value.metric_type}]`);
+    const li = tmpl.querySelector(`li.drag-list.metrics[data-${value.metric_type}]`);
     const content = li.querySelector('.li-content');
     // const btnDrag = content.querySelector('i');
     // debugger;
@@ -3008,7 +2991,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.appendFilter = (parent, token, filter) => {
     const tmpl = app.tmplList.content.cloneNode(true);
-    const li = tmpl.querySelector('li[data-filter]');
+    const li = tmpl.querySelector('li.drag-list.filters');
     const content = li.querySelector('.li-content');
     const btnDrag = content.querySelector('i');
     const span = content.querySelector('span');
@@ -3038,7 +3021,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // reset degli elementi in #workbook-objects
     // app.workbookTablesStruct.querySelectorAll('details').forEach(detail => detail.remove());
     app.workbookTablesStruct.querySelectorAll('#ul-metrics > li, #ul-filters > li, details').forEach(element => element.remove());
-    debugger;
     const parent = app.workbookTablesStruct.querySelector('#nav-fields');
 
     // INFO: 2024.03.02 - Rivedere workBookMap forse può essere utilizzata questa al posto
@@ -3049,6 +3031,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       const details = tmpl.querySelector("details");
       const summary = details.querySelector('summary');
       WorkBook.activeTable = prop.key;
+      details.setAttribute("name", "wbTables");
       details.dataset.alias = tableAlias;
       details.dataset.schema = prop.schema;
       details.dataset.table = prop.name;
@@ -3075,6 +3058,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       WorkBook.activeTable = object.id;
       // recupero le tabelle dal sessionStorage
       const columns = WorkBookStorage.getTable(object.table);
+      details.setAttribute("name", "wbFilters");
       details.dataset.schema = WorkBook.activeTable.dataset.schema;
       details.dataset.table = object.name;
       details.dataset.alias = alias;
@@ -3085,8 +3069,17 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       parent.appendChild(details);
       columns.forEach(column => {
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li[data-li]');
+        const li = content.querySelector('li.drag-list.generic');
+        // const li = content.querySelector('li.select-list');
+        const i = li.querySelector('i[draggable]');
         const span = li.querySelector('span');
+        i.dataset.tableId = object.id;
+        i.dataset.field = column.column_name;
+        i.id = `${alias}_${column.column_name}`;
+        // i.dataset.datatype = column.type_name.toLowerCase();
+        i.ondragstart = app.fieldDragStart;
+        i.ondragend = app.columnDragEnd;
+
         li.dataset.label = column.column_name;
         li.dataset.fn = 'handlerSelectField';
         li.dataset.elementSearch = 'columns';

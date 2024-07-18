@@ -106,12 +106,12 @@ code {
 }
 
 .column-defined[data-type="column"]{
-  background-color: #025E73;
+  background-color: var(--main-secondary-color);
   color: whitesmoke;
 }
 
 .filter-defined[data-type="filter"]{
-  background-color: #cd853f8c;
+  background-color: #f2d98d;
   color: #494949;
   padding: 2px 4px;
   font-size: .85rem;

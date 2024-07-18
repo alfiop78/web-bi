@@ -35,12 +35,13 @@
 <body class="antialiased">
 
   <template id="tmpl-li">
-    <li data-li data-element-search data-label data-searchable="true">
+    <!-- lista per la selezione di elementi -->
+    <li class="select-list" data-element-search data-label data-searchable="true">
       <span></span>
     </li>
 
     <!-- li con icona 'delete' -->
-    <li data-li-icon data-element-search data-label data-searchable="true">
+    <li class="icons-list" data-li-icon data-element-search data-label data-searchable="true">
       <span></span>
       <div>
         <button type="button" data-edit data-fn="editCustomMetric" class="button-icon material-icons-round md-18">edit</button>
@@ -48,34 +49,38 @@
       </div>
     </li>
 
-    <li data-li-drag data-tables data-element-search data-label data-searchable="true">
+    <li class="drag-list generic" data-tables data-element-search data-label data-searchable="true">
       <i class="material-icons-round md-18" draggable="true">drag_handle</i>
       <span></span>
     </li>
 
-    <li data-li-drag data-filter data-element-search="filters" data-label data-searchable="true" draggable="true">
+    <li class="drag-list tables" data-element-search data-label data-searchable="true">
+      <i class="material-icons-round md-18" draggable="true">drag_handle</i>
+      <span></span>
+    </li>
+
+    <li class="drag-list filters" data-element-search="filters" data-label data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
     </li>
 
-    <li data-li-drag data-element-search="metrics" data-label data-basic data-searchable="true" draggable="true">
-      <span class="li-content">
-        <i class="material-icons-round md-18">drag_handle</i>
-        <span></span>
-      </span>
-      <!-- <i data-id="metric-new" class="material-icons-round md-18">add</i> -->
-    </li>
-
-    <li data-li-drag data-element-search="metrics" data-label data-advanced data-searchable="true" draggable="true">
+    <li class="drag-list metrics" data-element-search="metrics" data-label data-basic data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
     </li>
 
-    <li data-li-drag data-element-search="metrics" data-label data-composite data-searchable="true" draggable="true">
+    <li class="drag-list metrics" data-element-search="metrics" data-label data-advanced data-searchable="true" draggable="true">
+      <span class="li-content">
+        <i class="material-icons-round md-18">drag_handle</i>
+        <span></span>
+      </span>
+    </li>
+
+    <li class="drag-list metrics" data-element-search="metrics" data-label data-composite data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
@@ -288,7 +293,7 @@
                   <div class="col grid-12 relative-ul">
                     <ul id="ul-schemata" class="custom-scrollbar">
                       @foreach($schemata as $schema)
-                      <li data-fn="handlerSchema" data-schema="{{$schema['SCHEMA_NAME']}}">{{$schema['SCHEMA_NAME']}}</li>
+                      <li class="select-list" data-fn="handlerSchema" data-schema="{{$schema['SCHEMA_NAME']}}">{{$schema['SCHEMA_NAME']}}</li>
                       @endforeach
                     </ul>
                   </div>
@@ -631,7 +636,7 @@
                   <section class="col grid-8">
                     <section class="textarea-formula">
                       <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" tabindex="2" />
-                      <div id="textarea-filter" data-fn="addText" class="textarea" data-content-editable></div>
+                      <div id="textarea-filter" data-fn="addText" class="textarea dropzone" data-content-editable></div>
                       <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                     </section>
                   </section>
@@ -758,10 +763,13 @@
                                 <desc id="WB_MONTHS" data-table="WB_MONTHS" data-alias="WB_MONTHS" data-join-field="quarter_id" data-field="id_month" data-table-join="WB_DATE" data-schema="decisyon_cache" data-joins="1">wb_months</desc>
                                 <desc id="WB_DATE" data-table="WB_DATE" data-alias="WB_DATE" data-field="id_date" data-join-field="month_id" data-schema="decisyon_cache" data-joins="1">wb_date</desc>
                               </g>
+                              <foreignObject id="btn-join" x="0" y="0" width="26" height="18">
+                                <button class="material-icons-round md-18">join_inner</button>
+                              </foreignObject>
                             </defs>
-                            <foreignObject x="100" y="150" width="20" height="20">
+                            <!-- <foreignObject x="100" y="150" width="20" height="20">
                               <button class="material-icons-round md-18">edit</button>
-                            </foreignObject>
+                            </foreignObject> -->
                           </svg>
                           <span id="coords"></span>
                         </div>

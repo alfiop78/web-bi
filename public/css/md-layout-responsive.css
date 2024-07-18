@@ -4,12 +4,13 @@
 
 :root{
   --main-bg-color: #e2e2e2;
-  --main-primary-color: #796465;
-  --main-secondary-color: steelblue;
+  --main-primary-color: #2a3e59;
+  --main-secondary-color: #54728c;
   --main-third-color: #e9e9e5;
   --main-color-outisde-card: #424242;
   --main-color-button-flat: #8c5f11;
   --main-color-header-table: #d2d2d2;
+  --main-important-color: #d9665b;
   --filters-color: olive;
 }
 html, body{width: 100%; height: 100%;margin: 0;padding: 0;
@@ -300,5 +301,5 @@ input[type="number"] {
 
 i[draggable="true"]:hover {
   cursor: grab;
-  color: steelblue;
+  color: #011126;
 }

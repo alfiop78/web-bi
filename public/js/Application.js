@@ -225,11 +225,13 @@ class Application {
     if (searchAttr) {
       const id = e.target.id;
       const value = e.target.value.toLowerCase();
+      console.info("search: ", value);
       // se sono presenti <details> li apro tutti
       document.querySelectorAll(`*[data-search-id='${id}'] > details`).forEach(detail => detail.setAttribute('open', 'true'));
       let li = Array.from(document.querySelectorAll(`*[data-search-id='${id}'] li[data-searchable='true'][data-element-search='${searchAttr}']`));
       li.filter(item => item.hidden = (item.dataset.label.toLowerCase().indexOf(value) === -1) ? true : false);
-
+      // chiudo tutti i detail se il testo di ricerca non contiene un valore
+      if (value === "") document.querySelectorAll(`*[data-search-id='${id}'] > details`).forEach(detail => detail.removeAttribute('open'));
     }
   }
 

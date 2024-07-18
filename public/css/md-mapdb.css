@@ -252,7 +252,7 @@ use.table[data-multifact]{
 .name{
   font-weight: bold;
   font-size: 1rem;
-  color: brown;
+  color: var(--main-important-color);
 }
 
 .wj-content{
@@ -379,7 +379,7 @@ details > summary{
 
 details[open] > summary {
   padding-left: 2px;
-  color: #025E73;
+  color: #54728C;
 }
 
 details > li[data-datatype='float'] {
@@ -388,10 +388,10 @@ details > li[data-datatype='float'] {
 }
 
 details > li {
-  margin: 2px 8px;
-  margin-inline-start: 1.2em;
+  margin: 4px 8px;
+  margin-inline-start: 6px;
   line-height: 1.6rem;
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
 #ul-metrics > li, #ul-filters > li {
@@ -438,7 +438,7 @@ li:not([draggable]):hover > i {
   width: 100%;
 }
 
-#ul-filters > li[data-filter] > .li-content {
+#ul-filters > li.drag-list.filters > .li-content {
   color: peru;
   display: flex;
   align-items: center;
@@ -453,14 +453,23 @@ li:not([draggable]):hover > i {
 }
 
 #ul-metrics > li[data-composite] > .li-content {
-  color: sienna;
+  color: #a6786d;
   display: flex;
   align-items: center;
   width: 100%;
 }
 
 details > li[data-type="column"] {
-  color: #025E73;
+  color: white;
+}
+
+details > li.drag-list.tables > span {
+  display: flex;
+  width: 100%;
+  padding: 2px 8px;
+  background-color: #54728C;
+  margin-right: 1em;
+  border-radius: 2px;
 }
 
 #textarea-metric.dropzone.dropping{
@@ -532,7 +541,7 @@ p.field-search {
 }
 
 .input-search.columns::placeholder {
-  color: #025E73;
+  color: var(--main-primary-color);
 }
 
 .input-search.metrics::placeholder {
@@ -584,22 +593,6 @@ textarea:focus, textarea:active {
   top: 8px;
   left: 8px;
   color: darkgray;
-}
-
-section#canvas-area:not([data-message])::before {
-  visibility: hidden;
-}
-
-section#canvas-area[data-message]::before {
-  content: attr(data-message);
-  /* content: 'message info'; */
-  position: absolute;
-  z-index: 999;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  padding: .5em;
-  justify-content: center;
 }
 
 #ul-tables > li[data-li-drag] > i {
