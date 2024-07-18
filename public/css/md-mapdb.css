@@ -94,7 +94,7 @@ path:not([data-join-id]){
   fill: transparent;
   stroke: darkgrey;
   /* stroke-dasharray: 4; */
-  stroke-width: 1.5;
+  stroke-width: 2;
   stroke-linecap: round;
 }
 
@@ -102,7 +102,7 @@ path[data-join-id]{
   fill: transparent;
   /* stroke: #aeaea9; */
   stroke: white;
-  stroke-width: 1.5;
+  stroke-width: 2;
   stroke-linecap: round;
 }
 
@@ -203,8 +203,12 @@ use.table.dropzone.dropping {
 }
 
 use.table:hover{
+  cursor: pointer;
+  fill: white;
+}
+
+use.table.move:hover{
   cursor: move;
-  /* opacity: 1; */
   fill: white;
 }
 
@@ -582,7 +586,11 @@ textarea:focus, textarea:active {
   color: darkgray;
 }
 
-section#canvas-area::before {
+section#canvas-area:not([data-message])::before {
+  visibility: hidden;
+}
+
+section#canvas-area[data-message]::before {
   content: attr(data-message);
   /* content: 'message info'; */
   position: absolute;
@@ -590,6 +598,7 @@ section#canvas-area::before {
   display: flex;
   width: 100%;
   align-items: center;
+  padding: .5em;
   justify-content: center;
 }
 
@@ -599,11 +608,23 @@ section#canvas-area::before {
   align-items: center;
 }
 
-#table-info {
+#svg-console {
   position: absolute;
-  right: 0px;
-  background-color: white;
-  width: 250px;
-  height: 100%;
-  box-shadow: -4px 0px 5px -4px gray;
+  background-color: transparent;
+  height: auto;
+  width: 100%;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+}
+
+#message-console[data-message]::before {
+  content: attr(data-message);
+  position: relative;
+  background-color: #494949;
+  color: white;
+  z-index: 11;
+  padding: 8px;
+  border-radius: 2px;
+  display: flex;
 }

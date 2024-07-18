@@ -1499,7 +1499,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     Draw.hidden();
   }
 
-  app.tableSelected = async (e) => {
+  // 2024.07.18 gestito con dblclick in DrawSVG.js
+  /* app.tableSelected = async (e) => {
     console.log(e);
     console.log(e.ctrlKey);
     // if (e.ctrlKey) return;
@@ -1531,7 +1532,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     DT.fields(WorkBook.fields.get(WorkBook.activeTable.dataset.alias));
     // imposto un colore diverso per le meriche già definite nel workbook
     DT.metrics(WorkBook.metrics);
-  }
+  } */
 
   // tasto Elabora e SQL
   // Creazione della struttura necessaria per creare le query
@@ -2328,20 +2329,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   // recupero le tabelle del database in base allo schema selezionato
   app.getTable = async () => {
     return await fetch('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info')
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then(response => response)
-      .catch(err => {
-        App.showConsole(err, 'error');
-        console.error(err);
-      });
-  }
-
-  app.getPreviewSVGTable = async () => {
-    return await fetch('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_preview')
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;

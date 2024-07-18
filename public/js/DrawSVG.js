@@ -13,6 +13,7 @@ class DrawSVG {
   constructor(element) {
     this.svg = document.getElementById(element);
     this.svg.querySelectorAll("use, path").forEach(element => element.remove());
+    this.messageConsole = document.getElementById("message-console");
     this.svg.dataset.height = this.svg.parentElement.offsetHeight;
     this.svg.dataset.width = this.svg.parentElement.offsetWidth;
     this.contextMenu = document.getElementById('context-menu-table');
@@ -136,7 +137,7 @@ class DrawSVG {
         // ...punti finali (in base al mouse) della linea perchè questi variano
         // ...se sto droppando in 'bottom' o in 'right'
         // OPTIMIZE: 2024.02.01 - calcolo controlPoint dinamici
-        console.log(this.currentLineRef.getTotalLength());
+        // console.log(this.currentLineRef.getTotalLength());
         const anchorPoints = (this.countJoins >= 1 && this.nearestTable.classList.contains('fact')) ?
           [
             {
@@ -192,7 +193,13 @@ class DrawSVG {
           // La linea tratteggiata compare SOLO quando si sta aggiungendo al punto di ancoraggio 'bottom'.
           // In questo modo, sto indicando all'utente, che in questo punto di ancoraggio si può droppare una
           // Fact per consentire l'analisi multifatti
-          (this.nearestPoint.anchor === 'bottom') ? this.currentLineRef.classList.add('fact') : this.currentLineRef.classList.remove('fact');
+          if (this.nearestPoint.anchor === "bottom") {
+            this.currentLineRef.classList.add('fact')
+            this.messageConsole.dataset.message = "Creazione Data Model per analisi Multifatti";
+          } else {
+            this.currentLineRef.classList.remove('fact');
+            delete this.messageConsole.dataset.message;
+          }
           this.autoPos();
           // Imposto un posizionamento, sull'asse x, semi-automatico andando a verificare
           // se ci sono altre tabelle nei pressi di quella corrente, per poterla
@@ -207,7 +214,7 @@ class DrawSVG {
 
           const d = `M${this.nearestPoint.x},${this.nearestPoint.y} C${this.nearestPoint.p1x},${this.nearestPoint.p1y} ${this.nearestPoint.p2x},${this.nearestPoint.p2y} ${this.nearestPoint.x2},${this.nearestPoint.y2}`;
           this.currentLineRef.setAttribute('d', d);
-          console.log(this.currentLineRef.getTotalLength());
+          // console.log(this.currentLineRef.getTotalLength());
           this.currentLineRef.dataset.to = this.nearestTable.id;
         }
       }
@@ -299,10 +306,8 @@ class DrawSVG {
       this.drawFact();
       this.currentLineRef.remove();
       console.log(this.joinLines);
-      debugger;
       this.joinLines.delete(this.currentLineRef.id);
-      console.log(this.joinLines);
-      debugger;
+      delete this.messageConsole.dataset.message;
     } else {
       // è presente una tableJoin, è un livello dimensionale
       // calcolo quante tabelle sono legate a q nearestTable (quante dimensioni ci sono)
@@ -367,22 +372,55 @@ class DrawSVG {
     this.coordsRef.innerHTML = `<small>x ${e.offsetX}</small><br /><small>y ${e.offsetY}</small>`;
   }
 
-  handlerDblClick(e) {
-    console.log(e.target);
-    console.log(this);
-    debugger;
+  async handlerDblClick(e) {
+    console.log('dblClick');
+    // console.log(e.target);
+    // console.log(this);
+    // deseleziono le altre tabelle con attributo active
+    Draw.svg.querySelectorAll("use.table[data-active='true']").forEach(use => delete use.dataset.active);
+    WorkBook.activeTable = e.currentTarget.id;
+    WorkBook.activeTable.dataset.active = 'true';
+    // recupero 50 record della tabella selezionata per visualizzare un anteprima
+    WorkBook.schema = WorkBook.activeTable.dataset.schema;
+    // TODO: potrei popolare qui il datatype delle colonne prendendo i dati dalle tabelle in
+    // sessionStorage, qui vengono salvati appena viene aggiunta la tabella al canvas.
+    // Attualmente questa operazione la faccio in setColumn()
+    // TODO: utilizzare anche qui la DataTable di GoogleChart ed eliminare il file con la Classe Table
+    let DT = new Table(await Draw.getPreviewSVGTable(), 'preview-table', true);
+    DT.template = 'tmpl-preview-table';
+    DT.addColumns();
+    DT.addRows();
+    DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
+    // imposto un colore diverso per le colonne già definite nel workbook
+    DT.fields(WorkBook.fields.get(WorkBook.activeTable.dataset.alias));
+    // imposto un colore diverso per le meriche già definite nel workbook
+    DT.metrics(WorkBook.metrics);
+  }
+
+  async getPreviewSVGTable() {
+    return await fetch('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_preview')
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(response => response)
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
   }
 
   tableMouseDown(e) {
     e.preventDefault();
     e.stopPropagation();
-    if (e.button === 2) return;
-    // if (!e.ctrlKey || e.button === 2) return;
+    if (!e.ctrlKey || e.button === 2) return;
     console.log('event mouseDown');
+    e.currentTarget.classList.add("move");
     this.coordinate = { x: +e.currentTarget.getAttribute('x'), y: +e.currentTarget.getAttribute('y') };
-    this.nearestTable;
+    if (e.target.dataset.type !== "fact") this.nearestTable = this.svg.querySelector(`#${e.target.dataset.tableJoin}`);
     this.el = e.currentTarget;
-    if (this.tablePopup.classList.contains("open")) this.tablePopup.classList.remove("open");
+    // if (this.tablePopup.classList.contains("open")) this.tablePopup.classList.remove("open");
   }
 
   tableMouseMove(e) {
@@ -390,8 +428,8 @@ class DrawSVG {
     e.stopPropagation();
     // console.log(e);
     // console.log('mousemove', e.currentTarget);
-    if (this.el) {
-      // if (this.el && e.ctrlKey) {
+    (e.ctrlKey) ? e.currentTarget.classList.add("move") : e.currentTarget.classList.remove("move");
+    if (this.el && e.ctrlKey) {
       this.coordinate.x += e.movementX;
       this.coordinate.y += e.movementY;
       // console.log(e);
@@ -500,18 +538,21 @@ class DrawSVG {
     e.preventDefault();
     // console.log('tableMouseEnter');
     this.currentTableRef = e.target.id;
-    this.tablePopup = document.getElementById("table-popup");
-    const { left: mouseX, bottom: mouseY } = e.currentTarget.getBoundingClientRect();
-    this.tablePopup.style.top = `${mouseY}px`;
-    this.tablePopup.style.left = `${mouseX + 28}px`;
-    this.tablePopup.querySelector("button").dataset.id = e.target.id;
-    this.tablePopup.classList.add("open");
+    (e.ctrlKey) ? e.currentTarget.classList.add("move") : e.currentTarget.classList.remove("move");
+
+    // this.tablePopup = document.getElementById("table-popup");
+    // const { left: mouseX, bottom: mouseY } = e.currentTarget.getBoundingClientRect();
+    // this.tablePopup.style.top = `${mouseY}px`;
+    // this.tablePopup.style.left = `${mouseX + 28}px`;
+    // this.tablePopup.querySelector("button").dataset.id = e.target.id;
+    // this.tablePopup.classList.add("open");
   }
 
   tableMouseLeave(e) {
     e.preventDefault();
     // console.log('tableMouseLeave');
     if (this.el) delete this.el;
+    e.currentTarget.classList.remove("move");
   }
 
   tableMouseUp(e) {
@@ -537,6 +578,7 @@ class DrawSVG {
       this.tables.get(this.nearestTable.id).joins = joins;
     }
 
+    // aggiorno gli attributi per la nuova posizione
     this.updateTable();
     if (this.currentLineRef) {
       // se esiste già una join per questa tabella non visualizzo la dialogJoin
@@ -699,11 +741,12 @@ class DrawSVG {
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;
-    use.dataset.fn = 'tableSelected';
-    // INFO: gli eventi impostati con il dataset in questo modo possono essere legati anche a init-responsive.js
-    use.dataset.enterFn = 'tableEnter';
-    // use.addEventListener('click', this.tableSelected.bind(this));
-    // use.ondblclick = this.handlerDblClick.bind(Draw);
+    use.addEventListener('click', (e) => {
+      this.svg.querySelectorAll("use.table[data-active='true']").forEach(use => delete use.dataset.active);
+      WorkBook.activeTable = e.target.id;
+      WorkBook.activeTable.dataset.active = 'true';
+    });
+    use.ondblclick = this.handlerDblClick;
     // punto di ancoraggio di destra
     use.dataset.anchorXTo = this.currentTable.x + 210;
     use.dataset.anchorYTo = this.currentTable.y + 15;
@@ -732,8 +775,6 @@ class DrawSVG {
   updateTable() {
     // qui aggiorno l'elemento del DOM che è stato spostato, quando non si utilizza il drag&drop
     const use = this.svg.querySelector(`#${this.currentTable.key}`);
-    use.dataset.enterFn = 'tableEnter';
-    // use.ondblclick = this.handlerDblClick.bind(Draw);
     // da testare
     use.dataset.x = this.currentTable.x;
     use.dataset.y = this.currentTable.y;
@@ -769,7 +810,6 @@ class DrawSVG {
     use.dataset.alias = this.currentTable.alias;
     use.dataset.shared_ref = this.currentTable.shared_ref;
     use.dataset.dimensionId = this.currentTable.dimensionId;
-    use.dataset.fn = 'tableSelected';
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;
@@ -818,10 +858,12 @@ class DrawSVG {
     use.dataset.name = this.currentTable.name;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.joins = this.currentTable.joins;
-    // use.dataset.fn = 'tableSelected';
-    // use.addEventListener('click', this.tableSelected.bind(this), true);
-    // use.dataset.enterFn = 'tableEnter';
-    // use.ondblclick = this.handlerDblClick.bind(Draw);
+    use.addEventListener('click', (e) => {
+      this.svg.querySelectorAll("use.table[data-active='true']").forEach(use => delete use.dataset.active);
+      WorkBook.activeTable = e.target.id;
+      WorkBook.activeTable.dataset.active = 'true';
+    });
+    use.ondblclick = this.handlerDblClick;
     use.setAttribute('x', this.currentTable.x);
     use.setAttribute('y', this.currentTable.y);
     // punto di ancoraggio di destra
@@ -1117,15 +1159,5 @@ class DrawSVG {
       ul.appendChild(li);
     }
   }
-
-  /* createDimensionInfo() {
-    const parent = document.getElementById('table-info');
-    // debugger;
-    this.svg.querySelectorAll("use.table[data-level-id='1']").forEach(dim => {
-      const div = document.createElement('div');
-      div.innerText = dim.dataset.table;
-      parent.appendChild(div);
-    });
-  } */
 
 }

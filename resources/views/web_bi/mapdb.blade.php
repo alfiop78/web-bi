@@ -701,15 +701,12 @@
                         </ul>
                       </div>
                       <div id="table-popup" class="popup">
-                        <section class="content-popup">
-                          <button class="material-icons-round md-18" data-id="" data-fn="tableSelected">table_rows_narrow</button>
-                          <!-- <button class="material-icons-round md-18">edit</button> -->
-                        </section>
+                        <button class="material-icons-round md-18" data-id data-fn="tableSelected">table_rows_narrow</button>
                       </div>
                       <div id="context-menu-column" class="context-menu">
                         <ul id="ul-context-menu-column" class="context-menu-items">
                           <span>Metrica</span>
-                          <button id="btn-add-metric" data-fn="setMetric" class="btn-link-context">Nuova metrica</button>
+                          <button id="btn-add-metric" data-fn="setMetric" class="btn-link-context">Imposta metrica</button>
                           <button id="btn-remove-wb-metric" data-fn="removeWBMetric" class="btn-link-context">Elimina</button>
                           <span>Colonna</span>
                           <button id="btn-add-column" data-fn="setColumn" class="btn-link-context">Nuova colonna</button>
@@ -717,22 +714,11 @@
                           <button id="btn-remove-column" data-fn="removeColumn" class="btn-link-context">Elimina</button>
                         </ul>
                       </div>
-                      <section id="canvas-area" data-message="">
+                      <section id="canvas-area">
+                        <section id="svg-console">
+                          <span id="message-console"></span>
+                        </section>
                         <div id="translate" class="translate" data-translate-x="0" data-translate-y="0">
-                          <dialog id="dlg-table-info" class="positioned popup">
-                            <button class="button-icon material-icons-round md-18 columns" disabled>view_column</button>
-                            <button class="button-icon material-icons-round md-18 metrics" disabled>multiline_chart</button>
-                            <button class="button-icon material-icons-round md-18" disabled>history</button>
-                            <button class="button-icon material-icons-round md-18" disabled>info</button>
-                          </dialog>
-                          <div id="table-info" hidden>
-
-                            <section class="row">
-                              <div class="col grid-12 center">
-                                <p>Informazioni tabella</p>
-                              </div>
-                            </section>
-                          </div>
                           <svg id="svg" class="dropzone" data-level="0">
                             <defs>
                               <g id="table-struct" class="struct">
@@ -757,9 +743,9 @@
                               </g>
                               <g id="table-common" class="struct common">
                                 <rect class="common" x="6" y="4" />
-                                <text x="32" y="20" font-family="Barlow" font-size=".85rem" font-style="italic"></text>
                                 <rect class="sub-common" x="12" y="8" />
                                 <rect class="table" x="0" y="0" />
+                                <text x="32" y="20" font-family="Barlow" font-size=".85rem" font-style="italic"></text>
                                 <rect class="symbol" x="0" y="0" />
                                 <image href="{{ asset('/images/layers_black_18dp.svg') }}" data-id x="4" y="6" width="18" height="18"></image>
                               </g>
@@ -773,6 +759,9 @@
                                 <desc id="WB_DATE" data-table="WB_DATE" data-alias="WB_DATE" data-field="id_date" data-join-field="month_id" data-schema="decisyon_cache" data-joins="1">wb_date</desc>
                               </g>
                             </defs>
+                            <foreignObject x="100" y="150" width="20" height="20">
+                              <button class="material-icons-round md-18">edit</button>
+                            </foreignObject>
                           </svg>
                           <span id="coords"></span>
                         </div>
