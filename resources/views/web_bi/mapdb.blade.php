@@ -384,6 +384,7 @@
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
                 <button data-fn="saveTimeDimension" id="btn-time-dimension-save" value="salva">Salva</button>
+                <button data-fn="updateTimeDimension" id="btn-time-dimension-update" value="Aggiorna" hidden>Aggiorna</button>
               </section>
             </section>
           </dialog>

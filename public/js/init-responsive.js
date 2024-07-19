@@ -2530,6 +2530,34 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     });
   }
 
+  // apertura dialog TIME dimension dall'icona 'time' (modalità modifica)
+  app.editTimeDimension = (e) => {
+    // imposto un attributo data-id sulla dialog per tenere memorizzato l'id dell'oggetto Draw.tables
+    // che si sta per modificare
+    app.dialogTime.dataset.id = e.target.id;
+    debugger;
+    // valorizzo workbook.activeTable
+    WorkBook.activeTable = e.target.dataset.tableJoin;
+    // lo <use class="table time"> ha un dataset.joinId da cui poter recuperare le informazioni
+    // per questa join tra time e fact
+    const timeJoin = WorkBook.join.get(e.target.dataset.joinId);
+    console.log(WorkBook.activeTable);
+    // selezione delle colonne in base alla  WorkBook.join già presente
+    document.querySelector(`#time-fields > li[data-field='${timeJoin.from.field}']`).dataset.selected = true;
+    // recupero le colonne della tabella "to" in join con la TIME, quasi
+    // sicuramente è già in sessionStorage WARN: da verificare
+    app.addFields_test(document.getElementById('ul-columns'), WorkBookStorage.getTable(WorkBook.activeTable.dataset.table));
+    // seleziono la colonna della tabella "to"
+    document.querySelector(`#ul-columns > li[data-field='${timeJoin.to.field}']`).dataset.selected = true;
+
+    // sto aggiornando la relazione con la TIME, nascondo "Salva" e visualizzo "Aggiorna"
+    document.querySelector("#btn-time-dimension-save").hidden = true;
+    const btnUpdate = document.getElementById("btn-time-dimension-update");
+    btnUpdate.hidden = false;
+    btnUpdate.dataset.token = e.target.dataset.joinId;
+    app.dialogTime.show();
+  }
+
   app.handlerTimeDimension = async (e) => {
     console.log(e.target);
     Draw.contextMenu.toggleAttribute('open');
@@ -2539,6 +2567,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     */
     if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) WorkBookStorage.saveSession(await app.getTable());
     app.addFields_test(document.getElementById('ul-columns'), WorkBookStorage.getTable(WorkBook.activeTable.dataset.table));
+    // const btnSave = document.getElementById("btn-time-dimension-save");
+    // btnSave.hidden = false;
+    // const btnUpdate = document.getElementById("btn-time-dimension-update");
+    // btnUpdate.hidden = true;
     app.dialogTime.show();
   }
 
@@ -2608,14 +2640,19 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const timeColumn = timeRef.dataset.field;
     const timeColumnDs = timeRef.dataset.fieldDs;
     const timeColumnType = timeRef.dataset.datatype;
+
     const column = document.querySelector('#ul-columns > li[data-selected]').dataset.label;
     const columnType = document.querySelector('#ul-columns > li[data-selected]').dataset.datatype;
     const tableAlias = document.querySelector('#ul-columns > li[data-selected]').dataset.alias;
     const table = document.querySelector('#ul-columns > li[data-selected]').dataset.table;
-    const token = rand().substring(0, 7);
+    // const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
+    // const token = rand().substring(0, 7);
+    // concateno il nome della tabella time (WB_YEARS) con le ultime 5 cifre della svg-data-XXXXX (factId)
+    const token = `${descTable.id}-${WorkBook.activeTable.dataset.factId.substring(9)}`;
     let field = (timeColumnType === 'date' && columnType === 'integer') ?
       `TO_CHAR(${tableAlias}.${column})::DATE` : `${tableAlias}.${column}`;
     console.log(WorkBook.activeTable);
+    // la proprietà dateTime è il campo, della Fact, legato alla dimensione TIME
     WorkBook.dateTime[WorkBook.activeTable.dataset.factId] = { tableAlias, timeField: column, datatype: columnType };
     // WARN: solo per vertica in questo caso.
     // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
@@ -2646,6 +2683,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       joins: +descTable.dataset.joins,
       factId: WorkBook.activeTable.dataset.factId,
       join: WorkBook.activeTable.id,
+      // joinId è valida solo per una tabella della dimensione TIME legata a una fact/lookup
+      joinId: token,
       joinField: descTable.dataset.joinField
     };
     Draw.currentTable = Draw.tables.get(`${descTable.id}-${WorkBook.activeTable.dataset.factId}`);
@@ -2667,25 +2706,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         table: WorkBook.activeTable.dataset.table,
       });
     });
-    // TODO: da inizializzare nel WorkBook
-    const timeFields = {
-      WB_YEARS: {
-        id: { sql: ['WB_YEARS.id_year'], datatype: 'integer' },
-        ds: { sql: ['WB_YEARS.year'], datatype: 'char' }
-      },
-      WB_QUARTERS: {
-        id: { sql: ['WB_QUARTERS.id_quarter'], datatype: 'integer' },
-        ds: { sql: ['WB_QUARTERS.quarter'], datatype: 'char' }
-      },
-      WB_MONTHS: {
-        id: { sql: ['WB_MONTHS.id_month'], datatype: 'integer' },
-        ds: { sql: ['WB_MONTHS.month'], datatype: 'char' }
-      },
-      WB_DATE: {
-        id: { sql: ['WB_DATE.id_date'], datatype: 'date' },
-        ds: { sql: ['WB_DATE.date'], datatype: 'date' }
-      }
-    };
+    // aggiungo le colonne delle tabelle TIME a WorkBook.field/s
     for (const [key, value] of timeTables) {
       WorkBook.field = {
         token: `tok_${key}`,
@@ -2694,11 +2715,105 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         tableAlias: value.tableAlias,
         table: value.table,
         name: key,
-        field: timeFields[key]
+        field: WorkBook.timeFields[key]
       };
       WorkBook.fields = `tok_${key}`;
     }
     WorkBook.checkChanges('time');
+    app.dialogTime.close();
+  }
+
+  // Aggiorna nella dialog time
+  app.updateTimeDimension = (e) => {
+    // WARN: qui è presente del codice ripetuto anche nella fn saveTimeDimension()
+    const timeRef = document.querySelector('#time-fields > li[data-selected]');
+    // recupero l'elemento <g> con la propria tabella
+    const descTable = Draw.svg.getElementById(timeRef.dataset.table);
+    const timeTable = timeRef.dataset.table;
+    const timeColumn = timeRef.dataset.field;
+    const timeColumnDs = timeRef.dataset.fieldDs;
+    const timeColumnType = timeRef.dataset.datatype;
+
+    const column = document.querySelector('#ul-columns > li[data-selected]').dataset.label;
+    const columnType = document.querySelector('#ul-columns > li[data-selected]').dataset.datatype;
+    const tableAlias = document.querySelector('#ul-columns > li[data-selected]').dataset.alias;
+    const table = document.querySelector('#ul-columns > li[data-selected]').dataset.table;
+    const token = e.target.dataset.token;
+    let field = (timeColumnType === 'date' && columnType === 'integer') ?
+      `TO_CHAR(${tableAlias}.${column})::DATE` : `${tableAlias}.${column}`;
+    // console.log(WorkBook.activeTable);
+    // imposto la proprietà dateTime sul WorkBook
+    WorkBook.dateTime[WorkBook.activeTable.dataset.factId] = { tableAlias, timeField: column, datatype: columnType };
+    // elimino l'elemento relativo a questa tabella da Draw.tables
+    // se è impostato un dataset.id vuol dire che sto modificando la join tra la time e la fact
+    // Prima di reimpostarla devo eliminare la Draw.tables relativa all'attuale join tra time-><fact
+    Draw.tables.delete(app.dialogTime.dataset.id);
+    const use = this.svg.querySelector(`#${app.dialogTime.dataset.id}`);
+    // aggiorno il tag <use> nel DOMsvg
+    use.id = `${descTable.id}-${WorkBook.activeTable.dataset.factId}`;
+    // ricreo l'elemento in Draw.tables
+    WorkBook.join = {
+      token,
+      value: {
+        alias: timeTable,
+        type: 'TIME',
+        // [DocVenditaDettaglio.DataDocumento, WEB_BI_TIME.date]
+        // SQL: [`TO_CHAR(${tableAlias}.${tableColumn})::DATE`, `WEB_BI_TIME.${web_bi_timeField}`],
+        SQL: [field, `${timeTable}.${timeColumn}`],
+        factId: WorkBook.activeTable.dataset.factId,
+        from: { table: timeTable, alias: timeTable, field: timeColumn },
+        to: { table, alias: tableAlias, field: column }
+      }
+    };
+    WorkBook.joins = token;
+    Draw.tables = {
+      id: `${descTable.id}-${WorkBook.activeTable.dataset.factId}`,
+      key: 'time',
+      x: +WorkBook.activeTable.getAttribute('x'),
+      y: +WorkBook.activeTable.getAttribute('y') + 30,
+      table: descTable.dataset.table,
+      alias: descTable.dataset.alias,
+      name: descTable.dataset.table,
+      schema: 'decisyon_cache',
+      joins: +descTable.dataset.joins,
+      factId: WorkBook.activeTable.dataset.factId,
+      join: WorkBook.activeTable.id,
+      // joinId è valida solo per una tabella della dimensione TIME legata a una fact/lookup
+      joinId: token,
+      joinField: descTable.dataset.joinField
+    };
+    Draw.currentTable = Draw.tables.get(`${descTable.id}-${WorkBook.activeTable.dataset.factId}`);
+    WorkBook.activeTable.dataset.joins = ++WorkBook.activeTable.dataset.joins;
+    Draw.tables.get(`${WorkBook.activeTable.id}`).joins = +WorkBook.activeTable.dataset.joins;
+    Draw.updateTime();
+    // sovrascrivo i campi della TIME precedentemente memorizzati in WorkBook.fields
+    WorkBook.createDataModel();
+    app.hierTables();
+    // recupero tutti i campi delle TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
+    WorkBook.activeTable = `${descTable.id}-${WorkBook.activeTable.dataset.factId}`;
+    // recupero i nomi delle tabelle time e le aggiungo a un oggetto map()
+    let timeTables = new Map();
+    Draw.svg.querySelectorAll(`use.time[data-fact-id='${WorkBook.activeTable.dataset.factId}']`).forEach(table => {
+      WorkBook.activeTable = table.id;
+      timeTables.set(table.dataset.table, {
+        schema: WorkBook.activeTable.dataset.schema,
+        tableAlias: WorkBook.activeTable.dataset.alias,
+        table: WorkBook.activeTable.dataset.table,
+      });
+    });
+    // aggiungo le colonne delle tabelle TIME a WorkBook.field/s
+    for (const [key, value] of timeTables) {
+      WorkBook.field = {
+        token: `tok_${key}`,
+        type: 'column',
+        schema: value.schema,
+        tableAlias: value.tableAlias,
+        table: value.table,
+        name: key,
+        field: WorkBook.timeFields[key]
+      };
+      WorkBook.fields = `tok_${key}`;
+    }
     app.dialogTime.close();
   }
 

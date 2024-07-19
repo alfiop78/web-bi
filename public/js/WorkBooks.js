@@ -249,6 +249,24 @@ class WorkBooks {
     this.edit = false;
     this.tablesModel = new Map();
     this.dateTime = {};
+    this.timeFields = {
+      WB_YEARS: {
+        id: { sql: ['WB_YEARS.id_year'], datatype: 'integer' },
+        ds: { sql: ['WB_YEARS.year'], datatype: 'char' }
+      },
+      WB_QUARTERS: {
+        id: { sql: ['WB_QUARTERS.id_quarter'], datatype: 'integer' },
+        ds: { sql: ['WB_QUARTERS.quarter'], datatype: 'char' }
+      },
+      WB_MONTHS: {
+        id: { sql: ['WB_MONTHS.id_month'], datatype: 'integer' },
+        ds: { sql: ['WB_MONTHS.month'], datatype: 'char' }
+      },
+      WB_DATE: {
+        id: { sql: ['WB_DATE.id_date'], datatype: 'date' },
+        ds: { sql: ['WB_DATE.date'], datatype: 'date' }
+      }
+    };
   }
 
   set name(value) {
@@ -387,6 +405,7 @@ class WorkBooks {
         Draw.svg.querySelectorAll(`use.table[data-table-join][data-fact-id='${fact.id}'], use.time[data-fact-id='${fact.id}']`);
 
       dimensionTables.forEach(table => {
+        // debugger;
         joinTables = [{ table: table.dataset.alias, id: table.id }];
         // recupero la join associata alla tabella in ciclo
         if (table.dataset.tableJoin) recursiveDimensionDown(table.dataset.tableJoin);

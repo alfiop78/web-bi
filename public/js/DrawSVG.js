@@ -900,59 +900,69 @@ class DrawSVG {
   }
 
   drawTimeRelated() {
-    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-    use.setAttribute('href', this.currentTable.id);
-    use.id = this.currentTable.id;
-    use.classList.add('table', 'time');
-    use.dataset.type = 'time';
-    use.dataset.table = this.currentTable.table;
-    use.dataset.joins = this.currentTable.joins;
-    use.dataset.tableJoin = this.currentTable.join;
-    use.dataset.name = this.currentTable.name;
-    use.dataset.alias = this.currentTable.alias;
-    use.dataset.schema = this.currentTable.schema;
-    use.dataset.factId = this.currentTable.factId;
-    Draw.svg.appendChild(use);
+    // se il tag <use> esiste già per questo this.currentTable.id non devo ricrearlo
+    // Questa situazione si verifica quando si aggiorna la relazione tra la dimensione TIME e la Fact
+    if (!this.svg.querySelector(`use.time#${this.currentTable.id}`)) {
+      const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+      use.setAttribute('href', this.currentTable.id);
+      use.id = this.currentTable.id;
+      use.classList.add('table', 'time');
+      use.dataset.type = 'time';
+      use.dataset.table = this.currentTable.table;
+      use.dataset.joins = this.currentTable.joins;
+      use.dataset.tableJoin = this.currentTable.join;
+      use.dataset.name = this.currentTable.name;
+      use.dataset.alias = this.currentTable.alias;
+      use.dataset.schema = this.currentTable.schema;
+      use.dataset.factId = this.currentTable.factId;
+      Draw.svg.appendChild(use);
+    }
   }
 
   recursiveHier(table, createJoin) {
     // cerco le tabelle gerarchicamente superiori a quella passata come argomento
-    Draw.svg.querySelectorAll(`g#time-dimension > desc[data-table-join='${table.dataset.table}']`).forEach(t => {
+    // es. Quando viene passata WB_QUARTERS, il primo ciclo restituisce WB_YEARS
+    Draw.svg.querySelectorAll(`g#time-dimension > desc[data-table-join='${table.dataset.table}']`).forEach(timeTable => {
       if (createJoin) {
-        const token = this.rand().substring(0, 7);
+        // TODO: potrei nominare il token in un altro modo, per evidenziare il
+        // fatto che queste join sono create automaticamente in base alla gerarchia
+        // della dimensione TIME (potrei nominarle con le iniziali delle tabelle es. WB_YEARS : wby-{factId})
+        // const token = this.rand().substring(0, 7);
+        const token = `${timeTable.dataset.alias}-${this.currentTable.factId.substring(9)}`;
+        debugger;
         WorkBook.join = {
           token,
           value: {
-            alias: t.dataset.alias,
+            alias: timeTable.dataset.alias,
             type: 'TIME',
-            SQL: [`${t.dataset.table}.${t.dataset.field}`, `${table.dataset.table}.${table.dataset.joinField}`],
+            SQL: [`${timeTable.dataset.table}.${timeTable.dataset.field}`, `${table.dataset.table}.${table.dataset.joinField}`],
             factId: this.currentTable.factId,
             // factId: WorkBook.activeTable.dataset.factId,
-            from: { table: t.dataset.table, alias: t.dataset.alias, field: t.dataset.field },
+            from: { table: timeTable.dataset.table, alias: timeTable.dataset.alias, field: timeTable.dataset.field },
             to: { table: table.dataset.table, alias: table.dataset.alias, field: table.dataset.joinField }
           }
         };
         WorkBook.joins = token;
       }
       this.tables = {
-        id: `${t.dataset.alias}-${this.currentTable.factId}`,
+        id: `${timeTable.dataset.alias}-${this.currentTable.factId}`,
         // id: `${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`,
         key: 'related-time',
-        table: t.dataset.table,
-        alias: t.dataset.alias,
-        name: t.dataset.table,
+        table: timeTable.dataset.table,
+        alias: timeTable.dataset.alias,
+        name: timeTable.dataset.table,
         schema: 'decisyon_cache',
-        joins: +t.dataset.joins,
+        joins: +timeTable.dataset.joins,
         factId: this.currentTable.factId,
         // factId: WorkBook.activeTable.dataset.factId,
-        join: `${t.dataset.tableJoin}-${this.currentTable.factId}`,
+        join: `${timeTable.dataset.tableJoin}-${this.currentTable.factId}`,
         // join: `${t.dataset.tableJoin}-${WorkBook.activeTable.dataset.factId}`,
-        joinField: t.dataset.joinField,
+        joinField: timeTable.dataset.joinField,
       };
-      this.currentTable = this.tables.get(`${t.dataset.alias}-${this.currentTable.factId}`);
+      this.currentTable = this.tables.get(`${timeTable.dataset.alias}-${this.currentTable.factId}`);
       // this.currentTable = this.tables.get(`${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`);
       this.drawTimeRelated(); // tabelle relative alla TIME (WB_YEARS, WB_QUARTERS, ecc...)
-      if (t.dataset.joinField) this.recursiveHier(t, createJoin);
+      if (timeTable.dataset.joinField) this.recursiveHier(timeTable, createJoin);
     });
   }
 
@@ -970,11 +980,23 @@ class DrawSVG {
     use.dataset.alias = this.currentTable.alias;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.factId = this.currentTable.factId;
+    // id a cui si può far riferimento in WorkBook.join
+    use.dataset.joinId = this.currentTable.joinId;
     use.setAttribute('x', this.currentTable.x + 4);
     use.setAttribute('y', this.currentTable.y + 4);
+    use.dataset.fn = "editTimeDimension";
     Draw.svg.appendChild(use);
 
     this.recursiveHier(use, createJoin);
+  }
+
+  updateTime() {
+    const use = this.svg.querySelector(`#${this.currentTable.id}`);
+    use.dataset.name = this.currentTable.name;
+    use.dataset.alias = this.currentTable.alias;
+    use.dataset.table = this.currentTable.table;
+    use.dataset.joinField = this.currentTable.joinField;
+    this.recursiveHier(use);
   }
 
   updateLine() {
