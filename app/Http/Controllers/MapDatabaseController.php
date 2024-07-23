@@ -320,6 +320,7 @@ class MapDatabaseController extends Controller
       $quarter = ceil($currDate->format('n') / 3);
       $json->{$currDate->format('Y-m-d')} = (object) [
         "id_date" => $currDate->format('Y-m-d'),
+        "date" => $currDate->format('Y-m-d'),
         // "trans_ly" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d'),
         "weekday" => $currDate->format('l'),
         "week" => $currDate->format('W'),
@@ -352,6 +353,7 @@ class MapDatabaseController extends Controller
     // Per recuperarne i valori non bisogna utilizzare MapJSONExtractor ma la sintassi xxx.yyy
     $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_DATE (
         id_date DATE NOT NULL PRIMARY KEY,
+        date DATE NOT NULL,
         year INTEGER,
         quarter_id INTEGER,
         quarter VARCHAR,
@@ -373,6 +375,7 @@ class MapDatabaseController extends Controller
 
         DB::connection('vertica_odbc')->table('decisyon_cache.WB_DATE')->insert([
           'id_date' => $date,
+          'date' => $date,
           'year' => $value->year,
           'quarter_id' => (int) $value->quarter_id,
           'quarter' => $value->quarter,

@@ -439,21 +439,20 @@ li:not([draggable]):hover > i {
 }
 
 #ul-filters > li.drag-list.filters > .li-content {
-  color: peru;
   display: flex;
   align-items: center;
   width: 100%;
 }
 
 #ul-metrics > li[data-advanced] > .li-content {
-  color: seagreen;
+  /* color: seagreen; */
   display: flex;
   align-items: center;
   width: 100%;
 }
 
 #ul-metrics > li[data-composite] > .li-content {
-  color: #a6786d;
+  /* color: #a6786d; */
   display: flex;
   align-items: center;
   width: 100%;

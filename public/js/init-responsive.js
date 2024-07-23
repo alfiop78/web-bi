@@ -483,7 +483,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       from: Draw.currentLineRef.dataset.from,
       to: Draw.currentLineRef.dataset.to
     }
-    debugger;
     Draw.openJoinWindow();
     Draw.createWindowJoinContent();
   }
@@ -2634,7 +2633,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   // contrassegno con l'attributo [data-selected] il campo selezionato delle tabelle TIME
   app.handlerTimeField = (e) => {
     // WorkBook.web_bi_time = e.target.dataset.field;
-    delete document.querySelector('#time-fields > li[data-selected]').dataset.selected;
+    if (document.querySelector("#time-fields > li[data-selected]")) delete document.querySelector('#time-fields > li[data-selected]').dataset.selected;
     e.target.dataset.selected = true;
   }
 

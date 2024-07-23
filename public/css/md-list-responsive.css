@@ -237,3 +237,16 @@ li.select-list:hover::before, li.icons-list:hover::before {
   left: -8px;
   background-color: var(--main-important-color);
 }
+
+li.filters {
+  background-color: var(--filters-color);
+  color: #494949;
+}
+
+li.metrics[data-type="advanced"] {
+  color: var(--metrics-advanced);
+}
+
+li.metrics[data-type="composite"] {
+  color: var(--metrics-composite);
+}

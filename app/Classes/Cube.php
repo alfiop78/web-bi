@@ -74,7 +74,6 @@ class Cube
       $this->datamart_fields[] = "{$column->name}_id";
       $this->datamart_fields[] = $column->name;
     }
-    // dd($this->datamart_fields);
   }
 
   // Creazione della clausola SELECT e dell'array _columns
