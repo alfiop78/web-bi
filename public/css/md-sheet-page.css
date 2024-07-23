@@ -111,7 +111,7 @@ code {
 }
 
 .filter-defined[data-type="filter"]{
-  background-color: #f2d98d;
+  background-color: var(--filters-color);
   color: #494949;
   padding: 2px 4px;
   font-size: .85rem;
@@ -176,21 +176,40 @@ code {
   display: none;
 }
 
-.metric-defined[data-type="basic"]:not([data-removed]) {
-  background-color: seagreen;
+/* .metric-defined[data-type="basic"]:not([data-removed]) { */
+/*   background-color: #276427b0; */
+/*   color: whitesmoke; */
+/* } */
+
+.metric-defined.basic:not([data-removed]) {
+  background-color: var(--metrics-basic);
   color: whitesmoke;
 }
 
-.metric-defined[data-type="advanced"]:not([data-removed]) {
+/* .metric-defined[data-type="advanced"]:not([data-removed]) {
   background-color: seagreen;
+  color: whitesmoke;
+  padding: 2px 4px;
+  font-size: .85rem;
+} */
+
+.metric-defined.advanced:not([data-removed]) {
+  background-color: var(--metrics-advanced);
   color: whitesmoke;
   padding: 2px 4px;
   font-size: .85rem;
 }
 
-.metric-defined[data-type="composite"] {
+/* .metric-defined[data-type="composite"] {
   background-color: rosybrown;
   color: #494949;
+  padding: 2px 4px;
+  font-size: .85rem;
+} */
+
+.metric-defined.composite:not([data-removed]) {
+  background-color: var(--metrics-composite);
+  color: whitesmoke;
   padding: 2px 4px;
   font-size: .85rem;
 }

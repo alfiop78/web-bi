@@ -64,6 +64,7 @@ dialog[open].popup {
 dialog h5 {
   font-weight: bold;
   color: var(--main-secondary-color);
+  border-top: solid var(--main-important-color);
 }
 
 /* elemento spostabile*/

@@ -4,6 +4,7 @@
 
 :root{
   --main-bg-color: #e2e2e2;
+  --main-fg-color: #494949;
   --main-primary-color: #2a3e59;
   --main-secondary-color: #54728c;
   --main-third-color: #e9e9e5;
@@ -11,8 +12,10 @@
   --main-color-button-flat: #8c5f11;
   --main-color-header-table: #d2d2d2;
   --main-important-color: #d9665b;
+  --mark-color: #f2d98d;
   --filters-color: #f2d98d;
-  --metrics-basic: #494949;
+  --metrics-basic: #54728c;
+  /* --metrics-basic: #276427b0; */
   --metrics-advanced: #A6786D;
   --metrics-composite: #d9665b;
 }
@@ -147,8 +150,8 @@ ul > section[data-sublist-table-card] > .sublist{display: flex; flex-direction: 
 ul > section[data-sublist-table-card] > .sublist > span{width: 100%; padding: 8px 6px;}
 
 mark{
-    background-color: sienna;
-    color: white;
+    background-color: var(--mark-color);
+    color: var(--main-fg-color);
     border-radius: 2px;
     padding: 2px 12px;
     display: inline-flex;

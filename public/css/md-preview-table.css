@@ -30,12 +30,12 @@ th {
   position: sticky;
   top: 0;
   vertical-align: middle;
-  border: solid thin gainsboro;
+  border: solid thin white;
   white-space: nowrap;
 }
 
 table[data-active="true"] thead th {
-  background-color: beige;
+  background-color: var(--mark-color);
 }
 
 table[data-active="false"] thead th {
@@ -44,11 +44,12 @@ table[data-active="false"] thead th {
 
 table[data-active="true"] thead th:hover{
   cursor: pointer;
-  background-color: burlywood;
+  background-color: var(--main-important-color);
+  color: whitesmoke;
 }
 
 thead th[data-token]{
-  background-color: steelblue!important;
+  background-color: var(--main-primary-color)!important;
   color: whitesmoke!important;
 }
 

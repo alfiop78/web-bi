@@ -160,13 +160,15 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     e.preventDefault();
     // console.log(e.target.id);
     console.log(e.currentTarget.id);
+    console.log(e.currentTarget.dataset.id);
     // reset #context-menu
     if (app.contextMenuRef.hasChildNodes()) app.contextMenuRef.querySelector('*').remove();
     const tmpl = app.tmplContextMenu.content.cloneNode(true);
     const content = tmpl.querySelector(`#${e.currentTarget.dataset.contextmenu}`);
     // aggiungo, a tutti gli elementi del context-menu, il token dell'elemento selezionato
     content.querySelectorAll('button').forEach(button => {
-      button.dataset.token = e.currentTarget.id;
+      // button.dataset.token = e.currentTarget.id;
+      button.dataset.token = e.currentTarget.dataset.id;
       if (button.dataset.button === 'delete' && Sheet.edit) button.disabled = 'true';
     });
     app.contextMenuRef.appendChild(content);
@@ -327,6 +329,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const fieldName = field.querySelector('span[data-field]');
     const metric = Sheet.metrics.get(token);
     field.dataset.type = metric.type;
+    field.classList.add(metric.type);
     field.dataset.id = metric.token;
     field.dataset.label = metric.alias;
     aggregateFn.dataset.metricId = metric.token;
@@ -565,7 +568,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
-    console.log(elementRef);
     Sheet.filters = elementId;
     app.addFilters(e.currentTarget, elementRef);
   }
@@ -880,13 +882,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     });
   }
 
+  // struttura tabelle nella #dlg-columns
   app.loadTableStruct = () => {
     // reset
     document.querySelectorAll('nav#table-field-list dl').forEach(element => element.remove());
     let parent = document.getElementById('table-field-list');
     // console.log(WorkBook.tablesModel);
     for (const [alias, object] of WorkBook.workBookMap) {
-    // for (const [alias, object] of WorkBook.tablesModel) {
+      // for (const [alias, object] of WorkBook.tablesModel) {
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
       const summary = details.querySelector('summary');
@@ -905,8 +908,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       parent.appendChild(details);
       columns.forEach(column => {
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li.drag-list.generic');
-        const i = content.querySelector('i[draggable]');
+        const li = content.querySelector('li.drag-list');
+        const i = li.querySelector('i[draggable]');
         const span = li.querySelector('span');
         li.dataset.label = column.column_name;
         i.id = `${alias}_${column.column_name}`;
@@ -1054,7 +1057,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       let ul = document.getElementById('ul-tables');
       for (const [key, value] of Object.entries(data)) {
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li.drag-list.generic');
+        const li = content.querySelector('li.drag-list');
         const i = li.querySelector('i');
         const span = li.querySelector('span');
         li.dataset.fn = "showTablePreview";
@@ -1153,7 +1156,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // TODO: scarico in sessionStorage tutte le tabelle del canvas
     let urls = [];
     for (const object of WorkBook.workBookMap.values()) {
-    // for (const object of WorkBook.tablesModel.values()) {
+      // for (const object of WorkBook.tablesModel.values()) {
       WorkBook.activeTable = object.key;
       // se la tabella è già presente in sessionStorage non rieseguo la query
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) {
@@ -1335,7 +1338,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       const filterRef = document.getElementById('ul-filters');
       const target = document.getElementById('dropzone-filters');
       // imposto un data-selected sui filtri per rendere visibile il fatto che sono stati aggiunti al report
-      const elementRef = filterRef.querySelector(`li[id='${token}']`);
+      // const elementRef = filterRef.querySelector(`li[id='${token}']`);
+      const elementRef = filterRef.querySelector(`i[id='${token}']`);
       app.addFilters(target, elementRef, true);
     });
     app.dialogSheet.close();
@@ -1891,7 +1895,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     let urls = [];
     // TODO: in ciclo serve solo il tableId
     for (const [alias, object] of WorkBook.workBookMap) {
-    // for (const [alias, object] of WorkBook.tablesModel) {
+      // for (const [alias, object] of WorkBook.tablesModel) {
       WorkBook.activeTable = object.key;
       urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info');
     }
@@ -3022,16 +3026,17 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.dialogMetric.close();
   }
 
+  // parent : #nav-fields (elenco tabelle e colonne del WorkBook)
   app.addDefinedFields = (parent) => {
     if (WorkBook.fields.has(WorkBook.activeTable.dataset.alias)) {
       for (const [token, value] of Object.entries(WorkBook.fields.get(WorkBook.activeTable.dataset.alias))) {
         const tmpl = app.tmplList.content.cloneNode(true);
-        const li = tmpl.querySelector('li.drag-list.tables');
-        const i = li.querySelector('i');
+        const li = tmpl.querySelector('li.drag-list');
         const span = li.querySelector('span');
+        const i = li.querySelector('i');
         li.dataset.id = token;
         i.id = token;
-        li.dataset.type = 'column';
+        li.classList.add("columns");
         li.dataset.elementSearch = 'fields';
         // li.dataset.label = value.field.ds.field;
         // TODO: rivedere la descrizione da far comparire per le colonne e colonne custom
@@ -3053,14 +3058,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.appendMetric = (parent, token, value) => {
     const tmpl = app.tmplList.content.cloneNode(true);
-    const li = tmpl.querySelector(`li.drag-list.metrics[data-${value.metric_type}]`);
-    const content = li.querySelector('.li-content');
-    // const btnDrag = content.querySelector('i');
-    // debugger;
-    const span = content.querySelector('span');
-    li.id = token;
-    li.dataset.type = value.metric_type;
-    // li.dataset.elementSearch = 'metrics';
+    const li = tmpl.querySelector("li.drag-list");
+    const span = li.querySelector('span');
+    const i = li.querySelector('i');
+    li.dataset.id = token;
+    i.id = token;
+    // li.dataset.type = value.metric_type;
+    li.classList.add(value.metric_type);
+    li.dataset.elementSearch = 'metrics';
     li.dataset.label = value.alias;
     // definisco quale context-menu-template apre questo elemento
     li.dataset.contextmenu = `ul-context-menu-${value.metric_type}`;
@@ -3083,11 +3088,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.appendFilter = (parent, token, filter) => {
     const tmpl = app.tmplList.content.cloneNode(true);
-    const li = tmpl.querySelector('li.drag-list.filters');
-    const content = li.querySelector('.li-content');
-    const btnDrag = content.querySelector('i');
-    const span = content.querySelector('span');
-    li.id = token;
+    const li = tmpl.querySelector('li.drag-list');
+    const span = li.querySelector('span');
+    const i = li.querySelector('i');
+    li.dataset.id = token;
+    i.id = token;
+    i.dataset.label = filter.name;
+    li.classList.add("filters");
+    li.dataset.elementSearch = "filters";
     li.dataset.label = filter.name;
     // definisco quale context-menu-template apre questo elemento
     li.dataset.contextmenu = 'ul-context-menu-filter';
@@ -3115,8 +3123,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.workbookTablesStruct.querySelectorAll('#ul-metrics > li, #ul-filters > li, details').forEach(element => element.remove());
     const parent = app.workbookTablesStruct.querySelector('#nav-fields');
 
-    // INFO: 2024.03.02 - Rivedere workBookMap forse può essere utilizzata questa al posto
-    // di tablesModel e hierTables
     for (const [tableAlias, prop] of WorkBook.workBookMap) {
       // console.log(tableAlias);
       const tmpl = app.tmplDetails.content.cloneNode(true);
@@ -3139,14 +3145,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   // creo la struttura tabelle nella dialog-filters
   app.addWorkBookContent = () => {
-    // reset
     app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
-    // parent
     let parent = app.dialogFilters.querySelector('nav');
-    console.log(WorkBook.tablesModel);
-    console.log(WorkBook.workBookMap);
-    debugger;
-    // for (const [alias, object] of WorkBook.tablesModel) {
     for (const [alias, object] of WorkBook.workBookMap) {
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
@@ -3165,9 +3165,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       parent.appendChild(details);
       columns.forEach(column => {
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li.drag-list.generic');
-        const i = li.querySelector('i[draggable]');
+        const li = content.querySelector('li.drag-list');
         const span = li.querySelector('span');
+        const i = li.querySelector('i');
         i.dataset.tableId = object.key;
         i.dataset.field = column.column_name;
         i.id = `${alias}_${column.column_name}`;

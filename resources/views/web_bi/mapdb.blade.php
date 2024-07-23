@@ -49,43 +49,43 @@
       </div>
     </li>
 
-    <li class="drag-list generic" data-tables data-element-search data-label data-searchable="true">
+    <li class="drag-list" data-element-search data-label data-searchable="true">
       <i class="material-icons-round md-18" draggable="true">drag_handle</i>
       <span></span>
     </li>
 
-    <li class="drag-list tables" data-element-search data-label data-searchable="true">
+    <!-- <li class="drag-list tables" data-element-search data-label data-searchable="true">
       <i class="material-icons-round md-18" draggable="true">drag_handle</i>
       <span></span>
-    </li>
+    </li> -->
 
-    <li class="drag-list filters" data-element-search="filters" data-label data-searchable="true" draggable="true">
+    <!-- <li class="drag-list filters" data-element-search="filters" data-label data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
-    </li>
+    </li> -->
 
-    <li class="drag-list metrics" data-element-search="metrics" data-label data-basic data-searchable="true" draggable="true">
+    <!-- <li class="drag-list metrics" data-element-search="metrics" data-label data-basic data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
-    </li>
+    </li> -->
 
-    <li class="drag-list metrics" data-element-search="metrics" data-label data-advanced data-searchable="true" draggable="true">
+    <!-- <li class="drag-list metrics" data-element-search="metrics" data-label data-advanced data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
-    </li>
+    </li> -->
 
-    <li class="drag-list metrics" data-element-search="metrics" data-label data-composite data-searchable="true" draggable="true">
+    <!-- <li class="drag-list metrics" data-element-search="metrics" data-label data-composite data-searchable="true" draggable="true">
       <span class="li-content">
         <i class="material-icons-round md-18">drag_handle</i>
         <span></span>
       </span>
-    </li>
+    </li> -->
   </template>
 
   <template id="tmpl-dl-element">
@@ -364,11 +364,11 @@
                   <div class="col grid-6">
                     <ul id="time-fields">
                       <!-- TODO: creare qui la struttura delle tabelle TIME con <summary> e <details> -->
-                      <li class="select-list" data-field="id_year" data-field-ds="year" data-table="WB_YEARS" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
-                      <li class="select-list" data-field="id_quarter" data-field-ds="quarter" data-table="WB_QUARTERS" data-datatype="integer" data-fn="handlerTimeField">QUARTER <small>Es.: 202302</small></li>
-                      <li class="select-list" data-field="id_month" data-field-ds="month" data-table="WB_MONTHS" data-datatype="integer" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
+                      <li class="select-list content" data-field="id_year" data-field-ds="year" data-table="WB_YEARS" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
+                      <li class="select-list content" data-field="id_quarter" data-field-ds="quarter" data-table="WB_QUARTERS" data-datatype="integer" data-fn="handlerTimeField">QUARTER <small>Es.: 202302</small></li>
+                      <li class="select-list content" data-field="id_month" data-field-ds="month" data-table="WB_MONTHS" data-datatype="integer" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
                       <!-- <li data-field="week_id" data-datatype="integer" data-fn="handlerTimeField">WEEK <small>Es.: 202312</small></li> -->
-                      <li class="select-list" data-field="id_date" data-field-ds="id_date" data-table="WB_DATE" data-datatype="date" data-fn="handlerTimeField">DATE <small>Es.: 2023-12-31</small></li>
+                      <li class="select-list content" data-field="id_date" data-field-ds="id_date" data-table="WB_DATE" data-datatype="date" data-fn="handlerTimeField">DATE <small>Es.: 2023-12-31</small></li>
                     </ul>
                   </div>
                   <section class="dlg-content col grid-6">
@@ -429,14 +429,14 @@
               <h5 class="title moveable">Creazione Metrica avanzata</h5>
               <section class="dlg-content">
                 <section class="row">
-                  <section class="col grid-3">
+                  <section class="col grid-4">
                     <section id="filter-area-drop">
                       <div class="relative-ul">
                         <ul id="filter-drop" class="custom-scrollbar dropzone"></ul>
                       </div>
                     </section>
                   </section>
-                  <section class="col grid-5">
+                  <section class="col grid-4">
                     <section class="input-area">
                       <input type="text" id="adv-metric-name" placeholder="Nome" value="" autocomplete="off" />
                       <div id="input-metric"></div>
@@ -571,8 +571,8 @@
                   </section>
                 </section>
                 <section class="btn-link">
-                  <button id="btn-add-join" class="btn-link default" data-fn="addJoin" value="Aggiungi Join">Aggiungi join</button>
-                  <button id="btn-remove-join" class="btn-link attention" data-fn="removeJoin" value="Elimina Join">Elimina join</button>
+                  <button id="btn-add-join" class="btn-link link" data-fn="addJoin" value="Aggiungi Join">Aggiungi join</button>
+                  <button id="btn-remove-join" class="btn-link link important" data-fn="removeJoin" value="Elimina Join">Elimina join</button>
                 </section>
                 <div class="wj-fields-list">
                   <section data-table-from>
@@ -691,9 +691,9 @@
                   <section class="step" data-step="1" selected>
                     <section class="wrapper-step">
                       <menu class="standard">
-                        <button id="btn-workbook-new" value="Nuovo">Nuovo</button>
-                        <button id="btn-workbook-open" value="open">Apri</button>
-                        <button id="btn-time-dimension" value="open" disabled>Tabella TIME</button>
+                        <button class="btn-link default" id="btn-workbook-new" value="Nuovo">Nuovo</button>
+                        <button class="btn-link default" id="btn-workbook-open" value="open">Apri</button>
+                        <button class="btn-link default" id="btn-time-dimension" value="open" disabled>Tabella TIME</button>
                         <!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
                         <section id="workbook-name" class="name data-source" contenteditable="true">Titolo</section>
                       </menu>
@@ -799,9 +799,9 @@
                     <section class="wrapper-content">
                       <menu class="standard">
                         <section class="buttons-menu">
-                          <button type="button" id="btn-sheet-new" data-fn="newSheetDialog">Nuovo</button>
-                          <button type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri</button>
-                          <button type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
+                          <button class="btn-link default" type="button" id="btn-sheet-new" data-fn="newSheetDialog">Nuovo</button>
+                          <button class="btn-link default" type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri</button>
+                          <button class="btn-link default" type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
                           <!-- <button id="btn-publish" class="btn-link important" data-fn="publish" value="Pubblica">Pubblica</button> -->
                         </section>
                         <section class="sheet-title">
@@ -817,7 +817,7 @@
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="1">
                               <ul id="nav-fields" class="custom-scrollbar" data-search-id="input-search-fields"></ul>
-                              <button class="btn-link default" data-fn="btnColumnNew" type="button" value="Nuova Colonna" disabled>Nuova Colonna</button>
+                              <button class="btn-link link" data-fn="btnColumnNew" type="button" value="Nuova Colonna" disabled>Nuova Colonna</button>
                             </section>
                             <p class="field-search">
                               <input id="input-search-metrics" data-element-search="metrics" autocomplete="off" type="search" class="input-search metrics" readonly placeholder="Metriche" />
@@ -825,7 +825,7 @@
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="2">
                               <ul id="ul-metrics" class="custom-scrollbar" data-search-id="input-search-metrics"></ul>
-                              <button class="btn-link default" data-fn="btnCompositeMetric" type="button" value="Nuova Metrica">Nuova Metrica</button>
+                              <button class="btn-link link" data-fn="btnCompositeMetric" type="button" value="Nuova Metrica">Nuova Metrica</button>
                             </section>
                             <p class="field-search">
                               <input id="input-search-filters" data-element-search="filters" autocomplete="off" type="search" class="input-search filters" readonly placeholder="Filtri" />
@@ -833,7 +833,7 @@
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="3">
                               <ul id="ul-filters" class="custom-scrollbar" data-search-id="input-search-filters"></ul>
-                              <button class="btn-link default" data-fn="openDialogFilter" type="button" value="Nuovo Filtro">Nuovo Filtro</button>
+                              <button class="btn-link link" data-fn="openDialogFilter" type="button" value="Nuovo Filtro">Nuovo Filtro</button>
                             </section>
                           </section>
                         </div>
@@ -946,8 +946,8 @@
                 <button id="prev">Workbook</button>
                 <div>
                   <button id="next" class="btn-buttons">Sheet</button>
-                  <button id="btn-sql-preview" class="btn-link important" data-fn="createProcess" value="SQL">SQL</button>
-                  <button id="btn-sheet-preview" class="btn-link important" data-fn="createProcess" value="Elabora">Elabora</button>
+                  <button id="btn-sql-preview" class="btn-buttons" data-fn="createProcess" value="SQL">SQL</button>
+                  <button id="btn-sheet-preview" class="btn-buttons important" data-fn="createProcess" value="Elabora">Elabora</button>
                 </div>
               </section>
 

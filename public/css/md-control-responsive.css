@@ -69,11 +69,11 @@ button {
 }
 
 button.default:not([disabled]):hover{
-  color: steelblue;
+  color: var(main-primary-color);
 }
 
 button.attention:not([disabled]):hover{
-  color: darkred;
+  color: var(--main-important-color);
 }
 
 .textarea-content::before {
@@ -119,27 +119,38 @@ button.btn-link[data-selected] {
 button.btn-link{
   border: unset;
   background-color: unset;
+  /* font-style: italic; */
+}
+
+button.btn-link:hover {
+  font-weight: bold;
+}
+
+button.link {
   font-style: italic;
+  /* color: var(--main-secondary-color); */
 }
 
 button:not([disabled]).btn-link:hover{
   cursor: pointer;
   text-decoration: underline;
+  font-weight: bold;
 }
 
-button:not([disabled]).btn-link.important{
+button:not([disabled]).btn-buttons.important{
   font-weight: bold;
   color: white;
-  background-color: #4682b4d9;
+  background-color: var(--main-important-color);
   border-radius: 2px;
   font-style: normal;
   padding: 8px 12px;
+  opacity: .8;
 }
 
 button:not([disabled]).btn-link.important:hover{
   cursor: pointer;
-  background-color: steelblue;
-  text-decoration: unset;
+  opacity: 1;
+  text-decoration: underline;
 }
 
 button.btn-link-context{
@@ -157,8 +168,8 @@ button.btn-link-context[disabled]:hover {
   cursor: not-allowed;
 }
 
-.default {
-  color: steelblue;
+button.btn-link.default:not([disabled]):hover {
+  text-decoration: unset;
 }
 
 input {
@@ -260,5 +271,5 @@ select {
 }
 
 select:focus {
-  box-shadow: 0px 4px 2px -3px steelblue;
+  box-shadow: 0px 4px 2px -3px var(--main-secondary-color);
 }

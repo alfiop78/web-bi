@@ -17,7 +17,7 @@ dt{
 
 dt.btn-link:hover {
   cursor: pointer;
-  font-style: bold;
+  font-weight: bold;
 }
 
 dd{
@@ -30,9 +30,14 @@ li{
   line-height: 1.7rem;
   position: relative;
   display: flex;
-  justify-content: space-between;
+  /* justify-content: space-between; */
   transition: padding 150ms;
   align-items: center;
+  margin: 4px;
+}
+
+li.content {
+  justify-content: space-between;
 }
 
 li[data-li-detail] {
@@ -63,11 +68,11 @@ li.icons-list > div {
   visibility: visible;
 }
 
-li:hover > i {
+/* li:hover > i {
   color: #54728C;
-}
+} */
 
-li.drag-list.generic {
+li.drag-list {
   justify-content: start;
 }
 
@@ -239,14 +244,19 @@ li.select-list:hover::before, li.icons-list:hover::before {
 }
 
 li.filters {
-  background-color: var(--filters-color);
-  color: #494949;
+  /* background-color: var(--filters-color); */
+  /* color: #494949; */
+  color: #9f7a0b;
 }
 
-li.metrics[data-type="advanced"] {
+li.drag-list.basic {
+  color: var(--metrics-basic);
+}
+
+li.drag-list.advanced {
   color: var(--metrics-advanced);
 }
 
-li.metrics[data-type="composite"] {
+li.drag-list.composite {
   color: var(--metrics-composite);
 }

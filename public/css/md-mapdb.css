@@ -109,7 +109,7 @@ path[data-join-id]{
 path:hover{
   cursor: pointer;
   fill: transparent;
-  stroke: sienna;
+  stroke: var(--main-important-color);
   stroke-width: 2.5;
   stroke-linecap: round;
 }
@@ -138,16 +138,16 @@ line {
 
 .struct > rect.symbol {
   /* fill: lightblue; */
-  fill: burlywood;
+  fill: var(--mark-color);
 }
 
 .struct.fact > rect.symbol {
-  fill: brown;
+  fill: var(--main-important-color);
 }
 
 .struct.common rect.symbol {
   /* fill: lightblue; */
-  fill: burlywood;
+  fill: var(--mark-color);
 }
 
 .struct.common > rect.common {
@@ -366,12 +366,13 @@ dt dd{
 
 details > summary:hover{
   cursor: pointer;
-  color: #005148;
+  color: var(--main-important-color);
+  font-weight: bold;
   padding-left: 2px;
 }
 
 details > summary{
-  font-weight: bold;
+  /* font-weight: bold; */
   line-height: 1.6rem;
   padding-left: 0px;
   transition: padding 150ms;
@@ -379,7 +380,8 @@ details > summary{
 
 details[open] > summary {
   padding-left: 2px;
-  color: #54728C;
+  color: var(--main-important-color);
+  font-weight: bold;
 }
 
 details > li[data-datatype='float'] {
@@ -394,14 +396,14 @@ details > li {
   border-radius: 4px;
 }
 
-#ul-metrics > li, #ul-filters > li {
+/* #ul-metrics > li, #ul-filters > li {
   line-height: 1.6rem;
   margin: 2px;
   border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
+} */
 
 li[data-selected] {
   font-weight: bold;
@@ -458,8 +460,8 @@ li:not([draggable]):hover > i {
   width: 100%;
 }
 
-details > li[data-type="column"] {
-  color: white;
+details > li.columns {
+  color: var(--main-secondary-color);
 }
 
 details > li.drag-list.tables > span {
@@ -535,20 +537,8 @@ p.field-search {
   justify-content: space-between;
 }
 
-.input-search.workbooks::placeholder {
-  color: black;
-}
-
-.input-search.columns::placeholder {
+.properties .input-search::placeholder {
   color: var(--main-primary-color);
-}
-
-.input-search.metrics::placeholder {
-  color: seagreen;
-}
-
-.input-search.filters::placeholder {
-  color: peru;
 }
 
 .context-menu span {
@@ -557,9 +547,9 @@ p.field-search {
   border-bottom: solid thin gainsboro;
 }
 
-
-.attention{
-  color: brown;
+.important{
+  color: var(--main-important-color);
+  font-weight: bold;
 }
 
 .textareas {
