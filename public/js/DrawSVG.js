@@ -671,18 +671,22 @@ class DrawSVG {
         // key : join token
         // per ogni join devo creare i due campi .join-field (from/to) e popolarli
         // con i dati presenti in WorkBook.joins
-        let joinFields = this.getJoinFieldsTemplate;
-        joinFields.from.dataset.token = key;
-        joinFields.from.dataset.field = value.from.field;
-        joinFields.from.dataset.table = value.from.table;
-        joinFields.from.dataset.alias = value.from.alias;
-        joinFields.from.innerHTML = value.from.field;
-        joinFields.to.dataset.token = key;
-        joinFields.to.dataset.field = value.to.field;
-        joinFields.to.dataset.table = value.to.table;
-        joinFields.to.dataset.alias = value.to.alias;
-        joinFields.to.innerHTML = value.to.field;
-        document.querySelector('#btn-remove-join').dataset.token = key;
+        // Quando viene utilizzata una tabella condivisa tra più fact, è necessario
+        // visualizzare qui solo la join relativa alla fact "di competenza"
+        if (this.currentLineRef.dataset.factId === value.factId) {
+          let joinFields = this.getJoinFieldsTemplate;
+          joinFields.from.dataset.token = key;
+          joinFields.from.dataset.field = value.from.field;
+          joinFields.from.dataset.table = value.from.table;
+          joinFields.from.dataset.alias = value.from.alias;
+          joinFields.from.innerHTML = value.from.field;
+          joinFields.to.dataset.token = key;
+          joinFields.to.dataset.field = value.to.field;
+          joinFields.to.dataset.table = value.to.table;
+          joinFields.to.dataset.alias = value.to.alias;
+          joinFields.to.innerHTML = value.to.field;
+          document.querySelector('#btn-remove-join').dataset.token = key;
+        }
       }
     }
     // in base alla linea di join corrente recupero le proprietà 'from' e 'to' che contengono
@@ -921,15 +925,11 @@ class DrawSVG {
 
   recursiveHier(table, createJoin) {
     // cerco le tabelle gerarchicamente superiori a quella passata come argomento
-    // es. Quando viene passata WB_QUARTERS, il primo ciclo restituisce WB_YEARS
+    // es. Quando viene passata WB_QUARTERS, il primo ciclo processa WB_YEARS
     Draw.svg.querySelectorAll(`g#time-dimension > desc[data-table-join='${table.dataset.table}']`).forEach(timeTable => {
       if (createJoin) {
-        // TODO: potrei nominare il token in un altro modo, per evidenziare il
-        // fatto che queste join sono create automaticamente in base alla gerarchia
-        // della dimensione TIME (potrei nominarle con le iniziali delle tabelle es. WB_YEARS : wby-{factId})
         // const token = this.rand().substring(0, 7);
         const token = `${timeTable.dataset.alias}-${this.currentTable.factId.substring(9)}`;
-        debugger;
         WorkBook.join = {
           token,
           value: {
@@ -946,7 +946,6 @@ class DrawSVG {
       }
       this.tables = {
         id: `${timeTable.dataset.alias}-${this.currentTable.factId}`,
-        // id: `${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`,
         key: 'related-time',
         table: timeTable.dataset.table,
         alias: timeTable.dataset.alias,
@@ -960,7 +959,6 @@ class DrawSVG {
         joinField: timeTable.dataset.joinField,
       };
       this.currentTable = this.tables.get(`${timeTable.dataset.alias}-${this.currentTable.factId}`);
-      // this.currentTable = this.tables.get(`${t.dataset.alias}-${WorkBook.activeTable.dataset.factId}`);
       this.drawTimeRelated(); // tabelle relative alla TIME (WB_YEARS, WB_QUARTERS, ecc...)
       if (timeTable.dataset.joinField) this.recursiveHier(timeTable, createJoin);
     });
@@ -980,23 +978,12 @@ class DrawSVG {
     use.dataset.alias = this.currentTable.alias;
     use.dataset.schema = this.currentTable.schema;
     use.dataset.factId = this.currentTable.factId;
-    // id a cui si può far riferimento in WorkBook.join
-    use.dataset.joinId = this.currentTable.joinId;
     use.setAttribute('x', this.currentTable.x + 4);
     use.setAttribute('y', this.currentTable.y + 4);
     use.dataset.fn = "editTimeDimension";
     Draw.svg.appendChild(use);
 
     this.recursiveHier(use, createJoin);
-  }
-
-  updateTime() {
-    const use = this.svg.querySelector(`#${this.currentTable.id}`);
-    use.dataset.name = this.currentTable.name;
-    use.dataset.alias = this.currentTable.alias;
-    use.dataset.table = this.currentTable.table;
-    use.dataset.joinField = this.currentTable.joinField;
-    this.recursiveHier(use);
   }
 
   updateLine() {

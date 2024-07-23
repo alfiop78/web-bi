@@ -469,8 +469,14 @@ class WorkBooks {
 
   get workBookMap() {
     let map = new Map();
-    Draw.svg.querySelectorAll('use').forEach(table => {
-      if (!map.has(table.dataset.alias)) map.set(table.dataset.alias, {
+    Draw.svg.querySelectorAll('use.table:not([data-shared_ref]), use.time').forEach(table => {
+      // if (!map.has(table.dataset.alias)) map.set(table.dataset.alias, {
+      //   key: table.id,
+      //   schema: table.dataset.schema,
+      //   table: table.dataset.table,
+      //   name: table.dataset.name
+      // });
+      map.set(table.dataset.alias, {
         key: table.id,
         schema: table.dataset.schema,
         table: table.dataset.table,
