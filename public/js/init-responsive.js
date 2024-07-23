@@ -249,8 +249,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     WorkBook.checkChanges(`alias-${input.value}`);
   }
 
-  // creazione/modifica colonna _id e _ds
-  app.columnDragStart = (e) => {
+  /* NOTE: DRAG&DROP EVENTS */
+
+  app.elementDragStart = (e) => {
     console.log('column drag start');
     console.log('e.target : ', e.target.id);
     e.target.classList.add('dragging');
@@ -259,32 +260,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     e.dataTransfer.effectAllowed = "copy";
   }
 
-  // column _id e _ds
-  app.setColumnDrop = (e) => {
-    e.preventDefault();
-    console.log('target:', e.target);
-    console.log('currentTarget:', e.currentTarget);
-    e.currentTarget.classList.replace('dropping', 'dropped');
-    if (!e.currentTarget.classList.contains('dropzone')) return;
-    const elementId = e.dataTransfer.getData('text/plain');
-    const elementRef = document.getElementById(elementId);
-    // elementRef : è l'elemento draggato
-    WorkBook.activeTable = elementRef.dataset.tableId;
-    // console.log(WorkBook.activeTable.dataset.table);
-    app.addMark({ field: elementRef.dataset.field, datatype: elementRef.dataset.datatype }, e.target);
-  }
-
-  // drag su campo per la creazione del report
-  app.fieldDragStart = (e) => {
-    console.log('field drag start');
-    console.log('e.target : ', e.target.id);
-    e.target.classList.add('dragging');
-    e.dataTransfer.setData('text/plain', e.target.id);
-    console.log(e.dataTransfer);
-    e.dataTransfer.effectAllowed = "copy";
-  }
-
-  app.columnDragEnter = (e) => {
+  app.elementDragEnter = (e) => {
     e.preventDefault();
     console.log(e.currentTarget);
     if (e.currentTarget.classList.contains('dropzone')) {
@@ -300,20 +276,45 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  app.columnDragOver = (e) => {
+  app.elementDragOver = (e) => {
     e.preventDefault();
     // console.log(e.currentTarget);
     if (e.currentTarget.classList.contains('dropzone')) {
+      e.currentTarget.classList.add('dropping');
       e.dataTransfer.dropEffect = "copy";
     } else {
+      e.currentTarget.classList.remove('dropping');
       e.dataTransfer.dropEffect = "none";
     }
   }
 
-  app.columnDragLeave = (e) => {
+  app.elementDragLeave = (e) => {
     e.preventDefault();
     console.log(e.currentTarget);
     e.currentTarget.classList.remove('dropping');
+  }
+
+  app.elementDragEnd = (e) => {
+    e.preventDefault();
+    // TODO:
+    if (e.dataTransfer.dropEffect === 'copy') {}
+  }
+  /* NOTE: END DRAG&DROP EVENTS */
+
+  // column _id e _ds
+  app.setColumnDrop = (e) => {
+    e.preventDefault();
+    console.log('target:', e.target);
+    console.log('currentTarget:', e.currentTarget);
+    // e.currentTarget.classList.replace('dropping', 'dropped');
+    e.currentTarget.classList.remove('dropping');
+    if (!e.currentTarget.classList.contains('dropzone')) return;
+    const elementId = e.dataTransfer.getData('text/plain');
+    const elementRef = document.getElementById(elementId);
+    // elementRef : è l'elemento draggato
+    WorkBook.activeTable = elementRef.dataset.tableId;
+    // console.log(WorkBook.activeTable.dataset.table);
+    app.addMark({ field: elementRef.dataset.field, datatype: elementRef.dataset.datatype }, e.target);
   }
 
   // stesso funzionamento di addField()
@@ -350,7 +351,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.columnDrop = (e) => {
     e.preventDefault();
-    e.currentTarget.classList.replace('dropping', 'dropped');
+    // e.currentTarget.classList.replace('dropping', 'dropped');
+    e.currentTarget.classList.remove('dropping');
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
@@ -397,29 +399,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  app.columnDragEnd = (e) => {
-    e.preventDefault();
-    if (e.dataTransfer.dropEffect === 'copy') {
-
-    }
-  }
-
-  app.rowDragEnter = (e) => {
-    e.preventDefault();
-    console.log(e.currentTarget);
-    if (e.currentTarget.classList.contains('dropzone')) {
-      console.info('dropzone columns');
-      // console.log(e.currentTarget, e.target);
-      // e.dataTransfer.dropEffect = "copy";
-      // coloro il border differente per la dropzone
-      e.currentTarget.classList.add('dropping');
-    } else {
-      console.warn('non in dropzone');
-      // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
-      e.dataTransfer.dropEffect = "none";
-    }
-  }
-
   app.handlerDragEnterFilter = (e) => {
     e.preventDefault();
     console.log(e.currentTarget);
@@ -432,16 +411,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     } else {
       console.warn('non in dropzone');
       // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
-      e.dataTransfer.dropEffect = "none";
-    }
-  }
-
-  app.rowDragOver = (e) => {
-    e.preventDefault();
-    // console.log(e.currentTarget);
-    if (e.currentTarget.classList.contains('dropzone')) {
-      e.dataTransfer.dropEffect = "copy";
-    } else {
       e.dataTransfer.dropEffect = "none";
     }
   }
@@ -464,7 +433,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.handlerDropFilter = (e) => {
     e.preventDefault();
-    e.currentTarget.classList.replace('dropping', 'dropped');
+    // e.currentTarget.classList.replace('dropping', 'dropped');
+    e.currentTarget.classList.remove('dropping');
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
@@ -495,49 +465,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     debugger;
   }
 
-  app.rowDragLeave = (e) => {
-    e.preventDefault();
-    console.log(e.currentTarget);
-    e.currentTarget.classList.remove('dropping');
-  }
-
-  /* sezione #sheet-filters*/
-  app.filterDragEnter = (e) => {
-    e.preventDefault();
-    console.log(e.currentTarget);
-    if (e.currentTarget.classList.contains('dropzone')) {
-      // console.log(e.currentTarget, e.target);
-      // e.dataTransfer.dropEffect = "copy";
-      // coloro il border differente per la dropzone
-      e.currentTarget.classList.add('dropping');
-    } else {
-      console.warn('non in dropzone');
-      // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
-      e.dataTransfer.dropEffect = "none";
-    }
-  }
-
-  app.filterDragOver = (e) => {
-    e.preventDefault();
-    // console.log(e.currentTarget);
-    if (e.currentTarget.classList.contains('dropzone')) {
-      e.dataTransfer.dropEffect = "copy";
-    } else {
-      e.dataTransfer.dropEffect = "none";
-    }
-  }
-
-  app.filterDragLeave = (e) => {
-    e.preventDefault();
-    // console.log(e.currentTarget);
-    e.currentTarget.classList.remove('dropping');
-  }
-
   app.newFilterDrop = (e) => {
     e.preventDefault();
     console.log('target:', e.target);
     console.log('currentTarget:', e.currentTarget);
-    e.currentTarget.classList.replace('dropping', 'dropped');
+    // e.currentTarget.classList.replace('dropping', 'dropped');
+    e.currentTarget.classList.remove('dropping');
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
@@ -564,19 +497,13 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.filterDrop = (e) => {
     e.preventDefault();
-    e.currentTarget.classList.replace('dropping', 'dropped');
+    // e.currentTarget.classList.replace('dropping', 'dropped');
+    e.currentTarget.classList.remove('dropping');
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
     Sheet.filters = elementId;
     app.addFilters(e.currentTarget, elementRef);
-  }
-
-  app.rowDragEnd = (e) => {
-    e.preventDefault();
-    if (e.dataTransfer.dropEffect === 'copy') {
-
-    }
   }
 
   /* addField viene utilizzate sia quando si effettua il drag&drop sulla dropzone-rows che
@@ -613,7 +540,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.rowDrop = (e) => {
     e.preventDefault();
-    e.currentTarget.classList.replace('dropping', 'dropped');
+    // e.currentTarget.classList.replace('dropping', 'dropped');
+    e.currentTarget.classList.remove('dropping');
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
@@ -916,8 +844,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         i.dataset.tableId = object.key;
         i.dataset.field = column.column_name;
         i.dataset.datatype = column.type_name.toLowerCase();
-        i.ondragstart = app.columnDragStart;
-        i.ondragend = app.columnDragEnd;
+        i.ondragstart = app.elementDragStart;
+        i.ondragend = app.elementDragEnd;
         li.dataset.elementSearch = 'fields';
         li.dataset.table = object.name;
         li.dataset.alias = alias;
@@ -991,7 +919,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     e.preventDefault();
     console.log(e.target);
     // console.clear();
-    e.currentTarget.classList.replace('dropping', 'dropped');
+    // e.currentTarget.classList.replace('dropping', 'dropped');
+    e.currentTarget.classList.remove('dropping');
     if (!e.currentTarget.classList.contains('dropzone')) return;
     e.currentTarget.classList.remove('dragging');
     const elementId = e.dataTransfer.getData('text/plain');
@@ -1010,36 +939,36 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   // column _id e _ds
-  app.txtAreaIdColumn.addEventListener('dragenter', app.columnDragEnter, false);
-  app.txtAreaDsColumn.addEventListener('dragenter', app.columnDragEnter, false);
-  app.txtAreaIdColumn.addEventListener('dragover', app.columnDragOver, false);
-  app.txtAreaDsColumn.addEventListener('dragover', app.columnDragOver, false);
-  app.txtAreaIdColumn.addEventListener('dragleave', app.columnDragLeave, false);
-  app.txtAreaDsColumn.addEventListener('dragleave', app.columnDragLeave, false);
+  app.txtAreaIdColumn.addEventListener('dragenter', app.elementDragEnter, false);
+  app.txtAreaDsColumn.addEventListener('dragenter', app.elementDragEnter, false);
+  app.txtAreaIdColumn.addEventListener('dragover', app.elementDragOver, false);
+  app.txtAreaDsColumn.addEventListener('dragover', app.elementDragOver, false);
+  app.txtAreaIdColumn.addEventListener('dragleave', app.elementDragLeave, false);
+  app.txtAreaDsColumn.addEventListener('dragleave', app.elementDragLeave, false);
   app.txtAreaIdColumn.addEventListener('drop', app.setColumnDrop, false);
   app.txtAreaDsColumn.addEventListener('drop', app.setColumnDrop, false);
   // textarea nella dialog-filters
-  app.txtAreaFilters.addEventListener("dragenter", app.filterDragEnter, false);
-  app.txtAreaFilters.addEventListener("dragover", app.filterDragOver, false);
-  app.txtAreaFilters.addEventListener("dragleave", app.filterDragLeave, false);
+  app.txtAreaFilters.addEventListener("dragenter", app.elementDragEnter, false);
+  app.txtAreaFilters.addEventListener("dragover", app.elementDragOver, false);
+  app.txtAreaFilters.addEventListener("dragleave", app.elementDragLeave, false);
   app.txtAreaFilters.addEventListener("drop", app.newFilterDrop, false);
 
-  app.columnsDropzone.addEventListener('dragenter', app.columnDragEnter, false);
-  app.columnsDropzone.addEventListener('dragover', app.columnDragOver, false);
-  app.columnsDropzone.addEventListener('dragleave', app.columnDragLeave, false);
+  app.columnsDropzone.addEventListener('dragenter', app.elementDragEnter, false);
+  app.columnsDropzone.addEventListener('dragover', app.elementDragOver, false);
+  app.columnsDropzone.addEventListener('dragleave', app.elementDragLeave, false);
   app.columnsDropzone.addEventListener('drop', app.columnDrop, false);
   // app.columnsDropzone.addEventListener('dragend', app.columnDragEnd, false);
   // dropzone sheet rows
-  app.rowsDropzone.addEventListener('dragenter', app.rowDragEnter, false);
-  app.rowsDropzone.addEventListener('dragover', app.rowDragOver, false);
-  app.rowsDropzone.addEventListener('dragleave', app.rowDragLeave, false);
+  app.rowsDropzone.addEventListener('dragenter', app.elementDragEnter, false);
+  app.rowsDropzone.addEventListener('dragover', app.elementDragOver, false);
+  app.rowsDropzone.addEventListener('dragleave', app.elementDragLeave, false);
   app.rowsDropzone.addEventListener('drop', app.rowDrop, false);
   // app.rowsDropzone.addEventListener('dragend', app.rowDragEnd, false);
 
   // dropzone #side-sheet-filters
-  app.filtersDropzone.addEventListener('dragenter', app.filterDragEnter, false);
-  app.filtersDropzone.addEventListener('dragover', app.filterDragOver, false);
-  app.filtersDropzone.addEventListener('dragleave', app.filterDragLeave, false);
+  app.filtersDropzone.addEventListener('dragenter', app.elementDragEnter, false);
+  app.filtersDropzone.addEventListener('dragover', app.elementDragOver, false);
+  app.filtersDropzone.addEventListener('dragleave', app.elementDragLeave, false);
   app.filtersDropzone.addEventListener('drop', app.filterDrop, false);
   // app.filtersDropzone.addEventListener('dragend', app.filterDragEnd, false);
 
@@ -3047,8 +2976,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         li.dataset.table = value.table;
         li.dataset.alias = value.tableAlias;
         li.dataset.field = value.name;
-        li.addEventListener('dragstart', app.fieldDragStart);
-        li.addEventListener('dragend', app.fieldDragEnd);
+        i.addEventListener('dragstart', app.elementDragStart);
+        i.addEventListener('dragend', app.elementDragEnd);
         // span.innerHTML = value.field.ds.sql.join('');
         span.innerHTML = value.name;
         parent.appendChild(li);
@@ -3069,8 +2998,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     li.dataset.label = value.alias;
     // definisco quale context-menu-template apre questo elemento
     li.dataset.contextmenu = `ul-context-menu-${value.metric_type}`;
-    li.addEventListener('dragstart', app.fieldDragStart);
-    li.addEventListener('dragend', app.fieldDragEnd);
+    i.addEventListener('dragstart', app.elementDragStart);
+    i.addEventListener('dragend', app.elementDragEnd);
     li.addEventListener('contextmenu', app.openContextMenu);
     span.innerHTML = value.alias;
     parent.appendChild(li);
@@ -3101,8 +3030,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     li.dataset.contextmenu = 'ul-context-menu-filter';
     li.dataset.field = filter.field;
     // TODO: eventi drag sull'icona drag
-    li.addEventListener('dragstart', app.fieldDragStart);
-    li.addEventListener('dragend', app.fieldDragEnd);
+    i.addEventListener('dragstart', app.elementDragStart);
+    i.addEventListener('dragend', app.elementDragEnd);
     li.addEventListener('contextmenu', app.openContextMenu);
     span.innerHTML = filter.name;
     parent.appendChild(li);
@@ -3172,8 +3101,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         i.dataset.field = column.column_name;
         i.id = `${alias}_${column.column_name}`;
         // i.dataset.datatype = column.type_name.toLowerCase();
-        i.ondragstart = app.fieldDragStart;
-        i.ondragend = app.columnDragEnd;
+        i.ondragstart = app.elementDragStart;
+        i.ondragend = app.elementDragEnd;
 
         li.dataset.label = column.column_name;
         li.dataset.fn = 'handlerSelectField';

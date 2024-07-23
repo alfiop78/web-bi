@@ -167,10 +167,9 @@ mark{
 span.markContent {
   position: relative;
   color: dimgrey;
-  margin-bottom: 8px;
+  margin: 0px 2px 4px 2px;
   display: inline-grid;
   justify-items: center;
-  margin-right: 4px;
 }
 /*mark.markContent::before {content: attr(data-attr); position: absolute; top: 100%; color: dimgray;}*/
 .markContent > i {position: absolute; left: -7px; top: -7px; color: black; visibility: hidden;}
@@ -309,3 +308,10 @@ i[draggable="true"]:hover {
   cursor: grab;
   color: #011126;
 }
+
+.textarea-content.dropzone.dropping,
+li.dropzone.dropping {
+  border: solid thin var(--main-important-color);
+  box-shadow: 0px 0px 3px 0px var(--main-important-color);
+}
+

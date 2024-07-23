@@ -22,7 +22,7 @@ code {
   align-items: center;
   /* grid-column-gap: 4px; */
   /* padding: 4px; */
-  height: 34px;
+  height: 42px;
 }
 
 .report-area .report-preview{
@@ -41,7 +41,7 @@ code {
   height: 100%;
   transition: height 500ms;
   align-items: center;
-  padding: 0px 4px;
+  padding: 0px 4px 8px 4px;
 }
 
 .relative{
@@ -73,7 +73,8 @@ code {
 /* } */
 
 .sheet-elements .dropzone.dropping{
-  border: solid thin darkgreen;
+  border: solid thin var(--main-important-color);
+  box-shadow: 0px 0px 3px 0px var(--main-important-color);
 }
 
 .defined {

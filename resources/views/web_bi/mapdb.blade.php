@@ -514,7 +514,7 @@
                   <section class="col grid-12">
                     <section class="textarea-formula">
                       <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus />
-                      <div id="textarea-composite-metric" data-fn="addText" data-content-editable class="dropzone textarea"></div>
+                      <div id="textarea-composite-metric" data-fn="addText" data-content-editable class="dropzone textarea-content"></div>
                       <textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
                     </section>
                   </section>
@@ -543,7 +543,7 @@
                   <section class="col grid-8">
                     <section class="textarea-formula">
                       <input type="text" id="custom-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
-                      <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea placeholder"></div>
+                      <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea-content placeholder"></div>
                       <textarea id="custom-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                     </section>
                   </section>
@@ -637,7 +637,7 @@
                   <section class="col grid-8">
                     <section class="textarea-formula">
                       <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" tabindex="2" />
-                      <div id="textarea-filter" data-fn="addText" class="textarea dropzone" data-content-editable></div>
+                      <div id="textarea-filter" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
                       <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                     </section>
                   </section>
