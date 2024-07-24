@@ -33,6 +33,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     dialogJoin: document.getElementById('dlg-join'),
     dialogColumns: document.getElementById('dlg-columns'),
     dialogTime: document.getElementById('dialog-time'),
+    dialogBaseMeasures: document.getElementById("dlg-base-metric"),
     // dialogInfo: document.getElementById('dlg-info'),
     dialogSchema: document.getElementById('dlg-schema'),
     dialogNewWorkBook: document.getElementById('dialog-new-workbook'),
@@ -602,16 +603,31 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.addSpan(textarea, null, 'metric');
   }
 
+  app.openDialogBaseMetric = (e) => {
+    const input = document.getElementById("base-metric-name");
+    const btnSave = document.getElementById("btn-base-metric-save");
+    const token = rand().substring(0, 7);
+    btnSave.dataset.token = token;
+    input.value = e.target.dataset.field;
+    btnSave.dataset.field = e.target.dataset.field;
+    app.dialogBaseMeasures.show();
+  }
+
+  /* app.handlerAggregate = (e) => {
+    delete document.querySelector("#ul-base-metrics-aggregate > li[data-selected]").dataset.selected;
+    e.target.dataset.selected = true;
+  } */
+
   // dialog-metric per definire le metriche di base del WorkBook (non custom metric di base, come (przmedio*quantita))
-  app.setMetric = (e) => {
+  app.saveBaseMetric = (e) => {
+    const input = document.getElementById("base-metric-name");
+    // const aggregateFn = document.querySelector("#ul-base-metrics-aggregate > li[data-selected]").dataset.value;
     // console.log(WorkBook.activeTable);
     // const table = WorkBook.activeTable.dataset.table;
-    const tableAlias = WorkBook.activeTable.dataset.alias;
     // const table = WorkBook.activeTable.dataset.table;
-    const field = `${tableAlias}.${e.target.dataset.field}`;
-    const alias = e.target.dataset.field;
+    const field = `${WorkBook.activeTable.dataset.alias}.${e.target.dataset.field}`;
+    const alias = input.value;
     // let name = e.target.dataset.field;
-    const token = rand().substring(0, 7);
     const factId = WorkBook.activeTable.dataset.factId;
 
     // verifico se sono presenti metriche con lo stesso 'alias'
@@ -623,17 +639,19 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
     // metric Map Object
     WorkBook.metrics = {
-      token,
+      token: e.target.dataset.token,
       alias,
-      field: e.target.dataset.field,
+      field,
       factId,
+      // aggregateFn,
       aggregateFn: 'SUM', // default
       SQL: field,
       distinct: false, // default
       type: 'metric',
       metric_type: 'basic'
     };
-    WorkBook.checkChanges(token);
+    WorkBook.checkChanges(e.target.dataset.token);
+    app.dialogBaseMeasures.close();
   }
 
   // apro la dialog column per definire le colonne del WorkBook
@@ -967,11 +985,13 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   // edit di una funzione di aggregazione sulla metrica aggiunta allo Sheet
   app.editAggregate = (e) => {
-    e.target.dataset.aggregate = e.target.innerText;
+    e.target.dataset.aggregate = e.target.innerText.toUpperCase();
     const token = e.target.dataset.metricId;
+    if (Sheet.metrics.get(token).aggregateFn !== e.target.innerText.toUpperCase()) e.target.dataset.modified = true;
     // console.log(Sheet.metrics.get(token).aggregateFn);
-    // console.log(Sheet.sheet.metrics[token].aggregateFn);
-    Sheet.metrics.get(token).aggregateFn = e.target.innerText;
+    Sheet.metrics.get(token).aggregateFn = e.target.innerText.toUpperCase();
+    e.target.innerText = e.target.innerText.toUpperCase();
+    console.log(Sheet.metrics.get(token).aggregateFn);
   }
 
   // edit di un alias della metrica dopo essere stata aggiunta allo Sheet
@@ -1245,7 +1265,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     Sheet.name = name.dataset.value;
     Sheet.userId = userId;
     // verifico se ci sono elementi modificati andando a controllare gli elmeneti con [data-adding] e [data-removed]
-    Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed]');
+    Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
     // se il report è in edit ed è stata fatta una modifica eseguo update()
     if (Sheet.edit === true) {
       // il report è già presente in local ed è stato aperto
@@ -1634,7 +1654,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.process = async (process) => {
     Sheet.userId = userId;
     if (Sheet.edit === true) {
-      Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed]');
+      Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
       if (Sheet.changes.length !== 0) {
         Sheet.update();
         // elimino il datamart perchè è stato modificato

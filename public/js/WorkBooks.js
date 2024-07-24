@@ -16,7 +16,6 @@ class Sheets {
     this.objectRemoved = new Map();
     this.fact = new Set(); // le fact utilizzate nel report
     this.from = {}, this.joins = {}, this.measures = {}; // #from e #joins e #tables dovranno essere presenti nella Sheets eperchè sono proprietà necessarie per processare il report
-    // this.joins = new Map();
   }
 
   // TODO: molti di questi setter/getter posso crearli come magicMethod

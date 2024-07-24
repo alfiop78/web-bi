@@ -526,9 +526,35 @@
             </section>
           </dialog>
 
+          <dialog id="dlg-base-metric" data-x="0" data-y="40" class="small absolute moveable">
+            <section class="dlg-grid">
+              <h5 class="title moveable">Creazione Metrica di base</h5>
+              <section class="dlg-content">
+                <section class="row">
+                  <section class="col grid-12">
+                    <input type="text" id="base-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
+                    <!-- <div class="relative-ul">
+                      <ul id="ul-base-metrics-aggregate" class="custom-scrollbar" data-search-id="input-search-base-metrics">
+                        <li class="select-list" data-fn="handlerAggregate" data-value="SUM" data-selected>SUM</li>
+                        <li class="select-list" data-fn="handlerAggregate" data-value="AVG">AVG</li>
+                        <li class="select-list" data-fn="handlerAggregate" data-value="MIN">MIN</li>
+                        <li class="select-list" data-fn="handlerAggregate" data-value="MAX">MAX</li>
+                        <li class="select-list" data-fn="handlerAggregate" data-value="COUNT">COUNT</li>
+                      </ul>
+                    </div> -->
+                  </section>
+                </section>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button data-fn="saveBaseMetric" id="btn-base-metric-save" value="salva">Salva</button>
+              </section>
+            </section>
+          </dialog>
+
           <dialog id="dlg-custom-metric" data-x="0" data-y="40" class="medium absolute moveable">
             <section class="dlg-grid">
-              <h5 class="title moveable">Creazione Metrica</h5>
+              <h5 class="title moveable">Creazione Metrica composta</h5>
               <section class="dlg-content">
                 <section class="row">
                   <section class="col grid-4">
@@ -711,7 +737,7 @@
                       <div id="context-menu-column" class="context-menu">
                         <ul id="ul-context-menu-column" class="context-menu-items">
                           <span>Metrica</span>
-                          <button id="btn-add-metric" data-fn="setMetric" class="btn-link-context">Imposta metrica</button>
+                          <button id="btn-add-metric" data-fn="openDialogBaseMetric" class="btn-link-context">Imposta metrica</button>
                           <button id="btn-remove-wb-metric" data-fn="removeWBMetric" class="btn-link-context">Elimina</button>
                           <span>Colonna</span>
                           <button id="btn-add-column" data-fn="setColumn" class="btn-link-context">Nuova colonna</button>
