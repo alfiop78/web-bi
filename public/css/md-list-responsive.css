@@ -251,6 +251,7 @@ li.filters {
 
 li.drag-list.basic {
   color: var(--metrics-basic);
+  font-style: italic;
 }
 
 li.drag-list.advanced {
@@ -260,3 +261,5 @@ li.drag-list.advanced {
 li.drag-list.composite {
   color: var(--metrics-composite);
 }
+
+details {margin: 4px;}

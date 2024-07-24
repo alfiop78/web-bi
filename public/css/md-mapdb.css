@@ -517,6 +517,7 @@ section#filter-area-drop {
   padding: 46px 8px 8px;
   background-color: white;
   border-radius: 2px;
+  box-shadow: 0px 1px 6px -2px gray;
 }
 
 section#filter-area-drop::before {

@@ -140,7 +140,7 @@
 
   <template id="tmpl-filter-dropped-adv-metric">
     <li data-token class="li-content-icons">
-      <i class="material-icons-round md-18">filter_alt</i>
+      <i class="material-icons-round md-18 filters">filter_alt</i>
       <span></span>
       <button data-token data-fn="removeFilterByAdvMetric" type="button" class="button-icon material-icons-round md-18">delete</button>
     </li>
@@ -218,7 +218,7 @@
     </template>
 
     <template id="tmpl-adv-metric">
-      <div id="adv-metric-defined">
+      <div id="adv-metric-defined" class="metrics">
         <section class="formula" data-token>
           <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span data-field></span>
         </section>
@@ -232,9 +232,8 @@
     </template>
 
     <template id="tmpl-metrics-defined">
-
       <!-- 08-09-2023 -->
-      <div class="metric-defined">
+      <div class="metric-defined metrics">
         <!-- <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span> -->
         <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span data-field></span>
         <button type="button" data-remove class="button-icon material-icons-round md-18 metric-defined" data-fn="removeDefinedMetric" data-metric-token>delete</button>

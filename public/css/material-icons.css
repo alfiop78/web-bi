@@ -6,6 +6,7 @@
   --danger-color: indianred;
   --warning-color: #c5791b;
   --done-color: seagreen;
+  --filters-color: #f2d98d;
 }
 
 .material-icons{padding: 6px;user-select: none;cursor: pointer;}
@@ -103,6 +104,8 @@
 /*colori*/
 .material-icons.md-orange{color: orange;}
 .material-icons.md-sienna{color: sienna;}
+
+.material-icons-round.filters {color: var(--filters-color);}
 
 .material-icons.md-highlight{color: var(--main-highlight-icons-color);}
 

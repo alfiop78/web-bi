@@ -267,11 +267,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       console.info('dropzone columns');
       // console.log(e.currentTarget, e.target);
       // e.dataTransfer.dropEffect = "copy";
-      // coloro il border differente per la dropzone
-      e.currentTarget.classList.add('dropping');
     } else {
       console.warn('non in dropzone');
-      // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
       e.dataTransfer.dropEffect = "none";
     }
   }
@@ -296,8 +293,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.elementDragEnd = (e) => {
     e.preventDefault();
-    // TODO:
-    if (e.dataTransfer.dropEffect === 'copy') {}
+    // if (e.dataTransfer.dropEffect === 'copy') {}
+    e.currentTarget.classList.remove('dropping');
   }
   /* NOTE: END DRAG&DROP EVENTS */
 
@@ -330,7 +327,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const fieldName = field.querySelector('span[data-field]');
     const metric = Sheet.metrics.get(token);
     field.dataset.type = metric.type;
-    field.classList.add(metric.type);
+    // field.classList.add(metric.type);
     field.dataset.id = metric.token;
     field.dataset.label = metric.alias;
     aggregateFn.dataset.metricId = metric.token;
@@ -399,38 +396,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  app.handlerDragEnterFilter = (e) => {
-    e.preventDefault();
-    console.log(e.currentTarget);
-    if (e.currentTarget.classList.contains('dropzone')) {
-      console.info('dropzone columns');
-      // console.log(e.currentTarget, e.target);
-      // e.dataTransfer.dropEffect = "copy";
-      // coloro il border differente per la dropzone
-      e.currentTarget.classList.add('dropping');
-    } else {
-      console.warn('non in dropzone');
-      // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
-      e.dataTransfer.dropEffect = "none";
-    }
-  }
-
-  app.handlerDragOverFilter = (e) => {
-    e.preventDefault();
-    // console.log(e.currentTarget);
-    if (e.currentTarget.classList.contains('dropzone')) {
-      e.dataTransfer.dropEffect = "copy";
-    } else {
-      e.dataTransfer.dropEffect = "none";
-    }
-  }
-
-  app.handlerDragLeaveFilter = (e) => {
-    e.preventDefault();
-    console.log(e.currentTarget);
-    e.currentTarget.classList.remove('dropping');
-  }
-
+  // drop filtri nella creazione della metrica avanzata
   app.handlerDropFilter = (e) => {
     e.preventDefault();
     // e.currentTarget.classList.replace('dropping', 'dropped');
@@ -883,38 +849,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     ref.appendChild(span);
   }
 
-  app.textareaDragEnter = (e) => {
-    e.preventDefault();
-    console.log(e.currentTarget);
-    if (e.currentTarget.classList.contains('dropzone')) {
-      console.info('dropzone columns');
-      // console.log(e.currentTarget, e.target);
-      // e.dataTransfer.dropEffect = "copy";
-      // coloro il border differente per la dropzone
-      e.currentTarget.classList.add('dropping');
-    } else {
-      console.warn('non in dropzone');
-      // TODO: se non sono in una dropzone modifico l'icona del drag&drop (icona "non consentito")
-      e.dataTransfer.dropEffect = "none";
-    }
-  }
-
-  app.textareaDragOver = (e) => {
-    e.preventDefault();
-    // console.log(e.currentTarget);
-    if (e.currentTarget.classList.contains('dropzone')) {
-      e.dataTransfer.dropEffect = "copy";
-    } else {
-      e.dataTransfer.dropEffect = "none";
-    }
-  }
-
-  app.textareaDragLeave = (e) => {
-    e.preventDefault();
-    console.log(e.currentTarget);
-    e.currentTarget.classList.remove('dropping');
-  }
-
   app.textareaDrop = (e) => {
     e.preventDefault();
     console.log(e.target);
@@ -970,7 +904,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.filtersDropzone.addEventListener('dragover', app.elementDragOver, false);
   app.filtersDropzone.addEventListener('dragleave', app.elementDragLeave, false);
   app.filtersDropzone.addEventListener('drop', app.filterDrop, false);
-  // app.filtersDropzone.addEventListener('dragend', app.filterDragEnd, false);
+  // textarea per la creazione della metrica composta
+  app.textareaCompositeMetric.addEventListener('dragenter', app.elementDragEnter, false);
+  app.textareaCompositeMetric.addEventListener('dragover', app.elementDragOver, false);
+  app.textareaCompositeMetric.addEventListener('dragleave', app.elementDragLeave, false);
+  app.textareaCompositeMetric.addEventListener('drop', app.textareaDrop, false);
+
 
   /* NOTE: END DRAG&DROP EVENTS */
 
@@ -1964,11 +1903,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     });
   }
 
+  // sezione drop per i filtri nelle metriche avanzate
   app.openDialogMetric = () => {
     const filterDrop = document.getElementById('filter-drop');
-    filterDrop.addEventListener('dragover', app.handlerDragOverFilter, false);
-    filterDrop.addEventListener('dragenter', app.handlerDragEnterFilter, false);
-    filterDrop.addEventListener('dragleave', app.handlerDragLeaveFilter, false);
+    filterDrop.addEventListener('dragover', app.elementDragOver, false);
+    filterDrop.addEventListener('dragenter', app.elementDragEnter, false);
+    filterDrop.addEventListener('dragleave', app.elementDragLeave, false);
     filterDrop.addEventListener('drop', app.handlerDropFilter, false);
     app.dialogMetric.show();
   }
@@ -2992,8 +2932,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const i = li.querySelector('i');
     li.dataset.id = token;
     i.id = token;
-    // li.dataset.type = value.metric_type;
+    // li.classList.add("metrics");
     li.classList.add(value.metric_type);
+    li.dataset.type = value.metric_type;
     li.dataset.elementSearch = 'metrics';
     li.dataset.label = value.alias;
     // definisco quale context-menu-template apre questo elemento
@@ -3183,11 +3124,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   /* NOTE: END SUPPORT FUNCTIONS */
-
-  app.textareaCompositeMetric.addEventListener('dragenter', app.textareaDragEnter, false);
-  app.textareaCompositeMetric.addEventListener('dragover', app.textareaDragOver, false);
-  app.textareaCompositeMetric.addEventListener('dragleave', app.textareaDragLeave, false);
-  app.textareaCompositeMetric.addEventListener('drop', app.textareaDrop, false);
 
   document.querySelectorAll('#workbook-objects[data-section-active]').forEach(section => {
     section.querySelectorAll('*[data-section]').forEach(subSection => {

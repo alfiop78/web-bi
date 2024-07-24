@@ -177,43 +177,26 @@ code {
   display: none;
 }
 
-/* .metric-defined[data-type="basic"]:not([data-removed]) { */
-/*   background-color: #276427b0; */
-/*   color: whitesmoke; */
-/* } */
-
-.metric-defined.basic:not([data-removed]) {
-  background-color: var(--metrics-basic);
-  color: whitesmoke;
-}
-
-/* .metric-defined[data-type="advanced"]:not([data-removed]) {
-  background-color: seagreen;
+.metric-defined.metrics:not([data-removed]) {
+  background-color: var(--metrics);
   color: whitesmoke;
   padding: 2px 4px;
   font-size: .85rem;
-} */
+}
 
-.metric-defined.advanced:not([data-removed]) {
+/* .metric-defined.advanced:not([data-removed]) {
   background-color: var(--metrics-advanced);
   color: whitesmoke;
   padding: 2px 4px;
   font-size: .85rem;
-}
-
-/* .metric-defined[data-type="composite"] {
-  background-color: rosybrown;
-  color: #494949;
-  padding: 2px 4px;
-  font-size: .85rem;
 } */
 
-.metric-defined.composite:not([data-removed]) {
+/* .metric-defined.composite:not([data-removed]) {
   background-color: var(--metrics-composite);
   color: whitesmoke;
   padding: 2px 4px;
   font-size: .85rem;
-}
+} */
 
 .metric-defined[data-type="composite"] code[data-aggregate] {
   display: none;
