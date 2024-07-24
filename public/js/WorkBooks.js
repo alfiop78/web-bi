@@ -224,6 +224,7 @@ class Sheets {
 
 class WorkBooks {
   #activeTable;
+  #elements = new Map();
   #field = new Map();
   #fields = new Map();
   #filters = new Map();
@@ -231,6 +232,7 @@ class WorkBooks {
   #join = new Map();
   #joins = new Map();
   #tableJoins = { from: null, to: null }; // refs
+  #workbookMap = new Map();
   #dataModel = new Map();
   #hierTables = new Map(); // elenco di tutte le tabelle del canvas con le relative tabelle discendenti (verso la fact)
   #options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
@@ -346,9 +348,12 @@ class WorkBooks {
 
   get filters() { return this.#filters; }
 
-  // INFO: da valutare se salvare tutto il dataModel quando si salva il workbook oppure man mano che si aggiungono
+  // TODO: da valutare se salvare tutto il dataModel quando si salva il workbook oppure man mano che si aggiungono
   // tabelle al canvas
   createDataModel() {
+    // questa viene invocata per mappare tutto il dataModel, quindi posso popolare qui anche workbookMap
+    this.workbookMap = Draw.svg.querySelectorAll('use.table:not([data-shared_ref]), use.time');
+
     Draw.svg.querySelectorAll("use.table.fact:not([data-joins='0'])").forEach(fact => {
       let joinTables = [], tables = {}, originTables = [];
       let recursiveDimensionDown = (table) => {
@@ -466,24 +471,18 @@ class WorkBooks {
     WorkBookStorage.save(this.workBook);
   }
 
-  get workBookMap() {
-    let map = new Map();
-    Draw.svg.querySelectorAll('use.table:not([data-shared_ref]), use.time').forEach(table => {
-      // if (!map.has(table.dataset.alias)) map.set(table.dataset.alias, {
-      //   key: table.id,
-      //   schema: table.dataset.schema,
-      //   table: table.dataset.table,
-      //   name: table.dataset.name
-      // });
-      map.set(table.dataset.alias, {
+  set workbookMap(tables) {
+    tables.forEach(table => {
+      this.#workbookMap.set(table.dataset.alias, {
         key: table.id,
         schema: table.dataset.schema,
         table: table.dataset.table,
         name: table.dataset.name
       });
     });
-    return map;
   }
+
+  get workbookMap() {return this.#workbookMap;}
 
   open(token) {
     WorkBookStorage.workBook = token;

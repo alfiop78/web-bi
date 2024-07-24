@@ -618,7 +618,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     e.target.dataset.selected = true;
   } */
 
-  // dialog-metric per definire le metriche di base del WorkBook (non custom metric di base, come (przmedio*quantita))
+  // salvataggio metrica di base
   app.saveBaseMetric = (e) => {
     const input = document.getElementById("base-metric-name");
     // const aggregateFn = document.querySelector("#ul-base-metrics-aggregate > li[data-selected]").dataset.value;
@@ -810,7 +810,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     document.querySelectorAll('nav#table-field-list dl').forEach(element => element.remove());
     let parent = document.getElementById('table-field-list');
     // console.log(WorkBook.tablesModel);
-    for (const [alias, object] of WorkBook.workBookMap) {
+    for (const [alias, object] of WorkBook.workbookMap) {
       // for (const [alias, object] of WorkBook.tablesModel) {
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
@@ -877,6 +877,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     ref.appendChild(span);
   }
 
+  // drop di una metrica nela textarea per le metriche composte
   app.textareaDrop = (e) => {
     e.preventDefault();
     console.log(e.target);
@@ -889,7 +890,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const elementRef = document.getElementById(elementId);
     // const field = document.createTextNode(elementRef.dataset.field);
     // e.currentTarget.appendChild(field);
-    debugger;
     const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
     const span = templateContent.querySelector('span');
     const mark = templateContent.querySelector('mark');
@@ -1053,7 +1053,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.checkSessionStorage = async () => {
     // scarico in sessionStorage tutte le tabelle del canvas
     let urls = [];
-    for (const object of WorkBook.workBookMap.values()) {
+    for (const object of WorkBook.workbookMap.values()) {
       // for (const object of WorkBook.tablesModel.values()) {
       WorkBook.activeTable = object.key;
       // se la tabella è già presente in sessionStorage non rieseguo la query
@@ -1389,7 +1389,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     * - creo la struttura delle tabelle->fields nella dialog filter
     */
     if (WorkBook.dataModel.size !== 0) {
-      // app.checkSessionStorage();
       Step.next();
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
       app.addTablesStruct();
@@ -1793,7 +1792,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // creo la struttura tabelle per poter creare nuovi filtri
     let urls = [];
     // TODO: in ciclo serve solo il tableId
-    for (const [alias, object] of WorkBook.workBookMap) {
+    for (const [alias, object] of WorkBook.workbookMap) {
       // for (const [alias, object] of WorkBook.tablesModel) {
       WorkBook.activeTable = object.key;
       urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info');
@@ -2349,6 +2348,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   // viene invocata alla fine del drag&drop
+  // WARN: 24.07.2024 probabilmente si può eliminare, viene utilizzato workbookMap al suo posto
   app.hierTables = () => {
     // creo hierTables : qui sono presenti tutte le tabelle del canvas. Questa mi serve per creare la struttura nello WorkBook
     /*{
@@ -2803,6 +2803,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
   }
 
+  // salvataggio di un campo dalla #dlg-columns
   app.saveColumn = (e) => {
     const fieldName = document.getElementById('column-name').value;
     const token = (e.currentTarget.dataset.token) ? e.currentTarget.dataset.token : rand().substring(0, 7);
@@ -3026,7 +3027,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.workbookTablesStruct.querySelectorAll('#ul-metrics > li, #ul-filters > li, details').forEach(element => element.remove());
     const parent = app.workbookTablesStruct.querySelector('#nav-fields');
 
-    for (const [tableAlias, prop] of WorkBook.workBookMap) {
+    for (const [tableAlias, prop] of WorkBook.workbookMap) {
       // console.log(tableAlias);
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
@@ -3050,7 +3051,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.addWorkBookContent = () => {
     app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
     let parent = app.dialogFilters.querySelector('nav');
-    for (const [alias, object] of WorkBook.workBookMap) {
+    for (const [alias, object] of WorkBook.workbookMap) {
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
       const summary = details.querySelector('summary');
