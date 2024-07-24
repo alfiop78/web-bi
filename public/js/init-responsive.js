@@ -2954,8 +2954,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     i.addEventListener('dragstart', app.elementDragStart);
     i.addEventListener('dragend', app.elementDragEnd);
     li.addEventListener('contextmenu', app.openContextMenu);
-    // span.innerHTML = value.alias;
-    span.innerHTML = value.name;
+    span.innerHTML = value.alias;
+    // span.innerHTML = value.name;
     parent.appendChild(li);
   }
 
