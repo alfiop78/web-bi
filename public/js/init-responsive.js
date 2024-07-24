@@ -169,7 +169,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     content.querySelectorAll('button').forEach(button => {
       // button.dataset.token = e.currentTarget.id;
       button.dataset.token = e.currentTarget.dataset.id;
-      if (button.dataset.button === 'delete' && Sheet.edit) button.disabled = 'true';
+      // if (button.dataset.button === 'delete' && Sheet.edit) button.disabled = 'true';
     });
     app.contextMenuRef.appendChild(content);
 

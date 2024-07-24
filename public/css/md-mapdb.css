@@ -312,7 +312,7 @@ use.table[data-multifact]{
 }
 
 .join-field[data-active] {
-  border-bottom: solid 3px sienna;
+  border-bottom: solid 3px var(--main-primary-color);
 }
 
 .join-field:not([data-active]) {
