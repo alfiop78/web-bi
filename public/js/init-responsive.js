@@ -809,24 +809,23 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // reset
     document.querySelectorAll('nav#table-field-list dl').forEach(element => element.remove());
     let parent = document.getElementById('table-field-list');
-    // console.log(WorkBook.tablesModel);
-    for (const [alias, object] of WorkBook.workbookMap) {
+    for (const [alias, objects] of WorkBook.workbookMap) {
       // for (const [alias, object] of WorkBook.tablesModel) {
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
       const summary = details.querySelector('summary');
       // recupero le tabelle dal sessionStorage
-      const columns = WorkBookStorage.getTable(object.table);
+      const columns = WorkBookStorage.getTable(objects.props.table);
       // INFO: l'attributo name non è supportato in firefox
       // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details#browser_compatibility
       details.setAttribute("name", "columns");
-      details.dataset.schema = object.schema;
-      details.dataset.table = object.name;
+      details.dataset.schema = objects.props.schema;
+      details.dataset.table = objects.props.name;
       details.dataset.alias = alias;
-      details.dataset.id = object.key;
+      details.dataset.id = objects.props.key;
       details.dataset.searchId = 'field-search';
-      summary.innerHTML = object.name;
-      summary.dataset.tableId = object.key;
+      summary.innerHTML = objects.props.name;
+      summary.dataset.tableId = objects.props.key;
       parent.appendChild(details);
       columns.forEach(column => {
         const content = app.tmplList.content.cloneNode(true);
@@ -835,13 +834,13 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         const span = li.querySelector('span');
         li.dataset.label = column.column_name;
         i.id = `${alias}_${column.column_name}`;
-        i.dataset.tableId = object.key;
+        i.dataset.tableId = objects.props.key;
         i.dataset.field = column.column_name;
         i.dataset.datatype = column.type_name.toLowerCase();
         i.ondragstart = app.elementDragStart;
         i.ondragend = app.elementDragEnd;
         li.dataset.elementSearch = 'fields';
-        li.dataset.table = object.name;
+        li.dataset.table = objects.props.name;
         li.dataset.alias = alias;
         // li.dataset.field = column.column_name;
         // li.dataset.key = column.CONSTRAINT_NAME;
@@ -1053,9 +1052,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.checkSessionStorage = async () => {
     // scarico in sessionStorage tutte le tabelle del canvas
     let urls = [];
-    for (const object of WorkBook.workbookMap.values()) {
+    for (const objects of WorkBook.workbookMap.values()) {
       // for (const object of WorkBook.tablesModel.values()) {
-      WorkBook.activeTable = object.key;
+      WorkBook.activeTable = objects.props.key;
       // se la tabella è già presente in sessionStorage non rieseguo la query
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) {
         urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/tables_info');
@@ -1792,9 +1791,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // creo la struttura tabelle per poter creare nuovi filtri
     let urls = [];
     // TODO: in ciclo serve solo il tableId
-    for (const [alias, object] of WorkBook.workbookMap) {
+    for (const [alias, objects] of WorkBook.workbookMap) {
       // for (const [alias, object] of WorkBook.tablesModel) {
-      WorkBook.activeTable = object.key;
+      WorkBook.activeTable = objects.props.key;
       urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info');
     }
     // promiseAll per recuperare tutte le tabelle del canvas, successivamente vado a popolare la dialogFilters con i dati ricevuti
@@ -2985,7 +2984,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
     if (WorkBook.metrics.size !== 0) {
       for (const [token, value] of WorkBook.metrics) {
-        app.appendMetric(parent, token, value);
+        // aggiungo qui solo le metriche composte
+        if (value.metric_type === "composite") app.appendMetric(parent, token, value);
       }
     }
   }
@@ -3020,6 +3020,39 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
   }
 
+  app.addTableFields = (parent, fields) => {
+    for (const [token, value] of Object.entries(fields)) {
+      const tmpl = app.tmplList.content.cloneNode(true);
+      const li = tmpl.querySelector('li.drag-list');
+      const span = li.querySelector('span');
+      const i = li.querySelector('i');
+      li.dataset.id = token;
+      i.id = token;
+      li.classList.add("columns");
+      li.dataset.elementSearch = 'fields';
+      // li.dataset.label = value.field.ds.field;
+      // TODO: rivedere la descrizione da far comparire per le colonne e colonne custom
+      // li.dataset.label = value.field.ds.sql.join('');
+      li.dataset.label = value.name;
+      // li.dataset.id = tableId;
+      li.dataset.schema = value.schema;
+      li.dataset.table = value.table;
+      li.dataset.alias = value.tableAlias;
+      li.dataset.field = value.name;
+      i.addEventListener('dragstart', app.elementDragStart);
+      i.addEventListener('dragend', app.elementDragEnd);
+      // span.innerHTML = value.field.ds.sql.join('');
+      span.innerHTML = value.name;
+      parent.appendChild(li);
+    }
+  }
+
+  app.addTableMetrics = (parent, metrics) => {
+    for (const [token, value] of Object.entries(metrics)) {
+      app.appendMetric(parent, token, value);
+    }
+  }
+
   // Apertura step Sheet, vengono caricati gli elementi del WorkBook
   app.addTablesStruct = async () => {
     // reset degli elementi in #workbook-objects
@@ -3027,20 +3060,22 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.workbookTablesStruct.querySelectorAll('#ul-metrics > li, #ul-filters > li, details').forEach(element => element.remove());
     const parent = app.workbookTablesStruct.querySelector('#nav-fields');
 
-    for (const [tableAlias, prop] of WorkBook.workbookMap) {
+    for (const [alias, objects] of WorkBook.workbookMap) {
       // console.log(tableAlias);
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
       const summary = details.querySelector('summary');
-      WorkBook.activeTable = prop.key;
+      WorkBook.activeTable = objects.props.key;
       details.setAttribute("name", "wbTables");
-      details.dataset.alias = tableAlias;
-      details.dataset.schema = prop.schema;
-      details.dataset.table = prop.name;
+      details.dataset.alias = alias;
+      details.dataset.schema = objects.props.schema;
+      details.dataset.table = objects.props.name;
       // summary.dataset.tableId = prop.key;
-      summary.innerHTML = prop.name;
+      summary.innerHTML = objects.props.name;
       parent.appendChild(details);
-      app.addDefinedFields(details);
+      app.addTableFields(details, objects.fields);
+      app.addTableMetrics(details, objects.metrics);
+      // app.addDefinedFields(details);
     }
 
     if (WorkBook.filters.size !== 0) app.addDefinedFilters();
@@ -3051,28 +3086,28 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.addWorkBookContent = () => {
     app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
     let parent = app.dialogFilters.querySelector('nav');
-    for (const [alias, object] of WorkBook.workbookMap) {
+    for (const [alias, objects] of WorkBook.workbookMap) {
       const tmpl = app.tmplDetails.content.cloneNode(true);
       const details = tmpl.querySelector("details");
       const summary = details.querySelector('summary');
-      WorkBook.activeTable = object.key;
+      WorkBook.activeTable = objects.props.key;
       // recupero le tabelle dal sessionStorage
-      const columns = WorkBookStorage.getTable(object.table);
+      const columns = WorkBookStorage.getTable(objects.props.table);
       details.setAttribute("name", "wbFilters");
       details.dataset.schema = WorkBook.activeTable.dataset.schema;
-      details.dataset.table = object.name;
+      details.dataset.table = objects.props.name;
       details.dataset.alias = alias;
-      details.dataset.id = object.key;
+      details.dataset.id = objects.props.key;
       details.dataset.searchId = 'column-search';
-      summary.innerHTML = object.name;
-      summary.dataset.tableId = object.key;
+      summary.innerHTML = objects.props.name;
+      summary.dataset.tableId = objects.props.key;
       parent.appendChild(details);
       columns.forEach(column => {
         const content = app.tmplList.content.cloneNode(true);
         const li = content.querySelector('li.drag-list');
         const span = li.querySelector('span');
         const i = li.querySelector('i');
-        i.dataset.tableId = object.key;
+        i.dataset.tableId = objects.props.key;
         i.dataset.field = column.column_name;
         i.id = `${alias}_${column.column_name}`;
         // i.dataset.datatype = column.type_name.toLowerCase();
@@ -3082,10 +3117,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         li.dataset.label = column.column_name;
         li.dataset.fn = 'handlerSelectField';
         li.dataset.elementSearch = 'columns';
-        li.dataset.tableId = object.key;
-        li.dataset.table = object.name;
+        li.dataset.tableId = objects.props.key;
+        li.dataset.table = objects.props.name;
         li.dataset.alias = alias;
-        // li.dataset.type = object.type;
+        // li.dataset.type = objects.props.type;
         li.dataset.field = column.column_name;
         // li.dataset.key = column.CONSTRAINT_NAME;
         span.innerText = column.column_name;

@@ -473,16 +473,31 @@ class WorkBooks {
 
   set workbookMap(tables) {
     tables.forEach(table => {
-      this.#workbookMap.set(table.dataset.alias, {
+      let fields = {}, metrics = {};
+      /* this.#workbookMap.set(table.dataset.alias, {
         key: table.id,
         schema: table.dataset.schema,
         table: table.dataset.table,
         name: table.dataset.name
-      });
+      }); */
+      let props = {
+        key: table.id,
+        schema: table.dataset.schema,
+        table: table.dataset.table,
+        name: table.dataset.name
+      }
+      if (this.fields.has(table.dataset.alias)) {
+        for (const [key, value] of Object.entries(this.fields.get(table.dataset.alias))) fields[key] = value;
+      }
+      for (const [key, value] of this.metrics) {
+        if (value.factId === table.id) metrics[key] = value;
+      }
+      this.#workbookMap.set(table.dataset.alias, { props, fields, metrics });
     });
+    console.log(this.#workbookMap);
   }
 
-  get workbookMap() {return this.#workbookMap;}
+  get workbookMap() { return this.#workbookMap; }
 
   open(token) {
     WorkBookStorage.workBook = token;
@@ -508,10 +523,6 @@ class WorkBooks {
         }
       }
     }
-
-    // Il dataModel è un oggetto Map() per cui deve essere ricreato qui, dopo aver popolato l'altro oggetto
-    // Map() this.tables
-    this.createDataModel();
 
     for (const [key, value] of Object.entries(WorkBookStorage.workBook.svg.lines)) {
       Draw.joinLines = value;
@@ -573,6 +584,8 @@ class WorkBooks {
         this.metrics = this.json;
       }
     }
+
+    this.createDataModel();
 
     return this;
   }
