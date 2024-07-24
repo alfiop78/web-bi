@@ -484,7 +484,7 @@ class Cube
         // $this->datamart_advancedMeasures[$tableName][$metric->alias] = "\t{$metric->alias} AS {$metric->alias}";
         // $this->datamart_advancedMeasures[] = "{$tableName}.{$metric->alias} AS {$metric->alias}";
 
-        $this->datamart_advancedMeasures[] = "NVL({$metric->alias},0) AS {$metric->alias}";
+        $this->datamart_advancedMeasures[] = "NVL({$metric->alias},0) AS '{$metric->alias}'";
         // $this->datamart_advancedMeasures[] = "NVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
         // aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
         $this->setFiltersMetricTable_new($metric->filters, $tableName);

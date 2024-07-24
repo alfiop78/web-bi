@@ -577,7 +577,7 @@ class MapDatabaseController extends Controller
     }
     if (!empty($query->process->compositeMeasures)) {
       foreach ($query->process->compositeMeasures as $metric) {
-        $query->compositeMeasures[] = implode(" ", $metric->SQL) . " AS {$metric->alias}";
+        $query->compositeMeasures[] = implode(" ", $metric->SQL) . " AS '{$metric->alias}'";
       }
     }
     return $query->datamart_new();

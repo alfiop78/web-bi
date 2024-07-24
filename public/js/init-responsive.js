@@ -201,6 +201,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     WorkBook.createDataModel();
     // creo una mappatura per popolare il WorkBook nello step successivo
     app.hierTables();
+    app.checkSessionStorage();
   }
 
   // Aggiunta metrica composta di base
@@ -606,10 +607,19 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // console.log(WorkBook.activeTable);
     // const table = WorkBook.activeTable.dataset.table;
     const tableAlias = WorkBook.activeTable.dataset.alias;
+    // const table = WorkBook.activeTable.dataset.table;
     const field = `${tableAlias}.${e.target.dataset.field}`;
     const alias = e.target.dataset.field;
+    // let name = e.target.dataset.field;
     const token = rand().substring(0, 7);
     const factId = WorkBook.activeTable.dataset.factId;
+
+    // verifico se sono presenti metriche con lo stesso 'alias'
+    // const aliasDuplicate = WorkBook.checkMetricsName(alias);
+    // if (aliasDuplicate) {
+    //   alias = `${WorkBook.activeTable.dataset.table}_${e.target.dataset.field}`;
+    //   name = `${e.target.dataset.field} (${WorkBook.activeTable.dataset.table})`;
+    // }
 
     // metric Map Object
     WorkBook.metrics = {
@@ -1021,7 +1031,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   app.checkSessionStorage = async () => {
-    // TODO: scarico in sessionStorage tutte le tabelle del canvas
+    // scarico in sessionStorage tutte le tabelle del canvas
     let urls = [];
     for (const object of WorkBook.workBookMap.values()) {
       // for (const object of WorkBook.tablesModel.values()) {
@@ -1644,6 +1654,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     process.id = Sheet.sheet.id;
     process.datamartId = Sheet.userId;
     console.log(process);
+    debugger;
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(process);
     // App.showConsole('Elaborazione in corso...', 'info');
@@ -2304,6 +2315,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     });
     console.info('controllo from : ', Sheet.from);
     console.info('controllo joins : ', Sheet.joins);
+    debugger;
   }
 
   app.showTablePreview = async (e) => {
@@ -2578,7 +2590,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // recupero tutti i campi delle TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     WorkBook.activeTable = `${data.descTable.id}-${WorkBook.activeTable.dataset.factId}`;
     // aggiungo i field delle tabelle time a WorkBook.fields
-    Draw.svg.querySelectorAll(`use.time[data-fact-id='${WorkBook.activeTable.dataset.factId}']`).forEach(timeTable => {
+    Draw.svg.querySelectorAll(`use.time[data-fact-id='${WorkBook.activeTable.dataset.factId}']`).forEach(async (timeTable) => {
       WorkBook.activeTable = timeTable.id;
       WorkBook.field = {
         token: `tok_${timeTable.dataset.table}`,
@@ -2942,7 +2954,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     i.addEventListener('dragstart', app.elementDragStart);
     i.addEventListener('dragend', app.elementDragEnd);
     li.addEventListener('contextmenu', app.openContextMenu);
-    span.innerHTML = value.alias;
+    // span.innerHTML = value.alias;
+    span.innerHTML = value.name;
     parent.appendChild(li);
   }
 

@@ -480,11 +480,11 @@ class DrawSVG {
         this.tables.get(e.currentTarget.id).join = this.nearestTable.id;
         // this.currentLineRef.dataset.to = nearestTable.id;
         const d = `M${+this.nearestTable.dataset.anchorXTo},${+this.nearestTable.dataset.anchorYTo} C${+this.nearestTable.dataset.anchorXTo + 40},${+this.nearestTable.dataset.anchorYTo} ${this.coordinate.x - 40},${this.coordinate.y + 15} ${this.coordinate.x - 10},${this.coordinate.y + 15}`;
-        if (this.currentLineRef) {
-          this.currentLineRef.setAttribute('d', d);
-          this.currentLineRef.dataset.startX = +this.nearestTable.dataset.anchorXTo;
-          this.currentLineRef.dataset.startY = +this.nearestTable.dataset.anchorYTo;
-        }
+        this.currentLineRef.setAttribute('d', d);
+        this.currentLineRef.dataset.startX = +this.nearestTable.dataset.anchorXTo;
+        this.currentLineRef.dataset.startY = +this.nearestTable.dataset.anchorYTo;
+        this.currentLineRef.dataset.factId = this.nearestTable.id;
+        this.currentLineRef.dataset.to = this.nearestTable.id;
       } else {
         // la fact non ha una nearestTable
         if (e.target.dataset.type !== "fact") {
@@ -1102,6 +1102,7 @@ class DrawSVG {
     lineClone.dataset.startX = +nearestTable.dataset.anchorXTo;
     lineClone.dataset.startY = +nearestTable.dataset.anchorYTo;
     lineClone.dataset.factId = nearestTable.dataset.factId;
+    console.log(nearestTable.dataset.factId);
     const d = `M${+nearestTable.dataset.anchorXTo},${+nearestTable.dataset.anchorYTo} C${+nearestTable.dataset.anchorXTo + 40},${+nearestTable.dataset.anchorYTo} ${this.currentTable.x - 40},${this.currentTable.y + 15} ${this.currentTable.x - 10},${this.currentTable.y + 15}`;
     lineClone.setAttribute('d', d);
     // elimino, dalla nuova linea clonata, il data-join-id, se presente, perchè qui sto creando una nuova join
