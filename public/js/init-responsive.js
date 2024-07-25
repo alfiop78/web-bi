@@ -43,6 +43,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     editWorkBookName: document.getElementById('workbook-name'),
     btnSaveSheet: document.getElementById('btn-sheet-save'),
     btnWorkBookNew: document.getElementById('btn-workbook-new'),
+    btnVersioning: document.getElementById('btn-versioning'),
+    btnBaseMetricSave: document.getElementById("btn-base-metric-save"),
     // drawer
     drawer: document.getElementById('drawer'),
     // body
@@ -60,8 +62,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     txtAreaFilters: document.getElementById("textarea-filter"),
     // popup
     tablePopup: document.getElementById("table-popup"),
-    // buttons
-    btnVersioning: document.getElementById('btn-versioning')
+    // inputs
+    inputBaseMetric: document.getElementById("base-metric-name")
   }
 
   const userId = 2;
@@ -362,7 +364,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // field.dataset.type = elementRef.dataset.type;
     field.dataset.id = elementRef.id;
     const metric = { ...WorkBook.metrics.get(elementRef.id) };
-    // const metric = WorkBook.metrics.get(elementRef.id);
     switch (metric.metric_type) {
       case 'basic':
       case 'advanced':
@@ -603,39 +604,29 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.addSpan(textarea, null, 'metric');
   }
 
+  app.verifyBaseMetric = (e) => {
+    const verify = WorkBook.checkMetricNames(e.target.value.toLowerCase());
+    app.btnBaseMetricSave.disabled = (verify) ? true : false;
+  }
+
+  app.inputBaseMetric.addEventListener("input", app.verifyBaseMetric);
+
   app.openDialogBaseMetric = (e) => {
-    const input = document.getElementById("base-metric-name");
-    const btnSave = document.getElementById("btn-base-metric-save");
     const token = rand().substring(0, 7);
-    btnSave.dataset.token = token;
-    input.value = e.target.dataset.field;
-    btnSave.dataset.field = e.target.dataset.field;
+    app.btnBaseMetricSave.dataset.token = token;
+    app.inputBaseMetric.value = e.target.dataset.field;
+    app.btnBaseMetricSave.dataset.field = e.target.dataset.field;
+    // TODO: verifica duplicazione nomi metrica
+    const verify = WorkBook.checkMetricNames(app.inputBaseMetric.value.toLowerCase());
+    app.btnBaseMetricSave.disabled = (verify) ? true : false;
     app.dialogBaseMeasures.show();
   }
 
-  /* app.handlerAggregate = (e) => {
-    delete document.querySelector("#ul-base-metrics-aggregate > li[data-selected]").dataset.selected;
-    e.target.dataset.selected = true;
-  } */
-
   // salvataggio metrica di base
   app.saveBaseMetric = (e) => {
-    const input = document.getElementById("base-metric-name");
-    // const aggregateFn = document.querySelector("#ul-base-metrics-aggregate > li[data-selected]").dataset.value;
-    // console.log(WorkBook.activeTable);
-    // const table = WorkBook.activeTable.dataset.table;
-    // const table = WorkBook.activeTable.dataset.table;
     const field = `${WorkBook.activeTable.dataset.alias}.${e.target.dataset.field}`;
-    const alias = input.value;
-    // let name = e.target.dataset.field;
+    const alias = app.inputBaseMetric.value;
     const factId = WorkBook.activeTable.dataset.factId;
-
-    // verifico se sono presenti metriche con lo stesso 'alias'
-    // const aliasDuplicate = WorkBook.checkMetricsName(alias);
-    // if (aliasDuplicate) {
-    //   alias = `${WorkBook.activeTable.dataset.table}_${e.target.dataset.field}`;
-    //   name = `${e.target.dataset.field} (${WorkBook.activeTable.dataset.table})`;
-    // }
 
     // metric Map Object
     WorkBook.metrics = {
@@ -643,7 +634,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       alias,
       field,
       factId,
-      // aggregateFn,
       aggregateFn: 'SUM', // default
       SQL: field,
       distinct: false, // default

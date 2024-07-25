@@ -584,4 +584,13 @@ class WorkBooks {
     return this;
   }
 
+  checkMetricNames(alias) {
+    // verifico se ci sono nomi di metriche duplicati
+    for (const value of this.metrics.values()) {
+      if (value.alias.toLowerCase() === alias) return true;
+    }
+    return false;
+  }
+
+
 }
