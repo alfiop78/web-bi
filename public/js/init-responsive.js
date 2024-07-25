@@ -616,7 +616,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.btnBaseMetricSave.dataset.token = token;
     app.inputBaseMetric.value = e.target.dataset.field;
     app.btnBaseMetricSave.dataset.field = e.target.dataset.field;
-    // TODO: verifica duplicazione nomi metrica
+    // verifica duplicazione nomi metrica
     const verify = WorkBook.checkMetricNames(app.inputBaseMetric.value.toLowerCase());
     app.btnBaseMetricSave.disabled = (verify) ? true : false;
     app.dialogBaseMeasures.show();
@@ -2910,7 +2910,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // salvo la nuova metrica nello storage
     window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
     if (!e.target.dataset.token) {
-      app.appendMetric(document.getElementById('ul-metrics'), token, object);
+      // aggiungo la nuova metrica nello stesso <details> della metrica originaria (originToken)
+      const parent = document.querySelector(`li[data-id='${e.target.dataset.originToken}']`).parentElement;
+      app.appendMetric(parent, token, object);
     } else {
       // la metrica già esiste, aggiorno il nome
       // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()

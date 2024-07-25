@@ -96,7 +96,8 @@ class Table {
         // console.log(key, value);
         // cerco, in thead, la colonna corrispondente e gli applico il token per identificare una metrica
         // già definita
-        [...this.thead.querySelectorAll(`th[data-field='${value.field}'][data-id='${value.factId}']`)].filter(th => th.dataset.metricToken = key);
+        const field = value.field.split('.');
+        [...this.thead.querySelectorAll(`th[data-field='${field[1]}'][data-id='${value.factId}']`)].filter(th => th.dataset.metricToken = key);
       }
     }
   }
