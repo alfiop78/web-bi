@@ -1028,7 +1028,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       const li = tmpl.querySelector('li.select-list');
       const span = li.querySelector('span');
       li.dataset.fn = 'workBookSelected';
+      li.dataset.elementSearch = "workbooks";
       li.dataset.token = token;
+      li.dataset.label = object.name;
       li.dataset.name = object.name;
       span.innerHTML = object.name;
       parent.appendChild(li);
@@ -1099,8 +1101,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         const li = tmpl.querySelector('li.select-list');
         const span = li.querySelector('span');
         li.dataset.fn = 'sheetSelected';
+        li.dataset.elementSearch = "sheets";
         li.dataset.token = token;
         li.dataset.name = object.name;
+        li.dataset.label = object.name;
         span.innerHTML = object.name;
         parent.appendChild(li);
       }

@@ -393,8 +393,13 @@
               <h5 class="title">Apri WorkBook</h5>
               <section class="dlg-content">
                 <section class="row">
-                  <div class="col grid-12 relative-ul">
-                    <ul id="ul-workbooks" class="custom-scrollbar"></ul>
+                  <div class="col grid-12">
+                    <div class="list-search">
+                      <input type="search" id="workbooks-search-id" data-element-search="workbooks" autocomplete="off" placeholder="Ricerca WorkBooks" />
+                      <div class="relative-ul">
+                        <ul id="ul-workbooks" data-search-id="workbooks-search-id" class="custom-scrollbar"></ul>
+                      </div>
+                    </div>
                   </div>
                 </section>
               </section>
@@ -409,8 +414,13 @@
               <h5 class="title">Apertura Sheet</h5>
               <section class="dlg-content">
                 <section class="row">
-                  <div class="col grid-12 relative-ul">
-                    <ul id="ul-sheets" class="custom-scrollbar"></ul>
+                  <div class="col grid-12">
+                    <div class="list-search">
+                      <input type="search" id="sheets-search-id" data-element-search="sheets" autocomplete="off" placeholder="Ricerca Sheets" />
+                      <div class="relative-ul">
+                        <ul id="ul-sheets" data-search-id="sheets-search-id" class="custom-scrollbar"></ul>
+                      </div>
+                    </div>
                   </div>
                 </section>
               </section>
