@@ -541,15 +541,6 @@
                 <section class="row">
                   <section class="col grid-12">
                     <input type="text" id="base-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
-                    <!-- <div class="relative-ul">
-                      <ul id="ul-base-metrics-aggregate" class="custom-scrollbar" data-search-id="input-search-base-metrics">
-                        <li class="select-list" data-fn="handlerAggregate" data-value="SUM" data-selected>SUM</li>
-                        <li class="select-list" data-fn="handlerAggregate" data-value="AVG">AVG</li>
-                        <li class="select-list" data-fn="handlerAggregate" data-value="MIN">MIN</li>
-                        <li class="select-list" data-fn="handlerAggregate" data-value="MAX">MAX</li>
-                        <li class="select-list" data-fn="handlerAggregate" data-value="COUNT">COUNT</li>
-                      </ul>
-                    </div> -->
                   </section>
                 </section>
               </section>

@@ -225,6 +225,8 @@ li[data-visible="false"] {
 
 li.select-list, li.icons-list {
   margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
 }
 
 li.select-list:hover, li.icons-list:hover {
