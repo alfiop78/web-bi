@@ -46,6 +46,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     btnVersioning: document.getElementById('btn-versioning'),
     btnBaseMetricSave: document.getElementById("btn-base-metric-save"),
     btnBaseCustomMetricSave: document.getElementById("btn-custom-metric-save"),
+    btnAdvancedMetricSave: document.getElementById("btn-metric-save"),
     // drawer
     drawer: document.getElementById('drawer'),
     // body
@@ -65,7 +66,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     tablePopup: document.getElementById("table-popup"),
     // inputs
     inputBaseMetric: document.getElementById("base-metric-name"),
-    inputBaseCustomMetric: document.getElementById("custom-metric-name")
+    inputBaseCustomMetric: document.getElementById("custom-metric-name"),
+    inputAdvancedMetricName: document.getElementById("adv-metric-name")
   }
 
   const userId = 2;
@@ -616,9 +618,16 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.btnBaseCustomMetricSave.disabled = (verify) ? true : false;
   }
 
+  app.verifyAdvancedMetric = (e) => {
+    const verify = WorkBook.checkMetricNames(e.target.value.toLowerCase());
+    app.btnAdvancedMetricSave.disabled = (verify) ? true : false;
+  }
+
   app.inputBaseMetric.addEventListener("input", app.verifyBaseMetric);
 
   app.inputBaseCustomMetric.addEventListener("input", app.verifyBaseCustomMetric);
+
+  app.inputAdvancedMetricName.addEventListener("input", app.verifyAdvancedMetric);
 
   app.openDialogBaseMetric = (e) => {
     const token = rand().substring(0, 7);
@@ -2881,7 +2890,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   // salvataggio metrica avanzata
   app.saveMetric = (e) => {
-    const alias = document.getElementById('adv-metric-name').value;
+    const alias = app.inputAdvancedMetricName.value;
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
     let filters = new Set();
