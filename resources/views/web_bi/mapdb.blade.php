@@ -49,43 +49,41 @@
       </div>
     </li>
 
-    <li class="drag-list" data-element-search data-label data-searchable="true">
+    <li class="drag-list columns" data-element-search data-label data-searchable="true">
+      <i class="material-icons-round md-18" draggable="true">drag_handle</i>
+      <i class="material-icons-round md-18">view_column</i>
+      <span></span>
+    </li>
+
+    <li class="drag-list filters" data-element-search data-label data-searchable="true">
+      <i class="material-icons-round md-18 md-dimgray" draggable="true">drag_handle</i>
+      <i class="material-icons-round md-18">filter_alt</i>
+      <span></span>
+    </li>
+
+    <li class="drag-list metrics basic" data-element-search data-label data-searchable="true">
+      <i class="material-icons-round md-18 md-dimgray" draggable="true">drag_handle</i>
+      <i class="material-icons-round md-18">functions</i>
+      <span></span>
+    </li>
+
+    <li class="drag-list metrics advanced" data-element-search data-label data-searchable="true">
+      <i class="material-icons-round md-18 md-dimgray" draggable="true">drag_handle</i>
+      <i class="material-icons-round md-18">query_stats</i>
+      <span></span>
+    </li>
+
+    <li class="drag-list metrics composite" data-element-search data-label data-searchable="true">
+      <i class="material-icons-round md-18 md-dimgray" draggable="true">drag_handle</i>
+      <i class="material-icons-round md-18">multiline_chart</i>
+      <span></span>
+    </li>
+
+    <li class="drag-list default" data-element-search data-label data-searchable="true">
       <i class="material-icons-round md-18" draggable="true">drag_handle</i>
       <span></span>
     </li>
 
-    <!-- <li class="drag-list tables" data-element-search data-label data-searchable="true">
-      <i class="material-icons-round md-18" draggable="true">drag_handle</i>
-      <span></span>
-    </li> -->
-
-    <!-- <li class="drag-list filters" data-element-search="filters" data-label data-searchable="true" draggable="true">
-      <span class="li-content">
-        <i class="material-icons-round md-18">drag_handle</i>
-        <span></span>
-      </span>
-    </li> -->
-
-    <!-- <li class="drag-list metrics" data-element-search="metrics" data-label data-basic data-searchable="true" draggable="true">
-      <span class="li-content">
-        <i class="material-icons-round md-18">drag_handle</i>
-        <span></span>
-      </span>
-    </li> -->
-
-    <!-- <li class="drag-list metrics" data-element-search="metrics" data-label data-advanced data-searchable="true" draggable="true">
-      <span class="li-content">
-        <i class="material-icons-round md-18">drag_handle</i>
-        <span></span>
-      </span>
-    </li> -->
-
-    <!-- <li class="drag-list metrics" data-element-search="metrics" data-label data-composite data-searchable="true" draggable="true">
-      <span class="li-content">
-        <i class="material-icons-round md-18">drag_handle</i>
-        <span></span>
-      </span>
-    </li> -->
   </template>
 
   <template id="tmpl-dl-element">
@@ -837,7 +835,7 @@
                         <div class="properties">
                           <section id="workbook-objects" data-section-active="2">
                             <p class="field-search">
-                              <input id="input-search-fields" data-element-search="fields" autocomplete="off" type="search" class="input-search columns" readonly placeholder="Campi" />
+                              <input id="input-search-fields" data-element-search="elements" autocomplete="off" type="search" class="input-search columns" readonly placeholder="Campi" />
                               <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-fields">search</button>
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="1">
@@ -845,7 +843,7 @@
                               <button class="btn-link link" data-fn="btnColumnNew" type="button" value="Nuova Colonna" disabled>Nuova Colonna</button>
                             </section>
                             <p class="field-search">
-                              <input id="input-search-metrics" data-element-search="metrics" autocomplete="off" type="search" class="input-search metrics" readonly placeholder="Metriche" />
+                              <input id="input-search-metrics" data-element-search="elements" autocomplete="off" type="search" class="input-search metrics" readonly placeholder="Metriche" />
                               <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-metrics">search</button>
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="2">

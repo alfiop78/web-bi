@@ -31,7 +31,7 @@ li{
   position: relative;
   display: flex;
   /* justify-content: space-between; */
-  transition: padding 150ms;
+  transition: padding 350ms;
   align-items: center;
   margin: 4px;
 }
@@ -173,7 +173,7 @@ li.icon > span{
 }
 
 nav[data-filters-defined] > li[data-selected] {
-  background-color: chocolate;
+  /* background-color: chocolate; */
   color: white;
 }
 
@@ -243,23 +243,98 @@ li.select-list:hover::before, li.icons-list:hover::before {
   background-color: var(--main-important-color);
 }
 
-li.filters {
-  /* background-color: var(--filters-color); */
-  /* color: #494949; */
-  color: #9f7a0b;
-}
-
 li.drag-list.basic {
-  color: var(--metrics-basic);
+  /* color: var(--metrics); */
   font-style: italic;
 }
 
-li.drag-list.advanced {
-  color: var(--metrics-advanced);
+/* li.drag-list.advanced {
+  color: var(--metrics);
 }
 
 li.drag-list.composite {
   color: var(--metrics-composite);
-}
+} */
 
 details {margin: 4px;}
+
+/* details > li.drag-list.columns {
+  color: var(--main-secondary-color);
+} */
+
+details > li.drag-list.tables > span {
+  display: flex;
+  width: 100%;
+  padding: 2px 8px;
+  background-color: #54728C;
+  margin-right: 1em;
+  border-radius: 2px;
+}
+
+details > summary:hover{
+  cursor: pointer;
+  color: var(--main-primary-color);
+  font-weight: bold;
+  padding-left: 2px;
+}
+
+details > summary{
+  /* font-weight: bold; */
+  line-height: 1.6rem;
+  padding-left: 0px;
+  transition: padding 150ms;
+}
+
+details[open] > summary {
+  padding-left: 2px;
+  color: var(--main-primary-color);
+  font-weight: bold;
+}
+
+details > li[data-datatype='float'] {
+  background-color: teal;
+  color: white;
+}
+
+details > li {
+  margin: 4px 8px;
+  margin-inline-start: 6px;
+  line-height: 1.6rem;
+  border-radius: 4px;
+}
+
+li.drag-list > i[draggable] {
+  visibility: hidden;
+}
+
+li.drag-list:hover > i[draggable] {
+  visibility: visible;
+}
+
+li.drag-list > i:not([draggable]) {
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+li.metrics.basic > i:not([draggable]), li.metrics.advanced > i:not([draggable]) {
+  background-color: var(--metrics);
+  color: whitesmoke;
+}
+
+li.metrics.composite > i:not([draggable]) {
+  background-color: var(--metrics-composite);
+  color: whitesmoke;
+}
+
+li.drag-list.columns > i:not([draggable]) {
+  background-color: var(--main-secondary-color);
+  color: whitesmoke;
+}
+
+li.filters > i:not([draggable]) {
+  background-color: var(--filters-color);
+  color: #494949;
+}
+
+li.drag-list.metrics > span, li.drag-list.filters > span, li.drag-list.columns > span
+{margin-left: 4px;}

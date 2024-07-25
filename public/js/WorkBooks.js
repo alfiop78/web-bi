@@ -474,12 +474,6 @@ class WorkBooks {
   set workbookMap(tables) {
     tables.forEach(table => {
       let fields = {}, metrics = {};
-      /* this.#workbookMap.set(table.dataset.alias, {
-        key: table.id,
-        schema: table.dataset.schema,
-        table: table.dataset.table,
-        name: table.dataset.name
-      }); */
       let props = {
         key: table.id,
         schema: table.dataset.schema,
@@ -494,7 +488,7 @@ class WorkBooks {
       }
       this.#workbookMap.set(table.dataset.alias, { props, fields, metrics });
     });
-    console.log(this.#workbookMap);
+    console.info("workbookMap : ", this.#workbookMap);
   }
 
   get workbookMap() { return this.#workbookMap; }

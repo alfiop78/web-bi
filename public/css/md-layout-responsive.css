@@ -15,8 +15,6 @@
   --mark-color: #f2d98d;
   --filters-color: #f2d98d;
   --metrics: #A6786D;
-  --metrics-basic: #54728c;
-  --metrics-advanced: #A6786D;
   --metrics-composite: #d9665b;
 }
 html, body{width: 100%; height: 100%;margin: 0;padding: 0;

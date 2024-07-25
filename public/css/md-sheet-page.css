@@ -228,6 +228,8 @@ code {
   overflow: auto;
   border: solid thin #ededed;
   border-radius: 2px;
+  display: grid;
+  grid-template-rows: 1fr auto;
 }
 
 #workbook-objects > p {

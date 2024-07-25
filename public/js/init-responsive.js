@@ -829,7 +829,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       parent.appendChild(details);
       columns.forEach(column => {
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li.drag-list');
+        const li = content.querySelector('li.drag-list.default');
         const i = li.querySelector('i[draggable]');
         const span = li.querySelector('span');
         li.dataset.label = column.column_name;
@@ -952,7 +952,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       let ul = document.getElementById('ul-tables');
       for (const [key, value] of Object.entries(data)) {
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li.drag-list');
+        const li = content.querySelector('li.drag-list.default');
         const i = li.querySelector('i');
         const span = li.querySelector('span');
         li.dataset.fn = "showTablePreview";
@@ -2927,47 +2927,17 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.dialogMetric.close();
   }
 
-  // parent : #nav-fields (elenco tabelle e colonne del WorkBook)
-  app.addDefinedFields = (parent) => {
-    if (WorkBook.fields.has(WorkBook.activeTable.dataset.alias)) {
-      for (const [token, value] of Object.entries(WorkBook.fields.get(WorkBook.activeTable.dataset.alias))) {
-        const tmpl = app.tmplList.content.cloneNode(true);
-        const li = tmpl.querySelector('li.drag-list');
-        const span = li.querySelector('span');
-        const i = li.querySelector('i');
-        li.dataset.id = token;
-        i.id = token;
-        li.classList.add("columns");
-        li.dataset.elementSearch = 'fields';
-        // li.dataset.label = value.field.ds.field;
-        // TODO: rivedere la descrizione da far comparire per le colonne e colonne custom
-        // li.dataset.label = value.field.ds.sql.join('');
-        li.dataset.label = value.name;
-        // li.dataset.id = tableId;
-        li.dataset.schema = value.schema;
-        li.dataset.table = value.table;
-        li.dataset.alias = value.tableAlias;
-        li.dataset.field = value.name;
-        i.addEventListener('dragstart', app.elementDragStart);
-        i.addEventListener('dragend', app.elementDragEnd);
-        // span.innerHTML = value.field.ds.sql.join('');
-        span.innerHTML = value.name;
-        parent.appendChild(li);
-      }
-    }
-  }
-
   app.appendMetric = (parent, token, value) => {
     const tmpl = app.tmplList.content.cloneNode(true);
-    const li = tmpl.querySelector("li.drag-list");
+    const li = tmpl.querySelector(`li.drag-list.metrics.${value.metric_type}`);
     const span = li.querySelector('span');
     const i = li.querySelector('i');
     li.dataset.id = token;
     i.id = token;
     // li.classList.add("metrics");
-    li.classList.add(value.metric_type);
+    // li.classList.add(value.metric_type);
     li.dataset.type = value.metric_type;
-    li.dataset.elementSearch = 'metrics';
+    li.dataset.elementSearch = 'elements';
     li.dataset.label = value.alias;
     // definisco quale context-menu-template apre questo elemento
     li.dataset.contextmenu = `ul-context-menu-${value.metric_type}`;
@@ -2979,8 +2949,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     parent.appendChild(li);
   }
 
-  app.addDefinedMetrics = () => {
-    // metriche mappate sul cubo
+  // aggiungo SOLO le metriche composite alla struttura WorkBook, le metriche
+  // basic/advanced vengono aggiungo "sotto" alla tabella di appartenenza (creata in workbookMap)
+  app.addDefinedCompositeMetrics = () => {
     const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
     if (WorkBook.metrics.size !== 0) {
       for (const [token, value] of WorkBook.metrics) {
@@ -2992,7 +2963,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.appendFilter = (parent, token, filter) => {
     const tmpl = app.tmplList.content.cloneNode(true);
-    const li = tmpl.querySelector('li.drag-list');
+    const li = tmpl.querySelector('li.drag-list.filters');
     const span = li.querySelector('span');
     const i = li.querySelector('i');
     li.dataset.id = token;
@@ -3023,13 +2994,13 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.addTableFields = (parent, fields) => {
     for (const [token, value] of Object.entries(fields)) {
       const tmpl = app.tmplList.content.cloneNode(true);
-      const li = tmpl.querySelector('li.drag-list');
+      const li = tmpl.querySelector('li.drag-list.columns');
       const span = li.querySelector('span');
       const i = li.querySelector('i');
       li.dataset.id = token;
       i.id = token;
       li.classList.add("columns");
-      li.dataset.elementSearch = 'fields';
+      li.dataset.elementSearch = "elements";
       // li.dataset.label = value.field.ds.field;
       // TODO: rivedere la descrizione da far comparire per le colonne e colonne custom
       // li.dataset.label = value.field.ds.sql.join('');
@@ -3049,6 +3020,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.addTableMetrics = (parent, metrics) => {
     for (const [token, value] of Object.entries(metrics)) {
+      // utilizzo appendMetric() perchè questa viene utilizzata anche
+      // quando viene creata una nuova metrica
       app.appendMetric(parent, token, value);
     }
   }
@@ -3075,11 +3048,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       parent.appendChild(details);
       app.addTableFields(details, objects.fields);
       app.addTableMetrics(details, objects.metrics);
-      // app.addDefinedFields(details);
     }
 
-    if (WorkBook.filters.size !== 0) app.addDefinedFilters();
-    app.addDefinedMetrics();
+    // if (WorkBook.filters.size !== 0) app.addDefinedFilters();
+    // TEST: verificare errori con un workbook senza nessun filtro
+    app.addDefinedFilters();
+    app.addDefinedCompositeMetrics();
   }
 
   // creo la struttura tabelle nella dialog-filters
@@ -3104,7 +3078,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       parent.appendChild(details);
       columns.forEach(column => {
         const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li.drag-list');
+        const li = content.querySelector('li.drag-list.default');
         const span = li.querySelector('span');
         const i = li.querySelector('i');
         i.dataset.tableId = objects.props.key;
