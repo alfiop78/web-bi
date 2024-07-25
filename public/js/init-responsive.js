@@ -45,6 +45,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     btnWorkBookNew: document.getElementById('btn-workbook-new'),
     btnVersioning: document.getElementById('btn-versioning'),
     btnBaseMetricSave: document.getElementById("btn-base-metric-save"),
+    btnBaseCustomMetricSave: document.getElementById("btn-custom-metric-save"),
     // drawer
     drawer: document.getElementById('drawer'),
     // body
@@ -63,7 +64,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // popup
     tablePopup: document.getElementById("table-popup"),
     // inputs
-    inputBaseMetric: document.getElementById("base-metric-name")
+    inputBaseMetric: document.getElementById("base-metric-name"),
+    inputBaseCustomMetric: document.getElementById("custom-metric-name")
   }
 
   const userId = 2;
@@ -552,7 +554,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // se presente il dataset.token sul btn-custom-metric-save sto modificando la metrica, altrimenti
     // è una nuova metrica
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
-    const alias = document.getElementById('custom-metric-name').value;
+    const alias = app.inputBaseCustomMetric.value;
+    // const alias = document.getElementById('custom-metric-name').value;
     const factId = WorkBook.activeTable.dataset.factId;
     let arr_sql = [];
     let fields = [], formula = [];
@@ -568,7 +571,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         formula.push(element.innerText.trim());
       }
     });
-    // console.log('arr_sql : ', arr_sql);
     WorkBook.metrics = {
       token,
       alias,
@@ -609,7 +611,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.btnBaseMetricSave.disabled = (verify) ? true : false;
   }
 
+  app.verifyBaseCustomMetric = (e) => {
+    const verify = WorkBook.checkMetricNames(e.target.value.toLowerCase());
+    app.btnBaseCustomMetricSave.disabled = (verify) ? true : false;
+  }
+
   app.inputBaseMetric.addEventListener("input", app.verifyBaseMetric);
+
+  app.inputBaseCustomMetric.addEventListener("input", app.verifyBaseCustomMetric);
 
   app.openDialogBaseMetric = (e) => {
     const token = rand().substring(0, 7);
