@@ -281,6 +281,7 @@ details > summary:hover{
 details > summary{
   /* font-weight: bold; */
   line-height: 1.6rem;
+  color: dimgray;
   padding-left: 0px;
   transition: padding 150ms;
 }
