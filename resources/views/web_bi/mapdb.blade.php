@@ -233,7 +233,9 @@
       <!-- 08-09-2023 -->
       <div class="metric-defined metrics">
         <!-- <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span> -->
-        <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span data-field></span>
+        <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code>
+        <span data-field></span>
+        <!-- <code data-field data-token data-value contenteditable="true" data-blur-fn="editMetricName"></code> -->
         <button type="button" data-remove class="button-icon material-icons-round md-18 metric-defined" data-fn="removeDefinedMetric" data-metric-token>delete</button>
         <button type="button" data-undo class="button-icon material-icons-round md-18 metric-defined" data-fn="undoDefinedMetric" data-metric-token>undo</button>
       </div>
@@ -445,7 +447,7 @@
                   </section>
                   <section class="col grid-4">
                     <section class="input-area">
-                      <input type="text" id="adv-metric-name" placeholder="Nome" value="" autocomplete="off" />
+                      <input type="text" id="input-advanced-metric-name" placeholder="Nome" value="" autocomplete="off" />
                       <div id="input-metric"></div>
                       <div>
                         <input type="checkbox" id="check-distinct" disabled />
@@ -508,7 +510,7 @@
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
-                <button data-fn="saveMetric" id="btn-metric-save" value="salva">Salva</button>
+                <button data-fn="saveAdvancedMeasure" id="btn-metric-save" value="salva">Salva</button>
               </section>
             </section>
           </dialog>
@@ -529,24 +531,7 @@
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
-                <button data-fn="saveCompositeMetric" id="btn-composite-metric-save" value="salva">Salva</button>
-              </section>
-            </section>
-          </dialog>
-
-          <dialog id="dlg-base-metric" data-x="0" data-y="40" class="small absolute moveable">
-            <section class="dlg-grid">
-              <h5 class="title moveable">Creazione Metrica di base</h5>
-              <section class="dlg-content">
-                <section class="row">
-                  <section class="col grid-12">
-                    <input type="text" id="base-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
-                  </section>
-                </section>
-              </section>
-              <section class="dlg-buttons">
-                <button name="cancel" value="chiudi">Chiudi</button>
-                <button data-fn="saveBaseMetric" id="btn-base-metric-save" value="salva">Salva</button>
+                <button data-fn="saveCompositeMeasure" id="btn-composite-metric-save" value="salva">Salva</button>
               </section>
             </section>
           </dialog>
@@ -566,7 +551,7 @@
                   </section>
                   <section class="col grid-8">
                     <section class="textarea-formula">
-                      <input type="text" id="custom-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
+                      <input type="text" id="input-base-custom-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                       <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea-content placeholder"></div>
                       <textarea id="custom-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                     </section>
@@ -575,7 +560,7 @@
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
-                <button data-fn="saveCustomMetric" id="btn-custom-metric-save" value="salva">Salva</button>
+                <button data-fn="saveBaseCustomMeasure" id="btn-custom-metric-save" value="salva">Salva</button>
               </section>
             </section>
           </dialog>
@@ -736,7 +721,7 @@
                       <div id="context-menu-column" class="context-menu">
                         <ul id="ul-context-menu-column" class="context-menu-items">
                           <span>Metrica</span>
-                          <button id="btn-add-metric" data-fn="openDialogBaseMetric" class="btn-link-context">Imposta metrica</button>
+                          <button id="btn-add-metric" data-fn="saveBaseMeasure" class="btn-link-context">Imposta metrica</button>
                           <button id="btn-remove-wb-metric" data-fn="removeWBMetric" class="btn-link-context">Elimina</button>
                           <span>Colonna</span>
                           <button id="btn-add-column" data-fn="setColumn" class="btn-link-context">Nuova colonna</button>

@@ -220,6 +220,14 @@ class Sheets {
     return result;
   }
 
+  checkMetricNames(alias) {
+    // verifico se ci sono nomi di metriche duplicati
+    for (const value of this.metrics.values()) {
+      if (value.alias.toLowerCase() === alias.toLowerCase()) return true;
+    }
+    return false;
+  }
+
 }
 
 class WorkBooks {
@@ -582,14 +590,6 @@ class WorkBooks {
     this.createDataModel();
 
     return this;
-  }
-
-  checkMetricNames(alias) {
-    // verifico se ci sono nomi di metriche duplicati
-    for (const value of this.metrics.values()) {
-      if (value.alias.toLowerCase() === alias) return true;
-    }
-    return false;
   }
 
 

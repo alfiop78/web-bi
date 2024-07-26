@@ -33,7 +33,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     dialogJoin: document.getElementById('dlg-join'),
     dialogColumns: document.getElementById('dlg-columns'),
     dialogTime: document.getElementById('dialog-time'),
-    dialogBaseMeasures: document.getElementById("dlg-base-metric"),
     // dialogInfo: document.getElementById('dlg-info'),
     dialogSchema: document.getElementById('dlg-schema'),
     dialogNewWorkBook: document.getElementById('dialog-new-workbook'),
@@ -64,10 +63,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     txtAreaFilters: document.getElementById("textarea-filter"),
     // popup
     tablePopup: document.getElementById("table-popup"),
-    // inputs
-    inputBaseMetric: document.getElementById("base-metric-name"),
-    inputBaseCustomMetric: document.getElementById("custom-metric-name"),
-    inputAdvancedMetricName: document.getElementById("adv-metric-name")
   }
 
   const userId = 2;
@@ -339,6 +334,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     field.dataset.id = metric.token;
     field.dataset.label = metric.alias;
     aggregateFn.dataset.metricId = metric.token;
+    debugger;
+    aggregateFn.dataset.aggregate = metric.aggregateFn;
     // Se lo Sheet è in modifica imposto il dataset 'added'
     (!Sheet.edit) ? field.dataset.added = 'true' : field.dataset.adding = 'true';
     // formula.dataset.id = metric.token;
@@ -371,11 +368,16 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     switch (metric.metric_type) {
       case 'basic':
       case 'advanced':
+        // TODO: 26.07.2024 verifico, se nello Sheet, è presente una metrica con lo stesso nome
+        // In caso positivo devo mostrare una dialog per poter modificare il nome della metrica, il nome
+        // verrà modificato SOLO per questo Sheet e non nel WorkBook
+        if (Sheet.checkMetricNames(metric.alias)) debugger;
         // aggiungo a Sheet.metrics solo gli elementi che possono essere modificati, le proprieta di sola lettura le prenderò sempre da WorkBook.metrics
         Sheet.metrics = { token: metric.token, factId: metric.factId, alias: metric.alias, type: metric.metric_type, aggregateFn: metric.aggregateFn, dependencies: false };
         app.addMetric(e.currentTarget, elementRef.id);
         break;
       case 'composite':
+        if (Sheet.checkMetricNames(metric.alias)) debugger;
         Sheet.metrics = { token: metric.token, alias: metric.alias, type: metric.metric_type, metrics: metric.metrics, dependencies: false };
         app.addMetric(e.currentTarget, elementRef.id);
         // dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
@@ -529,10 +531,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.editCustomMetric = (e) => {
     const metric = WorkBook.metrics.get(e.currentTarget.dataset.token);
     const textarea = document.getElementById('textarea-custom-metric');
-    const btnMetricSave = document.getElementById('btn-custom-metric-save');
-    const inputName = document.getElementById('custom-metric-name');
-    inputName.value = metric.alias;
-    btnMetricSave.dataset.token = e.currentTarget.dataset.token;
+    const btnSave = document.getElementById('btn-custom-metric-save');
+    const input = document.getElementById('input-base-custom-metric-name');
+    input.value = metric.alias;
+    btnSave.dataset.token = e.currentTarget.dataset.token;
     metric.formula.forEach(element => {
       if (element.hasOwnProperty('tableAlias')) {
         const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
@@ -552,12 +554,11 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   // salva metrica composta di base
-  app.saveCustomMetric = (e) => {
+  app.saveBaseCustomMeasure = (e) => {
     // se presente il dataset.token sul btn-custom-metric-save sto modificando la metrica, altrimenti
     // è una nuova metrica
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
-    const alias = app.inputBaseCustomMetric.value;
-    // const alias = document.getElementById('custom-metric-name').value;
+    const alias = document.getElementById('input-base-custom-metric-name').value;
     const factId = WorkBook.activeTable.dataset.factId;
     let arr_sql = [];
     let fields = [], formula = [];
@@ -608,48 +609,19 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.addSpan(textarea, null, 'metric');
   }
 
-  app.verifyBaseMetric = (e) => {
-    const verify = WorkBook.checkMetricNames(e.target.value.toLowerCase());
-    app.btnBaseMetricSave.disabled = (verify) ? true : false;
-  }
-
-  app.verifyBaseCustomMetric = (e) => {
-    const verify = WorkBook.checkMetricNames(e.target.value.toLowerCase());
-    app.btnBaseCustomMetricSave.disabled = (verify) ? true : false;
-  }
-
-  app.verifyAdvancedMetric = (e) => {
-    const verify = WorkBook.checkMetricNames(e.target.value.toLowerCase());
-    app.btnAdvancedMetricSave.disabled = (verify) ? true : false;
-  }
-
-  app.inputBaseMetric.addEventListener("input", app.verifyBaseMetric);
-
-  app.inputBaseCustomMetric.addEventListener("input", app.verifyBaseCustomMetric);
-
-  app.inputAdvancedMetricName.addEventListener("input", app.verifyAdvancedMetric);
-
-  app.openDialogBaseMetric = (e) => {
-    const token = rand().substring(0, 7);
-    app.btnBaseMetricSave.dataset.token = token;
-    app.inputBaseMetric.value = e.target.dataset.field;
-    app.btnBaseMetricSave.dataset.field = e.target.dataset.field;
-    // verifica duplicazione nomi metrica
-    const verify = WorkBook.checkMetricNames(app.inputBaseMetric.value.toLowerCase());
-    app.btnBaseMetricSave.disabled = (verify) ? true : false;
-    app.dialogBaseMeasures.show();
-  }
-
   // salvataggio metrica di base
-  app.saveBaseMetric = (e) => {
+  app.saveBaseMeasure = (e) => {
+    const token = rand().substring(0, 7);
     const field = `${WorkBook.activeTable.dataset.alias}.${e.target.dataset.field}`;
-    const alias = app.inputBaseMetric.value;
+    const alias = e.target.dataset.field;
     const factId = WorkBook.activeTable.dataset.factId;
 
     // metric Map Object
     WorkBook.metrics = {
-      token: e.target.dataset.token,
+      token,
       alias,
+      // OPTIMIZE: 26.07.2024 è da valutare se viene utilizzata la prop "table"
+      table : {table : WorkBook.activeTable.dataset.table, alias : WorkBook.activeTable.dataset.alias},
       field,
       factId,
       aggregateFn: 'SUM', // default
@@ -658,8 +630,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       type: 'metric',
       metric_type: 'basic'
     };
-    WorkBook.checkChanges(e.target.dataset.token);
-    app.dialogBaseMeasures.close();
+    WorkBook.checkChanges(token);
+    App.showConsole(`Metrica ${e.target.dataset.field} aggiunta al WorkBook`, "done", 3500);
   }
 
   // apro la dialog column per definire le colonne del WorkBook
@@ -2258,7 +2230,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   /* NOTE: END FETCH API */
 
   // creazione metrica composta
-  app.saveCompositeMetric = (e) => {
+  app.saveCompositeMeasure = (e) => {
     const alias = document.getElementById('composite-metric-name').value;
     const parent = document.getElementById('ul-metrics');
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
@@ -2889,8 +2861,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   // salvataggio metrica avanzata
-  app.saveMetric = (e) => {
-    const alias = app.inputAdvancedMetricName.value;
+  app.saveAdvancedMeasure = (e) => {
+    const alias = document.getElementById("input-advanced-metric-name").value;
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
     let filters = new Set();
@@ -2901,6 +2873,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
     // metric_type: se ci sono dei filtri (o timingFn) in questa metrica verrà sovrascritto in 'advanced'
     let object = { token, alias, field: metric.field, factId: metric.factId, aggregateFn, SQL: metric.SQL, distinct: false, type: 'metric', metric_type: 'basic', workbook_ref: WorkBook.workBook.token, updated_at: date };
+    // una metrica di base (non composta) contiene anche la proprietà "table", la aggiungo
+    // OPTIMIZE: da valutare se questa proprietà è necessaria
+    if (metric.hasOwnProperty("table")) object.table = metric.table;
     // recupero tutti i filtri droppati in #filter-drop
     // salvo solo il riferimento al filtro e non tutta la definizione del filtro
     app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.add(filter.dataset.token));
