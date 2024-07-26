@@ -220,10 +220,14 @@ class Sheets {
     return result;
   }
 
-  checkMetricNames(alias) {
+  checkMetricNames(token, alias) {
     // verifico se ci sono nomi di metriche duplicati
     for (const value of this.metrics.values()) {
-      if (value.alias.toLowerCase() === alias.toLowerCase()) return true;
+      // utilizzo il token per saltare il controllo (in this.metric) sulla
+      // metrica che si sta aggiungendo
+      if (token !== value.token) {
+        if (value.alias.toLowerCase() === alias.toLowerCase()) return true;
+      }
     }
     return false;
   }

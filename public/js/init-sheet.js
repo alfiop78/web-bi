@@ -1,6 +1,32 @@
 const dlgConfig = document.getElementById('dlg-sheet-config');
+const btnSheetPreview = document.getElementById("btn-sheet-preview");
+const btnSQLPreview = document.getElementById("btn-sql-preview");
 const saveColumnConfig = document.getElementById('btn-column-save');
 const tmplList = document.getElementById('tmpl-li');
+
+
+const config = { attributes: true, childList: false, subtree: false };
+const callback = (mutationList, observer) => {
+  // console.log(mutationList);
+  for (const mutation of mutationList) {
+    if (mutation.type === "attributes") {
+      console.log(`${mutation.attributeName} attributo è stato modificato.`);
+      console.log(mutation.target.dataset.error);
+      if (mutation.target.dataset.error === "true") {
+        console.error("Error");
+        btnSheetPreview.disabled = true;
+        btnSQLPreview.disabled = true;
+      } else {
+        btnSheetPreview.disabled = false;
+        btnSQLPreview.disabled = false;
+      }
+    }
+  }
+};
+const observerList = new MutationObserver(callback);
+observerList.observe(document.getElementById('dropzone-columns'), config);
+observerList.observe(document.getElementById('dropzone-rows'), config);
+observerList.observe(document.getElementById('dropzone-filters'), config);
 
 google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
 

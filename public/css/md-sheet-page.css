@@ -282,8 +282,10 @@ code[contenteditable="true"] {
   outline: none;
   transition: all 150ms;
   padding: 2px;
-  /* color: whitesmoke; */
-  /* font-family: monospace; */
+}
+
+code[contenteditable="true"][data-aggregate] {
+  font-weight: bold;
 }
 
 code[contenteditable="true"]:hover, code[contenteditable="true"]:focus {

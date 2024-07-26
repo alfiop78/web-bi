@@ -166,6 +166,11 @@ button.btn-buttons {
   padding: 8px 12px;
 }
 
+button.btn-buttons:disabled {
+  background-color: var(--disabled-bg);
+  color: var(--disabled-fg);
+}
+
 button.btn-link[disabled] {
   color: gray;
 }

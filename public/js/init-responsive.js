@@ -327,20 +327,23 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     btnUndo.dataset.metricToken = token;
     // const formula = field.querySelector('.formula');
     const aggregateFn = field.querySelector('code[data-aggregate]');
-    const fieldName = field.querySelector('span[data-field]');
+    const codeFieldName = field.querySelector('code[data-field]');
     const metric = Sheet.metrics.get(token);
     field.dataset.type = metric.type;
     // field.classList.add(metric.type);
     field.dataset.id = metric.token;
     field.dataset.label = metric.alias;
     aggregateFn.dataset.metricId = metric.token;
-    debugger;
     aggregateFn.dataset.aggregate = metric.aggregateFn;
     // Se lo Sheet è in modifica imposto il dataset 'added'
     (!Sheet.edit) ? field.dataset.added = 'true' : field.dataset.adding = 'true';
     // formula.dataset.id = metric.token;
     // formula.dataset.token = metric.token;
-    fieldName.innerHTML = `(${metric.alias})`;
+    // codeFieldName.innerHTML = `(${metric.alias})`;
+    codeFieldName.innerHTML = metric.alias;
+    codeFieldName.dataset.token = token;
+    codeFieldName.dataset.field = metric.alias;
+    codeFieldName.addEventListener("input", app.checkMetricNames);
     if (metric.metric_type !== 'composite') {
       aggregateFn.innerText = metric.aggregateFn;
       // fieldName.dataset.field = metric.field;
@@ -349,6 +352,16 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // imposto le fact da utilizzare nel report in base alle metriche da calcolare
     // le metriche composte non hanno il factId
     if (metric.factId) Sheet.fact.add(metric.factId);
+  }
+
+  app.checkMetricNames = (e) => {
+    const dropzone = document.getElementById("dropzone-columns");
+    dropzone.dataset.error = (Sheet.checkMetricNames(e.target.dataset.token, e.target.innerText)) ? true : false;
+    if (dropzone.dataset.error === "true") {
+      App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "warn", 2500);
+    } else {
+      Sheet.metrics.get(e.target.dataset.token).alias = e.target.innerText;
+    }
   }
 
   app.columnDrop = (e) => {
@@ -368,16 +381,28 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     switch (metric.metric_type) {
       case 'basic':
       case 'advanced':
-        // TODO: 26.07.2024 verifico, se nello Sheet, è presente una metrica con lo stesso nome
-        // In caso positivo devo mostrare una dialog per poter modificare il nome della metrica, il nome
-        // verrà modificato SOLO per questo Sheet e non nel WorkBook
-        if (Sheet.checkMetricNames(metric.alias)) debugger;
         // aggiungo a Sheet.metrics solo gli elementi che possono essere modificati, le proprieta di sola lettura le prenderò sempre da WorkBook.metrics
         Sheet.metrics = { token: metric.token, factId: metric.factId, alias: metric.alias, type: metric.metric_type, aggregateFn: metric.aggregateFn, dependencies: false };
         app.addMetric(e.currentTarget, elementRef.id);
+        // 26.07.2024 verifico, se nello Sheet, è presente una metrica con lo stesso nome
+        // In caso positivo devo mostrare una dialog per poter modificare il nome della metrica, il nome
+        // verrà modificato SOLO per questo Sheet e non nel WorkBook
+        // Questo controllo è aggiunto dopo addMetric in modo da poter impostare il focus sull'elemento
+        // già presente nel DOM.
+        if (Sheet.checkMetricNames(metric.token, metric.alias)) {
+          App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "warn", 2500);
+          // imposto il cursore nel <code> da modificare
+          document.querySelector(`.metric-defined > code[data-token='${elementRef.id}']`).focus({ focusVisible: true });
+          e.currentTarget.dataset.error = true;
+        }
         break;
       case 'composite':
-        if (Sheet.checkMetricNames(metric.alias)) debugger;
+        if (Sheet.checkMetricNames(metric.token, metric.alias)) {
+          App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "warn", 2500);
+          // imposto il cursore nel <code> da modificare
+          document.querySelector(`.metric-defined > code[data-token='${elementRef.id}']`).focus({ focusVisible: true });
+          e.currentTarget.dataset.error = true;
+        }
         Sheet.metrics = { token: metric.token, alias: metric.alias, type: metric.metric_type, metrics: metric.metrics, dependencies: false };
         app.addMetric(e.currentTarget, elementRef.id);
         // dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
@@ -621,7 +646,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       token,
       alias,
       // OPTIMIZE: 26.07.2024 è da valutare se viene utilizzata la prop "table"
-      table : {table : WorkBook.activeTable.dataset.table, alias : WorkBook.activeTable.dataset.alias},
+      table: { table: WorkBook.activeTable.dataset.table, alias: WorkBook.activeTable.dataset.alias },
       field,
       factId,
       aggregateFn: 'SUM', // default
