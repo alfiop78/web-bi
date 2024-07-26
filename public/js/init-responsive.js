@@ -43,8 +43,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     btnSaveSheet: document.getElementById('btn-sheet-save'),
     btnWorkBookNew: document.getElementById('btn-workbook-new'),
     btnVersioning: document.getElementById('btn-versioning'),
-    btnBaseMetricSave: document.getElementById("btn-base-metric-save"),
-    btnBaseCustomMetricSave: document.getElementById("btn-custom-metric-save"),
     btnAdvancedMetricSave: document.getElementById("btn-metric-save"),
     // drawer
     drawer: document.getElementById('drawer'),
@@ -63,6 +61,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     txtAreaFilters: document.getElementById("textarea-filter"),
     // popup
     tablePopup: document.getElementById("table-popup"),
+    // INPUTS
+    inputAdvMetricName: document.getElementById("input-advanced-metric-name")
   }
 
   const userId = 2;
@@ -283,7 +283,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       // verifica compatibilità elemento da droppare
       // Es.: non posso droppare una metrica nella dropzone-filters
       const elementRef = document.getElementById(e.dataTransfer.getData("text/plain"));
-      switch (e.target.id) {
+      switch (e.currentTarget.id) {
         case "dropzone-filters":
           if (elementRef.dataset.type !== "filter") {
             console.warn('non in dropzone');
@@ -2012,9 +2012,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // della metrica che si sta modificando. In questo modo, in saveMetric() posso usare la logica di
     // aggiornamento/creazione in base al data-token presente su btnSave
     btnSave.dataset.token = e.target.dataset.token;
-    const inputName = document.getElementById('adv-metric-name');
     // reimposto le proprietà della metrica nella dialog
-    inputName.value = metric.alias;
+    app.inputAdvMetricName.value = metric.alias;
     // aggiungo i filtri alla <nav> #filter-drop
     if (metric.hasOwnProperty('filters')) {
       metric.filters.forEach(token => {
@@ -2992,6 +2991,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // li.classList.add(value.metric_type);
     li.dataset.type = value.metric_type;
     li.dataset.elementSearch = 'elements';
+    li.dataset.factId = parent.dataset.factId;
     li.dataset.label = value.alias;
     // definisco quale context-menu-template apre questo elemento
     li.dataset.contextmenu = `ul-context-menu-${value.metric_type}`;
@@ -3096,6 +3096,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       WorkBook.activeTable = objects.props.key;
       details.setAttribute("name", "wbTables");
       details.dataset.alias = alias;
+      details.dataset.factId = objects.props.key;
       details.dataset.schema = objects.props.schema;
       details.dataset.table = objects.props.name;
       // summary.dataset.tableId = prop.key;
@@ -3257,6 +3258,26 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // reset <nav> laterale
     e.target.querySelectorAll('nav > details').forEach(element => element.remove());
   });
+
+  // input events
+  app.inputAdvancedMetric = (e) => {
+    // controllo duplicazione nomi metrica avanzata
+    // sul tasto "Salva" è presente il token di origine della metrica, tramite questo
+    // recupero il parent (la tabella) a cui appartiene questa metrica.
+    // Successivamente effettuo il controllo su WorkBook.metrics, due metriche con
+    // lo stesso non nome NON possono essere presenti sotto la stessa tabella
+    // ma in tabelle diverse si, verrà gestita, il nome duplicato della metrica, quando
+    // verranno aggiunte allo Sheet.
+    const originToken = app.btnAdvancedMetricSave.dataset.originToken;
+    const element = document.querySelector(`li.drag-list.metrics[data-id='${originToken}']`);
+    console.log(element.dataset.factId, e.target.value);
+    const check = WorkBook.checkMetricNames(element.dataset.factId, e.target.value);
+    app.btnAdvancedMetricSave.disabled = check;
+    console.log("check : ", check);
+
+  }
+
+  app.inputAdvMetricName.addEventListener("input", app.inputAdvancedMetric);
 
   app.dialogNewWorkBook.addEventListener('close', (e) => document.getElementById('input-workbook-name').value = '');
 

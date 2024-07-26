@@ -273,7 +273,7 @@ async function getTables(urls) {
   });
 
   app.dialogAdvMetric.addEventListener('close', () => {
-    document.getElementById('adv-metric-name').value = '';
+    document.getElementById('input-advanced-metric-name').value = '';
     const formula = document.getElementById('input-metric');
     const timingFunctions = document.getElementById('dl-timing-functions');
     const btnMetricSave = document.getElementById('btn-metric-save');

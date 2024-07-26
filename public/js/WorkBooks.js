@@ -596,5 +596,14 @@ class WorkBooks {
     return this;
   }
 
+  checkMetricNames(table, alias) {
+    for (const value of this.metrics.values()) {
+      if (table === value.factId) {
+        if (value.alias.toLowerCase() === alias.toLowerCase()) return true;
+      }
+    }
+    return false;
+  }
+
 
 }

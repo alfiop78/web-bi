@@ -955,7 +955,7 @@
                 <button id="prev">Workbook</button>
                 <div>
                   <button id="next" class="btn-buttons">Sheet</button>
-                  <button id="btn-sql-preview" class="btn-buttons" data-fn="createProcess" value="SQL">SQL</button>
+                  <button id="btn-sql-preview" class="btn-buttons" data-fn="createProcess" value="SQL" disabled>SQL</button>
                   <button id="btn-sheet-preview" class="btn-buttons important" data-fn="createProcess" value="Elabora">Elabora</button>
                 </div>
               </section>
