@@ -1391,11 +1391,26 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   document.getElementById('prev').onclick = () => Step.previous();
 
-  document.getElementById('next').onclick = async () => {
-    /* recupero dal DB (promise.all) tutte le tabelle mappate nel WorkBook
-    * - salvo i campi delle tabelle in sessionStorage in modo da poterci accedere più rapidamente
-    * - creo la struttura delle tabelle->fields nella dialog filter
-    */
+  // tasto "Sheet" :
+  // consente di passare alla visualizzazione Sheet e salvare il WorkBook
+  document.getElementById('next').onclick = () => {
+    // popolo il dataModel e, con esso, anche il workbookMap
+    WorkBook.createDataModel();
+    // verifico se tutte le join sono ok
+    const incorrectJoin = Draw.svg.querySelectorAll("path:not([data-join-id])").length;
+    if (incorrectJoin !== 0) {
+      App.showConsole(`Sono presenti ${incorrectJoin} join non impostate nel Data Model`, "error", 4000);
+      return;
+    }
+    // verifico se ci sono dimensioni TIME su tutti i cubi
+    // NOTE: every: controllo se TUTTI gli elementi dell'array passano il test implementato
+    // dalla funzione fornita (in questo caso non fornisco una funzione), restituisce un boolean
+    const checkTimeDim = [...Draw.svg.querySelectorAll("use.fact")].every(fact => Draw.svg.querySelector(`use.time[data-table-join='${fact.id}']`));
+    if (!checkTimeDim) {
+      App.showConsole("La dimensione TIME non è presente su tutte le tabelle dei fatti.", "error", 4000);
+      return;
+    }
+
     if (WorkBook.dataModel.size !== 0) {
       Step.next();
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
@@ -1403,10 +1418,11 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       // salvo il workbook creato, tenendo conto della prop 'updated_at', se ci sono
       // state variazioni la aggiorno altrimenti no
       WorkBook.save();
+      App.showConsole("Salvataggio del WorkBook in corso...", "done", 2000);
     }
   }
 
-  // TODO: spostare in Draw
+  // WARN: 26.07.2024 utilizzata ?
   app.highlightDimension = (e) => {
     // evidenzio con un colore diverso le tabelle appartenenti alla dimensione corrente
     Draw.svg.querySelectorAll(`use.table[data-dimension-id='${+e.target.dataset.dimensionId}']`).forEach(table => {
@@ -1414,7 +1430,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     });
   }
 
-  // TODO: spostare in Draw
+  // WARN: 26.07.2024 utilizzata ?
   app.unhighlightDimension = (e) => {
     // evidenzio con un colore diverso le tabelle appartenenti alla dimensione corrente
     Draw.svg.querySelectorAll(`use.table[data-dimension-id='${+e.target.dataset.dimensionId}']`).forEach(table => {
