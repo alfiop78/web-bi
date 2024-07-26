@@ -343,7 +343,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     codeFieldName.innerHTML = metric.alias;
     codeFieldName.dataset.token = token;
     codeFieldName.dataset.field = metric.alias;
-    codeFieldName.addEventListener("input", app.checkMetricNames);
+    codeFieldName.addEventListener("input", app.editMetricAlias);
     if (metric.metric_type !== 'composite') {
       aggregateFn.innerText = metric.aggregateFn;
       // fieldName.dataset.field = metric.field;
@@ -354,12 +354,16 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     if (metric.factId) Sheet.fact.add(metric.factId);
   }
 
-  app.checkMetricNames = (e) => {
+  app.editMetricAlias = (e) => {
     const dropzone = document.getElementById("dropzone-columns");
     dropzone.dataset.error = (Sheet.checkMetricNames(e.target.dataset.token, e.target.innerText)) ? true : false;
     if (dropzone.dataset.error === "true") {
       App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "warn", 2500);
     } else {
+      // imposto l'attributo [data-modified] in modo da aggiornare lo Sheet in localStorage
+      // e, alla successiva apertura dello Sheet, ritrovarmi con le stesse modifiche fatte qui
+      // (come per l'edit della funzione di aggregazione)
+      if (Sheet.metrics.get(e.target.dataset.token).alias.toLowerCase() !== e.target.innerText.toLowerCase()) e.target.dataset.modified = true;
       Sheet.metrics.get(e.target.dataset.token).alias = e.target.innerText;
     }
   }
@@ -992,17 +996,17 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     e.target.dataset.aggregate = e.target.innerText.toUpperCase();
     const token = e.target.dataset.metricId;
     if (Sheet.metrics.get(token).aggregateFn !== e.target.innerText.toUpperCase()) e.target.dataset.modified = true;
-    // console.log(Sheet.metrics.get(token).aggregateFn);
     Sheet.metrics.get(token).aggregateFn = e.target.innerText.toUpperCase();
     e.target.innerText = e.target.innerText.toUpperCase();
     console.log(Sheet.metrics.get(token).aggregateFn);
   }
 
   // edit di un alias della metrica dopo essere stata aggiunta allo Sheet
-  app.editMetricAlias = (e) => {
-    const token = e.target.parentElement.dataset.token;
-    Sheet.metrics.get(token).alias = e.target.innerHTML;
-  }
+  // WARN: 26.07.24 viene utilizzata?
+  // app.editMetricAlias = (e) => {
+  //   const token = e.target.parentElement.dataset.token;
+  //   Sheet.metrics.get(token).alias = e.target.innerHTML;
+  // }
 
   app.editFieldAlias = (e) => {
     const token = e.target.dataset.token;
