@@ -267,9 +267,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     e.preventDefault();
     console.log(e.currentTarget);
     if (e.currentTarget.classList.contains('dropzone')) {
-      console.info('dropzone columns');
+      //
       // console.log(e.currentTarget, e.target);
-      // e.dataTransfer.dropEffect = "copy";
+      e.dataTransfer.dropEffect = "copy";
     } else {
       console.warn('non in dropzone');
       e.dataTransfer.dropEffect = "none";
@@ -278,10 +278,38 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.elementDragOver = (e) => {
     e.preventDefault();
-    // console.log(e.currentTarget);
+    console.log(e.currentTarget, e.target);
     if (e.currentTarget.classList.contains('dropzone')) {
-      e.currentTarget.classList.add('dropping');
-      e.dataTransfer.dropEffect = "copy";
+      // verifica compatibilità elemento da droppare
+      // Es.: non posso droppare una metrica nella dropzone-filters
+      const elementRef = document.getElementById(e.dataTransfer.getData("text/plain"));
+      switch (e.target.id) {
+        case "dropzone-filters":
+          if (elementRef.dataset.type !== "filter") {
+            console.warn('non in dropzone');
+            e.dataTransfer.dropEffect = "none";
+            e.currentTarget.classList.remove("dropping");
+          } else {
+            e.dataTransfer.dropEffect = "copy";
+            e.currentTarget.classList.add('dropping');
+          }
+          break;
+        case "dropzone-columns":
+        case "dropzone-rows":
+          if (elementRef.dataset.type === "filter") {
+            console.warn('non in dropzone');
+            e.dataTransfer.dropEffect = "none";
+            e.currentTarget.classList.remove("dropping");
+          } else {
+            e.currentTarget.classList.add('dropping');
+            e.dataTransfer.dropEffect = "copy";
+          }
+          break;
+        default:
+          e.currentTarget.classList.add('dropping');
+          e.dataTransfer.dropEffect = "copy";
+          break;
+      }
     } else {
       e.currentTarget.classList.remove('dropping');
       e.dataTransfer.dropEffect = "none";
@@ -501,7 +529,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.filterDrop = (e) => {
     e.preventDefault();
-    // e.currentTarget.classList.replace('dropping', 'dropped');
     e.currentTarget.classList.remove('dropping');
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const elementId = e.dataTransfer.getData('text/plain');
@@ -1000,13 +1027,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     e.target.innerText = e.target.innerText.toUpperCase();
     console.log(Sheet.metrics.get(token).aggregateFn);
   }
-
-  // edit di un alias della metrica dopo essere stata aggiunta allo Sheet
-  // WARN: 26.07.24 viene utilizzata?
-  // app.editMetricAlias = (e) => {
-  //   const token = e.target.parentElement.dataset.token;
-  //   Sheet.metrics.get(token).alias = e.target.innerHTML;
-  // }
 
   app.editFieldAlias = (e) => {
     const token = e.target.dataset.token;
@@ -3002,6 +3022,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const i = li.querySelector('i');
     li.dataset.id = token;
     i.id = token;
+    i.dataset.type = "filter";
     i.dataset.label = filter.name;
     li.classList.add("filters");
     li.dataset.elementSearch = "filters";

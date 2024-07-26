@@ -10,8 +10,8 @@ const callback = (mutationList, observer) => {
   // console.log(mutationList);
   for (const mutation of mutationList) {
     if (mutation.type === "attributes") {
-      console.log(`${mutation.attributeName} attributo è stato modificato.`);
-      console.log(mutation.target.dataset.error);
+      // console.log(`${mutation.attributeName} attributo è stato modificato.`);
+      // console.log(mutation.target.dataset.error);
       if (mutation.target.dataset.error === "true") {
         console.error("Error");
         btnSheetPreview.disabled = true;
