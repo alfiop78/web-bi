@@ -65,6 +65,19 @@ class BIConnectionsController extends Controller
     return $connection->save();
   }
 
+  public static function getDB()
+  {
+    // dump(session('db_host'));
+    Config::set([
+      'database.connections.clientDatabase.driver' => session('db_driver', config('database.connections.clientDatabase.driver')),
+      'database.connections.clientDatabase.host' => session('db_host', config('database.connections.clientDatabase.host')),
+      'database.connections.clientDatabase.port' => session('db_port', config('database.connections.clientDatabase.port')),
+      'database.connections.clientDatabase.database' => session('db_schema', config('database.connections.clientDatabase.database')),
+      'database.connections.clientDatabase.username' => session('db_username', config('database.connections.clientDatabase.username')),
+      'database.connections.clientDatabase.password' => session('db_password', config('database.connections.clientDatabase.password')),
+    ]);
+  }
+
   /**
    * Display the specified resource.
    *
@@ -74,7 +87,6 @@ class BIConnectionsController extends Controller
   public function show(BIConnections $bIConnections, $id)
   {
     $element = $bIConnections::findOrFail($id);
-    // dd($element->host);
     session(['db_name' => $element->name]);
     session(['db_driver' => $element->driver]);
     session(['db_host' => $element->host]);
@@ -82,36 +94,11 @@ class BIConnectionsController extends Controller
     session(['db_schema' => $element->schema]);
     session(['db_username' => $element->username]);
     session(['db_password' => $element->password]);
-    // dump(session('client_db'));
-    // dd(session()->get('host')); // stesso risultato di session('host')
-    // dump(config('database.connections'));
-    // Config::set('database.connections.clientDatabase', [
-    //   'driver' => $element->driver,
-    //   'host' => $element->host,
-    //   'port' => $element->port,
-    //   'database' => $element->schema,
-    //   'username' => $element->username,
-    //   'password' => $element->password,
-    //   'charset' => 'utf8mb4',
-    //   'collation' => 'utf8mb4_unicode_ci',
-    //   'prefix' => '',
-    //   'prefix_indexes' => true,
-    //   'strict' => true,
-    //   'engine' => 'innodb row_format=dynamic'
-    // ]);
-    dump(config('database.connections.clientDatabase'));
-    Config::set([
-      'database.connections.clientDatabase.driver' => session('db_driver', config('database.connections.clientDatabase.driver')),
-      'database.connections.clientDatabase.host' => session('db_host', config('database.connections.clientDatabase.host')),
-      'database.connections.clientDatabase.port' => session('db_port', config('database.connections.clientDatabase.port')),
-      'database.connections.clientDatabase.database' => session('db_schema', config('database.connections.clientDatabase.database')),
-      'database.connections.clientDatabase.username' => session('db_username', config('database.connections.clientDatabase.username')),
-      'database.connections.clientDatabase.password' => session('db_password', config('database.connections.clientDatabase.password')),
-    ]);
-    dump(config('database.connections.clientDatabase'));
-    $schemaList = DB::connection('clientDatabase')->table("information_schema.SCHEMATA")->select("SCHEMA_NAME")->orderBy("SCHEMA_NAME")->get();
-    dd($schemaList);
+    $this::getDB();
 
+    // dd(session()->get('host')); // stesso risultato di session('host')
+    // $schemaList = DB::connection('clientDatabase')->table("information_schema.SCHEMATA")->select("SCHEMA_NAME")->orderBy("SCHEMA_NAME")->get();
+    // dd($schemaList);
     return response()->json($element);
   }
 

@@ -16,13 +16,21 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 // aggiunta per utilizzare Config per la connessione a differenti db
 use Illuminate\Support\Facades\Config;
+use App\Http\Controllers\BIConnectionsController;
 
 class MapDatabaseController extends Controller
 {
   public function mapdb()
   {
-    dd(config('database.connections.clientDatabase'));
-    Config::set('database.connections.mysql_test', [
+    // recupero ed imposto la connessione al db selezionata dall'utente nella index
+    BIConnectionsController::getDB();
+    dump(config('database.connections.clientDatabase'));
+    // TODO: configurare le altre opzioni per le varie connessioni
+    // Memorizzare, nel db (bi_db_connections), tutte le opzioni di tutti i tipi di
+    // database, le opzioni chee non sono necessarie per un determinato database
+    // si possono lasciare NULL in modo da aggiungere a Config::set solo le opzioni
+    // valide per quel database
+    /* Config::set('database.connections.mysql_test', [
       'driver' => 'mysql',
       'host' => '192.168.2.3',
       'port' => '3306',
@@ -35,10 +43,19 @@ class MapDatabaseController extends Controller
       'prefix_indexes' => true,
       'strict' => true,
       'engine' => 'innodb row_format=dynamic'
-    ]);
-    $value = config('database.connections');
-    // dd($value);
-    $schemaList = DB::connection('mysql_test')->select("SHOW SCHEMAS;");
+    ]); */
+    switch (session('db_driver')) {
+      case 'mysql':
+        $schemaList = DB::connection('clientDatabase')->select("SHOW SCHEMAS;");
+        break;
+      case 'vertica':
+        $schemaList = DB::connection('clientDatabase')->table("V_CATALOG.SCHEMATA")->select("SCHEMA_NAME")->where("IS_SYSTEM_SCHEMA", FALSE)->orderBy("SCHEMA_NAME")->get();
+        break;
+      default:
+        # code...
+        break;
+    }
+    // $schemaList = DB::connection('clientDatabase')->select("SHOW SCHEMAS;");
     // dd($schemaList);
 
     // dump(Schema::connection("mysql")->hasTable("bi_sheets"));

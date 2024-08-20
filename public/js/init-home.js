@@ -84,7 +84,7 @@ var App = new Application();
    * i parametri di connessione nel file database.php
    * */
   app.connectionSelected = async (e) => {
-    const id = e.target.dataset.id;
+    const id = e.currentTarget.dataset.id;
     console.log(id);
     const url = `/fetch_api/${id}/show`;
     await fetch(url)
