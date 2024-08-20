@@ -30,6 +30,7 @@ class VerifyCsrfToken extends Middleware
     '/fetch_api/cube/sheet_create',
     '/fetch_api/cube/sql',
     '/fetch_api/dimension/time',
-    '/fetch_api/datamartPost'
+    '/fetch_api/datamartPost',
+    '/fetch_api/connections/store'
   ];
 }

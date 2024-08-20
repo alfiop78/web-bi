@@ -14,11 +14,33 @@ use App\Classes\Cube;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+// aggiunta per utilizzare Config per la connessione a differenti db
+use Illuminate\Support\Facades\Config;
 
 class MapDatabaseController extends Controller
 {
   public function mapdb()
   {
+    dd(config('database.connections.clientDatabase'));
+    Config::set('database.connections.mysql_test', [
+      'driver' => 'mysql',
+      'host' => '192.168.2.3',
+      'port' => '3306',
+      'database' => 'msc_bi_data',
+      'username' => 'apietrantuono',
+      'password' => '4lfi0',
+      'charset' => 'utf8mb4',
+      'collation' => 'utf8mb4_unicode_ci',
+      'prefix' => '',
+      'prefix_indexes' => true,
+      'strict' => true,
+      'engine' => 'innodb row_format=dynamic'
+    ]);
+    $value = config('database.connections');
+    // dd($value);
+    $schemaList = DB::connection('mysql_test')->select("SHOW SCHEMAS;");
+    // dd($schemaList);
+
     // dump(Schema::connection("mysql")->hasTable("bi_sheets"));
     // dump(Schema::connection("vertica_odbc")->hasTable("decisyon_cache.WB_DATE"));
     // dump(Schema::connection("vertica_odbc")->hasTable("WB_DATE"));

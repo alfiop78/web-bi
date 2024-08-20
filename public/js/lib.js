@@ -23,7 +23,7 @@ window.onload = function() {
         default:
           break;
       }
-    	
+
     }
 
     input.addEventListener('input', (e) => {
@@ -40,8 +40,4 @@ window.onload = function() {
     btn.onclick = () => document.querySelector('dialog[open]').close();
   });
 
-  // TODO: da eliminare perchè verranno sostituite dalle <dialog> aperte con show() anzihè showModal()
-  document.querySelectorAll("button[name='cancelAbsoluteWindow']").forEach(btn => {
-    btn.onclick = () => delete document.querySelector('#absolute-window').dataset.open;
-  });
 };

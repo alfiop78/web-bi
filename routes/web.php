@@ -14,6 +14,7 @@ use App\Http\Controllers\BImetricController;
 use App\Http\Controllers\BIfilterController;
 use App\Http\Controllers\BIdashboardController;
 use App\Http\Controllers\BIsheetSpecsController;
+use App\Http\Controllers\BIConnectionsController;
 // uso il Model BIsheet che viene utilizzato nella route curlprocess (web_bi.schedule_report)
 use App\Models\BIsheet;
 use App\Models\BIworkbook;
@@ -45,9 +46,11 @@ Route::get('/users', [UserController::class, 'index']);
 // })->name('web_bi.index_origin'); // home page
 
 // pagina predisposta per il dvd (Marco Gardin) al momento non utilizzata
-Route::get('/', function () {
-  return view('web_bi.index');
-})->name('web_bi.index');
+// Route::get('/', function () {
+//   return view('web_bi.index');
+// })->name('web_bi.index');
+
+Route::get('/', [BIConnectionsController::class, 'index'])->name('web_bi.index');
 
 Route::get('/mapdb', [MapDatabaseController::class, 'mapdb'])->name('web_bi.mapdb');
 
@@ -411,6 +414,10 @@ Route::post('/fetch_api/datamartpost', [MapDatabaseController::class, 'datamartP
 // upsert
 Route::post('fetch_api/json/sheet_specs_upsert', [BIsheetSpecsController::class, 'upsert']);
 
+Route::get('fetch_api/{id}/show', [BIConnectionsController::class, 'show']);
+
+// store
+Route::post('/fetch_api/connections/store', [BIConnectionsController::class, 'store'])->name('connection.store');
 // store json
 Route::prefix('/fetch_api/json/')->group(function () {
   Route::post('/workbook_store', [BIworkbookController::class, 'store']);
