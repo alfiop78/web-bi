@@ -27,36 +27,14 @@
       </section>
 
       <nav>
-        <!-- <a href="#" id="new-connection"><i class="material-icons-round md-18">add</i><span>Crea connessione</span></a> -->
-        <a href="#"><i class="material-icons-round md-18">info</i><span>db 1</span></a>
-        <a href="#"><i class="material-icons-round md-18">info</i><span>db 2</span></a>
-        <a href="#"><i class="material-icons-round md-18">info</i><span>db 3</span></a>
-        <a href="#"><i class="material-icons-round md-18">info</i><span>db 4</span></a>
-        <a href="#"><i class="material-icons-round md-18">info</i><span>db 5</span></a>
+
+        <a href="{{ route('web_bi.mapdb') }}">WorkSpace</a>
+        <a href="{{ route('web_bi.versioning') }}">Versionamento</a>
+        <a href="{{ route('web_bi.dashboard_create') }}">Crea Dashboard</a>
+        <a href="{{ route('web_bi.dashboards') }}">Dashboard</a>
+        <hr />
+        <a href="#">Impostazioni</a>
       </nav>
-      @php
-      $value = config('database.connections');
-      dump($value);
-      Config::set('database.connections.mysql_test',[
-      'driver' => 'mysql',
-      'host' => '192.168.2.3',
-      'port' => '3306',
-      'database' => 'msc_bi_data',
-      'username' => 'apietrantuono',
-      'password' => '4lfi0',
-      'charset' => 'utf8mb4',
-      'collation' => 'utf8mb4_unicode_ci',
-      'prefix' => '',
-      'prefix_indexes' => true,
-      'strict' => true,
-      'engine' => 'innodb row_format=dynamic',
-      'options' => extension_loaded('pdo_mysql') ? array_filter([
-      PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-      ]) : [],
-      ]);
-      $value = config('database.connections');
-      dump($value);
-      @endphp
     </div>
 
     <header>
@@ -103,7 +81,10 @@
                     </div>
                   </section>
                   <section class="row">
-                    <div class="col grid-8">
+                    <div class="col grid-6">
+                      <input id="input-dsn" type="text" value="" name="dsn" placeholder="DSN" />
+                    </div>
+                    <div class="col grid-6">
                       <input id="input-schema" type="text" value="" name="schema" placeholder="Schema" />
                     </div>
                   </section>
@@ -128,7 +109,7 @@
             <div class="grid-content">
               <div class="row">
                 <div class="col grid-4">
-                  <h4>Titolo sezione</h4>
+                  <h4>Connessione al Database</h4>
                   <div class="row">
                     <section class="col grid-12">
                       <section class="list-search">
@@ -148,7 +129,12 @@
                   </div>
                   <div class="row">
                     <section class="col grid-12">
-                      <a href="#" id="new-connection"><i class="material-icons-round md-18">add</i><span>Crea connessione</span></a>
+                      <!-- <a href="#" id="new-connection"><i class="material-icons-round md-18">add</i><span>Crea connessione</span></a> -->
+                      <section class="btn-link">
+                        <button id="new-connection" class="btn-link link">Aggiungi</button>
+                        <button id="remove-connection" class="btn-link link" disabled>Elimina</button>
+                        <button id="edit-connection" class="btn-link link" disabled>Modifica</button>
+                      </section>
                     </section>
                   </div>
                 </div>
@@ -160,26 +146,6 @@
             </div>
           </div>
 
-          <div class="a">
-            <div class="abs">
-              <div class="">
-                <a href="{{ route('web_bi.mapdb') }}" class="text-sm text-gray-700 dark:text-gray-500 underline"><img src="/favicon.png" alt="Map Database" /></a>
-                <h2>WorkSpace</h2>
-              </div>
-              <div class="">
-                <a href="{{ route('web_bi.versioning') }}" class="text-sm text-gray-700 dark:text-gray-500 underline"><img src="/favicon.png" alt="Map Database" /></a>
-                <h2>Versionamento</h2>
-              </div>
-              <div class="">
-                <a href="{{ route('web_bi.dashboard_create') }}" class="text-sm text-gray-700 dark:text-gray-500 underline"><img src="/favicon.png" alt="Creazione nuova Dashboard" /></a>
-                <h2>Crea Dashboards</h2>
-              </div>
-              <div class="">
-                <a href="{{ route('web_bi.dashboards') }}" class="text-sm text-gray-700 dark:text-gray-500 underline"><img src="/favicon.png" alt="Map Database" /></a>
-                <h2>Dashboards</h2>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

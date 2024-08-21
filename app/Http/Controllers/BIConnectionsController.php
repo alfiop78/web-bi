@@ -46,19 +46,13 @@ class BIConnectionsController extends Controller
    */
   public function store(Request $request)
   {
-    // dump($request->all());
-    // dump($request->input('title'));
-    // dump($request->input('host'));
-    // dump($request->input('port'));
-    // dump($request->input('db'));
-    // dd($request->input('username'));
-
     $connection = new BIConnections();
     // salvo su DB
     $connection->name = $request->input("title");
     $connection->driver = $request->input("database");
     $connection->host = $request->input("host");
     $connection->port = $request->input("port");
+    $connection->dsn = $request->input("dsn");
     $connection->schema = $request->input("schema");
     $connection->username = $request->input("username");
     $connection->password = $request->input("password");
@@ -68,13 +62,24 @@ class BIConnectionsController extends Controller
   public static function getDB()
   {
     // dump(session('db_host'));
-    Config::set([
+    /* Config::set([
       'database.connections.clientDatabase.driver' => session('db_driver', config('database.connections.clientDatabase.driver')),
       'database.connections.clientDatabase.host' => session('db_host', config('database.connections.clientDatabase.host')),
       'database.connections.clientDatabase.port' => session('db_port', config('database.connections.clientDatabase.port')),
       'database.connections.clientDatabase.database' => session('db_schema', config('database.connections.clientDatabase.database')),
       'database.connections.clientDatabase.username' => session('db_username', config('database.connections.clientDatabase.username')),
       'database.connections.clientDatabase.password' => session('db_password', config('database.connections.clientDatabase.password')),
+    ]); */
+    $database_name = "client_" . session('db_driver');
+    session(['db_client_name' => $database_name]);
+    // dd($database_name);
+    Config::set([
+      "database.connections.{$database_name}.driver" => session('db_driver'),
+      "database.connections.{$database_name}.host" => session('db_host'),
+      "database.connections.{$database_name}.port" => session('db_port'),
+      "database.connections.{$database_name}.database" => session('db_schema'),
+      "database.connections.{$database_name}.username" => session('db_username'),
+      "database.connections.{$database_name}.password" => session('db_password'),
     ]);
   }
 
@@ -89,6 +94,7 @@ class BIConnectionsController extends Controller
     $element = $bIConnections::findOrFail($id);
     session(['db_name' => $element->name]);
     session(['db_driver' => $element->driver]);
+    session(['db_dsn' => $element->dsn]);
     session(['db_host' => $element->host]);
     session(['db_port' => $element->port]);
     session(['db_schema' => $element->schema]);

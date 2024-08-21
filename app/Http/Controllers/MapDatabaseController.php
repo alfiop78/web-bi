@@ -24,38 +24,20 @@ class MapDatabaseController extends Controller
   {
     // recupero ed imposto la connessione al db selezionata dall'utente nella index
     BIConnectionsController::getDB();
-    dump(config('database.connections.clientDatabase'));
-    // TODO: configurare le altre opzioni per le varie connessioni
-    // Memorizzare, nel db (bi_db_connections), tutte le opzioni di tutti i tipi di
-    // database, le opzioni chee non sono necessarie per un determinato database
-    // si possono lasciare NULL in modo da aggiungere a Config::set solo le opzioni
-    // valide per quel database
-    /* Config::set('database.connections.mysql_test', [
-      'driver' => 'mysql',
-      'host' => '192.168.2.3',
-      'port' => '3306',
-      'database' => 'msc_bi_data',
-      'username' => 'apietrantuono',
-      'password' => '4lfi0',
-      'charset' => 'utf8mb4',
-      'collation' => 'utf8mb4_unicode_ci',
-      'prefix' => '',
-      'prefix_indexes' => true,
-      'strict' => true,
-      'engine' => 'innodb row_format=dynamic'
-    ]); */
+
+    // dump(config('database.connections.client_mysql'));
     switch (session('db_driver')) {
       case 'mysql':
-        $schemaList = DB::connection('clientDatabase')->select("SHOW SCHEMAS;");
+        // $schemaList = DB::connection('clientDatabase')->select("SHOW SCHEMAS;");
+        $schemaList = DB::connection(session('db_client_name'))->select("SHOW SCHEMAS;");
         break;
       case 'vertica':
-        $schemaList = DB::connection('clientDatabase')->table("V_CATALOG.SCHEMATA")->select("SCHEMA_NAME")->where("IS_SYSTEM_SCHEMA", FALSE)->orderBy("SCHEMA_NAME")->get();
+        $schemaList = DB::connection(session('db_client_name'))->table("V_CATALOG.SCHEMATA")->select("SCHEMA_NAME")->where("IS_SYSTEM_SCHEMA", FALSE)->orderBy("SCHEMA_NAME")->get();
         break;
       default:
         # code...
         break;
     }
-    // $schemaList = DB::connection('clientDatabase')->select("SHOW SCHEMAS;");
     // dd($schemaList);
 
     // dump(Schema::connection("mysql")->hasTable("bi_sheets"));
@@ -70,7 +52,8 @@ class MapDatabaseController extends Controller
     // TODO: connessione a mysql
     // $schemaList = DB::connection('mysql')->select("SHOW SCHEMAS;");
     // $schemaList = DB::connection('vertica_odbc')->select("SELECT SCHEMA_NAME FROM V_CATALOG.SCHEMATA WHERE IS_SYSTEM_SCHEMA = FALSE ORDER BY SCHEMA_NAME;");
-    $schemaList = DB::connection('vertica_odbc')->table("V_CATALOG.SCHEMATA")->select("SCHEMA_NAME")->where("IS_SYSTEM_SCHEMA", FALSE)->orderBy("SCHEMA_NAME")->get();
+    // $schemaList = DB::connection('vertica_odbc')->table("V_CATALOG.SCHEMATA")->select("SCHEMA_NAME")->where("IS_SYSTEM_SCHEMA", FALSE)->orderBy("SCHEMA_NAME")->get();
+    // session(['db_driver' => 'vertica']);
     // dd($schemaList);
     return view('web_bi.mapdb')->with('schemata', $schemaList);
     // altro esempio
@@ -460,7 +443,22 @@ class MapDatabaseController extends Controller
     /* $tables = DB::connection('mysql_local')->select("SHOW TABLES"); */
     /* $tables = DB::connection('mysql')->select("SHOW TABLES"); */
     // connessione a vertica per recuperare l'elenco delle tabelle
-    $tables = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='$schema' ORDER BY TABLE_NAME ASC;");
+    // $tables = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='$schema' ORDER BY TABLE_NAME ASC;");
+    BIConnectionsController::getDB();
+    // dump(session('db_driver'));
+    // dump(session('db_client_name'));
+    switch (session('db_driver')) {
+      case 'vertica':
+        $tables = DB::connection(session('db_client_name'))->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='$schema' ORDER BY TABLE_NAME ASC;");
+        break;
+      case 'mysql':
+        // $tables = Schema::connection(session('db_client_name'))->getAllTables();
+        // $tables = DB::connection(session('db_client_name'))->table("information_schema.tables")->select("TABLE_NAME")->where('TABLE_SCHEMA', $schema)->OrderBy("TABLE_NAME")->get();
+        $tables = DB::connection(session('db_client_name'))->select("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_SCHEMA='$schema' ORDER BY TABLE_NAME ASC;");
+      default:
+        break;
+    }
+    // dd($tables);
     /* $tables = DB::connection('vertica')->select("SELECT * FROM automotive_bi_data.Azienda"); */
     return response()->json($tables);
   }

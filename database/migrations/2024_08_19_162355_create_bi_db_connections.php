@@ -16,12 +16,13 @@ class CreateBiDbConnections extends Migration
     Schema::create('bi_db_connections', function (Blueprint $table) {
       $table->id();
       $table->string('name');
-      $table->string('driver');
-      $table->string('host');
-      $table->string('port');
-      $table->string('schema');
-      $table->string('username');
-      $table->string('password');
+      $table->string('dsn')->nullable(); // per alcuni database (Es.: Vertica) può essere NULL
+      $table->string('driver', 50);
+      $table->ipAddress('host');
+      $table->string('port', 10);
+      $table->string('schema', 50);
+      $table->string('username', 50);
+      $table->string('password', 50);
       $table->timestamps();
     });
   }

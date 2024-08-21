@@ -291,8 +291,20 @@
                 <section class="row">
                   <div class="col grid-12 relative-ul">
                     <ul id="ul-schemata" class="custom-scrollbar">
+                      @php
+                      // {{ dump(session('db_driver')); }}
+                      @endphp
                       @foreach($schemata as $schema)
-                      <li class="select-list" data-fn="handlerSchema" data-schema="{{$schema['SCHEMA_NAME']}}">{{$schema['SCHEMA_NAME']}}</li>
+                      @switch(session('db_driver'))
+                      @case('vertica')
+                      <li class="select-list" data-fn="handlerSchema" data-schema="{{$schema['SCHEMA_NAME']}}">{{ $schema['SCHEMA_NAME'] }}</li>
+                      @break
+                      @case('mysql')
+                      <li class="select-list" data-fn="handlerSchema" data-schema="{{$schema->Database}}">{{ $schema->Database }}</li>
+                      @break
+                      @default
+                      <!-- Default case... -->
+                      @endswitch
                       @endforeach
                     </ul>
                   </div>

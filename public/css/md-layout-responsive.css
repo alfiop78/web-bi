@@ -407,6 +407,14 @@ div.elements::-webkit-scrollbar {
   background-color: #a9a9a95e;
 }
 
+hr {
+  border: none;
+  border-top: solid thin;
+  border-bottom: solid thin;
+  color: gainsboro;
+  margin: 1.5em 2em;
+}
+
 /*new list features/lists */
 ul>section[data-sublist-table-card] {
   border: none;

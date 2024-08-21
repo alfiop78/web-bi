@@ -152,14 +152,76 @@ return [
       'prefix_indexes' => true,
     ],
 
-    'clientDatabase' => [
+    // connessione mysql selezionata dall'utente
+    'client_mysql' => [
       'driver' => 'mysql',
-      // 'url' => env('DATABASE_URL'),
       'host' => env('DB_HOST', '127.0.0.1'),
       'port' => env('DB_PORT', '3306'),
       'database' => env('DB_DATABASE', 'forge'),
       'username' => env('DB_USERNAME', 'forge'),
-      'password' => env('DB_PASSWORD', '')
+      'password' => env('DB_PASSWORD', ''),
+      'unix_socket' => env('DB_SOCKET', ''),
+      'charset' => 'utf8mb4',
+      'collation' => 'utf8mb4_unicode_ci',
+      'prefix' => '',
+      'prefix_indexes' => true,
+      'strict' => true,
+      'engine' => null,
+      'options' => extension_loaded('pdo_mysql') ? array_filter([
+        PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+      ]) : [],
+    ],
+
+    // Connessione postgreSQL selezionata dall'utente
+    'client_pgsql' => [
+      'driver' => 'pgsql',
+      'url' => env('DATABASE_URL'),
+      'host' => env('DB_HOST_PGSQL', '127.0.0.1'),
+      'port' => env('DB_PORT_PGSQL', '5432'),
+      'database' => env('DB_DATABASE_PGSQL', 'forge'),
+      'username' => env('DB_USERNAME_PGSQL', 'forge'),
+      'password' => env('DB_PASSWORD_PGSQL', ''),
+      'charset' => 'utf8',
+      'prefix' => '',
+      'prefix_indexes' => true,
+      'schema' => 'md_decisyon_v6',
+      'sslmode' => 'prefer',
+    ],
+
+    // Connessione vertica selezionata dall'utente
+    'client_vertica' => [
+      'driver' => 'odbc',
+      'dsn' => 'VMart251',
+      'url' => env('DATABASE_URL'),
+      'host' => env('DB_HOST_VERTICA', '127.0.0.1'),
+      'port' => env('DB_PRT_VERTICA', '5433'),
+      'database' => env('DB_DATABASE_VERTICA', 'decisyon_cache'),
+      'charset' => 'utf8',
+      'prefix' => '',
+      'prefix_indexes' => true,
+      'schema' => '',
+      'sslmode' => 'prefer',
+      'options' => [
+        'processor' => Illuminate\Database\Query\Processors\Processor::class,   //default
+        'grammar' => [
+          'query' => Illuminate\Database\Query\Grammars\Grammar::class,       //default
+          'schema' => Illuminate\Database\Schema\Grammars\MyVerticaGrammar::class      // Ho creato MyVerticaGrammar.php
+        ]
+      ]
+    ],
+
+    // Connessione SQLServer selezionata dall'utente
+    'client_sqlsrv' => [
+      'driver' => 'sqlsrv',
+      'url' => env('DATABASE_URL'),
+      'host' => env('DB_HOST', 'localhost'),
+      'port' => env('DB_PORT', '1433'),
+      'database' => env('DB_DATABASE', 'forge'),
+      'username' => env('DB_USERNAME', 'forge'),
+      'password' => env('DB_PASSWORD', ''),
+      'charset' => 'utf8',
+      'prefix' => '',
+      'prefix_indexes' => true,
     ],
 
   ],
