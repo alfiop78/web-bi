@@ -61,15 +61,6 @@ class BIConnectionsController extends Controller
 
   public static function getDB()
   {
-    // dump(session('db_host'));
-    /* Config::set([
-      'database.connections.clientDatabase.driver' => session('db_driver', config('database.connections.clientDatabase.driver')),
-      'database.connections.clientDatabase.host' => session('db_host', config('database.connections.clientDatabase.host')),
-      'database.connections.clientDatabase.port' => session('db_port', config('database.connections.clientDatabase.port')),
-      'database.connections.clientDatabase.database' => session('db_schema', config('database.connections.clientDatabase.database')),
-      'database.connections.clientDatabase.username' => session('db_username', config('database.connections.clientDatabase.username')),
-      'database.connections.clientDatabase.password' => session('db_password', config('database.connections.clientDatabase.password')),
-    ]); */
     $database_name = "client_" . session('db_driver');
     session(['db_client_name' => $database_name]);
     // dd($database_name);
@@ -77,6 +68,7 @@ class BIConnectionsController extends Controller
       "database.connections.{$database_name}.driver" => session('db_driver'),
       "database.connections.{$database_name}.host" => session('db_host'),
       "database.connections.{$database_name}.port" => session('db_port'),
+      "database.connections.{$database_name}.dsn" => session('db_dsn'),
       "database.connections.{$database_name}.database" => session('db_schema'),
       "database.connections.{$database_name}.username" => session('db_username'),
       "database.connections.{$database_name}.password" => session('db_password'),

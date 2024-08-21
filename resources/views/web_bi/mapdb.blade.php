@@ -180,6 +180,11 @@
           <button id="btn-schema" class="material-icons-round md-24 main-menu">schema</button>
         </section>
       </nav>
+      <nav id="technical-info">
+        <section class="icon-vertical-menu">
+          <span class="material-icons-round md-18">stream</span>
+        </section>
+      </nav>
 
     </div>
 
