@@ -1,0 +1,14 @@
+:root{
+  --main-highlight-icons-color: sienna;
+  --columns-color: steelblue;
+  --metrics-color: darkgreen;
+  --btn-remove-column-defined: whitesmoke;
+  --danger-color: indianred;
+  --warning-color: #c5791b;
+  --done-color: seagreen;
+  --filters-color: #f2d98d;
+}
+
+.material-symbols-rounded.md-light {
+  color: white;
+}

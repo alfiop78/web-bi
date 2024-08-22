@@ -20,6 +20,10 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-preview-table.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-mapdb.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-sheet-page.css') }}" />
+  <!-- fill : false -->
+  <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,0,0" /> -->
+  <!-- fill : true -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/Step.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
@@ -182,7 +186,7 @@
       </nav>
       <nav id="technical-info">
         <section class="icon-vertical-menu">
-          <span class="material-icons-round md-18">stream</span>
+          <span class="material-symbols-rounded md-18">database</span>
         </section>
       </nav>
 

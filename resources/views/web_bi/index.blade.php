@@ -7,7 +7,8 @@
   <title>Web-BI | HOME</title>
   <!-- <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0"> -->
   <link rel="icon" href="/favicon.png" type="image/png" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-icons.css') }}" />
+  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-icons.css') }}" /> -->
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-symbols.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer.css') }}" />
@@ -16,6 +17,8 @@
   <script src="{{ asset('/js/Application.js') }}"></script>
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />
 </head>
 
 <body class="antialiased">
@@ -23,7 +26,7 @@
 
     <div id="drawer">
       <section class="account">
-        <h5>user</h5><i class="material-icons md-light">person</i>
+        <h5>user</h5><i class="material-symbols-rounded md-light">person</i>
       </section>
 
       <nav>
@@ -40,8 +43,8 @@
     <header>
       <div class="nav-button">
         <!-- codelab-nav-button-->
-        <a href="/" id="arrow-back"><i class="material-icons md-light">close</i></a>
-        <a href="#" id="menu" onclick="App.menu()"><i class="material-icons md-light">menu</i></a>
+        <a href="/" id="arrow-back"><i class="material-symbols-rounded md-light">close</i></a>
+        <a href="#" id="menu" onclick="App.menu()"><i class="material-symbols-rounded md-light">menu</i></a>
       </div>
       <h1 class="title">Gaia-BI</h1>
     </header>
@@ -129,7 +132,7 @@
                   </div>
                   <div class="row">
                     <section class="col grid-12">
-                      <!-- <a href="#" id="new-connection"><i class="material-icons-round md-18">add</i><span>Crea connessione</span></a> -->
+                      <!-- <a href="#" id="new-connection"><i class="material-symbols-rounded-round md-18">add</i><span>Crea connessione</span></a> -->
                       <section class="btn-link">
                         <button id="new-connection" class="btn-link link">Aggiungi</button>
                         <button id="remove-connection" class="btn-link link" disabled>Elimina</button>
@@ -155,7 +158,7 @@
 
     <div id="console">
       <div id="fabsConsole">
-        <i class="material-icons md-18">info</i>
+        <i class="material-symbols-rounded md-18">info</i>
         <p></p>
       </div>
     </div>
