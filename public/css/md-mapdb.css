@@ -364,10 +364,6 @@ dt dd{
   margin-inline-start: 20px;
 }
 
-li[data-selected] {
-  font-weight: bold;
-}
-
 li[data-selected] > i[data-mode="add"] {
   display: none;
 }

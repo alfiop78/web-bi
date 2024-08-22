@@ -29,11 +29,28 @@ nav>a {
   padding: 12px 8px;
 }
 
-nav>a:not([disabled]):hover {
-  background-color: gainsboro;
+nav>button {
+  display: flex;
+  width: 100%;
+  padding: 12px 8px;
+  align-items: center;
 }
 
-nav>a>span {
+nav>button>a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: black;
+}
+
+nav>a:not([disabled]):hover,
+nav>button:not([disabled]):hover {
+  background-color: gainsboro;
+  cursor: pointer;
+}
+
+nav>a>span,
+nav>button>a>span {
   padding: 0 8px;
 }
 

@@ -26,25 +26,36 @@
 
     <div id="drawer">
       <section class="account">
-        <h5>user</h5><i class="material-symbols-rounded md-light">person</i>
+        <h5>user</h5>
+        <i class="material-symbols-rounded md-light">person</i>
       </section>
 
       <nav>
-
-        <a href="{{ route('web_bi.mapdb') }}">WorkSpace</a>
-        <a href="{{ route('web_bi.versioning') }}">Versionamento</a>
-        <a href="{{ route('web_bi.dashboard_create') }}">Crea Dashboard</a>
-        <a href="{{ route('web_bi.dashboards') }}">Dashboard</a>
+        {{-- session()->forget('db_name') --}}
+        <a href="#" title="Database selected">
+          @if (session('db_name'))
+          <i id="db-icon-status" class="material-symbols-rounded done">database</i>
+          @else
+          <!-- dump('sessione non impostata') -->
+          <i id="db-icon-status" class="material-symbols-rounded error">database_off</i>
+          @endif
+          <span id="database-name">{{ session('db_name', 'Database non impostato') }}</span>
+        </a>
         <hr />
-        <a href="#">Impostazioni</a>
+        <a href="{{ route('web_bi.mapdb') }}" title="Workspace"><i class="material-symbols-rounded">workspaces</i><span>Workspace</span></a>
+        <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded">cloud_sync</i><span>Versionamento</span></a>
+        <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded">dashboard_customize</i><span>Creazione Dashboard</span></a>
+        <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded">dashboard</i><span>Dashboards</span></a>
+        <hr />
+        <a href="#" title="Settings"><i class="material-symbols-rounded md-18">settings</i><span>Impostazioni</span></a>
       </nav>
     </div>
 
     <header>
       <div class="nav-button">
         <!-- codelab-nav-button-->
-        <a href="/" id="arrow-back"><i class="material-symbols-rounded md-light">close</i></a>
-        <a href="#" id="menu" onclick="App.menu()"><i class="material-symbols-rounded md-light">menu</i></a>
+        <a href="/" id="arrow-back"><i class="material-symbols-rounded white">close</i></a>
+        <a href="#" id="menu" onclick="App.menu()"><i class="material-symbols-rounded white">menu</i></a>
       </div>
       <h1 class="title">Gaia-BI</h1>
     </header>
@@ -69,7 +80,7 @@
                         <select id="field-db" name="database">
                           <option value="mysql">MySQL</option>
                           <option value="pgsql">PostgreSQL</option>
-                          <option value="vertica">Vertica</option>
+                          <option value="odbc">Vertica</option>
                           <option value="sqlsrv">SQL Server</option>
                         </select>
                       </div>

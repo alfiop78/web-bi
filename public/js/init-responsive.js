@@ -1077,6 +1077,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     Draw = new DrawSVG('svg');
     document.getElementById('workbook-name').dataset.value = name;
     document.getElementById('workbook-name').innerText = name;
+    // abilito il tasto "carica Schema"
+    document.querySelector('#btnSchemata').disabled = false;
     app.dialogNewWorkBook.close();
   }
 
@@ -1110,6 +1112,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // scarico le tabelle del canvas in sessionStorage, questo controllo va fatto dopo aver definito WorkBook.hierTables
     app.checkSessionStorage();
     Draw.checkResizeSVG();
+    document.querySelector('#btnSchemata').disabled = false;
     app.dialogWorkBook.close();
     // il WorkBook è già creato quindi da questo momento è in fase di edit
     WorkBook.edit = true;

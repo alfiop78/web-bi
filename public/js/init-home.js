@@ -85,7 +85,8 @@ var App = new Application();
    * */
   app.connectionSelected = async (e) => {
     const id = e.currentTarget.dataset.id;
-    console.log(id);
+    const databaseName = document.getElementById('database-name');
+    const iconStatus = document.getElementById('db-icon-status');
     const url = `/fetch_api/${id}/show`;
     await fetch(url)
       .then((response) => {
@@ -95,6 +96,18 @@ var App = new Application();
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+        if (data) {
+          // seleziono la connessione impostata
+          e.target.dataset.selected = 'true';
+          iconStatus.classList.replace('error', 'done');
+          iconStatus.innerText = 'database';
+          databaseName.innerHTML = data.name;
+        } else {
+          delete e.target.dataset.selected;
+          iconStatus.classList.replace('done', 'error');
+          iconStatus.innerText = 'database_off';
+          databaseName.innerHTML = 'Database non impostato';
+        }
       })
       .catch((err) => console.error(err));
   }

@@ -697,9 +697,3 @@ li.dropzone.dropping {
   border: solid thin var(--main-important-color);
   box-shadow: 0px 0px 3px 0px var(--main-important-color);
 }
-
-#technical-info {
-  position: absolute;
-  width: inherit;
-  bottom: 1em;
-}

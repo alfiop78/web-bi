@@ -9,6 +9,20 @@
   --filters-color: #f2d98d;
 }
 
-.material-symbols-rounded.md-light {
+/* COLORS */
+.material-symbols-rounded.white {
   color: white;
+}
+
+.material-symbols-rounded.error {
+  color: var(--main-important-color);
+}
+
+.material-symbols-rounded.done {
+  color: forestgreen;
+}
+
+/* SETTINGS */
+.material-symbols-rounded.hidden {
+  display: none;
 }

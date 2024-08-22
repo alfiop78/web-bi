@@ -63,7 +63,7 @@ class BIConnectionsController extends Controller
   {
     $database_name = "client_" . session('db_driver');
     session(['db_client_name' => $database_name]);
-    // dd($database_name);
+    // dump($database_name);
     Config::set([
       "database.connections.{$database_name}.driver" => session('db_driver'),
       "database.connections.{$database_name}.host" => session('db_host'),

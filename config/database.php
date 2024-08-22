@@ -189,7 +189,7 @@ return [
     ],
 
     // Connessione vertica selezionata dall'utente
-    'client_vertica' => [
+    'client_odbc' => [
       'driver' => 'odbc',
       'dsn' => 'VMart251',
       'url' => env('DATABASE_URL'),

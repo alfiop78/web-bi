@@ -11,8 +11,9 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-icons.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer-responsive.css') }}" />
+  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-icons.css') }}" /> -->
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-symbols.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
   <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-input-responsive.css') }}" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
@@ -20,9 +21,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-preview-table.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-mapdb.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-sheet-page.css') }}" />
-  <!-- fill : false -->
-  <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,0,0" /> -->
-  <!-- fill : true -->
+  <!-- Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/Step.js') }}"></script>
@@ -173,30 +172,40 @@
     <div id="drawer" open>
 
       <section class="account">
-        <i class="material-icons md-light">person</i>
+        <h5>user</h5>
+        <i class="material-symbols-rounded md-light">person</i>
       </section>
 
       <nav>
-        <!-- <a href="#" id="mdc-back">HOME</a> -->
-        <section class="icon-vertical-menu">
-          <a href="{{ url('/') }}"><i class="material-icons-round md-24">home</i></a>
-          <button id="btn-datanase" class="material-icons-round md-24 main-menu" disabled>storage</button>
-          <button id="btn-schema" class="material-icons-round md-24 main-menu">schema</button>
-        </section>
+        <a href="#" title="Database selected">
+          @if (session('db_name'))
+          <i class="material-symbols-rounded md-18 done">database</i>
+          @else
+          <i class="material-symbols-rounded md-18 error">database_off</i>
+          @endif
+          <span id="database-name">{{ session('db_name', 'Database non impostato') }}</span>
+        </a>
+        <hr />
+        <a href="{{ route('web_bi.index') }}" title="HomePage"><i class="material-symbols-rounded md-18">home</i><span>Home</span></a>
+        <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded">cloud_sync</i><span>Versionamento</span></a>
+        <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded">dashboard_customize</i><span>Creazione Dashboard</span></a>
+        <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded">dashboard</i><span>Dashboards</span></a>
+        <hr />
+        <a href="#" title="Settings"><i class="material-symbols-rounded md-18">settings</i><span>Impostazioni</span></a>
+        <!-- <button>
+          <a href="#" title="test">
+            <i class="material-symbols-rounded">info</i><span>test &lt;button&gt;</span>
+          </a>
+        </button> -->
       </nav>
-      <nav id="technical-info">
-        <section class="icon-vertical-menu">
-          <span class="material-symbols-rounded md-18">database</span>
-        </section>
-      </nav>
-
     </div>
 
     <header>
       <div class="nav-button">
         <!-- codelab-nav-button-->
         <!-- <a href="/" id="arrow-back"><i class="material-icons md-light">close</i></a> -->
-        <a href="#" id="menu" onclick="App.menu()"><i class="material-icons md-light">menu</i></a>
+        <a href="/" id="arrow-back"><i class="material-symbols-rounded white">close</i></a>
+        <a href="#" id="menu" onclick="App.menu()"><i class="material-symbols-rounded white">menu</i></a>
       </div>
 
       <h1 class="title">Map database</h1>
@@ -305,7 +314,7 @@
                       @endphp
                       @foreach($schemata as $schema)
                       @switch(session('db_driver'))
-                      @case('vertica')
+                      @case('odbc')
                       <li class="select-list" data-fn="handlerSchema" data-schema="{{$schema['SCHEMA_NAME']}}">{{ $schema['SCHEMA_NAME'] }}</li>
                       @break
                       @case('mysql')
@@ -807,11 +816,12 @@
                       </section>
                       <section id="tables-area">
                         <section class="table-area-wrapper">
-                          <section class="list-search">
+                          <section class="list-search buttonSection">
                             <input type="search" id="table-search" data-element-search="tables" placeholder="Ricerca tabelle" autocomplete="off" />
                             <div class="relative-ul">
                               <ul id="ul-tables" data-search-id="table-search" class="custom-scrollbar"></ul>
                             </div>
+                            <button class="btn-link link" id="btnSchemata" disabled="true">Carica Schema</button>
                           </section>
                           <section class="table-preview">
                             <input type="search" id="columns-search-id" autocomplete="off" placeholder="Ricerca colonne" />

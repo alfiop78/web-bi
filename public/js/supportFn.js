@@ -184,7 +184,7 @@ async function getTables(urls) {
     dialogAdvMetric: document.getElementById('dlg-metric'),
     dialogCustomMetric: document.getElementById('dlg-custom-metric'),
     dialogColumns: document.getElementById('dlg-columns'),
-    btnSchema: document.getElementById('btn-schema'),
+    btnSchema: document.getElementById('btnSchemata'),
     dialogSchema: document.getElementById('dlg-schema')
   }
 
@@ -252,7 +252,10 @@ async function getTables(urls) {
 
   /* end mouse event */
 
-  app.btnSchema.onclick = () => app.dialogSchema.showModal();
+  app.btnSchema.onclick = (e) => {
+    // e.preventDefault();
+    app.dialogSchema.showModal();
+  }
 
   app.dialogCustomMetric.addEventListener('close', () => {
     const textArea = document.getElementById('textarea-custom-metric');

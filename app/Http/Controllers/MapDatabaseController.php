@@ -24,14 +24,13 @@ class MapDatabaseController extends Controller
   {
     // recupero ed imposto la connessione al db selezionata dall'utente nella index
     BIConnectionsController::getDB();
-
-    // dump(config('database.connections.client_mysql'));
+    // dump(session('db_client_name'));
+    // dd(config('database.connections.client_odbc'));
     switch (session('db_driver')) {
       case 'mysql':
-        // $schemaList = DB::connection('clientDatabase')->select("SHOW SCHEMAS;");
         $schemaList = DB::connection(session('db_client_name'))->select("SHOW SCHEMAS;");
         break;
-      case 'vertica':
+      case 'odbc':
         $schemaList = DB::connection(session('db_client_name'))->table("V_CATALOG.SCHEMATA")->select("SCHEMA_NAME")->where("IS_SYSTEM_SCHEMA", FALSE)->orderBy("SCHEMA_NAME")->get();
         break;
       default:
@@ -448,7 +447,7 @@ class MapDatabaseController extends Controller
     // dump(session('db_driver'));
     // dump(session('db_client_name'));
     switch (session('db_driver')) {
-      case 'vertica':
+      case 'odbc':
         $tables = DB::connection(session('db_client_name'))->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='$schema' ORDER BY TABLE_NAME ASC;");
         break;
       case 'mysql':
