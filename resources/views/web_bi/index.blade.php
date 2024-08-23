@@ -72,12 +72,12 @@
                   <h5 class="title">Crea nuova connessione</h5>
                   <section class="dlg-content">
                     <section class="row">
-                      <div class="col grid-12">
+                      <section class="col grid-12">
                         <input id="input-connection-name" type="text" name="title" value="" placeholder="Nome connessione" />
-                      </div>
+                      </section>
                     </section>
                     <section class="row">
-                      <div class="col grid-12">
+                      <section class="col grid-12">
                         <div class="field label">
                           <label for="field-db">Database</label>
                           <select id="field-db" name="database">
@@ -87,31 +87,32 @@
                             <option value="sqlsrv">SQL Server</option>
                           </select>
                         </div>
-                      </div>
+                      </section>
                     </section>
                     <section class="row">
-                      <div class="col grid-8">
+                      <section class="col grid-8">
                         <input id="input-host" type="text" name="host" value="" placeholder="host" />
-                      </div>
-                      <div class="col grid-4">
+                      </section>
+                      <section class="col grid-4">
                         <input id="input-port" type="text" name="port" placeholder="port" />
-                      </div>
+                      </section>
                     </section>
                     <section class="row">
-                      <div class="col grid-6">
+                      <section class="col grid-6">
                         <input id="input-dsn" type="text" value="" name="dsn" placeholder="DSN" />
-                      </div>
-                      <div class="col grid-6">
+                      </section>
+                      <section class="col grid-6">
+                        <label>*Schema in cui memorizzare i datamart</label>
                         <input id="input-schema" type="text" value="" name="schema" placeholder="Schema" />
-                      </div>
+                      </section>
                     </section>
                     <section class="row">
-                      <div class="col grid-6">
+                      <section class="col grid-6">
                         <input id="input-username" type="text" value="" name="username" placeholder="Username" />
-                      </div>
-                      <div class="col grid-6">
+                      </section>
+                      <section class="col grid-6">
                         <input id="input-psw" type="password" name="password" placeholder="Password" />
-                      </div>
+                      </section>
                     </section>
                   </section>
                   <section class="dlg-buttons">
@@ -155,10 +156,10 @@
                       </section>
                     </div>
                   </section>
-                  <div class="col grid-7">
+                  <section class="col grid-7">
                     <h4>Titolo sezione</h4>
                     grid-8
-                  </div>
+                  </section>
                 </div>
               </div>
             </div>

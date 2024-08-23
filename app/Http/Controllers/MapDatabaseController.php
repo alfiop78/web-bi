@@ -147,6 +147,12 @@ class MapDatabaseController extends Controller
     // dd(config('database.connections.client_odbc'));
     // dd(Schema::connection('vertica_odbc')->hasTable("WEB_BI_$id"));
     // TEST: testare con mysql, sqlsrv e pgsql
+    // Per eseguire correttamente il test, in fase di creazione della
+    // connessione, deve essere aggiunto lo schema dove verranno memorizzati i datamart
+    // Per questo motivo ho aggiunto una label relativa alla input Schema nella dialog di creazione
+    // di una nuova connessione
+    // dd(Schema::connection(session('db_client_name'))->hasTable("decisyon_cache.WEB_BI_$id"));
+    // dd(Schema::connection(session('db_client_name'))->hasTable("WEB_BI_$id"));
     return Schema::connection(session('db_client_name'))->hasTable("WEB_BI_$id");
   }
 
@@ -226,6 +232,7 @@ class MapDatabaseController extends Controller
 
   private function dropTIMEtables()
   {
+    // TODO: nuova logica session('db_client_name')
     if (Schema::connection("vertica_odbc")->hasTable("WB_DATE")) {
       if (!DB::connection('vertica_odbc')->statement("ALTER TABLE decisyon_cache.WB_DATE DROP CONSTRAINT fx_months;")) {
         if (!Schema::connection("vertica_odbc")->drop("decisyon_cache.WB_DATE")) {
@@ -504,6 +511,7 @@ class MapDatabaseController extends Controller
       // echo ("tabella $toId esiste");
       Schema::connection('vertica_odbc')->drop("decisyon_cache.WEB_BI_{$toId}");
     }
+    // TODO: nuova logica session('db_client_name')
     $sql = "SELECT COPY_TABLE ('decisyon_cache.WEB_BI_{$fromId}','decisyon_cache.WEB_BI_{$toId}');";
     // NOTE: forse può essere utilizzato ->select invece di ->statement
     $copy = DB::connection('vertica_odbc')->statement($sql);
@@ -524,13 +532,23 @@ class MapDatabaseController extends Controller
 
     // $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->orderBy('area_id')->paginate(15000);
 
-    // TODO: nuova logica session('db_client_name')
-    $columnsResult = DB::connection('vertica_odbc')->table('COLUMNS')
-      ->select('column_name')
-      ->where('TABLE_SCHEMA', "decisyon_cache")->where('TABLE_NAME', "WEB_BI_{$id}")->orderBy('ordinal_position')->get();
+    BIConnectionsController::getDB();
+    switch (session('db_driver')) {
+      case 'odbc':
+        $queryColumns = DB::connection(session('db_client_name'))->table('COLUMNS')->select('column_name');
+        break;
+      case 'mysql':
+        $queryColumns = DB::connection(session('db_client_name'))->table('information_schema.COLUMNS')->select('column_name');
+        break;
+      // TODO: implementazione altri DB
+      default:
+        break;
+    }
+    $columnsData = $queryColumns->where('TABLE_SCHEMA', "decisyon_cache")
+      ->where('TABLE_NAME', "WEB_BI_{$id}")->orderBy('ordinal_position')->get();
 
-    $query = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}");
-    foreach ($columnsResult as $columns) {
+    $query = DB::connection(session('db_client_name'))->table("decisyon_cache.WEB_BI_{$id}");
+    foreach ($columnsData as $columns) {
       foreach ($columns as $column) {
         $query->orderBy($column);
       }

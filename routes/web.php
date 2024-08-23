@@ -398,12 +398,6 @@ Route::get('/fetch_api/{id}/datamart', [MapDatabaseController::class, 'datamart'
 // preview del datamart
 Route::get('/fetch_api/{id}/preview', [MapDatabaseController::class, 'preview'])->name('web_bi.fetch_api.preview');
 
-/* Route::get('/fetch_api/{id}/check_datamart', function ($id) {
-  // $result = DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable("WEB_BI_$id");
-  dd(Schema::connection('vertica_odbc')->hasTable("WEB_BI_$id"));
-  return Schema::connection('vertica_odbc')->hasTable("WEB_BI_$id");
-})->name('web_bi.fetch_api.check_datamart'); */
-
 Route::get('/fetch_api/{id}/check_datamart', [MapDatabaseController::class, 'datamartExists'])->name('web_bi.fetch_api.check_datamart');
 
 Route::get('/fetch_api/{id}/delete_datamart', function ($id) {
