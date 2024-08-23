@@ -95,20 +95,18 @@ class Application {
     this.drawer = document.getElementById('drawer');
     console.log(this.drawer);
     this.drawer.toggleAttribute('open');
-    document.getElementById('container').addEventListener('click', this.containerClick, true);
+    // document.getElementById('container').addEventListener('click', this.containerClick, true);
   }
 
   containerClick(e) {
     // console.log('containerClick');
     // console.log(e.target);
-    this.drawerOpen = document.querySelector('#drawer[open]');
-    // console.log(this.drawerOpen);
-    // chiudo il drawer
+    /* this.drawerOpen = document.querySelector('#drawer[open]');
     // se il drawer è aperto lo chiudo
     if (this.drawerOpen) {
       this.drawerOpen.toggleAttribute('open');
       document.getElementById('container').removeEventListener('click', this.containerClick, true);
-    }
+    } */
     let openedTooltips = document.querySelector('.tooltip[open]');
     if (openedTooltips) {
       // console.log('tooltip aperti');

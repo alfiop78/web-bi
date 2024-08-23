@@ -15,7 +15,6 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 // aggiunta per utilizzare Config per la connessione a differenti db
-use Illuminate\Support\Facades\Config;
 use App\Http\Controllers\BIConnectionsController;
 
 class MapDatabaseController extends Controller
@@ -132,6 +131,7 @@ class MapDatabaseController extends Controller
     //             WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table' and C.data_type_id = types.type_id
     //             ORDER BY c.ordinal_position ASC;");
 
+    // TODO: nuova logica session('db_client_name')
     $info = DB::connection('vertica_odbc')->table('COLUMNS')
       ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
       ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
@@ -140,32 +140,64 @@ class MapDatabaseController extends Controller
     // return response()->json($info);
   }
 
+  public function datamartExists($id)
+  {
+    // dump($id);
+    BIConnectionsController::getDB();
+    // dd(config('database.connections.client_odbc'));
+    // dd(Schema::connection('vertica_odbc')->hasTable("WEB_BI_$id"));
+    // TEST: testare con mysql, sqlsrv e pgsql
+    return Schema::connection(session('db_client_name'))->hasTable("WEB_BI_$id");
+  }
+
   // chiamata con promise.all
   public function tables_info($schema, $table)
   {
     /* dd($table); */
     /* $tables = DB::connection('mysql')->select("DESCRIBE Azienda"); */
-    // $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME
-    //             FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
-    //             ON C.TABLE_ID=CC.TABLE_ID
-    //             AND C.COLUMN_NAME=CC.COLUMN_NAME
-    //             AND CC.CONSTRAINT_TYPE='p'
-    //             WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table'
-    //             ORDER BY c.ordinal_position ASC;");
+    /* $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME
+                FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
+                ON C.TABLE_ID=CC.TABLE_ID
+                AND C.COLUMN_NAME=CC.COLUMN_NAME
+                AND CC.CONSTRAINT_TYPE='p'
+                WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table'
+                ORDER BY c.ordinal_position ASC;"); */
 
     // $info = DB::connection('vertica_odbc')->select("SELECT C.column_name, c.is_nullable, types.type_name, c.data_type_length, c.ordinal_position FROM COLUMNS C, TYPES types WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table' and C.data_type_id = types.type_id ORDER BY c.ordinal_position ASC;");
-    $info = DB::connection('vertica_odbc')->table('COLUMNS')
-      ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
-      ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
-      ->where('TABLE_SCHEMA', $schema)->where('TABLE_NAME', $table)->orderBy('ordinal_position')->get();
-
-    return response()->json([$table => $info]);
+    // agosto 2024 nuova logica con session('db_client_name')
+    BIConnectionsController::getDB();
+    switch (session('db_driver')) {
+      case 'odbc':
+        $query = DB::connection(session('db_client_name'))->table('COLUMNS')
+          ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
+          ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id');
+        break;
+      case 'mysql':
+        $query = DB::connection(session('db_client_name'))->table('information_schema.COLUMNS')
+          ->select(
+            'column_name',
+            'data_type as type_name',
+            DB::raw('CASE WHEN CHARACTER_MAXIMUM_LENGTH IS NOT NULL
+              THEN CHARACTER_MAXIMUM_LENGTH
+              ELSE NUMERIC_PRECISION END as data_type_length'),
+            'ordinal_position'
+          );
+        break;
+        // TODO: aggiungere sqlsrv e pgsql
+      default:
+        break;
+    }
+    $query->where('TABLE_SCHEMA', $schema)
+      ->where('TABLE_NAME', $table)->orderBy('ordinal_position');
+    // dd($query->get());
+    return response()->json([$table => $query->get()]);
   }
 
   public function columns_info($schema, $table, $column)
   {
     /* dd($table); */
     /* $tables = DB::connection('mysql')->select("DESCRIBE Azienda"); */
+    // TODO: nuova logica session('db_client_name')
     $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME, C.TABLE_SCHEMA, C.TABLE_NAME
                 FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
                 ON C.TABLE_ID=CC.TABLE_ID
@@ -179,9 +211,9 @@ class MapDatabaseController extends Controller
 
   public function table_preview($schema, $table)
   {
-    /* dd($table); */
     /* $tables = DB::connection('mysql')->select("DESCRIBE Azienda"); */
-    $data = DB::connection('vertica_odbc')->select("SELECT * FROM $schema.$table LIMIT 50;");
+    // $data = DB::connection('vertica_odbc')->select("SELECT * FROM $schema.$table LIMIT 50;");
+    $data = DB::connection(session('db_client_name'))->select("SELECT * FROM $schema.$table LIMIT 50;");
     return response()->json($data);
   }
 
@@ -446,6 +478,7 @@ class MapDatabaseController extends Controller
     BIConnectionsController::getDB();
     // dump(session('db_driver'));
     // dump(session('db_client_name'));
+    // TODO: provare a convertirle con QueryBuilder
     switch (session('db_driver')) {
       case 'odbc':
         $tables = DB::connection(session('db_client_name'))->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='$schema' ORDER BY TABLE_NAME ASC;");
@@ -491,6 +524,7 @@ class MapDatabaseController extends Controller
 
     // $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->orderBy('area_id')->paginate(15000);
 
+    // TODO: nuova logica session('db_client_name')
     $columnsResult = DB::connection('vertica_odbc')->table('COLUMNS')
       ->select('column_name')
       ->where('TABLE_SCHEMA', "decisyon_cache")->where('TABLE_NAME', "WEB_BI_{$id}")->orderBy('ordinal_position')->get();
@@ -533,6 +567,7 @@ class MapDatabaseController extends Controller
     // $data = DB::connection('vertica_odbc')->table($table)->select("dealer_id", "dealer_ds")->paginate(15000);
     // $data = DB::connection('vertica_odbc')->table($table)->where("dealer_id", "=", 447)->paginate(15000);
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [447, 497])->paginate(15000);
+    // TODO: nuova logica session('db_client_name')
     $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->paginate(20000);
     return $data;
 
@@ -551,6 +586,7 @@ class MapDatabaseController extends Controller
     // dd($id);
     // $datamart = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='decisyon_cache' AND TABLE_NAME='WEB_BI_$id';");
     // if ($datamart) {
+    // TODO: nuova logica session('db_client_name')
     $data = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.WEB_BI_$id LIMIT 20");
     // dd(memory_get_usage());
     // dd(memory_get_peak_usage());

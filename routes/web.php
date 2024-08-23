@@ -398,11 +398,13 @@ Route::get('/fetch_api/{id}/datamart', [MapDatabaseController::class, 'datamart'
 // preview del datamart
 Route::get('/fetch_api/{id}/preview', [MapDatabaseController::class, 'preview'])->name('web_bi.fetch_api.preview');
 
-Route::get('/fetch_api/{id}/check_datamart', function ($id) {
+/* Route::get('/fetch_api/{id}/check_datamart', function ($id) {
   // $result = DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable("WEB_BI_$id");
+  dd(Schema::connection('vertica_odbc')->hasTable("WEB_BI_$id"));
   return Schema::connection('vertica_odbc')->hasTable("WEB_BI_$id");
-  // return (int) (empty($result)) ? 0 : 1; // TODO: testare
-})->name('web_bi.fetch_api.check_datamart');
+})->name('web_bi.fetch_api.check_datamart'); */
+
+Route::get('/fetch_api/{id}/check_datamart', [MapDatabaseController::class, 'datamartExists'])->name('web_bi.fetch_api.check_datamart');
 
 Route::get('/fetch_api/{id}/delete_datamart', function ($id) {
   $dropResult = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.WEB_BI_{$id};");

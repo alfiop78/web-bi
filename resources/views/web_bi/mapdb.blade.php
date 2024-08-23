@@ -169,36 +169,6 @@
   </template>
 
   <main>
-    <div id="drawer" open>
-
-      <section class="account">
-        <h5>user</h5>
-        <i class="material-symbols-rounded md-light">person</i>
-      </section>
-
-      <nav>
-        <a href="#" title="Database selected">
-          @if (session('db_name'))
-          <i class="material-symbols-rounded md-18 done">database</i>
-          @else
-          <i class="material-symbols-rounded md-18 error">database_off</i>
-          @endif
-          <span id="database-name">{{ session('db_name', 'Database non impostato') }}</span>
-        </a>
-        <hr />
-        <a href="{{ route('web_bi.index') }}" title="HomePage"><i class="material-symbols-rounded md-18">home</i><span>Home</span></a>
-        <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded">cloud_sync</i><span>Versionamento</span></a>
-        <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded">dashboard_customize</i><span>Creazione Dashboard</span></a>
-        <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded">dashboard</i><span>Dashboards</span></a>
-        <hr />
-        <a href="#" title="Settings"><i class="material-symbols-rounded md-18">settings</i><span>Impostazioni</span></a>
-        <!-- <button>
-          <a href="#" title="test">
-            <i class="material-symbols-rounded">info</i><span>test &lt;button&gt;</span>
-          </a>
-        </button> -->
-      </nav>
-    </div>
 
     <header>
       <div class="nav-button">
@@ -307,7 +277,7 @@
               <h5 class="">Seleziona schema Database</h5>
               <section class="dlg-content">
                 <section class="row">
-                  <div class="col grid-12 relative-ul">
+                  <section class="col grid-12 relative-ul">
                     <ul id="ul-schemata" class="custom-scrollbar">
                       @php
                       // {{ dump(session('db_driver')); }}
@@ -325,7 +295,7 @@
                       @endswitch
                       @endforeach
                     </ul>
-                  </div>
+                  </section>
                 </section>
               </section>
               <section class="dlg-buttons">
@@ -339,9 +309,9 @@
               <h5 class="title moveable">Alias tabella</h5>
               <section class="dlg-content">
                 <section class="row">
-                  <div class="col grid-12">
+                  <section class="col grid-12">
                     <input type="text" id="table-alias" placeholder="Alias" value="" autocomplete="on" />
-                  </div>
+                  </section>
                 </section>
               </section>
               <section class="dlg-buttons">
@@ -356,9 +326,9 @@
               <h5 class="title moveable">Titolo WorkBook</h5>
               <section class="dlg-content">
                 <section class="row">
-                  <div class="col grid-12">
+                  <section class="col grid-12">
                     <input type="text" id="input-workbook-name" placeholder="Nome" value="" autocomplete="on" />
-                  </div>
+                  </section>
                 </section>
               </section>
               <section class="dlg-buttons">
@@ -390,7 +360,7 @@
               <h5 class="title moveable">Imposta relazione con tabella TIME</h5>
               <section class="dlg-content">
                 <section class="row">
-                  <div class="col grid-6">
+                  <section class="col grid-6">
                     <ul id="time-fields">
                       <!-- TODO: creare qui la struttura delle tabelle TIME con <summary> e <details> -->
                       <li class="select-list content" data-field="id_year" data-field-ds="year" data-table="WB_YEARS" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
@@ -399,7 +369,7 @@
                       <!-- <li data-field="week_id" data-datatype="integer" data-fn="handlerTimeField">WEEK <small>Es.: 202312</small></li> -->
                       <li class="select-list content" data-field="id_date" data-field-ds="id_date" data-table="WB_DATE" data-datatype="date" data-fn="handlerTimeField">DATE <small>Es.: 2023-12-31</small></li>
                     </ul>
-                  </div>
+                  </section>
                   <section class="dlg-content col grid-6">
                     <section class="list-search">
                       <input type="search" id="time-column-search" data-element-search="time-column" placeholder="Ricerca colonna" autocomplete="off" />
@@ -425,14 +395,14 @@
               <h5 class="title">Apri WorkBook</h5>
               <section class="dlg-content">
                 <section class="row">
-                  <div class="col grid-12">
+                  <section class="col grid-12">
                     <div class="list-search">
                       <input type="search" id="workbooks-search-id" data-element-search="workbooks" autocomplete="off" placeholder="Ricerca WorkBooks" />
                       <div class="relative-ul">
                         <ul id="ul-workbooks" data-search-id="workbooks-search-id" class="custom-scrollbar"></ul>
                       </div>
                     </div>
-                  </div>
+                  </section>
                 </section>
               </section>
               <section class="dlg-buttons">
@@ -446,14 +416,14 @@
               <h5 class="title">Apertura Sheet</h5>
               <section class="dlg-content">
                 <section class="row">
-                  <div class="col grid-12">
+                  <section class="col grid-12">
                     <div class="list-search">
                       <input type="search" id="sheets-search-id" data-element-search="sheets" autocomplete="off" placeholder="Ricerca Sheets" />
                       <div class="relative-ul">
                         <ul id="ul-sheets" data-search-id="sheets-search-id" class="custom-scrollbar"></ul>
                       </div>
                     </div>
-                  </div>
+                  </section>
                 </section>
               </section>
               <section class="dlg-buttons">
@@ -690,6 +660,36 @@
           </dialog>
 
           <div class="wrapper">
+            <div id="drawer">
+
+              <section class="account">
+                <h5>user</h5>
+                <i class="material-symbols-rounded md-light">person</i>
+              </section>
+
+              <nav>
+                <a href="#" title="Database selected">
+                  @if (session('db_name'))
+                  <i class="material-symbols-rounded md-18 done">database</i>
+                  @else
+                  <i class="material-symbols-rounded md-18 error">database_off</i>
+                  @endif
+                  <span id="database-name">{{ session('db_name', 'Database non impostato') }}</span>
+                </a>
+                <hr />
+                <a href="{{ route('web_bi.index') }}" title="HomePage"><i class="material-symbols-rounded md-18">home</i><span>Home</span></a>
+                <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded">cloud_sync</i><span>Versionamento</span></a>
+                <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded">dashboard_customize</i><span>Creazione Dashboard</span></a>
+                <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded">dashboard</i><span>Dashboards</span></a>
+                <hr />
+                <a href="#" title="Settings"><i class="material-symbols-rounded md-18">settings</i><span>Impostazioni</span></a>
+                <!-- <button>
+          <a href="#" title="test">
+            <i class="material-symbols-rounded">info</i><span>test &lt;button&gt;</span>
+          </a>
+        </button> -->
+              </nav>
+            </div>
 
             <dialog id="dlg-columns" data-x="0" data-y="40" class="medium absolute moveable">
               <section class="dlg-grid">
@@ -734,7 +734,7 @@
                         <button class="btn-link default" id="btn-workbook-open" value="open">Apri</button>
                         <button class="btn-link default" id="btn-time-dimension" value="open" disabled>Tabella TIME</button>
                         <!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
-                        <section id="workbook-name" class="name data-source" contenteditable="true">Titolo</section>
+                        <section id="workbook-name" class="name data-source" contenteditable="true">Titolo WorkBook</section>
                       </menu>
                       <div id="context-menu-table" class="context-menu">
                         <ul id="ul-context-menu-table" class="context-menu-items">
@@ -845,7 +845,7 @@
                           <!-- <button id="btn-publish" class="btn-link important" data-fn="publish" value="Pubblica">Pubblica</button> -->
                         </section>
                         <section class="sheet-title">
-                          <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Titolo">Titolo</div>
+                          <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Titolo">Titolo Sheet</div>
                         </section>
                       </menu>
                       <section id="wrapper-sheet" class="wrapper-sheet">

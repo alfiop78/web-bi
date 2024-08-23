@@ -250,9 +250,9 @@ section>h3~h5 {
     display: none;
   }
 
-  #drawer {
+  /* #drawer {
     width: 340px;
-  }
+  } */
 
   h4 {
     font-size: 1.7rem;
@@ -409,7 +409,7 @@ div.elements::-webkit-scrollbar {
 
 hr {
   border: none;
-  border-top: solid thin;
+  /* border-top: solid thin; */
   border-bottom: solid thin;
   color: gainsboro;
   margin: 1.5em 2em;
@@ -551,10 +551,11 @@ span.markContent {
 
 #body>.wrapper {
   display: grid;
-  grid-template-columns: 100%;
+  grid-template-columns: auto 1fr;
   height: inherit;
   position: relative;
   grid-template-rows: 1fr;
+  grid-column-gap: 1em;
   padding: 1em;
 }
 
@@ -622,15 +623,17 @@ input[type="number"] {
   grid-column-gap: 2em;
 }
 
+.row.start {
+  align-content: flex-start;
+}
+
 .row>.col {
   display: grid;
   padding: .5em;
   grid-gap: 1em;
 }
 
-.row>section.col {
-  display: grid;
-  padding: .5em;
+.row>div.col {
   background-color: white;
   box-shadow: 0px 1px 5px 0px gray;
 }

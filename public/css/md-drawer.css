@@ -4,7 +4,8 @@ nav {
 
 #drawer {
   background: #fff;
-  width: 256px;
+  /* width: 256px; */
+  transition: width 250ms;
   flex-shrink: 0;
   position: relative;
   z-index: 100;
@@ -45,8 +46,10 @@ nav>button>a {
 
 nav>a:not([disabled]):hover,
 nav>button:not([disabled]):hover {
-  background-color: gainsboro;
+  /* background-color: gainsboro; */
   cursor: pointer;
+  color: var(--main-secondary-color);
+  font-weight: bold;
 }
 
 nav>a>span,
@@ -58,10 +61,20 @@ nav>a[selected] {
   font-weight: bold;
 }
 
+#drawer:not([open])>nav>a>span,
+#drawer:not([open]) .account>h5
+{
+  visibility: hidden;
+}
+
+#drawer:not([open])>nav hr {
+  margin: .5em .5em;
+}
+
 
 @media screen and (min-device-width: 361px) and (max-device-width: 768px) {
   #drawer {
-    width: 256px;
+    /* width: 256px; */
     position: absolute;
     left: 0;
     top: 0;
@@ -108,5 +121,15 @@ nav>a[selected] {
 
   nav {
     font-size: .8rem;
+  }
+}
+
+@media screen and (min-device-width: 769px) {
+  #drawer[open] {
+    width: 340px;
+  }
+
+  #drawer:not([open]) {
+    width: 40px;
   }
 }

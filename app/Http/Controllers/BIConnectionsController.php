@@ -62,6 +62,7 @@ class BIConnectionsController extends Controller
   public static function getDB()
   {
     $database_name = "client_" . session('db_driver');
+    // la key 'db_client_name' deve corrispondere alla key memorizzata in database.php
     session(['db_client_name' => $database_name]);
     // dump($database_name);
     Config::set([
@@ -69,7 +70,9 @@ class BIConnectionsController extends Controller
       "database.connections.{$database_name}.host" => session('db_host'),
       "database.connections.{$database_name}.port" => session('db_port'),
       "database.connections.{$database_name}.dsn" => session('db_dsn'),
-      "database.connections.{$database_name}.database" => session('db_schema'),
+      // "database.connections.{$database_name}.database" => session('db_schema'),
+      // TODO: andrà implementato un nome schema di gaiaBi al posto di decisyon_cache
+      "database.connections.{$database_name}.database" => [session('db_schema'), 'decisyon_cache'],
       "database.connections.{$database_name}.username" => session('db_username'),
       "database.connections.{$database_name}.password" => session('db_password'),
     ]);
