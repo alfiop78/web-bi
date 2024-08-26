@@ -5,6 +5,8 @@ namespace App\Classes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Exception;
+// aggiunta per utilizzare Config per la connessione a differenti db
+use App\Http\Controllers\BIConnectionsController;
 
 class Cube
 {
@@ -45,6 +47,7 @@ class Cube
     // ...quindi $this->process->{fields} sarà sempre presente
     $this->fields = $this->process->{"fields"};
     $this->hierarchiesTimeLevel = $this->process->{"hierarchiesTimeLevel"};
+    BIConnectionsController::getDB();
   }
 
   public function __set($prop, $value)
@@ -109,13 +112,29 @@ class Cube
     // dd($this->select_clause);
   }
 
+  private function ifNullOperator()
+  {
+    switch (session('db_driver')) {
+      case 'odbc':
+        return 'NVL';
+        break;
+      case 'mysql':
+        return 'IFNULL';
+        break;
+      default:
+        break;
+    }
+  }
+
   public function metrics_new()
   {
     // metriche di base
     $this->report_metrics = [];
+    dd(SELF::ifNullOperator());
     foreach ($this->baseMeasures as $value) {
       // $metric = "\nROUND(NVL({$value->aggregateFn}({$value->SQL}), 0),4) AS '{$value->alias}'";
-      $metric = "\nNVL({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
+      // $metric = "\nNVL({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
+      $metric = "\n" . SELF::ifNullOperator() . "({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
       $this->report_metrics[$this->factId][] = $metric;
       // $metrics_base[] = $metric;
       if (property_exists($this, 'sql_info')) {
@@ -125,7 +144,8 @@ class Cube
       // $metrics_base_datamart[] = "\nNVL({$value->aggregateFn}({$this->baseTableName}.'{$value->alias}'), 0) AS '{$value->alias}'";
 
       // $this->datamart_baseMeasures[] = "\nNVL({$value->aggregateFn}({$value->field}), 0) AS '{$value->alias}'";
-      $this->datamart_baseMeasures[] = "NVL({$value->alias},0) AS '{$value->alias}'";
+      // $this->datamart_baseMeasures[] = "NVL({$value->alias},0) AS '{$value->alias}'";
+      $this->datamart_baseMeasures[] = SELF::ifNullOperator() . "({$value->alias},0) AS '{$value->alias}'";
     }
     // dd($this->report_metrics);
 
@@ -271,13 +291,23 @@ class Cube
     if (!is_null($this->report_filters[$this->factId])) $sql .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
     $sql .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
-    // var_dump($sql);
-    $query = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
-    // dd($query);
+    dd($sql);
+    switch (session('db_driver')) {
+      case 'odbc':
+        $createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
+        break;
+      case 'mysql':
+        $createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} AS ($sql);";
+        break;
+      default:
+        break;
+    }
+    // $query = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
+    // dd($createStmt);
     // var_dump($query);
     // elimino la tabella temporanea che sto creando, se già presente
     $this->dropTemporaryTables($this->baseTableName);
-    return DB::connection('vertica_odbc')->statement($query);
+    return DB::connection('vertica_odbc')->statement($createStmt);
   }
 
   // Aggiunta di tabelle "provenienti" dalle metriche avanzate
@@ -329,15 +359,15 @@ class Cube
         // metrica last-year
         $this->time_sql = [
           ["WB_YEARS.previous", "WB_QUARTERS.year_id"],
-          ["WB_QUARTERS.id_quarter", "WB_MONTHS.quarter_id"],
-          ["WB_MONTHS.id_month", "WB_DATE.month_id"]
+          ["WB_QUARTERS.id", "WB_MONTHS.quarter_id"],
+          ["WB_MONTHS.id", "WB_DATE.month_id"]
         ];
         break;
       case "last-month":
         // metrica last-month
         $this->time_sql = [
-          ["WB_YEARS.id_year", "WB_QUARTERS.year_id"],
-          ["WB_QUARTERS.id_quarter", "WB_MONTHS.quarter_id"],
+          ["WB_YEARS.id", "WB_QUARTERS.year_id"],
+          ["WB_QUARTERS.id", "WB_MONTHS.quarter_id"],
           ["WB_MONTHS.last", "WB_DATE.month_id"]
         ];
         break;
@@ -352,15 +382,15 @@ class Cube
     switch ($timingFunction) {
       case "last-year":
         $this->time_sql = [
-          ["WB_YEARS.id_year", "WB_QUARTERS.year_id"],
-          ["WB_QUARTERS.id_quarter", "WB_MONTHS.quarter_id"],
+          ["WB_YEARS.id", "WB_QUARTERS.year_id"],
+          ["WB_QUARTERS.id", "WB_MONTHS.quarter_id"],
           ["WB_MONTHS.last", "WB_DATE.month_id"]
         ];
         break;
       case "last-month":
         $this->time_sql = [
-          ["WB_YEARS.id_year", "WB_QUARTERS.year_id"],
-          ["WB_QUARTERS.id_quarter", "WB_MONTHS.quarter_id"],
+          ["WB_YEARS.id", "WB_QUARTERS.year_id"],
+          ["WB_QUARTERS.id", "WB_MONTHS.quarter_id"],
           ["WB_MONTHS.previous", "WB_DATE.month_id"]
         ];
         break;
@@ -404,9 +434,9 @@ class Cube
           }
         } else {
           $this->time_sql = [
-            ["WB_YEARS.id_year", "WB_QUARTERS.year_id"],
-            ["WB_QUARTERS.id_quarter", "WB_MONTHS.quarter_id"],
-            ["WB_MONTHS.id_month", "WB_DATE.month_id"]
+            ["WB_YEARS.id", "WB_QUARTERS.year_id"],
+            ["WB_QUARTERS.id", "WB_MONTHS.quarter_id"],
+            ["WB_MONTHS.id", "WB_DATE.month_id"]
           ];
         }
         // dd($this->time_sql);

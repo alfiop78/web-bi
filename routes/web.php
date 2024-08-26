@@ -72,12 +72,12 @@ Route::get('/create-dashboard', function () {
 Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']);
 // recupero elenco tabelle dello schema selezionato
 Route::get('/fetch_api/schema/{schema}/tables', [MapDatabaseController::class, 'tables'])->name('web_bi.fetch_api.tables');
+// verifica tabelle TIME
+Route::get('/fetch_api/time/exists', [MapDatabaseController::class, 'timeDimensionExists'])->name('web_bi.fetch_api.timeExists');
 
 // recupero il DESCRIBE della tabella
 // viene utilizzata dalla request getTable() e altre fn in init-responsive.js
 Route::get('/fetch_api/{schema}/schema/{table}/table_info', [MapDatabaseController::class, 'table_info'])->name('web_bi.fetch_api.table_info');
-// utilizzata da checkSessionStorage()
-Route::get('/fetch_api/{schema}/schema/{table}/tables_info', [MapDatabaseController::class, 'tables_info'])->name('web_bi.fetch_api.tables_info');
 
 // recupero il DESCRIBE della tabella
 Route::get('/fetch_api/{schema}/schema/{table}/table/{column}/column_name', [MapDatabaseController::class, 'columns_info'])->name('web_bi.fetch_api.columns_info');

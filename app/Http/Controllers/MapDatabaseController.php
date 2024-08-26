@@ -14,6 +14,8 @@ use App\Classes\Cube;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+// aggiunta per utilizzare create table
+use Illuminate\Database\Schema\Blueprint;
 // aggiunta per utilizzare Config per la connessione a differenti db
 use App\Http\Controllers\BIConnectionsController;
 
@@ -39,7 +41,7 @@ class MapDatabaseController extends Controller
     // dd($schemaList);
 
     // dump(Schema::connection("mysql")->hasTable("bi_sheets"));
-    // dump(Schema::connection("vertica_odbc")->hasTable("decisyon_cache.WB_DATE"));
+    // dd(Schema::connection("vertica_odbc")->hasTable("decisyon_cache.WB_DATE"));
     // dump(Schema::connection("vertica_odbc")->hasTable("WB_DATE"));
     // dump(Schema::connection("vertica_odbc")->hasTable("automotive_bi_data.Azienda"));
     // dd(DB::connection("vertica_odbc")->getSchemaBuilder()->hasTable("WB_DATE"));
@@ -56,6 +58,12 @@ class MapDatabaseController extends Controller
     return view('web_bi.mapdb')->with('schemata', $schemaList);
     // altro esempio
     // return view('web_bi.mapping')->with(['dimensions' => json_encode($dimensions), 'schemes' => $schemaList]);
+  }
+
+  public function timeDimensionExists()
+  {
+    // dd(Schema::connection('vertica_odbc')->hasTable('decisyon_cache.WB_DATE')); ok
+    return (Schema::connection(session('db_client_name'))->hasTable('WB_DATE'));
   }
 
   // test connessione vertica (senza utilizzo di Eloquen/ORM)
@@ -116,27 +124,36 @@ class MapDatabaseController extends Controller
   // Invocata sia da Mapping (ottengo la lista dei campi della tabella) che da report (dialog-filter)
   public function table_info($schema, $table)
   {
-    /* dd($table); */
-    /* $tables = DB::connection('mysql')->select("DESCRIBE Azienda"); */
-    // $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME
-    //             FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
-    //             ON C.TABLE_ID=CC.TABLE_ID
-    //             AND C.COLUMN_NAME=CC.COLUMN_NAME
-    //             AND CC.CONSTRAINT_TYPE='p'
-    //             WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table'
-    //             ORDER BY c.ordinal_position ASC;");
-
-    // $info = DB::connection('vertica_odbc')->select("SELECT C.column_name, c.is_nullable, types.type_name, c.data_type_length, c.ordinal_position
-    //             FROM COLUMNS C, TYPES types
-    //             WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table' and C.data_type_id = types.type_id
-    //             ORDER BY c.ordinal_position ASC;");
-
-    // TODO: nuova logica session('db_client_name')
-    $info = DB::connection('vertica_odbc')->table('COLUMNS')
-      ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
-      ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
-      ->where('TABLE_SCHEMA', $schema)->where('TABLE_NAME', $table)->orderBy('ordinal_position')->get();
-    return response()->json([$table => $info]);
+    BIConnectionsController::getDB();
+    switch (session('db_driver')) {
+      case 'odbc':
+        $query = DB::connection(session('db_client_name'))->table('COLUMNS')
+          ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
+          ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id');
+        break;
+      case 'mysql':
+        // TEST: da testare
+        $query = DB::connection(session('db_client_name'))->table('information_schema.COLUMNS')
+          ->select(
+            'column_name',
+            'data_type as type_name',
+            DB::raw('CASE WHEN CHARACTER_MAXIMUM_LENGTH IS NOT NULL
+              THEN CHARACTER_MAXIMUM_LENGTH
+              ELSE NUMERIC_PRECISION END as data_type_length'),
+            'ordinal_position'
+          );
+        break;
+      default:
+        break;
+    }
+    // $info = DB::connection('vertica_odbc')->table('COLUMNS')
+    //   ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
+    //   ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
+    //   ->where('TABLE_SCHEMA', $schema)->where('TABLE_NAME', $table)->orderBy('ordinal_position')->get();
+    $query->where('TABLE_SCHEMA', $schema)
+      ->where('TABLE_NAME', $table)->orderBy('ordinal_position');
+    // return response()->json([$table => $info]);
+    return response()->json([$table => $query->get()]);
     // return response()->json($info);
   }
 
@@ -156,49 +173,7 @@ class MapDatabaseController extends Controller
     return Schema::connection(session('db_client_name'))->hasTable("WEB_BI_$id");
   }
 
-  // chiamata con promise.all
-  public function tables_info($schema, $table)
-  {
-    /* dd($table); */
-    /* $tables = DB::connection('mysql')->select("DESCRIBE Azienda"); */
-    /* $info = DB::connection('vertica_odbc')->select("SELECT C.COLUMN_NAME, C.DATA_TYPE, C.IS_NULLABLE, CC.CONSTRAINT_NAME
-                FROM COLUMNS C LEFT JOIN CONSTRAINT_COLUMNS CC
-                ON C.TABLE_ID=CC.TABLE_ID
-                AND C.COLUMN_NAME=CC.COLUMN_NAME
-                AND CC.CONSTRAINT_TYPE='p'
-                WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table'
-                ORDER BY c.ordinal_position ASC;"); */
-
-    // $info = DB::connection('vertica_odbc')->select("SELECT C.column_name, c.is_nullable, types.type_name, c.data_type_length, c.ordinal_position FROM COLUMNS C, TYPES types WHERE C.TABLE_SCHEMA = '$schema' AND C.TABLE_NAME = '$table' and C.data_type_id = types.type_id ORDER BY c.ordinal_position ASC;");
-    // agosto 2024 nuova logica con session('db_client_name')
-    BIConnectionsController::getDB();
-    switch (session('db_driver')) {
-      case 'odbc':
-        $query = DB::connection(session('db_client_name'))->table('COLUMNS')
-          ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
-          ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id');
-        break;
-      case 'mysql':
-        $query = DB::connection(session('db_client_name'))->table('information_schema.COLUMNS')
-          ->select(
-            'column_name',
-            'data_type as type_name',
-            DB::raw('CASE WHEN CHARACTER_MAXIMUM_LENGTH IS NOT NULL
-              THEN CHARACTER_MAXIMUM_LENGTH
-              ELSE NUMERIC_PRECISION END as data_type_length'),
-            'ordinal_position'
-          );
-        break;
-        // TODO: aggiungere sqlsrv e pgsql
-      default:
-        break;
-    }
-    $query->where('TABLE_SCHEMA', $schema)
-      ->where('TABLE_NAME', $table)->orderBy('ordinal_position');
-    // dd($query->get());
-    return response()->json([$table => $query->get()]);
-  }
-
+  // 26.08.2024 Non ancora implementata da JS
   public function columns_info($schema, $table, $column)
   {
     /* dd($table); */
@@ -223,16 +198,30 @@ class MapDatabaseController extends Controller
     return response()->json($data);
   }
 
+  // 26.08.2024 Non ancora implementata da JS
   // ottengo valori distinti per il field selezionato (dialog-filter)
   public function distinct_values($schema, $table, $field)
   {
-    $values = DB::connection('vertica_odbc')->table($schema . "." . $table)->distinct()->orderBy($field, 'asc')->limit(500)->get($field);
+    // TEST: 26.08.2024 da testare
+    $values = DB::connection(session('db_client_name'))
+      ->table($schema . "." . $table)->distinct()
+      ->orderBy($field, 'asc')->limit(500)->get($field);
     return response()->json($values);
   }
 
   private function dropTIMEtables()
   {
     // TODO: nuova logica session('db_client_name')
+    BIConnectionsController::getDB();
+    switch (session('db_driver')) {
+      case 'odbc':
+        break;
+      case 'mysql':
+        break;
+      default:
+        break;
+    }
+    // dd(Schema::connection(session('db_client_name'))->hasTable('WB_DATE'));
     if (Schema::connection("vertica_odbc")->hasTable("WB_DATE")) {
       if (!DB::connection('vertica_odbc')->statement("ALTER TABLE decisyon_cache.WB_DATE DROP CONSTRAINT fx_months;")) {
         if (!Schema::connection("vertica_odbc")->drop("decisyon_cache.WB_DATE")) {
@@ -252,7 +241,7 @@ class MapDatabaseController extends Controller
     }
   }
 
-  private function web_bi_time_year($start, $end)
+  private function wb_years($start, $end)
   {
     $yearsInterval = new DateInterval('P1Y');
     $yearPeriod = new DatePeriod($start, $yearsInterval, $end);
@@ -262,26 +251,39 @@ class MapDatabaseController extends Controller
       $years[(int) $date->format('Y')] = (int) $currDate->sub($yearsInterval)->format('Y');
     }
     // dd($years);
+    if (session('db_driver') === 'odbc') {
+      $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_YEARS (
+        id INTEGER PRIMARY KEY,
+        previous INTEGER,
+        year CHAR(6) NOT NULL) INCLUDE SCHEMA PRIVILEGES";
+      $create_stmt = DB::connection(session('db_client_name'))->statement($sql);
+    } else {
+      $create_stmt = Schema::connection(session('db_client_name'))
+        ->create('WB_YEARS', function (Blueprint $table) {
+          $table->unsignedBigInteger('id')->primary();
+          $table->unsignedSmallInteger('previous');
+          $table->char('year', 6)->nullable(false);
+        });
+    }
+    // $create_stmt : null tabella creata correttamente
+    // dump(config("database.connections.client_mysql.database"));
+    // dd(Schema::connection(session('db_client_name'))->hasTable('WB_YEARS'));
+    // dd($create_stmt);
     // la tabella non esiste, la creo
-    $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_YEARS (
-    id_year INTEGER PRIMARY KEY NOT NULL,
-    previous INTEGER,
-    year CHAR(6) NOT NULL) INCLUDE SCHEMA PRIVILEGES";
-    // $result_create = DB::connection('vertica_odbc')->statement($sql);
-    if (!DB::connection('vertica_odbc')->statement($sql)) {
-      // $result : null tabella creata correttamente
+    if (!$create_stmt) {
       foreach ($years as $currentYear => $lastYear) {
-        DB::connection('vertica_odbc')->table('decisyon_cache.WB_YEARS')->insert([
-          'id_year' => $currentYear,
+        DB::connection(session('db_client_name'))->table('decisyon_cache.WB_YEARS')->insert([
+          'id' => $currentYear,
           'previous' => $lastYear,
           'year' => "Y {$currentYear}"
         ]);
       }
-      return DB::connection('vertica_odbc')->statement('COMMIT;');
+      // return DB::connection(session('db_client_name'))->statement('COMMIT;');
+      // DB::connection(session('db_client_name'))->statement('COMMIT;');
     }
   }
 
-  private function web_bi_time_quarter($start, $end)
+  private function wb_quarters($start, $end)
   {
     $interval = new DateInterval('P3M');
     $period = new DatePeriod($start, $interval, $end);
@@ -298,7 +300,7 @@ class MapDatabaseController extends Controller
 
       // dd($currDate, $previous_quarter_id);
       $json->{$quarter_id} = (object) [
-        "id_quarter" => $quarter_id,
+        "id" => $quarter_id,
         "quarter" => "Q {$quarter}",
         "previous" => $previous_quarter_id, // quarter 3 mesi precedenti
         "last" => $last_year,
@@ -306,30 +308,44 @@ class MapDatabaseController extends Controller
       ];
     }
 
-    $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_QUARTERS (
-      id_quarter INTEGER PRIMARY KEY NOT NULL,
-      quarter CHAR(3) NOT NULL,
-      previous INTEGER,
-      last INTEGER,
-      year_id integer NOT NULL CONSTRAINT fx_years REFERENCES decisyon_cache.WB_YEARS (id_year)
-    ) INCLUDE SCHEMA PRIVILEGES";
-    // $result_create = DB::connection('vertica_odbc')->statement($sql);
-    if (!DB::connection('vertica_odbc')->statement($sql)) {
+    if (session('db_driver') === 'odbc') {
+      $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_QUARTERS (
+        id INTEGER PRIMARY KEY,
+        quarter CHAR(3) NOT NULL,
+        previous INTEGER,
+        last INTEGER,
+        year_id integer NOT NULL CONSTRAINT fx_years REFERENCES decisyon_cache.WB_YEARS (id)
+      ) INCLUDE SCHEMA PRIVILEGES";
+      $create_stmt = DB::connection('vertica_odbc')->statement($sql);
+    } else {
+      $create_stmt = Schema::connection(session('db_client_name'))
+        ->create('WB_QUARTERS', function (Blueprint $table) {
+          $table->unsignedBigInteger('id')->primary();
+          $table->char('quarter', 3)->nullable(false);
+          $table->unsignedMediumInteger('previous');
+          $table->unsignedMediumInteger('last');
+          $table->foreignId('year_id')->nullable(false)->constrained('WB_YEARS');
+        });
+    }
+    // dd($create_stmt);
+
+    if (!$create_stmt) {
       // $result : null tabella creata correttamente
       foreach ($json as $quarter => $value) {
-        DB::connection('vertica_odbc')->table('decisyon_cache.WB_QUARTERS')->insert([
-          'id_quarter' => $quarter,
+        DB::connection(session('db_client_name'))->table('decisyon_cache.WB_QUARTERS')->insert([
+          'id' => $quarter,
           'quarter' => $value->quarter,
           'previous' => $value->previous,
           'last' => $value->last,
           'year_id' => $value->year_id
         ]);
       }
-      return DB::connection('vertica_odbc')->statement('COMMIT;');
+      // return DB::connection(session('db_client_name'))->statement('COMMIT;');
+      // DB::connection(session('db_client_name'))->statement('COMMIT;');
     }
   }
 
-  private function web_bi_time_month($start, $end)
+  private function wb_months($start, $end)
   {
     $interval = new DateInterval('P1M');
     $period = new DatePeriod($start, $interval, $end);
@@ -339,37 +355,51 @@ class MapDatabaseController extends Controller
       // calcolo il quarter
       $quarter = ceil($currDate->format('n') / 3);
       $json->{$months->format('Ym')} = (object) [
-        "id_month" => (int) $months->format('Ym'),
+        "id" => (int) $months->format('Ym'),
         "month" => $months->format('F'),
         "previous" => (int) $currDate->sub(new DateInterval('P1M'))->format('Ym'),
         "last" => (int) $currDate->sub(new DateInterval('P1Y'))->format('Ym'),
         "quarter_id" => (int) "{$currDate->format('Y')}0{$quarter}"
       ];
     }
-    // la tabella non esiste, la creo
-    $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_MONTHS (
-      id_month INTEGER PRIMARY KEY NOT NULL,
-      month VARCHAR NOT NULL,
-      previous INTEGER,
-      last INTEGER,
-      quarter_id INTEGER NOT NULL CONSTRAINT fx_quarters REFERENCES decisyon_cache.WB_QUARTERS (id_quarter)
-      ) INCLUDE SCHEMA PRIVILEGES";
-    if (!DB::connection('vertica_odbc')->statement($sql)) {
+
+    if (session('db_driver') === 'odbc') {
+      $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_MONTHS (
+        id INTEGER PRIMARY KEY,
+        month VARCHAR NOT NULL,
+        previous INTEGER,
+        last INTEGER,
+        quarter_id INTEGER NOT NULL CONSTRAINT fx_quarters REFERENCES decisyon_cache.WB_QUARTERS (id)
+        ) INCLUDE SCHEMA PRIVILEGES";
+      $create_stmt = DB::connection(session('db_client_name'))->statement($sql);
+    } else {
+      // la tabella non esiste, la creo
+      $create_stmt = Schema::connection(session('db_client_name'))
+        ->create('WB_MONTHS', function (Blueprint $table) {
+          $table->unsignedBigInteger('id')->primary();
+          $table->char('month')->nullable();
+          $table->unsignedMediumInteger('previous');
+          $table->unsignedMediumInteger('last');
+          $table->foreignId('quarter_id')->nullable(false)->constrained('WB_QUARTERS');
+        });
+    }
+    if (!$create_stmt) {
       // $result : null tabella creata correttamente
       foreach ($json as $month_id => $value) {
-        DB::connection('vertica_odbc')->table('decisyon_cache.WB_MONTHS')->insert([
-          'id_month' => $month_id,
+        DB::connection(session('db_client_name'))->table('decisyon_cache.WB_MONTHS')->insert([
+          'id' => $month_id,
           'month' => $value->month,
           'previous' => $value->previous,
           'last' => $value->last,
           'quarter_id' => $value->quarter_id
         ]);
       }
-      return DB::connection('vertica_odbc')->statement('COMMIT;');
+      // return DB::connection(session('db_client_name'))->statement('COMMIT;');
+      // DB::connection(session('db_client_name'))->statement('COMMIT;');
     }
   }
 
-  private function web_bi_time($start, $end)
+  private function wb_date($start, $end)
   {
     $interval = new DateInterval('P1D');
     $period = new DatePeriod($start, $interval, $end);
@@ -379,7 +409,7 @@ class MapDatabaseController extends Controller
       // calcolo il quarter
       $quarter = ceil($currDate->format('n') / 3);
       $json->{$currDate->format('Y-m-d')} = (object) [
-        "id_date" => $currDate->format('Y-m-d'),
+        "id" => $currDate->format('Y-m-d'),
         "date" => $currDate->format('Y-m-d'),
         // "trans_ly" => $currDate->sub(new DateInterval('P1Y'))->format('Y-m-d'),
         "weekday" => $currDate->format('l'),
@@ -408,23 +438,42 @@ class MapDatabaseController extends Controller
         "previous" => $currDate->sub(new DateInterval('P1D'))->format('Y-m-d')
       ];
     }
-    // TODO: utilizzare il complex datatype ROW (vertica) per gli OBJECT, ad esempio la colonna 'last', per
-    // creare le colonne come "strutture dati"
-    // Per recuperarne i valori non bisogna utilizzare MapJSONExtractor ma la sintassi xxx.yyy
-    $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_DATE (
-        id_date DATE NOT NULL PRIMARY KEY,
+
+    if (session('db_driver') === 'odbc') {
+      // TODO: utilizzare il complex datatype ROW (vertica) per gli OBJECT, ad esempio la colonna 'last', per
+      // creare le colonne come "strutture dati"
+      // Per recuperarne i valori non bisogna utilizzare MapJSONExtractor ma la sintassi xxx.yyy
+      $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_DATE (
+        id DATE PRIMARY KEY,
         date DATE NOT NULL,
         year INTEGER,
         quarter_id INTEGER,
         quarter VARCHAR,
-        month_id INTEGER NOT NULL CONSTRAINT fx_months REFERENCES decisyon_cache.WB_MONTHS (id_month),
+        month_id INTEGER NOT NULL CONSTRAINT fx_months REFERENCES decisyon_cache.WB_MONTHS (id),
         month VARCHAR,
         week CHAR(2),
         day VARCHAR,
         previous DATE,
         last DATE
         ) INCLUDE SCHEMA PRIVILEGES";
-    if (!DB::connection('vertica_odbc')->statement($sql)) {
+      $create_stmt = DB::connection(session('db_client_name'))->statement($sql);
+    } else {
+      $create_stmt = Schema::connection(session('db_client_name'))
+        ->create('WB_DATE', function (Blueprint $table) {
+          $table->date('id')->primary();
+          $table->date('date')->nullable(false);
+          $table->unsignedSmallInteger('year');
+          $table->unsignedMediumInteger('quarter_id');
+          $table->char('quarter');
+          $table->foreignId('month_id')->nullable(false)->constrained('WB_MONTHS');
+          $table->char('month');
+          $table->char('week', 2);
+          $table->char('day');
+          $table->date('previous');
+          $table->date('last');
+        });
+    }
+    if (!$create_stmt) {
       foreach ($json as $date => $value) {
         // $str = json_encode($value);
         // dd(json_encode($value->previous_json));
@@ -433,8 +482,8 @@ class MapDatabaseController extends Controller
         // NOTE: da vertica 11 è possibile fare la INSERT INTO con più record con la seguente sintassi:
         // INSERT INTO nometabella (field1, field2) VALUES (1, 'test'), (2, 'test'), (3, 'test')....
 
-        DB::connection('vertica_odbc')->table('decisyon_cache.WB_DATE')->insert([
-          'id_date' => $date,
+        DB::connection(session('db_client_name'))->table('decisyon_cache.WB_DATE')->insert([
+          'id' => $date,
           'date' => $date,
           'year' => $value->year,
           'quarter_id' => (int) $value->quarter_id,
@@ -451,28 +500,37 @@ class MapDatabaseController extends Controller
         ]);
       }
     }
-    return DB::connection('vertica_odbc')->statement('COMMIT;');
+    // return DB::connection(session('db_client_name'))->statement('COMMIT;');
+    // DB::connection(session('db_client_name'))->statement('COMMIT;');
   }
 
   public function dimensionTIME()
   {
     // se la tabella è già presente la elimino
     $this->dropTIMEtables();
-    $start = new DateTime('2019-01-01 00:00:00');
-    $end   = new DateTime('2025-01-01 00:00:00');
+    // $start = new DateTime('2019-01-01 00:00:00');
+    // $end   = new DateTime('2025-01-01 00:00:00');
+    $start = new DateTime('2024-06-01 00:00:00');
+    $end   = new DateTime('2024-08-01 00:00:00');
 
-    $year_result = $this->web_bi_time_year($start, $end);
-    if (!$year_result) {
+    $this->wb_years($start, $end);
+    $this->wb_quarters($start, $end);
+    $this->wb_months($start, $end);
+    $this->wb_date($start, $end);
+    return true;
+
+    /* $year_result = $this->wb_years($start, $end);
+    if ($year_result) {
       // year inseriti
-      $quarter_result = $this->web_bi_time_quarter($start, $end);
-      if (!$quarter_result) {
-        $month_result = $this->web_bi_time_month($start, $end);
-        if (!$month_result) {
-          $date_result = $this->web_bi_time($start, $end);
+      $quarter_result = $this->wb_quarters($start, $end);
+      if ($quarter_result) {
+        $month_result = $this->wb_months($start, $end);
+        if ($month_result) {
+          $date_result = $this->wb_date($start, $end);
           return $date_result;
         }
       }
-    }
+    } */
   }
 
   // Elenco delle tabelle dello schema selezionato
@@ -483,23 +541,23 @@ class MapDatabaseController extends Controller
     // connessione a vertica per recuperare l'elenco delle tabelle
     // $tables = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='$schema' ORDER BY TABLE_NAME ASC;");
     BIConnectionsController::getDB();
-    // dump(session('db_driver'));
-    // dump(session('db_client_name'));
-    // TODO: provare a convertirle con QueryBuilder
     switch (session('db_driver')) {
       case 'odbc':
-        $tables = DB::connection(session('db_client_name'))->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='$schema' ORDER BY TABLE_NAME ASC;");
+        $query = DB::connection(session('db_client_name'))->table('V_CATALOG.ALL_TABLES')
+          ->where('SCHEMA_NAME', $schema);
         break;
       case 'mysql':
         // $tables = Schema::connection(session('db_client_name'))->getAllTables();
-        // $tables = DB::connection(session('db_client_name'))->table("information_schema.tables")->select("TABLE_NAME")->where('TABLE_SCHEMA', $schema)->OrderBy("TABLE_NAME")->get();
-        $tables = DB::connection(session('db_client_name'))->select("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_SCHEMA='$schema' ORDER BY TABLE_NAME ASC;");
+        $query = DB::connection(session('db_client_name'))->table('information_schema.tables')
+          ->where('TABLE_SCHEMA', $schema);
+        // $tables = DB::connection(session('db_client_name'))->select("SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_SCHEMA='$schema' ORDER BY TABLE_NAME ASC;");
       default:
         break;
     }
-    // dd($tables);
-    /* $tables = DB::connection('vertica')->select("SELECT * FROM automotive_bi_data.Azienda"); */
-    return response()->json($tables);
+    $query->addSelect('TABLE_NAME');
+    $query->orderBy('TABLE_NAME');
+    // dd($query->get());
+    return response()->json($query->get());
   }
 
   public function copy_table($fromId, $toId)
@@ -511,9 +569,9 @@ class MapDatabaseController extends Controller
       // echo ("tabella $toId esiste");
       Schema::connection('vertica_odbc')->drop("decisyon_cache.WEB_BI_{$toId}");
     }
-    // TODO: nuova logica session('db_client_name')
+    // TODO: nuova logica session('db_client_name').
+    // Per mysql và utilizzato CREATE TABLE ... LIKE (vedere documentazione)
     $sql = "SELECT COPY_TABLE ('decisyon_cache.WEB_BI_{$fromId}','decisyon_cache.WEB_BI_{$toId}');";
-    // NOTE: forse può essere utilizzato ->select invece di ->statement
     $copy = DB::connection('vertica_odbc')->statement($sql);
     return $copy;
   }
@@ -540,7 +598,7 @@ class MapDatabaseController extends Controller
       case 'mysql':
         $queryColumns = DB::connection(session('db_client_name'))->table('information_schema.COLUMNS')->select('column_name');
         break;
-      // TODO: implementazione altri DB
+        // TODO: implementazione altri DB
       default:
         break;
     }

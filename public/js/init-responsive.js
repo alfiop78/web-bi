@@ -1090,7 +1090,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       WorkBook.activeTable = objects.props.key;
       // se la tabella è già presente in sessionStorage non rieseguo la query
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) {
-        urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/tables_info');
+        urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info');
       }
     }
     // in app.getTables() c'è il controllo se sono presenti urls da scaricare
@@ -1839,16 +1839,17 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       });
   } */
 
+  // creo la struttura tabelle nella dialog filter
   app.openDialogFilter = async () => {
-    // creo la struttura tabelle per poter creare nuovi filtri
-    let urls = [];
-    // TODO: in ciclo serve solo il tableId
-    for (const [alias, objects] of WorkBook.workbookMap) {
+    // NOTE: commentata il 26.08.2024 perchè l'elenco delle tabelle viene memorizzato
+    // in sessionStorage al momento dell'apertura del DataModel
+    // let urls = [];
+    /* for (const [alias, objects] of WorkBook.workbookMap) {
       // for (const [alias, object] of WorkBook.tablesModel) {
       WorkBook.activeTable = objects.props.key;
       urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info');
-    }
-    // promiseAll per recuperare tutte le tabelle del canvas, successivamente vado a popolare la dialogFilters con i dati ricevuti
+    } */
+    // popolo la dialogFilter
     app.addWorkBookContent();
     app.dialogFilters.showModal();
   }
@@ -2264,8 +2265,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   /* NOTE: FETCH API */
 
-  // TODO: potrei creare un unica function (in supportFn.js) che esegue la FETCH API passandogli la url
-  // recupero le tabelle del database in base allo schema selezionato
+  // richiamato da handlerSVGDragEnd quando viene aggiunta una nuova tabella al DataModel
+  // (viene richiamata anche da handlerTimeDimension)
   app.getTable = async () => {
     return await fetch('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info')
       .then((response) => {
@@ -3318,4 +3319,32 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         console.error(err);
       });
   }
+
+  // verifica esistenza dimensione time su DB
+  //
+  app.timeDimensionExists = async () => {
+    const url = 'fetch_api/time/exists';
+    await fetch(url)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.text())
+      .then((response) => {
+        console.log(response);
+        App.closeConsole();
+        if (response) {
+          App.showConsole('Tabelle TIME presenti', 'done', 3000);
+        } else {
+          // debugger;
+          App.showConsole('Tabelle TIME non presenti, da creare', 'warning', 3000);
+          document.querySelector("#btn-time-dimension").disabled = false;
+        }
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+  }
+  app.timeDimensionExists();
 })();

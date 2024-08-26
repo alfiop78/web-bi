@@ -363,11 +363,11 @@
                   <section class="col grid-6">
                     <ul id="time-fields">
                       <!-- TODO: creare qui la struttura delle tabelle TIME con <summary> e <details> -->
-                      <li class="select-list content" data-field="id_year" data-field-ds="year" data-table="WB_YEARS" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
-                      <li class="select-list content" data-field="id_quarter" data-field-ds="quarter" data-table="WB_QUARTERS" data-datatype="integer" data-fn="handlerTimeField">QUARTER <small>Es.: 202302</small></li>
-                      <li class="select-list content" data-field="id_month" data-field-ds="month" data-table="WB_MONTHS" data-datatype="integer" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
+                      <li class="select-list content" data-field="id" data-field-ds="year" data-table="WB_YEARS" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
+                      <li class="select-list content" data-field="id" data-field-ds="quarter" data-table="WB_QUARTERS" data-datatype="integer" data-fn="handlerTimeField">QUARTER <small>Es.: 202302</small></li>
+                      <li class="select-list content" data-field="id" data-field-ds="month" data-table="WB_MONTHS" data-datatype="integer" data-fn="handlerTimeField">MONTH <small>Es.: 202312</small></li>
                       <!-- <li data-field="week_id" data-datatype="integer" data-fn="handlerTimeField">WEEK <small>Es.: 202312</small></li> -->
-                      <li class="select-list content" data-field="id_date" data-field-ds="id_date" data-table="WB_DATE" data-datatype="date" data-fn="handlerTimeField">DATE <small>Es.: 2023-12-31</small></li>
+                      <li class="select-list content" data-field="id" data-field-ds="date" data-table="WB_DATE" data-datatype="date" data-fn="handlerTimeField">DATE <small>Es.: 2023-12-31</small></li>
                     </ul>
                   </section>
                   <section class="dlg-content col grid-6">
@@ -798,10 +798,10 @@
                                 <image id="time" href="{{ asset('/images/access_time_filled_865858_18dp.svg') }}" height="18" width="18"></image>
                               </g>
                               <g id="time-dimension">
-                                <desc id="WB_YEARS" data-table="WB_YEARS" data-alias="WB_YEARS" data-field="id_year" data-table-join="WB_QUARTERS" data-schema="decisyon_cache" data-joins="0">wb_years</desc>
-                                <desc id="WB_QUARTERS" data-table="WB_QUARTERS" data-alias="WB_QUARTERS" data-join-field="year_id" data-field="id_quarter" data-table-join="WB_MONTHS" data-related-join="WB_YEARS" data-schema="decisyon_cache" data-joins="1">wb_quarters</desc>
-                                <desc id="WB_MONTHS" data-table="WB_MONTHS" data-alias="WB_MONTHS" data-join-field="quarter_id" data-field="id_month" data-table-join="WB_DATE" data-related-join="WB_QUARTERS" data-schema="decisyon_cache" data-joins="1">wb_months</desc>
-                                <desc id="WB_DATE" data-table="WB_DATE" data-alias="WB_DATE" data-field="id_date" data-join-field="month_id" data-related-join="WB_MONTHS" data-schema="decisyon_cache" data-joins="1">wb_date</desc>
+                                <desc id="WB_YEARS" data-table="WB_YEARS" data-alias="WB_YEARS" data-field="id" data-table-join="WB_QUARTERS" data-schema="decisyon_cache" data-joins="0">wb_years</desc>
+                                <desc id="WB_QUARTERS" data-table="WB_QUARTERS" data-alias="WB_QUARTERS" data-join-field="year_id" data-field="id" data-table-join="WB_MONTHS" data-related-join="WB_YEARS" data-schema="decisyon_cache" data-joins="1">wb_quarters</desc>
+                                <desc id="WB_MONTHS" data-table="WB_MONTHS" data-alias="WB_MONTHS" data-join-field="quarter_id" data-field="id" data-table-join="WB_DATE" data-related-join="WB_QUARTERS" data-schema="decisyon_cache" data-joins="1">wb_months</desc>
+                                <desc id="WB_DATE" data-table="WB_DATE" data-alias="WB_DATE" data-field="id" data-join-field="month_id" data-related-join="WB_MONTHS" data-schema="decisyon_cache" data-joins="1">wb_date</desc>
                               </g>
                               <foreignObject id="btn-join" x="0" y="0" width="26" height="18">
                                 <button class="material-icons-round md-18">join_inner</button>
