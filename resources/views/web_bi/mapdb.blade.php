@@ -343,9 +343,9 @@
               <h5 class="title moveable">Titolo Sheet</h5>
               <section class="dlg-content">
                 <section class="row">
-                  <div class="col grid-12">
+                  <section class="col grid-12">
                     <input type="text" id="input-sheet-name" placeholder="Nome" value="" autocomplete="on" />
-                  </div>
+                  </section>
                 </section>
               </section>
               <section class="dlg-buttons">

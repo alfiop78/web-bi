@@ -552,6 +552,11 @@ class MapDatabaseController extends Controller
   {
     // dd($fromId, $toId);
     // TODO: se la tabella di destinazione già esiste la elimino
+    BIConnectionsController::getDB();
+    dump(config("database.connections.client_mysql.database"));
+    dd(Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$toId}"));
+
+
     if (Schema::connection('vertica_odbc')->hasTable("WEB_BI_{$toId}")) {
       // tabella esiste
       // echo ("tabella $toId esiste");

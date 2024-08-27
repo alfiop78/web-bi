@@ -35,6 +35,7 @@ class Cube
   public $compositeMeasures = [];
   public $queries = [];
   private $time_sql = [];
+  private $ifNullOperator;
 
   function __construct($process)
   {
@@ -48,6 +49,16 @@ class Cube
     $this->fields = $this->process->{"fields"};
     $this->hierarchiesTimeLevel = $this->process->{"hierarchiesTimeLevel"};
     BIConnectionsController::getDB();
+    switch (session('db_driver')) {
+      case 'odbc':
+        $this->ifNullOperator = 'NVL';
+        break;
+      case 'mysql':
+        $this->ifNullOperator = 'IFNULL';
+        break;
+      default:
+        break;
+    }
   }
 
   public function __set($prop, $value)
@@ -112,29 +123,15 @@ class Cube
     // dd($this->select_clause);
   }
 
-  private function ifNullOperator()
-  {
-    switch (session('db_driver')) {
-      case 'odbc':
-        return 'NVL';
-        break;
-      case 'mysql':
-        return 'IFNULL';
-        break;
-      default:
-        break;
-    }
-  }
-
   public function metrics_new()
   {
     // metriche di base
     $this->report_metrics = [];
-    dd(SELF::ifNullOperator());
+    // dd(SELF::ifNullOperator());
     foreach ($this->baseMeasures as $value) {
       // $metric = "\nROUND(NVL({$value->aggregateFn}({$value->SQL}), 0),4) AS '{$value->alias}'";
       // $metric = "\nNVL({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
-      $metric = "\n" . SELF::ifNullOperator() . "({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
+      $metric = "\n{$this->ifNullOperator}({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
       $this->report_metrics[$this->factId][] = $metric;
       // $metrics_base[] = $metric;
       if (property_exists($this, 'sql_info')) {
@@ -145,7 +142,7 @@ class Cube
 
       // $this->datamart_baseMeasures[] = "\nNVL({$value->aggregateFn}({$value->field}), 0) AS '{$value->alias}'";
       // $this->datamart_baseMeasures[] = "NVL({$value->alias},0) AS '{$value->alias}'";
-      $this->datamart_baseMeasures[] = SELF::ifNullOperator() . "({$value->alias},0) AS '{$value->alias}'";
+      $this->datamart_baseMeasures[] = "{$this->ifNullOperator}({$value->alias},0) AS '{$value->alias}'";
     }
     // dd($this->report_metrics);
 
@@ -228,6 +225,7 @@ class Cube
       // dd($token, $join);
       $this->WHERE_baseTable[$token] = implode(" = ", $join);
     } */
+    dd($this->where_time_clause);
     // dd($this->where_clause, $this->where_time_clause);
   }
 
@@ -259,10 +257,18 @@ class Cube
     // $this->_groupBy .= implode(",\n", $fieldList);
     // dd($this->_groupBy);
     // dd($this->segmented);
-    if (count($this->segmented) > 40) {
-      $segmented = implode(",\n", $this->segmented);
-      // $this->_groupBy .= "\nSEGMENTED BY HASH({$segmented}) ALL NODES";
-      $this->groupby_clause['SEGMENTED'] = "\nSEGMENTED BY HASH({$segmented}) ALL NODES";
+    switch (session('db_driver')) {
+      case 'odbc':
+        if (count($this->segmented) > 40) {
+          $segmented = implode(",\n", $this->segmented);
+          // $this->_groupBy .= "\nSEGMENTED BY HASH({$segmented}) ALL NODES";
+          $this->groupby_clause['SEGMENTED'] = "\nSEGMENTED BY HASH({$segmented}) ALL NODES";
+        }
+        break;
+      case 'mysql':
+        break;
+      default:
+        break;
     }
     // dd($this->_groupBy);
     // dd($this->groupby_clause);
@@ -291,7 +297,7 @@ class Cube
     if (!is_null($this->report_filters[$this->factId])) $sql .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
     $sql .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
-    dd($sql);
+    // dd($sql);
     switch (session('db_driver')) {
       case 'odbc':
         $createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
@@ -307,7 +313,8 @@ class Cube
     // var_dump($query);
     // elimino la tabella temporanea che sto creando, se già presente
     $this->dropTemporaryTables($this->baseTableName);
-    return DB::connection('vertica_odbc')->statement($createStmt);
+    return DB::connection(session('db_client_name'))->statement($createStmt);
+    // return DB::connection('vertica_odbc')->statement($createStmt);
   }
 
   // Aggiunta di tabelle "provenienti" dalle metriche avanzate
@@ -501,10 +508,10 @@ class Cube
       foreach ($advancedMetric as $metric) {
         unset($this->sqlAdvancedMeasures);
         // dd($metric);
-        $groupAdvancedMeasures[$this->factId][$metric->alias] = "NVL({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
+        $groupAdvancedMeasures[$this->factId][$metric->alias] = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
         if (property_exists($this, 'sql_info')) {
           // TODO: testare con un alias contenente spazi
-          $this->json_info_advanced[$tableName]->{'METRICS'}->{"$metric->alias"} = "NVL({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
+          $this->json_info_advanced[$tableName]->{'METRICS'}->{"$metric->alias"} = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
           // dd($this->json_info_advanced);
         }
         // dd($groupAdvancedMeasures);
@@ -514,7 +521,7 @@ class Cube
         // $this->datamart_advancedMeasures[$tableName][$metric->alias] = "\t{$metric->alias} AS {$metric->alias}";
         // $this->datamart_advancedMeasures[] = "{$tableName}.{$metric->alias} AS {$metric->alias}";
 
-        $this->datamart_advancedMeasures[] = "NVL({$metric->alias},0) AS '{$metric->alias}'";
+        $this->datamart_advancedMeasures[] = "{$this->ifNullOperator}({$metric->alias}, 0) AS '{$metric->alias}'";
         // $this->datamart_advancedMeasures[] = "NVL({$metric->aggregateFn}({$metric->alias}), 0) AS {$metric->alias}";
         // aggiungo i filtri presenti nella metrica filtrata ai filtri già presenti sul report
         $this->setFiltersMetricTable_new($metric->filters, $tableName);
@@ -603,17 +610,26 @@ class Cube
     if (array_key_exists($this->factId, $this->filters_metricTable)) $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->filters_metricTable[$this->factId]);
     $this->sqlAdvancedMeasures .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
     $comment = "/*\nCreazione tabella METRIC :\n" . implode("\n", array_keys($advancedMetrics[$this->factId])) . "\n*/\n";
-    $sql = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->sqlAdvancedMeasures);";
-    // dd($sql);
-    var_dump($sql);
+    switch (session('db_driver')) {
+      case 'odbc':
+        $createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS \n($this->sqlAdvancedMeasures);";
+        break;
+      case 'mysql':
+        $createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.$tableName AS \n($this->sqlAdvancedMeasures);";
+        break;
+      default:
+        break;
+    }
+    // dd($createStmt);
+    var_dump($createStmt);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
     if (property_exists($this, 'sql_info')) {
-      $result = ["raw_sql" => nl2br($sql), "format_sql" => $this->json_info_advanced];
+      $result = ["raw_sql" => nl2br($createStmt), "format_sql" => $this->json_info_advanced];
     } else {
       // elimino la tabella temporanea, se esiste, prima di ricrearla
       // La elimino anche in caso di errore nella creazione della tabella temporanea
       $this->dropTemporaryTables($tableName);
-      $result = DB::connection('vertica_odbc')->statement($sql);
+      $result = DB::connection(session('db_client_name'))->statement($createStmt);
       $this->queries[$tableName] = $this->datamart_fields;
       // dd($this->queries);
       /* try {
@@ -649,6 +665,7 @@ class Cube
 
   private function dropTemporaryTables($table)
   {
+    // WARN: da verificare se funziona anche su tabelle temporanee
     if (Schema::connection('vertica_odbc')->hasTable($table)) {
       // tabella esiste
       Schema::connection('vertica_odbc')->drop("decisyon_cache.$table");
@@ -666,11 +683,20 @@ class Cube
     }
     // dd(implode("UNION\n", $union));
     $union_sql = implode("UNION\n", $union);
-    $this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS\n($union_sql);";
+    switch (session('db_driver')) {
+      case 'odbc':
+        $this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS\n($union_sql);";
+        break;
+      case 'mysql':
+        $this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} AS\n($union_sql);";
+        break;
+      default:
+      break;
+    }
     // dd($this->union_clause);
     // var_dump($this->union_clause);
     $this->dropTemporaryTables("union_{$this->report_id}_{$this->datamart_id}");
-    DB::connection('vertica_odbc')->statement($this->union_clause);
+    DB::connection(session('db_client_name'))->statement($this->union_clause);
   }
 
   /* creazione datamart finale:
@@ -680,8 +706,17 @@ class Cube
   {
     $this->distinct_fields();
     $comment = "/*Creazione DATAMART :\ndecisyon_cache.{$this->datamart_name}\n*/\n";
-    $sql = "{$comment}CREATE TABLE decisyon_cache.{$this->datamart_name} INCLUDE SCHEMA PRIVILEGES AS ";
-    $sql .= self::SELECT;
+    switch (session('db_driver')) {
+      case 'odbc':
+        $createStmt = "{$comment}CREATE TABLE decisyon_cache.{$this->datamart_name} INCLUDE SCHEMA PRIVILEGES AS ";
+        break;
+      case 'mysql':
+        $createStmt = "{$comment}CREATE TABLE decisyon_cache.{$this->datamart_name} AS ";
+        break;
+      default:
+      break;
+    }
+    $createStmt .= self::SELECT;
     $fields = [];
     foreach ($this->datamart_fields as $field) {
       $fields[] = "union_{$this->report_id}_{$this->datamart_id}.{$field}";
@@ -690,9 +725,9 @@ class Cube
     // - livelli dimensionali
     // - metriche di base, metriche avanzate e metriche composte
     $mergeElements = array_merge($fields, $this->datamart_baseMeasures, $this->datamart_advancedMeasures, $this->compositeMeasures);
-    $sql .= implode(",\n", $mergeElements);
+    $createStmt .= implode(",\n", $mergeElements);
     // dd($sql);
-    $sql .= self::FROM . "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}";
+    $createStmt .= self::FROM . "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}";
     $joinLEFT = "";
     $ONClause = [];
     foreach ($this->queries as $k => $v) {
@@ -703,12 +738,12 @@ class Cube
       $joinLEFT .= implode("\nAND ", $ONClause);
       unset($ONClause);
     }
-    $sql .= $joinLEFT;
+    $createStmt .= $joinLEFT;
     // var_dump($sql);
     // se il datamart già esiste lo elimino prima di ricrearlo
     $this->dropTemporaryTables($this->datamart_name);
     // TODO: eliminare anche le altre tabelle temporanee, memorizzate in $this->queries
-    DB::connection('vertica_odbc')->statement($sql);
+    DB::connection(session('db_client_name'))->statement($createStmt);
     return $this->report_id;
   }
 } // End Class
