@@ -204,7 +204,22 @@ class Cube
       // dd($join);
       // qui utilizzo la proprietà SQL con implode(' = ', $join->SQL)
       if ($join->type === "TIME") {
+        // dump($join);
         // $this->where_time_clause[$this->factId][$token] = implode(" = ", $join->SQL);
+        if (property_exists($join, 'datatype')) {
+          if (strtolower($join->datatype) === 'int' || strtolower($join->datatype) === 'integer') {
+            switch (session('db_driver')) {
+              case 'odbc':
+                $join->SQL[0] = "TO_CHAR({$join->SQL[0]})::DATE";
+                break;
+              case 'mysql':
+                $join->SQL[0] = "DATE_FORMAT({$join->SQL[0]}, '%Y-%m-%d')";
+                break;
+              default:
+                break;
+            }
+          }
+        }
         $this->where_time_clause[$this->factId][$join->alias] = implode(" = ", $join->SQL);
 
         if (property_exists($this, 'sql_info')) {
@@ -225,7 +240,7 @@ class Cube
       // dd($token, $join);
       $this->WHERE_baseTable[$token] = implode(" = ", $join);
     } */
-    dd($this->where_time_clause);
+    // dd($this->where_time_clause);
     // dd($this->where_clause, $this->where_time_clause);
   }
 
@@ -691,7 +706,7 @@ class Cube
         $this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} AS\n($union_sql);";
         break;
       default:
-      break;
+        break;
     }
     // dd($this->union_clause);
     // var_dump($this->union_clause);
@@ -714,7 +729,7 @@ class Cube
         $createStmt = "{$comment}CREATE TABLE decisyon_cache.{$this->datamart_name} AS ";
         break;
       default:
-      break;
+        break;
     }
     $createStmt .= self::SELECT;
     $fields = [];

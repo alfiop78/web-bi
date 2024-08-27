@@ -2623,16 +2623,20 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     };
     // WARN: solo per vertica in questo caso.
     // qui potrei applicare solo ${table.timeColumn} e poi, tramite laravel db grammar aggiungere la sintassi del db utilizzato
-    const field = (data.timeColumnType === 'date' && data.columnType === 'integer') ?
-      `TO_CHAR(${data.tableAlias}.${data.column})::DATE` : `${data.tableAlias}.${data.column}`;
+
+    // const field = (data.timeColumnType === 'date' && data.columnType === 'integer') ?
+    //   `TO_CHAR(${data.tableAlias}.${data.column})::DATE` : `${data.tableAlias}.${data.column}`;
+
+    // field della Fact
     WorkBook.join = {
       token: token_join,
       value: {
         alias: data.timeTable,
         type: 'TIME',
+        datatype : data.columnType,
         // [DocVenditaDettaglio.DataDocumento, WEB_BI_TIME.date]
         // SQL: [`TO_CHAR(${tableAlias}.${tableColumn})::DATE`, `WEB_BI_TIME.${web_bi_timeField}`],
-        SQL: [field, `${data.timeTable}.${data.timeColumn}`],
+        SQL: [`${data.tableAlias}.${data.column}`, `${data.timeTable}.${data.timeColumn}`],
         factId: WorkBook.activeTable.dataset.factId,
         from: { table: data.timeTable, alias: data.timeTable, field: data.timeColumn },
         to: { table: data.table, alias: data.tableAlias, field: data.column }
