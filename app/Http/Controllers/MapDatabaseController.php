@@ -211,31 +211,27 @@ class MapDatabaseController extends Controller
 
   private function dropTIMEtables()
   {
-    // TODO: nuova logica session('db_client_name')
     BIConnectionsController::getDB();
     switch (session('db_driver')) {
       case 'odbc':
+        $foreignKey = 'CONSTRAINT';
         break;
       case 'mysql':
+        $foreignKey = 'FOREIGN KEY';
         break;
       default:
         break;
     }
-    // dd(Schema::connection(session('db_client_name'))->hasTable('WB_DATE'));
-    if (Schema::connection("vertica_odbc")->hasTable("WB_DATE")) {
-      if (!DB::connection('vertica_odbc')->statement("ALTER TABLE decisyon_cache.WB_DATE DROP CONSTRAINT fx_months;")) {
-        if (!Schema::connection("vertica_odbc")->drop("decisyon_cache.WB_DATE")) {
-          if (Schema::connection("vertica_odbc")->hasTable("WB_MONTHS")) {
-            if (!DB::connection('vertica_odbc')->statement("ALTER TABLE decisyon_cache.WB_MONTHS DROP CONSTRAINT fx_quarters;")) {
-              if (!Schema::connection("vertica_odbc")->drop("decisyon_cache.WB_MONTHS")) {
-                if (Schema::connection('vertica_odbc')->hasTable("WB_QUARTERS")) {
-                  if (!Schema::connection("vertica_odbc")->drop("decisyon_cache.WB_QUARTERS")) {
-                    if (Schema::connection('vertica_odbc')->hasTable("WB_YEARS")) Schema::connection('vertica_odbc')->drop("decisyon_cache.WB_YEARS");
-                  }
-                }
-              }
-            }
-          }
+    if (Schema::connection(session('db_client_name'))->hasTable('WB_DATE')) {
+      DB::connection(session('db_client_name'))->statement("ALTER TABLE decisyon_cache.WB_DATE DROP $foreignKey wb_date_month_id_foreign;");
+      Schema::connection(session('db_client_name'))->drop('decisyon_cache.WB_DATE');
+      if (Schema::connection(session('db_client_name'))->hasTable('WB_MONTHS')) {
+        DB::connection(session('db_client_name'))->statement("ALTER TABLE decisyon_cache.WB_MONTHS DROP $foreignKey wb_months_quarter_id_foreign;");
+        Schema::connection(session('db_client_name'))->drop('decisyon_cache.WB_MONTHS');
+        if (Schema::connection(session('db_client_name'))->hasTable('WB_QUARTERS')) {
+          DB::connection(session('db_client_name'))->statement("ALTER TABLE decisyon_cache.WB_QUARTERS DROP $foreignKey wb_quarters_year_id_foreign;");
+          Schema::connection(session('db_client_name'))->drop('decisyon_cache.WB_QUARTERS');
+          if (Schema::connection(session('db_client_name'))->hasTable('WB_YEARS')) Schema::connection(session('db_client_name'))->drop('decisyon_cache.WB_YEARS');
         }
       }
     }
@@ -250,6 +246,8 @@ class MapDatabaseController extends Controller
       $currDate = new DateTimeImmutable($date->format('Y-m-d'));
       $years[(int) $date->format('Y')] = (int) $currDate->sub($yearsInterval)->format('Y');
     }
+
+    // dd(Schema::connection(session('db_client_name'))->hasTable('WB_YEARS'));
     // dd($years);
     if (session('db_driver') === 'odbc') {
       $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_YEARS (
@@ -297,7 +295,6 @@ class MapDatabaseController extends Controller
       $last_year = (int) "{$currDate->sub(new DateInterval('P1Y'))->format('Y')}0{$quarter}";
       $previous = ceil($currDate->sub(new DateInterval('P3M'))->format('n') / 3);
       $previous_quarter_id = (int) "{$currDate->sub(new DateInterval('P3M'))->format('Y')}0{$previous}";
-
       // dd($currDate, $previous_quarter_id);
       $json->{$quarter_id} = (object) [
         "id" => $quarter_id,
@@ -307,15 +304,16 @@ class MapDatabaseController extends Controller
         "year_id" => (int) $date->format('Y')
       ];
     }
-
+    // dd($json);
     if (session('db_driver') === 'odbc') {
       $sql = "CREATE TABLE IF NOT EXISTS decisyon_cache.WB_QUARTERS (
         id INTEGER PRIMARY KEY,
         quarter CHAR(3) NOT NULL,
         previous INTEGER,
         last INTEGER,
-        year_id integer NOT NULL CONSTRAINT fx_years REFERENCES decisyon_cache.WB_YEARS (id)
+        year_id INTEGER NOT NULL CONSTRAINT wb_quarters_year_id_foreign REFERENCES decisyon_cache.WB_YEARS (id)
       ) INCLUDE SCHEMA PRIVILEGES";
+      // nella foreignId utilizzo gli stessi nomi utilizzati da Laravel (tabella_campo_foreign)
       $create_stmt = DB::connection('vertica_odbc')->statement($sql);
     } else {
       $create_stmt = Schema::connection(session('db_client_name'))
@@ -369,7 +367,7 @@ class MapDatabaseController extends Controller
         month VARCHAR NOT NULL,
         previous INTEGER,
         last INTEGER,
-        quarter_id INTEGER NOT NULL CONSTRAINT fx_quarters REFERENCES decisyon_cache.WB_QUARTERS (id)
+        quarter_id INTEGER NOT NULL CONSTRAINT wb_months_quarter_id_foreign REFERENCES decisyon_cache.WB_QUARTERS (id)
         ) INCLUDE SCHEMA PRIVILEGES";
       $create_stmt = DB::connection(session('db_client_name'))->statement($sql);
     } else {
@@ -449,7 +447,7 @@ class MapDatabaseController extends Controller
         year INTEGER,
         quarter_id INTEGER,
         quarter VARCHAR,
-        month_id INTEGER NOT NULL CONSTRAINT fx_months REFERENCES decisyon_cache.WB_MONTHS (id),
+        month_id INTEGER NOT NULL CONSTRAINT wb_date_month_id_foreign REFERENCES decisyon_cache.WB_MONTHS (id),
         month VARCHAR,
         week CHAR(2),
         day VARCHAR,
@@ -507,30 +505,20 @@ class MapDatabaseController extends Controller
   public function dimensionTIME()
   {
     // se la tabella è già presente la elimino
+    // TODO: utilizzare il try...catch
+    // dd(Schema::connection(session('db_client_name'))->hasTable('WB_DATE'));
     $this->dropTIMEtables();
-    // $start = new DateTime('2019-01-01 00:00:00');
-    // $end   = new DateTime('2025-01-01 00:00:00');
-    $start = new DateTime('2024-06-01 00:00:00');
-    $end   = new DateTime('2024-08-01 00:00:00');
+    $start = new DateTime('2019-01-01 00:00:00');
+    $end   = new DateTime('2026-01-01 00:00:00');
+    // test
+    // $start = new DateTime('2024-01-01 00:00:00');
+    // $end   = new DateTime('2024-07-01 00:00:00');
 
     $this->wb_years($start, $end);
     $this->wb_quarters($start, $end);
     $this->wb_months($start, $end);
     $this->wb_date($start, $end);
     return true;
-
-    /* $year_result = $this->wb_years($start, $end);
-    if ($year_result) {
-      // year inseriti
-      $quarter_result = $this->wb_quarters($start, $end);
-      if ($quarter_result) {
-        $month_result = $this->wb_months($start, $end);
-        if ($month_result) {
-          $date_result = $this->wb_date($start, $end);
-          return $date_result;
-        }
-      }
-    } */
   }
 
   // Elenco delle tabelle dello schema selezionato

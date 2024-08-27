@@ -732,7 +732,7 @@
                       <menu class="standard">
                         <button class="btn-link default" id="btn-workbook-new" value="Nuovo">Nuovo</button>
                         <button class="btn-link default" id="btn-workbook-open" value="open">Apri</button>
-                        <button class="btn-link default" id="btn-time-dimension" value="open" disabled>Tabella TIME</button>
+                        <button class="btn-link default" id="btn-time-dimension" value="open">Tabella TIME</button>
                         <!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
                         <section id="workbook-name" class="name data-source" contenteditable="true">Titolo WorkBook</section>
                       </menu>
