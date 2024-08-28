@@ -328,6 +328,7 @@ class Cube
     // var_dump($query);
     // elimino la tabella temporanea che sto creando, se già presente
     $this->dropTemporaryTables($this->baseTableName);
+    // TODO: utilizzare il try...catch
     return DB::connection(session('db_client_name'))->statement($createStmt);
     // return DB::connection('vertica_odbc')->statement($createStmt);
   }
@@ -636,7 +637,6 @@ class Cube
         break;
     }
     // dd($createStmt);
-    var_dump($createStmt);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
     if (property_exists($this, 'sql_info')) {
       $result = ["raw_sql" => nl2br($createStmt), "format_sql" => $this->json_info_advanced];
@@ -691,19 +691,19 @@ class Cube
   {
     $union = [];
     foreach ($this->queries as $table => $fields) {
-      $sql = self::SELECT;
+      $sql = "(".self::SELECT;
       $sql .= implode(",\n", $fields);
-      $sql .= self::FROM . "decisyon_cache.{$table}\n";
+      $sql .= self::FROM . "decisyon_cache.{$table})\n";
       $union[$table] = $sql;
     }
     // dd(implode("UNION\n", $union));
     $union_sql = implode("UNION\n", $union);
     switch (session('db_driver')) {
       case 'odbc':
-        $this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS\n($union_sql);";
+        $this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS\n$union_sql;";
         break;
       case 'mysql':
-        $this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} AS\n($union_sql);";
+        $this->union_clause = "CREATE TEMPORARY TABLE decisyon_cache.union_{$this->report_id}_{$this->datamart_id} AS\n$union_sql;";
         break;
       default:
         break;

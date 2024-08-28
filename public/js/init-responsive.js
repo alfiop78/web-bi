@@ -64,8 +64,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // INPUTS
     inputAdvMetricName: document.getElementById("input-advanced-metric-name")
   }
-  const databaseId = +document.querySelector('main').dataset.databaseId;
-
   const userId = 2;
 
   document.body.addEventListener('mousemove', (e) => {
@@ -1053,7 +1051,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const parent = document.getElementById("ul-workbooks");
     // reset list
     parent.querySelectorAll('li').forEach(workbook => workbook.remove());
-    for (const [token, object] of Object.entries(WorkBookStorage.workBooks(databaseId))) {
+    for (const [token, object] of Object.entries(WorkBookStorage.workBooks(+document.querySelector('main').dataset.databaseId))) {
       const tmpl = app.tmplList.content.cloneNode(true);
       const li = tmpl.querySelector('li.select-list');
       const span = li.querySelector('span');

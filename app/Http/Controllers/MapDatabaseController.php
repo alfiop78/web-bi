@@ -681,8 +681,9 @@ class MapDatabaseController extends Controller
       $query->factId = substr($fact, -5);
       $query->baseTableName = "WB_BASE_{$query->report_id}_{$query->datamart_id}_{$query->factId}";
       $res = $query->base_table_new();
+      // dd($res === true ||$res === NULL);
       $query->queries[$query->baseTableName] = $query->datamart_fields;
-      if (!$res) {
+      if ($res === true || $res === NULL) {
         // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
         // creo una tabella temporanea per ogni metrica filtrata
         // dd($query->process->{"advancedMeasures"});

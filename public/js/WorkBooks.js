@@ -511,6 +511,7 @@ class WorkBooks {
     WorkBookStorage.workBook = token;
     this.workBook.created_at = WorkBookStorage.workBook.created_at;
     this.workBook.updated_at = WorkBookStorage.workBook.updated_at;
+    this.databaseId = WorkBookStorage.workBook.databaseId;
 
     // reimposto la Classe
     this.dateTime = WorkBookStorage.workBook.dateTime;
