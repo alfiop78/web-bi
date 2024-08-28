@@ -90,6 +90,7 @@ class BIConnectionsController extends Controller
   public function show(BIConnections $bIConnections, $id)
   {
     $element = $bIConnections::findOrFail($id);
+    session(['db_id' => $element->id]);
     session(['db_name' => $element->name]);
     session(['db_driver' => $element->driver]);
     session(['db_dsn' => $element->dsn]);

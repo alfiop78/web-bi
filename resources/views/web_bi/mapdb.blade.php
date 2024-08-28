@@ -168,7 +168,7 @@
     <div></div>
   </template>
 
-  <main>
+  <main data-database-id="{{ session('db_id')}}">
 
     <header>
       <div class="nav-button">

@@ -37,9 +37,9 @@ class Storages {
   }
 
   // tutti gli workBooks
-  workBooks() {
+  workBooks(databaseId) {
     for (const [token, object] of Object.entries(this.storage)) {
-      if (JSON.parse(object).type === 'workbook') {
+      if (JSON.parse(object).type === 'workbook' && JSON.parse(object).databaseId === databaseId) {
         this.#workBooks[token] = JSON.parse(object);
       }
     }

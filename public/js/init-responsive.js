@@ -64,6 +64,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // INPUTS
     inputAdvMetricName: document.getElementById("input-advanced-metric-name")
   }
+  const databaseId = +document.querySelector('main').dataset.databaseId;
 
   const userId = 2;
 
@@ -1052,7 +1053,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const parent = document.getElementById("ul-workbooks");
     // reset list
     parent.querySelectorAll('li').forEach(workbook => workbook.remove());
-    for (const [token, object] of Object.entries(WorkBookStorage.workBooks())) {
+    for (const [token, object] of Object.entries(WorkBookStorage.workBooks(databaseId))) {
       const tmpl = app.tmplList.content.cloneNode(true);
       const li = tmpl.querySelector('li.select-list');
       const span = li.querySelector('span');
@@ -1074,6 +1075,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.newWorkBook = () => {
     const name = document.getElementById('input-workbook-name').value;
     WorkBook = new WorkBooks(name);
+    WorkBook.databaseId = +document.querySelector('main').dataset.databaseId;
     Draw = new DrawSVG('svg');
     document.getElementById('workbook-name').dataset.value = name;
     document.getElementById('workbook-name').innerText = name;
@@ -1444,6 +1446,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       app.addTablesStruct();
       // salvo il workbook creato, tenendo conto della prop 'updated_at', se ci sono
       // state variazioni la aggiorno altrimenti no
+      // TODO: 28.08.2024 quando non viene modificato nulla non devo salvare il workbook
       WorkBook.save();
       App.showConsole("Salvataggio del WorkBook in corso...", "done", 2000);
     }
