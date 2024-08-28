@@ -637,7 +637,7 @@
                 <section class="row">
                   <section class="col grid-4">
                     <div class="list-search">
-                      <input type="search" id="input-search-columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off" autofocus tabindex="1">
+                      <input type="search" id="input-search-columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off" tabindex="2">
                       <div class="relative-ul">
                         <nav class="custom-scrollbar" data-search-id="input-search-columns"></nav>
                       </div>
@@ -645,7 +645,7 @@
                   </section>
                   <section class="col grid-8">
                     <section class="textarea-formula">
-                      <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" tabindex="2" />
+                      <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                       <div id="textarea-filter" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
                       <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                     </section>

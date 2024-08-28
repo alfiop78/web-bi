@@ -1495,6 +1495,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       }
     }
     process.fields = fields;
+    debugger;
+    // BUG: 28.08.2024 qui c'è da verificare se, in un report con una metrica "timingFunctions", sia stato messo un livello
+    // della dimensione TIME, altrimenti, in setFiltersMetricTable_new, la variabile time_sql non viene valorizzata
 
     // ottengo le keys dell'object 'process.fields' per verificare quali livelli della TIME sono presenti
     Object.keys(process.fields).forEach(timeField => {
@@ -1704,17 +1707,19 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.process = async (process) => {
     Sheet.userId = userId;
     if (Sheet.edit === true) {
-      Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
-      if (Sheet.changes.length !== 0) {
-        Sheet.update();
-        // elimino il datamart perchè è stato modificato
-        let exist = await Sheet.exist();
-        if (exist) {
-          let result = await Sheet.delete();
-          console.log('datamart eliminato : ', result);
-          if (result && Resource.tableRef) Resource.tableRef.clearChart();
-        }
+      // anche se il datamart non è stato modificato, ma è stato cliccato il
+      // tasto Elabora, devo eliminarlo per poterlo ricostruire
+      // elimino il datamart perchè è stato modificato
+      const exist = await Sheet.exist();
+      if (exist) {
+        // TEST: 28.08.2024 da testare anche con Vertica se il dropIfExists funziona correttamente in MapDatabaseController.php
+        let result = await Sheet.delete();
+        console.log('datamart eliminato : ', result);
+        debugger;
+        if (result === "" && Resource.tableRef) Resource.tableRef.clearChart();
       }
+      Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
+      if (Sheet.changes.length !== 0) Sheet.update();
     } else {
       Sheet.create();
     }
@@ -2633,7 +2638,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       value: {
         alias: data.timeTable,
         type: 'TIME',
-        datatype : data.columnType,
+        datatype: data.columnType,
         // [DocVenditaDettaglio.DataDocumento, WEB_BI_TIME.date]
         // SQL: [`TO_CHAR(${tableAlias}.${tableColumn})::DATE`, `WEB_BI_TIME.${web_bi_timeField}`],
         SQL: [`${data.tableAlias}.${data.column}`, `${data.timeTable}.${data.timeColumn}`],

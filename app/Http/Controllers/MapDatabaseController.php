@@ -157,7 +157,7 @@ class MapDatabaseController extends Controller
     // return response()->json($info);
   }
 
-  public function datamartExists($id)
+  public function checkDatamart($id)
   {
     // dump($id);
     BIConnectionsController::getDB();
@@ -170,7 +170,13 @@ class MapDatabaseController extends Controller
     // di una nuova connessione
     // dd(Schema::connection(session('db_client_name'))->hasTable("decisyon_cache.WEB_BI_$id"));
     // dd(Schema::connection(session('db_client_name'))->hasTable("WEB_BI_$id"));
+    // dd(Schema::connection(session('db_client_name'))->hasTable("WEB_BI_$id"));
     return Schema::connection(session('db_client_name'))->hasTable("WEB_BI_$id");
+  }
+
+  public function deleteDatamart($id)
+  {
+    return Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.WEB_BI_$id");
   }
 
   // 26.08.2024 Non ancora implementata da JS

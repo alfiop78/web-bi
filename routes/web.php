@@ -398,12 +398,9 @@ Route::get('/fetch_api/{id}/datamart', [MapDatabaseController::class, 'datamart'
 // preview del datamart
 Route::get('/fetch_api/{id}/preview', [MapDatabaseController::class, 'preview'])->name('web_bi.fetch_api.preview');
 
-Route::get('/fetch_api/{id}/check_datamart', [MapDatabaseController::class, 'datamartExists'])->name('web_bi.fetch_api.check_datamart');
+Route::get('/fetch_api/{id}/check_datamart', [MapDatabaseController::class, 'checkDatamart'])->name('web_bi.fetch_api.check_datamart');
 
-Route::get('/fetch_api/{id}/delete_datamart', function ($id) {
-  $dropResult = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.WEB_BI_{$id};");
-  return (!$dropResult) ? 1 : 0;
-})->name('web_bi.fetch_api.delete_datamart');
+Route::get('/fetch_api/{id}/delete_datamart', [MapDatabaseController::class, 'deleteDatamart'])->name('web_bi.fetch_api.delete_datamart');
 
 // Metodo POST commentato, possibile utilizzo futuro, vedere commenti in MapDatabaseController
 Route::post('/fetch_api/datamartpost', [MapDatabaseController::class, 'datamartPost'])->name('web_bi.fetch_api.datamartPost');

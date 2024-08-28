@@ -681,9 +681,9 @@ class Cube
   private function dropTemporaryTables($table)
   {
     // WARN: da verificare se funziona anche su tabelle temporanee
-    if (Schema::connection('vertica_odbc')->hasTable($table)) {
+    if (Schema::connection(session('db_client_name'))->hasTable($table)) {
       // tabella esiste
-      Schema::connection('vertica_odbc')->drop("decisyon_cache.$table");
+      Schema::connection(session('db_client_name'))->drop("decisyon_cache.$table");
     }
   }
 
@@ -748,7 +748,8 @@ class Cube
     foreach ($this->queries as $k => $v) {
       $joinLEFT .= "\nLEFT JOIN decisyon_cache.{$k}\n\tON ";
       foreach ($v as $field) {
-        $ONClause[] = "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}.'$field' = $k.'$field'";
+        // $ONClause[] = "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}.'$field' = $k.'$field'";
+        $ONClause[] = "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}.$field = $k.$field";
       }
       $joinLEFT .= implode("\nAND ", $ONClause);
       unset($ONClause);
