@@ -7,7 +7,6 @@
   <title>Web-BI | HOME</title>
   <!-- <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0"> -->
   <link rel="icon" href="/favicon.png" type="image/png" />
-  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-icons.css') }}" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-symbols.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
@@ -24,8 +23,6 @@
 
 <body class="antialiased">
   <main>
-
-
     <header>
       <div class="nav-button">
         <!-- codelab-nav-button-->
@@ -61,7 +58,7 @@
                 <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded">dashboard_customize</i><span>Creazione Dashboard</span></a>
                 <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded">dashboard</i><span>Dashboards</span></a>
                 <hr />
-                <a href="#" title="Settings"><i class="material-symbols-rounded md-18">settings</i><span>Impostazioni</span></a>
+                <a href="#" title="Settings"><i class="material-symbols-rounded">settings</i><span>Impostazioni</span></a>
               </nav>
             </div>
 
@@ -178,7 +175,6 @@
         <p></p>
       </div>
     </div>
-
   </main>
   <script type="text/javascript" src="{{ asset('/js/init-home.js') }}" async></script>
 </body>

@@ -26,3 +26,8 @@
 .material-symbols-rounded.hidden {
   display: none;
 }
+
+/* DIMENSIONS */
+.material-symbols-rounded.md-18 {
+  font-size: 18px;
+}

@@ -480,8 +480,8 @@ span.markContent {
 
 .markContent:hover>i {
   position: absolute;
-  left: -7px;
-  top: -7px;
+  left: -10px;
+  top: -10px;
   color: black;
   visibility: visible;
 }

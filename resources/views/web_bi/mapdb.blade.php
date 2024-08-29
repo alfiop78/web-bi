@@ -47,43 +47,43 @@
     <li class="icons-list" data-li-icon data-element-search data-label data-searchable="true">
       <span></span>
       <div>
-        <button type="button" data-edit data-fn="editCustomMetric" class="button-icon material-icons-round md-18">edit</button>
-        <button type="button" data-delete data-fn="removeWBMetric" class="button-icon material-icons-round md-18">delete</button>
+        <button type="button" data-edit data-fn="editCustomMetric" class="button-icon material-symbols-rounded md-18">edit</button>
+        <button type="button" data-delete data-fn="removeWBMetric" class="button-icon material-symbols-rounded md-18">delete</button>
       </div>
     </li>
 
     <li class="drag-list columns" data-element-search data-label data-searchable="true">
-      <i class="material-icons-round md-18" draggable="true">drag_handle</i>
-      <i class="material-icons-round md-18">view_column</i>
+      <i class="material-symbols-rounded md-18" draggable="true">drag_handle</i>
+      <i class="material-symbols-rounded md-18">view_column</i>
       <span></span>
     </li>
 
     <li class="drag-list filters" data-element-search data-label data-searchable="true">
-      <i class="material-icons-round md-18 md-dimgray" draggable="true">drag_handle</i>
-      <i class="material-icons-round md-18">filter_alt</i>
+      <i class="material-symbols-rounded md-18 md-dimgray" draggable="true">drag_handle</i>
+      <i class="material-symbols-rounded md-18">filter_alt</i>
       <span></span>
     </li>
 
     <li class="drag-list metrics basic" data-element-search data-label data-searchable="true">
-      <i class="material-icons-round md-18 md-dimgray" draggable="true">drag_handle</i>
-      <i class="material-icons-round md-18">functions</i>
+      <i class="material-symbols-rounded md-18 md-dimgray" draggable="true">drag_handle</i>
+      <i class="material-symbols-rounded md-18">functions</i>
       <span></span>
     </li>
 
     <li class="drag-list metrics advanced" data-element-search data-label data-searchable="true">
-      <i class="material-icons-round md-18 md-dimgray" draggable="true">drag_handle</i>
-      <i class="material-icons-round md-18">query_stats</i>
+      <i class="material-symbols-rounded md-18 md-dimgray" draggable="true">drag_handle</i>
+      <i class="material-symbols-rounded md-18">query_stats</i>
       <span></span>
     </li>
 
     <li class="drag-list metrics composite" data-element-search data-label data-searchable="true">
-      <i class="material-icons-round md-18 md-dimgray" draggable="true">drag_handle</i>
-      <i class="material-icons-round md-18">multiline_chart</i>
+      <i class="material-symbols-rounded md-18 md-dimgray" draggable="true">drag_handle</i>
+      <i class="material-symbols-rounded md-18">multiline_chart</i>
       <span></span>
     </li>
 
     <li class="drag-list default" data-element-search data-label data-searchable="true">
-      <i class="material-icons-round md-18" draggable="true">drag_handle</i>
+      <i class="material-symbols-rounded md-18" draggable="true">drag_handle</i>
       <span></span>
     </li>
 
@@ -100,8 +100,8 @@
       <div>
         <span data-value></span>
         <span>
-          <button data-fn="uploadObject" data-upload="workbook" class="button-icon material-icons-round md-18">upload</button>
-          <button data-fn="deleteWorkBook" data-delete class="button-icon material-icons-round md-18">delete</button>
+          <button data-fn="uploadObject" data-upload="workbook" class="button-icon material-symbols-rounded md-18">upload</button>
+          <button data-fn="deleteWorkBook" data-delete class="button-icon material-symbols-rounded md-18">delete</button>
         </span>
       </div>
     </dt>
@@ -112,8 +112,8 @@
       <div>
         <span data-value></span>
         <span>
-          <button data-fn="uploadObject" data-upload="sheet" class="button-icon material-icons-round md-18">upload</button>
-          <button data-fn="deleteSheet" data-delete class="button-icon material-icons-round md-18">delete</button>
+          <button data-fn="uploadObject" data-upload="sheet" class="button-icon material-symbols-rounded md-18">upload</button>
+          <button data-fn="deleteSheet" data-delete class="button-icon material-symbols-rounded md-18">delete</button>
         </span>
       </div>
     </dd>
@@ -124,7 +124,7 @@
       <summary></summary>
     </details>
     <li class="new-worksheet-object">
-      <i class="material-icons-round md-18 new-object">add</i>
+      <i class="material-symbols-rounded md-18 new-object">add</i>
       <button class="new-object" data-fn="btnMetricNew" type="button" value="crea metrica">Metrica Composta</button>
     </li>
   </template>
@@ -141,9 +141,9 @@
 
   <template id="tmpl-filter-dropped-adv-metric">
     <li data-token class="li-content-icons">
-      <i class="material-icons-round md-18 filters">filter_alt</i>
+      <i class="material-symbols-rounded md-18 filters">filter_alt</i>
       <span></span>
-      <button data-token data-fn="removeFilterByAdvMetric" type="button" class="button-icon material-icons-round md-18">delete</button>
+      <button data-token data-fn="removeFilterByAdvMetric" type="button" class="button-icon material-symbols-rounded md-18">delete</button>
     </li>
   </template>
 
@@ -158,7 +158,7 @@
   <template id="tmpl-sql-raw">
     <div class="sql-raw">
       <div class="absolute-icons">
-        <button data-fn="copyToClipboard" data-copy class="material-icons-round md-18">copy</button>
+        <button data-fn="copyToClipboard" data-copy class="material-symbols-rounded md-18">copy</button>
       </div>
       <div class="sql-content"></div>
     </div>
@@ -187,19 +187,19 @@
 
     <template id="tmpl-columns-defined">
       <div class="column-defined">
-        <i class="button-icon material-icons-round md-18">table_rows</i>
+        <i class="button-icon material-symbols-rounded md-18">table_rows</i>
         <code contenteditable="true" data-blur-fn="editFieldAlias"></code>
-        <button type="button" data-remove class="button-icon material-icons-round md-18 column-defined" data-fn="removeDefinedColumn" data-column-token>delete</button>
-        <button type="button" data-undo class="button-icon material-icons-round md-18 column-defined" data-fn="undoDefinedColumn" data-column-token>undo</button>
+        <button type="button" data-remove class="button-icon material-symbols-rounded md-18 column-defined" data-fn="removeDefinedColumn" data-column-token>delete</button>
+        <button type="button" data-undo class="button-icon material-symbols-rounded md-18 column-defined" data-fn="undoDefinedColumn" data-column-token>undo</button>
       </div>
     </template>
 
     <template id="tmpl-filters-defined">
       <div class="filter-defined">
-        <i class="button-icon material-icons-round md-18">filter_alt</i>
+        <i class="button-icon material-symbols-rounded md-18">filter_alt</i>
         <span class="defined"></span>
-        <button type="button" data-remove class="button-icon material-icons-round md-18 filter-defined" data-fn="removeDefinedFilter" data-filter-token>delete</button>
-        <button type="button" data-undo class="button-icon material-icons-round md-18 filter-defined" data-fn="undoDefinedFilter" data-filter-token>undo</button>
+        <button type="button" data-remove class="button-icon material-symbols-rounded md-18 filter-defined" data-fn="removeDefinedFilter" data-filter-token>delete</button>
+        <button type="button" data-undo class="button-icon material-symbols-rounded md-18 filter-defined" data-fn="undoDefinedFilter" data-filter-token>undo</button>
       </div>
     </template>
 
@@ -224,14 +224,14 @@
         <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code>
         <!-- <span data-field></span> -->
         <code data-field data-token data-value contenteditable="true" data-blur-fn="editMetricName"></code>
-        <button type="button" data-remove class="button-icon material-icons-round md-18 metric-defined" data-fn="removeDefinedMetric" data-metric-token>delete</button>
-        <button type="button" data-undo class="button-icon material-icons-round md-18 metric-defined" data-fn="undoDefinedMetric" data-metric-token>undo</button>
+        <button type="button" data-remove class="button-icon material-symbols-rounded md-18 metric-defined" data-fn="removeDefinedMetric" data-metric-token>delete</button>
+        <button type="button" data-undo class="button-icon material-symbols-rounded md-18 metric-defined" data-fn="undoDefinedMetric" data-metric-token>undo</button>
       </div>
     </template>
 
     <template id="tmpl-formula">
       <span class="markContent">
-        <i class="material-icons-round md-14">cancel</i>
+        <i class="material-symbols-rounded md-14">cancel</i>
         <mark></mark>
         <small></small>
       </span>
@@ -239,7 +239,7 @@
 
     <template id="tmpl-composite-formula">
       <span class="markContent">
-        <i class="material-icons-round md-14">cancel</i>
+        <i class="material-symbols-rounded md-14">cancel</i>
         <mark></mark>
       </span>
     </template>
@@ -670,19 +670,19 @@
               <nav>
                 <a href="#" title="Database selected">
                   @if (session('db_name'))
-                  <i class="material-symbols-rounded md-18 done">database</i>
+                  <i class="material-symbols-rounded done">database</i>
                   @else
-                  <i class="material-symbols-rounded md-18 error">database_off</i>
+                  <i class="material-symbols-rounded error">database_off</i>
                   @endif
                   <span id="database-name">{{ session('db_name', 'Database non impostato') }}</span>
                 </a>
                 <hr />
-                <a href="{{ route('web_bi.index') }}" title="HomePage"><i class="material-symbols-rounded md-18">home</i><span>Home</span></a>
+                <a href="{{ route('web_bi.index') }}" title="HomePage"><i class="material-symbols-rounded">home</i><span>Home</span></a>
                 <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded">cloud_sync</i><span>Versionamento</span></a>
                 <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded">dashboard_customize</i><span>Creazione Dashboard</span></a>
                 <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded">dashboard</i><span>Dashboards</span></a>
                 <hr />
-                <a href="#" title="Settings"><i class="material-symbols-rounded md-18">settings</i><span>Impostazioni</span></a>
+                <a href="#" title="Settings"><i class="material-symbols-rounded">settings</i><span>Impostazioni</span></a>
                 <!-- <button>
           <a href="#" title="test">
             <i class="material-symbols-rounded">info</i><span>test &lt;button&gt;</span>
@@ -746,7 +746,7 @@
                         </ul>
                       </div>
                       <div id="table-popup" class="popup">
-                        <button class="material-icons-round md-18" data-id data-fn="tableSelected">table_rows_narrow</button>
+                        <button class="material-symbols-rounded md-18" data-id data-fn="tableSelected">table_rows_narrow</button>
                       </div>
                       <div id="context-menu-column" class="context-menu">
                         <ul id="ul-context-menu-column" class="context-menu-items">
@@ -804,11 +804,11 @@
                                 <desc id="WB_DATE" data-table="WB_DATE" data-alias="WB_DATE" data-field="id" data-join-field="month_id" data-related-join="WB_MONTHS" data-schema="decisyon_cache" data-joins="1">wb_date</desc>
                               </g>
                               <foreignObject id="btn-join" x="0" y="0" width="26" height="18">
-                                <button class="material-icons-round md-18">join_inner</button>
+                                <button class="material-symbols-rounded md-18">join_inner</button>
                               </foreignObject>
                             </defs>
                             <!-- <foreignObject x="100" y="150" width="20" height="20">
-                              <button class="material-icons-round md-18">edit</button>
+                              <button class="material-symbols-rounded md-18">edit</button>
                             </foreignObject> -->
                           </svg>
                           <span id="coords"></span>
@@ -853,7 +853,7 @@
                           <section id="workbook-objects" data-section-active="2">
                             <p class="field-search">
                               <input id="input-search-fields" data-element-search="elements" autocomplete="off" type="search" class="input-search columns" readonly placeholder="Campi" />
-                              <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-fields">search</button>
+                              <button type="button" class="button-icon material-symbols-rounded md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-fields">search</button>
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="1">
                               <ul id="nav-fields" class="custom-scrollbar" data-search-id="input-search-fields"></ul>
@@ -861,7 +861,7 @@
                             </section>
                             <p class="field-search">
                               <input id="input-search-metrics" data-element-search="elements" autocomplete="off" type="search" class="input-search metrics" readonly placeholder="Metriche" />
-                              <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-metrics">search</button>
+                              <button type="button" class="button-icon material-symbols-rounded md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-metrics">search</button>
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="2">
                               <ul id="ul-metrics" class="custom-scrollbar" data-search-id="input-search-metrics"></ul>
@@ -869,7 +869,7 @@
                             </section>
                             <p class="field-search">
                               <input id="input-search-filters" data-element-search="filters" autocomplete="off" type="search" class="input-search filters" readonly placeholder="Filtri" />
-                              <button type="button" class="button-icon material-icons-round md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-filters">search</button>
+                              <button type="button" class="button-icon material-symbols-rounded md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-filters">search</button>
                             </p>
                             <section data-worksheet-object class="custom-scrollbar" data-section="3">
                               <ul id="ul-filters" class="custom-scrollbar" data-search-id="input-search-filters"></ul>
@@ -910,12 +910,12 @@
                                 <h5 class="title moveable">Configurazione</h5>
                                 <section class="dlg-content">
                                   <section class="row">
-                                    <div class="col grid-12">
+                                    <section class="col grid-12">
                                       <input id="field-label" type="text" value="" placeholder="Etichetta colonna" />
-                                    </div>
+                                    </section>
                                   </section>
                                   <section class="row">
-                                    <div class="col grid-5">
+                                    <section class="col grid-5">
                                       <div class="field label">
                                         <label for="field-datatype">Tipo di dato</label>
                                         <select id="field-datatype">
@@ -927,8 +927,8 @@
                                           <option id="boolean" value="boolean">Vero/Falso</option>
                                         </select>
                                       </div>
-                                    </div>
-                                    <div class="col grid-5">
+                                    </section>
+                                    <section class="col grid-5">
                                       <div class="field label">
                                         <label for="field-format">Formattazione</label>
                                         <select id="field-format">
@@ -937,21 +937,21 @@
                                           <option value="percent">Percentuale</option>
                                         </select>
                                       </div>
-                                    </div>
-                                    <div class="col grid-2">
+                                    </section>
+                                    <section class="col grid-2">
                                       <div class="field label">
                                         <label for="frationDigits">Decimali</label>
                                         <input id="frationDigits" type="number" value="2" />
                                       </div>
-                                    </div>
+                                    </section>
                                   </section>
                                   <section class="row">
-                                    <div class="col grid-12">
+                                    <section class="col grid-12">
                                       <div class="field hr">
                                         <input type="checkbox" id="filter-column" name="filter-column" />
                                         <label for="filter-column">Imposta filtro Dashboard</label>
                                       </div>
-                                    </div>
+                                    </section>
                                   </section>
 
                                 </section>

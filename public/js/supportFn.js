@@ -260,7 +260,7 @@ async function getTables(urls) {
   app.dialogCustomMetric.addEventListener('close', () => {
     const textArea = document.getElementById('textarea-custom-metric');
     const ul = document.getElementById('ul-custom-metrics');
-    document.getElementById('custom-metric-name').value = '';
+    document.getElementById('input-base-custom-metric-name').value = '';
     document.getElementById('custom-metric-note').value = '';
     textArea.querySelectorAll('*').forEach(element => element.remove());
     ul.querySelectorAll('li').forEach(metric => metric.remove());
