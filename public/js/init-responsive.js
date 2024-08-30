@@ -277,7 +277,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.elementDragOver = (e) => {
     e.preventDefault();
-    console.log(e.currentTarget, e.target);
+    // console.log(e.currentTarget, e.target);
     if (e.currentTarget.classList.contains('dropzone')) {
       // verifica compatibilità elemento da droppare
       // Es.: non posso droppare una metrica nella dropzone-filters
@@ -1722,6 +1722,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
       if (Sheet.changes.length !== 0) Sheet.update();
     } else {
+      debugger;
       Sheet.create();
     }
     Resource.json.token = Sheet.sheet.token;
@@ -1758,6 +1759,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         document.querySelectorAll('div[data-removed]').forEach(el => el.remove());
         // app.saveSheet();
         // app.loadPreview();
+        // imposto Sheet.edit = true perchè da questo momento qualsiasi cosa aggiunta allo Sheet avrà
+        // lo contrassegna come "modificato" e quindi verrà, alla prossima elaborazione, eliminata la tabella dal DB
+        // per poterla ricreare
+        Sheet.edit = true;
         app.sheetPreview();
         App.loaderStop();
       })
@@ -3344,7 +3349,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         console.log(response);
         App.closeConsole();
         if (response) {
-          App.showConsole('Tabelle TIME presenti', 'done', 3000);
+          App.showConsole('Tabelle TIME presenti', 'done', 2000);
         } else {
           // debugger;
           App.showConsole('Tabelle TIME non presenti, da creare', 'warning', 3000);

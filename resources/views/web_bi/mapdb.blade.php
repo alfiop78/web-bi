@@ -684,10 +684,10 @@
                 <hr />
                 <a href="#" title="Settings"><i class="material-symbols-rounded">settings</i><span>Impostazioni</span></a>
                 <!-- <button>
-          <a href="#" title="test">
-            <i class="material-symbols-rounded">info</i><span>test &lt;button&gt;</span>
-          </a>
-        </button> -->
+                  <a href="#" title="test">
+                    <i class="material-symbols-rounded">info</i><span>test &lt;button&gt;</span>
+                  </a>
+                </button> -->
               </nav>
             </div>
 

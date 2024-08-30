@@ -320,7 +320,7 @@ class MapDatabaseController extends Controller
         year_id INTEGER NOT NULL CONSTRAINT wb_quarters_year_id_foreign REFERENCES decisyon_cache.WB_YEARS (id)
       ) INCLUDE SCHEMA PRIVILEGES";
       // nella foreignId utilizzo gli stessi nomi utilizzati da Laravel (tabella_campo_foreign)
-      $create_stmt = DB::connection('vertica_odbc')->statement($sql);
+      $create_stmt = DB::connection(session('db_client_name'))->statement($sql);
     } else {
       $create_stmt = Schema::connection(session('db_client_name'))
         ->create('WB_QUARTERS', function (Blueprint $table) {
@@ -628,6 +628,7 @@ class MapDatabaseController extends Controller
     return $data;
   }
 
+  // viene invocata da init-dashboards.js
   public function datamart($id)
   {
     // dd($id);
