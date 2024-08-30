@@ -8,7 +8,7 @@
       "tag": "div",
       "classes": [
         "grid",
-        "rows-2"
+        "content"
       ],
       "childs": [
         {
@@ -18,10 +18,10 @@
           ],
           "childs": [
             {
-              "tag": "div",
+              "tag": "section",
               "classes": [
                 "col",
-                "col-1"
+                "grid-12"
               ],
               "childs": [
                 {
@@ -42,10 +42,10 @@
           ],
           "childs": [
             {
-              "tag": "div",
+              "tag": "section",
               "classes": [
                 "col",
-                "col-1"
+                "grid-12"
               ],
               "attributes": {
                 "resource": true

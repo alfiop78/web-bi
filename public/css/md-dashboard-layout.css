@@ -9,6 +9,7 @@
   display: grid;
   grid-template-rows: auto;
   grid-gap: 1em;
+  width: 100%;
 }
 
 .layout .row {

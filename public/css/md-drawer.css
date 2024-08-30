@@ -7,11 +7,17 @@ nav {
   /* width: 256px; */
   transition: width 250ms;
   flex-shrink: 0;
-  position: relative;
+  /* position: relative; */
+  position: absolute;
   z-index: 100;
   display: flex;
   flex-direction: column;
   background: #F8F9FA;
+  height: calc(100% - 64px - 2em);
+  margin-left: 1em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  background-color: #494949;
 }
 
 .account {
@@ -26,7 +32,7 @@ nav>a {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: black;
+  color: white;
   padding: 12px 8px;
 }
 
@@ -126,7 +132,7 @@ nav>a[selected] {
 
 @media screen and (min-device-width: 769px) {
   #drawer[open] {
-    width: 340px;
+    width: 280px;
   }
 
   #drawer:not([open]) {

@@ -559,19 +559,32 @@ class MapDatabaseController extends Controller
     // dd($fromId, $toId);
     // TODO: se la tabella di destinazione già esiste la elimino
     BIConnectionsController::getDB();
-    dump(config("database.connections.client_mysql.database"));
-    dd(Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$toId}"));
+    // dump(config("database.connections.client_mysql.database"));
+    // dd(Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$toId}"));
 
-
-    if (Schema::connection('vertica_odbc')->hasTable("WEB_BI_{$toId}")) {
-      // tabella esiste
+    if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$toId}")) {
+      // se il datamart "finale" (senza userId) già esiste, devo eliminarlo prima di ricrearlo
       // echo ("tabella $toId esiste");
-      Schema::connection('vertica_odbc')->drop("decisyon_cache.WEB_BI_{$toId}");
+      Schema::connection(session('db_client_name'))->drop("WEB_BI_{$toId}");
     }
     // TODO: nuova logica session('db_client_name').
+    switch (session('db_driver')) {
+      case 'odbc':
+        $sql = "SELECT COPY_TABLE ('decisyon_cache.WEB_BI_{$fromId}','decisyon_cache.WEB_BI_{$toId}');";
+        $copy = DB::connection(session('db_client_name'))->statement($sql);
+        break;
+      case 'mysql':
+        $createTable = DB::connection(session('db_client_name'))
+          ->statement("CREATE TABLE decisyon_cache.WEB_BI_{$toId} LIKE decisyon_cache.WEB_BI_{$fromId};");
+        if ($createTable) {
+          $copy = DB::connection(session('db_client_name'))
+            ->statement("INSERT INTO decisyon_cache.WEB_BI_{$toId} SELECT * FROM decisyon_cache.WEB_BI_{$fromId};");
+        }
+        break;
+      default:
+        break;
+    }
     // Per mysql và utilizzato CREATE TABLE ... LIKE (vedere documentazione)
-    $sql = "SELECT COPY_TABLE ('decisyon_cache.WEB_BI_{$fromId}','decisyon_cache.WEB_BI_{$toId}');";
-    $copy = DB::connection('vertica_odbc')->statement($sql);
     return $copy;
   }
 
@@ -590,6 +603,7 @@ class MapDatabaseController extends Controller
     // $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->orderBy('area_id')->paginate(15000);
 
     BIConnectionsController::getDB();
+    // dd(session('db_driver'));
     switch (session('db_driver')) {
       case 'odbc':
         $queryColumns = DB::connection(session('db_client_name'))->table('COLUMNS')->select('column_name');
@@ -644,7 +658,8 @@ class MapDatabaseController extends Controller
     // $data = DB::connection('vertica_odbc')->table($table)->where("dealer_id", "=", 447)->paginate(15000);
     // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [447, 497])->paginate(15000);
     // TODO: nuova logica session('db_client_name')
-    $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->paginate(20000);
+    // $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->paginate(20000);
+    $data = DB::connection(session('db_client_name'))->table("decisyon_cache.WEB_BI_{$id}")->paginate(20000);
     return $data;
 
     // return response()->json($data);

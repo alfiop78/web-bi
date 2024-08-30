@@ -411,7 +411,7 @@ hr {
   border: none;
   /* border-top: solid thin; */
   border-bottom: solid thin;
-  color: gainsboro;
+  color: black;
   margin: 1.5em 2em;
 }
 
@@ -551,19 +551,19 @@ span.markContent {
 
 #body>.wrapper {
   display: grid;
-  grid-template-columns: auto 1fr;
+  /* grid-template-columns: auto 1fr; */
   height: inherit;
   position: relative;
   grid-template-rows: 1fr;
   grid-column-gap: 1em;
-  padding: 1em;
+  padding: 1em 1em 1em 5em;
 }
 
 small {
   font-size: smaller;
 }
 
-.dlg-content {
+.dlg-content, .grid.content {
   display: grid;
   grid-gap: 1em;
   grid-template-rows: auto;

@@ -31,36 +31,36 @@
       </div>
       <h1 class="title">Gaia-BI</h1>
     </header>
+    <div id="drawer">
+      <section class="account">
+        <h5>user</h5>
+        <i class="material-symbols-rounded md-light">person</i>
+      </section>
+
+      <nav>
+        {{-- session()->forget('db_name') --}}
+        <a href="#" title="Database selected">
+          @if (session('db_name'))
+          <i id="db-icon-status" class="material-symbols-rounded done">database</i>
+          @else
+          <!-- dump('sessione non impostata') -->
+          <i id="db-icon-status" class="material-symbols-rounded error">database_off</i>
+          @endif
+          <span id="database-name">{{ session('db_name', 'Database non impostato') }}</span>
+        </a>
+        <hr />
+        <a href="{{ route('web_bi.mapdb') }}" title="Workspace"><i class="material-symbols-rounded">workspaces</i><span>Workspace</span></a>
+        <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded">cloud_sync</i><span>Versionamento</span></a>
+        <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded">dashboard_customize</i><span>Creazione Dashboard</span></a>
+        <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded">dashboard</i><span>Dashboards</span></a>
+        <hr />
+        <a href="#" title="Settings"><i class="material-symbols-rounded">settings</i><span>Impostazioni</span></a>
+      </nav>
+    </div>
     <div id="container">
       <div id="content">
         <div id="body">
           <div class="wrapper">
-            <div id="drawer" open>
-              <section class="account">
-                <h5>user</h5>
-                <i class="material-symbols-rounded md-light">person</i>
-              </section>
-
-              <nav>
-                {{-- session()->forget('db_name') --}}
-                <a href="#" title="Database selected">
-                  @if (session('db_name'))
-                  <i id="db-icon-status" class="material-symbols-rounded done">database</i>
-                  @else
-                  <!-- dump('sessione non impostata') -->
-                  <i id="db-icon-status" class="material-symbols-rounded error">database_off</i>
-                  @endif
-                  <span id="database-name">{{ session('db_name', 'Database non impostato') }}</span>
-                </a>
-                <hr />
-                <a href="{{ route('web_bi.mapdb') }}" title="Workspace"><i class="material-symbols-rounded">workspaces</i><span>Workspace</span></a>
-                <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded">cloud_sync</i><span>Versionamento</span></a>
-                <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded">dashboard_customize</i><span>Creazione Dashboard</span></a>
-                <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded">dashboard</i><span>Dashboards</span></a>
-                <hr />
-                <a href="#" title="Settings"><i class="material-symbols-rounded">settings</i><span>Impostazioni</span></a>
-              </nav>
-            </div>
 
             <dialog id="dlg-new-connection" data-x="0" data-y="0">
               <form id="form-new-connection" method="post" action="{{ route('connection.store') }}">

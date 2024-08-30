@@ -11,7 +11,6 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" />
-  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-icons.css') }}" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-symbols.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
@@ -180,6 +179,37 @@
 
       <h1 class="title">Map database</h1>
     </header>
+
+    <div id="drawer">
+
+      <section class="account">
+        <h5>user</h5>
+        <i class="material-symbols-rounded md-light">person</i>
+      </section>
+
+      <nav>
+        <a href="#" title="Database selected">
+          @if (session('db_name'))
+          <i class="material-symbols-rounded done">database</i>
+          @else
+          <i class="material-symbols-rounded error">database_off</i>
+          @endif
+          <span id="database-name">{{ session('db_name', 'Database non impostato') }}</span>
+        </a>
+        <hr />
+        <a href="{{ route('web_bi.index') }}" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
+        <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded white">cloud_sync</i><span>Versionamento</span></a>
+        <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded white">dashboard_customize</i><span>Creazione Dashboard</span></a>
+        <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded white">dashboard</i><span>Dashboards</span></a>
+        <hr />
+        <a href="#" title="Settings"><i class="material-symbols-rounded white">settings</i><span>Impostazioni</span></a>
+        <!-- <button>
+                  <a href="#" title="test">
+                    <i class="material-symbols-rounded">info</i><span>test &lt;button&gt;</span>
+                  </a>
+                </button> -->
+      </nav>
+    </div>
 
     <template id="tmpl-join-field">
       <div class="join-field" data-fn="handlerJoin" data-active>Campo</div>
@@ -660,36 +690,6 @@
           </dialog>
 
           <div class="wrapper">
-            <div id="drawer">
-
-              <section class="account">
-                <h5>user</h5>
-                <i class="material-symbols-rounded md-light">person</i>
-              </section>
-
-              <nav>
-                <a href="#" title="Database selected">
-                  @if (session('db_name'))
-                  <i class="material-symbols-rounded done">database</i>
-                  @else
-                  <i class="material-symbols-rounded error">database_off</i>
-                  @endif
-                  <span id="database-name">{{ session('db_name', 'Database non impostato') }}</span>
-                </a>
-                <hr />
-                <a href="{{ route('web_bi.index') }}" title="HomePage"><i class="material-symbols-rounded">home</i><span>Home</span></a>
-                <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded">cloud_sync</i><span>Versionamento</span></a>
-                <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded">dashboard_customize</i><span>Creazione Dashboard</span></a>
-                <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded">dashboard</i><span>Dashboards</span></a>
-                <hr />
-                <a href="#" title="Settings"><i class="material-symbols-rounded">settings</i><span>Impostazioni</span></a>
-                <!-- <button>
-                  <a href="#" title="test">
-                    <i class="material-symbols-rounded">info</i><span>test &lt;button&gt;</span>
-                  </a>
-                </button> -->
-              </nav>
-            </div>
 
             <dialog id="dlg-columns" data-x="0" data-y="40" class="medium absolute moveable">
               <section class="dlg-grid">

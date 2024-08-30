@@ -3335,6 +3335,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       });
   }
 
+  window.addEventListener('resize', (e) => {
+    const stepTranslate = document.getElementById('stepTranslate');
+    // console.log(e);
+    console.log(stepTranslate.offsetWidth);
+    // stepTranslate.dataset.translateX = stepTranslate.offsetWidth;
+    // stepTranslate.style.transform = `translateX(${stepTranslate.offsetWidth}px)`;
+  });
+
   // verifica esistenza dimensione time su DB
   //
   app.timeDimensionExists = async () => {
