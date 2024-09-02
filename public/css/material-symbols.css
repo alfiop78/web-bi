@@ -22,6 +22,10 @@
   color: forestgreen;
 }
 
+.material-symbols-rounded.danger {
+  color: var(--main-important-color);
+}
+
 /* SETTINGS */
 .material-symbols-rounded.hidden {
   display: none;

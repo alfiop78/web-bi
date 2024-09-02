@@ -90,233 +90,160 @@
               </menu>
 
               <div class="grid-content">
-                <div class="row">
-                  <section class="col grid-12 autofit">
-                    <div class="row">
-                      <section class="col grid-12 titleSearchListButtons">
-                        <div class="row alignBetween">
-                          <section class="col grid-4">
-                            <h3>WorkBooks</h3>
+                <div class="row autofit">
+                  <section class="col col-1">
+                    <section class="col titleSearchListButtons">
+                      <div class="row">
+                        <section class="col grid-4">
+                          <h3>WorkBooks</h3>
+                        </section>
+                        <section class="col grid-8">
+                          <menu class="allButtons" data-id="workbook" hidden>
+                            <button data-fn="uploadAll" data-type="workbook" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
+                            <button data-fn="downloadAll" data-type="workbook" data-download class="button-icons material-symbols-rounded md-18">download</button>
+                            <button data-fn="upgradeAll" data-type="workbook" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
+                            <button data-fn="deleteAll" data-type="workbook" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
+                          </menu>
+                        </section>
+                      </div>
+                      <div class="row">
+                        <section class="col grid-12">
+                          <input id="search-workbook" type="search" autocomplete="off" data-search-id="search-workbook" data-element-search="workbook" placeholder="Ricerca" />
+                        </section>
+                      </div>
+                      <div class="row">
+                        <section class="col grid-12">
+                          <div class="relative-ul" data-id="workbook" data-type="workbook">
+                            <ul class="elements custom-scrollbar" data-search-id="search-workbook" id="ul-workbook"></ul>
+                          </div>
+                        </section>
+                      </div>
+                      <div class="row">
+                        <section class="col grid-12">
+                          <section class="hideableButtons">
+                            <button type="button" class="btn-link default" data-select-all data-type="workbook">Select All</button>
+                            <button type="button" class="btn-link default" data-unselect-all data-type="workbook">Unselect All</button>
                           </section>
-                          <section class="col grid-8">
-                            <menu class="allButtons" data-id="workbook" hidden>
-                              <button data-fn="uploadAll" data-type="workbook" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
-                              <button data-fn="downloadAll" data-type="workbook" data-download class="button-icons material-symbols-rounded md-18">download</button>
-                              <button data-fn="upgradeAll" data-type="workbook" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
-                              <button data-fn="deleteAll" data-type="workbook" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
-                            </menu>
-                          </section>
-                        </div>
-                        <div class="row">
-                          <section class="col grid-12">
-                            <input id="search-workbook" type="search" autocomplete="off" data-search-id="search-workbook" data-element-search="workbook" placeholder="Ricerca" />
-                          </section>
-                        </div>
-                        <div class="row">
-                          <section class="col grid-12">
-                            <div class="relative-ul" data-id="workbook" data-type="workbook">
-                              <ul class="elements custom-scrollbar" data-search-id="search-workbook" id="ul-workbook"></ul>
-                            </div>
-                          </section>
-                        </div>
-                        <div class="row">
-                          <section class="col grid-12">
-                            <section class="hideableButtons">
-                              <button type="button" class="btn-link default" data-select-all data-type="workbook">Select All</button>
-                              <button type="button" class="btn-link default" data-unselect-all data-type="workbook">Unselect All</button>
-                            </section>
-                          </section>
-                        </div>
-                      </section>
-                    </div>
-                    <div class="row">
-                      <section class="col grid-12 titleSearchListButtons">
-                        <div class="row alignBetween">
-                          <section class="col grid-4">
-                            <h3>Sheets</h3>
-                          </section>
-                          <section class="col grid-8">
-                            <menu class="allButtons" data-id="sheet" hidden>
-                              <button data-fn="uploadAll" data-type="sheet" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
-                              <button data-fn="downloadAll" data-type="sheet" data-download class="button-icons material-symbols-rounded md-18">download</button>
-                              <button data-fn="upgradeAll" data-type="sheet" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
-                              <button data-fn="deleteAll" data-type="sheet" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
-                            </menu>
-                          </section>
-                        </div>
-                        <div class="row">
-                          <section class="col grid-12">
-                            <input id="search-sheet" type="search" autocomplete="off" data-search-id="search-sheet" data-element-search="sheet" placeholder="Ricerca" />
-                          </section>
-                        </div>
-                        <div class="row">
-                          <section class="col grid-12">
-                            <div class="relative-ul" data-id="sheet" data-type="sheet">
-                              <ul class="elements custom-scrollbar" data-search-id="search-sheet" id="ul-sheet"></ul>
-                            </div>
-                          </section>
-                        </div>
-                        <div class="row">
-                          <section class="col grid-12">
-                            <section class="hideableButtons">
-                              <button type="button" class="btn-link default" data-select-all data-type="sheet">Select All</button>
-                              <button type="button" class="btn-link default" data-unselect-all data-type="sheet">Unselect All</button>
-                            </section>
-                          </section>
-                        </div>
-                      </section>
-                    </div>
-                    <div class="row">
-                      <section class="col grid-12 titleSearchListButtons">
-                        <div class="row alignBetween">
-                          <section class="col grid-4">
-                            <h3>Metriche</h3>
-                          </section>
-                          <section class="col grid-8">
-                            <menu class="allButtons" data-id="metric" hidden>
-                              <button data-fn="uploadAll" data-type="metric" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
-                              <button data-fn="downloadAll" data-type="metric" data-download class="button-icons material-symbols-rounded md-18">download</button>
-                              <button data-fn="upgradeAll" data-type="metric" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
-                              <button data-fn="deleteAll" data-type="metric" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
-                            </menu>
-                          </section>
-                        </div>
-                        <div class="row">
-                          <section class="col grid-12">
-                            <input id="search-metric" type="search" autocomplete="off" data-search-id="search-metric" data-element-search="metric" placeholder="Ricerca" />
-                          </section>
-                        </div>
-                        <div class="row">
-                          <section class="col grid-12">
-                            <div class="relative-ul" data-id="metric" data-type="metric">
-                              <ul class="elements custom-scrollbar" data-search-id="search-metric" id="ul-metric"></ul>
-                            </div>
-                          </section>
-                        </div>
-                        <div class="row">
-                          <section class="col grid-12">
-                            <section class="hideableButtons">
-                              <button type="button" class="btn-link default" data-select-all data-type="metric">Select All</button>
-                              <button type="button" class="btn-link default" data-unselect-all data-type="metric">Unselect All</button>
-                            </section>
-                          </section>
-                        </div>
-
-                      </section>
-                    </div>
-                    <div class="row">
-                      <section class="col grid-12 titleSearchListButtons">
-                        <div class="row">
-                          <section class="col grid-4">
-                            <h3>Filtri</h3>
-                          </section>
-                          <section class="col grid-8">
-                            <menu class="allButtons" data-id="filter" hidden>
-                              <button data-fn="uploadAll" data-type="filter" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
-                              <button data-fn="downloadAll" data-type="filter" data-download class="button-icons material-symbols-rounded md-18">download</button>
-                              <button data-fn="upgradeAll" data-type="filter" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
-                              <button data-fn="deleteAll" data-type="filter" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
-                            </menu>
-                          </section>
-                        </div>
-                        <div class="row">
-                          <section class="col grid-12">
-                            <input id="search-filter" type="search" autocomplete="off" data-search-id="search-filter" data-element-search="filter" placeholder="Ricerca" />
-                          </section>
-                        </div>
-                        <div class="row">
-                          <section class="col grid-12">
-                            <div class="relative-ul" data-id="filter" data-type="filter">
-                              <ul class="elements custom-scrollbar" data-search-id="search-filter" id="ul-filter"></ul>
-                            </div>
-                          </section>
-                        </div>
-                        <div class="row">
-                          <section class="col grid-12">
-                            <section class="hideableButtons">
-                              <button type="button" class="btn-link default" data-select-all data-type="filter">Select All</button>
-                              <button type="button" class="btn-link default" data-unselect-all data-type="filter">Unselect All</button>
-                            </section>
-                          </section>
-                        </div>
-
-                      </section>
-                    </div>
+                        </section>
+                      </div>
+                    </section>
                   </section>
-                  <!-- <section class="col grid-12 autofit">
-                    <div class="details">
-                      <section class="placeholder" data-attr="WorkBooks">
-                        <menu class="allButtons" data-id="workbook" hidden>
-                          <button data-fn="uploadAll" data-type="workbook" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
-                          <button data-fn="downloadAll" data-type="workbook" data-download class="button-icons material-symbols-rounded md-18">download</button>
-                          <button data-fn="upgradeAll" data-type="workbook" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
-                          <button data-fn="deleteAll" data-type="workbook" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
-                        </menu>
-                        <input id="search-workbook" type="search" autocomplete="off" data-search-id="search-workbook" data-element-search="workbook" placeholder="Ricerca" />
-                        <div class="relative-ul" data-id="workbook" data-type="workbook">
-                          <ul class="elements custom-scrollbar" data-search-id="search-workbook" id="ul-workbook"></ul>
-                        </div>
-                        <section class="hideableButtons">
-                          <button type="button" class="btn-link default" data-select-all data-type="workbook">Select All</button>
-                          <button type="button" class="btn-link default" data-unselect-all data-type="workbook">Unselect All</button>
+
+                  <section class="col col-2">
+                    <section class="col titleSearchListButtons">
+                      <div class="row">
+                        <section class="col grid-4">
+                          <h3>Sheets</h3>
                         </section>
-                      </section>
-                    </div>
-                    <div class="details">
-                      <section class="placeholder" data-attr="Sheets">
-                        <menu class="allButtons" data-id="sheet" hidden>
-                          <button data-fn="uploadAll" data-type="sheet" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
-                          <button data-fn="downloadAll" data-type="sheet" data-download class="button-icons material-symbols-rounded md-18">download</button>
-                          <button data-fn="upgradeAll" data-type="sheet" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
-                          <button data-fn="deleteAll" data-type="sheet" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
-                        </menu>
-                        <input id="search-sheet" type="search" autocomplete="off" data-search-id="search-sheet" data-element-search="sheet" placeholder="Ricerca" />
-                        <div class="relative-ul custom-scrollbar" data-id="sheet" data-type="sheet">
-                          <ul class="elements custom-scrollbar" data-search-id="search-sheet" id="ul-sheet"></ul>
-                        </div>
-                        <section class="hideableButtons">
-                          <button type="button" class="btn-link default" data-select-all data-type="sheet">Select All</button>
-                          <button type="button" class="btn-link default" data-unselect-all data-type="sheet">Unselect All</button>
+                        <section class="col grid-8">
+                          <menu class="allButtons" data-id="sheet" hidden>
+                            <button data-fn="uploadAll" data-type="sheet" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
+                            <button data-fn="downloadAll" data-type="sheet" data-download class="button-icons material-symbols-rounded md-18">download</button>
+                            <button data-fn="upgradeAll" data-type="sheet" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
+                            <button data-fn="deleteAll" data-type="sheet" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
+                          </menu>
                         </section>
-                      </section>
-                    </div>
-                    <div class="details">
-                      <section data-id="metric" class="placeholder" data-attr="Metriche">
-                        <menu class="allButtons" data-id="metric" hidden>
-                          <button data-fn="uploadAll" data-type="metric" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
-                          <button data-fn="downloadAll" data-type="metric" data-download class="button-icons material-symbols-rounded md-18">download</button>
-                          <button data-fn="upgradeAll" data-type="metric" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
-                          <button data-fn="deleteAll" data-type="metric" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
-                        </menu>
-                        <input id="search-metric" type="search" autocomplete="off" data-search-id="search-metric" data-element-search="metric" placeholder="Ricerca" />
-                        <div class="relative-ul custom-scrollbar" data-id="metric" data-type="metric">
-                          <ul class="elements custom-scrollbar" data-search-id="search-metric" id="ul-metric"></ul>
-                        </div>
-                        <section class="hideableButtons">
-                          <button type="button" class="btn-link default" data-select-all data-type="metric">Select All</button>
-                          <button type="button" class="btn-link default" data-unselect-all data-type="metric">Unselect All</button>
+                      </div>
+                      <div class="row">
+                        <section class="col grid-12">
+                          <input id="search-sheet" type="search" autocomplete="off" data-search-id="search-sheet" data-element-search="sheet" placeholder="Ricerca" />
                         </section>
-                      </section>
-                    </div>
-                    <div class="details">
-                      <section data-id="filter" hidden class="placeholder" data-attr="Filtri">
-                        <menu class="allButtons" data-id="filter" hidden>
-                          <button data-fn="uploadAll" data-type="filter" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
-                          <button data-fn="downloadAll" data-type="filter" data-download class="button-icons material-symbols-rounded md-18">download</button>
-                          <button data-fn="upgradeAll" data-type="filter" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
-                          <button data-fn="deleteAll" data-type="filter" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
-                        </menu>
-                        <input id="search-filter" type="search" autocomplete="off" data-search-id="search-filter" data-element-search="filter" placeholder="Ricerca" />
-                        <div class="relative-ul custom-scrollbar" data-id="filter" data-type="filter">
-                          <ul class="elements custom-scrollbar" data-search-id="search-filter" id="ul-filter"></ul>
-                        </div>
-                        <section class="hideableButtons">
-                          <button type="button" class="btn-link default" data-select-all data-type="filter">Select All</button>
-                          <button type="button" class="btn-link default" data-unselect-all data-type="filter">Unselect All</button>
+                      </div>
+                      <div class="row">
+                        <section class="col grid-12">
+                          <div class="relative-ul" data-id="sheet" data-type="sheet">
+                            <ul class="elements custom-scrollbar" data-search-id="search-sheet" id="ul-sheet"></ul>
+                          </div>
                         </section>
-                      </section>
-                    </div>
-                  </section> -->
+                      </div>
+                      <div class="row">
+                        <section class="col grid-12">
+                          <section class="hideableButtons">
+                            <button type="button" class="btn-link default" data-select-all data-type="sheet">Select All</button>
+                            <button type="button" class="btn-link default" data-unselect-all data-type="sheet">Unselect All</button>
+                          </section>
+                        </section>
+                      </div>
+                    </section>
+                  </section>
+                  <section class="col col-3-span">
+
+                    <section class="col grid-12 titleSearchListButtons">
+                      <div class="row">
+                        <section class="col grid-4">
+                          <h3>Metriche</h3>
+                        </section>
+                        <section class="col grid-8">
+                          <menu class="allButtons" data-id="metric" hidden>
+                            <button data-fn="uploadAll" data-type="metric" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
+                            <button data-fn="downloadAll" data-type="metric" data-download class="button-icons material-symbols-rounded md-18">download</button>
+                            <button data-fn="upgradeAll" data-type="metric" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
+                            <button data-fn="deleteAll" data-type="metric" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
+                          </menu>
+                        </section>
+                      </div>
+                      <div class="row">
+                        <section class="col grid-12">
+                          <input id="search-metric" type="search" autocomplete="off" data-search-id="search-metric" data-element-search="metric" placeholder="Ricerca" />
+                        </section>
+                      </div>
+                      <div class="row">
+                        <section class="col grid-12">
+                          <div class="relative-ul" data-id="metric" data-type="metric">
+                            <ul class="elements custom-scrollbar" data-search-id="search-metric" id="ul-metric"></ul>
+                          </div>
+                        </section>
+                      </div>
+                      <div class="row">
+                        <section class="col grid-12">
+                          <section class="hideableButtons">
+                            <button type="button" class="btn-link default" data-select-all data-type="metric">Select All</button>
+                            <button type="button" class="btn-link default" data-unselect-all data-type="metric">Unselect All</button>
+                          </section>
+                        </section>
+                      </div>
+
+                    </section>
+                  </section>
+                  <section class="col col-4-span">
+
+                    <section class="col grid-12 titleSearchListButtons">
+                      <div class="row">
+                        <section class="col grid-4">
+                          <h3>Filtri</h3>
+                        </section>
+                        <section class="col grid-8">
+                          <menu class="allButtons" data-id="filter" hidden>
+                            <button data-fn="uploadAll" data-type="filter" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
+                            <button data-fn="downloadAll" data-type="filter" data-download class="button-icons material-symbols-rounded md-18">download</button>
+                            <button data-fn="upgradeAll" data-type="filter" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
+                            <button data-fn="deleteAll" data-type="filter" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
+                          </menu>
+                        </section>
+                      </div>
+                      <div class="row">
+                        <section class="col grid-12">
+                          <input id="search-filter" type="search" autocomplete="off" data-search-id="search-filter" data-element-search="filter" placeholder="Ricerca" />
+                        </section>
+                      </div>
+                      <div class="row">
+                        <section class="col grid-12">
+                          <div class="relative-ul" data-id="filter" data-type="filter">
+                            <ul class="elements custom-scrollbar" data-search-id="search-filter" id="ul-filter"></ul>
+                          </div>
+                        </section>
+                      </div>
+                      <div class="row">
+                        <section class="col grid-12">
+                          <section class="hideableButtons">
+                            <button type="button" class="btn-link default" data-select-all data-type="filter">Select All</button>
+                            <button type="button" class="btn-link default" data-unselect-all data-type="filter">Unselect All</button>
+                          </section>
+                        </section>
+                      </div>
+
+                    </section>
+                  </section>
 
                 </div>
                 <div class="row">

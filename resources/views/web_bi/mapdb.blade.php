@@ -391,7 +391,7 @@
                       <li class="select-list content" data-field="id" data-field-ds="date" data-table="WB_DATE" data-datatype="date" data-fn="handlerTimeField">DATE <small>Es.: 2023-12-31</small></li>
                     </ul>
                   </section>
-                  <section class="dlg-content col grid-6">
+                  <section class="col grid-6">
                     <section class="list-search">
                       <input type="search" id="time-column-search" data-element-search="time-column" placeholder="Ricerca colonna" autocomplete="off" />
                       <div class="relative-ul">

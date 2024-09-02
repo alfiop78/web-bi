@@ -198,7 +198,7 @@ h2 {
 h3 {
   font-size: 1.1rem;
   margin: 4px;
-  font-weight: lighter;
+  font-weight: bold;
   text-align: center;
 }
 
@@ -576,8 +576,8 @@ small {
   padding: .5em 2em;
 }
 
-.col-4.col-8 {
-  grid-template-columns: 4fr 8fr;
+.autofit {
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
 }
 
 .placeholder[data-attr] {
@@ -631,9 +631,11 @@ input[type="number"] {
 /* grid 11.01.2024 */
 .row {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  /* grid-template-columns: repeat(12, 1fr); */
   /* padding: .5em; */
   grid-column-gap: 2em;
+  position: relative;
+  grid-template-rows: min-content;
 }
 
 .row.alignBetween {
@@ -649,11 +651,26 @@ input[type="number"] {
   display: grid;
   padding: .5em;
   grid-gap: 1em;
+  grid-template-rows: auto 1fr; /* col con titolo e contentuo */
+}
+
+.row>.cols {
+  display: grid;
+  /* grid-column: span 12; */
 }
 
 .row>div.col {
   background-color: white;
   box-shadow: 0px 1px 5px 0px gray;
+  display: grid;
+}
+
+.row>.col.col-1 {
+  grid-column: 1;
+}
+
+.row>.col.col-2-span {
+  grid-column: span 2;
 }
 
 .row>.col.center {

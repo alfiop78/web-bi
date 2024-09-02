@@ -51,7 +51,6 @@
         <div id="body">
           <div class="wrapper">
 
-
             <dialog id="dlg-new-connection" data-x="0" data-y="0">
               <form id="form-new-connection" method="post" action="{{ route('connection.store') }}">
                 @csrf
@@ -127,9 +126,11 @@
                 {{-- session()->forget('db_name') --}}
               </menu>
               <div class="grid-content">
-                <div class="row start">
-                  <section class="col grid-5">
-                    <h4>Connessione al Database</h4>
+                <div class="row autofit">
+                  <section class="col col-1">
+                    <div class="row">
+                      <h4>Connessione al Database</h4>
+                    </div>
                     <div class="row">
                       <div class="col grid-12">
                         <section class="list-search">
@@ -149,7 +150,6 @@
                     </div>
                     <div class="row">
                       <section class="col grid-12">
-                        <!-- <a href="#" id="new-connection"><i class="material-symbols-rounded-round md-18">add</i><span>Crea connessione</span></a> -->
                         <section class="btn-link">
                           <button id="new-connection" class="btn-link link">Aggiungi</button>
                           <button id="remove-connection" class="btn-link link" disabled>Elimina</button>
@@ -158,9 +158,24 @@
                       </section>
                     </div>
                   </section>
-                  <section class="col grid-7">
-                    <h4>Titolo sezione</h4>
-                    grid-8
+                  <section class="col col-2-span">
+                    <div class="row">
+                      <h4>Titolo sezione</h4>
+                    </div>
+                    <div class="row">
+                      <section class="col grid-12">
+                          <span>contenuto sezione</span>
+                      </section>
+                    </div>
+                    <div class="row">
+                      <section class="col grid-12">
+                        <section class="btn-link">
+                          <button id="new-connection" class="btn-link link">Aggiungi</button>
+                          <button id="remove-connection" class="btn-link link" disabled>Elimina</button>
+                          <button id="edit-connection" class="btn-link link" disabled>Modifica</button>
+                        </section>
+                      </section>
+                    </div>
                   </section>
                 </div>
               </div>
