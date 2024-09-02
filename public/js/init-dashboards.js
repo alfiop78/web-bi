@@ -290,7 +290,7 @@ var Resource = new Resources();
   document.querySelectorAll('a[data-token]').forEach(a => {
     a.addEventListener('click', async (e) => {
       // scarico il json dal DB, lo salvo in sessionStorage
-      await fetch(`/fetch_api/name/${e.target.dataset.token}/dashboard_show`)
+      await fetch(`/fetch_api/name/${e.currentTarget.dataset.token}/dashboard_show`)
         .then((response) => {
           console.log(response);
           if (!response.ok) { throw Error(response.statusText); }

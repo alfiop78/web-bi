@@ -38,17 +38,6 @@
       </section>
 
       <nav>
-        {{-- session()->forget('db_name') --}}
-        <a href="#" title="Database selected">
-          @if (session('db_name'))
-          <i id="db-icon-status" class="material-symbols-rounded done">database</i>
-          @else
-          <!-- dump('sessione non impostata') -->
-          <i id="db-icon-status" class="material-symbols-rounded error">database_off</i>
-          @endif
-          <span id="database-name">{{ session('db_name', 'Database non impostato') }}</span>
-        </a>
-        <hr />
         <a href="{{ route('web_bi.mapdb') }}" title="Workspace"><i class="material-symbols-rounded">workspaces</i><span>Workspace</span></a>
         <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded">cloud_sync</i><span>Versionamento</span></a>
         <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded">dashboard_customize</i><span>Creazione Dashboard</span></a>
@@ -61,6 +50,7 @@
       <div id="content">
         <div id="body">
           <div class="wrapper">
+
 
             <dialog id="dlg-new-connection" data-x="0" data-y="0">
               <form id="form-new-connection" method="post" action="{{ route('connection.store') }}">
@@ -120,7 +110,22 @@
               </form>
             </dialog>
 
-            <div class="grid">
+            <div class="grid layout">
+              <menu class="standard align-end">
+                <section class="dbStatus">
+                  {{-- session()->forget('db_name') --}}
+                  <span id="database-name">
+                    {{ session('db_name', 'Nessun Database collegato') }}
+                    @if (session('db_name'))
+                    <i class="material-symbols-rounded done">database</i>
+                    @else
+                    <i class="material-symbols-rounded error">database_off</i>
+                    @endif
+                  </span>
+                </section>
+
+                {{-- session()->forget('db_name') --}}
+              </menu>
               <div class="grid-content">
                 <div class="row start">
                   <section class="col grid-5">

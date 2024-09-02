@@ -42,11 +42,19 @@
 /* .grid-layout > .content > .body.grid-section-2 .objects { */
 .objects {
   display: grid;
-  /* grid-template-columns: repeat(auto-fill, 340px); */
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  /* grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); */
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   /* grid-auto-rows: 380px; */
   grid-gap: 1em;
   margin: 1em;
+}
+
+.autofit {
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+}
+
+.titleSearchListButtons {
+  grid-template-rows: auto auto 1fr auto;
 }
 
 ul {
@@ -179,7 +187,8 @@ li:hover[data-sync="false"][data-storage="db"] button[data-delete] {
 .details {
   display: grid;
   /* grid-template-rows: auto 3fr 1fr; */
-  grid-template-rows: auto 1fr;
+  /* grid-template-rows: auto 1fr; */
+  grid-template-rows: auto auto auto 1fr auto;
   grid-row-gap: 1em;
   background-color: white;
 }
@@ -216,7 +225,7 @@ li:hover[data-sync="false"][data-storage="db"] button[data-delete] {
 }
 
 menu.allButtons {
-  position: absolute;
+  position: relative;
   right: 1em;
 }
 
@@ -253,7 +262,7 @@ li input:checked {
 }
 
 .hideableButtons {
-  position: absolute;
+  position: relative;
   bottom: 4px;
   display: flex;
   width: 100%;

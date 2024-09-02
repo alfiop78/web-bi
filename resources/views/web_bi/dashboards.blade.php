@@ -82,9 +82,14 @@
             </div>
             <div id="chart_div"></div> -->
             <!-- </div> -->
+            <div class="grid">
+              <div class="grid-content">
+                <div id="template-layout" class="layout"></div>
 
-            <progress id="progress-bar" max="100" value="0"></progress>
-            <div id="template-layout" class="layout"></div>
+                <progress id="progress-bar" max="100" value="0"></progress>
+              </div>
+            </div>
+
 
             <!-- <div class="objects">
             <div id="chart_div"></div>

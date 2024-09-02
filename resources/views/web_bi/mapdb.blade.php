@@ -188,15 +188,6 @@
       </section>
 
       <nav>
-        <a href="#" title="Database selected">
-          @if (session('db_name'))
-          <i class="material-symbols-rounded done">database</i>
-          @else
-          <i class="material-symbols-rounded error">database_off</i>
-          @endif
-          <span id="database-name">{{ session('db_name', 'Database non impostato') }}</span>
-        </a>
-        <hr />
         <a href="{{ route('web_bi.index') }}" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
         <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded white">cloud_sync</i><span>Versionamento</span></a>
         <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded white">dashboard_customize</i><span>Creazione Dashboard</span></a>
@@ -730,11 +721,24 @@
                   <section class="step" data-step="1" selected>
                     <section class="wrapper-step">
                       <menu class="standard">
-                        <button class="btn-link default" id="btn-workbook-new" value="Nuovo">Nuovo</button>
-                        <button class="btn-link default" id="btn-workbook-open" value="open">Apri</button>
-                        <button class="btn-link default" id="btn-time-dimension" value="open">Tabella TIME</button>
-                        <!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
-                        <section id="workbook-name" class="name data-source" contenteditable="true">Titolo WorkBook</section>
+                        <section>
+                          <button class="btn-link default" id="btn-workbook-new" value="Nuovo">Nuovo</button>
+                          <button class="btn-link default" id="btn-workbook-open" value="open">Apri</button>
+                          <button class="btn-link default" id="btn-time-dimension" value="open">Tabella TIME</button>
+                          <!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
+                          <section id="workbook-name" class="name data-source" contenteditable="true">Titolo WorkBook</section>
+                        </section>
+                        <section class="dbStatus">
+                          {{-- session()->forget('db_name') --}}
+                          <span id="database-name">
+                            {{ session('db_name', 'Nessun Database collegato') }}
+                            @if (session('db_name'))
+                            <i class="material-symbols-rounded done">database</i>
+                            @else
+                            <i class="material-symbols-rounded error">database_off</i>
+                            @endif
+                          </span>
+                        </section>
                       </menu>
                       <div id="context-menu-table" class="context-menu">
                         <ul id="ul-context-menu-table" class="context-menu-items">
@@ -838,14 +842,23 @@
                   <section class="step" data-step="2">
                     <section class="wrapper-content">
                       <menu class="standard">
-                        <section class="buttons-menu">
+                        <section>
                           <button class="btn-link default" type="button" id="btn-sheet-new" data-fn="newSheetDialog">Nuovo</button>
                           <button class="btn-link default" type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri</button>
                           <button class="btn-link default" type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
                           <!-- <button id="btn-publish" class="btn-link important" data-fn="publish" value="Pubblica">Pubblica</button> -->
-                        </section>
-                        <section class="sheet-title">
                           <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Titolo">Titolo Sheet</div>
+                        </section>
+                        <section class="dbStatus">
+                          {{-- session()->forget('db_name') --}}
+                          <span id="database-name">
+                            {{ session('db_name', 'Nessun Database collegato') }}
+                            @if (session('db_name'))
+                            <i class="material-symbols-rounded done">database</i>
+                            @else
+                            <i class="material-symbols-rounded error">database_off</i>
+                            @endif
+                          </span>
                         </section>
                       </menu>
                       <section id="wrapper-sheet" class="wrapper-sheet">

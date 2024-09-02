@@ -129,6 +129,12 @@ header h1 {
   height: 100%;
 }
 
+.name{
+  font-weight: bold;
+  font-size: 1rem;
+  color: var(--main-important-color);
+}
+
 #console {
   /*position: absolute;*/
   position: fixed;
@@ -611,6 +617,13 @@ input[type="number"] {
   padding: 1em;
 }
 
+.grid.layout {
+  background-color: white;
+  box-shadow: 0 1px 4px 3px lightgrey;
+  border-radius: 2px;
+  grid-template-rows: auto 1fr;
+}
+
 .grid-content {
   display: grid;
 }
@@ -621,6 +634,11 @@ input[type="number"] {
   grid-template-columns: repeat(12, 1fr);
   /* padding: .5em; */
   grid-column-gap: 2em;
+}
+
+.row.alignBetween {
+  display: flex;
+  justify-content: space-between;
 }
 
 .row.start {
@@ -690,6 +708,10 @@ input[type="number"] {
   grid-column: span 12;
 }
 
+.row>.col.gridMenu {
+  grid-template-rows: auto 1fr;
+}
+
 i[draggable="true"]:hover {
   cursor: grab;
   color: #011126;
@@ -699,4 +721,28 @@ i[draggable="true"]:hover {
 li.dropzone.dropping {
   border: solid thin var(--main-important-color);
   box-shadow: 0px 0px 3px 0px var(--main-important-color);
+}
+
+menu.standard {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  margin: 0;
+  gap: 1em;
+  justify-content: space-between;
+}
+
+menu.standard.align-end {
+  justify-content: flex-end;
+}
+
+menu.standard>section {
+  display: flex;
+  align-items: center;
+  column-gap: 4px;
+}
+
+menu.standard>.dbStatus>span {
+  display: flex;
+  align-items: center;
 }

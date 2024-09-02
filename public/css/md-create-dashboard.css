@@ -130,10 +130,6 @@ fieldset legend {
   justify-content: center;
 }
 
-.title {
-  font-style: italic;
-}
-
 .thumb-layout {
   display: flex;
   flex-direction: column;
