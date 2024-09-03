@@ -214,34 +214,6 @@ dialog .textarea-formula{
   grid-row-gap: 1em;
 }
 
-.col-3{
-  grid-template-columns: 260px 1fr 230px;
-}
-
-.columns-2 {
-  grid-template-columns: auto auto;
-}
-
-.col-2{
-  grid-template-columns: 260px 1fr;
-}
-
-/* .col-3{
-  grid-auto-flow: column;
-} */
-
-.col-2-equals{
-  grid-template-columns: 50% 50%;
-}
-
-.col-1{
-  grid-template-columns: 1fr;
-}
-
-.row-1{
-  grid-template-rows: auto;
-}
-
 dialog .buttons{
   padding: 1em;
 }

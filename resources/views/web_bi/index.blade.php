@@ -113,12 +113,12 @@
               <menu class="standard align-end">
                 <section class="dbStatus">
                   {{-- session()->forget('db_name') --}}
-                  <span id="database-name">
-                    {{ session('db_name', 'Nessun Database collegato') }}
+                  <span>
+                    <span id="database-name">{{ session('db_name', 'Nessun Database collegato') }}</span>
                     @if (session('db_name'))
-                    <i class="material-symbols-rounded done">database</i>
+                    <i id="db-icon-status" class="material-symbols-rounded done">database</i>
                     @else
-                    <i class="material-symbols-rounded error">database_off</i>
+                    <i id="db-icon-status" class="material-symbols-rounded error">database_off</i>
                     @endif
                   </span>
                 </section>
@@ -127,7 +127,7 @@
               </menu>
               <div class="grid-content">
                 <div class="row autofit">
-                  <section class="col col-1">
+                  <section class="col header body footer col-1">
                     <div class="row">
                       <h4>Connessione al Database</h4>
                     </div>
@@ -158,13 +158,13 @@
                       </section>
                     </div>
                   </section>
-                  <section class="col col-2-span">
+                  <section class="col header body footer col-2-span">
                     <div class="row">
                       <h4>Titolo sezione</h4>
                     </div>
                     <div class="row">
                       <section class="col grid-12">
-                          <span>contenuto sezione</span>
+                        <span>contenuto sezione</span>
                       </section>
                     </div>
                     <div class="row">
