@@ -113,12 +113,12 @@
               <menu class="standard align-end">
                 <section class="dbStatus">
                   {{-- session()->forget('db_name') --}}
-                  <span>
+                  <span id="db-connection-status" data-connected="{{ session('db_id', 0) }}">
                     <span id="database-name">{{ session('db_name', 'Nessun Database collegato') }}</span>
                     @if (session('db_name'))
-                    <i id="db-icon-status" class="material-symbols-rounded done">database</i>
+                    <i id="db-icon-status" class="material-symbols-rounded">database</i>
                     @else
-                    <i id="db-icon-status" class="material-symbols-rounded error">database_off</i>
+                    <i id="db-icon-status" class="material-symbols-rounded">database_off</i>
                     @endif
                   </span>
                 </section>

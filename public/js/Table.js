@@ -94,10 +94,21 @@ class Table {
       for (const [key, value] of metrics) {
         // debugger;
         // console.log(key, value);
-        // cerco, in thead, la colonna corrispondente e gli applico il token per identificare una metrica
-        // già definita
-        const field = value.field.split('.');
-        [...this.thead.querySelectorAll(`th[data-field='${field[1]}'][data-id='${value.factId}']`)].filter(th => th.dataset.metricToken = key);
+        if (value.metric_type === 'basic') {
+          // le metriche composte di base hanno un object 'fields' contenente un array da cui si può estrapolare il field con split
+          let field;
+          if (value.hasOwnProperty('fields')) {
+            value.fields.forEach(field => {
+              field = field.split('.');
+              [...this.thead.querySelectorAll(`th[data-field='${field[1]}'][data-id='${value.factId}']`)].filter(th => th.dataset.metricToken = key);
+            });
+          } else {
+            // cerco, in thead, la colonna corrispondente e gli applico il token per identificare una metrica
+            // già definita
+            field = value.field.split('.');
+            [...this.thead.querySelectorAll(`th[data-field='${field[1]}'][data-id='${value.factId}']`)].filter(th => th.dataset.metricToken = key);
+          }
+        }
       }
     }
   }

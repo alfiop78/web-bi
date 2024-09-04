@@ -87,6 +87,7 @@ var App = new Application();
     const id = e.currentTarget.dataset.id;
     const databaseName = document.getElementById('database-name');
     const iconStatus = document.getElementById('db-icon-status');
+    const spanConnectionStatus = document.getElementById('db-connection-status');
     const url = `/fetch_api/${id}/show`;
     await fetch(url)
       .then((response) => {
@@ -99,14 +100,16 @@ var App = new Application();
         if (data) {
           // seleziono la connessione impostata
           e.target.dataset.selected = 'true';
-          iconStatus.classList.replace('error', 'done');
+          // iconStatus.classList.replace('error', 'done');
           iconStatus.innerText = 'database';
           databaseName.innerHTML = data.name;
+          spanConnectionStatus.dataset.connected = data.id;
         } else {
           delete e.target.dataset.selected;
-          iconStatus.classList.replace('done', 'error');
+          // iconStatus.classList.replace('done', 'error');
           iconStatus.innerText = 'database_off';
           databaseName.innerHTML = 'Database non impostato';
+          spanConnectionStatus.dataset.connected = 0;
         }
       })
       .catch((err) => console.error(err));

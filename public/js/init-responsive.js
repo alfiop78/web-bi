@@ -2705,6 +2705,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     Draw.drawTime();
 
     app.setPropertyTimeDimension(fieldsData);
+    app.checkSessionStorage();
     app.hierTables();
 
     WorkBook.checkChanges('time');
