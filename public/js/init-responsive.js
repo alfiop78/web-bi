@@ -1188,47 +1188,53 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         let partialData = [];
         // TODO: rivedere come utilizzare la progressBar con i dati provenienti dal cursorPaginate.
         // La progress-bar veniva correttamente utilizzata con il paginate
-        progressBar.value = +((paginateData.to / paginateData.total) * 100);
-        progressLabel.hidden = false;
-        progressTo.innerText = paginateData.to;
-        progressTotal.innerText = paginateData.total;
-        console.log(paginateData);
-        // console.log(paginateData.data);
-        // funzione ricorsiva fino a quando è presente next_page_url
-        let recursivePaginate = async (url) => {
-          await fetch(url).then(response => {
-            // console.log(response);
-            if (!response.ok) { throw Error(response.statusText); }
-            return response;
-          }).then(response => response.json()).then(paginate => {
-            console.log(paginate);
-            progressBar.value = +((paginate.to / paginate.total) * 100);
-            progressTo.innerText = paginate.to;
-            progressTotal.innerText = paginate.total;
-            // console.log(progressBar.value);
-            partialData = partialData.concat(paginate.data);
-            if (paginate.next_page_url) {
-              recursivePaginate(paginate.next_page_url);
-            } else {
-              // Non sono presenti altre pagine, visualizzo il dashboard
-              console.log('tutte le paginate completate :', partialData);
-              Resource.data = partialData;
-              google.charts.setOnLoadCallback(drawDatamart());
-              App.loaderStop();
-            }
-          }).catch((err) => {
-            App.showConsole(err, 'error');
-            console.error(err);
-          });
-        }
-        partialData = paginateData.data;
-        if (paginateData.next_page_url) {
-          recursivePaginate(paginateData.next_page_url);
+        if (paginateData.total !== 0) {
+          console.log(paginateData);
+          progressBar.value = +((paginateData.to / paginateData.total) * 100);
+          progressLabel.hidden = false;
+          progressTo.innerText = paginateData.to;
+          progressTotal.innerText = paginateData.total;
+          // console.log(paginateData.data);
+          // funzione ricorsiva fino a quando è presente next_page_url
+          let recursivePaginate = async (url) => {
+            await fetch(url).then(response => {
+              // console.log(response);
+              if (!response.ok) { throw Error(response.statusText); }
+              return response;
+            }).then(response => response.json()).then(paginate => {
+              console.log(paginate);
+              progressBar.value = +((paginate.to / paginate.total) * 100);
+              progressTo.innerText = paginate.to;
+              progressTotal.innerText = paginate.total;
+              // console.log(progressBar.value);
+              partialData = partialData.concat(paginate.data);
+              if (paginate.next_page_url) {
+                recursivePaginate(paginate.next_page_url);
+              } else {
+                // Non sono presenti altre pagine, visualizzo il dashboard
+                console.log('tutte le paginate completate :', partialData);
+                Resource.data = partialData;
+                google.charts.setOnLoadCallback(drawDatamart());
+                App.loaderStop();
+              }
+            }).catch((err) => {
+              App.showConsole(err, 'error');
+              console.error(err);
+            });
+          }
+          partialData = paginateData.data;
+          if (paginateData.next_page_url) {
+            recursivePaginate(paginateData.next_page_url);
+          } else {
+            // Non sono presenti altre pagine, visualizzo il dashboard
+            Resource.data = partialData;
+            google.charts.setOnLoadCallback(drawDatamart());
+            App.loaderStop();
+          }
         } else {
-          // Non sono presenti altre pagine, visualizzo il dashboard
-          Resource.data = partialData;
-          google.charts.setOnLoadCallback(drawDatamart());
           App.loaderStop();
+        App.showConsole('Nessun dato presente', 'warning', 2000);
+
         }
       })
       .catch(err => {
