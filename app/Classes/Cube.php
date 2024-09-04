@@ -210,10 +210,12 @@ class Cube
           if (strtolower($join->datatype) === 'int' || strtolower($join->datatype) === 'integer') {
             switch (session('db_driver')) {
               case 'odbc':
-                $join->SQL[0] = "TO_CHAR({$join->SQL[0]})::DATE";
+                if ($join->alias === 'WB_DATE') $join->SQL[0] = "TO_CHAR({$join->SQL[0]})::DATE";
+                // $join->SQL[0] = "TO_CHAR({$join->SQL[0]})::DATE";
                 break;
               case 'mysql':
-                $join->SQL[0] = "DATE_FORMAT({$join->SQL[0]}, '%Y-%m-%d')";
+                // TEST: da testare con il WorkBook Multifact
+                if ($join->alias === 'WB_DATE') $join->SQL[0] = "DATE_FORMAT({$join->SQL[0]}, '%Y-%m-%d')";
                 break;
               default:
                 break;
