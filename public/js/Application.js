@@ -23,7 +23,7 @@ class Application {
     // var i = document.querySelector('i.md-circle');
     // gestore dell'evento scroll
     document.querySelector('main').addEventListener('scroll', this.handlerScroll, true);
-    document.getElementById('container').addEventListener('click', this.containerClick, true);
+    // document.getElementById('container').addEventListener('click', this.containerClick, true);
 
     /* console.log(window.screen.height);
     console.log(window.screen.availHeight);

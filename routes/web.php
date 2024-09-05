@@ -51,6 +51,7 @@ Route::get('/users', [UserController::class, 'index']);
 // })->name('web_bi.index');
 
 Route::get('/', [BIConnectionsController::class, 'index'])->name('web_bi.index');
+Route::get('/index_origin', [BIConnectionsController::class, 'index'])->name('web_bi.index_origin');
 
 Route::get('/mapdb', [MapDatabaseController::class, 'mapdb'])->name('web_bi.mapdb');
 

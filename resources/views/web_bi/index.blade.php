@@ -5,10 +5,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Web-BI | HOME</title>
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
   <!-- <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0"> -->
   <link rel="icon" href="/favicon.png" type="image/png" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-symbols.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" />
+  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
@@ -22,180 +23,148 @@
 </head>
 
 <body class="antialiased">
-  <main>
-    <header>
-      <div class="nav-button">
-        <!-- codelab-nav-button-->
-        <a href="/" id="arrow-back"><i class="material-symbols-rounded white">close</i></a>
-        <a href="#" id="menu" onclick="App.menu()"><i class="material-symbols-rounded white">menu</i></a>
-      </div>
-      <h1 class="title">Gaia-BI</h1>
-    </header>
-    <div id="drawer">
-      <section class="account">
-        <h5>user</h5>
-        <i class="material-symbols-rounded md-light">person</i>
-      </section>
-
-      <nav>
-        <a href="{{ route('web_bi.mapdb') }}" title="Workspace"><i class="material-symbols-rounded">workspaces</i><span>Workspace</span></a>
-        <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded">cloud_sync</i><span>Versionamento</span></a>
-        <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded">dashboard_customize</i><span>Creazione Dashboard</span></a>
-        <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded">dashboard</i><span>Dashboards</span></a>
-        <hr />
-        <a href="#" title="Settings"><i class="material-symbols-rounded">settings</i><span>Impostazioni</span></a>
-      </nav>
+  <header>
+    <div class="nav-button">
+      <a href="#" id="menu" onclick="App.menu()"><i class="material-symbols-rounded white">menu</i></a>
     </div>
-    <div id="container">
-      <div id="content">
-        <div id="body">
-          <div class="wrapper">
+    <h1 class="title">Gaia-BI</h1>
+  </header>
+  <div class="left-sidebar">
+    <section class="account">
+      <h5>user</h5>
+      <i class="material-symbols-rounded md-light">person</i>
+    </section>
 
-            <dialog id="dlg-new-connection" data-x="0" data-y="0">
-              <form id="form-new-connection" method="post" action="{{ route('connection.store') }}">
-                @csrf
-                <section class="dlg-grid">
-                  <h5 class="title">Crea nuova connessione</h5>
-                  <section class="dlg-content">
-                    <section class="row">
-                      <section class="col grid-12">
-                        <input id="input-connection-name" type="text" name="title" value="" placeholder="Nome connessione" />
-                      </section>
-                    </section>
-                    <section class="row">
-                      <section class="col grid-12">
-                        <div class="field label">
-                          <label for="field-db">Database</label>
-                          <select id="field-db" name="database">
-                            <option value="mysql">MySQL</option>
-                            <option value="pgsql">PostgreSQL</option>
-                            <option value="odbc">Vertica</option>
-                            <option value="sqlsrv">SQL Server</option>
-                          </select>
-                        </div>
-                      </section>
-                    </section>
-                    <section class="row">
-                      <section class="col grid-8">
-                        <input id="input-host" type="text" name="host" value="" placeholder="host" />
-                      </section>
-                      <section class="col grid-4">
-                        <input id="input-port" type="text" name="port" placeholder="port" />
-                      </section>
-                    </section>
-                    <section class="row">
-                      <section class="col grid-6">
-                        <input id="input-dsn" type="text" value="" name="dsn" placeholder="DSN" />
-                      </section>
-                      <section class="col grid-6">
-                        <label>*Schema in cui memorizzare i datamart</label>
-                        <input id="input-schema" type="text" value="" name="schema" placeholder="Schema" />
-                      </section>
-                    </section>
-                    <section class="row">
-                      <section class="col grid-6">
-                        <input id="input-username" type="text" value="" name="username" placeholder="Username" />
-                      </section>
-                      <section class="col grid-6">
-                        <input id="input-psw" type="password" name="password" placeholder="Password" />
-                      </section>
+    <nav>
+      <a href="{{ route('web_bi.mapdb') }}" title="Workspace"><i class="material-symbols-rounded">workspaces</i><span>Workspace</span></a>
+      <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded">cloud_sync</i><span>Versionamento</span></a>
+      <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded">dashboard_customize</i><span>Creazione Dashboard</span></a>
+      <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded">dashboard</i><span>Dashboards</span></a>
+      <hr />
+      <a href="#" title="Settings"><i class="material-symbols-rounded">settings</i><span>Impostazioni</span></a>
+    </nav>
+  </div>
+  <main>
+    <div id="content">
+      <div id="body" hidden>
+        <menu class="standard align-end">
+          <section class="dbStatus">
+            {{-- session()->forget('db_name') --}}
+            <span id="db-connection-status" data-connected="{{ session('db_id', 0) }}">
+              <span id="database-name">{{ session('db_name', 'Nessun Database collegato') }}</span>
+              @if (session('db_name'))
+              <i id="db-icon-status" class="material-symbols-rounded">database</i>
+              @else
+              <i id="db-icon-status" class="material-symbols-rounded">database_off</i>
+              @endif
+            </span>
+          </section>
+          {{-- session()->forget('db_name') --}}
+        </menu>
+        <div class="wrapper">
+          <dialog id="dlg-new-connection" data-x="0" data-y="0">
+            <form id="form-new-connection" method="post" action="{{ route('connection.store') }}">
+              @csrf
+              <section class="dlg-grid">
+                <h5 class="title">Crea nuova connessione</h5>
+                <section class="dlg-content">
+                  <section class="row">
+                    <section class="col grid-12">
+                      <input id="input-connection-name" type="text" name="title" value="" placeholder="Nome connessione" />
                     </section>
                   </section>
-                  <section class="dlg-buttons">
-                    <button type="reset" name="cancel" value="chiudi">Chiudi</button>
-                    <button type="submit" id="btn-connection-save">Salva</button>
-                  </section>
-                </section>
-              </form>
-            </dialog>
-
-            <div class="grid layout">
-              <menu class="standard align-end">
-                <section class="dbStatus">
-                  {{-- session()->forget('db_name') --}}
-                  <span id="db-connection-status" data-connected="{{ session('db_id', 0) }}">
-                    <span id="database-name">{{ session('db_name', 'Nessun Database collegato') }}</span>
-                    @if (session('db_name'))
-                    <i id="db-icon-status" class="material-symbols-rounded">database</i>
-                    @else
-                    <i id="db-icon-status" class="material-symbols-rounded">database_off</i>
-                    @endif
-                  </span>
-                </section>
-
-                {{-- session()->forget('db_name') --}}
-              </menu>
-              <div class="grid-content">
-                <div class="row autofit">
-                  <section class="col header body footer col-1">
-                    <div class="row">
-                      <h4>Connessione al Database</h4>
-                    </div>
-                    <div class="row">
-                      <div class="col grid-12">
-                        <section class="list-search">
-                          <input type="search" id="database-search" data-element-search="connections" placeholder="Ricerca Database" autocomplete="off" />
-                          <div class="relative-ul">
-                            <ul id="ul-connections" data-search-id="database-search" class="custom-scrollbar">
-                              @foreach($connections as $connection)
-                              <li class="select-list" data-id="{{ $connection['id'] }}">
-                                <span>{{$connection['name']}}</span>
-                                <span><small>{{ $connection['driver'] }}</small>&nbsp;<small>({{ $connection['host'] }})</small></span>
-                              </li>
-                              @endforeach
-                            </ul>
-                          </div>
-                        </section>
+                  <section class="row">
+                    <section class="col grid-12">
+                      <div class="field label">
+                        <label for="field-db">Database</label>
+                        <select id="field-db" name="database">
+                          <option value="mysql">MySQL</option>
+                          <option value="pgsql">PostgreSQL</option>
+                          <option value="odbc">Vertica</option>
+                          <option value="sqlsrv">SQL Server</option>
+                        </select>
                       </div>
-                    </div>
-                    <div class="row">
-                      <section class="col grid-12">
-                        <section class="btn-link">
-                          <button id="new-connection" class="btn-link link">Aggiungi</button>
-                          <button id="remove-connection" class="btn-link link" disabled>Elimina</button>
-                          <button id="edit-connection" class="btn-link link" disabled>Modifica</button>
-                        </section>
-                      </section>
-                    </div>
+                    </section>
                   </section>
-                  <section class="col header body footer col-2-span">
-                    <div class="row">
-                      <h4>Titolo sezione</h4>
-                    </div>
-                    <div class="row">
-                      <section class="col grid-12">
-                        <span>contenuto sezione</span>
-                      </section>
-                    </div>
-                    <div class="row">
-                      <section class="col grid-12">
-                        <section class="btn-link">
-                          <button id="new-connection" class="btn-link link">Aggiungi</button>
-                          <button id="remove-connection" class="btn-link link" disabled>Elimina</button>
-                          <button id="edit-connection" class="btn-link link" disabled>Modifica</button>
-                        </section>
-                      </section>
-                    </div>
+                  <section class="row">
+                    <section class="col grid-8">
+                      <input id="input-host" type="text" name="host" value="" placeholder="host" />
+                    </section>
+                    <section class="col grid-4">
+                      <input id="input-port" type="text" name="port" placeholder="port" />
+                    </section>
                   </section>
+                  <section class="row">
+                    <section class="col grid-6">
+                      <input id="input-dsn" type="text" value="" name="dsn" placeholder="DSN" />
+                    </section>
+                    <section class="col grid-6">
+                      <label>*Schema in cui memorizzare i datamart</label>
+                      <input id="input-schema" type="text" value="" name="schema" placeholder="Schema" />
+                    </section>
+                  </section>
+                  <section class="row">
+                    <section class="col grid-6">
+                      <input id="input-username" type="text" value="" name="username" placeholder="Username" />
+                    </section>
+                    <section class="col grid-6">
+                      <input id="input-psw" type="password" name="password" placeholder="Password" />
+                    </section>
+                  </section>
+                </section>
+                <section class="dlg-buttons">
+                  <button type="reset" name="cancel" value="chiudi">Chiudi</button>
+                  <button type="submit" id="btn-connection-save">Salva</button>
+                </section>
+              </section>
+            </form>
+          </dialog>
+
+          <div class="card col-1">
+            <h1>Connessione al Database</h1>
+            <p>Medium length description. Let's add a few more words here.</p>
+            <div class="visual">
+              <section class="list-search">
+                <input type="search" id="database-search" data-element-search="connections" placeholder="Ricerca Database" autocomplete="off" />
+                <div class="relative-ul">
+                  <ul id="ul-connections" data-search-id="database-search" class="custom-scrollbar">
+                    @foreach($connections as $connection)
+                    <li class="select-list" data-id="{{ $connection['id'] }}">
+                      <span>{{$connection['name']}}</span>
+                      <span><small>{{ $connection['driver'] }}</small>&nbsp;<small>({{ $connection['host'] }})</small></span>
+                    </li>
+                    @endforeach
+                  </ul>
                 </div>
-              </div>
+              </section>
             </div>
+            <div class="card-button">
+              <button id="new-connection" class="btn-link link">Aggiungi</button>
+              <button id="remove-connection" class="btn-link link" disabled>Elimina</button>
+              <button id="edit-connection" class="btn-link link" disabled>Modifica</button>
+            </div>
+          </div>
+
+          <div class="card col-2-span">
+            <h1>Title - Card 2</h1>
+            <p>Medium length description. Let's add a few more words here.</p>
+            <div class="visual"></div>
           </div>
 
         </div>
       </div>
     </div>
-    <footer>
-      <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="120" width="120" />
-    </footer>
 
-    <div id="console">
-      <div id="fabsConsole">
-        <i class="material-symbols-rounded md-18">info</i>
-        <p></p>
-      </div>
-    </div>
   </main>
+  <div class="loader">
+    <svg viewBox="0 0 32 32" width="32" height="32">
+      <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
+    </svg>
+  </div>
+  <div class="right-sidebar">Right Sidebar</div>
+  <footer>
+    <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="120" width="120" />
+  </footer>
   <script type="text/javascript" src="{{ asset('/js/init-home.js') }}" async></script>
 </body>
 
