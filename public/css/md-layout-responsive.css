@@ -635,7 +635,6 @@ input[type="number"] {
   grid-column-gap: 2em;
   position: relative;
   align-items: flex-start; /* default */
-  /* grid-auto-rows: min-content; */
 }
 
 .row>.col.header.body.footer {

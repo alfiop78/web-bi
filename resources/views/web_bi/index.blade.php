@@ -3,18 +3,17 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+  <link rel="icon" href="/favicon.png" type="image/png" />
   <title>Web-BI | HOME</title>
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
-  <!-- <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0"> -->
-  <link rel="icon" href="/favicon.png" type="image/png" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/wd-layout.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-symbols.css') }}" />
-  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/index.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -29,7 +28,7 @@
     </div>
     <h1 class="title">Gaia-BI</h1>
   </header>
-  <div class="left-sidebar">
+  <div id="drawer" class="left-sidebar" open>
     <section class="account">
       <h5>user</h5>
       <i class="material-symbols-rounded md-light">person</i>
@@ -69,12 +68,12 @@
                 <h5 class="title">Crea nuova connessione</h5>
                 <section class="dlg-content">
                   <section class="row">
-                    <section class="col grid-12">
+                    <section class="col col-12">
                       <input id="input-connection-name" type="text" name="title" value="" placeholder="Nome connessione" />
                     </section>
                   </section>
                   <section class="row">
-                    <section class="col grid-12">
+                    <section class="col col-12">
                       <div class="field label">
                         <label for="field-db">Database</label>
                         <select id="field-db" name="database">
@@ -87,27 +86,27 @@
                     </section>
                   </section>
                   <section class="row">
-                    <section class="col grid-8">
+                    <section class="col col-8">
                       <input id="input-host" type="text" name="host" value="" placeholder="host" />
                     </section>
-                    <section class="col grid-4">
+                    <section class="col col-4">
                       <input id="input-port" type="text" name="port" placeholder="port" />
                     </section>
                   </section>
-                  <section class="row">
-                    <section class="col grid-6">
+                  <section class="row align-end">
+                    <section class="col col-6">
                       <input id="input-dsn" type="text" value="" name="dsn" placeholder="DSN" />
                     </section>
-                    <section class="col grid-6">
+                    <section class="col col-6">
                       <label>*Schema in cui memorizzare i datamart</label>
-                      <input id="input-schema" type="text" value="" name="schema" placeholder="Schema" />
+                      <input id="input-schema" type="text" value="" name="schema" placeholder="decisyon_cache (default)" value="decisyon_cache" />
                     </section>
                   </section>
                   <section class="row">
-                    <section class="col grid-6">
+                    <section class="col col-6">
                       <input id="input-username" type="text" value="" name="username" placeholder="Username" />
                     </section>
-                    <section class="col grid-6">
+                    <section class="col col-6">
                       <input id="input-psw" type="password" name="password" placeholder="Password" />
                     </section>
                   </section>
@@ -119,36 +118,37 @@
               </section>
             </form>
           </dialog>
+          <div class="row autofit">
 
-          <div class="card col-1">
-            <h1>Connessione al Database</h1>
-            <p>Medium length description. Let's add a few more words here.</p>
-            <div class="visual">
-              <section class="list-search">
-                <input type="search" id="database-search" data-element-search="connections" placeholder="Ricerca Database" autocomplete="off" />
-                <div class="relative-ul">
-                  <ul id="ul-connections" data-search-id="database-search" class="custom-scrollbar">
-                    @foreach($connections as $connection)
-                    <li class="select-list" data-id="{{ $connection['id'] }}">
-                      <span>{{$connection['name']}}</span>
-                      <span><small>{{ $connection['driver'] }}</small>&nbsp;<small>({{ $connection['host'] }})</small></span>
-                    </li>
-                    @endforeach
-                  </ul>
-                </div>
-              </section>
+            <div class="card col col-1">
+              <h1>Connessione al Database</h1>
+              <p>Selezionare o creare una nuova connessione al Database</p>
+              <div class="visual">
+                <section class="list-search">
+                  <input type="search" id="database-search" data-element-search="connections" placeholder="Ricerca Database" autocomplete="off" />
+                  <div class="relative-ul">
+                    <ul id="ul-connections" data-search-id="database-search" class="custom-scrollbar">
+                      @foreach($connections as $connection)
+                      <li class="select-list" data-id="{{ $connection['id'] }}">
+                        <span>{{$connection['name']}}</span>
+                        <span><small>{{ $connection['driver'] }}</small>&nbsp;<small>({{ $connection['host'] }})</small></span>
+                      </li>
+                      @endforeach
+                    </ul>
+                  </div>
+                </section>
+              </div>
+              <div class="card-button">
+                <button id="new-connection" class="btn-link link">Aggiungi</button>
+                <button id="remove-connection" class="btn-link link" disabled>Elimina</button>
+                <button id="edit-connection" class="btn-link link" disabled>Modifica</button>
+              </div>
             </div>
-            <div class="card-button">
-              <button id="new-connection" class="btn-link link">Aggiungi</button>
-              <button id="remove-connection" class="btn-link link" disabled>Elimina</button>
-              <button id="edit-connection" class="btn-link link" disabled>Modifica</button>
+            <div class="card col col-2-span">
+              <h1>Title - Card 2</h1>
+              <p>Medium length description. Let's add a few more words here.</p>
+              <div class="visual"></div>
             </div>
-          </div>
-
-          <div class="card col-2-span">
-            <h1>Title - Card 2</h1>
-            <p>Medium length description. Let's add a few more words here.</p>
-            <div class="visual"></div>
           </div>
 
         </div>

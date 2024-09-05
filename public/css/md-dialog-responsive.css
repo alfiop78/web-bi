@@ -65,6 +65,9 @@ dialog h5 {
   font-weight: bold;
   color: var(--main-secondary-color);
   border-top: solid var(--main-important-color);
+  font-size: 1rem;
+  padding: 1em;
+  margin: 0px;
 }
 
 /* elemento spostabile*/
@@ -172,11 +175,17 @@ dialog > .buttons {
   justify-content: space-between;
 }
 
-dialog > .dlg-grid{
+dialog .dlg-grid{
   display: grid;
   grid-template-rows: auto 1fr auto;
   grid-row-gap: 1em;
   height: 100%;
+}
+
+.dlg-content {
+  display: grid;
+  grid-gap: 1em;
+  padding: .5em 2em;
 }
 
 .dlg-grid.row-4{

@@ -6,12 +6,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
   <link rel="icon" href="/favicon.png" type="image/png" />
   <title>Gaia-BI | Creazione Dashboard</title>
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/wd-layout.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" />
+  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout.css') }}" /> -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-symbols.css') }}" />
-  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer-responsive.css') }}" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
@@ -26,6 +26,27 @@
 </head>
 
 <body class="antialiased">
+  <header>
+    <div class="nav-button">
+      <a href="#" id="menu" onclick="App.menu()"><i class="material-symbols-rounded white">menu</i></a>
+    </div>
+    <h1 class="title">Creazione Dashboard</h1>
+  </header>
+  <div id="drawer" class="left-sidebar" open>
+    <section class="account">
+      <h5>user</h5>
+      <i class="material-symbols-rounded md-light">person</i>
+    </section>
+
+    <nav>
+      <a href="{{ route('web_bi.index') }}" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
+      <a href="{{ route('web_bi.mapdb') }}" title="Workspace"><i class="material-symbols-rounded">workspaces</i><span>Workspace</span></a>
+      <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded white">cloud_sync</i><span>Versionamento</span></a>
+      <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded white">dashboard</i><span>Dashboards</span></a>
+      <hr />
+      <a href="#" title="Settings"><i class="material-symbols-rounded white">settings</i><span>Impostazioni</span></a>
+    </nav>
+  </div>
 
   <template id="tmpl-li">
     <li data-li data-element-search data-label data-searchable="true">
@@ -48,128 +69,93 @@
   </template>
 
   <main>
-    <header>
-      <div class="nav-button">
-        <!-- codelab-nav-button-->
-        <!-- <a href="/" id="arrow-back"><i class="material-symbols-rounded md-light">close</i></a> -->
-        <a href="/" id="arrow-back"><i class="material-symbols-rounded white">close</i></a>
-        <a href="#" id="menu" onclick="App.menu()"><i class="material-symbols-rounded white">menu</i></a>
-      </div>
 
-      <h1 class="title">Creazione Dashboard</h1>
-    </header>
-    <div id="drawer">
+    <div id="content" class="custom-scrollbar">
 
-      <section class="account">
-        <h5>user</h5>
-        <i class="material-symbols-rounded md-light">person</i>
-      </section>
-
-      <nav>
-        <a href="{{ route('web_bi.index') }}" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
-        <a href="{{ route('web_bi.mapdb') }}" title="Workspace"><i class="material-symbols-rounded">workspaces</i><span>Workspace</span></a>
-        <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded white">cloud_sync</i><span>Versionamento</span></a>
-        <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded white">dashboard</i><span>Dashboards</span></a>
-        <hr />
-        <a href="#" title="Settings"><i class="material-symbols-rounded white">settings</i><span>Impostazioni</span></a>
-      </nav>
-    </div>
-
-    <div id="container">
-
-      <div id="content" class="custom-scrollbar">
-
-        <div id="body" hidden>
-          <div class="wrapper">
-            <dialog id="dlg-chart" class="small">
-              <section class="dlg-grid">
-                <h5 class="title">Selezione del report</h5>
-                <section class="dlg-content col col-1">
-                  <section class="list-search">
-                    <input type="search" id="" data-element-search="" placeholder="Ricerca" autocomplete="off" />
-                    <div class="relative-ul min-height">
-                      <ul id="ul-sheets" data-search-id="" class="custom-scrollbar"></ul>
-                    </div>
-                  </section>
-                </section>
-                <section class="dlg-buttons">
-                  <button name="cancel" value="chiudi">Chiudi</button>
-                  <button id="btn-chart-save">Salva</button>
-                </section>
-              </section>
-            </dialog>
-            <!-- dialog Templates per i layout -->
-            <dialog id="dlg-template-layout" class="large">
-              <section class="dlg-grid">
-                <h5 class="title">Selezione del Layout pagina</h5>
-                <section class="dlg-content col col-1 search">
-                  <input type="search" id="search-templates" placeholder="Ricerca" autocomplete="on" />
-                  <section id="thumbnails" class="preview-area"></section>
-                </section>
-                <section class="dlg-buttons">
-                  <button name="cancel" value="chiudi">Chiudi</button>
-                  <button data-fn="btnTemplateDone" id="btn-template-save">OK</button>
-                </section>
-              </section>
-            </dialog>
-
-            <div class="grid layout">
-              <menu class="standard">
-                <section>
-                  <button type="button" class="btn-link default" value="Apri" id="">Apri</button>
-                  <button type="button" class="btn-link default" value="Chiudi" id="">Chiudi</button>
-                  <button type="button" class="btn-link default" value="Pubblica" data-fn="publish" id="publish">Pubblica</button>
-                  <section id="dashboardTitle" class="name" contenteditable="true" data-value="Titolo">Titolo Dashboard</section>
-                </section>
-                <section class="dbStatus">
-                  {{-- session()->forget('db_name') --}}
-                  <span id="db-connection-status" data-connected="{{ session('db_id', 0) }}">
-                    <span id="database-name">{{ session('db_name', 'Nessun Database collegato') }}</span>
-                    @if (session('db_name'))
-                    <i id="db-icon-status" class="material-symbols-rounded">database</i>
-                    @else
-                    <i id="db-icon-status" class="material-symbols-rounded">database_off</i>
-                    @endif
-                  </span>
-                </section>
-              </menu>
-              <div class="grid-content">
-                <div class="row">
-                  <section class="col grid-12">
-                    <fieldset>
-                      <legend>Parametri Dashboard</legend>
-
-                      <div>
-                        <section>
-                          <!-- <p>Selezione del Layout (dialog per la visualizzazione delle preview dei layout e scelta del layout)</p> -->
-                          <!-- <button type="button" class="btn-link" id="btn-dlg-layout" data-fn="openDlgTemplateLayout">Selezione del Layout</button> -->
-                        </section>
-                        <p>Opzioni del grafico/Tabella</p>
-                      </div>
-
-                      <div>
-                        <textarea id="note" rows="10" cols="60" name="note" placeholder="Note"></textarea>
-                      </div>
-                    </fieldset>
-                  </section>
-                </div>
-                <div class="row">
-                  <div class="col grid-12 gridMenu">
-
-                    <section class="buttons">
-                      <button id="btnPreview" type="button" data-fn="preview">Anteprima</button>
-                      <button id="btnSave" type="button" data-fn="save">Salva</button>
-                      <button type="button" id="addLayout" data-fn="openDlgTemplateLayout" class="btn-link default">Seleziona Layout</button>
-                    </section>
-
-                    <section id="dashboard-preview" class="dashboard-preview">
-                      <div id="template-layout" class="preview"></div>
-                    </section>
+      <div id="body" hidden>
+        <menu class="standard">
+          <section>
+            <button type="button" class="btn-link default" value="Apri" id="">Apri</button>
+            <button type="button" class="btn-link default" value="Chiudi" id="">Chiudi</button>
+            <button type="button" class="btn-link default" value="Pubblica" data-fn="publish" id="publish">Pubblica</button>
+            <section id="dashboardTitle" class="name" contenteditable="true" data-value="Titolo">Titolo Dashboard</section>
+          </section>
+          <section class="dbStatus">
+            {{-- session()->forget('db_name') --}}
+            <span id="db-connection-status" data-connected="{{ session('db_id', 0) }}">
+              <span id="database-name">{{ session('db_name', 'Nessun Database collegato') }}</span>
+              @if (session('db_name'))
+              <i id="db-icon-status" class="material-symbols-rounded">database</i>
+              @else
+              <i id="db-icon-status" class="material-symbols-rounded">database_off</i>
+              @endif
+            </span>
+          </section>
+        </menu>
+        <div class="wrapper">
+          <dialog id="dlg-chart" class="small">
+            <section class="dlg-grid">
+              <h5 class="title">Selezione del report</h5>
+              <section class="dlg-content col col-1">
+                <section class="list-search">
+                  <input type="search" id="" data-element-search="" placeholder="Ricerca" autocomplete="off" />
+                  <div class="relative-ul min-height">
+                    <ul id="ul-sheets" data-search-id="" class="custom-scrollbar"></ul>
                   </div>
+                </section>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button id="btn-chart-save">Salva</button>
+              </section>
+            </section>
+          </dialog>
+          <!-- dialog Templates per i layout -->
+          <dialog id="dlg-template-layout" class="large">
+            <section class="dlg-grid">
+              <h5 class="title">Selezione del Layout pagina</h5>
+              <section class="dlg-content col col-1 search">
+                <input type="search" id="search-templates" placeholder="Ricerca" autocomplete="on" />
+                <section id="thumbnails" class="preview-area"></section>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button data-fn="btnTemplateDone" id="btn-template-save">OK</button>
+              </section>
+            </section>
+          </dialog>
 
+          <div class="row">
+            <section class="col">
+              <fieldset>
+                <legend>Parametri Dashboard</legend>
+
+                <div>
+                  <section>
+                    <!-- <p>Selezione del Layout (dialog per la visualizzazione delle preview dei layout e scelta del layout)</p> -->
+                    <!-- <button type="button" class="btn-link" id="btn-dlg-layout" data-fn="openDlgTemplateLayout">Selezione del Layout</button> -->
+                  </section>
+                  <p>Opzioni del grafico/Tabella</p>
                 </div>
-              </div>
 
+                <div>
+                  <textarea id="note" rows="10" cols="60" name="note" placeholder="Note"></textarea>
+                </div>
+              </fieldset>
+            </section>
+          </div>
+          <div class="row">
+            <div class="col gridMenu">
+
+              <section class="buttons">
+                <button id="btnPreview" type="button" data-fn="preview">Anteprima</button>
+                <button id="btnSave" type="button" data-fn="save">Salva</button>
+                <button type="button" id="addLayout" data-fn="openDlgTemplateLayout" class="btn-link default">Seleziona Layout</button>
+              </section>
+
+              <section id="dashboard-preview" class="dashboard-preview">
+                <div id="template-layout" class="preview"></div>
+              </section>
             </div>
 
           </div>
@@ -178,24 +164,6 @@
 
       </div>
 
-      <div id="controls">
-        <div id="fabs">
-          <!-- <a href="#" id="previous-step" title="Previous step">logout</a> -->
-          <!-- <button id="mdc-logout" class="button dense raised">HOME</button> -->
-          <!-- <div class="spacer"></div> -->
-          <!-- <button id="mdc-home" class="button dense raised" onclick="location.href='home/'">i miei veicoli</button> -->
-          <!-- <a href="#" id="next-step" title="Next step">i miei veicoli</a> -->
-          <!-- <i class="material-symbols-rounded md-circle md-right md-24" onclick="">navigate_before</i> -->
-          <!-- <a href="/" id="done" hidden="" title="Codelab complete">Done</a> -->
-        </div>
-      </div>
-
-      <div id="console">
-        <div id="fabsConsole">
-          <i class="material-symbols-rounded md-18">info</i>
-          <p></p>
-        </div>
-      </div>
     </div>
 
   </main>
@@ -204,6 +172,10 @@
       <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
     </svg>
   </div>
+  <div class="right-sidebar">Right Sidebar</div>
+  <footer>
+    <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="120" width="120" />
+  </footer>
   <script type="text/javascript" src="{{ asset('/js/init-dashboard-create.js') }}" async></script>
 </body>
 

@@ -101,8 +101,8 @@ li.icon > span{
 .relative-ul {
   position: relative;
   /* min-height: 350px; */
-  min-height: 220px;
-  /* max-height: 500px; */
+  min-height: 300px;
+  max-height: 500px;
 }
 
 .relative-ul.min-height {
