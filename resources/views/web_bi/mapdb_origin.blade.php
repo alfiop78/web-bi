@@ -11,11 +11,11 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/wd-layout.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
-  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-symbols.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-steps-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-preview-table.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-mapdb.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-sheet-page.css') }}" />
@@ -706,11 +706,9 @@
             </section>
           </dialog>
 
-
-
           <section class="steps" data-step="1">
             <div class="overflow">
-              <div id="stepTranslate">
+              <div id="stepTranslate" data-translate-x="0">
                 <section class="step" data-step="1" selected>
                   <section class="wrapper-step">
                     <menu class="standard">
@@ -829,10 +827,6 @@
                         </section>
                       </section>
                     </section>
-                  </section>
-                  <section class="actions">
-                    <button id="prev">Workbook</button>
-                    <button id="next" class="btn-buttons">Sheet</button>
                   </section>
 
                 </section>
@@ -988,17 +982,18 @@
                       </div>
                     </section>
                   </section>
-                  <section class="actions">
-                    <button id="prev">Workbook</button>
-                    <div>
-                      <button id="btn-sql-preview" class="btn-buttons" data-fn="createProcess" value="SQL" disabled>SQL</button>
-                      <button id="btn-sheet-preview" class="btn-buttons important" data-fn="createProcess" value="Elabora">Elabora</button>
-                    </div>
-                  </section>
                 </section>
               </div>
 
             </div>
+            <section class="actions">
+              <button id="prev">Workbook</button>
+              <div>
+                <button id="next" class="btn-buttons">Sheet</button>
+                <button id="btn-sql-preview" class="btn-buttons" data-fn="createProcess" value="SQL" disabled>SQL</button>
+                <button id="btn-sheet-preview" class="btn-buttons important" data-fn="createProcess" value="Elabora">Elabora</button>
+              </div>
+            </section>
           </section>
 
         </div>

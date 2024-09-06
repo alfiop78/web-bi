@@ -83,7 +83,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     document.querySelectorAll('.context-menu[open]').forEach(menu => menu.toggleAttribute('open'));
   });
   // la Classe Steps deve impostare alcune proprietà DOPO che viene visualizzato il body, non può essere posizionato prima di App.init();
-  var Step = new Steps('stepTranslate');
+  // var Step = new Steps('stepTranslate');
 
   const config = { attributes: true, childList: true, subtree: true };
 
@@ -1422,7 +1422,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.editWorkBookName.onblur = (e) => WorkBook.name = e.target.innerText;
 
-  document.getElementById('prev').onclick = () => Step.previous();
+  document.getElementById('prev').onclick = () => {
+      const translateRef = document.getElementById('stepTranslate');
+      translateRef.dataset.step = 1;
+  };
 
   // tasto "Sheet" :
   // consente di passare alla visualizzazione Sheet e salvare il WorkBook
@@ -1445,7 +1448,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
 
     if (WorkBook.dataModel.size !== 0) {
-      Step.next();
+      const translateRef = document.getElementById('stepTranslate');
+      translateRef.dataset.step = 2;
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
       app.addTablesStruct();
       // salvo il workbook creato, tenendo conto della prop 'updated_at', se ci sono
@@ -3345,8 +3349,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   window.addEventListener('resize', (e) => {
     const stepTranslate = document.getElementById('stepTranslate');
     // console.log(e);
-    console.log(stepTranslate.offsetWidth);
-    // stepTranslate.dataset.translateX = stepTranslate.offsetWidth;
+    // console.log(stepTranslate.offsetWidth);
+    // const translateValue = (stepTranslate.dataset.translateX < 0) ? -stepTranslate.offsetWidth : stepTranslate.offsetWidth;
+    // stepTranslate.dataset.translateX = translateValue;
+    // stepTranslate.dataset.translateX = (stepTranslate.dataset.translateX < 0) ? `-${stepTranslate.offsetWidth}` : stepTranslate.offsetWidth;
+    // stepTranslate.style.transform = (stepTranslate.dataset.translateX < 0) ? `-${stepTranslate.offsetWidth}` : stepTranslate.offsetWidth;
+    // stepTranslate.style.setProperty("--page-width", `${translateValue}px`);
     // stepTranslate.style.transform = `translateX(${stepTranslate.offsetWidth}px)`;
   });
 

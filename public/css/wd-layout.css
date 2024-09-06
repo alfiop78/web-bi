@@ -134,8 +134,6 @@ body {
 .wrapper {
   display: grid;
   grid-gap: 2em;
-  /* grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); */
-  /* grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); */
 }
 
 .wrapper>.row.autofit {
