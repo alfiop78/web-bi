@@ -1233,7 +1233,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
           }
         } else {
           App.loaderStop();
-        App.showConsole('Nessun dato presente', 'warning', 2000);
+          App.showConsole('Nessun dato presente', 'warning', 2000);
 
         }
       })
@@ -1423,8 +1423,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.editWorkBookName.onblur = (e) => WorkBook.name = e.target.innerText;
 
   document.getElementById('prev').onclick = () => {
-      const translateRef = document.getElementById('stepTranslate');
-      translateRef.dataset.step = 1;
+    const translateRef = document.getElementById('stepTranslate');
+    const steps = document.getElementById('steps');
+    steps.dataset.step = 1;
+    translateRef.dataset.step = 1;
   };
 
   // tasto "Sheet" :
@@ -1449,6 +1451,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
     if (WorkBook.dataModel.size !== 0) {
       const translateRef = document.getElementById('stepTranslate');
+      const steps = document.getElementById('steps');
+      steps.dataset.step = 2;
       translateRef.dataset.step = 2;
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
       app.addTablesStruct();

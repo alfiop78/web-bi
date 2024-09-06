@@ -4,15 +4,18 @@ code {
 
 .report-area{
   display: grid;
-  grid-template-rows: auto 1fr;
-  grid-row-gap: 1em;
+  grid-template-rows: auto 1fr auto;
+  grid-row-gap: .5em;
   position: relative;
+  /* background-color: var(--main-bg-color); */
 }
 
 .report-area .columns-rows{
   display: grid;
   grid-template-rows: auto;
   grid-row-gap: .5em;
+  background-color: white;
+  padding: 6px 0px;
 }
 
 .report-area .sheet-elements{
@@ -47,30 +50,6 @@ code {
 .relative{
   position: relative;
 }
-
-/* #sheet-columns .sheet-elements::before { */
-/*   content: 'Colonne'; */
-/*   position: absolute; */
-/*   top: 8px; */
-/*   left: 8px; */
-/*   color: darkgray; */
-/* } */
-
-/* #sheet-rows .sheet-elements::before { */
-/*   content: 'Righe'; */
-/*   position: absolute; */
-/*   top: 8px; */
-/*   left: 8px; */
-/*   color: darkgray; */
-/* } */
-
-/* #sheet-filters .sheet-elements::before { */
-/*   content: 'Filtri'; */
-/*   position: absolute; */
-/*   top: 8px; */
-/*   left: 8px; */
-/*   color: darkgray; */
-/* } */
 
 .sheet-elements .dropzone.dropping{
   border: solid thin var(--main-important-color);
@@ -448,4 +427,16 @@ mark.keyword {
   font-weight: bold;
   border-radius: unset;
   color: darkcyan;
+}
+
+#datatable {
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
+.progressBar {
+  display: flex;
+  justify-content: center;
+  padding: 1em;
+  background-color: white;
 }

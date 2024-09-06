@@ -126,6 +126,10 @@ button {
   background-color: transparent;
 }
 
+button:hover {
+  cursor: pointer;
+}
+
 button.default:not([disabled]):hover {
   color: var(main-primary-color);
 }
@@ -159,14 +163,19 @@ button {
 
 button.btn-buttons {
   font-weight: bold;
-  background-color: var(--main-primary-color);
+  background-color: var(--main-secondary-color);
   color: white;
   border-radius: 2px;
   font-style: normal;
   padding: 8px 12px;
 }
 
-button.btn-buttons:disabled {
+button.btn-buttons:hover {
+  font-weight: bold;
+  background-color: var(--main-primary-color);
+}
+
+button:disabled {
   background-color: var(--disabled-bg);
   color: var(--disabled-fg);
 }
@@ -285,27 +294,27 @@ input:read-write::placeholder {
 }
 
 /* visualizzo / nascondo i tasti per l'elaborazione in base allo step in cui mi trovo*/
-.steps[data-step="1"] #next {
+#steps[data-step="1"] #next {
   display: inline;
 }
 
-.steps[data-step="1"] #btn-sheet-preview {
+#steps[data-step="1"] #btn-sheet-preview {
   display: none;
 }
 
-.steps[data-step="1"] #btn-sql-preview {
+#steps[data-step="1"] #btn-sql-preview {
   display: none;
 }
 
-.steps[data-step="2"] #next {
+#steps[data-step="2"] #next {
   display: none;
 }
 
-.steps[data-step="2"] #btn-sheet-preview {
+#steps[data-step="2"] #btn-sheet-preview {
   display: inline;
 }
 
-.steps[data-step="2"] #btn-sql-preview {
+#steps[data-step="2"] #btn-sql-preview {
   display: inline;
 }
 

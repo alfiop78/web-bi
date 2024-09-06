@@ -323,6 +323,7 @@ li.drag-list > i[draggable] {
 
 li.drag-list:hover > i[draggable] {
   visibility: visible;
+  cursor: grab;
 }
 
 li.drag-list > i:not([draggable]) {

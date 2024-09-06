@@ -61,12 +61,28 @@ thead th[data-metric-token]{
 .table-preview{
   overflow: auto;
   position: relative;
+  background-color: white;
 }
 
-.table-content{
+.sheet-preview{
+  overflow: auto;
+  position: relative;
+  background-color: white;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: 6px 0px;
+}
+
+.table-preview>.table-content{
   position: absolute;
   width: 100%;
   height: calc(100% - 38px);
+}
+
+.sheet-preview>.table-content{
+  position: relative;
+  /* width: 100%; */
+  /* height: calc(100% - 38px); */
 }
 
 .table-content.columnsHandler {

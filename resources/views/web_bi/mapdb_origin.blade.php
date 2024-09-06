@@ -810,6 +810,7 @@
                       </div>
                     </section>
                     <section class="row">
+
                       <section class="table-area-wrapper">
                         <section class="list-search buttonSection">
                           <input type="search" id="table-search" data-element-search="tables" placeholder="Ricerca tabelle" autocomplete="off" />
@@ -821,11 +822,11 @@
                         <section class="table-preview">
                           <input type="search" id="columns-search-id" autocomplete="off" placeholder="Ricerca colonne" />
                           <div class="table-content">
-                            <!-- data-search-input : definisce la input che effettua la ricerca di colonne in questa tabella -->
                             <table id="preview-table" class="custom-scrollbar" data-search-input="columns-search-id"></table>
                           </div>
                         </section>
                       </section>
+
                     </section>
                   </section>
 

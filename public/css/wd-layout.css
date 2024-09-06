@@ -331,3 +331,48 @@ h1 {
   margin: 0 auto;
   align-items: center;
 }
+
+mark {
+  background-color: var(--mark-color);
+  color: var(--main-fg-color);
+  border-radius: 2px;
+  padding: 2px 12px;
+  display: inline-flex;
+  width: 100%;
+  justify-content: center;
+}
+
+span.markContent {
+  position: relative;
+  color: dimgrey;
+  margin: 0px 2px 4px 2px;
+  display: inline-grid;
+  justify-items: center;
+}
+
+/*mark.markContent::before {content: attr(data-attr); position: absolute; top: 100%; color: dimgray;}*/
+.markContent>i {
+  position: absolute;
+  left: -7px;
+  top: -7px;
+  color: black;
+  visibility: hidden;
+}
+
+.markContent:hover>i {
+  position: absolute;
+  left: -10px;
+  top: -10px;
+  color: black;
+  visibility: visible;
+}
+
+.markContent>i:hover {
+  cursor: pointer;
+}
+
+.name{
+  font-weight: bold;
+  font-size: 1rem;
+  color: var(--main-important-color);
+}

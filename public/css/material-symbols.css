@@ -9,6 +9,10 @@
   --filters-color: #f2d98d;
 }
 
+.material-symbols-rounded {
+  padding: 2px 4px;
+}
+
 /* COLORS */
 .material-symbols-rounded.white {
   color: white;

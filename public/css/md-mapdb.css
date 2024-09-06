@@ -11,15 +11,13 @@ html, body{
 
 .wrapper-step{
   display: grid;
-  /* grid-template-rows: auto 60% 1fr; */
   grid-template-rows: auto 1fr .8fr;
-  background-color: white;
   height: 100%;
   width: 100%;
   padding: 1em;
 }
 
-.steps > .actions{
+.actions{
   display: flex;
   justify-content: space-between;
   width: inherit;
@@ -521,34 +519,30 @@ textarea:focus, textarea:active {
   display: flex;
 }
 
-.steps {
-  align-items: center;
-  display: flex;
-  width: 100%;
-  height: 100%;
-  flex-direction: column;
+#steps {
+  display: grid;
   background: white;
-  justify-content: flex-start;
   box-shadow: 0 1px 4px 3px lightgrey;
   border-radius: 2px;
 }
 
-.steps>.overflow {
+#steps>.overflow {
   position: relative;
   user-select: none;
-  display: flex;
-  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  /* height: 100%; */
   width: 100%;
   overflow: hidden;
-  flex-flow: column;
-  align-items: center;
-  justify-self: center;
+  /* flex-flow: column; */
+  /* align-items: center; */
+  /* justify-self: center; */
 }
 
 #stepTranslate {
   display: flex;
-  height: 100%;
-  width: 100%;
+  /* height: 100%; */
+  /* width: 100%; */
   position: relative;
   left: 0px;
   transition: left 250ms;
@@ -562,14 +556,14 @@ textarea:focus, textarea:active {
   left: -100%;
 }
 
-.steps .step {
+#steps .step {
   align-items: center;
   display: flex;
   flex-direction: column;
   min-width: 100%;
 }
 
-.steps .step>.pageContent {
+#steps .step>.pageContent {
   width: 95%;
   display: flex;
   justify-content: flex-start;
@@ -577,7 +571,7 @@ textarea:focus, textarea:active {
   flex-flow: column;
 }
 
-.steps h4 {
+#steps h4 {
   font-size: 1.3rem;
   font-weight: normal;
   text-align: left;
@@ -585,7 +579,7 @@ textarea:focus, textarea:active {
   padding: 4px;
 }
 
-.steps .buttons {
+#steps .buttons {
   width: 90%;
   background: gainsboro;
   display: flex;
@@ -594,13 +588,13 @@ textarea:focus, textarea:active {
   border-radius: 4px;
 }
 
-.steps .buttons>.left-buttons {
+#steps .buttons>.left-buttons {
   width: 50%;
   display: flex;
   justify-content: space-evenly;
 }
 
-.steps .buttons>.right-buttons {
+#steps .buttons>.right-buttons {
   width: 50%;
   display: flex;
   justify-content: space-evenly;

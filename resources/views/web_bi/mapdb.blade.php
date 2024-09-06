@@ -289,7 +289,7 @@
             <h5 class="">Seleziona schema Database</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col grid-12 relative-ul">
+                <section class="col relative-ul">
                   <ul id="ul-schemata" class="custom-scrollbar">
                     @php
                     // {{ dump(session('db_driver')); }}
@@ -321,7 +321,7 @@
             <h5 class="title moveable">Alias tabella</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col grid-12">
+                <section class="col">
                   <input type="text" id="table-alias" placeholder="Alias" value="" autocomplete="on" />
                 </section>
               </section>
@@ -338,7 +338,7 @@
             <h5 class="title moveable">Titolo WorkBook</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col grid-12">
+                <section class="col">
                   <input type="text" id="input-workbook-name" placeholder="Nome" value="" autocomplete="on" />
                 </section>
               </section>
@@ -355,7 +355,7 @@
             <h5 class="title moveable">Titolo Sheet</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col grid-12">
+                <section class="col">
                   <input type="text" id="input-sheet-name" placeholder="Nome" value="" autocomplete="on" />
                 </section>
               </section>
@@ -372,7 +372,7 @@
             <h5 class="title moveable">Imposta relazione con tabella TIME</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col grid-6">
+                <section class="col col-6-span">
                   <ul id="time-fields">
                     <!-- TODO: creare qui la struttura delle tabelle TIME con <summary> e <details> -->
                     <li class="select-list content" data-field="id" data-field-ds="year" data-table="WB_YEARS" data-datatype="integer" data-fn="handlerTimeField">YEAR <small>Es.: 2023</small></li>
@@ -382,7 +382,7 @@
                     <li class="select-list content" data-field="id" data-field-ds="date" data-table="WB_DATE" data-datatype="date" data-fn="handlerTimeField">DATE <small>Es.: 2023-12-31</small></li>
                   </ul>
                 </section>
-                <section class="col grid-6">
+                <section class="col col-6-span">
                   <section class="list-search">
                     <input type="search" id="time-column-search" data-element-search="time-column" placeholder="Ricerca colonna" autocomplete="off" />
                     <div class="relative-ul">
@@ -407,7 +407,7 @@
             <h5 class="title">Apri WorkBook</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col grid-12">
+                <section class="col">
                   <div class="list-search">
                     <input type="search" id="workbooks-search-id" data-element-search="workbooks" autocomplete="off" placeholder="Ricerca WorkBooks" />
                     <div class="relative-ul">
@@ -428,7 +428,7 @@
             <h5 class="title">Apertura Sheet</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col grid-12">
+                <section class="col">
                   <div class="list-search">
                     <input type="search" id="sheets-search-id" data-element-search="sheets" autocomplete="off" placeholder="Ricerca Sheets" />
                     <div class="relative-ul">
@@ -450,14 +450,14 @@
             <h5 class="title moveable">Creazione Metrica avanzata</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col grid-4">
+                <section class="col col-4-span">
                   <section id="filter-area-drop">
                     <div class="relative-ul">
                       <ul id="filter-drop" class="custom-scrollbar dropzone"></ul>
                     </div>
                   </section>
                 </section>
-                <section class="col grid-4">
+                <section class="col col-4-span">
                   <section class="input-area">
                     <input type="text" id="input-advanced-metric-name" placeholder="Nome" value="" autocomplete="off" />
                     <div id="input-metric"></div>
@@ -468,7 +468,7 @@
                     <textarea id="advanced-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                   </section>
                 </section>
-                <section class="col grid-4">
+                <section class="col col-4-span">
                   <div class="relative-ul">
                     <dl id="dl-timing-functions" class="custom-scrollbar">
                       <dt class="btn-link">Last Period/Day</dt>
@@ -532,7 +532,7 @@
             <h5 class="title moveable">Creazione Metrica Composta</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col grid-12">
+                <section class="col">
                   <section class="textarea-formula">
                     <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus />
                     <div id="textarea-composite-metric" data-fn="addText" data-content-editable class="dropzone textarea-content"></div>
@@ -553,7 +553,7 @@
             <h5 class="title moveable">Creazione Metrica composta</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col grid-4">
+                <section class="col col-4-span">
                   <div class="list-search">
                     <input type="search" id="input-search-custom-metrics" placeholder="Ricerca" data-element-search="custom-metrics" class="input-search" autocomplete="off" tabindex="2">
                     <div class="relative-ul">
@@ -561,7 +561,7 @@
                     </div>
                   </div>
                 </section>
-                <section class="col grid-8">
+                <section class="col col-8-span">
                   <section class="textarea-formula">
                     <input type="text" id="input-base-custom-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                     <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea-content placeholder"></div>
@@ -647,7 +647,7 @@
             <h5 class="title moveable">Creazione Filtro</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col grid-4">
+                <section class="col col-4-span">
                   <div class="list-search">
                     <input type="search" id="input-search-columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off" tabindex="2">
                     <div class="relative-ul">
@@ -655,7 +655,7 @@
                     </div>
                   </div>
                 </section>
-                <section class="col grid-8">
+                <section class="col col-8-span">
                   <section class="textarea-formula">
                     <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                     <div id="textarea-filter" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
@@ -678,7 +678,7 @@
               <h5 class="title moveable">Definizione colonne</h5>
               <section class="dlg-content">
                 <section class="row">
-                  <section class="col grid-4">
+                  <section class="col col-4-span">
                     <div class="list-search">
                       <input type="search" id="input-search-fields-dc" placeholder="Ricerca" data-element-search="fields" class="input-search" autocomplete="off" autofocus tabindex="1">
                       <div class="relative-ul">
@@ -686,7 +686,7 @@
                       </div>
                     </div>
                   </section>
-                  <section class="col grid-8">
+                  <section class="col col-8-span">
                     <section class="textareas">
                       <input type="text" id="column-name" placeholder="Nome" autocomplete="off" tabindex="2">
                       <section class="textarea-column">
@@ -708,7 +708,7 @@
 
 
 
-          <section class="steps" data-step="1">
+          <section id="steps" data-step="1">
             <div class="overflow">
               <div id="stepTranslate">
                 <section class="step" data-step="1" selected>
@@ -812,7 +812,7 @@
                       </div>
                     </section>
                     <section class="row">
-                      <section class="table-area-wrapper">
+                      <div class="col col-3">
                         <section class="list-search buttonSection">
                           <input type="search" id="table-search" data-element-search="tables" placeholder="Ricerca tabelle" autocomplete="off" />
                           <div class="relative-ul">
@@ -820,19 +820,18 @@
                           </div>
                           <button class="btn-link link" id="btnSchemata" disabled="true">Carica Schema</button>
                         </section>
+
+                      </div>
+                      <div class="col col-9-span">
                         <section class="table-preview">
                           <input type="search" id="columns-search-id" autocomplete="off" placeholder="Ricerca colonne" />
                           <div class="table-content">
-                            <!-- data-search-input : definisce la input che effettua la ricerca di colonne in questa tabella -->
                             <table id="preview-table" class="custom-scrollbar" data-search-input="columns-search-id"></table>
                           </div>
                         </section>
-                      </section>
+
+                      </div>
                     </section>
-                  </section>
-                  <section class="actions">
-                    <button id="prev">Workbook</button>
-                    <button id="next" class="btn-buttons">Sheet</button>
                   </section>
 
                 </section>
@@ -914,18 +913,18 @@
                             </section>
                           </div>
                         </section>
-                        <section class="table-preview">
+                        <section class="sheet-preview">
                           <dialog id="dlg-sheet-config" data-x="0" data-y="0" class="medium absolute moveable">
                             <section class="dlg-grid">
                               <h5 class="title moveable">Configurazione</h5>
                               <section class="dlg-content">
                                 <section class="row">
-                                  <section class="col grid-12">
+                                  <section class="col">
                                     <input id="field-label" type="text" value="" placeholder="Etichetta colonna" />
                                   </section>
                                 </section>
                                 <section class="row">
-                                  <section class="col grid-5">
+                                  <section class="col col-5-span">
                                     <div class="field label">
                                       <label for="field-datatype">Tipo di dato</label>
                                       <select id="field-datatype">
@@ -938,7 +937,7 @@
                                       </select>
                                     </div>
                                   </section>
-                                  <section class="col grid-5">
+                                  <section class="col col-5-span">
                                     <div class="field label">
                                       <label for="field-format">Formattazione</label>
                                       <select id="field-format">
@@ -948,7 +947,7 @@
                                       </select>
                                     </div>
                                   </section>
-                                  <section class="col grid-2">
+                                  <section class="col col-2-span">
                                     <div class="field label">
                                       <label for="frationDigits">Decimali</label>
                                       <input id="frationDigits" type="number" value="2" />
@@ -956,7 +955,7 @@
                                   </section>
                                 </section>
                                 <section class="row">
-                                  <section class="col grid-12">
+                                  <section class="col">
                                     <div class="field hr">
                                       <input type="checkbox" id="filter-column" name="filter-column" />
                                       <label for="filter-column">Imposta filtro Dashboard</label>
@@ -979,24 +978,27 @@
                             </div>
                             <section id="datatable">
                               <!-- <progress id="progress-bar" max="100" value="70">70%</progress> -->
-                              <label for="progress-bar" hidden>Record <span id="progress-to"></span>&nbsp;di&nbsp;<span id="progress-total"></span>&nbsp;totali</label>
-                              <progress id="progress-bar" max="100" value="0">70 %</progress>
                               <table id="preview-datamart" class="custom-scrollbar"></table>
                             </section>
                           </div>
                         </section>
+                        <div class="progressBar">
+                          <label for="progress-bar" hidden>Record <span id="progress-to"></span>&nbsp;di&nbsp;<span id="progress-total"></span>&nbsp;totali</label>
+                          <progress id="progress-bar" max="100" value="0">70 %</progress>
+                        </div>
                       </div>
                     </section>
                   </section>
-                  <section class="actions">
-                    <button id="prev">Workbook</button>
-                    <div>
-                      <button id="btn-sql-preview" class="btn-buttons" data-fn="createProcess" value="SQL" disabled>SQL</button>
-                      <button id="btn-sheet-preview" class="btn-buttons important" data-fn="createProcess" value="Elabora">Elabora</button>
-                    </div>
-                  </section>
                 </section>
               </div>
+              <section class="actions">
+                <button id="prev">Workbook</button>
+                <div>
+                  <button id="next" class="btn-buttons">Sheet</button>
+                  <button id="btn-sql-preview" class="btn-buttons" data-fn="createProcess" value="SQL" disabled>SQL</button>
+                  <button id="btn-sheet-preview" class="btn-buttons important" data-fn="createProcess" value="Elabora">Elabora</button>
+                </div>
+              </section>
 
             </div>
           </section>
