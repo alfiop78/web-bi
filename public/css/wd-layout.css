@@ -108,7 +108,8 @@ body {
 }
 
 #content {
-  display: block;
+  display: grid;
+  /* display: block; */
   width: 100%;
   position: absolute;
   padding: 1em;

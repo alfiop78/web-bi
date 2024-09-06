@@ -811,7 +811,7 @@
                         <span id="coords"></span>
                       </div>
                     </section>
-                    <section id="tables-area">
+                    <section class="row">
                       <section class="table-area-wrapper">
                         <section class="list-search buttonSection">
                           <input type="search" id="table-search" data-element-search="tables" placeholder="Ricerca tabelle" autocomplete="off" />

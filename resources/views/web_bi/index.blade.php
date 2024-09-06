@@ -86,27 +86,27 @@
                     </section>
                   </section>
                   <section class="row">
-                    <section class="col col-8">
+                    <section class="col col-8-span">
                       <input id="input-host" type="text" name="host" value="" placeholder="host" />
                     </section>
-                    <section class="col col-4">
+                    <section class="col col-4-span">
                       <input id="input-port" type="text" name="port" placeholder="port" />
                     </section>
                   </section>
                   <section class="row align-end">
-                    <section class="col col-6">
+                    <section class="col col-6-span">
                       <input id="input-dsn" type="text" value="" name="dsn" placeholder="DSN" />
                     </section>
-                    <section class="col col-6">
+                    <section class="col col-6-span">
                       <label>*Schema in cui memorizzare i datamart</label>
                       <input id="input-schema" type="text" value="" name="schema" placeholder="decisyon_cache (default)" value="decisyon_cache" />
                     </section>
                   </section>
                   <section class="row">
-                    <section class="col col-6">
+                    <section class="col col-6-span">
                       <input id="input-username" type="text" value="" name="username" placeholder="Username" />
                     </section>
-                    <section class="col col-6">
+                    <section class="col col-6-span">
                       <input id="input-psw" type="password" name="password" placeholder="Password" />
                     </section>
                   </section>

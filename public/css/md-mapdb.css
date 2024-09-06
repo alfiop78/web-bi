@@ -31,13 +31,12 @@ html, body{
 
 #canvas-area{
   width: 100%;
-  position: relative;
+  /* position: relative; */
   overflow: hidden;
   display: grid;
-  grid-template-rows: 1fr;
-  grid-auto-flow: row;
-  align-items: start;
-  border-bottom: solid thick gainsboro;
+  /* grid-template-rows: 1fr; */
+  /* grid-auto-flow: row; */
+  /* align-items: start; */
   background-color: gainsboro;
 }
 
