@@ -77,6 +77,7 @@
           <section>
             <button type="button" class="btn-link default" value="Apri" id="">Apri</button>
             <button type="button" class="btn-link default" value="Chiudi" id="">Chiudi</button>
+            <button id="btnSave" class="btn-link default" type="button" data-fn="save">Salva</button>
             <button type="button" class="btn-link default" value="Pubblica" data-fn="publish" id="publish">Pubblica</button>
             <section id="dashboardTitle" class="name" contenteditable="true" data-value="Titolo">Titolo Dashboard</section>
           </section>
@@ -126,30 +127,53 @@
           </dialog>
 
           <div class="row">
-            <section class="col">
-              <fieldset>
-                <legend>Parametri Dashboard</legend>
+            <div class="card col col-6">
+              <h1>Parametri</h1>
+              <p>description</p>
+              <div class="visual">
 
-                <div>
-                  <section>
-                    <!-- <p>Selezione del Layout (dialog per la visualizzazione delle preview dei layout e scelta del layout)</p> -->
-                    <!-- <button type="button" class="btn-link" id="btn-dlg-layout" data-fn="openDlgTemplateLayout">Selezione del Layout</button> -->
-                  </section>
-                  <p>Opzioni del grafico/Tabella</p>
-                </div>
+                <fieldset>
+                  <legend>Parametri Dashboard</legend>
 
-                <div>
-                  <textarea id="note" rows="10" cols="60" name="note" placeholder="Note"></textarea>
-                </div>
-              </fieldset>
-            </section>
+                  <div>
+                    <section>
+                      <!-- <p>Selezione del Layout (dialog per la visualizzazione delle preview dei layout e scelta del layout)</p> -->
+                      <!-- <button type="button" class="btn-link" id="btn-dlg-layout" data-fn="openDlgTemplateLayout">Selezione del Layout</button> -->
+                    </section>
+                    <p>Opzioni del grafico/Tabella</p>
+                  </div>
+
+                  <div>
+                    <textarea id="note" rows="10" cols="60" name="note" placeholder="Note"></textarea>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+            <div class="card col col-6-span">
+              <h1>Parametri Utenti/Gruppi</h1>
+              <p>description</p>
+              <div class="visual">
+                <fieldset>
+                  <legend>Parametri Utenti/Gruppi</legend>
+
+                  <div>
+                    <section>
+                      <!-- <p>Selezione del Layout (dialog per la visualizzazione delle preview dei layout e scelta del layout)</p> -->
+                      <!-- <button type="button" class="btn-link" id="btn-dlg-layout" data-fn="openDlgTemplateLayout">Selezione del Layout</button> -->
+                    </section>
+                    <p>Opzioni del grafico/Tabella</p>
+                  </div>
+
+                </fieldset>
+              </div>
+
+            </div>
           </div>
           <div class="row">
             <div class="col gridMenu">
 
               <section class="buttons">
                 <button id="btnPreview" type="button" data-fn="preview">Anteprima</button>
-                <button id="btnSave" type="button" data-fn="save">Salva</button>
                 <button type="button" id="addLayout" data-fn="openDlgTemplateLayout" class="btn-link default">Seleziona Layout</button>
               </section>
 
