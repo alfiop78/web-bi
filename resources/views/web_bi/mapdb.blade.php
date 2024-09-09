@@ -1010,7 +1010,7 @@
     </div>
     <div id="console">
       <div id="fabsConsole">
-        <i class="material-icons md-18">info</i>
+        <i class="material-symbols-rounded">info</i>
         <p></p>
       </div>
     </div>

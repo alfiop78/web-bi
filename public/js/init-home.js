@@ -100,16 +100,16 @@ var App = new Application();
         if (data) {
           // seleziono la connessione impostata
           e.target.dataset.selected = 'true';
-          // iconStatus.classList.replace('error', 'done');
           iconStatus.innerText = 'database';
           databaseName.innerHTML = data.name;
           spanConnectionStatus.dataset.connected = data.id;
+          App.showConsole('Connessione effettuata', 'done', 2000);
         } else {
           delete e.target.dataset.selected;
-          // iconStatus.classList.replace('done', 'error');
           iconStatus.innerText = 'database_off';
           databaseName.innerHTML = 'Database non impostato';
           spanConnectionStatus.dataset.connected = 0;
+          App.showConsole('Connessione non riuscita', 'error', 2000);
         }
       })
       .catch((err) => console.error(err));

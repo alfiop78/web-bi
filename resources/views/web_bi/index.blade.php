@@ -155,6 +155,12 @@
       </div>
     </div>
 
+    <div id="console">
+      <div id="fabsConsole">
+        <i class="material-symbols-rounded">info</i>
+        <p></p>
+      </div>
+    </div>
   </main>
   <div class="loader">
     <svg viewBox="0 0 32 32" width="32" height="32">
