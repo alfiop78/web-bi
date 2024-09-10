@@ -169,7 +169,7 @@ var Resource = new Resources();
     // Template Layout come fatto in init-dashboards.js
 
     // const sheetLayout = 'stock';
-    const templateLayout = 'layout-1';
+    const templateLayout = 'layout-1-test';
     const urls = [
       `/js/json-templates/${templateLayout}.json`
     ];

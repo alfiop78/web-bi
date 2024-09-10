@@ -29,29 +29,32 @@ fieldset legend {
   padding-inline-end: 8px;
 }
 
-.thumbnails .col, .preview .col {
+.thumbnails .col,
+.preview .col {
   display: grid;
 }
 
-.thumbnails > .grid, .preview > .grid {
+.thumbnails>.grid,
+.preview>.grid {
   display: grid;
 }
 
-.thumbnails > .grid.rows-2 {
+/* .thumbnails>.grid.rows-2 {
   grid-template-rows: 2fr 8fr;
   grid-row-gap: 12px;
   height: inherit;
   padding: 6px;
-}
+} */
 
-.preview > .grid.rows-2 {
+.preview>.grid.rows-2 {
   grid-template-rows: 1fr 9fr;
   grid-row-gap: 2em;
   height: inherit;
   padding: 6px;
 }
 
-.thumbnails .col.col-1, .preview .col.col-1 {
+.thumbnails .col.col-1,
+.preview .col.col-1 {
   grid-template-columns: 100%;
   margin: 0px auto;
   width: 80%;
@@ -68,7 +71,8 @@ fieldset legend {
   gap: 1em;
 }
 
-.thumbnails .col div, .preview .col .contentObject {
+.thumbnails .col div,
+.preview .col .contentObject {
   background-color: #c9c9c9;
   border-radius: 2px;
   padding: 4px;
@@ -179,3 +183,37 @@ fieldset legend {
   cursor: pointer;
   color: #494949;
 }
+
+/* TEST: nuovi layout */
+.thumbnails {
+  display: grid;
+}
+
+.thumbnails>.grid {
+  display: grid;
+}
+
+.thumbnails>.rows-2 {
+  grid-template-rows: 40px 1fr;
+  grid-template-areas:
+    "flt"
+    "main";
+}
+
+.thumbnails>.cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.thumbnails .filters {
+  grid-column: 1 / 4;
+  background-color: lightcoral;
+  grid-area: flt;
+}
+
+.thumbnails .main {
+  grid-column: 1 / 4;
+  background-color: lightcyan;
+  grid-area: main;
+}
+
+/* TEST: nuovi layout */
