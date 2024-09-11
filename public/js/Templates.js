@@ -51,7 +51,9 @@ class Templates {
         const tag = document.createElement(child.tag);
         if (child.id) tag.id = child.id;
         // l'array "classes" è sempre presente però potrebbe essere vuoto, se non ci sono classi da impostare
-        child.classes.forEach(cssClass => tag.classList.add(cssClass));
+        if (child.classes) {
+          child.classes.forEach(cssClass => tag.classList.add(cssClass));
+        }
         parent.appendChild(tag);
         if (child.childs) this.recursive(tag, child.childs);
       });

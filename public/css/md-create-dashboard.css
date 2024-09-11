@@ -114,8 +114,8 @@ fieldset legend {
 
 .thumbnails {
   background-color: #e2e2e2;
-  width: 290px;
-  height: 250px;
+  width: 340px;
+  height: 300px;
 }
 
 .preview {
@@ -138,48 +138,51 @@ fieldset legend {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 8px;
+  border: solid thin transparent;
 }
 
 /* NOTE: esempio di media query per responsive layout */
 @media screen and (min-width: 1024px) {
   .preview-area {
     /* grid-template-columns: repeat(auto-fill, minmax(calc(50% - 2em), 1fr)); */
-    grid-template-columns: repeat(auto-fill, 300px);
+    grid-template-columns: repeat(auto-fill, 400px);
     grid-template-rows: auto 1fr;
     justify-content: center;
-    grid-column-gap: 1em;
+    grid-column-gap: 2em;
     position: relative;
   }
 }
 
 .thumb-layout[data-selected] {
-  border: solid thin steelblue;
+  border: solid thin grey;
+  padding: 8px;
 }
 
 .absolute {
   position: absolute;
 }
 
-.chart-elements.defined {
+.preview .chart-elements.defined {
   display: flex;
   align-items: start;
   justify-content: start;
 }
 
-.chart-elements:not(.defined)::after {
+.preview .chart-elements:not(.defined)::after {
   content: 'Aggiungi risorsa';
   display: block;
   color: grey;
 }
 
-.chart-elements:not(.defined)::before {
+.preview .chart-elements:not(.defined)::before {
   font-family: 'Material Symbols Rounded';
   content: 'add';
   font-size: 48px;
   color: grey;
 }
 
-.chart-elements:not(.defined):hover::before {
+.preview .chart-elements:not(.defined):hover::before {
   cursor: pointer;
   color: #494949;
 }
@@ -187,33 +190,133 @@ fieldset legend {
 /* TEST: nuovi layout */
 .thumbnails {
   display: grid;
+  padding: 8px;
 }
 
-.thumbnails>.grid {
+.thumbnails>.layout {
   display: grid;
+  grid-gap: 8px;
+  justify-content: center;
 }
 
-.thumbnails>.rows-2 {
-  grid-template-rows: 40px 1fr;
+/* layout 2 righe / 1 colonna */
+.thumbnails>.layout .chartContent {
+  border-radius: 4px;
+  padding: 4px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
+.thumbnails>.layout>.filters {
+  grid-column: 1 / 4;
+  background-color: #bfbdbd;
+  grid-area: filterArea;
+}
+
+.thumbnails>.layout.generic {
+  grid-template: 40px 1fr / 1fr;
   grid-template-areas:
-    "flt"
-    "main";
+    "filterArea"
+    "mainArea";
 }
 
-.thumbnails>.cols-1 {
-  grid-template-columns: 1fr;
-}
-
-.thumbnails .filters {
+.thumbnails>.generic>.main {
   grid-column: 1 / 4;
-  background-color: lightcoral;
-  grid-area: flt;
+  background-color: #bfbdbd;
+  grid-area: mainArea;
+  justify-content: center;
+  grid-row-gap: 8px;
 }
 
-.thumbnails .main {
-  grid-column: 1 / 4;
-  background-color: lightcyan;
-  grid-area: main;
+.thumbnails .resourceActions {
+  padding: 4px;
+  display: flex;
+  gap: 8px;
 }
+
+/* layout 2 righe / 1 colonna */
+
+/* Layout 2 righe / 2 colonne uguali */
+.thumbnails>.layout.horizontalCharts {
+  grid-template: 40px 1fr / 1fr 1fr;
+  grid-template-areas:
+    "filterArea filterArea"
+    "leftmain rightmain";
+}
+
+.thumbnails>.horizontalCharts>.left {
+  grid-column: 1 / 2;
+  background-color: #bfbdbd;
+  grid-area: leftmain;
+}
+
+.thumbnails>.horizontalCharts>.right {
+  grid-column: 2 / 4;
+  background-color: #bfbdbd;
+  grid-area: rightmain;
+}
+
+/* Layout 2 righe / 2 colonne uguali */
+
+/* Layout 2 righe / 2 colonne diverse */
+.thumbnails>.layout.horizontalChartsUnequal {
+  grid-template: 40px 1fr / 1fr 1fr 1fr;
+  grid-template-areas:
+    "filterArea filterArea filterArea"
+    "leftmain leftmain rightmain";
+}
+
+.thumbnails>.horizontalChartsUnequal>.left {
+  grid-column: 1 / 3;
+  background-color: #bfbdbd;
+  grid-area: leftmain;
+}
+
+.thumbnails>.horizontalChartsUnequal>.right {
+  grid-column: 3 / 4;
+  background-color: #bfbdbd;
+  grid-area: rightmain;
+}
+
+/* Layout 2 righe / 2 colonne diverse */
+
+
+/* Layout three section */
+.thumbnails>.layout.threeSection {
+  grid-template: 40px 1fr / 1fr 1fr;
+  grid-template-areas:
+    "filterArea filterArea"
+    "leftmain rightmain";
+}
+
+.thumbnails>.threeSection>.left {
+  grid-column: 1 / 2;
+  background-color: #bfbdbd;
+  grid-area: leftmain;
+}
+
+.thumbnails>.threeSection>.right {
+  grid-column: 2 / 4;
+  grid-area: rightmain;
+  display: grid;
+  grid-template-areas:
+    "object-1"
+    "object-2";
+  grid-row-gap: 1em;
+}
+
+.object {
+  background-color: #bfbdbd;
+}
+
+#object-1 {
+  grid-area: object-1;
+}
+
+#object-2 {
+  grid-area: object-2;
+}
+
+/* Layout three section */
 
 /* TEST: nuovi layout */

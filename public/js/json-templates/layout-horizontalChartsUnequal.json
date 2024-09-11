@@ -1,0 +1,149 @@
+{
+  "parentElement_id": "template-layout",
+  "id": "layout-horizontalChartsUnequal",
+  "name": "Horizontal Charts (2)",
+  "comment": "Template con l'area filtri e due graifici posizionati in orizzontale con dimensioni diverse",
+  "childs": [
+    {
+      "tag": "div",
+      "classes": [
+        "layout",
+        "horizontalChartsUnequal"
+      ],
+      "childs": [
+        {
+          "tag": "section",
+          "classes": [
+            "filters",
+            "filterContent"
+          ],
+          "childs": [
+            {
+              "tag": "div",
+              "id": "filter_div",
+              "classes": [
+                "contentObject"
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "section",
+          "classes": [
+            "left",
+            "chartContent"
+          ],
+          "attributes": {
+            "resource": true
+          },
+          "childs": [
+            {
+              "tag": "div",
+              "id": "chart_div",
+              "classes": [
+                "chart-elements",
+                "contentObject"
+              ],
+              "attributes": {
+                "fn": "addResource"
+              }
+            },
+            {
+              "tag": "section",
+              "id": "btn-resource-section",
+              "classes": [
+                "resourceActions"
+              ],
+              "childs": [
+                {
+                  "tag": "button",
+                  "type": "icon",
+                  "id": "resource-1-settings",
+                  "text": "settings",
+                  "classes": [
+                    "material-symbolys-rounded",
+                    "md-18"
+                  ],
+                  "attributes": {
+                    "fn": "resourceSettings"
+                  }
+                },
+                {
+                  "tag": "button",
+                  "type": "icon",
+                  "id": "resource-2-settings",
+                  "text": "delete",
+                  "classes": [
+                    "material-symbolys-rounded",
+                    "md-18"
+                  ],
+                  "attributes": {
+                    "fn": "resourceRemove"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "section",
+          "classes": [
+            "right",
+            "chartContent"
+          ],
+          "attributes": {
+            "resource": true
+          },
+          "childs": [
+            {
+              "tag": "div",
+              "id": "chart_div",
+              "classes": [
+                "chart-elements",
+                "contentObject"
+              ],
+              "attributes": {
+                "fn": "addResource"
+              }
+            },
+            {
+              "tag": "section",
+              "id": "btn-resource-section",
+              "classes": [
+                "resourceActions"
+              ],
+              "childs": [
+                {
+                  "tag": "button",
+                  "type": "icon",
+                  "id": "resource-1-settings",
+                  "text": "settings",
+                  "classes": [
+                    "material-symbolys-rounded",
+                    "md-18"
+                  ],
+                  "attributes": {
+                    "fn": "resourceSettings"
+                  }
+                },
+                {
+                  "tag": "button",
+                  "type": "icon",
+                  "id": "resource-2-settings",
+                  "text": "delete",
+                  "classes": [
+                    "material-symbolys-rounded",
+                    "md-18"
+                  ],
+                  "attributes": {
+                    "fn": "resourceRemove"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

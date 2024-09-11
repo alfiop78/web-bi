@@ -1,0 +1,91 @@
+{
+  "parentElement_id": "template-layout",
+  "id": "layout-1",
+  "name": "generic data table",
+  "comment": "Template con 2 righe, una per i filtri e una per la DataTable",
+  "childs": [
+    {
+      "tag": "div",
+      "classes": [
+        "layout",
+        "generic"
+      ],
+      "childs": [
+        {
+          "tag": "section",
+          "classes": [
+            "filters",
+            "filterContent"
+          ],
+          "childs": [
+            {
+              "tag": "div",
+              "id": "filter_div",
+              "classes": [
+                "contentObject"
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "section",
+          "classes": [
+            "main",
+            "chartContent"
+          ],
+          "attributes": {
+            "resource": true
+          },
+          "childs": [
+            {
+              "tag": "div",
+              "id": "chart_div",
+              "classes": [
+                "chart-elements",
+                "contentObject"
+              ],
+              "attributes": {
+                "fn": "addResource"
+              }
+            },
+            {
+              "tag": "section",
+              "id": "btn-resource-section",
+              "classes": [
+                "resourceActions"
+              ],
+              "childs": [
+                {
+                  "tag": "button",
+                  "type": "icon",
+                  "id": "resource-1-settings",
+                  "text": "settings",
+                  "classes": [
+                    "material-icons-round",
+                    "md-18"
+                  ],
+                  "attributes": {
+                    "fn": "resourceSettings"
+                  }
+                },
+                {
+                  "tag": "button",
+                  "type": "icon",
+                  "id": "resource-2-settings",
+                  "text": "delete",
+                  "classes": [
+                    "material-icons-round",
+                    "md-18"
+                  ],
+                  "attributes": {
+                    "fn": "resourceRemove"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

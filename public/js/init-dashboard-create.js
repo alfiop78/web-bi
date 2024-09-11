@@ -169,9 +169,12 @@ var Resource = new Resources();
     // Template Layout come fatto in init-dashboards.js
 
     // const sheetLayout = 'stock';
-    const templateLayout = 'layout-1-test';
+    const templateLayout = 'layout-generic';
     const urls = [
-      `/js/json-templates/${templateLayout}.json`
+      `/js/json-templates/${templateLayout}.json`,
+      `/js/json-templates/layout-horizontalCharts.json`,
+      `/js/json-templates/layout-horizontalChartsUnequal.json`,
+      `/js/json-templates/layout-threeSection.json`,
     ];
 
     const init = { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, method: 'POST' };
