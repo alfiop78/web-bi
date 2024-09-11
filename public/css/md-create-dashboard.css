@@ -245,7 +245,6 @@ fieldset legend {
   grid-template-rows: 1fr auto;
 }
 
-.layout>.filters,
 .layout>.filters {
   grid-column: 1 / 4;
   background-color: #bfbdbd;

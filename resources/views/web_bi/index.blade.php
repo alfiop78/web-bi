@@ -16,7 +16,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <!-- <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@100;200;400;500;600&display=swap" rel="stylesheet" /> -->
   <!-- Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />
 </head>
@@ -35,10 +35,16 @@
     </section>
 
     <nav>
-      <a href="{{ route('web_bi.mapdb') }}" title="Workspace"><i class="material-symbols-rounded">workspaces</i><span>Workspace</span></a>
-      <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded">cloud_sync</i><span>Versionamento</span></a>
-      <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded">dashboard_customize</i><span>Creazione Dashboard</span></a>
-      <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded">dashboard</i><span>Dashboards</span></a>
+      <a href="#" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
+      <hr />
+      <section class="navOverflow">
+        <section class="navContent">
+          <a href="{{ route('web_bi.mapdb') }}" title="Workspace"><i class="material-symbols-rounded">workspaces</i><span>Workspace</span></a>
+          <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded">cloud_sync</i><span>Versionamento</span></a>
+          <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded">dashboard_customize</i><span>Creazione Dashboard</span></a>
+          <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded">dashboard</i><span>Dashboards</span></a>
+        </section>
+      </section>
       <hr />
       <a href="#" title="Settings"><i class="material-symbols-rounded">settings</i><span>Impostazioni</span></a>
     </nav>
@@ -169,7 +175,10 @@
   </div>
   <div class="right-sidebar">Right Sidebar</div>
   <footer>
-    <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="120" width="120" />
+      <section class="footerContent">
+        <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
+        <p>Lynx International</p>
+      </section>
   </footer>
   <script type="text/javascript" src="{{ asset('/js/init-home.js') }}" async></script>
 </body>

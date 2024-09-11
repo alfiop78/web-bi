@@ -11,13 +11,10 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/wd-layout.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
-  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout.css') }}" /> -->
-  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-symbols.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dashboards.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dashboard-layout.css') }}" />
   <script src="{{ asset('/js/Application.js') }}"></script>
   <script src="{{ asset('/js/lib.js') }}"></script>
   <script src="{{ asset('/js/Templates.js') }}"></script>
@@ -46,20 +43,28 @@
     <nav>
       <a href="{{ route('web_bi.index') }}" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
       <hr />
-      {{-- {{ dd($dashboards) }} --}}
-      @foreach($dashboards as $dashboard)
-      <a href="#" data-token="{{ json_decode($dashboard)->token }}">
-        <i class="material-symbols-rounded white">dashboard</i><span>{{ json_decode($dashboard)->name }}</span>
-      </a>
-      @endforeach
+      <section class="navOverflow">
+        <section class="navContent">
+          {{-- {{ dd($dashboards) }} --}}
+          @foreach($dashboards as $dashboard)
+          <a href="#" data-token="{{ json_decode($dashboard)->token }}">
+            <i class="material-symbols-rounded white">dashboard</i><span>{{ json_decode($dashboard)->name }}</span>
+          </a>
+          @endforeach
+        </section>
+      </section>
       <hr />
       <a href="#" title="Settings"><i class="material-symbols-rounded white">settings</i><span>Impostazioni</span></a>
     </nav>
   </div>
+  <template id="tmpl-actions-resource">
+    <section class="resourceActions">
+      <button class="material-symbols-rounded" data-fn="resourceSettings">settings</button>
+      <button class="material-symbols-rounded" data-fn="resourceRemove">delete</button>
+    </section>
+  </template>
 
   <main>
-
-
     <div id="content" class="custom-scrollbar">
 
       <div id="body" hidden>
@@ -74,10 +79,8 @@
             <div id="chart_div"></div> -->
           <!-- </div> -->
           <div class="row">
-
             <div class="col">
-              <div id="template-layout" class="layout"></div>
-
+              <div id="template-layout" class="view"></div>
               <progress id="progress-bar" max="100" value="0"></progress>
             </div>
           </div>
@@ -93,8 +96,6 @@
         <p></p>
       </div>
     </div>
-
-
   </main>
   <div class="loader">
     <svg viewBox="0 0 32 32" width="32" height="32">
@@ -103,7 +104,10 @@
   </div>
   <div class="right-sidebar">Right Sidebar</div>
   <footer>
-    <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="120" width="120" />
+      <section class="footerContent">
+        <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
+        <p>Lynx International</p>
+      </section>
   </footer>
   <script type="text/javascript" src="{{ asset('/js/init-dashboards.js') }}" async></script>
 </body>

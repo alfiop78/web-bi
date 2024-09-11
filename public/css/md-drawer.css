@@ -1,7 +1,3 @@
-nav {
-  font-size: 1rem;
-}
-
 .account {
   display: flex;
   flex-direction: column;
@@ -10,7 +6,23 @@ nav {
   color: var(--main-bg-color);
 }
 
-nav>a {
+hr {
+  width: 70%;
+  border-top: solid thin;
+  border-bottom: none;
+}
+
+nav>.navOverflow {
+  overflow-y: auto;
+  position: relative;
+  height: 100%;
+}
+
+nav>.navOverflow>.navContent {
+  position: absolute;
+}
+
+nav a {
   display: flex;
   align-items: center;
   text-decoration: none;
@@ -32,19 +44,19 @@ nav>button>a {
   color: black;
 }
 
-nav>a:not([disabled]):hover,
+nav a:not([disabled]):hover,
 nav>button:not([disabled]):hover {
   cursor: pointer;
   /* color: var(--main-secondary-color); */
   font-weight: bold;
 }
 
-nav>a>span,
+nav a>span,
 nav>button>a>span {
   padding: 0 8px;
 }
 
-nav>a[selected] {
+nav a[selected] {
   font-weight: bold;
 }
 
@@ -53,7 +65,7 @@ nav>a[selected] {
   display: none;
 } */
 
-#drawer:not([open])>nav>a>span {display: none;}
+#drawer:not([open])>nav a>span {display: none;}
 
 #drawer:not([open])>nav hr {
   margin: .5em .5em;
@@ -131,25 +143,44 @@ nav>a[selected] {
     flex-direction: column;
   }
 
+  #drawer[open] {
+    background: #494949;
+    grid-column: 1 / 2;
+    transition: width 150ms;
+    width: 260px;
+    z-index: 100;
+    display: grid;
+    grid-template-rows: auto 1fr; /* account / menu */
+  }
+
   #drawer:not([open]) {
     grid-column: 1 / 2;
     transition: width 150ms;
-    width: 60px;
+    width: 64px;
     z-index: 100;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: auto 1fr; /* account / menu */
   }
 
-  #drawer[open]>nav {
+  /* #drawer[open]>nav {
     display: flex;
     flex-flow: column;
     align-items: flex-start;
-  }
+  } */
 
-  #drawer:not([open])>nav {
+  /* #drawer:not([open])>nav {
     display: flex;
     flex-flow: column;
     align-items: center;
+  } */
+  #drawer[open]>nav {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto auto;
+  }
+
+  #drawer:not([open])>nav {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto auto;
   }
 
 }

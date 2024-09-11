@@ -47,9 +47,14 @@
 
     <nav>
       <a href="{{ route('web_bi.index') }}" title="HomePage"><i class="material-symbols-rounded white">home</i><span>Home</span></a>
-      <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded white">cloud_sync</i><span>Versionamento</span></a>
-      <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded white">dashboard_customize</i><span>Creazione Dashboard</span></a>
-      <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded white">dashboard</i><span>Dashboards</span></a>
+      <hr />
+      <section class="navOverflow">
+        <section class="navContent">
+          <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded white">cloud_sync</i><span>Versionamento</span></a>
+          <a href="{{ route('web_bi.dashboard_create') }}" title="Creazione Dashboard"><i class="material-symbols-rounded white">dashboard_customize</i><span>Creazione Dashboard</span></a>
+          <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded white">dashboard</i><span>Dashboards</span></a>
+        </section>
+      </section>
       <hr />
       <a href="#" title="Settings"><i class="material-symbols-rounded white">settings</i><span>Impostazioni</span></a>
       <!-- <button>
@@ -1022,7 +1027,10 @@
   </div>
   <div class="right-sidebar">Right Sidebar</div>
   <footer>
-    <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="120" width="120" />
+      <section class="footerContent">
+        <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="24" width="24" />
+        <p>Lynx International</p>
+      </section>
   </footer>
   <script type="text/javascript" src="{{ asset('/js/init-responsive.js') }}" async></script>
   <script type="text/javascript" src="{{ asset('/js/init-sheet.js') }}" async></script>
