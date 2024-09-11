@@ -68,6 +68,14 @@
     </section>
   </template>
 
+    <template id="tmpl-actions-resource">
+      <section class="resourceActions">
+        <button class="material-symbols-rounded" data-fn="resourceSettings">settings</button>
+        <button class="material-symbols-rounded" data-fn="resourceRemove">delete</button>
+      </section>
+
+    </template>
+
   <main>
 
     <div id="content" class="grid custom-scrollbar">

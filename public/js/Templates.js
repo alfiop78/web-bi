@@ -1,6 +1,8 @@
 class Templates {
   #data = new Map();
-  constructor() { }
+  constructor() {
+    this.resourceActionsTmpl = document.getElementById('tmpl-actions-resource');
+  }
 
   set data(value) {
     // this.#data = value;
@@ -23,13 +25,15 @@ class Templates {
         child.classes.forEach(cssClass => tag.classList.add(cssClass));
         // se, l'elemento che sto creando è un .chart-elements dovrò
         // aggiungere anche le icone per configurarlo, eliminarlo ecc...
-        if (child.attributes) {
-          for (const [key, value] of Object.entries(child.attributes)) {
-            tag.dataset[key] = value
-          }
-          if (child.type === 'icon') tag.innerText = child.text;
+        for (const [key, value] of Object.entries(child.attributes)) {
+          tag.dataset[key] = value
         }
         parent.appendChild(tag);
+        if (child.attributes.actions) {
+          this.actionsContent = this.resourceActionsTmpl.content.cloneNode(true);
+          this.resourceAction = this.actionsContent.querySelector('.resourceActions');
+          parent.appendChild(this.resourceAction);
+        }
         if (child.childs) this.recursive(tag, child.childs);
       });
     }

@@ -6,10 +6,11 @@
   "childs": [
     {
       "tag": "div",
-      "id":"generic",
+      "id": "generic",
       "classes": [
         "layout"
       ],
+      "attributes": {},
       "childs": [
         {
           "tag": "section",
@@ -17,13 +18,15 @@
             "filters",
             "filterContent"
           ],
+          "attributes": {},
           "childs": [
             {
               "tag": "div",
               "id": "filter_div",
               "classes": [
                 "contentObject"
-              ]
+              ],
+              "attributes": {}
             }
           ]
         },
@@ -45,43 +48,9 @@
                 "contentObject"
               ],
               "attributes": {
-                "fn": "addResource"
+                "fn": "addResource",
+                "actions": true
               }
-            },
-            {
-              "tag": "section",
-              "id": "btn-resource-section",
-              "classes": [
-                "resourceActions"
-              ],
-              "childs": [
-                {
-                  "tag": "button",
-                  "type": "icon",
-                  "id": "resource-1-settings",
-                  "text": "settings",
-                  "classes": [
-                    "material-icons-round",
-                    "md-18"
-                  ],
-                  "attributes": {
-                    "fn": "resourceSettings"
-                  }
-                },
-                {
-                  "tag": "button",
-                  "type": "icon",
-                  "id": "resource-2-settings",
-                  "text": "delete",
-                  "classes": [
-                    "material-icons-round",
-                    "md-18"
-                  ],
-                  "attributes": {
-                    "fn": "resourceRemove"
-                  }
-                }
-              ]
             }
           ]
         }
