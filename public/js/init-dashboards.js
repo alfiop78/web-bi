@@ -244,7 +244,9 @@ var Resource = new Resources();
       .then(data => {
         if (!data) return;
         console.log(data);
+        debugger;
         Template.data = data;
+        Template.id = data.id;
         // creo il template nel DOM
         Template.create();
         // carico le risorse (sheet) necessarie alla dashboard

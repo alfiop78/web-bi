@@ -214,7 +214,7 @@ var Resource = new Resources();
     const template = document.querySelector('.thumb-layout[data-selected]').id;
     Template.id = template;
     // console.log(template);
-    Template.dashboardRef = document.getElementById('dashboard-preview');
+    // Template.dashboardRef = document.getElementById('dashboard-preview');
     // creo l'anteprima nel DOM
     Template.create();
   }
@@ -222,6 +222,7 @@ var Resource = new Resources();
   // Fn invocata dal tasto + che viene creato dinamicamente dal layout-template
   // apertura dialog per l'aggiunta del chart o DataTable
   app.addResource = (e) => {
+    if (e.currentTarget.classList.contains('defined')) return false;
     // il ref corrente, appena aggiunto
     Resource.ref = document.getElementById(e.currentTarget.id);
     const ul = document.getElementById('ul-sheets');

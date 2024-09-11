@@ -120,8 +120,8 @@ fieldset legend {
 
 .preview {
   background-color: #e2e2e2;
-  width: inherit;
-  height: 550px;
+  /* width: inherit; */
+  /* height: 550px; */
 }
 
 .dashboard-preview {
@@ -188,6 +188,20 @@ fieldset legend {
 }
 
 /* TEST: nuovi layout */
+
+.chart-elements:not(.defined) {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chart-elements.defined {
+  position: relative;
+  overflow: auto;
+  flex-direction: column;
+}
+
 .preview,
 .thumbnails {
   display: grid;
@@ -195,6 +209,7 @@ fieldset legend {
 
 .preview {
   padding: 1em;
+  overflow-y: auto;
 }
 
 .thumbnails {
@@ -223,11 +238,22 @@ fieldset legend {
   grid-template-rows: 1fr auto;
 }
 
-.preview>.layout>.filters,
-.thumbnails>.layout>.filters {
+.preview>.layout .chartContent {
+  border-radius: 4px;
+  padding: 1em;
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
+.layout>.filters,
+.layout>.filters {
   grid-column: 1 / 4;
   background-color: #bfbdbd;
   grid-area: filterArea;
+}
+
+.preview>.layout>.filters {
+  padding: 1em;
 }
 
 .thumbnails>#thumb-generic {
@@ -238,7 +264,7 @@ fieldset legend {
 }
 
 .preview>#generic {
-  grid-template: 160px 1fr / 1fr;
+  grid-template: minmax(60px, auto) 1fr / 1fr;
   grid-template-areas:
     "filterArea"
     "mainArea";
@@ -256,7 +282,7 @@ fieldset legend {
   grid-column: 1 / 4;
   background-color: #bfbdbd;
   grid-area: mainArea;
-  justify-content: center;
+  /* justify-content: center; */
   grid-row-gap: 1em;
 }
 

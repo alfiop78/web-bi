@@ -87,6 +87,12 @@
       </div>
 
     </div>
+    <div id="console">
+      <div id="fabsConsole">
+        <i class="material-symbols-rounded">info</i>
+        <p></p>
+      </div>
+    </div>
 
 
   </main>

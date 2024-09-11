@@ -70,9 +70,9 @@
 
   <main>
 
-    <div id="content" class="custom-scrollbar">
+    <div id="content" class="grid custom-scrollbar">
 
-      <div id="body" hidden>
+      <div id="body" class="menu" hidden>
         <menu class="standard">
           <section>
             <button type="button" class="btn-link default" value="Apri" id="">Apri</button>
@@ -93,7 +93,7 @@
             </span>
           </section>
         </menu>
-        <div class="wrapper">
+        <div class="wrapper menu">
           <dialog id="dlg-chart" class="small">
             <section class="dlg-grid">
               <h5 class="title">Selezione del report</h5>
@@ -170,16 +170,16 @@
             </div>
           </div>
           <div class="row">
-            <div class="col gridMenu">
+            <div class="col menu">
 
               <section class="buttons">
                 <button id="btnPreview" type="button" data-fn="preview">Anteprima</button>
                 <button type="button" id="addLayout" data-fn="openDlgTemplateLayout" class="btn-link default">Seleziona Layout</button>
               </section>
 
-              <section id="dashboard-preview" class="dashboard-preview">
-                <div id="template-layout" class="preview"></div>
-              </section>
+              <div id="template-layout" class="preview"></div>
+              <!-- <section id="dashboard-preview" class="dashboard-preview"> -->
+              <!-- </section> -->
             </div>
 
           </div>
@@ -188,6 +188,12 @@
 
       </div>
 
+    </div>
+    <div id="console">
+      <div id="fabsConsole">
+        <i class="material-symbols-rounded">info</i>
+        <p></p>
+      </div>
     </div>
 
   </main>

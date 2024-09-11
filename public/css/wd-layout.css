@@ -131,9 +131,17 @@ body {
   display: grid;
 }
 
+#content>#body.menu {
+  grid-template-rows: auto 1fr;
+}
+
 .wrapper {
   display: grid;
   grid-gap: 2em;
+}
+
+.wrapper.menu {
+  grid-template-rows: auto 1fr;
 }
 
 .wrapper>.row.autofit {
@@ -224,6 +232,10 @@ h1 {
 .row>.col {
   grid-column: 1 / 13;
   display: grid;
+}
+
+.row>.col.menu {
+  grid-template-rows: auto 1fr;
 }
 
 .col.col-1 {
