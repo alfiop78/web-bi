@@ -169,9 +169,8 @@ var Resource = new Resources();
     // Template Layout come fatto in init-dashboards.js
 
     // const sheetLayout = 'stock';
-    const templateLayout = 'layout-generic';
     const urls = [
-      `/js/json-templates/${templateLayout}.json`,
+      `/js/json-templates/layout-generic.json`,
       `/js/json-templates/layout-horizontalCharts.json`,
       `/js/json-templates/layout-horizontalChartsUnequal.json`,
       `/js/json-templates/layout-threeSection.json`,
@@ -189,10 +188,11 @@ var Resource = new Resources();
       .then((data) => {
         console.log(data);
         if (!data) return;
+        // creo le preview dei template
         data.forEach(template => {
           // imposto i dati di questo Template nella classe
           Template.data = template;
-          // creo le preview dei template
+          Template.id = template.id;
           Template.thumbnails();
         })
       })
@@ -212,7 +212,6 @@ var Resource = new Resources();
     app.dlgTemplateLayout.close();
     //  recupero il template selezionato
     const template = document.querySelector('.thumb-layout[data-selected]').id;
-    debugger;
     Template.id = template;
     // console.log(template);
     Template.dashboardRef = document.getElementById('dashboard-preview');

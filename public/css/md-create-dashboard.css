@@ -188,15 +188,31 @@ fieldset legend {
 }
 
 /* TEST: nuovi layout */
+.preview,
 .thumbnails {
   display: grid;
+}
+
+.preview {
+  padding: 1em;
+}
+
+.thumbnails {
   padding: 8px;
 }
 
+.preview>.layout,
 .thumbnails>.layout {
   display: grid;
-  grid-gap: 8px;
   justify-content: center;
+}
+
+.thumbnails>.layout {
+  grid-gap: 8px;
+}
+
+.preview>.layout {
+  grid-gap: 1em;
 }
 
 /* layout 2 righe / 1 colonna */
@@ -207,25 +223,41 @@ fieldset legend {
   grid-template-rows: 1fr auto;
 }
 
+.preview>.layout>.filters,
 .thumbnails>.layout>.filters {
   grid-column: 1 / 4;
   background-color: #bfbdbd;
   grid-area: filterArea;
 }
 
-.thumbnails>.layout.generic {
+.thumbnails>#thumb-generic {
   grid-template: 40px 1fr / 1fr;
   grid-template-areas:
     "filterArea"
     "mainArea";
 }
 
-.thumbnails>.generic>.main {
+.preview>#generic {
+  grid-template: 160px 1fr / 1fr;
+  grid-template-areas:
+    "filterArea"
+    "mainArea";
+}
+
+.thumbnails>#thumb-generic>.main {
   grid-column: 1 / 4;
   background-color: #bfbdbd;
   grid-area: mainArea;
   justify-content: center;
   grid-row-gap: 8px;
+}
+
+.preview>#generic>.main {
+  grid-column: 1 / 4;
+  background-color: #bfbdbd;
+  grid-area: mainArea;
+  justify-content: center;
+  grid-row-gap: 1em;
 }
 
 .thumbnails .resourceActions {
