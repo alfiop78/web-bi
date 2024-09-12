@@ -109,12 +109,29 @@
           <dialog id="dlg-chart" class="small">
             <section class="dlg-grid">
               <h5 class="title">Selezione del report</h5>
+              <!-- TODO: Aggiungere un sottotilo per tutte le dialog, con tag <p> -->
               <section class="dlg-content col col-1">
-                <section class="list-search">
-                  <input type="search" id="" data-element-search="" placeholder="Ricerca" autocomplete="off" />
-                  <div class="relative-ul min-height">
-                    <ul id="ul-sheets" data-search-id="" class="custom-scrollbar"></ul>
-                  </div>
+                <section class="row">
+                  <!-- WorkBooks -->
+                  <section class="col col-6-span">
+                    <section class="list-search">
+                      <input type="search" id="workbooks-search-id" data-element-search="workbooks" placeholder="Ricerca" autocomplete="off" />
+                      <div class="relative-ul">
+                        <ul id="ul-workbooks" data-search-id="workbooks-search-id" class="custom-scrollbar"></ul>
+                      </div>
+                    </section>
+                  </section>
+                  <!-- Sheets -->
+                  <section class="col col-6-span">
+                    <section class="list-search">
+                      <input type="search" id="sheets-search-id" data-element-search="sheets" placeholder="Ricerca" autocomplete="off" />
+                      <div class="relative-ul">
+                        <ul id="ul-sheets" data-search-id="sheets-search-id" class="custom-scrollbar"></ul>
+                      </div>
+                    </section>
+
+                  </section>
+
                 </section>
               </section>
               <section class="dlg-buttons">
@@ -216,10 +233,10 @@
   </div>
   <div class="right-sidebar">Right Sidebar</div>
   <footer>
-      <section class="footerContent">
-        <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
-        <p>Lynx International</p>
-      </section>
+    <section class="footerContent">
+      <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
+      <p>Lynx International</p>
+    </section>
   </footer>
   <script type="text/javascript" src="{{ asset('/js/init-dashboard-create.js') }}" async></script>
 </body>

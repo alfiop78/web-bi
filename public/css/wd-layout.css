@@ -21,29 +21,11 @@
 * {
   box-sizing: border-box;
   font-family: 'Barlow';
-  font-size: .85rem;
+  font-size: .9rem;
 }
 
-@media screen and (min-width: 1024px) {
+@media screen and (min-width: 1921px) {
   * {
-    box-sizing: border-box;
-    font-family: 'Barlow';
-    font-size: .85rem;
-  }
-}
-
-@media screen and (min-width: 1280px) {
-  * {
-    box-sizing: border-box;
-    font-family: 'Barlow';
-    font-size: .9rem;
-  }
-}
-
-@media screen and (min-width: 1440px) {
-  * {
-    box-sizing: border-box;
-    font-family: 'Barlow';
     font-size: 1rem;
   }
 }

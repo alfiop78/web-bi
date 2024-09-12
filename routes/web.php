@@ -55,6 +55,7 @@ Route::get('/', [BIConnectionsController::class, 'index'])->name('web_bi.index')
 Route::get('/mapdb', [MapDatabaseController::class, 'mapdb'])->name('web_bi.mapdb');
 
 Route::get('/versioning', function () {
+  // TODO: recuperare solo gli Workbook del DB collegato
   return view('web_bi.versioning');
 })->name('web_bi.versioning');
 

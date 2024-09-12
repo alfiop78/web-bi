@@ -163,12 +163,8 @@ var Resource = new Resources();
   }
 
   app.openDlgTemplateLayout = async () => {
-    // TODO: creare le anteprime di tutti i Template Layout
     // TODO: I Template Layout li devo mettere nel DB invece di metterli nei file .json
-    // Prima di fare questo TODO, nel frattempo, utilizzo la proomise che chiama il
-    // Template Layout come fatto in init-dashboards.js
-
-    // const sheetLayout = 'stock';
+    // carico la lista dei template .json, nella dialog
     const urls = [
       `/js/json-templates/layout-generic.json`,
       `/js/json-templates/layout-horizontalCharts.json`,
@@ -227,7 +223,9 @@ var Resource = new Resources();
     Resource.ref = document.getElementById(e.currentTarget.id);
     const ul = document.getElementById('ul-sheets');
     // pulisco <ul>
-    ul.querySelectorAll('li').forEach(el => el.remove());
+    // WARN: questo viene fatto nell'eveneto onclose della dialog, quindi qui si può eliminare
+    // ul.querySelectorAll('li').forEach(el => el.remove());
+
     // carico elenco sheets del localStorage
     for (const [token, sheet] of Object.entries(Storage.getSheets())) {
       // console.log(token, sheet);
@@ -463,7 +461,7 @@ var Resource = new Resources();
   // End Drag events
 
   app.titleRef.addEventListener('blur', (e) => {
-    e.target.dataset.value = e.target.innerHTML;
+    e.target.dataset.value = e.target.innerText;
   });
 
 })();
