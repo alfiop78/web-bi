@@ -81,7 +81,11 @@
           <div class="row">
             <div class="col">
               <div id="template-layout" class="view"></div>
-              <progress id="progress-bar" max="100" value="0"></progress>
+              <div class="progressBar">
+                <label for="progress-bar" hidden>Record <span id="progress-to"></span>&nbsp;di&nbsp;<span id="progress-total"></span>&nbsp;totali</label>
+                <progress id="progress-bar" max="100" value="0">70 %</progress>
+              </div>
+              <!-- <progress id="progress-bar" max="100" value="0"></progress> -->
             </div>
           </div>
 
@@ -104,10 +108,10 @@
   </div>
   <div class="right-sidebar">Right Sidebar</div>
   <footer>
-      <section class="footerContent">
-        <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
-        <p>Lynx International</p>
-      </section>
+    <section class="footerContent">
+      <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
+      <p>Lynx International</p>
+    </section>
   </footer>
   <script type="text/javascript" src="{{ asset('/js/init-dashboards.js') }}" async></script>
 </body>

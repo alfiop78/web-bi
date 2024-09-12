@@ -982,7 +982,6 @@
                               <ul id="ul-columns-handler" class="custom-scrollbar"></ul>
                             </div>
                             <section id="datatable">
-                              <!-- <progress id="progress-bar" max="100" value="70">70%</progress> -->
                               <table id="preview-datamart" class="custom-scrollbar"></table>
                             </section>
                           </div>

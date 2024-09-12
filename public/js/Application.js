@@ -6,7 +6,9 @@ class Application {
   #console = document.getElementById('console');
   #messageConsole = document.querySelector('#console p');
   #iconConsole = document.querySelector('#console i');
-  constructor() { }
+  constructor() {
+    this.loader = document.querySelector('.loader');
+  }
 
   init() {
     // var main = document.getElementsByTagName("main")[0];
@@ -34,6 +36,14 @@ class Application {
     //document.getElementById("testTop").innerText = window.screenTop;
     // console.log(main.offsetHeight);
   }
+
+  showLoader() {
+    // const spinner = document.querySelector('.loader');
+    // spinner.hidden = false;
+    this.loader.hidden = false;
+  }
+
+  closeLoader() { this.loader.hidden = true; }
 
   loaderStart() {
     const spinner = document.querySelector('.local-loader');

@@ -283,7 +283,6 @@ var Resource = new Resources();
   }
 
   app.dashboardSelected = (e) => {
-    debugger;
     const dashboard = JSON.parse(window.localStorage.getItem(e.currentTarget.id));
     document.querySelector('h1.title').innerHTML = dashboard.title;
     app.getLayout(dashboard);
@@ -343,6 +342,11 @@ var Resource = new Resources();
 
     // Chiamata in GET con laravel paginate()
     const progressBar = document.getElementById('progress-bar');
+    const progressTo = document.getElementById('progress-to');
+    const progressTotal = document.getElementById('progress-total');
+    const progressLabel = document.querySelector("label[for='progress-bar']");
+    App.showLoader();
+    App.showConsole('Apertura Dashboard in corso...', null, null);
     let partialData = [];
     await fetch(`/fetch_api/${Resource.datamart_id}/datamart?page=1`)
       .then((response) => {
@@ -354,11 +358,13 @@ var Resource = new Resources();
       .then(async (paginateData) => {
         console.log(paginateData);
         console.log(paginateData.data);
-        // TODO: aggiungere laa progressBar
-        // debugger;
+        progressBar.value = +((paginateData.to / paginateData.total) * 100);
+        progressLabel.hidden = false;
+        progressTo.innerText = paginateData.to;
+        progressTotal.innerText = paginateData.total;
         // funzione ricorsiva fino a quando è presente next_page_url
         let recursivePaginate = async (url) => {
-          console.log(url);
+          // console.log(url);
           await fetch(url).then((response) => {
             // console.log(response);
             if (!response.ok) { throw Error(response.statusText); }
@@ -366,7 +372,9 @@ var Resource = new Resources();
           }).then(response => response.json()).then((paginate) => {
             console.log(paginate);
             progressBar.value = +((paginate.to / paginate.total) * 100);
-            console.log(progressBar.value);
+            progressTo.innerText = paginate.to;
+            progressTotal.innerText = paginate.total;
+            // console.log(progressBar.value);
             partialData = partialData.concat(paginate.data);
             if (paginate.next_page_url) {
               recursivePaginate(paginate.next_page_url);
@@ -376,6 +384,8 @@ var Resource = new Resources();
               console.log('tutte le paginate completate :', partialData);
               Resource.data = partialData;
               google.charts.setOnLoadCallback(app.draw());
+              App.closeLoader();
+              App.closeConsole();
             }
           }).catch((err) => {
             App.showConsole(err, 'error');
@@ -389,6 +399,8 @@ var Resource = new Resources();
           // Non sono presenti altre pagine, visualizzo il dashboard
           Resource.data = partialData;
           google.charts.setOnLoadCallback(app.draw());
+          App.closeConsole();
+          App.closeLoader();
         }
       })
       .catch(err => {
