@@ -1348,6 +1348,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const name = document.getElementById('input-sheet-name').value;
     // Sheet non è definito (prima attivazione del tasto Sheet)
     Sheet = new Sheets(name, rand().substring(0, 7), WorkBook.workBook.token);
+    SheetStorage.sheet = Sheet.sheet.token;
     document.getElementById('sheet-name').dataset.value = Sheet.name;
     document.getElementById('sheet-name').innerText = Sheet.name;
     // Imposto la prop 'edit' = false, verrà impostata a 'true' quando si apre uno Sheet
