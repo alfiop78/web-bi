@@ -161,7 +161,7 @@
             <div class="card">
               <div class="row">
                 <section class="col col-5-span">
-                  <h1>Sheets</h1>
+                  <h1>Metriche</h1>
                 </section>
                 <section class="col col-7-span">
                   <menu class="allButtons" data-id="metric" hidden>

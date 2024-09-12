@@ -1780,7 +1780,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         Sheet.edit = true;
         app.sheetPreview();
         App.loaderStop();
-      App.closeConsole();
+        App.closeConsole();
       })
       .catch(err => {
         App.showConsole(err, 'error', 3000);

@@ -253,14 +253,7 @@ class Resources extends Dashboards {
       for (const [key, value] of Object.entries(row)) {
         switch (this.json.data.columns[key].type) {
           case 'date':
-            if (value.length === 8) {
-              // console.log('Data di 8 cifre (YYYYMMDD)', value);
-              const date = new Date(`${value.substring(0, 4)}-${value.substring(4, 6)}-${value.substring(6, 8)}`);
-              // console.log(new Intl.DateTimeFormat("it-IT", dateOptions).format(date));
-              v.push({ v: date, f: new Intl.DateTimeFormat("it-IT", dateOptions).format(date), p: { className: 'myClass' } });
-            } else {
-              v.push({ v: null });
-            }
+            rowValue.push({ v: new Date(value), f: new Date(value), p: { className: 'myClass' } });
             break;
           case 'number':
             // TODO: valutare se formattare qui i valori (come sopra per le date) oppure con le funzioni Formatter (sotto)
@@ -363,7 +356,20 @@ class Resources extends Dashboards {
     switch (datatype) {
       case 'varchar':
       case 'char':
+      case 'binary':
+      case 'varbinary':
+      case 'blob':
+      case 'text':
+      case 'long varchar':
         this.datatype = 'string';
+        break;
+      case 'date':
+      case 'datetime':
+        this.datatype = 'date';
+        break;
+      case 'time':
+      case 'timestamp':
+        this.datatype = 'datetime';
         break;
       default:
         this.datatype = 'number';

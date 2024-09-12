@@ -194,6 +194,7 @@ fieldset legend {
   display: flex;
   flex-direction: column;
   align-items: center;
+  box-shadow: unset;
 }
 
 .chart-elements.defined {
