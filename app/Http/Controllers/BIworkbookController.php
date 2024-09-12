@@ -19,6 +19,15 @@ class BIworkbookController extends Controller
   }
 
   /**
+   * Visualizzo gli WorkBooks del DB attualmente collegato
+   *
+   * @return \Illuminate\Http\Response
+   */
+  public function indexDB() {
+
+  }
+
+  /**
    * Show the form for creating a new resource.
    *
    * @return \Illuminate\Http\Response
@@ -38,12 +47,14 @@ class BIworkbookController extends Controller
   {
     $token = $request->collect()->get('token');
     $name = $request->collect()->get('name');
+    $connectionId = $request->collect()->get('databaseId');
     // codifico tutta la $request in json per poterla inserire nel DB
     $json = json_encode($request->all());
     $workbook = new BIworkbook();
     // salvo su DB
     $workbook->token = $token;
     $workbook->name = $name;
+    $workbook->connectionId = $connectionId;
     $workbook->json_value = $json;
     return $workbook->save();
   }

@@ -68,6 +68,7 @@ Route::get('/dashboards', [BIdashboardController::class, 'index'])->name('web_bi
 Route::get('/create-dashboard', function () {
   return view('web_bi.create-dashboard');
 })->name('web_bi.dashboard_create');
+// Route::get('/create-dashboard', [BIworkbookController::class, 'indexDB'])->name('web_bi.dashboard_create');
 
 // recupero l'elenco dei database presenti (schema)
 Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']);
