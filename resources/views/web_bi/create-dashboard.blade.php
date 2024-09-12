@@ -84,7 +84,7 @@
 
     <div id="content" class="grid custom-scrollbar">
 
-      <div id="body" class="menu" hidden>
+      <div id="body" class="raw menu" hidden>
         <menu class="standard">
           <section>
             <button type="button" class="btn-link default" value="Apri" id="">Apri</button>

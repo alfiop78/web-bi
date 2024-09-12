@@ -72,7 +72,7 @@
 
     <div id="content" class="custom-scrollbar">
 
-      <div id="body" hidden>
+      <div id="body" class="raw" hidden>
         <menu class="standard align-end">
           <section class="dbStatus">
             {{-- session()->forget('db_name') --}}

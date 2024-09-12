@@ -67,7 +67,7 @@
   <main>
     <div id="content" class="custom-scrollbar">
 
-      <div id="body" hidden>
+      <div id="body" class="raw" hidden>
         <div class="wrapper">
           <!--Div that will hold the dashboard-->
           <!-- <div id="dashboard_div"> -->

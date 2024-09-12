@@ -15,7 +15,7 @@ html, body{
   grid-template-rows: auto 1fr auto;
   height: 100%;
   width: 100%;
-  padding: 1em;
+  /* padding: 1em; */
 }
 
 .actions{
@@ -406,7 +406,7 @@ li:not([data-selected]) > i[data-mode="remove"] {
   /* grid-row-gap: 8px; */
   height: 100%;
   width: 100%;
-  padding: 1em;
+  /* padding: 1em; */
 }
 
 menu.horizontal-menu {
@@ -522,9 +522,9 @@ textarea:focus, textarea:active {
 
 #steps {
   display: grid;
-  background: white;
-  box-shadow: 0 1px 4px 3px lightgrey;
-  border-radius: 2px;
+  /* background: white; */
+  /* box-shadow: 0 1px 4px 3px lightgrey; */
+  /* border-radius: 2px; */
 }
 
 #steps>.overflow {

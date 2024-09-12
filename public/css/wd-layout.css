@@ -139,7 +139,7 @@ footer>.footerContent {
   /* display: block; */
   width: 100%;
   position: absolute;
-  padding: 1em;
+  /* padding: 1em; */
   top: 0;
   left: 0;
   right: 0;
@@ -148,6 +148,17 @@ footer>.footerContent {
   overflow-x: hidden;
   background: var(--main-bg-color);
   transition: all 500ms;
+  box-shadow: 0px 1px 3px 2px gainsboro;
+}
+
+#body {
+  padding: 1em;
+  border-radius: 4px;
+  background-color: white;
+}
+
+#body.raw {
+  background-color: var(--main-bg-color);
 }
 
 #content.grid {
