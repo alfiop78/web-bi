@@ -23,8 +23,6 @@ class BIsheetController extends Controller
 
   public function indexByWorkbook($workbookToken) {
     // dd($workbookToken);
-    // TODO: prima di implementare questo Metodo, devo aggiungere una ForeignKey nella tabella bi_sheets che fa
-    // riferimento alla bi_workbooks.id
     $sheets = BIsheet::where('workbookId', $workbookToken)->get(['name', 'token', 'workbookId', 'userId', 'datamartId']);
     // return response()->json(['sheet' => $sheets]);
     return response()->json($sheets);
