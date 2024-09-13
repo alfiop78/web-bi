@@ -92,6 +92,40 @@ var Resource = new Resources();
       });
   }
 
+  app.workbookSelected = async (e) => {
+    console.log(e.currentTarget.dataset.token);
+    // recupero l'elenco degli sheets del workbook selezionato
+    await fetch(`/fetch_api/workbook_token/${e.currentTarget.dataset.token}/sheet_indexByWorkbook`)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(data => {
+        // console.log(data);
+        const ul = document.getElementById('ul-sheets');
+        ul.querySelectorAll('li').forEach(el => el.remove());
+        data.forEach(sheet => {
+          const content = app.tmplList.content.cloneNode(true);
+          const li = content.querySelector('li[data-li]');
+          const span = li.querySelector('span');
+          li.dataset.token = sheet.token;
+          li.dataset.datamartId = sheet.datamartId;
+          li.dataset.userId = sheet.userId;
+          li.dataset.label = sheet.name;
+          li.dataset.workbookId = sheet.workbookId;
+          li.addEventListener('click', app.sheetSelected);
+          li.dataset.elementSearch = 'sheets';
+          span.innerText = sheet.name;
+          ul.appendChild(li);
+        });
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+  }
+
   app.publish = async () => {
     // il tasto "pubblica" deve :
     // - recuperare tutti gli oggetti della pagina (report)
@@ -221,26 +255,6 @@ var Resource = new Resources();
     if (e.currentTarget.classList.contains('defined')) return false;
     // il ref corrente, appena aggiunto
     Resource.ref = document.getElementById(e.currentTarget.id);
-    const ul = document.getElementById('ul-sheets');
-    // pulisco <ul>
-    // WARN: questo viene fatto nell'eveneto onclose della dialog, quindi qui si può eliminare
-    // ul.querySelectorAll('li').forEach(el => el.remove());
-
-    // carico elenco sheets del localStorage
-    for (const [token, sheet] of Object.entries(Storage.getSheets())) {
-      // console.log(token, sheet);
-      const content = app.tmplList.content.cloneNode(true);
-      const li = content.querySelector('li[data-li]');
-      const span = li.querySelector('span');
-      li.dataset.token = token;
-      li.dataset.datamartId = sheet.id;
-      li.dataset.userId = sheet.userId;
-      li.dataset.label = sheet.name;
-      li.addEventListener('click', app.sheetSelected);
-      li.dataset.elementSearch = 'sheets';
-      span.innerText = sheet.name;
-      ul.appendChild(li);
-    }
     app.dlgChartSection.showModal();
   }
 
@@ -381,7 +395,10 @@ var Resource = new Resources();
   app.dlgTemplateLayout.onclose = () => document.querySelectorAll('#thumbnails *').forEach(layouts => layouts.remove());
 
   // reset sheets
-  app.dlgChartSection.onclose = () => document.querySelectorAll('#ul-sheets > li').forEach(el => el.remove());
+  app.dlgChartSection.onclose = () => {
+    // document.querySelectorAll('#ul-sheets > li').forEach(el => el.remove());
+    // document.querySelectorAll('#ul-workbooks > li').forEach(el => el.remove());
+  }
 
   // Drag events
   app.filterDragStart = (e) => {

@@ -18,6 +18,13 @@ class CreateBIsheetsTable extends Migration
       $table->string('token')->primary();
       $table->string('name');
       $table->longText('json_value');
+      $table->unsignedBigInteger('userId');
+      $table->string('datamartId', 25); // datamart timestamp
+    });
+
+    Schema::table('bi_sheets', function (Blueprint $table) {
+      $table->string('workbookId', 7);
+      $table->foreign('workbookId')->references('token')->on('bi_workbooks');
       $table->timestamps();
     });
   }

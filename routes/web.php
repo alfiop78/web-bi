@@ -65,10 +65,10 @@ Route::get('/versioning', function () {
 
 Route::get('/dashboards', [BIdashboardController::class, 'index'])->name('web_bi.dashboards');
 
-Route::get('/create-dashboard', function () {
+/* Route::get('/create-dashboard', function () {
   return view('web_bi.create-dashboard');
-})->name('web_bi.dashboard_create');
-// Route::get('/create-dashboard', [BIworkbookController::class, 'indexDB'])->name('web_bi.dashboard_create');
+})->name('web_bi.dashboard_create'); */
+Route::get('/create-dashboard', [BIworkbookController::class, 'indexByDashboardCreate'])->name('web_bi.dashboard_create');
 
 // recupero l'elenco dei database presenti (schema)
 Route::get('/fetch_api/schema', [MapDatabaseController::class, 'schemata']);
@@ -455,6 +455,9 @@ Route::prefix('/fetch_api/json/')->group(function () {
   Route::post('/filter_update', [BIfilterController::class, 'update']);
   Route::post('/sheet_specs_update', [BIsheetSpecsController::class, 'update']);
 });
+
+// recupero degli sheets appartenenti a un determinato workbooks
+Route::get('fetch_api/workbook_token/{token}/sheet_indexByWorkbook', [BIsheetController::class, 'indexByWorkbook']);
 
 // test vertica
 Route::get('/mapping/test_vertica', [MapDatabaseController::class, 'test_vertica']); // connessione con il metodo usato in Zend / PHP

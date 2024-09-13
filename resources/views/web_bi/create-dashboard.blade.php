@@ -54,7 +54,7 @@
   </div>
 
   <template id="tmpl-li">
-    <li data-li data-element-search data-label data-searchable="true">
+    <li class="select-list" data-li data-element-search data-label data-searchable="true">
       <span></span>
     </li>
   </template>
@@ -114,15 +114,23 @@
                 <section class="row">
                   <!-- WorkBooks -->
                   <section class="col col-6-span">
+                    <h4>WorkBooks</h4>
                     <section class="list-search">
                       <input type="search" id="workbooks-search-id" data-element-search="workbooks" placeholder="Ricerca" autocomplete="off" />
                       <div class="relative-ul">
-                        <ul id="ul-workbooks" data-search-id="workbooks-search-id" class="custom-scrollbar"></ul>
+                        <ul id="ul-workbooks" data-search-id="workbooks-search-id" class="custom-scrollbar">
+                          @foreach($workbooks as $workbook)
+                          <li data-li data-element-search="workbooks" class="select-list" data-label="{{ $workbook->name }}" data-searchable="true" data-token="{{ $workbook->token }}" data-fn="workbookSelected">
+                            <span>{{ $workbook->name }}</span>
+                          </li>
+                          @endforeach
+                        </ul>
                       </div>
                     </section>
                   </section>
                   <!-- Sheets -->
                   <section class="col col-6-span">
+                    <h4>Sheets</h4>
                     <section class="list-search">
                       <input type="search" id="sheets-search-id" data-element-search="sheets" placeholder="Ricerca" autocomplete="off" />
                       <div class="relative-ul">

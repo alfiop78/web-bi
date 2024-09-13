@@ -24,6 +24,10 @@
   font-size: .9rem;
 }
 
+h4 {
+  font-size: 1.2rem;
+}
+
 @media screen and (min-width: 1921px) {
   * {
     font-size: 1rem;

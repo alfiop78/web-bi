@@ -14,17 +14,19 @@ class BIworkbookController extends Controller
    */
   public function index()
   {
-    $workbooks = BIworkbook::all();
+    // $workbooks = BIworkbook::all();
+    $workbooks = BIworkbook::where('connectionId', session('db_id'))->get();
     return response()->json(['workbook' => $workbooks]);
   }
 
   /**
    * Visualizzo gli WorkBooks del DB attualmente collegato
-   *
+   * (Viene invocata da create-dashboard)
    * @return \Illuminate\Http\Response
    */
-  public function indexDB() {
-
+  public function indexByDashboardCreate() {
+    $workbooks = BIworkbook::where('connectionId', session('db_id'))->get(['token', 'name']);
+    return view('web_bi.create-dashboard')->with('workbooks', $workbooks);
   }
 
   /**

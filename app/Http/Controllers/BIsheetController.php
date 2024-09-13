@@ -18,6 +18,15 @@ class BIsheetController extends Controller
     return response()->json(['sheet' => $sheets]);
   }
 
+  public function indexByWorkbook($workbookToken) {
+    // dd($workbookToken);
+    // TODO: prima di implementare questo Metodo, devo aggiungere una ForeignKey nella tabella bi_sheets che fa
+    // riferimento alla bi_workbooks.id
+    $sheets = BIsheet::where('workbookId', $workbookToken)->get(['name', 'token', 'workbookId', 'userId', 'datamartId']);
+    // return response()->json(['sheet' => $sheets]);
+    return response()->json($sheets);
+  }
+
   /**
    * Show the form for creating a new resource.
    *
@@ -38,6 +47,9 @@ class BIsheetController extends Controller
   {
     $token = $request->collect()->get('token');
     $name = $request->collect()->get('name');
+    $workbookId = $request->collect()->get('workbook_ref');
+    $userId = $request->collect()->get('userId');
+    $datamartId = $request->collect()->get('id'); // datamartId
     // codifico tutta la $request in json per poterla inserire nel DB
     $json = json_encode($request->all());
     $sheet = new BIsheet();
@@ -45,6 +57,9 @@ class BIsheetController extends Controller
     $sheet->token = $token;
     $sheet->name = $name;
     $sheet->json_value = $json;
+    $sheet->workbookId = $workbookId;
+    $sheet->userId = $userId;
+    $sheet->datamartId = $datamartId;
     return $sheet->save();
   }
 
