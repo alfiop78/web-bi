@@ -173,12 +173,8 @@ var Storage = new SheetStorages();
 
   app.getLocal = () => {
     // lista di tutti gli sheet del workbook in ciclo
-    for (const [token, object] of Object.entries(Storage.getAll())) {
-      console.log(object);
-      // FIX: i dashboard e i template verrano salvati solo su DB.
-      // 23.11.2023 - Attualmente sono disponibili in localStorage, quindi aggiungo
-      // questo if temporaneamente
-      // if (object.type !== 'dashboard' && !object.type.startsWith('specs_')) app.addElement(token, object, 'local');
+    const databaseId = +document.querySelector('main').dataset.databaseId;
+    for (const [token, object] of Object.entries(Storage.getAll(databaseId))) {
       if (object.type !== 'dashboard' && !object.hasOwnProperty('wrapper')) app.addElement(token, object, 'local');
     }
   }

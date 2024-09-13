@@ -4,7 +4,6 @@ La classe recupera il local storage ad ogni accesso alla pagina e contiene Metod
 class Storages {
   #selected; // l'elemento selezionato in un determinato momento
   #workbook;
-  #workSheet;
   #workBooks = {};
 
   constructor() {
@@ -108,13 +107,29 @@ class Storages {
     return metrics;
   }
 
-  getAll() {
-    let all = {};
+  getAll(databaseId) {
+    /* let all = {};
     for (const [token, object] of Object.entries(this.storage)) {
-      if (token.indexOf('template-') === -1) all[token] = JSON.parse(object);
+      const json = JSON.parse(object);
+      if (json.databaseId) {
+        if (json.databaseId === databaseId) all[token] = json;
+      } else {
+        all[token] = json;
+      }
+    }
+    return all; */
+    // TODO: Recuperare, a cascata, gli Workbook -> sheet -> metriche -> filtri partendo dal workbook che ha il databaseId
+    // corrispondente all'attuale database connesso
+    let all = {};
+    for (const [workbookToken, workbook] of Object.entries(this.workBooks(databaseId))) {
+      all[workbookToken] = workbook;
+      for (const [token, object] of Object.entries(this.storage)) {
+        // verifico se l'object appartiene al workbook
+        const json = JSON.parse(object);
+        if (json.workbook_ref === workbookToken) all[token] = json;
+      }
     }
     return all;
-
   }
 }
 

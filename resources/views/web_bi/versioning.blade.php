@@ -68,7 +68,7 @@
     </nav>
   </div>
 
-  <main>
+  <main data-database-id="{{session('db_id')}}">
 
     <div id="content" class="custom-scrollbar">
 

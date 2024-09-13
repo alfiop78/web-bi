@@ -14,6 +14,9 @@ class BIsheetController extends Controller
    */
   public function index()
   {
+    dd(session('db_id'));
+    // TODO: con il databaseId eseguo la query tra bi_sheet e bi_workbook per recuperare gli sheets che fanno parte
+    // degli workbook con connectionId = session('db_id')
     $sheets = BIsheet::all();
     return response()->json(['sheet' => $sheets]);
   }
