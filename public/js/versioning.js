@@ -107,11 +107,6 @@ var Storage = new SheetStorages();
     const statusIcon = li.querySelector('i[data-sync-status]');
     const span = li.querySelector('span[data-value]');
     // const updated_at = li.querySelector('span[data-updated_at]');
-    const workBookRef = li.querySelector('span[data-workbook_ref]');
-    const btnDownload = li.querySelector('button[data-download]');
-    const btnUpload = li.querySelector('button[data-upload]');
-    const btnUpgrade = li.querySelector('button[data-upgrade]');
-    const btnDelete = li.querySelector('button[data-delete]');
     if (storage === 'db') statusIcon.innerText = 'sync';
     inputCheck.dataset.id = token;
     inputCheck.dataset.type = object.type;
@@ -122,17 +117,9 @@ var Storage = new SheetStorages();
     liContent.dataset.token = token;
     liContent.dataset.storage = storage;
     liContent.dataset.type = object.type;
-    btnDownload.dataset.token = token;
-    btnUpload.dataset.token = token;
-    btnUpgrade.dataset.token = token;
-    btnDelete.dataset.token = token;
     // la proprietà workbook_ref viene impostata come dataset
     if (object.hasOwnProperty('workbook_ref')) {
       li.dataset.workbookRef = object.workbook_ref;
-      btnDownload.dataset.workbookRef = object.workbook_ref;
-      btnUpload.dataset.workbookRef = object.workbook_ref;
-      btnUpgrade.dataset.workbookRef = object.workbook_ref;
-      btnDelete.dataset.workbookRef = object.workbook_ref;
       // TODO recupero il nome del WorkBook a cui è associato questa risorsa
       // Questo deve essere fatto DOPO il caricamento degli oggetti dal DB
       // const workbookName = document.querySelector(`#ul-workbook > li[id='${object.workbook_ref}']`);
@@ -145,29 +132,13 @@ var Storage = new SheetStorages();
         li.dataset.label = object.name;
         span.dataset.value = object.name;
         span.innerText = object.name;
-        /* if (object.hasOwnProperty('workbook_ref')) {
-          // recupero il nome del workBook a cui si riferisce la risorsa in ciclo
-          if (window.localStorage.getItem(object.workbook_ref)) {
-            const workBook = JSON.parse(window.localStorage.getItem(object.workbook_ref)).name;
-            workBookRef.innerText = workBook;
-          }
-        } */
         break;
       default:
         li.dataset.label = object.alias;
         span.dataset.value = object.alias;
         span.innerText = object.alias;
-        /* if (window.localStorage.getItem(object.workbook_ref)) {
-          const workBook = JSON.parse(window.localStorage.getItem(object.workbook_ref)).name;
-          workBookRef.innerText = workBook;
-        } */
         break;
     }
-    btnUpload.dataset.upload = object.type;
-    btnUpgrade.dataset.upgrade = object.type;
-    btnDownload.dataset.download = object.type;
-    btnDelete.dataset.delete = object.type;
-    // updated_at.innerText = object.updated_at;
     document.querySelector(`#ul-${object.type}`).appendChild(li);
   }
 
@@ -175,7 +146,7 @@ var Storage = new SheetStorages();
     // lista di tutti gli sheet del workbook in ciclo
     const databaseId = +document.querySelector('main').dataset.databaseId;
     for (const [token, object] of Object.entries(Storage.getAll(databaseId))) {
-      if (object.type !== 'dashboard' && !object.hasOwnProperty('wrapper')) app.addElement(token, object, 'local');
+      app.addElement(token, object, 'local');
     }
   }
 
@@ -187,8 +158,8 @@ var Storage = new SheetStorages();
     // se è stato selezionato più di un elemento visualizzo .allButtons
     const countChecked = document.querySelectorAll(`#ul-${type} li input:checked`).length;
     // visualizzo/nascondo .allButtons
-    document.querySelector(`menu.allButtons[data-id='${type}']`).hidden = (countChecked > 1) ? false : true;
-    if (countChecked > 1) {
+    document.querySelector(`menu.allButtons[data-id='${type}']`).hidden = (countChecked) ? false : true;
+    if (countChecked) {
       const allButtons = {
         upload: document.querySelector(`button[data-type='${type}'][data-upload]`),
         download: document.querySelector(`button[data-type='${type}'][data-download]`),

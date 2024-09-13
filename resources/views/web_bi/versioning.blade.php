@@ -33,12 +33,6 @@
           <span data-value class="text-ellipsis"></span>
         </div>
       </div>
-      <div class="li-buttons">
-        <button data-fn="uploadObject" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
-        <button data-fn="downloadObject" data-download class="button-icons material-symbols-rounded md-18">download</button>
-        <button data-fn="upgradeObject" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
-        <button data-fn="deleteObject" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
-      </div>
     </li>
   </template>
   <header>
@@ -255,6 +249,12 @@
 
     </div>
 
+    <div id="console">
+      <div id="fabsConsole">
+        <i class="material-symbols-rounded">info</i>
+        <p></p>
+      </div>
+    </div>
   </main>
   <div class="loader">
     <svg viewBox="0 0 32 32" width="32" height="32">

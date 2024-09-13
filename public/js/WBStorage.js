@@ -108,18 +108,7 @@ class Storages {
   }
 
   getAll(databaseId) {
-    /* let all = {};
-    for (const [token, object] of Object.entries(this.storage)) {
-      const json = JSON.parse(object);
-      if (json.databaseId) {
-        if (json.databaseId === databaseId) all[token] = json;
-      } else {
-        all[token] = json;
-      }
-    }
-    return all; */
-    // TODO: Recuperare, a cascata, gli Workbook -> sheet -> metriche -> filtri partendo dal workbook che ha il databaseId
-    // corrispondente all'attuale database connesso
+    // Recupero tutti gli oggetti appartenenti al db connesso e, a cascata, appartenenti al workbook in ciclo
     let all = {};
     for (const [workbookToken, workbook] of Object.entries(this.workBooks(databaseId))) {
       all[workbookToken] = workbook;
