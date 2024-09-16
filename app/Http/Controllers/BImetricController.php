@@ -38,6 +38,7 @@ class BImetricController extends Controller
   {
     $token = $request->collect()->get('token');
     $name = $request->collect()->get('alias');
+    $workbookId = $request->collect()->get('workbook_ref');
     // codifico tutta la $request in json per poterla inserire nel DB
     $json = json_encode($request->all());
     // l'inserimento con Eloquent ha inserito anche i campi created_at/updated_at
@@ -46,6 +47,7 @@ class BImetricController extends Controller
     $metric->token = $token;
     $metric->name = $name;
     $metric->json_value = $json;
+    $metric->workbookId = $workbookId;
 
     // **************************** vecchia gestione con una route ::get ***************
     /*$jsonContent = json_decode($json);

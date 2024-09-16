@@ -38,6 +38,7 @@ class BIfilterController extends Controller
   {
     $token = $request->collect()->get('token');
     $name = $request->collect()->get('name');
+    $workbookId = $request->collect()->get('workbook_ref');
     // codifico tutta la $request in json per poterla inserire nel DB
     $json = json_encode($request->all());
     $filter = new BIfilter();
@@ -45,6 +46,7 @@ class BIfilterController extends Controller
     $filter->token = $token;
     $filter->name = $name;
     $filter->json_value = $json;
+    $filter->workbookId = $workbookId;
     return $filter->save();
   }
 
