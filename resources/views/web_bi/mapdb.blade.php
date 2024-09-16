@@ -1027,7 +1027,7 @@
   <div class="right-sidebar">Right Sidebar</div>
   <footer>
       <section class="footerContent">
-        <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="24" width="24" />
+        <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="48" width="48" />
         <p>Lynx International</p>
       </section>
   </footer>
