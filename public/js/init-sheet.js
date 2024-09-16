@@ -477,7 +477,11 @@ saveColumnConfig.onclick = () => {
   // TODO: Il containerId deve essere deciso in init-dashboard-create.js
   Resource.json.wrapper.containerId = 'chart_div';
   console.log('specifications : ', Resource.json);
-  window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
+  debugger;
+  const sheet = JSON.parse(window.localStorage.getItem(Resource.json.token));
+  sheet.specs = Resource.json;
+  window.localStorage.setItem(Resource.json.token, JSON.stringify(sheet));
+  // window.localStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
   // le metriche calcolate restituisce -1 per getTableColumnIndex, quindi devo ridisegnare il report
   // richiamando previewReady() altrimenti il metodo draw() di GoogleChart aggiorna la visualizzazione correttamente
   (Resource.dataTableIndex === -1) ?
@@ -536,7 +540,10 @@ function columnHander(e) {
     }
   }
   debugger;
-  window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
+  const sheet = JSON.parse(window.localStorage.getItem(Resource.json.token));
+  sheet.specs = Resource.json;
+  window.localStorage.setItem(Resource.json.token, JSON.stringify(sheet));
+  // window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
   // Qui dovrò sempre richiamare il previewReady() perchè devono essere ricalcolate le "colonne generate", in base al nuovo
   // raggruppamento definito qui
   previewReady();

@@ -176,8 +176,13 @@ button.btn-buttons:hover {
 }
 
 button:disabled {
-  background-color: var(--disabled-bg);
-  color: var(--disabled-fg);
+  background-color: var(--button-disabled-bg);
+  color: var(--button-disabled-fg);
+}
+
+button.button-icons:disabled {
+  background-color: unset;
+  color: var(--icon-disabled-fg);
 }
 
 button.btn-link[disabled] {

@@ -9,7 +9,7 @@ class Sheets {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
     // this.workBookToken = WorkBookToken;
     this.options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
-    this.sheet = { token, type: 'sheet', workbook_ref: WorkBookToken };
+    this.sheet = { token, type: 'sheet', workbook_ref: WorkBookToken, sheet : {}, specs : {} };
     this.name = name;
     // mappo gli elmenti rimossi dal report in fase di edit. Questo mi consentirà
     // di stabilire se aggiornare "updated_at" del report oppure no
@@ -62,10 +62,9 @@ class Sheets {
   }
 
   save() {
-    this.sheet.fields = Object.fromEntries(this.fields);
-    debugger;
-    this.sheet.from = this.from;
-    this.sheet.joins = this.joins;
+    this.sheet.sheet.fields = Object.fromEntries(this.fields);
+    this.sheet.sheet.from = this.from;
+    this.sheet.sheet.joins = this.joins;
     // this.sheet.from = Object.fromEntries(this.from);
     // this.sheet.joins = Object.fromEntries(this.joins);
     this.sheet.workbook_ref = this.sheet.workbook_ref;
@@ -73,23 +72,23 @@ class Sheets {
       * Se non sono presenti ma sono presenti in metriche filtrate elaboro comunque il report
       * altrimenti visualizzo un AVVISO perchè l'esecuzione potrebbe essere troppo lunga
     */
-    this.sheet.filters = [...this.filters];
+    this.sheet.sheet.filters = [...this.filters];
     // reset delle metriche
-    delete this.sheet.metrics;
-    delete this.sheet.advMetrics;
-    delete this.sheet.compositeMetrics;
+    delete this.sheet.sheet.metrics;
+    delete this.sheet.sheet.advMetrics;
+    delete this.sheet.sheet.compositeMetrics;
 
     for (const [token, metric] of this.metrics) {
       switch (metric.type) {
         case 'basic':
-          (!this.sheet.hasOwnProperty('metrics')) ? this.sheet.metrics = { [token]: metric } : this.sheet.metrics[token] = metric;
+          (!this.sheet.hasOwnProperty('metrics')) ? this.sheet.sheet.metrics = { [token]: metric } : this.sheet.sheet.metrics[token] = metric;
           break;
         case 'advanced':
-          (!this.sheet.hasOwnProperty('advMetrics')) ? this.sheet.advMetrics = { [token]: metric } : this.sheet.advMetrics[token] = metric;
+          (!this.sheet.hasOwnProperty('advMetrics')) ? this.sheet.sheet.advMetrics = { [token]: metric } : this.sheet.sheet.advMetrics[token] = metric;
           break;
         default:
           // compositeMetrics
-          (!this.sheet.hasOwnProperty('compositeMetrics')) ? this.sheet.compositeMetrics = { [token]: metric } : this.sheet.compositeMetrics[token] = metric;
+          (!this.sheet.hasOwnProperty('compositeMetrics')) ? this.sheet.sheet.compositeMetrics = { [token]: metric } : this.sheet.sheet.compositeMetrics[token] = metric;
           // this.sheet.compositeMetrics[token] = metric;
           break;
       }
@@ -132,23 +131,16 @@ class Sheets {
     this.sheet.created_at = SheetStorage.sheet.created_at;
     this.sheet.updated_at = SheetStorage.sheet.updated_at;
 
-    for (const [token, field] of Object.entries(SheetStorage.sheet.fields)) {
+    for (const [token, field] of Object.entries(SheetStorage.sheet.sheet.fields)) {
       this.fields = { token, name: field };
     }
 
     // from
     // TODO: la proprietà 'from' viene ricreata, in setSheet() quindi potrei NON metterla qui
-    this.from = SheetStorage.sheet.from;
-    /* for (const [tableAlias, object] of Object.entries(SheetStorage.sheet.from)) {
-      this.from = {
-        alias: tableAlias,
-        schema: object.schema,
-        table: object.table
-      }
-    } */
+    this.from = SheetStorage.sheet.sheet.from;
 
     // filters
-    for (const [token, filter] of Object.entries(SheetStorage.sheet.filters)) {
+    for (const [token, filter] of Object.entries(SheetStorage.sheet.sheet.filters)) {
       this.filters = filter;
     }
 
@@ -156,22 +148,22 @@ class Sheets {
     /* TODO: valutare la possibilitò di aggiungere proprietà (fields, filters, ecc...) alla Classe Sheets così come ho fatto per joins
     * quindi con una sola riga re-imposto le joins dello Sheet
     */
-    this.joins = SheetStorage.sheet.joins;
+    this.joins = SheetStorage.sheet.sheet.joins;
 
-    if (SheetStorage.sheet.hasOwnProperty('metrics')) {
-      for (const value of Object.values(SheetStorage.sheet.metrics)) {
+    if (SheetStorage.sheet.sheet.hasOwnProperty('metrics')) {
+      for (const value of Object.values(SheetStorage.sheet.sheet.metrics)) {
         this.metrics = value;
       }
     }
 
-    if (SheetStorage.sheet.hasOwnProperty('advMetrics')) {
-      for (const value of Object.values(SheetStorage.sheet.advMetrics)) {
+    if (SheetStorage.sheet.sheet.hasOwnProperty('advMetrics')) {
+      for (const value of Object.values(SheetStorage.sheet.sheet.advMetrics)) {
         this.metrics = value;
       }
     }
 
-    if (SheetStorage.sheet.hasOwnProperty('compositeMetrics')) {
-      for (const value of Object.values(SheetStorage.sheet.compositeMetrics)) {
+    if (SheetStorage.sheet.sheet.hasOwnProperty('compositeMetrics')) {
+      for (const value of Object.values(SheetStorage.sheet.sheet.compositeMetrics)) {
         this.metrics = value;
       }
     }

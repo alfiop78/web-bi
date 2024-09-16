@@ -60,28 +60,20 @@ li {
   margin: 6px 4px;
 }
 
+li.checkInput {
+  display: flex;
+  grid-column-gap: 4px;
+  margin: 6px 4px;
+}
+
 ul > li > .li-content, ul > li > .li-buttons{
   display: flex;
   align-items: center;
   column-gap: 4px;
 }
 
-/* .li-content:hover > div {
-  font-weight: bold;
-  background-color: #ebebeb;
-  border-radius: 2px;
-} */
-
-.li-content:hover {
-  font-weight: bold;
-  background-color: #ebebeb;
-  border-radius: 2px;
-}
-
 .li-content[data-selected] {
   font-weight: bold;
-  background-color: #ebebeb;
-  border-radius: 2px;
 }
 
 .li-content > .li-content-details{

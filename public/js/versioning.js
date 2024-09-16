@@ -192,6 +192,7 @@ var Storage = new SheetStorages();
     let urls = [];
     document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
       urls.push(`/fetch_api/name/${el.dataset.id}/${type}_show`);
+      if (type === 'sheet') urls.push(`/fetch_api/name/${el.dataset.id}/sheet_specs_show`);
     });
     // ottengo tutte le risposte in un array
     await Promise.all(urls.map(url => fetch(url)))
@@ -204,7 +205,9 @@ var Storage = new SheetStorages();
       .then((data) => {
         if (data) {
           data.forEach(json => {
-            Storage.save(JSON.parse(json.json_value))
+            const parsed = JSON.parse(json.json_value);
+            // il json delle specifiche del report NON contiene la proprietà 'type'
+            (parsed.type) ? Storage.save(JSON.parse(json.json_value)) : window.localStorage.setItem(`specs_${parsed.token}`, json.json_value);
             // aggiorno lo status dell'elemento dopo il download
             const li = document.getElementById(`${json.token}`);
             const statusIcon = li.querySelector('i[data-sync-status]');
@@ -215,7 +218,7 @@ var Storage = new SheetStorages();
           });
           // de-seleziono gli elementi selezionati
           app.unselect(type);
-          App.showConsole('Sincronizzazione completata con successo!', 'done', 3000);
+          App.showConsole('Sincronizzazione completata!', 'done', 3000);
         } else {
           App.showConsole('Errori nella sincronizzazione degli elementi', 'error', 3000);
         }
@@ -255,7 +258,7 @@ var Storage = new SheetStorages();
           });
           // de-seleziono gli elementi selezionati
           app.unselect(type);
-          App.showConsole('Sincronizzazione completata con successo!', 'done', 3000);
+          App.showConsole('Sincronizzazione completata!', 'done', 3000);
         } else {
           // console.error("Errore nell'aggiornamento della risorsa");
           App.showConsole('Errori nella sincronizzazione degli elementi', 'error', 3000);
@@ -295,7 +298,7 @@ var Storage = new SheetStorages();
           });
           // de-seleziono gli elementi selezionati
           app.unselect(type);
-          App.showConsole('Sincronizzazione completata con successo!', 'done', 3000);
+          App.showConsole('Sincronizzazione completata!', 'done', 3000);
         } else {
           App.showConsole('Errori nella sincronizzazione degli elementi', 'error', 3000);
         }
@@ -309,6 +312,7 @@ var Storage = new SheetStorages();
     document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
       urls.push(`/fetch_api/name/${el.dataset.id}/${type}_destroy`);
       tokens.push(el.dataset.id);
+      if (type === 'sheet') urls.push(`/fetch_api/name/${el.dataset.id}/sheet_specs_destroy`);
     });
     // ottengo tutte le risposte in un array
     await Promise.all(urls.map(url => fetch(url)))
@@ -325,10 +329,11 @@ var Storage = new SheetStorages();
             // aggiorno lo status dell'elemento dopo l'upload
             const li = document.getElementById(`${token}`);
             window.localStorage.removeItem(token);
+            if (type === 'sheet') window.localStorage.removeItem(`specs_${token}`);
             // elimino anche dal DOM l'elemento
             li.remove();
           });
-          App.showConsole('Sincronizzazione completata con successo!', 'done', 3000);
+          App.showConsole('Sincronizzazione completata!', 'done', 3000);
         } else {
           // console.error("Errore nell'aggiornamento della risorsa");
           App.showConsole('Errori nella sincronizzazione degli elementi', 'error', 3000);
@@ -380,199 +385,6 @@ var Storage = new SheetStorages();
     });
   }
 
-  app.saveSpecifications = async (method, token) => {
-    // method : store / update
-    const url = `/fetch_api/json/sheet_specs_${method}`;
-    const params = window.localStorage.getItem(`specs_${token}`);
-    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
-    const req = new Request(url, init);
-    await fetch(req)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('specs salvate : ', data);
-      })
-      .catch((err) => console.error(err));
-  }
-
-  app.deleteSpecifications = async (token) => {
-    // method : store / update
-    await fetch(`/fetch_api/name/${token}/sheet_specs_destroy`)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        // console.log(data);
-        if (data) {
-          console.log('data : ', data);
-          // console.log('ELEMENTO ELIMINATO CON SUCCESSO!');
-          // lo elimino anche dal localStorage se presente
-          window.localStorage.removeItem(token);
-        } else {
-          console.error("Errore nella cancellazione della risorsa!");
-        }
-      })
-      .catch((err) => console.error(err));
-  }
-
-  app.downloadSpecifications = async (token) => {
-    // method : store / update
-    await fetch(`/fetch_api/name/${token}/sheet_specs_show`)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        // console.log(data);
-        if (data) {
-          console.log('specs scaricate correttamente : ', data);
-          window.localStorage.setItem(`specs_${token}`, data.json_value);
-        } else {
-          console.error("Errore nella cancellazione della risorsa!");
-        }
-      })
-      .catch((err) => console.error(err));
-  }
-
-  app.uploadObject = async (e) => {
-    const type = e.currentTarget.dataset.upload;
-    let url = `/fetch_api/json/${type}_store`;
-    const token = e.currentTarget.dataset.token;
-    const json = JSON.parse(window.localStorage.getItem(token));
-    const params = JSON.stringify(json);
-    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
-    // recupero l'elemento da salvare su db, presente nello storage
-    // console.log(JSON.stringify(json));
-    const req = new Request(url, init);
-    await fetch(req)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        if (data) {
-          // aggiorno lo status dell'elemento dopo l'upload
-          const li = document.getElementById(`${token}`);
-          const statusIcon = li.querySelector('i[data-sync-status]');
-          li.dataset.sync = 'true';
-          li.dataset.identical = 'true';
-          statusIcon.classList.add('done');
-          statusIcon.innerText = "done";
-          // Il tasto Upload implica che l'oggetto Sheet non è presente su DB, di consenguenza neanche le specs sono presenti
-          // quindi effettuo lo store anche per le specs
-          if (type === 'sheet') app.saveSpecifications('store', token);
-        } else {
-          console.error("Errore nell'aggiornamento della risorsa");
-        }
-      })
-      .catch((err) => console.error(err));
-  }
-
-  app.upgradeObject = async (e) => {
-    // TODO: questa Fn è identica a app.uploadObject(), trovare il modo di utilizzarne solo una
-    const type = e.currentTarget.dataset.upgrade;
-    debugger;
-    let url = `/fetch_api/json/${type}_update`;
-    const token = e.currentTarget.dataset.token;
-    const json = JSON.parse(window.localStorage.getItem(token));
-    const params = JSON.stringify(json);
-    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
-    // recupero l'elemento da salvare su db, presente nello storage
-    // console.log(JSON.stringify(json));
-    const req = new Request(url, init);
-    await fetch(req)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        if (data) {
-          // aggiorno lo status dell'elemento dopo l'upload
-          const li = document.getElementById(token);
-          const statusIcon = li.querySelector('i[data-sync-status]');
-          li.dataset.sync = 'true';
-          li.dataset.identical = 'true';
-          statusIcon.classList.add('done');
-          statusIcon.innerText = "done";
-          // Il tasto Upload implica che l'oggetto Sheet non è presente su DB, di consenguenza neanche le specs sono presenti
-          // quindi effettuo lo store anche per le specs
-          if (type === 'sheet') app.saveSpecifications('update', token);
-        } else {
-          console.error("Errore nell'aggiornamento della risorsa");
-        }
-      })
-      .catch((err) => console.error(err));
-  }
-
-  app.deleteObject = async (e) => {
-    const type = e.currentTarget.dataset.delete;
-    const token = e.currentTarget.dataset.token;
-    await fetch(`/fetch_api/name/${token}/${type}_destroy`)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        // console.log(data);
-        if (data) {
-          console.log('data : ', data);
-          // console.log('ELEMENTO ELIMINATO CON SUCCESSO!');
-          // lo elimino anche dal localStorage se presente
-          window.localStorage.removeItem(token);
-          const li = document.getElementById(`${token}`);
-          // Il tasto Upload implica che l'oggetto Sheet non è presente su DB, di consenguenza neanche le specs sono presenti
-          // quindi effettuo lo store anche per le specs
-          if (type === 'sheet') app.deleteSpecifications(token);
-          // elimino anche dal DOM l'elemento
-          li.remove();
-        } else {
-          console.error("Errore nella cancellazione della risorsa!");
-        }
-      })
-      .catch((err) => console.error(err));
-  }
-
-  app.downloadObject = async (e) => {
-    const type = e.currentTarget.dataset.download;
-    const token = e.currentTarget.dataset.token;
-    await fetch(`/fetch_api/name/${token}/${type}_show`)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data) {
-          console.log('data : ', JSON.parse(data.json_value));
-          console.log('ELEMENTO SCARICATO CON SUCCESSO!');
-          // lo salvo nello storage
-          Storage.save(JSON.parse(data.json_value));
-          // aggiorno lo status dell'elemento dopo l'upload
-          const li = document.getElementById(`${token}`);
-          const statusIcon = li.querySelector('i[data-sync-status]');
-          li.dataset.sync = 'true';
-          li.dataset.identical = 'true';
-          statusIcon.classList.add('done');
-          statusIcon.innerText = "done";
-          if (type === 'sheet') app.downloadSpecifications(token);
-        } else {
-          console.error("Errore nella cancellazione della risorsa!");
-        }
-      })
-      .catch((err) => console.error(err));
-  }
-
   app.showResource = (e) => {
     const refs = {
       "created_at": document.querySelector('#created_at > span[data-value]'),
@@ -617,53 +429,5 @@ var Storage = new SheetStorages();
   }
 
   app.init();
-
-  app.downloadObjectFromDB = async (name, type) => {
-    let url;
-    switch (type) {
-      case 'dimensions':
-        url = '/fetch_api/name/' + name + '/dimension_show';
-        break;
-      case 'cubes':
-        url = '/fetch_api/name/' + name + '/cube_show';
-        break;
-      case 'filters':
-        url = '/fetch_api/name/' + name + '/filter_show';
-        break;
-      case 'metrics':
-        url = '/fetch_api/name/' + name + '/metric_show';
-        break;
-      default:
-        url = '/fetch_api/name/' + name + '/process_show';
-        break;
-    }
-    await fetch(url)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        // console.log(data);
-        if (data) {
-          console.log('data : ', data);
-          console.log('ELEMENTO SCARICATO CON SUCCESSO!');
-          storage.save = JSON.parse(data.json_value);
-          const sectionElement = app.dialogVersioning.querySelector("section[data-object-name='" + name + "'][data-object-type='" + type + "']");
-          console.log('sectionElement : ', sectionElement);
-          // modifico l'icona in .vers-status impostando sync con la classe md-status al posto di md-warning
-          sectionElement.querySelector('.vers-status > button').innerText = 'sync';
-          sectionElement.querySelector('.vers-status > button').classList.replace('md-warning', 'md-status');
-          // modifico la descrizione in .vers-status-descr impostando "Sincronizzato"
-          sectionElement.querySelector('.vers-status-descr').innerText = 'Sincronizzato';
-          // nascondo l'icona btn-download e btn-upgrade-production
-          sectionElement.querySelector('.vers-actions button[data-id="btn-download"]').disabled = true;
-          sectionElement.querySelector('.vers-actions button[data-id="btn-upgrade-production"]').disabled = true;
-        } else {
-          // TODO:
-        }
-      })
-      .catch((err) => console.error(err));
-  }
 
 })();

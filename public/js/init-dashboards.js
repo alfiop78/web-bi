@@ -264,16 +264,14 @@ var Resource = new Resources();
     for (const [token, value] of Object.entries(resources)) {
       Resource.datamart_id = value.datamart_id;
       // scarico la risorsa (le specs) dal DB e successivamente invoco getData()
-      debugger;
-      fetch(`/fetch_api/name/${token}/sheet_specs_show`)
+      fetch(`/fetch_api/name/${token}/sheet_show`)
         .then((response) => {
           if (!response.ok) { throw Error(response.statusText); }
           return response;
         })
         .then((response) => response.json())
         .then((data) => {
-          Resource.json = data.json_value;
-          debugger;
+          Resource.json = JSON.parse(data.json_specs);
           // imposto il riferimento nel DOM, del layout, per questa risorsa/report
           Resource.ref = value.ref;
           app.getData();

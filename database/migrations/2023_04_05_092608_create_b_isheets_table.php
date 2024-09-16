@@ -15,9 +15,10 @@ class CreateBIsheetsTable extends Migration
   {
     Schema::create('bi_sheets', function (Blueprint $table) {
       // $table->id();
-      $table->string('token')->primary();
+      $table->string('token', 7)->primary();
       $table->string('name');
       $table->longText('json_value');
+      $table->longText('json_specs');
       $table->unsignedBigInteger('userId');
       $table->string('datamartId', 25); // datamart timestamp
     });

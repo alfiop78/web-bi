@@ -14,8 +14,9 @@
   --filters-color: #f2d98d;
   --metrics: #A6786D;
   --metrics-composite: #d9665b;
-  --disabled-bg: gainsboro;
-  --disabled-fg: #494949;
+  --icon-disabled-fg: gainsboro;
+  --button-disabled-bg: gainsboro;
+  --button-disabled-fg: #494949;
 }
 
 * {

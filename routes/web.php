@@ -13,7 +13,6 @@ use App\Http\Controllers\BIsheetController;
 use App\Http\Controllers\BImetricController;
 use App\Http\Controllers\BIfilterController;
 use App\Http\Controllers\BIdashboardController;
-use App\Http\Controllers\BIsheetSpecsController;
 use App\Http\Controllers\BIConnectionsController;
 // uso il Model BIsheet che viene utilizzato nella route curlprocess (web_bi.schedule_report)
 use App\Models\BIsheet;
@@ -406,8 +405,6 @@ Route::get('/fetch_api/{id}/delete_datamart', [MapDatabaseController::class, 'de
 
 // Metodo POST commentato, possibile utilizzo futuro, vedere commenti in MapDatabaseController
 Route::post('/fetch_api/datamartpost', [MapDatabaseController::class, 'datamartPost'])->name('web_bi.fetch_api.datamartPost');
-// upsert
-Route::post('fetch_api/json/sheet_specs_upsert', [BIsheetSpecsController::class, 'upsert']);
 
 Route::get('fetch_api/{id}/show', [BIConnectionsController::class, 'show']);
 
@@ -420,7 +417,6 @@ Route::prefix('/fetch_api/json/')->group(function () {
   Route::post('/metric_store', [BImetricController::class, 'store']);
   Route::post('/filter_store', [BIfilterController::class, 'store']);
   Route::post('/dashboard_store', [BIdashboardController::class, 'store']);
-  Route::post('/sheet_specs_store', [BIsheetSpecsController::class, 'store']);
 });
 // destroy json
 Route::prefix('/fetch_api/name/')->group(function () {
@@ -428,7 +424,6 @@ Route::prefix('/fetch_api/name/')->group(function () {
   Route::get('{token}/sheet_destroy', [BIsheetController::class, 'destroy']);
   Route::get('{token}/metric_destroy', [BImetricController::class, 'destroy']);
   Route::get('{token}/filter_destroy', [BIfilterController::class, 'destroy']);
-  Route::get('{token}/sheet_specs_destroy', [BIsheetSpecsController::class, 'destroy']);
 });
 // index
 Route::prefix('/fetch_api/versioning/')->group(function () {
@@ -445,7 +440,6 @@ Route::prefix('/fetch_api/name/')->group(function () {
   Route::get('{token}/workbook_show', [BIworkbookController::class, 'show']);
   Route::get('{token}/sheet_show', [BIsheetController::class, 'show']);
   Route::get('{token}/dashboard_show', [BIdashboardController::class, 'show']);
-  Route::get('{token}/sheet_specs_show', [BIsheetSpecsController::class, 'show']);
 });
 // update
 Route::prefix('/fetch_api/json/')->group(function () {
@@ -453,7 +447,6 @@ Route::prefix('/fetch_api/json/')->group(function () {
   Route::post('/sheet_update', [BIsheetController::class, 'update']);
   Route::post('/metric_update', [BImetricController::class, 'update']);
   Route::post('/filter_update', [BIfilterController::class, 'update']);
-  Route::post('/sheet_specs_update', [BIsheetSpecsController::class, 'update']);
 });
 
 // recupero degli sheets appartenenti a un determinato workbooks

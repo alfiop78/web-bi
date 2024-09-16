@@ -66,11 +66,11 @@ var Resource = new Resources();
   // TODO: utilizzare questa logica anche sulle altre pagine
   App.init();
 
-  app.saveSpecifications = async () => {
+  app.updateSheet = async () => {
     let url, params, req = [];
     for (const token of Resource.resource.keys()) {
-      url = `/fetch_api/json/sheet_specs_upsert`;
-      params = window.localStorage.getItem(`specs_${token}`);
+      url = `/fetch_api/json/sheet_update`;
+      params = window.localStorage.getItem(token);
       const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
       req.push(new Request(url, init));
     }
@@ -132,6 +132,7 @@ var Resource = new Resources();
     // - crearne i COPY_TABLE da WEB_BI_timestamp_userId -> WEB_BI_timestamp
     // - salvare le specifiche in bi_sheet_specifications
     console.log(Resource.resource);
+    debugger;
     let urls = [];
     for (const dashboard of Resource.resource.values()) {
       urls.push(`/fetch_api/copy_from/${dashboard.datamart_id}_${dashboard.user_id}/copy_to/${dashboard.datamart_id}/copy_table`);
@@ -144,9 +145,10 @@ var Resource = new Resources();
           return response.text();
         }))
       })
-      .then(response => {
-        console.log(response);
-        app.saveSpecifications();
+      .then(data => {
+        console.log(data);
+        if (data) App.showConsole("Pubblicazione completata", 'done', 2000);
+        app.updateSheet();
       })
       .catch(err => {
         App.showConsole(err, 'error');
@@ -169,10 +171,12 @@ var Resource = new Resources();
       layout: Template.id,
       resources: Object.fromEntries(Resource.resource)
     };
-    debugger;
     console.log(json);
     // salvo le specifiche solo in locale, quando pubblico la dashboard salvo le specifiche su DB
-    window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
+    const sheet = JSON.parse(window.localStorage.getItem(Resource.json.token));
+    sheet.specs = Resource.json;
+    window.localStorage.setItem(Resource.json.token, JSON.stringify(sheet));
+    // window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
     const url = `/fetch_api/json/dashboard_store`;
     const params = JSON.stringify(json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
@@ -185,7 +189,7 @@ var Resource = new Resources();
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        debugger;
+        if (data) App.showConsole("Salvataggio completato", 'done', 2000);
       })
       .catch((err) => console.error(err));
   }
@@ -318,7 +322,8 @@ var Resource = new Resources();
     Resource.token = e.currentTarget.dataset.token;
     // aggiungo un token per identificare, in publish(), il report (datamart_id)
     Resource.ref.dataset.token = e.currentTarget.dataset.token;
-    Resource.json = window.localStorage.getItem(`specs_${e.currentTarget.dataset.token}`);
+    debugger;
+    Resource.json = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
     Resource.resource = {
       datamart_id: e.currentTarget.dataset.datamartId,
       userId: e.currentTarget.dataset.userId
@@ -478,6 +483,7 @@ var Resource = new Resources();
   // End Drag events
 
   app.titleRef.addEventListener('blur', (e) => {
+    debugger;
     e.target.dataset.value = e.target.innerText;
   });
 

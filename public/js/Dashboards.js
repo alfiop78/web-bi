@@ -118,7 +118,7 @@ class Resources extends Dashboards {
   }
 
   set json(value) {
-    this.#json = JSON.parse(value);
+    this.#json = value;
   }
 
   get json() { return this.#json; }
@@ -206,8 +206,10 @@ class Resources extends Dashboards {
     this.json.data.group.key = this.#specs_group.key;
     this.json.data.group.columns = this.#specs_group.columns;
     this.bind();
+    const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
+    sheet.specs = this.json;
     debugger;
-    window.localStorage.setItem(`specs_${Sheet.sheet.token}`, JSON.stringify(this.json));
+    window.localStorage.setItem(Sheet.sheet.token, JSON.stringify(sheet));
   }
 
   bind() {

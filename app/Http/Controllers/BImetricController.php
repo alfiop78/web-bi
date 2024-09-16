@@ -119,7 +119,11 @@ class BImetricController extends Controller
    */
   public function destroy(BImetric $bImetric, $token)
   {
-    $element = $bImetric::findOrFail($token);
-    return $element->delete();
+    try {
+      $element = $bImetric::findOrFail($token);
+      return $element->delete();
+    } catch (\Throwable $th) {
+      return response()->json(['err' => "Elemento non presente nel metadato"]);
+    }
   }
 }

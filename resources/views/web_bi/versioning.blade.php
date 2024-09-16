@@ -25,10 +25,10 @@
 <body class="antialiased">
 
   <template id="tmpl-li">
-    <li data-li data-element-search data-label data-searchable="true" data-sync="false">
+    <li class="checkInput" data-li data-element-search data-label data-searchable="true" data-sync="false">
       <input type="checkbox" />
       <div class="li-content" data-fn="showResource">
-        <i class="material-symbols-rounded md-18" data-sync-status>label</i>
+        <i class="material-symbols-rounded" data-sync-status>label</i>
         <div class="li-content-details">
           <span data-value class="text-ellipsis"></span>
         </div>
@@ -91,10 +91,10 @@
                 </section>
                 <section class="col col-7-span">
                   <menu class="allButtons" data-id="workbook" hidden>
-                    <button data-fn="uploadAll" data-type="workbook" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
-                    <button data-fn="downloadAll" data-type="workbook" data-download class="button-icons material-symbols-rounded md-18">download</button>
-                    <button data-fn="upgradeAll" data-type="workbook" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
-                    <button data-fn="deleteAll" data-type="workbook" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
+                    <button data-fn="uploadAll" data-type="workbook" data-upload class="button-icons material-symbols-rounded">upload</button>
+                    <button data-fn="downloadAll" data-type="workbook" data-download class="button-icons material-symbols-rounded">download</button>
+                    <button data-fn="upgradeAll" data-type="workbook" data-upgrade class="button-icons material-symbols-rounded danger">upgrade</button>
+                    <button data-fn="deleteAll" data-type="workbook" data-delete class="button-icons material-symbols-rounded danger">delete</button>
                   </menu>
                 </section>
               </div>
@@ -125,10 +125,10 @@
                 </section>
                 <section class="col col-7-span">
                   <menu class="allButtons" data-id="sheet" hidden>
-                    <button data-fn="uploadAll" data-type="sheet" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
-                    <button data-fn="downloadAll" data-type="sheet" data-download class="button-icons material-symbols-rounded md-18">download</button>
-                    <button data-fn="upgradeAll" data-type="sheet" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
-                    <button data-fn="deleteAll" data-type="sheet" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
+                    <button data-fn="uploadAll" data-type="sheet" data-upload class="button-icons material-symbols-rounded">upload</button>
+                    <button data-fn="downloadAll" data-type="sheet" data-download class="button-icons material-symbols-rounded">download</button>
+                    <button data-fn="upgradeAll" data-type="sheet" data-upgrade class="button-icons material-symbols-rounded danger">upgrade</button>
+                    <button data-fn="deleteAll" data-type="sheet" data-delete class="button-icons material-symbols-rounded danger">delete</button>
                   </menu>
                 </section>
               </div>
@@ -159,10 +159,10 @@
                 </section>
                 <section class="col col-7-span">
                   <menu class="allButtons" data-id="metric" hidden>
-                    <button data-fn="uploadAll" data-type="metric" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
-                    <button data-fn="downloadAll" data-type="metric" data-download class="button-icons material-symbols-rounded md-18">download</button>
-                    <button data-fn="upgradeAll" data-type="metric" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
-                    <button data-fn="deleteAll" data-type="metric" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
+                    <button data-fn="uploadAll" data-type="metric" data-upload class="button-icons material-symbols-rounded">upload</button>
+                    <button data-fn="downloadAll" data-type="metric" data-download class="button-icons material-symbols-rounded">download</button>
+                    <button data-fn="upgradeAll" data-type="metric" data-upgrade class="button-icons material-symbols-rounded danger">upgrade</button>
+                    <button data-fn="deleteAll" data-type="metric" data-delete class="button-icons material-symbols-rounded danger">delete</button>
                   </menu>
                 </section>
               </div>
@@ -191,10 +191,10 @@
                 </section>
                 <section class="col col-7-span">
                   <menu class="allButtons" data-id="filter" hidden>
-                    <button data-fn="uploadAll" data-type="filter" data-upload class="button-icons material-symbols-rounded md-18">upload</button>
-                    <button data-fn="downloadAll" data-type="filter" data-download class="button-icons material-symbols-rounded md-18">download</button>
-                    <button data-fn="upgradeAll" data-type="filter" data-upgrade class="button-icons material-symbols-rounded md-18 danger">upgrade</button>
-                    <button data-fn="deleteAll" data-type="filter" data-delete class="button-icons material-symbols-rounded md-18 danger">delete</button>
+                    <button data-fn="uploadAll" data-type="filter" data-upload class="button-icons material-symbols-rounded">upload</button>
+                    <button data-fn="downloadAll" data-type="filter" data-download class="button-icons material-symbols-rounded">download</button>
+                    <button data-fn="upgradeAll" data-type="filter" data-upgrade class="button-icons material-symbols-rounded danger">upgrade</button>
+                    <button data-fn="deleteAll" data-type="filter" data-delete class="button-icons material-symbols-rounded danger">delete</button>
                   </menu>
                 </section>
               </div>

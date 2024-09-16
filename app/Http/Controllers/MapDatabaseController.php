@@ -565,9 +565,9 @@ class MapDatabaseController extends Controller
     if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$toId}")) {
       // se il datamart "finale" (senza userId) già esiste, devo eliminarlo prima di ricrearlo
       // echo ("tabella $toId esiste");
-      Schema::connection(session('db_client_name'))->drop("WEB_BI_{$toId}");
+      Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_{$toId}");
+      // Schema::connection(session('db_client_name'))->drop("WEB_BI_{$toId}");
     }
-    // TODO: nuova logica session('db_client_name').
     switch (session('db_driver')) {
       case 'odbc':
         $sql = "SELECT COPY_TABLE ('decisyon_cache.WEB_BI_{$fromId}','decisyon_cache.WEB_BI_{$toId}');";

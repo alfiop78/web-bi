@@ -102,8 +102,11 @@ class BIfilterController extends Controller
    */
   public function destroy(BIfilter $bIfilter, $token)
   {
-    $element = $bIfilter::findOrFail($token);
-    // dd($element);
-    return $element->delete();
+    try {
+      $element = $bIfilter::findOrFail($token);
+      return $element->delete();
+    } catch (\Throwable $th) {
+      return response()->json(['err' => "Elemento non presente nel metadato"]);
+    }
   }
 }

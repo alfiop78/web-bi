@@ -113,7 +113,11 @@ class BIworkbookController extends Controller
    */
   public function destroy(BIworkbook $bIworkbook, $token)
   {
-    $element = $bIworkbook::findOrFail($token);
-    return $element->delete();
+    try {
+      $element = $bIworkbook::findOrFail($token);
+      return $element->delete();
+    } catch (\Throwable $th) {
+      return response()->json(['err' => "Elemento non presente nel metadato"]);
+    }
   }
 }

@@ -27,7 +27,8 @@ class BIsheetController extends Controller
     return response()->json(['sheet' => $sheets]);
   }
 
-  public function indexByWorkbook($workbookToken) {
+  public function indexByWorkbook($workbookToken)
+  {
     // dd($workbookToken);
     $sheets = BIsheet::where('workbookId', $workbookToken)->get(['name', 'token', 'workbookId', 'userId', 'datamartId']);
     // return response()->json(['sheet' => $sheets]);
@@ -58,12 +59,17 @@ class BIsheetController extends Controller
     $userId = $request->collect()->get('userId');
     $datamartId = $request->collect()->get('id'); // datamartId
     // codifico tutta la $request in json per poterla inserire nel DB
+    // dd($request->all());
+    $specs = json_encode($request->collect()->get('specs'));
+    // WARN: in questo caso salvo specs anche qui, da rivedere, probabilmente
+    // dovrò creare due proprietà separate nel localStorage (sheet e specs)
     $json = json_encode($request->all());
     $sheet = new BIsheet();
     // salvo su DB
     $sheet->token = $token;
     $sheet->name = $name;
     $sheet->json_value = $json;
+    $sheet->json_specs = $specs;
     $sheet->workbookId = $workbookId;
     $sheet->userId = $userId;
     $sheet->datamartId = $datamartId;
@@ -105,12 +111,16 @@ class BIsheetController extends Controller
     $token = $request->collect()->get('token');
     $name = $request->collect()->get('name');
     // codifico tutta la $request in json per poterla inserire nel DB
+    $specs = json_encode($request->collect()->get('specs'));
+    // WARN: in questo caso salvo specs anche qui, da rivedere, probabilmente
+    // dovrò creare due proprietà separate nel localStorage (sheet e specs)
     $json = json_encode($request->all());
     // cerco nel DB il token del PROCESS da aggiornare
     $sheet = $bIsheet::findOrFail($token);
     $sheet->token = $token;
     $sheet->name = $name;
     $sheet->json_value = $json;
+    $sheet->json_specs = $specs;
     return $sheet->save();
   }
 
@@ -122,7 +132,11 @@ class BIsheetController extends Controller
    */
   public function destroy(BIsheet $bIsheet, $token)
   {
-    $element = $bIsheet::findOrFail($token);
-    return $element->delete();
+    try {
+      $element = $bIsheet::findOrFail($token);
+      return $element->delete();
+    } catch (\Throwable $th) {
+      return response()->json(['err' => "Elemento non presente nel metadato"]);
+    }
   }
 }

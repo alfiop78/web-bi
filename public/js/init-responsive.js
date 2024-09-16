@@ -1170,7 +1170,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       }); */
     // end chiamta in POST
 
-    Resource.json = window.localStorage.getItem(`specs_${Sheet.sheet.token}`);
+    Resource.json = JSON.parse(window.localStorage.getItem(Sheet.sheet.token)).specs;
 
     const progressBar = document.getElementById('progress-bar');
     const progressTo = document.getElementById('progress-to');
