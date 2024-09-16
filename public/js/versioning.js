@@ -192,7 +192,6 @@ var Storage = new SheetStorages();
     let urls = [];
     document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
       urls.push(`/fetch_api/name/${el.dataset.id}/${type}_show`);
-      if (type === 'sheet') urls.push(`/fetch_api/name/${el.dataset.id}/sheet_specs_show`);
     });
     // ottengo tutte le risposte in un array
     await Promise.all(urls.map(url => fetch(url)))
@@ -205,9 +204,15 @@ var Storage = new SheetStorages();
       .then((data) => {
         if (data) {
           data.forEach(json => {
-            const parsed = JSON.parse(json.json_value);
-            // il json delle specifiche del report NON contiene la proprietà 'type'
-            (parsed.type) ? Storage.save(JSON.parse(json.json_value)) : window.localStorage.setItem(`specs_${parsed.token}`, json.json_value);
+            if (type === 'sheet') {
+              // aggiungo le specs alla proprietà 'specs' all'interno del json
+              const specs = JSON.parse(json.json_specs);
+              const sheet = JSON.parse(json.json_value);
+              sheet.specs = specs;
+              Storage.save(sheet);
+            } else {
+              Storage.save(JSON.parse(json.json_value))
+            }
             // aggiorno lo status dell'elemento dopo il download
             const li = document.getElementById(`${json.token}`);
             const statusIcon = li.querySelector('i[data-sync-status]');
@@ -312,7 +317,6 @@ var Storage = new SheetStorages();
     document.querySelectorAll(`#ul-${type} li input:checked`).forEach(el => {
       urls.push(`/fetch_api/name/${el.dataset.id}/${type}_destroy`);
       tokens.push(el.dataset.id);
-      if (type === 'sheet') urls.push(`/fetch_api/name/${el.dataset.id}/sheet_specs_destroy`);
     });
     // ottengo tutte le risposte in un array
     await Promise.all(urls.map(url => fetch(url)))
@@ -329,7 +333,6 @@ var Storage = new SheetStorages();
             // aggiorno lo status dell'elemento dopo l'upload
             const li = document.getElementById(`${token}`);
             window.localStorage.removeItem(token);
-            if (type === 'sheet') window.localStorage.removeItem(`specs_${token}`);
             // elimino anche dal DOM l'elemento
             li.remove();
           });
