@@ -848,7 +848,7 @@
                         <button class="btn-link default" type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri</button>
                         <button class="btn-link default" type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
                         <!-- <button id="btn-publish" class="btn-link important" data-fn="publish" value="Pubblica">Pubblica</button> -->
-                        <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="Titolo">Titolo Sheet</div>
+                        <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="">Titolo Sheet</div>
                       </section>
                       <section class="dbStatus">
                         {{-- session()->forget('db_name') --}}

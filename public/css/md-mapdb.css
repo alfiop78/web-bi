@@ -11,8 +11,8 @@ html, body{
 
 .wrapper-step{
   display: grid;
-  /* grid-template-rows: auto 1fr .8fr; */
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr .8fr;
+  /* grid-template-rows: auto 1fr auto; */
   height: 100%;
   width: 100%;
   /* padding: 1em; */

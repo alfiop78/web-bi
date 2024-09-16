@@ -1246,8 +1246,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   // apertura nuovo Sheet, viene recuperato dal localStorage
   app.sheetSelected = async (e) => {
     const sheetToken = e.currentTarget.dataset.token;
-    document.getElementById('sheet-name').dataset.value = '';
-    document.getElementById('sheet-name').innerText = 'Titolo';
+    // document.getElementById('sheet-name').dataset.value = '';
+    // document.getElementById('sheet-name').innerText = 'Titolo';
     document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
     document.querySelector('#btn-sheet-save').disabled = true;
     // chiamare il metodo open() dell'oggetto Sheet e seguire la stessa logica utilizzata per workBookSelected()
