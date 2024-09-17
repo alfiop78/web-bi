@@ -85,9 +85,29 @@
     <div id="content" class="grid custom-scrollbar">
 
       <div id="body" class="raw menu" hidden>
+        <dialog id="dialog-dashboard-open">
+          <section class="dlg-grid">
+            <h5 class="title">Apri Dashboard</h5>
+            <section class="dlg-content">
+              <section class="row">
+                <section class="col">
+                  <div class="list-search">
+                    <input type="search" id="dashboards-search-id" data-element-search="dashboards" autocomplete="off" placeholder="Ricerca Dashboard" />
+                    <div class="relative-ul">
+                      <ul id="ul-dashboards" data-search-id="dashboards-search-id" class="custom-scrollbar"></ul>
+                    </div>
+                  </div>
+                </section>
+              </section>
+            </section>
+            <section class="dlg-buttons">
+              <button name="cancel" value="chiudi">Chiudi</button>
+            </section>
+          </section>
+        </dialog>
         <menu class="standard">
           <section>
-            <button type="button" class="btn-link default" value="Apri" id="">Apri</button>
+            <button type="button" class="btn-link default" data-fn="openDashboard" value="Apri" id="">Apri</button>
             <button type="button" class="btn-link default" value="Chiudi" id="">Chiudi</button>
             <button id="btnSave" class="btn-link default" type="button" data-fn="save">Salva</button>
             <button type="button" class="btn-link default" value="Pubblica" data-fn="publish" id="publish">Pubblica</button>

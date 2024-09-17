@@ -13,7 +13,9 @@ var Resource = new Resources();
     number: function(properties) {
       return new google.visualization.NumberFormat(properties);
     },
-    dashboardName: document.getElementById('dashboardTitle')
+    dashboardName: document.getElementById('dashboardTitle'),
+    // dialogs
+    dlgDashboard: document.getElementById('dialog-dashboard-open')
   }
 
   const rand = () => Math.random(0).toString(36).substring(2);
@@ -90,6 +92,10 @@ var Resource = new Resources();
         App.showConsole(err, 'error');
         console.error(err);
       });
+  }
+
+  app.openDashboard = (e) => {
+    app.dlgDashboard.showModal();
   }
 
   app.workbookSelected = async (e) => {
