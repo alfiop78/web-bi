@@ -1416,11 +1416,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     Sheet.name = e.target.textContent;
   }
 
-  app.setSheetTitle = (e) => {
-    e.target.readOnly = false;
+  app.editWorkBookName.onblur = (e) => {
+    e.target.dataset.value = e.target.textContent;
+    if (WorkBook) WorkBook.name = e.target.textContent;
   }
-
-  app.editWorkBookName.onblur = (e) => WorkBook.name = e.target.innerText;
 
   // tasto Workbook, creazione DataModel
   app.btnWorkBook.onclick = (e) => {

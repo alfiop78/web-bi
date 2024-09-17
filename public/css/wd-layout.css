@@ -429,8 +429,7 @@ span.markContent {
 .name {
   font-weight: bold;
   padding: 4px 8px;
-  background-color: var(--main-important-color);
-  color: white;
+  color: #494949;
   border-radius: 2px;
   opacity: .8;
 }
@@ -438,4 +437,17 @@ span.markContent {
 .name[contenteditable="true"]:focus,
 .name[contenteditable="true"]:hover {
   opacity: 1;
+}
+
+.name:not([data-value]) ~ small {
+  display: inline;
+  font-style: italic;
+  background-color: var(--main-important-color);
+  padding: 4px 8px;
+  border-radius: 2px;
+  color: white;
+}
+
+.name[data-value] ~ small {
+  display: none;
 }

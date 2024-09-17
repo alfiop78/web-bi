@@ -664,6 +664,8 @@
                   <section class="textarea-formula">
                     <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                     <div id="textarea-filter" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
+
+
                     <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                   </section>
                 </section>
@@ -726,7 +728,8 @@
                         <!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
                       </section>
                       <section>
-                        <section id="workbook-name" class="name data-source" contenteditable="true">Titolo WorkBook</section>
+                        <div id="workbook-name" class="name" contenteditable="true">Titolo WorkBook</div>
+                        <small>Titolo non inserito</small>
                       </section>
                       <section class="dbStatus">
                         {{-- session()->forget('db_name') --}}
@@ -851,7 +854,8 @@
                         <button class="btn-link default" type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
                       </section>
                       <section>
-                        <div id="sheet-name" class="name" data-blur-fn="editSheetTitle" data-fn="setSheetTitle" contenteditable="true">Titolo Sheet</div>
+                        <div id="sheet-name" class="name" data-blur-fn="editSheetTitle" contenteditable="true">Titolo Sheet</div>
+                        <small>Titolo non inserito</small>
                       </section>
                       <section class="dbStatus">
                         {{-- session()->forget('db_name') --}}
