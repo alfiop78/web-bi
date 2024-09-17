@@ -160,7 +160,12 @@ var Resource = new Resources();
   app.save = async (e) => {
     console.log(e.target);
     const token = rand().substring(0, 7);
-    const title = document.getElementById('dashboardTitle').dataset.value;
+    const title = document.getElementById('dashboardTitle');
+    if (!title.dataset.value) {
+      App.showConsole('Titolo Dashboard non inserito', 'error', 2000);
+      title.focus();
+      return false;
+    }
     const note = document.getElementById('note').value;
     // salvo il json 'dashboard-token' in bi_dashboards
     // TODO: aggiungere la prop 'published' (bool). Questa mi consentirà
@@ -483,8 +488,11 @@ var Resource = new Resources();
   // End Drag events
 
   app.titleRef.addEventListener('blur', (e) => {
-    debugger;
-    e.target.dataset.value = e.target.innerText;
+    if (e.target.dataset.value) e.target.dataset.value = e.target.textContent;
+  });
+
+  app.titleRef.addEventListener('input', (e) => {
+    (e.target.textContent.length === 0) ? delete e.target.dataset.value: e.target.dataset.value = e.target.textContent;
   });
 
 })();

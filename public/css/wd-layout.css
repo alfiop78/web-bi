@@ -432,6 +432,7 @@ span.markContent {
   color: #494949;
   border-radius: 2px;
   opacity: .8;
+  transition: font-size 150ms, padding 150ms;
 }
 
 .name[contenteditable="true"]:focus,
@@ -450,4 +451,9 @@ span.markContent {
 
 .name[data-value] ~ small {
   display: none;
+}
+
+.name[data-value] {
+  font-size: 1.4rem;
+  padding: 0px 8px;
 }

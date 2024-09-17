@@ -1109,6 +1109,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     WorkBook.name = e.currentTarget.dataset.name;
     // modifico il nome del WorkBook in #workbook-name
     document.getElementById('workbook-name').innerText = WorkBook.name;
+    document.getElementById('workbook-name').dataset.value = WorkBook.name;
     // WARN: probabilmente, il DataModel, posso recuperarlo direttamente dallo storage, senza ricrearlo
     // WorkBook.createDataModel();
     app.hierTables();
@@ -1412,14 +1413,24 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   // TODO: da spostare in supportFn.js
   app.editSheetTitle = (e) => {
-    e.target.dataset.value = e.target.textContent;
-    Sheet.name = e.target.textContent;
+    if (e.target.dataset.value) {
+      e.target.dataset.value = e.target.textContent;
+      Sheet.name = e.target.textContent;
+    }
   }
 
+  app.sheetName.addEventListener('input', (e) => {
+    (e.target.textContent.length === 0) ? delete e.target.dataset.value : e.target.dataset.value = e.target.textContent;
+  });
+
   app.editWorkBookName.onblur = (e) => {
-    e.target.dataset.value = e.target.textContent;
+    if (e.target.dataset.value) e.target.dataset.value = e.target.textContent;
     if (WorkBook) WorkBook.name = e.target.textContent;
   }
+
+  app.editWorkBookName.addEventListener('input', (e) => {
+    (e.target.textContent.length === 0) ? delete e.target.dataset.value : e.target.dataset.value = e.target.textContent;
+  });
 
   // tasto Workbook, creazione DataModel
   app.btnWorkBook.onclick = (e) => {
