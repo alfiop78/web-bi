@@ -44,6 +44,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     btnWorkBookNew: document.getElementById('btn-workbook-new'),
     btnVersioning: document.getElementById('btn-versioning'),
     btnAdvancedMetricSave: document.getElementById("btn-metric-save"),
+    btnWorkBook: document.getElementById('workbook'),
+    btnSheet: document.getElementById('sheet'),
     // drawer
     drawer: document.getElementById('drawer'),
     // body
@@ -62,7 +64,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // popup
     tablePopup: document.getElementById("table-popup"),
     // INPUTS
-    inputAdvMetricName: document.getElementById("input-advanced-metric-name")
+    inputAdvMetricName: document.getElementById("input-advanced-metric-name"),
+    sheetName: document.getElementById('sheet-name')
   }
   const userId = 2;
 
@@ -1245,9 +1248,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   // apertura nuovo Sheet, viene recuperato dal localStorage
   app.sheetSelected = async (e) => {
-    const sheetToken = e.currentTarget.dataset.token;
-    // document.getElementById('sheet-name').dataset.value = '';
-    // document.getElementById('sheet-name').innerText = 'Titolo';
+    // const sheetToken = e.currentTarget.dataset.token;
     document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
     document.querySelector('#btn-sheet-save').disabled = true;
     // chiamare il metodo open() dell'oggetto Sheet e seguire la stessa logica utilizzata per workBookSelected()
@@ -1255,9 +1256,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     Sheet = new Sheets(e.currentTarget.dataset.name, e.currentTarget.dataset.token, WorkBook.workBook.token);
     // reimposto tutte le proprietà della Classe
     Sheet.open();
-    const name = document.getElementById('sheet-name');
-    name.innerText = Sheet.name;
-    name.dataset.value = Sheet.name;
+    app.sheetName.innerText = Sheet.name;
+    app.sheetName.dataset.value = Sheet.name;
     /* Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...)
     * della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
     */
@@ -1301,9 +1301,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   app.saveSheet = async () => {
-    // imposto il nome recuperandolo dallo #sheet-name
-    const name = document.getElementById('sheet-name');
-    Sheet.name = name.dataset.value;
+    Sheet.name = app.sheetName.dataset.value;
     Sheet.userId = userId;
     // verifico se ci sono elementi modificati andando a controllare gli elmeneti con [data-adding] e [data-removed]
     Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
@@ -1334,23 +1332,20 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   app.newSheetDialog = () => {
-    // if (Sheet) delete Sheet.sheet;
-    // Sheet = undefined;
-    // console.log(Sheet);
-    document.getElementById('sheet-name').dataset.value = '';
-    document.getElementById('sheet-name').innerText = 'Titolo';
+    delete app.sheetName.dataset.value;
     document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
     // document.querySelector('#btn-sheet-save').disabled = true;
     app.dialogNewSheet.showModal();
   }
 
+  // dialog-new-sheet
   app.newSheet = () => {
     const name = document.getElementById('input-sheet-name').value;
     // Sheet non è definito (prima attivazione del tasto Sheet)
     Sheet = new Sheets(name, rand().substring(0, 7), WorkBook.workBook.token);
     SheetStorage.sheet = Sheet.sheet.token;
-    document.getElementById('sheet-name').dataset.value = Sheet.name;
-    document.getElementById('sheet-name').innerText = Sheet.name;
+    app.sheetName.dataset.value = Sheet.name;
+    app.sheetName.innerText = Sheet.name;
     // Imposto la prop 'edit' = false, verrà impostata a 'true' quando si apre uno Sheet
     // dal tasto 'Apri Sheet'
     Sheet.edit = false;
@@ -1416,23 +1411,28 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   // TODO: da spostare in supportFn.js
-  app.handlerEditSheetName = (e) => {
-    e.target.dataset.value = e.target.innerText;
-    Sheet.name = e.target.innerText;
+  app.editSheetTitle = (e) => {
+    e.target.dataset.value = e.target.textContent;
+    Sheet.name = e.target.textContent;
+  }
+
+  app.setSheetTitle = (e) => {
+    e.target.readOnly = false;
   }
 
   app.editWorkBookName.onblur = (e) => WorkBook.name = e.target.innerText;
 
-  document.getElementById('prev').onclick = () => {
+  // tasto Workbook, creazione DataModel
+  app.btnWorkBook.onclick = (e) => {
     const translateRef = document.getElementById('stepTranslate');
     const steps = document.getElementById('steps');
     steps.dataset.step = 1;
     translateRef.dataset.step = 1;
-  };
+  }
 
   // tasto "Sheet" :
   // consente di passare alla visualizzazione Sheet e salvare il WorkBook
-  document.getElementById('next').onclick = () => {
+  app.btnSheet.onclick = () => {
     // popolo il dataModel e, con esso, anche il workbookMap
     WorkBook.createDataModel();
     // verifico se tutte le join sono ok
@@ -1462,6 +1462,18 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       // TODO: 28.08.2024 quando non viene modificato nulla non devo salvare il workbook
       WorkBook.save();
       App.showConsole("Salvataggio del WorkBook in corso...", "done", 2000);
+      // 17.09.2024 imposto un nuovo Sheet, se non ne è presente uno già definito
+      // Se l'oggetto della Classe Sheets non è inizializzato, apro un nuovo Sheet dal titolo 'New Sheet'
+      console.log(Sheet);
+      if (!Sheet) {
+        Sheet = new Sheets('Titolo Sheet', rand().substring(0, 7), WorkBook.workBook.token);
+        SheetStorage.sheet = Sheet.sheet.token;
+        app.sheetName.innerText = Sheet.name;
+        // Imposto la prop 'edit' = false, verrà impostata a 'true' quando si apre uno Sheet
+        // dal tasto 'Apri Sheet'
+        Sheet.edit = false;
+        Resource = new Resources('preview-datamart');
+      }
     }
   }
 
@@ -1481,6 +1493,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     });
   }
 
+  // WARN: 26.07.2024 utilizzata ?
   app.dimensionDone = () => {
     // dopo aver scelto le dimensioni da associare alla nuova fact posso nascondere il cubo di origine
     Draw.hidden();
@@ -1489,6 +1502,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   // tasto Elabora e SQL
   // Creazione della struttura necessaria per creare le query
   app.createProcess = async (e) => {
+    // verifico se è stato inserito il titolo dello Sheet
+    if (!app.sheetName.value) {
+      App.showConsole('Inserire il titolo dello Sheet', 'warning', 2000);
+      app.sheetName.readOnly = false;
+      app.sheetName.focus();
+      return false;
+    }
+
     let process = {}, fields = {}, filters = {};
     process.facts = [...Sheet.fact];
     for (const [token, field] of Sheet.fields) {

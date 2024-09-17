@@ -428,6 +428,14 @@ span.markContent {
 
 .name {
   font-weight: bold;
-  font-size: 1rem;
-  color: var(--main-important-color);
+  padding: 4px 8px;
+  background-color: var(--main-important-color);
+  color: white;
+  border-radius: 2px;
+  opacity: .8;
+}
+
+.name[contenteditable="true"]:focus,
+.name[contenteditable="true"]:hover {
+  opacity: 1;
 }

@@ -299,7 +299,15 @@ input:read-write::placeholder {
 }
 
 /* visualizzo / nascondo i tasti per l'elaborazione in base allo step in cui mi trovo*/
-#steps[data-step="1"] #next {
+#steps[data-step="1"] .actions {
+  justify-content: flex-end;
+}
+
+#steps[data-step="1"] #workbook {
+  display: none;
+}
+
+#steps[data-step="1"] #sheet {
   display: inline;
 }
 
@@ -311,7 +319,7 @@ input:read-write::placeholder {
   display: none;
 }
 
-#steps[data-step="2"] #next {
+#steps[data-step="2"] #sheet {
   display: none;
 }
 

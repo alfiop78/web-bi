@@ -37,7 +37,7 @@
     <div class="nav-button">
       <a href="#" id="menu" onclick="App.menu()"><i class="material-symbols-rounded white">menu</i></a>
     </div>
-    <h1 class="title">Creazione Data Model - WorkBook</h1>
+    <h1 class="title">Creazione Data Model</h1>
   </header>
   <div id="drawer" class="left-sidebar">
     <section class="account">
@@ -724,6 +724,8 @@
                         <button class="btn-link default" id="btn-workbook-open" value="open">Apri</button>
                         <button class="btn-link default" id="btn-time-dimension" value="open">Tabella TIME</button>
                         <!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
+                      </section>
+                      <section>
                         <section id="workbook-name" class="name data-source" contenteditable="true">Titolo WorkBook</section>
                       </section>
                       <section class="dbStatus">
@@ -847,8 +849,9 @@
                         <button class="btn-link default" type="button" id="btn-sheet-new" data-fn="newSheetDialog">Nuovo</button>
                         <button class="btn-link default" type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri</button>
                         <button class="btn-link default" type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
-                        <!-- <button id="btn-publish" class="btn-link important" data-fn="publish" value="Pubblica">Pubblica</button> -->
-                        <div id="sheet-name" class="name" data-blur-fn="handlerEditSheetName" contenteditable="true" data-value="">Titolo Sheet</div>
+                      </section>
+                      <section>
+                        <div id="sheet-name" class="name" data-blur-fn="editSheetTitle" data-fn="setSheetTitle" contenteditable="true">Titolo Sheet</div>
                       </section>
                       <section class="dbStatus">
                         {{-- session()->forget('db_name') --}}
@@ -996,9 +999,9 @@
                 </section>
               </div>
               <section class="actions">
-                <button id="prev">Workbook</button>
+                <button id="workbook" class="btn-buttons">Workbook</button>
                 <div>
-                  <button id="next" class="btn-buttons">Sheet</button>
+                  <button id="sheet" class="btn-buttons">Sheet</button>
                   <button id="btn-sql-preview" class="btn-buttons" data-fn="createProcess" value="SQL" disabled>SQL</button>
                   <button id="btn-sheet-preview" class="btn-buttons important" data-fn="createProcess" value="Elabora">Elabora</button>
                 </div>
@@ -1026,10 +1029,10 @@
   </div>
   <div class="right-sidebar">Right Sidebar</div>
   <footer>
-      <section class="footerContent">
-        <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="48" width="48" />
-        <p>Lynx International</p>
-      </section>
+    <section class="footerContent">
+      <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="48" width="48" />
+      <p>Lynx International</p>
+    </section>
   </footer>
   <script type="text/javascript" src="{{ asset('/js/init-responsive.js') }}" async></script>
   <script type="text/javascript" src="{{ asset('/js/init-sheet.js') }}" async></script>
