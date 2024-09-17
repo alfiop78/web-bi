@@ -93,8 +93,7 @@
             <button type="button" class="btn-link default" value="Pubblica" data-fn="publish" id="publish">Pubblica</button>
           </section>
           <section>
-            <div id="dashboardTitle" class="name" contenteditable="true">Titolo Dashboard</div>
-            <small>Titolo non inserito</small>
+            <div id="dashboardTitle" class="name" contenteditable="true" data-default-value="Titolo Dashboard">Titolo Dashboard</div>
           </section>
           <section class="dbStatus">
             {{-- session()->forget('db_name') --}}

@@ -287,7 +287,38 @@
     </template>
 
     <div id="content" class="grid">
-      <div id="body" hidden>
+      <div id="body" class="raw menu" data-step="1" hidden>
+          <!-- menu workbook -->
+        <menu class="standard">
+          <section data-workbook-menu>
+            <button class="btn-link default" id="btn-workbook-new" value="Nuovo">Nuovo</button>
+            <button class="btn-link default" id="btn-workbook-open" value="open">Apri</button>
+            <button class="btn-link default" id="btn-time-dimension" value="open">Tabella TIME</button>
+            <!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
+          </section>
+          <section data-workbook-menu>
+            <div id="workbook-name" class="name" contenteditable="true" data-default-value="Titolo WorkBook">Titolo WorkBook</div>
+          </section>
+          <section data-sheet-menu>
+            <button class="btn-link default" type="button" id="btn-sheet-new" data-fn="newSheetDialog">Nuovo</button>
+            <button class="btn-link default" type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri</button>
+            <button class="btn-link default" type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
+          </section>
+          <section data-sheet-menu>
+            <div id="sheet-name" class="name" contenteditable="true" data-default-value="Titolo Sheet"></div>
+          </section>
+          <section class="dbStatus">
+            {{-- session()->forget('db_name') --}}
+            <span id="db-connection-status" data-connected="{{ session('db_id', 0) }}">
+              <span id="database-name">{{ session('db_name', 'Nessun Database collegato') }}</span>
+              @if (session('db_name'))
+              <i id="db-icon-status" class="material-symbols-rounded">database</i>
+              @else
+              <i id="db-icon-status" class="material-symbols-rounded">database_off</i>
+              @endif
+            </span>
+          </section>
+        </menu>
 
         <dialog id="dlg-schema">
           <section class="dlg-grid">
@@ -664,8 +695,6 @@
                   <section class="textarea-formula">
                     <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                     <div id="textarea-filter" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
-
-
                     <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                   </section>
                 </section>
@@ -713,23 +742,19 @@
             </section>
           </dialog>
 
-
-
           <section id="steps" data-step="1">
             <div class="overflow">
               <div id="stepTranslate">
                 <section class="step" data-step="1" selected>
                   <section class="wrapper-step">
-                    <menu class="standard">
+                    <!-- <menu class="standard">
                       <section>
                         <button class="btn-link default" id="btn-workbook-new" value="Nuovo">Nuovo</button>
                         <button class="btn-link default" id="btn-workbook-open" value="open">Apri</button>
                         <button class="btn-link default" id="btn-time-dimension" value="open">Tabella TIME</button>
-                        <!-- <button id="btn-workbook-close" value="Chiudi" disabled>Chiudi</button> -->
                       </section>
                       <section>
-                        <div id="workbook-name" class="name" contenteditable="true">Titolo WorkBook</div>
-                        <small>Titolo non inserito</small>
+                        <div id="workbook-name" class="name" contenteditable="true" data-default-value="Titolo WorkBook">Titolo WorkBook</div>
                       </section>
                       <section class="dbStatus">
                         {{-- session()->forget('db_name') --}}
@@ -742,7 +767,7 @@
                           @endif
                         </span>
                       </section>
-                    </menu>
+                    </menu> -->
                     <div id="context-menu-table" class="context-menu">
                       <ul id="ul-context-menu-table" class="context-menu-items">
                         <button id="addFactJoin" class="btn-link-context" data-fn="handlerAddJoin" disabled>Aggiungi Join</button>
@@ -847,28 +872,6 @@
                 </section>
                 <section class="step" data-step="2">
                   <section class="wrapper-content">
-                    <menu class="standard">
-                      <section>
-                        <button class="btn-link default" type="button" id="btn-sheet-new" data-fn="newSheetDialog">Nuovo</button>
-                        <button class="btn-link default" type="button" id="btn-sheet-open" data-fn="openSheetDialog">Apri</button>
-                        <button class="btn-link default" type="button" id="btn-sheet-save" data-fn="saveSheet">Salva</button>
-                      </section>
-                      <section>
-                        <div id="sheet-name" class="name" data-blur-fn="editSheetTitle" contenteditable="true">Titolo Sheet</div>
-                        <small>Titolo non inserito</small>
-                      </section>
-                      <section class="dbStatus">
-                        {{-- session()->forget('db_name') --}}
-                        <span id="db-connection-status" data-connected="{{ session('db_id', 0) }}">
-                          <span id="database-name">{{ session('db_name', 'Nessun Database collegato') }}</span>
-                          @if (session('db_name'))
-                          <i id="db-icon-status" class="material-symbols-rounded">database</i>
-                          @else
-                          <i id="db-icon-status" class="material-symbols-rounded">database_off</i>
-                          @endif
-                        </span>
-                      </section>
-                    </menu>
                     <section id="wrapper-sheet" class="wrapper-sheet">
                       <div class="properties">
                         <section id="workbook-objects" data-section-active="2">

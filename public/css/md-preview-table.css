@@ -62,6 +62,8 @@ thead th[data-metric-token]{
   overflow: auto;
   position: relative;
   background-color: white;
+  display: grid;
+  grid-template-rows: auto 1fr;
 }
 
 .sheet-preview{

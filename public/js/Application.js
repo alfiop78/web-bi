@@ -261,4 +261,13 @@ class Application {
 
   closeConsole() { this.#console.toggleAttribute('open'); }
 
+  checkTitle(target) {
+    if (target.textContent.length === 0) {
+      delete target.dataset.tempValue;
+      delete target.dataset.value;
+    } else {
+      target.dataset.tempValue = target.textContent;
+    }
+  }
+
 } // end Class

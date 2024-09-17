@@ -51,7 +51,7 @@
   </div>
   <main>
     <div id="content">
-      <div id="body" class="raw" hidden>
+      <div id="body" class="raw menu" hidden>
         <menu class="standard align-end">
           <section class="dbStatus">
             {{-- session()->forget('db_name') --}}
@@ -66,7 +66,7 @@
           </section>
           {{-- session()->forget('db_name') --}}
         </menu>
-        <div class="wrapper">
+        <div class="wrapper flex">
           <dialog id="dlg-new-connection" data-x="0" data-y="0">
             <form id="form-new-connection" method="post" action="{{ route('connection.store') }}">
               @csrf

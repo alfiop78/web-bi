@@ -13,7 +13,7 @@ var Resource = new Resources();
     number: function(properties) {
       return new google.visualization.NumberFormat(properties);
     },
-    titleRef: document.getElementById('dashboardTitle')
+    dashboardName: document.getElementById('dashboardTitle')
   }
 
   const rand = () => Math.random(0).toString(36).substring(2);
@@ -160,10 +160,9 @@ var Resource = new Resources();
   app.save = async (e) => {
     console.log(e.target);
     const token = rand().substring(0, 7);
-    const title = document.getElementById('dashboardTitle');
-    if (!title.dataset.value) {
-      App.showConsole('Titolo Dashboard non inserito', 'error', 2000);
-      title.focus();
+    if (!app.dashboardName.dataset.value) {
+      App.showConsole('Titolo non inserito', 'error', 2000);
+      app.dashboardName.focus();
       return false;
     }
     const note = document.getElementById('note').value;
@@ -172,7 +171,8 @@ var Resource = new Resources();
     // di visualizzare la dashboard, solo le dashboards pubblicate possono
     // essere visualizzate
     let json = {
-      title, note, token, type: 'dashboard',
+      title : app.dashboardName.dataset.value,
+      note, token, type: 'dashboard',
       layout: Template.id,
       resources: Object.fromEntries(Resource.resource)
     };
@@ -487,12 +487,14 @@ var Resource = new Resources();
 
   // End Drag events
 
-  app.titleRef.addEventListener('blur', (e) => {
-    if (e.target.dataset.value) e.target.dataset.value = e.target.textContent;
-  });
+  app.dashboardName.onblur = (e) => {
+    if (e.target.dataset.tempValue) {
+      e.target.dataset.value = e.target.textContent;
+    } else {
+      e.target.innerText = e.target.dataset.defaultValue;
+    }
+  }
 
-  app.titleRef.addEventListener('input', (e) => {
-    (e.target.textContent.length === 0) ? delete e.target.dataset.value: e.target.dataset.value = e.target.textContent;
-  });
+  app.dashboardName.oninput = (e) => App.checkTitle(e.target);
 
 })();

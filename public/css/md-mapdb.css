@@ -11,11 +11,10 @@ html, body{
 
 .wrapper-step{
   display: grid;
-  grid-template-rows: auto 1fr .8fr;
-  /* grid-template-rows: auto 1fr auto; */
+  grid-template-rows: 1fr .8fr;
   height: 100%;
   width: 100%;
-  /* padding: 1em; */
+  padding: 1em;
 }
 
 .actions{
@@ -402,11 +401,11 @@ li:not([data-selected]) > i[data-mode="remove"] {
 
 .wrapper-content{
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: 1fr;
   /* grid-row-gap: 8px; */
   height: 100%;
   width: 100%;
-  /* padding: 1em; */
+  padding: 1em;
 }
 
 menu.horizontal-menu {
@@ -532,21 +531,17 @@ textarea:focus, textarea:active {
   user-select: none;
   display: grid;
   grid-template-rows: 1fr auto;
-  /* height: 100%; */
   width: 100%;
   overflow: hidden;
-  /* flex-flow: column; */
-  /* align-items: center; */
-  /* justify-self: center; */
+  padding: 0px 2px;
 }
 
 #stepTranslate {
   display: flex;
-  /* height: 100%; */
-  /* width: 100%; */
   position: relative;
   left: 0px;
   transition: left 250ms;
+  column-gap: 1em;
 }
 
 #stepTranslate[data-step="1"] {
@@ -554,7 +549,7 @@ textarea:focus, textarea:active {
 }
 
 #stepTranslate[data-step="2"] {
-  left: -100%;
+  left: calc(-100% - 1em);
 }
 
 #steps .step {
@@ -562,6 +557,9 @@ textarea:focus, textarea:active {
   display: flex;
   flex-direction: column;
   min-width: 100%;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0px 1px 6px 1px #cac6c6;
 }
 
 #steps .step>.pageContent {

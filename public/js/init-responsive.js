@@ -39,7 +39,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     dialogNewSheet: document.getElementById('dialog-new-sheet'),
     // buttons
     btnSelectSchema: document.getElementById('btn-select-schema'),
-    editWorkBookName: document.getElementById('workbook-name'),
     btnSaveSheet: document.getElementById('btn-sheet-save'),
     btnWorkBookNew: document.getElementById('btn-workbook-new'),
     btnVersioning: document.getElementById('btn-versioning'),
@@ -65,7 +64,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     tablePopup: document.getElementById("table-popup"),
     // INPUTS
     inputAdvMetricName: document.getElementById("input-advanced-metric-name"),
-    sheetName: document.getElementById('sheet-name')
+    sheetName: document.getElementById('sheet-name'),
+    workbookName: document.getElementById('workbook-name')
   }
   const userId = 2;
 
@@ -1078,8 +1078,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     WorkBook = new WorkBooks(name);
     WorkBook.databaseId = +document.querySelector('main').dataset.databaseId;
     Draw = new DrawSVG('svg');
-    document.getElementById('workbook-name').dataset.value = name;
-    document.getElementById('workbook-name').innerText = name;
+    app.workbookName.dataset.value = name;
+    app.workbookName.innerText = name;
     // abilito il tasto "carica Schema"
     document.querySelector('#btnSchemata').disabled = false;
     app.dialogNewWorkBook.close();
@@ -1252,8 +1252,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // const sheetToken = e.currentTarget.dataset.token;
     document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
     document.querySelector('#btn-sheet-save').disabled = true;
-    // chiamare il metodo open() dell'oggetto Sheet e seguire la stessa logica utilizzata per workBookSelected()
-    // Sheet = new Sheets(e.currentTarget.dataset.token, Sheet.sheet.workbook_ref);
     Sheet = new Sheets(e.currentTarget.dataset.name, e.currentTarget.dataset.token, WorkBook.workBook.token);
     // reimposto tutte le proprietà della Classe
     Sheet.open();
@@ -1412,25 +1410,31 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   // TODO: da spostare in supportFn.js
-  app.editSheetTitle = (e) => {
-    if (e.target.dataset.value) {
+  app.sheetName.onblur = (e) => {
+    if (e.target.dataset.tempValue) {
       e.target.dataset.value = e.target.textContent;
       Sheet.name = e.target.textContent;
+      delete e.target.dataset.tempValue;
+    } else {
+      e.target.innerText = e.target.dataset.defaultValue;
     }
   }
 
-  app.sheetName.addEventListener('input', (e) => {
-    (e.target.textContent.length === 0) ? delete e.target.dataset.value : e.target.dataset.value = e.target.textContent;
-  });
+  app.sheetName.oninput = (e) => App.checkTitle(e.target);
 
-  app.editWorkBookName.onblur = (e) => {
-    if (e.target.dataset.value) e.target.dataset.value = e.target.textContent;
-    if (WorkBook) WorkBook.name = e.target.textContent;
+  app.workbookName.onblur = (e) => {
+    if (e.target.dataset.tempValue) {
+      e.target.dataset.value = e.target.textContent;
+      if (WorkBook) {
+        WorkBook.name = e.target.textContent;
+        delete e.target.dataset.tempValue;
+      }
+    } else {
+      e.target.innerText = e.target.dataset.defaultValue;
+    }
   }
 
-  app.editWorkBookName.addEventListener('input', (e) => {
-    (e.target.textContent.length === 0) ? delete e.target.dataset.value : e.target.dataset.value = e.target.textContent;
-  });
+  app.workbookName.oninput = (e) => App.checkTitle(e.target);
 
   // tasto Workbook, creazione DataModel
   app.btnWorkBook.onclick = (e) => {
@@ -1438,6 +1442,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const steps = document.getElementById('steps');
     steps.dataset.step = 1;
     translateRef.dataset.step = 1;
+    app.body.dataset.step = 1;
   }
 
   // tasto "Sheet" :
@@ -1465,6 +1470,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       const steps = document.getElementById('steps');
       steps.dataset.step = 2;
       translateRef.dataset.step = 2;
+      app.body.dataset.step = 2;
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
       app.addTablesStruct();
       // salvo il workbook creato, tenendo conto della prop 'updated_at', se ci sono
@@ -1476,7 +1482,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       // Se l'oggetto della Classe Sheets non è inizializzato, apro un nuovo Sheet dal titolo 'New Sheet'
       console.log(Sheet);
       if (!Sheet) {
-        Sheet = new Sheets('Titolo Sheet', rand().substring(0, 7), WorkBook.workBook.token);
+        Sheet = new Sheets(app.sheetName.dataset.defaultValue, rand().substring(0, 7), WorkBook.workBook.token);
         SheetStorage.sheet = Sheet.sheet.token;
         app.sheetName.innerText = Sheet.name;
         // Imposto la prop 'edit' = false, verrà impostata a 'true' quando si apre uno Sheet
@@ -1513,9 +1519,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   // Creazione della struttura necessaria per creare le query
   app.createProcess = async (e) => {
     // verifico se è stato inserito il titolo dello Sheet
-    if (!app.sheetName.value) {
+    debugger;
+    if (!app.sheetName.dataset.value) {
       App.showConsole('Inserire il titolo dello Sheet', 'warning', 2000);
-      app.sheetName.readOnly = false;
       app.sheetName.focus();
       return false;
     }
