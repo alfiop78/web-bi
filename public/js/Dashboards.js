@@ -1,5 +1,4 @@
 class Dashboards {
-  #dashboards = {};
   constructor() { }
 
   drawControls(filtersRef) {
@@ -33,16 +32,6 @@ class Dashboards {
       });
     }
     return this.controls;
-  }
-
-  // TODO: verificare se viene utilizzata (l'elenco delle dashboard viene recuperato dal Model)
-  getDashboards() {
-    for (const [token, object] of Object.entries(window.localStorage)) {
-      if (JSON.parse(object).type === 'dashboard') {
-        this.#dashboards[token] = JSON.parse(object);
-      }
-    }
-    return this.#dashboards;
   }
 
 }

@@ -107,10 +107,9 @@
         </dialog>
         <menu class="standard">
           <section>
-            <button type="button" class="btn-link default" data-fn="openDashboard" value="Apri" id="">Apri</button>
-            <button type="button" class="btn-link default" value="Chiudi" id="">Chiudi</button>
-            <button id="btnSave" class="btn-link default" type="button" data-fn="save">Salva</button>
-            <button type="button" class="btn-link default" value="Pubblica" data-fn="publish" id="publish">Pubblica</button>
+            <button type="button" class="btn-link default" data-fn="openDashboard" value="Apri">Apri</button>
+            <button id="btnSave" class="btn-link default" type="button" data-fn="save" disabled>Salva</button>
+            <button id="btnPublish" type="button" class="btn-buttons" value="Pubblica" data-fn="publish" disabled>Pubblica</button>
           </section>
           <section>
             <div id="dashboardTitle" class="name" contenteditable="true" data-default-value="Titolo Dashboard">Titolo Dashboard</div>
@@ -203,7 +202,7 @@
                   </div>
 
                   <div>
-                    <textarea id="note" rows="10" cols="60" name="note" placeholder="Note"></textarea>
+                    <textarea id="note" name="note" placeholder="Note"></textarea>
                   </div>
                 </fieldset>
               </div>

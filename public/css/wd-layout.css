@@ -471,6 +471,8 @@ span.markContent {
   opacity: .8;
   font-size: inherit;
   box-shadow: unset;
+  display: flex;
+  align-items: center;
 }
 
 .name[contenteditable="true"]:focus,

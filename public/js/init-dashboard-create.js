@@ -1,10 +1,13 @@
+// TODO: 18.09.2024 intercettare le modifiche fatte al report oppure ai filtri, per poter
+// abilitare il tasto "Salva"
 var App = new Application();
 var Template = new Templates();
-var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizializzare quando ricevuti i dati dal datamart
+// var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizializzare quando ricevuti i dati dal datamart
 var Storage = new SheetStorages();
 var Resource = new Resources();
 (() => {
   var app = {
+    layoutRef: document.getElementById('template-layout'),
     // templates
     tmplList: document.getElementById('tmpl-li'),
     // dialogs
@@ -18,7 +21,8 @@ var Resource = new Resources();
     dlgDashboard: document.getElementById('dialog-dashboard-open'),
     jsonDashboard: {},
     // buttons
-    btnSave: document.getElementById('btnSave')
+    btnSave: document.getElementById('btnSave'),
+    btnPublish: document.getElementById('btnPublish')
   }
 
   const rand = () => Math.random(0).toString(36).substring(2);
@@ -97,7 +101,19 @@ var Resource = new Resources();
       });
   }
 
+  app.clearDashboard = () => {
+    // chiudo eventuali dashboard già aperti
+    // elimino il template, anche se non è stato ancora selezionato
+    app.layoutRef.querySelectorAll('*').forEach(el => el.remove());
+    delete app.btnSave.dataset.token;
+    delete app.dashboardName.dataset.value;
+    app.btnSave.disabled = true;
+    app.btnPublish.disabled = true;
+    app.dashboardName.textContent = app.dashboardName.dataset.defaultValue;
+  }
+
   app.openDashboard = async () => {
+    app.clearDashboard();
     App.showConsole('Recupero elenco Dashboard', 'info');
     await fetch(`/fetch_api/dashboardsByConnectionId`)
       .then((response) => {
@@ -137,7 +153,7 @@ var Resource = new Resources();
       })
       .then((response) => response.json())
       .then(data => {
-        console.log(data);
+        // console.log(data);
         // imposto il titolo della dashboard
         app.dashboardName.textContent = data.name;
         app.dashboardName.dataset.value = data.name;
@@ -152,6 +168,7 @@ var Resource = new Resources();
         app.dlgDashboard.close();
         App.closeConsole();
         // promise.all per recuperare tutti gli oggetti della dashboard
+        // TEST: provare la promise.race per poter recuperare i dati
         app.getResources();
       })
       .catch(err => {
@@ -225,7 +242,7 @@ var Resource = new Resources();
     // - crearne i COPY_TABLE da WEB_BI_timestamp_userId -> WEB_BI_timestamp
     // - salvare le specifiche in bi_sheet_specifications
     console.log(Resource.resource);
-    debugger;
+    // debugger;
     let urls = [];
     for (const dashboard of Resource.resource.values()) {
       urls.push(`/fetch_api/copy_from/${dashboard.datamart_id}_${dashboard.user_id}/copy_to/${dashboard.datamart_id}/copy_table`);
@@ -288,7 +305,11 @@ var Resource = new Resources();
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        if (data) App.showConsole("Salvataggio completato", 'done', 2000);
+        if (data) {
+          App.showConsole("Salvataggio completato", 'done', 2000);
+          app.btnPublish.disabled = false;
+          e.target.disabled = true;
+        }
       })
       .catch((err) => {
         App.showConsole(err, 'error');
@@ -407,61 +428,9 @@ var Resource = new Resources();
             // Non sono presenti altre pagine, visualizzo il dashboard
             Resource.data = partialData[index];
             google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
+            // abilito alcuni tasti dopo aver aperto la dashboard
           }
         });
-      })
-      .catch(err => {
-        App.showConsole(err, 'error');
-        console.error(err);
-      });
-  }
-
-  app.getData = async () => {
-    let partialData = [];
-    // TODO: aggiungere la progressBar anche qui
-    await fetch(`/fetch_api/${Resource.resource.get(Resource.token).datamart_id}_${Resource.resource.get(Resource.token).user_id}/preview?page=1`)
-      .then((response) => {
-        // console.log(response);
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then(async (paginateData) => {
-        console.log(paginateData);
-        console.log(paginateData.data);
-        // debugger;
-        // Resource.data = paginateData.data;
-        // funzione ricorsiva fino a quando è presente next_page_url
-        let recursivePaginate = async (url) => {
-          // console.log(url);
-          await fetch(url).then((response) => {
-            // console.log(response);
-            if (!response.ok) { throw Error(response.statusText); }
-            return response;
-          }).then(response => response.json()).then((paginate) => {
-            partialData = partialData.concat(paginate.data);
-            if (paginate.next_page_url) {
-              recursivePaginate(paginate.next_page_url);
-              console.log(partialData);
-            } else {
-              // Non sono presenti altre pagine, visualizzo la dashboard
-              console.log('tutte le paginate completate :', partialData);
-              Resource.data = partialData;
-              google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
-            }
-          }).catch((err) => {
-            App.showConsole(err, 'error');
-            console.error(err);
-          });
-        }
-        partialData = paginateData.data;
-        if (paginateData.next_page_url) {
-          recursivePaginate(paginateData.next_page_url);
-        } else {
-          // Non sono presenti altre pagine, visualizzo il dashboard
-          Resource.data = partialData;
-          google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
-        }
       })
       .catch(err => {
         App.showConsole(err, 'error');
@@ -476,13 +445,13 @@ var Resource = new Resources();
     Resource.token = e.currentTarget.dataset.token;
     // aggiungo un token per identificare, in publish(), il report (datamart_id)
     Resource.ref.dataset.token = e.currentTarget.dataset.token;
-    debugger;
     Resource.json = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
     Resource.resource = {
       datamart_id: e.currentTarget.dataset.datamartId,
       userId: e.currentTarget.dataset.userId
     };
-    app.getData(e.currentTarget.dataset.token);
+    const urls = [`/fetch_api/${Resource.resource.get(Resource.token).datamart_id}_${Resource.resource.get(Resource.token).user_id}/preview?page=1`];
+    app.getAllData(urls);
     app.dlgChartSection.close();
     // aggiungo la class 'defined' nel div che contiene il grafico/tabella
     Resource.ref.classList.add('defined');
