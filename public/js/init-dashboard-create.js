@@ -143,12 +143,38 @@ var Resource = new Resources();
         Template.create();
         app.dlgDashboard.close();
         App.closeConsole();
-      // TODO: promise.all per recuperare tutti gli oggetti della dashboard
+        // TODO: promise.all per recuperare tutti gli oggetti della dashboard
+        app.getResources();
       })
       .catch(err => {
         App.showConsole(err, 'error');
         console.error(err);
       });
+  }
+
+  app.getResources = () => {
+    console.log(app.jsonDashboard);
+    let urls = [];
+    // ciclo le resources
+    for (const [token, value] of Object.entries(app.jsonDashboard.resources)) {
+      // NOTE: logica utilizzata in app.sheetSelected()
+      Resource.token = token;
+      // il ref corrente, appena aggiunto
+      Resource.ref = document.getElementById(value.ref);
+      // aggiungo un token per identificare, in publish(), il report (datamart_id)
+      Resource.ref.dataset.token = token;
+      // recupero le specifiche dello sheet dallo storage, TODO: da valutare se meglio recuperarlo dal DB
+      Resource.json = JSON.parse(window.localStorage.getItem(token)).specs;
+      Resource.resource = {
+        datamart_id: value.datamart_id,
+        userId: value.user_id
+      };
+      // urls.push(`/fetch_api/${Resource.resource.get(Resource.token).datamart_id}_${Resource.resource.get(Resource.token).user_id}/preview?page=1`)
+      urls.push(`/fetch_api/${value.datamart_id}_${value.user_id}/preview?page=1`)
+      // aggiungo la class 'defined' nel div che contiene il grafico/tabella
+      Resource.ref.classList.add('defined');
+    }
+    app.getAllData(urls);
   }
 
   app.workbookSelected = async (e) => {
@@ -326,6 +352,56 @@ var Resource = new Resources();
     // il ref corrente, appena aggiunto
     Resource.ref = document.getElementById(e.currentTarget.id);
     app.dlgChartSection.showModal();
+  }
+
+  app.getAllData = async (urls) => {
+    let partialData = [];
+    await Promise.all(urls.map(url => fetch(url)))
+      .then(responses => {
+        return Promise.all(responses.map(response => {
+          if (!response.ok) { throw Error(response.statusText); }
+          return response.json();
+        }))
+      })
+      .then(async (paginateData) => {
+        paginateData.forEach((pagData, index) => {
+          console.log(pagData.data);
+          let recursivePaginate = async (url, index) => {
+            // console.log(url);
+            await fetch(url).then((response) => {
+              // console.log(response);
+              if (!response.ok) { throw Error(response.statusText); }
+              return response;
+            }).then(response => response.json()).then((paginate) => {
+              partialData[index] = partialData[index].concat(paginate.data);
+              if (paginate.next_page_url) {
+                recursivePaginate(paginate.next_page_url);
+                console.log(partialData[index]);
+              } else {
+                // Non sono presenti altre pagine, visualizzo la dashboard
+                console.log('tutte le paginate completate :', partialData[index]);
+                Resource.data = partialData[index];
+                google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
+              }
+            }).catch((err) => {
+              App.showConsole(err, 'error');
+              console.error(err);
+            });
+          }
+          partialData[index] = pagData.data;
+          if (pagData.next_page_url) {
+            recursivePaginate(pagData.next_page_url);
+          } else {
+            // Non sono presenti altre pagine, visualizzo il dashboard
+            Resource.data = partialData[index];
+            google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
+          }
+        });
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
   }
 
   app.getData = async () => {
