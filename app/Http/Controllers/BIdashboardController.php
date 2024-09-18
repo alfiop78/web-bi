@@ -15,17 +15,21 @@ class BIdashboardController extends Controller
   public function index()
   {
     $dashboards = BIdashboard::get(['name', 'token']);
-    $names = [];
     // dd($dashboards);
-    foreach ($dashboards as $das) {
-      // dd($das->name);
-      $names[] = $das;
-    }
-    return view('web_bi.dashboards')->with('dashboards', $names);
-    // return view('web_bi.dashboards')->with('dashboards', $dashboards);
+    return view('web_bi.dashboards')->with('dashboards', $dashboards);
     // return response()->json(['dashboard' => $dashboards]);
   }
 
+  /**
+   * Visualizzo la lista di risorse (dashboard) appartenenti alla connessione corrente
+   *
+   * @return \Illuminate\Http\Response
+   */
+  public function indexByConnectionId()
+  {
+    $dashboards = BIdashboard::where('connectionId', session('db_id'))->get(['name', 'token', 'json_value']);
+    return response()->json($dashboards);
+  }
   /**
    * Show the form for creating a new resource.
    *
@@ -54,6 +58,7 @@ class BIdashboardController extends Controller
     $dashboard->token = $token;
     $dashboard->name = $name;
     $dashboard->json_value = $json;
+    $dashboard->connectionId = session('db_id');
     return $dashboard->save();
   }
 

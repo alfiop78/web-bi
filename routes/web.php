@@ -451,6 +451,8 @@ Route::prefix('/fetch_api/json/')->group(function () {
 
 // recupero degli sheets appartenenti a un determinato workbooks
 Route::get('fetch_api/workbook_token/{token}/sheet_indexByWorkbook', [BIsheetController::class, 'indexByWorkbook']);
+// recupero le dashboards della connessione corrente
+Route::get('fetch_api/dashboardsByConnectionId', [BIdashboardController::class, 'indexByConnectionId']);
 
 // test vertica
 Route::get('/mapping/test_vertica', [MapDatabaseController::class, 'test_vertica']); // connessione con il metodo usato in Zend / PHP

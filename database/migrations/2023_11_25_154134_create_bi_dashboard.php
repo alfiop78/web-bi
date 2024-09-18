@@ -17,6 +17,7 @@ class CreateBiDashboard extends Migration
       $table->string('token')->primary();
       $table->string('name');
       $table->longText('json_value');
+      $table->foreignId('connectionId')->constrained('bi_db_connections'); // FK -> bi_db_connections
       $table->timestamps();
     });
   }

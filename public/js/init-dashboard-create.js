@@ -15,7 +15,8 @@ var Resource = new Resources();
     },
     dashboardName: document.getElementById('dashboardTitle'),
     // dialogs
-    dlgDashboard: document.getElementById('dialog-dashboard-open')
+    dlgDashboard: document.getElementById('dialog-dashboard-open'),
+    jsonDashboard: {}
   }
 
   const rand = () => Math.random(0).toString(36).substring(2);
@@ -94,8 +95,60 @@ var Resource = new Resources();
       });
   }
 
-  app.openDashboard = (e) => {
+  app.openDashboard = async () => {
+    App.showConsole('Recupero elenco Dashboard', 'info');
+    await fetch(`/fetch_api/dashboardsByConnectionId`)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(data => {
+        console.log(data);
+        const ul = document.getElementById('ul-dashboards');
+        data.forEach(dashboard => {
+          const content = app.tmplList.content.cloneNode(true);
+          const li = content.querySelector('li[data-li]');
+          const span = li.querySelector('span');
+          li.dataset.token = dashboard.token;
+          li.dataset.label = dashboard.name;
+          li.addEventListener('click', app.dashboardSelected);
+          li.dataset.elementSearch = 'dashboards';
+          span.innerText = dashboard.name;
+          ul.appendChild(li);
+        });
+        App.closeConsole();
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
     app.dlgDashboard.showModal();
+  }
+
+  app.dashboardSelected = async (e) => {
+    App.showConsole(`Recupero dati della Dashboard ${e.currentTarget.dataset.label}`, 'info');
+    await fetch(`/fetch_api/name/${e.currentTarget.dataset.token}/dashboard_show`)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.json())
+      .then(data => {
+        // console.log(data);
+        app.jsonDashboard = JSON.parse(data.json_value);
+        // imposto il template della dashboard selezionata
+        Template.id = app.jsonDashboard.layout;
+        // creo l'anteprima nel DOM
+        Template.create();
+        app.dlgDashboard.close();
+        App.closeConsole();
+      // TODO: promise.all per recuperare tutti gli oggetti della dashboard
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
   }
 
   app.workbookSelected = async (e) => {
@@ -177,7 +230,7 @@ var Resource = new Resources();
     // di visualizzare la dashboard, solo le dashboards pubblicate possono
     // essere visualizzate
     let json = {
-      title : app.dashboardName.dataset.value,
+      title: app.dashboardName.dataset.value,
       note, token, type: 'dashboard',
       layout: Template.id,
       resources: Object.fromEntries(Resource.resource)
@@ -211,7 +264,9 @@ var Resource = new Resources();
     // TODO: da valutare, potrei visualizzare una preview del dashboard completo di dati
   }
 
-  app.openDlgTemplateLayout = async () => {
+  app.openDlgTemplateLayout = () => app.dlgTemplateLayout.showModal();
+
+  app.getTemplates = async () => {
     // TODO: I Template Layout li devo mettere nel DB invece di metterli nei file .json
     // carico la lista dei template .json, nella dialog
     const urls = [
@@ -243,7 +298,7 @@ var Resource = new Resources();
       })
       .catch(err => console.error(err));
 
-    app.dlgTemplateLayout.showModal();
+    // app.dlgTemplateLayout.showModal();
   }
 
   app.layoutSelected = (e) => {
@@ -408,13 +463,15 @@ var Resource = new Resources();
 
   // onclose dialogs
   // reset dei layout già presenti, verrano ricreati all'apertura della dialog
-  app.dlgTemplateLayout.onclose = () => document.querySelectorAll('#thumbnails *').forEach(layouts => layouts.remove());
+  // app.dlgTemplateLayout.onclose = () => document.querySelectorAll('#thumbnails *').forEach(layouts => layouts.remove());
 
   // reset sheets
   app.dlgChartSection.onclose = () => {
     // document.querySelectorAll('#ul-sheets > li').forEach(el => el.remove());
     // document.querySelectorAll('#ul-workbooks > li').forEach(el => el.remove());
   }
+
+  app.dlgDashboard.onclose = () => document.querySelectorAll('#ul-dashboards li').forEach(el => el.remove());
 
   // Drag events
   app.filterDragStart = (e) => {
@@ -502,5 +559,7 @@ var Resource = new Resources();
   }
 
   app.dashboardName.oninput = (e) => App.checkTitle(e.target);
+
+  app.getTemplates();
 
 })();

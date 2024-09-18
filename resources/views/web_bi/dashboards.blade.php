@@ -45,10 +45,12 @@
       <hr />
       <section class="navOverflow">
         <section class="navContent">
-          {{-- {{ dd($dashboards) }} --}}
           @foreach($dashboards as $dashboard)
-          <a href="#" data-token="{{ json_decode($dashboard)->token }}">
+          <!-- <a href="#" data-token="{{ json_decode($dashboard)->token }}">
             <i class="material-symbols-rounded white">dashboard</i><span>{{ json_decode($dashboard)->name }}</span>
+          </a> -->
+          <a href="#" data-token="{{ $dashboard['token'] }}">
+            <i class="material-symbols-rounded white">dashboard</i><span>{{ $dashboard['name'] }}</span>
           </a>
           @endforeach
         </section>
