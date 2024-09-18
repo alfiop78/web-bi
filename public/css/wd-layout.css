@@ -186,17 +186,32 @@ footer>.footerContent {
 }
 
 menu.standard {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  /* align-items: center; */
   padding: 8px;
   margin: 0;
-  gap: 1em;
+  column-gap: 1em;
   border-radius: 4px;
-  justify-content: space-between;
+  /* justify-content: space-between; */
   background-color: white;
   box-shadow: 0px 1px 6px 1px #cac6c6;
 }
 
+menu.standard.onlyStatus {
+  grid-template-columns: auto;
+}
+
+menu.standard>section:first-child {
+  justify-content: flex-start;
+}
+
+/* l'ultimo elemento del menù và sempre allineato flex-end, anche
+* quando è presente un solo elemento (nel caso di dbstatus)
+* */
+menu.standard>section:last-child {
+  justify-content: flex-end;
+}
 
 menu.standard.align-end {
   justify-content: flex-end;
@@ -204,7 +219,6 @@ menu.standard.align-end {
 
 menu.standard>section {
   display: flex;
-  align-items: center;
   column-gap: 4px;
 }
 

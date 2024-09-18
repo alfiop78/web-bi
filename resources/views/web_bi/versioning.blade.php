@@ -67,7 +67,7 @@
     <div id="content" class="custom-scrollbar">
 
       <div id="body" class="raw menu" hidden>
-        <menu class="standard align-end">
+        <menu class="standard onlyStatus">
           <section class="dbStatus">
             {{-- session()->forget('db_name') --}}
             <span id="db-connection-status" data-connected="{{ session('db_id', 0) }}">
