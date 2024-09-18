@@ -16,7 +16,9 @@ var Resource = new Resources();
     dashboardName: document.getElementById('dashboardTitle'),
     // dialogs
     dlgDashboard: document.getElementById('dialog-dashboard-open'),
-    jsonDashboard: {}
+    jsonDashboard: {},
+    // buttons
+    btnSave: document.getElementById('btnSave')
   }
 
   const rand = () => Math.random(0).toString(36).substring(2);
@@ -135,7 +137,13 @@ var Resource = new Resources();
       })
       .then((response) => response.json())
       .then(data => {
-        // console.log(data);
+        console.log(data);
+        // imposto il titolo della dashboard
+        app.dashboardName.textContent = data.name;
+        app.dashboardName.dataset.value = data.name;
+        // imposto il token sul tasto "Salva" per poter aggiornare la dashboard e non inserirla nel DB
+        app.btnSave.dataset.token = data.token;
+
         app.jsonDashboard = JSON.parse(data.json_value);
         // imposto il template della dashboard selezionata
         Template.id = app.jsonDashboard.layout;
@@ -143,7 +151,7 @@ var Resource = new Resources();
         Template.create();
         app.dlgDashboard.close();
         App.closeConsole();
-        // TODO: promise.all per recuperare tutti gli oggetti della dashboard
+        // promise.all per recuperare tutti gli oggetti della dashboard
         app.getResources();
       })
       .catch(err => {
@@ -243,8 +251,8 @@ var Resource = new Resources();
 
   // onclick events
   app.save = async (e) => {
-    console.log(e.target);
-    const token = rand().substring(0, 7);
+    // se è presente dataset.token sto aggiornando una dashboard esistente
+    const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     if (!app.dashboardName.dataset.value) {
       App.showConsole('Titolo non inserito', 'error', 2000);
       app.dashboardName.focus();
@@ -267,7 +275,8 @@ var Resource = new Resources();
     sheet.specs = Resource.json;
     window.localStorage.setItem(Resource.json.token, JSON.stringify(sheet));
     // window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
-    const url = `/fetch_api/json/dashboard_store`;
+    // const url = `/fetch_api/json/dashboard_store`;
+    const url = (e.target.dataset.token) ? '/fetch_api/json/dashboard_update' : '/fetch_api/json/dashboard_store';
     const params = JSON.stringify(json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
@@ -281,7 +290,10 @@ var Resource = new Resources();
         console.log(data);
         if (data) App.showConsole("Salvataggio completato", 'done', 2000);
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
   }
 
   app.preview = (e) => {

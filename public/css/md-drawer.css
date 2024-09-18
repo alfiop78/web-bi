@@ -20,6 +20,7 @@ nav>.navOverflow {
 
 nav>.navOverflow>.navContent {
   position: absolute;
+  width: 100%;
 }
 
 nav a {

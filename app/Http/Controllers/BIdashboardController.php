@@ -94,7 +94,16 @@ class BIdashboardController extends Controller
    */
   public function update(Request $request, BIdashboard $bIdashboard)
   {
-    //
+    $token = $request->collect()->get('token');
+    $name = $request->collect()->get('title');
+    // codifico tutta la $request in json per poterla inserire nel DB
+    $json = json_encode($request->all());
+    // cerco nel DB il token del PROCESS da aggiornare
+    $dashboard = $bIdashboard::findOrFail($token);
+    // salvo su DB
+    $dashboard->name = $name;
+    $dashboard->json_value = $json;
+    return $dashboard->save();
   }
 
   /**

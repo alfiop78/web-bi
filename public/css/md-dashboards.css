@@ -21,6 +21,10 @@
   /* justify-content: center; */
 }
 
+.contentObject>.filters {
+  padding: 1em;
+}
+
 .gradient {
   background-image: none !important;
 }
@@ -92,35 +96,40 @@ td.align-right {
   margin-block-start: 4px;
   margin-block-end: 4px;
   margin: 0px 1em;
+  background-color: #494949;
+  color: white;
+  border-radius: 4px;
 }
 
 .g-category-filter li {
-  background-color: #494949;
-  padding: 6px;
-  margin: 0px 2px;
-  color: white;
-  line-height: 1em;
+  /* background-color: #494949; */
+  /* padding: 6px; */
+  /* margin: 0px 2px; */
+  /* color: white; */
+  line-height: unset;
 }
 
 .g-category-filter li div {
   margin: 0px 8px;
 }
 
-.goog-inline-block {
+/* .goog-inline-block {
   vertical-align: middle;
-}
+} */
 
 .goog-combobox {
   padding: 6px;
-  background: beige !important;
+  background: #e1e1e1 !important;
   border: unset !important;
   font: normal small 'Barlow', sans-serif !important;
+  border-radius: 4px;
 }
 
 .goog-combobox input.label-input-label {
   background: none !important;
   box-shadow: none;
   border: unset;
+  color: #494949 !important;
 }
 
 .chart-elements {
@@ -131,6 +140,9 @@ td.align-right {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  /* padding: .5em; */
+  background-color: white;
+  border-radius: 4px;
 }
 
 .google-visualization-table-div-page {
@@ -147,7 +159,15 @@ td.align-right {
 .goog-custom-button-disabled .goog-custom-button-outer-box,
 .goog-custom-button-disabled .goog-custom-button-inner-box {
   border: none !important;
+  color: red !important;
+}
 
+/* aggiungendo lo span rendo più specifico l'elemento a cui applicare il !important
+* https://developer.mozilla.org/en-US/docs/Web/CSS/important
+* */
+.goog-custom-button-disabled .goog-custom-button-outer-box>span,
+.goog-custom-button-disabled .goog-custom-button-inner-box>span {
+  color: var(--mark-color) !important;
 }
 
 .google-visualization-table-div-page [role="button"] {
@@ -193,20 +213,22 @@ td.align-right {
   /* font-family: 'Barlow', sans-serif; */
 }
 
+/* tasto "next" del paginate */
 .goog-custom-button-outer-box {
   border: none !important;
-  color: darkgoldenrod;
+  color: var(--mark-color);
 }
 
 .google-visualization-table-page-number:hover {
-  background-color: darkgoldenrod !important;
+  background-color: var(--mark-color) !important;
   font-weight: bold;
+  color: #494949 !important;
 }
 
 /* numero di pagina corrente*/
 .google-visualization-table-page-number.current {
   font-weight: bold !important;
-  background-color: indianred !important;
+  background-color: var(--main-important-color) !important;
   border: none !important;
   /* font-size: 10px!important; */
   color: white !important;
@@ -215,6 +237,7 @@ td.align-right {
 
 .google-visualization-table {
   user-select: none;
+  padding: 1em;
 }
 
 .google-visualization-table-page-next:before,
@@ -243,10 +266,12 @@ td.align-right {
 }
 
 .view>.layout .chartContent {
-  border-radius: 4px;
+  /* border-radius: 4px; */
   padding: 1em;
-  display: grid;
-  grid-template-rows: 1fr auto;
+  /* display: grid; */
+  /* grid-template-rows: 1fr auto; */
+  display: flex;
+  flex-direction: column;
 }
 
 .view>.layout>.filters {
@@ -283,6 +308,17 @@ td.align-right {
   row-gap: 1em;
   flex-direction: column;
   align-items: center;
+}
+
+/* menu dei filtri */
+.goog-combobox .goog-menu {
+  background-color: #494949;
+  border-radius: 2px;
+  margin-top: 8px!important;
+}
+
+div.goog-menuitem-content {
+  color: white;
 }
 
 /* TEST: nuovi layout */

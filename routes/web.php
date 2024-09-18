@@ -447,6 +447,7 @@ Route::prefix('/fetch_api/json/')->group(function () {
   Route::post('/sheet_update', [BIsheetController::class, 'update']);
   Route::post('/metric_update', [BImetricController::class, 'update']);
   Route::post('/filter_update', [BIfilterController::class, 'update']);
+  Route::post('/dashboard_update', [BIdashboardController::class, 'update']);
 });
 
 // recupero degli sheets appartenenti a un determinato workbooks
