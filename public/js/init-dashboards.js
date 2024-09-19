@@ -17,10 +17,9 @@ var Resource = new Resources();
   google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
 
   app.draw = () => {
-    const prepareData = Resource.prepareData();
     // Utilizzo la DataTable per poter impostare la formattazione. La formattazione NON
     // è consentità con la DataView perchè questa è read-only
-    Resource.dataTable = new google.visualization.DataTable(prepareData);
+    Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
     // definisco la formattazione per le percentuali e per i valori currency
     // console.log(dataFormatted);
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
@@ -273,7 +272,7 @@ var Resource = new Resources();
           Resource.specs = JSON.parse(data.json_specs);
           // imposto il riferimento nel DOM, del layout, per questa risorsa/report
           Resource.ref = value.ref;
-          app.getData();
+          app.getAllData();
         })
         .catch((err) => console.error(err));
     }
@@ -399,6 +398,75 @@ var Resource = new Resources();
         console.error(err);
       });
     // end chiamata in GET
+  }
+
+  app.getAllData = async () => {
+    const progressBar = document.getElementById('progress-bar');
+    const progressTo = document.getElementById('progress-to');
+    const progressTotal = document.getElementById('progress-total');
+    const progressLabel = document.querySelector("label[for='progress-bar']");
+    App.showLoader();
+    App.showConsole('Apertura Dashboard in corso...', null, null);
+    // TODO: implementare una lista di urls come fatto in init-dashboard-create.js
+    const urls = [`/fetch_api/${Resource.datamart_id}/datamart?page=1`];
+    let partialData = [];
+    await Promise.all(urls.map(url => fetch(url)))
+      .then(responses => {
+        return Promise.all(responses.map(response => {
+          if (!response.ok) { throw Error(response.statusText); }
+          return response.json();
+        }))
+      })
+      .then(async (paginateData) => {
+        paginateData.forEach((pagData, index) => {
+          console.log(pagData.data);
+          progressBar.value = +((pagData.to / pagData.total) * 100);
+          progressLabel.hidden = false;
+          progressTo.innerText = pagData.to;
+          progressTotal.innerText = pagData.total;
+          let recursivePaginate = async (url, index) => {
+            await fetch(url).then((response) => {
+              if (!response.ok) { throw Error(response.statusText); }
+              return response;
+            }).then(response => response.json())
+              .then((paginate) => {
+                progressBar.value = +((paginate.to / paginate.total) * 100);
+                progressTo.innerText = paginate.to;
+                progressTotal.innerText = paginate.total;
+                partialData[index] = partialData[index].concat(paginate.data);
+                if (paginate.next_page_url) {
+                  recursivePaginate(paginate.next_page_url, index);
+                  console.log(partialData[index]);
+                } else {
+                  // Non sono presenti altre pagine, visualizzo la dashboard
+                  console.log('tutte le paginate completate :', partialData[index]);
+                  Resource.data = partialData[index];
+                  google.charts.setOnLoadCallback(app.draw());
+                  App.closeConsole();
+                  App.closeLoader();
+                }
+              }).catch((err) => {
+                App.showConsole(err, 'error');
+                console.error(err);
+              });
+          }
+          partialData[index] = pagData.data;
+          if (pagData.next_page_url) {
+            recursivePaginate(pagData.next_page_url, index);
+          } else {
+            // Non sono presenti altre pagine, visualizzo il dashboard
+            Resource.data = partialData[index];
+            google.charts.setOnLoadCallback(app.draw());
+            App.closeConsole();
+            App.closeLoader();
+          }
+        });
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+
   }
 
 })();

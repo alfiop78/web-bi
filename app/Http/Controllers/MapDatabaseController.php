@@ -645,24 +645,61 @@ class MapDatabaseController extends Controller
   // viene invocata da init-dashboards.js
   public function datamart($id)
   {
+    /* $data = DB::connection(session('db_client_name'))->table("decisyon_cache.WEB_BI_{$id}")->paginate(20000);
+    return $data; */
+    // ---------- copiato dal metodo preview ----------------
+
     // dd($id);
     // $datamart = DB::connection('vertica_odbc')->select("SELECT TABLE_NAME FROM v_catalog.all_tables WHERE SCHEMA_NAME='decisyon_cache' AND TABLE_NAME='WEB_BI_$id';");
-    // TODO viene utilizzata anche dalla preview, forse per la preview meglio utilizzare un'altra function
-    // $data = DB::connection('vertica_odbc')->select("SELECT * FROM decisyon_cache.WEB_BI_$id LIMIT 5000");
-    // $table = "decisyon_cache.WEB_BI_$id";
-    // $data = DB::connection('vertica_odbc')->table($table)->limit(10)->get(); // ok
+    // $data = DB::connection('vertica_odbc')->table($table)->limit(5)->get(); // ok
+    // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497, 43, 473, 437, 445, 461, 485, 549, 621, 1000002079, 455, 471, 179])->paginate(15000);
+    // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [1000002045, 447, 497])->paginate(15000);
 
-    // $data = DB::connection('vertica_odbc')->table($table)->select("area_id", "zona_id", "dealer_id")->get();
-    // Utilizzo di paginate()
-    // $data = DB::connection('vertica_odbc')->table($table)->select("dealer_id", "dealer_ds")->paginate(15000);
-    // $data = DB::connection('vertica_odbc')->table($table)->where("dealer_id", "=", 447)->paginate(15000);
-    // $data = DB::connection('vertica_odbc')->table($table)->whereIn("descrizione_id", [447, 497])->paginate(15000);
-    // TODO: nuova logica session('db_client_name')
-    // $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->paginate(20000);
-    $data = DB::connection(session('db_client_name'))->table("decisyon_cache.WEB_BI_{$id}")->paginate(20000);
+    // BUG: 2024.03.24 : senza l'utilizzo di orderBy, il paginate non funziona correttamente quando deve
+    // essere disegnata la google DataTable
+    // $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->paginate(15000);
+
+    // $data = DB::connection('vertica_odbc')->table("decisyon_cache.WEB_BI_{$id}")->orderBy('area_id')->paginate(15000);
+
+    BIConnectionsController::getDB();
+    // dd(session('db_driver'));
+    switch (session('db_driver')) {
+      case 'odbc':
+        $queryColumns = DB::connection(session('db_client_name'))->table('COLUMNS')->select('column_name');
+        break;
+      case 'mysql':
+        $queryColumns = DB::connection(session('db_client_name'))->table('information_schema.COLUMNS')->select('column_name');
+        break;
+        // TODO: implementazione altri DB
+      default:
+        break;
+    }
+    $columnsData = $queryColumns->where('TABLE_SCHEMA', "decisyon_cache")
+      ->where('TABLE_NAME', "WEB_BI_{$id}")->orderBy('ordinal_position')->get();
+
+    $query = DB::connection(session('db_client_name'))->table("decisyon_cache.WEB_BI_{$id}");
+    foreach ($columnsData as $columns) {
+      foreach ($columns as $column) {
+        $query->orderBy($column);
+      }
+    }
+
+    // $data = $query->cursorPaginate(10000);
+    // NOTE: il cursorPaginate dovrebbe essere più performante (da testare) ma non contiene i dati relativi al
+    // numero di pagine, al momento utilizzo paginate() con la clausola OrderBy
+    $data = $query->paginate(20000);
+
+    // $query->orderBy('area_id')->orderBy('area')
+    //   ->orderBy('zona_id')->orderBy('zona')
+    //   ->orderBy('descrizione_id')->orderBy('descrizione')
+    //   ->orderBy('year_id')->orderBy('year')
+    //   ->orderBy('quarter_id')->orderBy('quarter')
+    //   ->orderBy('month_id')->orderBy('month')
+    //   ->orderBy('basketMLI_id')->orderBy('basketMLI');
+    // $data = $query->cursorPaginate(15000);
+    // dd($data);
     return $data;
-
-    // return response()->json($data);
+    // ---------- copiato dal metodo preview ----------------
   }
 
   // Questo metodo l'ho messo in POST dopo aver ricevuto gli errori di memory_limit.
