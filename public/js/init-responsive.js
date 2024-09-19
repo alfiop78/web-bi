@@ -1110,6 +1110,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // modifico il nome del WorkBook in #workbook-name
     document.getElementById('workbook-name').innerText = WorkBook.name;
     document.getElementById('workbook-name').dataset.value = WorkBook.name;
+    document.getElementById('workbook-name').dataset.tempValue = WorkBook.name;
     // WARN: probabilmente, il DataModel, posso recuperarlo direttamente dallo storage, senza ricrearlo
     // WorkBook.createDataModel();
     app.hierTables();
@@ -1174,7 +1175,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       }); */
     // end chiamta in POST
 
-    Resource.json = JSON.parse(window.localStorage.getItem(Sheet.sheet.token)).specs;
+    Resource.specs = JSON.parse(window.localStorage.getItem(Sheet.sheet.token)).specs;
 
     const progressBar = document.getElementById('progress-bar');
     const progressTo = document.getElementById('progress-to');
@@ -1257,6 +1258,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     Sheet.open();
     app.sheetName.innerText = Sheet.name;
     app.sheetName.dataset.value = Sheet.name;
+    app.sheetName.dataset.tempValue = Sheet.name;
     /* Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...)
     * della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
     */
@@ -1326,7 +1328,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // verranno contrassegnate come edit:true
     Sheet.edit = true;
     // ricreo sempre le specifiche
-    Resource.json.token = Sheet.sheet.token;
+    Resource.specs.token = Sheet.sheet.token;
     Resource.setSpecifications();
   }
 
@@ -1371,9 +1373,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       (field.dataset.added) ? field.remove() : Sheet.removeObject(field, token, Sheet.fields.get(token));
     }
     Sheet.fields.delete(token);
-    const index = Resource.json.filters.findIndex(filter => filter.id === e.currentTarget.dataset.label);
-    // se il filtro è presente in Resource.json.filters, lo elimino
-    if (index !== -1) Resource.json.filters.splice(index, 1);
+    const index = Resource.specs.filters.findIndex(filter => filter.id === e.currentTarget.dataset.label);
+    // se il filtro è presente in Resource.specs.filters, lo elimino
+    if (index !== -1) Resource.specs.filters.splice(index, 1);
   }
 
   app.undoDefinedColumn = (e) => {
@@ -1777,7 +1779,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       debugger;
       Sheet.create();
     }
-    Resource.json.token = Sheet.sheet.token;
+    Resource.specs.token = Sheet.sheet.token;
     Resource.setSpecifications();
 
     process.id = Sheet.sheet.id;

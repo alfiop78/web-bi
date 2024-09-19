@@ -1,11 +1,20 @@
 class Dashboards {
+  #json = {};
   constructor() { }
+
+  set json(value) {
+    this.#json = value;
+  }
+
+  get json() {
+    return this.#json;
+  }
 
   drawControls(filtersRef) {
     this.controls = [];
     // console.log(this.sheetSpecs);
-    if (this.json.filters) {
-      this.json.filters.forEach(filter => {
+    if (this.specs.filters) {
+      this.specs.filters.forEach(filter => {
         // creo qui il div class="filters" che conterrà il filtro
         // In questo modo non è necessario specificare i filtri nel template layout
         this.filterRef = document.createElement('div');
@@ -42,7 +51,7 @@ class Resources extends Dashboards {
   #prepareData = { cols: [], rows: [] };
   #specs_columns = {};
   #specs_group = { key: [], columns: [] };
-  #json = {
+  #specs = {
     token: null,
     name: null,
     data: {
@@ -106,24 +115,24 @@ class Resources extends Dashboards {
     return this.#resource;
   }
 
-  set json(value) {
-    this.#json = value;
+  set specs(value) {
+    this.#specs = value;
   }
 
-  get json() { return this.#json; }
+  get specs() { return this.#specs; }
 
   setSpecifications() {
     this.#specs_columns = {};
     this.#specs_group = { key: [], columns: [] };
-    this.json.name = Sheet.name;
+    this.specs.name = Sheet.name;
     for (const [token, field] of Sheet.fields) {
       const workbookField = WorkBook.field.get(token).field;
       Object.keys(WorkBook.field.get(token).field).forEach(key => {
         // console.log(key);
         let field_id_ds = (key === 'id') ? `${field}_${key}` : field;
-        if (this.json.data.columns[field_id_ds]) {
+        if (this.specs.data.columns[field_id_ds]) {
           // colonna già presente, la aggiungo a #specs_columns ma non modifico le proprietà type e p
-          this.#specs_columns[field_id_ds] = this.json.data.columns[field_id_ds];
+          this.#specs_columns[field_id_ds] = this.specs.data.columns[field_id_ds];
         } else {
           // colonna non presente nelle specifiche
           this.#specs_columns[field_id_ds] = {
@@ -135,7 +144,7 @@ class Resources extends Dashboards {
         }
 
         // json.data.group.key
-        const keyColumn = this.json.data.group.key.find(value => value.id === field_id_ds);
+        const keyColumn = this.specs.data.group.key.find(value => value.id === field_id_ds);
         if (!keyColumn) {
           // colonna non presente in json.data.group.key
           const visible = (key === 'id') ? false : true;
@@ -153,9 +162,9 @@ class Resources extends Dashboards {
     // console.log(this.#specs_group.key);
 
     for (const [token, metric] of Sheet.metrics) {
-      if (this.json.data.columns[metric.alias]) {
+      if (this.specs.data.columns[metric.alias]) {
         // metrica già presente in json.data.columns
-        this.#specs_columns[metric.alias] = this.json.data.columns[metric.alias];
+        this.#specs_columns[metric.alias] = this.specs.data.columns[metric.alias];
       } else {
         // colonna non presente in json.data.columns
         this.#specs_columns[metric.alias] = {
@@ -166,7 +175,7 @@ class Resources extends Dashboards {
         };
       }
 
-      const findMetric = this.json.data.group.columns.find(value => value.alias === metric.alias);
+      const findMetric = this.specs.data.group.columns.find(value => value.alias === metric.alias);
       if (!findMetric) {
         // non presente
         this.#specs_group.columns.push({
@@ -191,12 +200,12 @@ class Resources extends Dashboards {
         this.#specs_group.columns.push(findMetric);
       }
     }
-    this.json.data.columns = this.#specs_columns;
-    this.json.data.group.key = this.#specs_group.key;
-    this.json.data.group.columns = this.#specs_group.columns;
+    this.specs.data.columns = this.#specs_columns;
+    this.specs.data.group.key = this.#specs_group.key;
+    this.specs.data.group.columns = this.#specs_group.columns;
     this.bind();
     const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
-    sheet.specs = this.json;
+    sheet.specs = this.specs;
     debugger;
     window.localStorage.setItem(Sheet.sheet.token, JSON.stringify(sheet));
   }
@@ -204,10 +213,10 @@ class Resources extends Dashboards {
   bind() {
     let bind = [];
     // se il filtro impostato è uno solo salvo il bind con un solo elemento nell'array
-    if (this.json.filters.length === 1) {
+    if (this.specs.filters.length === 1) {
       bind = [0];
     } else {
-      const iter = this.json.filters.entries();
+      const iter = this.specs.filters.entries();
       let result = iter.next();
       while (!result.done) {
         let subBind = [];
@@ -222,7 +231,7 @@ class Resources extends Dashboards {
     }
     console.info('bind : ', bind);
     debugger;
-    this.json.bind = bind;
+    this.specs.bind = bind;
   }
 
   prepareData() {
@@ -235,14 +244,14 @@ class Resources extends Dashboards {
           this.#prepareData.cols.push({
             id: key,
             label: key,
-            type: this.json.data.columns[key].type,
-            p: this.json.data.columns[key].p
+            type: this.specs.data.columns[key].type,
+            p: this.specs.data.columns[key].p
           });
         });
       }
       let rowValue = [];
       for (const [key, value] of Object.entries(row)) {
-        switch (this.json.data.columns[key].type) {
+        switch (this.specs.data.columns[key].type) {
           case 'date':
             rowValue.push({ v: new Date(value), f: new Date(value), p: { className: 'myClass' } });
             break;
@@ -253,7 +262,7 @@ class Resources extends Dashboards {
             // (isNaN(parseFloat(value))) ? v.push({ v: 0 }) : v.push({ v: parseFloat(value) });
             break;
           default:
-            // (!this.json.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: this.json.data.columns[key].p } });
+            // (!this.specs.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: this.specs.data.columns[key].p } });
             rowValue.push({ v: value });
             break;
         }
@@ -268,8 +277,8 @@ class Resources extends Dashboards {
     //   this.#prepareData.cols.push({
     //     id: key,
     //     label: key,
-    //     type: this.json.data.columns[key].type,
-    //     p: this.json.data.columns[key].p
+    //     type: this.specs.data.columns[key].type,
+    //     p: this.specs.data.columns[key].p
     //   });
     //   // debugger;
     // }
@@ -278,7 +287,7 @@ class Resources extends Dashboards {
     // this.data.forEach(row => {
     //   let v = [];
     //   for (const [key, value] of Object.entries(row)) {
-    //     switch (this.json.data.columns[key].type) {
+    //     switch (this.specs.data.columns[key].type) {
     //       case 'date':
     //         if (value.length === 8) {
     //           // console.log('Data di 8 cifre (YYYYMMDD)', value);
@@ -296,7 +305,7 @@ class Resources extends Dashboards {
     //         // (isNaN(parseFloat(value))) ? v.push({ v: 0 }) : v.push({ v: parseFloat(value) });
     //         break;
     //       default:
-    //         // (!this.json.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: this.json.data.columns[key].p } });
+    //         // (!this.specs.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: this.specs.data.columns[key].p } });
     //         v.push({ v: value });
     //         break;
     //     }
@@ -311,7 +320,7 @@ class Resources extends Dashboards {
 
   groupFunction() {
     this.groupKey = [], this.groupColumn = [];
-    this.json.data.group.key.forEach(column => {
+    this.specs.data.group.key.forEach(column => {
       // if (column.properties.grouped) keyColumns.push(Resource.dataTable.getColumnIndex(column.id));
       // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
       // che viene modificata dall'utente a runtime
@@ -324,7 +333,7 @@ class Resources extends Dashboards {
         });
       }
     });
-    this.json.data.group.columns.forEach(metric => {
+    this.specs.data.group.columns.forEach(metric => {
       // salvo in groupColumnsIndex TUTTE le metriche, deciderò nella DataView
       // quali dovranno essere visibili (quelle con dependencies:false)
       // recupero l'indice della colonna in base al suo nome
@@ -371,7 +380,7 @@ class Resources extends Dashboards {
 
   createDataView() {
     this.viewColumns = [], this.viewMetrics = [];
-    this.json.data.group.key.forEach(column => {
+    this.specs.data.group.key.forEach(column => {
       if (column.properties.visible) {
         this.viewColumns.push(this.dataGroup.getColumnIndex(column.id));
         // imposto la classe per le colonne dimensionali
@@ -379,7 +388,7 @@ class Resources extends Dashboards {
       }
     });
     // dalla dataGroup, recupero gli indici di colonna delle metriche
-    this.json.data.group.columns.forEach(metric => {
+    this.specs.data.group.columns.forEach(metric => {
       if (!metric.dependencies && metric.properties.visible) {
         const index = this.dataGroup.getColumnIndex(metric.alias);
         // NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo
@@ -447,79 +456,5 @@ class Resources extends Dashboards {
     this.dataViewGrouped.setColumns(this.viewDefined);
     console.log('dataViewGrouped : ', this.dataViewGrouped);
   }
-
-  // WARN: da eliminare perchè ho provato il updateOrCreate() in init-dashboard.js
-  /* saveSpecifications() {
-    const url = (this.jsonExists === true) ? '/fetch_api/json/sheet_specs_update' : '/fetch_api/json/sheet_specs_store';
-    const params = JSON.stringify(this.json);
-    // debugger;
-    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
-    const req = new Request(url, init);
-    fetch(req)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((err) => console.error(err));
-  } */
-
-  /* prepareData() {
-    this.#prepareData = { cols: [], rows: [] };
-    // aggiungo le colonne
-    for (const key of Object.keys(this.data[0])) {
-      // prepareData.cols.push({ id: key, label: key });
-      // console.log(key);
-      this.#prepareData.cols.push({
-        id: key,
-        label: this.json.data.columns[key].label,
-        type: this.json.data.columns[key].type
-      });
-    }
-
-    let dateOptions = {
-      // weekday: "long",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    };
-    // aggiungo le righe
-    this.data.forEach(row => {
-      let v = [];
-      for (const [key, value] of Object.entries(row)) {
-        // if (key === 'DtArrivo_ds') console.log(new Date(value));
-        // console.log(value);
-        switch (this.json.data.columns[key].type) {
-          case 'date':
-            if (value.length === 8) {
-              // console.log('Data di 8 cifre (YYYYMMDD)', value);
-              const date = new Date(`${value.substring(0, 4)}-${value.substring(4, 6)}-${value.substring(6, 8)}`);
-              // console.log(new Intl.DateTimeFormat("it-IT", dateOptions).format(date));
-              v.push({ v: date, f: new Intl.DateTimeFormat("it-IT", dateOptions).format(date), p: { className: 'myClass' } });
-            } else {
-              v.push({ v: null });
-            }
-            break;
-          case 'number':
-            // TODO: valutare se formattare qui i valori (come sopra per le date) oppure con le funzioni Formatter (sotto)
-            // di GoogleChart
-            (isNaN(parseFloat(value))) ? v.push({ v: null }) : v.push({ v: parseFloat(value) });
-            // (isNaN(parseFloat(value))) ? v.push({ v: 0 }) : v.push({ v: parseFloat(value) });
-            break;
-          default:
-            (!this.json.data.columns[key].p) ? v.push({ v: value }) : v.push({ v: value, p: { className: this.json.data.columns[key].p } });
-            // v.push({ v: value });
-            break;
-        }
-      }
-      this.#prepareData.rows.push({ c: v });
-    });
-    // debugger;
-    // console.log(this.#prepareData);
-    return this.#prepareData;
-  } */
 
 }

@@ -108,11 +108,11 @@
         <menu class="standard">
           <section>
             <button type="button" class="btn-link default" data-fn="openDashboard" value="Apri">Apri</button>
-            <button id="btnSave" class="btn-link default" type="button" data-fn="save" disabled>Salva</button>
+            <button id="btnSave" class="btn-link default" type="button" data-fn="save">Salva</button>
             <button id="btnPublish" type="button" class="btn-buttons" value="Pubblica" data-fn="publish" disabled>Pubblica</button>
           </section>
           <section>
-            <div id="dashboardTitle" class="name" contenteditable="true" data-default-value="Titolo Dashboard">Titolo Dashboard</div>
+            <div id="dashboardTitle" class="name" contenteditable="true" data-default-value="Titolo Dashboard" data-mutation-observer="title">Titolo Dashboard</div>
           </section>
           <section class="dbStatus">
             {{-- session()->forget('db_name') --}}

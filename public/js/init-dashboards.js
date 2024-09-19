@@ -1,6 +1,6 @@
 var App = new Application();
 var Template = new Templates();
-var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizializzare quando ricevuti i dati dal datamart
+// var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizializzare quando ricevuti i dati dal datamart
 var Resource = new Resources();
 (() => {
   var app = {
@@ -28,13 +28,13 @@ var Resource = new Resources();
     const controls = Resource.drawControls(document.getElementById('filter_div'));
 
     // console.log(JSON.parse(Resource.view.toJSON()));
-    // utilizzo senza i metodi setter. Le proprietà del ChartWrapper sono incluse in Resource.json
-    // var wrap = new google.visualization.ChartWrapper(Resource.json.wrapper);
+    // utilizzo senza i metodi setter. Le proprietà del ChartWrapper sono incluse in Resource.specs
+    // var wrap = new google.visualization.ChartWrapper(Resource.specs.wrapper);
     // utilizzo con i metodi setter
     var wrap = new google.visualization.ChartWrapper();
     wrap.setChartType('Table');
     wrap.setContainerId(Resource.ref);
-    wrap.setOptions(Resource.json.wrapper.options);
+    wrap.setOptions(Resource.specs.wrapper.options);
 
     // NOTE: esempio array di View
     // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
@@ -57,7 +57,7 @@ var Resource = new Resources();
       );
       console.log('group():', Resource.dataGroup);
       // formatter
-      Resource.json.data.group.columns.forEach(metric => {
+      Resource.specs.data.group.columns.forEach(metric => {
         let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
         formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
       });
@@ -65,7 +65,7 @@ var Resource = new Resources();
       Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
       Resource.createDataView();
 
-      tableRef.draw(Resource.dataViewGrouped, Resource.json.wrapper.options);
+      tableRef.draw(Resource.dataViewGrouped, Resource.specs.wrapper.options);
     }
 
     // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
@@ -77,10 +77,10 @@ var Resource = new Resources();
 
     // Se presente un solo filtro effettuo il bind tra l'unico controller e il wrap
     // altrimenti dovrò creare una struttura di bind(), commentata in
-    if (Resource.json.filters.length === 1) {
+    if (Resource.specs.filters.length === 1) {
       gdashboard.bind(controls, wrap);
     } else {
-      Resource.json.bind.forEach((v, index) => {
+      Resource.specs.bind.forEach((v, index) => {
         // console.log('index', index);
         if (index === 0) {
           // il primo bind deve essere creato dall'istanza gdashboard, i successivi posso legarli ad una variabile
@@ -109,13 +109,13 @@ var Resource = new Resources();
     const controls = Resource.drawControls(document.getElementById('filter_div'));
 
     // console.log(JSON.parse(Resource.view.toJSON()));
-    // utilizzo senza i metodi setter. Le proprietà del ChartWrapper sono incluse in Resource.json
-    // var wrap = new google.visualization.ChartWrapper(Resource.json.wrapper);
+    // utilizzo senza i metodi setter. Le proprietà del ChartWrapper sono incluse in Resource.specs
+    // var wrap = new google.visualization.ChartWrapper(Resource.specs.wrapper);
     // utilizzo con i metodi setter
     var wrap = new google.visualization.ChartWrapper();
     wrap.setChartType('Table');
     wrap.setContainerId(Resource.ref);
-    wrap.setOptions(Resource.json.wrapper.options);
+    wrap.setOptions(Resource.specs.wrapper.options);
 
     // NOTE: esempio array di View
     // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
@@ -128,7 +128,7 @@ var Resource = new Resources();
       console.log('onReady');
       let tableRef = new google.visualization.Table(document.getElementById(Resource.ref));
       let keyColumns = [];
-      Resource.json.data.group.key.forEach(column => {
+      Resource.specs.data.group.key.forEach(column => {
         // if (column.properties.grouped) keyColumns.push(Resource.dataTable.getColumnIndex(column.id));
         // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
         // che viene modificata dall'utente a runtime
@@ -137,7 +137,7 @@ var Resource = new Resources();
         }
       });
       let groupColumnsIndex = [];
-      Resource.json.data.group.columns.forEach(metric => {
+      Resource.specs.data.group.columns.forEach(metric => {
         // salvo in groupColumnsIndex TUTTE le metriche, deciderò nella DataView
         // quali dovranno essere visibili (quelle con dependencies:false)
         // recupero l'indice della colonna in base al suo nome
@@ -157,11 +157,11 @@ var Resource = new Resources();
       Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
 
       let viewColumns = [], viewMetrics = [];
-      Resource.json.data.view.forEach(column => {
+      Resource.specs.data.view.forEach(column => {
         if (column.properties.visible) viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
       });
       // dalla dataGroup, recupero gli indici di colonna delle metriche
-      Resource.json.data.group.columns.forEach(metric => {
+      Resource.specs.data.group.columns.forEach(metric => {
         if (!metric.dependencies && metric.properties.visible) {
           const index = Resource.dataGroup.getColumnIndex(metric.alias);
 
@@ -183,8 +183,8 @@ var Resource = new Resources();
               // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
               let resultFormatted;
               // formattazione della cella con formatValue()
-              if (Resource.json.data.formatter[metric.alias]) {
-                const metricFormat = Resource.json.data.formatter[metric.alias];
+              if (Resource.specs.data.formatter[metric.alias]) {
+                const metricFormat = Resource.specs.data.formatter[metric.alias];
                 let formatter;
                 formatter = app[metricFormat.type](metricFormat.prop);
                 resultFormatted = (result) ? formatter.formatValue(result) : '-';
@@ -208,7 +208,7 @@ var Resource = new Resources();
       // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
       // console.log(Resource.dataGroup.getColumnProperties(0));
       Resource.dataViewGrouped.setColumns(viewDefined);
-      tableRef.draw(Resource.dataViewGrouped, Resource.json.wrapper.options);
+      tableRef.draw(Resource.dataViewGrouped, Resource.specs.wrapper.options);
     }
 
     // "ubicazione_ds" influenza "marca_veicolo_ds" -> "marca_veicolo_ds" influenza "modello_ds"
@@ -217,7 +217,7 @@ var Resource = new Resources();
     let binds;
     // Questa logica funziona con il bind() di un filtro verso quello successivo ma
     // possono esserci anche situazioni diverse, che sono da implementare
-    Resource.json.bind.forEach((v, index) => {
+    Resource.specs.bind.forEach((v, index) => {
       // console.log('index', index);
       if (index === 0) {
         // il primo bind deve essere creato dall'istanza gdashboard, i successivi posso legarli ad una variabile
@@ -244,7 +244,6 @@ var Resource = new Resources();
       .then(data => {
         if (!data) return;
         console.log(data);
-        debugger;
         Template.data = data;
         Template.id = data.id;
         // creo il template nel DOM
@@ -258,9 +257,9 @@ var Resource = new Resources();
       });
   }
 
-  // per ogni report lancio la fetch (in getData()) per recuperare i dati
+  // recupero dati dagli Sheet collegati a questa Dashboard
+  // TODO: predisporre una promise.all per scaricare tutte le risorse della Dashboard
   app.loadResources = (resources) => {
-    // TODO: predisporre una promise.all per scaricare tutte le risorse della Dashboard
     for (const [token, value] of Object.entries(resources)) {
       Resource.datamart_id = value.datamart_id;
       // scarico la risorsa (le specs) dal DB e successivamente invoco getData()
@@ -271,19 +270,13 @@ var Resource = new Resources();
         })
         .then((response) => response.json())
         .then((data) => {
-          Resource.json = JSON.parse(data.json_specs);
+          Resource.specs = JSON.parse(data.json_specs);
           // imposto il riferimento nel DOM, del layout, per questa risorsa/report
           Resource.ref = value.ref;
           app.getData();
         })
         .catch((err) => console.error(err));
     }
-  }
-
-  app.dashboardSelected = (e) => {
-    const dashboard = JSON.parse(window.localStorage.getItem(e.currentTarget.id));
-    document.querySelector('h1.title').innerHTML = dashboard.title;
-    app.getLayout(dashboard);
   }
 
   document.querySelectorAll('a[data-token]').forEach(a => {
@@ -298,10 +291,10 @@ var Resource = new Resources();
         .then((response) => response.json())
         .then(data => {
           console.log(data);
-          let json = JSON.parse(data.json_value);
-          window.sessionStorage.setItem(json.token, JSON.stringify(json));
-          document.querySelector('h1.title').innerHTML = json.title;
-          app.getLayout(json);
+          Resource.json = JSON.parse(data.json_value);
+          // window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
+          document.querySelector('h1.title').innerHTML = Resource.json.title;
+          app.getLayout(Resource.json);
         })
         .catch(err => {
           App.showConsole(err, 'error');
@@ -394,7 +387,7 @@ var Resource = new Resources();
         if (paginateData.next_page_url) {
           recursivePaginate(paginateData.next_page_url);
         } else {
-          // Non sono presenti altre pagine, visualizzo il dashboard
+          // Non sono presenti altre pagine, visualizzo la dashboard
           Resource.data = partialData;
           google.charts.setOnLoadCallback(app.draw());
           App.closeConsole();

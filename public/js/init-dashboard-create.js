@@ -2,7 +2,6 @@
 // abilitare il tasto "Salva"
 var App = new Application();
 var Template = new Templates();
-// var Dashboard = new Dashboards(); // istanza della Classe Dashboards, da inizializzare quando ricevuti i dati dal datamart
 var Storage = new SheetStorages();
 var Resource = new Resources();
 (() => {
@@ -19,7 +18,6 @@ var Resource = new Resources();
     dashboardName: document.getElementById('dashboardTitle'),
     // dialogs
     dlgDashboard: document.getElementById('dialog-dashboard-open'),
-    jsonDashboard: {},
     // buttons
     btnSave: document.getElementById('btnSave'),
     btnPublish: document.getElementById('btnPublish')
@@ -69,16 +67,47 @@ var Resource = new Resources();
   // observerList.observe(targetNode, config);
   observerList.observe(document.getElementById('body'), config);
 
+  // observer per gli oggetti con [data-mutation-observer]
+  // es. Titolo
+  const callbackObservers = (mutationList, observer) => {
+    // console.log(mutationList, observer);
+    for (const mutation of mutationList) {
+      if (mutation.type === 'attributes') {
+        console.log(`The ${mutation.attributeName} attribute was modified.`);
+        // console.log(mutation.target);
+        if (mutation.target.hasChildNodes()) {
+          console.log(mutation.target.dataset.mutationObserver);
+          // nell'attributo data-mutation-observer è presente il nome della proprietà del json da verificare
+          // TEST: 19.09.2024 da completare
+          /* const json = JSON.parse(window.sessionStorage.getItem(Resource.json.token));
+          if (json) {
+            if (json.title !== mutation.target.dataset.value) {
+              console.info("Dato modificato");
+              app.btnSave.disabled = false;
+            }
+          } */
+        }
+      }
+    }
+  };
+  // Create an observer instance linked to the callback function
+  const observers = new MutationObserver(callbackObservers);
+  document.querySelectorAll('*[data-mutation-observer]').forEach(element => {
+    observers.observe(element, { attributes: true, childList: false, subtree: false });
+  });
+
+
   // Viene rimosso 'hidden' dal #body. In questo modo la modifica viene
   // intercettata dall'observer e vengono associate le funzioni sugli elementi
   // che hanno l'attributo data-fn
   // TODO: utilizzare questa logica anche sulle altre pagine
   App.init();
 
-  app.updateSheet = async () => {
+  // aggiorno tutti gli oggetti della dashboard
+  app.updateSheets = async () => {
     let url, params, req = [];
     for (const token of Resource.resource.keys()) {
-      url = `/fetch_api/json/sheet_update`;
+      url = '/fetch_api/json/sheet_update';
       params = window.localStorage.getItem(token);
       const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
       req.push(new Request(url, init));
@@ -92,8 +121,8 @@ var Resource = new Resources();
         }))
       })
       .then(response => {
-        debugger;
         console.log(response);
+        App.showConsole('Tutti gli oggetti della Dashboard sono stati aggiornati', 'done', 2000);
       })
       .catch(err => {
         App.showConsole(err, 'error');
@@ -107,11 +136,12 @@ var Resource = new Resources();
     app.layoutRef.querySelectorAll('*').forEach(el => el.remove());
     delete app.btnSave.dataset.token;
     delete app.dashboardName.dataset.value;
-    app.btnSave.disabled = true;
-    app.btnPublish.disabled = true;
+    // app.btnSave.disabled = true;
+    // app.btnPublish.disabled = true;
     app.dashboardName.textContent = app.dashboardName.dataset.defaultValue;
   }
 
+  // recupero l'elenco delle Dashboard appartenenti al DB corrente
   app.openDashboard = async () => {
     app.clearDashboard();
     App.showConsole('Recupero elenco Dashboard', 'info');
@@ -144,6 +174,7 @@ var Resource = new Resources();
     app.dlgDashboard.showModal();
   }
 
+  // selezione della dashboard da aprire
   app.dashboardSelected = async (e) => {
     App.showConsole(`Recupero dati della Dashboard ${e.currentTarget.dataset.label}`, 'info');
     await fetch(`/fetch_api/name/${e.currentTarget.dataset.token}/dashboard_show`)
@@ -157,18 +188,23 @@ var Resource = new Resources();
         // imposto il titolo della dashboard
         app.dashboardName.textContent = data.name;
         app.dashboardName.dataset.value = data.name;
+        app.dashboardName.dataset.tempValue = data.name;
         // imposto il token sul tasto "Salva" per poter aggiornare la dashboard e non inserirla nel DB
         app.btnSave.dataset.token = data.token;
 
-        app.jsonDashboard = JSON.parse(data.json_value);
+        Resource.json = JSON.parse(data.json_value);
+        console.log(Resource.json);
         // imposto il template della dashboard selezionata
-        Template.id = app.jsonDashboard.layout;
+        Template.id = Resource.json.layout;
         // creo l'anteprima nel DOM
         Template.create();
         app.dlgDashboard.close();
+        // salvo la dashboard nel session storage, in questo modo posso tenere conto delle modifiche fatte e
+        // abilitare/disabilitare di conseguenza il tasto btnSave in base al MutationObserver
+        window.sessionStorage.setItem(Resource.json.token, JSON.stringify(Resource.json));
         App.closeConsole();
         // promise.all per recuperare tutti gli oggetti della dashboard
-        // TEST: provare la promise.race per poter recuperare i dati
+        // TODO: provare la promise.race per poter recuperare i dati
         app.getResources();
       })
       .catch(err => {
@@ -178,10 +214,10 @@ var Resource = new Resources();
   }
 
   app.getResources = () => {
-    console.log(app.jsonDashboard);
+    console.log(Resource.json);
     let urls = [];
     // ciclo le resources
-    for (const [token, value] of Object.entries(app.jsonDashboard.resources)) {
+    for (const [token, value] of Object.entries(Resource.json.resources)) {
       // NOTE: logica utilizzata in app.sheetSelected()
       Resource.token = token;
       // il ref corrente, appena aggiunto
@@ -189,12 +225,11 @@ var Resource = new Resources();
       // aggiungo un token per identificare, in publish(), il report (datamart_id)
       Resource.ref.dataset.token = token;
       // recupero le specifiche dello sheet dallo storage, TODO: da valutare se meglio recuperarlo dal DB
-      Resource.json = JSON.parse(window.localStorage.getItem(token)).specs;
+      Resource.specs = JSON.parse(window.localStorage.getItem(token)).specs;
       Resource.resource = {
         datamart_id: value.datamart_id,
         userId: value.user_id
       };
-      // urls.push(`/fetch_api/${Resource.resource.get(Resource.token).datamart_id}_${Resource.resource.get(Resource.token).user_id}/preview?page=1`)
       urls.push(`/fetch_api/${value.datamart_id}_${value.user_id}/preview?page=1`)
       // aggiungo la class 'defined' nel div che contiene il grafico/tabella
       Resource.ref.classList.add('defined');
@@ -236,7 +271,8 @@ var Resource = new Resources();
       });
   }
 
-  app.publish = async () => {
+  app.publish = async (e) => {
+    e.target.disabled = true;
     // il tasto "pubblica" deve :
     // - recuperare tutti gli oggetti della pagina (report)
     // - crearne i COPY_TABLE da WEB_BI_timestamp_userId -> WEB_BI_timestamp
@@ -257,8 +293,8 @@ var Resource = new Resources();
       })
       .then(data => {
         console.log(data);
-        if (data) App.showConsole("Pubblicazione completata", 'done', 2000);
-        app.updateSheet();
+        if (data) App.showConsole("Dashboard pubblicata", 'done', 2000);
+        app.updateSheets();
       })
       .catch(err => {
         App.showConsole(err, 'error');
@@ -266,8 +302,9 @@ var Resource = new Resources();
       });
   }
 
-  // onclick events
+  // Salvataggio della Dashboard
   app.save = async (e) => {
+    e.target.disabled = true;
     // se è presente dataset.token sto aggiornando una dashboard esistente
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     if (!app.dashboardName.dataset.value) {
@@ -275,26 +312,34 @@ var Resource = new Resources();
       app.dashboardName.focus();
       return false;
     }
+    // verifica di validità
+    if (Resource.resource.size === 0) {
+      App.showConsole('Nessun oggetto aggiunto alla Dashboard', 'error', 2000);
+      return false;
+    }
     const note = document.getElementById('note').value;
     // salvo il json 'dashboard-token' in bi_dashboards
     // TODO: aggiungere la prop 'published' (bool). Questa mi consentirà
     // di visualizzare la dashboard, solo le dashboards pubblicate possono
     // essere visualizzate
-    let json = {
+    Resource.json = {
       title: app.dashboardName.dataset.value,
-      note, token, type: 'dashboard',
+      note,
+      token,
+      type: 'dashboard',
       layout: Template.id,
       resources: Object.fromEntries(Resource.resource)
-    };
-    console.log(json);
+    }
+    console.log(Resource.json);
+    debugger;
     // salvo le specifiche solo in locale, quando pubblico la dashboard salvo le specifiche su DB
-    const sheet = JSON.parse(window.localStorage.getItem(Resource.json.token));
-    sheet.specs = Resource.json;
-    window.localStorage.setItem(Resource.json.token, JSON.stringify(sheet));
-    // window.localStorage.setItem(`specs_${Resource.json.token}`, JSON.stringify(Resource.json));
+    const sheet = JSON.parse(window.localStorage.getItem(Resource.specs.token));
+    sheet.specs = Resource.specs;
+    window.localStorage.setItem(Resource.specs.token, JSON.stringify(sheet));
+    // window.localStorage.setItem(`specs_${Resource.specs.token}`, JSON.stringify(Resource.specs));
     // const url = `/fetch_api/json/dashboard_store`;
     const url = (e.target.dataset.token) ? '/fetch_api/json/dashboard_update' : '/fetch_api/json/dashboard_store';
-    const params = JSON.stringify(json);
+    const params = JSON.stringify(Resource.json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
     await fetch(req)
@@ -308,7 +353,7 @@ var Resource = new Resources();
         if (data) {
           App.showConsole("Salvataggio completato", 'done', 2000);
           app.btnPublish.disabled = false;
-          e.target.disabled = true;
+          e.target.disabled = false;
         }
       })
       .catch((err) => {
@@ -445,7 +490,7 @@ var Resource = new Resources();
     Resource.token = e.currentTarget.dataset.token;
     // aggiungo un token per identificare, in publish(), il report (datamart_id)
     Resource.ref.dataset.token = e.currentTarget.dataset.token;
-    Resource.json = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
+    Resource.specs = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
     Resource.resource = {
       datamart_id: e.currentTarget.dataset.datamartId,
       userId: e.currentTarget.dataset.userId
@@ -481,7 +526,7 @@ var Resource = new Resources();
 
   app.drawTable = () => {
     // aggiungo i filtri se sono stati impostati nel preview sheet
-    Resource.json.filters.forEach(filter => app.createTemplateFilter(filter));
+    Resource.specs.filters.forEach(filter => app.createTemplateFilter(filter));
 
     Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
     // Resource.DOMref = new google.visualization.Table(document.getElementById('chart_div'));
@@ -492,7 +537,7 @@ var Resource = new Resources();
     Resource.dataGroup = new google.visualization.data.group(
       Resource.dataTable, Resource.groupKey, Resource.groupColumn
     );
-    Resource.json.data.group.columns.forEach(metric => {
+    Resource.specs.data.group.columns.forEach(metric => {
       let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
       formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
     });
@@ -500,15 +545,15 @@ var Resource = new Resources();
 
     Resource.createDataView();
     // console.info('DataView', Resource.dataViewGrouped);
-    Resource.DOMref.draw(Resource.dataViewGrouped, Resource.json.wrapper.options);
+    Resource.DOMref.draw(Resource.dataViewGrouped, Resource.specs.wrapper.options);
   }
 
   app.btnRemoveFilter = (e) => {
     const filterId = e.target.dataset.id;
-    // const f = Resource.json.filters.find(filter => filter.containerId === filterId);
+    // const f = Resource.specs.filters.find(filter => filter.containerId === filterId);
     // Cerco, con findIndex(), l'indice corrispondente all'elemento da rimuovere
-    const index = Resource.json.filters.findIndex(filter => filter.containerId === filterId);
-    Resource.json.filters.splice(index, 1);
+    const index = Resource.specs.filters.findIndex(filter => filter.containerId === filterId);
+    Resource.specs.filters.splice(index, 1);
     // lo rimuovo anche dal DOM
     const filterRef = document.getElementById(filterId);
     filterRef.parentElement.remove();
@@ -592,17 +637,17 @@ var Resource = new Resources();
     // ... oldFilter lo inserisco nel .filter-container di provenienza
     parentDiv.insertBefore(elementRef.parentElement, oldFilter.parentElement);
     // Salvo tutti i filtri nell'ordine in cui sono stati spostati con drag&drop
-    Resource.json.filters = [];
+    Resource.specs.filters = [];
     parentDiv.querySelectorAll('.filter-container').forEach(filter => {
       const filterDiv = filter.querySelector('.preview-filter');
-      Resource.json.filters.push({
+      Resource.specs.filters.push({
         id: filterDiv.dataset.name,
         containerId: filterDiv.id,
         filterColumnLabel: filterDiv.innerText,
         caption: filterDiv.innerText
       });
     });
-    console.log('filters dopo il drop : ', Resource.json.filters);
+    console.log('filters dopo il drop : ', Resource.specs.filters);
   }
 
   // End Drag events
@@ -616,6 +661,13 @@ var Resource = new Resources();
   }
 
   app.dashboardName.oninput = (e) => App.checkTitle(e.target);
+
+  app.resourceRemove = () => {
+    console.log(Resource.ref);
+    Resource.ref.querySelector('div').remove();
+    Resource.ref.classList.remove('defined');
+    document.querySelectorAll('#filter_div.contentObject>*').forEach(el => el.remove());
+  }
 
   app.getTemplates();
 
