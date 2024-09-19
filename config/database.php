@@ -202,7 +202,6 @@ return [
       'prefix_indexes' => true,
       'schema' => ['decisyon_cache'],
       // 'schema' => ['decisyon_cache', 'automotive_bi_data'],
-      // 'schema' => '',
       'sslmode' => 'prefer',
       'options' => [
         'processor' => Illuminate\Database\Query\Processors\Processor::class,   //default
