@@ -81,18 +81,19 @@ class Sheets {
     for (const [token, metric] of this.metrics) {
       switch (metric.type) {
         case 'basic':
-          (!this.sheet.hasOwnProperty('metrics')) ? this.sheet.sheet.metrics = { [token]: metric } : this.sheet.sheet.metrics[token] = metric;
+          (!this.sheet.sheet.hasOwnProperty('metrics')) ? this.sheet.sheet.metrics = { [token]: metric } : this.sheet.sheet.metrics[token] = metric;
           break;
         case 'advanced':
-          (!this.sheet.hasOwnProperty('advMetrics')) ? this.sheet.sheet.advMetrics = { [token]: metric } : this.sheet.sheet.advMetrics[token] = metric;
+          (!this.sheet.sheet.hasOwnProperty('advMetrics')) ? this.sheet.sheet.advMetrics = { [token]: metric } : this.sheet.sheet.advMetrics[token] = metric;
           break;
         default:
           // compositeMetrics
-          (!this.sheet.hasOwnProperty('compositeMetrics')) ? this.sheet.sheet.compositeMetrics = { [token]: metric } : this.sheet.sheet.compositeMetrics[token] = metric;
+          (!this.sheet.sheet.hasOwnProperty('compositeMetrics')) ? this.sheet.sheet.compositeMetrics = { [token]: metric } : this.sheet.sheet.compositeMetrics[token] = metric;
           // this.sheet.compositeMetrics[token] = metric;
           break;
       }
     }
+    debugger;
 
   }
 

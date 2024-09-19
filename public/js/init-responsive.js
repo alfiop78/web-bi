@@ -388,7 +388,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const dropzone = document.getElementById("dropzone-columns");
     dropzone.dataset.error = (Sheet.checkMetricNames(e.target.dataset.token, e.target.innerText)) ? true : false;
     if (dropzone.dataset.error === "true") {
-      App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "warn", 2500);
+      App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "error", 2500);
     } else {
       // imposto l'attributo [data-modified] in modo da aggiornare lo Sheet in localStorage
       // e, alla successiva apertura dello Sheet, ritrovarmi con le stesse modifiche fatte qui
@@ -424,7 +424,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         // Questo controllo è aggiunto dopo addMetric in modo da poter impostare il focus sull'elemento
         // già presente nel DOM.
         if (Sheet.checkMetricNames(metric.token, metric.alias)) {
-          App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "warn", 2500);
+          App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "error", 2500);
           // imposto il cursore nel <code> da modificare
           document.querySelector(`.metric-defined > code[data-token='${elementRef.id}']`).focus({ focusVisible: true });
           e.currentTarget.dataset.error = true;
@@ -432,7 +432,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         break;
       case 'composite':
         if (Sheet.checkMetricNames(metric.token, metric.alias)) {
-          App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "warn", 2500);
+          App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "error", 2500);
           // imposto il cursore nel <code> da modificare
           document.querySelector(`.metric-defined > code[data-token='${elementRef.id}']`).focus({ focusVisible: true });
           e.currentTarget.dataset.error = true;
@@ -1307,6 +1307,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // verifico se ci sono elementi modificati andando a controllare gli elmeneti con [data-adding] e [data-removed]
     Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
     // se il report è in edit ed è stata fatta una modifica eseguo update()
+    debugger;
     if (Sheet.edit === true) {
       // il report è già presente in local ed è stato aperto
       // se ci sono state delle modifiche eseguo update
@@ -1521,7 +1522,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   // Creazione della struttura necessaria per creare le query
   app.createProcess = async (e) => {
     // verifico se è stato inserito il titolo dello Sheet
-    debugger;
     if (!app.sheetName.dataset.value) {
       App.showConsole('Inserire il titolo dello Sheet', 'warning', 2000);
       app.sheetName.focus();
@@ -1550,7 +1550,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       }
     }
     process.fields = fields;
-    debugger;
     // BUG: 28.08.2024 qui c'è da verificare se, in un report con una metrica "timingFunctions", sia stato messo un livello
     // della dimensione TIME, altrimenti, in setFiltersMetricTable_new, la variabile time_sql non viene valorizzata
 
@@ -1635,7 +1634,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // se non ci sono filtri nel Report bisogna far comparire un avviso
     // perchè l'elaborazione potrebbe essere troppo onerosa
     if (Sheet.filters.size === 0) {
-      App.showConsole('Non sono presenti filtri nel report', 'error', 5000);
+      App.showConsole('Non sono presenti filtri nel report', 'error', 3000);
       return false;
     } else {
       Sheet.filters.forEach(token => {
@@ -1781,6 +1780,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
     Resource.specs.token = Sheet.sheet.token;
     Resource.setSpecifications();
+    debugger;
 
     process.id = Sheet.sheet.id;
     process.datamartId = Sheet.userId;
@@ -2451,7 +2451,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     });
     console.info('controllo from : ', Sheet.from);
     console.info('controllo joins : ', Sheet.joins);
-    debugger;
   }
 
   app.showTablePreview = async (e) => {
