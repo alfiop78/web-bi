@@ -93,8 +93,6 @@ class Sheets {
           break;
       }
     }
-    debugger;
-
   }
 
   // il tasto Aggiorna deve essere attivato solo quando ci sono delle modifiche fatte

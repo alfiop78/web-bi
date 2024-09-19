@@ -388,12 +388,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const dropzone = document.getElementById("dropzone-columns");
     dropzone.dataset.error = (Sheet.checkMetricNames(e.target.dataset.token, e.target.innerText)) ? true : false;
     if (dropzone.dataset.error === "true") {
-      App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "error", 2500);
+      App.showConsole("Sono presenti metriche con nomi uguali, rinominare la metrica", "error", 2500);
     } else {
       // imposto l'attributo [data-modified] in modo da aggiornare lo Sheet in localStorage
       // e, alla successiva apertura dello Sheet, ritrovarmi con le stesse modifiche fatte qui
       // (come per l'edit della funzione di aggregazione)
-      if (Sheet.metrics.get(e.target.dataset.token).alias.toLowerCase() !== e.target.innerText.toLowerCase()) e.target.dataset.modified = true;
+      if (Sheet.edit) {
+        if (Sheet.metrics.get(e.target.dataset.token).alias.toLowerCase() !== e.target.innerText.toLowerCase()) e.target.dataset.modified = true;
+      }
       Sheet.metrics.get(e.target.dataset.token).alias = e.target.innerText;
     }
   }
@@ -1295,19 +1297,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     document.querySelectorAll('#btn-sql-preview, #btn-sheet-preview').forEach(button => button.disabled = false);
   }
 
-  app.publish = () => {
-    // TODO: utilizzare upsert per fare il save or update, sia del report che delle metriche/filtri
-    // TODO: recupero tutti gli oggetti da versionare (metriche, filtri)
-    // TODO: verifico se è da versionare anche il workbook
-  }
-
   app.saveSheet = async () => {
     Sheet.name = app.sheetName.dataset.value;
     Sheet.userId = userId;
     // verifico se ci sono elementi modificati andando a controllare gli elmeneti con [data-adding] e [data-removed]
     Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
     // se il report è in edit ed è stata fatta una modifica eseguo update()
-    debugger;
     if (Sheet.edit === true) {
       // il report è già presente in local ed è stato aperto
       // se ci sono state delle modifiche eseguo update
@@ -1316,6 +1311,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         // elimino il datamart perchè è stato modificato
         let exist = await Sheet.exist();
         if (exist) {
+          debugger;
           let result = await Sheet.delete();
           console.log('datamart eliminato : ', result);
           if (result && Resource.tableRef) Resource.tableRef.clearChart();
