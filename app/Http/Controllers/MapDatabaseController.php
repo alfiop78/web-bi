@@ -63,8 +63,7 @@ class MapDatabaseController extends Controller
   public function timeDimensionExists()
   {
     // dd(Schema::connection('vertica_odbc')->hasTable('decisyon_cache.WB_DATE')); ok
-    // return (Schema::connection(session('db_client_name'))->hasTable('WB_DATE')); ok (in locale)
-    return (Schema::connection(session('db_client_name'))->hasTable('decisyon_cache.WB_DATE'));
+    return (Schema::connection(session('db_client_name'))->hasTable('WB_DATE')); // ok (in locale)
   }
 
   // test connessione vertica (senza utilizzo di Eloquen/ORM)
