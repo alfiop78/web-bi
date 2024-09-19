@@ -1,5 +1,5 @@
 <?php
-// copiato da PostgresGrammar
+// copiato da PostgresGrammar.php
 namespace Illuminate\Database\Schema\Grammars;
 
 use Illuminate\Database\Schema\Blueprint;
