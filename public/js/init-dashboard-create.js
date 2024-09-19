@@ -450,25 +450,26 @@ var Resource = new Resources();
               // console.log(response);
               if (!response.ok) { throw Error(response.statusText); }
               return response;
-            }).then(response => response.json()).then((paginate) => {
-              partialData[index] = partialData[index].concat(paginate.data);
-              if (paginate.next_page_url) {
-                recursivePaginate(paginate.next_page_url);
-                console.log(partialData[index]);
-              } else {
-                // Non sono presenti altre pagine, visualizzo la dashboard
-                console.log('tutte le paginate completate :', partialData[index]);
-                Resource.data = partialData[index];
-                google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
-              }
-            }).catch((err) => {
-              App.showConsole(err, 'error');
-              console.error(err);
-            });
+            }).then(response => response.json())
+              .then((paginate) => {
+                partialData[index] = partialData[index].concat(paginate.data);
+                if (paginate.next_page_url) {
+                  recursivePaginate(paginate.next_page_url, index);
+                  console.log(partialData[index]);
+                } else {
+                  // Non sono presenti altre pagine, visualizzo la dashboard
+                  console.log('tutte le paginate completate :', partialData[index]);
+                  Resource.data = partialData[index];
+                  google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
+                }
+              }).catch((err) => {
+                App.showConsole(err, 'error');
+                console.error(err);
+              });
           }
           partialData[index] = pagData.data;
           if (pagData.next_page_url) {
-            recursivePaginate(pagData.next_page_url);
+            recursivePaginate(pagData.next_page_url, index);
           } else {
             // Non sono presenti altre pagine, visualizzo il dashboard
             Resource.data = partialData[index];
