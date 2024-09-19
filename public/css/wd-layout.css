@@ -235,7 +235,7 @@ menu.standard>.dbStatus>span[data-connected] {
   align-items: center;
   padding: 0px 8px;
   border-radius: 4px;
-  column-gap: 1em;
+  column-gap: .5em;
   background-color: green;
   color: white;
 }

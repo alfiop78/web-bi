@@ -11,7 +11,6 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/wd-layout.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
-  <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" /> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-symbols.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
@@ -19,6 +18,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-preview-table.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-mapdb.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-sheet-page.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/wb-table-preview.css') }}" />
   <!-- Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />
   <script src="{{ asset('/js/Application.js') }}"></script>

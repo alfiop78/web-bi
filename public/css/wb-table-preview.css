@@ -1,0 +1,44 @@
+.g-tableHeader {
+  background-color: #494949;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.g-tableRow {
+  /* line-height: 1rem; */
+}
+
+.g-headerCell {
+  color: white;
+  border: none !important;
+  font-size: .8rem;
+  background-color: #494949;
+  /* text-transform: uppercase; */
+}
+
+/* colonne con metriche */
+.g-headerCell.col-metrics {
+  color: #494949;
+  background-color: var(--mark-color);
+}
+
+.g-tableCell {
+  color: #494949;
+  padding: 4px 8px !important;
+  white-space: nowrap;
+  border: none !important;
+}
+
+.g-tableCell.col-metrics {
+  text-align: end;
+}
+
+.g-oddRow {
+
+}
+
+.g-hoverRow {
+
+}
+
+.g-rowNumberCell {}

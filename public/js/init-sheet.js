@@ -118,15 +118,25 @@ function drawDatamart() {
   // imposto le opzioni per la dataTable
   Resource.options = {
     title: 'titolo report',
-    showRowNumber: true,
+    showRowNumber: false,
     allowHTML: true,
     frozenColumns: 0,
     page: 'enabled',
-    pageSize: 20,
+    pageSize: 18,
     alternatingRowStyle: true,
     // sort: 'event',
     width: '100%',
-    height: '100%'
+    height: '100%',
+    cssClassNames: {
+      headerRow: "g-tableHeader",
+      tableRow: "g-tableRow",
+      oddTableRow: "g-oddRow",
+      selectedTableRow: "g-selectedRow",
+      hoverTableRow: "g-hoverRow",
+      headerCell: "g-headerCell",
+      tableCell: "g-tableCell",
+      rowNumberCell: "g-rowNumberCell"
+    }
   };
   // NOTE: prova impostazione CSS su una colonna
   // Resource.dataTable.setColumnProperty(1, 'className', 'cssc1')

@@ -8,7 +8,8 @@ table{
 }
 
 table .col-metrics {
-  background-color: #4682b440;
+  /* background-color: var(--mark-color); */
+  background-color: #f3f3f3;
   color: #494949;
   font-weight: bold;
 }
