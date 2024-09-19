@@ -114,7 +114,7 @@ return [
       'sslmode' => 'prefer',
     ],
 
-    'vertica_odbc' => [
+    /* 'vertica_odbc' => [
       'driver' => 'odbc',
       'dsn' => 'VMart251',
       'url' => env('DATABASE_URL'),
@@ -137,7 +137,7 @@ return [
           'schema' => Illuminate\Database\Schema\Grammars\MyVerticaGrammar::class      // Ho creato MyVerticaGrammar.php
         ]
       ]
-    ],
+    ], */
 
     'sqlsrv' => [
       'driver' => 'sqlsrv',
