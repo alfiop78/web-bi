@@ -992,7 +992,7 @@
                               <ul id="ul-columns-handler" class="custom-scrollbar"></ul>
                             </div>
                             <section id="datatable">
-                              <table id="preview-datamart" class="custom-scrollbar"></table>
+                              <table id="preview-datamart"></table>
                             </section>
                           </div>
                         </section>
