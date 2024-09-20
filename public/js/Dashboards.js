@@ -187,7 +187,7 @@ class Resources extends Dashboards {
             visible: true,
             formatter: {
               type: 'number', format: 'default', prop: {
-                negativeColor: red, negativeParens: true, fractionDigits: 0, groupingSymbol: '.'
+                negativeColor: 'red', negativeParens: true, fractionDigits: 0, groupingSymbol: '.'
               }
             }
           },

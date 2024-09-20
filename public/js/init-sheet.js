@@ -40,6 +40,16 @@ function updatedSheet() {
 let app = {
   number: function(properties) {
     return new google.visualization.NumberFormat(properties);
+    // TEST: per provare il colore sui numeri negativi (non funziona, da rivedere 20.09.2024)
+    /* const prop = {
+      fractionDigits: 0,
+      negativeColor: 'red',
+      negativeParens: true,
+      groupingSymbol: '.',
+      // suffix: ' €'
+    };
+    return new google.visualization.NumberFormat(prop); */
+
   }
 }
 
@@ -215,7 +225,7 @@ function previewReady() {
     let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
     formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
   });
-  // console.log('group():', Resource.dataGroup);
+  // console.log('dataGroup():', Resource.dataGroup);
   // console.log(Resource.dataGroup.getColumnIndex())
   // Imposto le label memorizzate in group.key. In questo caso potrei utilizzare gli object da passare
   // a group(), invece degli indici, per le colonne, è la stessa logica utilizzata per le metriche.

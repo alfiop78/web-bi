@@ -1,6 +1,6 @@
 table {
-  display: inline-block!important;
-  overflow-x: unset!important;
+  display: inline-block !important;
+  overflow-x: unset !important;
   width: 100%;
   height: 1080px;
 }
@@ -21,16 +21,16 @@ table {
   border-bottom-right-radius: 4px;
 }
 
-.g-tableRow {
-  /* line-height: 1rem; */
-}
+/* .g-tableRow {
+  line-height: 1rem;
+} */
 
 .g-headerCell {
   color: white;
   border: none !important;
   font-size: .8rem;
   background-color: #494949;
-  padding: 1em!important;
+  padding: 1em !important;
 }
 
 /* colonne con metriche */
@@ -54,6 +54,71 @@ table {
   background-color: #f4f4f469;
 }
 
-.g-hoverRow {}
+/* .g-hoverRow {} */
 
-.g-rowNumberCell {}
+/* .g-rowNumberCell {} */
+
+.google-visualization-table .gradient {
+  background-image: unset!important;
+}
+
+/* paginate */
+.google-visualization-table-div-page {
+  font-family: inherit!important;
+  padding: 2px!important;
+  background-color: #494949!important;
+  background-image: unset!important;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.google-visualization-table-div-page [role="button"] {
+  padding: 1em;
+  font-family: inherit!important;
+  font-size: 1rem!important;
+  line-height: 1rem!important;
+  border: none;
+}
+
+.goog-custom-button {
+  background: unset!important;
+  margin: unset!important;
+}
+
+.google-visualization-table-page-next::before {
+  font-size: 1.5rem;
+  color: var(--mark-color);
+}
+
+.google-visualization-table-page-prev::before {
+  font-size: 1.5rem;
+  color: var(--mark-color);
+}
+
+.goog-custom-button-outer-box, .goog-custom-button-inner-box {
+  border-style: unset!important;
+  border-color: unset!important;
+}
+
+/* tasti numeri pagine */
+.google-visualization-table-page-numbers {
+  zoom: unset!important;
+  padding: 1em;
+}
+
+.google-visualization-table-page-number {
+  border: unset!important;
+  font-size: inherit!important;
+  background-color: var(--main-bg-color)!important;
+  min-width: 19px!important;
+}
+
+.google-visualization-table-page-number:hover {
+  border: unset!important;
+  background-color: var(--mark-color)!important;
+}
+
+/* numero di pagina corrente */
+.google-visualization-table-page-number.current {
+  background-color: var(--mark-color)!important;
+}
