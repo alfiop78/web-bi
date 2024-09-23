@@ -3424,5 +3424,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         console.error(err);
       });
   }
+
   app.timeDimensionExists();
+
 })();

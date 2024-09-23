@@ -124,4 +124,17 @@ var App = new Application();
     btn.onclick = () => document.querySelector('dialog[open]').close();
   });
 
+  document.querySelectorAll('#drawer .navContent>a:not([title="Dashboards"])').forEach(el => {
+    el.onclick = (e) => {
+      const connectedId = document.getElementById('db-connection-status');
+      // verifico se è stata stabilita una connessione al DB
+      if (+connectedId.dataset.connected === 0) {
+        e.preventDefault();
+        App.showConsole('Nessun database connesso', 'error', 2000);
+        return false;
+      }
+    }
+  });
+
+
 })();
