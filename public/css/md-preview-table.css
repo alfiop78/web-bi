@@ -4,7 +4,7 @@ table{
   overflow-x: auto;
   width: 100%;
   /* height: 100%; */
-  height: 1080px;
+  /* height: 1080px; */
   margin: 0 auto;
   border-spacing: 0;
 }
@@ -79,9 +79,11 @@ thead th[data-metric-token]{
 }
 
 .table-preview>.table-content{
-  position: absolute;
-  width: 100%;
-  height: calc(100% - 38px);
+  position: relative;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .sheet-preview>.table-content{

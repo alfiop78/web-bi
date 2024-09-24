@@ -11,10 +11,17 @@ html, body{
 
 .wrapper-step{
   display: grid;
-  grid-template-rows: 1fr auto;
+  /* grid-template-rows: 2fr 1fr; */
+  grid-template-rows: minmax(550px, max-content) auto;
   height: 100%;
   width: 100%;
   padding: 1em;
+}
+
+.wrapper-step > .row {
+  /* resize: vertical; */
+  height: auto;
+  grid-row: 2;
 }
 
 .actions{
@@ -26,13 +33,11 @@ html, body{
 
 #canvas-area{
   width: 100%;
-  /* position: relative; */
   overflow: hidden;
   display: grid;
-  /* grid-template-rows: 1fr; */
-  /* grid-auto-flow: row; */
-  /* align-items: start; */
   background-color: gainsboro;
+  resize: vertical;
+  grid-row: 1 / 2;
 }
 
 svg#svg {
