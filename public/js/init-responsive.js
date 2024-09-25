@@ -1472,14 +1472,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       app.body.dataset.step = 2;
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
       app.addTablesStruct();
-      // salvo il workbook creato, tenendo conto della prop 'updated_at', se ci sono
-      // state variazioni la aggiorno altrimenti no
-      // TODO: 28.08.2024 quando non viene modificato nulla non devo salvare il workbook
       WorkBook.save();
-      App.showConsole("Salvataggio del WorkBook in corso...", "done", 2000);
       // 17.09.2024 imposto un nuovo Sheet, se non ne è presente uno già definito
       // Se l'oggetto della Classe Sheets non è inizializzato, apro un nuovo Sheet dal titolo 'New Sheet'
-      console.log(Sheet);
+      // console.log(Sheet);
       if (!Sheet) {
         Sheet = new Sheets(app.sheetName.dataset.defaultValue, rand().substring(0, 7), WorkBook.workBook.token);
         SheetStorage.sheet = Sheet.sheet.token;

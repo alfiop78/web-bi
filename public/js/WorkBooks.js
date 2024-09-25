@@ -9,7 +9,7 @@ class Sheets {
     // lo Sheet viene preparato qui, in base ai dati presenti nel WorkBook passato qui al Costruttore
     // this.workBookToken = WorkBookToken;
     this.options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
-    this.sheet = { token, type: 'sheet', workbook_ref: WorkBookToken, sheet : {}, specs : {} };
+    this.sheet = { token, type: 'sheet', workbook_ref: WorkBookToken, sheet: {}, specs: {} };
     this.name = name;
     // mappo gli elmenti rimossi dal report in fase di edit. Questo mi consentirà
     // di stabilire se aggiornare "updated_at" del report oppure no
@@ -228,7 +228,6 @@ class Sheets {
 
 class WorkBooks {
   #activeTable;
-  #elements = new Map();
   #field = new Map();
   #fields = new Map();
   #filters = new Map();
@@ -468,7 +467,10 @@ class WorkBooks {
     if (!this.workBook.hasOwnProperty('created_at')) this.workBook.created_at = new Date().toLocaleDateString('it-IT', this.#options);
     if (this.edit) {
       // sono in edit mode, se sono state fatte modifiche aggiorno 'updated_at'
-      if (this.workBookChange.size !== 0) this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+      if (this.workBookChange.size !== 0) {
+        this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+        App.showConsole("Salvataggio del WorkBook in corso...", "done", 2000);
+      }
     } else {
       // non sono in edit mode, salvo sempre 'updated_at'
       this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
