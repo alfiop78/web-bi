@@ -16,6 +16,7 @@ html, body{
   height: 100%;
   width: 100%;
   padding: 1em;
+  grid-row-gap: 8px;
 }
 
 .wrapper-step > .row {
@@ -335,11 +336,13 @@ section[data-table-from] .table, section[data-table-to] .table{
 .wrapper-sheet{
   display: grid;
   grid-auto-flow: column;
-  grid-template-columns: 340px 4fr;
+  /* grid-template-columns: 340px 4fr; */
+  grid-template-columns: minmax(200px,auto) repeat(11, auto);
   grid-column-gap: .5rem;
   width: 100%;
   height: 100%;
-  padding: .5em;
+  background-color: #e2e2e2;
+  padding: 8px;
 }
 
 .dropzone.columns .columns-area{
@@ -450,7 +453,7 @@ p.field-search {
   justify-content: space-between;
 }
 
-.properties .input-search::placeholder {
+#workbook-content-area .input-search::placeholder {
   color: var(--main-primary-color);
 }
 

@@ -8,7 +8,7 @@
   <link rel="icon" href="/favicon.png" type="image/png" />
   <title>Web-BI | HOME</title>
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/wd-layout.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/wb-layout.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-symbols.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer.css') }}" />

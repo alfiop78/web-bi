@@ -250,16 +250,25 @@ menu.standard>.dbStatus>span[data-connected="0"] {
   flex-direction: column;
   background: white;
   border-radius: 4px;
-  padding: 1rem;
+  padding: 1em;
   box-shadow: 0px 1px 6px 1px #cac6c6;
 }
 
 .visual {
   height: 100%;
-  /* width: 100%; */
-  /* background: gainsboro; */
   padding: .5em;
   margin: 0.5rem 0;
+}
+
+.card.grid {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  /* card con contenuti header, body, footer */
+}
+
+.card.grid>.visual {
+  display: grid;
+  grid-template-rows: auto 1fr;
 }
 
 h1 {
@@ -272,7 +281,6 @@ h1 {
   grid-template-columns: repeat(12, 1fr);
   grid-gap: 2em;
   position: relative;
-  /* align-items: flex-start; */
 }
 
 .row.align-end {
@@ -282,6 +290,8 @@ h1 {
 .row>.col {
   grid-column: 1 / 13;
   display: grid;
+  /* padding: 8px; */
+  padding: 1em;
 }
 
 .row>.col.menu {
@@ -478,4 +488,9 @@ span.markContent {
 .name[contenteditable="true"]:focus,
 .name[contenteditable="true"]:hover {
   opacity: 1;
+}
+
+/* .col con border */
+.col.border {
+  border: solid thin #e2e2e2;
 }

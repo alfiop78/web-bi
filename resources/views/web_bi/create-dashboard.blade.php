@@ -7,7 +7,7 @@
   <link rel="icon" href="/favicon.png" type="image/png" />
   <title>Gaia-BI | Creazione Dashboard</title>
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/wd-layout.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/wb-layout.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
   <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout.css') }}" /> -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />

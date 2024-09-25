@@ -9,7 +9,7 @@
   <!-- TODO: tooltip e loader -->
   <!-- <link rel="stylesheet" href="{{ asset('/css/md-tooltip.css') }}"> -->
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/wd-layout.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/wb-layout.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/material-symbols.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-drawer.css') }}" />
@@ -403,7 +403,7 @@
           </section>
         </dialog>
 
-        <dialog id="dialog-time" data-x="0" data-y="40" class="medium absolute moveable">
+        <dialog id="dialog-time" data-x="0" data-y="40" class="absolute moveable">
           <section class="dlg-grid">
             <h5 class="title moveable">Imposta relazione con tabella TIME</h5>
             <section class="dlg-content">
@@ -481,7 +481,7 @@
         </dialog>
 
         <!-- creazione metrica filtrata -->
-        <dialog id="dlg-metric" data-x="0" data-y="40" class="medium absolute moveable droppable">
+        <dialog id="dlg-metric" data-x="0" data-y="40" class="absolute moveable droppable">
           <section class="dlg-grid">
             <h5 class="title moveable">Creazione Metrica avanzata</h5>
             <section class="dlg-content">
@@ -584,7 +584,7 @@
           </section>
         </dialog>
 
-        <dialog id="dlg-custom-metric" data-x="0" data-y="40" class="medium absolute moveable">
+        <dialog id="dlg-custom-metric" data-x="0" data-y="40" class="absolute moveable">
           <section class="dlg-grid">
             <h5 class="title moveable">Creazione Metrica composta</h5>
             <section class="dlg-content">
@@ -656,7 +656,7 @@
           </section>
         </dialog>
 
-        <dialog id="dlg-sql-info" data-x="0" data-y="40" class="medium absolute moveable">
+        <dialog id="dlg-sql-info" data-x="0" data-y="40" class="absolute moveable">
           <section class="grid dlg-grid row-4">
             <h5 class="title moveable">SQL</h5>
             <menu>
@@ -678,7 +678,7 @@
           </section>
         </dialog>
 
-        <dialog id="dlg-filters" data-x="0" data-y="40" class="medium absolute moveable">
+        <dialog id="dlg-filters" data-x="0" data-y="40" class="absolute moveable">
           <section class="dlg-grid">
             <h5 class="title moveable">Creazione Filtro</h5>
             <section class="dlg-content">
@@ -709,7 +709,7 @@
 
         <div class="wrapper">
 
-          <dialog id="dlg-columns" data-x="0" data-y="40" class="medium absolute moveable">
+          <dialog id="dlg-columns" data-x="0" data-y="40" class="absolute moveable">
             <section class="dlg-grid">
               <h5 class="title moveable">Definizione colonne</h5>
               <section class="dlg-content">
@@ -847,7 +847,7 @@
                       </div>
                     </section>
                     <section class="row">
-                      <div class="col col-3">
+                      <div class="col col-3 border">
                         <section class="list-search buttonSection">
                           <input type="search" id="table-search" data-element-search="tables" placeholder="Ricerca tabelle" autocomplete="off" />
                           <div class="relative-ul">
@@ -855,9 +855,8 @@
                           </div>
                           <button class="btn-link link" id="btnSchemata" disabled="true">Carica Schema</button>
                         </section>
-
                       </div>
-                      <div class="col col-9-span">
+                      <div class="col col-9-span border">
                         <section class="table-preview">
                           <input type="search" id="columns-search-id" autocomplete="off" placeholder="Ricerca colonne" />
                           <div class="table-content">
@@ -873,7 +872,7 @@
                 <section class="step" data-step="2">
                   <section class="wrapper-content">
                     <section id="wrapper-sheet" class="wrapper-sheet">
-                      <div class="properties">
+                      <div id="workbook-content-area">
                         <section id="workbook-objects" data-section-active="2">
                           <p class="field-search">
                             <input id="input-search-fields" data-element-search="elements" autocomplete="off" type="search" class="input-search columns" readonly placeholder="Campi" />
@@ -929,7 +928,7 @@
                           </div>
                         </section>
                         <section class="sheet-preview">
-                          <dialog id="dlg-sheet-config" data-x="0" data-y="0" class="medium absolute moveable">
+                          <dialog id="dlg-sheet-config" data-x="0" data-y="0" class="absolute moveable">
                             <section class="dlg-grid">
                               <h5 class="title moveable">Configurazione</h5>
                               <section class="dlg-content">

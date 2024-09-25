@@ -7,7 +7,7 @@
   <link rel="icon" href="/favicon.png" type="image/png" />
   <title>Gaia-BI | Versionamento</title>
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-loader.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/wd-layout.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/wb-layout.css') }}" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-dialog-responsive.css') }}" />
   <!-- <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-layout-responsive.css') }}" /> -->
@@ -84,7 +84,7 @@
         <div class="wrapper">
           <div class="row autofit">
 
-            <div class="card">
+            <div class="card grid">
               <div class="row">
                 <section class="col col-4-span">
                   <h1>WorkBooks</h1>
@@ -99,10 +99,10 @@
                 </section>
               </div>
               <div class="visual">
+                <section class="col col-12">
+                  <input id="search-workbook" type="search" autocomplete="off" data-search-id="search-workbook" data-element-search="workbook" placeholder="Ricerca" />
+                </section>
                 <div class="row searchList">
-                  <section class="col col-12">
-                    <input id="search-workbook" type="search" autocomplete="off" data-search-id="search-workbook" data-element-search="workbook" placeholder="Ricerca" />
-                  </section>
                   <section class="col col-12">
                     <div class="relative-ul" data-id="workbook" data-type="workbook">
                       <ul class="elements custom-scrollbar" data-search-id="search-workbook" id="ul-workbook"></ul>
@@ -115,10 +115,9 @@
                 <button type="button" class="btn-link link" data-select-all data-type="workbook">Select All</button>
                 <button type="button" class="btn-link link" data-unselect-all data-type="workbook">Unselect All</button>
               </div>
-
             </div>
             <!-- Sheets -->
-            <div class="card">
+            <div class="card grid">
               <div class="row">
                 <section class="col col-5-span">
                   <h1>Sheets</h1>
@@ -133,10 +132,10 @@
                 </section>
               </div>
               <div class="visual">
+                <section class="col col-12">
+                  <input id="search-sheet" type="search" autocomplete="off" data-search-id="search-sheet" data-element-search="sheet" placeholder="Ricerca" />
+                </section>
                 <div class="row searchList">
-                  <section class="col col-12">
-                    <input id="search-sheet" type="search" autocomplete="off" data-search-id="search-sheet" data-element-search="sheet" placeholder="Ricerca" />
-                  </section>
                   <section class="col col-12">
                     <div class="relative-ul" data-id="sheet" data-type="sheet">
                       <ul class="elements custom-scrollbar" data-search-id="search-sheet" id="ul-sheet"></ul>
@@ -149,10 +148,9 @@
                 <button type="button" class="btn-link link" data-select-all data-type="sheet">Select All</button>
                 <button type="button" class="btn-link link" data-unselect-all data-type="sheet">Unselect All</button>
               </div>
-
             </div>
             <!-- Metriche -->
-            <div class="card">
+            <div class="card grid">
               <div class="row">
                 <section class="col col-5-span">
                   <h1>Metriche</h1>
@@ -167,10 +165,10 @@
                 </section>
               </div>
               <div class="visual">
+                <section class="col col-12">
+                  <input id="search-metric" type="search" autocomplete="off" data-search-id="search-metric" data-element-search="metric" placeholder="Ricerca" />
+                </section>
                 <div class="row searchList">
-                  <section class="col col-12">
-                    <input id="search-metric" type="search" autocomplete="off" data-search-id="search-metric" data-element-search="metric" placeholder="Ricerca" />
-                  </section>
                   <section class="col col-12">
                     <div class="relative-ul" data-id="metric" data-type="metric">
                       <ul class="elements custom-scrollbar" data-search-id="search-metric" id="ul-metric"></ul>
@@ -184,7 +182,7 @@
               </div>
             </div>
             <!-- Filtri -->
-            <div class="card">
+            <div class="card grid">
               <div class="row">
                 <section class="col col-5-span">
                   <h1>Filtri</h1>
@@ -199,10 +197,10 @@
                 </section>
               </div>
               <div class="visual">
+                <section class="col">
+                  <input id="search-filter" type="search" autocomplete="off" data-search-id="search-filter" data-element-search="filter" placeholder="Ricerca" />
+                </section>
                 <div class="row searchList">
-                  <section class="col">
-                    <input id="search-filter" type="search" autocomplete="off" data-search-id="search-filter" data-element-search="filter" placeholder="Ricerca" />
-                  </section>
                   <section class="col col-12">
                     <div class="relative-ul" data-id="filter" data-type="filter">
                       <ul class="elements custom-scrollbar" data-search-id="search-filter" id="ul-filter"></ul>
@@ -263,10 +261,10 @@
   </div>
   <div class="right-sidebar">Right Sidebar</div>
   <footer>
-      <section class="footerContent">
-        <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
-        <p>Lynx International</p>
-      </section>
+    <section class="footerContent">
+      <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
+      <p>Lynx International</p>
+    </section>
   </footer>
   <script type="text/javascript" src="{{ asset('/js/versioning.js') }}" async></script>
 </body>

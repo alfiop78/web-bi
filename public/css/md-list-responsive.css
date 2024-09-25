@@ -1,7 +1,7 @@
 ul{
   padding-block-start: 0em;
-  padding-inline-start: .5em;
-  padding-inline-end: .5em;
+  padding-inline-start: 0px;
+  padding-inline-end: 0px;
   margin-block-start: unset;
   padding-block-end: 0em;
   margin-block-end: unset;
@@ -105,20 +105,23 @@ li.icon > span{
 
 .relative-ul {
   position: relative;
-  /* min-height: 350px; */
   min-height: 300px;
-  max-height: 500px;
 }
 
 .relative-ul > ul, .relative-ul > dl {
   position: absolute;
-  border-radius: 2px;
+  /* border-radius: 2px; */
   width: 100%;
   height: 100%;
   overflow: auto;
-  padding-inline-start: 8px;
-  padding-block-start: 6px;
-  padding-block-end: 6px;
+  padding-inline-start: 0px;
+  padding-inline-end: 0px;
+  padding-block-start: 0px;
+  padding-block-end: 0px;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
 }
 
 .relative-ul > nav {
@@ -253,7 +256,7 @@ li.select-list:hover::before, li.icons-list:hover::before {
   height: 80%;
   width: 6px;
   border-radius: 2px;
-  left: -8px;
+  left: -4px;
   background-color: var(--main-important-color);
 }
 
@@ -312,10 +315,9 @@ details > li[data-datatype='float'] {
 }
 
 details > li {
-  margin: 4px 8px;
-  margin-inline-start: 6px;
+  margin: 4px 2px;
+  margin-inline-start: 0px;
   line-height: 1.6rem;
-  border-radius: 4px;
 }
 
 li.drag-list > i[draggable] {

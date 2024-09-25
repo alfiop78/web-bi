@@ -75,7 +75,7 @@ thead th[data-metric-token]{
   background-color: white;
   display: grid;
   grid-template-rows: 1fr auto;
-  padding: 6px 0px;
+  padding: 8px;
 }
 
 .table-preview>.table-content{
