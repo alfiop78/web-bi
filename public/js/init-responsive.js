@@ -45,6 +45,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     btnAdvancedMetricSave: document.getElementById("btn-metric-save"),
     btnWorkBook: document.getElementById('workbook'),
     btnSheet: document.getElementById('sheet'),
+    btnShowInfo: document.getElementById('btnShowInfo'),
     // drawer
     drawer: document.getElementById('drawer'),
     // body
@@ -3422,5 +3423,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   app.timeDimensionExists();
+
+  app.btnShowInfo.onclick = () => {
+    const boxInfo = document.getElementById('boxInfo');
+    boxInfo.toggleAttribute('open');
+  }
 
 })();

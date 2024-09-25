@@ -104,7 +104,33 @@ main {
 .right-sidebar {
   background: var(--main-bg-color);
   grid-column: 3 / 4;
-  padding: 8px;
+  width: 24px;
+  transition: width 150ms;
+  position: relative;
+}
+
+.right-sidebar>button{
+  position: absolute;
+  left: -12px;
+  color: white;
+  background-color: var(--main-primary-color);
+  border-radius: 2px;
+}
+
+/* .right-sidebar::before {
+  font-family: 'Material Symbols Rounded';
+  position: absolute;
+  content: 'multiple_stop';
+  left: -12px;
+  font-size: 24px;
+  color: white;
+  background-color: var(--main-primary-color);
+  border-radius: 2px;
+} */
+
+.right-sidebar[open] {
+  padding: 1em;
+  width: 350px;
 }
 
 footer {

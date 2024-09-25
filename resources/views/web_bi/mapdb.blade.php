@@ -1033,7 +1033,9 @@
       <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
     </svg>
   </div>
-  <div class="right-sidebar">Right Sidebar</div>
+    <div id="boxInfo" class="right-sidebar">
+      <button type="button" id="btnShowInfo" class="material-symbols-rounded">multiple_stop</button>
+    </div>
   <footer>
     <section class="footerContent">
       <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="48" width="48" />
