@@ -403,7 +403,7 @@
           </section>
         </dialog>
 
-        <dialog id="dialog-time" data-x="0" data-y="40" class="absolute moveable">
+        <dialog id="dialog-time" data-x="0" data-y="40" class="mediumSize absolute moveable">
           <section class="dlg-grid">
             <h5 class="title moveable">Imposta relazione con tabella TIME</h5>
             <section class="dlg-content">
@@ -438,7 +438,7 @@
 
         <div id="context-menu" class="context-menu"></div>
 
-        <dialog id="dialog-workbook-open">
+        <dialog id="dialog-workbook-open" class="smallSize">
           <section class="dlg-grid">
             <h5 class="title">Apri WorkBook</h5>
             <section class="dlg-content">
@@ -459,7 +459,7 @@
           </section>
         </dialog>
 
-        <dialog id="dialog-sheet-open">
+        <dialog id="dialog-sheet-open" class="smallSize">
           <section class="dlg-grid">
             <h5 class="title">Apertura Sheet</h5>
             <section class="dlg-content">
@@ -481,7 +481,7 @@
         </dialog>
 
         <!-- creazione metrica filtrata -->
-        <dialog id="dlg-metric" data-x="0" data-y="40" class="absolute moveable droppable">
+        <dialog id="dlg-metric" data-x="0" data-y="40" class="mediumSize absolute moveable droppable">
           <section class="dlg-grid">
             <h5 class="title moveable">Creazione Metrica avanzata</h5>
             <section class="dlg-content">
@@ -563,7 +563,7 @@
           </section>
         </dialog>
 
-        <dialog id="dlg-composite-metric" data-x="0" data-y="0" class="small absolute moveable droppable">
+        <dialog id="dlg-composite-metric" data-x="0" data-y="0" class="mediumSize absolute moveable droppable">
           <section class="dlg-grid">
             <h5 class="title moveable">Creazione Metrica Composta</h5>
             <section class="dlg-content">
@@ -584,7 +584,7 @@
           </section>
         </dialog>
 
-        <dialog id="dlg-custom-metric" data-x="0" data-y="40" class="absolute moveable">
+        <dialog id="dlg-custom-metric" data-x="0" data-y="40" class="mediumSize absolute moveable">
           <section class="dlg-grid">
             <h5 class="title moveable">Creazione Metrica composta</h5>
             <section class="dlg-content">
@@ -678,7 +678,7 @@
           </section>
         </dialog>
 
-        <dialog id="dlg-filters" data-x="0" data-y="40" class="absolute moveable">
+        <dialog id="dlg-filters" data-x="0" data-y="40" class="mediumSize absolute moveable">
           <section class="dlg-grid">
             <h5 class="title moveable">Creazione Filtro</h5>
             <section class="dlg-content">

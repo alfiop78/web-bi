@@ -112,7 +112,8 @@ main {
 
 .right-sidebar>button{
   position: absolute;
-  left: -12px;
+  /* left: -12px; */
+  left: 0px;
   color: white;
   background-color: var(--main-primary-color);
   border-radius: 2px;

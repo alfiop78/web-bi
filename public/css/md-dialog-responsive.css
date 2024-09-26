@@ -8,6 +8,16 @@ dialog {
   width: 40%;
 }
 
+@media screen and (min-height: 800px) {
+  dialog.mediumSize {
+    width: 60%;
+  }
+
+  dialog.smallSize {
+    width: 40%;
+  }
+}
+
 dialog.popup {
   width: 170px;
   height: 40px;
