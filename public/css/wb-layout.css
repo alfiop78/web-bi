@@ -105,6 +105,7 @@ main {
   background: var(--main-bg-color);
   grid-column: 3 / 4;
   width: 24px;
+  padding: 1em;
   transition: width 150ms;
   position: relative;
 }
@@ -115,6 +116,7 @@ main {
   color: white;
   background-color: var(--main-primary-color);
   border-radius: 2px;
+  z-index: 2;
 }
 
 /* .right-sidebar::before {
@@ -129,8 +131,8 @@ main {
 } */
 
 .right-sidebar[open] {
-  padding: 1em;
   width: 350px;
+  padding: 1em;
 }
 
 footer {
@@ -519,4 +521,22 @@ span.markContent {
 /* .col con border */
 .col.border {
   border: solid thin #e2e2e2;
+}
+
+.informations {
+  color: #494949;
+}
+
+.info {
+  position: relative;
+  padding: 1em 0;
+}
+
+.info>span {
+  font-weight: lighter;
+}
+
+.info>button {
+  position: absolute;
+  right: 4px;
 }

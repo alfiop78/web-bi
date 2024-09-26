@@ -46,6 +46,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     btnWorkBook: document.getElementById('workbook'),
     btnSheet: document.getElementById('sheet'),
     btnShowInfo: document.getElementById('btnShowInfo'),
+    btnCopyText: document.getElementById('btnCopyText'),
     // drawer
     drawer: document.getElementById('drawer'),
     // body
@@ -1079,6 +1080,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.newWorkBook = () => {
     const name = document.getElementById('input-workbook-name').value;
     WorkBook = new WorkBooks(name);
+    debugger;
     WorkBook.databaseId = +document.querySelector('main').dataset.databaseId;
     Draw = new DrawSVG('svg');
     app.workbookName.dataset.value = name;
@@ -1110,6 +1112,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     WorkBook = WorkBook.open(e.currentTarget.dataset.token);
     WorkBook.workBook.token = e.currentTarget.dataset.token;
     WorkBook.name = e.currentTarget.dataset.name;
+    app.workBookInformations();
     // modifico il nome del WorkBook in #workbook-name
     document.getElementById('workbook-name').innerText = WorkBook.name;
     document.getElementById('workbook-name').dataset.value = WorkBook.name;
@@ -1185,6 +1188,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const progressTotal = document.getElementById('progress-total');
     const progressLabel = document.querySelector("label[for='progress-bar']");
     App.loaderStart();
+
     await fetch(`/fetch_api/${Sheet.sheet.id}_${Sheet.userId}/preview`)
       .then((response) => {
         console.log(response);
@@ -1238,11 +1242,11 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             Resource.data = partialData;
             google.charts.setOnLoadCallback(drawDatamart());
             App.loaderStop();
+            app.sheetInformations();
           }
         } else {
           App.loaderStop();
           App.showConsole('Nessun dato presente', 'warning', 2000);
-
         }
       })
       .catch(err => {
@@ -1443,6 +1447,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     steps.dataset.step = 1;
     translateRef.dataset.step = 1;
     app.body.dataset.step = 1;
+    // visualizzo/nascondo i box info
+    document.getElementById('workbook_info').hidden = false;
+    document.getElementById('sheet_info').hidden = true;
   }
 
   // tasto "Sheet" :
@@ -1471,6 +1478,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       steps.dataset.step = 2;
       translateRef.dataset.step = 2;
       app.body.dataset.step = 2;
+      // visualizzo/nascondo i box info
+      document.getElementById('workbook_info').hidden = true;
+      document.getElementById('sheet_info').hidden = false;
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
       app.addTablesStruct();
       WorkBook.save();
@@ -1773,10 +1783,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
     Resource.specs.token = Sheet.sheet.token;
     Resource.setSpecifications();
-    debugger;
 
     process.id = Sheet.sheet.id;
     process.datamartId = Sheet.userId;
+    debugger;
     console.log(process);
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(process);
@@ -1804,8 +1814,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
           delete el.dataset.adding;
         });
         document.querySelectorAll('div[data-removed]').forEach(el => el.remove());
-        // app.saveSheet();
-        // app.loadPreview();
         // imposto Sheet.edit = true perchè da questo momento qualsiasi cosa aggiunta allo Sheet avrà
         // lo contrassegna come "modificato" e quindi verrà, alla prossima elaborazione, eliminata la tabella dal DB
         // per poterla ricreare
@@ -3424,9 +3432,40 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.timeDimensionExists();
 
+  app.sheetInformations = () => {
+    // const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
+    for (const [key, value] of Object.entries(Sheet.getInformations())) {
+      const ref = document.getElementById(key);
+      ref.textContent = value;
+    }
+  }
+
+  app.workBookInformations = () => {
+    // const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
+    for (const [key, value] of Object.entries(WorkBook.getInformations())) {
+      const ref = document.getElementById(key);
+      ref.textContent = value;
+    }
+  }
+
   app.btnShowInfo.onclick = () => {
     const boxInfo = document.getElementById('boxInfo');
     boxInfo.toggleAttribute('open');
   }
+
+  // TODO: implementare e testare il copy in produzione (https)
+  /* app.btnCopyText.onclick = (e) => {
+    const sheetId = document.getElementById('infoReportId')
+    writeClipboardText(sheetId.textContent);
+    // TEST: da provare in HTTPS
+    // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText
+    async function writeClipboardText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+  } */
 
 })();

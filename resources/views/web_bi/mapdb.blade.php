@@ -288,7 +288,7 @@
 
     <div id="content" class="grid">
       <div id="body" class="raw menu" data-step="1" hidden>
-          <!-- menu workbook -->
+        <!-- menu workbook -->
         <menu class="standard">
           <section data-workbook-menu>
             <button class="btn-link default" id="btn-workbook-new" value="Nuovo">Nuovo</button>
@@ -1033,9 +1033,62 @@
       <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
     </svg>
   </div>
-    <div id="boxInfo" class="right-sidebar">
-      <button type="button" id="btnShowInfo" class="material-symbols-rounded">multiple_stop</button>
+  <div id="boxInfo" class="right-sidebar">
+    <button type="button" id="btnShowInfo" class="material-symbols-rounded">multiple_stop</button>
+    <div class="row">
+      <div class="col">
+        <div id="workbook_info" class="informations workbook">
+          <div class="info">
+            <!-- <button id="btnCopyText__name" type="button" class="material-symbols-rounded">content_copy</button> -->
+            <span>Nome</span>
+            <p id="info__workbook_name"></p>
+          </div>
+          <div class="info">
+            <!-- <button id="btnCopyText__token" type="button" class="material-symbols-rounded">content_copy</button> -->
+            <span>ObjectID</span>
+            <p id="info__workbook_token"></p>
+          </div>
+          <div class="info">
+            <!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
+            <span>Data creazione</span>
+            <p id="info__workbook_created_at"></p>
+          </div>
+          <div class="info">
+            <!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
+            <span>Data aggiornamento</span>
+            <p id="info__workbook_updated_at"></p>
+          </div>
+        </div>
+        <div id="sheet_info" class="informations sheet" hidden>
+          <div class="info">
+            <!-- <button id="btnCopyText__name" type="button" class="material-symbols-rounded">content_copy</button> -->
+            <span>Nome</span>
+            <p id="info__sheet_name"></p>
+          </div>
+          <div class="info">
+            <!-- <button id="btnCopyText__token" type="button" class="material-symbols-rounded">content_copy</button> -->
+            <span>ObjectID</span>
+            <p id="info__sheet_token"></p>
+          </div>
+          <div class="info">
+            <!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
+            <span>Report Id</span>
+            <p id="info__datamart_id"></p>
+          </div>
+          <div class="info">
+            <!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
+            <span>Data creazione</span>
+            <p id="info__sheet_created_at"></p>
+          </div>
+          <div class="info">
+            <!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
+            <span>Data aggiornamento</span>
+            <p id="info__sheet_updated_at"></p>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
   <footer>
     <section class="footerContent">
       <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="48" width="48" />
