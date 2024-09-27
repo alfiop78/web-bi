@@ -176,7 +176,9 @@ class MapDatabaseController extends Controller
 
   public function deleteDatamart($id)
   {
-    return Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.WEB_BI_$id");
+    if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$id}")) {
+      return Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.WEB_BI_$id");
+    }
   }
 
   // 26.08.2024 Non ancora implementata da JS

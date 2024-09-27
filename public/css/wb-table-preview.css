@@ -35,10 +35,10 @@ table {
 } */
 
 .g-headerCell {
-  color: white;
+  color: #494949;
   border: none !important;
   font-size: .8rem;
-  background-color: #494949;
+  background-color: gainsboro;
   padding: 1em !important;
 }
 
@@ -75,7 +75,7 @@ table {
 .google-visualization-table-div-page {
   font-family: inherit!important;
   padding: 2px!important;
-  background-color: #494949!important;
+  background-color: gainsboro!important;
   background-image: unset!important;
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
@@ -96,12 +96,14 @@ table {
 
 .google-visualization-table-page-next::before {
   font-size: 1.5rem;
-  color: var(--mark-color);
+  /* color: var(--mark-color); */
+  color: #494949;
 }
 
 .google-visualization-table-page-prev::before {
   font-size: 1.5rem;
-  color: var(--mark-color);
+  /* color: var(--mark-color); */
+  color: #494949;
 }
 
 .goog-custom-button-outer-box, .goog-custom-button-inner-box {
@@ -118,16 +120,22 @@ table {
 .google-visualization-table-page-number {
   border: unset!important;
   font-size: inherit!important;
-  background-color: var(--main-bg-color)!important;
+  background-color: #494949!important;
+  color: gainsboro!important;
+  /* background-color: var(--mark-color)!important; */
   min-width: 22px!important;
 }
 
 .google-visualization-table-page-number:hover {
   border: unset!important;
-  background-color: var(--mark-color)!important;
+  background-color: black!important;
+  color: white;
 }
 
 /* numero di pagina corrente */
 .google-visualization-table-page-number.current {
+  border: unset!important;
   background-color: var(--mark-color)!important;
+  /* background-color: #494949!important; */
+  color: #494949!important;
 }

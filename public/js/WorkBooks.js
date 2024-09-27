@@ -170,15 +170,18 @@ class Sheets {
     return this;
   }
 
-  // WARN: i metodi exist e delete potrebbero essere ricreati come un unico metodo
   async exist() {
+    App.showConsole('Verifica in corso...', null, null);
     return await fetch(`/fetch_api/${this.sheet.id}_${this.userId}/check_datamart`)
       .then((response) => {
         if (!response.ok) { throw Error(response.statusText); }
         return response;
       })
       .then((response) => response.text())
-      .then(response => response)
+      .then(response => {
+        App.closeConsole();
+        return response;
+      })
       .catch(err => {
         console.error(err);
       });

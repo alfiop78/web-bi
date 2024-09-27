@@ -1187,8 +1187,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const progressTo = document.getElementById('progress-to');
     const progressTotal = document.getElementById('progress-total');
     const progressLabel = document.querySelector("label[for='progress-bar']");
-    App.loaderStart();
-
+    // App.loaderStart();
+    App.showConsole('Recupero dati in corso...', null, null);
     await fetch(`/fetch_api/${Sheet.sheet.id}_${Sheet.userId}/preview`)
       .then((response) => {
         console.log(response);
@@ -1241,7 +1241,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             // Non sono presenti altre pagine, visualizzo il dashboard
             Resource.data = partialData;
             google.charts.setOnLoadCallback(drawDatamart());
-            App.loaderStop();
+            // App.loaderStop();
+            App.closeConsole();
             app.sheetInformations();
           }
         } else {
@@ -1294,8 +1295,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     Resource = new Resources('preview-datamart');
     // verifico se il datamart, per lo Sheet selezionato, è già presente sul DB.
     // In caso positivo lo apro in preview-datamart.
-    let exist = await Sheet.exist();
-    if (exist) app.sheetPreview();
+    if (await Sheet.exist()) {
+      App.closeConsole();
+      app.sheetPreview();
+    }
     // Imposto la prop 'edit' = true perchè andrò ad operare su uno Sheet aperto
     Sheet.edit = true;
     document.querySelector('#btn-sheet-save').disabled = false;
@@ -1314,13 +1317,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       if (Sheet.changes.length !== 0) {
         Sheet.update();
         // elimino il datamart perchè è stato modificato
-        let exist = await Sheet.exist();
-        if (exist) {
-          debugger;
-          let result = await Sheet.delete();
-          console.log('datamart eliminato : ', result);
-          if (result && Resource.tableRef) Resource.tableRef.clearChart();
-        }
+        let result = await Sheet.delete();
+        console.log('datamart eliminato : ', result);
+        if (result && Resource.tableRef) Resource.tableRef.clearChart();
       }
     } else {
       // il report è stato appena creato e faccio save()
@@ -1762,21 +1761,9 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.process = async (process) => {
     Sheet.userId = userId;
     if (Sheet.edit === true) {
-      // anche se il datamart non è stato modificato, ma è stato cliccato il
-      // tasto Elabora, devo eliminarlo per poterlo ricostruire
-      // elimino il datamart perchè è stato modificato
-      const exist = await Sheet.exist();
-      if (exist) {
-        // TEST: 28.08.2024 da testare anche con Vertica se il dropIfExists funziona correttamente in MapDatabaseController.php
-        let result = await Sheet.delete();
-        console.log('datamart eliminato : ', result);
-        debugger;
-        if (result === "" && Resource.tableRef) Resource.tableRef.clearChart();
-      }
       Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
       if (Sheet.changes.length !== 0) Sheet.update();
     } else {
-      debugger;
       Sheet.create();
     }
     Resource.specs.token = Sheet.sheet.token;
@@ -1784,7 +1771,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
     process.id = Sheet.sheet.id;
     process.datamartId = Sheet.userId;
-    debugger;
     console.log(process);
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(process);
@@ -1816,93 +1802,15 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         // lo contrassegna come "modificato" e quindi verrà, alla prossima elaborazione, eliminata la tabella dal DB
         // per poterla ricreare
         Sheet.edit = true;
+        App.closeConsole();
         app.sheetPreview();
         App.loaderStop();
-        App.closeConsole();
       })
       .catch(err => {
         App.showConsole(err, 'error', 3000);
         console.error(err);
       });
   }
-
-  /* app.process = async (process) => {
-    // lo Sheet.id può essere già presente quando è stato aperto
-    if (!Sheet.id) Sheet.id = Date.now();
-    process.id = Sheet.id;
-    // console.log(process);
-    app.saveSheet();
-    // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
-    const params = JSON.stringify(process);
-    // console.log(params);
-    // App.showConsole('Elaborazione in corso...', 'info');
-    // lo processo in post, come fatto per il salvataggio del process. La richiesta in get potrebbe superare il limite consentito nella url, come già successo per saveReport()
-    const url = "/fetch_api/cube/sheet_create";
-    const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
-    const req = new Request(url, init);
-    let partialData = [];
-    await fetch(req)
-      .then((response) => {
-        // TODO: Rivedere la gestione del try...catch per poter creare un proprio oggetto Error visualizzando un errore personalizzato
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.json())
-      .then(async (paginateData) => {
-        if (paginateData) {
-          console.log(paginateData);
-          console.log(paginateData.data);
-          let recursivePaginate = async (url) => {
-            // console.log(url);
-            await fetch(url).then((response) => {
-              // console.log(response);
-              if (!response.ok) { throw Error(response.statusText); }
-              return response;
-            }).then(response => response.json()).then((paginate) => {
-              partialData = partialData.concat(paginate.data);
-              if (paginate.next_page_url) {
-                recursivePaginate(paginate.next_page_url);
-                console.log(partialData);
-              } else {
-                // Non sono presenti altre pagine, visualizzo il dashboard
-                console.log('tutte le paginate completate :', partialData);
-                Resource.data = partialData;
-                google.charts.setOnLoadCallback(drawDatamart());
-              }
-            }).catch((err) => {
-              App.showConsole(err, 'error');
-              console.error(err);
-            });
-          }
-          // TODO: Nel partialData potrei scegliere di visualizzare già la tabella, i successivi
-          // paginate aggiungeranno dati alla DataTable. Vedere su Google Developers come aggiungere
-          // dati a una tabella già esistente
-          partialData = paginateData.data;
-          console.log(partialData);
-          if (paginateData.next_page_url) {
-            recursivePaginate(paginateData.next_page_url);
-          } else {
-            // Non sono presenti altre pagine, visualizzo il dashboard
-            Resource.data = partialData;
-            google.charts.setOnLoadCallback(drawDatamart());
-            // Al termine del process elimino dalle dropzones gli elementi che sono stati
-            // eliminati dallo Sheet, quindi gli elementi con dataset.removed
-            document.querySelectorAll('div[data-removed]').forEach(element => element.remove());
-            // Allo stesso modo, elimino il dataset.adding per rendere "finali" gli elementi aggiunti
-            // al report in fase di edit
-            document.querySelectorAll('div[data-adding]').forEach(element => delete element.dataset.adding);
-          }
-        } else {
-          // TODO Da testare se il codice arriva qui o viene gestito sempre dal catch()
-          console.debug('FX non è stata creata');
-          App.showConsole('Errori nella creazione del datamart', 'error', 5000);
-        }
-      })
-      .catch(err => {
-        App.showConsole(err, 'error', 3000);
-        console.error(err);
-      });
-  } */
 
   // creo la struttura tabelle nella dialog filter
   app.openDialogFilter = async () => {

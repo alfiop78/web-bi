@@ -735,6 +735,11 @@ class Cube
     // var_dump($sql);
     try {
       // TODO: E' necessario eliminare prima il datamart se è già presente, in questo modo posso eliminare la chiamata a datamartExists in init-responsive.js
+      if (Schema::connection(session('db_client_name'))->hasTable("decisyon_cache.WEB_BI_{$this->report_id}_{$this->datamart_id}")) {
+        // TEST: 27.09.2024 verifica, in laravel viene restituito un NOTICE quando si utilizza dropIfExists() e una tabella non è presente
+        Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_{$this->report_id}_{$this->datamart_id}");
+      }
+      // creazione del datamart
       DB::connection(session('db_client_name'))->statement($createStmt);
       // elimino la tabella union....
       Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.union_{$this->report_id}_{$this->datamart_id}");
