@@ -325,14 +325,9 @@ class Cube
       default:
         break;
     }
-    // $query = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
     // dd($createStmt);
     // var_dump($query);
-    // elimino la tabella temporanea che sto creando, se già presente
-    $this->dropTemporaryTables($this->baseTableName);
-    // TODO: utilizzare il try...catch
     return DB::connection(session('db_client_name'))->statement($createStmt);
-    // return DB::connection('vertica_odbc')->statement($createStmt);
   }
 
   // Aggiunta di tabelle "provenienti" dalle metriche avanzate
@@ -640,60 +635,32 @@ class Cube
     }
     // dd($createStmt);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
+    $result = null;
     if (property_exists($this, 'sql_info')) {
       $result = ["raw_sql" => nl2br($createStmt), "format_sql" => $this->json_info_advanced];
     } else {
-      // elimino la tabella temporanea, se esiste, prima di ricrearla
-      // La elimino anche in caso di errore nella creazione della tabella temporanea
-      $this->dropTemporaryTables($tableName);
-      $result = DB::connection(session('db_client_name'))->statement($createStmt);
-      $this->queries[$tableName] = $this->datamart_fields;
       // dd($this->queries);
-      /* try {
-        $result = DB::connection('vertica_odbc')->statement($sql);
-        dd($result);
-      } catch (Exception $e) {
-        // dd("Errore gestito: {$e}");
-        $this->dropTemporaryTables($tableName);
-        throw new Exception("Errore elaborazione richiesta", $e->getCode());
-      } */
-
-      /* versione precedente, senza dropIfExists
-       * if (DB::connection('vertica_odbc')->getSchemaBuilder()->hasTable($tableName)) {
-        // dd('la tabella già esiste, la elimino');
-        $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$tableName;");
-        if (!$drop) {
-          // null : tabella eliminata, ricreo la tabella temporanea
-          $result = DB::connection('vertica_odbc')->statement($sql);
+      // Qui se l'elaborazione fallisce devo eliminare tutte le tabelle temporanee create finora (basetable, e altre metric_table ad esempio)
+      // TODO: 27.09.2024 rivedere la gestione degli errori con Laravel
+      try {
+        $result = DB::connection(session('db_client_name'))->statement($createStmt);
+        $this->queries[$tableName] = $this->datamart_fields;
+      } catch (\Throwable $th) {
+        foreach (array_keys($this->queries) as $table) {
+          Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
         }
-      } else {
-        // dd('la tabella non esiste');
-        $result = DB::connection('vertica_odbc')->statement($sql);
-      } */
-      // } catch (Exception $e) {
-      // dd('ERrore gestito');
-      // $drop = DB::connection('vertica_odbc')->statement("DROP TABLE decisyon_cache.$this->baseTableName;");
-      // throw new Exception("Errore elaborazione richiesta", 1);
-      // }
+        throw $th;
+      }
     }
     // dd($sql);
     return $result;
-  }
-
-  private function dropTemporaryTables($table)
-  {
-    // WARN: da verificare se funziona anche su tabelle temporanee
-    if (Schema::connection(session('db_client_name'))->hasTable($table)) {
-      // tabella esiste
-      Schema::connection(session('db_client_name'))->drop("decisyon_cache.$table");
-    }
   }
 
   private function distinct_fields()
   {
     $union = [];
     foreach ($this->queries as $table => $fields) {
-      $sql = "(".self::SELECT;
+      $sql = "(" . self::SELECT;
       $sql .= implode(",\n", $fields);
       $sql .= self::FROM . "decisyon_cache.{$table})\n";
       $union[$table] = $sql;
@@ -712,8 +679,16 @@ class Cube
     }
     // dd($this->union_clause);
     // var_dump($this->union_clause);
-    $this->dropTemporaryTables("union_{$this->report_id}_{$this->datamart_id}");
-    DB::connection(session('db_client_name'))->statement($this->union_clause);
+    // DB::connection(session('db_client_name'))->statement($this->union_clause);
+    // TODO: Qui se l'elaborazione fallisce devo eliminare tutte le tabelle temporanee create finora (basetable, e altre metric_table ad esempio)
+    try {
+      DB::connection(session('db_client_name'))->statement($this->union_clause);
+    } catch (\Throwable $th) {
+      foreach (array_keys($this->queries) as $table) {
+        Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
+      }
+      throw $th;
+    }
   }
 
   /* creazione datamart finale:
@@ -758,10 +733,24 @@ class Cube
     }
     $createStmt .= $joinLEFT;
     // var_dump($sql);
-    // se il datamart già esiste lo elimino prima di ricrearlo
-    $this->dropTemporaryTables($this->datamart_name);
-    // TODO: eliminare anche le altre tabelle temporanee, memorizzate in $this->queries
-    DB::connection(session('db_client_name'))->statement($createStmt);
+    try {
+      // TODO: E' necessario eliminare prima il datamart se è già presente, in questo modo posso eliminare la chiamata a datamartExists in init-responsive.js
+      DB::connection(session('db_client_name'))->statement($createStmt);
+      // elimino la tabella union....
+      Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.union_{$this->report_id}_{$this->datamart_id}");
+      // elimino tutte le tabelle temporanee utilizzate per creare il datamart
+      foreach (array_keys($this->queries) as $table) {
+        Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
+      }
+    } catch (\Throwable $th) {
+      // elimino la tabella union....
+      Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.union_{$this->report_id}_{$this->datamart_id}");
+      // elimino tutte le tabelle temporanee utilizzate per creare il datamart
+      foreach (array_keys($this->queries) as $table) {
+        Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
+      }
+      throw $th;
+    }
     return $this->report_id;
   }
 } // End Class

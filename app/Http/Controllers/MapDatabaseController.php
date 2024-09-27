@@ -726,62 +726,76 @@ class MapDatabaseController extends Controller
 
   public function sheetCreate(Request $request)
   {
-    $process = json_decode(json_encode($request->all())); // object
-    $query = new Cube($process);
-    $query->datamartFields();
-    foreach ($query->facts as $fact) {
-      $query->fact = $fact;
-      $query->factId = substr($fact, -5);
-      $query->baseTableName = "WB_BASE_{$query->report_id}_{$query->datamart_id}_{$query->factId}";
-      $res = $query->base_table_new();
-      // dd($res === true ||$res === NULL);
-      $query->queries[$query->baseTableName] = $query->datamart_fields;
-      if ($res === true || $res === NULL) {
-        // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
-        // creo una tabella temporanea per ogni metrica filtrata
-        // dd($query->process->{"advancedMeasures"});
-        // dd(empty($query->process->{"advancedMeasures"}));
-        if (!empty($query->process->{"advancedMeasures"})) {
-          // sono presenti metriche avanzate
-          if (property_exists($query->process->{"advancedMeasures"}, $fact)) {
-            $query->filteredMetrics = $query->process->{'advancedMeasures'}->{$fact};
-            // verifico quali, tra le metriche filtrate, contengono gli stessi filtri.
-            // Le metriche che contengono gli stessi filtri vanno eseguite in un unica query.
-            // Oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
-            $query->groupMetricsByFilters = (object)[];
-            // raggruppare per tipologia dei filtri
-            $groupFilters = array();
-            // creo un gruppo di filtri
-            foreach ($query->filteredMetrics as $metric) {
-              // dd($metric->formula->filters);
-              // ogni gruppo di filtri ha un tokenGrouup diverso come key dell'array
-              $tokenGroup = "grp_" . bin2hex(random_bytes(4));
-              if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
-            }
-            // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
-            foreach ($groupFilters as $token => $group) {
-              $metrics = array();
+    try {
+      $process = json_decode(json_encode($request->all())); // object
+      $query = new Cube($process);
+      $query->datamartFields();
+      foreach ($query->facts as $fact) {
+        $query->fact = $fact;
+        $query->factId = substr($fact, -5);
+        $query->baseTableName = "WB_BASE_{$query->report_id}_{$query->datamart_id}_{$query->factId}";
+        $res = $query->base_table_new();
+        // dd($res === true ||$res === NULL);
+        $query->queries[$query->baseTableName] = $query->datamart_fields;
+        if ($res === true || $res === NULL) {
+          // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
+          // creo una tabella temporanea per ogni metrica filtrata
+          // dd($query->process->{"advancedMeasures"});
+          // dd(empty($query->process->{"advancedMeasures"}));
+          if (!empty($query->process->{"advancedMeasures"})) {
+            // sono presenti metriche avanzate
+            if (property_exists($query->process->{"advancedMeasures"}, $fact)) {
+              $query->filteredMetrics = $query->process->{'advancedMeasures'}->{$fact};
+              // verifico quali, tra le metriche filtrate, contengono gli stessi filtri.
+              // Le metriche che contengono gli stessi filtri vanno eseguite in un unica query.
+              // Oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
+              $query->groupMetricsByFilters = (object)[];
+              // raggruppare per tipologia dei filtri
+              $groupFilters = array();
+              // creo un gruppo di filtri
               foreach ($query->filteredMetrics as $metric) {
-                if (get_object_vars($metric->filters) == get_object_vars($group)) {
-                  // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
-                  array_push($metrics, $metric);
-                }
+                // dd($metric->formula->filters);
+                // ogni gruppo di filtri ha un tokenGrouup diverso come key dell'array
+                $tokenGroup = "grp_" . bin2hex(random_bytes(4));
+                if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
               }
-              // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
-              $query->groupMetricsByFilters->$token = $metrics;
+              // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
+              foreach ($groupFilters as $token => $group) {
+                $metrics = array();
+                foreach ($query->filteredMetrics as $metric) {
+                  if (get_object_vars($metric->filters) == get_object_vars($group)) {
+                    // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
+                    array_push($metrics, $metric);
+                  }
+                }
+                // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
+                $query->groupMetricsByFilters->$token = $metrics;
+              }
+              // dd($query->groupMetricsByFilters);
+              $metricTable = $query->createMetricDatamarts_new();
             }
-            // dd($query->groupMetricsByFilters);
-            $metricTable = $query->createMetricDatamarts_new();
           }
         }
       }
-    }
-    if (!empty($query->process->compositeMeasures)) {
-      foreach ($query->process->compositeMeasures as $metric) {
-        $query->compositeMeasures[] = implode(" ", $metric->SQL) . " AS '{$metric->alias}'";
+      if (!empty($query->process->compositeMeasures)) {
+        foreach ($query->process->compositeMeasures as $metric) {
+          $query->compositeMeasures[] = implode(" ", $metric->SQL) . " AS '{$metric->alias}'";
+        }
       }
+      return $query->datamart_new();
+    } catch (\Throwable $th) {
+      // abort(500);
+      // $msg = $th->getMessage();
+      // dump($th);
+      // return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
+      // return response()->json(['error' => 500, 'message' => $msg], 500);
+      throw $th;
     }
-    return $query->datamart_new();
+    // } catch (Exception $e) {
+    //   $msg = $e->getMessage();
+    //   abort(500);
+    //   // return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
+    // }
   }
 
   public function sheetCurlProcess($report)
