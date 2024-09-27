@@ -227,13 +227,14 @@ class Sheets {
   getInformations() {
     // popolo le informazioni per poter essere inserite nel BoxInfo
     // il nome delle key deve corrispondere al nome del div nel DOM
-    return {
-      info__sheet_token: this.sheet.token,
-      info__datamart_id: `decisyon_cache.WEB_BI_${this.sheet.id}_${this.userId}`,
-      info__sheet_name: this.name,
-      info__sheet_created_at: this.sheet.created_at,
-      info__sheet_updated_at: this.sheet.updated_at
+    let info = {
+      info__token: this.sheet.token,
+      info__name: this.name,
+      info__created_at: this.sheet.created_at,
+      info__updated_at: this.sheet.updated_at
     }
+    if (this.sheet.id) info.info__datamart_id = `decisyon_cache.WEB_BI_${this.sheet.id}_${this.userId}`;
+    return info;
   }
 
 }
@@ -617,10 +618,10 @@ class WorkBooks {
     // popolo le informazioni per poter essere inserite nel BoxInfo
     // il nome delle key deve corrispondere al nome del div nel DOM, in modo da poter essere ciclati
     return {
-      info__workbook_token: this.workBook.token,
-      info__workbook_name: this.name,
-      info__workbook_created_at: this.workBook.created_at,
-      info__workbook_updated_at: this.workBook.updated_at
+      info__token: this.workBook.token,
+      info__name: this.name,
+      info__created_at: this.workBook.created_at,
+      info__updated_at: this.workBook.updated_at
     }
   }
 

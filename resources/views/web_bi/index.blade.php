@@ -105,7 +105,7 @@
                     </section>
                     <section class="col col-6-span">
                       <label>*Schema in cui memorizzare i datamart</label>
-                      <input id="input-schema" type="text" value="" name="schema" placeholder="decisyon_cache (default)" value="decisyon_cache" />
+                      <input id="input-schema" type="text" value="" name="schema" placeholder="decisyon_cache (default)" value="decisyon_cache" disabled />
                     </section>
                   </section>
                   <section class="row">

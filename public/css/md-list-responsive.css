@@ -1,4 +1,4 @@
-ul{
+ul {
   padding-block-start: 0em;
   padding-inline-start: 0px;
   padding-inline-end: 0px;
@@ -7,11 +7,11 @@ ul{
   margin-block-end: unset;
 }
 
-dl{
+dl {
   background-color: transparent;
 }
 
-dt{
+dt {
   margin: 8px 0px;
 }
 
@@ -20,11 +20,11 @@ dt.btn-link:hover {
   font-weight: bold;
 }
 
-dd{
+dd {
   margin-inline-start: 2em;
 }
 
-li{
+li {
   list-style: none;
   padding-left: 0px;
   line-height: 1.7rem;
@@ -57,7 +57,7 @@ li[data-li-detail] {
   margin-bottom: 4px;
 }
 
-li.icons-list > div {
+li.icons-list>div {
   display: flex;
   align-items: center;
 }
@@ -69,11 +69,11 @@ li.icons-list > div {
   grid-column-gap: 4px;
 }
 
-.li-content-icons > button {
+.li-content-icons>button {
   visibility: hidden;
 }
 
-.li-content-icons:hover > button {
+.li-content-icons:hover>button {
   visibility: visible;
 }
 
@@ -91,24 +91,29 @@ li.drag-list:hover {
   font-weight: bold;
 }
 
-li[hidden] {display: none !important;}
+li[hidden] {
+  display: none !important;
+}
 
-section.data-item{position: relative;}
+section.data-item {
+  position: relative;
+}
 
-nav > li{
+nav>li {
   line-height: 3rem;
 }
 
-li.icon > span{
+li.icon>span {
   margin-left: .5rem;
 }
 
 .relative-ul {
   position: relative;
-  min-height: 300px;
+  /* min-height: 300px; */
 }
 
-.relative-ul > ul, .relative-ul > dl {
+.relative-ul>ul,
+.relative-ul>dl {
   position: absolute;
   /* border-radius: 2px; */
   width: 100%;
@@ -124,7 +129,7 @@ li.icon > span{
   right: 0;
 }
 
-.relative-ul > nav {
+.relative-ul>nav {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -138,21 +143,29 @@ li.icon > span{
   border-bottom-right-radius: 4px;
 }
 
-.list-search{
+.list-search {
   display: grid;
   grid-auto-flow: row;
-  grid-template-rows: auto 1fr;
-  grid-row-gap: .5em;
+  /* grid-template-rows: auto 1fr; */
+  grid-template-rows: auto minmax(200px, 1fr);
+  grid-row-gap: 8px;
 }
 
 .list-search.buttonSection {
   display: grid;
   grid-auto-flow: row;
-  grid-template-rows: auto 1fr auto;
-  grid-row-gap: .5em;
+  grid-template-rows: auto minmax(200px, 1fr) auto;
+  grid-row-gap: 8px;
 }
 
-.list-no-search{
+@media screen and (min-height: 800px) {
+  .list-search.buttonSection {
+    grid-template-rows: auto minmax(70px, 1fr) auto;
+    grid-row-gap: 4px;
+  }
+}
+
+.list-no-search {
   display: grid;
   grid-auto-flow: row;
   grid-template-rows: 1fr;
@@ -174,7 +187,7 @@ li.icon > span{
   color: darkgray;
 }
 
-.list-search.absolute{
+.list-search.absolute {
   display: grid;
   grid-auto-flow: row;
   grid-template-rows: auto 1fr;
@@ -187,7 +200,7 @@ li.icon > span{
   background-color: white;
 }
 
-nav[data-filters-defined] > li[data-selected] {
+nav[data-filters-defined]>li[data-selected] {
   /* background-color: chocolate; */
   color: white;
 }
@@ -204,7 +217,7 @@ dt[selected] {
   font-weight: bold;
 }
 
-*[data-id="value-icons"] > div {
+*[data-id="value-icons"]>div {
   display: flex;
   align-items: center;
 
@@ -217,7 +230,7 @@ dt[selected] {
   text-overflow: ellipsis;
 }
 
-.sub-elements{
+.sub-elements {
   color: gray;
 }
 
@@ -230,27 +243,30 @@ ul.context-menu-items {
   background-color: inherit;
 }
 
-* [data-contextmenu]:hover{
-  cursor: context-menu!important;
+* [data-contextmenu]:hover {
+  cursor: context-menu !important;
 }
 
 li[data-visible="false"] {
   opacity: .5;
 }
 
-li.select-list, li.icons-list {
+li.select-list,
+li.icons-list {
   margin-bottom: 8px;
   display: flex;
   justify-content: space-between;
 }
 
-li.select-list:hover, li.icons-list:hover {
+li.select-list:hover,
+li.icons-list:hover {
   padding-left: 4px;
   cursor: pointer;
   font-weight: bold;
 }
 
-li.select-list:hover::before, li.icons-list:hover::before {
+li.select-list:hover::before,
+li.icons-list:hover::before {
   content: '';
   position: absolute;
   height: 80%;
@@ -273,13 +289,15 @@ li.drag-list.composite {
   color: var(--metrics-composite);
 } */
 
-details {margin: 4px;}
+details {
+  margin: 4px;
+}
 
 /* details > li.drag-list.columns {
   color: var(--main-secondary-color);
 } */
 
-details > li.drag-list.tables > span {
+details>li.drag-list.tables>span {
   display: flex;
   width: 100%;
   padding: 2px 8px;
@@ -288,14 +306,14 @@ details > li.drag-list.tables > span {
   border-radius: 2px;
 }
 
-details > summary:hover{
+details>summary:hover {
   cursor: pointer;
   color: var(--main-primary-color);
   font-weight: bold;
   padding-left: 2px;
 }
 
-details > summary{
+details>summary {
   /* font-weight: bold; */
   line-height: 1.6rem;
   color: dimgray;
@@ -303,56 +321,60 @@ details > summary{
   transition: padding 150ms;
 }
 
-details[open] > summary {
+details[open]>summary {
   padding-left: 2px;
   color: var(--main-primary-color);
   font-weight: bold;
 }
 
-details > li[data-datatype='float'] {
+details>li[data-datatype='float'] {
   background-color: teal;
   color: white;
 }
 
-details > li {
+details>li {
   margin: 4px 2px;
   margin-inline-start: 0px;
   line-height: 1.6rem;
 }
 
-li.drag-list > i[draggable] {
+li.drag-list>i[draggable] {
   visibility: hidden;
 }
 
-li.drag-list:hover > i[draggable] {
+li.drag-list:hover>i[draggable] {
   visibility: visible;
   cursor: grab;
 }
 
-li.drag-list > i:not([draggable]) {
+li.drag-list>i:not([draggable]) {
   border-radius: 4px;
   padding: 2px 4px;
 }
 
-li.metrics.basic > i:not([draggable]), li.metrics.advanced > i:not([draggable]) {
+li.metrics.basic>i:not([draggable]),
+li.metrics.advanced>i:not([draggable]) {
   background-color: var(--metrics);
   color: whitesmoke;
 }
 
-li.metrics.composite > i:not([draggable]) {
+li.metrics.composite>i:not([draggable]) {
   background-color: var(--metrics-composite);
   color: whitesmoke;
 }
 
-li.drag-list.columns > i:not([draggable]) {
+li.drag-list.columns>i:not([draggable]) {
   background-color: var(--main-secondary-color);
   color: whitesmoke;
 }
 
-li.filters > i:not([draggable]) {
+li.filters>i:not([draggable]) {
   background-color: var(--filters-color);
   color: #494949;
 }
 
-li.drag-list.metrics > span, li.drag-list.filters > span, li.drag-list.columns > span
-{margin-left: 4px;}
+li.drag-list.metrics>span,
+li.drag-list.filters>span,
+li.drag-list.columns>span {
+  margin-left: 4px;
+}

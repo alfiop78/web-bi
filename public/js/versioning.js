@@ -254,7 +254,7 @@ var Storage = new SheetStorages();
         if (data) {
           tokens.forEach(token => {
             // aggiorno lo status dell'elemento dopo l'upload
-            const li = document.getElementById(`${token}`);
+            const li = document.getElementById(token);
             const statusIcon = li.querySelector('i[data-sync-status]');
             li.dataset.sync = 'true';
             li.dataset.identical = 'true';
@@ -294,7 +294,7 @@ var Storage = new SheetStorages();
         if (data) {
           tokens.forEach(token => {
             // aggiorno lo status dell'elemento dopo l'upload
-            const li = document.getElementById(`${token}`);
+            const li = document.getElementById(token);
             const statusIcon = li.querySelector('i[data-sync-status]');
             li.dataset.sync = 'true';
             li.dataset.identical = 'true';
@@ -331,7 +331,7 @@ var Storage = new SheetStorages();
           // console.log(data);
           tokens.forEach(token => {
             // aggiorno lo status dell'elemento dopo l'upload
-            const li = document.getElementById(`${token}`);
+            const li = document.getElementById(token);
             window.localStorage.removeItem(token);
             // elimino anche dal DOM l'elemento
             li.remove();

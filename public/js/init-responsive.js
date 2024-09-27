@@ -1447,9 +1447,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     steps.dataset.step = 1;
     translateRef.dataset.step = 1;
     app.body.dataset.step = 1;
-    // visualizzo/nascondo i box info
-    document.getElementById('workbook_info').hidden = false;
-    document.getElementById('sheet_info').hidden = true;
+    // carico le proprietà del Workbook nel boxInfo
+    app.workBookInformations();
   }
 
   // tasto "Sheet" :
@@ -1478,9 +1477,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       steps.dataset.step = 2;
       translateRef.dataset.step = 2;
       app.body.dataset.step = 2;
-      // visualizzo/nascondo i box info
-      document.getElementById('workbook_info').hidden = true;
-      document.getElementById('sheet_info').hidden = false;
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
       app.addTablesStruct();
       WorkBook.save();
@@ -1496,6 +1492,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         Sheet.edit = false;
         Resource = new Resources('preview-datamart');
       }
+      // carico le proprietà dello Sheet nel boxInfo
+      app.sheetInformations();
     }
   }
 
@@ -3433,18 +3431,33 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.timeDimensionExists();
 
   app.sheetInformations = () => {
-    // const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
-    for (const [key, value] of Object.entries(Sheet.getInformations())) {
-      const ref = document.getElementById(key);
-      ref.textContent = value;
+    document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);
+    if (Sheet) {
+      // sono presenti info, elimino la classe css 'none'
+      document.querySelector('#info.informations').classList.remove('none');
+      for (const [key, value] of Object.entries(Sheet.getInformations())) {
+        const ref = document.getElementById(key);
+        if (ref) {
+          ref.hidden = false;
+          const refContent = document.getElementById(`${key}_content`);
+          refContent.textContent = value;
+        }
+      }
     }
   }
 
   app.workBookInformations = () => {
-    // const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
-    for (const [key, value] of Object.entries(WorkBook.getInformations())) {
-      const ref = document.getElementById(key);
-      ref.textContent = value;
+    document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);
+    if (WorkBook) {
+      document.querySelector('#info.informations').classList.remove('none');
+      for (const [key, value] of Object.entries(WorkBook.getInformations())) {
+        const ref = document.getElementById(key);
+        if (ref) {
+          ref.hidden = false;
+          const refContent = document.getElementById(`${key}_content`);
+          refContent.textContent = value;
+        }
+      }
     }
   }
 

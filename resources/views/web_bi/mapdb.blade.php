@@ -325,24 +325,29 @@
             <h5 class="">Seleziona schema Database</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col relative-ul">
-                  <ul id="ul-schemata" class="custom-scrollbar">
-                    @php
-                    // {{ dump(session('db_driver')); }}
-                    @endphp
-                    @foreach($schemata as $schema)
-                    @switch(session('db_driver'))
-                    @case('odbc')
-                    <li class="select-list" data-fn="handlerSchema" data-schema="{{$schema['SCHEMA_NAME']}}">{{ $schema['SCHEMA_NAME'] }}</li>
-                    @break
-                    @case('mysql')
-                    <li class="select-list" data-fn="handlerSchema" data-schema="{{$schema->Database}}">{{ $schema->Database }}</li>
-                    @break
-                    @default
-                    <!-- Default case... -->
-                    @endswitch
-                    @endforeach
-                  </ul>
+                <section class="col">
+                  <div class="list-search">
+                    <input type="search" id="schemata-search-id" data-element-search="schemata" autocomplete="off" placeholder="Ricerca Schema" />
+                    <div class="relative-ul">
+                      <ul id="ul-schemata" data-search-id="schemata-search-id" class="custom-scrollbar">
+                        @php
+                        // {{ dump(session('db_driver')); }}
+                        @endphp
+                        @foreach($schemata as $schema)
+                        @switch(session('db_driver'))
+                        @case('odbc')
+                        <li class="select-list" data-fn="handlerSchema" data-searchable="true" data-element-search="schemata" data-label="{{$schema['SCHEMA_NAME']}}" data-schema="{{$schema['SCHEMA_NAME']}}">{{ $schema['SCHEMA_NAME'] }}</li>
+                        @break
+                        @case('mysql')
+                        <li class="select-list" data-fn="handlerSchema" data-searchable="true" data-element-search="schemata" data-label="{{$schema['SCHEMA_NAME']}}" data-schema="{{$schema->Database}}">{{ $schema->Database }}</li>
+                        @break
+                        @default
+                        <!-- Default case... -->
+                        @endswitch
+                        @endforeach
+                      </ul>
+                    </div>
+                  </div>
                 </section>
               </section>
             </section>
@@ -747,27 +752,6 @@
               <div id="stepTranslate">
                 <section class="step" data-step="1" selected>
                   <section class="wrapper-step">
-                    <!-- <menu class="standard">
-                      <section>
-                        <button class="btn-link default" id="btn-workbook-new" value="Nuovo">Nuovo</button>
-                        <button class="btn-link default" id="btn-workbook-open" value="open">Apri</button>
-                        <button class="btn-link default" id="btn-time-dimension" value="open">Tabella TIME</button>
-                      </section>
-                      <section>
-                        <div id="workbook-name" class="name" contenteditable="true" data-default-value="Titolo WorkBook">Titolo WorkBook</div>
-                      </section>
-                      <section class="dbStatus">
-                        {{-- session()->forget('db_name') --}}
-                        <span id="db-connection-status" data-connected="{{ session('db_id', 0) }}">
-                          <span id="database-name">{{ session('db_name', 'Nessun Database collegato') }}</span>
-                          @if (session('db_name'))
-                          <i id="db-icon-status" class="material-symbols-rounded">database</i>
-                          @else
-                          <i id="db-icon-status" class="material-symbols-rounded">database_off</i>
-                          @endif
-                        </span>
-                      </section>
-                    </menu> -->
                     <div id="context-menu-table" class="context-menu">
                       <ul id="ul-context-menu-table" class="context-menu-items">
                         <button id="addFactJoin" class="btn-link-context" data-fn="handlerAddJoin" disabled>Aggiungi Join</button>
@@ -1035,57 +1019,31 @@
   </div>
   <div id="boxInfo" class="right-sidebar">
     <button type="button" id="btnShowInfo" class="material-symbols-rounded">multiple_stop</button>
-    <div class="row">
-      <div class="col">
-        <div id="workbook_info" class="informations workbook">
-          <div class="info">
-            <!-- <button id="btnCopyText__name" type="button" class="material-symbols-rounded">content_copy</button> -->
-            <span>Nome</span>
-            <p id="info__workbook_name"></p>
-          </div>
-          <div class="info">
-            <!-- <button id="btnCopyText__token" type="button" class="material-symbols-rounded">content_copy</button> -->
-            <span>ObjectID</span>
-            <p id="info__workbook_token"></p>
-          </div>
-          <div class="info">
-            <!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
-            <span>Data creazione</span>
-            <p id="info__workbook_created_at"></p>
-          </div>
-          <div class="info">
-            <!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
-            <span>Data aggiornamento</span>
-            <p id="info__workbook_updated_at"></p>
-          </div>
-        </div>
-        <div id="sheet_info" class="informations sheet" hidden>
-          <div class="info">
-            <!-- <button id="btnCopyText__name" type="button" class="material-symbols-rounded">content_copy</button> -->
-            <span>Nome</span>
-            <p id="info__sheet_name"></p>
-          </div>
-          <div class="info">
-            <!-- <button id="btnCopyText__token" type="button" class="material-symbols-rounded">content_copy</button> -->
-            <span>ObjectID</span>
-            <p id="info__sheet_token"></p>
-          </div>
-          <div class="info">
-            <!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
-            <span>Report Id</span>
-            <p id="info__datamart_id"></p>
-          </div>
-          <div class="info">
-            <!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
-            <span>Data creazione</span>
-            <p id="info__sheet_created_at"></p>
-          </div>
-          <div class="info">
-            <!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
-            <span>Data aggiornamento</span>
-            <p id="info__sheet_updated_at"></p>
-          </div>
-        </div>
+    <div id="info" class="informations none">
+      <div id="info__name" class="info" hidden>
+        <!-- <button id="btnCopyText__name" type="button" class="material-symbols-rounded">content_copy</button> -->
+        <span>Nome</span>
+        <p id="info__name_content"></p>
+      </div>
+      <div id="info__token" class="info" hidden>
+        <!-- <button id="btnCopyText__token" type="button" class="material-symbols-rounded">content_copy</button> -->
+        <span>ObjectID</span>
+        <p id="info__token_content"></p>
+      </div>
+      <div id="info__datamart_id" class="info" hidden>
+        <!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
+        <span>Report Id</span>
+        <p id="info__datamart_id_content"></p>
+      </div>
+      <div id="info__created_at" class="info" hidden>
+        <!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
+        <span>Data creazione</span>
+        <p id="info__created_at_content"></p>
+      </div>
+      <div id="info__updated_at" class="info" hidden>
+        <!-- <button id="btnCopyText__id" type="button" class="material-symbols-rounded">content_copy</button> -->
+        <span>Data aggiornamento</span>
+        <p id="info__updated_at_content"></p>
       </div>
     </div>
   </div>

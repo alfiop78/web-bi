@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BIsheet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class BIsheetController extends Controller
 {
@@ -133,7 +134,11 @@ class BIsheetController extends Controller
   public function destroy(BIsheet $bIsheet, $token)
   {
     try {
+      // TODO: elimino il datamart
       $element = $bIsheet::findOrFail($token);
+      // dump($element);
+      dump("{$element->datamartId}_{$element->userId}");
+      dd(Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.WEB_BI_{$element->datamartId}_{$element->userId}"));
       return $element->delete();
     } catch (\Throwable $th) {
       return response()->json(['err' => "Elemento non presente nel metadato"]);

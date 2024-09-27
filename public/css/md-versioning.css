@@ -70,6 +70,7 @@ ul > li > .li-content, ul > li > .li-buttons{
   display: flex;
   align-items: center;
   column-gap: 4px;
+  width: 100%;
 }
 
 .li-content[data-selected] {
