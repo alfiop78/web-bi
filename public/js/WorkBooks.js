@@ -99,6 +99,7 @@ class Sheets {
   // OPTIMIZE: il codice si ripete in update() e in save()
   update() {
     this.sheet.name = this.name;
+    this.sheet.facts = [...this.fact];
     this.sheet.userId = this.userId;
     this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.options);
     this.save();
@@ -110,6 +111,7 @@ class Sheets {
     this.sheet.id = Date.now();
     this.sheet.userId = this.userId;
     this.sheet.name = this.name;
+    this.sheet.facts = [...this.fact];
     this.sheet.created_at = new Date().toLocaleDateString('it-IT', this.options);
     this.sheet.updated_at = new Date().toLocaleDateString('it-IT', this.options);
     this.save();

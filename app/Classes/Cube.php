@@ -42,6 +42,7 @@ class Cube
     $this->process = $process;
     $this->report_id = $this->process->{"id"};
     $this->facts = $this->process->{"facts"};
+    // TODO: da modificare in userId
     $this->datamart_id = $this->process->{"datamartId"};
     $this->datamart_name = "WEB_BI_{$this->report_id}_{$this->datamart_id}";
     // il report deve necessariamente contenere almeno un livello dimensionale
@@ -88,6 +89,8 @@ class Cube
       $this->datamart_fields[] = "{$column->name}_id";
       $this->datamart_fields[] = $column->name;
     }
+    // dd($this->datamart_fields);
+
   }
 
   // Creazione della clausola SELECT e dell'array _columns
@@ -396,6 +399,32 @@ class Cube
     }
   }
 
+  // TEST: 30.09.2024 da testare
+  private function levelQuarter($timingFunction)
+  {
+    // ultimo livello del report YEAR
+    switch ($timingFunction) {
+      case "last-year":
+        // metrica last-year
+        $this->time_sql = [
+          ["WB_YEARS.id", "WB_QUARTERS.year_id"],
+          ["WB_QUARTERS.previous", "WB_MONTHS.quarter_id"],
+          ["WB_MONTHS.id", "WB_DATE.month_id"]
+        ];
+        break;
+      case "last-month":
+        // metrica last-month
+        $this->time_sql = [
+          ["WB_YEARS.id", "WB_QUARTERS.year_id"],
+          ["WB_QUARTERS.id", "WB_MONTHS.quarter_id"],
+          ["WB_MONTHS.last", "WB_DATE.month_id"]
+        ];
+        break;
+      default:
+        break;
+    }
+  }
+
   private function levelMonth($timingFunction)
   {
     // livello MONTH nel report
@@ -445,6 +474,7 @@ class Cube
               $this->levelMonth($token);
               break;
             case "tok_WB_QUARTERS":
+              $this->levelQuarter($token);
               break;
             case "tok_WB_YEARS":
               $this->levelYear($token);
@@ -459,7 +489,6 @@ class Cube
             ["WB_MONTHS.id", "WB_DATE.month_id"]
           ];
         }
-        // dd($this->time_sql);
 
         // dd($this->from_clause[$this->factId]);
         // dd(array_key_exists("WB_YEARS", $this->from_clause[$this->factId]));
@@ -734,12 +763,14 @@ class Cube
     $createStmt .= $joinLEFT;
     // var_dump($sql);
     try {
-      // TODO: E' necessario eliminare prima il datamart se è già presente, in questo modo posso eliminare la chiamata a datamartExists in init-responsive.js
+      // elimino prima il datamart già esistente
+      dd(Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$this->report_id}_{$this->datamart_id}"));
       if (Schema::connection(session('db_client_name'))->hasTable("decisyon_cache.WEB_BI_{$this->report_id}_{$this->datamart_id}")) {
         // TEST: 27.09.2024 verifica, in laravel viene restituito un NOTICE quando si utilizza dropIfExists() e una tabella non è presente
         Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_{$this->report_id}_{$this->datamart_id}");
       }
       // creazione del datamart
+      // dd($createStmt);
       DB::connection(session('db_client_name'))->statement($createStmt);
       // elimino la tabella union....
       Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.union_{$this->report_id}_{$this->datamart_id}");

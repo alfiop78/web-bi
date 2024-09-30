@@ -339,7 +339,7 @@
                         <li class="select-list" data-fn="handlerSchema" data-searchable="true" data-element-search="schemata" data-label="{{$schema['SCHEMA_NAME']}}" data-schema="{{$schema['SCHEMA_NAME']}}">{{ $schema['SCHEMA_NAME'] }}</li>
                         @break
                         @case('mysql')
-                        <li class="select-list" data-fn="handlerSchema" data-searchable="true" data-element-search="schemata" data-label="{{$schema['SCHEMA_NAME']}}" data-schema="{{$schema->Database}}">{{ $schema->Database }}</li>
+                        <li class="select-list" data-fn="handlerSchema" data-searchable="true" data-element-search="schemata" data-label="{{$schema->Database}}" data-schema="{{$schema->Database}}">{{ $schema->Database }}</li>
                         @break
                         @default
                         <!-- Default case... -->

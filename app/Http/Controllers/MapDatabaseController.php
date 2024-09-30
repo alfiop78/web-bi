@@ -18,6 +18,11 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 // aggiunta per utilizzare Config per la connessione a differenti db
 use App\Http\Controllers\BIConnectionsController;
+// uso i Model BIsheet, BIworkbook, BImetric e BIfilter che viene utilizzato nella route curlprocess (web_bi.schedule_report)
+use App\Models\BIsheet;
+use App\Models\BIworkbook;
+use App\Models\BIfilter;
+use App\Models\BImetric;
 
 class MapDatabaseController extends Controller
 {
@@ -800,6 +805,195 @@ class MapDatabaseController extends Controller
     // }
   }
 
+  /**
+   * Creazione dell'oggetto 'process' per l'esecuzione da curl
+   *
+   * @return ProcessObject
+   */
+  public function scheduleProcess($token)
+  {
+    // recupero l'oggetto Sheet dal metadato
+    // BUG: verifica se l'elemento è presente (è stato versionato)
+    $json_sheet = json_decode(BIsheet::where("token", $token)->first('json_value')->{'json_value'});
+    // var_dump($json_sheet);
+    // exit;
+    // WorkBook
+    // BUG: verifica se l'elemento è presente (è stato versionato)
+    $json_workbook = json_decode(BIworkbook::where("token", "=", $json_sheet->{'workbook_ref'})->first('json_value')->{'json_value'});
+    // creo l'object 'process' che verrà processato da this->sheetCurlProcess()
+    $process = (object)[
+      'id' => $json_sheet->id,
+      'datamartId' => $json_sheet->userId,
+      'facts' => $json_sheet->facts,
+      'from' => $json_sheet->sheet->from,
+      'joins' => $json_sheet->sheet->joins,
+      'filters' => (object)[],
+      'fields' => (object)[],
+      'baseMeasures' => (object)[],
+      'advancedMeasures' => (object)[],
+      'compositeMeasures' => (object)[],
+      'hierarchiesTimeLevel' =>  NULL
+    ];
+    // $fields = (object)[];
+    $metrics = (object)[];
+    $advancedMeasures = (object)[];
+    $compositeMeasures = (object)[];
+    // fields vengono recuperati dal WorkBook
+    foreach ($json_sheet->sheet->fields as $token => $name) {
+      // recupero le proprietà 'field', 'tableAlias' mentre la proprietà 'name' la utilizzo dallo Sheet
+      // dump($token);
+      $process->fields->$token = (object)[
+        'field' => $json_workbook->fields_new->{$token}->field,
+        'name' => $name,
+        'tableAlias' => $json_workbook->fields_new->{$token}->tableAlias
+      ];
+      // TODO: da rivedere (anche in init-responsive.js)
+      switch ($token) {
+        case 'tok_WB_MONTHS':
+          $process->hierarchiesTimeLevel = $token;
+          break;
+        case 'tok_WB_QUARTERS':
+          $process->hierarchiesTimeLevel = $token;
+          break;
+        default:
+          $process->hierarchiesTimeLevel = $token;
+          break;
+      }
+    }
+    // dd($process->fields);
+    // recupero i filtri impostati nello Sheet
+    foreach ($json_sheet->sheet->filters as $token) {
+      // BUG: verifica se l'elemento è presente (è stato versionato)
+      $process->filters->$token = json_decode(BIfilter::where("token", $token)->first('json_value')->{'json_value'});
+    }
+
+    $timingFunctions = ['last-year', 'last-month', 'ecc..'];
+    foreach ($json_sheet->facts as $fact) {
+      if (property_exists($json_sheet->sheet, 'metrics')) {
+        foreach ($json_sheet->sheet->metrics as $token => $object) {
+          // anche qui, come in 'fields', alcune proprietà vanno recuperato da json_sheet mentre altre dal WorkBook
+          $metrics->$token = (object)[
+            'token' => $object->token, // TODO: probabilmente il token non serve
+            "alias" => $object->alias,
+            "aggregateFn" => $object->aggregateFn,
+            "SQL" => $json_workbook->metrics->{$token}->SQL,
+            "distinct" => $json_workbook->metrics->{$token}->distinct
+          ];
+          $process->baseMeasures->$fact = $metrics;
+        }
+      }
+
+      // metriche avanzate
+      if (property_exists($json_sheet->sheet, 'advMetrics')) {
+        foreach ($json_sheet->sheet->advMetrics as $token => $object) {
+          // recupero la metrica avanzata dal DB
+          // BUG: verifica se l'elemento è presente (è stato versionato)
+          $json_advanced_measures = json_decode(BImetric::where("token", $token)->first('json_value')->{'json_value'});
+          // recupero i filtri contenuti all'interno della metrica avanzata in ciclo
+          $json_filters_metric = (object)[];
+          foreach ($json_advanced_measures->filters as $filterToken) {
+            // se il filtro è un timingFn recupero la definizione $object-timingFn che si trova all'interno della metrica
+            if (in_array($filterToken, $timingFunctions)) {
+              $json_filters_metric->$filterToken = $json_advanced_measures->timingFn->$filterToken;
+            } else {
+              // BUG: verifica se l'elemento è presente (è stato versionato)
+              $json_filters_metric->$filterToken = json_decode(BIfilter::where("token", $filterToken)->first('json_value')->{'json_value'});
+            }
+          }
+          $advancedMeasures->$token = (object)[
+            "alias" => $object->alias,
+            "aggregateFn" => $object->aggregateFn,
+            "SQL" => $json_advanced_measures->SQL,
+            "distinct" => $json_advanced_measures->distinct,
+            "filters" => $json_filters_metric
+          ];
+          $process->advancedMeasures->$fact = $advancedMeasures;
+        }
+      }
+    }
+    // metriche composte
+    if (property_exists($json_sheet->sheet, 'compositeMetrics')) {
+      foreach ($json_sheet->sheet->compositeMetrics as $token => $object) {
+        // recupero la metrica avanzata dal DB
+        // BUG: verifica se l'elemento è presente (è stato versionato)
+        $json_composite_measures = json_decode(BImetric::where("token", $token)->first('json_value')->{'json_value'});
+        $process->compositeMeasures->$token = (object)[
+          "alias" => $object->alias,
+          "SQL" => $json_composite_measures->sql
+        ];
+      }
+    }
+    // dd($process);
+    return $this->curlProcess($process);
+  }
+
+  private function curlProcess($process)
+  {
+    // dd($process);
+    $query = new Cube($process);
+    $query->datamartFields();
+    foreach ($query->facts as $fact) {
+      $query->fact = $fact;
+      $query->factId = substr($fact, -5);
+      $query->baseTableName = "WB_BASE_{$query->report_id}_{$query->datamart_id}_{$query->factId}";
+      $res = $query->base_table_new();
+      // dd($res === true ||$res === NULL);
+      $query->queries[$query->baseTableName] = $query->datamart_fields;
+      if ($res === true || $res === NULL) {
+        // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
+        // creo una tabella temporanea per ogni metrica filtrata
+        // dd($query->process->{"advancedMeasures"});
+        // dd(empty($query->process->{"advancedMeasures"}));
+        if (!empty($query->process->advancedMeasures)) {
+          // sono presenti metriche avanzate
+          if (property_exists($query->process->advancedMeasures, $fact)) {
+            $query->filteredMetrics = $query->process->advancedMeasures->$fact;
+            // verifico quali, tra le metriche filtrate, contengono gli stessi filtri.
+            // Le metriche che contengono gli stessi filtri vanno eseguite in un unica query.
+            // Oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
+            $query->groupMetricsByFilters = (object)[];
+            // raggruppare per tipologia dei filtri
+            $groupFilters = array();
+            // creo un gruppo di filtri
+            foreach ($query->filteredMetrics as $metric) {
+              // dd($metric->formula->filters);
+              // ogni gruppo di filtri ha un tokenGrouup diverso come key dell'array
+              $tokenGroup = "grp_" . bin2hex(random_bytes(4));
+              if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
+            }
+            // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
+            foreach ($groupFilters as $token => $group) {
+              $metrics = array();
+              foreach ($query->filteredMetrics as $metric) {
+                if (get_object_vars($metric->filters) == get_object_vars($group)) {
+                  // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
+                  array_push($metrics, $metric);
+                }
+              }
+              // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
+              $query->groupMetricsByFilters->$token = $metrics;
+            }
+            // dd($query->groupMetricsByFilters);
+            $metricTable = $query->createMetricDatamarts_new();
+          }
+        }
+      }
+    }
+    // metriche composte
+    if (!empty($query->process->compositeMeasures)) {
+      foreach ($query->process->compositeMeasures as $metric) {
+        $query->compositeMeasures[] = implode(" ", $metric->SQL) . " AS '{$metric->alias}'";
+      }
+    }
+
+    try {
+      if ($query->datamart_new()) return "OK\n";
+    } catch (\Throwable $th) {
+      $msg = $th->getMessage();
+      return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
+    }
+  }
+
   public function sheetCurlProcess($report)
   {
     // curl http://127.0.0.1:8000/curl/process/210wu29ifoh/schedule
@@ -1061,7 +1255,7 @@ class MapDatabaseController extends Controller
   } */
 
   // curl
-  public function curlprocess($json)
+  /* public function curlprocess($json)
   {
     // curl http://127.0.0.1:8000/curl/process/210wu29ifoh/schedule
     // con il login : curl https://user:psw@gaia.automotive-cloud.com/curl/process/{processToken}/schedule
@@ -1105,7 +1299,7 @@ class MapDatabaseController extends Controller
     if (property_exists($cube, 'filters')) $q->filters($cube->{'filters'});
     // TODO: siccome il group by viene creato uguale alla clausola SELECT potrei unirli e non fare qui 2 chiamate
     $q->groupBy($cube->{'select'});
-    /* dd($q); */
+    // dd($q);
     // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
     try {
       $baseTable = $q->baseTable(null);
@@ -1155,5 +1349,5 @@ class MapDatabaseController extends Controller
       // abort(500, "ERRORE ESECUZIONE QUERY : $msg");
     }
     // dd($baseTable);
-  }
+  } */
 }

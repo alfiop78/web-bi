@@ -14,12 +14,13 @@ use App\Http\Controllers\BImetricController;
 use App\Http\Controllers\BIfilterController;
 use App\Http\Controllers\BIdashboardController;
 use App\Http\Controllers\BIConnectionsController;
-// uso il Model BIsheet che viene utilizzato nella route curlprocess (web_bi.schedule_report)
+// uso i Model BIsheet, BIworkbook, BImetric e BIfilter che viene utilizzato nella route curlprocess (web_bi.schedule_report)
 use App\Models\BIsheet;
 use App\Models\BIworkbook;
 use App\Models\BIfilter;
 use App\Models\BImetric;
 // test 22.12.2022 aggiunta per utilizzare /fetch_api/dimension/time
+// NOTE: 30.09.2024 spostate le funzioni per /fetch_api/dimension/time in MapDatabaseController
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -44,11 +45,6 @@ Route::get('/users', [UserController::class, 'index']);
 //   return view('web_bi.index_origin');
 // })->name('web_bi.index_origin'); // home page
 
-// pagina predisposta per il dvd (Marco Gardin) al momento non utilizzata
-// Route::get('/', function () {
-//   return view('web_bi.index');
-// })->name('web_bi.index');
-
 Route::get('/', [BIConnectionsController::class, 'index'])->name('web_bi.index');
 
 Route::get('/mapdb', [MapDatabaseController::class, 'mapdb'])->name('web_bi.mapdb');
@@ -58,15 +54,8 @@ Route::get('/versioning', function () {
   return view('web_bi.versioning');
 })->name('web_bi.versioning');
 
-// Route::get('/dashboards', function () {
-//   return view('web_bi.dashboards');
-// })->name('web_bi.dashboards');
-
 Route::get('/dashboards', [BIdashboardController::class, 'index'])->name('web_bi.dashboards');
 
-/* Route::get('/create-dashboard', function () {
-  return view('web_bi.create-dashboard');
-})->name('web_bi.dashboard_create'); */
 Route::get('/create-dashboard', [BIworkbookController::class, 'indexByDashboardCreate'])->name('web_bi.dashboard_create');
 
 // recupero l'elenco dei database presenti (schema)
@@ -99,7 +88,7 @@ Route::get('/500', function () {
   return view('errors.500');
 });
 
-// copy_table
+// copy_table (utilizzata per la Pubblicazione della Dashboard)
 Route::get('/fetch_api/copy_from/{from_id}/copy_to/{to_id}/copy_table', [MapDatabaseController::class, 'copy_table'])->name('web_bi.fetch_api.copy_table');
 
 // creazione dimensione time
@@ -107,7 +96,6 @@ Route::get('/fetch_api/copy_from/{from_id}/copy_to/{to_id}/copy_table', [MapData
 Route::get('/fetch_api/dimension/time', [MapDatabaseController::class, 'dimensionTIME'])->name('web_bi.fetch_api_time');
 
 /* Route::get('/fetch_api/dimension/time', function () {
-
   $start = new DateTime('2021-01-01 00:00:00');
   $end   = new DateTime('2025-01-01 00:00:00');
   // $end   = new DateTime('2021-01-31 00:00:00');
@@ -302,7 +290,9 @@ Route::get('/fetch_api/dimension/time', [MapDatabaseController::class, 'dimensio
   return $map->curlprocess($json_value);
 })->name('web_bi.schedule_report'); */
 
-Route::get('/curl/process/{token}/schedule', function ($token) {
+Route::get('/curl/process/{token}/schedule', [MapDatabaseController::class, 'scheduleProcess'])->name('web_bi.schedule');
+
+Route::get('/curl/process/{token}/schedule_old', function ($token) {
   // TODO: molto probabilmente converrà spostare la function di questa Route in MapDatabaseController
   $map = new MapDatabaseController();
   // interrogo la tabella bi_processes per recuperare il json_value relativo al report indicato nel token
@@ -458,4 +448,3 @@ Route::get('fetch_api/dashboardsByConnectionId', [BIdashboardController::class, 
 // test vertica
 Route::get('/mapping/test_vertica', [MapDatabaseController::class, 'test_vertica']); // connessione con il metodo usato in Zend / PHP
 Route::get('/mapping/vertica_odbc', [MapDatabaseController::class, 'vertica_odbc']); // connessione con ORM / Facade di Laravel
-/* map database web-bi*/
