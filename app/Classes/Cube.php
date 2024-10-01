@@ -764,8 +764,7 @@ class Cube
     // var_dump($sql);
     try {
       // elimino prima il datamart già esistente
-      dd(Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$this->report_id}_{$this->datamart_id}"));
-      if (Schema::connection(session('db_client_name'))->hasTable("decisyon_cache.WEB_BI_{$this->report_id}_{$this->datamart_id}")) {
+      if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$this->report_id}_{$this->datamart_id}")) {
         // TEST: 27.09.2024 verifica, in laravel viene restituito un NOTICE quando si utilizza dropIfExists() e una tabella non è presente
         Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_{$this->report_id}_{$this->datamart_id}");
       }
