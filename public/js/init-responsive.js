@@ -1201,6 +1201,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
                 console.log('tutte le paginate completate :', partialData);
                 Resource.data = partialData;
                 google.charts.setOnLoadCallback(drawDatamart());
+                App.closeConsole();
                 App.loaderStop();
               }
             }).catch((err) => {
@@ -1215,12 +1216,13 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             // Non sono presenti altre pagine, visualizzo il dashboard
             Resource.data = partialData;
             google.charts.setOnLoadCallback(drawDatamart());
-            // App.loaderStop();
+            App.loaderStop();
             App.closeConsole();
             app.sheetInformations();
           }
         } else {
           App.loaderStop();
+          App.closeConsole();
           App.showConsole('Nessun dato presente', 'warning', 2000);
         }
       })
@@ -1290,10 +1292,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       // se ci sono state delle modifiche eseguo update
       if (Sheet.changes.length !== 0) {
         Sheet.update();
-        // elimino il datamart perchè è stato modificato
+        // elimino il datamart perchè è stato modificato il report e le colonne nel datamart e nel report potrebbero non corrispondere più
         let result = await Sheet.delete();
-        console.log('datamart eliminato : ', result);
-        if (result && Resource.tableRef) Resource.tableRef.clearChart();
+        App.showConsole('Datamart eliminato', 'done', 1500);
+        // console.log('datamart eliminato : ', result);
+        if (result) {
+          document.querySelectorAll('div[data-removed]').forEach(el => el.remove());
+          if (Resource.tableRef) Resource.tableRef.clearChart();
+        }
       }
     } else {
       // il report è stato appena creato e faccio save()

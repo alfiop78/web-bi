@@ -25,6 +25,60 @@
   font-size: .9rem;
 }
 
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* *::-webkit-scrollbar-thumb {
+  display: block;
+  background-color: #5f6162c7;
+  border-radius: 2px;
+} */
+
+/* *::-webkit-scrollbar-track {
+  display: block;
+  background-color: gainsboro;
+} */
+
+*:hover::-webkit-scrollbar {
+  display: block;
+  width: 4px;
+  height: 5px;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  display: block;
+  background-color: #5f6162c7;
+  border-radius: 2px;
+}
+
+*:hover::-webkit-scrollbar-track {
+  display: block;
+  background-color: gainsboro;
+}
+
+/* .custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar {
+  display: block;
+  width: 4px;
+  height: 5px;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  display: block;
+  background-color: #5f6162c7;
+  border-radius: 2px;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-track {
+  display: block;
+  background-color: gainsboro;
+} */
+
+
 h4 {
   font-size: 1.2rem;
 }

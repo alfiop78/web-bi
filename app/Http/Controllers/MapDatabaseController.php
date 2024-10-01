@@ -23,6 +23,7 @@ use App\Models\BIsheet;
 use App\Models\BIworkbook;
 use App\Models\BIfilter;
 use App\Models\BImetric;
+use PhpParser\Node\Stmt\TryCatch;
 
 class MapDatabaseController extends Controller
 {
@@ -182,7 +183,25 @@ class MapDatabaseController extends Controller
   public function deleteDatamart($id)
   {
     if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$id}")) {
-      return Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.WEB_BI_$id");
+      try {
+        switch (session('db_driver')) {
+          case 'odbc':
+            Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_{$id}");
+            break;
+          case 'mysql':
+            Schema::connection(session('db_client_name'))->drop("WEB_BI_{$id}");
+            break;
+          default:
+            Schema::connection(session('db_client_name'))->drop("WEB_BI_{$id}");
+            break;
+        }
+        return TRUE;
+      } catch (\Throwable $th) {
+        throw $th;
+      }
+      // return Schema::connection(session('db_client_name'))->drop("WEB_BI_{$id}");
+      // return Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_$id");
+      // return Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.WEB_BI_$id");
     }
   }
 

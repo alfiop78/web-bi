@@ -182,6 +182,7 @@ class Sheets {
       .then((response) => response.text())
       .then(response => {
         App.closeConsole();
+        if (!response) App.showConsole('Datamart non presente', 'warning', 1500);
         return response;
       })
       .catch(err => {
