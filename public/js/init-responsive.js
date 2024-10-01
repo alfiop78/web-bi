@@ -1203,6 +1203,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
                 google.charts.setOnLoadCallback(drawDatamart());
                 App.closeConsole();
                 App.loaderStop();
+                app.sheetInformations();
               }
             }).catch((err) => {
               App.showConsole(err, 'error');
@@ -1913,27 +1914,29 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     *  Qui possono esserci sia campi che definiscono il <mark> sia elementi, della formula, che definiscono lo <span>
     */
     filter.formula.forEach(element => {
-      if (element.hasOwnProperty('field')) {
-        // determino il <mark>
-        const templateContent = app.tmplFormula.content.cloneNode(true);
-        const i = templateContent.querySelector('i');
-        i.addEventListener('click', app.cancelFormulaObject);
-        const span = templateContent.querySelector('span');
-        const mark = templateContent.querySelector('mark');
-        const small = templateContent.querySelector('small');
-        mark.dataset.tableAlias = element.table_alias;
-        mark.dataset.table = element.table;
-        mark.dataset.field = element.field;
-        mark.innerText = element.field;
-        small.innerText = element.table;
-        txtArea.appendChild(span);
-      } else {
-        const span = document.createElement('span');
-        span.dataset.check = 'filter';
-        span.setAttribute('contenteditable', 'true');
-        span.setAttribute('tabindex', 0);
-        span.innerText = element;
-        txtArea.appendChild(span);
+      if (element) {
+        if (element.hasOwnProperty('field')) {
+          // determino il <mark>
+          const templateContent = app.tmplFormula.content.cloneNode(true);
+          const i = templateContent.querySelector('i');
+          i.addEventListener('click', app.cancelFormulaObject);
+          const span = templateContent.querySelector('span');
+          const mark = templateContent.querySelector('mark');
+          const small = templateContent.querySelector('small');
+          mark.dataset.tableAlias = element.table_alias;
+          mark.dataset.table = element.table;
+          mark.dataset.field = element.field;
+          mark.innerText = element.field;
+          small.innerText = element.table;
+          txtArea.appendChild(span);
+        } else {
+          const span = document.createElement('span');
+          span.dataset.check = 'filter';
+          span.setAttribute('contenteditable', 'true');
+          span.setAttribute('tabindex', 0);
+          span.innerText = element;
+          txtArea.appendChild(span);
+        }
       }
     });
   }
