@@ -259,8 +259,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   /* NOTE: DRAG&DROP EVENTS */
 
   app.elementDragStart = (e) => {
-    console.log('column drag start');
-    console.log('e.target : ', e.target.id);
+    // console.log('column drag start');
+    // console.log('e.target : ', e.target.id);
     e.target.classList.add('dragging');
     e.dataTransfer.setData('text/plain', e.target.id);
     console.log(e.dataTransfer);
@@ -271,7 +271,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     e.preventDefault();
     console.log(e.currentTarget);
     if (e.currentTarget.classList.contains('dropzone')) {
-      //
+      const data = e.dataTransfer.getData('text/plain');
       // console.log(e.currentTarget, e.target);
       e.dataTransfer.dropEffect = "copy";
     } else {
@@ -284,36 +284,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     e.preventDefault();
     // console.log(e.currentTarget, e.target);
     if (e.currentTarget.classList.contains('dropzone')) {
-      // verifica compatibilità elemento da droppare
-      // Es.: non posso droppare una metrica nella dropzone-filters
-      const elementRef = document.getElementById(e.dataTransfer.getData("text/plain"));
-      switch (e.currentTarget.id) {
-        case "dropzone-filters":
-          if (elementRef.dataset.type !== "filter") {
-            console.warn('non in dropzone');
-            e.dataTransfer.dropEffect = "none";
-            e.currentTarget.classList.remove("dropping");
-          } else {
-            e.dataTransfer.dropEffect = "copy";
-            e.currentTarget.classList.add('dropping');
-          }
-          break;
-        case "dropzone-columns":
-        case "dropzone-rows":
-          if (elementRef.dataset.type === "filter") {
-            console.warn('non in dropzone');
-            e.dataTransfer.dropEffect = "none";
-            e.currentTarget.classList.remove("dropping");
-          } else {
-            e.currentTarget.classList.add('dropping');
-            e.dataTransfer.dropEffect = "copy";
-          }
-          break;
-        default:
-          e.currentTarget.classList.add('dropping');
-          e.dataTransfer.dropEffect = "copy";
-          break;
-      }
+      e.dataTransfer.dropEffect = "copy";
+      e.currentTarget.classList.add('dropping');
     } else {
       e.currentTarget.classList.remove('dropping');
       e.dataTransfer.dropEffect = "none";
@@ -582,6 +554,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     if (!e.currentTarget.classList.contains('dropzone')) return;
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
+    // TODO: verifica se l'elemento droppato è compatibile con il currentTarget
+    // es.: non posso droppare una metrica nella sezione filtri
     // elementRef : è l'elemento nella lista di sinistra che ho draggato
     // TODO: rinominare elementRef.id in elementRef.dataset.token
     // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
