@@ -173,7 +173,7 @@
       <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
     </svg>
   </div>
-  <div class="right-sidebar">Right Sidebar</div>
+  <div class="right-sidebar"></div>
   <footer>
       <section class="footerContent">
         <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />

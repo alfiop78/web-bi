@@ -99,17 +99,12 @@
                 </section>
               </div>
               <div class="visual">
-                <section class="col col-12">
+                <section class="list-search">
                   <input id="search-workbook" type="search" autocomplete="off" data-search-id="search-workbook" data-element-search="workbook" placeholder="Ricerca" />
+                  <div class="relative-ul" data-id="workbook" data-type="workbook">
+                    <ul class="elements custom-scrollbar" data-search-id="search-workbook" id="ul-workbook"></ul>
+                  </div>
                 </section>
-                <div class="row searchList">
-                  <section class="col col-12">
-                    <div class="relative-ul" data-id="workbook" data-type="workbook">
-                      <ul class="elements custom-scrollbar" data-search-id="search-workbook" id="ul-workbook"></ul>
-                    </div>
-                  </section>
-                </div>
-
               </div>
               <div class="buttons align-center">
                 <button type="button" class="btn-link link" data-select-all data-type="workbook">Select All</button>
@@ -132,17 +127,12 @@
                 </section>
               </div>
               <div class="visual">
-                <section class="col col-12">
+                <section class="list-search">
                   <input id="search-sheet" type="search" autocomplete="off" data-search-id="search-sheet" data-element-search="sheet" placeholder="Ricerca" />
+                  <div class="relative-ul" data-id="sheet" data-type="sheet">
+                    <ul class="elements custom-scrollbar" data-search-id="search-sheet" id="ul-sheet"></ul>
+                  </div>
                 </section>
-                <div class="row searchList">
-                  <section class="col col-12">
-                    <div class="relative-ul" data-id="sheet" data-type="sheet">
-                      <ul class="elements custom-scrollbar" data-search-id="search-sheet" id="ul-sheet"></ul>
-                    </div>
-                  </section>
-                </div>
-
               </div>
               <div class="buttons align-center">
                 <button type="button" class="btn-link link" data-select-all data-type="sheet">Select All</button>
@@ -165,16 +155,12 @@
                 </section>
               </div>
               <div class="visual">
-                <section class="col col-12">
+                <section class="list-search">
                   <input id="search-metric" type="search" autocomplete="off" data-search-id="search-metric" data-element-search="metric" placeholder="Ricerca" />
+                  <div class="relative-ul" data-id="metric" data-type="metric">
+                    <ul class="elements custom-scrollbar" data-search-id="search-metric" id="ul-metric"></ul>
+                  </div>
                 </section>
-                <div class="row searchList">
-                  <section class="col col-12">
-                    <div class="relative-ul" data-id="metric" data-type="metric">
-                      <ul class="elements custom-scrollbar" data-search-id="search-metric" id="ul-metric"></ul>
-                    </div>
-                  </section>
-                </div>
               </div>
               <div class="buttons align-center">
                 <button type="button" class="btn-link link" data-select-all data-type="metric">Select All</button>
@@ -197,17 +183,12 @@
                 </section>
               </div>
               <div class="visual">
-                <section class="col">
+                <section class="list-search">
                   <input id="search-filter" type="search" autocomplete="off" data-search-id="search-filter" data-element-search="filter" placeholder="Ricerca" />
+                  <div class="relative-ul" data-id="filter" data-type="filter">
+                    <ul class="elements custom-scrollbar" data-search-id="search-filter" id="ul-filter"></ul>
+                  </div>
                 </section>
-                <div class="row searchList">
-                  <section class="col col-12">
-                    <div class="relative-ul" data-id="filter" data-type="filter">
-                      <ul class="elements custom-scrollbar" data-search-id="search-filter" id="ul-filter"></ul>
-                    </div>
-                  </section>
-                </div>
-
               </div>
               <div class="buttons align-center">
                 <button type="button" class="btn-link link" data-select-all data-type="filter">Select All</button>
@@ -259,7 +240,7 @@
       <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
     </svg>
   </div>
-  <div class="right-sidebar">Right Sidebar</div>
+  <div class="right-sidebar"></div>
   <footer>
     <section class="footerContent">
       <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
