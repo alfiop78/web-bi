@@ -506,14 +506,81 @@ p.field-search {
   /* grid-template-rows: auto 1fr; */
 }
 
-textarea {
-  padding: 1em;
-  margin: 1em 0px;
-  border-radius: 2px;
-  border-color: transparent;
-  color: #494949;
-  resize: none;
+/* textarea { */
+/*   padding: 1em; */
+/*   margin: 1em 0px; */
+/*   border-radius: 2px; */
+/*   border-color: transparent; */
+/*   color: #494949; */
+/*   resize: none; */
+/*   width: 100%; */
+/*   height: 100%; */
+/* } */
+
+/* suggestions */
+#popup {
+  display: none;
+  position:absolute
 }
+
+#popup.open {
+  display: block;
+  /* position: absolute; */
+  background-color: #494949;
+  color: white;
+  z-index: 50;
+  padding: 8px;
+  box-shadow: 0px 1px 4px 1px gray;
+  border-radius: 2px;
+}
+
+.textarea-container {
+  position: relative;
+}
+
+.container__textarea {
+  background: transparent;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.container__mirror {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  color: transparent;
+}
+
+.container__suggestions {
+  border: 1px solid rgb(203 213 225);
+  background: #fff;
+  border-radius: 0.5rem;
+  display: none;
+  position: absolute;
+  width: 12rem;
+}
+
+.container__suggestion {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  height: 2rem;
+  padding: 0 0.5rem;
+}
+
+.container__suggestion:not(:first-child) {
+  border-top: 1px solid rgb(203 213 225);
+}
+
+.container__suggestion--focused {
+  background: rgb(226 232 240);
+}
+
+/* suggestions */
 
 textarea:focus,
 textarea:active {
@@ -650,4 +717,10 @@ textarea:active {
 
 .stepButtons.right {
   right: 0px;
+}
+
+#test {
+  position: absolute;
+  background: black;
+  color: white;
 }

@@ -486,7 +486,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const elementRef = document.getElementById(elementId);
     // elementRef : è l'elemento draggato
     WorkBook.activeTable = elementRef.dataset.tableId;
-    app.addMark({ field: elementRef.dataset.field, datatype: elementRef.dataset.datatype }, e.target);
+    // e.target.innerText += `${WorkBook.activeTable.dataset.name}.${elementRef.dataset.field}`;
+    // app.addMark({ field: elementRef.dataset.field, datatype: elementRef.dataset.datatype }, e.target);
   }
 
   app.addFilters = (target, elementRef) => {
@@ -875,22 +876,22 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  app.addMark = (data, ref) => {
+  /* app.addMark = (data, ref) => {
     const templateContent = app.tmplFormula.content.cloneNode(true);
     const i = templateContent.querySelector('i');
     i.addEventListener('click', app.cancelFormulaObject);
     const span = templateContent.querySelector('span');
     const mark = templateContent.querySelector('mark');
-    const small = templateContent.querySelector('small');
+    // const small = templateContent.querySelector('small');
     // aggiungo il tableAlias e table come attributo.
     mark.dataset.tableAlias = WorkBook.activeTable.dataset.alias;
     mark.dataset.table = WorkBook.activeTable.dataset.table;
     mark.dataset.field = data.field;
     mark.dataset.datatype = data.datatype;
-    mark.innerText = data.field;
-    small.innerText = WorkBook.activeTable.dataset.name;
+    mark.innerText = `${WorkBook.activeTable.dataset.name}.${data.field}`;
+    // small.innerText = WorkBook.activeTable.dataset.name;
     ref.appendChild(span);
-  }
+  } */
 
   // drop di una metrica nela textarea per le metriche composte
   app.textareaDrop = (e) => {
@@ -3173,14 +3174,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   // click all'interno di una textarea
   // TODO: da spostare in supportFn.js
-  app.addText = (e) => {
+  /* app.addText = (e) => {
     // console.log('e : ', e);
     // console.log('e.target : ', e.target);
     // console.log('e.currentTarget : ', e.currentTarget);
     if (e.target.localName === 'div') {
       app.addSpan(e.target);
     }
-  }
+  } */
 
   app.tablePopup.onmouseleave = (e) => {
     if (e.target.classList.contains("open")) e.target.classList.remove("open");
@@ -3373,3 +3374,86 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   } */
 
 })();
+
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOMContentLoaded');
+  // const containerEle = document.getElementById('textarea-container');
+  const textarea = document.getElementById('textarea-filter');
+  const popup = document.getElementById('popup');
+
+  const mirroredEle = document.querySelector('#textarea-container .container__mirror');
+
+  const textareaStyles = window.getComputedStyle(textarea);
+  [
+    'border',
+    'boxSizing',
+    'fontFamily',
+    'fontSize',
+    'fontWeight',
+    'letterSpacing',
+    'lineHeight',
+    'padding',
+    'textDecoration',
+    'textIndent',
+    'textTransform',
+    'whiteSpace',
+    'wordSpacing',
+    'wordWrap',
+  ].forEach((property) => {
+    mirroredEle.style[property] = textareaStyles[property];
+  });
+  mirroredEle.style.borderColor = 'transparent';
+
+  const parseValue = (v) => v.endsWith('px') ? parseInt(v.slice(0, -2), 10) : 0;
+  const borderWidth = parseValue(textareaStyles.borderWidth);
+
+  const ro = new ResizeObserver(() => {
+    mirroredEle.style.width = `${textarea.clientWidth + 2 * borderWidth}px`;
+    mirroredEle.style.height = `${textarea.clientHeight + 2 * borderWidth}px`;
+  });
+  ro.observe(textarea);
+
+  textarea.addEventListener('scroll', () => {
+    mirroredEle.scrollTop = textarea.scrollTop;
+  });
+
+  textarea.addEventListener('input', (e) => {
+    const cursorPos = textarea.selectionStart;
+    const textBeforeCursor = textarea.value.substring(0, cursorPos);
+    const textAfterCursor = textarea.value.substring(cursorPos);
+
+    const pre = document.createTextNode(textBeforeCursor);
+    const post = document.createTextNode(textAfterCursor);
+    const caretEle = document.createElement('span');
+    caretEle.innerHTML = '&nbsp;';
+
+    mirroredEle.innerHTML = '';
+    mirroredEle.append(pre, caretEle, post);
+
+    // console.log(caretEle);
+    // const rect = caretEle.getBoundingClientRect();
+    // console.log(rect);
+    // popup.style.left = `${rect.left}px`;
+    // popup.style.top = `${rect.top}px`;
+    if (e.target.value.length >= 3) {
+      popup.querySelectorAll('ul>li').forEach(el => el.remove());;
+      // cerco tra le tabelle/colonne della nav#wbFilters
+      const search = [...document.querySelectorAll('#wbFilters>details>li')].filter(el => (el.dataset.label.toLowerCase().indexOf(e.target.value.toLowerCase()) !== -1) ? true : false);
+      // console.log(search);
+      search.forEach((founded, index) => {
+        // visualizzo solo i primi 6 elementi
+        if (index < 6) {
+          const li = document.createElement('li');
+          li.innerText = founded.dataset.label;
+          popup.querySelector('ul').appendChild(li);
+        }
+      })
+      popup.classList.add('open');
+    } else {
+      popup.classList.remove('open');
+    }
+    // (e.target.value.length === 0) ? popup.classList.remove('open') : popup.classList.add('open');
+    popup.style.left = `${caretEle.offsetLeft}px`;
+    popup.style.top = `${caretEle.offsetTop + caretEle.offsetHeight + 12}px`;
+  });
+});

@@ -227,6 +227,7 @@ dialog .textarea-formula {
   display: grid;
   grid-template-rows: auto 2fr 1fr;
   grid-row-gap: 1em;
+  position: relative;
 }
 
 dialog .buttons {

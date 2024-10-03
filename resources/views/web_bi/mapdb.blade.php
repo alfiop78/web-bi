@@ -692,14 +692,22 @@
                   <div class="list-search">
                     <input type="search" id="input-search-columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off" tabindex="2">
                     <div class="relative-ul">
-                      <nav class="custom-scrollbar" data-search-id="input-search-columns"></nav>
+                      <nav id="wbFilters" class="custom-scrollbar" data-search-id="input-search-columns"></nav>
                     </div>
                   </div>
                 </section>
                 <section class="col col-8-span">
                   <section class="textarea-formula">
                     <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
-                    <div id="textarea-filter" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
+                    <!-- <div id="textarea-filter" data-fn="addText" class="textarea-content dropzone" data-content-editable contenteditable="true"></div> -->
+                    <!-- <textarea id="textarea-filter" class="textarea-content dropzone"></textarea> -->
+                    <div class="textarea-container" id="textarea-container">
+                        <div id="popup">
+                          <ul></ul>
+                        </div>
+                      <div class="container__mirror"></div>
+                      <textarea id="textarea-filter" class="container__textarea"></textarea>
+                    </div>
                     <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                   </section>
                 </section>
