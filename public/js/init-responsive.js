@@ -3115,6 +3115,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         li.dataset.tableId = objects.props.key;
         li.dataset.table = objects.props.name;
         li.dataset.alias = alias;
+        li.dataset.datatype = column.type_name.toLowerCase();
         // li.dataset.type = objects.props.type;
         li.dataset.field = column.column_name;
         // li.dataset.key = column.CONSTRAINT_NAME;
@@ -3438,17 +3439,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.value.length >= 3) {
       popup.querySelectorAll('ul>li').forEach(el => el.remove());;
       // cerco tra le tabelle/colonne della nav#wbFilters
-      const search = [...document.querySelectorAll('#wbFilters>details>li')].filter(el => (el.dataset.label.toLowerCase().indexOf(e.target.value.toLowerCase()) !== -1) ? true : false);
-      // console.log(search);
-      search.forEach((founded, index) => {
-        // visualizzo solo i primi 6 elementi
-        if (index < 6) {
-          const li = document.createElement('li');
-          li.innerText = founded.dataset.label;
-          popup.querySelector('ul').appendChild(li);
-        }
-      })
-      popup.classList.add('open');
+      const founded = [...document.querySelectorAll('#wbFilters>details>li')].filter(el => (el.dataset.label.toLowerCase().indexOf(e.target.value.toLowerCase()) !== -1) ? true : false);
+      console.log(founded);
+      console.log(founded.length);
+      if (founded.length !== 0) {
+        founded.forEach((el, index) => {
+          // visualizzo solo i primi 6 elementi
+          if (index < 6) {
+            const li = document.createElement('li');
+            const small = document.createElement('small');
+            // li.innerText = `(${el.dataset.table}) .${el.dataset.label}`;
+            li.innerText = el.dataset.label;
+            small.innerText = el.dataset.table;
+            li.appendChild(small);
+            popup.querySelector('ul').appendChild(li);
+          }
+        })
+        popup.classList.add('open');
+      } else {
+        popup.classList.remove('open');
+      }
     } else {
       popup.classList.remove('open');
     }

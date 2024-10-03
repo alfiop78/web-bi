@@ -534,6 +534,16 @@ p.field-search {
   border-radius: 2px;
 }
 
+#popup>ul>li {
+  display: block;
+}
+
+#popup>ul>li>small {
+  display: block;
+  font-size: small;
+  color: gainsboro;
+}
+
 .textarea-container {
   position: relative;
 }
