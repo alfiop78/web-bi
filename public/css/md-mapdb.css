@@ -532,10 +532,12 @@ p.field-search {
   padding: 8px;
   box-shadow: 0px 1px 4px 1px gray;
   border-radius: 2px;
+  transition: left 150ms, top 150ms;
 }
 
 #popup>ul>li {
   display: block;
+  line-height: unset;
 }
 
 #popup>ul>li>small {

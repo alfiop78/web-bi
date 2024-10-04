@@ -702,9 +702,9 @@
                     <!-- <div id="textarea-filter" data-fn="addText" class="textarea-content dropzone" data-content-editable contenteditable="true"></div> -->
                     <!-- <textarea id="textarea-filter" class="textarea-content dropzone"></textarea> -->
                     <div class="textarea-container" id="textarea-container">
-                        <div id="popup">
-                          <ul></ul>
-                        </div>
+                      <div id="popup">
+                        <ul></ul>
+                      </div>
                       <div class="container__mirror"></div>
                       <textarea id="textarea-filter" class="container__textarea"></textarea>
                     </div>
@@ -1062,6 +1062,8 @@
     </section>
   </footer>
   <script type="text/javascript" src="{{ asset('/js/init-responsive.js') }}" async></script>
+  <!-- init-map-loaded ci sono funzioni dopo aver completato il DOMContentLoaded -->
+  <script type="text/javascript" src="{{ asset('/js/init-map-loaded.js') }}" async></script>
   <script type="text/javascript" src="{{ asset('/js/init-sheet.js') }}" async></script>
   <script type="text/javascript" src="{{ asset('/js/supportFn.js') }}" async></script>
 </body>
