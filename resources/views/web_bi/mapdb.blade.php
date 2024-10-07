@@ -699,12 +699,9 @@
                 <section class="col col-8-span">
                   <section class="textarea-formula">
                     <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
-                    <!-- <div id="textarea-filter" data-fn="addText" class="textarea-content dropzone" data-content-editable contenteditable="true"></div> -->
                     <!-- <textarea id="textarea-filter" class="textarea-content dropzone"></textarea> -->
                     <div class="textarea-container" id="textarea-container">
-                      <div id="popup">
-                        <ul></ul>
-                      </div>
+                      <div id="popup"><ul></ul></div>
                       <div class="container__mirror"></div>
                       <textarea id="textarea-filter" class="container__textarea"></textarea>
                     </div>

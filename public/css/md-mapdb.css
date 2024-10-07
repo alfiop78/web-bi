@@ -520,7 +520,7 @@ p.field-search {
 /* suggestions */
 #popup {
   display: none;
-  position:absolute
+  position: absolute
 }
 
 #popup.open {
@@ -538,6 +538,10 @@ p.field-search {
 #popup>ul>li {
   display: block;
   line-height: unset;
+}
+
+.container__suggestion.focused {
+  background: #9595958a;
 }
 
 #popup>ul>li>small {
@@ -580,13 +584,13 @@ p.field-search {
   align-items: center;
   cursor: pointer;
   display: flex;
-  height: 2rem;
+  /* height: 2rem; */
   padding: 0 0.5rem;
 }
 
-.container__suggestion:not(:first-child) {
+/* .container__suggestion:not(:first-child) {
   border-top: 1px solid rgb(203 213 225);
-}
+} */
 
 .container__suggestion--focused {
   background: rgb(226 232 240);
