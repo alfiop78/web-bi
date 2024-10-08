@@ -520,7 +520,7 @@ p.field-search {
 /* suggestions */
 #popup {
   display: none;
-  position: absolute
+  position: absolute;
 }
 
 #popup.open {

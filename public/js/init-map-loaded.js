@@ -4,12 +4,10 @@ var popupSuggestions = document.getElementById('popup');
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOMContentLoaded');
   // TODO: 04.10.2024 qui potrei nascondere il loader della pagina
-  // const containerEle = document.getElementById('textarea-container');
-  /* const textarea = document.getElementById('textarea-filter');
 
   const mirroredEle = document.querySelector('#textarea-container .container__mirror');
 
-  const textareaStyles = window.getComputedStyle(textarea);
+  const textareaStyles = window.getComputedStyle(textareaFilter);
   [
     'border',
     'boxSizing',
@@ -34,13 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const borderWidth = parseValue(textareaStyles.borderWidth);
 
   const ro = new ResizeObserver(() => {
-    mirroredEle.style.width = `${textarea.clientWidth + 2 * borderWidth}px`;
-    mirroredEle.style.height = `${textarea.clientHeight + 2 * borderWidth}px`;
+    mirroredEle.style.width = `${textareaFilter.clientWidth + 2 * borderWidth}px`;
+    mirroredEle.style.height = `${textareaFilter.clientHeight + 2 * borderWidth}px`;
   });
-  ro.observe(textarea);
+  ro.observe(textareaFilter);
 
-  textarea.addEventListener('scroll', () => mirroredEle.scrollTop = textarea.scrollTop); */
-
+  textareaFilter.addEventListener('scroll', () => mirroredEle.scrollTop = textareaFilter.scrollTop);
 });
 
 
@@ -97,7 +94,7 @@ textareaFilter.addEventListener('input', (e) => {
   const pre = document.createTextNode(textBeforeCursor);
   const post = document.createTextNode(textAfterCursor);
   const caretEle = document.createElement('span');
-  caretEle.innerHTML = '&nbsp;';
+  // caretEle.innerHTML = '&nbsp;';
 
   mirroredEle.innerHTML = '';
   mirroredEle.append(pre, caretEle, post);
@@ -120,18 +117,18 @@ textareaFilter.addEventListener('input', (e) => {
         // TODO: utilizzare l'overflow al posto di index < 6 altrimenti non riesco a visualizzare tutti gli elementi trovati
         if (index < 6) {
           const li = document.createElement('li');
-          const column = document.createElement('span');
-          const table = document.createElement('small');
+          // const column = document.createElement('span');
+          // const table = document.createElement('small');
           li.classList.add('container__suggestion');
           // li.innerText = `(${el.dataset.table}) .${el.dataset.label}`;
-          // li.innerText = el.dataset.label;
-          column.innerText = el.dataset.label;
-          table.innerText = el.dataset.table;
+          li.innerText = el.dataset.label;
+          // column.innerText = el.dataset.label;
+          // table.innerText = el.dataset.table;
           li.addEventListener('click', function() {
             replaceCurrentWord(e.target, this.innerText);
             popupSuggestions.classList.remove('open');
           });
-          li.append(column, table);
+          // li.append(column, table);
           popupSuggestions.querySelector('ul').appendChild(li);
         }
       })
@@ -149,16 +146,20 @@ textareaFilter.addEventListener('input', (e) => {
 
 let currentSuggestionIndex = -1;
 textareaFilter.addEventListener('keydown', (e) => {
-  if (!['ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(e.key)) return;
+  if (!['Tab', 'ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(e.key)) return;
   const suggestions = popupSuggestions.querySelectorAll('.container__suggestion');
   const numSuggestions = suggestions.length;
-  if (numSuggestions === 0) {
-    return;
-  }
+  if (numSuggestions === 0) return;
   e.preventDefault();
   switch (e.key) {
+    case 'Tab':
+      suggestions[
+        clamp(0, currentSuggestionIndex, numSuggestions - 1)
+      ].classList.remove('focused');
+      currentSuggestionIndex = (e.shiftKey) ? clamp(0, currentSuggestionIndex - 1, numSuggestions - 1) : clamp(0, currentSuggestionIndex + 1, numSuggestions - 1);
+      suggestions[currentSuggestionIndex].classList.add('focused');
+      break;
     case 'ArrowDown':
-      // console.log('down');
       suggestions[
         clamp(0, currentSuggestionIndex, numSuggestions - 1)
       ].classList.remove('focused');
@@ -166,7 +167,6 @@ textareaFilter.addEventListener('keydown', (e) => {
       suggestions[currentSuggestionIndex].classList.add('focused');
       break;
     case 'ArrowUp':
-      // console.log('up');
       suggestions[
         clamp(0, currentSuggestionIndex, numSuggestions - 1)
       ].classList.remove('focused');
@@ -174,12 +174,10 @@ textareaFilter.addEventListener('keydown', (e) => {
       suggestions[currentSuggestionIndex].classList.add('focused');
       break;
     case 'Enter':
-      // console.log('Enter');
-      replaceCurrentWord(e.target, suggestions[currentSuggestionIndex].innerText);
+      if (currentSuggestionIndex !== -1) replaceCurrentWord(e.target, suggestions[currentSuggestionIndex].innerText);
       popupSuggestions.classList.remove('open');
       break;
     case 'Escape':
-      // console.log('esc')
       popupSuggestions.classList.remove('open');
       break;
     default:
