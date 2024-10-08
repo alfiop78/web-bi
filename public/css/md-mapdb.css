@@ -525,29 +525,29 @@ p.field-search {
 
 #popup.open {
   display: block;
-  /* position: absolute; */
-  background-color: #494949;
-  color: white;
+  background-color: #f2f2f2;
+  color: #494949;
   z-index: 50;
   padding: 8px;
-  box-shadow: 0px 1px 4px 1px gray;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
   border-radius: 2px;
-  transition: left 150ms, top 150ms;
+  transition: left 250ms, top 250ms;
 }
 
 #popup>ul>li {
   display: block;
-  line-height: unset;
+  line-height: 1rem;
 }
 
 .container__suggestion.focused {
   background: #9595958a;
+  border-radius: 2px;
 }
 
 #popup>ul>li>small {
   display: block;
   font-size: small;
-  color: gainsboro;
+  color: gray;
 }
 
 .textarea-container {
@@ -584,8 +584,6 @@ p.field-search {
   align-items: center;
   cursor: pointer;
   display: flex;
-  /* height: 2rem; */
-  padding: 0 0.5rem;
 }
 
 /* .container__suggestion:not(:first-child) {
@@ -739,4 +737,60 @@ textarea:active {
   position: absolute;
   background: black;
   color: white;
+}
+
+/* test autocomplete */
+#search_container {
+  position: relative;
+  /* IMPORTANT */
+}
+
+#search_ {
+  border: 0;
+  /* HAS TO BE SIMILAR TO #autocomplete */
+  font-size: 14px;
+  /* HAS TO BE SIMILAR TO #autocomplete */
+  padding: 10px;
+  /* IMPORTANT */
+
+  /* FOR DESIGN PURPOSE */
+  outline: 0;
+  /* color: #f8fafd; */
+  color: red;
+  width: 100%;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(0, 0, 0, 0);
+  font-family: 'Inconsolata', monospace;
+}
+
+#search_::placeholder {
+  /* color: #f8fafd; */
+  color: #494949;
+  /* FOR DESIGN PURPOSE */
+}
+
+#autocomplete {
+  position: absolute;
+  /* IMPORTANT */
+  z-index: -1;
+  /* IMPORTANT */
+  border: 0;
+  /* HAS TO BE SIMILAR TO #search_ */
+  font-size: 14px;
+  /* HAS TO BE SIMILAR TO #search_ */
+  left: 10px;
+  /* ACCORDING TO THE LEFT-PADDING OF #search_ */
+  top: 10px;
+  /* ACCORDING TO THE TOP-PADDING OF #search_ */
+
+  /* FOR DESIGN PURPOSE */
+  background-color: rgba(0, 0, 0, 0);
+  font-family: 'Inconsolata', monospace;
+  /* color: rgba(248, 250, 253, 0.4); */
+  color: grey;
+  width: 100%;
+}
+
+#txt-test>span {
+  color: #a2a2a2;
 }

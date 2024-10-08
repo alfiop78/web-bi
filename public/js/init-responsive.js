@@ -926,10 +926,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.txtAreaIdColumn.addEventListener('drop', app.setColumnDrop, false);
   app.txtAreaDsColumn.addEventListener('drop', app.setColumnDrop, false);
   // textarea nella dialog-filters
-  app.txtAreaFilters.addEventListener("dragenter", app.elementDragEnter, false);
-  app.txtAreaFilters.addEventListener("dragover", app.elementDragOver, false);
-  app.txtAreaFilters.addEventListener("dragleave", app.elementDragLeave, false);
-  app.txtAreaFilters.addEventListener("drop", app.newFilterDrop, false);
+  // app.txtAreaFilters.addEventListener("dragenter", app.elementDragEnter, false);
+  // app.txtAreaFilters.addEventListener("dragover", app.elementDragOver, false);
+  // app.txtAreaFilters.addEventListener("dragleave", app.elementDragLeave, false);
+  // app.txtAreaFilters.addEventListener("drop", app.newFilterDrop, false);
 
   app.columnsDropzone.addEventListener('dragenter', app.elementDragEnter, false);
   app.columnsDropzone.addEventListener('dragover', app.elementDragOver, false);
@@ -2046,8 +2046,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       // ... altrimenti devo recuperare il cubeToken. Ci sono anche filtri che possono essere fatti su un livello dimensionale e su una FACT
       if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
-        // object.workBook = { table: element.dataset.table, tableAlias: element.dataset.tableAlias };
-        // object.tables.add(element.dataset.tableAlias);
         (element.dataset.type === 'time') ? object.tables.add('time') : object.tables.add(element.dataset.tableAlias);
         object.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
         object.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id

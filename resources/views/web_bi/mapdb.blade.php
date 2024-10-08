@@ -700,11 +700,19 @@
                   <section class="textarea-formula">
                     <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                     <!-- <textarea id="textarea-filter" class="textarea-content dropzone"></textarea> -->
-                    <div class="textarea-container" id="textarea-container">
-                      <div id="popup"><ul></ul></div>
+                    <!-- <div id="filter-formula"></div> -->
+                    <!-- <div class="textarea-container" id="textarea-container">
+                      <div id="popup">
+                        <ul></ul>
+                      </div>
                       <div class="container__mirror"></div>
-                      <textarea id="textarea-filter" class="container__textarea"></textarea>
-                    </div>
+                      <textarea id="textarea-filter" spellcheck="false" class="container__textarea"></textarea>
+                    </div> -->
+                    <!-- <div id="search_container">
+                      <div id="autocomplete"></div>
+                      <input id="search_" type="text" placeholder="Search" />
+                    </div> -->
+                    <div id="txt-test" contenteditable="true" spellcheck="false"></div>
                     <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                   </section>
                 </section>
