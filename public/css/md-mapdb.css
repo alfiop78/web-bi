@@ -530,7 +530,7 @@ p.field-search {
   z-index: 50;
   padding: 8px;
   box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
-  box-shadow: 0px 0px 3px 0px;
+  box-shadow: 0px 0px 2px 0px;
   border-radius: 2px;
   transition: left 250ms, top 250ms;
 }
@@ -551,14 +551,20 @@ p.field-search {
   position: relative;
   width: 100%;
   height: 100%;
-  border: solid thin gray;
+  border: solid thin gainsboro;
+  border-radius: 2px;
   padding: 8px;
 }
 
-.textarea__container>div[contenteditable] {
+div[contenteditable] {
   width: 100%;
   height: 100%;
   outline: none;
+}
+
+/* nascondo l'element <br> nelle div contenteditable quando il testo è vuoto */
+div[contenteditable]>br {
+  display: none;
 }
 
 #textarea {
@@ -581,7 +587,6 @@ div[contenteditable]>span[data-text]::after {
   border-radius: 2px;
   margin-left: 4px;
   padding: 0px 6px;
-  /* border: solid thin lightgray; */
   box-shadow: 0px 0px 2px 0px;
   font-family: monospace;
   font-size: .8rem;

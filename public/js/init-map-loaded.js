@@ -14,14 +14,20 @@ document.addEventListener('DOMContentLoaded', () => {
 textareaFilter.addEventListener('keyup', (e) => {
   // const sel = document.getSelection();
   // console.log(sel);
-  const caretPosition = sel.anchorOffset;
+  // const caretPosition = sel.anchorOffset;
   // console.log(`caretPosition : ${caretPosition}`);
-  if (e.code === 'Space') {
-    if (e.target.querySelector('span')) {
-      e.target.querySelector('span').textContent = '';
-      popup.classList.remove('open');
-      delete e.target.querySelector('span').dataset.text;
-    }
+  // console.log(e.code, e.key);
+  // e.preventDefault();
+  switch (e.code) {
+    case 'Space':
+      if (e.target.querySelector('span')) {
+        e.target.querySelector('span').textContent = '';
+        popup.classList.remove('open');
+        delete e.target.querySelector('span').dataset.text;
+      }
+      break;
+    default:
+      break;
   }
 });
 
@@ -34,7 +40,7 @@ textareaFilter.addEventListener('keydown', function(e) {
   // const sel = document.getSelection();
   // console.log(sel);
   // const caretPosition = sel.anchorOffset;
-  if (!['Tab'].includes(e.key)) return;
+  if (!['Tab', 'Enter'].includes(e.key)) return;
   e.preventDefault();
   switch (e.key) {
     case 'Tab':
@@ -69,22 +75,28 @@ const findIndexOfCurrentWord = (textarea, caretPosition) => {
 textareaFilter.addEventListener('input', (e) => {
   // console.log(sel);
   // console.log(sel.baseNode.textContent);
+  // if (!e.target.firstChild || e.target.firstChild.nodeType !== 3) return;
   if (!e.target.firstChild) return;
+  // return;
   const suggestionsTables = [...document.querySelectorAll('#wbFilters>details')];
-  const suggestionsColumns = [...document.querySelectorAll('#wbFilters>details>li')];
   const caretPosition = sel.anchorOffset;
   const startIndex = findIndexOfCurrentWord(e.target, caretPosition);
   let currentWord = e.target.firstChild.textContent.substring(startIndex + 1);
-  console.info(`current word : ${currentWord}`);
+  // console.info(`current word : ${currentWord}`);
   if (currentWord.length > 0) {
     // se il carattere che interrompe la parola (trovato dal egex) è un punto allora devo cercare nell'array delle Colonne, altrimenti in quello delle Tabelle
     const chartAt = e.target.firstChild.textContent.at(startIndex);
-    console.log(`chartAt : ${chartAt}`);
+    // console.log(`chartAt : ${chartAt}`);
+    let table = null;
+    if (chartAt === '.') {
+      // recupero la tabella (prima del punto) in modo da cercare le colonne SOLO di quella tabella
+      const startIndexTable = findIndexOfCurrentWord(e.target, startIndex);
+      table = e.target.firstChild.textContent.substring(startIndexTable + 1, startIndex);
+    }
     // console.info(`current word : ${currentWord}`);
-    let regex = new RegExp(`^${currentWord}.*`, 'i');
-    // TODO: recupero la tabella (prima del punto) in modo da cercare le colonne SOLO di quella tabella
-    // console.log()
-    const match = (chartAt === '.') ? suggestionsColumns.find(value => value.dataset.label.match(regex)) : suggestionsTables.find(value => value.dataset.table.match(regex));
+    // let regex = new RegExp(`^${currentWord}.*`, 'i');
+    const regex = new RegExp(`^${currentWord}.*`);
+    const match = (chartAt === '.') ? [...document.querySelectorAll(`#wbFilters>details[data-table='${table}']>li`)].find(value => value.dataset.label.match(regex)) : suggestionsTables.find(value => value.dataset.table.match(regex));
     // console.log(`match ${match}`);
     if (match) {
       const span = document.createElement('span');
@@ -102,5 +114,76 @@ textareaFilter.addEventListener('input', (e) => {
         delete e.target.querySelector('span').dataset.text;
       }
     }
+  }
+});
+
+// SQL : viene passato alla procedura .php che elabora il report
+// sqlFormula : è la formula scritta nella textarea, verrà utilizzata per ripristinarla nella textarea in case di edit
+// di un filtro
+// TEST: questo codice può validare la formula, cercando le tabelle presenti in #wbFilters ma
+// questo codice andrà spostato nel tasto "Salva" del filtro
+textareaFilter.addEventListener('blur', (e) => {
+  if (!e.target.firstChild) return;
+  // split in un array (separato da spazi) l'sql
+  const sqlFormula = e.target.firstChild.textContent.split(' ');
+  let tables = new Set();
+  // replico i nomi delle tabelle con i suoi alias di tabella, recuperandoli dalla ul#wbFilters
+  const SQL = sqlFormula.map(value => {
+    if (value.includes('.')) {
+      // nome_tabella.nome_campo
+      const table = value.split('.')[0];
+      const alias = document.querySelector(`#wbFilters>details[data-table='${table}']`).dataset.alias;
+      tables.add(alias);
+      const regex = new RegExp(`${table}`, 'i');
+      return value.replace(regex, alias);
+    }
+    return value;
+  });
+  console.log(SQL);
+  console.log(tables);
+  console.log(sqlFormula);
+
+  for (const factId of WorkBook.dataModel.keys()) {
+    // WARN: 2024.02.08 questa logica è utilizzata anche in setSheet(). Creare un metodo riutilizzabile.
+    let from = {}, joins = {};
+    // object.tables : l'alias della tabella
+    tables.forEach(alias => {
+      const tablesOfModel = WorkBook.dataModel.get(factId);
+      // se si tratta di una tabella 'time' la converto in WB_YEARS, questa sarà sempre presente
+      // nella relazione con la tabella time
+      // WARN: da testare prima di spostare questa funzione nel tasto "Salva"
+      // if (alias === 'time') alias = 'WB_YEARS';
+      if (tablesOfModel.hasOwnProperty(alias)) {
+        tablesOfModel[alias].forEach(table => {
+          const data = Draw.tables.get(table.id);
+          // 'from' del filtro, questo indica quali tabelle includere quando si utilizza
+          // questo filtro nel report
+          from[data.alias] = { schema: data.schema, table: data.table };
+          // 'join', indica quali join utilizzare quando si utilizza questo filtro in un report
+          if (WorkBook.joins.has(data.alias)) {
+            // esiste una join per questa tabella
+            for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
+              if (join.factId === factId) joins[token] = join;
+            }
+          }
+        });
+      }
+    });
+    console.log(from);
+    console.log(joins);
+    // object.from[factId] = from;
+    // object.joins[factId] = joins;
+  }
+});
+
+textareaFilter.addEventListener('drop', (e) => {
+  const elementId = e.dataTransfer.getData('text/plain');
+  const elementRef = document.getElementById(elementId);
+  // elementRef : è l'elemento draggato
+  WorkBook.activeTable = elementRef.dataset.tableId;
+  if (e.target.firstChild) {
+    e.target.firstChild.textContent += `${WorkBook.activeTable.dataset.table}.${elementRef.dataset.field}`;
+  } else {
+    e.target.textContent += `${WorkBook.activeTable.dataset.table}.${elementRef.dataset.field}`;
   }
 });
