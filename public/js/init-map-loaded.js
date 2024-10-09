@@ -177,13 +177,31 @@ textareaFilter.addEventListener('blur', (e) => {
 });
 
 textareaFilter.addEventListener('drop', (e) => {
+  e.preventDefault();
   const elementId = e.dataTransfer.getData('text/plain');
   const elementRef = document.getElementById(elementId);
+  const caretPosition = document.caretPositionFromPoint(e.clientX, e.clientY);
+  const textNode = caretPosition.offsetNode;
+  const offset = caretPosition.offset;
   // elementRef : è l'elemento draggato
   WorkBook.activeTable = elementRef.dataset.tableId;
-  if (e.target.firstChild) {
+  /* if (e.target.firstChild) {
     e.target.firstChild.textContent += `${WorkBook.activeTable.dataset.table}.${elementRef.dataset.field}`;
   } else {
     e.target.textContent += `${WorkBook.activeTable.dataset.table}.${elementRef.dataset.field}`;
+  } */
+  console.log(offset);
+  const text = document.createTextNode(`${WorkBook.activeTable.dataset.table}.${elementRef.dataset.field}`);
+  if (offset !== 0) {
+    let replacement = textNode.splitText(offset);
+    let p = document.createElement('p');
+    p.innerHTML = textNode.textContent;
+    // NOTE: utilizzo di un elemento parent (<p> in questo caso) per poter utilizzare insertBefore
+    // ...che non è possibile utilizzare su nodi Text
+    textNode.parentNode.insertBefore(text, replacement);
+    textNode.textContent = p.textContent;
+  } else {
+    textNode.textContent = text.textContent;
   }
+  e.target.normalize();
 });
