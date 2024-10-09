@@ -3089,6 +3089,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       details.setAttribute("name", "wbFilters");
       details.dataset.schema = WorkBook.activeTable.dataset.schema;
       details.dataset.table = objects.props.name;
+      details.dataset.label = objects.props.name;
       details.dataset.alias = alias;
       details.dataset.id = objects.props.key;
       details.dataset.searchId = 'column-search';
