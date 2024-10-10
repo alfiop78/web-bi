@@ -33,15 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
     switch (e.code) {
       case 'Space':
         if (e.target.querySelector('span')) {
-          e.target.querySelector('span').textContent = '';
+          // e.target.querySelector('span').textContent = '';
           // popup.classList.remove('open');
-          delete e.target.querySelector('span').dataset.text;
+          // delete e.target.querySelector('span').dataset.text;
           e.target.querySelector('span').remove();
         }
         break;
       case 'Backspace':
       case 'Delete':
-        if (e.target.firstChild.textContent.length === 0 && e.target.querySelector('span')) e.target.querySelector('span').remove();
+        // elimino il primo elemento se questo corrisponde a un nodo type = 3 (es. lo <span>)
+        if (e.target.firstChild.nodeType === 1) e.target.firstChild.remove();
         break;
       default:
         break;
@@ -62,9 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
     switch (e.key) {
       case 'Tab':
         e.target.firstChild.textContent += e.target.querySelector('span').textContent;
-        e.target.querySelector('span').textContent = '';
+        // e.target.querySelector('span').textContent = '';
         // popup.classList.remove('open');
-        delete e.target.querySelector('span').dataset.text;
+        // delete e.target.querySelector('span').dataset.text;
         e.target.querySelector('span').remove();
         // posiziono il cursore alla fine della stringa
         sel.setPosition(e.target.firstChild, e.target.firstChild.length);
@@ -83,11 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const suggestionsTables = [...document.querySelectorAll('#wbFilters>details')];
     const caretPosition = sel.anchorOffset;
     const startIndex = findIndexOfCurrentWord(e.target, caretPosition);
-    // const endIndex = e.target.firstChild.textContent.substring(startIndex+1, e.target.firstChild.textContent.search(/\W/));
-    // const currentWord = e.target.firstChild.textContent.substring(startIndex + 1, e.target.firstChild.textContent.indexOf(' '));
     const currentWord = e.target.firstChild.textContent.substring(startIndex + 1, caretPosition);
     // const currentWord = (endIndex > 0) ? e.target.firstChild.textContent.substring(startIndex + 1, caretPosition) : e.target.firstChild.textContent.substring(startIndex + 1);
-    console.info(`current word : ${currentWord}`);
+    // console.info(`current word : ${currentWord}`);
     if (currentWord.length > 0) {
       // se il carattere che interrompe la parola (trovato dal egex) è un punto allora devo cercare nell'array delle Colonne, altrimenti in quello delle Tabelle
       const chartAt = e.target.firstChild.textContent.at(startIndex);
@@ -106,18 +105,39 @@ document.addEventListener('DOMContentLoaded', () => {
         suggestionsTables.find(value => value.dataset.table.match(regex));
       // console.log(`match ${match}`);
       if (match) {
+        console.log(sel);
         const span = document.createElement('span');
         span.textContent = match.dataset.label.slice(currentWord.length, match.dataset.label.length);
         span.dataset.text = match.dataset.label.slice(currentWord.length, match.dataset.label.length);
-        (e.target.querySelector('span')) ? e.target.replaceChild(span, e.target.querySelector('span')) : e.target.insertBefore(span, e.target.querySelector('br'));
+        const node = sel.anchorNode;
+        console.log(node.parentNode.querySelector('span'));
+        // se è presente già un "suggerimento" (span) lo elimino
+        if (node.parentNode.querySelector('span')) node.parentNode.querySelector('span').remove();
+        // offset indica la posizione del cursore
+        const offset = sel.anchorOffset;
+        // splitText separa il nodo in due dove, 'node' è la parte prima del cursore e replacement e la parte successiva al cursore
+        let replacement = node.splitText(offset);
+        // creo un elemento p per poter effettuare il insertBefore dello span contenente il "suggestion"
+        let p = document.createElement('p');
+        // inserisco, in p, la prima parte (prima del cursore in posizione corrente)
+        p.innerHTML = node.textContent;
+        // inserisco lo span del suggerimento prima della parte DOPO il cursore (replacement)
+        node.parentNode.insertBefore(span, replacement);
+        // il nodo ora contiene tutto l'elemento <p> che è composto in questo modo :
+        // <p>parte PRIMA del testo <span>suggerimento</span> parte DOPO il cursore
+        node.textContent = p.textContent;
+        // siccome ho riscritto il nodo, la posizione del cursore viene impostata all'inizio del nodo, quindi la reimposto dov'era (offset)
+        sel.setPosition(node, offset);
+        // normalizzo i nodi
+        e.target.normalize();
         /* popup.classList.add('open');
         popup.style.left = `${e.target.querySelector('span').offsetLeft}px`;
         popup.style.top = `${e.target.querySelector('span').offsetTop + 30}px`; */
       } else {
         if (e.target.querySelector('span')) {
-          e.target.querySelector('span').textContent = '';
+          // e.target.querySelector('span').textContent = '';
           // popup.classList.remove('open');
-          delete e.target.querySelector('span').dataset.text;
+          // delete e.target.querySelector('span').dataset.text;
           e.target.querySelector('span').remove();
         }
       }
