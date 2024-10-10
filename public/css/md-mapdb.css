@@ -563,9 +563,9 @@ div[contenteditable] {
 }
 
 /* nascondo l'element <br> nelle div contenteditable quando il testo è vuoto */
-div[contenteditable]>br {
+/* div[contenteditable]>br {
   display: none;
-}
+} */
 
 #textarea {
   color: black;

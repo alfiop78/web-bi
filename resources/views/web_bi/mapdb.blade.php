@@ -701,12 +701,12 @@
                     <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                     <div class="textarea__container">
                       <div id="popup">
-                          <ul>
-                            <li>val 1</li>
-                            <li>val 2</li>
-                          </ul>
+                        <ul>
+                          <li>val 1</li>
+                          <li>val 2</li>
+                        </ul>
                       </div>
-                      <div id="textarea-filter" contenteditable="true" spellcheck="false"></div>
+                      <div id="textarea-filter" contenteditable="true" spellcheck="false"><br /></div>
                     </div>
                     <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                   </section>
