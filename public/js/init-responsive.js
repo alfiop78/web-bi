@@ -1627,6 +1627,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
 
     process.filters = filters;
+    debugger;
+    return
     app.setSheet();
     process.from = Sheet.from;
     process.joins = Sheet.joins;

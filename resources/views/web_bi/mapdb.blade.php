@@ -715,7 +715,7 @@
             </section>
             <section class="dlg-buttons">
               <button name="cancel" value="chiudi">Chiudi</button>
-              <button data-fn="saveFilter" id="btn-filter-save" value="salva">Salva</button>
+              <button id="btn-filter-save" value="salva">Salva</button>
             </section>
           </section>
         </dialog>

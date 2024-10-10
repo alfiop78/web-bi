@@ -1,8 +1,10 @@
+var dlgFilter = document.getElementById('dlg-filters');
+var btnFilterSave = document.getElementById('btn-filter-save');
 var textareaFilter = document.getElementById('textarea-filter');
 var popupSuggestions = document.getElementById('popup');
 const sel = document.getSelection();
-// var suggestionsTables = ['Azienda', 'DocVenditaDettaglio', 'CodMarcaVeicolo', 'CodMarcaRicambi', 'TipoMovimento'];
-// var suggestionsColumns = ['id', 'codice', 'Descrizione', 'id_casaMadre', 'zonaVenditaCM'];
+const rand = () => Math.random(0).toString(36).substring(2);
+const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
 
 const findIndexOfCurrentWord = (textarea, caretPosition) => {
   // ottengo il valore corrente e la posizione del cursore
@@ -78,9 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
   textareaFilter.addEventListener('input', (e) => {
     // console.log(sel);
     // console.log(sel.baseNode.textContent);
-    // if (!e.target.firstChild || e.target.firstChild.nodeType !== 3) return;
-    if (!e.target.firstChild) return;
-    // return;
+    // console.log(e.target.firstChild.nodeType, e.target.firstChild.nodeName);
+    // console.log(e.target.firstChild);
+    if (e.target.firstChild.nodeType === 1) return;
     const suggestionsTables = [...document.querySelectorAll('#wbFilters>details')];
     const caretPosition = sel.anchorOffset;
     const startIndex = findIndexOfCurrentWord(e.target, caretPosition);
@@ -105,20 +107,20 @@ document.addEventListener('DOMContentLoaded', () => {
         suggestionsTables.find(value => value.dataset.table.match(regex));
       // console.log(`match ${match}`);
       if (match) {
-        console.log(sel);
+        // console.log(sel);
         const span = document.createElement('span');
         span.textContent = match.dataset.label.slice(currentWord.length, match.dataset.label.length);
         span.dataset.text = match.dataset.label.slice(currentWord.length, match.dataset.label.length);
         const node = sel.anchorNode;
-        console.log(node.parentNode.querySelector('span'));
+        // console.log(node.parentNode.querySelector('span'));
         // se è presente già un "suggerimento" (span) lo elimino
         if (node.parentNode.querySelector('span')) node.parentNode.querySelector('span').remove();
         // offset indica la posizione del cursore
         const offset = sel.anchorOffset;
         // splitText separa il nodo in due dove, 'node' è la parte prima del cursore e replacement e la parte successiva al cursore
-        let replacement = node.splitText(offset);
+        const replacement = node.splitText(offset);
         // creo un elemento p per poter effettuare il insertBefore dello span contenente il "suggestion"
-        let p = document.createElement('p');
+        const p = document.createElement('p');
         // inserisco, in p, la prima parte (prima del cursore in posizione corrente)
         p.innerHTML = node.textContent;
         // inserisco lo span del suggerimento prima della parte DOPO il cursore (replacement)
@@ -145,35 +147,38 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // SQL : viene passato alla procedura .php che elabora il report
-  // sqlFormula : è la formula scritta nella textarea, verrà utilizzata per ripristinarla nella textarea in case di edit
+  // formula : è la formula scritta nella textarea, verrà utilizzata per ripristinarla nella textarea in case di edit
   // di un filtro
   // TEST: questo codice può validare la formula, cercando le tabelle presenti in #wbFilters ma
   // questo codice andrà spostato nel tasto "Salva" del filtro
   textareaFilter.addEventListener('blur', (e) => {
     if (!e.target.firstChild) return;
     // split in un array (separato da spazi) l'sql
-    const sqlFormula = e.target.firstChild.textContent.split(' ');
-    let tables = new Set();
+    if (e.target.firstChild.nodeType !== 3) return;
+    const formula = e.target.firstChild.textContent.split(' ');
+    const date = new Date().toLocaleDateString('it-IT', options);
+    let object = { tables: new Set(), from: {}, joins: {}, formula, sql: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
+    // let tables = new Set();
     // replico i nomi delle tabelle con i suoi alias di tabella, recuperandoli dalla ul#wbFilters
-    const SQL = sqlFormula.map(value => {
+    object.sql = formula.map(value => {
       if (value.includes('.')) {
         // nome_tabella.nome_campo
         const table = value.split('.')[0];
         const alias = document.querySelector(`#wbFilters>details[data-table='${table}']`).dataset.alias;
-        tables.add(alias);
+        object.tables.add(alias);
         const regex = new RegExp(`${table}`, 'i');
         return value.replace(regex, alias);
       }
       return value;
     });
-    // console.log(SQL);
-    // console.log(tables);
-    // console.log(sqlFormula);
+    // object.tables = [...object.tables];
+    console.log(object);
+
     for (const factId of WorkBook.dataModel.keys()) {
       // WARN: 2024.02.08 questa logica è utilizzata anche in setSheet(). Creare un metodo riutilizzabile.
       let from = {}, joins = {};
       // object.tables : l'alias della tabella
-      tables.forEach(alias => {
+      object.tables.forEach(alias => {
         const tablesOfModel = WorkBook.dataModel.get(factId);
         // se si tratta di una tabella 'time' la converto in WB_YEARS, questa sarà sempre presente
         // nella relazione con la tabella time
@@ -197,9 +202,18 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       // console.log(from);
       // console.log(joins);
-      // object.from[factId] = from;
-      // object.joins[factId] = joins;
+      object.from[factId] = from;
+      object.joins[factId] = joins;
     }
+
+    // Salvataggio del Filtro
+    /* WorkBook.filters = {
+      token,
+      value: object
+    }; */
+
+    // TODO: verificare se object.tables viene convertito in array quando salvato nello storage e/o nel Metodo WorkBook.filters console.log(object);
+    debugger;
   });
 
   textareaFilter.addEventListener('drop', (e) => {
@@ -231,4 +245,100 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     e.target.normalize();
   });
-});
+}); // end DOMContentLoaded
+
+btnFilterSave.onclick = (e) => {
+  if (e.target.firstChild.nodeType !== 3) return;
+  const input = document.getElementById('input-filter-name');
+  const name = input.value;
+  // in edit recupero il token da e.target.dataset.token
+  const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
+
+  const formula = e.target.firstChild.textContent.split(' ');
+  const date = new Date().toLocaleDateString('it-IT', options);
+  let object = { tables: new Set(), from: {}, joins: {}, formula, sql: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
+  // let tables = new Set();
+  // replico i nomi delle tabelle con i suoi alias di tabella, recuperandoli dalla ul#wbFilters
+  object.sql = formula.map(value => {
+    if (value.includes('.')) {
+      // nome_tabella.nome_campo
+      const table = value.split('.')[0];
+      const alias = document.querySelector(`#wbFilters>details[data-table='${table}']`).dataset.alias;
+      object.tables.add(alias);
+      const regex = new RegExp(`${table}`, 'i');
+      return value.replace(regex, alias);
+    }
+    return value;
+  });
+
+  for (const factId of WorkBook.dataModel.keys()) {
+    // WARN: 2024.02.08 questa logica è utilizzata anche in setSheet(). Creare un metodo riutilizzabile.
+    let from = {}, joins = {};
+    // object.tables : l'alias della tabella
+    object.tables.forEach(alias => {
+      const tablesOfModel = WorkBook.dataModel.get(factId);
+      // se si tratta di una tabella 'time' la converto in WB_YEARS, questa sarà sempre presente
+      // nella relazione con la tabella time
+      // WARN: da testare prima di spostare questa funzione nel tasto "Salva"
+      // if (alias === 'time') alias = 'WB_YEARS';
+      if (tablesOfModel.hasOwnProperty(alias)) {
+        tablesOfModel[alias].forEach(table => {
+          const data = Draw.tables.get(table.id);
+          // 'from' del filtro, questo indica quali tabelle includere quando si utilizza
+          // questo filtro nel report
+          from[data.alias] = { schema: data.schema, table: data.table };
+          // 'join', indica quali join utilizzare quando si utilizza questo filtro in un report
+          if (WorkBook.joins.has(data.alias)) {
+            // esiste una join per questa tabella
+            for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
+              if (join.factId === factId) joins[token] = join;
+            }
+          }
+        });
+      }
+    });
+    // console.log(from);
+    // console.log(joins);
+    object.from[factId] = from;
+    object.joins[factId] = joins;
+  }
+
+  // la prop 'created_at' va aggiunta solo in fase di nuovo filtro e non quando si aggiorna il filtro
+  if (e.target.dataset.token) {
+    // aggiornamento del filtro
+    // recupero il filtro dallo storage per leggere 'created_at'
+    const filter = JSON.parse(window.localStorage.getItem(e.target.dataset.token));
+    object.created_at = filter.created_at;
+  } else {
+    object.created_at = date;
+  }
+
+  // Salvataggio del Filtro
+  WorkBook.filters = {
+    token,
+    // TODO: verificare se object.tables viene convertito in array quando salvato nello storage e/o nel Metodo WorkBook.filters
+    value: object
+  };
+
+  console.log(object);
+  // salvo il nuovo filtro appena creato
+  // completato il salvataggio rimuovo l'attributo data-token da e.target
+  window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
+  if (!e.target.dataset.token) {
+    // TODO: appendFilter può essere spostata qui
+    // app.appendFilter(document.getElementById('ul-filters'), token, object);
+  } else {
+    // filtro modificato, aggiorno solo il nome eventualmente modificato
+    // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
+    const liElement = document.getElementById(token);
+    liElement.dataset.label = name;
+    liElement.querySelector('span > span').innerHTML = name;
+    dlgFilter.close();
+  }
+  input.value = '';
+  // ripulisco la textarea
+  debugger;
+  textareaFilter.querySelectorAll('*:not(br)').forEach(element => element.remove());
+  delete e.target.dataset.token;
+  document.getElementById('filter-note').value = '';
+}
