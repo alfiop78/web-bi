@@ -248,7 +248,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     struct.querySelector('text').innerHTML = input.value;
     Draw.svg.querySelector(`#${WorkBook.activeTable.id}`).dataset.name = input.value;
     // modifico la prop 'name' di WorkBook.hierTables. Questa viene letta da
-    // app.addTablesStruct() per popolare la pagina 'Sheet'
     WorkBook.hierTables.get(WorkBook.activeTable.id).name = input.value;
     // WorkBook.svg
     Draw.tables.get(WorkBook.activeTable.id).name = input.value;
@@ -876,7 +875,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  /* app.addMark = (data, ref) => {
+  app.addMark = (data, ref) => {
     const templateContent = app.tmplFormula.content.cloneNode(true);
     const i = templateContent.querySelector('i');
     i.addEventListener('click', app.cancelFormulaObject);
@@ -891,7 +890,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     mark.innerText = `${WorkBook.activeTable.dataset.name}.${data.field}`;
     // small.innerText = WorkBook.activeTable.dataset.name;
     ref.appendChild(span);
-  } */
+  }
 
   // drop di una metrica nela textarea per le metriche composte
   app.textareaDrop = (e) => {
@@ -1628,7 +1627,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
     process.filters = filters;
     debugger;
-    return
     app.setSheet();
     process.from = Sheet.from;
     process.joins = Sheet.joins;
@@ -2980,37 +2978,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     }
   }
 
-  app.appendFilter = (parent, token, filter) => {
-    const tmpl = app.tmplList.content.cloneNode(true);
-    const li = tmpl.querySelector('li.drag-list.filters');
-    const span = li.querySelector('span');
-    const i = li.querySelector('i');
-    li.dataset.id = token;
-    i.id = token;
-    i.dataset.type = "filter";
-    i.dataset.label = filter.name;
-    li.classList.add("filters");
-    li.dataset.elementSearch = "filters";
-    li.dataset.label = filter.name;
-    // definisco quale context-menu-template apre questo elemento
-    li.dataset.contextmenu = 'ul-context-menu-filter';
-    li.dataset.field = filter.field;
-    // TODO: eventi drag sull'icona drag
-    i.addEventListener('dragstart', app.elementDragStart);
-    i.addEventListener('dragend', app.elementDragEnd);
-    li.addEventListener('contextmenu', app.openContextMenu);
-    span.innerHTML = filter.name;
-    parent.appendChild(li);
-  }
-
-  app.addDefinedFilters = () => {
-    const parent = document.getElementById('ul-filters');
-    // filtri mappati sul WorkBook
-    for (const [token, value] of WorkBook.filters) {
-      app.appendFilter(parent, token, value);
-    }
-  }
-
   app.addTableFields = (parent, fields) => {
     for (const [token, value] of Object.entries(fields)) {
       const tmpl = app.tmplList.content.cloneNode(true);
@@ -3070,10 +3037,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       app.addTableFields(details, objects.fields);
       app.addTableMetrics(details, objects.metrics);
     }
-
-    // if (WorkBook.filters.size !== 0) app.addDefinedFilters();
     // TEST: verificare errori con un workbook senza nessun filtro
-    app.addDefinedFilters();
+    for (const token of WorkBook.filters.keys()) { appendFilter(token); }
     app.addDefinedCompositeMetrics();
   }
 

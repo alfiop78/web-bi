@@ -1,7 +1,12 @@
-var dlgFilter = document.getElementById('dlg-filters');
-var btnFilterSave = document.getElementById('btn-filter-save');
+// templates
+const template_li = document.getElementById('tmpl-li');
+const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
+const contextMenuRef = document.getElementById('context-menu');
+// Dialogs
+const dlgFilter = document.getElementById('dlg-filters');
+const btnFilterSave = document.getElementById('btn-filter-save');
 var textareaFilter = document.getElementById('textarea-filter');
-var popupSuggestions = document.getElementById('popup');
+const popupSuggestions = document.getElementById('popup');
 const sel = document.getSelection();
 const rand = () => Math.random(0).toString(36).substring(2);
 const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
@@ -34,17 +39,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // e.preventDefault();
     switch (e.code) {
       case 'Space':
-        if (e.target.querySelector('span')) {
-          // e.target.querySelector('span').textContent = '';
-          // popup.classList.remove('open');
-          // delete e.target.querySelector('span').dataset.text;
-          e.target.querySelector('span').remove();
-        }
+        e.target.querySelector('span')?.remove();
+        // popup.classList.remove('open');
         break;
       case 'Backspace':
       case 'Delete':
-        // elimino il primo elemento se questo corrisponde a un nodo type = 3 (es. lo <span>)
-        if (e.target.firstChild.nodeType === 1) e.target.firstChild.remove();
+        // elimino il primo elemento se questo corrisponde a un nodo type = 1 (il TextNode è un nodeType 3)
+        // (es. lo <span> o <br> che non elimino)
+        if (e.target.firstChild.nodeType === 1 && e.target.firstChild.nodeName !== 'BR') e.target.firstChild.remove();
         break;
       default:
         break;
@@ -64,13 +66,15 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     switch (e.key) {
       case 'Tab':
-        e.target.firstChild.textContent += e.target.querySelector('span').textContent;
-        // e.target.querySelector('span').textContent = '';
-        // popup.classList.remove('open');
-        // delete e.target.querySelector('span').dataset.text;
-        e.target.querySelector('span').remove();
-        // posiziono il cursore alla fine della stringa
-        sel.setPosition(e.target.firstChild, e.target.firstChild.length);
+        if (e.target.querySelector('span')) {
+          e.target.firstChild.textContent += e.target.querySelector('span').textContent;
+          // e.target.querySelector('span').textContent = '';
+          // popup.classList.remove('open');
+          // delete e.target.querySelector('span').dataset.text;
+          e.target.querySelector('span').remove();
+          // posiziono il cursore alla fine della stringa
+          sel.setPosition(e.target.firstChild, e.target.firstChild.length);
+        }
         break;
       default:
         break;
@@ -146,74 +150,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // SQL : viene passato alla procedura .php che elabora il report
-  // formula : è la formula scritta nella textarea, verrà utilizzata per ripristinarla nella textarea in case di edit
-  // di un filtro
-  // TEST: questo codice può validare la formula, cercando le tabelle presenti in #wbFilters ma
-  // questo codice andrà spostato nel tasto "Salva" del filtro
   textareaFilter.addEventListener('blur', (e) => {
-    if (!e.target.firstChild) return;
-    // split in un array (separato da spazi) l'sql
-    if (e.target.firstChild.nodeType !== 3) return;
-    const formula = e.target.firstChild.textContent.split(' ');
-    const date = new Date().toLocaleDateString('it-IT', options);
-    let object = { tables: new Set(), from: {}, joins: {}, formula, sql: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
-    // let tables = new Set();
-    // replico i nomi delle tabelle con i suoi alias di tabella, recuperandoli dalla ul#wbFilters
-    object.sql = formula.map(value => {
-      if (value.includes('.')) {
-        // nome_tabella.nome_campo
-        const table = value.split('.')[0];
-        const alias = document.querySelector(`#wbFilters>details[data-table='${table}']`).dataset.alias;
-        object.tables.add(alias);
-        const regex = new RegExp(`${table}`, 'i');
-        return value.replace(regex, alias);
-      }
-      return value;
-    });
-    // object.tables = [...object.tables];
-    console.log(object);
-
-    for (const factId of WorkBook.dataModel.keys()) {
-      // WARN: 2024.02.08 questa logica è utilizzata anche in setSheet(). Creare un metodo riutilizzabile.
-      let from = {}, joins = {};
-      // object.tables : l'alias della tabella
-      object.tables.forEach(alias => {
-        const tablesOfModel = WorkBook.dataModel.get(factId);
-        // se si tratta di una tabella 'time' la converto in WB_YEARS, questa sarà sempre presente
-        // nella relazione con la tabella time
-        // WARN: da testare prima di spostare questa funzione nel tasto "Salva"
-        // if (alias === 'time') alias = 'WB_YEARS';
-        if (tablesOfModel.hasOwnProperty(alias)) {
-          tablesOfModel[alias].forEach(table => {
-            const data = Draw.tables.get(table.id);
-            // 'from' del filtro, questo indica quali tabelle includere quando si utilizza
-            // questo filtro nel report
-            from[data.alias] = { schema: data.schema, table: data.table };
-            // 'join', indica quali join utilizzare quando si utilizza questo filtro in un report
-            if (WorkBook.joins.has(data.alias)) {
-              // esiste una join per questa tabella
-              for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
-                if (join.factId === factId) joins[token] = join;
-              }
-            }
-          });
-        }
-      });
-      // console.log(from);
-      // console.log(joins);
-      object.from[factId] = from;
-      object.joins[factId] = joins;
-    }
-
-    // Salvataggio del Filtro
-    /* WorkBook.filters = {
-      token,
-      value: object
-    }; */
-
-    // TODO: verificare se object.tables viene convertito in array quando salvato nello storage e/o nel Metodo WorkBook.filters console.log(object);
-    debugger;
+    // TODO: 10.10.2024 Qui potrei effettuare un controllo di validità.
+    // Ad esempio se i nomi delle tabelle o i nomi delle colonne sono validi.
+    // Se, nelle keyword (AND, OR, BETWEEN, ecc) sono inseriti gli spazi...
+    // ...
+    // Elimino eventuali elementi <span> "suggestion" rimasti in sospeso
+    // INFO: ChainingOperatore: se l'elemento esiste lo rimuovo, se non esiste NON viene generate un errore ma undefined
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining
+    e.target.querySelector('span')?.remove();
+    // e.target.querySelector('span').remove();
   });
 
   textareaFilter.addEventListener('drop', (e) => {
@@ -225,11 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const offset = caretPosition.offset;
     // elementRef : è l'elemento draggato
     WorkBook.activeTable = elementRef.dataset.tableId;
-    /* if (e.target.firstChild) {
-      e.target.firstChild.textContent += `${WorkBook.activeTable.dataset.table}.${elementRef.dataset.field}`;
-    } else {
-      e.target.textContent += `${WorkBook.activeTable.dataset.table}.${elementRef.dataset.field}`;
-    } */
     console.log(offset);
     const text = document.createTextNode(`${WorkBook.activeTable.dataset.table}.${elementRef.dataset.field}`);
     if (offset !== 0) {
@@ -247,29 +188,35 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 }); // end DOMContentLoaded
 
+/*
+  * Tasto di salvataggio/aggiornamento filtro
+  * sql : viene passato alla procedura .php che elabora il report
+  * formula : è la formula scritta nella textarea, verrà utilizzata per ripristinarla nella textarea in case di edit
+*/
 btnFilterSave.onclick = (e) => {
-  if (e.target.firstChild.nodeType !== 3) return;
+  if (textareaFilter.firstChild.nodeType !== 3) return;
   const input = document.getElementById('input-filter-name');
   const name = input.value;
-  // in edit recupero il token da e.target.dataset.token
+  // in edit recupero il token presente sul tasto
   const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
-
-  const formula = e.target.firstChild.textContent.split(' ');
+  let tables = new Set();
+  const formula = textareaFilter.firstChild.textContent.split(' ');
   const date = new Date().toLocaleDateString('it-IT', options);
-  let object = { tables: new Set(), from: {}, joins: {}, formula, sql: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
-  // let tables = new Set();
+  let object = { type: 'filter', name, token, tables: [], from: {}, joins: {}, formula, sql: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
   // replico i nomi delle tabelle con i suoi alias di tabella, recuperandoli dalla ul#wbFilters
   object.sql = formula.map(value => {
     if (value.includes('.')) {
       // nome_tabella.nome_campo
       const table = value.split('.')[0];
       const alias = document.querySelector(`#wbFilters>details[data-table='${table}']`).dataset.alias;
-      object.tables.add(alias);
+      tables.add(alias);
       const regex = new RegExp(`${table}`, 'i');
       return value.replace(regex, alias);
     }
     return value;
   });
+  // converto l'oggetto Set() tables in un array
+  object.tables = [...tables];
 
   for (const factId of WorkBook.dataModel.keys()) {
     // WARN: 2024.02.08 questa logica è utilizzata anche in setSheet(). Creare un metodo riutilizzabile.
@@ -279,7 +226,8 @@ btnFilterSave.onclick = (e) => {
       const tablesOfModel = WorkBook.dataModel.get(factId);
       // se si tratta di una tabella 'time' la converto in WB_YEARS, questa sarà sempre presente
       // nella relazione con la tabella time
-      // WARN: da testare prima di spostare questa funzione nel tasto "Salva"
+      // TEST: 10.10.2024 Funzionamento con un filtro su tabella TIME, probabilmente questa logica non
+      // è più utilizzata
       // if (alias === 'time') alias = 'WB_YEARS';
       if (tablesOfModel.hasOwnProperty(alias)) {
         tablesOfModel[alias].forEach(table => {
@@ -297,8 +245,6 @@ btnFilterSave.onclick = (e) => {
         });
       }
     });
-    // console.log(from);
-    // console.log(joins);
     object.from[factId] = from;
     object.joins[factId] = joins;
   }
@@ -313,20 +259,15 @@ btnFilterSave.onclick = (e) => {
     object.created_at = date;
   }
 
+  // console.log(object);
   // Salvataggio del Filtro
-  WorkBook.filters = {
-    token,
-    // TODO: verificare se object.tables viene convertito in array quando salvato nello storage e/o nel Metodo WorkBook.filters
-    value: object
-  };
-
-  console.log(object);
-  // salvo il nuovo filtro appena creato
-  // completato il salvataggio rimuovo l'attributo data-token da e.target
+  WorkBook.filters = { token, value: object };
   window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
+  // completato il salvataggio rimuovo l'attributo data-token da e.target
   if (!e.target.dataset.token) {
-    // TODO: appendFilter può essere spostata qui
-    // app.appendFilter(document.getElementById('ul-filters'), token, object);
+    appendFilter(token);
+    input.value = '';
+    input.focus();
   } else {
     // filtro modificato, aggiorno solo il nome eventualmente modificato
     // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
@@ -335,10 +276,80 @@ btnFilterSave.onclick = (e) => {
     liElement.querySelector('span > span').innerHTML = name;
     dlgFilter.close();
   }
-  input.value = '';
-  // ripulisco la textarea
-  debugger;
-  textareaFilter.querySelectorAll('*:not(br)').forEach(element => element.remove());
+  // ripulisco la textarea eliminando solo il nodo #text, lascio il <br />
+  if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
   delete e.target.dataset.token;
   document.getElementById('filter-note').value = '';
 }
+
+/*
+ * Creazione elenco filtri nella #ul-filters
+ * Viene invocata quando si Salva un nuovo filtro e
+ * quando si costruisce l'elenco #ul-filters
+*/
+function appendFilter(token) {
+  const parent = document.getElementById('ul-filters');
+  const tmpl = template_li.content.cloneNode(true);
+  const li = tmpl.querySelector('li.drag-list.filters');
+  const span = li.querySelector('span');
+  const i = li.querySelector('i');
+  const filter = WorkBook.filters.get(token);
+  li.dataset.id = token;
+  i.id = token;
+  i.dataset.type = "filter";
+  i.dataset.label = filter.name;
+  li.classList.add("filters");
+  li.dataset.elementSearch = "filters";
+  li.dataset.label = filter.name;
+  // definisco quale context-menu-template apre questo elemento
+  li.dataset.contextmenu = 'ul-context-menu-filter';
+  // TEST: 10.10.2024 Sembra non essere utilizzato, è presente nei filtri creati prima di questa data
+  // li.dataset.field = filter.field;
+  i.addEventListener('dragstart', elementDragStart);
+  i.addEventListener('dragend', elementDragEnd);
+  li.addEventListener('contextmenu', app.openContextMenu);
+  span.innerHTML = filter.name;
+  parent.appendChild(li);
+}
+
+// NOTE: funzioni Drag&Drop
+
+function elementDragStart(e) {
+  // console.log('column drag start');
+  // console.log('e.target : ', e.target.id);
+  e.target.classList.add('dragging');
+  e.dataTransfer.setData('text/plain', e.target.id);
+  console.log(e.dataTransfer);
+  e.dataTransfer.effectAllowed = "copy";
+}
+
+function elementDragEnd(e) {
+  e.preventDefault();
+  // if (e.dataTransfer.dropEffect === 'copy') {}
+  e.currentTarget.classList.remove('dropping');
+}
+
+function openContextMenu(e) {
+  e.preventDefault();
+  // console.log(e.target.id);
+  console.log(e.currentTarget.id);
+  console.log(e.currentTarget.dataset.id);
+  // reset #context-menu
+  if (contextMenuRef.hasChildNodes()) contextMenuRef.querySelector('*').remove();
+  const tmpl = tmplContextMenu.content.cloneNode(true);
+  const content = tmpl.querySelector(`#${e.currentTarget.dataset.contextmenu}`);
+  // aggiungo, a tutti gli elementi del context-menu, il token dell'elemento selezionato
+  content.querySelectorAll('button').forEach(button => {
+    // button.dataset.token = e.currentTarget.id;
+    button.dataset.token = e.currentTarget.dataset.id;
+    // if (button.dataset.button === 'delete' && Sheet.edit) button.disabled = 'true';
+  });
+  contextMenuRef.appendChild(content);
+
+  const { clientX: mouseX, clientY: mouseY } = e;
+  contextMenuRef.style.top = `${mouseY}px`;
+  contextMenuRef.style.left = `${mouseX}px`;
+  contextMenuRef.toggleAttribute('open');
+}
+
+// NOTE: funzioni Drag&Drop
