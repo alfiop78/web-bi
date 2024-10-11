@@ -61,7 +61,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     textareaCompositeMetric: document.getElementById('textarea-composite-metric'),
     txtAreaIdColumn: document.getElementById('textarea-column-id'),
     txtAreaDsColumn: document.getElementById('textarea-column-ds'),
-    txtAreaFilters: document.getElementById("textarea-filter"),
+    textarea_filter: document.getElementById("textarea-filter"),
     // popup
     tablePopup: document.getElementById("table-popup"),
     // INPUTS
@@ -257,6 +257,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   /* NOTE: DRAG&DROP EVENTS */
 
+  // FIX: aggiunta in ini-map-loaded
   app.elementDragStart = (e) => {
     // console.log('column drag start');
     // console.log('e.target : ', e.target.id);
@@ -297,6 +298,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     e.currentTarget.classList.remove('dropping');
   }
 
+  // FIX: aggiunta in ini-map-loaded
   app.elementDragEnd = (e) => {
     e.preventDefault();
     // if (e.dataTransfer.dropEffect === 'copy') {}
@@ -924,11 +926,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   app.txtAreaDsColumn.addEventListener('dragleave', app.elementDragLeave, false);
   app.txtAreaIdColumn.addEventListener('drop', app.setColumnDrop, false);
   app.txtAreaDsColumn.addEventListener('drop', app.setColumnDrop, false);
-  // textarea nella dialog-filters
-  // app.txtAreaFilters.addEventListener("dragenter", app.elementDragEnter, false);
-  // app.txtAreaFilters.addEventListener("dragover", app.elementDragOver, false);
-  // app.txtAreaFilters.addEventListener("dragleave", app.elementDragLeave, false);
-  // app.txtAreaFilters.addEventListener("drop", app.newFilterDrop, false);
 
   app.columnsDropzone.addEventListener('dragenter', app.elementDragEnter, false);
   app.columnsDropzone.addEventListener('dragover', app.elementDragOver, false);
@@ -1794,53 +1791,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       });
   }
 
-  // creo la struttura tabelle nella dialog filter
-  app.openDialogFilter = async () => {
-    // NOTE: commentata il 26.08.2024 perchè l'elenco delle tabelle viene memorizzato
-    // in sessionStorage al momento dell'apertura del DataModel
-    // let urls = [];
-    /* for (const [alias, objects] of WorkBook.workbookMap) {
-      // for (const [alias, object] of WorkBook.tablesModel) {
-      WorkBook.activeTable = objects.props.key;
-      urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info');
-    } */
-    // popolo la dialogFilter
-    app.addWorkBookContent();
-    app.dialogFilters.showModal();
-  }
-
-  // aggiunta colonna, nella dialogFilters, alla textarea
-  // NOTE: sostituita da newFilterDrop dopo aver aggiunto la funzionalità del drag&drop anche nella dialog-filter
-  /* app.handlerSelectField = (e) => {
-    WorkBook.activeTable = e.currentTarget.dataset.tableId;
-    console.log(WorkBook.activeTable.dataset.table);
-    const field = e.currentTarget.dataset.field;
-    const table = e.currentTarget.dataset.table;
-    const alias = e.currentTarget.dataset.alias;
-    console.log(field);
-    // textarea
-    const txtArea = app.dialogFilters.querySelector('#textarea-filter');
-    const templateContent = app.tmplFormula.content.cloneNode(true);
-    const i = templateContent.querySelector('i');
-    i.addEventListener('click', app.cancelFormulaObject);
-    const span = templateContent.querySelector('span');
-    const mark = templateContent.querySelector('mark');
-    const small = templateContent.querySelector('small');
-
-    // aggiungo il tableAlias e table come attributo.
-    // ...in questo modo visualizzo solo il nome della colonna ma quando andrò a salvare la formula del filtro salverò table.field
-    mark.dataset.tableAlias = alias;
-    mark.dataset.table = table;
-    mark.dataset.field = field;
-    mark.dataset.type = e.currentTarget.dataset.type;
-    mark.dataset.tableId = e.currentTarget.dataset.tableId;
-    mark.innerText = field;
-    small.innerText = table;
-    txtArea.appendChild(span);
-
-    app.addSpan(txtArea, null, 'filter');
-  } */
-
   // aggiungo il filtro selezionato allo Sheet
   app.addFilter = (e) => {
     Sheet.filters = e.currentTarget.dataset.token;
@@ -1894,52 +1844,23 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   /*
     * modifica di un filtro.
     * -inserisco il contenuto della formula nella #textarea-filter
-    * -recupero la definizione dell'elemento per reimpostare, nella textarea, la formula del filtro
+    *  Questa Funzione non può essere messa dopo il DOMContentLoaded perchè
+    *  si trova all'interno di un context-menu che viene aperte nelle fasi successive
   */
   app.editFilter = (e) => {
     // console.log(e.target.dataset.token);
     // il context-menu è sempre aperto in questo caso, lo chiudo
     app.contextMenuRef.toggleAttribute('open');
-    app.openDialogFilter();
-    console.log(WorkBook.filters.get(e.target.dataset.token));
-    let filter = WorkBook.filters.get(e.target.dataset.token);
-    const txtArea = app.dialogFilters.querySelector('#textarea-filter');
+    const filter = WorkBook.filters.get(e.target.dataset.token);
     const btnFilterSave = document.getElementById('btn-filter-save');
     const inputName = document.getElementById('input-filter-name');
     inputName.value = filter.name;
-    // app.dialogFilters.dataset.mode = 'edit'
     // imposto il token sul tasto btnFilterSave, in questo modo posso salvare/aggiornare il filtro in base alla presenza o meno di data-token
     btnFilterSave.dataset.token = e.target.dataset.token;
-    /*
-    *  metto in ciclo gli elementi della proprietà 'formula' del filtro.
-    *  Qui possono esserci sia campi che definiscono il <mark> sia elementi, della formula, che definiscono lo <span>
-    */
-    filter.formula.forEach(element => {
-      if (element) {
-        if (element.hasOwnProperty('field')) {
-          // determino il <mark>
-          const templateContent = app.tmplFormula.content.cloneNode(true);
-          const i = templateContent.querySelector('i');
-          i.addEventListener('click', app.cancelFormulaObject);
-          const span = templateContent.querySelector('span');
-          const mark = templateContent.querySelector('mark');
-          const small = templateContent.querySelector('small');
-          mark.dataset.tableAlias = element.table_alias;
-          mark.dataset.table = element.table;
-          mark.dataset.field = element.field;
-          mark.innerText = element.field;
-          small.innerText = element.table;
-          txtArea.appendChild(span);
-        } else {
-          const span = document.createElement('span');
-          span.dataset.check = 'filter';
-          span.setAttribute('contenteditable', 'true');
-          span.setAttribute('tabindex', 0);
-          span.innerText = element;
-          txtArea.appendChild(span);
-        }
-      }
-    });
+    const text = document.createTextNode(filter.formula.join(' '));
+    // aggiungo il testo della formula prima del tag <br>
+    app.textarea_filter.insertBefore(text, app.textarea_filter.lastChild);
+    openDialogFilter();
   }
 
   // sezione drop per i filtri nelle metriche avanzate
@@ -2952,58 +2873,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // TEST: verificare errori con un workbook senza nessun filtro
     for (const token of WorkBook.filters.keys()) { appendFilter(token); }
     app.addDefinedCompositeMetrics();
-  }
-
-  // creo la struttura tabelle nella dialog-filters
-  app.addWorkBookContent = () => {
-    app.dialogFilters.querySelectorAll('nav dl').forEach(element => element.remove());
-    let parent = app.dialogFilters.querySelector('nav');
-    for (const [alias, objects] of WorkBook.workbookMap) {
-      const tmpl = app.tmplDetails.content.cloneNode(true);
-      const details = tmpl.querySelector("details");
-      const summary = details.querySelector('summary');
-      WorkBook.activeTable = objects.props.key;
-      // recupero le tabelle dal sessionStorage
-      const columns = WorkBookStorage.getTable(objects.props.table);
-      details.setAttribute("name", "wbFilters");
-      details.dataset.schema = WorkBook.activeTable.dataset.schema;
-      details.dataset.table = objects.props.name;
-      details.dataset.label = objects.props.name;
-      details.dataset.alias = alias;
-      details.dataset.id = objects.props.key;
-      details.dataset.searchId = 'column-search';
-      summary.innerHTML = objects.props.name;
-      summary.dataset.tableId = objects.props.key;
-      parent.appendChild(details);
-      columns.forEach(column => {
-        const content = app.tmplList.content.cloneNode(true);
-        const li = content.querySelector('li.drag-list.default');
-        const span = li.querySelector('span');
-        const i = li.querySelector('i');
-        i.dataset.tableId = objects.props.key;
-        i.dataset.field = column.column_name;
-        i.id = `${alias}_${column.column_name}`;
-        // i.dataset.datatype = column.type_name.toLowerCase();
-        i.ondragstart = app.elementDragStart;
-        i.ondragend = app.elementDragEnd;
-
-        li.dataset.label = column.column_name;
-        li.dataset.fn = 'handlerSelectField';
-        li.dataset.elementSearch = 'columns';
-        li.dataset.tableId = objects.props.key;
-        li.dataset.table = objects.props.name;
-        li.dataset.alias = alias;
-        li.dataset.datatype = column.type_name.toLowerCase();
-        // li.dataset.type = objects.props.type;
-        li.dataset.field = column.column_name;
-        // li.dataset.key = column.CONSTRAINT_NAME;
-        span.innerText = column.column_name;
-        span.dataset.datatype = column.type_name.toLowerCase();
-        // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
-        // li.dataset.fn = 'addFieldToJoin';
-        details.appendChild(li);
-      });
-    }
   }
 
   app.addSpan = (target, value = null) => {

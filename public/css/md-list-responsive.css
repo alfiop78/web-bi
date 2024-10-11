@@ -238,7 +238,7 @@ ul.context-menu-items {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  margin: 6px;
+  /* margin: 6px; */
   padding: 6px;
   background-color: inherit;
 }

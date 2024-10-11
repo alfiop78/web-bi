@@ -888,7 +888,7 @@
                           </p>
                           <section data-worksheet-object class="custom-scrollbar" data-section="3">
                             <ul id="ul-filters" class="custom-scrollbar" data-search-id="input-search-filters"></ul>
-                            <button class="btn-link link" data-fn="openDialogFilter" type="button" value="Nuovo Filtro">Nuovo Filtro</button>
+                            <button class="btn-link link" id="btnOpenDialogFilter" type="button" value="Nuovo Filtro">Nuovo Filtro</button>
                           </section>
                         </section>
                       </div>

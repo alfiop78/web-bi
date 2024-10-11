@@ -2,12 +2,15 @@
 const template_li = document.getElementById('tmpl-li');
 const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
 const contextMenuRef = document.getElementById('context-menu');
+const tmplDetails = document.getElementById('tmpl-details-element');
 // Dialogs
 const dlgFilter = document.getElementById('dlg-filters');
 // Textarea
 var textareaFilter = document.getElementById('textarea-filter');
 // Buttons
 const btnFilterSave = document.getElementById('btn-filter-save');
+const btnOpenDialogFilter = document.getElementById('btnOpenDialogFilter');
+btnOpenDialogFilter.addEventListener('click', openDialogFilter);
 // Other
 const popupSuggestions = document.getElementById('popup');
 const sel = document.getSelection();
@@ -286,10 +289,13 @@ btnFilterSave.onclick = (e) => {
     input.focus();
   } else {
     // filtro modificato, aggiorno solo il nome eventualmente modificato
-    // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
-    const liElement = document.getElementById(token);
-    liElement.dataset.label = name;
-    liElement.querySelector('span > span').innerHTML = name;
+    // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById() in questo caso
+    const li = document.querySelector(`li[data-id='${token}']`);
+    const dragIcon = li.querySelector('i');
+    const span = li.querySelector('span');
+    li.dataset.label = name;
+    dragIcon.dataset.label = name;
+    span.textContent = name;
     dlgFilter.close();
   }
   // ripulisco la textarea eliminando solo il nodo #text, lascio il <br />
@@ -323,7 +329,7 @@ function appendFilter(token) {
   // li.dataset.field = filter.field;
   i.addEventListener('dragstart', elementDragStart);
   i.addEventListener('dragend', elementDragEnd);
-  li.addEventListener('contextmenu', app.openContextMenu);
+  li.addEventListener('contextmenu', openContextMenu);
   span.innerHTML = filter.name;
   parent.appendChild(li);
 }
@@ -368,4 +374,67 @@ function openContextMenu(e) {
   contextMenuRef.style.top = `${mouseY}px`;
   contextMenuRef.style.left = `${mouseX}px`;
   contextMenuRef.toggleAttribute('open');
+}
+
+function openDialogFilter() {
+  createTableStruct();
+  dlgFilter.showModal();
+}
+
+dlgFilter.addEventListener('close', () => {
+  console.log('close');
+  // reset della textarea, input, note
+  if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
+});
+
+function createTableStruct() {
+  let parent = document.getElementById('wbFilters');
+  // ripulisco la struttura se presente
+  parent.querySelectorAll('dl').forEach(element => element.remove());
+  for (const [alias, objects] of WorkBook.workbookMap) {
+    const tmpl = tmplDetails.content.cloneNode(true);
+    const details = tmpl.querySelector("details");
+    const summary = details.querySelector('summary');
+    WorkBook.activeTable = objects.props.key;
+    // recupero le tabelle dal sessionStorage
+    const columns = WorkBookStorage.getTable(objects.props.table);
+    details.setAttribute("name", "wbFilters");
+    details.dataset.schema = WorkBook.activeTable.dataset.schema;
+    details.dataset.table = objects.props.name;
+    details.dataset.label = objects.props.name;
+    details.dataset.alias = alias;
+    details.dataset.id = objects.props.key;
+    details.dataset.searchId = 'column-search';
+    summary.innerHTML = objects.props.name;
+    summary.dataset.tableId = objects.props.key;
+    parent.appendChild(details);
+    columns.forEach(column => {
+      const content = template_li.content.cloneNode(true);
+      const li = content.querySelector('li.drag-list.default');
+      const span = li.querySelector('span');
+      const i = li.querySelector('i');
+      i.dataset.tableId = objects.props.key;
+      i.dataset.field = column.column_name;
+      i.id = `${alias}_${column.column_name}`;
+      // i.dataset.datatype = column.type_name.toLowerCase();
+      i.ondragstart = elementDragStart;
+      i.ondragend = elementDragEnd;
+
+      li.dataset.label = column.column_name;
+      li.dataset.fn = 'handlerSelectField';
+      li.dataset.elementSearch = 'columns';
+      li.dataset.tableId = objects.props.key;
+      li.dataset.table = objects.props.name;
+      li.dataset.alias = alias;
+      li.dataset.datatype = column.type_name.toLowerCase();
+      // li.dataset.type = objects.props.type;
+      li.dataset.field = column.column_name;
+      // li.dataset.key = column.CONSTRAINT_NAME;
+      span.innerText = column.column_name;
+      span.dataset.datatype = column.type_name.toLowerCase();
+      // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
+      // li.dataset.fn = 'addFieldToJoin';
+      details.appendChild(li);
+    });
+  }
 }
