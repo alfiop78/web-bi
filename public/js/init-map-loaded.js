@@ -70,10 +70,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // console.log(sel);
     // const caretPosition = sel.anchorOffset;
     if (!['Tab', 'Enter'].includes(e.key)) return;
-    e.preventDefault();
+    // e.preventDefault();
     switch (e.key) {
       case 'Tab':
         if (e.target.querySelector('span')) {
+          e.preventDefault();
           e.target.firstChild.textContent += e.target.querySelector('span').textContent;
           // e.target.querySelector('span').textContent = '';
           // popup.classList.remove('open');
@@ -83,6 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
           sel.setPosition(e.target.firstChild, e.target.firstChild.length);
         }
         break;
+      case 'Enter':
+        e.preventDefault();
+      break;
       default:
         break;
     }

@@ -554,6 +554,7 @@ p.field-search {
   border: solid thin gainsboro;
   border-radius: 2px;
   padding: 8px;
+  min-height: 200px;
 }
 
 div[contenteditable] {

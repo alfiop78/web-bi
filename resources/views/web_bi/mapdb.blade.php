@@ -690,7 +690,7 @@
               <section class="row">
                 <section class="col col-4-span">
                   <div class="list-search">
-                    <input type="search" id="input-search-columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off" tabindex="2">
+                    <input type="search" id="input-search-columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off" tabindex="3">
                     <div class="relative-ul">
                       <nav id="wbFilters" class="custom-scrollbar" data-search-id="input-search-columns"></nav>
                     </div>
@@ -706,7 +706,7 @@
                           <li>val 2</li>
                         </ul>
                       </div>
-                      <div id="textarea-filter" contenteditable="true" class="dropzone" spellcheck="false"><br /></div>
+                      <div id="textarea-filter" contenteditable="true" class="dropzone" spellcheck="false" tabindex="2"><br /></div>
                     </div>
                     <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                   </section>
