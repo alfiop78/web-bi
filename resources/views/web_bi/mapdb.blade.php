@@ -706,7 +706,7 @@
                           <li>val 2</li>
                         </ul>
                       </div>
-                      <div id="textarea-filter" contenteditable="true" spellcheck="false"><br /></div>
+                      <div id="textarea-filter" contenteditable="true" class="dropzone" spellcheck="false"><br /></div>
                     </div>
                     <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                   </section>
@@ -1063,7 +1063,7 @@
   </footer>
   <script type="text/javascript" src="{{ asset('/js/init-responsive.js') }}" async></script>
   <!-- init-map-loaded ci sono funzioni dopo aver completato il DOMContentLoaded -->
-  <script type="text/javascript" src="{{ asset('/js/init-map-loaded.js') }}" async></script>
+  <script type="text/javascript" src="{{ asset('/js/init-map-loaded.js') }}"></script>
   <script type="text/javascript" src="{{ asset('/js/init-sheet.js') }}" async></script>
   <script type="text/javascript" src="{{ asset('/js/supportFn.js') }}" async></script>
 </body>

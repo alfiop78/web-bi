@@ -4,10 +4,14 @@ const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
 const contextMenuRef = document.getElementById('context-menu');
 // Dialogs
 const dlgFilter = document.getElementById('dlg-filters');
-const btnFilterSave = document.getElementById('btn-filter-save');
+// Textarea
 var textareaFilter = document.getElementById('textarea-filter');
+// Buttons
+const btnFilterSave = document.getElementById('btn-filter-save');
+// Other
 const popupSuggestions = document.getElementById('popup');
 const sel = document.getSelection();
+
 const rand = () => Math.random(0).toString(36).substring(2);
 const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
 
@@ -163,6 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   textareaFilter.addEventListener('drop', (e) => {
+    // impedisco che venga droppato l'id dell'elemento
     e.preventDefault();
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
@@ -171,9 +176,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const offset = caretPosition.offset;
     // elementRef : è l'elemento draggato
     WorkBook.activeTable = elementRef.dataset.tableId;
+    console.log(textNode);
     console.log(offset);
     const text = document.createTextNode(`${WorkBook.activeTable.dataset.table}.${elementRef.dataset.field}`);
     if (offset !== 0) {
+      // BUG: 11.10.2024 Quando si effettua il drop DOPO l'ultimo carattere (spazio)
+      // si verifica un errore perchè è presente l'elemento <br> in quella posizione
+      // Questo comporta che il textNode non è più un node ma è l'elemento textarea
       let replacement = textNode.splitText(offset);
       let p = document.createElement('p');
       p.innerHTML = textNode.textContent;
@@ -185,7 +194,22 @@ document.addEventListener('DOMContentLoaded', () => {
       textNode.textContent = text.textContent;
     }
     e.target.normalize();
+    e.target.appendChild(document.createElement('br'));
   });
+
+  textareaFilter.addEventListener('dragenter', (e) => {
+    e.preventDefault();
+    console.log('dragEnter');
+    // elimino l'elemento <br> altrimenti, nell'evento drop viene preso in considerazione la textarea e non il textnode
+    e.target.querySelector('br')?.remove();
+  });
+
+  textareaFilter.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    console.log('dragLeave');
+    e.target.appendChild(document.createElement('br'));
+  });
+
 }); // end DOMContentLoaded
 
 /*
@@ -220,33 +244,27 @@ btnFilterSave.onclick = (e) => {
 
   for (const factId of WorkBook.dataModel.keys()) {
     // WARN: 2024.02.08 questa logica è utilizzata anche in setSheet(). Creare un metodo riutilizzabile.
-    let from = {}, joins = {};
+    object.from[factId] = {};
+    object.joins[factId] = {};
     // object.tables : l'alias della tabella
     object.tables.forEach(alias => {
       const tablesOfModel = WorkBook.dataModel.get(factId);
-      // se si tratta di una tabella 'time' la converto in WB_YEARS, questa sarà sempre presente
-      // nella relazione con la tabella time
-      // TEST: 10.10.2024 Funzionamento con un filtro su tabella TIME, probabilmente questa logica non
-      // è più utilizzata
-      // if (alias === 'time') alias = 'WB_YEARS';
       if (tablesOfModel.hasOwnProperty(alias)) {
         tablesOfModel[alias].forEach(table => {
           const data = Draw.tables.get(table.id);
           // 'from' del filtro, questo indica quali tabelle includere quando si utilizza
           // questo filtro nel report
-          from[data.alias] = { schema: data.schema, table: data.table };
+          object.from[factId][data.alias] = { schema: data.schema, table: data.table };
           // 'join', indica quali join utilizzare quando si utilizza questo filtro in un report
           if (WorkBook.joins.has(data.alias)) {
             // esiste una join per questa tabella
             for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
-              if (join.factId === factId) joins[token] = join;
+              if (join.factId === factId) object.joins[factId][token] = join;
             }
           }
         });
       }
     });
-    object.from[factId] = from;
-    object.joins[factId] = joins;
   }
 
   // la prop 'created_at' va aggiunta solo in fase di nuovo filtro e non quando si aggiorna il filtro
@@ -258,8 +276,6 @@ btnFilterSave.onclick = (e) => {
   } else {
     object.created_at = date;
   }
-
-  // console.log(object);
   // Salvataggio del Filtro
   WorkBook.filters = { token, value: object };
   window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
@@ -329,6 +345,8 @@ function elementDragEnd(e) {
   e.currentTarget.classList.remove('dropping');
 }
 
+// NOTE: funzioni Drag&Drop
+
 function openContextMenu(e) {
   e.preventDefault();
   // console.log(e.target.id);
@@ -351,5 +369,3 @@ function openContextMenu(e) {
   contextMenuRef.style.left = `${mouseX}px`;
   contextMenuRef.toggleAttribute('open');
 }
-
-// NOTE: funzioni Drag&Drop

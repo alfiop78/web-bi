@@ -2033,94 +2033,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.cancelFormulaObject = (e) => e.currentTarget.parentElement.remove();
 
-  // salvataggio di un filtro in WorkBook
-  app.saveFilter = (e) => {
-    const input = document.getElementById('input-filter-name');
-    const name = input.value;
-    // in edit recupero il token da e.target.dataset.token
-    const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
-    const date = new Date().toLocaleDateString('it-IT', options);
-    let object = { token, name, tables: new Set(), sql: [], from: {}, joins: {}, type: 'filter', formula: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
-    document.querySelectorAll('#textarea-filter *').forEach(element => {
-      // se, nell'elemento <mark> è presente il tableId allora posso recuperare anche hierToken, hierName e dimensionToken
-      // ... altrimenti devo recuperare il cubeToken. Ci sono anche filtri che possono essere fatti su un livello dimensionale e su una FACT
-      if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
-      if (element.nodeName === 'MARK') {
-        (element.dataset.type === 'time') ? object.tables.add('time') : object.tables.add(element.dataset.tableAlias);
-        object.formula.push({ table_alias: element.dataset.tableAlias, table: element.dataset.table, field: element.dataset.field });
-        object.sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
-        object.field = element.dataset.field;
-      } else {
-        object.formula.push(element.innerText.trim());
-        object.sql.push(element.innerText.trim());
-      }
-    });
-    // imposto le proprietà from e joins in base a quello che si trova in object.tables
-    // per ogni Fact presente nel dataModel
-    for (const factId of WorkBook.dataModel.keys()) {
-      // WARN: 2024.02.08 questa logica è utilizzata anche in setSheet(). Creare un metodo riutilizzabile.
-      let from = {}, joins = {};
-      // object.tables : l'alias della tabella
-      object.tables.forEach(tableAlias => {
-        const tables = WorkBook.dataModel.get(factId);
-        // se si tratta di una tabella 'time' la converto in WB_YEARS, questa sarà sempre presente
-        // nella relazione con la tabella time
-        debugger
-        if (tableAlias === 'time') tableAlias = 'WB_YEARS';
-        if (tables.hasOwnProperty(tableAlias)) {
-          tables[tableAlias].forEach(table => {
-            const data = Draw.tables.get(table.id);
-            // 'from' del filtro, questo indica quali tabelle includere quando si utilizza
-            // questo filtro nel report
-            from[data.alias] = { schema: data.schema, table: data.table };
-
-            // 'join', indica quali join utilizzare quando si utilizza questo filtro in un report
-            if (WorkBook.joins.has(data.alias)) {
-              // esiste una join per questa tabella
-              for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
-                if (join.factId === factId) joins[token] = join;
-              }
-            }
-          });
-        }
-      });
-      object.from[factId] = from;
-      object.joins[factId] = joins;
-    }
-    debugger;
-    object.tables = [...object.tables];
-    // la prop 'created_at' va aggiunta solo in fase di nuovo filtro e non quando si aggiorna il filtro
-    if (e.target.dataset.token) {
-      // aggiornamento del filtro
-      // recupero il filtro dallo storage per leggere 'created_at'
-      const filter = JSON.parse(window.localStorage.getItem(e.target.dataset.token));
-      object.created_at = filter.created_at;
-    } else {
-      object.created_at = date;
-    }
-    WorkBook.filters = {
-      token,
-      value: object
-    };
-    // salvo il nuovo filtro appena creato
-    // completato il salvataggio rimuovo l'attributo data-token da e.target
-    window.localStorage.setItem(token, JSON.stringify(WorkBook.filters.get(token)));
-    if (!e.target.dataset.token) {
-      app.appendFilter(document.getElementById('ul-filters'), token, object);
-    } else {
-      // filtro modificato, aggiorno solo il nome eventualmente modificato
-      // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
-      const liElement = document.getElementById(token);
-      liElement.dataset.label = name;
-      liElement.querySelector('span > span').innerHTML = name;
-      app.dialogFilters.close();
-    }
-    input.value = '';
-    document.querySelectorAll('#textarea-filter *').forEach(element => element.remove());
-    delete e.target.dataset.token;
-    document.getElementById('filter-note').value = '';
-  }
-
   // TODO: spostare in supportFn.js
   app.addFiltersMetric = e => e.currentTarget.toggleAttribute('selected');
 
@@ -2313,7 +2225,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
   app.setSheet = () => {
     Sheet.fact.forEach(factId => {
-      // WARN: 2024.02.08 questa logica è utilizzata anche in saveFilter(). Creare un metodo riutilizzabile.
+      // WARN: 2024.02.08 questa logica è utilizzata anche in btnFilterSave(). Creare un metodo riutilizzabile.
       let from = {}, joins = {};
       Sheet.tables.forEach(tableAlias => {
         const tables = WorkBook.dataModel.get(factId);
