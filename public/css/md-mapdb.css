@@ -600,13 +600,17 @@ textarea:active {
   border: solid thin darkgrey;
 }
 
+/* #textarea-custom-metric:focus::before {
+  content: '';
+}
+
 #textarea-custom-metric::before {
-  content: "Trascinare qui le colonne dell'anteprima tabella in basso";
+  content: "Digitare qui la formula (es.: Prezzo * Quantita)";
   position: absolute;
   top: 8px;
   left: 8px;
   color: darkgray;
-}
+} */
 
 #ul-tables>li[data-li-drag]>i {
   height: 24px;

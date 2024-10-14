@@ -592,7 +592,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   }
 
   // salva metrica composta di base
-  app.saveBaseCustomMeasure = (e) => {
+  /* app.saveBaseCustomMeasure = (e) => {
     // se presente il dataset.token sul btn-custom-metric-save sto modificando la metrica, altrimenti
     // è una nuova metrica
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
@@ -626,7 +626,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     };
     WorkBook.checkChanges(token);
     app.dialogCustomMetric.close();
-  }
+  } */
 
   /* selezione di una colonna dalla table-preview, aggiungo la colonna alla dialog-custom-metric
   * per la creazione di una metrica composta di base (przmedio * quantita)

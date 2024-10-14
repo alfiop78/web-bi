@@ -246,6 +246,10 @@ button.btn-link-context:not(:disabled):hover {
   text-decoration: underline;
 }
 
+button.btn-link-context:disabled {
+  color: #aeaeae;
+}
+
 button.btn-link-context:disabled:hover {
   cursor: not-allowed;
 }

@@ -206,7 +206,7 @@
     <template id="tmpl-columns-defined">
       <div class="column-defined">
         <i class="button-icon material-symbols-rounded md-18">table_rows</i>
-        <code contenteditable="true" data-blur-fn="editFieldAlias"></code>
+        <code contenteditable="true" data-blur-fn="editFieldAlias" spellcheck="false"></code>
         <button type="button" data-remove class="button-icon material-symbols-rounded md-18 column-defined" data-fn="removeDefinedColumn" data-column-token>delete</button>
         <button type="button" data-undo class="button-icon material-symbols-rounded md-18 column-defined" data-fn="undoDefinedColumn" data-column-token>undo</button>
       </div>
@@ -224,7 +224,7 @@
     <template id="tmpl-adv-metric">
       <div id="adv-metric-defined" class="metrics">
         <section class="formula" data-token>
-          <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span data-field></span>
+          <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate" spellcheck="false"></code><span data-field></span>
         </section>
       </div>
 
@@ -239,9 +239,9 @@
       <!-- 08-09-2023 -->
       <div class="metric-defined metrics">
         <!-- <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span> -->
-        <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code>
+        <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate" spellcheck="false"></code>
         <!-- <span data-field></span> -->
-        <code data-field data-token data-value contenteditable="true" data-blur-fn="editMetricName"></code>
+        <code data-field data-token data-value contenteditable="true" data-blur-fn="editMetricName" spellcheck="false"></code>
         <button type="button" data-remove class="button-icon material-symbols-rounded md-18 metric-defined" data-fn="removeDefinedMetric" data-metric-token>delete</button>
         <button type="button" data-undo class="button-icon material-symbols-rounded md-18 metric-defined" data-fn="undoDefinedMetric" data-metric-token>undo</button>
       </div>
@@ -605,7 +605,16 @@
                 <section class="col col-8-span">
                   <section class="textarea-formula">
                     <input type="text" id="input-base-custom-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
-                    <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea-content placeholder"></div>
+                    <div class="textarea__container">
+                      <div id="popup">
+                        <ul>
+                          <li>val 1</li>
+                          <li>val 2</li>
+                        </ul>
+                      </div>
+                      <div id="textarea-custom-metric" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
+                    </div>
+                    <!-- <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea-content placeholder"></div> -->
                     <textarea id="custom-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                   </section>
                 </section>

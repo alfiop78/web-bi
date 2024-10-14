@@ -7,8 +7,10 @@ const tmplDetails = document.getElementById('tmpl-details-element');
 const dlgFilter = document.getElementById('dlg-filters');
 // Textarea
 var textareaFilter = document.getElementById('textarea-filter');
+var textareaCustomMetric = document.getElementById('textarea-custom-metric');
 // Buttons
 const btnFilterSave = document.getElementById('btn-filter-save');
+const btnCustomMetricSave = document.getElementById('btn-custom-metric-save');
 const btnOpenDialogFilter = document.getElementById('btnOpenDialogFilter');
 btnOpenDialogFilter.addEventListener('click', openDialogFilter);
 // Other
@@ -37,60 +39,78 @@ const findIndexOfCurrentWord = (textarea, caretPosition) => {
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOMContentLoaded');
   // TODO: 04.10.2024 qui potrei nascondere il loader della pagina
-  textareaFilter.addEventListener('keyup', (e) => {
-    // const sel = document.getSelection();
-    // console.log(sel);
-    // const caretPosition = sel.anchorOffset;
-    // console.log(`caretPosition : ${caretPosition}`);
-    // console.log(e.code, e.key);
-    // e.preventDefault();
-    switch (e.code) {
-      case 'Space':
-        e.target.querySelector('span')?.remove();
-        // popup.classList.remove('open');
-        break;
-      case 'Backspace':
-      case 'Delete':
-        // elimino il primo elemento se questo corrisponde a un nodo type = 1 (il TextNode è un nodeType 3)
-        // (es. lo <span> o <br> che non elimino)
-        if (e.target.firstChild.nodeType === 1 && e.target.firstChild.nodeName !== 'BR') e.target.firstChild.remove();
-        break;
-      default:
-        break;
-    }
-  });
-
-  textareaFilter.addEventListener('click', (e) => {
-    const caretPosition = document.caretPositionFromPoint(e.clientX, e.clientY);
-    console.log(caretPosition.offset);
-  });
-
-  textareaFilter.addEventListener('keydown', function(e) {
-    // const sel = document.getSelection();
-    // console.log(sel);
-    // const caretPosition = sel.anchorOffset;
-    if (!['Tab', 'Enter'].includes(e.key)) return;
-    // e.preventDefault();
-    switch (e.key) {
-      case 'Tab':
-        if (e.target.querySelector('span')) {
-          e.preventDefault();
-          e.target.firstChild.textContent += e.target.querySelector('span').textContent;
-          // e.target.querySelector('span').textContent = '';
+  // NOTE: textarea-filter
+  document.querySelectorAll(".textarea[contenteditable='true']").forEach(textarea => {
+    textarea.addEventListener('keyup', (e) => {
+      // const sel = document.getSelection();
+      // console.log(sel);
+      // const caretPosition = sel.anchorOffset;
+      // console.log(`caretPosition : ${caretPosition}`);
+      // console.log(e.code, e.key);
+      // e.preventDefault();
+      switch (e.code) {
+        case 'Space':
+          e.target.querySelector('span')?.remove();
           // popup.classList.remove('open');
-          // delete e.target.querySelector('span').dataset.text;
-          e.target.querySelector('span').remove();
-          // posiziono il cursore alla fine della stringa
-          sel.setPosition(e.target.firstChild, e.target.firstChild.length);
-        }
-        break;
-      case 'Enter':
-        e.preventDefault();
-      break;
-      default:
-        break;
-    }
+          break;
+        case 'Backspace':
+        case 'Delete':
+          // elimino il primo elemento se questo corrisponde a un nodo type = 1 (il TextNode è un nodeType 3)
+          // (es. lo <span> o <br> che non elimino)
+          if (e.target.firstChild.nodeType === 1 && e.target.firstChild.nodeName !== 'BR') e.target.firstChild.remove();
+          break;
+        default:
+          break;
+      }
+    });
+
+    textarea.addEventListener('click', (e) => {
+      const caretPosition = document.caretPositionFromPoint(e.clientX, e.clientY);
+      // console.log(caretPosition.offset);
+    });
+
+    textarea.addEventListener('keydown', function(e) {
+      // const sel = document.getSelection();
+      // console.log(sel);
+      // const caretPosition = sel.anchorOffset;
+      if (!['Tab', 'Enter'].includes(e.key)) return;
+      // e.preventDefault();
+      switch (e.key) {
+        case 'Tab':
+          if (e.target.querySelector('span')) {
+            e.preventDefault();
+            e.target.firstChild.textContent += e.target.querySelector('span').textContent;
+            // e.target.querySelector('span').textContent = '';
+            // popup.classList.remove('open');
+            // delete e.target.querySelector('span').dataset.text;
+            e.target.querySelector('span').remove();
+            // posiziono il cursore alla fine della stringa
+            sel.setPosition(e.target.firstChild, e.target.firstChild.length);
+          }
+          break;
+        case 'Enter':
+          e.preventDefault();
+          break;
+        default:
+          break;
+      }
+    });
+
+    textarea.addEventListener('blur', (e) => {
+      // TODO: 10.10.2024 Qui potrei effettuare un controllo di validità.
+      // Ad esempio se i nomi delle tabelle o i nomi delle colonne sono validi.
+      // Se, nelle keyword (AND, OR, BETWEEN, ecc) sono inseriti gli spazi...
+      // ...
+      // Elimino eventuali elementi <span> "suggestion" rimasti in sospeso
+      // INFO: ChainingOperatore: se l'elemento esiste lo rimuovo, se non esiste NON viene generate un errore ma undefined
+      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining
+      e.target.querySelector('span')?.remove();
+      // e.target.querySelector('span').remove();
+    });
+
+
   });
+
 
   textareaFilter.addEventListener('input', (e) => {
     // console.log(sel);
@@ -161,18 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  textareaFilter.addEventListener('blur', (e) => {
-    // TODO: 10.10.2024 Qui potrei effettuare un controllo di validità.
-    // Ad esempio se i nomi delle tabelle o i nomi delle colonne sono validi.
-    // Se, nelle keyword (AND, OR, BETWEEN, ecc) sono inseriti gli spazi...
-    // ...
-    // Elimino eventuali elementi <span> "suggestion" rimasti in sospeso
-    // INFO: ChainingOperatore: se l'elemento esiste lo rimuovo, se non esiste NON viene generate un errore ma undefined
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining
-    e.target.querySelector('span')?.remove();
-    // e.target.querySelector('span').remove();
-  });
-
   textareaFilter.addEventListener('drop', (e) => {
     // impedisco che venga droppato l'id dell'elemento
     e.preventDefault();
@@ -216,6 +224,79 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('dragLeave');
     e.target.appendChild(document.createElement('br'));
   });
+  // NOTE: textarea-filter
+
+  // NOTE: textarea-custom-metric
+  textareaCustomMetric.addEventListener('input', (e) => {
+    // console.log(sel);
+    // console.log(sel.baseNode.textContent);
+    // console.log(e.target.firstChild.nodeType, e.target.firstChild.nodeName);
+    // console.log(e.target.firstChild);
+    if (e.target.firstChild.nodeType === 1) return;
+    // recupero l'elenco delle colonne dal sessionStorage
+    const suggestionsTables = JSON.parse(window.sessionStorage.getItem(WorkBook.activeTable.dataset.table));
+    const caretPosition = sel.anchorOffset;
+    const startIndex = findIndexOfCurrentWord(e.target, caretPosition);
+    const currentWord = e.target.firstChild.textContent.substring(startIndex + 1, caretPosition);
+    // const currentWord = (endIndex > 0) ? e.target.firstChild.textContent.substring(startIndex + 1, caretPosition) : e.target.firstChild.textContent.substring(startIndex + 1);
+    // console.info(`current word : ${currentWord}`);
+    if (currentWord.length > 0) {
+      // se il carattere che interrompe la parola (trovato dal egex) è un punto allora devo cercare nell'array delle Colonne, altrimenti in quello delle Tabelle
+      const chartAt = e.target.firstChild.textContent.at(startIndex);
+      // console.log(`chartAt : ${chartAt}`);
+      let table = null;
+      if (chartAt === '.') {
+        // recupero la tabella (prima del punto) in modo da cercare le colonne SOLO di quella tabella
+        const startIndexTable = findIndexOfCurrentWord(e.target, startIndex);
+        table = e.target.firstChild.textContent.substring(startIndexTable + 1, startIndex);
+      }
+      // console.info(`current word : ${currentWord}`);
+      // let regex = new RegExp(`^${currentWord}.*`, 'i');
+      const regex = new RegExp(`^${currentWord}.*`);
+      // const match = console.log([...suggestionsTables].find(value => value.column_name.match(regex)));
+      const match = [...suggestionsTables].find(value => value.column_name.match(regex));
+      // console.log(`match ${match}`);
+      if (match) {
+        // console.log(sel);
+        const span = document.createElement('span');
+        span.textContent = match.column_name.slice(currentWord.length, match.column_name.length);
+        span.dataset.text = match.column_name.slice(currentWord.length, match.column_name.length);
+        const node = sel.anchorNode;
+        // console.log(node.parentNode.querySelector('span'));
+        // se è presente già un "suggerimento" (span) lo elimino
+        if (node.parentNode.querySelector('span')) node.parentNode.querySelector('span').remove();
+        // offset indica la posizione del cursore
+        const offset = sel.anchorOffset;
+        // splitText separa il nodo in due dove, 'node' è la parte prima del cursore e replacement e la parte successiva al cursore
+        const replacement = node.splitText(offset);
+        // creo un elemento p per poter effettuare il insertBefore dello span contenente il "suggestion"
+        const p = document.createElement('p');
+        // inserisco, in p, la prima parte (prima del cursore in posizione corrente)
+        p.innerHTML = node.textContent;
+        // inserisco lo span del suggerimento prima della parte DOPO il cursore (replacement)
+        node.parentNode.insertBefore(span, replacement);
+        // il nodo ora contiene tutto l'elemento <p> che è composto in questo modo :
+        // <p>parte PRIMA del testo <span>suggerimento</span> parte DOPO il cursore
+        node.textContent = p.textContent;
+        // siccome ho riscritto il nodo, la posizione del cursore viene impostata all'inizio del nodo, quindi la reimposto dov'era (offset)
+        sel.setPosition(node, offset);
+        // normalizzo i nodi
+        e.target.normalize();
+        /* popup.classList.add('open');
+        popup.style.left = `${e.target.querySelector('span').offsetLeft}px`;
+        popup.style.top = `${e.target.querySelector('span').offsetTop + 30}px`; */
+      } else {
+        if (e.target.querySelector('span')) {
+          // e.target.querySelector('span').textContent = '';
+          // popup.classList.remove('open');
+          // delete e.target.querySelector('span').dataset.text;
+          e.target.querySelector('span').remove();
+        }
+      }
+    }
+  });
+
+  // NOTE: textarea-custom-metric
 
 }); // end DOMContentLoaded
 
@@ -441,4 +522,43 @@ function createTableStruct() {
       details.appendChild(li);
     });
   }
+}
+
+// salva metrica composta di base
+btnCustomMetricSave.onclick = (e) => {
+  // se presente il dataset.token sul btn-custom-metric-save sto modificando la metrica, altrimenti
+  // è una nuova metrica
+  const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
+  const alias = document.getElementById('input-base-custom-metric-name').value;
+  const factId = WorkBook.activeTable.dataset.factId;
+  let arr_sql = [];
+  let fields = [];
+  const formula = textareaCustomMetric.firstChild.textContent.split(' ');
+  document.querySelectorAll('#textarea-custom-metric *').forEach(element => {
+    if (element.classList.contains('markContent') || element.nodeName === 'I' || element.innerText.length === 0) return;
+    // se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
+    if (element.nodeName === 'MARK') {
+      arr_sql.push(`${element.dataset.tableAlias}.${element.innerText}`);
+      fields.push(`${element.dataset.tableAlias}.${element.innerText}`);
+      formula.push({ tableAlias: element.dataset.tableAlias, field: element.innerText });
+    } else {
+      arr_sql.push(element.innerText.trim());
+      formula.push(element.innerText.trim());
+    }
+  });
+  debugger;
+  WorkBook.metrics = {
+    token,
+    alias,
+    fields, // es.:[przMedio, quantita]
+    factId,
+    formula: formula,
+    aggregateFn: 'SUM', // default
+    SQL: `${arr_sql.join(' ')}`,
+    distinct: false, // default
+    type: 'metric',
+    metric_type: 'basic'
+  };
+  WorkBook.checkChanges(token);
+  app.dialogCustomMetric.close();
 }
