@@ -108,10 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.target.querySelector('span')?.remove();
       // e.target.querySelector('span').remove();
     });
-
-
   });
-
 
   textareaFilter.addEventListener('input', (e) => {
     // console.log(sel);
@@ -459,7 +456,7 @@ function openDialogFilter() {
 }
 
 dlgFilter.addEventListener('close', () => {
-  console.log('close');
+  // console.log('close');
   // reset della textarea, input, note
   if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
 });

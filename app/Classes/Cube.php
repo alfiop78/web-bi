@@ -132,7 +132,6 @@ class Cube
     $this->report_metrics = [];
     // dd(SELF::ifNullOperator());
     foreach ($this->baseMeasures as $value) {
-      // FIX: 15.10.2024 Quando tutte le metriche saranno convertite in array verrà eseguito sempre l'implode e questo if posso toglierlo
       $sql = (is_array($value->sql)) ? implode(' ', $value->sql) : $value->sql;
       // TODO: 15.10.2024 estrarre l'array SQL
       $metric = "\n{$this->ifNullOperator}({$value->aggregateFn}({$sql}), 0) AS '{$value->alias}'";

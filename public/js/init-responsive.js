@@ -131,36 +131,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   // observerList.observe(targetNode, config);
   observerList.observe(document.getElementById('body'), config);
   observerList.observe(app.drawer, config);
-  // observerList.observe(Draw.svg, config);
-
-  // TODO: observer sull'elemento <svg>, ogni modifica fatta in questo elemento salva il workbook_temp
-
-  /* const configSVG = { attributes: false, childList: true, subtree: true };
-  const callbackSVG = (mutationList, observer) => {
-    // console.log(mutationList, observer);
-    for (const mutation of mutationList) {
-      if (mutation.type === 'childList') {
-        // console.info('A child node has been added or removed.');
-        Array.from(mutation.addedNodes).forEach(node => {
-          // console.log(node.nodeName);
-          if (node.nodeName !== '#text') {
-
-            if (node.hasChildNodes()) {
-            }
-          }
-        });
-      } else if (mutation.type === 'attributes') {
-        // console.log(`The ${mutation.attributeName} attribute was modified.`);
-        // console.log(mutation.target);
-        if (mutation.target.hasChildNodes()) {
-        }
-      }
-    }
-  };
-  // Create an observer instance linked to the callback function
-  const observerListSVG = new MutationObserver(callbackSVG);
-  // Start observing the target node for configured mutations
-  observerListSVG.observe(document.getElementById('svg'), configSVG); */
 
   app.openContextMenu = (e) => {
     e.preventDefault();
@@ -218,7 +188,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // delete document.querySelector('#btn-custom-metric-save').dataset.token;
     for (const [key, value] of WorkBook.metrics) {
       // console.log(key, value);
-      if (value.hasOwnProperty('fields')) {
+      if (value.hasOwnProperty('formula')) {
         // è una metrica composta di base, quindi definita sul cubo (es. przmedio * quantita)
         const content = app.tmplList.content.cloneNode(true);
         const li = content.querySelector('li.icons-list');
@@ -573,60 +543,10 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const input = document.getElementById('input-base-custom-metric-name');
     input.value = metric.alias;
     btnSave.dataset.token = e.currentTarget.dataset.token;
-    metric.formula.forEach(element => {
-      if (element.hasOwnProperty('tableAlias')) {
-        const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
-        const span = templateContent.querySelector('span');
-        const mark = templateContent.querySelector('mark');
-        mark.dataset.tableAlias = element.tableAlias;
-        mark.innerText = element.field;
-        textarea.appendChild(span);
-      } else {
-        const span = document.createElement('span');
-        span.setAttribute('contenteditable', 'true');
-        span.setAttribute('tabindex', 0);
-        span.innerText = element;
-        textarea.appendChild(span);
-      }
-    });
+    const text = document.createTextNode(metric.formula.join(' '));
+    // aggiungo il testo della formula prima del tag <br>
+    textarea.insertBefore(text, textarea.lastChild);
   }
-
-  // salva metrica composta di base
-  /* app.saveBaseCustomMeasure = (e) => {
-    // se presente il dataset.token sul btn-custom-metric-save sto modificando la metrica, altrimenti
-    // è una nuova metrica
-    const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
-    const alias = document.getElementById('input-base-custom-metric-name').value;
-    const factId = WorkBook.activeTable.dataset.factId;
-    let arr_sql = [];
-    let fields = [], formula = [];
-    document.querySelectorAll('#textarea-custom-metric *').forEach(element => {
-      if (element.classList.contains('markContent') || element.nodeName === 'I' || element.innerText.length === 0) return;
-      // se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
-      if (element.nodeName === 'MARK') {
-        arr_sql.push(`${element.dataset.tableAlias}.${element.innerText}`);
-        fields.push(`${element.dataset.tableAlias}.${element.innerText}`);
-        formula.push({ tableAlias: element.dataset.tableAlias, field: element.innerText });
-      } else {
-        arr_sql.push(element.innerText.trim());
-        formula.push(element.innerText.trim());
-      }
-    });
-    WorkBook.metrics = {
-      token,
-      alias,
-      fields, // es.:[przMedio, quantita]
-      factId,
-      formula: formula,
-      aggregateFn: 'SUM', // default
-      SQL: `${arr_sql.join(' ')}`,
-      distinct: false, // default
-      type: 'metric',
-      metric_type: 'basic'
-    };
-    WorkBook.checkChanges(token);
-    app.dialogCustomMetric.close();
-  } */
 
   /* selezione di una colonna dalla table-preview, aggiungo la colonna alla dialog-custom-metric
   * per la creazione di una metrica composta di base (przmedio * quantita)
@@ -650,20 +570,19 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   // salvataggio metrica di base
   app.saveBaseMeasure = (e) => {
     const token = rand().substring(0, 7);
-    const field = `${WorkBook.activeTable.dataset.alias}.${e.target.dataset.field}`;
+    // const field = `${WorkBook.activeTable.dataset.alias}.${e.target.dataset.field}`;
     const alias = e.target.dataset.field;
     const factId = WorkBook.activeTable.dataset.factId;
 
     // metric Map Object
     WorkBook.metrics = {
-      token,
-      alias,
+      token, alias,
       // OPTIMIZE: 26.07.2024 è da valutare se viene utilizzata la prop "table"
-      table: { table: WorkBook.activeTable.dataset.table, alias: WorkBook.activeTable.dataset.alias },
-      field,
+      // table: { table: WorkBook.activeTable.dataset.table, alias: WorkBook.activeTable.dataset.alias },
+      // field,
       factId,
       aggregateFn: 'SUM', // default
-      SQL: field,
+      SQL: `${WorkBook.activeTable.dataset.alias}.${e.target.dataset.field}`,
       distinct: false, // default
       type: 'metric',
       metric_type: 'basic'
