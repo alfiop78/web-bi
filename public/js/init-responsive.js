@@ -1561,7 +1561,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
           case 'composite':
             process.compositeMeasures[token] = {
               alias: metric.alias,
-              SQL: wbMetrics.sql,
+              sql: wbMetrics.SQL,
               metrics: wbMetrics.metrics
             };
             break;
@@ -1571,8 +1571,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
                 token,
                 alias: metric.alias,
                 aggregateFn: metric.aggregateFn,
-                field: wbMetrics.field,
-                SQL: wbMetrics.SQL,
+                // field: wbMetrics.field,
+                sql: wbMetrics.SQL,
                 distinct: wbMetrics.distinct,
                 filters: {}
               };
@@ -1598,8 +1598,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
                 token,
                 alias: metric.alias,
                 aggregateFn: metric.aggregateFn,
-                field: wbMetrics.field,
-                SQL: wbMetrics.SQL,
+                // field: wbMetrics.field, // 15.10.2024 field non mi sembra utilizzato in cube.php
+                sql: wbMetrics.SQL,
                 distinct: wbMetrics.distinct
               });
             }

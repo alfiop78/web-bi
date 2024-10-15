@@ -5,6 +5,7 @@ const contextMenuRef = document.getElementById('context-menu');
 const tmplDetails = document.getElementById('tmpl-details-element');
 // Dialogs
 const dlgFilter = document.getElementById('dlg-filters');
+const dlgCustomMetric = document.getElementById('dlg-custom-metric');
 // Textarea
 var textareaFilter = document.getElementById('textarea-filter');
 var textareaCustomMetric = document.getElementById('textarea-custom-metric');
@@ -241,15 +242,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // const currentWord = (endIndex > 0) ? e.target.firstChild.textContent.substring(startIndex + 1, caretPosition) : e.target.firstChild.textContent.substring(startIndex + 1);
     // console.info(`current word : ${currentWord}`);
     if (currentWord.length > 0) {
-      // se il carattere che interrompe la parola (trovato dal egex) è un punto allora devo cercare nell'array delle Colonne, altrimenti in quello delle Tabelle
-      const chartAt = e.target.firstChild.textContent.at(startIndex);
-      // console.log(`chartAt : ${chartAt}`);
-      let table = null;
-      if (chartAt === '.') {
-        // recupero la tabella (prima del punto) in modo da cercare le colonne SOLO di quella tabella
-        const startIndexTable = findIndexOfCurrentWord(e.target, startIndex);
-        table = e.target.firstChild.textContent.substring(startIndexTable + 1, startIndex);
-      }
       // console.info(`current word : ${currentWord}`);
       // let regex = new RegExp(`^${currentWord}.*`, 'i');
       const regex = new RegExp(`^${currentWord}.*`);
@@ -531,34 +523,40 @@ btnCustomMetricSave.onclick = (e) => {
   const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
   const alias = document.getElementById('input-base-custom-metric-name').value;
   const factId = WorkBook.activeTable.dataset.factId;
-  let arr_sql = [];
-  let fields = [];
-  const formula = textareaCustomMetric.firstChild.textContent.split(' ');
-  document.querySelectorAll('#textarea-custom-metric *').forEach(element => {
-    if (element.classList.contains('markContent') || element.nodeName === 'I' || element.innerText.length === 0) return;
-    // se l'elemento è un <mark> lo aggiungo all'array arr_sql, questo creerà la formula in formato SQL
-    if (element.nodeName === 'MARK') {
-      arr_sql.push(`${element.dataset.tableAlias}.${element.innerText}`);
-      fields.push(`${element.dataset.tableAlias}.${element.innerText}`);
-      formula.push({ tableAlias: element.dataset.tableAlias, field: element.innerText });
-    } else {
-      arr_sql.push(element.innerText.trim());
-      formula.push(element.innerText.trim());
-    }
+  const suggestionsTables = JSON.parse(window.sessionStorage.getItem(WorkBook.activeTable.dataset.table));
+  let SQL = [];
+  const formula = textareaCustomMetric.firstChild.textContent.split(/\b/);
+  // ogni elemento inserito nella formula deve essere verificato, la verifica consiste nel trovare
+  // quello che è stato inserito, se è presente (come colonna) nella tabella
+  formula.forEach(el => {
+    const match = [...suggestionsTables].find(value => el === value.column_name);
+    (match) ? SQL.push(`${WorkBook.activeTable.dataset.alias}.${el}`) : SQL.push(el);
   });
-  debugger;
+  // console.log(sql);
   WorkBook.metrics = {
-    token,
-    alias,
-    fields, // es.:[przMedio, quantita]
-    factId,
-    formula: formula,
+    token, alias, factId, formula,
     aggregateFn: 'SUM', // default
-    SQL: `${arr_sql.join(' ')}`,
+    SQL,
     distinct: false, // default
     type: 'metric',
     metric_type: 'basic'
-  };
+  }
+  App.showConsole(`Metrica ${alias} aggiunta al WorkBook`, 'done', 2000);
   WorkBook.checkChanges(token);
-  app.dialogCustomMetric.close();
+  dlgCustomMetric.close();
 }
+
+// INFO: replace current word (questo script era stato usato per sostituire la parola che si sta digitando con il suggerimento della popup)
+// Replace current word with selected suggestion
+/* const replaceCurrentWord = (newWord) => {
+    const currentValue = textarea.value;
+    const cursorPos = textarea.selectionStart;
+    const startIndex = findIndexOfCurrentWord();
+
+    const newValue = currentValue.substring(0, startIndex + 1) +
+                    newWord +
+                    currentValue.substring(cursorPos);
+    textarea.value = newValue;
+    textarea.focus();
+    textarea.selectionStart = textarea.selectionEnd = startIndex + 1 + newWord.length;
+}; */
