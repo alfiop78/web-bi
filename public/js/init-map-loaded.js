@@ -301,11 +301,30 @@ btnFilterSave.onclick = (e) => {
   // in edit recupero il token presente sul tasto
   const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
   let tables = new Set();
-  const formula = textareaFilter.firstChild.textContent.split(' ');
+  // const formula = textareaFilter.firstChild.textContent.split(' ');
+  const formula = textareaFilter.firstChild.textContent.split(/\b/);
+  console.log(formula);
+  debugger;
+  // const formula = textareaFilter.firstChild.textContent.split(/\w+.(?=\.)/g);
+  const tablesFounded = textareaFilter.firstChild.textContent.match(/\w+.(?=\.)/g);
+  const sql = formula.map(table => {
+    debugger;
+    if (tablesFounded.includes(table)) {
+      debugger;
+    }
+    // nome_tabella.nome_campo
+    // const alias = document.querySelector(`#wbFilters>details[data-table='${table}']`).dataset.alias;
+    // tables.add(alias);
+    // const regex = new RegExp(`${table}`, 'i');
+    // return value.replace(regex, alias);
+  });
+  console.log(sql);
+  return;
   const date = new Date().toLocaleDateString('it-IT', options);
   let object = { type: 'filter', name, token, tables: [], from: {}, joins: {}, formula, sql: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
   // replico i nomi delle tabelle con i suoi alias di tabella, recuperandoli dalla ul#wbFilters
   object.sql = formula.map(value => {
+    console.log(value);
     if (value.includes('.')) {
       // nome_tabella.nome_campo
       const table = value.split('.')[0];
@@ -376,6 +395,7 @@ btnFilterSave.onclick = (e) => {
   if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
   delete e.target.dataset.token;
   document.getElementById('filter-note').value = '';
+  App.showConsole(`Nuovo filtro aggiunto al WorkBook: ${name}`, 'done', 2000);
 }
 
 /*

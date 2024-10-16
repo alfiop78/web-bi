@@ -715,7 +715,7 @@
                           <li>val 2</li>
                         </ul>
                       </div>
-                      <div id="textarea-filter" contenteditable="true" class="dropzone" spellcheck="false" tabindex="2"><br /></div>
+                      <div id="textarea-filter" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
                     </div>
                     <textarea id="filter-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                   </section>
