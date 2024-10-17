@@ -576,7 +576,15 @@
                 <section class="col">
                   <section class="textarea-formula">
                     <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus />
-                    <div id="textarea-composite-metric" data-fn="addText" data-content-editable class="dropzone textarea-content"></div>
+                    <div class="textarea__container">
+                      <div id="popup">
+                        <ul>
+                          <li>val 1</li>
+                          <li>val 2</li>
+                        </ul>
+                      </div>
+                      <div id="textarea-composite-metric" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
+                    </div>
                     <textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
                   </section>
                 </section>

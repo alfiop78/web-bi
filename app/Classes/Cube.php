@@ -132,9 +132,9 @@ class Cube
     $this->report_metrics = [];
     // dd(SELF::ifNullOperator());
     foreach ($this->baseMeasures as $value) {
-      $sql = (is_array($value->sql)) ? implode(' ', $value->sql) : $value->sql;
-      // TODO: 15.10.2024 estrarre l'array SQL
-      $metric = "\n{$this->ifNullOperator}({$value->aggregateFn}({$sql}), 0) AS '{$value->alias}'";
+      // dd($value);
+      // $sql = (is_array($value->sql)) ? implode(' ', $value->sql) : $value->sql;
+      $metric = "\n{$this->ifNullOperator}({$value->aggregateFn}({$value->sql}), 0) AS '{$value->alias}'";
       $this->report_metrics[$this->factId][] = $metric;
       // $metrics_base[] = $metric;
       if (property_exists($this, 'sql_info')) {
@@ -249,10 +249,11 @@ class Cube
     // dd($this->where_clause, $this->where_time_clause);
   }
 
-  public function filters_new()
+  public function createFilters()
   {
     foreach ($this->process->{"filters"} as $filter) {
-      $this->report_filters[$this->factId][$filter->name] = implode(" ", $filter->sql);
+      // $this->report_filters[$this->factId][$filter->name] = implode(' ', $filter->sql);
+      $this->report_filters[$this->factId][$filter->name] = $filter->sql;
     }
     // dd($this->report_filters);
   }
@@ -307,7 +308,7 @@ class Cube
     }
     $this->from_new();
     $this->where_new();
-    $this->filters_new();
+    $this->createFilters();
     $this->groupBy_new();
     $sql = NULL;
     $sql .= self::SELECT . implode(",\n", $this->select_clause[$this->factId]);
@@ -330,6 +331,7 @@ class Cube
     }
     // dd($createStmt);
     // var_dump($query);
+    // dump($createStmt);
     return DB::connection(session('db_client_name'))->statement($createStmt);
   }
 
@@ -516,10 +518,10 @@ class Cube
         // dd($filter->SQL, $this->filters_metricTable, $this->filters_baseTable);
         // aggiungo senza verificare se già presente il codice SQL del filtro
         // perchè, essendo un array associativo, al massimo il codice SQL del filtro viene riscritto
-        $this->filters_metricTable[$this->factId][$filter->name] = implode(" ", $filter->sql);
+        $this->filters_metricTable[$this->factId][$filter->name] = $filter->sql;
 
         if (property_exists($this, 'sql_info')) {
-          $this->json_info_advanced[$tableName]->{'AND'}->{$filter->name} = implode(" = ", $filter->sql);
+          $this->json_info_advanced[$tableName]->{'AND'}->{$filter->name} = $filter->sql;
         }
       }
     }
@@ -549,10 +551,8 @@ class Cube
       // dd($m);
       foreach ($advancedMetric as $metric) {
         unset($this->sqlAdvancedMeasures);
-        // dd($metric);
-        $sql = (is_array($metric->sql)) ? implode(' ', $metric->sql) : $metric->sql;
-        // dd($sql);
-        $groupAdvancedMeasures[$this->factId][$metric->alias] = "{$this->ifNullOperator}({$metric->aggregateFn}({$sql}), 0) AS '{$metric->alias}'";
+        // dump($metric->sql);
+        $groupAdvancedMeasures[$this->factId][$metric->alias] = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->sql}), 0) AS '{$metric->alias}'";
         if (property_exists($this, 'sql_info')) {
           // TODO: testare con un alias contenente spazi
           $this->json_info_advanced[$tableName]->{'METRICS'}->{"$metric->alias"} = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";

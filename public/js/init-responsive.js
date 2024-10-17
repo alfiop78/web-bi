@@ -1478,6 +1478,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         const wbMetrics = WorkBook.metrics.get(token);
         switch (metric.type) {
           case 'composite':
+            debugger;
             process.compositeMeasures[token] = {
               alias: metric.alias,
               sql: wbMetrics.SQL,
@@ -1485,6 +1486,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             };
             break;
           case 'advanced':
+            debugger;
             if (wbMetrics.factId === factId) {
               let obj = {
                 token,
@@ -1512,6 +1514,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             break;
           default:
             // basic
+            debugger;
             if (wbMetrics.factId === factId) {
               baseMeasures.set(token, {
                 token,
@@ -2010,7 +2013,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const parent = document.getElementById('ul-metrics');
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
     const date = new Date().toLocaleDateString('it-IT', options);
-    let object = { token, alias, sql: [], metrics: {}, type: 'metric', formula: [], metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
+    let object = { token, alias, SQL: [], metrics: {}, type: 'metric', formula: [], metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
     document.querySelectorAll('#textarea-composite-metric *').forEach(element => {
       if (element.classList.contains('markContent') || element.nodeName === 'I') return;
       if (element.nodeName === 'MARK') {
@@ -2018,7 +2021,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         const metricFormula = WorkBook.metrics.get(element.dataset.token);
         switch (metricFormula.metric_type) {
           case 'composite':
-            object.sql.push(metricFormula.sql.join(' '));
+            object.SQL.push(metricFormula.sql.join(' '));
             // la proprietà 'formula' mi servrà per ricreare la formula della metrica in fase di edit
             object.formula.push({ token: metricFormula.token, alias: metricFormula.alias });
             for (const [token, metric] of Object.entries(WorkBook.metrics.get(metricFormula.token).metrics)) {
@@ -2035,13 +2038,13 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             // ... utilizzare MyVerticaGrammar.php oppure altre grammatiche relative ad altri DB già predisposti in Laravel
 
             // object.sql.push(`NVL(${metricFormula.aggregateFn}(${element.innerText}),0)`);
-            object.sql.push(`NVL(${element.innerText},0)`);
+            object.SQL.push(`NVL(${element.innerText},0)`);
             // object.sql.push(element.innerText);
             object.formula.push({ token: metricFormula.token, alias: metricFormula.alias });
             break;
         }
       } else {
-        object.sql.push(element.innerText.trim());
+        object.SQL.push(element.innerText.trim());
         object.formula.push(element.innerText.trim());
       }
     });
@@ -2056,9 +2059,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     } else {
       // la metrica già esiste, aggiorno il nome
       // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
-      const liElement = document.getElementById(token);
-      liElement.dataset.label = alias;
-      liElement.querySelector('span > span').innerHTML = alias;
+      const li = document.querySelector(`li[data-id='${token}']`);
+      const dragIcon = li.querySelector('i');
+      const span = li.querySelector('span');
+      li.dataset.label = alias;
+      dragIcon.dataset.label = alias;
+      span.textContent = alias;
     }
     app.dialogCompositeMetric.close();
   }
@@ -2649,13 +2655,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
     const aggregateFn = app.dialogMetric.querySelector('.formula > code[data-aggregate]').innerText;
     // TODO: aggiungere opzione 'distinct'.
-
-    // metric_type: se ci sono dei filtri (o timingFn) in questa metrica verrà sovrascritto in 'advanced'
-    let object = { token, alias, field: metric.field, factId: metric.factId, aggregateFn, SQL: metric.SQL, distinct: false, type: 'metric', metric_type: 'basic', workbook_ref: WorkBook.workBook.token, updated_at: date };
-    debugger;
-    // una metrica di base (non composta) contiene anche la proprietà "table", la aggiungo
-    // OPTIMIZE: da valutare se questa proprietà è necessaria
-    if (metric.hasOwnProperty("table")) object.table = metric.table;
+    let object = { token, type: 'metric', alias, factId: metric.factId, aggregateFn, SQL: metric.SQL, distinct: false, metric_type: 'advanced', workbook_ref: WorkBook.workBook.token, updated_at: date };
     // recupero tutti i filtri droppati in #filter-drop
     // salvo solo il riferimento al filtro e non tutta la definizione del filtro
     app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.add(filter.dataset.token));
@@ -2673,10 +2673,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       }
     }
 
-    if (filters.size !== 0) {
-      object.filters = [...filters];
-      object.metric_type = 'advanced';
-    }
+    if (filters.size !== 0) object.filters = [...filters];
     // aggiornamento/creazione della metrica imposta created_at
     object.created_at = (e.target.dataset.token) ? metric.created_at : date;
     WorkBook.metrics = object;
@@ -2689,9 +2686,12 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     } else {
       // la metrica già esiste, aggiorno il nome
       // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
-      const liElement = document.getElementById(token);
-      liElement.dataset.label = alias;
-      liElement.querySelector('span > span').innerHTML = alias;
+      const li = document.querySelector(`li[data-id='${token}']`);
+      const dragIcon = li.querySelector('i');
+      const span = li.querySelector('span');
+      li.dataset.label = alias;
+      dragIcon.dataset.label = alias;
+      span.textContent = alias;
     }
     app.dialogMetric.close();
   }

@@ -338,13 +338,13 @@ code[data-alias] {
   color: darkgray;
 } */
 
-#textarea-composite-metric::before {
+/* #textarea-composite-metric::before {
   content: "Trascinare le metriche in questa sezione per creare la formula";
   position: absolute;
   top: 8px;
   left: 8px;
   color: darkgray;
-}
+} */
 
 .grid>.content {
   overflow: auto;
