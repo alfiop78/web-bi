@@ -187,8 +187,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     // ul.querySelectorAll('li').forEach(metric => metric.remove());
     // delete document.querySelector('#btn-custom-metric-save').dataset.token;
     for (const [key, value] of WorkBook.metrics) {
-      // console.log(key, value);
-      if (value.hasOwnProperty('formula')) {
+      console.log(key, value);
+      if (value.hasOwnProperty('formula') && value.metric_type === 'basic') {
         // è una metrica composta di base, quindi definita sul cubo (es. przmedio * quantita)
         const content = app.tmplList.content.cloneNode(true);
         const li = content.querySelector('li.icons-list');
@@ -543,7 +543,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     const input = document.getElementById('input-base-custom-metric-name');
     input.value = metric.alias;
     btnSave.dataset.token = e.currentTarget.dataset.token;
-    const text = document.createTextNode(metric.formula.join(' '));
+    const text = document.createTextNode(metric.formula.join(''));
     // aggiungo il testo della formula prima del tag <br>
     textarea.insertBefore(text, textarea.lastChild);
   }
@@ -1776,7 +1776,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     inputName.value = filter.name;
     // imposto il token sul tasto btnFilterSave, in questo modo posso salvare/aggiornare il filtro in base alla presenza o meno di data-token
     btnFilterSave.dataset.token = e.target.dataset.token;
-    const text = document.createTextNode(filter.formula.join(' '));
+    const text = document.createTextNode(filter.formula.join(''));
     // aggiungo il testo della formula prima del tag <br>
     app.textarea_filter.insertBefore(text, app.textarea_filter.lastChild);
     openDialogFilter();
@@ -2652,6 +2652,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 
     // metric_type: se ci sono dei filtri (o timingFn) in questa metrica verrà sovrascritto in 'advanced'
     let object = { token, alias, field: metric.field, factId: metric.factId, aggregateFn, SQL: metric.SQL, distinct: false, type: 'metric', metric_type: 'basic', workbook_ref: WorkBook.workBook.token, updated_at: date };
+    debugger;
     // una metrica di base (non composta) contiene anche la proprietà "table", la aggiungo
     // OPTIMIZE: da valutare se questa proprietà è necessaria
     if (metric.hasOwnProperty("table")) object.table = metric.table;

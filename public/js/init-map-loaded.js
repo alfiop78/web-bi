@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // e.target.querySelector('span').remove();
     });
   });
+  // NOTE: end DOMContentLoaded
 
   textareaFilter.addEventListener('input', (e) => {
     // console.log(sel);
@@ -302,39 +303,29 @@ btnFilterSave.onclick = (e) => {
   const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
   let tables = new Set();
   // const formula = textareaFilter.firstChild.textContent.split(' ');
+  // separo ogni parola/elemento della formula con \b
   const formula = textareaFilter.firstChild.textContent.split(/\b/);
-  console.log(formula);
-  debugger;
+  // console.log(formula);
   // const formula = textareaFilter.firstChild.textContent.split(/\w+.(?=\.)/g);
+  // estraggo dalla formula solo le tabelle, che devono essere convertite in alias
+  // es.: Azienda.id, il regex estrae "Azienda", (prima del punto)
   const tablesFounded = textareaFilter.firstChild.textContent.match(/\w+.(?=\.)/g);
-  const sql = formula.map(table => {
-    debugger;
-    if (tablesFounded.includes(table)) {
-      debugger;
-    }
-    // nome_tabella.nome_campo
-    // const alias = document.querySelector(`#wbFilters>details[data-table='${table}']`).dataset.alias;
-    // tables.add(alias);
-    // const regex = new RegExp(`${table}`, 'i');
-    // return value.replace(regex, alias);
-  });
-  console.log(sql);
-  return;
   const date = new Date().toLocaleDateString('it-IT', options);
   let object = { type: 'filter', name, token, tables: [], from: {}, joins: {}, formula, sql: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
   // replico i nomi delle tabelle con i suoi alias di tabella, recuperandoli dalla ul#wbFilters
-  object.sql = formula.map(value => {
-    console.log(value);
-    if (value.includes('.')) {
-      // nome_tabella.nome_campo
-      const table = value.split('.')[0];
-      const alias = document.querySelector(`#wbFilters>details[data-table='${table}']`).dataset.alias;
+  object.sql = formula.map(element => {
+    if (tablesFounded.includes(element)) {
+      // recupero l'alias della tabella che mi servirà per creare l'sql
+      const alias = document.querySelector(`#wbFilters>details[data-table='${element}']`).dataset.alias;
       tables.add(alias);
-      const regex = new RegExp(`${table}`, 'i');
-      return value.replace(regex, alias);
+      const regex = new RegExp(`${element}`, 'i');
+      return element.replace(regex, alias);
+    } else {
+      return element;
     }
-    return value;
   });
+  console.log(object.sql);
+  console.log(object.formula);
   // converto l'oggetto Set() tables in un array
   object.tables = [...tables];
 
@@ -478,8 +469,15 @@ function openDialogFilter() {
 dlgFilter.addEventListener('close', () => {
   // console.log('close');
   // reset della textarea, input, note
-  if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
+  // effettuo un controllo sul firstChild perchè la textarea viene ripulita anche quando si
+  // salva un filtro, in quel caso, qui, non viene trovato il firstChild
+  textareaFilter.firstChild?.remove();
+  /* if (textareaFilter.firstChild) {
+    if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
+  } */
 });
+
+dlgCustomMetric.addEventListener('close', () => textareaCustomMetric.firstChild?.remove());
 
 function createTableStruct() {
   let parent = document.getElementById('wbFilters');
