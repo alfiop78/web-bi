@@ -43,7 +43,7 @@
       <hr />
       <section class="navOverflow">
         <section class="navContent">
-          <a href="{{ route('web_bi.mapdb') }}" title="Workspace"><i class="material-symbols-rounded">workspaces</i><span>Workspace</span></a>
+          <a href="{{ route('web_bi.workspace') }}" title="Workspace"><i class="material-symbols-rounded">workspaces</i><span>Workspace</span></a>
           <a href="{{ route('web_bi.versioning') }}" title="Versionamento"><i class="material-symbols-rounded white">cloud_sync</i><span>Versionamento</span></a>
           <a href="{{ route('web_bi.dashboards') }}" title="Dashboards"><i class="material-symbols-rounded white">dashboard</i><span>Dashboards</span></a>
         </section>

@@ -47,7 +47,7 @@ Route::get('/users', [UserController::class, 'index']);
 
 Route::get('/', [BIConnectionsController::class, 'index'])->name('web_bi.index');
 
-Route::get('/mapdb', [MapDatabaseController::class, 'mapdb'])->name('web_bi.mapdb');
+Route::get('/workspace', [MapDatabaseController::class, 'workspace'])->name('web_bi.workspace');
 
 Route::get('/versioning', function () {
   // TODO: recuperare solo gli Workbook del DB collegato

@@ -16,7 +16,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-control-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-list-responsive.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-preview-table.css') }}" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-mapdb.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-workspace.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-sheet-page.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/wb-table-preview.css') }}" />
   <!-- Icons -->
@@ -197,8 +197,6 @@
   </template>
 
   <main data-database-id="{{ session('db_id')}}">
-
-
     <template id="tmpl-join-field">
       <div class="join-field" data-fn="handlerJoin" data-active>Campo</div>
     </template>
@@ -486,7 +484,7 @@
         </dialog>
 
         <!-- creazione metrica filtrata -->
-        <dialog id="dlg-metric" data-x="0" data-y="40" class="mediumSize absolute moveable droppable">
+        <dialog id="dlg-advanced-metric" data-x="0" data-y="40" class="mediumSize absolute moveable droppable">
           <section class="dlg-grid">
             <h5 class="title moveable">Creazione Metrica avanzata</h5>
             <section class="dlg-content">
@@ -563,7 +561,7 @@
             </section>
             <section class="dlg-buttons">
               <button name="cancel" value="chiudi">Chiudi</button>
-              <button data-fn="saveAdvancedMeasure" id="btn-metric-save" value="salva">Salva</button>
+              <button id="btn-metric-save" value="salva">Salva</button>
             </section>
           </section>
         </dialog>
@@ -575,7 +573,7 @@
               <section class="row">
                 <section class="col">
                   <section class="textarea-formula">
-                    <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus />
+                    <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                     <div class="textarea__container">
                       <div id="popup">
                         <ul>
@@ -592,7 +590,7 @@
             </section>
             <section class="dlg-buttons">
               <button name="cancel" value="chiudi">Chiudi</button>
-              <button data-fn="saveCompositeMeasure" id="btn-composite-metric-save" value="salva">Salva</button>
+              <button id="btn-composite-metric-save" value="salva" tabindex="3">Salva</button>
             </section>
           </section>
         </dialog>
@@ -1078,11 +1076,11 @@
       <p>Lynx International</p>
     </section>
   </footer>
-  <script type="text/javascript" src="{{ asset('/js/init-responsive.js') }}" async></script>
-  <!-- init-map-loaded ci sono funzioni dopo aver completato il DOMContentLoaded -->
-  <script type="text/javascript" src="{{ asset('/js/init-map-loaded.js') }}"></script>
+  <script type="text/javascript" src="{{ asset('/js/workspace-init.js') }}"></script>
+  <script type="text/javascript" src="{{ asset('/js/workspace_functions.js') }}" defer></script>
   <script type="text/javascript" src="{{ asset('/js/init-sheet.js') }}" async></script>
   <script type="text/javascript" src="{{ asset('/js/supportFn.js') }}" async></script>
+  <script type="text/javascript" src="{{ asset('/js/workspace_event.js') }}" async></script>
 </body>
 
 </html>

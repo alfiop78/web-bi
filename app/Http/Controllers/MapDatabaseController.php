@@ -27,7 +27,7 @@ use PhpParser\Node\Stmt\TryCatch;
 
 class MapDatabaseController extends Controller
 {
-  public function mapdb()
+  public function workspace()
   {
     // recupero ed imposto la connessione al db selezionata dall'utente nella index
     BIConnectionsController::getDB();
@@ -61,7 +61,7 @@ class MapDatabaseController extends Controller
     // $schemaList = DB::connection('vertica_odbc')->table("V_CATALOG.SCHEMATA")->select("SCHEMA_NAME")->where("IS_SYSTEM_SCHEMA", FALSE)->orderBy("SCHEMA_NAME")->get();
     // session(['db_driver' => 'vertica']);
     // dd($schemaList);
-    return view('web_bi.mapdb')->with('schemata', $schemaList);
+    return view('web_bi.workspace')->with('schemata', $schemaList);
     // altro esempio
     // return view('web_bi.mapping')->with(['dimensions' => json_encode($dimensions), 'schemes' => $schemaList]);
   }
@@ -805,8 +805,18 @@ class MapDatabaseController extends Controller
       }
       if (!empty($query->process->compositeMeasures)) {
         foreach ($query->process->compositeMeasures as $metric) {
-          dd($metric);
-          $query->compositeMeasures[] = implode(" ", $metric->sql) . " AS '{$metric->alias}'";
+          $sql = [];
+          // converto l'object $metric->metrics in un array per poter controllare con in_array()
+          $metrics = (array) $metric->metrics;
+          // ciclo tutta la formula, quando incontro una metrica la racchiudo in ifNullOperator
+          foreach ($metric->sql as $element) {
+            $sql[] = (in_array($element, $metrics)) ? "{$query->ifNullOperator}({$element}, 0)" : trim($element);
+          }
+          $sql_string = implode(' ', $sql);
+          // racchiudo le metriche all'interno della composta con la funzione NVL (o IFNULL) ottenendo
+          // Es. : ( NVL(ricavo,0) - NVL(costo,0) / NVL(ricavo,0) * 100)
+          // $query->compositeMeasures[] = "\n{$sql_string} AS '{$metric->alias}'";
+          $query->compositeMeasures[] = "{$sql_string} AS '{$metric->alias}'";
         }
       }
       return $query->datamart_new();

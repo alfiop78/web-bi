@@ -1,3 +1,4 @@
+console.info('supportFn');
 const dialogSQL = document.getElementById('dlg-sql-info');
 const tmplSQLInfo = document.getElementById('tmpl-sql-info-element');
 const tmplSQLRaw = document.getElementById('tmpl-sql-raw');
@@ -275,7 +276,7 @@ async function getTables(urls) {
     document.getElementById('filter-note').value = '';
   });
 
-  app.dialogAdvMetric.addEventListener('close', () => {
+  dlgAdvancedMetric.addEventListener('close', () => {
     document.getElementById('input-advanced-metric-name').value = '';
     const formula = document.getElementById('input-metric');
     const timingFunctions = document.getElementById('dl-timing-functions');

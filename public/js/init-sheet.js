@@ -1,3 +1,4 @@
+console.info('init-sheet');
 const dlgConfig = document.getElementById('dlg-sheet-config');
 const btnSheetPreview = document.getElementById("btn-sheet-preview");
 const btnSQLPreview = document.getElementById("btn-sql-preview");
@@ -290,6 +291,8 @@ function previewReady() {
         // delle colonne ricavo e costo per creare la metrica margine :
         // recupero la formula della metrica composta
         const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
+        const composeMetrics = Object.values(JSON.parse(localStorage.getItem(metric.token)).metrics);
+        // converto le composeMetrics in array per poterlo facilmente confrontare in formula.forEach...
         // Creo una Func "dinamica"
         let calcFunction = function(dt, row) {
           let formulaJoined = [];
@@ -297,7 +300,13 @@ function previewReady() {
           // valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
           // if (metric.alias === 'marginalita') debugger;
           formula.forEach(formulaEl => {
-            if (formulaEl.alias) {
+            // verifico se l'elemento in ciclo, della formula, è una metrica
+            if (composeMetrics.includes(formulaEl)) {
+              formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl)));
+            } else {
+              formulaJoined.push(formulaEl);
+            }
+            /* if (formulaEl.alias) {
               // if (metric.alias === 'marginalita') {
               //   console.log(dt);
               //   console.log(formulaEl.alias, dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
@@ -306,7 +315,7 @@ function previewReady() {
               formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
             } else {
               formulaJoined.push(formulaEl);
-            }
+            } */
           });
           // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
           // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre

@@ -35,7 +35,8 @@ class Cube
   public $compositeMeasures = [];
   public $queries = [];
   private $time_sql = [];
-  private $ifNullOperator;
+  // private $ifNullOperator;
+  // public $ifNullOperator;
 
   function __construct($process)
   {

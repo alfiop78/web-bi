@@ -5,6 +5,26 @@ var WorkBookStorage = new Storages();
 var Dashboard = new Dashboards();
 var Resource;
 var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
+// Textarea
+var textareaFilter = document.getElementById('textarea-filter');
+var textareaCustomMetric = document.getElementById('textarea-custom-metric');
+var textareaCompositeMetric = document.getElementById('textarea-composite-metric');
+// Buttons
+const btnFilterSave = document.getElementById('btn-filter-save');
+const btnCustomMetricSave = document.getElementById('btn-custom-metric-save');
+const btnCompositeMetricSave = document.getElementById('btn-composite-metric-save');
+const btnAdvancedMetricSave = document.getElementById('btn-metric-save');
+const btnOpenDialogFilter = document.getElementById('btnOpenDialogFilter');
+// Dialogs
+const dlgFilter = document.getElementById('dlg-filters');
+const dlgCustomMetric = document.getElementById('dlg-custom-metric');
+const dlgCompositeMetric = document.getElementById('dlg-composite-metric');
+const dlgAdvancedMetric = document.getElementById('dlg-advanced-metric');
+// templates
+const template_li = document.getElementById('tmpl-li');
+const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
+const contextMenuRef = document.getElementById('context-menu');
+const tmplDetails = document.getElementById('tmpl-details-element');
 (() => {
   var app = {
     // templates
@@ -26,7 +46,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     dialogSheet: document.getElementById('dialog-sheet-open'),
     dialogTables: document.getElementById('dlg-tables'),
     dialogFilters: document.getElementById('dlg-filters'),
-    dialogMetric: document.getElementById('dlg-metric'),
     dialogCustomMetric: document.getElementById('dlg-custom-metric'),
     dialogCompositeMetric: document.getElementById('dlg-composite-metric'),
     dialogRename: document.getElementById('dialog-rename'),
@@ -70,6 +89,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     workbookName: document.getElementById('workbook-name')
   }
   const userId = 2;
+  console.info('workspace-init');
 
   document.body.addEventListener('mousemove', (e) => {
     // console.log({ clientX: e.clientX, clientY: e.clientY, offsetX: e.offsetX, offsetY: e.offsetY, pageX: e.pageX, pageY: e.pageY, x: e.x, y: e.y });
@@ -204,7 +224,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         ul.appendChild(li);
       }
     }
-    app.dialogCustomMetric.show();
+    app.dialogCustomMetric.showModal();
     Draw.contextMenu.toggleAttribute('open');
   }
 
@@ -1478,21 +1498,18 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
         const wbMetrics = WorkBook.metrics.get(token);
         switch (metric.type) {
           case 'composite':
-            debugger;
             process.compositeMeasures[token] = {
               alias: metric.alias,
-              sql: wbMetrics.SQL,
+              sql: wbMetrics.formula,
               metrics: wbMetrics.metrics
             };
             break;
           case 'advanced':
-            debugger;
             if (wbMetrics.factId === factId) {
               let obj = {
                 token,
                 alias: metric.alias,
                 aggregateFn: metric.aggregateFn,
-                // field: wbMetrics.field,
                 sql: wbMetrics.SQL,
                 distinct: wbMetrics.distinct,
                 filters: {}
@@ -1514,7 +1531,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
             break;
           default:
             // basic
-            debugger;
             if (wbMetrics.factId === factId) {
               baseMeasures.set(token, {
                 token,
@@ -1792,14 +1808,14 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     filterDrop.addEventListener('dragenter', app.elementDragEnter, false);
     filterDrop.addEventListener('dragleave', app.elementDragLeave, false);
     filterDrop.addEventListener('drop', app.handlerDropFilter, false);
-    app.dialogMetric.show();
+    dlgAdvancedMetric.show();
   }
 
   app.editAdvancedMetric = (e) => {
     app.contextMenuRef.toggleAttribute('open');
     const metric = WorkBook.metrics.get(e.target.dataset.token);
     const filterDrop = document.getElementById('filter-drop');
-    const input = app.dialogMetric.querySelector('#input-metric');
+    const input = dlgAdvancedMetric.querySelector('#input-metric');
     const tmpl = app.tmplAdvMetricsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('#adv-metric-defined');
     const formula = field.querySelector('.formula');
@@ -2008,7 +2024,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
   /* NOTE: END FETCH API */
 
   // creazione metrica composta
-  app.saveCompositeMeasure = (e) => {
+  /* app.saveCompositeMeasure = (e) => {
     const alias = document.getElementById('composite-metric-name').value;
     const parent = document.getElementById('ul-metrics');
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
@@ -2067,7 +2083,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       span.textContent = alias;
     }
     app.dialogCompositeMetric.close();
-  }
+  } */
 
   app.setSheet = () => {
     Sheet.fact.forEach(factId => {
@@ -2645,58 +2661,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     app.openDialogMetric();
   }
 
-  // salvataggio metrica avanzata
-  app.saveAdvancedMeasure = (e) => {
-    const alias = document.getElementById("input-advanced-metric-name").value;
-    const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
-    const date = new Date().toLocaleDateString('it-IT', options);
-    let filters = new Set();
-    const metric = WorkBook.metrics.get(e.target.dataset.originToken);
-    // WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
-    const aggregateFn = app.dialogMetric.querySelector('.formula > code[data-aggregate]').innerText;
-    // TODO: aggiungere opzione 'distinct'.
-    let object = { token, type: 'metric', alias, factId: metric.factId, aggregateFn, SQL: metric.SQL, distinct: false, metric_type: 'advanced', workbook_ref: WorkBook.workBook.token, updated_at: date };
-    // recupero tutti i filtri droppati in #filter-drop
-    // salvo solo il riferimento al filtro e non tutta la definizione del filtro
-    app.dialogMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.add(filter.dataset.token));
-    // se ci sono funzioni temporali selezionate le aggiungo all'object 'filters' con token = alla funzione scelta (es.: last-year)
-    if (document.querySelector('#dl-timing-functions > dt[selected]')) {
-      const timingFn = document.querySelector('#dl-timing-functions > dt[selected]');
-      // TODO: aggiungere le altre funzioni temporali
-      if (['last-year', 'last-month', 'year-to-month'].includes(timingFn.dataset.value)) {
-        const timeField = timingFn.dataset.timeField;
-        // Per questa metrica è stata aggiunta una timingFn.
-        // oltre ad aggiungere il token (es.: 'last-year') nel Set 'filters' devo aggiungere anche la definizione di
-        // ... questa timingFn, questo perchè la timingFn non è un filtro 'separato' che viene salvato in storage
-        filters.add(timingFn.dataset.value);
-        object.timingFn = { [timingFn.dataset.value]: { field: timeField } };
-      }
-    }
 
-    if (filters.size !== 0) object.filters = [...filters];
-    // aggiornamento/creazione della metrica imposta created_at
-    object.created_at = (e.target.dataset.token) ? metric.created_at : date;
-    WorkBook.metrics = object;
-    // salvo la nuova metrica nello storage
-    window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
-    if (!e.target.dataset.token) {
-      // aggiungo la nuova metrica nello stesso <details> della metrica originaria (originToken)
-      const parent = document.querySelector(`li[data-id='${e.target.dataset.originToken}']`).parentElement;
-      app.appendMetric(parent, token, object);
-    } else {
-      // la metrica già esiste, aggiorno il nome
-      // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
-      const li = document.querySelector(`li[data-id='${token}']`);
-      const dragIcon = li.querySelector('i');
-      const span = li.querySelector('span');
-      li.dataset.label = alias;
-      dragIcon.dataset.label = alias;
-      span.textContent = alias;
-    }
-    app.dialogMetric.close();
-  }
-
-  app.appendMetric = (parent, token, value) => {
+  /* app.appendMetric = (parent, token, value) => {
     const tmpl = app.tmplList.content.cloneNode(true);
     const li = tmpl.querySelector(`li.drag-list.metrics.${value.metric_type}`);
     const span = li.querySelector('span');
@@ -2717,7 +2683,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     span.innerHTML = value.alias;
     // span.innerHTML = value.name;
     parent.appendChild(li);
-  }
+  } */
 
   // aggiungo SOLO le metriche composite alla struttura WorkBook, le metriche
   // basic/advanced vengono aggiungo "sotto" alla tabella di appartenenza (creata in workbookMap)
@@ -2726,7 +2692,8 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     if (WorkBook.metrics.size !== 0) {
       for (const [token, value] of WorkBook.metrics) {
         // aggiungo qui solo le metriche composte
-        if (value.metric_type === "composite") app.appendMetric(parent, token, value);
+        // if (value.metric_type === "composite") app.appendMetric(parent, token, value);
+        if (value.metric_type === "composite") appendMetric(parent, token);
       }
     }
   }
@@ -2762,7 +2729,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
     for (const [token, value] of Object.entries(metrics)) {
       // utilizzo appendMetric() perchè questa viene utilizzata anche
       // quando viene creata una nuova metrica
-      app.appendMetric(parent, token, value);
+      appendMetric(parent, token);
     }
   }
 
@@ -3040,5 +3007,6 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
       }
     }
   } */
+  console.info('end workspace-init');
 
 })();
