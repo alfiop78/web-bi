@@ -390,18 +390,39 @@ function compositeMetricSave(e) {
   const alias = document.getElementById('composite-metric-name').value;
   const parent = document.getElementById('ul-metrics');
   const date = new Date().toLocaleDateString('it-IT', options);
-  let object = { token, type: 'metric', alias, formula: [], metrics: {}, metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
+  let object = { token, type: 'metric', alias, SQL: [], formula: [], metrics: {}, metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
   object.formula = textareaCompositeMetric.firstChild.textContent.split(/\b/);
   console.log(object.formula);
-  // object.SQL = object.formula.join('');
-  // TODO: recupero le metriche presenti all'interno della formula per poter creare la proprietà object.metrics.
-  // Questa viene utilizzata in columnDrop() per poter aggiungere allo sheet, le metriche all'interno di una metrica composta
-  // console.log(object.SQL);
-  let suggestions = [];
-  for (const value of WorkBook.metrics.values()) {
-    suggestions.push(value.alias);
-    if (object.formula.includes(value.alias)) object.metrics[value.token] = value.alias;
-  }
+  // ottengo i token delle metriche che compongono la metrica composta
+  object.formula.forEach(el => {
+    if (document.querySelector(`li.metrics[data-label='${el}']`)) {
+      console.log(`metrica ${el} trovata`);
+      const element = document.querySelector(`li.metrics[data-label='${el}']`);
+      const metricFormula = WorkBook.metrics.get(element.dataset.id);
+      debugger;
+      switch (metricFormula.metric_type) {
+        case 'composite':
+          object.SQL.push(metricFormula.SQL.join(''));
+          for (const [token, metric] of Object.entries(WorkBook.metrics.get(metricFormula.token).metrics)) {
+            object.metrics[token] = metric;
+          }
+          break;
+        default:
+          // base / advanced
+          object.metrics[metricFormula.token] = el;
+          object.SQL.push(metricFormula.SQL.join(''));
+          break;
+      }
+    } else {
+      object.SQL.push(el);
+    }
+  });
+  console.log(object);
+  debugger;
+  return;
+  object.formula.forEach(el => {
+    if (suggestions.includes(el)) object.SQL.push()
+  });
   // aggiornamento/creazione della metrica imposta created_at
   object.created_at = (e.target.dataset.token) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
   WorkBook.metrics = object;
