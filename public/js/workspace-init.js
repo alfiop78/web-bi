@@ -1500,9 +1500,10 @@ const tmplDetails = document.getElementById('tmpl-details-element');
           case 'composite':
             process.compositeMeasures[token] = {
               alias: metric.alias,
-              sql: wbMetrics.formula,
+              sql: wbMetrics.SQL,
               metrics: wbMetrics.metrics
             };
+            debugger;
             break;
           case 'advanced':
             if (wbMetrics.factId === factId) {

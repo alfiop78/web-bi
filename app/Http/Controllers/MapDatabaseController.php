@@ -805,6 +805,7 @@ class MapDatabaseController extends Controller
       }
       if (!empty($query->process->compositeMeasures)) {
         foreach ($query->process->compositeMeasures as $metric) {
+          // dd($metric);
           $sql = [];
           // converto l'object $metric->metrics in un array per poter controllare con in_array()
           $metrics = (array) $metric->metrics;
@@ -817,6 +818,7 @@ class MapDatabaseController extends Controller
           // Es. : ( NVL(ricavo,0) - NVL(costo,0) / NVL(ricavo,0) * 100)
           // $query->compositeMeasures[] = "\n{$sql_string} AS '{$metric->alias}'";
           $query->compositeMeasures[] = "{$sql_string} AS '{$metric->alias}'";
+          // dd($query->compositeMeasures);
         }
       }
       return $query->datamart_new();

@@ -399,7 +399,6 @@ function compositeMetricSave(e) {
       console.log(`metrica ${el} trovata`);
       const element = document.querySelector(`li.metrics[data-label='${el}']`);
       const metricFormula = WorkBook.metrics.get(element.dataset.id);
-      debugger;
       switch (metricFormula.metric_type) {
         case 'composite':
           object.SQL.push(metricFormula.SQL.join(''));
@@ -410,23 +409,18 @@ function compositeMetricSave(e) {
         default:
           // base / advanced
           object.metrics[metricFormula.token] = el;
-          object.SQL.push(metricFormula.SQL.join(''));
+          object.SQL.push(el);
           break;
       }
     } else {
       object.SQL.push(el);
     }
   });
-  console.log(object);
-  debugger;
-  return;
-  object.formula.forEach(el => {
-    if (suggestions.includes(el)) object.SQL.push()
-  });
   // aggiornamento/creazione della metrica imposta created_at
   object.created_at = (e.target.dataset.token) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
-  WorkBook.metrics = object;
+  console.log(object);
   debugger;
+  WorkBook.metrics = object;
   window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
   if (!e.target.dataset.token) {
     // app.appendMetric(parent, token, object);
