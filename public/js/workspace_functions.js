@@ -401,7 +401,8 @@ function compositeMetricSave(e) {
       const metricFormula = WorkBook.metrics.get(element.dataset.id);
       switch (metricFormula.metric_type) {
         case 'composite':
-          object.SQL.push(metricFormula.SQL.join(''));
+          // object.SQL.push(metricFormula.SQL.join(''));
+          object.SQL.push(metricFormula.SQL);
           for (const [token, metric] of Object.entries(WorkBook.metrics.get(metricFormula.token).metrics)) {
             object.metrics[token] = metric;
           }

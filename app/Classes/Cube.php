@@ -764,7 +764,7 @@ class Cube
       unset($ONClause);
     }
     $createStmt .= $joinLEFT;
-    // var_dump($sql);
+    // dd($createStmt);
     try {
       // elimino prima il datamart già esistente
       if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$this->report_id}_{$this->datamart_id}")) {

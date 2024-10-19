@@ -2884,6 +2884,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
 
   document.querySelector("#btn-time-dimension").onclick = async () => {
     debugger;
+    return;
     // let jsonDataParsed = JSON.parse(window.localStorage.getItem(processToken));
     // console.dir(jsonDataParsed.report);
     // const jsonData = { start: "2022-01-01", end: "2023-01-01" };
