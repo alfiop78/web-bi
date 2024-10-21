@@ -1,0 +1,42 @@
+ricavo_ve_cb
+
+{
+  "token":"x4hw2p4",
+  "alias":"ricavo_ve_cb",
+  "SQL":["(","","NVL(ricavo_rapp_4_no_trader,0)","-","NVL(ricavo_rapp_4_trader,0)","+","NVL(ricavo_rapp_5_emiliana,0)",")"],
+  "metrics":{"tp4erki":"ricavo_rapp_4_no_trader","hfetge1":"ricavo_rapp_4_trader","myu65qd":"ricavo_rapp_5_emiliana"},
+  "type":"metric",
+  "formula":["(","",{"token":"tp4erki","alias":"ricavo_rapp_4_no_trader"},"-",{"token":"hfetge1","alias":"ricavo_rapp_4_trader"},"+",{"token":"myu65qd","alias":"ricavo_rapp_5_emiliana"},")"],
+  "metric_type":"composite",
+  "workbook_ref":"k34s2ce",
+  "updated_at":"21/10/2024, 14:39:06,7",
+  "created_at":"21/10/2024, 14:39:06,7"
+}
+
+costo_ve_cb
+{
+  "token":"4sd25oy",
+  "alias":"costo_ve_cb",
+  "SQL":["(","NVL(costo_rapp_4_no_trader,0)","-","NVL(costo_rapp_4_trader,0)","+","NVL(costo_rapp_5_emiliana,0)",")"],
+  "metrics":{"kljyane":"costo_rapp_4_no_trader","zs8q1z0":"costo_rapp_4_trader","osuym18":"costo_rapp_5_emiliana"},
+  "type":"metric",
+  "formula":["(",{"token":"kljyane","alias":"costo_rapp_4_no_trader"},"-",{"token":"zs8q1z0","alias":"costo_rapp_4_trader"},"+",{"token":"osuym18","alias":"costo_rapp_5_emiliana"},")"],
+  "metric_type":"composite",
+  "workbook_ref":"k34s2ce",
+  "updated_at":"21/10/2024, 14:40:32,5",
+  "created_at":"21/10/2024, 14:40:32,5"
+}
+
+marginalita_4
+{
+  "token":"xg6r4u2",
+  "alias":"marginalita_4",
+  "SQL":["((","(  NVL(ricavo_rapp_4_no_trader,0) - NVL(ricavo_rapp_4_trader,0) + NVL(ricavo_rapp_5_emiliana,0) )","-","( NVL(costo_rapp_4_no_trader,0) - NVL(costo_rapp_4_trader,0) + NVL(costo_rapp_5_emiliana,0) )",")","/","(  NVL(ricavo_rapp_4_no_trader,0) - NVL(ricavo_rapp_4_trader,0) + NVL(ricavo_rapp_5_emiliana,0) )",")","*","100"],
+  "metrics":{"tp4erki":"ricavo_rapp_4_no_trader","hfetge1":"ricavo_rapp_4_trader","myu65qd":"ricavo_rapp_5_emiliana","kljyane":"costo_rapp_4_no_trader","zs8q1z0":"costo_rapp_4_trader","osuym18":"costo_rapp_5_emiliana"},
+  "type":"metric",
+  "formula":["((",{"token":"x4hw2p4","alias":"ricavo_ve_cb"},"-",{"token":"4sd25oy","alias":"costo_ve_cb"},")","/",{"token":"x4hw2p4","alias":"ricavo_ve_cb"},")","*","100"],
+  "metric_type":"composite",
+  "workbook_ref":"k34s2ce",
+  "updated_at":"21/10/2024, 14:46:51,8",
+  "created_at":"21/10/2024, 14:46:51,8"
+}

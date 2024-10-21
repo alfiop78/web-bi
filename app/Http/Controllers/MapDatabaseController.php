@@ -805,6 +805,11 @@ class MapDatabaseController extends Controller
       }
       if (!empty($query->process->compositeMeasures)) {
         foreach ($query->process->compositeMeasures as $metric) {
+          $query->compositeMeasures[] = implode(" ", $metric->sql) . " AS '{$metric->alias}'";
+        }
+      }
+      /* if (!empty($query->process->compositeMeasures)) {
+        foreach ($query->process->compositeMeasures as $metric) {
           // dump($metric);
           $sql = [];
           // converto l'object $metric->metrics in un array per poter controllare con in_array()
@@ -828,7 +833,7 @@ class MapDatabaseController extends Controller
           $query->compositeMeasures[] = "{$sql_string} AS '{$metric->alias}'";
           if ($metric->alias === 'marginalita_test') dump($query->compositeMeasures);
         }
-      }
+      } */
       return $query->datamart_new();
     } catch (\Throwable $th) {
       // abort(500);

@@ -2025,7 +2025,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
   /* NOTE: END FETCH API */
 
   // creazione metrica composta
-  /* app.saveCompositeMeasure = (e) => {
+  app.saveCompositeMeasure = (e) => {
     const alias = document.getElementById('composite-metric-name').value;
     const parent = document.getElementById('ul-metrics');
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
@@ -2038,7 +2038,8 @@ const tmplDetails = document.getElementById('tmpl-details-element');
         const metricFormula = WorkBook.metrics.get(element.dataset.token);
         switch (metricFormula.metric_type) {
           case 'composite':
-            object.SQL.push(metricFormula.sql.join(' '));
+            debugger;
+            object.SQL.push(metricFormula.SQL.join(' '));
             // la proprietà 'formula' mi servrà per ricreare la formula della metrica in fase di edit
             object.formula.push({ token: metricFormula.token, alias: metricFormula.alias });
             for (const [token, metric] of Object.entries(WorkBook.metrics.get(metricFormula.token).metrics)) {
@@ -2084,7 +2085,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
       span.textContent = alias;
     }
     app.dialogCompositeMetric.close();
-  } */
+  }
 
   app.setSheet = () => {
     Sheet.fact.forEach(factId => {
@@ -2810,14 +2811,14 @@ const tmplDetails = document.getElementById('tmpl-details-element');
 
   // click all'interno di una textarea
   // TODO: da spostare in supportFn.js
-  /* app.addText = (e) => {
+  app.addText = (e) => {
     // console.log('e : ', e);
     // console.log('e.target : ', e.target);
     // console.log('e.currentTarget : ', e.currentTarget);
     if (e.target.localName === 'div') {
       app.addSpan(e.target);
     }
-  } */
+  }
 
   app.tablePopup.onmouseleave = (e) => {
     if (e.target.classList.contains("open")) e.target.classList.remove("open");
