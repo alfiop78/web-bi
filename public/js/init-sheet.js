@@ -301,11 +301,13 @@ function previewReady() {
           // if (metric.alias === 'marginalita') debugger;
           formula.forEach(formulaEl => {
             // verifico se l'elemento in ciclo, della formula, è una metrica
+            // TEST: logica 1
             /* if (composeMetrics.includes(formulaEl)) {
               formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl)));
             } else {
               formulaJoined.push(formulaEl);
             } */
+            // TEST: logica 2
             if (formulaEl.alias) {
               // if (metric.alias === 'marginalita') {
               //   console.log(dt);

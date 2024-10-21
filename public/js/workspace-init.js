@@ -2040,6 +2040,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
             object.SQL.push(metricFormula.SQL);
             // la proprietà 'formula' mi servrà per ricreare la formula della metrica in fase di edit
             object.formula.push({ token: metricFormula.token, alias: metricFormula.alias });
+            // object.formula.push(metricFormula.alias);
             for (const [token, metric] of Object.entries(WorkBook.metrics.get(metricFormula.token).metrics)) {
               object.metrics[token] = metric;
             }
@@ -2057,6 +2058,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
             // object.SQL.push(`NVL(${element.innerText}, 0)`);
             object.SQL.push(element.innerText);
             object.formula.push({ token: metricFormula.token, alias: metricFormula.alias });
+            // object.formula.push(metricFormula.alias);
             break;
         }
       } else {
@@ -2065,6 +2067,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
       }
     });
     console.log(object);
+    debugger;
     // aggiornamento/creazione della metrica imposta created_at
     object.created_at = (e.target.dataset.token) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
     WorkBook.metrics = object;
