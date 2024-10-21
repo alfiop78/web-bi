@@ -2056,7 +2056,8 @@ const tmplDetails = document.getElementById('tmpl-details-element');
             // ... utilizzare MyVerticaGrammar.php oppure altre grammatiche relative ad altri DB già predisposti in Laravel
 
             // object.sql.push(`NVL(${metricFormula.aggregateFn}(${element.innerText}),0)`);
-            object.SQL.push(`NVL(${element.innerText},0)`);
+            // TEST: togliere la NVL per poi metterla in Cube.php
+            object.SQL.push(`NVL(${element.innerText}, 0)`);
             // object.sql.push(element.innerText);
             object.formula.push({ token: metricFormula.token, alias: metricFormula.alias });
             break;
