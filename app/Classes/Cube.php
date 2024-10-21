@@ -750,7 +750,7 @@ class Cube
     // - metriche di base, metriche avanzate e metriche composte
     $mergeElements = array_merge($fields, $this->datamart_baseMeasures, $this->datamart_advancedMeasures, $this->compositeMeasures);
     $createStmt .= implode(",\n", $mergeElements);
-    // dd($sql);
+    // dd($createStmt);
     $createStmt .= self::FROM . "decisyon_cache.union_{$this->report_id}_{$this->datamart_id}";
     $joinLEFT = "";
     $ONClause = [];

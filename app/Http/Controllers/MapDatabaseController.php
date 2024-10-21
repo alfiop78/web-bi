@@ -803,12 +803,15 @@ class MapDatabaseController extends Controller
           }
         }
       }
-      if (!empty($query->process->compositeMeasures)) {
+      // TEST:
+      /* if (!empty($query->process->compositeMeasures)) {
         foreach ($query->process->compositeMeasures as $metric) {
+          dd($metric);
           $query->compositeMeasures[] = implode(" ", $metric->sql) . " AS '{$metric->alias}'";
         }
-      }
-      /* if (!empty($query->process->compositeMeasures)) {
+      } */
+      // TEST:
+      if (!empty($query->process->compositeMeasures)) {
         foreach ($query->process->compositeMeasures as $metric) {
           // dump($metric);
           $sql = [];
@@ -831,9 +834,9 @@ class MapDatabaseController extends Controller
           // Es. : ( NVL(ricavo,0) - NVL(costo,0) / NVL(ricavo,0) * 100)
           // $query->compositeMeasures[] = "\n{$sql_string} AS '{$metric->alias}'";
           $query->compositeMeasures[] = "{$sql_string} AS '{$metric->alias}'";
-          if ($metric->alias === 'marginalita_test') dump($query->compositeMeasures);
+          // dd($query->compositeMeasures);
         }
-      } */
+      }
       return $query->datamart_new();
     } catch (\Throwable $th) {
       // abort(500);

@@ -1503,7 +1503,6 @@ const tmplDetails = document.getElementById('tmpl-details-element');
               sql: wbMetrics.SQL,
               metrics: wbMetrics.metrics
             };
-            debugger;
             break;
           case 'advanced':
             if (wbMetrics.factId === factId) {
@@ -1562,7 +1561,6 @@ const tmplDetails = document.getElementById('tmpl-details-element');
     }
 
     process.filters = filters;
-    debugger;
     app.setSheet();
     process.from = Sheet.from;
     process.joins = Sheet.joins;
@@ -2038,8 +2036,8 @@ const tmplDetails = document.getElementById('tmpl-details-element');
         const metricFormula = WorkBook.metrics.get(element.dataset.token);
         switch (metricFormula.metric_type) {
           case 'composite':
-            debugger;
-            object.SQL.push(metricFormula.SQL.join(' '));
+            // object.SQL.push(metricFormula.SQL.join(' '));
+            object.SQL.push(metricFormula.SQL);
             // la proprietà 'formula' mi servrà per ricreare la formula della metrica in fase di edit
             object.formula.push({ token: metricFormula.token, alias: metricFormula.alias });
             for (const [token, metric] of Object.entries(WorkBook.metrics.get(metricFormula.token).metrics)) {
@@ -2056,9 +2054,8 @@ const tmplDetails = document.getElementById('tmpl-details-element');
             // ... utilizzare MyVerticaGrammar.php oppure altre grammatiche relative ad altri DB già predisposti in Laravel
 
             // object.sql.push(`NVL(${metricFormula.aggregateFn}(${element.innerText}),0)`);
-            // TEST: togliere la NVL per poi metterla in Cube.php
-            object.SQL.push(`NVL(${element.innerText}, 0)`);
-            // object.sql.push(element.innerText);
+            // object.SQL.push(`NVL(${element.innerText}, 0)`);
+            object.SQL.push(element.innerText);
             object.formula.push({ token: metricFormula.token, alias: metricFormula.alias });
             break;
         }
@@ -2067,7 +2064,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
         object.formula.push(element.innerText.trim());
       }
     });
-    // console.log(object);
+    console.log(object);
     // aggiornamento/creazione della metrica imposta created_at
     object.created_at = (e.target.dataset.token) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
     WorkBook.metrics = object;

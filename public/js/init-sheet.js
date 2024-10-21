@@ -292,7 +292,6 @@ function previewReady() {
         // recupero la formula della metrica composta
         const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
         // const composeMetrics = Object.values(JSON.parse(localStorage.getItem(metric.token)).metrics);
-        debugger;
         // converto le composeMetrics in array per poterlo facilmente confrontare in formula.forEach...
         // Creo una Func "dinamica"
         let calcFunction = function(dt, row) {
