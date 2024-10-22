@@ -528,7 +528,7 @@ p.field-search {
   background-color: #f2f2f2;
   color: #494949;
   z-index: 50;
-  padding: 8px;
+  padding: 6px;
   box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
   box-shadow: 0px 0px 2px 0px;
   border-radius: 2px;
@@ -538,7 +538,8 @@ p.field-search {
 #popup>ul>li {
   display: block;
   line-height: 1rem;
-  margin: 8px 4px;
+  margin: 0px;
+  padding: 6px 8px;
 }
 
 #popup>ul>li>small {
@@ -564,11 +565,6 @@ div[contenteditable] {
   outline: none;
 }
 
-/* nascondo l'element <br> nelle div contenteditable quando il testo è vuoto */
-/* div[contenteditable]>br {
-  display: none;
-} */
-
 #textarea {
   color: black;
   outline: none;
@@ -590,7 +586,6 @@ div[contenteditable]>span[data-text]::after {
   margin-left: 4px;
   padding: 0px 2px;
   box-shadow: 0px 0px 2px 0px;
-  /* font-family: monospace; */
   font-size: smaller;
 }
 
@@ -598,15 +593,14 @@ div[contenteditable]>span[data-text]::after {
   cursor: pointer;
   display: flex;
   padding: 0 0.5rem;
+  background-color: inherit;
+  transition: background-color 200ms;
 }
 
-/* .container__suggestion:not(:first-child) {
-  border-top: 1px solid rgb(203 213 225);
-} */
-
-.container__suggestion--focused {
+.focused {
   background-color: #494949;
   color: gainsboro;
+  border-radius: 4px;
 }
 
 /* suggestions */

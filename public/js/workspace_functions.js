@@ -662,12 +662,15 @@ function inputCompositeMetric(e) {
           const column = document.createElement('span');
           // const table = document.createElement('small');
           li.classList.add('container__suggestion');
-          li.dataset.index = index;
+          // li.dataset.index = index;
           column.innerText = el;
           // table.innerText = el;
           li.addEventListener('click', function() {
-            replaceCurrentWord(e.target, this.innerText);
+            const indexMatch = this.textContent.search(regex);
+            const autocomplete = this.textContent.substring(indexMatch + currentWord.length);
+            e.target.firstChild.textContent += autocomplete + ' ';
             popupSuggestions.classList.remove('open');
+            sel.setPosition(e.target.firstChild, e.target.firstChild.length);
           });
           // li.append(column, table);
           li.append(column);

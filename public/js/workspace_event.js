@@ -1,4 +1,5 @@
 console.info('workspace_event');
+let currentSuggestionIndex = -1;
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOMContentLoaded');
@@ -23,13 +24,18 @@ document.addEventListener('DOMContentLoaded', () => {
       switch (e.code) {
         case 'Space':
           e.target.querySelector('span')?.remove();
-          // popup.classList.remove('open');
+          popupSuggestions.classList.remove('open');
+          currentSuggestionIndex = -1;
           break;
         case 'Backspace':
         case 'Delete':
           // elimino il primo elemento se questo corrisponde a un nodo type = 1 (il TextNode è un nodeType 3)
           // (es. lo <span> o <br> che non elimino)
-          if (e.target.firstChild.nodeType === 1 && e.target.firstChild.nodeName !== 'BR') e.target.firstChild.remove();
+          if (e.target.firstChild.nodeType === 1 && e.target.firstChild.nodeName !== 'BR') {
+            e.target.firstChild.remove();
+            popupSuggestions.classList.remove('open');
+            currentSuggestionIndex = -1;
+          }
           break;
         default:
           break;
@@ -41,57 +47,57 @@ document.addEventListener('DOMContentLoaded', () => {
       // console.log(caretPosition.offset);
     });
 
-    let currentSuggestionIndex = -1;
+    // TODO: da commentare
     const clamp = (min, value, max) => Math.min(Math.max(min, value), max);
+
     textarea.addEventListener('keydown', function(e) {
-      // const sel = document.getSelection();
-      // console.log(sel);
-      // const caretPosition = sel.anchorOffset;
       if (!['Tab', 'Enter', 'ArrowDown', 'ArrowUp'].includes(e.key)) return;
       const suggestions = popupSuggestions.querySelectorAll('.container__suggestion');
       const numSuggestions = suggestions.length;
+      const caretPosition = sel.anchorOffset;
+      const startIndex = findIndexOfCurrentWord(e.target, caretPosition);
+      const currentWord = e.target.firstChild.textContent.substring(startIndex + 1, caretPosition);
+      const regex = new RegExp(`^${currentWord}.*`);
+      let indexMatch, autocomplete;
       e.preventDefault();
       switch (e.key) {
         case 'ArrowDown':
           suggestions[
             clamp(0, currentSuggestionIndex, numSuggestions - 1)
-          ].classList.remove('container__suggestion--focused');
+          ].classList.remove('focused');
           currentSuggestionIndex = clamp(0, currentSuggestionIndex + 1, numSuggestions - 1);
-          suggestions[currentSuggestionIndex].classList.add('container__suggestion--focused');
+          suggestions[currentSuggestionIndex].classList.add('focused');
+          // cerco l'indice dell'occorrenza della parola corrente
+          indexMatch = suggestions[currentSuggestionIndex].textContent.search(regex);
+          // recupero un pezzo della stringa del suggestions partendo da quello già scritto (currentWord)
+          // es.: ric(currentWord) avo_ve_cb(suggerimento da inserire nello span di autocomplete)
+          autocomplete = suggestions[currentSuggestionIndex].textContent.substring(indexMatch + currentWord.length);
+          if (e.target.querySelector('span')) e.target.querySelector('span').textContent = autocomplete;
           break;
         case 'ArrowUp':
           suggestions[
             clamp(0, currentSuggestionIndex, numSuggestions - 1)
-          ].classList.remove('container__suggestion--focused');
+          ].classList.remove('focused');
           currentSuggestionIndex = clamp(0, currentSuggestionIndex - 1, numSuggestions - 1);
-          suggestions[currentSuggestionIndex].classList.add('container__suggestion--focused');
+          suggestions[currentSuggestionIndex].classList.add('focused');
+          indexMatch = suggestions[currentSuggestionIndex].textContent.search(regex);
+          autocomplete = suggestions[currentSuggestionIndex].textContent.substring(indexMatch + currentWord.length);
+          if (e.target.querySelector('span')) e.target.querySelector('span').textContent = autocomplete;
           break;
         case 'Tab':
           if (e.target.querySelector('span')) {
             e.preventDefault();
-            e.target.firstChild.textContent += e.target.querySelector('span').textContent;
-            // e.target.querySelector('span').textContent = '';
+            e.target.firstChild.textContent += e.target.querySelector('span').textContent + ' ';
             popupSuggestions.classList.remove('open');
             // delete e.target.querySelector('span').dataset.text;
             e.target.querySelector('span').remove();
             // posiziono il cursore alla fine della stringa
             sel.setPosition(e.target.firstChild, e.target.firstChild.length);
+            currentSuggestionIndex = -1;
           }
           break;
         case 'Enter':
           e.preventDefault();
-          // FIX:
-          const caretPosition = sel.anchorOffset;
-          const startIndex = findIndexOfCurrentWord(e.target, caretPosition);
-          const currentWord = e.target.firstChild.textContent.substring(startIndex + 1, caretPosition);
-          console.log(currentWord);
-          debugger;
-          e.target.firstChild.textContent += suggestions[currentSuggestionIndex].innerText;
-          popupSuggestions.classList.remove('open');
-          e.target.querySelector('span').remove();
-          // posiziono il cursore alla fine della stringa
-          sel.setPosition(e.target.firstChild, e.target.firstChild.length);
-          // replaceCurrentWord(e.target, suggestions[currentSuggestionIndex].innerText);
           break;
         default:
           break;
@@ -107,7 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // INFO: ChainingOperatore: se l'elemento esiste lo rimuovo, se non esiste NON viene generate un errore ma undefined
       // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining
       e.target.querySelector('span')?.remove();
-      // e.target.querySelector('span').remove();
+      // WARN: chiudendo la popup qui non viene più attivato l'evento click sugli elementi della popup
+      // popupSuggestions.classList?.remove('open');
     });
   });
   // NOTE: end DOMContentLoaded
