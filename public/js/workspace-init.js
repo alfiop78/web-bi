@@ -2024,6 +2024,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
 
   // creazione metrica composta
   app.saveCompositeMeasure = (e) => {
+    debugger;
     const alias = document.getElementById('composite-metric-name').value;
     const parent = document.getElementById('ul-metrics');
     const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);

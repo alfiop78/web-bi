@@ -573,64 +573,64 @@ function inputCustomMetric(e) {
 
 // evento input sulla textarea #textarea-composite-metric
 // OPTIMIZE: 18.10.2024 questa funzione, a parte il suggestions, è uguale a inputCustomMetric()
-// function inputCompositeMetric(e) {
-//   // console.log(sel);
-//   // console.log(sel.baseNode.textContent);
-//   // console.log(e.target.firstChild.nodeType, e.target.firstChild.nodeName);
-//   // console.log(e.target.firstChild);
-//   if (e.target.firstChild.nodeType === 1) return;
-//   // recupero l'elenco delle metriche da WorkBook.metrics
-//   let suggestions = [];
-//   for (const value of WorkBook.metrics.values()) {
-//     suggestions.push(value.alias);
-//   }
-//   const caretPosition = sel.anchorOffset;
-//   const startIndex = findIndexOfCurrentWord(e.target, caretPosition);
-//   const currentWord = e.target.firstChild.textContent.substring(startIndex + 1, caretPosition);
-//   // console.info(`current word : ${currentWord}`);
-//   if (currentWord.length > 0) {
-//     // console.info(`current word : ${currentWord}`);
-//     // let regex = new RegExp(`^${currentWord}.*`, 'i');
-//     const regex = new RegExp(`^${currentWord}.*`);
-//     const match = suggestions.find(value => value.match(regex));
-//     console.log(`match ${match}`);
-//     if (match) {
-//       // console.log(sel);
-//       const span = document.createElement('span');
-//       span.textContent = match.slice(currentWord.length, match.length);
-//       span.dataset.text = match.slice(currentWord.length, match.length);
-//       const node = sel.anchorNode;
-//       // console.log(node.parentNode.querySelector('span'));
-//       // se è presente già un "suggerimento" (span) lo elimino
-//       if (node.parentNode.querySelector('span')) node.parentNode.querySelector('span').remove();
-//       // offset indica la posizione del cursore
-//       const offset = sel.anchorOffset;
-//       // splitText separa il nodo in due dove, 'node' è la parte prima del cursore e replacement e la parte successiva al cursore
-//       const replacement = node.splitText(offset);
-//       // creo un elemento p per poter effettuare il insertBefore dello span contenente il "suggestion"
-//       const p = document.createElement('p');
-//       // inserisco, in p, la prima parte (prima del cursore in posizione corrente)
-//       p.innerHTML = node.textContent;
-//       // inserisco lo span del suggerimento prima della parte DOPO il cursore (replacement)
-//       node.parentNode.insertBefore(span, replacement);
-//       // il nodo ora contiene tutto l'elemento <p> che è composto in questo modo :
-//       // <p>parte PRIMA del testo <span>suggerimento</span> parte DOPO il cursore
-//       node.textContent = p.textContent;
-//       // siccome ho riscritto il nodo, la posizione del cursore viene impostata all'inizio del nodo, quindi la reimposto dov'era (offset)
-//       sel.setPosition(node, offset);
-//       // normalizzo i nodi
-//       e.target.normalize();
-//       /* popup.classList.add('open');
-//       popup.style.left = `${e.target.querySelector('span').offsetLeft}px`;
-//       popup.style.top = `${e.target.querySelector('span').offsetTop + 30}px`; */
-//     } else {
-//       if (e.target.querySelector('span')) {
-//         // e.target.querySelector('span').textContent = '';
-//         // popup.classList.remove('open');
-//         // delete e.target.querySelector('span').dataset.text;
-//         e.target.querySelector('span').remove();
-//       }
-//     }
-//   }
-// }
+function inputCompositeMetric(e) {
+  // console.log(sel);
+  // console.log(sel.baseNode.textContent);
+  // console.log(e.target.firstChild.nodeType, e.target.firstChild.nodeName);
+  // console.log(e.target.firstChild);
+  if (e.target.firstChild.nodeType === 1) return;
+  // recupero l'elenco delle metriche da WorkBook.metrics
+  let suggestions = [];
+  for (const value of WorkBook.metrics.values()) {
+    suggestions.push(value.alias);
+  }
+  const caretPosition = sel.anchorOffset;
+  const startIndex = findIndexOfCurrentWord(e.target, caretPosition);
+  const currentWord = e.target.firstChild.textContent.substring(startIndex + 1, caretPosition);
+  // console.info(`current word : ${currentWord}`);
+  if (currentWord.length > 0) {
+    // console.info(`current word : ${currentWord}`);
+    // let regex = new RegExp(`^${currentWord}.*`, 'i');
+    const regex = new RegExp(`^${currentWord}.*`);
+    const match = suggestions.find(value => value.match(regex));
+    console.log(`match ${match}`);
+    if (match) {
+      // console.log(sel);
+      const span = document.createElement('span');
+      span.textContent = match.slice(currentWord.length, match.length);
+      span.dataset.text = match.slice(currentWord.length, match.length);
+      const node = sel.anchorNode;
+      // console.log(node.parentNode.querySelector('span'));
+      // se è presente già un "suggerimento" (span) lo elimino
+      if (node.parentNode.querySelector('span')) node.parentNode.querySelector('span').remove();
+      // offset indica la posizione del cursore
+      const offset = sel.anchorOffset;
+      // splitText separa il nodo in due dove, 'node' è la parte prima del cursore e replacement e la parte successiva al cursore
+      const replacement = node.splitText(offset);
+      // creo un elemento p per poter effettuare il insertBefore dello span contenente il "suggestion"
+      const p = document.createElement('p');
+      // inserisco, in p, la prima parte (prima del cursore in posizione corrente)
+      p.innerHTML = node.textContent;
+      // inserisco lo span del suggerimento prima della parte DOPO il cursore (replacement)
+      node.parentNode.insertBefore(span, replacement);
+      // il nodo ora contiene tutto l'elemento <p> che è composto in questo modo :
+      // <p>parte PRIMA del testo <span>suggerimento</span> parte DOPO il cursore
+      node.textContent = p.textContent;
+      // siccome ho riscritto il nodo, la posizione del cursore viene impostata all'inizio del nodo, quindi la reimposto dov'era (offset)
+      sel.setPosition(node, offset);
+      // normalizzo i nodi
+      e.target.normalize();
+      /* popup.classList.add('open');
+      popup.style.left = `${e.target.querySelector('span').offsetLeft}px`;
+      popup.style.top = `${e.target.querySelector('span').offsetTop + 30}px`; */
+    } else {
+      if (e.target.querySelector('span')) {
+        // e.target.querySelector('span').textContent = '';
+        // popup.classList.remove('open');
+        // delete e.target.querySelector('span').dataset.text;
+        e.target.querySelector('span').remove();
+      }
+    }
+  }
+}
 console.info('END workspace_functions');

@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // metriche avanzate
   btnAdvancedMetricSave.addEventListener('click', advancedMetricSave);
   // metriche composite
-  // btnCompositeMetricSave.addEventListener('click', compositeMetricSave);
+  btnCompositeMetricSave.addEventListener('click', compositeMetricSave);
   btnOpenDialogFilter.addEventListener('click', openDialogFilter);
   // TODO: 04.10.2024 qui potrei nascondere il loader della pagina
   // NOTE: textarea-filter
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // textarea-custom-metric
   textareaCustomMetric.addEventListener('input', inputCustomMetric);
   // textarea-composite-metric
-  // textareaCompositeMetric.addEventListener('input', inputCompositeMetric);
+  textareaCompositeMetric.addEventListener('input', inputCompositeMetric);
 
 }); // end DOMContentLoaded
 
