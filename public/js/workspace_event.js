@@ -41,19 +41,37 @@ document.addEventListener('DOMContentLoaded', () => {
       // console.log(caretPosition.offset);
     });
 
+    let currentSuggestionIndex = -1;
+    const clamp = (min, value, max) => Math.min(Math.max(min, value), max);
     textarea.addEventListener('keydown', function(e) {
       // const sel = document.getSelection();
       // console.log(sel);
       // const caretPosition = sel.anchorOffset;
-      if (!['Tab', 'Enter'].includes(e.key)) return;
-      // e.preventDefault();
+      if (!['Tab', 'Enter', 'ArrowDown', 'ArrowUp'].includes(e.key)) return;
+      const suggestions = popupSuggestions.querySelectorAll('.container__suggestion');
+      const numSuggestions = suggestions.length;
+      e.preventDefault();
       switch (e.key) {
+        case 'ArrowDown':
+          suggestions[
+            clamp(0, currentSuggestionIndex, numSuggestions - 1)
+          ].classList.remove('container__suggestion--focused');
+          currentSuggestionIndex = clamp(0, currentSuggestionIndex + 1, numSuggestions - 1);
+          suggestions[currentSuggestionIndex].classList.add('container__suggestion--focused');
+          break;
+        case 'ArrowUp':
+          suggestions[
+            clamp(0, currentSuggestionIndex, numSuggestions - 1)
+          ].classList.remove('container__suggestion--focused');
+          currentSuggestionIndex = clamp(0, currentSuggestionIndex - 1, numSuggestions - 1);
+          suggestions[currentSuggestionIndex].classList.add('container__suggestion--focused');
+          break;
         case 'Tab':
           if (e.target.querySelector('span')) {
             e.preventDefault();
             e.target.firstChild.textContent += e.target.querySelector('span').textContent;
             // e.target.querySelector('span').textContent = '';
-            // popup.classList.remove('open');
+            popupSuggestions.classList.remove('open');
             // delete e.target.querySelector('span').dataset.text;
             e.target.querySelector('span').remove();
             // posiziono il cursore alla fine della stringa
@@ -62,6 +80,18 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         case 'Enter':
           e.preventDefault();
+          // FIX:
+          const caretPosition = sel.anchorOffset;
+          const startIndex = findIndexOfCurrentWord(e.target, caretPosition);
+          const currentWord = e.target.firstChild.textContent.substring(startIndex + 1, caretPosition);
+          console.log(currentWord);
+          debugger;
+          e.target.firstChild.textContent += suggestions[currentSuggestionIndex].innerText;
+          popupSuggestions.classList.remove('open');
+          e.target.querySelector('span').remove();
+          // posiziono il cursore alla fine della stringa
+          sel.setPosition(e.target.firstChild, e.target.firstChild.length);
+          // replaceCurrentWord(e.target, suggestions[currentSuggestionIndex].innerText);
           break;
         default:
           break;

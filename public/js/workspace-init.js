@@ -32,7 +32,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
     tmplList: document.getElementById('tmpl-li'),
     tmplFilterDropped: document.getElementById('tmpl-filter-dropped-adv-metric'),
     tmplContextMenu: document.getElementById('tmpl-context-menu-content'),
-    contextMenuRef: document.getElementById('context-menu'),
+    // contextMenuRef: document.getElementById('context-menu'),
     contextMenuColumnRef: document.getElementById('context-menu-column'),
     tmplDetails: document.getElementById('tmpl-details-element'),
     tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
@@ -151,29 +151,6 @@ const tmplDetails = document.getElementById('tmpl-details-element');
   // observerList.observe(targetNode, config);
   observerList.observe(document.getElementById('body'), config);
   observerList.observe(app.drawer, config);
-
-  app.openContextMenu = (e) => {
-    e.preventDefault();
-    // console.log(e.target.id);
-    console.log(e.currentTarget.id);
-    console.log(e.currentTarget.dataset.id);
-    // reset #context-menu
-    if (app.contextMenuRef.hasChildNodes()) app.contextMenuRef.querySelector('*').remove();
-    const tmpl = app.tmplContextMenu.content.cloneNode(true);
-    const content = tmpl.querySelector(`#${e.currentTarget.dataset.contextmenu}`);
-    // aggiungo, a tutti gli elementi del context-menu, il token dell'elemento selezionato
-    content.querySelectorAll('button').forEach(button => {
-      // button.dataset.token = e.currentTarget.id;
-      button.dataset.token = e.currentTarget.dataset.id;
-      // if (button.dataset.button === 'delete' && Sheet.edit) button.disabled = 'true';
-    });
-    app.contextMenuRef.appendChild(content);
-
-    const { clientX: mouseX, clientY: mouseY } = e;
-    app.contextMenuRef.style.top = `${mouseY}px`;
-    app.contextMenuRef.style.left = `${mouseX}px`;
-    app.contextMenuRef.toggleAttribute('open');
-  }
 
   app.handlerSVGDragEnd = async (e) => {
     e.preventDefault();
@@ -1775,7 +1752,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
   app.editFilter = (e) => {
     // console.log(e.target.dataset.token);
     // il context-menu è sempre aperto in questo caso, lo chiudo
-    app.contextMenuRef.toggleAttribute('open');
+    contextMenuRef.toggleAttribute('open');
     const filter = WorkBook.filters.get(e.target.dataset.token);
     const inputName = document.getElementById('input-filter-name');
     inputName.value = filter.name;
@@ -1798,7 +1775,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
   }
 
   app.editAdvancedMetric = (e) => {
-    app.contextMenuRef.toggleAttribute('open');
+    contextMenuRef.toggleAttribute('open');
     const metric = WorkBook.metrics.get(e.target.dataset.token);
     const filterDrop = document.getElementById('filter-drop');
     const input = dlgAdvancedMetric.querySelector('#input-metric');
@@ -1843,8 +1820,9 @@ const tmplDetails = document.getElementById('tmpl-details-element');
     app.openDialogMetric();
   }
 
+  // la Fn deriva dal menù contestuale quindi, l'evento, viene attivato dal MutationObserver
   app.editCompositeMetric = (e) => {
-    app.contextMenuRef.toggleAttribute('open');
+    contextMenuRef.toggleAttribute('open');
     const metric = WorkBook.metrics.get(e.target.dataset.token);
     // ricostruisco la formula all'interno del div #textarea-composite-metric
     const inputName = document.getElementById('composite-metric-name');
@@ -2541,7 +2519,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
 
   // apertura dialog per la creazione di una nuova metrica
   app.newAdvMeasure = (e) => {
-    app.contextMenuRef.toggleAttribute('open');
+    contextMenuRef.toggleAttribute('open');
     // TODO: aggiungo la formula della metrica (SUM(NettoRiga)) nella textarea ma, in questo caso la textarea è disabilitata.
     // nella metrica filtrata posso modificare solo la funzione di aggregazione
     console.log(e.target);
@@ -2563,30 +2541,6 @@ const tmplDetails = document.getElementById('tmpl-details-element');
     // TODO: valutare se spostarla in Application.js oppure in supportFn
     app.openDialogMetric();
   }
-
-
-  /* app.appendMetric = (parent, token, value) => {
-    const tmpl = app.tmplList.content.cloneNode(true);
-    const li = tmpl.querySelector(`li.drag-list.metrics.${value.metric_type}`);
-    const span = li.querySelector('span');
-    const i = li.querySelector('i');
-    li.dataset.id = token;
-    i.id = token;
-    // li.classList.add("metrics");
-    // li.classList.add(value.metric_type);
-    li.dataset.type = value.metric_type;
-    li.dataset.elementSearch = 'elements';
-    li.dataset.factId = parent.dataset.factId;
-    li.dataset.label = value.alias;
-    // definisco quale context-menu-template apre questo elemento
-    li.dataset.contextmenu = `ul-context-menu-${value.metric_type}`;
-    i.addEventListener('dragstart', app.elementDragStart);
-    i.addEventListener('dragend', app.elementDragEnd);
-    li.addEventListener('contextmenu', app.openContextMenu);
-    span.innerHTML = value.alias;
-    // span.innerHTML = value.name;
-    parent.appendChild(li);
-  } */
 
   // aggiungo SOLO le metriche composite alla struttura WorkBook, le metriche
   // basic/advanced vengono aggiungo "sotto" alla tabella di appartenenza (creata in workbookMap)

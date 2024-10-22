@@ -9,17 +9,17 @@ const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'nume
 
 // INFO: replace current word (questo script era stato usato per sostituire la parola che si sta digitando con il suggerimento della popup)
 // Replace current word with selected suggestion
-/* const replaceCurrentWord = (newWord) => {
-    const currentValue = textarea.value;
-    const cursorPos = textarea.selectionStart;
-    const startIndex = findIndexOfCurrentWord();
+/* const replaceCurrentWord = (textarea, newWord) => {
+  const currentValue = textarea.value;
+  const cursorPos = textarea.selectionStart;
+  const startIndex = findIndexOfCurrentWord();
 
-    const newValue = currentValue.substring(0, startIndex + 1) +
-                    newWord +
-                    currentValue.substring(cursorPos);
-    textarea.value = newValue;
-    textarea.focus();
-    textarea.selectionStart = textarea.selectionEnd = startIndex + 1 + newWord.length;
+  const newValue = currentValue.substring(0, startIndex + 1) +
+    newWord +
+    currentValue.substring(cursorPos);
+  textarea.value = newValue;
+  textarea.focus();
+  textarea.selectionStart = textarea.selectionEnd = startIndex + 1 + newWord.length;
 }; */
 
 const findIndexOfCurrentWord = (textarea, caretPosition) => {
@@ -208,7 +208,7 @@ function elementDragEnd(e) {
   e.currentTarget.classList.remove('dropping');
 }
 
-// NOTE: funzioni Drag&Drop
+// NOTE: end funzioni Drag&Drop
 
 function openContextMenu(e) {
   e.preventDefault();
@@ -248,6 +248,8 @@ dlgFilter.addEventListener('close', () => {
     if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
   } */
 });
+
+dlgCompositeMetric.addEventListener('close', () => textareaCompositeMetric.firstChild?.remove());
 
 dlgCustomMetric.addEventListener('close', () => textareaCustomMetric.firstChild?.remove());
 
@@ -386,7 +388,6 @@ function advancedMetricSave(e) {
 
 // salva metrica composta
 function compositeMetricSave(e) {
-  debugger;
   const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
   const alias = document.getElementById('composite-metric-name').value;
   const parent = document.getElementById('ul-metrics');
@@ -420,12 +421,13 @@ function compositeMetricSave(e) {
   });
   // aggiornamento/creazione della metrica imposta created_at
   object.created_at = (e.target.dataset.token) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
-  console.log(object);
+  console.log('Metrica composta : ', object);
   WorkBook.metrics = object;
   window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
   if (!e.target.dataset.token) {
     // app.appendMetric(parent, token, object);
     appendMetric(parent, token);
+    App.showConsole(`Metrica '${alias}' aggiunta al WorkBook`, 'done', 2000);
   } else {
     // la metrica già esiste, aggiorno il nome
     // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
@@ -435,6 +437,7 @@ function compositeMetricSave(e) {
     li.dataset.label = alias;
     dragIcon.dataset.label = alias;
     span.textContent = alias;
+    App.showConsole(`Metrica '${alias}' modificata`, 'done', 2000);
   }
   dlgCompositeMetric.close();
 }
@@ -572,7 +575,7 @@ function inputCustomMetric(e) {
 
 // evento input sulla textarea #textarea-composite-metric
 // OPTIMIZE: 18.10.2024 questa funzione, a parte il suggestions, è uguale a inputCustomMetric()
-function inputCompositeMetric(e) {
+/* function inputCompositeMetric(e) {
   // console.log(sel);
   // console.log(sel.baseNode.textContent);
   // console.log(e.target.firstChild.nodeType, e.target.firstChild.nodeName);
@@ -619,33 +622,94 @@ function inputCompositeMetric(e) {
       sel.setPosition(node, offset);
       // normalizzo i nodi
       e.target.normalize();
-      /* popup.classList.add('open');
-      popup.style.left = `${e.target.querySelector('span').offsetLeft}px`;
-      popup.style.top = `${e.target.querySelector('span').offsetTop + 30}px`; */
     } else {
       if (e.target.querySelector('span')) {
         // e.target.querySelector('span').textContent = '';
-        // popup.classList.remove('open');
         // delete e.target.querySelector('span').dataset.text;
         e.target.querySelector('span').remove();
       }
     }
   }
+} */
+// TEST: stessa funzione di sopra ma invece del autocomplete utilizzo una popup
+function inputCompositeMetric(e) {
+  // console.log(sel);
+  // console.log(sel.baseNode.textContent);
+  // console.log(e.target.firstChild.nodeType, e.target.firstChild.nodeName);
+  // console.log(e.target.firstChild);
+  if (e.target.firstChild.nodeType === 1) return;
+  // recupero l'elenco delle metriche da WorkBook.metrics
+  let suggestions = [];
+  for (const value of WorkBook.metrics.values()) {
+    suggestions.push(value.alias);
+  }
+  const caretPosition = sel.anchorOffset;
+  const startIndex = findIndexOfCurrentWord(e.target, caretPosition);
+  const currentWord = e.target.firstChild.textContent.substring(startIndex + 1, caretPosition);
+  // console.info(`current word : ${currentWord}`);
+  if (currentWord.length > 0) {
+    popupSuggestions.querySelectorAll('ul>li').forEach(el => el.remove());
+    // console.info(`current word : ${currentWord}`);
+    // let regex = new RegExp(`^${currentWord}.*`, 'i');
+    const regex = new RegExp(`^${currentWord}.*`);
+    const matches = suggestions.filter(value => value.match(regex));
+    if (matches.length !== 0) {
+      matches.forEach((el, index) => {
+        // visualizzo solo i primi 6 elementi
+        // TODO: utilizzare l'overflow al posto di index < 6 altrimenti non riesco a visualizzare tutti gli elementi trovati
+        if (index < 6) {
+          const li = document.createElement('li');
+          const column = document.createElement('span');
+          // const table = document.createElement('small');
+          li.classList.add('container__suggestion');
+          li.dataset.index = index;
+          column.innerText = el;
+          // table.innerText = el;
+          li.addEventListener('click', function() {
+            replaceCurrentWord(e.target, this.innerText);
+            popupSuggestions.classList.remove('open');
+          });
+          // li.append(column, table);
+          li.append(column);
+          popupSuggestions.querySelector('ul').appendChild(li);
+        }
+      })
+      const match = suggestions.find(value => value.match(regex));
+      console.log(`match ${match}`);
+      if (match) {
+        // console.log(sel);
+        const span = document.createElement('span');
+        span.textContent = match.slice(currentWord.length, match.length);
+        span.dataset.text = match.slice(currentWord.length, match.length);
+        const node = sel.anchorNode;
+        // console.log(node.parentNode.querySelector('span'));
+        // se è presente già un "suggerimento" (span) lo elimino
+        if (node.parentNode.querySelector('span')) node.parentNode.querySelector('span').remove();
+        // offset indica la posizione del cursore
+        const offset = sel.anchorOffset;
+        // splitText separa il nodo in due dove, 'node' è la parte prima del cursore e replacement e la parte successiva al cursore
+        const replacement = node.splitText(offset);
+        // creo un elemento p per poter effettuare il insertBefore dello span contenente il "suggestion"
+        const p = document.createElement('p');
+        // inserisco, in p, la prima parte (prima del cursore in posizione corrente)
+        p.innerHTML = node.textContent;
+        // inserisco lo span del suggerimento prima della parte DOPO il cursore (replacement)
+        node.parentNode.insertBefore(span, replacement);
+        // il nodo ora contiene tutto l'elemento <p> che è composto in questo modo :
+        // <p>parte PRIMA del testo <span>suggerimento</span> parte DOPO il cursore
+        node.textContent = p.textContent;
+        // siccome ho riscritto il nodo, la posizione del cursore viene impostata all'inizio del nodo, quindi la reimposto dov'era (offset)
+        sel.setPosition(node, offset);
+        // normalizzo i nodi
+        e.target.normalize();
+        popup.classList.add('open');
+        popup.style.left = `${e.target.querySelector('span').offsetLeft}px`;
+        popup.style.top = `${e.target.querySelector('span').offsetTop + 30}px`;
+      }
+    } else {
+      popupSuggestions.classList.remove('open');
+      if (e.target.querySelector('span')) e.target.querySelector('span').remove();
+    }
+  }
 }
 console.info('END workspace_functions');
-
-/*
- // Replace current word with selected suggestion
-    const replaceCurrentWord = (newWord) => {
-        const currentValue = textarea.value;
-        const cursorPos = textarea.selectionStart;
-        const startIndex = findIndexOfCurrentWord();
-
-        const newValue = currentValue.substring(0, startIndex + 1) +
-                        newWord +
-                        currentValue.substring(cursorPos);
-        textarea.value = newValue;
-        textarea.focus();
-        textarea.selectionStart = textarea.selectionEnd = startIndex + 1 + newWord.length;
-    };
- * */
