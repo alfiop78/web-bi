@@ -291,33 +291,36 @@ function previewReady() {
         // delle colonne ricavo e costo per creare la metrica margine :
         // recupero la formula della metrica composta
         const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
-        // const composeMetrics = Object.values(JSON.parse(localStorage.getItem(metric.token)).metrics);
         // converto le composeMetrics in array per poterlo facilmente confrontare in formula.forEach...
         // Creo una Func "dinamica"
         let calcFunction = function(dt, row) {
           let formulaJoined = [];
           // in formulaJoined ciclo tutti gli elementi della Formula, imposto i
           // valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
-          // if (metric.alias === 'marginalita') debugger;
           formula.forEach(formulaEl => {
+            // TEST: logica 2
             // verifico se l'elemento in ciclo, della formula, è una metrica
-            // TEST: logica 1
-            /* if (composeMetrics.includes(formulaEl)) {
+            // se l'indice della colonna è presente (!== -1) ne recupero il valore
+            if (dt.getColumnIndex(formulaEl) !== -1) {
               formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl)));
             } else {
+              // altrimenti aggiungo nella formula le altre componenti, come le parentesi ad esempio e gli operatori per il calcolo
               formulaJoined.push(formulaEl);
-            } */
-            // TEST: logica 2
-            if (formulaEl.alias) {
+            }
+            // TEST: logica 1
+            // Con questa logica la proprietà 'formula' è composta con gli object dove sono presenti metriche:
+            // "formula":["((",{"token":"x9atpa7","alias":"ricavo_ve_cb"},"-",{"token":"7eaac8j","alias":"costo_ve_cb"},")","/",{"token":"x9atpa7","alias":"ricavo_ve_cb"},")","*","100"],
+            /* if (formulaEl.alias) {
               // if (metric.alias === 'marginalita') {
               //   console.log(dt);
               //   console.log(formulaEl.alias, dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
               //   console.log('ricavo_rapporto_2', dt.getValue(row, dt.getColumnIndex('ricavo_rapporto_2')));
               // }
+              if (metric.alias === 'marginalita_test_2') console.log('getColumnIndex : ', dt.getColumnIndex(formulaEl.alias));
               formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
             } else {
               formulaJoined.push(formulaEl);
-            }
+            } */
           });
           // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
           // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
