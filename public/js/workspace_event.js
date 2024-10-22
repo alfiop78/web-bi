@@ -132,6 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
   textareaCustomMetric.addEventListener('input', inputCustomMetric);
   // textarea-composite-metric
   textareaCompositeMetric.addEventListener('input', inputCompositeMetric);
+  // apertura dialog #dlg-composite-metric
+  btnNewCompositeMeasure.onclick = () => dlgCompositeMetric.showModal();
 
 }); // end DOMContentLoaded
 

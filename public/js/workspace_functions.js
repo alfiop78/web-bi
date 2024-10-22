@@ -421,7 +421,6 @@ function compositeMetricSave(e) {
   // aggiornamento/creazione della metrica imposta created_at
   object.created_at = (e.target.dataset.token) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
   console.log(object);
-  debugger;
   WorkBook.metrics = object;
   window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
   if (!e.target.dataset.token) {
@@ -634,3 +633,19 @@ function inputCompositeMetric(e) {
   }
 }
 console.info('END workspace_functions');
+
+/*
+ // Replace current word with selected suggestion
+    const replaceCurrentWord = (newWord) => {
+        const currentValue = textarea.value;
+        const cursorPos = textarea.selectionStart;
+        const startIndex = findIndexOfCurrentWord();
+
+        const newValue = currentValue.substring(0, startIndex + 1) +
+                        newWord +
+                        currentValue.substring(cursorPos);
+        textarea.value = newValue;
+        textarea.focus();
+        textarea.selectionStart = textarea.selectionEnd = startIndex + 1 + newWord.length;
+    };
+ * */

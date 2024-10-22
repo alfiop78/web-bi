@@ -897,7 +897,7 @@
                           </p>
                           <section data-worksheet-object class="custom-scrollbar" data-section="2">
                             <ul id="ul-metrics" class="custom-scrollbar" data-search-id="input-search-metrics"></ul>
-                            <button class="btn-link link" data-fn="btnCompositeMetric" type="button" value="Nuova Metrica">Nuova Metrica</button>
+                            <button class="btn-link link" id="btnNewCompositeMeasure" data-fn="btnCompositeMetric" type="button" value="Nuova Metrica">Nuova Metrica</button>
                           </section>
                           <p class="field-search">
                             <input id="input-search-filters" data-element-search="filters" autocomplete="off" type="search" class="input-search filters" readonly placeholder="Filtri" />
