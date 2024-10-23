@@ -47,7 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // console.log(caretPosition.offset);
     });
 
-    // TODO: da commentare
+    // Fn che garantisce che l'indice della popup sia sempre valido.
+    // Accetta un valore minimo, il valore che si vuole bloccare e
+    // il valore massimo.
+    // Quindi, ci restituisce il valore bloccato, che è garantito non essere inferiore al minimo e non maggiore del massimo
     const clamp = (min, value, max) => Math.min(Math.max(min, value), max);
 
     textarea.addEventListener('keydown', function(e) {
@@ -170,7 +173,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // textarea-composite-metric
   textareaCompositeMetric.addEventListener('input', inputCompositeMetric);
   // apertura dialog #dlg-composite-metric
-  btnNewCompositeMeasure.onclick = () => dlgCompositeMetric.showModal();
+  btnNewCompositeMeasure.onclick = () => {
+    dlgCompositeMetricCheck();
+    dlgCompositeMetric.showModal();
+  }
 
 }); // end DOMContentLoaded
 

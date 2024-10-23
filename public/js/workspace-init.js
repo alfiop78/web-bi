@@ -1830,6 +1830,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
     btnCompositeMetricSave.dataset.token = e.target.dataset.token;
     const text = document.createTextNode(metric.formula.join(''));
     textareaCompositeMetric.insertBefore(text, textareaCompositeMetric.lastChild);
+    dlgCompositeMetricCheck();
     dlgCompositeMetric.showModal();
   }
 

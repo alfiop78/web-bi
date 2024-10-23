@@ -571,19 +571,33 @@
             <h5 class="title moveable">Creazione Metrica Composta</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col">
+                <section class="col col-4-span">
+                  <div class="list-search">
+                    <input type="search" id="input-search-metrics-dlg-composite" placeholder="Ricerca" data-element-search="metrics-dlg-composite" class="input-search" autocomplete="off" tabindex="3">
+                    <div class="relative-ul">
+                      <nav id="navMetrics" data-search-id="input-search-metrics-dlg-composite" class="custom-scrollbar">
+                        <details data-id="basic">
+                          <summary>Base</summary>
+                        </details>
+                        <details data-id="advanced">
+                          <summary>Avanzate</summary>
+                        </details>
+                        <details data-id="composite">
+                          <summary>Composte</summary>
+                        </details>
+                      </nav>
+                    </div>
+                  </div>
+                </section>
+                <section class="col col-8-span">
                   <section class="textarea-formula">
                     <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                     <div class="textarea__container">
                       <div id="popup">
-                        <ul>
-                          <li>val 1</li>
-                          <li>val 2</li>
-                        </ul>
+                        <ul></ul>
                       </div>
                       <div id="textarea-composite-metric" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
                     </div>
-                    <!-- <div id="textarea-composite-metric" data-fn="addText" data-content-editable class="dropzone textarea-content"></div> -->
                     <textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
                   </section>
                 </section>
@@ -592,7 +606,6 @@
             <section class="dlg-buttons">
               <button name="cancel" value="chiudi">Chiudi</button>
               <button id="btn-composite-metric-save" value="salva" tabindex="3">Salva</button>
-              <!-- <button data-fn="saveCompositeMeasure" id="btn-composite-metric-save" value="salva" tabindex="3">Salva</button> -->
             </section>
           </section>
         </dialog>

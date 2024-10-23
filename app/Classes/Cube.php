@@ -319,7 +319,7 @@ class Cube
     if (!is_null($this->report_filters[$this->factId])) $sql .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
     $sql .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
-    // dd($sql);
+    dump($sql);
     switch (session('db_driver')) {
       case 'odbc':
         $createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
@@ -665,7 +665,7 @@ class Cube
       default:
         break;
     }
-    // dd($createStmt);
+    dump($createStmt);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
     $result = null;
     if (property_exists($this, 'sql_info')) {
@@ -764,7 +764,7 @@ class Cube
       unset($ONClause);
     }
     $createStmt .= $joinLEFT;
-    // dd($createStmt);
+    dump($createStmt);
     try {
       // elimino prima il datamart già esistente
       if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$this->report_id}_{$this->datamart_id}")) {

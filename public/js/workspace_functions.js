@@ -179,7 +179,7 @@ function appendMetric(parent, token) {
   // li.classList.add(value.metric_type);
   li.dataset.type = metric.metric_type;
   li.dataset.elementSearch = 'elements';
-  li.dataset.factId = parent.dataset.factId;
+  if (metric.metric_type !== 'composite') li.dataset.factId = parent.dataset.factId;
   li.dataset.label = metric.alias;
   // definisco quale context-menu-template apre questo elemento
   li.dataset.contextmenu = `ul-context-menu-${metric.metric_type}`;
@@ -713,6 +713,51 @@ function inputCompositeMetric(e) {
       popupSuggestions.classList.remove('open');
       if (e.target.querySelector('span')) e.target.querySelector('span').remove();
     }
+  } else {
+    popupSuggestions.classList.remove('open');
+    if (e.target.querySelector('span')) e.target.querySelector('span').remove();
   }
 }
+
+function dlgCompositeMetricCheck() {
+  console.log(WorkBook.metrics);
+  const nav = document.getElementById('navMetrics');
+  const basicDetails = nav.querySelector("details[data-id='basic']");
+  const advancedDetails = nav.querySelector("details[data-id='advanced']");
+  const compositeDetails = nav.querySelector("details[data-id='composite']");
+  // reset ul
+  nav.querySelectorAll('details>li').forEach(el => el.remove());
+  // const sort = [...WorkBook.metric.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  // INFO: ordinamento di un oggetto Map() tramite una proprietà dell'oggetto
+  // const sort = [...WorkBook.metrics.values()].sort((a, b) => a.metric_type.localeCompare(b.metric_type));
+  // console.log(sort);
+  for (const metric of WorkBook.metrics.values()) {
+    const tmpl = template_li.content.cloneNode(true);
+    const li = tmpl.querySelector(`li.drag-list.metrics.${metric.metric_type}`);
+    const span = li.querySelector('span');
+    const i = li.querySelector('i');
+    li.dataset.id = metric.token;
+    i.id = metric.token;
+    li.dataset.type = metric.metric_type;
+    li.dataset.elementSearch = 'metrics-dlg-composite';
+    if (metric.factId) li.dataset.factId = metric.factId;
+    li.dataset.label = metric.alias;
+    i.addEventListener('dragstart', elementDragStart);
+    i.addEventListener('dragend', elementDragEnd);
+    span.innerHTML = metric.alias;
+    switch  (metric.metric_type) {
+      case 'advanced':
+        advancedDetails.appendChild(li);
+      break;
+      case 'composite':
+        compositeDetails.appendChild(li);
+      break;
+      default:
+        // basic
+        basicDetails.appendChild(li);
+      break;
+    }
+  }
+}
+
 console.info('END workspace_functions');

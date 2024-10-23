@@ -277,7 +277,7 @@ li.icons-list:hover::before {
 }
 
 li.drag-list.basic {
-  /* color: var(--metrics); */
+  color: var(--basic-metric-fg);
   font-style: italic;
 }
 
