@@ -643,7 +643,7 @@
             </section>
             <section class="dlg-buttons">
               <button name="cancel" value="chiudi">Chiudi</button>
-              <button data-fn="saveBaseCustomMeasure" id="btn-custom-metric-save" value="salva">Salva</button>
+              <button id="btn-custom-metric-save" value="salva">Salva</button>
             </section>
           </section>
         </dialog>

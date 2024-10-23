@@ -311,6 +311,7 @@ function customBaseMetricSave(e) {
   // è una nuova metrica
   const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
   const alias = document.getElementById('input-base-custom-metric-name').value;
+  let fields = [];
   const factId = WorkBook.activeTable.dataset.factId;
   const suggestionsTables = JSON.parse(window.sessionStorage.getItem(WorkBook.activeTable.dataset.table));
   let SQL = [];
@@ -319,15 +320,26 @@ function customBaseMetricSave(e) {
   // quello che è stato inserito, se è presente (come colonna) nella tabella
   formula.forEach(el => {
     const match = [...suggestionsTables].find(value => el === value.column_name);
-    (match) ? SQL.push(`${WorkBook.activeTable.dataset.alias}.${el}`) : SQL.push(el);
+    if (match) {
+      SQL.push(`${WorkBook.activeTable.dataset.alias}.${el}`);
+      fields.push(el);
+    } else {
+      SQL.push(el.trim());
+    }
   });
   WorkBook.metrics = {
-    token, alias, factId, formula,
-    aggregateFn: 'SUM', // default
-    SQL: SQL.join(''),
-    distinct: false, // default
+    token, alias,
     type: 'metric',
-    metric_type: 'basic'
+    metric_type: 'basic',
+    factId,
+    properties: {
+      table: WorkBook.activeTable.dataset.table,
+      fields
+    },
+    formula,
+    aggregateFn: 'SUM', // default
+    SQL: SQL.join(' '),
+    distinct: false // default
   }
   App.showConsole(`Metrica ${alias} aggiunta al WorkBook`, 'done', 2000);
   WorkBook.checkChanges(token);
@@ -344,7 +356,18 @@ function advancedMetricSave(e) {
   // WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
   const aggregateFn = dlgAdvancedMetric.querySelector('.formula > code[data-aggregate]').innerText;
   // TODO: aggiungere opzione 'distinct'.
-  let object = { token, type: 'metric', alias, factId: metric.factId, aggregateFn, SQL: metric.SQL, distinct: false, metric_type: 'advanced', workbook_ref: WorkBook.workBook.token, updated_at: date };
+  let object = {
+    token,
+    alias,
+    type: 'metric',
+    metric_type: 'advanced',
+    factId: metric.factId,
+    aggregateFn,
+    SQL: metric.SQL,
+    distinct: false,
+    workbook_ref: WorkBook.workBook.token,
+    updated_at: date
+  };
   // recupero tutti i filtri droppati in #filter-drop
   // salvo solo il riferimento al filtro e non tutta la definizione del filtro
   dlgAdvancedMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.add(filter.dataset.token));
@@ -416,7 +439,7 @@ function compositeMetricSave(e) {
           break;
       }
     } else {
-      object.SQL.push(el);
+      object.SQL.push(el.trim());
     }
   });
   // aggiornamento/creazione della metrica imposta created_at

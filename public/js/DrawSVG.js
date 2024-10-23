@@ -402,9 +402,9 @@ class DrawSVG {
     DT.addRows();
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
     // imposto un colore diverso per le colonne già definite nel workbook
-    DT.fields(WorkBook.fields.get(WorkBook.activeTable.dataset.alias));
+    DT.fields();
     // imposto un colore diverso per le meriche già definite nel workbook
-    DT.metrics(WorkBook.metrics);
+    DT.metrics();
   }
 
   async getPreviewSVGTable() {

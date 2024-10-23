@@ -829,12 +829,15 @@ class MapDatabaseController extends Controller
               $sql[] = (in_array($element, $metrics)) ? "{$query->ifNullOperator}({$element}, 0)" : trim($element);
             }
           }
+          // WARN: è necessario aggiungere gli spazi perchè in javascript li elimino con trim()
           $sql_string = implode(' ', $sql);
+          // if ($metric->alias === 'test_issue245_1') dd($sql_string);
           // racchiudo le metriche all'interno della composta con la funzione NVL (o IFNULL) ottenendo
           // Es. : ( NVL(ricavo,0) - NVL(costo,0) / NVL(ricavo,0) * 100)
           // $query->compositeMeasures[] = "\n{$sql_string} AS '{$metric->alias}'";
           $query->compositeMeasures[] = "{$sql_string} AS '{$metric->alias}'";
           // dd($query->compositeMeasures);
+          // dump($query->compositeMeasures);
         }
       }
       return $query->datamart_new();

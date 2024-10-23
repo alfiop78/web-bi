@@ -567,22 +567,22 @@ const tmplDetails = document.getElementById('tmpl-details-element');
   // salvataggio metrica di base
   app.saveBaseMeasure = (e) => {
     const token = rand().substring(0, 7);
-    // const field = `${WorkBook.activeTable.dataset.alias}.${e.target.dataset.field}`;
     const alias = e.target.dataset.field;
     const factId = WorkBook.activeTable.dataset.factId;
 
     // metric Map Object
     WorkBook.metrics = {
       token, alias,
-      // OPTIMIZE: 26.07.2024 è da valutare se viene utilizzata la prop "table"
-      // table: { table: WorkBook.activeTable.dataset.table, alias: WorkBook.activeTable.dataset.alias },
-      // field,
+      type: 'metric',
+      metric_type: 'basic',
       factId,
+      properties: {
+        table: WorkBook.activeTable.dataset.table,
+        fields: [e.target.dataset.field]
+      },
       aggregateFn: 'SUM', // default
       SQL: `${WorkBook.activeTable.dataset.alias}.${e.target.dataset.field}`,
-      distinct: false, // default
-      type: 'metric',
-      metric_type: 'basic'
+      distinct: false // default
     };
     WorkBook.checkChanges(token);
     App.showConsole(`Metrica ${e.target.dataset.field} aggiunta al WorkBook`, "done", 3500);
