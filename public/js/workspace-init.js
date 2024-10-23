@@ -811,7 +811,8 @@ const tmplDetails = document.getElementById('tmpl-details-element');
   }
 
   // drop di una metrica nela textarea per le metriche composte
-  app.textareaDrop = (e) => {
+  /* app.textareaDrop = (e) => {
+    debugger;
     e.preventDefault();
     console.log(e.target);
     // console.clear();
@@ -831,7 +832,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
     app.textareaCompositeMetric.appendChild(span);
     // aggiungo anche uno span per il proseguimento della scrittura della formula
     app.addSpan(app.textareaCompositeMetric, null, 'metric');
-  }
+  } */
 
   // column _id e _ds
   app.txtAreaIdColumn.addEventListener('dragenter', app.elementDragEnter, false);
@@ -861,10 +862,10 @@ const tmplDetails = document.getElementById('tmpl-details-element');
   app.filtersDropzone.addEventListener('dragleave', app.elementDragLeave, false);
   app.filtersDropzone.addEventListener('drop', app.filterDrop, false);
   // textarea per la creazione della metrica composta
-  app.textareaCompositeMetric.addEventListener('dragenter', app.elementDragEnter, false);
-  app.textareaCompositeMetric.addEventListener('dragover', app.elementDragOver, false);
-  app.textareaCompositeMetric.addEventListener('dragleave', app.elementDragLeave, false);
-  app.textareaCompositeMetric.addEventListener('drop', app.textareaDrop, false);
+  // app.textareaCompositeMetric.addEventListener('dragenter', app.elementDragEnter, false);
+  // app.textareaCompositeMetric.addEventListener('dragover', app.elementDragOver, false);
+  // app.textareaCompositeMetric.addEventListener('dragleave', app.elementDragLeave, false);
+  // app.textareaCompositeMetric.addEventListener('drop', app.textareaDrop, false);
 
 
   /* NOTE: END DRAG&DROP EVENTS */

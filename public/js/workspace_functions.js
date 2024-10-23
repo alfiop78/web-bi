@@ -745,18 +745,34 @@ function dlgCompositeMetricCheck() {
     i.addEventListener('dragstart', elementDragStart);
     i.addEventListener('dragend', elementDragEnd);
     span.innerHTML = metric.alias;
-    switch  (metric.metric_type) {
+    switch (metric.metric_type) {
       case 'advanced':
         advancedDetails.appendChild(li);
-      break;
+        break;
       case 'composite':
         compositeDetails.appendChild(li);
-      break;
+        break;
       default:
         // basic
         basicDetails.appendChild(li);
-      break;
+        break;
     }
+  }
+}
+
+// elementi droppati nella textarea
+function appendDropped(caretPosition, text) {
+  const textNode = caretPosition.offsetNode;
+  if (caretPosition.offset !== 0) {
+    let replacement = textNode.splitText(caretPosition.offset);
+    let p = document.createElement('p');
+    p.innerHTML = textNode.textContent;
+    // NOTE: utilizzo di un elemento parent (<p> in questo caso) per poter usare il metodo insertBefore()
+    // ...che non è possibile utilizzare su nodi Text
+    textNode.parentNode.insertBefore(text, replacement);
+    textNode.textContent = p.textContent;
+  } else {
+    textNode.textContent = text.textContent;
   }
 }
 

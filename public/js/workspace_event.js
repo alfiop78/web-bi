@@ -119,52 +119,54 @@ document.addEventListener('DOMContentLoaded', () => {
       // WARN: chiudendo la popup qui non viene più attivato l'evento click sugli elementi della popup
       // popupSuggestions.classList?.remove('open');
     });
+
+    textarea.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      console.log('dragEnter');
+      // elimino l'elemento <br> altrimenti, nell'evento drop viene preso in considerazione la textarea e non il textnode
+      e.target.querySelector('br')?.remove();
+    });
+
+    textarea.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      console.log('dragLeave');
+      e.target.appendChild(document.createElement('br'));
+    });
   });
   // NOTE: end DOMContentLoaded
 
+  // NOTE: drag&drop
   textareaFilter.addEventListener('drop', (e) => {
     // impedisco che venga droppato l'id dell'elemento
     e.preventDefault();
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
     const caretPosition = document.caretPositionFromPoint(e.clientX, e.clientY);
-    const textNode = caretPosition.offsetNode;
-    const offset = caretPosition.offset;
     // elementRef : è l'elemento draggato
     WorkBook.activeTable = elementRef.dataset.tableId;
-    console.log(textNode);
-    console.log(offset);
     const text = document.createTextNode(`${WorkBook.activeTable.dataset.table}.${elementRef.dataset.field}`);
-    if (offset !== 0) {
-      // BUG: 11.10.2024 Quando si effettua il drop DOPO l'ultimo carattere (spazio)
-      // si verifica un errore perchè è presente l'elemento <br> in quella posizione
-      // Questo comporta che il textNode non è più un node ma è l'elemento textarea
-      let replacement = textNode.splitText(offset);
-      let p = document.createElement('p');
-      p.innerHTML = textNode.textContent;
-      // NOTE: utilizzo di un elemento parent (<p> in questo caso) per poter utilizzare insertBefore
-      // ...che non è possibile utilizzare su nodi Text
-      textNode.parentNode.insertBefore(text, replacement);
-      textNode.textContent = p.textContent;
-    } else {
-      textNode.textContent = text.textContent;
-    }
+    appendDropped(caretPosition, text);
+    // INFO: normalize consente di riunificare tutti i nodeText e li mette tutti in un unico nodeText
     e.target.normalize();
+    // posiziono il cursore alla fine della stringa
+    sel.setPosition(e.target.firstChild, caretPosition.offset + text.textContent.length);
     e.target.appendChild(document.createElement('br'));
   });
 
-  textareaFilter.addEventListener('dragenter', (e) => {
+  textareaCompositeMetric.addEventListener('drop', (e) => {
+    // impedisco che venga droppato l'id dell'elemento
     e.preventDefault();
-    console.log('dragEnter');
-    // elimino l'elemento <br> altrimenti, nell'evento drop viene preso in considerazione la textarea e non il textnode
-    e.target.querySelector('br')?.remove();
-  });
-
-  textareaFilter.addEventListener('dragleave', (e) => {
-    e.preventDefault();
-    console.log('dragLeave');
+    const elementId = e.dataTransfer.getData('text/plain');
+    const caretPosition = document.caretPositionFromPoint(e.clientX, e.clientY);
+    const text = document.createTextNode(WorkBook.metrics.get(elementId).alias);
+    appendDropped(caretPosition, text)
+    e.target.normalize();
+    // posiziono il cursore alla fine della stringa
+    sel.setPosition(e.target.firstChild, caretPosition.offset + text.textContent.length);
     e.target.appendChild(document.createElement('br'));
   });
+
+  // NOTE: end drag&drop
 
   // textarea-filter
   textareaFilter.addEventListener('input', inputFilter);
