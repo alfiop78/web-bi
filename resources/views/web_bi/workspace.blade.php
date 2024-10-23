@@ -593,7 +593,7 @@
                   <section class="textarea-formula">
                     <input type="text" id="composite-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                     <div class="textarea__container">
-                      <div id="popup">
+                      <div class="popup__suggestions">
                         <ul></ul>
                       </div>
                       <div id="textarea-composite-metric" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
@@ -627,11 +627,8 @@
                   <section class="textarea-formula">
                     <input type="text" id="input-base-custom-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                     <div class="textarea__container">
-                      <div id="popup">
-                        <ul>
-                          <li>val 1</li>
-                          <li>val 2</li>
-                        </ul>
+                      <div class="popup__suggestions">
+                        <ul></ul>
                       </div>
                       <div id="textarea-custom-metric" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
                     </div>
@@ -730,11 +727,8 @@
                   <section class="textarea-formula">
                     <input type="text" id="input-filter-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
                     <div class="textarea__container">
-                      <div id="popup">
-                        <ul>
-                          <li>val 1</li>
-                          <li>val 2</li>
-                        </ul>
+                      <div class="popup__suggestions">
+                        <ul></ul>
                       </div>
                       <div id="textarea-filter" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
                     </div>

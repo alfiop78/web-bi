@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // NOTE: textarea-filter
   document.querySelectorAll(".textarea[contenteditable='true']").forEach(textarea => {
     textarea.addEventListener('keyup', (e) => {
+      popupSuggestions = e.target.parentElement.querySelector('.popup__suggestions');
       // const sel = document.getSelection();
       // console.log(sel);
       // const caretPosition = sel.anchorOffset;
@@ -55,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     textarea.addEventListener('keydown', function(e) {
       if (!['Tab', 'Enter', 'ArrowDown', 'ArrowUp'].includes(e.key)) return;
+      popupSuggestions = e.target.parentElement.querySelector('.popup__suggestions');
       const suggestions = popupSuggestions.querySelectorAll('.container__suggestion');
       const numSuggestions = suggestions.length;
       const caretPosition = sel.anchorOffset;

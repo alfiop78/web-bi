@@ -518,12 +518,12 @@ p.field-search {
 /* } */
 
 /* NOTE: suggestions */
-#popup {
+.popup__suggestions {
   display: none;
   position: absolute;
 }
 
-#popup.open {
+.popup__suggestions.open {
   display: block;
   background-color: #f2f2f2;
   color: #494949;
@@ -535,14 +535,14 @@ p.field-search {
   transition: left 250ms, top 250ms;
 }
 
-#popup>ul>li {
+.popup__suggestions>ul>li {
   display: block;
   line-height: 1rem;
   margin: 0px;
   padding: 6px 8px;
 }
 
-#popup>ul>li>small {
+.popup__suggestions>ul>li>small {
   display: block;
   font-size: small;
   color: gray;
