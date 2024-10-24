@@ -79,8 +79,10 @@ class Table {
   }
 
   fields() {
-    for (const [key, value] of Object.entries(WorkBook.fields.get(WorkBook.activeTable.dataset.alias))) {
+    if (WorkBook.fields.has(WorkBook.activeTable.dataset.alias)) {
+      for (const [key, value] of Object.entries(WorkBook.fields.get(WorkBook.activeTable.dataset.alias))) {
         [...this.thead.querySelectorAll(`th[data-field='${value.origin_field}']`)].filter(th => th.dataset.token = key);
+      }
     }
   }
 

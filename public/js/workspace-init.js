@@ -1193,6 +1193,8 @@ const tmplDetails = document.getElementById('tmpl-details-element');
     if (Sheet.edit === true) {
       // il report è già presente in local ed è stato aperto
       // se ci sono state delle modifiche eseguo update
+      console.log(Sheet.changes);
+      debugger;
       if (Sheet.changes.length !== 0) {
         Sheet.update();
         // elimino il datamart perchè è stato modificato il report e le colonne nel datamart e nel report potrebbero non corrispondere più
@@ -1452,67 +1454,73 @@ const tmplDetails = document.getElementById('tmpl-details-element');
     });
 
     process.advancedMeasures = {}, process.baseMeasures = {}, process.compositeMeasures = {};
-    Sheet.fact.forEach(factId => {
-      let advancedMeasures = new Map(), baseMeasures = new Map();
-      // es. :
-      // baseMeasures : {
-      //  fact-1 : {object di metriche di base}
-      //  fact-2 : {object di metriche di base}
-      // }
+    try {
+      Sheet.fact.forEach(factId => {
+        let advancedMeasures = new Map(), baseMeasures = new Map();
+        // es. :
+        // baseMeasures : {
+        //  fact-1 : {object di metriche di base}
+        //  fact-2 : {object di metriche di base}
+        // }
 
-      for (const [token, metric] of Sheet.metrics) {
-        const wbMetrics = WorkBook.metrics.get(token);
-        switch (metric.type) {
-          case 'composite':
-            process.compositeMeasures[token] = {
-              alias: metric.alias,
-              sql: wbMetrics.SQL,
-              metrics: wbMetrics.metrics
-            };
-            break;
-          case 'advanced':
-            if (wbMetrics.factId === factId) {
-              let obj = {
-                token,
+        for (const [token, metric] of Sheet.metrics) {
+          const wbMetrics = WorkBook.metrics.get(token);
+          switch (metric.type) {
+            case 'composite':
+              process.compositeMeasures[token] = {
                 alias: metric.alias,
-                aggregateFn: metric.aggregateFn,
                 sql: wbMetrics.SQL,
-                distinct: wbMetrics.distinct,
-                filters: {}
+                metrics: wbMetrics.metrics
               };
-              // aggiungo i filtri definiti all'interno della metrica avanzata
-              wbMetrics.filters.forEach(filterToken => {
-                // se, nei filtri della metrica, sono presenti filtri di funzioni temporali,
-                // ...la definizione del filtro và recuperata da WorkBook.metrics.timingFn
-                // TODO: implementare le altre funzioni temporali
-                if (['last-year', 'last-month', 'year-to-month'].includes(filterToken)) {
-                  // advancedMetrics.get(token).filters[filterToken] = wbMetrics.timingFn[filterToken];
-                  obj.filters[filterToken] = wbMetrics.timingFn[filterToken];
-                } else {
-                  obj.filters[filterToken] = WorkBook.filters.get(filterToken);
-                }
-              });
-              advancedMeasures.set(token, obj);
-            }
-            break;
-          default:
-            // basic
-            if (wbMetrics.factId === factId) {
-              baseMeasures.set(token, {
-                token,
-                alias: metric.alias,
-                aggregateFn: metric.aggregateFn,
-                // field: wbMetrics.field, // 15.10.2024 field non mi sembra utilizzato in cube.php
-                sql: wbMetrics.SQL,
-                distinct: wbMetrics.distinct
-              });
-            }
-            break;
+              break;
+            case 'advanced':
+              if (wbMetrics.factId === factId) {
+                let obj = {
+                  token,
+                  alias: metric.alias,
+                  aggregateFn: metric.aggregateFn,
+                  sql: wbMetrics.SQL,
+                  distinct: wbMetrics.distinct,
+                  filters: {}
+                };
+                // aggiungo i filtri definiti all'interno della metrica avanzata
+                wbMetrics.filters.forEach(filterToken => {
+                  // se, nei filtri della metrica, sono presenti filtri di funzioni temporali,
+                  // ...la definizione del filtro và recuperata da WorkBook.metrics.timingFn
+                  // TODO: implementare le altre funzioni temporali
+                  if (['last-year', 'last-month', 'year-to-month'].includes(filterToken)) {
+                    // advancedMetrics.get(token).filters[filterToken] = wbMetrics.timingFn[filterToken];
+                    obj.filters[filterToken] = wbMetrics.timingFn[filterToken];
+                  } else {
+                    obj.filters[filterToken] = WorkBook.filters.get(filterToken);
+                  }
+                });
+                advancedMeasures.set(token, obj);
+              }
+              break;
+            default:
+              // basic
+              if (wbMetrics.factId === factId) {
+                baseMeasures.set(token, {
+                  token,
+                  alias: metric.alias,
+                  aggregateFn: metric.aggregateFn,
+                  // field: wbMetrics.field, // 15.10.2024 field non mi sembra utilizzato in cube.php
+                  sql: wbMetrics.SQL,
+                  distinct: wbMetrics.distinct
+                });
+              }
+              break;
+          }
         }
-      }
-      if (advancedMeasures.size !== 0) process.advancedMeasures[factId] = Object.fromEntries(advancedMeasures);
-      if (baseMeasures.size !== 0) process.baseMeasures[factId] = Object.fromEntries(baseMeasures);
-    });
+        if (advancedMeasures.size !== 0) process.advancedMeasures[factId] = Object.fromEntries(advancedMeasures);
+        if (baseMeasures.size !== 0) process.baseMeasures[factId] = Object.fromEntries(baseMeasures);
+      });
+    } catch (error) {
+      App.showConsole('Errori nella creazione del processo', 'error');
+      throw error;
+      // console.log(error);
+    }
     // se non ci sono filtri nel Report bisogna far comparire un avviso
     // perchè l'elaborazione potrebbe essere troppo onerosa
     if (Sheet.filters.size === 0) {

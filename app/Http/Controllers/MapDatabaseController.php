@@ -1057,7 +1057,31 @@ class MapDatabaseController extends Controller
     // metriche composte
     if (!empty($query->process->compositeMeasures)) {
       foreach ($query->process->compositeMeasures as $metric) {
-        $query->compositeMeasures[] = implode(" ", $metric->SQL) . " AS '{$metric->alias}'";
+        // dump($metric);
+        $sql = [];
+        // converto l'object $metric->metrics in un array per poter controllare con in_array()
+        $metrics = (array) $metric->metrics;
+        // ciclo tutta la formula, quando incontro una metrica la racchiudo in ifNullOperator
+        foreach ($metric->sql as $element) {
+          // se l'elemento in ciclo è un array si tratta di una metrica composta nidificata, effettuo la stessa operazione
+          // dump($element);
+          if (is_array($element)) {
+            foreach ($element as $el) {
+              $sql[] = (in_array($el, $metrics)) ? "{$query->ifNullOperator}({$el}, 0)" : trim($el);
+            }
+          } else {
+            $sql[] = (in_array($element, $metrics)) ? "{$query->ifNullOperator}({$element}, 0)" : trim($element);
+          }
+        }
+        // WARN: è necessario aggiungere gli spazi perchè in javascript li elimino con trim()
+        $sql_string = implode(' ', $sql);
+        // if ($metric->alias === 'test_issue245_1') dd($sql_string);
+        // racchiudo le metriche all'interno della composta con la funzione NVL (o IFNULL) ottenendo
+        // Es. : ( NVL(ricavo,0) - NVL(costo,0) / NVL(ricavo,0) * 100)
+        // $query->compositeMeasures[] = "\n{$sql_string} AS '{$metric->alias}'";
+        $query->compositeMeasures[] = "{$sql_string} AS '{$metric->alias}'";
+        // dd($query->compositeMeasures);
+        // dump($query->compositeMeasures);
       }
     }
 
