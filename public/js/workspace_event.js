@@ -92,7 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
         case 'Tab':
           if (e.target.querySelector('span')) {
             e.preventDefault();
-            e.target.firstChild.textContent += e.target.querySelector('span').textContent + ' ';
+            // e.target.firstChild.textContent += e.target.querySelector('span').textContent + ' ';
+            // NOTE: per la textarea filter non può essere utilizzato lo spazio dopo il aver premuto Tab perchè il nome tabella va seguito dal punto per
+            // poter inserire il nome colonna "Azienda.id"
+            e.target.firstChild.textContent += e.target.querySelector('span').textContent;
             popupSuggestions.classList.remove('open');
             // delete e.target.querySelector('span').dataset.text;
             e.target.querySelector('span').remove();

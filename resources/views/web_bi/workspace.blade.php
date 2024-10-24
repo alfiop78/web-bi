@@ -617,7 +617,7 @@
               <section class="row">
                 <section class="col col-4-span">
                   <div class="list-search">
-                    <input type="search" id="input-search-custom-metrics" placeholder="Ricerca" data-element-search="custom-metrics" class="input-search" autocomplete="off" tabindex="2">
+                    <input type="search" id="input-search-custom-metrics" placeholder="Ricerca" data-element-search="custom-metrics" class="input-search" autocomplete="off" tabindex="3">
                     <div class="relative-ul">
                       <ul id="ul-custom-metrics" class="custom-scrollbar" data-search-id="input-search-custom-metrics"></ul>
                     </div>
@@ -632,7 +632,6 @@
                       </div>
                       <div id="textarea-custom-metric" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
                     </div>
-                    <!-- <div id="textarea-custom-metric" data-fn="addText" data-content-editable class="textarea-content placeholder"></div> -->
                     <textarea id="custom-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                   </section>
                 </section>

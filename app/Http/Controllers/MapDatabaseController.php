@@ -134,7 +134,12 @@ class MapDatabaseController extends Controller
     switch (session('db_driver')) {
       case 'odbc':
         $query = DB::connection(session('db_client_name'))->table('COLUMNS')
-          ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
+          ->select(
+            'column_name',
+            DB::raw('LOWER(type_name) AS type_name'),
+            'data_type_length',
+            'ordinal_position'
+          )
           ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id');
         break;
       case 'mysql':
