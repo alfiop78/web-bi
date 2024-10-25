@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const clamp = (min, value, max) => Math.min(Math.max(min, value), max);
 
     textarea.addEventListener('keydown', function(e) {
+      // se il tasto premuto NON è incluso nell'array return
       if (!['Tab', 'Enter', 'ArrowDown', 'ArrowUp'].includes(e.key)) return;
       popupSuggestions = e.target.parentElement.querySelector('.popup__suggestions');
       const suggestions = popupSuggestions.querySelectorAll('.container__suggestion');
@@ -67,6 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       switch (e.key) {
         case 'ArrowDown':
+          // se la popup seuggestion non è aperta : return
+          if (!popupSuggestions.classList.contains('open')) return;
           suggestions[
             clamp(0, currentSuggestionIndex, numSuggestions - 1)
           ].classList.remove('focused');
@@ -80,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (e.target.querySelector('span')) e.target.querySelector('span').textContent = autocomplete;
           break;
         case 'ArrowUp':
+          if (!popupSuggestions.classList.contains('open')) return;
           suggestions[
             clamp(0, currentSuggestionIndex, numSuggestions - 1)
           ].classList.remove('focused');

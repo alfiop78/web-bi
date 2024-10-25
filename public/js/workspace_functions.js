@@ -483,7 +483,8 @@ function inputFilter(e) {
   // const currentWord = (endIndex > 0) ? e.target.firstChild.textContent.substring(startIndex + 1, caretPosition) : e.target.firstChild.textContent.substring(startIndex + 1);
   // console.info(`current word : ${currentWord}`);
   if (currentWord.length > 0) {
-    // se il carattere che interrompe la parola (trovato dal egex) è un punto allora devo cercare nell'array delle Colonne, altrimenti in quello delle Tabelle
+    // se il carattere che interrompe la parola (trovato dal regex) è un punto allora devo cercare
+    // nell'array delle Colonne, altrimenti in quello delle Tabelle
     const chartAt = e.target.firstChild.textContent.at(startIndex);
     // console.log(`chartAt : ${chartAt}`);
     let table = null;
@@ -494,7 +495,9 @@ function inputFilter(e) {
     }
     // console.info(`current word : ${currentWord}`);
     // let regex = new RegExp(`^${currentWord}.*`, 'i');
-    const regex = new RegExp(`^${currentWord}.*`);
+    // const regex = new RegExp(`^${currentWord}.*`);
+    const regex = new RegExp(`^${currentWord}`);
+    console.log(regex);
     // se è presente il punto cerco tra le colonne altrimenti cerco tra le tabelle
     const match = (chartAt === '.') ?
       [...document.querySelectorAll(`#wbFilters>details[data-table='${table}']>li`)].find(value => value.dataset.label.match(regex)) :
@@ -512,6 +515,8 @@ function inputFilter(e) {
       e.target.querySelector('span')?.remove();
       // if (e.target.querySelector('span')) e.target.querySelector('span').remove();
     }
+  } else {
+    e.target.querySelector('span')?.remove();
   }
 }
 
