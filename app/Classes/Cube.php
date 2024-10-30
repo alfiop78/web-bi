@@ -315,11 +315,15 @@ class Cube
     $sql .= self::SELECT . implode(",\n", $this->select_clause[$this->factId]);
     if (!empty($this->report_metrics[$this->factId])) $sql .= "," . implode(", ", $this->report_metrics[$this->factId]);
     $sql .= self::FROM . implode(",\n", $this->from_clause[$this->factId]);
-    $sql .= self::WHERE . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId]));
+    if (array_key_exists($this->factId, $this->where_time_clause)) {
+      $sql .= self::WHERE . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId]));
+    } else {
+      $sql .= self::WHERE . implode("\nAND ", $this->where_clause[$this->factId]);
+    }
     if (!is_null($this->report_filters[$this->factId])) $sql .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
     $sql .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
-    // dump($sql);
+    // dd($sql);
     switch (session('db_driver')) {
       case 'odbc':
         $createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
@@ -629,6 +633,7 @@ class Cube
       $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->WHERE_metricTable[$this->factId]);
     }
 
+    if (array_key_exists($this->factId, $this->where_time_clause)) $this->sqlAdvancedMeasures .= "\nAND" . implode("\nAND ", $this->where_time_clause[$this->factId]);
     // dd($this->sqlAdvancedMeasures);
     // dd($this->where_time_clause, $this->WHERE_timingFn, $this->WHERE_metricTable);
     // utilizzo array_merge, verranno unite le join della TIME e, quelle con key uguale, verranno sovrascirtte
@@ -637,17 +642,12 @@ class Cube
     // dd(array_merge($this->where_time_clause[$this->factId], $this->WHERE_timingFn[$this->factId]));
     // dd($this->where_time_clause[$this->factId]);
     // dd($this->WHERE_timingFn);
-    if (array_key_exists($this->factId, $this->WHERE_timingFn)) {
+    if (array_key_exists($this->factId, $this->WHERE_timingFn)) $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->WHERE_timingFn[$this->factId]);
+
+    /* if (array_key_exists($this->factId, $this->WHERE_timingFn)) {
       $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", array_merge($this->where_time_clause[$this->factId], $this->WHERE_timingFn[$this->factId]));
     } else {
       $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->where_time_clause[$this->factId]);
-    }
-    /* if (array_key_exists($this->factId, $this->WHERE_timingFn)) {
-      $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->WHERE_timingFn[$this->factId]);
-    } else {
-      if (array_key_exists($this->factId, $this->where_time_clause)) {
-        $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->where_time_clause[$this->factId]);
-      }
     } */
     $this->WHERE_timingFn = [];
     // aggiungo i filtri del report e i filtri contenuti nella metrica
