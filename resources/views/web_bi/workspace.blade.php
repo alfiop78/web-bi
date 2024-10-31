@@ -501,7 +501,7 @@
                     <input type="text" id="input-advanced-metric-name" placeholder="Nome" value="" autocomplete="off" />
                     <div id="input-metric"></div>
                     <div>
-                      <input type="checkbox" id="check-distinct" disabled />
+                      <input type="checkbox" id="check-distinct" />
                       <label for="check-distinct">DISTINCT</label>
                     </div>
                     <textarea id="advanced-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>

@@ -556,8 +556,15 @@ class Cube
       // dd($m);
       foreach ($advancedMetric as $metric) {
         unset($this->sqlAdvancedMeasures);
-        // dump($metric->sql);
-        $groupAdvancedMeasures[$this->factId][$metric->alias] = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->sql}), 0) AS '{$metric->alias}'";
+        // dd($metric);
+        // dd($metric->sql);
+        // dump(($metric->distinct));
+
+        $groupAdvancedMeasures[$this->factId][$metric->alias] = ($metric->distinct) ?
+          "{$this->ifNullOperator}({$metric->aggregateFn}(DISTINCT {$metric->sql}), 0) AS '{$metric->alias}'" :
+          "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->sql}), 0) AS '{$metric->alias}'";
+        // $groupAdvancedMeasures[$this->factId][$metric->alias] = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->sql}), 0) AS '{$metric->alias}'";
+        // dd($groupAdvancedMeasures);
         if (property_exists($this, 'sql_info')) {
           // TODO: testare con un alias contenente spazi
           $this->json_info_advanced[$tableName]->{'METRICS'}->{"$metric->alias"} = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";

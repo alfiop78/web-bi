@@ -358,6 +358,7 @@ function advancedMetricSave(e) {
   const metric = WorkBook.metrics.get(e.target.dataset.originToken);
   // WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
   const aggregateFn = dlgAdvancedMetric.querySelector('.formula > code[data-aggregate]').innerText;
+  const distinct = document.getElementById('check-distinct').checked;
   // TODO: aggiungere opzione 'distinct'.
   let object = {
     token,
@@ -367,7 +368,7 @@ function advancedMetricSave(e) {
     factId: metric.factId,
     aggregateFn,
     SQL: metric.SQL,
-    distinct: false,
+    distinct,
     workbook_ref: WorkBook.workBook.token,
     updated_at: date
   };

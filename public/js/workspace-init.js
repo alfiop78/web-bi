@@ -1349,11 +1349,11 @@ const tmplDetails = document.getElementById('tmpl-details-element');
     // verifico se ci sono dimensioni TIME su tutti i cubi
     // NOTE: every: controllo se TUTTI gli elementi dell'array passano il test implementato
     // dalla funzione fornita (in questo caso non fornisco una funzione), restituisce un boolean
-    const checkTimeDim = [...Draw.svg.querySelectorAll("use.fact")].every(fact => Draw.svg.querySelector(`use.time[data-table-join='${fact.id}']`));
+    /* const checkTimeDim = [...Draw.svg.querySelectorAll("use.fact")].every(fact => Draw.svg.querySelector(`use.time[data-table-join='${fact.id}']`));
     if (!checkTimeDim) {
       App.showConsole("La dimensione TIME non è presente su tutte le tabelle dei fatti.", "error", 4000);
       return;
-    }
+    } */
 
     if (WorkBook.dataModel.size !== 0) {
       const translateRef = document.getElementById('stepTranslate');
@@ -1794,6 +1794,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
     const btnSave = document.getElementById('btn-metric-save');
     const aggregateFn = formula.querySelector('code[data-aggregate]');
     const fieldName = formula.querySelector('span');
+    document.getElementById('check-distinct').checked = metric.distinct;
     aggregateFn.innerText = metric.aggregateFn;
     fieldName.innerText = `( ${metric.alias} )`;
     input.appendChild(field);
@@ -2542,6 +2543,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
     const btnSave = document.getElementById('btn-metric-save');
     const aggregateFn = formula.querySelector('code[data-aggregate]');
     const fieldName = formula.querySelector('span');
+    document.getElementById('check-distinct').checked = false;
     aggregateFn.innerText = metric.aggregateFn;
     fieldName.innerText = `( ${metric.alias} )`;
     input.appendChild(field);
