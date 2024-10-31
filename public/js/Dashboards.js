@@ -339,12 +339,21 @@ class Resources extends Dashboards {
       // recupero l'indice della colonna in base al suo nome
       const index = this.dataTable.getColumnIndex(metric.alias);
       // TODO: modificare la prop 'aggregateFn' in 'aggregation' in fase di creazione delle metriche
-      // const aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
+      let aggregation;
+      switch (metric.aggregateFn) {
+        case 'COUNT':
+        case 'MIN':
+        case 'MAX':
+          aggregation = 'sum';
+          break;
+        default:
+          aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
+          break;
+      }
       let object = {
         id: metric.alias,
         column: index,
-        // aggregation: google.visualization.data[aggregation],
-        aggregation: google.visualization.data.sum,
+        aggregation: google.visualization.data[aggregation],
         type: 'number',
         label: metric.label
       };

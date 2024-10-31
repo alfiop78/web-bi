@@ -190,16 +190,15 @@ function previewReady() {
       keyColumns.push({ id: column.id, column: Resource.dataTable.getColumnIndex(column.id), label: column.label, type: column.type });
     }
   }); */
-  // Resource.groupFunction();
+  Resource.groupFunction();
   // imposto qui il metodo group() perchè per la dashboard è diverso (viene usato il ChartWrapper)
-  /* Resource.dataGroup = new google.visualization.data.group(
-    // Resource.dataTable, Resource.groupKey, Resource.groupColumn
-    Resource.dataTable, Resource.groupKey
+  Resource.dataGroup = new google.visualization.data.group(
+    Resource.dataTable, Resource.groupKey, Resource.groupColumn
+    // Resource.dataTable, Resource.groupKey
   );
   console.log('dataGroup : ', Resource.dataGroup);
-  debugger; */
-  console.log(Resource.dataTable);
-  debugger;
+  // console.log(Resource.dataTable);
+  // debugger;
   // creo l'object che verrà messo nel terzo param di group()
   // Es.: { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
   // le metriche che hanno la proprietà dependencies: true, sono quelle NON aggiunte DIRETTAMENTE
@@ -225,11 +224,10 @@ function previewReady() {
   //   let formatter = app[value.type](value.prop);
   //   formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(key));
   // }
-  /* Resource.specs.data.group.columns.forEach(metric => {
+  Resource.specs.data.group.columns.forEach(metric => {
     let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
     formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
   });
-  debugger; */
   // console.log('dataGroup():', Resource.dataGroup);
   // console.log(Resource.dataGroup.getColumnIndex())
   // Imposto le label memorizzate in group.key. In questo caso potrei utilizzare gli object da passare
@@ -249,9 +247,8 @@ function previewReady() {
 
   // DataView, mi consente di visualizzare SOLO le colonne definite nel report ed
   // effettuare eventuali calcoli per le metriche composite ('calc')
-  Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataTable);
+  Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
   console.log('DataViewGrouped :', Resource.dataViewGrouped);
-  debugger;
 
   // TEST: recupero gli indici delle colonne area_ds, zona_ds (colonna da visualizzare)
   // console.log('costo_rapporto_6 (index):', Resource.dataGroup.getColumnIndex('costo_rapporto_6'));
@@ -279,18 +276,19 @@ function previewReady() {
   let viewColumns = [], viewMetrics = [];
   Resource.specs.data.group.key.forEach(column => {
     if (column.properties.visible) {
-      debugger;
-      viewColumns.push(Resource.dataViewGrouped.getColumnIndex(column.id));
-      debugger;
+      // debugger;
+      // viewColumns.push(Resource.dataViewGrouped.getColumnIndex(column.id));
+      viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
+      // debugger;
       // imposto la classe per le colonne dimensionali
-      // Resource.dataGroup.setColumnProperty(Resource.dataGroup.getColumnIndex(column.id), 'className', 'dimensional-column');
+      Resource.dataGroup.setColumnProperty(Resource.dataGroup.getColumnIndex(column.id), 'className', 'dimensional-column');
     }
   });
   // dalla dataGroup, recupero gli indici di colonna delle metriche
   Resource.specs.data.group.columns.forEach(metric => {
     if (!metric.dependencies && metric.properties.visible) {
-      const index = Resource.dataViewGrouped.getColumnIndex(metric.alias);
-      debugger;
+      const index = Resource.dataGroup.getColumnIndex(metric.alias);
+      // const index = Resource.dataViewGrouped.getColumnIndex(metric.alias);
       // Implementazione della func 'calc' per le metriche composite.
       if (metric.type === 'composite') {
         // è una metrica composta, creo la funzione calc, sostituendo i nomi
@@ -358,7 +356,6 @@ function previewReady() {
   // concateno i due array che popoleranno la DataView.setColumns()
   let viewDefined = viewColumns.concat(viewMetrics)
   console.log('DataView defined:', viewDefined);
-  debugger;
   // Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
   // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
   // console.log(Resource.dataGroup.getColumnProperties(0));
