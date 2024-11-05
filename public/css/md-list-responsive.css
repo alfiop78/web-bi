@@ -112,6 +112,10 @@ li.icon>span {
   /* min-height: 300px; */
 }
 
+.relative-ul.minHeight {
+  min-height: 300px;
+}
+
 .relative-ul>ul,
 .relative-ul>dl {
   position: absolute;
@@ -247,6 +251,16 @@ ul.context-menu-items {
   cursor: context-menu !important;
 }
 
+li.toggle-list.filters>button,
+li.added-list.filters>button {
+  visibility: hidden;
+}
+
+li.toggle-list.filters:hover>button:not([disabled]),
+li.added-list.filters:hover>button {
+  visibility: visible;
+}
+
 li[data-visible="false"] {
   opacity: .5;
 }
@@ -371,10 +385,16 @@ li.drag-list.columns>i:not([draggable]) {
 li.filters>i:not([draggable]) {
   background-color: var(--filters-color);
   color: #494949;
+  border-radius: 4px;
 }
 
 li.drag-list.metrics>span,
-li.drag-list.filters>span,
+li.toggle-list.filters>span,
+li.added-list.filters>span,
 li.drag-list.columns>span {
   margin-left: 4px;
+}
+
+li.toggle-list[added] {
+  color: #e2e2e2;
 }

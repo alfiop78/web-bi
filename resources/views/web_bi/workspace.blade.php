@@ -86,8 +86,19 @@
       <span></span>
     </li>
 
-    <li class="drag-list filters" data-element-search data-label data-searchable="true">
+    <!-- <li class="drag-list filters" data-element-search data-label data-searchable="true">
       <i class="material-symbols-rounded md-18 md-dimgray" draggable="true">drag_handle</i>
+      <i class="material-symbols-rounded md-18">filter_alt</i>
+      <span></span>
+    </li> -->
+    <li class="toggle-list filters" data-element-search data-label data-searchable="true">
+      <button data-id="filter__add" class="material-symbols-rounded md-18 md-dimgray">add</button>
+      <i class="material-symbols-rounded md-18">filter_alt</i>
+      <span></span>
+    </li>
+
+    <li class="added-list filters" data-label>
+      <button data-id="filter__remove" class="material-symbols-rounded md-18">remove</button>
       <i class="material-symbols-rounded md-18">filter_alt</i>
       <span></span>
     </li>
@@ -1002,9 +1013,21 @@
                           </dialog>
 
                           <div class="table-content columnsHandler">
-                            <div class="relative-ul" id="column-handler">
-                              <ul id="ul-columns-handler" class="custom-scrollbar"></ul>
-                            </div>
+                            <section id="sheet__content">
+                                <button class="material-symbols-rounded">arrow_menu_close</button>
+                              <p>Filtri del report</p>
+                              <section id="sheet__filters" class="sheet__contents">
+                                <section class="custom-scrollbar">
+                                  <ul id="ul-filters-sheet"></ul>
+                                </section>
+                              </section>
+                              <p>Colonne nascoste</p>
+                              <section id="sheet__columns" class="sheet__contents">
+                                <section class="custom-scrollbar">
+                                  <ul id="ul-columns-handler"></ul>
+                                </section>
+                              </section>
+                            </section>
                             <section id="datatable">
                               <table id="preview-datamart"></table>
                             </section>

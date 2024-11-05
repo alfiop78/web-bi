@@ -140,6 +140,23 @@ function filterSave(e) {
   App.showConsole(`Nuovo filtro aggiunto al WorkBook: ${name}`, 'done', 2000);
 }
 
+// selezione di un filtro da aggiungere allo Sheet
+function filterSelected(e) {
+  console.log(e.target);
+  // e.target.parentElement.toggleAttribute('added');
+  const li__selected = document.querySelector(`li[data-id='${e.target.id}']`);
+  e.target.disabled = 'true';
+  li__selected.toggleAttribute('added');
+
+  const parent = document.getElementById('ul-filters-sheet');
+  const tmpl = template_li.content.cloneNode(true);
+  const li = tmpl.querySelector('li.added-list.filters');
+  const span = li.querySelector('span');
+  const btnRemove = li.querySelector("button[data-id='filter__remove']");
+  span.innerText = e.target.dataset.label;
+  parent.appendChild(li);
+}
+
 /*
  * Creazione elenco filtri nella #ul-filters
  * Viene invocata quando si Salva un nuovo filtro e
@@ -148,23 +165,23 @@ function filterSave(e) {
 function appendFilter(token) {
   const parent = document.getElementById('ul-filters');
   const tmpl = template_li.content.cloneNode(true);
-  const li = tmpl.querySelector('li.drag-list.filters');
+  // const li = tmpl.querySelector('li.drag-list.filters');
+  const li = tmpl.querySelector('li.toggle-list.filters');
   const span = li.querySelector('span');
-  const i = li.querySelector('i');
+  const btnAdd = li.querySelector("button[data-id='filter__add']");
   const filter = WorkBook.filters.get(token);
   li.dataset.id = token;
-  i.id = token;
-  i.dataset.type = "filter";
-  i.dataset.label = filter.name;
+  btnAdd.id = token;
+  btnAdd.dataset.type = "filter";
+  btnAdd.dataset.label = filter.name;
   li.classList.add("filters");
   li.dataset.elementSearch = "filters";
   li.dataset.label = filter.name;
   // definisco quale context-menu-template apre questo elemento
   li.dataset.contextmenu = 'ul-context-menu-filter';
-  // TEST: 10.10.2024 Sembra non essere utilizzato, è presente nei filtri creati prima di questa data
-  // li.dataset.field = filter.field;
-  i.addEventListener('dragstart', elementDragStart);
-  i.addEventListener('dragend', elementDragEnd);
+  btnAdd.addEventListener('click', filterSelected);
+  // i.addEventListener('dragstart', elementDragStart);
+  // i.addEventListener('dragend', elementDragEnd);
   li.addEventListener('contextmenu', openContextMenu);
   span.innerHTML = filter.name;
   parent.appendChild(li);
