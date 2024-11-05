@@ -395,6 +395,6 @@ li.drag-list.columns>span {
   margin-left: 4px;
 }
 
-li.toggle-list[added] {
-  color: #e2e2e2;
+li.toggle-list.added {
+  color: #919191;
 }

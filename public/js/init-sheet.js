@@ -27,7 +27,7 @@ const callback = (mutationList, observer) => {
 const observerList = new MutationObserver(callback);
 observerList.observe(document.getElementById('dropzone-columns'), config);
 observerList.observe(document.getElementById('dropzone-rows'), config);
-observerList.observe(document.getElementById('dropzone-filters'), config);
+// observerList.observe(document.getElementById('dropzone-filters'), config);
 
 google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
 

@@ -63,8 +63,7 @@ code {
 }
 
 .column-defined,
-.metric-defined,
-.filter-defined {
+.metric-defined {
   display: flex;
   align-items: center;
   position: relative;
@@ -72,6 +71,13 @@ code {
   padding: 2px 6px;
   border-radius: 2px;
   width: auto;
+}
+
+.filter-defined {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 2px;
 }
 
 .column-defined>button[data-remove],
@@ -89,13 +95,6 @@ code {
 .column-defined[data-type="column"] {
   background-color: var(--main-secondary-color);
   color: whitesmoke;
-}
-
-.filter-defined[data-type="filter"] {
-  background-color: var(--filters-color);
-  color: #494949;
-  padding: 2px 4px;
-  font-size: .85rem;
 }
 
 .column-defined[data-type="column"]>i[data-column-remove] {

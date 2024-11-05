@@ -143,17 +143,31 @@ function filterSave(e) {
 // selezione di un filtro da aggiungere allo Sheet
 function filterSelected(e) {
   console.log(e.target);
-  // e.target.parentElement.toggleAttribute('added');
+  // aggiungo, sulla <li> del filtro selezionato, la class 'added' per evidenziare che il filtro
+  // è stato aggiunto al report, non può essere aggiunto di nuovo.
   const li__selected = document.querySelector(`li[data-id='${e.target.id}']`);
-  e.target.disabled = 'true';
-  li__selected.toggleAttribute('added');
+  li__selected.classList.add('added');
+  Sheet.filters = e.target.id;
+  addTemplateFilter(e.target.id);
+}
 
+// aggiunta del filtro alla sezione #ul-filters-sheet
+function addTemplateFilter(token) {
   const parent = document.getElementById('ul-filters-sheet');
+  const elementRef = document.getElementById(token);
+  elementRef.disabled = 'true';
   const tmpl = template_li.content.cloneNode(true);
   const li = tmpl.querySelector('li.added-list.filters');
   const span = li.querySelector('span');
-  const btnRemove = li.querySelector("button[data-id='filter__remove']");
-  span.innerText = e.target.dataset.label;
+  const btnRemove = li.querySelector('button[data-remove]');
+  const btnUndo = li.querySelector('button[data-undo]');
+  li.dataset.type = 'filter';
+  li.dataset.id = elementRef.id;
+  (!Sheet.edit) ? li.dataset.added = 'true' : li.dataset.adding = 'true';
+  btnRemove.dataset.filterToken = elementRef.id;
+  btnUndo.dataset.filterToken = elementRef.id;
+  span.dataset.token = elementRef.id;
+  span.innerHTML = elementRef.dataset.label;
   parent.appendChild(li);
 }
 

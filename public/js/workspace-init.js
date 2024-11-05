@@ -77,7 +77,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
     // columns and rows dropzone (step 2)
     columnsDropzone: document.getElementById('dropzone-columns'),
     rowsDropzone: document.getElementById('dropzone-rows'),
-    filtersDropzone: document.getElementById('dropzone-filters'),
+    // filtersDropzone: document.getElementById('dropzone-filters'),
     textareaCompositeMetric: document.getElementById('textarea-composite-metric'),
     txtAreaIdColumn: document.getElementById('textarea-column-id'),
     txtAreaDsColumn: document.getElementById('textarea-column-ds'),
@@ -458,22 +458,15 @@ const tmplDetails = document.getElementById('tmpl-details-element');
     // app.addMark({ field: elementRef.dataset.field, datatype: elementRef.dataset.datatype }, e.target);
   }
 
-  app.addFilters = (target, elementRef) => {
-    const tmpl = app.tmplFiltersDefined.content.cloneNode(true);
-    const field = tmpl.querySelector('.filter-defined');
-    const span = field.querySelector('span');
-    const btnRemove = field.querySelector('button[data-remove]');
-    const btnUndo = field.querySelector('button[data-undo]');
-    field.dataset.type = 'filter';
-    field.dataset.id = elementRef.id;
-    (!Sheet.edit) ? field.dataset.added = 'true' : field.dataset.adding = 'true';
-    btnRemove.dataset.filterToken = elementRef.id;
-    btnUndo.dataset.filterToken = elementRef.id;
-    span.dataset.token = elementRef.id;
-    span.innerHTML = elementRef.dataset.label;
-    target.appendChild(field);
+  app.addFilterToSheet = (token) => {
+    // aggiungo, sulla <li> del filtro selezionato, la class 'added' per evidenziare che il filtro
+    // è stato aggiunto al report, non può essere aggiunto di nuovo.
+    const li__selected = document.querySelector(`li[data-id='${token}']`);
+    li__selected.classList.add('added');
+    addTemplateFilter(token);
   }
 
+  // WARN: 2024.05.11 non più utilizzata
   app.filterDrop = (e) => {
     e.preventDefault();
     e.currentTarget.classList.remove('dropping');
@@ -857,10 +850,10 @@ const tmplDetails = document.getElementById('tmpl-details-element');
   // app.rowsDropzone.addEventListener('dragend', app.rowDragEnd, false);
 
   // dropzone #side-sheet-filters
-  app.filtersDropzone.addEventListener('dragenter', app.elementDragEnter, false);
+  /* app.filtersDropzone.addEventListener('dragenter', app.elementDragEnter, false);
   app.filtersDropzone.addEventListener('dragover', app.elementDragOver, false);
   app.filtersDropzone.addEventListener('dragleave', app.elementDragLeave, false);
-  app.filtersDropzone.addEventListener('drop', app.filterDrop, false);
+  app.filtersDropzone.addEventListener('drop', app.filterDrop, false); */
   // textarea per la creazione della metrica composta
   // app.textareaCompositeMetric.addEventListener('dragenter', app.elementDragEnter, false);
   // app.textareaCompositeMetric.addEventListener('dragover', app.elementDragOver, false);
@@ -1138,7 +1131,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
   // apertura nuovo Sheet, viene recuperato dal localStorage
   app.sheetSelected = async (e) => {
     // const sheetToken = e.currentTarget.dataset.token;
-    document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
+    document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #ul-filters-sheet > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
     document.querySelector('#btn-sheet-save').disabled = true;
     Sheet = new Sheets(e.currentTarget.dataset.name, e.currentTarget.dataset.token, WorkBook.workBook.token);
     // reimposto tutte le proprietà della Classe
@@ -1162,13 +1155,9 @@ const tmplDetails = document.getElementById('tmpl-details-element');
 
     // filters
     Sheet.filters.forEach(token => {
-      const filterRef = document.getElementById('ul-filters');
-      const target = document.getElementById('dropzone-filters');
-      // imposto un data-selected sui filtri per rendere visibile il fatto che sono stati aggiunti al report
-      // const elementRef = filterRef.querySelector(`li[id='${token}']`);
-      const elementRef = filterRef.querySelector(`i[id='${token}']`);
-      app.addFilters(target, elementRef, true);
+      app.addFilterToSheet(token);
     });
+
     app.dialogSheet.close();
     // in fase di apertura della preview, le specifiche sono sicuramente già presenti.
     Resource = new Resources('preview-datamart');
@@ -1220,7 +1209,7 @@ const tmplDetails = document.getElementById('tmpl-details-element');
 
   app.newSheetDialog = () => {
     delete app.sheetName.dataset.value;
-    document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #dropzone-filters > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
+    document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #ul-filters-sheet > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
     // document.querySelector('#btn-sheet-save').disabled = true;
     app.dialogNewSheet.showModal();
   }
