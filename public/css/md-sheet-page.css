@@ -1,5 +1,5 @@
 code {
-  font-size: .85rem;
+  font-size: .9rem;
 }
 
 .report-area {
@@ -105,12 +105,20 @@ code {
   visibility: visible;
 }
 
-.column-defined[data-type="column"]>i {
+.column-defined[data-type="column"]>i,
+.metric-defined>button,
+.column-defined>button {
   color: whitesmoke;
 }
 
 .column-defined[data-type="metric"] {
   background-color: seagreen;
+}
+
+.metric-defined {
+  color: whitesmoke;
+  padding: 2px 4px;
+  font-size: .9rem;
 }
 
 .column-defined[data-adding],
@@ -125,7 +133,13 @@ code {
   color: #494949;
 }
 
-.filter-defined[data-removed]>i{
+.column-defined[data-removed]>i,
+.metric-defined[data-removed]>button,
+.column-defined[data-removed]>button {
+  color: #494949;
+}
+
+.filter-defined[data-removed]>i {
   background-color: #e2e2e2;
 }
 
@@ -159,11 +173,13 @@ code {
   display: none;
 }
 
-.metric-defined.metrics:not([data-removed]) {
+
+.metric-defined[data-type="advanced"]:not([data-removed]) {
   background-color: var(--metrics);
-  color: whitesmoke;
-  padding: 2px 4px;
-  font-size: .85rem;
+}
+
+.metric-defined[data-type="composite"]:not([data-removed]) {
+  background-color: var(--metrics-composite);
 }
 
 /* .metric-defined.advanced:not([data-removed]) {

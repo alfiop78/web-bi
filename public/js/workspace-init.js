@@ -491,6 +491,10 @@ const btnTogle_table__content = document.getElementById('btnToggle_table__conten
     // const workBookField = WorkBook.field.get(token).origin_field;
     field.dataset.type = 'column';
     field.dataset.label = Sheet.fields.get(token);
+    field.addEventListener('mousedown', definedMouseDown);
+    field.addEventListener('mousemove', definedMouseMove);
+    field.addEventListener('mouseleave', definedMouseLeave);
+    field.addEventListener('mouseup', definedMouseUp);
     // field.dataset.name = workBookField;
     field.dataset.id = token;
     // if (!Sheet.edit) field.dataset.added = 'true';
@@ -506,10 +510,12 @@ const btnTogle_table__content = document.getElementById('btnToggle_table__conten
     // TODO: da aggiungere in fase di creazione del process
     Sheet.tables = WorkBook.field.get(token).tableAlias;
     target.appendChild(field);
+    field.dataset.x = field.offsetLeft;
     // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
     // i.addEventListener('click', app.handlerSetMetric);
   }
 
+  // right
   app.rowDrop = (e) => {
     e.preventDefault();
     // e.currentTarget.classList.replace('dropping', 'dropped');
