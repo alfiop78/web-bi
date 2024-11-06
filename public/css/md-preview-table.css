@@ -92,8 +92,17 @@ thead th[data-metric-token]{
   /* height: calc(100% - 38px); */
 }
 
-.table-content.columnsHandler {
+.table-content {
   display: grid;
+  grid-template-columns: 0px 1fr;
+  transition: grid-template-columns 250ms;
+}
+
+.table-content:not(.open) #sheet__filters::before {
+  content: unset;
+}
+
+.table-content.open {
   grid-template-columns: 300px auto;
 }
 

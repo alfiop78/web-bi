@@ -848,19 +848,6 @@ const tmplDetails = document.getElementById('tmpl-details-element');
   app.rowsDropzone.addEventListener('dragleave', app.elementDragLeave, false);
   app.rowsDropzone.addEventListener('drop', app.rowDrop, false);
   // app.rowsDropzone.addEventListener('dragend', app.rowDragEnd, false);
-
-  // dropzone #side-sheet-filters
-  /* app.filtersDropzone.addEventListener('dragenter', app.elementDragEnter, false);
-  app.filtersDropzone.addEventListener('dragover', app.elementDragOver, false);
-  app.filtersDropzone.addEventListener('dragleave', app.elementDragLeave, false);
-  app.filtersDropzone.addEventListener('drop', app.filterDrop, false); */
-  // textarea per la creazione della metrica composta
-  // app.textareaCompositeMetric.addEventListener('dragenter', app.elementDragEnter, false);
-  // app.textareaCompositeMetric.addEventListener('dragover', app.elementDragOver, false);
-  // app.textareaCompositeMetric.addEventListener('dragleave', app.elementDragLeave, false);
-  // app.textareaCompositeMetric.addEventListener('drop', app.textareaDrop, false);
-
-
   /* NOTE: END DRAG&DROP EVENTS */
 
   // TODO: da spostare in supportFn.js
@@ -1718,27 +1705,6 @@ const tmplDetails = document.getElementById('tmpl-details-element');
     WorkBook.filters.delete(e.currentTarget.dataset.token);
     window.localStorage.removeItem(e.currentTarget.dataset.token);
     document.querySelector(`li[id='${e.currentTarget.dataset.token}']`).remove();
-  }
-
-  // rimuovo il filtro aggiunto allo Sheet
-  app.removeDefinedFilter = (e) => {
-    const token = e.target.dataset.filterToken;
-    const filter = document.querySelector(`.filter-defined[data-id='${token}']`);
-    if (Sheet.edit) {
-      (filter.dataset.adding) ? filter.remove() : Sheet.removeObject(filter, token);
-    } else {
-      (filter.dataset.added) ? filter.remove() : Sheet.removeObject(filter, token);
-    }
-    Sheet.filters.delete(token);
-  }
-
-  // ripristino il filtro selezionato dallo Sheet
-  app.undoDefinedFilter = (e) => {
-    const token = e.target.dataset.filterToken;
-    // Recupero, da Sheet.removedFilters, gli elementi rimossi per poterli ripristinare
-    Sheet.filters = token;
-    Sheet.objectRemoved.delete(token);
-    delete document.querySelector(`.filter-defined[data-id='${token}']`).dataset.removed;
   }
 
   /*

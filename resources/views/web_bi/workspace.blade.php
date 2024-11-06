@@ -91,18 +91,17 @@
       <i class="material-symbols-rounded md-18">filter_alt</i>
       <span></span>
     </li> -->
-    <li class="toggle-list filters" data-element-search data-label data-searchable="true">
+    <li class="toggle-list" data-element-search data-label data-searchable="true">
       <button data-id="filter__add" class="material-symbols-rounded md-18 md-dimgray">add</button>
       <i class="material-symbols-rounded md-18">filter_alt</i>
       <span></span>
     </li>
 
-    <li class="added-list filters filter-defined" data-label>
-      <!-- <button data-id="filter__remove" class="material-symbols-rounded md-18">remove</button> -->
+    <li class="added-list filter-defined" data-label>
       <i class="material-symbols-rounded md-18">filter_alt</i>
       <span class="defined"></span>
-      <button type="button" data-remove class="button-icon material-symbols-rounded md-18 filter-defined" data-fn="removeDefinedFilter" data-filter-token>delete</button>
-      <button type="button" data-undo class="button-icon material-symbols-rounded md-18 filter-defined" data-fn="undoDefinedFilter" data-filter-token>undo</button>
+      <button type="button" data-remove class="button-icon material-symbols-rounded md-18 filter-defined" data-filter-token>delete</button>
+      <button type="button" data-undo class="button-icon material-symbols-rounded md-18 filter-defined" data-filter-token>undo</button>
     </li>
 
     <li class="drag-list metrics basic" data-element-search data-label data-searchable="true">
@@ -923,7 +922,7 @@
                             <button type="button" class="button-icon material-symbols-rounded md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-filters">search</button>
                           </p>
                           <section data-worksheet-object class="custom-scrollbar" data-section="3">
-                            <ul id="ul-filters" class="custom-scrollbar" data-search-id="input-search-filters"></ul>
+                            <ul id="ul-filters" class="filters custom-scrollbar" data-search-id="input-search-filters"></ul>
                             <button class="btn-link link" id="btnOpenDialogFilter" type="button" value="Nuovo Filtro">Nuovo Filtro</button>
                           </section>
                         </section>
@@ -1014,16 +1013,16 @@
                             </section>
                           </dialog>
 
-                          <div class="table-content columnsHandler">
+                          <div id="table__content" class="table-content">
                             <section id="sheet__content">
                               <button class="material-symbols-rounded">arrow_menu_close</button>
-                              <p>Filtri del report</p>
+                              <!-- <p>Filtri del report</p> -->
                               <section id="sheet__filters" class="sheet__contents">
                                 <section class="custom-scrollbar">
-                                  <ul id="ul-filters-sheet"></ul>
+                                  <ul id="ul-filters-sheet" class="filters"></ul>
                                 </section>
                               </section>
-                              <p>Colonne nascoste</p>
+                              <!-- <p>Colonne nascoste</p> -->
                               <section id="sheet__columns" class="sheet__contents">
                                 <section class="custom-scrollbar">
                                   <ul id="ul-columns-handler"></ul>

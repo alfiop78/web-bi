@@ -140,12 +140,42 @@ function filterSave(e) {
   App.showConsole(`Nuovo filtro aggiunto al WorkBook: ${name}`, 'done', 2000);
 }
 
+// rimuovo il filtro aggiunto allo Sheet
+function removeFilterFromSheet(e) {
+  const sheetFilter = document.querySelector(`.filter-defined[data-id='${e.target.dataset.filterToken}']`);
+  const token = e.target.dataset.filterToken;
+  if (sheetFilter.dataset.adding || (sheetFilter.dataset.added && !Sheet.edit)) {
+    // quando il filtro ha attr data-adding oppure quando ha data-added e lo Sheet NON è in edit lo elimino
+    sheetFilter.remove();
+    // ripristino (#ul-filters) il filtro eliminato dal report
+    const li__addedFilter = document.querySelector(`ul.filters>li.added[data-id='${token}']`);
+    li__addedFilter.classList.remove('added');
+    const btnAddFilter = document.getElementById(token);
+    btnAddFilter.removeAttribute('disabled');
+  } else {
+    Sheet.removeObject(sheetFilter, e.target.dataset.filterToken);
+  }
+  Sheet.filters.delete(e.target.dataset.filterToken);
+}
+
+function undoRemovedFilter(e) {
+  const token = e.target.dataset.filterToken;
+  // Recupero, da Sheet.removedFilters, gli elementi rimossi per poterli ripristinare
+  Sheet.filters = token;
+  Sheet.objectRemoved.delete(token);
+  delete document.querySelector(`.filter-defined[data-id='${token}']`).dataset.removed;
+
+  const li__selected = document.querySelector(`ul.filters>li[data-id='${token}']`);
+  li__selected.classList.add('added');
+  Sheet.filters = token;
+}
+
 // selezione di un filtro da aggiungere allo Sheet
 function filterSelected(e) {
-  console.log(e.target);
+  // console.log(e.target);
   // aggiungo, sulla <li> del filtro selezionato, la class 'added' per evidenziare che il filtro
   // è stato aggiunto al report, non può essere aggiunto di nuovo.
-  const li__selected = document.querySelector(`li[data-id='${e.target.id}']`);
+  const li__selected = document.querySelector(`ul.filters>li[data-id='${e.target.id}']`);
   li__selected.classList.add('added');
   Sheet.filters = e.target.id;
   addTemplateFilter(e.target.id);
@@ -155,9 +185,9 @@ function filterSelected(e) {
 function addTemplateFilter(token) {
   const parent = document.getElementById('ul-filters-sheet');
   const elementRef = document.getElementById(token);
-  elementRef.disabled = 'true';
+  elementRef.setAttribute('disabled', 'true');
   const tmpl = template_li.content.cloneNode(true);
-  const li = tmpl.querySelector('li.added-list.filters');
+  const li = tmpl.querySelector('li.added-list');
   const span = li.querySelector('span');
   const btnRemove = li.querySelector('button[data-remove]');
   const btnUndo = li.querySelector('button[data-undo]');
@@ -165,7 +195,9 @@ function addTemplateFilter(token) {
   li.dataset.id = elementRef.id;
   (!Sheet.edit) ? li.dataset.added = 'true' : li.dataset.adding = 'true';
   btnRemove.dataset.filterToken = elementRef.id;
+  btnRemove.addEventListener('click', removeFilterFromSheet);
   btnUndo.dataset.filterToken = elementRef.id;
+  btnUndo.addEventListener('click', undoRemovedFilter);
   span.dataset.token = elementRef.id;
   span.innerHTML = elementRef.dataset.label;
   parent.appendChild(li);
@@ -180,7 +212,7 @@ function appendFilter(token) {
   const parent = document.getElementById('ul-filters');
   const tmpl = template_li.content.cloneNode(true);
   // const li = tmpl.querySelector('li.drag-list.filters');
-  const li = tmpl.querySelector('li.toggle-list.filters');
+  const li = tmpl.querySelector('li.toggle-list');
   const span = li.querySelector('span');
   const btnAdd = li.querySelector("button[data-id='filter__add']");
   const filter = WorkBook.filters.get(token);
@@ -188,7 +220,7 @@ function appendFilter(token) {
   btnAdd.id = token;
   btnAdd.dataset.type = "filter";
   btnAdd.dataset.label = filter.name;
-  li.classList.add("filters");
+  // li.classList.add("filters");
   li.dataset.elementSearch = "filters";
   li.dataset.label = filter.name;
   // definisco quale context-menu-template apre questo elemento

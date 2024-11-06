@@ -120,10 +120,13 @@ code {
 }
 
 .column-defined[data-removed],
-.metric-defined[data-removed],
-.filter-defined[data-removed] {
+.metric-defined[data-removed] {
   background-color: lightgrey;
   color: #494949;
+}
+
+.filter-defined[data-removed]>i{
+  background-color: #e2e2e2;
 }
 
 .column-defined[data-removed]>code,
@@ -240,8 +243,18 @@ code {
   height: 100%;
   width: 100%;
   grid-row-gap: 4px;
-  grid-template-rows: auto 1fr auto 2fr;
+  /* grid-template-rows: auto 1fr auto 2fr; */
+  grid-template-rows: 1fr 2fr;
   border-right: solid thin gainsboro;
+}
+
+#sheet__filters::before {
+  content: 'Filtri';
+  font-weight: bold;
+}
+
+#sheet__filters>section {
+  padding-top: 2em;
 }
 
 #sheet__content>button {
