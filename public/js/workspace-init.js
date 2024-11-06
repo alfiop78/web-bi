@@ -26,6 +26,7 @@ const template_li = document.getElementById('tmpl-li');
 const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
 const contextMenuRef = document.getElementById('context-menu');
 const tmplDetails = document.getElementById('tmpl-details-element');
+const btnTogle_table__content = document.getElementById('btnToggle_table__content');
 (() => {
   var app = {
     // templates

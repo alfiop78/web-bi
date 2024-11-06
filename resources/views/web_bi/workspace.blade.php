@@ -1015,14 +1015,12 @@
 
                           <div id="table__content" class="table-content">
                             <section id="sheet__content">
-                              <button class="material-symbols-rounded">arrow_menu_close</button>
-                              <!-- <p>Filtri del report</p> -->
+                              <button id="btnToggle_table__content" class="material-symbols-rounded">arrow_menu_open</button>
                               <section id="sheet__filters" class="sheet__contents">
                                 <section class="custom-scrollbar">
                                   <ul id="ul-filters-sheet" class="filters"></ul>
                                 </section>
                               </section>
-                              <!-- <p>Colonne nascoste</p> -->
                               <section id="sheet__columns" class="sheet__contents">
                                 <section class="custom-scrollbar">
                                   <ul id="ul-columns-handler"></ul>

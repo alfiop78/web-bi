@@ -140,6 +140,12 @@ function filterSave(e) {
   App.showConsole(`Nuovo filtro aggiunto al WorkBook: ${name}`, 'done', 2000);
 }
 
+btnTogle_table__content.onclick = (e) => {
+  const table__content = document.getElementById('table__content');
+  table__content.toggleAttribute('open');
+  e.target.innerText = (table__content.hasAttribute('open')) ? 'arrow_menu_close' : 'arrow_menu_open';
+}
+
 // rimuovo il filtro aggiunto allo Sheet
 function removeFilterFromSheet(e) {
   const sheetFilter = document.querySelector(`.filter-defined[data-id='${e.target.dataset.filterToken}']`);
@@ -179,6 +185,11 @@ function filterSelected(e) {
   li__selected.classList.add('added');
   Sheet.filters = e.target.id;
   addTemplateFilter(e.target.id);
+  // se nella #ul-filters-sheet è presente 1 elemento apro il table__content, in questo modo si evidenzia il fatto
+  // che ho aggiunto un filtro al report
+  const table__content = document.getElementById('table__content');
+  if (document.querySelector('#ul-filters-sheet>li').childElementCount >= 1) table__content.setAttribute('open', 'true');
+  btnTogle_table__content.innerText = (table__content.hasAttribute('open')) ? 'arrow_menu_close' : 'arrow_menu_open';
 }
 
 // aggiunta del filtro alla sezione #ul-filters-sheet

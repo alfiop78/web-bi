@@ -255,13 +255,11 @@ ul.context-menu-items {
   cursor: context-menu !important;
 }
 
-li.toggle-list.filters>button,
-li.added-list.filters>button {
+ul.filters>li.toggle-list>button {
   visibility: hidden;
 }
 
-li.toggle-list.filters:hover>button:not(:disabled),
-li.added-list.filters:hover>button {
+ul.filters>li.toggle-list:hover>button:not(:disabled) {
   visibility: visible;
 }
 

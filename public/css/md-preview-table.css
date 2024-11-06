@@ -88,8 +88,6 @@ thead th[data-metric-token]{
 
 .sheet-preview>.table-content{
   position: relative;
-  /* width: 100%; */
-  /* height: calc(100% - 38px); */
 }
 
 .table-content {
@@ -98,12 +96,20 @@ thead th[data-metric-token]{
   transition: grid-template-columns 250ms;
 }
 
-.table-content:not(.open) #sheet__filters::before {
+.table-content #sheet__filters::before {
   content: unset;
 }
 
-.table-content.open {
-  grid-template-columns: 300px auto;
+.table-content[open] #sheet__filters::before {
+  content: 'Filtri';
+}
+
+.table-content[open] #sheet__columns::before {
+  content: 'Visualizza/Nascondi Colonne';
+}
+
+.table-content[open] {
+  grid-template-columns: 300px 1fr;
 }
 
 .hiddenColumn {opacity: .4;}

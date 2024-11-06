@@ -248,20 +248,23 @@ code {
   border-right: solid thin gainsboro;
 }
 
-#sheet__filters::before {
-  content: 'Filtri';
+.sheet__contents::before {
   font-weight: bold;
 }
 
-#sheet__filters>section {
+.sheet__contents>section {
   padding-top: 2em;
 }
 
 #sheet__content>button {
   position: absolute;
-  right: 0px;
-  top: calc(50% - 14px);
+  z-index: 10;
+  right: -12px;
+  top: calc(50% - 20px);
   padding: unset;
+  background-color: gainsboro;
+  border-radius: 4px;
+  height: 40px;
 }
 
 #sheet__content>p {
