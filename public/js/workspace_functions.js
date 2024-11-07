@@ -3,10 +3,9 @@ console.info('workspace_functions');
 // vertica : 'float', 'integer', 'numeric'
 // mysql : 'decimal', 'int', 'double'
 const numericDataType = ['float', 'integer', 'numeric', 'decimal', 'int', 'double'];
-var xCoordinate = {};
-var definedElement;
 var popupSuggestions;
 const sel = document.getSelection();
+var dragSrcElement = null;
 
 const rand = () => Math.random(0).toString(36).substring(2);
 const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
@@ -194,47 +193,70 @@ function filterSelected(e) {
   btnTogle_table__content.innerText = (table__content.hasAttribute('open')) ? 'arrow_menu_close' : 'arrow_menu_open';
 }
 
-function definedMouseDown(e) {
-  console.log('mousedown');
-  e.preventDefault();
-  // console.log(e);
-  if (e.button === 2) return;
-  xCoordinate = e.currentTarget.offsetLeft;
-  e.currentTarget.classList.add("move");
-  // console.log(e.currentTarget.offsetLeft);
-  definedElement = e.currentTarget;
+// TEST: implementazione del dragdrop per gli elementi .defined
+function handleColumnDragStart(e) {
+  this.style.opacity = '0.4';
+
+  // if (!e.ctrlKey || e.button === 2) return;
+  dragSrcElement = this;
+
+  e.dataTransfer.effectAllowed = 'move';
+  // e.dataTransfer.setData('text/html', this.innerHTML);
 }
 
-function definedMouseMove(e) {
-  e.preventDefault();
-  console.log(e.target.getClientRects());
-  // console.log('mouseover');
-  if (definedElement) {
-    // console.log(e);
-    console.log(e.movementX);
-    // xCoordinate = e.currentTarget.offsetLeft;
-    // console.log(e.currentTarget.offsetLeft);
-    console.log(e.movementX);
-    // xCoordinate += e.movementX;
-    e.currentTarget.style.left += `${e.movementX}px`;
-    // console.log(xCoordinate);
-    // e.currentTarget.left = `${xCoordinate}px`;
+function handleColumnDragOver(e) {
+  if (e.preventDefault) e.preventDefault();
+  // if (!e.ctrlKey) return;
+  const elementAt = document.elementFromPoint(e.clientX, e.clientY);
+  if (elementAt === dragSrcElement) return false;
+  // console.log(elementAt);
+  // verifico che l'elemento su cui sto passando sia un .column-defined
+  if (elementAt.classList.contains('column-defined')) {
+    if (dragSrcElement.offsetLeft - elementAt.offsetLeft <= (dragSrcElement.offsetWidth / 2)) {
+      elementAt.after(dragSrcElement);
+    } else {
+      elementAt.before(dragSrcElement);
+    }
+    e.dataTransfer.dropEffect = 'move';
+
   }
+
+  return false;
 }
 
-function definedMouseUp(e) {
-  // console.log('mouseup');
-  e.preventDefault();
-  if (!definedElement) return;
-  delete definedElement;
+function handleColumnDragEnter(e) {
+  this.classList.add('over');
 }
 
-function definedMouseLeave(e) {
-  e.preventDefault();
-  // console.log('tableMouseLeave');
-  if (definedElement) delete definedElement;
-  e.currentTarget.classList.remove("move");
+function handleColumnDragLeave(e) {
+  this.classList.remove('over');
 }
+
+function handleColumnDragEnd(e) {
+  this.style.opacity = '1';
+  let items = document.querySelectorAll('.column-defined');
+
+  items.forEach(function(item) {
+    item.classList.remove('over');
+  });
+}
+
+function handleColumnDrop(e) {
+  if (e.stopPropagation) {
+    e.stopPropagation(); // stops the browser from redirecting.
+  }
+
+  // elementAt.before(dragSrcEl);
+  // console.log(dragSrcEl, this);
+  /* if (dragSrcEl != this) {
+      dragSrcEl.innerHTML = this.innerHTML;
+      this.innerHTML = e.dataTransfer.getData('text/html');
+  } */
+
+  return false;
+}
+
+// TEST: implementazione del dragdrop per gli elementi .defined
 
 // aggiunta del filtro alla sezione #ul-filters-sheet
 function addTemplateFilter(token) {
@@ -316,10 +338,11 @@ function appendMetric(parent, token) {
 
 function elementDragStart(e) {
   // console.log('column drag start');
+  console.log(e.currentTarget);
   // console.log('e.target : ', e.target.id);
   e.target.classList.add('dragging');
   e.dataTransfer.setData('text/plain', e.target.id);
-  console.log(e.dataTransfer);
+  // console.log(e.dataTransfer);
   e.dataTransfer.effectAllowed = "copy";
 }
 

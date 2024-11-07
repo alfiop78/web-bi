@@ -237,7 +237,7 @@ const btnTogle_table__content = document.getElementById('btnToggle_table__conten
 
   app.elementDragEnter = (e) => {
     e.preventDefault();
-    console.log(e.currentTarget);
+    // console.log(e.currentTarget);
     if (e.currentTarget.classList.contains('dropzone')) {
       const data = e.dataTransfer.getData('text/plain');
       // console.log(e.currentTarget, e.target);
@@ -262,7 +262,7 @@ const btnTogle_table__content = document.getElementById('btnToggle_table__conten
 
   app.elementDragLeave = (e) => {
     e.preventDefault();
-    console.log(e.currentTarget);
+    // console.log(e.currentTarget);
     e.currentTarget.classList.remove('dropping');
   }
 
@@ -491,10 +491,13 @@ const btnTogle_table__content = document.getElementById('btnToggle_table__conten
     // const workBookField = WorkBook.field.get(token).origin_field;
     field.dataset.type = 'column';
     field.dataset.label = Sheet.fields.get(token);
-    field.addEventListener('mousedown', definedMouseDown);
-    field.addEventListener('mousemove', definedMouseMove);
-    field.addEventListener('mouseleave', definedMouseLeave);
-    field.addEventListener('mouseup', definedMouseUp);
+    field.setAttribute('draggable', 'true');
+    field.addEventListener('dragstart', handleColumnDragStart, false);
+    field.addEventListener('dragover', handleColumnDragOver, false);
+    field.addEventListener('dragenter', handleColumnDragEnter, false);
+    field.addEventListener('dragleave', handleColumnDragLeave, false);
+    field.addEventListener('dragend', handleColumnDragEnd, false);
+    field.addEventListener('drop', handleColumnDrop, false);
     // field.dataset.name = workBookField;
     field.dataset.id = token;
     // if (!Sheet.edit) field.dataset.added = 'true';
@@ -510,7 +513,7 @@ const btnTogle_table__content = document.getElementById('btnToggle_table__conten
     // TODO: da aggiungere in fase di creazione del process
     Sheet.tables = WorkBook.field.get(token).tableAlias;
     target.appendChild(field);
-    field.dataset.x = field.offsetLeft;
+    field.dataset.x = 0;
     // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
     // i.addEventListener('click', app.handlerSetMetric);
   }
