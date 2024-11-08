@@ -5,7 +5,12 @@ console.info('workspace_functions');
 const numericDataType = ['float', 'integer', 'numeric', 'decimal', 'int', 'double'];
 var popupSuggestions;
 const sel = document.getSelection();
-var dragSrcElement = null;
+// utilizzate nel drag&drop .column-defined
+var dragSrcEl = null;
+var elementAt = null;
+const span = document.createElement('span');
+span.className = 'mark';
+var subsequentElements;
 
 const rand = () => Math.random(0).toString(36).substring(2);
 const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1 };
@@ -194,66 +199,77 @@ function filterSelected(e) {
 }
 
 // TEST: implementazione del dragdrop per gli elementi .defined
-function handleColumnDragStart(e) {
-  this.style.opacity = '0.4';
+function handleDragStart(e) {
+  this.style.opacity = '0.2';
 
-  // if (!e.ctrlKey || e.button === 2) return;
-  dragSrcElement = this;
+  dragSrcEl = this;
 
   e.dataTransfer.effectAllowed = 'move';
-  // e.dataTransfer.setData('text/html', this.innerHTML);
+  e.dataTransfer.setData('text/html', this.innerHTML);
 }
 
-function handleColumnDragOver(e) {
+// over all'interno di #dropzone-rows
+function handleDragOver(e) {
   if (e.preventDefault) e.preventDefault();
-  // if (!e.ctrlKey) return;
-  const elementAt = document.elementFromPoint(e.clientX, e.clientY);
-  if (elementAt === dragSrcElement) return false;
+  // console.log(this);
+  elementAt = document.elementFromPoint(e.clientX, e.clientY);
+  subsequentElements = document.elementFromPoint(e.clientX, e.clientY);
   // console.log(elementAt);
-  // verifico che l'elemento su cui sto passando sia un .column-defined
-  if (elementAt.classList.contains('column-defined')) {
-    if (dragSrcElement.offsetLeft - elementAt.offsetLeft <= (dragSrcElement.offsetWidth / 2)) {
-      elementAt.after(dragSrcElement);
-    } else {
-      elementAt.before(dragSrcElement);
+  if (elementAt.classList.contains('box')) {
+    // .box
+    // fino a quando elementAt ha un elemento successivo, sposto tutti di 20px left con la cssClass .diff
+    if (dragSrcEl !== elementAt) {
+      while (subsequentElements.nextElementSibling) {
+        subsequentElements.nextElementSibling.classList.add('diff');
+        subsequentElements = subsequentElements.nextElementSibling;
+      }
     }
-    e.dataTransfer.dropEffect = 'move';
-
+    // se il mouse si trova sullo stesso elemento (elementAt === dragSrcEl) non visualizzo lo span
+    if (dragSrcEl !== elementAt) elementAt.before(span);
+  } else {
+    // .container
+    elementAt.appendChild(span);
+    // this.appendChild(dragSrcEl);
   }
 
+  e.dataTransfer.dropEffect = 'move';
+
   return false;
+
 }
 
-function handleColumnDragEnter(e) {
-  this.classList.add('over');
+function handleDragEnter(e) {
+  console.log('drageneter');
+  console.log(this, dragSrcEl);
+  // this.classList.add('over');
+  if (this !== dragSrcEl) this.classList.add('over');
 }
 
-function handleColumnDragLeave(e) {
+function handleDragLeave(e) {
+  console.log('dragLeave');
   this.classList.remove('over');
+  this.parentElement.querySelectorAll('.diff').forEach(el => el.classList.remove('diff'));
 }
 
-function handleColumnDragEnd(e) {
-  this.style.opacity = '1';
-  let items = document.querySelectorAll('.column-defined');
+// drop nella #dropzone-rows
+function handleRowDrop(e) {
+  if (e.stopPropagation) e.stopPropagation();
 
+  // TODO: commentare il codice (testato su example_collection)
+  dragSrcEl.classList.replace('el', 'box');
+  elementAt.classList.remove('over');
+  span.after(dragSrcEl);
+  span?.remove();
+  this.querySelectorAll('.diff').forEach(el => el.classList.remove('diff'));
+}
+
+function handleDragEnd(e) {
+  this.style.opacity = '1';
+
+  // FIX: valorizzare items (appunti su example_collection)
   items.forEach(function(item) {
     item.classList.remove('over');
   });
-}
-
-function handleColumnDrop(e) {
-  if (e.stopPropagation) {
-    e.stopPropagation(); // stops the browser from redirecting.
-  }
-
-  // elementAt.before(dragSrcEl);
-  // console.log(dragSrcEl, this);
-  /* if (dragSrcEl != this) {
-      dragSrcEl.innerHTML = this.innerHTML;
-      this.innerHTML = e.dataTransfer.getData('text/html');
-  } */
-
-  return false;
 }
 
 // TEST: implementazione del dragdrop per gli elementi .defined

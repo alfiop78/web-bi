@@ -492,12 +492,10 @@ const btnTogle_table__content = document.getElementById('btnToggle_table__conten
     field.dataset.type = 'column';
     field.dataset.label = Sheet.fields.get(token);
     field.setAttribute('draggable', 'true');
-    field.addEventListener('dragstart', handleColumnDragStart, false);
-    field.addEventListener('dragover', handleColumnDragOver, false);
-    field.addEventListener('dragenter', handleColumnDragEnter, false);
-    field.addEventListener('dragleave', handleColumnDragLeave, false);
-    field.addEventListener('dragend', handleColumnDragEnd, false);
-    field.addEventListener('drop', handleColumnDrop, false);
+    field.addEventListener('dragstart', handleDragStart, false);
+    field.addEventListener('dragenter', handleDragEnter, false);
+    field.addEventListener('dragleave', handleDragLeave, false);
+    field.addEventListener('dragend', handleDragEnd, false);
     // field.dataset.name = workBookField;
     field.dataset.id = token;
     // if (!Sheet.edit) field.dataset.added = 'true';
@@ -853,11 +851,8 @@ const btnTogle_table__content = document.getElementById('btnToggle_table__conten
   app.columnsDropzone.addEventListener('drop', app.columnDrop, false);
   // app.columnsDropzone.addEventListener('dragend', app.columnDragEnd, false);
   // dropzone sheet rows
-  app.rowsDropzone.addEventListener('dragenter', app.elementDragEnter, false);
-  app.rowsDropzone.addEventListener('dragover', app.elementDragOver, false);
-  app.rowsDropzone.addEventListener('dragleave', app.elementDragLeave, false);
-  app.rowsDropzone.addEventListener('drop', app.rowDrop, false);
-  // app.rowsDropzone.addEventListener('dragend', app.rowDragEnd, false);
+  app.rowsDropzone.addEventListener('dragover', handleDragOver, false);
+  app.rowsDropzone.addEventListener('drop', handleRowDrop, false);
   /* NOTE: END DRAG&DROP EVENTS */
 
   // TODO: da spostare in supportFn.js
