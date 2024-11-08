@@ -188,6 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
     dlgCompositeMetricCheck();
     dlgCompositeMetric.showModal();
   }
+  // dropzone sheet rows
+  rowsDropzone.addEventListener('dragover', handleDragOver, false);
+  rowsDropzone.addEventListener('drop', handleRowDrop, false);
 
 }); // end DOMContentLoaded
 

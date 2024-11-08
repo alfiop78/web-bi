@@ -71,8 +71,32 @@ code {
   padding: 2px 6px;
   border-radius: 2px;
   width: auto;
-  left: 0px;
-  transition: left 500ms;
+  /* left: 0px; */
+  /* transition: left 250ms; */
+}
+
+.pointer__none {
+  pointer-events: none;
+}
+
+.dropzone .box {
+  left: 0;
+  transition: left 150ms;
+}
+
+.dropzone .box.over {
+  border: 2px dotted #666;
+  left: 10px;
+}
+
+.dropzone .box.diff {
+  left: 10px;
+}
+
+.dropzone .bookmarkDrop {
+  background-color: black;
+  height: inherit;
+  width: 1px;
 }
 
 .filter-defined {

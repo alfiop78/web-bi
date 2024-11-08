@@ -26,7 +26,12 @@ const template_li = document.getElementById('tmpl-li');
 const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
 const contextMenuRef = document.getElementById('context-menu');
 const tmplDetails = document.getElementById('tmpl-details-element');
+const template_columnDefined = document.getElementById('tmpl-columns-defined');
+
 const btnTogle_table__content = document.getElementById('btnToggle_table__content');
+// dropzone
+const rowsDropzone = document.getElementById('dropzone-rows');
+
 (() => {
   var app = {
     // templates
@@ -77,7 +82,6 @@ const btnTogle_table__content = document.getElementById('btnToggle_table__conten
     workbookTablesStruct: document.querySelector('#workbook-objects'),
     // columns and rows dropzone (step 2)
     columnsDropzone: document.getElementById('dropzone-columns'),
-    rowsDropzone: document.getElementById('dropzone-rows'),
     // filtersDropzone: document.getElementById('dropzone-filters'),
     textareaCompositeMetric: document.getElementById('textarea-composite-metric'),
     txtAreaIdColumn: document.getElementById('textarea-column-id'),
@@ -488,7 +492,6 @@ const btnTogle_table__content = document.getElementById('btnToggle_table__conten
     const code = field.querySelector('code');
     const btnRemove = field.querySelector('button[data-remove]');
     const btnUndo = field.querySelector('button[data-undo]');
-    // const workBookField = WorkBook.field.get(token).origin_field;
     field.dataset.type = 'column';
     field.dataset.label = Sheet.fields.get(token);
     field.setAttribute('draggable', 'true');
@@ -496,7 +499,6 @@ const btnTogle_table__content = document.getElementById('btnToggle_table__conten
     field.addEventListener('dragenter', handleDragEnter, false);
     field.addEventListener('dragleave', handleDragLeave, false);
     field.addEventListener('dragend', handleDragEnd, false);
-    // field.dataset.name = workBookField;
     field.dataset.id = token;
     // if (!Sheet.edit) field.dataset.added = 'true';
     // In edit:true imposto il dataset.adding altrimenti dataset.added
@@ -511,9 +513,6 @@ const btnTogle_table__content = document.getElementById('btnToggle_table__conten
     // TODO: da aggiungere in fase di creazione del process
     Sheet.tables = WorkBook.field.get(token).tableAlias;
     target.appendChild(field);
-    field.dataset.x = 0;
-    // TODO: impostare qui gli eventi che mi potranno servire in futuro (per editare o spostare questo elemento droppato)
-    // i.addEventListener('click', app.handlerSetMetric);
   }
 
   // right
@@ -850,9 +849,6 @@ const btnTogle_table__content = document.getElementById('btnToggle_table__conten
   app.columnsDropzone.addEventListener('dragleave', app.elementDragLeave, false);
   app.columnsDropzone.addEventListener('drop', app.columnDrop, false);
   // app.columnsDropzone.addEventListener('dragend', app.columnDragEnd, false);
-  // dropzone sheet rows
-  app.rowsDropzone.addEventListener('dragover', handleDragOver, false);
-  app.rowsDropzone.addEventListener('drop', handleRowDrop, false);
   /* NOTE: END DRAG&DROP EVENTS */
 
   // TODO: da spostare in supportFn.js
@@ -2546,8 +2542,10 @@ const btnTogle_table__content = document.getElementById('btnToggle_table__conten
       li.dataset.table = value.table;
       li.dataset.alias = value.tableAlias;
       li.dataset.field = value.name;
-      i.addEventListener('dragstart', app.elementDragStart);
-      i.addEventListener('dragend', app.elementDragEnd);
+      i.addEventListener('dragstart', handleDragStart);
+      i.addEventListener('dragend', handleDragEnd);
+      i.addEventListener('dragenter', handleDragEnter);
+      i.addEventListener('dragleave', handleDragLeave);
       // span.innerHTML = value.field.ds.sql.join('');
       span.innerHTML = value.name;
       parent.appendChild(li);

@@ -9,7 +9,7 @@ const sel = document.getSelection();
 var dragSrcEl = null;
 var elementAt = null;
 const span = document.createElement('span');
-span.className = 'mark';
+span.className = 'bookmarkDrop';
 var subsequentElements;
 
 const rand = () => Math.random(0).toString(36).substring(2);
@@ -201,11 +201,13 @@ function filterSelected(e) {
 // TEST: implementazione del dragdrop per gli elementi .defined
 function handleDragStart(e) {
   this.style.opacity = '0.2';
-
   dragSrcEl = this;
-
   e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/html', this.innerHTML);
+  (this.id) ? e.dataTransfer.setData('text/plain', this.id) : e.dataTransfer.setData('text/plain', this.dataset.id);
+  // e.dataTransfer.setData('text/plain', this.id);
+  // aggiungo la cssClass pointer__none per impostare pointer-events: none sugli elementi child di .column-defined.box
+  // in questo modo, in handleDragOver, quando il mouse passa su questi elementi non vengono presi in considerazione da elementFromPoint
+  document.querySelectorAll('.dropzone.rows>.column-defined>*').forEach(item => item.classList.add('pointer__none'));
 }
 
 // over all'interno di #dropzone-rows
@@ -216,7 +218,7 @@ function handleDragOver(e) {
   subsequentElements = document.elementFromPoint(e.clientX, e.clientY);
   // console.log(elementAt);
   if (elementAt.classList.contains('box')) {
-    // .box
+    // .column-defined.box
     // fino a quando elementAt ha un elemento successivo, sposto tutti di 20px left con la cssClass .diff
     if (dragSrcEl !== elementAt) {
       while (subsequentElements.nextElementSibling) {
@@ -227,36 +229,70 @@ function handleDragOver(e) {
     // se il mouse si trova sullo stesso elemento (elementAt === dragSrcEl) non visualizzo lo span
     if (dragSrcEl !== elementAt) elementAt.before(span);
   } else {
-    // .container
-    elementAt.appendChild(span);
-    // this.appendChild(dragSrcEl);
+    // .dropzone.rows
+    // Quando il mouse passa sopra questi elementi vanno gestiti
+    if (elementAt.classList.contains('dropzone')) elementAt.appendChild(span);
   }
-
   e.dataTransfer.dropEffect = 'move';
 
   return false;
-
 }
 
 function handleDragEnter(e) {
-  console.log('drageneter');
-  console.log(this, dragSrcEl);
+  // console.log('drageneter');
+  // console.log(this, dragSrcEl);
   // this.classList.add('over');
   if (this !== dragSrcEl) this.classList.add('over');
 }
 
 function handleDragLeave(e) {
-  console.log('dragLeave');
+  // console.log('dragLeave');
   this.classList.remove('over');
   this.parentElement.querySelectorAll('.diff').forEach(el => el.classList.remove('diff'));
+}
+
+// aggiungo l'elemento droppato #dropzone-rows
+function createColumnDefined(token) {
+  const template = template_columnDefined.content.cloneNode(true);
+  const field = template.querySelector('.column-defined');
+  const code = field.querySelector('code');
+  const btnRemove = field.querySelector('button[data-remove]');
+  const btnUndo = field.querySelector('button[data-undo]');
+  Sheet.fields = { token, name: WorkBook.field.get(token).name };
+  field.dataset.label = Sheet.fields.get(token);
+  field.addEventListener('dragstart', handleDragStart, false);
+  field.addEventListener('dragenter', handleDragEnter, false);
+  field.addEventListener('dragleave', handleDragLeave, false);
+  field.addEventListener('dragend', handleDragEnd, false);
+  field.dataset.id = token;
+  // if (!Sheet.edit) field.dataset.added = 'true';
+  // In edit:true imposto il dataset.adding altrimenti dataset.added
+  (!Sheet.edit) ? field.dataset.added = 'true' : field.dataset.adding = 'true';
+  btnRemove.dataset.columnToken = token;
+  btnRemove.dataset.label = Sheet.fields.get(token);
+  btnUndo.dataset.columnToken = token;
+  // field.dataset.token = elementRef.id;
+  code.dataset.token = token;
+  code.innerHTML = Sheet.fields.get(token);
+  // aggiungo a Sheet.fields solo le proprietà utili alla creazione della query
+  // TODO: da aggiungere in fase di creazione del process
+  Sheet.tables = WorkBook.field.get(token).tableAlias;
+  return field;
 }
 
 // drop nella #dropzone-rows
 function handleRowDrop(e) {
   if (e.stopPropagation) e.stopPropagation();
-
+  e.preventDefault();
+  // console.log('DROP : ',elementAt);
+  // debugger;
   // TODO: commentare il codice (testato su example_collection)
-  dragSrcEl.classList.replace('el', 'box');
+  // recupero le informazioni (dataset) riguardo l'elemento droppato per poter creare il .column-defined che andrà posizionato nella #dropzone-rows
+  const token = e.dataTransfer.getData('text/plain');
+  // se il dataset.id è già presente sull'elemento che sto droppando significa che sto spostando un div .column-defined.box che era già stato
+  // droppato (colonna già droppata)
+  if (!dragSrcEl.dataset.id) dragSrcEl = createColumnDefined(token);
+  dragSrcEl.classList.add('box');
   elementAt.classList.remove('over');
   span.after(dragSrcEl);
   span?.remove();
@@ -265,11 +301,14 @@ function handleRowDrop(e) {
 
 function handleDragEnd(e) {
   this.style.opacity = '1';
-
-  // FIX: valorizzare items (appunti su example_collection)
-  items.forEach(function(item) {
-    item.classList.remove('over');
-  });
+  document.querySelectorAll('.dropzone.rows>.column-defined>*').forEach(item => item.classList.remove('pointer__none'));
+  document.querySelectorAll('.dropzone.rows>div').forEach(item => item.classList.remove('over'));
+  // ogni elemento droppato viene posizionato alla fine dell'oggetto Map Sheet.fields perchè il Map() conserva l'ordine
+  // di inserimento. L'ordine di inserimento contenuto in Sheet.fields non corrisponde agli elementi aggiunti col drag&drop perchè questi
+  // possono essere spostati.
+  // Quindi plisco Sheet.fields e lo ricreo in base all'ordine rappresentato nel DOM #dropzone-rows
+  Sheet.fields.clear();
+  document.querySelectorAll('#dropzone-rows>.column-defined').forEach(field => Sheet.fields = {token : field.dataset.id, name : WorkBook.field.get(field.dataset.id).name});
 }
 
 // TEST: implementazione del dragdrop per gli elementi .defined

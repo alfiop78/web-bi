@@ -214,7 +214,8 @@
     </template>
 
     <template id="tmpl-columns-defined">
-      <div class="column-defined">
+      <div class="column-defined box" data-type="column" draggable="true">
+          <!-- TODO: modificare il layout per fare in modo da visualizzare l'icona drag sulla sinistra e le icone remove/undo sulla destra, a comparsa -->
         <i class="button-icon material-symbols-rounded md-18">table_rows</i>
         <code contenteditable="true" data-blur-fn="editFieldAlias" spellcheck="false"></code>
         <button type="button" data-remove class="button-icon material-symbols-rounded md-18 column-defined" data-fn="removeDefinedColumn" data-column-token>delete</button>

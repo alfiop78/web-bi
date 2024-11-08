@@ -30,6 +30,10 @@
   display: none;
 }
 
+[draggable] {
+  user-select: none;
+}
+
 /* *::-webkit-scrollbar-thumb {
   display: block;
   background-color: #5f6162c7;
@@ -269,10 +273,10 @@ footer>.footerContent {
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
 }
 
-.box {
+/* .box {
   height: 300px;
   background-color: firebrick;
-}
+} */
 
 .autofit .box1 {
   grid-column: 1;
