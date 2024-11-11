@@ -938,14 +938,12 @@
                         <section class="columns-rows">
                           <div id="sheet-columns" class="relative">
                             <section class="sheet-elements">
-                              <span>Colonne</span>
-                              <section id="dropzone-columns" class="dropzone columns custom-scrollbar"></section>
+                              <section id="dropzone-columns" class="dropzone columns custom-scrollbar" data-attr="Colonne"></section>
                             </section>
                           </div>
                           <div id="sheet-rows" class="relative">
                             <section class="sheet-elements">
-                              <span>Righe</span>
-                              <section id="dropzone-rows" class="dropzone rows custom-scrollbar"></section>
+                              <section id="dropzone-rows" class="dropzone rows custom-scrollbar" data-attr="Righe"></section>
                             </section>
                           </div>
                           <!-- <div id="sheet-filters" class="relative">

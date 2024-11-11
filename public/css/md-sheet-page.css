@@ -21,16 +21,26 @@ code {
 
 .report-area .sheet-elements {
   display: grid;
-  grid-template-columns: 60px 1fr;
+  grid-template-columns: 1fr;
   user-select: none;
   align-items: center;
   /* grid-column-gap: 4px; */
   /* padding: 4px; */
-  height: 42px;
+  height: 55px;
 }
 
 .report-area .report-preview {
   border: solid thin gainsboro;
+}
+
+.dropzone[data-attr]::before {
+  content: attr(data-attr);
+  position: absolute;
+  font-style: italic;
+  color: gray;
+  font-size: .9rem;
+  /* top: 0px; */
+  left: 0px;
 }
 
 .sheet-elements .dropzone {
@@ -45,7 +55,7 @@ code {
   height: 100%;
   transition: height 500ms;
   align-items: center;
-  padding: 0px 4px 8px 4px;
+  padding: 2px 6px 14px 4em;
 }
 
 .relative {
@@ -73,6 +83,14 @@ code {
   width: auto;
   /* left: 0px; */
   /* transition: left 250ms; */
+}
+
+.metric-defined>code[data-field],
+.column-defined>code {
+  width: 110px;
+  /* max-width: 130px; */
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .pointer__none {
@@ -199,7 +217,7 @@ code {
   display: none;
 }
 
-
+.metric-defined[data-type="basic"]:not([data-removed]),
 .metric-defined[data-type="advanced"]:not([data-removed]) {
   background-color: var(--metrics);
 }

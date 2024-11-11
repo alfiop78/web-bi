@@ -482,56 +482,6 @@ const rowsDropzone = document.getElementById('dropzone-rows');
     app.addFilters(e.currentTarget, elementRef);
   }
 
-  /* addField viene utilizzate sia quando si effettua il drag&drop sulla dropzone-rows che
-  * quando si apre un nuovo Sheet per ripololare la dropzone-rows con gli elementi proveniente da Sheet.open()
-  */
-  app.addField = (target, token) => {
-    // aggiunti allo sheet avranno un attributo (su .column-defined) data-added
-    const tmpl = app.tmplColumnsDefined.content.cloneNode(true);
-    const field = tmpl.querySelector('.column-defined');
-    const code = field.querySelector('code');
-    const btnRemove = field.querySelector('button[data-remove]');
-    const btnUndo = field.querySelector('button[data-undo]');
-    field.dataset.type = 'column';
-    field.dataset.label = Sheet.fields.get(token);
-    field.setAttribute('draggable', 'true');
-    field.addEventListener('dragstart', handleDragStart, false);
-    field.addEventListener('dragenter', handleDragEnter, false);
-    field.addEventListener('dragleave', handleDragLeave, false);
-    field.addEventListener('dragend', handleDragEnd, false);
-    field.dataset.id = token;
-    // if (!Sheet.edit) field.dataset.added = 'true';
-    // In edit:true imposto il dataset.adding altrimenti dataset.added
-    (!Sheet.edit) ? field.dataset.added = 'true' : field.dataset.adding = 'true';
-    btnRemove.dataset.columnToken = token;
-    btnRemove.dataset.label = Sheet.fields.get(token);
-    btnUndo.dataset.columnToken = token;
-    // field.dataset.token = elementRef.id;
-    code.dataset.token = token;
-    code.innerHTML = Sheet.fields.get(token);
-    // aggiungo a Sheet.fields solo le proprietà utili alla creazione della query
-    // TODO: da aggiungere in fase di creazione del process
-    Sheet.tables = WorkBook.field.get(token).tableAlias;
-    target.appendChild(field);
-  }
-
-  // right
-  app.rowDrop = (e) => {
-    e.preventDefault();
-    // e.currentTarget.classList.replace('dropping', 'dropped');
-    e.currentTarget.classList.remove('dropping');
-    if (!e.currentTarget.classList.contains('dropzone')) return;
-    const elementId = e.dataTransfer.getData('text/plain');
-    const elementRef = document.getElementById(elementId);
-    // TODO: verifica se l'elemento droppato è compatibile con il currentTarget
-    // es.: non posso droppare una metrica nella sezione filtri
-    // elementRef : è l'elemento nella lista di sinistra che ho draggato
-    // TODO: rinominare elementRef.id in elementRef.dataset.token
-    // salvo, in Sheet.fields, solo il token, mi riferirò a questo elemento dalla sua definizione in WorkBook.fields
-    Sheet.fields = { token: elementRef.id, name: WorkBook.field.get(elementRef.id).name };
-    app.addField(e.currentTarget, elementRef.id);
-  }
-
   // Modifica di una metrica composta di base
   app.editCustomMetric = (e) => {
     const metric = WorkBook.metrics.get(e.currentTarget.dataset.token);
@@ -1133,7 +1083,7 @@ const rowsDropzone = document.getElementById('dropzone-rows');
     for (const [token, field] of Sheet.fields) {
       // WARN: per il momento il target per i fields è sempre #dropzone-rows
       const target = document.getElementById('dropzone-rows');
-      app.addField(target, token)
+      target.appendChild(createColumnDefined(token));
     }
 
     for (const [token, metrics] of Sheet.metrics) {
