@@ -640,7 +640,7 @@ class Cube
       $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->WHERE_metricTable[$this->factId]);
     }
 
-    if (array_key_exists($this->factId, $this->where_time_clause)) $this->sqlAdvancedMeasures .= "\nAND" . implode("\nAND ", $this->where_time_clause[$this->factId]);
+    if (array_key_exists($this->factId, $this->where_time_clause)) $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->where_time_clause[$this->factId]);
     // dd($this->sqlAdvancedMeasures);
     // dd($this->where_time_clause, $this->WHERE_timingFn, $this->WHERE_metricTable);
     // utilizzo array_merge, verranno unite le join della TIME e, quelle con key uguale, verranno sovrascirtte
