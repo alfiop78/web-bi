@@ -215,11 +215,13 @@
 
     <template id="tmpl-columns-defined">
       <div class="column-defined box" data-type="column" draggable="true">
-          <!-- TODO: modificare il layout per fare in modo da visualizzare l'icona drag sulla sinistra e le icone remove/undo sulla destra, a comparsa -->
-        <i class="button-icon material-symbols-rounded md-18">table_rows</i>
+        <!-- TODO: modificare il layout per fare in modo da visualizzare l'icona drag sulla sinistra e le icone remove/undo sulla destra, a comparsa -->
+        <i class="button-icon material-symbols-rounded md-18">drag_handle</i>
         <code contenteditable="true" data-blur-fn="editFieldAlias" spellcheck="false"></code>
         <button type="button" data-remove class="button-icon material-symbols-rounded md-18 column-defined" data-fn="removeDefinedColumn" data-column-token>delete</button>
         <button type="button" data-undo class="button-icon material-symbols-rounded md-18 column-defined" data-fn="undoDefinedColumn" data-column-token>undo</button>
+        <!-- <div class="defined_contents"> -->
+        <!-- </div> -->
       </div>
     </template>
 
@@ -250,6 +252,7 @@
       <!-- 08-09-2023 -->
       <div class="metric-defined metrics">
         <!-- <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span> -->
+        <i class="button-icon material-symbols-rounded md-18">drag_handle</i>
         <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate" spellcheck="false"></code>
         <!-- <span data-field></span> -->
         <code data-field data-token data-value contenteditable="true" data-blur-fn="editMetricName" spellcheck="false"></code>
@@ -946,12 +949,6 @@
                               <section id="dropzone-rows" class="dropzone rows custom-scrollbar" data-attr="Righe"></section>
                             </section>
                           </div>
-                          <!-- <div id="sheet-filters" class="relative">
-                            <section class="sheet-elements">
-                              <span>Filtri</span>
-                              <section id="dropzone-filters" class="dropzone filters custom-scrollbar"></section>
-                            </section>
-                          </div> -->
                         </section>
                         <section class="sheet-preview">
                           <dialog id="dlg-sheet-config" data-x="0" data-y="0" class="absolute moveable">
@@ -1012,9 +1009,9 @@
                             </section>
                           </dialog>
 
-                          <div id="table__content" class="table-content">
+                          <div id="table__content" class="table-content" open>
                             <section id="sheet__content">
-                              <button id="btnToggle_table__content" class="material-symbols-rounded">arrow_menu_open</button>
+                              <button id="btnToggle_table__content" class="material-symbols-rounded">arrow_menu_close</button>
                               <section id="sheet__filters" class="sheet__contents">
                                 <section class="custom-scrollbar">
                                   <ul id="ul-filters-sheet" class="filters"></ul>
@@ -1024,6 +1021,12 @@
                                 <section class="custom-scrollbar">
                                   <ul id="ul-columns-handler"></ul>
                                 </section>
+                              </section>
+                              <section id="sheet__options" class="sheet__contents">
+                                <div id="toolbar_div">
+                                  <a id="export__datatable_csv" target="_blank" type="button" value="Export CSV">Export DataTable CSV</a>
+                                  <a id="export__dataview_csv" target="_blank" type="button" value="Export CSV">Export DataView CSV</a>
+                                </div>
                               </section>
                             </section>
                             <section id="datatable">

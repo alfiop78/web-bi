@@ -72,19 +72,6 @@ code {
   user-select: none;
 }
 
-.column-defined,
-.metric-defined {
-  display: flex;
-  align-items: center;
-  position: relative;
-  gap: 4px;
-  padding: 2px 6px;
-  border-radius: 2px;
-  width: auto;
-  /* left: 0px; */
-  /* transition: left 250ms; */
-}
-
 .metric-defined>code[data-field],
 .column-defined>code {
   width: 110px;
@@ -136,9 +123,18 @@ code {
   visibility: visible;
 }
 
+.column-defined,
+.metric-defined {
+  color: whitesmoke;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  border-radius: 2px;
+  position: relative;
+}
+
 .column-defined[data-type="column"] {
   background-color: var(--main-secondary-color);
-  color: whitesmoke;
 }
 
 .column-defined[data-type="column"]>i[data-column-remove] {
@@ -149,7 +145,10 @@ code {
   visibility: visible;
 }
 
-.column-defined[data-type="column"]>i,
+.column-defined>i {
+  color: whitesmoke;
+}
+
 .metric-defined>button,
 .column-defined>button {
   color: whitesmoke;
@@ -157,12 +156,6 @@ code {
 
 .column-defined[data-type="metric"] {
   background-color: seagreen;
-}
-
-.metric-defined {
-  color: whitesmoke;
-  padding: 2px 4px;
-  font-size: .9rem;
 }
 
 .column-defined[data-adding],
@@ -304,7 +297,7 @@ code {
   width: 100%;
   grid-row-gap: 4px;
   /* grid-template-rows: auto 1fr auto 2fr; */
-  grid-template-rows: 1fr 2fr;
+  grid-template-rows: 1fr 2fr auto;
   border-right: solid thin gainsboro;
 }
 
@@ -556,4 +549,9 @@ mark.keyword {
   justify-content: center;
   padding: 1em;
   background-color: white;
+}
+
+#toolbar_div {
+  display: flex;
+  flex-direction: column;
 }

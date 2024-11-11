@@ -4,6 +4,8 @@ const btnSheetPreview = document.getElementById("btn-sheet-preview");
 const btnSQLPreview = document.getElementById("btn-sql-preview");
 const saveColumnConfig = document.getElementById('btn-column-save');
 const tmplList = document.getElementById('tmpl-li');
+const export__datatable_csv = document.getElementById('export__datatable_csv');
+const export__dataview_csv = document.getElementById('export__dataview_csv');
 
 
 const config = { attributes: true, childList: false, subtree: false };
@@ -167,7 +169,38 @@ function drawDatamart() {
   google.visualization.events.addListener(Resource.tableRef, 'ready', previewReady);
 
   Resource.tableRef.draw(Resource.dataTable, Resource.options);
+  // drawToolbar();
+  // var csv = google.visualization.dataTableToCsv(Resource.dataTable);
+  // console.log(csv);
+  var csvFormattedDataTable = google.visualization.dataTableToCsv(Resource.dataTable);
+  console.log(csvFormattedDataTable);
+  var encodedUri = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvFormattedDataTable);
+  export__datatable_csv.href = encodedUri;
+  export__datatable_csv.download = 'table-data.csv';
+  // export__csv.target = '_blank';
 }
+
+function drawToolbar() {
+  var components = [
+    {
+      type: 'igoogle', datasource: 'https://spreadsheets.google.com/tq?key=pCQbetd-CptHnwJEfo8tALA',
+      gadget: 'https://www.google.com/ig/modules/pie-chart.xml',
+      userprefs: { '3d': 1 }
+    },
+    { type: 'html', datasource: 'https://spreadsheets.google.com/tq?key=pCQbetd-CptHnwJEfo8tALA' },
+    // { type: 'csv', datasource: 'https://spreadsheets.google.com/tq?key=pCQbetd-CptHnwJEfo8tALA' },
+    { type: 'csv', datasource: csv },
+    {
+      type: 'htmlcode', datasource: 'https://spreadsheets.google.com/tq?key=pCQbetd-CptHnwJEfo8tALA',
+      gadget: 'https://www.google.com/ig/modules/pie-chart.xml',
+      userprefs: { '3d': 1 },
+      style: 'width: 800px; height: 700px; border: 3px solid purple;'
+    }
+  ];
+
+  var container = document.getElementById('toolbar_div');
+  google.visualization.drawToolbar(container, components);
+};
 
 function previewReady() {
   // Imposto un altro riferimento a tableRef altrimenti l'evento ready si attiva ricorsivamente (errore)
@@ -366,6 +399,11 @@ function previewReady() {
   // con l'opzione sort: 'event' viene comunque processato l'evento 'sort'
   // senza effettuare l'ordinamento.
   Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
+  var csvFormattedDataTable = google.visualization.dataTableToCsv(Resource.dataViewGrouped);
+  console.log(csvFormattedDataTable);
+  var encodedUri = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvFormattedDataTable);
+  export__dataview_csv.href = encodedUri;
+  export__dataview_csv.download = 'table-view-data.csv';
 }
 
 function sort(e) {

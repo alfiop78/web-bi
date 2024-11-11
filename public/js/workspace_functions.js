@@ -231,6 +231,7 @@ function handleDragOver(e) {
   } else {
     // .dropzone.rows
     // Quando il mouse passa sopra questi elementi vanno gestiti
+    (elementAt.classList.contains('dropzone')) ? elementAt.classList.add('dropping') : elementAt.classList.remove('dropping');
     if (elementAt.classList.contains('dropzone')) elementAt.appendChild(span);
   }
   e.dataTransfer.dropEffect = 'move';
@@ -246,9 +247,14 @@ function handleDragEnter(e) {
 }
 
 function handleDragLeave(e) {
-  // console.log('dragLeave');
+  e.preventDefault();
   this.classList.remove('over');
   this.parentElement.querySelectorAll('.diff').forEach(el => el.classList.remove('diff'));
+}
+
+function handleRowDragLeave(e) {
+  e.preventDefault();
+  this.classList.remove('dropping');
 }
 
 // aggiungo l'elemento droppato #dropzone-rows
@@ -297,6 +303,7 @@ function handleRowDrop(e) {
   span.after(dragSrcEl);
   span?.remove();
   this.querySelectorAll('.diff').forEach(el => el.classList.remove('diff'));
+  this.classList.remove('dropping');
 }
 
 function handleDragEnd(e) {
@@ -308,7 +315,7 @@ function handleDragEnd(e) {
   // possono essere spostati.
   // Quindi plisco Sheet.fields e lo ricreo in base all'ordine rappresentato nel DOM #dropzone-rows
   Sheet.fields.clear();
-  document.querySelectorAll('#dropzone-rows>.column-defined').forEach(field => Sheet.fields = {token : field.dataset.id, name : WorkBook.field.get(field.dataset.id).name});
+  document.querySelectorAll('#dropzone-rows>.column-defined').forEach(field => Sheet.fields = { token: field.dataset.id, name: WorkBook.field.get(field.dataset.id).name });
 }
 
 // TEST: implementazione del dragdrop per gli elementi .defined

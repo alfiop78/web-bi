@@ -191,6 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // dropzone sheet rows
   rowsDropzone.addEventListener('dragover', handleDragOver, false);
   rowsDropzone.addEventListener('drop', handleRowDrop, false);
+  rowsDropzone.addEventListener('dragleave', handleRowDragLeave, false);
 
 }); // end DOMContentLoaded
 
