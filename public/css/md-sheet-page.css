@@ -4,7 +4,7 @@ code {
 
 .report-area {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr auto auto;
   grid-row-gap: .5em;
   position: relative;
   grid-column: 2 / 13;
@@ -126,7 +126,7 @@ code {
 .column-defined,
 .metric-defined {
   color: whitesmoke;
-  padding: 4px;
+  padding: 2px;
   display: flex;
   align-items: center;
   border-radius: 2px;
@@ -364,7 +364,7 @@ code {
 code[contenteditable="true"] {
   outline: none;
   transition: all 150ms;
-  padding: 2px;
+  padding: 0px 2px;
 }
 
 code[contenteditable="true"][data-aggregate] {
@@ -538,8 +538,13 @@ mark.keyword {
 }
 
 #datatable {
-  /* display: grid; */
-  /* grid-template-rows: 1fr auto; */
+  overflow-x: hidden;
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+#sheet__preview {
   overflow-x: hidden;
   position: relative;
 }
@@ -554,4 +559,8 @@ mark.keyword {
 #toolbar_div {
   display: flex;
   flex-direction: column;
+}
+
+menu {
+  display: flex;
 }

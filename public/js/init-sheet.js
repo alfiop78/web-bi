@@ -173,7 +173,6 @@ function drawDatamart() {
   // var csv = google.visualization.dataTableToCsv(Resource.dataTable);
   // console.log(csv);
   var csvFormattedDataTable = google.visualization.dataTableToCsv(Resource.dataTable);
-  console.log(csvFormattedDataTable);
   var encodedUri = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvFormattedDataTable);
   export__datatable_csv.href = encodedUri;
   export__datatable_csv.download = 'table-data.csv';
@@ -400,7 +399,7 @@ function previewReady() {
   // senza effettuare l'ordinamento.
   Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
   var csvFormattedDataTable = google.visualization.dataTableToCsv(Resource.dataViewGrouped);
-  console.log(csvFormattedDataTable);
+  // console.log(csvFormattedDataTable);
   var encodedUri = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvFormattedDataTable);
   export__dataview_csv.href = encodedUri;
   export__dataview_csv.download = 'table-view-data.csv';

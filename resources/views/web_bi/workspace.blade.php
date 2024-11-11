@@ -1030,7 +1030,14 @@
                               </section>
                             </section>
                             <section id="datatable">
-                              <table id="preview-datamart"></table>
+                                <menu>
+                                  <span>Opzioni</span>
+                                  <!-- <li><button id="export__datatable_csv">Esport. CSV (completa)</button></li> -->
+                                  <!-- <li><button id="export__dataview_csv">Esport. CSV (Visualizzazione)</button></li> -->
+                                </menu>
+                                <div id="sheet__preview">
+                                  <table id="preview-datamart"></table>
+                                </div>
                             </section>
                           </div>
                         </section>
