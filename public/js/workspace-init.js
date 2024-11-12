@@ -30,7 +30,7 @@ const contextMenuRef = document.getElementById('context-menu');
 const tmplDetails = document.getElementById('tmpl-details-element');
 const template_columnDefined = document.getElementById('tmpl-columns-defined');
 
-const btnTogle_table__content = document.getElementById('btnToggle_table__content');
+const btnToggle_table__content = document.getElementById('btnToggle_table__content');
 // dropzone
 const rowsDropzone = document.getElementById('dropzone-rows');
 

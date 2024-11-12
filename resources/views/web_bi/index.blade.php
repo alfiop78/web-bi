@@ -151,9 +151,14 @@
               </div>
             </div>
             <div class="card col col-2-span">
-              <h1>Title - Card 2</h1>
-              <p>Medium length description. Let's add a few more words here.</p>
-              <div class="visual"></div>
+              <h1>Log Modifiche</h1>
+              <!-- <p>Ultime modifiche</p> -->
+              <div class="visual">
+                <li><i>2024.12.11</i>&nbsp;<span>Aggiunta estrazione Excel e CSV</span></li>
+                <li><i>2024.12.11</i>&nbsp;<span>Drag&Drop per spostare le colonne definite nello Sheet</span></li>
+                <li><i>2024.12.11</i>&nbsp;<span>Spostamento area Filtri definiti nello Sheet</span> </li>
+                <li>...</li>
+              </div>
             </div>
           </div>
 
@@ -175,10 +180,10 @@
   </div>
   <div class="right-sidebar"></div>
   <footer>
-      <section class="footerContent">
-        <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
-        <p>Lynx International</p>
-      </section>
+    <section class="footerContent">
+      <img src="{{ asset('/images/lynx_logo.png') }}" alt="Lynx logo" height="80" width="80" />
+      <p>Lynx International</p>
+    </section>
   </footer>
   <script type="text/javascript" src="{{ asset('/js/init-home.js') }}" async></script>
 </body>

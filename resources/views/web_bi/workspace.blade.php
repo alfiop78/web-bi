@@ -1035,9 +1035,9 @@
                             </section>
                           </dialog>
 
-                          <div id="table__content" class="table-content" open>
+                          <div id="table__content" class="table-content">
                             <section id="sheet__content">
-                              <button id="btnToggle_table__content" class="material-symbols-rounded">arrow_menu_close</button>
+                              <button id="btnToggle_table__content" class="material-symbols-rounded">arrow_menu_open</button>
                               <section id="sheet__filters" class="sheet__contents">
                                 <section class="custom-scrollbar">
                                   <ul id="ul-filters-sheet" class="filters"></ul>
