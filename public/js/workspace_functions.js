@@ -8,8 +8,11 @@ const sel = document.getSelection();
 // utilizzate nel drag&drop .column-defined
 var dragSrcEl = null;
 var elementAt = null;
-const span = document.createElement('span');
-span.className = 'bookmarkDrop';
+const i = document.createElement('i');
+// span.className = 'bookmarkDrop';
+i.className = 'material-symbols-rounded';
+i.classList.add('md-24', 'warn', 'padding__none');
+i.innerText = 'start';
 var subsequentElements;
 
 const rand = () => Math.random(0).toString(36).substring(2);
@@ -227,12 +230,12 @@ function handleDragOver(e) {
       }
     }
     // se il mouse si trova sullo stesso elemento (elementAt === dragSrcEl) non visualizzo lo span
-    if (dragSrcEl !== elementAt) elementAt.before(span);
+    if (dragSrcEl !== elementAt) elementAt.before(i);
   } else {
     // .dropzone.rows
     // Quando il mouse passa sopra questi elementi vanno gestiti
     (elementAt.classList.contains('dropzone')) ? elementAt.classList.add('dropping') : elementAt.classList.remove('dropping');
-    if (elementAt.classList.contains('dropzone')) elementAt.appendChild(span);
+    if (elementAt.classList.contains('dropzone')) elementAt.appendChild(i);
   }
   e.dataTransfer.dropEffect = 'move';
 
@@ -246,13 +249,15 @@ function handleDragEnter(e) {
   if (this !== dragSrcEl) this.classList.add('over');
 }
 
+// applicato all'elemento .box (riga / colonna già definita nella dropzone)
 function handleDragLeave(e) {
   e.preventDefault();
   this.classList.remove('over');
   this.parentElement.querySelectorAll('.diff').forEach(el => el.classList.remove('diff'));
 }
 
-function handleRowDragLeave(e) {
+// valida sia per #dropzone-rows che per #dropzone-columns
+function handleDropzoneDragLeave(e) {
   e.preventDefault();
   this.classList.remove('dropping');
 }
@@ -300,8 +305,30 @@ function handleRowDrop(e) {
   if (!dragSrcEl.dataset.id) dragSrcEl = createColumnDefined(token);
   dragSrcEl.classList.add('box');
   elementAt.classList.remove('over');
-  span.after(dragSrcEl);
-  span?.remove();
+  i.after(dragSrcEl);
+  i?.remove();
+  this.querySelectorAll('.diff').forEach(el => el.classList.remove('diff'));
+  this.classList.remove('dropping');
+}
+
+// drop nella #dropzone-columns
+function handleColumnDrop(e) {
+  if (e.stopPropagation) e.stopPropagation();
+  e.preventDefault();
+  // console.log('DROP : ',elementAt);
+  // debugger;
+  // TODO: commentare il codice (testato su example_collection)
+  // recupero le informazioni (dataset) riguardo l'elemento droppato per poter creare il .column-defined che andrà posizionato nella #dropzone-rows
+  const token = e.dataTransfer.getData('text/plain');
+  // se il dataset.id è già presente sull'elemento che sto droppando significa che sto spostando un div .column-defined.box che era già stato
+  // droppato (colonna già droppata)
+  debugger;
+  // TODO: 12.11.2024 da implementare
+  if (!dragSrcEl.dataset.id) dragSrcEl = createColumnDefined(token);
+  dragSrcEl.classList.add('box');
+  elementAt.classList.remove('over');
+  i.after(dragSrcEl);
+  i?.remove();
   this.querySelectorAll('.diff').forEach(el => el.classList.remove('diff'));
   this.classList.remove('dropping');
 }

@@ -46,8 +46,9 @@ code {
 .sheet-elements .dropzone {
   border: solid thin #ededed;
   position: relative;
-  overflow: auto; display: flex;
-  column-gap: 8px;
+  overflow: auto;
+  display: flex;
+  column-gap: 4px;
   /* row-gap: .5em; */
   /* flex-wrap: wrap; */
   width: 100%;
@@ -71,12 +72,35 @@ code {
   user-select: none;
 }
 
-.metric-defined>code[data-field],
-.column-defined>code {
-  width: 110px;
-  /* max-width: 130px; */
+.column-defined>i {
+  cursor: grab;
+}
+
+.defined_contents {
+  display: flex;
+  padding: 2px;
+  border-radius: 2px;
+  align-items: center;
+}
+
+.defined_contents>code,
+.defined_contents>code[data-field] {
   text-overflow: ellipsis;
   overflow: hidden;
+}
+
+.metric-defined[data-type="composite"]>.defined_contents>code[data-field],
+.column-defined>.defined_contents>code {
+  width: 130px;
+}
+
+.defined_contents>code[data-aggregate] {
+  width: 30px;
+}
+
+.metric-defined[data-type="basic"]>.defined_contents>code[data-field],
+.metric-defined[data-type="advanced"]>.defined_contents>code[data-field] {
+  width: 100px;
 }
 
 .pointer__none {
@@ -89,7 +113,7 @@ code {
 }
 
 .dropzone .box.over {
-  border: 2px dotted #666;
+  border: 1px dotted #666;
   left: 10px;
 }
 
@@ -100,7 +124,7 @@ code {
 .dropzone .bookmarkDrop {
   background-color: black;
   height: inherit;
-  width: 1px;
+  width: 2px;
 }
 
 .filter-defined {
@@ -110,14 +134,13 @@ code {
   gap: 2px;
 }
 
-.column-defined>button[data-remove],
-.metric-defined>button[data-remove],
+.defined_contents>button[data-remove],
 .filter-defined>button[data-remove] {
   visibility: hidden;
 }
 
-.column-defined:hover>button[data-remove],
-.metric-defined:hover>button[data-remove],
+.column-defined:hover>.defined_contents>button[data-remove],
+.metric-defined:hover>.defined_contents>button[data-remove],
 .filter-defined:hover>button[data-remove] {
   visibility: visible;
 }
@@ -136,20 +159,25 @@ code {
   background-color: var(--main-secondary-color);
 }
 
-.column-defined[data-type="column"]>i[data-column-remove] {
-  visibility: hidden;
+/* .column-defined[data-type="column"]>.defined_contents {
+  background-color: var(--main-secondary-color);
+} */
+
+.metric-defined[data-type="basic"],
+.metric-defined[data-type="advanced"] {
+  background-color: var(--metrics);
 }
 
-.column-defined[data-type="column"]:hover>i[data-column-remove] {
-  visibility: visible;
+.metric-defined[data-type="composite"] {
+  background-color: var(--metrics-composite);
 }
 
-.column-defined>i {
-  color: whitesmoke;
+.column-defined>i,
+.metric-defined>i {
+  color: white;
 }
 
-.metric-defined>button,
-.column-defined>button {
+.defined_contents>button {
   color: whitesmoke;
 }
 
@@ -170,8 +198,9 @@ code {
 }
 
 .column-defined[data-removed]>i,
-.metric-defined[data-removed]>button,
-.column-defined[data-removed]>button {
+.metric-defined[data-removed]>i,
+.metric-defined[data-removed]>.defined_contents>button,
+.column-defined[data-removed]>.defined_contents>button {
   color: #494949;
 }
 
@@ -179,69 +208,45 @@ code {
   background-color: #e2e2e2;
 }
 
-.column-defined[data-removed]>code,
-.metric-defined[data-removed]>span,
+.column-defined[data-removed]>.defined_contents>code,
+.metric-defined[data-removed]>.defined_contents>code[data-field],
 .filter-defined[data-removed]>span {
   text-decoration: line-through;
 }
 
-.column-defined>button[data-remove],
-.metric-defined>button[data-remove],
+.defined_contents>button[data-remove],
 .filter-defined>button[data-remove] {
   display: block;
 }
 
-.column-defined>button[data-undo],
-.metric-defined>button[data-undo],
+.defined_contents>button[data-undo],
 .filter-defined>button[data-undo] {
   display: none;
 }
 
-.column-defined[data-removed]>button[data-undo],
-.metric-defined[data-removed]>button[data-undo],
+.column-defined[data-removed]>.defined_contents>button[data-undo],
+.metric-defined[data-removed]>.defined_contents>button[data-undo],
 .filter-defined[data-removed]>button[data-undo] {
   display: block;
 }
 
-.column-defined[data-removed]>button[data-remove],
-.metric-defined[data-removed]>button[data-remove],
+.column-defined[data-removed]>.defined_contents>button[data-remove],
+.metric-defined[data-removed]>.defined_contents>button[data-remove],
 .filter-defined[data-removed]>button[data-remove] {
   display: none;
 }
-
-.metric-defined[data-type="basic"]:not([data-removed]),
-.metric-defined[data-type="advanced"]:not([data-removed]) {
-  background-color: var(--metrics);
-}
-
-.metric-defined[data-type="composite"]:not([data-removed]) {
-  background-color: var(--metrics-composite);
-}
-
-/* .metric-defined.advanced:not([data-removed]) {
-  background-color: var(--metrics-advanced);
-  color: whitesmoke;
-  padding: 2px 4px;
-  font-size: .85rem;
-} */
-
-/* .metric-defined.composite:not([data-removed]) {
-  background-color: var(--metrics-composite);
-  color: whitesmoke;
-  padding: 2px 4px;
-  font-size: .85rem;
-} */
 
 .metric-defined[data-type="composite"] code[data-aggregate] {
   display: none;
 }
 
-.column-defined>i[data-id="btn-set-metric"],
+/* 12.11.2024 commentato, non sembra essere utilizzato */
+/* .column-defined>i[data-id="btn-set-metric"],
 .metric-defined>i[data-id="btn-set-filter"] {
   position: absolute;
   color: #494949;
   left: 100%;
-}
+} */
 
 #workbook-content-area {
   position: relative;

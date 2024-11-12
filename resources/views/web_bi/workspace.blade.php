@@ -215,13 +215,12 @@
 
     <template id="tmpl-columns-defined">
       <div class="column-defined box" data-type="column" draggable="true">
-        <!-- TODO: modificare il layout per fare in modo da visualizzare l'icona drag sulla sinistra e le icone remove/undo sulla destra, a comparsa -->
-        <i class="button-icon material-symbols-rounded md-18">drag_handle</i>
-        <code contenteditable="true" data-blur-fn="editFieldAlias" spellcheck="false"></code>
-        <button type="button" data-remove class="button-icon material-symbols-rounded md-18 column-defined" data-fn="removeDefinedColumn" data-column-token>delete</button>
-        <button type="button" data-undo class="button-icon material-symbols-rounded md-18 column-defined" data-fn="undoDefinedColumn" data-column-token>undo</button>
-        <!-- <div class="defined_contents"> -->
-        <!-- </div> -->
+        <i class="button-icon material-symbols-rounded md-18">drag_indicator</i>
+        <div class="defined_contents">
+          <code contenteditable="true" data-blur-fn="editFieldAlias" spellcheck="false"></code>
+          <button type="button" data-remove class="button-icon material-symbols-rounded md-18 column-defined" data-fn="removeDefinedColumn" data-column-token>delete</button>
+          <button type="button" data-undo class="button-icon material-symbols-rounded md-18 column-defined" data-fn="undoDefinedColumn" data-column-token>undo</button>
+        </div>
       </div>
     </template>
 
@@ -249,15 +248,15 @@
     </template>
 
     <template id="tmpl-metrics-defined">
-      <!-- 08-09-2023 -->
       <div class="metric-defined metrics">
         <!-- <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span> -->
-        <i class="button-icon material-symbols-rounded md-18">drag_handle</i>
-        <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate" spellcheck="false"></code>
-        <!-- <span data-field></span> -->
-        <code data-field data-token data-value contenteditable="true" data-blur-fn="editMetricName" spellcheck="false"></code>
-        <button type="button" data-remove class="button-icon material-symbols-rounded md-18 metric-defined" data-fn="removeDefinedMetric" data-metric-token>delete</button>
-        <button type="button" data-undo class="button-icon material-symbols-rounded md-18 metric-defined" data-fn="undoDefinedMetric" data-metric-token>undo</button>
+        <i class="button-icon material-symbols-rounded md-18">drag_indicator</i>
+        <div class="defined_contents">
+          <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate" spellcheck="false"></code>
+          <code data-field data-token data-value contenteditable="true" data-blur-fn="editMetricName" spellcheck="false"></code>
+          <button type="button" data-remove class="button-icon material-symbols-rounded md-18 metric-defined" data-fn="removeDefinedMetric" data-metric-token>delete</button>
+          <button type="button" data-undo class="button-icon material-symbols-rounded md-18 metric-defined" data-fn="undoDefinedMetric" data-metric-token>undo</button>
+        </div>
       </div>
     </template>
 

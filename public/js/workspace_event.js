@@ -191,7 +191,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // dropzone sheet rows
   rowsDropzone.addEventListener('dragover', handleDragOver, false);
   rowsDropzone.addEventListener('drop', handleRowDrop, false);
-  rowsDropzone.addEventListener('dragleave', handleRowDragLeave, false);
+  rowsDropzone.addEventListener('dragleave', handleDropzoneDragLeave, false);
+  // dropzone sheet columns
+  columnsDropzone.addEventListener('dragover', handleDragOver, false);
+  columnsDropzone.addEventListener('drop', handleColumnDrop, false);
+  columnsDropzone.addEventListener('dragleave', handleDropzoneDragLeave, false);
 
   btnOptions.addEventListener('click', () => dlg__chart_options.showModal());
 

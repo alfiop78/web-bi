@@ -1,4 +1,4 @@
-:root{
+:root {
   --main-highlight-icons-color: sienna;
   --columns-color: steelblue;
   --metrics-color: darkgreen;
@@ -13,12 +13,17 @@
   padding: 2px 4px;
 }
 
+.material-symbols-rounded.padding__none {
+  padding: unset;
+}
+
 /* COLORS */
 .material-symbols-rounded.white {
   color: white;
 }
 
-.material-symbols-rounded.error {
+.material-symbols-rounded.error,
+.material-symbols-rounded.warn {
   color: var(--main-important-color);
 }
 

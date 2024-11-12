@@ -33,6 +33,7 @@ const template_columnDefined = document.getElementById('tmpl-columns-defined');
 const btnToggle_table__content = document.getElementById('btnToggle_table__content');
 // dropzone
 const rowsDropzone = document.getElementById('dropzone-rows');
+const columnsDropzone = document.getElementById('dropzone-columns');
 
 (() => {
   var app = {
