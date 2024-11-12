@@ -334,6 +334,32 @@
           </section>
         </menu>
 
+        <dialog id="dlg__chart_options">
+          <section class="dlg-grid">
+            <h5 class="title moveable">Configurazione DataTable/Grafico</h5>
+            <section class="dlg-content">
+              <section class="row">
+                <!-- <section class="col col-4-span">
+                  <li>Estrazione</li>
+                  <li>Chart Editor</li>
+                </section> -->
+                <section class="col col-12">
+                  <a id="export__datatable_csv" target="_blank" type="button" value="Export CSV">Export DataTable CSV</a>
+                  <a id="export__datatable_xls" target="_blank" type="button" value="Export Excel">Export DataTable Excel</a>
+                </section>
+                <section class="col col-12">
+                  <a id="export__dataview_csv" target="_blank" type="button" value="Export CSV">Export DataView CSV</a>
+                </section>
+              </section>
+            </section>
+            <section class="dlg-buttons">
+              <button name="cancel" value="chiudi">Chiudi</button>
+              <!-- <button id="btn__options_save" value="salva">Ok</button> -->
+            </section>
+          </section>
+
+        </dialog>
+
         <dialog id="dlg-schema">
           <section class="dlg-grid">
             <h5 class="">Seleziona schema Database</h5>
@@ -1022,29 +1048,36 @@
                                   <ul id="ul-columns-handler"></ul>
                                 </section>
                               </section>
-                              <section id="sheet__options" class="sheet__contents">
+                              <!-- <section id="sheet__options" class="sheet__contents">
                                 <div id="toolbar_div">
                                   <a id="export__datatable_csv" target="_blank" type="button" value="Export CSV">Export DataTable CSV</a>
                                   <a id="export__dataview_csv" target="_blank" type="button" value="Export CSV">Export DataView CSV</a>
                                 </div>
-                              </section>
+                              </section> -->
                             </section>
-                            <section id="datatable">
+                            <section id="datatable" class="progress">
+                              <div id="sheet__preview">
+                                <table id="preview-datamart"></table>
+                              </div>
+                              <section class="chart_options">
                                 <menu>
-                                  <span>Opzioni</span>
+                                  <li><button id="btnOptions" class="material-symbols-rounded">settings</button></li>
                                   <!-- <li><button id="export__datatable_csv">Esport. CSV (completa)</button></li> -->
                                   <!-- <li><button id="export__dataview_csv">Esport. CSV (Visualizzazione)</button></li> -->
                                 </menu>
-                                <div id="sheet__preview">
-                                  <table id="preview-datamart"></table>
+                                <div class="progressBar">
+                                  <label for="progress-bar" hidden>Record <span id="progress-to"></span>&nbsp;di&nbsp;<span id="progress-total"></span>&nbsp;totali</label>
+                                  <progress id="progress-bar" max="100" value="0">70 %</progress>
                                 </div>
+
+                              </section>
                             </section>
                           </div>
                         </section>
-                        <div class="progressBar">
+                        <!-- <div class="progressBar">
                           <label for="progress-bar" hidden>Record <span id="progress-to"></span>&nbsp;di&nbsp;<span id="progress-total"></span>&nbsp;totali</label>
                           <progress id="progress-bar" max="100" value="0">70 %</progress>
-                        </div>
+                        </div> -->
                       </div>
                     </section>
                   </section>

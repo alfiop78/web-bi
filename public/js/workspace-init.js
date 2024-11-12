@@ -16,11 +16,13 @@ const btnCompositeMetricSave = document.getElementById('btn-composite-metric-sav
 const btnAdvancedMetricSave = document.getElementById('btn-metric-save');
 const btnOpenDialogFilter = document.getElementById('btnOpenDialogFilter');
 const btnNewCompositeMeasure = document.getElementById('btnNewCompositeMeasure');
+const btnOptions = document.getElementById('btnOptions');
 // Dialogs
 const dlgFilter = document.getElementById('dlg-filters');
 const dlgCustomMetric = document.getElementById('dlg-custom-metric');
 const dlgCompositeMetric = document.getElementById('dlg-composite-metric');
 const dlgAdvancedMetric = document.getElementById('dlg-advanced-metric');
+const dlg__chart_options = document.getElementById('dlg__chart_options');
 // templates
 const template_li = document.getElementById('tmpl-li');
 const tmplContextMenu = document.getElementById('tmpl-context-menu-content');

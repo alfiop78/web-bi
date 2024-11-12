@@ -193,6 +193,8 @@ document.addEventListener('DOMContentLoaded', () => {
   rowsDropzone.addEventListener('drop', handleRowDrop, false);
   rowsDropzone.addEventListener('dragleave', handleRowDragLeave, false);
 
+  btnOptions.addEventListener('click', () => dlg__chart_options.showModal());
+
 }); // end DOMContentLoaded
 
 console.info('END workspace_event');
