@@ -29,6 +29,7 @@ const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
 const contextMenuRef = document.getElementById('context-menu');
 const tmplDetails = document.getElementById('tmpl-details-element');
 const template_columnDefined = document.getElementById('tmpl-columns-defined');
+const template__filterDropped = document.getElementById('tmpl-filter-dropped-adv-metric');
 
 const btnToggle_table__content = document.getElementById('btnToggle_table__content');
 // dropzone
@@ -39,7 +40,6 @@ const columnsDropzone = document.getElementById('dropzone-columns');
   var app = {
     // templates
     tmplList: document.getElementById('tmpl-li'),
-    tmplFilterDropped: document.getElementById('tmpl-filter-dropped-adv-metric'),
     tmplContextMenu: document.getElementById('tmpl-context-menu-content'),
     // contextMenuRef: document.getElementById('context-menu'),
     contextMenuColumnRef: document.getElementById('context-menu-column'),
@@ -425,7 +425,7 @@ const columnsDropzone = document.getElementById('dropzone-columns');
     const elementId = e.dataTransfer.getData('text/plain');
     const elementRef = document.getElementById(elementId);
     console.log(elementRef);
-    const tmplFilter = app.tmplFilterDropped.content.cloneNode(true);
+    const tmplFilter = template__filterDropped.content.cloneNode(true);
     const li = tmplFilter.querySelector('li');
     const span = li.querySelector('span');
     const btnRemove = li.querySelector('button');
@@ -1726,7 +1726,7 @@ const columnsDropzone = document.getElementById('dropzone-columns');
           document.querySelector(`#dl-timing-functions > dt[data-value='${token}']`).setAttribute('selected', 'true');
         } else {
           // TODO: questo codice è ripetuto in handlerDropFilter()
-          const tmplFilter = app.tmplFilterDropped.content.cloneNode(true);
+          const tmplFilter = template__filterDropped.content.cloneNode(true);
           const li = tmplFilter.querySelector('li');
           const span = li.querySelector('span');
           const btnRemove = li.querySelector('button');

@@ -180,7 +180,7 @@
   </template>
 
   <template id="tmpl-filter-dropped-adv-metric">
-    <li data-token class="li-content-icons">
+    <li data-token class="li-content-icons" data-label data-element-search>
       <i class="material-symbols-rounded md-18 filters">filter_alt</i>
       <span></span>
       <button data-token data-fn="removeFilterByAdvMetric" type="button" class="button-icon material-symbols-rounded md-18">delete</button>
@@ -532,9 +532,9 @@
               <section class="row">
                 <section class="col col-4-span">
                   <div class="list-search">
-                    <input type="search" id="input-search-metrics-dlg-composite" placeholder="Ricerca" data-element-search="metrics-dlg-composite" class="input-search" autocomplete="off" tabindex="3">
+                    <input type="search" id="id__search_filters_dlg_advanced_metric" placeholder="Ricerca" data-element-search="search__filters_dlg_advanced_metric" class="input-search" autocomplete="off" tabindex="3">
                     <div class="relative-ul">
-                        <ul id="id__ul_filters" data-search-id="" class="custom-scrollbar"></ul>
+                      <ul id="id__ul_filters" data-search-id="id__search_filters_dlg_advanced_metric" class="filters custom-scrollbar"></ul>
                     </div>
                   </div>
                 </section>

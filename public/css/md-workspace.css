@@ -463,7 +463,7 @@ section#filter-area-drop {
 }
 
 section#filter-area-drop::before {
-  content: 'Trascinare qui i filtri da aggiungere alla metrica';
+  content: 'Filtri aggiunti alla metrica';
   position: absolute;
   top: 8px;
   left: 8px;

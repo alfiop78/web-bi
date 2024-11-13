@@ -408,22 +408,34 @@ function appendFilterToDialogAdvMetrics() {
     const btnAdd = li.querySelector("button[data-id='filter__add']");
     // const filter = WorkBook.filters.get(key);
     li.dataset.id = token;
-    btnAdd.id = token;
+    btnAdd.dataset.id = token;
     btnAdd.dataset.type = "filter";
     btnAdd.dataset.label = filter.name;
     // li.classList.add("filters");
-    li.dataset.elementSearch = "filters";
+    li.dataset.elementSearch = 'search__filters_dlg_advanced_metric';
     li.dataset.label = filter.name;
-    // definisco quale context-menu-template apre questo elemento
-    li.dataset.contextmenu = 'ul-context-menu-filter';
     btnAdd.addEventListener('click', addToMetric); // TODO: creare la Fn addToMetric()
-    span.innerHTML = filter.name;
+    span.innerText = filter.name;
     parent.appendChild(li);
   }
 }
 
-function addToMetric() {
-  debugger;
+function addToMetric(e) {
+  const parent = document.getElementById('filter-drop'); // TOOD: rinominare in ul__filter_drop
+  const token = e.currentTarget.dataset.id;
+  const template = template__filterDropped.content.cloneNode(true);
+  const li = template.querySelector('li');
+  const span = li.querySelector('span');
+  const btnRemove = li.querySelector('button');
+  li.dataset.token = token;
+  span.innerText = WorkBook.filters.get(token).name;
+  btnRemove.dataset.token = token;
+  parent.appendChild(li);
+  // 2024.11.13 - L'elemento aggiunto a #filter-drop deve essere disabilitato da questa
+  // ul (#id__ul_filters) in modo da evitare di aggiungerla per più di una volta alla metrica
+  e.currentTarget.setAttribute('disabled', 'true');
+  // imposto una cssClass .added per evidenziare che il filtro è stato già aggiunto alla metrica
+  e.currentTarget.parentElement.classList.add('added');
 }
 
 function appendMetric(parent, token) {
@@ -616,7 +628,6 @@ function advancedMetricSave(e) {
   // WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
   const aggregateFn = dlg__advancedMetric.querySelector('.formula > code[data-aggregate]').innerText;
   const distinct = document.getElementById('check-distinct').checked;
-  // TODO: aggiungere opzione 'distinct'.
   let object = {
     token,
     alias,
