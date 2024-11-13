@@ -1494,7 +1494,6 @@ const columnsDropzone = document.getElementById('dropzone-columns');
     process.datamartId = Sheet.userId;
     process.sql_info = true;
     console.log(process);
-    debugger;
     // app.saveSheet();
     // invio, al fetchAPI solo i dati della prop 'report' che sono quelli utili alla creazione del datamart
     const params = JSON.stringify(process);

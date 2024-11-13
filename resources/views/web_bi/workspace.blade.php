@@ -198,7 +198,7 @@
   <template id="tmpl-sql-raw">
     <div class="sql-raw">
       <div class="absolute-icons">
-        <button data-fn="copyToClipboard" data-copy class="material-symbols-rounded md-18">copy</button>
+        <button data-fn="copyToClipboard" data-copy class="material-symbols-rounded">content_copy</button>
       </div>
       <div class="sql-content"></div>
     </div>
@@ -728,7 +728,7 @@
           </section>
         </dialog>
 
-        <dialog id="dlg-sql-info" data-x="0" data-y="40" class="absolute moveable">
+        <dialog id="dlg-sql-info" data-x="0" data-y="40" class="large absolute moveable">
           <section class="grid dlg-grid row-4">
             <h5 class="title moveable">SQL</h5>
             <menu>
@@ -1086,7 +1086,7 @@
                 <button id="workbook" class="btn-buttons">Workbook</button>
                 <div>
                   <button id="sheet" class="btn-buttons">Sheet</button>
-                  <button id="btn-sql-preview" class="btn-buttons" data-fn="createProcess" value="SQL" disabled>SQL</button>
+                  <button id="btn-sql-preview" class="btn-buttons" data-fn="createProcess" value="SQL">SQL</button>
                   <button id="btn-sheet-preview" class="btn-buttons important" data-fn="createProcess" value="Elabora">Elabora</button>
                 </div>
               </section>

@@ -292,7 +292,7 @@ Route::get('/fetch_api/dimension/time', [MapDatabaseController::class, 'dimensio
 
 Route::get('/curl/process/{token}/schedule', [MapDatabaseController::class, 'scheduleProcess'])->name('web_bi.schedule');
 
-Route::get('/curl/process/{token}/schedule_old', function ($token) {
+/* Route::get('/curl/process/{token}/schedule_old', function ($token) {
   // TODO: molto probabilmente converrà spostare la function di questa Route in MapDatabaseController
   $map = new MapDatabaseController();
   // interrogo la tabella bi_processes per recuperare il json_value relativo al report indicato nel token
@@ -382,7 +382,7 @@ Route::get('/curl/process/{token}/schedule_old', function ($token) {
   // var_dump($process->advancedMeasures);
   // exit;
   return $map->sheetCurlProcess($process);
-})->name('web_bi.schedule_report');
+})->name('web_bi.schedule_report'); */
 
 // visualizzazione anteprima datamart con paginate()
 Route::get('/fetch_api/{id}/datamart', [MapDatabaseController::class, 'datamart'])->name('web_bi.fetch_api.datamart');

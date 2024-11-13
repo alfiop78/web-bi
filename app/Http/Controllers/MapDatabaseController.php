@@ -1097,175 +1097,66 @@ class MapDatabaseController extends Controller
   public function sql(Request $request)
   {
     // echo gettype($cube);
-    // dd($request);
     // per accedere al contenuto della $request lo converto in json codificando la $request e decodificandolo in json
     $process = json_decode(json_encode($request->all())); // object
-    $q = new Cube($process);
-    // array di colonne che verranno incluse nel datamart finale
-    $q->datamartFields();
-    foreach ($q->facts as $fact) {
-      if (property_exists($process, 'sql_info')) {
-        $q->sql_info = (object)[
-          "SELECT" => (object)[],
-          "METRICS" => (object)[],
-          "FROM" => (object)[],
-          "WHERE" => (object)[],
-          "WHERE-TIME" => (object)[],
-          "AND" => (object)[],
-          "GROUP BY" => (object)[]
-        ];
-      }
-      $q->select();
-      // $fact : svg-data-xxxxx
-      $q->factId = substr($fact, -5);
-      $q->baseTableName = "WB_BASE_{$q->report_id}_{$q->datamart_id}_{$q->factId}";
-      // se esistono metriche di base
-      if (property_exists($q->process, 'baseMeasures')) {
-        $q->baseMetrics = $q->process->{'baseMeasures'}->{$fact};
-
-        $q->metrics();
-        // var_dump($q->_metrics_base);
-        $q->from($process->{'from'}->{$fact});
-        $q->where($process->{'joins'}->{$fact});
-        if (property_exists($process, 'compositeMeasures')) $q->compositeMetrics = $process->{'compositeMeasures'};
-        // i filtri vengono verificati già nella funzione createProcess()
-        $q->filters($process->{'filters'});
-        $q->groupBy();
-        // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
-        // $resultSQL['base'] = $q->baseTable();
-        $q->baseTable();
-        // array di query elaborate
-        $q->queries[$q->baseTableName] = $q->datamart_fields;
-        if (property_exists($process, 'advancedMeasures')) {
-          $q->filteredMetrics = $process->{'advancedMeasures'};
-          $q->json_info_advanced = array();
-          // verifico quali, tra le metriche filtrate, contengono gli stessi filtri. Le metriche che contengono gli stessi filtri vanno eseguite in un unica query
-          // oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
-          $q->groupMetricsByFilters = (object)[];
+    $query = new Cube($process);
+    $query->datamartFields();
+    foreach ($query->facts as $fact) {
+      $query->sql_info = (object)[
+        "SELECT" => (object)[],
+        "METRICS" => (object)[],
+        "FROM" => (object)[],
+        "WHERE" => (object)[],
+        "WHERE-TIME" => (object)[],
+        "AND" => (object)[],
+        "GROUP BY" => (object)[]
+      ];
+      $query->fact = $fact;
+      $query->factId = substr($fact, -5);
+      $query->baseTableName = "WB_BASE_{$query->report_id}_{$query->datamart_id}_{$query->factId}";
+      $resultSQL['base'][] = $query->base_table_new();
+      // return $resultSQL;
+      // dd($res === true ||$res === NULL);
+      $query->queries[$query->baseTableName] = $query->datamart_fields;
+      // creo una tabella temporanea per ogni metrica filtrata
+      // dd($query->process->{"advancedMeasures"});
+      // dd(empty($query->process->{"advancedMeasures"}));
+      if (!empty($query->process->{"advancedMeasures"})) {
+        // sono presenti metriche avanzate
+        if (property_exists($query->process->{"advancedMeasures"}, $fact)) {
+          $query->filteredMetrics = $query->process->{'advancedMeasures'}->{$fact};
+          // verifico quali, tra le metriche filtrate, contengono gli stessi filtri.
+          // Le metriche che contengono gli stessi filtri vanno eseguite in un unica query.
+          // Oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
+          $query->groupMetricsByFilters = (object)[];
           // raggruppare per tipologia dei filtri
           $groupFilters = array();
           // creo un gruppo di filtri
-          foreach ($q->filteredMetrics as $metric) {
-            // var_dump($metric->filters);
+          foreach ($query->filteredMetrics as $metric) {
+            // dd($metric->formula->filters);
             // ogni gruppo di filtri ha un tokenGrouup diverso come key dell'array
-            $tokenGroup = "group_" . bin2hex(random_bytes(4));
+            $tokenGroup = "grp_" . bin2hex(random_bytes(4));
             if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
           }
           // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
           foreach ($groupFilters as $token => $group) {
             $metrics = array();
-            foreach ($q->filteredMetrics as $metric) {
+            foreach ($query->filteredMetrics as $metric) {
               if (get_object_vars($metric->filters) == get_object_vars($group)) {
                 // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
                 array_push($metrics, $metric);
               }
             }
             // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
-            $q->groupMetricsByFilters->$token = $metrics;
+            $query->groupMetricsByFilters->$token = $metrics;
           }
-          // dd($q->groupMetricsByFilters);
-          $resultSQL['advanced'] = $q->createMetricDatamarts();
-          // WARN: Attenzione, nel comando dd() gli oggetti all'interno di json_info_advanced non
-          // sono visibili ma hanno un numero di riferimento che punta all'oggetto originale.
-
-          // return $resultSQL;
+          // dd($query->groupMetricsByFilters);
+          $query->json_info_advanced = [];
+          $resultSQL['advanced'] = $query->createMetricDatamarts_new();
         }
       }
     }
-    dd($q->queries);
-    // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
-    // creo una tabella temporanea per ogni metrica filtrata
-    // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-    // dd($q->results);
-    $resultSQL["base"] = $q->results;
-    $resultSQL['datamart'] = $q->datamart();
+    $resultSQL['datamart'] = $query->datamart_new();
     return $resultSQL;
   }
-
-  /* public function sql(Request $request)
-  {
-    // echo gettype($cube);
-    // dd($request);
-    // per accedere al contenuto della $request lo converto in json codificando la $request e decodificandolo in json
-    $cube = json_decode(json_encode($request->all())); // object
-    $q = new Cube();
-    // imposto le proprietà con i magic methods
-    $q->reportId = $cube->{'id'};
-    $q->datamartId = $cube->{'datamartId'};
-    $q->facts = $cube->{'facts'}; // array
-    $q->baseTableName = "WEB_BI_TMP_BASE_{$q->reportId}_{$q->datamartId}";
-    $q->datamartName = "WEB_BI_{$q->reportId}_{$q->datamartId}";
-    $q->baseColumns = $cube->{'fields'};
-    $q->sql_info = (object)[
-      "SELECT" => (object)[],
-      "METRICS" => (object)[],
-      "FROM" => (object)[],
-      "WHERE" => (object)[],
-      "WHERE-TIME" => (object)[],
-      "AND" => (object)[],
-      "GROUP BY" => (object)[]
-    ];
-    // imposto le colonne da includere nel datamart finale
-    $q->fields();
-    $q->select();
-    // imposto il magic method con le metriche composte
-    if (property_exists($cube, 'compositeMeasures')) $q->compositeMetrics = $cube->{'compositeMeasures'};
-    // verifico se sono presenti metriche di base
-    if (property_exists($cube, 'metrics')) {
-      $q->baseMetrics = $cube->{'metrics'};
-      $q->metrics();
-    }
-    // creo le clausole per SQL
-    $q->from($cube->{'from'});
-    $q->where($cube->{'joins'});
-    // TODO: un filtro deve essere sempre presente, qui dovrei togliere il controllo
-    // su property_exists
-
-    if (property_exists($cube, 'filters')) $q->filters($cube->{'filters'});
-    $q->groupBy($cube->{'fields'});
-    // creo la tabella Temporanea, al suo interno ci sono le metriche NON filtrate
-    $resultSQL['base'] = $q->baseTable();
-    // dd($resultSQL);
-    // return $resultSQL;
-    // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
-    // creo una tabella temporanea per ogni metrica filtrata
-    if (property_exists($cube, 'advancedMeasures')) {
-      $q->filteredMetrics = $cube->{'advancedMeasures'};
-      $q->json_info_advanced = array();
-      // verifico quali, tra le metriche filtrate, contengono gli stessi filtri. Le metriche che contengono gli stessi filtri vanno eseguite in un unica query
-      // oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
-      $q->groupMetricsByFilters = (object)[];
-      // raggruppare per tipologia dei filtri
-      $groupFilters = array();
-      // creo un gruppo di filtri
-      foreach ($q->filteredMetrics as $metric) {
-        // var_dump($metric->filters);
-        // ogni gruppo di filtri ha un tokenGrouup diverso come key dell'array
-        $tokenGroup = "group_" . bin2hex(random_bytes(4));
-        if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
-      }
-      // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
-      foreach ($groupFilters as $token => $group) {
-        $metrics = array();
-        foreach ($q->filteredMetrics as $metric) {
-          if (get_object_vars($metric->filters) == get_object_vars($group)) {
-            // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
-            array_push($metrics, $metric);
-          }
-        }
-        // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
-        $q->groupMetricsByFilters->$token = $metrics;
-      }
-      // dd($q->groupMetricsByFilters);
-      $resultSQL['advanced'] = $q->createMetricDatamarts();
-      // WARN: Attenzione, nel comando dd() gli oggetti all'interno di json_info_advanced non
-      // sono visibili ma hanno un numero di riferimento che punta all'oggetto originale.
-
-      // return $resultSQL;
-    }
-    // unisco la baseTable con le metricTable con una LEFT OUTER JOIN baseTable->metric-1->metric-2, ecc... creando la FX finale
-    $resultSQL['datamart'] = $q->createDatamart();
-    return $resultSQL;
-    // return nl2br(implode("\n\n\n", $resultSQL));
-  } */
 }

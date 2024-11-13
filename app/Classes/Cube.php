@@ -35,6 +35,7 @@ class Cube
   public $compositeMeasures = [];
   public $queries = [];
   private $time_sql = [];
+  private $sql_union_clause = [];
   // private $ifNullOperator;
   // public $ifNullOperator;
 
@@ -120,6 +121,7 @@ class Cube
         // $this->_columns[] = "{$column->name}_id";
         if (property_exists($this, 'sql_info')) {
           $this->sql_info->{'SELECT'}->{$name_key} = "{$sql} AS {$name_key}";
+          // dd($this->sql_info);
         }
       }
     }
@@ -181,6 +183,7 @@ class Cube
       }
     }
     // dd($this->from_clause);
+    // dd($this->sql_info);
   }
 
   /*
@@ -255,8 +258,11 @@ class Cube
     foreach ($this->process->{"filters"} as $filter) {
       // $this->report_filters[$this->factId][$filter->name] = implode(' ', $filter->sql);
       $this->report_filters[$this->factId][$filter->name] = $filter->sql;
+
+      if (property_exists($this, 'sql_info')) $this->sql_info->AND->{$filter->name} = $filter->sql;
     }
     // dd($this->report_filters);
+    // dd($this->sql_info);
   }
 
   public function groupBy_new()
@@ -323,7 +329,7 @@ class Cube
     if (!is_null($this->report_filters[$this->factId])) $sql .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
     $sql .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
-    dump($sql);
+    // dump($sql);
     switch (session('db_driver')) {
       case 'odbc':
         $createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
@@ -337,7 +343,13 @@ class Cube
     // dd($createStmt);
     // var_dump($query);
     // dump($createStmt);
-    return DB::connection(session('db_client_name'))->statement($createStmt);
+    if (property_exists($this, 'sql_info')) {
+      return ["raw_sql" => nl2br($createStmt), "format_sql" => $this->sql_info];
+      // dd($createStmt);
+      // dd($this->sql_info);
+    } else {
+      return DB::connection(session('db_client_name'))->statement($createStmt);
+    }
   }
 
   // Aggiunta di tabelle "provenienti" dalle metriche avanzate
@@ -349,7 +361,7 @@ class Cube
 
       // TODO: da testare con una metrica filtrata contenente la prop 'from'
       if (property_exists($this, 'sql_info')) {
-        $this->json_info_advanced[$tableName]->{'FROM'}->{$alias} = "{$prop->schema}.{$prop->table} AS {$alias}";
+        $this->json_info_advanced[$tableName]->FROM->$alias = "{$prop->schema}.{$prop->table} AS {$alias}";
       }
     }
   }
@@ -373,7 +385,7 @@ class Cube
       } else {
         $this->WHERE_metricTable[$this->factId][$token] = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
         if (property_exists($this, 'sql_info')) {
-          $this->json_info_advanced[$tableName]->{'WHERE'}->{$token} = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
+          $this->json_info_advanced[$tableName]->WHERE->$token = "{$join->from->alias}.{$join->from->field} = {$join->to->alias}.{$join->to->field}";
         }
       }
     }
@@ -526,7 +538,7 @@ class Cube
         $this->filters_metricTable[$this->factId][$filter->name] = $filter->sql;
 
         if (property_exists($this, 'sql_info')) {
-          $this->json_info_advanced[$tableName]->{'AND'}->{$filter->name} = $filter->sql;
+          $this->json_info_advanced[$tableName]->AND->{$filter->name} = $filter->sql;
         }
       }
     }
@@ -567,7 +579,7 @@ class Cube
         // dd($groupAdvancedMeasures);
         if (property_exists($this, 'sql_info')) {
           // TODO: testare con un alias contenente spazi
-          $this->json_info_advanced[$tableName]->{'METRICS'}->{"$metric->alias"} = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
+          $this->json_info_advanced[$tableName]->METRICS->{"$metric->alias"} = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->sql}), 0) AS '{$metric->alias}'";
           // dd($this->json_info_advanced);
         }
         // dd($groupAdvancedMeasures);
@@ -672,11 +684,12 @@ class Cube
       default:
         break;
     }
-    dump($createStmt);
+    // dump($createStmt);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
     $result = null;
     if (property_exists($this, 'sql_info')) {
-      $result = ["raw_sql" => nl2br($createStmt), "format_sql" => $this->json_info_advanced];
+      $this->queries[$tableName] = $this->datamart_fields;
+      return ["raw_sql" => nl2br($createStmt), "format_sql" => $this->json_info_advanced];
     } else {
       // dd($this->queries);
       // Qui se l'elaborazione fallisce devo eliminare tutte le tabelle temporanee create finora (basetable, e altre metric_table ad esempio)
@@ -704,7 +717,6 @@ class Cube
       $sql .= self::FROM . "decisyon_cache.{$table})\n";
       $union[$table] = $sql;
     }
-    // dd(implode("UNION\n", $union));
     $union_sql = implode("UNION\n", $union);
     switch (session('db_driver')) {
       case 'odbc':
@@ -720,13 +732,18 @@ class Cube
     // var_dump($this->union_clause);
     // DB::connection(session('db_client_name'))->statement($this->union_clause);
     // TODO: Qui se l'elaborazione fallisce devo eliminare tutte le tabelle temporanee create finora (basetable, e altre metric_table ad esempio)
-    try {
-      DB::connection(session('db_client_name'))->statement($this->union_clause);
-    } catch (\Throwable $th) {
-      foreach (array_keys($this->queries) as $table) {
-        Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
+    if (property_exists($this, 'sql_info')) {
+      // dd($this->union_clause);
+      $this->sql_union_clause['union'] = $this->union_clause;
+    } else {
+      try {
+        DB::connection(session('db_client_name'))->statement($this->union_clause);
+      } catch (\Throwable $th) {
+        foreach (array_keys($this->queries) as $table) {
+          Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
+        }
+        throw $th;
       }
-      throw $th;
     }
   }
 
@@ -771,31 +788,39 @@ class Cube
       unset($ONClause);
     }
     $createStmt .= $joinLEFT;
-    dump($createStmt);
-    try {
-      // elimino prima il datamart già esistente
-      if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$this->report_id}_{$this->datamart_id}")) {
-        // TEST: 27.09.2024 verifica, in laravel viene restituito un NOTICE quando si utilizza dropIfExists() e una tabella non è presente
-        Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_{$this->report_id}_{$this->datamart_id}");
+    // dd($createStmt);
+    if (property_exists($this, 'sql_info')) {
+      // dd($this->sql_union_clause);
+      return [
+        "union" =>  ["raw_sql" => nl2br($this->sql_union_clause['union'])],
+        "datamart" => ["raw_sql" => nl2br($createStmt)]
+      ];
+    } else {
+      try {
+        // elimino prima il datamart già esistente
+        if (Schema::connection(session('db_client_name'))->hasTable("WEB_BI_{$this->report_id}_{$this->datamart_id}")) {
+          // TEST: 27.09.2024 verifica, in laravel viene restituito un NOTICE quando si utilizza dropIfExists() e una tabella non è presente
+          Schema::connection(session('db_client_name'))->drop("decisyon_cache.WEB_BI_{$this->report_id}_{$this->datamart_id}");
+        }
+        // creazione del datamart
+        // dd($createStmt);
+        DB::connection(session('db_client_name'))->statement($createStmt);
+        // elimino la tabella union....
+        Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.union_{$this->report_id}_{$this->datamart_id}");
+        // elimino tutte le tabelle temporanee utilizzate per creare il datamart
+        foreach (array_keys($this->queries) as $table) {
+          Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
+        }
+      } catch (\Throwable $th) {
+        // elimino la tabella union....
+        Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.union_{$this->report_id}_{$this->datamart_id}");
+        // elimino tutte le tabelle temporanee utilizzate per creare il datamart
+        foreach (array_keys($this->queries) as $table) {
+          Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
+        }
+        throw $th;
       }
-      // creazione del datamart
-      // dd($createStmt);
-      DB::connection(session('db_client_name'))->statement($createStmt);
-      // elimino la tabella union....
-      Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.union_{$this->report_id}_{$this->datamart_id}");
-      // elimino tutte le tabelle temporanee utilizzate per creare il datamart
-      foreach (array_keys($this->queries) as $table) {
-        Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
-      }
-    } catch (\Throwable $th) {
-      // elimino la tabella union....
-      Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.union_{$this->report_id}_{$this->datamart_id}");
-      // elimino tutte le tabelle temporanee utilizzate per creare il datamart
-      foreach (array_keys($this->queries) as $table) {
-        Schema::connection(session('db_client_name'))->dropIfExists("decisyon_cache.$table");
-      }
-      throw $th;
+      return $this->report_id;
     }
-    return $this->report_id;
   }
 } // End Class
