@@ -95,12 +95,12 @@ code {
 }
 
 .defined_contents>code[data-aggregate] {
-  width: 30px;
+  width: 40px;
 }
 
 .metric-defined[data-type="basic"]>.defined_contents>code[data-field],
 .metric-defined[data-type="advanced"]>.defined_contents>code[data-field] {
-  width: 100px;
+  width: 90px;
 }
 
 .pointer__none {

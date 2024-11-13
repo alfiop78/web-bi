@@ -259,6 +259,7 @@ function handleDragLeave(e) {
 // valida sia per #dropzone-rows che per #dropzone-columns
 function handleDropzoneDragLeave(e) {
   e.preventDefault();
+  i?.remove();
   this.classList.remove('dropping');
 }
 
