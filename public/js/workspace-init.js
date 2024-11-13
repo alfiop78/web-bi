@@ -21,7 +21,7 @@ const btnOptions = document.getElementById('btnOptions');
 const dlgFilter = document.getElementById('dlg-filters');
 const dlgCustomMetric = document.getElementById('dlg-custom-metric');
 const dlgCompositeMetric = document.getElementById('dlg-composite-metric');
-const dlgAdvancedMetric = document.getElementById('dlg-advanced-metric');
+const dlg__advancedMetric = document.getElementById('dlg-advanced-metric');
 const dlg__chart_options = document.getElementById('dlg__chart_options');
 // templates
 const template_li = document.getElementById('tmpl-li');
@@ -1683,19 +1683,21 @@ const columnsDropzone = document.getElementById('dropzone-columns');
 
   // sezione drop per i filtri nelle metriche avanzate
   app.openDialogMetric = () => {
-    const filterDrop = document.getElementById('filter-drop');
-    filterDrop.addEventListener('dragover', app.elementDragOver, false);
-    filterDrop.addEventListener('dragenter', app.elementDragEnter, false);
-    filterDrop.addEventListener('dragleave', app.elementDragLeave, false);
-    filterDrop.addEventListener('drop', app.handlerDropFilter, false);
-    dlgAdvancedMetric.show();
+    // const filterDrop = document.getElementById('filter-drop');
+    // filterDrop.addEventListener('dragover', app.elementDragOver, false);
+    // filterDrop.addEventListener('dragenter', app.elementDragEnter, false);
+    // filterDrop.addEventListener('dragleave', app.elementDragLeave, false);
+    // filterDrop.addEventListener('drop', app.handlerDropFilter, false);
+    // TODO: carico lista filtri da aggiungere alla metrica avanzata
+    appendFilterToDialogAdvMetrics();
+    dlg__advancedMetric.showModal();
   }
 
   app.editAdvancedMetric = (e) => {
     contextMenuRef.toggleAttribute('open');
     const metric = WorkBook.metrics.get(e.target.dataset.token);
     const filterDrop = document.getElementById('filter-drop');
-    const input = dlgAdvancedMetric.querySelector('#input-metric');
+    const input = dlg__advancedMetric.querySelector('#input-metric');
     const tmpl = app.tmplAdvMetricsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('#adv-metric-defined');
     const formula = field.querySelector('.formula');

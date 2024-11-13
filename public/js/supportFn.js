@@ -160,7 +160,7 @@ async function getTables(urls) {
     document.getElementById('filter-note').value = '';
   });
 
-  dlgAdvancedMetric.addEventListener('close', () => {
+  dlg__advancedMetric.addEventListener('close', () => {
     document.getElementById('input-advanced-metric-name').value = '';
     const formula = document.getElementById('input-metric');
     const timingFunctions = document.getElementById('dl-timing-functions');

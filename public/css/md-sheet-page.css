@@ -412,7 +412,7 @@ code[data-alias] {
   flex-direction: column;
   gap: 1em; */
   display: grid;
-  grid-template-rows: auto auto auto 1fr;
+  grid-template-rows: auto auto auto 2fr 1fr;
   grid-gap: 1em;
 }
 

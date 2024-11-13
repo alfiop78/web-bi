@@ -525,17 +525,18 @@
         </dialog>
 
         <!-- creazione metrica filtrata -->
-        <dialog id="dlg-advanced-metric" data-x="0" data-y="40" class="mediumSize absolute moveable droppable">
+        <dialog id="dlg-advanced-metric" data-x="0" data-y="40" class="large moveable droppable">
           <section class="dlg-grid">
             <h5 class="title moveable">Creazione Metrica avanzata</h5>
             <section class="dlg-content">
               <section class="row">
                 <section class="col col-4-span">
-                  <section id="filter-area-drop">
+                  <div class="list-search">
+                    <input type="search" id="input-search-metrics-dlg-composite" placeholder="Ricerca" data-element-search="metrics-dlg-composite" class="input-search" autocomplete="off" tabindex="3">
                     <div class="relative-ul">
-                      <ul id="filter-drop" class="custom-scrollbar dropzone"></ul>
+                        <ul id="id__ul_filters" data-search-id="" class="custom-scrollbar"></ul>
                     </div>
-                  </section>
+                  </div>
                 </section>
                 <section class="col col-4-span">
                   <section class="input-area">
@@ -545,6 +546,11 @@
                       <input type="checkbox" id="check-distinct" />
                       <label for="check-distinct">DISTINCT</label>
                     </div>
+                    <section id="filter-area-drop">
+                      <div class="relative-ul">
+                        <ul id="filter-drop" class="custom-scrollbar"></ul>
+                      </div>
+                    </section>
                     <textarea id="advanced-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                   </section>
                 </section>
@@ -573,7 +579,7 @@
                       <dd>Analoga alla MAT, solamente che è applicata rispetto al mese corrente dell’anno precedente.</dd>
 
                       <dt class="btn-link">Last To Date</dt>
-                      <dd>La funzione aggrega i dati da inizio mese fino al giorno corrente.<br /> Il livello DAY deve essere presente nel report</dd>
+                      <dd>La funzione aggrega i dati da inizio mese fino al giorno corrente.<br />Il livello DAY deve essere presente nel report</dd>
 
                       <dt class="btn-link">Last Year MTD</dt>
                       <dd>Analoga alla Month to date, solamente che è applicata sui dati dell’anno precedente: da inizio mese al giorno corrente dell’anno precedente.</dd>

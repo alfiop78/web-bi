@@ -393,11 +393,37 @@ function appendFilter(token) {
   // definisco quale context-menu-template apre questo elemento
   li.dataset.contextmenu = 'ul-context-menu-filter';
   btnAdd.addEventListener('click', filterSelected);
-  // i.addEventListener('dragstart', elementDragStart);
-  // i.addEventListener('dragend', elementDragEnd);
   li.addEventListener('contextmenu', openContextMenu);
   span.innerHTML = filter.name;
   parent.appendChild(li);
+}
+
+function appendFilterToDialogAdvMetrics() {
+  const parent = document.getElementById('id__ul_filters');
+  for (const [token, filter] of WorkBook.filters) {
+    const tmpl = template_li.content.cloneNode(true);
+    // const li = tmpl.querySelector('li.drag-list.filters');
+    const li = tmpl.querySelector('li.toggle-list');
+    const span = li.querySelector('span');
+    const btnAdd = li.querySelector("button[data-id='filter__add']");
+    // const filter = WorkBook.filters.get(key);
+    li.dataset.id = token;
+    btnAdd.id = token;
+    btnAdd.dataset.type = "filter";
+    btnAdd.dataset.label = filter.name;
+    // li.classList.add("filters");
+    li.dataset.elementSearch = "filters";
+    li.dataset.label = filter.name;
+    // definisco quale context-menu-template apre questo elemento
+    li.dataset.contextmenu = 'ul-context-menu-filter';
+    btnAdd.addEventListener('click', addToMetric); // TODO: creare la Fn addToMetric()
+    span.innerHTML = filter.name;
+    parent.appendChild(li);
+  }
+}
+
+function addToMetric() {
+  debugger;
 }
 
 function appendMetric(parent, token) {
@@ -588,7 +614,7 @@ function advancedMetricSave(e) {
   let filters = new Set();
   const metric = WorkBook.metrics.get(e.target.dataset.originToken);
   // WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
-  const aggregateFn = dlgAdvancedMetric.querySelector('.formula > code[data-aggregate]').innerText;
+  const aggregateFn = dlg__advancedMetric.querySelector('.formula > code[data-aggregate]').innerText;
   const distinct = document.getElementById('check-distinct').checked;
   // TODO: aggiungere opzione 'distinct'.
   let object = {
@@ -605,7 +631,7 @@ function advancedMetricSave(e) {
   };
   // recupero tutti i filtri droppati in #filter-drop
   // salvo solo il riferimento al filtro e non tutta la definizione del filtro
-  dlgAdvancedMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.add(filter.dataset.token));
+  dlg__advancedMetric.querySelectorAll('#filter-drop li').forEach(filter => filters.add(filter.dataset.token));
   // se ci sono funzioni temporali selezionate le aggiungo all'object 'filters' con token = alla funzione scelta (es.: last-year)
   if (document.querySelector('#dl-timing-functions > dt[selected]')) {
     const timingFn = document.querySelector('#dl-timing-functions > dt[selected]');
@@ -641,7 +667,7 @@ function advancedMetricSave(e) {
     dragIcon.dataset.label = alias;
     span.textContent = alias;
   }
-  dlgAdvancedMetric.close();
+  dlg__advancedMetric.close();
 }
 
 // salva metrica composta
