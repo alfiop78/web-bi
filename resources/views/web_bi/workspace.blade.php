@@ -180,10 +180,10 @@
   </template>
 
   <template id="tmpl-filter-dropped-adv-metric">
-    <li data-token class="li-content-icons" data-label data-element-search>
+    <li data-token class="li-content-icons">
       <i class="material-symbols-rounded md-18 filters">filter_alt</i>
       <span></span>
-      <button data-token data-fn="removeFilterByAdvMetric" type="button" class="button-icon material-symbols-rounded md-18">delete</button>
+      <button data-token type="button" class="button-icon material-symbols-rounded md-18">delete</button>
     </li>
   </template>
 

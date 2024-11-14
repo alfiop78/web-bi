@@ -446,11 +446,6 @@ const columnsDropzone = document.getElementById('dropzone-columns');
     Draw.createWindowJoinContent();
   }
 
-  app.removeFilterByAdvMetric = (e) => {
-
-    debugger;
-  }
-
   app.newFilterDrop = (e) => {
     e.preventDefault();
     console.log('target:', e.target);
@@ -1693,10 +1688,10 @@ const columnsDropzone = document.getElementById('dropzone-columns');
     dlg__advancedMetric.showModal();
   }
 
+  // Invocata dal context menu per le metriche
   app.editAdvancedMetric = (e) => {
     contextMenuRef.toggleAttribute('open');
     const metric = WorkBook.metrics.get(e.target.dataset.token);
-    const filterDrop = document.getElementById('filter-drop');
     const input = dlg__advancedMetric.querySelector('#input-metric');
     const tmpl = app.tmplAdvMetricsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('#adv-metric-defined');
@@ -1717,7 +1712,10 @@ const columnsDropzone = document.getElementById('dropzone-columns');
     btnSave.dataset.token = e.target.dataset.token;
     // reimposto le proprietà della metrica nella dialog
     app.inputAdvMetricName.value = metric.alias;
-    // aggiungo i filtri alla <nav> #filter-drop
+    // apro prima la dialog (qui viene popolata la lista filtri #id__ul_filters)
+    // e successivamente, se sono presenti filtri su questa metrica, ne imposto la visualizzazione
+    // sul corrispondente elemento in #id__ul_filters
+    app.openDialogMetric();
     if (metric.hasOwnProperty('filters')) {
       metric.filters.forEach(token => {
         if (['last-year', 'last-month', 'ecc'].includes(token)) {
@@ -1725,19 +1723,13 @@ const columnsDropzone = document.getElementById('dropzone-columns');
           // ... #dl-timing-functions
           document.querySelector(`#dl-timing-functions > dt[data-value='${token}']`).setAttribute('selected', 'true');
         } else {
-          // TODO: questo codice è ripetuto in handlerDropFilter()
-          const tmplFilter = template__filterDropped.content.cloneNode(true);
-          const li = tmplFilter.querySelector('li');
-          const span = li.querySelector('span');
-          const btnRemove = li.querySelector('button');
-          li.dataset.token = token;
-          span.innerText = WorkBook.filters.get(token).name;
-          btnRemove.dataset.token = token;
-          filterDrop.appendChild(li);
+          addFilterToMetric(token);
+          // il filtro è incluso nella metrica, quindi deve essere disabilitato dalla lista #id__ul_filters
+          document.querySelector(`#id__ul_filters>li[data-id='${token}']`).classList.toggle('added');
+          document.querySelector(`#id__ul_filters>li>button[data-id='${token}']`).setAttribute('disabled', 'true');
         }
       });
     }
-    app.openDialogMetric();
   }
 
   // la Fn deriva dal menù contestuale quindi, l'evento, viene attivato dal MutationObserver

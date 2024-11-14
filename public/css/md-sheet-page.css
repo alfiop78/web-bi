@@ -302,7 +302,7 @@ code {
   grid-row-gap: 4px;
   /* grid-template-rows: auto 1fr auto 2fr; */
   grid-template-rows: 1fr 2fr;
-  border-right: solid thin gainsboro;
+  /* border-right: solid thin gainsboro; */
 }
 
 .sheet__contents::before {
@@ -316,12 +316,14 @@ code {
 #sheet__content>button {
   position: absolute;
   z-index: 10;
-  right: -12px;
+  right: -6px;
   top: calc(50% - 20px);
   padding: unset;
-  background-color: gainsboro;
+  background-color: #494949;
+  color: white;
   border-radius: 4px;
   height: 40px;
+  box-shadow: 0px 1px 6px 1px gray;
 }
 
 #sheet__content>p {

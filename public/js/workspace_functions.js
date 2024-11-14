@@ -400,6 +400,8 @@ function appendFilter(token) {
 
 function appendFilterToDialogAdvMetrics() {
   const parent = document.getElementById('id__ul_filters');
+  // reset della #id__ul_filters
+  parent.querySelectorAll('li').forEach(element => element.remove());
   for (const [token, filter] of WorkBook.filters) {
     const tmpl = template_li.content.cloneNode(true);
     // const li = tmpl.querySelector('li.drag-list.filters');
@@ -420,9 +422,18 @@ function appendFilterToDialogAdvMetrics() {
   }
 }
 
-function addToMetric(e) {
-  const parent = document.getElementById('filter-drop'); // TOOD: rinominare in ul__filter_drop
-  const token = e.currentTarget.dataset.id;
+function removeFilterByAdvancedMetric(e) {
+  // riabilito il filtro da #id__ul_filters
+  e.currentTarget.parentElement.remove();
+  const li = document.querySelector(`#id__ul_filters>li[data-id='${e.currentTarget.dataset.token}']`);
+  const btnAdd = document.querySelector(`#id__ul_filters>li>button[data-id='${e.currentTarget.dataset.token}']`);
+  li.classList.toggle('added');
+  btnAdd.removeAttribute('disabled');
+}
+
+// invocata anche da app.editAdvancedMetric() oltre che da addToMetric()
+function addFilterToMetric(token) {
+  const parent = document.getElementById('filter-drop'); // TODO: rinominare in ul__filter_drop
   const template = template__filterDropped.content.cloneNode(true);
   const li = template.querySelector('li');
   const span = li.querySelector('span');
@@ -430,7 +441,13 @@ function addToMetric(e) {
   li.dataset.token = token;
   span.innerText = WorkBook.filters.get(token).name;
   btnRemove.dataset.token = token;
+  btnRemove.addEventListener('click', removeFilterByAdvancedMetric);
   parent.appendChild(li);
+}
+
+// aggiunta filtro alla metrica avanzata
+function addToMetric(e) {
+  addFilterToMetric(e.currentTarget.dataset.id);
   // 2024.11.13 - L'elemento aggiunto a #filter-drop deve essere disabilitato da questa
   // ul (#id__ul_filters) in modo da evitare di aggiungerla per più di una volta alla metrica
   e.currentTarget.setAttribute('disabled', 'true');
