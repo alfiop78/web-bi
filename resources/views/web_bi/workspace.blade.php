@@ -348,6 +348,7 @@
                 </section>
                 <section class="col col-12">
                   <a id="export__dataview_csv" target="_blank" type="button" value="Export CSV">Export DataView CSV</a>
+                  <a id="export__dataview_xls" target="_blank" type="button" value="Export XLS" disabled>Export DataView XLS</a>
                 </section>
               </section>
             </section>
