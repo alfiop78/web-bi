@@ -182,6 +182,10 @@ function drawDatamart() {
   // export__csv.target = '_blank';
 }
 
+function replacement(match, offset, string) {
+  return `&#${match.charCodeAt()};`;
+}
+
 function export_datatable_XLS() {
   // INFO: i valori NULL causano un errore in fase di apertura su office 365
   // WARN: In locale dovrebbe comparire un errore https
@@ -208,8 +212,8 @@ function export_datatable_XLS() {
   xlsHeader.push("<Row ss:Height='25'>");
   // Header
   for (var i = 0; i < Resource.dataTable.getNumberOfColumns(); i++) {
-    console.log(Resource.dataTable.getColumnType(i));
-    console.log(Resource.dataTable.getColumnLabel(i));
+    // console.log(Resource.dataTable.getColumnType(i));
+    // console.log(Resource.dataTable.getColumnLabel(i));
     xlsHeader.push(`<Cell><Data ss:Type='String'>${Resource.dataTable.getColumnLabel(i)}</Data></Cell>`);
     xlsColumns.push(`<Column ss:Index='${i}' ss:AutoFitWidth='1'/>`);
   }
@@ -221,14 +225,18 @@ function export_datatable_XLS() {
   // rows
   json_data.rows.forEach((row, index) => {
     // console.log(index);
-    // if (index < 2) {
+    // if (index < 50) {
     xlsRows.push("<Row ss:Height='20'>");
     row.c.forEach((col, i) => {
       // valore della cella
-      // console.log(col.v);
       switch (Resource.dataTable.getColumnType(i)) {
         case 'string':
-          xlsRows.push(`<Cell><Data ss:Type='String'>${col.v}</Data></Cell>`);
+          // (?=\S)[^.\w]
+          // \S : any non-whitespace [^.\w] : il ^ all'interno delle [] indica una negazione, quindi escludo il punto e any-word char
+          // /(?=\S)\W/g
+          // \S : any non-whitespace char \W : any non-word char
+          const value = col.v.replace(/(?=\S)[^.\w]/g, replacement);
+          xlsRows.push(`<Cell><Data ss:Type='String'>${value}</Data></Cell>`);
           break;
         case 'number':
           xlsRows.push(`<Cell><Data ss:Type='Number'>${col.v}</Data></Cell>`);
@@ -252,7 +260,7 @@ function export_datatable_XLS() {
   export__datatable_xls.download = `excel_datatable.xls`;
 }
 
-function export_datatable_CSV(data) {
+function export_datatable_CSV() {
   var csvColumns;
   var csvContent;
 
@@ -267,6 +275,7 @@ function export_datatable_CSV(data) {
   csvColumns += '\n';
 
   // get data rows
+  // console.log(google.visualization.dataTableToCsv(Resource.dataTable));
   csvContent = csvColumns + google.visualization.dataTableToCsv(Resource.dataTable);
 
   // export__datatable_csv.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
