@@ -232,11 +232,14 @@ function export_datatable_XLS() {
       // valore della cella
       switch (Resource.dataTable.getColumnType(i)) {
         case 'string':
+          // sostituisco i caratteri nel regex con _ (Microsoft Excel)
+          const value = col.v.replace(/[&\\#+()$~%'"*?<>{}]/g, '_')
+
           // (?=\S)[^.\w]
           // \S : any non-whitespace [^.\w] : il ^ all'interno delle [] indica una negazione, quindi escludo il punto e any-word char
           // /(?=\S)\W/g
           // \S : any non-whitespace char \W : any non-word char
-          const value = col.v.replace(/(?=\S)[^.\w]/g, replacement);
+          // const value = col.v.replace(/(?=\S)[^.\w]/g, replacement);
           xlsRows.push(`<Cell><Data ss:Type='String'>${value}</Data></Cell>`);
           break;
         case 'number':
