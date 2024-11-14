@@ -65,13 +65,14 @@ function filterSave(e) {
   // const formula = textareaFilter.firstChild.textContent.split(' ');
   // separo ogni parola/elemento della formula con \b
   const formula = textareaFilter.firstChild.textContent.split(/\b/);
+  const formulaJoined = textareaFilter.firstChild.textContent.split(/\b/).join('');
   // console.log(formula);
   // const formula = textareaFilter.firstChild.textContent.split(/\w+.(?=\.)/g);
   // estraggo dalla formula solo le tabelle, che devono essere convertite in alias
   // es.: Azienda.id, il regex estrae "Azienda", (prima del punto)
   const tablesFounded = textareaFilter.firstChild.textContent.match(/\w+.(?=\.)/g);
   const date = new Date().toLocaleDateString('it-IT', options);
-  let object = { type: 'filter', name, token, tables: [], from: {}, joins: {}, formula, sql: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
+  let object = { type: 'filter', name, token, tables: [], from: {}, joins: {}, formula : formulaJoined, sql: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
   // replico i nomi delle tabelle con i suoi alias di tabella, recuperandoli dalla ul#wbFilters
   object.sql = formula.map(element => {
     if (tablesFounded.includes(element)) {

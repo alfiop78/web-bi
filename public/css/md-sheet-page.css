@@ -91,11 +91,11 @@ code {
 
 .metric-defined[data-type="composite"]>.defined_contents>code[data-field],
 .column-defined>.defined_contents>code {
-  width: 130px;
+  width: 140px;
 }
 
 .defined_contents>code[data-aggregate] {
-  width: 40px;
+  width: 50px;
 }
 
 .metric-defined[data-type="basic"]>.defined_contents>code[data-field],

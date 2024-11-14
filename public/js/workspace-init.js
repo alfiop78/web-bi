@@ -1670,7 +1670,8 @@ const columnsDropzone = document.getElementById('dropzone-columns');
     inputName.value = filter.name;
     // imposto il token sul tasto btnFilterSave, in questo modo posso salvare/aggiornare il filtro in base alla presenza o meno di data-token
     btnFilterSave.dataset.token = e.target.dataset.token;
-    const text = document.createTextNode(filter.formula.join(''));
+    // const text = document.createTextNode(filter.formula.join(''));
+    const text = document.createTextNode(filter.formula);
     // aggiungo il testo della formula prima del tag <br>
     textareaFilter.insertBefore(text, textareaFilter.lastChild);
     openDialogFilter();
