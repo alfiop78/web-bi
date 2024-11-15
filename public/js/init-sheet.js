@@ -212,7 +212,7 @@ function export_datatable_XLS() {
 
   xlsHeader.push("<Row ss:Height='25'>");
   // Header
-  for (var i = 0; i < Resource.dataTable.getNumberOfColumns(); i++) {
+  for (var i = 1; i < Resource.dataTable.getNumberOfColumns(); i++) {
     // console.log(Resource.dataTable.getColumnType(i));
     // console.log(Resource.dataTable.getColumnLabel(i));
     xlsHeader.push(`<Cell><Data ss:Type='String'>${Resource.dataTable.getColumnLabel(i)}</Data></Cell>`);
@@ -233,13 +233,13 @@ function export_datatable_XLS() {
       switch (Resource.dataTable.getColumnType(i)) {
         case 'string':
           // sostituisco i caratteri nel regex con _ (Microsoft Excel)
-          const value = col.v.replace(/[&\\#+()$~%'"*?<>{}]/g, '_')
+          // const value = col.v.replace(/[&\\#+()$~%'"*?<>{}]/g, '_')
 
           // (?=\S)[^.\w]
           // \S : any non-whitespace [^.\w] : il ^ all'interno delle [] indica una negazione, quindi escludo il punto e any-word char
           // /(?=\S)\W/g
           // \S : any non-whitespace char \W : any non-word char
-          // const value = col.v.replace(/(?=\S)[^.\w]/g, replacement);
+          const value = col.v.replace(/(?=\S)[^.\w]/g, replacement);
           xlsRows.push(`<Cell><Data ss:Type='String'>${value}</Data></Cell>`);
           break;
         case 'number':
