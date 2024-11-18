@@ -198,7 +198,7 @@
   <template id="tmpl-sql-raw">
     <div class="sql-raw">
       <div class="absolute-icons">
-        <button data-fn="copyToClipboard" data-copy class="material-symbols-rounded">content_copy</button>
+        <button data-fn="copyToClipboard" data-copy class="material-symbols-rounded" disabled>content_copy</button>
       </div>
       <div class="sql-content"></div>
     </div>

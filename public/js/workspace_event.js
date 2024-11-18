@@ -197,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // columnsDropzone.addEventListener('drop', handleColumnDrop, false);
   // columnsDropzone.addEventListener('dragleave', handleDropzoneDragLeave, false);
 
+  console.log(btnOptions);
   btnOptions.addEventListener('click', () => dlg__chart_options.showModal());
 
 }); // end DOMContentLoaded

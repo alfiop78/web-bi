@@ -212,11 +212,11 @@ function export_datatable_XLS() {
 
   xlsHeader.push("<Row ss:Height='25'>");
   // Header
-  for (var i = 1; i < Resource.dataTable.getNumberOfColumns(); i++) {
+  for (var i = 0; i < Resource.dataTable.getNumberOfColumns(); i++) {
     // console.log(Resource.dataTable.getColumnType(i));
     // console.log(Resource.dataTable.getColumnLabel(i));
     xlsHeader.push(`<Cell><Data ss:Type='String'>${Resource.dataTable.getColumnLabel(i)}</Data></Cell>`);
-    xlsColumns.push(`<Column ss:Index='${i}' ss:AutoFitWidth='1'/>`);
+    xlsColumns.push(`<Column ss:Index='${i + 1}' ss:AutoFitWidth='1'/>`);
   }
   xlsHeader.push("</Row>");
   // console.log(xlsHeader, xlsColumns);

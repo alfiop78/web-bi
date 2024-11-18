@@ -87,6 +87,12 @@ code {
 .defined_contents>code[data-field] {
   text-overflow: ellipsis;
   overflow: hidden;
+  text-wrap: nowrap;
+}
+
+.defined_contents>code:hover,
+.defined_contents>code[data-field]:hover {
+  text-overflow: unset;
 }
 
 .metric-defined[data-type="composite"]>.defined_contents>code[data-field],
