@@ -72,7 +72,7 @@ function filterSave(e) {
   // es.: Azienda.id, il regex estrae "Azienda", (prima del punto)
   const tablesFounded = textareaFilter.firstChild.textContent.match(/\w+.(?=\.)/g);
   const date = new Date().toLocaleDateString('it-IT', options);
-  let object = { type: 'filter', name, token, tables: [], from: {}, joins: {}, formula : formulaJoined, sql: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
+  let object = { type: 'filter', name, token, tables: [], from: {}, joins: {}, formula: formulaJoined, sql: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
   // replico i nomi delle tabelle con i suoi alias di tabella, recuperandoli dalla ul#wbFilters
   object.sql = formula.map(element => {
     if (tablesFounded.includes(element)) {
@@ -457,6 +457,7 @@ function addToMetric(e) {
 }
 
 function appendMetric(parent, token) {
+  debugger;
   const metric = WorkBook.metrics.get(token);
   const tmpl = template_li.content.cloneNode(true);
   const li = tmpl.querySelector(`li.drag-list.metrics.${metric.metric_type}`);
@@ -1174,7 +1175,7 @@ function export_datatable_XLS_new(e) {
   // creo la prima riga di intestazione
   let cols = [];
   JSON.parse(Resource.dataTable.toJSON()).cols.forEach(col => {
-    cols.push({value : col.label.toUpperCase(), type: 'string'});
+    cols.push({ value: col.label.toUpperCase(), type: 'string' });
   });
   dt.push(cols);
   // creazione delle righe
@@ -1211,6 +1212,35 @@ function export_datatable_XLS_new(e) {
 
   zipcelx(config);
   App.showConsole('Esportazione completata', 'done', 1500);
+}
+
+function addFields(parent, fields) {
+  for (const [token, value] of Object.entries(fields)) {
+    const tmpl = template_li.content.cloneNode(true);
+    const li = tmpl.querySelector('li.drag-list.columns');
+    const span = li.querySelector('span');
+    const i = li.querySelector('i');
+    li.dataset.id = token;
+    i.id = token;
+    li.classList.add("columns");
+    li.dataset.elementSearch = "elements";
+    // li.dataset.label = value.field.ds.field;
+    // TODO: rivedere la descrizione da far comparire per le colonne e colonne custom
+    // li.dataset.label = value.field.ds.sql.join('');
+    li.dataset.label = value.name;
+    // li.dataset.id = tableId;
+    li.dataset.schema = value.schema;
+    li.dataset.table = value.table;
+    li.dataset.alias = value.tableAlias;
+    li.dataset.field = value.name;
+    i.addEventListener('dragstart', handleDragStart);
+    i.addEventListener('dragend', handleDragEnd);
+    i.addEventListener('dragenter', handleDragEnter);
+    i.addEventListener('dragleave', handleDragLeave);
+    // span.innerHTML = value.field.ds.sql.join('');
+    span.innerHTML = value.name;
+    parent.appendChild(li);
+  }
 }
 
 console.info('END workspace_functions');

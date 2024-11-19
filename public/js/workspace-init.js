@@ -41,7 +41,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 (() => {
   var app = {
     // templates
-    tmplList: document.getElementById('tmpl-li'),
     tmplContextMenu: document.getElementById('tmpl-context-menu-content'),
     // contextMenuRef: document.getElementById('context-menu'),
     contextMenuColumnRef: document.getElementById('context-menu-column'),
@@ -197,7 +196,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       console.log(key, value);
       if (value.hasOwnProperty('formula') && value.metric_type === 'basic') {
         // è una metrica composta di base, quindi definita sul cubo (es. przmedio * quantita)
-        const content = app.tmplList.content.cloneNode(true);
+        const content = template_li.content.cloneNode(true);
         const li = content.querySelector('li.icons-list');
         const span = li.querySelector('span');
         const btnEdit = li.querySelector('button[data-edit]');
@@ -712,7 +711,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       summary.dataset.tableId = objects.props.key;
       parent.appendChild(details);
       columns.forEach(column => {
-        const content = app.tmplList.content.cloneNode(true);
+        const content = template_li.content.cloneNode(true);
         const li = content.querySelector('li.drag-list.default');
         const i = li.querySelector('i[draggable]');
         const span = li.querySelector('span');
@@ -812,7 +811,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       const data = await getDatabaseTable(schema);
       let ul = document.getElementById('ul-tables');
       for (const [key, value] of Object.entries(data)) {
-        const content = app.tmplList.content.cloneNode(true);
+        const content = template_li.content.cloneNode(true);
         const li = content.querySelector('li.drag-list.default');
         const i = li.querySelector('i');
         const span = li.querySelector('span');
@@ -866,7 +865,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // reset list
     parent.querySelectorAll('li').forEach(workbook => workbook.remove());
     for (const [token, object] of Object.entries(WorkBookStorage.workBooks(+document.querySelector('main').dataset.databaseId))) {
-      const tmpl = app.tmplList.content.cloneNode(true);
+      const tmpl = template_li.content.cloneNode(true);
       const li = tmpl.querySelector('li.select-list');
       const span = li.querySelector('span');
       li.dataset.fn = 'workBookSelected';
@@ -947,7 +946,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     const sheets = SheetStorage.sheets(WorkBook.workBook.token);
     if (sheets) {
       for (const [token, object] of Object.entries(sheets)) {
-        const tmpl = app.tmplList.content.cloneNode(true);
+        const tmpl = template_li.content.cloneNode(true);
         const li = tmpl.querySelector('li.select-list');
         const span = li.querySelector('span');
         li.dataset.fn = 'sheetSelected';
@@ -1289,6 +1288,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       translateRef.dataset.step = 2;
       app.body.dataset.step = 2;
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
+      debugger;
       app.addTablesStruct();
       WorkBook.save();
       // 17.09.2024 imposto un nuovo Sheet, se non ne è presente uno già definito
@@ -2325,7 +2325,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // console.log(source, response);
     const ul = app.dialogJoin.querySelector(`section[data-table-${source}] ul`);
     for (const [key, value] of Object.entries(response)) {
-      const content = app.tmplList.content.cloneNode(true);
+      const content = template_li.content.cloneNode(true);
       const li = content.querySelector('li.select-list');
       const span = li.querySelector('span');
       li.dataset.label = value.column_name;
@@ -2354,7 +2354,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   app.addFields_test = (ul, response) => {
     ul.querySelectorAll('li').forEach(li => li.remove());
     for (const [key, value] of Object.entries(response)) {
-      const content = app.tmplList.content.cloneNode(true);
+      const content = template_li.content.cloneNode(true);
       const li = content.querySelector('li.select-list');
       const span = li.querySelector('span');
       li.dataset.label = value.column_name;
@@ -2472,50 +2472,16 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     }
   }
 
-  app.addTableFields = (parent, fields) => {
-    for (const [token, value] of Object.entries(fields)) {
-      const tmpl = app.tmplList.content.cloneNode(true);
-      const li = tmpl.querySelector('li.drag-list.columns');
-      const span = li.querySelector('span');
-      const i = li.querySelector('i');
-      li.dataset.id = token;
-      i.id = token;
-      li.classList.add("columns");
-      li.dataset.elementSearch = "elements";
-      // li.dataset.label = value.field.ds.field;
-      // TODO: rivedere la descrizione da far comparire per le colonne e colonne custom
-      // li.dataset.label = value.field.ds.sql.join('');
-      li.dataset.label = value.name;
-      // li.dataset.id = tableId;
-      li.dataset.schema = value.schema;
-      li.dataset.table = value.table;
-      li.dataset.alias = value.tableAlias;
-      li.dataset.field = value.name;
-      i.addEventListener('dragstart', handleDragStart);
-      i.addEventListener('dragend', handleDragEnd);
-      i.addEventListener('dragenter', handleDragEnter);
-      i.addEventListener('dragleave', handleDragLeave);
-      // span.innerHTML = value.field.ds.sql.join('');
-      span.innerHTML = value.name;
-      parent.appendChild(li);
-    }
-  }
-
-  app.addTableMetrics = (parent, metrics) => {
-    for (const [token, value] of Object.entries(metrics)) {
-      // utilizzo appendMetric() perchè questa viene utilizzata anche
-      // quando viene creata una nuova metrica
-      appendMetric(parent, token);
-    }
-  }
-
   // Apertura step Sheet, vengono caricati gli elementi del WorkBook
+  // TODO: spostare in workspace-functions.js
   app.addTablesStruct = async () => {
     // reset degli elementi in #workbook-objects
     // app.workbookTablesStruct.querySelectorAll('details').forEach(detail => detail.remove());
     app.workbookTablesStruct.querySelectorAll('#ul-metrics > li, #ul-filters > li, details').forEach(element => element.remove());
     const parent = app.workbookTablesStruct.querySelector('#nav-fields');
 
+    // workbookMap viene creato nel Metodo createDataModel() e contiene la mappatura di tutte le tabelle del canvas
+    console.log(WorkBook.workbookMap);
     for (const [alias, objects] of WorkBook.workbookMap) {
       // console.log(tableAlias);
       const tmpl = app.tmplDetails.content.cloneNode(true);
@@ -2530,8 +2496,32 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       // summary.dataset.tableId = prop.key;
       summary.innerHTML = objects.props.name;
       parent.appendChild(details);
-      app.addTableFields(details, objects.fields);
-      app.addTableMetrics(details, objects.metrics);
+      addFields(details, objects.fields)
+      for (const [token, metric] of Object.entries(objects.metrics)) {
+        // utilizzo appendMetric() perchè questa viene utilizzata anche
+        // quando viene creata una nuova metrica
+        // appendMetric(parent, token);
+        // const metric = WorkBook.metrics.get(token);
+        const tmpl = template_li.content.cloneNode(true);
+        const li = tmpl.querySelector(`li.drag-list.metrics.${metric.metric_type}`);
+        const span = li.querySelector('span');
+        const i = li.querySelector('i');
+        li.dataset.id = token;
+        i.id = token;
+        // li.classList.add("metrics");
+        // li.classList.add(value.metric_type);
+        li.dataset.type = metric.metric_type;
+        li.dataset.elementSearch = 'elements';
+        if (metric.metric_type !== 'composite') li.dataset.factId = details.dataset.factId;
+        li.dataset.label = metric.alias;
+        // definisco quale context-menu-template apre questo elemento
+        li.dataset.contextmenu = `ul-context-menu-${metric.metric_type}`;
+        i.addEventListener('dragstart', elementDragStart);
+        i.addEventListener('dragend', elementDragEnd);
+        li.addEventListener('contextmenu', openContextMenu);
+        span.innerHTML = metric.alias;
+        details.appendChild(li);
+      }
     }
     // TEST: verificare errori con un workbook senza nessun filtro
     for (const token of WorkBook.filters.keys()) { appendFilter(token); }

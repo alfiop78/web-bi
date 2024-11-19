@@ -506,12 +506,47 @@ class WorkBooks {
         table: table.dataset.table,
         name: table.dataset.name
       }
-      if (this.fields.has(table.dataset.alias)) {
+      // recupero (da sessionStorage) tutte le colonne della tabella in ciclo
+      const columns = JSON.parse(window.sessionStorage.getItem(table.dataset.table));
+      console.log(columns);
+      columns.forEach(col => {
+        const token = `${col.ordinal_position}_${rand().substring(0, 7)}`;
+        switch (col.type_name) {
+          case 'float':
+            metrics[token] = {
+              token, // TODO: da valutare se è utilizzata la prop token qui
+              alias: col.column_name,
+              type: 'metric',
+              SQL : `${table.dataset.alias}.${col.column_name}`,
+              aggregateFn: 'SUM',
+              distinct: false,
+              factId: table.id,
+              metric_type: 'basic',
+              properties: {table: table.dataset.table, fields: [col.column_name]}
+            }
+            break;
+          default:
+            fields[token] = {
+              name: col.column_name,
+              table: table.dataset.table,
+              tableAlias: table.dataset.alias,
+              schema: table.dataset.schema,
+              tableId: table.id,
+              type: 'column',
+              origin_field: col.column_name,
+              datatype: col.type_name,
+              SQL: `${table.dataset.alias}.${col.column_name}`
+            }
+            break;
+        }
+      });
+      console.log(fields);
+      /* if (this.fields.has(table.dataset.alias)) {
         for (const [key, value] of Object.entries(this.fields.get(table.dataset.alias))) fields[key] = value;
       }
       for (const [key, value] of this.metrics) {
         if (value.factId === table.id) metrics[key] = value;
-      }
+      } */
       this.#workbookMap.set(table.dataset.alias, { props, fields, metrics });
     });
     console.info("workbookMap : ", this.#workbookMap);
