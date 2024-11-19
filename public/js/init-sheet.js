@@ -4,11 +4,8 @@ const btnSheetPreview = document.getElementById("btn-sheet-preview");
 const btnSQLPreview = document.getElementById("btn-sql-preview");
 const saveColumnConfig = document.getElementById('btn-column-save');
 const tmplList = document.getElementById('tmpl-li');
-const export__datatable_csv = document.getElementById('export__datatable_csv');
-const export__datatable_xls = document.getElementById('export__datatable_xls');
-const export__dataview_csv = document.getElementById('export__dataview_csv');
-const export__dataview_xls = document.getElementById('export__dataview_xls');
-
+// const export__datatable_csv = document.getElementById('export__datatable_csv');
+// const export__dataview_csv = document.getElementById('export__dataview_csv');
 
 const config = { attributes: true, childList: false, subtree: false };
 const callback = (mutationList, observer) => {
@@ -54,7 +51,6 @@ let app = {
       // suffix: ' €'
     };
     return new google.visualization.NumberFormat(prop); */
-
   }
 }
 
@@ -178,165 +174,12 @@ function drawDatamart() {
   var encodedUri = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvFormattedDataTable);
   export__datatable_csv.href = encodedUri;
   export__datatable_csv.download = 'table-data.csv'; */
-  export_datatable_CSV();
-  export_datatable_XLS();
+  // export_datatable_CSV();
   // export__csv.target = '_blank';
 }
 
 function replacement(match, offset, string) {
   return `&#${match.charCodeAt()};`;
-}
-
-function export_datatable_XLS() {
-  // INFO: i valori NULL causano un errore in fase di apertura su office 365
-  // WARN: In locale dovrebbe comparire un errore https
-  const mso = "progid='Excel.Sheet'";
-  let xml = `<?xml version='1.0' encoding='UTF-8'?><?mso-application ${mso}?>`;
-  let xlsWorkbook = "<Workbook xmlns='urn:schemas-microsoft-com:office:spreadsheet' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns:ss='urn:schemas-microsoft-com:office:spreadsheet' xmlns:html='https://www.w3.org/TR/html401/'>";
-  // let xlsStyles = ["<ss:Styles>"];
-  // xlsStyles.push("<ss:Style ss:ID='xl1'><ss:Font ss:Size='11' ss:Bold='1' ss:Color='black'/><ss:Alignment ss:Horizontal='Center' ss:Vertical='Center'/></ss:Style>");
-  // currency con 2 cifre decimali
-  // xlsStyles.push("<ss:Style ss:ID='currency'><ss:Font ss:Size='10' ss:Color='black'/><ss:NumberFormat ss:Format='Euro Currency'/></ss:Style>");
-  // standard : 2 dec
-  // xlsStyles.push("<ss:Style ss:ID='standard'><ss:Font ss:Size='10' ss:Color='black'/><ss:NumberFormat ss:Format='Standard'/></ss:Style>");
-  // senza cifre decimali
-  // xlsStyles.push("<ss:Style ss:ID='number'><ss:Font ss:Size='10' ss:Color='black'/><ss:NumberFormat ss:Format='General'/></ss:Style>");
-  // xlsStyles.push("<ss:Style ss:ID='percent'><ss:Font ss:Size='10' ss:Color='black'/><ss:NumberFormat ss:Format='Percent'/></ss:Style>");
-  // xlsStyles.push("<ss:Style ss:ID='xlFilterValue'><ss:Font ss:Bold='1' ss:Color='black'/><ss:Alignment ss:Horizontal='Center' ss:Vertical='Center'/><ss:Interior ss:Color='#9CB4CC' ss:Pattern='Solid'/></ss:Style>");
-  // xlsStyles.push("</ss:Styles>");
-  let xlsWorksheet = "<Worksheet ss:Name='Foglio 1'>";
-  let xlsTable = "<Table>";
-  let xlsColumns = [],
-    xlsHeader = [],
-    xlsRows = [];
-
-  xlsHeader.push("<Row ss:Height='25'>");
-  // Header
-  for (var i = 0; i < Resource.dataTable.getNumberOfColumns(); i++) {
-    // console.log(Resource.dataTable.getColumnType(i));
-    // console.log(Resource.dataTable.getColumnLabel(i));
-    xlsHeader.push(`<Cell><Data ss:Type='String'>${Resource.dataTable.getColumnLabel(i)}</Data></Cell>`);
-    xlsColumns.push(`<Column ss:Index='${i + 1}' ss:AutoFitWidth='1'/>`);
-  }
-  xlsHeader.push("</Row>");
-  // console.log(xlsHeader, xlsColumns);
-  // console.log(Resource.dataTable.getNumberOfRows());
-  // console.log(Resource.dataTable.toJSON());
-  const json_data = JSON.parse(Resource.dataTable.toJSON());
-  // rows
-  json_data.rows.forEach((row, index) => {
-    // console.log(index);
-    // if (index < 50) {
-    xlsRows.push("<Row ss:Height='20'>");
-    row.c.forEach((col, i) => {
-      // valore della cella
-      switch (Resource.dataTable.getColumnType(i)) {
-        case 'string':
-          // sostituisco i caratteri nel regex con _ (Microsoft Excel)
-          // const value = col.v.replace(/[&\\#+()$~%'"*?<>{}]/g, '_')
-
-          // (?=\S)[^.\w]
-          // \S : any non-whitespace [^.\w] : il ^ all'interno delle [] indica una negazione, quindi escludo il punto e any-word char
-          // /(?=\S)\W/g
-          // \S : any non-whitespace char \W : any non-word char
-          const value = col.v.replace(/(?=\S)[^.\w]/g, replacement);
-          xlsRows.push(`<Cell><Data ss:Type='String'>${value}</Data></Cell>`);
-          break;
-        case 'number':
-          xlsRows.push(`<Cell><Data ss:Type='Number'>${col.v}</Data></Cell>`);
-          break;
-        default:
-          break;
-      }
-    });
-    xlsRows.push("</Row>");
-    // }
-  });
-  // console.log(xlsRows);
-
-  let endTable = "</Table>";
-  let endWorksheet = "</Worksheet>";
-  let endWorkbook = "</Workbook>";
-  // return xml + xlsWorkbook + xlsStyles.join('') + xlsWorksheet + xlsTable + xlsColumns.join('') + xlsHeader.join('') + xlsRows.join('') + endTable + endWorksheet + endWorkbook;
-  // return xml + xlsWorkbook + xlsWorksheet + xlsTable + xlsColumns.join('') + xlsHeader.join('') + xlsRows.join('') + endTable + endWorksheet + endWorkbook;
-  const _xml = xml + xlsWorkbook + xlsWorksheet + xlsTable + xlsColumns.join('') + xlsHeader.join('') + xlsRows.join('') + endTable + endWorksheet + endWorkbook;
-  export__datatable_xls.href = 'data:application/vnd.ms-excel,' + encodeURIComponent(_xml);
-  export__datatable_xls.download = `excel_datatable.xls`;
-}
-
-function export_dataview_XLS() {
-  // INFO: i valori NULL causano un errore in fase di apertura su office 365
-  // WARN: In locale dovrebbe comparire un errore https
-  const mso = "progid='Excel.Sheet'";
-  let xml = `<?xml version='1.0' encoding='UTF-8'?><?mso-application ${mso}?>`;
-  let xlsWorkbook = "<Workbook xmlns='urn:schemas-microsoft-com:office:spreadsheet' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns:ss='urn:schemas-microsoft-com:office:spreadsheet' xmlns:html='https://www.w3.org/TR/html401/'>";
-  // let xlsStyles = ["<ss:Styles>"];
-  // xlsStyles.push("<ss:Style ss:ID='xl1'><ss:Font ss:Size='11' ss:Bold='1' ss:Color='black'/><ss:Alignment ss:Horizontal='Center' ss:Vertical='Center'/></ss:Style>");
-  // currency con 2 cifre decimali
-  // xlsStyles.push("<ss:Style ss:ID='currency'><ss:Font ss:Size='10' ss:Color='black'/><ss:NumberFormat ss:Format='Euro Currency'/></ss:Style>");
-  // standard : 2 dec
-  // xlsStyles.push("<ss:Style ss:ID='standard'><ss:Font ss:Size='10' ss:Color='black'/><ss:NumberFormat ss:Format='Standard'/></ss:Style>");
-  // senza cifre decimali
-  // xlsStyles.push("<ss:Style ss:ID='number'><ss:Font ss:Size='10' ss:Color='black'/><ss:NumberFormat ss:Format='General'/></ss:Style>");
-  // xlsStyles.push("<ss:Style ss:ID='percent'><ss:Font ss:Size='10' ss:Color='black'/><ss:NumberFormat ss:Format='Percent'/></ss:Style>");
-  // xlsStyles.push("<ss:Style ss:ID='xlFilterValue'><ss:Font ss:Bold='1' ss:Color='black'/><ss:Alignment ss:Horizontal='Center' ss:Vertical='Center'/><ss:Interior ss:Color='#9CB4CC' ss:Pattern='Solid'/></ss:Style>");
-  // xlsStyles.push("</ss:Styles>");
-  let xlsWorksheet = "<Worksheet ss:Name='Foglio 1'>";
-  let xlsTable = "<Table>";
-  let xlsColumns = [],
-    xlsHeader = [],
-    xlsRows = [];
-
-  xlsHeader.push("<Row ss:Height='25'>");
-  // Header
-  for (var i = 0; i < Resource.dataViewGrouped.getNumberOfColumns(); i++) {
-    // console.log(Resource.dataTable.getColumnType(i));
-    // console.log(Resource.dataTable.getColumnLabel(i));
-    xlsHeader.push(`<Cell><Data ss:Type='String'>${Resource.dataViewGrouped.getColumnLabel(i)}</Data></Cell>`);
-    xlsColumns.push(`<Column ss:Index='${i}' ss:AutoFitWidth='1'/>`);
-  }
-  xlsHeader.push("</Row>");
-  // console.log(xlsHeader, xlsColumns);
-  // console.log(Resource.dataTable.getNumberOfRows());
-  // console.log(Resource.dataTable.toJSON());
-  const json_data = JSON.parse(Resource.dataTable.toJSON());
-  debugger;
-  // rows
-  json_data.rows.forEach((row, index) => {
-    // console.log(index);
-    // if (index < 50) {
-    xlsRows.push("<Row ss:Height='20'>");
-    row.c.forEach((col, i) => {
-      // valore della cella
-      switch (Resource.dataViewGrouped.getColumnType(i)) {
-        case 'string':
-          // (?=\S)[^.\w]
-          // \S : any non-whitespace [^.\w] : il ^ all'interno delle [] indica una negazione, quindi escludo il punto e any-word char
-          // /(?=\S)\W/g
-          // \S : any non-whitespace char \W : any non-word char
-          const value = col.v.replace(/(?=\S)[^.\w]/g, replacement);
-          xlsRows.push(`<Cell><Data ss:Type='String'>${value}</Data></Cell>`);
-          break;
-        case 'number':
-          xlsRows.push(`<Cell><Data ss:Type='Number'>${col.v}</Data></Cell>`);
-          break;
-        default:
-          break;
-      }
-    });
-    xlsRows.push("</Row>");
-    // }
-  });
-  // console.log(xlsRows);
-
-  let endTable = "</Table>";
-  let endWorksheet = "</Worksheet>";
-  let endWorkbook = "</Workbook>";
-  // return xml + xlsWorkbook + xlsStyles.join('') + xlsWorksheet + xlsTable + xlsColumns.join('') + xlsHeader.join('') + xlsRows.join('') + endTable + endWorksheet + endWorkbook;
-  // return xml + xlsWorkbook + xlsWorksheet + xlsTable + xlsColumns.join('') + xlsHeader.join('') + xlsRows.join('') + endTable + endWorksheet + endWorkbook;
-  const _xml = xml + xlsWorkbook + xlsWorksheet + xlsTable + xlsColumns.join('') + xlsHeader.join('') + xlsRows.join('') + endTable + endWorksheet + endWorkbook;
-  export__datatable_xls.href = 'data:application/vnd.ms-excel,' + encodeURIComponent(_xml);
-  export__datatable_xls.download = `excel_dataview.xls`;
 }
 
 function export_datatable_CSV() {
@@ -358,8 +201,8 @@ function export_datatable_CSV() {
   csvContent = csvColumns + google.visualization.dataTableToCsv(Resource.dataTable);
 
   // export__datatable_csv.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
-  export__datatable_csv.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvContent);
-  export__datatable_csv.download = 'datatable.csv';
+  // export__datatable_csv.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvContent);
+  // export__datatable_csv.download = 'datatable.csv';
   // export__datatable_csv.target = '_blank';
 }
 
@@ -381,8 +224,8 @@ function export_dataview_CSV(data) {
   csvContent = csvColumns + google.visualization.dataTableToCsv(Resource.dataViewGrouped);
 
   // export__datatable_csv.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
-  export__dataview_csv.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvContent);
-  export__dataview_csv.download = 'dataview.csv';
+  // export__dataview_csv.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvContent);
+  // export__dataview_csv.download = 'dataview.csv';
   // export__datatable_csv.target = '_blank';
 }
 
@@ -610,8 +453,7 @@ function previewReady() {
   // var encodedUri = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvFormattedDataTable);
   // export__dataview_csv.href = encodedUri;
   // export__dataview_csv.download = 'table-view-data.csv';
-  export_dataview_CSV();
-  // export_dataview_XLS();
+  // export_dataview_CSV();
 }
 
 function sort(e) {

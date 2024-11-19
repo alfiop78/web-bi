@@ -36,6 +36,8 @@ const btnToggle_table__content = document.getElementById('btnToggle_table__conte
 const rowsDropzone = document.getElementById('dropzone-rows');
 const columnsDropzone = document.getElementById('dropzone-columns');
 
+const export__datatable_xls = document.getElementById('export__datatable_xls');
+
 (() => {
   var app = {
     // templates

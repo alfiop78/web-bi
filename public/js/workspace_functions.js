@@ -1166,4 +1166,51 @@ function showSQLInfo(data) {
   dialogSQL.showModal();
 }
 
+function export_datatable_XLS_new(e) {
+  e.preventDefault();
+  // console.log(JSON.parse(Resource.dataTable.toJSON()));
+  // creo 'dt' da passare a zipcelx
+  let dt = [];
+  // creo la prima riga di intestazione
+  let cols = [];
+  JSON.parse(Resource.dataTable.toJSON()).cols.forEach(col => {
+    cols.push({value : col.label.toUpperCase(), type: 'string'});
+  });
+  dt.push(cols);
+  // creazione delle righe
+  for (const values of Object.values(JSON.parse(Resource.dataTable.toJSON()).rows)) {
+    let row = [];
+    values.c.forEach((v, index) => {
+      row.push({ value: v.v, type: Resource.dataTable.getColumnType(index) })
+    });
+    dt.push(row)
+  }
+  const config = {
+    // filename: 'datatable',
+    // TODO: aggiungere data estrazione
+    filename: `${Sheet.name}`,
+    sheet: {
+      data: dt
+    }
+  };
+
+  /* const config = {
+    filename: 'datatable',
+    sheet: {
+      data: [
+        [{
+          value: 'test 1 colonna',
+          type: 'string'
+        }, {
+          value: 1400,
+          type: 'number'
+        }]
+      ]
+    }
+  }; */
+
+  zipcelx(config);
+  App.showConsole('Esportazione completata', 'done', 1500);
+}
+
 console.info('END workspace_functions');

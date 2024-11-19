@@ -29,6 +29,9 @@
   <script src="{{ asset('/js/Table.js') }}"></script>
   <script src="{{ asset('/js/DrawSVG.js') }}"></script>
   <script src="{{ asset('/js/Dashboards.js') }}"></script>
+  <!-- library zipcelx -->
+  <script src="{{ asset('/js/libs/zipcelx-master/lib/standalone.js') }}"></script>
+  <!-- google charts -->
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 
@@ -343,12 +346,12 @@
                   <li>Chart Editor</li>
                 </section> -->
                 <section class="col col-12">
-                  <a id="export__datatable_csv" target="_blank" type="button" value="Export CSV">Export DataTable CSV</a>
-                  <a id="export__datatable_xls" target="_blank" type="button" value="Export Excel">Export DataTable Excel</a>
+                  <!-- <a id="export__datatable_csv" target="_blank" value="Export CSV">Export DataTable CSV</a> -->
+                  <a href="#" id="export__datatable_xls" value="Export Excel">Export DataTable Excel</a>
                 </section>
                 <section class="col col-12">
-                  <a id="export__dataview_csv" target="_blank" type="button" value="Export CSV">Export DataView CSV</a>
-                  <a id="export__dataview_xls" target="_blank" type="button" value="Export XLS" disabled>Export DataView XLS</a>
+                  <!-- <a id="export__dataview_csv" target="_blank" type="button" value="Export CSV">Export DataView CSV</a> -->
+                  <!-- <a id="export__dataview_xls" target="_blank" type="button" value="Export XLS" disabled>Export DataView XLS</a> -->
                 </section>
               </section>
             </section>
@@ -1158,7 +1161,8 @@
   <script type="text/javascript" src="{{ asset('/js/workspace_functions.js') }}" defer></script>
   <script type="text/javascript" src="{{ asset('/js/init-sheet.js') }}" async></script>
   <script type="text/javascript" src="{{ asset('/js/supportFn.js') }}" async></script>
-  <script type="text/javascript" src="{{ asset('/js/workspace_event.js') }}" async></script>
+  <!-- <script type="text/javascript" src="{{ asset('/js/workspace_event.js') }}" async></script> -->
+  <script type="text/javascript" src="{{ asset('/js/workspace_event.js') }}" defer></script>
 </body>
 
 </html>
