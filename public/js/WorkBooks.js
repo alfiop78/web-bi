@@ -322,17 +322,8 @@ class WorkBooks {
 
   get field() { return this.#field; }
 
-  set fields(token) {
-    if (!this.#fields.has(this.#field.get(token).tableAlias)) {
-      // alias tabella non presente nelle #fields, la aggiungo
-      this.#fields.set(this.#field.get(token).tableAlias, {
-        [token]: this.#field.get(token)
-      });
-    } else {
-      // alias di tabella già presente
-      this.#fields.get(this.#field.get(token).tableAlias)[token] = this.#field.get(token);
-    }
-    // console.log('#fields : ', this.#fields);
+  set fields(object) {
+    this.#fields.set(object.token, object);
   }
 
   get fields() { return this.#fields; }
@@ -508,9 +499,9 @@ class WorkBooks {
       }
       // recupero (da sessionStorage) tutte le colonne della tabella in ciclo
       const columns = JSON.parse(window.sessionStorage.getItem(table.dataset.table));
-      console.log(columns);
+      // console.log(columns);
       columns.forEach(col => {
-        const token = `${col.ordinal_position}_${rand().substring(0, 7)}`;
+        const token = `_${table.id.substring(table.id.length - 5)}_${col.ordinal_position}_${col.column_name}`;
         switch (col.type_name) {
           case 'float':
             metrics[token] = {
@@ -524,9 +515,11 @@ class WorkBooks {
               metric_type: 'basic',
               properties: {table: table.dataset.table, fields: [col.column_name]}
             }
+            this.metrics = metrics[token];
             break;
           default:
             fields[token] = {
+              token,
               name: col.column_name,
               table: table.dataset.table,
               tableAlias: table.dataset.alias,
@@ -537,16 +530,10 @@ class WorkBooks {
               datatype: col.type_name,
               SQL: `${table.dataset.alias}.${col.column_name}`
             }
+            this.fields = fields[token];
             break;
         }
       });
-      console.log(fields);
-      /* if (this.fields.has(table.dataset.alias)) {
-        for (const [key, value] of Object.entries(this.fields.get(table.dataset.alias))) fields[key] = value;
-      }
-      for (const [key, value] of this.metrics) {
-        if (value.factId === table.id) metrics[key] = value;
-      } */
       this.#workbookMap.set(table.dataset.alias, { props, fields, metrics });
     });
     console.info("workbookMap : ", this.#workbookMap);
@@ -603,13 +590,13 @@ class WorkBooks {
       line.dataset.fn = "selectLine";
     }
 
-    for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.fields)) {
+    /* for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.fields)) {
       // per ogni tabella
       for (const [token, column] of Object.entries(values)) {
         this.field = column;
         this.fields = token;
       }
-    }
+    } */
 
     // joins
     for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.joins)) {
@@ -627,11 +614,11 @@ class WorkBooks {
       }
     }
 
-    if (WorkBookStorage.workBook.hasOwnProperty('metrics')) {
+    /* if (WorkBookStorage.workBook.hasOwnProperty('metrics')) {
       for (const value of Object.values(WorkBookStorage.workBook.metrics)) {
         this.metrics = value;
       }
-    }
+    } */
 
     for (const [token, metric] of Object.entries(WorkBookStorage.storage)) {
       // qui vengono recuperate metriche advanced/composite
@@ -641,7 +628,7 @@ class WorkBooks {
       }
     }
 
-    this.createDataModel();
+    // this.createDataModel();
 
     return this;
   }

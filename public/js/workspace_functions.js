@@ -271,7 +271,7 @@ function createColumnDefined(token) {
   const code = field.querySelector('code');
   const btnRemove = field.querySelector('button[data-remove]');
   const btnUndo = field.querySelector('button[data-undo]');
-  Sheet.fields = { token, name: WorkBook.field.get(token).name };
+  Sheet.fields = { token, name: WorkBook.fields.get(token).name };
   field.dataset.label = Sheet.fields.get(token);
   field.addEventListener('dragstart', handleDragStart, false);
   field.addEventListener('dragenter', handleDragEnter, false);
@@ -289,7 +289,7 @@ function createColumnDefined(token) {
   code.innerHTML = Sheet.fields.get(token);
   // aggiungo a Sheet.fields solo le proprietà utili alla creazione della query
   // TODO: da aggiungere in fase di creazione del process
-  Sheet.tables = WorkBook.field.get(token).tableAlias;
+  Sheet.tables = WorkBook.fields.get(token).tableAlias;
   return field;
 }
 
@@ -344,7 +344,7 @@ function handleDragEnd(e) {
   // possono essere spostati.
   // Quindi plisco Sheet.fields e lo ricreo in base all'ordine rappresentato nel DOM #dropzone-rows
   Sheet.fields.clear();
-  document.querySelectorAll('#dropzone-rows>.column-defined').forEach(field => Sheet.fields = { token: field.dataset.id, name: WorkBook.field.get(field.dataset.id).name });
+  document.querySelectorAll('#dropzone-rows>.column-defined').forEach(field => Sheet.fields = { token: field.dataset.id, name: WorkBook.fields.get(field.dataset.id).name });
 }
 
 // TEST: implementazione del dragdrop per gli elementi .defined

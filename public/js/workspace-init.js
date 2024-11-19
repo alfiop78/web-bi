@@ -321,7 +321,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // formula.dataset.id = metric.token;
     // formula.dataset.token = metric.token;
     // codeFieldName.innerHTML = `(${metric.alias})`;
-    codeFieldName.innerHTML = metric.alias;
+    codeFieldName.innerText = metric.alias;
     codeFieldName.dataset.token = token;
     codeFieldName.dataset.field = metric.alias;
     codeFieldName.addEventListener("input", app.editMetricAlias);
@@ -899,9 +899,10 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   app.checkSessionStorage = async () => {
     // scarico in sessionStorage tutte le tabelle del canvas
     let urls = [];
-    for (const objects of WorkBook.workbookMap.values()) {
+    const tables = Draw.svg.querySelectorAll('use.table:not([data-shared_ref]), use.time');
+    for (const objects of tables.values()) {
       // for (const object of WorkBook.tablesModel.values()) {
-      WorkBook.activeTable = objects.props.key;
+      WorkBook.activeTable = objects.id;
       // se la tabella è già presente in sessionStorage non rieseguo la query
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) {
         urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info');
@@ -918,6 +919,10 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     WorkBook = WorkBook.open(e.currentTarget.dataset.token);
     WorkBook.workBook.token = e.currentTarget.dataset.token;
     WorkBook.name = e.currentTarget.dataset.name;
+    // scarico le tabelle del canvas in sessionStorage, questo controllo va fatto dopo aver definito WorkBook.hierTables
+    await app.checkSessionStorage();
+    // Gli elementi del canvas sono stati disegnati, creo il workbookMap
+    WorkBook.workbookMap = Draw.svg.querySelectorAll('use.table:not([data-shared_ref]), use.time');
     app.workBookInformations();
     // modifico il nome del WorkBook in #workbook-name
     document.getElementById('workbook-name').innerText = WorkBook.name;
@@ -926,8 +931,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // WARN: probabilmente, il DataModel, posso recuperarlo direttamente dallo storage, senza ricrearlo
     // WorkBook.createDataModel();
     app.hierTables();
-    // scarico le tabelle del canvas in sessionStorage, questo controllo va fatto dopo aver definito WorkBook.hierTables
-    app.checkSessionStorage();
     Draw.checkResizeSVG();
     document.querySelector('#btnSchemata').disabled = false;
     app.dialogWorkBook.close();
@@ -1288,7 +1291,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       translateRef.dataset.step = 2;
       app.body.dataset.step = 2;
       // gli elementi impostati nel workBook devono essere disponibili nello sheet.
-      debugger;
       app.addTablesStruct();
       WorkBook.save();
       // 17.09.2024 imposto un nuovo Sheet, se non ne è presente uno già definito
