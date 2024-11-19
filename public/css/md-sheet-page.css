@@ -322,14 +322,15 @@ code {
 #sheet__content>button {
   position: absolute;
   z-index: 10;
-  right: -6px;
-  top: calc(50% - 20px);
+  right: 3px;
+  /* top: calc(50% - 20px); */
+  top: 0px;
   padding: unset;
   background-color: #494949;
   color: white;
   border-radius: 4px;
   height: 40px;
-  box-shadow: 0px 1px 6px 1px gray;
+  box-shadow: 0px 1px 4px 0px gray;
 }
 
 #sheet__content>p {

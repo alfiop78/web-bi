@@ -2,6 +2,9 @@
  * es.: la funzione logout(che distruggerà le variabili di sessione
  */
 
+// FIX: 19.11.2024 questo file non viene utilizzato come una vera Classe, conviene impostarlo come module ed esportare le funzioni che vengono utilizzate
+// un esempio dell'utilizzo dei moduli l'ho creato in example_collection.test
+
 class Application {
   #console = document.getElementById('console');
   #messageConsole = document.querySelector('#console p');

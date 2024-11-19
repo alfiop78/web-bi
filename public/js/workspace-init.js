@@ -1121,17 +1121,17 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       // il report è già presente in local ed è stato aperto
       // se ci sono state delle modifiche eseguo update
       console.log(Sheet.changes);
-      debugger;
       if (Sheet.changes.length !== 0) {
         Sheet.update();
         // elimino il datamart perchè è stato modificato il report e le colonne nel datamart e nel report potrebbero non corrispondere più
-        let result = await Sheet.delete();
-        App.showConsole('Datamart eliminato', 'done', 1500);
+        const result = await Sheet.delete();
         // console.log('datamart eliminato : ', result);
-        if (result) {
-          document.querySelectorAll('div[data-removed]').forEach(el => el.remove());
-          if (Resource.tableRef) Resource.tableRef.clearChart();
-        }
+        // il report è stato modificato per cui il datamart deve essere eliminato
+        if (result) App.showConsole('Il datamart è stato eliminato', 'done', 1500);
+        // se sono presenti elementi aggiunti (data-adding) oppure elementi rimossi (data-removed) ne aggiorno lo stato di visualizzazione
+        document.querySelectorAll('div[data-removed]').forEach(el => el.remove());
+        document.querySelectorAll('div[data-adding]').forEach(el => delete el.dataset.adding);
+        if (Resource.tableRef) Resource.tableRef.clearChart();
       }
     } else {
       // il report è stato appena creato e faccio save()

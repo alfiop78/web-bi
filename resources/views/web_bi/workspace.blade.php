@@ -1161,7 +1161,6 @@
   <script type="text/javascript" src="{{ asset('/js/workspace_functions.js') }}" defer></script>
   <script type="text/javascript" src="{{ asset('/js/init-sheet.js') }}" async></script>
   <script type="text/javascript" src="{{ asset('/js/supportFn.js') }}" async></script>
-  <!-- <script type="text/javascript" src="{{ asset('/js/workspace_event.js') }}" async></script> -->
   <script type="text/javascript" src="{{ asset('/js/workspace_event.js') }}" defer></script>
 </body>
 
