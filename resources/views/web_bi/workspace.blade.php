@@ -85,7 +85,7 @@
 
     <li class="drag-list columns" data-element-search data-label data-searchable="true">
       <i class="material-symbols-rounded md-18" draggable="true">drag_handle</i>
-      <i class="material-symbols-rounded md-18">view_column</i>
+      <i class="material-symbols-rounded md-18">table_rows</i>
       <span></span>
     </li>
 
@@ -129,7 +129,17 @@
       <i class="material-symbols-rounded md-18" draggable="true">drag_handle</i>
       <span></span>
     </li>
+  </template>
 
+  <template id="tmpl__createElement">
+      <li data-id="li__createColumn" data-schema data-table data-alias value="Nuova Colonna">
+        <i class="material-symbols-rounded md-18">add</i>
+        <span>Nuova Colonna</span>
+      </li>
+      <li data-id="li__createMetric" data-schema data-table data-alias value="Nuova Metrica">
+        <i class="material-symbols-rounded md-18">add</i>
+        <span>Nuova Metrica</span>
+      </li>
   </template>
 
   <template id="tmpl-dl-element">
@@ -287,11 +297,6 @@
       <ul id="ul-context-menu-basic" class="context-menu-items">
         <button data-fn="newAdvMeasure" class="btn-link-context">Crea metrica avanzata</button>
         <button data-button="delete" data-fn="removeMetric" class="btn-link-context" disabled>Elimina</button>
-      </ul>
-
-      <ul id="ul-context-menu-summary" class="context-menu-items">
-        <button data-fn="contextmenu__createCustomMetric" class="btn-link-context">Crea nuova metrica</button>
-        <button data-button="delete" data-fn="contextmenu__createCustomColumn" class="btn-link-context">Crea nuova colonna</button>
       </ul>
 
       <ul id="ul-context-menu-advanced" class="context-menu-items">
@@ -951,7 +956,6 @@
                           </p>
                           <section data-worksheet-object class="custom-scrollbar" data-section="1">
                             <ul id="nav-fields" class="custom-scrollbar" data-search-id="input-search-fields"></ul>
-                            <button class="btn-link link" data-fn="btnColumnNew" type="button" value="Nuova Colonna" disabled>Nuova Colonna</button>
                           </section>
                           <p class="field-search">
                             <input id="input-search-metrics" data-element-search="elements" autocomplete="off" type="search" class="input-search metrics" readonly placeholder="Metriche" />

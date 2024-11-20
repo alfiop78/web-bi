@@ -458,7 +458,8 @@ class WorkBooks {
   save() {
     this.workBook.name = this.title;
     this.workBook.databaseId = this.databaseId;
-    this.workBook.fields = Object.fromEntries(this.fields);
+    // this.workBook.fields = Object.fromEntries(this.fields);
+    // TODO: 20.11.2024 fields_new per ora viene utilizzato, da scheduleProcess() DA VALUTARE
     this.workBook.fields_new = Object.fromEntries(this.field);
     this.workBook.joins = Object.fromEntries(this.joins);
     // WARN: inutile salvarlo in localStorage, questo viene ricreato quando si apre un WorkBook
@@ -592,14 +593,6 @@ class WorkBooks {
       line.dataset.fn = "selectLine";
     }
 
-    /* for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.fields)) {
-      // per ogni tabella
-      for (const [token, column] of Object.entries(values)) {
-        this.field = column;
-        this.fields = token;
-      }
-    } */
-
     // joins
     for (const [tableAlias, values] of Object.entries(WorkBookStorage.workBook.joins)) {
       // per ogni tabella
@@ -615,12 +608,6 @@ class WorkBooks {
         this.filters = { token, value: this.json };
       }
     }
-
-    /* if (WorkBookStorage.workBook.hasOwnProperty('metrics')) {
-      for (const value of Object.values(WorkBookStorage.workBook.metrics)) {
-        this.metrics = value;
-      }
-    } */
 
     for (const [token, metric] of Object.entries(WorkBookStorage.storage)) {
       // qui vengono recuperate metriche advanced/composite

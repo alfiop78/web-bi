@@ -30,6 +30,7 @@ const contextMenuRef = document.getElementById('context-menu');
 const tmplDetails = document.getElementById('tmpl-details-element');
 const template_columnDefined = document.getElementById('tmpl-columns-defined');
 const template__filterDropped = document.getElementById('tmpl-filter-dropped-adv-metric');
+const template__createElement = document.getElementById('tmpl__createElement');
 
 const btnToggle_table__content = document.getElementById('btnToggle_table__content');
 // dropzone
@@ -2326,37 +2327,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     e.target.toggleAttribute('selected');
   }
 
-  // aggiungo i campi delle tabelle nella dialog-join
-  app.addFields = (source, response) => {
-    // source : from, to
-    // console.log(source, response);
-    const ul = app.dialogJoin.querySelector(`section[data-table-${source}] ul`);
-    for (const [key, value] of Object.entries(response)) {
-      const content = template_li.content.cloneNode(true);
-      const li = content.querySelector('li.select-list');
-      const span = li.querySelector('span');
-      li.dataset.label = value.column_name;
-      li.dataset.elementSearch = `${source}-fields`;
-      li.dataset.tableId = WorkBook.activeTable.id;
-      // li.dataset.factId = WorkBook.activeTable.dataset.factId;
-      li.dataset.table = WorkBook.activeTable.dataset.table;
-      li.dataset.alias = WorkBook.activeTable.dataset.alias;
-      li.dataset.label = value.column_name;
-      // li.dataset.key = value.CONSTRAINT_NAME;
-      span.innerText = value.column_name;
-      // scrivo il tipo di dato senza specificare la lunghezza, int(8) voglio che mi scriva solo int
-      // let pos = value.DATA_TYPE.indexOf('(');
-      // let type = (pos !== -1) ? value.DATA_TYPE.substring(0, pos) : value.DATA_TYPE;
-      span.dataset.datatype = value.type_name.toLowerCase();
-      // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
-      li.dataset.id = key;
-      // span.id = key;
-      // fn da associare all'evento in 'mutation observe'
-      li.dataset.fn = 'addFieldToJoin';
-      ul.appendChild(li);
-    }
-  }
-
   // TODO: test fn
   app.addFields_test = (ul, response) => {
     ul.querySelectorAll('li').forEach(li => li.remove());
@@ -2500,11 +2470,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       details.dataset.factId = objects.props.key;
       details.dataset.schema = objects.props.schema;
       details.dataset.table = objects.props.name;
-      // summary.dataset.tableId = prop.key;
       summary.innerText = objects.props.name;
-      summary.dataset.tableId = objects.props.key;
-      summary.dataset.contextmenu = 'ul-context-menu-summary';
-      summary.addEventListener('contextmenu', openContextMenu);
       parent.appendChild(details);
       addFields(details, objects.fields)
       for (const [token, metric] of Object.entries(objects.metrics)) {
@@ -2516,6 +2482,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         const li = tmpl.querySelector(`li.drag-list.metrics.${metric.metric_type}`);
         const span = li.querySelector('span');
         const i = li.querySelector('i');
+        // const icon = li.querySelector('i:not([draggable])');
         li.dataset.id = token;
         i.id = token;
         // li.classList.add("metrics");
@@ -2531,6 +2498,23 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         li.addEventListener('contextmenu', openContextMenu);
         span.innerText = metric.alias;
         details.appendChild(li);
+      }
+      if (WorkBook.activeTable.dataset.type !== 'time') {
+        // al termine della lista aggiungo i tasti "Nuova colonna" e "Nuova Metrica"
+        const content = template__createElement.content.cloneNode(true);
+        const li__createColumn = content.querySelector("li[data-id='li__createColumn']");
+        const li__createMetric = content.querySelector("li[data-id='li__createMetric']");
+        // li__createColumn.addEventListener('click', createCustomColumn);
+        li__createColumn.dataset.schema = objects.props.schema;
+        li__createColumn.dataset.table = objects.props.name;
+        li__createColumn.dataset.tableId = objects.props.key;
+        li__createColumn.dataset.alias = alias;
+        // li__createMetric.addEventListener('click', createCustomMetric);
+        li__createMetric.dataset.schema = objects.props.schema;
+        li__createMetric.dataset.table = objects.props.name;
+        li__createMetric.dataset.tableId = objects.props.key;
+        li__createMetric.dataset.alias = alias;
+        details.append(li__createMetric, li__createColumn);
       }
     }
     // TEST: verificare errori con un workbook senza nessun filtro

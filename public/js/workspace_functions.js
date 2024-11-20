@@ -1220,7 +1220,12 @@ function addFields(parent, fields) {
     const tmpl = template_li.content.cloneNode(true);
     const li = tmpl.querySelector('li.drag-list.columns');
     const span = li.querySelector('span');
-    const i = li.querySelector('i');
+    const i = li.querySelector('i[draggable]');
+    const icon = li.querySelector('i:not([draggable])');
+    if (value.constraint) {
+      li.dataset.constraint = value.constraint;
+      icon.innerText = 'key';
+    }
     li.dataset.id = token;
     i.id = token;
     li.classList.add("columns");
@@ -1234,7 +1239,6 @@ function addFields(parent, fields) {
     li.dataset.table = value.table;
     li.dataset.alias = value.tableAlias;
     li.dataset.field = value.name;
-    if (value.constraint) li.dataset.constraint = value.constraint;
     i.addEventListener('dragstart', handleDragStart);
     i.addEventListener('dragend', handleDragEnd);
     i.addEventListener('dragenter', handleDragEnter);
