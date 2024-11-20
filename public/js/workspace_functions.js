@@ -271,8 +271,7 @@ function createColumnDefined(token) {
   const code = field.querySelector('code');
   const btnRemove = field.querySelector('button[data-remove]');
   const btnUndo = field.querySelector('button[data-undo]');
-  Sheet.fields = { token, name: WorkBook.fields.get(token).name };
-  field.dataset.label = Sheet.fields.get(token);
+  field.dataset.label = Sheet.fields.get(token).name;
   field.addEventListener('dragstart', handleDragStart, false);
   field.addEventListener('dragenter', handleDragEnter, false);
   field.addEventListener('dragleave', handleDragLeave, false);
@@ -282,11 +281,11 @@ function createColumnDefined(token) {
   // In edit:true imposto il dataset.adding altrimenti dataset.added
   (!Sheet.edit) ? field.dataset.added = 'true' : field.dataset.adding = 'true';
   btnRemove.dataset.columnToken = token;
-  btnRemove.dataset.label = Sheet.fields.get(token);
+  btnRemove.dataset.label = Sheet.fields.get(token).name;
   btnUndo.dataset.columnToken = token;
   // field.dataset.token = elementRef.id;
   code.dataset.token = token;
-  code.innerHTML = Sheet.fields.get(token);
+  code.innerText = Sheet.fields.get(token).name;
   // aggiungo a Sheet.fields solo le proprietà utili alla creazione della query
   // TODO: da aggiungere in fase di creazione del process
   Sheet.tables = WorkBook.fields.get(token).tableAlias;
@@ -304,6 +303,8 @@ function handleRowDrop(e) {
   const token = e.dataTransfer.getData('text/plain');
   // se il dataset.id è già presente sull'elemento che sto droppando significa che sto spostando un div .column-defined.box che era già stato
   // droppato (colonna già droppata)
+  Sheet.fields = { token, name: WorkBook.fields.get(token).name, datatype: WorkBook.fields.get(token).datatype };
+  console.log(Sheet.fields);
   if (!dragSrcEl.dataset.id) dragSrcEl = createColumnDefined(token);
   dragSrcEl.classList.add('box');
   elementAt.classList.remove('over');
@@ -311,6 +312,7 @@ function handleRowDrop(e) {
   i?.remove();
   this.querySelectorAll('.diff').forEach(el => el.classList.remove('diff'));
   this.classList.remove('dropping');
+  // TODO: 20.11.2024 controllo se il nome colonna aggiunta è già presente nello Sheet
 }
 
 // drop nella #dropzone-columns
@@ -324,7 +326,6 @@ function handleColumnDrop(e) {
   const token = e.dataTransfer.getData('text/plain');
   // se il dataset.id è già presente sull'elemento che sto droppando significa che sto spostando un div .column-defined.box che era già stato
   // droppato (colonna già droppata)
-  debugger;
   // TODO: 12.11.2024 da implementare
   if (!dragSrcEl.dataset.id) dragSrcEl = createColumnDefined(token);
   dragSrcEl.classList.add('box');
@@ -344,7 +345,7 @@ function handleDragEnd(e) {
   // possono essere spostati.
   // Quindi plisco Sheet.fields e lo ricreo in base all'ordine rappresentato nel DOM #dropzone-rows
   Sheet.fields.clear();
-  document.querySelectorAll('#dropzone-rows>.column-defined').forEach(field => Sheet.fields = { token: field.dataset.id, name: WorkBook.fields.get(field.dataset.id).name });
+  document.querySelectorAll('#dropzone-rows>.column-defined').forEach(field => Sheet.fields = { token: field.dataset.id, name: field.dataset.label, datatype: WorkBook.fields.get(field.dataset.id).datatype });
 }
 
 // TEST: implementazione del dragdrop per gli elementi .defined
@@ -1233,6 +1234,7 @@ function addFields(parent, fields) {
     li.dataset.table = value.table;
     li.dataset.alias = value.tableAlias;
     li.dataset.field = value.name;
+    if (value.constraint) li.dataset.constraint = value.constraint;
     i.addEventListener('dragstart', handleDragStart);
     i.addEventListener('dragend', handleDragEnd);
     i.addEventListener('dragenter', handleDragEnter);

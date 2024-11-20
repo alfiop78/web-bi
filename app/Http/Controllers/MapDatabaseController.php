@@ -135,15 +135,22 @@ class MapDatabaseController extends Controller
       case 'odbc':
         $query = DB::connection(session('db_client_name'))->table('COLUMNS')
           ->select(
-            'column_name',
+            'COLUMNS.column_name',
             DB::raw('LOWER(type_name) AS type_name'),
             'data_type_length',
-            'ordinal_position'
+            'constraint_name',
+            'COLUMNS.ordinal_position'
           )
-          ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id');
+          ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
+          ->leftJoin('PRIMARY_KEYS', function ($leftJoin) {
+            $leftJoin->on('PRIMARY_KEYS.TABLE_SCHEMA', 'COLUMNS.TABLE_SCHEMA')
+              ->on('PRIMARY_KEYS.TABLE_NAME', 'COLUMNS.TABLE_NAME')
+              ->on('PRIMARY_KEYS.COLUMN_NAME', 'COLUMNS.COLUMN_NAME')
+              ->where('PRIMARY_KEYS.CONSTRAINT_TYPE', 'p');
+          });
         break;
       case 'mysql':
-        // TEST: da testare
+        // TODO: 20.11.2024 aggiungere l'ultima modifica fatta per vertica, la relazione con PRIMARY KEY
         $query = DB::connection(session('db_client_name'))->table('information_schema.COLUMNS')
           ->select(
             'column_name',
@@ -161,8 +168,9 @@ class MapDatabaseController extends Controller
     //   ->select('column_name', 'type_name', 'data_type_length', 'ordinal_position')
     //   ->join('TYPES', 'COLUMNS.data_type_id', 'TYPES.type_id')
     //   ->where('TABLE_SCHEMA', $schema)->where('TABLE_NAME', $table)->orderBy('ordinal_position')->get();
-    $query->where('TABLE_SCHEMA', $schema)
-      ->where('TABLE_NAME', $table)->orderBy('ordinal_position');
+    $query->where('COLUMNS.TABLE_SCHEMA', $schema)
+      ->where('COLUMNS.TABLE_NAME', $table)->orderBy('COLUMNS.ordinal_position');
+    // NOTE: debug query : ->where('TABLE_NAME', $table)->orderBy('ordinal_position')->dd();
     // return response()->json([$table => $info]);
     return response()->json([$table => $query->get()]);
     // return response()->json($info);

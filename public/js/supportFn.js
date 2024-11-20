@@ -26,35 +26,32 @@ async function getDatabaseTable(schema) {
 }
 
 async function getTables(urls) {
-  if (urls) {
-    return await Promise.all(urls.map(url => fetch(url)))
-      .then(responses => {
-        return Promise.all(responses.map(response => {
-          if (!response.ok) {
-            throw Error(response.statusText);
-          }
-          return response.json();
-        }))
+  return await Promise.all(urls.map(url => fetch(url)))
+    .then(responses => {
+      return Promise.all(responses.map(response => {
+        if (!response.ok) {
+          throw Error(response.statusText);
+        }
+        return response.json();
+      }))
+    })
+    .then(data => data)
+    .catch(err => console.error(err));
+
+  // ottengo le risposte separatamente
+  /* return await Promise.all(urls.map(url => {
+    fetch(url)
+      .then(response => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
       })
+      .then(response => response.json())
       .then(data => data)
-      .catch(err => console.error(err));
-
-    // ottengo le risposte separatamente
-    /* return await Promise.all(urls.map(url => {
-      fetch(url)
-        .then(response => {
-          if (!response.ok) { throw Error(response.statusText); }
-          return response;
-        })
-        .then(response => response.json())
-        .then(data => data)
-        .catch(err => {
-          App.showConsole(err, 'error');
-          console.error(err);
-        })
-    })); */
-
-  }
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      })
+  })); */
 
 }
 

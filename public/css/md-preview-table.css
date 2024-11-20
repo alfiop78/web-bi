@@ -110,6 +110,7 @@ thead th[data-metric-token]{
 
 .table-content[open] {
   grid-template-columns: 300px 1fr;
+  grid-column-gap: .5em;
 }
 
 .hiddenColumn {opacity: .4;}

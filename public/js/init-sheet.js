@@ -633,7 +633,7 @@ function columnHander(e) {
       // la colonna è nascosta, la visualizzo e raggruppo.
       e.target.dataset.visible = true;
       // La logica è descritta nell'else (quando si nasconde una colonna)
-      Resource.specs.data.group.key[dataTableIndex - 1].properties.grouped = true;
+      // Resource.specs.data.group.key[dataTableIndex - 1].properties.grouped = true;
       Resource.specs.data.group.key[dataTableIndex].properties.grouped = true;
       Resource.specs.data.group.key[dataTableIndex].properties.visible = true;
     } else {
@@ -647,7 +647,7 @@ function columnHander(e) {
       // Elimino il raggruppamento per la colonna che l'utente ha nascosto
       // se è una colonna dimensionale cerco in .group.key
       // altrimenti cerco in .group.columns
-      Resource.specs.data.group.key[dataTableIndex - 1].properties.grouped = false;
+      // Resource.specs.data.group.key[dataTableIndex - 1].properties.grouped = false;
       Resource.specs.data.group.key[dataTableIndex].properties.grouped = false;
       Resource.specs.data.group.key[dataTableIndex].properties.visible = false;
       // OPTIMIZE: se, invece di previewReady() provassi ad impostare i metodi hideColumn/showColumn di GoogleChart?
@@ -668,7 +668,6 @@ function columnHander(e) {
       metric.properties.visible = false;
     }
   }
-  debugger;
   const sheet = JSON.parse(window.localStorage.getItem(Resource.specs.token));
   sheet.specs = Resource.specs;
   window.localStorage.setItem(Resource.specs.token, JSON.stringify(sheet));

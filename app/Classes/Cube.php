@@ -1,4 +1,5 @@
 <?php
+// TODO: creare le query con QueryBuilder
 
 namespace App\Classes;
 
@@ -88,11 +89,10 @@ class Cube
   {
     // dd($this->fields);
     foreach ($this->fields as $column) {
-      $this->datamart_fields[] = "{$column->name}_id";
+      // $this->datamart_fields[] = "{$column->name}_id";
       $this->datamart_fields[] = $column->name;
     }
     // dd($this->datamart_fields);
-
   }
 
   // Creazione della clausola SELECT e dell'array _columns
@@ -101,7 +101,7 @@ class Cube
     CodSedeDealer_765.Descrizione AS sede_id,
     CodSedeDealer_765.Descrizione AS sede_ds
   */
-  public function select_new()
+  /* public function select_new()
   {
     // $fieldList = array();
     $name_key = NULL;
@@ -123,6 +123,28 @@ class Cube
           $this->sql_info->{'SELECT'}->{$name_key} = "{$sql} AS {$name_key}";
           // dd($this->sql_info);
         }
+      }
+    }
+    // dd($this->sql_info);
+    // dd($this->select_clause);
+  } */
+
+  public function select_new()
+  {
+    // $fieldList = array();
+    $name_key = NULL;
+    // dd($this->fields);
+    // per ogni tabella
+    foreach ($this->fields as $token => $column) {
+      // dd($column);
+      $this->select_clause[$this->factId][$token] = "{$column->SQL} AS {$column->name}";
+
+      // questo viene utilizzato nella clausola ON della LEFT JOIN
+      // WARN: al posto di _columns[], in createDatamart(), può essere utilizzato $this->datamart_fields[]
+      // $this->_columns[] = "{$column->name}_id";
+      if (property_exists($this, 'sql_info')) {
+        $this->sql_info->{'SELECT'}->{$token} = "{$column->SQL} AS {$column->name}";
+        // dd($this->sql_info);
       }
     }
     // dd($this->sql_info);
@@ -267,6 +289,31 @@ class Cube
 
   public function groupBy_new()
   {
+    $this->groupby_clause = [];
+    foreach ($this->fields as $token => $column) {
+      $this->groupby_clause[$this->factId][$token] = $column->SQL;
+      if (property_exists($this, 'sql_info')) {
+        $this->sql_info->{'GROUP BY'}->{$token} = $column->SQL;
+      }
+      array_push($this->segmented, $column->name);
+    }
+    switch (session('db_driver')) {
+      case 'odbc':
+        if (count($this->segmented) > 40) {
+          $segmented = implode(",\n", $this->segmented);
+          $this->groupby_clause['SEGMENTED'] = "\nSEGMENTED BY HASH({$segmented}) ALL NODES";
+        }
+        break;
+      case 'mysql':
+        break;
+      default:
+        break;
+    }
+    // dd($this->groupby_clause);
+  }
+
+  /* public function groupBy_new()
+  {
     // dd($groups);
     // $fieldList = array();
     $this->groupby_clause = [];
@@ -300,7 +347,7 @@ class Cube
     }
     // dd($this->_groupBy);
     // dd($this->groupby_clause);
-  }
+  } */
 
   public function base_table_new()
   {
@@ -329,7 +376,8 @@ class Cube
     if (!is_null($this->report_filters[$this->factId])) $sql .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
     $sql .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
     $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
-    // dump($sql);
+    // dd($sql);
+    // ob_flush()
     switch (session('db_driver')) {
       case 'odbc':
         $createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
@@ -729,7 +777,7 @@ class Cube
         break;
     }
     // dd($this->union_clause);
-    // var_dump($this->union_clause);
+    // dump($this->union_clause);
     // DB::connection(session('db_client_name'))->statement($this->union_clause);
     // TODO: Qui se l'elaborazione fallisce devo eliminare tutte le tabelle temporanee create finora (basetable, e altre metric_table ad esempio)
     if (property_exists($this, 'sql_info')) {
@@ -769,6 +817,7 @@ class Cube
     foreach ($this->datamart_fields as $field) {
       $fields[] = "union_{$this->report_id}_{$this->datamart_id}.{$field}";
     }
+    // dd($fields);
     // unisco i seguenti campi :
     // - livelli dimensionali
     // - metriche di base, metriche avanzate e metriche composte

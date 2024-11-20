@@ -384,6 +384,11 @@ li.drag-list.columns>i:not([draggable]) {
   color: whitesmoke;
 }
 
+li.drag-list.columns[data-constraint]>i:not([draggable]) {
+  background-color: var(--main-important-color);
+  color: whitesmoke;
+}
+
 ul.filters>li>i {
   background-color: var(--filters-color);
   color: #494949;

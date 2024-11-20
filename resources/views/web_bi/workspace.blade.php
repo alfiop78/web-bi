@@ -289,6 +289,11 @@
         <button data-button="delete" data-fn="removeMetric" class="btn-link-context" disabled>Elimina</button>
       </ul>
 
+      <ul id="ul-context-menu-summary" class="context-menu-items">
+        <button data-fn="contextmenu__createCustomMetric" class="btn-link-context">Crea nuova metrica</button>
+        <button data-button="delete" data-fn="contextmenu__createCustomColumn" class="btn-link-context">Crea nuova colonna</button>
+      </ul>
+
       <ul id="ul-context-menu-advanced" class="context-menu-items">
         <button data-fn="editAdvancedMetric" class="btn-link-context">Modifica</button>
         <button data-fn="removeAdvancedMetric" class="btn-link-context" disabled>Elimina</button>

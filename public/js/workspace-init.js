@@ -854,8 +854,9 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
   app.editFieldAlias = (e) => {
     const token = e.target.dataset.token;
-    Sheet.fields = { token, name: e.target.innerHTML };
     console.log(Sheet.fields.get(token));
+    Sheet.fields = { token, name: e.target.innerText, datatype: Sheet.fields.get(token).datatype };
+    console.log('nome colonna modificato :', Sheet.fields.get(token));
   }
 
   // apertura dialog con lista WorkBooks
@@ -901,15 +902,17 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     let urls = [];
     const tables = Draw.svg.querySelectorAll('use.table:not([data-shared_ref]), use.time');
     for (const objects of tables.values()) {
-      // for (const object of WorkBook.tablesModel.values()) {
       WorkBook.activeTable = objects.id;
       // se la tabella è già presente in sessionStorage non rieseguo la query
       if (!window.sessionStorage.getItem(WorkBook.activeTable.dataset.table)) {
         urls.push('/fetch_api/' + WorkBook.activeTable.dataset.schema + '/schema/' + WorkBook.activeTable.dataset.table + '/table_info');
       }
     }
-    // in app.getTables() c'è il controllo se sono presenti urls da scaricare
-    WorkBookStorage.saveTables(await getTables(urls));
+    if (urls.length !== 0) {
+      App.showConsole('Recupero tabelle in corso...', '');
+      WorkBookStorage.saveTables(await getTables(urls));
+      App.closeConsole();
+    }
   }
 
   // apertura del WorkBook
@@ -1347,16 +1350,17 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     for (const [token, field] of Sheet.fields) {
       // verifico le tabelle da includere in tables Sheet.tables
       if (Sheet.checkMultiFactFields(token)) {
-        Sheet.tables = WorkBook.field.get(token).tableAlias;
+        Sheet.tables = WorkBook.fields.get(token).tableAlias;
         fields[token] = {
           token,
-          field: WorkBook.field.get(token).field,
+          field: WorkBook.fields.get(token).origin_field,
+          SQL: WorkBook.fields.get(token).SQL,
           // TODO: potrei passare i campi _id e _ds anche in questo modo, valutare se
           // è più semplice gestirli in cube.php
           // id: WorkBook.field.get(token).field.id,
           // ds: WorkBook.field.get(token).field.ds,
-          tableAlias: WorkBook.field.get(token).tableAlias,
-          name: field
+          tableAlias: WorkBook.fields.get(token).tableAlias,
+          name: field.name
         };
       } else {
         App.showConsole(`Il campo ${field} non è in comune con tutte le tabelle dei Fatti`, 'error', 4000);
@@ -1364,6 +1368,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       }
     }
     process.fields = fields;
+    debugger;
     // BUG: 28.08.2024 qui c'è da verificare se, in un report con una metrica "timingFunctions", sia stato messo un livello
     // della dimensione TIME, altrimenti, in setFiltersMetricTable_new, la variabile time_sql non viene valorizzata
 
@@ -2060,7 +2065,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // btnSave.hidden = false;
     // const btnUpdate = document.getElementById("btn-time-dimension-update");
     // btnUpdate.hidden = true;
-    app.dialogTime.show();
+    app.dialogTime.showModal();
   }
 
   // rimozione tabella dal draw SVG
@@ -2192,7 +2197,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // recupero tutti i campi delle TIME, li ciclo per aggiungerli alla proprietà 'fields' del WorkBook
     WorkBook.activeTable = `${data.descTable.id}-${WorkBook.activeTable.dataset.factId}`;
     // aggiungo i field delle tabelle time a WorkBook.fields
-    Draw.svg.querySelectorAll(`use.time[data-fact-id='${WorkBook.activeTable.dataset.factId}']`).forEach(async (timeTable) => {
+    /* Draw.svg.querySelectorAll(`use.time[data-fact-id='${WorkBook.activeTable.dataset.factId}']`).forEach(async (timeTable) => {
       WorkBook.activeTable = timeTable.id;
       WorkBook.field = {
         token: `tok_${timeTable.dataset.table}`,
@@ -2204,7 +2209,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         field: WorkBook.timeFields[timeTable.dataset.table]
       };
       WorkBook.fields = `tok_${timeTable.dataset.table}`;
-    });
+    }); */
   }
 
   // salvataggio dimensione TIME dalla dialog-time
@@ -2496,7 +2501,10 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       details.dataset.schema = objects.props.schema;
       details.dataset.table = objects.props.name;
       // summary.dataset.tableId = prop.key;
-      summary.innerHTML = objects.props.name;
+      summary.innerText = objects.props.name;
+      summary.dataset.tableId = objects.props.key;
+      summary.dataset.contextmenu = 'ul-context-menu-summary';
+      summary.addEventListener('contextmenu', openContextMenu);
       parent.appendChild(details);
       addFields(details, objects.fields)
       for (const [token, metric] of Object.entries(objects.metrics)) {
@@ -2521,7 +2529,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         i.addEventListener('dragstart', elementDragStart);
         i.addEventListener('dragend', elementDragEnd);
         li.addEventListener('contextmenu', openContextMenu);
-        span.innerHTML = metric.alias;
+        span.innerText = metric.alias;
         details.appendChild(li);
       }
     }
@@ -2707,10 +2715,18 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         return response;
       })
       .then((response) => response.text())
-      .then((response) => {
+      .then(async (response) => {
         console.log(response);
         App.closeConsole();
         if (response) {
+          // se le tabelle TIME non sono presenti in sessionStorage le recupero
+          let urls = [];
+          document.querySelectorAll('g#time-dimension>desc[data-table]').forEach(table => {
+            if (!window.sessionStorage.getItem(table.id)) {
+              urls.push(`/fetch_api/${table.dataset.schema}/schema/${table.id}/table_info`);
+            }
+          });
+          if (urls.length !== 0) WorkBookStorage.saveTables(await getTables(urls));
           App.showConsole('Tabelle TIME presenti', 'done', 2000);
         } else {
           // debugger;

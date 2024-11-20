@@ -340,12 +340,15 @@ code {
 #sheet__content>.sheet__contents {
   position: relative;
   display: grid;
+  padding: 1em;
 }
 
 .sheet__contents>section {
   position: absolute;
   width: 100%;
   height: 100%;
+  padding: 3em 1em 1em;
+  border: solid thin gainsboro;
 }
 
 #workbook-objects>*[data-worksheet-object] {

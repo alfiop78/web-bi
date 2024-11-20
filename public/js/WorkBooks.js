@@ -34,8 +34,8 @@ class Sheets {
 
   // passaggio del token e recupero del field in WorkSheet tramite l'oggetto WorkBook passato al Costruttore
   set fields(object) {
-    this.#fields.set(object.token, object.name);
-    // console.info('this.#fields : ', this.#fields);
+    this.#fields.set(object.token, {name : object.name, datatype: object.datatype});
+    console.info('Sheet.#fields : ', this.#fields);
   }
 
   get fields() { return this.#fields; }
@@ -62,6 +62,7 @@ class Sheets {
   }
 
   save() {
+    debugger;
     this.sheet.sheet.fields = Object.fromEntries(this.fields);
     this.sheet.sheet.from = this.from;
     this.sheet.sheet.joins = this.joins;
@@ -132,8 +133,8 @@ class Sheets {
     this.sheet.created_at = SheetStorage.sheet.created_at;
     this.sheet.updated_at = SheetStorage.sheet.updated_at;
 
-    for (const [token, field] of Object.entries(SheetStorage.sheet.sheet.fields)) {
-      this.fields = { token, name: field };
+    for (const [token, object] of Object.entries(SheetStorage.sheet.sheet.fields)) {
+      this.fields = {token, name: object.name, datatype: object.datatype};
     }
 
     // from
@@ -528,6 +529,7 @@ class WorkBooks {
               type: 'column',
               origin_field: col.column_name,
               datatype: col.type_name,
+              constraint: col.constraint_name,
               SQL: `${table.dataset.alias}.${col.column_name}`
             }
             this.fields = fields[token];

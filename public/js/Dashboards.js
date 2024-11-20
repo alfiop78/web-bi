@@ -126,6 +126,79 @@ class Resources extends Dashboards {
     this.#specs_group = { key: [], columns: [] };
     this.specs.name = Sheet.name;
     for (const [token, field] of Sheet.fields) {
+      // FIX: 20.11.2024 aggiungere, in Sheet.fields, le altre proprietà del field, come fatto con Sheet.metrics (sotto).
+      // In questo modo non dovrò recuperare le sue proprietà da WorkBook.fields.get(token)
+      // const workbookField = WorkBook.fields.get(token);
+      debugger;
+      this.#specs_columns[field.name] = {
+        id: field.name,
+        label: field.name,
+        type: this.getDataType(field.datatype),
+        p: { data: 'column' }
+      };
+      const keyColumn = this.specs.data.group.key.find(value => value.label === field.name);
+      if (!keyColumn) {
+        // colonna non presente in json.data.group.key
+        this.#specs_group.key.push({
+          id: field.name, label: field.name, type: this.getDataType(field.datatype),
+          properties: { grouped: true, visible: true }
+        });
+      } else {
+        // già presente
+        this.#specs_group.key.push(keyColumn);
+      }
+    }
+    console.log(this.#specs_columns);
+    console.log(this.#specs_group.key);
+
+    for (const [token, metric] of Sheet.metrics) {
+      this.#specs_columns[metric.alias] = {
+        id: metric.alias,
+        label: metric.alias,
+        type: this.getDataType(metric.datatype),
+        p: { data: 'measure' }
+      };
+      const findMetric = this.specs.data.group.columns.find(value => value.alias === metric.alias);
+      if (!findMetric) {
+        // non presente
+        this.#specs_group.columns.push({
+          token,
+          alias: metric.alias,
+          aggregateFn: metric.aggregateFn,
+          dependencies: metric.dependencies,
+          properties: {
+            visible: true,
+            formatter: {
+              type: 'number', format: 'default', prop: {
+                negativeColor: 'red', negativeParens: true, fractionDigits: 0, groupingSymbol: '.'
+              }
+            }
+          },
+          label: metric.alias,
+          type: metric.type,
+          datatype: 'number'
+        });
+      } else {
+        // già presente
+        this.#specs_group.columns.push(findMetric);
+      }
+    }
+    this.specs.data.columns = this.#specs_columns;
+    this.specs.data.group.key = this.#specs_group.key;
+    this.specs.data.group.columns = this.#specs_group.columns;
+    debugger;
+    this.bind();
+    const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
+    sheet.specs = this.specs;
+    debugger;
+    window.localStorage.setItem(Sheet.sheet.token, JSON.stringify(sheet));
+  }
+
+  /* setSpecifications() {
+    this.#specs_columns = {};
+    this.#specs_group = { key: [], columns: [] };
+    this.specs.name = Sheet.name;
+    for (const [token, field] of Sheet.fields) {
       const workbookField = WorkBook.field.get(token).field;
       Object.keys(WorkBook.field.get(token).field).forEach(key => {
         // console.log(key);
@@ -208,7 +281,7 @@ class Resources extends Dashboards {
     sheet.specs = this.specs;
     debugger;
     window.localStorage.setItem(Sheet.sheet.token, JSON.stringify(sheet));
-  }
+  } */
 
   bind() {
     let bind = [];
