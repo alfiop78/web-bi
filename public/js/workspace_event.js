@@ -193,9 +193,9 @@ document.addEventListener('DOMContentLoaded', () => {
   rowsDropzone.addEventListener('drop', handleRowDrop, false);
   rowsDropzone.addEventListener('dragleave', handleDropzoneDragLeave, false);
   // dropzone sheet columns
-  // columnsDropzone.addEventListener('dragover', handleDragOver, false);
-  // columnsDropzone.addEventListener('drop', handleColumnDrop, false);
-  // columnsDropzone.addEventListener('dragleave', handleDropzoneDragLeave, false);
+  columnsDropzone.addEventListener('dragover', handleDragOver, false);
+  columnsDropzone.addEventListener('drop', handleColumnDrop, false);
+  columnsDropzone.addEventListener('dragleave', handleDropzoneDragLeave, false);
 
   btnOptions.addEventListener('click', () => dlg__chart_options.showModal());
   export__datatable_xls.addEventListener('click', export_datatable_XLS_new);

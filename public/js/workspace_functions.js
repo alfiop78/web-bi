@@ -205,13 +205,14 @@ function filterSelected(e) {
 // TEST: implementazione del dragdrop per gli elementi .defined
 function handleDragStart(e) {
   this.style.opacity = '0.2';
+  console.log('handleDragStart');
   dragSrcEl = this;
   e.dataTransfer.effectAllowed = 'move';
   (this.id) ? e.dataTransfer.setData('text/plain', this.id) : e.dataTransfer.setData('text/plain', this.dataset.id);
   // e.dataTransfer.setData('text/plain', this.id);
   // aggiungo la cssClass pointer__none per impostare pointer-events: none sugli elementi child di .column-defined.box
   // in questo modo, in handleDragOver, quando il mouse passa su questi elementi non vengono presi in considerazione da elementFromPoint
-  document.querySelectorAll('.dropzone.rows>.column-defined>*').forEach(item => item.classList.add('pointer__none'));
+  document.querySelectorAll('.columns-rows .dropzone>.defined>*').forEach(item => item.classList.add('pointer__none'));
 }
 
 // over all'interno di #dropzone-rows
@@ -266,8 +267,8 @@ function handleDropzoneDragLeave(e) {
 
 // aggiungo l'elemento droppato #dropzone-rows
 function createColumnDefined(token) {
-  const template = template_columnDefined.content.cloneNode(true);
-  const field = template.querySelector('.column-defined');
+  const template = template__columnDefined.content.cloneNode(true);
+  const field = template.querySelector('.defined');
   const code = field.querySelector('code');
   const btnRemove = field.querySelector('button[data-remove]');
   const btnUndo = field.querySelector('button[data-undo]');
@@ -292,6 +293,34 @@ function createColumnDefined(token) {
   return field;
 }
 
+function createMetricDefined(token) {
+  const template = template__metricDefined.content.cloneNode(true);
+  const field = template.querySelector('.defined');
+  const aggregateFn = field.querySelector('code[data-aggregate]');
+  const code = field.querySelector('code[data-field]');
+  const btnRemove = field.querySelector('button[data-remove]');
+  const btnUndo = field.querySelector('button[data-undo]');
+  const metric = Sheet.metrics.get(token);
+  field.dataset.id = token;
+  field.dataset.type = metric.type;
+  field.dataset.label = metric.alias;
+  aggregateFn.dataset.metricId = metric.token;
+  aggregateFn.dataset.aggregate = metric.aggregateFn;
+  // Se lo Sheet è in modifica imposto il dataset 'added'
+  (!Sheet.edit) ? field.dataset.added = 'true' : field.dataset.adding = 'true';
+  code.innerText = metric.alias;
+  code.dataset.token = token;
+  code.dataset.field = metric.alias;
+  btnRemove.dataset.metricToken = token;
+  btnUndo.dataset.metricToken = token;
+  // TODO: code.addEventListener("input", app.editMetricAlias);
+  if (metric.metric_type !== 'composite') aggregateFn.innerText = metric.aggregateFn;
+  // imposto le fact da utilizzare nel report in base alle metriche da calcolare
+  // le metriche composte non hanno il factId
+  if (metric.factId) Sheet.fact.add(metric.factId);
+  return field;
+}
+
 // drop nella #dropzone-rows
 function handleRowDrop(e) {
   if (e.stopPropagation) e.stopPropagation();
@@ -303,7 +332,8 @@ function handleRowDrop(e) {
   const token = e.dataTransfer.getData('text/plain');
   // se il dataset.id è già presente sull'elemento che sto droppando significa che sto spostando un div .column-defined.box che era già stato
   // droppato (colonna già droppata)
-  Sheet.fields = { token, name: WorkBook.fields.get(token).name, datatype: WorkBook.fields.get(token).datatype };
+  const element = WorkBook.elements.get(token);
+  Sheet.fields = { token, name: element.name, datatype: element.datatype };
   console.log(Sheet.fields);
   if (!dragSrcEl.dataset.id) dragSrcEl = createColumnDefined(token);
   dragSrcEl.classList.add('box');
@@ -324,10 +354,69 @@ function handleColumnDrop(e) {
   // TODO: commentare il codice (testato su example_collection)
   // recupero le informazioni (dataset) riguardo l'elemento droppato per poter creare il .column-defined che andrà posizionato nella #dropzone-rows
   const token = e.dataTransfer.getData('text/plain');
+  // verifico se si tratta di una metrica o di una colonna dimensionale
+  const element = WorkBook.elements.get(token);
+  debugger;
+  if (element.type === 'metric') {
+    // template per le metriche
+    switch (element.metric_type) {
+      case 'composite':
+        Sheet.metrics = { token: element.token, alias: element.alias, SQL: element.SQL, type: element.metric_type, metrics: element.metrics, dependencies: false };
+        // TEST: 21.11.2024
+        debugger;
+        if (!dragSrcEl.dataset.id) dragSrcEl = createMetricDefined(token);
+        // dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
+        // ...al suo interno per consentirne l'elaborazione
+        for (const metricToken of Object.keys(Sheet.metrics.get(element.token).metrics)) {
+          // nell'oggetto Sheet.metrics aggiungo una prop 'dependencies' per specificare
+          // ... che questa metrica è stata aggiunta perchè è all'interno di una metrica composta
+          // verifico se la metrica all'interno di quella composta è stata già aggiunta allo Sheet
+          if (!Sheet.metrics.has(metricToken)) {
+            // la metrica in ciclo non è stata aggiunta allo Sheet, la aggiungo con la prop 'dependencies'
+            //... per specificare che è stata aggiunta indirettamente, essa si trova in una metrica composta
+            // NOTE: clonazione di un object con syntax ES6.
+            const nestedMetric = { ...WorkBook.elements.get(metricToken) };
+            Sheet.metrics = { token: nestedMetric.token, factId: nestedMetric.factId, alias: nestedMetric.alias, type: nestedMetric.metric_type, aggregateFn: nestedMetric.aggregateFn, dependencies: true };
+          }
+        }
+        break;
+      default:
+        // basic, advanced
+        // aggiungo a Sheet.metrics solo gli elementi che possono essere modificati, le proprieta di sola lettura le prenderò sempre da WorkBook.metrics
+        Sheet.metrics = { token: element.token, factId: element.factId, alias: element.alias, SQL: element.SQL, distinct: element.distinct, type: element.metric_type, aggregateFn: element.aggregateFn, dependencies: false };
+        if (!dragSrcEl.dataset.id) dragSrcEl = createMetricDefined(token);
+        // app.addMetric(e.currentTarget, elementRef.id);
+        // 26.07.2024 verifico, se nello Sheet, è presente una metrica con lo stesso nome
+        // In caso positivo devo mostrare una dialog per poter modificare il nome della metrica, il nome
+        // verrà modificato SOLO per questo Sheet e non nel WorkBook
+        // Questo controllo è aggiunto dopo addMetric in modo da poter impostare il focus sull'elemento
+        // già presente nel DOM.
+        // FIX: 21.11.2024 commentato temporaneamente dopo lo spostamento di app.columnDrop a questa Fn, da riattivare
+        /* if (Sheet.checkMetricNames(metric.token, metric.alias)) {
+          App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "error", 2500);
+          // imposto il cursore nel <code> da modificare
+          document.querySelector(`.metric-defined > code[data-token='${token}']`).focus({ focusVisible: true });
+          e.currentTarget.dataset.error = true;
+        } */
+        break;
+    }
+  } else {
+    // TODO: column, va convertita in metrica
+    let aggregateFn;
+    switch (element.datatype) {
+      case 'integer':
+        aggregateFn = 'COUNT';
+        break;
+      default:
+        aggregateFn = 'SUM';
+        break;
+    }
+    Sheet.metrics = { token, factId: element.tableId, alias: element.name, SQL: element.SQL, distinct: false, type: 'basic', aggregateFn, dependencies: false };
+    console.log(Sheet.metrics);
+    if (!dragSrcEl.dataset.id) dragSrcEl = createMetricDefined(token);
+  }
   // se il dataset.id è già presente sull'elemento che sto droppando significa che sto spostando un div .column-defined.box che era già stato
   // droppato (colonna già droppata)
-  // TODO: 12.11.2024 da implementare
-  if (!dragSrcEl.dataset.id) dragSrcEl = createColumnDefined(token);
   dragSrcEl.classList.add('box');
   elementAt.classList.remove('over');
   i.after(dragSrcEl);
@@ -338,7 +427,7 @@ function handleColumnDrop(e) {
 
 function handleDragEnd(e) {
   this.style.opacity = '1';
-  document.querySelectorAll('.dropzone.rows>.column-defined>*').forEach(item => item.classList.remove('pointer__none'));
+  document.querySelectorAll('.columns-rows .dropzone>.defined>*').forEach(item => item.classList.remove('pointer__none'));
   document.querySelectorAll('.dropzone.rows>div').forEach(item => item.classList.remove('over'));
   // ogni elemento droppato viene posizionato alla fine dell'oggetto Map Sheet.fields perchè il Map() conserva l'ordine
   // di inserimento. L'ordine di inserimento contenuto in Sheet.fields non corrisponde agli elementi aggiunti col drag&drop perchè questi
@@ -485,6 +574,7 @@ function appendMetric(parent, token) {
 // NOTE: funzioni Drag&Drop
 
 function elementDragStart(e) {
+  debugger;
   // console.log('column drag start');
   console.log(e.currentTarget);
   // console.log('e.target : ', e.target.id);
@@ -545,6 +635,8 @@ dlgCompositeMetric.addEventListener('close', () => textareaCompositeMetric.first
 
 dlgCustomMetric.addEventListener('close', () => textareaCustomMetric.firstChild?.remove());
 
+// elementi della dialog filters
+// WARN: codice molto simile a app.addTableStruct, da ottimizzare
 function createTableStruct() {
   let parent = document.getElementById('wbFilters');
   // ripulisco la struttura se presente
@@ -1219,9 +1311,11 @@ function addFields(parent, fields) {
   for (const [token, value] of Object.entries(fields)) {
     const tmpl = template_li.content.cloneNode(true);
     const li = tmpl.querySelector('li.drag-list.columns');
-    const span = li.querySelector('span');
-    const i = li.querySelector('i[draggable]');
-    const icon = li.querySelector('i:not([draggable])');
+    const span__content = li.querySelector('.span__content');
+    const span = span__content.querySelector('span');
+    const i = span__content.querySelector('i[draggable]');
+    const btnConvertToMetric = li.lastElementChild;
+    const icon = span__content.querySelector('i:not([draggable])');
     if (value.constraint) {
       li.dataset.constraint = value.constraint;
       icon.innerText = 'key';
@@ -1243,10 +1337,55 @@ function addFields(parent, fields) {
     i.addEventListener('dragend', handleDragEnd);
     i.addEventListener('dragenter', handleDragEnter);
     i.addEventListener('dragleave', handleDragLeave);
+    btnConvertToMetric.dataset.token = token;
+    btnConvertToMetric.addEventListener('click', convertToMetric);
     // span.innerHTML = value.field.ds.sql.join('');
     span.innerHTML = value.name;
     parent.appendChild(li);
   }
+}
+
+function convertToMetric(e) {
+  // elemento (colonna) da cui convertire in metrica
+  const referenceElement = document.querySelector(`.drag-list.columns[data-id='${e.currentTarget.dataset.token}']`);
+  // console.log(token);
+  // recupero l'elemento da convertire
+  const element = WorkBook.elements.get(e.currentTarget.dataset.token);
+  // console.log(element);
+  // creo la metrica che salverò in customMetrics, queste verranno salvate in storage, insiemen al WorkBook e alle metriche
+  // custom di base (es. : przmedio*quantita)
+  let aggregateFn;
+  switch (element.datatype) {
+    case 'integer':
+      aggregateFn = 'COUNT';
+      break;
+    default:
+      aggregateFn = 'SUM';
+      break;
+  }
+  const token = `_cm_${e.currentTarget.dataset.token}`;
+  const metric = { token, factId: element.tableId, alias: element.name, SQL: element.SQL, distinct: false, type: 'metric', metric_type: 'basic', aggregateFn, dependencies: false };
+  Sheet.metrics = metric;
+  // console.log(Sheet.metrics);
+  WorkBook.elements = metric;
+  WorkBook.customMetrics = metric;
+  // duplico l'elemento da convertire
+  const tmpl = template_li.content.cloneNode(true);
+  const li = tmpl.querySelector('li.drag-list.metrics.basic');
+  const span = li.querySelector('span');
+  const i = li.querySelector('i');
+  li.dataset.id = token;
+  i.id = token;
+  li.dataset.type = 'basic';
+  li.dataset.elementSearch = 'elements';
+  li.dataset.label = metric.alias;
+  // definisco quale context-menu-template apre questo elemento
+  li.dataset.contextmenu = 'ul-context-menu-basic';
+  i.addEventListener('dragstart', handleDragStart);
+  i.addEventListener('dragend', handleDragEnd);
+  li.addEventListener('contextmenu', openContextMenu);
+  span.innerText = metric.alias;
+  referenceElement.after(li);
 }
 
 console.info('END workspace_functions');

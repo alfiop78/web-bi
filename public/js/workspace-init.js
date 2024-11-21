@@ -28,7 +28,8 @@ const template_li = document.getElementById('tmpl-li');
 const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
 const contextMenuRef = document.getElementById('context-menu');
 const tmplDetails = document.getElementById('tmpl-details-element');
-const template_columnDefined = document.getElementById('tmpl-columns-defined');
+const template__columnDefined = document.getElementById('tmpl-columns-defined');
+const template__metricDefined = document.getElementById('tmpl-metrics-defined');
 const template__filterDropped = document.getElementById('tmpl-filter-dropped-adv-metric');
 const template__createElement = document.getElementById('tmpl__createElement');
 
@@ -300,7 +301,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   }
 
   // stesso funzionamento di addField()
-  app.addMetric = (target, token) => {
+  /* app.addMetric = (target, token) => {
     const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('.metric-defined');
     const btnRemove = tmpl.querySelector('button[data-remove]');
@@ -334,7 +335,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // imposto le fact da utilizzare nel report in base alle metriche da calcolare
     // le metriche composte non hanno il factId
     if (metric.factId) Sheet.fact.add(metric.factId);
-  }
+  } */
 
   app.editMetricAlias = (e) => {
     const dropzone = document.getElementById("dropzone-columns");
@@ -352,8 +353,9 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     }
   }
 
-  app.columnDrop = (e) => {
+  /* app.columnDrop = (e) => {
     e.preventDefault();
+    debugger;
     // e.currentTarget.classList.replace('dropping', 'dropped');
     e.currentTarget.classList.remove('dropping');
     if (!e.currentTarget.classList.contains('dropzone')) return;
@@ -416,7 +418,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         Sheet.fields = elementRef.id;
         break;
     }
-  }
+  } */
 
   // drop filtri nella creazione della metrica avanzata
   app.handlerDropFilter = (e) => {
@@ -794,10 +796,10 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   app.txtAreaIdColumn.addEventListener('drop', app.setColumnDrop, false);
   app.txtAreaDsColumn.addEventListener('drop', app.setColumnDrop, false);
 
-  app.columnsDropzone.addEventListener('dragenter', app.elementDragEnter, false);
-  app.columnsDropzone.addEventListener('dragover', app.elementDragOver, false);
-  app.columnsDropzone.addEventListener('dragleave', app.elementDragLeave, false);
-  app.columnsDropzone.addEventListener('drop', app.columnDrop, false);
+  // app.columnsDropzone.addEventListener('dragenter', app.elementDragEnter, false);
+  // app.columnsDropzone.addEventListener('dragover', app.elementDragOver, false);
+  // app.columnsDropzone.addEventListener('dragleave', app.elementDragLeave, false);
+  // app.columnsDropzone.addEventListener('drop', app.columnDrop, false);
   // app.columnsDropzone.addEventListener('dragend', app.columnDragEnd, false);
   /* NOTE: END DRAG&DROP EVENTS */
 
@@ -1399,23 +1401,29 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         // }
 
         for (const [token, metric] of Sheet.metrics) {
-          const wbMetrics = WorkBook.metrics.get(token);
+          const wbMetrics = WorkBook.elements.get(token);
+          debugger;
           switch (metric.type) {
             case 'composite':
               process.compositeMeasures[token] = {
                 alias: metric.alias,
-                sql: wbMetrics.SQL,
-                metrics: wbMetrics.metrics
+                sql: metric.SQL,
+                metrics: metric.metrics
+                // sql: wbMetrics.SQL,
+                // metrics: wbMetrics.metrics
               };
               break;
             case 'advanced':
-              if (wbMetrics.factId === factId) {
+              // if (wbMetrics.factId === factId) {
+              if (metric.factId === factId) {
                 let obj = {
                   token,
                   alias: metric.alias,
                   aggregateFn: metric.aggregateFn,
-                  sql: wbMetrics.SQL,
-                  distinct: wbMetrics.distinct,
+                  // sql: wbMetrics.SQL,
+                  // distinct: wbMetrics.distinct,
+                  sql: metric.SQL,
+                  distinct: metric.distinct,
                   filters: {}
                 };
                 // aggiungo i filtri definiti all'interno della metrica avanzata
@@ -1435,14 +1443,17 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
               break;
             default:
               // basic
-              if (wbMetrics.factId === factId) {
+              debugger;
+              // if (wbMetrics.factId === factId) {
+              if (metric.factId === factId) {
                 baseMeasures.set(token, {
                   token,
                   alias: metric.alias,
                   aggregateFn: metric.aggregateFn,
-                  // field: wbMetrics.field, // 15.10.2024 field non mi sembra utilizzato in cube.php
-                  sql: wbMetrics.SQL,
-                  distinct: wbMetrics.distinct
+                  // sql: wbMetrics.SQL,
+                  sql: metric.SQL,
+                  // distinct: wbMetrics.distinct
+                  distinct: metric.distinct
                 });
               }
               break;
@@ -2493,8 +2504,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         li.dataset.label = metric.alias;
         // definisco quale context-menu-template apre questo elemento
         li.dataset.contextmenu = `ul-context-menu-${metric.metric_type}`;
-        i.addEventListener('dragstart', elementDragStart);
-        i.addEventListener('dragend', elementDragEnd);
+        i.addEventListener('dragstart', handleDragStart);
+        i.addEventListener('dragend', handleDragEnd);
         li.addEventListener('contextmenu', openContextMenu);
         span.innerText = metric.alias;
         details.appendChild(li);

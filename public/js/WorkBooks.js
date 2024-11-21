@@ -34,7 +34,7 @@ class Sheets {
 
   // passaggio del token e recupero del field in WorkSheet tramite l'oggetto WorkBook passato al Costruttore
   set fields(object) {
-    this.#fields.set(object.token, {name : object.name, datatype: object.datatype});
+    this.#fields.set(object.token, { name: object.name, datatype: object.datatype });
     console.info('Sheet.#fields : ', this.#fields);
   }
 
@@ -134,7 +134,7 @@ class Sheets {
     this.sheet.updated_at = SheetStorage.sheet.updated_at;
 
     for (const [token, object] of Object.entries(SheetStorage.sheet.sheet.fields)) {
-      this.fields = {token, name: object.name, datatype: object.datatype};
+      this.fields = { token, name: object.name, datatype: object.datatype };
     }
 
     // from
@@ -249,6 +249,8 @@ class Sheets {
 class WorkBooks {
   #activeTable;
   #field = new Map();
+  #elements = new Map();
+  #customMetrics = new Map();
   #fields = new Map();
   #filters = new Map();
   #metrics = new Map();
@@ -298,6 +300,18 @@ class WorkBooks {
   }
 
   get name() { return this.title; }
+
+  set elements(value) {
+    this.#elements.set(value.token, value);
+  }
+
+  get elements() { return this.#elements; }
+
+  set customMetrics(value) {
+    this.#customMetrics.set(value.token, value);
+  }
+
+  get customMetrics() { return this.#customMetrics; }
 
   set tableJoins(object) {
     this.#tableJoins.from = Draw.svg.querySelector(`#${object.from}`);
@@ -503,21 +517,25 @@ class WorkBooks {
       const columns = JSON.parse(window.sessionStorage.getItem(table.dataset.table));
       // console.log(columns);
       columns.forEach(col => {
-        const token = `_${table.id.substring(table.id.length - 5)}_${col.ordinal_position}_${col.column_name}`;
+        // const token = `_${table.id.substring(table.id.length - 5)}_${col.ordinal_position}_${col.column_name}`;
+        const token = (table.dataset.type === 'time') ?
+          `_${table.dataset.table}_${col.ordinal_position}_${col.column_name}` :
+          `_${table.id.substring(table.id.length - 5)}_${col.ordinal_position}_${col.column_name}`;
         switch (col.type_name) {
           case 'float':
             metrics[token] = {
               token, // TODO: da valutare se è utilizzata la prop token qui
               alias: col.column_name,
               type: 'metric',
-              SQL : `${table.dataset.alias}.${col.column_name}`,
+              SQL: `${table.dataset.alias}.${col.column_name}`,
               aggregateFn: 'SUM',
               distinct: false,
               factId: table.id,
               metric_type: 'basic',
-              properties: {table: table.dataset.table, fields: [col.column_name]}
+              properties: { table: table.dataset.table, fields: [col.column_name] }
             }
             this.metrics = metrics[token];
+            this.elements = metrics[token];
             break;
           default:
             fields[token] = {
@@ -534,6 +552,7 @@ class WorkBooks {
               SQL: `${table.dataset.alias}.${col.column_name}`
             }
             this.fields = fields[token];
+            this.elements = fields[token];
             break;
         }
       });

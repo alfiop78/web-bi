@@ -84,9 +84,12 @@
     </li>
 
     <li class="drag-list columns" data-element-search data-label data-searchable="true">
-      <i class="material-symbols-rounded md-18" draggable="true">drag_handle</i>
-      <i class="material-symbols-rounded md-18">table_rows</i>
-      <span></span>
+      <span class="span__content">
+        <i class="material-symbols-rounded md-18" draggable="true">drag_handle</i>
+        <i class="material-symbols-rounded md-18">table_rows</i>
+        <span></span>
+      </span>
+      <i class="material-symbols-rounded md-18">functions</i>
     </li>
 
     <!-- <li class="drag-list filters" data-element-search data-label data-searchable="true">
@@ -132,14 +135,14 @@
   </template>
 
   <template id="tmpl__createElement">
-      <li data-id="li__createColumn" data-schema data-table data-alias value="Nuova Colonna">
-        <i class="material-symbols-rounded md-18">add</i>
-        <span>Nuova Colonna</span>
-      </li>
-      <li data-id="li__createMetric" data-schema data-table data-alias value="Nuova Metrica">
-        <i class="material-symbols-rounded md-18">add</i>
-        <span>Nuova Metrica</span>
-      </li>
+    <li data-id="li__createColumn" data-schema data-table data-alias value="Nuova Colonna">
+      <i class="material-symbols-rounded md-18">add</i>
+      <span>Nuova Colonna</span>
+    </li>
+    <li data-id="li__createMetric" data-schema data-table data-alias value="Nuova Metrica">
+      <i class="material-symbols-rounded md-18">add</i>
+      <span>Nuova Metrica</span>
+    </li>
   </template>
 
   <template id="tmpl-dl-element">
@@ -227,7 +230,7 @@
     </template>
 
     <template id="tmpl-columns-defined">
-      <div class="column-defined box" data-type="column" draggable="true">
+      <div class="column-defined defined box" data-type="column" draggable="true">
         <i class="button-icon material-symbols-rounded md-18">drag_indicator</i>
         <div class="defined_contents">
           <code contenteditable="true" data-blur-fn="editFieldAlias" spellcheck="false"></code>
@@ -261,7 +264,7 @@
     </template>
 
     <template id="tmpl-metrics-defined">
-      <div class="metric-defined metrics">
+      <div class="metric-defined defined metrics">
         <!-- <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate"></code><span>(</span><code data-field data-metric-id data-table-alias></code><span>)</span> -->
         <i class="button-icon material-symbols-rounded md-18">drag_indicator</i>
         <div class="defined_contents">
