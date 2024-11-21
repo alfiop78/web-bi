@@ -349,14 +349,9 @@ function handleRowDrop(e) {
 function handleColumnDrop(e) {
   if (e.stopPropagation) e.stopPropagation();
   e.preventDefault();
-  // console.log('DROP : ',elementAt);
-  // debugger;
-  // TODO: commentare il codice (testato su example_collection)
-  // recupero le informazioni (dataset) riguardo l'elemento droppato per poter creare il .column-defined che andrà posizionato nella #dropzone-rows
   const token = e.dataTransfer.getData('text/plain');
   // verifico se si tratta di una metrica o di una colonna dimensionale
   const element = WorkBook.elements.get(token);
-  debugger;
   if (element.type === 'metric') {
     // template per le metriche
     switch (element.metric_type) {
@@ -401,19 +396,9 @@ function handleColumnDrop(e) {
         break;
     }
   } else {
-    // TODO: column, va convertita in metrica
-    let aggregateFn;
-    switch (element.datatype) {
-      case 'integer':
-        aggregateFn = 'COUNT';
-        break;
-      default:
-        aggregateFn = 'SUM';
-        break;
-    }
-    Sheet.metrics = { token, factId: element.tableId, alias: element.name, SQL: element.SQL, distinct: false, type: 'basic', aggregateFn, dependencies: false };
-    console.log(Sheet.metrics);
-    if (!dragSrcEl.dataset.id) dragSrcEl = createMetricDefined(token);
+    // WARN: column, attualmente non gestita
+    App.showConsole('Funzionalità non ancora gestita', 'warning', 2000);
+    return;
   }
   // se il dataset.id è già presente sull'elemento che sto droppando significa che sto spostando un div .column-defined.box che era già stato
   // droppato (colonna già droppata)
@@ -711,19 +696,22 @@ function customBaseMetricSave(e) {
       SQL.push(el.trim());
     }
   });
+  // TODO: 21.11.2024 verificare per quale motivo la creazione dell'object qui è diversa da quella in convertToMetric()
   const metric = {
-    token, alias,
+    token,
+    factId,
+    alias,
+    SQL: SQL.join(' '),
+    distinct: false, // default
     type: 'metric',
     metric_type: 'basic',
-    factId,
     properties: {
       table: WorkBook.activeTable.dataset.table,
       fields
     },
     formula,
     aggregateFn: 'SUM', // default
-    SQL: SQL.join(' '),
-    distinct: false // default
+    cssClass: 'custom'
   }
   WorkBook.checkChanges(token);
   WorkBook.elements = metric;
@@ -1342,8 +1330,7 @@ function addFields(parent, fields) {
     btnConvertToMetric.dataset.tableId = value.tableId;
     btnConvertToMetric.dataset.token = token;
     btnConvertToMetric.addEventListener('click', convertToMetric);
-    // span.innerHTML = value.field.ds.sql.join('');
-    span.innerHTML = value.name;
+    span.innerText = value.name;
     parent.appendChild(li);
   }
 }
@@ -1384,7 +1371,8 @@ function convertToMetric(e) {
     type: 'metric',
     metric_type: 'basic',
     aggregateFn,
-    dependencies: false
+    dependencies: false,
+    cssClass: 'custom'
   };
   WorkBook.checkChanges(token);
   WorkBook.elements = metric;
@@ -1401,8 +1389,10 @@ function appendNewMetric(metric) {
   const referenceElement = document.querySelector(`#${WorkBook.activeTable.id}_new_metric`);
   const tmpl = template_li.content.cloneNode(true);
   const li = tmpl.querySelector('li.drag-list.metrics.basic');
-  const span = li.querySelector('span');
-  const i = li.querySelector('i');
+  const span__content = li.querySelector('.span__content');
+  const span = span__content.querySelector('span');
+  const i = span__content.querySelector('i[draggable]');
+  li.classList.add('custom');
   li.dataset.id = metric.token;
   i.id = metric.token;
   li.dataset.type = 'basic';

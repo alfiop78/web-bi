@@ -188,34 +188,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     app.checkSessionStorage();
   }
 
-  /* // Aggiunta metrica composta di base
-  app.addCustomMetric = () => {
-    // carico elenco metrica composte di base
-    const ul = document.getElementById('ul-custom-metrics');
-    // ul.querySelectorAll('li').forEach(metric => metric.remove());
-    // delete document.querySelector('#btn-custom-metric-save').dataset.token;
-    for (const [key, value] of WorkBook.metrics) {
-      console.log(key, value);
-      if (value.hasOwnProperty('formula') && value.metric_type === 'basic') {
-        // è una metrica composta di base, quindi definita sul cubo (es. przmedio * quantita)
-        const content = template_li.content.cloneNode(true);
-        const li = content.querySelector('li.icons-list');
-        const span = li.querySelector('span');
-        const btnEdit = li.querySelector('button[data-edit]');
-        const btnRemove = li.querySelector('button[data-delete]');
-        li.dataset.token = value.token;
-        li.dataset.label = value.alias;
-        li.dataset.elementSearch = 'custom-metrics';
-        btnEdit.dataset.token = value.token;
-        btnRemove.dataset.metricToken = value.token;
-        span.innerText = value.alias;
-        ul.appendChild(li);
-      }
-    }
-    app.dialogCustomMetric.showModal();
-    Draw.contextMenu.toggleAttribute('open');
-  } */
-
   // imposto un alias per tabella aggiunta al canvas
   app.setAliasTable = () => app.dialogRename.showModal();
 
@@ -284,58 +256,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   }
   /* NOTE: END DRAG&DROP EVENTS */
 
-  // column _id e _ds
-  app.setColumnDrop = (e) => {
-    e.preventDefault();
-    console.log('target:', e.target);
-    console.log('currentTarget:', e.currentTarget);
-    // e.currentTarget.classList.replace('dropping', 'dropped');
-    e.currentTarget.classList.remove('dropping');
-    if (!e.currentTarget.classList.contains('dropzone')) return;
-    const elementId = e.dataTransfer.getData('text/plain');
-    const elementRef = document.getElementById(elementId);
-    // elementRef : è l'elemento draggato
-    WorkBook.activeTable = elementRef.dataset.tableId;
-    // console.log(WorkBook.activeTable.dataset.table);
-    app.addMark({ field: elementRef.dataset.field, datatype: elementRef.dataset.datatype }, e.target);
-  }
-
-  // stesso funzionamento di addField()
-  /* app.addMetric = (target, token) => {
-    const tmpl = app.tmplMetricsDefined.content.cloneNode(true);
-    const field = tmpl.querySelector('.metric-defined');
-    const btnRemove = tmpl.querySelector('button[data-remove]');
-    const btnUndo = tmpl.querySelector('button[data-undo]');
-    btnRemove.dataset.metricToken = token;
-    btnUndo.dataset.metricToken = token;
-    // const formula = field.querySelector('.formula');
-    const aggregateFn = field.querySelector('code[data-aggregate]');
-    const codeFieldName = field.querySelector('code[data-field]');
-    const metric = Sheet.metrics.get(token);
-    field.dataset.type = metric.type;
-    // field.classList.add(metric.type);
-    field.dataset.id = metric.token;
-    field.dataset.label = metric.alias;
-    aggregateFn.dataset.metricId = metric.token;
-    aggregateFn.dataset.aggregate = metric.aggregateFn;
-    // Se lo Sheet è in modifica imposto il dataset 'added'
-    (!Sheet.edit) ? field.dataset.added = 'true' : field.dataset.adding = 'true';
-    // formula.dataset.id = metric.token;
-    // formula.dataset.token = metric.token;
-    // codeFieldName.innerHTML = `(${metric.alias})`;
-    codeFieldName.innerText = metric.alias;
-    codeFieldName.dataset.token = token;
-    codeFieldName.dataset.field = metric.alias;
-    codeFieldName.addEventListener("input", app.editMetricAlias);
-    if (metric.metric_type !== 'composite') {
-      aggregateFn.innerText = metric.aggregateFn;
-      // fieldName.dataset.field = metric.field;
-    }
-    target.appendChild(field);
-    // imposto le fact da utilizzare nel report in base alle metriche da calcolare
-    // le metriche composte non hanno il factId
-    if (metric.factId) Sheet.fact.add(metric.factId);
-  } */
 
   app.editMetricAlias = (e) => {
     const dropzone = document.getElementById("dropzone-columns");
@@ -421,6 +341,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   } */
 
   // drop filtri nella creazione della metrica avanzata
+  // WARN: 21.11.2024 utilizzata?
   app.handlerDropFilter = (e) => {
     e.preventDefault();
     // e.currentTarget.classList.replace('dropping', 'dropped');
@@ -462,7 +383,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // elementRef : è l'elemento draggato
     WorkBook.activeTable = elementRef.dataset.tableId;
     // e.target.innerText += `${WorkBook.activeTable.dataset.name}.${elementRef.dataset.field}`;
-    // app.addMark({ field: elementRef.dataset.field, datatype: elementRef.dataset.datatype }, e.target);
   }
 
   app.addFilterToSheet = (token) => {
@@ -471,17 +391,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     const li__selected = document.querySelector(`li[data-id='${token}']`);
     li__selected.classList.add('added');
     addTemplateFilter(token);
-  }
-
-  // WARN: 2024.05.11 non più utilizzata
-  app.filterDrop = (e) => {
-    e.preventDefault();
-    e.currentTarget.classList.remove('dropping');
-    if (!e.currentTarget.classList.contains('dropzone')) return;
-    const elementId = e.dataTransfer.getData('text/plain');
-    const elementRef = document.getElementById(elementId);
-    Sheet.filters = elementId;
-    app.addFilters(e.currentTarget, elementRef);
   }
 
   // Modifica di una metrica composta di base
@@ -495,137 +404,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     const text = document.createTextNode(metric.formula.join(''));
     // aggiungo il testo della formula prima del tag <br>
     textarea.insertBefore(text, textarea.lastChild);
-  }
-
-  /* selezione di una colonna dalla table-preview, aggiungo la colonna alla dialog-custom-metric
-  * per la creazione di una metrica composta di base (przmedio * quantita)
-  TODO: questa funzionalità andrà sostituita con il drag&drop
-  */
-  app.handlerSelectColumn = (e) => {
-    const field = e.target.dataset.field;
-    // aggiungo la metrica alla textarea-metric
-    const textarea = app.dialogCustomMetric.querySelector('#textarea-custom-metric');
-    const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
-    const span = templateContent.querySelector('span');
-    const mark = templateContent.querySelector('mark');
-    // mark.dataset.metricToken = e.currentTarget.dataset.metricToken;
-    mark.innerText = field;
-    mark.dataset.tableAlias = WorkBook.activeTable.dataset.alias;
-    textarea.appendChild(span);
-    // aggiungo anche uno span per il proseguimento della scrittura della formula
-    app.addSpan(textarea, null, 'metric');
-  }
-
-  // salvataggio metrica di base
-  app.saveBaseMeasure = (e) => {
-    const token = rand().substring(0, 7);
-    const alias = e.target.dataset.field;
-    const factId = WorkBook.activeTable.dataset.factId;
-
-    // metric Map Object
-    WorkBook.metrics = {
-      token, alias,
-      type: 'metric',
-      metric_type: 'basic',
-      factId,
-      properties: {
-        table: WorkBook.activeTable.dataset.table,
-        fields: [e.target.dataset.field]
-      },
-      aggregateFn: 'SUM', // default
-      SQL: `${WorkBook.activeTable.dataset.alias}.${e.target.dataset.field}`,
-      distinct: false // default
-    };
-    WorkBook.checkChanges(token);
-    App.showConsole(`Metrica ${e.target.dataset.field} aggiunta al WorkBook`, "done", 3500);
-  }
-
-  // apro la dialog column per definire le colonne del WorkBook
-  app.setColumn = (e) => {
-    WorkBook.currentField = e.currentTarget.dataset.field;
-    document.getElementById('column-name').value = e.currentTarget.dataset.field;
-    // nel sessionStorage ho già la tabella aggiunta al canvas, quindi
-    // posso recuperare il datatype dal sessionStorage
-    const tableSpecs = JSON.parse(window.sessionStorage.getItem(WorkBook.activeTable.dataset.table));
-    // cerco la colonna per poterne recuperare il datatype
-    const fieldSpecs = tableSpecs.find(column => column.column_name === e.currentTarget.dataset.field);
-    const datatype = fieldSpecs.type_name.toLowerCase();
-    const id = document.querySelector('#textarea-column-id');
-    const ds = document.querySelector('#textarea-column-ds');
-    app.addMark({ field: e.currentTarget.dataset.field, datatype }, id);
-    app.addMark({ field: e.currentTarget.dataset.field, datatype }, ds);
-    // carico elenco tabelle del canvas
-    app.loadTableStruct();
-    app.dialogColumns.show();
-  }
-
-  app.editColumn = (e) => {
-    WorkBook.currentField = e.currentTarget.dataset.field;
-    // imposto il token sul tasto "salva" in modo da poter distinguere
-    // l'aggiornamento/creazione di una colonna. Il dataset.token indica che
-    // la colonna esiste già e deve essere aggiornata
-    document.querySelector('#btn-columns-define').dataset.token = e.currentTarget.dataset.token;
-    // Nella proprietà 'field.[[id][ds]].formula' è presente l'oggetto che
-    // consente di ricostruire la formula (come per i filtri o le metriche composte)
-    const column = WorkBook.field.get(e.currentTarget.dataset.token);
-    for (const [key, value] of Object.entries(column.field)) {
-      // console.log(key, value);
-      // se l'elemento della formula(element) contiene il campo "field" posso
-      // aggiungerlo, come <mark>, altrimenti è normale testo (es. || l'operatore di concatenazione)
-      const txtarea = (key === 'id') ? app.txtAreaIdColumn : app.txtAreaDsColumn;
-      value.formula.forEach(element => {
-        if (element.hasOwnProperty('field')) {
-          // determino il <mark>
-          app.addMark({ field: element.field, datatype: element.datatype }, txtarea);
-        } else {
-          app.addSpan(txtarea, element);
-        }
-
-      });
-    }
-    // imposto il nome della colonna assegnato in fase di creazione, prop name
-    document.getElementById('column-name').value = column.name;
-    app.loadTableStruct();
-    WorkBook.checkChanges(e.currentTarget.dataset.token);
-    app.dialogColumns.show();
-  }
-
-  // Cancellazione della colonna precedentemente definita in WorkBook.table[s]
-  app.removeColumn = (e) => {
-    // WARN: attenzione perchè la colonna potrebbe essere stata usata in qualche report
-    // Stabilire se la colonna può essere eliminata, anche se utilizzata sugli Sheet (in questo caso
-    // eliminerò a cascata su tutti gli Sheet questa colonna) oppure disabilitare 'Elimina colonna'
-    // se questa è utilizzata sugli Sheet
-
-    // console.log(WorkBook.workBook.token);
-    const workbook_ref = WorkBook.workBook.token;
-
-    // WorkBook.activeTable è già valorizzato, quando si seleziona la tabella dal canvas
-    // Elimino l'oggetto all'interno del Map 'fields'
-    delete WorkBook.fields.get(WorkBook.activeTable.dataset.alias)[e.currentTarget.dataset.token];
-    WorkBook.field.delete(e.currentTarget.dataset.token);
-    // verifico che l'oggetto Map con l'alias della tabella contenga altri elementi, altrimenti
-    // devo eliminare anche workBook.fields(tableAlias)
-    if (Object.keys(WorkBook.fields.get(WorkBook.activeTable.dataset.alias)).length === 0) {
-      WorkBook.fields.delete(WorkBook.activeTable.dataset.alias);
-    }
-    delete document.querySelector(`#preview-table th[data-token='${e.currentTarget.dataset.token}']`).dataset.token;
-
-    // TODO: Visualizzare un avviso che indica la cancellazione della colonna anche su tutti gli sheet dove è stato creato
-
-    // 1 - Cerco lo sheet, nello storage, con workbook_ref relativo a questo workbook
-    // 2 - Elimino la colonna all'interno della prop 'fields'
-    const sheets = SheetStorage.sheets(workbook_ref);
-    // WARN: se sono presenti sheet, li aggiorno, però c'è da valutare se annullare la cache del datamart
-    // altrimenti le colonne dello sheet non corrispondono a quelle impostate in righe/colonne (nella pagina)
-    if (sheets) {
-      for (const value of Object.values(sheets)) {
-        delete value.fields[e.currentTarget.dataset.token];
-        value.updated_at = new Date().toLocaleDateString('it-IT', options);
-        SheetStorage.save(value);
-      }
-    }
-    WorkBook.checkChanges(e.currentTarget.dataset.token);
   }
 
   app.removeWBMetric = (e) => {
@@ -655,152 +433,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     WorkBook.checkChanges(e.currentTarget.dataset.metricToken);
   }
 
-  app.contextMenuColumn = (e) => {
-    e.preventDefault();
-    if (!e.currentTarget.dataset.id) return false;
-    // console.log(e.target.getBoundingClientRect());
-    // const { clientX: mouseX, clientY: mouseY } = e;
-    // const { right: mouseX, top: mouseY } = e.target.getBoundingClientRect();
-    // const { left: mouseX, top: mouseY } = e.currentTarget.getBoundingClientRect();
-    const { left: mouseX, bottom: mouseY } = e.currentTarget.getBoundingClientRect();
-    // console.log(e.currentTarget.getBoundingClientRect());
-    app.contextMenuColumnRef.style.top = `${mouseY + 4}px`;
-    app.contextMenuColumnRef.style.left = `${mouseX + 4}px`;
-    // Imposto la tabella attiva, su cui si è attivato il context-menu
-    WorkBook.activeTable = e.currentTarget.dataset.id;
-    // Imposto, sugli elementi del context-menu, l'id della tabella selezionata
-    app.contextMenuColumnRef.toggleAttribute('open');
-    document.querySelectorAll('#ul-context-menu-column button').forEach(item => {
-      // imposto il data-token solo sui tasti 'Elimina' e 'Modifica' (colonna o metrica già definita)
-      // console.log(item);
-      item.removeAttribute('disabled');
-      item.dataset.field = e.currentTarget.dataset.field;
-      switch (item.id) {
-        case 'btn-remove-wb-metric':
-          (e.currentTarget.dataset.metricToken) ? item.dataset.metricToken = e.currentTarget.dataset.metricToken : item.disabled = 'true';
-          break;
-        case 'btn-edit-column':
-        case 'btn-remove-column':
-          // Disabilito le voci 'elimina/modifica' se non è presente il token (colonna non definita nel workbook)
-          (e.currentTarget.dataset.token) ? item.dataset.token = e.currentTarget.dataset.token : item.disabled = 'true';
-          break;
-        default:
-          break;
-      }
-    });
-  }
-
-  // struttura tabelle nella #dlg-columns
-  app.loadTableStruct = () => {
-    // reset
-    document.querySelectorAll('nav#table-field-list dl').forEach(element => element.remove());
-    let parent = document.getElementById('table-field-list');
-    for (const [alias, objects] of WorkBook.workbookMap) {
-      // for (const [alias, object] of WorkBook.tablesModel) {
-      const tmpl = app.tmplDetails.content.cloneNode(true);
-      const details = tmpl.querySelector("details");
-      const summary = details.querySelector('summary');
-      // recupero le tabelle dal sessionStorage
-      const columns = WorkBookStorage.getTable(objects.props.table);
-      // INFO: l'attributo name non è supportato in firefox
-      // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details#browser_compatibility
-      details.setAttribute("name", "columns");
-      details.dataset.schema = objects.props.schema;
-      details.dataset.table = objects.props.name;
-      details.dataset.alias = alias;
-      details.dataset.id = objects.props.key;
-      details.dataset.searchId = 'field-search';
-      summary.innerHTML = objects.props.name;
-      summary.dataset.tableId = objects.props.key;
-      parent.appendChild(details);
-      columns.forEach(column => {
-        const content = template_li.content.cloneNode(true);
-        const li = content.querySelector('li.drag-list.default');
-        const i = li.querySelector('i[draggable]');
-        const span = li.querySelector('span');
-        li.dataset.label = column.column_name;
-        i.id = `${alias}_${column.column_name}`;
-        i.dataset.tableId = objects.props.key;
-        i.dataset.field = column.column_name;
-        i.dataset.datatype = column.type_name.toLowerCase();
-        i.ondragstart = app.elementDragStart;
-        i.ondragend = app.elementDragEnd;
-        li.dataset.elementSearch = 'fields';
-        li.dataset.table = objects.props.name;
-        li.dataset.alias = alias;
-        // li.dataset.field = column.column_name;
-        // li.dataset.key = column.CONSTRAINT_NAME;
-        span.innerText = column.column_name;
-        // scrivo il tipo di dato senza specificare la lunghezza int(8) voglio che mi scriva solo int
-        // let pos = column.DATA_TYPE.indexOf('(');
-        // let type = (pos !== -1) ? column.DATA_TYPE.substring(0, pos) : column.DATA_TYPE;
-        // li.dataset.type = type;
-        li.dataset.datatype = column.type_name.toLowerCase();
-        // span.dataset.key = value.CONSTRAINT_NAME; // pk : chiave primaria
-        // li.dataset.id = key;
-        // span.id = key;
-        // li.dataset.fn = 'addFieldToJoin';
-        details.appendChild(li);
-      });
-    }
-  }
-
-  app.addMark = (data, ref) => {
-    const templateContent = app.tmplFormula.content.cloneNode(true);
-    const i = templateContent.querySelector('i');
-    i.addEventListener('click', app.cancelFormulaObject);
-    const span = templateContent.querySelector('span');
-    const mark = templateContent.querySelector('mark');
-    // const small = templateContent.querySelector('small');
-    // aggiungo il tableAlias e table come attributo.
-    mark.dataset.tableAlias = WorkBook.activeTable.dataset.alias;
-    mark.dataset.table = WorkBook.activeTable.dataset.table;
-    mark.dataset.field = data.field;
-    mark.dataset.datatype = data.datatype;
-    mark.innerText = `${WorkBook.activeTable.dataset.name}.${data.field}`;
-    // small.innerText = WorkBook.activeTable.dataset.name;
-    ref.appendChild(span);
-  }
-
-  // drop di una metrica nela textarea per le metriche composte
-  /* app.textareaDrop = (e) => {
-    debugger;
-    e.preventDefault();
-    console.log(e.target);
-    // console.clear();
-    // e.currentTarget.classList.replace('dropping', 'dropped');
-    e.currentTarget.classList.remove('dropping');
-    if (!e.currentTarget.classList.contains('dropzone')) return;
-    e.currentTarget.classList.remove('dragging');
-    const elementId = e.dataTransfer.getData('text/plain');
-    const elementRef = document.getElementById(elementId);
-    // const field = document.createTextNode(elementRef.dataset.field);
-    // e.currentTarget.appendChild(field);
-    const templateContent = app.tmplCompositeFormula.content.cloneNode(true);
-    const span = templateContent.querySelector('span');
-    const mark = templateContent.querySelector('mark');
-    mark.dataset.token = elementRef.id;
-    mark.innerText = WorkBook.metrics.get(elementRef.id).alias;
-    app.textareaCompositeMetric.appendChild(span);
-    // aggiungo anche uno span per il proseguimento della scrittura della formula
-    app.addSpan(app.textareaCompositeMetric, null, 'metric');
-  } */
-
-  // column _id e _ds
-  app.txtAreaIdColumn.addEventListener('dragenter', app.elementDragEnter, false);
-  app.txtAreaDsColumn.addEventListener('dragenter', app.elementDragEnter, false);
-  app.txtAreaIdColumn.addEventListener('dragover', app.elementDragOver, false);
-  app.txtAreaDsColumn.addEventListener('dragover', app.elementDragOver, false);
-  app.txtAreaIdColumn.addEventListener('dragleave', app.elementDragLeave, false);
-  app.txtAreaDsColumn.addEventListener('dragleave', app.elementDragLeave, false);
-  app.txtAreaIdColumn.addEventListener('drop', app.setColumnDrop, false);
-  app.txtAreaDsColumn.addEventListener('drop', app.setColumnDrop, false);
-
-  // app.columnsDropzone.addEventListener('dragenter', app.elementDragEnter, false);
-  // app.columnsDropzone.addEventListener('dragover', app.elementDragOver, false);
-  // app.columnsDropzone.addEventListener('dragleave', app.elementDragLeave, false);
-  // app.columnsDropzone.addEventListener('drop', app.columnDrop, false);
-  // app.columnsDropzone.addEventListener('dragend', app.columnDragEnd, false);
   /* NOTE: END DRAG&DROP EVENTS */
 
   // TODO: da spostare in supportFn.js
@@ -883,9 +515,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     app.dialogWorkBook.showModal();
   }
 
-  app.btnWorkBookNew.onclick = () => {
-    app.dialogNewWorkBook.showModal();
-  }
+  app.btnWorkBookNew.onclick = () => app.dialogNewWorkBook.showModal();
 
   app.newWorkBook = () => {
     const name = document.getElementById('input-workbook-name').value;
@@ -1089,14 +719,13 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     * della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
     */
     for (const [token, field] of Sheet.fields) {
-      // WARN: per il momento il target per i fields è sempre #dropzone-rows
       const target = document.getElementById('dropzone-rows');
       target.appendChild(createColumnDefined(token));
     }
 
     for (const [token, metrics] of Sheet.metrics) {
       const target = document.getElementById('dropzone-columns');
-      if (!metrics.dependencies) app.addMetric(target, token);
+      if (!metrics.dependencies) target.appendChild(createMetricDefined(token));
     }
 
     // filters
@@ -1314,28 +943,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       // carico le proprietà dello Sheet nel boxInfo
       app.sheetInformations();
     }
-  }
-
-  // WARN: 26.07.2024 utilizzata ?
-  app.highlightDimension = (e) => {
-    // evidenzio con un colore diverso le tabelle appartenenti alla dimensione corrente
-    Draw.svg.querySelectorAll(`use.table[data-dimension-id='${+e.target.dataset.dimensionId}']`).forEach(table => {
-      table.dataset.related = 'true';
-    });
-  }
-
-  // WARN: 26.07.2024 utilizzata ?
-  app.unhighlightDimension = (e) => {
-    // evidenzio con un colore diverso le tabelle appartenenti alla dimensione corrente
-    Draw.svg.querySelectorAll(`use.table[data-dimension-id='${+e.target.dataset.dimensionId}']`).forEach(table => {
-      delete table.dataset.related;
-    });
-  }
-
-  // WARN: 26.07.2024 utilizzata ?
-  app.dimensionDone = () => {
-    // dopo aver scelto le dimensioni da associare alla nuova fact posso nascondere il cubo di origine
-    Draw.hidden();
   }
 
   // tasto Elabora e SQL
@@ -1648,12 +1255,13 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   }
 
   // aggiungo il filtro selezionato allo Sheet
-  app.addFilter = (e) => {
+  // WARN: 21.11.2024 verifica utilizzo
+  /* app.addFilter = (e) => {
     Sheet.filters = e.currentTarget.dataset.token;
     // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
     const li = document.getElementById(e.currentTarget.dataset.token);
     li.dataset.selected = 'true';
-  }
+  } */
 
   app.removeWBFilter = (e) => {
     // recupero il workbook_ref dal filtro che sto per eliminare
@@ -1705,7 +1313,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // filterDrop.addEventListener('dragenter', app.elementDragEnter, false);
     // filterDrop.addEventListener('dragleave', app.elementDragLeave, false);
     // filterDrop.addEventListener('drop', app.handlerDropFilter, false);
-    // TODO: carico lista filtri da aggiungere alla metrica avanzata
     appendFilterToDialogAdvMetrics();
     dlg__advancedMetric.showModal();
   }
@@ -1767,13 +1374,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     dlgCompositeMetricCheck();
     dlgCompositeMetric.showModal();
   }
-
-  app.cancelFormulaObject = (e) => e.currentTarget.parentElement.remove();
-
-  // TODO: spostare in supportFn.js
-  app.addFiltersMetric = e => e.currentTarget.toggleAttribute('selected');
-
-  /* NOTE: END ONCLICK EVENTS*/
 
   /* NOTE: MOUSE EVENTS */
   // TODO: spostare in supportFn.js
@@ -2372,55 +1972,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     }
   }
 
-  // salvataggio di un campo dalla #dlg-columns
-  app.saveColumn = (e) => {
-    const fieldName = document.getElementById('column-name').value;
-    const token = (e.currentTarget.dataset.token) ? e.currentTarget.dataset.token : rand().substring(0, 7);
-    // imposto le colonne _id e _ds in WorkBook.columns
-    let fields = { id: { sql: [], formula: [], datatype: null }, ds: { sql: [], formula: [], datatype: null } };
-    // colonna _id e _ds
-    ['id', 'ds'].forEach(key => {
-      document.querySelectorAll(`#textarea-column-${key} *`).forEach(element => {
-        if (element.classList.contains('markContent') || element.nodeName === 'SMALL' || element.nodeName === 'I') return;
-        if (element.nodeName === 'MARK') {
-          // il campo potrebbe appartenere ad una tabella diversa da quella selezionata
-          // quindi  aggiungo anche il table alias
-          fields[key].sql.push(`${element.dataset.tableAlias}.${element.dataset.field}`); // Azienda_444.id
-          fields[key].formula.push(
-            {
-              table_alias: element.dataset.tableAlias,
-              table: element.dataset.table,
-              field: element.dataset.field,
-              datatype: element.dataset.datatype
-            });
-          fields[key].datatype = element.dataset.datatype;
-        } else {
-          fields[key].sql.push(element.innerText.trim());
-          fields[key].formula.push(element.innerText.trim());
-        }
-      });
-    });
-
-    WorkBook.field = {
-      token,
-      type: 'column',
-      schema: WorkBook.schema,
-      tableAlias: WorkBook.activeTable.dataset.alias,
-      tableId: WorkBook.activeTable.id,
-      table: WorkBook.activeTable.dataset.table,
-      name: fieldName,
-      origin_field: WorkBook.currentField,
-      field: fields
-    };
-    // 03.02.2024 impostata la prop tableId
-    // WorkBook.field contiene l'elenco dei field aggiunti al WorkBook
-    // mentre WorkBook.fields contiene lo stesso elenco dei campi però
-    // all'interno delle rispettive tabelle
-    WorkBook.fields = token;
-    app.dialogColumns.close();
-    WorkBook.checkChanges(token);
-  }
-
   // apertura dialog per la creazione di una nuova metrica
   app.newAdvMeasure = (e) => {
     contextMenuRef.toggleAttribute('open');
@@ -2484,20 +2035,18 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       summary.innerText = objects.props.name;
       parent.appendChild(details);
       addFields(details, objects.fields)
+      // TODO: 21.11.2024 - utilizzare un metodo addMetrics() come fatto per addFields()
       for (const [token, metric] of Object.entries(objects.metrics)) {
-        // utilizzo appendMetric() perchè questa viene utilizzata anche
-        // quando viene creata una nuova metrica
-        // appendMetric(parent, token);
-        // const metric = WorkBook.metrics.get(token);
         const tmpl = template_li.content.cloneNode(true);
         const li = tmpl.querySelector(`li.drag-list.metrics.${metric.metric_type}`);
-        const span = li.querySelector('span');
-        const i = li.querySelector('i');
-        // const icon = li.querySelector('i:not([draggable])');
+        const span__content = li.querySelector('.span__content');
+        const span = span__content.querySelector('span');
+        const i = span__content.querySelector('i[draggable]');
+        const btn__info = li.lastElementChild;
+        const icon = span__content.querySelector('i:not([draggable])');
+        if (metric.cssClass) li.classList.add(metric.cssClass);
         li.dataset.id = token;
         i.id = token;
-        // li.classList.add("metrics");
-        // li.classList.add(value.metric_type);
         li.dataset.type = metric.metric_type;
         li.dataset.elementSearch = 'elements';
         if (metric.metric_type !== 'composite') li.dataset.factId = details.dataset.factId;
@@ -2529,61 +2078,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     app.addDefinedCompositeMetrics();
   }
 
-  app.addSpan = (target, value = null) => {
-    // TODO: provare a crearlo da template
-    const span = document.createElement('span');
-    span.setAttribute('contenteditable', 'true');
-    span.innerText = value;
-    span.onkeydown = (e) => {
-      if (e.defaultPrevented) return;
-      const lastSpan = (e.target === target.querySelector('span[contenteditable]:last-child'));
-      switch (e.key) {
-        case 'Tab':
-          // Tab : inserisce un nuovo <span> se è stato inserito del testo nello <span> corrente
-          // se il tasto shift non è premuto e mi trovo sull'ultimo span, aggiungo un altro span, se lo
-          // <span> attuale NON è vuoto.
-          if (!e.shiftKey && lastSpan && e.target.textContent.length !== 0) {
-            app.addSpan(target);
-            e.preventDefault();
-          }
-          break;
-        case 'Backspace':
-          // Backspace : elimina lo <span> se è vuoto, altrimenti ha il comportamento di default
-          if (span.textContent.length === 0) {
-            // posiziono il focus sul primo span disponibile andando indietro nel DOM
-            /* const event = new Event('build');
-            // Listen for the event.
-             span.addEventListener('build', function(e) { console.log(e) }, false);
-            // Dispatch the event.
-            span.dispatchEvent(event);
-            */
-            // span.dispatchEvent(evt);
-            span.remove();
-            // imposto il focus sull'ultimo <span> presente nella formula, se presente
-            const lastSpanFormula = target.querySelector('span[contenteditable]:last-child');
-            if (lastSpanFormula) lastSpanFormula.focus();
-          }
-          break;
-        default:
-          break;
-      }
-    }
-    target.appendChild(span);
-    span.focus();
-  }
-
   app.handlerAddJoin = () => Draw.addFactJoin();
-
-  // click all'interno di una textarea
-  // TODO: da spostare in supportFn.js
-  app.addText = (e) => {
-    // console.log('e : ', e);
-    // console.log('e.target : ', e.target);
-    // console.log('e.currentTarget : ', e.currentTarget);
-    if (e.target.localName === 'div') {
-      app.addSpan(e.target);
-    }
-  }
 
   app.tablePopup.onmouseleave = (e) => {
     if (e.target.classList.contains("open")) e.target.classList.remove("open");
@@ -2614,10 +2109,11 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     app.dialogJoin.querySelectorAll('.join-field').forEach(joinField => joinField.remove());
   });
 
-  // TODO: spostare in supportFn oppure Application.js
   app.dialogColumns.addEventListener('close', (e) => {
+    // FIX: 21.11.2024 : da ricostrure dopo la creazione della dialog column con i suggerimenti
     // ripulisco gli elementi delle <ul> (I campi delle tabelle)
     // reset della textarea
+    debugger;
     const textAreaId = document.getElementById('textarea-column-id');
     const textAreaDs = document.getElementById('textarea-column-ds');
     textAreaId.querySelectorAll('*').forEach(element => element.remove());
@@ -2696,43 +2192,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // stepTranslate.style.transform = `translateX(${stepTranslate.offsetWidth}px)`;
   });
 
-  // verifica esistenza dimensione time su DB
-  //
-  app.timeDimensionExists = async () => {
-    const url = 'fetch_api/time/exists';
-    await fetch(url)
-      .then((response) => {
-        if (!response.ok) { throw Error(response.statusText); }
-        return response;
-      })
-      .then((response) => response.text())
-      .then(async (response) => {
-        console.log(response);
-        App.closeConsole();
-        if (response) {
-          // se le tabelle TIME non sono presenti in sessionStorage le recupero
-          let urls = [];
-          document.querySelectorAll('g#time-dimension>desc[data-table]').forEach(table => {
-            if (!window.sessionStorage.getItem(table.id)) {
-              urls.push(`/fetch_api/${table.dataset.schema}/schema/${table.id}/table_info`);
-            }
-          });
-          if (urls.length !== 0) WorkBookStorage.saveTables(await getTables(urls));
-          App.showConsole('Tabelle TIME presenti', 'done', 2000);
-        } else {
-          // debugger;
-          App.showConsole('Tabelle TIME non presenti, da creare', 'warning', 3000);
-          document.querySelector("#btn-time-dimension").disabled = false;
-        }
-      })
-      .catch(err => {
-        App.showConsole(err, 'error');
-        console.error(err);
-      });
-  }
-
-  app.timeDimensionExists();
-
   app.sheetInformations = () => {
     document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);
     if (Sheet) {
@@ -2783,6 +2242,42 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       }
     }
   } */
+
+  // verifica esistenza dimensione time su DB
+  app.timeDimensionExists = async () => {
+    const url = 'fetch_api/time/exists';
+    await fetch(url)
+      .then((response) => {
+        if (!response.ok) { throw Error(response.statusText); }
+        return response;
+      })
+      .then((response) => response.text())
+      .then(async (response) => {
+        console.log(response);
+        App.closeConsole();
+        if (response) {
+          // se le tabelle TIME non sono presenti in sessionStorage le recupero
+          let urls = [];
+          document.querySelectorAll('g#time-dimension>desc[data-table]').forEach(table => {
+            if (!window.sessionStorage.getItem(table.id)) {
+              urls.push(`/fetch_api/${table.dataset.schema}/schema/${table.id}/table_info`);
+            }
+          });
+          if (urls.length !== 0) WorkBookStorage.saveTables(await getTables(urls));
+          App.showConsole('Tabelle TIME presenti', 'done', 2000);
+        } else {
+          // debugger;
+          App.showConsole('Tabelle TIME non presenti, da creare', 'warning', 3000);
+          document.querySelector("#btn-time-dimension").disabled = false;
+        }
+      })
+      .catch(err => {
+        App.showConsole(err, 'error');
+        console.error(err);
+      });
+  }
+
+  app.timeDimensionExists();
   console.info('end workspace-init');
 
 })();

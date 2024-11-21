@@ -51,8 +51,6 @@ class Table {
       th.innerHTML = column;
       if (this.active) {
         th.dataset.id = WorkBook.activeTable.id;
-        th.dataset.fn = 'handlerSelectColumn';
-        th.dataset.contextFn = 'contextMenuColumn';
       }
       this.tr.appendChild(th);
     });
@@ -76,25 +74,6 @@ class Table {
       });
 
     });
-  }
-
-  fields() {
-    if (WorkBook.fields.has(WorkBook.activeTable.dataset.alias)) {
-      for (const [key, value] of Object.entries(WorkBook.fields.get(WorkBook.activeTable.dataset.alias))) {
-        [...this.thead.querySelectorAll(`th[data-field='${value.origin_field}']`)].filter(th => th.dataset.token = key);
-      }
-    }
-  }
-
-  metrics() {
-    for (const [key, value] of WorkBook.metrics) {
-      if (value.metric_type === 'basic') {
-        // le metriche di base hanno la proprietà "properties.fields" contenente un array di colonne che compongono la metrica
-        value.properties.fields.forEach(field => {
-          [...this.thead.querySelectorAll(`th[data-field='${field}'][data-id='${value.factId}']`)].filter(th => th.dataset.metricToken = key);
-        });
-      }
-    }
   }
 
 }

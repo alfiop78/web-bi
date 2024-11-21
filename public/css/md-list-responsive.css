@@ -89,17 +89,20 @@ li.drag-list {
   justify-content: start;
 }
 
-li.drag-list.columns {
+li.drag-list.columns,
+li.drag-list.metrics {
   display: flex;
   justify-content: space-between;
 }
 
-li.drag-list.columns>.span__content {
+li.drag-list.columns>.span__content,
+li.drag-list.metrics>.span__content {
   display: flex;
   align-items: center;
 }
 
-li.drag-list.columns>.span__content>span {
+li.drag-list.columns>.span__content>span,
+li.drag-list.metrics>.span__content>span {
   text-overflow: ellipsis;
   overflow: hidden;
   width: 140px;
@@ -111,24 +114,38 @@ li.drag-list:hover {
   font-weight: bold;
 }
 
-li.drag-list.columns>span>i[draggable] {
+li.drag-list.columns>span>i[draggable],
+li.drag-list.metrics>span>i[draggable] {
   display: none;
 }
 
-li.drag-list.columns:hover>span>i[draggable] {
+li.drag-list.columns:hover>span>i[draggable],
+li.drag-list.metrics:hover>span>i[draggable] {
   display: inline-block;
+  cursor: grab;
 }
 
-li.drag-list.columns:hover>span>i:not([draggable]) {
+li.drag-list.columns:hover>span>i:not([draggable]),
+li.drag-list.metrics:hover>span>i:not([draggable]) {
   display: none;
 }
 
-li.drag-list.columns>i {
+li.drag-list.columns>i,
+li.drag-list.metrics>i {
   visibility: hidden;
 }
 
-li.drag-list.columns:hover>i {
+li.drag-list.columns:hover>i,
+li.drag-list.metrics:hover>i {
   visibility: visible;
+}
+
+li.drag-list.columns>span>i:not([draggable]) {
+  color: var(--main-secondary-color);
+}
+
+li.drag-list.columns[data-constraint]>span>i:not([draggable]) {
+  color: var(--main-important-color);
 }
 
 li[hidden] {
@@ -328,26 +345,20 @@ li.icons-list:hover::before {
   background-color: var(--main-important-color);
 }
 
+/* metriche di base */
 li.drag-list.basic {
-  color: var(--basic-metric-fg);
+  color: var(--text-default);
+}
+
+/* metriche di base custom */
+li.drag-list.basic.custom {
+  color: #666;
   font-style: italic;
 }
-
-/* li.drag-list.advanced {
-  color: var(--metrics);
-}
-
-li.drag-list.composite {
-  color: var(--metrics-composite);
-} */
 
 details {
   margin: 4px;
 }
-
-/* details > li.drag-list.columns {
-  color: var(--main-secondary-color);
-} */
 
 details>li.drag-list.tables>span {
   display: flex;
@@ -404,17 +415,6 @@ li.drag-list>i:not([draggable]) {
   padding: 2px 4px;
 }
 
-li.drag-list.metrics>i[draggable] {
-  display: none;
-}
-
-li.drag-list.metrics:hover>i[draggable] {
-  display: block;
-}
-
-li.drag-list.metrics:hover>i:not([draggable]) {
-  display: none;
-}
 
 li.metrics.basic>i:not([draggable]),
 li.metrics.advanced>i:not([draggable]) {
@@ -427,28 +427,14 @@ li.metrics.composite>i:not([draggable]) {
   color: whitesmoke;
 }
 
-li.drag-list.columns>span>i:not([draggable]) {
-  /* background-color: var(--main-secondary-color); */
-  color: var(--main-secondary-color);
-  /* color: whitesmoke; */
-}
-
-li.drag-list.columns[data-constraint]>span>i:not([draggable]) {
-  /* background-color: var(--main-important-color); */
-  /* color: whitesmoke; */
-  color: var(--main-important-color);
-}
-
 ul.filters>li>i {
   background-color: var(--filters-color);
   color: #494949;
   border-radius: 4px;
 }
 
-li.drag-list.metrics>span,
 li.toggle-list>span,
-li.added-list>span,
-li.drag-list.columns>span {
+li.added-list>span {
   margin-left: 4px;
 }
 
@@ -458,4 +444,8 @@ li.toggle-list.added {
 
 li.toggle-list.added>button:disabled {
   visibility: hidden;
+}
+
+li[data-id='li__new_metric'] span {
+  font-weight: 500;
 }

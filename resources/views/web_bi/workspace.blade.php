@@ -92,11 +92,6 @@
       <i class="material-symbols-rounded md-18">functions</i>
     </li>
 
-    <!-- <li class="drag-list filters" data-element-search data-label data-searchable="true">
-      <i class="material-symbols-rounded md-18 md-dimgray" draggable="true">drag_handle</i>
-      <i class="material-symbols-rounded md-18">filter_alt</i>
-      <span></span>
-    </li> -->
     <li class="toggle-list" data-element-search data-label data-searchable="true">
       <button data-id="filter__add" class="material-symbols-rounded md-18 md-dimgray">add</button>
       <i class="material-symbols-rounded md-18">filter_alt</i>
@@ -111,9 +106,12 @@
     </li>
 
     <li class="drag-list metrics basic" data-element-search data-label data-searchable="true">
-      <i class="material-symbols-rounded md-18 md-dimgray" draggable="true">drag_handle</i>
-      <i class="material-symbols-rounded md-18">functions</i>
-      <span></span>
+      <span class="span__content">
+        <i class="material-symbols-rounded md-18 md-dimgray" draggable="true">drag_handle</i>
+        <i class="material-symbols-rounded md-18">functions</i>
+        <span></span>
+      </span>
+      <i class="material-symbols-rounded md-18">info</i>
     </li>
 
     <li class="drag-list metrics advanced" data-element-search data-label data-searchable="true">
@@ -838,7 +836,7 @@
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
-                <button data-fn="saveColumn" id="btn-columns-define" value="salva">Salva</button>
+                <button id="btn-columns-define" value="salva">Salva</button>
               </section>
             </section>
           </dialog>
@@ -859,17 +857,6 @@
                     </div>
                     <div id="table-popup" class="popup">
                       <button class="material-symbols-rounded md-18" data-id data-fn="tableSelected">table_rows_narrow</button>
-                    </div>
-                    <div id="context-menu-column" class="context-menu">
-                      <ul id="ul-context-menu-column" class="context-menu-items">
-                        <span>Metrica</span>
-                        <button id="btn-add-metric" data-fn="saveBaseMeasure" class="btn-link-context">Imposta metrica</button>
-                        <button id="btn-remove-wb-metric" data-fn="removeWBMetric" class="btn-link-context">Elimina</button>
-                        <span>Colonna</span>
-                        <button id="btn-add-column" data-fn="setColumn" class="btn-link-context">Nuova colonna</button>
-                        <button id="btn-edit-column" data-fn="editColumn" class="btn-link-context">Modifica</button>
-                        <button id="btn-remove-column" data-fn="removeColumn" class="btn-link-context">Elimina</button>
-                      </ul>
                     </div>
                     <section id="canvas-area">
                       <section id="svg-console">

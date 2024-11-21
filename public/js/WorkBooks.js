@@ -530,13 +530,10 @@ class WorkBooks {
         const token = (table.dataset.type === 'time') ?
           `_${table.dataset.table}_${col.ordinal_position}_${col.column_name}` :
           `_${table.id.substring(table.id.length - 5)}_${col.ordinal_position}_${col.column_name}`;
-        // const ws_token = (table.dataset.type === 'time') ?
-        //   `_cm__${table.dataset.table}_${col.ordinal_position}_${col.column_name}` :
-        //   `_cm__${table.id.substring(table.id.length - 5)}_${col.ordinal_position}_${col.column_name}`;
         switch (col.type_name) {
           case 'float':
             metrics[token] = {
-              token, // TODO: da valutare se è utilizzata la prop token qui
+              token,
               alias: col.column_name,
               type: 'metric',
               SQL: `${table.dataset.alias}.${col.column_name}`,
@@ -569,13 +566,15 @@ class WorkBooks {
         }
         // aggiungo le metriche custom create
         for (const [token, object] of Object.entries(this.workSheet)) {
-          this.elements = this.workSheet[token];
-          if (this.workSheet[token].type === 'metric') {
-            metrics[token] = object;
-            this.metrics = object;
-          } else {
-            fields[token] = object;
-            this.fields = object;
+          if (object.factId === table.id) {
+            this.elements = this.workSheet[token];
+            if (this.workSheet[token].type === 'metric') {
+              metrics[token] = object;
+              this.metrics = object;
+            } else {
+              fields[token] = object;
+              this.fields = object;
+            }
           }
         }
       });

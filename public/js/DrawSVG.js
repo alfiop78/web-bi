@@ -401,10 +401,6 @@ class DrawSVG {
     DT.addColumns();
     DT.addRows();
     DT.inputSearch.addEventListener('input', DT.columnSearch.bind(DT));
-    // imposto un colore diverso per le colonne già definite nel workbook
-    DT.fields();
-    // imposto un colore diverso per le meriche già definite nel workbook
-    DT.metrics();
   }
 
   async getPreviewSVGTable() {
