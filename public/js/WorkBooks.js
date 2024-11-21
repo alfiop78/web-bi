@@ -293,6 +293,8 @@ class WorkBooks {
         ds: { sql: ['WB_DATE.date'], datatype: 'date' }
       }
     };
+
+    this.workSheet = {};
   }
 
   set name(value) {
@@ -501,6 +503,13 @@ class WorkBooks {
       // non sono in edit mode, salvo sempre 'updated_at'
       this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
     }
+    this.workBook.worksheet = this.workSheet;
+    WorkBookStorage.save(this.workBook);
+  }
+
+  update() {
+    this.workBook.updated_at = new Date().toLocaleDateString('it-IT', this.#options);
+    App.showConsole("WorkBook aggiornato", "done", 1500);
     WorkBookStorage.save(this.workBook);
   }
 
@@ -521,6 +530,9 @@ class WorkBooks {
         const token = (table.dataset.type === 'time') ?
           `_${table.dataset.table}_${col.ordinal_position}_${col.column_name}` :
           `_${table.id.substring(table.id.length - 5)}_${col.ordinal_position}_${col.column_name}`;
+        // const ws_token = (table.dataset.type === 'time') ?
+        //   `_cm__${table.dataset.table}_${col.ordinal_position}_${col.column_name}` :
+        //   `_cm__${table.id.substring(table.id.length - 5)}_${col.ordinal_position}_${col.column_name}`;
         switch (col.type_name) {
           case 'float':
             metrics[token] = {
@@ -555,6 +567,17 @@ class WorkBooks {
             this.elements = fields[token];
             break;
         }
+        // aggiungo le metriche custom create
+        for (const [token, object] of Object.entries(this.workSheet)) {
+          this.elements = this.workSheet[token];
+          if (this.workSheet[token].type === 'metric') {
+            metrics[token] = object;
+            this.metrics = object;
+          } else {
+            fields[token] = object;
+            this.fields = object;
+          }
+        }
       });
       this.#workbookMap.set(table.dataset.alias, { props, fields, metrics });
     });
@@ -567,6 +590,8 @@ class WorkBooks {
     WorkBookStorage.workBook = token;
     this.workBook.created_at = WorkBookStorage.workBook.created_at;
     this.workBook.updated_at = WorkBookStorage.workBook.updated_at;
+    // debugger;
+    this.workSheet = WorkBookStorage.workBook.worksheet;
     this.databaseId = WorkBookStorage.workBook.databaseId;
 
     // reimposto la Classe
@@ -635,6 +660,8 @@ class WorkBooks {
         this.metrics = this.json;
       }
     }
+
+    // metriche e colonne custom (worksheet)
 
     // this.createDataModel();
 

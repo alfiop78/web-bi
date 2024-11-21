@@ -188,7 +188,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     app.checkSessionStorage();
   }
 
-  // Aggiunta metrica composta di base
+  /* // Aggiunta metrica composta di base
   app.addCustomMetric = () => {
     // carico elenco metrica composte di base
     const ul = document.getElementById('ul-custom-metrics');
@@ -214,7 +214,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     }
     app.dialogCustomMetric.showModal();
     Draw.contextMenu.toggleAttribute('open');
-  }
+  } */
 
   // imposto un alias per tabella aggiunta al canvas
   app.setAliasTable = () => app.dialogRename.showModal();
@@ -2469,7 +2469,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     const parent = app.workbookTablesStruct.querySelector('#nav-fields');
 
     // workbookMap viene creato nel Metodo createDataModel() e contiene la mappatura di tutte le tabelle del canvas
-    console.log(WorkBook.workbookMap);
+    // console.log(WorkBook.workbookMap);
     for (const [alias, objects] of WorkBook.workbookMap) {
       // console.log(tableAlias);
       const tmpl = app.tmplDetails.content.cloneNode(true);
@@ -2511,21 +2511,17 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         details.appendChild(li);
       }
       if (WorkBook.activeTable.dataset.type !== 'time') {
-        // al termine della lista aggiungo i tasti "Nuova colonna" e "Nuova Metrica"
+        // al termine della lista aggiungo il tasto "Nuova Metrica"
         const content = template__createElement.content.cloneNode(true);
-        const li__createColumn = content.querySelector("li[data-id='li__createColumn']");
-        const li__createMetric = content.querySelector("li[data-id='li__createMetric']");
-        // li__createColumn.addEventListener('click', createCustomColumn);
-        li__createColumn.dataset.schema = objects.props.schema;
-        li__createColumn.dataset.table = objects.props.name;
-        li__createColumn.dataset.tableId = objects.props.key;
-        li__createColumn.dataset.alias = alias;
-        // li__createMetric.addEventListener('click', createCustomMetric);
+        const li__createMetric = content.querySelector("li[data-id='li__new_metric']");
+        li__createMetric.addEventListener('click', createCustomMetric);
+        li__createMetric.id = `${objects.props.key}_new_metric`;
         li__createMetric.dataset.schema = objects.props.schema;
         li__createMetric.dataset.table = objects.props.name;
         li__createMetric.dataset.tableId = objects.props.key;
         li__createMetric.dataset.alias = alias;
-        details.append(li__createMetric, li__createColumn);
+        // details.append(li__createMetric, li__createColumn);
+        details.appendChild(li__createMetric);
       }
     }
     // TEST: verificare errori con un workbook senza nessun filtro

@@ -135,13 +135,9 @@
   </template>
 
   <template id="tmpl__createElement">
-    <li data-id="li__createColumn" data-schema data-table data-alias value="Nuova Colonna">
+    <li data-id="li__new_metric" data-schema data-table data-alias value="Crea Metrica">
       <i class="material-symbols-rounded md-18">add</i>
-      <span>Nuova Colonna</span>
-    </li>
-    <li data-id="li__createMetric" data-schema data-table data-alias value="Nuova Metrica">
-      <i class="material-symbols-rounded md-18">add</i>
-      <span>Nuova Metrica</span>
+      <span>Crea Metrica</span>
     </li>
   </template>
 
@@ -676,17 +672,9 @@
 
         <dialog id="dlg-custom-metric" data-x="0" data-y="40" class="mediumSize absolute moveable">
           <section class="dlg-grid">
-            <h5 class="title moveable">Creazione Metrica composta</h5>
+            <h5 class="title moveable">Creazione Metrica di base</h5>
             <section class="dlg-content">
               <section class="row">
-                <section class="col col-4-span">
-                  <div class="list-search">
-                    <input type="search" id="input-search-custom-metrics" placeholder="Ricerca" data-element-search="custom-metrics" class="input-search" autocomplete="off" tabindex="3">
-                    <div class="relative-ul">
-                      <ul id="ul-custom-metrics" class="custom-scrollbar" data-search-id="input-search-custom-metrics"></ul>
-                    </div>
-                  </div>
-                </section>
                 <section class="col col-8-span">
                   <section class="textarea-formula">
                     <input type="text" id="input-base-custom-metric-name" placeholder="Nome" value="" autocomplete="off" autofocus tabindex="1" />
@@ -698,6 +686,19 @@
                     </div>
                     <textarea id="custom-metric-note" row="5" cols="10" placeholder="Note" disabled></textarea>
                   </section>
+                </section>
+                <section class="col col-4-span">
+                  <div>
+                    <label for="sel__aggregation_base_metric">Aggregazione</label>
+                    <select id="sel__aggregation_base_metric" disabled>
+                      <option id="" value="COUNT">COUNT</option>
+                      <option id="" value="SUM">SUM</option>
+                      <option id="" value="AVG">AVG</option>
+                      <option id="" value="MIN">MIN</option>
+                      <option id="" value="MAX">MAX</option>
+                      <option id="" value="ecc..">ecc..</option>
+                    </select>
+                  </div>
                 </section>
               </section>
             </section>
@@ -959,6 +960,7 @@
                           </p>
                           <section data-worksheet-object class="custom-scrollbar" data-section="1">
                             <ul id="nav-fields" class="custom-scrollbar" data-search-id="input-search-fields"></ul>
+                            <button class="btn-link link" id="btn__custom_column" type="button" value="Crea Colonna">Crea Colonna</button>
                           </section>
                           <p class="field-search">
                             <input id="input-search-metrics" data-element-search="elements" autocomplete="off" type="search" class="input-search metrics" readonly placeholder="Metriche" />

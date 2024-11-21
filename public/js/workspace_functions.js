@@ -711,7 +711,7 @@ function customBaseMetricSave(e) {
       SQL.push(el.trim());
     }
   });
-  WorkBook.metrics = {
+  const metric = {
     token, alias,
     type: 'metric',
     metric_type: 'basic',
@@ -725,8 +725,11 @@ function customBaseMetricSave(e) {
     SQL: SQL.join(' '),
     distinct: false // default
   }
-  App.showConsole(`Metrica ${alias} aggiunta al WorkBook`, 'done', 2000);
   WorkBook.checkChanges(token);
+  WorkBook.elements = metric;
+  WorkBook.workSheet[token] = metric;
+  WorkBook.update();
+  appendNewMetric(metric);
   dlgCustomMetric.close();
 }
 
@@ -1328,7 +1331,6 @@ function addFields(parent, fields) {
     // TODO: rivedere la descrizione da far comparire per le colonne e colonne custom
     // li.dataset.label = value.field.ds.sql.join('');
     li.dataset.label = value.name;
-    // li.dataset.id = tableId;
     li.dataset.schema = value.schema;
     li.dataset.table = value.table;
     li.dataset.alias = value.tableAlias;
@@ -1337,6 +1339,7 @@ function addFields(parent, fields) {
     i.addEventListener('dragend', handleDragEnd);
     i.addEventListener('dragenter', handleDragEnter);
     i.addEventListener('dragleave', handleDragLeave);
+    btnConvertToMetric.dataset.tableId = value.tableId;
     btnConvertToMetric.dataset.token = token;
     btnConvertToMetric.addEventListener('click', convertToMetric);
     // span.innerHTML = value.field.ds.sql.join('');
@@ -1345,9 +1348,16 @@ function addFields(parent, fields) {
   }
 }
 
+function createCustomMetric(e) {
+  // const tableId = e.currentTarget.dataset.tableId;
+  WorkBook.activeTable = e.currentTarget.dataset.tableId;
+  dlgCustomMetric.showModal();
+}
+
 function convertToMetric(e) {
   // elemento (colonna) da cui convertire in metrica
-  const referenceElement = document.querySelector(`.drag-list.columns[data-id='${e.currentTarget.dataset.token}']`);
+  WorkBook.activeTable = e.currentTarget.dataset.tableId;
+  // const referenceElement = document.querySelector(`.drag-list.columns[data-id='${e.currentTarget.dataset.token}']`);
   // console.log(token);
   // recupero l'elemento da convertire
   const element = WorkBook.elements.get(e.currentTarget.dataset.token);
@@ -1363,19 +1373,38 @@ function convertToMetric(e) {
       aggregateFn = 'SUM';
       break;
   }
-  const token = `_cm_${e.currentTarget.dataset.token}`;
-  const metric = { token, factId: element.tableId, alias: element.name, SQL: element.SQL, distinct: false, type: 'metric', metric_type: 'basic', aggregateFn, dependencies: false };
-  Sheet.metrics = metric;
-  // console.log(Sheet.metrics);
+  // const token = `_cm_${e.currentTarget.dataset.token}`;
+  const token = rand().substring(0, 7);
+  const metric = {
+    token,
+    factId: element.tableId,
+    alias: element.name,
+    SQL: element.SQL,
+    distinct: false,
+    type: 'metric',
+    metric_type: 'basic',
+    aggregateFn,
+    dependencies: false
+  };
+  WorkBook.checkChanges(token);
   WorkBook.elements = metric;
-  WorkBook.customMetrics = metric;
-  // duplico l'elemento da convertire
+  WorkBook.workSheet[token] = metric;
+  // TODO: il metodo update() è da ottimizzare perchè è presente, in save(), un controllo su checkChanges
+  WorkBook.update();
+  // creo l'elemento da aggiungere
+  appendNewMetric(metric);
+  e.currentTarget.style.visibility = 'hidden';
+}
+
+// aggiungo la metrica appena creata (metrica custom di base)
+function appendNewMetric(metric) {
+  const referenceElement = document.querySelector(`#${WorkBook.activeTable.id}_new_metric`);
   const tmpl = template_li.content.cloneNode(true);
   const li = tmpl.querySelector('li.drag-list.metrics.basic');
   const span = li.querySelector('span');
   const i = li.querySelector('i');
-  li.dataset.id = token;
-  i.id = token;
+  li.dataset.id = metric.token;
+  i.id = metric.token;
   li.dataset.type = 'basic';
   li.dataset.elementSearch = 'elements';
   li.dataset.label = metric.alias;
@@ -1385,7 +1414,8 @@ function convertToMetric(e) {
   i.addEventListener('dragend', handleDragEnd);
   li.addEventListener('contextmenu', openContextMenu);
   span.innerText = metric.alias;
-  referenceElement.after(li);
+  referenceElement.before(li);
+  App.showConsole(`Metrica ${metric.alias} aggiunta al WorkBook`, 'done', 1500);
 }
 
 console.info('END workspace_functions');
