@@ -4,12 +4,15 @@ let currentSuggestionIndex = -1;
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOMContentLoaded');
   btnFilterSave.addEventListener('click', filterSave);
+  // salvataggio colonna custom
+  btn__save_column.addEventListener('click', columnSave);
   // metrica custom di base
   btnCustomMetricSave.addEventListener('click', customBaseMetricSave);
   // metriche avanzate
   btnAdvancedMetricSave.addEventListener('click', advancedMetricSave);
   // metriche composite
   btnCompositeMetricSave.addEventListener('click', compositeMetricSave);
+  // dialog creazione filtri
   btnOpenDialogFilter.addEventListener('click', openDialogFilter);
   // TODO: 04.10.2024 qui potrei nascondere il loader della pagina
   // NOTE: textarea-filter
@@ -181,6 +184,8 @@ document.addEventListener('DOMContentLoaded', () => {
   textareaFilter.addEventListener('input', inputFilter);
   // textarea-custom-metric
   textareaCustomMetric.addEventListener('input', inputCustomMetric);
+  // textarea__custom_column
+  textarea__custom_column.addEventListener('input', inputCustomColumn);
   // textarea-composite-metric
   textareaCompositeMetric.addEventListener('input', inputCompositeMetric);
   // apertura dialog #dlg-composite-metric

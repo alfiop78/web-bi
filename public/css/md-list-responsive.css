@@ -449,6 +449,6 @@ li.toggle-list.added>button:disabled {
   visibility: hidden;
 }
 
-li[data-id='li__new_metric'] span {
+li[data-id='li__new_metric'] span, li[data-id="li__new_column"] span {
   font-weight: 500;
 }

@@ -150,6 +150,107 @@ function filterSave(e) {
   App.showConsole(`Nuovo filtro aggiunto al WorkBook: ${name}`, 'done', 2000);
 }
 
+function columnSave(e) {
+  console.log(WorkBook.activeTable);
+  debugger;
+  if (textarea__custom_column.firstChild.nodeType !== 3) return;
+  const input = document.getElementById('input__column_name');
+  const name = input.value;
+  // in edit recupero il token presente sul tasto
+  const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
+  let tables = new Set();
+  // separo ogni parola/elemento della formula con \b
+  const formula = textarea__custom_column.firstChild.textContent.split(/\b/);
+  const formulaJoined = textarea__custom_column.firstChild.textContent.split(/\b/).join('');
+  // console.log(formula);
+  // estraggo dalla formula solo le tabelle, che devono essere convertite in alias
+  // es.: Azienda.id, il regex estrae "Azienda", (prima del punto)
+  const tablesFounded = textarea__custom_column.firstChild.textContent.match(/\w+.(?=\.)/g);
+  const date = new Date().toLocaleDateString('it-IT', options);
+  let object = {
+    token,
+    type: 'column',
+    name,
+    // schema,
+    tables: [],
+    // tableAlias,
+    // tableId,
+    // datatype,
+    formula: formulaJoined,
+    sql: [],
+    workbook_ref: WorkBook.workBook.token
+  };
+  // replico i nomi delle tabelle con i suoi alias di tabella, recuperandoli dalla ul#wbColumns
+  object.sql = formula.map(element => {
+    if (tablesFounded.includes(element)) {
+      // recupero l'alias della tabella che mi servirà per creare l'sql
+      const alias = document.querySelector(`#wbColumns>details[data-table='${element}']`).dataset.alias;
+      tables.add(alias);
+      // const regex = new RegExp(`${element}`, 'i');
+      return element.replace(new RegExp(`${element}`, 'i'), alias);
+    } else {
+      return element;
+    }
+  }).join('');
+  console.log(object.sql);
+  console.log(object.formula);
+  // converto l'oggetto Set() tables in un array e lo aggiungo a object.tables
+  debugger;
+  object.tables = [...tables];
+  // TODO: 22.11.2024 logica utilizzata per i filtri, quando sono utilizzate colonne provenienti da diverse tabelle.
+  // Valutare se applicarla anche per le colonne
+  /* for (const factId of WorkBook.dataModel.keys()) {
+    // WARN: 2024.02.08 questa logica è utilizzata anche in setSheet(). Creare un metodo riutilizzabile.
+    object.from[factId] = {};
+    object.joins[factId] = {};
+    // object.tables : l'alias della tabella
+    object.tables.forEach(alias => {
+      const tablesOfModel = WorkBook.dataModel.get(factId);
+      if (tablesOfModel.hasOwnProperty(alias)) {
+        tablesOfModel[alias].forEach(table => {
+          const data = Draw.tables.get(table.id);
+          // 'from' del filtro, questo indica quali tabelle includere quando si utilizza
+          // questo filtro nel report
+          object.from[factId][data.alias] = { schema: data.schema, table: data.table };
+          // 'join', indica quali join utilizzare quando si utilizza questo filtro in un report
+          if (WorkBook.joins.has(data.alias)) {
+            // esiste una join per questa tabella
+            for (const [token, join] of Object.entries(WorkBook.joins.get(data.alias))) {
+              if (join.factId === factId) object.joins[factId][token] = join;
+            }
+          }
+        });
+      }
+    });
+  } */
+
+  // TODO: 22.11.2024 aggiornare il WorkBook
+  WorkBook.elements = object;
+  WorkBook.fields = object;
+  // completato il salvataggio rimuovo l'attributo data-token da e.target
+  if (!e.target.dataset.token) {
+    appendColumn(token);
+    input.value = '';
+    input.focus();
+  } else {
+    // filtro modificato, aggiorno solo il nome eventualmente modificato
+    // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById() in questo caso
+    const li = document.querySelector(`li[data-id='${token}']`);
+    const dragIcon = li.querySelector('i[draggable]');
+    debugger;
+    const span = li.querySelector('span__content>span');
+    li.dataset.label = name;
+    dragIcon.dataset.label = name;
+    span.textContent = name;
+    dlg__custom_columns.close();
+  }
+  // ripulisco la textarea eliminando solo il nodo #text, lascio il <br />
+  if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
+  delete e.target.dataset.token;
+  document.getElementById('filter-note').value = '';
+  App.showConsole(`Nuovo filtro aggiunto al WorkBook: ${name}`, 'done', 2000);
+}
+
 btnToggle_table__content.onclick = (e) => {
   const table__content = document.getElementById('table__content');
   table__content.toggleAttribute('open');
@@ -448,6 +549,45 @@ function addTemplateFilter(token) {
 }
 
 /*
+ * Creazione elenco colonne nella ##workbook-objects
+ * Viene invocata quando si Salva una nuova colonna custom
+ * e quando si costruisce l'elenco in #workbook-objects
+*/
+function appendColumn(token) {
+  // creo la <li> per la nuova colonna dopo l'ultima colonna "originale" della tabella
+  console.log(WorkBook.activeTable);
+  const columnsCount = document.querySelectorAll(`#nav-fields>details[data-fact-id='${WorkBook.activeTable.id}']>li.columns`).length;
+  const referenceElement = document.querySelector(`#nav-fields>details[data-fact-id='${WorkBook.activeTable.id}']>li.columns:nth-child(${columnsCount +1})`);
+  console.log(referenceElement);
+  debugger;
+  const tmpl = template_li.content.cloneNode(true);
+  const li = tmpl.querySelector('li.drag-list.columns');
+  const span__content = li.querySelector('.span__content');
+  const span = span__content.querySelector('span');
+  const i = span__content.querySelector('i[draggable]');
+  debugger;
+  // const filter = WorkBook.filters.get(token);
+  li.dataset.id = token;
+  i.id = token;
+  li.classList.add("columns");
+  li.dataset.elementSearch = "elements";
+  // li.dataset.label = value.field.ds.field;
+  // TODO: rivedere la descrizione da far comparire per le colonne e colonne custom
+  // li.dataset.label = value.field.ds.sql.join('');
+  li.dataset.label = value.name;
+  li.dataset.schema = value.schema;
+  li.dataset.table = value.table;
+  li.dataset.alias = value.tableAlias;
+  li.dataset.field = value.name;
+  i.addEventListener('dragstart', handleDragStart);
+  i.addEventListener('dragend', handleDragEnd);
+  i.addEventListener('dragenter', handleDragEnter);
+  i.addEventListener('dragleave', handleDragLeave);
+  span.innerText = value.name;
+  referenceElement.after(li);
+}
+
+/*
  * Creazione elenco filtri nella #ul-filters
  * Viene invocata quando si Salva un nuovo filtro e
  * quando si costruisce l'elenco #ul-filters
@@ -605,7 +745,7 @@ function openContextMenu(e) {
 }
 
 function openDialogFilter() {
-  createTableStruct();
+  createTableStruct('wbFilters');
   dlgFilter.showModal();
 }
 
@@ -626,8 +766,8 @@ dlgCustomMetric.addEventListener('close', () => textareaCustomMetric.firstChild?
 
 // elementi della dialog filters
 // WARN: codice molto simile a app.addTableStruct, da ottimizzare
-function createTableStruct() {
-  let parent = document.getElementById('wbFilters');
+function createTableStruct(parent_id) {
+  const parent = document.getElementById(parent_id);
   // ripulisco la struttura se presente
   parent.querySelectorAll('dl').forEach(element => element.remove());
   for (const [alias, objects] of WorkBook.workbookMap) {
@@ -970,6 +1110,58 @@ function inputCustomMetric(e) {
   } else {
     popupSuggestions.classList.remove('open');
     // if (e.target.querySelector('span')) e.target.querySelector('span').remove();
+    e.target.querySelector('span')?.remove();
+  }
+}
+
+// evento input nella textarea per la creazione di colonne custom
+function inputCustomColumn(e) {
+  // console.log(sel);
+  // console.log(sel.baseNode.textContent);
+  // console.log(e.target.firstChild.nodeType, e.target.firstChild.nodeName);
+  // console.log(e.target.firstChild);
+  if (e.target.firstChild.nodeType === 1) return;
+  const suggestionsTables = [...document.querySelectorAll('#wbColumns>details')];
+  const caretPosition = sel.anchorOffset;
+  const startIndex = findIndexOfCurrentWord(e.target, caretPosition);
+  const currentWord = e.target.firstChild.textContent.substring(startIndex + 1, caretPosition);
+  // NOTE: non utilizzo la popupSuggestions perchè qui sono presenti elementi univoci
+  // Il nome Tabella è univoco e, allo stesso modo, il nome colonna della tabella è univoco
+  // const currentWord = (endIndex > 0) ? e.target.firstChild.textContent.substring(startIndex + 1, caretPosition) : e.target.firstChild.textContent.substring(startIndex + 1);
+  // console.info(`current word : ${currentWord}`);
+  if (currentWord.length > 0) {
+    // se il carattere che interrompe la parola (trovato dal regex) è un punto allora devo cercare
+    // nell'array delle Colonne, altrimenti in quello delle Tabelle
+    const chartAt = e.target.firstChild.textContent.at(startIndex);
+    // console.log(`chartAt : ${chartAt}`);
+    let table = null;
+    if (chartAt === '.') {
+      // recupero la tabella (prima del punto) in modo da cercare le colonne SOLO di quella tabella
+      const startIndexTable = findIndexOfCurrentWord(e.target, startIndex);
+      table = e.target.firstChild.textContent.substring(startIndexTable + 1, startIndex);
+    }
+    // console.info(`current word : ${currentWord}`);
+    // let regex = new RegExp(`^${currentWord}.*`, 'i');
+    // const regex = new RegExp(`^${currentWord}.*`);
+    const regex = new RegExp(`^${currentWord}`);
+    // console.log(regex);
+    // se è presente il punto cerco tra le colonne altrimenti cerco tra le tabelle
+    const match = (chartAt === '.') ?
+      [...document.querySelectorAll(`#wbColumns>details[data-table='${table}']>li`)].find(value => value.dataset.label.match(regex)) :
+      suggestionsTables.find(value => value.dataset.table.match(regex));
+    // console.log(`match ${match}`);
+    if (match) {
+      // console.log(sel);
+      const span = document.createElement('span');
+      span.textContent = match.dataset.label.slice(currentWord.length, match.dataset.label.length);
+      span.dataset.text = match.dataset.label.slice(currentWord.length, match.dataset.label.length);
+      autocomplete(span);
+      // normalizzo i nodi
+      e.target.normalize();
+    } else {
+      e.target.querySelector('span')?.remove();
+    }
+  } else {
     e.target.querySelector('span')?.remove();
   }
 }
@@ -1344,6 +1536,13 @@ function createCustomMetric(e) {
   // const tableId = e.currentTarget.dataset.tableId;
   WorkBook.activeTable = e.currentTarget.dataset.tableId;
   dlgCustomMetric.showModal();
+}
+
+function createCustomColumn(e) {
+  // const tableId = e.currentTarget.dataset.tableId;
+  createTableStruct('wbColumns');
+  WorkBook.activeTable = e.currentTarget.dataset.tableId;
+  dlg__custom_columns.showModal();
 }
 
 function convertToMetric(e) {

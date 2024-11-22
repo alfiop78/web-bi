@@ -136,9 +136,13 @@
   </template>
 
   <template id="tmpl__createElement">
-    <li data-id="li__new_metric" data-schema data-table data-alias value="Crea Metrica">
+    <li data-id="li__new_metric" data-fn="createCustomMetric" data-schema data-table data-alias value="Crea Metrica">
       <i class="material-symbols-rounded md-18">add</i>
       <span>Crea Metrica</span>
+    </li>
+    <li data-id="li__new_column" data-fn="createCustomColumn" data-schema data-table data-alias value="Crea Colonna">
+      <i class="material-symbols-rounded md-18">add</i>
+      <span>Crea Colonna</span>
     </li>
   </template>
 
@@ -811,35 +815,35 @@
 
         <div class="wrapper">
 
-          <dialog id="dlg-columns" data-x="0" data-y="40" class="absolute moveable">
+          <dialog id="dlg__custom_column" data-x="0" data-y="40" class="mediumSize absolute moveable">
             <section class="dlg-grid">
-              <h5 class="title moveable">Definizione colonne</h5>
+              <h5 class="title moveable">Definizione colonna personalizzata</h5>
               <section class="dlg-content">
                 <section class="row">
                   <section class="col col-4-span">
                     <div class="list-search">
-                      <input type="search" id="input-search-fields-dc" placeholder="Ricerca" data-element-search="fields" class="input-search" autocomplete="off" autofocus tabindex="1">
+                      <input type="search" id="input__search_columns" placeholder="Ricerca" data-element-search="columns" class="input-search" autocomplete="off" tabindex="3">
                       <div class="relative-ul">
-                        <nav id="table-field-list" class="custom-scrollbar" data-search-id="input-search-fields-dc"></nav>
+                        <nav id="wbColumns" class="custom-scrollbar" data-search-id="input__search_columns"></nav>
                       </div>
                     </div>
                   </section>
                   <section class="col col-8-span">
-                    <section class="textareas">
-                      <input type="text" id="column-name" placeholder="Nome" autocomplete="off" tabindex="2">
-                      <section class="textarea-column">
-                        <div id="textarea-column-id" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
-                      </section>
-                      <section class="textarea-column">
-                        <div id="textarea-column-ds" data-fn="addText" class="textarea-content dropzone" data-content-editable></div>
-                      </section>
+                    <section class="textarea-formula">
+                      <input type="text" id="input__column_name" placeholder="Nome" autocomplete="off" tabindex="2">
+                      <div class="textarea__container">
+                        <div class="popup__suggestions">
+                          <ul></ul>
+                        </div>
+                        <div id="textarea__custom_column" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
+                      </div>
                     </section>
                   </section>
                 </section>
               </section>
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
-                <button id="btn-columns-define" value="salva">Salva</button>
+                <button id="btn__save_column" value="salva">Salva</button>
               </section>
             </section>
           </dialog>
@@ -950,7 +954,7 @@
                           </p>
                           <section data-worksheet-object class="custom-scrollbar" data-section="1">
                             <ul id="nav-fields" class="custom-scrollbar" data-search-id="input-search-fields"></ul>
-                            <button class="btn-link link" id="btn__custom_column" type="button" value="Crea Colonna">Crea Colonna</button>
+                            <!-- <button class="btn-link link" id="btn__custom_column" type="button" value="Crea Colonna">Crea Colonna</button> -->
                           </section>
                           <p class="field-search">
                             <input id="input-search-metrics" data-element-search="elements" autocomplete="off" type="search" class="input-search metrics" readonly placeholder="Metriche" />

@@ -8,6 +8,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 // Textarea
 var textareaFilter = document.getElementById('textarea-filter');
 var textareaCustomMetric = document.getElementById('textarea-custom-metric');
+var textarea__custom_column = document.getElementById('textarea__custom_column');
 var textareaCompositeMetric = document.getElementById('textarea-composite-metric');
 // Buttons
 const btnFilterSave = document.getElementById('btn-filter-save');
@@ -17,12 +18,15 @@ const btnAdvancedMetricSave = document.getElementById('btn-metric-save');
 const btnOpenDialogFilter = document.getElementById('btnOpenDialogFilter');
 const btnNewCompositeMeasure = document.getElementById('btnNewCompositeMeasure');
 const btnOptions = document.getElementById('btnOptions');
+// const btn__custom_column = document.getElementById('btn__custom_column');
+const btn__save_column = document.getElementById('btn__save_column');
 // Dialogs
 const dlgFilter = document.getElementById('dlg-filters');
 const dlgCustomMetric = document.getElementById('dlg-custom-metric');
 const dlgCompositeMetric = document.getElementById('dlg-composite-metric');
 const dlg__advancedMetric = document.getElementById('dlg-advanced-metric');
 const dlg__chart_options = document.getElementById('dlg__chart_options');
+const dlg__custom_columns = document.getElementById('dlg__custom_column');
 // templates
 const template_li = document.getElementById('tmpl-li');
 const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
@@ -63,7 +67,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     dialogCompositeMetric: document.getElementById('dlg-composite-metric'),
     dialogRename: document.getElementById('dialog-rename'),
     dialogJoin: document.getElementById('dlg-join'),
-    dialogColumns: document.getElementById('dlg-columns'),
     dialogTime: document.getElementById('dialog-time'),
     // dialogInfo: document.getElementById('dlg-info'),
     dialogSchema: document.getElementById('dlg-schema'),
@@ -2071,8 +2074,15 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         li__createMetric.dataset.table = objects.props.name;
         li__createMetric.dataset.tableId = objects.props.key;
         li__createMetric.dataset.alias = alias;
-        // details.append(li__createMetric, li__createColumn);
         details.appendChild(li__createMetric);
+        const li__createColumn = content.querySelector("li[data-id='li__new_column']");
+        li__createColumn.addEventListener('click', createCustomColumn);
+        li__createColumn.id = `${objects.props.key}_new_column`;
+        li__createColumn.dataset.schema = objects.props.schema;
+        li__createColumn.dataset.table = objects.props.name;
+        li__createColumn.dataset.tableId = objects.props.key;
+        li__createColumn.dataset.alias = alias;
+        details.appendChild(li__createColumn);
       }
     }
     // TEST: verificare errori con un workbook senza nessun filtro
@@ -2109,19 +2119,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // ripulisco gli elementi delle <ul> (I campi delle tabelle)
     app.dialogJoin.querySelectorAll('ul > li').forEach(li => li.remove());
     app.dialogJoin.querySelectorAll('.join-field').forEach(joinField => joinField.remove());
-  });
-
-  app.dialogColumns.addEventListener('close', (e) => {
-    // FIX: 21.11.2024 : da ricostrure dopo la creazione della dialog column con i suggerimenti
-    // ripulisco gli elementi delle <ul> (I campi delle tabelle)
-    // reset della textarea
-    debugger;
-    const textAreaId = document.getElementById('textarea-column-id');
-    const textAreaDs = document.getElementById('textarea-column-ds');
-    textAreaId.querySelectorAll('*').forEach(element => element.remove());
-    textAreaDs.querySelectorAll('*').forEach(element => element.remove());
-    // reset <nav> laterale
-    e.target.querySelectorAll('nav > details').forEach(element => element.remove());
   });
 
   // input events
