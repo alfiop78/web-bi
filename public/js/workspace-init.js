@@ -9,7 +9,7 @@ var WorkBook, Sheet, Process; // instanze della Classe WorkBooks e Sheets
 var textareaFilter = document.getElementById('textarea-filter');
 var textareaCustomMetric = document.getElementById('textarea-custom-metric');
 var textarea__custom_column = document.getElementById('textarea__custom_column');
-var textareaCompositeMetric = document.getElementById('textarea-composite-metric');
+var textarea__composite_metric = document.getElementById('textarea__composite-metric');
 // Buttons
 const btnFilterSave = document.getElementById('btn-filter-save');
 const btnCustomMetricSave = document.getElementById('btn-custom-metric-save');
@@ -20,9 +20,9 @@ const btnNewCompositeMeasure = document.getElementById('btnNewCompositeMeasure')
 const btnOptions = document.getElementById('btnOptions');
 const btn__save_column = document.getElementById('btn__save_column');
 // Dialogs
-const dlgFilter = document.getElementById('dlg-filters');
+const dlg__filters = document.getElementById('dlg__filters');
 const dlgCustomMetric = document.getElementById('dlg-custom-metric');
-const dlgCompositeMetric = document.getElementById('dlg-composite-metric');
+const dlg__composite_metric = document.getElementById('dlg__composite_metric');
 const dlg__advancedMetric = document.getElementById('dlg-advanced-metric');
 const dlg__chart_options = document.getElementById('dlg__chart_options');
 const dlg__custom_columns = document.getElementById('dlg__custom_column');
@@ -91,7 +91,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // columns and rows dropzone (step 2)
     columnsDropzone: document.getElementById('dropzone-columns'),
     // filtersDropzone: document.getElementById('dropzone-filters'),
-    textareaCompositeMetric: document.getElementById('textarea-composite-metric'),
     txtAreaIdColumn: document.getElementById('textarea-column-id'),
     txtAreaDsColumn: document.getElementById('textarea-column-ds'),
     // popup
@@ -1389,9 +1388,9 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     inputName.value = metric.alias;
     btnCompositeMetricSave.dataset.token = e.target.dataset.token;
     const text = document.createTextNode(metric.formula.join(''));
-    textareaCompositeMetric.insertBefore(text, textareaCompositeMetric.lastChild);
+    textarea__composite_metric.insertBefore(text, textarea__composite_metric.lastChild);
     dlgCompositeMetricCheck();
-    dlgCompositeMetric.showModal();
+    dlg__composite_metric.showModal();
   }
 
   /* NOTE: MOUSE EVENTS */
@@ -2020,12 +2019,12 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   // aggiungo SOLO le metriche composite alla struttura WorkBook, le metriche
   // basic/advanced vengono aggiungo "sotto" alla tabella di appartenenza (creata in workbookMap)
   app.addDefinedCompositeMetrics = () => {
-    const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
+    // const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
     if (WorkBook.metrics.size !== 0) {
       for (const [token, value] of WorkBook.metrics) {
         // aggiungo qui solo le metriche composte
         // if (value.metric_type === "composite") app.appendMetric(parent, token, value);
-        if (value.metric_type === "composite") appendMetric(parent, token);
+        if (value.metric_type === "composite") appendCompositeMetric(token);
       }
     }
   }

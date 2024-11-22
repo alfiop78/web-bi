@@ -255,7 +255,7 @@ class Application {
     // console.log(message+icon);
     // if (!time) time = 2000; // se time non è impostato il message viene visualizzato alla chiamata di closeConsole()
     // type = info, warning, error, done
-    this.#messageConsole.innerText = message;
+    this.#messageConsole.innerHTML = message;
     this.#iconConsole.setAttribute('data-icon', icon);
     this.#iconConsole.innerText = icon;
     if (!this.#console.hasAttribute('open')) this.#console.toggleAttribute('open');

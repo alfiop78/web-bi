@@ -577,17 +577,25 @@ class WorkBooks {
             }
           }
         }
-        // aggiungo le metriche avanzate al workBook
-        for (const [token, advancedMetric] of WorkBook.metrics) {
-          if (advancedMetric.metric_type === 'advanced' && advancedMetric.factId === table.id) {
-            metrics[token] = advancedMetric;
+        // aggiungo le metriche avanzate e composite al workBook
+        for (const [token, metric] of WorkBook.metrics) {
+          if (metric.metric_type === 'advanced' && metric.factId === table.id) {
+            metrics[token] = metric;
             // la aggiungo anche al Map() elements
-          this.elements = advancedMetric;
+            this.elements = metric;
           }
         }
       });
       this.#workbookMap.set(table.dataset.alias, { props, fields, metrics });
     });
+    // aggiungo le metriche composte al workBook all'esterno del ciclo, queste
+    // metriche non sono associate ad una specifica tabella e vengono posizionate in una <ul> separata
+    for (const metric of WorkBook.metrics.values()) {
+      if (metric.metric_type === 'composite') {
+        // la aggiungo anche al Map() elements
+        this.elements = metric;
+      }
+    }
     console.info("workbookMap : ", this.#workbookMap);
   }
 

@@ -124,9 +124,12 @@
     </li>
 
     <li class="drag-list metrics composite" data-element-search data-label data-searchable="true">
-      <i class="material-symbols-rounded md-18 md-dimgray" draggable="true">drag_handle</i>
-      <i class="material-symbols-rounded md-18">multiline_chart</i>
-      <span></span>
+      <span class="span__content">
+        <i class="material-symbols-rounded md-18" draggable="true">drag_handle</i>
+        <i class="material-symbols-rounded md-18">multiline_chart</i>
+        <span></span>
+      </span>
+      <i class="material-symbols-rounded md-18">info</i>
     </li>
 
     <li class="drag-list default" data-element-search data-label data-searchable="true">
@@ -293,13 +296,13 @@
     </template>
 
     <template id="tmpl-context-menu-content">
-        <!-- context-menu per i filtri -->
+      <!-- context-menu per i filtri -->
       <ul id="ul-context-menu-filter" class="context-menu-items">
         <button data-fn="editFilter" class="btn-link-context">Modifica</button>
         <button data-button="delete" data-fn="removeWBFilter" class="btn-link-context" disabled>Elimina</button>
       </ul>
 
-        <!-- context-menu per le colonne custom -->
+      <!-- context-menu per le colonne custom -->
       <ul id="ul__contextmenu_custom_column" class="context-menu-items">
         <button data-fn="editCustomColumn" class="btn-link-context">Modifica</button>
         <button data-button="delete" data-fn="removeCustomColumn" class="btn-link-context" disabled>Elimina</button>
@@ -641,7 +644,7 @@
           </section>
         </dialog>
 
-        <dialog id="dlg-composite-metric" data-x="0" data-y="0" class="mediumSize absolute moveable droppable">
+        <dialog id="dlg__composite_metric" data-x="0" data-y="0" class="mediumSize absolute moveable droppable">
           <section class="dlg-grid">
             <h5 class="title moveable">Creazione Metrica Composta</h5>
             <section class="dlg-content">
@@ -671,7 +674,7 @@
                       <div class="popup__suggestions">
                         <ul></ul>
                       </div>
-                      <div id="textarea-composite-metric" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
+                      <div id="textarea__composite-metric" contenteditable="true" class="textarea dropzone" spellcheck="false" tabindex="2"><br /></div>
                     </div>
                     <textarea id="composite-metric-note" row="5" cols="10" disabled placeholder="Note"></textarea>
                   </section>
@@ -789,7 +792,7 @@
           </section>
         </dialog>
 
-        <dialog id="dlg-filters" data-x="0" data-y="40" class="mediumSize absolute moveable">
+        <dialog id="dlg__filters" data-x="0" data-y="40" class="mediumSize absolute moveable">
           <section class="dlg-grid">
             <h5 class="title moveable">Creazione Filtro</h5>
             <section class="dlg-content">

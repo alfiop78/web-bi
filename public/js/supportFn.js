@@ -61,8 +61,6 @@ async function getTables(urls) {
 // in questo modo potranno essere invocate anche da init-responsice.js (da verificare)
 (() => {
   var app = {
-    dialogCompositeMetric: document.getElementById('dlg-composite-metric'),
-    dialogFilter: document.getElementById('dlg-filters'),
     dialogAdvMetric: document.getElementById('dlg-metric'),
     dialogCustomMetric: document.getElementById('dlg-custom-metric'),
     dialogColumns: document.getElementById('dlg-columns'),
@@ -147,7 +145,7 @@ async function getTables(urls) {
     delete document.querySelector('#btn-custom-metric-save').dataset.token;
   });
 
-  app.dialogFilter.addEventListener('close', (e) => {
+  dlg__filters.addEventListener('close', (e) => {
     e.target.querySelectorAll('nav > details').forEach(element => element.remove());
     document.getElementById('input-filter-name').value = '';
     document.querySelectorAll('#textarea-filter *').forEach(element => element.remove());
@@ -170,12 +168,11 @@ async function getTables(urls) {
     delete btnMetricSave.dataset.originToken;
   });
 
-  app.dialogCompositeMetric.addEventListener('close', () => {
+  dlg__composite_metric.addEventListener('close', () => {
     document.getElementById('composite-metric-name').value = '';
-    const textarea = document.getElementById('textarea-composite-metric');
     const btnMetricSave = document.getElementById('btn-composite-metric-save');
-    textarea.querySelectorAll('*').forEach(element => element.remove());
-    textarea.value = '';
+    textarea__composite_metric.querySelectorAll('*').forEach(element => element.remove());
+    textarea__composite_metric.value = '';
     // se il tasto #btn-metric-save ha l'attributo 'edit' lo rimuovo
     delete btnMetricSave.dataset.token;
   });

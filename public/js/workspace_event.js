@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     e.target.appendChild(document.createElement('br'));
   });
 
-  textareaCompositeMetric.addEventListener('drop', (e) => {
+  textarea__composite_metric.addEventListener('drop', (e) => {
     // impedisco che venga droppato l'id dell'elemento
     e.preventDefault();
     const elementId = e.dataTransfer.getData('text/plain');
@@ -187,11 +187,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // textarea__custom_column
   textarea__custom_column.addEventListener('input', inputCustomColumn);
   // textarea-composite-metric
-  textareaCompositeMetric.addEventListener('input', inputCompositeMetric);
+  textarea__composite_metric.addEventListener('input', inputCompositeMetric);
   // apertura dialog #dlg-composite-metric
   btnNewCompositeMeasure.onclick = () => {
     dlgCompositeMetricCheck();
-    dlgCompositeMetric.showModal();
+    dlg__composite_metric.showModal();
   }
   // dropzone sheet rows
   rowsDropzone.addEventListener('dragover', handleDragOver, false);

@@ -141,7 +141,7 @@ function filterSave(e) {
     li.dataset.label = name;
     dragIcon.dataset.label = name;
     span.textContent = name;
-    dlgFilter.close();
+    dlg__filters.close();
   }
   // ripulisco la textarea eliminando solo il nodo #text, lascio il <br />
   if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
@@ -461,7 +461,14 @@ function handleColumnDrop(e) {
     // template per le metriche
     switch (element.metric_type) {
       case 'composite':
-        Sheet.metrics = { token: element.token, alias: element.alias, SQL: element.SQL, type: element.metric_type, metrics: element.metrics, dependencies: false };
+        Sheet.metrics = {
+          token: element.token,
+          alias: element.alias,
+          SQL: element.SQL,
+          type: element.metric_type,
+          metrics: element.metrics,
+          dependencies: false
+        };
         // TEST: 21.11.2024
         debugger;
         if (!dragSrcEl.dataset.id) dragSrcEl = createMetricDefined(token);
@@ -476,7 +483,16 @@ function handleColumnDrop(e) {
             //... per specificare che è stata aggiunta indirettamente, essa si trova in una metrica composta
             // NOTE: clonazione di un object con syntax ES6.
             const nestedMetric = { ...WorkBook.elements.get(metricToken) };
-            Sheet.metrics = { token: nestedMetric.token, factId: nestedMetric.factId, alias: nestedMetric.alias, type: nestedMetric.metric_type, aggregateFn: nestedMetric.aggregateFn, dependencies: true };
+            debugger;
+            Sheet.metrics = {
+              token: nestedMetric.token,
+              factId: nestedMetric.factId,
+              alias: nestedMetric.alias,
+              SQL: nestedMetric.sql,
+              type: nestedMetric.metric_type,
+              aggregateFn: nestedMetric.aggregateFn,
+              dependencies: true
+            };
           }
         }
         break;
@@ -675,7 +691,7 @@ function addToMetric(e) {
 }
 
 // aggiungo la metrica advanced/composite alla strutturaa #workbook-objects
-// TODO: questa Fn è simile a appendCustomMetric(), alcune parti possono essere scritte in una Fn separata, oppure in un modulo che esporta
+// OPTIMIZE: 22.11.2024 questa Fn è simile a appendCustomMetric(), alcune parti possono essere scritte in una Fn separata, oppure in un modulo che esporta
 // alcuni elementi ripetuti, in questo caso la creazione del template
 function appendMetric(parent, token) {
   const metric = WorkBook.metrics.get(token);
@@ -700,6 +716,30 @@ function appendMetric(parent, token) {
   li.addEventListener('contextmenu', openContextMenu);
   span.innerText = metric.alias;
   referenceElement.before(li);
+}
+
+// OPTIMIZE: 22.11.2024 questo metodo è uguale a appendMetric() da ottimizzare
+function appendCompositeMetric(token) {
+  const parent = document.getElementById('ul-metrics');
+  const metric = WorkBook.metrics.get(token);
+  const tmpl = template_li.content.cloneNode(true);
+  const li = tmpl.querySelector(`li.drag-list.metrics.${metric.metric_type}`);
+  const span__content = li.querySelector('.span__content');
+  const span = span__content.querySelector('span');
+  const i = span__content.querySelector('i[draggable]');
+  li.dataset.id = token;
+  i.id = token;
+  li.dataset.type = metric.metric_type;
+  li.dataset.elementSearch = 'elements';
+  if (metric.metric_type !== 'composite') li.dataset.factId = parent.dataset.factId;
+  li.dataset.label = metric.alias;
+  // definisco quale context-menu-template apre questo elemento
+  li.dataset.contextmenu = `ul-context-menu-${metric.metric_type}`;
+  i.addEventListener('dragstart', handleDragStart);
+  i.addEventListener('dragend', handleDragEnd);
+  li.addEventListener('contextmenu', openContextMenu);
+  span.innerText = metric.alias;
+  parent.appendChild(li);
 }
 
 // NOTE: funzioni Drag&Drop
@@ -748,10 +788,10 @@ function openContextMenu(e) {
 
 function openDialogFilter() {
   createTableStruct('wbFilters');
-  dlgFilter.showModal();
+  dlg__filters.showModal();
 }
 
-dlgFilter.addEventListener('close', () => {
+dlg__filters.addEventListener('close', () => {
   // console.log('close');
   // reset della textarea, input, note
   // effettuo un controllo sul firstChild perchè la textarea viene ripulita anche quando si
@@ -762,7 +802,7 @@ dlgFilter.addEventListener('close', () => {
   } */
 });
 
-dlgCompositeMetric.addEventListener('close', () => textareaCompositeMetric.firstChild?.remove());
+dlg__composite_metric.addEventListener('close', () => textarea__composite_metric.firstChild?.remove());
 
 dlgCustomMetric.addEventListener('close', () => textareaCustomMetric.firstChild?.remove());
 
@@ -918,14 +958,13 @@ function advancedMetricSave(e) {
   if (!e.target.dataset.token) {
     // aggiungo la nuova metrica nello stesso <details> della metrica originaria (originToken)
     const parent = document.querySelector(`li[data-id='${e.target.dataset.originToken}']`).parentElement;
-    // app.appendMetric(parent, token, object);
     appendMetric(parent, token);
   } else {
     // la metrica già esiste, aggiorno il nome
     // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
     const li = document.querySelector(`li[data-id='${token}']`);
     const dragIcon = li.querySelector('i');
-    const span = li.querySelector('span');
+    const span = li.querySelector('.span__content>span');
     li.dataset.label = alias;
     dragIcon.dataset.label = alias;
     span.textContent = alias;
@@ -933,14 +972,14 @@ function advancedMetricSave(e) {
   dlg__advancedMetric.close();
 }
 
-// salva metrica composta
+// salvataggio metrica composta
 function compositeMetricSave(e) {
   const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
   const alias = document.getElementById('composite-metric-name').value;
   const parent = document.getElementById('ul-metrics');
   const date = new Date().toLocaleDateString('it-IT', options);
   let object = { token, type: 'metric', alias, SQL: [], formula: [], metrics: {}, metric_type: 'composite', workbook_ref: WorkBook.workBook.token, updated_at: date };
-  object.formula = textareaCompositeMetric.firstChild.textContent.split(/\b/);
+  object.formula = textarea__composite_metric.firstChild.textContent.split(/\b/);
   console.log(object.formula);
   // ottengo i token delle metriche che compongono la metrica composta
   object.formula.forEach(el => {
@@ -970,23 +1009,23 @@ function compositeMetricSave(e) {
   object.created_at = (e.target.dataset.token) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
   console.log('Metrica composta : ', object);
   WorkBook.metrics = object;
+  WorkBook.elements = object;
   window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
   if (!e.target.dataset.token) {
-    // app.appendMetric(parent, token, object);
-    appendMetric(parent, token);
-    App.showConsole(`Metrica '${alias}' aggiunta al WorkBook`, 'done', 2000);
+    appendCompositeMetric(token);
+    App.showConsole(`Metrica <b>${alias}</b> aggiunta al WorkBook`, 'done', 1500);
   } else {
     // la metrica già esiste, aggiorno il nome
     // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById()
     const li = document.querySelector(`li[data-id='${token}']`);
     const dragIcon = li.querySelector('i');
-    const span = li.querySelector('span');
+    const span = li.querySelector('.span__content>span');
     li.dataset.label = alias;
     dragIcon.dataset.label = alias;
     span.textContent = alias;
     App.showConsole(`Metrica '${alias}' modificata`, 'done', 2000);
   }
-  dlgCompositeMetric.close();
+  dlg__composite_metric.close();
 }
 
 function inputFilter(e) {
@@ -1252,8 +1291,8 @@ function inputCompositeMetric(e) {
         // normalizzo i nodi
         e.target.normalize();
         popupSuggestions.classList.add('open');
-        popupSuggestions.style.left = `${e.target.querySelector('span').offsetLeft} px`;
-        popupSuggestions.style.top = `${e.target.querySelector('span').offsetTop + 30} px`;
+        popupSuggestions.style.left = `${e.target.querySelector('span').offsetLeft}px`;
+        popupSuggestions.style.top = `${e.target.querySelector('span').offsetTop + 30}px`;
       }
     } else {
       popupSuggestions.classList.remove('open');

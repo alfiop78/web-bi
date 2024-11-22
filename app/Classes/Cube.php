@@ -154,8 +154,9 @@ class Cube
     // metriche di base
     $this->report_metrics = [];
     // dd(SELF::ifNullOperator());
+    dd($this->baseMeasures);
     foreach ($this->baseMeasures as $value) {
-      // dd($value);
+      // dump($value);
       // $sql = (is_array($value->sql)) ? implode(' ', $value->sql) : $value->sql;
       $metric = "\n{$this->ifNullOperator}({$value->aggregateFn}({$value->sql}), 0) AS '{$value->alias}'";
       $this->report_metrics[$this->factId][] = $metric;

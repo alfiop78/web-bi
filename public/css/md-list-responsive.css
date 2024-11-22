@@ -427,15 +427,14 @@ li.drag-list>i:not([draggable]) {
   padding: 2px 4px;
 }
 
-
 li.metrics.basic>i:not([draggable]),
 li.metrics.advanced>i:not([draggable]) {
   color: var(--metrics);
 }
 
-li.metrics.composite>i:not([draggable]) {
-  background-color: var(--metrics-composite);
-  color: whitesmoke;
+li.drag-list.composite>.span__content>i:not([draggable]),
+li.drag-list.composite>i:not([draggable]) {
+  color: var(--metrics-composite);
 }
 
 ul.filters>li>i {
