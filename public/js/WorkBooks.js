@@ -526,10 +526,9 @@ class WorkBooks {
       const columns = JSON.parse(window.sessionStorage.getItem(table.dataset.table));
       // console.log(columns);
       columns.forEach(col => {
-        // const token = `_${table.id.substring(table.id.length - 5)}_${col.ordinal_position}_${col.column_name}`;
         const token = (table.dataset.type === 'time') ?
-          `_${table.dataset.table}_${col.ordinal_position}_${col.column_name}` :
-          `_${table.id.substring(table.id.length - 5)}_${col.ordinal_position}_${col.column_name}`;
+          `_${table.dataset.table}_${col.column_name}` :
+          `_${table.id.substring(table.id.length - 5)}_${col.column_name}`;
         switch (col.type_name) {
           case 'float':
             metrics[token] = {
@@ -564,9 +563,10 @@ class WorkBooks {
             this.elements = fields[token];
             break;
         }
-        // aggiungo le metriche custom create
+        // aggiungo le metriche e le colonne custom create
         for (const [token, object] of Object.entries(this.workSheet)) {
-          if (object.factId === table.id) {
+          // debugger;
+          if (object.factId === table.id || object.tableId === table.id) {
             this.elements = this.workSheet[token];
             if (this.workSheet[token].type === 'metric') {
               metrics[token] = object;
