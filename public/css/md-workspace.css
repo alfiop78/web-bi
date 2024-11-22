@@ -480,8 +480,15 @@ p.field-search {
   justify-content: space-between;
 }
 
+#workbook-content-area .input-search {
+  font-style: italic;
+  margin-bottom: unset;
+  box-shadow: unset;
+}
+
 #workbook-content-area .input-search::placeholder {
-  color: var(--main-primary-color);
+  /* color: var(--main-primary-color); */
+  font-style: italic;
 }
 
 .context-menu span {

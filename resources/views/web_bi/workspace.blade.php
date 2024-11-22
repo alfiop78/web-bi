@@ -293,22 +293,32 @@
     </template>
 
     <template id="tmpl-context-menu-content">
+        <!-- context-menu per i filtri -->
       <ul id="ul-context-menu-filter" class="context-menu-items">
         <button data-fn="editFilter" class="btn-link-context">Modifica</button>
-        <button data-button="delete" data-fn="removeWBFilter" class="btn-link-context">Elimina</button>
+        <button data-button="delete" data-fn="removeWBFilter" class="btn-link-context" disabled>Elimina</button>
       </ul>
 
+        <!-- context-menu per le colonne custom -->
+      <ul id="ul__contextmenu_custom_column" class="context-menu-items">
+        <button data-fn="editCustomColumn" class="btn-link-context">Modifica</button>
+        <button data-button="delete" data-fn="removeCustomColumn" class="btn-link-context" disabled>Elimina</button>
+      </ul>
+
+      <!-- context-menu per le metriche di base -->
       <ul id="ul-context-menu-basic" class="context-menu-items">
         <button data-fn="newAdvMeasure" class="btn-link-context">Crea metrica avanzata</button>
         <button data-button="delete" data-fn="removeMetric" class="btn-link-context" disabled>Elimina</button>
       </ul>
 
+      <!-- context-menu per le metriche avanzate -->
       <ul id="ul-context-menu-advanced" class="context-menu-items">
         <button data-fn="editAdvancedMetric" class="btn-link-context">Modifica</button>
         <button data-fn="removeAdvancedMetric" class="btn-link-context" disabled>Elimina</button>
         <!-- <button data-fn="renameAdvancedMetric" class="btn-link-context" disabled>Rinomina</button> -->
       </ul>
 
+      <!-- context-menu per le metriche composte -->
       <ul id="ul-context-menu-composite" class="context-menu-items">
         <button data-fn="editCompositeMetric" class="btn-link-context">Modifica</button>
         <button data-fn="removeCompositeMetric" class="btn-link-context" disabled>Elimina</button>
@@ -949,24 +959,25 @@
                       <div id="workbook-content-area">
                         <section id="workbook-objects" data-section-active="2">
                           <p class="field-search">
-                            <input id="input-search-fields" data-element-search="elements" autocomplete="off" type="search" class="input-search columns" readonly placeholder="Campi" />
-                            <button type="button" class="button-icon material-symbols-rounded md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-fields">search</button>
+                            <input id="input-search-fields" data-element-search="elements" autocomplete="off" type="search" class="input-search columns" placeholder="Ricerca" />
+                            <!-- <input id="input-search-fields" data-element-search="elements" autocomplete="off" type="search" class="input-search columns" readonly placeholder="Campi" /> -->
+                            <!-- <button type="button" class="button-icon material-symbols-rounded md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-fields">search</button> -->
                           </p>
                           <section data-worksheet-object class="custom-scrollbar" data-section="1">
                             <ul id="nav-fields" class="custom-scrollbar" data-search-id="input-search-fields"></ul>
                             <!-- <button class="btn-link link" id="btn__custom_column" type="button" value="Crea Colonna">Crea Colonna</button> -->
                           </section>
                           <p class="field-search">
-                            <input id="input-search-metrics" data-element-search="elements" autocomplete="off" type="search" class="input-search metrics" readonly placeholder="Metriche" />
-                            <button type="button" class="button-icon material-symbols-rounded md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-metrics">search</button>
+                            <input id="input-search-metrics" data-element-search="elements" autocomplete="off" type="search" class="input-search metrics" placeholder="Ricerca" />
+                            <!-- <button type="button" class="button-icon material-symbols-rounded md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-metrics">search</button> -->
                           </p>
                           <section data-worksheet-object class="custom-scrollbar" data-section="2">
                             <ul id="ul-metrics" class="custom-scrollbar" data-search-id="input-search-metrics"></ul>
                             <button class="btn-link link" id="btnNewCompositeMeasure" data-fn="btnCompositeMetric" type="button" value="Nuova Metrica">Nuova Metrica</button>
                           </section>
                           <p class="field-search">
-                            <input id="input-search-filters" data-element-search="filters" autocomplete="off" type="search" class="input-search filters" readonly placeholder="Filtri" />
-                            <button type="button" class="button-icon material-symbols-rounded md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-filters">search</button>
+                            <input id="input-search-filters" data-element-search="filters" autocomplete="off" type="search" class="input-search filters" placeholder="Ricerca" />
+                            <!-- <button type="button" class="button-icon material-symbols-rounded md-18" data-fn="handlerWorkSheetSearch" data-id="input-search-filters">search</button> -->
                           </p>
                           <section data-worksheet-object class="custom-scrollbar" data-section="3">
                             <ul id="ul-filters" class="filters custom-scrollbar" data-search-id="input-search-filters"></ul>

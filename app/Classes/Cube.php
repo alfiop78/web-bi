@@ -131,9 +131,7 @@ class Cube
 
   public function select_new()
   {
-    // $fieldList = array();
-    $name_key = NULL;
-    // dd($this->fields);
+    // dump($this->fields);
     // per ogni tabella
     foreach ($this->fields as $token => $column) {
       // dd($column);

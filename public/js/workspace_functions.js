@@ -79,8 +79,8 @@ function filterSave(e) {
       // recupero l'alias della tabella che mi servirà per creare l'sql
       const alias = document.querySelector(`#wbFilters>details[data-table='${element}']`).dataset.alias;
       tables.add(alias);
-      const regex = new RegExp(`${element}`, 'i');
-      return element.replace(regex, alias);
+      // const regex = new RegExp(`${element}`, 'i');
+      return element.replace(new RegExp(`${element}`, 'i'), alias);
     } else {
       return element;
     }
@@ -157,7 +157,9 @@ function columnSave(e) {
   const input = document.getElementById('input__column_name');
   const name = input.value;
   // in edit recupero il token presente sul tasto
-  const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
+  const token_string = WorkBook.activeTable.id.substring(WorkBook.activeTable.id.length - 5);
+  const generated_token = rand().substring(0, 7);
+  const token = (e.target.dataset.token) ? e.target.dataset.token : `__${token_string}_${generated_token}`;
   let tables = new Set();
   // separo ogni parola/elemento della formula con \b
   const formula = textarea__custom_column.firstChild.textContent.split(/\b/);
@@ -166,33 +168,30 @@ function columnSave(e) {
   // estraggo dalla formula solo le tabelle, che devono essere convertite in alias
   // es.: Azienda.id, il regex estrae "Azienda", (prima del punto)
   const tablesFounded = textarea__custom_column.firstChild.textContent.match(/\w+.(?=\.)/g);
-  const date = new Date().toLocaleDateString('it-IT', options);
   let object = {
     token,
     type: 'column',
     name,
-    // schema,
+    tableId: WorkBook.activeTable.id,
+    cssClass: 'custom',
+    datatype: 'varchar',
     tables: [],
-    // tableAlias,
-    // tableId,
-    // datatype,
     formula: formulaJoined,
-    sql: [],
-    workbook_ref: WorkBook.workBook.token
+    SQL: []
   };
   // replico i nomi delle tabelle con i suoi alias di tabella, recuperandoli dalla ul#wbColumns
-  object.sql = formula.map(element => {
+  object.SQL = formula.map(element => {
     if (tablesFounded.includes(element)) {
       // recupero l'alias della tabella che mi servirà per creare l'sql
       const alias = document.querySelector(`#wbColumns>details[data-table='${element}']`).dataset.alias;
       tables.add(alias);
-      // const regex = new RegExp(`${element}`, 'i');
+      // const regex = new RegExp(`${ element } `, 'i');
       return element.replace(new RegExp(`${element}`, 'i'), alias);
     } else {
       return element;
     }
   }).join('');
-  console.log(object.sql);
+  console.log(object.SQL);
   console.log(object.formula);
   // converto l'oggetto Set() tables in un array e lo aggiungo a object.tables
   debugger;
@@ -224,21 +223,25 @@ function columnSave(e) {
     });
   } */
 
+  // il workBook è stato modificato
+  WorkBook.checkChanges(token);
   // TODO: 22.11.2024 aggiornare il WorkBook
   WorkBook.elements = object;
+  // TODO: 22.11.2024 da valutare se è utilizzato
   WorkBook.fields = object;
+  WorkBook.workSheet[token] = object;
+  WorkBook.update();
   // completato il salvataggio rimuovo l'attributo data-token da e.target
   if (!e.target.dataset.token) {
     appendColumn(token);
     input.value = '';
     input.focus();
   } else {
-    // filtro modificato, aggiorno solo il nome eventualmente modificato
+    // colonna modificata, aggiorno solo il nome eventualmente modificato
     // NOTE: il querySelector() non gestisce gli id che iniziano con un numero, per questo motivo utilizzo getElementById() in questo caso
     const li = document.querySelector(`li[data-id='${token}']`);
     const dragIcon = li.querySelector('i[draggable]');
-    debugger;
-    const span = li.querySelector('span__content>span');
+    const span = li.querySelector('.span__content>span');
     li.dataset.label = name;
     dragIcon.dataset.label = name;
     span.textContent = name;
@@ -247,8 +250,8 @@ function columnSave(e) {
   // ripulisco la textarea eliminando solo il nodo #text, lascio il <br />
   if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
   delete e.target.dataset.token;
-  document.getElementById('filter-note').value = '';
-  App.showConsole(`Nuovo filtro aggiunto al WorkBook: ${name}`, 'done', 2000);
+  // document.getElementById('filter-note').value = '';
+  App.showConsole(`Colonna "${name}" aggiunta al WorkBook`, 'done', 2000);
 }
 
 btnToggle_table__content.onclick = (e) => {
@@ -492,7 +495,7 @@ function handleColumnDrop(e) {
         /* if (Sheet.checkMetricNames(metric.token, metric.alias)) {
           App.showConsole("Sono presenti Metriche con nomi uguali, rinominare la metrica", "error", 2500);
           // imposto il cursore nel <code> da modificare
-          document.querySelector(`.metric-defined > code[data-token='${token}']`).focus({ focusVisible: true });
+          document.querySelector(`.metric-defined>code[data-token='${token}']`).focus({ focusVisible: true });
           e.currentTarget.dataset.error = true;
         } */
         break;
@@ -557,7 +560,7 @@ function appendColumn(token) {
   // creo la <li> per la nuova colonna dopo l'ultima colonna "originale" della tabella
   console.log(WorkBook.activeTable);
   const columnsCount = document.querySelectorAll(`#nav-fields>details[data-fact-id='${WorkBook.activeTable.id}']>li.columns`).length;
-  const referenceElement = document.querySelector(`#nav-fields>details[data-fact-id='${WorkBook.activeTable.id}']>li.columns:nth-child(${columnsCount +1})`);
+  const referenceElement = document.querySelector(`#nav-fields>details[data-fact-id='${WorkBook.activeTable.id}']>li.columns:nth-child(${columnsCount + 1})`);
   console.log(referenceElement);
   debugger;
   const tmpl = template_li.content.cloneNode(true);
@@ -565,15 +568,14 @@ function appendColumn(token) {
   const span__content = li.querySelector('.span__content');
   const span = span__content.querySelector('span');
   const i = span__content.querySelector('i[draggable]');
+  const value = WorkBook.elements.get(token);
   debugger;
   // const filter = WorkBook.filters.get(token);
   li.dataset.id = token;
   i.id = token;
   li.classList.add("columns");
   li.dataset.elementSearch = "elements";
-  // li.dataset.label = value.field.ds.field;
   // TODO: rivedere la descrizione da far comparire per le colonne e colonne custom
-  // li.dataset.label = value.field.ds.sql.join('');
   li.dataset.label = value.name;
   li.dataset.schema = value.schema;
   li.dataset.table = value.table;
@@ -822,7 +824,9 @@ function createTableStruct(parent_id) {
 function customBaseMetricSave(e) {
   // se presente il dataset.token sul btn-custom-metric-save sto modificando la metrica, altrimenti
   // è una nuova metrica
-  const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
+  const token_string = WorkBook.activeTable.id.substring(WorkBook.activeTable.id.length - 5);
+  const generated_token = rand().substring(0, 7);
+  const token = (e.target.dataset.token) ? e.target.dataset.token : `__${token_string}_${generated_token}`;
   const alias = document.getElementById('input-base-custom-metric-name').value;
   let fields = [];
   const factId = WorkBook.activeTable.dataset.factId;
@@ -998,19 +1002,19 @@ function inputFilter(e) {
   // NOTE: non utilizzo la popupSuggestions perchè qui sono presenti elementi univoci
   // Il nome Tabella è univoco e, allo stesso modo, il nome colonna della tabella è univoco
   // const currentWord = (endIndex > 0) ? e.target.firstChild.textContent.substring(startIndex + 1, caretPosition) : e.target.firstChild.textContent.substring(startIndex + 1);
-  // console.info(`current word : ${currentWord}`);
+  // console.info(`current word: ${currentWord}`);
   if (currentWord.length > 0) {
     // se il carattere che interrompe la parola (trovato dal regex) è un punto allora devo cercare
     // nell'array delle Colonne, altrimenti in quello delle Tabelle
     const chartAt = e.target.firstChild.textContent.at(startIndex);
-    // console.log(`chartAt : ${chartAt}`);
+    // console.log(`chartAt: ${chartAt}`);
     let table = null;
     if (chartAt === '.') {
       // recupero la tabella (prima del punto) in modo da cercare le colonne SOLO di quella tabella
       const startIndexTable = findIndexOfCurrentWord(e.target, startIndex);
       table = e.target.firstChild.textContent.substring(startIndexTable + 1, startIndex);
     }
-    // console.info(`current word : ${currentWord}`);
+    // console.info(`current word: ${currentWord}`);
     // let regex = new RegExp(`^${currentWord}.*`, 'i');
     // const regex = new RegExp(`^${currentWord}.*`);
     const regex = new RegExp(`^${currentWord}`);
@@ -1051,11 +1055,11 @@ function inputCustomMetric(e) {
   const currentWord = e.target.firstChild.textContent.substring(startIndex + 1, caretPosition);
   popupSuggestions = e.target.parentElement.querySelector('.popup__suggestions');
   // const currentWord = (endIndex > 0) ? e.target.firstChild.textContent.substring(startIndex + 1, caretPosition) : e.target.firstChild.textContent.substring(startIndex + 1);
-  // console.info(`current word : ${currentWord}`);
+  // console.info(`current word: ${currentWord}`);
   if (currentWord.length > 0) {
     popupSuggestions.querySelectorAll('ul>li').forEach(el => el.remove());
-    // console.info(`current word : ${currentWord}`);
-    // let regex = new RegExp(`^${currentWord}.*`, 'i');
+    // console.info(`current word: ${currentWord}`);
+    // let regex = new RegExp(`^ ${currentWord}.*`, 'i');
     const regex = new RegExp(`^${currentWord}.*`);
     // const matches = suggestionsTables.filter(value => value.column_name.match(regex));
     // oltre al nome colonna controllo anche il datatype, in modo da suggerire solo le colonne con dato numerico
@@ -1128,28 +1132,28 @@ function inputCustomColumn(e) {
   // NOTE: non utilizzo la popupSuggestions perchè qui sono presenti elementi univoci
   // Il nome Tabella è univoco e, allo stesso modo, il nome colonna della tabella è univoco
   // const currentWord = (endIndex > 0) ? e.target.firstChild.textContent.substring(startIndex + 1, caretPosition) : e.target.firstChild.textContent.substring(startIndex + 1);
-  // console.info(`current word : ${currentWord}`);
+  // console.info(`current word: ${currentWord}`);
   if (currentWord.length > 0) {
     // se il carattere che interrompe la parola (trovato dal regex) è un punto allora devo cercare
     // nell'array delle Colonne, altrimenti in quello delle Tabelle
     const chartAt = e.target.firstChild.textContent.at(startIndex);
-    // console.log(`chartAt : ${chartAt}`);
+    // console.log(`chartAt: ${ chartAt } `);
     let table = null;
     if (chartAt === '.') {
       // recupero la tabella (prima del punto) in modo da cercare le colonne SOLO di quella tabella
       const startIndexTable = findIndexOfCurrentWord(e.target, startIndex);
       table = e.target.firstChild.textContent.substring(startIndexTable + 1, startIndex);
     }
-    // console.info(`current word : ${currentWord}`);
+    // console.info(`current word: ${currentWord}`);
     // let regex = new RegExp(`^${currentWord}.*`, 'i');
     // const regex = new RegExp(`^${currentWord}.*`);
     const regex = new RegExp(`^${currentWord}`);
     // console.log(regex);
     // se è presente il punto cerco tra le colonne altrimenti cerco tra le tabelle
     const match = (chartAt === '.') ?
-      [...document.querySelectorAll(`#wbColumns>details[data-table='${table}']>li`)].find(value => value.dataset.label.match(regex)) :
+      [...document.querySelectorAll(`#wbColumns > details[data-table='${table}']> li`)].find(value => value.dataset.label.match(regex)) :
       suggestionsTables.find(value => value.dataset.table.match(regex));
-    // console.log(`match ${match}`);
+    // console.log(`match ${ match } `);
     if (match) {
       // console.log(sel);
       const span = document.createElement('span');
@@ -1205,11 +1209,11 @@ function inputCompositeMetric(e) {
   const currentWord = e.target.firstChild.textContent.substring(startIndex + 1, caretPosition);
   popupSuggestions = e.target.parentElement.querySelector('.popup__suggestions');
   // console.log(popupSuggestions);
-  // console.info(`current word : ${currentWord}`);
+  // console.info(`current word: ${currentWord}`);
   if (currentWord.length > 0) {
     popupSuggestions.querySelectorAll('ul>li').forEach(el => el.remove());
-    // console.info(`current word : ${currentWord}`);
-    // let regex = new RegExp(`^${currentWord}.*`, 'i');
+    // console.info(`current word: ${currentWord}`);
+    // let regex = new RegExp(`^ ${currentWord}.*`, 'i');
     const regex = new RegExp(`^${currentWord}.*`);
     const matches = suggestions.filter(value => value.match(regex));
     // gestione del popupSuggestions
@@ -1238,7 +1242,7 @@ function inputCompositeMetric(e) {
         }
       });
       const match = suggestions.find(value => value.match(regex));
-      // console.log(`match ${match}`);
+      // console.log(`match ${ match } `);
       // gestione dell'autocomplete "inline"
       if (match) {
         const span = document.createElement('span');
@@ -1248,8 +1252,8 @@ function inputCompositeMetric(e) {
         // normalizzo i nodi
         e.target.normalize();
         popupSuggestions.classList.add('open');
-        popupSuggestions.style.left = `${e.target.querySelector('span').offsetLeft}px`;
-        popupSuggestions.style.top = `${e.target.querySelector('span').offsetTop + 30}px`;
+        popupSuggestions.style.left = `${e.target.querySelector('span').offsetLeft} px`;
+        popupSuggestions.style.top = `${e.target.querySelector('span').offsetTop + 30} px`;
       }
     } else {
       popupSuggestions.classList.remove('open');
@@ -1331,13 +1335,6 @@ function showSQLInfo(data) {
   const divSQL = div.querySelector('div.sql-content');
   // base
 
-  /* let baseRawSQL = data.base.raw_sql;
-  keywords.forEach(keyword => {
-    const myRe = new RegExp(keyword, 'g');
-    // const myRe = /keyword/g;
-    baseRawSQL = baseRawSQL.replaceAll(myRe, `<mark class="keyword">${keyword}</mark>`);
-  });
-  divSQL.innerHTML = baseRawSQL; */
   div.id = 'BASE';
   data.base.forEach(sql => {
     const tmpldiv = document.getElementById('tmpl-content-div');
@@ -1350,7 +1347,6 @@ function showSQLInfo(data) {
 
   divIcon.dataset.id = 'BASE';
   btnCopy.dataset.id = 'BASE';
-  // divSQL.innerHTML = data.base.raw_sql.replace('FROM', "<mark class='keyword'>FROM</mark>");
   sqlRaw.appendChild(div);
 
   // advanced
@@ -1504,6 +1500,7 @@ function addFields(parent, fields) {
     const i = span__content.querySelector('i[draggable]');
     const btnConvertToMetric = li.lastElementChild;
     const icon = span__content.querySelector('i:not([draggable])');
+    // console.log(`${value.table}.${value.name}`);
     if (value.constraint) {
       li.dataset.constraint = value.constraint;
       icon.innerText = 'key';
@@ -1515,15 +1512,22 @@ function addFields(parent, fields) {
     // li.dataset.label = value.field.ds.field;
     // TODO: rivedere la descrizione da far comparire per le colonne e colonne custom
     // li.dataset.label = value.field.ds.sql.join('');
+    li.dataset.datatype = value.datatype;
     li.dataset.label = value.name;
     li.dataset.schema = value.schema;
     li.dataset.table = value.table;
     li.dataset.alias = value.tableAlias;
     li.dataset.field = value.name;
+    if (value.cssClass === 'custom') {
+      li.classList.add(value.cssClass);
+      li.dataset.contextmenu = 'ul__contextmenu_custom_column';
+      li.addEventListener('contextmenu', openContextMenu);
+    }
     i.addEventListener('dragstart', handleDragStart);
     i.addEventListener('dragend', handleDragEnd);
     i.addEventListener('dragenter', handleDragEnter);
     i.addEventListener('dragleave', handleDragLeave);
+    // sulle colonne custom questa icona viene nascosta da CSS
     btnConvertToMetric.dataset.tableId = value.tableId;
     btnConvertToMetric.dataset.token = token;
     btnConvertToMetric.addEventListener('click', convertToMetric);
@@ -1539,7 +1543,6 @@ function createCustomMetric(e) {
 }
 
 function createCustomColumn(e) {
-  // const tableId = e.currentTarget.dataset.tableId;
   createTableStruct('wbColumns');
   WorkBook.activeTable = e.currentTarget.dataset.tableId;
   dlg__custom_columns.showModal();
@@ -1564,7 +1567,7 @@ function convertToMetric(e) {
       aggregateFn = 'SUM';
       break;
   }
-  // const token = `_cm_${e.currentTarget.dataset.token}`;
+  // const token = `_cm_${ e.currentTarget.dataset.token } `;
   const token = rand().substring(0, 7);
   const metric = {
     token,
@@ -1590,6 +1593,7 @@ function convertToMetric(e) {
 
 // aggiungo la metrica appena creata (metrica custom di base)
 function appendCustomMetric(metric) {
+  // TODO: 22.11.2024 utilizzare la stessa logica di appendColumn()
   const referenceElement = document.querySelector(`#${WorkBook.activeTable.id}_new_metric`);
   const tmpl = template_li.content.cloneNode(true);
   const li = tmpl.querySelector('li.drag-list.metrics.basic');

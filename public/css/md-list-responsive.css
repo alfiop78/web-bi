@@ -81,17 +81,20 @@ li.icons-list>div {
   visibility: visible;
 }
 
-/* li:hover > i {
-  color: #54728C;
-} */
-
 li.drag-list {
   justify-content: start;
+}
+
+li.drag-list:hover {
+  padding-left: 4px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 li.drag-list.columns,
 li.drag-list.metrics {
   display: flex;
+  cursor: default;
   justify-content: space-between;
 }
 
@@ -108,11 +111,6 @@ li.drag-list.metrics>.span__content>span {
   width: 140px;
 }
 
-li.drag-list:hover {
-  padding-left: 4px;
-  cursor: pointer;
-  font-weight: bold;
-}
 
 li.drag-list.columns>span>i[draggable],
 li.drag-list.metrics>span>i[draggable] {
@@ -135,13 +133,22 @@ li.drag-list.metrics>i {
   visibility: hidden;
 }
 
-li.drag-list.columns:hover>i,
+li.drag-list.columns[data-datatype="integer"]:hover>i,
 li.drag-list.metrics:hover>i {
   visibility: visible;
+  cursor: pointer;
+}
+
+li.drag-list.columns.custom:hover>i {
+  visibility: hidden;
 }
 
 li.drag-list.columns>span>i:not([draggable]) {
   color: var(--main-secondary-color);
+}
+
+li.drag-list.columns.custom>span>i:not([draggable]) {
+  color: var(--main-important-color);
 }
 
 li.drag-list.columns[data-constraint]>span>i:not([draggable]) {
@@ -346,7 +353,8 @@ li.icons-list:hover::before {
 }
 
 /* metriche di base */
-li.drag-list.basic>.span__content>i, li.drag-list.advanced>.span__content>i {
+li.drag-list.basic>.span__content>i,
+li.drag-list.advanced>.span__content>i {
   color: var(--metrics);
 }
 
@@ -449,6 +457,8 @@ li.toggle-list.added>button:disabled {
   visibility: hidden;
 }
 
-li[data-id='li__new_metric'] span, li[data-id="li__new_column"] span {
-  font-weight: 500;
+li[data-id='li__new_metric'] span,
+li[data-id="li__new_column"] span {
+  font-style: italic;
+  color: #8d8d8d;
 }

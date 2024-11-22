@@ -18,7 +18,6 @@ const btnAdvancedMetricSave = document.getElementById('btn-metric-save');
 const btnOpenDialogFilter = document.getElementById('btnOpenDialogFilter');
 const btnNewCompositeMeasure = document.getElementById('btnNewCompositeMeasure');
 const btnOptions = document.getElementById('btnOptions');
-// const btn__custom_column = document.getElementById('btn__custom_column');
 const btn__save_column = document.getElementById('btn__save_column');
 // Dialogs
 const dlgFilter = document.getElementById('dlg-filters');
@@ -471,14 +470,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   }
 
   /* NOTE: ONCLICK EVENTS*/
-
-  // TODO: da spostare in supportFn.js
-  app.handlerWorkSheetSearch = (e) => {
-    // l'attributo data-id contiene l'id della input da attivare per la ricerca
-    const input = document.getElementById(e.target.dataset.id);
-    input.removeAttribute('readonly');
-    input.focus();
-  }
 
   // edit di una funzione di aggregazione sulla metrica aggiunta allo Sheet
   app.editAggregate = (e) => {
@@ -1308,6 +1299,32 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     openDialogFilter();
   }
 
+  /*
+    * modifica di un colonna personalizzata
+    * -inserisco il contenuto della formula nella #textarea__custom_column
+    *  Questa Funzione non può essere messa dopo il DOMContentLoaded perchè
+    *  si trova all'interno di un context-menu che viene aperte nelle fasi successive
+  */
+  app.editCustomColumn = (e) => {
+    // console.log(e.target.dataset.token);
+    // il context-menu è sempre aperto in questo caso, lo chiudo
+    contextMenuRef.toggleAttribute('open');
+    const element = WorkBook.elements.get(e.target.dataset.token);
+    const inputName = document.getElementById('input__column_name');
+    inputName.value = element.name;
+    // imposto il token sul tasto #btn__save_column, in questo modo posso salvare/aggiornare la colonna custom in base alla presenza o meno di data-token
+    btn__save_column.dataset.token = e.target.dataset.token;
+    // const text = document.createTextNode(filter.formula.join(''));
+    const text = document.createTextNode(element.formula);
+    // aggiungo il testo della formula prima del tag <br>
+    textarea__custom_column.insertBefore(text, textarea__custom_column.lastChild);
+    createTableStruct('wbColumns');
+    WorkBook.activeTable = element.tableId;
+    console.log(WorkBook.activeTable);
+    debugger;
+    dlg__custom_columns.showModal();
+  }
+
   // sezione drop per i filtri nelle metriche avanzate
   app.openDialogMetric = () => {
     // const filterDrop = document.getElementById('filter-drop');
@@ -2104,13 +2121,13 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         // console.log(section, e.target);
         section.dataset.sectionActive = e.target.dataset.section;
       }, false);
-      subSection.addEventListener('mouseleave', () => {
+      /* subSection.addEventListener('mouseleave', () => {
         console.log('mouseLeave');
         // reimposto eventuali input utilizzate per la ricerca se è stato cancellato il testo al loro interno
         section.querySelectorAll("input[type='search']").forEach(input => {
           if (input.value.length === 0) input.setAttribute('readonly', 'true');
         });
-      }, false);
+      }, false); */
     });
   });
 
