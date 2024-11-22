@@ -352,6 +352,7 @@ function handleColumnDrop(e) {
   const token = e.dataTransfer.getData('text/plain');
   // verifico se si tratta di una metrica o di una colonna dimensionale
   const element = WorkBook.elements.get(token);
+  debugger;
   if (element.type === 'metric') {
     // template per le metriche
     switch (element.metric_type) {
@@ -531,29 +532,32 @@ function addToMetric(e) {
   e.currentTarget.parentElement.classList.add('added');
 }
 
+// aggiungo la metrica advanced/composite alla strutturaa #workbook-objects
+// TODO: questa Fn è simile a appendCustomMetric(), alcune parti possono essere scritte in una Fn separata, oppure in un modulo che esporta
+// alcuni elementi ripetuti, in questo caso la creazione del template
 function appendMetric(parent, token) {
-  debugger;
   const metric = WorkBook.metrics.get(token);
+  const referenceElement = document.querySelector(`#${metric.factId}_new_metric`);
   const tmpl = template_li.content.cloneNode(true);
   const li = tmpl.querySelector(`li.drag-list.metrics.${metric.metric_type}`);
-  const span = li.querySelector('span');
-  const i = li.querySelector('i');
+  const span__content = li.querySelector('.span__content');
+  const span = span__content.querySelector('span');
+  const i = span__content.querySelector('i[draggable]');
   li.dataset.id = token;
   i.id = token;
-  // li.classList.add("metrics");
-  // li.classList.add(value.metric_type);
   li.dataset.type = metric.metric_type;
   li.dataset.elementSearch = 'elements';
   if (metric.metric_type !== 'composite') li.dataset.factId = parent.dataset.factId;
   li.dataset.label = metric.alias;
   // definisco quale context-menu-template apre questo elemento
   li.dataset.contextmenu = `ul-context-menu-${metric.metric_type}`;
-  i.addEventListener('dragstart', elementDragStart);
-  i.addEventListener('dragend', elementDragEnd);
+  // i.addEventListener('dragstart', elementDragStart);
+  // i.addEventListener('dragend', elementDragEnd);
+  i.addEventListener('dragstart', handleDragStart);
+  i.addEventListener('dragend', handleDragEnd);
   li.addEventListener('contextmenu', openContextMenu);
-  span.innerHTML = metric.alias;
-  // span.innerHTML = value.name;
-  parent.appendChild(li);
+  span.innerText = metric.alias;
+  referenceElement.before(li);
 }
 
 // NOTE: funzioni Drag&Drop
@@ -717,7 +721,7 @@ function customBaseMetricSave(e) {
   WorkBook.elements = metric;
   WorkBook.workSheet[token] = metric;
   WorkBook.update();
-  appendNewMetric(metric);
+  appendCustomMetric(metric);
   dlgCustomMetric.close();
 }
 
@@ -764,6 +768,7 @@ function advancedMetricSave(e) {
   // aggiornamento/creazione della metrica imposta created_at
   object.created_at = (e.target.dataset.token) ? metric.created_at : date;
   WorkBook.metrics = object;
+  WorkBook.elements = object;
   // salvo la nuova metrica nello storage
   window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
   if (!e.target.dataset.token) {
@@ -1380,12 +1385,12 @@ function convertToMetric(e) {
   // TODO: il metodo update() è da ottimizzare perchè è presente, in save(), un controllo su checkChanges
   WorkBook.update();
   // creo l'elemento da aggiungere
-  appendNewMetric(metric);
+  appendCustomMetric(metric);
   e.currentTarget.style.visibility = 'hidden';
 }
 
 // aggiungo la metrica appena creata (metrica custom di base)
-function appendNewMetric(metric) {
+function appendCustomMetric(metric) {
   const referenceElement = document.querySelector(`#${WorkBook.activeTable.id}_new_metric`);
   const tmpl = template_li.content.cloneNode(true);
   const li = tmpl.querySelector('li.drag-list.metrics.basic');

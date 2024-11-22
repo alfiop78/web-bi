@@ -346,6 +346,10 @@ li.icons-list:hover::before {
 }
 
 /* metriche di base */
+li.drag-list.basic>.span__content>i, li.drag-list.advanced>.span__content>i {
+  color: var(--metrics);
+}
+
 li.drag-list.basic {
   color: var(--text-default);
 }
@@ -419,7 +423,6 @@ li.drag-list>i:not([draggable]) {
 li.metrics.basic>i:not([draggable]),
 li.metrics.advanced>i:not([draggable]) {
   color: var(--metrics);
-  /* color: whitesmoke; */
 }
 
 li.metrics.composite>i:not([draggable]) {

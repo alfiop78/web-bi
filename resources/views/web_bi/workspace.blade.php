@@ -89,7 +89,7 @@
         <i class="material-symbols-rounded md-18">table_rows</i>
         <span></span>
       </span>
-      <i class="material-symbols-rounded md-18">functions</i>
+      <i class="material-symbols-rounded md-18">function</i>
     </li>
 
     <li class="toggle-list" data-element-search data-label data-searchable="true">
@@ -115,9 +115,12 @@
     </li>
 
     <li class="drag-list metrics advanced" data-element-search data-label data-searchable="true">
-      <i class="material-symbols-rounded md-18 md-dimgray" draggable="true">drag_handle</i>
-      <i class="material-symbols-rounded md-18">query_stats</i>
-      <span></span>
+      <span class="span__content">
+        <i class="material-symbols-rounded md-18" draggable="true">drag_handle</i>
+        <i class="material-symbols-rounded md-18">function</i>
+        <span></span>
+      </span>
+      <i class="material-symbols-rounded md-18">info</i>
     </li>
 
     <li class="drag-list metrics composite" data-element-search data-label data-searchable="true">

@@ -1022,6 +1022,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
               break;
             case 'advanced':
               // if (wbMetrics.factId === factId) {
+              debugger;
               if (metric.factId === factId) {
                 let obj = {
                   token,
@@ -1050,8 +1051,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
               break;
             default:
               // basic
-              debugger;
-              // if (wbMetrics.factId === factId) {
               if (metric.factId === factId) {
                 baseMeasures.set(token, {
                   token,
@@ -2044,7 +2043,10 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         const i = span__content.querySelector('i[draggable]');
         const btn__info = li.lastElementChild;
         const icon = span__content.querySelector('i:not([draggable])');
-        if (metric.cssClass) li.classList.add(metric.cssClass);
+        if (metric.cssClass) {
+          li.classList.add(metric.cssClass);
+          icon.innerText = 'function';
+        }
         li.dataset.id = token;
         i.id = token;
         li.dataset.type = metric.metric_type;

@@ -577,6 +577,14 @@ class WorkBooks {
             }
           }
         }
+        // aggiungo le metriche avanzate al workBook
+        for (const [token, advancedMetric] of WorkBook.metrics) {
+          if (advancedMetric.metric_type === 'advanced' && advancedMetric.factId === table.id) {
+            metrics[token] = advancedMetric;
+            // la aggiungo anche al Map() elements
+          this.elements = advancedMetric;
+          }
+        }
       });
       this.#workbookMap.set(table.dataset.alias, { props, fields, metrics });
     });
