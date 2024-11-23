@@ -488,9 +488,10 @@ function handleColumnDrop(e) {
               token: nestedMetric.token,
               factId: nestedMetric.factId,
               alias: nestedMetric.alias,
-              SQL: nestedMetric.sql,
+              SQL: nestedMetric.SQL,
               type: nestedMetric.metric_type,
               aggregateFn: nestedMetric.aggregateFn,
+              distinct: nestedMetric.distinct,
               dependencies: true
             };
           }

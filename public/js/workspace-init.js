@@ -2045,7 +2045,11 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       const details = tmpl.querySelector("details");
       const summary = details.querySelector('summary');
       WorkBook.activeTable = objects.props.key;
-      details.setAttribute("name", "wbTables");
+      // INFO: 23.11.2024 l'attributo "name" riconosce il details aperto e chiude automaticamente
+      // gli altri (compatibilità con chrome e non Firefox).
+      // Al momento conviene non inserirlo perchè, nella ricerca, tutti i <details> vengono
+      // chiusi e non vengono visualizzati gli elementi ricercati
+      // details.setAttribute("name", "wbTables");
       details.dataset.alias = alias;
       details.dataset.factId = objects.props.key;
       details.dataset.schema = objects.props.schema;

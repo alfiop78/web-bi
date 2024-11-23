@@ -154,7 +154,7 @@ class Cube
     // metriche di base
     $this->report_metrics = [];
     // dd(SELF::ifNullOperator());
-    dd($this->baseMeasures);
+    // dd($this->baseMeasures);
     foreach ($this->baseMeasures as $value) {
       // dump($value);
       // $sql = (is_array($value->sql)) ? implode(' ', $value->sql) : $value->sql;
