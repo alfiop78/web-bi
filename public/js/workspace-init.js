@@ -2080,6 +2080,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         li.dataset.contextmenu = `ul-context-menu-${metric.metric_type}`;
         i.addEventListener('dragstart', handleDragStart);
         i.addEventListener('dragend', handleDragEnd);
+        // i.addEventListener('dragenter', handleDragEnter);
+        // i.addEventListener('dragleave', handleDragLeave);
         li.addEventListener('contextmenu', openContextMenu);
         span.innerText = metric.alias;
         details.appendChild(li);

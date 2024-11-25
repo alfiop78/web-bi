@@ -96,6 +96,10 @@ thead th[data-metric-token]{
   transition: grid-template-columns 250ms;
 }
 
+.table-content .sheet__contents {
+  padding: unset;
+}
+
 .table-content #sheet__filters::before {
   content: unset;
 }

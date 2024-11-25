@@ -26,7 +26,7 @@ code {
   align-items: center;
   /* grid-column-gap: 4px; */
   /* padding: 4px; */
-  /* height: 55px; */
+  height: 55px;
 }
 
 .report-area .report-preview {
