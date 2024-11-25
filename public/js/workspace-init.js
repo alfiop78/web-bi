@@ -840,27 +840,42 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
   app.removeDefinedMetric = (e) => {
     const token = e.target.dataset.metricToken;
-    const obj = Sheet.metrics.get(token);
     // Se la metrica che si sta per eliminare è stata aggiunta (non era inclusa nello Sheet)
     // elimino tutto il div anziché marcarlo come data-removed
     const metric = document.querySelector(`.metric-defined[data-id='${token}']`);
     if (Sheet.edit) {
-      // (metric.dataset.adding) ? metric.remove() : removeMetric();
-      (metric.dataset.adding) ? metric.remove() : Sheet.objectRemoved.set(token, obj);
+      (metric.dataset.adding) ? metric.remove() : Sheet.objectRemoved.set(token, Sheet.metrics.get(token));
     } else {
-      (metric.dataset.added) ? metric.remove() : Sheet.objectRemoved.set(token, obj);
+      (metric.dataset.added) ? metric.remove() : Sheet.objectRemoved.set(token, Sheet.metrics.get(token));
     }
     metric.dataset.removed = 'true';
-    Sheet.metrics.delete(token);
+    // Se la metrica è contenuta in una metrica composta la contrassegno come dependencies:true
+    // Quindi non verrà visualizzata ma è comunque inclusa nello Sheet per poter effettuare
+    // il calcolo della metrica composta
+    // cerco questa metrica all'interno delle metriche composte
+    const check = () => {
+      for (const metric of Sheet.metrics.values()) {
+        if (metric.type === 'composite' && metric.metrics.hasOwnProperty(token)) {
+          // la metrica che si sta eliminando è contenuta in una metrica composta.
+          // dependencies: true
+          return true;
+        }
+      }
+      return false;
+    }
+    (check()) ? Sheet.metrics.get(token).dependencies = true : Sheet.metrics.delete(token);
     if (Sheet.metrics.size === 0) Sheet.metrics.clear();
   }
 
   app.undoDefinedMetric = (e) => {
     const token = e.target.dataset.metricToken;
-    // Recupero, da Sheet.removedMetrics, gli elementi rimossi per poterli ripristinare
+    // Recupero, da Sheet.objectRemoved, gli elementi rimossi per poterli ripristinare
     if (Sheet.objectRemoved.has(token)) {
-      const obj = Sheet.objectRemoved.get(token);
-      Sheet.metrics = { token, obj };
+      if (Sheet.objectRemoved.get(token).dependencies === true) {
+        Sheet.objectRemoved.get(token).dependencies = false;
+      } else {
+        Sheet.metrics = Sheet.objectRemoved.get(token);
+      }
       // elimino da removedMetrics l'oggetto appena ripristinato
       Sheet.objectRemoved.delete(token);
       delete document.querySelector(`.metric-defined[data-id='${token}']`).dataset.removed;

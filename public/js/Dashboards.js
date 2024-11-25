@@ -180,6 +180,11 @@ class Resources extends Dashboards {
         });
       } else {
         // già presente
+        // imposto solo le eproprietà che potrebbero essere state modificate nello Sheet
+        findMetric.alias = metric.alias;
+        findMetric.aggregateFn = metric.aggregateFn;
+        findMetric.dependencies = metric.dependencies;
+        findMetric.label = metric.alias;
         this.#specs_group.columns.push(findMetric);
       }
     }
