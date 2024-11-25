@@ -228,7 +228,7 @@ function columnSave(e) {
   // TODO: 22.11.2024 aggiornare il WorkBook
   WorkBook.elements = object;
   // TODO: 22.11.2024 da valutare se è utilizzato
-  WorkBook.fields = object;
+  // WorkBook.fields = object;
   WorkBook.workSheet[token] = object;
   WorkBook.update();
   // completato il salvataggio rimuovo l'attributo data-token da e.target
@@ -262,32 +262,36 @@ btnToggle_table__content.onclick = (e) => {
 
 // rimuovo il filtro aggiunto allo Sheet
 function removeFilterFromSheet(e) {
-  const sheetFilter = document.querySelector(`.filter-defined[data-id='${e.target.dataset.filterToken}']`);
   const token = e.target.dataset.filterToken;
-  if (sheetFilter.dataset.adding || (sheetFilter.dataset.added && !Sheet.edit)) {
+  const filter = document.querySelector(`.filter-defined[data-id='${token}']`);
+  debugger;
+  if (filter.dataset.adding || (filter.dataset.added && !Sheet.edit)) {
     // quando il filtro ha attr data-adding oppure quando ha data-added e lo Sheet NON è in edit lo elimino
-    sheetFilter.remove();
+    filter.remove();
     // ripristino (#ul-filters) il filtro eliminato dal report
     const li__addedFilter = document.querySelector(`ul.filters>li.added[data-id='${token}']`);
     li__addedFilter.classList.remove('added');
     const btnAddFilter = document.getElementById(token);
     btnAddFilter.removeAttribute('disabled');
   } else {
-    Sheet.removeObject(sheetFilter, e.target.dataset.filterToken);
+    // Sheet.removeObject(filter, token);
+    debugger;
+    filter.dataset.removed = 'true';
+    Sheet.objectRemoved.set(token, token);
   }
-  Sheet.filters.delete(e.target.dataset.filterToken);
+  Sheet.filters.delete(token);
 }
 
 function undoRemovedFilter(e) {
   const token = e.target.dataset.filterToken;
   // Recupero, da Sheet.removedFilters, gli elementi rimossi per poterli ripristinare
-  Sheet.filters = token;
-  Sheet.objectRemoved.delete(token);
-  delete document.querySelector(`.filter-defined[data-id='${token}']`).dataset.removed;
-
-  const li__selected = document.querySelector(`ul.filters>li[data-id='${token}']`);
-  li__selected.classList.add('added');
-  Sheet.filters = token;
+  if (Sheet.objectRemoved.has(token)) {
+    delete document.querySelector(`.filter-defined[data-id='${token}']`).dataset.removed;
+    const li__selected = document.querySelector(`ul.filters>li[data-id='${token}']`);
+    li__selected.classList.add('added');
+    Sheet.objectRemoved.delete(token);
+    Sheet.filters = token;
+  }
 }
 
 // selezione di un filtro da aggiungere allo Sheet
@@ -395,7 +399,8 @@ function createColumnDefined(token) {
   code.innerText = Sheet.fields.get(token).name;
   // aggiungo a Sheet.fields solo le proprietà utili alla creazione della query
   // TODO: da aggiungere in fase di creazione del process
-  Sheet.tables = WorkBook.fields.get(token).tableAlias;
+  // Sheet.tables = WorkBook.fields.get(token).tableAlias;
+  Sheet.tables = WorkBook.elements.get(token).tableAlias;
   return field;
 }
 
@@ -1352,14 +1357,11 @@ function dlgCompositeMetricCheck() {
   // for (const metric of WorkBook.metrics.values()) {
   for (const element of WorkBook.elements.values()) {
     if (element.type === 'metric') {
-      console.log(element, element.metric_type);
       const tmpl = template_li.content.cloneNode(true);
       const li = tmpl.querySelector(`li.drag-list.metrics.${element.metric_type}`);
-      console.log(li);
       const span__content = li.querySelector('span');
       const span = span__content.querySelector('span');
       const i = li.querySelector('i');
-      console.log(element.alias, element.token);
       li.dataset.id = element.token;
       i.id = element.token;
       li.dataset.type = element.metric_type;

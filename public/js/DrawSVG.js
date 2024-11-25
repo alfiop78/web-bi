@@ -1123,11 +1123,11 @@ class DrawSVG {
     WorkBook.activeTable = e.currentTarget.id;
     const btnAddFactJoin = document.getElementById('addFactJoin');
     const btnTimeDimension = document.getElementById('time-dimension');
-    const btnCustomMetric = document.getElementById('context-custom-metric');
+    // const btnCustomMetric = document.getElementById('context-custom-metric');
     // per le tabelle con data-shared_ref disabilito alcuni tasti
     btnAddFactJoin.disabled = (this.table.dataset.shared_ref || this.svg.querySelectorAll('use.table.fact').length === 1) ? true : false;
     btnTimeDimension.disabled = (this.table.dataset.shared_ref || this.table.dataset.type === 'table') ? true : false;
-    btnCustomMetric.disabled = (this.table.dataset.shared_ref || this.table.dataset.type === 'table') ? true : false;
+    // btnCustomMetric.disabled = (this.table.dataset.shared_ref || this.table.dataset.type === 'table') ? true : false;
 
     // console.log(e.target.dataset);
     // console.log(e.target.getBoundingClientRect());

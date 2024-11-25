@@ -536,13 +536,13 @@ class Cube
         if ($token !== "year-to-month") {
           // creo l'SQL join della dimensione TIME in base al livello più basso presente nel report (year, quarter, month, date)
           switch ($this->hierarchiesTimeLevel) {
-            case "tok_WB_MONTHS":
+            case "WB_MONTHS":
               $this->levelMonth($token);
               break;
-            case "tok_WB_QUARTERS":
+            case "WB_QUARTERS":
               $this->levelQuarter($token);
               break;
-            case "tok_WB_YEARS":
+            case "WB_YEARS":
               $this->levelYear($token);
               break;
             default:

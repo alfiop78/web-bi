@@ -506,7 +506,7 @@
             <section class="dlg-buttons">
               <button name="cancel" value="chiudi">Chiudi</button>
               <button data-fn="saveTimeDimension" id="btn-time-dimension-save" value="salva">Salva</button>
-              <button data-fn="updateTimeDimension" id="btn-time-dimension-update" value="Aggiorna" hidden>Aggiorna</button>
+              <!-- <button data-fn="updateTimeDimension" id="btn-time-dimension-update" value="Aggiorna" hidden>Aggiorna</button> -->
             </section>
           </section>
         </dialog>
@@ -870,7 +870,7 @@
                       <ul id="ul-context-menu-table" class="context-menu-items">
                         <button id="addFactJoin" class="btn-link-context" data-fn="handlerAddJoin" disabled>Aggiungi Join</button>
                         <button id="time-dimension" data-fn="handlerTimeDimension" class="btn-link-context">Dimensione TIME</button>
-                        <button id="context-custom-metric" data-fn="addCustomMetric" class="btn-link-context">Metrica person.</button>
+                        <!-- <button id="context-custom-metric" data-fn="addCustomMetric" class="btn-link-context">Metrica person.</button> -->
                         <button data-fn="removeTable" class="btn-link-context">Rimuovi</button>
                         <button data-fn="setAliasTable" class="btn-link-context">Imposta alias</button>
                       </ul>

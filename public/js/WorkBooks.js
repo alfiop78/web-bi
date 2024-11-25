@@ -53,14 +53,6 @@ class Sheets {
 
   get metrics() { return this.#metrics; }
 
-  removeObject(field, token, object = token) {
-    // il Set() filters contiene, come object, il token, quindi imposto un valore di
-    // default per l'argomento object quando (da removeDefinedFilters()) non viene
-    // passato il 3 argomento
-    field.dataset.removed = 'true';
-    this.objectRemoved.set(token, object);
-  }
-
   save() {
     debugger;
     this.sheet.sheet.fields = Object.fromEntries(this.fields);
@@ -476,7 +468,7 @@ class WorkBooks {
     this.workBook.databaseId = this.databaseId;
     // this.workBook.fields = Object.fromEntries(this.fields);
     // TODO: 20.11.2024 fields_new per ora viene utilizzato, da scheduleProcess() DA VALUTARE
-    this.workBook.fields_new = Object.fromEntries(this.field);
+    // this.workBook.fields_new = Object.fromEntries(this.field);
     this.workBook.joins = Object.fromEntries(this.joins);
     // WARN: inutile salvarlo in localStorage, questo viene ricreato quando si apre un WorkBook
     this.workBook.dataModel = Object.fromEntries(this.dataModel);
@@ -557,7 +549,8 @@ class WorkBooks {
               origin_field: col.column_name,
               datatype: col.type_name,
               constraint: col.constraint_name,
-              SQL: `${table.dataset.alias}.${col.column_name}`
+              SQL: `${table.dataset.alias}.${col.column_name}`,
+              time: (table.dataset.type === 'time')
             }
             this.fields = fields[token];
             this.elements = fields[token];

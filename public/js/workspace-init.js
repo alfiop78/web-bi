@@ -805,20 +805,23 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // Se la colonna che si sta per eliminare è stata aggiunta (non era inclusa nello Sheet)
     // elimino tutto il div anziché marcarlo come data-removed
     const field = document.querySelector(`.column-defined[data-id='${token}']`);
-
+    // effettuo una copia dell'oggetto 'fields' altrimenti il delete successivo potrebbe eliminare l'oggetto 'fields' contenuto
+    // in objectRemoved
+    const obj = Sheet.fields.get(token);
     // In edit=true i campi aggiunti allo Sheet sono contrassegnati con dataset.adding
     // ed è già presente il dataset.added. Perr questo motivo elimino dal DOM gli elementi
     // 'adding', in edit:true, e added in edit:false
     if (Sheet.edit) {
       // edit mode
       // (field.dataset.adding) ? field.remove() : removeField();
-      // Memorizzo l'elemento eliminato in un oggetto Map(), da qui posso ripristinarlo
-      (field.dataset.adding) ? field.remove() : Sheet.removeObject(field, token, Sheet.fields.get(token));
+      // Memorizzo l'elemento eliminato in un oggetto Set(), da qui posso ripristinarlo
+      (field.dataset.adding) ? field.remove() : Sheet.objectRemoved.set(token, obj);
     } else {
       // FIX: da rivedere questa logica 05.12.2023
-      (field.dataset.added) ? field.remove() : Sheet.removeObject(field, token, Sheet.fields.get(token));
+      (field.dataset.added) ? field.remove() : Sheet.objectRemoved.set(token, obj);
     }
     Sheet.fields.delete(token);
+    field.dataset.removed = 'true';
     const index = Resource.specs.filters.findIndex(filter => filter.id === e.currentTarget.dataset.label);
     // se il filtro è presente in Resource.specs.filters, lo elimino
     if (index !== -1) Resource.specs.filters.splice(index, 1);
@@ -827,23 +830,27 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   app.undoDefinedColumn = (e) => {
     const token = e.target.dataset.columnToken;
     // Recupero, da Sheet.objectRemoved, gli elementi rimossi per poterli ripristinare
-    Sheet.fields = { token, name: Sheet.objectRemoved.get(token) };
-    Sheet.objectRemoved.delete(token);
-    delete document.querySelector(`.column-defined[data-id='${token}']`).dataset.removed;
+    if (Sheet.objectRemoved.has(token)) {
+      const obj = Sheet.objectRemoved.get(token);
+      Sheet.fields = { token, name: obj.name, datatype: obj.datatype };
+      Sheet.objectRemoved.delete(token);
+      delete document.querySelector(`.column-defined[data-id='${token}']`).dataset.removed;
+    }
   }
 
   app.removeDefinedMetric = (e) => {
     const token = e.target.dataset.metricToken;
+    const obj = Sheet.metrics.get(token);
     // Se la metrica che si sta per eliminare è stata aggiunta (non era inclusa nello Sheet)
     // elimino tutto il div anziché marcarlo come data-removed
     const metric = document.querySelector(`.metric-defined[data-id='${token}']`);
     if (Sheet.edit) {
       // (metric.dataset.adding) ? metric.remove() : removeMetric();
-      (metric.dataset.adding) ? metric.remove() : Sheet.removeObject(metric, token, Sheet.metrics.get(token));
+      (metric.dataset.adding) ? metric.remove() : Sheet.objectRemoved.set(token, obj);
     } else {
-      (metric.dataset.added) ? metric.remove() : Sheet.removeObject(metric, token, Sheet.metrics.get(token));
+      (metric.dataset.added) ? metric.remove() : Sheet.objectRemoved.set(token, obj);
     }
-
+    metric.dataset.removed = 'true';
     Sheet.metrics.delete(token);
     if (Sheet.metrics.size === 0) Sheet.metrics.clear();
   }
@@ -851,10 +858,13 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   app.undoDefinedMetric = (e) => {
     const token = e.target.dataset.metricToken;
     // Recupero, da Sheet.removedMetrics, gli elementi rimossi per poterli ripristinare
-    Sheet.metrics = Sheet.objectRemoved.get(token);
-    // elimino da removedMetrics l'oggetto appena ripristinato
-    Sheet.objectRemoved.delete(token);
-    delete document.querySelector(`.metric-defined[data-id='${token}']`).dataset.removed;
+    if (Sheet.objectRemoved.has(token)) {
+      const obj = Sheet.objectRemoved.get(token);
+      Sheet.metrics = { token, obj };
+      // elimino da removedMetrics l'oggetto appena ripristinato
+      Sheet.objectRemoved.delete(token);
+      delete document.querySelector(`.metric-defined[data-id='${token}']`).dataset.removed;
+    }
   }
 
   // TODO: da spostare in supportFn.js
@@ -956,42 +966,28 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     for (const [token, field] of Sheet.fields) {
       // verifico le tabelle da includere in tables Sheet.tables
       if (Sheet.checkMultiFactFields(token)) {
-        Sheet.tables = WorkBook.fields.get(token).tableAlias;
+        const obj = WorkBook.elements.get(token);
+        Sheet.tables = obj.tableAlias;
         fields[token] = {
           token,
-          field: WorkBook.fields.get(token).origin_field,
-          SQL: WorkBook.fields.get(token).SQL,
-          // TODO: potrei passare i campi _id e _ds anche in questo modo, valutare se
-          // è più semplice gestirli in cube.php
-          // id: WorkBook.field.get(token).field.id,
-          // ds: WorkBook.field.get(token).field.ds,
-          tableAlias: WorkBook.fields.get(token).tableAlias,
+          field: obj.origin_field,
+          SQL: obj.SQL,
+          tableAlias: obj.tableAlias,
           name: field.name
         };
+        // se è un livello della dimensione TIME, ne importo 'hierarchiesTimeLevel' per stabilire l'ultimo livello "TIME" presente nel report
+        if (obj.time) process.hierarchiesTimeLevel = obj.table;
       } else {
         App.showConsole(`Il campo ${field} non è in comune con tutte le tabelle dei Fatti`, 'error', 4000);
         return false;
       }
     }
     process.fields = fields;
-    debugger;
     // BUG: 28.08.2024 qui c'è da verificare se, in un report con una metrica "timingFunctions", sia stato messo un livello
     // della dimensione TIME, altrimenti, in setFiltersMetricTable_new, la variabile time_sql non viene valorizzata
 
-    // ottengo le keys dell'object 'process.fields' per verificare quali livelli della TIME sono presenti
-    Object.keys(process.fields).forEach(timeField => {
-      switch (timeField) {
-        case "tok_WB_MONTHS":
-          process.hierarchiesTimeLevel = timeField;
-          break;
-        case "tok_WB_QUARTERS":
-          process.hierarchiesTimeLevel = timeField;
-          break;
-        default:
-          process.hierarchiesTimeLevel = timeField;
-          break;
-      }
-    });
+    console.log(process.hierarchiesTimeLevel);
+    debugger;
 
     process.advancedMeasures = {}, process.baseMeasures = {}, process.compositeMeasures = {};
     try {
@@ -1005,20 +1001,15 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
         for (const [token, metric] of Sheet.metrics) {
           const wbMetrics = WorkBook.elements.get(token);
-          debugger;
           switch (metric.type) {
             case 'composite':
               process.compositeMeasures[token] = {
                 alias: metric.alias,
                 sql: metric.SQL,
                 metrics: metric.metrics
-                // sql: wbMetrics.SQL,
-                // metrics: wbMetrics.metrics
               };
               break;
             case 'advanced':
-              // if (wbMetrics.factId === factId) {
-              debugger;
               if (metric.factId === factId) {
                 let obj = {
                   token,
@@ -1052,9 +1043,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
                   token,
                   alias: metric.alias,
                   aggregateFn: metric.aggregateFn,
-                  // sql: wbMetrics.SQL,
                   sql: metric.SQL,
-                  // distinct: wbMetrics.distinct
                   distinct: metric.distinct
                 });
               }
@@ -1869,7 +1858,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   }
 
   // "Aggiorna" nella dialog time
-  app.updateTimeDimension = (e) => {
+  /* app.updateTimeDimension = (e) => {
+    // TODO: 25.11.2024 Rivedere tutta la Fn
     const fieldsData = app.getFieldsFromTimeDimension();
     // elimino tutte le join appartenenti alla dimensione TIME (per la fact corrente)
     const factId = WorkBook.activeTable.dataset.factId.substring(9); // ultime 5 cifre
@@ -1920,7 +1910,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     app.setPropertyTimeDimension(fieldsData);
     app.hierTables();
     app.dialogTime.close();
-  }
+  } */
 
   // inserisco la colonna selezionata per la creazione della join
   app.addFieldToJoin = (e) => {

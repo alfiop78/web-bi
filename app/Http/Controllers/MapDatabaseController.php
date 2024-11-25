@@ -908,12 +908,12 @@ class MapDatabaseController extends Controller
             'name' => $name,
             'tableAlias' => $json_workbook->fields_new->{$token}->tableAlias
           ];
-          // TODO: da rivedere (anche in init-responsive.js)
+          // TODO: 25.11.2024 da rivedere (anche in init-responsive.js)
           switch ($token) {
-            case 'tok_WB_MONTHS':
+            case 'WB_MONTHS':
               $process->hierarchiesTimeLevel = $token;
               break;
-            case 'tok_WB_QUARTERS':
+            case 'WB_QUARTERS':
               $process->hierarchiesTimeLevel = $token;
               break;
             default:
