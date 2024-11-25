@@ -129,7 +129,7 @@ class Resources extends Dashboards {
       // FIX: 20.11.2024 aggiungere, in Sheet.fields, le altre proprietà del field, come fatto con Sheet.metrics (sotto).
       // In questo modo non dovrò recuperare le sue proprietà da WorkBook.fields.get(token)
       // const workbookField = WorkBook.fields.get(token);
-      debugger;
+      // debugger;
       this.#specs_columns[field.name] = {
         id: field.name,
         label: field.name,
@@ -186,7 +186,7 @@ class Resources extends Dashboards {
     this.specs.data.columns = this.#specs_columns;
     this.specs.data.group.key = this.#specs_group.key;
     this.specs.data.group.columns = this.#specs_group.columns;
-    debugger;
+    // debugger;
     this.bind();
     const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
     sheet.specs = this.specs;

@@ -170,7 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const elementId = e.dataTransfer.getData('text/plain');
     const caretPosition = document.caretPositionFromPoint(e.clientX, e.clientY);
-    const text = document.createTextNode(WorkBook.metrics.get(elementId).alias);
+    const text = document.createTextNode(WorkBook.elements.get(elementId).alias);
+    // const text = document.createTextNode(WorkBook.metrics.get(elementId).alias);
     appendDropped(caretPosition, text)
     e.target.normalize();
     // posiziono il cursore alla fine della stringa

@@ -717,7 +717,8 @@ function addToMetric(e) {
 // OPTIMIZE: 22.11.2024 questa Fn è simile a appendCustomMetric(), alcune parti possono essere scritte in una Fn separata, oppure in un modulo che esporta
 // alcuni elementi ripetuti, in questo caso la creazione del template
 function appendMetric(parent, token) {
-  const metric = WorkBook.metrics.get(token);
+  // const metric = WorkBook.metris.get(token);
+  const metric = WorkBook.elements.get(token);
   const referenceElement = document.querySelector(`#${metric.factId}_new_metric`);
   const tmpl = template_li.content.cloneNode(true);
   const li = tmpl.querySelector(`li.drag-list.metrics.${metric.metric_type}`);
@@ -744,7 +745,8 @@ function appendMetric(parent, token) {
 // OPTIMIZE: 22.11.2024 questo metodo è uguale a appendMetric() da ottimizzare
 function appendCompositeMetric(token) {
   const parent = document.getElementById('ul-metrics');
-  const metric = WorkBook.metrics.get(token);
+  const metric = WorkBook.elements.get(token);
+  // const metric = WorkBook.metrics.get(token);
   const tmpl = template_li.content.cloneNode(true);
   const li = tmpl.querySelector(`li.drag-list.metrics.${metric.metric_type}`);
   const span__content = li.querySelector('.span__content');
@@ -938,7 +940,8 @@ function advancedMetricSave(e) {
   const token = (e.target.dataset.token) ? e.target.dataset.token : rand().substring(0, 7);
   const date = new Date().toLocaleDateString('it-IT', options);
   let filters = new Set();
-  const metric = WorkBook.metrics.get(e.target.dataset.originToken);
+  // const metric = WorkBook.metrics.get(e.target.dataset.originToken);
+  const metric = WorkBook.elements.get(e.target.dataset.originToken);
   // WARN: per il momento recupero innerText anziché dataset.aggregate perchè l'evento onBlur non viene attivato
   const aggregateFn = dlg__advancedMetric.querySelector('.formula > code[data-aggregate]').innerText;
   const distinct = document.getElementById('check-distinct').checked;
@@ -974,10 +977,11 @@ function advancedMetricSave(e) {
   if (filters.size !== 0) object.filters = [...filters];
   // aggiornamento/creazione della metrica imposta created_at
   object.created_at = (e.target.dataset.token) ? metric.created_at : date;
-  WorkBook.metrics = object;
+  // WorkBook.metrics = object;
   WorkBook.elements = object;
   // salvo la nuova metrica nello storage
-  window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
+  // window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
+  window.localStorage.setItem(token, JSON.stringify(WorkBook.elements.get(token)));
   if (!e.target.dataset.token) {
     // aggiungo la nuova metrica nello stesso <details> della metrica originaria (originToken)
     const parent = document.querySelector(`li[data-id='${e.target.dataset.originToken}']`).parentElement;
@@ -1009,12 +1013,14 @@ function compositeMetricSave(e) {
     if (document.querySelector(`li.metrics[data-label='${el}']`)) {
       console.log(`metrica ${el} trovata`);
       const element = document.querySelector(`li.metrics[data-label='${el}']`);
-      const metricFormula = WorkBook.metrics.get(element.dataset.id);
+      // const metricFormula = WorkBook.metrics.get(element.dataset.id);
+      const metricFormula = WorkBook.elements.get(element.dataset.id);
       switch (metricFormula.metric_type) {
         case 'composite':
           // object.SQL.push(metricFormula.SQL.join(''));
           object.SQL.push(metricFormula.SQL);
-          for (const [token, metric] of Object.entries(WorkBook.metrics.get(metricFormula.token).metrics)) {
+          // for (const [token, metric] of Object.entries(WorkBook.metrics.get(metricFormula.token).metrics)) {
+          for (const [token, metric] of Object.entries(WorkBook.elements.get(metricFormula.token).metrics)) {
             object.metrics[token] = metric;
           }
           break;
@@ -1029,11 +1035,12 @@ function compositeMetricSave(e) {
     }
   });
   // aggiornamento/creazione della metrica imposta created_at
-  object.created_at = (e.target.dataset.token) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
+  // object.created_at = (e.target.dataset.token) ? WorkBook.metrics.get(e.target.dataset.token).created_at : date;
+  object.created_at = (e.target.dataset.token) ? WorkBook.elements.get(e.target.dataset.token).created_at : date;
   console.log('Metrica composta : ', object);
-  WorkBook.metrics = object;
+  // WorkBook.metrics = object;
   WorkBook.elements = object;
-  window.localStorage.setItem(token, JSON.stringify(WorkBook.metrics.get(token)));
+  window.localStorage.setItem(token, JSON.stringify(WorkBook.elements.get(token)));
   if (!e.target.dataset.token) {
     appendCompositeMetric(token);
     App.showConsole(`Metrica <b>${alias}</b> aggiunta al WorkBook`, 'done', 1500);
@@ -1263,7 +1270,8 @@ function inputCompositeMetric(e) {
   if (e.target.firstChild.nodeType === 1) return;
   // recupero l'elenco delle metriche da WorkBook.metrics
   let suggestions = [];
-  for (const value of WorkBook.metrics.values()) {
+  // for (const value of WorkBook.metrics.values()) {
+  for (const value of WorkBook.elements.values()) {
     suggestions.push(value.alias);
   }
   const caretPosition = sel.anchorOffset;
@@ -1341,31 +1349,39 @@ function dlgCompositeMetricCheck() {
   // INFO: ordinamento di un oggetto Map() tramite una proprietà dell'oggetto
   // const sort = [...WorkBook.metrics.values()].sort((a, b) => a.metric_type.localeCompare(b.metric_type));
   // console.log(sort);
-  for (const metric of WorkBook.metrics.values()) {
-    const tmpl = template_li.content.cloneNode(true);
-    const li = tmpl.querySelector(`li.drag-list.metrics.${metric.metric_type}`);
-    const span = li.querySelector('span');
-    const i = li.querySelector('i');
-    li.dataset.id = metric.token;
-    i.id = metric.token;
-    li.dataset.type = metric.metric_type;
-    li.dataset.elementSearch = 'metrics-dlg-composite';
-    if (metric.factId) li.dataset.factId = metric.factId;
-    li.dataset.label = metric.alias;
-    i.addEventListener('dragstart', elementDragStart);
-    i.addEventListener('dragend', elementDragEnd);
-    span.innerHTML = metric.alias;
-    switch (metric.metric_type) {
-      case 'advanced':
-        advancedDetails.appendChild(li);
-        break;
-      case 'composite':
-        compositeDetails.appendChild(li);
-        break;
-      default:
-        // basic
-        basicDetails.appendChild(li);
-        break;
+  // for (const metric of WorkBook.metrics.values()) {
+  for (const element of WorkBook.elements.values()) {
+    if (element.type === 'metric') {
+      console.log(element, element.metric_type);
+      const tmpl = template_li.content.cloneNode(true);
+      const li = tmpl.querySelector(`li.drag-list.metrics.${element.metric_type}`);
+      console.log(li);
+      const span__content = li.querySelector('span');
+      const span = span__content.querySelector('span');
+      const i = li.querySelector('i');
+      console.log(element.alias, element.token);
+      li.dataset.id = element.token;
+      i.id = element.token;
+      li.dataset.type = element.metric_type;
+      li.dataset.elementSearch = 'metrics-dlg-composite';
+      if (element.factId) li.dataset.factId = element.factId;
+      li.dataset.label = element.alias;
+      i.addEventListener('dragstart', elementDragStart);
+      i.addEventListener('dragend', elementDragEnd);
+      span.innerHTML = element.alias;
+      switch (element.metric_type) {
+        case 'advanced':
+          advancedDetails.appendChild(li);
+          break;
+        case 'composite':
+          compositeDetails.appendChild(li);
+          break;
+        default:
+          // basic
+          basicDetails.appendChild(li);
+          break;
+      }
+
     }
   }
 }

@@ -51,7 +51,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     contextMenuColumnRef: document.getElementById('context-menu-column'),
     tmplDetails: document.getElementById('tmpl-details-element'),
     tmplColumnsDefined: document.getElementById('tmpl-columns-defined'),
-    tmplMetricsDefined: document.getElementById('tmpl-metrics-defined'),
     tmplAdvMetricsDefined: document.getElementById('tmpl-adv-metric'),
     tmplFiltersDefined: document.getElementById('tmpl-filters-defined'),
     tmplFormula: document.getElementById('tmpl-formula'),
@@ -396,7 +395,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
   // Modifica di una metrica composta di base
   app.editCustomMetric = (e) => {
-    const metric = WorkBook.metrics.get(e.currentTarget.dataset.token);
+    const metric = WorkBook.elements.get(e.currentTarget.dataset.token);
+    // const metric = WorkBook.metrics.get(e.currentTarget.dataset.token);
     const textarea = document.getElementById('textarea-custom-metric');
     const btnSave = document.getElementById('btn-custom-metric-save');
     const input = document.getElementById('input-base-custom-metric-name');
@@ -407,14 +407,17 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     textarea.insertBefore(text, textarea.lastChild);
   }
 
+  // TODO: 25.11.2024 da implementare
   app.removeWBMetric = (e) => {
     console.log(e.currentTarget.dataset.metricToken);
     const workbook_ref = WorkBook.workBook.token;
     // WorkBook.activeTable è già valorizzato, quando si seleziona la tabella dal canvas
-    WorkBook.metrics.delete(e.currentTarget.dataset.metricToken);
+    // WorkBook.metrics.delete(e.currentTarget.dataset.metricToken);
+    // WorkBook.elemenets.delete(e.currentTarget.dataset.metricToken);
     // verifico che l'oggetto Map con l'alias della tabella contenga altri elementi, altrimenti
     // devo eliminare anche workBook.fields(tableAlias)
-    if (WorkBook.metrics.size === 0) WorkBook.metrics.clear();
+    // if (WorkBook.metrics.size === 0) WorkBook.metrics.clear();
+    // if (WorkBook.elements.size === 0) WorkBook.metrics.clear();
     // delete document.querySelector(`#preview-table th[data-metric-token='${e.currentTarget.dataset.metricToken}']`).dataset.metricToken;
     // 1 - Cerco lo sheet, nello storage, con workbook_ref relativo a questo workbook
     // 2 - Elimino la colonna all'interno della prop 'fields'
@@ -1338,7 +1341,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   // Invocata dal context menu per le metriche
   app.editAdvancedMetric = (e) => {
     contextMenuRef.toggleAttribute('open');
-    const metric = WorkBook.metrics.get(e.target.dataset.token);
+    // const metric = WorkBook.metrics.get(e.target.dataset.token);
+    const metric = WorkBook.elements.get(e.target.dataset.token);
     const input = dlg__advancedMetric.querySelector('#input-metric');
     const tmpl = app.tmplAdvMetricsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('#adv-metric-defined');
@@ -1382,7 +1386,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   // la Fn deriva dal menù contestuale quindi, l'evento, viene attivato dal MutationObserver
   app.editCompositeMetric = (e) => {
     contextMenuRef.toggleAttribute('open');
-    const metric = WorkBook.metrics.get(e.target.dataset.token);
+    // const metric = WorkBook.metrics.get(e.target.dataset.token);
+    const metric = WorkBook.elements.get(e.target.dataset.token);
     // ricostruisco la formula all'interno del div #textarea-composite-metric
     const inputName = document.getElementById('composite-metric-name');
     inputName.value = metric.alias;
@@ -1997,7 +2002,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // nella metrica filtrata posso modificare solo la funzione di aggregazione
     console.log(e.target);
     // recupero la metrica da WorkBook.metric
-    const metric = WorkBook.metrics.get(e.currentTarget.dataset.token);
+    const metric = WorkBook.elements.get(e.currentTarget.dataset.token);
     const input = document.getElementById('input-metric');
     const tmpl = app.tmplAdvMetricsDefined.content.cloneNode(true);
     const field = tmpl.querySelector('#adv-metric-defined');
@@ -2020,13 +2025,13 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   // basic/advanced vengono aggiungo "sotto" alla tabella di appartenenza (creata in workbookMap)
   app.addDefinedCompositeMetrics = () => {
     // const parent = app.workbookTablesStruct.querySelector('#ul-metrics');
-    if (WorkBook.metrics.size !== 0) {
-      for (const [token, value] of WorkBook.metrics) {
-        // aggiungo qui solo le metriche composte
-        // if (value.metric_type === "composite") app.appendMetric(parent, token, value);
-        if (value.metric_type === "composite") appendCompositeMetric(token);
-      }
+    // if (WorkBook.metrics.size !== 0) {
+    for (const [token, value] of WorkBook.elements) {
+      // aggiungo qui solo le metriche composte
+      // if (value.metric_type === "composite") app.appendMetric(parent, token, value);
+      if (value.metric_type === "composite") appendCompositeMetric(token);
     }
+    // }
   }
 
   // Apertura step Sheet, vengono caricati gli elementi del WorkBook

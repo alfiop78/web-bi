@@ -485,12 +485,12 @@ class WorkBooks {
       tables: Object.fromEntries(Draw.tables),
       lines: Object.fromEntries(Draw.joinLines)
     }
-    for (const [token, metric] of this.metrics) {
+    /* for (const [token, metric] of this.metrics) {
       if (metric.metric_type === 'basic') {
         // WARN: perchè non utilizzo Object.fromEntries ?
         (!this.workBook.hasOwnProperty('metrics')) ? this.workBook.metrics = { [token]: metric } : this.workBook.metrics[token] = metric;
       }
-    }
+    } */
     // console.info('WorkBook : ', this.workBook);
     if (!this.workBook.hasOwnProperty('created_at')) this.workBook.created_at = new Date().toLocaleDateString('it-IT', this.#options);
     if (this.edit) {
@@ -563,7 +563,7 @@ class WorkBooks {
             this.elements = fields[token];
             break;
         }
-        // aggiungo le metriche e le colonne custom create
+        // aggiungo le metriche e le colonne custom create, si trovano nella proprietà "worksheet"
         for (const [token, object] of Object.entries(this.workSheet)) {
           // debugger;
           if (object.factId === table.id || object.tableId === table.id) {
@@ -577,8 +577,8 @@ class WorkBooks {
             }
           }
         }
-        // aggiungo le metriche avanzate e composite al workBook
-        for (const [token, metric] of WorkBook.metrics) {
+        // aggiungo le metriche avanzate al workBook
+        for (const [token, metric] of WorkBook.elements) {
           if (metric.metric_type === 'advanced' && metric.factId === table.id) {
             metrics[token] = metric;
             // la aggiungo anche al Map() elements
@@ -590,12 +590,12 @@ class WorkBooks {
     });
     // aggiungo le metriche composte al workBook all'esterno del ciclo, queste
     // metriche non sono associate ad una specifica tabella e vengono posizionate in una <ul> separata
-    for (const metric of WorkBook.metrics.values()) {
+    /* for (const metric of WorkBook.elements.values()) {
       if (metric.metric_type === 'composite') {
         // la aggiungo anche al Map() elements
         this.elements = metric;
       }
-    }
+    } */
     console.info("workbookMap : ", this.#workbookMap);
   }
 
@@ -672,7 +672,8 @@ class WorkBooks {
       // qui vengono recuperate metriche advanced/composite
       this.json = JSON.parse(metric);
       if (this.json.type === 'metric' && this.json.workbook_ref === WorkBookStorage.workBook.token) {
-        this.metrics = this.json;
+        this.elements = this.json;
+        // if (this.json.metric_type === 'composite') this.elements = this.json;
       }
     }
 
