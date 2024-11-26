@@ -108,6 +108,7 @@ li.drag-list.columns>.span__content>span,
 li.drag-list.metrics>.span__content>span {
   text-overflow: ellipsis;
   overflow: hidden;
+  padding: 0px 2px 0px 0px;
   /* width: 100%; */
 }
 

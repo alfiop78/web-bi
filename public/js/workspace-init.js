@@ -852,30 +852,34 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     }
   }
 
+  // elimino la metrica dallo Sheet e controllo, per le composite, le sue dipendenze
   app.removeDefinedMetric = (e) => {
     const token = e.target.dataset.metricToken;
     // Se la metrica che si sta per eliminare è stata aggiunta (non era inclusa nello Sheet)
     // elimino tutto il div anziché marcarlo come data-removed
-    const metric = document.querySelector(`.metric-defined[data-id='${token}']`);
-    if (Sheet.edit) {
-      (metric.dataset.adding) ? metric.remove() : Sheet.objectRemoved.set(token, Sheet.metrics.get(token));
-    } else {
-      (metric.dataset.added) ? metric.remove() : Sheet.objectRemoved.set(token, Sheet.metrics.get(token));
-    }
-    metric.dataset.removed = 'true';
-    const sheetMetric = Sheet.metrics.get(token);
+    const metricRef = document.querySelector(`.metric-defined[data-id='${token}']`);
+    // clono la metrica perchè la prop "dependencies" può essere modificata e questa
+    // modifica non deve riflettersi in Sheet.objectRemoved
+    const metric = { ...Sheet.metrics.get(token) };
+    ((Sheet.edit && metricRef.dataset.adding) || (!Sheet.edit && metricRef.dataset.added)) ?
+      metricRef.remove() :
+      Sheet.objectRemoved.set(token, metric);
+    metricRef.dataset.removed = 'true';
     let check;
-
-    if (sheetMetric.type === 'composite') {
-      // è una metrica composta che si sta eliminando, verifico le metriche al suo interno se devono essere eliminate
-      Object.keys(sheetMetric.metrics).forEach(key => {
-        // la metrica inclusa nella composite (in ciclo) è stata aggiunta esplicitamente, non posso eliminarla
+    if (metric.type === 'composite') {
+      // è una metrica composta che si sta eliminando.
+      // Se le metriche che la compongono sono utilizzate in altre metriche
+      // non posso eliminarle
+      Object.keys(metric.metrics).forEach(key => {
+        // le metriche presenti nello Sheet, incluse esplicitamente (dependencies:false), non posso eliminarla
         if (Sheet.metrics.get(key).dependencies === true) {
           // la metrica inclusa nella composite (in ciclo) è presente nel report come dependencies:true, è stata
-          // inclusa automaticamente perchè è presente in una metrica composta
-          // Se la metrica in cui è inclusa è diversa da quella che sto eliminando, non posso eliminare la metrica (fa parte di un'altra composta)
-          // controllo tutte le metriche composte presenti nello Sheet
-          check = checkCompositeMetrics(token, key);
+          // inclusa automaticamente perchè è presente in una metrica composite
+          // Se la metrica in cui è inclusa è diversa da quella che sto eliminando, non
+          // posso eliminare la metrica (fa parte di un'altra composite)
+          // controllo tutte le metriche composite presenti in Sheet.metrics
+          // check = checkCompositeMetrics(token, key);
+          check = checkMetricsDeps(token, key);
           if (!check) Sheet.metrics.delete(key);
         }
       });
@@ -885,25 +889,40 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       // Se la metrica da eliminare (basic,advanced) è contenuta in una metrica composta deve comunque
       // essere pesente nel report ma la contrassegno come dependencies:true (non visibile su report ma presente su datamart)
       // cerco questa metrica all'interno delle metriche composte
-      check = checkRemoveMetrics(token);
+      // check = checkRemoveMetrics(token);
+      check = checkMetricsDeps(token);
       (check) ? Sheet.metrics.get(token).dependencies = true : Sheet.metrics.delete(token);
     }
-
-    if (Sheet.metrics.size === 0) Sheet.metrics.clear();
+    // if (Sheet.metrics.size === 0) Sheet.metrics.clear();
   }
 
   app.undoDefinedMetric = (e) => {
     const token = e.target.dataset.metricToken;
-    // Recupero, da Sheet.objectRemoved, gli elementi rimossi per poterli ripristinare
+    const metricRef = document.querySelector(`.metric-defined[data-id='${token}']`);
+    // verifico se la metrica è presente in Sheet.objectRemoved
     if (Sheet.objectRemoved.has(token)) {
-      if (Sheet.objectRemoved.get(token).dependencies === true) {
-        Sheet.objectRemoved.get(token).dependencies = false;
-      } else {
-        Sheet.metrics = Sheet.objectRemoved.get(token);
+      Sheet.metrics = Sheet.objectRemoved.get(token);
+      // verifico se la metrica da ripristinare è una composite
+      if (Sheet.metrics.get(token).type === 'composite') {
+        // NOTE: codice commentato in handleColumnDrop()
+        for (const metricToken of Object.keys(Sheet.metrics.get(token).metrics)) {
+          if (!Sheet.metrics.has(metricToken)) {
+            const nestedMetric = { ...WorkBook.elements.get(metricToken) };
+            Sheet.metrics = {
+              token: nestedMetric.token,
+              factId: nestedMetric.factId,
+              alias: nestedMetric.alias,
+              SQL: nestedMetric.SQL,
+              type: nestedMetric.metric_type,
+              aggregateFn: nestedMetric.aggregateFn,
+              distinct: nestedMetric.distinct,
+              dependencies: true
+            };
+          }
+        }
       }
-      // elimino da removedMetrics l'oggetto appena ripristinato
       Sheet.objectRemoved.delete(token);
-      delete document.querySelector(`.metric-defined[data-id='${token}']`).dataset.removed;
+      delete metricRef.dataset.removed;
     }
   }
 
