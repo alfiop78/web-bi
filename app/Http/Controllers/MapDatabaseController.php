@@ -802,11 +802,17 @@ class MapDatabaseController extends Controller
               foreach ($groupFilters as $token => $group) {
                 $metrics = array();
                 foreach ($query->filteredMetrics as $metric) {
-                  if (get_object_vars($metric->filters) == get_object_vars($group)) {
+                  // dd($metric->filters);
+                  // dd($group);
+                  // se la metrica in ciclo non ha filtri deve comunque essere aggiunta all'array $metrics
+                  if (empty($metric->filters)) {
+                    array_push($metrics, $metric);
+                  } elseif (get_object_vars($metric->filters) == get_object_vars($group)) {
                     // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
                     array_push($metrics, $metric);
                   }
                 }
+                // dd($metrics);
                 // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
                 $query->groupMetricsByFilters->$token = $metrics;
               }

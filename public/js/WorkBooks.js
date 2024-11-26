@@ -54,7 +54,6 @@ class Sheets {
   get metrics() { return this.#metrics; }
 
   save() {
-    debugger;
     this.sheet.sheet.fields = Object.fromEntries(this.fields);
     this.sheet.sheet.from = this.from;
     this.sheet.sheet.joins = this.joins;

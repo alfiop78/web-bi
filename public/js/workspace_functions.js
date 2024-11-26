@@ -471,18 +471,30 @@ function handleColumnDrop(e) {
   const element = WorkBook.elements.get(token);
   if (element.type === 'metric') {
     // template per le metriche
+    // creo un obj che conterrà la metrica con le proprietà comuni a tutte le metriche.
+    // Le varie proprietà della metrica variano in base al metric_type...sviluppato nello switch
+    let obj = {
+      token: element.token,
+      alias: element.alias,
+      SQL: element.SQL,
+      type: element.metric_type,
+      dependencies: null
+    }
     switch (element.metric_type) {
       case 'composite':
-        Sheet.metrics = {
+        // aggiungo, per le metriche composte, la proprietà 'metrics'
+        obj.metrics = element.metrics;
+        obj.dependencies = false;
+        Sheet.metrics = obj;
+        /* Sheet.metrics = {
           token: element.token,
           alias: element.alias,
           SQL: element.SQL,
           type: element.metric_type,
           metrics: element.metrics,
           dependencies: false
-        };
+        }; */
         // TEST: 21.11.2024
-        debugger;
         if (!dragSrcEl.dataset.id) dragSrcEl = createMetricDefined(token);
         // dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
         // ...al suo interno per consentirne l'elaborazione
@@ -495,8 +507,17 @@ function handleColumnDrop(e) {
             //... per specificare che è stata aggiunta indirettamente, essa si trova in una metrica composta
             // NOTE: clonazione di un object con syntax ES6.
             const nestedMetric = { ...WorkBook.elements.get(metricToken) };
-            debugger;
-            Sheet.metrics = {
+            // la metrica nidificata sovrascrive le proprietà di obj valorizzato prima dello switch
+            obj.token = nestedMetric.token;
+            obj.factId = nestedMetric.factId;
+            obj.alias = nestedMetric.alias;
+            obj.SQL = nestedMetric.SQL;
+            obj.type = nestedMetric.metric_type;
+            obj.aggregateFn = nestedMetric.aggregateFn;
+            obj.distinct = nestedMetric.distinct;
+            obj.dependencies = true;
+            Sheet.metrics = obj;
+            /* Sheet.metrics = {
               token: nestedMetric.token,
               factId: nestedMetric.factId,
               alias: nestedMetric.alias,
@@ -505,14 +526,28 @@ function handleColumnDrop(e) {
               aggregateFn: nestedMetric.aggregateFn,
               distinct: nestedMetric.distinct,
               dependencies: true
-            };
+            }; */
           }
         }
         break;
       default:
         // basic, advanced
         // aggiungo a Sheet.metrics solo gli elementi che possono essere modificati, le proprieta di sola lettura le prenderò sempre da WorkBook.metrics
-        Sheet.metrics = { token: element.token, factId: element.factId, alias: element.alias, SQL: element.SQL, distinct: element.distinct, type: element.metric_type, aggregateFn: element.aggregateFn, dependencies: false };
+        obj.factId = element.factId;
+        obj.distinct = element.distinct;
+        obj.aggregateFn = element.aggregateFn;
+        obj.dependencies = false;
+        Sheet.metrics = obj;
+        /* Sheet.metrics = {
+          token: element.token,
+          factId: element.factId,
+          alias: element.alias,
+          SQL: element.SQL,
+          distinct: element.distinct,
+          type: element.metric_type,
+          aggregateFn: element.aggregateFn,
+          dependencies: false
+        }; */
         if (!dragSrcEl.dataset.id) dragSrcEl = createMetricDefined(token);
         // app.addMetric(e.currentTarget, elementRef.id);
         // 26.07.2024 verifico, se nello Sheet, è presente una metrica con lo stesso nome
@@ -935,8 +970,17 @@ function customBaseMetricSave(e) {
   WorkBook.elements = metric;
   WorkBook.workSheet[token] = metric;
   WorkBook.update();
-  appendCustomMetric(metric);
-  dlgCustomMetric.close();
+  if (!e.target.dataset.token) {
+    appendCustomMetric(metric);
+  } else {
+    const li = document.querySelector(`li[data-id='${token}']`);
+    const dragIcon = li.querySelector('i');
+    const span = li.querySelector('.span__content>span');
+    li.dataset.label = alias;
+    dragIcon.dataset.label = alias;
+    span.textContent = alias;
+  }
+ dlgCustomMetric.close();
 }
 
 // salvataggio metrica avanzata
@@ -1277,7 +1321,7 @@ function inputCompositeMetric(e) {
   let suggestions = [];
   // for (const value of WorkBook.metrics.values()) {
   for (const value of WorkBook.elements.values()) {
-    suggestions.push(value.alias);
+    if (value.type === 'metric') suggestions.push(value.alias);
   }
   const caretPosition = sel.anchorOffset;
   const startIndex = findIndexOfCurrentWord(e.target, caretPosition);
@@ -1611,6 +1655,7 @@ function addFields(parent, fields) {
     btnConvertToMetric.dataset.tableId = value.tableId;
     btnConvertToMetric.dataset.token = token;
     btnConvertToMetric.addEventListener('click', convertToMetric);
+    // btnConvertToMetric.addEventListener('click', createCustomMetric);
     span.innerText = value.name;
     parent.appendChild(li);
   }
@@ -1658,6 +1703,7 @@ function convertToMetric(e) {
     type: 'metric',
     metric_type: 'basic',
     aggregateFn,
+    formula: [element.name],
     dependencies: false,
     cssClass: 'custom'
   };
@@ -1676,7 +1722,7 @@ function appendCustomMetric(metric) {
   // TODO: 22.11.2024 utilizzare la stessa logica di appendColumn()
   const referenceElement = document.querySelector(`#${WorkBook.activeTable.id}_new_metric`);
   const tmpl = template_li.content.cloneNode(true);
-  const li = tmpl.querySelector('li.drag-list.metrics.basic');
+  const li = tmpl.querySelector('li.drag-list.metrics.basic.custom');
   const span__content = li.querySelector('.span__content');
   const span = span__content.querySelector('span');
   const i = span__content.querySelector('i[draggable]');
@@ -1687,13 +1733,59 @@ function appendCustomMetric(metric) {
   li.dataset.elementSearch = 'elements';
   li.dataset.label = metric.alias;
   // definisco quale context-menu-template apre questo elemento
-  li.dataset.contextmenu = 'ul-context-menu-basic';
+  // li.dataset.contextmenu = 'ul-context-menu-basic';
   i.addEventListener('dragstart', handleDragStart);
   i.addEventListener('dragend', handleDragEnd);
   li.addEventListener('contextmenu', openContextMenu);
   span.innerText = metric.alias;
   referenceElement.before(li);
-  App.showConsole(`Metrica ${metric.alias} aggiunta al WorkBook`, 'done', 1500);
+  App.showConsole(`Metrica "${metric.alias}" aggiunta al WorkBook`, 'done', 1500);
+}
+
+/* token : è il token della metrica che si sta per eliminare dallo Sheet
+ * key : è il token della metrica contenuta all'interno di una metrica composta
+  * */
+function checkCompositeMetrics(token, key) {
+  // controllo se, la metrica che si sta eliminando è contenuta in qualche
+  // altra metrica composta oppure è stata aggiunta al report con dependencies:false.
+  // In questi due casi non posso eliminarla.
+  // return : true non elimino la metrica
+  // return false : elimino la metrica da Sheet.metrics
+  for (const [sheetToken, sheetMetric] of Sheet.metrics) {
+    debugger;
+    if (sheetToken !== token && sheetMetric.type === 'composite') {
+      // se la metrica in ciclo è una composite,
+      // ed è inclusa nella metrica composite in ciclo
+      // non la elimino
+      if (sheetMetric.metrics.hasOwnProperty(key)) {
+        // la metrica che si sta eliminando è contenuta in una metrica composta.
+        return true;
+      }
+    }
+  }
+  // la metrica può essere eliminata da Sheet.metrics
+  return false;
+}
+
+function checkRemoveMetrics(token) {
+  // controllo se, la metrica che si sta eliminando è contenuta in qualche
+  // altra metrica composta oppure è stata aggiunta al report con dependencies:false.
+  // In questi due casi non posso eliminarla.
+  // return : true non elimino la metrica
+  // return false : elimino la metrica da Sheet.metrics
+  for (const sheetMetric of Sheet.metrics.values()) {
+    if (sheetMetric.type === 'composite') {
+      // se la metrica in ciclo è una composite,
+      // ed è inclusa nella metrica composite in ciclo
+      // non la elimino
+      if (sheetMetric.metrics.hasOwnProperty(token)) {
+        // la metrica che si sta eliminando è contenuta in una metrica composta.
+        return true;
+      }
+    }
+  }
+  // la metrica può essere eliminata da Sheet.metrics
+  return false;
 }
 
 console.info('END workspace_functions');

@@ -396,6 +396,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   // Modifica di una metrica composta di base
   app.editCustomMetric = (e) => {
     const metric = WorkBook.elements.get(e.currentTarget.dataset.token);
+    // imposto la tabella corrente in Workbook.activeTable
+    WorkBook.activeTable = metric.factId;
     // const metric = WorkBook.metrics.get(e.currentTarget.dataset.token);
     const textarea = document.getElementById('textarea-custom-metric');
     const btnSave = document.getElementById('btn-custom-metric-save');
@@ -405,6 +407,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     const text = document.createTextNode(metric.formula.join(''));
     // aggiungo il testo della formula prima del tag <br>
     textarea.insertBefore(text, textarea.lastChild);
+    dlgCustomMetric.showModal();
   }
 
   // TODO: 25.11.2024 da implementare
@@ -477,6 +480,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   app.editAggregate = (e) => {
     e.target.dataset.aggregate = e.target.innerText.toUpperCase();
     const token = e.target.dataset.metricId;
+    // se l'aggregazione è stata modificata contrassegno la metrica come "modificata"
     if (Sheet.metrics.get(token).aggregateFn !== e.target.innerText.toUpperCase()) e.target.dataset.modified = true;
     Sheet.metrics.get(token).aggregateFn = e.target.innerText.toUpperCase();
     e.target.innerText = e.target.innerText.toUpperCase();
@@ -485,9 +489,19 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
 
   app.editFieldAlias = (e) => {
     const token = e.target.dataset.token;
-    console.log(Sheet.fields.get(token));
-    Sheet.fields = { token, name: e.target.innerText, datatype: Sheet.fields.get(token).datatype };
+    // console.log(Sheet.fields.get(token));
+    if (Sheet.fields.get(token).name !== e.target.innerText) e.target.dataset.modified = true;
+    Sheet.fields.get(token).name = e.target.innerText;
+    // Sheet.fields = { token, name: e.target.innerText, datatype: Sheet.fields.get(token).datatype };
     console.log('nome colonna modificato :', Sheet.fields.get(token));
+  }
+
+  app.editMetricAlias = (e) => {
+    const token = e.target.dataset.token;
+    console.log(Sheet.metrics.get(token));
+    if (Sheet.metrics.get(token).alias !== e.target.innerText) e.target.dataset.modified = true;
+    Sheet.metrics.get(token).alias = e.target.innerText;
+    console.log('alias metrica modificato :', Sheet.metrics.get(token));
   }
 
   // apertura dialog con lista WorkBooks
@@ -849,21 +863,32 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       (metric.dataset.added) ? metric.remove() : Sheet.objectRemoved.set(token, Sheet.metrics.get(token));
     }
     metric.dataset.removed = 'true';
-    // Se la metrica è contenuta in una metrica composta la contrassegno come dependencies:true
-    // Quindi non verrà visualizzata ma è comunque inclusa nello Sheet per poter effettuare
-    // il calcolo della metrica composta
-    // cerco questa metrica all'interno delle metriche composte
-    const check = () => {
-      for (const metric of Sheet.metrics.values()) {
-        if (metric.type === 'composite' && metric.metrics.hasOwnProperty(token)) {
-          // la metrica che si sta eliminando è contenuta in una metrica composta.
-          // dependencies: true
-          return true;
+    const sheetMetric = Sheet.metrics.get(token);
+    let check;
+
+    if (sheetMetric.type === 'composite') {
+      // è una metrica composta che si sta eliminando, verifico le metriche al suo interno se devono essere eliminate
+      Object.keys(sheetMetric.metrics).forEach(key => {
+        // la metrica inclusa nella composite (in ciclo) è stata aggiunta esplicitamente, non posso eliminarla
+        if (Sheet.metrics.get(key).dependencies === true) {
+          // la metrica inclusa nella composite (in ciclo) è presente nel report come dependencies:true, è stata
+          // inclusa automaticamente perchè è presente in una metrica composta
+          // Se la metrica in cui è inclusa è diversa da quella che sto eliminando, non posso eliminare la metrica (fa parte di un'altra composta)
+          // controllo tutte le metriche composte presenti nello Sheet
+          check = checkCompositeMetrics(token, key);
+          if (!check) Sheet.metrics.delete(key);
         }
-      }
-      return false;
+      });
+      // posso eliminare dallo Sheet la metrica composta "target"
+      Sheet.metrics.delete(token);
+    } else {
+      // Se la metrica da eliminare (basic,advanced) è contenuta in una metrica composta deve comunque
+      // essere pesente nel report ma la contrassegno come dependencies:true (non visibile su report ma presente su datamart)
+      // cerco questa metrica all'interno delle metriche composte
+      check = checkRemoveMetrics(token);
+      (check) ? Sheet.metrics.get(token).dependencies = true : Sheet.metrics.delete(token);
     }
-    (check()) ? Sheet.metrics.get(token).dependencies = true : Sheet.metrics.delete(token);
+
     if (Sheet.metrics.size === 0) Sheet.metrics.clear();
   }
 
@@ -977,6 +1002,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     }
 
     let process = {}, fields = {}, filters = {};
+    process.hierarchiesTimeLevel = null;
     process.facts = [...Sheet.fact];
     for (const [token, field] of Sheet.fields) {
       // verifico le tabelle da includere in tables Sheet.tables
@@ -1002,7 +1028,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // della dimensione TIME, altrimenti, in setFiltersMetricTable_new, la variabile time_sql non viene valorizzata
 
     console.log(process.hierarchiesTimeLevel);
-    debugger;
 
     process.advancedMeasures = {}, process.baseMeasures = {}, process.compositeMeasures = {};
     try {
@@ -1013,41 +1038,40 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         //  fact-1 : {object di metriche di base}
         //  fact-2 : {object di metriche di base}
         // }
-
         for (const [token, metric] of Sheet.metrics) {
           const wbMetrics = WorkBook.elements.get(token);
           switch (metric.type) {
             case 'composite':
               process.compositeMeasures[token] = {
                 alias: metric.alias,
-                sql: metric.SQL,
-                metrics: metric.metrics
+                sql: wbMetrics.SQL,
+                metrics: wbMetrics.metrics
               };
+              // la proprietà 'metrics', con i token delle metriche incluse nella composite, viene ricomposto in MapDatabaseController.php
               break;
             case 'advanced':
-              if (metric.factId === factId) {
+              if (wbMetrics.factId === factId) {
                 let obj = {
                   token,
                   alias: metric.alias,
                   aggregateFn: metric.aggregateFn,
-                  // sql: wbMetrics.SQL,
-                  // distinct: wbMetrics.distinct,
-                  sql: metric.SQL,
-                  distinct: metric.distinct,
+                  sql: wbMetrics.SQL,
+                  distinct: wbMetrics.distinct,
                   filters: {}
                 };
-                // aggiungo i filtri definiti all'interno della metrica avanzata
-                wbMetrics.filters.forEach(filterToken => {
-                  // se, nei filtri della metrica, sono presenti filtri di funzioni temporali,
-                  // ...la definizione del filtro và recuperata da WorkBook.metrics.timingFn
-                  // TODO: implementare le altre funzioni temporali
-                  if (['last-year', 'last-month', 'year-to-month'].includes(filterToken)) {
-                    // advancedMetrics.get(token).filters[filterToken] = wbMetrics.timingFn[filterToken];
-                    obj.filters[filterToken] = wbMetrics.timingFn[filterToken];
-                  } else {
-                    obj.filters[filterToken] = WorkBook.filters.get(filterToken);
-                  }
-                });
+                if (wbMetrics.filters) {
+                  wbMetrics.filters.forEach(filterToken => {
+                    // se, nei filtri della metrica, sono presenti filtri di funzioni temporali,
+                    // ...la definizione del filtro và recuperata da WorkBook.metrics.timingFn
+                    // TODO: implementare le altre funzioni temporali
+                    if (['last-year', 'last-month', 'year-to-month'].includes(filterToken)) {
+                      // advancedMetrics.get(token).filters[filterToken] = wbMetrics.timingFn[filterToken];
+                      obj.filters[filterToken] = wbMetrics.timingFn[filterToken];
+                    } else {
+                      obj.filters[filterToken] = WorkBook.filters.get(filterToken);
+                    }
+                  });
+                }
                 advancedMeasures.set(token, obj);
               }
               break;
@@ -1058,8 +1082,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
                   token,
                   alias: metric.alias,
                   aggregateFn: metric.aggregateFn,
-                  sql: metric.SQL,
-                  distinct: metric.distinct
+                  sql: wbMetrics.SQL,
+                  distinct: wbMetrics.distinct
                 });
               }
               break;
@@ -1070,13 +1094,13 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       });
     } catch (error) {
       App.showConsole('Errori nella creazione del processo', 'error');
+      console.log(error);
       throw error;
-      // console.log(error);
     }
     // se non ci sono filtri nel Report bisogna far comparire un avviso
     // perchè l'elaborazione potrebbe essere troppo onerosa
     if (Sheet.filters.size === 0) {
-      App.showConsole('Non sono presenti filtri nel report', 'error', 3000);
+      App.showConsole('Non sono presenti filtri nel report', 'error', 2000);
       return false;
     } else {
       Sheet.filters.forEach(token => {
@@ -1203,6 +1227,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     Sheet.userId = userId;
     if (Sheet.edit === true) {
       Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
+      debugger;
       if (Sheet.changes.length !== 0) Sheet.update();
     } else {
       Sheet.create();
@@ -2069,8 +2094,12 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       addFields(details, objects.fields)
       // TODO: 21.11.2024 - utilizzare un metodo addMetrics() come fatto per addFields()
       for (const [token, metric] of Object.entries(objects.metrics)) {
-        const tmpl = template_li.content.cloneNode(true);
-        const li = tmpl.querySelector(`li.drag-list.metrics.${metric.metric_type}`);
+        const template = template_li.content.cloneNode(true);
+        // metrica di base custom (es. : przmedio * quantita)
+        const li = (metric.cssClass)
+          ? template.querySelector(`li.drag-list.metrics.${metric.metric_type}.${metric.cssClass}`)
+          : template.querySelector(`li.drag-list.metrics.${metric.metric_type}`)
+        // const li = tmpl.querySelector(`li.drag-list.metrics.${metric.metric_type}`);
         const span__content = li.querySelector('.span__content');
         const span = span__content.querySelector('span');
         const i = span__content.querySelector('i[draggable]');
@@ -2079,6 +2108,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         if (metric.cssClass) {
           li.classList.add(metric.cssClass);
           icon.innerText = 'function';
+          // li.dataset.contextmenu = `ul-context-menu-${metric.metric_type}`;
         }
         li.dataset.id = token;
         i.id = token;
@@ -2087,7 +2117,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         if (metric.metric_type !== 'composite') li.dataset.factId = details.dataset.factId;
         li.dataset.label = metric.alias;
         // definisco quale context-menu-template apre questo elemento
-        li.dataset.contextmenu = `ul-context-menu-${metric.metric_type}`;
+        // li.dataset.contextmenu = `ul-context-menu-${metric.metric_type}`;
         i.addEventListener('dragstart', handleDragStart);
         i.addEventListener('dragend', handleDragEnd);
         // i.addEventListener('dragenter', handleDragEnter);

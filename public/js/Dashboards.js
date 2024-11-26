@@ -125,11 +125,7 @@ class Resources extends Dashboards {
     this.#specs_columns = {};
     this.#specs_group = { key: [], columns: [] };
     this.specs.name = Sheet.name;
-    for (const [token, field] of Sheet.fields) {
-      // FIX: 20.11.2024 aggiungere, in Sheet.fields, le altre proprietà del field, come fatto con Sheet.metrics (sotto).
-      // In questo modo non dovrò recuperare le sue proprietà da WorkBook.fields.get(token)
-      // const workbookField = WorkBook.fields.get(token);
-      // debugger;
+    for (const field of Sheet.fields.values()) {
       this.#specs_columns[field.name] = {
         id: field.name,
         label: field.name,
@@ -138,9 +134,11 @@ class Resources extends Dashboards {
       };
       const keyColumn = this.specs.data.group.key.find(value => value.label === field.name);
       if (!keyColumn) {
-        // colonna non presente in json.data.group.key
+        // colonna non presente in json.data.group.key, la creo
         this.#specs_group.key.push({
-          id: field.name, label: field.name, type: this.getDataType(field.datatype),
+          id: field.name,
+          label: field.name,
+          type: this.getDataType(field.datatype),
           properties: { grouped: true, visible: true }
         });
       } else {

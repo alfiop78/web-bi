@@ -105,7 +105,7 @@
       <button type="button" data-undo class="button-icon material-symbols-rounded md-18 filter-defined" data-filter-token>undo</button>
     </li>
 
-    <li class="drag-list metrics basic" data-element-search data-label data-searchable="true">
+    <li class="drag-list metrics basic" data-contextmenu="ul-context-menu-basic" data-element-search data-label data-searchable="true">
       <span class="span__content">
         <i class="material-symbols-rounded md-18 md-dimgray" draggable="true">drag_handle</i>
         <i class="material-symbols-rounded md-18">functions</i>
@@ -114,7 +114,16 @@
       <i class="material-symbols-rounded md-18">info</i>
     </li>
 
-    <li class="drag-list metrics advanced" data-element-search data-label data-searchable="true">
+    <li class="drag-list metrics basic custom" data-contextmenu="ul-context-menu-basic__custom" data-element-search data-label data-searchable="true">
+      <span class="span__content">
+        <i class="material-symbols-rounded md-18 md-dimgray" draggable="true">drag_handle</i>
+        <i class="material-symbols-rounded md-18">functions</i>
+        <span></span>
+      </span>
+      <i class="material-symbols-rounded md-18">info</i>
+    </li>
+
+    <li class="drag-list metrics advanced" data-contextmenu="ul-context-menu-advanced" data-element-search data-label data-searchable="true">
       <span class="span__content">
         <i class="material-symbols-rounded md-18" draggable="true">drag_handle</i>
         <i class="material-symbols-rounded md-18">function</i>
@@ -123,7 +132,7 @@
       <i class="material-symbols-rounded md-18">info</i>
     </li>
 
-    <li class="drag-list metrics composite" data-element-search data-label data-searchable="true">
+    <li class="drag-list metrics composite" data-contextmenu="ul-context-menu-composite" data-element-search data-label data-searchable="true">
       <span class="span__content">
         <i class="material-symbols-rounded md-18" draggable="true">drag_handle</i>
         <i class="material-symbols-rounded md-18">multiline_chart</i>
@@ -273,7 +282,7 @@
         <i class="button-icon material-symbols-rounded md-18">drag_indicator</i>
         <div class="defined_contents">
           <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate" spellcheck="false"></code>
-          <code data-field data-token data-value contenteditable="true" data-blur-fn="editMetricName" spellcheck="false"></code>
+          <code data-field data-token data-value contenteditable="true" data-blur-fn="editMetricAlias" spellcheck="false"></code>
           <button type="button" data-remove class="button-icon material-symbols-rounded md-18 metric-defined" data-fn="removeDefinedMetric" data-metric-token>delete</button>
           <button type="button" data-undo class="button-icon material-symbols-rounded md-18 metric-defined" data-fn="undoDefinedMetric" data-metric-token>undo</button>
         </div>
@@ -312,6 +321,13 @@
       <ul id="ul-context-menu-basic" class="context-menu-items">
         <button data-fn="newAdvMeasure" class="btn-link-context">Crea metrica avanzata</button>
         <button data-button="delete" data-fn="removeMetric" class="btn-link-context" disabled>Elimina</button>
+      </ul>
+
+      <!-- context-menu per le metriche di base custom -->
+      <ul id="ul-context-menu-basic__custom" class="context-menu-items">
+        <button data-fn="newAdvMeasure" class="btn-link-context">Crea metrica avanzata</button>
+        <button data-fn="editCustomMetric" class="btn-link-context">Modifica</button>
+        <button data-button="delete" data-fn="removeCustomBasicMetric" class="btn-link-context" disabled>Elimina</button>
       </ul>
 
       <!-- context-menu per le metriche avanzate -->
