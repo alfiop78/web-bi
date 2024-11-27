@@ -156,9 +156,10 @@ class Cube
     // dd(SELF::ifNullOperator());
     // dd($this->baseMeasures);
     foreach ($this->baseMeasures as $value) {
-      // dump($value);
+      // dd($value);
       // $sql = (is_array($value->sql)) ? implode(' ', $value->sql) : $value->sql;
-      $metric = "\n{$this->ifNullOperator}({$value->aggregateFn}({$value->sql}), 0) AS '{$value->alias}'";
+      $metric = "\n{$this->ifNullOperator}({$value->aggregateFn}({$value->SQL}), 0) AS '{$value->alias}'";
+      // dd($metric);
       $this->report_metrics[$this->factId][] = $metric;
       // $metrics_base[] = $metric;
       if (property_exists($this, 'sql_info')) {
@@ -278,9 +279,9 @@ class Cube
   {
     foreach ($this->process->{"filters"} as $filter) {
       // $this->report_filters[$this->factId][$filter->name] = implode(' ', $filter->sql);
-      $this->report_filters[$this->factId][$filter->name] = $filter->sql;
+      $this->report_filters[$this->factId][$filter->name] = $filter->SQL;
 
-      if (property_exists($this, 'sql_info')) $this->sql_info->AND->{$filter->name} = $filter->sql;
+      if (property_exists($this, 'sql_info')) $this->sql_info->AND->{$filter->name} = $filter->SQL;
     }
     // dd($this->report_filters);
     // dd($this->sql_info);
@@ -576,16 +577,16 @@ class Cube
           // con la WEB_BI_TIME
           unset($this->json_info_advanced[$tableName]->{'WHERE-TIME'});
         }
-        // $this->WHERE_timingFn[$token] = implode(" = ", $filter->sql);
+        // $this->WHERE_timingFn[$token] = implode(" = ", $filter->SQL);
         // dd($this->WHERE_timingFn);
       } else {
         // dd($filter->SQL, $this->filters_metricTable, $this->filters_baseTable);
         // aggiungo senza verificare se già presente il codice SQL del filtro
         // perchè, essendo un array associativo, al massimo il codice SQL del filtro viene riscritto
-        $this->filters_metricTable[$this->factId][$filter->name] = $filter->sql;
+        $this->filters_metricTable[$this->factId][$filter->name] = $filter->SQL;
 
         if (property_exists($this, 'sql_info')) {
-          $this->json_info_advanced[$tableName]->AND->{$filter->name} = $filter->sql;
+          $this->json_info_advanced[$tableName]->AND->{$filter->name} = $filter->SQL;
         }
       }
     }
@@ -620,13 +621,13 @@ class Cube
         // dump(($metric->distinct));
 
         $groupAdvancedMeasures[$this->factId][$metric->alias] = ($metric->distinct) ?
-          "{$this->ifNullOperator}({$metric->aggregateFn}(DISTINCT {$metric->sql}), 0) AS '{$metric->alias}'" :
-          "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->sql}), 0) AS '{$metric->alias}'";
-        // $groupAdvancedMeasures[$this->factId][$metric->alias] = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->sql}), 0) AS '{$metric->alias}'";
+          "{$this->ifNullOperator}({$metric->aggregateFn}(DISTINCT {$metric->SQL}), 0) AS '{$metric->alias}'" :
+          "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
+        // $groupAdvancedMeasures[$this->factId][$metric->alias] = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
         // dd($groupAdvancedMeasures);
         if (property_exists($this, 'sql_info')) {
           // TODO: testare con un alias contenente spazi
-          $this->json_info_advanced[$tableName]->METRICS->{"$metric->alias"} = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->sql}), 0) AS '{$metric->alias}'";
+          $this->json_info_advanced[$tableName]->METRICS->{"$metric->alias"} = "{$this->ifNullOperator}({$metric->aggregateFn}({$metric->SQL}), 0) AS '{$metric->alias}'";
           // dd($this->json_info_advanced);
         }
         // dd($groupAdvancedMeasures);

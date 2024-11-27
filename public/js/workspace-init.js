@@ -257,7 +257,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   /* NOTE: END DRAG&DROP EVENTS */
 
 
-  app.editMetricAlias = (e) => {
+  /* app.editMetricAlias = (e) => {
     const dropzone = document.getElementById("dropzone-columns");
     dropzone.dataset.error = (Sheet.checkMetricNames(e.target.dataset.token, e.target.innerText)) ? true : false;
     if (dropzone.dataset.error === "true") {
@@ -271,7 +271,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       }
       Sheet.metrics.get(e.target.dataset.token).alias = e.target.innerText;
     }
-  }
+  } */
 
   /* app.columnDrop = (e) => {
     e.preventDefault();
@@ -492,6 +492,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // console.log(Sheet.fields.get(token));
     if (Sheet.fields.get(token).name !== e.target.innerText) e.target.dataset.modified = true;
     Sheet.fields.get(token).name = e.target.innerText;
+    // aggiorno anche data-label sull'elemento .defined[data-id]
+    document.querySelector(`.defined[data-id='${token}']`).dataset.label = e.target.innerText;
     // Sheet.fields = { token, name: e.target.innerText, datatype: Sheet.fields.get(token).datatype };
     console.log('nome colonna modificato :', Sheet.fields.get(token));
   }
@@ -501,6 +503,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     console.log(Sheet.metrics.get(token));
     if (Sheet.metrics.get(token).alias !== e.target.innerText) e.target.dataset.modified = true;
     Sheet.metrics.get(token).alias = e.target.innerText;
+    document.querySelector(`.defined[data-id='${token}']`).dataset.label = e.target.innerText;
     console.log('alias metrica modificato :', Sheet.metrics.get(token));
   }
 
@@ -761,16 +764,18 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   app.saveSheet = async () => {
     Sheet.name = app.sheetName.dataset.value;
     Sheet.userId = userId;
+    debugger;
     // verifico se ci sono elementi modificati andando a controllare gli elmeneti con [data-adding] e [data-removed]
-    Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
+    // Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
     // se il report è in edit ed è stata fatta una modifica eseguo update()
     if (Sheet.edit === true) {
       // il report è già presente in local ed è stato aperto
       // se ci sono state delle modifiche eseguo update
-      console.log(Sheet.changes);
-      if (Sheet.changes.length !== 0) {
+      // console.log(Sheet.changes);
+      if (document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]').length !== 0) {
         Sheet.update();
         // elimino il datamart perchè è stato modificato il report e le colonne nel datamart e nel report potrebbero non corrispondere più
+        debugger;
         const result = await Sheet.delete();
         // console.log('datamart eliminato : ', result);
         // il report è stato modificato per cui il datamart deve essere eliminato
@@ -780,6 +785,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         document.querySelectorAll('div[data-adding]').forEach(el => delete el.dataset.adding);
         if (Resource.tableRef) Resource.tableRef.clearChart();
       }
+      document.querySelectorAll('code[data-modified]').forEach(node => delete node.dataset.modified);
     } else {
       // il report è stato appena creato e faccio save()
       Sheet.create();
@@ -846,7 +852,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // Recupero, da Sheet.objectRemoved, gli elementi rimossi per poterli ripristinare
     if (Sheet.objectRemoved.has(token)) {
       const obj = Sheet.objectRemoved.get(token);
-      Sheet.fields = { token, name: obj.name, datatype: obj.datatype };
+      Sheet.fields = { token, name: obj.name, datatype: obj.datatype, SQL: obj.SQL, time: (obj.time) ? { table: obj.table } : false };
       Sheet.objectRemoved.delete(token);
       delete document.querySelector(`.column-defined[data-id='${token}']`).dataset.removed;
     }
@@ -1063,7 +1069,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
             case 'composite':
               process.compositeMeasures[token] = {
                 alias: metric.alias,
-                sql: wbMetrics.SQL,
+                SQL: wbMetrics.SQL,
                 metrics: wbMetrics.metrics
               };
               // la proprietà 'metrics', con i token delle metriche incluse nella composite, viene ricomposto in MapDatabaseController.php
@@ -1074,7 +1080,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
                   token,
                   alias: metric.alias,
                   aggregateFn: metric.aggregateFn,
-                  sql: wbMetrics.SQL,
+                  SQL: wbMetrics.SQL,
                   distinct: wbMetrics.distinct,
                   filters: {}
                 };
@@ -1101,7 +1107,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
                   token,
                   alias: metric.alias,
                   aggregateFn: metric.aggregateFn,
-                  sql: wbMetrics.SQL,
+                  SQL: wbMetrics.SQL,
                   distinct: wbMetrics.distinct
                 });
               }
@@ -1245,9 +1251,9 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   app.process = async (process) => {
     Sheet.userId = userId;
     if (Sheet.edit === true) {
-      Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
       debugger;
-      if (Sheet.changes.length !== 0) Sheet.update();
+      // Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
+      if (document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]').length !== 0) Sheet.update();
     } else {
       Sheet.create();
     }
@@ -1283,6 +1289,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
           delete el.dataset.adding;
         });
         document.querySelectorAll('div[data-removed]').forEach(el => el.remove());
+        document.querySelectorAll('code[data-modified]').forEach(node => delete node.dataset.modified);
         // imposto Sheet.edit = true perchè da questo momento qualsiasi cosa aggiunta allo Sheet avrà
         // lo contrassegna come "modificato" e quindi verrà, alla prossima elaborazione, eliminata la tabella dal DB
         // per poterla ricreare

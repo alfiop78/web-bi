@@ -72,9 +72,9 @@ function filterSave(e) {
   // es.: Azienda.id, il regex estrae "Azienda", (prima del punto)
   const tablesFounded = textareaFilter.firstChild.textContent.match(/\w+.(?=\.)/g);
   const date = new Date().toLocaleDateString('it-IT', options);
-  let object = { type: 'filter', name, token, tables: [], from: {}, joins: {}, formula: formulaJoined, sql: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
+  let object = { type: 'filter', name, token, tables: [], from: {}, joins: {}, formula: formulaJoined, SQL: [], workbook_ref: WorkBook.workBook.token, updated_at: date };
   // replico i nomi delle tabelle con i suoi alias di tabella, recuperandoli dalla ul#wbFilters
-  object.sql = formula.map(element => {
+  object.SQL = formula.map(element => {
     if (tablesFounded.includes(element)) {
       // recupero l'alias della tabella che mi servirà per creare l'sql
       const alias = document.querySelector(`#wbFilters>details[data-table='${element}']`).dataset.alias;
@@ -450,8 +450,13 @@ function handleRowDrop(e) {
   // se il dataset.id è già presente sull'elemento che sto droppando significa che sto spostando un div .column-defined.box che era già stato
   // droppato (colonna già droppata)
   const element = WorkBook.elements.get(token);
-  Sheet.fields = { token, name: element.name, datatype: element.datatype };
-  console.log(Sheet.fields);
+  console.log(element);
+  Sheet.fields = {
+    token, SQL: element.SQL,
+    name: element.name,
+    datatype: element.datatype,
+    time: (element.time) ? { table: element.table } : false
+  };
   if (!dragSrcEl.dataset.id) dragSrcEl = createColumnDefined(token);
   dragSrcEl.classList.add('box');
   elementAt.classList.remove('over');
@@ -564,11 +569,17 @@ function handleDragEnd(e) {
     // console.log(field);
     // console.log(WorkBook.fields.get(field.dataset.id));
     // console.log(WorkBook.elements.get(field.dataset.id));
+    const element = WorkBook.elements.get(field.dataset.id);
+    console.log('handleDragEnd :', element);
+    // recupero da WorkBook.elements perchè sull'elemento, nel DOM, non sono presenti alcune proprietà
+
     Sheet.fields = {
       token: field.dataset.id,
       name: field.dataset.label,
-      // datatype: WorkBook.fields.get(field.dataset.id).datatype
-      datatype: WorkBook.elements.get(field.dataset.id).datatype
+      // name: field.querySelector('code').textContent,
+      SQL: element.SQL,
+      time: (element.time) ? { table: element.table } : false,
+      datatype: element.datatype
     }
   });
   // TODO: 25.11.224 da implementare

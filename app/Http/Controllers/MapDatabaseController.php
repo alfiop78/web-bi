@@ -826,7 +826,7 @@ class MapDatabaseController extends Controller
       /* if (!empty($query->process->compositeMeasures)) {
         foreach ($query->process->compositeMeasures as $metric) {
           dd($metric);
-          $query->compositeMeasures[] = implode(" ", $metric->sql) . " AS '{$metric->alias}'";
+          $query->compositeMeasures[] = implode(" ", $metric->SQL) . " AS '{$metric->alias}'";
         }
       } */
       // TEST:
@@ -837,7 +837,7 @@ class MapDatabaseController extends Controller
           // converto l'object $metric->metrics in un array per poter controllare con in_array()
           $metrics = (array) $metric->metrics;
           // ciclo tutta la formula, quando incontro una metrica la racchiudo in ifNullOperator
-          foreach ($metric->sql as $element) {
+          foreach ($metric->SQL as $element) {
             // se l'elemento in ciclo è un array si tratta di una metrica composta nidificata, effettuo la stessa operazione
             // dump($element);
             if (is_array($element)) {
@@ -886,9 +886,11 @@ class MapDatabaseController extends Controller
     // dd(BIsheet::find($token));
     if (BIsheet::find($token)) {
       $json_sheet = json_decode(BIsheet::where("token", $token)->first('json_value')->json_value);
+      // dd($json_sheet);
       // WorkBook
       if (BIworkbook::find($json_sheet->workbook_ref)) {
-        $json_workbook = json_decode(BIworkbook::where("token", $json_sheet->workbook_ref)->first('json_value')->json_value);
+        // $json_workbook = json_decode(BIworkbook::where("token", $json_sheet->workbook_ref)->first('json_value')->json_value);
+        // // dd($json_workbook);
         // creo l'object 'process' che verrà processato da this->sheetCurlProcess()
         $process = (object)[
           'id' => $json_sheet->id,
@@ -906,28 +908,17 @@ class MapDatabaseController extends Controller
         $metrics = (object)[];
         $advancedMeasures = (object)[];
         // fields vengono recuperati dal WorkBook
-        foreach ($json_sheet->sheet->fields as $token => $name) {
+        foreach ($json_sheet->sheet->fields as $token => $field) {
           // recupero le proprietà 'field', 'tableAlias' mentre la proprietà 'name' la utilizzo dallo Sheet
-          // dump($token);
           $process->fields->$token = (object)[
-            'field' => $json_workbook->fields_new->{$token}->field,
-            'name' => $name,
-            'tableAlias' => $json_workbook->fields_new->{$token}->tableAlias
+            'SQL' => $field->SQL,
+            'name' => $field->name
           ];
-          // TODO: 25.11.2024 da rivedere (anche in init-responsive.js)
-          switch ($token) {
-            case 'WB_MONTHS':
-              $process->hierarchiesTimeLevel = $token;
-              break;
-            case 'WB_QUARTERS':
-              $process->hierarchiesTimeLevel = $token;
-              break;
-            default:
-              $process->hierarchiesTimeLevel = $token;
-              break;
-          }
+          // se è un livello della dimensione TIME, ne importo 'hierarchiesTimeLevel' per stabilire l'ultimo livello "TIME" presente nel report
+          // dump(($field->time));
+          if ($field->time) $process->hierarchiesTimeLevel = $field->time->table;
         }
-        // dd($process->fields);
+        // dd($process);
         // recupero i filtri impostati nello Sheet
         foreach ($json_sheet->sheet->filters as $token) {
           if (BIfilter::find($token)) {
@@ -947,8 +938,10 @@ class MapDatabaseController extends Controller
                 'token' => $object->token, // TODO: probabilmente il token non serve
                 "alias" => $object->alias,
                 "aggregateFn" => $object->aggregateFn,
-                "SQL" => $json_workbook->metrics->{$token}->SQL,
-                "distinct" => $json_workbook->metrics->{$token}->distinct
+                "SQL" => $json_sheet->sheet->metrics->{$token}->SQL,
+                // "SQL" => $json_workbook->metrics->{$token}->SQL,
+                "distinct" => $json_sheet->sheet->metrics->{$token}->distinct
+                // "distinct" => $json_workbook->metrics->{$token}->distinct
               ];
               $process->baseMeasures->$fact = $metrics;
             }
@@ -997,7 +990,7 @@ class MapDatabaseController extends Controller
               $json_composite_measures = json_decode(BImetric::where("token", $token)->first('json_value')->json_value);
               $process->compositeMeasures->$token = (object)[
                 "alias" => $object->alias,
-                "SQL" => $json_composite_measures->sql
+                "SQL" => $json_composite_measures->SQL
               ];
             } else {
               return "Metrica (objectId : {$token}) non presente nel Database";
@@ -1016,9 +1009,11 @@ class MapDatabaseController extends Controller
 
   private function curlProcess($process)
   {
+    // utilizzo per test anche alla url : http://web-bi.test/curl/process/bd0aqzq/schedule aprendola su browser
     // curl http://127.0.0.1:8000/curl/process/210wu29ifoh/schedule
     // con il login : curl https://user:psw@gaia.automotive-cloud.com/curl/process/{processToken}/schedule
     // ...oppure : curl -u 'user:psw' https://gaia.automotive-cloud.com/curl/process/{processToken}/schedule
+    // dd($process);
     $query = new Cube($process);
     $query->datamartFields();
     foreach ($query->facts as $fact) {
@@ -1076,7 +1071,7 @@ class MapDatabaseController extends Controller
         // converto l'object $metric->metrics in un array per poter controllare con in_array()
         $metrics = (array) $metric->metrics;
         // ciclo tutta la formula, quando incontro una metrica la racchiudo in ifNullOperator
-        foreach ($metric->sql as $element) {
+        foreach ($metric->SQL as $element) {
           // se l'elemento in ciclo è un array si tratta di una metrica composta nidificata, effettuo la stessa operazione
           // dump($element);
           if (is_array($element)) {
