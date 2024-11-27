@@ -251,7 +251,7 @@ function columnSave(e) {
   if (textareaFilter.firstChild.nodeType === 3) textareaFilter.firstChild.remove();
   delete e.target.dataset.token;
   // document.getElementById('filter-note').value = '';
-  App.showConsole(`Colonna "${name}" aggiunta al WorkBook`, 'done', 2000);
+  App.showConsole(`Colonna <b>${name}</b> aggiunta al WorkBook`, 'done', 2000);
 }
 
 btnToggle_table__content.onclick = (e) => {
@@ -312,7 +312,7 @@ function filterSelected(e) {
 
 // INFO: implementazione del dragdrop per gli elementi .defined
 function handleDragStart(e) {
-  console.log('handleDragStart : ', e.target);
+  // console.log('handleDragStart : ', e.target);
   this.style.opacity = '0.2';
   // console.log('handleDragStart');
   dragSrcEl = this;
@@ -585,7 +585,18 @@ function handleDragEnd(e) {
   const metricsClone = new Map(Sheet.metrics);
   Sheet.metrics.clear();
   // console.log(metricsClone);
-  document.querySelectorAll('.metric-defined.defined').forEach(metric => Sheet.metrics = metricsClone.get(metric.dataset.id));
+  document.querySelectorAll('.metric-defined.defined').forEach(metric => {
+    if (metricsClone.get(metric.dataset.id).type === 'composite') {
+      // recupero le metriche che la compongono
+      Object.keys(metricsClone.get(metric.dataset.id).metrics).forEach(token => {
+        // se la metrica ha dependencies = false significa che è inclusa in questo ciclo, quindi verrà
+        // aggiunta comunque, adesso la aggiungo solo se ha dependencies = true altrimenti l'ordine
+        // degli elementi nel DOM non corrisponde
+        if (metricsClone.get(token).dependencies) Sheet.metrics = metricsClone.get(token);
+      });
+    }
+    Sheet.metrics = metricsClone.get(metric.dataset.id);
+  });
   console.info('metrics dopo il drop : ', Sheet.metrics);
 }
 
@@ -1722,7 +1733,7 @@ function appendCustomMetric(metric) {
   li.addEventListener('contextmenu', openContextMenu);
   span.innerText = metric.alias;
   referenceElement.before(li);
-  App.showConsole(`Metrica "${metric.alias}" aggiunta al WorkBook`, 'done', 1500);
+  App.showConsole(`Metrica <b>${metric.alias}</b> aggiunta al WorkBook`, 'done', 1500);
 }
 
 /* token : è il token della metrica che si sta per eliminare dallo Sheet
