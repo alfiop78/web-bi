@@ -40,7 +40,7 @@ class Sheets {
       time: object.time,
       datatype: object.datatype
     });
-    console.info('Sheet.#fields : ', this.#fields);
+    // console.info('Sheet.#fields : ', this.#fields);
   }
 
   get fields() { return this.#fields; }

@@ -764,7 +764,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   app.saveSheet = async () => {
     Sheet.name = app.sheetName.dataset.value;
     Sheet.userId = userId;
-    debugger;
     // verifico se ci sono elementi modificati andando a controllare gli elmeneti con [data-adding] e [data-removed]
     // Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
     // se il report è in edit ed è stata fatta una modifica eseguo update()
@@ -772,7 +771,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       // il report è già presente in local ed è stato aperto
       // se ci sono state delle modifiche eseguo update
       // console.log(Sheet.changes);
-      if (document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]').length !== 0) {
+      if (document.querySelectorAll('div[data-adding], div[data-removed], *[data-modified]').length !== 0) {
         Sheet.update();
         // elimino il datamart perchè è stato modificato il report e le colonne nel datamart e nel report potrebbero non corrispondere più
         debugger;
@@ -785,7 +784,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         document.querySelectorAll('div[data-adding]').forEach(el => delete el.dataset.adding);
         if (Resource.tableRef) Resource.tableRef.clearChart();
       }
-      document.querySelectorAll('code[data-modified]').forEach(node => delete node.dataset.modified);
+      document.querySelectorAll('*[data-modified]').forEach(node => delete node.dataset.modified);
     } else {
       // il report è stato appena creato e faccio save()
       Sheet.create();
@@ -1253,7 +1252,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     if (Sheet.edit === true) {
       debugger;
       // Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
-      if (document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]').length !== 0) Sheet.update();
+      if (document.querySelectorAll('div[data-adding], div[data-removed], *[data-modified]').length !== 0) Sheet.update();
     } else {
       Sheet.create();
     }
@@ -1289,7 +1288,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
           delete el.dataset.adding;
         });
         document.querySelectorAll('div[data-removed]').forEach(el => el.remove());
-        document.querySelectorAll('code[data-modified]').forEach(node => delete node.dataset.modified);
+        document.querySelectorAll('*[data-modified]').forEach(node => delete node.dataset.modified);
         // imposto Sheet.edit = true perchè da questo momento qualsiasi cosa aggiunta allo Sheet avrà
         // lo contrassegna come "modificato" e quindi verrà, alla prossima elaborazione, eliminata la tabella dal DB
         // per poterla ricreare
@@ -2146,14 +2145,14 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         // li.dataset.contextmenu = `ul-context-menu-${metric.metric_type}`;
         i.addEventListener('dragstart', handleDragStart);
         i.addEventListener('dragend', handleDragEnd);
-        // i.addEventListener('dragenter', handleDragEnter);
-        // i.addEventListener('dragleave', handleDragLeave);
+        i.addEventListener('dragenter', handleDragEnter);
+        i.addEventListener('dragleave', handleDragLeave);
         li.addEventListener('contextmenu', openContextMenu);
         span.innerText = metric.alias;
         details.appendChild(li);
       }
+      // al termine della lista aggiungo i tasti "Nuova Metrica" e "Nuova Colonna"
       if (WorkBook.activeTable.dataset.type !== 'time') {
-        // al termine della lista aggiungo il tasto "Nuova Metrica"
         const content = template__createElement.content.cloneNode(true);
         const li__createMetric = content.querySelector("li[data-id='li__new_metric']");
         li__createMetric.addEventListener('click', createCustomMetric);

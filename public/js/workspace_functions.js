@@ -310,8 +310,9 @@ function filterSelected(e) {
   btnToggle_table__content.innerText = (table__content.hasAttribute('open')) ? 'arrow_menu_close' : 'arrow_menu_open';
 }
 
-// TEST: implementazione del dragdrop per gli elementi .defined
+// INFO: implementazione del dragdrop per gli elementi .defined
 function handleDragStart(e) {
+  console.log('handleDragStart : ', e.target);
   this.style.opacity = '0.2';
   // console.log('handleDragStart');
   dragSrcEl = this;
@@ -342,9 +343,9 @@ function handleDragOver(e) {
     // se il mouse si trova sullo stesso elemento (elementAt === dragSrcEl) non visualizzo lo span
     if (dragSrcEl !== elementAt) elementAt.before(i);
   } else {
-    // .dropzone.rows
-    // Quando il mouse passa sopra questi elementi vanno gestiti
+    // .dropzone
     (elementAt.classList.contains('dropzone')) ? elementAt.classList.add('dropping') : elementAt.classList.remove('dropping');
+    // aggiungo l'elemento draggato come ultimo elemento della dropzone
     if (elementAt.classList.contains('dropzone')) elementAt.appendChild(i);
   }
   e.dataTransfer.dropEffect = 'move';
@@ -417,7 +418,7 @@ function createMetricDefined(token) {
   field.dataset.type = metric.type;
   field.dataset.label = metric.alias;
   // TODO: 25.11.2024 Al momento disabilito il dragstar per le metriche perchè è da implementare
-  // field.addEventListener('dragstart', handleDragStart, false);
+  field.addEventListener('dragstart', handleDragStart, false);
   field.addEventListener('dragenter', handleDragEnter, false);
   field.addEventListener('dragleave', handleDragLeave, false);
   field.addEventListener('dragend', handleDragEnd, false);
@@ -485,7 +486,6 @@ function handleColumnDrop(e) {
           metrics: element.metrics,
           dependencies: false
         };
-        // TEST: 21.11.2024
         if (!dragSrcEl.dataset.id) dragSrcEl = createMetricDefined(token);
         // dopo aver aggiunto una metrica composta allo Sheet, bisogna aggiungere anche le metriche
         // ...al suo interno per consentirne l'elaborazione
@@ -555,39 +555,41 @@ function handleColumnDrop(e) {
 }
 
 function handleDragEnd(e) {
+  console.log('handleDragEnd : ', e.target)
   this.style.opacity = '1';
   // console.info('dragEnd', this);
   document.querySelectorAll('.defined_contents').forEach(item => item.classList.remove('pointer__none'));
-  document.querySelectorAll('.dropzone.rows>div').forEach(item => item.classList.remove('over'));
+  document.querySelectorAll('.dropzone>div').forEach(item => item.classList.remove('over'));
+  // Imposto un data-modified su e.target per contrassegnare lo Sheet come "modificato", quindi verranno salvate le modifiche
+  e.target.dataset.modified = true;
   // ogni elemento droppato viene posizionato alla fine dell'oggetto Map Sheet.fields perchè il Map() conserva l'ordine
   // di inserimento. L'ordine di inserimento contenuto in Sheet.fields non corrisponde agli elementi aggiunti col drag&drop perchè questi
   // possono essere spostati.
   // Quindi pulisco Sheet.fields e lo ricreo in base all'ordine rappresentato nel DOM #dropzone-rows
 
+  // NOTE: clonazione Map()
+  const fieldsClone = new Map(Sheet.fields);
   Sheet.fields.clear();
-  document.querySelectorAll('#dropzone-rows .column-defined.defined').forEach(field => {
-    // console.log(field);
-    // console.log(WorkBook.fields.get(field.dataset.id));
-    // console.log(WorkBook.elements.get(field.dataset.id));
-    const element = WorkBook.elements.get(field.dataset.id);
-    console.log('handleDragEnd :', element);
-    // recupero da WorkBook.elements perchè sull'elemento, nel DOM, non sono presenti alcune proprietà
-
+  document.querySelectorAll('.column-defined.defined').forEach(field => {
     Sheet.fields = {
       token: field.dataset.id,
-      name: field.dataset.label,
-      // name: field.querySelector('code').textContent,
-      SQL: element.SQL,
-      time: (element.time) ? { table: element.table } : false,
-      datatype: element.datatype
+      name: fieldsClone.get(field.dataset.id).name,
+      SQL: fieldsClone.get(field.dataset.id).SQL,
+      time: fieldsClone.get(field.dataset.id).time,
+      datatype: fieldsClone.get(field.dataset.id).datatype
     }
   });
-  // TODO: 25.11.224 da implementare
-  // Sheet.metrics.clear();
-  // document.querySelectorAll('.metric-defined').forEach(field => Sheet.metrics = { token: field.dataset.id, name: field.dataset.label, datatype: WorkBook.fields.get(field.dataset.id).datatype });
+  console.info('Sheet.fields in handleDragEnd : ', Sheet.fields);
+  // 27.11.2024 Riordino Sheet.metrics
+  // NOTE: clonazione Map()
+  const metricsClone = new Map(Sheet.metrics);
+  Sheet.metrics.clear();
+  // console.log(metricsClone);
+  document.querySelectorAll('.metric-defined.defined').forEach(metric => Sheet.metrics = metricsClone.get(metric.dataset.id));
+  console.info('metrics dopo il drop : ', Sheet.metrics);
 }
 
-// TEST: implementazione del dragdrop per gli elementi .defined
+// INFO: implementazione del dragdrop per gli elementi .defined
 
 // aggiunta del filtro alla sezione #ul-filters-sheet
 function addTemplateFilter(token) {

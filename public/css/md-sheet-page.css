@@ -72,7 +72,7 @@ code {
   user-select: none;
 }
 
-.column-defined>i {
+.column-defined>i, .metric-defined>i {
   cursor: grab;
 }
 
