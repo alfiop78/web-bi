@@ -312,9 +312,29 @@ function filterSelected(e) {
 
 // INFO: implementazione del dragdrop per gli elementi .defined
 function handleDragStart(e) {
+  // console.log('handleDragStart : ', this);
   // console.log('handleDragStart : ', e.target);
+  // console.log('handleDragStart : ', e.currentTarget);
+  // TEST: creazione elemento da mostrare durante il drag
+  /* const clone = this.cloneNode(true);
+  clone.innerText = 'test';
+  clone.style.position = 'absolute';
+  clone.style.top = '10px';
+  document.body.appendChild(clone);
+  e.dataTransfer.setDragImage(clone, 0, 0); */
+  // const span = document.createElement('span');
+  /* const span = this.cloneNode(true);
+  span.innerText = 'TEST';
+  span.style.position = 'absolute';
+  span.style.top = '10px';
+  span.style.padding = '4px';
+  span.style.backgroundColor = 'blue';
+  span.style.color = 'white';
+  this.parentElement.appendChild(span);
+  e.dataTransfer.setDragImage(span, 0, 0); */
+  // END TEST: creazione elemento da mostrare durante il drag
+
   this.style.opacity = '0.2';
-  // console.log('handleDragStart');
   dragSrcEl = this;
   e.dataTransfer.effectAllowed = 'move';
   (this.id) ? e.dataTransfer.setData('text/plain', this.id) : e.dataTransfer.setData('text/plain', this.dataset.id);
@@ -354,6 +374,7 @@ function handleDragOver(e) {
 }
 
 function handleDragEnter(e) {
+  e.preventDefault();
   // console.log('drageneter');
   // console.log(this, dragSrcEl);
   // this.classList.add('over');
@@ -473,6 +494,7 @@ function handleColumnDrop(e) {
   if (e.stopPropagation) e.stopPropagation();
   e.preventDefault();
   const token = e.dataTransfer.getData('text/plain');
+  console.log('drop : ', token);
   const element = WorkBook.elements.get(token);
   if (element.type === 'metric') {
     // template per le metriche

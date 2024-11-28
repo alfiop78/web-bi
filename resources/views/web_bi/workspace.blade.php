@@ -277,8 +277,8 @@
     </template>
 
     <template id="tmpl-metrics-defined">
-      <div class="metric-defined defined metrics box" draggable="true">
-        <i class="button-icon material-symbols-rounded md-18">drag_indicator</i>
+      <div class="metric-defined defined metrics box">
+        <i class="button-icon material-symbols-rounded md-18" draggable="true">drag_indicator</i>
         <div class="defined_contents">
           <code data-aggregate="" data-metric-id contenteditable="true" data-blur-fn="editAggregate" spellcheck="false"></code>
           <code data-field data-token data-value contenteditable="true" data-blur-fn="editMetricAlias" spellcheck="false"></code>

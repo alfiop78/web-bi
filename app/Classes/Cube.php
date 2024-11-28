@@ -89,45 +89,11 @@ class Cube
   {
     // dd($this->fields);
     foreach ($this->fields as $column) {
-      // $this->datamart_fields[] = "{$column->name}_id";
       $this->datamart_fields[] = $column->name;
+      // $this->datamart_fields[] = "'{$column->name}'";
     }
     // dd($this->datamart_fields);
   }
-
-  // Creazione della clausola SELECT e dell'array _columns
-  /* es.:
-    SELECT\n
-    CodSedeDealer_765.Descrizione AS sede_id,
-    CodSedeDealer_765.Descrizione AS sede_ds
-  */
-  /* public function select_new()
-  {
-    // $fieldList = array();
-    $name_key = NULL;
-    // dd($this->fields);
-    // per ogni tabella
-    foreach ($this->fields as $column) {
-      // dd($column);
-      foreach ($column->field as $key => $value) {
-        // key: id/ds
-        $name_key = "{$column->name}_{$key}";
-        $sql = implode("", $value->sql); // alias_tabella.nome_campo[_id]
-        // $fieldList[$name_key] = ($key === "ds") ? "{$sql} AS {$column->name}" : "{$sql} AS {$name_key}";
-        $this->select_clause[$this->factId][$name_key] = ($key === "ds") ? "{$sql} AS {$column->name}" : "{$sql} AS {$name_key}";
-
-        // questo viene utilizzato nella clausola ON della LEFT JOIN
-        // WARN: al posto di _columns[], in createDatamart(), può essere utilizzato $this->datamart_fields[]
-        // $this->_columns[] = "{$column->name}_id";
-        if (property_exists($this, 'sql_info')) {
-          $this->sql_info->{'SELECT'}->{$name_key} = "{$sql} AS {$name_key}";
-          // dd($this->sql_info);
-        }
-      }
-    }
-    // dd($this->sql_info);
-    // dd($this->select_clause);
-  } */
 
   public function select_new()
   {
@@ -136,12 +102,14 @@ class Cube
     foreach ($this->fields as $token => $column) {
       // dd($column);
       $this->select_clause[$this->factId][$token] = "{$column->SQL} AS {$column->name}";
+      // $this->select_clause[$this->factId][$token] = "{$column->SQL} AS '{$column->name}'";
 
       // questo viene utilizzato nella clausola ON della LEFT JOIN
       // WARN: al posto di _columns[], in createDatamart(), può essere utilizzato $this->datamart_fields[]
       // $this->_columns[] = "{$column->name}_id";
       if (property_exists($this, 'sql_info')) {
         $this->sql_info->{'SELECT'}->{$token} = "{$column->SQL} AS {$column->name}";
+        // $this->sql_info->{'SELECT'}->{$token} = "{$column->SQL} AS '{$column->name}'";
         // dd($this->sql_info);
       }
     }
