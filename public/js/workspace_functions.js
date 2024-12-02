@@ -1480,9 +1480,11 @@ function showSQLInfo(data) {
     const tmpldiv = document.getElementById('tmpl-content-div');
     const tmplContent = tmpldiv.content.cloneNode(true);
     const div = tmplContent.querySelector('div');
-    div.innerHTML = sql.raw_sql;
-    divSQL.appendChild(div);
-    // divSQL.innerHTML += sql.raw_sql;
+    if (sql) {
+      div.innerHTML = sql.raw_sql;
+      divSQL.appendChild(div);
+      // divSQL.innerHTML += sql.raw_sql;
+    }
   });
 
   divIcon.dataset.id = 'BASE';
@@ -1533,6 +1535,7 @@ function showSQLInfo(data) {
   sqlFormat.appendChild(divMain);
   // popolo il div sql-info-format
   data.base.forEach(sql => {
+    if (!sql) return;
     for (const [clause, value] of Object.entries(sql.format_sql)) {
       // console.log(clause, value);
       const tmpl = tmplSQLInfo.content.cloneNode(true);

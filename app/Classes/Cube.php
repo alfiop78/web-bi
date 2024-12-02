@@ -15,9 +15,7 @@ class Cube
   const FROM = "\nFROM\n";
   const GROUPBY = "\nGROUP BY\n";
   const WHERE = "\nWHERE\n";
-  public $results = [];
   private $select_clause = [];
-  public $datamart_fields = [];
   private $from_clause = [];
   private $where_clause = [];
   private $where_time_clause = [];
@@ -33,10 +31,12 @@ class Cube
   private $WHERE_metricTable = []; // Clausola WHERE per le metriche abanzate
   private $WHERE_timingFn = [];
   private $segmented = [];
-  public $compositeMeasures = [];
-  public $queries = [];
   private $time_sql = [];
   private $sql_union_clause = [];
+  public $results = [];
+  public $datamart_fields = [];
+  public $compositeMeasures = [];
+  public $queries = [];
   // private $ifNullOperator;
   // public $ifNullOperator;
 
@@ -79,9 +79,7 @@ class Cube
   /* Creazione di un array contenenti le colonne da inserire nella creazione
     del datamart, sia nella clausola SELECT che in GROUPBY
     array:4 [
-      0 => "'sid_id'"
       1 => "'sid'"
-      2 => "'sede_id'"
       3 => "'sede'"
     ]
   */
@@ -280,91 +278,87 @@ class Cube
     // dd($this->groupby_clause);
   }
 
-  /* public function groupBy_new()
+  /*
+  * Questo Metodo crea la struttura delle query che verrà utilizzata sia per le metriche di base che per
+  * quelle avanzate, se il report non contiene metriche di base questa struttura verrà sempre creata
+  * per poter calcolare le metriche avanzate
+  * */
+  public function createBaseQuery()
   {
-    // dd($groups);
-    // $fieldList = array();
-    $this->groupby_clause = [];
-    $name_key = NULL;
-    foreach ($this->fields as $column) {
-      foreach ($column->field as $key => $value) {
-        $name_key = "{$column->name}_{$key}";
-        $sql = implode("", $value->sql); // alias_tabella.nome_campo[_id]
-        $this->groupby_clause[$this->factId][$name_key] = $sql;
-        if (property_exists($this, 'sql_info')) {
-          $this->sql_info->{'GROUP BY'}->{$name_key} = $sql;
-        }
-        ($key === "id") ? array_push($this->segmented, $name_key) : array_push($this->segmented, $column->name);
-      }
-    }
-    // $this->_groupBy .= implode(",\n", $fieldList);
-    // dd($this->_groupBy);
-    // dd($this->segmented);
-    switch (session('db_driver')) {
-      case 'odbc':
-        if (count($this->segmented) > 40) {
-          $segmented = implode(",\n", $this->segmented);
-          // $this->_groupBy .= "\nSEGMENTED BY HASH({$segmented}) ALL NODES";
-          $this->groupby_clause['SEGMENTED'] = "\nSEGMENTED BY HASH({$segmented}) ALL NODES";
-        }
-        break;
-      case 'mysql':
-        break;
-      default:
-        break;
-    }
-    // dd($this->_groupBy);
-    // dd($this->groupby_clause);
-  } */
+    // questa struttura viene utilizzata sia per le metriche di base che avanzate
+    // TODO: rinominare in report_select, report_from, ecc... per indicare che è la query
+    // "di base"
+    $this->select_new();
+    $this->from_new();
+    $this->where_new();
+    $this->createFilters();
+    $this->groupBy_new();
+
+    // $this->baseQuerySQL['SELECT'] = self::SELECT . implode(",\n", $this->select_clause[$this->factId]);
+    // $this->baseQuerySQL['FROM'] = self::FROM . implode(",\n", $this->from_clause[$this->factId]);
+    // // TODO: 02.12.2024: utilizzare operatore ternario
+    // if (array_key_exists($this->factId, $this->where_time_clause)) {
+    //   $this->baseQuerySQL['WHERE'] = self::WHERE . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId]));
+    // } else {
+    //   $this->baseQuerySQL['WHERE'] = self::WHERE . implode("\nAND ", $this->where_clause[$this->factId]);
+    // }
+    // if (!is_null($this->report_filters[$this->factId])) $this->baseQuerySQL['FILTERS'] = "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
+    // $this->baseQuerySQL['GROUP'] = self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
+    // dd($this->baseQuerySQL);
+  }
 
   public function base_table_new()
   {
-    $this->select_new();
+    // $this->select_new();
     if (!empty($this->process->baseMeasures)) {
-      // dd("base metrics presenti");
+      $sql = NULL;
+      // dd("metriche di base presenti");
+      // dump("calcolo metriche di base");
+      // dump($this->process->baseMeasures);
       if (property_exists($this->process->baseMeasures, $this->fact)) {
         // metriche per la fact in ciclo presenti
         $this->baseMeasures = $this->process->baseMeasures->{$this->fact};
         $this->metrics_new();
       }
-    }
-    $this->from_new();
-    $this->where_new();
-    $this->createFilters();
-    $this->groupBy_new();
-    $sql = NULL;
-    $sql .= self::SELECT . implode(",\n", $this->select_clause[$this->factId]);
-    if (!empty($this->report_metrics[$this->factId])) $sql .= "," . implode(", ", $this->report_metrics[$this->factId]);
-    $sql .= self::FROM . implode(",\n", $this->from_clause[$this->factId]);
-    if (array_key_exists($this->factId, $this->where_time_clause)) {
-      $sql .= self::WHERE . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId]));
-    } else {
-      $sql .= self::WHERE . implode("\nAND ", $this->where_clause[$this->factId]);
-    }
-    if (!is_null($this->report_filters[$this->factId])) $sql .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
-    $sql .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
-    $comment = "/*\nCreazione tabella BASE :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
-    // dd($sql);
-    // ob_flush()
-    switch (session('db_driver')) {
-      case 'odbc':
-        $createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
-        break;
-      case 'mysql':
-        $createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} AS ($sql);";
-        break;
-      default:
-        break;
-    }
-    // dd($createStmt);
-    // var_dump($query);
-    dump($createStmt);
-    if (property_exists($this, 'sql_info')) {
-      return ["raw_sql" => nl2br($createStmt), "format_sql" => $this->sql_info];
+      // $this->from_new();
+      // $this->where_new();
+      // $this->createFilters();
+      // $this->groupBy_new();
+      $sql .= self::SELECT . implode(",\n", $this->select_clause[$this->factId]);
+      // aggiungo, alla clausola SELECT di $this->baseQuerySQL, le metriche di base da calcolare
+      if (!empty($this->report_metrics[$this->factId])) $sql .= "," . implode(", ", $this->report_metrics[$this->factId]);
+      $sql .= self::FROM . implode(",\n", $this->from_clause[$this->factId]);
+      if (array_key_exists($this->factId, $this->where_time_clause)) {
+        $sql .= self::WHERE . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId]));
+      } else {
+        $sql .= self::WHERE . implode("\nAND ", $this->where_clause[$this->factId]);
+      }
+      if (!is_null($this->report_filters[$this->factId])) $sql .= "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
+      $sql .= self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
+      $this->queries[$this->baseTableName] = $this->datamart_fields;
+      $comment = "/*\nCreazione tabella per calcolo ... :\ndecisyon_cache.{$this->baseTableName}\n*/\n";
+      // dump($sql);
+      // ob_flush()
+      switch (session('db_driver')) {
+        case 'odbc':
+          $createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} ON COMMIT PRESERVE ROWS INCLUDE SCHEMA PRIVILEGES AS ($sql);";
+          break;
+        case 'mysql':
+          $createStmt = "{$comment}CREATE TEMPORARY TABLE decisyon_cache.{$this->baseTableName} AS ($sql);";
+          break;
+        default:
+          break;
+      }
       // dd($createStmt);
-      // dd($this->sql_info);
-    } else {
-      return DB::connection(session('db_client_name'))->statement($createStmt);
+      // var_dump($query);
+      // dump($createStmt);
+      if (property_exists($this, 'sql_info')) {
+        return ["raw_sql" => nl2br($createStmt), "format_sql" => $this->sql_info];
+        // dd($createStmt);
+        // dd($this->sql_info);
+      } else {
+        return DB::connection(session('db_client_name'))->statement($createStmt);
+      }
     }
   }
 
@@ -536,15 +530,15 @@ class Cube
             }
           }
         }
-
+        /* WARN: 02.12.2024 non completato (da verificare) dd($this->WHERE_timingFn);
         if (property_exists($this, 'sql_info')) {
-          $this->json_info_advanced[$tableName]->{'AND'}->{$token} = implode(" = ", $filter->SQL);
+          $this->json_info_advanced[$tableName]->AND->{$token} = $filter->SQL;
           // $this->json_info_advanced[$tableName]->{'AND'}->{$filter->alias} = implode(" = ", $filter->SQL);
           // elimino la prop 'WHERE-TIME' da json_info_advanced perchè la metrica filtrata
           // contiene una funzione temporale, quindi non può coesistere insieme ad un altra relazione
           // con la WEB_BI_TIME
           unset($this->json_info_advanced[$tableName]->{'WHERE-TIME'});
-        }
+        } */
         // $this->WHERE_timingFn[$token] = implode(" = ", $filter->SQL);
         // dd($this->WHERE_timingFn);
       } else {
@@ -650,8 +644,7 @@ class Cube
     // dd($this->select_clause);
     // unisco gli array della clausola select con le metriche da calcolare per il gruppo di metriche
     // dd(array_merge($this->select_clause[$this->factId], $advancedMetrics[$this->factId]));
-    $this->sqlAdvancedMeasures = self::SELECT;
-    $this->sqlAdvancedMeasures .= implode(",\n", array_merge($this->select_clause[$this->factId], $advancedMetrics[$this->factId]));
+    $this->sqlAdvancedMeasures = self::SELECT . implode(",\n", array_merge($this->select_clause[$this->factId], $advancedMetrics[$this->factId]));
     // dd($this->sqlAdvancedMeasures);
     // dd($this->from_clause[$this->factId], $this->FROM_metricTable[$this->factId]);
     if (array_key_exists($this->factId, $this->FROM_metricTable)) {
@@ -750,7 +743,8 @@ class Cube
         break;
     }
     // dd($this->union_clause);
-    dump($this->union_clause);
+    // dump($this->union_clause);
+    // dd($this->queries);
     // DB::connection(session('db_client_name'))->statement($this->union_clause);
     // TODO: Qui se l'elaborazione fallisce devo eliminare tutte le tabelle temporanee create finora (basetable, e altre metric_table ad esempio)
     if (property_exists($this, 'sql_info')) {
