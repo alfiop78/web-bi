@@ -70,7 +70,6 @@ class Sheets {
       * altrimenti visualizzo un AVVISO perchè l'esecuzione potrebbe essere troppo lunga
     */
     this.sheet.sheet.filters = [...this.filters];
-    debugger;
     // reset delle metriche
     delete this.sheet.sheet.metrics;
     delete this.sheet.sheet.advMetrics;
@@ -91,6 +90,7 @@ class Sheets {
           break;
       }
     }
+    debugger;
   }
 
   // il tasto Aggiorna deve essere attivato solo quando ci sono delle modifiche fatte

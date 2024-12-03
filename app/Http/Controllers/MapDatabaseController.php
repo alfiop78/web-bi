@@ -777,7 +777,6 @@ class MapDatabaseController extends Controller
         // TODO: rinominare in "calcolo metriche di base"
         $query->base_table_new();
         // dd($result_base_metrics);
-        // $query->queries[$query->baseTableName] = $query->datamart_fields;
         // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
         // creo una tabella temporanea per ogni metrica filtrata
         // dd($query->process->{"advancedMeasures"});
@@ -909,6 +908,7 @@ class MapDatabaseController extends Controller
         $advancedMeasures = (object)[];
         // fields vengono recuperati dal WorkBook
         foreach ($json_sheet->sheet->fields as $token => $field) {
+          // dump($field);
           // recupero le proprietà 'field', 'tableAlias' mentre la proprietà 'name' la utilizzo dallo Sheet
           $process->fields->$token = (object)[
             'SQL' => $field->SQL,
@@ -931,6 +931,7 @@ class MapDatabaseController extends Controller
         $timingFunctions = ['last-year', 'last-month', 'ecc..'];
         foreach ($json_sheet->facts as $fact) {
           // metriche di base
+          dump($json_sheet->sheet);
           if (property_exists($json_sheet->sheet, 'metrics')) {
             foreach ($json_sheet->sheet->metrics as $token => $object) {
               // anche qui, come in 'fields', alcune proprietà vanno recuperato da json_sheet mentre altre dal WorkBook
@@ -939,9 +940,7 @@ class MapDatabaseController extends Controller
                 "alias" => $object->alias,
                 "aggregateFn" => $object->aggregateFn,
                 "SQL" => $json_sheet->sheet->metrics->{$token}->SQL,
-                // "SQL" => $json_workbook->metrics->{$token}->SQL,
                 "distinct" => $json_sheet->sheet->metrics->{$token}->distinct
-                // "distinct" => $json_workbook->metrics->{$token}->distinct
               ];
               $process->baseMeasures->$fact = $metrics;
             }
@@ -997,7 +996,6 @@ class MapDatabaseController extends Controller
             }
           }
         }
-        // dd($process);
         return $this->curlProcess($process);
       } else {
         return "WorkBook (objectId: {$json_sheet->workbook_ref}) non presente nel Database";
@@ -1013,7 +1011,7 @@ class MapDatabaseController extends Controller
     // curl http://127.0.0.1:8000/curl/process/210wu29ifoh/schedule
     // con il login : curl https://user:psw@gaia.automotive-cloud.com/curl/process/{processToken}/schedule
     // ...oppure : curl -u 'user:psw' https://gaia.automotive-cloud.com/curl/process/{processToken}/schedule
-    // dd($process);
+    // dump($process);
     $query = new Cube($process);
     $query->datamartFields();
     foreach ($query->facts as $fact) {
@@ -1021,7 +1019,9 @@ class MapDatabaseController extends Controller
       $query->factId = substr($fact, -5);
       $query->baseTableName = "WB_BASE_{$query->report_id}_{$query->datamart_id}_{$query->factId}";
       $query->createBaseQuery();
-      $query->base_table_new();
+      // dump(($query->process->baseMeasures));
+      // dump(!empty((array) $query->process->baseMeasures));
+      if (!empty((array) $query->process->baseMeasures)) $query->base_table_new();
       // dd($res === true ||$res === NULL);
       // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
       // creo una tabella temporanea per ogni metrica filtrata
@@ -1048,7 +1048,12 @@ class MapDatabaseController extends Controller
           foreach ($groupFilters as $token => $group) {
             $metrics = array();
             foreach ($query->filteredMetrics as $metric) {
-              if (get_object_vars($metric->filters) == get_object_vars($group)) {
+              // dd($metric->filters);
+              // dd($group);
+              // se la metrica in ciclo non ha filtri deve comunque essere aggiunta all'array $metrics
+              if (empty($metric->filters)) {
+                array_push($metrics, $metric);
+              } elseif (get_object_vars($metric->filters) == get_object_vars($group)) {
                 // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
                 array_push($metrics, $metric);
               }
@@ -1057,7 +1062,7 @@ class MapDatabaseController extends Controller
             $query->groupMetricsByFilters->$token = $metrics;
           }
           // dd($query->groupMetricsByFilters);
-          $metricTable = $query->createMetricDatamarts_new();
+          $query->createMetricDatamarts_new();
         }
       }
     }

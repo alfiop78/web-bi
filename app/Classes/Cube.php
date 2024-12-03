@@ -293,26 +293,15 @@ class Cube
     $this->where_new();
     $this->createFilters();
     $this->groupBy_new();
-
-    // $this->baseQuerySQL['SELECT'] = self::SELECT . implode(",\n", $this->select_clause[$this->factId]);
-    // $this->baseQuerySQL['FROM'] = self::FROM . implode(",\n", $this->from_clause[$this->factId]);
-    // // TODO: 02.12.2024: utilizzare operatore ternario
-    // if (array_key_exists($this->factId, $this->where_time_clause)) {
-    //   $this->baseQuerySQL['WHERE'] = self::WHERE . implode("\nAND ", array_merge($this->where_clause[$this->factId], $this->where_time_clause[$this->factId]));
-    // } else {
-    //   $this->baseQuerySQL['WHERE'] = self::WHERE . implode("\nAND ", $this->where_clause[$this->factId]);
-    // }
-    // if (!is_null($this->report_filters[$this->factId])) $this->baseQuerySQL['FILTERS'] = "\nAND " . implode("\nAND ", $this->report_filters[$this->factId]);
-    // $this->baseQuerySQL['GROUP'] = self::GROUPBY . implode(",\n", $this->groupby_clause[$this->factId]);
-    // dd($this->baseQuerySQL);
   }
 
   public function base_table_new()
   {
     // $this->select_new();
+    // dd(!empty($this->process->baseMeasures));
     if (!empty($this->process->baseMeasures)) {
-      $sql = NULL;
       // dd("metriche di base presenti");
+      $sql = NULL;
       // dump("calcolo metriche di base");
       // dump($this->process->baseMeasures);
       if (property_exists($this->process->baseMeasures, $this->fact)) {
@@ -698,7 +687,7 @@ class Cube
       default:
         break;
     }
-    dump($createStmt);
+    // dump($createStmt);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
     $result = null;
     if (property_exists($this, 'sql_info')) {
@@ -804,7 +793,7 @@ class Cube
       unset($ONClause);
     }
     $createStmt .= $joinLEFT;
-    dump($createStmt);
+    // dump($createStmt);
     if (property_exists($this, 'sql_info')) {
       // dd($this->sql_union_clause);
       return [
