@@ -555,7 +555,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       }
     }
     if (urls.length !== 0) {
-      App.showConsole('Recupero tabelle in corso...', '');
+      App.showConsole('Recupero tabelle in corso...');
       WorkBookStorage.saveTables(await getTables(urls));
       App.closeConsole();
     }
@@ -771,7 +771,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       // il report è già presente in local ed è stato aperto
       // se ci sono state delle modifiche eseguo update
       // console.log(Sheet.changes);
-      if (document.querySelectorAll('div[data-adding], div[data-removed], *[data-modified]').length !== 0) {
+      if (document.querySelectorAll('*[data-adding], *[data-removed], *[data-modified]').length !== 0) {
         Sheet.update();
         // elimino il datamart perchè è stato modificato il report e le colonne nel datamart e nel report potrebbero non corrispondere più
         debugger;
@@ -780,8 +780,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         // il report è stato modificato per cui il datamart deve essere eliminato
         if (result) App.showConsole('Il datamart è stato eliminato', 'done', 1500);
         // se sono presenti elementi aggiunti (data-adding) oppure elementi rimossi (data-removed) ne aggiorno lo stato di visualizzazione
-        document.querySelectorAll('div[data-removed]').forEach(el => el.remove());
-        document.querySelectorAll('div[data-adding]').forEach(el => delete el.dataset.adding);
+        document.querySelectorAll('*[data-removed]').forEach(el => el.remove());
+        document.querySelectorAll('*[data-adding]').forEach(el => delete el.dataset.adding);
         if (Resource.tableRef) Resource.tableRef.clearChart();
       }
       document.querySelectorAll('*[data-modified]').forEach(node => delete node.dataset.modified);
@@ -1252,7 +1252,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     if (Sheet.edit === true) {
       debugger;
       // Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
-      if (document.querySelectorAll('div[data-adding], div[data-removed], *[data-modified]').length !== 0) Sheet.update();
+      if (document.querySelectorAll('*[data-adding], *[data-removed], *[data-modified]').length !== 0) Sheet.update();
     } else {
       Sheet.create();
     }
@@ -1283,7 +1283,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         console.log(response);
         // elimino gli attributi data-added/removed sugli elementi del report modificati in base alla versione
         // precedente del report
-        document.querySelectorAll('div[data-adding]').forEach(el => {
+        document.querySelectorAll('*[data-adding]').forEach(el => {
           el.dataset.added = 'true;'
           delete el.dataset.adding;
         });
