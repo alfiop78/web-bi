@@ -929,9 +929,9 @@ class MapDatabaseController extends Controller
         }
 
         $timingFunctions = ['last-year', 'last-month', 'ecc..'];
-        foreach ($json_sheet->facts as $fact) {
+        /* foreach ($json_sheet->facts as $fact) {
           // metriche di base
-          dump($json_sheet->sheet);
+          // dd($json_sheet->sheet);
           if (property_exists($json_sheet->sheet, 'metrics')) {
             foreach ($json_sheet->sheet->metrics as $token => $object) {
               // anche qui, come in 'fields', alcune proprietà vanno recuperato da json_sheet mentre altre dal WorkBook
@@ -980,22 +980,74 @@ class MapDatabaseController extends Controller
               }
             }
           }
-        }
-        // metriche composte
-        if (property_exists($json_sheet->sheet, 'compositeMetrics')) {
-          foreach ($json_sheet->sheet->compositeMetrics as $token => $object) {
-            // recupero la metrica avanzata dal DB
-            if (BImetric::find($token)) {
-              $json_composite_measures = json_decode(BImetric::where("token", $token)->first('json_value')->json_value);
-              $process->compositeMeasures->$token = (object)[
-                "alias" => $object->alias,
-                "SQL" => $json_composite_measures->SQL
-              ];
-            } else {
-              return "Metrica (objectId : {$token}) non presente nel Database";
+        } */
+        foreach ($json_sheet->facts as $fact) {
+          // metriche di base
+          // dd($json_sheet->sheet);
+          if (property_exists($json_sheet->sheet, 'metrics')) {
+            foreach ($json_sheet->sheet->metrics as $token => $object) {
+              // anche qui, come in 'fields', alcune proprietà vanno recuperato da json_sheet mentre altre dal WorkBook
+              // utilizzo la stessa logica presente in createProcess()
+              dump($object);
+              switch ($object->type) {
+                case 'composite':
+                  if (BImetric::find($token)) {
+                    $json_composite_measures = json_decode(BImetric::where("token", $token)->first('json_value')->json_value);
+                    $process->compositeMeasures->$token = (object)[
+                      "alias" => $object->alias,
+                      "SQL" => $json_composite_measures->SQL,
+                      "metrics" => $json_composite_measures->metrics
+                    ];
+                  } else {
+                    return "Metrica (objectId : {$token}) non presente nel Database";
+                  }
+                  break;
+                case 'advanced':
+                  if (BImetric::find($token)) {
+                    $json_advanced_measures = json_decode(BImetric::where("token", $token)->first('json_value')->json_value);
+                    // recupero i filtri contenuti all'interno della metrica avanzata in ciclo
+                    $json_filters_metric = (object)[];
+                    foreach ($json_advanced_measures->filters as $filterToken) {
+                      // se il filtro è un timingFn recupero la definizione $object-timingFn che si trova all'interno della metrica
+                      if (in_array($filterToken, $timingFunctions)) {
+                        $json_filters_metric->$filterToken = $json_advanced_measures->timingFn->$filterToken;
+                      } else {
+                        // BUG: verifica se l'elemento è presente (è stato versionato)
+                        if (BIfilter::find($filterToken)) {
+                          $json_filters_metric->$filterToken = json_decode(BIfilter::where("token", $filterToken)->first('json_value')->json_value);
+                        } else {
+                          return "Filtro (objectId : {$filterToken}) non presente nel Database";
+                        }
+                      }
+                    }
+                    $advancedMeasures->$token = (object)[
+                      "alias" => $object->alias,
+                      "aggregateFn" => $object->aggregateFn,
+                      "SQL" => $json_advanced_measures->SQL,
+                      "distinct" => $json_advanced_measures->distinct,
+                      "filters" => $json_filters_metric
+                    ];
+                    $process->advancedMeasures->$fact = $advancedMeasures;
+                  } else {
+                    return "Metrica (objectId : {$token}) non presente nel Database";
+                  }
+                  break;
+                default:
+                  // base metrics
+                  $metrics->$token = (object)[
+                    'token' => $object->token, // TODO: probabilmente il token non serve
+                    "alias" => $object->alias,
+                    "aggregateFn" => $object->aggregateFn,
+                    "SQL" => $json_sheet->sheet->metrics->{$token}->SQL,
+                    "distinct" => $json_sheet->sheet->metrics->{$token}->distinct
+                  ];
+                  $process->baseMeasures->$fact = $metrics;
+                  break;
+              }
             }
           }
         }
+        // metriche composte
         return $this->curlProcess($process);
       } else {
         return "WorkBook (objectId: {$json_sheet->workbook_ref}) non presente nel Database";
@@ -1011,7 +1063,7 @@ class MapDatabaseController extends Controller
     // curl http://127.0.0.1:8000/curl/process/210wu29ifoh/schedule
     // con il login : curl https://user:psw@gaia.automotive-cloud.com/curl/process/{processToken}/schedule
     // ...oppure : curl -u 'user:psw' https://gaia.automotive-cloud.com/curl/process/{processToken}/schedule
-    // dump($process);
+    dump($process);
     $query = new Cube($process);
     $query->datamartFields();
     foreach ($query->facts as $fact) {
@@ -1020,14 +1072,15 @@ class MapDatabaseController extends Controller
       $query->baseTableName = "WB_BASE_{$query->report_id}_{$query->datamart_id}_{$query->factId}";
       $query->createBaseQuery();
       // dump(($query->process->baseMeasures));
-      // dump(!empty((array) $query->process->baseMeasures));
+      dump(!empty((array) $query->process->baseMeasures));
       if (!empty((array) $query->process->baseMeasures)) $query->base_table_new();
       // dd($res === true ||$res === NULL);
       // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
       // creo una tabella temporanea per ogni metrica filtrata
       // dd($query->process->{"advancedMeasures"});
       // dd(empty($query->process->{"advancedMeasures"}));
-      if (!empty($query->process->advancedMeasures)) {
+      dump(!empty((array) $query->process->advancedMeasures));
+      if (!empty((array) $query->process->advancedMeasures)) {
         // sono presenti metriche avanzate
         if (property_exists($query->process->advancedMeasures, $fact)) {
           $query->filteredMetrics = $query->process->advancedMeasures->$fact;
@@ -1067,9 +1120,10 @@ class MapDatabaseController extends Controller
       }
     }
     // metriche composte
-    if (!empty($query->process->compositeMeasures)) {
+    dump(!empty((array) $query->process->compositeMeasures));
+    if (!empty((array) $query->process->compositeMeasures)) {
       foreach ($query->process->compositeMeasures as $metric) {
-        // dump($metric);
+        // dd($metric);
         $sql = [];
         // converto l'object $metric->metrics in un array per poter controllare con in_array()
         $metrics = (array) $metric->metrics;

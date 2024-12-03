@@ -10,6 +10,8 @@ var textareaFilter = document.getElementById('textarea-filter');
 var textareaCustomMetric = document.getElementById('textarea-custom-metric');
 var textarea__custom_column = document.getElementById('textarea__custom_column');
 var textarea__composite_metric = document.getElementById('textarea__composite-metric');
+// inputs
+const input__sheetName = document.getElementById('sheet-name');
 // Buttons
 const btnFilterSave = document.getElementById('btn-filter-save');
 const btnCustomMetricSave = document.getElementById('btn-custom-metric-save');
@@ -26,6 +28,7 @@ const dlg__composite_metric = document.getElementById('dlg__composite_metric');
 const dlg__advancedMetric = document.getElementById('dlg-advanced-metric');
 const dlg__chart_options = document.getElementById('dlg__chart_options');
 const dlg__custom_columns = document.getElementById('dlg__custom_column');
+const dlg__sheet = document.getElementById('dialog-sheet-open');
 // templates
 const template_li = document.getElementById('tmpl-li');
 const tmplContextMenu = document.getElementById('tmpl-context-menu-content');
@@ -58,7 +61,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // dialogs
     dialogWorkBook: document.getElementById('dialog-workbook-open'),
     dialogSQL: document.getElementById('dlg-sql-info'),
-    dialogSheet: document.getElementById('dialog-sheet-open'),
+    // dialogSheet: document.getElementById('dialog-sheet-open'),
     dialogTables: document.getElementById('dlg-tables'),
     dialogFilters: document.getElementById('dlg-filters'),
     dialogCustomMetric: document.getElementById('dlg-custom-metric'),
@@ -96,7 +99,6 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     tablePopup: document.getElementById("table-popup"),
     // INPUTS
     inputAdvMetricName: document.getElementById("input-advanced-metric-name"),
-    sheetName: document.getElementById('sheet-name'),
     workbookName: document.getElementById('workbook-name')
   }
   const userId = 2;
@@ -385,13 +387,13 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // e.target.innerText += `${WorkBook.activeTable.dataset.name}.${elementRef.dataset.field}`;
   }
 
-  app.addFilterToSheet = (token) => {
+  /* app.addFilterToSheet = (token) => {
     // aggiungo, sulla <li> del filtro selezionato, la class 'added' per evidenziare che il filtro
     // è stato aggiunto al report, non può essere aggiunto di nuovo.
     const li__selected = document.querySelector(`li[data-id='${token}']`);
     li__selected.classList.add('added');
     addTemplateFilter(token);
-  }
+  } */
 
   // Modifica di una metrica composta di base
   app.editCustomMetric = (e) => {
@@ -601,7 +603,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         const tmpl = template_li.content.cloneNode(true);
         const li = tmpl.querySelector('li.select-list');
         const span = li.querySelector('span');
-        li.dataset.fn = 'sheetSelected';
+        // li.dataset.fn = 'sheetSelected';
+        li.addEventListener('click', sheetSelected);
         li.dataset.elementSearch = "sheets";
         li.dataset.token = token;
         li.dataset.name = object.name;
@@ -609,7 +612,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         span.innerHTML = object.name;
         parent.appendChild(li);
       }
-      app.dialogSheet.showModal();
+      dlg__sheet.showModal();
     }
   }
 
@@ -639,7 +642,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       }); */
     // end chiamta in POST
 
-    Resource.specs = JSON.parse(window.localStorage.getItem(Sheet.sheet.token)).specs;
+    /* Resource.specs = JSON.parse(window.localStorage.getItem(Sheet.sheet.token)).specs;
 
     const progressBar = document.getElementById('progress-bar');
     const progressTo = document.getElementById('progress-to');
@@ -714,23 +717,23 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       .catch(err => {
         App.showConsole(err, 'error');
         console.error(err);
-      });
+      }); */
   }
 
   // apertura nuovo Sheet, viene recuperato dal localStorage
-  app.sheetSelected = async (e) => {
+  /* app.sheetSelected = async (e) => {
     // const sheetToken = e.currentTarget.dataset.token;
     document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #ul-filters-sheet > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
     document.querySelector('#btn-sheet-save').disabled = true;
     Sheet = new Sheets(e.currentTarget.dataset.name, e.currentTarget.dataset.token, WorkBook.workBook.token);
     // reimposto tutte le proprietà della Classe
     Sheet.open();
+    debugger;
     app.sheetName.innerText = Sheet.name;
     app.sheetName.dataset.value = Sheet.name;
     app.sheetName.dataset.tempValue = Sheet.name;
-    /* Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...)
-    * della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
-    */
+    // Re-inserisco, nello Sheet, tutti gli elementi (fileds, filters, metrics, ecc...)
+    // della classe Sheet (come quando si aggiungono in fase di creazione Sheet)
     for (const [token, field] of Sheet.fields) {
       const target = document.getElementById('dropzone-rows');
       target.appendChild(createColumnDefined(token));
@@ -759,10 +762,10 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     Sheet.edit = true;
     document.querySelector('#btn-sheet-save').disabled = false;
     document.querySelectorAll('#btn-sql-preview, #btn-sheet-preview').forEach(button => button.disabled = false);
-  }
+  } */
 
   app.saveSheet = async () => {
-    Sheet.name = app.sheetName.dataset.value;
+    Sheet.name = input__sheetName.dataset.value;
     Sheet.userId = userId;
     // verifico se ci sono elementi modificati andando a controllare gli elmeneti con [data-adding] e [data-removed]
     // Sheet.changes = document.querySelectorAll('div[data-adding], div[data-removed], code[data-modified]');
@@ -798,7 +801,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   }
 
   app.newSheetDialog = () => {
-    delete app.sheetName.dataset.value;
+    delete input__sheetName.dataset.value;
     document.querySelectorAll('#dropzone-columns > *, #dropzone-rows > *, #ul-filters-sheet > *, #ul-columns-handler > *, #preview-datamart > *').forEach(element => element.remove());
     // document.querySelector('#btn-sheet-save').disabled = true;
     app.dialogNewSheet.showModal();
@@ -810,8 +813,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // Sheet non è definito (prima attivazione del tasto Sheet)
     Sheet = new Sheets(name, rand().substring(0, 7), WorkBook.workBook.token);
     SheetStorage.sheet = Sheet.sheet.token;
-    app.sheetName.dataset.value = Sheet.name;
-    app.sheetName.innerText = Sheet.name;
+    input__sheetName.dataset.value = Sheet.name;
+    input__sheetName.innerText = Sheet.name;
     // Imposto la prop 'edit' = false, verrà impostata a 'true' quando si apre uno Sheet
     // dal tasto 'Apri Sheet'
     Sheet.edit = false;
@@ -931,8 +934,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     }
   }
 
-  // TODO: da spostare in supportFn.js
-  app.sheetName.onblur = (e) => {
+  // TODO: da spostare in workspace_sheet.js
+  input__sheetName.onblur = (e) => {
     if (e.target.dataset.tempValue) {
       e.target.dataset.value = e.target.textContent;
       Sheet.name = e.target.textContent;
@@ -942,7 +945,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     }
   }
 
-  app.sheetName.oninput = (e) => App.checkTitle(e.target);
+  input__sheetName.oninput = (e) => App.checkTitle(e.target);
 
   app.workbookName.onblur = (e) => {
     if (e.target.dataset.tempValue) {
@@ -1002,16 +1005,17 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       // Se l'oggetto della Classe Sheets non è inizializzato, apro un nuovo Sheet dal titolo 'New Sheet'
       // console.log(Sheet);
       if (!Sheet) {
-        Sheet = new Sheets(app.sheetName.dataset.defaultValue, rand().substring(0, 7), WorkBook.workBook.token);
+        Sheet = new Sheets(input__sheetName.dataset.defaultValue, rand().substring(0, 7), WorkBook.workBook.token);
         SheetStorage.sheet = Sheet.sheet.token;
-        app.sheetName.innerText = Sheet.name;
+        input__sheetName.innerText = Sheet.name;
         // Imposto la prop 'edit' = false, verrà impostata a 'true' quando si apre uno Sheet
         // dal tasto 'Apri Sheet'
         Sheet.edit = false;
         Resource = new Resources('preview-datamart');
       }
       // carico le proprietà dello Sheet nel boxInfo
-      app.sheetInformations();
+      // app.sheetInformations();
+      sheetInformations()
     }
   }
 
@@ -1019,9 +1023,9 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
   // Creazione della struttura necessaria per creare le query
   app.createProcess = async (e) => {
     // verifico se è stato inserito il titolo dello Sheet
-    if (!app.sheetName.dataset.value) {
+    if (!input__sheetName.dataset.value) {
       App.showConsole('Inserire il titolo dello Sheet', 'warning', 2000);
-      app.sheetName.focus();
+      input__sheetName.focus();
       return false;
     }
 
@@ -1294,7 +1298,8 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         // per poterla ricreare
         Sheet.edit = true;
         App.closeConsole();
-        app.sheetPreview();
+        // app.sheetPreview();
+        preview();
         App.loaderStop();
       })
       .catch(err => {
@@ -2278,7 +2283,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
     // stepTranslate.style.transform = `translateX(${stepTranslate.offsetWidth}px)`;
   });
 
-  app.sheetInformations = () => {
+  /* app.sheetInformations = () => {
     document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);
     if (Sheet) {
       // sono presenti info, elimino la classe css 'none'
@@ -2292,7 +2297,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
         }
       }
     }
-  }
+  } */
 
   app.workBookInformations = () => {
     document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);

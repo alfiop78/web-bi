@@ -62,16 +62,27 @@ class Sheets {
     this.sheet.sheet.fields = Object.fromEntries(this.fields);
     this.sheet.sheet.from = this.from;
     this.sheet.sheet.joins = this.joins;
-    // this.sheet.from = Object.fromEntries(this.from);
-    // this.sheet.joins = Object.fromEntries(this.joins);
+    this.sheet.sheet.metrics = {};
+    // this.sheet.sheet.measures = [];
+    // la prop 'measures' include tutti e tre i tipi di metriche, questa proprietà tiene in considerazione l'ordine
+    // in cui sono presenti nel report (anche dopo eventuali drag&drop) e, per ripristinare l'ordine corretto, in fase
+    // di apertura dello Sheet, è necessario fare riferimento a questa prop in sheetSelected()
+    // this.sheet.sheet.measures = Object.fromEntries(this.metrics);
     this.sheet.workbook_ref = this.sheet.workbook_ref;
     /* WARN : verifica dei filtri del report.
       * Se non sono presenti ma sono presenti in metriche filtrate elaboro comunque il report
       * altrimenti visualizzo un AVVISO perchè l'esecuzione potrebbe essere troppo lunga
     */
     this.sheet.sheet.filters = [...this.filters];
+
+    this.sheet.sheet.metrics = Object.fromEntries(this.metrics);
+
+    /* for (const [token, value] of this.metrics) {
+      this.sheet.sheet.metrics[token] = value;
+    } */
+    debugger;
     // reset delle metriche
-    delete this.sheet.sheet.metrics;
+    /* delete this.sheet.sheet.metrics;
     delete this.sheet.sheet.advMetrics;
     delete this.sheet.sheet.compositeMetrics;
 
@@ -89,8 +100,7 @@ class Sheets {
           // this.sheet.compositeMetrics[token] = metric;
           break;
       }
-    }
-    debugger;
+    } */
   }
 
   // il tasto Aggiorna deve essere attivato solo quando ci sono delle modifiche fatte
@@ -130,8 +140,14 @@ class Sheets {
     this.sheet.created_at = SheetStorage.sheet.created_at;
     this.sheet.updated_at = SheetStorage.sheet.updated_at;
 
+    // NOTE: 03.12.2024 L'ordine di visualizzazione di questa proprietà, in Storage, non corrisponde al reale ordinamento, che proviene dall'oggetto Map()
+    // Se, in Map() ho ordinato id, descrizione, in Storage potrei vedere descrizione, id perchè l'object {} visualizza
+    // l'ordine alfabetico
     for (const [token, object] of Object.entries(SheetStorage.sheet.sheet.fields)) {
-      this.fields = { token, SQL: object.SQL, name: object.name, datatype: object.datatype, time: (object.time) ? { table: object.table } : false };
+      console.log(object);
+      debugger;
+      this.fields = { token, SQL: object.SQL, name: object.name, datatype: object.datatype, time: (object.time) ? { table: object.time.table } : false };
+      debugger;
     }
 
     // from
@@ -144,30 +160,19 @@ class Sheets {
     }
 
     // joins
-    /* TODO: valutare la possibilitò di aggiungere proprietà (fields, filters, ecc...) alla Classe Sheets così come ho fatto per joins
+    /* TODO: valutare la possibilità di aggiungere proprietà (fields, filters, ecc...) alla Classe Sheets così come ho fatto per joins
     * quindi con una sola riga re-imposto le joins dello Sheet
     */
     this.joins = SheetStorage.sheet.sheet.joins;
 
+    // this.sheet.measures = SheetStorage.sheet.sheet.measures;
+    // this.sheet.sheet.metrics = SheetStorage.sheet.sheet.metrics;
     if (SheetStorage.sheet.sheet.hasOwnProperty('metrics')) {
-      for (const value of Object.values(SheetStorage.sheet.sheet.metrics)) {
-        this.metrics = value;
+      for (const element of Object.values(SheetStorage.sheet.sheet.metrics)) {
+        this.metrics = element;
       }
     }
 
-    if (SheetStorage.sheet.sheet.hasOwnProperty('advMetrics')) {
-      for (const value of Object.values(SheetStorage.sheet.sheet.advMetrics)) {
-        this.metrics = value;
-      }
-    }
-
-    if (SheetStorage.sheet.sheet.hasOwnProperty('compositeMetrics')) {
-      for (const value of Object.values(SheetStorage.sheet.sheet.compositeMetrics)) {
-        this.metrics = value;
-      }
-    }
-
-    return this;
   }
 
   async exist() {
