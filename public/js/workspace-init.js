@@ -557,7 +557,7 @@ const export__datatable_xls = document.getElementById('export__datatable_xls');
       }
     }
     if (urls.length !== 0) {
-      App.showConsole('Recupero tabelle in corso...');
+      App.showConsole('Recupero tabelle in corso...', 'info');
       WorkBookStorage.saveTables(await getTables(urls));
       App.closeConsole();
     }

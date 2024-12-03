@@ -620,6 +620,7 @@ class Cube
         $sqlFilteredMetrics[] = $this->createMetricTable_new($tableName, $groupAdvancedMeasures);
         unset($this->json_info_advanced[$tableName]);
       } else {
+        // dd($groupAdvancedMeasures);
         $this->createMetricTable_new($tableName, $groupAdvancedMeasures, false);
       }
     }
@@ -650,25 +651,20 @@ class Cube
       $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->WHERE_metricTable[$this->factId]);
     }
 
-    // if (array_key_exists($this->factId, $this->where_time_clause)) $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->where_time_clause[$this->factId]);
-    // dd($this->sqlAdvancedMeasures);
-    // dd($this->where_time_clause, $this->WHERE_timingFn, $this->WHERE_metricTable);
     // utilizzo array_merge, verranno unite le join della TIME e, quelle con key uguale, verranno sovrascirtte
     // dal secondo array passato come argomento. In questo caso, se è prsente una metrica con timing function sovrrascive
     // le join della TIME "originale"
-    // dd(array_merge($this->where_time_clause[$this->factId], $this->WHERE_timingFn[$this->factId]));
-    // dump($this->where_time_clause[$this->factId]);
-    // dd($this->WHERE_timingFn[$this->factId]);
-    // if (array_key_exists($this->factId, $this->WHERE_timingFn)) $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->WHERE_timingFn[$this->factId]);
 
-    /* if (array_key_exists($this->factId, $this->WHERE_timingFn)) {
-      $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", array_merge($this->where_time_clause[$this->factId], $this->WHERE_timingFn[$this->factId]));
-    } else {
-      $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->where_time_clause[$this->factId]);
-    } */
-    $this->sqlAdvancedMeasures .= (array_key_exists($this->factId, $this->WHERE_timingFn)) ?
-      "\nAND " . implode("\nAND ", array_merge($this->where_time_clause[$this->factId], $this->WHERE_timingFn[$this->factId])) :
-      "\nAND " . implode("\nAND ", $this->where_time_clause[$this->factId]);
+    switch (true) {
+      case (array_key_exists($this->factId, $this->WHERE_timingFn)):
+        $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", array_merge($this->where_time_clause[$this->factId], $this->WHERE_timingFn[$this->factId]));
+        break;
+      case (array_key_exists($this->factId, $this->where_time_clause)):
+        $this->sqlAdvancedMeasures .= "\nAND " . implode("\nAND ", $this->where_time_clause[$this->factId]);
+        break;
+      default:
+        break;
+    }
 
     // dd($this->sqlAdvancedMeasures);
     $this->WHERE_timingFn = [];
@@ -687,7 +683,7 @@ class Cube
       default:
         break;
     }
-    // dump($createStmt);
+    // dd($createStmt);
     // TODO: eliminare la tabella temporanea come fatto per baseTable
     $result = null;
     if (property_exists($this, 'sql_info')) {

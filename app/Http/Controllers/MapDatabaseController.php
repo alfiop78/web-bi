@@ -27,6 +27,8 @@ use PhpParser\Node\Stmt\TryCatch;
 
 class MapDatabaseController extends Controller
 {
+  private $query = NULL;
+
   public function workspace()
   {
     // recupero ed imposto la connessione al db selezionata dall'utente nella index
@@ -763,102 +765,104 @@ class MapDatabaseController extends Controller
     return response()->json($data);
   }
 
+  private function calcAdvancedMetrics()
+  {
+    $this->query->filteredMetrics = $this->query->process->advancedMeasures->{$this->query->fact};
+    // verifico quali, tra le metriche filtrate, contengono gli stessi filtri.
+    // Le metriche che contengono gli stessi filtri vanno eseguite in un unica query.
+    // Oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
+    $this->query->groupMetricsByFilters = (object)[];
+    // raggruppare per tipologia dei filtri
+    $groupFilters = array();
+    // creo un gruppo di filtri
+    foreach ($this->query->filteredMetrics as $metric) {
+      // dd($metric->formula->filters);
+      // ogni gruppo di filtri ha un tokenGrouup diverso come key dell'array
+      $tokenGroup = "grp_" . bin2hex(random_bytes(4));
+      if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
+    }
+    // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
+    foreach ($groupFilters as $token => $group) {
+      $metrics = array();
+      foreach ($this->query->filteredMetrics as $metric) {
+        // dd($metric->filters);
+        // dd($group);
+        // se la metrica in ciclo non ha filtri deve comunque essere aggiunta all'array $metrics
+        if (empty($metric->filters)) {
+          array_push($metrics, $metric);
+        } elseif (get_object_vars($metric->filters) == get_object_vars($group)) {
+          // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
+          array_push($metrics, $metric);
+        }
+      }
+      // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
+      $this->query->groupMetricsByFilters->$token = $metrics;
+    }
+  }
+
+  private function calcCompositeMetrics()
+  {
+    // dump(!empty((array) $this->query->process->compositeMeasures));
+    if (!empty((array) $this->query->process->compositeMeasures)) {
+      foreach ($this->query->process->compositeMeasures as $metric) {
+        // dd($metric);
+        $sql = [];
+        // converto l'object $metric->metrics in un array per poter controllare con in_array()
+        $metrics = (array) $metric->metrics;
+        // ciclo tutta la formula, quando incontro una metrica la racchiudo in ifNullOperator
+        foreach ($metric->SQL as $element) {
+          // se l'elemento in ciclo è un array si tratta di una metrica composta nidificata, effettuo la stessa operazione
+          // dump($element);
+          if (is_array($element)) {
+            foreach ($element as $el) {
+              $sql[] = (in_array($el, $metrics)) ? "{$this->query->ifNullOperator}({$el}, 0)" : trim($el);
+            }
+          } else {
+            $sql[] = (in_array($element, $metrics)) ? "{$this->query->ifNullOperator}({$element}, 0)" : trim($element);
+          }
+        }
+        // WARN: è necessario aggiungere gli spazi perchè in javascript li elimino con trim()
+        $sql_string = implode(' ', $sql);
+        // if ($metric->alias === 'test_issue245_1') dd($sql_string);
+        // racchiudo le metriche all'interno della composta con la funzione NVL (o IFNULL) ottenendo
+        // Es. : ( NVL(ricavo,0) - NVL(costo,0) / NVL(ricavo,0) * 100)
+        // $this->query->compositeMeasures[] = "\n{$sql_string} AS '{$metric->alias}'";
+        $this->query->compositeMeasures[] = "{$sql_string} AS '{$metric->alias}'";
+        // dd($this->query->compositeMeasures);
+        // dump($this->query->compositeMeasures);
+      }
+    }
+  }
+
   public function sheetCreate(Request $request)
   {
     try {
       $process = json_decode(json_encode($request->all())); // object
-      $query = new Cube($process);
-      $query->datamartFields();
-      foreach ($query->facts as $fact) {
-        $query->fact = $fact;
-        $query->factId = substr($fact, -5);
-        $query->baseTableName = "WB_BASE_{$query->report_id}_{$query->datamart_id}_{$query->factId}";
-        $query->createBaseQuery();
+      $this->query = new Cube($process);
+      $this->query->datamartFields();
+      foreach ($this->query->facts as $fact) {
+        $this->query->fact = $fact;
+        $this->query->factId = substr($fact, -5);
+        $this->query->baseTableName = "WB_BASE_{$this->query->report_id}_{$this->query->datamart_id}_{$this->query->factId}";
+        $this->query->createBaseQuery();
         // TODO: rinominare in "calcolo metriche di base"
-        $query->base_table_new();
+        $this->query->base_table_new();
         // dd($result_base_metrics);
         // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
         // creo una tabella temporanea per ogni metrica filtrata
-        // dd($query->process->{"advancedMeasures"});
-        // dd(empty($query->process->{"advancedMeasures"}));
-        if (!empty($query->process->advancedMeasures)) {
+        // dd($this->query->process->{"advancedMeasures"});
+        // dd(empty($this->query->process->{"advancedMeasures"}));
+        if (!empty($this->query->process->advancedMeasures)) {
           // sono presenti metriche avanzate
-          if (property_exists($query->process->advancedMeasures, $fact)) {
-            $query->filteredMetrics = $query->process->advancedMeasures->{$fact};
-            // verifico quali, tra le metriche filtrate, contengono gli stessi filtri.
-            // Le metriche che contengono gli stessi filtri vanno eseguite in un unica query.
-            // Oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
-            $query->groupMetricsByFilters = (object)[];
-            // raggruppare per tipologia dei filtri
-            $groupFilters = array();
-            // creo un gruppo di filtri
-            foreach ($query->filteredMetrics as $metric) {
-              // dd($metric->formula->filters);
-              // ogni gruppo di filtri ha un tokenGrouup diverso come key dell'array
-              $tokenGroup = "grp_" . bin2hex(random_bytes(4));
-              if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
-            }
-            // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
-            foreach ($groupFilters as $token => $group) {
-              $metrics = array();
-              foreach ($query->filteredMetrics as $metric) {
-                // dd($metric->filters);
-                // dd($group);
-                // se la metrica in ciclo non ha filtri deve comunque essere aggiunta all'array $metrics
-                if (empty($metric->filters)) {
-                  array_push($metrics, $metric);
-                } elseif (get_object_vars($metric->filters) == get_object_vars($group)) {
-                  // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
-                  array_push($metrics, $metric);
-                }
-              }
-              // dd($metrics);
-              // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
-              $query->groupMetricsByFilters->$token = $metrics;
-            }
-            // dd($query->groupMetricsByFilters);
-            $metricTable = $query->createMetricDatamarts_new();
+          if (property_exists($this->query->process->advancedMeasures, $fact)) {
+            $this->calcAdvancedMetrics();
+            $this->query->createMetricDatamarts_new();
           }
         }
       }
-      // TEST:
-      /* if (!empty($query->process->compositeMeasures)) {
-        foreach ($query->process->compositeMeasures as $metric) {
-          dd($metric);
-          $query->compositeMeasures[] = implode(" ", $metric->SQL) . " AS '{$metric->alias}'";
-        }
-      } */
-      // TEST:
-      if (!empty($query->process->compositeMeasures)) {
-        foreach ($query->process->compositeMeasures as $metric) {
-          // dump($metric);
-          $sql = [];
-          // converto l'object $metric->metrics in un array per poter controllare con in_array()
-          $metrics = (array) $metric->metrics;
-          // ciclo tutta la formula, quando incontro una metrica la racchiudo in ifNullOperator
-          foreach ($metric->SQL as $element) {
-            // se l'elemento in ciclo è un array si tratta di una metrica composta nidificata, effettuo la stessa operazione
-            // dump($element);
-            if (is_array($element)) {
-              foreach ($element as $el) {
-                $sql[] = (in_array($el, $metrics)) ? "{$query->ifNullOperator}({$el}, 0)" : trim($el);
-              }
-            } else {
-              $sql[] = (in_array($element, $metrics)) ? "{$query->ifNullOperator}({$element}, 0)" : trim($element);
-            }
-          }
-          // WARN: è necessario aggiungere gli spazi perchè in javascript li elimino con trim()
-          $sql_string = implode(' ', $sql);
-          // if ($metric->alias === 'test_issue245_1') dd($sql_string);
-          // racchiudo le metriche all'interno della composta con la funzione NVL (o IFNULL) ottenendo
-          // Es. : ( NVL(ricavo,0) - NVL(costo,0) / NVL(ricavo,0) * 100)
-          // $query->compositeMeasures[] = "\n{$sql_string} AS '{$metric->alias}'";
-          $query->compositeMeasures[] = "{$sql_string} AS '{$metric->alias}'";
-          // dd($query->compositeMeasures);
-          // dump($query->compositeMeasures);
-        }
-      }
-      return $query->datamart_new();
+      // calcolo metriche composte
+      $this->calcCompositeMetrics();
+      return $this->query->datamart_new();
     } catch (\Throwable $th) {
       // abort(500);
       // $msg = $th->getMessage();
@@ -929,58 +933,6 @@ class MapDatabaseController extends Controller
         }
 
         $timingFunctions = ['last-year', 'last-month', 'ecc..'];
-        /* foreach ($json_sheet->facts as $fact) {
-          // metriche di base
-          // dd($json_sheet->sheet);
-          if (property_exists($json_sheet->sheet, 'metrics')) {
-            foreach ($json_sheet->sheet->metrics as $token => $object) {
-              // anche qui, come in 'fields', alcune proprietà vanno recuperato da json_sheet mentre altre dal WorkBook
-              $metrics->$token = (object)[
-                'token' => $object->token, // TODO: probabilmente il token non serve
-                "alias" => $object->alias,
-                "aggregateFn" => $object->aggregateFn,
-                "SQL" => $json_sheet->sheet->metrics->{$token}->SQL,
-                "distinct" => $json_sheet->sheet->metrics->{$token}->distinct
-              ];
-              $process->baseMeasures->$fact = $metrics;
-            }
-          }
-
-          // metriche avanzate
-          if (property_exists($json_sheet->sheet, 'advMetrics')) {
-            foreach ($json_sheet->sheet->advMetrics as $token => $object) {
-              // recupero la metrica avanzata dal DB
-              if (BImetric::find($token)) {
-                $json_advanced_measures = json_decode(BImetric::where("token", $token)->first('json_value')->json_value);
-                // recupero i filtri contenuti all'interno della metrica avanzata in ciclo
-                $json_filters_metric = (object)[];
-                foreach ($json_advanced_measures->filters as $filterToken) {
-                  // se il filtro è un timingFn recupero la definizione $object-timingFn che si trova all'interno della metrica
-                  if (in_array($filterToken, $timingFunctions)) {
-                    $json_filters_metric->$filterToken = $json_advanced_measures->timingFn->$filterToken;
-                  } else {
-                    // BUG: verifica se l'elemento è presente (è stato versionato)
-                    if (BIfilter::find($filterToken)) {
-                      $json_filters_metric->$filterToken = json_decode(BIfilter::where("token", $filterToken)->first('json_value')->json_value);
-                    } else {
-                      return "Filtro (objectId : {$filterToken}) non presente nel Database";
-                    }
-                  }
-                }
-                $advancedMeasures->$token = (object)[
-                  "alias" => $object->alias,
-                  "aggregateFn" => $object->aggregateFn,
-                  "SQL" => $json_advanced_measures->SQL,
-                  "distinct" => $json_advanced_measures->distinct,
-                  "filters" => $json_filters_metric
-                ];
-                $process->advancedMeasures->$fact = $advancedMeasures;
-              } else {
-                return "Metrica (objectId : {$token}) non presente nel Database";
-              }
-            }
-          }
-        } */
         foreach ($json_sheet->facts as $fact) {
           // metriche di base
           // dd($json_sheet->sheet);
@@ -988,7 +940,7 @@ class MapDatabaseController extends Controller
             foreach ($json_sheet->sheet->metrics as $token => $object) {
               // anche qui, come in 'fields', alcune proprietà vanno recuperato da json_sheet mentre altre dal WorkBook
               // utilizzo la stessa logica presente in createProcess()
-              dump($object);
+              // dump($object);
               switch ($object->type) {
                 case 'composite':
                   if (BImetric::find($token)) {
@@ -1063,96 +1015,37 @@ class MapDatabaseController extends Controller
     // curl http://127.0.0.1:8000/curl/process/210wu29ifoh/schedule
     // con il login : curl https://user:psw@gaia.automotive-cloud.com/curl/process/{processToken}/schedule
     // ...oppure : curl -u 'user:psw' https://gaia.automotive-cloud.com/curl/process/{processToken}/schedule
-    dump($process);
-    $query = new Cube($process);
-    $query->datamartFields();
-    foreach ($query->facts as $fact) {
-      $query->fact = $fact;
-      $query->factId = substr($fact, -5);
-      $query->baseTableName = "WB_BASE_{$query->report_id}_{$query->datamart_id}_{$query->factId}";
-      $query->createBaseQuery();
-      // dump(($query->process->baseMeasures));
-      dump(!empty((array) $query->process->baseMeasures));
-      if (!empty((array) $query->process->baseMeasures)) $query->base_table_new();
+    // dump($process);
+    $this->query = new Cube($process);
+    $this->query->datamartFields();
+    foreach ($this->query->facts as $fact) {
+      $this->query->fact = $fact;
+      $this->query->factId = substr($fact, -5);
+      $this->query->baseTableName = "WB_BASE_{$this->query->report_id}_{$this->query->datamart_id}_{$this->query->factId}";
+      $this->query->createBaseQuery();
+      // dump(($this->query->process->baseMeasures));
+      // dump(!empty((array) $this->query->process->baseMeasures));
+      // se sono presenti metrica di base calcolo base_table_new()
+      if (!empty((array) $this->query->process->baseMeasures)) $this->query->base_table_new();
       // dd($res === true ||$res === NULL);
       // se la risposta == NULL la creazione della tabella temporanea è stata eseguita correttamente (senza errori)
       // creo una tabella temporanea per ogni metrica filtrata
-      // dd($query->process->{"advancedMeasures"});
-      // dd(empty($query->process->{"advancedMeasures"}));
-      dump(!empty((array) $query->process->advancedMeasures));
-      if (!empty((array) $query->process->advancedMeasures)) {
+      // dd($this->query->process->{"advancedMeasures"});
+      // dd(empty($this->query->process->{"advancedMeasures"}));
+      // dump(!empty((array) $this->query->process->advancedMeasures));
+      if (!empty((array) $this->query->process->advancedMeasures)) {
         // sono presenti metriche avanzate
-        if (property_exists($query->process->advancedMeasures, $fact)) {
-          $query->filteredMetrics = $query->process->advancedMeasures->$fact;
-          // verifico quali, tra le metriche filtrate, contengono gli stessi filtri.
-          // Le metriche che contengono gli stessi filtri vanno eseguite in un unica query.
-          // Oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
-          $query->groupMetricsByFilters = (object)[];
-          // raggruppare per tipologia dei filtri
-          $groupFilters = array();
-          // creo un gruppo di filtri
-          foreach ($query->filteredMetrics as $metric) {
-            // dd($metric->formula->filters);
-            // ogni gruppo di filtri ha un tokenGrouup diverso come key dell'array
-            $tokenGroup = "grp_" . bin2hex(random_bytes(4));
-            if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
-          }
-          // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
-          foreach ($groupFilters as $token => $group) {
-            $metrics = array();
-            foreach ($query->filteredMetrics as $metric) {
-              // dd($metric->filters);
-              // dd($group);
-              // se la metrica in ciclo non ha filtri deve comunque essere aggiunta all'array $metrics
-              if (empty($metric->filters)) {
-                array_push($metrics, $metric);
-              } elseif (get_object_vars($metric->filters) == get_object_vars($group)) {
-                // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
-                array_push($metrics, $metric);
-              }
-            }
-            // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
-            $query->groupMetricsByFilters->$token = $metrics;
-          }
-          // dd($query->groupMetricsByFilters);
-          $query->createMetricDatamarts_new();
+        if (property_exists($this->query->process->advancedMeasures, $fact)) {
+          $this->calcAdvancedMetrics();
+          $this->query->createMetricDatamarts_new();
         }
       }
     }
     // metriche composte
-    dump(!empty((array) $query->process->compositeMeasures));
-    if (!empty((array) $query->process->compositeMeasures)) {
-      foreach ($query->process->compositeMeasures as $metric) {
-        // dd($metric);
-        $sql = [];
-        // converto l'object $metric->metrics in un array per poter controllare con in_array()
-        $metrics = (array) $metric->metrics;
-        // ciclo tutta la formula, quando incontro una metrica la racchiudo in ifNullOperator
-        foreach ($metric->SQL as $element) {
-          // se l'elemento in ciclo è un array si tratta di una metrica composta nidificata, effettuo la stessa operazione
-          // dump($element);
-          if (is_array($element)) {
-            foreach ($element as $el) {
-              $sql[] = (in_array($el, $metrics)) ? "{$query->ifNullOperator}({$el}, 0)" : trim($el);
-            }
-          } else {
-            $sql[] = (in_array($element, $metrics)) ? "{$query->ifNullOperator}({$element}, 0)" : trim($element);
-          }
-        }
-        // WARN: è necessario aggiungere gli spazi perchè in javascript li elimino con trim()
-        $sql_string = implode(' ', $sql);
-        // if ($metric->alias === 'test_issue245_1') dd($sql_string);
-        // racchiudo le metriche all'interno della composta con la funzione NVL (o IFNULL) ottenendo
-        // Es. : ( NVL(ricavo,0) - NVL(costo,0) / NVL(ricavo,0) * 100)
-        // $query->compositeMeasures[] = "\n{$sql_string} AS '{$metric->alias}'";
-        $query->compositeMeasures[] = "{$sql_string} AS '{$metric->alias}'";
-        // dd($query->compositeMeasures);
-        // dump($query->compositeMeasures);
-      }
-    }
+    $this->calcCompositeMetrics();
 
     try {
-      if ($query->datamart_new()) return "OK\n";
+      if ($this->query->datamart_new()) return "OK\n";
     } catch (\Throwable $th) {
       $msg = $th->getMessage();
       return response()->json(['error' => 500, 'message' => "Errore esecuzione query: $msg"], 500);
@@ -1165,10 +1058,10 @@ class MapDatabaseController extends Controller
     // echo gettype($cube);
     // per accedere al contenuto della $request lo converto in json codificando la $request e decodificandolo in json
     $process = json_decode(json_encode($request->all())); // object
-    $query = new Cube($process);
-    $query->datamartFields();
-    foreach ($query->facts as $fact) {
-      $query->sql_info = (object)[
+    $this->query = new Cube($process);
+    $this->query->datamartFields();
+    foreach ($this->query->facts as $fact) {
+      $this->query->sql_info = (object)[
         "SELECT" => (object)[],
         "METRICS" => (object)[],
         "FROM" => (object)[],
@@ -1177,51 +1070,25 @@ class MapDatabaseController extends Controller
         "AND" => (object)[],
         "GROUP BY" => (object)[]
       ];
-      $query->fact = $fact;
-      $query->factId = substr($fact, -5);
-      $query->baseTableName = "WB_BASE_{$query->report_id}_{$query->datamart_id}_{$query->factId}";
-      $query->createBaseQuery();
-      $resultSQL['base'][] = $query->base_table_new();
+      $this->query->fact = $fact;
+      $this->query->factId = substr($fact, -5);
+      $this->query->baseTableName = "WB_BASE_{$this->query->report_id}_{$this->query->datamart_id}_{$this->query->factId}";
+      $this->query->createBaseQuery();
+      $resultSQL['base'][] = $this->query->base_table_new();
       // return $resultSQL;
       // dd($res === true ||$res === NULL);
       // creo una tabella temporanea per ogni metrica filtrata
-      if (!empty($query->process->{"advancedMeasures"})) {
+      if (!empty($this->query->process->{"advancedMeasures"})) {
         // sono presenti metriche avanzate
-        if (property_exists($query->process->{"advancedMeasures"}, $fact)) {
-          $query->filteredMetrics = $query->process->{'advancedMeasures'}->{$fact};
-          // verifico quali, tra le metriche filtrate, contengono gli stessi filtri.
-          // Le metriche che contengono gli stessi filtri vanno eseguite in un unica query.
-          // Oggetto contenente un array di metriche appartenenti allo stesso gruppo (contiene gli stessi filtri)
-          $query->groupMetricsByFilters = (object)[];
-          // raggruppare per tipologia dei filtri
-          $groupFilters = array();
-          // creo un gruppo di filtri
-          foreach ($query->filteredMetrics as $metric) {
-            // dd($metric->formula->filters);
-            // ogni gruppo di filtri ha un tokenGrouup diverso come key dell'array
-            $tokenGroup = "grp_" . bin2hex(random_bytes(4));
-            if (!in_array($metric->filters, $groupFilters)) $groupFilters[$tokenGroup] = $metric->filters;
-          }
-          // per ogni gruppo di filtri vado a posizionare le relative metriche al suo interno
-          foreach ($groupFilters as $token => $group) {
-            $metrics = array();
-            foreach ($query->filteredMetrics as $metric) {
-              if (get_object_vars($metric->filters) == get_object_vars($group)) {
-                // la metrica in ciclo ha gli stessi filtri del gruppo in ciclo, la aggiungo
-                array_push($metrics, $metric);
-              }
-            }
-            // per ogni gruppo aggiungo l'array $metrics che contiene le metriche che hanno gli stessi filtri del gruppo in ciclo
-            $query->groupMetricsByFilters->$token = $metrics;
-          }
-          // dd($query->groupMetricsByFilters);
-          $query->json_info_advanced = [];
-          $resultSQL['advanced'] = $query->createMetricDatamarts_new();
+        if (property_exists($this->query->process->{"advancedMeasures"}, $fact)) {
+          $this->calcAdvancedMetrics();
+          $this->query->json_info_advanced = [];
+          $resultSQL['advanced'] = $this->query->createMetricDatamarts_new();
         }
       }
     }
     ob_clean();
-    $resultSQL['datamart'] = $query->datamart_new();
+    $resultSQL['datamart'] = $this->query->datamart_new();
     return $resultSQL;
   }
 }
