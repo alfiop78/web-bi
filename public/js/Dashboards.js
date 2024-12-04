@@ -375,6 +375,7 @@ class Resources extends Dashboards {
     return this.datatype;
   }
 
+  // WARN: 04.12.2024 Questa funzione deve essere univoca sia per init-sheet.js che per Dashboards.js
   createDataView() {
     this.viewColumns = [], this.viewMetrics = [];
     this.specs.data.group.key.forEach(column => {
@@ -414,16 +415,22 @@ class Resources extends Dashboards {
             // in formulaJoined ciclo tutti gli elementi della Formula, imposto i
             // valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
             formula.forEach(formulaEl => {
-              if (formulaEl.alias) {
+              /* if (formulaEl.alias) {
                 formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
               } else {
+                formulaJoined.push(formulaEl);
+              } */
+              if (dt.getColumnIndex(formulaEl) !== -1) {
+                formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl)));
+              } else {
+                // altrimenti aggiungo nella formula le altre componenti, come le parentesi ad esempio e gli operatori per il calcolo
                 formulaJoined.push(formulaEl);
               }
             });
             // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
             // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
             // effettuo un controllo sul risultato in caso fosse NaN
-            const result = (isNaN(eval(formulaJoined.join('')))) ? 0 : eval(formulaJoined.join(''));
+            const result = (isNaN(eval(formulaJoined.join(' ')))) ? 0 : eval(formulaJoined.join(' '));
             let total = (result) ? { v: result } : { v: result, f: '-' };
             // console.log(result);
             // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));

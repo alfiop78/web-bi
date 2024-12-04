@@ -212,7 +212,9 @@ class Sheets {
   checkMultiFactFields(token) {
     let result = true;
     if (this.fact.size > 1) {
-      result = [...this.fact].every(fact => (WorkBook.dataModel.get(fact).hasOwnProperty(WorkBook.field.get(token).tableAlias)));
+      // result = [...this.fact].every(fact => (WorkBook.dataModel.get(fact).hasOwnProperty(WorkBook.field.get(token).tableAlias)));
+      result = [...this.fact].every(fact => (WorkBook.dataModel.get(fact).hasOwnProperty(WorkBook.elements.get(token).tableAlias)));
+      // FIX: 04.12.2024 issue#264
       // console.log(result);
     }
     return result;
