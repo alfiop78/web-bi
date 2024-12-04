@@ -98,8 +98,8 @@ code {
 
 .defined_contents>code,
 .defined_contents>code[data-field] {
-  text-overflow: ellipsis;
-  overflow: hidden;
+  /* text-overflow: ellipsis; */
+  /* overflow: hidden; */
   text-wrap: nowrap;
 }
 
