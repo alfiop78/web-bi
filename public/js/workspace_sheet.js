@@ -152,5 +152,17 @@ async function preview() {
 }
 
 function sheetInformations() {
-
+  document.querySelectorAll('#info>.info').forEach(info => info.hidden = true);
+  if (Sheet) {
+    // sono presenti info, elimino la classe css 'none'
+    document.querySelector('#info.informations').classList.remove('none');
+    for (const [key, value] of Object.entries(Sheet.getInformations())) {
+      const ref = document.getElementById(key);
+      if (ref) {
+        ref.hidden = false;
+        const refContent = document.getElementById(`${key}_content`);
+        refContent.textContent = value;
+      }
+    }
+  }
 }
