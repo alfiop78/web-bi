@@ -592,7 +592,8 @@ function handleDragEnd(e) {
   // NOTE: clonazione Map()
   const fieldsClone = new Map(Sheet.fields);
   Sheet.fields.clear();
-  document.querySelectorAll('.column-defined.defined').forEach(field => {
+  document.querySelectorAll('.column-defined.defined:not([data-removed])').forEach(field => {
+    if (!fieldsClone.has(field.dataset.id)) return;
     Sheet.fields = {
       token: field.dataset.id,
       name: fieldsClone.get(field.dataset.id).name,
@@ -607,7 +608,8 @@ function handleDragEnd(e) {
   const metricsClone = new Map(Sheet.metrics);
   Sheet.metrics.clear();
   // console.log(metricsClone);
-  document.querySelectorAll('.metric-defined.defined').forEach(metric => {
+  document.querySelectorAll('.metric-defined.defined:not([data-removed])').forEach(metric => {
+    if (!metricsClone.has(metric.dataset.id)) return;
     if (metricsClone.get(metric.dataset.id).type === 'composite') {
       // recupero le metriche che la compongono
       Object.keys(metricsClone.get(metric.dataset.id).metrics).forEach(token => {
