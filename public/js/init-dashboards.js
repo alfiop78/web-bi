@@ -24,7 +24,7 @@ var Resource = new Resources();
     // console.log(dataFormatted);
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
     // Creo i filtri nella Classe Dashboards
-    const controls = Resource.drawControls(document.getElementById('filter_div'));
+    const controls = Resource.drawControls(document.getElementById('filter__dashboard'));
     debugger;
 
     // console.log(JSON.parse(Resource.view.toJSON()));
@@ -106,7 +106,7 @@ var Resource = new Resources();
     // console.log(dataFormatted);
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
     // Creo i filtri nella Classe Dashboards
-    const controls = Resource.drawControls(document.getElementById('filter_div'));
+    const controls = Resource.drawControls(document.getElementById('filter__dashboard'));
 
     // console.log(JSON.parse(Resource.view.toJSON()));
     // utilizzo senza i metodi setter. Le proprietà del ChartWrapper sono incluse in Resource.specs

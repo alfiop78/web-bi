@@ -590,7 +590,7 @@ saveColumnConfig.onclick = () => {
       // non è presente, lo aggiungo
       Resource.specs.filters.push({
         id: Resource.dataGroup.getColumnId(dataGroupIndex),
-        containerId: `flt-${label}`,
+        containerId: `flt-${Resource.specs.token}-${label}`,
         filterColumnLabel: label,
         caption: label
       });

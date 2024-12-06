@@ -78,16 +78,17 @@ fieldset legend {
   padding: 4px;
 }
 
-#filter_div {
-  /* display: flex; */
-  /* flex-wrap: wrap; */
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+#filter__dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  /* display: grid; */
+  /* grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); */
   user-select: none;
   background-color: #c9c9c9;
   margin: unset;
   border-radius: 2px;
   box-shadow: 0px 0px 5px 0px grey;
+  gap: 8px;
 }
 
 .filter-container {
@@ -244,7 +245,32 @@ fieldset legend {
   border-radius: 4px;
   padding: 1em;
   display: grid;
-  grid-template-rows: 1fr auto;
+  /* grid-template-rows: 1fr auto; */
+  grid-template-rows: auto 1fr auto;
+  grid-row-gap: 8px;
+}
+
+.preview>.layout .filters__chart {
+  display: inline-flex;
+  padding: 1em;
+  border-radius: 4px;
+  background: whitesmoke;
+  box-shadow: 0px 0px 5px 0px grey;
+  column-gap: 8px;
+}
+
+.preview>.layout .filters__chart>.filter__container, .preview #filter__dashboard>.filter__container {
+  display: flex;
+  align-items: center;
+  column-gap: 4px;
+  height: 35px;
+  background: #b7cddd;
+  border-radius: 4px;
+  margin: 8px;
+}
+
+.preview>.layout .filters__chart>.filter__container>span, .preview #filter__dashboard>.filter__container>span {
+  min-width: 120px
 }
 
 .layout>.filters {

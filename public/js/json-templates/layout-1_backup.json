@@ -25,7 +25,7 @@
               "childs": [
                 {
                   "tag": "div",
-                  "id": "filter_div",
+                  "id": "filter__dashboard",
                   "classes": [
                     "contentObject"
                   ]

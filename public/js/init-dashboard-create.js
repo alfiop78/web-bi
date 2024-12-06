@@ -4,11 +4,15 @@ var App = new Application();
 var Template = new Templates();
 var Storage = new SheetStorages();
 var Resource = new Resources();
+// dialogs
+let dlg__config_filterDashboard = document.getElementById('dlg__config_dashboardFilters');
+// templates
+const template__li = document.getElementById('template__li');
 (() => {
   var app = {
     layoutRef: document.getElementById('template-layout'),
     // templates
-    tmplList: document.getElementById('tmpl-li'),
+    // tmplList: document.getElementById('tmpl-li'),
     // dialogs
     dlgTemplateLayout: document.getElementById('dlg-template-layout'),
     dlgChartSection: document.getElementById('dlg-chart'),
@@ -156,7 +160,7 @@ var Resource = new Resources();
         console.log(data);
         const ul = document.getElementById('ul-dashboards');
         data.forEach(dashboard => {
-          const content = app.tmplList.content.cloneNode(true);
+          const content = template__li.content.cloneNode(true);
           const li = content.querySelector('li[data-li]');
           const span = li.querySelector('span');
           li.dataset.token = dashboard.token;
@@ -252,7 +256,7 @@ var Resource = new Resources();
         const ul = document.getElementById('ul-sheets');
         ul.querySelectorAll('li').forEach(el => el.remove());
         data.forEach(sheet => {
-          const content = app.tmplList.content.cloneNode(true);
+          const content = template__li.content.cloneNode(true);
           const li = content.querySelector('li[data-li]');
           const span = li.querySelector('span');
           li.dataset.token = sheet.token;
@@ -493,6 +497,8 @@ var Resource = new Resources();
     // aggiungo un token per identificare, in publish(), il report (datamart_id)
     Resource.ref.dataset.token = e.currentTarget.dataset.token;
     Resource.specs = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
+    // debugger;
+    Template.createFilterSection();
     Resource.resource = {
       datamart_id: e.currentTarget.dataset.datamartId,
       userId: e.currentTarget.dataset.userId
@@ -506,7 +512,11 @@ var Resource = new Resources();
 
   app.drawTable = () => {
     // aggiungo i filtri se sono stati impostati nel preview sheet
-    Template.createFilterSection();
+    // console.log(Template);
+    // console.log(Resource);
+    // console.log(Resource.ref);
+    // debugger;
+    // Template.createFilterSection();
 
     Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
     // Resource.DOMref = new google.visualization.Table(document.getElementById('chart_div'));
@@ -606,7 +616,7 @@ var Resource = new Resources();
     // target corrisponde all'elemento .preview-filter, mentre currentTarget corrisponde al
     // contenitore del filtro
     if (!e.currentTarget.classList.contains('dropzone')) return;
-    const parentDiv = document.getElementById('filter_div');
+    const parentDiv = document.getElementById('filter__dashboard');
     // id filtro che sto draggando (flt-0, flt-1, ecc...)
     const elementId = e.dataTransfer.getData('text/plain');
     // elementRef è l'elemento che sto spostando "newFilter"...
@@ -646,9 +656,46 @@ var Resource = new Resources();
     console.log(Resource.ref);
     Resource.ref.querySelector('div').remove();
     Resource.ref.classList.remove('defined');
-    document.querySelectorAll('#filter_div.contentObject>*').forEach(el => el.remove());
+    document.querySelectorAll('#filter__dashboard.contentObject>*').forEach(el => el.remove());
   }
 
   app.getTemplates();
 
 })();
+
+function addDashboardFilter(e) {
+  console.log(e.currentTarget);
+  const filter__dashboard = document.getElementById('filter__dashboard');
+
+  const template = document.getElementById('template__filter');
+  const tmplFilterContent = template.content.cloneNode(true);
+  const container = tmplFilterContent.querySelector('.filter__container');
+  // const filterDiv = container.querySelector('.preview-filter');
+  const span = container.querySelector('span');
+  const btnOptions = container.querySelector('button');
+  container.id = e.currentTarget.id;
+  container.addEventListener('click', handleFilterDashboard);
+  container.dataset.name = e.currentTarget.dataset.name;
+  container.dataset.label = e.currentTarget.dataset.label;
+  btnOptions.dataset.id = e.currentTarget.id;
+  btnOptions.dataset.label = e.currentTarget.dataset.label;
+  span.innerText = e.currentTarget.dataset.caption;
+  filter__dashboard.appendChild(container);
+}
+
+function handleFilterDashboard(e) {
+  // per ogni resource aggiunta alla dashboard, ciclo i propri filtri
+  //
+  Resource.specs.filters.forEach(filter => {
+    const parent = document.getElementById('filters__sameReport');
+    if (filter.containerId === e.currentTarget.id) return;
+    const template = template__li.content.cloneNode(true);
+    const li = template.querySelector('li');
+    const span = li.querySelector('span');
+    span.id = `li_${filter.containerId}`;
+    span.dataset.name = `name_${filter.id}`;
+    span.innerText = `name_${filter.id}`
+    parent.appendChild(li);
+  });
+  dlg__config_filterDashboard.showModal();
+}

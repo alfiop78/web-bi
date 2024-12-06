@@ -53,16 +53,23 @@
     </nav>
   </div>
 
-  <template id="tmpl-li">
+  <template id="template__li">
     <li class="select-list" data-li data-element-search data-label data-searchable="true">
       <span></span>
     </li>
   </template>
 
   <template id="template__filter">
-    <div class="filter-container dropzone">
+    <!-- <div class="filter-container dropzone">
       <div class="preview-filter" draggable="true"></div>
       <button type="button" data-fn="btnRemoveFilter" class="material-symbols-rounded md-18">delete</button>
+    </div> -->
+    <div class="filter__container" draggable="true">
+      <i class="button-icon material-symbols-rounded md-18">drag_indicator</i>
+      <span></span>
+      <button type="button" class="button-icon material-symbols-rounded md-18">info</button>
+      <!-- <div class="defined_contents"> -->
+      <!-- </div> -->
     </div>
   </template>
 
@@ -180,6 +187,41 @@
               <section class="dlg-buttons">
                 <button name="cancel" value="chiudi">Chiudi</button>
                 <button data-fn="btnTemplateDone" id="btn-template-save">OK</button>
+              </section>
+            </section>
+          </dialog>
+
+          <dialog id="dlg__config_dashboardFilters">
+            <section class="dlg-grid">
+              <h5 class="title">Definizione dei filtri della pagina</h5>
+              <section class="dlg-content">
+                <section class="row">
+                  <section class="col">
+                    <span>test</span>
+                  </section>
+                </section>
+                <section class="row">
+                  <section class="col col-5-span">
+                    <!-- <p>section 1</p> -->
+                    <div class="list-search">
+                      <!-- <input type="search" id="input-search-metrics-dlg-composite" placeholder="Ricerca" data-element-search="metrics-dlg-composite" class="input-search" autocomplete="off" tabindex="3"> -->
+                        <p>Filtri del report</p>
+                      <div class="relative-ul">
+                        <ul id="filters__sameReport"></ul>
+                      </div>
+                    </div>
+                  </section>
+                  <section class="col col-5-span">
+                    <p>section 2</p>
+                  </section>
+                  <section class="col col-2-span">
+                    <p>Reports</p>
+                  </section>
+                </section>
+              </section>
+              <section class="dlg-buttons">
+                <button name="cancel" value="chiudi">Chiudi</button>
+                <button id="btn__filterDashboard_done">Salva</button>
               </section>
             </section>
           </dialog>

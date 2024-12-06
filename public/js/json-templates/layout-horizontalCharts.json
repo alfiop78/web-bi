@@ -23,7 +23,7 @@
           "childs": [
             {
               "tag": "div",
-              "id": "filter_div",
+              "id": "filter__dashboard",
               "classes": [
                 "contentObject"
               ],
@@ -42,8 +42,18 @@
           },
           "childs": [
             {
+              "tag": "section",
+              "id": "flt__chart__1",
+              "classes": [
+                "filters__chart"
+              ],
+              "attributes": {
+                "chartId": "chart__1"
+              }
+            },
+            {
               "tag": "div",
-              "id": "chart__left",
+              "id": "chart__1",
               "classes": [
                 "chart-elements",
                 "contentObject"
@@ -66,8 +76,18 @@
           },
           "childs": [
             {
+              "tag": "section",
+              "id": "flt__chart__2",
+              "classes": [
+                "filters__chart"
+              ],
+              "attributes": {
+                "chartId": "chart__2"
+              }
+            },
+            {
               "tag": "div",
-              "id": "chart__right",
+              "id": "chart__2",
               "classes": [
                 "chart-elements",
                 "contentObject"

@@ -10,7 +10,7 @@
   font-family: 'Barlow', sans-serif !important;
 }
 
-#filter_div {
+#filter__dashboard {
   display: flex;
   flex-wrap: wrap;
   user-select: none;
