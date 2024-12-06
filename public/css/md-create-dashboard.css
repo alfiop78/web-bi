@@ -296,6 +296,7 @@ fieldset legend {
 /* layout 2 righe / 1 colonna */
 
 /* Layout 2 righe / 2 colonne uguali */
+
 .thumbnails>.layout.horizontalCharts {
   grid-template: 40px 1fr / 1fr 1fr;
   grid-template-areas:
@@ -303,13 +304,20 @@ fieldset legend {
     "leftmain rightmain";
 }
 
-.thumbnails>.horizontalCharts>.left {
+.preview>.layout.horizontalCharts {
+  grid-template: minmax(60px, auto) 1fr / 1fr 1fr;
+  grid-template-areas:
+    "filterArea filterArea"
+    "leftmain rightmain";
+}
+
+.horizontalCharts>.left {
   grid-column: 1 / 2;
   background-color: #bfbdbd;
   grid-area: leftmain;
 }
 
-.thumbnails>.horizontalCharts>.right {
+.horizontalCharts>.right {
   grid-column: 2 / 4;
   background-color: #bfbdbd;
   grid-area: rightmain;

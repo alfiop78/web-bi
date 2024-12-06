@@ -59,7 +59,7 @@
     </li>
   </template>
 
-  <template id="template-filter">
+  <template id="template__filter">
     <div class="filter-container dropzone">
       <div class="preview-filter" draggable="true"></div>
       <button type="button" data-fn="btnRemoveFilter" class="material-symbols-rounded md-18">delete</button>

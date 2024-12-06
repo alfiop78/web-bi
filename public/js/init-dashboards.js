@@ -25,6 +25,7 @@ var Resource = new Resources();
     var gdashboard = new google.visualization.Dashboard(document.getElementById('template-layout'));
     // Creo i filtri nella Classe Dashboards
     const controls = Resource.drawControls(document.getElementById('filter_div'));
+    debugger;
 
     // console.log(JSON.parse(Resource.view.toJSON()));
     // utilizzo senza i metodi setter. Le proprietà del ChartWrapper sono incluse in Resource.specs

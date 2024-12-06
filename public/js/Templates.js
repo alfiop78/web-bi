@@ -2,6 +2,7 @@ class Templates {
   #data = new Map();
   constructor() {
     this.resourceActionsTmpl = document.getElementById('tmpl-actions-resource');
+    this.filter__div;
   }
 
   set data(value) {
@@ -11,10 +12,37 @@ class Templates {
 
   get data() { return this.#data; }
 
+  createFilterSection() {
+    console.log(this.filter__div);
+    Resource.specs.filters.forEach(filter => {
+      const template = document.getElementById('template__filter');
+      const tmplFilterContent = template.content.cloneNode(true);
+      const containerDiv = tmplFilterContent.querySelector('.filter-container.dropzone');
+      const filterDiv = containerDiv.querySelector('.preview-filter');
+      const btnRemove = containerDiv.querySelector('button');
+      filterDiv.id = filter.containerId;
+      filterDiv.dataset.name = filter.id;
+      // filterDiv.addEventListener('dragstart', app.filterDragStart);
+      // containerDiv.addEventListener('dragover', app.filterDragOver);
+      // containerDiv.addEventListener('dragenter', app.filterDragEnter);
+      // containerDiv.addEventListener('dragleave', app.filterDragLeave);
+      // containerDiv.addEventListener('drop', app.filterDrop);
+      // containerDiv.addEventListener('dragend', app.filterDragEnd);
+      btnRemove.dataset.id = filter.containerId;
+      btnRemove.dataset.label = filter.filterColumnLabel;
+      filterDiv.innerText = filter.caption;
+      this.filter__div.appendChild(containerDiv);
+    });
+    this.actionsContent = this.resourceActionsTmpl.content.cloneNode(true);
+    this.resourceAction = this.actionsContent.querySelector('.resourceActions');
+    this.filter__div.parentElement.appendChild(this.resourceAction);
+  }
+
   create() {
     // console.log(this.#data);
     // recupero l'elemento 'parent' a cui aggiungere il template json (presente in data)
     this.parent = document.getElementById(this.#data.get(this.id).parentElement_id);
+    this.parent.querySelector('.layout')?.remove();
     // console.log(this.parent);
     this.recursive = (parent, childs) => {
       childs.forEach(child => {
@@ -38,6 +66,7 @@ class Templates {
       });
     }
     if (this.#data.get(this.id).childs) this.recursive(this.parent, this.#data.get(this.id).childs);
+    this.filter__div = document.getElementById('filter_div');
   }
 
   thumbnails() {

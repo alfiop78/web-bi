@@ -6,10 +6,12 @@
   "childs": [
     {
       "tag": "div",
+      "id": "layout__horizontalCharts",
       "classes": [
         "layout",
         "horizontalCharts"
       ],
+      "attributes": {},
       "childs": [
         {
           "tag": "section",
@@ -17,13 +19,15 @@
             "filters",
             "filterContent"
           ],
+          "attributes": {},
           "childs": [
             {
               "tag": "div",
               "id": "filter_div",
               "classes": [
                 "contentObject"
-              ]
+              ],
+              "attributes": {}
             }
           ]
         },
@@ -39,49 +43,15 @@
           "childs": [
             {
               "tag": "div",
-              "id": "chart_div",
+              "id": "chart__left",
               "classes": [
                 "chart-elements",
                 "contentObject"
               ],
               "attributes": {
-                "fn": "addResource"
+                "fn": "addResource",
+                "actions": true
               }
-            },
-            {
-              "tag": "section",
-              "id": "btn-resource-section",
-              "classes": [
-                "resourceActions"
-              ],
-              "childs": [
-                {
-                  "tag": "button",
-                  "type": "icon",
-                  "id": "resource-1-settings",
-                  "text": "settings",
-                  "classes": [
-                    "material-symbolys-rounded",
-                    "md-18"
-                  ],
-                  "attributes": {
-                    "fn": "resourceSettings"
-                  }
-                },
-                {
-                  "tag": "button",
-                  "type": "icon",
-                  "id": "resource-2-settings",
-                  "text": "delete",
-                  "classes": [
-                    "material-symbolys-rounded",
-                    "md-18"
-                  ],
-                  "attributes": {
-                    "fn": "resourceRemove"
-                  }
-                }
-              ]
             }
           ]
         },
@@ -97,49 +67,15 @@
           "childs": [
             {
               "tag": "div",
-              "id": "chart_div",
+              "id": "chart__right",
               "classes": [
                 "chart-elements",
                 "contentObject"
               ],
               "attributes": {
-                "fn": "addResource"
+                "fn": "addResource",
+                "actions": true
               }
-            },
-            {
-              "tag": "section",
-              "id": "btn-resource-section",
-              "classes": [
-                "resourceActions"
-              ],
-              "childs": [
-                {
-                  "tag": "button",
-                  "type": "icon",
-                  "id": "resource-1-settings",
-                  "text": "settings",
-                  "classes": [
-                    "material-symbolys-rounded",
-                    "md-18"
-                  ],
-                  "attributes": {
-                    "fn": "resourceSettings"
-                  }
-                },
-                {
-                  "tag": "button",
-                  "type": "icon",
-                  "id": "resource-2-settings",
-                  "text": "delete",
-                  "classes": [
-                    "material-symbolys-rounded",
-                    "md-18"
-                  ],
-                  "attributes": {
-                    "fn": "resourceRemove"
-                  }
-                }
-              ]
             }
           ]
         }

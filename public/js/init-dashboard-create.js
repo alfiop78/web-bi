@@ -26,7 +26,8 @@ var Resource = new Resources();
   const rand = () => Math.random(0).toString(36).substring(2);
 
   // Load the Visualization API and the corechart package.
-  google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
+  // google.charts.load('current', { 'packages': ['bar', 'table', 'corechart', 'line', 'controls', 'charteditor'], 'language': 'it' });
+  google.charts.load('current', { 'packages': ['corechart', 'controls', 'charteditor'], 'language': 'it' });
 
   const config = { attributes: true, childList: true, subtree: true };
 
@@ -503,31 +504,9 @@ var Resource = new Resources();
     Resource.ref.classList.add('defined');
   }
 
-  app.createTemplateFilter = (filter) => {
-    const filterRef = document.getElementById('filter_div');
-    const tmplFilter = document.getElementById('template-filter');
-    const tmplFilterContent = tmplFilter.content.cloneNode(true);
-    const containerDiv = tmplFilterContent.querySelector('.filter-container.dropzone');
-    const filterDiv = containerDiv.querySelector('.preview-filter');
-    const btnRemove = containerDiv.querySelector('button');
-    filterDiv.id = filter.containerId;
-    filterDiv.dataset.name = filter.id;
-    // TODO: potrei impostarle con data-fn in MutationObserver
-    filterDiv.addEventListener('dragstart', app.filterDragStart);
-    containerDiv.addEventListener('dragover', app.filterDragOver);
-    containerDiv.addEventListener('dragenter', app.filterDragEnter);
-    containerDiv.addEventListener('dragleave', app.filterDragLeave);
-    containerDiv.addEventListener('drop', app.filterDrop);
-    containerDiv.addEventListener('dragend', app.filterDragEnd);
-    btnRemove.dataset.id = filter.containerId;
-    btnRemove.dataset.label = filter.filterColumnLabel;
-    filterDiv.innerText = filter.caption;
-    filterRef.appendChild(containerDiv);
-  }
-
   app.drawTable = () => {
     // aggiungo i filtri se sono stati impostati nel preview sheet
-    Resource.specs.filters.forEach(filter => app.createTemplateFilter(filter));
+    Template.createFilterSection();
 
     Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
     // Resource.DOMref = new google.visualization.Table(document.getElementById('chart_div'));

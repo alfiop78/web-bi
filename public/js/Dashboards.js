@@ -204,6 +204,7 @@ class Resources extends Dashboards {
       bind = [0];
     } else {
       const iter = this.specs.filters.entries();
+      debugger;
       let result = iter.next();
       while (!result.done) {
         let subBind = [];
