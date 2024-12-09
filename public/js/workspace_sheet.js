@@ -38,7 +38,6 @@ async function sheetSelected(e) {
   document.querySelectorAll('#btn-sql-preview, #btn-sheet-preview').forEach(button => button.disabled = false);
 }
 
-
 function addFilterToSheet(token) {
   // aggiungo, sulla <li> del filtro selezionato, la class 'added' per evidenziare che il filtro
   // è stato aggiunto al report, non può essere aggiunto di nuovo.

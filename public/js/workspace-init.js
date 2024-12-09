@@ -21,12 +21,13 @@ const btnOpenDialogFilter = document.getElementById('btnOpenDialogFilter');
 const btnNewCompositeMeasure = document.getElementById('btnNewCompositeMeasure');
 const btnOptions = document.getElementById('btnOptions');
 const btn__save_column = document.getElementById('btn__save_column');
+const btn__newVisualization = document.getElementById('btn__newVisualization');
 // Dialogs
 const dlg__filters = document.getElementById('dlg__filters');
 const dlgCustomMetric = document.getElementById('dlg-custom-metric');
 const dlg__composite_metric = document.getElementById('dlg__composite_metric');
 const dlg__advancedMetric = document.getElementById('dlg-advanced-metric');
-const dlg__chart_options = document.getElementById('dlg__chart_options');
+const popover__chartOptions = document.getElementById('popover__chartOptions');
 const dlg__custom_columns = document.getElementById('dlg__custom_column');
 const dlg__sheet = document.getElementById('dialog-sheet-open');
 // templates

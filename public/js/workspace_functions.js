@@ -1,4 +1,5 @@
 console.info('workspace_functions');
+let chartEditor = null;
 // ho incluso, qui, i datatype di vertica a mysql :
 // vertica : 'float', 'integer', 'numeric'
 // mysql : 'decimal', 'int', 'double'
@@ -1829,6 +1830,58 @@ function checkRemoveMetrics(token) {
   }
   // la metrica può essere eliminata da Sheet.metrics
   return false;
+}
+
+function popoverShow(e) {
+  const popover = document.getElementById(e.target.dataset.popoverId);
+  popover.showPopover();
+  const { top, right } = e.currentTarget.getBoundingClientRect();
+  popover.style.top = `${top - popover.offsetHeight}px`;
+  popover.style.left = `${right}px`;
+}
+
+function loadEditor() {
+  // Create the chart to edit.
+  /* var wrapper = new google.visualization.ChartWrapper({
+    'chartType': 'LineChart',
+    'dataSourceUrl': 'http://spreadsheets.google.com/tq?key=pCQbetd-CptGXxxQIG7VFIQ&pub=1',
+    'query': 'SELECT A,D WHERE D > 100 ORDER BY D',
+    'options': { 'title': 'Population Density (people/km^2)', 'legend': 'none' }
+  }); */
+  // recupero il wrapper attuale
+  let wrapper = new google.visualization.ChartWrapper();
+  wrapper.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
+  wrapper.setContainerId(Resource.ref.id);
+  wrapper.setDataTable(Resource.dataViewGrouped);
+  wrapper.setOptions(Resource.specs.wrapper[Resource.wrapper].options);
+
+  // Recupero il chartWrapper dello Sheet visualizzato
+
+  chartEditor = new google.visualization.ChartEditor();
+  google.visualization.events.addListener(chartEditor, 'ok', redrawChart);
+  chartEditor.openDialog(wrapper, {});
+}
+
+function openChartEditor(e) {
+  const popover = document.getElementById(e.target.parentElement.dataset.popoverId);
+  google.charts.setOnLoadCallback(loadEditor);
+  popover.hidePopover();
+}
+
+// On "OK" save the chart to a <div> on the page.
+function redrawChart() {
+  // creo una nuova "visualization" in Resource.specs.wrapper
+  // console.log(chartEditor.getChartWrapper());
+  const chartWrapper = chartEditor.getChartWrapper();
+  const chartType = chartWrapper.getChartType();
+  const containerId = chartWrapper.getContainerId();
+  const options = chartWrapper.getOptions();
+  const group = Resource.specs.wrapper[Resource.wrapper].group;
+  console.log(group.key);
+  debugger;
+  chartEditor.getChartWrapper().draw(document.getElementById(containerId));
+  Resource.specs.wrapper[chartType] = { chartType, group, options };
+  Resource.wrapper = chartType;
 }
 
 console.info('END workspace_functions');

@@ -56,32 +56,35 @@ class Resources extends Dashboards {
     name: null,
     data: {
       columns: {},
-      group: {
-        key: [],
-        columns: []
-      }
     },
     filters: [],
     bind: [],
+    // il wrapper di default è una Table
     wrapper: {
-      chartType: null,
-      containerId: null,
-      options: {
-        width: "100%",
-        height: "auto",
-        page: "enabled",
-        frozenColumns: 0,
-        pageSize: 15,
-        allowHTML: true,
-        cssClassNames: {
-          headerRow: "g-table-header",
-          tableRow: "g-table-row",
-          oddTableRow: "",
-          selectedTableRow: "",
-          hoverTableRow: "",
-          headerCell: "g-header-cell",
-          tableCell: "g-table-cell",
-          rowNumberCell: ""
+      Table: {
+        group: { key: [], columns: [] },
+        chartType: 'Table',
+        options: {
+          showRowNumber: false,
+          allowHTML: true,
+          frozenColumns: 0,
+          page: 'enable',
+          pageSize: 100,
+          // scrollLeftStartPosition: 300,
+          alternatingRowStyle: true,
+          // sort: 'event',
+          width: '100%',
+          height: '100%',
+          cssClassNames: {
+            headerRow: "g-tableHeader",
+            tableRow: "g-tableRow",
+            oddTableRow: "g-oddRow",
+            selectedTableRow: "g-selectedRow",
+            hoverTableRow: "g-hoverRow",
+            headerCell: "g-headerCell",
+            tableCell: "g-tableCell",
+            rowNumberCell: "g-rowNumberCell"
+          }
         }
       }
     }
@@ -90,6 +93,8 @@ class Resources extends Dashboards {
   constructor(ref) {
     super();
     this.ref = document.getElementById(ref);
+    // chartWrapper default è una Table
+    this.wrapper = 'Table'
   }
 
   set data(value) {
@@ -132,7 +137,7 @@ class Resources extends Dashboards {
         type: this.getDataType(field.datatype),
         p: { data: 'column' }
       };
-      const keyColumn = this.specs.data.group.key.find(value => value.label === field.name);
+      const keyColumn = this.specs.wrapper[this.wrapper].group.key.find(value => value.label === field.name);
       if (!keyColumn) {
         // colonna non presente in json.data.group.key, la creo
         this.#specs_group.key.push({
@@ -156,7 +161,7 @@ class Resources extends Dashboards {
         type: this.getDataType(metric.datatype),
         p: { data: 'measure' }
       };
-      const findMetric = this.specs.data.group.columns.find(value => value.alias === metric.alias);
+      const findMetric = this.specs.wrapper[this.wrapper].group.columns.find(value => value.alias === metric.alias);
       if (!findMetric) {
         // non presente
         this.#specs_group.columns.push({
@@ -187,8 +192,9 @@ class Resources extends Dashboards {
       }
     }
     this.specs.data.columns = this.#specs_columns;
-    this.specs.data.group.key = this.#specs_group.key;
-    this.specs.data.group.columns = this.#specs_group.columns;
+    debugger;
+    this.specs.wrapper[this.wrapper].group.key = this.#specs_group.key;
+    this.specs.wrapper[this.wrapper].group.columns = this.#specs_group.columns;
     // debugger;
     this.bind();
     const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
@@ -204,7 +210,6 @@ class Resources extends Dashboards {
       bind = [0];
     } else {
       const iter = this.specs.filters.entries();
-      debugger;
       let result = iter.next();
       while (!result.done) {
         let subBind = [];
@@ -218,7 +223,6 @@ class Resources extends Dashboards {
       }
     }
     console.info('bind : ', bind);
-    debugger;
     this.specs.bind = bind;
   }
 
@@ -308,7 +312,7 @@ class Resources extends Dashboards {
 
   groupFunction() {
     this.groupKey = [], this.groupColumn = [];
-    this.specs.data.group.key.forEach(column => {
+    this.specs.wrapper[this.wrapper].group.key.forEach(column => {
       // if (column.properties.grouped) keyColumns.push(Resource.dataTable.getColumnIndex(column.id));
       // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
       // che viene modificata dall'utente a runtime
@@ -321,7 +325,7 @@ class Resources extends Dashboards {
         });
       }
     });
-    this.specs.data.group.columns.forEach(metric => {
+    this.specs.wrapper[this.wrapper].group.columns.forEach(metric => {
       // salvo in groupColumnsIndex TUTTE le metriche, deciderò nella DataView
       // quali dovranno essere visibili (quelle con dependencies:false)
       // recupero l'indice della colonna in base al suo nome
@@ -379,7 +383,7 @@ class Resources extends Dashboards {
   // WARN: 04.12.2024 Questa funzione deve essere univoca sia per init-sheet.js che per Dashboards.js
   createDataView() {
     this.viewColumns = [], this.viewMetrics = [];
-    this.specs.data.group.key.forEach(column => {
+    this.specs.wrapper[this.wrapper].group.key.forEach(column => {
       if (column.properties.visible) {
         this.viewColumns.push(this.dataGroup.getColumnIndex(column.id));
         // imposto la classe per le colonne dimensionali
@@ -387,7 +391,7 @@ class Resources extends Dashboards {
       }
     });
     // dalla dataGroup, recupero gli indici di colonna delle metriche
-    this.specs.data.group.columns.forEach(metric => {
+    this.specs.wrapper[this.wrapper].group.columns.forEach(metric => {
       if (!metric.dependencies && metric.properties.visible) {
         const index = this.dataGroup.getColumnIndex(metric.alias);
         // NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo

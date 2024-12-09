@@ -203,7 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
   columnsDropzone.addEventListener('drop', handleColumnDrop, false);
   columnsDropzone.addEventListener('dragleave', handleDropzoneDragLeave, false);
 
-  btnOptions.addEventListener('click', () => dlg__chart_options.showModal());
+  btnOptions.addEventListener('click', popoverShow);
+  btn__newVisualization.addEventListener('click', openChartEditor);
   export__datatable_xls.addEventListener('click', export_datatable_XLS_new);
 
 }); // end DOMContentLoaded

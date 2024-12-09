@@ -19,6 +19,7 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-workspace.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/md-sheet-page.css') }}" />
   <link rel="stylesheet" type="text/css" href="{{ asset('/css/wb-table-preview.css') }}" />
+  <link rel="stylesheet" type="text/css" href="{{ asset('/css/chart_editor.css') }}" />
   <!-- Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,1,0" />
   <script src="{{ asset('/js/Application.js') }}"></script>
@@ -378,32 +379,13 @@
           </section>
         </menu>
 
-        <dialog id="dlg__chart_options">
-          <section class="dlg-grid">
-            <h5 class="title moveable">Configurazione DataTable/Grafico</h5>
-            <section class="dlg-content">
-              <section class="row">
-                <!-- <section class="col col-4-span">
-                  <li>Estrazione</li>
-                  <li>Chart Editor</li>
-                </section> -->
-                <section class="col col-12">
-                  <!-- <a id="export__datatable_csv" target="_blank" value="Export CSV">Export DataTable CSV</a> -->
-                  <a href="#" id="export__datatable_xls" value="Export Excel">Export DataTable Excel</a>
-                </section>
-                <section class="col col-12">
-                  <!-- <a id="export__dataview_csv" target="_blank" type="button" value="Export CSV">Export DataView CSV</a> -->
-                  <!-- <a id="export__dataview_xls" target="_blank" type="button" value="Export XLS" disabled>Export DataView XLS</a> -->
-                </section>
-              </section>
-            </section>
-            <section class="dlg-buttons">
-              <button name="cancel" value="chiudi">Chiudi</button>
-              <!-- <button id="btn__options_save" value="salva">Ok</button> -->
-            </section>
-          </section>
-
-        </dialog>
+        <div id="popover__chartOptions" popover>
+          <nav data-popover-id="popover__chartOptions">
+            <button id="btn__newVisualization">Crea Visualizzazione</button>
+            <button id="export__datatable_xls">Excel</button>
+            <button id="export__dataview_csv" disabled>CSV</button>
+          </nav>
+        </div>
 
         <dialog id="dlg-schema">
           <section class="dlg-grid">
@@ -1107,7 +1089,7 @@
                               </div>
                               <section class="chart_options">
                                 <menu>
-                                  <li><button id="btnOptions" class="material-symbols-rounded">settings</button></li>
+                                  <li><button id="btnOptions" data-popover-id="popover__chartOptions" class="material-symbols-rounded">settings</button></li>
                                   <!-- <li><button id="export__datatable_csv">Esport. CSV (completa)</button></li> -->
                                   <!-- <li><button id="export__dataview_csv">Esport. CSV (Visualizzazione)</button></li> -->
                                 </menu>
