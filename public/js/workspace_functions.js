@@ -1832,6 +1832,14 @@ function checkRemoveMetrics(token) {
   return false;
 }
 
+function popoverChartWrappers(e) {
+  const popover = document.getElementById(e.target.dataset.popoverId);
+  popover.showPopover();
+  const { top, right } = e.currentTarget.getBoundingClientRect();
+  popover.style.top = `${top - popover.offsetHeight}px`;
+  popover.style.left = `${right}px`;
+}
+
 function popoverShow(e) {
   const popover = document.getElementById(e.target.dataset.popoverId);
   popover.showPopover();
@@ -1876,12 +1884,29 @@ function redrawChart() {
   const chartType = chartWrapper.getChartType();
   const containerId = chartWrapper.getContainerId();
   const options = chartWrapper.getOptions();
-  const group = Resource.specs.wrapper[Resource.wrapper].group;
-  console.log(group.key);
-  debugger;
-  chartEditor.getChartWrapper().draw(document.getElementById(containerId));
-  Resource.specs.wrapper[chartType] = { chartType, group, options };
+  // alcune opzioni non sono contenute nel metodo getOptions() quindi, se si tratta
+  // di un chartType : Table le imposto qui manualmente
+  if (chartType === 'Table') {
+    options.allowHTML = true;
+    options.page = 'enable';
+    options.width = '100%';
+    options.height = '100%';
+    options.cssClassNames = {
+      headerRow: "g-tableHeader",
+      tableRow: "g-tableRow",
+      oddTableRow: "g-oddRow",
+      selectedTableRow: "g-selectedRow",
+      hoverTableRow: "g-hoverRow",
+      headerCell: "g-headerCell",
+      tableCell: "g-tableCell",
+      rowNumberCell: "g-rowNumberCell"
+    }
+  }
   Resource.wrapper = chartType;
+  // creo le prop group.key e group.columns per questo chartWrapper
+  Resource.createWrapperSpecs();
+  chartEditor.getChartWrapper().draw(document.getElementById(containerId));
+  Resource.specs.wrapper[chartType] = { chartType, group: Resource.specs.wrapper[chartType].group, options };
 }
 
 console.info('END workspace_functions');

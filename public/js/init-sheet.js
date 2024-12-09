@@ -76,7 +76,6 @@ function createSheetColumns(data) {
       ulColumnsHandler.appendChild(li);
     }
   });
-
 }
 
 function drawDatamart() {
@@ -151,9 +150,6 @@ function previewReady() {
     }
   }); */
   Resource.groupFunction();
-  console.log(Resource.groupKey);
-  console.log(Resource.groupColumn);
-  debugger;
   // imposto qui il metodo group() perchè per la dashboard è diverso (viene usato il ChartWrapper)
   Resource.dataGroup = new google.visualization.data.group(
     // Resource.chartWrapper.getDataTable(), Resource.groupKey, Resource.groupColumn

@@ -204,7 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
   columnsDropzone.addEventListener('dragleave', handleDropzoneDragLeave, false);
 
   btnOptions.addEventListener('click', popoverShow);
+  btn__chartWrappers.addEventListener('click', popoverChartWrappers);
   btn__newVisualization.addEventListener('click', openChartEditor);
+  //excel
   export__datatable_xls.addEventListener('click', export_datatable_XLS_new);
 
 }); // end DOMContentLoaded

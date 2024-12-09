@@ -73,6 +73,22 @@ async function preview() {
   // end chiamta in POST
 
   Resource.specs = JSON.parse(window.localStorage.getItem(Sheet.sheet.token)).specs;
+  // se esistono più di un chartWrapper li visualizzo in questa popover
+  if (Object.keys(Resource.specs.wrapper).length >= 2) {
+    btn__chartWrappers.removeAttribute('disabled');
+    Object.keys(Resource.specs.wrapper).forEach(chartType => {
+      const btn = document.createElement('button');
+      btn.value = chartType;
+      btn.dataset.value = chartType;
+      btn.innerText = chartType;
+      btn.addEventListener('click', (e) => {
+        Resource.wrapper = e.target.dataset.value;
+        previewReady();
+      });
+      popover__chartWrappers.querySelector('nav').appendChild(btn);
+    });
+  }
+
 
   const progressBar = document.getElementById('progress-bar');
   const progressTo = document.getElementById('progress-to');

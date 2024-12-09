@@ -203,6 +203,64 @@ class Resources extends Dashboards {
     window.localStorage.setItem(Sheet.sheet.token, JSON.stringify(sheet));
   }
 
+  createWrapperSpecs() {
+    this.#specs_group = { key: [], columns: [] };
+    for (const field of Sheet.fields.values()) {
+      const keyColumn = this.specs.wrapper[this.wrapper].group.key.find(value => value.label === field.name);
+      if (!keyColumn) {
+        // colonna non presente in json.data.group.key, la creo
+        this.#specs_group.key.push({
+          id: field.name,
+          label: field.name,
+          type: this.getDataType(field.datatype),
+          properties: { grouped: true, visible: true }
+        });
+      } else {
+        // già presente
+        this.#specs_group.key.push(keyColumn);
+      }
+    }
+    for (const [token, metric] of Sheet.metrics) {
+      const findMetric = this.specs.wrapper[this.wrapper].group.columns.find(value => value.alias === metric.alias);
+      if (!findMetric) {
+        // non presente
+        this.#specs_group.columns.push({
+          token,
+          alias: metric.alias,
+          aggregateFn: metric.aggregateFn,
+          dependencies: metric.dependencies,
+          properties: {
+            visible: true,
+            formatter: {
+              type: 'number', format: 'default', prop: {
+                negativeColor: 'red', negativeParens: true, fractionDigits: 0, groupingSymbol: '.'
+              }
+            }
+          },
+          label: metric.alias,
+          type: metric.type,
+          datatype: 'number'
+        });
+      } else {
+        // già presente
+        // imposto solo le eproprietà che potrebbero essere state modificate nello Sheet
+        findMetric.alias = metric.alias;
+        findMetric.aggregateFn = metric.aggregateFn;
+        findMetric.dependencies = metric.dependencies;
+        findMetric.label = metric.alias;
+        this.#specs_group.columns.push(findMetric);
+      }
+    }
+    debugger;
+    this.specs.wrapper[this.wrapper].group.key = this.#specs_group.key;
+    this.specs.wrapper[this.wrapper].group.columns = this.#specs_group.columns;
+    const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
+    sheet.specs = this.specs;
+    debugger;
+    window.localStorage.setItem(Sheet.sheet.token, JSON.stringify(sheet));
+
+  }
+
   bind() {
     let bind = [];
     // se il filtro impostato è uno solo salvo il bind con un solo elemento nell'array
