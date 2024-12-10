@@ -59,6 +59,13 @@
     </li>
   </template>
 
+    <template id="template__filters">
+      <div class="filters draggable">
+        <i class="material-symbols-rounded" draggable="true">drag_indicator</i>
+        <div></div>
+      </div>
+    </template>
+
   <template id="template__filter">
     <!-- <div class="filter-container dropzone">
       <div class="preview-filter" draggable="true"></div>
@@ -82,7 +89,7 @@
 
   <template id="tmpl-actions-resource">
     <section class="resourceActions">
-      <button class="material-symbols-rounded" data-popover-id="popover__chartWrapper" data-fn="resourceSettings">table_chart_view</button>
+      <button class="material-symbols-rounded" data-id="" data-popover-id="popover__chartWrappers" data-fn="resourceSettings" disabled>table_chart_view</button>
       <button class="material-symbols-rounded" data-fn="resourceRemove">delete</button>
     </section>
   </template>
@@ -92,6 +99,11 @@
     <div id="content" class="grid custom-scrollbar">
 
       <div id="body" class="raw menu" hidden>
+
+        <div id="popover__chartWrappers" popover>
+          <nav data-popover-id="popover__chartWrappers"></nav>
+        </div>
+
         <dialog id="dialog-dashboard-open">
           <section class="dlg-grid">
             <h5 class="title">Apri Dashboard</h5>
@@ -205,7 +217,7 @@
                     <!-- <p>section 1</p> -->
                     <div class="list-search">
                       <!-- <input type="search" id="input-search-metrics-dlg-composite" placeholder="Ricerca" data-element-search="metrics-dlg-composite" class="input-search" autocomplete="off" tabindex="3"> -->
-                        <p>Filtri del report</p>
+                      <p>Filtri del report</p>
                       <div class="relative-ul">
                         <ul id="filters__sameReport"></ul>
                       </div>
@@ -309,7 +321,9 @@
       <p>Lynx International</p>
     </section>
   </footer>
-  <script type="text/javascript" src="{{ asset('/js/init-dashboard-create.js') }}" async></script>
+  <script type="text/javascript" src="{{ asset('/js/init-dashboard-create.js') }}"></script>
+  <script type="text/javascript" src="{{ asset('/js/dashboard-create-functions.js') }}" defer></script>
+  <script type="text/javascript" src="{{ asset('/js/dashboard-create-events.js') }}" defer></script>
 </body>
 
 </html>

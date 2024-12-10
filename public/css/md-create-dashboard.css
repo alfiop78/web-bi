@@ -413,3 +413,8 @@ fieldset legend {
 /* Layout three section */
 
 /* TEST: nuovi layout */
+
+.filters__chart>.filters {
+  display: flex;
+  align-items: center;
+}

@@ -1,9 +1,11 @@
+console.log('init-dashboard-create');
 // TODO: 18.09.2024 intercettare le modifiche fatte al report oppure ai filtri, per poter
 // abilitare il tasto "Salva"
 var App = new Application();
 var Template = new Templates();
 var Storage = new SheetStorages();
 var Resource = new Resources();
+let popover__chartWrappers = document.getElementById('popover__chartWrappers');
 // dialogs
 let dlg__config_filterDashboard = document.getElementById('dlg__config_dashboardFilters');
 // templates
@@ -218,6 +220,14 @@ const template__li = document.getElementById('template__li');
       });
   }
 
+  app.resourceSettings = (e) => {
+    const popover = document.getElementById(e.currentTarget.dataset.popoverId);
+    const { top, right } = e.currentTarget.getBoundingClientRect();
+    popover.showPopover();
+    popover.style.top = `${top - popover.offsetHeight}px`;
+    popover.style.left = `${right}px`;
+  }
+
   app.getResources = () => {
     console.log(Resource.json);
     let urls = [];
@@ -317,11 +327,28 @@ const template__li = document.getElementById('template__li');
       app.dashboardName.focus();
       return false;
     }
-    // verifica di validità
+
+    // TODO: filtri della Dashboard
+    document.querySelectorAll('filter__dashboard>div[data-id]').forEach(filter => {
+      Resource.dashboardFilters = {
+
+      }
+
+    });
+
+    // TODO: 10.12.2024 Recupero le risorse aggiunte alla dashboard
+    document.querySelectorAll('section.chartContent[data-resource]').forEach(resource => {
+      console.log(resource);
+      debugger;
+    });
+    return;
+
+    //
+    /* // verifica di validità
     if (Resource.resource.size === 0) {
       App.showConsole('Nessun oggetto aggiunto alla Dashboard', 'error', 2000);
       return false;
-    }
+    } */
     const note = document.getElementById('note').value;
     // salvo il json 'dashboard-token' in bi_dashboards
     // TODO: aggiungere la prop 'published' (bool). Questa mi consentirà
@@ -341,8 +368,7 @@ const template__li = document.getElementById('template__li');
     const sheet = JSON.parse(window.localStorage.getItem(Resource.specs.token));
     sheet.specs = Resource.specs;
     window.localStorage.setItem(Resource.specs.token, JSON.stringify(sheet));
-    // window.localStorage.setItem(`specs_${Resource.specs.token}`, JSON.stringify(Resource.specs));
-    // const url = `/fetch_api/json/dashboard_store`;
+    // Salvo la Dashboard su database
     const url = (e.target.dataset.token) ? '/fetch_api/json/dashboard_update' : '/fetch_api/json/dashboard_store';
     const params = JSON.stringify(Resource.json);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
@@ -466,7 +492,8 @@ const template__li = document.getElementById('template__li');
                   console.log('tutte le paginate completate :', partialData[index]);
                   Resource.data = partialData[index];
                   // google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
-                  google.charts.setOnLoadCallback(app.draw__new());
+                  // google.charts.setOnLoadCallback(app.draw__new());
+                  google.charts.setOnLoadCallback(draw());
                 }
               }).catch((err) => {
                 App.showConsole(err, 'error');
@@ -480,7 +507,7 @@ const template__li = document.getElementById('template__li');
             // Non sono presenti altre pagine, visualizzo il dashboard
             Resource.data = partialData[index];
             // google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
-            google.charts.setOnLoadCallback(app.draw__new());
+            google.charts.setOnLoadCallback(draw());
             // abilito alcuni tasti dopo aver aperto la dashboard
           }
         });
@@ -500,17 +527,40 @@ const template__li = document.getElementById('template__li');
     Resource.ref.dataset.token = e.currentTarget.dataset.token;
     Resource.dashboardContent = Resource.ref.parentElement;
     Resource.specs = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
-    // debugger;
-    // Template.createFilterSection();
-    Resource.resource = {
-      datamart_id: e.currentTarget.dataset.datamartId,
-      userId: e.currentTarget.dataset.userId
-    };
-    const urls = [`/fetch_api/${Resource.resource.get(Resource.token).datamart_id}_${Resource.resource.get(Resource.token).user_id}/preview?page=1`];
+    // imposto, sul tasto btn__chartWrapper il token di questo Sheet
+    const btn__chartWrapper = Resource.dashboardContent.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
+    // se esistono più di un chartWrapper li visualizzo nella popover__chartWrappers
+    if (Object.keys(Resource.specs.wrapper).length >= 2) {
+      btn__chartWrapper.removeAttribute('disabled');
+      Object.keys(Resource.specs.wrapper).forEach(chartType => {
+        const btn = document.createElement('button');
+        btn.value = chartType;
+        btn.innerText = chartType;
+        btn.addEventListener('click', selectWrapper);
+        popover__chartWrappers.querySelector('nav').appendChild(btn);
+      });
+    }
+    // Resource.resource = {
+    //   datamart_id: e.currentTarget.dataset.datamartId,
+    //   userId: e.currentTarget.dataset.userId
+    // };
+    // TODO: qui dovrei fare una singola promise anzichè una promiseAll
+    const urls = [`/fetch_api/${e.currentTarget.dataset.datamartId}_${e.currentTarget.dataset.userId}/preview?page=1`];
     app.getAllData(urls);
     app.dlgChartSection.close();
     // aggiungo la class 'defined' nel div che contiene il grafico/tabella
     Resource.ref.classList.add('defined');
+  }
+
+  function selectWrapper(e) {
+    Resource.wrapper = e.target.getAttribute('value');
+    onReady();
+    // draw();
+    // aggiorno la propr 'wrapper' nel Map() Resource.resource
+    // Resource.resource.get(Resource.token).wrapper = Resource.specs.wrapper[Resource.wrapper];
+    // console.log(Resource.resource);
+    // debugger;
+    popover__chartWrappers.hidePopover();
   }
 
   app.draw__new = () => {
@@ -741,3 +791,4 @@ function handleFilterDashboard(e) {
   });
   dlg__config_filterDashboard.showModal();
 }
+console.log(' ENDinit-dashboard-create');

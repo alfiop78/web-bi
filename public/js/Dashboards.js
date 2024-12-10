@@ -10,6 +10,43 @@ class Dashboards {
     return this.#json;
   }
 
+  drawControls_create(filtersRef) {
+    this.controls = [];
+    // console.log(this.sheetSpecs);
+    if (this.specs.filters) {
+      this.specs.filters.forEach(filter => {
+        // creo qui il div class="filters" che conterrà il filtro
+        // In questo modo non è necessario specificare i filtri nel template layout
+        const template = document.getElementById('template__filters').content.cloneNode(true);
+        let content = template.querySelector('.filters');
+        let i = content.querySelector('i');
+        i.dataset.id = filter.containerId;
+        i.dataset.name = filter.filterColumnLabel;
+        i.addEventListener('click', addDashboardFilters);
+        let div = content.querySelector('div');
+        div.id = filter.containerId;
+        filtersRef.appendChild(content);
+        this.filter = new google.visualization.ControlWrapper({
+          'controlType': 'CategoryFilter',
+          'containerId': filter.containerId,
+          'options': {
+            'filterColumnIndex': filter.filterColumnIndex,
+            'filterColumnLabel': filter.filterColumnLabel,
+            'ui': {
+              'caption': filter.caption,
+              'label': '',
+              'cssClass': 'g-category-filter',
+              'selectedValuesLayout': 'aside'
+              // 'labelStacking': 'horizontal'
+            }
+          }
+        });
+        this.controls.push(this.filter);
+      });
+    }
+    return this.controls;
+  }
+
   drawControls(filtersRef) {
     this.controls = [];
     // console.log(this.sheetSpecs);
@@ -21,7 +58,6 @@ class Dashboards {
         this.filterRef.className = 'filters';
         this.filterRef.id = filter.containerId;
         filtersRef.appendChild(this.filterRef);
-        // console.log(filter.containerId, filter.filterColumnLabel);
         this.filter = new google.visualization.ControlWrapper({
           'controlType': 'CategoryFilter',
           'containerId': filter.containerId,
@@ -94,7 +130,7 @@ class Resources extends Dashboards {
     super();
     this.ref = document.getElementById(ref);
     // chartWrapper default è una Table
-    this.wrapper = 'Table'
+    this.wrapper = 'Table';
   }
 
   set data(value) {
@@ -110,10 +146,18 @@ class Resources extends Dashboards {
     // object: contiene ref (il riferimento nel DOM), il datamart_id e lo user_id
     this.#resource.set(this.token, {
       token: this.token,
-      ref: this.ref.id,
       datamart_id: object.datamart_id,
-      user_id: object.userId
+      user_id: object.userId,
+      data: this.specs.data,
+      wrappers: {
+        [this.ref.id]: {
+          containerId: this.ref.id,
+          [this.wrapper]: this.specs.wrapper[this.wrapper]
+        }
+      }
     });
+    console.log(this.#resource);
+    debugger;
   }
 
   get resource() {

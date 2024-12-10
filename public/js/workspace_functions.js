@@ -1832,6 +1832,7 @@ function checkRemoveMetrics(token) {
   return false;
 }
 
+// WARN: codice ripetuto in popoverShow
 function popoverChartWrappers(e) {
   const popover = document.getElementById(e.target.dataset.popoverId);
   popover.showPopover();
@@ -1840,6 +1841,7 @@ function popoverChartWrappers(e) {
   popover.style.left = `${right}px`;
 }
 
+// WARN: codice ripetuto popoverChartWrappers
 function popoverShow(e) {
   const popover = document.getElementById(e.target.dataset.popoverId);
   popover.showPopover();
