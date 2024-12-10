@@ -465,7 +465,8 @@ const template__li = document.getElementById('template__li');
                   // Non sono presenti altre pagine, visualizzo la dashboard
                   console.log('tutte le paginate completate :', partialData[index]);
                   Resource.data = partialData[index];
-                  google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
+                  // google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
+                  google.charts.setOnLoadCallback(app.draw__new());
                 }
               }).catch((err) => {
                 App.showConsole(err, 'error');
@@ -478,7 +479,8 @@ const template__li = document.getElementById('template__li');
           } else {
             // Non sono presenti altre pagine, visualizzo il dashboard
             Resource.data = partialData[index];
-            google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
+            // google.charts.setOnLoadCallback(app.drawTable(Resource.resource.token));
+            google.charts.setOnLoadCallback(app.draw__new());
             // abilito alcuni tasti dopo aver aperto la dashboard
           }
         });
@@ -496,9 +498,10 @@ const template__li = document.getElementById('template__li');
     Resource.token = e.currentTarget.dataset.token;
     // aggiungo un token per identificare, in publish(), il report (datamart_id)
     Resource.ref.dataset.token = e.currentTarget.dataset.token;
+    Resource.dashboardContent = Resource.ref.parentElement;
     Resource.specs = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
     // debugger;
-    Template.createFilterSection();
+    // Template.createFilterSection();
     Resource.resource = {
       datamart_id: e.currentTarget.dataset.datamartId,
       userId: e.currentTarget.dataset.userId
@@ -508,6 +511,45 @@ const template__li = document.getElementById('template__li');
     app.dlgChartSection.close();
     // aggiungo la class 'defined' nel div che contiene il grafico/tabella
     Resource.ref.classList.add('defined');
+  }
+
+  app.draw__new = () => {
+    Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
+    // Create a dashboard.
+    console.log(Resource.ref.id);
+    let gdashboard = new google.visualization.Dashboard(Resource.dashboardContent);
+    // imposto i filtri per questa dashboard
+    const controls = Resource.drawControls(document.getElementById(`flt__${Resource.ref.id}`));
+    // creo il ChartWrapper Table, anche se questo Sheet ha più ChartWrapper creati, imposterò un tasto per fare lo swicth e cambiare la visualizzazione
+    Resource.chartWrapper = new google.visualization.ChartWrapper();
+    // imposto sempre Table di default
+    Resource.chartWrapper.setChartType('Table');
+    Resource.chartWrapper.setContainerId(Resource.ref.id);
+    Resource.chartWrapper.setDataTable(Resource.dataTable);
+    console.log(Resource.specs.wrapper.Table.options);
+    debugger;
+    // Resource.chartWrapper.setOptions(Resource.specs.wrapper.Table.options);
+    Resource.chartWrapper.setOption('height', 'auto');
+    Resource.chartWrapper.setOption('allowHTML', true);
+    Resource.chartWrapper.setOption('page', 'enabled');
+    Resource.chartWrapper.setOption('pageSize', 15);
+    Resource.chartWrapper.setOption('width', '100%');
+    Resource.chartWrapper.setOption('cssClassNames', {
+      "headerRow": "g-table-header",
+      "tableRow": "g-table-row",
+      "oddTableRow": null,
+      "selectedTableRow": null,
+      "hoverTableRow": null,
+      "headerCell": "g-header-cell",
+      "tableCell": "g-table-cell",
+      "rowNumberCell": null
+    });
+    console.log(Resource.chartWrapper.getOptions());
+    debugger;
+    gdashboard.bind(controls, Resource.chartWrapper);
+
+    // Draw the dashboard.
+    gdashboard.draw(Resource.dataTable);
   }
 
   app.drawTable = () => {

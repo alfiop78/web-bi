@@ -11,7 +11,7 @@ class Templates {
 
   get data() { return this.#data; }
 
-  createFilterSection() {
+  /* createFilterSection() {
     const parent = document.querySelector(`#flt__${Resource.ref.id}`);
     Resource.specs.filters.forEach(filter => {
       const template = document.getElementById('template__filter');
@@ -36,7 +36,7 @@ class Templates {
       span.innerText = filter.caption;
       parent.appendChild(container);
     });
-  }
+  } */
 
   create() {
     // console.log(this.#data);

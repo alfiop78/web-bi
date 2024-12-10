@@ -494,7 +494,8 @@ saveColumnConfig.onclick = () => {
   // le metriche calcolate restituisce -1 per getTableColumnIndex, quindi devo ridisegnare il report
   // richiamando previewReady() altrimenti il metodo draw() di GoogleChart aggiorna la visualizzazione correttamente
   (Resource.dataTableIndex === -1) ?
-    previewReady() : Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
+    // previewReady() : Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.options);
+    previewReady() : Resource.chartWrapperView.draw();
   dlgConfig.close();
   // la 'updated_at' dello sheet deve essere aggiornata perchè viene modificato lo Sheet
   updatedSheet();

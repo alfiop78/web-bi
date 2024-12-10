@@ -82,7 +82,7 @@
 
   <template id="tmpl-actions-resource">
     <section class="resourceActions">
-      <button class="material-symbols-rounded" data-fn="resourceSettings">settings</button>
+      <button class="material-symbols-rounded" data-popover-id="popover__chartWrapper" data-fn="resourceSettings">table_chart_view</button>
       <button class="material-symbols-rounded" data-fn="resourceRemove">delete</button>
     </section>
   </template>

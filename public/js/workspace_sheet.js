@@ -46,6 +46,7 @@ function addFilterToSheet(token) {
   addTemplateFilter(token);
 }
 
+// switch tra i vari tipi di grafici (ChartWrapper) creati
 function selectWrapper(e) {
   Resource.wrapper = e.target.getAttribute('value');
   previewReady();
