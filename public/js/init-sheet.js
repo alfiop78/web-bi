@@ -152,15 +152,15 @@ function previewReady() {
   Resource.groupFunction();
   // imposto qui il metodo group() perchè per la dashboard è diverso (viene usato il ChartWrapper)
   Resource.dataGroup = new google.visualization.data.group(
-    // Resource.chartWrapper.getDataTable(), Resource.groupKey, Resource.groupColumn
-    Resource.dataTable, Resource.groupKey, Resource.groupColumn
+    Resource.chartWrapper.getDataTable(), Resource.groupKey, Resource.groupColumn
+    // Resource.dataTable, Resource.groupKey, Resource.groupColumn
     // Resource.dataTable, Resource.groupKey
   );
   console.log('dataGroup : ', Resource.dataGroup);
-  Resource.chartWrapper = new google.visualization.ChartWrapper();
-  Resource.chartWrapper.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
-  Resource.chartWrapper.setContainerId(Resource.ref.id);
-  Resource.chartWrapper.setOptions(Resource.specs.wrapper[Resource.wrapper].options);
+  Resource.chartWrapperView = new google.visualization.ChartWrapper();
+  Resource.chartWrapperView.setChartType(Resource.specs.wrapper[Resource.wrapper].chartType);
+  Resource.chartWrapperView.setContainerId(Resource.ref.id);
+  Resource.chartWrapperView.setOptions(Resource.specs.wrapper[Resource.wrapper].options);
   // console.log(Resource.dataTable);
   // creo l'object che verrà messo nel terzo param di group()
   // Es.: { column: 16, aggregation: google.visualization.data.sum, type: 'number' },
@@ -238,14 +238,15 @@ function previewReady() {
   // });
   Resource.createDataView();
 
-  // google.visualization.events.addListener(Resource.chartWrapper, 'sort', sort);
+  google.visualization.events.addListener(Resource.chartWrapperView, 'ready', ready);
+  // google.visualization.events.addListener(Resource.chartWrapperView, 'sort', sort);
   // con l'opzione sort: 'event' viene comunque processato l'evento 'sort'
   // senza effettuare l'ordinamento.
   console.log(Resource.wrapper);
   console.log(Resource.specs.wrapper[Resource.wrapper].options);
-  debugger;
-  Resource.chartWrapper.setDataTable(Resource.dataViewGrouped);
-  Resource.chartWrapper.draw();
+  Resource.chartWrapperView.setDataTable(Resource.dataViewGrouped);
+  Resource.chartWrapperView.draw();
+  // google.visualization.events.addListener(Resource.chartWrapperView, 'sort', sort);
   // Resource.tableRefGroup.draw(Resource.dataViewGrouped, Resource.specs.wrapper[Resource.wrapper].options);
   // var csvFormattedDataTable = google.visualization.dataTableToCsv(Resource.dataViewGrouped);
   // console.log(csvFormattedDataTable);
@@ -253,6 +254,10 @@ function previewReady() {
   // export__dataview_csv.href = encodedUri;
   // export__dataview_csv.download = 'table-view-data.csv';
   // export_dataview_CSV();
+}
+
+function ready() {
+  google.visualization.events.addListener(Resource.chartWrapperView.getChart(), 'sort', sort);
 }
 
 
@@ -330,6 +335,7 @@ function drawToolbar() {
 };
 
 function sort(e) {
+  debugger;
   const labelRef = document.getElementById('field-label');
   const selectDataType = document.getElementById('field-datatype');
   const selectFormat = document.getElementById('field-format');

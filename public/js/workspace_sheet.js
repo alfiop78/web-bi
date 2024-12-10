@@ -46,6 +46,23 @@ function addFilterToSheet(token) {
   addTemplateFilter(token);
 }
 
+function selectWrapper(e) {
+  Resource.wrapper = e.target.getAttribute('value');
+  previewReady();
+  // Rivedo le colonne/metriche nascoste in questa visualizzazione e aggiorno la
+  // ul #ul-columns-handler
+  // Ciclo le proprietà group.key e group.columns per reimpostare la proprietà visible corrispondente
+  Resource.specs.wrapper[Resource.wrapper].group.key.forEach(column => {
+    const element = document.querySelector(`#ul-columns-handler>li[data-column-id='${column.id}']`);
+    element.dataset.visible = column.properties.visible;
+  });
+
+  Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(column => {
+    const element = document.querySelector(`#ul-columns-handler>li[data-column-id='${column.alias}']`);
+    element.dataset.visible = column.properties.visible;
+  });
+}
+
 async function preview() {
   // NOTE: Chiamata in post per poter passare tutte le colonne, incluso l'alias, alla query
   // TODO: Passo in param un object con le colonne da estrarre (tutte)
@@ -79,12 +96,9 @@ async function preview() {
     Object.keys(Resource.specs.wrapper).forEach(chartType => {
       const btn = document.createElement('button');
       btn.value = chartType;
-      btn.dataset.value = chartType;
+      // btn.dataset.value = chartType;
       btn.innerText = chartType;
-      btn.addEventListener('click', (e) => {
-        Resource.wrapper = e.target.dataset.value;
-        previewReady();
-      });
+      btn.addEventListener('click', selectWrapper);
       popover__chartWrappers.querySelector('nav').appendChild(btn);
     });
   }

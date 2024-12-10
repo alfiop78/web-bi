@@ -620,7 +620,7 @@ span.markContent {
   background-color: #494949;
   border: none;
   border-radius: 4px;
-  padding: 1em .5em;
+  padding: 8px 4px;
 }
 
 :popover-open {

@@ -72,7 +72,7 @@ class Resources extends Dashboards {
           pageSize: 100,
           // scrollLeftStartPosition: 300,
           alternatingRowStyle: true,
-          // sort: 'event',
+          sort: 'event',
           width: '100%',
           height: '100%',
           cssClassNames: {
