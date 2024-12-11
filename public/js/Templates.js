@@ -11,33 +11,6 @@ class Templates {
 
   get data() { return this.#data; }
 
-  /* createFilterSection() {
-    const parent = document.querySelector(`#flt__${Resource.ref.id}`);
-    Resource.specs.filters.forEach(filter => {
-      const template = document.getElementById('template__filter');
-      const tmplFilterContent = template.content.cloneNode(true);
-      const container = tmplFilterContent.querySelector('.filter__container');
-      // const filterDiv = container.querySelector('.preview-filter');
-      const span = container.querySelector('span');
-      const btnOptions = container.querySelector('button');
-      container.id = filter.containerId;
-      container.dataset.name = filter.id;
-      container.dataset.label = filter.filterColumnLabel;
-      container.dataset.caption = filter.caption;
-      container.addEventListener('click', addDashboardFilter);
-      // filterDiv.addEventListener('dragstart', app.filterDragStart);
-      // containerDiv.addEventListener('dragover', app.filterDragOver);
-      // containerDiv.addEventListener('dragenter', app.filterDragEnter);
-      // containerDiv.addEventListener('dragleave', app.filterDragLeave);
-      // containerDiv.addEventListener('drop', app.filterDrop);
-      // containerDiv.addEventListener('dragend', app.filterDragEnd);
-      btnOptions.dataset.id = filter.containerId;
-      btnOptions.dataset.label = filter.filterColumnLabel;
-      span.innerText = filter.caption;
-      parent.appendChild(container);
-    });
-  } */
-
   create() {
     // console.log(this.#data);
     // recupero l'elemento 'parent' a cui aggiungere il template json (presente in data)

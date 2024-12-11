@@ -100,7 +100,14 @@ function addDashboardFilters(e) {
   e.currentTarget.style.color = 'red';
   const div = document.createElement('div');
   div.dataset.id = e.currentTarget.dataset.id;
+  div.dataset.sheet = e.currentTarget.dataset.sheet;
+  div.dataset.name = e.currentTarget.dataset.name;
   div.innerText = e.currentTarget.dataset.name;
+  /* Resource.dashboardFilters.set(e.currentTarget.dataset.id, {
+    id : e.currentTarget.dataset.name,
+    containerId: e.currentTarget.dataset.id,
+    filterColumnLabel: e.currentTarget.dataset.name,
+    caption: e.currentTarget.dataset.name
+  }); */
   parent.appendChild(div);
-
 }

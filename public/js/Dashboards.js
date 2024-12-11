@@ -1,6 +1,9 @@
 class Dashboards {
   #json = {};
-  constructor() { }
+  #dashboard = {};
+  constructor() {
+    this.dashboardFilters = new Map();
+  }
 
   set json(value) {
     this.#json = value;
@@ -20,6 +23,7 @@ class Dashboards {
         const template = document.getElementById('template__filters').content.cloneNode(true);
         let content = template.querySelector('.filters');
         let i = content.querySelector('i');
+        i.dataset.sheet = filter.sheet;
         i.dataset.id = filter.containerId;
         i.dataset.name = filter.filterColumnLabel;
         i.addEventListener('click', addDashboardFilters);
@@ -79,11 +83,24 @@ class Dashboards {
     return this.controls;
   }
 
+  set dashboard(value) {
+    this.#dashboard.type = 'dashboard';
+    this.#dashboard.title = 'prova';
+    this.#dashboard.token = value.token;
+    this.#dashboard.layout = value.layout;
+    this.#dashboard.dashboardFilters = Object.fromEntries(this.dashboardFilters);
+    this.#dashboard.resources = Object.fromEntries(this.resources);
+    console.log(this.#dashboard);
+    debugger;
+  }
+
+  get dashboard() { return this.#dashboard; }
+
 }
 
 class Resources extends Dashboards {
   #data;
-  #resource = new Map();
+  #resources = new Map();
   #prepareData = { cols: [], rows: [] };
   #specs_columns = {};
   #specs_group = { key: [], columns: [] };
@@ -142,7 +159,7 @@ class Resources extends Dashboards {
   /*
    * Viene creato un Object Map() con il token del report e il suo elemento nel DOM corrispondente
    * */
-  set resource(object) {
+  /* set resource(object) {
     // object: contiene ref (il riferimento nel DOM), il datamart_id e lo user_id
     this.#resource.set(this.token, {
       token: this.token,
@@ -158,10 +175,15 @@ class Resources extends Dashboards {
     });
     console.log(this.#resource);
     debugger;
+  } */
+  set resources(object) {
+    // object: contiene ref (il riferimento nel DOM), il datamart_id e lo user_id
+    this.#resources.set(object.token, object);
+    console.log('resources : ', this.#resources);
   }
 
-  get resource() {
-    return this.#resource;
+  get resources() {
+    return this.#resources;
   }
 
   set specs(value) {

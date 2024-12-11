@@ -329,41 +329,68 @@ const template__li = document.getElementById('template__li');
     }
 
     // TODO: filtri della Dashboard
-    document.querySelectorAll('filter__dashboard>div[data-id]').forEach(filter => {
-      Resource.dashboardFilters = {
-
-      }
-
+    document.querySelectorAll('#filter__dashboard>div[data-id]').forEach(filter => {
+      Resource.dashboardFilters.set(filter.dataset.id, {
+        id: filter.dataset.name,
+        containerId: filter.dataset.id,
+        filterColumnLabel: filter.dataset.name,
+        caption: filter.dataset.name,
+        sheet: filter.dataset.sheet
+      });
     });
 
     // TODO: 10.12.2024 Recupero le risorse aggiunte alla dashboard
-    document.querySelectorAll('section.chartContent[data-resource]').forEach(resource => {
-      console.log(resource);
-      debugger;
+    document.querySelectorAll('section.chartContent[data-resource]>.chart-elements').forEach(sheet => {
+      const token = sheet.dataset.token;
+      const specs = JSON.parse(window.localStorage.getItem(token)).specs;
+      console.log(specs);
+      // verifico se questa risorsa è già stata inserita in un altro container
+      if (Resource.resources.has(token)) {
+        // aggiorno solo il wrapper, le altre proprietà sono uguali
+        // TEST: 10.12.2024 da testare (questo sarebbe il secondo oggetto grafico appartenente allo stesso datamart)
+        Resource.resources.get(token).wrappers[sheet.id] = specs.wrapper[sheet.dataset.wrapper];
+      } else {
+        // aggiungo, al wrapper, il containerId che verrà usato nella dashboard
+        specs.wrapper[sheet.dataset.wrapper].containerId = sheet.id;
+        Resource.resources = {
+          token,
+          userId: +sheet.dataset.userId,
+          datamartId: +sheet.dataset.datamartId,
+          data: specs.data,
+          wrappers: { [sheet.id]: specs.wrapper[sheet.dataset.wrapper] }
+        };
+      }
     });
-    return;
 
     //
-    /* // verifica di validità
-    if (Resource.resource.size === 0) {
+    // verifica di validità
+    if (Resource.resources.size === 0) {
       App.showConsole('Nessun oggetto aggiunto alla Dashboard', 'error', 2000);
       return false;
-    } */
+    }
+
     const note = document.getElementById('note').value;
     // salvo il json 'dashboard-token' in bi_dashboards
     // TODO: aggiungere la prop 'published' (bool). Questa mi consentirà
     // di visualizzare la dashboard, solo le dashboards pubblicate possono
     // essere visualizzate
-    Resource.json = {
+    Resource.dashboard = {
+      title: app.dashboardName.dataset.value,
+      note,
+      token,
+      layout: Template.id
+    }
+    debugger;
+    /* Resource.json = {
       title: app.dashboardName.dataset.value,
       note,
       token,
       type: 'dashboard',
       layout: Template.id,
-      resources: Object.fromEntries(Resource.resource)
-    }
-    console.log(Resource.json);
-    debugger;
+      resources: Object.fromEntries(Resource.resources)
+    } */
+    // console.log(Resource.json);
+    return;
     // salvo le specifiche solo in locale, quando pubblico la dashboard salvo le specifiche su DB
     const sheet = JSON.parse(window.localStorage.getItem(Resource.specs.token));
     sheet.specs = Resource.specs;
@@ -525,6 +552,12 @@ const template__li = document.getElementById('template__li');
     Resource.token = e.currentTarget.dataset.token;
     // aggiungo un token per identificare, in publish(), il report (datamart_id)
     Resource.ref.dataset.token = e.currentTarget.dataset.token;
+    Resource.ref.dataset.datamartId = e.currentTarget.dataset.datamartId;
+    Resource.ref.dataset.userId = e.currentTarget.dataset.userId;
+    // NOTE: 10.12.2024 imposto di default 'Table' ma potrei impostare il default
+    // direttamente nelle specs.wrapper dello sheet, ad esempio se salvo lo sheet come barChart
+    // potrei impostare una proprietà 'default : true' nel wrapper barChart
+    Resource.ref.dataset.wrapper = 'Table';
     Resource.dashboardContent = Resource.ref.parentElement;
     Resource.specs = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
     // imposto, sul tasto btn__chartWrapper il token di questo Sheet
@@ -535,6 +568,7 @@ const template__li = document.getElementById('template__li');
       Object.keys(Resource.specs.wrapper).forEach(chartType => {
         const btn = document.createElement('button');
         btn.value = chartType;
+        btn.dataset.token = Resource.token;
         btn.innerText = chartType;
         btn.addEventListener('click', selectWrapper);
         popover__chartWrappers.querySelector('nav').appendChild(btn);
@@ -554,12 +588,9 @@ const template__li = document.getElementById('template__li');
 
   function selectWrapper(e) {
     Resource.wrapper = e.target.getAttribute('value');
+    const chartElement = document.querySelector(`div.chart-elements[data-token='${e.currentTarget.dataset.token}']`);
     onReady();
-    // draw();
-    // aggiorno la propr 'wrapper' nel Map() Resource.resource
-    // Resource.resource.get(Resource.token).wrapper = Resource.specs.wrapper[Resource.wrapper];
-    // console.log(Resource.resource);
-    // debugger;
+    chartElement.dataset.wrapper = Resource.wrapper;
     popover__chartWrappers.hidePopover();
   }
 
@@ -755,40 +786,4 @@ const template__li = document.getElementById('template__li');
 
 })();
 
-function addDashboardFilter(e) {
-  console.log(e.currentTarget);
-  const filter__dashboard = document.getElementById('filter__dashboard');
-
-  const template = document.getElementById('template__filter');
-  const tmplFilterContent = template.content.cloneNode(true);
-  const container = tmplFilterContent.querySelector('.filter__container');
-  // const filterDiv = container.querySelector('.preview-filter');
-  const span = container.querySelector('span');
-  const btnOptions = container.querySelector('button');
-  container.id = e.currentTarget.id;
-  container.addEventListener('click', handleFilterDashboard);
-  container.dataset.name = e.currentTarget.dataset.name;
-  container.dataset.label = e.currentTarget.dataset.label;
-  btnOptions.dataset.id = e.currentTarget.id;
-  btnOptions.dataset.label = e.currentTarget.dataset.label;
-  span.innerText = e.currentTarget.dataset.caption;
-  filter__dashboard.appendChild(container);
-}
-
-function handleFilterDashboard(e) {
-  // per ogni resource aggiunta alla dashboard, ciclo i propri filtri
-  //
-  Resource.specs.filters.forEach(filter => {
-    const parent = document.getElementById('filters__sameReport');
-    if (filter.containerId === e.currentTarget.id) return;
-    const template = template__li.content.cloneNode(true);
-    const li = template.querySelector('li');
-    const span = li.querySelector('span');
-    span.id = `li_${filter.containerId}`;
-    span.dataset.name = `name_${filter.id}`;
-    span.innerText = `name_${filter.id}`
-    parent.appendChild(li);
-  });
-  dlg__config_filterDashboard.showModal();
-}
 console.log(' ENDinit-dashboard-create');
