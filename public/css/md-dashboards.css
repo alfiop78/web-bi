@@ -288,6 +288,27 @@ td.align-right {
     "mainArea";
 }
 
+/* NOTE: horizontalCharts */
+.view>.layout.horizontalCharts {
+  grid-template: minmax(60px, auto) 1fr / 1fr 1fr;
+  grid-template-areas:
+    "filterArea filterArea"
+    "leftmain rightmain";
+}
+
+.horizontalCharts>.left {
+  grid-column: 1 / 2;
+  background-color: #bfbdbd;
+  grid-area: leftmain;
+}
+
+.horizontalCharts>.right {
+  grid-column: 2 / 4;
+  background-color: #bfbdbd;
+  grid-area: rightmain;
+}
+
+
 .view>#generic>.main {
   grid-column: 1 / 4;
   /* background-color: #bfbdbd; */

@@ -149,7 +149,7 @@ function previewReady() {
       keyColumns.push({ id: column.id, column: Resource.dataTable.getColumnIndex(column.id), label: column.label, type: column.type });
     }
   }); */
-  Resource.groupFunction();
+  Resource.groupFunctionSheet();
   // imposto qui il metodo group() perchè per la dashboard è diverso (viene usato il ChartWrapper)
   Resource.dataGroup = new google.visualization.data.group(
     Resource.chartWrapper.getDataTable(), Resource.groupKey, Resource.groupColumn
@@ -236,7 +236,7 @@ function previewReady() {
   // Resource.specs.data.view.forEach(column => {
   //   if (column.properties.visible) viewColumns.push(Resource.dataGroup.getColumnIndex(column.id));
   // });
-  Resource.createDataView();
+  Resource.createDataViewSheet();
 
   google.visualization.events.addListener(Resource.chartWrapperView, 'ready', ready);
   // google.visualization.events.addListener(Resource.chartWrapperView, 'sort', sort);

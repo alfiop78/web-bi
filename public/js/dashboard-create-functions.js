@@ -51,7 +51,7 @@ function onReady() {
   // let tableRef = new google.visualization.Table(document.getElementById(Resource.ref));
   // console.log(groupColumnsIndex);
   // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
-  Resource.groupFunction();
+  Resource.groupFunctionSheet();
   // Al momento non utilizzo il Metodo groupFunction() nella classe Dashboard
   // perchè da qui richiamo il wrapper del ChartWrapper invece dal report non c'è il ChartWrapper
   // TODO: potrei crearlo anche l' il ChartWrapper
@@ -88,7 +88,7 @@ function onReady() {
   }); */
 
   Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
-  Resource.createDataView();
+  Resource.createDataViewSheet();
 
   Resource.chartWrapperView.setDataTable(Resource.dataViewGrouped);
   Resource.chartWrapperView.draw();

@@ -52,7 +52,7 @@ class Dashboards {
   }
 
   drawControls(filtersRef) {
-    this.controls = [];
+    this.chartControls = [];
     // console.log(this.sheetSpecs);
     if (this.specs.filters) {
       this.specs.filters.forEach(filter => {
@@ -77,21 +77,52 @@ class Dashboards {
             }
           }
         });
-        this.controls.push(this.filter);
+        this.chartControls.push(this.filter);
       });
+    }
+    return this.chartControls;
+  }
+
+  drawControls_new(filtersRef) {
+    this.controls = [];
+    if (this.json.dashboardFilters) {
+      for (const [filterId, filter] of Object.entries(this.json.dashboardFilters)) {
+        // creo qui il div class="filters" che conterrà il filtro
+        // In questo modo non è necessario specificare i filtri nel template layout
+        this.filterRef = document.createElement('div');
+        this.filterRef.className = 'filters';
+        // this.filterRef.id = filterId;
+        this.filterRef.id = `fltDashboard-${filterId}`;
+        filtersRef.appendChild(this.filterRef);
+        this.filter = new google.visualization.ControlWrapper({
+          'controlType': 'CategoryFilter',
+          'containerId': `fltDashboard-${filterId}`,
+          'options': {
+            'filterColumnIndex': filter.filterColumnIndex,
+            'filterColumnLabel': filter.filterColumnLabel,
+            'ui': {
+              'caption': filter.caption,
+              'label': '',
+              'cssClass': 'g-category-filter',
+              'selectedValuesLayout': 'aside'
+              // 'labelStacking': 'horizontal'
+            }
+          }
+        });
+        this.controls.push(this.filter);
+      }
     }
     return this.controls;
   }
 
   set dashboard(value) {
     this.#dashboard.type = 'dashboard';
-    this.#dashboard.title = 'prova';
+    this.#dashboard.title = value.title;
     this.#dashboard.token = value.token;
     this.#dashboard.layout = value.layout;
     this.#dashboard.dashboardFilters = Object.fromEntries(this.dashboardFilters);
     this.#dashboard.resources = Object.fromEntries(this.resources);
     console.log(this.#dashboard);
-    debugger;
   }
 
   get dashboard() { return this.#dashboard; }
@@ -129,14 +160,18 @@ class Resources extends Dashboards {
           width: '100%',
           height: '100%',
           cssClassNames: {
-            headerRow: "g-tableHeader",
-            tableRow: "g-tableRow",
-            oddTableRow: "g-oddRow",
-            selectedTableRow: "g-selectedRow",
-            hoverTableRow: "g-hoverRow",
-            headerCell: "g-headerCell",
-            tableCell: "g-tableCell",
-            rowNumberCell: "g-rowNumberCell"
+            headerRow: "g-table-header",
+            tableRow: "g-table-row",
+            oddTableRow: null,
+            // oddTableRow: "g-oddRow",
+            // selectedTableRow: "g-selectedRow",
+            // hoverTableRow: "g-hoverRow",
+            selectedTableRow: null,
+            hoverTableRow: null,
+            headerCell: "g-header-cell",
+            tableCell: "g-table-cell",
+            // rowNumberCell: "g-rowNumberCell"
+            rowNumberCell: null
           }
         }
       }
@@ -436,6 +471,49 @@ class Resources extends Dashboards {
 
   groupFunction() {
     this.groupKey = [], this.groupColumn = [];
+    this.specs.wrappers[this.ref.id].group.key.forEach(column => {
+      // if (column.properties.grouped) keyColumns.push(Resource.dataTable.getColumnIndex(column.id));
+      // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
+      // che viene modificata dall'utente a runtime
+      if (column.properties.grouped) {
+        this.groupKey.push({
+          id: column.id,
+          column: this.dataTable.getColumnIndex(column.id),
+          label: column.label,
+          type: column.type
+        });
+      }
+    });
+    this.specs.wrappers[this.ref.id].group.columns.forEach(metric => {
+      // salvo in groupColumnsIndex TUTTE le metriche, deciderò nella DataView
+      // quali dovranno essere visibili (quelle con dependencies:false)
+      // recupero l'indice della colonna in base al suo nome
+      const index = this.dataTable.getColumnIndex(metric.alias);
+      // TODO: modificare la prop 'aggregateFn' in 'aggregation' in fase di creazione delle metriche
+      let aggregation;
+      switch (metric.aggregateFn) {
+        case 'COUNT':
+        case 'MIN':
+        case 'MAX':
+          aggregation = 'sum';
+          break;
+        default:
+          aggregation = (metric.aggregateFn) ? metric.aggregateFn.toLowerCase() : 'sum';
+          break;
+      }
+      let object = {
+        id: metric.alias,
+        column: index,
+        aggregation: google.visualization.data[aggregation],
+        type: 'number',
+        label: metric.label
+      };
+      this.groupColumn.push(object);
+    });
+  }
+
+  groupFunctionSheet() {
+    this.groupKey = [], this.groupColumn = [];
     this.specs.wrapper[this.wrapper].group.key.forEach(column => {
       // if (column.properties.grouped) keyColumns.push(Resource.dataTable.getColumnIndex(column.id));
       // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
@@ -506,6 +584,91 @@ class Resources extends Dashboards {
 
   // WARN: 04.12.2024 Questa funzione deve essere univoca sia per init-sheet.js che per Dashboards.js
   createDataView() {
+    this.viewColumns = [], this.viewMetrics = [];
+    this.specs.wrappers[this.ref.id].group.key.forEach(column => {
+      if (column.properties.visible) {
+        this.viewColumns.push(this.dataGroup.getColumnIndex(column.id));
+        // imposto la classe per le colonne dimensionali
+        this.dataGroup.setColumnProperty(this.dataGroup.getColumnIndex(column.id), 'className', 'dimensional-column');
+      }
+    });
+    // dalla dataGroup, recupero gli indici di colonna delle metriche
+    this.specs.wrappers[this.ref.id].group.columns.forEach(metric => {
+      if (!metric.dependencies && metric.properties.visible) {
+        const index = this.dataGroup.getColumnIndex(metric.alias);
+        // NOTE: si potrebbe utilizzare un nuovo oggetto new Function in questo
+        // modo come alternativa a eval() (non l'ho testato)
+        // function evil(fn) {
+        //   return new Function('return ' + fn)();
+        // }
+        // console.log(evil('12/5*9+9.4*2')); // => 40.4     const index = Resource.dataGroup.getColumnIndex(metric.alias);
+
+        // Implementazione della func 'calc' per le metriche composite.
+        if (metric.type === 'composite') {
+          // è una metrica composta, creo la funzione calc, sostituendo i nomi
+          // delle metriche contenute nella formula, con gli indici corrispondenti.
+          // Es.: margine = ((ricavo - costo) / ricavo) * 100, recuperare gli indici
+          // delle colonne ricavo e costo per creare la metrica margine :
+          // recupero la formula della metrica composta
+          const formula = JSON.parse(localStorage.getItem(metric.token)).formula;
+          // Creo una Func "dinamica"
+          let calcFunction = function(dt, row) {
+            const app = {
+              number: function(properties) {
+                return new google.visualization.NumberFormat(properties);
+              }
+            }
+            let formulaJoined = [];
+            // in formulaJoined ciclo tutti gli elementi della Formula, imposto i
+            // valori della DataTable, con getValue(), recuperandoli con getColumnIndex(nome_colonna)
+            formula.forEach(formulaEl => {
+              /* if (formulaEl.alias) {
+                formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl.alias)));
+              } else {
+                formulaJoined.push(formulaEl);
+              } */
+              if (dt.getColumnIndex(formulaEl) !== -1) {
+                formulaJoined.push(dt.getValue(row, dt.getColumnIndex(formulaEl)));
+              } else {
+                // altrimenti aggiungo nella formula le altre componenti, come le parentesi ad esempio e gli operatori per il calcolo
+                formulaJoined.push(formulaEl);
+              }
+            });
+            // La funzione eval() è in grado di eseguire operazioni con valori 'string' es. eval('2 + 2') = 4.
+            // Quindi inserisco tutto il contenuto della stringa formulaJoined in eval(), inoltre
+            // effettuo un controllo sul risultato in caso fosse NaN
+            const result = (isNaN(eval(formulaJoined.join(' ')))) ? 0 : eval(formulaJoined.join(' '));
+            let total = (result) ? { v: result } : { v: result, f: '-' };
+            // console.log(result);
+            // const result = (isNaN(eval(formulaJoined.join('')))) ? null : eval(formulaJoined.join(''));
+            // formattazione della cella con formatValue()
+            const formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
+            const resultFormatted = (result) ? formatter.formatValue(result) : '-';
+            total = { v: result, f: resultFormatted };
+            // resultFormatted = (result) ? result : '-';
+            // total = (result) ? { v: result } : { v: result, f: '-' };
+            return total;
+          }
+          this.viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
+        } else {
+          this.viewMetrics.push(index);
+        }
+        this.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
+        // let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
+        // formatter.format(Resource.dataGroup, Resource.dataGroup.getColumnIndex(metric.alias));
+      }
+    });
+    // concateno i due array che popoleranno la DataView.setColumns()
+    this.viewDefined = this.viewColumns.concat(this.viewMetrics)
+    console.log('DataView defined:', this.viewDefined);
+    // Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
+    // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
+    // console.log(Resource.dataGroup.getColumnProperties(0));
+    this.dataViewGrouped.setColumns(this.viewDefined);
+    console.log('dataViewGrouped : ', this.dataViewGrouped);
+  }
+
+  createDataViewSheet() {
     this.viewColumns = [], this.viewMetrics = [];
     this.specs.wrapper[this.wrapper].group.key.forEach(column => {
       if (column.properties.visible) {

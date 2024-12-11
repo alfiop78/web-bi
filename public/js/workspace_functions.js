@@ -1894,14 +1894,17 @@ function redrawChart() {
     options.width = '100%';
     options.height = '100%';
     options.cssClassNames = {
-      headerRow: "g-tableHeader",
-      tableRow: "g-tableRow",
+      headerRow: "g-table-header",
+      tableRow: "g-table-row",
       oddTableRow: "g-oddRow",
-      selectedTableRow: "g-selectedRow",
-      hoverTableRow: "g-hoverRow",
-      headerCell: "g-headerCell",
-      tableCell: "g-tableCell",
-      rowNumberCell: "g-rowNumberCell"
+      // selectedTableRow: "g-selectedRow",
+      // hoverTableRow: "g-hoverRow",
+      selectedTableRow: null,
+      hoverTableRow: null,
+      headerCell: "g-header-cell",
+      tableCell: "g-table-cell",
+      // rowNumberCell: "g-rowNumberCell"
+      rowNumberCell: null
     }
   }
   Resource.wrapper = chartType;

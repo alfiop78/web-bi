@@ -110,33 +110,6 @@ const template__li = document.getElementById('template__li');
   // TODO: utilizzare questa logica anche sulle altre pagine
   App.init();
 
-  // aggiorno tutti gli oggetti della dashboard
-  app.updateSheets = async () => {
-    let url, params, req = [];
-    for (const token of Resource.resource.keys()) {
-      url = '/fetch_api/json/sheet_update';
-      params = window.localStorage.getItem(token);
-      const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
-      req.push(new Request(url, init));
-    }
-
-    await Promise.all(req.map(req => fetch(req)))
-      .then(responses => {
-        return Promise.all(responses.map(response => {
-          if (!response.ok) { throw Error(response.statusText); }
-          return response.text();
-        }))
-      })
-      .then(response => {
-        console.log(response);
-        App.showConsole('Tutti gli oggetti della Dashboard sono stati aggiornati', 'done', 2000);
-      })
-      .catch(err => {
-        App.showConsole(err, 'error');
-        console.error(err);
-      });
-  }
-
   app.clearDashboard = () => {
     // chiudo eventuali dashboard già aperti
     // elimino il template, anche se non è stato ancora selezionato
@@ -292,11 +265,12 @@ const template__li = document.getElementById('template__li');
     // - recuperare tutti gli oggetti della pagina (report)
     // - crearne i COPY_TABLE da WEB_BI_timestamp_userId -> WEB_BI_timestamp
     // - salvare le specifiche in bi_sheet_specifications
-    console.log(Resource.resource);
+    console.log(Resource.resources);
     // debugger;
     let urls = [];
-    for (const dashboard of Resource.resource.values()) {
-      urls.push(`/fetch_api/copy_from/${dashboard.datamart_id}_${dashboard.user_id}/copy_to/${dashboard.datamart_id}/copy_table`);
+    for (const wrapper of Resource.resources.values()) {
+      debugger;
+      urls.push(`/fetch_api/copy_from/${wrapper.datamartId}_${wrapper.userId}/copy_to/${wrapper.datamartId}/copy_table`);
     }
     console.log(urls);
     await Promise.all(urls.map(url => fetch(url)))
@@ -309,7 +283,6 @@ const template__li = document.getElementById('template__li');
       .then(data => {
         console.log(data);
         if (data) App.showConsole("Dashboard pubblicata", 'done', 2000);
-        app.updateSheets();
       })
       .catch(err => {
         App.showConsole(err, 'error');
@@ -343,7 +316,7 @@ const template__li = document.getElementById('template__li');
     document.querySelectorAll('section.chartContent[data-resource]>.chart-elements').forEach(sheet => {
       const token = sheet.dataset.token;
       const specs = JSON.parse(window.localStorage.getItem(token)).specs;
-      console.log(specs);
+      // console.log(specs);
       // verifico se questa risorsa è già stata inserita in un altro container
       if (Resource.resources.has(token)) {
         // aggiorno solo il wrapper, le altre proprietà sono uguali
@@ -357,12 +330,12 @@ const template__li = document.getElementById('template__li');
           userId: +sheet.dataset.userId,
           datamartId: +sheet.dataset.datamartId,
           data: specs.data,
+          bind: specs.bind,
+          filters: specs.filters,
           wrappers: { [sheet.id]: specs.wrapper[sheet.dataset.wrapper] }
         };
       }
     });
-
-    //
     // verifica di validità
     if (Resource.resources.size === 0) {
       App.showConsole('Nessun oggetto aggiunto alla Dashboard', 'error', 2000);
@@ -380,24 +353,11 @@ const template__li = document.getElementById('template__li');
       token,
       layout: Template.id
     }
+    console.log(Resource.dashboard);
     debugger;
-    /* Resource.json = {
-      title: app.dashboardName.dataset.value,
-      note,
-      token,
-      type: 'dashboard',
-      layout: Template.id,
-      resources: Object.fromEntries(Resource.resources)
-    } */
-    // console.log(Resource.json);
-    return;
-    // salvo le specifiche solo in locale, quando pubblico la dashboard salvo le specifiche su DB
-    const sheet = JSON.parse(window.localStorage.getItem(Resource.specs.token));
-    sheet.specs = Resource.specs;
-    window.localStorage.setItem(Resource.specs.token, JSON.stringify(sheet));
     // Salvo la Dashboard su database
     const url = (e.target.dataset.token) ? '/fetch_api/json/dashboard_update' : '/fetch_api/json/dashboard_store';
-    const params = JSON.stringify(Resource.json);
+    const params = JSON.stringify(Resource.dashboard);
     const init = { headers: { 'Content-Type': 'application/json' }, method: 'POST', body: params };
     const req = new Request(url, init);
     await fetch(req)

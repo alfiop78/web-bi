@@ -104,7 +104,6 @@ async function preview() {
     });
   }
 
-
   const progressBar = document.getElementById('progress-bar');
   const progressTo = document.getElementById('progress-to');
   const progressTotal = document.getElementById('progress-total');
