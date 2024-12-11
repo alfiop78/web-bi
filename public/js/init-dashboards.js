@@ -48,23 +48,28 @@ var Resource = new Resources();
       Resource.chartWrapper.setChartType(wrapper.chartType);
       Resource.chartWrapper.setContainerId(wrapper.containerId);
       Resource.chartWrapper.setOptions(wrapper.options);
-      // app.getDataView();
-      // console.log(Resource.dataViewGrouped);
+      app.getDataView();
+      console.log(Resource.viewDefined);
+      debugger;
+      console.log(Resource.dataViewGrouped);
       // Resource.createDataViewDashboard();
       // return;
       let v = new google.visualization.DataView(Resource.dataTable);
-      if (wrapper.chartType === 'Table') {
-        v.setColumns([1, 2, 3]); // dataTable
+      v.setColumns(Resource.viewDefined);
+      /* if (wrapper.chartType === 'Table') {
+        // v.setColumns([1, 2, 3]); // dataTable
+        v.setColumns(['CodAziendaSId', 'dealer', 'NettoRiga']); // dataTable
       } else {
-        v.setColumns([2, 3]); // datatable
-      }
-
+        // v.setColumns([2, 3]); // datatable
+        v.setColumns(['sede', 'NettoRiga']); // datatable
+      } */
       Resource.chartWrapper.setView(v);
       // Resource.chartWrapper.setView(Resource.dataViewGrouped);
       console.log(Resource.chartWrapper.getView());
       debugger;
       wrappers.push(Resource.chartWrapper);
     }
+
     Resource.gdashboard.bind(Resource.dashboardControls, wrappers);
     Resource.gdashboard.draw(Resource.dataTable);
   }
@@ -468,7 +473,7 @@ var Resource = new Resources();
         .then(data => {
           console.log(data);
           Resource.json = JSON.parse(data.json_value);
-          debugger;
+          // debugger;
           document.querySelector('h1.title').innerHTML = Resource.json.title;
           app.getLayout(Resource.json);
         })

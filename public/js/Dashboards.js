@@ -589,7 +589,6 @@ class Resources extends Dashboards {
       if (column.properties.visible) {
         this.viewColumns.push(this.dataTable.getColumnIndex(column.id));
         // imposto la classe per le colonne dimensionali
-        debugger;
         this.dataTable.setColumnProperty(this.dataTable.getColumnIndex(column.id), 'className', 'dimensional-column');
       }
     });
@@ -603,7 +602,10 @@ class Resources extends Dashboards {
     this.viewColumns = [], this.viewMetrics = [];
     this.specs.wrappers[this.ref.id].group.key.forEach(column => {
       if (column.properties.visible) {
-        this.viewColumns.push(this.dataGroup.getColumnIndex(column.id));
+        // this.viewColumns.push(this.dataGroup.getColumnIndex(column.id));
+        console.log(this.dataGroup.getColumnId(this.dataGroup.getColumnIndex(column.id)));
+        // debugger;
+        this.viewColumns.push(column.id);
         // imposto la classe per le colonne dimensionali
         this.dataGroup.setColumnProperty(this.dataGroup.getColumnIndex(column.id), 'className', 'dimensional-column');
       }
@@ -667,7 +669,8 @@ class Resources extends Dashboards {
           }
           this.viewMetrics.push({ id: metric.alias, calc: calcFunction, type: 'number', label: metric.label, properties: { className: 'col-metrics' } });
         } else {
-          this.viewMetrics.push(index);
+          // this.viewMetrics.push(index);
+          this.viewMetrics.push(metric.alias);
         }
         this.dataGroup.setColumnProperty(index, 'className', 'col-metrics');
         // let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
@@ -675,13 +678,16 @@ class Resources extends Dashboards {
       }
     });
     // concateno i due array che popoleranno la DataView.setColumns()
+    // debugger;
     this.viewDefined = this.viewColumns.concat(this.viewMetrics)
     console.log('DataView defined:', this.viewDefined);
+    // debugger;
     // Resource.dataGroup.setColumnProperty(0, 'className', 'cssc1')
     // console.log(Resource.dataGroup.getColumnProperty(0, 'className'));
     // console.log(Resource.dataGroup.getColumnProperties(0));
     this.dataViewGrouped.setColumns(this.viewDefined);
     console.log('dataViewGrouped : ', this.dataViewGrouped);
+    // debugger;
   }
 
   createDataViewSheet() {
