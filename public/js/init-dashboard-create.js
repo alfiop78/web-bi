@@ -196,6 +196,21 @@ const template__li = document.getElementById('template__li');
   app.resourceSettings = (e) => {
     const popover = document.getElementById(e.currentTarget.dataset.popoverId);
     const { top, right } = e.currentTarget.getBoundingClientRect();
+    // aggiungo i wrapper (ChartWrapper) alla popover
+    // se esistono più di un chartWrapper li visualizzo nella popover__chartWrappers
+    const wrappers = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs.wrapper;
+    if (Object.keys(wrappers).length >= 2) {
+      // btn__chartWrapper.removeAttribute('disabled');
+      Object.keys(wrappers).forEach(chartType => {
+        const btn = document.createElement('button');
+        btn.value = chartType;
+        btn.dataset.token = Resource.token;
+        btn.dataset.ref = e.currentTarget.dataset.id;
+        btn.innerText = chartType;
+        btn.addEventListener('click', selectWrapper);
+        popover.querySelector('nav').appendChild(btn);
+      });
+    }
     popover.showPopover();
     popover.style.top = `${top - popover.offsetHeight}px`;
     popover.style.left = `${right}px`;
@@ -318,13 +333,13 @@ const template__li = document.getElementById('template__li');
       const specs = JSON.parse(window.localStorage.getItem(token)).specs;
       // console.log(specs);
       // verifico se questa risorsa è già stata inserita in un altro container
+      specs.wrapper[sheet.dataset.wrapper].containerId = sheet.id;
+      // specs.wrapper[sheet.dataset.wrapper].containerId = sheet.id;
       if (Resource.resources.has(token)) {
         // aggiorno solo il wrapper, le altre proprietà sono uguali
         // TEST: 10.12.2024 da testare (questo sarebbe il secondo oggetto grafico appartenente allo stesso datamart)
         Resource.resources.get(token).wrappers[sheet.id] = specs.wrapper[sheet.dataset.wrapper];
       } else {
-        // aggiungo, al wrapper, il containerId che verrà usato nella dashboard
-        specs.wrapper[sheet.dataset.wrapper].containerId = sheet.id;
         Resource.resources = {
           token,
           userId: +sheet.dataset.userId,
@@ -522,22 +537,10 @@ const template__li = document.getElementById('template__li');
     Resource.specs = JSON.parse(window.localStorage.getItem(e.currentTarget.dataset.token)).specs;
     // imposto, sul tasto btn__chartWrapper il token di questo Sheet
     const btn__chartWrapper = Resource.dashboardContent.querySelector(".resourceActions>button[data-popover-id='popover__chartWrappers']");
-    // se esistono più di un chartWrapper li visualizzo nella popover__chartWrappers
-    if (Object.keys(Resource.specs.wrapper).length >= 2) {
-      btn__chartWrapper.removeAttribute('disabled');
-      Object.keys(Resource.specs.wrapper).forEach(chartType => {
-        const btn = document.createElement('button');
-        btn.value = chartType;
-        btn.dataset.token = Resource.token;
-        btn.innerText = chartType;
-        btn.addEventListener('click', selectWrapper);
-        popover__chartWrappers.querySelector('nav').appendChild(btn);
-      });
-    }
-    // Resource.resource = {
-    //   datamart_id: e.currentTarget.dataset.datamartId,
-    //   userId: e.currentTarget.dataset.userId
-    // };
+    btn__chartWrapper.dataset.id = Resource.ref.id;
+    btn__chartWrapper.dataset.token = e.currentTarget.dataset.token;
+    if (Object.keys(Resource.specs.wrapper).length >= 2) btn__chartWrapper.removeAttribute('disabled');
+
     // TODO: qui dovrei fare una singola promise anzichè una promiseAll
     const urls = [`/fetch_api/${e.currentTarget.dataset.datamartId}_${e.currentTarget.dataset.userId}/preview?page=1`];
     app.getAllData(urls);
@@ -548,9 +551,9 @@ const template__li = document.getElementById('template__li');
 
   function selectWrapper(e) {
     Resource.wrapper = e.target.getAttribute('value');
-    const chartElement = document.querySelector(`div.chart-elements[data-token='${e.currentTarget.dataset.token}']`);
+    const chartContent = document.getElementById(e.currentTarget.dataset.ref);
     onReady();
-    chartElement.dataset.wrapper = Resource.wrapper;
+    chartContent.dataset.wrapper = Resource.wrapper;
     popover__chartWrappers.hidePopover();
   }
 

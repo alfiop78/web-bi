@@ -28,16 +28,75 @@ var Resource = new Resources();
     Resource.dashboardControls = Resource.drawControls_new(document.getElementById('filter__dashboard'));
   }
 
+  app.drawTestOneDatasource = () => {
+    Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
+    let wrappers = [];
+    // imposto i filtri per questa dashboard
+    // per ogni wrapper presente in questo datamart...
+    for (const [ref, wrapper] of Object.entries(Resource.specs.wrappers)) {
+      // let controls = [];
+      Resource.ref = document.getElementById(ref);
+      /* Resource.groupFunction();
+      Resource.dataGroup = new google.visualization.data.group(
+        Resource.dataTable, Resource.groupKey, Resource.groupColumn
+      );
+      console.log('group():', Resource.dataGroup);
+      debugger; */
+      // Creazione dell'oggetto grafico (ChartWrapper)
+      Resource.chartWrapper = new google.visualization.ChartWrapper();
+      // imposto sempre Table di default
+      Resource.chartWrapper.setChartType(wrapper.chartType);
+      Resource.chartWrapper.setContainerId(wrapper.containerId);
+      Resource.chartWrapper.setOptions(wrapper.options);
+      // app.getDataView();
+      // console.log(Resource.dataViewGrouped);
+      // Resource.createDataViewDashboard();
+      // return;
+      let v = new google.visualization.DataView(Resource.dataTable);
+      if (wrapper.chartType === 'Table') {
+        v.setColumns([1, 2, 3]); // dataTable
+      } else {
+        v.setColumns([2, 3]); // datatable
+      }
+
+      Resource.chartWrapper.setView(v);
+      // Resource.chartWrapper.setView(Resource.dataViewGrouped);
+      console.log(Resource.chartWrapper.getView());
+      debugger;
+      wrappers.push(Resource.chartWrapper);
+    }
+    Resource.gdashboard.bind(Resource.dashboardControls, wrappers);
+    Resource.gdashboard.draw(Resource.dataTable);
+  }
+
+  app.getDataView = () => {
+    // esempio utilizzato senza impostare le metriche contenute nelle composite
+    console.log('onReady');
+    // let tableRef = new google.visualization.Table(document.getElementById(Resource.ref));
+    // console.log(groupColumnsIndex);
+    // Funzione group(), raggruppo i dati in base alle key presenti in keyColumns
+    Resource.groupFunction();
+    // Al momento non utilizzo il Metodo groupFunction() nella classe Dashboard
+    // perchè da qui richiamo il wrapper del ChartWrapper invece dal report non c'è il ChartWrapper
+    // TODO: potrei crearlo anche l' il ChartWrapper
+    Resource.dataGroup = new google.visualization.data.group(
+      Resource.dataTable, Resource.groupKey, Resource.groupColumn
+    );
+
+    Resource.dataViewGrouped = new google.visualization.DataView(Resource.dataGroup);
+    Resource.createDataView();
+  }
+
   app.drawResources = () => {
     Resource.dataTable = new google.visualization.DataTable(Resource.prepareData());
     // imposto i filtri per questa dashboard
-    let controls = [];
     // per ogni wrapper presente in questo datamart...
     for (const [ref, wrapper] of Object.entries(Resource.specs.wrappers)) {
+      // let controls = [];
       Resource.ref = document.getElementById(ref);
       Resource.gdashboard = new google.visualization.Dashboard(Resource.ref.parentElement);
-      controls = Resource.drawControls(document.getElementById(`flt__${Resource.ref.id}`));
-      console.log(controls);
+      const controls = Resource.drawControls(document.getElementById(`flt__${Resource.ref.id}`));
+      console.log('controls : ', controls);
       // console.log(JSON.parse(Resource.view.toJSON()));
       // utilizzo con i metodi setter
       // creo il ChartWrapper Table, anche se questo Sheet ha più ChartWrapper creati, imposterò un tasto per fare lo swicth e cambiare la visualizzazione
@@ -46,28 +105,14 @@ var Resource = new Resources();
       Resource.chartWrapper.setChartType(wrapper.chartType);
       Resource.chartWrapper.setContainerId(wrapper.containerId);
       // Resource.chartWrapper.setDataTable(Resource.dataTable);
-      // console.log(Resource.specs.wrapper[ref].Table.options);
-      Resource.chartWrapper.setOption('height', 'auto');
-      Resource.chartWrapper.setOption('allowHTML', true);
-      Resource.chartWrapper.setOption('page', 'enabled');
-      Resource.chartWrapper.setOption('pageSize', 15);
-      Resource.chartWrapper.setOption('width', '100%');
-      Resource.chartWrapper.setOption('cssClassNames', {
-        "headerRow": "g-table-header",
-        "tableRow": "g-table-row",
-        "oddTableRow": null,
-        "selectedTableRow": null,
-        "hoverTableRow": null,
-        "headerCell": "g-header-cell",
-        "tableCell": "g-table-cell",
-        "rowNumberCell": null
-      });
+      console.log(wrapper.options);
+      Resource.chartWrapper.setOptions(wrapper.options);
 
       // NOTE: esempio array di View
       // table.setView([{ columns: [1, 3, 5, 7, 16] }, { columns: [0, 1, 2, 3] }]);
       // table.setView({ columns: [1, 3, 5, 7, 9, 16] });
 
-      google.visualization.events.addListener(Resource.chartWrapper, 'ready', onReady);
+      // google.visualization.events.addListener(Resource.chartWrapper, 'ready', onReady);
 
       function onReady() {
         // esempio utilizzato senza impostare le metriche contenute nelle composite
@@ -90,25 +135,6 @@ var Resource = new Resources();
         Resource.chartWrapperView.setContainerId(wrapper.containerId);
         // TODO: reimpostare la proprietà cssClassNames corretto in fase di creazione dashboard
         Resource.chartWrapperView.setOptions(wrapper.options);
-        /* if (Resource.wrapper === 'Table') {
-          Resource.chartWrapperView.setOption('height', 'auto');
-          Resource.chartWrapperView.setOption('allowHTML', true);
-          Resource.chartWrapperView.setOption('page', 'enabled');
-          Resource.chartWrapperView.setOption('pageSize', 15);
-          Resource.chartWrapperView.setOption('width', '100%');
-          Resource.chartWrapperView.setOption('cssClassNames', {
-            "headerRow": "g-table-header",
-            "tableRow": "g-table-row",
-            "oddTableRow": null,
-            "selectedTableRow": null,
-            "hoverTableRow": null,
-            "headerCell": "g-header-cell",
-            "tableCell": "g-table-cell",
-            "rowNumberCell": null
-          });
-        } else {
-          Resource.chartWrapperView.setOptions(wrapper[wrapper.chartType].options);
-        } */
         // formatter
         /* Resource.specs.wrapper[Resource.wrapper].group.columns.forEach(metric => {
           let formatter = app[metric.properties.formatter.type](metric.properties.formatter.prop);
@@ -123,24 +149,28 @@ var Resource = new Resources();
       }
 
       let binds;
-      // Questa logica funziona con il bind() di un filtro verso quello successivo ma
-      // possono esserci anche situazioni diverse, che sono da implementare
-      Resource.specs.bind.forEach((v, index) => {
-        // console.log('index', index);
-        if (index === 0) {
-          // il primo bind deve essere creato dall'istanza gdashboard, i successivi posso legarli ad una variabile
-          binds = Resource.gdashboard.bind(Resource.dashboardControls[v[0]], Resource.dashboardControls[v[1]]);
-          binds = Resource.gdashboard.bind(controls[v[0]], controls[v[1]]);
-        } else {
-          binds.bind(Resource.dashboardControls[v[0]], Resource.dashboardControls[v[1]]);
-          binds.bind(controls[v[0]], controls[v[1]]);
-        }
-      });
-      // Tutti i controlli influenzano la table
-      // binds.bind(controls, Resource.chartWrapper);
-      binds.bind(Resource.dashboardControls, Resource.chartWrapper);
-      binds.bind(controls, Resource.chartWrapper);
-
+      debugger;
+      if (Resource.specs.bind.length === 1) {
+        Resource.gdashboard.bind(controls, Resource.chartWrapper);
+      } else {
+        // Questa logica funziona con il bind() di un filtro verso quello successivo ma
+        // possono esserci anche situazioni diverse, che sono da implementare
+        Resource.specs.bind.forEach((v, index) => {
+          // console.log('index', index);
+          if (index === 0) {
+            // il primo bind deve essere creato dall'istanza gdashboard, i successivi posso legarli ad una variabile
+            // binds = Resource.gdashboard.bind(Resource.dashboardControls[v[0]], Resource.dashboardControls[v[1]]);
+            binds = Resource.gdashboard.bind(controls[v[0]], controls[v[1]]);
+          } else {
+            // binds.bind(Resource.dashboardControls[v[0]], Resource.dashboardControls[v[1]]);
+            binds.bind(controls[v[0]], controls[v[1]]);
+          }
+        });
+        // Tutti i controlli influenzano la table
+        // binds.bind(controls, Resource.chartWrapper);
+        // binds.bind(Resource.dashboardControls, Resource.chartWrapper);
+        binds.bind(controls, Resource.chartWrapper);
+      }
 
       // Resource.gdashboard.bind(controls, Resource.chartWrapper);
       // Resource.gdashboard.bind(Resource.dashboardControls, Resource.chartWrapper);
@@ -414,20 +444,14 @@ var Resource = new Resources();
     }
   } */
 
-  app.loadResources = (resources) => {
+  app.loadResources = async (resources) => {
     console.log('loadResources');
     // preparo la dashboard e i controlli (filtri della dashboard)
     app.draw();
     for (const [token, value] of Object.entries(resources)) {
       console.log(value);
       Resource.specs = value;
-      debugger;
-      // Resource.datamart_id = value.datamartId;
-      // Resource.specs.data = value.data;
-      // Resource.ref = value.ref;
-      // Resource.specs.wrapper = value.wrappers;
-      // debugger;
-      app.getAllData();
+      await app.getAllData();
     }
   }
 
@@ -595,7 +619,8 @@ var Resource = new Resources();
                   console.log('tutte le paginate completate :', partialData[index]);
                   Resource.data = partialData[index];
                   // google.charts.setOnLoadCallback(app.draw());
-                  google.charts.setOnLoadCallback(app.drawResources());
+                  // google.charts.setOnLoadCallback(app.drawResources());
+                  google.charts.setOnLoadCallback(app.drawTestOneDatasource());
                   App.closeConsole();
                   App.closeLoader();
                 }
@@ -610,7 +635,8 @@ var Resource = new Resources();
           } else {
             // Non sono presenti altre pagine, visualizzo il dashboard
             Resource.data = partialData[index];
-            google.charts.setOnLoadCallback(app.drawResources());
+            // google.charts.setOnLoadCallback(app.drawResources());
+            google.charts.setOnLoadCallback(app.drawTestOneDatasource());
             App.closeConsole();
             App.closeLoader();
           }

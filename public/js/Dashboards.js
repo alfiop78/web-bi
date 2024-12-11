@@ -471,6 +471,7 @@ class Resources extends Dashboards {
 
   groupFunction() {
     this.groupKey = [], this.groupColumn = [];
+    debugger;
     this.specs.wrappers[this.ref.id].group.key.forEach(column => {
       // if (column.properties.grouped) keyColumns.push(Resource.dataTable.getColumnIndex(column.id));
       // imposto il key con un object anzichè con gli indici, questo perchè voglio impostare la label
@@ -580,6 +581,21 @@ class Resources extends Dashboards {
         break;
     }
     return this.datatype;
+  }
+
+  createDataViewDashboard() {
+    this.viewColumns = [], this.viewMetrics = [];
+    this.specs.wrappers[this.ref.id].group.key.forEach(column => {
+      if (column.properties.visible) {
+        this.viewColumns.push(this.dataTable.getColumnIndex(column.id));
+        // imposto la classe per le colonne dimensionali
+        debugger;
+        this.dataTable.setColumnProperty(this.dataTable.getColumnIndex(column.id), 'className', 'dimensional-column');
+      }
+    });
+    console.log(this.viewColumns);
+    debugger;
+
   }
 
   // WARN: 04.12.2024 Questa funzione deve essere univoca sia per init-sheet.js che per Dashboards.js
