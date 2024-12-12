@@ -369,14 +369,8 @@ class Resources extends Dashboards {
         this.#specs_group.columns.push(findMetric);
       }
     }
-    debugger;
     this.specs.wrapper[this.wrapper].group.key = this.#specs_group.key;
     this.specs.wrapper[this.wrapper].group.columns = this.#specs_group.columns;
-    const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
-    sheet.specs = this.specs;
-    debugger;
-    window.localStorage.setItem(Sheet.sheet.token, JSON.stringify(sheet));
-
   }
 
   bind() {

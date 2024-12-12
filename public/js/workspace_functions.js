@@ -1888,30 +1888,43 @@ function redrawChart() {
   const options = chartWrapper.getOptions();
   // alcune opzioni non sono contenute nel metodo getOptions() quindi, se si tratta
   // di un chartType : Table le imposto qui manualmente
-  if (chartType === 'Table') {
-    options.allowHTML = true;
-    options.page = 'enable';
-    options.width = '100%';
-    options.height = '100%';
-    options.cssClassNames = {
-      headerRow: "g-table-header",
-      tableRow: "g-table-row",
-      oddTableRow: "g-oddRow",
-      // selectedTableRow: "g-selectedRow",
-      // hoverTableRow: "g-hoverRow",
-      selectedTableRow: null,
-      hoverTableRow: null,
-      headerCell: "g-header-cell",
-      tableCell: "g-table-cell",
-      // rowNumberCell: "g-rowNumberCell"
-      rowNumberCell: null
-    }
-  }
   Resource.wrapper = chartType;
   // creo le prop group.key e group.columns per questo chartWrapper
-  Resource.createWrapperSpecs();
+  if (Resource.specs.wrapper.hasOwnProperty(chartType)) {
+    // aggiorno le options del grafico
+    if (chartType === 'Table') {
+      options.allowHTML = true;
+      options.page = 'enable';
+      options.width = '100%';
+      options.height = '100%';
+      options.cssClassNames = {
+        headerRow: "g-table-header",
+        tableRow: "g-table-row",
+        oddTableRow: "g-oddRow",
+        // selectedTableRow: "g-selectedRow",
+        // hoverTableRow: "g-hoverRow",
+        selectedTableRow: null,
+        hoverTableRow: null,
+        headerCell: "g-header-cell",
+        tableCell: "g-table-cell",
+        // rowNumberCell: "g-rowNumberCell"
+        rowNumberCell: null
+      }
+    }
+    debugger;
+    Resource.specs.wrapper[chartType].options = options;
+  } else {
+    // creo la struttura della proprietà 'group'
+    Resource.specs.wrapper[chartType] = { group: { key: [], columns: [] } }
+    Resource.createWrapperSpecs();
+    Resource.specs.wrapper[chartType] = { chartType, group: Resource.specs.wrapper[chartType].group, options };
+  }
+  // ridisegno il grafico
   chartEditor.getChartWrapper().draw(document.getElementById(containerId));
-  Resource.specs.wrapper[chartType] = { chartType, group: Resource.specs.wrapper[chartType].group, options };
+  // aggiorno lo Sheet e tutte le proprie specifiche
+  const sheet = JSON.parse(window.localStorage.getItem(Sheet.sheet.token));
+  sheet.specs = Resource.specs;
+  window.localStorage.setItem(Sheet.sheet.token, JSON.stringify(sheet));
 }
 
 console.info('END workspace_functions');
